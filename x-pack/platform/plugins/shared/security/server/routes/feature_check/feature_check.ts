@@ -55,7 +55,7 @@ export function defineSecurityFeatureCheckRoute({ router, logger }: RouteDefinit
       const esClient = (await context.core).elasticsearch.client;
       const { has_all_requested: canReadSecurity } =
         await esClient.asCurrentUser.security.hasPrivileges({
-          body: { cluster: ['read_security'] },
+          cluster: ['read_security'],
         });
 
       if (!canReadSecurity) {

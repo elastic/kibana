@@ -6,22 +6,22 @@ Object {
   "references": Array [],
   "state": Object {
     "adHocDataViews": Object {
-      "d594baeb-5eca-480c-8885-ba79eaf41372": Object {
+      "host-generated-uuid": Object {
         "allowNoIndex": false,
         "fieldAttrs": Object {},
         "fieldFormats": Object {},
-        "id": "d594baeb-5eca-480c-8885-ba79eaf41372",
-        "name": "ml_host_risk_score_mockSpaceId",
+        "id": "host-generated-uuid",
+        "name": "ea_host_risk_score_mockSpaceId",
         "runtimeFieldMap": Object {},
         "sourceFilters": Array [],
         "timeFieldName": "@timestamp",
-        "title": "ml_host_risk_score_mockSpaceId",
+        "title": "ea_host_risk_score_mockSpaceId",
       },
     },
     "datasourceStates": Object {
       "formBased": Object {
         "layers": Object {
-          "e614baeb-5eca-480c-8885-ba79eaf41372": Object {
+          "layer-id1-generated-uuid": Object {
             "columnOrder": Array [
               "02a55c97-d7a4-440d-ac77-33b941c16189",
               "8886a925-4419-4d9a-8498-3bda4ecf1b0a",
@@ -62,12 +62,12 @@ Object {
             "incompleteColumns": Object {},
             "sampling": 1,
           },
-          "f614baeb-5eca-480c-8885-ba79eaf52483": Object {
+          "layer-id2-generated-uuid": Object {
             "columnOrder": Array [
-              "1dd5663b-f062-43f8-8688-fc8166c2ca8e",
+              "layer2-column-id-generated-uuid",
             ],
             "columns": Object {
-              "1dd5663b-f062-43f8-8688-fc8166c2ca8e": Object {
+              "layer2-column-id-generated-uuid": Object {
                 "customLabel": true,
                 "dataType": "number",
                 "isBucketed": false,
@@ -129,13 +129,13 @@ Object {
     ],
     "internalReferences": Array [
       Object {
-        "id": "d594baeb-5eca-480c-8885-ba79eaf41372",
-        "name": "indexpattern-datasource-layer-e614baeb-5eca-480c-8885-ba79eaf41372",
+        "id": "host-generated-uuid",
+        "name": "indexpattern-datasource-layer-layer-id1-generated-uuid",
         "type": "index-pattern",
       },
       Object {
-        "id": "d594baeb-5eca-480c-8885-ba79eaf41372",
-        "name": "indexpattern-datasource-layer-f614baeb-5eca-480c-8885-ba79eaf52483",
+        "id": "host-generated-uuid",
+        "name": "indexpattern-datasource-layer-layer-id2-generated-uuid",
         "type": "index-pattern",
       },
     ],
@@ -159,7 +159,7 @@ Object {
           "accessors": Array [
             "8886a925-4419-4d9a-8498-3bda4ecf1b0a",
           ],
-          "layerId": "e614baeb-5eca-480c-8885-ba79eaf41372",
+          "layerId": "layer-id1-generated-uuid",
           "layerType": "data",
           "position": "top",
           "seriesType": "line",
@@ -174,16 +174,16 @@ Object {
         },
         Object {
           "accessors": Array [
-            "1dd5663b-f062-43f8-8688-fc8166c2ca8e",
+            "layer2-column-id-generated-uuid",
           ],
-          "layerId": "f614baeb-5eca-480c-8885-ba79eaf52483",
+          "layerId": "layer-id2-generated-uuid",
           "layerType": "referenceLine",
           "yConfig": Array [
             Object {
               "axisMode": "left",
               "color": "#aa6556",
               "fill": "none",
-              "forAccessor": "1dd5663b-f062-43f8-8688-fc8166c2ca8e",
+              "forAccessor": "layer2-column-id-generated-uuid",
               "icon": "alert",
               "iconPosition": "left",
               "lineWidth": 2,

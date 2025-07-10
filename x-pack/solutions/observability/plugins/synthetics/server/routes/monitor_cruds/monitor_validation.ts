@@ -6,10 +6,10 @@
  */
 import * as t from 'io-ts';
 import { i18n } from '@kbn/i18n';
-import { isLeft } from 'fp-ts/lib/Either';
+import { isLeft } from 'fp-ts/Either';
 import { formatErrors } from '@kbn/securitysolution-io-ts-utils';
 
-import { omit } from 'lodash';
+import { omit, isEmpty } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { AlertConfigSchema } from '../../../common/runtime_types/monitor_management/alert_config_schema';
 import { CreateMonitorPayLoad } from './add_monitor/add_monitor_api';
@@ -69,9 +69,11 @@ export class MonitorValidationError extends Error {
 /**
  * Validates monitor fields with respect to the relevant Codec identified by object's 'type' property.
  * @param monitorFields {MonitorFields} The mixed type representing the possible monitor payload from UI.
+ * @param spaceId
  */
-export function validateMonitor(monitorFields: MonitorFields): ValidationResult {
-  const { [ConfigKey.MONITOR_TYPE]: monitorType } = monitorFields;
+export function validateMonitor(monitorFields: MonitorFields, spaceId: string): ValidationResult {
+  const { [ConfigKey.MONITOR_TYPE]: monitorType, [ConfigKey.KIBANA_SPACES]: kSpaces } =
+    monitorFields;
 
   if (monitorType !== MonitorTypeEnum.BROWSER && !monitorFields.name) {
     monitorFields.name = monitorFields.urls || monitorFields.hosts;
@@ -159,6 +161,21 @@ export function validateMonitor(monitorFields: MonitorFields): ValidationResult 
     }
   }
 
+  if (spaceId && !isEmpty(kSpaces)) {
+    // we throw error if kSpaces is not empty and spaceId is not present
+    if (kSpaces && !kSpaces.includes(spaceId) && !kSpaces.includes('*')) {
+      return {
+        valid: false,
+        reason: i18n.translate('xpack.synthetics.createMonitor.validation.invalidSpace', {
+          defaultMessage:
+            'Invalid space ID provided in monitor configuration. It should always include the current space ID.',
+        }),
+        details: '',
+        payload: monitorFields,
+      };
+    }
+  }
+
   return {
     valid: true,
     reason: '',
@@ -230,6 +247,10 @@ export const normalizeAPIConfig = (monitor: CreateMonitorPayLoad) => {
   let unsupportedKeys = Object.keys(rawConfig).filter((key) => !supportedKeys.includes(key));
 
   const result = omit(rawConfig, unsupportedKeys);
+  let kSpaces = rawConfig[ConfigKey.KIBANA_SPACES] as string[];
+  if (kSpaces?.includes('*')) {
+    kSpaces = ['*'];
+  }
 
   const formattedConfig = {
     ...result,
@@ -237,6 +258,7 @@ export const normalizeAPIConfig = (monitor: CreateMonitorPayLoad) => {
     private_locations: _privateLocations,
     retest_on_failure: _retestOnFailure,
     custom_heartbeat_id: _customHeartbeatId,
+    ...(kSpaces ? { [ConfigKey.KIBANA_SPACES]: kSpaces } : {}),
   } as CreateMonitorPayLoad;
 
   const requestBodyCheck = formattedConfig[ConfigKey.REQUEST_BODY_CHECK];

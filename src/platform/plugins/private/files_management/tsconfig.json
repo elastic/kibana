@@ -15,7 +15,7 @@
     "@kbn/shared-ux-file-image",
     "@kbn/shared-ux-router",
     "@kbn/content-management-table-list-view-common",
-    "@kbn/react-kibana-context-render",
+    "@kbn/charts-theme",
   ],
   "exclude": [
     "target/**/*",

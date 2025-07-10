@@ -51,7 +51,7 @@ const createCardConfig = (
       return {
         title: noMetricIndicesPromptTitle,
         description: noMetricIndicesPromptDescription,
-        href: onboardingLocator?.getRedirectUrl({ category: onboardingFlow }),
+        href: onboardingLocator?.getRedirectUrl({}),
       };
     }
   }

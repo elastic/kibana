@@ -15,11 +15,11 @@ import {
 import { noop } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
-
 import type { Filter } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
-import { dataTableSelectors, tableDefaults, TableId } from '@kbn/securitysolution-data-table';
+import { DataViewManagerScopeName } from '../../../../data_view_manager/constants';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import type { NarrowDateRange } from '../../../../common/components/ml/types';
 import { dataViewSpecToViewBase } from '../../../../common/lib/kuery';
 import { useCalculateEntityRiskScore } from '../../../../entity_analytics/api/hooks/use_calculate_entity_risk_score';
@@ -35,8 +35,8 @@ import { AlertsByStatus } from '../../../../overview/components/detection_respon
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
-import type { HostItem } from '../../../../../common/search_strategy';
-import { LastEventIndexKey, RiskScoreEntity } from '../../../../../common/search_strategy';
+import { type HostItem, LastEventIndexKey } from '../../../../../common/search_strategy';
+import { EntityType } from '../../../../../common/entity_analytics/types';
 import { SecurityPageName } from '../../../../app/types';
 import { FiltersGlobal } from '../../../../common/components/filters_global';
 import { HeaderPage } from '../../../../common/components/header_page';
@@ -59,19 +59,14 @@ import { inputsSelectors } from '../../../../common/store';
 import { setHostDetailsTablesActivePageToZero } from '../../store/actions';
 import { setAbsoluteRangeDatePicker } from '../../../../common/store/inputs/actions';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
-
 import { HostDetailsTabs } from './details_tabs';
 import { navTabsHostDetails } from './nav_tabs';
 import type { HostDetailsProps } from './types';
 import { HostsType } from '../../store/model';
 import { getHostDetailsPageFilters } from './helpers';
-import { showGlobalFilters } from '../../../../timelines/components/timeline/helpers';
 import { useGlobalFullScreen } from '../../../../common/containers/use_full_screen';
 import { Display } from '../display';
-import {
-  useDeepEqualSelector,
-  useShallowEqualSelector,
-} from '../../../../common/hooks/use_selector';
+import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { ID, useHostDetails } from '../../containers/hosts/details';
 import { manageQuery } from '../../../../common/components/page/manage_query';
 import { useInvalidFilterQuery } from '../../../../common/hooks/use_invalid_filter_query';
@@ -81,16 +76,17 @@ import { AlertCountByRuleByStatus } from '../../../../common/components/alert_co
 import { useLicense } from '../../../../common/hooks/use_license';
 import { ResponderActionButton } from '../../../../common/components/endpoint/responder';
 import { useRefetchOverviewPageRiskScore } from '../../../../entity_analytics/api/hooks/use_refetch_overview_page_risk_score';
+import { SourcererScopeName } from '../../../../sourcerer/store/model';
+import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
+import { useDataViewSpec } from '../../../../data_view_manager/hooks/use_data_view_spec';
+import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
+import { PageLoader } from '../../../../common/components/page_loader';
 
 const ES_HOST_FIELD = 'host.name';
 const HostOverviewManage = manageQuery(HostOverview);
 
 const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDetailsPagePath }) => {
   const dispatch = useDispatch();
-  const getTable = useMemo(() => dataTableSelectors.getTableByIdSelector(), []);
-  const graphEventId = useShallowEqualSelector(
-    (state) => (getTable(state, TableId.hostsPageEvents) ?? tableDefaults).graphEventId
-  );
   const getGlobalFiltersQuerySelector = useMemo(
     () => inputsSelectors.globalFiltersQuerySelector(),
     []
@@ -129,7 +125,26 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
     [dispatch]
   );
 
-  const { indicesExist, selectedPatterns, sourcererDataView } = useSourcererDataView();
+  const {
+    indicesExist: oldIndicesExist,
+    selectedPatterns: oldSelectedPatterns,
+    sourcererDataView: oldSourcererDataView,
+  } = useSourcererDataView();
+
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+
+  const { dataView, status } = useDataView(DataViewManagerScopeName.explore);
+  const { dataViewSpec } = useDataViewSpec(DataViewManagerScopeName.explore);
+  const experimentalSelectedPatterns = useSelectedPatterns(DataViewManagerScopeName.explore);
+
+  const sourcererDataView = newDataViewPickerEnabled ? dataViewSpec : oldSourcererDataView;
+  const indicesExist = newDataViewPickerEnabled
+    ? !!dataView?.matchedIndices?.length
+    : oldIndicesExist;
+  const selectedPatterns = newDataViewPickerEnabled
+    ? experimentalSelectedPatterns
+    : oldSelectedPatterns;
+
   const [loading, { inspect, hostDetails: hostOverview, id, refetch }] = useHostDetails({
     endDate: to,
     startDate: from,
@@ -183,15 +198,16 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
     [rawFilteredQuery]
   );
 
-  const entity = useMemo(() => ({ type: 'host' as const, name: detailName }), [detailName]);
+  const entity = useMemo(
+    () => ({ type: EntityType.host as const, name: detailName }),
+    [detailName]
+  );
   const privileges = useAssetCriticalityPrivileges(entity.name);
 
   const refetchRiskScore = useRefetchOverviewPageRiskScore(HOST_OVERVIEW_RISK_SCORE_QUERY_ID);
-  const { calculateEntityRiskScore } = useCalculateEntityRiskScore(
-    RiskScoreEntity.host,
-    detailName,
-    { onSuccess: refetchRiskScore }
-  );
+  const { calculateEntityRiskScore } = useCalculateEntityRiskScore(EntityType.host, detailName, {
+    onSuccess: refetchRiskScore,
+  });
 
   const canReadAssetCriticality = !!privileges.data?.has_read_permissions;
   const criticality = useAssetCriticalityData({
@@ -200,12 +216,16 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
     onChange: calculateEntityRiskScore,
   });
 
+  if (newDataViewPickerEnabled && status === 'pristine') {
+    return <PageLoader />;
+  }
+
   return (
     <>
       {indicesExist ? (
         <>
           <EuiWindowEvent event="resize" handler={noop} />
-          <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
+          <FiltersGlobal>
             <SiemSearchBar id={InputsModelId.global} sourcererDataView={sourcererDataView} />
           </FiltersGlobal>
 
@@ -264,6 +284,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
                     hostName={detailName}
                     indexNames={selectedPatterns}
                     jobNameById={jobNameById}
+                    scopeId={SourcererScopeName.explore}
                   />
                 )}
               </AnomalyTableProvider>

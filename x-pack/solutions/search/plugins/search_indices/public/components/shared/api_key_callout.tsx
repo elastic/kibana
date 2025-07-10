@@ -39,8 +39,8 @@ export const APIKeyCallout = ({ apiKey }: APIKeyCalloutProps) => {
     <EuiPanel
       paddingSize="m"
       hasShadow={false}
-      hasBorder={true}
-      color="plain"
+      hasBorder={false}
+      color="subdued"
       data-test-subj={dataTestSubj}
     >
       <EuiFlexGroup direction="column" gutterSize="s">

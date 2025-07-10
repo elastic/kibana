@@ -7,7 +7,7 @@
 
 import React, { useEffect, useRef } from 'react';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
-import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
+import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { useSearchApi } from '@kbn/presentation-publishing';
 import type {
   LayerDescriptor,
@@ -15,7 +15,7 @@ import type {
   MapSettings,
 } from '../../../common/descriptor_types';
 import { createBasemapLayerDescriptor } from '../../classes/layers/create_basemap_layer_descriptor';
-import { MapApi, MapRuntimeState, MapSerializedState } from '../types';
+import { MapApi, MapSerializedState } from '../types';
 import { MAP_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import { RenderToolTipContent } from '../../classes/tooltips/tooltip_property';
 import { MAP_RENDERER_TYPE } from './types';
@@ -63,7 +63,7 @@ export function MapRenderer(props: Props) {
 
   return (
     <div className="mapEmbeddableContainer">
-      <ReactEmbeddableRenderer<MapSerializedState, MapRuntimeState, MapApi>
+      <EmbeddableRenderer<MapSerializedState, MapApi>
         type={MAP_SAVED_OBJECT_TYPE}
         getParentApi={() => ({
           type: MAP_RENDERER_TYPE,

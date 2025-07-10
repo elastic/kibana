@@ -8,7 +8,7 @@
  */
 
 import React, { useMemo, useState, ReactNode } from 'react';
-import { estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
 import {
   Comparators,
@@ -158,6 +158,9 @@ export function ClustersTable({ clusters }: Props) {
       }}
       noItemsMessage={i18n.translate('inspector.requests.clusters.table.noItemsFound', {
         defaultMessage: 'No clusters found',
+      })}
+      cellProps={(item, column) => ({
+        'data-test-subj': `inspectorRequestClustersTableCell-${column.name}-${item.name}`,
       })}
     />
   );

@@ -21,7 +21,6 @@ export const mockOptions: RelatedUsersRequestOptions = {
   factoryQueryType: RelatedEntitiesQueries.relatedUsers,
   hostName: 'host1',
   from: '2020-09-02T15:17:13.678Z',
-  isNewRiskScoreModuleInstalled: false,
 };
 
 export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
@@ -113,35 +112,33 @@ export const mockDeps = () => ({
 export const expectedDsl = {
   allow_no_indices: true,
   track_total_hits: false,
-  body: {
-    aggregations: {
-      user_count: { cardinality: { field: 'user.name' } },
-      user_data: {
-        terms: { field: 'user.name', size: 1000 },
-        aggs: {
-          ip: { terms: { field: 'host.ip', size: 10 } },
-        },
+  aggregations: {
+    user_count: { cardinality: { field: 'user.name' } },
+    user_data: {
+      terms: { field: 'user.name', size: 1000 },
+      aggs: {
+        ip: { terms: { field: 'host.ip', size: 10 } },
       },
     },
-    query: {
-      bool: {
-        filter: [
-          { term: { 'host.name': 'host1' } },
-          { term: { 'event.category': 'authentication' } },
-          { term: { 'event.outcome': 'success' } },
-          {
-            range: {
-              '@timestamp': {
-                format: 'strict_date_optional_time',
-                gt: '2020-09-02T15:17:13.678Z',
-              },
+  },
+  query: {
+    bool: {
+      filter: [
+        { term: { 'host.name': 'host1' } },
+        { term: { 'event.category': 'authentication' } },
+        { term: { 'event.outcome': 'success' } },
+        {
+          range: {
+            '@timestamp': {
+              format: 'strict_date_optional_time',
+              gt: '2020-09-02T15:17:13.678Z',
             },
           },
-        ],
-      },
+        },
+      ],
     },
-    size: 0,
   },
+  size: 0,
   ignore_unavailable: true,
   index: ['test_indices*'],
 };

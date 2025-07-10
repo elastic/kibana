@@ -72,6 +72,7 @@ export const MANUAL_RULE_RUN_START_DATE_OUT_OF_RANGE_ERROR = (maxDaysLookback: n
 export const MANUAL_RULE_RUN_NOTIFIACTIONS_LIMITATIONS = i18n.translate(
   'xpack.securitySolution.manualRuleRun.notificationsLimitations',
   {
-    defaultMessage: 'Rule actions are not performed during manual rule runs.',
+    defaultMessage:
+      'Alert summary rule actions that run at a custom frequency are not performed during manual rule runs.',
   }
 );

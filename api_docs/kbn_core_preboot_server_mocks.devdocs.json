@@ -25,7 +25,7 @@
           "{ readonly isSetupOnHold: jest.MockInstance<boolean, [], unknown>; readonly holdSetupUntilResolved: jest.MockInstance<void, [pluginName: string, reason: string, promise: Promise<{ shouldReloadConfig: boolean; } | undefined>], unknown>; readonly waitUntilCanSetup: jest.MockInstance<Promise<{ shouldReloadConfig: boolean; }>, [], unknown>; } & ",
           "InternalPrebootServicePreboot"
         ],
-        "path": "packages/core/preboot/core-preboot-server-mocks/src/preboot_service.mock.ts",
+        "path": "src/core/packages/preboot/server-mocks/src/preboot_service.mock.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -41,7 +41,7 @@
           "{ readonly isSetupOnHold: jest.MockInstance<boolean, [], unknown>; readonly holdSetupUntilResolved: jest.MockInstance<void, [reason: string, promise: Promise<{ shouldReloadConfig: boolean; } | undefined>], unknown>; } & ",
           "PrebootServicePreboot"
         ],
-        "path": "packages/core/preboot/core-preboot-server-mocks/src/preboot_service.mock.ts",
+        "path": "src/core/packages/preboot/server-mocks/src/preboot_service.mock.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -55,7 +55,7 @@
         "tags": [],
         "label": "prebootServiceMock",
         "description": [],
-        "path": "packages/core/preboot/core-preboot-server-mocks/src/preboot_service.mock.ts",
+        "path": "src/core/packages/preboot/server-mocks/src/preboot_service.mock.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -69,7 +69,7 @@
             "signature": [
               "() => jest.Mocked<PrebootServiceContract>"
             ],
-            "path": "packages/core/preboot/core-preboot-server-mocks/src/preboot_service.mock.ts",
+            "path": "src/core/packages/preboot/server-mocks/src/preboot_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -84,15 +84,9 @@
             "description": [],
             "signature": [
               "() => ",
-              {
-                "pluginId": "@kbn/core-preboot-server-mocks",
-                "scope": "server",
-                "docId": "kibKbnCorePrebootServerMocksPluginApi",
-                "section": "def-server.InternalPrebootServicePrebootMock",
-                "text": "InternalPrebootServicePrebootMock"
-              }
+              "InternalPrebootServicePrebootMock"
             ],
-            "path": "packages/core/preboot/core-preboot-server-mocks/src/preboot_service.mock.ts",
+            "path": "src/core/packages/preboot/server-mocks/src/preboot_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -107,15 +101,9 @@
             "description": [],
             "signature": [
               "() => ",
-              {
-                "pluginId": "@kbn/core-preboot-server-mocks",
-                "scope": "server",
-                "docId": "kibKbnCorePrebootServerMocksPluginApi",
-                "section": "def-server.PrebootServicePrebootMock",
-                "text": "PrebootServicePrebootMock"
-              }
+              "PrebootServicePrebootMock"
             ],
-            "path": "packages/core/preboot/core-preboot-server-mocks/src/preboot_service.mock.ts",
+            "path": "src/core/packages/preboot/server-mocks/src/preboot_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],

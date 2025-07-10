@@ -23,9 +23,10 @@ import type {
 import type { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
 import { EndpointAuthorizationError } from '../../endpoint/errors';
 import { parseRequest } from './parse_request';
+import { buildIndexNameWithNamespace } from '../../../common/endpoint/utils/index_name_utilities';
 
 /**
- * EndpointFieldProvider mimics indexField provider from timeline plugin: x-pack/solutions/security/plugins/timelines/server/search_strategy/index_fields/index.ts
+ * EndpointFieldProvider mimics indexField provider from timeline plugin: x-pack/platform/plugins/shared/timelines/server/search_strategy/index_fields/index.ts
  * but it uses ES internalUser instead to avoid adding extra index privileges for users with event filters permissions.
  * It is used to retrieve index patterns for event filters form.
  */
@@ -52,7 +53,7 @@ export const requestEndpointFieldsSearch = async (
   beatFields: BeatFields,
   indexPatterns: DataViewsServerPluginStart
 ): Promise<IndexFieldsStrategyResponse> => {
-  const parsedRequest = parseRequest(request);
+  let parsedRequest = parseRequest(request);
 
   if (
     parsedRequest.indices.length > 1 ||
@@ -60,6 +61,27 @@ export const requestEndpointFieldsSearch = async (
       parsedRequest.indices[0] !== METADATA_UNITED_INDEX)
   ) {
     throw new Error(`Invalid indices request ${request.indices.join(', ')}`);
+  }
+
+  if (
+    parsedRequest.indices[0] === eventsIndexPattern &&
+    context.experimentalFeatures.endpointManagementSpaceAwarenessEnabled
+  ) {
+    const { id: spaceId } = await context.getActiveSpace(deps.request);
+    const integrationNamespaces = await context
+      .getInternalFleetServices(spaceId)
+      .getIntegrationNamespaces(['endpoint']);
+
+    const namespaces = integrationNamespaces.endpoint;
+    if (namespaces && namespaces.length > 0) {
+      const combinedPatterns = namespaces.map((namespace) =>
+        buildIndexNameWithNamespace(eventsIndexPattern, namespace, { preserveWildcard: true })
+      );
+      parsedRequest = {
+        ...parsedRequest,
+        indices: [combinedPatterns.join(',')],
+      };
+    }
   }
 
   const { canWriteEventFilters, canReadEndpointList } = await context.getEndpointAuthz(

@@ -8,7 +8,7 @@
  */
 
 import { buildDataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 
 const fields = [
   {
@@ -31,5 +31,7 @@ const fields = [
 
 export const dataViewEsql = buildDataViewMock({
   name: 'index-pattern-esql',
+  title: 'index-pattern-esql',
   fields,
+  isPersisted: false,
 });

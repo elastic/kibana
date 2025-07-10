@@ -11,9 +11,346 @@
   "server": {
     "classes": [],
     "functions": [],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "parentPluginId": "llmTasks",
+        "id": "def-server.RetrieveDocumentationParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "RetrieveDocumentationParams",
+        "description": [
+          "\nParameters for {@link RetrieveDocumentationAPI}"
+        ],
+        "path": "x-pack/platform/plugins/shared/ai_infra/llm_tasks/server/tasks/retrieve_documentation/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "llmTasks",
+            "id": "def-server.RetrieveDocumentationParams.searchTerm",
+            "type": "string",
+            "tags": [],
+            "label": "searchTerm",
+            "description": [
+              "\nThe search term to perform semantic text with.\nE.g. \"What is Kibana Lens?\""
+            ],
+            "path": "x-pack/platform/plugins/shared/ai_infra/llm_tasks/server/tasks/retrieve_documentation/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "llmTasks",
+            "id": "def-server.RetrieveDocumentationParams.max",
+            "type": "number",
+            "tags": [],
+            "label": "max",
+            "description": [
+              "\nMaximum number of documents to return.\nDefaults to 3."
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/ai_infra/llm_tasks/server/tasks/retrieve_documentation/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "llmTasks",
+            "id": "def-server.RetrieveDocumentationParams.products",
+            "type": "Array",
+            "tags": [],
+            "label": "products",
+            "description": [
+              "\nOptional list of products to restrict the search to."
+            ],
+            "signature": [
+              "(\"security\" | \"kibana\" | \"observability\" | \"elasticsearch\")[] | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/ai_infra/llm_tasks/server/tasks/retrieve_documentation/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "llmTasks",
+            "id": "def-server.RetrieveDocumentationParams.maxDocumentTokens",
+            "type": "number",
+            "tags": [],
+            "label": "maxDocumentTokens",
+            "description": [
+              "\nThe maximum number of tokens to return *per document*.\nDocuments exceeding this limit will go through token reduction.\n\nDefaults to `1000`."
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/ai_infra/llm_tasks/server/tasks/retrieve_documentation/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "llmTasks",
+            "id": "def-server.RetrieveDocumentationParams.tokenReductionStrategy",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "tokenReductionStrategy",
+            "description": [
+              "\nThe token reduction strategy to apply for documents exceeding max token count.\n- \"highlight\": Use Elasticsearch semantic highlighter to build a summary (concatenating highlights)\n- \"truncate\": Will keep the N first tokens\n- \"summarize\": Will call the LLM asking to generate a contextualized summary of the document\n\nOverall, `summarize` is more efficient, but significantly slower, given that an additional\nLLM call will be performed.\n\nDefaults to `highlight`"
+            ],
+            "signature": [
+              "\"highlight\" | \"truncate\" | \"summarize\" | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/ai_infra/llm_tasks/server/tasks/retrieve_documentation/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "llmTasks",
+            "id": "def-server.RetrieveDocumentationParams.request",
+            "type": "Object",
+            "tags": [],
+            "label": "request",
+            "description": [
+              "\nThe request that initiated the task."
+            ],
+            "signature": [
+              "KibanaRequest",
+              "<unknown, unknown, unknown, any>"
+            ],
+            "path": "x-pack/platform/plugins/shared/ai_infra/llm_tasks/server/tasks/retrieve_documentation/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "llmTasks",
+            "id": "def-server.RetrieveDocumentationParams.connectorId",
+            "type": "string",
+            "tags": [],
+            "label": "connectorId",
+            "description": [
+              "\nId of the LLM connector to use for the task."
+            ],
+            "path": "x-pack/platform/plugins/shared/ai_infra/llm_tasks/server/tasks/retrieve_documentation/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "llmTasks",
+            "id": "def-server.RetrieveDocumentationParams.functionCalling",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "functionCalling",
+            "description": [
+              "\nOptional functionCalling parameter to pass down to the inference APIs."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.FunctionCallingMode",
+                "text": "FunctionCallingMode"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/ai_infra/llm_tasks/server/tasks/retrieve_documentation/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "llmTasks",
+            "id": "def-server.RetrieveDocumentationParams.inferenceId",
+            "type": "string",
+            "tags": [],
+            "label": "inferenceId",
+            "description": [
+              "\nInferece ID to route the request to the right index to perform the search."
+            ],
+            "path": "x-pack/platform/plugins/shared/ai_infra/llm_tasks/server/tasks/retrieve_documentation/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "llmTasks",
+        "id": "def-server.RetrieveDocumentationResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "RetrieveDocumentationResult",
+        "description": [
+          "\nResponse type for {@link RetrieveDocumentationAPI}"
+        ],
+        "path": "x-pack/platform/plugins/shared/ai_infra/llm_tasks/server/tasks/retrieve_documentation/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "llmTasks",
+            "id": "def-server.RetrieveDocumentationResult.success",
+            "type": "boolean",
+            "tags": [],
+            "label": "success",
+            "description": [
+              "whether the call was successful or not"
+            ],
+            "path": "x-pack/platform/plugins/shared/ai_infra/llm_tasks/server/tasks/retrieve_documentation/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "llmTasks",
+            "id": "def-server.RetrieveDocumentationResult.documents",
+            "type": "Array",
+            "tags": [],
+            "label": "documents",
+            "description": [
+              "List of results for this search"
+            ],
+            "signature": [
+              {
+                "pluginId": "llmTasks",
+                "scope": "server",
+                "docId": "kibLlmTasksPluginApi",
+                "section": "def-server.RetrieveDocumentationResultDoc",
+                "text": "RetrieveDocumentationResultDoc"
+              },
+              "[]"
+            ],
+            "path": "x-pack/platform/plugins/shared/ai_infra/llm_tasks/server/tasks/retrieve_documentation/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "llmTasks",
+        "id": "def-server.RetrieveDocumentationResultDoc",
+        "type": "Interface",
+        "tags": [],
+        "label": "RetrieveDocumentationResultDoc",
+        "description": [
+          "\nIndividual result item in a {@link RetrieveDocumentationResult}"
+        ],
+        "path": "x-pack/platform/plugins/shared/ai_infra/llm_tasks/server/tasks/retrieve_documentation/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "llmTasks",
+            "id": "def-server.RetrieveDocumentationResultDoc.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [
+              "title of the document"
+            ],
+            "path": "x-pack/platform/plugins/shared/ai_infra/llm_tasks/server/tasks/retrieve_documentation/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "llmTasks",
+            "id": "def-server.RetrieveDocumentationResultDoc.url",
+            "type": "string",
+            "tags": [],
+            "label": "url",
+            "description": [
+              "full url to the online documentation"
+            ],
+            "path": "x-pack/platform/plugins/shared/ai_infra/llm_tasks/server/tasks/retrieve_documentation/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "llmTasks",
+            "id": "def-server.RetrieveDocumentationResultDoc.content",
+            "type": "string",
+            "tags": [],
+            "label": "content",
+            "description": [
+              "full content of the doc article"
+            ],
+            "path": "x-pack/platform/plugins/shared/ai_infra/llm_tasks/server/tasks/retrieve_documentation/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "llmTasks",
+            "id": "def-server.RetrieveDocumentationResultDoc.summarized",
+            "type": "boolean",
+            "tags": [],
+            "label": "summarized",
+            "description": [
+              "true if content exceeded max token length and had to go through token reduction"
+            ],
+            "path": "x-pack/platform/plugins/shared/ai_infra/llm_tasks/server/tasks/retrieve_documentation/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "llmTasks",
+        "id": "def-server.RetrieveDocumentationAPI",
+        "type": "Type",
+        "tags": [],
+        "label": "RetrieveDocumentationAPI",
+        "description": [
+          "\nRetrieve documentation API"
+        ],
+        "signature": [
+          "(options: ",
+          {
+            "pluginId": "llmTasks",
+            "scope": "server",
+            "docId": "kibLlmTasksPluginApi",
+            "section": "def-server.RetrieveDocumentationParams",
+            "text": "RetrieveDocumentationParams"
+          },
+          ") => Promise<",
+          {
+            "pluginId": "llmTasks",
+            "scope": "server",
+            "docId": "kibLlmTasksPluginApi",
+            "section": "def-server.RetrieveDocumentationResult",
+            "text": "RetrieveDocumentationResult"
+          },
+          ">"
+        ],
+        "path": "x-pack/platform/plugins/shared/ai_infra/llm_tasks/server/tasks/retrieve_documentation/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "llmTasks",
+            "id": "def-server.RetrieveDocumentationAPI.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "llmTasks",
+                "scope": "server",
+                "docId": "kibLlmTasksPluginApi",
+                "section": "def-server.RetrieveDocumentationParams",
+                "text": "RetrieveDocumentationParams"
+              }
+            ],
+            "path": "x-pack/platform/plugins/shared/ai_infra/llm_tasks/server/tasks/retrieve_documentation/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "objects": [],
     "setup": {
       "parentPluginId": "llmTasks",
@@ -75,9 +412,21 @@
           ],
           "signature": [
             "(options: ",
-            "RetrieveDocumentationParams",
+            {
+              "pluginId": "llmTasks",
+              "scope": "server",
+              "docId": "kibLlmTasksPluginApi",
+              "section": "def-server.RetrieveDocumentationParams",
+              "text": "RetrieveDocumentationParams"
+            },
             ") => Promise<",
-            "RetrieveDocumentationResult",
+            {
+              "pluginId": "llmTasks",
+              "scope": "server",
+              "docId": "kibLlmTasksPluginApi",
+              "section": "def-server.RetrieveDocumentationResult",
+              "text": "RetrieveDocumentationResult"
+            },
             ">"
           ],
           "path": "x-pack/platform/plugins/shared/ai_infra/llm_tasks/server/types.ts",
@@ -93,7 +442,13 @@
               "label": "options",
               "description": [],
               "signature": [
-                "RetrieveDocumentationParams"
+                {
+                  "pluginId": "llmTasks",
+                  "scope": "server",
+                  "docId": "kibLlmTasksPluginApi",
+                  "section": "def-server.RetrieveDocumentationParams",
+                  "text": "RetrieveDocumentationParams"
+                }
               ],
               "path": "x-pack/platform/plugins/shared/ai_infra/llm_tasks/server/tasks/retrieve_documentation/types.ts",
               "deprecated": false,

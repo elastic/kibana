@@ -61,7 +61,6 @@ export class CrowdstrikeAgentStatusClient extends AgentStatusClient {
 
   async getAgentStatuses(agentIds: string[]): Promise<AgentStatusRecords> {
     const esClient = this.options.esClient;
-    const metadataService = this.options.endpointService.getEndpointMetadataService();
     const sortField = 'crowdstrike.host.last_seen';
 
     const query = {
@@ -116,7 +115,7 @@ export class CrowdstrikeAgentStatusClient extends AgentStatusClient {
           { ignore: [404] }
         ),
 
-        getPendingActionsSummary(esClient, metadataService, this.log, agentIds),
+        getPendingActionsSummary(this.options.endpointService, this.options.spaceId, agentIds),
       ]).catch(catchAndWrapError);
 
       const mostRecentAgentInfosByAgentId = searchResponse?.hits?.hits?.reduce<
@@ -158,7 +157,6 @@ export class CrowdstrikeAgentStatusClient extends AgentStatusClient {
           pendingActions: pendingActions?.pending_actions ?? {},
         };
 
-        // console.log({ acc });
         return acc;
       }, {});
     } catch (err) {

@@ -6,7 +6,7 @@
  */
 
 import React, { Component } from 'react';
-import type { GeoShapeRelation } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { GeoShapeRelation } from '@elastic/elasticsearch/lib/api/types';
 import {
   EuiButtonIcon,
   EuiPopover,
@@ -242,7 +242,7 @@ export class ToolsControl extends Component<Props, State> {
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>{toolsPopoverButton}</EuiFlexItem>
         <EuiFlexItem>
-          <EuiButton size="s" fill onClick={this.props.cancelDraw}>
+          <EuiButton size="s" fill onClick={this.props.cancelDraw} autoFocus>
             <FormattedMessage
               id="xpack.maps.tooltip.toolsControl.cancelDrawButtonLabel"
               defaultMessage="Cancel"

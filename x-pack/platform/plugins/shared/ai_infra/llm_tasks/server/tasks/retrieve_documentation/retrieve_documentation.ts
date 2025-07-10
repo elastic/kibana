@@ -6,8 +6,8 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import type { OutputAPI } from '@kbn/inference-common';
-import type { ProductDocSearchAPI } from '@kbn/product-doc-base-plugin/server';
+import { type OutputAPI } from '@kbn/inference-common';
+import type { ProductDocSearchAPI, DocSearchResult } from '@kbn/product-doc-base-plugin/server';
 import { truncate, count as countTokens } from '../../utils/tokens';
 import type { RetrieveDocumentationAPI } from './types';
 import { summarizeDocument } from './summarize_document';
@@ -30,12 +30,44 @@ export const retrieveDocumentation =
     connectorId,
     products,
     functionCalling,
+    inferenceId,
     max = MAX_DOCUMENTS_DEFAULT,
     maxDocumentTokens = MAX_TOKENS_DEFAULT,
-    tokenReductionStrategy = 'summarize',
+    tokenReductionStrategy = 'highlight',
   }) => {
+    const applyTokenReductionStrategy = async (doc: DocSearchResult): Promise<string> => {
+      let content: string;
+      switch (tokenReductionStrategy) {
+        case 'highlight':
+          content = doc.highlights.join('\n\n');
+          break;
+        case 'summarize':
+          const extractResponse = await summarizeDocument({
+            searchTerm,
+            documentContent: doc.content,
+            outputAPI,
+            connectorId,
+            functionCalling,
+          });
+          content = extractResponse.summary;
+          break;
+        case 'truncate':
+          content = doc.content;
+          break;
+      }
+      return truncate(content, maxDocumentTokens);
+    };
+
     try {
-      const { results } = await searchDocAPI({ query: searchTerm, products, max });
+      const highlights =
+        tokenReductionStrategy === 'highlight' ? calculateHighlightCount(maxDocumentTokens) : 0;
+      const { results } = await searchDocAPI({
+        query: searchTerm,
+        products,
+        max,
+        highlights,
+        inferenceId,
+      });
 
       log.debug(`searching with term=[${searchTerm}] returned ${results.length} documents`);
 
@@ -49,18 +81,7 @@ export const retrieveDocumentation =
 
           let content = document.content;
           if (docHasTooManyTokens) {
-            if (tokenReductionStrategy === 'summarize') {
-              const extractResponse = await summarizeDocument({
-                searchTerm,
-                documentContent: document.content,
-                outputAPI,
-                connectorId,
-                functionCalling,
-              });
-              content = truncate(extractResponse.summary, maxDocumentTokens);
-            } else {
-              content = truncate(document.content, maxDocumentTokens);
-            }
+            content = await applyTokenReductionStrategy(document);
           }
 
           log.debug(`done processing document [${document.url}]`);
@@ -68,6 +89,7 @@ export const retrieveDocumentation =
             title: document.title,
             url: document.url,
             content,
+            summarized: docHasTooManyTokens,
           };
         })
       );
@@ -86,3 +108,9 @@ export const retrieveDocumentation =
       return { success: false, documents: [] };
     }
   };
+
+const AVG_TOKENS_PER_HIGHLIGHT = 250;
+
+const calculateHighlightCount = (maxTokensPerDoc: number): number => {
+  return Math.ceil(maxTokensPerDoc / AVG_TOKENS_PER_HIGHLIGHT);
+};

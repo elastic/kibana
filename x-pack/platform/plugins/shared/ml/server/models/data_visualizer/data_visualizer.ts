@@ -438,7 +438,7 @@ export class DataVisualizer {
         index,
         track_total_hits: true,
         size,
-        body: searchBody,
+        ...searchBody,
       },
       { maxRetries: 0 }
     );
@@ -531,7 +531,7 @@ export class DataVisualizer {
       {
         index,
         size,
-        body: searchBody,
+        ...searchBody,
       },
       { maxRetries: 0 }
     );
@@ -579,7 +579,7 @@ export class DataVisualizer {
       {
         index,
         size,
-        body: searchBody,
+        ...searchBody,
       },
       { maxRetries: 0 }
     );
@@ -674,7 +674,7 @@ export class DataVisualizer {
       {
         index,
         size,
-        body: searchBody,
+        ...searchBody,
       },
       { maxRetries: 0 }
     );
@@ -787,7 +787,7 @@ export class DataVisualizer {
       {
         index,
         size,
-        body: searchBody,
+        ...searchBody,
       },
       { maxRetries: 0 }
     );
@@ -866,7 +866,7 @@ export class DataVisualizer {
       {
         index,
         size,
-        body: searchBody,
+        ...searchBody,
       },
       { maxRetries: 0 }
     );
@@ -938,7 +938,7 @@ export class DataVisualizer {
       {
         index,
         size,
-        body: searchBody,
+        ...searchBody,
       },
       { maxRetries: 0 }
     );
@@ -1006,7 +1006,7 @@ export class DataVisualizer {
       {
         index,
         size,
-        body: searchBody,
+        ...searchBody,
       },
       { maxRetries: 0 }
     );

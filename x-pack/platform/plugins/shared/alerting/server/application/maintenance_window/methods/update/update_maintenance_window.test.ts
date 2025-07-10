@@ -8,17 +8,15 @@
 import moment from 'moment-timezone';
 import { Frequency } from '@kbn/rrule';
 import { updateMaintenanceWindow } from './update_maintenance_window';
-import { UpdateMaintenanceWindowParams } from './types';
+import type { UpdateMaintenanceWindowParams } from './types';
 import {
   savedObjectsClientMock,
   loggingSystemMock,
   uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
-import { SavedObject } from '@kbn/core/server';
-import {
-  MaintenanceWindowClientContext,
-  MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
-} from '../../../../../common';
+import type { SavedObject } from '@kbn/core/server';
+import type { MaintenanceWindowClientContext } from '../../../../../common';
+import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '../../../../../common';
 import { getMockMaintenanceWindow } from '../../../../data/maintenance_window/test_helpers';
 import type { MaintenanceWindow } from '../../types';
 import { FilterStateStore } from '@kbn/es-query';
@@ -38,6 +36,7 @@ const updatedAttributes = {
     dtstart: '2023-03-26T00:00:00.000Z',
     freq: Frequency.WEEKLY,
     count: 2,
+    byweekday: ['-1MO', 'WE'],
   },
 };
 
@@ -110,8 +109,8 @@ describe('MaintenanceWindowClient - update', () => {
       {
         ...updatedAttributes,
         events: [
-          { gte: '2023-03-26T00:00:00.000Z', lte: '2023-03-26T02:00:00.000Z' },
-          { gte: '2023-04-01T23:00:00.000Z', lte: '2023-04-02T01:00:00.000Z' }, // Daylight savings
+          { gte: '2023-03-26T23:00:00.000Z', lte: '2023-03-27T01:00:00.000Z' },
+          { gte: '2023-03-28T23:00:00.000Z', lte: '2023-03-29T01:00:00.000Z' }, // Daylight savings
         ],
         expirationDate: moment(new Date(secondTimestamp)).tz('UTC').add(1, 'year').toISOString(),
         createdAt: '2023-02-26T00:00:00.000Z',
@@ -394,56 +393,6 @@ describe('MaintenanceWindowClient - update', () => {
       invalid: 
       ---------^"
     `);
-  });
-
-  it('should throw if trying to update a MW with a scoped query with other than 1 category ID', async () => {
-    jest.useFakeTimers().setSystemTime(new Date(firstTimestamp));
-    const mockMaintenanceWindow = getMockMaintenanceWindow({
-      expirationDate: moment(new Date(firstTimestamp)).tz('UTC').subtract(1, 'year').toISOString(),
-    });
-
-    savedObjectsClient.get.mockResolvedValueOnce({
-      attributes: mockMaintenanceWindow,
-      version: '123',
-      id: 'test-id',
-      categoryIds: ['observability', 'securitySolution'],
-    } as unknown as SavedObject);
-
-    await expect(async () => {
-      await updateMaintenanceWindow(mockContext, {
-        id: 'test-id',
-        data: {
-          scopedQuery: {
-            kql: "_id: '1234'",
-            filters: [
-              {
-                meta: {
-                  disabled: false,
-                  negate: false,
-                  alias: null,
-                  key: 'kibana.alert.action_group',
-                  field: 'kibana.alert.action_group',
-                  params: {
-                    query: 'test',
-                  },
-                  type: 'phrase',
-                },
-                $state: {
-                  store: FilterStateStore.APP_STATE,
-                },
-                query: {
-                  match_phrase: {
-                    'kibana.alert.action_group': 'test',
-                  },
-                },
-              },
-            ],
-          },
-        },
-      });
-    }).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Failed to update maintenance window by id: test-id, Error: Error: Cannot edit archived maintenance windows: Cannot edit archived maintenance windows"`
-    );
   });
 
   it('should throw if updating a maintenance window that has expired', async () => {

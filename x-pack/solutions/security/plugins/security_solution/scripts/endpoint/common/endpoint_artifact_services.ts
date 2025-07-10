@@ -29,7 +29,7 @@ import { HOST_ISOLATION_EXCEPTIONS_LIST_DEFINITION } from '../../../public/manag
 import type { NewTrustedApp } from '../../../common/endpoint/types';
 import { newTrustedAppToCreateExceptionListItem } from '../../../public/management/pages/trusted_apps/service/mappers';
 
-const ensureArtifactListExists = memoize(
+export const ensureArtifactListExists = memoize(
   async (
     kbnClient: KbnClient,
     artifactType: keyof typeof ENDPOINT_ARTIFACT_LISTS | 'endpointExceptions'
@@ -61,6 +61,7 @@ const ensureArtifactListExists = memoize(
           list_id: ENDPOINT_LIST_ID,
           type: ExceptionListTypeEnum.ENDPOINT,
         };
+        break;
 
       default:
         throw new Error(`Unknown Artifact list: ${artifactType}`);
@@ -86,12 +87,12 @@ const ensureArtifactListExists = memoize(
  * Creates an exception list item.
  * NOTE: this method does NOT create the list itself.
  *
- * @private
+ * @internal
  *
  * @param kbnClient
  * @param data
  */
-const createExceptionListItem = async (
+export const createExceptionListItem = async (
   kbnClient: KbnClient,
   data: CreateExceptionListItemSchema
 ): Promise<ExceptionListItemSchema> => {

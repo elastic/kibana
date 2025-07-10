@@ -6,6 +6,8 @@
  */
 
 import expect from '@kbn/expect';
+import { GLOBAL_SETTINGS_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/server/constants';
+
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { SpaceTestApiClient } from './api_helper';
@@ -30,6 +32,13 @@ export default function (providerContext: FtrProviderContext) {
         space: TEST_SPACE_1,
       });
       await cleanFleetIndices(esClient);
+      // Create settings to simulate older cluster
+      await kibanaServer.savedObjects.create({
+        type: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
+        id: 'fleet-default-settings',
+        attributes: {},
+        overwrite: true,
+      });
 
       // Create agent policies it should create a enrollment key for every keys
       const [defaultSpacePolicy1, spaceTest1Policy1] = await Promise.all([
@@ -121,6 +130,16 @@ export default function (providerContext: FtrProviderContext) {
 
         expect(policiesDefaultSpaceIds.length).to.eql(3);
         expect(policiesTestSpaceIds.length).to.eql(0);
+      });
+
+      it('enrollment api keys should be available', async () => {
+        const defaultSpaceEnrollmentApiKeys = await apiClient.getEnrollmentApiKeys();
+        expect(defaultSpaceEnrollmentApiKeys.items.length).to.eql(3);
+
+        await apiClient.getEnrollmentApiKeys(defaultSpaceEnrollmentApiKeys.items[0].id);
+
+        const testSpaceEnrollmentApiKeys = await apiClient.getEnrollmentApiKeys(TEST_SPACE_1);
+        expect(testSpaceEnrollmentApiKeys.items.length).to.eql(0);
       });
 
       it('package policies should be migrated to the default space', async () => {

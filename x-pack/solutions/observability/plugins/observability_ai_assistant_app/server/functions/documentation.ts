@@ -6,7 +6,8 @@
  */
 
 import { DocumentationProduct } from '@kbn/product-doc-common';
-import { FunctionVisibility } from '@kbn/observability-ai-assistant-plugin/common';
+import { defaultInferenceEndpoints } from '@kbn/inference-common';
+import { getInferenceIdFromWriteIndex } from '@kbn/observability-ai-assistant-plugin/server';
 import type { FunctionRegistrationParameters } from '.';
 
 export const RETRIEVE_DOCUMENTATION_NAME = 'retrieve_elastic_doc';
@@ -18,20 +19,20 @@ export async function registerDocumentationFunction({
 }: FunctionRegistrationParameters) {
   const isProductDocAvailable = (await llmTasks.retrieveDocumentationAvailable()) ?? false;
 
-  functions.registerInstruction(({ availableFunctionNames }) => {
-    return availableFunctionNames.includes(RETRIEVE_DOCUMENTATION_NAME)
-      ? `When asked questions about the Elastic stack or products, You should use the ${RETRIEVE_DOCUMENTATION_NAME} function before answering,
+  if (isProductDocAvailable) {
+    functions.registerInstruction(({ availableFunctionNames }) => {
+      return availableFunctionNames.includes(RETRIEVE_DOCUMENTATION_NAME)
+        ? `When asked questions about the Elastic stack or products, You should use the ${RETRIEVE_DOCUMENTATION_NAME} function before answering,
       to retrieve documentation related to the question. Consider that the documentation returned by the function
       is always more up to date and accurate than any own internal knowledge you might have.`
-      : undefined;
-  });
+        : undefined;
+    });
+  }
 
   functions.registerFunction(
     {
       name: RETRIEVE_DOCUMENTATION_NAME,
-      visibility: isProductDocAvailable
-        ? FunctionVisibility.AssistantOnly
-        : FunctionVisibility.Internal,
+      isInternal: !isProductDocAvailable,
       description: `Use this function to retrieve documentation about Elastic products.
       You can retrieve documentation about the Elastic stack, such as Kibana and Elasticsearch,
       or for Elastic solutions, such as Elastic Security, Elastic Observability or Elastic Enterprise Search
@@ -41,6 +42,7 @@ export async function registerDocumentationFunction({
         properties: {
           query: {
             description: `The query to use to retrieve documentation
+            Always write the query in English, as the documentation is available only in English.
             Examples:
             - "How to enable TLS for Elasticsearch?"
             - "What is Kibana Lens?"`,
@@ -62,14 +64,21 @@ export async function registerDocumentationFunction({
         required: ['query'],
       } as const,
     },
-    async ({ arguments: { query, product }, connectorId, useSimulatedFunctionCalling }) => {
+    async ({ arguments: { query, product }, connectorId, simulateFunctionCalling }) => {
+      const esClient = (await resources.context.core).elasticsearch.client;
+
+      const inferenceId =
+        (await getInferenceIdFromWriteIndex(esClient, resources.logger)) ??
+        defaultInferenceEndpoints.ELSER;
+
       const response = await llmTasks!.retrieveDocumentation({
         searchTerm: query,
         products: product ? [product] : undefined,
         max: 3,
         connectorId,
         request: resources.request,
-        functionCalling: useSimulatedFunctionCalling ? 'simulated' : 'native',
+        functionCalling: simulateFunctionCalling ? 'simulated' : 'auto',
+        inferenceId,
       });
 
       return {

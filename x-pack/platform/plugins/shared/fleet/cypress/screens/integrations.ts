@@ -29,6 +29,8 @@ export const INTEGRATIONS_SEARCHBAR = {
   BADGE: 'epmList.categoryBadge',
   REMOVE_BADGE_BUTTON: 'epmList.categoryBadge.closeBtn',
 };
+export const INSTALLED_INTEGRATIONS_DASHBOARDS_LINK = 'installedIntegrationsDashboardsLink';
+export const INSTALLED_INTEGRATIONS_TABLE_ROW = 'installedIntegrationsTableRow';
 
 export const SETTINGS = {
   INSTALL_ASSETS_BTN: 'installAssetsButton',
@@ -49,3 +51,11 @@ export const INTEGRATION_POLICIES_UPGRADE_CHECKBOX = 'epmDetails.upgradePolicies
 
 export const getIntegrationCard = (integration: string) => `integration-card:epr:${integration}`;
 export const getIntegrationCategories = (category: string) => `epmList.categories.${category}`;
+export const getIntegrationTableIntegrationName = (integration: string) =>
+  `installedIntegrationsTable.integrationNameColumn.${integration}`;
+
+export const ADD_INTEGRATION_FLYOUT = {
+  SELECT_INTEGRATION_COMBOBOX: 'comboBoxToggleListButton',
+  PASSWORD_INPUT: 'passwordInput-1password-authorization-token',
+  SUBMIT_BTN: 'addIntegrationFlyout.submitBtn',
+};

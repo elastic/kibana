@@ -20,6 +20,7 @@ type BuildMessageProps = DeepPartial<Message> & {
       name: string;
       trigger: MessageRole.Assistant | MessageRole.User | MessageRole.Elastic;
     };
+    deanonymizations?: Message['message']['deanonymizations'];
   };
 };
 
@@ -29,19 +30,6 @@ export function buildMessage(params: BuildMessageProps): Message {
       '@timestamp': new Date().toISOString(),
     },
     params
-  );
-}
-
-export function buildSystemMessage(
-  params?: Omit<BuildMessageProps, 'message'> & {
-    message: DeepPartial<Omit<Message['message'], 'role'>>;
-  }
-) {
-  return buildMessage(
-    // @ts-expect-error upgrade typescript v5.1.6
-    merge({}, params, {
-      message: { role: MessageRole.System },
-    })
   );
 }
 
@@ -117,7 +105,8 @@ export function buildConversation(params?: Partial<Conversation>): Conversation 
       title: '',
       last_updated: '',
     },
-    messages: [buildSystemMessage()],
+    systemMessage: '',
+    messages: [],
     labels: {},
     numeric_labels: {},
     namespace: '',

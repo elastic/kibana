@@ -15,10 +15,7 @@ import {
 } from '../../../../../../../common/api/detection_engine/rule_management';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import type { ConfigType } from '../../../../../../config';
-import {
-  getNonPackagedRulesCount,
-  getRulesCount,
-} from '../../../logic/search/get_existing_prepackaged_rules';
+import { getRulesCount } from '../../../logic/search/get_existing_prepackaged_rules';
 import { getExportByObjectIds } from '../../../logic/export/get_export_by_object_ids';
 import { getExportAll } from '../../../logic/export/get_export_all';
 import { buildSiemResponse } from '../../../../routes/utils';
@@ -56,15 +53,22 @@ export const exportRulesRoute = (
       },
       async (context, request, response) => {
         const siemResponse = buildSiemResponse(response);
-        const rulesClient = await (await context.alerting).getRulesClient();
-        const exceptionsClient = (await context.lists)?.getExceptionListClient();
-        const actionsClient = (await context.actions)?.getActionsClient();
+        const ctx = await context.resolve([
+          'core',
+          'securitySolution',
+          'alerting',
+          'actions',
+          'lists',
+        ]);
 
-        const { getExporter, getClient } = (await context.core).savedObjects;
+        const rulesClient = await ctx.alerting.getRulesClient();
+        const exceptionsClient = ctx.lists?.getExceptionListClient();
+        const actionsClient = ctx.actions.getActionsClient();
+
+        const { getExporter, getClient } = ctx.core.savedObjects;
 
         const client = getClient({ includedHiddenTypes: ['action'] });
         const actionsExporter = getExporter(client);
-        const { prebuiltRulesCustomizationEnabled } = config.experimentalFeatures;
 
         try {
           const exportSizeLimit = config.maxRuleImportExportSize;
@@ -74,18 +78,11 @@ export const exportRulesRoute = (
               body: `Can't export more than ${exportSizeLimit} rules`,
             });
           } else {
-            let rulesCount = 0;
+            const rulesCount = await getRulesCount({
+              rulesClient,
+              filter: '',
+            });
 
-            if (prebuiltRulesCustomizationEnabled) {
-              rulesCount = await getRulesCount({
-                rulesClient,
-                filter: '',
-              });
-            } else {
-              rulesCount = await getNonPackagedRulesCount({
-                rulesClient,
-              });
-            }
             if (rulesCount > exportSizeLimit) {
               return siemResponse.error({
                 statusCode: 400,
@@ -102,16 +99,14 @@ export const exportRulesRoute = (
                   request.body.objects.map((obj) => obj.rule_id),
                   actionsExporter,
                   request,
-                  actionsClient,
-                  prebuiltRulesCustomizationEnabled
+                  actionsClient
                 )
               : await getExportAll(
                   rulesClient,
                   exceptionsClient,
                   actionsExporter,
                   request,
-                  actionsClient,
-                  prebuiltRulesCustomizationEnabled
+                  actionsClient
                 );
 
           const responseBody = request.query.exclude_export_details

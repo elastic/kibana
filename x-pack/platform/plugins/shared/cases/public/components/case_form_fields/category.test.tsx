@@ -11,19 +11,18 @@ import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { useForm, Form } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer } from '../../common/mock';
+
 import { Category } from './category';
 import { useGetCategories } from '../../containers/use_get_categories';
 import { categories } from '../../containers/mock';
 import { EuiButton } from '@elastic/eui';
+import { renderWithTestingProviders } from '../../common/mock';
 
 jest.mock('../../containers/use_get_categories');
 
 const useGetCategoriesMock = useGetCategories as jest.Mock;
 
 describe('Category', () => {
-  let appMockRender: AppMockRenderer;
   const onSubmit = jest.fn();
 
   const FormComponent: FC<PropsWithChildren<unknown>> = ({ children }) => {
@@ -40,11 +39,10 @@ describe('Category', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     useGetCategoriesMock.mockReturnValue({ isLoading: false, data: categories });
-    appMockRender = createAppMockRenderer();
   });
 
   it('renders the category field correctly', () => {
-    appMockRender.render(
+    renderWithTestingProviders(
       <FormComponent>
         <Category isLoading={false} />
       </FormComponent>
@@ -54,7 +52,7 @@ describe('Category', () => {
   });
 
   it('shows the optional label correctly', () => {
-    appMockRender.render(
+    renderWithTestingProviders(
       <FormComponent>
         <Category isLoading={false} />
       </FormComponent>
@@ -64,7 +62,7 @@ describe('Category', () => {
   });
 
   it('disables the combobox when it is loading', () => {
-    appMockRender.render(
+    renderWithTestingProviders(
       <FormComponent>
         <Category isLoading={true} />
       </FormComponent>
@@ -76,7 +74,7 @@ describe('Category', () => {
   it('disables the combobox when is loading categories', async () => {
     useGetCategoriesMock.mockReturnValue({ isLoading: true, data: categories });
 
-    appMockRender.render(
+    renderWithTestingProviders(
       <FormComponent>
         <Category isLoading={false} />
       </FormComponent>
@@ -92,7 +90,7 @@ describe('Category', () => {
 
     useGetCategoriesMock.mockReturnValue(() => ({ isLoading: true, data: [category] }));
 
-    appMockRender.render(
+    renderWithTestingProviders(
       <FormComponent>
         <Category isLoading={false} />
       </FormComponent>

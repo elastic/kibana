@@ -6,8 +6,8 @@
  */
 
 import { DEFAULT_MAX_SIGNALS } from '../../../../../common/constants';
-import type { AboutStepRule } from '../../../../detections/pages/detection_engine/rules/types';
-import { fillEmptySeverityMappings } from '../../../../detections/pages/detection_engine/rules/helpers';
+import type { AboutStepRule } from '../../../common/types';
+import { fillEmptySeverityMappings } from '../../../common/helpers';
 
 export const threatDefault = [
   {
@@ -23,7 +23,11 @@ export const stepAboutDefaultValue: AboutStepRule = {
   description: '',
   isAssociatedToEndpointList: false,
   isBuildingBlock: false,
-  severity: { value: 'low', mapping: fillEmptySeverityMappings([]), isMappingChecked: false },
+  severity: {
+    value: 'low',
+    mapping: fillEmptySeverityMappings([]),
+    isMappingChecked: false,
+  },
   riskScore: { value: 21, mapping: [], isMappingChecked: false },
   references: [''],
   falsePositives: [''],

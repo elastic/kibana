@@ -6,10 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { AlertInstanceContext } from '@kbn/alerting-plugin/server';
-import { EsQueryRuleParams } from './rule_type_params';
-import { Comparator } from '../../../common/comparator_types';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { AlertInstanceContext } from '@kbn/alerting-plugin/server';
+import type { EsQueryRuleParams } from '@kbn/response-ops-rule-params/es_query';
+import type { FieldsObject } from '@kbn/alerting-rule-utils';
+import type { Comparator } from '../../../common/comparator_types';
 import { getHumanReadableComparator } from '../../../common';
 import { isEsqlQueryRule } from './util';
 import { isSearchSourceRule } from './util';
@@ -35,6 +36,7 @@ export interface EsQueryRuleActionContext extends AlertInstanceContext {
   // a link which navigates to stack management in case of Elastic query rule
   link: string;
   sourceFields: string[];
+  grouping?: FieldsObject;
 }
 
 interface AddMessagesOpts {

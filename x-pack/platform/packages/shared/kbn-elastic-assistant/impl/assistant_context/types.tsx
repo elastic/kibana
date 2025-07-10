@@ -37,28 +37,32 @@ export interface Conversation {
   id: string;
   title: string;
   messages: ClientMessage[];
-  updatedAt?: Date;
-  createdAt?: Date;
+  updatedAt?: string;
+  createdAt?: string;
   replacements: Replacements;
-  isDefault?: boolean;
   excludeFromLastConversationStorage?: boolean;
 }
 
 export interface AssistantTelemetry {
-  reportAssistantInvoked: (params: { invokedBy: string; conversationId: string }) => void;
+  reportAssistantInvoked: (params: { invokedBy: string }) => void;
   reportAssistantMessageSent: (params: {
-    conversationId: string;
     role: string;
     actionTypeId: string;
     model?: string;
     provider?: string;
     isEnabledKnowledgeBase: boolean;
   }) => void;
-  reportAssistantQuickPrompt: (params: { conversationId: string; promptTitle: string }) => void;
-  reportAssistantSettingToggled: (params: { assistantStreamingEnabled?: boolean }) => void;
+  reportAssistantQuickPrompt: (params: { promptTitle: string }) => void;
+  reportAssistantStarterPrompt: (params: { promptTitle: string }) => void;
+  reportAssistantSettingToggled: (params: {
+    assistantStreamingEnabled?: boolean;
+    alertsCountUpdated?: boolean;
+  }) => void;
 }
 
 export interface AssistantAvailability {
+  // True when searchAiLake configurations is available
+  hasSearchAILakeConfigurations: boolean;
   // True when user is Enterprise, or Security Complete PLI for serverless. When false, the Assistant is disabled and unavailable
   isAssistantEnabled: boolean;
   // When true, the Assistant is hidden and unavailable
@@ -71,6 +75,7 @@ export interface AssistantAvailability {
   hasUpdateAIAssistantAnonymization: boolean;
   // When true, user has `Edit` privilege for `Global Knowledge Base`
   hasManageGlobalKnowledgeBase: boolean;
+  isStarterPromptsEnabled: boolean;
 }
 
 export type GetAssistantMessages = (commentArgs: {
@@ -83,4 +88,5 @@ export type GetAssistantMessages = (commentArgs: {
   currentUserAvatar?: UserAvatar;
   setIsStreaming: (isStreaming: boolean) => void;
   systemPromptContent?: string;
+  contentReferencesVisible: boolean;
 }) => EuiCommentProps[];

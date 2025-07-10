@@ -7,6 +7,7 @@
 import path from 'path';
 
 import { FtrConfigProviderContext } from '@kbn/test';
+import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import { services } from './services';
 import { PRECONFIGURED_ACTION_CONNECTORS } from '../shared';
 
@@ -25,6 +26,7 @@ export function createTestConfig(options: CreateTestConfigOptions) {
     );
     return {
       ...svlSharedConfig.getAll(),
+      testConfigCategory: ScoutTestRunConfigCategory.API_TEST,
       suiteTags: options.suiteTags,
       services: {
         ...services,
@@ -35,10 +37,13 @@ export function createTestConfig(options: CreateTestConfigOptions) {
           ...svlSharedConfig.get('kbnTestServer.serverArgs'),
           '--serverless=security',
           `--xpack.actions.preconfigured=${JSON.stringify(PRECONFIGURED_ACTION_CONNECTORS)}`,
+          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+            'bulkEditAlertSuppressionEnabled',
+          ])}`,
           ...(options.kbnTestServerArgs || []),
           `--plugin-path=${path.resolve(
             __dirname,
-            '../../../../../test/analytics/plugins/analytics_ftr_helpers'
+            '../../../../../src/platform/test/analytics/plugins/analytics_ftr_helpers'
           )}`,
         ],
         env: {

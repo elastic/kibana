@@ -1,0 +1,42 @@
+{
+  "extends": "../../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node",
+      "react",
+      "@kbn/ambient-ui-types",
+      "@kbn/ambient-storybook-types",
+      "@emotion/react/types/css-prop"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/data-views-plugin",
+    "@kbn/i18n",
+    "@kbn/search-types",
+    "@kbn/xstate-utils",
+    "@kbn/core-ui-settings-browser",
+    "@kbn/i18n-react",
+    "@kbn/charts-plugin",
+    "@kbn/utility-types",
+    "@kbn/logs-data-access-plugin",
+    "@kbn/ml-random-sampler-utils",
+    "@kbn/zod",
+    "@kbn/calculate-auto",
+    "@kbn/es-query",
+    "@kbn/router-utils",
+    "@kbn/share-plugin",
+    "@kbn/discover-plugin",
+    "@kbn/embeddable-plugin",
+    "@kbn/data-plugin",
+    "@kbn/saved-search-component",
+  ]
+}

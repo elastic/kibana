@@ -201,9 +201,9 @@ export const NotificationsList: FC = () => {
           <FormattedMessage id="xpack.ml.notifications.entityLabel" defaultMessage="Entity ID" />
         ),
         sortable: true,
-        truncateText: false,
+        truncateText: true,
         'data-test-subj': 'mlNotificationEntity',
-        width: '200px',
+        width: '15%',
       },
       {
         field: 'message',
@@ -211,7 +211,9 @@ export const NotificationsList: FC = () => {
           <FormattedMessage id="xpack.ml.notifications.messageLabel" defaultMessage="Message" />
         ),
         sortable: false,
-        truncateText: false,
+        truncateText: {
+          lines: 8,
+        },
         'data-test-subj': 'mlNotificationMessage',
       },
     ];

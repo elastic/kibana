@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export { injectTask } from './inject_task';
+export { injectTask, injectTaskBulk } from './inject_task';
 export { setupTestServers } from './setup_test_servers';
 export { retry } from './retry';

@@ -5,13 +5,16 @@
  * 2.0.
  */
 
-import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
+import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 
+import { ProductFeatureKey } from '@kbn/security-solution-features/keys';
+import type { ILicense } from '@kbn/licensing-plugin/server';
 import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import { withSecuritySpan } from '../../../../../utils/with_security_span';
 import type { MlAuthz } from '../../../../machine_learning/authz';
+import type { ProductFeaturesService } from '../../../../product_features_service';
 import { createPrebuiltRuleAssetsClient } from '../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
 import type { RuleImportErrorObject } from '../import/errors';
 import type {
@@ -22,23 +25,27 @@ import type {
   ImportRuleArgs,
   ImportRulesArgs,
   PatchRuleArgs,
+  RevertPrebuiltRuleArgs,
   UpdateRuleArgs,
   UpgradePrebuiltRuleArgs,
 } from './detection_rules_client_interface';
 import { createRule } from './methods/create_rule';
 import { deleteRule } from './methods/delete_rule';
 import { importRule } from './methods/import_rule';
+import { importRules } from './methods/import_rules';
 import { patchRule } from './methods/patch_rule';
 import { updateRule } from './methods/update_rule';
 import { upgradePrebuiltRule } from './methods/upgrade_prebuilt_rule';
-import { importRules } from './methods/import_rules';
+import { revertPrebuiltRule } from './methods/revert_prebuilt_rule';
+import { MINIMUM_RULE_CUSTOMIZATION_LICENSE } from '../../../../../../common/constants';
 
 interface DetectionRulesClientParams {
   actionsClient: ActionsClient;
   rulesClient: RulesClient;
   savedObjectsClient: SavedObjectsClientContract;
   mlAuthz: MlAuthz;
-  isRuleCustomizationEnabled: boolean;
+  productFeaturesService: ProductFeaturesService;
+  license: ILicense;
 }
 
 export const createDetectionRulesClient = ({
@@ -46,11 +53,30 @@ export const createDetectionRulesClient = ({
   rulesClient,
   mlAuthz,
   savedObjectsClient,
-  isRuleCustomizationEnabled,
+  productFeaturesService,
+  license,
 }: DetectionRulesClientParams): IDetectionRulesClient => {
   const prebuiltRuleAssetClient = createPrebuiltRuleAssetsClient(savedObjectsClient);
 
   return {
+    getRuleCustomizationStatus() {
+      /**
+       * The prebuilt rules customization feature is gated by the license level.
+       *
+       * The license level is verified against the minimum required level for
+       * the feature (Enterprise). However, since Serverless always operates at
+       * the Enterprise license level, we must also check if the feature is
+       * enabled in the product features. In Serverless, for different tiers,
+       * unavailable features are disabled.
+       */
+      const isRulesCustomizationEnabled =
+        license.hasAtLeast(MINIMUM_RULE_CUSTOMIZATION_LICENSE) &&
+        productFeaturesService.isEnabled(ProductFeatureKey.prebuiltRuleCustomization);
+
+      return {
+        isRulesCustomizationEnabled,
+      };
+    },
     async createCustomRule(args: CreateCustomRuleArgs): Promise<RuleResponse> {
       return withSecuritySpan('DetectionRulesClient.createCustomRule', async () => {
         return createRule({
@@ -91,7 +117,6 @@ export const createDetectionRulesClient = ({
           prebuiltRuleAssetClient,
           mlAuthz,
           ruleUpdate,
-          isRuleCustomizationEnabled,
         });
       });
     },
@@ -104,7 +129,6 @@ export const createDetectionRulesClient = ({
           prebuiltRuleAssetClient,
           mlAuthz,
           rulePatch,
-          isRuleCustomizationEnabled,
         });
       });
     },
@@ -123,7 +147,22 @@ export const createDetectionRulesClient = ({
           ruleAsset,
           mlAuthz,
           prebuiltRuleAssetClient,
-          isRuleCustomizationEnabled,
+        });
+      });
+    },
+
+    async revertPrebuiltRule({
+      ruleAsset,
+      existingRule,
+    }: RevertPrebuiltRuleArgs): Promise<RuleResponse> {
+      return withSecuritySpan('DetectionRulesClient.revertPrebuiltRule', async () => {
+        return revertPrebuiltRule({
+          actionsClient,
+          rulesClient,
+          ruleAsset,
+          mlAuthz,
+          prebuiltRuleAssetClient,
+          existingRule,
         });
       });
     },
@@ -136,7 +175,6 @@ export const createDetectionRulesClient = ({
           importRulePayload: args,
           mlAuthz,
           prebuiltRuleAssetClient,
-          isRuleCustomizationEnabled,
         });
       });
     },

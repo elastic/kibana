@@ -6,14 +6,10 @@ paths: {}
 components:
   x-codegen-enabled: true
   schemas:
-    NonEmptyString:
-      type: string
-      format: nonempty
-      minLength: 1
-      description: A string that does not contain only whitespace characters
     ConnectorId:
       type: string
       description: The GenAI connector id to use.
+
     LangSmithOptions:
       type: object
       description: The LangSmith options object.
@@ -27,3 +23,15 @@ components:
         api_key:
           type: string
           description: The API key to use for tracing.
+
+    LangSmithEvaluationOptions:
+      description: The LangSmith settings object for evaluations.
+      allOf:
+        - $ref: '#/components/schemas/LangSmithOptions'
+        - type: object
+          required:
+            - dataset
+          properties:
+            dataset:
+              type: string
+              description: The dataset name to use for evaluations.

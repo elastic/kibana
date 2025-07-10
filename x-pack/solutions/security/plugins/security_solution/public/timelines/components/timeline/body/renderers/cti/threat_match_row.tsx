@@ -11,11 +11,11 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import type { Fields } from '../../../../../../../common/search_strategy';
 import {
+  FEED_NAME,
   MATCHED_ATOMIC,
   MATCHED_FIELD,
   MATCHED_TYPE,
   REFERENCE,
-  FEED_NAME,
 } from '../../../../../../../common/cti/constants';
 import { MatchDetails } from './match_details';
 import { IndicatorDetails } from './indicator_details';
@@ -26,21 +26,21 @@ export interface ThreatMatchRowProps {
   feedName?: string;
   indicatorReference?: string;
   indicatorType?: string;
-  isDraggable?: boolean;
   sourceField: string;
   sourceValue: string;
+  scopeId: string;
 }
 
 export const ThreatMatchRow = ({
   contextId,
   data,
   eventId,
-  isDraggable,
+  scopeId,
 }: {
   contextId: string;
   data: Fields;
   eventId: string;
-  isDraggable?: boolean;
+  scopeId: string;
 }) => {
   const props = {
     contextId,
@@ -48,9 +48,9 @@ export const ThreatMatchRow = ({
     indicatorReference: getOr([], REFERENCE, data)[0] as string | undefined,
     feedName: getOr([], FEED_NAME, data)[0] as string | undefined,
     indicatorType: getOr([], MATCHED_TYPE, data)[0] as string | undefined,
-    isDraggable,
     sourceField: get(MATCHED_FIELD, data)[0] as string,
     sourceValue: get(MATCHED_ATOMIC, data)[0] as string,
+    scopeId,
   };
 
   return <ThreatMatchRowView {...props} />;
@@ -62,9 +62,9 @@ export const ThreatMatchRowView = ({
   feedName,
   indicatorReference,
   indicatorType,
-  isDraggable,
   sourceField,
   sourceValue,
+  scopeId,
 }: ThreatMatchRowProps) => {
   return (
     <EuiFlexGroup
@@ -72,24 +72,25 @@ export const ThreatMatchRowView = ({
       data-test-subj="threat-match-row"
       gutterSize="s"
       justifyContent="center"
+      wrap={true}
     >
       <EuiFlexItem grow={false}>
         <MatchDetails
+          scopeId={scopeId}
           contextId={contextId}
           eventId={eventId}
-          isDraggable={isDraggable}
           sourceField={sourceField}
           sourceValue={sourceValue}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <IndicatorDetails
+          scopeId={scopeId}
           contextId={contextId}
           eventId={eventId}
           feedName={feedName}
           indicatorReference={indicatorReference}
           indicatorType={indicatorType}
-          isDraggable={isDraggable}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

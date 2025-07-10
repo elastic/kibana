@@ -1,0 +1,10 @@
+{
+  "type": "shared-browser",
+  "id": "@kbn/wci-browser",
+  "owner": [
+    "@elastic/search-kibana",
+    "@elastic/workchat-eng"
+  ],
+  "group": "chat",
+  "visibility": "private"
+}

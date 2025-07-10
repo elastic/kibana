@@ -5,26 +5,37 @@
  * 2.0.
  */
 
+import { type QueryClient, useQuery, useQueryClient } from '@tanstack/react-query';
+import { HttpSetup } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { BedrockLogo, OpenAILogo, GeminiLogo } from '@kbn/stack-connectors-plugin/public/common';
-import { ComponentType, useMemo } from 'react';
+import { SERVICE_PROVIDERS } from '@kbn/inference-endpoint-ui-common';
+
+import type { PlaygroundConnector, InferenceActionConnector, ActionConnector } from '../types';
 import { LLMs } from '../../common/types';
 import { LLMModel } from '../types';
-import { useLoadConnectors } from './use_load_connectors';
 import { MODELS } from '../../common/models';
+import { useKibana } from './use_kibana';
+import { LOAD_CONNECTORS_QUERY_KEY, LoadConnectorsQuery } from './use_load_connectors';
+
+const isInferenceActionConnector = (
+  connector: ActionConnector
+): connector is InferenceActionConnector => {
+  return 'config' in connector && 'provider' in connector.config;
+};
 
 const mapLlmToModels: Record<
   LLMs,
   {
-    icon: ComponentType;
+    icon: string | ((connector: PlaygroundConnector) => string);
     getModels: (
       connectorName: string,
-      includeName: boolean
+      includeName: boolean,
+      modelId?: string
     ) => Array<{ label: string; value?: string; promptTokenLimit?: number }>;
   }
 > = {
   [LLMs.openai]: {
-    icon: OpenAILogo,
+    icon: SERVICE_PROVIDERS.openai.icon,
     getModels: (connectorName, includeName) =>
       MODELS.filter(({ provider }) => provider === LLMs.openai).map((model) => ({
         label: `${model.name} ${includeName ? `(${connectorName})` : ''}`,
@@ -33,7 +44,7 @@ const mapLlmToModels: Record<
       })),
   },
   [LLMs.openai_azure]: {
-    icon: OpenAILogo,
+    icon: SERVICE_PROVIDERS.openai.icon,
     getModels: (connectorName) => [
       {
         label: i18n.translate('xpack.searchPlayground.openAIAzureModel', {
@@ -44,7 +55,7 @@ const mapLlmToModels: Record<
     ],
   },
   [LLMs.openai_other]: {
-    icon: OpenAILogo,
+    icon: SERVICE_PROVIDERS.openai.icon,
     getModels: (connectorName) => [
       {
         label: i18n.translate('xpack.searchPlayground.otherOpenAIModel', {
@@ -55,7 +66,7 @@ const mapLlmToModels: Record<
     ],
   },
   [LLMs.bedrock]: {
-    icon: BedrockLogo,
+    icon: SERVICE_PROVIDERS.amazonbedrock.icon,
     getModels: () =>
       MODELS.filter(({ provider }) => provider === LLMs.bedrock).map((model) => ({
         label: model.name,
@@ -64,7 +75,7 @@ const mapLlmToModels: Record<
       })),
   },
   [LLMs.gemini]: {
-    icon: GeminiLogo,
+    icon: SERVICE_PROVIDERS.googlevertexai.icon,
     getModels: () =>
       MODELS.filter(({ provider }) => provider === LLMs.gemini).map((model) => ({
         label: model.name,
@@ -72,52 +83,88 @@ const mapLlmToModels: Record<
         promptTokenLimit: model.promptTokenLimit,
       })),
   },
+  [LLMs.inference]: {
+    icon: (connector) => {
+      return isInferenceActionConnector(connector)
+        ? SERVICE_PROVIDERS[connector.config.provider].icon
+        : '';
+    },
+    getModels: (connectorName, _, modelId) => [
+      {
+        label: connectorName,
+        value: modelId,
+        promptTokenLimit: MODELS.find((m) => m.model === modelId)?.promptTokenLimit,
+      },
+    ],
+  },
 };
 
+export const LLMS_QUERY_KEY = ['search-playground', 'llms-models'];
+
+export const LLMsQuery =
+  (http: HttpSetup, client: QueryClient) => async (): Promise<LLMModel[]> => {
+    const connectors = await client.fetchQuery<PlaygroundConnector[]>({
+      queryKey: LOAD_CONNECTORS_QUERY_KEY,
+      queryFn: LoadConnectorsQuery(http),
+      retry: false,
+    });
+
+    const mapConnectorTypeToCount = connectors.reduce<Partial<Record<LLMs, number>>>(
+      (result, connector) => {
+        result[connector.type] = (result[connector.type] || 0) + 1;
+        return result;
+      },
+      {}
+    );
+
+    const models = connectors.reduce<LLMModel[]>((result, connector) => {
+      const connectorType = connector.type as LLMs;
+      const llmParams = mapLlmToModels[connectorType];
+
+      if (!llmParams) {
+        return result;
+      }
+
+      const showConnectorName = Number(mapConnectorTypeToCount?.[connectorType]) > 1;
+
+      llmParams
+        .getModels(
+          connector.name,
+          false,
+          isInferenceActionConnector(connector)
+            ? connector.config?.providerConfig?.model_id
+            : undefined
+        )
+        .map(({ label, value, promptTokenLimit }) => ({
+          id: connector?.id + label,
+          name: label,
+          value,
+          connectorType: connector.type,
+          connectorName: connector.name,
+          showConnectorName,
+          icon: typeof llmParams.icon === 'function' ? llmParams.icon(connector) : llmParams.icon,
+          disabled: !connector,
+          connectorId: connector.id,
+          promptTokenLimit,
+        }))
+        .forEach((model) => result.push(model));
+
+      return result;
+    }, []);
+
+    return models;
+  };
+
 export const useLLMsModels = (): LLMModel[] => {
-  const { data: connectors } = useLoadConnectors();
+  const client = useQueryClient();
+  const {
+    services: { http },
+  } = useKibana();
 
-  const mapConnectorTypeToCount = useMemo(
-    () =>
-      connectors?.reduce<Partial<Record<LLMs, number>>>(
-        (result, connector) => ({
-          ...result,
-          [connector.type]: (result[connector.type] || 0) + 1,
-        }),
-        {}
-      ),
-    [connectors]
-  );
+  const { data } = useQuery(LLMS_QUERY_KEY, LLMsQuery(http, client), {
+    keepPreviousData: true,
+    retry: false,
+  });
 
-  return useMemo(
-    () =>
-      connectors?.reduce<LLMModel[]>((result, connector) => {
-        const llmParams = mapLlmToModels[connector.type];
-
-        if (!llmParams) {
-          return result;
-        }
-
-        const showConnectorName = Number(mapConnectorTypeToCount?.[connector.type]) > 1;
-
-        return [
-          ...result,
-          ...llmParams
-            .getModels(connector.name, false)
-            .map(({ label, value, promptTokenLimit }) => ({
-              id: connector?.id + label,
-              name: label,
-              value,
-              connectorType: connector.type,
-              connectorName: connector.name,
-              showConnectorName,
-              icon: llmParams.icon,
-              disabled: !connector,
-              connectorId: connector.id,
-              promptTokenLimit,
-            })),
-        ];
-      }, []) || [],
-    [connectors, mapConnectorTypeToCount]
-  );
+  return data || [];
 };

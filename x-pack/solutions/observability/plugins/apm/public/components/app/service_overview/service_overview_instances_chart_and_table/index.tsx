@@ -117,6 +117,7 @@ export function ServiceOverviewInstancesChartAndTable({
       });
     },
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       environment,
       kuery,
@@ -184,6 +185,7 @@ export function ServiceOverviewInstancesChartAndTable({
     },
     // only fetches detailed statistics when requestId is invalidated by main statistics api call
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [requestId],
     { preservePreviousData: false }
   );

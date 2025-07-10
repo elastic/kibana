@@ -11,7 +11,6 @@ import { IScopedClusterClient } from '@kbn/core/server';
 import {
   IndicesDataStream,
   IndicesDataStreamsStatsDataStreamsStatsItem,
-  IndicesGetIndexTemplateIndexTemplateItem,
   SecurityHasPrivilegesResponse,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { MeteringStats } from '../../../lib/types';
@@ -32,14 +31,12 @@ const enhanceDataStreams = ({
   meteringStats,
   dataStreamsPrivileges,
   globalMaxRetention,
-  indexTemplates,
 }: {
   dataStreams: IndicesDataStream[];
   dataStreamsStats?: IndicesDataStreamsStatsDataStreamsStatsItem[];
   meteringStats?: MeteringStats[];
   dataStreamsPrivileges?: SecurityHasPrivilegesResponse;
   globalMaxRetention?: string;
-  indexTemplates?: IndicesGetIndexTemplateIndexTemplateItem[];
 }): EnhancedDataStreamFromEs[] => {
   return dataStreams.map((dataStream) => {
     const enhancedDataStream: EnhancedDataStreamFromEs = {
@@ -51,6 +48,9 @@ const enhanceDataStreams = ({
           : true,
         manage_data_stream_lifecycle: dataStreamsPrivileges
           ? dataStreamsPrivileges.index[dataStream.name].manage_data_stream_lifecycle
+          : true,
+        read_failure_store: dataStreamsPrivileges
+          ? dataStreamsPrivileges.index[dataStream.name].read_failure_store
           : true,
       },
     };
@@ -71,16 +71,6 @@ const enhanceDataStreams = ({
       if (datastreamMeteringStats) {
         enhancedDataStream.metering_size_in_bytes = datastreamMeteringStats.size_in_bytes;
         enhancedDataStream.metering_doc_count = datastreamMeteringStats.num_docs;
-      }
-    }
-
-    if (indexTemplates) {
-      const indexTemplate = indexTemplates.find(
-        (template) => template.name === dataStream.template
-      );
-      if (indexTemplate) {
-        enhancedDataStream.index_mode =
-          indexTemplate.index_template?.template?.settings?.index?.mode;
       }
     }
 
@@ -122,14 +112,12 @@ const getMeteringStats = (client: IScopedClusterClient, name?: string) => {
 
 const getDataStreamsPrivileges = (client: IScopedClusterClient, names: string[]) => {
   return client.asCurrentUser.security.hasPrivileges({
-    body: {
-      index: [
-        {
-          names,
-          privileges: ['delete_index', 'manage_data_stream_lifecycle'],
-        },
-      ],
-    },
+    index: [
+      {
+        names,
+        privileges: ['delete_index', 'manage_data_stream_lifecycle', 'read_failure_store'],
+      },
+    ],
   });
 };
 
@@ -174,8 +162,18 @@ export function registerGetAllRoute({ router, lib: { handleEsError }, config }: 
           );
         }
 
-        const { index_templates: indexTemplates } =
-          await client.asCurrentUser.indices.getIndexTemplate();
+        const { persistent, defaults } = await client.asInternalUser.cluster.getSettings({
+          include_defaults: true,
+        });
+        const isLogsdbEnabled =
+          (persistent?.cluster?.logsdb?.enabled ?? defaults?.cluster?.logsdb?.enabled) === 'true';
+
+        // Get failure store cluster settings
+        const failureStoreSettings = {
+          enabled:
+            persistent?.data_streams?.failure_store?.enabled ??
+            defaults?.data_streams?.failure_store?.enabled,
+        };
 
         // Only take the lifecycle of the first data stream since all data streams have the same global retention period
         const lifecycle = await getDataStreamLifecycle(client, dataStreams[0].name);
@@ -188,10 +186,15 @@ export function registerGetAllRoute({ router, lib: { handleEsError }, config }: 
           meteringStats,
           dataStreamsPrivileges,
           globalMaxRetention,
-          indexTemplates,
         });
 
-        return response.ok({ body: deserializeDataStreamList(enhancedDataStreams) });
+        return response.ok({
+          body: deserializeDataStreamList(
+            enhancedDataStreams,
+            isLogsdbEnabled,
+            failureStoreSettings
+          ),
+        });
       } catch (error) {
         return handleEsError({ error, response });
       }
@@ -237,22 +240,21 @@ export function registerGetOneRoute({ router, lib: { handleEsError }, config }: 
 
         if (dataStreams[0]) {
           let dataStreamsPrivileges;
-          let indexTemplates;
 
           if (config.isSecurityEnabled()) {
             dataStreamsPrivileges = await getDataStreamsPrivileges(client, [dataStreams[0].name]);
           }
 
-          if (dataStreams[0].template) {
-            const { index_templates: templates } =
-              await client.asCurrentUser.indices.getIndexTemplate({
-                name: dataStreams[0].template,
-              });
+          const { persistent, defaults } = await client.asInternalUser.cluster.getSettings({
+            include_defaults: true,
+          });
 
-            if (templates) {
-              indexTemplates = templates;
-            }
-          }
+          // Get failure store cluster settings
+          const failureStoreSettings = {
+            enabled:
+              persistent?.data_streams?.failure_store?.enabled ??
+              defaults?.data_streams?.failure_store?.enabled,
+          };
 
           const enhancedDataStreams = enhanceDataStreams({
             dataStreams,
@@ -260,9 +262,15 @@ export function registerGetOneRoute({ router, lib: { handleEsError }, config }: 
             meteringStats,
             dataStreamsPrivileges,
             globalMaxRetention,
-            indexTemplates,
           });
-          const body = deserializeDataStream(enhancedDataStreams[0]);
+          const isLogsdbEnabled =
+            (persistent?.cluster?.logsdb?.enabled ?? defaults?.cluster?.logsdb?.enabled) === 'true';
+
+          const body = deserializeDataStream(
+            enhancedDataStreams[0],
+            isLogsdbEnabled,
+            failureStoreSettings
+          );
           return response.ok({ body });
         }
 

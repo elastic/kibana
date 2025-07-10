@@ -123,6 +123,21 @@ describe('Transaction details', () => {
     cy.url().should('include', 'opbeans-java/errors');
   });
 
+  describe('Trace sample summary', () => {
+    it('shows transaction summary', () => {
+      cy.visitKibana(
+        `/app/apm/services/opbeans-node/transactions/view?${new URLSearchParams({
+          ...timeRange,
+          transactionName: 'GET /api/product/:id',
+        })}`
+      );
+
+      cy.getByTestSubj('apmHttpInfoRequestMethod').should('exist');
+      cy.getByTestSubj('apmHttpInfoUrl').should('exist');
+      cy.getByTestSubj('apmUiSharedHttpStatusCodeBadge').should('exist');
+    });
+  });
+
   describe('when navigating to a trace sample', () => {
     it('keeps the same trace sample after reloading the page', () => {
       cy.visitKibana(

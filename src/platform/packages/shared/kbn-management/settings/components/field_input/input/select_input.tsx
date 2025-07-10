@@ -8,10 +8,11 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiSelect, EuiSelectProps } from '@elastic/eui';
+import { EuiFormRow, EuiSelect, EuiSelectProps } from '@elastic/eui';
 
 import { getFieldInputValue, useUpdate } from '@kbn/management-settings-utilities';
 
+import { i18n } from '@kbn/i18n';
 import { InputProps } from '../types';
 import { TEST_SUBJ_PREFIX_FIELD } from '.';
 
@@ -24,6 +25,10 @@ export interface SelectInputProps extends InputProps<'select'> {
   /** Specify the option values. */
   optionValues: Array<string | number>;
 }
+
+const invalidMessage = i18n.translate('management.settings.selectInput.invalidMessage', {
+  defaultMessage: 'The saved option is unavailable. Select a new option',
+});
 
 /**
  * Component for manipulating a `select` field.
@@ -59,15 +64,22 @@ export const SelectInput = ({
   const { id, ariaAttributes } = field;
   const { ariaLabel, ariaDescribedBy } = ariaAttributes;
   const [value] = getFieldInputValue(field, unsavedChange);
+  const isInvalid = useMemo(() => !optionsProp.includes(value), [optionsProp, value]);
 
   return (
-    <EuiSelect
-      aria-describedby={ariaDescribedBy}
-      aria-label={ariaLabel}
-      data-test-subj={`${TEST_SUBJ_PREFIX_FIELD}-${id}`}
-      disabled={!isSavingEnabled}
-      fullWidth
-      {...{ onChange, options, value }}
-    />
+    <>
+      <EuiFormRow isInvalid={isInvalid} error={isInvalid ? [invalidMessage] : undefined}>
+        <EuiSelect
+          aria-describedby={ariaDescribedBy}
+          aria-label={ariaLabel}
+          data-test-subj={`${TEST_SUBJ_PREFIX_FIELD}-${id}`}
+          disabled={!isSavingEnabled}
+          isInvalid={isInvalid}
+          hasNoInitialSelection={isInvalid}
+          fullWidth
+          {...{ onChange, options, ...(isInvalid ? {} : { value }) }}
+        />
+      </EuiFormRow>
+    </>
   );
 };

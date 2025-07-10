@@ -19,6 +19,7 @@ export { getInspectResponse } from './utils/get_inspect_response';
 export { getAlertDetailsUrl, getAlertUrl } from './utils/alerting/alert_url';
 export { convertToBuiltInComparators } from './utils/convert_legacy_outside_comparator';
 export { ProcessorEvent } from './processor_event';
+export { ElapsedTimestampTooltip } from './components/elapsed_timestamp_tooltip';
 
 export {
   enableInspectEsQueries,
@@ -26,23 +27,11 @@ export {
   enableComparisonByDefault,
   defaultApmServiceEnvironment,
   apmProgressiveLoading,
-  apmServiceInventoryOptimizedSorting,
   apmServiceGroupMaxNumberOfServices,
-  apmTraceExplorerTab,
-  apmLabsButton,
-  enableInfrastructureProfilingIntegration,
-  enableInfrastructureAssetCustomDashboards,
-  enableAwsLambdaMetrics,
-  enableAgentExplorerView,
   apmEnableTableSearchBar,
-  entityCentricExperience,
   apmAWSLambdaPriceFactor,
   apmAWSLambdaRequestCostPerMillion,
-  apmEnableServiceMetrics,
-  apmEnableContinuousRollups,
-  enableCriticalPath,
   syntheticsThrottlingEnabled,
-  apmEnableProfilingIntegration,
   profilingShowErrorFrames,
   profilingCo2PerKWH,
   profilingDatacenterPUE,
@@ -53,7 +42,7 @@ export {
   profilingAzureCostDiscountRate,
   apmEnableTransactionProfiling,
   apmEnableServiceInventoryTableSearchBar,
-  profilingFetchTopNFunctionsFromStacktraces,
+  apmEnableServiceMapApiV2,
 } from './ui_settings_keys';
 
 export {
@@ -64,6 +53,7 @@ export {
 /** @deprecated deprecated in 8.17. Please use casesFeatureIdV2 instead */
 export const casesFeatureId = 'observabilityCases';
 export const casesFeatureIdV2 = 'observabilityCasesV2';
+export const casesFeatureIdV3 = 'observabilityCasesV3';
 export const sloFeatureId = 'slo';
 // The ID of the observability app. Should more appropriately be called
 // 'observability' but it's used in telemetry by applicationUsage so we don't
@@ -76,8 +66,13 @@ export const observabilityFeatureId = 'observability';
 // Name of a locator created by the uptime plugin. Intended for use
 // by other plugins as well, so defined here to prevent cross-references.
 export { uptimeOverviewLocatorID } from '@kbn/deeplinks-observability';
+export const casesOverviewLocatorID = 'OBSERVABILITY_CASES_OVERVIEW_LOCATOR';
+export const casesDetailLocatorID = 'OBSERVABILITY_CASES_DETAIL_LOCATOR';
 export const syntheticsMonitorDetailLocatorID = 'SYNTHETICS_MONITOR_DETAIL_LOCATOR';
+export const syntheticsMonitorLocationQueryLocatorID =
+  'SYNTHETICS_MONITOR_GROUP_BY_LOCATION_LOCATOR';
 export const syntheticsEditMonitorLocatorID = 'SYNTHETICS_EDIT_MONITOR_LOCATOR';
+export const syntheticsAddMonitorLocatorID = 'SYNTHETICS_ADD_MONITOR_LOCATOR';
 export const syntheticsSettingsLocatorID = 'SYNTHETICS_SETTINGS';
 export const alertsLocatorID = 'ALERTS_LOCATOR';
 export const ruleDetailsLocatorID = 'RULE_DETAILS_LOCATOR';
@@ -91,3 +86,8 @@ export const observabilityPaths = paths.observability;
 export type { AlertsLocator, AlertsLocatorParams } from './locators/alerts';
 export { AlertsLocatorDefinition } from './locators/alerts';
 export { observabilityAlertFeatureIds } from './constants';
+
+export {
+  OBSERVABILITY_TIERED_FEATURES,
+  OBSERVABILITY_COMPLETE_LANDING_PAGE_FEATURE,
+} from './product_features';

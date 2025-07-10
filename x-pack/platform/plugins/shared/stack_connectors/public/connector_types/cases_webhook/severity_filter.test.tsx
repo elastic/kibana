@@ -7,7 +7,8 @@
 
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
-import { CaseSeverity, severities, SeverityFilter } from './severity_filter';
+import { CaseSeverity, SeverityFilter } from './severity_filter';
+import * as i18n from './translations';
 const onSeverityChange = jest.fn();
 const defaultProps = {
   selectedSeverity: CaseSeverity.LOW,
@@ -26,11 +27,14 @@ describe('SeverityFilter', () => {
     expect(superSelect).toHaveTextContent('Low');
     fireEvent.click(superSelect);
     const options = getAllByRole('option');
-    const allSeverities = Object.keys(severities) as CaseSeverity[];
-    expect(options).toHaveLength(allSeverities.length);
-    options.forEach((option, index) => {
-      expect(option).toHaveTextContent(severities[allSeverities[index]].label);
-    });
+
+    expect(options).toHaveLength(Object.values(CaseSeverity).length);
+    expect(options.map((option) => option.textContent)).toEqual([
+      i18n.SEVERITY_LOW_LABEL,
+      i18n.SEVERITY_MEDIUM_LABEL,
+      i18n.SEVERITY_HIGH_LABEL,
+      i18n.SEVERITY_CRITICAL_LABEL,
+    ]);
   });
 
   it('should call onSeverityChange with selected severity when an option is clicked', () => {

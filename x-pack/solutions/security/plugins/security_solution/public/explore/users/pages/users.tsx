@@ -6,13 +6,16 @@
  */
 
 import { EuiSpacer, EuiWindowEvent } from '@elastic/eui';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { noop } from 'lodash/fp';
 import React, { useCallback, useMemo, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import type { Filter } from '@kbn/es-query';
 import { isTab } from '@kbn/timelines-plugin/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import { LastEventIndexKey } from '@kbn/timelines-plugin/common';
+import { DataViewManagerScopeName } from '../../../data_view_manager/constants';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { InputsModelId } from '../../../common/store/inputs/constants';
 import { SecurityPageName } from '../../../app/types';
 import { FiltersGlobal } from '../../../common/components/filters_global';
@@ -42,13 +45,17 @@ import { useSourcererDataView } from '../../../sourcerer/containers';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 import { UsersKpiComponent } from '../components/kpi_users';
-import { LastEventIndexKey, RiskScoreEntity } from '../../../../common/search_strategy';
+import { EntityType } from '../../../../common/entity_analytics/types';
 import { generateSeverityFilter } from '../../hosts/store/helpers';
 import { UsersTableType } from '../store/model';
 import { hasMlUserPermissions } from '../../../../common/machine_learning/has_ml_user_permissions';
 import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_capabilities';
 import { EmptyPrompt } from '../../../common/components/empty_prompt';
 import { userNameExistsFilter } from './details/helpers';
+import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
+import { useDataViewSpec } from '../../../data_view_manager/hooks/use_data_view_spec';
+import { useSelectedPatterns } from '../../../data_view_manager/hooks/use_selected_patterns';
+import { PageLoader } from '../../../common/components/page_loader';
 
 const ID = 'UsersQueryId';
 
@@ -91,14 +98,31 @@ const UsersComponent = () => {
     }
 
     if (tabName === UsersTableType.risk) {
-      const severityFilter = generateSeverityFilter(severitySelection, RiskScoreEntity.user);
+      const severityFilter = generateSeverityFilter(severitySelection, EntityType.user);
 
       return [...severityFilter, ...globalFilters];
     }
     return globalFilters;
   }, [severitySelection, tabName, globalFilters]);
 
-  const { indicesExist, selectedPatterns, sourcererDataView } = useSourcererDataView();
+  const {
+    indicesExist: oldIndicesExist,
+    selectedPatterns: oldSelectedPatterns,
+    sourcererDataView: oldSourcererDataView,
+  } = useSourcererDataView();
+
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+
+  const { dataView, status } = useDataView(DataViewManagerScopeName.explore);
+  const { dataViewSpec } = useDataViewSpec(DataViewManagerScopeName.explore);
+  const experimentalSelectedPatterns = useSelectedPatterns(DataViewManagerScopeName.explore);
+
+  const sourcererDataView = newDataViewPickerEnabled ? dataViewSpec : oldSourcererDataView;
+  const indicesExist = newDataViewPickerEnabled ? dataView.hasMatchedIndices() : oldIndicesExist;
+  const selectedPatterns = newDataViewPickerEnabled
+    ? experimentalSelectedPatterns
+    : oldSelectedPatterns;
+
   const [globalFiltersQuery, kqlError] = useMemo(
     () =>
       convertToBuildEsQuery({
@@ -155,6 +179,10 @@ const UsersComponent = () => {
 
   const capabilities = useMlCapabilities();
   const navTabs = useMemo(() => navTabsUsers(hasMlUserPermissions(capabilities)), [capabilities]);
+
+  if (newDataViewPickerEnabled && status === 'pristine') {
+    return <PageLoader />;
+  }
 
   return (
     <>

@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiCopy, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { AttachmentType } from '@kbn/cases-plugin/common';
 import type { ClientMessage } from '@kbn/elastic-assistant';
 import React, { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { useAssistantContext } from '@kbn/elastic-assistant/impl/assistant_context';
+import { removeContentReferences } from '@kbn/elastic-assistant-common';
 import { useKibana, useToasts } from '../../common/lib/kibana';
 import type { Note } from '../../common/lib/note';
 import { appActions } from '../../common/store/actions';
@@ -23,6 +24,15 @@ import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experime
 
 interface Props {
   message: ClientMessage;
+}
+
+/**
+ * Returns the content of the message compatible with a standard markdown renderer.
+ *
+ * Content references are removed as they can only be rendered by the assistant.
+ */
+function getSelfContainedContent(content: string): string {
+  return removeContentReferences(content).trim();
 }
 
 const CommentActionsComponent: React.FC<Props> = ({ message }) => {
@@ -48,14 +58,14 @@ const CommentActionsComponent: React.FC<Props> = ({ message }) => {
   const onAddNoteToTimeline = useCallback(() => {
     updateAndAssociateNode({
       associateNote,
-      newNote: content,
+      newNote: getSelfContainedContent(content),
       updateNewNote: () => {},
       updateNote,
       user: '', // TODO: attribute assistant messages
     });
 
     toasts.addSuccess(i18n.ADDED_NOTE_TO_TIMELINE);
-  }, [associateNote, content, toasts, updateNote]);
+  }, [associateNote, toasts, updateNote, content]);
 
   // Attach to case support
   const selectCaseModal = cases.hooks.useCasesAddToExistingCaseModal({
@@ -67,13 +77,13 @@ const CommentActionsComponent: React.FC<Props> = ({ message }) => {
     selectCaseModal.open({
       getAttachments: () => [
         {
-          comment: content,
+          comment: getSelfContainedContent(content),
           type: AttachmentType.user,
           owner: i18n.ELASTIC_AI_ASSISTANT,
         },
       ],
     });
-  }, [content, selectCaseModal]);
+  }, [selectCaseModal, content]);
 
   // Note: This feature is behind the `isModelEvaluationEnabled` FF. If ever released, this URL should be configurable
   // as APM data may not go to the same cluster where the Kibana instance is running
@@ -125,20 +135,6 @@ const CommentActionsComponent: React.FC<Props> = ({ message }) => {
             iconType="addDataApp"
             onClick={onAddToExistingCase}
           />
-        </EuiToolTip>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiToolTip position="top" content={i18n.COPY_TO_CLIPBOARD}>
-          <EuiCopy textToCopy={content}>
-            {(copy) => (
-              <EuiButtonIcon
-                aria-label={i18n.COPY_TO_CLIPBOARD}
-                color="primary"
-                iconType="copyClipboard"
-                onClick={copy}
-              />
-            )}
-          </EuiCopy>
         </EuiToolTip>
       </EuiFlexItem>
     </EuiFlexGroup>

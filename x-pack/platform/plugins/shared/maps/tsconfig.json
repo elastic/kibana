@@ -5,11 +5,13 @@
     "allowJs": true
   },
   "include": [
+    "*.ts",
     "common/**/*",
     "public/**/*",
     "server/**/*",
     "server/config.ts",
-    "../../../../../typings/**/*"
+    "../../../../../typings/**/*",
+    "test/scout/**/*",
   ],
   "kbn_references": [
     "@kbn/core",
@@ -54,7 +56,6 @@
     "@kbn/mapbox-gl",
     "@kbn/core-execution-context-common",
     "@kbn/chart-icons",
-    "@kbn/ui-theme",
     "@kbn/monaco",
     "@kbn/safer-lodash-set",
     "@kbn/custom-integrations-plugin",
@@ -91,7 +92,10 @@
     "@kbn/embeddable-enhanced-plugin",
     "@kbn/presentation-containers",
     "@kbn/field-utils",
-    "@kbn/react-hooks"
+    "@kbn/react-hooks",
+    "@kbn/scout",
+    "@kbn/react-kibana-mount",
+    "@kbn/css-utils",
   ],
   "exclude": [
     "target/**/*",

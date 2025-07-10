@@ -30,7 +30,6 @@ export class SentinelOneAgentStatusClient extends AgentStatusClient {
 
   async getAgentStatuses(agentIds: string[]): Promise<AgentStatusRecords> {
     const esClient = this.options.esClient;
-    const metadataService = this.options.endpointService.getEndpointMetadataService();
     const sortField = 'sentinel_one.agent.last_active_date';
     const searchRequest: SearchRequest = {
       index: SENTINEL_ONE_AGENT_INDEX_PATTERN,
@@ -76,7 +75,7 @@ export class SentinelOneAgentStatusClient extends AgentStatusClient {
       const [searchResponse, allPendingActions] = await Promise.all([
         esClient.search(searchRequest, { ignore: [404] }),
 
-        getPendingActionsSummary(esClient, metadataService, this.log, agentIds),
+        getPendingActionsSummary(this.options.endpointService, this.options.spaceId, agentIds),
       ]).catch(catchAndWrapError);
 
       this.log.debug(

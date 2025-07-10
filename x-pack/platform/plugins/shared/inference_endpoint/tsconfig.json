@@ -1,0 +1,23 @@
+{
+  "extends": "../../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+  },
+  "include": [
+    "__mocks__/**/*",
+    "common/**/*",
+    "public/**/*",
+    "server/**/*"
+  ],
+  "exclude": [
+    "target/**/*",
+    ".storybook/**/*.js"
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/logging",
+    "@kbn/inference-endpoint-ui-common",
+    "@kbn/config-schema",
+    "@kbn/safer-lodash-set",
+  ]
+}

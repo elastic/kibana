@@ -5,146 +5,102 @@
  * 2.0.
  */
 
-import { filter, from, map, switchMap, tap } from 'rxjs';
-import { Readable } from 'stream';
+import { filter, map, tap, defer } from 'rxjs';
 import {
   Message,
   MessageRole,
   createInferenceInternalError,
   ToolChoiceType,
-  ToolSchemaType,
-  type ToolOptions,
 } from '@kbn/inference-common';
-import { parseSerdeChunkMessage } from './serde_utils';
+import { toUtf8 } from '@smithy/util-utf8';
+import type {
+  Message as BedRockConverseMessage,
+  ModelStreamErrorException,
+} from '@aws-sdk/client-bedrock-runtime';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import type { ImageBlock } from '@aws-sdk/client-bedrock-runtime';
+import { isDefined } from '@kbn/ml-is-defined';
+import type { DocumentType as JsonMember } from '@smithy/types';
 import { InferenceConnectorAdapter } from '../../types';
-import type { BedRockImagePart, BedRockMessage, BedRockTextPart, BedrockToolChoice } from './types';
+import { handleConnectorResponse } from '../../utils';
+import type { BedRockImagePart, BedRockMessage, BedRockTextPart } from './types';
+import { serdeEventstreamIntoObservable } from './serde_eventstream_into_observable';
 import {
-  BedrockChunkMember,
-  serdeEventstreamIntoObservable,
-} from './serde_eventstream_into_observable';
-import { processCompletionChunks } from './process_completion_chunks';
+  ConverseCompletionChunk,
+  processConverseCompletionChunks,
+} from './process_completion_chunks';
 import { addNoToolUsageDirective } from './prompts';
+import { toolChoiceToConverse, toolsToConverseBedrock } from './convert_tools';
 
 export const bedrockClaudeAdapter: InferenceConnectorAdapter = {
-  chatComplete: ({ executor, system, messages, toolChoice, tools, abortSignal }) => {
+  chatComplete: ({
+    executor,
+    system = 'You are a helpful assistant for Elastic.',
+    messages,
+    toolChoice,
+    tools,
+    temperature = 0,
+    modelName,
+    abortSignal,
+    metadata,
+  }) => {
     const noToolUsage = toolChoice === ToolChoiceType.none;
 
+    const converseMessages = messagesToBedrock(messages).map(
+      (message) =>
+        ({
+          role: message.role,
+          content: message.rawContent,
+        } as BedRockConverseMessage)
+    );
+    const systemMessage = noToolUsage
+      ? [{ text: addNoToolUsageDirective(system) }]
+      : [{ text: system }];
+    const bedRockTools = noToolUsage ? [] : toolsToConverseBedrock(tools, messages);
+
     const subActionParams = {
-      system: noToolUsage ? addNoToolUsageDirective(system) : system,
-      messages: messagesToBedrock(messages),
-      tools: noToolUsage ? [] : toolsToBedrock(tools, messages),
-      toolChoice: toolChoiceToBedrock(toolChoice),
-      temperature: 0,
+      system: systemMessage,
+      messages: converseMessages,
+      tools: bedRockTools?.length ? bedRockTools : undefined,
+      toolChoice: toolChoiceToConverse(toolChoice),
+      temperature,
+      model: modelName,
       stopSequences: ['\n\nHuman:'],
       signal: abortSignal,
     };
 
-    return from(
-      executor.invoke({
-        subAction: 'invokeStream',
+    return defer(() => {
+      return executor.invoke({
+        subAction: 'converseStream',
         subActionParams,
-      })
-    ).pipe(
-      switchMap((response) => {
-        const readable = response.data as Readable;
-        return serdeEventstreamIntoObservable(readable);
-      }),
+      });
+    }).pipe(
+      handleConnectorResponse({ processStream: serdeEventstreamIntoObservable }),
       tap((eventData) => {
-        if ('modelStreamErrorException' in eventData) {
+        if (
+          isPopulatedObject<'modelStreamErrorException', ModelStreamErrorException>(eventData, [
+            'modelStreamErrorException',
+          ])
+        ) {
           throw createInferenceInternalError(eventData.modelStreamErrorException.originalMessage);
         }
       }),
-      filter((value): value is BedrockChunkMember => {
-        return 'chunk' in value && value.chunk?.headers?.[':event-type']?.value === 'chunk';
+      filter((value) => {
+        return typeof value === 'object' && !!value;
       }),
       map((message) => {
-        return parseSerdeChunkMessage(message.chunk);
+        const key = Object.keys(message)[0];
+        if (key && isPopulatedObject<string, { body: Uint8Array }>(message, [key])) {
+          return {
+            type: key,
+            body: JSON.parse(toUtf8(message[key].body)),
+          } as ConverseCompletionChunk;
+        }
       }),
-      processCompletionChunks()
+      filter((value): value is ConverseCompletionChunk => !!value),
+      processConverseCompletionChunks()
     );
   },
-};
-
-const toolChoiceToBedrock = (
-  toolChoice: ToolOptions['toolChoice']
-): BedrockToolChoice | undefined => {
-  if (toolChoice === ToolChoiceType.required) {
-    return {
-      type: 'any',
-    };
-  } else if (toolChoice === ToolChoiceType.auto) {
-    return {
-      type: 'auto',
-    };
-  } else if (typeof toolChoice === 'object') {
-    return {
-      type: 'tool',
-      name: toolChoice.function,
-    };
-  }
-  // ToolChoiceType.none is not supported by claude
-  // we are adding a directive to the system instructions instead in that case.
-  return undefined;
-};
-
-const toolsToBedrock = (tools: ToolOptions['tools'], messages: Message[]) => {
-  function walkSchema<T extends ToolSchemaType>(schemaPart: T): T {
-    if (schemaPart.type === 'object' && schemaPart.properties) {
-      return {
-        ...schemaPart,
-        properties: Object.fromEntries(
-          Object.entries(schemaPart.properties).map(([key, childSchemaPart]) => {
-            return [key, walkSchema(childSchemaPart)];
-          })
-        ),
-      };
-    }
-
-    if (schemaPart.type === 'array') {
-      return {
-        ...schemaPart,
-        // Claude is prone to ignoring the "array" part of an array type
-        description: schemaPart.description + '. Must be provided as a JSON array',
-        items: walkSchema(schemaPart.items),
-      };
-    }
-
-    return schemaPart;
-  }
-
-  if (tools) {
-    return Object.entries(tools).map(([toolName, toolDef]) => {
-      return {
-        name: toolName,
-        description: toolDef.description,
-        input_schema: walkSchema(
-          toolDef.schema ?? {
-            type: 'object' as const,
-            properties: {},
-          }
-        ),
-      };
-    });
-  }
-
-  const hasToolUse = messages.filter(
-    (message) =>
-      message.role === MessageRole.Tool ||
-      (message.role === MessageRole.Assistant && message.toolCalls?.length)
-  );
-
-  if (hasToolUse) {
-    return [
-      {
-        name: 'do_not_call_this_tool',
-        description: 'Do not call this tool, it is strictly forbidden',
-        input_schema: {
-          type: 'object',
-          properties: {},
-        },
-      },
-    ];
-  }
 };
 
 const messagesToBedrock = (messages: Message[]): BedRockMessage[] => {
@@ -153,24 +109,30 @@ const messagesToBedrock = (messages: Message[]): BedRockMessage[] => {
       case MessageRole.User:
         return {
           role: 'user' as const,
-          rawContent: (typeof message.content === 'string'
-            ? [message.content]
-            : message.content
-          ).map((contentPart) => {
-            if (typeof contentPart === 'string') {
-              return { text: contentPart, type: 'text' } satisfies BedRockTextPart;
-            } else if (contentPart.type === 'text') {
-              return { text: contentPart.text, type: 'text' } satisfies BedRockTextPart;
-            }
-            return {
-              type: 'image',
-              source: {
-                data: contentPart.source.data,
-                mediaType: contentPart.source.mimeType,
-                type: 'base64',
-              },
-            } satisfies BedRockImagePart;
-          }),
+          rawContent: (typeof message.content === 'string' ? [message.content] : message.content)
+            .map((contentPart) => {
+              if (typeof contentPart === 'string') {
+                return { text: contentPart, type: 'text' } satisfies BedRockTextPart;
+              } else if (contentPart.type === 'text') {
+                return { text: contentPart.text, type: 'text' } satisfies BedRockTextPart;
+              }
+              if (contentPart.source?.data) {
+                const imageBlock: ImageBlock = {
+                  // Convert mimetype = 'image/png' to 'png'
+                  // https://docs.aws.amazon.com/bedrock/latest/APIReference/API_runtime_ImageBlock.html
+                  format: contentPart.source.mimeType.split(
+                    '/'
+                  )[1] as BedRockImagePart['image']['format'],
+                  source: {
+                    bytes: new TextEncoder().encode(contentPart.source.data),
+                  },
+                };
+                return {
+                  image: imageBlock,
+                };
+              }
+            })
+            .filter<BedRockTextPart | BedRockImagePart>(isDefined),
         };
       case MessageRole.Assistant:
         return {
@@ -180,12 +142,11 @@ const messagesToBedrock = (messages: Message[]): BedRockMessage[] => {
             ...(message.toolCalls
               ? message.toolCalls.map((toolCall) => {
                   return {
-                    type: 'tool_use' as const,
-                    id: toolCall.toolCallId,
-                    name: toolCall.function.name,
-                    input: ('arguments' in toolCall.function
-                      ? toolCall.function.arguments
-                      : {}) as Record<string, unknown>,
+                    toolUse: {
+                      toolUseId: toolCall.toolCallId,
+                      name: toolCall.function.name,
+                      input: 'arguments' in toolCall.function ? toolCall.function.arguments : {},
+                    },
                   };
                 })
               : []),
@@ -196,9 +157,18 @@ const messagesToBedrock = (messages: Message[]): BedRockMessage[] => {
           role: 'user' as const,
           rawContent: [
             {
-              type: 'tool_result' as const,
-              tool_use_id: message.toolCallId,
-              content: JSON.stringify(message.response),
+              toolResult: {
+                toolUseId: message.toolCallId,
+                content: [
+                  (typeof message.response === 'string'
+                    ? ({
+                        text: message.response,
+                      } as { text: string })
+                    : {
+                        json: message.response,
+                      }) as { json: JsonMember },
+                ],
+              },
             },
           ],
         };

@@ -11,10 +11,11 @@ import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { SecuritySolutionLinkButton } from '../../../../../common/components/links';
 import { OnboardingCardId } from '../../../../constants';
 import type { OnboardingCardComponent } from '../../../../types';
-import { OnboardingCardContentImagePanel } from '../common/card_content_image_panel';
+import { OnboardingCardContentAssetPanel } from '../common/card_content_asset_panel';
 import { CardCallOut } from '../common/card_callout';
 import attackDiscoveryImageSrc from './images/attack_discovery.png';
 import * as i18n from './translations';
+import { CardAssetType } from '../types';
 
 export const AttackDiscoveryCard: OnboardingCardComponent = React.memo(
   ({ isCardComplete, setExpandedCardId, setComplete }) => {
@@ -27,11 +28,17 @@ export const AttackDiscoveryCard: OnboardingCardComponent = React.memo(
       setExpandedCardId(OnboardingCardId.integrations, { scroll: true });
     }, [setExpandedCardId]);
 
+    const asset = useMemo(
+      () => ({
+        type: CardAssetType.image,
+        source: attackDiscoveryImageSrc,
+        alt: i18n.ATTACK_DISCOVERY_CARD_TITLE,
+      }),
+      []
+    );
+
     return (
-      <OnboardingCardContentImagePanel
-        imageSrc={attackDiscoveryImageSrc}
-        imageAlt={i18n.ATTACK_DISCOVERY_CARD_TITLE}
-      >
+      <OnboardingCardContentAssetPanel asset={asset}>
         <EuiFlexGroup
           direction="column"
           gutterSize="xl"
@@ -47,7 +54,7 @@ export const AttackDiscoveryCard: OnboardingCardComponent = React.memo(
                 <EuiSpacer size="m" />
                 <CardCallOut
                   color="primary"
-                  icon="iInCircle"
+                  icon="info"
                   text={i18n.ATTACK_DISCOVERY_CARD_CALLOUT_INTEGRATIONS_TEXT}
                   action={
                     <EuiLink onClick={expandIntegrationsCard}>
@@ -76,7 +83,7 @@ export const AttackDiscoveryCard: OnboardingCardComponent = React.memo(
             </SecuritySolutionLinkButton>
           </EuiFlexItem>
         </EuiFlexGroup>
-      </OnboardingCardContentImagePanel>
+      </OnboardingCardContentAssetPanel>
     );
   }
 );

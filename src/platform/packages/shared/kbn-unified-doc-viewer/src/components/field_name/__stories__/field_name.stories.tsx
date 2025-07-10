@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { storiesOf } from '@storybook/react';
 import React from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
 import { DataViewField } from '@kbn/data-views-plugin/public';
@@ -36,13 +35,26 @@ const renderFieldName = (fldName: React.ReactNode) => {
   );
 };
 
-storiesOf('components/FieldName/FieldNameStories', module)
-  .add('default', () => renderFieldName(<FieldName fieldName={'Discover test'} />))
-  .add('with field type', () =>
-    renderFieldName(<FieldName fieldName={'Discover test'} fieldType={'number'} />)
-  )
-  .add('with field mapping', () =>
+export default {
+  title: 'components/FieldName/FieldNameStories',
+};
+
+export const Default = {
+  render: () => renderFieldName(<FieldName fieldName={'Discover test'} />),
+  name: 'default',
+};
+
+export const WithFieldType = {
+  render: () => renderFieldName(<FieldName fieldName={'Discover test'} fieldType={'number'} />),
+
+  name: 'with field type',
+};
+
+export const WithFieldMapping = {
+  render: () =>
     renderFieldName(
       <FieldName fieldName={'Discover test'} fieldMapping={field} fieldType={'number'} />
-    )
-  );
+    ),
+
+  name: 'with field mapping',
+};

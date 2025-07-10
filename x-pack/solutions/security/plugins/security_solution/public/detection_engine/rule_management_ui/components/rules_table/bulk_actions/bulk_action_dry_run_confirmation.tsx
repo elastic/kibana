@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiConfirmModal } from '@elastic/eui';
 
-import * as i18n from '../../../../../detections/pages/detection_engine/rules/translations';
+import * as i18n from '../../../../common/translations';
 import { BulkActionRuleErrorsList } from './bulk_action_rule_errors_list';
 import { BulkActionTypeEnum } from '../../../../../../common/api/detection_engine/rule_management';
 import { assertUnreachable } from '../../../../../../common/utility_types';
@@ -26,6 +26,8 @@ const getActionRejectedTitle = (
       return i18n.BULK_EXPORT_CONFIRMATION_REJECTED_TITLE(failedRulesCount);
     case BulkActionTypeEnum.run:
       return i18n.BULK_MANUAL_RULE_RUN_CONFIRMATION_REJECTED_TITLE(failedRulesCount);
+    case BulkActionTypeEnum.fill_gaps:
+      return i18n.BULK_FILL_RULE_GAPS_CONFIRMATION_REJECTED_TITLE(failedRulesCount);
     default:
       assertUnreachable(bulkAction);
   }
@@ -42,6 +44,8 @@ const getActionConfirmLabel = (
       return i18n.BULK_EXPORT_CONFIRMATION_CONFIRM(succeededRulesCount);
     case BulkActionTypeEnum.run:
       return i18n.BULK_MANUAL_RULE_RUN_CONFIRMATION_CONFIRM(succeededRulesCount);
+    case BulkActionTypeEnum.fill_gaps:
+      return i18n.BULK_FILL_RULE_GAPS_CONFIRMATION_CONFIRM;
     default:
       assertUnreachable(bulkAction);
   }

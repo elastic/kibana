@@ -10,7 +10,7 @@ import { merge } from 'rxjs';
 import { Comparators } from '@elastic/eui';
 import { useUrlState } from '@kbn/ml-url-state';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { getFieldType } from '@kbn/field-utils';
 import { UI_SETTINGS } from '@kbn/data-service';
 import useObservable from 'react-use/lib/useObservable';

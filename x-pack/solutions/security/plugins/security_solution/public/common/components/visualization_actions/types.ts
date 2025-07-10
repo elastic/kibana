@@ -18,6 +18,7 @@ import type { Filter, Query } from '@kbn/es-query';
 
 import type { LensProps } from '@kbn/cases-plugin/public/types';
 import type { EuiThemeComputed } from '@elastic/eui';
+import type { TablesAdapter } from '@kbn/expressions-plugin/common';
 import type { InputsModelId } from '../../store/inputs/constants';
 import type { SourcererScopeName } from '../../../sourcerer/store/model';
 import type { Status } from '../../../../common/api/detection_engine';
@@ -29,6 +30,7 @@ export type GetLensAttributes = (params: {
   stackByField?: string;
   euiTheme: EuiThemeComputed;
   extraOptions?: ExtraOptions;
+  esql?: string;
 }) => LensAttributes;
 
 export interface UseLensAttributesProps {
@@ -40,6 +42,7 @@ export interface UseLensAttributesProps {
   scopeId?: SourcererScopeName;
   stackByField?: string;
   title?: string;
+  esql?: string;
 }
 
 export enum VisualizationContextMenuActions {
@@ -71,10 +74,26 @@ export interface VisualizationActionsProps {
   casesAttachmentMetadata?: LensProps['metadata'];
 }
 
+export interface VisualizationTablesWithMeta {
+  tables: TablesAdapter['tables'];
+  meta: {
+    statistics: {
+      totalCount: number;
+    };
+  };
+}
+
+export interface UseVisualizationResponseResponse {
+  searchSessionId?: string;
+  tables?: VisualizationTablesWithMeta;
+  loading: boolean;
+}
+
 export interface EmbeddableData {
   requests: string[];
   responses: string[];
   isLoading: boolean;
+  tables?: VisualizationTablesWithMeta;
 }
 
 export type OnEmbeddableLoaded = (data: EmbeddableData) => void;
@@ -114,6 +133,11 @@ export interface LensEmbeddableComponentProps {
    * Metadata for cases Attachable visualization.
    */
   casesAttachmentMetadata?: LensProps['metadata'];
+
+  /**
+   * When provided it will render an visualization where the query is ESQL.
+   */
+  esql?: string;
 }
 
 export enum RequestStatus {

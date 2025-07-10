@@ -14,7 +14,6 @@ import { LLMs } from '../../types';
 
 const render = (children: React.ReactNode) =>
   testingLibraryRender(<IntlProvider locale="en">{children}</IntlProvider>);
-const MockIcon = () => <span />;
 
 jest.mock('../../hooks/use_management_link');
 jest.mock('../../hooks/use_usage_tracker', () => ({
@@ -42,7 +41,7 @@ describe('SummarizationModel', () => {
         id: 'model1',
         name: 'Model1',
         disabled: false,
-        icon: MockIcon,
+        icon: 'MockIcon',
         connectorId: 'connector1',
         connectorName: 'nameconnector1',
         connectorType: LLMs.openai_azure,
@@ -51,7 +50,7 @@ describe('SummarizationModel', () => {
         id: 'model2',
         name: 'Model2',
         disabled: true,
-        icon: MockIcon,
+        icon: 'MockIcon',
         connectorId: 'connector2',
         connectorName: 'nameconnector2',
         connectorType: LLMs.openai,
@@ -61,6 +60,7 @@ describe('SummarizationModel', () => {
       <SummarizationModel selectedModel={models[1]} models={models} onSelect={jest.fn()} />
     );
 
+    expect(getByTestId('aiConnectorTitle')).toBeInTheDocument();
     expect(getByTestId('summarizationModelSelect')).toBeInTheDocument();
   });
 });

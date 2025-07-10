@@ -31,7 +31,20 @@ export {
 export { getParsedFilterQuery } from './utils/get_parsed_filtered_query';
 export { getInspectResponse } from '../common/utils/get_inspect_response';
 
-export * from './types';
+export type {
+  ObservabilityRouteCreateOptions,
+  ObservabilityRouteHandlerResources,
+  AbstractObservabilityServerRouteRepository,
+  ObservabilityServerRouteRepository,
+  APIEndpoint,
+  ObservabilityAPIReturnType,
+  ObservabilityRequestHandlerContext,
+  ObservabilityPluginRouter,
+} from './types';
+export {
+  metricsExplorerViewSavedObjectAttributesRT,
+  metricsExplorerViewSavedObjectRT,
+} from './types';
 
 const configSchema = schema.object({
   annotations: schema.object({
@@ -68,6 +81,9 @@ const configSchema = schema.object({
   }),
   enabled: schema.boolean({ defaultValue: true }),
   createO11yGenericFeatureId: schema.boolean({ defaultValue: false }),
+  managedOtlpServiceUrl: offeringBasedSchema({
+    serverless: schema.string({ defaultValue: '' }),
+  }),
 });
 
 export const config: PluginConfigDescriptor = {

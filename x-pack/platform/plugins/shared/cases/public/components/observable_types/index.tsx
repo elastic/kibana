@@ -61,7 +61,9 @@ const ObservableTypesComponent: React.FC<ObservableTypesProps> = ({
       fullWidth
       title={
         <EuiFlexGroup alignItems="center" gutterSize="none">
-          <EuiFlexItem grow={false}>{i18n.TITLE}</EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <h2>{i18n.TITLE}</h2>
+          </EuiFlexItem>
         </EuiFlexGroup>
       }
       description={<p>{i18n.DESCRIPTION}</p>}

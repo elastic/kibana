@@ -16,7 +16,7 @@ import {
   calculatePackagePrivilegesFromKibanaPrivileges,
   getAuthorizationFromPrivileges,
 } from './authz';
-import { ENDPOINT_PRIVILEGES } from './constants';
+import { ENDPOINT_PRIVILEGES, SECURITY_SOLUTION_APP_ID } from './constants';
 
 const SECURITY_SOLUTION_ID = DEFAULT_APP_CATEGORIES.security.id;
 
@@ -69,7 +69,7 @@ describe('fleet authz', () => {
         navLinks: {},
         management: {},
         catalogue: {},
-        siem: endpointCapabilities,
+        [SECURITY_SOLUTION_APP_ID]: endpointCapabilities,
         transform: transformCapabilities,
       });
 
@@ -95,7 +95,7 @@ describe('fleet authz', () => {
         navLinks: {},
         management: {},
         catalogue: {},
-        siem: endpointExceptionsCapabilities,
+        [SECURITY_SOLUTION_APP_ID]: endpointExceptionsCapabilities,
       });
 
       expect(actual).toEqual(expected);
@@ -120,7 +120,7 @@ describe('fleet authz', () => {
         navLinks: {},
         management: {},
         catalogue: {},
-        siem: endpointCapabilities,
+        [SECURITY_SOLUTION_APP_ID]: endpointCapabilities,
       });
 
       expect(actual).toEqual(expected);

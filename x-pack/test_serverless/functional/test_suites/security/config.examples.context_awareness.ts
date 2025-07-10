@@ -14,6 +14,7 @@ export default createTestConfig({
     reportName:
       'Serverless Security Discover Context Awareness Functional Tests - Example Profiles',
   },
+  suiteTags: { exclude: ['skipSvlSec'] },
   kbnServerArgs: [
     `--discover.experimental.enabledProfiles=${JSON.stringify([
       'example-root-profile',

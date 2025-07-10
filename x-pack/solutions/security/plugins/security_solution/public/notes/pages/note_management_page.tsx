@@ -28,6 +28,7 @@ import {
   userSelectedRow,
   userSortedNotes,
   selectAllNotes,
+  selectAllReversed,
   selectNotesPagination,
   selectNotesTableSort,
   fetchNotes,
@@ -118,6 +119,7 @@ const pageSizeOptions = [10, 25, 50, 100];
 export const NoteManagementPage = () => {
   const dispatch = useDispatch();
   const notes = useSelector(selectAllNotes);
+  const notesReversed = useSelector(selectAllReversed);
   const pagination = useSelector(selectNotesPagination);
   const sort = useSelector(selectNotesTableSort);
   const notesSearch = useSelector(selectNotesTableSearch);
@@ -129,7 +131,9 @@ export const NoteManagementPage = () => {
   const fetchLoading = fetchNotesStatus === ReqStatus.Loading;
   const fetchError = fetchNotesStatus === ReqStatus.Failed;
   const fetchErrorData = useSelector(selectFetchNotesError);
-
+  const tableNotes = useMemo(() => {
+    return sort.direction === 'asc' ? notes : notesReversed;
+  }, [notes, notesReversed, sort.direction]);
   const fetchData = useCallback(() => {
     dispatch(
       fetchNotes({
@@ -230,7 +234,7 @@ export const NoteManagementPage = () => {
       <EuiSpacer size="m" />
       <NotesUtilityBar />
       <EuiBasicTable
-        items={notes}
+        items={tableNotes}
         pagination={currentPagination}
         columns={columns}
         onChange={onTableChange}

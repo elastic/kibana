@@ -47,3 +47,12 @@ export const fetchIntegrationsFailedNotifier = (toasts: IToasts, error: Error) =
     text: error.message,
   });
 };
+
+export const fetchFailedStatsFailedNotifier = (toasts: IToasts, error: Error) => {
+  toasts.addDanger({
+    title: i18n.translate('xpack.datasetQuality.fetchFailedStatsFailed', {
+      defaultMessage: "We couldn't get your failed docs information.",
+    }),
+    text: error.message,
+  });
+};

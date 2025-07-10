@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import { KueryNode } from '@kbn/es-query';
-import {
+import type { KueryNode } from '@kbn/es-query';
+import type {
   Logger,
   SavedObjectsClientContract,
   PluginInitializerContext,
   ISavedObjectsRepository,
   UiSettingsServiceStart,
 } from '@kbn/core/server';
-import { ActionsClient, ActionsAuthorization } from '@kbn/actions-plugin/server';
-import {
+import type { ActionsClient, ActionsAuthorization } from '@kbn/actions-plugin/server';
+import type {
   GrantAPIKeyResult as SecurityPluginGrantAPIKeyResult,
   InvalidateAPIKeyResult as SecurityPluginInvalidateAPIKeyResult,
 } from '@kbn/security-plugin/server';
-import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
-import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import { IEventLogClient, IEventLogger } from '@kbn/event-log-plugin/server';
-import { AuditLogger } from '@kbn/security-plugin/server';
-import { DistributiveOmit } from '@elastic/eui';
-import {
+import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
+import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import type { IEventLogClient, IEventLogger } from '@kbn/event-log-plugin/server';
+import type { AuditLogger } from '@kbn/security-plugin/server';
+import type { DistributiveOmit } from '@elastic/eui';
+import type {
   RuleTypeRegistry,
   IntervalSchedule,
   SanitizedRule,
@@ -32,12 +32,12 @@ import {
   RuleSystemAction,
   RuleAction,
 } from '../types';
-import { AlertingAuthorization } from '../authorization';
-import { AlertingRulesConfig } from '../config';
-import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
-import { GetAlertIndicesAlias } from '../lib';
-import { AlertsService } from '../alerts_service';
-import { BackfillClient } from '../backfill_client/backfill_client';
+import type { AlertingAuthorization } from '../authorization';
+import type { AlertingRulesConfig } from '../config';
+import type { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
+import type { GetAlertIndicesAlias } from '../lib';
+import type { AlertsService } from '../alerts_service';
+import type { BackfillClient } from '../backfill_client/backfill_client';
 
 export type {
   BulkEditOperation,
@@ -53,6 +53,7 @@ export type {
   GetGlobalExecutionKPIParams,
   GetRuleExecutionKPIParams,
 } from './methods/get_execution_kpi';
+export type { GetGlobalExecutionSummaryParams } from './methods/get_execution_summary';
 export type { GetActionErrorLogByIdParams } from './methods/get_action_error_log';
 
 export interface RulesClientContext {
@@ -167,7 +168,7 @@ export interface BulkOperationError {
   };
 }
 
-export type BulkAction = 'DELETE' | 'ENABLE' | 'DISABLE';
+export type BulkAction = 'DELETE' | 'ENABLE' | 'DISABLE' | 'GET';
 
 export interface RuleBulkOperationAggregation {
   alertTypeId: {
@@ -185,3 +186,16 @@ export type DenormalizedAction = DistributiveOmit<
   actionRef: string;
   actionTypeId: string;
 };
+
+interface DashboardItem {
+  refId: string;
+}
+
+interface InvestigationGuide {
+  blob: string;
+}
+
+export interface DenormalizedArtifacts {
+  dashboards?: DashboardItem[];
+  investigation_guide?: InvestigationGuide;
+}

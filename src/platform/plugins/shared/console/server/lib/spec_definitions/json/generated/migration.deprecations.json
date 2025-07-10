@@ -13,7 +13,7 @@
       "_migration/deprecations",
       "{index}/_migration/deprecations"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/migration-api-deprecation.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-migration-deprecations",
     "availability": {
       "stack": true,
       "serverless": false

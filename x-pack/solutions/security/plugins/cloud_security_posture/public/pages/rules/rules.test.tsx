@@ -20,6 +20,7 @@ import { useCspIntegrationLink } from '../../common/navigation/use_csp_integrati
 import { useLicenseManagementLocatorApi } from '../../common/api/use_license_management_locator_api';
 import { useCspBenchmarkIntegrationsV2 } from '../benchmarks/use_csp_benchmark_integrations';
 import * as TEST_SUBJECTS from './test_subjects';
+import { SECURITY_FEATURE_ID } from '../../test/constants';
 
 jest.mock('@kbn/cloud-security-posture/src/hooks/use_csp_setup_status_api');
 jest.mock('../../common/api/use_license_management_locator_api');
@@ -47,7 +48,7 @@ const getTestComponent =
         ...coreStart.application,
         capabilities: {
           ...coreStart.application.capabilities,
-          siem: { crud: true },
+          [SECURITY_FEATURE_ID]: { crud: true },
         },
       },
     };
@@ -73,7 +74,10 @@ describe('<Rules />', () => {
           cspm: { status: 'indexed' },
           kspm: { status: 'indexed' },
           indicesDetails: [
-            { index: 'logs-cloud_security_posture.findings_latest-default', status: 'not-empty' },
+            {
+              index: 'security_solution-cloud_security_posture.misconfiguration_latest',
+              status: 'not-empty',
+            },
             { index: 'logs-cloud_security_posture.findings-default*', status: 'not-empty' },
           ],
         },

@@ -6,18 +6,24 @@ disabled:
   - x-pack/test_serverless/functional/test_suites/observability/cypress/config_headless.ts
   - x-pack/test_serverless/functional/test_suites/observability/cypress/config_runner.ts
 
+  # Observability AI Assistant local-only tests
+  - x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.ai_assistant_local.serverless.config.ts
+
 defaultQueue: 'n2-4-spot'
 enabled:
   - x-pack/test_serverless/api_integration/test_suites/observability/config.ts
+  - x-pack/test_serverless/api_integration/test_suites/observability/config.logs_essentials.ts
   - x-pack/test_serverless/api_integration/test_suites/observability/config.feature_flags.ts
   - x-pack/test_serverless/api_integration/test_suites/observability/common_configs/config.group1.ts
+  - x-pack/test_serverless/api_integration/test_suites/observability/common_configs/config.logs_essentials.group1.ts
   - x-pack/test_serverless/api_integration/test_suites/observability/fleet/config.ts
-  - x-pack/test_serverless/api_integration/test_suites/observability/ai_assistant/config.ts
   - x-pack/test_serverless/functional/test_suites/observability/config.ts
+  - x-pack/test_serverless/functional/test_suites/observability/config.logs_essentials.ts
   - x-pack/test_serverless/functional/test_suites/observability/config.examples.ts
   - x-pack/test_serverless/functional/test_suites/observability/config.feature_flags.ts
   - x-pack/test_serverless/functional/test_suites/observability/config.saved_objects_management.ts
   - x-pack/test_serverless/functional/test_suites/observability/config.context_awareness.ts
+  - x-pack/test_serverless/functional/test_suites/observability/common_configs/config.config_compat_mode.ts
   - x-pack/test_serverless/functional/test_suites/observability/common_configs/config.group1.ts
   - x-pack/test_serverless/functional/test_suites/observability/common_configs/config.group2.ts
   - x-pack/test_serverless/functional/test_suites/observability/common_configs/config.group3.ts
@@ -26,8 +32,17 @@ enabled:
   - x-pack/test_serverless/functional/test_suites/observability/common_configs/config.group6.ts
   - x-pack/test_serverless/functional/test_suites/observability/common_configs/config.group7.ts
   - x-pack/test_serverless/functional/test_suites/observability/common_configs/config.group8.ts
+  - x-pack/test_serverless/functional/test_suites/observability/common_configs/config.group9.ts
+  - x-pack/test_serverless/functional/test_suites/observability/common_configs/config.group10.ts
+  - x-pack/test_serverless/functional/test_suites/observability/common_configs/config.group11.ts
+  - x-pack/test_serverless/functional/test_suites/observability/common_configs/config.group12.ts
+  - x-pack/test_serverless/functional/test_suites/observability/common_configs/config.logs_essentials.group1.ts
   - x-pack/test_serverless/functional/test_suites/observability/config.screenshots.ts
   - x-pack/test_serverless/functional/test_suites/observability/config.telemetry.ts
   # serverless config files that run deployment-agnostic tests
-  - x-pack/test/api_integration/deployment_agnostic/configs/serverless/oblt.serverless.config.ts
-  - x-pack/test/api_integration/deployment_agnostic/configs/serverless/oblt.apm.serverless.config.ts
+  - x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.serverless.config.ts
+  - x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.ai_assistant.serverless.config.ts
+  - x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.apm.serverless.config.ts
+  - x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.synthetics.serverless.config.ts
+  - x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.streams.serverless.config.ts
+  - x-pack/solutions/observability/test/api_integration_deployment_agnostic/feature_flag_configs/serverless/oblt.serverless.config.ts

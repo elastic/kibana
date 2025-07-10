@@ -114,7 +114,14 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
         it('Estimated data are not available due to underprivileged user', async () => {
           await testSubjects.existOrFail(
-            `${PageObjects.datasetQuality.testSubjectSelectors.datasetQualityInsufficientPrivileges}-${PageObjects.datasetQuality.texts.estimatedData}`
+            `${PageObjects.datasetQuality.testSubjectSelectors.datasetQualityInsufficientPrivileges}-${PageObjects.datasetQuality.texts.estimatedData}`,
+            /**
+             * This test was failing periodically because of
+             * poor network conditions in the CI.
+             * In those cases the default timeout of 2 minutes
+             * was not enough to properly load the UI and pass the test.
+             */
+            { timeout: 240000 }
           );
         });
 
@@ -125,7 +132,12 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
         });
       });
 
-      describe('User can monitor some data streams', () => {
+      describe('User can monitor some data streams', function () {
+        // This disables the forward-compatibility test for Elasticsearch 8.19 with Kibana and ES 9.0.
+        // These versions are not expected to work together. Note: Failure store is not available in ES 9.0,
+        // and running these tests will result in an "unknown index privilege [read_failure_store]" error.
+        this.onlyEsVersion('8.19 || >=9.1');
+
         before(async () => {
           // Index logs for synth-* and apache.access datasets
           await synthtrace.index(getInitialTestLogs({ to, count: 4 }));
@@ -170,18 +182,11 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
           await PageObjects.datasetQuality.navigateTo();
         });
 
-        it('"View dashboards" and "See integration" are hidden for underprivileged user', async () => {
+        it('"View dashboards" is hidden for underprivileged user', async () => {
           await PageObjects.datasetQuality.navigateToDetails({
             dataStream: apacheAccessDataStreamName,
           });
           await PageObjects.datasetQuality.openIntegrationActionsMenu();
-
-          // "See Integration" is hidden
-          await testSubjects.missingOrFail(
-            PageObjects.datasetQuality.testSubjectSelectors.datasetQualityDetailsIntegrationAction(
-              'Overview'
-            )
-          );
 
           // "View Dashboards" is hidden
           await testSubjects.missingOrFail(
@@ -217,7 +222,7 @@ async function createDatasetQualityUserWithRole(
         feature: {
           dataQuality: [hasDataQualityPrivileges ? 'all' : 'none'],
           discover: ['all'],
-          fleet: ['none'],
+          fleet: ['read'],
         },
         spaces: ['*'],
       },

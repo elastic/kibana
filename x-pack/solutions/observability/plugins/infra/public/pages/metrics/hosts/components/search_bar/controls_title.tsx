@@ -50,7 +50,7 @@ const TitleWithPopoverMessage = ({
       <EuiFlexGroup responsive={false} alignItems="center" gutterSize="xs">
         <EuiFlexItem grow={false}>{title}</EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <Popover>{helpMessage}</Popover>
+          <Popover buttonAriaLabelText={title}>{helpMessage}</Popover>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFormLabel>

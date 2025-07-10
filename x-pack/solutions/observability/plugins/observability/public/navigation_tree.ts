@@ -69,19 +69,24 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
               defaultMessage: 'AI Assistant',
             }),
           },
-          {
-            link: 'inventory',
-            spaceBefore: 'm',
-          },
           ...(streamsAvailable
             ? [
                 {
                   link: 'streams' as const,
+                  withBadge: true,
+                  badgeOptions: {
+                    icon: 'beaker',
+                    tooltip: i18n.translate('xpack.observability.obltNav.streamsBadgeTooltip', {
+                      defaultMessage:
+                        'This functionality is experimental and not supported. It may change or be removed at any time.',
+                    }),
+                  },
                 },
               ]
             : []),
           {
             id: 'apm',
+            link: 'apm:services',
             title: i18n.translate('xpack.observability.obltNav.applications', {
               defaultMessage: 'Applications',
             }),
@@ -139,10 +144,34 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
                   },
                 ],
               },
+              {
+                id: 'uptime',
+                title: i18n.translate('xpack.observability.obltNav.apm.uptimeGroupTitle', {
+                  defaultMessage: 'Uptime',
+                }),
+                children: [
+                  {
+                    link: 'uptime',
+                    title: i18n.translate('xpack.observability.obltNav.apm.uptime.monitors', {
+                      defaultMessage: 'Uptime monitors',
+                    }),
+                  },
+                  {
+                    link: 'uptime:Certificates',
+                    title: i18n.translate(
+                      'xpack.observability.obltNav.apm.uptime.tlsCertificates',
+                      {
+                        defaultMessage: 'TLS certificates',
+                      }
+                    ),
+                  },
+                ],
+              },
             ],
           },
           {
             id: 'metrics',
+            link: 'metrics:inventory',
             title: i18n.translate('xpack.observability.obltNav.infrastructure', {
               defaultMessage: 'Infrastructure',
             }),
@@ -153,7 +182,7 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
                   {
                     link: 'metrics:inventory',
                     title: i18n.translate('xpack.observability.infrastructure.inventory', {
-                      defaultMessage: 'Infrastructure inventory',
+                      defaultMessage: 'Infrastructure Inventory',
                     }),
                     getIsActive: ({ pathNameSerialized, prepend }) => {
                       return pathNameSerialized.startsWith(prepend('/app/metrics/inventory'));
@@ -202,7 +231,7 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
             id: 'machine_learning-landing',
             renderAs: 'panelOpener',
             title: i18n.translate('xpack.observability.obltNav.machineLearning', {
-              defaultMessage: 'Machine learning',
+              defaultMessage: 'Machine Learning',
             }),
             children: [
               {
@@ -211,16 +240,7 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
                     link: 'ml:overview',
                   },
                   {
-                    link: 'ml:notifications',
-                  },
-                  {
-                    link: 'ml:memoryUsage',
-                    title: i18n.translate(
-                      'xpack.observability.obltNav.machineLearning.memoryUsage',
-                      {
-                        defaultMessage: 'Memory usage',
-                      }
-                    ),
+                    link: 'ml:dataVisualizer',
                   },
                 ],
               },
@@ -232,22 +252,10 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
                 breadcrumbStatus: 'hidden',
                 children: [
                   {
-                    link: 'ml:anomalyDetection',
-                    title: i18n.translate('xpack.observability.obltNav.ml.anomaly_detection.jobs', {
-                      defaultMessage: 'Jobs',
-                    }),
-                  },
-                  {
                     link: 'ml:anomalyExplorer',
                   },
                   {
                     link: 'ml:singleMetricViewer',
-                  },
-                  {
-                    link: 'ml:settings',
-                  },
-                  {
-                    link: 'ml:suppliedConfigurations',
                   },
                 ],
               },
@@ -259,15 +267,6 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
                 breadcrumbStatus: 'hidden',
                 children: [
                   {
-                    link: 'ml:dataFrameAnalytics',
-                    title: i18n.translate(
-                      'xpack.observability.obltNav.ml.data_frame_analytics.jobs',
-                      {
-                        defaultMessage: 'Jobs',
-                      }
-                    ),
-                  },
-                  {
                     link: 'ml:resultExplorer',
                   },
                   {
@@ -276,72 +275,9 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
                 ],
               },
               {
-                id: 'category-model_management',
-                title: i18n.translate('xpack.observability.obltNav.ml.model_management', {
-                  defaultMessage: 'Model management',
-                }),
-                breadcrumbStatus: 'hidden',
-                children: [
-                  {
-                    link: 'ml:nodesOverview',
-                    title: i18n.translate(
-                      'xpack.observability.obltNav.ml.model_management.trainedModels',
-                      {
-                        defaultMessage: 'Trained models',
-                      }
-                    ),
-                  },
-                ],
-              },
-              {
-                id: 'category-data_visualizer',
-                title: i18n.translate('xpack.observability.obltNav.ml.data_visualizer', {
-                  defaultMessage: 'Data visualizer',
-                }),
-                breadcrumbStatus: 'hidden',
-                children: [
-                  {
-                    link: 'ml:fileUpload',
-                    title: i18n.translate(
-                      'xpack.observability.obltNav.ml.data_visualizer.file_data_visualizer',
-                      {
-                        defaultMessage: 'File data visualizer',
-                      }
-                    ),
-                  },
-                  {
-                    link: 'ml:indexDataVisualizer',
-                    title: i18n.translate(
-                      'xpack.observability.obltNav.ml.data_visualizer.data_view_data_visualizer',
-                      {
-                        defaultMessage: 'Data view data visualizer',
-                      }
-                    ),
-                  },
-                  {
-                    link: 'ml:esqlDataVisualizer',
-                    title: i18n.translate(
-                      'xpack.observability.obltNav.ml.data_visualizer.esql_data_visualizer',
-                      {
-                        defaultMessage: 'ES|QL data visualizer',
-                      }
-                    ),
-                  },
-                  {
-                    link: 'ml:dataDrift',
-                    title: i18n.translate(
-                      'xpack.observability.obltNav.ml.data_visualizer.data_drift',
-                      {
-                        defaultMessage: 'Data drift',
-                      }
-                    ),
-                  },
-                ],
-              },
-              {
                 id: 'category-aiops_labs',
                 title: i18n.translate('xpack.observability.obltNav.ml.aiops_labs', {
-                  defaultMessage: 'Aiops labs',
+                  defaultMessage: 'AIOps labs',
                 }),
                 breadcrumbStatus: 'hidden',
                 children: [
@@ -410,119 +346,137 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
       },
     ],
     footer: [
-      { type: 'recentlyAccessed' },
-      {
-        type: 'navItem',
-        title: i18n.translate('xpack.observability.obltNav.addData', {
-          defaultMessage: 'Add data',
-        }),
-        link: 'observabilityOnboarding',
-        icon: 'launch',
-      },
-      {
-        type: 'navItem',
-        id: 'devTools',
-        title: i18n.translate('xpack.observability.obltNav.devTools', {
-          defaultMessage: 'Developer tools',
-        }),
-        link: 'dev_tools',
-        icon: 'editorCodeBlock',
-      },
       {
         type: 'navGroup',
-        id: 'project_settings_project_nav',
-        title: i18n.translate('xpack.observability.obltNav.management', {
-          defaultMessage: 'Management',
-        }),
-        icon: 'gear',
-        breadcrumbStatus: 'hidden',
+        id: 'observability_project_nav_footer',
         children: [
           {
-            id: 'stack_management', // This id can't be changed as we use it to open the panel programmatically
-            link: 'management',
-            title: i18n.translate('xpack.observability.obltNav.stackManagement', {
-              defaultMessage: 'Stack Management',
+            title: i18n.translate('xpack.observability.obltNav.addData', {
+              defaultMessage: 'Add data',
             }),
-            renderAs: 'panelOpener',
+            link: 'observabilityOnboarding',
+            icon: 'launch',
+          },
+          {
+            id: 'devTools',
+            title: i18n.translate('xpack.observability.obltNav.devTools', {
+              defaultMessage: 'Developer tools',
+            }),
+            link: 'dev_tools',
+            icon: 'editorCodeBlock',
+          },
+          {
+            id: 'project_settings_project_nav',
+            title: i18n.translate('xpack.observability.obltNav.management', {
+              defaultMessage: 'Management',
+            }),
+            icon: 'gear',
+            breadcrumbStatus: 'hidden',
+            renderAs: 'accordion',
             spaceBefore: null,
             children: [
               {
-                title: 'Ingest',
+                id: 'stack_management', // This id can't be changed as we use it to open the panel programmatically
+                title: i18n.translate('xpack.observability.obltNav.stackManagement', {
+                  defaultMessage: 'Stack Management',
+                }),
+                renderAs: 'panelOpener',
+                spaceBefore: null,
                 children: [
-                  { link: 'management:ingest_pipelines' },
-                  { link: 'management:pipelines' },
+                  {
+                    title: 'Ingest',
+                    children: [
+                      { link: 'management:ingest_pipelines' },
+                      { link: 'management:pipelines' },
+                    ],
+                  },
+                  {
+                    title: 'Data',
+                    children: [
+                      { link: 'management:index_management' },
+                      { link: 'management:data_quality' },
+                      { link: 'management:index_lifecycle_management' },
+                      { link: 'management:snapshot_restore' },
+                      { link: 'management:rollup_jobs' },
+                      { link: 'management:transform' },
+                      { link: 'management:cross_cluster_replication' },
+                      { link: 'management:remote_clusters' },
+                      { link: 'management:migrate_data' },
+                      { link: 'management:content_connectors' },
+                    ],
+                  },
+                  {
+                    title: 'Alerts and Insights',
+                    children: [
+                      { link: 'management:triggersActions' },
+                      { link: 'management:cases' },
+                      { link: 'management:triggersActionsConnectors' },
+                      { link: 'management:reporting' },
+                      { link: 'management:jobsListLink' },
+                      { link: 'management:watcher' },
+                      { link: 'management:maintenanceWindows' },
+                    ],
+                  },
+                  {
+                    title: 'Machine Learning',
+                    children: [
+                      { link: 'management:overview' },
+                      { link: 'management:anomaly_detection' },
+                      { link: 'management:analytics' },
+                      { link: 'management:trained_models' },
+                      { link: 'management:supplied_configurations' },
+                    ],
+                  },
+                  {
+                    title: 'Security',
+                    children: [
+                      { link: 'management:users' },
+                      { link: 'management:roles' },
+                      { link: 'management:api_keys' },
+                      { link: 'management:role_mappings' },
+                    ],
+                  },
+                  {
+                    title: 'Kibana',
+                    children: [
+                      { link: 'management:dataViews' },
+                      { link: 'management:filesManagement' },
+                      { link: 'management:objects' },
+                      { link: 'management:tags' },
+                      { link: 'management:search_sessions' },
+                      { link: 'management:aiAssistantManagementSelection' },
+                      { link: 'management:spaces' },
+                      { link: 'management:settings' },
+                    ],
+                  },
+                  {
+                    title: 'Stack',
+                    children: [
+                      { link: 'management:license_management' },
+                      { link: 'management:upgrade_assistant' },
+                    ],
+                  },
                 ],
               },
               {
-                title: 'Data',
-                children: [
-                  { link: 'management:index_management' },
-                  { link: 'management:data_quality' },
-                  { link: 'management:index_lifecycle_management' },
-                  { link: 'management:snapshot_restore' },
-                  { link: 'management:rollup_jobs' },
-                  { link: 'management:transform' },
-                  { link: 'management:cross_cluster_replication' },
-                  { link: 'management:remote_clusters' },
-                  { link: 'management:migrate_data' },
-                ],
+                id: 'monitoring',
+                link: 'monitoring',
               },
               {
-                title: 'Alerts and Insights',
-                children: [
-                  { link: 'management:triggersActions' },
-                  { link: 'management:cases' },
-                  { link: 'management:triggersActionsConnectors' },
-                  { link: 'management:reporting' },
-                  { link: 'management:jobsListLink' },
-                  { link: 'management:watcher' },
-                  { link: 'management:maintenanceWindows' },
-                ],
+                link: 'integrations',
               },
               {
-                title: 'Security',
-                children: [
-                  { link: 'management:users' },
-                  { link: 'management:roles' },
-                  { link: 'management:api_keys' },
-                  { link: 'management:role_mappings' },
-                ],
+                link: 'fleet',
               },
               {
-                title: 'Kibana',
-                children: [
-                  { link: 'management:dataViews' },
-                  { link: 'management:filesManagement' },
-                  { link: 'management:objects' },
-                  { link: 'management:tags' },
-                  { link: 'management:search_sessions' },
-                  { link: 'management:aiAssistantManagementSelection' },
-                  { link: 'management:spaces' },
-                  { link: 'management:settings' },
-                ],
+                id: 'cloudLinkUserAndRoles',
+                cloudLink: 'userAndRoles',
               },
               {
-                title: 'Stack',
-                children: [
-                  { link: 'management:license_management' },
-                  { link: 'management:upgrade_assistant' },
-                ],
+                id: 'cloudLinkBilling',
+                cloudLink: 'billingAndSub',
               },
             ],
-          },
-          {
-            link: 'integrations',
-          },
-          {
-            link: 'fleet',
-          },
-          {
-            id: 'cloudLinkUserAndRoles',
-            cloudLink: 'userAndRoles',
-          },
-          {
-            id: 'cloudLinkBilling',
-            cloudLink: 'billingAndSub',
           },
         ],
       },

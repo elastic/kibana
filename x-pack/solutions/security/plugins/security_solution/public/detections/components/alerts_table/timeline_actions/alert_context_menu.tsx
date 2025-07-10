@@ -36,6 +36,7 @@ import { useAlertsActions } from './use_alerts_actions';
 import { useExceptionFlyout } from './use_add_exception_flyout';
 import { useAlertExceptionActions } from './use_add_exception_actions';
 import { useEventFilterModal } from './use_event_filter_modal';
+import { TimelineId } from '../../../../../common/types/timeline';
 import type {
   DataViewId,
   IndexPatternArray,
@@ -44,13 +45,14 @@ import type {
   Status,
 } from '../../../../../common/api/detection_engine';
 import { ATTACH_ALERT_TO_CASE_FOR_ROW } from '../../../../timelines/components/timeline/body/translations';
+import { selectTimelineById } from '../../../../timelines/store/selectors';
 import { useEventFilterAction } from './use_event_filter_action';
 import { useAddToCaseActions } from './use_add_to_case_actions';
 import type { Rule } from '../../../../detection_engine/rule_management/logic/types';
 import type { AlertTableContextMenuItem } from '../types';
 import { useAlertTagsActions } from './use_alert_tags_actions';
 import { useAlertAssigneesActions } from './use_alert_assignees_actions';
-
+import { timelineDefaults } from '../../../../timelines/store/defaults';
 interface AlertContextMenuProps {
   ariaLabel?: string;
   ariaRowindex: number;
@@ -78,11 +80,15 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
   const onMenuItemClick = useCallback(() => {
     setPopover(false);
   }, []);
-
+  const { activeTab } = useSelector(
+    (state: State) => selectTimelineById(state, TimelineId.active) ?? timelineDefaults
+  );
   const getGlobalQueries = useMemo(() => inputsSelectors.globalQuery(), []);
-  const getTimelineQuery = useMemo(() => inputsSelectors.timelineQueryByIdSelector(), []);
+  const getTimelineQuery = useMemo(() => inputsSelectors.timelineQueryByIdSelectorFactory(), []);
   const globalQuery = useSelector((state: State) => getGlobalQueries(state));
-  const timelineQuery = useSelector((state: State) => getTimelineQuery(state, scopeId));
+  const timelineQuery = useSelector((state: State) =>
+    getTimelineQuery(state, `${TimelineId.active}-${activeTab}`)
+  );
 
   const getAlertId = () => (ecsRowData?.kibana?.alert ? ecsRowData?._id : null);
   const alertId = getAlertId();
@@ -127,28 +133,12 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
   );
 
   const onButtonClick = useCallback(() => {
-    setPopover(!isPopoverOpen);
-  }, [isPopoverOpen]);
+    setPopover((current) => !current);
+  }, []);
 
   const closePopover = useCallback((): void => {
     setPopover(false);
   }, []);
-
-  const button = useMemo(() => {
-    return (
-      <EuiToolTip position="top" content={i18n.MORE_ACTIONS}>
-        <EuiButtonIcon
-          aria-label={ariaLabel}
-          data-test-subj="timeline-context-menu-button"
-          size="s"
-          iconType="boxesHorizontal"
-          data-popover-open={isPopoverOpen}
-          onClick={onButtonClick}
-          isDisabled={disabled}
-        />
-      </EuiToolTip>
-    );
-  }, [disabled, onButtonClick, ariaLabel, isPopoverOpen]);
 
   const refetchAll = useCallback(() => {
     const refetchQuery = (newQueries: inputsModel.GlobalQuery[]) => {
@@ -280,6 +270,26 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     [alertTagsPanels, alertAssigneesPanels, items]
   );
 
+  const button = useMemo(() => {
+    const hasItems = !!items.length;
+    const tooltipContent = hasItems ? i18n.MORE_ACTIONS : i18n.INSUFFICIENT_PRIVILEGES;
+
+    return (
+      <EuiToolTip position="top" content={tooltipContent}>
+        <EuiButtonIcon
+          aria-label={ariaLabel}
+          data-test-subj="timeline-context-menu-button"
+          size="s"
+          iconType="boxesHorizontal"
+          data-popover-open={isPopoverOpen}
+          onClick={onButtonClick}
+          isDisabled={disabled || !hasItems}
+          color={isPopoverOpen ? 'primary' : 'text'}
+        />
+      </EuiToolTip>
+    );
+  }, [ariaLabel, isPopoverOpen, onButtonClick, disabled, items.length]);
+
   const osqueryFlyout = useMemo(() => {
     return (
       <OsqueryFlyout
@@ -293,28 +303,26 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
 
   return (
     <>
-      {items.length > 0 && (
-        <div key="actions-context-menu">
-          <EventsTdContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
-            <EuiPopover
-              id="singlePanel"
-              button={button}
-              isOpen={isPopoverOpen}
-              closePopover={closePopover}
-              panelPaddingSize="none"
-              anchorPosition="downLeft"
-              repositionOnScroll
-            >
-              <EuiContextMenu
-                size="s"
-                initialPanelId={0}
-                panels={panels}
-                data-test-subj="actions-context-menu"
-              />
-            </EuiPopover>
-          </EventsTdContent>
-        </div>
-      )}
+      <div key="actions-context-menu">
+        <EventsTdContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
+          <EuiPopover
+            id="singlePanel"
+            button={button}
+            isOpen={isPopoverOpen}
+            closePopover={closePopover}
+            panelPaddingSize="none"
+            anchorPosition="downLeft"
+            repositionOnScroll
+          >
+            <EuiContextMenu
+              size="s"
+              initialPanelId={0}
+              panels={panels}
+              data-test-subj="actions-context-menu"
+            />
+          </EuiPopover>
+        </EventsTdContent>
+      </div>
       {openAddExceptionFlyout &&
         ruleId &&
         ruleRuleId &&

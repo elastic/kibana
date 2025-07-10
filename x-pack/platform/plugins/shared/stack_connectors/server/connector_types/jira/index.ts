@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
 
 import type {
   ActionType as ConnectorType,
@@ -17,7 +17,7 @@ import {
   CasesConnectorFeatureId,
   UptimeConnectorFeatureId,
   SecurityConnectorFeatureId,
-} from '@kbn/actions-plugin/common/types';
+} from '@kbn/actions-plugin/common';
 import { validate } from './validators';
 import {
   ExternalIncidentServiceConfigurationSchema,
@@ -26,7 +26,7 @@ import {
 } from './schema';
 import { createExternalService } from './service';
 import { api } from './api';
-import {
+import type {
   ExecutorParams,
   ExecutorSubActionPushParams,
   JiraPublicConfigurationType,

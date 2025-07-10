@@ -19,7 +19,7 @@ import {
   Storage,
   withNotifyOnErrors,
 } from '@kbn/kibana-utils-plugin/public';
-
+import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
 import { ACTION_VISUALIZE_LENS_FIELD, VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { ACTION_CONVERT_TO_LENS } from '@kbn/visualizations-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -32,6 +32,7 @@ import { App } from './app';
 import { EditorFrameStart, LensTopNavMenuEntryGenerator, VisualizeEditorContext } from '../types';
 import { addHelpMenuToAppChrome } from '../help_menu_util';
 import { LensPluginStartDependencies } from '../plugin';
+import { extract } from '../../common/embeddable_factory';
 import { LENS_EMBEDDABLE_TYPE, LENS_EDIT_BY_VALUE, APP_ID } from '../../common/constants';
 import { LensAttributesService } from '../lens_attribute_service';
 import { LensAppServices, RedirectToOriginProps, HistoryLocationState } from './types';
@@ -148,13 +149,13 @@ export async function mountApp(
   }
 ) {
   const { createEditorFrame, attributeService, topNavMenuEntryGenerators, locator } = mountProps;
+  const { contextType, initialContext, initialStateFromLocator, originatingApp } =
+    getInitialContext(params.history) || {};
+
   const [[coreStart, startDependencies], instance] = await Promise.all([
     core.getStartServices(),
     createEditorFrame(),
   ]);
-
-  const { contextType, initialContext, initialStateFromLocator, originatingApp } =
-    getInitialContext(params.history) || {};
 
   const lensServices = await getLensServices(
     coreStart,
@@ -169,7 +170,7 @@ export async function mountApp(
   const embeddableEditorIncomingState = stateTransfer?.getIncomingEditorState(APP_ID);
 
   addHelpMenuToAppChrome(coreStart.chrome, coreStart.docLinks);
-  if (!lensServices.application.capabilities.visualize.save) {
+  if (!lensServices.application.capabilities.visualize_v2.save) {
     coreStart.chrome.setBadge({
       text: i18n.translate('xpack.lens.badge.readOnly.text', {
         defaultMessage: 'Read only',
@@ -217,13 +218,17 @@ export async function mountApp(
       embeddableId = initialContext.embeddableId;
     }
     if (stateTransfer && props?.state) {
-      const { state, isCopied } = props;
-      stateTransfer.navigateToWithEmbeddablePackage(mergedOriginatingApp, {
+      const { state: rawState, isCopied } = props;
+      const { references } = extract(rawState as unknown as EmbeddableStateWithType);
+      stateTransfer.navigateToWithEmbeddablePackage<LensSerializedState>(mergedOriginatingApp, {
         path: embeddableEditorIncomingState?.originatingPath,
         state: {
           embeddableId: isCopied ? undefined : embeddableId,
           type: LENS_EMBEDDABLE_TYPE,
-          input: { ...state, savedObject: state.savedObjectId },
+          serializedState: {
+            references,
+            rawState,
+          },
           searchSessionId: data.search.session.getSessionId(),
         },
       });
@@ -397,8 +402,6 @@ export async function mountApp(
   const unlistenParentHistory = params.history.listen(() => {
     window.dispatchEvent(new HashChangeEvent('hashchange'));
   });
-
-  params.element.classList.add('lnsAppWrapper');
 
   render(
     <KibanaRenderContextProvider {...coreStart}>

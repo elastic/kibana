@@ -37,8 +37,11 @@ export function registerGetAllRoute({ router, config, lib: { handleEsError } }: 
         const { index_templates: templatesEs } =
           await client.asCurrentUser.indices.getIndexTemplate();
 
-        // @ts-expect-error TemplateSerialized.index_patterns not compatible with IndicesIndexTemplate.index_patterns
-        const templates = deserializeTemplateList(templatesEs, cloudManagedTemplatePrefix);
+        const templates = deserializeTemplateList(
+          // @ts-expect-error TemplateSerialized.index_patterns not compatible with IndicesIndexTemplate.index_patterns
+          templatesEs,
+          cloudManagedTemplatePrefix
+        );
 
         if (config.isLegacyTemplatesEnabled === false) {
           // If isLegacyTemplatesEnabled=false, we do not want to fetch legacy templates and return an empty array;
@@ -98,6 +101,12 @@ export function registerGetOneRoute({ router, config, lib: { handleEsError } }: 
       try {
         const cloudManagedTemplatePrefix = await getCloudManagedTemplatePrefix(client);
 
+        const { persistent, defaults } = await client.asInternalUser.cluster.getSettings({
+          include_defaults: true,
+        });
+        const isLogsdbEnabled =
+          (persistent?.cluster?.logsdb?.enabled ?? defaults?.cluster?.logsdb?.enabled) === 'true';
+
         if (isLegacy) {
           const indexTemplateByName = await client.asCurrentUser.indices.getTemplate({
             name,
@@ -107,7 +116,8 @@ export function registerGetOneRoute({ router, config, lib: { handleEsError } }: 
             return response.ok({
               body: deserializeLegacyTemplate(
                 { ...indexTemplateByName[name], name },
-                cloudManagedTemplatePrefix
+                cloudManagedTemplatePrefix,
+                isLogsdbEnabled
               ),
             });
           }
@@ -120,7 +130,8 @@ export function registerGetOneRoute({ router, config, lib: { handleEsError } }: 
               body: deserializeTemplate(
                 // @ts-expect-error TemplateSerialized.index_patterns not compatible with IndicesIndexTemplate.index_patterns
                 { ...indexTemplates[0].index_template, name },
-                cloudManagedTemplatePrefix
+                cloudManagedTemplatePrefix,
+                isLogsdbEnabled
               ),
             });
           }

@@ -1,26 +1,36 @@
 paths-ignore:
-  - '**/*-mocks/**'
-  - '**/*.cy.*'
-  - '**/*.mock.*'
-  - '**/*.mocks.*'
-  - '**/*.test.*'
-  - '**/.storybook/**'
   - '**/__fixtures__/**'
   - '**/__jest__/**'
   - '**/__mocks__/**'
   - '**/__snapshots__/**'
   - '**/__stories__/**'
   - '**/__tests__/**'
+  - '**/.storybook/**'
+  - '**/*-mocks/**'
+  - '**/*.cy.*'
+  - '**/*.yaml'
+  - '**/*.hbs'
+  - '**/*.njk'
+  - '**/*.mock.*'
+  - '**/*.mocks.*'
+  - '**/*.test.*'
   - '**/cypress/**'
   - '**/e2e/**'
   - '**/ftr_e2e/**'
   - '**/integration_tests/**'
   - '**/jest.config.*'
   - '**/jest.integration.config.*'
+  - '**/kbn-scout-*'
   - '**/mocks.*'
   - '**/mocks/**'
+  - '**/stub/**'
+  - '**/scripts/**'
+  - '**/setup_tests.*'
   - '**/storybook/**'
+  - '**/*_test_utils/**'
+  - '**/*-test-data/**'
   - '**/test_helpers/**'
+  - '**/test-helpers/**'
   - '**/test_utils/**'
   - api_docs
   - dev_docs
@@ -29,68 +39,101 @@ paths-ignore:
   - kbn_pm
   - legacy_rfcs
   - oas_docs
-  - packages/*/scripts
-  - packages/core/test-helpers/core-test-helpers-kbn-server
-  - packages/kbn-ambient-*-types
-  - packages/kbn-apm-synthtrace
-  - packages/kbn-axe-config
   - packages/kbn-babel-*
   - packages/kbn-bazel-*
+  - packages/kbn-capture-oas-snapshot-cli
+  - packages/kbn-check-mappings-update-cli
+  - packages/kbn-check-prod-native-modules-cli
   - packages/kbn-ci-*
   - packages/kbn-cli-dev-mode
-  - packages/kbn-cypress-*
-  - packages/kbn-dev-cli-errors
-  - packages/kbn-dev-cli-runner
-  - packages/kbn-dev-proc-runner
-  - packages/kbn-dev-utils
+  - packages/kbn-dependency-*
   - packages/kbn-docs-utils
-  - packages/kbn-es
-  - packages/kbn-es-archiver
   - packages/kbn-eslint-*
-  - packages/kbn-expect
   - packages/kbn-failed-test-reporter-cli
   - packages/kbn-find-used-node-modules
   - packages/kbn-ftr-*
+  - packages/kbn-import-locator
   - packages/kbn-generate
-  - packages/kbn-get-repo-files
-  - packages/kbn-import-resolver
-  - packages/kbn-jest-*
-  - packages/kbn-journeys
+  - packages/kbn-generate-console-definitions
+  - packages/kbn-json-ast
   - packages/kbn-kibana-manifest-schema
-  - packages/kbn-managed-vscode-config
-  - packages/kbn-managed-vscode-config-cli
+  - packages/kbn-lint-*
+  - packages/kbn-managed-vscode-*
+  - packages/kbn-manifest
+  - packages/kbn-mock-idp-plugin
   - packages/kbn-optimizer
-  - packages/kbn-optimizer-*
-  - packages/kbn-peggy
   - packages/kbn-peggy-loader
   - packages/kbn-performance-testing-dataset-extractor
-  - packages/kbn-plugin-generator
-  - packages/kbn-plugin-helpers
+  - packages/kbn-picomatcher
+  - packages/kbn-plugin-*
   - packages/kbn-relocate
-  - packages/kbn-repo-path
-  - packages/kbn-repo-source-classifier
-  - packages/kbn-repo-source-classifier-cli
-  - packages/kbn-scout
-  - packages/kbn-scout-*
-  - packages/kbn-some-dev-log
+  - packages/kbn-repo-*
+  - packages/kbn-set-map
   - packages/kbn-sort-package-json
-  - packages/kbn-stdio-dev-helpers
-  - packages/kbn-storybook
-  - packages/kbn-telemetry-tools
-  - packages/kbn-test
+  - packages/kbn-styled-components-mapping-cli
   - packages/kbn-test-*
-  - packages/kbn-tooling-log
   - packages/kbn-ts-*
+  - packages/kbn-validate-next-docs-cli
   - packages/kbn-web-worker-stub
+  - packages/kbn-whereis-pkg-cli
   - packages/kbn-yarn-lock-validator
   - scripts
-  - test
+  - src/platform/packages/*/kbn-ambient-*-types
+  - src/platform/packages/*/kbn-babel-*
+  - src/platform/packages/*/kbn-ci-*
+  - src/platform/packages/*/kbn-cypress-*
+  - src/platform/packages/*/kbn-ftr-*
+  - src/platform/packages/*/kbn-jest-*
+  - src/platform/packages/*/kbn-optimizer-*
+  - src/platform/packages/*/kbn-test-*
+  - src/platform/packages/private/kbn-code-owners
+  - src/platform/packages/private/kbn-gen-ai-functional-testing
+  - src/platform/packages/private/kbn-get-repo-files
+  - src/platform/packages/private/kbn-import-resolver
+  - src/platform/packages/private/kbn-journeys
+  - src/platform/packages/private/kbn-mock-idp-utils
+  - src/platform/packages/private/kbn-node-libs-browser-webpack-plugin
+  - src/platform/packages/private/kbn-optimizer-webpack-helpers
+  - src/platform/packages/private/kbn-reporting/mocks_server
+  - src/platform/packages/private/kbn-peggy
+  - src/platform/packages/private/kbn-repo-path
+  - src/platform/packages/private/kbn-some-dev-log
+  - src/platform/packages/private/kbn-stdio-dev-helpers
+  - src/platform/packages/private/kbn-telemetry-tools
+  - src/platform/packages/shared/kbn-apm-synthtrace
+  - src/platform/packages/shared/kbn-axe-config
+  - src/platform/packages/shared/kbn-cache-cli
+  - src/platform/packages/shared/kbn-dev-cli-errors
+  - src/platform/packages/shared/kbn-dev-cli-runner
+  - src/platform/packages/shared/kbn-dev-proc-runner
+  - src/platform/packages/shared/kbn-dev-utils
+  - src/platform/packages/shared/kbn-es
+  - src/platform/packages/shared/kbn-es-archiver
+  - src/platform/packages/shared/kbn-expect
+  - src/platform/packages/shared/kbn-openapi-*
+  - src/platform/packages/shared/kbn-scout
+  - src/platform/packages/shared/kbn-storybook
+  - src/platform/packages/shared/kbn-test
+  - src/platform/packages/shared/kbn-tooling-log
+  - src/platform/test
   - typings
   - x-pack/examples
+  - x-pack/packages/ai-infra/product-doc-artifact-builder
+  - x-pack/packages/kbn-synthetics-private-location
+  - x-pack/platform/packages/shared/kbn-ai-tools-cli
+  - x-pack/platform/packages/shared/kbn-inference-cli
+  - x-pack/platform/packages/shared/kbn-kibana-api-cli
+  - x-pack/platform/packages/shared/kbn-sample-parser
+  - x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/public/assets/**
+  - x-pack/platform/test
   - x-pack/performance
-  - x-pack/platform/**/scripts
-  - x-pack/plugins/observability_solution/*/scripts
   - x-pack/scripts
-  - x-pack/solutions/**/scripts
+  - x-pack/solutions/observability/packages/kbn-genai-cli
+  - x-pack/solutions/*/test
   - x-pack/test
   - x-pack/test_serverless
+query-filters:
+  - exclude:
+      paths:
+        - codeql/javascript-queries/AngularJS
+        - codeql/javascript-queries/Electron

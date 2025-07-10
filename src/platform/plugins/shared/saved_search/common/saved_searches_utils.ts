@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
-import { SavedSearch, SavedSearchAttributes } from '.';
-import { SerializableSavedSearch } from './types';
+import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import type { SavedSearch, SavedSearchAttributes } from '.';
+import type { SerializableSavedSearch } from './types';
 
 export const fromSavedSearchAttributes = <
   Serialized extends boolean = false,

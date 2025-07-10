@@ -11,12 +11,14 @@ import {
   ChatCompletionMessageEvent,
   ChatCompletionTokenCountEvent,
   ToolOptions,
-  UnvalidatedToolCall,
   withoutTokenCountEvents,
 } from '@kbn/inference-common';
+import { trace } from '@opentelemetry/api';
 import type { Logger } from '@kbn/logging';
 import { OperatorFunction, map, merge, share, toArray } from 'rxjs';
+import { setChoice } from '@kbn/inference-tracing/src/with_chat_complete_span';
 import { validateToolCalls } from '../../util/validate_tool_calls';
+import { mergeChunks } from './merge_chunks';
 
 export function chunksIntoMessage<TToolOptions extends ToolOptions>({
   logger,
@@ -39,47 +41,21 @@ export function chunksIntoMessage<TToolOptions extends ToolOptions>({
         withoutTokenCountEvents(),
         toArray(),
         map((chunks): ChatCompletionMessageEvent<TToolOptions> => {
-          const concatenatedChunk = chunks.reduce(
-            (prev, chunk) => {
-              prev.content += chunk.content ?? '';
-
-              chunk.tool_calls?.forEach((toolCall) => {
-                let prevToolCall = prev.tool_calls[toolCall.index];
-                if (!prevToolCall) {
-                  prev.tool_calls[toolCall.index] = {
-                    function: {
-                      name: '',
-                      arguments: '',
-                    },
-                    toolCallId: '',
-                  };
-
-                  prevToolCall = prev.tool_calls[toolCall.index];
-                }
-
-                prevToolCall.function.name += toolCall.function.name;
-                prevToolCall.function.arguments += toolCall.function.arguments;
-                prevToolCall.toolCallId += toolCall.toolCallId;
-              });
-
-              return prev;
-            },
-            { content: '', tool_calls: [] as UnvalidatedToolCall[] }
-          );
-
-          // some models (Claude not to name it) can have their toolCall index not start at 0, so we remove the null elements
-          concatenatedChunk.tool_calls = concatenatedChunk.tool_calls.filter((call) => !!call);
+          const concatenatedChunk = mergeChunks(chunks);
 
           logger.debug(() => `Received completed message: ${JSON.stringify(concatenatedChunk)}`);
 
-          const validatedToolCalls = validateToolCalls<TToolOptions>({
-            ...toolOptions,
-            toolCalls: concatenatedChunk.tool_calls,
-          });
+          const { content, tool_calls: toolCalls } = concatenatedChunk;
+          const activeSpan = trace.getActiveSpan();
+          if (activeSpan) {
+            setChoice(activeSpan, { content, toolCalls });
+          }
+
+          const validatedToolCalls = validateToolCalls<TToolOptions>({ ...toolOptions, toolCalls });
 
           return {
             type: ChatCompletionEventType.ChatCompletionMessage,
-            content: concatenatedChunk.content,
+            content,
             toolCalls: validatedToolCalls,
           };
         })

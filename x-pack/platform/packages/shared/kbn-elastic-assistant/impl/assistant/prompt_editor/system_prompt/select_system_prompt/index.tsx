@@ -14,14 +14,11 @@ import {
   EuiFormRow,
   EuiSuperSelect,
   EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 
-import { euiThemeVars } from '@kbn/ui-theme';
-import {
-  PromptResponse,
-  PromptTypeEnum,
-} from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
+import { PromptResponse, PromptTypeEnum } from '@kbn/elastic-assistant-common/impl/schemas';
 import { getOptions } from '../helpers';
 import * as i18n from '../translations';
 import { useAssistantContext } from '../../../../assistant_context';
@@ -38,7 +35,7 @@ export interface Props {
   isOpen?: boolean;
   isSettingsModalVisible: boolean;
   selectedPrompt: PromptResponse | undefined;
-  setIsSettingsModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
+  setIsSettingsModalVisible?: React.Dispatch<React.SetStateAction<boolean>>;
   onSystemPromptSelectionChange: (promptId: string | undefined) => void;
 }
 
@@ -56,6 +53,7 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
   selectedPrompt,
   setIsSettingsModalVisible,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const { setSelectedSettingsTab } = useAssistantContext();
   const allSystemPrompts = useMemo(
     () => allPrompts.filter((p) => p.promptType === PromptTypeEnum.system),
@@ -93,7 +91,7 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
   const onChange = useCallback(
     async (selectedSystemPromptId: string) => {
       if (selectedSystemPromptId === ADD_NEW_SYSTEM_PROMPT) {
-        setIsSettingsModalVisible(true);
+        setIsSettingsModalVisible?.(true);
         setSelectedSettingsTab(SYSTEM_PROMPTS_TAB);
         return;
       }
@@ -128,7 +126,7 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
           <EuiSuperSelect
             // Limits popover z-index to prevent it from getting too high and covering tooltips.
             // If the z-index is not defined, when a popover is opened, it sets the target z-index + 2000
-            popoverProps={{ zIndex: euiThemeVars.euiZLevel8 }}
+            popoverProps={{ zIndex: euiTheme.levels.modal as number }}
             compressed={compressed}
             data-test-subj={TEST_IDS.PROMPT_SUPERSELECT}
             fullWidth
@@ -144,6 +142,7 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
             prepend={!isSettingsModalVisible ? PROMPT_CONTEXT_SELECTOR_PREFIX : undefined}
             css={css`
               padding-right: 56px !important;
+              ${compressed ? 'font-size: 0.9rem;' : ''}
             `}
           />
         </EuiFormRow>
@@ -168,10 +167,10 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
                 inline-size: 16px;
                 block-size: 16px;
                 border-radius: 16px;
-                background: ${euiThemeVars.euiColorMediumShade};
+                background: ${euiTheme.colors.backgroundBaseSubdued};
 
                 :hover:not(:disabled) {
-                  background: ${euiThemeVars.euiColorMediumShade};
+                  background: ${euiTheme.colors.backgroundBaseSubdued};
                   transform: none;
                 }
 

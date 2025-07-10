@@ -15,7 +15,6 @@ import type { CoreStart, StartServicesAccessor } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { RegisterManagementAppArgs } from '@kbn/management-plugin/public';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { AuthenticationServiceSetup } from '@kbn/security-plugin-types-public';
 import { Route, Router, Routes } from '@kbn/shared-ux-router';
 
@@ -61,64 +60,66 @@ export const usersManagementApp = Object.freeze({
         ]);
 
         render(
-          <Providers
-            services={coreStart}
-            history={history}
-            authc={authc}
-            onChange={createBreadcrumbsChangeHandler(coreStart.chrome, setBreadcrumbs)}
-          >
-            <ReadonlyBadge
-              featureId="users"
-              tooltip={i18n.translate('xpack.security.management.users.readonlyTooltip', {
-                defaultMessage: 'Unable to create or edit users',
-              })}
-            />
-            <Breadcrumb
-              text={i18n.translate('xpack.security.users.breadcrumb', {
-                defaultMessage: 'Users',
-              })}
-              href="/"
+          coreStart.rendering.addContext(
+            <Providers
+              services={coreStart}
+              history={history}
+              authc={authc}
+              onChange={createBreadcrumbsChangeHandler(coreStart.chrome, setBreadcrumbs)}
             >
-              <Routes>
-                <Route path={['/', '']} exact>
-                  <UsersGridPage
-                    notifications={coreStart.notifications}
-                    userAPIClient={new UserAPIClient(coreStart.http)}
-                    rolesAPIClient={new RolesAPIClient(coreStart.http)}
-                    history={history}
-                    navigateToApp={coreStart.application.navigateToApp}
-                    readOnly={!coreStart.application.capabilities.users.save}
+              <ReadonlyBadge
+                featureId="users"
+                tooltip={i18n.translate('xpack.security.management.users.readonlyTooltip', {
+                  defaultMessage: 'Unable to create or edit users',
+                })}
+              />
+              <Breadcrumb
+                text={i18n.translate('xpack.security.users.breadcrumb', {
+                  defaultMessage: 'Users',
+                })}
+                href="/"
+              >
+                <Routes>
+                  <Route path={['/', '']} exact>
+                    <UsersGridPage
+                      notifications={coreStart.notifications}
+                      userAPIClient={new UserAPIClient(coreStart.http)}
+                      rolesAPIClient={new RolesAPIClient(coreStart.http)}
+                      history={history}
+                      navigateToApp={coreStart.application.navigateToApp}
+                      readOnly={!coreStart.application.capabilities.users.save}
+                    />
+                  </Route>
+                  <Route path="/create">
+                    <Breadcrumb
+                      text={i18n.translate('xpack.security.users.editUserPage.createBreadcrumb', {
+                        defaultMessage: 'Create',
+                      })}
+                      href="/create"
+                    >
+                      <CreateUserPage />
+                    </Breadcrumb>
+                  </Route>
+                  <Route
+                    path="/edit/:username"
+                    render={(props) => {
+                      // Additional decoding is a workaround for a bug in react-router's version of the `history` module.
+                      // See https://github.com/elastic/kibana/issues/82440
+                      const username = tryDecodeURIComponent(props.match.params.username);
+                      return (
+                        <Breadcrumb text={username} href={`/edit/${encodeURIComponent(username)}`}>
+                          <EditUserPage username={username} />
+                        </Breadcrumb>
+                      );
+                    }}
                   />
-                </Route>
-                <Route path="/create">
-                  <Breadcrumb
-                    text={i18n.translate('xpack.security.users.editUserPage.createBreadcrumb', {
-                      defaultMessage: 'Create',
-                    })}
-                    href="/create"
-                  >
-                    <CreateUserPage />
-                  </Breadcrumb>
-                </Route>
-                <Route
-                  path="/edit/:username"
-                  render={(props) => {
-                    // Additional decoding is a workaround for a bug in react-router's version of the `history` module.
-                    // See https://github.com/elastic/kibana/issues/82440
-                    const username = tryDecodeURIComponent(props.match.params.username);
-                    return (
-                      <Breadcrumb text={username} href={`/edit/${encodeURIComponent(username)}`}>
-                        <EditUserPage username={username} />
-                      </Breadcrumb>
-                    );
-                  }}
-                />
-                <Route path="/edit">
-                  <Redirect to="/create" />
-                </Route>
-              </Routes>
-            </Breadcrumb>
-          </Providers>,
+                  <Route path="/edit">
+                    <Redirect to="/create" />
+                  </Route>
+                </Routes>
+              </Breadcrumb>
+            </Providers>
+          ),
           element
         );
 
@@ -144,13 +145,11 @@ export const Providers: FC<PropsWithChildren<ProvidersProps>> = ({
   onChange,
   children,
 }) => (
-  <KibanaRenderContextProvider {...services}>
-    <KibanaContextProvider services={services}>
-      <AuthenticationProvider authc={authc}>
-        <Router history={history}>
-          <BreadcrumbsProvider onChange={onChange}>{children}</BreadcrumbsProvider>
-        </Router>
-      </AuthenticationProvider>
-    </KibanaContextProvider>
-  </KibanaRenderContextProvider>
+  <KibanaContextProvider services={services}>
+    <AuthenticationProvider authc={authc}>
+      <Router history={history}>
+        <BreadcrumbsProvider onChange={onChange}>{children}</BreadcrumbsProvider>
+      </Router>
+    </AuthenticationProvider>
+  </KibanaContextProvider>
 );

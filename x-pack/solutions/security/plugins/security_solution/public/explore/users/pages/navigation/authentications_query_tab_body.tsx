@@ -6,6 +6,8 @@
  */
 
 import React from 'react';
+import { SourcererScopeName } from '../../../../sourcerer/store/model';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { AuthenticationsUserTable } from '../../../components/authentication/authentications_user_table';
 import { histogramConfigs } from '../../../components/authentication/helpers';
 import type { AuthenticationsUserTableProps } from '../../../components/authentication/types';
@@ -25,15 +27,19 @@ export const AuthenticationsQueryTabBody = ({
   deleteQuery,
   userName,
 }: AuthenticationsUserTableProps) => {
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+
   return (
     <>
       <MatrixHistogram
         endDate={endDate}
         filterQuery={filterQuery}
         id={HISTOGRAM_QUERY_ID}
-        setQuery={setQuery}
         startDate={startDate}
         {...histogramConfigs}
+        sourcererScopeId={
+          newDataViewPickerEnabled ? SourcererScopeName.explore : SourcererScopeName.default
+        }
       />
 
       <AuthenticationsUserTable

@@ -20,10 +20,14 @@ import {
   STANDARD_INDEX_MODE,
   LOGSDB_INDEX_MODE,
 } from '../constants';
+import { DataStreamOptions } from '../types/data_streams';
 
 const hasEntries = (data: object = {}) => Object.entries(data).length > 0;
 
-export function serializeTemplate(templateDeserialized: TemplateDeserialized): TemplateSerialized {
+export function serializeTemplate(
+  templateDeserialized: TemplateDeserialized,
+  dataStreamOptions?: DataStreamOptions
+): TemplateSerialized {
   const {
     version,
     priority,
@@ -50,6 +54,9 @@ export function serializeTemplate(templateDeserialized: TemplateDeserialized): T
           mode: indexMode,
         },
       },
+      // If the existing template contains data stream options, we need to persist them.
+      // Otherwise, they will be lost when the template is updated.
+      ...(dataStreamOptions && { data_stream_options: dataStreamOptions }),
     },
     index_patterns: indexPatterns,
     data_stream: dataStream,
@@ -63,7 +70,8 @@ export function serializeTemplate(templateDeserialized: TemplateDeserialized): T
 
 export function deserializeTemplate(
   templateEs: TemplateSerialized & { name: string },
-  cloudManagedTemplatePrefix?: string
+  cloudManagedTemplatePrefix?: string,
+  isLogsdbEnabled?: boolean
 ): TemplateDeserialized {
   const {
     name,
@@ -92,7 +100,7 @@ export function deserializeTemplate(
   const ilmPolicyName = settings?.index?.lifecycle?.name;
 
   const indexMode = (settings?.index?.mode ??
-    (indexPatterns.some((pattern) => pattern === 'logs-*-*')
+    (isLogsdbEnabled && indexPatterns.some((pattern) => pattern === 'logs-*-*')
       ? LOGSDB_INDEX_MODE
       : STANDARD_INDEX_MODE)) as IndexMode;
 
@@ -168,13 +176,15 @@ export function serializeLegacyTemplate(template: TemplateDeserialized): LegacyT
 
 export function deserializeLegacyTemplate(
   templateEs: LegacyTemplateSerialized & { name: string },
-  cloudManagedTemplatePrefix?: string
+  cloudManagedTemplatePrefix?: string,
+  isLogsdbEnabled?: boolean
 ): TemplateDeserialized {
   const { settings, aliases, mappings, ...rest } = templateEs;
 
   const deserializedTemplate = deserializeTemplate(
     { ...rest, template: { aliases, settings, mappings } },
-    cloudManagedTemplatePrefix
+    cloudManagedTemplatePrefix,
+    isLogsdbEnabled
   );
 
   return {

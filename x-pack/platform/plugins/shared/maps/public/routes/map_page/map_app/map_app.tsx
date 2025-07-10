@@ -15,6 +15,7 @@ import {
   KibanaExecutionContext,
   ScopedHistory,
 } from '@kbn/core/public';
+import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
 import { Adapters } from '@kbn/inspector-plugin/public';
 import { Subscription } from 'rxjs';
 import { type Filter, FilterStateStore, type Query, type TimeRange } from '@kbn/es-query';
@@ -27,6 +28,7 @@ import {
   SavedQuery,
   syncGlobalQueryStateWithUrl,
 } from '@kbn/data-plugin/public';
+import { css } from '@emotion/react';
 import {
   createKbnUrlStateStorage,
   withNotifyOnErrors,
@@ -38,7 +40,6 @@ import {
   getExecutionContextService,
   getCoreChrome,
   getIndexPatternService,
-  getMapsCapabilities,
   getNavigation,
   getSpacesApi,
   getTimeFilter,
@@ -64,6 +65,23 @@ import {
 import { waitUntilTimeLayersLoad$ } from './wait_until_time_layers_load';
 import { RefreshConfig as MapRefreshConfig, ParsedMapStateJSON } from '../saved_map';
 
+const styles = {
+  wrapper: css([
+    {
+      display: 'flex',
+      flexDirection: 'column',
+    },
+    kbnFullBodyHeightCss(),
+  ]),
+  fullScreen: css({
+    height: '100vh !important',
+  }),
+  reactMapsRoot: css({
+    flexGrow: 1,
+    display: 'flex',
+    flexDirection: 'column',
+  }),
+};
 export interface Props {
   savedMap: SavedMap;
   // saveCounter used to trigger MapApp render after SaveMap.save
@@ -534,9 +552,7 @@ export class MapApp extends React.Component<Props, State> {
         showSearchBar={true}
         showFilterBar={true}
         showDatePicker={true}
-        saveQueryMenuVisibility={
-          getMapsCapabilities().saveQuery ? 'allowed_by_app_privilege' : 'globally_managed'
-        }
+        allowSavingQueries
         savedQuery={this.state.savedQuery}
         onSaved={this._updateStateFromSavedQuery}
         onSavedQueryUpdated={this._updateStateFromSavedQuery}
@@ -581,10 +597,10 @@ export class MapApp extends React.Component<Props, State> {
     }
 
     return (
-      <div id="maps-plugin" className={this.props.isFullScreen ? 'mapFullScreen' : ''}>
+      <div id="maps-plugin" css={[styles.wrapper, this.props.isFullScreen && styles.fullScreen]}>
         {this._renderTopNav()}
         <h1 className="euiScreenReaderOnly">{`screenTitle placeholder`}</h1>
-        <div id="react-maps-root">
+        <div id="react-maps-root" css={styles.reactMapsRoot}>
           {this._renderLegacyUrlConflict()}
           <MapContainer
             addFilters={this._addFilter}

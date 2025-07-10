@@ -61,10 +61,7 @@ export const ScheduleRiskEngineCallout: React.FC = () => {
     scheduleRiskEngineMutation();
   }, [scheduleRiskEngineMutation]);
 
-  if (
-    !riskEngineStatus?.isNewRiskScoreModuleInstalled ||
-    riskEngineStatus?.risk_engine_status !== RiskEngineStatusEnum.ENABLED
-  ) {
+  if (riskEngineStatus?.risk_engine_status !== RiskEngineStatusEnum.ENABLED) {
     return null;
   }
 
@@ -78,7 +75,7 @@ export const ScheduleRiskEngineCallout: React.FC = () => {
         />
       }
       color="primary"
-      iconType="iInCircle"
+      iconType="info"
     >
       <FormattedMessage
         defaultMessage="The assigned criticality levels will impact entity risk scores on the next engine run."

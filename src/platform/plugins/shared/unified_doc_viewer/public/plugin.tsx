@@ -77,7 +77,10 @@ export class UnifiedDocViewerPublicPlugin
             index={hit.raw._index}
             id={hit.raw._id ?? hit.id}
             dataView={dataView}
-            textBasedHits={textBasedHits}
+            // If ES|QL query changes, then textBasedHits will update too.
+            // This is a workaround to reuse the previously referred hit
+            // so the doc viewer preserves the state even after the record disappears from hits list.
+            esqlHit={Array.isArray(textBasedHits) ? hit : undefined}
             decreaseAvailableHeightBy={decreaseAvailableHeightBy}
             onRefresh={() => {}}
           />
@@ -91,7 +94,11 @@ export class UnifiedDocViewerPublicPlugin
   }
 
   public start(core: CoreStart, deps: UnifiedDocViewerStartDeps) {
-    const { analytics, uiSettings } = core;
+    const {
+      analytics,
+      uiSettings,
+      notifications: { toasts },
+    } = core;
     const { data, fieldFormats, fieldsMetadata, share } = deps;
     const storage = new Storage(localStorage);
     const unifiedDocViewer = {
@@ -102,6 +109,7 @@ export class UnifiedDocViewerPublicPlugin
       data,
       fieldFormats,
       fieldsMetadata,
+      toasts,
       storage,
       uiSettings,
       unifiedDocViewer,

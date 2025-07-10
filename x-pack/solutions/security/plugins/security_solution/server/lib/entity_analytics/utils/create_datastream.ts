@@ -9,7 +9,7 @@
 // The original function created an index, while here we create a datastream. If and when responseOps develops first-party code to work with datastreams (https://github.com/elastic/kibana/issues/140403), this file should be removed.
 
 import { get } from 'lodash';
-import type { IndicesSimulateIndexTemplateResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { IndicesSimulateIndexTemplateResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { retryTransientEsErrors } from './retry_transient_es_errors';
 
@@ -50,7 +50,7 @@ const updateTotalFieldLimitSetting = async ({
       () =>
         esClient.indices.putSettings({
           index,
-          body: { 'index.mapping.total_fields.limit': totalFieldsLimit },
+          settings: { 'index.mapping.total_fields.limit': totalFieldsLimit },
         }),
       { logger }
     );
@@ -58,6 +58,31 @@ const updateTotalFieldLimitSetting = async ({
     logger.error(
       `Failed to PUT index.mapping.total_fields.limit settings for index ${index}: ${err.message}`
     );
+    throw err;
+  }
+};
+
+export const rolloverDataStream = async ({
+  logger,
+  esClient,
+  dataStreamName,
+}: {
+  logger: Logger;
+  esClient: ElasticsearchClient;
+  dataStreamName: string;
+}) => {
+  logger.info(`Rollover data stream - ${dataStreamName}`);
+  try {
+    await retryTransientEsErrors(
+      () =>
+        esClient.indices.rollover({
+          alias: dataStreamName,
+        }),
+      { logger }
+    );
+    logger.info(`Successfully rolled over data stream - ${dataStreamName}`);
+  } catch (err) {
+    logger.error(`Failed to rollover data stream - ${dataStreamName}: ${err.message}`);
     throw err;
   }
 };
@@ -89,7 +114,7 @@ export const updateUnderlyingMapping = async ({ logger, esClient, index }: Updat
 
   try {
     await retryTransientEsErrors(
-      () => esClient.indices.putMapping({ index, body: simulatedMapping }),
+      () => esClient.indices.putMapping({ index, ...simulatedMapping }),
       { logger }
     );
     logger.info(`Update mappings for ${index}`);

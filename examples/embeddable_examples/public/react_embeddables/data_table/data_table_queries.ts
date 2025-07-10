@@ -16,7 +16,7 @@ import { listenForCompatibleApi } from '@kbn/presentation-containers';
 import { apiPublishesDataViews, fetch$ } from '@kbn/presentation-publishing';
 import { BehaviorSubject, combineLatest, lastValueFrom, map, Subscription, switchMap } from 'rxjs';
 import { StartDeps } from '../../plugin';
-import { apiPublishesSelectedFields } from '../field_list/publishes_selected_fields';
+import { apiPublishesSelectedFields } from './publishes_selected_fields';
 import { DataTableApi } from './types';
 
 export const initializeDataTableQueries = async (
@@ -60,7 +60,7 @@ export const initializeDataTableQueries = async (
         dataView$.next(defaultDataView);
         return;
       }
-      const dataViewSubscription = dataViewProvider.dataViews.subscribe((dataViews) => {
+      const dataViewSubscription = dataViewProvider.dataViews$.subscribe((dataViews) => {
         dataView$.next(dataViews?.[0] ?? defaultDataView);
       });
       return () => dataViewSubscription.unsubscribe();

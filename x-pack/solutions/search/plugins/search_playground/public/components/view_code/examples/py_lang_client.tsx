@@ -7,11 +7,17 @@
 
 import { EuiCodeBlock } from '@elastic/eui';
 import React from 'react';
-import { ChatForm } from '../../../types';
+import { FieldErrors } from 'react-hook-form';
+import { PlaygroundForm, PlaygroundFormFields } from '../../../types';
 import { Prompt } from '../../../../common/prompt';
+import { elasticsearchQueryObject } from '../../../utils/user_query';
 import { getESQuery } from './utils';
 
-export const PY_LANG_CLIENT = (formValues: ChatForm, clientDetails: string) => (
+export const PY_LANG_CLIENT = (
+  formValues: PlaygroundForm,
+  formErrors: FieldErrors<PlaygroundForm>,
+  clientDetails: string
+) => (
   <EuiCodeBlock language="py" isCopyable overflowHeight="100%">
     {`## Install the required packages
 ## pip install -qU elasticsearch openai
@@ -28,9 +34,13 @@ openai_client = OpenAI(
 
 index_source_fields = ${JSON.stringify(formValues.source_fields, null, 4)}
 
-def get_elasticsearch_results():
+def get_elasticsearch_results(query):
     es_query = ${getESQuery({
-      ...formValues.elasticsearch_query,
+      ...elasticsearchQueryObject(
+        formValues.elasticsearch_query,
+        formValues.user_elasticsearch_query,
+        formErrors[PlaygroundFormFields.userElasticsearchQuery]
+      ),
       size: formValues.doc_size,
     })}
 
@@ -40,16 +50,18 @@ def get_elasticsearch_results():
 def create_openai_prompt(results):
     context = ""
     for hit in results:
-        inner_hit_path = f"{hit['_index']}.{index_source_fields.get(hit['_index'])[0]}"
-
-        ## For semantic_text matches, we need to extract the text from the inner_hits
-        if 'inner_hits' in hit and inner_hit_path in hit['inner_hits']:
-            context += '\\n --- \\n'.join(inner_hit['_source']['text'] for inner_hit in hit['inner_hits'][inner_hit_path]['hits']['hits'])
+        ## For semantic_text matches, we need to extract the text from the highlighted field
+        if "highlight" in hit:
+            highlighted_texts = []
+            for values in hit["highlight"].values():
+                highlighted_texts.extend(values)
+            context += "\\n --- \\n".join(highlighted_texts)
         else:
-            source_field = index_source_fields.get(hit["_index"])[0]
-            hit_context = hit["_source"][source_field]
-            context += f"{hit_context}\\n"
-
+            context_fields = index_source_fields.get(hit["_index"])
+            for source_field in context_fields:
+                hit_context = hit["_source"][source_field]
+                if hit_context:
+                    context += f"{source_field}: {hit_context}\\n"
     prompt = f"""${Prompt(formValues.prompt, {
       context: true,
       citations: formValues.citations,
@@ -71,7 +83,7 @@ def generate_openai_completion(user_prompt, question):
 
 if __name__ == "__main__":
     question = "my question"
-    elasticsearch_results = get_elasticsearch_results()
+    elasticsearch_results = get_elasticsearch_results(question)
     context_prompt = create_openai_prompt(elasticsearch_results)
     openai_completion = generate_openai_completion(context_prompt, question)
     print(openai_completion)

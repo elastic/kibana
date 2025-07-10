@@ -23,5 +23,6 @@
     "@kbn/shared-ux-router",
     "@kbn/ml-response-stream",
     "@kbn/react-kibana-context-render",
+    "@kbn/charts-theme",
   ]
 }

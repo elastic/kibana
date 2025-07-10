@@ -11,13 +11,13 @@ import React, { ReactNode } from 'react';
 import { StubBrowserStorage } from '@kbn/test-jest-helpers';
 import { render, waitFor, screen, act } from '@testing-library/react';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { RefreshInterval } from '@kbn/data-service-server';
 import { dataPluginMock } from '../../../../mocks';
 import { createConnectedSearchSessionIndicator } from './connected_search_session_indicator';
 import { BehaviorSubject } from 'rxjs';
 import { map } from 'rxjs';
 import {
   ISessionService,
-  RefreshInterval,
   SearchSessionState,
   SearchUsageCollector,
   TimefilterContract,
@@ -81,7 +81,7 @@ test("shouldn't show indicator in case no active search session", async () => {
   expect(container).toMatchInlineSnapshot(`
     <div>
       <div
-        css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+        class="css-qvyf25-redirectAppLinksStyles"
         data-test-subj="kbnRedirectAppLink"
       />
     </div>
@@ -111,7 +111,7 @@ test("shouldn't show indicator in case app hasn't opt-in", async () => {
   expect(container).toMatchInlineSnapshot(`
     <div>
       <div
-        css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+        class="css-qvyf25-redirectAppLinksStyles"
         data-test-subj="kbnRedirectAppLink"
       />
     </div>

@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import { EuiFilterButton, hexToRgb } from '@elastic/eui';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import { FieldValueSuggestions } from '@kbn/observability-shared-plugin/public';
 import { useAppDataViewContext } from '../../hooks/use_app_data_view';
 import { useSeriesFilters } from '../../hooks/use_series_filters';
@@ -112,13 +112,15 @@ export function FilterValueButton({
   );
 }
 
-const FilterButton = euiStyled(EuiFilterButton)`
-  background-color: rgba(${(props) => {
-    const color = props.hasActiveFilters
-      ? props.color === 'danger'
-        ? hexToRgb(props.theme.eui.euiColorDanger)
-        : hexToRgb(props.theme.eui.euiColorPrimary)
-      : 'initial';
-    return `${color[0]}, ${color[1]}, ${color[2]}, 0.1`;
-  }});
+const FilterButton = styled(EuiFilterButton)`
+  background-color: rgba(
+    ${(props) => {
+      const color = props.hasActiveFilters
+        ? props.color === 'danger'
+          ? hexToRgb(props.theme.euiTheme.colors.danger)
+          : hexToRgb(props.theme.euiTheme.colors.primary)
+        : 'initial';
+      return `${color[0]}, ${color[1]}, ${color[2]}, 0.1`;
+    }}
+  );
 `;

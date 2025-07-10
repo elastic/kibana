@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
-import { StartServicesAccessor } from '@kbn/core/server';
+import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import type { StartServicesAccessor } from '@kbn/core/server';
 import type {
   PluginSetup as DataPluginSetup,
   PluginStart as DataPluginStart,
 } from '@kbn/data-plugin/server';
 import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
-import { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
+import type { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
 import { getSavedSearchObjectType } from './saved_objects';
 import { SavedSearchType, LATEST_VERSION } from '../common';
 import { SavedSearchStorage } from './content_management';

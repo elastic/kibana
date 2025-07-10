@@ -12,7 +12,6 @@ import {
   InfraSynthtraceEsClient,
   LogsSynthtraceEsClient,
 } from '@kbn/apm-synthtrace';
-import { enableInfrastructureAssetCustomDashboards } from '@kbn/observability-plugin/common';
 import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
 import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -201,11 +200,9 @@ const SYNTH_HOSTS = [
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const browser = getService('browser');
-  const security = getService('security');
   const esArchiver = getService('esArchiver');
   const esClient = getService('es');
   const find = getService('find');
-  const kibanaServer = getService('kibanaServer');
   const observability = getService('observability');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
@@ -220,70 +217,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     'security',
     'settings',
     'header',
+    'discover',
   ]);
 
   // Helpers
-
-  const loginWithReadOnlyUserAndNavigateToHostsFlyout = async () => {
-    await security.role.create('global_hosts_read_privileges_role', {
-      elasticsearch: {
-        indices: [
-          { names: ['metrics-*'], privileges: ['read', 'view_index_metadata'] },
-          { names: ['metricbeat-*'], privileges: ['read', 'view_index_metadata'] },
-        ],
-      },
-      kibana: [
-        {
-          feature: {
-            infrastructure: ['read'],
-            apm: ['read'],
-            advancedSettings: ['read'],
-            streams: ['read'],
-          },
-          spaces: ['*'],
-        },
-      ],
-    });
-
-    await security.user.create('global_hosts_read_privileges_user', {
-      password: 'global_hosts_read_privileges_user-password',
-      roles: ['global_hosts_read_privileges_role'],
-      full_name: 'test user',
-    });
-
-    await pageObjects.security.forceLogout();
-
-    await pageObjects.security.login(
-      'global_hosts_read_privileges_user',
-      'global_hosts_read_privileges_user-password',
-      {
-        expectSpaceSelector: false,
-      }
-    );
-
-    await pageObjects.common.navigateToApp(HOSTS_VIEW_PATH);
-    await pageObjects.header.waitUntilLoadingHasFinished();
-    await pageObjects.timePicker.setAbsoluteRange(
-      START_SYNTHTRACE_DATE.format(DATE_PICKER_FORMAT),
-      END_SYNTHTRACE_DATE.format(DATE_PICKER_FORMAT)
-    );
-
-    await waitForPageToLoad();
-
-    await pageObjects.infraHostsView.clickTableOpenFlyoutButton();
-  };
-
-  const logoutAndDeleteReadOnlyUser = async () => {
-    await pageObjects.security.forceLogout();
-    await Promise.all([
-      security.role.delete('global_hosts_read_privileges_role'),
-      security.user.delete('global_hosts_read_privileges_user'),
-    ]);
-  };
-
-  const setCustomDashboardsEnabled = (value: boolean = true) =>
-    kibanaServer.uiSettings.update({ [enableInfrastructureAssetCustomDashboards]: value });
-
   const returnTo = async (path: string, timeout = 2000) =>
     retry.waitForWithTimeout('returned to hosts view', timeout, async () => {
       await browser.goBack();
@@ -385,7 +322,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       describe('#Single Host Flyout', () => {
         before(async () => {
-          await setCustomDashboardsEnabled(true);
           await pageObjects.common.navigateToApp(HOSTS_VIEW_PATH);
           await pageObjects.header.waitUntilLoadingHasFinished();
         });
@@ -529,16 +465,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
             it('should render logs tab', async () => {
               await pageObjects.assetDetails.logsExists();
-            });
-          });
-
-          describe('Dashboards Tab', () => {
-            before(async () => {
-              await pageObjects.assetDetails.clickDashboardsTab();
-            });
-
-            it('should render dashboards tab splash screen with option to add dashboard', async () => {
-              await pageObjects.assetDetails.addDashboardExists();
             });
           });
 
@@ -689,7 +615,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           });
 
           // flaky, the option is not visible
-          it.skip('should have an option to open the chart in lens', async () => {
+          it('should have an option to open the chart in lens', async () => {
             await retry.tryForTime(5000, async () => {
               await pageObjects.infraHostsView.clickAndValidateMetricChartActionOptions();
               await browser.pressKeys(browser.keys.ESCAPE);
@@ -708,14 +634,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           });
 
           it('should load the Logs tab section when clicking on it', async () => {
-            await testSubjects.existOrFail('hostsView-logs');
+            await testSubjects.existOrFail('embeddedSavedSearchDocTable');
           });
 
           it('should load the Logs tab with the right columns', async () => {
             await retry.tryForTime(5000, async () => {
-              const columnLabels = await pageObjects.infraHostsView.getLogsTableColumnHeaders();
+              const columnHeaders = await pageObjects.discover.getDocHeader();
 
-              expect(columnLabels).to.eql(['Timestamp', 'host.name', 'Message']);
+              expect(columnHeaders).to.have.string('@timestamp');
+              expect(columnHeaders).to.have.string('Summary');
             });
           });
         });
@@ -994,39 +921,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             await retry.tryForTime(5000, async () => {
               await testSubjects.exists('hostsViewTableNoData');
             });
-          });
-        });
-      });
-
-      describe('#Permissions: Read Only User - Single Host Flyout', () => {
-        describe('Dashboards Tab', () => {
-          before(async () => {
-            await setCustomDashboardsEnabled(true);
-            await loginWithReadOnlyUserAndNavigateToHostsFlyout();
-            await pageObjects.assetDetails.clickDashboardsTab();
-          });
-
-          after(async () => {
-            await retry.tryForTime(5000, async () => {
-              await pageObjects.infraHome.clickCloseFlyoutButton();
-            });
-            await logoutAndDeleteReadOnlyUser();
-          });
-
-          it('should render dashboards tab splash screen with disabled option to add dashboard', async () => {
-            await pageObjects.assetDetails.addDashboardExists();
-            const elementToHover = await pageObjects.assetDetails.getAddDashboardButton();
-            await retry.tryForTime(5000, async () => {
-              await elementToHover.moveMouseTo();
-              await testSubjects.existOrFail('infraCannotAddDashboardTooltip');
-            });
-          });
-
-          it('should not render dashboards tab if the feature is disabled', async () => {
-            await setCustomDashboardsEnabled(false);
-            await pageObjects.assetDetails.clickOverviewTab();
-            await browser.refresh();
-            await !pageObjects.assetDetails.dashboardsTabExists();
           });
         });
       });

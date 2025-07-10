@@ -1,0 +1,1665 @@
+{
+  "id": "@kbn/file-upload",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/file-upload",
+        "id": "def-common.FileUploadManager",
+        "type": "Class",
+        "tags": [],
+        "label": "FileUploadManager",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/file-upload",
+            "id": "def-common.FileUploadManager.fileAnalysisStatus$",
+            "type": "Object",
+            "tags": [],
+            "label": "fileAnalysisStatus$",
+            "description": [],
+            "signature": [
+              "Observable",
+              "<",
+              {
+                "pluginId": "@kbn/file-upload",
+                "scope": "common",
+                "docId": "kibKbnFileUploadPluginApi",
+                "section": "def-common.FileAnalysis",
+                "text": "FileAnalysis"
+              },
+              "[]>"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload",
+            "id": "def-common.FileUploadManager.filePipelines$",
+            "type": "Object",
+            "tags": [],
+            "label": "filePipelines$",
+            "description": [],
+            "signature": [
+              "Observable",
+              "<(",
+              {
+                "pluginId": "fileUpload",
+                "scope": "common",
+                "docId": "kibFileUploadPluginApi",
+                "section": "def-common.IngestPipeline",
+                "text": "IngestPipeline"
+              },
+              " | undefined)[]>"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload",
+            "id": "def-common.FileUploadManager.settings$",
+            "type": "Object",
+            "tags": [],
+            "label": "settings$",
+            "description": [],
+            "signature": [
+              "Observable",
+              "<",
+              "Config",
+              "<",
+              "IndicesIndexSettings",
+              ">>"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload",
+            "id": "def-common.FileUploadManager.mappings$",
+            "type": "Object",
+            "tags": [],
+            "label": "mappings$",
+            "description": [],
+            "signature": [
+              "Observable",
+              "<",
+              "Config",
+              "<",
+              "MappingTypeMapping",
+              ">>"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload",
+            "id": "def-common.FileUploadManager.existingIndexName$",
+            "type": "Object",
+            "tags": [],
+            "label": "existingIndexName$",
+            "description": [],
+            "signature": [
+              "Observable",
+              "<string | null>"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload",
+            "id": "def-common.FileUploadManager.uploadStatus$",
+            "type": "Object",
+            "tags": [],
+            "label": "uploadStatus$",
+            "description": [],
+            "signature": [
+              "Observable",
+              "<",
+              {
+                "pluginId": "@kbn/file-upload",
+                "scope": "common",
+                "docId": "kibKbnFileUploadPluginApi",
+                "section": "def-common.UploadStatus",
+                "text": "UploadStatus"
+              },
+              ">"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload",
+            "id": "def-common.FileUploadManager.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/file-upload",
+                "id": "def-common.FileUploadManager.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "fileUpload",
+                "description": [],
+                "signature": [
+                  "FileUploadStartApi"
+                ],
+                "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/file-upload",
+                "id": "def-common.FileUploadManager.Unnamed.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "http",
+                "description": [],
+                "signature": [
+                  "HttpSetup"
+                ],
+                "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/file-upload",
+                "id": "def-common.FileUploadManager.Unnamed.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "dataViewsContract",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "dataViews",
+                    "scope": "public",
+                    "docId": "kibDataViewsPluginApi",
+                    "section": "def-public.DataViewsServicePublic",
+                    "text": "DataViewsServicePublic"
+                  }
+                ],
+                "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/file-upload",
+                "id": "def-common.FileUploadManager.Unnamed.$4",
+                "type": "Object",
+                "tags": [],
+                "label": "notifications",
+                "description": [],
+                "signature": [
+                  "NotificationsStart"
+                ],
+                "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/file-upload",
+                "id": "def-common.FileUploadManager.Unnamed.$5",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "autoAddInferenceEndpointName",
+                "description": [],
+                "signature": [
+                  "string | null"
+                ],
+                "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "@kbn/file-upload",
+                "id": "def-common.FileUploadManager.Unnamed.$6",
+                "type": "boolean",
+                "tags": [],
+                "label": "autoCreateDataView",
+                "description": [],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/file-upload",
+                "id": "def-common.FileUploadManager.Unnamed.$7",
+                "type": "boolean",
+                "tags": [],
+                "label": "removePipelinesAfterImport",
+                "description": [],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/file-upload",
+                "id": "def-common.FileUploadManager.Unnamed.$8",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "existingIndexName",
+                "description": [],
+                "signature": [
+                  "string | null"
+                ],
+                "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "@kbn/file-upload",
+                "id": "def-common.FileUploadManager.Unnamed.$9",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "indexSettingsOverride",
+                "description": [],
+                "signature": [
+                  "IndicesIndexSettings",
+                  " | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/file-upload",
+            "id": "def-common.FileUploadManager.destroy",
+            "type": "Function",
+            "tags": [],
+            "label": "destroy",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/file-upload",
+            "id": "def-common.FileUploadManager.addFiles",
+            "type": "Function",
+            "tags": [],
+            "label": "addFiles",
+            "description": [],
+            "signature": [
+              "(fileList: FileList) => Promise<void>"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/file-upload",
+                "id": "def-common.FileUploadManager.addFiles.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "fileList",
+                "description": [],
+                "signature": [
+                  "FileList"
+                ],
+                "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/file-upload",
+            "id": "def-common.FileUploadManager.addFile",
+            "type": "Function",
+            "tags": [],
+            "label": "addFile",
+            "description": [],
+            "signature": [
+              "(file: File) => Promise<void>"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/file-upload",
+                "id": "def-common.FileUploadManager.addFile.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "file",
+                "description": [],
+                "signature": [
+                  "File"
+                ],
+                "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/file-upload",
+            "id": "def-common.FileUploadManager.removeFile",
+            "type": "Function",
+            "tags": [],
+            "label": "removeFile",
+            "description": [],
+            "signature": [
+              "(index: number) => Promise<void>"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/file-upload",
+                "id": "def-common.FileUploadManager.removeFile.$1",
+                "type": "number",
+                "tags": [],
+                "label": "index",
+                "description": [],
+                "signature": [
+                  "number"
+                ],
+                "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/file-upload",
+            "id": "def-common.FileUploadManager.removeClashingFiles",
+            "type": "Function",
+            "tags": [],
+            "label": "removeClashingFiles",
+            "description": [],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/file-upload",
+            "id": "def-common.FileUploadManager.analyzeFileWithOverrides",
+            "type": "Function",
+            "tags": [],
+            "label": "analyzeFileWithOverrides",
+            "description": [],
+            "signature": [
+              "(index: number) => (overrides: ",
+              {
+                "pluginId": "fileUpload",
+                "scope": "common",
+                "docId": "kibFileUploadPluginApi",
+                "section": "def-common.InputOverrides",
+                "text": "InputOverrides"
+              },
+              ") => Promise<void>"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/file-upload",
+                "id": "def-common.FileUploadManager.analyzeFileWithOverrides.$1",
+                "type": "number",
+                "tags": [],
+                "label": "index",
+                "description": [],
+                "signature": [
+                  "number"
+                ],
+                "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/file-upload",
+            "id": "def-common.FileUploadManager.getUploadStatus",
+            "type": "Function",
+            "tags": [],
+            "label": "getUploadStatus",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/file-upload",
+                "scope": "common",
+                "docId": "kibKbnFileUploadPluginApi",
+                "section": "def-common.UploadStatus",
+                "text": "UploadStatus"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/file-upload",
+            "id": "def-common.FileUploadManager.getExistingIndexName",
+            "type": "Function",
+            "tags": [],
+            "label": "getExistingIndexName",
+            "description": [],
+            "signature": [
+              "() => string | null"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/file-upload",
+            "id": "def-common.FileUploadManager.setExistingIndexName",
+            "type": "Function",
+            "tags": [],
+            "label": "setExistingIndexName",
+            "description": [],
+            "signature": [
+              "(name: string | null) => void"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/file-upload",
+                "id": "def-common.FileUploadManager.setExistingIndexName.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "signature": [
+                  "string | null"
+                ],
+                "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/file-upload",
+            "id": "def-common.FileUploadManager.isExistingIndexUpload",
+            "type": "Function",
+            "tags": [],
+            "label": "isExistingIndexUpload",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/file-upload",
+            "id": "def-common.FileUploadManager.getFiles",
+            "type": "Function",
+            "tags": [],
+            "label": "getFiles",
+            "description": [],
+            "signature": [
+              "() => ",
+              "FileWrapper",
+              "[]"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/file-upload",
+            "id": "def-common.FileUploadManager.updatePipeline",
+            "type": "Function",
+            "tags": [],
+            "label": "updatePipeline",
+            "description": [],
+            "signature": [
+              "(index: number) => (pipeline: string) => void"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/file-upload",
+                "id": "def-common.FileUploadManager.updatePipeline.$1",
+                "type": "number",
+                "tags": [],
+                "label": "index",
+                "description": [],
+                "signature": [
+                  "number"
+                ],
+                "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/file-upload",
+            "id": "def-common.FileUploadManager.updatePipelines",
+            "type": "Function",
+            "tags": [],
+            "label": "updatePipelines",
+            "description": [],
+            "signature": [
+              "(pipelines: (",
+              {
+                "pluginId": "fileUpload",
+                "scope": "common",
+                "docId": "kibFileUploadPluginApi",
+                "section": "def-common.IngestPipeline",
+                "text": "IngestPipeline"
+              },
+              " | undefined)[]) => void"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/file-upload",
+                "id": "def-common.FileUploadManager.updatePipelines.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "pipelines",
+                "description": [],
+                "signature": [
+                  "(",
+                  {
+                    "pluginId": "fileUpload",
+                    "scope": "common",
+                    "docId": "kibFileUploadPluginApi",
+                    "section": "def-common.IngestPipeline",
+                    "text": "IngestPipeline"
+                  },
+                  " | undefined)[]"
+                ],
+                "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/file-upload",
+            "id": "def-common.FileUploadManager.getMappings",
+            "type": "Function",
+            "tags": [],
+            "label": "getMappings",
+            "description": [],
+            "signature": [
+              "() => ",
+              "Config",
+              "<",
+              "MappingTypeMapping",
+              ">"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/file-upload",
+            "id": "def-common.FileUploadManager.updateMappings",
+            "type": "Function",
+            "tags": [],
+            "label": "updateMappings",
+            "description": [],
+            "signature": [
+              "(mappings: string | ",
+              "MappingTypeMapping",
+              ") => void"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/file-upload",
+                "id": "def-common.FileUploadManager.updateMappings.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "mappings",
+                "description": [],
+                "signature": [
+                  "string | ",
+                  "MappingTypeMapping"
+                ],
+                "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/file-upload",
+            "id": "def-common.FileUploadManager.getSettings",
+            "type": "Function",
+            "tags": [],
+            "label": "getSettings",
+            "description": [],
+            "signature": [
+              "() => ",
+              "Config",
+              "<",
+              "IndicesIndexSettings",
+              ">"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/file-upload",
+            "id": "def-common.FileUploadManager.updateSettings",
+            "type": "Function",
+            "tags": [],
+            "label": "updateSettings",
+            "description": [],
+            "signature": [
+              "(settings: string | ",
+              "IndicesIndexSettings",
+              ") => void"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/file-upload",
+                "id": "def-common.FileUploadManager.updateSettings.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "settings",
+                "description": [],
+                "signature": [
+                  "string | ",
+                  "IndicesIndexSettings"
+                ],
+                "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/file-upload",
+            "id": "def-common.FileUploadManager.getAutoCreateDataView",
+            "type": "Function",
+            "tags": [],
+            "label": "getAutoCreateDataView",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/file-upload",
+            "id": "def-common.FileUploadManager.import",
+            "type": "Function",
+            "tags": [],
+            "label": "import",
+            "description": [],
+            "signature": [
+              "(indexName: string, dataViewName?: string | null | undefined) => Promise<",
+              {
+                "pluginId": "@kbn/file-upload-common",
+                "scope": "common",
+                "docId": "kibKbnFileUploadCommonPluginApi",
+                "section": "def-common.FileUploadResults",
+                "text": "FileUploadResults"
+              },
+              " | null>"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/file-upload",
+                "id": "def-common.FileUploadManager.import.$1",
+                "type": "string",
+                "tags": [],
+                "label": "indexName",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/file-upload",
+                "id": "def-common.FileUploadManager.import.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "dataViewName",
+                "description": [],
+                "signature": [
+                  "string | null | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/file-upload",
+        "id": "def-common.useFileUpload",
+        "type": "Function",
+        "tags": [],
+        "label": "useFileUpload",
+        "description": [],
+        "signature": [
+          "(fileUploadManager: ",
+          {
+            "pluginId": "@kbn/file-upload",
+            "scope": "common",
+            "docId": "kibKbnFileUploadPluginApi",
+            "section": "def-common.FileUploadManager",
+            "text": "FileUploadManager"
+          },
+          ", data: ",
+          {
+            "pluginId": "data",
+            "scope": "public",
+            "docId": "kibDataPluginApi",
+            "section": "def-public.DataPublicPluginStart",
+            "text": "DataPublicPluginStart"
+          },
+          ", application: ",
+          "ApplicationStart",
+          ", http: ",
+          "HttpSetup",
+          ", notifications: ",
+          "NotificationsStart",
+          ", onUploadComplete: ((results: ",
+          {
+            "pluginId": "@kbn/file-upload-common",
+            "scope": "common",
+            "docId": "kibKbnFileUploadCommonPluginApi",
+            "section": "def-common.FileUploadResults",
+            "text": "FileUploadResults"
+          },
+          " | null) => void) | undefined) => { fileUploadManager: ",
+          {
+            "pluginId": "@kbn/file-upload",
+            "scope": "common",
+            "docId": "kibKbnFileUploadPluginApi",
+            "section": "def-common.FileUploadManager",
+            "text": "FileUploadManager"
+          },
+          "; indexName: string; setIndexName: React.Dispatch<React.SetStateAction<string>>; indexValidationStatus: ",
+          {
+            "pluginId": "@kbn/file-upload",
+            "scope": "common",
+            "docId": "kibKbnFileUploadPluginApi",
+            "section": "def-common.STATUS",
+            "text": "STATUS"
+          },
+          "; setIndexValidationStatus: React.Dispatch<React.SetStateAction<",
+          {
+            "pluginId": "@kbn/file-upload",
+            "scope": "common",
+            "docId": "kibKbnFileUploadPluginApi",
+            "section": "def-common.STATUS",
+            "text": "STATUS"
+          },
+          ">>; deleteFile: (i: number) => Promise<void>; filesStatus: ",
+          {
+            "pluginId": "@kbn/file-upload",
+            "scope": "common",
+            "docId": "kibKbnFileUploadPluginApi",
+            "section": "def-common.FileAnalysis",
+            "text": "FileAnalysis"
+          },
+          "[]; uploadStatus: ",
+          {
+            "pluginId": "@kbn/file-upload",
+            "scope": "common",
+            "docId": "kibKbnFileUploadPluginApi",
+            "section": "def-common.UploadStatus",
+            "text": "UploadStatus"
+          },
+          "; fileClashes: boolean; fullFileUpload: () => Promise<void>; uploadStarted: boolean; onImportClick: () => Promise<void>; canImport: boolean; mappings: ",
+          "Config",
+          "<",
+          "MappingTypeMapping",
+          ">; settings: ",
+          "Config",
+          "<",
+          "IndicesIndexSettings",
+          ">; pipelines: (",
+          {
+            "pluginId": "fileUpload",
+            "scope": "common",
+            "docId": "kibFileUploadPluginApi",
+            "section": "def-common.IngestPipeline",
+            "text": "IngestPipeline"
+          },
+          " | undefined)[]; importResults: ",
+          {
+            "pluginId": "@kbn/file-upload-common",
+            "scope": "common",
+            "docId": "kibKbnFileUploadCommonPluginApi",
+            "section": "def-common.FileUploadResults",
+            "text": "FileUploadResults"
+          },
+          " | null; dataViewName: string | null; setDataViewName: React.Dispatch<React.SetStateAction<string | null>>; dataViewNameError: string; indexCreateMode: ",
+          {
+            "pluginId": "@kbn/file-upload",
+            "scope": "common",
+            "docId": "kibKbnFileUploadPluginApi",
+            "section": "def-common.UPLOAD_TYPE",
+            "text": "UPLOAD_TYPE"
+          },
+          "; setIndexCreateMode: React.Dispatch<React.SetStateAction<",
+          {
+            "pluginId": "@kbn/file-upload",
+            "scope": "common",
+            "docId": "kibKbnFileUploadPluginApi",
+            "section": "def-common.UPLOAD_TYPE",
+            "text": "UPLOAD_TYPE"
+          },
+          ">>; indices: ",
+          {
+            "pluginId": "@kbn/index-management-shared-types",
+            "scope": "common",
+            "docId": "kibKbnIndexManagementSharedTypesPluginApi",
+            "section": "def-common.Index",
+            "text": "Index"
+          },
+          "[]; existingIndexName: string | null; setExistingIndexName: (idxName: string | null) => void; }"
+        ],
+        "path": "x-pack/platform/packages/shared/file-upload/src/use_file_upload.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/file-upload",
+            "id": "def-common.useFileUpload.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "fileUploadManager",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/file-upload",
+                "scope": "common",
+                "docId": "kibKbnFileUploadPluginApi",
+                "section": "def-common.FileUploadManager",
+                "text": "FileUploadManager"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload/src/use_file_upload.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/file-upload",
+            "id": "def-common.useFileUpload.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "data",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "public",
+                "docId": "kibDataPluginApi",
+                "section": "def-public.DataPublicPluginStart",
+                "text": "DataPublicPluginStart"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload/src/use_file_upload.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/file-upload",
+            "id": "def-common.useFileUpload.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "application",
+            "description": [],
+            "signature": [
+              "ApplicationStart"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload/src/use_file_upload.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/file-upload",
+            "id": "def-common.useFileUpload.$4",
+            "type": "Object",
+            "tags": [],
+            "label": "http",
+            "description": [],
+            "signature": [
+              "HttpSetup"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload/src/use_file_upload.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/file-upload",
+            "id": "def-common.useFileUpload.$5",
+            "type": "Object",
+            "tags": [],
+            "label": "notifications",
+            "description": [],
+            "signature": [
+              "NotificationsStart"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload/src/use_file_upload.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/file-upload",
+            "id": "def-common.useFileUpload.$6",
+            "type": "Function",
+            "tags": [],
+            "label": "onUploadComplete",
+            "description": [],
+            "signature": [
+              "((results: ",
+              {
+                "pluginId": "@kbn/file-upload-common",
+                "scope": "common",
+                "docId": "kibKbnFileUploadCommonPluginApi",
+                "section": "def-common.FileUploadResults",
+                "text": "FileUploadResults"
+              },
+              " | null) => void) | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload/src/use_file_upload.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/file-upload",
+        "id": "def-common.useFileUploadContext",
+        "type": "Function",
+        "tags": [],
+        "label": "useFileUploadContext",
+        "description": [],
+        "signature": [
+          "() => { fileUploadManager: ",
+          {
+            "pluginId": "@kbn/file-upload",
+            "scope": "common",
+            "docId": "kibKbnFileUploadPluginApi",
+            "section": "def-common.FileUploadManager",
+            "text": "FileUploadManager"
+          },
+          "; indexName: string; setIndexName: React.Dispatch<React.SetStateAction<string>>; indexValidationStatus: ",
+          {
+            "pluginId": "@kbn/file-upload",
+            "scope": "common",
+            "docId": "kibKbnFileUploadPluginApi",
+            "section": "def-common.STATUS",
+            "text": "STATUS"
+          },
+          "; setIndexValidationStatus: React.Dispatch<React.SetStateAction<",
+          {
+            "pluginId": "@kbn/file-upload",
+            "scope": "common",
+            "docId": "kibKbnFileUploadPluginApi",
+            "section": "def-common.STATUS",
+            "text": "STATUS"
+          },
+          ">>; deleteFile: (i: number) => Promise<void>; filesStatus: ",
+          {
+            "pluginId": "@kbn/file-upload",
+            "scope": "common",
+            "docId": "kibKbnFileUploadPluginApi",
+            "section": "def-common.FileAnalysis",
+            "text": "FileAnalysis"
+          },
+          "[]; uploadStatus: ",
+          {
+            "pluginId": "@kbn/file-upload",
+            "scope": "common",
+            "docId": "kibKbnFileUploadPluginApi",
+            "section": "def-common.UploadStatus",
+            "text": "UploadStatus"
+          },
+          "; fileClashes: boolean; fullFileUpload: () => Promise<void>; uploadStarted: boolean; onImportClick: () => Promise<void>; canImport: boolean; mappings: ",
+          "Config",
+          "<",
+          "MappingTypeMapping",
+          ">; settings: ",
+          "Config",
+          "<",
+          "IndicesIndexSettings",
+          ">; pipelines: (",
+          {
+            "pluginId": "fileUpload",
+            "scope": "common",
+            "docId": "kibFileUploadPluginApi",
+            "section": "def-common.IngestPipeline",
+            "text": "IngestPipeline"
+          },
+          " | undefined)[]; importResults: ",
+          {
+            "pluginId": "@kbn/file-upload-common",
+            "scope": "common",
+            "docId": "kibKbnFileUploadCommonPluginApi",
+            "section": "def-common.FileUploadResults",
+            "text": "FileUploadResults"
+          },
+          " | null; dataViewName: string | null; setDataViewName: React.Dispatch<React.SetStateAction<string | null>>; dataViewNameError: string; indexCreateMode: ",
+          {
+            "pluginId": "@kbn/file-upload",
+            "scope": "common",
+            "docId": "kibKbnFileUploadPluginApi",
+            "section": "def-common.UPLOAD_TYPE",
+            "text": "UPLOAD_TYPE"
+          },
+          "; setIndexCreateMode: React.Dispatch<React.SetStateAction<",
+          {
+            "pluginId": "@kbn/file-upload",
+            "scope": "common",
+            "docId": "kibKbnFileUploadPluginApi",
+            "section": "def-common.UPLOAD_TYPE",
+            "text": "UPLOAD_TYPE"
+          },
+          ">>; indices: ",
+          {
+            "pluginId": "@kbn/index-management-shared-types",
+            "scope": "common",
+            "docId": "kibKbnIndexManagementSharedTypesPluginApi",
+            "section": "def-common.Index",
+            "text": "Index"
+          },
+          "[]; existingIndexName: string | null; setExistingIndexName: (idxName: string | null) => void; }"
+        ],
+        "path": "x-pack/platform/packages/shared/file-upload/src/use_file_upload.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/file-upload",
+        "id": "def-common.UploadStatus",
+        "type": "Interface",
+        "tags": [],
+        "label": "UploadStatus",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/file-upload",
+            "id": "def-common.UploadStatus.analysisStatus",
+            "type": "Enum",
+            "tags": [],
+            "label": "analysisStatus",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/file-upload",
+                "scope": "common",
+                "docId": "kibKbnFileUploadPluginApi",
+                "section": "def-common.STATUS",
+                "text": "STATUS"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload",
+            "id": "def-common.UploadStatus.overallImportStatus",
+            "type": "Enum",
+            "tags": [],
+            "label": "overallImportStatus",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/file-upload",
+                "scope": "common",
+                "docId": "kibKbnFileUploadPluginApi",
+                "section": "def-common.STATUS",
+                "text": "STATUS"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload",
+            "id": "def-common.UploadStatus.indexCreated",
+            "type": "Enum",
+            "tags": [],
+            "label": "indexCreated",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/file-upload",
+                "scope": "common",
+                "docId": "kibKbnFileUploadPluginApi",
+                "section": "def-common.STATUS",
+                "text": "STATUS"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload",
+            "id": "def-common.UploadStatus.pipelineCreated",
+            "type": "Enum",
+            "tags": [],
+            "label": "pipelineCreated",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/file-upload",
+                "scope": "common",
+                "docId": "kibKbnFileUploadPluginApi",
+                "section": "def-common.STATUS",
+                "text": "STATUS"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload",
+            "id": "def-common.UploadStatus.modelDeployed",
+            "type": "Enum",
+            "tags": [],
+            "label": "modelDeployed",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/file-upload",
+                "scope": "common",
+                "docId": "kibKbnFileUploadPluginApi",
+                "section": "def-common.STATUS",
+                "text": "STATUS"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload",
+            "id": "def-common.UploadStatus.dataViewCreated",
+            "type": "Enum",
+            "tags": [],
+            "label": "dataViewCreated",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/file-upload",
+                "scope": "common",
+                "docId": "kibKbnFileUploadPluginApi",
+                "section": "def-common.STATUS",
+                "text": "STATUS"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload",
+            "id": "def-common.UploadStatus.pipelinesDeleted",
+            "type": "Enum",
+            "tags": [],
+            "label": "pipelinesDeleted",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/file-upload",
+                "scope": "common",
+                "docId": "kibKbnFileUploadPluginApi",
+                "section": "def-common.STATUS",
+                "text": "STATUS"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload",
+            "id": "def-common.UploadStatus.fileImport",
+            "type": "Enum",
+            "tags": [],
+            "label": "fileImport",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/file-upload",
+                "scope": "common",
+                "docId": "kibKbnFileUploadPluginApi",
+                "section": "def-common.STATUS",
+                "text": "STATUS"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload",
+            "id": "def-common.UploadStatus.filesStatus",
+            "type": "Array",
+            "tags": [],
+            "label": "filesStatus",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/file-upload",
+                "scope": "common",
+                "docId": "kibKbnFileUploadPluginApi",
+                "section": "def-common.FileAnalysis",
+                "text": "FileAnalysis"
+              },
+              "[]"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload",
+            "id": "def-common.UploadStatus.fileClashes",
+            "type": "Array",
+            "tags": [],
+            "label": "fileClashes",
+            "description": [],
+            "signature": [
+              "FileClash",
+              "[]"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload",
+            "id": "def-common.UploadStatus.formatMix",
+            "type": "boolean",
+            "tags": [],
+            "label": "formatMix",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload",
+            "id": "def-common.UploadStatus.mappingsJsonValid",
+            "type": "boolean",
+            "tags": [],
+            "label": "mappingsJsonValid",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload",
+            "id": "def-common.UploadStatus.settingsJsonValid",
+            "type": "boolean",
+            "tags": [],
+            "label": "settingsJsonValid",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload",
+            "id": "def-common.UploadStatus.pipelinesJsonValid",
+            "type": "boolean",
+            "tags": [],
+            "label": "pipelinesJsonValid",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload",
+            "id": "def-common.UploadStatus.errors",
+            "type": "Array",
+            "tags": [],
+            "label": "errors",
+            "description": [],
+            "signature": [
+              "{ title: string; error: any; }[]"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [
+      {
+        "parentPluginId": "@kbn/file-upload",
+        "id": "def-common.CLASH_ERROR_TYPE",
+        "type": "Enum",
+        "tags": [],
+        "label": "CLASH_ERROR_TYPE",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/merge_tools.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/file-upload",
+        "id": "def-common.CLASH_TYPE",
+        "type": "Enum",
+        "tags": [],
+        "label": "CLASH_TYPE",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/merge_tools.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/file-upload",
+        "id": "def-common.STATUS",
+        "type": "Enum",
+        "tags": [],
+        "label": "STATUS",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/file-upload",
+        "id": "def-common.UPLOAD_TYPE",
+        "type": "Enum",
+        "tags": [],
+        "label": "UPLOAD_TYPE",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/file-upload/src/use_file_upload.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/file-upload",
+        "id": "def-common.FileAnalysis",
+        "type": "Type",
+        "tags": [],
+        "label": "FileAnalysis",
+        "description": [],
+        "signature": [
+          "AnalysisResults & { loaded: boolean; importStatus: ",
+          {
+            "pluginId": "@kbn/file-upload",
+            "scope": "common",
+            "docId": "kibKbnFileUploadPluginApi",
+            "section": "def-common.STATUS",
+            "text": "STATUS"
+          },
+          "; fileName: string; fileContents: string; data: ArrayBuffer | null; fileTooLarge: boolean; fileCouldNotBeRead: boolean; fileCouldNotBeReadPermissionError: any; serverError: any; results: ",
+          {
+            "pluginId": "fileUpload",
+            "scope": "common",
+            "docId": "kibFileUploadPluginApi",
+            "section": "def-common.FindFileStructureResponse",
+            "text": "FindFileStructureResponse"
+          },
+          " | null; explanation: string[] | undefined; importProgress: number; docCount: number; supportedFormat: boolean; failures: ",
+          "ImportFailure",
+          "[]; fileSizeInfo: FileSizeInfo; }"
+        ],
+        "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_wrapper.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/file-upload",
+        "id": "def-common.FileUploadContext",
+        "type": "Object",
+        "tags": [],
+        "label": "FileUploadContext",
+        "description": [],
+        "signature": [
+          "React.Context<{ fileUploadManager: ",
+          {
+            "pluginId": "@kbn/file-upload",
+            "scope": "common",
+            "docId": "kibKbnFileUploadPluginApi",
+            "section": "def-common.FileUploadManager",
+            "text": "FileUploadManager"
+          },
+          "; indexName: string; setIndexName: React.Dispatch<React.SetStateAction<string>>; indexValidationStatus: ",
+          {
+            "pluginId": "@kbn/file-upload",
+            "scope": "common",
+            "docId": "kibKbnFileUploadPluginApi",
+            "section": "def-common.STATUS",
+            "text": "STATUS"
+          },
+          "; setIndexValidationStatus: React.Dispatch<React.SetStateAction<",
+          {
+            "pluginId": "@kbn/file-upload",
+            "scope": "common",
+            "docId": "kibKbnFileUploadPluginApi",
+            "section": "def-common.STATUS",
+            "text": "STATUS"
+          },
+          ">>; deleteFile: (i: number) => Promise<void>; filesStatus: ",
+          {
+            "pluginId": "@kbn/file-upload",
+            "scope": "common",
+            "docId": "kibKbnFileUploadPluginApi",
+            "section": "def-common.FileAnalysis",
+            "text": "FileAnalysis"
+          },
+          "[]; uploadStatus: ",
+          {
+            "pluginId": "@kbn/file-upload",
+            "scope": "common",
+            "docId": "kibKbnFileUploadPluginApi",
+            "section": "def-common.UploadStatus",
+            "text": "UploadStatus"
+          },
+          "; fileClashes: boolean; fullFileUpload: () => Promise<void>; uploadStarted: boolean; onImportClick: () => Promise<void>; canImport: boolean; mappings: ",
+          "Config",
+          "<",
+          "MappingTypeMapping",
+          ">; settings: ",
+          "Config",
+          "<",
+          "IndicesIndexSettings",
+          ">; pipelines: (",
+          {
+            "pluginId": "fileUpload",
+            "scope": "common",
+            "docId": "kibFileUploadPluginApi",
+            "section": "def-common.IngestPipeline",
+            "text": "IngestPipeline"
+          },
+          " | undefined)[]; importResults: ",
+          {
+            "pluginId": "@kbn/file-upload-common",
+            "scope": "common",
+            "docId": "kibKbnFileUploadCommonPluginApi",
+            "section": "def-common.FileUploadResults",
+            "text": "FileUploadResults"
+          },
+          " | null; dataViewName: string | null; setDataViewName: React.Dispatch<React.SetStateAction<string | null>>; dataViewNameError: string; indexCreateMode: ",
+          {
+            "pluginId": "@kbn/file-upload",
+            "scope": "common",
+            "docId": "kibKbnFileUploadPluginApi",
+            "section": "def-common.UPLOAD_TYPE",
+            "text": "UPLOAD_TYPE"
+          },
+          "; setIndexCreateMode: React.Dispatch<React.SetStateAction<",
+          {
+            "pluginId": "@kbn/file-upload",
+            "scope": "common",
+            "docId": "kibKbnFileUploadPluginApi",
+            "section": "def-common.UPLOAD_TYPE",
+            "text": "UPLOAD_TYPE"
+          },
+          ">>; indices: ",
+          {
+            "pluginId": "@kbn/index-management-shared-types",
+            "scope": "common",
+            "docId": "kibKbnIndexManagementSharedTypesPluginApi",
+            "section": "def-common.Index",
+            "text": "Index"
+          },
+          "[]; existingIndexName: string | null; setExistingIndexName: (idxName: string | null) => void; } | undefined>"
+        ],
+        "path": "x-pack/platform/packages/shared/file-upload/src/use_file_upload.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

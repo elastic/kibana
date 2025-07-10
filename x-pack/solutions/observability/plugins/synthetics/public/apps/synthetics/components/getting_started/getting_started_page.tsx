@@ -24,18 +24,17 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useBreadcrumbs, useEnablement, useLocations } from '../../hooks';
 import { usePrivateLocationsAPI } from '../settings/private_locations/hooks/use_locations_api';
 import { LoadingState } from '../monitors_page/overview/overview/monitor_detail_flyout';
-import {
-  getServiceLocations,
-  selectAddingNewPrivateLocation,
-  setAddingNewPrivateLocation,
-  getAgentPoliciesAction,
-  selectAgentPolicies,
-  cleanMonitorListState,
-} from '../../state';
+import { getServiceLocations, cleanMonitorListState } from '../../state';
 import { MONITOR_ADD_ROUTE } from '../../../../../common/constants/ui';
 import { SimpleMonitorForm } from './simple_monitor_form';
-import { AddLocationFlyout, NewLocation } from '../settings/private_locations/add_location_flyout';
+import {
+  AddOrEditLocationFlyout,
+  NewLocation,
+} from '../settings/private_locations/add_or_edit_location_flyout';
 import type { ClientPluginsStart } from '../../../../plugin';
+import { getAgentPoliciesAction, selectAgentPolicies } from '../../state/agent_policies';
+import { setIsPrivateLocationFlyoutVisible } from '../../state/private_locations/actions';
+import { selectPrivateLocationFlyoutVisible } from '../../state/private_locations/selectors';
 
 export const GettingStartedPage = () => {
   const dispatch = useDispatch();
@@ -131,23 +130,23 @@ export const GettingStartedOnPrem = () => {
 
   useBreadcrumbs([{ text: MONITORING_OVERVIEW_LABEL }]); // No extra breadcrumbs on overview
 
-  const isAddingNewLocation = useSelector(selectAddingNewPrivateLocation);
+  const isPrivateLocationFlyoutVisible = useSelector(selectPrivateLocationFlyoutVisible);
 
-  const setIsAddingNewLocation = useCallback(
-    (val: boolean) => dispatch(setAddingNewPrivateLocation(val)),
+  const setIsFlyoutOpen = useCallback(
+    (val: boolean) => dispatch(setIsPrivateLocationFlyoutVisible(val)),
     [dispatch]
   );
 
-  const { onSubmit, privateLocations, loading } = usePrivateLocationsAPI();
+  const { onCreateLocationAPI, privateLocations } = usePrivateLocationsAPI();
 
   const handleSubmit = (formData: NewLocation) => {
-    onSubmit(formData);
+    onCreateLocationAPI(formData);
   };
 
   // make sure flyout is closed when first visiting the page
   useEffect(() => {
-    setIsAddingNewLocation(false);
-  }, [setIsAddingNewLocation]);
+    setIsFlyoutOpen(false);
+  }, [setIsFlyoutOpen]);
 
   return (
     <>
@@ -167,7 +166,7 @@ export const GettingStartedOnPrem = () => {
                 fill
                 iconType="plusInCircleFilled"
                 data-test-subj="gettingStartedAddLocationButton"
-                onClick={() => setIsAddingNewLocation(true)}
+                onClick={() => setIsFlyoutOpen(true)}
               >
                 {CREATE_LOCATION_LABEL}
               </EuiButton>
@@ -177,12 +176,11 @@ export const GettingStartedOnPrem = () => {
         footer={<GettingStartedLink />}
       />
 
-      {isAddingNewLocation ? (
-        <AddLocationFlyout
-          setIsOpen={setIsAddingNewLocation}
+      {isPrivateLocationFlyoutVisible ? (
+        <AddOrEditLocationFlyout
+          onCloseFlyout={() => setIsFlyoutOpen(false)}
           onSubmit={handleSubmit}
           privateLocations={privateLocations}
-          isLoading={loading}
         />
       ) : null}
     </>

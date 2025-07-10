@@ -15,7 +15,8 @@
   "kbn_references": [
     "@kbn/i18n",
     "@kbn/core",
-    "@kbn/deeplinks-security"
+    "@kbn/deeplinks-security",
+    "@kbn/core-chrome-browser"
   ],
   "exclude": ["target/**/*"]
 }

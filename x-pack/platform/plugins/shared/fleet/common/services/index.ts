@@ -66,7 +66,7 @@ export {
   mapPackageReleaseToIntegrationCardRelease,
 } from './package_prerelease';
 
-export { getAllowedOutputTypeForPolicy } from './output_helpers';
+export { getAllowedOutputTypesForAgentPolicy } from './output_helpers';
 export { agentStatusesToSummary } from './agent_statuses_to_summary';
 
 export {
@@ -92,4 +92,4 @@ export {
   isAgentVersionLessThanFleetServer,
 } from './check_fleet_server_versions';
 
-export { removeSOAttributes, getSortConfig } from './agent_utils';
+export { removeSOAttributes, getSortConfig, checkTargetVersionsValidity } from './agent_utils';

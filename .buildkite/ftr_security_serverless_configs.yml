@@ -3,21 +3,18 @@ disabled:
   - x-pack/test/security_solution_api_integration/config/serverless/config.base.ts
   - x-pack/test/security_solution_api_integration/config/serverless/config.base.essentials.ts
   - x-pack/test/security_solution_api_integration/config/serverless/config.base.edr_workflows.ts
-  - x-pack/test/defend_workflows_cypress/serverless_config.base.ts
-  - x-pack/test/osquery_cypress/serverless_config.base.ts
+  - x-pack/test/security_solution_api_integration/config/serverless/config.base.ai4dsoc.ts
+  - x-pack/solutions/security/test/defend_workflows_cypress/serverless_config.base.ts
+  - x-pack/solutions/security/test/osquery_cypress/serverless_config.base.ts
 
   # Cypress configs, for now these are still run manually
-  - x-pack/test/defend_workflows_cypress/serverless_config.ts
-  - x-pack/test/osquery_cypress/serverless_cli_config.ts
+  - x-pack/solutions/security/test/defend_workflows_cypress/serverless_config.ts
+  - x-pack/solutions/security/test/osquery_cypress/serverless_cli_config.ts
   - x-pack/test/security_solution_cypress/serverless_config.ts
+  - x-pack/test/security_solution_cypress/ai4dsoc_serverless_config.ts
 
   # Playwright
   - x-pack/test/security_solution_playwright/serverless_config.ts
-
-  # Serverless base config files
-  - x-pack/test_serverless/api_integration/config.base.ts
-  - x-pack/test_serverless/functional/config.base.ts
-  - x-pack/test_serverless/shared/config.base.ts
 
   # MKI only configs files
   - x-pack/test_serverless/functional/test_suites/security/config.mki_only.ts
@@ -38,6 +35,7 @@ enabled:
   - x-pack/test_serverless/functional/test_suites/security/config.saved_objects_management.ts
   - x-pack/test_serverless/functional/test_suites/security/config.context_awareness.ts
   - x-pack/test_serverless/functional/test_suites/security/config.examples.context_awareness.ts
+  - x-pack/test_serverless/functional/test_suites/security/common_configs/config.config_compat_mode.ts
   - x-pack/test_serverless/functional/test_suites/security/common_configs/config.group1.ts
   - x-pack/test_serverless/functional/test_suites/security/common_configs/config.group2.ts
   - x-pack/test_serverless/functional/test_suites/security/common_configs/config.group3.ts
@@ -46,6 +44,10 @@ enabled:
   - x-pack/test_serverless/functional/test_suites/security/common_configs/config.group6.ts
   - x-pack/test_serverless/functional/test_suites/security/common_configs/config.group7.ts
   - x-pack/test_serverless/functional/test_suites/security/common_configs/config.group8.ts
+  - x-pack/test_serverless/functional/test_suites/security/common_configs/config.group9.ts
+  - x-pack/test_serverless/functional/test_suites/security/common_configs/config.group10.ts
+  - x-pack/test_serverless/functional/test_suites/security/common_configs/config.group11.ts
+  - x-pack/test_serverless/functional/test_suites/security/common_configs/config.group12.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/detection_engine/actions/trial_license_complete_tier/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/detection_engine/alerts/basic_license_essentials_tier/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/detection_engine/alerts/trial_license_complete_tier/configs/serverless.config.ts
@@ -61,6 +63,7 @@ enabled:
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/detection_engine/rule_execution_logic/eql/trial_license_complete_tier/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/detection_engine/rule_execution_logic/esql/trial_license_complete_tier/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/detection_engine/rule_execution_logic/general_logic/trial_license_complete_tier/configs/serverless.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/detection_engine/rule_execution_logic/general_logic/basic_license_essentials_tier/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/detection_engine/rule_execution_logic/indicator_match/trial_license_complete_tier/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/detection_engine/rule_execution_logic/machine_learning/trial_license_complete_tier/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/detection_engine/rule_execution_logic/new_terms/trial_license_complete_tier/configs/serverless.config.ts
@@ -73,12 +76,12 @@ enabled:
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/rule_patch/basic_license_essentials_tier/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/rule_update/trial_license_complete_tier/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/rule_update/basic_license_essentials_tier/configs/serverless.config.ts
-  - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/prebuilt_rules/bundled_prebuilt_rules_package/trial_license_complete_tier/configs/serverless.config.ts
-  - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/prebuilt_rules/large_prebuilt_rules_package/trial_license_complete_tier/configs/serverless.config.ts
-  - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/prebuilt_rules/management/trial_license_complete_tier/configs/serverless.config.ts
-  - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/prebuilt_rules/update_prebuilt_rules_package/trial_license_complete_tier/configs/serverless.config.ts
-  - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/prebuilt_rules/prebuilt_rule_customization/customization_enabled/configs/serverless.config.ts
-  - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/prebuilt_rules/prebuilt_rule_customization/customization_disabled/configs/serverless.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/prebuilt_rules/common/configs/serverless_essentials_tier.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/prebuilt_rules/customization_disabled/configs/serverless_essentials_tier.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/prebuilt_rules/customization_enabled/configs/serverless.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/prebuilt_rules/customization_enabled/upgrade_prebuilt_rules/diffable_rule_fields/common_fields/configs/serverless.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/prebuilt_rules/customization_enabled/upgrade_prebuilt_rules/diffable_rule_fields/type_specific_fields/configs/serverless.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/prebuilt_rules/ml_disabled/configs/serverless_essentials_tier.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/rule_bulk_actions/trial_license_complete_tier/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/rule_delete/trial_license_complete_tier/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/rule_delete/basic_license_essentials_tier/configs/serverless.config.ts
@@ -98,6 +101,7 @@ enabled:
   - x-pack/test/security_solution_api_integration/test_suites/entity_analytics/risk_engine/trial_license_complete_tier/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/entity_analytics/risk_engine/basic_license_essentials_tier/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/entity_analytics/entity_store/trial_license_complete_tier/configs/serverless.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/entity_analytics/monitoring/trial_license_complete_tier/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/lists_and_exception_lists/exception_lists_items/trial_license_complete_tier/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/lists_and_exception_lists/authorization/exceptions/lists/essentials_tier/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/lists_and_exception_lists/authorization/exceptions/common/essentials_tier/configs/serverless.config.ts
@@ -121,7 +125,11 @@ enabled:
   - x-pack/test/security_solution_api_integration/test_suites/edr_workflows/resolver/trial_license_complete_tier/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/edr_workflows/response_actions/trial_license_complete_tier/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/edr_workflows/spaces/trial_license_complete_tier/configs/serverless.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/siem_migrations/rules/trial_license_complete_tier/configs/serverless.config.ts
   - x-pack/test/security_solution_endpoint/configs/serverless.endpoint.config.ts
   - x-pack/test/security_solution_endpoint/configs/serverless.integrations.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/ai4dsoc/cases/search_ai_lake_tier/configs/serverless.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/ai4dsoc/nlp_cleanup_task/search_ai_lake_tier/configs/serverless.config.ts
   # serverless config files that run deployment-agnostic tests
-  - x-pack/test/api_integration/deployment_agnostic/configs/serverless/security.serverless.config.ts
+  - x-pack/platform/test/spaces_api_integration/deployment_agnostic/security_and_spaces/serverless.config.ts
+  - x-pack/platform/test/spaces_api_integration/deployment_agnostic/security_and_spaces/serverless.copy_to_space.config.ts

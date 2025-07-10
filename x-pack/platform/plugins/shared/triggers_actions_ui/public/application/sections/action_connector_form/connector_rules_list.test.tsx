@@ -15,7 +15,6 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { getIsExperimentalFeatureEnabled } from '../../../common/get_experimental_features';
 import { ConnectorRulesList } from './connector_rules_list';
 import { useKibana } from '../../../common/lib/kibana';
-import {} from '../../lib/rule_api/rules_kuery_filter';
 import { ActionConnector } from '../../../types';
 import { mockedRulesData, ruleTypeFromApi } from '../rules_list/components/test_helpers';
 
@@ -23,14 +22,14 @@ jest.mock('../../../common/lib/kibana');
 jest.mock('../../lib/rule_api/rules_kuery_filter', () => ({
   loadRulesWithKueryFilter: jest.fn(),
 }));
-jest.mock('../../lib/rule_api/rule_types', () => ({
-  loadRuleTypes: jest.fn(),
+jest.mock('@kbn/response-ops-rules-apis/apis/get_rule_types', () => ({
+  getRuleTypes: jest.fn(),
 }));
 jest.mock('../../../common/get_experimental_features', () => ({
   getIsExperimentalFeatureEnabled: jest.fn(),
 }));
 
-const { loadRuleTypes } = jest.requireMock('../../lib/rule_api/rule_types');
+const { getRuleTypes } = jest.requireMock('@kbn/response-ops-rules-apis/apis/get_rule_types');
 const { loadRulesWithKueryFilter } = jest.requireMock('../../lib/rule_api/rules_kuery_filter');
 
 const getUrlForAppMock = jest.fn();
@@ -64,7 +63,7 @@ describe('Connector rules list', () => {
       total: mockedRulesData.length,
       data: mockedRulesData,
     });
-    loadRuleTypes.mockResolvedValue([ruleTypeFromApi]);
+    getRuleTypes.mockResolvedValue([ruleTypeFromApi]);
   });
 
   afterEach(() => {

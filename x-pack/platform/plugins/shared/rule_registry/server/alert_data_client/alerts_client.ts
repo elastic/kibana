@@ -6,57 +6,60 @@
  */
 import Boom from '@hapi/boom';
 import { v4 as uuidv4 } from 'uuid';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { PublicMethodsOf } from '@kbn/utility-types';
-import { Filter, buildEsQuery, EsQueryConfig } from '@kbn/es-query';
+import type { estypes } from '@elastic/elasticsearch';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { Filter, EsQueryConfig } from '@kbn/es-query';
+import { buildEsQuery } from '@kbn/es-query';
 import { decodeVersion, encodeHitVersion } from '@kbn/securitysolution-es-utils';
+import type { STATUS_VALUES } from '@kbn/rule-data-utils';
 import {
   ALERT_TIME_RANGE,
   ALERT_STATUS,
   getEsQueryConfig,
   getSafeSortIds,
-  STATUS_VALUES,
   ALERT_STATUS_RECOVERED,
   ALERT_END,
   ALERT_STATUS_ACTIVE,
   ALERT_CASE_IDS,
   MAX_CASES_PER_ALERT,
-  isSiemRuleType,
 } from '@kbn/rule-data-utils';
 
-import {
+import type {
   AggregateName,
   AggregationsAggregate,
   MappingRuntimeFields,
   QueryDslQueryContainer,
   SortCombinations,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { RuleTypeParams, AlertingServerStart } from '@kbn/alerting-plugin/server';
+import type {
+  RuleTypeParams,
+  AlertingServerStart,
+  AlertingAuthorization,
+} from '@kbn/alerting-plugin/server';
 import {
   ReadOperations,
-  AlertingAuthorization,
   WriteOperations,
   AlertingAuthorizationEntity,
 } from '@kbn/alerting-plugin/server';
-import { Logger, ElasticsearchClient, EcsEvent } from '@kbn/core/server';
-import { AuditLogger } from '@kbn/security-plugin/server';
-import { FieldDescriptor, IndexPatternsFetcher } from '@kbn/data-plugin/server';
+import type { Logger, ElasticsearchClient, EcsEvent } from '@kbn/core/server';
+import type { AuditLogger } from '@kbn/security-plugin/server';
+import { IndexPatternsFetcher } from '@kbn/data-plugin/server';
 import { isEmpty } from 'lodash';
-import { RuleTypeRegistry } from '@kbn/alerting-plugin/server/types';
-import { TypeOf } from 'io-ts';
-import { BrowserFields } from '../../common';
-import { alertAuditEvent, operationAlertAuditActionMap } from './audit_events';
+import type { RuleTypeRegistry } from '@kbn/alerting-plugin/server/types';
+import type { TypeOf } from 'io-ts';
+import { alertAuditEvent, operationAlertAuditActionMap } from '@kbn/alerting-plugin/server/lib';
+import type { GetBrowserFieldsResponse } from '@kbn/alerting-types';
 import {
   ALERT_WORKFLOW_STATUS,
   ALERT_RULE_CONSUMER,
   ALERT_RULE_TYPE_ID,
   SPACE_IDS,
 } from '../../common/technical_rule_data_field_names';
-import { ParsedTechnicalFields } from '../../common/parse_technical_fields';
-import { IRuleDataService } from '../rule_data_plugin_service';
+import type { ParsedTechnicalFields } from '../../common/parse_technical_fields';
+import type { IRuleDataService } from '../rule_data_plugin_service';
 import { getAuthzFilter, getSpacesFilter } from '../lib';
 import { fieldDescriptorToBrowserFieldMapper } from './browser_fields';
-import { alertsAggregationsSchema } from '../../common/types';
+import type { alertsAggregationsSchema } from '../../common/types';
 import {
   MAX_ALERTS_GROUPING_QUERY_SIZE,
   MAX_ALERTS_PAGES,
@@ -168,8 +171,6 @@ export class AlertsClient {
   private readonly esClient: ElasticsearchClient;
   private readonly spaceId: string | undefined;
   private readonly ruleDataService: IRuleDataService;
-  private readonly getRuleType: RuleTypeRegistry['get'];
-  private readonly getRuleList: RuleTypeRegistry['list'];
   private getAlertIndicesAlias!: AlertingServerStart['getAlertIndicesAlias'];
 
   constructor(options: ConstructorOptions) {
@@ -181,8 +182,6 @@ export class AlertsClient {
     // Otherwise, if space is enabled and not specified, it is "default"
     this.spaceId = this.authorization.getSpaceId();
     this.ruleDataService = options.ruleDataService;
-    this.getRuleType = options.getRuleType;
-    this.getRuleList = options.getRuleList;
     this.getAlertIndicesAlias = options.getAlertIndicesAlias;
   }
 
@@ -307,7 +306,7 @@ export class AlertsClient {
 
       const config = getEsQueryConfig();
 
-      let queryBody: estypes.SearchRequest['body'] = {
+      let queryBody: estypes.SearchRequest = {
         fields: [ALERT_RULE_TYPE_ID, ALERT_RULE_CONSUMER, ALERT_WORKFLOW_STATUS, SPACE_IDS],
         query: await this.buildEsQueryWithAuthz(
           query,
@@ -343,7 +342,7 @@ export class AlertsClient {
       const result = await this.esClient.search<ParsedTechnicalFields, TAggregations>({
         index: index ?? '.alerts-*',
         ignore_unavailable: true,
-        body: queryBody,
+        ...queryBody,
         seq_no_primary_term: true,
       });
 
@@ -515,7 +514,7 @@ export class AlertsClient {
     query: object | string;
     operation: WriteOperations.Update | ReadOperations.Find | ReadOperations.Get;
   }) {
-    let lastSortIds;
+    let lastSortIds: Array<string | number> | undefined;
     let hasSortIds = true;
     const alertSpaceId = this.spaceId;
     if (alertSpaceId == null) {
@@ -781,10 +780,8 @@ export class AlertsClient {
         ...decodeVersion(_version),
         id,
         index,
-        body: {
-          doc: {
-            ...fieldToUpdate,
-          },
+        doc: {
+          ...fieldToUpdate,
         },
         refresh: 'wait_for',
       });
@@ -1206,52 +1203,29 @@ export class AlertsClient {
     indices,
     metaFields,
     allowNoIndex,
+    includeEmptyFields,
+    indexFilter,
   }: {
     ruleTypeIds: string[];
     indices: string[];
     metaFields: string[];
     allowNoIndex: boolean;
-  }): Promise<{ browserFields: BrowserFields; fields: FieldDescriptor[] }> {
+    includeEmptyFields: boolean;
+    indexFilter?: estypes.QueryDslQueryContainer;
+  }): Promise<GetBrowserFieldsResponse> {
     const indexPatternsFetcherAsInternalUser = new IndexPatternsFetcher(this.esClient);
-    const ruleTypeList = this.getRuleList();
-    const fieldsForAAD = new Set<string>();
-
-    for (const rule of ruleTypeList.values()) {
-      if (ruleTypeIds.includes(rule.id) && rule.hasFieldsForAAD) {
-        (rule.fieldsForAAD ?? []).forEach((f) => {
-          fieldsForAAD.add(f);
-        });
-      }
-    }
 
     const { fields } = await indexPatternsFetcherAsInternalUser.getFieldsForWildcard({
       pattern: indices,
       metaFields,
       fieldCapsOptions: { allow_no_indices: allowNoIndex },
-      fields: [...fieldsForAAD, 'kibana.*'],
+      includeEmptyFields,
+      indexFilter,
     });
 
     return {
       browserFields: fieldDescriptorToBrowserFieldMapper(fields),
       fields,
     };
-  }
-
-  public async getAADFields({ ruleTypeId }: { ruleTypeId: string }) {
-    const { fieldsForAAD = [] } = this.getRuleType(ruleTypeId);
-    if (isSiemRuleType(ruleTypeId)) {
-      throw Boom.badRequest(`Security solution rule type is not supported`);
-    }
-
-    const indices = await this.getAuthorizedAlertsIndices([ruleTypeId]);
-    const indexPatternsFetcherAsInternalUser = new IndexPatternsFetcher(this.esClient);
-    const { fields = [] } = await indexPatternsFetcherAsInternalUser.getFieldsForWildcard({
-      pattern: indices ?? [],
-      metaFields: ['_id', '_index'],
-      fieldCapsOptions: { allow_no_indices: true },
-      fields: [...fieldsForAAD, 'kibana.*'],
-    });
-
-    return fields;
   }
 }

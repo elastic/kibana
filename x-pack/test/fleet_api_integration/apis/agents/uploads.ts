@@ -75,7 +75,7 @@ export default function (providerContext: FtrProviderContext) {
         index: AGENT_ACTIONS_INDEX,
         refresh: true,
         op_type: 'create',
-        body: {
+        document: {
           type: 'REQUEST_DIAGNOSTICS',
           action_id: `fleet_uploads_test-${fileName}-action`,
           agents: [opts.agentId],
@@ -91,7 +91,7 @@ export default function (providerContext: FtrProviderContext) {
         index: AGENT_ACTIONS_RESULTS_INDEX,
         refresh: true,
         op_type: 'create',
-        body: {
+        document: {
           action_id: `fleet_uploads_test-${fileName}-action`,
           agent_id: opts.agentId,
           '@timestamp': opts.timestamp,
@@ -114,7 +114,7 @@ export default function (providerContext: FtrProviderContext) {
         id: fileName,
         refresh: true,
         op_type: 'create',
-        body: {
+        document: {
           '@timestamp': opts.timestamp,
           upload_id: fileName,
           action_id: `fleet_uploads_test-${fileName}-action`,
@@ -142,7 +142,7 @@ export default function (providerContext: FtrProviderContext) {
         id: `${fileName}.0`,
         op_type: 'create',
         refresh: true,
-        body: {
+        document: {
           '@timestamp': opts.timestamp,
           last: true,
           bid: fileName,

@@ -156,7 +156,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
   );
 
   const getAnomaliesMapsLink = async (anomaly: MlAnomaliesTableRecord) => {
-    const initialLayers = getInitialAnomaliesLayers(anomaly.jobId);
+    const initialLayers = getInitialAnomaliesLayers(anomaly.jobId, euiTheme);
     const anomalyBucketStartMoment = moment(anomaly.source.timestamp).tz(
       getDateFormatTz(uiSettings)
     );
@@ -765,7 +765,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
   };
 
   const { anomaly, showViewSeriesLink } = props;
-  const canUpdateJob = usePermissionCheck('canUpdateJob');
+  const [canUpdateJob, canUseAiops] = usePermissionCheck(['canUpdateJob', 'canUseAiops']);
   const canConfigureRules = isRuleSupported(anomaly.source) && canUpdateJob;
 
   const contextMenuItems = useMemo(() => {
@@ -788,7 +788,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
       });
     }
 
-    if (application.capabilities.discover?.show && !isCategorizationAnomalyRecord) {
+    if (application.capabilities.discover_v2?.show && !isCategorizationAnomalyRecord) {
       // Add item from the start, but disable it during the URL generation.
       const isLoading = openInDiscoverUrlError === undefined && openInDiscoverUrl === undefined;
 
@@ -837,7 +837,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
         );
       }
     }
-    if (application.capabilities.maps?.show) {
+    if (application.capabilities.maps_v2?.show) {
       if (anomaly.isGeoRecord === true) {
         items.push(
           <EuiContextMenuItem
@@ -881,7 +881,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
       }
     }
 
-    if (application.capabilities.discover?.show && isCategorizationAnomalyRecord) {
+    if (application.capabilities.discover_v2?.show && isCategorizationAnomalyRecord) {
       items.push(
         <EuiContextMenuItem
           key="view_examples"
@@ -929,7 +929,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
       );
     }
 
-    if (openInLogRateAnalysisUrl) {
+    if (openInLogRateAnalysisUrl && canUseAiops) {
       items.push(
         <EuiContextMenuItem
           key="log_rate_analysis"
@@ -945,7 +945,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
       );
     }
 
-    if (messageField !== null) {
+    if (messageField !== null && canUseAiops) {
       items.push(
         <EuiContextMenuItem
           key="run_pattern_analysis"

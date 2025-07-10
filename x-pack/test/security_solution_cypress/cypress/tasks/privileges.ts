@@ -62,13 +62,17 @@ export const secAll: Role = {
     kibana: [
       {
         feature: {
-          siem: ['all'],
+          siemV3: ['all'],
+          securitySolutionTimeline: ['all'],
+          securitySolutionNotes: ['all'],
           securitySolutionAssistant: ['all'],
           securitySolutionAttackDiscovery: ['all'],
           securitySolutionCases: ['all'],
           securitySolutionCasesV2: ['all'],
+          securitySolutionCasesV3: ['all'],
           actions: ['all'],
           actionsSimulators: ['all'],
+          securitySolutionSiemMigrations: ['all'],
         },
         spaces: ['*'],
       },
@@ -96,11 +100,14 @@ export const secReadCasesAll: Role = {
     kibana: [
       {
         feature: {
-          siem: ['read'],
+          siemV3: ['read'],
+          securitySolutionTimeline: ['all'],
+          securitySolutionNotes: ['all'],
           securitySolutionAssistant: ['all'],
           securitySolutionAttackDiscovery: ['all'],
           securitySolutionCases: ['all'],
           securitySolutionCasesV2: ['all'],
+          securitySolutionCasesV3: ['all'],
           actions: ['all'],
           actionsSimulators: ['all'],
         },
@@ -130,11 +137,14 @@ export const secAllCasesOnlyReadDelete: Role = {
     kibana: [
       {
         feature: {
-          siem: ['all'],
+          siemV3: ['all'],
+          securitySolutionTimeline: ['all'],
+          securitySolutionNotes: ['all'],
           securitySolutionAssistant: ['all'],
           securitySolutionAttackDiscovery: ['all'],
           securitySolutionCases: ['cases_read', 'cases_delete'],
           securitySolutionCasesV2: ['cases_read', 'cases_delete'],
+          securitySolutionCasesV3: ['cases_read', 'cases_delete'],
           actions: ['all'],
           actionsSimulators: ['all'],
         },
@@ -164,11 +174,14 @@ export const secAllCasesNoDelete: Role = {
     kibana: [
       {
         feature: {
-          siem: ['all'],
+          siemV3: ['all'],
+          securitySolutionTimeline: ['all'],
+          securitySolutionNotes: ['all'],
           securitySolutionAssistant: ['all'],
           securitySolutionAttackDiscovery: ['all'],
           securitySolutionCases: ['minimal_all'],
           securitySolutionCasesV2: ['minimal_all'],
+          securitySolutionCasesV3: ['minimal_all'],
           actions: ['all'],
           actionsSimulators: ['all'],
         },

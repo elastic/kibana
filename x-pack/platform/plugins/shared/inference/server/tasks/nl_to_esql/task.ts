@@ -21,7 +21,10 @@ export function naturalLanguageToEsql<TToolOptions extends ToolOptions>({
   toolChoice,
   logger,
   functionCalling,
+  maxRetries,
+  retryConfiguration,
   system,
+  metadata,
   ...rest
 }: NlToEsqlTaskParams<TToolOptions>): Observable<NlToEsqlTaskEvent<TToolOptions>> {
   return from(loadDocBase()).pipe(
@@ -38,6 +41,9 @@ export function naturalLanguageToEsql<TToolOptions extends ToolOptions>({
         logger,
         systemMessage,
         functionCalling,
+        maxRetries,
+        retryConfiguration,
+        metadata,
         toolOptions: {
           tools,
           toolChoice,
@@ -48,9 +54,12 @@ export function naturalLanguageToEsql<TToolOptions extends ToolOptions>({
       return requestDocumentation({
         connectorId,
         functionCalling,
+        maxRetries,
+        retryConfiguration,
         outputApi: client.output,
         messages,
         system: systemMessage,
+        metadata,
         toolOptions: {
           tools,
           toolChoice,
@@ -59,8 +68,8 @@ export function naturalLanguageToEsql<TToolOptions extends ToolOptions>({
         switchMap((documentationEvent) => {
           return askLlmToRespond({
             documentationRequest: {
-              commands: documentationEvent.output.commands,
-              functions: documentationEvent.output.functions,
+              commands: documentationEvent.output?.commands,
+              functions: documentationEvent.output?.functions,
             },
           });
         })

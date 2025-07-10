@@ -52,7 +52,17 @@ describe('Login view routes', () => {
     });
 
     it('correctly defines route.', () => {
-      expect(routeConfig.options).toEqual({ authRequired: 'optional', excludeFromOAS: true });
+      expect(routeConfig.options).toEqual({ excludeFromOAS: true });
+
+      expect(routeConfig.security).toEqual(
+        expect.objectContaining({
+          authc: { enabled: 'optional' },
+          authz: {
+            enabled: false,
+            reason: expect.any(String),
+          },
+        })
+      );
 
       expect(routeConfig.validate).toEqual({
         body: undefined,

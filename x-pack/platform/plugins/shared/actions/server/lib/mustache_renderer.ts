@@ -7,7 +7,7 @@
 
 import Mustache from 'mustache';
 import { isString, isPlainObject, cloneDeepWith, merge } from 'lodash';
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { getMustacheLambdas } from './mustache_lambdas';
 
 export type Escape = 'markdown' | 'slack' | 'json' | 'none';
@@ -114,6 +114,7 @@ function addToStringDeep(object: unknown): void {
   if (Array.isArray(object)) {
     // instead, add an asJSON()
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (object as any).asJSON = () => JSON.stringify(object);
     object.forEach((element) => addToStringDeep(element));
     return;

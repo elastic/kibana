@@ -5,15 +5,20 @@
  * 2.0.
  */
 import { isEmpty } from 'lodash';
-import type { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
+import type { SearchRequest as ESSearchRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { InferSearchResponseOf } from '@kbn/es-types';
 import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import type { KibanaRequest } from '@kbn/core/server';
 import { OBSERVABILITY_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
+import type { estypes } from '@elastic/elasticsearch';
 import type { InfraBackendLibs } from '../infra_types';
 
 type RequiredParams = ESSearchRequest & {
   size: number;
   track_total_hits: boolean | number;
+  sort?: estypes.SortOptions[];
+  _source?: string[] | false;
+  search_after?: Array<string | number>;
 };
 
 export type InfraAlertsClient = Awaited<ReturnType<typeof getInfraAlertsClient>>;

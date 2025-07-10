@@ -145,6 +145,8 @@ describe('SyntheticsService', () => {
     jest.spyOn(service, 'getOutput').mockResolvedValue({ hosts: ['es'], api_key: 'i:k' });
     jest.spyOn(service, 'getSyntheticsParams').mockResolvedValue({});
 
+    service.getMaintenanceWindows = jest.fn();
+
     return { service, locations };
   };
 
@@ -223,7 +225,7 @@ describe('SyntheticsService', () => {
 
       (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({} as AxiosResponse);
 
-      await service.addConfigs({ monitor: payload } as any);
+      await service.addConfigs({ monitor: payload } as any, []);
 
       expect(axios).toHaveBeenCalledTimes(1);
       expect(axios).toHaveBeenCalledWith(
@@ -289,7 +291,7 @@ describe('SyntheticsService', () => {
 
       const payload = getFakePayload([locations[0]]);
 
-      await service.editConfig({ monitor: payload } as any);
+      await service.editConfig({ monitor: payload } as any, true, []);
 
       expect(axios).toHaveBeenCalledTimes(1);
       expect(axios).toHaveBeenCalledWith(
@@ -306,7 +308,7 @@ describe('SyntheticsService', () => {
 
       const payload = getFakePayload([locations[0]]);
 
-      await service.editConfig({ monitor: payload } as any);
+      await service.editConfig({ monitor: payload } as any, true, []);
 
       expect(axios).toHaveBeenCalledTimes(1);
       expect(axios).toHaveBeenCalledWith(
@@ -323,7 +325,7 @@ describe('SyntheticsService', () => {
 
       const payload = getFakePayload([locations[0]]);
 
-      await service.addConfigs({ monitor: payload } as any);
+      await service.addConfigs({ monitor: payload } as any, []);
 
       expect(axios).toHaveBeenCalledTimes(1);
       expect(axios).toHaveBeenCalledWith(
@@ -450,6 +452,7 @@ describe('SyntheticsService', () => {
         },
       });
     });
+
     it('returns the space limited params', async () => {
       const { service } = getMockedService();
       jest.spyOn(service, 'getSyntheticsParams').mockRestore();
@@ -468,6 +471,44 @@ describe('SyntheticsService', () => {
       expect(params).toEqual({
         default: {
           username: 'elastic',
+        },
+      });
+    });
+
+    it('returns the params from mixed spaces', async () => {
+      const { service } = getMockedService();
+      jest.spyOn(service, 'getSyntheticsParams').mockRestore();
+
+      serverMock.encryptedSavedObjects = mockEncryptedSO({
+        params: [
+          {
+            attributes: { key: 'username', value: 'elastic' },
+            namespaces: ['default'],
+          },
+          {
+            attributes: { key: 'username-shared', value: 'elastic' },
+            namespaces: ['*'],
+          },
+          {
+            attributes: { key: 'username-test-space', value: 'elastic' },
+            namespaces: ['test'],
+          },
+        ],
+      });
+
+      const params = await service.getSyntheticsParams({ spaceId: 'default' });
+
+      expect(params).toEqual({
+        '*': {
+          'username-shared': 'elastic',
+        },
+        default: {
+          username: 'elastic',
+          'username-shared': 'elastic',
+        },
+        test: {
+          'username-shared': 'elastic',
+          'username-test-space': 'elastic',
         },
       });
     });
@@ -493,6 +534,8 @@ describe('SyntheticsService', () => {
     service.locations = locations;
     jest.spyOn(service, 'getOutput').mockResolvedValue({ hosts: ['es'], api_key: 'i:k' });
     jest.spyOn(service, 'getSyntheticsParams').mockResolvedValue({});
+
+    service.getMaintenanceWindows = jest.fn();
 
     it('paginates the results', async () => {
       serverMock.config = mockConfig;

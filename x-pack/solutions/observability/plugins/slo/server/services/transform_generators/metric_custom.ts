@@ -13,7 +13,7 @@ import { getElasticsearchQueryOrThrow, parseIndex, TransformGenerator } from '.'
 import {
   getSLOPipelineId,
   getSLOTransformId,
-  SLO_DESTINATION_INDEX_NAME,
+  SLI_DESTINATION_INDEX_NAME,
 } from '../../../common/constants';
 import { getSLOTransformTemplate } from '../../assets/transform_templates/slo_transform_template';
 import { MetricCustomIndicator, SLODefinition } from '../../domain/models';
@@ -24,8 +24,8 @@ import { getFilterRange, getTimesliceTargetComparator } from './common';
 export const INVALID_EQUATION_REGEX = /[^A-Z|+|\-|\s|\d+|\.|\(|\)|\/|\*|>|<|=|\?|\:|&|\!|\|]+/g;
 
 export class MetricCustomTransformGenerator extends TransformGenerator {
-  constructor(spaceId: string, dataViewService: DataViewsService) {
-    super(spaceId, dataViewService);
+  constructor(spaceId: string, dataViewService: DataViewsService, isServerless: boolean) {
+    super(spaceId, dataViewService, isServerless);
   }
 
   public async getTransformParams(slo: SLODefinition): Promise<TransformPutTransformRequest> {
@@ -57,7 +57,7 @@ export class MetricCustomTransformGenerator extends TransformGenerator {
       query: {
         bool: {
           filter: [
-            getFilterRange(slo, indicator.params.timestampField),
+            getFilterRange(slo, indicator.params.timestampField, this.isServerless),
             getElasticsearchQueryOrThrow(indicator.params.filter, dataView),
           ],
         },
@@ -68,7 +68,7 @@ export class MetricCustomTransformGenerator extends TransformGenerator {
   private buildDestination(slo: SLODefinition) {
     return {
       pipeline: getSLOPipelineId(slo.id, slo.revision),
-      index: SLO_DESTINATION_INDEX_NAME,
+      index: SLI_DESTINATION_INDEX_NAME,
     };
   }
 

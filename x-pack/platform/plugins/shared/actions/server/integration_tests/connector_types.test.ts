@@ -6,12 +6,12 @@
  */
 
 import type { TestElasticsearchUtils, TestKibanaUtils } from '@kbn/core-test-helpers-kbn-server';
-import { ActionTypeRegistry } from '../action_type_registry';
+import type { ActionTypeRegistry } from '../action_type_registry';
 import { setupTestServers } from './lib';
 import { connectorTypes } from './mocks/connector_types';
 import { actionsConfigMock } from '../actions_config.mock';
 import { loggerMock } from '@kbn/logging-mocks';
-import { Services } from '../types';
+import type { ActionTypeConfig, Services } from '../types';
 
 jest.mock('../action_type_registry', () => {
   const actual = jest.requireActual('../action_type_registry');
@@ -52,7 +52,7 @@ describe('Connector type config checks', () => {
   });
 
   for (const connectorTypeId of connectorTypes) {
-    const skipConnectorType = ['.gen-ai'];
+    const skipConnectorType = ['.gen-ai', '.inference'];
     if (skipConnectorType.includes(connectorTypeId)) {
       continue;
     }
@@ -64,8 +64,24 @@ describe('Connector type config checks', () => {
 
       // SubActionConnector
       if (getService) {
+        let connectorConfig: ActionTypeConfig = {};
+
+        if (connectorTypeId === '.microsoft_defender_endpoint') {
+          connectorConfig = {
+            clientId: 'foo',
+            tenantId: 'foo-foo',
+            oAuthServerUrl: 'https://_fake_auth.com/',
+            oAuthScope: 'some-scope',
+            apiUrl: 'https://_face_api_.com',
+          };
+        } else if (connectorTypeId === '.bedrock') {
+          connectorConfig = {
+            apiUrl: 'https://_face_api_.com',
+          };
+        }
+
         const subActions = getService({
-          config: {},
+          config: connectorConfig,
           configurationUtilities: actionsConfigMock.create(),
           connector: { id: 'foo', type: 'bar' },
           logger: loggerMock.create(),

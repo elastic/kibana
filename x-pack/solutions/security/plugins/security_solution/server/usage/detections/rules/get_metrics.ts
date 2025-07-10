@@ -12,11 +12,16 @@ import { updateRuleUsage } from './update_usage';
 import { getDetectionRules } from '../../queries/get_detection_rules';
 import { getAlerts } from '../../queries/get_alerts';
 import { MAX_PER_PAGE, MAX_RESULTS_WINDOW } from '../../constants';
-import { getInitialEventLogUsage, getInitialRulesUsage } from './get_initial_usage';
+import {
+  getInitialEventLogUsage,
+  getInitialRulesUsage,
+  getInitialSpacesUsage,
+} from './get_initial_usage';
 import { getCaseComments } from '../../queries/get_case_comments';
 import { getRuleIdToCasesMap } from './transform_utils/get_rule_id_to_cases_map';
 import { getAlertIdToCountMap } from './transform_utils/get_alert_id_to_count_map';
 import { getRuleIdToEnabledMap } from './transform_utils/get_rule_id_to_enabled_map';
+import { getSpacesUsage } from './transform_utils/get_spaces_usage';
 import { getRuleObjectCorrelations } from './transform_utils/get_rule_object_correlations';
 import { getEventLogByTypeAndStatus } from '../../queries/get_event_log_by_type_and_status';
 
@@ -53,6 +58,7 @@ export const getRuleMetrics = async ({
         detection_rule_detail: [],
         detection_rule_usage: getInitialRulesUsage(),
         detection_rule_status: getInitialEventLogUsage(),
+        spaces_usage: getInitialSpacesUsage(),
       };
     }
 
@@ -123,6 +129,7 @@ export const getRuleMetrics = async ({
       detection_rule_detail: elasticRuleObjects,
       detection_rule_usage: rulesUsage,
       detection_rule_status: eventLogMetricsTypeStatus,
+      spaces_usage: getSpacesUsage(ruleResults),
     };
   } catch (e) {
     // ignore failure, usage will be zeroed. We use debug mode to not unnecessarily worry users as this will not effect them.
@@ -133,6 +140,7 @@ export const getRuleMetrics = async ({
       detection_rule_detail: [],
       detection_rule_usage: getInitialRulesUsage(),
       detection_rule_status: getInitialEventLogUsage(),
+      spaces_usage: getInitialSpacesUsage(),
     };
   }
 };

@@ -4,7 +4,8 @@
     "outDir": "target/types",
   },
   "include": [
-    "public/**/*"
+    "public/**/*",
+    "../../../../../typings/emotion.d.ts",
   ],
   "kbn_references": [
     "@kbn/core",
@@ -29,6 +30,8 @@
     "@kbn/saved-search-plugin",
     "@kbn/code-editor",
     "@kbn/react-kibana-context-render",
+    "@kbn/palettes",
+    "@kbn/css-utils",
   ],
   "exclude": [
     "target/**/*",

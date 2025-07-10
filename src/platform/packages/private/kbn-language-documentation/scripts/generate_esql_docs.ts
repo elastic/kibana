@@ -20,34 +20,75 @@ interface DocsSectionContent {
 
 (function () {
   const pathToElasticsearch = process.argv[2];
-  const { scalarFunctions, aggregationFunctions } = loadFunctionDocs(pathToElasticsearch);
-  writeFunctionDocs(
-    scalarFunctions,
-    path.join(__dirname, '../src/sections/generated/scalar_functions.tsx')
-  );
-  writeFunctionDocs(
-    aggregationFunctions,
-    path.join(__dirname, '../src/sections/generated/aggregation_functions.tsx')
-  );
+  if (!pathToElasticsearch) {
+    throw new Error('Path to Elasticsearch must be provided as the first argument.');
+  }
+
+  // Define function types and their corresponding output paths
+  const functionTypes = [
+    { fnType: 'scalar', outputFile: '../src/sections/generated/scalar_functions.tsx' },
+    { fnType: 'agg', outputFile: '../src/sections/generated/aggregation_functions.tsx' },
+    {
+      fnType: 'time_series_agg',
+      outputFile: '../src/sections/generated/timeseries_aggregation_functions.tsx',
+    },
+    { fnType: 'grouping', outputFile: '../src/sections/generated/grouping_functions.tsx' },
+    { fnType: 'operator', outputFile: '../src/sections/generated/operators.tsx' },
+  ];
+
+  // Process each function type
+  functionTypes.forEach(({ fnType, outputFile }) => {
+    const functionDocs = loadFunctionDocs({
+      pathToDefs: getPathToDefs(pathToElasticsearch, fnType),
+      pathToDocs: getPathToDocs(pathToElasticsearch, fnType),
+      fnType,
+    });
+
+    writeFunctionDocs(functionDocs, path.join(__dirname, outputFile));
+  });
 })();
 
-function loadFunctionDocs(pathToElasticsearch: string) {
-  // Define the directory path
-  const definitionsPath = path.join(
-    pathToElasticsearch,
-    '/docs/reference/esql/functions/kibana/definition'
+/**
+ * Constructs the path to the definitions directory.
+ */
+function getPathToDefs(basePath: string, fnType: string): string {
+  return path.join(
+    basePath,
+    `/docs/reference/query-languages/esql/kibana/definition/${
+      fnType === 'operator' ? 'operator' : 'function'
+    }s`
   );
-  const docsPath = path.join(pathToElasticsearch, '/docs/reference/esql/functions/kibana/docs');
+}
 
+/**
+ * Constructs the path to the documentation directory.
+ */
+function getPathToDocs(basePath: string, fnType: string): string {
+  return path.join(
+    basePath,
+    `/docs/reference/query-languages/esql/kibana/docs/${
+      fnType === 'operator' ? 'operator' : 'function'
+    }s`
+  );
+}
+
+function loadFunctionDocs({
+  pathToDefs,
+  pathToDocs,
+  fnType,
+}: {
+  pathToDefs: string;
+  pathToDocs: string;
+  fnType: string;
+}) {
   // Read the directory
-  const docsFiles = fs.readdirSync(docsPath);
+  const docsFiles = fs.readdirSync(pathToDocs);
 
   const ESFunctionDefinitions = fs
-    .readdirSync(definitionsPath)
-    .map((file) => JSON.parse(fs.readFileSync(`${definitionsPath}/${file}`, 'utf-8')));
+    .readdirSync(pathToDefs)
+    .map((file) => JSON.parse(fs.readFileSync(`${pathToDefs}/${file}`, 'utf-8')));
 
-  const scalarFunctions = new Map<string, DocsSectionContent>();
-  const aggregationFunctions = new Map<string, DocsSectionContent>();
+  const docs = new Map<string, DocsSectionContent>();
 
   // Iterate over each file in the directory
   for (const file of docsFiles) {
@@ -57,41 +98,38 @@ function loadFunctionDocs(pathToElasticsearch: string) {
         (def) => def.name === path.basename(file, '.md')
       );
 
-      if (!functionDefinition || functionDefinition.snapshot_only) {
+      if (
+        !functionDefinition ||
+        functionDefinition.snapshot_only ||
+        functionDefinition.type !== fnType
+      ) {
         continue;
       }
 
       // Read the file content
-      const content = fs.readFileSync(path.join(docsPath, file), 'utf-8');
+      const content = fs.readFileSync(path.join(pathToDocs, file), 'utf-8');
 
       // Get the function name from the file name by removing the .md extension
-      const functionName = path.basename(file, '.md');
+      const functionName = `${
+        functionDefinition.titleName ? functionDefinition.titleName : path.basename(file, '.md')
+      }${functionDefinition.operator ? ` (${functionDefinition.operator})` : ''}`;
 
       // Add the function name and content to the map
-      if (functionDefinition.type === 'eval') {
-        scalarFunctions.set(functionName, {
-          description: content,
-          preview: functionDefinition.preview,
-        });
-      }
-      if (functionDefinition.type === 'agg') {
-        aggregationFunctions.set(functionName, {
-          description: content,
-          preview: functionDefinition.preview,
-        });
-      }
+      docs.set(functionName, {
+        description: content,
+        preview: functionDefinition.preview,
+      });
     }
   }
 
-  return { scalarFunctions, aggregationFunctions };
+  return docs;
 }
 
 function writeFunctionDocs(functionDocs: Map<string, DocsSectionContent>, pathToDocsFile: string) {
   const codeStrings = Array.from(functionDocs.entries()).map(([name, doc]) => {
-    const docWithoutLinks = removeAsciiDocInternalCrossReferences(
-      doc.description,
-      Array.from(functionDocs.keys())
-    );
+    const defaultMessage = doc.description
+      .replace(/^.*\n/, '') // remove first line (comment from ES)
+      .replaceAll('`', '\\`');
     return `
   const foo = 
   // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
@@ -111,7 +149,7 @@ function writeFunctionDocs(functionDocs: Map<string, DocsSectionContent>, pathTo
         markdownContent={i18n.translate(
           'languageDocumentation.documentationESQL.${name}.markdown',
           {
-            defaultMessage: \`${docWithoutLinks.replaceAll('`', '\\`')}\`,
+            defaultMessage: \`${defaultMessage}\`,
             description:
               'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             ignoreTag: true,
@@ -135,31 +173,6 @@ function writeFunctionDocs(functionDocs: Map<string, DocsSectionContent>, pathTo
   const newFileContents = recast.print(ast);
 
   fs.writeFileSync(pathToDocsFile, newFileContents.code);
-}
-
-/**
- * Deals with asciidoc internal cross-references in the function descriptions
- *
- * Examples:
- * <<esql-mv_max>> -> `MV_MAX`
- * <<esql-st_intersects,ST_INTERSECTS>> -> `ST_INTERSECTS`
- * <<esql-multivalued-fields, multivalued fields>> -> multivalued fields
- */
-function removeAsciiDocInternalCrossReferences(asciidocString: string, functionNames: string[]) {
-  const internalCrossReferenceRegex = /<<(.+?)(,.+?)?>>/g;
-
-  const extractPossibleFunctionName = (id: string) => id.replace('esql-', '');
-
-  return asciidocString.replace(internalCrossReferenceRegex, (_match, anchorId, linkText) => {
-    const ret = linkText ? linkText.slice(1) : anchorId;
-
-    const matchingFunction = functionNames.find(
-      (name) =>
-        extractPossibleFunctionName(ret) === name.toLowerCase() ||
-        extractPossibleFunctionName(ret) === name.toUpperCase()
-    );
-    return matchingFunction ? `\`${matchingFunction.toUpperCase()}\`` : ret;
-  });
 }
 
 /**

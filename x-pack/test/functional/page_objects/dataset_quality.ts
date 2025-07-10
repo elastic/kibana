@@ -5,20 +5,21 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
-import querystring from 'querystring';
-import rison from '@kbn/rison';
-import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { IndicesIndexSettings } from '@elastic/elasticsearch/lib/api/types';
 import {
   DATA_QUALITY_URL_STATE_KEY,
-  datasetQualityUrlSchemaV1,
   datasetQualityDetailsUrlSchemaV1,
+  datasetQualityUrlSchemaV1,
+  datasetQualityDetailsUrlSchemaV2,
 } from '@kbn/data-quality-plugin/common';
 import {
-  DEFAULT_DEGRADED_FIELD_SORT_DIRECTION,
-  DEFAULT_DEGRADED_FIELD_SORT_FIELD,
+  DEFAULT_QUALITY_ISSUE_SORT_DIRECTION,
+  DEFAULT_QUALITY_ISSUE_SORT_FIELD,
 } from '@kbn/dataset-quality-plugin/common/constants';
+import expect from '@kbn/expect';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import rison from '@kbn/rison';
+import querystring from 'querystring';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 const defaultPageState: datasetQualityUrlSchemaV1.UrlSchema = {
@@ -37,8 +38,23 @@ const defaultDetailsPageState: datasetQualityDetailsUrlSchemaV1.UrlSchema = {
       page: 0,
       rowsPerPage: 10,
       sort: {
-        field: DEFAULT_DEGRADED_FIELD_SORT_FIELD,
-        direction: DEFAULT_DEGRADED_FIELD_SORT_DIRECTION,
+        field: DEFAULT_QUALITY_ISSUE_SORT_FIELD,
+        direction: DEFAULT_QUALITY_ISSUE_SORT_DIRECTION,
+      },
+    },
+  },
+};
+
+const defaultDetailsPageStateV2: datasetQualityDetailsUrlSchemaV2.UrlSchema = {
+  v: 2,
+  dataStream: 'logs-synth.1-default',
+  qualityIssues: {
+    table: {
+      page: 0,
+      rowsPerPage: 10,
+      sort: {
+        field: DEFAULT_QUALITY_ISSUE_SORT_FIELD,
+        direction: DEFAULT_QUALITY_ISSUE_SORT_DIRECTION,
       },
     },
   },
@@ -54,7 +70,7 @@ type SummaryPanelKpi = Record<
 >;
 
 type SummaryPanelKPI = Record<
-  'docsCountTotal' | 'size' | 'services' | 'hosts' | 'degradedDocs',
+  'docsCountTotal' | 'size' | 'services' | 'hosts' | 'degradedDocs' | 'failedDocs',
   string
 >;
 
@@ -70,6 +86,19 @@ const texts = {
   services: 'Services',
   hosts: 'Hosts',
   degradedDocs: 'Degraded docs',
+  failedDocs: 'Failed docs',
+  datasetNameColumn: 'Data set name',
+  datasetNamespaceColumn: 'Namespace',
+  datasetTypeColumn: 'Type',
+  datasetSizeColumn: 'Size',
+  datasetQualityColumn: 'Data set quality',
+  datasetDegradedDocsColumn: 'Degraded docs (%)',
+  datasetFailedDocsColumn: 'Failed docs (%)',
+  datasetLastActivityColumn: 'Last activity',
+  datasetActionsColumn: 'Actions',
+  datasetIssueColumn: 'Issue',
+  datasetDocsCountColumn: 'Docs count',
+  datasetLastOccurrenceColumn: 'Last Occurrence',
 };
 
 export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProviderContext) {
@@ -88,6 +117,8 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     showFullDatasetNamesSwitch: 'button[aria-label="Show full data set names"]',
     showInactiveDatasetsNamesSwitch: 'button[aria-label="Show inactive data sets"]',
     superDatePickerApplyButton: '[data-test-subj="superDatePickerQuickSelectApplyButton"]',
+    qualityIssueDegradedChart: '.euiButtonGroupButton[data-test-subj="degraded"]',
+    qualityIssueFailedChart: '.euiButtonGroupButton[data-test-subj="failed"]',
   };
 
   const testSubjectSelectors = {
@@ -95,7 +126,7 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     datasetQualityFiltersContainer: 'datasetQualityFiltersContainer',
     datasetQualityExpandButton: 'datasetQualityExpandButton',
     datasetQualityDetailsDegradedFieldsExpandButton:
-      'datasetQualityDetailsDegradedFieldsExpandButton',
+      'datasetQualityDetailsQualityIssuesExpandButton',
     datasetQualityDetailsDegradedFieldFlyout: 'datasetQualityDetailsDegradedFieldFlyout',
     datasetDetailsContainer: 'datasetDetailsContainer',
     datasetQualityDetailsTitle: 'datasetQualityDetailsTitle',
@@ -112,6 +143,7 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     datasetQualityIntegrationsSelectableButton: 'datasetQualityIntegrationsSelectableButton',
     datasetQualityNamespacesSelectable: 'datasetQualityNamespacesSelectable',
     datasetQualityNamespacesSelectableButton: 'datasetQualityNamespacesSelectableButton',
+    datasetQualityTypesSelectable: 'datasetQualityFilterType',
     datasetQualityQualitiesSelectable: 'datasetQualityQualitiesSelectable',
     datasetQualityQualitiesSelectableButton: 'datasetQualityQualitiesSelectableButton',
     datasetQualityDetailsEmptyPrompt: 'datasetQualityDetailsEmptyPrompt',
@@ -124,7 +156,6 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     datasetQualityInsufficientPrivileges: 'datasetQualityInsufficientPrivileges',
     datasetQualityNoDataEmptyState: 'datasetQualityTableNoData',
     datasetQualityNoPrivilegesEmptyState: 'datasetQualityNoPrivilegesEmptyState',
-
     superDatePickerToggleQuickMenuButton: 'superDatePickerToggleQuickMenuButton',
     superDatePickerApplyTimeButton: 'superDatePickerApplyTimeButton',
     superDatePickerQuickMenu: 'superDatePickerQuickMenu',
@@ -138,6 +169,8 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
       'datasetQualityDetailsDegradedFieldFlyoutIssueDoesNotExist',
     datasetQualityDetailsOverviewDegradedFieldToggleSwitch:
       'datasetQualityDetailsOverviewDegradedFieldToggleSwitch',
+    datasetQualityDetailsActionsDropdown: 'datasetQualityDetailsActionsDropdown',
+    openInDiscover: 'openInDiscover',
   };
 
   return {
@@ -193,12 +226,36 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
       );
     },
 
+    async navigateToDetailsV2(pageState: datasetQualityDetailsUrlSchemaV2.UrlSchema) {
+      const queryStringParams = querystring.stringify({
+        [DATA_QUALITY_URL_STATE_KEY]: rison.encode(
+          datasetQualityDetailsUrlSchemaV2.urlSchemaRT.encode({
+            ...defaultDetailsPageStateV2,
+            ...pageState,
+          })
+        ),
+      });
+
+      return PageObjects.common.navigateToUrlWithBrowserHistory(
+        'management',
+        '/data/data_quality/details',
+        queryStringParams,
+        {
+          // the check sometimes is too slow for the page so it misses the point
+          // in time before the app rewrites the URL
+          ensureCurrentUrl: false,
+        }
+      );
+    },
+
     async waitUntilTableLoaded() {
       await find.waitForDeletedByCssSelector('.euiBasicTable-loading', 20 * 1000);
     },
 
     async waitUntilSummaryPanelLoaded(isStateful: boolean = true) {
-      await testSubjects.missingOrFail(`datasetQuality-${texts.activeDatasets}-loading`);
+      await testSubjects.missingOrFail(`datasetQuality-${texts.activeDatasets}-loading`, {
+        timeout: 5 * 1000, // Increasing timeout since tests were flaky
+      });
       if (isStateful) {
         await testSubjects.missingOrFail(`datasetQuality-${texts.estimatedData}-loading`);
       }
@@ -302,21 +359,27 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
       await this.waitUntilTableLoaded();
       const table = await this.getDatasetsTable();
       return this.parseTable(table, [
-        '0',
-        'Data Set Name',
-        'Namespace',
-        'Size',
-        'Data Set Quality',
-        'Degraded Docs (%)',
-        'Last Activity',
-        'Actions',
+        texts.datasetNameColumn,
+        texts.datasetNamespaceColumn,
+        texts.datasetTypeColumn,
+        texts.datasetSizeColumn,
+        texts.datasetQualityColumn,
+        texts.datasetDegradedDocsColumn,
+        texts.datasetFailedDocsColumn,
+        texts.datasetLastActivityColumn,
+        texts.datasetActionsColumn,
       ]);
     },
 
     async parseDegradedFieldTable() {
       await this.waitUntilTableLoaded();
       const table = await this.getDatasetQualityDetailsDegradedFieldTable();
-      return this.parseTable(table, ['0', 'Field', 'Docs count', 'Last Occurrence']);
+      return this.parseTable(table, [
+        '0',
+        texts.datasetIssueColumn,
+        texts.datasetDocsCountColumn,
+        texts.datasetLastOccurrenceColumn,
+      ]);
     },
 
     async filterForIntegrations(integrations: string[]) {
@@ -348,6 +411,7 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     },
 
     async toggleShowFullDatasetNames() {
+      await find.waitForDeletedByCssSelector('.euiToolTipPopover', 5 * 1000);
       return find.clickByCssSelector(selectors.showFullDatasetNamesSwitch);
     },
 
@@ -375,6 +439,14 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
       return testSubjects.find(testSubjectSelectors.datasetQualityDetailsHeaderButton);
     },
 
+    openDatasetQualityDetailsActionsButton() {
+      return testSubjects.click(testSubjectSelectors.datasetQualityDetailsActionsDropdown);
+    },
+
+    getOpenInDiscoverButton() {
+      return testSubjects.find(testSubjectSelectors.openInDiscover);
+    },
+
     openIntegrationActionsMenu() {
       return testSubjects.click(testSubjectSelectors.datasetQualityDetailsIntegrationActionsButton);
     },
@@ -398,15 +470,20 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
         { title: texts.services, key: 'services' },
         { title: texts.hosts, key: 'hosts' },
         { title: texts.degradedDocs, key: 'degradedDocs' },
+        { title: texts.failedDocs, key: 'failedDocs' },
       ].filter((item) => !excludeKeys.includes(item.key));
 
       const kpiTexts = await Promise.all(
-        kpiTitleAndKeys.map(async ({ title, key }) => ({
-          key,
-          value: await testSubjects.getVisibleText(
-            `${testSubjectSelectors.datasetQualityDetailsSummaryKpiValue}-${title}`
-          ),
-        }))
+        kpiTitleAndKeys.map(async ({ title, key }) => {
+          const selector = `${testSubjectSelectors.datasetQualityDetailsSummaryKpiValue}-${title}`;
+
+          const exists = await testSubjects.exists(selector);
+          if (!exists) {
+            return { key, value: undefined } as { key: string; value: string | undefined };
+          }
+
+          return { key, value: await testSubjects.getVisibleText(selector) };
+        })
       );
 
       return kpiTexts.reduce(
@@ -418,10 +495,6 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
       );
     },
 
-    /**
-     * Selects a breakdown field from the unified histogram breakdown selector
-     * @param fieldText The text of the field to select. Use 'No breakdown' to clear the selection
-     */
     async selectBreakdownField(fieldText: string) {
       return euiSelectable.searchAndSelectOption(
         testSubjectSelectors.unifiedHistogramBreakdownSelectorButton,
@@ -432,12 +505,22 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
       );
     },
 
+    async selectQualityIssueChart(type: 'degraded' | 'failed') {
+      const chartSelector =
+        type === 'degraded'
+          ? selectors.qualityIssueDegradedChart
+          : selectors.qualityIssueFailedChart;
+      return find.clickByCssSelector(chartSelector);
+    },
+
     async openDegradedFieldFlyout(fieldName: string) {
       await this.waitUntilTableLoaded();
       const cols = await this.parseDegradedFieldTable();
-      const fieldNameCol = cols.Field;
+      const fieldNameCol = cols.Issue;
       const fieldNameColCellTexts = await fieldNameCol.getCellTexts();
-      const testDatasetRowIndex = fieldNameColCellTexts.findIndex((dName) => dName === fieldName);
+      const testDatasetRowIndex = fieldNameColCellTexts.findIndex(
+        (dName) => dName === `${fieldName} field ignored`
+      );
 
       expect(testDatasetRowIndex).to.be.greaterThan(-1);
 
@@ -450,10 +533,37 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
 
       const fieldExpandButton = expandButtons[testDatasetRowIndex];
 
-      // Check if 'title' attribute is "Expand" or "Collapse"
       const isCollapsed = (await fieldExpandButton.getAttribute('title')) === 'Expand';
 
-      // Open if collapsed
+      if (isCollapsed) {
+        await fieldExpandButton.click();
+      }
+
+      await this.waitUntilDegradedFieldFlyoutLoaded();
+    },
+
+    async openFailedDocsFlyout() {
+      await this.waitUntilTableLoaded();
+      const cols = await this.parseDegradedFieldTable();
+      const fieldNameCol = cols.Issue;
+      const fieldNameColCellTexts = await fieldNameCol.getCellTexts();
+      const testDatasetRowIndex = fieldNameColCellTexts.findIndex(
+        (dName) => dName === `Documents indexing failed`
+      );
+
+      expect(testDatasetRowIndex).to.be.greaterThan(-1);
+
+      const expandColumn = cols['0'];
+      const expandButtons = await expandColumn.getCellChildren(
+        `[data-test-subj=${testSubjectSelectors.datasetQualityDetailsDegradedFieldsExpandButton}]`
+      );
+
+      expect(expandButtons.length).to.be.greaterThan(0);
+
+      const fieldExpandButton = expandButtons[testDatasetRowIndex];
+
+      const isCollapsed = (await fieldExpandButton.getAttribute('title')) === 'Expand';
+
       if (isCollapsed) {
         await fieldExpandButton.click();
       }

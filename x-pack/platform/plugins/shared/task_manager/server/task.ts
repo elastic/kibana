@@ -5,16 +5,23 @@
  * 2.0.
  */
 
-import { ObjectType, schema, TypeOf } from '@kbn/config-schema';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+import type { ObjectType, TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import { isNumber } from 'lodash';
+import type { KibanaRequest } from '@kbn/core/server';
+import type { Frequency } from '@kbn/rrule';
 import { isErr, tryAsResult } from './lib/result_type';
-import { Interval, isInterval, parseIntervalAsMillisecond } from './lib/intervals';
-import { DecoratedError } from './task_running';
+import type { Interval } from './lib/intervals';
+import { isInterval, parseIntervalAsMillisecond } from './lib/intervals';
+import type { DecoratedError } from './task_running';
 
 export const DEFAULT_TIMEOUT = '5m';
 
 export enum TaskPriority {
   Low = 1,
+  NormalLongRunning = 40,
   Normal = 50,
 }
 
@@ -50,6 +57,12 @@ export interface RunContext {
    * The document describing the task instance, its params, state, id, etc.
    */
   taskInstance: ConcreteTaskInstance;
+
+  /**
+   * If an API key is associated with the task, a fake KibanaRequest object
+   * is generated using the API key and passed as part of the run context.
+   */
+  fakeRequest?: KibanaRequest;
 }
 
 /**
@@ -82,7 +95,7 @@ export type SuccessfulRunResult = {
        * continue to use which ever schedule it already has, and if no there is
        * no previous schedule then it will be treated as a single-run task.
        */
-      schedule?: IntervalSchedule;
+      schedule?: IntervalSchedule | RruleSchedule;
       runAt?: never;
     }
 );
@@ -244,6 +257,47 @@ export interface IntervalSchedule {
    * An interval in minutes (e.g. '5m'). If specified, this is a recurring task.
    * */
   interval: Interval;
+  rrule?: never;
+}
+
+export type Rrule = RruleMonthly | RruleWeekly | RruleDaily;
+export interface RruleSchedule {
+  rrule: Rrule;
+  interval?: never;
+}
+
+interface RruleCommon {
+  dtstart?: string;
+  freq: Frequency;
+  interval: number;
+  tzid: string;
+}
+interface RruleMonthly extends RruleCommon {
+  freq: Frequency.MONTHLY;
+  bymonthday?: number[];
+  byhour?: number[];
+  byminute?: number[];
+  byweekday?: string[];
+}
+interface RruleWeekly extends RruleCommon {
+  freq: Frequency.WEEKLY;
+  byweekday?: string[];
+  byhour?: number[];
+  byminute?: number[];
+  bymonthday?: never;
+}
+interface RruleDaily extends RruleCommon {
+  freq: Frequency.DAILY;
+  byhour?: number[];
+  byminute?: number[];
+  byweekday?: string[];
+  bymonthday?: never;
+}
+
+export interface TaskUserScope {
+  apiKeyId: string;
+  spaceId?: string;
+  apiKeyCreatedByUser: boolean;
 }
 
 /*
@@ -294,7 +348,7 @@ export interface TaskInstance {
    *
    * Currently, this supports a single format: an interval in minutes or seconds (e.g. '5m', '30s').
    */
-  schedule?: IntervalSchedule;
+  schedule?: IntervalSchedule | RruleSchedule;
 
   /**
    * A task-specific set of parameters, used by the task's run function to tailor
@@ -351,6 +405,21 @@ export interface TaskInstance {
    * Used to break up tasks so each Kibana node can claim tasks on a subset of the partitions
    */
   partition?: number;
+
+  /**
+   * Used to allow tasks to be scoped to a user via their API key
+   */
+  apiKey?: string;
+
+  /**
+   * Meta data related to the API key associated with this task
+   */
+  userScope?: TaskUserScope;
+
+  /*
+   * Optionally override the priority defined in the task type for this specific task instance
+   */
+  priority?: TaskPriority;
 }
 
 /**
@@ -483,8 +552,16 @@ export type SerializedConcreteTaskInstance = Omit<
   retryAt: string | null;
   runAt: string;
   partition?: number;
+  apiKey?: string;
+  userScope?: TaskUserScope;
 };
 
 export type PartialSerializedConcreteTaskInstance = Partial<SerializedConcreteTaskInstance> & {
   id: SerializedConcreteTaskInstance['id'];
 };
+
+export interface ApiKeyOptions {
+  request?: KibanaRequest;
+}
+
+export type ScheduleOptions = Record<string, unknown> & ApiKeyOptions;

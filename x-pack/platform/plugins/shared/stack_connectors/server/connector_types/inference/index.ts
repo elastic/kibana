@@ -4,20 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
-import {
-  SubActionConnectorType,
-  ValidatorType,
-} from '@kbn/actions-plugin/server/sub_action_framework/types';
+import type { SubActionConnectorType } from '@kbn/actions-plugin/server/sub_action_framework/types';
+import { ValidatorType } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import {
   GenerativeAIForSearchPlaygroundConnectorFeatureId,
   GenerativeAIForSecurityConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
-import { ValidatorServices } from '@kbn/actions-plugin/server/types';
-import { GenerativeAIForObservabilityConnectorFeatureId } from '@kbn/actions-plugin/common/connector_feature_config';
-import { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ValidatorServices } from '@kbn/actions-plugin/server/types';
+import { GenerativeAIForObservabilityConnectorFeatureId } from '@kbn/actions-plugin/common';
+import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import {
   INFERENCE_CONNECTOR_TITLE,
   INFERENCE_CONNECTOR_ID,
@@ -25,7 +22,7 @@ import {
   SUB_ACTION,
 } from '../../../common/inference/constants';
 import { ConfigSchema, SecretsSchema } from '../../../common/inference/schema';
-import { Config, Secrets } from '../../../common/inference/types';
+import type { Config, Secrets } from '../../../common/inference/types';
 import { InferenceConnector } from './inference';
 import { unflattenObject } from '../lib/unflatten_object';
 
@@ -161,8 +158,16 @@ export const configValidator = (configObject: Config, validatorServices: Validat
       );
     }
 
+    if (taskType === 'chat_completion' && !Object.keys(SUB_ACTION).includes('UNIFIED_COMPLETION')) {
+      throw new Error(
+        `Task type is not supported${
+          taskType && taskType.length ? `: ${taskType}` : ``
+        } by Inference Endpoint.`
+      );
+    }
+
     if (
-      !taskType.includes('completion') &&
+      taskType !== 'chat_completion' &&
       !Object.keys(SUB_ACTION).includes(taskType.toUpperCase())
     ) {
       throw new Error(

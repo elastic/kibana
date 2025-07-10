@@ -22,6 +22,13 @@ type DeepPartial<TInputObj> = {
 interface ObjectDiffResult<TBase, TCompare> {
   added: DeepPartial<TCompare>;
   removed: DeepPartial<TBase>;
+  updated: {
+    [K in keyof TBase & keyof TCompare]?: TBase[K] extends TCompare[K] ? never : TCompare[K];
+  };
+}
+
+function isAllUndefined(obj: unknown): boolean {
+  return Array.isArray(obj) && obj.every((value) => value === undefined);
 }
 
 /**
@@ -34,16 +41,18 @@ export function calculateObjectDiff<TBase extends Obj, TCompare extends Obj>(
   oldObj: TBase,
   newObj?: TCompare
 ): ObjectDiffResult<TBase, TCompare> {
-  const added: DeepPartial<TCompare> = {};
-  const removed: DeepPartial<TBase> = {};
+  const added: ObjectDiffResult<TBase, TCompare>['added'] = {};
+  const removed: ObjectDiffResult<TBase, TCompare>['removed'] = {};
+  const updated: ObjectDiffResult<TBase, TCompare>['updated'] = {};
 
-  if (!newObj) return { added, removed };
+  if (!newObj) return { added, removed, updated };
 
   function diffRecursive(
     base: Obj,
     compare: Obj,
     addedMap: DeepPartial<Obj>,
-    removedMap: DeepPartial<Obj>
+    removedMap: DeepPartial<Obj>,
+    updatedMap: DeepPartial<Obj>
   ): void {
     for (const key in compare) {
       if (!(key in base)) {
@@ -51,14 +60,32 @@ export function calculateObjectDiff<TBase extends Obj, TCompare extends Obj>(
       } else if (isPlainObject(base[key]) && isPlainObject(compare[key])) {
         addedMap[key] = {};
         removedMap[key] = {};
+        updatedMap[key] = {};
         diffRecursive(
           base[key] as Obj,
           compare[key] as Obj,
           addedMap[key] as Obj,
-          removedMap[key] as Obj
+          removedMap[key] as Obj,
+          updatedMap[key] as Obj
         );
         if (isEmpty(addedMap[key])) delete addedMap[key];
         if (isEmpty(removedMap[key])) delete removedMap[key];
+      } else if (Array.isArray(base[key]) && Array.isArray(compare[key])) {
+        addedMap[key] = [];
+        removedMap[key] = [];
+        updatedMap[key] = [];
+        diffRecursive(
+          base[key] as Obj,
+          compare[key] as Obj,
+          addedMap[key] as Obj,
+          removedMap[key] as Obj,
+          updatedMap[key] as Obj
+        );
+        if (isAllUndefined(addedMap[key])) delete addedMap[key];
+        if (isAllUndefined(removedMap[key])) delete removedMap[key];
+        if (isAllUndefined(updatedMap[key])) delete updatedMap[key];
+      } else if (base[key] !== compare[key]) {
+        updatedMap[key] = compare[key];
       }
     }
 
@@ -69,7 +96,7 @@ export function calculateObjectDiff<TBase extends Obj, TCompare extends Obj>(
     }
   }
 
-  diffRecursive(oldObj, newObj, added, removed);
+  diffRecursive(oldObj, newObj, added, removed, updated);
 
-  return { added, removed };
+  return { added, removed, updated };
 }

@@ -18,7 +18,8 @@ import { EuiPopoverProps, EuiIcon, keys, htmlIdGenerator } from '@elastic/eui';
 import { PersistedState } from '@kbn/visualizations-plugin/public';
 import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/public';
 
-import { getDataActions } from '../../../services';
+import { VALUE_CLICK_TRIGGER } from '@kbn/embeddable-plugin/public';
+import { css } from '@emotion/react';
 import { CUSTOM_LEGEND_VIS_TYPES, LegendItem } from './models';
 import { VisLegendItem } from './legend_item';
 import { BasicVislibParams } from '../../../types';
@@ -28,6 +29,7 @@ export interface VisLegendProps {
   visData: unknown;
   uiState?: PersistedState;
   fireEvent: IInterpreterRenderHandlers['event'];
+  hasCompatibleActions: IInterpreterRenderHandlers['hasCompatibleActions'];
   addLegend: BasicVislibParams['addLegend'];
   position: 'top' | 'bottom' | 'left' | 'right';
 }
@@ -38,6 +40,26 @@ export interface VisLegendState {
   filterableLabels: Set<string>;
   selectedLabel: string | null;
 }
+
+const visLegendStyles = {
+  inEmbPanel: css({
+    '.embPanel &': {
+      borderBottomRightRadius: 0,
+      borderTopLeftRadius: 0,
+      opacity: 0, // Fix overflow of vis's specifically for inside embeddable panels, lets the panel decide the overflow
+
+      '&:focus': {
+        opacity: 1,
+      },
+    },
+    '.embPanel:hover &': {
+      opacity: 1,
+    },
+    '.embPanel--editing &': {
+      opacity: 1, // Always show in editing mode
+    },
+  }),
+};
 
 export class VisLegend extends PureComponent<VisLegendProps, VisLegendState> {
   legendId = htmlIdGenerator()('legend');
@@ -104,8 +126,13 @@ export class VisLegend extends PureComponent<VisLegendProps, VisLegendState> {
       return false;
     }
 
-    const filters = await getDataActions().createFiltersFromValueClickAction({ data: item.values });
-    return Boolean(filters.length);
+    const filters = this.props.hasCompatibleActions
+      ? await this.props.hasCompatibleActions({
+          name: VALUE_CLICK_TRIGGER,
+          data: item.values,
+        })
+      : false;
+    return filters;
   };
 
   toggleDetails = (label: string | null) => (event?: BaseSyntheticEvent) => {
@@ -274,6 +301,7 @@ export class VisLegend extends PureComponent<VisLegendProps, VisLegendState> {
           title={i18n.translate('visTypeVislib.vislib.legend.toggleLegendButtonTitle', {
             defaultMessage: 'Toggle legend',
           })}
+          css={visLegendStyles.inEmbPanel}
         >
           <EuiIcon color="text" type="list" />
         </button>

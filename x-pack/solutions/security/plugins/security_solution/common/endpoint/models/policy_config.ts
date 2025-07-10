@@ -13,24 +13,26 @@ import { isBillablePolicy } from './policy_config_helpers';
 /**
  * Return a new default `PolicyConfig` for platinum and above licenses
  */
-export const policyFactory = (
+export const policyFactory = ({
   license = '',
   cloud = false,
-  licenseUid = '',
+  licenseUuid = '',
   clusterUuid = '',
   clusterName = '',
-  serverless = false
-): PolicyConfig => {
+  serverless = false,
+  isGlobalTelemetryEnabled = false,
+} = {}): PolicyConfig => {
   const policy: PolicyConfig = {
     meta: {
       license,
-      license_uuid: licenseUid,
+      license_uuid: licenseUuid,
       cluster_uuid: clusterUuid,
       cluster_name: clusterName,
       cloud,
       serverless,
     },
     global_manifest_version: 'latest',
+    global_telemetry_enabled: isGlobalTelemetryEnabled,
     windows: {
       events: {
         credential_access: true,
@@ -93,9 +95,11 @@ export const policyFactory = (
     },
     mac: {
       events: {
+        dns: true,
         process: true,
         file: true,
         network: true,
+        security: true,
       },
       malware: {
         mode: ProtectionModes.prevent,

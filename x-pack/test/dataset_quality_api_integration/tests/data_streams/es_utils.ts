@@ -22,16 +22,19 @@ export async function addIntegrationToLogIndexTemplate({
 
   await esClient.indices.putIndexTemplate({
     name: 'logs',
-    body: {
-      ...indexTemplates[0].index_template,
-      _meta: {
-        ...indexTemplates[0].index_template._meta,
-        package: {
-          name,
-        },
-        managed_by: managedBy,
+    ...indexTemplates[0].index_template,
+    _meta: {
+      ...indexTemplates[0].index_template._meta,
+      package: {
+        name,
       },
+      managed_by: managedBy,
     },
+    // PUT expects string[] while GET might return string | string[]
+    ignore_missing_component_templates: indexTemplates[0].index_template
+      .ignore_missing_component_templates
+      ? [indexTemplates[0].index_template.ignore_missing_component_templates].flat()
+      : undefined,
   });
 }
 
@@ -42,13 +45,16 @@ export async function cleanLogIndexTemplate({ esClient }: { esClient: Client }) 
 
   await esClient.indices.putIndexTemplate({
     name: 'logs',
-    body: {
-      ...indexTemplates[0].index_template,
-      _meta: {
-        ...indexTemplates[0].index_template._meta,
-        package: undefined,
-        managed_by: undefined,
-      },
+    ...indexTemplates[0].index_template,
+    _meta: {
+      ...indexTemplates[0].index_template._meta,
+      package: undefined,
+      managed_by: undefined,
     },
+    // PUT expects string[] while GET might return string | string[]
+    ignore_missing_component_templates: indexTemplates[0].index_template
+      .ignore_missing_component_templates
+      ? [indexTemplates[0].index_template.ignore_missing_component_templates].flat()
+      : undefined,
   });
 }

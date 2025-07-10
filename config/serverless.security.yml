@@ -1,52 +1,112 @@
 # Security Project config
 
+# Make sure the plugins belonging to this project type are loaded
+plugins.allowlistPluginGroups: ['platform', 'security']
+
+# Ess plugins
+xpack.securitySolutionEss.enabled: false
+
 ## Disable plugins
-enterpriseSearch.enabled: false
-xpack.apm.enabled: false
-xpack.infra.enabled: false
-xpack.observabilityLogsExplorer.enabled: false
-xpack.observability.enabled: false
 xpack.observabilityAIAssistant.enabled: false
-xpack.search.notebooks.enabled: false
-xpack.searchPlayground.enabled: false
-xpack.searchInferenceEndpoints.enabled: false
-xpack.inventory.enabled: false
 
 ## Fine-tune the security solution feature privileges. Also, refer to `serverless.yml` for the project-agnostic overrides.
 xpack.features.overrides:
-  ### Dashboard feature is hidden in Role management since it's automatically granted by SIEM feature.
-  dashboard.hidden: true
-  ### Discover feature is hidden in Role management since it's automatically granted by SIEM feature.
+  ### The following features are hidden in Role management since they're automatically granted by SIEM feature.
   discover.hidden: true
+  discover_v2.hidden: true
+  dashboard.hidden: true
+  dashboard_v2.hidden: true
+  visualize.hidden: true
+  visualize_v2.hidden: true
+  maps.hidden: true
+  maps_v2.hidden: true
   ### Machine Learning feature is moved from Analytics category to the Security one as the last item.
   ml:
     category: "security"
     order: 1101
+  ### Security's feature privileges are fine-tuned to grant access to Discover, Dashboard, Maps, and Visualize apps.
+  siemV3:
+    privileges:
+      ### Security's `All` feature privilege should implicitly grant `All` access to Discover, Dashboard, Maps, and
+      ### Visualize features.
+      all.composedOf:
+        - feature: "discover_v2"
+          privileges: [ "all" ]
+        - feature: "dashboard_v2"
+          privileges: [ "all" ]
+        - feature: "visualize_v2"
+          privileges: [ "all" ]
+        - feature: "maps_v2"
+          privileges: [ "all" ]
+      # Security's `Read` feature privilege should implicitly grant `Read` access to Discover, Dashboard, Maps, and
+      # Visualize features. Additionally, it should implicitly grant privilege to create short URLs in Discover,
+      ### Dashboard, and Visualize apps.
+      read.composedOf:
+        - feature: "discover_v2"
+          privileges: [ "read" ]
+        - feature: "dashboard_v2"
+          privileges: [ "read" ]
+        - feature: "visualize_v2"
+          privileges: [ "read" ]
+        - feature: "maps_v2"
+          privileges: [ "read" ]
+
+  ### Security's feature privileges are fine-tuned to grant access to Discover, Dashboard, Maps, and Visualize apps.
+  siemV2:
+    privileges:
+      ### Security's `All` feature privilege should implicitly grant `All` access to Discover, Dashboard, Maps, and
+      ### Visualize features.
+      all.composedOf:
+        - feature: "discover_v2"
+          privileges: [ "all" ]
+        - feature: "dashboard_v2"
+          privileges: [ "all" ]
+        - feature: "visualize_v2"
+          privileges: [ "all" ]
+        - feature: "maps_v2"
+          privileges: [ "all" ]
+      # Security's `Read` feature privilege should implicitly grant `Read` access to Discover, Dashboard, Maps, and
+      # Visualize features. Additionally, it should implicitly grant privilege to create short URLs in Discover,
+      ### Dashboard, and Visualize apps.
+      read.composedOf:
+        - feature: "discover_v2"
+          privileges: [ "read" ]
+        - feature: "dashboard_v2"
+          privileges: [ "read" ]
+        - feature: "visualize_v2"
+          privileges: [ "read" ]
+        - feature: "maps_v2"
+          privileges: [ "read" ]
+
   ### Security's feature privileges are fine-tuned to grant access to Discover, Dashboard, Maps, and Visualize apps.
   siem:
     privileges:
       ### Security's `All` feature privilege should implicitly grant `All` access to Discover, Dashboard, Maps, and
       ### Visualize features.
       all.composedOf:
-        - feature: "discover"
+        - feature: "discover_v2"
           privileges: [ "all" ]
-        - feature: "dashboard"
+        - feature: "dashboard_v2"
           privileges: [ "all" ]
-        - feature: "visualize"
+        - feature: "visualize_v2"
           privileges: [ "all" ]
-        - feature: "maps"
+        - feature: "maps_v2"
+          privileges: [ "all" ]
+        - feature: "savedQueryManagement"
           privileges: [ "all" ]
       # Security's `Read` feature privilege should implicitly grant `Read` access to Discover, Dashboard, Maps, and
       # Visualize features. Additionally, it should implicitly grant privilege to create short URLs in Discover,
       ### Dashboard, and Visualize apps.
       read.composedOf:
-        - feature: "discover"
+        - feature: "discover_v2"
           privileges: [ "read" ]
-        - feature: "dashboard"
+        - feature: "dashboard_v2"
           privileges: [ "read" ]
-        - feature: "visualize"
+        - feature: "visualize_v2"
           privileges: [ "read" ]
-        - feature: "maps"
+        - feature: "maps_v2"
+          privileges: [ "read" ]
+        - feature: "savedQueryManagement"
           privileges: [ "read" ]
 
 ## Cloud settings
@@ -70,17 +130,11 @@ newsfeed.enabled: true
 ## Set the home route
 uiSettings.overrides.defaultRoute: /app/security/get_started
 
-## Set the dev project switcher current type
-xpack.serverless.plugin.developer.projectSwitcher.currentType: 'security'
-
 # Specify in telemetry the project type
 telemetry.labels.serverless: security
 
 # Fleet specific configuration
 xpack.fleet.internal.registry.capabilities: ['security']
-xpack.fleet.internal.registry.spec.min: '3.0'
-xpack.fleet.internal.registry.spec.max: '3.3'
-xpack.fleet.internal.registry.kibanaVersionCheckEnabled: false
 xpack.fleet.internal.registry.excludePackages: [
     # Oblt integrations
     'apm',
@@ -137,7 +191,23 @@ console.ui.embeddedEnabled: false
 # Enable project level rentention checks in DSL form from Index Management UI
 xpack.index_management.enableProjectLevelRetentionChecks: true
 
+# Increase task manager capacity because security projects have more resources (Memory and CPU)
+xpack.task_manager.capacity: 20
+
+## Enable uiSettings validations
+xpack.securitySolution.enableUiSettingsValidations: true
+
+# Alerting and action circuit breakers
+xpack.alerting.rules.run.ruleTypeOverrides:
+  - id: siem.indicatorRule
+    timeout: 10m
+  - id: siem.eqlRule
+    timeout: 5m
+  - id: attack-discovery
+    timeout: 10m
+
 # Experimental Security Solution features
 
-# This feature is disabled in Serverless until fully performance tested within a Serverless environment
-xpack.securitySolution.enableExperimental: ['entityStoreDisabled']
+# These features are disabled in Serverless until fully tested
+xpack.securitySolution.enableExperimental:
+  - privilegedUserMonitoringDisabled

@@ -64,6 +64,25 @@ const getInvalidAgentsWarning = (invalidAgents: string[]) =>
 export class EndpointActionsClient extends ResponseActionsClientImpl {
   protected readonly agentType: ResponseActionAgentType = 'endpoint';
 
+  protected async fetchAgentPolicyInfo(
+    agentIds: string[]
+  ): Promise<LogsEndpointAction['agent']['policy']> {
+    const cacheKey = `fetchAgentPolicyInfo:${agentIds.sort().join('#')}`;
+    const cacheResponse = this.cache.get<LogsEndpointAction['agent']['policy']>(cacheKey);
+
+    if (cacheResponse) {
+      this.log.debug(
+        () => `Cached agent policy info. found - returning it:\n${stringify(cacheResponse)}`
+      );
+      return cacheResponse;
+    }
+
+    const agentPolicyInfo = await this.fetchFleetInfoForAgents(agentIds);
+
+    this.cache.set(cacheKey, agentPolicyInfo);
+    return agentPolicyInfo;
+  }
+
   private async checkAgentIds(ids: string[]): Promise<{
     valid: string[];
     invalid: string[];
@@ -72,7 +91,7 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
   }> {
     const uniqueIds = [...new Set(ids)];
     const foundEndpointHosts = await this.options.endpointService
-      .getEndpointMetadataService()
+      .getEndpointMetadataService(this.options.spaceId)
       .getMetadataForEndpoints(uniqueIds);
     const validIds = foundEndpointHosts.map((endpoint: HostMetadata) => endpoint.elastic.agent.id);
     const invalidIds = ids.filter((id) => !validIds.includes(id));
@@ -176,7 +195,10 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
       }),
     });
 
-    return this.fetchActionDetails<TResponse>(actionId);
+    // We bypass space validation when retrieving the action details to ensure that if a failed
+    // action was created, and it did not contain the agent policy information (and space is enabled)
+    // we don't trigger an error.
+    return this.fetchActionDetails<TResponse>(actionId, true);
   }
 
   private async dispatchActionViaFleet({

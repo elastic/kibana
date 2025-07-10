@@ -5,12 +5,33 @@
  * 2.0.
  */
 
+import { debugRendererFactory } from './debug';
+import { errorRendererFactory } from './error';
+import { imageRendererFactory } from './image';
 import { markdownFactory } from './markdown';
+import { metricRendererFactory } from './metric';
 import { pie } from './pie';
 import { plot } from './plot';
+import { repeatImageRendererFactory } from './repeat_image';
+import { revealImageRendererFactory } from './reveal_image';
+import { progressRendererFactory } from './progress';
+import { shapeRendererFactory } from './shape';
 import { textFactory } from './text';
 import { tableFactory } from './table';
 
 export const renderFunctions = [pie, plot];
 
-export const renderFunctionFactories = [markdownFactory, tableFactory, textFactory];
+export const renderFunctionFactories = [
+  debugRendererFactory,
+  errorRendererFactory,
+  imageRendererFactory,
+  markdownFactory,
+  markdownFactory,
+  metricRendererFactory,
+  progressRendererFactory,
+  repeatImageRendererFactory,
+  revealImageRendererFactory,
+  shapeRendererFactory,
+  tableFactory,
+  textFactory,
+];

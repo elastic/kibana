@@ -23,31 +23,18 @@ import {
   EuiLink,
   EuiButtonIcon,
 } from '@elastic/eui';
-import {
-  AnalyticsServiceStart,
-  AppMountParameters,
-  I18nStart,
-  ThemeServiceStart,
-  UserProfileService,
-} from '@kbn/core/public';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { AppMountParameters } from '@kbn/core/public';
+import { RenderingService } from '@kbn/core-rendering-browser';
 import { ExampleDefinition } from './types';
 
-interface StartServices {
-  analytics: Pick<AnalyticsServiceStart, 'reportEvent'>;
-  i18n: I18nStart;
-  theme: Pick<ThemeServiceStart, 'theme$'>;
-  userProfile: UserProfileService;
-}
-
 interface Props {
-  startServices: StartServices;
+  rendering: RenderingService;
   examples: ExampleDefinition[];
   navigateToApp: (appId: string) => void;
   getUrlForApp: (appId: string) => string;
 }
 
-function DeveloperExamples({ startServices, examples, navigateToApp, getUrlForApp }: Props) {
+function DeveloperExamples({ examples, navigateToApp, getUrlForApp, rendering }: Props) {
   const [search, setSearch] = useState<string>('');
 
   const lcSearch = search.toLowerCase();
@@ -59,8 +46,8 @@ function DeveloperExamples({ startServices, examples, navigateToApp, getUrlForAp
         return false;
       });
 
-  return (
-    <KibanaRenderContextProvider {...startServices}>
+  return rendering.addContext(
+    <EuiPageTemplate offset={0}>
       <EuiPageTemplate.Header>
         <EuiFlexGroup justifyContent={'spaceBetween'}>
           <EuiFlexItem>
@@ -119,7 +106,7 @@ function DeveloperExamples({ startServices, examples, navigateToApp, getUrlForAp
           ))}
         </EuiFlexGroup>
       </EuiPageTemplate.Section>
-    </KibanaRenderContextProvider>
+    </EuiPageTemplate>
   );
 }
 

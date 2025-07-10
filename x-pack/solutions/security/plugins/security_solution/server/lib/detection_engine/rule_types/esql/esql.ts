@@ -6,16 +6,13 @@
  */
 
 import { performance } from 'perf_hooks';
-import type {
-  AlertInstanceContext,
-  AlertInstanceState,
-  RuleExecutorServices,
-} from '@kbn/alerting-plugin/server';
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
+import { cloneDeep } from 'lodash';
 
 import {
   computeIsESQLQueryAggregating,
   getIndexListFromEsqlQuery,
+  getMvExpandFields,
 } from '@kbn/securitysolution-utils';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import { buildEsqlSearchRequest } from './build_esql_search_request';
@@ -23,15 +20,21 @@ import { performEsqlRequest } from './esql_request';
 import { wrapEsqlAlerts } from './wrap_esql_alerts';
 import { wrapSuppressedEsqlAlerts } from './wrap_suppressed_esql_alerts';
 import { bulkCreateSuppressedAlertsInMemory } from '../utils/bulk_create_suppressed_alerts_in_memory';
-import { createEnrichEventsFunction } from '../utils/enrichments';
-import { rowToDocument } from './utils';
+import {
+  rowToDocument,
+  mergeEsqlResultInSource,
+  getMvExpandUsage,
+  updateExcludedDocuments,
+  initiateExcludedDocuments,
+} from './utils';
 import { fetchSourceDocuments } from './fetch_source_documents';
 import { buildReasonMessageForEsqlAlert } from '../utils/reason_formatters';
 import type { RulePreviewLoggedRequest } from '../../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
-import type { CreateRuleOptions, RunOpts, SignalSource } from '../types';
-import { logEsqlRequest } from '../utils/logged_requests';
+import type { SecurityRuleServices, SecuritySharedParams, SignalSource } from '../types';
 import { getDataTierFilter } from '../utils/get_data_tier_filter';
-import * as i18n from '../translations';
+import { checkErrorDetails } from '../utils/check_error_details';
+import { logClusterShardFailuresEsql } from '../utils/log_cluster_shard_failures_esql';
+import type { ExcludedDocument, EsqlState } from './types';
 
 import {
   addToSearchAfterReturn,
@@ -43,63 +46,80 @@ import {
 } from '../utils/utils';
 import type { EsqlRuleParams } from '../../rule_schema';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
-import { getIsAlertSuppressionActive } from '../utils/get_is_alert_suppression_active';
-import type { ExperimentalFeatures } from '../../../../../common';
+import {
+  alertSuppressionTypeGuard,
+  getIsAlertSuppressionActive,
+} from '../utils/get_is_alert_suppression_active';
+import { bulkCreate } from '../factories';
+import type { ScheduleNotificationResponseActionsService } from '../../rule_response_actions/schedule_notification_response_actions';
+
+const MAX_EXCLUDED_DOCUMENTS = 100 * 1000;
 
 export const esqlExecutor = async ({
-  runOpts: {
+  sharedParams,
+  services,
+  state,
+  licensing,
+  scheduleNotificationResponseActionsService,
+  ruleExecutionTimeout,
+}: {
+  sharedParams: SecuritySharedParams<EsqlRuleParams>;
+  services: SecurityRuleServices;
+  state: EsqlState;
+  licensing: LicensingPluginSetup;
+  scheduleNotificationResponseActionsService: ScheduleNotificationResponseActionsService;
+  ruleExecutionTimeout?: string;
+}) => {
+  const {
     completeRule,
     tuple,
-    ruleExecutionLogger,
-    bulkCreate,
-    mergeStrategy,
     primaryTimestamp,
     secondaryTimestamp,
     exceptionFilter,
     unprocessedExceptions,
-    alertTimestampOverride,
-    publicBaseUrl,
-    alertWithSuppression,
-    intendedTimestamp,
-  },
-  services,
-  state,
-  spaceId,
-  experimentalFeatures,
-  licensing,
-  scheduleNotificationResponseActionsService,
-}: {
-  runOpts: RunOpts<EsqlRuleParams>;
-  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
-  state: Record<string, unknown>;
-  spaceId: string;
-  version: string;
-  experimentalFeatures: ExperimentalFeatures;
-  licensing: LicensingPluginSetup;
-  scheduleNotificationResponseActionsService: CreateRuleOptions['scheduleNotificationResponseActionsService'];
-}) => {
+    ruleExecutionLogger,
+  } = sharedParams;
   const loggedRequests: RulePreviewLoggedRequest[] = [];
   const ruleParams = completeRule.ruleParams;
-  /**
-   * ES|QL returns results as a single page. max size of 10,000
-   * while we try increase size of the request to catch all alerts that might been deduplicated
-   * we don't want to overload ES/Kibana with large responses
-   */
-  const ESQL_PAGE_SIZE_CIRCUIT_BREAKER = tuple.maxSignals * 3;
   const isLoggedRequestsEnabled = state?.isLoggedRequestsEnabled ?? false;
 
   return withSecuritySpan('esqlExecutor', async () => {
     const result = createSearchAfterReturnType();
-    let size = tuple.maxSignals;
     const dataTiersFilters = await getDataTierFilter({
       uiSettingsClient: services.uiSettingsClient,
     });
+    const isRuleAggregating = computeIsESQLQueryAggregating(ruleParams.query);
+    const hasMvExpand = getMvExpandFields(ruleParams.query).length > 0;
+    // since pagination is not supported in ES|QL, we will use tuple.maxSignals + 1 to determine if search results are exhausted
+    const size = tuple.maxSignals + 1;
 
+    /**
+     * ES|QL returns results as a single page, max size of 10,000
+     * To mitigate this, we will use the maxSignals as a page size
+     * Wll keep track of the earlier found document ids and will exclude them in subsequent requests
+     * to avoid duplicates.
+     * This is a workaround until pagination is supported in ES|QL
+     * Since aggregating queries do not produce event ids, we will not exclude them.
+     * All alerts for aggregating queries are unique anyway
+     */
+    const excludedDocuments: ExcludedDocument[] = initiateExcludedDocuments({
+      state,
+      isRuleAggregating,
+      tuple,
+      hasMvExpand,
+      query: ruleParams.query,
+    });
+
+    let iteration = 0;
     try {
-      while (
-        result.createdSignalsCount <= tuple.maxSignals &&
-        size <= ESQL_PAGE_SIZE_CIRCUIT_BREAKER
-      ) {
+      while (result.createdSignalsCount <= tuple.maxSignals) {
+        if (excludedDocuments.length > MAX_EXCLUDED_DOCUMENTS) {
+          result.warningMessages.push(
+            `Excluded documents exceeded the limit of ${MAX_EXCLUDED_DOCUMENTS}, some alerts might not have been created. Consider reducing the lookback time for the rule.`
+          );
+          break;
+        }
+
         const esqlRequest = buildEsqlSearchRequest({
           query: ruleParams.query,
           from: tuple.from.toISOString(),
@@ -109,14 +129,16 @@ export const esqlExecutor = async ({
           primaryTimestamp,
           secondaryTimestamp,
           exceptionFilter,
+          excludedDocumentIds: excludedDocuments.map(({ id }) => id),
+          ruleExecutionTimeout,
         });
 
-        if (isLoggedRequestsEnabled) {
-          loggedRequests.push({
-            request: logEsqlRequest(esqlRequest),
-            description: i18n.ESQL_SEARCH_REQUEST_DESCRIPTION,
-          });
-        }
+        const esqlQueryString = {
+          drop_null_columns: true,
+          // allow_partial_results is true by default, but we need to set it to false for aggregating queries
+          allow_partial_results: !isRuleAggregating,
+        };
+        const hasLoggedRequestsReachedLimit = iteration >= 2;
 
         ruleExecutionLogger.debug(`ES|QL query request: ${JSON.stringify(esqlRequest)}`);
         const exceptionsWarning = getUnprocessedExceptionsWarnings(unprocessedExceptions);
@@ -128,25 +150,22 @@ export const esqlExecutor = async ({
 
         const response = await performEsqlRequest({
           esClient: services.scopedClusterClient.asCurrentUser,
-          requestParams: esqlRequest,
+          requestBody: esqlRequest,
+          requestQueryParams: esqlQueryString,
+          shouldStopExecution: services.shouldStopExecution,
+          ruleExecutionLogger,
+          loggedRequests: isLoggedRequestsEnabled ? loggedRequests : undefined,
         });
 
+        logClusterShardFailuresEsql({ response, result });
         const esqlSearchDuration = performance.now() - esqlSignalSearchStart;
         result.searchAfterTimes.push(makeFloatString(esqlSearchDuration));
 
-        if (isLoggedRequestsEnabled && loggedRequests[0]) {
-          loggedRequests[0].duration = Math.round(esqlSearchDuration);
-        }
+        ruleExecutionLogger.debug(
+          `ES|QL query request for ${iteration} iteration took: ${esqlSearchDuration}ms`
+        );
 
-        ruleExecutionLogger.debug(`ES|QL query request took: ${esqlSearchDuration}ms`);
-
-        const isRuleAggregating = computeIsESQLQueryAggregating(completeRule.ruleParams.query);
-
-        const results = response.values
-          // slicing already processed results in previous iterations
-          .slice(size - tuple.maxSignals)
-          .map((row) => rowToDocument(response.columns, row));
-
+        const results = response.values.map((row) => rowToDocument(response.columns, row));
         const index = getIndexListFromEsqlQuery(completeRule.ruleParams.query);
 
         const sourceDocuments = await fetchSourceDocuments({
@@ -155,6 +174,8 @@ export const esqlExecutor = async ({
           index,
           isRuleAggregating,
           loggedRequests: isLoggedRequestsEnabled ? loggedRequests : undefined,
+          hasLoggedRequestsReachedLimit,
+          runtimeMappings: sharedParams.runtimeMappings,
         });
 
         const isAlertSuppressionActive = await getIsAlertSuppressionActive({
@@ -162,61 +183,46 @@ export const esqlExecutor = async ({
           licensing,
         });
 
-        const wrapHits = (events: Array<estypes.SearchHit<SignalSource>>) =>
-          wrapEsqlAlerts({
-            events,
-            spaceId,
-            completeRule,
-            mergeStrategy,
-            isRuleAggregating,
-            alertTimestampOverride,
-            ruleExecutionLogger,
-            publicBaseUrl,
-            tuple,
-            intendedTimestamp,
-          });
+        const { expandedFieldsInResponse: expandedFields } = getMvExpandUsage(
+          response.columns,
+          completeRule.ruleParams.query
+        );
 
         const syntheticHits: Array<estypes.SearchHit<SignalSource>> = results.map((document) => {
-          const { _id, _version, _index, ...source } = document;
+          const { _id, _version, _index, ...esqlResult } = document;
+
+          const sourceDocument = _id ? sourceDocuments[_id] : undefined;
+          // when mv_expand command present we must clone source, since the reference will be used multiple times
+          const source = hasMvExpand ? cloneDeep(sourceDocument?._source) : sourceDocument?._source;
 
           return {
-            _source: source as SignalSource,
-            fields: _id ? sourceDocuments[_id]?.fields : {},
+            _source: mergeEsqlResultInSource(source, esqlResult),
+            fields: sourceDocument?.fields,
             _id: _id ?? '',
-            _index: _index ?? '',
+            _index: _index || sourceDocument?._index || '',
+            _version: sourceDocument?._version,
           };
         });
 
-        if (isAlertSuppressionActive) {
+        if (
+          isAlertSuppressionActive &&
+          alertSuppressionTypeGuard(completeRule.ruleParams.alertSuppression)
+        ) {
           const wrapSuppressedHits = (events: Array<estypes.SearchHit<SignalSource>>) =>
             wrapSuppressedEsqlAlerts({
+              sharedParams,
               events,
-              spaceId,
-              completeRule,
-              mergeStrategy,
               isRuleAggregating,
-              alertTimestampOverride,
-              ruleExecutionLogger,
-              publicBaseUrl,
-              primaryTimestamp,
-              secondaryTimestamp,
-              tuple,
-              intendedTimestamp,
+              expandedFields,
             });
 
           const bulkCreateResult = await bulkCreateSuppressedAlertsInMemory({
+            sharedParams,
             enrichedEvents: syntheticHits,
             toReturn: result,
-            wrapHits,
-            bulkCreate,
             services,
-            ruleExecutionLogger,
-            tuple,
             alertSuppression: completeRule.ruleParams.alertSuppression,
             wrapSuppressedHits,
-            alertTimestampOverride,
-            alertWithSuppression,
-            experimentalFeatures,
             buildReasonMessage: buildReasonMessageForEsqlAlert,
             mergeSourceAndFields: true,
             // passing 1 here since ES|QL does not support pagination
@@ -227,25 +233,43 @@ export const esqlExecutor = async ({
             `Created ${bulkCreateResult.createdItemsCount} alerts. Suppressed ${bulkCreateResult.suppressedItemsCount} alerts`
           );
 
+          updateExcludedDocuments({
+            excludedDocuments,
+            sourceDocuments,
+            results,
+            isRuleAggregating,
+            aggregatableTimestampField: sharedParams.aggregatableTimestampField,
+          });
+
           if (bulkCreateResult.alertsWereTruncated) {
             result.warningMessages.push(getSuppressionMaxSignalsWarning());
             break;
           }
         } else {
-          const wrappedAlerts = wrapHits(syntheticHits);
-
-          const enrichAlerts = createEnrichEventsFunction({
-            services,
-            logger: ruleExecutionLogger,
+          const wrappedAlerts = wrapEsqlAlerts({
+            sharedParams,
+            events: syntheticHits,
+            isRuleAggregating,
+            expandedFields,
           });
-          const bulkCreateResult = await bulkCreate(
+
+          const bulkCreateResult = await bulkCreate({
             wrappedAlerts,
-            tuple.maxSignals - result.createdSignalsCount,
-            enrichAlerts
-          );
+            services,
+            sharedParams,
+            maxAlerts: tuple.maxSignals - result.createdSignalsCount,
+          });
 
           addToSearchAfterReturn({ current: result, next: bulkCreateResult });
           ruleExecutionLogger.debug(`Created ${bulkCreateResult.createdItemsCount} alerts`);
+
+          updateExcludedDocuments({
+            excludedDocuments,
+            sourceDocuments,
+            results,
+            isRuleAggregating,
+            aggregatableTimestampField: sharedParams.aggregatableTimestampField,
+          });
 
           if (bulkCreateResult.alertsWereTruncated) {
             result.warningMessages.push(getMaxSignalsWarning());
@@ -266,14 +290,24 @@ export const esqlExecutor = async ({
           );
           break;
         }
-        // ES|QL does not support pagination so we need to increase size of response to be able to catch all events
-        size += tuple.maxSignals;
+        iteration++;
       }
     } catch (error) {
+      if (checkErrorDetails(error).isUserError) {
+        result.userError = true;
+      }
       result.errors.push(error.message);
       result.success = false;
     }
 
-    return { ...result, state, ...(isLoggedRequestsEnabled ? { loggedRequests } : {}) };
+    return {
+      ...result,
+      state: {
+        ...state,
+        excludedDocuments,
+        lastQuery: hasMvExpand ? ruleParams.query : undefined, // lastQuery is only relevant for mv_expand queries
+      },
+      ...(isLoggedRequestsEnabled ? { loggedRequests } : {}),
+    };
   });
 };

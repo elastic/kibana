@@ -10,7 +10,7 @@ import { INTERNAL_ROUTES } from '@kbn/reporting-common';
 import { ROUTE_TAG_CAN_REDIRECT } from '@kbn/security-plugin/server';
 import { ReportingCore } from '../../..';
 import { authorizedUserPreRouting, getCounters } from '../../common';
-import { handleUnavailable } from '../../common/generate';
+import { handleUnavailable } from '../../common/request_handler';
 import {
   commonJobsRouteHandlerFactory,
   jobManagementPreRouting,
@@ -30,6 +30,12 @@ export function registerJobInfoRoutesInternal(reporting: ReportingCore) {
     router.get(
       {
         path,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           query: schema.object({
             page: schema.string({ defaultValue: '0' }),
@@ -51,7 +57,7 @@ export function registerJobInfoRoutesInternal(reporting: ReportingCore) {
         const page = parseInt(queryPage, 10) || 0;
         const size = Math.min(100, parseInt(querySize, 10) || 10);
         const jobIds = queryIds ? queryIds.split(',') : null;
-        const results = await jobsQuery.list(user, page, size, jobIds);
+        const results = await jobsQuery.list(req, user, page, size, jobIds);
 
         counters.usageCounter();
 
@@ -72,6 +78,12 @@ export function registerJobInfoRoutesInternal(reporting: ReportingCore) {
     router.get(
       {
         path,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: false,
         options: { access: 'internal' },
       },
@@ -107,6 +119,12 @@ export function registerJobInfoRoutesInternal(reporting: ReportingCore) {
     router.get(
       {
         path,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: jobHandlers.validate,
         options: { access: 'internal' },
       },
@@ -145,6 +163,12 @@ export function registerJobInfoRoutesInternal(reporting: ReportingCore) {
     router.get(
       {
         path,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: jobHandlers.validate,
         options: { tags: [ROUTE_TAG_CAN_REDIRECT], access: 'internal' },
       },
@@ -161,6 +185,12 @@ export function registerJobInfoRoutesInternal(reporting: ReportingCore) {
     router.delete(
       {
         path,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: jobHandlers.validate,
         options: { access: 'internal' },
       },

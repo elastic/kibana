@@ -11,12 +11,12 @@ Object {
     },
     Object {
       "id": "security-solution-my-test",
-      "name": "indexpattern-datasource-layer-31213ae3-905b-4e88-b987-0cccb1f3209f",
+      "name": "indexpattern-datasource-layer-layer-event-outcome-success-id-generated-uuid",
       "type": "index-pattern",
     },
     Object {
       "id": "security-solution-my-test",
-      "name": "indexpattern-datasource-layer-b9acd453-f476-4467-ad38-203e37b73e55",
+      "name": "indexpattern-datasource-layer-layer-event-outcome-failure-id-generated-uuid",
       "type": "index-pattern",
     },
   ],
@@ -24,56 +24,13 @@ Object {
     "datasourceStates": Object {
       "formBased": Object {
         "layers": Object {
-          "31213ae3-905b-4e88-b987-0cccb1f3209f": Object {
+          "layer-event-outcome-failure-id-generated-uuid": Object {
             "columnOrder": Array [
-              "430e690c-9992-414f-9bce-00812d99a5e7",
-              "938b445a-a291-4bbc-84fe-4f47b69c20e4",
+              "column-event-outcome-failure-filter-id-generated-uuid",
+              "column-event-outcome-failure-id-generated-uuid",
             ],
             "columns": Object {
-              "430e690c-9992-414f-9bce-00812d99a5e7": Object {
-                "dataType": "string",
-                "isBucketed": true,
-                "label": "Filters",
-                "operationType": "filters",
-                "params": Object {
-                  "filters": Array [
-                    Object {
-                      "input": Object {
-                        "language": "kuery",
-                        "query": "event.outcome : \\"success\\" ",
-                      },
-                      "label": "Succ.",
-                    },
-                  ],
-                },
-                "scale": "ordinal",
-              },
-              "938b445a-a291-4bbc-84fe-4f47b69c20e4": Object {
-                "dataType": "number",
-                "isBucketed": false,
-                "label": "Succ.",
-                "operationType": "count",
-                "scale": "ratio",
-                "sourceField": "___records___",
-              },
-            },
-            "incompleteColumns": Object {},
-          },
-          "b9acd453-f476-4467-ad38-203e37b73e55": Object {
-            "columnOrder": Array [
-              "e959c351-a3a2-4525-b244-9623f215a8fd",
-              "c8165fc3-7180-4f1b-8c87-bc3ea04c6df7",
-            ],
-            "columns": Object {
-              "c8165fc3-7180-4f1b-8c87-bc3ea04c6df7": Object {
-                "dataType": "number",
-                "isBucketed": false,
-                "label": "Fail",
-                "operationType": "count",
-                "scale": "ratio",
-                "sourceField": "___records___",
-              },
-              "e959c351-a3a2-4525-b244-9623f215a8fd": Object {
+              "column-event-outcome-failure-filter-id-generated-uuid": Object {
                 "customLabel": true,
                 "dataType": "string",
                 "isBucketed": true,
@@ -91,6 +48,49 @@ Object {
                   ],
                 },
                 "scale": "ordinal",
+              },
+              "column-event-outcome-failure-id-generated-uuid": Object {
+                "dataType": "number",
+                "isBucketed": false,
+                "label": "Fail",
+                "operationType": "count",
+                "scale": "ratio",
+                "sourceField": "___records___",
+              },
+            },
+            "incompleteColumns": Object {},
+          },
+          "layer-event-outcome-success-id-generated-uuid": Object {
+            "columnOrder": Array [
+              "column-event-outcome-success-filter-id-generated-uuid",
+              "column-event-outcome-success-id-generated-uuid",
+            ],
+            "columns": Object {
+              "column-event-outcome-success-filter-id-generated-uuid": Object {
+                "dataType": "string",
+                "isBucketed": true,
+                "label": "Filters",
+                "operationType": "filters",
+                "params": Object {
+                  "filters": Array [
+                    Object {
+                      "input": Object {
+                        "language": "kuery",
+                        "query": "event.outcome : \\"success\\" ",
+                      },
+                      "label": "Succ.",
+                    },
+                  ],
+                },
+                "scale": "ordinal",
+              },
+              "column-event-outcome-success-id-generated-uuid": Object {
+                "dataType": "number",
+                "isBucketed": false,
+                "label": "Succ.",
+                "operationType": "count",
+                "scale": "ratio",
+                "sourceField": "___records___",
               },
             },
             "incompleteColumns": Object {},
@@ -229,31 +229,31 @@ Object {
       "layers": Array [
         Object {
           "accessors": Array [
-            "938b445a-a291-4bbc-84fe-4f47b69c20e4",
+            "column-event-outcome-success-id-generated-uuid",
           ],
-          "layerId": "31213ae3-905b-4e88-b987-0cccb1f3209f",
+          "layerId": "layer-event-outcome-success-id-generated-uuid",
           "layerType": "data",
           "seriesType": "bar_horizontal_stacked",
-          "xAccessor": "430e690c-9992-414f-9bce-00812d99a5e7",
+          "xAccessor": "column-event-outcome-success-filter-id-generated-uuid",
           "yConfig": Array [
             Object {
-              "color": "#54B399",
-              "forAccessor": "938b445a-a291-4bbc-84fe-4f47b69c20e4",
+              "color": "#16C5C0",
+              "forAccessor": "column-event-outcome-success-id-generated-uuid",
             },
           ],
         },
         Object {
           "accessors": Array [
-            "c8165fc3-7180-4f1b-8c87-bc3ea04c6df7",
+            "column-event-outcome-failure-id-generated-uuid",
           ],
-          "layerId": "b9acd453-f476-4467-ad38-203e37b73e55",
+          "layerId": "layer-event-outcome-failure-id-generated-uuid",
           "layerType": "data",
           "seriesType": "bar_horizontal_stacked",
-          "xAccessor": "e959c351-a3a2-4525-b244-9623f215a8fd",
+          "xAccessor": "column-event-outcome-failure-filter-id-generated-uuid",
           "yConfig": Array [
             Object {
-              "color": "#CA8EAE",
-              "forAccessor": "c8165fc3-7180-4f1b-8c87-bc3ea04c6df7",
+              "color": "#EE72A6",
+              "forAccessor": "column-event-outcome-failure-id-generated-uuid",
             },
           ],
         },

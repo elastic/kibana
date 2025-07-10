@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Role } from '@kbn/security-plugin-types-common';
+
 import { ToolingLog } from '@kbn/tooling-log';
 
 import { SecurityRoleName } from '@kbn/security-solution-plugin/common/test';
@@ -35,7 +37,7 @@ export const samlAuthentication = async (
   };
 
   const rolesPath =
-    '../../../../packages/kbn-es/src/serverless_resources/project_roles/security/roles.yml';
+    '../../../../src/platform/packages/shared/kbn-es/src/serverless_resources/project_roles/security/roles.yml';
 
   // If config.env.PROXY_ORG is set, it means that proxy service is used to create projects. Define the proxy org filename to override the roles.
   const rolesFilename = config.env.PROXY_ORG ? `${config.env.PROXY_ORG}.json` : undefined;
@@ -67,13 +69,13 @@ export const samlAuthentication = async (
     cloudUsersFilePath,
   });
 
+  const adminCookieHeader = await sessionManager.getApiCredentialsForRole('admin');
+
   on('task', {
     getSessionCookie: async (role: string | SecurityRoleName): Promise<string> => {
       return sessionManager.getInteractiveUserSessionCookieWithRoleScope(role);
     },
     getApiKeyForRole: async (role: string | SecurityRoleName): Promise<string> => {
-      const adminCookieHeader = await sessionManager.getApiCredentialsForRole('admin');
-
       let roleDescriptor = {};
 
       const roleConfig = getRoleConfiguration(role, rolesPath);
@@ -97,6 +99,48 @@ export const samlAuthentication = async (
 
       const apiKey = response.data.encoded;
       return apiKey;
+    },
+    createServerlessCustomRole: async ({
+      roleDescriptor,
+      roleName,
+    }: {
+      roleDescriptor: { kibana: Role['kibana']; elasticsearch: Role['elasticsearch'] };
+      roleName: string;
+    }): Promise<{ status: number; data: Role }> => {
+      const customRoleDescriptors = {
+        kibana: roleDescriptor.kibana,
+        elasticsearch: roleDescriptor.elasticsearch ?? [],
+      };
+
+      const response = await axios.put(
+        `${kbnHost}/api/security/role/${roleName}`,
+        customRoleDescriptors,
+        {
+          headers: {
+            ...INTERNAL_REQUEST_HEADERS,
+            ...adminCookieHeader,
+          },
+        }
+      );
+      return {
+        status: response.status,
+        data: response.data,
+      };
+    },
+    deleteServerlessCustomRole: async (
+      roleName: string
+    ): Promise<{ status: number; data: unknown }> => {
+      const response = await axios.delete(`${kbnHost}/api/security/role/${roleName}`, {
+        headers: {
+          ...INTERNAL_REQUEST_HEADERS,
+          ...adminCookieHeader,
+        },
+      });
+
+      return {
+        status: response.status,
+        data: response.data,
+      };
     },
     getFullname: async (
       role: string | SecurityRoleName = DEFAULT_SERVERLESS_ROLE

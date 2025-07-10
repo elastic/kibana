@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { CriteriaWithPagination } from '@elastic/eui';
 import {
   EuiInMemoryTable,
   EuiSkeletonLoading,
@@ -14,10 +15,10 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 
+import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import { RULES_TABLE_INITIAL_PAGE_SIZE, RULES_TABLE_PAGE_SIZE_OPTIONS } from '../constants';
-import { RulesChangelogLink } from '../rules_changelog_link';
 import { AddPrebuiltRulesTableNoItemsMessage } from './add_prebuilt_rules_no_items_message';
 import { useAddPrebuiltRulesTableContext } from './add_prebuilt_rules_table_context';
 import { AddPrebuiltRulesTableFilters } from './add_prebuilt_rules_table_filters';
@@ -44,6 +45,14 @@ export const AddPrebuiltRulesTable = React.memo(() => {
 
   const shouldShowProgress = isUpgradingSecurityPackages || isRefetching;
 
+  const [pageIndex, setPageIndex] = useState(0);
+  const handleTableChange = useCallback(
+    ({ page: { index } }: CriteriaWithPagination<RuleResponse>) => {
+      setPageIndex(index);
+    },
+    [setPageIndex]
+  );
+
   return (
     <>
       {shouldShowProgress && (
@@ -68,9 +77,13 @@ export const AddPrebuiltRulesTable = React.memo(() => {
           ) : (
             <>
               <EuiFlexGroup direction="column">
-                <EuiFlexItem grow={false}>
+                {/*
+                TODO: The rules changelog link is not yet available for v9. Uncomment this when it is available.
+                Issue to uncomment: https://github.com/elastic/kibana/issues/213709
+                <EuiFlexItem grow={false} css={{ alignSelf: 'start' }}>
                   <RulesChangelogLink />
                 </EuiFlexItem>
+                */}
                 <EuiFlexItem grow={false}>
                   <AddPrebuiltRulesTableFilters />
                 </EuiFlexItem>
@@ -82,6 +95,7 @@ export const AddPrebuiltRulesTable = React.memo(() => {
                 pagination={{
                   initialPageSize: RULES_TABLE_INITIAL_PAGE_SIZE,
                   pageSizeOptions: RULES_TABLE_PAGE_SIZE_OPTIONS,
+                  pageIndex,
                 }}
                 selection={{
                   selectable: () => true,
@@ -91,6 +105,7 @@ export const AddPrebuiltRulesTable = React.memo(() => {
                 itemId="rule_id"
                 data-test-subj="add-prebuilt-rules-table"
                 columns={rulesColumns}
+                onTableChange={handleTableChange}
               />
             </>
           )

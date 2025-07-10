@@ -29,33 +29,31 @@ export const getAgentCountForAgentPolicies = async (
   >({
     index: AGENTS_INDEX,
     ignore_unavailable: true,
-    body: {
-      query: {
-        bool: {
-          filter: [
-            {
-              term: {
-                active: 'true',
-              },
+    query: {
+      bool: {
+        filter: [
+          {
+            term: {
+              active: 'true',
             },
-            {
-              terms: {
-                policy_id: agentPolicyIds,
-              },
-            },
-          ],
-        },
-      },
-      aggs: {
-        agent_counts: {
-          terms: {
-            field: 'policy_id',
-            size: agentPolicyIds.length,
           },
+          {
+            terms: {
+              policy_id: agentPolicyIds,
+            },
+          },
+        ],
+      },
+    },
+    aggs: {
+      agent_counts: {
+        terms: {
+          field: 'policy_id',
+          size: agentPolicyIds.length,
         },
       },
-      size: 0,
     },
+    size: 0,
   });
 
   const response: Record<string, number> = agentPolicyIds.reduce<Record<string, number>>(

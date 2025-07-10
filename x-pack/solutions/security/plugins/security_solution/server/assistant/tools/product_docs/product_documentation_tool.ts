@@ -5,13 +5,29 @@
  * 2.0.
  */
 
-import { DynamicStructuredTool } from '@langchain/core/tools';
+import { tool } from '@langchain/core/tools';
 
 import { z } from '@kbn/zod';
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
+import {
+  contentReferenceBlock,
+  productDocumentationReference,
+} from '@kbn/elastic-assistant-common';
+import type { ContentReferencesStore } from '@kbn/elastic-assistant-common';
+import type { RetrieveDocumentationResultDoc } from '@kbn/llm-tasks-plugin/server';
+import type { Require } from '@kbn/elastic-assistant-plugin/server/types';
+import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import { APP_UI_ID } from '../../../../common';
 
+export type ProductDocumentationToolParams = Require<
+  AssistantToolParams,
+  'llmTasks' | 'connectorId'
+>;
+
 const toolDetails = {
+  // note: this description is overwritten when `getTool` is called
+  // local definitions exist ../elastic_assistant/server/lib/prompt/tool_prompts.ts
+  // local definitions can be overwritten by security-ai-prompt integration definitions
   description:
     'Use this tool to retrieve documentation about Elastic products. You can retrieve documentation about the Elastic stack, such as Kibana and Elasticsearch, or for Elastic solutions, such as Elastic Security, Elastic Observability or Elastic Enterprise Search.',
   id: 'product-documentation-tool',
@@ -20,31 +36,49 @@ const toolDetails = {
 export const PRODUCT_DOCUMENTATION_TOOL: AssistantTool = {
   ...toolDetails,
   sourceRegister: APP_UI_ID,
-  isSupported: (params: AssistantToolParams): params is AssistantToolParams => {
+  isSupported: (params: AssistantToolParams): params is ProductDocumentationToolParams => {
     return params.llmTasks != null && params.connectorId != null;
   },
-  getTool(params: AssistantToolParams) {
+  async getTool(params: AssistantToolParams) {
     if (!this.isSupported(params)) return null;
 
-    const { connectorId, llmTasks, request } = params as AssistantToolParams;
+    const { connectorId, llmTasks, request, contentReferencesStore } =
+      params as ProductDocumentationToolParams;
 
-    // This check is here in order to satisfy TypeScript
-    if (llmTasks == null || connectorId == null) return null;
+    return tool(
+      async ({ query, product }) => {
+        const response = await llmTasks.retrieveDocumentation({
+          searchTerm: query,
+          products: product ? [product] : undefined,
+          max: 3,
+          connectorId,
+          request,
+          functionCalling: 'auto',
+          inferenceId: defaultInferenceEndpoints.ELSER,
+        });
 
-    return new DynamicStructuredTool({
-      name: toolDetails.name,
-      description: toolDetails.description,
-      schema: z.object({
-        query: z.string().describe(
-          `The query to use to retrieve documentation
+        const enrichedDocuments = response.documents.map(enrichDocument(contentReferencesStore));
+
+        return {
+          content: {
+            documents: enrichedDocuments,
+          },
+        };
+      },
+      {
+        name: toolDetails.name,
+        description: params.description || toolDetails.description,
+        schema: z.object({
+          query: z.string().describe(
+            `The query to use to retrieve documentation
             Examples:
             - "How to enable TLS for Elasticsearch?"
             - "What is Kibana Security?"`
-        ),
-        product: z
-          .enum(['kibana', 'elasticsearch', 'observability', 'security'])
-          .describe(
-            `If specified, will filter the products to retrieve documentation for
+          ),
+          product: z
+            .enum(['kibana', 'elasticsearch', 'observability', 'security'])
+            .describe(
+              `If specified, will filter the products to retrieve documentation for
             Possible options are:
             - "kibana": Kibana product
             - "elasticsearch": Elasticsearch product
@@ -52,28 +86,27 @@ export const PRODUCT_DOCUMENTATION_TOOL: AssistantTool = {
             - "security": Elastic Security solution
             If not specified, will search against all products
             `
-          )
-          .optional(),
-      }),
-      func: async ({ query, product }) => {
-        const response = await llmTasks.retrieveDocumentation({
-          searchTerm: query,
-          products: product ? [product] : undefined,
-          max: 3,
-          connectorId,
-          request,
-          // o11y specific parameter, hardcode to native as we do not utilize the other value (simulated)
-          functionCalling: 'native',
-        });
-
-        return {
-          content: {
-            documents: response.documents,
-          },
-        };
-      },
-      tags: ['product-documentation'],
-      // TODO: Remove after ZodAny is fixed https://github.com/langchain-ai/langchainjs/blob/main/langchain-core/src/tools.ts
-    }) as unknown as DynamicStructuredTool;
+            )
+            .optional(),
+        }),
+        tags: ['product-documentation'],
+      }
+    );
   },
+};
+
+type EnrichedDocument = RetrieveDocumentationResultDoc & {
+  citation?: string;
+};
+
+const enrichDocument = (contentReferencesStore: ContentReferencesStore) => {
+  return (document: RetrieveDocumentationResultDoc): EnrichedDocument => {
+    const reference = contentReferencesStore.add((p) =>
+      productDocumentationReference(p.id, document.title, document.url)
+    );
+    return {
+      ...document,
+      citation: contentReferenceBlock(reference),
+    };
+  };
 };

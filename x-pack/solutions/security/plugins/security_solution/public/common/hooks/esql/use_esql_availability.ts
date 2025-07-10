@@ -19,9 +19,6 @@ export const useEsqlAvailability = () => {
   const { uiSettings } = useKibana().services;
   const isEsqlAdvancedSettingEnabled = uiSettings?.get(ENABLE_ESQL);
 
-  const isTimelineEsqlFeatureFlagDisabled =
-    useIsExperimentalFeatureEnabled('timelineEsqlTabDisabled');
-
   const isEsqlRuleTypeEnabled =
     !useIsExperimentalFeatureEnabled('esqlRulesDisabled') && isEsqlAdvancedSettingEnabled;
 
@@ -29,8 +26,7 @@ export const useEsqlAvailability = () => {
     () => ({
       isEsqlAdvancedSettingEnabled,
       isEsqlRuleTypeEnabled,
-      isTimelineEsqlEnabledByFeatureFlag: !isTimelineEsqlFeatureFlagDisabled,
     }),
-    [isEsqlAdvancedSettingEnabled, isTimelineEsqlFeatureFlagDisabled, isEsqlRuleTypeEnabled]
+    [isEsqlAdvancedSettingEnabled, isEsqlRuleTypeEnabled]
   );
 };

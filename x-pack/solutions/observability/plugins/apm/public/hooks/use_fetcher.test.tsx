@@ -143,6 +143,7 @@ describe('useFetcher', () => {
     });
 
     it('should show "first response" while loading "second response"', async () => {
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       const hook = renderHook(({ callback, args }) => useFetcher(callback, args), {
         initialProps: {
           callback: () => Promise.resolve('first response'),
@@ -211,6 +212,7 @@ describe('useFetcher', () => {
         args: ['a'],
       };
 
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       const hook = renderHook(({ callback, args }) => useFetcher(callback, args), {
         initialProps,
         wrapper,

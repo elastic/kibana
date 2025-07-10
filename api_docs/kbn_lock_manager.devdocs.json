@@ -1,0 +1,296 @@
+{
+  "id": "@kbn/lock-manager",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/lock-manager",
+        "id": "def-server.LockAcquisitionError",
+        "type": "Class",
+        "tags": [],
+        "label": "LockAcquisitionError",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/lock-manager",
+            "scope": "server",
+            "docId": "kibKbnLockManagerPluginApi",
+            "section": "def-server.LockAcquisitionError",
+            "text": "LockAcquisitionError"
+          },
+          " extends Error"
+        ],
+        "path": "packages/kbn-lock-manager/src/lock_manager_client.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/lock-manager",
+            "id": "def-server.LockAcquisitionError.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-lock-manager/src/lock_manager_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/lock-manager",
+                "id": "def-server.LockAcquisitionError.Unnamed.$1",
+                "type": "string",
+                "tags": [],
+                "label": "message",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-lock-manager/src/lock_manager_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/lock-manager",
+        "id": "def-server.LockManagerService",
+        "type": "Class",
+        "tags": [],
+        "label": "LockManagerService",
+        "description": [],
+        "path": "packages/kbn-lock-manager/src/lock_manager_service.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/lock-manager",
+            "id": "def-server.LockManagerService.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-lock-manager/src/lock_manager_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/lock-manager",
+                "id": "def-server.LockManagerService.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "coreSetup",
+                "description": [],
+                "signature": [
+                  "CoreSetup",
+                  "<any, unknown>"
+                ],
+                "path": "packages/kbn-lock-manager/src/lock_manager_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/lock-manager",
+                "id": "def-server.LockManagerService.Unnamed.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "logger",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/logging",
+                    "scope": "common",
+                    "docId": "kibKbnLoggingPluginApi",
+                    "section": "def-common.Logger",
+                    "text": "Logger"
+                  }
+                ],
+                "path": "packages/kbn-lock-manager/src/lock_manager_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/lock-manager",
+            "id": "def-server.LockManagerService.withLock",
+            "type": "Function",
+            "tags": [],
+            "label": "withLock",
+            "description": [
+              "\nAcquires a lock with the given ID and executes the callback function.\nIf the lock is already held by another process, the callback will not be executed.\n\nExample usage:\n\nconst { withLock } = new LockManagerService(coreSetup, logger);\nawait withLock('my_lock', () => {\n // perform operation\n});"
+            ],
+            "signature": [
+              "<T>(lockId: string, callback: () => Promise<T>, { metadata, }?: { metadata?: Record<string, any> | undefined; }) => Promise<T>"
+            ],
+            "path": "packages/kbn-lock-manager/src/lock_manager_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/lock-manager",
+                "id": "def-server.LockManagerService.withLock.$1",
+                "type": "string",
+                "tags": [],
+                "label": "lockId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-lock-manager/src/lock_manager_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/lock-manager",
+                "id": "def-server.LockManagerService.withLock.$2",
+                "type": "Function",
+                "tags": [],
+                "label": "callback",
+                "description": [],
+                "signature": [
+                  "() => Promise<T>"
+                ],
+                "path": "packages/kbn-lock-manager/src/lock_manager_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/lock-manager",
+                "id": "def-server.LockManagerService.withLock.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "{\n      metadata,\n    }",
+                "description": [],
+                "path": "packages/kbn-lock-manager/src/lock_manager_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/lock-manager",
+                    "id": "def-server.LockManagerService.withLock.$3.metadata",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "metadata",
+                    "description": [],
+                    "signature": [
+                      "Record<string, any> | undefined"
+                    ],
+                    "path": "packages/kbn-lock-manager/src/lock_manager_service.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/lock-manager",
+            "id": "def-server.LockManagerService.getLock",
+            "type": "Function",
+            "tags": [],
+            "label": "getLock",
+            "description": [],
+            "signature": [
+              "(lockId: string) => Promise<",
+              "LockDocument",
+              " | undefined>"
+            ],
+            "path": "packages/kbn-lock-manager/src/lock_manager_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/lock-manager",
+                "id": "def-server.LockManagerService.getLock.$1",
+                "type": "string",
+                "tags": [],
+                "label": "lockId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-lock-manager/src/lock_manager_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/lock-manager",
+        "id": "def-server.isLockAcquisitionError",
+        "type": "Function",
+        "tags": [],
+        "label": "isLockAcquisitionError",
+        "description": [],
+        "signature": [
+          "(error: unknown) => boolean"
+        ],
+        "path": "packages/kbn-lock-manager/src/lock_manager_client.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/lock-manager",
+            "id": "def-server.isLockAcquisitionError.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "packages/kbn-lock-manager/src/lock_manager_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

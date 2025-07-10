@@ -9,19 +9,42 @@
   "description": "Server APIs for the Elastic AI Assistant",
   "plugin": {
     "id": "elasticAssistant",
-    "browser": false,
+    "browser": true,
     "server": true,
+    "configPath": [
+      "xpack",
+      "elasticAssistant"
+    ],
     "requiredPlugins": [
       "actions",
+      "alerting",
       "data",
+      "eventLog",
       "ml",
+      "ruleRegistry",
       "taskManager",
       "licensing",
       "llmTasks",
       "inference",
       "productDocBase",
       "spaces",
-      "security"
+      "security",
+      "stackConnectors",
+      "triggersActionsUi",
+      "elasticAssistantSharedState",
+      "aiAssistantManagementSelection",
+      "discover"
+    ],
+    "requiredBundles": [
+      "kibanaReact",
+      "kibanaUtils"
+    ]
+  },
+  "build": {
+    "extraExcludes": [
+      // Only include the encoded versions in the build due to https://github.com/elastic/kibana/issues/202114
+      "**/knowledge_base/security_labs/*.md",
+      "!**/knowledge_base/security_labs/*.encoded.md"
     ]
   }
 }

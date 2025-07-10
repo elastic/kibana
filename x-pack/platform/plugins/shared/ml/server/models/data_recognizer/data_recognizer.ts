@@ -886,7 +886,7 @@ export class DataRecognizer {
   }
 
   private async _saveJob(job: ModuleJob) {
-    return this._mlClient.putJob({ job_id: job.id, body: job.config });
+    return this._mlClient.putJob({ job_id: job.id, ...job.config });
   }
 
   // save the datafeeds.
@@ -920,7 +920,7 @@ export class DataRecognizer {
     return this._mlClient.putDatafeed(
       {
         datafeed_id: datafeed.id,
-        body: datafeed.config,
+        ...datafeed.config,
       },
       this._authorizationHeader
     );

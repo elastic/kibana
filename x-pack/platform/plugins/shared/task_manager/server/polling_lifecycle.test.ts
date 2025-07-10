@@ -6,23 +6,28 @@
  */
 
 import sinon from 'sinon';
-import { of, Subject } from 'rxjs';
+import { Subject } from 'rxjs';
 
-import { TaskPollingLifecycle, claimAvailableTasks, TaskLifecycleEvent } from './polling_lifecycle';
+import type { TaskLifecycleEvent } from './polling_lifecycle';
+import { TaskPollingLifecycle, claimAvailableTasks } from './polling_lifecycle';
 import { createInitialMiddleware } from './lib/middleware';
 import { TaskTypeDictionary } from './task_type_dictionary';
 import { taskStoreMock } from './task_store.mock';
 import { mockLogger } from './test_utils';
 import { taskClaimingMock } from './queries/task_claiming.mock';
-import { TaskClaiming, ClaimOwnershipResult } from './queries/task_claiming';
-import type { TaskClaiming as TaskClaimingClass } from './queries/task_claiming';
-import { asOk, Err, isErr, isOk, Ok } from './lib/result_type';
+import { TaskClaiming } from './queries/task_claiming';
+import type {
+  TaskClaiming as TaskClaimingClass,
+  ClaimOwnershipResult,
+} from './queries/task_claiming';
+import type { Err, Ok } from './lib/result_type';
+import { asOk, isErr, isOk } from './lib/result_type';
 import { FillPoolResult } from './lib/fill_pool';
-import { executionContextServiceMock } from '@kbn/core/server/mocks';
+import { executionContextServiceMock, httpServiceMock } from '@kbn/core/server/mocks';
 import { TaskCost } from './task';
 import { CLAIM_STRATEGY_MGET, DEFAULT_KIBANAS_PER_PARTITION } from './config';
 import { TaskPartitioner } from './lib/task_partitioner';
-import { KibanaDiscoveryService } from './kibana_discovery_service';
+import type { KibanaDiscoveryService } from './kibana_discovery_service';
 import { TaskEventType } from './task_events';
 
 const executionContext = executionContextServiceMock.createSetupContract();
@@ -100,13 +105,12 @@ describe('TaskPollingLifecycle', () => {
       },
       auto_calculate_default_ech_capacity: false,
     },
+    basePathService: httpServiceMock.createBasePath(),
     taskStore: mockTaskStore,
     logger: taskManagerLogger,
     definitions: new TaskTypeDictionary(taskManagerLogger),
     middleware: createInitialMiddleware(),
     startingCapacity: 20,
-    capacityConfiguration$: of(20),
-    pollIntervalConfiguration$: of(100),
     executionContext,
     taskPartitioner: new TaskPartitioner({
       logger: taskManagerLogger,
@@ -154,81 +158,39 @@ describe('TaskPollingLifecycle', () => {
 
     test('provides TaskClaiming with the capacity available when strategy = CLAIM_STRATEGY_UPDATE_BY_QUERY', () => {
       const elasticsearchAndSOAvailability$ = new Subject<boolean>();
-      const capacity$ = new Subject<number>();
 
       new TaskPollingLifecycle({
         ...taskManagerOpts,
         elasticsearchAndSOAvailability$,
-        capacityConfiguration$: capacity$,
+        startingCapacity: 40,
       });
-
       const taskClaimingGetCapacity = (TaskClaiming as jest.Mock<TaskClaimingClass>).mock
         .calls[0][0].getAvailableCapacity;
 
-      capacity$.next(40);
       expect(taskClaimingGetCapacity()).toEqual(40);
       expect(taskClaimingGetCapacity('report')).toEqual(1);
       expect(taskClaimingGetCapacity('quickReport')).toEqual(5);
-
-      capacity$.next(60);
-      expect(taskClaimingGetCapacity()).toEqual(60);
-      expect(taskClaimingGetCapacity('report')).toEqual(1);
-      expect(taskClaimingGetCapacity('quickReport')).toEqual(5);
-
-      capacity$.next(4);
-      expect(taskClaimingGetCapacity()).toEqual(4);
-      expect(taskClaimingGetCapacity('report')).toEqual(1);
-      expect(taskClaimingGetCapacity('quickReport')).toEqual(4);
     });
 
     test('provides TaskClaiming with the capacity available when strategy = CLAIM_STRATEGY_MGET', () => {
       const elasticsearchAndSOAvailability$ = new Subject<boolean>();
-      const capacity$ = new Subject<number>();
-
       new TaskPollingLifecycle({
         ...taskManagerOpts,
         config: { ...taskManagerOpts.config, claim_strategy: CLAIM_STRATEGY_MGET },
         elasticsearchAndSOAvailability$,
-        capacityConfiguration$: capacity$,
+        startingCapacity: 40,
       });
 
       const taskClaimingGetCapacity = (TaskClaiming as jest.Mock<TaskClaimingClass>).mock
         .calls[0][0].getAvailableCapacity;
 
-      capacity$.next(40);
       expect(taskClaimingGetCapacity()).toEqual(80);
       expect(taskClaimingGetCapacity('report')).toEqual(10);
       expect(taskClaimingGetCapacity('quickReport')).toEqual(10);
-
-      capacity$.next(60);
-      expect(taskClaimingGetCapacity()).toEqual(120);
-      expect(taskClaimingGetCapacity('report')).toEqual(10);
-      expect(taskClaimingGetCapacity('quickReport')).toEqual(10);
-
-      capacity$.next(4);
-      expect(taskClaimingGetCapacity()).toEqual(8);
-      expect(taskClaimingGetCapacity('report')).toEqual(8);
-      expect(taskClaimingGetCapacity('quickReport')).toEqual(8);
     });
   });
 
   describe('stop', () => {
-    test('stops polling once the ES and SavedObjects services become unavailable', () => {
-      const elasticsearchAndSOAvailability$ = new Subject<boolean>();
-      new TaskPollingLifecycle({ elasticsearchAndSOAvailability$, ...taskManagerOpts });
-
-      elasticsearchAndSOAvailability$.next(true);
-
-      clock.tick(150);
-      expect(mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable).toHaveBeenCalled();
-
-      elasticsearchAndSOAvailability$.next(false);
-
-      mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable.mockClear();
-      clock.tick(150);
-      expect(mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable).not.toHaveBeenCalled();
-    });
-
     test('stops polling if stop() is called', () => {
       const elasticsearchAndSOAvailability$ = new Subject<boolean>();
       const pollingLifecycle = new TaskPollingLifecycle({
@@ -250,30 +212,6 @@ describe('TaskPollingLifecycle', () => {
 
       clock.tick(100);
       expect(mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable).toHaveBeenCalledTimes(1);
-    });
-
-    test('restarts polling once the ES and SavedObjects services become available again', () => {
-      const elasticsearchAndSOAvailability$ = new Subject<boolean>();
-      new TaskPollingLifecycle({
-        elasticsearchAndSOAvailability$,
-        ...taskManagerOpts,
-      });
-
-      elasticsearchAndSOAvailability$.next(true);
-
-      clock.tick(150);
-      expect(mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable).toHaveBeenCalled();
-
-      elasticsearchAndSOAvailability$.next(false);
-      mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable.mockClear();
-      clock.tick(150);
-
-      expect(mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable).not.toHaveBeenCalled();
-
-      elasticsearchAndSOAvailability$.next(true);
-      clock.tick(150);
-
-      expect(mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable).toHaveBeenCalled();
     });
   });
 
@@ -589,6 +527,32 @@ describe('TaskPollingLifecycle', () => {
         tag: 'err',
         error: new Error(`Partially failed to poll for work: some tasks could not be claimed.`),
       });
+    });
+  });
+
+  describe('pollingLifecycleEvents capacity and poll interval', () => {
+    test('returns observables with initialized values', async () => {
+      const elasticsearchAndSOAvailability$ = new Subject<boolean>();
+      const taskPollingLifecycle = new TaskPollingLifecycle({
+        ...taskManagerOpts,
+        config: {
+          ...taskManagerOpts.config,
+          poll_interval: 2,
+        },
+        elasticsearchAndSOAvailability$,
+      });
+
+      elasticsearchAndSOAvailability$.next(true);
+
+      const capacitySubscription = jest.fn();
+      const pollIntervalSubscription = jest.fn();
+
+      taskPollingLifecycle.capacityConfiguration$.subscribe(capacitySubscription);
+      taskPollingLifecycle.pollIntervalConfiguration$.subscribe(pollIntervalSubscription);
+      expect(capacitySubscription).toHaveBeenCalledTimes(1);
+      expect(capacitySubscription).toHaveBeenNthCalledWith(1, 20);
+      expect(pollIntervalSubscription).toHaveBeenCalledTimes(1);
+      expect(pollIntervalSubscription).toHaveBeenNthCalledWith(1, 2);
     });
   });
 });

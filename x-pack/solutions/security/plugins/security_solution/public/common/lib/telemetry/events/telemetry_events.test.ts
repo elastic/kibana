@@ -19,9 +19,28 @@ describe('telemetry events', () => {
         if (!propertyTypes[item]) {
           propertyTypes[item] = eventType;
         } else {
-          expect(propertyTypes[item]).toEqual(eventType);
+          try {
+            expect(propertyTypes[item]).toEqual(eventType);
+          } catch (e) {
+            // Show a descriptive error message
+            throw new Error(`Property "${item}" has inconsistent types.\n${e}`);
+          }
         }
       });
+    });
+  });
+
+  it('ensure event type have no collision', () => {
+    const eventTypes: Set<string> = new Set();
+    telemetryEvents.forEach((event) => {
+      expect(event).toHaveProperty('eventType');
+
+      try {
+        expect(eventTypes.has(event.eventType)).toBeFalsy();
+      } catch (e) {
+        throw new Error(`Event type "${event.eventType}" has collision.\n${e}`);
+      }
+      eventTypes.add(event.eventType);
     });
   });
 });

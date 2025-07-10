@@ -10,17 +10,20 @@ import {
   SUB_ACTION,
   CROWDSTRIKE_CONNECTOR_ID,
 } from '@kbn/stack-connectors-plugin/common/crowdstrike/constants';
-import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { SearchRequest, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type {
   CrowdstrikeBaseApiResponse,
   CrowdStrikeExecuteRTRResponse,
+  CrowdstrikeGetScriptsResponse,
 } from '@kbn/stack-connectors-plugin/common/crowdstrike/types';
 import { v4 as uuidv4 } from 'uuid';
 
+import { CROWDSTRIKE_INDEX_PATTERNS_BY_INTEGRATION } from '../../../../../../common/endpoint/service/response_actions/crowdstrike';
 import { mapParametersToCrowdStrikeArguments } from './utils';
 import type { CrowdstrikeActionRequestCommonMeta } from '../../../../../../common/endpoint/types/crowdstrike';
 import type {
   CommonResponseActionMethodOptions,
+  CustomScriptsResponse,
   ProcessPendingActionsMethodOptions,
 } from '../../..';
 import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
@@ -28,6 +31,7 @@ import { stringify } from '../../../../utils/stringify';
 import { ResponseActionsClientError } from '../errors';
 import type {
   ActionDetails,
+  EndpointActionData,
   EndpointActionDataParameterTypes,
   EndpointActionResponseDataOutput,
   LogsEndpointAction,
@@ -49,10 +53,24 @@ import type {
   NormalizedExternalConnectorClient,
   NormalizedExternalConnectorClientExecuteOptions,
 } from '../lib/normalized_external_connector_client';
+import { catchAndWrapError } from '../../../../utils';
+import { buildIndexNameWithNamespace } from '../../../../../../common/endpoint/utils/index_name_utilities';
 
 export type CrowdstrikeActionsClientOptions = ResponseActionsClientOptions & {
   connectorActions: NormalizedExternalConnectorClient;
 };
+
+interface CrowdstrikeResponseOptions {
+  error?:
+    | {
+        code: string;
+        message: string;
+      }
+    | undefined;
+  actionId: string;
+  agentId: string | string[];
+  data: EndpointActionData<EndpointActionDataParameterTypes, EndpointActionResponseDataOutput>;
+}
 
 export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
   protected readonly agentType: ResponseActionAgentType = 'crowdstrike';
@@ -62,6 +80,132 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
     super(options);
     this.connectorActionsClient = connectorActions;
     connectorActions.setup(CROWDSTRIKE_CONNECTOR_ID);
+  }
+
+  /**
+   * Returns a list of all indexes for Crowdstrike data supported for response actions
+   * @internal
+   */
+  private async fetchIndexNames(): Promise<string[]> {
+    const cachedInfo = this.cache.get<string[]>('fetchIndexNames');
+
+    if (cachedInfo) {
+      this.log.debug(
+        `Returning cached response with list of index names:\n${stringify(cachedInfo)}`
+      );
+      return cachedInfo;
+    }
+
+    const integrationNames = Object.keys(CROWDSTRIKE_INDEX_PATTERNS_BY_INTEGRATION);
+    const fleetServices = this.options.endpointService.getInternalFleetServices(
+      this.options.spaceId
+    );
+    const indexNamespaces = await fleetServices.getIntegrationNamespaces(integrationNames);
+    const indexNames: string[] = [];
+
+    for (const [integrationName, namespaces] of Object.entries(indexNamespaces)) {
+      if (namespaces.length > 0) {
+        const indexPatterns =
+          CROWDSTRIKE_INDEX_PATTERNS_BY_INTEGRATION[
+            integrationName as keyof typeof CROWDSTRIKE_INDEX_PATTERNS_BY_INTEGRATION
+          ];
+
+        for (const indexPattern of indexPatterns) {
+          indexNames.push(
+            ...namespaces.map((namespace) => buildIndexNameWithNamespace(indexPattern, namespace))
+          );
+        }
+      }
+    }
+
+    this.cache.set('fetchIndexNames', indexNames);
+    this.log.debug(() => `Crowdstrike indexes with namespace:\n${stringify(indexNames)}`);
+
+    return indexNames;
+  }
+
+  protected async fetchAgentPolicyInfo(
+    agentIds: string[]
+  ): Promise<LogsEndpointAction['agent']['policy']> {
+    const cacheKey = `fetchAgentPolicyInfo:${agentIds.sort().join('#')}`;
+    const cacheResponse = this.cache.get<LogsEndpointAction['agent']['policy']>(cacheKey);
+
+    if (cacheResponse) {
+      this.log.debug(
+        () => `Cached agent policy info. found - returning it:\n${stringify(cacheResponse)}`
+      );
+      return cacheResponse;
+    }
+
+    const esClient = this.options.esClient;
+    const esSearchRequest: SearchRequest = {
+      index: await this.fetchIndexNames(),
+      query: { bool: { filter: [{ terms: { 'device.id': agentIds } }] } },
+      collapse: {
+        field: 'device.id',
+        inner_hits: {
+          name: 'most_recent',
+          size: 1,
+          _source: ['agent', 'device.id', 'event.created'],
+          sort: [{ 'event.created': 'desc' }],
+        },
+      },
+      _source: false,
+      ignore_unavailable: true,
+    };
+
+    if (!esSearchRequest.index || esSearchRequest.index.length === 0) {
+      throw new ResponseActionsClientError(
+        `Unable to build list of indexes while retrieving policy information for Crowdstrike agents [${agentIds.join(
+          ', '
+        )}]. Check to ensure at least one integration policy exists.`,
+        400
+      );
+    }
+
+    this.log.debug(() => `Searching for agents with:\n${stringify(esSearchRequest)}`);
+
+    // Get the latest ingested document for each agent ID
+    const crowdstrikeEsResults = await esClient.search(esSearchRequest).catch(catchAndWrapError);
+
+    this.log.debug(() => `Records found:\n${stringify(crowdstrikeEsResults, 20)}`);
+
+    const agentIdsFound: string[] = [];
+    const fleetAgentIdToCrowdstrikeAgentIdMap: Record<string, string> =
+      crowdstrikeEsResults.hits.hits.reduce((acc, esDoc) => {
+        const doc = esDoc.inner_hits?.most_recent.hits.hits[0]._source;
+
+        if (doc) {
+          agentIdsFound.push(doc.device.id);
+          acc[doc.agent.id] = doc.device.id;
+        }
+
+        return acc;
+      }, {} as Record<string, string>);
+    const elasticAgentIds = Object.keys(fleetAgentIdToCrowdstrikeAgentIdMap);
+
+    if (elasticAgentIds.length === 0) {
+      throw new ResponseActionsClientError(
+        `Unable to find elastic agent IDs for Crowdstrike agent ids: [${agentIds.join(', ')}]`,
+        400
+      );
+    }
+
+    // ensure all agent ids were found
+    for (const agentId of agentIds) {
+      if (!agentIdsFound.includes(agentId)) {
+        throw new ResponseActionsClientError(`Crowdstrike agent id [${agentId}] not found`, 404);
+      }
+    }
+
+    const agentPolicyInfo = await this.fetchFleetInfoForAgents(elasticAgentIds);
+
+    for (const agentInfo of agentPolicyInfo) {
+      agentInfo.agentId = fleetAgentIdToCrowdstrikeAgentIdMap[agentInfo.elasticAgentId];
+    }
+
+    this.cache.set(cacheKey, agentPolicyInfo);
+    return agentPolicyInfo;
   }
 
   protected async writeActionRequestToEndpointIndex<
@@ -94,7 +238,7 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
 
   /**
    * Sends actions to Crowdstrike directly (via Connector)
-   * @private
+   * @internal
    */
   private async sendAction(
     actionType: SUB_ACTION,
@@ -137,11 +281,9 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
       index: ['logs-crowdstrike*'],
       size: 1,
       _source: ['host.hostname', 'host.name'],
-      body: {
-        query: {
-          bool: {
-            filter: [{ term: { 'device.id': agentId } }],
-          },
+      query: {
+        bool: {
+          filter: [{ term: { 'device.id': agentId } }],
         },
       },
     };
@@ -310,7 +452,9 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
   ): Promise<
     ActionDetails<ResponseActionRunScriptOutputContent, ResponseActionRunScriptParameters>
   > {
-    const reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions = {
+    const reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
+      RunScriptActionRequestBody['parameters']
+    > = {
       ...actionRequest,
       ...this.getMethodOptions(options),
       command: 'runscript',
@@ -374,7 +518,7 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
     const stdout = actionResponse.data?.combined.resources[agentId].stdout || '';
     const stderr = actionResponse.data?.combined.resources[agentId].stderr || '';
     const error = actionResponse.data?.combined.resources[agentId].errors?.[0];
-    const options = {
+    const options: CrowdstrikeResponseOptions = {
       actionId: doc.EndpointActions.action_id,
       agentId,
       data: {
@@ -398,14 +542,16 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
         : {}),
     };
 
-    await this.writeActionResponseToEndpointIndex(options);
+    const responseDoc = await this.writeActionResponseToEndpointIndex(options);
+    // telemetry event for completed action
+    await this.sendActionResponseTelemetry([responseDoc]);
   }
 
   private async completeCrowdstrikeAction(
     actionResponse: ActionTypeExecutorResult<CrowdstrikeBaseApiResponse>,
     doc: LogsEndpointAction
   ): Promise<void> {
-    const options = {
+    const options: CrowdstrikeResponseOptions = {
       actionId: doc.EndpointActions.action_id,
       agentId: doc.agent.id,
       data: doc.EndpointActions.data,
@@ -419,7 +565,36 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
         : {}),
     };
 
-    await this.writeActionResponseToEndpointIndex(options);
+    const responseDoc = await this.writeActionResponseToEndpointIndex(options);
+    // telemetry event for completed action
+    await this.sendActionResponseTelemetry([responseDoc]);
+  }
+
+  async getCustomScripts(): Promise<CustomScriptsResponse> {
+    try {
+      const customScriptsResponse = (await this.sendAction(
+        SUB_ACTION.GET_RTR_CLOUD_SCRIPTS,
+        {}
+      )) as ActionTypeExecutorResult<CrowdstrikeGetScriptsResponse>;
+
+      const resources = customScriptsResponse.data?.resources || [];
+      // Transform CrowdStrike script resources to CustomScriptsResponse format
+      const data = resources.map((script) => ({
+        // due to External EDR's schema nature - we expect a maybe() everywhere - empty strings are needed
+        id: script.id || '',
+        name: script.name || '',
+        description: script.description || '',
+      }));
+      return { data } as CustomScriptsResponse;
+    } catch (err) {
+      const error = new ResponseActionsClientError(
+        `Failed to fetch Crowdstrike scripts, failed with: ${err.message}`,
+        500,
+        err
+      );
+      this.log.error(error);
+      throw error;
+    }
   }
 
   async processPendingActions({

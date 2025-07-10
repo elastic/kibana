@@ -357,6 +357,22 @@
           },
           {
             "parentPluginId": "@kbn/core-metrics-collectors-server-internal",
+            "id": "def-server.ProcessMetricsCollector.registerMetrics",
+            "type": "Function",
+            "tags": [],
+            "label": "registerMetrics",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/core/packages/metrics/collectors-server-internal/src/process.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-metrics-collectors-server-internal",
             "id": "def-server.ProcessMetricsCollector.reset",
             "type": "Function",
             "tags": [],

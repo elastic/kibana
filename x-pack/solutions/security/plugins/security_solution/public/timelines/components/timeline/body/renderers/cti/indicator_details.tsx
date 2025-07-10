@@ -10,8 +10,8 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
-  INDICATOR_MATCHED_TYPE,
   FEED_NAME,
+  INDICATOR_MATCHED_TYPE,
   INDICATOR_REFERENCE,
 } from '../../../../../../../common/cti/constants';
 import { DraggableBadge } from '../../../../../../common/components/draggables';
@@ -24,7 +24,7 @@ interface IndicatorDetailsProps {
   feedName: string | undefined;
   indicatorReference: string | undefined;
   indicatorType: string | undefined;
-  isDraggable?: boolean;
+  scopeId: string;
 }
 
 export const IndicatorDetails: React.FC<IndicatorDetailsProps> = ({
@@ -33,7 +33,7 @@ export const IndicatorDetails: React.FC<IndicatorDetailsProps> = ({
   feedName,
   indicatorReference,
   indicatorType,
-  isDraggable,
+  scopeId,
 }) => (
   <EuiFlexGroup
     alignItems="flexStart"
@@ -46,11 +46,11 @@ export const IndicatorDetails: React.FC<IndicatorDetailsProps> = ({
     {indicatorType && (
       <EuiFlexItem grow={false}>
         <DraggableBadge
+          scopeId={scopeId}
           contextId={contextId}
           data-test-subj="threat-match-indicator-details-indicator-type"
           eventId={eventId}
           field={INDICATOR_MATCHED_TYPE}
-          isDraggable={isDraggable}
           value={indicatorType}
           isAggregatable={true}
           fieldType={'keyword'}
@@ -70,10 +70,10 @@ export const IndicatorDetails: React.FC<IndicatorDetailsProps> = ({
         <EuiFlexItem grow={false}>
           <DraggableBadge
             contextId={contextId}
+            scopeId={scopeId}
             data-test-subj="threat-match-indicator-details-indicator-feedName"
             eventId={eventId}
             field={FEED_NAME}
-            isDraggable={isDraggable}
             value={feedName}
             isAggregatable={true}
             fieldType={'keyword'}
@@ -92,7 +92,6 @@ export const IndicatorDetails: React.FC<IndicatorDetailsProps> = ({
             data-test-subj="threat-match-indicator-details-indicator-reference"
             eventId={eventId}
             fieldName={INDICATOR_REFERENCE}
-            isDraggable={isDraggable}
             value={indicatorReference}
             isAggregatable={true}
             fieldType={'keyword'}

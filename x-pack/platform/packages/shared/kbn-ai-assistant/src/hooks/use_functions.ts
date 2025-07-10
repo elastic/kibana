@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useObservable } from 'react-use/lib';
+import useObservable from 'react-use/lib/useObservable';
 import { useAIAssistantChatService } from './use_ai_assistant_chat_service';
 
 export const useFunctions = () => {

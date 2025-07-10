@@ -5,22 +5,23 @@
  * 2.0.
  */
 
+import type { CriteriaWithPagination } from '@elastic/eui';
 import {
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiInMemoryTable,
+  EuiBasicTable,
   EuiProgress,
   EuiSkeletonLoading,
   EuiSkeletonText,
   EuiSkeletonTitle,
 } from '@elastic/eui';
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import type { RuleUpgradeState } from '../../../../rule_management/model/prebuilt_rule_upgrade';
-import * as i18n from '../../../../../detections/pages/detection_engine/rules/translations';
-import { RULES_TABLE_INITIAL_PAGE_SIZE, RULES_TABLE_PAGE_SIZE_OPTIONS } from '../constants';
-import { RulesChangelogLink } from '../rules_changelog_link';
+import * as i18n from '../../../../common/translations';
+import { RULES_TABLE_PAGE_SIZE_OPTIONS } from '../constants';
 import { UpgradePrebuiltRulesTableButtons } from './upgrade_prebuilt_rules_table_buttons';
+import type { UpgradePrebuiltRulesSortingOptions } from './upgrade_prebuilt_rules_table_context';
 import { useUpgradePrebuiltRulesTableContext } from './upgrade_prebuilt_rules_table_context';
 import { UpgradePrebuiltRulesTableFilters } from './upgrade_prebuilt_rules_table_filters';
 import { useUpgradePrebuiltRulesTableColumns } from './use_upgrade_prebuilt_rules_table_columns';
@@ -43,14 +44,33 @@ export const UpgradePrebuiltRulesTable = React.memo(() => {
       ruleUpgradeStates,
       hasRulesToUpgrade,
       isLoading,
+      isFetching,
       isRefetching,
       isUpgradingSecurityPackages,
+      pagination,
+      sortingOptions,
     },
+    actions: { setPagination, setSortingOptions },
   } = useUpgradePrebuiltRulesTableContext();
   const [selected, setSelected] = useState<RuleUpgradeState[]>([]);
 
   const rulesColumns = useUpgradePrebuiltRulesTableColumns();
   const shouldShowProgress = isUpgradingSecurityPackages || isRefetching;
+  const handleTableChange = useCallback(
+    ({ page: { index, size }, sort }: CriteriaWithPagination<RuleUpgradeState>) => {
+      setPagination({
+        page: index + 1,
+        perPage: size,
+      });
+      if (sort) {
+        setSortingOptions({
+          field: sort.field as UpgradePrebuiltRulesSortingOptions['field'],
+          order: sort.direction,
+        });
+      }
+    },
+    [setPagination, setSortingOptions]
+  );
 
   return (
     <>
@@ -76,9 +96,13 @@ export const UpgradePrebuiltRulesTable = React.memo(() => {
           ) : (
             <>
               <EuiFlexGroup direction="column">
-                <EuiFlexItem grow={false}>
+                {/*
+                TODO: The rules changelog link is not yet available for v9. Uncomment this when it is available.
+                Issue to uncomment: https://github.com/elastic/kibana/issues/213709
+                <EuiFlexItem grow={false} css={{ alignSelf: 'start' }}>
                   <RulesChangelogLink />
                 </EuiFlexItem>
+                */}
                 <EuiFlexItem grow={false}>
                   <EuiFlexGroup
                     alignItems="flexStart"
@@ -96,21 +120,31 @@ export const UpgradePrebuiltRulesTable = React.memo(() => {
                 </EuiFlexItem>
               </EuiFlexGroup>
 
-              <EuiInMemoryTable
+              <EuiBasicTable
+                loading={isFetching}
                 items={ruleUpgradeStates}
-                sorting
                 pagination={{
-                  initialPageSize: RULES_TABLE_INITIAL_PAGE_SIZE,
+                  totalItemCount: pagination.total,
                   pageSizeOptions: RULES_TABLE_PAGE_SIZE_OPTIONS,
+                  pageIndex: pagination.page - 1,
+                  pageSize: pagination.perPage,
                 }}
                 selection={{
                   selectable: () => true,
                   onSelectionChange: setSelected,
                   initialSelected: selected,
                 }}
+                sorting={{
+                  sort: {
+                    // EuiBasicTable has incorrect `sort.field` types which accept only `keyof Item` and reject fields in dot notation
+                    field: sortingOptions.field as keyof RuleUpgradeState,
+                    direction: sortingOptions.order,
+                  },
+                }}
                 itemId="rule_id"
                 data-test-subj="rules-upgrades-table"
                 columns={rulesColumns}
+                onChange={handleTableChange}
               />
             </>
           )

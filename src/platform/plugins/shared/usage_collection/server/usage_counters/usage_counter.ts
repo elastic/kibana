@@ -58,7 +58,6 @@ export class UsageCounter implements IUsageCounter {
       incrementBy = 1,
       namespace,
     } = params;
-
     this.counter$.next({
       domainId: this.domainId,
       counterName,

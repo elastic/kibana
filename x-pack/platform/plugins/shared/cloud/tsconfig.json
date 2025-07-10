@@ -18,6 +18,8 @@
     "@kbn/logging-mocks",
     "@kbn/logging",
     "@kbn/core-saved-objects-server",
+    "@kbn/std",
+    "@kbn/projects-solutions-groups",
   ],
   "exclude": [
     "target/**/*",

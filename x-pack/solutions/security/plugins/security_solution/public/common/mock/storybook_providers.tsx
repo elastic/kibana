@@ -79,11 +79,9 @@ const coreMock = {
   timelines: {
     getHoverActions: () => ({
       getAddToTimelineButton: () => {},
-      getColumnToggleButton: () => {},
       getCopyButton: () => {},
       getFilterForValueButton: () => {},
       getFilterOutValueButton: () => {},
-      getOverflowButton: () => {},
     }),
   },
 } as unknown as CoreStart;

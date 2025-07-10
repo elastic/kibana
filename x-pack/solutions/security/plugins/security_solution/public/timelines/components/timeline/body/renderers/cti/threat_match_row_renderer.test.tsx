@@ -6,7 +6,7 @@
  */
 
 import { TimelineId } from '../../../../../../../common/types/timeline';
-import { render, fireEvent } from '@testing-library/react';
+import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { get } from 'lodash';
 
@@ -71,7 +71,6 @@ describe('threatMatchRowRenderer', () => {
     it('renders with minimum required props', () => {
       const children = threatMatchRowRenderer.renderRow({
         data: threatMatchData,
-        isDraggable: true,
         scopeId: TimelineId.test,
       });
       const { getByTestId } = render(<TestProviders>{children}</TestProviders>);
@@ -94,7 +93,6 @@ describe('threatMatchRowRenderer', () => {
 
       const children = threatMatchRowRenderer.renderRow({
         data: modThreatMatchData,
-        isDraggable: true,
         scopeId: TimelineId.test,
       });
       const { getByTestId, queryAllByTestId, findAllByTestId, findByTestId } = render(

@@ -15,7 +15,7 @@ import * as i18n from '../translations';
 
 interface Props {
   currentConversation: Conversation | undefined;
-  handleOnConversationSelected: ({ cId, cTitle }: { cId: string; cTitle: string }) => Promise<void>;
+  handleOnConversationSelected: ({ cId }: { cId: string }) => Promise<void>;
 }
 
 export const WelcomeSetup: React.FC<Props> = ({

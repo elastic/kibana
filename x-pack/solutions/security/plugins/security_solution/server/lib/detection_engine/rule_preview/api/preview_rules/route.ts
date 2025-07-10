@@ -17,8 +17,6 @@ import type {
   RuleTypeState,
 } from '@kbn/alerting-plugin/common';
 import { parseDuration, DISABLE_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common';
-import type { ExecutorType } from '@kbn/alerting-plugin/server/types';
-import type { Alert } from '@kbn/alerting-plugin/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import {
   DEFAULT_PREVIEW_INDEX,
@@ -52,8 +50,8 @@ import type { RuleExecutionContext, StatusChangeArgs } from '../../../rule_monit
 import type { ConfigType } from '../../../../../config';
 import { alertInstanceFactoryStub } from './alert_instance_factory_stub';
 import type {
-  CreateRuleOptions,
   CreateSecurityRuleTypeWrapperProps,
+  SecurityAlertType,
 } from '../../../rule_types/types';
 import {
   createEqlAlertType,
@@ -79,7 +77,6 @@ export const previewRulesRoute = (
   config: ConfigType,
   ml: SetupPlugins['ml'],
   security: SetupPlugins['security'],
-  ruleOptions: CreateRuleOptions,
   securityRuleTypeOptions: CreateSecurityRuleTypeWrapperProps,
   previewRuleDataClient: IRuleDataClient,
   getStartServices: StartServicesAccessor<StartPlugins>,
@@ -201,45 +198,11 @@ export const previewRulesRoute = (
             isPreview: true,
           });
 
-          const runExecutors = async <
-            TParams extends RuleParams,
-            TState extends RuleTypeState,
-            TInstanceState extends AlertInstanceState,
-            TInstanceContext extends AlertInstanceContext,
-            TActionGroupIds extends string = ''
-          >(
-            executor: ExecutorType<
-              TParams,
-              TState,
-              TInstanceState,
-              TInstanceContext,
-              TActionGroupIds
-            >,
-            ruleTypeId: string,
-            ruleTypeName: string,
-            params: TParams,
-            shouldWriteAlerts: () => boolean,
-            alertFactory: {
-              create: (
-                id: string
-              ) => Pick<
-                Alert<TInstanceState, TInstanceContext, TActionGroupIds>,
-                | 'getState'
-                | 'replaceState'
-                | 'scheduleActions'
-                | 'setContext'
-                | 'getContext'
-                | 'hasContext'
-                | 'getUuid'
-                | 'getStart'
-              >;
-              alertLimit: {
-                getValue: () => number;
-                setLimitReached: () => void;
-              };
-              done: () => { getRecoveredAlerts: () => [] };
-            }
+          const runExecutors = async <TParams extends RuleParams, TState extends RuleTypeState>(
+            securityRuleType: SecurityAlertType<TParams, TState>,
+            params: TParams
           ) => {
+            const ruleType = previewRuleTypeWrapper(securityRuleType);
             let statePreview = runState as TState;
             let loggedRequests = [];
 
@@ -264,8 +227,8 @@ export const previewRulesRoute = (
               consumer: SERVER_APP_ID,
               enabled: true,
               revision: 0,
-              ruleTypeId,
-              ruleTypeName,
+              ruleTypeId: ruleType.id,
+              ruleTypeName: ruleType.name,
               updatedAt: new Date(),
               updatedBy: username ?? 'preview-updated-by',
               muteAll: false,
@@ -286,16 +249,29 @@ export const previewRulesRoute = (
             while (invocationCount > 0 && !isAborted) {
               invocationStartTime = moment();
 
-              ({ state: statePreview, loggedRequests } = (await executor({
+              ({ state: statePreview, loggedRequests } = (await ruleType.executor({
                 executionId: uuidv4(),
                 params,
                 previousStartedAt,
                 rule,
                 services: {
-                  shouldWriteAlerts,
-                  shouldStopExecution: () => false,
+                  shouldWriteAlerts: () => true,
+                  shouldStopExecution: () => isAborted,
                   alertsClient: null,
-                  alertFactory,
+                  alertFactory: {
+                    create: alertInstanceFactoryStub<
+                      TParams,
+                      TState,
+                      AlertInstanceState,
+                      AlertInstanceContext,
+                      'default'
+                    >,
+                    alertLimit: {
+                      getValue: () => 1000,
+                      setLimitReached: () => {},
+                    },
+                    done: () => ({ getRecoveredAlerts: () => [] }),
+                  },
                   savedObjectsClient: coreContext.savedObjects.client,
                   scopedClusterClient: wrapScopedClusterClient({
                     abortController,
@@ -322,6 +298,7 @@ export const previewRulesRoute = (
                   return { dateStart: date, dateEnd: date };
                 },
                 isServerless,
+                ruleExecutionTimeout: `${PREVIEW_TIMEOUT_SECONDS}s`,
               })) as { state: TState; loggedRequests: RulePreviewLoggedRequest[] });
 
               const errors = loggedStatusChanges
@@ -354,169 +331,45 @@ export const previewRulesRoute = (
 
           switch (previewRuleParams.type) {
             case 'query':
-              const queryAlertType = previewRuleTypeWrapper(
-                createQueryAlertType({
-                  ...ruleOptions,
-                  id: QUERY_RULE_TYPE_ID,
-                  name: 'Custom Query Rule',
-                })
-              );
-              await runExecutors(
-                queryAlertType.executor,
-                queryAlertType.id,
-                queryAlertType.name,
-                previewRuleParams,
-                () => true,
-                {
-                  create: alertInstanceFactoryStub,
-                  alertLimit: {
-                    getValue: () => 1000,
-                    setLimitReached: () => {},
-                  },
-                  done: () => ({ getRecoveredAlerts: () => [] }),
-                }
-              );
+              const queryAlertType = createQueryAlertType({
+                id: QUERY_RULE_TYPE_ID,
+                name: 'Custom Query Rule',
+              });
+              await runExecutors(queryAlertType, previewRuleParams);
               break;
             case 'saved_query':
-              const savedQueryAlertType = previewRuleTypeWrapper(
-                createQueryAlertType({
-                  ...ruleOptions,
-                  id: SAVED_QUERY_RULE_TYPE_ID,
-                  name: 'Saved Query Rule',
-                })
-              );
-              await runExecutors(
-                savedQueryAlertType.executor,
-                savedQueryAlertType.id,
-                savedQueryAlertType.name,
-                previewRuleParams,
-                () => true,
-                {
-                  create: alertInstanceFactoryStub,
-                  alertLimit: {
-                    getValue: () => 1000,
-                    setLimitReached: () => {},
-                  },
-                  done: () => ({ getRecoveredAlerts: () => [] }),
-                }
-              );
+              const savedQueryAlertType = createQueryAlertType({
+                id: SAVED_QUERY_RULE_TYPE_ID,
+                name: 'Saved Query Rule',
+              });
+              await runExecutors(savedQueryAlertType, previewRuleParams);
               break;
             case 'threshold':
-              const thresholdAlertType = previewRuleTypeWrapper(
-                createThresholdAlertType(ruleOptions)
-              );
-              await runExecutors(
-                thresholdAlertType.executor,
-                thresholdAlertType.id,
-                thresholdAlertType.name,
-                previewRuleParams,
-                () => true,
-                {
-                  create: alertInstanceFactoryStub,
-                  alertLimit: {
-                    getValue: () => 1000,
-                    setLimitReached: () => {},
-                  },
-                  done: () => ({ getRecoveredAlerts: () => [] }),
-                }
-              );
+              const thresholdAlertType = createThresholdAlertType();
+              await runExecutors(thresholdAlertType, previewRuleParams);
               break;
             case 'threat_match':
-              const threatMatchAlertType = previewRuleTypeWrapper(
-                createIndicatorMatchAlertType(ruleOptions)
-              );
-              await runExecutors(
-                threatMatchAlertType.executor,
-                threatMatchAlertType.id,
-                threatMatchAlertType.name,
-                previewRuleParams,
-                () => true,
-                {
-                  create: alertInstanceFactoryStub,
-                  alertLimit: {
-                    getValue: () => 1000,
-                    setLimitReached: () => {},
-                  },
-                  done: () => ({ getRecoveredAlerts: () => [] }),
-                }
-              );
+              const threatMatchAlertType = createIndicatorMatchAlertType();
+              await runExecutors(threatMatchAlertType, previewRuleParams);
               break;
             case 'eql':
-              const eqlAlertType = previewRuleTypeWrapper(createEqlAlertType(ruleOptions));
-              await runExecutors(
-                eqlAlertType.executor,
-                eqlAlertType.id,
-                eqlAlertType.name,
-                previewRuleParams,
-                () => true,
-                {
-                  create: alertInstanceFactoryStub,
-                  alertLimit: {
-                    getValue: () => 1000,
-                    setLimitReached: () => {},
-                  },
-                  done: () => ({ getRecoveredAlerts: () => [] }),
-                }
-              );
+              const eqlAlertType = createEqlAlertType();
+              await runExecutors(eqlAlertType, previewRuleParams);
               break;
             case 'esql':
               if (config.experimentalFeatures.esqlRulesDisabled) {
                 throw Error('ES|QL rule type is not supported');
               }
-              const esqlAlertType = previewRuleTypeWrapper(createEsqlAlertType(ruleOptions));
-              await runExecutors(
-                esqlAlertType.executor,
-                esqlAlertType.id,
-                esqlAlertType.name,
-                previewRuleParams,
-                () => true,
-                {
-                  create: alertInstanceFactoryStub,
-                  alertLimit: {
-                    getValue: () => 1000,
-                    setLimitReached: () => {},
-                  },
-                  done: () => ({ getRecoveredAlerts: () => [] }),
-                }
-              );
+              const esqlAlertType = createEsqlAlertType();
+              await runExecutors(esqlAlertType, previewRuleParams);
               break;
             case 'machine_learning':
-              const mlAlertType = previewRuleTypeWrapper(createMlAlertType(ruleOptions));
-              await runExecutors(
-                mlAlertType.executor,
-                mlAlertType.id,
-                mlAlertType.name,
-                previewRuleParams,
-                () => true,
-                {
-                  create: alertInstanceFactoryStub,
-                  alertLimit: {
-                    getValue: () => 1000,
-                    setLimitReached: () => {},
-                  },
-                  done: () => ({ getRecoveredAlerts: () => [] }),
-                }
-              );
+              const mlAlertType = createMlAlertType(ml);
+              await runExecutors(mlAlertType, previewRuleParams);
               break;
             case 'new_terms':
-              const newTermsAlertType = previewRuleTypeWrapper(
-                createNewTermsAlertType(ruleOptions)
-              );
-              await runExecutors(
-                newTermsAlertType.executor,
-                newTermsAlertType.id,
-                newTermsAlertType.name,
-                previewRuleParams,
-                () => true,
-                {
-                  create: alertInstanceFactoryStub,
-                  alertLimit: {
-                    getValue: () => 1000,
-                    setLimitReached: () => {},
-                  },
-                  done: () => ({ getRecoveredAlerts: () => [] }),
-                }
-              );
+              const newTermsAlertType = createNewTermsAlertType();
+              await runExecutors(newTermsAlertType, previewRuleParams);
               break;
             default:
               assertUnreachable(previewRuleParams);

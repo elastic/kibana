@@ -33,6 +33,7 @@ import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { MlServicesContext } from '../../app';
 
 interface StartPlugins {
@@ -56,11 +57,12 @@ interface StartPlugins {
   savedSearch: SavedSearchPublicPluginStart;
   security?: SecurityPluginStart;
   share: SharePluginStart;
-  spacesApi?: SpacesPluginStart;
+  spaces?: SpacesPluginStart;
   triggersActionsUi?: TriggersAndActionsUIPublicPluginStart;
   uiActions: UiActionsStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   usageCollection?: UsageCollectionSetup;
+  fieldsMetadata: FieldsMetadataPublicStart;
 }
 export type StartServices = CoreStart &
   StartPlugins & {

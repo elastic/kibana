@@ -8,14 +8,21 @@
 import React, { useCallback, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiSpacer } from '@elastic/eui';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
+import { css } from '@emotion/css';
 import { SecuritySolutionLinkButton } from '../../../../../common/components/links';
 import { OnboardingCardId } from '../../../../constants';
 import type { OnboardingCardComponent } from '../../../../types';
-import { OnboardingCardContentImagePanel } from '../common/card_content_image_panel';
+import { OnboardingCardContentAssetPanel } from '../common/card_content_asset_panel';
 import { CardCallOut } from '../common/card_callout';
 import { CardSubduedText } from '../common/card_subdued_text';
-import alertsImageSrc from './images/alerts.png';
 import * as i18n from './translations';
+import type { CardSelectorListItem } from '../common/card_selector_list';
+import { CardSelectorList } from '../common/card_selector_list';
+import { ALERTS_CARD_ITEMS_BY_ID, ALERTS_CARD_ITEMS } from './alerts_card_config';
+import { useOnboardingContext } from '../../../onboarding_context';
+import { DEFAULT_ALERTS_CARD_ITEM_SELECTED } from './constants';
+import { useStoredSelectedCardItemId } from '../../../hooks/use_stored_state';
+import type { CardSelectorAssetListItem } from '../types';
 
 export const AlertsCard: OnboardingCardComponent = ({
   isCardComplete,
@@ -23,6 +30,17 @@ export const AlertsCard: OnboardingCardComponent = ({
   setComplete,
   isCardAvailable,
 }) => {
+  const { spaceId } = useOnboardingContext();
+  const [selectedAlertId, setSelectedAlertId] = useStoredSelectedCardItemId(
+    'alerts',
+    spaceId,
+    DEFAULT_ALERTS_CARD_ITEM_SELECTED.id
+  );
+  const selectedCardItem = useMemo<CardSelectorAssetListItem>(
+    () => ALERTS_CARD_ITEMS_BY_ID[selectedAlertId],
+    [selectedAlertId]
+  );
+
   const isIntegrationsCardComplete = useMemo(
     () => isCardComplete(OnboardingCardId.integrations),
     [isCardComplete]
@@ -37,24 +55,43 @@ export const AlertsCard: OnboardingCardComponent = ({
     setExpandedCardId(OnboardingCardId.integrations, { scroll: true });
   }, [setExpandedCardId]);
 
+  const onSelectCard = useCallback(
+    (item: CardSelectorListItem) => {
+      setSelectedAlertId(item.id);
+    },
+    [setSelectedAlertId]
+  );
+
   return (
-    <OnboardingCardContentImagePanel imageSrc={alertsImageSrc} imageAlt={i18n.ALERTS_CARD_TITLE}>
+    <OnboardingCardContentAssetPanel asset={selectedCardItem.asset}>
       <EuiFlexGroup
         direction="column"
         gutterSize="xl"
         justifyContent="flexStart"
         alignItems="flexStart"
       >
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem
+          className={css`
+            width: 100%;
+          `}
+        >
           <CardSubduedText data-test-subj="alertsCardDescription" size="s">
             {i18n.ALERTS_CARD_DESCRIPTION}
           </CardSubduedText>
+          <EuiSpacer />
+          <CardSelectorList
+            title={i18n.ALERTS_CARD_STEP_SELECTOR_TITLE}
+            items={ALERTS_CARD_ITEMS}
+            onSelect={onSelectCard}
+            selectedItem={selectedCardItem}
+            cardId={OnboardingCardId.alerts}
+          />
           {isIntegrationsCardAvailable && !isIntegrationsCardComplete && (
             <>
               <EuiSpacer size="m" />
               <CardCallOut
                 color="primary"
-                icon="iInCircle"
+                icon="info"
                 text={i18n.ALERTS_CARD_CALLOUT_INTEGRATIONS_TEXT}
                 action={
                   <EuiLink onClick={expandIntegrationsCard}>
@@ -81,7 +118,7 @@ export const AlertsCard: OnboardingCardComponent = ({
           </SecuritySolutionLinkButton>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </OnboardingCardContentImagePanel>
+    </OnboardingCardContentAssetPanel>
   );
 };
 

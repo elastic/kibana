@@ -7,6 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+jest.mock('./util', () => {
+  const module = jest.requireActual('./util');
+  return {
+    ...module,
+    setXState: jest.fn(module.setXState),
+  };
+});
+
 import { schema } from '@kbn/config-schema';
 import type { CoreVersionedRouter } from '@kbn/core-http-router-server-internal';
 import { get } from 'lodash';
@@ -17,11 +25,15 @@ import {
   processVersionedRouter,
 } from './process_versioned_router';
 import { VersionedRouterRoute } from '@kbn/core-http-server';
-import { createOpIdGenerator } from './util';
+import { createOpIdGenerator, setXState } from './util';
 
 let oasConverter: OasConverter;
 beforeEach(() => {
   oasConverter = new OasConverter();
+});
+
+afterEach(() => {
+  jest.clearAllMocks();
 });
 
 describe('extractVersionedRequestBodies', () => {
@@ -121,43 +133,66 @@ describe('extractVersionedResponses', () => {
 });
 
 describe('processVersionedRouter', () => {
-  it('correctly extracts the version based on the version filter', () => {
-    const baseCase = processVersionedRouter(
-      { getRoutes: () => [createTestRoute()] } as unknown as CoreVersionedRouter,
-      new OasConverter(),
-      createOpIdGenerator(),
-      { access: 'public', version: '2023-10-31' }
-    );
+  it('correctly extracts the version based on the version filter', async () => {
+    const baseCase = await processVersionedRouter({
+      appRouter: { getRoutes: () => [createTestRoute()] } as unknown as CoreVersionedRouter,
+      converter: new OasConverter(),
+      getOpId: createOpIdGenerator(),
+      filters: { access: 'public', version: '2023-10-31' },
+    });
 
     expect(Object.keys(get(baseCase, 'paths["/foo"].get.responses.200.content')!)).toEqual([
       'application/test+json',
     ]);
 
-    const filteredCase = processVersionedRouter(
-      { getRoutes: () => [createTestRoute()] } as unknown as CoreVersionedRouter,
-      new OasConverter(),
-      createOpIdGenerator(),
-      { version: '2024-12-31', access: 'public' }
-    );
+    const filteredCase = await processVersionedRouter({
+      appRouter: { getRoutes: () => [createTestRoute()] } as unknown as CoreVersionedRouter,
+      converter: new OasConverter(),
+      getOpId: createOpIdGenerator(),
+      filters: { version: '2024-12-31', access: 'public' },
+    });
     expect(Object.keys(get(filteredCase, 'paths["/foo"].get.responses.200.content')!)).toEqual([
       'application/test+json',
     ]);
   });
 
-  it('correctly updates the authz description for routes that require privileges', () => {
-    const results = processVersionedRouter(
-      { getRoutes: () => [createTestRoute()] } as unknown as CoreVersionedRouter,
-      new OasConverter(),
-      createOpIdGenerator(),
-      { version: '2023-10-31', access: 'public' }
-    );
+  it('correctly updates the authz description for routes that require privileges', async () => {
+    const results = await processVersionedRouter({
+      appRouter: { getRoutes: () => [createTestRoute()] } as unknown as CoreVersionedRouter,
+      converter: new OasConverter(),
+      getOpId: createOpIdGenerator(),
+      filters: { version: '2023-10-31', access: 'public' },
+    });
     expect(results.paths['/foo']).toBeDefined();
 
     expect(results.paths['/foo']!.get).toBeDefined();
 
     expect(results.paths['/foo']!.get!.description).toBe(
-      'This is a test route description.<br/><br/>[Required authorization] Route required privileges: ALL of [manage_spaces].'
+      'This is a test route description.<br/><br/>[Required authorization] Route required privileges: manage_spaces.'
     );
+  });
+
+  it('calls setXState with correct arguments', async () => {
+    const testRouter = { getRoutes: () => [createTestRoute()] } as unknown as CoreVersionedRouter;
+    await processVersionedRouter({
+      appRouter: testRouter,
+      converter: new OasConverter(),
+      getOpId: createOpIdGenerator(),
+      filters: {
+        version: '2023-10-31',
+        access: 'public',
+      },
+      env: { serverless: true },
+    });
+
+    const routes = testRouter.getRoutes();
+    expect(setXState).toHaveBeenCalledTimes(routes.length);
+    routes.forEach((_, idx) => {
+      const [availability, operation, env] = (setXState as jest.Mock).mock.calls[idx];
+      expect(availability === undefined || typeof availability === 'object').toBe(true);
+      expect(typeof operation === 'object').toBe(true);
+      expect(env).toEqual({ serverless: true });
+    });
   });
 });
 

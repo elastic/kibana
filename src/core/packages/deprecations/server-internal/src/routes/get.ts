@@ -14,6 +14,12 @@ export const registerGetRoute = (router: InternalDeprecationRouter) => {
   router.get(
     {
       path: '/',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the Core Deprecations Client',
+        },
+      },
       options: {
         access: 'public',
       },

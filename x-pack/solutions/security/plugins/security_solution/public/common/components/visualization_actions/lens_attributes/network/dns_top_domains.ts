@@ -8,10 +8,10 @@ import { v4 as uuidv4 } from 'uuid';
 import { TOP_VALUE, UNIQUE_COUNT } from '../../translations';
 import type { LensAttributes, GetLensAttributes } from '../../types';
 
-const layerId = uuidv4();
-const columnTopValue = uuidv4();
-const columnTimestamp = uuidv4();
-const columnDNSQuestionName = uuidv4();
+const layerId = `layer-id-${uuidv4()}`;
+const columnTopValue = `column-top-value-id-${uuidv4()}`;
+const columnTimestamp = `column-timestamp-id-${uuidv4()}`;
+const columnDNSQuestionName = `column-dns-question-name-id-${uuidv4()}`;
 
 /* Exported from Kibana Saved Object */
 export const getDnsTopDomainsLensAttributes: GetLensAttributes = ({

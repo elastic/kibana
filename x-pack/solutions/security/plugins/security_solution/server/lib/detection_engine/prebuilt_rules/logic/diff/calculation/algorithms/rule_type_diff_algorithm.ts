@@ -69,8 +69,9 @@ const mergeVersions = <TValue>({
   diffOutcome,
 }: MergeArgs<TValue>): MergeResult<TValue> => {
   switch (diffOutcome) {
-    // Scenario -AA is treated as scenario AAA:
-    // https://github.com/elastic/kibana/pull/184889#discussion_r1636421293
+    // Missing base versions always return target version
+    // Scenario -AA is treated as AAA
+    // https://github.com/elastic/kibana/issues/210358#issuecomment-2654492854
     case ThreeWayDiffOutcome.MissingBaseNoUpdate:
     case ThreeWayDiffOutcome.StockValueNoUpdate:
       return {
@@ -83,8 +84,9 @@ const mergeVersions = <TValue>({
     case ThreeWayDiffOutcome.StockValueCanUpdate:
     // NOTE: This scenario is currently inaccessible via normal UI or API workflows, but the logic is covered just in case
     case ThreeWayDiffOutcome.CustomizedValueCanUpdate:
-    // Scenario -AB is treated as scenario ABC:
-    // https://github.com/elastic/kibana/pull/184889#discussion_r1636421293
+    // Missing base versions always return target version
+    // We return all -AB rule type fields as NON_SOLVABLE, whether or not the rule is customized
+    // https://github.com/elastic/kibana/issues/210358#issuecomment-2654492854
     case ThreeWayDiffOutcome.MissingBaseCanUpdate: {
       return {
         mergedVersion: targetVersion,

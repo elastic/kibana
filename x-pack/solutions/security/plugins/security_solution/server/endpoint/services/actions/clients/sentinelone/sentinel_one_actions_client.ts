@@ -36,6 +36,8 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { Readable } from 'stream';
 import type { Mutable } from 'utility-types';
+import { buildIndexNameWithNamespace } from '../../../../../../common/endpoint/utils/index_name_utilities';
+import { SENTINEL_ONE_AGENT_INDEX_PATTERN } from '../../../../../../common/endpoint/service/response_actions/sentinel_one';
 import type {
   SentinelOneKillProcessScriptArgs,
   SentinelOneProcessListScriptArgs,
@@ -72,6 +74,7 @@ import type {
   SentinelOneActionRequestCommonMeta,
   SentinelOneActivityDataForType80,
   SentinelOneActivityEsDoc,
+  SentinelOneAgentEsDoc,
   SentinelOneGetFileRequestMeta,
   SentinelOneGetFileResponseMeta,
   SentinelOneIsolationRequestMeta,
@@ -122,6 +125,131 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     super(options);
     this.connectorActionsClient = connectorActions;
     connectorActions.setup(SENTINELONE_CONNECTOR_ID);
+  }
+
+  private async fetchSentinelOneAgentIndexNames(): Promise<string[]> {
+    const cachedInfo = this.cache.get<string[]>('fetchSentinelOneAgentIndexNames');
+
+    if (cachedInfo) {
+      this.log.debug(
+        `Returning cached response with list of Agent index names:\n${stringify(cachedInfo)}`
+      );
+      return cachedInfo;
+    }
+
+    const fleetServices = this.options.endpointService.getInternalFleetServices(
+      this.options.spaceId
+    );
+    const indexNamespaces = await fleetServices.getIntegrationNamespaces(['sentinel_one']);
+    const indexNames: string[] = [];
+
+    for (const namespaces of Object.values(indexNamespaces)) {
+      if (namespaces.length > 0) {
+        indexNames.push(
+          ...namespaces.map((namespace) =>
+            buildIndexNameWithNamespace(SENTINEL_ONE_AGENT_INDEX_PATTERN, namespace)
+          )
+        );
+      }
+    }
+
+    this.log.debug(() => `Index list with namespace:\n${stringify(indexNames)}`);
+
+    this.cache.set('fetchSentinelOneAgentIndexNames', indexNames);
+
+    return indexNames;
+  }
+
+  protected async fetchAgentPolicyInfo(
+    agentIds: string[]
+  ): Promise<LogsEndpointAction['agent']['policy']> {
+    const cacheKey = `fetchAgentPolicyInfo:${agentIds.sort().join('#')}`;
+    const cacheResponse = this.cache.get<LogsEndpointAction['agent']['policy']>(cacheKey);
+
+    if (cacheResponse) {
+      this.log.debug(
+        () => `Cached agent policy info. found - returning it:\n${stringify(cacheResponse)}`
+      );
+      return cacheResponse;
+    }
+
+    const esClient = this.options.esClient;
+    const esSearchRequest: SearchRequest = {
+      index: await this.fetchSentinelOneAgentIndexNames(),
+      query: {
+        bool: {
+          filter: [{ terms: { 'sentinel_one.agent.agent.id': agentIds } }],
+        },
+      },
+      collapse: {
+        field: 'sentinel_one.agent.agent.id',
+        inner_hits: {
+          name: 'most_recent',
+          size: 1,
+          _source: ['agent', 'sentinel_one.agent.agent.id', 'event.created'],
+          sort: [{ 'event.created': 'desc' }],
+        },
+      },
+      _source: false,
+      ignore_unavailable: true,
+    };
+
+    if (!esSearchRequest.index || esSearchRequest.index.length === 0) {
+      throw new ResponseActionsClientError(
+        `Unable to build list of indexes while retrieving policy information for SentinelOne agents [${agentIds.join(
+          ', '
+        )}]. Check to ensure at least one integration policy exists.`,
+        400
+      );
+    }
+
+    this.log.debug(() => `Looking for agents with:\n${stringify(esSearchRequest)}`);
+
+    // Get the latest ingested document for each agent ID
+    const s1AgentsEsResults = await esClient
+      .search<SentinelOneAgentEsDoc, { most_recent: SentinelOneAgentEsDoc }>(esSearchRequest)
+      .catch(catchAndWrapError);
+
+    this.log.debug(() => `SentinelOne Agent records found:\n${stringify(s1AgentsEsResults, 20)}`);
+
+    const agentIdsFound: string[] = [];
+    const fleetAgentIdToS1AgentIdMap: Record<string, string> = s1AgentsEsResults.hits.hits.reduce(
+      (acc, s1AgentEsDoc) => {
+        const doc = s1AgentEsDoc.inner_hits?.most_recent.hits.hits[0]._source;
+
+        if (doc) {
+          agentIdsFound.push(doc.sentinel_one.agent.agent.id);
+          acc[doc.agent.id] = doc.sentinel_one.agent.agent.id;
+        }
+
+        return acc;
+      },
+      {} as Record<string, string>
+    );
+    const elasticAgentIds = Object.keys(fleetAgentIdToS1AgentIdMap);
+
+    if (elasticAgentIds.length === 0) {
+      throw new ResponseActionsClientError(
+        `Unable to find elastic agent IDs for SentinelOne agent ids: [${agentIds.join(', ')}]`,
+        400
+      );
+    }
+
+    // ensure all MS agent ids were found
+    for (const agentId of agentIds) {
+      if (!agentIdsFound.includes(agentId)) {
+        throw new ResponseActionsClientError(`SentinelOne agent id [${agentId}] not found`, 404);
+      }
+    }
+
+    const agentPolicyInfo = await this.fetchFleetInfoForAgents(elasticAgentIds);
+
+    for (const agentInfo of agentPolicyInfo) {
+      agentInfo.agentId = fleetAgentIdToS1AgentIdMap[agentInfo.elasticAgentId];
+    }
+
+    this.cache.set(cacheKey, agentPolicyInfo);
+    return agentPolicyInfo;
   }
 
   private async handleResponseActionCreation<
@@ -205,7 +333,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
 
   /**
    * Sends actions to SentinelOne directly (via Connector)
-   * @private
+   * @internal
    */
   private async sendAction<
     TResponse = unknown,
@@ -246,7 +374,8 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
   private async getAgentDetails(
     agentId: string
   ): Promise<SentinelOneGetAgentsResponse['data'][number]> {
-    const cachedEntry = this.cache.get<SentinelOneGetAgentsResponse['data'][number]>(agentId);
+    const cacheKey = `getAgentDetails:${agentId}`;
+    const cachedEntry = this.cache.get<SentinelOneGetAgentsResponse['data'][number]>(cacheKey);
 
     if (cachedEntry) {
       this.log.debug(
@@ -255,28 +384,18 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       return cachedEntry;
     }
 
-    let s1ApiResponse: SentinelOneGetAgentsResponse | undefined;
-
-    try {
-      const response = await this.sendAction<
-        SentinelOneGetAgentsResponse,
-        SentinelOneGetAgentsParams
-      >(SUB_ACTION.GET_AGENTS, { ids: agentId });
-
-      s1ApiResponse = response.data;
-    } catch (err) {
-      throw new ResponseActionsClientError(
-        `Error while attempting to retrieve SentinelOne host with agent id [${agentId}]: ${err.message}`,
-        500,
-        err
-      );
-    }
+    const s1ApiResponse = (
+      await this.sendAction<SentinelOneGetAgentsResponse, SentinelOneGetAgentsParams>(
+        SUB_ACTION.GET_AGENTS,
+        { ids: agentId }
+      )
+    ).data;
 
     if (!s1ApiResponse || !s1ApiResponse.data[0]) {
       throw new ResponseActionsClientError(`SentinelOne agent id [${agentId}] not found`, 404);
     }
 
-    this.cache.set(agentId, s1ApiResponse.data[0]);
+    this.cache.set(cacheKey, s1ApiResponse.data[0]);
 
     return s1ApiResponse.data[0];
   }
@@ -795,8 +914,8 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
               requiresApproval: false,
               outputDestination: 'SentinelCloud',
               inputParams: terminateScriptInfo.buildScriptArgs({
-                // @ts-expect-error TS2339: Property 'process_name' does not exist (`.validateRequest()` has already validated that `process_name` exists)
-                processName: reqIndexOptions.parameters.process_name,
+                processName: (reqIndexOptions.parameters as ResponseActionParametersWithProcessName)
+                  .process_name,
               }),
             },
           });
@@ -988,7 +1107,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
    * retrieve script info. for scripts that are used to handle Elastic response actions
    * @param scriptType
    * @param osType
-   * @private
+   * @internal
    */
   private async fetchScriptInfo<
     TScriptOptions extends SentinelOneScriptArgs = SentinelOneScriptArgs
@@ -1102,7 +1221,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
 
     if (!agentResponse) {
       throw new ResponseActionAgentResponseEsDocNotFound(
-        `Action ID [${actionId}] for agent ID [${actionId}] is still pending`,
+        `Action ID [${actionId}] for agent ID [${agentId}] is still pending`,
         404
       );
     }
@@ -1115,7 +1234,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
    * document for them and returns it. (NOTE: the response is NOT written to ES - only returned)
    * @param actionRequests
    * @param command
-   * @private
+   * @internal
    */
   private async checkPendingIsolateOrReleaseActions(
     actionRequests: Array<
@@ -1602,7 +1721,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
    * Calculates the state of a SentinelOne Task using the response from their task status API. It
    * returns a normalized object with basic info derived from the task status value
    * @param taskStatusRecord
-   * @private
+   * @internal
    */
   private calculateTaskState(taskStatusRecord: SentinelOneRemoteScriptExecutionStatus): {
     isPending: boolean;

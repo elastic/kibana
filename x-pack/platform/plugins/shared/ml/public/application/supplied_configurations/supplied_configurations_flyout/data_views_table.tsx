@@ -12,7 +12,7 @@ import React, { useCallback } from 'react';
 import type { EuiTableFieldDataColumnType, EuiTableActionsColumnType } from '@elastic/eui';
 import { EuiButtonEmpty, EuiInMemoryTable } from '@elastic/eui';
 
-import { useMlKibana, useMlLocator } from '../../contexts/kibana';
+import { useMlKibana, useMlManagementLocator } from '../../contexts/kibana';
 import { ML_PAGES } from '../../../../common/constants/locator';
 import type {
   RecognizeModuleResult,
@@ -31,19 +31,16 @@ export const DataViewsTable: FC<Props> = ({ matchingDataViews, moduleId, jobsLen
       application: { navigateToUrl },
     },
   } = useMlKibana();
-  const mlLocator = useMlLocator()!;
+  const mlManagementLocator = useMlManagementLocator()!;
 
   const getUrl = useCallback(
-    async (id: string) => {
-      return await mlLocator.getUrl({
-        page: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_RECOGNIZER,
-        pageState: {
-          id: moduleId,
-          index: id,
-        },
+    (id: string) => {
+      return mlManagementLocator.getRedirectUrl({
+        sectionId: 'ml',
+        appId: `anomaly_detection/${ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_RECOGNIZER}?id=${moduleId}&index=${id}`,
       });
     },
-    [mlLocator, moduleId]
+    [mlManagementLocator, moduleId]
   );
 
   const columns: Array<
@@ -86,8 +83,8 @@ export const DataViewsTable: FC<Props> = ({ matchingDataViews, moduleId, jobsLen
               <EuiButtonEmpty
                 isDisabled={false}
                 color={'primary'}
-                onClick={async () => {
-                  const url = await getUrl(dataViewInfo.id);
+                onClick={() => {
+                  const url = getUrl(dataViewInfo.id);
                   navigateToUrl(url);
                 }}
               >

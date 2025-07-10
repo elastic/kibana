@@ -4,17 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { v4 as uuidv4 } from 'uuid';
-import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  EuiEmptyPrompt,
-  EuiButton,
-  EuiFlexItem,
-  EuiResizableContainer,
-  EuiPanel,
-  EuiHorizontalRule,
-  EuiFlexGroup,
   EuiButtonIcon,
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiPanel,
   EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -24,28 +21,25 @@ import { SectionLoading } from '../../shared_imports';
 import { ProcessTree } from '../process_tree';
 import type { AlertStatusEventEntityIdMap, Process, ProcessEvent } from '../../../common';
 import type { DisplayOptionsState } from '../session_view_display_options';
-import type { SessionViewDeps, SessionViewIndices, SessionViewTelemetryKey } from '../../types';
-import { SessionViewDetailPanel } from '../session_view_detail_panel';
-import { SessionViewSearchBar } from '../session_view_search_bar';
 import { SessionViewDisplayOptions } from '../session_view_display_options';
+import type { SessionViewDeps, SessionViewIndices, SessionViewTelemetryKey } from '../../types';
+import { SessionViewSearchBar } from '../session_view_search_bar';
 import { TTYPlayer } from '../tty_player';
 import { useStyles } from './styles';
 import {
   useFetchAlertStatus,
-  useFetchSessionViewProcessEvents,
-  useFetchSessionViewAlerts,
   useFetchGetTotalIOBytes,
+  useFetchSessionViewAlerts,
+  useFetchSessionViewProcessEvents,
 } from './hooks';
 import { LOCAL_STORAGE_DISPLAY_OPTIONS_KEY } from '../../../common/constants';
 import {
   AUDITBEAT_DATA_SOURCE,
   AUDITBEAT_INDEX,
-  CLOUD_DEFEND_DATA_SOURCE,
-  CLOUD_DEFEND_INDEX,
   ELASTIC_DEFEND_DATA_SOURCE,
   ENDPOINT_INDEX,
 } from '../../methods';
-import { REFRESH_SESSION, TOGGLE_TTY_PLAYER, DETAIL_PANEL } from './translations';
+import { REFRESH_SESSION, TOGGLE_TTY_PLAYER } from './translations';
 
 /**
  * The main wrapper component for the session view.
@@ -55,15 +49,14 @@ export const SessionView = ({
   sessionEntityId,
   sessionStartTime,
   height,
-  isFullScreen = false,
   jumpToEntityId,
   jumpToCursor,
   investigatedAlertId,
   loadAlertDetails,
   canReadPolicyManagement,
   trackEvent,
-  openDetailsInExpandableFlyout,
-  closeDetailsInExpandableFlyout,
+  openDetails,
+  closeDetails,
   resetJumpToEntityId,
   resetJumpToCursor,
 }: SessionViewDeps & { trackEvent: (name: SessionViewTelemetryKey) => void }) => {
@@ -76,7 +69,6 @@ export const SessionView = ({
   // track session open telemetry
   useEffect(() => {
     const sourceMap: Record<string, SessionViewIndices> = {
-      [CLOUD_DEFEND_INDEX]: CLOUD_DEFEND_DATA_SOURCE,
       [ENDPOINT_INDEX]: ELASTIC_DEFEND_DATA_SOURCE,
       [AUDITBEAT_INDEX]: AUDITBEAT_DATA_SOURCE,
     };
@@ -91,7 +83,6 @@ export const SessionView = ({
   }, [index, investigatedAlertId, trackEvent]);
 
   const [showTTY, setShowTTY] = useState(false);
-  const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [selectedProcess, setSelectedProcess] = useState<Process | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<Process[] | null>(null);
@@ -107,11 +98,8 @@ export const SessionView = ({
   const [currentJumpToCursor, setCurrentJumpToCursor] = useState(jumpToCursor);
   const [currentJumpToEntityId, setCurrentJumpToEntityId] = useState(jumpToEntityId);
   const [currentJumpToOutputEntityId, setCurrentJumpToOutputEntityId] = useState('');
-  const sessionViewId = useMemo(() => `session-view-uuid-${uuidv4()}`, []);
 
-  const styles = useStyles({ height, isFullScreen });
-
-  const detailPanelCollapseFn = useRef(() => {});
+  const styles = useStyles({ height });
 
   // to give an indication to the user that there may be more search results if they turn on verbose mode.
   const showVerboseSearchTooltip = useMemo(() => {
@@ -119,16 +107,16 @@ export const SessionView = ({
   }, [displayOptions?.verboseMode, searchResults, searchQuery]);
 
   const onProcessSelected = useCallback(
-    (process: Process | null) => {
+    (process: Process | null, isManualSelection = false) => {
       setSelectedProcess(process);
 
-      // used when SessionView is displayed in the expandable flyout
       // This refreshes the detailed panel rendered in the flyout preview panel
-      if (openDetailsInExpandableFlyout) {
-        openDetailsInExpandableFlyout(process);
+      // the isManualSelection prevents the detailed panel to render on first load of the SessionView component
+      if (isManualSelection) {
+        openDetails(process);
       }
     },
-    [openDetailsInExpandableFlyout]
+    [openDetails]
   );
 
   const onJumpToEvent = useCallback(
@@ -171,14 +159,11 @@ export const SessionView = ({
     currentJumpToCursor
   );
 
-  const {
-    data: alertsData,
-    fetchNextPage: fetchNextPageAlerts,
-    isFetching: isFetchingAlerts,
-    hasNextPage: hasNextPageAlerts,
-    error: alertsError,
-    refetch: refetchAlerts,
-  } = useFetchSessionViewAlerts(sessionEntityId, sessionStartTime, investigatedAlertId);
+  const { error: alertsError, refetch: refetchAlerts } = useFetchSessionViewAlerts(
+    sessionEntityId,
+    sessionStartTime,
+    investigatedAlertId
+  );
 
   const { data: totalTTYOutputBytes, refetch: refetchTotalTTYOutput } = useFetchGetTotalIOBytes(
     index,
@@ -196,28 +181,20 @@ export const SessionView = ({
     if (hasTTYOutput) {
       setShowTTY(!showTTY);
 
-      // used when SessionView is displayed in the expandable flyout
       // This closes the detailed panel rendered in the flyout preview panel when the user activate the TTY output mode
       // then reopens the detailed panel to the previously selected process when the user deactivates the TTY output mode
-      if (closeDetailsInExpandableFlyout && !showTTY) {
-        closeDetailsInExpandableFlyout();
+      if (!showTTY) {
+        closeDetails();
       }
-      if (openDetailsInExpandableFlyout && showTTY) {
-        openDetailsInExpandableFlyout(selectedProcess);
+      if (showTTY) {
+        openDetails(selectedProcess);
       }
 
       trackEvent('tty_loaded');
     } else {
       trackEvent('disabled_tty_clicked');
     }
-  }, [
-    closeDetailsInExpandableFlyout,
-    hasTTYOutput,
-    openDetailsInExpandableFlyout,
-    selectedProcess,
-    showTTY,
-    trackEvent,
-  ]);
+  }, [closeDetails, hasTTYOutput, openDetails, selectedProcess, showTTY, trackEvent]);
 
   const handleRefresh = useCallback(() => {
     refetch({ refetchPage: (_page, i, allPages) => allPages.length - 1 === i });
@@ -225,22 +202,6 @@ export const SessionView = ({
     refetchTotalTTYOutput();
     trackEvent('refresh_clicked');
   }, [refetch, refetchAlerts, refetchTotalTTYOutput, trackEvent]);
-
-  const alerts = useMemo(() => {
-    let events: ProcessEvent[] = [];
-
-    if (alertsData) {
-      alertsData.pages.forEach((page) => {
-        events = events.concat(page.events);
-      });
-    }
-
-    return events;
-  }, [alertsData]);
-
-  const alertsCount = useMemo(() => {
-    return alertsData?.pages?.[0].total || 0;
-  }, [alertsData]);
 
   const hasError = error || alertsError;
   const dataLoaded = data && data.pages?.length > (jumpToCursor ? 1 : 0);
@@ -294,22 +255,8 @@ export const SessionView = ({
   }, []);
 
   const toggleDetailPanel = useCallback(() => {
-    const newValue = !isDetailOpen;
-    detailPanelCollapseFn.current();
-    setIsDetailOpen(newValue);
-
-    if (newValue) {
-      trackEvent('details_opened');
-    } else {
-      trackEvent('details_closed');
-    }
-  }, [isDetailOpen, trackEvent]);
-
-  const toggleDetailPanelInFlyout = useCallback(() => {
-    if (openDetailsInExpandableFlyout) {
-      openDetailsInExpandableFlyout(selectedProcess);
-    }
-  }, [openDetailsInExpandableFlyout, selectedProcess]);
+    openDetails(selectedProcess);
+  }, [openDetails, selectedProcess]);
 
   const onShowAlertDetails = useCallback(
     (alertUuid: string) => {
@@ -520,73 +467,21 @@ export const SessionView = ({
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
-            {openDetailsInExpandableFlyout ? (
-              <EuiButtonIcon onClick={toggleDetailPanelInFlyout} iconType="list" />
-            ) : (
-              <EuiButton
-                onClick={toggleDetailPanel}
-                iconType="list"
-                data-test-subj="sessionView:sessionViewDetailPanelToggle"
-                fill={!isDetailOpen}
-              >
-                {DETAIL_PANEL}
-              </EuiButton>
-            )}
+            <EuiButtonIcon onClick={toggleDetailPanel} iconType="list" />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>
       <EuiHorizontalRule margin="none" />
-      {openDetailsInExpandableFlyout ? (
-        <>
-          {errorEmptyPrompt}
-          {processTree}
-        </>
-      ) : (
-        <EuiResizableContainer>
-          {(EuiResizablePanel, EuiResizableButton, { togglePanel }) => {
-            detailPanelCollapseFn.current = () => {
-              togglePanel?.(sessionViewId, { direction: 'left' });
-            };
-
-            return (
-              <>
-                <EuiResizablePanel initialSize={100} minSize="60%" paddingSize="none">
-                  {errorEmptyPrompt}
-                  {processTree}
-                </EuiResizablePanel>
-                <EuiResizableButton css={styles.resizeHandle} />
-                <EuiResizablePanel
-                  id={sessionViewId}
-                  initialSize={30}
-                  minSize="320px"
-                  paddingSize="none"
-                  css={styles.detailPanel}
-                >
-                  <SessionViewDetailPanel
-                    index={index}
-                    alerts={alerts}
-                    alertsCount={alertsCount}
-                    isFetchingAlerts={isFetchingAlerts}
-                    hasNextPageAlerts={hasNextPageAlerts}
-                    fetchNextPageAlerts={fetchNextPageAlerts}
-                    investigatedAlertId={investigatedAlertId}
-                    selectedProcess={selectedProcess}
-                    onJumpToEvent={onJumpToEvent}
-                    onShowAlertDetails={onShowAlertDetails}
-                  />
-                </EuiResizablePanel>
-              </>
-            );
-          }}
-        </EuiResizableContainer>
-      )}
+      <>
+        {errorEmptyPrompt}
+        {processTree}
+      </>
       <TTYPlayer
         index={index}
         show={showTTY}
         sessionEntityId={sessionEntityId}
         sessionStartTime={sessionStartTime}
         onClose={onToggleTTY}
-        isFullscreen={isFullScreen}
         onJumpToEvent={onJumpToEvent}
         autoSeekToEntityId={currentJumpToOutputEntityId}
         canReadPolicyManagement={canReadPolicyManagement}

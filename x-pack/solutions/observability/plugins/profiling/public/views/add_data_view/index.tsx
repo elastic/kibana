@@ -68,6 +68,7 @@ export function AddDataView() {
     services: { setupDataCollectionInstructions },
     start: { core },
   } = useProfilingDependencies();
+  const { docLinks } = core;
 
   const { data, status } = useAsync(
     ({ http }) => {
@@ -410,7 +411,7 @@ EOF`}
                     <EuiLink
                       data-test-subj="profilingAddDataViewInstructionsHereLink"
                       target="_blank"
-                      href={`https://www.elastic.co/guide/en/kibana/master/api-keys.html`}
+                      href={docLinks.links.management.apiKeys}
                     >
                       {i18n.translate('xpack.profiling.tabs.symbols.step2.instructions', {
                         defaultMessage: 'Instructions here',
@@ -455,7 +456,7 @@ EOF`}
                             <EuiLink
                               data-test-subj="profilingAddDataViewTheCorrespondingDocumentationPageLink"
                               target="_blank"
-                              href={`${core.docLinks.ELASTIC_WEBSITE_URL}/guide/en/observability/${core.docLinks.DOC_LINK_VERSION}/profiling-add-symbols.html`}
+                              href={`${docLinks.ELASTIC_WEBSITE_URL}/guide/en/observability/${docLinks.DOC_LINK_VERSION}/profiling-add-symbols.html`}
                             >
                               {i18n.translate('xpack.profiling.tabs.symbols.step3.doc-ref.link', {
                                 defaultMessage: 'the corresponding documentation page',
@@ -475,8 +476,9 @@ EOF`}
     ],
     [
       collectionAgentHost,
-      core.docLinks.DOC_LINK_VERSION,
-      core.docLinks.ELASTIC_WEBSITE_URL,
+      docLinks.DOC_LINK_VERSION,
+      docLinks.ELASTIC_WEBSITE_URL,
+      docLinks.links.management.apiKeys,
       core.http.basePath,
       data?.profilerAgent.version,
       majorVersion,
@@ -536,7 +538,7 @@ EOF`}
         <>
           <EuiCallOut
             color="warning"
-            iconType="help"
+            iconType="question"
             title={
               <FormattedMessage
                 id="xpack.profiling.tabs.debWarning"
@@ -593,7 +595,7 @@ EOF`}
                     <EuiLink
                       data-test-subj="profilingAddDataViewAdvancedConfigurationLink"
                       target="_blank"
-                      href={`${core.docLinks.ELASTIC_WEBSITE_URL}/guide/en/observability/${core.docLinks.DOC_LINK_VERSION}/profiling-advanced-configuration.html`}
+                      href={`${docLinks.ELASTIC_WEBSITE_URL}/guide/en/observability/${docLinks.DOC_LINK_VERSION}/profiling-advanced-configuration.html`}
                     >
                       {i18n.translate('xpack.profiling.tabs.debWarning.advancedLink', {
                         defaultMessage: 'Advanced configuration',

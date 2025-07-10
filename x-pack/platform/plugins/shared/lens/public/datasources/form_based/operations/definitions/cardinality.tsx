@@ -77,6 +77,11 @@ export const cardinalityOperation: OperationDefinition<
   displayName: CARDINALITY_NAME,
   allowAsReference: true,
   input: 'field',
+  getSerializedFormat() {
+    return {
+      id: 'number',
+    };
+  },
   getPossibleOperationForField: ({
     aggregationRestrictions,
     aggregatable,
@@ -120,7 +125,6 @@ export const cardinalityOperation: OperationDefinition<
       label: ofName(field.displayName, previousColumn?.timeShift, previousColumn?.reducedTimeRange),
       dataType: 'number',
       operationType: CARDINALITY_ID,
-      scale: SCALE,
       sourceField: field.name,
       isBucketed: IS_BUCKETED,
       filter: getFilter(previousColumn, columnParams),
@@ -175,6 +179,10 @@ export const cardinalityOperation: OperationDefinition<
         ),
       },
     ];
+  },
+  toESQL: (column, columnId) => {
+    if (column.params?.emptyAsNull || column.timeShift) return;
+    return `COUNT_DISTINCT(${column.sourceField})`;
   },
   toEsAggsFn: (column, columnId) => {
     return buildExpressionFunction<AggFunctionsMapping['aggCardinality']>('aggCardinality', {

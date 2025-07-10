@@ -11,15 +11,23 @@ import { BaseMessage } from '@langchain/core/messages';
 import { Logger } from '@kbn/logging';
 import { KibanaRequest, KibanaResponseFactory, ResponseHeaders } from '@kbn/core-http-server';
 import type { LangChainTracer } from '@langchain/core/tracers/tracer_langchain';
-import { ExecuteConnectorRequestBody, Message, Replacements } from '@kbn/elastic-assistant-common';
+import {
+  ContentReferencesStore,
+  ExecuteConnectorRequestBody,
+  Message,
+  Replacements,
+  ScreenContext,
+} from '@kbn/elastic-assistant-common';
 import { StreamResponseWithHeaders } from '@kbn/ml-response-stream/server';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import { TelemetryParams } from '@kbn/langchain/server/tracers/telemetry/telemetry_tracer';
 import type { LlmTasksPluginStart } from '@kbn/llm-tasks-plugin/server';
+import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { CoreRequestHandlerContext } from '@kbn/core/server';
 import { ResponseBody } from '../types';
-import type { AssistantTool } from '../../../types';
+import type { AssistantTool, ElasticAssistantApiRequestHandlerContext } from '../../../types';
 import { AIAssistantKnowledgeBaseDataClient } from '../../../ai_assistant_data_clients/knowledge_base';
 import { AIAssistantConversationsDataClient } from '../../../ai_assistant_data_clients/conversations';
 import { AIAssistantDataClient } from '../../../ai_assistant_data_clients';
@@ -38,11 +46,14 @@ export interface AssistantDataClients {
 
 export interface AgentExecutorParams<T extends boolean> {
   abortSignal?: AbortSignal;
+  assistantContext: ElasticAssistantApiRequestHandlerContext;
   alertsIndexPattern?: string;
   actionsClient: PublicMethodsOf<ActionsClient>;
   assistantTools?: AssistantTool[];
   connectorId: string;
   conversationId?: string;
+  contentReferencesStore: ContentReferencesStore;
+  core: CoreRequestHandlerContext;
   dataClients?: AssistantDataClients;
   esClient: ElasticsearchClient;
   langChainMessages: BaseMessage[];
@@ -50,6 +61,7 @@ export interface AgentExecutorParams<T extends boolean> {
   llmType?: string;
   isOssModel?: boolean;
   inference: InferenceServerStart;
+  inferenceChatModelEnabled?: boolean;
   logger: Logger;
   onNewReplacements?: (newReplacements: Replacements) => void;
   replacements: Replacements;
@@ -57,12 +69,15 @@ export interface AgentExecutorParams<T extends boolean> {
   onLlmResponse?: OnLlmResponse;
   request: KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
   response?: KibanaResponseFactory;
+  savedObjectsClient: SavedObjectsClientContract;
+  screenContext?: ScreenContext;
   size?: number;
   systemPrompt?: string;
   telemetry: AnalyticsServiceSetup;
   telemetryParams?: TelemetryParams;
   traceOptions?: TraceOptions;
   responseLanguage?: string;
+  timeout?: number;
 }
 
 export interface StaticReturnType {

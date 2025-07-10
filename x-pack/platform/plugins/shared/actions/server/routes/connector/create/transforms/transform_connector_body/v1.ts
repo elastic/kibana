@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ConnectorCreateParams } from '../../../../../application/connector/methods/create/types';
-import { CreateConnectorRequestBodyV1 } from '../../../../../../common/routes/connector/apis/create';
+import type { ConnectorCreateParams } from '../../../../../application/connector/methods/create/types';
+import type { CreateConnectorRequestBodyV1 } from '../../../../../../common/routes/connector/apis/create';
 
 export const transformCreateConnectorBody = ({
   connector_type_id: actionTypeId,

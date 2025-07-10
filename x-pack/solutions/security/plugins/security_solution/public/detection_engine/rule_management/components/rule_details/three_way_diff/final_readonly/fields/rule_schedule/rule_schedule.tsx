@@ -5,21 +5,36 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiDescriptionList } from '@elastic/eui';
-import { parseDuration } from '@kbn/alerting-plugin/common';
+import type { RuleSchedule } from '../../../../../../../../../common/api/detection_engine/model/rule_schema/rule_schedule';
+import { toSimpleRuleSchedule } from '../../../../../../../../../common/api/detection_engine/model/rule_schema/to_simple_rule_schedule';
 import * as i18n from '../../../../translations';
-import type { RuleSchedule } from '../../../../../../../../../common/api/detection_engine';
 import { AccessibleTimeValue } from '../../../../rule_schedule_section';
-import { secondsToDurationString } from '../../../../../../../../detections/pages/detection_engine/rules/helpers';
 
 interface RuleScheduleReadOnlyProps {
   ruleSchedule: RuleSchedule;
 }
 
 export function RuleScheduleReadOnly({ ruleSchedule }: RuleScheduleReadOnlyProps) {
-  const lookbackSeconds = parseDuration(ruleSchedule.lookback) / 1000;
-  const lookbackHumanized = secondsToDurationString(lookbackSeconds);
+  const simpleRuleSchedule = useMemo(() => toSimpleRuleSchedule(ruleSchedule), [ruleSchedule]);
+
+  if (simpleRuleSchedule) {
+    return (
+      <EuiDescriptionList
+        listItems={[
+          {
+            title: i18n.INTERVAL_FIELD_LABEL,
+            description: <AccessibleTimeValue timeValue={simpleRuleSchedule.interval} />,
+          },
+          {
+            title: i18n.LOOK_BACK_FIELD_LABEL,
+            description: <AccessibleTimeValue timeValue={simpleRuleSchedule.lookback} />,
+          },
+        ]}
+      />
+    );
+  }
 
   return (
     <EuiDescriptionList
@@ -29,8 +44,10 @@ export function RuleScheduleReadOnly({ ruleSchedule }: RuleScheduleReadOnlyProps
           description: <AccessibleTimeValue timeValue={ruleSchedule.interval} />,
         },
         {
-          title: i18n.FROM_FIELD_LABEL,
-          description: <AccessibleTimeValue timeValue={lookbackHumanized} />,
+          title: i18n.RULE_SOURCE_EVENTS_TIME_RANGE_FIELD_LABEL,
+          description: (
+            <span>{i18n.RULE_SOURCE_EVENTS_TIME_RANGE(ruleSchedule.from, ruleSchedule.to)}</span>
+          ),
         },
       ]}
     />

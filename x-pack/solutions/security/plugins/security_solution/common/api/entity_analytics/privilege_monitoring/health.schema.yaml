@@ -1,0 +1,36 @@
+openapi: 3.0.0
+
+info:
+  title: Health check on Privilege Monitoring
+  version: "2023-10-31"
+paths:
+  /api/entity_analytics/monitoring/privileges/health:
+    get:
+      x-labels: [ess, serverless]
+      x-codegen-enabled: true
+      operationId: PrivMonHealth
+      summary: Health check on Privilege Monitoring
+
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    oneOf:
+                    - $ref: './common.schema.yaml#/components/schemas/EngineStatus'
+                    - type: string
+                      enum: [not_found]
+                  error:
+                    type: object
+                    required:
+                      - status
+                    properties:
+                      message:
+                        type: string
+
+                required:
+                  - status

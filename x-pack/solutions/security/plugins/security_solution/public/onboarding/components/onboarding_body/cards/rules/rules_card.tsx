@@ -11,17 +11,36 @@ import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { SecuritySolutionLinkButton } from '../../../../../common/components/links';
 import { OnboardingCardId } from '../../../../constants';
 import type { OnboardingCardComponent } from '../../../../types';
-import { OnboardingCardContentImagePanel } from '../common/card_content_image_panel';
+import { OnboardingCardContentAssetPanel } from '../common/card_content_asset_panel';
 import { CardCallOut } from '../common/card_callout';
+
 import { CardSubduedText } from '../common/card_subdued_text';
-import rulesImageSrc from './images/rules.png';
 import * as i18n from './translations';
+import type { CardSelectorListItem } from '../common/card_selector_list';
+import { CardSelectorList } from '../common/card_selector_list';
+import { useOnboardingContext } from '../../../onboarding_context';
+import { RULES_CARD_ITEMS_BY_ID, RULES_CARD_ITEMS } from './rules_card_config';
+import { DEFAULT_RULES_CARD_ITEM_SELECTED } from './constants';
+import type { CardSelectorAssetListItem } from '../types';
+import { useStoredSelectedCardItemId } from '../../../hooks/use_stored_state';
 
 export const RulesCard: OnboardingCardComponent = ({
   isCardComplete,
   setExpandedCardId,
   isCardAvailable,
 }) => {
+  const { spaceId } = useOnboardingContext();
+
+  const [selectedRuleId, setSelectedRuleId] = useStoredSelectedCardItemId(
+    'rules',
+    spaceId,
+    DEFAULT_RULES_CARD_ITEM_SELECTED.id
+  );
+  const selectedCardItem = useMemo<CardSelectorAssetListItem>(
+    () => RULES_CARD_ITEMS_BY_ID[selectedRuleId],
+    [selectedRuleId]
+  );
+
   const isIntegrationsCardComplete = useMemo(
     () => isCardComplete(OnboardingCardId.integrations),
     [isCardComplete]
@@ -36,8 +55,15 @@ export const RulesCard: OnboardingCardComponent = ({
     setExpandedCardId(OnboardingCardId.integrations, { scroll: true });
   }, [setExpandedCardId]);
 
+  const onSelectCard = useCallback(
+    (item: CardSelectorListItem) => {
+      setSelectedRuleId(item.id);
+    },
+    [setSelectedRuleId]
+  );
+
   return (
-    <OnboardingCardContentImagePanel imageSrc={rulesImageSrc} imageAlt={i18n.RULES_CARD_TITLE}>
+    <OnboardingCardContentAssetPanel asset={selectedCardItem.asset}>
       <EuiFlexGroup
         direction="column"
         gutterSize="xl"
@@ -48,12 +74,20 @@ export const RulesCard: OnboardingCardComponent = ({
           <CardSubduedText data-test-subj="rulesCardDescription" size="s">
             {i18n.RULES_CARD_DESCRIPTION}
           </CardSubduedText>
+          <EuiSpacer />
+          <CardSelectorList
+            title={i18n.RULES_CARD_STEP_SELECTOR_TITLE}
+            items={RULES_CARD_ITEMS}
+            onSelect={onSelectCard}
+            selectedItem={selectedCardItem}
+            cardId={OnboardingCardId.rules}
+          />
           {isIntegrationsCardAvailable && !isIntegrationsCardComplete && (
             <>
               <EuiSpacer size="m" />
               <CardCallOut
                 color="primary"
-                icon="iInCircle"
+                icon="info"
                 text={i18n.RULES_CARD_CALLOUT_INTEGRATIONS_TEXT}
                 action={
                   <EuiLink onClick={expandIntegrationsCard}>
@@ -79,7 +113,7 @@ export const RulesCard: OnboardingCardComponent = ({
           </SecuritySolutionLinkButton>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </OnboardingCardContentImagePanel>
+    </OnboardingCardContentAssetPanel>
   );
 };
 

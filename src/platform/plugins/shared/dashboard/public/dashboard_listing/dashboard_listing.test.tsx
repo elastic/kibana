@@ -7,10 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ComponentType, ReactWrapper, mount } from 'enzyme';
 import React, { PropsWithChildren } from 'react';
-import { act } from 'react-dom/test-utils';
-
 import { I18nProvider } from '@kbn/i18n-react';
 /**
  * Mock Table List view. This dashboard component is a wrapper around the shared UX table List view. We
@@ -22,6 +19,7 @@ import { TableListView } from '@kbn/content-management-table-list-view';
 import { DashboardListing } from './dashboard_listing';
 import { DashboardListingProps } from './types';
 import { coreServices } from '../services/kibana_services';
+import { render } from '@testing-library/react';
 
 jest.mock('@kbn/content-management-table-list-view-table', () => {
   const originalModule = jest.requireActual('@kbn/content-management-table-list-view-table');
@@ -44,35 +42,16 @@ jest.mock('@kbn/content-management-table-list-view', () => {
   };
 });
 
-function makeDefaultProps(): DashboardListingProps {
-  return {
-    goToDashboard: jest.fn(),
-    getDashboardUrl: jest.fn(),
-  };
-}
-
-function mountWith({ props: incomingProps }: { props?: Partial<DashboardListingProps> }) {
-  const props = { ...makeDefaultProps(), ...incomingProps };
-  const wrappingComponent: React.FC<{
-    children: React.ReactNode;
-  }> = ({ children }) => {
-    return <I18nProvider>{children}</I18nProvider>;
-  };
-  const component = mount(<DashboardListing {...props} />, {
-    wrappingComponent: wrappingComponent as ComponentType<{}>,
+const renderDashboardListing = (props: Partial<DashboardListingProps> = {}) =>
+  render(<DashboardListing goToDashboard={jest.fn()} getDashboardUrl={jest.fn()} {...props} />, {
+    wrapper: I18nProvider,
   });
-  return { component, props };
-}
 
 test('initial filter is passed through', async () => {
-  (coreServices.application.capabilities as any).dashboard.showWriteControls = false;
+  (coreServices.application.capabilities as any).dashboard_v2.showWriteControls = false;
 
-  let component: ReactWrapper;
+  renderDashboardListing({ initialFilter: 'kibanana' });
 
-  await act(async () => {
-    ({ component } = mountWith({ props: { initialFilter: 'kibanana' } }));
-  });
-  component!.update();
   expect(TableListView).toHaveBeenCalledWith(
     expect.objectContaining({ initialFilter: 'kibanana' }),
     expect.any(Object) // react context
@@ -80,14 +59,10 @@ test('initial filter is passed through', async () => {
 });
 
 test('when showWriteControls is true, table list view is passed editing functions', async () => {
-  (coreServices.application.capabilities as any).dashboard.showWriteControls = true;
+  (coreServices.application.capabilities as any).dashboard_v2.showWriteControls = true;
 
-  let component: ReactWrapper;
+  renderDashboardListing();
 
-  await act(async () => {
-    ({ component } = mountWith({}));
-  });
-  component!.update();
   expect(TableListView).toHaveBeenCalledWith(
     expect.objectContaining({
       createItem: expect.any(Function),
@@ -99,14 +74,9 @@ test('when showWriteControls is true, table list view is passed editing function
 });
 
 test('when showWriteControls is false, table list view is not passed editing functions', async () => {
-  (coreServices.application.capabilities as any).dashboard.showWriteControls = false;
+  (coreServices.application.capabilities as any).dashboard_v2.showWriteControls = false;
+  renderDashboardListing();
 
-  let component: ReactWrapper;
-
-  await act(async () => {
-    ({ component } = mountWith({}));
-  });
-  component!.update();
   expect(TableListView).toHaveBeenCalledWith(
     expect.objectContaining({
       createItem: undefined,

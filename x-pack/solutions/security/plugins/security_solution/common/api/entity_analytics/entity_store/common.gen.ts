@@ -17,9 +17,14 @@
 import { z } from '@kbn/zod';
 
 export type EntityType = z.infer<typeof EntityType>;
-export const EntityType = z.enum(['user', 'host', 'service', 'universal']);
+export const EntityType = z.enum(['user', 'host', 'service', 'generic']);
 export type EntityTypeEnum = typeof EntityType.enum;
 export const EntityTypeEnum = EntityType.enum;
+
+export type BaseECSEntityField = z.infer<typeof BaseECSEntityField>;
+export const BaseECSEntityField = z.enum(['user', 'host', 'service', 'entity']);
+export type BaseECSEntityFieldEnum = typeof BaseECSEntityField.enum;
+export const BaseECSEntityFieldEnum = BaseECSEntityField.enum;
 
 export type IndexPattern = z.infer<typeof IndexPattern>;
 export const IndexPattern = z.string();
@@ -36,8 +41,59 @@ export const EngineDescriptor = z.object({
   status: EngineStatus,
   filter: z.string().optional(),
   fieldHistoryLength: z.number().int(),
-  error: z.object({}).optional(),
+  lookbackPeriod: z
+    .string()
+    .regex(/[smdh]$/)
+    .optional()
+    .default('24h'),
+  timestampField: z.string().optional(),
+  timeout: z
+    .string()
+    .regex(/[smdh]$/)
+    .optional()
+    .default('180s'),
+  frequency: z
+    .string()
+    .regex(/[smdh]$/)
+    .optional()
+    .default('1m'),
+  delay: z
+    .string()
+    .regex(/[smdh]$/)
+    .optional()
+    .default('1m'),
+  docsPerSecond: z.number().int().optional(),
+  error: z
+    .object({
+      message: z.string(),
+      action: z.literal('init'),
+    })
+    .optional(),
 });
+
+export type TransformStatsMetadata = z.infer<typeof TransformStatsMetadata>;
+export const TransformStatsMetadata = z.object({
+  pages_processed: z.number().int(),
+  documents_processed: z.number().int(),
+  documents_indexed: z.number().int(),
+  documents_deleted: z.number().int().optional(),
+  trigger_count: z.number().int(),
+  index_time_in_ms: z.number().int(),
+  index_total: z.number().int(),
+  index_failures: z.number().int(),
+  search_time_in_ms: z.number().int(),
+  search_total: z.number().int(),
+  search_failures: z.number().int(),
+  processing_time_in_ms: z.number().int(),
+  processing_total: z.number().int(),
+  delete_time_in_ms: z.number().int().optional(),
+  exponential_avg_checkpoint_duration_ms: z.number().int(),
+  exponential_avg_documents_indexed: z.number().int(),
+  exponential_avg_documents_processed: z.number().int(),
+});
+
+export type Metadata = z.infer<typeof Metadata>;
+export const Metadata = TransformStatsMetadata;
 
 export type EngineComponentResource = z.infer<typeof EngineComponentResource>;
 export const EngineComponentResource = z.enum([
@@ -58,6 +114,7 @@ export type EngineComponentStatus = z.infer<typeof EngineComponentStatus>;
 export const EngineComponentStatus = z.object({
   id: z.string(),
   installed: z.boolean(),
+  metadata: Metadata.optional(),
   resource: EngineComponentResource,
   health: z.enum(['green', 'yellow', 'red', 'unknown']).optional(),
   errors: z
@@ -80,3 +137,9 @@ export const InspectQuery = z.object({
   response: z.array(z.string()),
   dsl: z.array(z.string()),
 });
+
+/**
+ * Interval in which enrich policy runs. For example, `"1h"` means the rule runs every hour. Must be less than or equal to half the duration of the lookback period,
+ */
+export type Interval = z.infer<typeof Interval>;
+export const Interval = z.string().regex(/^[1-9]\d*[smh]$/);

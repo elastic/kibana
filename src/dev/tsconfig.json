@@ -10,6 +10,7 @@
   ],
   "exclude": [
     "target/**/*",
+    "packages/**/*"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -45,5 +46,7 @@
     "@kbn/dev-proc-runner",
     "@kbn/core-i18n-server-internal",
     "@kbn/code-owners",
+    "@kbn/projects-solutions-groups",
+    "@kbn/dot-text",
   ]
 }

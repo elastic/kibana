@@ -152,9 +152,9 @@ exports[`MetricsAxisOptions component should init with the default set of props 
         "type": "category",
       }
     }
+    disableAxisControls={false}
     onPositionChanged={[Function]}
     setCategoryAxis={[Function]}
-    useMultiLayerAxis={false}
   />
 </Fragment>
 `;

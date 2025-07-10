@@ -7,26 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ComponentType } from 'react';
-import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { ExpressionsSetup, ExpressionsStart } from '@kbn/expressions-plugin/public';
-import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import type { ComponentType } from 'react';
+import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { ExpressionsSetup, ExpressionsStart } from '@kbn/expressions-plugin/public';
+import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { GlobalSearchPluginSetup } from '@kbn/global-search-plugin/public';
-import { NavigationPublicPluginStart as NavigationStart } from '@kbn/navigation-plugin/public';
-import { SharePluginStart, SharePluginSetup } from '@kbn/share-plugin/public';
-import { UrlForwardingSetup, UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
-import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
-import { Start as InspectorPublicPluginStart } from '@kbn/inspector-plugin/public';
-import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
-import { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
+import type { NavigationPublicPluginStart as NavigationStart } from '@kbn/navigation-plugin/public';
+import type { SharePluginStart, SharePluginSetup } from '@kbn/share-plugin/public';
+import type { UrlForwardingSetup, UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
+import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import type { Start as InspectorPublicPluginStart } from '@kbn/inspector-plugin/public';
+import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
+import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
-import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
-import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
+import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
@@ -43,9 +43,11 @@ import type { DataVisualizerPluginStart } from '@kbn/data-visualizer-plugin/publ
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
 import type { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
-import { DiscoverAppLocator } from '../common';
-import { DiscoverCustomizationContext } from './customizations';
-import { type DiscoverContainerProps } from './components/discover_container';
+import type { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
+import type { ApmSourceAccessPluginStart } from '@kbn/apm-sources-access-plugin/public';
+import type { Setup as InspectorPublicPluginSetup } from '@kbn/inspector-plugin/public/plugin';
+import type { DiscoverAppLocator } from '../common';
+import type { DiscoverContainerProps } from './components/discover_container';
 
 /**
  * @public
@@ -82,11 +84,6 @@ export interface DiscoverSetup {
    * ```
    */
   readonly locator: undefined | DiscoverAppLocator;
-  readonly showInlineTopNav: () => void;
-  readonly configureInlineTopNav: (
-    projectNavId: string,
-    options: DiscoverCustomizationContext['inlineTopNav']
-  ) => void;
 }
 
 export interface DiscoverStart {
@@ -121,6 +118,11 @@ export interface DiscoverStart {
    * ```
    */
   readonly locator: undefined | DiscoverAppLocator;
+  /**
+   * @deprecated
+   * Embedding Discover in other applications is discouraged and will be removed in the future.
+   * Use the Discover context awareness framework instead to register a custom Discover profile.
+   */
   readonly DiscoverContainer: ComponentType<DiscoverContainerProps>;
 }
 
@@ -134,6 +136,7 @@ export interface DiscoverSetupPlugins {
   expressions: ExpressionsSetup;
   globalSearch?: GlobalSearchPluginSetup;
   home?: HomePublicPluginSetup;
+  inspector: InspectorPublicPluginSetup;
   observabilityAIAssistant?: ObservabilityAIAssistantPublicSetup;
   share?: SharePluginSetup;
   uiActions: UiActionsSetup;
@@ -174,4 +177,6 @@ export interface DiscoverStartPlugins {
   unifiedSearch: UnifiedSearchPublicPluginStart;
   urlForwarding: UrlForwardingStart;
   usageCollection?: UsageCollectionSetup;
+  embeddableEnhanced?: EmbeddableEnhancedPluginStart;
+  apmSourcesAccess?: ApmSourceAccessPluginStart;
 }

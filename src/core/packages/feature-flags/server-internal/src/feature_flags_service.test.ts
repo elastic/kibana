@@ -7,38 +7,43 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { firstValueFrom } from 'rxjs';
+import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import apm from 'elastic-apm-node';
 import { type Client, OpenFeature, type Provider } from '@openfeature/server-sdk';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { configServiceMock } from '@kbn/config-mocks';
 import type { FeatureFlagsStart } from '@kbn/core-feature-flags-server';
 import { FeatureFlagsService } from '..';
+import { FeatureFlagsConfig } from './feature_flags_config';
 
 describe('FeatureFlagsService Server', () => {
   let featureFlagsService: FeatureFlagsService;
   let featureFlagsClient: Client;
+  let config$: BehaviorSubject<FeatureFlagsConfig>;
 
   beforeEach(() => {
     const getClientSpy = jest.spyOn(OpenFeature, 'getClient');
+    const mockedConfigService = configServiceMock.create();
+    config$ = new BehaviorSubject<FeatureFlagsConfig>({
+      overrides: {
+        'my-overridden-flag': true,
+        'myPlugin.myOverriddenFlag': true,
+        myDestructuredObjPlugin: { myOverriddenFlag: true },
+      },
+    });
+    mockedConfigService.atPath.mockReturnValue(config$);
     featureFlagsService = new FeatureFlagsService(
       mockCoreContext.create({
-        configService: configServiceMock.create({
-          atPath: {
-            overrides: {
-              'my-overridden-flag': true,
-              'myPlugin.myOverriddenFlag': true,
-              myDestructuredObjPlugin: { myOverriddenFlag: true },
-            },
-          },
-        }),
+        configService: mockedConfigService,
       })
     );
     featureFlagsClient = getClientSpy.mock.results[0].value;
   });
 
   afterEach(async () => {
+    jest.useRealTimers();
     await featureFlagsService.stop();
+    jest.spyOn(OpenFeature, 'setProviderAndWait').mockRestore(); // Make sure that we clean up any previous mocked implementations
     jest.clearAllMocks();
     await OpenFeature.clearProviders();
   });
@@ -47,7 +52,7 @@ describe('FeatureFlagsService Server', () => {
     test('appends a provider (no async operation)', () => {
       expect.assertions(1);
       const { setProvider } = featureFlagsService.setup();
-      const spy = jest.spyOn(OpenFeature, 'setProvider');
+      const spy = jest.spyOn(OpenFeature, 'setProviderAndWait');
       const fakeProvider = { metadata: { name: 'fake provider' } } as Provider;
       setProvider(fakeProvider);
       expect(spy).toHaveBeenCalledWith(fakeProvider);
@@ -254,6 +259,47 @@ describe('FeatureFlagsService Server', () => {
       expect(getBooleanValueSpy).toHaveBeenCalledWith('another-flag', false);
     });
 
+    test('observe a number flag with overrides', async () => {
+      const flag$ = startContract.getBooleanValue$('my-overridden-flag', false);
+      const observedValues: boolean[] = [];
+      flag$.subscribe((v) => observedValues.push(v));
+      // Initial emission
+      await expect(firstValueFrom(flag$)).resolves.toEqual(true);
+      expect(apmSpy).toHaveBeenCalledWith({ 'flag_my-overridden-flag': true });
+      expect(observedValues).toHaveLength(1);
+
+      // Does not reevaluate and emit if the other flags are changed
+      config$.next({
+        overrides: {
+          'my-overridden-flag': true,
+          'myPlugin.myOverriddenFlag': false,
+        },
+      });
+      await expect(firstValueFrom(flag$)).resolves.toEqual(true);
+      expect(observedValues).toHaveLength(1); // still 1
+
+      // Reevaluates and emits when the observed flag is changed
+      config$.next({
+        overrides: {
+          'my-overridden-flag': false,
+          'myPlugin.myOverriddenFlag': false,
+        },
+      });
+      await expect(firstValueFrom(flag$)).resolves.toEqual(false);
+      expect(observedValues).toHaveLength(2);
+      expect(observedValues).toStrictEqual([true, false]);
+
+      // Reevaluates and emits when the observed flag is changed (removed)
+      config$.next({
+        overrides: {
+          'myPlugin.myOverriddenFlag': false,
+        },
+      });
+      await expect(firstValueFrom(flag$)).resolves.toEqual(false);
+      expect(observedValues).toHaveLength(3);
+      expect(observedValues).toStrictEqual([true, false, false]);
+    });
+
     test('overrides with dotted names', async () => {
       const getBooleanValueSpy = jest.spyOn(featureFlagsClient, 'getBooleanValue');
       await expect(
@@ -271,7 +317,22 @@ describe('FeatureFlagsService Server', () => {
     expect(getOverrides()).toStrictEqual({
       'my-overridden-flag': true,
       'myPlugin.myOverriddenFlag': true,
-      myDestructuredObjPlugin: { myOverriddenFlag: true },
+      'myDestructuredObjPlugin.myOverriddenFlag': true,
+    });
+  });
+
+  describe('bootstrapping helpers', () => {
+    test('return empty initial feature flags if no getter registered', async () => {
+      const { getInitialFeatureFlags } = featureFlagsService.setup();
+      await expect(getInitialFeatureFlags()).resolves.toEqual({});
+    });
+
+    test('calls the getter when registered', async () => {
+      const { setInitialFeatureFlagsGetter, getInitialFeatureFlags } = featureFlagsService.setup();
+      const mockGetter = jest.fn().mockResolvedValue({ myFlag: true });
+      setInitialFeatureFlagsGetter(mockGetter);
+      await expect(getInitialFeatureFlags()).resolves.toEqual({ myFlag: true });
+      expect(mockGetter).toHaveBeenCalledTimes(1);
     });
   });
 });

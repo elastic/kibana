@@ -14,8 +14,9 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import { coverageOverviewCardColorThresholds, coverageOverviewLegendWidth } from '../constants';
+import { coverageOverviewLegendWidth } from '../constants';
 import * as i18n from '../translations';
+import { useCoverageColors } from '../use_coverage_colors';
 
 const LegendLabel = ({ label, color }: { label: string; color?: string }) => (
   <EuiFacetButton
@@ -36,20 +37,22 @@ const LegendLabel = ({ label, color }: { label: string; color?: string }) => (
 );
 
 export const CoverageOverviewLegend = () => {
+  const { coverageColors } = useCoverageColors();
+
   const thresholds = useMemo(
     () =>
-      coverageOverviewCardColorThresholds.map(({ threshold, color }, index, thresholdsMap) => (
+      coverageColors.map(({ threshold, backgroundColor }, index, thresholdsMap) => (
         <LegendLabel
+          key={index}
           label={`${
             index === 0
               ? `\u003E${threshold}`
               : `${threshold}-${thresholdsMap[index - 1].threshold}`
           } ${i18n.CoverageOverviewLegendRulesLabel}`}
-          key={index}
-          color={color}
+          color={backgroundColor}
         />
       )),
-    []
+    [coverageColors]
   );
 
   return (

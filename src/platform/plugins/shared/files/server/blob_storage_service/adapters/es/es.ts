@@ -112,13 +112,11 @@ export class ElasticsearchBlobStorageClient implements BlobStorageClient {
         await esClient.indices.create({
           index,
           wait_for_active_shards: 'all',
-          body: {
-            settings: {
-              number_of_shards: 1,
-              auto_expand_replicas: '0-1',
-            },
-            mappings,
+          settings: {
+            number_of_shards: 1,
+            auto_expand_replicas: '0-1',
           },
+          mappings,
         });
       } catch (e) {
         if (e instanceof errors.ResponseError && e.statusCode === 400) {

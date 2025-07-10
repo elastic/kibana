@@ -11,10 +11,10 @@ export const SPARSE_SEMANTIC_FIELD_FIELD_CAPS = {
   indices: ['test-index2'],
   fields: {
     infer_field: {
-      semantic_text: {
-        type: 'semantic_text',
+      text: {
+        type: 'text',
         metadata_field: false,
-        searchable: false,
+        searchable: true,
         aggregatable: false,
       },
     },
@@ -80,6 +80,48 @@ export const SPARSE_SEMANTIC_FIELD_MAPPINGS = {
   },
 } as any as IndicesGetMappingResponse;
 
+export const SPARSE_SEMANTIC_FIELD_MAPPINGS_OBJECT_TYPE = {
+  'test-index-2': {
+    mappings: {
+      properties: {
+        title: {
+          properties: {
+            semanticTextField: {
+              type: 'semantic_text',
+              inference_id: 'elser-endpoint',
+              model_settings: {
+                task_type: 'sparse_embedding',
+              },
+            },
+          },
+        },
+      },
+    },
+  },
+} as any as IndicesGetMappingResponse;
+
+export const SPARSE_SEMANTIC_FIELD_MAPPINGS_MULTI_FIELD_TYPE = {
+  'test-index-2': {
+    mappings: {
+      properties: {
+        title: {
+          type: 'text',
+          fields: {
+            semanticTextField: {
+              type: 'semantic_text',
+              inference_id: 'elser-endpoint',
+              model_settings: {
+                service: 'elasticsearch',
+                task_type: 'sparse_embedding',
+              },
+            },
+          },
+        },
+      },
+    },
+  },
+} as any as IndicesGetMappingResponse;
+
 export const DENSE_SEMANTIC_FIELD_MAPPINGS = {
   'test-index2': {
     mappings: {
@@ -127,10 +169,10 @@ export const DENSE_SEMANTIC_FIELD_FIELD_CAPS = {
   indices: ['test-index2'],
   fields: {
     infer_field: {
-      semantic_text: {
-        type: 'semantic_text',
+      text: {
+        type: 'text',
         metadata_field: false,
-        searchable: false,
+        searchable: true,
         aggregatable: false,
       },
     },
@@ -202,6 +244,112 @@ export const DENSE_SPARSE_SAME_FIELD_NAME_CAPS = {
     text: { text: { type: 'text', metadata_field: false, searchable: true, aggregatable: false } },
     'model_id.keyword': {
       keyword: { type: 'keyword', metadata_field: false, searchable: true, aggregatable: true },
+    },
+  },
+};
+export const SPARSE_SEMANTIC_FIELD_MAPPINGS_OBJECT_TYPE_FIELD_CAPS = {
+  indices: ['test-index-2'],
+  fields: {
+    'title.semanticTextField.inference': {
+      object: {
+        type: 'object',
+        metadata_field: false,
+        searchable: false,
+        aggregatable: false,
+      },
+    },
+    'title.semanticTextField.inference.chunks': {
+      nested: {
+        type: 'nested',
+        metadata_field: false,
+        searchable: false,
+        aggregatable: false,
+      },
+    },
+    'title.semanticTextField.inference.chunks.offset': {
+      offset_source: {
+        type: 'offset_source',
+        metadata_field: false,
+        searchable: false,
+        aggregatable: false,
+      },
+    },
+    'title.semanticTextField.inference.chunks.embeddings': {
+      sparse_vector: {
+        type: 'sparse_vector',
+        metadata_field: false,
+        searchable: true,
+        aggregatable: false,
+      },
+    },
+    'title.semanticTextField': {
+      text: {
+        type: 'text',
+        metadata_field: false,
+        searchable: true,
+        aggregatable: false,
+      },
+    },
+    title: {
+      object: {
+        type: 'object',
+        metadata_field: false,
+        searchable: false,
+        aggregatable: false,
+      },
+    },
+  },
+};
+export const SPARSE_SEMANTIC_FIELD_MAPPINGS_MULTI_FIELD_TYPE_FIELD_CAPS = {
+  indices: ['test-index-2'],
+  fields: {
+    'title.semanticTextField.inference': {
+      object: {
+        type: 'object',
+        metadata_field: false,
+        searchable: false,
+        aggregatable: false,
+      },
+    },
+    'title.semanticTextField.inference.chunks': {
+      nested: {
+        type: 'nested',
+        metadata_field: false,
+        searchable: false,
+        aggregatable: false,
+      },
+    },
+    'title.semanticTextField.inference.chunks.offset': {
+      offset_source: {
+        type: 'offset_source',
+        metadata_field: false,
+        searchable: false,
+        aggregatable: false,
+      },
+    },
+    'title.semanticTextField.inference.chunks.embeddings': {
+      sparse_vector: {
+        type: 'sparse_vector',
+        metadata_field: false,
+        searchable: true,
+        aggregatable: false,
+      },
+    },
+    'title.semanticTextField': {
+      text: {
+        type: 'text',
+        metadata_field: false,
+        searchable: true,
+        aggregatable: false,
+      },
+    },
+    title: {
+      object: {
+        type: 'object',
+        metadata_field: false,
+        searchable: false,
+        aggregatable: false,
+      },
     },
   },
 };

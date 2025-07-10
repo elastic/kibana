@@ -17,6 +17,7 @@ import { createReactQueryWrapper, TestProviders } from '../../../../common/mock'
 import type { OpenTimelineResult, TimelineResultNote } from '../types';
 import { NotePreviews } from '.';
 import { useDeleteNote } from './hooks/use_delete_note';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../common/hooks/use_selector');
@@ -30,6 +31,8 @@ jest.mock('react-redux', () => {
 });
 
 jest.mock('./hooks/use_delete_note');
+
+jest.mock('../../../../common/components/user_privileges');
 
 const deleteMutateMock = jest.fn();
 
@@ -50,6 +53,11 @@ describe('NotePreviews', () => {
       onSuccess: jest.fn(),
       onError: jest.fn(),
       isLoading: false,
+    });
+    (useUserPrivileges as jest.Mock).mockReturnValue({
+      notesPrivileges: {
+        crud: true,
+      },
     });
   });
 
@@ -339,6 +347,39 @@ describe('NotePreviews', () => {
       });
       expect(deleteMutateMock.mock.calls).toHaveLength(1);
       expect(deleteMutateMock.mock.calls[0][0]).toBe('test-id-1');
+    });
+  });
+
+  describe('Insuffiecient privileges', () => {
+    it('should not show the delete note button', () => {
+      (useUserPrivileges as jest.Mock).mockReturnValue({
+        notesPrivileges: {
+          crud: false,
+        },
+      });
+
+      const timeline = mockTimelineResults[0];
+      (useDeepEqualSelector as jest.Mock).mockReturnValue(timeline);
+
+      const wrapper = mountWithI18nProvider(
+        <NotePreviews
+          notes={[
+            {
+              note: 'enabled delete',
+              savedObjectId: 'test-id',
+              updated: note2updated,
+              updatedBy: 'alice',
+            },
+          ]}
+          showTimelineDescription
+          timelineId="test-timeline-id"
+        />,
+        {
+          wrappingComponent: createReactQueryWrapper(),
+        }
+      );
+
+      expect(wrapper.find('[data-test-subj="delete-note"]').exists()).toBe(false);
     });
   });
 });

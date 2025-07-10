@@ -8,6 +8,7 @@
 import type { CoreStart } from '@kbn/core/public';
 import { JOB_STATUS } from '@kbn/reporting-common';
 import type { JobId, ReportOutput, ReportSource, TaskRunResult } from '@kbn/reporting-common/types';
+import { RecurringSchedule } from '@kbn/response-ops-recurring-schedule-form/types';
 import { ReportingPublicPluginStartDependencies } from './plugin';
 
 /*
@@ -17,10 +18,7 @@ export type StartServices = [
   Pick<
     CoreStart,
     // required for modules that render React
-    | 'analytics'
-    | 'i18n'
-    | 'theme'
-    | 'userProfile'
+    | 'rendering'
     // used extensively in Reporting plugin
     | 'application'
     | 'notifications'
@@ -51,4 +49,29 @@ export interface JobSummary {
 export interface JobSummarySet {
   completed?: JobSummary[];
   failed?: JobSummary[];
+}
+
+export type ReportTypeId = 'pngV2' | 'printablePdfV2' | 'csv_searchsource' | 'csv_v2';
+
+export interface ScheduledReport {
+  title: string;
+  reportTypeId: ReportTypeId;
+  optimizedForPrinting?: boolean;
+  recurring: boolean;
+  recurringSchedule: RecurringSchedule;
+  sendByEmail: boolean;
+  emailRecipients: string[];
+  /**
+   * @internal Still unsupported by the schedule API
+   */
+  startDate?: string;
+  /**
+   * @internal Still unsupported by the schedule API
+   */
+  timezone?: string;
+}
+
+export interface ReportTypeData {
+  label: string;
+  id: string;
 }

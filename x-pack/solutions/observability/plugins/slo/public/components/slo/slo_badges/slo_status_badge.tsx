@@ -6,71 +6,82 @@
  */
 
 import React from 'react';
-import { EuiBadge, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import { EuiBadge, EuiFlexItem, EuiSkeletonText, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 
 export interface SloStatusProps {
   slo: SLOWithSummaryResponse;
+  isLoading?: boolean;
 }
 
-export function SloStatusBadge({ slo }: SloStatusProps) {
+interface StatusHealth {
+  displayText: string;
+  badgeColor: string;
+}
+
+type SLOStatus = 'HEALTHY' | 'DEGRADING' | 'VIOLATED' | 'NO_DATA';
+
+export const displayStatus: Record<SLOStatus, StatusHealth> = {
+  HEALTHY: {
+    displayText: i18n.translate('xpack.slo.sloStatusBadge.healthy', {
+      defaultMessage: 'Healthy',
+    }),
+    badgeColor: 'success',
+  },
+
+  DEGRADING: {
+    displayText: i18n.translate('xpack.slo.sloStatusBadge.degrading', {
+      defaultMessage: 'Degrading',
+    }),
+    badgeColor: 'warning',
+  },
+  VIOLATED: {
+    displayText: i18n.translate('xpack.slo.sloStatusBadge.violated', {
+      defaultMessage: 'Violated',
+    }),
+    badgeColor: 'danger',
+  },
+  NO_DATA: {
+    displayText: i18n.translate('xpack.slo.sloStatusBadge.noData', {
+      defaultMessage: 'No Data',
+    }),
+    badgeColor: 'default',
+  },
+};
+
+export function SloStatusBadge({ slo, isLoading }: SloStatusProps) {
+  if (isLoading || !slo) {
+    return <EuiSkeletonText lines={2} data-test-subj="loadingTitle" />;
+  }
   return (
     <>
       <EuiFlexItem grow={false}>
-        {slo.summary.status === 'NO_DATA' && (
+        {slo.summary.status === 'NO_DATA' ? (
           <EuiToolTip
             position="top"
             content={i18n.translate('xpack.slo.sloStatusBadge.noDataTooltip', {
               defaultMessage: 'It may take some time before the data is aggregated and available.',
             })}
           >
-            <EuiBadge color="default">
-              {i18n.translate('xpack.slo.sloStatusBadge.noData', {
-                defaultMessage: 'No data',
-              })}
+            <EuiBadge color={displayStatus[slo.summary.status].badgeColor}>
+              {displayStatus[slo.summary.status]?.displayText}
             </EuiBadge>
           </EuiToolTip>
-        )}
-        {slo.summary.status === 'HEALTHY' && (
-          <div>
-            <EuiBadge color="success">
-              {i18n.translate('xpack.slo.sloStatusBadge.healthy', {
-                defaultMessage: 'Healthy',
-              })}
-            </EuiBadge>
-          </div>
-        )}
-        {slo.summary.status === 'DEGRADING' && (
-          <div>
-            <EuiBadge color="warning">
-              {i18n.translate('xpack.slo.sloStatusBadge.degrading', {
-                defaultMessage: 'Degrading',
-              })}
-            </EuiBadge>
-          </div>
-        )}
-        {slo.summary.status === 'VIOLATED' && (
-          <div>
-            <EuiBadge color="danger">
-              {i18n.translate('xpack.slo.sloStatusBadge.violated', {
-                defaultMessage: 'Violated',
-              })}
-            </EuiBadge>
-          </div>
+        ) : (
+          <EuiBadge color={displayStatus[slo.summary.status].badgeColor}>
+            {displayStatus[slo.summary.status]?.displayText}
+          </EuiBadge>
         )}
       </EuiFlexItem>
 
       {slo.summary.errorBudget.isEstimated && (
         <EuiFlexItem grow={false}>
-          {/* Prevent badges from growing when inside an EuiFlexGroup by wrapping content with div */}
-          <div>
-            <EuiBadge color="default">
-              {i18n.translate('xpack.slo.sloStatusBadge.forecasted', {
-                defaultMessage: 'Forecasted',
-              })}
-            </EuiBadge>
-          </div>
+          <EuiBadge color="default">
+            {i18n.translate('xpack.slo.sloStatusBadge.forecasted', {
+              defaultMessage: 'Forecasted',
+            })}
+          </EuiBadge>
         </EuiFlexItem>
       )}
     </>

@@ -9,7 +9,7 @@ import type { Moment } from 'moment';
 
 import type { Logger } from '@kbn/logging';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 
@@ -25,16 +25,13 @@ import type {
 } from '@kbn/alerting-plugin/server';
 import type { WithoutReservedActionGroups } from '@kbn/alerting-plugin/common';
 import type { ListClient } from '@kbn/lists-plugin/server';
-import type {
-  PersistenceServices,
-  IRuleDataClient,
-  SuppressedAlertService,
-} from '@kbn/rule-registry-plugin/server';
+import type { PersistenceServices, IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import type { EcsFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/ecs_field_map';
 import type { TypeOfFieldMap } from '@kbn/rule-registry-plugin/common/field_map';
 import type { Filter } from '@kbn/es-query';
 
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import type { DocLinksServiceSetup } from '@kbn/core/server';
 import type { RulePreviewLoggedRequest } from '../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
 import type { RuleResponseAction } from '../../../../common/api/detection_engine/model/rule_response_actions';
 import type { ConfigType } from '../../../config';
@@ -46,22 +43,19 @@ import type { IRuleExecutionLogForExecutors, IRuleMonitoringService } from '../r
 import type { RefreshTypes } from '../types';
 
 import type { Status } from '../../../../common/api/detection_engine';
-import type { BaseHit, SearchTypes, EqlSequence } from '../../../../common/detection_engine/types';
-import type { GenericBulkCreateResponse } from './factories';
+import type { BaseHit, SearchTypes } from '../../../../common/detection_engine/types';
 import type { BuildReasonMessage } from './utils/reason_formatters';
 import type {
-  BaseFieldsLatest,
-  DetectionAlert,
-  EqlBuildingBlockFieldsLatest,
-  EqlShellFieldsLatest,
-  WrappedFieldsLatest,
+  DetectionAlertLatest,
+  DetectionAlert800,
+  WrappedAlert,
 } from '../../../../common/api/detection_engine/model/alerts';
 import type {
   RuleAction,
   RuleResponse,
 } from '../../../../common/api/detection_engine/model/rule_schema';
-import type { EnrichEvents } from './utils/enrichments/types';
 import type { ThresholdResult } from './threshold/types';
+import type { ScheduleNotificationResponseActionsService } from '../rule_response_actions/schedule_notification_response_actions';
 
 export interface SecurityAlertTypeReturnValue<TState extends RuleTypeState> {
   bulkCreateTimes: string[];
@@ -70,7 +64,6 @@ export interface SecurityAlertTypeReturnValue<TState extends RuleTypeState> {
   createdSignals: unknown[];
   errors: string[];
   userError?: boolean;
-  lastLookbackDate?: Date | null;
   searchAfterTimes: string[];
   state: TState;
   success: boolean;
@@ -80,7 +73,7 @@ export interface SecurityAlertTypeReturnValue<TState extends RuleTypeState> {
   loggedRequests?: RulePreviewLoggedRequest[];
 }
 
-export interface RunOpts<TParams extends RuleParams> {
+export interface SecuritySharedParams<TParams extends RuleParams = RuleParams> {
   completeRule: CompleteRule<TParams>;
   tuple: {
     to: Moment;
@@ -90,9 +83,6 @@ export interface RunOpts<TParams extends RuleParams> {
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
   listClient: ListClient;
   searchAfterSize: number;
-  bulkCreate: BulkCreate;
-  wrapHits: WrapHits;
-  wrapSequences: WrapSequences;
   ruleDataClient: IRuleDataClient;
   inputIndex: string[];
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
@@ -103,34 +93,46 @@ export interface RunOpts<TParams extends RuleParams> {
   unprocessedExceptions: ExceptionListItemSchema[];
   exceptionFilter: Filter | undefined;
   alertTimestampOverride: Date | undefined;
-  alertWithSuppression: SuppressedAlertService;
   refreshOnIndexingAlerts: RefreshTypes;
   publicBaseUrl: string | undefined;
-  experimentalFeatures?: ExperimentalFeatures;
+  experimentalFeatures: ExperimentalFeatures;
   intendedTimestamp: Date | undefined;
+  spaceId: string;
+  ignoreFields: Record<string, boolean>;
+  ignoreFieldsRegexes: string[];
+  eventsTelemetry: ITelemetryEventsSender | undefined;
+  licensing: LicensingPluginSetup;
+  scheduleNotificationResponseActionsService: ScheduleNotificationResponseActionsService;
 }
 
-export type SecurityAlertType<
+type SecurityActionGroupId = 'default';
+
+export type SecurityExecutorOptions<
   TParams extends RuleParams,
-  TState extends RuleTypeState,
-  TInstanceContext extends AlertInstanceContext = {},
-  TActionGroupIds extends string = never
-> = Omit<
-  RuleType<TParams, TParams, TState, AlertInstanceState, TInstanceContext, TActionGroupIds>,
+  TState extends RuleTypeState
+> = RuleExecutorOptions<
+  TParams,
+  TState,
+  AlertInstanceState,
+  AlertInstanceContext,
+  WithoutReservedActionGroups<SecurityActionGroupId, never>
+> & {
+  services: PersistenceServices;
+  sharedParams: SecuritySharedParams<TParams>;
+};
+
+export type SecurityAlertType<TParams extends RuleParams, TState extends RuleTypeState> = Omit<
+  RuleType<
+    TParams,
+    TParams,
+    TState,
+    AlertInstanceState,
+    AlertInstanceContext,
+    SecurityActionGroupId
+  >,
   'executor'
 > & {
-  executor: (
-    options: RuleExecutorOptions<
-      TParams,
-      TState,
-      AlertInstanceState,
-      TInstanceContext,
-      WithoutReservedActionGroups<TActionGroupIds, never>
-    > & {
-      services: PersistenceServices;
-      runOpts: RunOpts<TParams>;
-    }
-  ) => Promise<
+  executor: (options: SecurityExecutorOptions<TParams, TState>) => Promise<
     SearchAfterAndBulkCreateReturnType & {
       state: TState;
       loggedRequests?: RulePreviewLoggedRequest[];
@@ -141,6 +143,7 @@ export type SecurityAlertType<
 export interface CreateSecurityRuleTypeWrapperProps {
   lists: SetupPlugins['lists'];
   actions: SetupPlugins['actions'];
+  docLinks: DocLinksServiceSetup;
   logger: Logger;
   config: ConfigType;
   publicBaseUrl: string | undefined;
@@ -148,26 +151,20 @@ export interface CreateSecurityRuleTypeWrapperProps {
   ruleExecutionLoggerFactory: IRuleMonitoringService['createRuleExecutionLogClientForExecutors'];
   version: string;
   isPreview?: boolean;
-  experimentalFeatures?: ExperimentalFeatures;
+  isServerless?: boolean;
+  experimentalFeatures: ExperimentalFeatures;
   alerting: SetupPlugins['alerting'];
   analytics?: AnalyticsServiceSetup;
+  eventsTelemetry: ITelemetryEventsSender | undefined;
+  licensing: LicensingPluginSetup;
+  scheduleNotificationResponseActionsService: ScheduleNotificationResponseActionsService;
 }
 
 export type CreateSecurityRuleTypeWrapper = (
   options: CreateSecurityRuleTypeWrapperProps
 ) => <TParams extends RuleParams, TState extends RuleTypeState>(
-  type: SecurityAlertType<TParams, TState, AlertInstanceContext, 'default'>
+  type: SecurityAlertType<TParams, TState>
 ) => RuleType<TParams, TParams, TState, AlertInstanceState, AlertInstanceContext, 'default'>;
-
-export interface CreateRuleOptions {
-  experimentalFeatures: ExperimentalFeatures;
-  logger: Logger;
-  ml?: SetupPlugins['ml'];
-  eventsTelemetry?: ITelemetryEventsSender | undefined;
-  version: string;
-  licensing: LicensingPluginSetup;
-  scheduleNotificationResponseActionsService: (params: ScheduleNotificationActions) => void;
-}
 
 export interface ScheduleNotificationActions {
   signals: unknown[];
@@ -175,7 +172,7 @@ export interface ScheduleNotificationActions {
   responseActions: RuleResponseAction[] | undefined;
 }
 
-export interface CreateQueryRuleOptions extends CreateRuleOptions {
+export interface CreateQueryRuleOptions {
   id: typeof QUERY_RULE_TYPE_ID | typeof SAVED_QUERY_RULE_TYPE_ID;
   name: 'Custom Query Rule' | 'Saved Query Rule';
 }
@@ -230,37 +227,6 @@ export interface SignalSource {
   kibana?: SearchTypes;
 }
 
-export interface BulkItem {
-  create?: {
-    _index: string;
-    _type?: string;
-    _id: string;
-    _version: number;
-    result?: string;
-    _shards?: {
-      total: number;
-      successful: number;
-      failed: number;
-    };
-    _seq_no?: number;
-    _primary_term?: number;
-    status: number;
-    error?: {
-      type: string;
-      reason: string;
-      index_uuid?: string;
-      shard: string;
-      index: string;
-    };
-  };
-}
-
-export interface BulkResponse {
-  took: number;
-  errors: boolean;
-  items: BulkItem[];
-}
-
 export type EventHit = Exclude<TypeOfFieldMap<EcsFieldMap>, '@timestamp'> & {
   '@timestamp': string;
   [key: string]: SearchTypes;
@@ -271,7 +237,7 @@ export type SignalSearchResponse<
   TAggregations = Record<estypes.AggregateName, estypes.AggregationsAggregate>
 > = estypes.SearchResponse<SignalSource, TAggregations>;
 export type SignalSourceHit = estypes.SearchHit<SignalSource>;
-export type AlertSourceHit = estypes.SearchHit<DetectionAlert>;
+export type AlertSourceHit = estypes.SearchHit<DetectionAlert800>;
 export type WrappedSignalHit = BaseHit<SignalHit>;
 export type BaseSignalHit = estypes.SearchHit<SignalSource>;
 
@@ -331,65 +297,37 @@ export interface AlertAttributes<T extends RuleParams = RuleParams> {
   params: T;
 }
 
-export type BulkResponseErrorAggregation = Record<string, { count: number; statusCode: number }>;
-
 export type SignalsEnrichment = (signals: SignalSourceHit[]) => Promise<SignalSourceHit[]>;
 
-export type BulkCreate = <T extends BaseFieldsLatest>(
-  docs: Array<WrappedFieldsLatest<T>>,
-  maxAlerts?: number,
-  enrichEvents?: EnrichEvents
-) => Promise<GenericBulkCreateResponse<T>>;
-
 export type SimpleHit = BaseHit<{ '@timestamp'?: string }>;
-
-export type WrapHits = (
-  hits: Array<estypes.SearchHit<SignalSource>>,
-  buildReasonMessage: BuildReasonMessage
-) => Array<WrappedFieldsLatest<BaseFieldsLatest>>;
 
 export type WrapSuppressedHits = (
   hits: Array<estypes.SearchHit<SignalSource>>,
   buildReasonMessage: BuildReasonMessage
-) => Array<WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest>>;
+) => Array<WrappedAlert<DetectionAlertLatest & SuppressionFieldsLatest>>;
 
-export type WrapSequences = (
-  sequences: Array<EqlSequence<SignalSource>>,
-  buildReasonMessage: BuildReasonMessage
-) => Array<
-  WrappedFieldsLatest<EqlShellFieldsLatest> | WrappedFieldsLatest<EqlBuildingBlockFieldsLatest>
->;
-
-export type RuleServices = RuleExecutorServices<
+export type SecurityRuleServices = RuleExecutorServices<
   AlertInstanceState,
   AlertInstanceContext,
   'default'
->;
+> &
+  PersistenceServices;
 
 export interface SearchAfterAndBulkCreateParams {
-  tuple: {
-    to: moment.Moment;
-    from: moment.Moment;
-    maxSignals: number;
-  };
-  services: RuleServices;
-  listClient: ListClient;
-  exceptionsList: ExceptionListItemSchema[];
-  ruleExecutionLogger: IRuleExecutionLogForExecutors;
+  sharedParams: SecuritySharedParams;
+  services: SecurityRuleServices;
   eventsTelemetry: ITelemetryEventsSender | undefined;
-  inputIndexPattern: string[];
-  pageSize: number;
   filter: estypes.QueryDslQueryContainer;
   buildReasonMessage: BuildReasonMessage;
   enrichment?: SignalsEnrichment;
-  bulkCreate: BulkCreate;
-  wrapHits: WrapHits;
   trackTotalHits?: boolean;
   sortOrder?: estypes.SortOrder;
-  runtimeMappings: estypes.MappingRuntimeFields | undefined;
-  primaryTimestamp: string;
-  secondaryTimestamp?: string;
   additionalFilters?: estypes.QueryDslQueryContainer[];
+  isLoggedRequestsEnabled?: boolean;
+  /**
+   * If defined, will override the value of max_signals found in sharedParams.tuple
+   */
+  maxSignalsOverride?: number;
 }
 
 export interface SearchAfterAndBulkCreateReturnType {
@@ -398,17 +336,23 @@ export interface SearchAfterAndBulkCreateReturnType {
   searchAfterTimes: string[];
   enrichmentTimes: string[];
   bulkCreateTimes: string[];
-  lastLookBackDate: Date | null | undefined;
   createdSignalsCount: number;
   createdSignals: unknown[];
   errors: string[];
   userError?: boolean;
   warningMessages: string[];
   suppressedAlertsCount?: number;
+  loggedRequests?: RulePreviewLoggedRequest[];
+}
+
+export interface LoggedRequestsConfig {
+  type: string;
+  description: string;
+  skipRequestQuery?: boolean;
 }
 
 // the new fields can be added later if needed
 export interface OverrideBodyQuery {
   _source?: estypes.SearchSourceConfig;
-  fields?: estypes.Fields;
+  fields?: Array<estypes.QueryDslFieldAndFormat | estypes.Field>;
 }

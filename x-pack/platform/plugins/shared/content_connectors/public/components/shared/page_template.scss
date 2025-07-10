@@ -1,0 +1,13 @@
+.searchConnectorsPageTemplate {
+  position: relative;
+
+  &__content {
+    // Note: relative positioning is required for our centered Loading component
+    position: relative;
+  }
+
+  .euiSideNavItem--emphasized {
+    background-color: transparent;
+    box-shadow: none;
+  }
+}

@@ -216,31 +216,32 @@ export const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
                   const isActive = schedule.id && activeSnoozes.includes(schedule.id);
                   return (
                     <EuiFlexItem key={`snooze-${schedule.id}`}>
-                      <button
+                      <EuiButton
+                        size="s"
+                        onClick={onClickEditScheduleFactory(schedule as SnoozeSchedule)}
+                        iconType={isActive ? 'bellSlash' : 'calendar'}
+                        iconSide="left"
                         style={{
                           paddingLeft: '9px',
                           paddingRight: '9px',
-                          height: '36px',
-                          // Replicate euiPanel--accent vs euiPanel--subdued
-                          // Applying these classNames by themselves doesn't work due to a CSS-in-JS issue with EuiPanel
-                          color: isActive ? '#a8376a' : euiTheme.colors.subduedText,
-                          backgroundColor: isActive ? 'rgba(240,78,152,0.2)' : euiTheme.colors.body,
+                          color: isActive
+                            ? euiTheme.colors.textAccent
+                            : euiTheme.colors.textSubdued,
+                          backgroundColor: isActive
+                            ? euiTheme.colors.backgroundLightAccent
+                            : euiTheme.colors.body,
                         }}
-                        className="euiButton euiPanel euiPanel--borderRadiusMedium euiPanel--noShadow euiPanel--noBorder"
-                        onClick={onClickEditScheduleFactory(schedule as SnoozeSchedule)}
+                        fullWidth={true}
                       >
                         <EuiFlexGroup alignItems="center">
                           <EuiFlexItem grow={false}>
-                            <EuiIcon type={isActive ? 'bellSlash' : 'calendar'} />
-                          </EuiFlexItem>
-                          <EuiFlexItem style={{ textAlign: 'left' }}>
                             {scheduleSummary(schedule as SnoozeSchedule)}
                           </EuiFlexItem>
                           <EuiFlexItem grow={false}>
                             <EuiIcon type="arrowRight" />
                           </EuiFlexItem>
                         </EuiFlexGroup>
-                      </button>
+                      </EuiButton>
                     </EuiFlexItem>
                   );
                 })}
@@ -487,7 +488,7 @@ export const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
           </EuiText>
           <EuiSpacer size="s" />
           <EuiCallOut
-            iconType="iInCircle"
+            iconType="info"
             size="s"
             title={i18n.translate(
               'xpack.triggersActionsUI.sections.rulesList.cancelSnoozeConfirmCallout',

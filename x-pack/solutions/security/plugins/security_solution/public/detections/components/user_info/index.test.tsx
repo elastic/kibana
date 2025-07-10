@@ -15,6 +15,7 @@ import * as api from '../../containers/detection_engine/alerts/api';
 import { TestProviders } from '../../../common/mock/test_providers';
 import { UserPrivilegesProvider } from '../../../common/components/user_privileges/user_privileges_context';
 import { sourcererSelectors } from '../../../common/store';
+import { SECURITY_FEATURE_ID } from '../../../../common';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../containers/detection_engine/alerts/api');
@@ -26,7 +27,7 @@ describe('useUserInfo', () => {
       services: {
         application: {
           capabilities: {
-            siem: {
+            [SECURITY_FEATURE_ID]: {
               crud: true,
             },
           },
@@ -68,7 +69,9 @@ describe('useUserInfo', () => {
     const wrapper = ({ children }: React.PropsWithChildren) => (
       <TestProviders>
         <UserPrivilegesProvider
-          kibanaCapabilities={{ siem: { show: true, crud: true } } as unknown as Capabilities}
+          kibanaCapabilities={
+            { [SECURITY_FEATURE_ID]: { show: true, crud: true } } as unknown as Capabilities
+          }
         >
           <ManageUserInfo>{children}</ManageUserInfo>
         </UserPrivilegesProvider>

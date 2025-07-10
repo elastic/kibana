@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiHeaderLink } from '@elastic/eui';
+import { EuiButtonEmpty } from '@elastic/eui';
 import {
   DATA_QUALITY_DETAILS_LOCATOR_ID,
   DataQualityDetailsLocatorParams,
@@ -41,15 +41,16 @@ export const DatasetQualityDetailsLink = React.memo(
     });
 
     return (
-      <EuiHeaderLink
+      <EuiButtonEmpty
         {...datasetQualityLinkDetailsProps}
         color="primary"
         data-test-subj={`datasetQualityTableDetailsLink-${dataStream}`}
         target="_blank"
         size="xs"
+        flush="both"
       >
         {children}
-      </EuiHeaderLink>
+      </EuiButtonEmpty>
     );
   }
 );

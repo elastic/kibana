@@ -22,6 +22,24 @@ export {
   replaceOriginalValuesWithUuidValues,
 } from './impl/data_anonymization/helpers';
 
+export {
+  newContentReferencesStore,
+  securityAlertReference,
+  knowledgeBaseReference,
+  securityAlertsPageReference,
+  productDocumentationReference,
+  esqlQueryReference,
+  contentReferenceString,
+  contentReferenceBlock,
+  removeContentReferences,
+  pruneContentReferences,
+} from './impl/content_references';
+
+export type {
+  ContentReferencesStore,
+  ContentReferenceBlock,
+} from './impl/content_references/types';
+
 export { transformRawData } from './impl/data_anonymization/transform_raw_data';
 export { parseBedrockBuffer, handleBedrockChunk } from './impl/utils/bedrock';
 export * from './constants';
@@ -48,3 +66,21 @@ export {
   /** The default (relative) start of the date range (i.e. `now-24h`) */
   DEFAULT_START,
 } from './impl/alerts/get_open_and_acknowledged_alerts_query';
+
+export { getAttackDiscoveryLoadingMessage } from './impl/utils/get_attack_discovery_loading_message';
+
+export {
+  getAttackChainMarkdown,
+  getAttackDiscoveryMarkdown,
+  getAttackDiscoveryMarkdownFields,
+  getMarkdownFields,
+  getMarkdownWithOriginalValues,
+} from './impl/utils/get_attack_discovery_markdown';
+
+export {
+  getOriginalAlertIds,
+  getTacticLabel,
+  getTacticMetadata,
+  replaceNewlineLiterals,
+  transformInternalReplacements,
+} from './impl/utils/attack_discovery_helpers';

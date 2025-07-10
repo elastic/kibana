@@ -15,8 +15,8 @@ export const useStyles = (minimal = false, isInvestigated = false) => {
   const cached = useMemo(() => {
     const { colors, font, size, border } = euiTheme;
 
-    const dangerBorder = transparentize(colors.danger, 0.2);
-    const dangerBackground = transparentize(colors.danger, 0.08);
+    const dangerBorder = transparentize(colors.danger, 0.2); // TODO: Borealis migration - replace transparentize with color token
+    const dangerBackground = transparentize(colors.danger, 0.08); // TODO: Borealis migration - replace transparentize with color token
     const borderThickness = border.width.thin;
     const mediumPadding = size.m;
 

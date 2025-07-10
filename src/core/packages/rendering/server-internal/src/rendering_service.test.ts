@@ -16,6 +16,7 @@ import {
   getScriptPathsMock,
   getBrowserLoggingConfigMock,
   getApmConfigMock,
+  getIsThemeBundledMock,
 } from './rendering_service.test.mocks';
 
 import { load } from 'cheerio';
@@ -27,10 +28,13 @@ import {
   mockRenderingServiceParams,
   mockRenderingPrebootDeps,
   mockRenderingSetupDeps,
+  mockRenderingStartDeps,
 } from './test_helpers/params';
 import { InternalRenderingServicePreboot, InternalRenderingServiceSetup } from './types';
-import { RenderingService } from './rendering_service';
+import { RenderingService, DEFAULT_THEME_NAME_FEATURE_FLAG } from './rendering_service';
 import { AuthStatus } from '@kbn/core-http-server';
+import { DEFAULT_THEME_NAME, ThemeName } from '@kbn/core-ui-settings-common';
+import { BehaviorSubject } from 'rxjs';
 
 const BUILD_DATE = '2023-05-15T23:12:09+0000';
 const INJECTED_METADATA = {
@@ -207,6 +211,7 @@ function renderTestCases(
       expect(getScriptPathsMock).toHaveBeenCalledWith({
         darkMode: true,
         baseHref: '/mock-server-basepath',
+        themeName: 'borealis',
       });
     });
 
@@ -250,6 +255,19 @@ function renderTestCases(
     it('renders feature flags overrides', async () => {
       mockRenderingSetupDeps.featureFlags.getOverrides.mockReturnValueOnce({
         'my-overridden-flag': 1234,
+      });
+      const [render] = await getRender();
+      const content = await render(createKibanaRequest(), uiSettings, {
+        isAnonymousPage: false,
+      });
+      const dom = load(content);
+      const data = JSON.parse(dom('kbn-injected-metadata').attr('data') ?? '""');
+      expect(data).toMatchSnapshot(INJECTED_METADATA);
+    });
+
+    it('renders initial feature flags', async () => {
+      mockRenderingSetupDeps.featureFlags.getInitialFeatureFlags.mockResolvedValueOnce({
+        'my-initial-flag': 1234,
       });
       const [render] = await getRender();
       const content = await render(createKibanaRequest(), uiSettings, {
@@ -582,6 +600,71 @@ describe('RenderingService', () => {
     renderDarkModeTestCases(async () => {
       await service.preboot(mockRenderingPrebootDeps);
       return [(await service.setup(mockRenderingSetupDeps)).render, mockRenderingSetupDeps];
+    });
+  });
+
+  describe('start()', () => {
+    it('subscribes to the featureFlags.setStringValue$ observable and updates theme name accordingly', async () => {
+      // setup and render added to assert the current theme name
+      const { render } = await service.setup(mockRenderingSetupDeps);
+      const themeName$ = new BehaviorSubject<ThemeName>(DEFAULT_THEME_NAME);
+      const getStringValue$ = jest
+        .fn()
+        .mockImplementation((_, fallback) => themeName$.asObservable());
+      service.start({
+        ...mockRenderingStartDeps,
+        featureFlags: {
+          ...mockRenderingStartDeps.featureFlags,
+          getStringValue$,
+        },
+      });
+
+      expect(getStringValue$).toHaveBeenCalledTimes(1);
+      expect(getStringValue$).toHaveBeenCalledWith(
+        DEFAULT_THEME_NAME_FEATURE_FLAG,
+        DEFAULT_THEME_NAME
+      );
+
+      const uiSettings = {
+        client: uiSettingsServiceMock.createClient(),
+        globalClient: uiSettingsServiceMock.createClient(),
+      };
+
+      getIsThemeBundledMock.mockImplementation((name) => ['borealis', 'amsterdam'].includes(name));
+
+      let renderResult = await render(createKibanaRequest(), uiSettings);
+      expect(getIsThemeBundledMock).toHaveBeenCalledWith('borealis');
+      expect(renderResult).toContain(',&quot;name&quot;:&quot;borealis&quot;');
+
+      themeName$.next('amsterdam');
+      renderResult = await render(createKibanaRequest(), uiSettings);
+      expect(renderResult).toContain(',&quot;name&quot;:&quot;amsterdam&quot;');
+    });
+
+    it('falls back to the default theme if theme is not bundled', async () => {
+      // setup and render added to assert the current theme name
+      const { render } = await service.setup(mockRenderingSetupDeps);
+      const themeName$ = new BehaviorSubject<ThemeName>('unknown' as any);
+      const getStringValue$ = jest
+        .fn()
+        .mockImplementation((_, fallback) => themeName$.asObservable());
+      service.start({
+        ...mockRenderingStartDeps,
+        featureFlags: {
+          ...mockRenderingStartDeps.featureFlags,
+          getStringValue$,
+        },
+      });
+
+      const uiSettings = {
+        client: uiSettingsServiceMock.createClient(),
+        globalClient: uiSettingsServiceMock.createClient(),
+      };
+
+      getIsThemeBundledMock.mockReturnValue(false);
+
+      const renderResult = await render(createKibanaRequest(), uiSettings);
+      expect(renderResult).toContain(',&quot;name&quot;:&quot;borealis&quot;');
     });
   });
 });

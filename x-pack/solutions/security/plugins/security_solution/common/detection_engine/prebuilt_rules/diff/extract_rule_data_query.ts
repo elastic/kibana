@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Filter } from '@kbn/es-query';
 import type {
   EqlQueryLanguage,
   EsqlQueryLanguage,
@@ -48,7 +49,7 @@ export const extractInlineKqlQuery = (
     type: KqlQueryType.inline_query,
     query: query?.trim() ?? '',
     language: language ?? 'kuery',
-    filters: filters ?? [],
+    filters: normalizeFilterArray(filters),
   };
 };
 
@@ -63,9 +64,9 @@ interface ExtractRuleEqlQueryParams {
 
 export const extractRuleEqlQuery = (params: ExtractRuleEqlQueryParams): RuleEqlQuery => {
   return {
-    query: params.query.trim(),
+    query: params.query?.trim(),
     language: params.language,
-    filters: params.filters ?? [],
+    filters: normalizeFilterArray(params.filters),
     event_category_override: params.eventCategoryOverride,
     timestamp_field: params.timestampField,
     tiebreaker_field: params.tiebreakerField,
@@ -77,7 +78,33 @@ export const extractRuleEsqlQuery = (
   language: EsqlQueryLanguage
 ): RuleEsqlQuery => {
   return {
-    query: query.trim(),
+    query: query?.trim(),
     language,
   };
+};
+
+/**
+ * Normalizes filter properties to only include ones relevant to the query itself
+ * Relevant issues:
+ *  - https://github.com/elastic/kibana/issues/202966
+ *  - https://github.com/elastic/kibana/issues/206527
+ */
+const normalizeFilterArray = (filters: RuleFilterArray | undefined): RuleFilterArray => {
+  if (!filters?.length) {
+    return [];
+  }
+  return (filters as Filter[]).map((filter) => ({
+    query: filter.query,
+    meta: filter.meta
+      ? {
+          negate: filter.meta.negate,
+          disabled: filter.meta.disabled !== undefined ? filter.meta.disabled : false,
+          params: filter.meta.params,
+          relation: 'relation' in filter.meta ? filter.meta?.relation : undefined,
+          type: filter.meta.type ?? 'custom',
+          alias: filter.meta.alias ?? undefined,
+          key: filter.meta.key ?? undefined,
+        }
+      : undefined,
+  }));
 };

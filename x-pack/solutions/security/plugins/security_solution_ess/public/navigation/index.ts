@@ -7,9 +7,9 @@
 
 import type { Services } from '../common/services';
 import { subscribeBreadcrumbs } from './breadcrumbs';
-import { initSideNavigation } from './side_navigation';
+import { registerSolutionNavigation } from './solution_navigation';
 
 export const startNavigation = (services: Services) => {
-  initSideNavigation(services);
+  registerSolutionNavigation(services);
   subscribeBreadcrumbs(services);
 };

@@ -10,7 +10,6 @@
 import React from 'react';
 
 import { EuiSwitch, EuiSwitchProps } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 
 import { getFieldInputValue, useUpdate } from '@kbn/management-settings-utilities';
 
@@ -44,13 +43,7 @@ export const BooleanInput = ({
 
   return (
     <EuiSwitch
-      label={
-        !!value ? (
-          <FormattedMessage id="management.settings.onLabel" defaultMessage="On" />
-        ) : (
-          <FormattedMessage id="management.settings.offLabel" defaultMessage="Off" />
-        )
-      }
+      label={name}
       aria-label={ariaLabel}
       aria-describedby={ariaDescribedBy}
       checked={!!value}

@@ -84,23 +84,21 @@ export async function getLogTypes(
     size: 0,
     filter_path: ['aggregations.levels.buckets', 'aggregations.types.buckets'],
     ignore_unavailable: true,
-    body: {
-      sort: { '@timestamp': { order: 'desc', unmapped_type: 'long' } },
-      query: {
-        bool: {
-          filter: [elasticsearchLogsFilter, ...filter],
-        },
+    sort: { '@timestamp': { order: 'desc', unmapped_type: 'long' } },
+    query: {
+      bool: {
+        filter: [elasticsearchLogsFilter, ...filter],
       },
-      aggs: {
-        types: {
-          terms: {
-            field: 'event.dataset',
-          },
-          aggs: {
-            levels: {
-              terms: {
-                field: 'log.level',
-              },
+    },
+    aggs: {
+      types: {
+        terms: {
+          field: 'event.dataset',
+        },
+        aggs: {
+          levels: {
+            terms: {
+              field: 'log.level',
             },
           },
         },

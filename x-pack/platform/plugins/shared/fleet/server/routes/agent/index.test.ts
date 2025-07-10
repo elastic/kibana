@@ -11,6 +11,7 @@ import type { FleetRequestHandlerContext } from '../..';
 
 import { xpackMocks } from '../../mocks';
 import {
+  BulkMigrateAgentsResponseSchema,
   DeleteAgentResponseSchema,
   DeleteAgentUploadFileResponseSchema,
   GetActionStatusResponseSchema,
@@ -20,6 +21,7 @@ import {
   GetAgentsResponseSchema,
   GetAvailableAgentVersionsResponseSchema,
   ListAgentUploadsResponseSchema,
+  MigrateSingleAgentResponseSchema,
   PostBulkActionResponseSchema,
   PostNewAgentActionResponseSchema,
   PostRetrieveAgentsByActionsResponseSchema,
@@ -56,6 +58,7 @@ import {
 
 import { postNewAgentActionHandlerBuilder } from './actions_handlers';
 
+import { bulkMigrateAgentsHandler, migrateSingleAgentHandler } from './migrate_handlers';
 jest.mock('./handlers', () => ({
   ...jest.requireActual('./handlers'),
   getAgentHandler: jest.fn(),
@@ -73,6 +76,11 @@ jest.mock('./handlers', () => ({
   deleteAgentUploadFileHandler: jest.fn(),
   postAgentReassignHandler: jest.fn(),
   postRetrieveAgentsByActionsHandler: jest.fn(),
+}));
+
+jest.mock('./migrate_handlers', () => ({
+  migrateSingleAgentHandler: jest.fn(),
+  bulkMigrateAgentsHandler: jest.fn(),
 }));
 
 jest.mock('./actions_handlers', () => ({
@@ -235,6 +243,8 @@ describe('schema validation', () => {
         degraded: 1,
         unenrolling: 1,
         enrolling: 1,
+        orphaned: 1,
+        uninstalled: 1,
       },
     };
     (getAgentsHandler as jest.Mock).mockImplementation((ctx, request, res) => {
@@ -472,6 +482,38 @@ describe('schema validation', () => {
       body: expectedResponse,
     });
     const validationResp = GetAvailableAgentVersionsResponseSchema.validate(expectedResponse);
+    expect(validationResp).toEqual(expectedResponse);
+  });
+
+  it('migrate single agent should return valid response', async () => {
+    const expectedResponse = {
+      actionId: 'migrate-action-123',
+    };
+    (migrateSingleAgentHandler as jest.Mock).mockImplementation((ctx, request, res) => {
+      return res.ok({ body: expectedResponse });
+    });
+    await migrateSingleAgentHandler(context, {} as any, response);
+
+    expect(response.ok).toHaveBeenCalledWith({
+      body: expectedResponse,
+    });
+    const validationResp = MigrateSingleAgentResponseSchema.validate(expectedResponse);
+    expect(validationResp).toEqual(expectedResponse);
+  });
+
+  it('bulk migrate agents should return valid response', async () => {
+    const expectedResponse = {
+      actionId: 'migrate-action-123',
+    };
+    (bulkMigrateAgentsHandler as jest.Mock).mockImplementation((ctx, request, res) => {
+      return res.ok({ body: expectedResponse });
+    });
+    await bulkMigrateAgentsHandler(context, {} as any, response);
+
+    expect(response.ok).toHaveBeenCalledWith({
+      body: expectedResponse,
+    });
+    const validationResp = BulkMigrateAgentsResponseSchema.validate(expectedResponse);
     expect(validationResp).toEqual(expectedResponse);
   });
 });

@@ -54,7 +54,227 @@
   "server": {
     "classes": [],
     "functions": [],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "parentPluginId": "productDocBase",
+        "id": "def-server.DocSearchOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "DocSearchOptions",
+        "description": [
+          "\nOptions for the Product documentation {@link SearchApi}"
+        ],
+        "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/services/search/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "productDocBase",
+            "id": "def-server.DocSearchOptions.query",
+            "type": "string",
+            "tags": [],
+            "label": "query",
+            "description": [
+              "plain text search query"
+            ],
+            "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/services/search/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "productDocBase",
+            "id": "def-server.DocSearchOptions.max",
+            "type": "number",
+            "tags": [],
+            "label": "max",
+            "description": [
+              "max number of hits. Defaults to 3"
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/services/search/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "productDocBase",
+            "id": "def-server.DocSearchOptions.highlights",
+            "type": "number",
+            "tags": [],
+            "label": "highlights",
+            "description": [
+              "number of content highlights per hit. Defaults to 3"
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/services/search/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "productDocBase",
+            "id": "def-server.DocSearchOptions.products",
+            "type": "Array",
+            "tags": [],
+            "label": "products",
+            "description": [
+              "optional list of products to filter search"
+            ],
+            "signature": [
+              "(\"security\" | \"kibana\" | \"observability\" | \"elasticsearch\")[] | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/services/search/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "productDocBase",
+            "id": "def-server.DocSearchOptions.inferenceId",
+            "type": "string",
+            "tags": [],
+            "label": "inferenceId",
+            "description": [
+              "optional inference ID to filter search"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/services/search/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "productDocBase",
+        "id": "def-server.DocSearchResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "DocSearchResponse",
+        "description": [
+          "\nResponse for the {@link SearchApi}"
+        ],
+        "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/services/search/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "productDocBase",
+            "id": "def-server.DocSearchResponse.results",
+            "type": "Array",
+            "tags": [],
+            "label": "results",
+            "description": [
+              "List of results for this search"
+            ],
+            "signature": [
+              {
+                "pluginId": "productDocBase",
+                "scope": "server",
+                "docId": "kibProductDocBasePluginApi",
+                "section": "def-server.DocSearchResult",
+                "text": "DocSearchResult"
+              },
+              "[]"
+            ],
+            "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/services/search/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "productDocBase",
+        "id": "def-server.DocSearchResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "DocSearchResult",
+        "description": [
+          "\nIndividual result returned in a {@link DocSearchResponse} by the {@link SearchApi}"
+        ],
+        "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/services/search/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "productDocBase",
+            "id": "def-server.DocSearchResult.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [
+              "title of the doc article page"
+            ],
+            "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/services/search/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "productDocBase",
+            "id": "def-server.DocSearchResult.url",
+            "type": "string",
+            "tags": [],
+            "label": "url",
+            "description": [
+              "full url to the online documentation"
+            ],
+            "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/services/search/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "productDocBase",
+            "id": "def-server.DocSearchResult.productName",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "productName",
+            "description": [
+              "product name this document is associated to"
+            ],
+            "signature": [
+              "\"security\" | \"kibana\" | \"observability\" | \"elasticsearch\""
+            ],
+            "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/services/search/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "productDocBase",
+            "id": "def-server.DocSearchResult.content",
+            "type": "string",
+            "tags": [],
+            "label": "content",
+            "description": [
+              "full content of the doc article"
+            ],
+            "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/services/search/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "productDocBase",
+            "id": "def-server.DocSearchResult.highlights",
+            "type": "Array",
+            "tags": [],
+            "label": "highlights",
+            "description": [
+              "content highlights based on the query"
+            ],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/services/search/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
     "misc": [
       {
@@ -63,12 +283,26 @@
         "type": "Type",
         "tags": [],
         "label": "SearchApi",
-        "description": [],
+        "description": [
+          "\nSearch API to be used to retrieve product documentation."
+        ],
         "signature": [
           "(options: ",
-          "DocSearchOptions",
+          {
+            "pluginId": "productDocBase",
+            "scope": "server",
+            "docId": "kibProductDocBasePluginApi",
+            "section": "def-server.DocSearchOptions",
+            "text": "DocSearchOptions"
+          },
           ") => Promise<",
-          "DocSearchResponse",
+          {
+            "pluginId": "productDocBase",
+            "scope": "server",
+            "docId": "kibProductDocBasePluginApi",
+            "section": "def-server.DocSearchResponse",
+            "text": "DocSearchResponse"
+          },
           ">"
         ],
         "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/services/search/types.ts",
@@ -84,7 +318,13 @@
             "label": "options",
             "description": [],
             "signature": [
-              "DocSearchOptions"
+              {
+                "pluginId": "productDocBase",
+                "scope": "server",
+                "docId": "kibProductDocBasePluginApi",
+                "section": "def-server.DocSearchOptions",
+                "text": "DocSearchOptions"
+              }
             ],
             "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/services/search/types.ts",
             "deprecated": false,
@@ -129,9 +369,21 @@
           "description": [],
           "signature": [
             "(options: ",
-            "DocSearchOptions",
+            {
+              "pluginId": "productDocBase",
+              "scope": "server",
+              "docId": "kibProductDocBasePluginApi",
+              "section": "def-server.DocSearchOptions",
+              "text": "DocSearchOptions"
+            },
             ") => Promise<",
-            "DocSearchResponse",
+            {
+              "pluginId": "productDocBase",
+              "scope": "server",
+              "docId": "kibProductDocBasePluginApi",
+              "section": "def-server.DocSearchResponse",
+              "text": "DocSearchResponse"
+            },
             ">"
           ],
           "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/types.ts",
@@ -147,7 +399,13 @@
               "label": "options",
               "description": [],
               "signature": [
-                "DocSearchOptions"
+                {
+                  "pluginId": "productDocBase",
+                  "scope": "server",
+                  "docId": "kibProductDocBasePluginApi",
+                  "section": "def-server.DocSearchOptions",
+                  "text": "DocSearchOptions"
+                }
               ],
               "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/services/search/types.ts",
               "deprecated": false,

@@ -20,7 +20,7 @@ import { FormattedRelativePreferenceDate } from '../../../../common/components/f
 import type { HostsTableColumns } from '.';
 import * as i18n from './translations';
 import type { Maybe, RiskSeverity } from '../../../../../common/search_strategy';
-import { RiskScoreEntity } from '../../../../../common/search_strategy';
+import { EntityType } from '../../../../../common/entity_analytics/types';
 import { VIEW_HOSTS_BY_SEVERITY } from '../../../../entity_analytics/components/host_risk_score_table/translations';
 import { RiskScoreLevel } from '../../../../entity_analytics/components/severity/common';
 import { ENTITY_RISK_LEVEL } from '../../../../entity_analytics/components/risk_score/translations';
@@ -62,7 +62,7 @@ export const getHostsColumns = (
       name: (
         <EuiToolTip content={i18n.FIRST_LAST_SEEN_TOOLTIP}>
           <>
-            {i18n.LAST_SEEN} <EuiIcon color="subdued" type="iInCircle" className="eui-alignTop" />
+            {i18n.LAST_SEEN} <EuiIcon color="subdued" type="info" className="eui-alignTop" />
           </>
         </EuiToolTip>
       ),
@@ -85,7 +85,7 @@ export const getHostsColumns = (
       name: (
         <EuiToolTip content={i18n.OS_LAST_SEEN_TOOLTIP}>
           <>
-            {i18n.OS} <EuiIcon color="subdued" type="iInCircle" className="eui-alignTop" />
+            {i18n.OS} <EuiIcon color="subdued" type="info" className="eui-alignTop" />
           </>
         </EuiToolTip>
       ),
@@ -143,7 +143,7 @@ export const getHostsColumns = (
   if (showRiskColumn) {
     columns.push({
       field: 'node.risk',
-      name: ENTITY_RISK_LEVEL(RiskScoreEntity.host),
+      name: ENTITY_RISK_LEVEL(EntityType.host),
       truncateText: false,
       mobileOptions: { show: true },
       sortable: false,

@@ -7,8 +7,8 @@
 
 import expect from 'expect';
 import { KibanaFeatureConfig, SubFeaturePrivilegeConfig } from '@kbn/features-plugin/common';
-import { SupertestWithRoleScopeType } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/services';
 import type { Role } from '@kbn/security-plugin-types-common';
+import { SupertestWithRoleScopeType } from '../../../services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 /*
@@ -45,6 +45,8 @@ export default function ({ getService }: FtrProviderContext) {
   let supertestAdminWithApiKey: SupertestWithRoleScopeType;
 
   describe('security/authorization', function () {
+    this.tags(['failsOnMKI']);
+
     before(async function () {
       supertestAdminWithCookieCredentials = await roleScopedSupertest.getSupertestWithRoleScope(
         'admin',
@@ -92,8 +94,8 @@ export default function ({ getService }: FtrProviderContext) {
                 },
                 {
                   feature: {
-                    dashboard: ['read'],
-                    discover: ['all'],
+                    dashboard_v2: ['read'],
+                    discover_v2: ['all'],
                     ml: ['all'],
                   },
                   spaces: ['marketing', 'sales'],
@@ -121,7 +123,11 @@ export default function ({ getService }: FtrProviderContext) {
                 },
                 {
                   application: 'kibana-.kibana',
-                  privileges: ['feature_dashboard.read', 'feature_discover.all', 'feature_ml.all'],
+                  privileges: [
+                    'feature_dashboard_v2.read',
+                    'feature_discover_v2.all',
+                    'feature_ml.all',
+                  ],
                   resources: ['space:marketing', 'space:sales'],
                 },
               ],
@@ -185,8 +191,8 @@ export default function ({ getService }: FtrProviderContext) {
                 },
                 {
                   feature: {
-                    dashboard: ['read'],
-                    discover: ['all'],
+                    dashboard_v2: ['read'],
+                    discover_v2: ['all'],
                     ml: ['all'],
                   },
                   spaces: ['marketing', 'sales'],
@@ -225,8 +231,8 @@ export default function ({ getService }: FtrProviderContext) {
                 },
                 {
                   feature: {
-                    dashboard: ['read'],
-                    discover: ['all'],
+                    dashboard_v2: ['read'],
+                    discover_v2: ['all'],
                     ml: ['all'],
                   },
                   spaces: ['marketing', 'sales'],
@@ -266,8 +272,8 @@ export default function ({ getService }: FtrProviderContext) {
                 },
                 {
                   feature: {
-                    dashboard: ['read'],
-                    discover: ['all'],
+                    dashboard_v2: ['read'],
+                    discover_v2: ['all'],
                     ml: ['all'],
                   },
                   spaces: ['marketing', 'sales'],
@@ -281,15 +287,13 @@ export default function ({ getService }: FtrProviderContext) {
           it('should fail when role already exists', async function () {
             await es.security.putRole({
               name: 'test_role',
-              body: {
-                cluster: ['monitor'],
-                indices: [
-                  {
-                    names: ['beats-*'],
-                    privileges: ['write'],
-                  },
-                ],
-              },
+              cluster: ['monitor'],
+              indices: [
+                {
+                  names: ['beats-*'],
+                  privileges: ['write'],
+                },
+              ],
             });
 
             await supertestAdminWithApiKey
@@ -311,37 +315,39 @@ export default function ({ getService }: FtrProviderContext) {
         it('should get roles', async function () {
           await es.security.putRole({
             name: 'role_to_get',
-            body: {
-              cluster: ['manage'],
-              indices: [
-                {
-                  names: ['logstash-*'],
-                  privileges: ['read', 'view_index_metadata'],
-                },
-              ],
-              applications: [
-                {
-                  application: 'kibana-.kibana',
-                  privileges: ['read'],
-                  resources: ['*'],
-                },
-                {
-                  application: 'kibana-.kibana',
-                  privileges: ['feature_dashboard.read', 'feature_discover.all', 'feature_ml.all'],
-                  resources: ['space:marketing', 'space:sales'],
-                },
-                {
-                  application: 'apm',
-                  privileges: ['apm-privilege'],
-                  resources: ['*'],
-                },
-              ],
-              metadata: {
-                foo: 'test-metadata',
+            cluster: ['manage'],
+            indices: [
+              {
+                names: ['logstash-*'],
+                privileges: ['read', 'view_index_metadata'],
               },
-              transient_metadata: {
-                enabled: true,
+            ],
+            applications: [
+              {
+                application: 'kibana-.kibana',
+                privileges: ['read'],
+                resources: ['*'],
               },
+              {
+                application: 'kibana-.kibana',
+                privileges: [
+                  'feature_dashboard_v2.read',
+                  'feature_discover_v2.all',
+                  'feature_ml.all',
+                ],
+                resources: ['space:marketing', 'space:sales'],
+              },
+              {
+                application: 'apm',
+                privileges: ['apm-privilege'],
+                resources: ['*'],
+              },
+            ],
+            metadata: {
+              foo: 'test-metadata',
+            },
+            transient_metadata: {
+              enabled: true,
             },
           });
 
@@ -371,8 +377,8 @@ export default function ({ getService }: FtrProviderContext) {
               {
                 base: [],
                 feature: {
-                  dashboard: ['read'],
-                  discover: ['all'],
+                  dashboard_v2: ['read'],
+                  discover_v2: ['all'],
                   ml: ['all'],
                 },
                 spaces: ['marketing', 'sales'],
@@ -387,53 +393,57 @@ export default function ({ getService }: FtrProviderContext) {
         it('should get roles by space id', async function () {
           await es.security.putRole({
             name: 'space_role_not_to_get',
-            body: {
-              cluster: ['manage'],
-              indices: [
-                {
-                  names: ['logstash-*'],
-                  privileges: ['read', 'view_index_metadata'],
-                },
-              ],
-              applications: [
-                {
-                  application: 'kibana-.kibana',
-                  privileges: ['feature_dashboard.read', 'feature_discover.all', 'feature_ml.all'],
-                  resources: ['space:marketing', 'space:sales'],
-                },
-              ],
-              metadata: {
-                foo: 'test-metadata',
+            cluster: ['manage'],
+            indices: [
+              {
+                names: ['logstash-*'],
+                privileges: ['read', 'view_index_metadata'],
               },
-              transient_metadata: {
-                enabled: true,
+            ],
+            applications: [
+              {
+                application: 'kibana-.kibana',
+                privileges: [
+                  'feature_dashboard_v2.read',
+                  'feature_discover_v2.all',
+                  'feature_ml.all',
+                ],
+                resources: ['space:marketing', 'space:sales'],
               },
+            ],
+            metadata: {
+              foo: 'test-metadata',
+            },
+            transient_metadata: {
+              enabled: true,
             },
           });
 
           await es.security.putRole({
             name: 'space_role_to_get',
-            body: {
-              cluster: ['manage'],
-              indices: [
-                {
-                  names: ['logstash-*'],
-                  privileges: ['read', 'view_index_metadata'],
-                },
-              ],
-              applications: [
-                {
-                  application: 'kibana-.kibana',
-                  privileges: ['feature_dashboard.read', 'feature_discover.all', 'feature_ml.all'],
-                  resources: ['space:engineering', 'space:sales'],
-                },
-              ],
-              metadata: {
-                foo: 'test-metadata',
+            cluster: ['manage'],
+            indices: [
+              {
+                names: ['logstash-*'],
+                privileges: ['read', 'view_index_metadata'],
               },
-              transient_metadata: {
-                enabled: true,
+            ],
+            applications: [
+              {
+                application: 'kibana-.kibana',
+                privileges: [
+                  'feature_dashboard_v2.read',
+                  'feature_discover_v2.all',
+                  'feature_ml.all',
+                ],
+                resources: ['space:engineering', 'space:sales'],
               },
+            ],
+            metadata: {
+              foo: 'test-metadata',
+            },
+            transient_metadata: {
+              enabled: true,
             },
           });
 
@@ -467,29 +477,27 @@ export default function ({ getService }: FtrProviderContext) {
         it('should update a role with elasticsearch, kibana and other applications privileges', async function () {
           await es.security.putRole({
             name: 'role_to_update',
-            body: {
-              cluster: ['monitor'],
-              indices: [
-                {
-                  names: ['beats-*'],
-                  privileges: ['write'],
-                },
-              ],
-              applications: [
-                {
-                  application: 'kibana-.kibana',
-                  privileges: ['read'],
-                  resources: ['*'],
-                },
-                {
-                  application: 'apm',
-                  privileges: ['apm-privilege'],
-                  resources: ['*'],
-                },
-              ],
-              metadata: {
-                bar: 'old-metadata',
+            cluster: ['monitor'],
+            indices: [
+              {
+                names: ['beats-*'],
+                privileges: ['write'],
               },
+            ],
+            applications: [
+              {
+                application: 'kibana-.kibana',
+                privileges: ['read'],
+                resources: ['*'],
+              },
+              {
+                application: 'apm',
+                privileges: ['apm-privilege'],
+                resources: ['*'],
+              },
+            ],
+            metadata: {
+              bar: 'old-metadata',
             },
           });
 
@@ -511,7 +519,7 @@ export default function ({ getService }: FtrProviderContext) {
               kibana: [
                 {
                   feature: {
-                    dashboard: ['read'],
+                    dashboard_v2: ['read'],
                     dev_tools: ['all'],
                   },
                   spaces: ['*'],
@@ -538,7 +546,7 @@ export default function ({ getService }: FtrProviderContext) {
               applications: [
                 {
                   application: 'kibana-.kibana',
-                  privileges: ['feature_dashboard.read', 'feature_dev_tools.all'],
+                  privileges: ['feature_dashboard_v2.read', 'feature_dev_tools.all'],
                   resources: ['*'],
                 },
                 {
@@ -566,15 +574,13 @@ export default function ({ getService }: FtrProviderContext) {
         it(`should update a role adding DLS and FLS privileges`, async function () {
           await es.security.putRole({
             name: 'role_to_update_with_dls_fls',
-            body: {
-              cluster: ['monitor'],
-              indices: [
-                {
-                  names: ['beats-*'],
-                  privileges: ['write'],
-                },
-              ],
-            },
+            cluster: ['monitor'],
+            indices: [
+              {
+                names: ['beats-*'],
+                privileges: ['write'],
+              },
+            ],
           });
 
           await supertestAdminWithApiKey
@@ -610,29 +616,27 @@ export default function ({ getService }: FtrProviderContext) {
         it(`should not update a role with 'run as' privileges`, async function () {
           await es.security.putRole({
             name: 'role_to_update',
-            body: {
-              cluster: ['monitor'],
-              indices: [
-                {
-                  names: ['beats-*'],
-                  privileges: ['write'],
-                },
-              ],
-              applications: [
-                {
-                  application: 'kibana-.kibana',
-                  privileges: ['read'],
-                  resources: ['*'],
-                },
-                {
-                  application: 'apm',
-                  privileges: ['apm-privilege'],
-                  resources: ['*'],
-                },
-              ],
-              metadata: {
-                bar: 'old-metadata',
+            cluster: ['monitor'],
+            indices: [
+              {
+                names: ['beats-*'],
+                privileges: ['write'],
               },
+            ],
+            applications: [
+              {
+                application: 'kibana-.kibana',
+                privileges: ['read'],
+                resources: ['*'],
+              },
+              {
+                application: 'apm',
+                privileges: ['apm-privilege'],
+                resources: ['*'],
+              },
+            ],
+            metadata: {
+              bar: 'old-metadata',
             },
           });
 
@@ -655,7 +659,7 @@ export default function ({ getService }: FtrProviderContext) {
               kibana: [
                 {
                   feature: {
-                    dashboard: ['read'],
+                    dashboard_v2: ['read'],
                     dev_tools: ['all'],
                   },
                   spaces: ['*'],
@@ -706,29 +710,27 @@ export default function ({ getService }: FtrProviderContext) {
         it(`should not update a role with remote cluster privileges`, async function () {
           await es.security.putRole({
             name: 'role_to_update',
-            body: {
-              cluster: ['monitor'],
-              indices: [
-                {
-                  names: ['beats-*'],
-                  privileges: ['write'],
-                },
-              ],
-              applications: [
-                {
-                  application: 'kibana-.kibana',
-                  privileges: ['read'],
-                  resources: ['*'],
-                },
-                {
-                  application: 'apm',
-                  privileges: ['apm-privilege'],
-                  resources: ['*'],
-                },
-              ],
-              metadata: {
-                bar: 'old-metadata',
+            cluster: ['monitor'],
+            indices: [
+              {
+                names: ['beats-*'],
+                privileges: ['write'],
               },
+            ],
+            applications: [
+              {
+                application: 'kibana-.kibana',
+                privileges: ['read'],
+                resources: ['*'],
+              },
+              {
+                application: 'apm',
+                privileges: ['apm-privilege'],
+                resources: ['*'],
+              },
+            ],
+            metadata: {
+              bar: 'old-metadata',
             },
           });
 
@@ -756,7 +758,7 @@ export default function ({ getService }: FtrProviderContext) {
               kibana: [
                 {
                   feature: {
-                    dashboard: ['read'],
+                    dashboard_v2: ['read'],
                     dev_tools: ['all'],
                   },
                   spaces: ['*'],
@@ -807,29 +809,27 @@ export default function ({ getService }: FtrProviderContext) {
         it(`should not update a role with remote index privileges`, async function () {
           await es.security.putRole({
             name: 'role_to_update',
-            body: {
-              cluster: ['monitor'],
-              indices: [
-                {
-                  names: ['beats-*'],
-                  privileges: ['write'],
-                },
-              ],
-              applications: [
-                {
-                  application: 'kibana-.kibana',
-                  privileges: ['read'],
-                  resources: ['*'],
-                },
-                {
-                  application: 'apm',
-                  privileges: ['apm-privilege'],
-                  resources: ['*'],
-                },
-              ],
-              metadata: {
-                bar: 'old-metadata',
+            cluster: ['monitor'],
+            indices: [
+              {
+                names: ['beats-*'],
+                privileges: ['write'],
               },
+            ],
+            applications: [
+              {
+                application: 'kibana-.kibana',
+                privileges: ['read'],
+                resources: ['*'],
+              },
+              {
+                application: 'apm',
+                privileges: ['apm-privilege'],
+                resources: ['*'],
+              },
+            ],
+            metadata: {
+              bar: 'old-metadata',
             },
           });
 
@@ -858,7 +858,7 @@ export default function ({ getService }: FtrProviderContext) {
               kibana: [
                 {
                   feature: {
-                    dashboard: ['read'],
+                    dashboard_v2: ['read'],
                     dev_tools: ['all'],
                   },
                   spaces: ['*'],
@@ -910,29 +910,27 @@ export default function ({ getService }: FtrProviderContext) {
         it('should delete an existing role', async function () {
           await es.security.putRole({
             name: 'role_to_delete',
-            body: {
-              cluster: ['monitor'],
-              indices: [
-                {
-                  names: ['beats-*'],
-                  privileges: ['write'],
-                },
-              ],
-              applications: [
-                {
-                  application: 'kibana-.kibana',
-                  privileges: ['read'],
-                  resources: ['*'],
-                },
-                {
-                  application: 'apm',
-                  privileges: ['apm-privilege'],
-                  resources: ['*'],
-                },
-              ],
-              metadata: {
-                bar: 'old-metadata',
+            cluster: ['monitor'],
+            indices: [
+              {
+                names: ['beats-*'],
+                privileges: ['write'],
               },
+            ],
+            applications: [
+              {
+                application: 'kibana-.kibana',
+                privileges: ['read'],
+                resources: ['*'],
+              },
+              {
+                application: 'apm',
+                privileges: ['apm-privilege'],
+                resources: ['*'],
+              },
+            ],
+            metadata: {
+              bar: 'old-metadata',
             },
           });
           await supertestAdminWithApiKey.delete('/api/security/role/role_to_delete').expect(204);
@@ -1061,7 +1059,7 @@ export default function ({ getService }: FtrProviderContext) {
         // If any of these features adds a new sub-feature privilege we should make an explicit decision whether it
         // should be displayed in Serverless.
         const features = body as KibanaFeatureConfig[];
-        for (const featureId of ['discover', 'dashboard']) {
+        for (const featureId of ['discover_v2', 'dashboard_v2']) {
           const feature = features.find((f) => f.id === featureId)!;
           const subFeaturesPrivileges = collectSubFeaturesPrivileges(feature);
           for (const privilege of subFeaturesPrivileges.values()) {

@@ -9,14 +9,14 @@ import { isOfAggregateQueryType } from '@kbn/es-query';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { BehaviorSubject } from 'rxjs';
-import '../helpers.scss';
 import { PublishingSubject } from '@kbn/presentation-publishing';
+import { LensPluginStartDependencies } from '../../../plugin';
+import { DatasourceMap, VisualizationMap } from '../../../types';
 import { generateId } from '../../../id_generator';
 import { setupPanelManagement } from '../../../react_embeddable/inline_editing/panel_management';
 import { prepareInlineEditPanel } from '../../../react_embeddable/inline_editing/setup_inline_editing';
-import { mountInlineEditPanel } from '../../../react_embeddable/inline_editing/mount';
+import { mountInlinePanel } from '../../../react_embeddable/mount';
 import type { TypedLensByValueInput, LensRuntimeState } from '../../../react_embeddable/types';
-import type { LensPluginStartDependencies } from '../../../plugin';
 import type { LensChartLoadEvent } from './types';
 
 const asyncNoop = async () => {};
@@ -31,8 +31,8 @@ export function isEmbeddableEditActionCompatible(
 }
 
 export async function executeEditEmbeddableAction({
-  deps,
   core,
+  deps,
   attributes,
   lensEvent,
   container,
@@ -40,8 +40,11 @@ export async function executeEditEmbeddableAction({
   onApply,
   onCancel,
 }: {
-  deps: LensPluginStartDependencies;
   core: CoreStart;
+  deps: LensPluginStartDependencies & {
+    visualizationMap: VisualizationMap;
+    datasourceMap: DatasourceMap;
+  };
   attributes: TypedLensByValueInput['attributes'];
   lensEvent: LensChartLoadEvent;
   container?: HTMLElement | null;
@@ -59,6 +62,8 @@ export async function executeEditEmbeddableAction({
   const panelManagementApi = setupPanelManagement(uuid, container, {
     isNewlyCreated$,
     setAsCreated: () => isNewlyCreated$.next(false),
+    isReadOnly: () => false,
+    canEdit: () => true,
   });
   const openInlineEditor = prepareInlineEditPanel(
     { attributes },
@@ -89,6 +94,6 @@ export async function executeEditEmbeddableAction({
   });
   if (ConfigPanel) {
     // no need to pass the uuid in this use case
-    mountInlineEditPanel(ConfigPanel, core, undefined, undefined, container);
+    mountInlinePanel(ConfigPanel, core, undefined, { container });
   }
 }

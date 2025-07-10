@@ -43,6 +43,7 @@ function renderTableRowActions({
       onUnenrollClick={jest.fn()}
       onUpgradeClick={jest.fn()}
       onGetUninstallCommandClick={jest.fn()}
+      onMigrateAgentClick={jest.fn()}
     />
   );
 
@@ -52,9 +53,7 @@ function renderTableRowActions({
 }
 describe('TableRowActions', () => {
   beforeEach(() => {
-    mockedExperimentalFeaturesService.get.mockReturnValue({
-      diagnosticFileUploadEnabled: true,
-    } as any);
+    mockedExperimentalFeaturesService.get.mockReturnValue({ enableAgentMigrations: true } as any); // mock the flag as true so the test runs and the table action item renders
     mockedUseAuthz.mockReturnValue({
       fleet: {
         all: true,
@@ -64,6 +63,91 @@ describe('TableRowActions', () => {
       integrations: {},
     } as any);
     mockedUseAgentVersion.mockReturnValue('8.10.2');
+  });
+
+  describe('Migrate agent action', () => {
+    function renderAndGetMigrateButton({
+      agent,
+      agentPolicy,
+    }: {
+      agent: Agent;
+      agentPolicy?: AgentPolicy;
+    }) {
+      const { utils } = renderTableRowActions({
+        agent,
+        agentPolicy,
+      });
+
+      return utils.queryByTestId('migrateAgentMenuItem');
+    }
+
+    it('should render an active action button when agent isnt protected', async () => {
+      const res = renderAndGetMigrateButton({
+        agent: {
+          active: true,
+          status: 'online',
+          local_metadata: { elastic: { agent: { version: '8.8.0' } } },
+        } as any,
+        agentPolicy: {
+          is_managed: false,
+          is_protected: false,
+        } as AgentPolicy,
+      });
+
+      expect(res).not.toBe(null);
+      expect(res).toBeEnabled();
+    });
+
+    it('should not render an active action button when agent is protected by policy', async () => {
+      const res = renderAndGetMigrateButton({
+        agent: {
+          active: true,
+          status: 'online',
+          local_metadata: { elastic: { agent: { version: '8.8.0' } } },
+        } as any,
+        agentPolicy: {
+          is_managed: false,
+          is_protected: true,
+        } as AgentPolicy,
+      });
+
+      expect(res).toBe(null);
+    });
+
+    it('should not render an active action button when agent is a fleet server agent', async () => {
+      const res = renderAndGetMigrateButton({
+        agent: {
+          active: true,
+          status: 'online',
+          components: [{ type: 'fleet-server' }],
+        } as any,
+        agentPolicy: {
+          is_managed: true,
+          is_protected: false,
+          package_policies: [{ package: { name: 'fleet_server' } }],
+        } as AgentPolicy,
+      });
+
+      expect(res).toBe(null);
+    });
+    it('should not render an active action button when feature flag is disabled', async () => {
+      mockedExperimentalFeaturesService.get.mockReturnValue({
+        enableAgentMigrations: false,
+      } as any);
+      const res = renderAndGetMigrateButton({
+        agent: {
+          active: true,
+          status: 'online',
+          local_metadata: { elastic: { agent: { version: '8.8.0' } } },
+        } as any,
+        agentPolicy: {
+          is_managed: false,
+          is_protected: false,
+        } as AgentPolicy,
+      });
+
+      expect(res).toBe(null);
+    });
   });
 
   describe('Request Diagnotics action', () => {
@@ -81,17 +165,6 @@ describe('TableRowActions', () => {
 
       return utils.queryByTestId('requestAgentDiagnosticsBtn');
     }
-
-    it('should not render action if feature is disabled', async () => {
-      mockedExperimentalFeaturesService.get.mockReturnValue({
-        diagnosticFileUploadEnabled: false,
-      } as any);
-      const res = renderAndGetDiagnosticsButton({
-        agent: { active: true } as Agent,
-        agentPolicy: {} as AgentPolicy,
-      });
-      expect(res).toBe(null);
-    });
 
     it('should not render action if authz do not have Agents:All', async () => {
       mockedUseAuthz.mockReturnValue({

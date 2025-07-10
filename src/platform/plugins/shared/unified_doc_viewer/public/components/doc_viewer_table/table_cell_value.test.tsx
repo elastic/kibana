@@ -9,11 +9,17 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { TableFieldValue } from './table_cell_value';
+import { userEvent } from '@testing-library/user-event';
+import { TableFieldValue, DOC_VIEWER_DEFAULT_TRUNCATE_MAX_HEIGHT } from './table_cell_value';
 import { setUnifiedDocViewerServices } from '../../plugin';
 import { mockUnifiedDocViewerServices } from '../../__mocks__';
 
 setUnifiedDocViewerServices(mockUnifiedDocViewerServices);
+
+const truncationStyles = {
+  overflow: 'hidden',
+  maxHeight: `${DOC_VIEWER_DEFAULT_TRUNCATE_MAX_HEIGHT}px`,
+};
 
 let mockScrollHeight = 0;
 jest.spyOn(HTMLElement.prototype, 'scrollHeight', 'get').mockImplementation(() => mockScrollHeight);
@@ -61,28 +67,28 @@ describe('TableFieldValue', () => {
     expect(toggleButton.getAttribute('aria-expanded')).toBe('false');
 
     let valueElement = screen.getByTestId('tableDocViewRow-message-value');
-    expect(valueElement.getAttribute('css')).toBeDefined();
-    expect(valueElement.classList.contains('kbnDocViewer__value--truncated')).toBe(true);
 
-    toggleButton.click();
+    expect(valueElement).toHaveStyle(truncationStyles);
+
+    await userEvent.click(toggleButton);
 
     toggleButton = screen.getByTestId('toggleLongFieldValue-message');
     expect(toggleButton).toBeInTheDocument();
     expect(toggleButton.getAttribute('aria-expanded')).toBe('true');
 
     valueElement = screen.getByTestId('tableDocViewRow-message-value');
-    expect(valueElement.getAttribute('css')).toBeNull();
-    expect(valueElement.classList.contains('kbnDocViewer__value--truncated')).toBe(false);
 
-    toggleButton.click();
+    expect(valueElement).not.toHaveStyle(truncationStyles);
+
+    await userEvent.click(toggleButton);
 
     toggleButton = screen.getByTestId('toggleLongFieldValue-message');
     expect(toggleButton).toBeInTheDocument();
     expect(toggleButton.getAttribute('aria-expanded')).toBe('false');
 
     valueElement = screen.getByTestId('tableDocViewRow-message-value');
-    expect(valueElement.getAttribute('css')).toBeDefined();
-    expect(valueElement.classList.contains('kbnDocViewer__value--truncated')).toBe(true);
+
+    expect(valueElement).toHaveStyle(truncationStyles);
   });
 
   it('should not truncate a long value when inside a popover', async () => {
@@ -103,7 +109,7 @@ describe('TableFieldValue', () => {
     expect(screen.queryByTestId('toggleLongFieldValue-message')).toBeNull();
 
     const valueElement = screen.getByTestId('tableDocViewRow-message-value');
-    expect(valueElement.getAttribute('css')).toBeNull();
-    expect(valueElement.classList.contains('kbnDocViewer__value--truncated')).toBe(false);
+
+    expect(valueElement).not.toHaveStyle(truncationStyles);
   });
 });

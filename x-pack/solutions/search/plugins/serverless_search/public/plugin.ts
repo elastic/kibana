@@ -26,9 +26,9 @@ import {
   ServerlessSearchPluginStart,
   ServerlessSearchPluginStartDependencies,
 } from './types';
-import { createIndexDocumentsContent } from './application/components/index_documents/documents_tab';
 import { getErrorCode, getErrorMessage, isKibanaServerError } from './utils/get_error_message';
 import { navigationTree } from './navigation_tree';
+import { SEARCH_HOMEPAGE_PATH } from './application/constants';
 
 export class ServerlessSearchPlugin
   implements
@@ -99,6 +99,21 @@ export class ServerlessSearchPlugin
       },
     });
 
+    core.application.register({
+      id: 'serverlessHomeRedirect',
+      title: homeTitle,
+      appRoute: '/app/elasticsearch',
+      euiIconType: 'logoElastic',
+      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
+      visibleIn: [],
+      async mount({}: AppMountParameters) {
+        const [coreStart] = await core.getStartServices();
+        coreStart.chrome.docTitle.change(homeTitle);
+        coreStart.application.navigateToApp('searchHomepage');
+        return () => {};
+      },
+    });
+
     const connectorsTitle = i18n.translate('xpack.serverlessSearch.app.connectors.title', {
       defaultMessage: 'Connectors',
     });
@@ -141,24 +156,6 @@ export class ServerlessSearchPlugin
       },
     });
 
-    const { searchIndices } = setupDeps;
-    core.application.register({
-      id: 'serverlessHomeRedirect',
-      title: homeTitle,
-      appRoute: '/app/elasticsearch',
-      euiIconType: 'logoElastic',
-      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
-      visibleIn: [],
-      async mount({}: AppMountParameters) {
-        const [coreStart] = await core.getStartServices();
-        coreStart.chrome.docTitle.change(homeTitle);
-        coreStart.application.navigateToApp(searchIndices.startAppId);
-        return () => {};
-      },
-    });
-
-    setupDeps.discover.showInlineTopNav();
-
     return {};
   }
 
@@ -167,7 +164,7 @@ export class ServerlessSearchPlugin
     services: ServerlessSearchPluginStartDependencies
   ): ServerlessSearchPluginStart {
     const { serverless, management, indexManagement, security } = services;
-    serverless.setProjectHome(services.searchIndices.startRoute);
+    serverless.setProjectHome(SEARCH_HOMEPAGE_PATH);
     const aiAssistantIsEnabled = core.application.capabilities.observabilityAIAssistant?.show;
 
     const navigationTree$ = of(navigationTree(core.application));
@@ -202,9 +199,6 @@ export class ServerlessSearchPlugin
     });
 
     indexManagement?.extensionsService.setIndexMappingsContent(createIndexMappingsContent(core));
-    indexManagement?.extensionsService.addIndexDetailsTab(
-      createIndexDocumentsContent(core, services)
-    );
     indexManagement?.extensionsService.setIndexOverviewContent(
       createIndexOverviewContent(core, services)
     );

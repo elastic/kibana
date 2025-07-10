@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { tint, useEuiBackgroundColor, useEuiTheme } from '@elastic/eui';
+import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { CELL_CLASS } from '../../../utils/get_render_cell_value';
 import { DocumentDiffMode } from '../types';
@@ -28,9 +28,9 @@ export const useComparisonCss = ({
   showDiffDecorations?: boolean;
 }) => {
   const { euiTheme } = useEuiTheme();
-  const baseCellBackgroundColor = useEuiBackgroundColor('subdued', { method: 'transparent' });
-  const matchSegmentBackgroundColor = useEuiBackgroundColor('success');
-  const diffSegmentBackgroundColor = useEuiBackgroundColor('danger');
+  const baseCellBackgroundColor = euiTheme.colors.backgroundBaseSubdued;
+  const matchSegmentBackgroundColor = euiTheme.colors.backgroundBaseSuccess;
+  const diffSegmentBackgroundColor = euiTheme.colors.backgroundBaseDanger;
 
   const indicatorCss = css`
     position: absolute;
@@ -61,7 +61,7 @@ export const useComparisonCss = ({
         .${CELL_CLASS} {
           &,
           & * {
-            color: ${euiTheme.colors.successText} !important;
+            color: ${euiTheme.colors.textSuccess} !important;
           }
         }
       }
@@ -70,7 +70,7 @@ export const useComparisonCss = ({
         .${CELL_CLASS} {
           &,
           & * {
-            color: ${euiTheme.colors.dangerText} !important;
+            color: ${euiTheme.colors.textDanger} !important;
           }
         }
       }
@@ -82,12 +82,12 @@ export const useComparisonCss = ({
 
     .${ADDED_SEGMENT_CLASS} {
       background-color: ${matchSegmentBackgroundColor};
-      color: ${euiTheme.colors.successText};
+      color: ${euiTheme.colors.textSuccess};
     }
 
     .${REMOVED_SEGMENT_CLASS} {
       background-color: ${diffSegmentBackgroundColor};
-      color: ${euiTheme.colors.dangerText};
+      color: ${euiTheme.colors.textDanger};
     }
 
     ${(diffMode === 'chars' || diffMode === 'words') &&
@@ -120,7 +120,7 @@ export const useComparisonCss = ({
         .${REMOVED_SEGMENT_CLASS}:before {
           content: '-';
           ${indicatorCss}
-          background-color: ${tint(euiTheme.colors.danger, 0.25)};
+          background-color: ${euiTheme.colors.backgroundFilledDanger};
           color: ${euiTheme.colors.lightestShade};
         }
       `}

@@ -12,15 +12,13 @@ export {
   ENTERPRISE_SEARCH_CONTENT_APP_ID,
   ENTERPRISE_SEARCH_APPLICATIONS_APP_ID,
   ENTERPRISE_SEARCH_ANALYTICS_APP_ID,
-  ENTERPRISE_SEARCH_APPSEARCH_APP_ID,
-  ENTERPRISE_SEARCH_WORKPLACESEARCH_APP_ID,
   SERVERLESS_ES_APP_ID,
+  SEARCH_HOMEPAGE,
   SERVERLESS_ES_CONNECTORS_ID,
-  SEARCH_ELASTICSEARCH,
-  SEARCH_VECTOR_SEARCH,
-  SEARCH_SEMANTIC_SEARCH,
-  SEARCH_AI_SEARCH,
   ES_SEARCH_PLAYGROUND_ID,
+  SEARCH_INDICES_START,
+  SEARCH_INDICES,
+  SEARCH_INDEX_MANAGEMENT,
 } from './constants';
 
 export type {
@@ -28,8 +26,6 @@ export type {
   EnterpriseSearchContentApp,
   EnterpriseSearchApplicationsApp,
   EnterpriseSearchAnalyticsApp,
-  EnterpriseSearchAppsearchApp,
-  EnterpriseSearchWorkplaceSearchApp,
   ServerlessSearchApp,
   DeepLinkId,
 } from './deep_links';

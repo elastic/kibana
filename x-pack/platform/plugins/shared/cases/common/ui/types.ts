@@ -13,6 +13,7 @@ import type {
   UPDATE_CASES_CAPABILITY,
   CREATE_COMMENT_CAPABILITY,
   CASES_REOPEN_CAPABILITY,
+  ASSIGN_CASE_CAPABILITY,
 } from '..';
 import type {
   CASES_CONNECTORS_CAPABILITY,
@@ -53,6 +54,7 @@ type DeepRequired<T> = { [K in keyof T]: DeepRequired<T[K]> } & Required<T>;
 export interface CasesContextFeatures {
   alerts: { sync?: boolean; enabled?: boolean; isExperimental?: boolean };
   metrics: SingleCaseMetricsFeature[];
+  observables?: { enabled: boolean };
 }
 
 export type CasesFeaturesAllRequired = DeepRequired<CasesContextFeatures>;
@@ -68,6 +70,9 @@ export interface CasesUiConfigType {
     allowedMimeTypes: string[];
   };
   stack: {
+    enabled: boolean;
+  };
+  incrementalId: {
     enabled: boolean;
   };
 }
@@ -97,6 +102,11 @@ export type UserActionUI = SnakeToCamelCase<UserAction>;
 export type FindCaseUserActions = Omit<SnakeToCamelCase<UserActionFindResponse>, 'userActions'> & {
   userActions: UserActionUI[];
 };
+
+export interface InternalFindCaseUserActions extends FindCaseUserActions {
+  latestAttachments: AttachmentUI[];
+}
+
 export type CaseUserActionsStats = SnakeToCamelCase<CaseUserActionStatsResponse>;
 export type CaseUI = Omit<SnakeToCamelCase<CaseSnakeCase>, 'comments'> & {
   comments: AttachmentUI[];
@@ -320,6 +330,7 @@ export interface CasesPermissions {
   settings: boolean;
   reopenCase: boolean;
   createComment: boolean;
+  assign: boolean;
 }
 
 export interface CasesCapabilities {
@@ -332,4 +343,9 @@ export interface CasesCapabilities {
   [CASES_SETTINGS_CAPABILITY]: boolean;
   [CREATE_COMMENT_CAPABILITY]: boolean;
   [CASES_REOPEN_CAPABILITY]: boolean;
+  [ASSIGN_CASE_CAPABILITY]: boolean;
+}
+
+export interface CasesSettings {
+  displayIncrementalCaseId: boolean;
 }

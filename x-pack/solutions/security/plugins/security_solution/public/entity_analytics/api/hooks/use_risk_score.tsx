@@ -8,38 +8,33 @@
 import { useCallback, useEffect, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { useRiskScoreFeatureStatus } from './use_risk_score_feature_status';
+import { EntityRiskQueries } from '../../../../common/api/search_strategy';
+import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_capabilities';
 import { createFilter } from '../../../common/containers/helpers';
-import type { RiskScoreSortField, StrategyResponseType } from '../../../../common/search_strategy';
-import {
-  RiskQueries,
-  getUserRiskIndex,
-  RiskScoreEntity,
-  getHostRiskIndex,
+import type {
+  EntityType,
+  RiskScoreSortField,
+  RiskScoreStrategyResponse,
+  StrategyResponseType,
 } from '../../../../common/search_strategy';
 import type { ESQuery } from '../../../../common/typed_json';
-
 import type { InspectResponse } from '../../../types';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
-import { isIndexNotFoundError } from '../../../common/utils/exceptions';
+import { isIndexNotFoundError, isAbortError } from '../../../common/utils/exceptions';
 import type { inputsModel } from '../../../common/store';
-import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { useSearchStrategy } from '../../../common/containers/use_search_strategy';
-import { useIsNewRiskScoreModuleInstalled } from './use_risk_engine_status';
+import { useGetDefaultRiskIndex } from '../../hooks/use_get_default_risk_index';
+import { useHasSecurityCapability } from '../../../helper_hooks';
+import { useRiskEngineStatus } from './use_risk_engine_status';
 
-export interface RiskScoreState<T extends RiskScoreEntity.host | RiskScoreEntity.user> {
-  data:
-    | undefined
-    | StrategyResponseType<
-        T extends RiskScoreEntity.host ? RiskQueries.hostsRiskScore : RiskQueries.usersRiskScore
-      >['data'];
+export interface RiskScoreState<T extends EntityType> {
+  data: RiskScoreStrategyResponse<T>['data'];
   inspect: InspectResponse;
   isInspected: boolean;
   refetch: inputsModel.Refetch;
   totalCount: number;
-  isModuleEnabled: boolean;
   isAuthorized: boolean;
-  isDeprecated: boolean;
+  hasEngineBeenInstalled: boolean;
   loading: boolean;
   error: unknown;
 }
@@ -63,15 +58,12 @@ interface UseRiskScore<T> extends UseRiskScoreParams {
   riskEntity: T;
 }
 
-export const initialResult: Omit<
-  StrategyResponseType<RiskQueries.hostsRiskScore | RiskQueries.usersRiskScore>,
-  'rawResponse'
-> = {
+export const initialResult: Omit<StrategyResponseType<EntityRiskQueries.list>, 'rawResponse'> = {
   totalCount: 0,
   data: undefined,
 };
 
-export const useRiskScore = <T extends RiskScoreEntity.host | RiskScoreEntity.user>({
+export const useRiskScore = <T extends EntityType>({
   timerange,
   onlyLatest = true,
   filterQuery,
@@ -81,30 +73,19 @@ export const useRiskScore = <T extends RiskScoreEntity.host | RiskScoreEntity.us
   riskEntity,
   includeAlertsCount = false,
 }: UseRiskScore<T>): RiskScoreState<T> => {
-  const spaceId = useSpaceId();
-  const { installed: isNewRiskScoreModuleInstalled, isLoading: riskScoreStatusLoading } =
-    useIsNewRiskScoreModuleInstalled();
-  const defaultIndex =
-    spaceId && !riskScoreStatusLoading && isNewRiskScoreModuleInstalled !== undefined
-      ? riskEntity === RiskScoreEntity.host
-        ? getHostRiskIndex(spaceId, onlyLatest, isNewRiskScoreModuleInstalled)
-        : getUserRiskIndex(spaceId, onlyLatest, isNewRiskScoreModuleInstalled)
-      : undefined;
-  const factoryQueryType =
-    riskEntity === RiskScoreEntity.host ? RiskQueries.hostsRiskScore : RiskQueries.usersRiskScore;
-
-  const { querySize, cursorStart } = pagination || {};
-
-  const { addError } = useAppToasts();
-
+  const defaultIndex = useGetDefaultRiskIndex(onlyLatest);
   const {
-    isDeprecated,
-    isEnabled,
-    isAuthorized,
-    isLoading: isDeprecatedLoading,
-    refetch: refetchDeprecated,
-  } = useRiskScoreFeatureStatus(riskEntity, defaultIndex);
-
+    data: riskEngineStatus,
+    isFetching: isStatusLoading,
+    refetch: refetchEngineStatus,
+  } = useRiskEngineStatus();
+  const factoryQueryType = EntityRiskQueries.list;
+  const { querySize, cursorStart } = pagination || {};
+  const { addError } = useAppToasts();
+  const { isPlatinumOrTrialLicense } = useMlCapabilities();
+  const hasEntityAnalyticsCapability = useHasSecurityCapability('entity-analytics');
+  const isAuthorized = isPlatinumOrTrialLicense && hasEntityAnalyticsCapability;
+  const hasEngineBeenInstalled = riskEngineStatus?.risk_engine_status !== 'NOT_INSTALLED';
   const {
     loading,
     result: response,
@@ -112,18 +93,19 @@ export const useRiskScore = <T extends RiskScoreEntity.host | RiskScoreEntity.us
     refetch,
     inspect,
     error,
-  } = useSearchStrategy<RiskQueries.hostsRiskScore | RiskQueries.usersRiskScore>({
+  } = useSearchStrategy<EntityRiskQueries.list>({
     factoryQueryType,
     initialResult,
     abort: skip,
     showErrorToast: false,
   });
+
   const refetchAll = useCallback(() => {
     if (defaultIndex) {
-      refetchDeprecated(defaultIndex);
+      refetchEngineStatus();
       refetch();
     }
-  }, [defaultIndex, refetch, refetchDeprecated]);
+  }, [defaultIndex, refetch, refetchEngineStatus]);
 
   const riskScoreResponse = useMemo(
     () => ({
@@ -132,19 +114,17 @@ export const useRiskScore = <T extends RiskScoreEntity.host | RiskScoreEntity.us
       refetch: refetchAll,
       totalCount: response.totalCount,
       isAuthorized,
-      isDeprecated,
-      isModuleEnabled: isEnabled,
       isInspected: false,
+      hasEngineBeenInstalled,
       error,
     }),
     [
-      inspect,
-      isDeprecated,
-      isEnabled,
-      isAuthorized,
-      refetchAll,
       response.data,
       response.totalCount,
+      inspect,
+      refetchAll,
+      isAuthorized,
+      hasEngineBeenInstalled,
       error,
     ]
   );
@@ -190,7 +170,7 @@ export const useRiskScore = <T extends RiskScoreEntity.host | RiskScoreEntity.us
 
   useEffect(() => {
     if (error) {
-      if (!isIndexNotFoundError(error)) {
+      if (!isIndexNotFoundError(error) && !isAbortError(error)) {
         addError(error, {
           title: i18n.translate('xpack.securitySolution.riskScore.failSearchDescription', {
             defaultMessage: `Failed to run search on risk score`,
@@ -201,19 +181,12 @@ export const useRiskScore = <T extends RiskScoreEntity.host | RiskScoreEntity.us
   }, [addError, error]);
 
   useEffect(() => {
-    if (
-      !skip &&
-      !isDeprecatedLoading &&
-      riskScoreRequest != null &&
-      isAuthorized &&
-      isEnabled &&
-      !isDeprecated
-    ) {
+    if (!skip && riskScoreRequest != null && isAuthorized && hasEngineBeenInstalled) {
       search(riskScoreRequest);
     }
-  }, [isEnabled, isDeprecated, isAuthorized, isDeprecatedLoading, riskScoreRequest, search, skip]);
+  }, [hasEngineBeenInstalled, isAuthorized, riskScoreRequest, search, skip]);
 
-  const result = { ...riskScoreResponse, loading: loading || isDeprecatedLoading };
+  const result = { ...riskScoreResponse, loading: loading || isStatusLoading };
 
   return result;
 };

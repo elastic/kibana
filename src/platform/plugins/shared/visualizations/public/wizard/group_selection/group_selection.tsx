@@ -27,13 +27,50 @@ import {
   EuiTabs,
   EuiTab,
   EuiIconTip,
+  type UseEuiTheme,
+  euiBreakpoint,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DocLinksStart } from '@kbn/core/public';
+import { css } from '@emotion/react';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { BaseVisType, TypesStart } from '../../vis_types';
 import { VisGroups } from '../../vis_types/vis_groups_enum';
 import type { VisTypeAlias } from '../../vis_types/vis_type_alias_registry';
-import './group_selection.scss';
+
+const groupSelectionStyles = {
+  body: css({
+    // override EUI specificity
+    '.euiModalBody__overflow': {
+      padding: '0 !important',
+    },
+  }),
+  visGroups: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      padding: `${euiTheme.size.s} ${euiTheme.size.xl} 0`,
+    }),
+  footer: (euiThemeContext: UseEuiTheme) =>
+    css({
+      padding: `0 ${euiThemeContext.euiTheme.size.xl} ${euiThemeContext.euiTheme.size.l}`,
+      background: euiThemeContext.euiTheme.colors.backgroundBaseFormsPrepend,
+      [euiBreakpoint(euiThemeContext, ['xs', 's'])]: {
+        background: euiThemeContext.euiTheme.colors.backgroundBasePlain,
+      },
+    }),
+  footerDescriptionList: (euiThemeContext: UseEuiTheme) =>
+    css({
+      [euiBreakpoint(euiThemeContext, ['xs', 's'])]: {
+        paddingTop: euiThemeContext.euiTheme.size.l,
+      },
+    }),
+  footerDescriptionListTitle: css({
+    // override EUI specificity
+    width: 'auto !important',
+  }),
+  visGroupCardWrapper: css({
+    position: 'relative',
+  }),
+};
 
 export interface GroupSelectionProps {
   onVisTypeSelected: (visType: BaseVisType | VisTypeAlias) => void;
@@ -95,6 +132,7 @@ function GroupSelection({
   visTypesRegistry,
   ...props
 }: GroupSelectionProps) {
+  const styles = useMemoCss(groupSelectionStyles);
   const visualizeGuideLink = props.docLinks.links.visualize.guide;
   const promotedVisGroups = useMemo(
     () =>
@@ -128,16 +166,16 @@ function GroupSelection({
   return (
     <>
       <EuiModalHeader>
-        <EuiModalHeaderTitle data-test-subj="groupModalHeader">
+        <EuiModalHeaderTitle data-test-subj="groupModalHeader" id="vis-wizard-modal-title">
           <FormattedMessage
             id="visualizations.newVisWizard.title"
             defaultMessage="Create visualization"
           />
         </EuiModalHeaderTitle>
       </EuiModalHeader>
-      <EuiModalBody className="visNewVisDialogGroupSelection__body">
+      <EuiModalBody css={styles.body}>
         {shouldDisplayLegacyTab && (
-          <div className="visNewVisDialogGroupSelection__visGroups">
+          <div css={styles.visGroups}>
             <EuiTabs>
               {tabs.map((t) => (
                 <EuiTab
@@ -153,7 +191,7 @@ function GroupSelection({
           </div>
         )}
 
-        <div className="visNewVisDialogGroupSelection__visGroups">
+        <div css={styles.visGroups}>
           <EuiSpacer size="s" />
           {tab === 'recommended' ? (
             <EuiFlexGrid columns={2} data-test-subj="visNewDialogGroups">
@@ -203,15 +241,12 @@ function GroupSelection({
 }
 
 const ModalFooter = ({ visualizeGuideLink }: { visualizeGuideLink: string }) => {
+  const styles = useMemoCss(groupSelectionStyles);
   return (
-    <div className="visNewVisDialogGroupSelection__footer">
+    <div css={styles.footer}>
       <EuiSpacer size="l" />
-      <EuiDescriptionList
-        className="visNewVisDialogGroupSelection__footerDescriptionList"
-        type="responsiveColumn"
-        compressed
-      >
-        <EuiDescriptionListTitle className="visNewVisDialogGroupSelection__footerDescriptionListTitle">
+      <EuiDescriptionList type="responsiveColumn" compressed css={styles.footerDescriptionList}>
+        <EuiDescriptionListTitle css={styles.footerDescriptionListTitle}>
           <FormattedMessage
             id="visualizations.newVisWizard.learnMoreText"
             defaultMessage="Want to learn more?"
@@ -236,8 +271,10 @@ const VisGroup = ({ visType, onVisTypeSelected, shouldStretch = false }: VisCard
   }, [onVisTypeSelected, visType]);
   return (
     <EuiFlexItem
-      className="visNewVisDialog__groupsCardWrapper"
-      css={shouldStretch ? { gridColumn: '1 / -1' } : null}
+      css={[
+        shouldStretch ? { gridColumn: '1 / -1' } : null,
+        groupSelectionStyles.visGroupCardWrapper,
+      ]}
     >
       <EuiCard
         titleSize="xs"

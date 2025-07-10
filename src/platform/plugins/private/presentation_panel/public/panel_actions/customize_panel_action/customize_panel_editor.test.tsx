@@ -25,20 +25,20 @@ describe('customize panel editor', () => {
   let setDescription: (description?: string) => void;
 
   beforeEach(() => {
-    const titleSubject = new BehaviorSubject<string | undefined>(undefined);
-    setTitle = jest.fn((title) => titleSubject.next(title));
-    const descriptionSubject = new BehaviorSubject<string | undefined>(undefined);
-    setDescription = jest.fn((description) => descriptionSubject.next(description));
-    const viewMode = new BehaviorSubject<ViewMode>('edit');
-    setViewMode = jest.fn((nextViewMode) => viewMode.next(nextViewMode));
+    const title$ = new BehaviorSubject<string | undefined>(undefined);
+    setTitle = jest.fn((title) => title$.next(title));
+    const description$ = new BehaviorSubject<string | undefined>(undefined);
+    setDescription = jest.fn((description) => description$.next(description));
+    const viewMode$ = new BehaviorSubject<ViewMode>('edit');
+    setViewMode = jest.fn((nextViewMode) => viewMode$.next(nextViewMode));
 
     api = {
-      viewMode,
-      dataViews: new BehaviorSubject<DataView[] | undefined>([]),
-      panelTitle: titleSubject,
-      setPanelTitle: setTitle,
-      panelDescription: descriptionSubject,
-      setPanelDescription: setDescription,
+      viewMode$,
+      dataViews$: new BehaviorSubject<DataView[] | undefined>([]),
+      title$,
+      setTitle,
+      description$,
+      setDescription,
     };
   });
 
@@ -61,7 +61,7 @@ describe('customize panel editor', () => {
     });
 
     it('Initializes panel title with default title from API', () => {
-      api.defaultPanelTitle = new BehaviorSubject<string | undefined>('Default title');
+      api.defaultTitle$ = new BehaviorSubject<string | undefined>('Default title');
       renderPanelEditor();
       expect(screen.getByTestId('customEmbeddablePanelTitleInput')).toHaveValue('Default title');
     });
@@ -82,15 +82,26 @@ describe('customize panel editor', () => {
     });
 
     it('should use default title when title is undefined', () => {
-      api.defaultPanelTitle = new BehaviorSubject<string | undefined>('Default title');
+      api.defaultTitle$ = new BehaviorSubject<string | undefined>('Default title');
       setTitle(undefined);
       renderPanelEditor();
       const titleInput = screen.getByTestId('customEmbeddablePanelTitleInput');
       expect(titleInput).toHaveValue('Default title');
     });
 
+    // Even if the input value matches defaultTitle on apply, we expect setTitle(undefined) to be called,  meaning the title is treated as "not customized".
+    it('should not set panel custom title if it matches default title on apply', async () => {
+      api.defaultTitle$ = new BehaviorSubject<string | undefined>('Default title');
+      renderPanelEditor();
+      const titleInput = screen.getByTestId('customEmbeddablePanelTitleInput');
+      expect(titleInput).toHaveValue('Default title');
+      await userEvent.click(screen.getByTestId('saveCustomizePanelButton'));
+      expect(setTitle).toHaveBeenCalledWith(undefined);
+      expect(api.title$?.getValue()).toBeUndefined();
+    });
+
     it('should use title even when empty string', () => {
-      api.defaultPanelTitle = new BehaviorSubject<string | undefined>('Default title');
+      api.defaultTitle$ = new BehaviorSubject<string | undefined>('Default title');
       setTitle('');
       renderPanelEditor();
       const titleInput = screen.getByTestId('customEmbeddablePanelTitleInput');
@@ -98,7 +109,7 @@ describe('customize panel editor', () => {
     });
 
     it('Resets panel title to default when reset button is pressed', async () => {
-      api.defaultPanelTitle = new BehaviorSubject<string | undefined>('Default title');
+      api.defaultTitle$ = new BehaviorSubject<string | undefined>('Default title');
       setTitle('Initial title');
       renderPanelEditor();
       await userEvent.type(screen.getByTestId('customEmbeddablePanelTitleInput'), 'New title');
@@ -107,7 +118,7 @@ describe('customize panel editor', () => {
     });
 
     it('should hide title reset when no default exists', async () => {
-      api.defaultPanelTitle = new BehaviorSubject<string | undefined>(undefined);
+      api.defaultTitle$ = new BehaviorSubject<string | undefined>(undefined);
       setTitle('Initial title');
       renderPanelEditor();
       await userEvent.type(screen.getByTestId('customEmbeddablePanelTitleInput'), 'New title');
@@ -129,7 +140,7 @@ describe('customize panel editor', () => {
     });
 
     it('Initializes panel description with default description from API', () => {
-      api.defaultPanelDescription = new BehaviorSubject<string | undefined>('Default description');
+      api.defaultDescription$ = new BehaviorSubject<string | undefined>('Default description');
       renderPanelEditor();
       expect(screen.getByTestId('customEmbeddablePanelDescriptionInput')).toHaveValue(
         'Default description'
@@ -155,7 +166,7 @@ describe('customize panel editor', () => {
     });
 
     it('should use default description when description is undefined', () => {
-      api.defaultPanelDescription = new BehaviorSubject<string | undefined>('Default description');
+      api.defaultDescription$ = new BehaviorSubject<string | undefined>('Default description');
       setDescription(undefined);
       renderPanelEditor();
       const descriptionInput = screen.getByTestId('customEmbeddablePanelDescriptionInput');
@@ -163,7 +174,7 @@ describe('customize panel editor', () => {
     });
 
     it('should use description even when empty string', () => {
-      api.defaultPanelDescription = new BehaviorSubject<string | undefined>('Default description');
+      api.defaultDescription$ = new BehaviorSubject<string | undefined>('Default description');
       setDescription('');
       renderPanelEditor();
       const descriptionInput = screen.getByTestId('customEmbeddablePanelDescriptionInput');
@@ -171,7 +182,7 @@ describe('customize panel editor', () => {
     });
 
     it('Resets panel description to default when reset button is pressed', async () => {
-      api.defaultPanelDescription = new BehaviorSubject<string | undefined>('Default description');
+      api.defaultDescription$ = new BehaviorSubject<string | undefined>('Default description');
       setDescription('Initial description');
       renderPanelEditor();
       await userEvent.type(
@@ -185,7 +196,7 @@ describe('customize panel editor', () => {
     });
 
     it('should hide description reset when no default exists', async () => {
-      api.defaultPanelDescription = new BehaviorSubject<string | undefined>(undefined);
+      api.defaultDescription$ = new BehaviorSubject<string | undefined>(undefined);
       setDescription('Initial description');
       renderPanelEditor();
       await userEvent.type(

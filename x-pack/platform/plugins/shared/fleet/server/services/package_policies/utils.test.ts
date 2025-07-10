@@ -6,13 +6,18 @@
  */
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 
+import { createPackageInfoMock } from '../../../common/mocks';
 import { PackagePolicyMocks } from '../../mocks';
 
 import { appContextService } from '../app_context';
 import { licenseService } from '../license';
 import { outputService } from '../output';
 
-import { mapPackagePolicySavedObjectToPackagePolicy, preflightCheckPackagePolicy } from './utils';
+import {
+  canDeployAsAgentlessOrThrow,
+  mapPackagePolicySavedObjectToPackagePolicy,
+  preflightCheckPackagePolicy,
+} from './utils';
 
 describe('Package Policy Utils', () => {
   describe('mapPackagePolicySavedObjectToPackagePolicy()', () => {
@@ -75,9 +80,6 @@ describe('Package Policy Utils', () => {
 
     it('should throw if no enterprise license and multiple policy_ids is provided', async () => {
       jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(false);
-      jest
-        .spyOn(appContextService, 'getExperimentalFeatures')
-        .mockReturnValue({ enableReusableIntegrationPolicies: true } as any);
 
       await expect(
         preflightCheckPackagePolicy(soClient, { ...testPolicy, policy_ids: ['1', '2'] })
@@ -88,9 +90,6 @@ describe('Package Policy Utils', () => {
 
     it('should throw if no enterprise license and no policy_ids is provided', async () => {
       jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(false);
-      jest
-        .spyOn(appContextService, 'getExperimentalFeatures')
-        .mockReturnValue({ enableReusableIntegrationPolicies: true } as any);
 
       await expect(
         preflightCheckPackagePolicy(soClient, { ...testPolicy, policy_ids: [] })
@@ -99,22 +98,8 @@ describe('Package Policy Utils', () => {
       );
     });
 
-    it('should throw if enterprise license and multiple policy_ids is provided but no feature flag', async () => {
-      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
-      jest
-        .spyOn(appContextService, 'getExperimentalFeatures')
-        .mockReturnValue({ enableReusableIntegrationPolicies: false } as any);
-
-      await expect(
-        preflightCheckPackagePolicy(soClient, { ...testPolicy, policy_ids: ['1', '2'] })
-      ).rejects.toThrowError('Reusable integration policies are not supported');
-    });
-
     it('should not throw if enterprise license and multiple policy_ids is provided', async () => {
       jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
-      jest
-        .spyOn(appContextService, 'getExperimentalFeatures')
-        .mockReturnValue({ enableReusableIntegrationPolicies: true } as any);
       await expect(
         preflightCheckPackagePolicy(soClient, { ...testPolicy, policy_ids: ['1', '2'] })
       ).resolves.not.toThrow();
@@ -122,9 +107,6 @@ describe('Package Policy Utils', () => {
 
     it('should not throw if enterprise license and no policy_ids is provided', async () => {
       jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
-      jest
-        .spyOn(appContextService, 'getExperimentalFeatures')
-        .mockReturnValue({ enableReusableIntegrationPolicies: true } as any);
       await expect(
         preflightCheckPackagePolicy(soClient, { ...testPolicy, policy_ids: [] })
       ).resolves.not.toThrow();
@@ -190,5 +172,84 @@ describe('Package Policy Utils', () => {
         )
       ).resolves.not.toThrow();
     });
+  });
+});
+
+describe('canDeployAsAgentlessOrThrow', () => {
+  const getTestPolicy = (supportsAgentless: boolean = true) => ({
+    name: 'Test Package Policy',
+    namespace: 'test',
+    enabled: true,
+    policy_ids: ['test'],
+    inputs: [],
+    package: {
+      name: 'test',
+      title: 'Test',
+      version: '0.0.1',
+    },
+    supports_agentless: supportsAgentless,
+  });
+
+  const getMockConfig = (agentlessCustomIntegrations: boolean = false) => ({
+    enabled: true,
+    agents: { enabled: true, elasticsearch: {} },
+    agentless: { enabled: true, customIntegrations: { enabled: agentlessCustomIntegrations } },
+  });
+
+  it('should throw if policy supports agentless, is custom package, and is not allowed', () => {
+    jest.spyOn(appContextService, 'getConfig').mockReturnValue(getMockConfig());
+    let error = null;
+    try {
+      canDeployAsAgentlessOrThrow(
+        getTestPolicy(),
+        createPackageInfoMock({ installSource: 'custom' })
+      );
+    } catch (e) {
+      error = e;
+    }
+
+    expect(error).not.toBe(null);
+  });
+
+  it('should not throw if policy supports agentless, is not custom package, and is not allowed', () => {
+    jest.spyOn(appContextService, 'getConfig').mockReturnValue(getMockConfig());
+    let error = null;
+    try {
+      canDeployAsAgentlessOrThrow(getTestPolicy(), createPackageInfoMock());
+    } catch (e) {
+      error = e;
+    }
+
+    expect(error).toBe(null);
+  });
+
+  it('should not throw if policy does not support agentless, is custom package, and is not allowed', () => {
+    jest.spyOn(appContextService, 'getConfig').mockReturnValue(getMockConfig());
+    let error = null;
+    try {
+      canDeployAsAgentlessOrThrow(
+        getTestPolicy(false),
+        createPackageInfoMock({ installSource: 'upload' })
+      );
+    } catch (e) {
+      error = e;
+    }
+
+    expect(error).toBe(null);
+  });
+
+  it('should not throw if policy supports agentless, is custom package, and is allowed', () => {
+    jest.spyOn(appContextService, 'getConfig').mockReturnValue(getMockConfig(true));
+    let error = null;
+    try {
+      canDeployAsAgentlessOrThrow(
+        getTestPolicy(),
+        createPackageInfoMock({ installSource: 'custom' })
+      );
+    } catch (e) {
+      error = e;
+    }
+
+    expect(error).toBe(null);
   });
 });

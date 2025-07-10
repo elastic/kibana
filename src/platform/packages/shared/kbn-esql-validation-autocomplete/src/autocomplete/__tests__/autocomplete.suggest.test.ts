@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
 import { ESQLCallbacks } from '../../shared/types';
 import * as autocomplete from '../autocomplete';
 import { getCallbackMocks } from '../../__tests__/helpers';
@@ -26,7 +25,7 @@ const setup = async (caret = '?') => {
     const pos = query.indexOf(caret);
     if (pos < 0) throw new Error(`User cursor/caret "${caret}" not found in query: ${query}`);
     const querySansCaret = query.slice(0, pos) + query.slice(pos + 1);
-    return await autocomplete.suggest(querySansCaret, pos, ctx, getAstAndSyntaxErrors, cb);
+    return await autocomplete.suggest(querySansCaret, pos, ctx, cb);
   };
 
   return {
@@ -42,6 +41,6 @@ describe('autocomplete.suggest', () => {
     await suggest('sHoW ?');
     await suggest('row ? |');
 
-    expect(callbacks.getColumnsFor.mock.calls.length).toBe(0);
+    expect((callbacks.getColumnsFor as any).mock.calls.length).toBe(0);
   });
 });

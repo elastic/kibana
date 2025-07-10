@@ -5,9 +5,14 @@
  * 2.0.
  */
 
-import './resolve_all_conflicts.scss';
-
-import { EuiContextMenuItem, EuiContextMenuPanel, EuiLink, EuiPopover } from '@elastic/eui';
+import {
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiLink,
+  EuiPopover,
+  useEuiFontSize,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
 import React, { Component } from 'react';
 
 import { i18n } from '@kbn/i18n';
@@ -47,20 +52,34 @@ const options: ResolveOption[] = [
   },
 ];
 
+interface ResolveAllButtonProps {
+  onButtonClick: () => void;
+}
+
+const ResolveAllButton = ({ onButtonClick }: ResolveAllButtonProps) => {
+  const { fontSize } = useEuiFontSize('s');
+  return (
+    <EuiLink
+      onClick={onButtonClick}
+      css={css`
+        font-size: ${fontSize};
+      `}
+    >
+      <FormattedMessage
+        id="xpack.spaces.management.copyToSpace.resolveAllConflictsLink"
+        defaultMessage="(resolve all)"
+      />
+    </EuiLink>
+  );
+};
+
 export class ResolveAllConflicts extends Component<ResolveAllConflictsProps, State> {
   public state = {
     isPopoverOpen: false,
   };
 
   public render() {
-    const button = (
-      <EuiLink onClick={this.onButtonClick} className={'spcCopyToSpace__resolveAllConflictsLink'}>
-        <FormattedMessage
-          id="xpack.spaces.management.copyToSpace.resolveAllConflictsLink"
-          defaultMessage="(resolve all)"
-        />
-      </EuiLink>
-    );
+    const button = <ResolveAllButton onButtonClick={this.onButtonClick} />;
 
     const items = options.map((item) => {
       return (

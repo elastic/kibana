@@ -1,22 +1,13 @@
 # Search Project Config
 
-## Disable APM and Uptime, enable Enterprise Search
-xpack.apm.enabled: false
+# Make sure the plugins belonging to this project type are loaded
+plugins.allowlistPluginGroups: ['platform', 'search']
 
-xpack.cloudSecurityPosture.enabled: false
-xpack.infra.enabled: false
-xpack.observabilityLogsExplorer.enabled: false
-xpack.observability.enabled: false
-xpack.securitySolution.enabled: false
-xpack.serverless.observability.enabled: false
-enterpriseSearch.enabled: false
+xpack.search.enabled: false
 xpack.osquery.enabled: false
 
 # Enable fleet on search projects for agentless features
 xpack.fleet.enabled: true
-xpack.fleet.internal.registry.kibanaVersionCheckEnabled: false
-xpack.fleet.internal.registry.spec.min: '3.0'
-xpack.fleet.internal.registry.spec.max: '3.3'
 xpack.fleet.packages:
   # fleet_server package installed to publish agent metrics
   - name: fleet_server
@@ -43,16 +34,19 @@ xpack.fleet.internal.registry.excludePackages: [
 
   # Profiling integrations
   'profiler_agent',
+
+  # Search connectors
+  'elastic_connectors',
 ]
 
 ## Fine-tune the search solution feature privileges. Also, refer to `serverless.yml` for the project-agnostic overrides.
 xpack.features.overrides:
   ### Dashboards feature is moved from Analytics category to the Search one.
-  dashboard.category: "enterpriseSearch"
+  dashboard_v2.category: "enterpriseSearch"
   ### Dev Tools feature is moved from Analytics category to the Search one.
   dev_tools.category: "enterpriseSearch"
   ### Discover feature is moved from Analytics category to the Search one.
-  discover.category: "enterpriseSearch"
+  discover_v2.category: "enterpriseSearch"
   ### Machine Learning feature is moved from Analytics category to the Management one.
   ml.category: "management"
   ### Stack Alerts feature is moved from Analytics category to the Search one renamed to simply `Alerts`.
@@ -63,29 +57,22 @@ xpack.features.overrides:
   observabilityAIAssistant:
     name: "AI Assistant"
     category: "enterpriseSearch"
-  ### AI Assistant enables the Inventory feature, moving to Search
-  inventory:
-    category: "enterpriseSearch"
 
 ## Cloud settings
 xpack.cloud.serverless.project_type: search
 
 ## Enable the Serverless Search plugin
 xpack.serverless.search.enabled: true
-xpack.searchIndices.enabled: true
 
 ## Set the home route
 uiSettings.overrides.defaultRoute: /app/elasticsearch
-
-## Set the dev project switcher current type
-xpack.serverless.plugin.developer.projectSwitcher.currentType: 'search'
 
 # Specify in telemetry the project type
 telemetry.labels.serverless: search
 
 # Alerts and LLM config
 xpack.actions.enabledActionTypes:
-  ['.email', '.index', '.slack', '.jira', '.webhook', '.teams', '.gen-ai', '.bedrock', '.gemini']
+  ['.email', '.index', '.slack', '.jira', '.webhook', '.teams', '.gen-ai', '.bedrock', '.gemini', '.inference']
 
 # Customize empty page state for analytics apps
 no_data_page.analyticsNoDataPageFlavor: 'serverless_search'
@@ -98,18 +85,18 @@ xpack.ml.dfa.enabled: false
 xpack.ml.nlp:
   enabled: true
   modelDeployment:
-    allowStaticAllocations: true
+    allowStaticAllocations: false
     vCPURange:
       low:
         min: 0
         max: 2
         static: 2
       medium:
-        min: 1
+        min: 0
         max: 32
         static: 32
       high:
-        min: 1
+        min: 0
         max: 512
         static: 512
 xpack.ml.compatibleModuleType: 'search'
@@ -117,11 +104,13 @@ xpack.ml.compatibleModuleType: 'search'
 data_visualizer.resultLinks.fileBeat.enabled: false
 
 # Search Notebooks
-xpack.search.notebooks.catalog.url: https://elastic-enterprise-search.s3.us-east-2.amazonaws.com/serverless/catalog.json
+xpack.searchNotebooks.catalog.url: https://elastic-enterprise-search.s3.us-east-2.amazonaws.com/serverless/catalog.json
 
 # Semantic text UI
-
 xpack.index_management.dev.enableSemanticText: true
+
+# Search Homepage
+xpack.searchHomepage.enabled: true
 
 # AI Assistant config
 xpack.observabilityAIAssistant.enabled: true
@@ -129,6 +118,9 @@ xpack.searchAssistant.enabled: true
 xpack.searchAssistant.ui.enabled: true
 xpack.observabilityAIAssistant.scope: "search"
 aiAssistantManagementSelection.preferredAIAssistantType: "observability"
-xpack.observabilityAiAssistantManagement.logSourcesEnabled: false
-xpack.observabilityAiAssistantManagement.spacesEnabled: false
-xpack.observabilityAiAssistantManagement.visibilityEnabled: false
+
+# Query Rules UI
+xpack.searchQueryRules.enabled: true
+
+## Search Connectors in stack management
+xpack.contentConnectors.ui.enabled: false

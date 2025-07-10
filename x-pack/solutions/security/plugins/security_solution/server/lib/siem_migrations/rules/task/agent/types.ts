@@ -6,18 +6,28 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { InferenceClient } from '@kbn/inference-plugin/server';
+import type { RunnableConfig } from '@langchain/core/runnables';
 import type { RuleMigrationsRetriever } from '../retrievers';
+import type { EsqlKnowledgeBase } from '../util/esql_knowledge_base';
+import type { SiemMigrationTelemetryClient } from '../rule_migrations_telemetry_client';
 import type { ChatModel } from '../util/actions_client_chat';
-import type { migrateRuleState } from './state';
+import type { migrateRuleConfigSchema, migrateRuleState } from './state';
 
 export type MigrateRuleState = typeof migrateRuleState.State;
-export type GraphNode = (state: MigrateRuleState) => Promise<Partial<MigrateRuleState>>;
+export type MigrateRuleGraphConfig = RunnableConfig<(typeof migrateRuleConfigSchema)['State']>;
+export type GraphNode = (
+  state: MigrateRuleState,
+  config: MigrateRuleGraphConfig
+) => Promise<Partial<MigrateRuleState>>;
+
+export interface RuleMigrationAgentRunOptions {
+  skipPrebuiltRulesMatching: boolean;
+}
 
 export interface MigrateRuleGraphParams {
-  inferenceClient: InferenceClient;
+  esqlKnowledgeBase: EsqlKnowledgeBase;
   model: ChatModel;
-  connectorId: string;
   ruleMigrationsRetriever: RuleMigrationsRetriever;
   logger: Logger;
+  telemetryClient: SiemMigrationTelemetryClient;
 }

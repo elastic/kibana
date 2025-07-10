@@ -20,23 +20,20 @@ snapshots.js
 !.buildkite
 
 # plugin overrides
-/src/core/lib/kbn_internal_native_observable
 /src/platform/plugins/shared/data/common/es_query/kuery/ast/_generated_/**
 /x-pack/platform/plugins/private/canvas/canvas_plugin
 /x-pack/platform/plugins/private/canvas/shareable_runtime/build
 /x-pack/platform/plugins/private/canvas/storybook/build
 /x-pack/platform/plugins/private/reporting/server/export_types/printable_pdf/server/lib/pdf/assets/**
 /x-pack/platform/plugins/private/reporting/server/export_types/printable_pdf_v2/server/lib/pdf/assets/**
-/x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/assets/**
+/x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/public/assets/**
 
 # package overrides
 /packages/kbn-eslint-config
 /packages/kbn-plugin-generator/template
 /packages/kbn-generate/templates
-/packages/kbn-pm/dist
-/packages/kbn-test/src/functional_test_runner/__tests__/fixtures/
-/packages/kbn-test/src/functional_test_runner/lib/config/__tests__/fixtures/
-/packages/kbn-ui-framework/dist
+/src/platform/packages/shared/kbn-test/src/functional_test_runner/__tests__/fixtures/
+/src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/config/__tests__/fixtures/
 /src/platform/packages/shared/kbn-flot-charts/lib
 /src/platform/packages/shared/kbn-monaco/src/**/antlr
 /src/platform/packages/shared/kbn-esql-ast/src/**/antlr

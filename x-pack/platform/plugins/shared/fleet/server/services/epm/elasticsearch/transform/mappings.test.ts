@@ -14,10 +14,10 @@ describe('loadMappingForTransform', () => {
     const fields = loadMappingForTransform(
       {
         packageInfo: {} as any,
-        assetsMap: new Map(),
         archiveIterator: createArchiveIteratorFromMap(new Map()),
         paths: [],
       },
+      new Map(),
       'test'
     );
 
@@ -28,36 +28,37 @@ describe('loadMappingForTransform', () => {
     const fields = loadMappingForTransform(
       {
         packageInfo: {} as any,
-        assetsMap: new Map([
-          [
-            '/package/ti_opencti/2.1.0/elasticsearch/transform/latest_ioc/fields/ecs.yml',
-            Buffer.from(
-              `
-- description: Description of the threat feed in a UI friendly format.
-  name: threat.feed.description
-  type: keyword
-- description: The name of the threat feed in UI friendly format.
-  name: threat.feed.name
-  type: keyword`
-            ),
-          ],
-          [
-            '/package/ti_opencti/2.1.0/elasticsearch/transform/latest_ioc/fields/ecs-extra.yml',
-            Buffer.from(
-              `
-- description: The display name indicator in an UI friendly format
-  level: extended
-  name: threat.indicator.name
-  type: keyword`
-            ),
-          ],
-        ]),
+
         archiveIterator: createArchiveIteratorFromMap(new Map()),
         paths: [
           '/package/ti_opencti/2.1.0/elasticsearch/transform/latest_ioc/fields/ecs.yml',
           '/package/ti_opencti/2.1.0/elasticsearch/transform/latest_ioc/fields/ecs-extra.yml',
         ],
       },
+      new Map([
+        [
+          '/package/ti_opencti/2.1.0/elasticsearch/transform/latest_ioc/fields/ecs.yml',
+          Buffer.from(
+            `
+- description: Description of the threat feed in a UI friendly format.
+  name: threat.feed.description
+  type: keyword
+- description: The name of the threat feed in UI friendly format.
+  name: threat.feed.name
+  type: keyword`
+          ),
+        ],
+        [
+          '/package/ti_opencti/2.1.0/elasticsearch/transform/latest_ioc/fields/ecs-extra.yml',
+          Buffer.from(
+            `
+- description: The display name indicator in an UI friendly format
+  level: extended
+  name: threat.indicator.name
+  type: keyword`
+          ),
+        ],
+      ]),
       'latest_ioc'
     );
 

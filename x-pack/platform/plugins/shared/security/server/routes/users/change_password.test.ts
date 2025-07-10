@@ -40,10 +40,7 @@ describe('Change password', () => {
     ).toHaveBeenCalledTimes(1);
     expect(
       mockCoreContext.elasticsearch.client.asCurrentUser.security.changePassword
-    ).toHaveBeenCalledWith(
-      { username, body: { password: 'new-password' } },
-      headers && { headers }
-    );
+    ).toHaveBeenCalledWith({ username, password: 'new-password' }, headers && { headers });
   }
 
   beforeEach(() => {

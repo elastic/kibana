@@ -11,12 +11,12 @@ Object {
     },
     Object {
       "id": "security-solution-my-test",
-      "name": "indexpattern-datasource-layer-e406bf4f-942b-41ac-b516-edb5cef06ec8",
+      "name": "indexpattern-datasource-layer-layer-source-ip-id-generated-uuid",
       "type": "index-pattern",
     },
     Object {
       "id": "security-solution-my-test",
-      "name": "indexpattern-datasource-layer-38aa6532-6bf9-4c8f-b2a6-da8d32f7d0d7",
+      "name": "indexpattern-datasource-layer-layer-destination-ip-id-generated-uuid",
       "type": "index-pattern",
     },
   ],
@@ -24,13 +24,13 @@ Object {
     "datasourceStates": Object {
       "formBased": Object {
         "layers": Object {
-          "38aa6532-6bf9-4c8f-b2a6-da8d32f7d0d7": Object {
+          "layer-destination-ip-id-generated-uuid": Object {
             "columnOrder": Array [
-              "4607c585-3af3-43b9-804f-e49b27796d79",
-              "d27e0966-daf9-41f4-9033-230cf1e76dc9",
+              "column-destination-ip-filter-id-generated-uuid",
+              "column-destination-ip-id-generated-uuid",
             ],
             "columns": Object {
-              "4607c585-3af3-43b9-804f-e49b27796d79": Object {
+              "column-destination-ip-filter-id-generated-uuid": Object {
                 "dataType": "string",
                 "isBucketed": true,
                 "label": "Filters",
@@ -48,7 +48,7 @@ Object {
                 },
                 "scale": "ordinal",
               },
-              "d27e0966-daf9-41f4-9033-230cf1e76dc9": Object {
+              "column-destination-ip-id-generated-uuid": Object {
                 "dataType": "number",
                 "filter": Object {
                   "language": "kuery",
@@ -63,25 +63,13 @@ Object {
             },
             "incompleteColumns": Object {},
           },
-          "e406bf4f-942b-41ac-b516-edb5cef06ec8": Object {
+          "layer-source-ip-id-generated-uuid": Object {
             "columnOrder": Array [
-              "d9c438c5-f776-4436-9d20-d62dc8c03be8",
-              "5acd4c9d-dc3b-4b21-9632-e4407944c36d",
+              "column-source-ip-filter-id-generated-uuid",
+              "column-source-ip-id-generated-uuid",
             ],
             "columns": Object {
-              "5acd4c9d-dc3b-4b21-9632-e4407944c36d": Object {
-                "dataType": "number",
-                "filter": Object {
-                  "language": "kuery",
-                  "query": "source.ip: \\"10.0.0.0/8\\" or source.ip: \\"192.168.0.0/16\\" or source.ip: \\"172.16.0.0/12\\" or source.ip: \\"fd00::/8\\"",
-                },
-                "isBucketed": false,
-                "label": "Unique count of source.ip",
-                "operationType": "unique_count",
-                "scale": "ratio",
-                "sourceField": "source.ip",
-              },
-              "d9c438c5-f776-4436-9d20-d62dc8c03be8": Object {
+              "column-source-ip-filter-id-generated-uuid": Object {
                 "dataType": "string",
                 "isBucketed": true,
                 "label": "Filters",
@@ -98,6 +86,18 @@ Object {
                   ],
                 },
                 "scale": "ordinal",
+              },
+              "column-source-ip-id-generated-uuid": Object {
+                "dataType": "number",
+                "filter": Object {
+                  "language": "kuery",
+                  "query": "source.ip: \\"10.0.0.0/8\\" or source.ip: \\"192.168.0.0/16\\" or source.ip: \\"172.16.0.0/12\\" or source.ip: \\"fd00::/8\\"",
+                },
+                "isBucketed": false,
+                "label": "Unique count of source.ip",
+                "operationType": "unique_count",
+                "scale": "ratio",
+                "sourceField": "source.ip",
               },
             },
             "incompleteColumns": Object {},
@@ -228,33 +228,33 @@ Object {
       "layers": Array [
         Object {
           "accessors": Array [
-            "5acd4c9d-dc3b-4b21-9632-e4407944c36d",
+            "column-source-ip-id-generated-uuid",
           ],
-          "layerId": "e406bf4f-942b-41ac-b516-edb5cef06ec8",
+          "layerId": "layer-source-ip-id-generated-uuid",
           "layerType": "data",
           "position": "top",
           "seriesType": "bar_horizontal_stacked",
           "showGridlines": false,
-          "xAccessor": "d9c438c5-f776-4436-9d20-d62dc8c03be8",
+          "xAccessor": "column-source-ip-filter-id-generated-uuid",
           "yConfig": Array [
             Object {
-              "color": "#CA8EAE",
-              "forAccessor": "5acd4c9d-dc3b-4b21-9632-e4407944c36d",
+              "color": "#EE72A6",
+              "forAccessor": "column-source-ip-id-generated-uuid",
             },
           ],
         },
         Object {
           "accessors": Array [
-            "d27e0966-daf9-41f4-9033-230cf1e76dc9",
+            "column-destination-ip-id-generated-uuid",
           ],
-          "layerId": "38aa6532-6bf9-4c8f-b2a6-da8d32f7d0d7",
+          "layerId": "layer-destination-ip-id-generated-uuid",
           "layerType": "data",
           "seriesType": "bar_horizontal_stacked",
-          "xAccessor": "4607c585-3af3-43b9-804f-e49b27796d79",
+          "xAccessor": "column-destination-ip-filter-id-generated-uuid",
           "yConfig": Array [
             Object {
-              "color": "#D36086",
-              "forAccessor": "d27e0966-daf9-41f4-9033-230cf1e76dc9",
+              "color": "#61A2FF",
+              "forAccessor": "column-destination-ip-id-generated-uuid",
             },
           ],
         },

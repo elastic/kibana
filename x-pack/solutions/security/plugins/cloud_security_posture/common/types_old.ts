@@ -6,12 +6,16 @@
  */
 import { type TypeOf } from '@kbn/config-schema';
 import type { CspBenchmarkRuleMetadata } from '@kbn/cloud-security-posture-common/schema/rules/latest';
-import type { CspFinding } from '@kbn/cloud-security-posture-common';
+import type {
+  CspFinding,
+  MisconfigurationEvaluationStatus,
+} from '@kbn/cloud-security-posture-common';
 import { SUPPORTED_CLOUDBEAT_INPUTS, SUPPORTED_POLICY_TEMPLATES } from './constants';
 
 import { getComplianceDashboardSchema } from './schemas/stats';
-
+type CloudConnectorType = 'cloud_connectors';
 export type AwsCredentialsType =
+  | CloudConnectorType
   | 'assume_role'
   | 'direct_access_keys'
   | 'temporary_keys'
@@ -36,7 +40,7 @@ export type AzureCredentialsType =
   | 'service_principal_with_client_username_and_password'
   | 'managed_identity';
 
-export type Evaluation = 'passed' | 'failed' | 'NA';
+export type Evaluation = MisconfigurationEvaluationStatus;
 
 export type PostureTypes = 'cspm' | 'kspm' | 'vuln_mgmt' | 'all';
 /** number between 1-100 */
@@ -98,10 +102,9 @@ export interface ComplianceDashboardDataV2 {
   groupedFindingsEvaluation: GroupedFindingsEvaluation[];
   trend: PostureTrend[];
   benchmarks: BenchmarkData[];
+  namespaces: string[];
 }
 
-export type BenchmarkId = CspBenchmarkRuleMetadata['benchmark']['id'];
-export type BenchmarkName = CspBenchmarkRuleMetadata['benchmark']['name'];
 export type RuleSection = CspBenchmarkRuleMetadata['section'];
 
 // Fleet Integration types
@@ -191,3 +194,8 @@ export interface AggFieldBucket {
     doc_count?: string;
   }>;
 }
+
+export type CredentialsType = Extract<
+  AwsCredentialsType,
+  'direct_access_keys' | 'assume_role' | 'temporary_keys' | 'cloud_connectors'
+>;

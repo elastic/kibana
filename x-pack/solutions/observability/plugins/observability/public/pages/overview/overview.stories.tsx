@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { makeDecorator } from '@storybook/addons';
-import { storiesOf } from '@storybook/react';
+import { makeDecorator } from '@storybook/preview-api';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import React, { ReactNode } from 'react';
 import { MemoryRouter } from 'react-router-dom';
@@ -218,306 +217,338 @@ const coreAlertsThrowsError = {
   },
 } as unknown as CoreStart;
 
-storiesOf('app/Overview', module)
-  .addDecorator(withCore(core))
-  .add('Empty State', () => {
-    registerDataHandler({
-      appName: 'apm',
-      fetchData: fetchApmData,
-      hasData: async () => ({ hasData: false, indices: sampleAPMIndices }),
-    });
-    registerDataHandler({
-      appName: 'infra_logs',
-      fetchData: fetchLogsData,
-      hasData: async () => ({ hasData: false, indices: 'test-index' }),
-    });
-    registerDataHandler({
-      appName: 'infra_metrics',
-      fetchData: fetchMetricsData,
-      hasData: async () => ({ hasData: false, indices: 'metric-*' }),
-    });
-    registerDataHandler({
-      appName: 'uptime',
-      fetchData: fetchUptimeData,
-      hasData: async () => ({ hasData: false, indices: 'heartbeat-*,synthetics-*' }),
-    });
+export default {
+  title: 'app/Overview',
+  decorators: [withCore(core)],
+};
 
-    return <OverviewPage />;
-  })
-  .add('Single Panel', () => {
-    registerDataHandler({
-      appName: 'infra_logs',
-      fetchData: fetchLogsData,
-      hasData: async () => ({ hasData: true, indices: 'test-index' }),
-    });
-
-    return <OverviewPage />;
-  })
-  .add('Logs and Metrics', () => {
-    registerDataHandler({
-      appName: 'infra_logs',
-      fetchData: fetchLogsData,
-      hasData: async () => ({ hasData: true, indices: 'test-index' }),
-    });
-    registerDataHandler({
-      appName: 'infra_metrics',
-      fetchData: fetchMetricsData,
-      hasData: async () => ({ hasData: true, indices: 'metric-*' }),
-    });
-
-    return <OverviewPage />;
-  })
-  .add(
-    'Logs, Metrics, and Alerts',
-    () => {
-      registerDataHandler({
-        appName: 'infra_logs',
-        fetchData: fetchLogsData,
-        hasData: async () => ({ hasData: true, indices: 'test-index' }),
-      });
-      registerDataHandler({
-        appName: 'infra_metrics',
-        fetchData: fetchMetricsData,
-        hasData: async () => ({ hasData: true, indices: 'metric-*' }),
-      });
-
-      return <OverviewPage />;
-    },
-    { core: coreWithAlerts }
-  )
-  .add(
-    'Logs, Metrics, APM, and Alerts',
-    () => {
-      registerDataHandler({
-        appName: 'infra_logs',
-        fetchData: fetchLogsData,
-        hasData: async () => ({ hasData: true, indices: 'test-index' }),
-      });
-      registerDataHandler({
-        appName: 'infra_metrics',
-        fetchData: fetchMetricsData,
-        hasData: async () => ({ hasData: true, indices: 'metric-*' }),
-      });
-      registerDataHandler({
-        appName: 'apm',
-        fetchData: fetchApmData,
-        hasData: async () => ({ hasData: true, indices: sampleAPMIndices }),
-      });
-
-      return <OverviewPage />;
-    },
-    { core: coreWithAlerts }
-  )
-  .add('Logs, Metrics, APM, and Uptime', () => {
-    registerDataHandler({
-      appName: 'apm',
-      fetchData: fetchApmData,
-      hasData: async () => ({ hasData: true, indices: sampleAPMIndices }),
-    });
-    registerDataHandler({
-      appName: 'infra_logs',
-      fetchData: fetchLogsData,
-      hasData: async () => ({ hasData: true, indices: 'test-index' }),
-    });
-    registerDataHandler({
-      appName: 'infra_metrics',
-      fetchData: fetchMetricsData,
-      hasData: async () => ({ hasData: true, indices: 'metric-*' }),
-    });
-    registerDataHandler({
-      appName: 'uptime',
-      fetchData: fetchUptimeData,
-      hasData: async () => ({ hasData: true, indices: 'heartbeat-*,synthetics-*' }),
-    });
-
-    return <OverviewPage />;
-  })
-  .add(
-    'Logs, Metrics, APM, Uptime, and Alerts',
-    () => {
-      registerDataHandler({
-        appName: 'apm',
-        fetchData: fetchApmData,
-        hasData: async () => ({ hasData: true, indices: sampleAPMIndices }),
-      });
-      registerDataHandler({
-        appName: 'infra_logs',
-        fetchData: fetchLogsData,
-        hasData: async () => ({ hasData: true, indices: 'test-index' }),
-      });
-      registerDataHandler({
-        appName: 'infra_metrics',
-        fetchData: fetchMetricsData,
-        hasData: async () => ({ hasData: true, indices: 'metric-*' }),
-      });
-      registerDataHandler({
-        appName: 'uptime',
-        fetchData: fetchUptimeData,
-        hasData: async () => ({ hasData: true, indices: 'heartbeat-*,synthetics-*' }),
-      });
-
-      return <OverviewPage />;
-    },
-    { core: coreWithAlerts }
-  )
-  .add(
-    'Logs, Metrics, APM, Uptime, and News Feed',
-    () => {
-      registerDataHandler({
-        appName: 'apm',
-        fetchData: fetchApmData,
-        hasData: async () => ({ hasData: true, indices: sampleAPMIndices }),
-      });
-      registerDataHandler({
-        appName: 'infra_logs',
-        fetchData: fetchLogsData,
-        hasData: async () => ({ hasData: true, indices: 'test-index' }),
-      });
-      registerDataHandler({
-        appName: 'infra_metrics',
-        fetchData: fetchMetricsData,
-        hasData: async () => ({ hasData: true, indices: 'metric-*' }),
-      });
-      registerDataHandler({
-        appName: 'uptime',
-        fetchData: fetchUptimeData,
-        hasData: async () => ({ hasData: true, indices: 'heartbeat-*,synthetics-*' }),
-      });
-      return <OverviewPage />;
-    },
-    { core: coreWithNewsFeed }
-  )
-  .add('No Data', () => {
-    registerDataHandler({
-      appName: 'apm',
-      fetchData: async () => emptyAPMResponse,
-      hasData: async () => ({ hasData: true, indices: sampleAPMIndices }),
-    });
-    registerDataHandler({
-      appName: 'infra_logs',
-      fetchData: async () => emptyLogsResponse,
-      hasData: async () => ({ hasData: true, indices: 'test-index' }),
-    });
-    registerDataHandler({
-      appName: 'infra_metrics',
-      fetchData: async () => emptyMetricsResponse,
-      hasData: async () => ({ hasData: true, indices: 'metric-*' }),
-    });
-    registerDataHandler({
-      appName: 'uptime',
-      fetchData: async () => emptyUptimeResponse,
-      hasData: async () => ({ hasData: true, indices: 'heartbeat-*,synthetics-*' }),
-    });
-
-    return <OverviewPage />;
-  })
-  .add(
-    'Fetch Data with Error',
-    () => {
-      registerDataHandler({
-        appName: 'apm',
-        fetchData: async () => {
-          throw new Error('Error fetching APM data');
-        },
-        hasData: async () => ({ hasData: true, indices: sampleAPMIndices }),
-      });
-      registerDataHandler({
-        appName: 'infra_logs',
-        fetchData: async () => {
-          throw new Error('Error fetching Logs data');
-        },
-        hasData: async () => ({ hasData: true, indices: 'test-index' }),
-      });
-      registerDataHandler({
-        appName: 'infra_metrics',
-        fetchData: async () => {
-          throw new Error('Error fetching Metric data');
-        },
-        hasData: async () => ({ hasData: true, indices: 'metric-*' }),
-      });
-      registerDataHandler({
-        appName: 'uptime',
-        fetchData: async () => {
-          throw new Error('Error fetching Uptime data');
-        },
-        hasData: async () => ({ hasData: true, indices: 'heartbeat-*,synthetics-*' }),
-      });
-      return <OverviewPage />;
-    },
-    { core: coreAlertsThrowsError }
-  )
-  .add(
-    'hasData with Error and Alerts',
-    () => {
-      registerDataHandler({
-        appName: 'apm',
-        fetchData: fetchApmData,
-        // @ts-ignore throws an error instead
-        hasData: async () => {
-          throw new Error('Error has data');
-        },
-      });
-      registerDataHandler({
-        appName: 'infra_logs',
-        fetchData: fetchLogsData,
-        // @ts-ignore throws an error instead
-        hasData: async () => {
-          throw new Error('Error has data');
-        },
-      });
-      registerDataHandler({
-        appName: 'infra_metrics',
-        fetchData: fetchMetricsData,
-        // @ts-ignore throws an error instead
-        hasData: async () => {
-          throw new Error('Error has data');
-        },
-      });
-      registerDataHandler({
-        appName: 'uptime',
-        fetchData: fetchUptimeData,
-        // @ts-ignore throws an error instead
-        hasData: async () => {
-          throw new Error('Error has data');
-        },
-      });
-      return <OverviewPage />;
-    },
-    { core: coreWithAlerts }
-  )
-  .add('hasData with Error', () => {
-    registerDataHandler({
-      appName: 'apm',
-      fetchData: fetchApmData,
-      // @ts-ignore throws an error instead
-      hasData: async () => {
-        throw new Error('Error has data');
-      },
-    });
-    registerDataHandler({
-      appName: 'infra_logs',
-      fetchData: fetchLogsData,
-      // @ts-ignore throws an error instead
-      hasData: async () => {
-        throw new Error('Error has data');
-      },
-    });
-    registerDataHandler({
-      appName: 'infra_metrics',
-      fetchData: fetchMetricsData,
-      // @ts-ignore throws an error instead
-      hasData: async () => {
-        throw new Error('Error has data');
-      },
-    });
-    registerDataHandler({
-      appName: 'uptime',
-      fetchData: fetchUptimeData,
-      // @ts-ignore throws an error instead
-      hasData: async () => {
-        throw new Error('Error has data');
-      },
-    });
-
-    return <OverviewPage />;
+export const EmptyState = () => {
+  registerDataHandler({
+    appName: 'apm',
+    fetchData: fetchApmData,
+    hasData: async () => ({ hasData: false, indices: sampleAPMIndices }),
   });
+  registerDataHandler({
+    appName: 'infra_logs',
+    fetchData: fetchLogsData,
+    hasData: async () => ({ hasData: false, indices: 'test-index' }),
+  });
+  registerDataHandler({
+    appName: 'infra_metrics',
+    fetchData: fetchMetricsData,
+    hasData: async () => ({ hasData: false, indices: 'metric-*' }),
+  });
+  registerDataHandler({
+    appName: 'uptime',
+    fetchData: fetchUptimeData,
+    hasData: async () => ({ hasData: false, indices: 'heartbeat-*,synthetics-*' }),
+  });
+
+  return <OverviewPage />;
+};
+
+export const SinglePanel = () => {
+  registerDataHandler({
+    appName: 'infra_logs',
+    fetchData: fetchLogsData,
+    hasData: async () => ({ hasData: true, indices: 'test-index' }),
+  });
+
+  return <OverviewPage />;
+};
+
+export const LogsAndMetrics = {
+  render: () => {
+    registerDataHandler({
+      appName: 'infra_logs',
+      fetchData: fetchLogsData,
+      hasData: async () => ({ hasData: true, indices: 'test-index' }),
+    });
+    registerDataHandler({
+      appName: 'infra_metrics',
+      fetchData: fetchMetricsData,
+      hasData: async () => ({ hasData: true, indices: 'metric-*' }),
+    });
+
+    return <OverviewPage />;
+  },
+
+  name: 'Logs and Metrics',
+};
+
+export const LogsMetricsAndAlerts = {
+  render: () => {
+    registerDataHandler({
+      appName: 'infra_logs',
+      fetchData: fetchLogsData,
+      hasData: async () => ({ hasData: true, indices: 'test-index' }),
+    });
+    registerDataHandler({
+      appName: 'infra_metrics',
+      fetchData: fetchMetricsData,
+      hasData: async () => ({ hasData: true, indices: 'metric-*' }),
+    });
+
+    return <OverviewPage />;
+  },
+
+  name: 'Logs, Metrics, and Alerts',
+  parameters: { core: coreWithAlerts },
+};
+
+export const LogsMetricsApmAndAlerts = {
+  render: () => {
+    registerDataHandler({
+      appName: 'infra_logs',
+      fetchData: fetchLogsData,
+      hasData: async () => ({ hasData: true, indices: 'test-index' }),
+    });
+    registerDataHandler({
+      appName: 'infra_metrics',
+      fetchData: fetchMetricsData,
+      hasData: async () => ({ hasData: true, indices: 'metric-*' }),
+    });
+    registerDataHandler({
+      appName: 'apm',
+      fetchData: fetchApmData,
+      hasData: async () => ({ hasData: true, indices: sampleAPMIndices }),
+    });
+
+    return <OverviewPage />;
+  },
+
+  name: 'Logs, Metrics, APM, and Alerts',
+  parameters: { core: coreWithAlerts },
+};
+
+export const LogsMetricsApmAndUptime = {
+  render: () => {
+    registerDataHandler({
+      appName: 'apm',
+      fetchData: fetchApmData,
+      hasData: async () => ({ hasData: true, indices: sampleAPMIndices }),
+    });
+    registerDataHandler({
+      appName: 'infra_logs',
+      fetchData: fetchLogsData,
+      hasData: async () => ({ hasData: true, indices: 'test-index' }),
+    });
+    registerDataHandler({
+      appName: 'infra_metrics',
+      fetchData: fetchMetricsData,
+      hasData: async () => ({ hasData: true, indices: 'metric-*' }),
+    });
+    registerDataHandler({
+      appName: 'uptime',
+      fetchData: fetchUptimeData,
+      hasData: async () => ({ hasData: true, indices: 'heartbeat-*,synthetics-*' }),
+    });
+
+    return <OverviewPage />;
+  },
+
+  name: 'Logs, Metrics, APM, and Uptime',
+};
+
+export const LogsMetricsApmUptimeAndAlerts = {
+  render: () => {
+    registerDataHandler({
+      appName: 'apm',
+      fetchData: fetchApmData,
+      hasData: async () => ({ hasData: true, indices: sampleAPMIndices }),
+    });
+    registerDataHandler({
+      appName: 'infra_logs',
+      fetchData: fetchLogsData,
+      hasData: async () => ({ hasData: true, indices: 'test-index' }),
+    });
+    registerDataHandler({
+      appName: 'infra_metrics',
+      fetchData: fetchMetricsData,
+      hasData: async () => ({ hasData: true, indices: 'metric-*' }),
+    });
+    registerDataHandler({
+      appName: 'uptime',
+      fetchData: fetchUptimeData,
+      hasData: async () => ({ hasData: true, indices: 'heartbeat-*,synthetics-*' }),
+    });
+
+    return <OverviewPage />;
+  },
+
+  name: 'Logs, Metrics, APM, Uptime, and Alerts',
+  parameters: { core: coreWithAlerts },
+};
+
+export const LogsMetricsApmUptimeAndNewsFeed = {
+  render: () => {
+    registerDataHandler({
+      appName: 'apm',
+      fetchData: fetchApmData,
+      hasData: async () => ({ hasData: true, indices: sampleAPMIndices }),
+    });
+    registerDataHandler({
+      appName: 'infra_logs',
+      fetchData: fetchLogsData,
+      hasData: async () => ({ hasData: true, indices: 'test-index' }),
+    });
+    registerDataHandler({
+      appName: 'infra_metrics',
+      fetchData: fetchMetricsData,
+      hasData: async () => ({ hasData: true, indices: 'metric-*' }),
+    });
+    registerDataHandler({
+      appName: 'uptime',
+      fetchData: fetchUptimeData,
+      hasData: async () => ({ hasData: true, indices: 'heartbeat-*,synthetics-*' }),
+    });
+    return <OverviewPage />;
+  },
+
+  name: 'Logs, Metrics, APM, Uptime, and News Feed',
+  parameters: { core: coreWithNewsFeed },
+};
+
+export const NoData = () => {
+  registerDataHandler({
+    appName: 'apm',
+    fetchData: async () => emptyAPMResponse,
+    hasData: async () => ({ hasData: true, indices: sampleAPMIndices }),
+  });
+  registerDataHandler({
+    appName: 'infra_logs',
+    fetchData: async () => emptyLogsResponse,
+    hasData: async () => ({ hasData: true, indices: 'test-index' }),
+  });
+  registerDataHandler({
+    appName: 'infra_metrics',
+    fetchData: async () => emptyMetricsResponse,
+    hasData: async () => ({ hasData: true, indices: 'metric-*' }),
+  });
+  registerDataHandler({
+    appName: 'uptime',
+    fetchData: async () => emptyUptimeResponse,
+    hasData: async () => ({ hasData: true, indices: 'heartbeat-*,synthetics-*' }),
+  });
+
+  return <OverviewPage />;
+};
+
+export const FetchDataWithError = {
+  render: () => {
+    registerDataHandler({
+      appName: 'apm',
+      fetchData: async () => {
+        throw new Error('Error fetching APM data');
+      },
+      hasData: async () => ({ hasData: true, indices: sampleAPMIndices }),
+    });
+    registerDataHandler({
+      appName: 'infra_logs',
+      fetchData: async () => {
+        throw new Error('Error fetching Logs data');
+      },
+      hasData: async () => ({ hasData: true, indices: 'test-index' }),
+    });
+    registerDataHandler({
+      appName: 'infra_metrics',
+      fetchData: async () => {
+        throw new Error('Error fetching Metric data');
+      },
+      hasData: async () => ({ hasData: true, indices: 'metric-*' }),
+    });
+    registerDataHandler({
+      appName: 'uptime',
+      fetchData: async () => {
+        throw new Error('Error fetching Uptime data');
+      },
+      hasData: async () => ({ hasData: true, indices: 'heartbeat-*,synthetics-*' }),
+    });
+    return <OverviewPage />;
+  },
+
+  name: 'Fetch Data with Error',
+  parameters: { core: coreAlertsThrowsError },
+};
+
+export const HasDataWithErrorAndAlerts = {
+  render: () => {
+    registerDataHandler({
+      appName: 'apm',
+      fetchData: fetchApmData,
+      // @ts-ignore throws an error instead
+      hasData: async () => {
+        throw new Error('Error has data');
+      },
+    });
+    registerDataHandler({
+      appName: 'infra_logs',
+      fetchData: fetchLogsData,
+      // @ts-ignore throws an error instead
+      hasData: async () => {
+        throw new Error('Error has data');
+      },
+    });
+    registerDataHandler({
+      appName: 'infra_metrics',
+      fetchData: fetchMetricsData,
+      // @ts-ignore throws an error instead
+      hasData: async () => {
+        throw new Error('Error has data');
+      },
+    });
+    registerDataHandler({
+      appName: 'uptime',
+      fetchData: fetchUptimeData,
+      // @ts-ignore throws an error instead
+      hasData: async () => {
+        throw new Error('Error has data');
+      },
+    });
+    return <OverviewPage />;
+  },
+
+  name: 'hasData with Error and Alerts',
+  parameters: { core: coreWithAlerts },
+};
+
+export const HasDataWithError = {
+  render: () => {
+    registerDataHandler({
+      appName: 'apm',
+      fetchData: fetchApmData,
+      // @ts-ignore throws an error instead
+      hasData: async () => {
+        throw new Error('Error has data');
+      },
+    });
+    registerDataHandler({
+      appName: 'infra_logs',
+      fetchData: fetchLogsData,
+      // @ts-ignore throws an error instead
+      hasData: async () => {
+        throw new Error('Error has data');
+      },
+    });
+    registerDataHandler({
+      appName: 'infra_metrics',
+      fetchData: fetchMetricsData,
+      // @ts-ignore throws an error instead
+      hasData: async () => {
+        throw new Error('Error has data');
+      },
+    });
+    registerDataHandler({
+      appName: 'uptime',
+      fetchData: fetchUptimeData,
+      // @ts-ignore throws an error instead
+      hasData: async () => {
+        throw new Error('Error has data');
+      },
+    });
+
+    return <OverviewPage />;
+  },
+
+  name: 'hasData with Error',
+};

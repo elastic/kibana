@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { fold, map } from 'fp-ts/lib/Either';
-import { identity } from 'fp-ts/lib/function';
-import { pipe } from 'fp-ts/lib/pipeable';
+import { fold, map } from 'fp-ts/Either';
+import { identity } from 'fp-ts/function';
+import { pipe } from 'fp-ts/pipeable';
 import { failure } from 'io-ts/lib/PathReporter';
 import { inRange } from 'lodash';
 import type { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';

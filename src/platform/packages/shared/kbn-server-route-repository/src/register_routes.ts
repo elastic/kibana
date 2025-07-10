@@ -42,11 +42,13 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
   repository,
   logger,
   dependencies,
+  runDevModeChecks,
 }: {
   core: CoreSetup;
   repository: Record<string, ServerRoute<string, RouteParamsRT | undefined, any, any, any>>;
   logger: Logger;
   dependencies: TDependencies;
+  runDevModeChecks: boolean;
 }) {
   const routes = Object.values(repository);
 
@@ -96,6 +98,12 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
         }
 
         if (isKibanaResponse(result)) {
+          if (result.status >= 500) {
+            logger.error(() => `HTTP ${result.status}: ${JSON.stringify(result.payload)}`);
+          } else if (result.status >= 400) {
+            logger.debug(() => `HTTP ${result.status}: ${JSON.stringify(result.payload)}`);
+          }
+
           return result;
         } else if (isObservable(result)) {
           const controller = new AbortController();
@@ -113,8 +121,6 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
           return response.ok({ body });
         }
       } catch (error) {
-        logger.error(error);
-
         const opts = {
           statusCode: 500,
           body: {
@@ -122,6 +128,12 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
             attributes: {
               data: {},
             },
+          } as {
+            message: string | undefined;
+            attributes: {
+              data: unknown;
+              caused_by?: Array<{ message: string | undefined }>;
+            };
           },
         };
 
@@ -132,6 +144,18 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
         if (isBoom(error)) {
           opts.statusCode = error.output.statusCode;
           opts.body.attributes.data = error?.data;
+        }
+
+        if (error instanceof AggregateError) {
+          opts.body.attributes.caused_by = error.errors.map((innerError) => {
+            return { message: innerError.message };
+          });
+        }
+
+        if (opts.statusCode >= 500) {
+          logger.error(() => error);
+        } else {
+          logger.debug(() => error);
         }
 
         return response.custom(opts);
@@ -169,7 +193,8 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
       router.versioned[method]({
         path: pathname,
         access,
-        // @ts-expect-error we are essentially calling multiple methods at the same type so TS gets confused
+        summary: options.summary,
+        description: options.description,
         options: omit(options, 'access', 'description', 'summary', 'deprecated', 'discontinued'),
         security,
       }).addVersion(

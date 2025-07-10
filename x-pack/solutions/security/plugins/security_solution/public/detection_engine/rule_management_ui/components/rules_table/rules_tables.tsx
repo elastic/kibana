@@ -5,15 +5,21 @@
  * 2.0.
  */
 
-import { EuiBasicTable, EuiConfirmModal, EuiEmptyPrompt, EuiProgress } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiConfirmModal,
+  EuiEmptyPrompt,
+  EuiProgress,
+  EuiSpacer,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useMemo, useRef } from 'react';
 import { Loader } from '../../../../common/components/loader';
 import { useBoolState } from '../../../../common/hooks/use_bool_state';
-import { PrePackagedRulesPrompt } from '../../../../detections/components/rules/pre_packaged_rules/load_empty_prompt';
+import { PrePackagedRulesPrompt } from '../pre_packaged_rules/load_empty_prompt';
 import type { Rule } from '../../../rule_management/logic';
-import * as i18n from '../../../../detections/pages/detection_engine/rules/translations';
-import type { EuiBasicTableOnChange } from '../../../../detections/pages/detection_engine/rules/types';
+import * as i18n from '../../../common/translations';
+import type { EuiBasicTableOnChange } from '../../../common/types';
 import { BulkActionDryRunConfirmation } from './bulk_actions/bulk_action_dry_run_confirmation';
 import { BulkEditFlyout } from './bulk_actions/bulk_edit_flyout';
 import { useBulkActions } from './bulk_actions/use_bulk_actions';
@@ -38,6 +44,13 @@ import { useIsUpgradingSecurityPackages } from '../../../rule_management/logic/u
 import { useManualRuleRunConfirmation } from '../../../rule_gaps/components/manual_rule_run/use_manual_rule_run_confirmation';
 import { ManualRuleRunModal } from '../../../rule_gaps/components/manual_rule_run';
 import { BulkManualRuleRunLimitErrorModal } from './bulk_actions/bulk_manual_rule_run_limit_error_modal';
+import { RulesWithGapsOverviewPanel } from '../../../rule_gaps/components/rules_with_gaps_overview_panel';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { BulkEditDeleteAlertSuppressionConfirmation } from './bulk_actions/bulk_edit_delete_alert_suprression_confirmation';
+import { BulkActionEditTypeEnum } from '../../../../../common/api/detection_engine/rule_management';
+import { BulkFillRuleGapsModal } from '../../../rule_gaps/components/bulk_fill_rule_gaps';
+import { useBulkFillRuleGapsConfirmation } from '../../../rule_gaps/components/bulk_fill_rule_gaps/use_bulk_fill_rule_gaps_confirmation';
+import { BulkFillRuleGapsRuleLimitErrorModal } from './bulk_actions/bulk_schedule_gap_fills_rule_limit_error_modal';
 
 const INITIAL_SORT_FIELD = 'enabled';
 
@@ -118,10 +131,23 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
     confirmManualRuleRun,
   } = useManualRuleRunConfirmation();
 
+  const {
+    isBulkFillRuleGapsConfirmationVisible,
+    showBulkFillRuleGapsConfirmation,
+    cancelBulkFillRuleGaps,
+    confirmBulkFillRuleGaps,
+  } = useBulkFillRuleGapsConfirmation();
+
   const [
     isManualRuleRunLimitErrorVisible,
     showManualRuleRunLimitError,
     hideManualRuleRunLimitError,
+  ] = useBoolState();
+
+  const [
+    isBulkFillRuleGapsRuleLimitErrorVisible,
+    showBulkFillRuleGapsRuleLimitError,
+    hideBulkFillRuleGapsRuleLimitError,
   ] = useBoolState();
 
   const {
@@ -140,7 +166,9 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
     showBulkActionConfirmation,
     showBulkDuplicateConfirmation,
     showManualRuleRunConfirmation,
+    showBulkFillRuleGapsConfirmation,
     showManualRuleRunLimitError,
+    showBulkFillRuleGapsRuleLimitError,
     completeBulkEditForm,
     executeBulkActionsDryRun,
   });
@@ -211,6 +239,8 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
     setSelectedRuleIds(!isAllSelected ? rules.map(({ id }) => id) : []);
   }, [rules, isAllSelected, setIsAllSelected, setSelectedRuleIds]);
 
+  const storeGapsInEventLogEnabled = useIsExperimentalFeatureEnabled('storeGapsInEventLogEnabled');
+
   const isTableEmpty =
     ruleManagementFilters?.rules_summary.custom_count === 0 &&
     ruleManagementFilters?.rules_summary.prebuilt_installed_count === 0;
@@ -265,7 +295,7 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
               : i18n.BULK_DELETE_CONFIRMATION_TITLE
           }
           onCancel={handleDeletionCancel}
-          onConfirm={handleDeletionConfirm}
+          onConfirm={() => handleDeletionConfirm()}
           confirmButtonText={i18n.DELETE_CONFIRMATION_CONFIRM}
           cancelButtonText={i18n.DELETE_CONFIRMATION_CANCEL}
           buttonColor="danger"
@@ -285,8 +315,18 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
       {isManualRuleRunConfirmationVisible && (
         <ManualRuleRunModal onCancel={cancelManualRuleRun} onConfirm={confirmManualRuleRun} />
       )}
+      {isBulkFillRuleGapsConfirmationVisible && (
+        <BulkFillRuleGapsModal
+          onCancel={cancelBulkFillRuleGaps}
+          onConfirm={confirmBulkFillRuleGaps}
+          rulesCount={selectedRuleIds.length}
+        />
+      )}
       {isManualRuleRunLimitErrorVisible && (
         <BulkManualRuleRunLimitErrorModal onClose={hideManualRuleRunLimitError} />
+      )}
+      {isBulkFillRuleGapsRuleLimitErrorVisible && (
+        <BulkFillRuleGapsRuleLimitErrorModal onClose={hideBulkFillRuleGapsRuleLimitError} />
       )}
       {isBulkActionConfirmationVisible && bulkAction && (
         <BulkActionDryRunConfirmation
@@ -303,16 +343,31 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
           rulesCount={rulesCount}
         />
       )}
-      {isBulkEditFlyoutVisible && bulkEditActionType !== undefined && (
-        <BulkEditFlyout
-          rulesCount={bulkActionsDryRunResult?.succeededRulesCount ?? 0}
-          editAction={bulkEditActionType}
-          onClose={handleBulkEditFormCancel}
-          onConfirm={handleBulkEditFormConfirm}
-        />
-      )}
+      {isBulkEditFlyoutVisible &&
+        bulkEditActionType &&
+        (bulkEditActionType === BulkActionEditTypeEnum.delete_alert_suppression ? (
+          <BulkEditDeleteAlertSuppressionConfirmation
+            rulesCount={bulkActionsDryRunResult?.succeededRulesCount ?? 0}
+            onCancel={handleBulkEditFormCancel}
+            onConfirm={handleBulkEditFormConfirm}
+          />
+        ) : (
+          <BulkEditFlyout
+            rulesCount={bulkActionsDryRunResult?.succeededRulesCount ?? 0}
+            editAction={bulkEditActionType}
+            onClose={handleBulkEditFormCancel}
+            onConfirm={handleBulkEditFormConfirm}
+          />
+        ))}
+
       {shouldShowRulesTable && (
         <>
+          {selectedTab === AllRulesTabs.monitoring && storeGapsInEventLogEnabled && (
+            <>
+              <RulesWithGapsOverviewPanel />
+              <EuiSpacer />
+            </>
+          )}
           <RulesTableFilters />
           <RulesTableUtilityBar
             canBulkEdit={hasPermissions}

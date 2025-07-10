@@ -5,71 +5,70 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiTab, EuiTabs, EuiText, EuiSpacer } from '@elastic/eui';
-import type { Filter, Query } from '@kbn/es-query';
-import React, { useMemo, useState } from 'react';
+import { AssistantSpaceIdProvider, ConnectorSelectorInline } from '@kbn/elastic-assistant';
+import type { AttackDiscoveryStats } from '@kbn/elastic-assistant-common';
+import { EuiForm, EuiFormRow, EuiTab, EuiTabs, EuiText, EuiSpacer } from '@elastic/eui';
+import type { FilterManager } from '@kbn/data-plugin/public';
+import { noop } from 'lodash/fp';
+import React, { useCallback, useMemo, useState } from 'react';
 
+import { ElasticLLMCostAwarenessTour } from '@kbn/elastic-assistant/impl/tour/elastic_llm';
+import { css } from '@emotion/react';
+import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '@kbn/elastic-assistant/impl/tour/const';
 import { AlertSelectionQuery } from './alert_selection_query';
 import { AlertSelectionRange } from './alert_selection_range';
+import { getMaxAlerts } from './helpers/get_max_alerts';
 import { getTabs } from './helpers/get_tabs';
 import * as i18n from './translations';
+import type { AlertsSelectionSettings } from '../types';
+import { useKibanaFeatureFlags } from '../../use_kibana_feature_flags';
+import { useSpaceId } from '../../../../common/hooks/use_space_id';
 
 interface Props {
   alertsPreviewStackBy0: string;
   alertSummaryStackBy0: string;
-  end: string;
-  filters: Filter[];
-  maxAlerts: number;
-  query: Query;
+  connectorId?: string | undefined;
+  filterManager: FilterManager;
+  onSettingsChanged?: (settings: AlertsSelectionSettings) => void;
+  settings: AlertsSelectionSettings;
   setAlertsPreviewStackBy0: React.Dispatch<React.SetStateAction<string>>;
   setAlertSummaryStackBy0: React.Dispatch<React.SetStateAction<string>>;
-  setEnd: React.Dispatch<React.SetStateAction<string>>;
-  setFilters: React.Dispatch<React.SetStateAction<Filter[]>>;
-  setMaxAlerts: React.Dispatch<React.SetStateAction<string>>;
-  setQuery: React.Dispatch<React.SetStateAction<Query>>;
-  setStart: React.Dispatch<React.SetStateAction<string>>;
-  start: string;
+  showConnectorSelector: boolean;
+  onConnectorIdSelected?: (connectorId: string) => void;
+  stats: AttackDiscoveryStats | null;
 }
 
 const AlertSelectionComponent: React.FC<Props> = ({
   alertsPreviewStackBy0,
   alertSummaryStackBy0,
-  end,
-  filters,
-  maxAlerts,
-  query,
+  filterManager,
+  onSettingsChanged,
+  settings,
   setAlertsPreviewStackBy0,
   setAlertSummaryStackBy0,
-  setEnd,
-  setFilters,
-  setMaxAlerts,
-  setQuery,
-  setStart,
-  start,
+  showConnectorSelector,
+  connectorId,
+  onConnectorIdSelected,
+  stats,
 }) => {
+  const { attackDiscoveryAlertsEnabled } = useKibanaFeatureFlags();
+  const spaceId = useSpaceId();
+
   const tabs = useMemo(
     () =>
       getTabs({
         alertsPreviewStackBy0,
         alertSummaryStackBy0,
-        end,
-        filters,
-        maxAlerts,
-        query,
+        settings,
         setAlertsPreviewStackBy0,
         setAlertSummaryStackBy0,
-        start,
       }),
     [
       alertsPreviewStackBy0,
       alertSummaryStackBy0,
-      end,
-      filters,
-      maxAlerts,
-      query,
+      settings,
       setAlertsPreviewStackBy0,
       setAlertSummaryStackBy0,
-      start,
     ]
   );
 
@@ -80,44 +79,71 @@ const AlertSelectionComponent: React.FC<Props> = ({
     [selectedTabId, tabs]
   );
 
+  const onMaxAlertsChanged = useCallback(
+    (value: string) => {
+      const maxAlerts = getMaxAlerts(value);
+      onSettingsChanged?.({
+        ...settings,
+        size: maxAlerts,
+      });
+    },
+    [onSettingsChanged, settings]
+  );
+
   return (
-    <EuiFlexGroup data-test-subj="alertSelection" direction="column" gutterSize="none">
-      <EuiFlexItem grow={false}>
-        <EuiText data-test-subj="customizeAlerts" size="s">
-          <p>{i18n.CUSTOMIZE_THE_ALERTS}</p>
-        </EuiText>
-      </EuiFlexItem>
+    <EuiForm data-test-subj="alertSelection" fullWidth>
+      {showConnectorSelector && spaceId && (
+        <AssistantSpaceIdProvider spaceId={spaceId}>
+          <EuiSpacer size="s" />
 
-      <EuiFlexItem grow={false}>
-        <EuiSpacer size="m" />
-      </EuiFlexItem>
+          <EuiText data-test-subj="customizeAlerts" size="s">
+            <p>{i18n.CUSTOMIZE_THE_CONNECTOR_AND_ALERTS}</p>
+          </EuiText>
 
-      <EuiFlexItem grow={false}>
+          <EuiSpacer size="m" />
+
+          <ElasticLLMCostAwarenessTour
+            isDisabled={false}
+            wrapper={false}
+            selectedConnectorId={connectorId}
+            storageKey={NEW_FEATURES_TOUR_STORAGE_KEYS.ELASTIC_LLM_USAGE_ATTACK_DISCOVERY_FLYOUT}
+          >
+            <EuiFormRow
+              label={i18n.CONNECTOR}
+              css={css`
+                flex-grow: 1;
+              `}
+            >
+              <ConnectorSelectorInline
+                fullWidth={true}
+                onConnectorSelected={noop}
+                onConnectorIdSelected={onConnectorIdSelected}
+                selectedConnectorId={connectorId}
+                stats={attackDiscoveryAlertsEnabled ? undefined : stats}
+              />
+            </EuiFormRow>
+          </ElasticLLMCostAwarenessTour>
+          <EuiSpacer size="m" />
+        </AssistantSpaceIdProvider>
+      )}
+
+      <EuiFormRow label={i18n.CUSTOM_QUERY}>
         <AlertSelectionQuery
-          end={end}
-          filters={filters}
-          query={query}
-          setEnd={setEnd}
-          setFilters={setFilters}
-          setQuery={setQuery}
-          setStart={setStart}
-          start={start}
+          filterManager={filterManager}
+          settings={settings}
+          onSettingsChanged={onSettingsChanged}
         />
-      </EuiFlexItem>
+      </EuiFormRow>
 
-      <EuiFlexItem grow={false}>
-        <EuiSpacer />
-      </EuiFlexItem>
+      <EuiSpacer size={'m'} />
 
-      <EuiFlexItem grow={false}>
-        <AlertSelectionRange maxAlerts={maxAlerts} setMaxAlerts={setMaxAlerts} />
-      </EuiFlexItem>
+      <EuiFormRow label={i18n.SET_NUMBER_OF_ALERTS_TO_ANALYZE}>
+        <AlertSelectionRange maxAlerts={settings.size} setMaxAlerts={onMaxAlertsChanged} />
+      </EuiFormRow>
 
-      <EuiFlexItem grow={false}>
-        <EuiSpacer />
-      </EuiFlexItem>
+      <EuiSpacer size={'m'} />
 
-      <EuiTabs data-test-subj="tabs">
+      <EuiTabs data-test-subj="tabs" size="s">
         {tabs.map((tab) => (
           <EuiTab
             key={tab.id}
@@ -129,7 +155,7 @@ const AlertSelectionComponent: React.FC<Props> = ({
         ))}
       </EuiTabs>
       {selectedTabContent}
-    </EuiFlexGroup>
+    </EuiForm>
   );
 };
 

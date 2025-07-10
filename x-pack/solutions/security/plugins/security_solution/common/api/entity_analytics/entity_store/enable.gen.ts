@@ -16,7 +16,7 @@
 
 import { z } from '@kbn/zod';
 
-import { IndexPattern, EngineDescriptor } from './common.gen';
+import { IndexPattern, EntityType, Interval, EngineDescriptor } from './common.gen';
 
 export type InitEntityStoreRequestBody = z.infer<typeof InitEntityStoreRequestBody>;
 export const InitEntityStoreRequestBody = z.object({
@@ -26,6 +26,52 @@ export const InitEntityStoreRequestBody = z.object({
   fieldHistoryLength: z.number().int().optional().default(10),
   indexPattern: IndexPattern.optional(),
   filter: z.string().optional(),
+  entityTypes: z.array(EntityType).optional(),
+  enrichPolicyExecutionInterval: Interval.optional(),
+  /**
+   * The field to use as the timestamp.
+   */
+  timestampField: z.string().optional().default('@timestamp'),
+  /**
+   * The amount of time the transform looks back to calculate the aggregations.
+   */
+  lookbackPeriod: z
+    .string()
+    .regex(/[smdh]$/)
+    .optional()
+    .default('3h'),
+  /**
+   * The timeout for initializing the aggregating transform.
+   */
+  timeout: z
+    .string()
+    .regex(/[smdh]$/)
+    .optional()
+    .default('180s'),
+  /**
+   * The frequency at which the transform will run.
+   */
+  frequency: z
+    .string()
+    .regex(/[smdh]$/)
+    .optional()
+    .default('1m'),
+  /**
+   * The delay before the transform will run.
+   */
+  delay: z
+    .string()
+    .regex(/[smdh]$/)
+    .optional()
+    .default('1m'),
+  /**
+   * The number of documents per second to process.
+   */
+  docsPerSecond: z.number().int().optional().default(-1),
+  /**
+   * The initial page size to use for the composite aggregation of each checkpoint.
+   */
+  maxPageSearchSize: z.number().int().optional().default(500),
 });
 export type InitEntityStoreRequestBodyInput = z.input<typeof InitEntityStoreRequestBody>;
 

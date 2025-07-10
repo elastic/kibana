@@ -15,27 +15,33 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { ConnectorSelectorInline, useAssistantContext } from '@kbn/elastic-assistant';
-import type { AttackDiscoveryStats } from '@kbn/elastic-assistant-common';
+import {
+  AssistantSpaceIdProvider,
+  ConnectorSelectorInline,
+  useAssistantContext,
+} from '@kbn/elastic-assistant';
+import { type AttackDiscoveryStats } from '@kbn/elastic-assistant-common';
 import { noop } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { SettingsModal } from './settings_modal';
+import { ElasticLLMCostAwarenessTour } from '@kbn/elastic-assistant/impl/tour/elastic_llm';
+import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '@kbn/elastic-assistant/impl/tour/const';
 import { StatusBell } from './status_bell';
 import * as i18n from './translations';
+import { useKibanaFeatureFlags } from '../use_kibana_feature_flags';
+import { useSpaceId } from '../../../common/hooks/use_space_id';
 
 interface Props {
   connectorId: string | undefined;
   connectorsAreConfigured: boolean;
   isLoading: boolean;
   isDisabledActions: boolean;
-  localStorageAttackDiscoveryMaxAlerts: string | undefined;
   onGenerate: () => void;
   onCancel: () => void;
   onConnectorIdSelected: (connectorId: string) => void;
   openFlyout: () => void;
-  setLocalStorageAttackDiscoveryMaxAlerts: React.Dispatch<React.SetStateAction<string | undefined>>;
   stats: AttackDiscoveryStats | null;
+  showFlyout: boolean;
 }
 
 const HeaderComponent: React.FC<Props> = ({
@@ -43,22 +49,48 @@ const HeaderComponent: React.FC<Props> = ({
   connectorsAreConfigured,
   isLoading,
   isDisabledActions,
-  localStorageAttackDiscoveryMaxAlerts,
   onGenerate,
   onConnectorIdSelected,
   onCancel,
   openFlyout,
-  setLocalStorageAttackDiscoveryMaxAlerts,
   stats,
+  showFlyout,
 }) => {
-  const {
-    assistantFeatures: { attackDiscoveryAlertFiltering },
-  } = useAssistantContext();
-
   const { euiTheme } = useEuiTheme();
   const disabled = connectorId == null;
-
   const [didCancel, setDidCancel] = useState(false);
+  const { inferenceEnabled } = useAssistantContext();
+  const { attackDiscoveryAlertsEnabled } = useKibanaFeatureFlags();
+  const spaceId = useSpaceId();
+
+  const [isEISCostTourDisabled, setIsEISCostTourDisabled] = useState<boolean>(
+    attackDiscoveryAlertsEnabled ||
+      !connectorsAreConfigured ||
+      !spaceId ||
+      !inferenceEnabled ||
+      showFlyout
+  );
+
+  useEffect(() => {
+    if (
+      attackDiscoveryAlertsEnabled ||
+      !connectorsAreConfigured ||
+      !spaceId ||
+      !inferenceEnabled ||
+      showFlyout
+    ) {
+      setIsEISCostTourDisabled(true);
+    } else {
+      setIsEISCostTourDisabled(false);
+    }
+  }, [
+    attackDiscoveryAlertsEnabled,
+    connectorsAreConfigured,
+    inferenceEnabled,
+    isEISCostTourDisabled,
+    showFlyout,
+    spaceId,
+  ]);
 
   const handleCancel = useCallback(() => {
     setDidCancel(true);
@@ -71,73 +103,98 @@ const HeaderComponent: React.FC<Props> = ({
 
   const buttonProps = useMemo(
     () =>
-      isLoading
+      isLoading && !attackDiscoveryAlertsEnabled
         ? {
             dataTestSubj: 'cancel',
             color: 'danger' as EuiButtonProps['color'],
+            fill: attackDiscoveryAlertsEnabled,
             onClick: handleCancel,
             text: i18n.CANCEL,
           }
         : {
-            dataTestSubj: 'generate',
             color: 'primary' as EuiButtonProps['color'],
+            dataTestSubj: 'generate',
+            fill: attackDiscoveryAlertsEnabled,
             onClick: onGenerate,
             text: i18n.GENERATE,
           },
-    [isLoading, handleCancel, onGenerate]
+    [attackDiscoveryAlertsEnabled, handleCancel, isLoading, onGenerate]
   );
 
   return (
     <EuiFlexGroup
       alignItems="center"
       css={css`
-        margin-top: ${euiTheme.size.m};
+        margin-top: ${attackDiscoveryAlertsEnabled ? 0 : euiTheme.size.m};
       `}
       data-test-subj="header"
       gutterSize="none"
+      responsive={false}
     >
-      <StatusBell stats={stats} />
-      {connectorsAreConfigured && (
-        <EuiFlexItem
-          css={css`
-            margin-left: ${euiTheme.size.s};
-            margin-right: ${euiTheme.size.s};
-          `}
-          grow={false}
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup
+          alignItems="center"
+          direction={attackDiscoveryAlertsEnabled ? 'rowReverse' : 'row'}
+          gutterSize="none"
+          responsive={false}
+          wrap={false}
         >
-          <ConnectorSelectorInline
-            onConnectorSelected={noop}
-            onConnectorIdSelected={onConnectorIdSelected}
-            selectedConnectorId={connectorId}
-            stats={stats}
-          />
-        </EuiFlexItem>
-      )}
+          <EuiFlexItem grow={false}>
+            {!attackDiscoveryAlertsEnabled && connectorsAreConfigured && (
+              <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false} wrap={false}>
+                <EuiFlexItem
+                  data-test-subj="statusBell"
+                  grow={false}
+                  css={css`
+                    margin-left: ${euiTheme.size.s};
+                    margin-right: ${euiTheme.size.s};
+                  `}
+                >
+                  <StatusBell stats={stats} />
+                </EuiFlexItem>
 
-      <EuiFlexItem
-        css={css`
-          margin-right: ${euiTheme.size.m};
-        `}
-        grow={false}
-      >
-        {attackDiscoveryAlertFiltering ? (
-          <EuiToolTip content={i18n.SETTINGS} data-test-subj="openAlertSelectionToolTip">
-            <EuiButtonIcon
-              aria-label={i18n.SETTINGS}
-              color="text"
-              data-test-subj="openAlertSelection"
-              iconType="gear"
-              onClick={openFlyout}
-            />
-          </EuiToolTip>
-        ) : (
-          <SettingsModal
-            connectorId={connectorId}
-            isLoading={isLoading}
-            localStorageAttackDiscoveryMaxAlerts={localStorageAttackDiscoveryMaxAlerts}
-            setLocalStorageAttackDiscoveryMaxAlerts={setLocalStorageAttackDiscoveryMaxAlerts}
-          />
-        )}
+                <EuiFlexItem>
+                  {spaceId && (
+                    <AssistantSpaceIdProvider spaceId={spaceId}>
+                      <ElasticLLMCostAwarenessTour
+                        isDisabled={isEISCostTourDisabled}
+                        selectedConnectorId={connectorId}
+                        zIndex={999} // Should lower than the flyout
+                        storageKey={
+                          NEW_FEATURES_TOUR_STORAGE_KEYS.ELASTIC_LLM_USAGE_ATTACK_DISCOVERY
+                        }
+                      >
+                        <ConnectorSelectorInline
+                          onConnectorSelected={noop}
+                          onConnectorIdSelected={onConnectorIdSelected}
+                          selectedConnectorId={connectorId}
+                          stats={stats}
+                        />
+                      </ElasticLLMCostAwarenessTour>
+                    </AssistantSpaceIdProvider>
+                  )}
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            )}
+          </EuiFlexItem>
+
+          <EuiFlexItem
+            css={css`
+              margin-right: ${euiTheme.size.m};
+            `}
+            grow={false}
+          >
+            <EuiToolTip content={i18n.SETTINGS} data-test-subj="openAlertSelectionToolTip">
+              <EuiButtonIcon
+                aria-label={i18n.SETTINGS}
+                color="text"
+                data-test-subj="openAlertSelection"
+                iconType="gear"
+                onClick={openFlyout}
+              />
+            </EuiToolTip>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
@@ -146,11 +203,12 @@ const HeaderComponent: React.FC<Props> = ({
           data-test-subj="generateTooltip"
         >
           <EuiButton
-            data-test-subj={buttonProps.dataTestSubj}
-            size="s"
-            disabled={disabled || didCancel || isDisabledActions}
             color={buttonProps.color}
+            data-test-subj={buttonProps.dataTestSubj}
+            disabled={disabled || didCancel || isDisabledActions}
+            fill={buttonProps.fill}
             onClick={buttonProps.onClick}
+            size={attackDiscoveryAlertsEnabled ? 'm' : 's'}
           >
             {buttonProps.text}
           </EuiButton>

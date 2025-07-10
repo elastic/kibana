@@ -1,0 +1,8 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/sample-log-parser",
+  "owner": "@elastic/streams-program-team",
+  "group": "platform",
+  "visibility": "shared",
+  "devOnly": true
+}

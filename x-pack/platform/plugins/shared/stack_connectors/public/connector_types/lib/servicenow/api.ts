@@ -5,18 +5,16 @@
  * 2.0.
  */
 
-import { HttpSetup } from '@kbn/core/public';
+import type { HttpSetup, IHttpFetchError } from '@kbn/core/public';
 
-import {
-  ActionTypeExecutorResult,
-  INTERNAL_BASE_ACTION_API_PATH,
-  BASE_ACTION_API_PATH,
-} from '@kbn/actions-plugin/common';
+import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
+import { INTERNAL_BASE_ACTION_API_PATH, BASE_ACTION_API_PATH } from '@kbn/actions-plugin/common';
 import { snExternalServiceConfig } from '../../../../common/servicenow_config';
 import { API_INFO_ERROR } from './translations';
-import { AppInfo, RESTApiError, ServiceNowActionConnector } from './types';
-import { ConnectorExecutorResult, rewriteResponseToCamelCase } from '../rewrite_response_body';
-import { Choice } from './types';
+import type { AppInfo, RESTApiError, ServiceNowActionConnector } from './types';
+import type { ConnectorExecutorResult } from '../rewrite_response_body';
+import { rewriteResponseToCamelCase } from '../rewrite_response_body';
+import type { Choice } from './types';
 
 export async function getChoices({
   http,
@@ -59,37 +57,15 @@ export async function getAppInfo({
   actionTypeId: string;
 }): Promise<AppInfo | RESTApiError> {
   const {
-    secrets: { username, password, clientSecret, privateKey, privateKeyPassword },
-    config: { isOAuth, apiUrl, clientId, userIdentifierValue, jwtKeyId },
+    secrets: { username, password },
+    config: { isOAuth, apiUrl },
   } = connector;
 
   const urlWithoutTrailingSlash = apiUrl.endsWith('/') ? apiUrl.slice(0, -1) : apiUrl;
   let authHeader = 'Basic ' + btoa(username + ':' + password);
 
   if (isOAuth) {
-    const tokenResponse = await http.post<{ accessToken: string }>(
-      `${INTERNAL_BASE_ACTION_API_PATH}/connector/_oauth_access_token`,
-      {
-        body: JSON.stringify({
-          type: 'jwt',
-          options: {
-            tokenUrl: `${urlWithoutTrailingSlash}/oauth_token.do`,
-            config: {
-              clientId,
-              userIdentifierValue,
-              jwtKeyId,
-            },
-            secrets: {
-              clientSecret,
-              privateKey,
-              ...(privateKeyPassword && { privateKeyPassword }),
-            },
-          },
-        }),
-      }
-    );
-
-    const { accessToken } = tokenResponse;
+    const { accessToken } = await getOAuthToken({ http, signal, connector });
     authHeader = accessToken;
   }
 
@@ -111,4 +87,58 @@ export async function getAppInfo({
   return {
     ...data.result,
   };
+}
+
+export async function getOAuthToken({
+  http,
+  signal,
+  connector,
+}: {
+  http: HttpSetup;
+  signal: AbortSignal;
+  connector: ServiceNowActionConnector;
+}): Promise<{ accessToken: string }> {
+  const {
+    secrets: { clientSecret, privateKey, privateKeyPassword },
+    config: { apiUrl, clientId, userIdentifierValue, jwtKeyId },
+  } = connector;
+
+  const urlWithoutTrailingSlash = apiUrl.endsWith('/') ? apiUrl.slice(0, -1) : apiUrl;
+
+  try {
+    const res = await http.post<{ accessToken: string }>(
+      `${INTERNAL_BASE_ACTION_API_PATH}/connector/_oauth_access_token`,
+      {
+        signal,
+        body: JSON.stringify({
+          type: 'jwt',
+          options: {
+            tokenUrl: `${urlWithoutTrailingSlash}/oauth_token.do`,
+            config: {
+              clientId,
+              userIdentifierValue,
+              jwtKeyId,
+            },
+            secrets: {
+              clientSecret,
+              privateKey,
+              ...(privateKeyPassword && { privateKeyPassword }),
+            },
+          },
+        }),
+      }
+    );
+
+    return res;
+  } catch (error) {
+    const err = error as IHttpFetchError<{ statusCode?: number; error?: string; message?: string }>;
+    const errorMessage = err.body?.message ?? err.message;
+    const hasBodyError = err.body?.statusCode && err.body?.error;
+
+    const finalMessage = hasBodyError
+      ? `${err.body.statusCode} ${err.body.error}: ${errorMessage}`
+      : errorMessage;
+
+    throw new Error(finalMessage);
+  }
 }

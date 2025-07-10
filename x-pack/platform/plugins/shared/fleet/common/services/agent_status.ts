@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ActiveAgentStatuses } from '../constants';
 import type { Agent, AgentStatus, FleetServerAgent } from '../types';
 
 export function getPreviousAgentStatusForOfflineAgents(
@@ -36,6 +37,12 @@ export function getPreviousAgentStatusForOfflineAgents(
 export function buildKueryForUnenrolledAgents(): string {
   return 'status:unenrolled';
 }
+export function buildKueryForUninstalledAgents(): string {
+  return 'status:uninstalled';
+}
+export function buildKueryForOrphanedAgents(): string {
+  return 'status:orphaned';
+}
 
 export function buildKueryForOnlineAgents(): string {
   return 'status:online';
@@ -57,13 +64,19 @@ export function buildKueryForInactiveAgents() {
   return 'status:inactive';
 }
 
+export function buildKueryForActiveAgents() {
+  return `(${ActiveAgentStatuses.map((s) => `status:${s}`).join(' or ')})`;
+}
+
 export const AGENT_UPDATING_TIMEOUT_HOURS = 2;
 
 export function isStuckInUpdating(agent: Agent): boolean {
   const hasTimedOut = (upgradeStartedAt: string) =>
     Date.now() - Date.parse(upgradeStartedAt) > AGENT_UPDATING_TIMEOUT_HOURS * 60 * 60 * 1000;
   return (
-    (agent.status !== 'offline' && agent.active && isAgentInFailedUpgradeState(agent)) ||
+    (agent.status !== 'offline' &&
+      agent.active &&
+      isAgentInFailedUpgradeState(agent.upgrade_details)) ||
     (agent.status === 'updating' &&
       !!agent.upgrade_started_at &&
       !agent.upgraded_at &&
@@ -72,6 +85,6 @@ export function isStuckInUpdating(agent: Agent): boolean {
   );
 }
 
-export function isAgentInFailedUpgradeState(agent: Agent): boolean {
-  return agent.upgrade_details?.state === 'UPG_FAILED';
+export function isAgentInFailedUpgradeState(upgradeDetails?: Agent['upgrade_details']): boolean {
+  return upgradeDetails?.state === 'UPG_FAILED';
 }

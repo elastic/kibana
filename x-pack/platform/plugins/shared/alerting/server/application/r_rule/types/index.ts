@@ -6,4 +6,3 @@
  */
 
 export type { RRule } from './r_rule';
-export type { RRuleRequest } from './r_rule_request';

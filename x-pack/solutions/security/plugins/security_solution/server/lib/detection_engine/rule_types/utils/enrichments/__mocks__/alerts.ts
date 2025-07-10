@@ -51,7 +51,7 @@ import {
 } from '@kbn/rule-data-utils';
 
 import type { EventsForEnrichment } from '../types';
-import type { BaseFieldsLatest } from '../../../../../../../common/api/detection_engine/model/alerts';
+import type { DetectionAlertLatest } from '../../../../../../../common/api/detection_engine/model/alerts';
 
 import {
   ALERT_ANCESTORS,
@@ -78,12 +78,15 @@ import {
   ALERT_HOST_RISK_SCORE_CALCULATED_SCORE_NORM,
   ALERT_USER_RISK_SCORE_CALCULATED_LEVEL,
   ALERT_USER_RISK_SCORE_CALCULATED_SCORE_NORM,
+  ALERT_SERVICE_CRITICALITY,
+  ALERT_SERVICE_RISK_SCORE_CALCULATED_LEVEL,
+  ALERT_SERVICE_RISK_SCORE_CALCULATED_SCORE_NORM,
 } from '../../../../../../../common/field_maps/field_names';
 
 export const createAlert = (
   someUuid: string = '1',
   data?: object
-): EventsForEnrichment<BaseFieldsLatest> => ({
+): EventsForEnrichment<DetectionAlertLatest> => ({
   _id: someUuid,
   _source: {
     someKey: 'someValue',
@@ -214,6 +217,9 @@ export const createAlert = (
     [ALERT_USER_RISK_SCORE_CALCULATED_SCORE_NORM]: undefined,
     [ALERT_INTENDED_TIMESTAMP]: '2020-04-20T21:27:45+0000',
     [ALERT_RULE_EXECUTION_TYPE]: 'scheduled',
+    [ALERT_SERVICE_CRITICALITY]: undefined,
+    [ALERT_SERVICE_RISK_SCORE_CALCULATED_LEVEL]: undefined,
+    [ALERT_SERVICE_RISK_SCORE_CALCULATED_SCORE_NORM]: undefined,
     ...data,
   },
 });

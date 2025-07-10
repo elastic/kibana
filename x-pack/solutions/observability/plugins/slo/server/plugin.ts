@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import {
   CoreSetup,
   CoreStart,
@@ -15,12 +16,13 @@ import {
   PluginInitializerContext,
   SavedObjectsClient,
 } from '@kbn/core/server';
-import { AlertsLocatorDefinition, sloFeatureId } from '@kbn/observability-plugin/common';
-import { SLO_BURN_RATE_RULE_TYPE_ID } from '@kbn/rule-data-utils';
-import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { i18n } from '@kbn/i18n';
+import { AlertsLocatorDefinition, sloFeatureId } from '@kbn/observability-plugin/common';
+import { SLO_BURN_RATE_RULE_TYPE_ID, DEPRECATED_ALERTING_CONSUMERS } from '@kbn/rule-data-utils';
 import { mapValues } from 'lodash';
+import { LockAcquisitionError, LockManagerService } from '@kbn/lock-manager';
+import { getSloClientWithRequest } from './client';
 import { registerSloUsageCollector } from './lib/collectors/register';
 import { registerBurnRateRule } from './lib/rules/register_burn_rate_rule';
 import { getSloServerRouteRepository } from './routes/get_slo_server_route_repository';
@@ -28,8 +30,17 @@ import { registerServerRoutes } from './routes/register_routes';
 import { SLORoutesDependencies } from './routes/types';
 import { SO_SLO_TYPE, slo } from './saved_objects';
 import { SO_SLO_SETTINGS_TYPE, sloSettings } from './saved_objects/slo_settings';
-import { DefaultResourceInstaller, DefaultSLOInstaller } from './services';
+import {
+  DefaultResourceInstaller,
+  DefaultSummaryTransformManager,
+  DefaultTransformManager,
+  KibanaSavedObjectsSLORepository,
+} from './services';
+import { DefaultSummaryTransformGenerator } from './services/summary_transform_generator/summary_transform_generator';
+import { BulkDeleteTask } from './services/tasks/bulk_delete/bulk_delete_task';
 import { SloOrphanSummaryCleanupTask } from './services/tasks/orphan_summary_cleanup_task';
+import { TempSummaryCleanupTask } from './services/tasks/temp_summary_cleanup_task';
+import { createTransformGenerators } from './services/transform_generators';
 import type {
   SLOConfig,
   SLOPluginSetupDependencies,
@@ -37,7 +48,7 @@ import type {
   SLOServerSetup,
   SLOServerStart,
 } from './types';
-import { getSloClientWithRequest } from './client';
+import { LOCK_ID_RESOURCE_INSTALLER } from '../common/constants';
 
 const sloRuleTypes = [SLO_BURN_RATE_RULE_TYPE_ID];
 
@@ -48,25 +59,29 @@ export class SLOPlugin
   private readonly logger: Logger;
   private readonly config: SLOConfig;
   private readonly isServerless: boolean;
+  private readonly isDev: boolean;
   private sloOrphanCleanupTask?: SloOrphanSummaryCleanupTask;
+  private tempSummaryCleanupTask?: TempSummaryCleanupTask;
 
   constructor(private readonly initContext: PluginInitializerContext) {
     this.logger = this.initContext.logger.get();
     this.config = this.initContext.config.get<SLOConfig>();
     this.isServerless = this.initContext.env.packageInfo.buildFlavor === 'serverless';
+    this.isDev = this.initContext.env.mode.dev;
   }
 
   public setup(
     core: CoreSetup<SLOPluginStartDependencies, SLOServerStart>,
     plugins: SLOPluginSetupDependencies
   ): SLOServerSetup {
+    const lockManager = new LockManagerService(core, this.logger);
     const alertsLocator = plugins.share.url.locators.create(new AlertsLocatorDefinition());
 
     const savedObjectTypes = [SO_SLO_TYPE, SO_SLO_SETTINGS_TYPE];
 
     const alertingFeatures = sloRuleTypes.map((ruleTypeId) => ({
       ruleTypeId,
-      consumers: [sloFeatureId, ALERTING_FEATURE_ID],
+      consumers: [sloFeatureId, ALERTING_FEATURE_ID, ...DEPRECATED_ALERTING_CONSUMERS],
     }));
 
     plugins.features.registerKibanaFeature({
@@ -131,7 +146,7 @@ export class SLOPlugin
 
     registerSloUsageCollector(plugins.usageCollection);
 
-    const routeHandlerPlugins = mapValues(plugins, (value, key) => {
+    const mappedPlugins = mapValues(plugins, (value, key) => {
       return {
         setup: value,
         start: () =>
@@ -145,11 +160,59 @@ export class SLOPlugin
       core,
       dependencies: {
         corePlugins: core,
-        plugins: routeHandlerPlugins,
+        plugins: mappedPlugins,
+        config: {
+          isServerless: this.isServerless,
+        },
+        getScopedClients: async ({ request, logger }) => {
+          const [coreStart, pluginsStart] = await core.getStartServices();
+
+          const internalSoClient = new SavedObjectsClient(
+            coreStart.savedObjects.createInternalRepository()
+          );
+          const soClient = coreStart.savedObjects.getScopedClient(request);
+          const scopedClusterClient = coreStart.elasticsearch.client.asScoped(request);
+
+          const [dataViewsService, rulesClient, { id: spaceId }, racClient] = await Promise.all([
+            pluginsStart.dataViews.dataViewsServiceFactory(
+              soClient,
+              scopedClusterClient.asCurrentUser
+            ),
+            pluginsStart.alerting.getRulesClientWithRequest(request),
+            pluginsStart.spaces?.spacesService.getActiveSpace(request) ?? { id: 'default' },
+            pluginsStart.ruleRegistry.getRacClientWithRequest(request),
+          ]);
+
+          const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
+
+          const transformManager = new DefaultTransformManager(
+            createTransformGenerators(spaceId, dataViewsService, this.isServerless),
+            scopedClusterClient,
+            logger
+          );
+          const summaryTransformManager = new DefaultSummaryTransformManager(
+            new DefaultSummaryTransformGenerator(),
+            scopedClusterClient,
+            logger
+          );
+
+          return {
+            scopedClusterClient,
+            soClient,
+            internalSoClient,
+            dataViewsService,
+            rulesClient,
+            spaceId,
+            repository,
+            transformManager,
+            summaryTransformManager,
+            racClient,
+          };
+        },
       },
       logger: this.logger,
       repository: getSloServerRouteRepository({ isServerless: this.isServerless }),
-      isServerless: this.isServerless,
+      isDev: this.isDev,
     });
 
     core
@@ -157,11 +220,14 @@ export class SLOPlugin
       .then(async ([coreStart, pluginStart]) => {
         const esInternalClient = coreStart.elasticsearch.client.asInternalUser;
         const sloResourceInstaller = new DefaultResourceInstaller(esInternalClient, this.logger);
-        const sloInstaller = new DefaultSLOInstaller(sloResourceInstaller, this.logger);
-        await sloInstaller.install();
+        await lockManager.withLock(LOCK_ID_RESOURCE_INSTALLER, () =>
+          sloResourceInstaller.ensureCommonResourcesInstalled()
+        );
       })
-      .catch(() => {
-        // noop - error already logged from the installer
+      .catch((err) => {
+        if (err instanceof LockAcquisitionError) {
+          this.logger.debug('Cannot install SLO resources, another process is already doing it');
+        }
       });
 
     this.sloOrphanCleanupTask = new SloOrphanSummaryCleanupTask(
@@ -169,6 +235,19 @@ export class SLOPlugin
       this.logger,
       this.config
     );
+
+    this.tempSummaryCleanupTask = new TempSummaryCleanupTask({
+      core,
+      taskManager: plugins.taskManager,
+      logFactory: this.initContext.logger,
+      config: this.config,
+    });
+
+    new BulkDeleteTask({
+      core,
+      plugins: mappedPlugins,
+      logFactory: this.initContext.logger,
+    });
 
     return {};
   }
@@ -180,6 +259,8 @@ export class SLOPlugin
     this.sloOrphanCleanupTask
       ?.start(plugins.taskManager, internalSoClient, internalEsClient)
       .catch(() => {});
+
+    this.tempSummaryCleanupTask?.start(plugins).catch(() => {});
 
     return {
       getSloClientWithRequest: (request: KibanaRequest) => {

@@ -470,6 +470,17 @@ ${JSON.stringify(cyCustomEnv, null, 2)}
                 }
               } catch (error) {
                 log.error(error);
+
+                if (!result) {
+                  // `result` will be `undefined` when the process above does not reach the `cypress.run()`.
+                  // This can happen when there are errors setting up the run environment, and thus, we need
+                  // ensure we report the run as a failure.
+                  result = {
+                    status: 'failed',
+                    failures: 1,
+                    message: error.message,
+                  };
+                }
               }
 
               if (fleetServer) {

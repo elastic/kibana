@@ -7,8 +7,7 @@
 
 import React, { memo } from 'react';
 import { EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
-import isEmpty from 'lodash/isEmpty';
-import { groupBy } from 'lodash';
+import { groupBy, isEmpty } from 'lodash';
 import { EnrichmentSection } from './threat_details_view_enrichment_section';
 import { ENRICHMENT_TYPES } from '../../../../../common/cti/constants';
 import { EnrichmentRangePicker } from './threat_intelligence_view_enrichment_range_picker';

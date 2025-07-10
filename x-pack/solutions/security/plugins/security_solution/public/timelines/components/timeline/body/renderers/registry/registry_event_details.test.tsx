@@ -33,6 +33,7 @@ describe('RegistryEventDetails', () => {
     const wrapper = mount(
       <TestProviders>
         <RegistryEventDetails
+          scopeId="some_scope"
           contextId="test-context"
           data={mockEndpointRegistryModificationEvent}
           text={MODIFIED_REGISTRY_KEY}

@@ -18,6 +18,7 @@ import { useStatusAction } from '../actions/status/use_status_action';
 import { EditTagsFlyout } from '../actions/tags/edit_tags_flyout';
 import { useTagsAction } from '../actions/tags/use_tags_action';
 import { ConfirmDeleteCaseModal } from '../confirm_delete_case';
+import { useCasesContext } from '../cases_context/use_cases_context';
 import { useAssigneesAction } from '../actions/assignees/use_assignees_action';
 import { EditAssigneesFlyout } from '../actions/assignees/edit_assignees_flyout';
 import * as i18n from './translations';
@@ -40,6 +41,7 @@ export const useBulkActions = ({
   onActionSuccess,
 }: UseBulkActionsProps): UseBulkActionsReturnValue => {
   const isDisabled = selectedCases.length === 0;
+  const { permissions } = useCasesContext();
 
   const deleteAction = useDeleteAction({
     isDisabled,
@@ -73,6 +75,7 @@ export const useBulkActions = ({
 
   const canDelete = deleteAction.canDelete;
   const canUpdate = statusAction.canUpdateStatus;
+  const canAssign = permissions.assign;
 
   const panels = useMemo((): EuiContextMenuPanelDescriptor[] => {
     const mainPanelItems: EuiContextMenuPanelItemDescriptor[] = [];
@@ -110,6 +113,9 @@ export const useBulkActions = ({
 
     if (canUpdate) {
       mainPanelItems.push(tagsAction.getAction(selectedCases));
+    }
+
+    if (canAssign) {
       mainPanelItems.push(assigneesAction.getAction(selectedCases));
     }
 
@@ -141,6 +147,7 @@ export const useBulkActions = ({
   }, [
     canDelete,
     canUpdate,
+    canAssign,
     deleteAction,
     isDisabled,
     selectedCases,

@@ -5,19 +5,16 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 import objectHash from 'object-hash';
 import type {
-  BaseFieldsLatest,
-  NewTermsFieldsLatest,
-  WrappedFieldsLatest,
+  DetectionAlertLatest,
+  NewTermsAlertLatest,
+  WrappedAlert,
 } from '../../../../../common/api/detection_engine/model/alerts';
 import { ALERT_NEW_TERMS } from '../../../../../common/field_maps/field_names';
-import type { ConfigType } from '../../../../config';
-import type { CompleteRule, RuleParams } from '../../rule_schema';
 import { buildReasonMessageForNewTermsAlert } from '../utils/reason_formatters';
-import type { SignalSource } from '../types';
-import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
+import type { SecuritySharedParams, SignalSource } from '../types';
 import { transformHitToAlert } from '../factories/utils/transform_hit_to_alert';
 
 export interface EventsAndTerms {
@@ -26,49 +23,26 @@ export interface EventsAndTerms {
 }
 
 export const wrapNewTermsAlerts = ({
+  sharedParams,
   eventsAndTerms,
-  spaceId,
-  completeRule,
-  mergeStrategy,
-  indicesToQuery,
-  alertTimestampOverride,
-  ruleExecutionLogger,
-  publicBaseUrl,
-  intendedTimestamp,
 }: {
+  sharedParams: SecuritySharedParams;
   eventsAndTerms: EventsAndTerms[];
-  spaceId: string | null | undefined;
-  completeRule: CompleteRule<RuleParams>;
-  mergeStrategy: ConfigType['alertMergeStrategy'];
-  indicesToQuery: string[];
-  alertTimestampOverride: Date | undefined;
-  ruleExecutionLogger: IRuleExecutionLogForExecutors;
-  publicBaseUrl: string | undefined;
-  intendedTimestamp: Date | undefined;
-}): Array<WrappedFieldsLatest<NewTermsFieldsLatest>> => {
+}): Array<WrappedAlert<NewTermsAlertLatest>> => {
   return eventsAndTerms.map((eventAndTerms) => {
     const id = objectHash([
       eventAndTerms.event._index,
       eventAndTerms.event._id,
       String(eventAndTerms.event._version),
-      `${spaceId}:${completeRule.alertId}`,
+      `${sharedParams.spaceId}:${sharedParams.completeRule.alertId}`,
       eventAndTerms.newTerms,
     ]);
-    const baseAlert: BaseFieldsLatest = transformHitToAlert({
-      spaceId,
-      completeRule,
+    const baseAlert: DetectionAlertLatest = transformHitToAlert({
+      sharedParams,
       doc: eventAndTerms.event,
-      mergeStrategy,
-      ignoreFields: {},
-      ignoreFieldsRegexes: [],
       applyOverrides: true,
       buildReasonMessage: buildReasonMessageForNewTermsAlert,
-      indicesToQuery,
-      alertTimestampOverride,
-      ruleExecutionLogger,
       alertUuid: id,
-      publicBaseUrl,
-      intendedTimestamp,
     });
 
     return {

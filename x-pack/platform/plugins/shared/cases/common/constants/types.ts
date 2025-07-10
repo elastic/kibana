@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import type { OWNERS } from './owners';
+import type { SERVERLESS_PROJECT_TYPES, OWNERS } from './owners';
 
-export enum HttpApiTagOperation {
+export enum HttpApiPrivilegeOperation {
   Read = 'Read',
   Create = 'Create',
   Delete = 'Delete',
 }
 
 export type Owner = (typeof OWNERS)[number];
+export type ServerlessProjectType = (typeof SERVERLESS_PROJECT_TYPES)[number];

@@ -6,11 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useEffect } from 'react';
+import { usePerformanceContext } from '@kbn/ebt-tools';
 import { isTimeComparison } from '../../shared/time_comparison/get_comparison_options';
 import { getNodeName, NodeType } from '../../../../common/connections';
 import { useApmParams } from '../../../hooks/use_apm_params';
-import { useFetcher } from '../../../hooks/use_fetcher';
+import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { DependenciesTable } from '../../shared/dependencies_table';
 import { ServiceLink } from '../../shared/links/apm/service_link';
 import { useTimeRange } from '../../../hooks/use_time_range';
@@ -31,6 +32,7 @@ export function DependenciesDetailTable() {
   } = useApmParams('/dependencies/overview');
 
   const { core } = useApmPluginContext();
+  const { onPageReady } = usePerformanceContext();
 
   const comparisonEnabled = getComparisonEnabled({
     core,
@@ -57,6 +59,17 @@ export function DependenciesDetailTable() {
     },
     [start, end, environment, offset, dependencyName, kuery, comparisonEnabled]
   );
+
+  useEffect(() => {
+    if (status === FETCH_STATUS.SUCCESS) {
+      onPageReady({
+        meta: {
+          rangeFrom,
+          rangeTo,
+        },
+      });
+    }
+  }, [onPageReady, status, rangeFrom, rangeTo]);
 
   const dependencies =
     data?.services.map((dependency) => {

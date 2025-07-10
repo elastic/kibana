@@ -5,27 +5,13 @@
  * 2.0.
  */
 
-import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
-import { TaskTypes } from '../../types';
+import { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
+import { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
+
 export const INFERENCE_ENDPOINTS_TABLE_PER_PAGE_VALUES = [25, 50, 100];
 
-export enum ServiceProviderKeys {
-  'alibabacloud-ai-search' = 'alibabacloud-ai-search',
-  amazonbedrock = 'amazonbedrock',
-  azureopenai = 'azureopenai',
-  azureaistudio = 'azureaistudio',
-  cohere = 'cohere',
-  elasticsearch = 'elasticsearch',
-  elser = 'elser',
-  googleaistudio = 'googleaistudio',
-  hugging_face = 'hugging_face',
-  mistral = 'mistral',
-  openai = 'openai',
-  watsonxai = 'watsonxai',
-}
-
 export enum SortFieldInferenceEndpoint {
-  endpoint = 'endpoint',
+  inference_id = 'inference_id',
 }
 export enum SortOrder {
   asc = 'asc',
@@ -44,7 +30,7 @@ export interface QueryParams extends SortingParams {
 
 export interface FilterOptions {
   provider: ServiceProviderKeys[];
-  type: TaskTypes[];
+  type: InferenceTaskType[];
 }
 
 export interface AllInferenceEndpointsTableState {
@@ -55,12 +41,6 @@ export interface AllInferenceEndpointsTableState {
 export interface EuiBasicTableSortTypes {
   direction: SortOrder;
   field: string;
-}
-
-export interface InferenceEndpointUI {
-  endpoint: string;
-  provider: InferenceAPIConfigResponse;
-  type: string;
 }
 
 export interface InferenceUsageInfo {

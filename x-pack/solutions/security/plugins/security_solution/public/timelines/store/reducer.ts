@@ -13,58 +13,55 @@ import {
   addProvider,
   addTimeline,
   applyKqlFilterQuery,
+  clearEventsDeleted,
+  clearEventsLoading,
+  clearSelected,
   createTimeline,
   dataProviderEdited,
+  deleteNoteFromEvent,
   endTimelineSaving,
+  initializeSavedSearch,
+  initializeTimelineSettings,
   pinEvent,
+  removeColumn,
   removeProvider,
   setActiveTabTimeline,
+  setChanged,
+  setConfirmingNoteId,
+  setDataProviderVisibility,
+  setEventsDeleted,
+  setEventsLoading,
   setExcludedRowRendererIds,
   setFilters,
   setInsertTimeline,
   setSavedQueryId,
+  setSelected,
   showCallOutUnauthorizedMsg,
   showTimeline,
   startTimelineSaving,
+  toggleModalSaveTimeline,
   unPinEvent,
+  updateColumns,
+  updateColumnWidth,
   updateDataProviderEnabled,
   updateDataProviderExcluded,
   updateDataProviderType,
   updateDataView,
+  updateEqlOptions,
   updateIsFavorite,
+  updateItemsPerPage,
+  updateItemsPerPageOptions,
   updateKqlMode,
   updateProviders,
   updateRange,
-  updateTimeline,
-  updateGraphEventId,
-  updateTitleAndDescription,
-  updateSessionViewConfig,
-  toggleModalSaveTimeline,
-  updateEqlOptions,
-  setEventsLoading,
-  removeColumn,
-  upsertColumn,
-  updateColumns,
-  updateSort,
-  clearSelected,
-  setSelected,
-  setEventsDeleted,
-  initializeTimelineSettings,
-  updateItemsPerPage,
-  updateItemsPerPageOptions,
-  applyDeltaToColumnWidth,
-  clearEventsDeleted,
-  clearEventsLoading,
-  updateSavedSearchId,
-  updateSavedSearch,
-  initializeSavedSearch,
-  setDataProviderVisibility,
-  setChanged,
   updateRowHeight,
   updateSampleSize,
-  updateColumnWidth,
-  setConfirmingNoteId,
-  deleteNoteFromEvent,
+  updateSavedSearch,
+  updateSavedSearchId,
+  updateSort,
+  updateTimeline,
+  updateTitleAndDescription,
+  upsertColumn,
 } from './actions';
 
 import {
@@ -75,35 +72,32 @@ import {
   addTimelineToStore,
   applyKqlFilterQueryDraft,
   pinTimelineEvent,
+  removeTimelineColumn,
   removeTimelineProvider,
+  setDeletedTableEvents,
+  setInitializeTimelineSettings,
+  setLoadingTableEvents,
+  setSelectedTableEvents,
   unPinTimelineEvent,
   updateExcludedRowRenderersIds,
+  updateFilters,
+  updateSavedQuery,
+  updateTimelineColumns,
+  updateTimelineColumnWidth,
   updateTimelineIsFavorite,
+  updateTimelineItemsPerPage,
   updateTimelineKqlMode,
+  updateTimelinePerPageOptions,
   updateTimelineProviderEnabled,
   updateTimelineProviderExcluded,
   updateTimelineProviderProperties,
-  updateTimelineProviderType,
   updateTimelineProviders,
+  updateTimelineProviderType,
   updateTimelineRange,
   updateTimelineShowTimeline,
+  updateTimelineSort,
   updateTimelineTitleAndDescription,
-  updateSavedQuery,
-  updateTimelineGraphEventId,
-  updateFilters,
-  updateTimelineSessionViewConfig,
-  setLoadingTableEvents,
-  removeTableColumn,
-  upsertTableColumn,
-  updateTableColumns,
-  updateTableSort,
-  setSelectedTableEvents,
-  setDeletedTableEvents,
-  setInitializeTimelineSettings,
-  applyDeltaToTableColumnWidth,
-  updateTimelinePerPageOptions,
-  updateTimelineItemsPerPage,
-  updateTimelineColumnWidth,
+  upsertTimelineColumn,
 } from './helpers';
 
 import type { TimelineState } from './types';
@@ -164,22 +158,6 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
   .case(showTimeline, (state, { id, show }) => ({
     ...state,
     timelineById: updateTimelineShowTimeline({ id, show, timelineById: state.timelineById }),
-  }))
-  .case(updateGraphEventId, (state, { id, graphEventId }) => ({
-    ...state,
-    timelineById: updateTimelineGraphEventId({
-      id,
-      graphEventId,
-      timelineById: state.timelineById,
-    }),
-  }))
-  .case(updateSessionViewConfig, (state, { id, sessionViewConfig }) => ({
-    ...state,
-    timelineById: updateTimelineSessionViewConfig({
-      id,
-      sessionViewConfig,
-      timelineById: state.timelineById,
-    }),
   }))
   .case(pinEvent, (state, { id, eventId }) => ({
     ...state,
@@ -390,7 +368,7 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
   }))
   .case(removeColumn, (state, { id, columnId }) => ({
     ...state,
-    timelineById: removeTableColumn({
+    timelineById: removeTimelineColumn({
       id,
       columnId,
       timelineById: state.timelineById,
@@ -398,11 +376,11 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
   }))
   .case(upsertColumn, (state, { column, id, index }) => ({
     ...state,
-    timelineById: upsertTableColumn({ column, id, index, timelineById: state.timelineById }),
+    timelineById: upsertTimelineColumn({ column, id, index, timelineById: state.timelineById }),
   }))
   .case(updateColumns, (state, { id, columns }) => ({
     ...state,
-    timelineById: updateTableColumns({
+    timelineById: updateTimelineColumns({
       id,
       columns,
       timelineById: state.timelineById,
@@ -410,7 +388,7 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
   }))
   .case(updateSort, (state, { id, sort }) => ({
     ...state,
-    timelineById: updateTableSort({ id, sort, timelineById: state.timelineById }),
+    timelineById: updateTimelineSort({ id, sort, timelineById: state.timelineById }),
   }))
   .case(setSelected, (state, { id, eventIds, isSelected, isSelectAllChecked }) => ({
     ...state,
@@ -463,15 +441,6 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
     timelineById: updateTimelinePerPageOptions({
       id,
       itemsPerPageOptions,
-      timelineById: state.timelineById,
-    }),
-  }))
-  .case(applyDeltaToColumnWidth, (state, { id, columnId, delta }) => ({
-    ...state,
-    timelineById: applyDeltaToTableColumnWidth({
-      id,
-      columnId,
-      delta,
       timelineById: state.timelineById,
     }),
   }))

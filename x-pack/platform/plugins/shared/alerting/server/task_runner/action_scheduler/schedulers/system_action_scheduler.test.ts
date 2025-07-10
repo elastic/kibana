@@ -12,12 +12,9 @@ import { alertsClientMock } from '../../../alerts_client/alerts_client.mock';
 import { alertingEventLoggerMock } from '../../../lib/alerting_event_logger/alerting_event_logger.mock';
 import { RuleRunMetricsStore } from '../../../lib/rule_run_metrics_store';
 import { mockAAD } from '../../fixtures';
-import { Alert } from '../../../alert';
-import {
-  ActionsCompletion,
-  AlertInstanceContext,
-  AlertInstanceState,
-} from '@kbn/alerting-state-types';
+import type { Alert } from '../../../alert';
+import type { AlertInstanceContext, AlertInstanceState } from '@kbn/alerting-state-types';
+import { ActionsCompletion } from '@kbn/alerting-state-types';
 import { getRule, getRuleType, getDefaultSchedulerContext, generateAlert } from '../test_fixtures';
 import { SystemActionScheduler } from './system_action_scheduler';
 import { ALERT_UUID } from '@kbn/rule-data-utils';
@@ -25,8 +22,9 @@ import {
   getErrorSource,
   TaskErrorSource,
 } from '@kbn/task-manager-plugin/server/task_running/errors';
-import { CombinedSummarizedAlerts } from '../../../types';
+import type { CombinedSummarizedAlerts } from '../../../types';
 import { schema } from '@kbn/config-schema';
+import { TaskPriority } from '@kbn/task-manager-plugin/server';
 
 const alertingEventLogger = alertingEventLoggerMock.create();
 const actionsClient = actionsClientMock.create();
@@ -68,7 +66,13 @@ const getSchedulerContext = (params = {}) => {
   return { ...defaultSchedulerContext, rule, ...params, ruleRunMetricsStore };
 };
 
-const getResult = (actionId: string, actionUuid: string, summary: CombinedSummarizedAlerts) => ({
+const getResult = (
+  actionId: string,
+  actionUuid: string,
+  summary: CombinedSummarizedAlerts,
+  priority?: number,
+  apiKeyId?: string
+) => ({
   actionToEnqueue: {
     actionTypeId: '.test-system-action',
     apiKey: 'MTIzOmFiYw==',
@@ -79,6 +83,8 @@ const getResult = (actionId: string, actionUuid: string, summary: CombinedSummar
     relatedSavedObjects: [{ id: 'rule-id-1', namespace: 'test1', type: 'alert', typeId: 'test' }],
     source: { source: { id: 'rule-id-1', type: 'alert' }, type: 'SAVED_OBJECT' },
     spaceId: 'test1',
+    ...(priority && { priority }),
+    ...(apiKeyId && { apiKeyId }),
   },
   actionToLog: {
     alertSummary: {
@@ -181,6 +187,82 @@ describe('System Action Scheduler', () => {
 
       const finalSummary = { ...summarizedAlerts, all: { count: 2, data: [mockAAD, mockAAD] } };
       expect(results).toEqual([getResult('system-action-1', 'xxx-xxx', finalSummary)]);
+    });
+
+    test('should create actions to schedule with priority if specified for each system action', async () => {
+      alertsClient.getProcessedAlerts.mockReturnValue(alerts);
+
+      const summarizedAlerts = {
+        new: { count: 2, data: [mockAAD, mockAAD] },
+        ongoing: { count: 0, data: [] },
+        recovered: { count: 0, data: [] },
+      };
+      alertsClient.getSummarizedAlerts.mockResolvedValue(summarizedAlerts);
+
+      const scheduler = new SystemActionScheduler({
+        ...getSchedulerContext(),
+        priority: TaskPriority.Low,
+      });
+      const results = await scheduler.getActionsToSchedule({});
+
+      expect(alertsClient.getSummarizedAlerts).toHaveBeenCalledTimes(1);
+      expect(alertsClient.getSummarizedAlerts).toHaveBeenCalledWith({
+        excludedAlertInstanceIds: [],
+        executionUuid: defaultSchedulerContext.executionId,
+        ruleId: 'rule-id-1',
+        spaceId: 'test1',
+      });
+
+      expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toEqual(1);
+      expect(ruleRunMetricsStore.getNumberOfTriggeredActions()).toEqual(1);
+      expect(ruleRunMetricsStore.getStatusByConnectorType('.test-system-action')).toEqual({
+        numberOfGeneratedActions: 1,
+        numberOfTriggeredActions: 1,
+      });
+
+      expect(results).toHaveLength(1);
+
+      const finalSummary = { ...summarizedAlerts, all: { count: 2, data: [mockAAD, mockAAD] } };
+      expect(results).toEqual([getResult('system-action-1', 'xxx-xxx', finalSummary, 1)]);
+    });
+
+    test('should create actions to schedule with apiKeyId if specified for each system action', async () => {
+      alertsClient.getProcessedAlerts.mockReturnValue(alerts);
+
+      const summarizedAlerts = {
+        new: { count: 2, data: [mockAAD, mockAAD] },
+        ongoing: { count: 0, data: [] },
+        recovered: { count: 0, data: [] },
+      };
+      alertsClient.getSummarizedAlerts.mockResolvedValue(summarizedAlerts);
+
+      const scheduler = new SystemActionScheduler({
+        ...getSchedulerContext(),
+        apiKeyId: '464tfbwer5q43h',
+      });
+      const results = await scheduler.getActionsToSchedule({});
+
+      expect(alertsClient.getSummarizedAlerts).toHaveBeenCalledTimes(1);
+      expect(alertsClient.getSummarizedAlerts).toHaveBeenCalledWith({
+        excludedAlertInstanceIds: [],
+        executionUuid: defaultSchedulerContext.executionId,
+        ruleId: 'rule-id-1',
+        spaceId: 'test1',
+      });
+
+      expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toEqual(1);
+      expect(ruleRunMetricsStore.getNumberOfTriggeredActions()).toEqual(1);
+      expect(ruleRunMetricsStore.getStatusByConnectorType('.test-system-action')).toEqual({
+        numberOfGeneratedActions: 1,
+        numberOfTriggeredActions: 1,
+      });
+
+      expect(results).toHaveLength(1);
+
+      const finalSummary = { ...summarizedAlerts, all: { count: 2, data: [mockAAD, mockAAD] } };
+      expect(results).toEqual([
+        getResult('system-action-1', 'xxx-xxx', finalSummary, undefined, '464tfbwer5q43h'),
+      ]);
     });
 
     test('should remove new alerts from summary if suppressed by maintenance window', async () => {

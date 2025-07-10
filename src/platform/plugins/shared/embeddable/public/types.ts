@@ -14,11 +14,10 @@ import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-manag
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
-import type { PersistableStateService } from '@kbn/kibana-utils-plugin/common';
+import { PersistableState } from '@kbn/kibana-utils-plugin/common';
 import type { registerAddFromLibraryType } from './add_from_library/registry';
 import type { registerReactEmbeddableFactory } from './react_embeddable_system';
 import type { EmbeddableStateTransfer } from './state_transfer';
-import type { EmbeddableStateWithType } from '../common';
 import { EnhancementRegistryDefinition } from './enhancements/types';
 
 export interface EmbeddableSetupDependencies {
@@ -38,13 +37,21 @@ export interface EmbeddableSetup {
   /**
    * Register a saved object type with the "Add from library" flyout.
    *
+   * `onAdd` receives the container and the saved object. You may pass a second boolean parameter
+   *  to `addNewPanel` to enable a success message and automatic scrolling.
+   *
    * @example
    *  registerAddFromLibraryType({
    *    onAdd: (container, savedObject) => {
-   *      container.addNewPanel({
-   *        panelType: CONTENT_ID,
-   *        initialState: savedObject.attributes,
-   *      });
+   *     container.addNewPanel(
+   *         {
+   *           panelType: MY_EMBEDDABLE_TYPE,
+   *           serializedState: {
+   *             rawState: savedObject.attributes,
+   *           },
+   *         },
+   *         true // shows a toast and scrolls to panel
+   *       );
    *    },
    *    savedObjectType: MAP_SAVED_OBJECT_TYPE,
    *    savedObjectName: i18n.translate('xpack.maps.mapSavedObjectLabel', {
@@ -66,6 +73,7 @@ export interface EmbeddableSetup {
   registerEnhancement: (enhancement: EnhancementRegistryDefinition) => void;
 }
 
-export interface EmbeddableStart extends PersistableStateService<EmbeddableStateWithType> {
+export interface EmbeddableStart {
   getStateTransfer: (storage?: Storage) => EmbeddableStateTransfer;
+  getEnhancement: (enhancementId: string) => PersistableState;
 }

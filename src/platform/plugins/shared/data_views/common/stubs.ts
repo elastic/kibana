@@ -9,3 +9,4 @@
 
 export * from './field.stub';
 export * from './data_views/data_view.stub';
+export * from './data_views/data_view_lazy.stub';

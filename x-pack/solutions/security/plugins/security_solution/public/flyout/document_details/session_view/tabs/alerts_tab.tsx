@@ -11,6 +11,8 @@ import { i18n } from '@kbn/i18n';
 import { DetailPanelAlertTab, useFetchSessionViewAlerts } from '@kbn/session-view-plugin/public';
 import type { ProcessEvent } from '@kbn/session-view-plugin/common';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { LeftPanelVisualizeTab } from '../../left';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { SESSION_VIEW_ID } from '../../left/components/session_view';
 import {
   DocumentDetailsLeftPanelKey,
@@ -18,6 +20,9 @@ import {
 } from '../../shared/constants/panel_keys';
 import { ALERT_PREVIEW_BANNER } from '../../preview/constants';
 import { useSessionViewPanelContext } from '../context';
+import { SourcererScopeName } from '../../../../sourcerer/store/model';
+import { useSourcererDataView } from '../../../../sourcerer/containers';
+import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 
 /**
  * Tab displayed in the SessionView preview panel, shows alerts related to the session.
@@ -25,12 +30,25 @@ import { useSessionViewPanelContext } from '../context';
 export const AlertsTab = memo(() => {
   const { eventId, indexName, investigatedAlertId, sessionEntityId, sessionStartTime, scopeId } =
     useSessionViewPanelContext();
+
   const {
     data: alertsData,
     fetchNextPage: fetchNextPageAlerts,
     isFetching: isFetchingAlerts,
     hasNextPage: hasNextPageAlerts,
-  } = useFetchSessionViewAlerts(sessionEntityId, sessionStartTime, undefined);
+  } = useFetchSessionViewAlerts(sessionEntityId, sessionStartTime, investigatedAlertId);
+
+  const { selectedPatterns: oldSelectedPatterns } = useSourcererDataView(
+    SourcererScopeName.detections
+  );
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+  const experimentalSelectedPatterns = useSelectedPatterns(SourcererScopeName.detections);
+
+  const selectedPatterns = newDataViewPickerEnabled
+    ? experimentalSelectedPatterns
+    : oldSelectedPatterns;
+
+  const alertsIndex = useMemo(() => selectedPatterns.join(','), [selectedPatterns]);
 
   // this code mimics what is being done in the x-pack/plugins/session_view/public/components/session_view/index.tsx file
   const alerts = useMemo(() => {
@@ -52,14 +70,14 @@ export const AlertsTab = memo(() => {
         id: DocumentDetailsPreviewPanelKey,
         params: {
           id: evtId,
-          indexName,
+          indexName: alertsIndex,
           scopeId,
           banner: ALERT_PREVIEW_BANNER,
           isPreviewMode: true,
         },
       });
     },
-    [openPreviewPanel, indexName, scopeId]
+    [openPreviewPanel, scopeId, alertsIndex]
   );
 
   // this code mimics what is being done in the x-pack/plugins/session_view/public/components/session_view/index.tsx file
@@ -90,7 +108,7 @@ export const AlertsTab = memo(() => {
           jumpToCursor,
         },
         path: {
-          tab: 'visualize',
+          tab: LeftPanelVisualizeTab,
           subTab: SESSION_VIEW_ID,
         },
       });

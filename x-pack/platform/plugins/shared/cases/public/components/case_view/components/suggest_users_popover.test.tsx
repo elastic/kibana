@@ -6,8 +6,6 @@
  */
 
 import React from 'react';
-import type { AppMockRenderer } from '../../../common/mock';
-import { createAppMockRenderer } from '../../../common/mock';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
@@ -17,6 +15,7 @@ import { userProfiles } from '../../../containers/user_profiles/api.mock';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import type { AssigneeWithProfile } from '../../user_profiles/types';
+import { renderWithTestingProviders } from '../../../common/mock';
 
 jest.mock('../../../containers/user_profiles/api');
 
@@ -25,9 +24,8 @@ const asAssignee = (profile: UserProfileWithAvatar): AssigneeWithProfile => ({
   profile,
 });
 
-// Failing: See https://github.com/elastic/kibana/issues/171600
+// FLAKY: https://github.com/elastic/kibana/issues/216570
 describe.skip('SuggestUsersPopover', () => {
-  let appMockRender: AppMockRenderer;
   const defaultProps: SuggestUsersPopoverProps = {
     isLoading: false,
     assignedUsersWithProfiles: [],
@@ -38,14 +36,10 @@ describe.skip('SuggestUsersPopover', () => {
     currentUserProfile: undefined,
   };
 
-  beforeEach(() => {
-    appMockRender = createAppMockRenderer();
-  });
-
   it('calls onUsersChange when 1 user is selected', async () => {
     const onUsersChange = jest.fn();
     const props = { ...defaultProps, onUsersChange };
-    appMockRender.render(<SuggestUsersPopover {...props} />);
+    renderWithTestingProviders(<SuggestUsersPopover {...props} />);
 
     await waitForEuiPopoverOpen();
 
@@ -72,7 +66,7 @@ describe.skip('SuggestUsersPopover', () => {
   it('calls onUsersChange when multiple users are selected', async () => {
     const onUsersChange = jest.fn();
     const props = { ...defaultProps, onUsersChange };
-    appMockRender.render(<SuggestUsersPopover {...props} />);
+    renderWithTestingProviders(<SuggestUsersPopover {...props} />);
 
     await waitForEuiPopoverOpen();
 
@@ -115,7 +109,7 @@ describe.skip('SuggestUsersPopover', () => {
       currentUserProfile: userProfiles[1],
       onUsersChange,
     };
-    appMockRender.render(<SuggestUsersPopover {...props} />);
+    renderWithTestingProviders(<SuggestUsersPopover {...props} />);
 
     await waitForEuiPopoverOpen();
 
@@ -160,7 +154,7 @@ describe.skip('SuggestUsersPopover', () => {
   });
 
   it('does not show the assigned users total if there are no assigned users', async () => {
-    appMockRender.render(<SuggestUsersPopover {...defaultProps} />);
+    renderWithTestingProviders(<SuggestUsersPopover {...defaultProps} />);
 
     await waitForEuiPopoverOpen();
 
@@ -174,7 +168,7 @@ describe.skip('SuggestUsersPopover', () => {
   });
 
   it('shows the 1 assigned total after clicking on a user', async () => {
-    appMockRender.render(<SuggestUsersPopover {...defaultProps} />);
+    renderWithTestingProviders(<SuggestUsersPopover {...defaultProps} />);
 
     await waitForEuiPopoverOpen();
 
@@ -192,7 +186,7 @@ describe.skip('SuggestUsersPopover', () => {
       ...defaultProps,
       assignedUsersWithProfiles: [{ uid: userProfiles[0].uid, profile: userProfiles[0] }],
     };
-    appMockRender.render(<SuggestUsersPopover {...props} />);
+    renderWithTestingProviders(<SuggestUsersPopover {...props} />);
 
     await waitForEuiPopoverOpen();
 
@@ -206,7 +200,7 @@ describe.skip('SuggestUsersPopover', () => {
       ...defaultProps,
       togglePopover,
     };
-    appMockRender.render(<SuggestUsersPopover {...props} />);
+    renderWithTestingProviders(<SuggestUsersPopover {...props} />);
 
     await waitForEuiPopoverOpen();
 
@@ -218,7 +212,7 @@ describe.skip('SuggestUsersPopover', () => {
   });
 
   it('shows results initially', async () => {
-    appMockRender.render(<SuggestUsersPopover {...defaultProps} />);
+    renderWithTestingProviders(<SuggestUsersPopover {...defaultProps} />);
 
     await waitForEuiPopoverOpen();
 

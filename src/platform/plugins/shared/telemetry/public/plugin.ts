@@ -123,6 +123,8 @@ export interface TelemetryPluginConfig {
   labels: Record<string, unknown>;
   /** Whether to use Serverless-specific channels when reporting Snapshot Telemetry */
   appendServerlessChannelsSuffix: boolean;
+  /** Should use the local EBT shipper to persist events in the local ES */
+  localShipper: boolean;
 }
 
 function getTelemetryConstants(docLinks: DocLinksStart): TelemetryConstants {
@@ -155,9 +157,10 @@ export class TelemetryPlugin
   }
 
   public setup(
-    { analytics, http, notifications, getStartServices }: CoreSetup,
+    coreSetup: CoreSetup,
     { screenshotMode, home }: TelemetryPluginSetupDependencies
   ): TelemetryPluginSetup {
+    const { analytics, http, notifications, getStartServices } = coreSetup;
     const config = this.config;
     const currentKibanaVersion = this.currentKibanaVersion;
     this.telemetryService = new TelemetryService({
@@ -201,6 +204,13 @@ export class TelemetryPlugin
       buildShipperHeaders,
       buildShipperUrl: createBuildShipperUrl(sendTo),
     });
+
+    if (config.localShipper) {
+      // Make it async to exclude the shipper from the initial page load since this config will likely be false most of the time.
+      import('./local_shipper')
+        .then(({ initializeLocalShipper }) => initializeLocalShipper(coreSetup))
+        .catch(() => {});
+    }
 
     this.telemetrySender = new TelemetrySender(this.telemetryService, async () => {
       await this.refreshConfig(http);
@@ -308,7 +318,7 @@ export class TelemetryPlugin
    * Kibana should skip telemetry collection if reporting is taking a screenshot
    * or Synthetics monitoring is navigating Kibana.
    * @param screenshotMode {@link ScreenshotModePluginSetup}
-   * @private
+   * @internal
    */
   private shouldSkipTelemetry(screenshotMode: ScreenshotModePluginSetup): boolean {
     return screenshotMode.isScreenshotMode() || isSyntheticsMonitor();
@@ -329,7 +339,7 @@ export class TelemetryPlugin
   /**
    * Retrieve the up-to-date configuration
    * @param http HTTP helper to make requests to the server
-   * @private
+   * @internal
    */
   private async refreshConfig(http: HttpStart | HttpSetup): Promise<TelemetryPluginConfig> {
     const updatedConfig = await this.fetchUpdatedConfig(http);
@@ -347,7 +357,7 @@ export class TelemetryPlugin
    * This is a security feature, not included in the OSS build, so we need to fallback to `true`
    * in case it is `undefined`.
    * @param application CoreStart.application
-   * @private
+   * @internal
    */
   private getCanUserChangeSettings(application: ApplicationStart): boolean {
     return (application.capabilities?.savedObjectsManagement?.edit as boolean | undefined) ?? true;
@@ -379,7 +389,7 @@ export class TelemetryPlugin
   /**
    * Fetch configuration from the server and merge it with the one the browser already knows
    * @param http The HTTP helper to make the requests
-   * @private
+   * @internal
    */
   private async fetchUpdatedConfig(http: HttpStart | HttpSetup): Promise<TelemetryPluginConfig> {
     const {

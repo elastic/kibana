@@ -211,6 +211,7 @@ export const IndicesAndDataStreamsField: FunctionComponent<Props> = ({
                             setSelectIndicesMode('custom');
                             onUpdate({ indices: indexPatterns.join(',') });
                           }}
+                          data-test-subj="useIndexPatternsButton"
                         >
                           <FormattedMessage
                             id="xpack.snapshotRestore.policyForm.stepSettings.indicesToggleCustomLink"

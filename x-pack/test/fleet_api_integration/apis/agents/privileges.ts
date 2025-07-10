@@ -216,7 +216,7 @@ export default function (providerContext: FtrProviderContext) {
           id: 'file1',
           refresh: true,
           op_type: 'create',
-          body: {
+          document: {
             '@timestamp': new Date().toISOString(),
             upload_id: 'file1',
             action_id: `fleet_uploads_test-file1-action`,
@@ -310,6 +310,17 @@ export default function (providerContext: FtrProviderContext) {
         scenarios: ALL_SCENARIOS,
         send: {
           version: fleetServerVersion,
+        },
+        beforeEach: updateAgentBeforeEach,
+        afterEach: updateAgentAfterEach,
+      },
+      {
+        method: 'POST',
+        path: '/api/fleet/agents/agent1/migrate',
+        scenarios: ALL_SCENARIOS,
+        send: {
+          enrollment_token: '1234',
+          uri: 'https://example.com',
         },
         beforeEach: updateAgentBeforeEach,
         afterEach: updateAgentAfterEach,

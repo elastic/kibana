@@ -14,7 +14,7 @@ import {
   mockGetSearchDsl,
 } from './repository.test.mock';
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 
 import { SavedObjectsRepository } from './repository';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -440,14 +440,12 @@ describe('SavedObjectsRepository Encryption Extension', () => {
     ) => {
       expect(client.mget).toHaveBeenCalledWith(
         expect.objectContaining({
-          body: {
-            docs: objects.map(({ type, id }) =>
-              expect.objectContaining({
-                _index,
-                _id: getId(type, id),
-              })
-            ),
-          },
+          docs: objects.map(({ type, id }) =>
+            expect.objectContaining({
+              _index,
+              _id: getId(type, id),
+            })
+          ),
         }),
         expect.anything()
       );

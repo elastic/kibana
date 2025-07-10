@@ -8,7 +8,7 @@
  */
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { BehaviorSubject, combineLatest, Subject } from 'rxjs';
+import { BehaviorSubject, combineLatest, of, Subject } from 'rxjs';
 import useMountedState from 'react-use/lib/useMountedState';
 import {
   EuiBadge,
@@ -21,49 +21,40 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiSuperDatePicker,
-  EuiToolTip,
   OnTimeChangeProps,
 } from '@elastic/eui';
-import { CONTROL_GROUP_TYPE } from '@kbn/controls-plugin/common';
+import { CONTROL_GROUP_TYPE, ControlGroupSerializedState } from '@kbn/controls-plugin/common';
 import { ControlGroupApi } from '@kbn/controls-plugin/public';
 import { CoreStart } from '@kbn/core/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { ReactEmbeddableRenderer, ViewMode } from '@kbn/embeddable-plugin/public';
+import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { combineCompatibleChildrenApis } from '@kbn/presentation-containers';
 import {
   apiPublishesDataLoading,
-  HasUniqueId,
   PublishesDataLoading,
+  SerializedPanelState,
   useBatchedPublishingSubjects,
-  ViewMode as ViewModeType,
+  ViewMode,
 } from '@kbn/presentation-publishing';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 
-import {
-  clearControlGroupSerializedState,
-  getControlGroupSerializedState,
-  setControlGroupSerializedState,
-  WEB_LOGS_DATA_VIEW_ID,
-} from './serialized_control_group_state';
-import {
-  clearControlGroupRuntimeState,
-  getControlGroupRuntimeState,
-  setControlGroupRuntimeState,
-} from './runtime_control_group_state';
+import { savedStateManager, unsavedStateManager, WEB_LOGS_DATA_VIEW_ID } from './session_storage';
 
 const toggleViewButtons = [
   {
     id: `viewModeToggle_edit`,
-    value: ViewMode.EDIT,
+    value: 'edit',
     label: 'Edit mode',
   },
   {
     id: `viewModeToggle_view`,
-    value: ViewMode.VIEW,
+    value: 'view',
     label: 'View mode',
   },
 ];
+
+const CONTROL_GROUP_EMBEDDABLE_ID = 'CONTROL_GROUP_EMBEDDABLE_ID';
 
 export const ReactControlExample = ({
   core,
@@ -95,10 +86,7 @@ export const ReactControlExample = ({
     return new BehaviorSubject<[number, number] | undefined>(undefined);
   }, []);
   const viewMode$ = useMemo(() => {
-    return new BehaviorSubject<ViewModeType>(ViewMode.EDIT as ViewModeType);
-  }, []);
-  const saveNotification$ = useMemo(() => {
-    return new Subject<void>();
+    return new BehaviorSubject<ViewMode>('edit');
   }, []);
   const reload$ = useMemo(() => {
     return new Subject<void>();
@@ -114,42 +102,59 @@ export const ReactControlExample = ({
   const [dataViewNotFound, setDataViewNotFound] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
 
-  const dashboardApi = useMemo(() => {
+  const parentApi = useMemo(() => {
     const query$ = new BehaviorSubject<Query | AggregateQuery | undefined>(undefined);
-    const children$ = new BehaviorSubject<{ [key: string]: unknown }>({});
+    const unsavedSavedControlGroupState = unsavedStateManager.get();
+    const lastSavedControlGroupState = savedStateManager.get();
+    const lastSavedControlGroupState$ = new BehaviorSubject(lastSavedControlGroupState);
 
     return {
-      dataLoading: dataLoading$,
+      dataLoading$,
       unifiedSearchFilters$,
-      viewMode: viewMode$,
+      viewMode$,
       filters$,
       query$,
       timeRange$,
       timeslice$,
-      children$,
-      publishFilters: (newFilters: Filter[] | undefined) => filters$.next(newFilters),
-      setChild: (child: HasUniqueId) =>
-        children$.next({ ...children$.getValue(), [child.uuid]: child }),
-      removePanel: () => {},
-      replacePanel: () => {
-        return Promise.resolve('');
-      },
-      getPanelCount: () => {
-        return 2;
-      },
-      addNewPanel: () => {
-        return Promise.resolve(undefined);
-      },
-      saveNotification$,
       reload$,
+      getSerializedStateForChild: (childId: string) => {
+        if (childId === CONTROL_GROUP_EMBEDDABLE_ID) {
+          return unsavedSavedControlGroupState
+            ? unsavedSavedControlGroupState
+            : lastSavedControlGroupState;
+        }
+
+        return {
+          rawState: {},
+          references: [],
+        };
+      },
+      lastSavedStateForChild$: (childId: string) => {
+        return childId === CONTROL_GROUP_EMBEDDABLE_ID
+          ? lastSavedControlGroupState$
+          : of(undefined);
+      },
+      getLastSavedStateForChild: (childId: string) => {
+        return childId === CONTROL_GROUP_EMBEDDABLE_ID
+          ? lastSavedControlGroupState$.value
+          : {
+              rawState: {},
+              references: [],
+            };
+      },
+      setLastSavedControlGroupState: (
+        savedState: SerializedPanelState<ControlGroupSerializedState>
+      ) => {
+        lastSavedControlGroupState$.next(savedState);
+      },
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     const subscription = combineCompatibleChildrenApis<PublishesDataLoading, boolean | undefined>(
-      dashboardApi,
-      'dataLoading',
+      parentApi,
+      'dataLoading$',
       apiPublishesDataLoading,
       undefined,
       // flatten method
@@ -163,7 +168,7 @@ export const ReactControlExample = ({
     return () => {
       subscription.unsubscribe();
     };
-  }, [dashboardApi, dataLoading$]);
+  }, [parentApi, dataLoading$]);
 
   useEffect(() => {
     let ignore = false;
@@ -244,25 +249,20 @@ export const ReactControlExample = ({
     };
   }, [controlGroupFilters$, filters$, unifiedSearchFilters$]);
 
-  const [unsavedChanges, setUnsavedChanges] = useState<string | undefined>(undefined);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   useEffect(() => {
     if (!controlGroupApi) {
       return;
     }
-    const subscription = controlGroupApi.unsavedChanges.subscribe((nextUnsavedChanges) => {
-      if (!nextUnsavedChanges) {
-        clearControlGroupRuntimeState();
-        setUnsavedChanges(undefined);
+    const subscription = controlGroupApi.hasUnsavedChanges$.subscribe((nextHasUnsavedChanges) => {
+      if (!nextHasUnsavedChanges) {
+        unsavedStateManager.clear();
+        setHasUnsavedChanges(false);
         return;
       }
 
-      setControlGroupRuntimeState(nextUnsavedChanges);
-
-      // JSON.stringify removes keys where value is `undefined`
-      // switch `undefined` to `null` to see when value has been cleared
-      const replacer = (key: unknown, value: unknown) =>
-        typeof value === 'undefined' ? null : value;
-      setUnsavedChanges(JSON.stringify(nextUnsavedChanges, replacer, '  '));
+      unsavedStateManager.set(controlGroupApi.serializeState());
+      setHasUnsavedChanges(true);
     });
 
     return () => {
@@ -283,8 +283,8 @@ export const ReactControlExample = ({
             color="accent"
             size="s"
             onClick={() => {
-              clearControlGroupSerializedState();
-              clearControlGroupRuntimeState();
+              savedStateManager.clear();
+              unsavedStateManager.clear();
               window.location.reload();
             }}
           >
@@ -346,12 +346,10 @@ export const ReactControlExample = ({
             }}
           />
         </EuiFlexItem>
-        {unsavedChanges !== undefined && viewMode === 'edit' && (
+        {hasUnsavedChanges && viewMode === 'edit' && (
           <>
             <EuiFlexItem grow={false}>
-              <EuiToolTip content={<pre>{unsavedChanges}</pre>}>
-                <EuiBadge color="warning">Unsaved changes</EuiBadge>
-              </EuiToolTip>
+              <EuiBadge color="warning">Unsaved changes</EuiBadge>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
@@ -362,7 +360,7 @@ export const ReactControlExample = ({
                     return;
                   }
                   setIsResetting(true);
-                  await controlGroupApi.asyncResetUnsavedChanges();
+                  await controlGroupApi.resetUnsavedChanges();
                   if (isMounted()) setIsResetting(false);
                 }}
               >
@@ -371,11 +369,15 @@ export const ReactControlExample = ({
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButton
+                disabled={!controlGroupApi}
                 onClick={() => {
-                  if (controlGroupApi) {
-                    saveNotification$.next();
-                    setControlGroupSerializedState(controlGroupApi.serializeState());
+                  if (!controlGroupApi) {
+                    return;
                   }
+                  const savedState = controlGroupApi.serializeState();
+                  parentApi.setLastSavedControlGroupState(savedState);
+                  savedStateManager.set(savedState);
+                  unsavedStateManager.clear();
                 }}
               >
                 Save
@@ -400,37 +402,23 @@ export const ReactControlExample = ({
         }}
       />
       {hasControls && <EuiSpacer size="m" />}
-      <ReactEmbeddableRenderer
+      <EmbeddableRenderer
+        type={CONTROL_GROUP_TYPE}
+        maybeId={CONTROL_GROUP_EMBEDDABLE_ID}
         onApiAvailable={(api) => {
-          dashboardApi?.setChild(api);
           setControlGroupApi(api as ControlGroupApi);
         }}
         hidePanelChrome={true}
-        type={CONTROL_GROUP_TYPE}
-        getParentApi={() => ({
-          ...dashboardApi,
-          getSerializedStateForChild: getControlGroupSerializedState,
-          getRuntimeStateForChild: getControlGroupRuntimeState,
-        })}
+        getParentApi={() => parentApi}
         panelProps={{ hideLoader: true }}
-        key={`control_group`}
       />
       <EuiSpacer size="l" />
       {isControlGroupInitialized && (
         <div style={{ height: '400px' }}>
-          <ReactEmbeddableRenderer
-            type={'data_table'}
-            getParentApi={() => ({
-              ...dashboardApi,
-              getSerializedStateForChild: () => ({
-                rawState: {},
-                references: [],
-              }),
-            })}
+          <EmbeddableRenderer
+            type={'search_embeddable'}
+            getParentApi={() => parentApi}
             hidePanelChrome={false}
-            onApiAvailable={(api) => {
-              dashboardApi?.setChild(api);
-            }}
           />
         </div>
       )}

@@ -21,6 +21,7 @@ exports[`text_field_value TextFieldValue should render long text correctly, when
     </EuiFlexGroup>
   }
   delay="regular"
+  disableScreenReaderOutput={false}
   display="inlineBlock"
   position="top"
 >
@@ -51,6 +52,7 @@ exports[`text_field_value TextFieldValue should render long text correctly, when
     </EuiFlexGroup>
   }
   delay="regular"
+  disableScreenReaderOutput={false}
   display="inlineBlock"
   position="top"
 >
@@ -81,6 +83,7 @@ exports[`text_field_value TextFieldValue should render small text correctly, whe
     </EuiFlexGroup>
   }
   delay="regular"
+  disableScreenReaderOutput={false}
   display="inlineBlock"
   position="top"
 >
@@ -111,6 +114,7 @@ exports[`text_field_value TextFieldValue should render small text correctly, whe
     </EuiFlexGroup>
   }
   delay="regular"
+  disableScreenReaderOutput={false}
   display="inlineBlock"
   position="top"
 >

@@ -37,7 +37,8 @@ import {
 import { handleEsError } from './shared_imports';
 import { RouteDependencies } from './types';
 import type { UpgradeAssistantConfig } from './config';
-import type { FeatureSet } from '../common/types';
+import type { DataSourceExclusions, FeatureSet } from '../common/types';
+import { defaultExclusions } from './lib/data_source_exclusions';
 
 interface PluginsSetup {
   usageCollection: UsageCollectionSetup;
@@ -56,6 +57,7 @@ export class UpgradeAssistantServerPlugin implements Plugin {
   private readonly credentialStore: CredentialStore;
   private readonly kibanaVersion: string;
   private readonly initialFeatureSet: FeatureSet;
+  private readonly initialDataSourceExclusions: DataSourceExclusions;
 
   // Properties set at setup
   private licensing?: LicensingPluginSetup;
@@ -70,8 +72,9 @@ export class UpgradeAssistantServerPlugin implements Plugin {
     this.credentialStore = credentialStoreFactory(this.logger);
     this.kibanaVersion = env.packageInfo.version;
 
-    const { featureSet } = config.get();
+    const { featureSet, dataSourceExclusions } = config.get();
     this.initialFeatureSet = featureSet;
+    this.initialDataSourceExclusions = Object.assign({}, defaultExclusions, dataSourceExclusions);
   }
 
   private getWorker() {
@@ -82,7 +85,7 @@ export class UpgradeAssistantServerPlugin implements Plugin {
   }
 
   setup(
-    { http, getStartServices, savedObjects }: CoreSetup,
+    { http, deprecations, getStartServices, savedObjects, docLinks }: CoreSetup,
     { usageCollection, features, licensing, logsShared, security }: PluginsSetup
   ) {
     this.licensing = licensing;
@@ -119,6 +122,8 @@ export class UpgradeAssistantServerPlugin implements Plugin {
     });
 
     const router = http.createRouter();
+    // Initialize version service with current kibana version
+    versionService.setup(this.kibanaVersion);
 
     const dependencies: RouteDependencies = {
       router,
@@ -137,12 +142,12 @@ export class UpgradeAssistantServerPlugin implements Plugin {
       },
       config: {
         featureSet: this.initialFeatureSet,
+        dataSourceExclusions: this.initialDataSourceExclusions,
         isSecurityEnabled: () => security !== undefined && security.license.isEnabled(),
       },
+      current: versionService.getCurrentVersion(),
+      defaultTarget: versionService.getNextMajorVersion(),
     };
-
-    // Initialize version service with current kibana version
-    versionService.setup(this.kibanaVersion);
 
     registerRoutes(dependencies, this.getWorker.bind(this));
 

@@ -9,6 +9,7 @@ import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox } from '@elastic/eui';
 import { throttle } from 'lodash';
 import React, { useCallback, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 
 interface SuggestionsSelectProps {
@@ -26,6 +27,8 @@ interface SuggestionsSelectProps {
   prepend?: string;
   serviceName?: string;
 }
+
+export type { SuggestionsSelectProps };
 
 export function SuggestionsSelect({
   customOptions,
@@ -104,6 +107,9 @@ export function SuggestionsSelect({
 
   return (
     <EuiComboBox
+      aria-label={i18n.translate('xpack.apm.suggestionsSelect.comboBox.ariaLabel', {
+        defaultMessage: 'Select a value',
+      })}
       async={true}
       customOptionText={customOptionText}
       isClearable={isClearable}
@@ -115,7 +121,7 @@ export function SuggestionsSelect({
       selectedOptions={selectedOptions}
       singleSelection={{ asPlainText: true }}
       isInvalid={isInvalid}
-      style={{ minWidth: '256px' }}
+      css={{ minWidth: '256px' }}
       onCreateOption={handleCreateOption}
       data-test-subj={dataTestSubj}
       prepend={prepend}

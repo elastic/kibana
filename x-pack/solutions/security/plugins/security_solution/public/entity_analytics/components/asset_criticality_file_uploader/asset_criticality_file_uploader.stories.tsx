@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { Story } from '@storybook/react';
-import { addDecorator } from '@storybook/react';
+import type { StoryFn, Meta } from '@storybook/react';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
 import { euiLightVars } from '@kbn/ui-theme';
@@ -18,19 +17,22 @@ import { AssetCriticalityResultStep } from './components/result_step';
 import { AssetCriticalityValidationStep } from './components/validation_step';
 import { AssetCriticalityFilePickerStep } from './components/file_picker_step';
 
-addDecorator((storyFn) => (
-  <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>{storyFn()}</ThemeProvider>
-));
-
-const validLinesAsText = `user,user-001,low_impact\nuser-002,medium_impact\nuser,user-003,medium_impact\nhost,host-001,extreme_impact\nhost,host-002,extreme_impact`;
+const validLinesAsText = `user,user-001,low_impact\nuser-002,medium_impact\nuser,user-003,medium_impact\nhost,host-001,extreme_impact\nhost,host-002,extreme_impact\nservice,service-001,extreme_impact`;
 const invalidLinesAsText = `user,user-001,wow_impact\ntest,user-002,medium_impact\nuser,user-003,medium_impact,extra_column`;
 
 export default {
   component: AssetCriticalityFileUploader,
   title: 'Entity Analytics/AssetCriticalityFileUploader',
-};
+  decorators: [
+    (storyFn) => (
+      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+        {storyFn()}
+      </ThemeProvider>
+    ),
+  ],
+} as Meta;
 
-export const Default: Story<void> = () => {
+export const Default: StoryFn = () => {
   return (
     <StorybookProviders>
       <TestProvider>
@@ -44,7 +46,7 @@ export const Default: Story<void> = () => {
   );
 };
 
-export const FilePickerStep: Story<void> = () => {
+export const FilePickerStep: StoryFn = () => {
   return (
     <StorybookProviders>
       <TestProvider>
@@ -73,7 +75,7 @@ export const FilePickerStep: Story<void> = () => {
   );
 };
 
-export const ValidationStep: Story<void> = () => {
+export const ValidationStep: StoryFn = () => {
   return (
     <StorybookProviders>
       <TestProvider>
@@ -89,7 +91,7 @@ export const ValidationStep: Story<void> = () => {
                 size: 100,
                 validLines: {
                   text: validLinesAsText,
-                  count: 5,
+                  count: 6,
                 },
                 invalidLines: {
                   text: invalidLinesAsText,
@@ -127,7 +129,7 @@ export const ValidationStep: Story<void> = () => {
                 size: 100,
                 validLines: {
                   text: validLinesAsText,
-                  count: 5,
+                  count: 6,
                 },
                 invalidLines: {
                   text: invalidLinesAsText,
@@ -158,7 +160,7 @@ export const ValidationStep: Story<void> = () => {
   );
 };
 
-export const ResultsStep: Story<void> = () => {
+export const ResultsStep: StoryFn = () => {
   return (
     <StorybookProviders>
       <TestProvider>
@@ -196,7 +198,7 @@ export const ResultsStep: Story<void> = () => {
                   { message: 'error message 3', index: 5 },
                 ],
                 stats: {
-                  total: 5,
+                  total: 6,
                   successful: 2,
                   failed: 3,
                 },

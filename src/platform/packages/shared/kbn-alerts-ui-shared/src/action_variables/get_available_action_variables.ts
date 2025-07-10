@@ -8,8 +8,11 @@
  */
 
 import { partition } from 'lodash';
-import { ActionVariable } from '@kbn/alerting-types';
-import { ActionGroupWithMessageVariables, ActionVariables } from '@kbn/triggers-actions-ui-types';
+import type { ActionVariable } from '@kbn/alerting-types';
+import type {
+  ActionGroupWithMessageVariables,
+  ActionVariables,
+} from '@kbn/triggers-actions-ui-types';
 import { transformActionVariables } from './transforms';
 
 export const getAvailableActionVariables = (

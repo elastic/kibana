@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { deepFreeze } from '@kbn/std';
 import type { EndpointAuthzKeyList } from '../../types/authz';
 
 export const RESPONSE_ACTION_STATUS = ['failed', 'pending', 'successful'] as const;
@@ -212,10 +213,28 @@ export const RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELDS: Readonly<
     'sentinel_one.agent.agent.id',
   ],
   crowdstrike: ['device.id'],
-  // FIXME:PT temporary change. Tests for MS defender will be in PR https://github.com/elastic/kibana/pull/205012
-  microsoft_defender_endpoint: ['some.id'],
+  microsoft_defender_endpoint: [
+    'cloud.instance.id',
+    'm365_defender.alerts.entities.deviceId',
+    'm365_defender.alerts.devices.mdatpDeviceId',
+    'm365_defender.incident.alert.evidence.mde_device_id',
+  ],
 });
 
 export const SUPPORTED_AGENT_ID_ALERT_FIELDS: Readonly<string[]> = Object.values(
   RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELDS
 ).flat();
+
+/**
+ * A map of agent types to associated list of Fleet packages (integration type) that it supports.
+ * The value (Array of strings) is the name of the package, normally found in integration policies
+ * under `policy.package.name`
+ */
+export const RESPONSE_ACTIONS_SUPPORTED_INTEGRATION_TYPES: Readonly<
+  Record<ResponseActionAgentType, Readonly<string[]>>
+> = deepFreeze({
+  endpoint: ['endpoint'],
+  sentinel_one: ['sentinel_one'],
+  crowdstrike: ['crowdstrike'],
+  microsoft_defender_endpoint: ['microsoft_defender_endpoint', 'm365_defender'],
+});

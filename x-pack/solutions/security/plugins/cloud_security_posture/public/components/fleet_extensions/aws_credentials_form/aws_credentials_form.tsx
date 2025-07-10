@@ -15,7 +15,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
+import type { NewPackagePolicy, SetupTechnology } from '@kbn/fleet-plugin/public';
 import { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
@@ -47,6 +47,7 @@ export const AWS_SETUP_FORMAT = {
 } as const;
 
 export const AWS_CREDENTIALS_TYPE = {
+  CLOUD_CONNECTORS: 'cloud_connectors',
   ASSUME_ROLE: 'assume_role',
   DIRECT_ACCESS_KEYS: 'direct_access_keys',
   TEMPORARY_KEYS: 'temporary_keys',
@@ -92,11 +93,15 @@ const getSetupFormatOptions = (): CspRadioOption[] => [
 export interface AwsFormProps {
   newPolicy: NewPackagePolicy;
   input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_aws' }>;
+  isEditPage?: boolean;
+  setupTechnology?: SetupTechnology;
   updatePolicy(updatedPolicy: NewPackagePolicy): void;
   packageInfo: PackageInfo;
   onChange: any;
   setIsValid: (isValid: boolean) => void;
   disabled: boolean;
+  hasInvalidRequiredVars: boolean;
+  showCloudConnectors: boolean;
 }
 
 const CloudFormationSetup = ({
@@ -209,7 +214,8 @@ export const AwsCredentialsForm = ({
   packageInfo,
   onChange,
   setIsValid,
-  disabled,
+  disabled = false,
+  hasInvalidRequiredVars,
 }: AwsFormProps) => {
   const {
     awsCredentialsType,
@@ -265,6 +271,7 @@ export const AwsCredentialsForm = ({
       {setupFormat === AWS_SETUP_FORMAT.MANUAL && (
         <>
           <AwsCredentialTypeSelector
+            disabled={disabled}
             label={i18n.translate('xpack.csp.awsIntegration.awsCredentialTypeSelectorLabel', {
               defaultMessage: 'Preferred manual method',
             })}
@@ -289,6 +296,7 @@ export const AwsCredentialsForm = ({
             onChange={(key, value) => {
               updatePolicy(getPosturePolicy(newPolicy, input.type, { [key]: { value } }));
             }}
+            hasInvalidRequiredVars={hasInvalidRequiredVars}
           />
         </>
       )}
@@ -301,17 +309,20 @@ export const AwsCredentialTypeSelector = ({
   onChange,
   label,
   options,
+  disabled = false,
 }: {
   onChange(type: AwsCredentialsType): void;
   type: AwsCredentialsType;
   label: string;
   options: AwsCredentialsTypeOptions;
+  disabled: boolean;
 }) => (
   <EuiFormRow fullWidth label={label}>
     <EuiSelect
       fullWidth
       options={options}
       value={type}
+      disabled={disabled}
       onChange={(optionElem) => {
         onChange(optionElem.target.value as AwsCredentialsType);
       }}

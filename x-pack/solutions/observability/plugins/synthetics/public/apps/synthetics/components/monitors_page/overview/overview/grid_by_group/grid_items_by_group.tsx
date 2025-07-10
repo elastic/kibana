@@ -19,14 +19,20 @@ import {
 import { useFilters } from '../../../common/monitor_filters/use_filters';
 import { GroupGridItem } from './grid_group_item';
 import { ConfigKey } from '../../../../../../../../common/runtime_types';
-import { selectOverviewState, selectServiceLocationsState } from '../../../../../state';
+import {
+  OverviewView,
+  selectOverviewState,
+  selectServiceLocationsState,
+} from '../../../../../state';
 import { FlyoutParamProps } from '../types';
 import { selectOverviewStatus } from '../../../../../state/overview_status';
 
 export const GridItemsByGroup = ({
   setFlyoutConfigCallback,
+  view,
 }: {
   setFlyoutConfigCallback: (params: FlyoutParamProps) => void;
+  view: OverviewView;
 }) => {
   const [fullScreenGroup, setFullScreenGroup] = useState('');
   const {
@@ -50,7 +56,8 @@ export const GridItemsByGroup = ({
     values: getSyntheticsFilterDisplayValues(locations, 'locations', allLocations),
     otherValues: {
       label: 'Without any location',
-      items: allConfigs?.filter((monitor) => get(monitor, 'locations', []).length === 0),
+      // All monitors should have a locationId. This array tracks monitors that are missing it, which helps identify potential issues
+      items: allConfigs?.filter((monitor) => !get(monitor, 'locationId')),
     },
   };
 
@@ -80,7 +87,8 @@ export const GridItemsByGroup = ({
               defaultMessage: 'Without any location',
             }
           ),
-          items: allConfigs?.filter((monitor) => !get(monitor, 'location')),
+          // All monitors should have a locationId. This array tracks monitors that are missing it, which helps identify potential issues
+          items: allConfigs?.filter((monitor) => !get(monitor, 'locationId')),
         },
       };
       break;
@@ -147,6 +155,7 @@ export const GridItemsByGroup = ({
                 setFlyoutConfigCallback={setFlyoutConfigCallback}
                 setFullScreenGroup={setFullScreenGroup}
                 fullScreenGroup={fullScreenGroup}
+                view={view}
               />
             </WrappedPanel>
             <EuiSpacer size="m" />
@@ -162,6 +171,7 @@ export const GridItemsByGroup = ({
             setFlyoutConfigCallback={setFlyoutConfigCallback}
             setFullScreenGroup={setFullScreenGroup}
             fullScreenGroup={fullScreenGroup}
+            view={view}
           />
         </WrappedPanel>
       )}

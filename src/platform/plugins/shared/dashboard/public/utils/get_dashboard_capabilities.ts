@@ -13,13 +13,12 @@ import { coreServices } from '../services/kibana_services';
 export const getDashboardCapabilities = (): DashboardCapabilities => {
   const {
     application: {
-      capabilities: { dashboard },
+      capabilities: { dashboard_v2: dashboard },
     },
   } = coreServices;
 
   return {
     show: Boolean(dashboard.show),
-    saveQuery: Boolean(dashboard.saveQuery),
     createNew: Boolean(dashboard.createNew),
     createShortUrl: Boolean(dashboard.createShortUrl),
     showWriteControls: Boolean(dashboard.showWriteControls),

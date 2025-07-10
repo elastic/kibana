@@ -23,9 +23,9 @@ import { getCriteriaFromUsersType } from '../../../common/components/ml/criteria
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { AnomalyTableProvider } from '../../../common/components/ml/anomaly/anomaly_table_provider';
 import { buildUserNamesFilter } from '../../../../common/search_strategy';
-import { RiskScoreEntity } from '../../../../common/entity_analytics/risk_engine';
 import { FlyoutLoading } from '../../shared/components/flyout_loading';
 import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
+import { UserPanelFooter } from './footer';
 import { UserPanelContent } from './content';
 import { UserPanelHeader } from './header';
 import { useObservedUser } from './hooks/use_observed_user';
@@ -33,12 +33,14 @@ import { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_
 import { UserPreviewPanelFooter } from '../user_preview/footer';
 import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../../overview/components/detection_response/alerts_by_status/types';
 import { useNavigateToUserDetails } from './hooks/use_navigate_to_user_details';
+import { EntityIdentifierFields, EntityType } from '../../../../common/entity_analytics/types';
+import { useKibana } from '../../../common/lib/kibana';
+import { ENABLE_ASSET_INVENTORY_SETTING } from '../../../../common/constants';
 
 export interface UserPanelProps extends Record<string, unknown> {
   contextID: string;
   scopeId: string;
   userName: string;
-  isDraggable?: boolean;
   isPreviewMode?: boolean;
 }
 
@@ -47,7 +49,6 @@ export interface UserPanelExpandableFlyoutProps extends FlyoutPanelProps {
   params: UserPanelProps;
 }
 
-export const UserPanelKey: UserPanelExpandableFlyoutProps['key'] = 'user-panel';
 export const UserPreviewPanelKey: UserPanelExpandableFlyoutProps['key'] = 'user-preview-panel';
 export const USER_PANEL_RISK_SCORE_QUERY_ID = 'userPanelRiskScoreQuery';
 const FIRST_RECORD_PAGINATION = {
@@ -55,20 +56,17 @@ const FIRST_RECORD_PAGINATION = {
   querySize: 1,
 };
 
-export const UserPanel = ({
-  contextID,
-  scopeId,
-  userName,
-  isDraggable,
-  isPreviewMode,
-}: UserPanelProps) => {
+export const UserPanel = ({ contextID, scopeId, userName, isPreviewMode }: UserPanelProps) => {
+  const { uiSettings } = useKibana().services;
+  const assetInventoryEnabled = uiSettings.get(ENABLE_ASSET_INVENTORY_SETTING, true);
+
   const userNameFilterQuery = useMemo(
     () => (userName ? buildUserNamesFilter([userName]) : undefined),
     [userName]
   );
 
   const riskScoreState = useRiskScore({
-    riskEntity: RiskScoreEntity.user,
+    riskEntity: EntityType.user,
     filterQuery: userNameFilterQuery,
     onlyLatest: false,
     pagination: FIRST_RECORD_PAGINATION,
@@ -92,7 +90,7 @@ export const UserPanel = ({
   }, [refetch, refetchRiskInputsTab]);
 
   const { isLoading: recalculatingScore, calculateEntityRiskScore } = useCalculateEntityRiskScore(
-    RiskScoreEntity.user,
+    EntityType.user,
     userName,
     { onSuccess: refetchRiskScore }
   );
@@ -100,7 +98,7 @@ export const UserPanel = ({
   const { hasMisconfigurationFindings } = useHasMisconfigurations('user.name', userName);
 
   const { hasNonClosedAlerts } = useNonClosedAlerts({
-    field: 'user.name',
+    field: EntityIdentifierFields.userName,
     value: userName,
     to,
     from,
@@ -121,8 +119,7 @@ export const UserPanel = ({
     email,
     scopeId,
     contextID,
-    isDraggable,
-    isRiskScoreExist: !!userRiskData?.user?.risk,
+    isRiskScoreExist,
     hasMisconfigurationFindings,
     hasNonClosedAlerts,
     isPreviewMode,
@@ -171,7 +168,7 @@ export const UserPanel = ({
               }
               expandDetails={openPanelFirstTab}
               isPreviewMode={isPreviewMode}
-              isPreview={scopeId === TableId.rulePreview}
+              isRulePreview={scopeId === TableId.rulePreview}
             />
             <UserPanelHeader
               userName={userName}
@@ -187,18 +184,13 @@ export const UserPanel = ({
               onAssetCriticalityChange={calculateEntityRiskScore}
               contextID={contextID}
               scopeId={scopeId}
-              isDraggable={!!isDraggable}
               openDetailsPanel={openDetailsPanel}
               isPreviewMode={isPreviewMode}
               isLinkEnabled={isLinkEnabled}
             />
+            {!isPreviewMode && assetInventoryEnabled && <UserPanelFooter userName={userName} />}
             {isPreviewMode && (
-              <UserPreviewPanelFooter
-                userName={userName}
-                contextID={contextID}
-                scopeId={scopeId}
-                isDraggable={!!isDraggable}
-              />
+              <UserPreviewPanelFooter userName={userName} contextID={contextID} scopeId={scopeId} />
             )}
           </>
         );

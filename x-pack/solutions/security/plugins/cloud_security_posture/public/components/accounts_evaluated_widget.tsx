@@ -46,9 +46,11 @@ const benchmarks = [
 ];
 
 export const AccountsEvaluatedWidget = ({
+  activeNamespace,
   benchmarkAssets,
   benchmarkAbbreviateAbove = 999,
 }: {
+  activeNamespace?: string;
   benchmarkAssets: BenchmarkData[];
   /** numbers higher than the value of this field will be abbreviated using compact notation and have a tooltip displaying the full value */
   benchmarkAbbreviateAbove?: number;
@@ -63,15 +65,27 @@ export const AccountsEvaluatedWidget = ({
 
   const navToFindingsByCloudProvider = (provider: string) => {
     navToFindings(
-      { 'cloud.provider': provider, 'rule.benchmark.posture_type': CSPM_POLICY_TEMPLATE },
-      [FINDINGS_GROUPING_OPTIONS.CLOUD_ACCOUNT_NAME]
+      activeNamespace
+        ? {
+            [`${FINDINGS_GROUPING_OPTIONS.NAMESPACE}`]: activeNamespace,
+            'cloud.provider': provider,
+            'rule.benchmark.posture_type': CSPM_POLICY_TEMPLATE,
+          }
+        : { 'cloud.provider': provider, 'rule.benchmark.posture_type': CSPM_POLICY_TEMPLATE },
+      [FINDINGS_GROUPING_OPTIONS.CLOUD_ACCOUNT_ID]
     );
   };
 
   const navToFindingsByCisBenchmark = (cisBenchmark: string) => {
-    navToFindings({ 'rule.benchmark.id': cisBenchmark }, [
-      FINDINGS_GROUPING_OPTIONS.ORCHESTRATOR_CLUSTER_NAME,
-    ]);
+    navToFindings(
+      activeNamespace
+        ? {
+            [`${FINDINGS_GROUPING_OPTIONS.NAMESPACE}`]: activeNamespace,
+            'rule.benchmark.id': cisBenchmark,
+          }
+        : { 'rule.benchmark.id': cisBenchmark },
+      [FINDINGS_GROUPING_OPTIONS.ORCHESTRATOR_CLUSTER_ID]
+    );
   };
 
   const benchmarkElements = benchmarks.map((benchmark) => {

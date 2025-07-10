@@ -7,6 +7,7 @@
 
 export interface NetflowProps {
   contextId: string;
+  scopeId: string;
   destinationBytes?: string[] | null;
   destinationGeoContinentName?: string[] | null;
   destinationGeoCountryName?: string[] | null;
@@ -20,7 +21,6 @@ export interface NetflowProps {
   eventId: string;
   eventEnd?: string[] | null;
   eventStart?: string[] | null;
-  isDraggable?: boolean;
   networkBytes?: string[] | null;
   networkCommunityId?: string[] | null;
   networkDirection?: string[] | null;

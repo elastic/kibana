@@ -1,0 +1,201 @@
+{
+  "queries": [
+    {
+      "id": "shutdown_message",
+      "title": "Shutdown Message",
+      "description": "Identifies log messages indicating a shutdown event with the keyword 'GOODBYE'.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "GOODBYE",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "error_message",
+      "title": "Error Message",
+      "description": "Identifies log messages indicating an error related to opening a channel at an election address.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "regexp": {
+                "message": "Cannot open channel to .* at election address /.*:.*"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "exception_message",
+      "title": "Exception Message",
+      "description": "Identifies log messages indicating an 'end of stream' exception.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "caught end of stream exception",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "connection_broken_message",
+      "title": "Connection Broken Message",
+      "description": "Identifies log messages indicating a broken connection for a specific ID.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "regexp": {
+                "message": "Connection broken for id .*, my id = .*, error ="
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "ioexception_message",
+      "title": "IOException Message",
+      "description": "Identifies log messages indicating a session close due to a java.io.IOException with the message 'ZooKeeperServer not running'.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "regexp": {
+                "message": "Exception causing close of session .* due to java.io.IOException: ZooKeeperServer not running"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "session_expiry_message",
+      "title": "Session Expiry Message",
+      "description": "Identifies log messages indicating a session expiry due to a timeout.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "regexp": {
+                "message": "Expiring session .*, timeout of .*ms exceeded"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "startup_message",
+      "title": "Startup Message",
+      "description": "Identifies log messages indicating a startup event with the keyword 'starting up'.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "starting up",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "shutdown_complete_message",
+      "title": "Shutdown Complete Message",
+      "description": "Identifies log messages indicating the completion of a shutdown process.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "shutdown of request processor complete",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "startup_quorum_peer_message",
+      "title": "Startup Quorum Peer Message",
+      "description": "Identifies log messages indicating the startup of a quorum peer.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "Starting quorum peer",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "unexpected_exception_shutdown_message",
+      "title": "Unexpected Exception Causing Shutdown Message",
+      "description": "Identifies log messages indicating an unexpected exception causing a shutdown while the socket is still open.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "Unexpected exception causing shutdown while sock still open",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "unexpected_exception_message",
+      "title": "Unexpected Exception Message",
+      "description": "Identifies log messages indicating an unexpected exception.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "Unexpected Exception",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

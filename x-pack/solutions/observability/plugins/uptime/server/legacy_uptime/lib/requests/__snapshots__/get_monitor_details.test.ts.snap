@@ -3,61 +3,64 @@
 exports[`getMonitorDetails getMonitorAlerts should use expected filters for the query 1`] = `
 Array [
   Object {
-    "body": Object {
-      "aggs": Object {
-        "monitors": Object {
-          "terms": Object {
-            "field": "monitor.id",
-            "size": 1000,
-          },
+    "aggs": Object {
+      "monitors": Object {
+        "terms": Object {
+          "field": "monitor.id",
+          "size": 1000,
         },
       },
-      "query": Object {
-        "bool": Object {
-          "filter": Array [
-            Object {
-              "term": Object {
-                "monitor.id": "fooID",
-              },
-            },
-            Object {
-              "bool": Object {
-                "filter": Array [
-                  Object {
-                    "bool": Object {
-                      "minimum_should_match": 1,
-                      "should": Array [
-                        Object {
-                          "match": Object {
-                            "monitor.type": "http",
-                          },
-                        },
-                      ],
-                    },
-                  },
-                  Object {
-                    "bool": Object {
-                      "minimum_should_match": 1,
-                      "should": Array [
-                        Object {
-                          "match_phrase": Object {
-                            "url.domain": "www.cnn.com",
-                          },
-                        },
-                      ],
-                    },
-                  },
-                ],
-              },
-            },
-          ],
-        },
-      },
-      "size": 0,
     },
     "index": "heartbeat-*",
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "term": Object {
+              "monitor.id": "fooID",
+            },
+          },
+          Object {
+            "bool": Object {
+              "filter": Array [
+                Object {
+                  "bool": Object {
+                    "minimum_should_match": 1,
+                    "should": Array [
+                      Object {
+                        "match": Object {
+                          "monitor.type": "http",
+                        },
+                      },
+                    ],
+                  },
+                },
+                Object {
+                  "bool": Object {
+                    "minimum_should_match": 1,
+                    "should": Array [
+                      Object {
+                        "match_phrase": Object {
+                          "url.domain": "www.cnn.com",
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    "size": 0,
   },
   Object {
+    "context": Object {
+      "loggingOptions": Object {
+        "loggerName": "uptime",
+      },
+    },
     "meta": true,
   },
 ]
@@ -66,49 +69,52 @@ Array [
 exports[`getMonitorDetails getMonitorDetails will provide expected calls 1`] = `
 Array [
   Object {
-    "body": Object {
-      "_source": Array [
-        "error",
-        "@timestamp",
-      ],
-      "query": Object {
-        "bool": Object {
-          "filter": Array [
-            Object {
-              "range": Object {
-                "@timestamp": Object {
-                  "gte": "now-15m",
-                  "lte": "now",
-                },
+    "_source": Array [
+      "error",
+      "@timestamp",
+    ],
+    "index": "heartbeat-*",
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "range": Object {
+              "@timestamp": Object {
+                "gte": "now-15m",
+                "lte": "now",
               },
             },
-            Object {
-              "term": Object {
-                "monitor.id": "fooID",
-              },
+          },
+          Object {
+            "term": Object {
+              "monitor.id": "fooID",
             },
-          ],
-          "must": Array [
-            Object {
-              "exists": Object {
-                "field": "error",
-              },
+          },
+        ],
+        "must": Array [
+          Object {
+            "exists": Object {
+              "field": "error",
             },
-          ],
+          },
+        ],
+      },
+    },
+    "size": 1,
+    "sort": Array [
+      Object {
+        "@timestamp": Object {
+          "order": "desc",
         },
       },
-      "size": 1,
-      "sort": Array [
-        Object {
-          "@timestamp": Object {
-            "order": "desc",
-          },
-        },
-      ],
-    },
-    "index": "heartbeat-*",
+    ],
   },
   Object {
+    "context": Object {
+      "loggingOptions": Object {
+        "loggerName": "uptime",
+      },
+    },
     "meta": true,
   },
 ]

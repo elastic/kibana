@@ -6,22 +6,13 @@
  */
 
 import { z } from '@kbn/zod';
-import { RiskQueries } from '../model/factory_query_type';
+
+import { RiskScoreFields } from '../../../search_strategy/security_solution/risk_score/all';
 import { requestBasicOptionsSchema } from '../model/request_basic_options';
 import { sort } from '../model/sort';
 import { timerange } from '../model/timerange';
+import { EntityRiskQueries } from '../model/factory_query_type';
 import { riskScoreEntity } from './model/risk_score_entity';
-
-export enum RiskScoreFields {
-  timestamp = '@timestamp',
-  hostName = 'host.name',
-  hostRiskScore = 'host.risk.calculated_score_norm',
-  hostRisk = 'host.risk.calculated_level',
-  userName = 'user.name',
-  userRiskScore = 'user.risk.calculated_score_norm',
-  userRisk = 'user.risk.calculated_level',
-  alertsCount = 'alertsCount',
-}
 
 const baseRiskScoreRequestOptionsSchema = requestBasicOptionsSchema.extend({
   alertsTimerange: timerange.optional(),
@@ -37,32 +28,14 @@ const baseRiskScoreRequestOptionsSchema = requestBasicOptionsSchema.extend({
   sort: sort
     .removeDefault()
     .extend({
-      field: z.enum([
-        RiskScoreFields.timestamp,
-        RiskScoreFields.hostName,
-        RiskScoreFields.hostRiskScore,
-        RiskScoreFields.hostRisk,
-        RiskScoreFields.userName,
-        RiskScoreFields.userRiskScore,
-        RiskScoreFields.userRisk,
-        RiskScoreFields.alertsCount,
-      ]),
+      field: z.nativeEnum(RiskScoreFields),
     })
     .optional(),
 });
 
-export const hostsRiskScoreRequestOptionsSchema = baseRiskScoreRequestOptionsSchema.extend({
-  factoryQueryType: z.literal(RiskQueries.hostsRiskScore),
+export const riskScoreRequestOptionsSchema = baseRiskScoreRequestOptionsSchema.extend({
+  factoryQueryType: z.literal(EntityRiskQueries.list),
 });
-
-export const usersRiskScoreRequestOptionsSchema = baseRiskScoreRequestOptionsSchema.extend({
-  factoryQueryType: z.literal(RiskQueries.usersRiskScore),
-});
-
-export const riskScoreRequestOptionsSchema = z.union([
-  hostsRiskScoreRequestOptionsSchema,
-  usersRiskScoreRequestOptionsSchema,
-]);
 
 export type RiskScoreRequestOptionsInput = z.input<typeof riskScoreRequestOptionsSchema>;
 

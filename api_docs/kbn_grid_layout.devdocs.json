@@ -11,25 +11,25 @@
         "label": "GridLayout",
         "description": [],
         "signature": [
-          "({ layout, gridSettings, renderPanelContents, onLayoutChange, expandedPanelId, accessMode, }: ",
+          "({ layout, gridSettings, renderPanelContents, onLayoutChange, expandedPanelId, accessMode, className, useCustomDragHandle, }: ",
           "GridLayoutProps",
           ") => React.JSX.Element"
         ],
-        "path": "packages/kbn-grid-layout/grid/grid_layout.tsx",
+        "path": "src/platform/packages/private/kbn-grid-layout/grid/grid_layout.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/grid-layout",
             "id": "def-public.GridLayout.$1",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
-            "label": "{\n  layout,\n  gridSettings,\n  renderPanelContents,\n  onLayoutChange,\n  expandedPanelId,\n  accessMode = 'EDIT',\n}",
+            "label": "{\n  layout,\n  gridSettings,\n  renderPanelContents,\n  onLayoutChange,\n  expandedPanelId,\n  accessMode = 'EDIT',\n  className,\n  useCustomDragHandle = false,\n}",
             "description": [],
             "signature": [
               "GridLayoutProps"
             ],
-            "path": "packages/kbn-grid-layout/grid/grid_layout.tsx",
+            "path": "src/platform/packages/private/kbn-grid-layout/grid/grid_layout.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -64,14 +64,14 @@
           },
           ") => boolean"
         ],
-        "path": "packages/kbn-grid-layout/grid/utils/equality_checks.ts",
+        "path": "src/platform/packages/private/kbn-grid-layout/grid/utils/equality_checks.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/grid-layout",
             "id": "def-public.isLayoutEqual.$1",
-            "type": "Array",
+            "type": "Object",
             "tags": [],
             "label": "a",
             "description": [],
@@ -84,7 +84,7 @@
                 "text": "GridLayoutData"
               }
             ],
-            "path": "packages/kbn-grid-layout/grid/utils/equality_checks.ts",
+            "path": "src/platform/packages/private/kbn-grid-layout/grid/utils/equality_checks.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -92,7 +92,7 @@
           {
             "parentPluginId": "@kbn/grid-layout",
             "id": "def-public.isLayoutEqual.$2",
-            "type": "Array",
+            "type": "Object",
             "tags": [],
             "label": "b",
             "description": [],
@@ -105,7 +105,7 @@
                 "text": "GridLayoutData"
               }
             ],
-            "path": "packages/kbn-grid-layout/grid/utils/equality_checks.ts",
+            "path": "src/platform/packages/private/kbn-grid-layout/grid/utils/equality_checks.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -116,6 +116,35 @@
       }
     ],
     "interfaces": [
+      {
+        "parentPluginId": "@kbn/grid-layout",
+        "id": "def-public.GridLayoutData",
+        "type": "Interface",
+        "tags": [],
+        "label": "GridLayoutData",
+        "description": [],
+        "path": "src/platform/packages/private/kbn-grid-layout/grid/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/grid-layout",
+            "id": "def-public.GridLayoutData.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[key: string]: GridLayoutWidget",
+            "description": [],
+            "signature": [
+              "[key: string]:  ",
+              "GridLayoutWidget"
+            ],
+            "path": "src/platform/packages/private/kbn-grid-layout/grid/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/grid-layout",
         "id": "def-public.GridPanelData",
@@ -131,10 +160,9 @@
             "section": "def-public.GridPanelData",
             "text": "GridPanelData"
           },
-          " extends ",
-          "GridRect"
+          " extends GridRect"
         ],
-        "path": "packages/kbn-grid-layout/grid/types.ts",
+        "path": "src/platform/packages/private/kbn-grid-layout/grid/grid_panel/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -145,7 +173,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "packages/kbn-grid-layout/grid/types.ts",
+            "path": "src/platform/packages/private/kbn-grid-layout/grid/grid_panel/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -154,40 +182,62 @@
       },
       {
         "parentPluginId": "@kbn/grid-layout",
-        "id": "def-public.GridRowData",
+        "id": "def-public.GridSectionData",
         "type": "Interface",
         "tags": [],
-        "label": "GridRowData",
+        "label": "GridSectionData",
         "description": [],
-        "path": "packages/kbn-grid-layout/grid/types.ts",
+        "path": "src/platform/packages/private/kbn-grid-layout/grid/grid_section/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/grid-layout",
-            "id": "def-public.GridRowData.title",
+            "id": "def-public.GridSectionData.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "src/platform/packages/private/kbn-grid-layout/grid/grid_section/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/grid-layout",
+            "id": "def-public.GridSectionData.row",
+            "type": "number",
+            "tags": [],
+            "label": "row",
+            "description": [],
+            "path": "src/platform/packages/private/kbn-grid-layout/grid/grid_section/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/grid-layout",
+            "id": "def-public.GridSectionData.title",
             "type": "string",
             "tags": [],
             "label": "title",
             "description": [],
-            "path": "packages/kbn-grid-layout/grid/types.ts",
+            "path": "src/platform/packages/private/kbn-grid-layout/grid/grid_section/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/grid-layout",
-            "id": "def-public.GridRowData.isCollapsed",
+            "id": "def-public.GridSectionData.isCollapsed",
             "type": "boolean",
             "tags": [],
             "label": "isCollapsed",
             "description": [],
-            "path": "packages/kbn-grid-layout/grid/types.ts",
+            "path": "src/platform/packages/private/kbn-grid-layout/grid/grid_section/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/grid-layout",
-            "id": "def-public.GridRowData.panels",
+            "id": "def-public.GridSectionData.panels",
             "type": "Object",
             "tags": [],
             "label": "panels",
@@ -203,7 +253,7 @@
               },
               "; }"
             ],
-            "path": "packages/kbn-grid-layout/grid/types.ts",
+            "path": "src/platform/packages/private/kbn-grid-layout/grid/grid_section/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -216,8 +266,10 @@
         "type": "Interface",
         "tags": [],
         "label": "GridSettings",
-        "description": [],
-        "path": "packages/kbn-grid-layout/grid/types.ts",
+        "description": [
+          "\nThe settings for how the grid should be rendered"
+        ],
+        "path": "src/platform/packages/private/kbn-grid-layout/grid/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -228,7 +280,7 @@
             "tags": [],
             "label": "gutterSize",
             "description": [],
-            "path": "packages/kbn-grid-layout/grid/types.ts",
+            "path": "src/platform/packages/private/kbn-grid-layout/grid/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -239,7 +291,7 @@
             "tags": [],
             "label": "rowHeight",
             "description": [],
-            "path": "packages/kbn-grid-layout/grid/types.ts",
+            "path": "src/platform/packages/private/kbn-grid-layout/grid/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -250,7 +302,18 @@
             "tags": [],
             "label": "columnCount",
             "description": [],
-            "path": "packages/kbn-grid-layout/grid/types.ts",
+            "path": "src/platform/packages/private/kbn-grid-layout/grid/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/grid-layout",
+            "id": "def-public.GridSettings.keyboardDragTopLimit",
+            "type": "number",
+            "tags": [],
+            "label": "keyboardDragTopLimit",
+            "description": [],
+            "path": "src/platform/packages/private/kbn-grid-layout/grid/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -266,33 +329,13 @@
         "type": "Type",
         "tags": [],
         "label": "GridAccessMode",
-        "description": [],
+        "description": [
+          "\nControls whether the resize + drag handles are visible and functioning"
+        ],
         "signature": [
           "\"VIEW\" | \"EDIT\""
         ],
-        "path": "packages/kbn-grid-layout/grid/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/grid-layout",
-        "id": "def-public.GridLayoutData",
-        "type": "Type",
-        "tags": [],
-        "label": "GridLayoutData",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "@kbn/grid-layout",
-            "scope": "public",
-            "docId": "kibKbnGridLayoutPluginApi",
-            "section": "def-public.GridRowData",
-            "text": "GridRowData"
-          },
-          "[]"
-        ],
-        "path": "packages/kbn-grid-layout/grid/types.ts",
+        "path": "src/platform/packages/private/kbn-grid-layout/grid/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

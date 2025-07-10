@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
+import { screen } from '@testing-library/react';
 
-import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer, TestProviders } from '../../common/mock';
+import { TestProviders, renderWithTestingProviders } from '../../common/mock';
 import { HeaderPage } from '.';
 import { useMountAppended } from '../../utils/use_mount_appended';
 
@@ -16,15 +16,13 @@ jest.mock('../../common/navigation/hooks');
 
 describe('HeaderPage', () => {
   const mount = useMountAppended();
-  let appMock: AppMockRenderer;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    appMock = createAppMockRenderer();
   });
 
   it('renders', () => {
-    const result = appMock.render(
+    renderWithTestingProviders(
       <TestProviders>
         <HeaderPage border title="Test title">
           <p>{'Test supplement'}</p>
@@ -32,18 +30,28 @@ describe('HeaderPage', () => {
       </TestProviders>
     );
 
-    expect(result.getByText('Test title')).toBeInTheDocument();
-    expect(result.getByText('Test supplement')).toBeInTheDocument();
+    expect(screen.getByText('Test title')).toBeInTheDocument();
+    expect(screen.getByText('Test supplement')).toBeInTheDocument();
   });
 
-  it('renders the back link when provided', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <HeaderPage showBackButton title="Test title" />
+  it('renders the `incremental_id` when provided', () => {
+    renderWithTestingProviders(
+      <TestProviders settings={{ displayIncrementalCaseId: true }}>
+        <HeaderPage border title="Test title" incrementalId={1337} />
       </TestProviders>
     );
 
-    expect(wrapper.find('.casesHeaderPage__linkBack').first().exists()).toBe(true);
+    expect(screen.getByText('#1337')).toBeInTheDocument();
+  });
+
+  it('does not render the `incremental_id` when setting disabled', () => {
+    renderWithTestingProviders(
+      <TestProviders settings={{ displayIncrementalCaseId: false }}>
+        <HeaderPage border title="Test title" incrementalId={1337} />
+      </TestProviders>
+    );
+
+    expect(screen.queryByText('#1337')).not.toBeInTheDocument();
   });
 
   it('DOES NOT render the back link when not provided', () => {
@@ -80,27 +88,29 @@ describe('HeaderPage', () => {
 
   describe('Badges', () => {
     it('does not render the badge if the release is ga', () => {
-      const renderResult = appMock.render(<HeaderPage title="Test title" />);
+      renderWithTestingProviders(<HeaderPage title="Test title" />);
 
-      expect(renderResult.getByText('Test title')).toBeInTheDocument();
-      expect(renderResult.queryByText('Beta')).toBeFalsy();
-      expect(renderResult.queryByText('Technical preview')).toBeFalsy();
+      expect(screen.getByText('Test title')).toBeInTheDocument();
+      expect(screen.queryByText('Beta')).toBeFalsy();
+      expect(screen.queryByText('Technical preview')).toBeFalsy();
     });
 
     it('does render the beta badge', () => {
-      appMock = createAppMockRenderer({ releasePhase: 'beta' });
-      const renderResult = appMock.render(<HeaderPage title="Test title" />);
+      renderWithTestingProviders(<HeaderPage title="Test title" />, {
+        wrapperProps: { releasePhase: 'beta' },
+      });
 
-      expect(renderResult.getByText('Test title')).toBeInTheDocument();
-      expect(renderResult.getByText('Beta')).toBeInTheDocument();
+      expect(screen.getByText('Test title')).toBeInTheDocument();
+      expect(screen.getByText('Beta')).toBeInTheDocument();
     });
 
     it('does render the experimental badge', () => {
-      appMock = createAppMockRenderer({ releasePhase: 'experimental' });
-      const renderResult = appMock.render(<HeaderPage title="Test title" />);
+      renderWithTestingProviders(<HeaderPage title="Test title" />, {
+        wrapperProps: { releasePhase: 'experimental' },
+      });
 
-      expect(renderResult.getByText('Test title')).toBeInTheDocument();
-      expect(renderResult.getByText('Technical preview')).toBeInTheDocument();
+      expect(screen.getByText('Test title')).toBeInTheDocument();
+      expect(screen.getByText('Technical preview')).toBeInTheDocument();
     });
   });
 });

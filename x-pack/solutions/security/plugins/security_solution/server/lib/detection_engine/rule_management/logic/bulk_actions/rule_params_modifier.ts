@@ -6,16 +6,21 @@
  */
 
 import type { RuleParamsModifierResult } from '@kbn/alerting-plugin/server/rules_client/methods/bulk_edit';
-import type { ExperimentalFeatures } from '../../../../../../common';
 import type { InvestigationFieldsCombined, RuleAlertType } from '../../../rule_schema';
 import type {
   BulkActionEditForRuleParams,
   BulkActionEditPayloadIndexPatterns,
   BulkActionEditPayloadInvestigationFields,
+  BulkActionEditPayloadSetAlertSuppression,
 } from '../../../../../../common/api/detection_engine/rule_management';
 import { BulkActionEditTypeEnum } from '../../../../../../common/api/detection_engine/rule_management';
 import { invariant } from '../../../../../../common/utils/invariant';
 import { calculateFromValue } from '../../../rule_types/utils/utils';
+import type {
+  AlertSuppressionCamel,
+  AlertSuppressionDuration,
+} from '../../../../../../common/api/detection_engine/model/rule_schema/common_attributes.gen';
+import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../../common/detection_engine/constants';
 
 export const addItemsToArray = <T>(arr: T[], items: T[]): T[] =>
   Array.from(new Set([...arr, ...items]));
@@ -105,17 +110,36 @@ const shouldSkipInvestigationFieldsBulkAction = (
   return false;
 };
 
+const hasMatchingDuration = (
+  duration: AlertSuppressionDuration | undefined,
+  actionDuration: AlertSuppressionDuration | undefined
+) => duration?.value === actionDuration?.value && duration?.unit === actionDuration?.unit;
+
+const shouldSkipAddAlertSuppressionBulkAction = (
+  alertSuppression: AlertSuppressionCamel | undefined,
+  action: BulkActionEditPayloadSetAlertSuppression
+) => {
+  if (!hasMatchingDuration(alertSuppression?.duration, action.value.duration)) {
+    return false;
+  }
+
+  if (alertSuppression?.missingFieldsStrategy !== action.value.missing_fields_strategy) {
+    return false;
+  }
+
+  return action.value.group_by.every((field) => alertSuppression?.groupBy?.includes(field));
+};
+
 // eslint-disable-next-line complexity
 const applyBulkActionEditToRuleParams = (
   existingRuleParams: RuleAlertType['params'],
-  action: BulkActionEditForRuleParams,
-  experimentalFeatures: ExperimentalFeatures
+  action: BulkActionEditForRuleParams
 ): {
   ruleParams: RuleAlertType['params'];
   isActionSkipped: boolean;
 } => {
   let ruleParams = { ...existingRuleParams };
-  // If the action is succesfully applied and the rule params are modified,
+  // If the action is successfully applied and the rule params are modified,
   // we update the following flag to false. As soon as the current function
   // returns this flag as false, at least once, for any action, we know that
   // the rule needs to be marked as having its params updated.
@@ -243,6 +267,53 @@ const applyBulkActionEditToRuleParams = (
       ruleParams.investigationFields = action.value;
       break;
     }
+    // alert suppression actions
+    case BulkActionEditTypeEnum.delete_alert_suppression: {
+      if (!ruleParams?.alertSuppression) {
+        isActionSkipped = true;
+        break;
+      }
+
+      ruleParams.alertSuppression = undefined;
+      break;
+    }
+    case BulkActionEditTypeEnum.set_alert_suppression: {
+      invariant(
+        ruleParams.type !== 'threshold',
+        "Threshold rule doesn't support this action. Use 'set_alert_suppression_for_threshold' action instead"
+      );
+
+      if (shouldSkipAddAlertSuppressionBulkAction(ruleParams?.alertSuppression, action)) {
+        isActionSkipped = true;
+        break;
+      }
+
+      ruleParams.alertSuppression = {
+        groupBy: action.value.group_by,
+        missingFieldsStrategy:
+          action.value.missing_fields_strategy ?? DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY,
+        duration: action.value.duration,
+      };
+
+      break;
+    }
+    case BulkActionEditTypeEnum.set_alert_suppression_for_threshold: {
+      invariant(
+        ruleParams.type === 'threshold',
+        `${ruleParams.type} rule type doesn't support this action. Use 'set_alert_suppression' action instead.`
+      );
+
+      if (hasMatchingDuration(ruleParams?.alertSuppression?.duration, action.value.duration)) {
+        isActionSkipped = true;
+        break;
+      }
+
+      ruleParams.alertSuppression = {
+        duration: action.value.duration,
+      };
+
+      break;
+    }
     // timeline actions
     case BulkActionEditTypeEnum.set_timeline: {
       ruleParams = {
@@ -281,17 +352,12 @@ const applyBulkActionEditToRuleParams = (
  */
 export const ruleParamsModifier = (
   existingRuleParams: RuleAlertType['params'],
-  actions: BulkActionEditForRuleParams[],
-  experimentalFeatures: ExperimentalFeatures
+  actions: BulkActionEditForRuleParams[]
 ): RuleParamsModifierResult<RuleAlertType['params']> => {
   let isParamsUpdateSkipped = true;
 
   const modifiedParams = actions.reduce((acc, action) => {
-    const { ruleParams, isActionSkipped } = applyBulkActionEditToRuleParams(
-      acc,
-      action,
-      experimentalFeatures
-    );
+    const { ruleParams, isActionSkipped } = applyBulkActionEditToRuleParams(acc, action);
 
     // The rule was updated with at least one action, so mark our rule as updated
     if (!isActionSkipped) {

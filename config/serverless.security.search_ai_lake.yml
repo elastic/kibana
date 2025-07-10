@@ -1,0 +1,86 @@
+# Security Search AI Lake tier config
+
+## Cloud settings
+xpack.cloud.serverless.product_tier: search_ai_lake
+
+## Disable plugins
+xpack.osquery.enabled: false
+xpack.ml.ad.enabled: false
+xpack.ml.dfa.enabled: false
+
+## Plugins that are inaccessible in the UI
+xpack.securitySolutionServerless.inaccessibleApps:
+  - dashboards
+  - visualize
+  - maps
+  - lens
+
+## Disable plugin features
+xpack.alerting.maintenanceWindow.enabled: false
+xpack.alerting.rulesSettings.enabled: false
+xpack.trigger_actions_ui.rules.enabled: false
+
+xpack.features.overrides:
+  ### The following features are Security features hidden in Role management UI for this specific tier.
+  securitySolutionTimeline.hidden: true
+  securitySolutionNotes.hidden: true
+  siem.description: null
+  siemV2.description: null
+  siemV3.description: null
+  securitySolutionSiemMigrations.hidden: true
+
+  ## Fine-tune the security solution essentials feature privileges. These feature privilege overrides are set individually for each project type. Also, refer to `serverless.yml` for the project-agnostic overrides.
+  siemV3:
+    privileges:
+      all.composedOf:
+        ## Limited values so the fields from serverless.yml or serverless.security.yml are overwritten
+        ## We do not need to compose siemV3 from maps and visualizations because these functionalities are disabled in this tier
+        - feature: "discover_v2"
+          privileges: [ "all" ]
+          ## We need limited access to fleet (v1) in order to use integrations
+        - feature: "fleet"
+          privileges: [ "all" ]
+      read.composedOf:
+        - feature: "discover_v2"
+          privileges: [ "read" ]
+        - feature: "fleet"
+          privileges: [ "read" ]
+  siemV2:
+    privileges:
+      all.composedOf:
+        ## Limited values so the fields from serverless.yml or serverless.security.yml are overwritten
+        ## We do not need to compose siemV2 from maps and visualizations because these functionalities are disabled in this tier
+        - feature: "discover_v2"
+          privileges: [ "all" ]
+          ## We need limited access to fleet (v1) in order to use integrations
+        - feature: "fleet"
+          privileges: [ "all" ]
+      read.composedOf:
+        - feature: "discover_v2"
+          privileges: [ "read" ]
+        - feature: "fleet"
+          privileges: [ "read" ]
+  siem:
+    privileges:
+      all.composedOf:
+        ## Limited values so the fields from serverless.yml or serverless.security.yml are overwritten
+        ## We do not need to compose siemV2 from maps and visualizations because these functionalities are disabled in this tier
+        - feature: "discover_v2"
+          privileges: [ "all" ]
+        - feature: "savedQueryManagement"
+          privileges: [ "all" ]
+      read.composedOf:
+        - feature: "discover_v2"
+          privileges: [ "read" ]
+        - feature: "savedQueryManagement"
+          privileges: [ "read" ]
+
+# Custom integrations/fleet settings
+xpack.fleet.agentless.isDefault: true
+xpack.fleet.hideDashboards: true
+xpack.fleet.integrationsHomeOverride: '/app/security/configurations/integrations'
+xpack.fleet.prereleaseEnabledByDefault: true
+xpack.fleet.internal.registry.searchAiLakePackageAllowlistEnabled: true
+
+# Pin the prebuilt rules package version to the version that contains promotion rules
+xpack.securitySolution.prebuiltRulesPackageVersion: '9.0.5-beta.1'

@@ -11,13 +11,9 @@ import { useActions, useValues } from 'kea';
 
 import {
   EuiButton,
-  EuiButtonIcon,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
-  EuiPopover,
   EuiSearchBar,
   EuiSpacer,
   EuiText,
@@ -30,11 +26,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { LEARN_MORE_LINK } from '../../../shared/constants';
 import { KibanaLogic } from '../../../shared/kibana';
 import { handlePageChange } from '../../../shared/table_pagination';
-import {
-  NEW_INDEX_SELECT_CONNECTOR_CLIENTS_PATH,
-  NEW_INDEX_SELECT_CONNECTOR_NATIVE_PATH,
-  NEW_INDEX_SELECT_CONNECTOR_PATH,
-} from '../../routes';
+import { NEW_INDEX_SELECT_CONNECTOR_PATH } from '../../routes';
 import { EnterpriseSearchContentPageTemplate } from '../layout';
 
 import { DefaultSettingsFlyout } from '../settings/default_settings_flyout';
@@ -68,7 +60,6 @@ export const Connectors: React.FC<ConnectorsProps> = ({ isCrawler, isCrawlerSelf
     useActions(ConnectorsLogic);
   const { data, isLoading, searchParams, isEmpty, connectors } = useValues(ConnectorsLogic);
   const [searchQuery, setSearchValue] = useState('');
-  const [showMoreOptionsPopover, setShowMoreOptionsPopover] = useState<boolean>(false);
   const [showDefaultSettingsFlyout, setShowDefaultSettingsFlyout] = useState<boolean>(false);
   const { productFeatures } = useValues(KibanaLogic);
 
@@ -86,6 +77,7 @@ export const Connectors: React.FC<ConnectorsProps> = ({ isCrawler, isCrawlerSelf
     <>
       <DeleteConnectorModal isCrawler={isCrawler} />
       <EnterpriseSearchContentPageTemplate
+        data-test-subj="searchConnectorsPage"
         pageChrome={!isCrawler ? connectorsBreadcrumbs : crawlersBreadcrumbs}
         pageViewTelemetry={!isCrawler ? 'Connectors' : 'Web Crawlers'}
         isLoading={isLoading}
@@ -146,65 +138,6 @@ export const Connectors: React.FC<ConnectorsProps> = ({ isCrawler, isCrawlerSelf
                         defaultMessage="New Connector"
                       />
                     </EuiButton>
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiPopover
-                      isOpen={showMoreOptionsPopover}
-                      closePopover={() => setShowMoreOptionsPopover(false)}
-                      button={
-                        <EuiButtonIcon
-                          data-test-subj="entSearchContent-connectors-newConnector-moreOptionsButton"
-                          data-telemetry-id="entSearchContent-connectors-newConnector-moreOptionsButton"
-                          color="primary"
-                          display="fill"
-                          size="m"
-                          iconType="boxesVertical"
-                          aria-label={i18n.translate(
-                            'xpack.enterpriseSearch.connectors.more.ariaLabel',
-                            { defaultMessage: 'More options' }
-                          )}
-                          onClick={() => setShowMoreOptionsPopover(!showMoreOptionsPopover)}
-                        />
-                      }
-                    >
-                      <EuiContextMenuPanel
-                        size="s"
-                        items={[
-                          <EuiContextMenuItem
-                            size="s"
-                            key="newConnectorNative"
-                            onClick={() => {
-                              KibanaLogic.values.navigateToUrl(
-                                NEW_INDEX_SELECT_CONNECTOR_NATIVE_PATH
-                              );
-                            }}
-                            icon="plusInCircle"
-                          >
-                            {i18n.translate(
-                              'xpack.enterpriseSearch.connectors.newNativeConnectorButtonLabel',
-                              {
-                                defaultMessage: 'New Elastic managed Connector',
-                              }
-                            )}
-                          </EuiContextMenuItem>,
-                          <EuiContextMenuItem
-                            size="s"
-                            key="newConnectorClient"
-                            icon="plusInCircle"
-                            onClick={() => {
-                              KibanaLogic.values.navigateToUrl(
-                                NEW_INDEX_SELECT_CONNECTOR_CLIENTS_PATH
-                              );
-                            }}
-                          >
-                            {i18n.translate(
-                              'xpack.enterpriseSearch.connectors.newConnectorsClientButtonLabel',
-                              { defaultMessage: 'New Self-managed Connector' }
-                            )}
-                          </EuiContextMenuItem>,
-                        ]}
-                      />
-                    </EuiPopover>
                   </EuiFlexItem>
                 </EuiFlexGroup>,
                 ...(productFeatures.hasDefaultIngestPipeline

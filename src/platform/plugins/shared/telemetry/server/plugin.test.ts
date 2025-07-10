@@ -15,6 +15,7 @@ import { telemetryCollectionManagerPluginMock } from '@kbn/telemetry-collection-
 import { buildShipperHeaders } from '../common/ebt_v3_endpoint';
 import { TelemetryPlugin } from './plugin';
 import type { NodeRoles } from '@kbn/core-node-server';
+import { Observable } from 'rxjs';
 
 describe('TelemetryPlugin', () => {
   describe('setup', () => {
@@ -108,11 +109,11 @@ describe('TelemetryPlugin', () => {
           telemetryCollectionManager: telemetryCollectionManagerPluginMock.createSetupContract(),
         });
 
-        plugin.start(coreMock.createStart(), {
+        const returnedStartDependencies = plugin.start(coreMock.createStart(), {
           telemetryCollectionManager: telemetryCollectionManagerPluginMock.createStartContract(),
         });
 
-        return { startFetcherMock };
+        return { startFetcherMock, returnedStartDependencies };
       }
 
       afterEach(() => {
@@ -127,6 +128,12 @@ describe('TelemetryPlugin', () => {
       it('does not call startFetcher when not a UI node', () => {
         const { startFetcherMock } = createPluginForNodeRole({ ui: false });
         expect(startFetcherMock).toHaveBeenCalledTimes(0);
+      });
+
+      it('exposes isOptedIn$ Observable', () => {
+        const { returnedStartDependencies } = createPluginForNodeRole({ ui: true });
+        expect(returnedStartDependencies).toHaveProperty('isOptedIn$');
+        expect(returnedStartDependencies.isOptedIn$).toBeInstanceOf(Observable);
       });
     });
   });

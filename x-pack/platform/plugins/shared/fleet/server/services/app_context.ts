@@ -11,7 +11,6 @@ import { kibanaPackageJson } from '@kbn/repo-info';
 
 import type { HttpServiceSetup, KibanaRequest } from '@kbn/core-http-server';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
-
 import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import type {
   EncryptedSavedObjectsClient,
@@ -28,6 +27,7 @@ import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
 import type { Logger } from '@kbn/logging';
+import type { LockManagerService } from '@kbn/lock-manager';
 
 import type { FleetConfigType } from '../../common/types';
 import {
@@ -49,6 +49,7 @@ import type { FleetAppContext } from '../plugin';
 import type { TelemetryEventsSender } from '../telemetry/sender';
 import { UNINSTALL_TOKENS_SAVED_OBJECT_TYPE } from '../constants';
 import type { MessageSigningServiceInterface } from '..';
+import type { FleetUsage } from '../collectors/register';
 
 import type { BulkActionsResolver } from './agents/bulk_actions_resolver';
 import { type UninstallTokenServiceInterface } from './security/uninstall_token_service';
@@ -80,6 +81,8 @@ class AppContextService {
   private messageSigningService: MessageSigningServiceInterface | undefined;
   private uninstallTokenService: UninstallTokenServiceInterface | undefined;
   private taskManagerStart: TaskManagerStartContract | undefined;
+  private fetchUsage?: (abortController: AbortController) => Promise<FleetUsage | undefined>;
+  private lockManagerService: LockManagerService | undefined;
 
   public start(appContext: FleetAppContext) {
     this.data = appContext.data;
@@ -105,6 +108,8 @@ class AppContextService {
     this.messageSigningService = appContext.messageSigningService;
     this.uninstallTokenService = appContext.uninstallTokenService;
     this.taskManagerStart = appContext.taskManagerStart;
+    this.fetchUsage = appContext.fetchUsage;
+    this.lockManagerService = appContext.lockManagerService;
 
     if (appContext.config$) {
       this.config$ = appContext.config$;
@@ -343,6 +348,14 @@ class AppContextService {
 
   public getUninstallTokenService() {
     return this.uninstallTokenService;
+  }
+
+  public getFetchUsage() {
+    return this.fetchUsage;
+  }
+
+  public getLockManagerService() {
+    return this.lockManagerService;
   }
 }
 

@@ -32,13 +32,7 @@ jest.mock('../../common/utils/route/use_route_spy', () => ({
 }));
 
 jest.mock('uuid', () => ({
-  v4: jest
-    .fn()
-    .mockReturnValueOnce('d594baeb-5eca-480c-8885-ba79eaf41372')
-    .mockReturnValueOnce('c604baeb-5eca-480c-8885-ba79eaf41372')
-    .mockReturnValueOnce('e614baeb-5eca-480c-8885-ba79eaf41372')
-    .mockReturnValueOnce('f614baeb-5eca-480c-8885-ba79eaf52483')
-    .mockReturnValue('1dd5663b-f062-43f8-8688-fc8166c2ca8e'),
+  v4: jest.fn().mockReturnValue('generated-uuid'),
 }));
 
 describe('getRiskScoreOverTimeAreaAttributes', () => {
@@ -77,12 +71,12 @@ describe('getRiskScoreOverTimeAreaAttributes', () => {
       )
     ).toEqual(
       expect.objectContaining({
-        layerId: '1dd5663b-f062-43f8-8688-fc8166c2ca8e',
+        layerId: 'layer-id2-generated-uuid',
         layerType: 'referenceLine',
-        accessors: ['1dd5663b-f062-43f8-8688-fc8166c2ca8e'],
+        accessors: ['layer2-column-id-generated-uuid'],
         yConfig: [
           {
-            forAccessor: '1dd5663b-f062-43f8-8688-fc8166c2ca8e',
+            forAccessor: 'layer2-column-id-generated-uuid',
             axisMode: 'left',
             lineWidth: 2,
             color: '#aa6556',

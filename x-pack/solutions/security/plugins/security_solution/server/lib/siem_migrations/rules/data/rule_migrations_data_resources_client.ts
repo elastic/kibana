@@ -6,13 +6,18 @@
  */
 
 import { sha256 } from 'js-sha256';
-import type { QueryDslQueryContainer, Duration } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  QueryDslQueryContainer,
+  Duration,
+  BulkOperationContainer,
+} from '@elastic/elasticsearch/lib/api/types';
 import type {
   RuleMigrationResource,
   RuleMigrationResourceType,
 } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { StoredRuleMigrationResource } from '../types';
 import { RuleMigrationsDataBaseClient } from './rule_migrations_data_base_client';
+import { MAX_ES_SEARCH_SIZE } from '../constants';
 
 export type CreateRuleMigrationResourceInput = Pick<
   RuleMigrationResource,
@@ -40,6 +45,7 @@ const DEFAULT_SEARCH_BATCH_SIZE = 500 as const;
 export class RuleMigrationsDataResourcesClient extends RuleMigrationsDataBaseClient {
   public async upsert(resources: CreateRuleMigrationResourceInput[]): Promise<void> {
     const index = await this.getIndexName();
+    const profileId = await this.getProfileUid();
 
     let resourcesSlice: CreateRuleMigrationResourceInput[];
 
@@ -54,7 +60,7 @@ export class RuleMigrationsDataResourcesClient extends RuleMigrationsDataBaseCli
               doc: {
                 ...resource,
                 '@timestamp': createdAt,
-                updated_by: this.username,
+                updated_by: profileId,
                 updated_at: createdAt,
               },
               doc_as_upsert: true,
@@ -71,6 +77,7 @@ export class RuleMigrationsDataResourcesClient extends RuleMigrationsDataBaseCli
   /** Creates the resources in the index only if they do not exist */
   public async create(resources: CreateRuleMigrationResourceInput[]): Promise<void> {
     const index = await this.getIndexName();
+    const profileId = await this.getProfileUid();
 
     let resourcesSlice: CreateRuleMigrationResourceInput[];
     const createdAt = new Date().toISOString();
@@ -83,7 +90,7 @@ export class RuleMigrationsDataResourcesClient extends RuleMigrationsDataBaseCli
             {
               ...resource,
               '@timestamp': createdAt,
-              updated_by: this.username,
+              updated_by: profileId,
               updated_at: createdAt,
             },
           ]),
@@ -153,5 +160,22 @@ export class RuleMigrationsDataResourcesClient extends RuleMigrationsDataBaseCli
       }
     }
     return { bool: { filter } };
+  }
+
+  /**
+   *
+   * Prepares bulk ES delete operations for the resources of a given migrationId.
+   *
+   */
+  async prepareDelete(migrationId: string): Promise<BulkOperationContainer[]> {
+    const index = await this.getIndexName();
+    const resourcesToBeDeleted = await this.get(migrationId, { size: MAX_ES_SEARCH_SIZE });
+    const resourcesToBeDeletedDocIds = resourcesToBeDeleted.map((resource) => resource.id);
+    return resourcesToBeDeletedDocIds.map((docId) => ({
+      delete: {
+        _id: docId,
+        _index: index,
+      },
+    }));
   }
 }

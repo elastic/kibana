@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { RulesClient, ConstructorOptions } from '../../../../rules_client/rules_client';
+import type { ConstructorOptions } from '../../../../rules_client/rules_client';
+import { RulesClient } from '../../../../rules_client/rules_client';
 import {
   savedObjectsClientMock,
   loggingSystemMock,
@@ -18,12 +19,12 @@ import { alertingAuthorizationMock } from '../../../../authorization/alerting_au
 import { nodeTypes, fromKueryExpression, toKqlExpression } from '@kbn/es-query';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
-import { AlertingAuthorization } from '../../../../authorization/alerting_authorization';
-import { ActionsAuthorization } from '@kbn/actions-plugin/server';
+import type { AlertingAuthorization } from '../../../../authorization/alerting_authorization';
+import type { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from '../../../../rules_client/tests/lib';
 import { RecoveredActionGroup } from '../../../../../common';
-import { RegistryRuleType } from '../../../../rule_type_registry';
+import type { RegistryRuleType } from '../../../../rule_type_registry';
 import { schema } from '@kbn/config-schema';
 import {
   enabledRule1,
@@ -106,9 +107,9 @@ describe('find()', () => {
         name: 'myType',
         category: 'test',
         producer: 'myApp',
+        solution: 'stack',
         enabledInLicense: true,
         hasAlertsMappings: false,
-        hasFieldsForAAD: false,
         validLegacyConsumers: [],
       },
     ],
@@ -199,6 +200,12 @@ describe('find()', () => {
               },
             ],
             "alertTypeId": "myType",
+            "artifacts": Object {
+              "dashboards": Array [],
+              "investigation_guide": Object {
+                "blob": "",
+              },
+            },
             "createdAt": 2019-02-12T21:01:22.479Z,
             "executionStatus": Object {
               "lastExecutionDate": 2019-02-12T21:01:22.000Z,
@@ -314,6 +321,12 @@ describe('find()', () => {
               },
             ],
             "alertTypeId": "myType",
+            "artifacts": Object {
+              "dashboards": Array [],
+              "investigation_guide": Object {
+                "blob": "",
+              },
+            },
             "createdAt": 2019-02-12T21:01:22.479Z,
             "executionStatus": Object {
               "lastExecutionDate": 2019-02-12T21:01:22.000Z,
@@ -419,6 +432,12 @@ describe('find()', () => {
               },
             ],
             "alertTypeId": "myType",
+            "artifacts": Object {
+              "dashboards": Array [],
+              "investigation_guide": Object {
+                "blob": "",
+              },
+            },
             "createdAt": 2019-02-12T21:01:22.479Z,
             "executionStatus": Object {
               "lastExecutionDate": 2019-02-12T21:01:22.000Z,
@@ -526,9 +545,9 @@ describe('find()', () => {
           name: 'myType',
           category: 'test',
           producer: 'myApp',
+          solution: 'stack',
           enabledInLicense: true,
           hasAlertsMappings: false,
-          hasFieldsForAAD: false,
           validLegacyConsumers: [],
         },
       ],
@@ -545,9 +564,9 @@ describe('find()', () => {
           name: 'myType',
           category: 'test',
           producer: 'myApp',
+          solution: 'stack',
           enabledInLicense: true,
           hasAlertsMappings: false,
-          hasFieldsForAAD: false,
           validLegacyConsumers: [],
         },
       ],
@@ -567,6 +586,7 @@ describe('find()', () => {
       },
       category: 'test',
       producer: 'myApp',
+      solution: 'stack',
       validate: {
         params: schema.any(),
       },
@@ -585,6 +605,7 @@ describe('find()', () => {
       },
       category: 'test',
       producer: 'alerts',
+      solution: 'stack',
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
         injectReferences: injectReferencesFn,
@@ -705,6 +726,12 @@ describe('find()', () => {
               },
             ],
             "alertTypeId": "myType",
+            "artifacts": Object {
+              "dashboards": Array [],
+              "investigation_guide": Object {
+                "blob": "",
+              },
+            },
             "createdAt": 2019-02-12T21:01:22.479Z,
             "executionStatus": Object {
               "lastExecutionDate": 2019-02-12T21:01:22.000Z,
@@ -735,6 +762,12 @@ describe('find()', () => {
               },
             ],
             "alertTypeId": "123",
+            "artifacts": Object {
+              "dashboards": Array [],
+              "investigation_guide": Object {
+                "blob": "",
+              },
+            },
             "createdAt": 2019-02-12T21:01:22.479Z,
             "executionStatus": Object {
               "lastExecutionDate": 2019-02-12T21:01:22.000Z,
@@ -785,9 +818,9 @@ describe('find()', () => {
           name: 'myType',
           category: 'test',
           producer: 'myApp',
+          solution: 'stack',
           enabledInLicense: true,
           hasAlertsMappings: false,
-          hasFieldsForAAD: false,
           validLegacyConsumers: [],
         },
       ],
@@ -804,9 +837,9 @@ describe('find()', () => {
           name: 'myType',
           category: 'test',
           producer: 'myApp',
+          solution: 'stack',
           enabledInLicense: true,
           hasAlertsMappings: false,
-          hasFieldsForAAD: false,
           validLegacyConsumers: [],
         },
       ],
@@ -826,6 +859,7 @@ describe('find()', () => {
       },
       category: 'test',
       producer: 'myApp',
+      solution: 'stack',
       validate: {
         params: schema.any(),
       },
@@ -845,6 +879,7 @@ describe('find()', () => {
       },
       category: 'test',
       producer: 'alerts',
+      solution: 'stack',
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
         injectReferences: injectReferencesFn,
@@ -1008,6 +1043,12 @@ describe('find()', () => {
           "data": Array [
             Object {
               "actions": Array [],
+              "artifacts": Object {
+                "dashboards": Array [],
+                "investigation_guide": Object {
+                  "blob": "",
+                },
+              },
               "id": "1",
               "notifyWhen": undefined,
               "params": undefined,
@@ -1141,7 +1182,7 @@ describe('find()', () => {
   });
 
   describe('legacy actions migration for SIEM', () => {
-    test('should call migrateLegacyActions', async () => {
+    test('should call formatLegacyActions', async () => {
       const rulesClient = new RulesClient(rulesClientParams);
 
       (formatLegacyActions as jest.Mock).mockResolvedValueOnce([
@@ -1172,6 +1213,123 @@ describe('find()', () => {
       );
       expect(result.data[2]).toEqual(expect.objectContaining({ id: siemRule1.id, migrated: true }));
       expect(result.data[3]).toEqual(expect.objectContaining({ id: siemRule2.id, migrated: true }));
+    });
+  });
+
+  describe('artifacts', () => {
+    test('finds rules with artifacts', async () => {
+      unsecuredSavedObjectsClient.find.mockReset();
+
+      unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
+        total: 1,
+        per_page: 10,
+        page: 1,
+        saved_objects: [
+          {
+            id: '1',
+            type: RULE_SAVED_OBJECT_TYPE,
+            attributes: {
+              name: 'fakeRuleName',
+              alertTypeId: 'myType',
+              schedule: { interval: '10s' },
+              params: {
+                bar: true,
+              },
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+              executionStatus: {
+                status: 'pending',
+                lastExecutionDate: new Date('2019-02-12T21:01:22.479Z'),
+              },
+              notifyWhen: 'onActiveAlert',
+              actions: [
+                {
+                  actionTypeId: 'test-action-id',
+                  group: 'default',
+                  actionRef: 'action_0',
+                  params: {
+                    foo: true,
+                  },
+                  uuid: 100,
+                },
+              ],
+              artifacts: {
+                dashboards: [
+                  {
+                    refId: 'dashboard_0',
+                  },
+                ],
+              },
+            },
+            score: 1,
+            references: [
+              {
+                name: 'action_0',
+                type: 'action',
+                id: '1',
+              },
+              {
+                name: 'dashboard_0',
+                type: 'dashboard',
+                id: 'dashboard-1',
+              },
+            ],
+          },
+        ],
+      });
+
+      const rulesClient = new RulesClient(rulesClientParams);
+      const result = await rulesClient.find({ options: {} });
+      expect(result).toMatchInlineSnapshot(`
+        Object {
+          "data": Array [
+            Object {
+              "actions": Array [
+                Object {
+                  "actionTypeId": "test-action-id",
+                  "group": "default",
+                  "id": "1",
+                  "params": Object {
+                    "foo": true,
+                  },
+                  "uuid": 100,
+                },
+              ],
+              "alertTypeId": "myType",
+              "artifacts": Object {
+                "dashboards": Array [
+                  Object {
+                    "id": "dashboard-1",
+                  },
+                ],
+                "investigation_guide": Object {
+                  "blob": "",
+                },
+              },
+              "createdAt": 2019-02-12T21:01:22.479Z,
+              "executionStatus": Object {
+                "lastExecutionDate": 2019-02-12T21:01:22.000Z,
+                "status": "pending",
+              },
+              "id": "1",
+              "name": "fakeRuleName",
+              "notifyWhen": "onActiveAlert",
+              "params": Object {
+                "bar": true,
+              },
+              "schedule": Object {
+                "interval": "10s",
+              },
+              "snoozeSchedule": Array [],
+              "systemActions": Array [],
+              "updatedAt": 2019-02-12T21:01:22.479Z,
+            },
+          ],
+          "page": 1,
+          "perPage": 10,
+          "total": 1,
+        }
+      `);
     });
   });
 });

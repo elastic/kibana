@@ -63,11 +63,7 @@ const getFieldsConfig = (docService: DocumentationService): FieldsConfig => {
           defaultMessage="Field references or a static value for the dataset part of the data stream name. Must meet the criteria for {indexNamesLink}. Cannot contain {dash}. 100 characters max."
           values={{
             indexNamesLink: (
-              <EuiLink
-                href={`${docService.getEsDocsBasePath()}/indices-create-index.html#indices-create-api-path-params`}
-                target="_blank"
-                external
-              >
+              <EuiLink href={`${docService.getIndexParametersUrl()}`} target="_blank" external>
                 {i18n.translate('xpack.ingestPipelines.pipelineEditor.reroute.indexNameLink', {
                   defaultMessage: 'index names',
                 })}
@@ -105,11 +101,7 @@ const getFieldsConfig = (docService: DocumentationService): FieldsConfig => {
           defaultMessage="Field references or a static value for the namespace part of the data stream name. Must meet the criteria for {indexNamesLink}. 100 characters max."
           values={{
             indexNamesLink: (
-              <EuiLink
-                href={`${docService.getEsDocsBasePath()}/indices-create-index.html#indices-create-api-path-params`}
-                target="_blank"
-                external
-              >
+              <EuiLink href={`${docService.getIndexParametersUrl}`} target="_blank" external>
                 {i18n.translate('xpack.ingestPipelines.pipelineEditor.reroute.indexNameLink', {
                   defaultMessage: 'index names',
                 })}

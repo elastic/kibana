@@ -12,6 +12,9 @@ export const METRICS_INDEX_PATTERN = 'metrics-*,metricbeat-*';
 export const LOGS_INDEX_PATTERN = 'logs-*,filebeat-*,kibana_sample_data_logs*';
 export const METRICS_APP = 'metrics';
 export const LOGS_APP = 'logs';
+export const METRIC_SCHEMA_ECS = 'ecs';
+export const METRIC_SCHEMA_SEMCONV = 'semconv';
+export type MetricSchema = typeof METRIC_SCHEMA_ECS | typeof METRIC_SCHEMA_SEMCONV;
 
 export const METRICS_FEATURE_ID = AlertConsumers.INFRASTRUCTURE;
 export const INFRA_ALERT_FEATURE_ID = AlertConsumers.INFRASTRUCTURE;
@@ -31,14 +34,30 @@ export type InfraFeatureId = typeof METRICS_FEATURE_ID | typeof LOGS_FEATURE_ID;
 export const TIMESTAMP_FIELD = '@timestamp';
 export const TIEBREAKER_FIELD = '_doc';
 
+// processes
+export const TOP_N = 10;
+export const MANDATORY_PROCESS_FIELDS = [
+  'system.process.cpu.total.pct',
+  'system.process.memory.rss.pct',
+  'system.process.cpu.start_time',
+  'system.process.state',
+  'user.name',
+  'process.pid',
+  'process.command_line',
+];
+export const PROCESS_COMMANDLINE_FIELD = 'process.command_line';
+
 // system
 export const HOST_NAME_FIELD = 'host.name';
 export const CONTAINER_ID_FIELD = 'container.id';
 export const KUBERNETES_POD_UID_FIELD = 'kubernetes.pod.uid';
-export const SYSTEM_PROCESS_CMDLINE_FIELD = 'system.process.cmdline';
 export const EVENT_MODULE = 'event.module';
 export const METRICSET_MODULE = 'metricset.module';
 export const METRICSET_NAME = 'metricset.name';
+export const DATASTREAM_DATASET = 'data_stream.dataset';
+
+// OTel hostmetricsreceiver
+export const OTEL_RECEIVER_DATASET_VALUE = 'hostmetricsreceiver.otel';
 
 // integrations
 export const SYSTEM_INTEGRATION = 'system';

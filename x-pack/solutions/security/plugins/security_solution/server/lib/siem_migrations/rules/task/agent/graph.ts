@@ -8,40 +8,44 @@
 import { END, START, StateGraph } from '@langchain/langgraph';
 import { getCreateSemanticQueryNode } from './nodes/create_semantic_query';
 import { getMatchPrebuiltRuleNode } from './nodes/match_prebuilt_rule';
-
-import { migrateRuleState } from './state';
+import { migrateRuleConfigSchema, migrateRuleState } from './state';
 import { getTranslateRuleGraph } from './sub_graphs/translate_rule';
-import type { MigrateRuleGraphParams, MigrateRuleState } from './types';
+import type { MigrateRuleGraphConfig, MigrateRuleGraphParams, MigrateRuleState } from './types';
 
 export function getRuleMigrationAgent({
   model,
-  inferenceClient,
+  esqlKnowledgeBase,
   ruleMigrationsRetriever,
-  connectorId,
   logger,
+  telemetryClient,
 }: MigrateRuleGraphParams) {
   const matchPrebuiltRuleNode = getMatchPrebuiltRuleNode({
     model,
     logger,
     ruleMigrationsRetriever,
+    telemetryClient,
   });
+
   const translationSubGraph = getTranslateRuleGraph({
     model,
-    inferenceClient,
+    esqlKnowledgeBase,
     ruleMigrationsRetriever,
-    connectorId,
+    telemetryClient,
     logger,
   });
   const createSemanticQueryNode = getCreateSemanticQueryNode({ model });
 
-  const siemMigrationAgentGraph = new StateGraph(migrateRuleState)
+  const siemMigrationAgentGraph = new StateGraph(migrateRuleState, migrateRuleConfigSchema)
     // Nodes
     .addNode('createSemanticQuery', createSemanticQueryNode)
     .addNode('matchPrebuiltRule', matchPrebuiltRuleNode)
     .addNode('translationSubGraph', translationSubGraph)
     // Edges
     .addEdge(START, 'createSemanticQuery')
-    .addEdge('createSemanticQuery', 'matchPrebuiltRule')
+    .addConditionalEdges('createSemanticQuery', skipPrebuiltRuleConditional, [
+      'matchPrebuiltRule',
+      'translationSubGraph',
+    ])
     .addConditionalEdges('matchPrebuiltRule', matchedPrebuiltRuleConditional, [
       'translationSubGraph',
       END,
@@ -52,6 +56,13 @@ export function getRuleMigrationAgent({
   graph.name = 'Rule Migration Graph'; // Customizes the name displayed in LangSmith
   return graph;
 }
+
+const skipPrebuiltRuleConditional = (_state: MigrateRuleState, config: MigrateRuleGraphConfig) => {
+  if (config.configurable?.skipPrebuiltRulesMatching) {
+    return 'translationSubGraph';
+  }
+  return 'matchPrebuiltRule';
+};
 
 const matchedPrebuiltRuleConditional = (state: MigrateRuleState) => {
   if (state.elastic_rule?.prebuilt_rule_id) {

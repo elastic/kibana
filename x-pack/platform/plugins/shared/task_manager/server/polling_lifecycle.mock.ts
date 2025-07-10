@@ -5,12 +5,20 @@
  * 2.0.
  */
 
-import { TaskPollingLifecycle, TaskLifecycleEvent } from './polling_lifecycle';
-import { of, Observable } from 'rxjs';
+import type { TaskPollingLifecycle, TaskLifecycleEvent } from './polling_lifecycle';
+import type { Observable } from 'rxjs';
+import { of } from 'rxjs';
 
 export const taskPollingLifecycleMock = {
-  create(opts: { isStarted?: boolean; events$?: Observable<TaskLifecycleEvent> }) {
+  create(opts: {
+    isStarted?: boolean;
+    events$?: Observable<TaskLifecycleEvent>;
+    pollIntervalConfiguration$?: Observable<number>;
+    capacityConfiguration$?: Observable<number>;
+  }) {
     return {
+      pollIntervalConfiguration$: opts.pollIntervalConfiguration$ ?? of(),
+      capacityConfiguration$: opts.capacityConfiguration$ ?? of(),
       attemptToRun: jest.fn(),
       stop: jest.fn(),
       get isStarted() {

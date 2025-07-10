@@ -6,8 +6,10 @@
  */
 
 import React, { useState, Fragment, memo, useMemo, useCallback } from 'react';
+import ReactMarkdown from 'react-markdown';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -17,7 +19,6 @@ import {
   EuiHorizontalRule,
   EuiSpacer,
   EuiButtonEmpty,
-  htmlIdGenerator,
 } from '@elastic/eui';
 
 import type {
@@ -94,7 +95,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
   }) => {
     const defaultDataStreamId = useDataStreamId();
     const { isAgentlessEnabled } = useAgentless();
-
+    const showTopLevelDescription = packagePolicyInput.streams.length === 1;
     // Showing streams toggle state
     const [isShowingStreams, setIsShowingStreams] = useState<boolean>(() =>
       shouldShowStreamsByDefault(
@@ -157,8 +158,6 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
       [packageInputStreamShouldBeVisible, packageInputStreams, packagePolicyInput.streams]
     );
 
-    const titleElementId = useMemo(() => htmlIdGenerator()(), []);
-
     return (
       <>
         {/* Header / input-level toggle */}
@@ -170,10 +169,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
                 <EuiFlexGroup alignItems="center" gutterSize="s">
                   <EuiFlexItem grow={false}>
                     <EuiTitle size="xs">
-                      <h3
-                        data-test-subj="PackagePolicy.InputStreamConfig.title"
-                        id={titleElementId}
-                      >
+                      <h3 data-test-subj="PackagePolicy.InputStreamConfig.title">
                         {packageInput.title || packageInput.type}
                       </h3>
                     </EuiTitle>
@@ -196,7 +192,17 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
                 }
               }}
             />
+            <EuiSpacer size="s" />
+            {/* show the description under the top level toggle if theres only one stream */}
+            {showTopLevelDescription && (
+              <EuiText size="s" color="subdued">
+                <ReactMarkdown>
+                  {String(inputStreams[0]?.packageInputStream?.description)}
+                </ReactMarkdown>
+              </EuiText>
+            )}
           </EuiFlexItem>
+
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="s" alignItems="center">
               {hasErrors ? (
@@ -217,7 +223,15 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
                   iconType={isShowingStreams ? 'arrowUp' : 'arrowDown'}
                   iconSide="right"
                   aria-expanded={isShowingStreams}
-                  aria-labelledby={titleElementId}
+                  aria-label={i18n.translate(
+                    'xpack.fleet.createPackagePolicy.stepConfigure.expandAriaLabel',
+                    {
+                      defaultMessage: 'Change default settings for {title}',
+                      values: {
+                        title: packageInput.title || packageInput.type,
+                      },
+                    }
+                  )}
                 >
                   {
                     <FormattedMessage
@@ -242,7 +256,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
               packageInputVars={packageInput.vars}
               packagePolicyInput={packagePolicyInput}
               updatePackagePolicyInput={updatePackagePolicyInput}
-              inputVarsValidationResults={{ vars: inputValidationResults?.vars }}
+              inputValidationResults={inputValidationResults}
               forceShowErrors={forceShowErrors}
               isEditPage={isEditPage}
             />
@@ -259,6 +273,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
                   data-test-subj="PackagePolicy.InputStreamConfig"
                   packageInfo={packageInfo}
                   packageInputStream={packageInputStream}
+                  totalStreams={inputStreams.length}
                   packagePolicyInputStream={packagePolicyInputStream!}
                   updatePackagePolicyInputStream={(
                     updatedStream: Partial<PackagePolicyInputStream>
@@ -290,7 +305,9 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
                     updatePackagePolicyInput(updatedInput);
                   }}
                   inputStreamValidationResults={
-                    inputValidationResults?.streams![packagePolicyInputStream!.data_stream!.dataset]
+                    inputValidationResults?.streams?.[
+                      packagePolicyInputStream!.data_stream!.dataset
+                    ] ?? {}
                   }
                   forceShowErrors={forceShowErrors}
                   isEditPage={isEditPage}

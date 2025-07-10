@@ -14,6 +14,7 @@ import {
   REFERENCE_LINE_LAYER,
   LAYERED_XY_VIS,
   REFERENCE_LINE,
+  PointVisibilityOptions,
 } from '../constants';
 import { commonXYArgs } from './common_xy_args';
 import { strings } from '../i18n';
@@ -53,9 +54,14 @@ export const layeredXyVisFunction: LayeredXyVisFn = {
       }),
       default: false,
     },
+    pointVisibility: {
+      types: ['string'],
+      help: strings.getPointVisibilityHelp(),
+      options: Object.values(PointVisibilityOptions),
+    },
   },
   async fn(data, args, handlers) {
-    const { layeredXyVisFn } = await import('./layered_xy_vis_fn');
+    const { layeredXyVisFn } = await import('./expression_module');
     return await layeredXyVisFn(data, args, handlers);
   },
 };

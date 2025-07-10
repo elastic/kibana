@@ -8,9 +8,14 @@
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import { BoolQuery } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { useBreadcrumbs, useFetcher } from '@kbn/observability-shared-plugin/public';
-import { AlertConsumers } from '@kbn/rule-data-utils';
+import {
+  ExternalResourceLinks,
+  useBreadcrumbs,
+  useFetcher,
+} from '@kbn/observability-shared-plugin/public';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { getColumns } from '../../components/alerts_table/common/get_columns';
+import { ObservabilityAlertsTable } from '../../components/alerts_table/alerts_table';
 import {
   OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES,
   observabilityAlertFeatureIds,
@@ -31,7 +36,6 @@ import { HeaderMenu } from './components/header_menu/header_menu';
 import { getNewsFeed } from './components/news_feed/helpers/get_news_feed';
 import { NewsFeed } from './components/news_feed/news_feed';
 import { ObservabilityOnboardingCallout } from './components/observability_onboarding_callout';
-import { Resources } from './components/resources';
 import { EmptySections } from './components/sections/empty/empty_sections';
 import { SectionContainer } from './components/sections/section_container';
 import { calculateBucketSize } from './helpers/calculate_bucket_size';
@@ -45,19 +49,25 @@ import {
 const ALERTS_PER_PAGE = 10;
 const ALERTS_TABLE_ID = 'xpack.observability.overview.alert.table';
 
+const tableColumns = getColumns({ showRuleName: true });
+
 export function OverviewPage() {
   const {
     http,
     observabilityAIAssistant,
-    triggersActionsUi: {
-      alertsTableConfigurationRegistry,
-      getAlertsStateTable: AlertsStateTable,
-      getAlertSummaryWidget: AlertSummaryWidget,
-    },
+    triggersActionsUi: { getAlertSummaryWidget: AlertSummaryWidget },
     kibanaVersion,
+    serverless: isServerless,
+    data,
+    notifications,
+    fieldFormats,
+    application,
+    licensing,
+    cases,
+    settings,
   } = useKibana().services;
 
-  const { ObservabilityPageTemplate, observabilityRuleTypeRegistry } = usePluginContext();
+  const { ObservabilityPageTemplate } = usePluginContext();
 
   useBreadcrumbs(
     [
@@ -72,10 +82,11 @@ export function OverviewPage() {
     }
   );
 
-  const { data: newsFeed } = useFetcher(
-    () => getNewsFeed({ http, kibanaVersion }),
-    [http, kibanaVersion]
-  );
+  const { data: newsFeed } = useFetcher(() => {
+    if (!Boolean(isServerless)) {
+      return getNewsFeed({ http, kibanaVersion });
+    }
+  }, [http, kibanaVersion, isServerless]);
   const { hasAnyData, isAllRequestsComplete, hasDataMap } = useHasData();
 
   const { setScreenContext } = observabilityAIAssistant?.service || {};
@@ -83,8 +94,8 @@ export function OverviewPage() {
   const appsWithoutData = Object.keys(hasDataMap)
     .sort()
     .reduce((acc, app) => {
-      const data = hasDataMap[app as keyof HasDataMap];
-      if (data?.status === 'success' && !data?.hasData) {
+      const hasData = hasDataMap[app as keyof HasDataMap];
+      if (hasData?.status === 'success' && !hasData?.hasData) {
         const appName = appLabels[app as DataContextApps];
 
         return `${acc}${appName}, `;
@@ -244,17 +255,24 @@ export function OverviewPage() {
               fullSize
               timeRange={alertSummaryTimeRange}
             />
-            <AlertsStateTable
-              alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
-              configurationId={AlertConsumers.OBSERVABILITY}
+            <ObservabilityAlertsTable
+              id={ALERTS_TABLE_ID}
               ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES}
               consumers={observabilityAlertFeatureIds}
-              hideLazyLoader
-              id={ALERTS_TABLE_ID}
-              initialPageSize={ALERTS_PER_PAGE}
               query={esQuery}
-              showAlertStatusWithFlapping
-              cellContext={{ observabilityRuleTypeRegistry }}
+              initialPageSize={ALERTS_PER_PAGE}
+              columns={tableColumns}
+              showInspectButton
+              services={{
+                data,
+                http,
+                notifications,
+                fieldFormats,
+                application,
+                licensing,
+                cases,
+                settings,
+              }}
             />
           </SectionContainer>
         </EuiFlexItem>
@@ -271,12 +289,12 @@ export function OverviewPage() {
       <EuiFlexGroup>
         <EuiFlexItem>
           {/* Resources / What's New sections */}
-          <EuiFlexGroup>
-            <EuiFlexItem grow={4}>
+          <EuiFlexGroup direction="column">
+            <EuiFlexItem>
               {!!newsFeed?.items?.length && <NewsFeed items={newsFeed.items.slice(0, 3)} />}
             </EuiFlexItem>
-            <EuiFlexItem grow={2}>
-              <Resources />
+            <EuiFlexItem>
+              <ExternalResourceLinks />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

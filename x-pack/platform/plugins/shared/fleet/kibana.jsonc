@@ -30,6 +30,7 @@
       "dashboard",
       "fieldsMetadata",
       "logsDataAccess",
+      "embeddable",
       "spaces"
     ],
     "optionalPlugins": [
@@ -42,7 +43,7 @@
       "discover",
       "ingestPipelines",
       "guidedOnboarding",
-      "integrationAssistant"
+      "automaticImport"
     ],
     "requiredBundles": [
       "kibanaReact",

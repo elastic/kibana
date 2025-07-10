@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PluginSetupContract as ActionsPluginSetupContract } from '@kbn/actions-plugin/server';
+import type { PluginSetupContract as ActionsPluginSetupContract } from '@kbn/actions-plugin/server';
 
 import { getMicrosoftDefenderEndpointConnectorType } from './microsoft_defender_endpoint';
 import { getConnectorType as getCasesWebhookConnectorType } from './cases_webhook';
@@ -32,12 +32,13 @@ import { getConnectorType as getXmattersConnectorType } from './xmatters';
 import { getConnectorType as getTeamsConnectorType } from './teams';
 import { getConnectorType as getD3SecurityConnectorType } from './d3security';
 import { getConnectorType as getTheHiveConnectorType } from './thehive';
+import { getConnectorType as getXSOARConnectorType } from './xsoar';
 import { getOpsgenieConnectorType } from './opsgenie';
 import type { ActionParamsType as ServiceNowITSMActionParams } from './servicenow_itsm';
 import type { ActionParamsType as ServiceNowSIRActionParams } from './servicenow_sir';
 import { getSentinelOneConnectorType } from './sentinelone';
 import { getCrowdstrikeConnectorType } from './crowdstrike';
-import { ExperimentalFeatures } from '../../common/experimental_features';
+import type { ExperimentalFeatures } from '../../common/experimental_features';
 
 export { ConnectorTypeId as CasesWebhookConnectorTypeId } from './cases_webhook';
 export type { ActionParamsType as CasesWebhookActionParams } from './cases_webhook';
@@ -114,6 +115,7 @@ export function registerConnectorTypes({
   actions.registerSubActionConnectorType(getD3SecurityConnectorType());
   actions.registerSubActionConnectorType(getResilientConnectorType());
   actions.registerSubActionConnectorType(getTheHiveConnectorType());
+  actions.registerSubActionConnectorType(getXSOARConnectorType());
 
   if (experimentalFeatures.sentinelOneConnectorOn) {
     actions.registerSubActionConnectorType(getSentinelOneConnectorType());
@@ -121,7 +123,7 @@ export function registerConnectorTypes({
   if (experimentalFeatures.crowdstrikeConnectorOn) {
     actions.registerSubActionConnectorType(getCrowdstrikeConnectorType(experimentalFeatures));
   }
-  if (experimentalFeatures.inferenceConnectorOn) {
+  if (!experimentalFeatures.inferenceConnectorOff) {
     actions.registerSubActionConnectorType(getInferenceConnectorType());
   }
   if (experimentalFeatures.microsoftDefenderEndpointOn) {

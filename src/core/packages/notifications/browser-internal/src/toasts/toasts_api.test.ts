@@ -11,11 +11,15 @@ import { firstValueFrom } from 'rxjs';
 
 import { ToastsApi } from './toasts_api';
 
+import { apm } from '@elastic/apm-rum';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
-import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
-import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
-import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
-import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
+import { renderingServiceMock } from '@kbn/core-rendering-browser-mocks';
+
+jest.mock('@elastic/apm-rum', () => ({
+  apm: {
+    captureError: jest.fn(),
+  },
+}));
 
 async function getCurrentToasts(toasts: ToastsApi) {
   return await firstValueFrom(toasts.get$());
@@ -47,10 +51,7 @@ function toastDeps() {
 function startDeps() {
   return {
     overlays: {} as any,
-    analytics: analyticsServiceMock.createAnalyticsServiceStart(),
-    i18n: i18nServiceMock.createStartContract(),
-    theme: themeServiceMock.createStartContract(),
-    userProfile: userProfileServiceMock.createStart(),
+    rendering: renderingServiceMock.create(),
   };
 }
 
@@ -213,6 +214,9 @@ describe('#addDanger()', () => {
   it('adds a danger toast', async () => {
     const toasts = new ToastsApi(toastDeps());
     expect(toasts.addDanger({})).toHaveProperty('color', 'danger');
+    expect(apm.captureError).toBeCalledWith('No title or text is provided.', {
+      labels: { error_type: 'ToastDanger' },
+    });
   });
 
   it('returns the created toast', async () => {
@@ -220,12 +224,18 @@ describe('#addDanger()', () => {
     const toast = toasts.addDanger({});
     const currentToasts = await getCurrentToasts(toasts);
     expect(currentToasts[0]).toBe(toast);
+    expect(apm.captureError).toBeCalledWith('No title or text is provided.', {
+      labels: { error_type: 'ToastDanger' },
+    });
   });
 
   it('fallbacks to default values for undefined properties', async () => {
     const toasts = new ToastsApi(toastDeps());
     const toast = toasts.addDanger({ title: 'foo', toastLifeTimeMs: undefined });
     expect(toast.toastLifeTimeMs).toEqual(10000);
+    expect(apm.captureError).toBeCalledWith('foo', {
+      labels: { error_type: 'ToastDanger' },
+    });
   });
 });
 
@@ -233,16 +243,24 @@ describe('#addError', () => {
   it('adds an error toast', async () => {
     const toasts = new ToastsApi(toastDeps());
     toasts.start(startDeps());
-    const toast = toasts.addError(new Error('unexpected error'), { title: 'Something went wrong' });
+    const error = new Error('unexpected error');
+    const toast = toasts.addError(error, { title: 'Something went wrong' });
     expect(toast).toHaveProperty('color', 'danger');
     expect(toast).toHaveProperty('title', 'Something went wrong');
+    expect(apm.captureError).toBeCalledWith(error, {
+      labels: { error_type: 'ToastError' },
+    });
   });
 
   it('returns the created toast', async () => {
     const toasts = new ToastsApi(toastDeps());
     toasts.start(startDeps());
-    const toast = toasts.addError(new Error('unexpected error'), { title: 'Something went wrong' });
+    const error = new Error('unexpected error');
+    const toast = toasts.addError(error, { title: 'Something went wrong' });
     const currentToasts = await getCurrentToasts(toasts);
     expect(currentToasts[0]).toBe(toast);
+    expect(apm.captureError).toBeCalledWith(error, {
+      labels: { error_type: 'ToastError' },
+    });
   });
 });

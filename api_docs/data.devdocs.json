@@ -4281,6 +4281,40 @@
       },
       {
         "parentPluginId": "data",
+        "id": "def-public.convertIntervalToEsInterval",
+        "type": "Function",
+        "tags": [],
+        "label": "convertIntervalToEsInterval",
+        "description": [],
+        "signature": [
+          "(interval: string) => ",
+          "EsInterval"
+        ],
+        "path": "src/platform/plugins/shared/data/common/search/aggs/buckets/lib/time_buckets/calc_es_interval.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-public.convertIntervalToEsInterval.$1",
+            "type": "string",
+            "tags": [],
+            "label": "interval",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/plugins/shared/data/common/search/aggs/buckets/lib/time_buckets/calc_es_interval.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
         "id": "def-public.extractReferences",
         "type": "Function",
         "tags": [],
@@ -4790,7 +4824,7 @@
             "section": "def-common.SerializedSearchSourceFields",
             "text": "SerializedSearchSourceFields"
           },
-          " & { indexRefName: string; }, references: ",
+          " & { indexRefName?: string | undefined; }, references: ",
           "SavedObjectReference",
           "[]) => ",
           {
@@ -4820,7 +4854,7 @@
                 "section": "def-common.SerializedSearchSourceFields",
                 "text": "SerializedSearchSourceFields"
               },
-              " & { indexRefName: string; }"
+              " & { indexRefName?: string | undefined; }"
             ],
             "path": "src/platform/plugins/shared/data/common/search/search_source/inject_references.ts",
             "deprecated": false,
@@ -7506,6 +7540,35 @@
             "path": "src/platform/plugins/shared/data_views/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.GetFieldsOptions.abortSignal",
+            "type": "Object",
+            "tags": [],
+            "label": "abortSignal",
+            "description": [],
+            "signature": [
+              "AbortSignal | undefined"
+            ],
+            "path": "src/platform/plugins/shared/data_views/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.GetFieldsOptions.runtimeMappings",
+            "type": "Object",
+            "tags": [],
+            "label": "runtimeMappings",
+            "description": [],
+            "signature": [
+              "MappingRuntimeFields",
+              " | undefined"
+            ],
+            "path": "src/platform/plugins/shared/data_views/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -7998,12 +8061,20 @@
                 "path": "src/core/packages/saved-objects/import-export-server-internal/src/import/lib/collect_saved_objects.ts"
               },
               {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/saved-objects/server-internal/src/routes/legacy_import_export/lib/import_dashboards.ts"
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/kibana/assets/install.ts"
               },
               {
-                "plugin": "@kbn/core-saved-objects-browser-mocks",
-                "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts"
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/kibana/assets/install.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/kibana/assets/install.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/saved-objects/browser-mocks/src/simple_saved_object.mock.ts"
               },
               {
                 "plugin": "graph",
@@ -8018,124 +8089,8 @@
                 "path": "x-pack/platform/plugins/private/graph/server/sample_data/flights.ts"
               },
               {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/kibana/assets/install.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/kibana/assets/install.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/kibana/assets/install.ts"
-              },
-              {
                 "plugin": "osquery",
                 "path": "x-pack/platform/plugins/shared/osquery/server/routes/pack/read_pack_route.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/platform/plugins/shared/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/platform/plugins/shared/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/platform/plugins/shared/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/platform/plugins/shared/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/platform/plugins/shared/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
               },
               {
                 "plugin": "fleet",
@@ -8160,6 +8115,18 @@
               {
                 "plugin": "lists",
                 "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client.mock.ts"
+              },
+              {
+                "plugin": "searchPlayground",
+                "path": "x-pack/solutions/search/plugins/search_playground/server/utils/playgrounds.test.ts"
+              },
+              {
+                "plugin": "searchPlayground",
+                "path": "x-pack/solutions/search/plugins/search_playground/server/utils/playgrounds.test.ts"
+              },
+              {
+                "plugin": "searchPlayground",
+                "path": "x-pack/solutions/search/plugins/search_playground/server/utils/playgrounds.test.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -9558,7 +9525,7 @@
           },
           "; history: ",
           "SearchRequest",
-          "<Record<string, any>>[]; destroy: () => void; setOverwriteDataViewType: (overwriteType: string | false | undefined) => void; setField: <K extends keyof ",
+          "<Record<string, any>>[]; setOverwriteDataViewType: (overwriteType: string | false | undefined) => void; setField: <K extends keyof ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -9736,7 +9703,7 @@
             "section": "def-common.SearchSourceSearchOptions",
             "text": "SearchSourceSearchOptions"
           },
-          " | undefined) => Promise<unknown>) => void; getSearchRequestBody: () => any; loadDataViewFields: (dataView: ",
+          " | undefined) => Promise<unknown>) => void; getSearchRequestBody: () => any; destroy: () => void; loadDataViewFields: (dataView: ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -9870,15 +9837,7 @@
             "section": "def-common.TimeRange",
             "text": "TimeRange"
           },
-          " | undefined; refreshInterval?: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataQueryPluginApi",
-            "section": "def-common.RefreshInterval",
-            "text": "RefreshInterval"
-          },
-          " | undefined; filters?: ",
+          " | undefined; refreshInterval?: Readonly<{} & { value: number; pause: boolean; }> | undefined; filters?: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -9917,9 +9876,9 @@
         "label": "RefreshInterval",
         "description": [],
         "signature": [
-          "{ pause: boolean; value: number; }"
+          "{ readonly value: number; readonly pause: boolean; }"
         ],
-        "path": "src/platform/plugins/shared/data/common/query/timefilter/types.ts",
+        "path": "src/platform/packages/shared/kbn-data-service-server/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -11631,10 +11590,6 @@
           "trackAdoption": false,
           "references": [
             {
-              "plugin": "graph",
-              "path": "x-pack/platform/plugins/private/graph/public/plugin.ts"
-            },
-            {
               "plugin": "stackAlerts",
               "path": "x-pack/platform/plugins/shared/stack_alerts/public/rule_types/geo_containment/rule_form/data_view_select.tsx"
             },
@@ -11653,6 +11608,10 @@
             {
               "plugin": "stackAlerts",
               "path": "x-pack/platform/plugins/shared/stack_alerts/public/rule_types/geo_containment/rule_form/entity_form.tsx"
+            },
+            {
+              "plugin": "graph",
+              "path": "x-pack/platform/plugins/private/graph/public/plugin.ts"
             },
             {
               "plugin": "inputControlVis",
@@ -13618,6 +13577,40 @@
           },
           {
             "parentPluginId": "data",
+            "id": "def-server.DataViewsService.clearDataViewLazyCache",
+            "type": "Function",
+            "tags": [],
+            "label": "clearDataViewLazyCache",
+            "description": [
+              "\nClear instance in data view lazy cache"
+            ],
+            "signature": [
+              "(id: string) => void"
+            ],
+            "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-server.DataViewsService.clearDataViewLazyCache.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-server.DataViewsService.getCache",
             "type": "Function",
             "tags": [],
@@ -13876,7 +13869,7 @@
             "tags": [],
             "label": "getFieldsForIndexPattern",
             "description": [
-              "\nGet field list by providing an index patttern (or spec)."
+              "\nGet field list by providing an index pattern (or spec)."
             ],
             "signature": [
               "(indexPattern: ",
@@ -13903,7 +13896,7 @@
                 "section": "def-common.GetFieldsOptions",
                 "text": "GetFieldsOptions"
               },
-              ", \"allowNoIndex\"> | undefined) => Promise<",
+              ", \"allowNoIndex\" | \"pattern\"> | undefined) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -13964,7 +13957,7 @@
                     "section": "def-common.GetFieldsOptions",
                     "text": "GetFieldsOptions"
                   },
-                  ", \"allowNoIndex\"> | undefined"
+                  ", \"allowNoIndex\" | \"pattern\"> | undefined"
                 ],
                 "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
                 "deprecated": false,
@@ -15185,7 +15178,9 @@
             "signature": [
               "(options: { pattern: string | string[]; metaFields?: string[] | undefined; fieldCapsOptions?: { allow_no_indices: boolean; includeUnmapped?: boolean | undefined; } | undefined; type?: string | undefined; rollupIndex?: string | undefined; indexFilter?: ",
               "QueryDslQueryContainer",
-              " | undefined; fields?: string[] | undefined; allowHidden?: boolean | undefined; fieldTypes?: string[] | undefined; includeEmptyFields?: boolean | undefined; }) => Promise<{ fields: ",
+              " | undefined; fields?: string[] | undefined; allowHidden?: boolean | undefined; fieldTypes?: string[] | undefined; includeEmptyFields?: boolean | undefined; abortSignal?: AbortSignal | undefined; runtimeMappings?: ",
+              "MappingRuntimeFields",
+              " | undefined; }) => Promise<{ fields: ",
               {
                 "pluginId": "dataViews",
                 "scope": "server",
@@ -15346,6 +15341,35 @@
                     "description": [],
                     "signature": [
                       "boolean | undefined"
+                    ],
+                    "path": "src/platform/plugins/shared/data_views/server/fetcher/index_patterns_fetcher.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "data",
+                    "id": "def-server.IndexPatternsFetcher.getFieldsForWildcard.$1.abortSignal",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "abortSignal",
+                    "description": [],
+                    "signature": [
+                      "AbortSignal | undefined"
+                    ],
+                    "path": "src/platform/plugins/shared/data_views/server/fetcher/index_patterns_fetcher.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "data",
+                    "id": "def-server.IndexPatternsFetcher.getFieldsForWildcard.$1.runtimeMappings",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "runtimeMappings",
+                    "description": [],
+                    "signature": [
+                      "MappingRuntimeFields",
+                      " | undefined"
                     ],
                     "path": "src/platform/plugins/shared/data_views/server/fetcher/index_patterns_fetcher.ts",
                     "deprecated": false,
@@ -15764,15 +15788,11 @@
                 "signature": [
                   "{ create: { <TDocument = unknown>(this: That, params: ",
                   "CreateRequest",
-                  "<TDocument> | ",
-                  "CreateRequest",
                   "<TDocument>, options?: ",
                   "TransportRequestOptionsWithOutMeta",
                   " | undefined): Promise<",
                   "WriteResponseBase",
                   ">; <TDocument = unknown>(this: That, params: ",
-                  "CreateRequest",
-                  "<TDocument> | ",
                   "CreateRequest",
                   "<TDocument>, options?: ",
                   "TransportRequestOptionsWithMeta",
@@ -15782,23 +15802,17 @@
                   "WriteResponseBase",
                   ", unknown>>; <TDocument = unknown>(this: That, params: ",
                   "CreateRequest",
-                  "<TDocument> | ",
-                  "CreateRequest",
                   "<TDocument>, options?: ",
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "WriteResponseBase",
                   ">; }; update: { <TDocument = unknown, TPartialDocument = unknown, TDocumentR = unknown>(this: That, params: ",
                   "UpdateRequest",
-                  "<TDocument, TPartialDocument> | ",
-                  "UpdateRequest",
                   "<TDocument, TPartialDocument>, options?: ",
                   "TransportRequestOptionsWithOutMeta",
                   " | undefined): Promise<",
                   "UpdateResponse",
                   "<TDocumentR>>; <TDocument = unknown, TPartialDocument = unknown, TDocumentR = unknown>(this: That, params: ",
-                  "UpdateRequest",
-                  "<TDocument, TPartialDocument> | ",
                   "UpdateRequest",
                   "<TDocument, TPartialDocument>, options?: ",
                   "TransportRequestOptionsWithMeta",
@@ -15808,23 +15822,17 @@
                   "UpdateResponse",
                   "<TDocumentR>, unknown>>; <TDocument = unknown, TPartialDocument = unknown, TDocumentR = unknown>(this: That, params: ",
                   "UpdateRequest",
-                  "<TDocument, TPartialDocument> | ",
-                  "UpdateRequest",
                   "<TDocument, TPartialDocument>, options?: ",
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "UpdateResponse",
                   "<TDocumentR>>; }; get: { <TDocument = unknown>(this: That, params: ",
                   "GetRequest",
-                  " | ",
-                  "GetRequest",
                   ", options?: ",
                   "TransportRequestOptionsWithOutMeta",
                   " | undefined): Promise<",
                   "GetResponse",
                   "<TDocument>>; <TDocument = unknown>(this: That, params: ",
-                  "GetRequest",
-                  " | ",
                   "GetRequest",
                   ", options?: ",
                   "TransportRequestOptionsWithMeta",
@@ -15834,23 +15842,17 @@
                   "GetResponse",
                   "<TDocument>, unknown>>; <TDocument = unknown>(this: That, params: ",
                   "GetRequest",
-                  " | ",
-                  "GetRequest",
                   ", options?: ",
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "GetResponse",
                   "<TDocument>>; }; delete: { (this: That, params: ",
                   "DeleteRequest",
-                  " | ",
-                  "DeleteRequest",
                   ", options?: ",
                   "TransportRequestOptionsWithOutMeta",
                   " | undefined): Promise<",
                   "WriteResponseBase",
                   ">; (this: That, params: ",
-                  "DeleteRequest",
-                  " | ",
                   "DeleteRequest",
                   ", options?: ",
                   "TransportRequestOptionsWithMeta",
@@ -15859,8 +15861,6 @@
                   "<",
                   "WriteResponseBase",
                   ", unknown>>; (this: That, params: ",
-                  "DeleteRequest",
-                  " | ",
                   "DeleteRequest",
                   ", options?: ",
                   "TransportRequestOptions",
@@ -15872,8 +15872,6 @@
                   "AggregationsAggregate",
                   ">>(this: That, params?: ",
                   "SearchRequest",
-                  " | ",
-                  "SearchRequest",
                   " | undefined, options?: ",
                   "TransportRequestOptionsWithOutMeta",
                   " | undefined): Promise<",
@@ -15881,8 +15879,6 @@
                   "<TDocument, TAggregations>>; <TDocument = unknown, TAggregations = Record<string, ",
                   "AggregationsAggregate",
                   ">>(this: That, params?: ",
-                  "SearchRequest",
-                  " | ",
                   "SearchRequest",
                   " | undefined, options?: ",
                   "TransportRequestOptionsWithMeta",
@@ -15893,8 +15889,6 @@
                   "<TDocument, TAggregations>, unknown>>; <TDocument = unknown, TAggregations = Record<string, ",
                   "AggregationsAggregate",
                   ">>(this: That, params?: ",
-                  "SearchRequest",
-                  " | ",
                   "SearchRequest",
                   " | undefined, options?: ",
                   "TransportRequestOptions",
@@ -15912,15 +15906,11 @@
                   "default",
                   "; bulk: { <TDocument = unknown, TPartialDocument = unknown>(this: That, params: ",
                   "BulkRequest",
-                  "<TDocument, TPartialDocument> | ",
-                  "BulkRequest",
                   "<TDocument, TPartialDocument>, options?: ",
                   "TransportRequestOptionsWithOutMeta",
                   " | undefined): Promise<",
                   "BulkResponse",
                   ">; <TDocument = unknown, TPartialDocument = unknown>(this: That, params: ",
-                  "BulkRequest",
-                  "<TDocument, TPartialDocument> | ",
                   "BulkRequest",
                   "<TDocument, TPartialDocument>, options?: ",
                   "TransportRequestOptionsWithMeta",
@@ -15930,23 +15920,17 @@
                   "BulkResponse",
                   ", unknown>>; <TDocument = unknown, TPartialDocument = unknown>(this: That, params: ",
                   "BulkRequest",
-                  "<TDocument, TPartialDocument> | ",
-                  "BulkRequest",
                   "<TDocument, TPartialDocument>, options?: ",
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "BulkResponse",
                   ">; }; capabilities: { (this: That, params?: ",
                   "TODO",
-                  " | ",
-                  "TODO",
                   " | undefined, options?: ",
                   "TransportRequestOptionsWithOutMeta",
                   " | undefined): Promise<",
                   "TODO",
                   ">; (this: That, params?: ",
-                  "TODO",
-                  " | ",
                   "TODO",
                   " | undefined, options?: ",
                   "TransportRequestOptionsWithMeta",
@@ -15955,8 +15939,6 @@
                   "<",
                   "TODO",
                   ", unknown>>; (this: That, params?: ",
-                  "TODO",
-                  " | ",
                   "TODO",
                   " | undefined, options?: ",
                   "TransportRequestOptions",
@@ -15968,15 +15950,11 @@
                   "default",
                   "; clearScroll: { (this: That, params?: ",
                   "ClearScrollRequest",
-                  " | ",
-                  "ClearScrollRequest",
                   " | undefined, options?: ",
                   "TransportRequestOptionsWithOutMeta",
                   " | undefined): Promise<",
                   "ClearScrollResponse",
                   ">; (this: That, params?: ",
-                  "ClearScrollRequest",
-                  " | ",
                   "ClearScrollRequest",
                   " | undefined, options?: ",
                   "TransportRequestOptionsWithMeta",
@@ -15986,23 +15964,17 @@
                   "ClearScrollResponse",
                   ", unknown>>; (this: That, params?: ",
                   "ClearScrollRequest",
-                  " | ",
-                  "ClearScrollRequest",
                   " | undefined, options?: ",
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "ClearScrollResponse",
                   ">; }; closePointInTime: { (this: That, params: ",
                   "ClosePointInTimeRequest",
-                  " | ",
-                  "ClosePointInTimeRequest",
                   ", options?: ",
                   "TransportRequestOptionsWithOutMeta",
                   " | undefined): Promise<",
                   "ClosePointInTimeResponse",
                   ">; (this: That, params: ",
-                  "ClosePointInTimeRequest",
-                  " | ",
                   "ClosePointInTimeRequest",
                   ", options?: ",
                   "TransportRequestOptionsWithMeta",
@@ -16011,8 +15983,6 @@
                   "<",
                   "ClosePointInTimeResponse",
                   ", unknown>>; (this: That, params: ",
-                  "ClosePointInTimeRequest",
-                  " | ",
                   "ClosePointInTimeRequest",
                   ", options?: ",
                   "TransportRequestOptions",
@@ -16024,15 +15994,11 @@
                   "default",
                   "; count: { (this: That, params?: ",
                   "CountRequest",
-                  " | ",
-                  "CountRequest",
                   " | undefined, options?: ",
                   "TransportRequestOptionsWithOutMeta",
                   " | undefined): Promise<",
                   "CountResponse",
                   ">; (this: That, params?: ",
-                  "CountRequest",
-                  " | ",
                   "CountRequest",
                   " | undefined, options?: ",
                   "TransportRequestOptionsWithMeta",
@@ -16042,8 +16008,6 @@
                   "CountResponse",
                   ", unknown>>; (this: That, params?: ",
                   "CountRequest",
-                  " | ",
-                  "CountRequest",
                   " | undefined, options?: ",
                   "TransportRequestOptions",
                   " | undefined): Promise<",
@@ -16052,15 +16016,11 @@
                   "default",
                   "; deleteByQuery: { (this: That, params: ",
                   "DeleteByQueryRequest",
-                  " | ",
-                  "DeleteByQueryRequest",
                   ", options?: ",
                   "TransportRequestOptionsWithOutMeta",
                   " | undefined): Promise<",
                   "DeleteByQueryResponse",
                   ">; (this: That, params: ",
-                  "DeleteByQueryRequest",
-                  " | ",
                   "DeleteByQueryRequest",
                   ", options?: ",
                   "TransportRequestOptionsWithMeta",
@@ -16069,8 +16029,6 @@
                   "<",
                   "DeleteByQueryResponse",
                   ", unknown>>; (this: That, params: ",
-                  "DeleteByQueryRequest",
-                  " | ",
                   "DeleteByQueryRequest",
                   ", options?: ",
                   "TransportRequestOptions",
@@ -16078,15 +16036,11 @@
                   "DeleteByQueryResponse",
                   ">; }; deleteByQueryRethrottle: { (this: That, params: ",
                   "DeleteByQueryRethrottleRequest",
-                  " | ",
-                  "DeleteByQueryRethrottleRequest",
                   ", options?: ",
                   "TransportRequestOptionsWithOutMeta",
                   " | undefined): Promise<",
                   "TasksTaskListResponseBase",
                   ">; (this: That, params: ",
-                  "DeleteByQueryRethrottleRequest",
-                  " | ",
                   "DeleteByQueryRethrottleRequest",
                   ", options?: ",
                   "TransportRequestOptionsWithMeta",
@@ -16095,8 +16049,6 @@
                   "<",
                   "TasksTaskListResponseBase",
                   ", unknown>>; (this: That, params: ",
-                  "DeleteByQueryRethrottleRequest",
-                  " | ",
                   "DeleteByQueryRethrottleRequest",
                   ", options?: ",
                   "TransportRequestOptions",
@@ -16104,15 +16056,11 @@
                   "TasksTaskListResponseBase",
                   ">; }; deleteScript: { (this: That, params: ",
                   "DeleteScriptRequest",
-                  " | ",
-                  "DeleteScriptRequest",
                   ", options?: ",
                   "TransportRequestOptionsWithOutMeta",
                   " | undefined): Promise<",
                   "AcknowledgedResponseBase",
                   ">; (this: That, params: ",
-                  "DeleteScriptRequest",
-                  " | ",
                   "DeleteScriptRequest",
                   ", options?: ",
                   "TransportRequestOptionsWithMeta",
@@ -16121,8 +16069,6 @@
                   "<",
                   "AcknowledgedResponseBase",
                   ", unknown>>; (this: That, params: ",
-                  "DeleteScriptRequest",
-                  " | ",
                   "DeleteScriptRequest",
                   ", options?: ",
                   "TransportRequestOptions",
@@ -16136,33 +16082,23 @@
                   "default",
                   "; exists: { (this: That, params: ",
                   "ExistsRequest",
-                  " | ",
-                  "ExistsRequest",
                   ", options?: ",
                   "TransportRequestOptionsWithOutMeta",
                   " | undefined): Promise<boolean>; (this: That, params: ",
-                  "ExistsRequest",
-                  " | ",
                   "ExistsRequest",
                   ", options?: ",
                   "TransportRequestOptionsWithMeta",
                   " | undefined): Promise<",
                   "TransportResult",
                   "<boolean, unknown>>; (this: That, params: ",
-                  "ExistsRequest",
-                  " | ",
                   "ExistsRequest",
                   ", options?: ",
                   "TransportRequestOptions",
                   " | undefined): Promise<boolean>; }; existsSource: { (this: That, params: ",
                   "ExistsSourceRequest",
-                  " | ",
-                  "ExistsSourceRequest",
                   ", options?: ",
                   "TransportRequestOptionsWithOutMeta",
                   " | undefined): Promise<boolean>; (this: That, params: ",
-                  "ExistsSourceRequest",
-                  " | ",
                   "ExistsSourceRequest",
                   ", options?: ",
                   "TransportRequestOptionsWithMeta",
@@ -16170,21 +16106,15 @@
                   "TransportResult",
                   "<boolean, unknown>>; (this: That, params: ",
                   "ExistsSourceRequest",
-                  " | ",
-                  "ExistsSourceRequest",
                   ", options?: ",
                   "TransportRequestOptions",
                   " | undefined): Promise<boolean>; }; explain: { <TDocument = unknown>(this: That, params: ",
-                  "ExplainRequest",
-                  " | ",
                   "ExplainRequest",
                   ", options?: ",
                   "TransportRequestOptionsWithOutMeta",
                   " | undefined): Promise<",
                   "ExplainResponse",
                   "<TDocument>>; <TDocument = unknown>(this: That, params: ",
-                  "ExplainRequest",
-                  " | ",
                   "ExplainRequest",
                   ", options?: ",
                   "TransportRequestOptionsWithMeta",
@@ -16194,8 +16124,6 @@
                   "ExplainResponse",
                   "<TDocument>, unknown>>; <TDocument = unknown>(this: That, params: ",
                   "ExplainRequest",
-                  " | ",
-                  "ExplainRequest",
                   ", options?: ",
                   "TransportRequestOptions",
                   " | undefined): Promise<",
@@ -16204,15 +16132,11 @@
                   "default",
                   "; fieldCaps: { (this: That, params?: ",
                   "FieldCapsRequest",
-                  " | ",
-                  "FieldCapsRequest",
                   " | undefined, options?: ",
                   "TransportRequestOptionsWithOutMeta",
                   " | undefined): Promise<",
                   "FieldCapsResponse",
                   ">; (this: That, params?: ",
-                  "FieldCapsRequest",
-                  " | ",
                   "FieldCapsRequest",
                   " | undefined, options?: ",
                   "TransportRequestOptionsWithMeta",
@@ -16221,8 +16145,6 @@
                   "<",
                   "FieldCapsResponse",
                   ", unknown>>; (this: That, params?: ",
-                  "FieldCapsRequest",
-                  " | ",
                   "FieldCapsRequest",
                   " | undefined, options?: ",
                   "TransportRequestOptions",
@@ -16232,15 +16154,11 @@
                   "default",
                   "; getScript: { (this: That, params: ",
                   "GetScriptRequest",
-                  " | ",
-                  "GetScriptRequest",
                   ", options?: ",
                   "TransportRequestOptionsWithOutMeta",
                   " | undefined): Promise<",
                   "GetScriptResponse",
                   ">; (this: That, params: ",
-                  "GetScriptRequest",
-                  " | ",
                   "GetScriptRequest",
                   ", options?: ",
                   "TransportRequestOptionsWithMeta",
@@ -16250,23 +16168,17 @@
                   "GetScriptResponse",
                   ", unknown>>; (this: That, params: ",
                   "GetScriptRequest",
-                  " | ",
-                  "GetScriptRequest",
                   ", options?: ",
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "GetScriptResponse",
                   ">; }; getScriptContext: { (this: That, params?: ",
                   "GetScriptContextRequest",
-                  " | ",
-                  "GetScriptContextRequest",
                   " | undefined, options?: ",
                   "TransportRequestOptionsWithOutMeta",
                   " | undefined): Promise<",
                   "GetScriptContextResponse",
                   ">; (this: That, params?: ",
-                  "GetScriptContextRequest",
-                  " | ",
                   "GetScriptContextRequest",
                   " | undefined, options?: ",
                   "TransportRequestOptionsWithMeta",
@@ -16275,8 +16187,6 @@
                   "<",
                   "GetScriptContextResponse",
                   ", unknown>>; (this: That, params?: ",
-                  "GetScriptContextRequest",
-                  " | ",
                   "GetScriptContextRequest",
                   " | undefined, options?: ",
                   "TransportRequestOptions",
@@ -16284,15 +16194,11 @@
                   "GetScriptContextResponse",
                   ">; }; getScriptLanguages: { (this: That, params?: ",
                   "GetScriptLanguagesRequest",
-                  " | ",
-                  "GetScriptLanguagesRequest",
                   " | undefined, options?: ",
                   "TransportRequestOptionsWithOutMeta",
                   " | undefined): Promise<",
                   "GetScriptLanguagesResponse",
                   ">; (this: That, params?: ",
-                  "GetScriptLanguagesRequest",
-                  " | ",
                   "GetScriptLanguagesRequest",
                   " | undefined, options?: ",
                   "TransportRequestOptionsWithMeta",
@@ -16301,8 +16207,6 @@
                   "<",
                   "GetScriptLanguagesResponse",
                   ", unknown>>; (this: That, params?: ",
-                  "GetScriptLanguagesRequest",
-                  " | ",
                   "GetScriptLanguagesRequest",
                   " | undefined, options?: ",
                   "TransportRequestOptions",
@@ -16310,13 +16214,9 @@
                   "GetScriptLanguagesResponse",
                   ">; }; getSource: { <TDocument = unknown>(this: That, params: ",
                   "GetSourceRequest",
-                  " | ",
-                  "GetSourceRequest",
                   ", options?: ",
                   "TransportRequestOptionsWithOutMeta",
                   " | undefined): Promise<TDocument>; <TDocument = unknown>(this: That, params: ",
-                  "GetSourceRequest",
-                  " | ",
                   "GetSourceRequest",
                   ", options?: ",
                   "TransportRequestOptionsWithMeta",
@@ -16324,23 +16224,17 @@
                   "TransportResult",
                   "<TDocument, unknown>>; <TDocument = unknown>(this: That, params: ",
                   "GetSourceRequest",
-                  " | ",
-                  "GetSourceRequest",
                   ", options?: ",
                   "TransportRequestOptions",
                   " | undefined): Promise<TDocument>; }; graph: ",
                   "default",
                   "; healthReport: { (this: That, params?: ",
                   "HealthReportRequest",
-                  " | ",
-                  "HealthReportRequest",
                   " | undefined, options?: ",
                   "TransportRequestOptionsWithOutMeta",
                   " | undefined): Promise<",
                   "HealthReportResponse",
                   ">; (this: That, params?: ",
-                  "HealthReportRequest",
-                  " | ",
                   "HealthReportRequest",
                   " | undefined, options?: ",
                   "TransportRequestOptionsWithMeta",
@@ -16349,8 +16243,6 @@
                   "<",
                   "HealthReportResponse",
                   ", unknown>>; (this: That, params?: ",
-                  "HealthReportRequest",
-                  " | ",
                   "HealthReportRequest",
                   " | undefined, options?: ",
                   "TransportRequestOptions",
@@ -16360,15 +16252,11 @@
                   "default",
                   "; index: { <TDocument = unknown>(this: That, params: ",
                   "IndexRequest",
-                  "<TDocument> | ",
-                  "IndexRequest",
                   "<TDocument>, options?: ",
                   "TransportRequestOptionsWithOutMeta",
                   " | undefined): Promise<",
                   "WriteResponseBase",
                   ">; <TDocument = unknown>(this: That, params: ",
-                  "IndexRequest",
-                  "<TDocument> | ",
                   "IndexRequest",
                   "<TDocument>, options?: ",
                   "TransportRequestOptionsWithMeta",
@@ -16377,8 +16265,6 @@
                   "<",
                   "WriteResponseBase",
                   ", unknown>>; <TDocument = unknown>(this: That, params: ",
-                  "IndexRequest",
-                  "<TDocument> | ",
                   "IndexRequest",
                   "<TDocument>, options?: ",
                   "TransportRequestOptions",
@@ -16390,15 +16276,11 @@
                   "default",
                   "; info: { (this: That, params?: ",
                   "InfoRequest",
-                  " | ",
-                  "InfoRequest",
                   " | undefined, options?: ",
                   "TransportRequestOptionsWithOutMeta",
                   " | undefined): Promise<",
                   "InfoResponse",
                   ">; (this: That, params?: ",
-                  "InfoRequest",
-                  " | ",
                   "InfoRequest",
                   " | undefined, options?: ",
                   "TransportRequestOptionsWithMeta",
@@ -16408,55 +16290,43 @@
                   "InfoResponse",
                   ", unknown>>; (this: That, params?: ",
                   "InfoRequest",
-                  " | ",
-                  "InfoRequest",
                   " | undefined, options?: ",
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "InfoResponse",
                   ">; }; ingest: ",
                   "default",
-                  "; knnSearch: { <TDocument = unknown>(this: That, params: ",
-                  "KnnSearchRequest",
-                  " | ",
-                  "KnnSearchRequest",
-                  ", options?: ",
+                  "; knnSearch: { (this: That, params?: ",
+                  "TODO",
+                  " | undefined, options?: ",
                   "TransportRequestOptionsWithOutMeta",
                   " | undefined): Promise<",
-                  "KnnSearchResponse",
-                  "<TDocument>>; <TDocument = unknown>(this: That, params: ",
-                  "KnnSearchRequest",
-                  " | ",
-                  "KnnSearchRequest",
-                  ", options?: ",
+                  "TODO",
+                  ">; (this: That, params?: ",
+                  "TODO",
+                  " | undefined, options?: ",
                   "TransportRequestOptionsWithMeta",
                   " | undefined): Promise<",
                   "TransportResult",
                   "<",
-                  "KnnSearchResponse",
-                  "<TDocument>, unknown>>; <TDocument = unknown>(this: That, params: ",
-                  "KnnSearchRequest",
-                  " | ",
-                  "KnnSearchRequest",
-                  ", options?: ",
+                  "TODO",
+                  ", unknown>>; (this: That, params?: ",
+                  "TODO",
+                  " | undefined, options?: ",
                   "TransportRequestOptions",
                   " | undefined): Promise<",
-                  "KnnSearchResponse",
-                  "<TDocument>>; }; license: ",
+                  "TODO",
+                  ">; }; license: ",
                   "default",
                   "; logstash: ",
                   "default",
                   "; mget: { <TDocument = unknown>(this: That, params?: ",
-                  "MgetRequest",
-                  " | ",
                   "MgetRequest",
                   " | undefined, options?: ",
                   "TransportRequestOptionsWithOutMeta",
                   " | undefined): Promise<",
                   "MgetResponse",
                   "<TDocument>>; <TDocument = unknown>(this: That, params?: ",
-                  "MgetRequest",
-                  " | ",
                   "MgetRequest",
                   " | undefined, options?: ",
                   "TransportRequestOptionsWithMeta",
@@ -16465,8 +16335,6 @@
                   "<",
                   "MgetResponse",
                   "<TDocument>, unknown>>; <TDocument = unknown>(this: That, params?: ",
-                  "MgetRequest",
-                  " | ",
                   "MgetRequest",
                   " | undefined, options?: ",
                   "TransportRequestOptions",
@@ -16482,8 +16350,6 @@
                   "AggregationsAggregate",
                   ">>(this: That, params: ",
                   "MsearchRequest",
-                  " | ",
-                  "MsearchRequest",
                   ", options?: ",
                   "TransportRequestOptionsWithOutMeta",
                   " | undefined): Promise<",
@@ -16491,8 +16357,6 @@
                   "<TDocument, TAggregations>>; <TDocument = unknown, TAggregations = Record<string, ",
                   "AggregationsAggregate",
                   ">>(this: That, params: ",
-                  "MsearchRequest",
-                  " | ",
                   "MsearchRequest",
                   ", options?: ",
                   "TransportRequestOptionsWithMeta",
@@ -16503,8 +16367,6 @@
                   "<TDocument, TAggregations>, unknown>>; <TDocument = unknown, TAggregations = Record<string, ",
                   "AggregationsAggregate",
                   ">>(this: That, params: ",
-                  "MsearchRequest",
-                  " | ",
                   "MsearchRequest",
                   ", options?: ",
                   "TransportRequestOptions",
@@ -16514,8 +16376,6 @@
                   "AggregationsAggregate",
                   ">>(this: That, params: ",
                   "MsearchTemplateRequest",
-                  " | ",
-                  "MsearchTemplateRequest",
                   ", options?: ",
                   "TransportRequestOptionsWithOutMeta",
                   " | undefined): Promise<",
@@ -16523,8 +16383,6 @@
                   "<TDocument, TAggregations>>; <TDocument = unknown, TAggregations = Record<string, ",
                   "AggregationsAggregate",
                   ">>(this: That, params: ",
-                  "MsearchTemplateRequest",
-                  " | ",
                   "MsearchTemplateRequest",
                   ", options?: ",
                   "TransportRequestOptionsWithMeta",
@@ -16536,23 +16394,17 @@
                   "AggregationsAggregate",
                   ">>(this: That, params: ",
                   "MsearchTemplateRequest",
-                  " | ",
-                  "MsearchTemplateRequest",
                   ", options?: ",
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "MsearchTemplateResponse",
                   "<TDocument, TAggregations>>; }; mtermvectors: { (this: That, params?: ",
                   "MtermvectorsRequest",
-                  " | ",
-                  "MtermvectorsRequest",
                   " | undefined, options?: ",
                   "TransportRequestOptionsWithOutMeta",
                   " | undefined): Promise<",
                   "MtermvectorsResponse",
                   ">; (this: That, params?: ",
-                  "MtermvectorsRequest",
-                  " | ",
                   "MtermvectorsRequest",
                   " | undefined, options?: ",
                   "TransportRequestOptionsWithMeta",
@@ -16561,8 +16413,6 @@
                   "<",
                   "MtermvectorsResponse",
                   ", unknown>>; (this: That, params?: ",
-                  "MtermvectorsRequest",
-                  " | ",
                   "MtermvectorsRequest",
                   " | undefined, options?: ",
                   "TransportRequestOptions",
@@ -16572,15 +16422,11 @@
                   "default",
                   "; openPointInTime: { (this: That, params: ",
                   "OpenPointInTimeRequest",
-                  " | ",
-                  "OpenPointInTimeRequest",
                   ", options?: ",
                   "TransportRequestOptionsWithOutMeta",
                   " | undefined): Promise<",
                   "OpenPointInTimeResponse",
                   ">; (this: That, params: ",
-                  "OpenPointInTimeRequest",
-                  " | ",
                   "OpenPointInTimeRequest",
                   ", options?: ",
                   "TransportRequestOptionsWithMeta",
@@ -16589,8 +16435,6 @@
                   "<",
                   "OpenPointInTimeResponse",
                   ", unknown>>; (this: That, params: ",
-                  "OpenPointInTimeRequest",
-                  " | ",
                   "OpenPointInTimeRequest",
                   ", options?: ",
                   "TransportRequestOptions",
@@ -16598,13 +16442,9 @@
                   "OpenPointInTimeResponse",
                   ">; }; ping: { (this: That, params?: ",
                   "PingRequest",
-                  " | ",
-                  "PingRequest",
                   " | undefined, options?: ",
                   "TransportRequestOptionsWithOutMeta",
                   " | undefined): Promise<boolean>; (this: That, params?: ",
-                  "PingRequest",
-                  " | ",
                   "PingRequest",
                   " | undefined, options?: ",
                   "TransportRequestOptionsWithMeta",
@@ -16612,23 +16452,17 @@
                   "TransportResult",
                   "<boolean, unknown>>; (this: That, params?: ",
                   "PingRequest",
-                  " | ",
-                  "PingRequest",
                   " | undefined, options?: ",
                   "TransportRequestOptions",
                   " | undefined): Promise<boolean>; }; profiling: ",
                   "default",
                   "; putScript: { (this: That, params: ",
                   "PutScriptRequest",
-                  " | ",
-                  "PutScriptRequest",
                   ", options?: ",
                   "TransportRequestOptionsWithOutMeta",
                   " | undefined): Promise<",
                   "AcknowledgedResponseBase",
                   ">; (this: That, params: ",
-                  "PutScriptRequest",
-                  " | ",
                   "PutScriptRequest",
                   ", options?: ",
                   "TransportRequestOptionsWithMeta",
@@ -16637,8 +16471,6 @@
                   "<",
                   "AcknowledgedResponseBase",
                   ", unknown>>; (this: That, params: ",
-                  "PutScriptRequest",
-                  " | ",
                   "PutScriptRequest",
                   ", options?: ",
                   "TransportRequestOptions",
@@ -16648,15 +16480,11 @@
                   "default",
                   "; rankEval: { (this: That, params: ",
                   "RankEvalRequest",
-                  " | ",
-                  "RankEvalRequest",
                   ", options?: ",
                   "TransportRequestOptionsWithOutMeta",
                   " | undefined): Promise<",
                   "RankEvalResponse",
                   ">; (this: That, params: ",
-                  "RankEvalRequest",
-                  " | ",
                   "RankEvalRequest",
                   ", options?: ",
                   "TransportRequestOptionsWithMeta",
@@ -16665,8 +16493,6 @@
                   "<",
                   "RankEvalResponse",
                   ", unknown>>; (this: That, params: ",
-                  "RankEvalRequest",
-                  " | ",
                   "RankEvalRequest",
                   ", options?: ",
                   "TransportRequestOptions",
@@ -16674,15 +16500,11 @@
                   "RankEvalResponse",
                   ">; }; reindex: { (this: That, params: ",
                   "ReindexRequest",
-                  " | ",
-                  "ReindexRequest",
                   ", options?: ",
                   "TransportRequestOptionsWithOutMeta",
                   " | undefined): Promise<",
                   "ReindexResponse",
                   ">; (this: That, params: ",
-                  "ReindexRequest",
-                  " | ",
                   "ReindexRequest",
                   ", options?: ",
                   "TransportRequestOptionsWithMeta",
@@ -16691,8 +16513,6 @@
                   "<",
                   "ReindexResponse",
                   ", unknown>>; (this: That, params: ",
-                  "ReindexRequest",
-                  " | ",
                   "ReindexRequest",
                   ", options?: ",
                   "TransportRequestOptions",
@@ -16700,15 +16520,11 @@
                   "ReindexResponse",
                   ">; }; reindexRethrottle: { (this: That, params: ",
                   "ReindexRethrottleRequest",
-                  " | ",
-                  "ReindexRethrottleRequest",
                   ", options?: ",
                   "TransportRequestOptionsWithOutMeta",
                   " | undefined): Promise<",
                   "ReindexRethrottleResponse",
                   ">; (this: That, params: ",
-                  "ReindexRethrottleRequest",
-                  " | ",
                   "ReindexRethrottleRequest",
                   ", options?: ",
                   "TransportRequestOptionsWithMeta",
@@ -16718,23 +16534,17 @@
                   "ReindexRethrottleResponse",
                   ", unknown>>; (this: That, params: ",
                   "ReindexRethrottleRequest",
-                  " | ",
-                  "ReindexRethrottleRequest",
                   ", options?: ",
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "ReindexRethrottleResponse",
                   ">; }; renderSearchTemplate: { (this: That, params?: ",
                   "RenderSearchTemplateRequest",
-                  " | ",
-                  "RenderSearchTemplateRequest",
                   " | undefined, options?: ",
                   "TransportRequestOptionsWithOutMeta",
                   " | undefined): Promise<",
                   "RenderSearchTemplateResponse",
                   ">; (this: That, params?: ",
-                  "RenderSearchTemplateRequest",
-                  " | ",
                   "RenderSearchTemplateRequest",
                   " | undefined, options?: ",
                   "TransportRequestOptionsWithMeta",
@@ -16744,8 +16554,6 @@
                   "RenderSearchTemplateResponse",
                   ", unknown>>; (this: That, params?: ",
                   "RenderSearchTemplateRequest",
-                  " | ",
-                  "RenderSearchTemplateRequest",
                   " | undefined, options?: ",
                   "TransportRequestOptions",
                   " | undefined): Promise<",
@@ -16754,15 +16562,11 @@
                   "default",
                   "; scriptsPainlessExecute: { <TResult = unknown>(this: That, params?: ",
                   "ScriptsPainlessExecuteRequest",
-                  " | ",
-                  "ScriptsPainlessExecuteRequest",
                   " | undefined, options?: ",
                   "TransportRequestOptionsWithOutMeta",
                   " | undefined): Promise<",
                   "ScriptsPainlessExecuteResponse",
                   "<TResult>>; <TResult = unknown>(this: That, params?: ",
-                  "ScriptsPainlessExecuteRequest",
-                  " | ",
                   "ScriptsPainlessExecuteRequest",
                   " | undefined, options?: ",
                   "TransportRequestOptionsWithMeta",
@@ -16772,8 +16576,6 @@
                   "ScriptsPainlessExecuteResponse",
                   "<TResult>, unknown>>; <TResult = unknown>(this: That, params?: ",
                   "ScriptsPainlessExecuteRequest",
-                  " | ",
-                  "ScriptsPainlessExecuteRequest",
                   " | undefined, options?: ",
                   "TransportRequestOptions",
                   " | undefined): Promise<",
@@ -16782,8 +16584,6 @@
                   "AggregationsAggregate",
                   ">>(this: That, params: ",
                   "ScrollRequest",
-                  " | ",
-                  "ScrollRequest",
                   ", options?: ",
                   "TransportRequestOptionsWithOutMeta",
                   " | undefined): Promise<",
@@ -16791,8 +16591,6 @@
                   "<TDocument, TAggregations>>; <TDocument = unknown, TAggregations = Record<string, ",
                   "AggregationsAggregate",
                   ">>(this: That, params: ",
-                  "ScrollRequest",
-                  " | ",
                   "ScrollRequest",
                   ", options?: ",
                   "TransportRequestOptionsWithMeta",
@@ -16804,8 +16602,6 @@
                   "AggregationsAggregate",
                   ">>(this: That, params: ",
                   "ScrollRequest",
-                  " | ",
-                  "ScrollRequest",
                   ", options?: ",
                   "TransportRequestOptions",
                   " | undefined): Promise<",
@@ -16814,13 +16610,9 @@
                   "default",
                   "; searchMvt: { (this: That, params: ",
                   "SearchMvtRequest",
-                  " | ",
-                  "SearchMvtRequest",
                   ", options?: ",
                   "TransportRequestOptionsWithOutMeta",
                   " | undefined): Promise<ArrayBuffer>; (this: That, params: ",
-                  "SearchMvtRequest",
-                  " | ",
                   "SearchMvtRequest",
                   ", options?: ",
                   "TransportRequestOptionsWithMeta",
@@ -16828,21 +16620,15 @@
                   "TransportResult",
                   "<ArrayBuffer, unknown>>; (this: That, params: ",
                   "SearchMvtRequest",
-                  " | ",
-                  "SearchMvtRequest",
                   ", options?: ",
                   "TransportRequestOptions",
                   " | undefined): Promise<ArrayBuffer>; }; searchShards: { (this: That, params?: ",
-                  "SearchShardsRequest",
-                  " | ",
                   "SearchShardsRequest",
                   " | undefined, options?: ",
                   "TransportRequestOptionsWithOutMeta",
                   " | undefined): Promise<",
                   "SearchShardsResponse",
                   ">; (this: That, params?: ",
-                  "SearchShardsRequest",
-                  " | ",
                   "SearchShardsRequest",
                   " | undefined, options?: ",
                   "TransportRequestOptionsWithMeta",
@@ -16852,23 +16638,17 @@
                   "SearchShardsResponse",
                   ", unknown>>; (this: That, params?: ",
                   "SearchShardsRequest",
-                  " | ",
-                  "SearchShardsRequest",
                   " | undefined, options?: ",
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "SearchShardsResponse",
                   ">; }; searchTemplate: { <TDocument = unknown>(this: That, params?: ",
                   "SearchTemplateRequest",
-                  " | ",
-                  "SearchTemplateRequest",
                   " | undefined, options?: ",
                   "TransportRequestOptionsWithOutMeta",
                   " | undefined): Promise<",
                   "SearchTemplateResponse",
                   "<TDocument>>; <TDocument = unknown>(this: That, params?: ",
-                  "SearchTemplateRequest",
-                  " | ",
                   "SearchTemplateRequest",
                   " | undefined, options?: ",
                   "TransportRequestOptionsWithMeta",
@@ -16877,8 +16657,6 @@
                   "<",
                   "SearchTemplateResponse",
                   "<TDocument>, unknown>>; <TDocument = unknown>(this: That, params?: ",
-                  "SearchTemplateRequest",
-                  " | ",
                   "SearchTemplateRequest",
                   " | undefined, options?: ",
                   "TransportRequestOptions",
@@ -16906,15 +16684,11 @@
                   "default",
                   "; termsEnum: { (this: That, params: ",
                   "TermsEnumRequest",
-                  " | ",
-                  "TermsEnumRequest",
                   ", options?: ",
                   "TransportRequestOptionsWithOutMeta",
                   " | undefined): Promise<",
                   "TermsEnumResponse",
                   ">; (this: That, params: ",
-                  "TermsEnumRequest",
-                  " | ",
                   "TermsEnumRequest",
                   ", options?: ",
                   "TransportRequestOptionsWithMeta",
@@ -16924,23 +16698,17 @@
                   "TermsEnumResponse",
                   ", unknown>>; (this: That, params: ",
                   "TermsEnumRequest",
-                  " | ",
-                  "TermsEnumRequest",
                   ", options?: ",
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "TermsEnumResponse",
                   ">; }; termvectors: { <TDocument = unknown>(this: That, params: ",
                   "TermvectorsRequest",
-                  "<TDocument> | ",
-                  "TermvectorsRequest",
                   "<TDocument>, options?: ",
                   "TransportRequestOptionsWithOutMeta",
                   " | undefined): Promise<",
                   "TermvectorsResponse",
                   ">; <TDocument = unknown>(this: That, params: ",
-                  "TermvectorsRequest",
-                  "<TDocument> | ",
                   "TermvectorsRequest",
                   "<TDocument>, options?: ",
                   "TransportRequestOptionsWithMeta",
@@ -16949,8 +16717,6 @@
                   "<",
                   "TermvectorsResponse",
                   ", unknown>>; <TDocument = unknown>(this: That, params: ",
-                  "TermvectorsRequest",
-                  "<TDocument> | ",
                   "TermvectorsRequest",
                   "<TDocument>, options?: ",
                   "TransportRequestOptions",
@@ -16962,15 +16728,11 @@
                   "default",
                   "; updateByQuery: { (this: That, params: ",
                   "UpdateByQueryRequest",
-                  " | ",
-                  "UpdateByQueryRequest",
                   ", options?: ",
                   "TransportRequestOptionsWithOutMeta",
                   " | undefined): Promise<",
                   "UpdateByQueryResponse",
                   ">; (this: That, params: ",
-                  "UpdateByQueryRequest",
-                  " | ",
                   "UpdateByQueryRequest",
                   ", options?: ",
                   "TransportRequestOptionsWithMeta",
@@ -16979,8 +16741,6 @@
                   "<",
                   "UpdateByQueryResponse",
                   ", unknown>>; (this: That, params: ",
-                  "UpdateByQueryRequest",
-                  " | ",
                   "UpdateByQueryRequest",
                   ", options?: ",
                   "TransportRequestOptions",
@@ -16988,15 +16748,11 @@
                   "UpdateByQueryResponse",
                   ">; }; updateByQueryRethrottle: { (this: That, params: ",
                   "UpdateByQueryRethrottleRequest",
-                  " | ",
-                  "UpdateByQueryRethrottleRequest",
                   ", options?: ",
                   "TransportRequestOptionsWithOutMeta",
                   " | undefined): Promise<",
                   "UpdateByQueryRethrottleResponse",
                   ">; (this: That, params: ",
-                  "UpdateByQueryRethrottleRequest",
-                  " | ",
                   "UpdateByQueryRethrottleRequest",
                   ", options?: ",
                   "TransportRequestOptionsWithMeta",
@@ -17005,8 +16761,6 @@
                   "<",
                   "UpdateByQueryRethrottleResponse",
                   ", unknown>>; (this: That, params: ",
-                  "UpdateByQueryRethrottleRequest",
-                  " | ",
                   "UpdateByQueryRethrottleRequest",
                   ", options?: ",
                   "TransportRequestOptions",
@@ -21029,6 +20783,40 @@
           },
           {
             "parentPluginId": "data",
+            "id": "def-common.DataViewsService.clearDataViewLazyCache",
+            "type": "Function",
+            "tags": [],
+            "label": "clearDataViewLazyCache",
+            "description": [
+              "\nClear instance in data view lazy cache"
+            ],
+            "signature": [
+              "(id: string) => void"
+            ],
+            "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-common.DataViewsService.clearDataViewLazyCache.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-common.DataViewsService.getCache",
             "type": "Function",
             "tags": [],
@@ -21287,7 +21075,7 @@
             "tags": [],
             "label": "getFieldsForIndexPattern",
             "description": [
-              "\nGet field list by providing an index patttern (or spec)."
+              "\nGet field list by providing an index pattern (or spec)."
             ],
             "signature": [
               "(indexPattern: ",
@@ -21314,7 +21102,7 @@
                 "section": "def-common.GetFieldsOptions",
                 "text": "GetFieldsOptions"
               },
-              ", \"allowNoIndex\"> | undefined) => Promise<",
+              ", \"allowNoIndex\" | \"pattern\"> | undefined) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -21375,7 +21163,7 @@
                     "section": "def-common.GetFieldsOptions",
                     "text": "GetFieldsOptions"
                   },
-                  ", \"allowNoIndex\"> | undefined"
+                  ", \"allowNoIndex\" | \"pattern\"> | undefined"
                 ],
                 "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
                 "deprecated": false,
@@ -22692,6 +22480,128 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.SerializableField",
+        "type": "Class",
+        "tags": [],
+        "label": "SerializableField",
+        "description": [
+          "\nClass to extends that enabled serializing and deserializing instance values"
+        ],
+        "signature": [
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataPluginApi",
+            "section": "def-common.SerializableField",
+            "text": "SerializableField"
+          },
+          "<S>"
+        ],
+        "path": "src/platform/plugins/shared/data/common/serializable_field.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.SerializableField.isSerializable",
+            "type": "Function",
+            "tags": [],
+            "label": "isSerializable",
+            "description": [],
+            "signature": [
+              "<T>(field: unknown) => field is ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataPluginApi",
+                "section": "def-common.SerializableField",
+                "text": "SerializableField"
+              },
+              "<T>"
+            ],
+            "path": "src/platform/plugins/shared/data/common/serializable_field.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-common.SerializableField.isSerializable.$1",
+                "type": "Unknown",
+                "tags": [],
+                "label": "field",
+                "description": [],
+                "signature": [
+                  "unknown"
+                ],
+                "path": "src/platform/plugins/shared/data/common/serializable_field.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.SerializableField.serialize",
+            "type": "Function",
+            "tags": [],
+            "label": "serialize",
+            "description": [
+              "\nSerializes the class instance to a known `SerializedValue` that can be used to instantiate a new instance\n\nIdeally this returns the same params as found in the constructor."
+            ],
+            "signature": [
+              "() => S"
+            ],
+            "path": "src/platform/plugins/shared/data/common/serializable_field.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.SerializableField.deserialize",
+            "type": "Function",
+            "tags": [],
+            "label": "deserialize",
+            "description": [
+              "\ntypescript forbids abstract static methods but this is a workaround to require it\n"
+            ],
+            "signature": [
+              "(serializedValue: unknown) => unknown"
+            ],
+            "path": "src/platform/plugins/shared/data/common/serializable_field.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-common.SerializableField.deserialize.$1",
+                "type": "Unknown",
+                "tags": [],
+                "label": "serializedValue",
+                "description": [
+                  "type of `SerializedValue`"
+                ],
+                "signature": [
+                  "unknown"
+                ],
+                "path": "src/platform/plugins/shared/data/common/serializable_field.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "`instanceValue` should same type as instantiating class"
+            ]
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "functions": [
@@ -22848,6 +22758,39 @@
               "CSVOptions"
             ],
             "path": "src/platform/plugins/shared/data/common/exports/export_csv.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.deserializeField",
+        "type": "Function",
+        "tags": [],
+        "label": "deserializeField",
+        "description": [],
+        "signature": [
+          "(field: unknown) => unknown"
+        ],
+        "path": "src/platform/plugins/shared/data/common/serialize_utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.deserializeField.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "field",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/platform/plugins/shared/data/common/serialize_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -23298,6 +23241,39 @@
             "trackAdoption": false
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.serializeField",
+        "type": "Function",
+        "tags": [],
+        "label": "serializeField",
+        "description": [],
+        "signature": [
+          "(field: unknown) => unknown"
+        ],
+        "path": "src/platform/plugins/shared/data/common/serialize_utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.serializeField.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "field",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/platform/plugins/shared/data/common/serialize_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
         "initialIsOpen": false
       },
       {
@@ -23964,6 +23940,35 @@
             "path": "src/platform/plugins/shared/data_views/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.GetFieldsOptions.abortSignal",
+            "type": "Object",
+            "tags": [],
+            "label": "abortSignal",
+            "description": [],
+            "signature": [
+              "AbortSignal | undefined"
+            ],
+            "path": "src/platform/plugins/shared/data_views/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.GetFieldsOptions.runtimeMappings",
+            "type": "Object",
+            "tags": [],
+            "label": "runtimeMappings",
+            "description": [],
+            "signature": [
+              "MappingRuntimeFields",
+              " | undefined"
+            ],
+            "path": "src/platform/plugins/shared/data_views/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -24425,12 +24430,20 @@
                 "path": "src/core/packages/saved-objects/import-export-server-internal/src/import/lib/collect_saved_objects.ts"
               },
               {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/saved-objects/server-internal/src/routes/legacy_import_export/lib/import_dashboards.ts"
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/kibana/assets/install.ts"
               },
               {
-                "plugin": "@kbn/core-saved-objects-browser-mocks",
-                "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts"
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/kibana/assets/install.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/kibana/assets/install.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/saved-objects/browser-mocks/src/simple_saved_object.mock.ts"
               },
               {
                 "plugin": "graph",
@@ -24445,124 +24458,8 @@
                 "path": "x-pack/platform/plugins/private/graph/server/sample_data/flights.ts"
               },
               {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/kibana/assets/install.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/kibana/assets/install.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/kibana/assets/install.ts"
-              },
-              {
                 "plugin": "osquery",
                 "path": "x-pack/platform/plugins/shared/osquery/server/routes/pack/read_pack_route.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/platform/plugins/shared/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/platform/plugins/shared/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/platform/plugins/shared/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/platform/plugins/shared/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/platform/plugins/shared/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
               },
               {
                 "plugin": "fleet",
@@ -24587,6 +24484,18 @@
               {
                 "plugin": "lists",
                 "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client.mock.ts"
+              },
+              {
+                "plugin": "searchPlayground",
+                "path": "x-pack/solutions/search/plugins/search_playground/server/utils/playgrounds.test.ts"
+              },
+              {
+                "plugin": "searchPlayground",
+                "path": "x-pack/solutions/search/plugins/search_playground/server/utils/playgrounds.test.ts"
+              },
+              {
+                "plugin": "searchPlayground",
+                "path": "x-pack/solutions/search/plugins/search_playground/server/utils/playgrounds.test.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -25029,7 +24938,7 @@
             "section": "def-common.DataViewLazy",
             "text": "DataViewLazy"
           },
-          "[]>; clearCache: () => void; clearInstanceCache: (id?: string | undefined) => void; getCache: () => Promise<",
+          "[]>; clearCache: () => void; clearInstanceCache: (id?: string | undefined) => void; clearDataViewLazyCache: (id: string) => void; getCache: () => Promise<",
           "SavedObject",
           "<",
           {
@@ -25087,7 +24996,7 @@
             "section": "def-common.GetFieldsOptions",
             "text": "GetFieldsOptions"
           },
-          ", \"allowNoIndex\"> | undefined) => Promise<",
+          ", \"allowNoIndex\" | \"pattern\"> | undefined) => Promise<",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -25610,6 +25519,38 @@
       },
       {
         "parentPluginId": "data",
+        "id": "def-common.RawValue",
+        "type": "Type",
+        "tags": [],
+        "label": "RawValue",
+        "description": [
+          "\nAlias for unknown raw field value, could be instance of a field Class"
+        ],
+        "signature": [
+          "unknown"
+        ],
+        "path": "src/platform/plugins/shared/data/common/serializable_field.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.RefreshInterval",
+        "type": "Type",
+        "tags": [],
+        "label": "RefreshInterval",
+        "description": [],
+        "signature": [
+          "{ readonly value: number; readonly pause: boolean; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-data-service-server/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
         "id": "def-common.SAVED_QUERY_BASE_URL",
         "type": "string",
         "tags": [],
@@ -25634,6 +25575,42 @@
           "\"1\""
         ],
         "path": "src/platform/plugins/shared/data/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.SerializedField",
+        "type": "Type",
+        "tags": [],
+        "label": "SerializedField",
+        "description": [
+          "\nAll available serialized forms of complex/instance fields. Excludes non-complex/primitive fields.\n\nUse `SerializedValue` for all generalize serial values which includes non-complex/primitive fields.\n\nCurrently includes:\n- `RangeKey`\n- `MultiFieldKey`"
+        ],
+        "signature": [
+          "SerializedMultiFieldKey",
+          " | ",
+          "SerializedRangeKey"
+        ],
+        "path": "src/platform/plugins/shared/data/common/serialize_utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.SerializedValue",
+        "type": "Type",
+        "tags": [],
+        "label": "SerializedValue",
+        "description": [
+          "\nAlias for unknown serialized value. This value is what we store in the SO and app state\nto persist the color assignment based on the raw row value.\n\nIn most cases this is a `string` or `number` or plain `object`, in other cases this is an\nobject serialized from an instance of a given field (i.e. `RangeKey` or `MultiFieldKey`)."
+        ],
+        "signature": [
+          "unknown"
+        ],
+        "path": "src/platform/plugins/shared/data/common/serialize_utils.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -25740,6 +25717,48 @@
         "path": "src/platform/plugins/shared/data_views/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.SerializableType",
+        "type": "Object",
+        "tags": [],
+        "label": "SerializableType",
+        "description": [],
+        "path": "src/platform/plugins/shared/data/common/serialize_utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.SerializableType.MultiFieldKey",
+            "type": "string",
+            "tags": [],
+            "label": "MultiFieldKey",
+            "description": [],
+            "signature": [
+              "\"multiFieldKey\""
+            ],
+            "path": "src/platform/plugins/shared/data/common/serialize_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.SerializableType.RangeKey",
+            "type": "string",
+            "tags": [],
+            "label": "RangeKey",
+            "description": [],
+            "signature": [
+              "\"rangeKey\""
+            ],
+            "path": "src/platform/plugins/shared/data/common/serialize_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
         "initialIsOpen": false
       },
       {

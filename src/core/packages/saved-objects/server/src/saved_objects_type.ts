@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { MaybePromise } from '@kbn/utility-types';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { SavedObjectsNamespaceType } from '@kbn/core-saved-objects-common';
@@ -30,6 +30,10 @@ export interface SavedObjectsType<Attributes = any> {
    * The name of the type, which is also used as the internal id.
    */
   name: string;
+  /**
+   * The attribute path to the saved object's name
+   */
+  nameAttribute?: string;
   /**
    * Is the type hidden by default. If true, repositories will not have access to this type unless explicitly
    * declared as an `extraType` when creating the repository.
@@ -186,59 +190,11 @@ export interface SavedObjectsType<Attributes = any> {
    * ```
    */
   modelVersions?: SavedObjectsModelVersionMap | SavedObjectsModelVersionMapProvider;
-
   /**
-   * Allows to opt-in to the model version API.
-   *
-   * Must be a valid semver version (with the patch version being necessarily 0)
-   *
-   * When specified, the type will switch from using the {@link SavedObjectsType.migrations | legacy migration API}
-   * to use the {@link SavedObjectsType.modelVersions | modelVersion API} after the specified version.
-   *
-   * Once opted in, it will no longer be possible to use the legacy migration API after the specified version.
-   *
-   * @example A **valid** usage example would be:
-   *
-   * ```ts
-   * {
-   *   name: 'foo',
-   *   // other mandatory attributes...
-   *   switchToModelVersionAt: '8.8.0',
-   *   migrations: {
-   *     '8.1.0': migrateTo810,
-   *     '8.7.0': migrateTo870,
-   *   },
-   *   modelVersions: {
-   *     '1': modelVersion1
-   *   }
-   * }
-   * ```
-   *
-   * @example An **invalid** usage example would be:
-   *
-   * ```ts
-   * {
-   *   name: 'foo',
-   *   // other mandatory attributes...
-   *   switchToModelVersionAt: '8.9.0',
-   *   migrations: {
-   *     '8.1.0': migrateTo8_1,
-   *     '8.9.0': migrateTo8_9, // error: migration registered for the switch version
-   *     '8.10.0': migrateTo8_10, // error: migration registered for after the switch version
-   *   },
-   *   modelVersions: {
-   *     '1': modelVersion1
-   *   }
-   * }
-   * ```
-   *
-   * Please refer to the {@link SavedObjectsType.modelVersions | modelVersion API} for more documentation on
-   * the new API.
-   *
-   * @remarks All types will be forced to switch to use the new API during `8.10.0`. This switch is
-   *          allowing types owners to switch their types before the milestone (and for testing purposes).
+   * Function returning the title to display in the management table.
+   * If not defined, will use the object's type and id to generate a label.
    */
-  switchToModelVersionAt?: string;
+  getTitle?: (savedObject: Attributes) => string;
 }
 
 /**

@@ -30,5 +30,17 @@ describe('util tests', () => {
     it('should validate CCS pattern', () => {
       expect(isCCSRemoteIndexName('*:logstash-{now/d-2d}')).toBe(true);
     });
+
+    it('should not validate selector with wildcard', () => {
+      expect(isCCSRemoteIndexName('my-data-stream::*')).toBe(false);
+    });
+
+    it('should not validate index name with selector', () => {
+      expect(isCCSRemoteIndexName('my-data-stream::failures')).toBe(false);
+    });
+
+    it('should not validate wildcard with selector', () => {
+      expect(isCCSRemoteIndexName('-logs-*::data')).toBe(false);
+    });
   });
 });

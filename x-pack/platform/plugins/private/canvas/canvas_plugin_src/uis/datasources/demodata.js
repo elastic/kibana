@@ -13,7 +13,7 @@ import { DataSourceStrings } from '../../../i18n';
 const { DemoData: strings } = DataSourceStrings;
 
 const DemodataDatasource = () => (
-  <EuiCallOut title={strings.getHeading()} iconType="iInCircle">
+  <EuiCallOut title={strings.getHeading()} iconType="info">
     <EuiText size="s">
       <p>{strings.getDescription()}</p>
     </EuiText>

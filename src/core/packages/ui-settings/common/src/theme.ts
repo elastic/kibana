@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const DEFAULT_THEME_NAME = 'amsterdam';
-export const SUPPORTED_THEME_NAMES = ['amsterdam', 'borealis'];
+export const DEFAULT_THEME_NAME = 'borealis';
+export const SUPPORTED_THEME_NAMES = ['amsterdam', 'borealis'] as const;
 
 export type ThemeName = (typeof SUPPORTED_THEME_NAMES)[number];
 
@@ -35,26 +35,16 @@ export type ThemeTags = readonly ThemeTag[];
  * An array of theme tags available in Kibana by default when not customized
  * using KBN_OPTIMIZER_THEMES environment variable.
  */
-export const DEFAULT_THEME_TAGS: ThemeTags = ThemeAmsterdamTags;
+export const DEFAULT_THEME_TAGS: ThemeTags = ThemeBorealisTags;
 
-export const FALLBACK_THEME_TAG: ThemeTag = 'v8light';
+export const FALLBACK_THEME_TAG: ThemeTag = 'borealislight';
 
 const isValidTag = (tag: unknown) =>
   SUPPORTED_THEME_TAGS.includes(tag as (typeof SUPPORTED_THEME_TAGS)[number]);
 
 export function parseThemeTags(input?: unknown): ThemeTags {
-  if (!input) {
+  if (!input || input === '*') {
     return DEFAULT_THEME_TAGS;
-  }
-
-  if (input === '*') {
-    // TODO: Replace with SUPPORTED_THEME_TAGS when Borealis is in public beta
-    return DEFAULT_THEME_TAGS;
-  }
-
-  // TODO: remove when Borealis is in public beta
-  if (input === 'experimental') {
-    return SUPPORTED_THEME_TAGS;
   }
 
   let rawTags: string[];

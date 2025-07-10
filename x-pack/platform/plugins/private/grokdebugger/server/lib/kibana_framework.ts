@@ -60,6 +60,7 @@ export class KibanaFramework {
     const routeConfig = {
       path: config.path,
       validate: config.validate,
+      security: config.security,
     };
 
     switch (config.method) {

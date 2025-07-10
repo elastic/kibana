@@ -6,6 +6,7 @@
  */
 
 import React, { useState, useCallback, useMemo, FC } from 'react';
+import { css } from '@emotion/react';
 import {
   EuiPopover,
   EuiFlexItem,
@@ -15,11 +16,10 @@ import {
   EuiText,
   EuiLink,
   EuiIcon,
+  UseEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { TagBulkAction } from '../types';
-
-import './_action_bar.scss';
 
 export interface ActionBarProps {
   actions: TagBulkAction[];
@@ -70,7 +70,7 @@ export const ActionBar: FC<ActionBarProps> = ({
   }, [actions, onActionSelected, closePopover]);
 
   return (
-    <div className="tagMgt__actionBar">
+    <div css={styles}>
       <EuiFlexGroup justifyContent="flexStart" alignItems="center" gutterSize="m">
         <EuiFlexItem grow={false}>
           <EuiText size="xs" color="subdued">
@@ -121,3 +121,16 @@ export const ActionBar: FC<ActionBarProps> = ({
     </div>
   );
 };
+
+const styles = ({ euiTheme }: UseEuiTheme) =>
+  css({
+    borderBottom: euiTheme.border.thin,
+    paddingBotton: euiTheme.size.s,
+    '.tagMgt__actionBarIcon': {
+      marginLeft: euiTheme.size.xs,
+    },
+    '.tagMgt__actionBarDivider': {
+      height: euiTheme.size.base,
+      borderRight: euiTheme.border.thin,
+    },
+  });

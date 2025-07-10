@@ -11,13 +11,13 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import { take, filter } from 'rxjs';
 import supertest from 'supertest';
 import { Server as HapiServer } from '@hapi/hapi';
-import { createHttpService } from '@kbn/core-http-server-mocks';
 import type { IRouter } from '@kbn/core-http-server';
-import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 import type { HttpService } from '@kbn/core-http-server-internal';
+import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { ServerMetricsCollector } from '@kbn/core-metrics-collectors-server-internal';
 import { setTimeout as setTimeoutPromise } from 'timers/promises';
+import { createInternalHttpService } from '../utilities';
 
 describe('ServerMetricsCollector', () => {
   let server: HttpService;
@@ -29,7 +29,7 @@ describe('ServerMetricsCollector', () => {
   const sendGet = (path: string) => supertest(hapiServer.listener).get(path);
 
   beforeEach(async () => {
-    server = createHttpService();
+    server = createInternalHttpService();
     await server.preboot({ context: contextServiceMock.createPrebootContract() });
     const contextSetup = contextServiceMock.createSetupContract();
     const httpSetup = await server.setup({
@@ -46,9 +46,12 @@ describe('ServerMetricsCollector', () => {
   });
 
   it('collect requests infos', async () => {
-    router.get({ path: '/', validate: false }, async (ctx, req, res) => {
-      return res.ok({ body: '' });
-    });
+    router.get(
+      { path: '/', validate: false, security: { authz: { requiredPrivileges: ['foo'] } } },
+      async (ctx, req, res) => {
+        return res.ok({ body: '' });
+      }
+    );
 
     await server.start();
 
@@ -81,17 +84,27 @@ describe('ServerMetricsCollector', () => {
     const disconnectRequested$ = new Subject<void>(); // Controls the number of requests in the /disconnect endpoint
     const disconnectAborted$ = new Subject<void>(); // Controls the abort event in the /disconnect endpoint
 
-    router.get({ path: '/', validate: false }, async (ctx, req, res) => {
-      return res.ok({ body: '' });
-    });
-    router.get({ path: '/disconnect', validate: false }, async (ctx, req, res) => {
-      disconnectRequested$.next();
-      req.events.aborted$.subscribe(() => {
-        disconnectAborted$.next();
-      });
-      await never; // Never resolve the request
-      return res.ok({ body: '' });
-    });
+    router.get(
+      { path: '/', validate: false, security: { authz: { requiredPrivileges: ['foo'] } } },
+      async (ctx, req, res) => {
+        return res.ok({ body: '' });
+      }
+    );
+    router.get(
+      {
+        path: '/disconnect',
+        validate: false,
+        security: { authz: { requiredPrivileges: ['foo'] } },
+      },
+      async (ctx, req, res) => {
+        disconnectRequested$.next();
+        req.events.aborted$.subscribe(() => {
+          disconnectAborted$.next();
+        });
+        await never; // Never resolve the request
+        return res.ok({ body: '' });
+      }
+    );
     await server.start();
 
     await sendGet('/');
@@ -148,17 +161,26 @@ describe('ServerMetricsCollector', () => {
   });
 
   it('collect response times', async () => {
-    router.get({ path: '/no-delay', validate: false }, async (ctx, req, res) => {
-      return res.ok({ body: '' });
-    });
-    router.get({ path: '/500-ms', validate: false }, async (ctx, req, res) => {
-      await delay(500);
-      return res.ok({ body: '' });
-    });
-    router.get({ path: '/250-ms', validate: false }, async (ctx, req, res) => {
-      await delay(250);
-      return res.ok({ body: '' });
-    });
+    router.get(
+      { path: '/no-delay', validate: false, security: { authz: { requiredPrivileges: ['foo'] } } },
+      async (ctx, req, res) => {
+        return res.ok({ body: '' });
+      }
+    );
+    router.get(
+      { path: '/500-ms', validate: false, security: { authz: { requiredPrivileges: ['foo'] } } },
+      async (ctx, req, res) => {
+        await delay(500);
+        return res.ok({ body: '' });
+      }
+    );
+    router.get(
+      { path: '/250-ms', validate: false, security: { authz: { requiredPrivileges: ['foo'] } } },
+      async (ctx, req, res) => {
+        await delay(250);
+        return res.ok({ body: '' });
+      }
+    );
     await server.start();
 
     await Promise.all([sendGet('/no-delay'), sendGet('/250-ms')]);
@@ -178,11 +200,14 @@ describe('ServerMetricsCollector', () => {
     const waitSubject = new Subject();
     const hitSubject = new BehaviorSubject(0);
 
-    router.get({ path: '/', validate: false }, async (ctx, req, res) => {
-      hitSubject.next(hitSubject.value + 1);
-      await waitSubject.pipe(take(1)).toPromise();
-      return res.ok({ body: '' });
-    });
+    router.get(
+      { path: '/', validate: false, security: { authz: { requiredPrivileges: ['foo'] } } },
+      async (ctx, req, res) => {
+        hitSubject.next(hitSubject.value + 1);
+        await waitSubject.pipe(take(1)).toPromise();
+        return res.ok({ body: '' });
+      }
+    );
     await server.start();
 
     const waitForHits = (hits: number) =>
@@ -221,9 +246,12 @@ describe('ServerMetricsCollector', () => {
 
   describe('#reset', () => {
     it('reset the requests state', async () => {
-      router.get({ path: '/', validate: false }, async (ctx, req, res) => {
-        return res.ok({ body: '' });
-      });
+      router.get(
+        { path: '/', validate: false, security: { authz: { requiredPrivileges: ['foo'] } } },
+        async (ctx, req, res) => {
+          return res.ok({ body: '' });
+        }
+      );
       await server.start();
 
       await sendGet('/');
@@ -266,13 +294,23 @@ describe('ServerMetricsCollector', () => {
     });
 
     it('resets the response times', async () => {
-      router.get({ path: '/no-delay', validate: false }, async (ctx, req, res) => {
-        return res.ok({ body: '' });
-      });
-      router.get({ path: '/500-ms', validate: false }, async (ctx, req, res) => {
-        await delay(500);
-        return res.ok({ body: '' });
-      });
+      router.get(
+        {
+          path: '/no-delay',
+          validate: false,
+          security: { authz: { requiredPrivileges: ['foo'] } },
+        },
+        async (ctx, req, res) => {
+          return res.ok({ body: '' });
+        }
+      );
+      router.get(
+        { path: '/500-ms', validate: false, security: { authz: { requiredPrivileges: ['foo'] } } },
+        async (ctx, req, res) => {
+          await delay(500);
+          return res.ok({ body: '' });
+        }
+      );
 
       await server.start();
 

@@ -8,102 +8,149 @@
 import { i18n } from '@kbn/i18n';
 
 import React, { useEffect } from 'react';
-import { DefaultEmbeddableApi, ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import { DefaultEmbeddableApi, EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import {
-  initializeTitles,
+  initializeTitleManager,
   useBatchedPublishingSubjects,
   fetch$,
-  PublishesWritablePanelTitle,
-  PublishesPanelTitle,
+  PublishesWritableTitle,
+  PublishesTitle,
   SerializedTitles,
   HasEditCapabilities,
+  HasSupportedTriggers,
+  titleComparators,
 } from '@kbn/presentation-publishing';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { initializeUnsavedChanges } from '@kbn/presentation-containers';
+import { BehaviorSubject, Subject, map, merge } from 'rxjs';
 import type { StartServicesAccessor } from '@kbn/core-lifecycle-browser';
+import {
+  DynamicActionsSerializedState,
+  HasDynamicActions,
+} from '@kbn/embeddable-enhanced-plugin/public';
 import { MonitorFilters } from '../monitors_overview/types';
 import { SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE } from '../constants';
 import { ClientPluginsStart } from '../../../plugin';
 import { StatsOverviewComponent } from './stats_overview_component';
+import { openMonitorConfiguration } from '../common/monitors_open_configuration';
 
 export const getOverviewPanelTitle = () =>
   i18n.translate('xpack.synthetics.statusOverview.list.displayName', {
     defaultMessage: 'Synthetics Stats Overview',
   });
 
-export type OverviewEmbeddableState = SerializedTitles & {
-  filters: MonitorFilters;
+const DEFAULT_FILTERS: MonitorFilters = {
+  projects: [],
+  tags: [],
+  locations: [],
+  monitorIds: [],
+  monitorTypes: [],
 };
 
-export type StatsOverviewApi = DefaultEmbeddableApi<OverviewEmbeddableState> &
-  PublishesWritablePanelTitle &
-  PublishesPanelTitle &
-  HasEditCapabilities;
+export interface OverviewStatsEmbeddableCustomState {
+  filters?: MonitorFilters;
+}
+
+export type OverviewStatsEmbeddableState = SerializedTitles &
+  DynamicActionsSerializedState &
+  OverviewStatsEmbeddableCustomState;
+
+export type StatsOverviewApi = DefaultEmbeddableApi<OverviewStatsEmbeddableState> &
+  PublishesWritableTitle &
+  PublishesTitle &
+  HasEditCapabilities &
+  HasDynamicActions &
+  HasSupportedTriggers;
 
 export const getStatsOverviewEmbeddableFactory = (
   getStartServices: StartServicesAccessor<ClientPluginsStart>
 ) => {
-  const factory: ReactEmbeddableFactory<
-    OverviewEmbeddableState,
-    OverviewEmbeddableState,
-    StatsOverviewApi
-  > = {
+  const factory: EmbeddableFactory<OverviewStatsEmbeddableState, StatsOverviewApi> = {
     type: SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE,
-    deserializeState: (state) => {
-      return state.rawState as OverviewEmbeddableState;
-    },
-    buildEmbeddable: async (state, buildApi, uuid, parentApi) => {
+    buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
       const [coreStart, pluginStart] = await getStartServices();
 
-      const { titlesApi, titleComparators, serializeTitles } = initializeTitles(state);
+      const titleManager = initializeTitleManager(initialState.rawState);
       const defaultTitle$ = new BehaviorSubject<string | undefined>(getOverviewPanelTitle());
       const reload$ = new Subject<boolean>();
-      const filters$ = new BehaviorSubject(state.filters);
+      const filters$ = new BehaviorSubject(initialState.rawState.filters);
 
-      const api = buildApi(
-        {
-          ...titlesApi,
-          defaultPanelTitle: defaultTitle$,
-          getTypeDisplayName: () =>
-            i18n.translate('xpack.synthetics.editSloOverviewEmbeddableTitle.typeDisplayName', {
-              defaultMessage: 'filters',
-            }),
-
-          isEditingEnabled: () => true,
-          onEdit: async () => {
-            try {
-              const { openMonitorConfiguration } = await import(
-                '../common/monitors_open_configuration'
-              );
-
-              const result = await openMonitorConfiguration({
-                coreStart,
-                pluginStart,
-                initialState: {
-                  filters: filters$.getValue(),
-                },
-                title: i18n.translate('xpack.synthetics.editSloOverviewEmbeddableTitle.title', {
-                  defaultMessage: 'Create monitor stats',
-                }),
-              });
-              filters$.next(result.filters);
-            } catch (e) {
-              return Promise.reject();
-            }
-          },
-          serializeState: () => {
-            return {
-              rawState: {
-                ...serializeTitles(),
-                filters: filters$.getValue(),
-              },
-            };
-          },
-        },
-        {
-          ...titleComparators,
-          filters: [filters$, (value) => filters$.next(value)],
-        }
+      const { embeddableEnhanced } = pluginStart;
+      const dynamicActionsManager = embeddableEnhanced?.initializeEmbeddableDynamicActions(
+        uuid,
+        () => titleManager.api.title$.getValue(),
+        initialState
       );
+      const maybeStopDynamicActions = dynamicActionsManager?.startDynamicActions();
+
+      function serializeState() {
+        const { rawState: dynamicActionsState, references: dynamicActionsReferences } =
+          dynamicActionsManager?.serializeState() ?? {};
+        return {
+          rawState: {
+            ...titleManager.getLatestState(),
+            filters: filters$.getValue(),
+            ...dynamicActionsState,
+          },
+          references: dynamicActionsReferences ?? [],
+        };
+      }
+
+      const unsavedChangesApi = initializeUnsavedChanges<OverviewStatsEmbeddableState>({
+        parentApi,
+        uuid,
+        serializeState,
+        anyStateChange$: merge(
+          titleManager.anyStateChange$,
+          filters$,
+          ...(dynamicActionsManager ? [dynamicActionsManager.anyStateChange$] : [])
+        ).pipe(map(() => undefined)),
+        getComparators: () => ({
+          ...titleComparators,
+          filters: 'referenceEquality',
+          ...(dynamicActionsManager?.comparators ?? { enhancements: 'skip' }),
+        }),
+        defaultState: {
+          filters: DEFAULT_FILTERS,
+        },
+        onReset: (lastSaved) => {
+          dynamicActionsManager?.reinitializeState(lastSaved?.rawState ?? {});
+          titleManager.reinitializeState(lastSaved?.rawState);
+          filters$.next(lastSaved?.rawState.filters ?? DEFAULT_FILTERS);
+        },
+      });
+
+      const api = finalizeApi({
+        ...titleManager.api,
+        ...(dynamicActionsManager?.api ?? {}),
+        ...unsavedChangesApi,
+        supportedTriggers: () => [],
+        defaultTitle$,
+        getTypeDisplayName: () =>
+          i18n.translate('xpack.synthetics.editSloOverviewEmbeddableTitle.typeDisplayName', {
+            defaultMessage: 'filters',
+          }),
+
+        isEditingEnabled: () => true,
+        onEdit: async () => {
+          try {
+            const result = await openMonitorConfiguration({
+              coreStart,
+              pluginStart,
+              initialState: {
+                filters: filters$.getValue() || DEFAULT_FILTERS,
+              },
+              title: i18n.translate('xpack.synthetics.editSloOverviewEmbeddableTitle.title', {
+                defaultMessage: 'Create monitor stats',
+              }),
+              type: SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE,
+            });
+            filters$.next(result.filters);
+          } catch (e) {
+            return Promise.reject();
+          }
+        },
+        serializeState,
+      });
 
       const fetchSubscription = fetch$(api)
         .pipe()
@@ -119,6 +166,7 @@ export const getStatsOverviewEmbeddableFactory = (
           useEffect(() => {
             return () => {
               fetchSubscription.unsubscribe();
+              maybeStopDynamicActions?.stopDynamicActions();
             };
           }, []);
           return (
@@ -128,7 +176,7 @@ export const getStatsOverviewEmbeddableFactory = (
               }}
               data-shared-item="" // TODO: Remove data-shared-item and data-rendering-count as part of https://github.com/elastic/kibana/issues/179376
             >
-              <StatsOverviewComponent reload$={reload$} filters={filters} />
+              <StatsOverviewComponent reload$={reload$} filters={filters || DEFAULT_FILTERS} />
             </div>
           );
         },

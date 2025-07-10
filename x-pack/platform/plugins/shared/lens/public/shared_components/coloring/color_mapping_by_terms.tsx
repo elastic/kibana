@@ -8,13 +8,14 @@
 import React, { MutableRefObject, useState } from 'react';
 
 import {
-  EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiIconTip,
   EuiSpacer,
   EuiSwitch,
   EuiText,
+  useEuiTheme,
 } from '@elastic/eui';
 import {
   ColorMapping,
@@ -24,9 +25,13 @@ import {
   PaletteOutput,
   PaletteRegistry,
   CustomPaletteParams,
+  getConfigFromPalette,
 } from '@kbn/coloring';
 import { i18n } from '@kbn/i18n';
 import { KbnPalettes } from '@kbn/palettes';
+import { IFieldFormat } from '@kbn/field-formats-plugin/common';
+import { SerializedValue } from '@kbn/data-plugin/common';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { trackUiCounterEvents } from '../../lens_ui_telemetry';
 import { PalettePicker } from '../palette_picker';
 import { PalettePanelContainer } from './palette_panel_container';
@@ -42,7 +47,9 @@ interface ColorMappingByTermsProps {
   setColorMapping: (colorMapping?: ColorMapping.Config) => void;
   paletteService: PaletteRegistry;
   panelRef: MutableRefObject<HTMLDivElement | null>;
-  categories: Array<string | string[]>;
+  categories: SerializedValue[];
+  formatter?: IFieldFormat;
+  allowCustomMatch?: boolean;
 }
 
 export function ColorMappingByTerms({
@@ -56,8 +63,11 @@ export function ColorMappingByTerms({
   paletteService,
   panelRef,
   categories,
+  formatter,
+  allowCustomMatch,
 }: ColorMappingByTermsProps) {
-  const [useNewColorMapping, setUseNewColorMapping] = useState(Boolean(colorMapping));
+  const { euiTheme } = useEuiTheme();
+  const [useLegacyPalettes, setUseLegacyPalettes] = useState(!colorMapping);
 
   return (
     <EuiFormRow
@@ -65,7 +75,7 @@ export function ColorMappingByTerms({
       label={i18n.translate('xpack.lens.colorMapping.editColorMappingSectionLabel', {
         defaultMessage: 'Color mapping',
       })}
-      style={{ alignItems: 'center' }}
+      css={{ alignItems: 'center' }}
       fullWidth
     >
       <PalettePanelContainer
@@ -78,7 +88,7 @@ export function ColorMappingByTerms({
         )}
         siblingRef={panelRef}
         title={
-          useNewColorMapping
+          !useLegacyPalettes
             ? i18n.translate('xpack.lens.colorMapping.editColorMappingTitle', {
                 defaultMessage: 'Assign colors to terms',
               })
@@ -98,36 +108,68 @@ export function ColorMappingByTerms({
                 label={
                   <EuiText size="xs">
                     <span>
-                      {i18n.translate('xpack.lens.colorMapping.tryLabel', {
-                        defaultMessage: 'Use the new Color Mapping feature',
+                      {i18n.translate('xpack.lens.colorMapping.legacyLabel', {
+                        defaultMessage: 'Use legacy palettes',
                       })}{' '}
-                      <EuiBadge color="hollow">
-                        {i18n.translate('xpack.lens.colorMapping.techPreviewLabel', {
-                          defaultMessage: 'Tech preview',
-                        })}
-                      </EuiBadge>
+                      {(colorMapping?.assignments.length ?? 0) > 0 && (
+                        <EuiIconTip
+                          content={i18n.translate(
+                            'xpack.lens.colorMapping.helpIncompatibleFieldDotLabel',
+                            {
+                              defaultMessage: 'Disabling Color Mapping will clear all assignments',
+                            }
+                          )}
+                          position="top"
+                          size="s"
+                          type="dot"
+                          color={euiTheme.colors.warning}
+                        />
+                      )}{' '}
+                      <EuiIconTip
+                        color="subdued"
+                        content={
+                          <FormattedMessage
+                            id="xpack.lens.colorMapping.legacyPalettes"
+                            defaultMessage="Legacy palettes will be replaced by the new color assignment experience in a future version."
+                          />
+                        }
+                        iconProps={{
+                          className: 'eui-alignTop',
+                        }}
+                        position="top"
+                        size="s"
+                        type="question"
+                      />
                     </span>
                   </EuiText>
                 }
                 data-test-subj="lns_colorMappingOrLegacyPalette_switch"
                 compressed
-                checked={useNewColorMapping}
+                checked={useLegacyPalettes}
                 onChange={({ target: { checked } }) => {
-                  trackUiCounterEvents(`color_mapping_switch_${checked ? 'enabled' : 'disabled'}`);
-                  setColorMapping(checked ? { ...DEFAULT_COLOR_MAPPING_CONFIG } : undefined);
-                  setUseNewColorMapping(checked);
+                  const newColorMapping = checked
+                    ? undefined
+                    : palette
+                    ? getConfigFromPalette(palettes, palette.name)
+                    : { ...DEFAULT_COLOR_MAPPING_CONFIG };
+
+                  trackUiCounterEvents(`color_mapping_switch_${checked ? 'disabled' : 'enabled'}`);
+                  setColorMapping(newColorMapping);
+                  setUseLegacyPalettes(checked);
                 }}
               />
               <EuiSpacer size="s" />
             </EuiFlexItem>
             <EuiFlexItem>
-              {useNewColorMapping ? (
+              {!useLegacyPalettes ? (
                 <CategoricalColorMapping
                   isDarkMode={isDarkMode}
                   model={colorMapping ?? { ...DEFAULT_COLOR_MAPPING_CONFIG }}
                   onModelUpdate={setColorMapping}
                   specialTokens={SPECIAL_TOKENS_STRING_CONVERSION}
                   palettes={palettes}
+                  formatter={formatter}
+                  allowCustomMatch={allowCustomMatch}
                   data={{
                     type: 'categories',
                     categories,

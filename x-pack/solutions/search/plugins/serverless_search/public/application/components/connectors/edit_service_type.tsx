@@ -23,7 +23,6 @@ import {
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Connector as BaseConnector } from '@kbn/search-connectors';
 import { css } from '@emotion/react';
-import { useAssetBasePath } from '../../hooks/use_asset_base_path';
 
 import { BETA_LABEL, TECH_PREVIEW_LABEL } from '../../../../common/i18n_string';
 
@@ -56,7 +55,6 @@ export const EditServiceType: React.FC<EditServiceTypeProps> = ({ connector, isD
   const connectorTypes = useConnectorTypes();
   const queryClient = useQueryClient();
   const { queryKey } = useConnector(connector.id);
-  const assetBasePath = useAssetBasePath();
 
   const allConnectors = useMemo(
     () => connectorTypes.sort((a, b) => a.name.localeCompare(b.name)),
@@ -234,7 +232,7 @@ export const EditServiceType: React.FC<EditServiceTypeProps> = ({ connector, isD
               connector.service_type
                 ? connectorTypes.find((conn) => conn.serviceType === connector.service_type)
                     ?.iconPath ?? ''
-                : `${assetBasePath}/connectors.svg`
+                : 'plugs'
             }
             size="l"
           />

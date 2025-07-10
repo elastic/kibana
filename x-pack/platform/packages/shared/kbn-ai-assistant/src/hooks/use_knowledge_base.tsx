@@ -5,27 +5,34 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import { useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import pRetry from 'p-retry';
 import {
   type AbortableAsyncState,
   useAbortableAsync,
   APIReturnType,
+  KnowledgeBaseState,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { useKibana } from './use_kibana';
 import { useAIAssistantAppService } from './use_ai_assistant_app_service';
 
 export interface UseKnowledgeBaseResult {
   status: AbortableAsyncState<APIReturnType<'GET /internal/observability_ai_assistant/kb/status'>>;
+  isPolling: boolean;
+  install: (inferenceId: string) => Promise<void>;
+  warmupModel: (inferenceId: string) => Promise<void>;
+  isWarmingUpModel: boolean;
   isInstalling: boolean;
-  installError?: Error;
-  install: () => Promise<void>;
 }
 
 export function useKnowledgeBase(): UseKnowledgeBaseResult {
   const { notifications, ml } = useKibana().services;
   const service = useAIAssistantAppService();
 
-  const status = useAbortableAsync(
+  const [isWarmingUpModel, setIsWarmingUpModel] = useState(false);
+  const [installingInferenceId, setInstallingInferenceId] = useState<string>();
+
+  const statusRequest = useAbortableAsync(
     ({ signal }) => {
       return service.callApi('GET /internal/observability_ai_assistant/kb/status', {
         signal,
@@ -34,49 +41,142 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
     [service]
   );
 
-  const [isInstalling, setIsInstalling] = useState(false);
+  let isPolling = false;
 
-  const [installError, setInstallError] = useState<Error>();
+  // Poll if either:
+  // 1. The model is currently being deployed to ML nodes
+  // 2. The knowledge base is being reindexed (e.g., during model updates)
+  if (
+    statusRequest.value?.kbState === KnowledgeBaseState.DEPLOYING_MODEL ||
+    statusRequest.value?.isReIndexing
+  ) {
+    isPolling = true;
+  }
+  // Poll if we're in the process of installing a new model or warming up an existing one
+  else if (installingInferenceId !== undefined || isWarmingUpModel) {
+    // Continue polling if either:
+    // 1. The knowledge base is not in READY state yet
+    // 2. We're installing a specific model but its ID doesn't match the current model
+    if (
+      statusRequest.value?.kbState !== KnowledgeBaseState.READY ||
+      (installingInferenceId !== undefined &&
+        statusRequest.value?.currentInferenceId !== installingInferenceId)
+    ) {
+      isPolling = true;
+    }
+  }
 
-  return useMemo(() => {
-    let attempts: number = 0;
-    const MAX_ATTEMPTS = 5;
+  useEffect(() => {
+    // Only reset installation state when the KB is ready and the endpoint model matches what we're installing
+    if (
+      installingInferenceId &&
+      statusRequest.value?.kbState === KnowledgeBaseState.READY &&
+      statusRequest.value?.currentInferenceId === installingInferenceId
+    ) {
+      setInstallingInferenceId(undefined);
+    }
+  }, [statusRequest, installingInferenceId]);
 
-    const install = (): Promise<void> => {
-      setIsInstalling(true);
-      return service
-        .callApi('POST /internal/observability_ai_assistant/kb/setup', {
-          signal: null,
-        })
-        .then(() => ml.mlApi?.savedObjects.syncSavedObjects())
-        .then(() => {
-          status.refresh();
-        })
-        .catch((error) => {
-          if (
-            (error.body?.statusCode === 503 || error.body?.statusCode === 504) &&
-            attempts < MAX_ATTEMPTS
-          ) {
-            attempts++;
-            return install();
+  useEffect(() => {
+    // toggle warming up state to false once KB is ready
+    if (isWarmingUpModel && statusRequest.value?.kbState === KnowledgeBaseState.READY) {
+      setIsWarmingUpModel(false);
+    }
+  }, [isWarmingUpModel, statusRequest]);
+
+  const install = useCallback(
+    async (inferenceId: string) => {
+      setInstallingInferenceId(inferenceId);
+
+      try {
+        // Retry the setup with a maximum of 5 attempts
+        await pRetry(
+          async () => {
+            await service.callApi('POST /internal/observability_ai_assistant/kb/setup', {
+              params: {
+                query: {
+                  inference_id: inferenceId,
+                },
+              },
+              signal: null,
+            });
+          },
+          {
+            retries: 5,
           }
-          setInstallError(error);
-          notifications!.toasts.addError(error, {
-            title: i18n.translate('xpack.aiAssistant.errorSettingUpKnowledgeBase', {
-              defaultMessage: 'Could not set up Knowledge Base',
-            }),
-          });
-        })
-        .finally(() => {
-          setIsInstalling(false);
-        });
-    };
+        );
+        if (ml.mlApi?.savedObjects.syncSavedObjects) {
+          await ml.mlApi.savedObjects.syncSavedObjects();
+        }
 
-    return {
-      status,
-      install,
-      isInstalling,
-      installError,
+        // Refresh status after installation
+        statusRequest.refresh();
+      } catch (error) {
+        notifications!.toasts.addError(error, {
+          title: i18n.translate('xpack.aiAssistant.errorSettingUpKnowledgeBase', {
+            defaultMessage: 'Could not setup knowledge base',
+          }),
+        });
+      }
+    },
+    [ml, service, notifications, statusRequest]
+  );
+
+  const warmupModel = useCallback(
+    async (inferenceId: string) => {
+      setIsWarmingUpModel(true);
+      try {
+        await service.callApi('POST /internal/observability_ai_assistant/kb/warmup_model', {
+          params: {
+            query: {
+              inference_id: inferenceId,
+            },
+          },
+          signal: null,
+        });
+
+        // Refresh status after warming up model
+        statusRequest.refresh();
+      } catch (error) {
+        notifications!.toasts.addError(error, {
+          title: i18n.translate('xpack.aiAssistant.errorWarmingupModel', {
+            defaultMessage: 'Could not warm up knowledge base model',
+          }),
+        });
+      }
+    },
+    [service, notifications, statusRequest]
+  );
+
+  // poll the status if isPolling
+  useEffect(() => {
+    if (!isPolling) {
+      return;
+    }
+
+    const interval = setInterval(statusRequest.refresh, 5000);
+
+    if (
+      statusRequest.value?.kbState === KnowledgeBaseState.READY &&
+      statusRequest.value?.currentInferenceId === installingInferenceId
+    ) {
+      // done installing
+      clearInterval(interval);
+      return;
+    }
+
+    // cleanup the interval if unmount
+    return () => {
+      clearInterval(interval);
     };
-  }, [status, isInstalling, installError, service, ml, notifications]);
+  }, [statusRequest, isPolling, installingInferenceId]);
+
+  return {
+    status: statusRequest,
+    install,
+    isInstalling: installingInferenceId !== undefined,
+    isPolling,
+    warmupModel,
+    isWarmingUpModel,
+  };
 }

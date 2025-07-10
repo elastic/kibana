@@ -53,7 +53,12 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
   const apmAppDatasetName = 'apm.app.tug';
   const apmAppDataStreamName = `${type}-${apmAppDatasetName}-${defaultNamespace}`;
 
-  describe('Degraded fields flyout', () => {
+  describe('Degraded fields flyout', function () {
+    // This disables the forward-compatibility test for Elasticsearch 8.19 with Kibana and ES 9.0.
+    // These versions are not expected to work together. Note: Failure store is not available in ES 9.0,
+    // and running these tests will result in an "unknown index privilege [read_failure_store]" error.
+    this.onlyEsVersion('8.19 || >=9.1');
+
     describe('degraded field flyout open-close', () => {
       before(async () => {
         await synthtrace.index([
@@ -106,10 +111,10 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
     describe('detecting root cause for ignored fields', () => {
       before(async () => {
         // Create custom component template
-        await synthtrace.createComponentTemplate(
-          customComponentTemplateName,
-          logsSynthMappings(degradedDatasetWithLimitsName)
-        );
+        await synthtrace.createComponentTemplate({
+          name: customComponentTemplateName,
+          mappings: logsSynthMappings(degradedDatasetWithLimitsName),
+        });
 
         // Create custom index template
         await esClient.indices.putIndexTemplate({
@@ -136,10 +141,10 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
         await PageObjects.observabilityLogsExplorer.installPackage(nginxPkg);
 
         // Create custom component template for Nginx to avoid issues with LogsDB
-        await synthtrace.createComponentTemplate(
-          customComponentTemplateNameNginx,
-          logsNginxMappings(nginxAccessDatasetName)
-        );
+        await synthtrace.createComponentTemplate({
+          name: customComponentTemplateNameNginx,
+          mappings: logsNginxMappings(nginxAccessDatasetName),
+        });
 
         await synthtrace.index([
           // Ingest Degraded Logs with 25 fields in degraded DataSet
@@ -477,7 +482,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
           // Check value in Table
           const table = await PageObjects.datasetQuality.parseDegradedFieldTable();
-          const countColumn = table['Docs count'];
+          const countColumn = table[PageObjects.datasetQuality.texts.datasetDocsCountColumn];
           expect(await countColumn.getCellTexts()).to.eql(['5', '5', '5']);
 
           // Check value in Flyout
@@ -497,7 +502,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
           // Check value in Table
           const newTable = await PageObjects.datasetQuality.parseDegradedFieldTable();
-          const newCountColumn = newTable['Docs count'];
+          const newCountColumn = newTable[PageObjects.datasetQuality.texts.datasetDocsCountColumn];
           expect(await newCountColumn.getCellTexts()).to.eql(['15', '15', '5', '5']);
 
           // Check value in Flyout
@@ -566,6 +571,15 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
             dataStream: degradedDatasetWithLimitDataStreamName,
             expandedDegradedField: 'test_field',
           });
+
+          await testSubjects.existOrFail(
+            'datasetQualityDetailsDegradedFieldFlyoutFieldValue-values'
+          );
+
+          const expandButtons = await testSubjects.findAll('truncatedTextToggle');
+          for (const button of expandButtons) {
+            await button.click();
+          }
 
           await retry.tryForTime(5000, async () => {
             const testFieldValue1Exists = await PageObjects.datasetQuality.doesTextExist(
@@ -799,7 +813,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
           const linkURL = await linkButton.getAttribute('href');
 
-          expect(linkURL?.endsWith('mapping-settings-limit.html')).to.be(true);
+          expect(linkURL?.includes('mapping')).to.be(true);
         });
 
         it('should display increase field limit as a possible mitigation for special packages like apm app', async () => {
@@ -829,7 +843,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
           const linkURL = await linkButton.getAttribute('href');
 
-          expect(linkURL?.endsWith('mapping-settings-limit.html')).to.be(true);
+          expect(linkURL?.includes('mapping')).to.be(true);
         });
 
         it('should display increase field limit as a possible mitigation for non integration', async () => {

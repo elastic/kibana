@@ -6,6 +6,6 @@
  */
 
 import { getColumns } from './columns';
-import { RenderCellValue } from './render_cell_value';
+import { CellValue } from './render_cell_value';
 
-export { getColumns, RenderCellValue };
+export { getColumns, CellValue };

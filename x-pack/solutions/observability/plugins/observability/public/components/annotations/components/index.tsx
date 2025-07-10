@@ -6,16 +6,13 @@
  */
 
 import React, { lazy, Suspense } from 'react';
-import type { ObservabilityAnnotationsProps } from './observability_annotation';
-
-const ObservabilityAnnotationsLazy = lazy(() => import('./observability_annotation'));
+import {
+  type ObservabilityAnnotationsProps,
+  ObservabilityAnnotations as ObservabilityAnnotationsComponent,
+} from './observability_annotation';
 
 export function ObservabilityAnnotations(props: ObservabilityAnnotationsProps) {
-  return (
-    <Suspense fallback={null}>
-      <ObservabilityAnnotationsLazy {...props} />
-    </Suspense>
-  );
+  return <ObservabilityAnnotationsComponent {...props} />;
 }
 
 import type { CreateAnnotationProps } from './create_annotation';
@@ -26,6 +23,18 @@ export function CreateAnnotation(props: CreateAnnotationProps) {
   return (
     <Suspense fallback={null}>
       <CreateAnnotationLazy {...props} />
+    </Suspense>
+  );
+}
+
+import type { AnnotationIconProps } from './annotation_icon';
+
+const AnnotationIconLazy = lazy(() => import('./annotation_icon'));
+
+export function AnnotationIcon(props: AnnotationIconProps) {
+  return (
+    <Suspense fallback={null}>
+      <AnnotationIconLazy {...props} />
     </Suspense>
   );
 }

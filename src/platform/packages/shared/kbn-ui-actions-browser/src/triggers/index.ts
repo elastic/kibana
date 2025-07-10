@@ -13,3 +13,4 @@ export * from './default_trigger';
 export * from './visualize_field_trigger';
 export * from './visualize_geo_field_trigger';
 export * from './dashboard_app_panel_trigger';
+export * from './alert_rule_trigger';

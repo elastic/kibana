@@ -10,7 +10,6 @@ import { i18n } from '@kbn/i18n';
 import { appCategories, appIds } from '@kbn/management-cards-navigation';
 import { map, of } from 'rxjs';
 import { createNavigationTree } from './navigation_tree';
-import { createObservabilityDashboardRegistration } from './logs_signal/overview_registration';
 import {
   ServerlessObservabilityPublicSetup,
   ServerlessObservabilityPublicStart,
@@ -32,16 +31,8 @@ export class ServerlessObservabilityPlugin
       ServerlessObservabilityPublicStartDependencies,
       ServerlessObservabilityPublicStart
     >,
-    setupDeps: ServerlessObservabilityPublicSetupDependencies
+    _setupDeps: ServerlessObservabilityPublicSetupDependencies
   ): ServerlessObservabilityPublicSetup {
-    setupDeps.observability.dashboard.register(
-      createObservabilityDashboardRegistration({
-        search: _core
-          .getStartServices()
-          .then(([_coreStart, startDeps]) => startDeps.data.search.search),
-      })
-    );
-
     return {};
   }
 
@@ -52,7 +43,11 @@ export class ServerlessObservabilityPlugin
     const { serverless, management, security } = setupDeps;
     const navigationTree$ = (setupDeps.streams?.status$ || of({ status: 'disabled' })).pipe(
       map(({ status }) => {
-        return createNavigationTree({ streamsAvailable: status === 'enabled' });
+        return createNavigationTree({
+          streamsAvailable: status === 'enabled',
+          overviewAvailable: core.pricing.isFeatureAvailable('observability:complete_overview'),
+          isCasesAvailable: Boolean(setupDeps.cases),
+        });
       })
     );
     serverless.setProjectHome('/app/observability/landing');

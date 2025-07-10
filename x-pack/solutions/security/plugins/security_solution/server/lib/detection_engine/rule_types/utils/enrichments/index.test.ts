@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
-import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { enrichEvents } from '.';
 import { searchEnrichments } from './search_enrichments';
 import { ruleExecutionLogMock } from '../../../rule_monitoring/mocks';
@@ -14,7 +12,8 @@ import { createAlert } from './__mocks__/alerts';
 
 import { isIndexExist } from './utils/is_index_exist';
 
-import { allowedExperimentalValues } from '../../../../../../common';
+import type { PersistenceExecutorOptionsMock } from '@kbn/rule-registry-plugin/server/utils/create_persistence_rule_type_wrapper.mock';
+import { createPersistenceExecutorOptionsMock } from '@kbn/rule-registry-plugin/server/utils/create_persistence_rule_type_wrapper.mock';
 
 jest.mock('./search_enrichments', () => ({
   searchEnrichments: jest.fn(),
@@ -60,6 +59,23 @@ const userEnrichmentResponse = [
   },
 ];
 
+const serviceEnrichmentResponse = [
+  {
+    fields: {
+      'service.name': ['service name 1'],
+      'service.risk.calculated_level': ['Moderate'],
+      'service.risk.calculated_score_norm': [50],
+    },
+  },
+  {
+    fields: {
+      'service.name': ['service name 2'],
+      'service.risk.calculated_level': ['Critical'],
+      'service.risk.calculated_score_norm': [90],
+    },
+  },
+];
+
 const assetCriticalityUserResponse = [
   {
     fields: {
@@ -84,15 +100,24 @@ const assetCriticalityHostResponse = [
   },
 ];
 
+const assetCriticalityServiceResponse = [
+  {
+    fields: {
+      id_value: ['service name 1'],
+      criticality_level: ['high'],
+    },
+  },
+];
+
 describe('enrichEvents', () => {
   let ruleExecutionLogger: ReturnType<typeof ruleExecutionLogMock.forExecutors.create>;
-  let alertServices: RuleExecutorServicesMock;
+  let ruleServices: PersistenceExecutorOptionsMock;
   const createEntity = (entity: string, name: string) => ({
     [entity]: { name },
   });
   beforeEach(() => {
     ruleExecutionLogger = ruleExecutionLogMock.forExecutors.create();
-    alertServices = alertsMock.createRuleExecutorServices();
+    ruleServices = createPersistenceExecutorOptionsMock();
   });
   afterEach(() => {
     mockIsIndexExist.mockClear();
@@ -107,7 +132,7 @@ describe('enrichEvents', () => {
     ];
     const enrichedEvents = await enrichEvents({
       logger: ruleExecutionLogger,
-      services: alertServices,
+      services: ruleServices,
       events,
       spaceId: 'default',
     });
@@ -121,7 +146,7 @@ describe('enrichEvents', () => {
     const events = [createAlert('1'), createAlert('2')];
     const enrichedEvents = await enrichEvents({
       logger: ruleExecutionLogger,
-      services: alertServices,
+      services: ruleServices,
       events,
       spaceId: 'default',
     });
@@ -132,18 +157,20 @@ describe('enrichEvents', () => {
   it('return enriched events with risk score', async () => {
     mockSearchEnrichments
       .mockReturnValueOnce(hostEnrichmentResponse)
-      .mockReturnValueOnce(userEnrichmentResponse);
+      .mockReturnValueOnce(userEnrichmentResponse)
+      .mockReturnValueOnce(serviceEnrichmentResponse);
     mockIsIndexExist.mockImplementation(() => true);
 
     const enrichedEvents = await enrichEvents({
       logger: ruleExecutionLogger,
-      services: alertServices,
+      services: ruleServices,
       events: [
         createAlert('1', {
           ...createEntity('host', 'host name 1'),
           ...createEntity('user', 'user name 1'),
+          ...createEntity('service', 'service name 1'),
         }),
-        createAlert('2', createEntity('user', 'user name 2')),
+        createAlert('2', createEntity('service', 'service name 2')),
       ],
       spaceId: 'default',
     });
@@ -164,10 +191,17 @@ describe('enrichEvents', () => {
             calculated_score_norm: 50,
           },
         },
+        service: {
+          name: 'service name 1',
+          risk: {
+            calculated_level: 'Moderate',
+            calculated_score_norm: 50,
+          },
+        },
       }),
       createAlert('2', {
-        user: {
-          name: 'user name 2',
+        service: {
+          name: 'service name 2',
           risk: {
             calculated_level: 'Critical',
             calculated_score_norm: 90,
@@ -180,36 +214,36 @@ describe('enrichEvents', () => {
   it('return enriched events with asset criticality', async () => {
     mockSearchEnrichments
       .mockReturnValueOnce(assetCriticalityUserResponse)
-      .mockReturnValueOnce(assetCriticalityHostResponse);
+      .mockReturnValueOnce(assetCriticalityHostResponse)
+      .mockReturnValueOnce(assetCriticalityServiceResponse);
 
     // disable risk score enrichments
-    mockIsIndexExist.mockImplementationOnce(() => false);
-    mockIsIndexExist.mockImplementationOnce(() => false);
     mockIsIndexExist.mockImplementationOnce(() => false);
     // enable for asset criticality
     mockIsIndexExist.mockImplementation(() => true);
 
     const enrichedEvents = await enrichEvents({
       logger: ruleExecutionLogger,
-      services: alertServices,
+      services: ruleServices,
       events: [
         createAlert('1', {
           ...createEntity('host', 'host name 1'),
           ...createEntity('user', 'user name 1'),
+          ...createEntity('service', 'service name 1'),
         }),
         createAlert('2', createEntity('host', 'user name 1')),
       ],
       spaceId: 'default',
-      experimentalFeatures: allowedExperimentalValues,
     });
 
     expect(enrichedEvents).toEqual([
       createAlert('1', {
         ...createEntity('user', 'user name 1'),
         ...createEntity('host', 'host name 1'),
-
+        ...createEntity('service', 'service name 1'),
         'host.asset.criticality': 'low',
         'user.asset.criticality': 'important',
+        'service.asset.criticality': 'high',
       }),
       createAlert('2', {
         ...createEntity('host', 'user name 1'),
@@ -224,11 +258,10 @@ describe('enrichEvents', () => {
       })
       .mockImplementationOnce(() => userEnrichmentResponse);
     mockIsIndexExist.mockImplementation(() => true);
-    mockIsIndexExist.mockImplementation(() => true);
 
     const enrichedEvents = await enrichEvents({
       logger: ruleExecutionLogger,
-      services: alertServices,
+      services: ruleServices,
       events: [
         createAlert('1', {
           ...createEntity('host', 'host name 1'),

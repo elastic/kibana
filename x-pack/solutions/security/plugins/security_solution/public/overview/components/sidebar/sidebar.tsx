@@ -17,6 +17,7 @@ import {
 import { Filters as RecentTimelinesFilters } from '../recent_timelines/filters';
 import { StatefulRecentTimelines } from '../recent_timelines';
 import { StatefulNewsFeed } from '../../../common/components/news_feed';
+import { useUserPrivileges } from '../../../common/components/user_privileges';
 import type { FilterMode as RecentTimelinesFilterMode } from '../recent_timelines/types';
 import { SidebarHeader } from '../../../common/components/sidebar_header';
 
@@ -35,6 +36,9 @@ export const Sidebar = React.memo<{
   setRecentTimelinesFilterBy: (filterBy: RecentTimelinesFilterMode) => void;
 }>(({ recentTimelinesFilterBy, setRecentTimelinesFilterBy }) => {
   const { cases } = useKibana().services;
+  const {
+    timelinePrivileges: { read: canSeeTimelines },
+  } = useUserPrivileges();
   const recentTimelinesFilters = useMemo(
     () => (
       <RecentTimelinesFilters
@@ -57,10 +61,12 @@ export const Sidebar = React.memo<{
         </EuiFlexItem>
       )}
 
-      <EuiFlexItem grow={false}>
-        <SidebarHeader title={i18n.RECENT_TIMELINES}>{recentTimelinesFilters}</SidebarHeader>
-        <StatefulRecentTimelines filterBy={recentTimelinesFilterBy} />
-      </EuiFlexItem>
+      {canSeeTimelines && (
+        <EuiFlexItem grow={false} data-test-subj="recent-timelines-container">
+          <SidebarHeader title={i18n.RECENT_TIMELINES}>{recentTimelinesFilters}</SidebarHeader>
+          <StatefulRecentTimelines filterBy={recentTimelinesFilterBy} />
+        </EuiFlexItem>
+      )}
 
       <EuiFlexItem grow={false}>
         <StatefulNewsFeed

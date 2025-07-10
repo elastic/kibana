@@ -18,6 +18,8 @@ import { MappedColors } from '../mapped_colors';
 import { workoutColorForValue } from './helpers';
 import { decreaseOpacity } from './decrease_opacity';
 
+export const COMPATIBILITY_PALETTE_ID = 'kibana_palette';
+
 function buildRoundRobinCategoricalWithMappedColors(
   id: string,
   colors: string[],
@@ -38,7 +40,9 @@ function buildRoundRobinCategoricalWithMappedColors(
       const colorKey = series[0].name;
       mappedColors.mapKeys([colorKey]);
       const mappedColor = mappedColors.get(colorKey);
-      outputColor = chartConfiguration.behindText ? behindTextColorMap[mappedColor] : mappedColor;
+      outputColor = chartConfiguration.behindText
+        ? behindTextColorMap[mappedColor] ?? mappedColor
+        : mappedColor;
     } else {
       outputColor =
         chartConfiguration.behindText && behindTextColors
@@ -215,6 +219,7 @@ export const buildPalettes = (theme: CoreTheme): Record<string, PaletteDefinitio
   return {
     default: {
       title: defaultPalette.name,
+      tag: defaultPalette.tag,
       ...buildRoundRobinCategoricalWithMappedColors(
         'default', // needs to match key of palette definition
         defaultPalette.colors(),
@@ -229,11 +234,14 @@ export const buildPalettes = (theme: CoreTheme): Record<string, PaletteDefinitio
     cool: buildGradient('cool', kbnPalettes.get('cool')),
     warm: buildGradient('warm', kbnPalettes.get('warm')),
     gray: buildGradient('gray', kbnPalettes.get('gray')),
-    kibana_palette: {
+    [COMPATIBILITY_PALETTE_ID]: {
       title: i18n.translate('charts.palettes.kibanaPaletteLabel', {
         defaultMessage: 'Compatibility',
       }),
-      ...buildRoundRobinCategoricalWithMappedColors('kibana_palette', createLegacyColorPalette(20)),
+      ...buildRoundRobinCategoricalWithMappedColors(
+        COMPATIBILITY_PALETTE_ID,
+        createLegacyColorPalette(20)
+      ),
     },
     custom: buildCustomPalette(),
   };

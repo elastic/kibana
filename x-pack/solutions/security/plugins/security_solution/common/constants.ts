@@ -19,13 +19,14 @@ export { SecurityPageName } from '@kbn/security-solution-navigation';
  */
 export const APP_ID = 'securitySolution' as const;
 export const APP_UI_ID = 'securitySolutionUI' as const;
-export const ASSET_INVENTORY_FEATURE_ID = 'securitySolutionAssetInventory' as const;
 export const ASSISTANT_FEATURE_ID = 'securitySolutionAssistant' as const;
 export const ATTACK_DISCOVERY_FEATURE_ID = 'securitySolutionAttackDiscovery' as const;
-export const CASES_FEATURE_ID = 'securitySolutionCasesV2' as const;
+export const CASES_FEATURE_ID = 'securitySolutionCasesV3' as const;
+export const TIMELINE_FEATURE_ID = 'securitySolutionTimeline' as const;
+export const NOTES_FEATURE_ID = 'securitySolutionNotes' as const;
 export const SERVER_APP_ID = 'siem' as const;
+export const SECURITY_FEATURE_ID = 'siemV3' as const;
 export const APP_NAME = 'Security' as const;
-export const APP_ICON = 'securityAnalyticsApp' as const;
 export const APP_ICON_SOLUTION = 'logoSecurity' as const;
 export const APP_PATH = `/app/security` as const;
 export const APP_INTEGRATIONS_PATH = `/app/integrations` as const;
@@ -37,6 +38,7 @@ export const DEFAULT_DATE_FORMAT_TZ = 'dateFormat:tz' as const;
 export const DEFAULT_INDEX_KEY = 'securitySolution:defaultIndex' as const;
 export const DEFAULT_NUMBER_FORMAT = 'format:number:defaultPattern' as const;
 export const DEFAULT_DATA_VIEW_ID = 'security-solution' as const;
+export const DEFAULT_ALERT_DATA_VIEW_ID = 'security-solution-alert' as const;
 export const DEFAULT_TIME_FIELD = '@timestamp' as const;
 export const DEFAULT_TIME_RANGE = 'timepicker:timeDefaults' as const;
 export const DEFAULT_REFRESH_RATE_INTERVAL = 'timepicker:refreshIntervalDefaults' as const;
@@ -67,12 +69,10 @@ export const ENDPOINT_METRICS_INDEX = '.ds-metrics-endpoint.metrics-*' as const;
 export const DEFAULT_RULE_REFRESH_INTERVAL_ON = true as const;
 export const DEFAULT_RULE_REFRESH_INTERVAL_VALUE = 60000 as const; // ms
 export const DEFAULT_RULE_NOTIFICATION_QUERY_SIZE = 100 as const;
-export const SECURITY_FEATURE_ID = 'Security' as const;
 export const SECURITY_TAG_NAME = 'Security Solution' as const;
 export const SECURITY_TAG_DESCRIPTION = 'Security Solution auto-generated tag' as const;
 export const DEFAULT_SPACE_ID = 'default' as const;
 export const DEFAULT_RELATIVE_DATE_THRESHOLD = 24 as const;
-export const DEFAULT_MAX_UNASSOCIATED_NOTES = 1000 as const;
 
 // Document path where threat indicator fields are expected. Fields are used
 // to enrich signals, and are copied to threat.enrichments.
@@ -81,6 +81,8 @@ export const ENRICHMENT_DESTINATION_PATH = 'threat.enrichments' as const;
 export const DEFAULT_THREAT_INDEX_KEY = 'securitySolution:defaultThreatIndex' as const;
 export const DEFAULT_THREAT_INDEX_VALUE = ['logs-ti_*'] as const;
 export const DEFAULT_THREAT_MATCH_QUERY = '@timestamp >= "now-30d/d"' as const;
+
+export const EXPLORE_DATA_VIEW_PREFIX = 'explore-data-view' as const;
 
 export const EXPLORE_PATH = '/explore' as const;
 export const DASHBOARDS_PATH = '/dashboards' as const;
@@ -94,6 +96,7 @@ export const DETECTION_RESPONSE_PATH = '/detection_response' as const;
 export const DETECTIONS_PATH = '/detections' as const;
 export const ALERTS_PATH = '/alerts' as const;
 export const ALERT_DETAILS_REDIRECT_PATH = `${ALERTS_PATH}/redirect` as const;
+export const ALERT_SUMMARY_PATH = `/alert_summary` as const;
 export const RULES_PATH = '/rules' as const;
 export const RULES_LANDING_PATH = `${RULES_PATH}/landing` as const;
 export const RULES_ADD_PATH = `${RULES_PATH}/add_rules` as const;
@@ -110,10 +113,6 @@ export const NETWORK_PATH = '/network' as const;
 export const MANAGEMENT_PATH = '/administration' as const;
 export const COVERAGE_OVERVIEW_PATH = '/rules_coverage_overview' as const;
 export const THREAT_INTELLIGENCE_PATH = '/threat_intelligence' as const;
-export const INVESTIGATIONS_PATH = '/investigations' as const;
-export const MACHINE_LEARNING_PATH = '/ml' as const;
-export const ASSETS_PATH = '/assets' as const;
-export const CLOUD_DEFEND_PATH = '/cloud_defend' as const;
 export const ENDPOINTS_PATH = `${MANAGEMENT_PATH}/endpoints` as const;
 export const POLICIES_PATH = `${MANAGEMENT_PATH}/policy` as const;
 export const TRUSTED_APPS_PATH = `${MANAGEMENT_PATH}/trusted_apps` as const;
@@ -128,6 +127,10 @@ export const ENTITY_ANALYTICS_ASSET_CRITICALITY_PATH =
   `/entity_analytics_asset_criticality` as const;
 export const ENTITY_ANALYTICS_ENTITY_STORE_MANAGEMENT_PATH =
   `/entity_analytics_entity_store` as const;
+export const ENTITY_ANALYTICS_LANDING_PATH = '/entity_analytics_landing' as const;
+export const ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH =
+  '/entity_analytics_privileged_user_monitoring' as const;
+export const ENTITY_ANALYTICS_OVERVIEW_PATH = `/entity_analytics_overview` as const;
 export const APP_ALERTS_PATH = `${APP_PATH}${ALERTS_PATH}` as const;
 export const APP_CASES_PATH = `${APP_PATH}${CASES_PATH}` as const;
 export const APP_ENDPOINTS_PATH = `${APP_PATH}${ENDPOINTS_PATH}` as const;
@@ -142,6 +145,11 @@ export const APP_RESPONSE_ACTIONS_HISTORY_PATH =
 export const NOTES_PATH = `${MANAGEMENT_PATH}/notes` as const;
 export const SIEM_MIGRATIONS_PATH = '/siem_migrations' as const;
 export const SIEM_MIGRATIONS_RULES_PATH = `${SIEM_MIGRATIONS_PATH}/rules` as const;
+
+// AI SOC exclusive paths
+export const CONFIGURATIONS_PATH = '/configurations' as const;
+export const CONFIGURATIONS_INTEGRATIONS_PATH =
+  `${APP_PATH}/${CONFIGURATIONS_PATH}/integrations/browse` as const;
 
 // cloud logs to exclude from default index pattern
 export const EXCLUDE_ELASTIC_CLOUD_INDICES = ['-*elastic-cloud-logs-*'];
@@ -162,6 +170,9 @@ export const DEFAULT_INDEX_PATTERN = [...INCLUDE_INDEX_PATTERN, ...EXCLUDE_ELAST
 
 /** This Kibana Advanced Setting enables the `Security news` feed widget */
 export const ENABLE_NEWS_FEED_SETTING = 'securitySolution:enableNewsFeed' as const;
+
+/** This Kibana Advanced Setting sets a default AI connector for serverless AI features (AI for SOC) */
+export const DEFAULT_AI_CONNECTOR = 'securitySolution:defaultAIConnector' as const;
 
 /** This Kibana Advanced Setting allows users to enable/disable querying cold and frozen data tiers in analyzer */
 export const EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER =
@@ -204,13 +215,15 @@ export const EXTENDED_RULE_EXECUTION_LOGGING_MIN_LEVEL_SETTING =
 export const EXCLUDED_DATA_TIERS_FOR_RULE_EXECUTION =
   'securitySolution:excludedDataTiersForRuleExecution' as const;
 
-/** This Kibana Advances setting allows users to define the maximum amount of unassociated notes (notes without a `timelineId`) */
-export const MAX_UNASSOCIATED_NOTES = 'securitySolution:maxUnassociatedNotes' as const;
+/** This Kibana Advanced Setting allows users to enable/disable the Graph Visualizations for alerts and events */
+export const ENABLE_GRAPH_VISUALIZATION_SETTING =
+  'securitySolution:enableGraphVisualization' as const;
 
-/** This Kibana Advanced Setting allows users to enable/disable the Visualizations in Flyout feature */
-export const ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING =
-  'securitySolution:enableVisualizationsInFlyout' as const;
+/** This Kibana Advanced Setting allows users to enable/disable the Asset Inventory feature */
+export const ENABLE_ASSET_INVENTORY_SETTING = 'securitySolution:enableAssetInventory' as const;
 
+/** This Kibana Advanced Setting allows users to enable/disable the Cloud Connector Feature */
+export const ENABLE_CLOUD_CONNECTOR_SETTING = 'securitySolution:enableCloudConnector' as const;
 /**
  * Id for the notifications alerting type
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
@@ -240,12 +253,7 @@ export const DETECTION_ENGINE_TAGS_URL = `${DETECTION_ENGINE_URL}/tags` as const
 export const DETECTION_ENGINE_RULES_BULK_ACTION =
   `${DETECTION_ENGINE_RULES_URL}/_bulk_action` as const;
 export const DETECTION_ENGINE_RULES_PREVIEW = `${DETECTION_ENGINE_RULES_URL}/preview` as const;
-export const DETECTION_ENGINE_RULES_BULK_DELETE =
-  `${DETECTION_ENGINE_RULES_URL}/_bulk_delete` as const;
-export const DETECTION_ENGINE_RULES_BULK_CREATE =
-  `${DETECTION_ENGINE_RULES_URL}/_bulk_create` as const;
-export const DETECTION_ENGINE_RULES_BULK_UPDATE =
-  `${DETECTION_ENGINE_RULES_URL}/_bulk_update` as const;
+export const DETECTION_ENGINE_RULES_IMPORT_URL = `${DETECTION_ENGINE_RULES_URL}/_import` as const;
 
 export * from './entity_analytics/constants';
 
@@ -281,8 +289,12 @@ export const TIMELINE_COPY_URL = `${TIMELINE_URL}/_copy` as const;
 
 export const NOTE_URL = '/api/note' as const;
 export const PINNED_EVENT_URL = '/api/pinned_event' as const;
-export const SOURCERER_API_URL = '/internal/security_solution/sourcerer' as const;
-export const RISK_SCORE_INDEX_STATUS_API_URL = '/internal/risk_score/index_status' as const;
+
+/**
+ * This limit exists to maintain some kind of a safety net for how many events we are fetching in total,
+ * even though in theory we are only allowing up to 100 notes per document.
+ */
+export const NOTES_PER_PAGE_HARD_LIMIT = 10000;
 
 /**
  * Default signals index key for kibana.dev.yml
@@ -323,6 +335,7 @@ export const UNAUTHENTICATED_USER = 'Unauthenticated' as const;
  Licensing requirements
  */
 export const MINIMUM_ML_LICENSE = 'platinum' as const;
+export const MINIMUM_RULE_CUSTOMIZATION_LICENSE = 'enterprise' as const;
 
 /**
  Machine Learning constants
@@ -342,22 +355,6 @@ export const NOTIFICATION_DEFAULT_FREQUENCY = {
   throttle: null,
   summary: true,
 };
-
-export const showAllOthersBucket: string[] = [
-  'destination.ip',
-  'event.action',
-  'event.category',
-  'event.dataset',
-  'event.module',
-  'signal.rule.threat.tactic.name',
-  'source.ip',
-  'destination.ip',
-  'user.name',
-];
-
-export const RISKY_HOSTS_INDEX_PREFIX = 'ml_host_risk_score_' as const;
-
-export const RISKY_USERS_INDEX_PREFIX = 'ml_user_risk_score_' as const;
 
 export const TRANSFORM_STATES = {
   ABORTING: 'aborting',
@@ -382,7 +379,7 @@ export const STARTED_TRANSFORM_STATES = new Set([
 ]);
 
 /**
- * How many rules to update at a time is set to 50 from errors coming from
+ * How many rules to update at a time is set to 20 from errors coming from
  * the slow environments such as cloud when the rule updates are > 100 we were
  * seeing timeout issues.
  *
@@ -397,14 +394,14 @@ export const STARTED_TRANSFORM_STATES = new Set([
  * Lastly, we saw weird issues where Chrome on upstream 408 timeouts will re-call the REST route
  * which in turn could create additional connections we want to avoid.
  *
- * See file import_rules_route.ts for another area where 50 was chosen, therefore I chose
- * 50 here to mimic it as well. If you see this re-opened or what similar to it, consider
- * reducing the 50 above to a lower number.
+ * See file import_rules_route.ts for another area where 20 was chosen, therefore I chose
+ * 20 here to mimic it as well. If you see this re-opened or what similar to it, consider
+ * reducing the 20 above to a lower number.
  *
  * See the original ticket here:
  * https://github.com/elastic/kibana/issues/94418
  */
-export const MAX_RULES_TO_UPDATE_IN_PARALLEL = 50;
+export const MAX_RULES_TO_UPDATE_IN_PARALLEL = 20;
 
 export const LIMITED_CONCURRENCY_ROUTE_TAG_PREFIX = `${APP_ID}:limitedConcurrency`;
 
@@ -426,6 +423,8 @@ export const RULES_TABLE_MAX_PAGE_SIZE = 100;
 export const NEW_FEATURES_TOUR_STORAGE_KEYS = {
   RULE_MANAGEMENT_PAGE: 'securitySolution.rulesManagementPage.newFeaturesTour.v8.13',
   TIMELINES: 'securitySolution.security.timelineFlyoutHeader.saveTimelineTour',
+  SIEM_MAIN_LANDING_PAGE: 'securitySolution.siemMigrations.setupGuide.v8.18',
+  SIEM_RULE_TRANSLATION_PAGE: 'securitySolution.siemMigrations.ruleTranslationGuide.v8.18',
 };
 
 export const RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY =
@@ -433,19 +432,6 @@ export const RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY =
 
 export const RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_SOURCE_EVENT_TIME_RANGE_STORAGE_KEY =
   'securitySolution.ruleDetails.ruleExecutionLog.showSourceEventTimeRange.v8.15';
-
-// TODO: https://github.com/elastic/kibana/pull/142950
-/**
- * Error codes that can be thrown during _bulk_action API dry_run call and be processed and displayed to end user
- */
-export enum BulkActionsDryRunErrCode {
-  IMMUTABLE = 'IMMUTABLE',
-  MACHINE_LEARNING_AUTH = 'MACHINE_LEARNING_AUTH',
-  MACHINE_LEARNING_INDEX_PATTERN = 'MACHINE_LEARNING_INDEX_PATTERN',
-  ESQL_INDEX_PATTERN = 'ESQL_INDEX_PATTERN',
-  MANUAL_RULE_RUN_FEATURE = 'MANUAL_RULE_RUN_FEATURE',
-  MANUAL_RULE_RUN_DISABLED_RULE = 'MANUAL_RULE_RUN_DISABLED_RULE',
-}
 
 export const MAX_NUMBER_OF_NEW_TERMS_FIELDS = 3;
 
@@ -505,6 +491,11 @@ export const DEFAULT_ALERT_TAGS_VALUE = [
 export const MAX_COMMENT_LENGTH = 30000 as const;
 
 /**
+ * Max notes count per document in security solution
+ */
+export const MAX_NOTES_PER_DOCUMENT = 100;
+
+/**
  * Cases external attachment IDs
  */
 export const CASE_ATTACHMENT_ENDPOINT_TYPE_ID = 'endpoint' as const;
@@ -514,8 +505,15 @@ export const CASE_ATTACHMENT_ENDPOINT_TYPE_ID = 'endpoint' as const;
  */
 export const MAX_MANUAL_RULE_RUN_LOOKBACK_WINDOW_DAYS = 90;
 export const MAX_MANUAL_RULE_RUN_BULK_SIZE = 100;
+export const MAX_BULK_FILL_RULE_GAPS_LOOKBACK_WINDOW_DAYS = 90;
+export const MAX_BULK_FILL_RULE_GAPS_BULK_SIZE = 100;
 
 /*
  * Whether it is a Jest environment
  */
 export const JEST_ENVIRONMENT = typeof jest !== 'undefined';
+
+/*
+ * The tag to mark promotion rules that are related to the AI for SOC integrations
+ */
+export const PROMOTION_RULE_TAG = 'Promotion';

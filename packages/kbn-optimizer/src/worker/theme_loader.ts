@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { stringifyRequest, getOptions } from 'loader-utils';
 import webpack from 'webpack';
 import {
   FALLBACK_THEME_TAG,
@@ -15,11 +14,17 @@ import {
   hasNonDefaultThemeTags,
 } from '@kbn/core-ui-settings-common';
 
+const getStringifiedRequest = (loaderContext: webpack.LoaderContext<any>, request: string) => {
+  return JSON.stringify(
+    loaderContext.utils.contextify(loaderContext.context || loaderContext.rootContext, request)
+  );
+};
+
 // eslint-disable-next-line import/no-default-export
-export default function (this: webpack.loader.LoaderContext) {
+export default function (this: webpack.LoaderContext<any>) {
   this.cacheable(true);
 
-  const options = getOptions(this);
+  const options = this.getOptions();
   const bundleId = options.bundleId as string;
   const themeTags = parseThemeTags(options.themeTags);
   const isFallbackNeeded = hasNonDefaultThemeTags(themeTags);
@@ -38,7 +43,10 @@ export default function (this: webpack.loader.LoaderContext) {
     defaultClause = `
     default:
       console.error(new Error("SASS files in [${bundleId}] were not built for theme [" + window.__kbnThemeTag__ + "]. Styles were compiled using the [${FALLBACK_THEME_TAG}] theme instead to keep Kibana somewhat usable. Please adjust the advanced settings to make use of [${themeTags}] or make sure the KBN_OPTIMIZER_THEMES environment variable includes [" + window.__kbnThemeTag__ + "] in a comma-separated list of themes you want to compile. You can also set it to \'*\' to build all themes."));
-      return require(${stringifyRequest(this, `${this.resourcePath}?${FALLBACK_THEME_TAG}`)});`;
+      return require(${getStringifiedRequest(
+        this,
+        `${this.resourcePath}?${FALLBACK_THEME_TAG}`
+      )});`;
   }
 
   return `
@@ -47,7 +55,7 @@ ${themeTags
   .map(
     (tag) => `
   case '${tag}':
-    return require(${stringifyRequest(this, `${this.resourcePath}?${tag}`)});`
+    return require(${getStringifiedRequest(this, `${this.resourcePath}?${tag}`)});`
   )
   .join('\n')}
   ${defaultClause}

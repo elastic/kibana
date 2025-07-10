@@ -7,8 +7,10 @@
 
 import { useCallback, useReducer } from 'react';
 import { i18n } from '@kbn/i18n';
+import type { SiemMigrationRetryFilter } from '../../../../../common/siem_migrations/constants';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import { reducer, initialState } from './common/api_request_reducer';
+import type { RuleMigrationSettings } from '../../types';
 
 export const RULES_DATA_INPUT_START_MIGRATION_SUCCESS = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.service.startMigrationSuccess',
@@ -19,7 +21,11 @@ export const RULES_DATA_INPUT_START_MIGRATION_ERROR = i18n.translate(
   { defaultMessage: 'Error starting migration.' }
 );
 
-export type StartMigration = (migrationId: string) => void;
+export type StartMigration = (
+  migrationId: string,
+  retry?: SiemMigrationRetryFilter,
+  settings?: RuleMigrationSettings
+) => void;
 export type OnSuccess = () => void;
 
 export const useStartMigration = (onSuccess?: OnSuccess) => {
@@ -27,13 +33,19 @@ export const useStartMigration = (onSuccess?: OnSuccess) => {
   const [state, dispatch] = useReducer(reducer, initialState);
 
   const startMigration = useCallback<StartMigration>(
-    (migrationId) => {
+    (migrationId, retry, settings) => {
       (async () => {
         try {
           dispatch({ type: 'start' });
-          await siemMigrations.rules.startRuleMigration(migrationId);
+          const { started } = await siemMigrations.rules.startRuleMigration(
+            migrationId,
+            retry,
+            settings
+          );
 
-          notifications.toasts.addSuccess(RULES_DATA_INPUT_START_MIGRATION_SUCCESS);
+          if (started) {
+            notifications.toasts.addSuccess(RULES_DATA_INPUT_START_MIGRATION_SUCCESS);
+          }
           dispatch({ type: 'success' });
           onSuccess?.();
         } catch (err) {

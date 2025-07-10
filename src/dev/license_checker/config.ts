@@ -71,6 +71,7 @@ export const LICENSE_ALLOWED = [
   'Python-2.0',
   '(Apache-2.0 AND MIT)',
   'BlueOak-1.0.0',
+  'WTFPL OR CC0-1.0',
 ];
 
 // The following list only applies to licenses that
@@ -80,16 +81,19 @@ export const DEV_ONLY_LICENSE_ALLOWED = ['MPL-2.0', '(MPL-2.0 OR Apache-2.0)'];
 // there are some licenses which should not be globally allowed
 // but can be brought in on a per-package basis
 export const PER_PACKAGE_ALLOWED_LICENSES = {
-  'openpgp@5.10.1': ['LGPL-3.0+'],
+  'openpgp@5.11.3': ['LGPL-3.0+'],
 };
 // Globally overrides a license for a given package@version
 export const LICENSE_OVERRIDES = {
   'jsts@1.6.2': ['Eclipse Distribution License - v 1.0'], // cf. https://github.com/bjornharrtell/jsts
   '@mapbox/jsonlint-lines-primitives@2.0.2': ['MIT'], // license in readme https://github.com/tmcw/jsonlint
-  '@elastic/ems-client@8.6.2': ['Elastic License 2.0'],
-  '@elastic/eui@98.2.1-borealis.2': ['Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0'],
-  '@elastic/eui-theme-borealis@0.0.7': ['Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0'],
+  '@elastic/ems-client@8.6.3': ['Elastic License 2.0'],
+  '@elastic/eui@104.1.0': ['Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0'],
+  '@elastic/eui-amsterdam@104.1.0-amsterdam.0': [
+    'Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0',
+  ],
+  '@elastic/eui-theme-borealis@3.1.0': ['Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0'],
   'language-subtag-registry@0.3.21': ['CC-BY-4.0'], // retired ODC‑By license https://github.com/mattcg/language-subtag-registry
   'buffers@0.1.1': ['MIT'], // license in importing module https://www.npmjs.com/package/binary
-  '@bufbuild/protobuf@1.2.1': ['Apache-2.0'], // license (Apache-2.0 AND BSD-3-Clause)
+  '@bufbuild/protobuf@2.5.2': ['Apache-2.0'], // license (Apache-2.0 AND BSD-3-Clause)
 };

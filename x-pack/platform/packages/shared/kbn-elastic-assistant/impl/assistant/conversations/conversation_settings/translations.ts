@@ -14,27 +14,6 @@ export const SETTINGS_TITLE = i18n.translate(
   }
 );
 
-export const SETTINGS_DESCRIPTION = i18n.translate(
-  'xpack.elasticAssistant.assistant.conversations.settings.settingsDescription',
-  {
-    defaultMessage: 'Create and manage conversations with the Elastic AI Assistant.',
-  }
-);
-
-export const SETTINGS_ALL_TITLE = i18n.translate(
-  'xpack.elasticAssistant.assistant.conversations.settings.settingsAllTitle',
-  {
-    defaultMessage: 'All conversations',
-  }
-);
-
-export const SETTINGS_ALL_DESCRIPTION = i18n.translate(
-  'xpack.elasticAssistant.assistant.conversations.settings.settingsAllDescription',
-  {
-    defaultMessage: 'These settings apply to all conversations.',
-  }
-);
-
 export const CONNECTOR_TITLE = i18n.translate(
   'xpack.elasticAssistant.assistant.conversations.settings.connectorTitle',
   {

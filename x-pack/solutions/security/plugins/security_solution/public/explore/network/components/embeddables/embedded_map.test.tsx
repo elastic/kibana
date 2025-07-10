@@ -43,6 +43,7 @@ jest.mock('../../../../common/lib/kibana', () => ({
     addError: jest.fn(),
     addSuccess: jest.fn(),
     addWarning: jest.fn(),
+    addInfo: jest.fn(),
     remove: jest.fn(),
   }),
 }));
@@ -201,7 +202,7 @@ describe('EmbeddedMapComponent', () => {
       </TestProviders>
     );
     await waitFor(() => {
-      const dataViewArg = (getLayerList as jest.Mock).mock.calls[0][0];
+      const dataViewArg = (getLayerList as jest.Mock).mock.calls[0][1];
       expect(dataViewArg).toEqual([filebeatDataView]);
     });
   });
@@ -221,7 +222,7 @@ describe('EmbeddedMapComponent', () => {
       </TestProviders>
     );
     await waitFor(() => {
-      const dataViewArg = (getLayerList as jest.Mock).mock.calls[0][0];
+      const dataViewArg = (getLayerList as jest.Mock).mock.calls[0][1];
       expect(dataViewArg).toEqual([filebeatDataView]);
     });
     rerender(
@@ -231,7 +232,7 @@ describe('EmbeddedMapComponent', () => {
     );
     await waitFor(() => {
       // data view is updated with the returned embeddable.setLayerList callback, which is passesd getLayerList(dataViews)
-      const dataViewArg = (getLayerList as jest.Mock).mock.calls[1][0];
+      const dataViewArg = (getLayerList as jest.Mock).mock.calls[1][1];
       expect(dataViewArg).toEqual([filebeatDataView, packetbeatDataView]);
     });
   });

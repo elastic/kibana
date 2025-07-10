@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { coreMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { getStatsWithXpack } from './get_stats_with_xpack';
 import { SavedObjectsClient } from '@kbn/core/server';

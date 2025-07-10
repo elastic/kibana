@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
@@ -46,7 +45,6 @@ jest.mock('./helpers/get_evaluator_llm', () => {
     getEvaluatorLlm: jest.fn().mockResolvedValue(mockLlm),
   };
 });
-
 const actionsClient = {
   get: jest.fn(),
 } as unknown as ActionsClient;
@@ -59,9 +57,25 @@ const langSmithApiKey = 'test-api-key';
 const langSmithProject = 'test-lang-smith-project';
 const logger = loggerMock.create();
 const mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
+const mockEsClientInternalUser = elasticsearchServiceMock.createElasticsearchClient();
 const runName = 'test-run-name';
 
-const connectors = [mockExperimentConnector];
+const connectors = [
+  {
+    ...mockExperimentConnector,
+    prompts: {
+      default: '',
+      refine: '',
+      continue: '',
+      detailsMarkdown: '',
+      entitySummaryMarkdown: '',
+      mitreAttackTactics: '',
+      summaryMarkdown: '',
+      title: '',
+      insights: '',
+    },
+  },
+];
 
 const projectName = 'test-lang-smith-project';
 
@@ -120,6 +134,7 @@ describe('evaluateAttackDiscovery', () => {
       connectorTimeout,
       datasetName,
       esClient: mockEsClient,
+      esClientInternalUser: mockEsClientInternalUser,
       evaluationId,
       evaluatorConnectorId,
       langSmithApiKey,

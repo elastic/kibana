@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ValidatedEmail, ValidateEmailAddressesOptions } from '@kbn/actions-plugin/common';
-import { TriggersAndActionsUIPublicPluginSetup } from '@kbn/triggers-actions-ui-plugin/public';
+import type { ValidatedEmail, ValidateEmailAddressesOptions } from '@kbn/actions-plugin/common';
+import type { TriggersAndActionsUIPublicPluginSetup } from '@kbn/triggers-actions-ui-plugin/public';
 import { getMicrosoftDefenderEndpointConnectorType } from './microsoft_defender_endpoint';
 import { getCasesWebhookConnectorType } from './cases_webhook';
 import { getEmailConnectorType } from './email';
@@ -36,6 +36,7 @@ import { ExperimentalFeaturesService } from '../common/experimental_features_ser
 import { getSentinelOneConnectorType } from './sentinelone';
 import { getTheHiveConnectorType } from './thehive';
 import { getCrowdStrikeConnectorType } from './crowdstrike';
+import { getXSOARConnectorType } from './xsoar';
 
 export interface RegistrationServices {
   validateEmailAddresses: (
@@ -75,6 +76,7 @@ export function registerConnectorTypes({
   connectorTypeRegistry.register(getTinesConnectorType());
   connectorTypeRegistry.register(getD3SecurityConnectorType());
   connectorTypeRegistry.register(getTheHiveConnectorType());
+  connectorTypeRegistry.register(getXSOARConnectorType());
 
   if (ExperimentalFeaturesService.get().sentinelOneConnectorOn) {
     connectorTypeRegistry.register(getSentinelOneConnectorType());
@@ -82,7 +84,7 @@ export function registerConnectorTypes({
   if (ExperimentalFeaturesService.get().crowdstrikeConnectorOn) {
     connectorTypeRegistry.register(getCrowdStrikeConnectorType());
   }
-  if (ExperimentalFeaturesService.get().inferenceConnectorOn) {
+  if (!ExperimentalFeaturesService.get().inferenceConnectorOff) {
     connectorTypeRegistry.register(getInferenceConnectorType());
   }
   if (ExperimentalFeaturesService.get().microsoftDefenderEndpointOn) {

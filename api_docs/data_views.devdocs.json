@@ -1972,15 +1972,7 @@
             "label": "getFields",
             "description": [],
             "signature": [
-              "({ mapped, scripted, runtime, fieldName, forceRefresh, unmapped, indexFilter, metaFields, }: GetFieldsParams) => Promise<{ getFieldMap: () => { [x: string]: ",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataViewField",
-                "text": "DataViewField"
-              },
-              "; }; getFieldMapSorted: () => Record<string, ",
+              "({ mapped, scripted, runtime, fieldName, forceRefresh, unmapped, indexFilter, metaFields, }: GetFieldsParams) => Promise<{ getFieldMap: () => DataViewFieldMap; getFieldMapSorted: () => Record<string, ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -3657,6 +3649,40 @@
           },
           {
             "parentPluginId": "dataViews",
+            "id": "def-public.DataViewsService.clearDataViewLazyCache",
+            "type": "Function",
+            "tags": [],
+            "label": "clearDataViewLazyCache",
+            "description": [
+              "\nClear instance in data view lazy cache"
+            ],
+            "signature": [
+              "(id: string) => void"
+            ],
+            "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-public.DataViewsService.clearDataViewLazyCache.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
             "id": "def-public.DataViewsService.getCache",
             "type": "Function",
             "tags": [],
@@ -3915,7 +3941,7 @@
             "tags": [],
             "label": "getFieldsForIndexPattern",
             "description": [
-              "\nGet field list by providing an index patttern (or spec)."
+              "\nGet field list by providing an index pattern (or spec)."
             ],
             "signature": [
               "(indexPattern: ",
@@ -3942,7 +3968,7 @@
                 "section": "def-common.GetFieldsOptions",
                 "text": "GetFieldsOptions"
               },
-              ", \"allowNoIndex\"> | undefined) => Promise<",
+              ", \"allowNoIndex\" | \"pattern\"> | undefined) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -4003,7 +4029,7 @@
                     "section": "def-common.GetFieldsOptions",
                     "text": "GetFieldsOptions"
                   },
-                  ", \"allowNoIndex\"> | undefined"
+                  ", \"allowNoIndex\" | \"pattern\"> | undefined"
                 ],
                 "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
                 "deprecated": false,
@@ -6446,6 +6472,65 @@
         "deprecated": false,
         "trackAdoption": false,
         "children": [
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-public.IIndexPatternFieldList.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [
+              "\nCreates a DataViewField instance. Does not add it to the data view."
+            ],
+            "signature": [
+              "(field: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.FieldSpec",
+                "text": "FieldSpec"
+              },
+              ") => ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewField",
+                "text": "DataViewField"
+              }
+            ],
+            "path": "src/platform/plugins/shared/data_views/common/fields/field_list.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-public.IIndexPatternFieldList.create.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "field",
+                "description": [
+                  "field spec to create field instance"
+                ],
+                "signature": [
+                  {
+                    "pluginId": "dataViews",
+                    "scope": "common",
+                    "docId": "kibDataViewsPluginApi",
+                    "section": "def-common.FieldSpec",
+                    "text": "FieldSpec"
+                  }
+                ],
+                "path": "src/platform/plugins/shared/data_views/common/fields/field_list.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "a new data view field instance"
+            ]
+          },
           {
             "parentPluginId": "dataViews",
             "id": "def-public.IIndexPatternFieldList.add",
@@ -9489,6 +9574,40 @@
           },
           {
             "parentPluginId": "dataViews",
+            "id": "def-server.DataViewsService.clearDataViewLazyCache",
+            "type": "Function",
+            "tags": [],
+            "label": "clearDataViewLazyCache",
+            "description": [
+              "\nClear instance in data view lazy cache"
+            ],
+            "signature": [
+              "(id: string) => void"
+            ],
+            "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-server.DataViewsService.clearDataViewLazyCache.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
             "id": "def-server.DataViewsService.getCache",
             "type": "Function",
             "tags": [],
@@ -9747,7 +9866,7 @@
             "tags": [],
             "label": "getFieldsForIndexPattern",
             "description": [
-              "\nGet field list by providing an index patttern (or spec)."
+              "\nGet field list by providing an index pattern (or spec)."
             ],
             "signature": [
               "(indexPattern: ",
@@ -9774,7 +9893,7 @@
                 "section": "def-common.GetFieldsOptions",
                 "text": "GetFieldsOptions"
               },
-              ", \"allowNoIndex\"> | undefined) => Promise<",
+              ", \"allowNoIndex\" | \"pattern\"> | undefined) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -9835,7 +9954,7 @@
                     "section": "def-common.GetFieldsOptions",
                     "text": "GetFieldsOptions"
                   },
-                  ", \"allowNoIndex\"> | undefined"
+                  ", \"allowNoIndex\" | \"pattern\"> | undefined"
                 ],
                 "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
                 "deprecated": false,
@@ -11056,7 +11175,9 @@
             "signature": [
               "(options: { pattern: string | string[]; metaFields?: string[] | undefined; fieldCapsOptions?: { allow_no_indices: boolean; includeUnmapped?: boolean | undefined; } | undefined; type?: string | undefined; rollupIndex?: string | undefined; indexFilter?: ",
               "QueryDslQueryContainer",
-              " | undefined; fields?: string[] | undefined; allowHidden?: boolean | undefined; fieldTypes?: string[] | undefined; includeEmptyFields?: boolean | undefined; }) => Promise<{ fields: ",
+              " | undefined; fields?: string[] | undefined; allowHidden?: boolean | undefined; fieldTypes?: string[] | undefined; includeEmptyFields?: boolean | undefined; abortSignal?: AbortSignal | undefined; runtimeMappings?: ",
+              "MappingRuntimeFields",
+              " | undefined; }) => Promise<{ fields: ",
               {
                 "pluginId": "dataViews",
                 "scope": "server",
@@ -11217,6 +11338,35 @@
                     "description": [],
                     "signature": [
                       "boolean | undefined"
+                    ],
+                    "path": "src/platform/plugins/shared/data_views/server/fetcher/index_patterns_fetcher.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "dataViews",
+                    "id": "def-server.IndexPatternsFetcher.getFieldsForWildcard.$1.abortSignal",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "abortSignal",
+                    "description": [],
+                    "signature": [
+                      "AbortSignal | undefined"
+                    ],
+                    "path": "src/platform/plugins/shared/data_views/server/fetcher/index_patterns_fetcher.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "dataViews",
+                    "id": "def-server.IndexPatternsFetcher.getFieldsForWildcard.$1.runtimeMappings",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "runtimeMappings",
+                    "description": [],
+                    "signature": [
+                      "MappingRuntimeFields",
+                      " | undefined"
                     ],
                     "path": "src/platform/plugins/shared/data_views/server/fetcher/index_patterns_fetcher.ts",
                     "deprecated": false,
@@ -12354,15 +12504,11 @@
               "signature": [
                 "{ create: { <TDocument = unknown>(this: That, params: ",
                 "CreateRequest",
-                "<TDocument> | ",
-                "CreateRequest",
                 "<TDocument>, options?: ",
                 "TransportRequestOptionsWithOutMeta",
                 " | undefined): Promise<",
                 "WriteResponseBase",
                 ">; <TDocument = unknown>(this: That, params: ",
-                "CreateRequest",
-                "<TDocument> | ",
                 "CreateRequest",
                 "<TDocument>, options?: ",
                 "TransportRequestOptionsWithMeta",
@@ -12372,23 +12518,17 @@
                 "WriteResponseBase",
                 ", unknown>>; <TDocument = unknown>(this: That, params: ",
                 "CreateRequest",
-                "<TDocument> | ",
-                "CreateRequest",
                 "<TDocument>, options?: ",
                 "TransportRequestOptions",
                 " | undefined): Promise<",
                 "WriteResponseBase",
                 ">; }; update: { <TDocument = unknown, TPartialDocument = unknown, TDocumentR = unknown>(this: That, params: ",
                 "UpdateRequest",
-                "<TDocument, TPartialDocument> | ",
-                "UpdateRequest",
                 "<TDocument, TPartialDocument>, options?: ",
                 "TransportRequestOptionsWithOutMeta",
                 " | undefined): Promise<",
                 "UpdateResponse",
                 "<TDocumentR>>; <TDocument = unknown, TPartialDocument = unknown, TDocumentR = unknown>(this: That, params: ",
-                "UpdateRequest",
-                "<TDocument, TPartialDocument> | ",
                 "UpdateRequest",
                 "<TDocument, TPartialDocument>, options?: ",
                 "TransportRequestOptionsWithMeta",
@@ -12398,23 +12538,17 @@
                 "UpdateResponse",
                 "<TDocumentR>, unknown>>; <TDocument = unknown, TPartialDocument = unknown, TDocumentR = unknown>(this: That, params: ",
                 "UpdateRequest",
-                "<TDocument, TPartialDocument> | ",
-                "UpdateRequest",
                 "<TDocument, TPartialDocument>, options?: ",
                 "TransportRequestOptions",
                 " | undefined): Promise<",
                 "UpdateResponse",
                 "<TDocumentR>>; }; get: { <TDocument = unknown>(this: That, params: ",
                 "GetRequest",
-                " | ",
-                "GetRequest",
                 ", options?: ",
                 "TransportRequestOptionsWithOutMeta",
                 " | undefined): Promise<",
                 "GetResponse",
                 "<TDocument>>; <TDocument = unknown>(this: That, params: ",
-                "GetRequest",
-                " | ",
                 "GetRequest",
                 ", options?: ",
                 "TransportRequestOptionsWithMeta",
@@ -12424,23 +12558,17 @@
                 "GetResponse",
                 "<TDocument>, unknown>>; <TDocument = unknown>(this: That, params: ",
                 "GetRequest",
-                " | ",
-                "GetRequest",
                 ", options?: ",
                 "TransportRequestOptions",
                 " | undefined): Promise<",
                 "GetResponse",
                 "<TDocument>>; }; delete: { (this: That, params: ",
                 "DeleteRequest",
-                " | ",
-                "DeleteRequest",
                 ", options?: ",
                 "TransportRequestOptionsWithOutMeta",
                 " | undefined): Promise<",
                 "WriteResponseBase",
                 ">; (this: That, params: ",
-                "DeleteRequest",
-                " | ",
                 "DeleteRequest",
                 ", options?: ",
                 "TransportRequestOptionsWithMeta",
@@ -12449,8 +12577,6 @@
                 "<",
                 "WriteResponseBase",
                 ", unknown>>; (this: That, params: ",
-                "DeleteRequest",
-                " | ",
                 "DeleteRequest",
                 ", options?: ",
                 "TransportRequestOptions",
@@ -12462,8 +12588,6 @@
                 "AggregationsAggregate",
                 ">>(this: That, params?: ",
                 "SearchRequest",
-                " | ",
-                "SearchRequest",
                 " | undefined, options?: ",
                 "TransportRequestOptionsWithOutMeta",
                 " | undefined): Promise<",
@@ -12471,8 +12595,6 @@
                 "<TDocument, TAggregations>>; <TDocument = unknown, TAggregations = Record<string, ",
                 "AggregationsAggregate",
                 ">>(this: That, params?: ",
-                "SearchRequest",
-                " | ",
                 "SearchRequest",
                 " | undefined, options?: ",
                 "TransportRequestOptionsWithMeta",
@@ -12483,8 +12605,6 @@
                 "<TDocument, TAggregations>, unknown>>; <TDocument = unknown, TAggregations = Record<string, ",
                 "AggregationsAggregate",
                 ">>(this: That, params?: ",
-                "SearchRequest",
-                " | ",
                 "SearchRequest",
                 " | undefined, options?: ",
                 "TransportRequestOptions",
@@ -12502,15 +12622,11 @@
                 "default",
                 "; bulk: { <TDocument = unknown, TPartialDocument = unknown>(this: That, params: ",
                 "BulkRequest",
-                "<TDocument, TPartialDocument> | ",
-                "BulkRequest",
                 "<TDocument, TPartialDocument>, options?: ",
                 "TransportRequestOptionsWithOutMeta",
                 " | undefined): Promise<",
                 "BulkResponse",
                 ">; <TDocument = unknown, TPartialDocument = unknown>(this: That, params: ",
-                "BulkRequest",
-                "<TDocument, TPartialDocument> | ",
                 "BulkRequest",
                 "<TDocument, TPartialDocument>, options?: ",
                 "TransportRequestOptionsWithMeta",
@@ -12520,23 +12636,17 @@
                 "BulkResponse",
                 ", unknown>>; <TDocument = unknown, TPartialDocument = unknown>(this: That, params: ",
                 "BulkRequest",
-                "<TDocument, TPartialDocument> | ",
-                "BulkRequest",
                 "<TDocument, TPartialDocument>, options?: ",
                 "TransportRequestOptions",
                 " | undefined): Promise<",
                 "BulkResponse",
                 ">; }; capabilities: { (this: That, params?: ",
                 "TODO",
-                " | ",
-                "TODO",
                 " | undefined, options?: ",
                 "TransportRequestOptionsWithOutMeta",
                 " | undefined): Promise<",
                 "TODO",
                 ">; (this: That, params?: ",
-                "TODO",
-                " | ",
                 "TODO",
                 " | undefined, options?: ",
                 "TransportRequestOptionsWithMeta",
@@ -12545,8 +12655,6 @@
                 "<",
                 "TODO",
                 ", unknown>>; (this: That, params?: ",
-                "TODO",
-                " | ",
                 "TODO",
                 " | undefined, options?: ",
                 "TransportRequestOptions",
@@ -12558,15 +12666,11 @@
                 "default",
                 "; clearScroll: { (this: That, params?: ",
                 "ClearScrollRequest",
-                " | ",
-                "ClearScrollRequest",
                 " | undefined, options?: ",
                 "TransportRequestOptionsWithOutMeta",
                 " | undefined): Promise<",
                 "ClearScrollResponse",
                 ">; (this: That, params?: ",
-                "ClearScrollRequest",
-                " | ",
                 "ClearScrollRequest",
                 " | undefined, options?: ",
                 "TransportRequestOptionsWithMeta",
@@ -12576,23 +12680,17 @@
                 "ClearScrollResponse",
                 ", unknown>>; (this: That, params?: ",
                 "ClearScrollRequest",
-                " | ",
-                "ClearScrollRequest",
                 " | undefined, options?: ",
                 "TransportRequestOptions",
                 " | undefined): Promise<",
                 "ClearScrollResponse",
                 ">; }; closePointInTime: { (this: That, params: ",
                 "ClosePointInTimeRequest",
-                " | ",
-                "ClosePointInTimeRequest",
                 ", options?: ",
                 "TransportRequestOptionsWithOutMeta",
                 " | undefined): Promise<",
                 "ClosePointInTimeResponse",
                 ">; (this: That, params: ",
-                "ClosePointInTimeRequest",
-                " | ",
                 "ClosePointInTimeRequest",
                 ", options?: ",
                 "TransportRequestOptionsWithMeta",
@@ -12601,8 +12699,6 @@
                 "<",
                 "ClosePointInTimeResponse",
                 ", unknown>>; (this: That, params: ",
-                "ClosePointInTimeRequest",
-                " | ",
                 "ClosePointInTimeRequest",
                 ", options?: ",
                 "TransportRequestOptions",
@@ -12614,15 +12710,11 @@
                 "default",
                 "; count: { (this: That, params?: ",
                 "CountRequest",
-                " | ",
-                "CountRequest",
                 " | undefined, options?: ",
                 "TransportRequestOptionsWithOutMeta",
                 " | undefined): Promise<",
                 "CountResponse",
                 ">; (this: That, params?: ",
-                "CountRequest",
-                " | ",
                 "CountRequest",
                 " | undefined, options?: ",
                 "TransportRequestOptionsWithMeta",
@@ -12632,8 +12724,6 @@
                 "CountResponse",
                 ", unknown>>; (this: That, params?: ",
                 "CountRequest",
-                " | ",
-                "CountRequest",
                 " | undefined, options?: ",
                 "TransportRequestOptions",
                 " | undefined): Promise<",
@@ -12642,15 +12732,11 @@
                 "default",
                 "; deleteByQuery: { (this: That, params: ",
                 "DeleteByQueryRequest",
-                " | ",
-                "DeleteByQueryRequest",
                 ", options?: ",
                 "TransportRequestOptionsWithOutMeta",
                 " | undefined): Promise<",
                 "DeleteByQueryResponse",
                 ">; (this: That, params: ",
-                "DeleteByQueryRequest",
-                " | ",
                 "DeleteByQueryRequest",
                 ", options?: ",
                 "TransportRequestOptionsWithMeta",
@@ -12659,8 +12745,6 @@
                 "<",
                 "DeleteByQueryResponse",
                 ", unknown>>; (this: That, params: ",
-                "DeleteByQueryRequest",
-                " | ",
                 "DeleteByQueryRequest",
                 ", options?: ",
                 "TransportRequestOptions",
@@ -12668,15 +12752,11 @@
                 "DeleteByQueryResponse",
                 ">; }; deleteByQueryRethrottle: { (this: That, params: ",
                 "DeleteByQueryRethrottleRequest",
-                " | ",
-                "DeleteByQueryRethrottleRequest",
                 ", options?: ",
                 "TransportRequestOptionsWithOutMeta",
                 " | undefined): Promise<",
                 "TasksTaskListResponseBase",
                 ">; (this: That, params: ",
-                "DeleteByQueryRethrottleRequest",
-                " | ",
                 "DeleteByQueryRethrottleRequest",
                 ", options?: ",
                 "TransportRequestOptionsWithMeta",
@@ -12685,8 +12765,6 @@
                 "<",
                 "TasksTaskListResponseBase",
                 ", unknown>>; (this: That, params: ",
-                "DeleteByQueryRethrottleRequest",
-                " | ",
                 "DeleteByQueryRethrottleRequest",
                 ", options?: ",
                 "TransportRequestOptions",
@@ -12694,15 +12772,11 @@
                 "TasksTaskListResponseBase",
                 ">; }; deleteScript: { (this: That, params: ",
                 "DeleteScriptRequest",
-                " | ",
-                "DeleteScriptRequest",
                 ", options?: ",
                 "TransportRequestOptionsWithOutMeta",
                 " | undefined): Promise<",
                 "AcknowledgedResponseBase",
                 ">; (this: That, params: ",
-                "DeleteScriptRequest",
-                " | ",
                 "DeleteScriptRequest",
                 ", options?: ",
                 "TransportRequestOptionsWithMeta",
@@ -12711,8 +12785,6 @@
                 "<",
                 "AcknowledgedResponseBase",
                 ", unknown>>; (this: That, params: ",
-                "DeleteScriptRequest",
-                " | ",
                 "DeleteScriptRequest",
                 ", options?: ",
                 "TransportRequestOptions",
@@ -12726,33 +12798,23 @@
                 "default",
                 "; exists: { (this: That, params: ",
                 "ExistsRequest",
-                " | ",
-                "ExistsRequest",
                 ", options?: ",
                 "TransportRequestOptionsWithOutMeta",
                 " | undefined): Promise<boolean>; (this: That, params: ",
-                "ExistsRequest",
-                " | ",
                 "ExistsRequest",
                 ", options?: ",
                 "TransportRequestOptionsWithMeta",
                 " | undefined): Promise<",
                 "TransportResult",
                 "<boolean, unknown>>; (this: That, params: ",
-                "ExistsRequest",
-                " | ",
                 "ExistsRequest",
                 ", options?: ",
                 "TransportRequestOptions",
                 " | undefined): Promise<boolean>; }; existsSource: { (this: That, params: ",
                 "ExistsSourceRequest",
-                " | ",
-                "ExistsSourceRequest",
                 ", options?: ",
                 "TransportRequestOptionsWithOutMeta",
                 " | undefined): Promise<boolean>; (this: That, params: ",
-                "ExistsSourceRequest",
-                " | ",
                 "ExistsSourceRequest",
                 ", options?: ",
                 "TransportRequestOptionsWithMeta",
@@ -12760,21 +12822,15 @@
                 "TransportResult",
                 "<boolean, unknown>>; (this: That, params: ",
                 "ExistsSourceRequest",
-                " | ",
-                "ExistsSourceRequest",
                 ", options?: ",
                 "TransportRequestOptions",
                 " | undefined): Promise<boolean>; }; explain: { <TDocument = unknown>(this: That, params: ",
-                "ExplainRequest",
-                " | ",
                 "ExplainRequest",
                 ", options?: ",
                 "TransportRequestOptionsWithOutMeta",
                 " | undefined): Promise<",
                 "ExplainResponse",
                 "<TDocument>>; <TDocument = unknown>(this: That, params: ",
-                "ExplainRequest",
-                " | ",
                 "ExplainRequest",
                 ", options?: ",
                 "TransportRequestOptionsWithMeta",
@@ -12784,8 +12840,6 @@
                 "ExplainResponse",
                 "<TDocument>, unknown>>; <TDocument = unknown>(this: That, params: ",
                 "ExplainRequest",
-                " | ",
-                "ExplainRequest",
                 ", options?: ",
                 "TransportRequestOptions",
                 " | undefined): Promise<",
@@ -12794,15 +12848,11 @@
                 "default",
                 "; fieldCaps: { (this: That, params?: ",
                 "FieldCapsRequest",
-                " | ",
-                "FieldCapsRequest",
                 " | undefined, options?: ",
                 "TransportRequestOptionsWithOutMeta",
                 " | undefined): Promise<",
                 "FieldCapsResponse",
                 ">; (this: That, params?: ",
-                "FieldCapsRequest",
-                " | ",
                 "FieldCapsRequest",
                 " | undefined, options?: ",
                 "TransportRequestOptionsWithMeta",
@@ -12811,8 +12861,6 @@
                 "<",
                 "FieldCapsResponse",
                 ", unknown>>; (this: That, params?: ",
-                "FieldCapsRequest",
-                " | ",
                 "FieldCapsRequest",
                 " | undefined, options?: ",
                 "TransportRequestOptions",
@@ -12822,15 +12870,11 @@
                 "default",
                 "; getScript: { (this: That, params: ",
                 "GetScriptRequest",
-                " | ",
-                "GetScriptRequest",
                 ", options?: ",
                 "TransportRequestOptionsWithOutMeta",
                 " | undefined): Promise<",
                 "GetScriptResponse",
                 ">; (this: That, params: ",
-                "GetScriptRequest",
-                " | ",
                 "GetScriptRequest",
                 ", options?: ",
                 "TransportRequestOptionsWithMeta",
@@ -12840,23 +12884,17 @@
                 "GetScriptResponse",
                 ", unknown>>; (this: That, params: ",
                 "GetScriptRequest",
-                " | ",
-                "GetScriptRequest",
                 ", options?: ",
                 "TransportRequestOptions",
                 " | undefined): Promise<",
                 "GetScriptResponse",
                 ">; }; getScriptContext: { (this: That, params?: ",
                 "GetScriptContextRequest",
-                " | ",
-                "GetScriptContextRequest",
                 " | undefined, options?: ",
                 "TransportRequestOptionsWithOutMeta",
                 " | undefined): Promise<",
                 "GetScriptContextResponse",
                 ">; (this: That, params?: ",
-                "GetScriptContextRequest",
-                " | ",
                 "GetScriptContextRequest",
                 " | undefined, options?: ",
                 "TransportRequestOptionsWithMeta",
@@ -12865,8 +12903,6 @@
                 "<",
                 "GetScriptContextResponse",
                 ", unknown>>; (this: That, params?: ",
-                "GetScriptContextRequest",
-                " | ",
                 "GetScriptContextRequest",
                 " | undefined, options?: ",
                 "TransportRequestOptions",
@@ -12874,15 +12910,11 @@
                 "GetScriptContextResponse",
                 ">; }; getScriptLanguages: { (this: That, params?: ",
                 "GetScriptLanguagesRequest",
-                " | ",
-                "GetScriptLanguagesRequest",
                 " | undefined, options?: ",
                 "TransportRequestOptionsWithOutMeta",
                 " | undefined): Promise<",
                 "GetScriptLanguagesResponse",
                 ">; (this: That, params?: ",
-                "GetScriptLanguagesRequest",
-                " | ",
                 "GetScriptLanguagesRequest",
                 " | undefined, options?: ",
                 "TransportRequestOptionsWithMeta",
@@ -12891,8 +12923,6 @@
                 "<",
                 "GetScriptLanguagesResponse",
                 ", unknown>>; (this: That, params?: ",
-                "GetScriptLanguagesRequest",
-                " | ",
                 "GetScriptLanguagesRequest",
                 " | undefined, options?: ",
                 "TransportRequestOptions",
@@ -12900,13 +12930,9 @@
                 "GetScriptLanguagesResponse",
                 ">; }; getSource: { <TDocument = unknown>(this: That, params: ",
                 "GetSourceRequest",
-                " | ",
-                "GetSourceRequest",
                 ", options?: ",
                 "TransportRequestOptionsWithOutMeta",
                 " | undefined): Promise<TDocument>; <TDocument = unknown>(this: That, params: ",
-                "GetSourceRequest",
-                " | ",
                 "GetSourceRequest",
                 ", options?: ",
                 "TransportRequestOptionsWithMeta",
@@ -12914,23 +12940,17 @@
                 "TransportResult",
                 "<TDocument, unknown>>; <TDocument = unknown>(this: That, params: ",
                 "GetSourceRequest",
-                " | ",
-                "GetSourceRequest",
                 ", options?: ",
                 "TransportRequestOptions",
                 " | undefined): Promise<TDocument>; }; graph: ",
                 "default",
                 "; healthReport: { (this: That, params?: ",
                 "HealthReportRequest",
-                " | ",
-                "HealthReportRequest",
                 " | undefined, options?: ",
                 "TransportRequestOptionsWithOutMeta",
                 " | undefined): Promise<",
                 "HealthReportResponse",
                 ">; (this: That, params?: ",
-                "HealthReportRequest",
-                " | ",
                 "HealthReportRequest",
                 " | undefined, options?: ",
                 "TransportRequestOptionsWithMeta",
@@ -12939,8 +12959,6 @@
                 "<",
                 "HealthReportResponse",
                 ", unknown>>; (this: That, params?: ",
-                "HealthReportRequest",
-                " | ",
                 "HealthReportRequest",
                 " | undefined, options?: ",
                 "TransportRequestOptions",
@@ -12950,15 +12968,11 @@
                 "default",
                 "; index: { <TDocument = unknown>(this: That, params: ",
                 "IndexRequest",
-                "<TDocument> | ",
-                "IndexRequest",
                 "<TDocument>, options?: ",
                 "TransportRequestOptionsWithOutMeta",
                 " | undefined): Promise<",
                 "WriteResponseBase",
                 ">; <TDocument = unknown>(this: That, params: ",
-                "IndexRequest",
-                "<TDocument> | ",
                 "IndexRequest",
                 "<TDocument>, options?: ",
                 "TransportRequestOptionsWithMeta",
@@ -12967,8 +12981,6 @@
                 "<",
                 "WriteResponseBase",
                 ", unknown>>; <TDocument = unknown>(this: That, params: ",
-                "IndexRequest",
-                "<TDocument> | ",
                 "IndexRequest",
                 "<TDocument>, options?: ",
                 "TransportRequestOptions",
@@ -12980,15 +12992,11 @@
                 "default",
                 "; info: { (this: That, params?: ",
                 "InfoRequest",
-                " | ",
-                "InfoRequest",
                 " | undefined, options?: ",
                 "TransportRequestOptionsWithOutMeta",
                 " | undefined): Promise<",
                 "InfoResponse",
                 ">; (this: That, params?: ",
-                "InfoRequest",
-                " | ",
                 "InfoRequest",
                 " | undefined, options?: ",
                 "TransportRequestOptionsWithMeta",
@@ -12998,55 +13006,43 @@
                 "InfoResponse",
                 ", unknown>>; (this: That, params?: ",
                 "InfoRequest",
-                " | ",
-                "InfoRequest",
                 " | undefined, options?: ",
                 "TransportRequestOptions",
                 " | undefined): Promise<",
                 "InfoResponse",
                 ">; }; ingest: ",
                 "default",
-                "; knnSearch: { <TDocument = unknown>(this: That, params: ",
-                "KnnSearchRequest",
-                " | ",
-                "KnnSearchRequest",
-                ", options?: ",
+                "; knnSearch: { (this: That, params?: ",
+                "TODO",
+                " | undefined, options?: ",
                 "TransportRequestOptionsWithOutMeta",
                 " | undefined): Promise<",
-                "KnnSearchResponse",
-                "<TDocument>>; <TDocument = unknown>(this: That, params: ",
-                "KnnSearchRequest",
-                " | ",
-                "KnnSearchRequest",
-                ", options?: ",
+                "TODO",
+                ">; (this: That, params?: ",
+                "TODO",
+                " | undefined, options?: ",
                 "TransportRequestOptionsWithMeta",
                 " | undefined): Promise<",
                 "TransportResult",
                 "<",
-                "KnnSearchResponse",
-                "<TDocument>, unknown>>; <TDocument = unknown>(this: That, params: ",
-                "KnnSearchRequest",
-                " | ",
-                "KnnSearchRequest",
-                ", options?: ",
+                "TODO",
+                ", unknown>>; (this: That, params?: ",
+                "TODO",
+                " | undefined, options?: ",
                 "TransportRequestOptions",
                 " | undefined): Promise<",
-                "KnnSearchResponse",
-                "<TDocument>>; }; license: ",
+                "TODO",
+                ">; }; license: ",
                 "default",
                 "; logstash: ",
                 "default",
                 "; mget: { <TDocument = unknown>(this: That, params?: ",
-                "MgetRequest",
-                " | ",
                 "MgetRequest",
                 " | undefined, options?: ",
                 "TransportRequestOptionsWithOutMeta",
                 " | undefined): Promise<",
                 "MgetResponse",
                 "<TDocument>>; <TDocument = unknown>(this: That, params?: ",
-                "MgetRequest",
-                " | ",
                 "MgetRequest",
                 " | undefined, options?: ",
                 "TransportRequestOptionsWithMeta",
@@ -13055,8 +13051,6 @@
                 "<",
                 "MgetResponse",
                 "<TDocument>, unknown>>; <TDocument = unknown>(this: That, params?: ",
-                "MgetRequest",
-                " | ",
                 "MgetRequest",
                 " | undefined, options?: ",
                 "TransportRequestOptions",
@@ -13072,8 +13066,6 @@
                 "AggregationsAggregate",
                 ">>(this: That, params: ",
                 "MsearchRequest",
-                " | ",
-                "MsearchRequest",
                 ", options?: ",
                 "TransportRequestOptionsWithOutMeta",
                 " | undefined): Promise<",
@@ -13081,8 +13073,6 @@
                 "<TDocument, TAggregations>>; <TDocument = unknown, TAggregations = Record<string, ",
                 "AggregationsAggregate",
                 ">>(this: That, params: ",
-                "MsearchRequest",
-                " | ",
                 "MsearchRequest",
                 ", options?: ",
                 "TransportRequestOptionsWithMeta",
@@ -13093,8 +13083,6 @@
                 "<TDocument, TAggregations>, unknown>>; <TDocument = unknown, TAggregations = Record<string, ",
                 "AggregationsAggregate",
                 ">>(this: That, params: ",
-                "MsearchRequest",
-                " | ",
                 "MsearchRequest",
                 ", options?: ",
                 "TransportRequestOptions",
@@ -13104,8 +13092,6 @@
                 "AggregationsAggregate",
                 ">>(this: That, params: ",
                 "MsearchTemplateRequest",
-                " | ",
-                "MsearchTemplateRequest",
                 ", options?: ",
                 "TransportRequestOptionsWithOutMeta",
                 " | undefined): Promise<",
@@ -13113,8 +13099,6 @@
                 "<TDocument, TAggregations>>; <TDocument = unknown, TAggregations = Record<string, ",
                 "AggregationsAggregate",
                 ">>(this: That, params: ",
-                "MsearchTemplateRequest",
-                " | ",
                 "MsearchTemplateRequest",
                 ", options?: ",
                 "TransportRequestOptionsWithMeta",
@@ -13126,23 +13110,17 @@
                 "AggregationsAggregate",
                 ">>(this: That, params: ",
                 "MsearchTemplateRequest",
-                " | ",
-                "MsearchTemplateRequest",
                 ", options?: ",
                 "TransportRequestOptions",
                 " | undefined): Promise<",
                 "MsearchTemplateResponse",
                 "<TDocument, TAggregations>>; }; mtermvectors: { (this: That, params?: ",
                 "MtermvectorsRequest",
-                " | ",
-                "MtermvectorsRequest",
                 " | undefined, options?: ",
                 "TransportRequestOptionsWithOutMeta",
                 " | undefined): Promise<",
                 "MtermvectorsResponse",
                 ">; (this: That, params?: ",
-                "MtermvectorsRequest",
-                " | ",
                 "MtermvectorsRequest",
                 " | undefined, options?: ",
                 "TransportRequestOptionsWithMeta",
@@ -13151,8 +13129,6 @@
                 "<",
                 "MtermvectorsResponse",
                 ", unknown>>; (this: That, params?: ",
-                "MtermvectorsRequest",
-                " | ",
                 "MtermvectorsRequest",
                 " | undefined, options?: ",
                 "TransportRequestOptions",
@@ -13162,15 +13138,11 @@
                 "default",
                 "; openPointInTime: { (this: That, params: ",
                 "OpenPointInTimeRequest",
-                " | ",
-                "OpenPointInTimeRequest",
                 ", options?: ",
                 "TransportRequestOptionsWithOutMeta",
                 " | undefined): Promise<",
                 "OpenPointInTimeResponse",
                 ">; (this: That, params: ",
-                "OpenPointInTimeRequest",
-                " | ",
                 "OpenPointInTimeRequest",
                 ", options?: ",
                 "TransportRequestOptionsWithMeta",
@@ -13179,8 +13151,6 @@
                 "<",
                 "OpenPointInTimeResponse",
                 ", unknown>>; (this: That, params: ",
-                "OpenPointInTimeRequest",
-                " | ",
                 "OpenPointInTimeRequest",
                 ", options?: ",
                 "TransportRequestOptions",
@@ -13188,13 +13158,9 @@
                 "OpenPointInTimeResponse",
                 ">; }; ping: { (this: That, params?: ",
                 "PingRequest",
-                " | ",
-                "PingRequest",
                 " | undefined, options?: ",
                 "TransportRequestOptionsWithOutMeta",
                 " | undefined): Promise<boolean>; (this: That, params?: ",
-                "PingRequest",
-                " | ",
                 "PingRequest",
                 " | undefined, options?: ",
                 "TransportRequestOptionsWithMeta",
@@ -13202,23 +13168,17 @@
                 "TransportResult",
                 "<boolean, unknown>>; (this: That, params?: ",
                 "PingRequest",
-                " | ",
-                "PingRequest",
                 " | undefined, options?: ",
                 "TransportRequestOptions",
                 " | undefined): Promise<boolean>; }; profiling: ",
                 "default",
                 "; putScript: { (this: That, params: ",
                 "PutScriptRequest",
-                " | ",
-                "PutScriptRequest",
                 ", options?: ",
                 "TransportRequestOptionsWithOutMeta",
                 " | undefined): Promise<",
                 "AcknowledgedResponseBase",
                 ">; (this: That, params: ",
-                "PutScriptRequest",
-                " | ",
                 "PutScriptRequest",
                 ", options?: ",
                 "TransportRequestOptionsWithMeta",
@@ -13227,8 +13187,6 @@
                 "<",
                 "AcknowledgedResponseBase",
                 ", unknown>>; (this: That, params: ",
-                "PutScriptRequest",
-                " | ",
                 "PutScriptRequest",
                 ", options?: ",
                 "TransportRequestOptions",
@@ -13238,15 +13196,11 @@
                 "default",
                 "; rankEval: { (this: That, params: ",
                 "RankEvalRequest",
-                " | ",
-                "RankEvalRequest",
                 ", options?: ",
                 "TransportRequestOptionsWithOutMeta",
                 " | undefined): Promise<",
                 "RankEvalResponse",
                 ">; (this: That, params: ",
-                "RankEvalRequest",
-                " | ",
                 "RankEvalRequest",
                 ", options?: ",
                 "TransportRequestOptionsWithMeta",
@@ -13255,8 +13209,6 @@
                 "<",
                 "RankEvalResponse",
                 ", unknown>>; (this: That, params: ",
-                "RankEvalRequest",
-                " | ",
                 "RankEvalRequest",
                 ", options?: ",
                 "TransportRequestOptions",
@@ -13264,15 +13216,11 @@
                 "RankEvalResponse",
                 ">; }; reindex: { (this: That, params: ",
                 "ReindexRequest",
-                " | ",
-                "ReindexRequest",
                 ", options?: ",
                 "TransportRequestOptionsWithOutMeta",
                 " | undefined): Promise<",
                 "ReindexResponse",
                 ">; (this: That, params: ",
-                "ReindexRequest",
-                " | ",
                 "ReindexRequest",
                 ", options?: ",
                 "TransportRequestOptionsWithMeta",
@@ -13281,8 +13229,6 @@
                 "<",
                 "ReindexResponse",
                 ", unknown>>; (this: That, params: ",
-                "ReindexRequest",
-                " | ",
                 "ReindexRequest",
                 ", options?: ",
                 "TransportRequestOptions",
@@ -13290,15 +13236,11 @@
                 "ReindexResponse",
                 ">; }; reindexRethrottle: { (this: That, params: ",
                 "ReindexRethrottleRequest",
-                " | ",
-                "ReindexRethrottleRequest",
                 ", options?: ",
                 "TransportRequestOptionsWithOutMeta",
                 " | undefined): Promise<",
                 "ReindexRethrottleResponse",
                 ">; (this: That, params: ",
-                "ReindexRethrottleRequest",
-                " | ",
                 "ReindexRethrottleRequest",
                 ", options?: ",
                 "TransportRequestOptionsWithMeta",
@@ -13308,23 +13250,17 @@
                 "ReindexRethrottleResponse",
                 ", unknown>>; (this: That, params: ",
                 "ReindexRethrottleRequest",
-                " | ",
-                "ReindexRethrottleRequest",
                 ", options?: ",
                 "TransportRequestOptions",
                 " | undefined): Promise<",
                 "ReindexRethrottleResponse",
                 ">; }; renderSearchTemplate: { (this: That, params?: ",
                 "RenderSearchTemplateRequest",
-                " | ",
-                "RenderSearchTemplateRequest",
                 " | undefined, options?: ",
                 "TransportRequestOptionsWithOutMeta",
                 " | undefined): Promise<",
                 "RenderSearchTemplateResponse",
                 ">; (this: That, params?: ",
-                "RenderSearchTemplateRequest",
-                " | ",
                 "RenderSearchTemplateRequest",
                 " | undefined, options?: ",
                 "TransportRequestOptionsWithMeta",
@@ -13334,8 +13270,6 @@
                 "RenderSearchTemplateResponse",
                 ", unknown>>; (this: That, params?: ",
                 "RenderSearchTemplateRequest",
-                " | ",
-                "RenderSearchTemplateRequest",
                 " | undefined, options?: ",
                 "TransportRequestOptions",
                 " | undefined): Promise<",
@@ -13344,15 +13278,11 @@
                 "default",
                 "; scriptsPainlessExecute: { <TResult = unknown>(this: That, params?: ",
                 "ScriptsPainlessExecuteRequest",
-                " | ",
-                "ScriptsPainlessExecuteRequest",
                 " | undefined, options?: ",
                 "TransportRequestOptionsWithOutMeta",
                 " | undefined): Promise<",
                 "ScriptsPainlessExecuteResponse",
                 "<TResult>>; <TResult = unknown>(this: That, params?: ",
-                "ScriptsPainlessExecuteRequest",
-                " | ",
                 "ScriptsPainlessExecuteRequest",
                 " | undefined, options?: ",
                 "TransportRequestOptionsWithMeta",
@@ -13362,8 +13292,6 @@
                 "ScriptsPainlessExecuteResponse",
                 "<TResult>, unknown>>; <TResult = unknown>(this: That, params?: ",
                 "ScriptsPainlessExecuteRequest",
-                " | ",
-                "ScriptsPainlessExecuteRequest",
                 " | undefined, options?: ",
                 "TransportRequestOptions",
                 " | undefined): Promise<",
@@ -13372,8 +13300,6 @@
                 "AggregationsAggregate",
                 ">>(this: That, params: ",
                 "ScrollRequest",
-                " | ",
-                "ScrollRequest",
                 ", options?: ",
                 "TransportRequestOptionsWithOutMeta",
                 " | undefined): Promise<",
@@ -13381,8 +13307,6 @@
                 "<TDocument, TAggregations>>; <TDocument = unknown, TAggregations = Record<string, ",
                 "AggregationsAggregate",
                 ">>(this: That, params: ",
-                "ScrollRequest",
-                " | ",
                 "ScrollRequest",
                 ", options?: ",
                 "TransportRequestOptionsWithMeta",
@@ -13394,8 +13318,6 @@
                 "AggregationsAggregate",
                 ">>(this: That, params: ",
                 "ScrollRequest",
-                " | ",
-                "ScrollRequest",
                 ", options?: ",
                 "TransportRequestOptions",
                 " | undefined): Promise<",
@@ -13404,13 +13326,9 @@
                 "default",
                 "; searchMvt: { (this: That, params: ",
                 "SearchMvtRequest",
-                " | ",
-                "SearchMvtRequest",
                 ", options?: ",
                 "TransportRequestOptionsWithOutMeta",
                 " | undefined): Promise<ArrayBuffer>; (this: That, params: ",
-                "SearchMvtRequest",
-                " | ",
                 "SearchMvtRequest",
                 ", options?: ",
                 "TransportRequestOptionsWithMeta",
@@ -13418,21 +13336,15 @@
                 "TransportResult",
                 "<ArrayBuffer, unknown>>; (this: That, params: ",
                 "SearchMvtRequest",
-                " | ",
-                "SearchMvtRequest",
                 ", options?: ",
                 "TransportRequestOptions",
                 " | undefined): Promise<ArrayBuffer>; }; searchShards: { (this: That, params?: ",
-                "SearchShardsRequest",
-                " | ",
                 "SearchShardsRequest",
                 " | undefined, options?: ",
                 "TransportRequestOptionsWithOutMeta",
                 " | undefined): Promise<",
                 "SearchShardsResponse",
                 ">; (this: That, params?: ",
-                "SearchShardsRequest",
-                " | ",
                 "SearchShardsRequest",
                 " | undefined, options?: ",
                 "TransportRequestOptionsWithMeta",
@@ -13442,23 +13354,17 @@
                 "SearchShardsResponse",
                 ", unknown>>; (this: That, params?: ",
                 "SearchShardsRequest",
-                " | ",
-                "SearchShardsRequest",
                 " | undefined, options?: ",
                 "TransportRequestOptions",
                 " | undefined): Promise<",
                 "SearchShardsResponse",
                 ">; }; searchTemplate: { <TDocument = unknown>(this: That, params?: ",
                 "SearchTemplateRequest",
-                " | ",
-                "SearchTemplateRequest",
                 " | undefined, options?: ",
                 "TransportRequestOptionsWithOutMeta",
                 " | undefined): Promise<",
                 "SearchTemplateResponse",
                 "<TDocument>>; <TDocument = unknown>(this: That, params?: ",
-                "SearchTemplateRequest",
-                " | ",
                 "SearchTemplateRequest",
                 " | undefined, options?: ",
                 "TransportRequestOptionsWithMeta",
@@ -13467,8 +13373,6 @@
                 "<",
                 "SearchTemplateResponse",
                 "<TDocument>, unknown>>; <TDocument = unknown>(this: That, params?: ",
-                "SearchTemplateRequest",
-                " | ",
                 "SearchTemplateRequest",
                 " | undefined, options?: ",
                 "TransportRequestOptions",
@@ -13496,15 +13400,11 @@
                 "default",
                 "; termsEnum: { (this: That, params: ",
                 "TermsEnumRequest",
-                " | ",
-                "TermsEnumRequest",
                 ", options?: ",
                 "TransportRequestOptionsWithOutMeta",
                 " | undefined): Promise<",
                 "TermsEnumResponse",
                 ">; (this: That, params: ",
-                "TermsEnumRequest",
-                " | ",
                 "TermsEnumRequest",
                 ", options?: ",
                 "TransportRequestOptionsWithMeta",
@@ -13514,23 +13414,17 @@
                 "TermsEnumResponse",
                 ", unknown>>; (this: That, params: ",
                 "TermsEnumRequest",
-                " | ",
-                "TermsEnumRequest",
                 ", options?: ",
                 "TransportRequestOptions",
                 " | undefined): Promise<",
                 "TermsEnumResponse",
                 ">; }; termvectors: { <TDocument = unknown>(this: That, params: ",
                 "TermvectorsRequest",
-                "<TDocument> | ",
-                "TermvectorsRequest",
                 "<TDocument>, options?: ",
                 "TransportRequestOptionsWithOutMeta",
                 " | undefined): Promise<",
                 "TermvectorsResponse",
                 ">; <TDocument = unknown>(this: That, params: ",
-                "TermvectorsRequest",
-                "<TDocument> | ",
                 "TermvectorsRequest",
                 "<TDocument>, options?: ",
                 "TransportRequestOptionsWithMeta",
@@ -13539,8 +13433,6 @@
                 "<",
                 "TermvectorsResponse",
                 ", unknown>>; <TDocument = unknown>(this: That, params: ",
-                "TermvectorsRequest",
-                "<TDocument> | ",
                 "TermvectorsRequest",
                 "<TDocument>, options?: ",
                 "TransportRequestOptions",
@@ -13552,15 +13444,11 @@
                 "default",
                 "; updateByQuery: { (this: That, params: ",
                 "UpdateByQueryRequest",
-                " | ",
-                "UpdateByQueryRequest",
                 ", options?: ",
                 "TransportRequestOptionsWithOutMeta",
                 " | undefined): Promise<",
                 "UpdateByQueryResponse",
                 ">; (this: That, params: ",
-                "UpdateByQueryRequest",
-                " | ",
                 "UpdateByQueryRequest",
                 ", options?: ",
                 "TransportRequestOptionsWithMeta",
@@ -13569,8 +13457,6 @@
                 "<",
                 "UpdateByQueryResponse",
                 ", unknown>>; (this: That, params: ",
-                "UpdateByQueryRequest",
-                " | ",
                 "UpdateByQueryRequest",
                 ", options?: ",
                 "TransportRequestOptions",
@@ -13578,15 +13464,11 @@
                 "UpdateByQueryResponse",
                 ">; }; updateByQueryRethrottle: { (this: That, params: ",
                 "UpdateByQueryRethrottleRequest",
-                " | ",
-                "UpdateByQueryRethrottleRequest",
                 ", options?: ",
                 "TransportRequestOptionsWithOutMeta",
                 " | undefined): Promise<",
                 "UpdateByQueryRethrottleResponse",
                 ">; (this: That, params: ",
-                "UpdateByQueryRethrottleRequest",
-                " | ",
                 "UpdateByQueryRethrottleRequest",
                 ", options?: ",
                 "TransportRequestOptionsWithMeta",
@@ -13595,8 +13477,6 @@
                 "<",
                 "UpdateByQueryRethrottleResponse",
                 ", unknown>>; (this: That, params: ",
-                "UpdateByQueryRethrottleRequest",
-                " | ",
                 "UpdateByQueryRethrottleRequest",
                 ", options?: ",
                 "TransportRequestOptions",
@@ -13712,6 +13592,10 @@
             "references": [
               {
                 "plugin": "data",
+                "path": "src/platform/plugins/shared/data/public/query/filter_manager/lib/get_display_value.ts"
+              },
+              {
+                "plugin": "data",
                 "path": "src/platform/plugins/shared/data/common/search/search_source/fetch/get_search_params.ts"
               },
               {
@@ -13723,16 +13607,12 @@
                 "path": "src/platform/plugins/shared/data/common/search/tabify/response_writer.ts"
               },
               {
-                "plugin": "data",
-                "path": "src/platform/plugins/shared/data/common/search/aggs/param_types/field.ts"
-              },
-              {
-                "plugin": "data",
-                "path": "src/platform/plugins/shared/data/public/query/filter_manager/lib/get_display_value.ts"
-              },
-              {
                 "plugin": "@kbn/search-errors",
                 "path": "src/platform/packages/shared/kbn-search-errors/src/painless_error.tsx"
+              },
+              {
+                "plugin": "data",
+                "path": "src/platform/plugins/shared/data/common/search/aggs/param_types/field.ts"
               },
               {
                 "plugin": "savedObjectsManagement",
@@ -13748,11 +13628,11 @@
               },
               {
                 "plugin": "unifiedSearch",
-                "path": "src/platform/plugins/shared/unified_search/public/query_string_input/fetch_index_patterns.ts"
+                "path": "src/platform/plugins/shared/unified_search/public/dataview_picker/change_dataview.tsx"
               },
               {
                 "plugin": "unifiedSearch",
-                "path": "src/platform/plugins/shared/unified_search/public/dataview_picker/change_dataview.tsx"
+                "path": "src/platform/plugins/shared/unified_search/public/query_string_input/fetch_index_patterns.ts"
               },
               {
                 "plugin": "@kbn/unified-field-list",
@@ -13767,16 +13647,16 @@
                 "path": "src/platform/packages/shared/kbn-unified-field-list/src/hooks/use_existing_fields.ts"
               },
               {
+                "plugin": "controls",
+                "path": "src/platform/plugins/shared/controls/public/controls/data_controls/options_list_control/options_list_fetch_cache.ts"
+              },
+              {
                 "plugin": "lens",
                 "path": "x-pack/platform/plugins/shared/lens/public/data_views_service/loader.ts"
               },
               {
                 "plugin": "lens",
                 "path": "x-pack/platform/plugins/shared/lens/public/app_plugin/lens_top_nav.tsx"
-              },
-              {
-                "plugin": "controls",
-                "path": "src/platform/plugins/shared/controls/public/controls/data_controls/options_list_control/options_list_fetch_cache.ts"
               },
               {
                 "plugin": "@kbn/lens-embeddable-utils",
@@ -13792,11 +13672,11 @@
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/platform/plugins/shared/ml/public/application/jobs/new_job/common/job_creator/job_creator.ts"
+                "path": "x-pack/platform/plugins/shared/ml/public/application/jobs/new_job/common/results_loader/categorization_examples_loader.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/platform/plugins/shared/ml/public/application/jobs/new_job/common/results_loader/categorization_examples_loader.ts"
+                "path": "x-pack/platform/plugins/shared/ml/public/application/jobs/new_job/common/job_creator/job_creator.ts"
               },
               {
                 "plugin": "ml",
@@ -13805,10 +13685,6 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/platform/plugins/shared/ml/public/application/datavisualizer/index_based/data_loader/data_loader.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/platform/plugins/shared/ml/public/application/data_frame_analytics/pages/analytics_creation/hooks/use_index_data.ts"
               },
               {
                 "plugin": "ml",
@@ -13840,14 +13716,6 @@
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/platform/plugins/shared/ml/public/application/jobs/new_job/pages/components/pick_fields_step/components/bucket_span_estimator/estimate_bucket_span.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/platform/plugins/shared/ml/public/application/jobs/new_job/pages/components/datafeed_step/components/data_view/change_data_view.tsx"
-              },
-              {
-                "plugin": "ml",
                 "path": "x-pack/platform/plugins/shared/ml/public/application/data_frame_analytics/pages/analytics_exploration/components/outlier_exploration/use_outlier_data.ts"
               },
               {
@@ -13859,8 +13727,36 @@
                 "path": "x-pack/platform/plugins/shared/ml/public/application/data_frame_analytics/pages/analytics_management/components/source_selection/source_selection.tsx"
               },
               {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/public/application/jobs/new_job/pages/components/pick_fields_step/components/bucket_span_estimator/estimate_bucket_span.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/public/application/jobs/new_job/pages/components/datafeed_step/components/data_view/change_data_view.tsx"
+              },
+              {
                 "plugin": "canvas",
                 "path": "x-pack/platform/plugins/private/canvas/public/components/datasource/datasource_component.js"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/query_bar.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/platform/plugins/shared/stack_alerts/public/rule_types/geo_containment/rule_form/boundary_form.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/platform/plugins/shared/stack_alerts/public/rule_types/geo_containment/rule_form/entity_form.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/platform/plugins/shared/stack_alerts/public/rule_types/components/data_view_select_popover.tsx"
+              },
+              {
+                "plugin": "datasetQuality",
+                "path": "x-pack/platform/plugins/shared/dataset_quality/public/rule_types/degraded_docs/rule_form/rule_form.tsx"
               },
               {
                 "plugin": "graph",
@@ -13873,10 +13769,6 @@
               {
                 "plugin": "graph",
                 "path": "x-pack/platform/plugins/private/graph/public/state_management/persistence.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/query_bar.tsx"
               },
               {
                 "plugin": "transform",
@@ -13899,48 +13791,8 @@
                 "path": "x-pack/platform/plugins/shared/ml/server/models/job_service/new_job_caps/rollup.ts"
               },
               {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/public/sourcerer/containers/create_sourcerer_data_view.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/public/sourcerer/containers/create_sourcerer_data_view.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/public/sourcerer/containers/create_sourcerer_data_view.ts"
-              },
-              {
                 "plugin": "timelines",
-                "path": "x-pack/solutions/security/plugins/timelines/server/search_strategy/index_fields/index.ts"
-              },
-              {
-                "plugin": "exploratoryView",
-                "path": "x-pack/solutions/observability/plugins/exploratory_view/public/utils/observability_data_views/observability_data_views.ts"
-              },
-              {
-                "plugin": "exploratoryView",
-                "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/series_editor/columns/report_definition_field.tsx"
-              },
-              {
-                "plugin": "exploratoryView",
-                "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/series_editor/use_filter_values.ts"
-              },
-              {
-                "plugin": "exploratoryView",
-                "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/series_editor/columns/filter_value_btn.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/platform/plugins/shared/stack_alerts/public/rule_types/geo_containment/rule_form/boundary_form.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/platform/plugins/shared/stack_alerts/public/rule_types/geo_containment/rule_form/entity_form.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/platform/plugins/shared/stack_alerts/public/rule_types/components/data_view_select_popover.tsx"
+                "path": "x-pack/platform/plugins/shared/timelines/server/search_strategy/index_fields/index.ts"
               },
               {
                 "plugin": "graph",
@@ -13957,6 +13809,42 @@
               {
                 "plugin": "transform",
                 "path": "x-pack/platform/plugins/private/transform/public/app/sections/create_transform/components/step_define/common/common.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/sourcerer/containers/create_sourcerer_data_view.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/sourcerer/containers/create_sourcerer_data_view.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/sourcerer/containers/create_sourcerer_data_view.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/sourcerer/containers/create_sourcerer_data_view.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/sourcerer/containers/create_sourcerer_data_view.ts"
+              },
+              {
+                "plugin": "exploratoryView",
+                "path": "x-pack/solutions/observability/plugins/exploratory_view/public/utils/observability_data_views/observability_data_views.ts"
+              },
+              {
+                "plugin": "exploratoryView",
+                "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/series_editor/columns/report_definition_field.tsx"
+              },
+              {
+                "plugin": "exploratoryView",
+                "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/series_editor/use_filter_values.ts"
+              },
+              {
+                "plugin": "exploratoryView",
+                "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/series_editor/columns/filter_value_btn.tsx"
               },
               {
                 "plugin": "visTypeTimeseries",
@@ -13989,6 +13877,10 @@
               {
                 "plugin": "enterpriseSearch",
                 "path": "x-pack/solutions/search/plugins/enterprise_search/public/applications/analytics/components/analytics_collection_view/analytics_collection_explore_table_formulas.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-observability",
+                "path": "x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/apm/data_view/static.spec.ts"
               },
               {
                 "plugin": "enterpriseSearch",
@@ -14909,7 +14801,9 @@
             "type": "Function",
             "tags": [],
             "label": "isPersisted",
-            "description": [],
+            "description": [
+              "\nReturns true if the data view is persisted, and false if the dataview is adhoc."
+            ],
             "signature": [
               "() => boolean"
             ],
@@ -16135,6 +16029,26 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-common.AbstractDataView.hasMatchedIndices",
+            "type": "Function",
+            "tags": [],
+            "label": "hasMatchedIndices",
+            "description": [
+              "\nChecks if there are any matched indices."
+            ],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "src/platform/plugins/shared/data_views/common/data_views/abstract_data_views.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": [
+              "True if there are matched indices, false otherwise."
+            ]
           }
         ],
         "initialIsOpen": false
@@ -18171,15 +18085,7 @@
             "label": "getFields",
             "description": [],
             "signature": [
-              "({ mapped, scripted, runtime, fieldName, forceRefresh, unmapped, indexFilter, metaFields, }: GetFieldsParams) => Promise<{ getFieldMap: () => { [x: string]: ",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataViewField",
-                "text": "DataViewField"
-              },
-              "; }; getFieldMapSorted: () => Record<string, ",
+              "({ mapped, scripted, runtime, fieldName, forceRefresh, unmapped, indexFilter, metaFields, }: GetFieldsParams) => Promise<{ getFieldMap: () => DataViewFieldMap; getFieldMapSorted: () => Record<string, ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -19489,6 +19395,40 @@
           },
           {
             "parentPluginId": "dataViews",
+            "id": "def-common.DataViewsService.clearDataViewLazyCache",
+            "type": "Function",
+            "tags": [],
+            "label": "clearDataViewLazyCache",
+            "description": [
+              "\nClear instance in data view lazy cache"
+            ],
+            "signature": [
+              "(id: string) => void"
+            ],
+            "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-common.DataViewsService.clearDataViewLazyCache.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
             "id": "def-common.DataViewsService.getCache",
             "type": "Function",
             "tags": [],
@@ -19747,7 +19687,7 @@
             "tags": [],
             "label": "getFieldsForIndexPattern",
             "description": [
-              "\nGet field list by providing an index patttern (or spec)."
+              "\nGet field list by providing an index pattern (or spec)."
             ],
             "signature": [
               "(indexPattern: ",
@@ -19774,7 +19714,7 @@
                 "section": "def-common.GetFieldsOptions",
                 "text": "GetFieldsOptions"
               },
-              ", \"allowNoIndex\"> | undefined) => Promise<",
+              ", \"allowNoIndex\" | \"pattern\"> | undefined) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -19835,7 +19775,7 @@
                     "section": "def-common.GetFieldsOptions",
                     "text": "GetFieldsOptions"
                   },
-                  ", \"allowNoIndex\"> | undefined"
+                  ", \"allowNoIndex\" | \"pattern\"> | undefined"
                 ],
                 "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
                 "deprecated": false,
@@ -22264,6 +22204,40 @@
           },
           {
             "parentPluginId": "dataViews",
+            "id": "def-common.DataViewsServicePublicMethods.clearDataViewLazyCache",
+            "type": "Function",
+            "tags": [],
+            "label": "clearDataViewLazyCache",
+            "description": [
+              "\nClear the cache of lazy data view instances."
+            ],
+            "signature": [
+              "(id: string) => void"
+            ],
+            "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-common.DataViewsServicePublicMethods.clearDataViewLazyCache.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
             "id": "def-common.DataViewsServicePublicMethods.create",
             "type": "Function",
             "tags": [],
@@ -23042,7 +23016,7 @@
                 "section": "def-common.DataViewSpec",
                 "text": "DataViewSpec"
               },
-              ", options?: ",
+              ", options?: Omit<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -23050,7 +23024,7 @@
                 "section": "def-common.GetFieldsOptions",
                 "text": "GetFieldsOptions"
               },
-              " | undefined) => Promise<",
+              ", \"allowNoIndex\" | \"pattern\"> | undefined) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -23103,6 +23077,7 @@
                   "- Options for getting fields"
                 ],
                 "signature": [
+                  "Omit<",
                   {
                     "pluginId": "dataViews",
                     "scope": "common",
@@ -23110,7 +23085,7 @@
                     "section": "def-common.GetFieldsOptions",
                     "text": "GetFieldsOptions"
                   },
-                  " | undefined"
+                  ", \"allowNoIndex\" | \"pattern\"> | undefined"
                 ],
                 "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
                 "deprecated": false,
@@ -24293,6 +24268,35 @@
             "path": "src/platform/plugins/shared/data_views/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-common.GetFieldsOptions.abortSignal",
+            "type": "Object",
+            "tags": [],
+            "label": "abortSignal",
+            "description": [],
+            "signature": [
+              "AbortSignal | undefined"
+            ],
+            "path": "src/platform/plugins/shared/data_views/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-common.GetFieldsOptions.runtimeMappings",
+            "type": "Object",
+            "tags": [],
+            "label": "runtimeMappings",
+            "description": [],
+            "signature": [
+              "MappingRuntimeFields",
+              " | undefined"
+            ],
+            "path": "src/platform/plugins/shared/data_views/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -24468,6 +24472,65 @@
         "deprecated": false,
         "trackAdoption": false,
         "children": [
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-common.IIndexPatternFieldList.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [
+              "\nCreates a DataViewField instance. Does not add it to the data view."
+            ],
+            "signature": [
+              "(field: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.FieldSpec",
+                "text": "FieldSpec"
+              },
+              ") => ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewField",
+                "text": "DataViewField"
+              }
+            ],
+            "path": "src/platform/plugins/shared/data_views/common/fields/field_list.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-common.IIndexPatternFieldList.create.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "field",
+                "description": [
+                  "field spec to create field instance"
+                ],
+                "signature": [
+                  {
+                    "pluginId": "dataViews",
+                    "scope": "common",
+                    "docId": "kibDataViewsPluginApi",
+                    "section": "def-common.FieldSpec",
+                    "text": "FieldSpec"
+                  }
+                ],
+                "path": "src/platform/plugins/shared/data_views/common/fields/field_list.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "a new data view field instance"
+            ]
+          },
           {
             "parentPluginId": "dataViews",
             "id": "def-common.IIndexPatternFieldList.add",
@@ -25663,12 +25726,20 @@
                 "path": "src/core/packages/saved-objects/import-export-server-internal/src/import/lib/collect_saved_objects.ts"
               },
               {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/saved-objects/server-internal/src/routes/legacy_import_export/lib/import_dashboards.ts"
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/kibana/assets/install.ts"
               },
               {
-                "plugin": "@kbn/core-saved-objects-browser-mocks",
-                "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts"
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/kibana/assets/install.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/kibana/assets/install.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/saved-objects/browser-mocks/src/simple_saved_object.mock.ts"
               },
               {
                 "plugin": "graph",
@@ -25683,124 +25754,8 @@
                 "path": "x-pack/platform/plugins/private/graph/server/sample_data/flights.ts"
               },
               {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/kibana/assets/install.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/kibana/assets/install.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/kibana/assets/install.ts"
-              },
-              {
                 "plugin": "osquery",
                 "path": "x-pack/platform/plugins/shared/osquery/server/routes/pack/read_pack_route.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/platform/plugins/shared/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/platform/plugins/shared/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/platform/plugins/shared/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/platform/plugins/shared/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/platform/plugins/shared/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
               },
               {
                 "plugin": "fleet",
@@ -25825,6 +25780,18 @@
               {
                 "plugin": "lists",
                 "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client.mock.ts"
+              },
+              {
+                "plugin": "searchPlayground",
+                "path": "x-pack/solutions/search/plugins/search_playground/server/utils/playgrounds.test.ts"
+              },
+              {
+                "plugin": "searchPlayground",
+                "path": "x-pack/solutions/search/plugins/search_playground/server/utils/playgrounds.test.ts"
+              },
+              {
+                "plugin": "searchPlayground",
+                "path": "x-pack/solutions/search/plugins/search_playground/server/utils/playgrounds.test.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -26449,7 +26416,7 @@
             "section": "def-common.DataViewLazy",
             "text": "DataViewLazy"
           },
-          "[]>; clearCache: () => void; clearInstanceCache: (id?: string | undefined) => void; getCache: () => Promise<",
+          "[]>; clearCache: () => void; clearInstanceCache: (id?: string | undefined) => void; clearDataViewLazyCache: (id: string) => void; getCache: () => Promise<",
           "SavedObject",
           "<",
           {
@@ -26507,7 +26474,7 @@
             "section": "def-common.GetFieldsOptions",
             "text": "GetFieldsOptions"
           },
-          ", \"allowNoIndex\"> | undefined) => Promise<",
+          ", \"allowNoIndex\" | \"pattern\"> | undefined) => Promise<",
           {
             "pluginId": "dataViews",
             "scope": "common",

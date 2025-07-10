@@ -2,11 +2,28 @@
 
 set -euo pipefail
 
+source .buildkite/scripts/common/util.sh
+
+# shellcheck disable=SC2317
+function build_ready() {
+  build_state=$(buildkite-agent step get "state" --step "build")
+
+  if [[ "$build_state" == "finished" || "$build_state" == "ready" || "$build_state" == "ignored" ]]; then
+    echo "Build is ready, continuing..."
+  else
+    echo "Build is not ready, current state: $build_state"
+    return 1
+  fi
+}
+
 # This script is part of checks.sh in the PR pipeline but is called directly in the FIPS pipeline, so we need to bootstrap
 if [[ -z "${BASH_SOURCE[1]+x}" || "${BASH_SOURCE[1]}" != *"checks.sh"* ]]; then
   export DISABLE_BOOTSTRAP_VALIDATION=false
   .buildkite/scripts/bootstrap.sh
 fi
+
+# Wait 5x5 minutes for the build artifacts to be ready
+retry 5 300 build_ready
 
 .buildkite/scripts/download_build_artifacts.sh
 

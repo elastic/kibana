@@ -9,19 +9,49 @@
 
 import React, { useState } from 'react';
 
-import { EuiButtonEmpty, EuiPopover } from '@elastic/eui';
+import { EuiButtonEmpty, EuiPopover, UseEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Markdown } from '@kbn/shared-ux-markdown';
 import { useErrorTextStyle } from '@kbn/react-hooks';
+import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 
 interface ControlErrorProps {
   error: Error | string;
 }
 
+const defaultMessage = i18n.translate('controls.blockingError', {
+  defaultMessage: 'There was an error loading this control.',
+});
+
+const controlErrorStyles = {
+  button: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      width: '100%',
+      height: euiTheme.size.xl,
+      borderRadius: `0 ${euiTheme.border.radius.medium} ${euiTheme.border.radius.medium} 0 !important`,
+    }),
+  buttonContentCss: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      justifyContent: 'left',
+      paddingLeft: euiTheme.size.m,
+    }),
+  popover: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      width: '100%',
+      maxInlineSize: '100% !important',
+      height: euiTheme.size.xl,
+      boxShadow: 'none !important',
+      borderRadius: `0 ${euiTheme.border.radius.medium} ${euiTheme.border.radius.medium} 0 !important`,
+    }),
+};
+
 export const ControlError = ({ error }: ControlErrorProps) => {
   const errorTextStyle = useErrorTextStyle();
   const [isPopoverOpen, setPopoverOpen] = useState(false);
-  const errorMessage = error instanceof Error ? error.message : error;
+  const errorMessage = error instanceof Error ? error.message : error || defaultMessage;
+  const styles = useMemoCss(controlErrorStyles);
 
   const popoverButton = (
     <EuiButtonEmpty
@@ -31,9 +61,9 @@ export const ControlError = ({ error }: ControlErrorProps) => {
       iconType="error"
       data-test-subj="control-frame-error"
       onClick={() => setPopoverOpen((open) => !open)}
-      className="errorEmbeddableCompact__button controlErrorButton"
-      textProps={{ className: 'errorEmbeddableCompact__text' }}
-      contentProps={{ className: 'controlErrorButton--content' }}
+      className="controlErrorButton"
+      css={styles.button}
+      contentProps={{ css: styles.buttonContentCss }}
     >
       <FormattedMessage
         id="controls.frame.error.message"
@@ -46,8 +76,8 @@ export const ControlError = ({ error }: ControlErrorProps) => {
     <EuiPopover
       button={popoverButton}
       isOpen={isPopoverOpen}
-      className="controlPanel errorEmbeddableCompact__popover"
       closePopover={() => setPopoverOpen(false)}
+      css={styles.popover}
     >
       <Markdown data-test-subj="errorMessageMarkdown" readOnly css={errorTextStyle}>
         {errorMessage}

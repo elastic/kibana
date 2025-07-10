@@ -45,4 +45,10 @@ export const staticTelemetrySchema: MakeSchemaFrom<StaticTelemetryUsage> = {
       version: { type: 'keyword' },
     },
   },
+  'start-local': {
+    version: {
+      type: 'keyword',
+      _meta: { description: 'version of the start-local script used to launch Kibana' },
+    },
+  },
 };

@@ -8,9 +8,17 @@
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { i18n } from '@kbn/i18n';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
+import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common/constants';
 
-import { APP_ID, ATTACK_DISCOVERY_FEATURE_ID } from '../constants';
+import { APP_ID, ATTACK_DISCOVERY_FEATURE_ID, SERVER_APP_ID } from '../constants';
 import { type BaseKibanaFeatureConfig } from '../types';
+
+const alertingFeatures = [
+  {
+    ruleTypeId: ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID,
+    consumers: [SERVER_APP_ID],
+  },
+];
 
 export const getAttackDiscoveryBaseKibanaFeature = (): BaseKibanaFeatureConfig => ({
   id: ATTACK_DISCOVERY_FEATURE_ID,
@@ -20,12 +28,13 @@ export const getAttackDiscoveryBaseKibanaFeature = (): BaseKibanaFeatureConfig =
       defaultMessage: 'Attack discovery',
     }
   ),
-  order: 1100,
+  order: 1400,
   category: DEFAULT_APP_CATEGORIES.security,
   scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
   app: [ATTACK_DISCOVERY_FEATURE_ID, 'kibana'],
   catalogue: [APP_ID],
   minimumLicense: 'enterprise',
+  alerting: alertingFeatures,
   privileges: {
     all: {
       api: ['elasticAssistant'],
@@ -35,6 +44,10 @@ export const getAttackDiscoveryBaseKibanaFeature = (): BaseKibanaFeatureConfig =
         all: [],
         read: [],
       },
+      alerting: {
+        rule: { all: alertingFeatures },
+        alert: { all: alertingFeatures },
+      },
       ui: [],
     },
     read: {
@@ -43,6 +56,10 @@ export const getAttackDiscoveryBaseKibanaFeature = (): BaseKibanaFeatureConfig =
       savedObject: {
         all: [],
         read: [],
+      },
+      alerting: {
+        rule: { read: alertingFeatures },
+        alert: { all: alertingFeatures },
       },
       ui: [],
     },

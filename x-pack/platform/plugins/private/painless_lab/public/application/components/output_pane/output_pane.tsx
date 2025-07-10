@@ -12,13 +12,36 @@ import {
   EuiFlexItem,
   EuiLoadingSpinner,
   EuiTabbedContent,
+  UseEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { Response } from '../../types';
 import { OutputTab } from './output_tab';
 import { ParametersTab } from './parameters_tab';
 import { ContextTab } from './context_tab';
+
+const componentStyles = {
+  rightPane: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      backgroundColor: euiTheme.colors.emptyShade,
+      padding: euiTheme.size.s,
+      borderLeft: euiTheme.border.thin,
+      height: '100%',
+    }),
+  tabsStyles: css({
+    display: 'flex',
+    flexDirection: 'column',
+    height: '100%',
+
+    "[role='tabpanel']": {
+      height: '100%',
+      overflowY: 'auto',
+    },
+  }),
+};
 
 interface Props {
   isLoading: boolean;
@@ -26,6 +49,7 @@ interface Props {
 }
 
 export const OutputPane: FunctionComponent<Props> = ({ isLoading, response }) => {
+  const styles = useMemoCss(componentStyles);
   const outputTabLabel = (
     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
       <EuiFlexItem grow={false}>
@@ -47,10 +71,10 @@ export const OutputPane: FunctionComponent<Props> = ({ isLoading, response }) =>
   );
 
   return (
-    <div className="painlessLabRightPane">
+    <div css={styles.rightPane}>
       <EuiTabbedContent
-        className="painlessLabRightPane__tabs"
-        data-test-subj="painlessTabs"
+        css={styles.tabsStyles}
+        data-test-subj={isLoading ? `painlessTabs-loading` : `painlessTabs-loaded`}
         size="s"
         tabs={[
           {

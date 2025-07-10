@@ -6,6 +6,7 @@
  */
 import expect from '@kbn/expect';
 import { ROLES as SERVERLESS_USERNAMES } from '@kbn/security-solution-plugin/common/test';
+import { SECURITY_FEATURE_ID } from '@kbn/security-solution-plugin/common/constants';
 import { assetCriticalityRouteHelpersFactoryNoAuth } from '../../utils';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 import { usersAndRolesFactory } from '../../utils/users_and_roles';
@@ -18,7 +19,7 @@ const ROLES = [
       kibana: [
         {
           feature: {
-            siem: ['read'],
+            [SECURITY_FEATURE_ID]: ['read'],
           },
           spaces: ['default'],
         },

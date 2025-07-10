@@ -49,7 +49,6 @@ describe('suricata_row_renderer', () => {
   test('renders correctly against snapshot', async () => {
     const children = suricataRowRenderer.renderRow({
       data: nonSuricata,
-      isDraggable: true,
       scopeId: TimelineId.test,
     });
 
@@ -68,7 +67,6 @@ describe('suricata_row_renderer', () => {
   test('should render a suricata row', async () => {
     const children = suricataRowRenderer.renderRow({
       data: suricata,
-      isDraggable: true,
       scopeId: TimelineId.test,
     });
 
@@ -91,7 +89,6 @@ describe('suricata_row_renderer', () => {
     delete suricata?.suricata?.eve?.alert?.signature;
     const children = suricataRowRenderer.renderRow({
       data: suricata,
-      isDraggable: true,
       scopeId: TimelineId.test,
     });
     const wrapper = await getWrapper(

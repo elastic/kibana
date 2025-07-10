@@ -16,7 +16,6 @@ export const createLegacyUrlForwardApp = (
   forwards: ForwardDefinition[]
 ): App => ({
   id: 'kibana',
-  chromeless: true,
   title: 'Legacy URL migration',
   appRoute: '/app/kibana#/',
   visibleIn: [],

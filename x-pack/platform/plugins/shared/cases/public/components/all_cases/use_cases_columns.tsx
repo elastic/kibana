@@ -18,7 +18,6 @@ import {
   EuiButton,
   EuiLink,
   EuiIcon,
-  EuiHealth,
   EuiToolTip,
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
@@ -26,8 +25,7 @@ import { Status } from '@kbn/cases-components/src/status/status';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 
 import type { ActionConnector } from '../../../common/types/domain';
-import { CaseSeverity } from '../../../common/types/domain';
-import type { CaseUI } from '../../../common/ui/types';
+import type { CaseUI, CasesSettings } from '../../../common/ui/types';
 import type { CasesColumnSelection } from './types';
 import { getEmptyCellValue } from '../empty_value';
 import { FormattedRelativePreferenceDate } from '../formatted_date';
@@ -38,10 +36,11 @@ import { useCasesColumnsConfiguration } from './use_cases_columns_configuration'
 import { useApplicationCapabilities, useKibana } from '../../common/lib/kibana';
 import { TruncatedText } from '../truncated_text';
 import { getConnectorIcon } from '../utils';
-import { severities } from '../severity/config';
+import { SeverityHealth } from '../severity/config';
 import { AssigneesColumn } from './assignees_column';
 import { builderMap as customFieldsBuilderMap } from '../custom_fields/builder';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
+import { IncrementalIdText } from '../incremental_id';
 
 type CasesColumns =
   | EuiTableActionsColumnType<CaseUI>
@@ -60,12 +59,12 @@ const getLineClampedCss = css`
 
 const renderStringField = (field: string, dataTestSubj: string) =>
   field != null ? <span data-test-subj={dataTestSubj}>{field}</span> : getEmptyCellValue();
-
 export interface GetCasesColumn {
   filterStatus: string[];
   userProfiles: Map<string, UserProfileWithAvatar>;
   isSelectorView: boolean;
   selectedColumns: CasesColumnSelection[];
+  settings: CasesSettings;
   connectors?: ActionConnector[];
   onRowClick?: (theCase: CaseUI) => void;
   disableActions?: boolean;
@@ -84,6 +83,7 @@ export const useCasesColumns = ({
   onRowClick,
   disableActions = false,
   selectedColumns,
+  settings,
 }: GetCasesColumn): UseCasesColumnsReturnValue => {
   const casesColumnsConfig = useCasesColumnsConfiguration(isSelectorView);
   const { actions } = useActions({ disableActions });
@@ -113,9 +113,14 @@ export const useCasesColumns = ({
             const caseDetailsLinkComponent = isSelectorView ? (
               theCase.title
             ) : (
-              <CaseDetailsLink detailName={theCase.id} title={theCase.title}>
-                <TruncatedText text={theCase.title} />
-              </CaseDetailsLink>
+              <div>
+                <CaseDetailsLink detailName={theCase.id} title={theCase.title}>
+                  <TruncatedText text={theCase.title} />
+                </CaseDetailsLink>
+                {settings.displayIncrementalCaseId && typeof theCase.incrementalId === 'number' ? (
+                  <IncrementalIdText incrementalId={theCase.incrementalId} />
+                ) : null}
+              </div>
             );
 
             return caseDetailsLinkComponent;
@@ -298,14 +303,11 @@ export const useCasesColumns = ({
         sortable: true,
         render: (severity: CaseUI['severity']) => {
           if (severity != null) {
-            const severityData = severities[severity ?? CaseSeverity.LOW];
             return (
-              <EuiHealth
+              <SeverityHealth
                 data-test-subj={`case-table-column-severity-${severity}`}
-                color={severityData.color}
-              >
-                {severityData.label}
-              </EuiHealth>
+                severity={severity}
+              />
             );
           }
           return getEmptyCellValue();
@@ -331,10 +333,10 @@ export const useCasesColumns = ({
           }
           return getEmptyCellValue();
         },
-        width: '70px',
+        width: '120px',
       },
     }),
-    [assignCaseAction, casesColumnsConfig, connectors, isSelectorView, userProfiles]
+    [assignCaseAction, casesColumnsConfig, connectors, isSelectorView, userProfiles, settings]
   );
 
   // we need to extend the columnsDict with the columns of

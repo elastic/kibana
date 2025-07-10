@@ -65,7 +65,7 @@ export function getExplorerDefaultState(): ExplorerState {
     selectedJobs: null,
     tableData: {
       anomalies: [],
-      examplesByJobId: [''],
+      examplesByJobId: {},
       interval: 0,
       jobIds: [],
       showViewSeriesLink: false,

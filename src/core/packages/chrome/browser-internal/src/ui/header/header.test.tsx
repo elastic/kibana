@@ -46,7 +46,7 @@ function mockProps() {
     basePath: http.basePath,
     isLocked$: new BehaviorSubject(false),
     loadingCount$: new BehaviorSubject(0),
-    onIsLockedUpdate: () => {},
+    isFixed: true,
   };
 }
 
@@ -82,18 +82,17 @@ describe('Header', () => {
     const recentlyAccessed$ = new BehaviorSubject([
       { link: '', label: 'dashboard', id: 'dashboard' },
     ]);
-    const breadcrumbsAppendExtension$ = new BehaviorSubject<
-      undefined | ChromeBreadcrumbsAppendExtension
-    >(undefined);
+    const breadcrumbsAppendExtensions$ = new BehaviorSubject<ChromeBreadcrumbsAppendExtension[]>(
+      []
+    );
     const component = mountWithIntl(
       <Header
         {...mockProps()}
         breadcrumbs$={breadcrumbs$}
         navLinks$={navLinks$}
         recentlyAccessed$={recentlyAccessed$}
-        isLocked$={isLocked$}
         customNavLink$={customNavLink$}
-        breadcrumbsAppendExtension$={breadcrumbsAppendExtension$}
+        breadcrumbsAppendExtensions$={breadcrumbsAppendExtensions$}
         headerBanner$={headerBanner$}
         helpMenuLinks$={of([])}
         isServerless={false}
@@ -108,17 +107,28 @@ describe('Header', () => {
     expect(component.render()).toMatchSnapshot();
 
     act(() =>
-      breadcrumbsAppendExtension$.next({
-        content: (root: HTMLDivElement) => {
-          root.innerHTML = '<div class="my-extension">__render__</div>';
-          return () => (root.innerHTML = '');
+      breadcrumbsAppendExtensions$.next([
+        {
+          content: (root: HTMLDivElement) => {
+            root.innerHTML = '<div class="my-extension1">__render__</div>';
+            return () => (root.innerHTML = '');
+          },
         },
-      })
+        {
+          content: (root: HTMLDivElement) => {
+            root.innerHTML = '<div class="my-extension2">__render__</div>';
+            return () => (root.innerHTML = '');
+          },
+        },
+      ])
     );
     component.update();
-    expect(component.find('HeaderExtension').exists()).toBeTruthy();
+    expect(component.find('HeaderExtension').length).toBe(2);
     expect(
-      component.find('HeaderExtension').getDOMNode().querySelector('.my-extension')
+      component.find('HeaderExtension').at(0).getDOMNode().querySelector('.my-extension1')
+    ).toBeTruthy();
+    expect(
+      component.find('HeaderExtension').at(1).getDOMNode().querySelector('.my-extension2')
     ).toBeTruthy();
   });
 });

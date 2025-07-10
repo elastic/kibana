@@ -7,25 +7,15 @@
 
 import type { FC } from 'react';
 import React from 'react';
-import classNames from 'classnames';
 
-import {
-  Axis,
-  BarSeries,
-  Chart,
-  LEGACY_LIGHT_THEME,
-  Position,
-  ScaleType,
-  Settings,
-} from '@elastic/charts';
+import { Axis, BarSeries, Chart, Position, ScaleType, Settings } from '@elastic/charts';
 import type { EuiDataGridColumn } from '@elastic/eui';
-
+import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { isUnsupportedChartData, type ChartData } from '@kbn/ml-data-grid';
-
-import './column_chart.scss';
 
 import { i18n } from '@kbn/i18n';
 import { useColumnChart } from './use_column_chart';
+import { useColumnChartStyles } from './column_chart_styles';
 
 interface Props {
   chartData: ChartData;
@@ -48,19 +38,20 @@ export const ColumnChart: FC<Props> = ({
   isNumeric,
 }) => {
   const { data, legendText } = useColumnChart(chartData, columnType, maxChartColumns, isNumeric);
-
+  const styles = useColumnChartStyles();
+  const chartBaseTheme = useElasticChartsTheme();
   return (
     <div data-test-subj={dataTestSubj} style={{ width: '100%' }}>
       {!isUnsupportedChartData(chartData) && data.length > 0 && (
         <Chart size={size}>
           <Settings
-            // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
-            baseTheme={LEGACY_LIGHT_THEME}
+            baseTheme={chartBaseTheme}
             xDomain={Array.from({ length: maxChartColumns }, (_, i) => i)}
             theme={{
               chartMargins: zeroSize,
               chartPaddings: zeroSize,
               crosshair: { band: { visible: false } },
+              axes: { gridLine: { horizontal: { visible: false }, vertical: { visible: false } } },
             }}
             locale={i18n.getLocale()}
           />
@@ -83,12 +74,7 @@ export const ColumnChart: FC<Props> = ({
           />
         </Chart>
       )}
-      <div
-        className={classNames('dataGridChart__legend', {
-          'dataGridChart__legend--numeric': columnType.schema === 'number',
-        })}
-        data-test-subj={`${dataTestSubj}-legend`}
-      >
+      <div css={styles.legend} data-test-subj={`${dataTestSubj}-legend`}>
         {legendText}
       </div>
       {!hideLabel && <div data-test-subj={`${dataTestSubj}-id`}>{columnType.id}</div>}

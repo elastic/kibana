@@ -6,9 +6,9 @@
  */
 
 import { isPlainObject, isEmpty } from 'lodash';
-import { Type } from '@kbn/config-schema';
-import { Logger } from '@kbn/logging';
-import axios, {
+import type { Type } from '@kbn/config-schema';
+import type { Logger } from '@kbn/logging';
+import type {
   AxiosInstance,
   AxiosResponse,
   AxiosError,
@@ -17,18 +17,20 @@ import axios, {
   AxiosHeaderValue,
   AxiosBasicCredentials,
 } from 'axios';
-import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import axios from 'axios';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { finished } from 'stream/promises';
-import { IncomingMessage } from 'http';
+import type { IncomingMessage } from 'http';
 import { PassThrough } from 'stream';
-import { KibanaRequest } from '@kbn/core-http-server';
+import type { KibanaRequest } from '@kbn/core-http-server';
+import { TaskErrorSource, createTaskRunError } from '@kbn/task-manager-plugin/server';
 import { inspect } from 'util';
-import { ConnectorUsageCollector } from '../usage';
+import type { ConnectorUsageCollector } from '../usage';
 import { assertURL } from './helpers/validators';
-import { ActionsConfigurationUtilities } from '../actions_config';
-import { SubAction, SubActionRequestParams } from './types';
-import { ServiceParams } from './types';
+import type { ActionsConfigurationUtilities } from '../actions_config';
+import type { SubAction, SubActionRequestParams } from './types';
+import type { ServiceParams } from './types';
 import * as i18n from './translations';
 import { request } from '../lib/axios_utils';
 import { combineHeadersWithBasicAuthHeader } from '../lib/get_basic_auth_header';
@@ -43,7 +45,7 @@ export abstract class SubActionConnector<Config, Secrets> {
   [k: string]: ((params: unknown) => unknown) | unknown;
   private axiosInstance: AxiosInstance;
   private subActions: Map<string, SubAction> = new Map();
-  private configurationUtilities: ActionsConfigurationUtilities;
+  protected configurationUtilities: ActionsConfigurationUtilities;
   protected readonly kibanaRequest?: KibanaRequest;
   protected logger: Logger;
   protected esClient: ElasticsearchClient;
@@ -171,39 +173,61 @@ export abstract class SubActionConnector<Config, Secrets> {
 
       return res;
     } catch (error) {
-      if (isAxiosError(error)) {
-        this.logger.debug(
-          `Request to external service failed. Connector Id: ${this.connector.id}. Connector type: ${this.connector.type}. Method: ${error.config?.method}. URL: ${error.config?.url}`
-        );
+      this.logger.debug(
+        `Request to external service failed. Connector Id: ${this.connector.id}. Connector type: ${this.connector.type}. Method: ${error.config?.method}. URL: ${error.config?.url}`
+      );
 
-        let responseBody = '';
+      const finalError = await this.getRequestError(error);
+      throw finalError;
+    }
+  }
 
-        // The error response body may also be a stream, e.g. for the GenAI connector
-        if (error.response?.config?.responseType === 'stream' && error.response?.data) {
-          try {
-            const incomingMessage = error.response.data as IncomingMessage;
+  private async getRequestError(initialError: unknown) {
+    if (isAxiosError(initialError)) {
+      const error = await this.getErrorWithResponse(initialError);
 
-            const pt = incomingMessage.pipe(new PassThrough());
+      const errorMessage = `Status code: ${
+        error.status ?? error.response?.status
+      }. Message: ${this.getResponseErrorMessage(error)}`;
 
-            pt.on('data', (chunk) => {
-              responseBody += chunk.toString();
-            });
+      const errorInstance = new Error(errorMessage);
 
-            await finished(pt);
-
-            error.response.data = JSON.parse(responseBody);
-          } catch {
-            // the response body is a nice to have, no worries if it fails
-          }
-        }
-
-        const errorMessage = `Status code: ${
-          error.status ?? error.response?.status
-        }. Message: ${this.getResponseErrorMessage(error)}`;
-        throw new Error(errorMessage);
+      // Mark rate limiting errors as user errors
+      if (error.status === 429 || error.response?.status === 429) {
+        return createTaskRunError(errorInstance, TaskErrorSource.USER);
       }
 
-      throw error;
+      return errorInstance;
     }
+
+    return initialError;
+  }
+
+  private async getErrorWithResponse(error: AxiosError): Promise<AxiosError> {
+    let responseBody = '';
+
+    // The error response body may also be a stream, e.g. for the GenAI connector
+    if (error.response?.config?.responseType === 'stream' && error.response?.data) {
+      try {
+        const incomingMessage = error.response.data as IncomingMessage;
+
+        const pt = incomingMessage.pipe(new PassThrough());
+
+        pt.on('data', (chunk) => {
+          responseBody += chunk.toString();
+        });
+
+        await finished(pt);
+
+        error.response.data = JSON.parse(responseBody);
+
+        return error;
+      } catch {
+        // the response body is a nice to have, no worries if it fails
+        return error;
+      }
+    }
+
+    return error;
   }
 }

@@ -8,7 +8,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiConfirmModal } from '@elastic/eui';
+import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 function getI18nTexts(items: unknown[], entityName: string, entityNamePlural: string) {
@@ -77,10 +77,15 @@ export function ConfirmDeleteModal<T>({
     () => getI18nTexts(items, entityName, entityNamePlural),
     [entityName, entityNamePlural, items]
   );
+  const confirmDeleteModalTitle = useGeneratedHtmlId({
+    prefix: 'confirmDeleteModalTitle',
+  });
 
   return (
     <EuiConfirmModal
+      aria-labelledby={confirmDeleteModalTitle}
       title={title}
+      titleProps={{ id: confirmDeleteModalTitle }}
       buttonColor="danger"
       onCancel={onCancel}
       onConfirm={onConfirm}

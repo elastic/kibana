@@ -1,7 +1,0 @@
-{
-  "name": "@kbn/observability-alerting-rule-utils",
-  "description": "Utils shared between observability alerting rules",
-  "private": true,
-  "version": "1.0.0",
-  "license": "Elastic License 2.0"
-}

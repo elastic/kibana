@@ -39,7 +39,6 @@ import type { InfraPublicConfig } from '../common/plugin_config_types';
 import { createInventoryMetricRuleType } from './alerting/inventory';
 import { createLogThresholdRuleType } from './alerting/log_threshold';
 import { createMetricThresholdRuleType } from './alerting/metric_threshold';
-import { LOG_STREAM_EMBEDDABLE } from './components/log_stream/constants';
 import { createMetricsFetchData, createMetricsHasData } from './metrics_overview_fetchers';
 import { registerFeatures } from './register_feature';
 import { InventoryViewsService } from './services/inventory_views';
@@ -107,14 +106,12 @@ export class Plugin implements InfraClientPluginClass {
       createMetricThresholdRuleType({ assetDetailsLocator, metricsExplorerLocator })
     );
 
-    if (this.config.featureFlags.logsUIEnabled) {
-      // fetchData `appLink` redirects to logs explorer
-      pluginsSetup.observability.dashboard.register({
-        appName: 'infra_logs',
-        hasData: getLogsHasDataFetcher(core.getStartServices),
-        fetchData: getLogsOverviewDataFetcher(core.getStartServices),
-      });
-    }
+    // fetchData `appLink` redirects to logs explorer
+    pluginsSetup.observability.dashboard.register({
+      appName: 'infra_logs',
+      hasData: getLogsHasDataFetcher(core.getStartServices),
+      fetchData: getLogsOverviewDataFetcher(core.getStartServices),
+    });
 
     pluginsSetup.observability.dashboard.register({
       appName: 'infra_metrics',
@@ -186,46 +183,32 @@ export class Plugin implements InfraClientPluginClass {
       )
     );
 
-    pluginsSetup.embeddable.registerReactEmbeddableFactory(LOG_STREAM_EMBEDDABLE, async () => {
-      const { getLogStreamEmbeddableFactory } = await import(
-        './components/log_stream/log_stream_react_embeddable'
-      );
-      const [coreStart, pluginDeps, pluginStart] = await core.getStartServices();
-      return getLogStreamEmbeddableFactory({
-        coreStart,
-        pluginDeps,
-        pluginStart,
-      });
-    });
-
     pluginsSetup.observability.observabilityRuleTypeRegistry.register(
       createLogThresholdRuleType(core, pluginsSetup.share.url)
     );
 
-    if (this.config.featureFlags.logsUIEnabled) {
-      core.application.register({
-        id: 'logs',
-        title: i18n.translate('xpack.infra.logs.pluginTitle', {
-          defaultMessage: 'Logs',
-        }),
-        euiIconType: 'logoObservability',
-        order: 8100,
-        appRoute: '/app/logs',
-        deepLinks: Object.values(logRoutes),
-        category: DEFAULT_APP_CATEGORIES.observability,
-        mount: async (params: AppMountParameters) => {
-          // mount callback should not use setup dependencies, get start dependencies instead
-          const [coreStart, plugins, pluginStart] = await core.getStartServices();
+    core.application.register({
+      id: 'logs',
+      title: i18n.translate('xpack.infra.logs.pluginTitle', {
+        defaultMessage: 'Logs',
+      }),
+      euiIconType: 'logoObservability',
+      order: 8100,
+      appRoute: '/app/logs',
+      deepLinks: Object.values(logRoutes),
+      category: DEFAULT_APP_CATEGORIES.observability,
+      mount: async (params: AppMountParameters) => {
+        // mount callback should not use setup dependencies, get start dependencies instead
+        const [coreStart, plugins, pluginStart] = await core.getStartServices();
 
-          const isLogsExplorerAccessible = await firstValueFrom(
-            getLogsExplorerAccessible$(coreStart.application)
-          );
+        const isLogsExplorerAccessible = await firstValueFrom(
+          getLogsExplorerAccessible$(coreStart.application)
+        );
 
-          const { renderApp } = await import('./apps/logs_app');
-          return renderApp(coreStart, plugins, pluginStart, isLogsExplorerAccessible, params);
-        },
-      });
-    }
+        const { renderApp } = await import('./apps/logs_app');
+        return renderApp(coreStart, plugins, pluginStart, isLogsExplorerAccessible, params);
+      },
+    });
 
     // !! Need to be kept in sync with the routes in x-pack/solutions/observability/plugins/infra/public/pages/metrics/index.tsx
     const getInfraDeepLinks = ({
@@ -353,14 +336,11 @@ const getLogsNavigationEntries = ({
 }) => {
   const entries: NavigationEntry[] = [];
 
-  if (!config.featureFlags.logsUIEnabled) return entries;
-
   if (isLogsExplorerAccessible) {
     entries.push({
-      label: 'Explorer',
+      label: 'Discover',
       app: 'observability-logs-explorer',
       path: '/',
-      isBetaFeature: true,
     });
   }
 

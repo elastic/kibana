@@ -11,32 +11,40 @@ import React from 'react';
 
 import { EuiTitle, EuiSpacer, EuiDescriptionList } from '@elastic/eui';
 import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
-import { getTikaDisplayType } from '../../../../../common/utils/tika_utils';
-import { FILE_FORMATS } from '../../../../../common/constants';
+import { FILE_FORMATS } from '@kbn/file-upload-common';
+import { getTikaDisplayType } from '@kbn/file-upload/file_upload_manager/tika_utils';
 
-export const AnalysisSummary: FC<{ results: FindFileStructureResponse }> = ({ results }) => {
+interface Props {
+  results: FindFileStructureResponse;
+  showTitle?: boolean;
+}
+
+export const AnalysisSummary: FC<Props> = ({ results, showTitle = true }) => {
   const items = createDisplayItems(results);
 
   return (
-    <React.Fragment>
-      <EuiTitle size="s">
-        <h2>
-          <FormattedMessage
-            id="xpack.dataVisualizer.file.analysisSummary.summaryTitle"
-            defaultMessage="Summary"
-          />
-        </h2>
-      </EuiTitle>
+    <>
+      {showTitle ? (
+        <EuiTitle size="s">
+          <h2>
+            <FormattedMessage
+              id="xpack.dataVisualizer.file.analysisSummary.summaryTitle"
+              defaultMessage="Summary"
+            />
+          </h2>
+        </EuiTitle>
+      ) : null}
 
       <EuiSpacer size="m" />
 
       <EuiDescriptionList
         type="column"
-        columnWidths={[15, 85]}
+        columnWidths={showTitle ? [15, 85] : [50, 50]}
         listItems={items}
         className="analysis-summary-list"
+        compressed
       />
-    </React.Fragment>
+    </>
   );
 };
 

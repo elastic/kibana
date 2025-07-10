@@ -8,13 +8,13 @@ exports[`FieldName renders a custom description icon 1`] = `
     class="euiFlexItem emotion-euiFlexItem-growZero"
   >
     <div
-      class="euiFlexGroup kbnDocViewer__fieldIconContainer emotion-euiFlexGroup-s-flexStart-center-row"
+      class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-center-row-fieldIconContainer"
     >
       <div
         class="euiFlexItem emotion-euiFlexItem-growZero"
       >
         <span
-          class="euiToken kbnFieldIcon emotion-euiToken-square-light-s-euiColorVis1"
+          class="euiToken kbnFieldIcon emotion-euiToken-square-light-s-euiColorVis2"
         >
           <span
             data-euiicon-type="tokenString"
@@ -33,7 +33,7 @@ exports[`FieldName renders a custom description icon 1`] = `
       class="euiFlexGroup emotion-euiFlexGroup-wrap-none-flexStart-center-row"
     >
       <div
-        class="euiFlexItem kbnDocViewer__fieldName eui-textBreakAll emotion-euiFlexItem-growZero"
+        class="euiFlexItem kbnDocViewer__fieldName eui-textBreakAll emotion-euiFlexItem-growZero-fieldName"
         data-test-subj="tableDocViewRow-test-name"
       >
         <span
@@ -57,13 +57,13 @@ exports[`FieldName renders a geo field 1`] = `
     class="euiFlexItem emotion-euiFlexItem-growZero"
   >
     <div
-      class="euiFlexGroup kbnDocViewer__fieldIconContainer emotion-euiFlexGroup-s-flexStart-center-row"
+      class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-center-row-fieldIconContainer"
     >
       <div
         class="euiFlexItem emotion-euiFlexItem-growZero"
       >
         <span
-          class="euiToken kbnFieldIcon emotion-euiToken-square-light-s-euiColorVis5"
+          class="euiToken kbnFieldIcon emotion-euiToken-square-light-s-euiColorVis8"
         >
           <span
             data-euiicon-type="tokenGeo"
@@ -82,7 +82,7 @@ exports[`FieldName renders a geo field 1`] = `
       class="euiFlexGroup emotion-euiFlexGroup-wrap-none-flexStart-center-row"
     >
       <div
-        class="euiFlexItem kbnDocViewer__fieldName eui-textBreakAll emotion-euiFlexItem-growZero"
+        class="euiFlexItem kbnDocViewer__fieldName eui-textBreakAll emotion-euiFlexItem-growZero-fieldName"
         data-test-subj="tableDocViewRow-test.test.test-name"
       >
         <span
@@ -106,7 +106,7 @@ exports[`FieldName renders a number field by providing a field record 1`] = `
     class="euiFlexItem emotion-euiFlexItem-growZero"
   >
     <div
-      class="euiFlexGroup kbnDocViewer__fieldIconContainer emotion-euiFlexGroup-s-flexStart-center-row"
+      class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-center-row-fieldIconContainer"
     >
       <div
         class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -131,7 +131,7 @@ exports[`FieldName renders a number field by providing a field record 1`] = `
       class="euiFlexGroup emotion-euiFlexGroup-wrap-none-flexStart-center-row"
     >
       <div
-        class="euiFlexItem kbnDocViewer__fieldName eui-textBreakAll emotion-euiFlexItem-growZero"
+        class="euiFlexItem kbnDocViewer__fieldName eui-textBreakAll emotion-euiFlexItem-growZero-fieldName"
         data-test-subj="tableDocViewRow-test.test.test-name"
       >
         <span
@@ -155,13 +155,13 @@ exports[`FieldName renders a string field by providing fieldType and fieldName 1
     class="euiFlexItem emotion-euiFlexItem-growZero"
   >
     <div
-      class="euiFlexGroup kbnDocViewer__fieldIconContainer emotion-euiFlexGroup-s-flexStart-center-row"
+      class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-center-row-fieldIconContainer"
     >
       <div
         class="euiFlexItem emotion-euiFlexItem-growZero"
       >
         <span
-          class="euiToken kbnFieldIcon emotion-euiToken-square-light-s-euiColorVis1"
+          class="euiToken kbnFieldIcon emotion-euiToken-square-light-s-euiColorVis2"
         >
           <span
             data-euiicon-type="tokenString"
@@ -180,7 +180,7 @@ exports[`FieldName renders a string field by providing fieldType and fieldName 1
       class="euiFlexGroup emotion-euiFlexGroup-wrap-none-flexStart-center-row"
     >
       <div
-        class="euiFlexItem kbnDocViewer__fieldName eui-textBreakAll emotion-euiFlexItem-growZero"
+        class="euiFlexItem kbnDocViewer__fieldName eui-textBreakAll emotion-euiFlexItem-growZero-fieldName"
         data-test-subj="tableDocViewRow-test-name"
       >
         <span
@@ -204,7 +204,7 @@ exports[`FieldName renders unknown field 1`] = `
     class="euiFlexItem emotion-euiFlexItem-growZero"
   >
     <div
-      class="euiFlexGroup kbnDocViewer__fieldIconContainer emotion-euiFlexGroup-s-flexStart-center-row"
+      class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-center-row-fieldIconContainer"
     >
       <div
         class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -213,7 +213,7 @@ exports[`FieldName renders unknown field 1`] = `
           class="euiToken kbnFieldIcon emotion-euiToken-circle-light-s-gray"
         >
           <span
-            data-euiicon-type="questionInCircle"
+            data-euiicon-type="question"
             title="Unknown field"
           >
             Unknown field
@@ -229,7 +229,7 @@ exports[`FieldName renders unknown field 1`] = `
       class="euiFlexGroup emotion-euiFlexGroup-wrap-none-flexStart-center-row"
     >
       <div
-        class="euiFlexItem kbnDocViewer__fieldName eui-textBreakAll emotion-euiFlexItem-growZero"
+        class="euiFlexItem kbnDocViewer__fieldName eui-textBreakAll emotion-euiFlexItem-growZero-fieldName"
         data-test-subj="tableDocViewRow-test.test.test-name"
       >
         <span
@@ -253,7 +253,7 @@ exports[`FieldName renders when mapping is provided 1`] = `
     class="euiFlexItem emotion-euiFlexItem-growZero"
   >
     <div
-      class="euiFlexGroup kbnDocViewer__fieldIconContainer emotion-euiFlexGroup-s-flexStart-center-row"
+      class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-center-row-fieldIconContainer"
     >
       <div
         class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -278,7 +278,7 @@ exports[`FieldName renders when mapping is provided 1`] = `
       class="euiFlexGroup emotion-euiFlexGroup-wrap-none-flexStart-center-row"
     >
       <div
-        class="euiFlexItem kbnDocViewer__fieldName eui-textBreakAll emotion-euiFlexItem-growZero"
+        class="euiFlexItem kbnDocViewer__fieldName eui-textBreakAll emotion-euiFlexItem-growZero-fieldName"
         data-test-subj="tableDocViewRow-test-name"
       >
         <span
@@ -302,7 +302,7 @@ exports[`FieldName renders with a search highlight 1`] = `
     class="euiFlexItem emotion-euiFlexItem-growZero"
   >
     <div
-      class="euiFlexGroup kbnDocViewer__fieldIconContainer emotion-euiFlexGroup-s-flexStart-center-row"
+      class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-center-row-fieldIconContainer"
     >
       <div
         class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -327,7 +327,7 @@ exports[`FieldName renders with a search highlight 1`] = `
       class="euiFlexGroup emotion-euiFlexGroup-wrap-none-flexStart-center-row"
     >
       <div
-        class="euiFlexItem kbnDocViewer__fieldName eui-textBreakAll emotion-euiFlexItem-growZero"
+        class="euiFlexItem kbnDocViewer__fieldName eui-textBreakAll emotion-euiFlexItem-growZero-fieldName"
         data-test-subj="tableDocViewRow-test.test.test-name"
       >
         <span

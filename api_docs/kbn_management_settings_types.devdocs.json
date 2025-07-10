@@ -400,6 +400,44 @@
             "path": "src/platform/packages/shared/kbn-management/settings/types/field_definition.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/management-settings-types",
+            "id": "def-public.FieldDefinition.solution",
+            "type": "CompoundType",
+            "tags": [
+              "see"
+            ],
+            "label": "solution",
+            "description": [
+              "The solution where this setting is applicable.\nIf undefined, the setting must be displayed in all solutions."
+            ],
+            "signature": [
+              "UiSettingsSolution",
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-management/settings/types/field_definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/management-settings-types",
+            "id": "def-public.FieldDefinition.technicalPreview",
+            "type": "CompoundType",
+            "tags": [
+              "see"
+            ],
+            "label": "technicalPreview",
+            "description": [
+              "\nTechnical preview information for the field"
+            ],
+            "signature": [
+              "TechnicalPreviewSettings",
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-management/settings/types/field_definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

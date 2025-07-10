@@ -27,11 +27,15 @@ import {
   EuiSwitchEvent,
   EuiTextArea,
   EuiIconTip,
+  EuiText,
+  withEuiTheme,
+  WithEuiThemeProps,
+  mathWithUnits,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import { EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 
 export interface OnSaveProps {
   newTitle: string;
@@ -57,6 +61,7 @@ interface Props {
   showDescription: boolean;
   isValid?: boolean;
   customModalTitle?: string;
+  theme: WithEuiThemeProps['theme'];
 }
 
 export interface SaveModalState {
@@ -75,10 +80,13 @@ const generateId = htmlIdGenerator();
  * @deprecated
  * @removeBy 8.8.0
  */
-export class SavedObjectSaveModal extends React.Component<Props, SaveModalState> {
+class SavedObjectSaveModalComponent extends React.Component<
+  Props,
+  SaveModalState,
+  WithEuiThemeProps
+> {
   private warning = React.createRef<HTMLDivElement>();
   private formId = generateId('form');
-  private savedObjectTitleInputRef = React.createRef<HTMLInputElement>();
 
   public readonly state = {
     title: this.props.title,
@@ -90,17 +98,11 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
     hasAttemptedSubmit: false,
   };
 
-  public componentDidMount() {
-    setTimeout(() => {
-      // defer so input focus ref value has been populated
-      this.savedObjectTitleInputRef.current?.focus();
-    }, 0);
-  }
-
   public render() {
+    const { theme } = this.props;
     const { isTitleDuplicateConfirmed, hasTitleDuplicate, title, hasAttemptedSubmit } = this.state;
     const duplicateWarningId = generateId();
-
+    const modalTitleId = generateId('saveModal');
     const hasColumns = !!this.props.rightOptions;
 
     const titleInputValid =
@@ -119,7 +121,6 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
         >
           <EuiFieldText
             fullWidth
-            inputRef={this.savedObjectTitleInputRef}
             data-test-subj="savedObjectTitle"
             value={title}
             onChange={this.onTitleChange}
@@ -148,15 +149,21 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
     ) : (
       formBodyContent
     );
+    const styles = css({
+      width: hasColumns
+        ? mathWithUnits(theme.euiTheme.size.xxl, (x) => x * 20)
+        : mathWithUnits(theme.euiTheme.size.xxl, (x) => x * 15),
+    });
 
     return (
       <EuiModal
         data-test-subj="savedObjectSaveModal"
-        className={`kbnSavedObjectSaveModal${hasColumns ? ' kbnSavedObjectsSaveModal--wide' : ''}`}
         onClose={this.props.onClose}
+        css={styles}
+        aria-labelledby={modalTitleId}
       >
         <EuiModalHeader>
-          <EuiModalHeaderTitle>
+          <EuiModalHeaderTitle id={modalTitleId}>
             {this.props.customModalTitle ? (
               this.props.customModalTitle
             ) : (
@@ -408,7 +415,7 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
             css={({ euiTheme }) => ({ marginLeft: `-${euiTheme.size.base}` })}
             grow={false}
           >
-            <EuiIconTip type="iInCircle" content={this.props.mustCopyOnSaveMessage} />
+            <EuiIconTip type="info" content={this.props.mustCopyOnSaveMessage} />
           </EuiFlexItem>
         )}
         <EuiFlexItem grow={true} />
@@ -416,3 +423,5 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
     );
   };
 }
+
+export const SavedObjectSaveModal = withEuiTheme(SavedObjectSaveModalComponent);

@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import './selectable_spaces_control.scss';
-
 import type { EuiSelectableOption } from '@elastic/eui';
 import {
   EuiBadge,
@@ -18,7 +16,9 @@ import {
   EuiLoadingSpinner,
   EuiSelectable,
   EuiText,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import React, { lazy, Suspense } from 'react';
 
 import { i18n } from '@kbn/i18n';
@@ -62,7 +62,7 @@ const APPEND_CANNOT_SELECT = (
       defaultMessage: 'You need additional privileges to select this space.',
     })}
     position="left"
-    type="iInCircle"
+    type="info"
   />
 );
 const APPEND_CANNOT_DESELECT = (
@@ -71,7 +71,7 @@ const APPEND_CANNOT_DESELECT = (
       defaultMessage: 'You need additional privileges to deselect this space.',
     })}
     position="left"
-    type="iInCircle"
+    type="info"
   />
 );
 const APPEND_PROHIBITED = (
@@ -83,7 +83,7 @@ const APPEND_PROHIBITED = (
       defaultMessage: 'A copy of this saved object or a related object exists in this space.',
     })}
     position="left"
-    type="iInCircle"
+    type="info"
   />
 );
 const APPEND_FEATURE_IS_DISABLED = (
@@ -107,6 +107,7 @@ export const SelectableSpacesControl = (props: Props) => {
     prohibitedSpaces,
   } = props;
   const { services } = useSpaces();
+  const { euiTheme } = useEuiTheme();
   const { application, docLinks } = services;
   const { selectedSpaceIds, initiallySelectedSpaceIds } = shareOptions;
 
@@ -235,7 +236,9 @@ export const SelectableSpacesControl = (props: Props) => {
               listProps={{
                 bordered: true,
                 rowHeight: ROW_HEIGHT,
-                className: 'spcShareToSpace__spacesList',
+                css: css`
+                  margin-top: ${euiTheme.size.xs};
+                `,
                 'data-test-subj': 'sts-form-space-selector',
               }}
               height="full"

@@ -19,3 +19,14 @@ paths:
             application/json:
               schema:
                 $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RuleTagArray'
+              examples:
+                example1:
+                  value:
+                    - "zeek"
+                    - "suricata"
+                    - "windows"
+                    - "linux"
+                    - "network"
+                    - "initial access"
+                    - "remote access"
+                    - "phishing"

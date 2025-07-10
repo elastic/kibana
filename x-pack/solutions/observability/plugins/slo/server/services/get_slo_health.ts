@@ -6,7 +6,7 @@
  */
 
 import { TransformGetTransformStatsTransformStats } from '@elastic/elasticsearch/lib/api/types';
-import { ElasticsearchClient, IScopedClusterClient } from '@kbn/core/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 import {
   FetchSLOHealthParams,
   FetchSLOHealthResponse,
@@ -15,9 +15,9 @@ import {
 import { Dictionary, groupBy, keyBy } from 'lodash';
 import moment from 'moment';
 import {
+  SUMMARY_DESTINATION_INDEX_PATTERN,
   getSLOSummaryTransformId,
   getSLOTransformId,
-  SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
 } from '../../common/constants';
 import { SLODefinition } from '../domain/models';
 import { HealthStatus, State } from '../domain/models/health';
@@ -29,7 +29,6 @@ const STALE_THRESHOLD_MINUTES = 2 * 24 * 60;
 
 export class GetSLOHealth {
   constructor(
-    private esClient: ElasticsearchClient,
     private scopedClusterClient: IScopedClusterClient,
     private repository: SLORepository
   ) {}
@@ -69,8 +68,8 @@ export class GetSLOHealth {
   private async getSummaryDocsById(
     filteredList: Array<{ sloId: string; sloInstanceId: string; sloRevision: number }>
   ) {
-    const summaryDocs = await this.esClient.search<EsSummaryDocument>({
-      index: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
+    const summaryDocs = await this.scopedClusterClient.asCurrentUser.search<EsSummaryDocument>({
+      index: SUMMARY_DESTINATION_INDEX_PATTERN,
       query: {
         bool: {
           should: filteredList.map((item) => ({

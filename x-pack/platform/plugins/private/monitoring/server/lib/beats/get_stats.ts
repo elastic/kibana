@@ -38,14 +38,12 @@ export async function getStats(req: LegacyRequest, beatsIndexPattern: string, cl
     filter_path: beatsAggFilterPath,
     size: 0,
     ignore_unavailable: true,
-    body: {
-      query: createBeatsQuery({
-        start,
-        end,
-        clusterUuid,
-      }),
-      aggs: beatsUuidsAgg(maxBucketSize!),
-    },
+    query: createBeatsQuery({
+      start,
+      end,
+      clusterUuid,
+    }),
+    aggs: beatsUuidsAgg(maxBucketSize!),
   };
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');

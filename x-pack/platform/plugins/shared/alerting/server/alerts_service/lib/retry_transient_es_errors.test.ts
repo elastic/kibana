@@ -67,15 +67,19 @@ describe('retryTransientErrors', () => {
       new EsErrors.NoLivingConnectionsError('no living connection', {
         warnings: [],
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         meta: {} as any,
       }),
       new EsErrors.ConnectionError('no connection'),
       new EsErrors.TimeoutError('timeout'),
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       new EsErrors.ResponseError({ statusCode: 503, meta: {} as any, warnings: [] }),
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       new EsErrors.ResponseError({ statusCode: 408, meta: {} as any, warnings: [] }),
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       new EsErrors.ResponseError({ statusCode: 410, meta: {} as any, warnings: [] }),
     ];
 

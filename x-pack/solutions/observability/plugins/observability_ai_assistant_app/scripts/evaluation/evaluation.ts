@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Client } from '@elastic/elasticsearch';
+import { Client, HttpConnection } from '@elastic/elasticsearch';
 import { run } from '@kbn/dev-cli-runner';
 import * as fastGlob from 'fast-glob';
 import yargs from 'yargs';
@@ -42,6 +42,8 @@ function runEvaluations() {
           const kibanaClient = new KibanaClient(log, serviceUrls.kibanaUrl, argv.spaceId);
           const esClient = new Client({
             node: serviceUrls.esUrl,
+            Connection: HttpConnection,
+            requestTimeout: 30_000,
           });
 
           await kibanaClient.createSpaceIfNeeded();

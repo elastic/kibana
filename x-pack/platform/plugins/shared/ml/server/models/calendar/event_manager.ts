@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { GLOBAL_CALENDAR } from '../../../common/constants/calendars';
 import type { MlClient } from '../../lib/ml_client';
 
@@ -35,11 +35,9 @@ export class EventManager {
   }
 
   async addEvents(calendarId: string, events: ScheduledEvent[]) {
-    const body = { events };
-
     return await this._mlClient.postCalendarEvents({
       calendar_id: calendarId,
-      body,
+      events,
     });
   }
 

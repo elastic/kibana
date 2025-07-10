@@ -9,29 +9,33 @@
 
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { EuiProvider } from '@elastic/eui';
 import { BehaviorSubject } from 'rxjs';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { DataDocuments$ } from '../../state_management/discover_data_state_container';
+import type { DataDocuments$ } from '../../state_management/discover_data_state_container';
 import { discoverServiceMock } from '../../../../__mocks__/services';
 import { FetchStatus } from '../../../types';
 import { DiscoverDocuments, onResize } from './discover_documents';
 import { dataViewMock, esHitsMock } from '@kbn/discover-utils/src/__mocks__';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { EsHitRecord } from '@kbn/discover-utils/types';
-import { DiscoverMainProvider } from '../../state_management/discover_state_provider';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
-import { DiscoverAppState } from '../../state_management/discover_app_state_container';
-import { DiscoverCustomization, DiscoverCustomizationProvider } from '../../../../customizations';
+import type { DiscoverAppState } from '../../state_management/discover_app_state_container';
+import type { DiscoverCustomization } from '../../../../customizations';
 import { createCustomizationService } from '../../../../customizations/customization_service';
 import { DiscoverGrid } from '../../../../components/discover_grid';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
+import { type ProfilesManager } from '../../../../context_awareness';
+import { internalStateActions } from '../../state_management/redux';
+import { DiscoverTestProvider } from '../../../../__mocks__/test_provider';
 
 const customisationService = createCustomizationService();
 
-async function mountComponent(fetchStatus: FetchStatus, hits: EsHitRecord[]) {
+async function mountComponent(
+  fetchStatus: FetchStatus,
+  hits: EsHitRecord[],
+  profilesManager?: ProfilesManager
+) {
   const services = discoverServiceMock;
 
   services.data.query.timefilter.timefilter.getTime = () => {
@@ -46,6 +50,22 @@ async function mountComponent(fetchStatus: FetchStatus, hits: EsHitRecord[]) {
   stateContainer.appState.update({
     dataSource: createDataViewDataSource({ dataViewId: dataViewMock.id! }),
   });
+  stateContainer.internalState.dispatch(
+    stateContainer.injectCurrentTab(internalStateActions.setDataRequestParams)({
+      dataRequestParams: {
+        timeRangeRelative: {
+          from: '2020-05-14T11:05:13.590',
+          to: '2020-05-14T11:20:13.590',
+        },
+        timeRangeAbsolute: {
+          from: '2020-05-14T11:05:13.590',
+          to: '2020-05-14T11:20:13.590',
+        },
+        searchSessionId: 'test',
+      },
+    })
+  );
+
   stateContainer.dataState.data$.documents$ = documents$;
 
   const props = {
@@ -56,16 +76,19 @@ async function mountComponent(fetchStatus: FetchStatus, hits: EsHitRecord[]) {
     onFieldEdited: jest.fn(),
   };
 
+  profilesManager = profilesManager ?? services.profilesManager;
+  const scopedEbtManager = services.ebtManager.createScopedEBTManager();
+
   const component = mountWithIntl(
-    <KibanaContextProvider services={services}>
-      <DiscoverCustomizationProvider value={customisationService}>
-        <DiscoverMainProvider value={stateContainer}>
-          <EuiProvider>
-            <DiscoverDocuments {...props} />
-          </EuiProvider>
-        </DiscoverMainProvider>
-      </DiscoverCustomizationProvider>
-    </KibanaContextProvider>
+    <DiscoverTestProvider
+      services={{ ...services, profilesManager }}
+      stateContainer={stateContainer}
+      customizationService={customisationService}
+      scopedProfilesManager={profilesManager.createScopedProfilesManager({ scopedEbtManager })}
+      scopedEbtManager={scopedEbtManager}
+    >
+      <DiscoverDocuments {...props} />
+    </DiscoverTestProvider>
   );
   await act(async () => {
     component.update();
@@ -133,7 +156,6 @@ describe('Discover documents layout', () => {
       customization.rowAdditionalLeadingControls
     );
     expect(discoverGridComponent.prop('externalCustomRenderers')).toBeDefined();
-    expect(discoverGridComponent.prop('customGridColumnsConfiguration')).toBeDefined();
   });
 
   describe('context awareness', () => {

@@ -71,6 +71,7 @@ const mockRollupResponse = {
 
 describe('ES search strategy', () => {
   const mockApiCaller = jest.fn();
+  const mockRollupSearchCaller = jest.fn();
   const mockStatusCaller = jest.fn();
   const mockGetCaller = jest.fn();
   const mockSubmitCaller = jest.fn();
@@ -92,6 +93,9 @@ describe('ES search strategy', () => {
           delete: mockDeleteCaller,
         },
         transport: { request: mockApiCaller },
+        rollup: {
+          rollupSearch: mockRollupSearchCaller,
+        },
       },
     },
     searchSessionsClient: createSearchSessionsClientMock(),
@@ -132,7 +136,7 @@ describe('ES search strategy', () => {
       it('makes a POST request with params when no ID provided', async () => {
         mockSubmitCaller.mockResolvedValueOnce(mockAsyncResponse);
 
-        const params = { index: 'logstash-*', body: { query: {} } };
+        const params = { index: 'logstash-*', query: {} };
         const esSearch = await enhancedEsSearchStrategyProvider(
           mockLegacyConfig$,
           mockSearchConfig,
@@ -144,14 +148,14 @@ describe('ES search strategy', () => {
         expect(mockSubmitCaller).toBeCalled();
         const request = mockSubmitCaller.mock.calls[0][0];
         expect(request.index).toEqual(params.index);
-        expect(request.body).toEqual(params.body);
+        expect(request.query).toEqual(params.query);
         expect(request).toHaveProperty('keep_alive', '60000ms');
       });
 
       it('returns status if incomplete', async () => {
         mockStatusCaller.mockResolvedValueOnce(mockAsyncStatusResponse(false));
 
-        const params = { index: 'logstash-*', body: { query: {} } };
+        const params = { index: 'logstash-*', query: {} };
         const esSearch = await enhancedEsSearchStrategyProvider(
           mockLegacyConfig$,
           mockSearchConfig,
@@ -170,7 +174,7 @@ describe('ES search strategy', () => {
         mockStatusCaller.mockResolvedValueOnce(mockAsyncStatusResponse(true));
         mockGetCaller.mockResolvedValueOnce(mockAsyncResponse);
 
-        const params = { index: 'logstash-*', body: { query: {} } };
+        const params = { index: 'logstash-*', query: {} };
         const esSearch = await enhancedEsSearchStrategyProvider(
           mockLegacyConfig$,
           mockSearchConfig,
@@ -192,7 +196,7 @@ describe('ES search strategy', () => {
 
         const params = {
           index: 'logstash-*',
-          body: { query: {} },
+          query: {},
           wait_for_completion_timeout: '10s',
           keep_alive: '5m',
         };
@@ -214,7 +218,7 @@ describe('ES search strategy', () => {
       it('sets transport options on POST requests', async () => {
         const transportOptions = { maxRetries: 1 };
         mockSubmitCaller.mockResolvedValueOnce(mockAsyncResponse);
-        const params = { index: 'logstash-*', body: { query: {} } };
+        const params = { index: 'logstash-*', query: {} };
         const esSearch = enhancedEsSearchStrategyProvider(
           mockLegacyConfig$,
           mockSearchConfig,
@@ -229,7 +233,7 @@ describe('ES search strategy', () => {
           1,
           expect.objectContaining({
             batched_reduce_size: 64,
-            body: { query: {} },
+            query: {},
             ignore_unavailable: true,
             index: 'logstash-*',
             keep_alive: '60000ms',
@@ -245,7 +249,7 @@ describe('ES search strategy', () => {
       it('sets transport options on GET requests', async () => {
         mockStatusCaller.mockResolvedValueOnce(mockAsyncStatusResponse(true));
         mockGetCaller.mockResolvedValueOnce(mockAsyncResponse);
-        const params = { index: 'logstash-*', body: { query: {} } };
+        const params = { index: 'logstash-*', query: {} };
         const esSearch = enhancedEsSearchStrategyProvider(
           mockLegacyConfig$,
           mockSearchConfig,
@@ -270,7 +274,7 @@ describe('ES search strategy', () => {
       it('sets wait_for_completion_timeout and keep_alive in the request', async () => {
         mockSubmitCaller.mockResolvedValueOnce(mockAsyncResponse);
 
-        const params = { index: 'foo-*', body: {} };
+        const params = { index: 'foo-*' };
         const esSearch = await enhancedEsSearchStrategyProvider(
           mockLegacyConfig$,
           mockSearchConfig,
@@ -286,9 +290,9 @@ describe('ES search strategy', () => {
       });
 
       it('calls the rollup API if the index is a rollup type', async () => {
-        mockApiCaller.mockResolvedValueOnce(mockRollupResponse);
+        mockRollupSearchCaller.mockResolvedValueOnce(mockRollupResponse);
 
-        const params = { index: 'foo-程', body: {} };
+        const params = { index: 'foo-程' };
         const esSearch = await enhancedEsSearchStrategyProvider(
           mockLegacyConfig$,
           mockSearchConfig,
@@ -306,17 +310,26 @@ describe('ES search strategy', () => {
           )
           .toPromise();
 
-        expect(mockApiCaller).toBeCalled();
-        const { method, path } = mockApiCaller.mock.calls[0][0];
-        expect(method).toBe('POST');
-        expect(path).toBe('/foo-%E7%A8%8B/_rollup_search');
+        expect(mockRollupSearchCaller).toBeCalled();
+        expect(mockRollupSearchCaller).toHaveBeenCalledWith(
+          {
+            index: 'foo-程',
+            querystring: {
+              ignore_unavailable: true,
+            },
+            max_concurrent_shard_requests: undefined,
+            timeout: '100ms',
+            track_total_hits: true,
+          },
+          { meta: true, signal: undefined }
+        );
       });
 
       it("doesn't call the rollup API if the index is a rollup type BUT rollups are disabled", async () => {
         mockApiCaller.mockResolvedValueOnce(mockRollupResponse);
         mockSubmitCaller.mockResolvedValueOnce(mockAsyncResponse);
 
-        const params = { index: 'foo-程', body: { query: {} } };
+        const params = { index: 'foo-程', query: {} };
         const esSearch = await enhancedEsSearchStrategyProvider(
           mockLegacyConfig$,
           mockSearchConfig,
@@ -350,7 +363,7 @@ describe('ES search strategy', () => {
           },
         });
 
-        const params = { index: 'logstash-*', body: { query: {} } };
+        const params = { index: 'logstash-*', query: {} };
         const esSearch = await enhancedEsSearchStrategyProvider(
           mockLegacyConfig$,
           mockSearchConfig,
@@ -395,7 +408,7 @@ describe('ES search strategy', () => {
         });
         mockDeleteCaller.mockRejectedValueOnce(errResponse);
 
-        const params = { index: 'logstash-*', body: { query: {} } };
+        const params = { index: 'logstash-*', query: {} };
         const esSearch = await enhancedEsSearchStrategyProvider(
           mockLegacyConfig$,
           mockSearchConfig,
@@ -423,7 +436,7 @@ describe('ES search strategy', () => {
       it('Submit search with session id that is not saved creates a search with short keep_alive', async () => {
         mockSubmitCaller.mockResolvedValueOnce(mockAsyncResponse);
 
-        const params = { index: 'logstash-*', body: { query: {} } };
+        const params = { index: 'logstash-*', query: {} };
         const esSearch = await enhancedEsSearchStrategyProvider(
           mockLegacyConfig$,
           mockSearchConfig,
@@ -435,7 +448,7 @@ describe('ES search strategy', () => {
         expect(mockSubmitCaller).toBeCalled();
         const request = mockSubmitCaller.mock.calls[0][0];
         expect(request.index).toEqual(params.index);
-        expect(request.body).toEqual(params.body);
+        expect(request.query).toEqual(params.query);
 
         expect(request).toHaveProperty('keep_alive', '60000ms');
       });
@@ -443,7 +456,7 @@ describe('ES search strategy', () => {
       it('Submit search with session id and session is saved creates a search with long keep_alive', async () => {
         mockSubmitCaller.mockResolvedValueOnce(mockAsyncResponse);
 
-        const params = { index: 'logstash-*', body: { query: {} } };
+        const params = { index: 'logstash-*', query: {} };
         const esSearch = await enhancedEsSearchStrategyProvider(
           mockLegacyConfig$,
           mockSearchConfig,
@@ -455,7 +468,7 @@ describe('ES search strategy', () => {
         expect(mockSubmitCaller).toBeCalled();
         const request = mockSubmitCaller.mock.calls[0][0];
         expect(request.index).toEqual(params.index);
-        expect(request.body).toEqual(params.body);
+        expect(request.query).toEqual(params.query);
 
         expect(request).toHaveProperty('keep_alive', '604800000ms');
       });
@@ -464,7 +477,7 @@ describe('ES search strategy', () => {
         mockStatusCaller.mockResolvedValueOnce(mockAsyncStatusResponse(true));
         mockGetCaller.mockResolvedValueOnce(mockAsyncResponse);
 
-        const params = { index: 'logstash-*', body: { query: {} } };
+        const params = { index: 'logstash-*', query: {} };
         const esSearch = await enhancedEsSearchStrategyProvider(
           mockLegacyConfig$,
           mockSearchConfig,
@@ -484,7 +497,7 @@ describe('ES search strategy', () => {
         mockStatusCaller.mockResolvedValueOnce(mockAsyncStatusResponse(true));
         mockGetCaller.mockResolvedValueOnce(mockAsyncResponse);
 
-        const params = { index: 'logstash-*', body: { query: {} } };
+        const params = { index: 'logstash-*', query: {} };
         const esSearch = await enhancedEsSearchStrategyProvider(
           mockLegacyConfig$,
           mockSearchConfig,
@@ -506,7 +519,7 @@ describe('ES search strategy', () => {
         mockStatusCaller.mockResolvedValueOnce(mockAsyncStatusResponse(true));
         mockGetCaller.mockResolvedValueOnce(mockAsyncResponse);
 
-        const params = { index: 'logstash-*', body: { query: {} } };
+        const params = { index: 'logstash-*', query: {} };
         const esSearch = await enhancedEsSearchStrategyProvider(
           mockLegacyConfig$,
           mockSearchConfig,
@@ -541,7 +554,7 @@ describe('ES search strategy', () => {
           },
         });
 
-        const params = { index: 'logstash-*', body: { query: {} } };
+        const params = { index: 'logstash-*', query: {} };
         const esSearch = await enhancedEsSearchStrategyProvider(
           mockLegacyConfig$,
           mockSearchConfig,
@@ -582,7 +595,7 @@ describe('ES search strategy', () => {
 
       mockSubmitCaller.mockRejectedValue(errResponse);
 
-      const params = { index: 'logstash-*', body: { query: {} } };
+      const params = { index: 'logstash-*', query: {} };
       const esSearch = await enhancedEsSearchStrategyProvider(
         mockLegacyConfig$,
         mockSearchConfig,
@@ -607,7 +620,7 @@ describe('ES search strategy', () => {
 
       mockSubmitCaller.mockRejectedValue(errResponse);
 
-      const params = { index: 'logstash-*', body: { query: {} } };
+      const params = { index: 'logstash-*', query: {} };
       const esSearch = await enhancedEsSearchStrategyProvider(
         mockLegacyConfig$,
         mockSearchConfig,

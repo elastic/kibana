@@ -33,7 +33,7 @@
 
   .canvasPageManager__addPage {
     width: $euiSizeXXL + $euiSize;
-    background: $euiColorSuccess;
+    background: $euiColorPrimary;
     color: $euiColorGhost;
     opacity: 0;
     animation: buttonPop $euiAnimSpeedNormal $euiAnimSlightResistance;

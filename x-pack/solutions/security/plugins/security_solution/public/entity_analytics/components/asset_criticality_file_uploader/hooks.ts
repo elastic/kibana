@@ -6,11 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ParseConfig } from 'papaparse';
+import type { ParseLocalConfig } from 'papaparse';
 import { unparse, parse } from 'papaparse';
 import { useCallback, useMemo } from 'react';
 import type { EuiStepHorizontalProps } from '@elastic/eui/src/components/steps/step_horizontal';
 import { noop } from 'lodash/fp';
+import { useEnableExperimental } from '../../../common/hooks/use_experimental_features';
 import { useFormatBytes } from '../../../common/components/formatted_bytes';
 import { validateParsedContent, validateFile } from './validations';
 import { useKibana } from '../../../common/lib/kibana';
@@ -27,6 +28,7 @@ interface UseFileChangeCbParams {
 export const useFileValidation = ({ onError, onComplete }: UseFileChangeCbParams) => {
   const formatBytes = useFormatBytes();
   const { telemetry } = useKibana().services;
+  const experimentalFeatures = useEnableExperimental();
 
   const onErrorWrapper = useCallback(
     (
@@ -70,7 +72,8 @@ export const useFileValidation = ({ onError, onComplete }: UseFileChangeCbParams
         },
       });
 
-      const parserConfig: ParseConfig = {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const parserConfig: ParseLocalConfig<any, File> = {
         dynamicTyping: true,
         skipEmptyLines: true,
         complete(parsedFile, returnedFile) {
@@ -87,7 +90,10 @@ export const useFileValidation = ({ onError, onComplete }: UseFileChangeCbParams
             return;
           }
 
-          const { invalid, valid, errors } = validateParsedContent(parsedFile.data);
+          const { invalid, valid, errors } = validateParsedContent(
+            parsedFile.data,
+            experimentalFeatures
+          );
           const validLinesAsText = unparse(valid);
           const invalidLinesAsText = unparse(invalid);
           const processingEndTime = Date.now();
@@ -118,7 +124,7 @@ export const useFileValidation = ({ onError, onComplete }: UseFileChangeCbParams
 
       parse(file, parserConfig);
     },
-    [formatBytes, telemetry, onErrorWrapper, onComplete]
+    [formatBytes, telemetry, onErrorWrapper, experimentalFeatures, onComplete]
   );
 };
 

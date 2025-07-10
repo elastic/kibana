@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart } from '@kbn/core/server';
+import type { CoreSetup, CoreStart } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
-import { IEventLogService } from '.';
+import type { IEventLogService } from '.';
 import { Plugin } from './plugin';
 import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
 import { serverlessPluginMock } from '@kbn/serverless/server/mocks';

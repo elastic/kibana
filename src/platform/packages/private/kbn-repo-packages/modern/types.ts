@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ModuleGroup, ModuleVisibility } from '@kbn/repo-info/types';
+import type { KibanaGroup, ModuleVisibility } from '@kbn/projects-solutions-groups';
 import type { Package } from './package';
 import type { PLUGIN_CATEGORY } from './plugin_category_info';
 
@@ -95,7 +95,7 @@ export interface PackageManifestBaseFields {
   /**
    * Specifies the group to which this package belongs
    */
-  group?: ModuleGroup;
+  group?: KibanaGroup;
   /**
    * Specifies the package visibility, i.e. whether it can be accessed by everybody or only packages in the same group
    */
@@ -181,6 +181,10 @@ export interface PluginSelector {
    * When set to true, only select plugins which have browser-side components
    */
   browser?: boolean;
+  /**
+   * When defined, only select plugins that belong to the specified groups
+   */
+  allowlistPluginGroups?: readonly KibanaGroup[];
 }
 
 export interface KbnImportReq {

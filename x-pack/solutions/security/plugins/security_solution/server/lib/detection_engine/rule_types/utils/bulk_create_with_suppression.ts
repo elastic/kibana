@@ -8,25 +8,23 @@
 import { performance } from 'perf_hooks';
 import { isEmpty } from 'lodash';
 import type { Type as RuleType } from '@kbn/securitysolution-io-ts-alerting-types';
-import type { SuppressedAlertService } from '@kbn/rule-registry-plugin/server';
 import type {
   AlertWithCommonFieldsLatest,
   SuppressionFieldsLatest,
 } from '@kbn/rule-registry-plugin/common/schemas';
 
 import { isQueryRule } from '../../../../../common/detection_engine/utils';
-import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import { makeFloatString } from './utils';
 import type {
-  BaseFieldsLatest,
-  WrappedFieldsLatest,
+  DetectionAlertLatest,
+  WrappedAlert,
 } from '../../../../../common/api/detection_engine/model/alerts';
-import type { RuleServices } from '../types';
-import { createEnrichEventsFunction } from './enrichments';
-import type { ExperimentalFeatures } from '../../../../../common';
+import type { SecurityRuleServices, SecuritySharedParams } from '../types';
 import { getNumberOfSuppressedAlerts } from './get_number_of_suppressed_alerts';
+import type { EnrichEventsWrapper } from './enrichments/types';
+import { enrichEvents } from './enrichments';
 
-export interface GenericBulkCreateResponse<T extends BaseFieldsLatest> {
+export interface GenericBulkCreateResponse<T extends DetectionAlertLatest> {
   success: boolean;
   bulkCreateDuration: string;
   enrichmentDuration: string;
@@ -38,30 +36,25 @@ export interface GenericBulkCreateResponse<T extends BaseFieldsLatest> {
 }
 
 export const bulkCreateWithSuppression = async <
-  T extends SuppressionFieldsLatest & BaseFieldsLatest
+  T extends SuppressionFieldsLatest & DetectionAlertLatest
 >({
-  alertWithSuppression,
-  ruleExecutionLogger,
+  sharedParams,
   wrappedDocs,
   services,
   suppressionWindow,
-  alertTimestampOverride,
   isSuppressionPerRuleExecution,
   maxAlerts,
-  experimentalFeatures,
   ruleType,
 }: {
-  alertWithSuppression: SuppressedAlertService;
-  ruleExecutionLogger: IRuleExecutionLogForExecutors;
-  wrappedDocs: Array<WrappedFieldsLatest<T> & { subAlerts?: Array<WrappedFieldsLatest<T>> }>;
-  services: RuleServices;
+  sharedParams: SecuritySharedParams;
+  wrappedDocs: Array<WrappedAlert<T> & { subAlerts?: Array<WrappedAlert<T>> }>;
+  services: SecurityRuleServices;
   suppressionWindow: string;
-  alertTimestampOverride: Date | undefined;
   isSuppressionPerRuleExecution?: boolean;
   maxAlerts?: number;
-  experimentalFeatures: ExperimentalFeatures;
   ruleType?: RuleType;
 }): Promise<GenericBulkCreateResponse<T>> => {
+  const { ruleExecutionLogger, alertTimestampOverride } = sharedParams;
   if (wrappedDocs.length === 0) {
     return {
       errors: [],
@@ -77,17 +70,17 @@ export const bulkCreateWithSuppression = async <
 
   const start = performance.now();
 
-  const enrichAlerts = createEnrichEventsFunction({
-    services,
-    logger: ruleExecutionLogger,
-  });
-
   let enrichmentsTimeStart = 0;
   let enrichmentsTimeFinish = 0;
-  const enrichAlertsWrapper: typeof enrichAlerts = async (alerts, params) => {
+  const enrichAlertsWrapper: EnrichEventsWrapper = async (alerts, params) => {
     enrichmentsTimeStart = performance.now();
     try {
-      const enrichedAlerts = await enrichAlerts(alerts, params, experimentalFeatures);
+      const enrichedAlerts = await enrichEvents({
+        services,
+        logger: sharedParams.ruleExecutionLogger,
+        events: alerts,
+        spaceId: params.spaceId,
+      });
       return enrichedAlerts;
     } catch (error) {
       ruleExecutionLogger.error(`Alerts enrichment failed: ${error}`);
@@ -108,7 +101,7 @@ export const bulkCreateWithSuppression = async <
   }));
 
   const { createdAlerts, errors, suppressedAlerts, alertsWereTruncated } =
-    await alertWithSuppression(
+    await services.alertWithSuppression(
       alerts,
       suppressionWindow,
       enrichAlertsWrapper,

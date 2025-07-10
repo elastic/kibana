@@ -22,7 +22,6 @@ jest.mock('../../services', () => ({
   appContextService: {
     getSecurityLicense: jest.fn().mockReturnValue({ isEnabled: jest.fn().mockReturnValue(false) }),
     getCloud: jest.fn().mockReturnValue({ isServerlessEnabled: false } as any),
-    getExperimentalFeatures: jest.fn().mockReturnValue({ subfeaturePrivileges: false }),
     getLogger: jest.fn().mockReturnValue({ debug: jest.fn(), error: jest.fn() } as any),
   },
 }));

@@ -158,6 +158,7 @@ export function EditorFrame(props: EditorFrameProps) {
                 framePublicAPI={framePublicAPI}
                 uiActions={props.plugins.uiActions}
                 dataViews={props.plugins.dataViews}
+                data={props.plugins.data}
                 indexPatternService={props.indexPatternService}
                 getUserMessages={props.getUserMessages}
               />

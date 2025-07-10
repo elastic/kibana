@@ -77,6 +77,10 @@
     "@kbn/core-user-profile-server-mocks",
     "@kbn/core-user-profile-server-internal",
     "@kbn/core-feature-flags-server-internal",
+    "@kbn/core-http-rate-limiter-internal",
+    "@kbn/projects-solutions-groups",
+    "@kbn/telemetry",
+    "@kbn/core-pricing-server-internal",
   ],
   "exclude": [
     "target/**/*",

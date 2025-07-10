@@ -12,7 +12,7 @@ import { ThemeProvider } from 'styled-components';
 import { getMockTheme } from '../../../common/lib/kibana/kibana_react.mock';
 import { TestProviders } from '../../../common/mock';
 import { useRuleDetails } from '../hooks/use_rule_details';
-import { getStepsData } from '../../../detections/pages/detection_engine/rules/helpers';
+import { getStepsData } from '../../../detection_engine/common/helpers';
 import {
   mockAboutStepRule,
   mockDefineStepRule,
@@ -35,7 +35,7 @@ const mockUseRuleDetails = useRuleDetails as jest.Mock;
 jest.mock('../hooks/use_rule_details');
 
 const mockGetStepsData = getStepsData as jest.Mock;
-jest.mock('../../../detections/pages/detection_engine/rules/helpers');
+jest.mock('../../../detection_engine/common/helpers');
 
 const mockTheme = getMockTheme({ eui: { euiColorMediumShade: '#ece' } });
 const rule = { name: 'rule name', description: 'rule description' } as RuleResponse;

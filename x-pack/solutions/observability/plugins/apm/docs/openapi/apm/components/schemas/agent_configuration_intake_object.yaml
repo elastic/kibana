@@ -5,7 +5,7 @@ required:
 properties:
   agent_name:
     type: string
-    description: Agent name
+    description: The agent name is used by the UI to determine which settings to display.
   service:
     $ref: 'service_object.yaml'
   settings:

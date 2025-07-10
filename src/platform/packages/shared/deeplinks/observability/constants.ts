@@ -22,13 +22,13 @@ export const APM_APP_ID = 'apm';
 
 export const SYNTHETICS_APP_ID = 'synthetics';
 
+export const UPTIME_APP_ID = 'uptime';
+
 export const OBSERVABILITY_ONBOARDING_APP_ID = 'observabilityOnboarding';
 
 export const SLO_APP_ID = 'slo';
 
 export const AI_ASSISTANT_APP_ID = 'observabilityAIAssistant';
-
-export const INVESTIGATE_APP_ID = 'investigate';
 
 export const OBLT_UX_APP_ID = 'ux';
 

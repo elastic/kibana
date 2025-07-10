@@ -40,6 +40,7 @@ import {
   ALERT_CONSECUTIVE_MATCHES,
   ALERT_RULE_EXECUTION_TIMESTAMP,
   ALERT_PREVIOUS_ACTION_GROUP,
+  ALERT_PENDING_RECOVERED_COUNT,
 } from '@kbn/rule-data-utils';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { ObjectRemover } from '../../../../shared/lib';
@@ -191,6 +192,7 @@ export default function ({ getService }: FtrProviderContext) {
         [ALERT_RULE_TYPE_ID]: '.es-query',
         [ALERT_RULE_TAGS]: [],
         [ALERT_RULE_UUID]: ruleId,
+        [ALERT_PENDING_RECOVERED_COUNT]: 0,
       };
 
       expect(hits1).to.eql(expected);
@@ -278,6 +280,7 @@ export default function ({ getService }: FtrProviderContext) {
         'kibana.alert.consecutive_matches',
         'kibana.alert.severity_improving',
         'kibana.alert.previous_action_group',
+        'kibana.alert.url',
       ];
 
       for (const field of fields) {

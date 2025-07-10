@@ -10,17 +10,16 @@
 import { TimeRange } from '@kbn/es-query';
 import {
   CanAddNewPanel,
+  HasLastSavedChildState,
   HasSerializedChildState,
-  HasRuntimeChildState,
   PresentationContainer,
-  SerializedPanelState,
-  HasSaveNotification,
 } from '@kbn/presentation-containers';
 import {
   HasExecutionContext,
   PublishesDataLoading,
   PublishesTimeRange,
   PublishesUnsavedChanges,
+  SerializedPanelState,
   PublishesViewMode,
 } from '@kbn/presentation-publishing';
 import { PublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
@@ -28,22 +27,15 @@ import { PublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/p
 export type PageApi = PresentationContainer &
   CanAddNewPanel &
   HasExecutionContext &
-  HasSaveNotification &
+  HasLastSavedChildState &
   HasSerializedChildState &
-  HasRuntimeChildState &
   PublishesDataLoading &
   PublishesViewMode &
   PublishesReload &
   PublishesTimeRange &
   PublishesUnsavedChanges;
 
-export interface LastSavedState {
+export interface PageState {
   timeRange: TimeRange;
-  panelsState: Array<{ id: string; type: string; panelState: SerializedPanelState }>;
-}
-
-export interface UnsavedChanges {
-  timeRange?: TimeRange;
-  panels?: Array<{ id: string; type: string }>;
-  panelUnsavedChanges?: Record<string, object>;
+  panels: Array<{ id: string; type: string; serializedState: SerializedPanelState | undefined }>;
 }

@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type { estypes } from '@elastic/elasticsearch';
+import { IScopedClusterClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { isCCSRemoteIndexName } from '@kbn/es-query';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { assertNever } from '@kbn/std';
 import { partition } from 'lodash';
-import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../common/constants';
+import { SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../common/constants';
 import { StoredSLOSettings } from '../../domain/models';
 import { toHighPrecision } from '../../utils/number';
 import { createEsParams, typedSearch } from '../../utils/queries';
-import { getListOfSummaryIndices, getSloSettings } from '../slo_settings';
+import { getSummaryIndices, getSloSettings } from '../slo_settings';
 import { EsSummaryDocument } from '../summary_transform_generator/helpers/create_temp_summary';
 import { getElasticsearchQueryOrThrow, parseStringFilters } from '../transform_generators';
 import { fromRemoteSummaryDocumentToSloDefinition } from '../unsafe_federated/remote_summary_doc_to_slo';
@@ -32,7 +32,7 @@ import { isCursorPagination } from './types';
 
 export class DefaultSummarySearchClient implements SummarySearchClient {
   constructor(
-    private esClient: ElasticsearchClient,
+    private scopedClusterClient: IScopedClusterClient,
     private soClient: SavedObjectsClientContract,
     private logger: Logger,
     private spaceId: string
@@ -47,7 +47,7 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
   ): Promise<Paginated<SummaryResult>> {
     const parsedFilters = parseStringFilters(filters, this.logger);
     const settings = await getSloSettings(this.soClient);
-    const { indices } = await getListOfSummaryIndices(this.esClient, settings);
+    const { indices } = await getSummaryIndices(this.scopedClusterClient.asInternalUser, settings);
 
     const esParams = createEsParams({
       index: indices,
@@ -83,7 +83,7 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
 
     try {
       const summarySearch = await typedSearch<EsSummaryDocument, typeof esParams>(
-        this.esClient,
+        this.scopedClusterClient.asCurrentUser,
         esParams
       );
 
@@ -112,7 +112,11 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
       const finalTotal = total - (tempSummaryDocuments.length - tempSummaryDocumentsDeduped.length);
 
       const paginationResults = isCursorPagination(pagination)
-        ? { searchAfter: finalResults[finalResults.length - 1].sort, size: pagination.size }
+        ? {
+            // `sort` has unknown as types
+            searchAfter: finalResults[finalResults.length - 1].sort as Array<string | number>,
+            size: pagination.size,
+          }
         : pagination;
 
       return {
@@ -160,7 +164,7 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
         }),
       };
     } catch (err) {
-      this.logger.error(`Error while searching SLO summary documents. ${err}`);
+      this.logger.debug(`Error while searching SLO summary documents. ${err}`);
       return { total: 0, ...pagination, results: [] };
     }
   }
@@ -169,9 +173,11 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
     // Always attempt to delete temporary summary documents with an existing non-temp summary document
     // The temp summary documents are _eventually_ removed as we get through the real summary documents
 
-    await this.esClient.deleteByQuery({
-      index: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
+    await this.scopedClusterClient.asCurrentUser.deleteByQuery({
+      index: SUMMARY_DESTINATION_INDEX_PATTERN,
       wait_for_completion: false,
+      conflicts: 'proceed',
+      slices: 'auto',
       query: {
         bool: {
           filter: [{ terms: { 'slo.id': summarySloIds } }, { term: { isTempDoc: true } }],

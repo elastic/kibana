@@ -12,12 +12,14 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiLink,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 
 import { ConfigEntryView } from '../../types/types';
 import { ConfigurationField } from './configuration_field';
+import { ConfigFieldTitularComponent } from './titular_component_registry';
 import * as LABELS from '../../translations';
 
 interface ConfigurationFormItemsProps {
@@ -25,6 +27,9 @@ interface ConfigurationFormItemsProps {
   items: ConfigEntryView[];
   setConfigEntry: (key: string, value: string | number | boolean | null) => void;
   direction?: 'column' | 'row' | 'rowReverse' | 'columnReverse' | undefined;
+  isEdit?: boolean;
+  isPreconfigured?: boolean;
+  isInternalProvider?: boolean;
 }
 
 export const ConfigurationFormItems: React.FC<ConfigurationFormItemsProps> = ({
@@ -32,6 +37,9 @@ export const ConfigurationFormItems: React.FC<ConfigurationFormItemsProps> = ({
   items,
   setConfigEntry,
   direction,
+  isEdit,
+  isPreconfigured,
+  isInternalProvider,
 }) => {
   return (
     <EuiFlexGroup direction={direction} data-test-subj="configuration-fields">
@@ -50,6 +58,22 @@ export const ConfigurationFormItems: React.FC<ConfigurationFormItemsProps> = ({
           <p>{label}</p>
         );
 
+        const helpText =
+          isInternalProvider && key === 'model_id' && !isPreconfigured ? (
+            <>
+              {description}{' '}
+              <EuiLink
+                href="https://www.elastic.co/guide/en/elasticsearch/reference/current/inference-apis.html#default-enpoints"
+                external
+                target="_blank"
+              >
+                {LABELS.LEARN_MORE}
+              </EuiLink>
+            </>
+          ) : (
+            description
+          );
+
         const optionalLabel = !required ? (
           <EuiText color="subdued" size="xs">
             {LABELS.OPTIONALTEXT}
@@ -58,10 +82,11 @@ export const ConfigurationFormItems: React.FC<ConfigurationFormItemsProps> = ({
 
         return (
           <EuiFlexItem key={key}>
+            <ConfigFieldTitularComponent configKey={key} />
             <EuiFormRow
               label={rowLabel}
               fullWidth
-              helpText={description}
+              helpText={helpText}
               error={validationErrors}
               isInvalid={!isValid}
               labelAppend={optionalLabel}
@@ -73,6 +98,8 @@ export const ConfigurationFormItems: React.FC<ConfigurationFormItemsProps> = ({
                 setConfigValue={(value) => {
                   setConfigEntry(key, value);
                 }}
+                isEdit={isEdit}
+                isPreconfigured={isPreconfigured}
               />
             </EuiFormRow>
             {sensitive ? (

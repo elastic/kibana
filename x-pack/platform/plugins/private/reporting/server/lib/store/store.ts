@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { ILM_POLICY_NAME, JOB_STATUS } from '@kbn/reporting-common';
 import type {
@@ -52,6 +52,11 @@ export type ReportCompletedFields = Required<{
   completed_at: Report['completed_at'];
   output: Omit<ReportOutput, 'content'> | null;
 }>;
+
+export interface ReportWarningFields {
+  output: Omit<ReportOutput, 'content'>;
+  warning: string;
+}
 
 /*
  * When searching for long-pending reports, we get a subset of fields
@@ -141,12 +146,12 @@ export class ReportingStore {
       id: report._id,
       refresh: 'wait_for' as estypes.Refresh,
       op_type: 'create' as const,
-      body: {
+      document: {
         ...report.toReportSource(),
         ...sourceDoc({
           process_expiration: new Date(0).toISOString(),
-          attempts: 0,
-          status: JOB_STATUS.PENDING,
+          attempts: report.attempts || 0,
+          status: report.status || JOB_STATUS.PENDING,
         }),
       },
     };
@@ -334,6 +339,33 @@ export class ReportingStore {
     }
 
     this.reportingCore.getEventLogger(report).logReportSaved();
+
+    return body;
+  }
+
+  public async setReportWarning(
+    report: SavedReport,
+    warningInfo: ReportWarningFields
+  ): Promise<UpdateResponse<ReportDocument>> {
+    const { output, warning } = warningInfo;
+    const warnings: string[] = output.warnings ?? [];
+    warnings.push(warning);
+    const doc = sourceDoc({
+      output: {
+        ...output,
+        warnings,
+      },
+      status: JOB_STATUS.WARNINGS,
+    } as ReportSource);
+
+    let body: UpdateResponse<ReportDocument>;
+    try {
+      const client = await this.getClient();
+      body = await client.update<unknown, unknown, ReportDocument>(esDocForUpdate(report, doc));
+    } catch (err) {
+      this.logError(`Error in updating status to warning! Report: ${jobDebugMessage(report)}`, err, report); // prettier-ignore
+      throw err;
+    }
 
     return body;
   }

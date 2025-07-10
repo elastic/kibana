@@ -14,7 +14,8 @@ import type { Section } from '../../sections';
 import { useLink, useConfig, useAuthz, useStartServices } from '../../hooks';
 import { WithHeaderLayout } from '../../../../layouts';
 
-import { ExperimentalFeaturesService } from '../../services';
+import { AutoUpgradeAgentsTour } from '../../sections/agent_policy/components/auto_upgrade_agents_tour';
+import { useCanEnableAutomaticAgentUpgrades } from '../../../../hooks/use_can_enable_auto_upgrades';
 
 import { DefaultPageTitle } from './default_page_title';
 
@@ -32,10 +33,9 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
   const { getHref } = useLink();
   const { agents } = useConfig();
   const authz = useAuthz();
-  const { agentTamperProtectionEnabled, subfeaturePrivileges } = ExperimentalFeaturesService.get();
-
   const { docLinks } = useStartServices();
   const granularPrivilegesCallout = useDismissableTour('GRANULAR_PRIVILEGES');
+  const canEnableAutomaticAgentUpgrades = useCanEnableAutomaticAgentUpgrades();
 
   const tabs = [
     {
@@ -60,6 +60,7 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
       isSelected: section === 'agent_policies',
       href: getHref('policies_list'),
       'data-test-subj': 'fleet-agent-policies-tab',
+      id: 'fleet-agent-policies-tab',
     },
     {
       name: (
@@ -83,7 +84,7 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
       isSelected: section === 'uninstall_tokens',
       href: getHref('uninstall_tokens'),
       'data-test-subj': 'fleet-uninstall-tokens-tab',
-      isHidden: !authz.fleet.allAgents || !agentTamperProtectionEnabled, // needed only for agentTamperProtectionEnabled feature flag
+      isHidden: !authz.fleet.allAgents,
     },
     {
       name: (
@@ -115,7 +116,7 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
 
   return (
     <>
-      {!subfeaturePrivileges || !authz.fleet.all || granularPrivilegesCallout.isHidden ? null : (
+      {!authz.fleet.all || granularPrivilegesCallout.isHidden ? null : (
         <EuiCallOut
           size="s"
           iconType="cheer"
@@ -145,6 +146,9 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
       <WithHeaderLayout leftColumn={<DefaultPageTitle />} rightColumn={rightColumn} tabs={tabs}>
         {children}
       </WithHeaderLayout>
+      {canEnableAutomaticAgentUpgrades ? (
+        <AutoUpgradeAgentsTour anchor="#fleet-agent-policies-tab" />
+      ) : null}
     </>
   );
 };

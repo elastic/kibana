@@ -3,29 +3,31 @@
   "version": "1.0.0",
   "description": "Kibana Buildkite",
   "scripts": {
-    "test": "mocha",
-    "test:watch": "mocha --watch"
-  },
-  "overrides": {
-    "serialize-javascript": "^6.0.2"
+    "test": "jest --config jest.config.js",
+    "test:watch": "jest --config jest.config.js --watch",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@octokit/rest": "^18.10.0",
-    "axios": "^1.7.9",
+    "@octokit/rest": "^22.0.0",
+    "adm-zip": "^0.5.16",
+    "axios": "^1.8.3",
     "globby": "^11.1.0",
     "js-yaml": "^4.1.0",
     "minimatch": "^5.0.1",
+    "minimist": "^1.2.8",
     "tslib": "*"
   },
   "devDependencies": {
-    "@types/chai": "^4.3.3",
-    "@types/js-yaml": "^4.0.5",
+    "@types/jest": "^30.0.0",
+    "@types/js-yaml": "^4.0.9",
+    "@types/jscodeshift": "^0.12.0",
     "@types/minimatch": "^3.0.5",
-    "@types/mocha": "^10.0.1",
+    "@types/minimist": "^1.2.5",
     "@types/node": "^15.12.2",
-    "chai": "^4.3.10",
-    "mocha": "^11.0.1",
+    "jest": "^30.0.3",
+    "jscodeshift": "^17.1.2",
     "nock": "^12.0.2",
+    "ts-jest": "^29.4.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.1.6"
   },

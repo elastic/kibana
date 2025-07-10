@@ -7,6 +7,7 @@
 
 import { Client } from '@elastic/elasticsearch';
 import {
+  API_VERSIONS,
   CreateKnowledgeBaseResponse,
   ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_INDICES_URL,
   ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_URL,
@@ -16,8 +17,8 @@ import {
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type SuperTest from 'supertest';
-import { MachineLearningProvider } from '../../../../../../functional/services/ml';
-import { SUPPORTED_TRAINED_MODELS } from '../../../../../../functional/services/ml/api';
+import { MachineLearningProvider } from '@kbn/test-suites-xpack-platform/functional/services/ml';
+import { SUPPORTED_TRAINED_MODELS } from '@kbn/test-suites-xpack-platform/functional/services/ml/api';
 
 import { routeWithNamespace } from '../../../../../../common/utils/security_solution';
 
@@ -26,30 +27,89 @@ export const TINY_ELSER = {
   id: SUPPORTED_TRAINED_MODELS.TINY_ELSER.name,
 };
 
+export const TINY_ELSER_INFERENCE_ID = `${TINY_ELSER.id}_elasticsearch`;
+
 /**
  * Installs `pt_tiny_elser` model for testing Kb features
  * @param ml
  */
-export const installTinyElser = async (ml: ReturnType<typeof MachineLearningProvider>) => {
-  const config = {
-    ...ml.api.getTrainedModelConfig(TINY_ELSER.name),
-    input: {
-      field_names: ['text_field'],
-    },
-  };
-  await ml.api.assureMlStatsIndexExists();
-  await ml.api.importTrainedModel(TINY_ELSER.name, TINY_ELSER.id, config);
+export const installTinyElser = async ({
+  es,
+  ml,
+  log,
+}: {
+  es: Client;
+  ml: ReturnType<typeof MachineLearningProvider>;
+  log: ToolingLog;
+}) => {
+  try {
+    const config = {
+      ...ml.api.getTrainedModelConfig(TINY_ELSER.name),
+      input: {
+        field_names: ['text_field'],
+      },
+    };
+    await ml.api.assureMlStatsIndexExists();
+    await ml.api.importTrainedModel(TINY_ELSER.name, TINY_ELSER.id, config);
+  } catch (e) {
+    log.error(`Error installing Tiny Elser: ${e}`);
+  }
+  try {
+    await es.inference.put({
+      task_type: 'sparse_embedding',
+      inference_id: TINY_ELSER_INFERENCE_ID,
+      inference_config: {
+        service: 'elasticsearch',
+        service_settings: {
+          adaptive_allocations: {
+            enabled: true,
+            min_number_of_allocations: 0,
+            max_number_of_allocations: 8,
+          },
+          num_threads: 1,
+          model_id: TINY_ELSER.id,
+        },
+        task_settings: {},
+      },
+    });
+  } catch (e) {
+    log.error(`Error`);
+  }
 };
 
 /**
  * Deletes `pt_tiny_elser` model for testing Kb features
  * @param ml
  */
-export const deleteTinyElser = async (ml: ReturnType<typeof MachineLearningProvider>) => {
+export const deleteTinyElser = async ({
+  es,
+  ml,
+  log,
+}: {
+  es: Client;
+  ml: ReturnType<typeof MachineLearningProvider>;
+  log: ToolingLog;
+}) => {
+  try {
+    await es.inference.delete({
+      inference_id: TINY_ELSER_INFERENCE_ID,
+      force: true,
+    });
+  } catch (e) {
+    log.error(`Error deleting Tiny Elser Inference endpoint: ${e}`);
+  }
   await ml.api.stopTrainedModelDeploymentES(TINY_ELSER.id, true);
   await ml.api.deleteTrainedModelES(TINY_ELSER.id);
   await ml.api.cleanMlIndices();
   await ml.testResources.cleanMLSavedObjects();
+};
+
+export const getTinyElserServerArgs = () => {
+  return [
+    `--xpack.productDocBase.elserInferenceId=${TINY_ELSER_INFERENCE_ID}`,
+    `--xpack.securitySolution.siemRuleMigrations.elserInferenceId=${TINY_ELSER_INFERENCE_ID}`,
+    `--xpack.elasticAssistant.elserInferenceId=${TINY_ELSER_INFERENCE_ID}`,
+  ];
 };
 
 /**
@@ -66,14 +126,11 @@ export const setupKnowledgeBase = async (
   namespace?: string
 ): Promise<CreateKnowledgeBaseResponse> => {
   const path = ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_URL.replace('{resource?}', resource || '');
-  const route = routeWithNamespace(
-    `${path}?modelId=pt_tiny_elser&ignoreSecurityLabs=true`,
-    namespace
-  );
+  const route = routeWithNamespace(`${path}?ignoreSecurityLabs=true`, namespace);
   const response = await supertest
     .post(route)
     .set('kbn-xsrf', 'true')
-    .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+    .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.public.v1)
     .send();
   if (response.status !== 200) {
     throw new Error(

@@ -38,9 +38,9 @@ const mockNavigateToApp = {
   mockNavigateToApp: jest.fn(),
 };
 
-const mockGetEditRuleFlyout = jest.fn(() => (
-  <div data-test-subj="edit-rule-flyout">mocked component</div>
-));
+jest.mock('@kbn/response-ops-rule-form/flyout', () => ({
+  RuleFormFlyout: jest.fn(() => <div data-test-subj="edit-rule-flyout">mocked component</div>),
+}));
 
 const mockKibana = () => {
   useKibanaMock.mockReturnValue({
@@ -48,7 +48,6 @@ const mockKibana = () => {
       ...kibanaStartMock.startContract(),
       triggersActionsUi: {
         ...triggersActionsUiMock.createStart(),
-        getEditRuleFlyout: mockGetEditRuleFlyout,
       },
       cases: mockCases,
       http: mockHttp,
@@ -88,6 +87,65 @@ describe('Header Actions', () => {
       mockKibana();
       mockUseFetchRuleWithData();
     });
+    it('should offer an "Add to case" button which opens the add to case modal', async () => {
+      let attachments: any[] = [];
+
+      const useCasesAddToExistingCaseModalMock: any = jest.fn().mockImplementation(() => ({
+        open: ({ getAttachments }: { getAttachments: () => any[] }) => {
+          attachments = getAttachments();
+        },
+      })) as CasesPublicStart['hooks']['useCasesAddToExistingCaseModal'];
+
+      mockCases.hooks.useCasesAddToExistingCaseModal = useCasesAddToExistingCaseModalMock;
+
+      const { getByTestId } = render(
+        <HeaderActions
+          alert={alertWithGroupsAndTags}
+          alertIndex={'alert-index'}
+          alertStatus={alertWithGroupsAndTags.fields[ALERT_STATUS] as AlertStatus}
+          onUntrackAlert={mockOnUntrackAlert}
+          refetch={jest.fn()}
+          // @ts-expect-error partial implementation for testing
+          rule={{
+            id: mockRuleId,
+            name: mockRuleName,
+          }}
+        />
+      );
+
+      fireEvent.click(getByTestId('add-to-case-button'));
+
+      expect(attachments).toEqual([
+        {
+          alertId: mockAlertUuid,
+          index: 'alert-index',
+          rule: {
+            id: mockRuleId,
+            name: mockRuleName,
+          },
+          type: 'alert',
+        },
+      ]);
+    });
+
+    it('should not offer a "Snooze the rule" button', async () => {
+      const { queryByTestId } = render(
+        <HeaderActions
+          alert={alertWithGroupsAndTags}
+          alertIndex={'alert-index'}
+          alertStatus={alertWithGroupsAndTags.fields[ALERT_STATUS] as AlertStatus}
+          onUntrackAlert={mockOnUntrackAlert}
+          refetch={jest.fn()}
+          // @ts-expect-error partial implementation for testing
+          rule={{
+            id: mockRuleId,
+            name: mockRuleName,
+          }}
+        />
+      );
+
+      expect(queryByTestId('snooze-rule-button')).toBeFalsy();
+    });
 
     it('should display an actions button', () => {
       const { queryByTestId } = render(
@@ -95,47 +153,30 @@ describe('Header Actions', () => {
           alert={alertWithGroupsAndTags}
           alertStatus={alertWithGroupsAndTags.fields[ALERT_STATUS] as AlertStatus}
           onUntrackAlert={mockOnUntrackAlert}
+          refetch={jest.fn()}
         />
       );
       expect(queryByTestId('alert-details-header-actions-menu-button')).toBeTruthy();
     });
 
     describe('when clicking the actions button', () => {
-      it('should offer an "Add to case" button which opens the add to case modal', async () => {
-        let attachments: any[] = [];
-
-        const useCasesAddToExistingCaseModalMock: any = jest.fn().mockImplementation(() => ({
-          open: ({ getAttachments }: { getAttachments: () => any[] }) => {
-            attachments = getAttachments();
-          },
-        })) as CasesPublicStart['hooks']['useCasesAddToExistingCaseModal'];
-
-        mockCases.hooks.useCasesAddToExistingCaseModal = useCasesAddToExistingCaseModalMock;
-
+      it('should offer a "Snooze the rule" button', async () => {
         const { getByTestId, findByTestId } = render(
           <HeaderActions
             alert={alertWithGroupsAndTags}
-            alertIndex={'alert-index'}
             alertStatus={alertWithGroupsAndTags.fields[ALERT_STATUS] as AlertStatus}
             onUntrackAlert={mockOnUntrackAlert}
+            refetch={jest.fn()}
+            // @ts-expect-error partial implementation for testing
+            rule={{
+              id: mockRuleId,
+              name: mockRuleName,
+            }}
           />
         );
 
         fireEvent.click(await findByTestId('alert-details-header-actions-menu-button'));
-
-        fireEvent.click(getByTestId('add-to-case-button'));
-
-        expect(attachments).toEqual([
-          {
-            alertId: mockAlertUuid,
-            index: 'alert-index',
-            rule: {
-              id: mockRuleId,
-              name: mockRuleName,
-            },
-            type: 'alert',
-          },
-        ]);
+        expect(getByTestId('snooze-rule-button')).toBeDefined();
       });
 
       it('should offer a "Edit rule" button which opens the edit rule flyout', async () => {
@@ -144,6 +185,12 @@ describe('Header Actions', () => {
             alert={alertWithGroupsAndTags}
             alertStatus={alertWithGroupsAndTags.fields[ALERT_STATUS] as AlertStatus}
             onUntrackAlert={mockOnUntrackAlert}
+            refetch={jest.fn()}
+            // @ts-expect-error partial implementation for testing
+            rule={{
+              id: mockRuleId,
+              name: mockRuleName,
+            }}
           />
         );
 
@@ -158,6 +205,12 @@ describe('Header Actions', () => {
             alert={alertWithGroupsAndTags}
             alertStatus={alertWithGroupsAndTags.fields[ALERT_STATUS] as AlertStatus}
             onUntrackAlert={mockOnUntrackAlert}
+            refetch={jest.fn()}
+            // @ts-expect-error partial implementation for testing
+            rule={{
+              id: mockRuleId,
+              name: mockRuleName,
+            }}
           />
         );
 
@@ -171,6 +224,12 @@ describe('Header Actions', () => {
             alert={alertWithGroupsAndTags}
             alertStatus={alertWithGroupsAndTags.fields[ALERT_STATUS] as AlertStatus}
             onUntrackAlert={mockOnUntrackAlert}
+            refetch={jest.fn()}
+            // @ts-expect-error partial implementation for testing
+            rule={{
+              id: mockRuleId,
+              name: mockRuleName,
+            }}
           />
         );
 
@@ -196,6 +255,7 @@ describe('Header Actions', () => {
           alert={alertWithGroupsAndTags}
           alertStatus={alertWithGroupsAndTags.fields[ALERT_STATUS] as AlertStatus}
           onUntrackAlert={mockOnUntrackAlert}
+          refetch={jest.fn()}
         />
       );
 
@@ -209,6 +269,7 @@ describe('Header Actions', () => {
           alert={untrackedAlert}
           alertStatus={untrackedAlert.fields[ALERT_STATUS] as AlertStatus}
           onUntrackAlert={mockOnUntrackAlert}
+          refetch={jest.fn()}
         />
       );
 
@@ -222,6 +283,7 @@ describe('Header Actions', () => {
           alert={alertWithGroupsAndTags}
           alertStatus={alertWithGroupsAndTags.fields[ALERT_STATUS] as AlertStatus}
           onUntrackAlert={mockOnUntrackAlert}
+          refetch={jest.fn()}
         />
       );
       fireEvent.click(await findByTestId('alert-details-header-actions-menu-button'));

@@ -35,37 +35,35 @@ export const getInfrastructureData = async ({
     apm: {
       events: [ProcessorEvent.metric],
     },
-    body: {
-      track_total_hits: false,
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            { term: { [SERVICE_NAME]: serviceName } },
-            ...rangeQuery(start, end),
-            ...environmentQuery(environment),
-            ...kqlQuery(kuery),
-          ],
+    track_total_hits: false,
+    size: 0,
+    query: {
+      bool: {
+        filter: [
+          { term: { [SERVICE_NAME]: serviceName } },
+          ...rangeQuery(start, end),
+          ...environmentQuery(environment),
+          ...kqlQuery(kuery),
+        ],
+      },
+    },
+    aggs: {
+      containerIds: {
+        terms: {
+          field: CONTAINER_ID,
+          size: 500,
         },
       },
-      aggs: {
-        containerIds: {
-          terms: {
-            field: CONTAINER_ID,
-            size: 500,
-          },
+      hostNames: {
+        terms: {
+          field: HOST_HOSTNAME,
+          size: 500,
         },
-        hostNames: {
-          terms: {
-            field: HOST_HOSTNAME,
-            size: 500,
-          },
-        },
-        podNames: {
-          terms: {
-            field: KUBERNETES_POD_NAME,
-            size: 500,
-          },
+      },
+      podNames: {
+        terms: {
+          field: KUBERNETES_POD_NAME,
+          size: 500,
         },
       },
     },

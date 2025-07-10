@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { deleteAlertsAndRules } from '../../../../../tasks/api_calls/common';
+import {
+  deleteAlertsAndRules,
+  deletePrebuiltRulesAssets,
+} from '../../../../../tasks/api_calls/common';
 import {
   MODAL_CONFIRMATION_BTN,
-  MODAL_CONFIRMATION_BODY,
   RULES_TAGS_POPOVER_BTN,
   MODAL_ERROR_BODY,
 } from '../../../../../screens/alerts_detection_rules';
@@ -36,12 +38,10 @@ import {
   testAllTagsBadges,
   testTagsBadge,
   testMultipleSelectedRulesLabel,
-  filterByElasticRules,
   clickErrorToastBtn,
   cancelConfirmationModal,
   selectRulesByName,
   getRulesManagementTableRows,
-  selectAllRulesOnPage,
   getRuleRow,
   disableAutoRefresh,
 } from '../../../../../tasks/alerts_detection_rules';
@@ -51,17 +51,14 @@ import {
   waitForBulkEditActionToFinish,
   submitBulkEditForm,
   clickAddIndexPatternsMenuItem,
-  checkPrebuiltRulesCannotBeModified,
   checkMachineLearningRulesCannotBeModified,
   checkEsqlRulesCannotBeModified,
-  waitForMixedRulesBulkEditModal,
   openBulkEditAddTagsForm,
   openBulkEditDeleteTagsForm,
   typeTags,
   openTagsSelect,
   openBulkActionsMenu,
   clickApplyTimelineTemplatesMenuItem,
-  clickAddTagsMenuItem,
   checkOverwriteTagsCheckbox,
   checkOverwriteIndexPatternsCheckbox,
   openBulkEditAddIndexPatternsForm,
@@ -107,7 +104,6 @@ import {
 
 import {
   createAndInstallMockedPrebuiltRules,
-  getAvailablePrebuiltRulesCount,
   preventPrebuiltRulesPackageInstallation,
 } from '../../../../../tasks/api_calls/prebuilt_rules';
 import { setRowsPerPageTo, sortByTableColumn } from '../../../../../tasks/table_pagination';
@@ -135,10 +131,26 @@ describe(
   () => {
     beforeEach(() => {
       login();
-      preventPrebuiltRulesPackageInstallation(); // Make sure prebuilt rules aren't pulled from Fleet API
       // Make sure persisted rules table state is cleared
       resetRulesTableState();
       deleteAlertsAndRules();
+      deletePrebuiltRulesAssets();
+
+      const PREBUILT_RULES = [
+        createRuleAssetSavedObject({
+          ...defaultRuleData,
+          name: 'Prebuilt rule 1',
+          rule_id: 'rule_1',
+        }),
+        createRuleAssetSavedObject({
+          ...defaultRuleData,
+          name: 'Prebuilt rule 2',
+          rule_id: 'rule_2',
+        }),
+      ];
+
+      createAndInstallMockedPrebuiltRules(PREBUILT_RULES);
+
       createRule(getNewRule({ name: RULE_NAME, ...defaultRuleData, rule_id: '1', enabled: false }));
       createRule(
         getEqlRule({ ...defaultRuleData, rule_id: '2', name: 'New EQL Rule', enabled: false })
@@ -146,7 +158,7 @@ describe(
       createRule(
         getMachineLearningRule({
           name: 'New ML Rule Test',
-          tags: ['test-default-tag-1', 'test-default-tag-2'],
+          tags: prePopulatedTags,
           investigation_fields: { field_names: prePopulatedInvestigationFields },
           enabled: false,
         })
@@ -181,17 +193,6 @@ describe(
     });
 
     describe('Prerequisites', () => {
-      const PREBUILT_RULES = [
-        createRuleAssetSavedObject({
-          name: 'Prebuilt rule 1',
-          rule_id: 'rule_1',
-        }),
-        createRuleAssetSavedObject({
-          name: 'Prebuilt rule 2',
-          rule_id: 'rule_2',
-        }),
-      ];
-
       it('No rules selected', () => {
         openBulkActionsMenu();
 
@@ -200,77 +201,6 @@ describe(
         cy.get(INDEX_PATTERNS_RULE_BULK_MENU_ITEM).should('be.disabled');
         cy.get(APPLY_TIMELINE_RULE_BULK_MENU_ITEM).should('be.disabled');
       });
-
-      // github.com/elastic/kibana/issues/179954
-      it('Only prebuilt rules selected', { tags: ['@skipInServerlessMKI'] }, () => {
-        createAndInstallMockedPrebuiltRules(PREBUILT_RULES);
-
-        // select Elastic(prebuilt) rules, check if we can't proceed further, as Elastic rules are not editable
-        filterByElasticRules();
-        selectAllRulesOnPage();
-        clickApplyTimelineTemplatesMenuItem();
-
-        getRulesManagementTableRows().then((rows) => {
-          // check modal window for Elastic rule that can't be edited
-          checkPrebuiltRulesCannotBeModified(rows.length);
-
-          // the confirm button closes modal
-          cy.get(MODAL_CONFIRMATION_BTN).should('have.text', 'Close').click();
-          cy.get(MODAL_CONFIRMATION_BODY).should('not.exist');
-        });
-      });
-
-      // https://github.com/elastic/kibana/issues/179955
-      it(
-        'Prebuilt and custom rules selected: user proceeds with custom rules editing',
-        { tags: ['@skipInServerlessMKI'] },
-        () => {
-          getRulesManagementTableRows().then((existedRulesRows) => {
-            createAndInstallMockedPrebuiltRules(PREBUILT_RULES);
-
-            // modal window should show how many rules can be edit, how many not
-            selectAllRules();
-            clickAddTagsMenuItem();
-
-            waitForMixedRulesBulkEditModal(existedRulesRows.length);
-
-            getAvailablePrebuiltRulesCount().then((availablePrebuiltRulesCount) => {
-              checkPrebuiltRulesCannotBeModified(availablePrebuiltRulesCount);
-            });
-
-            // user can proceed with custom rule editing
-            cy.get(MODAL_CONFIRMATION_BTN)
-              .should('have.text', `Edit ${existedRulesRows.length} rules`)
-              .click();
-
-            // action should finish
-            typeTags(['test-tag']);
-            submitBulkEditForm();
-            waitForBulkEditActionToFinish({ updatedCount: existedRulesRows.length });
-          });
-        }
-      );
-
-      // https://github.com/elastic/kibana/issues/179956
-      it(
-        'Prebuilt and custom rules selected: user cancels action',
-        { tags: ['@skipInServerlessMKI'] },
-        () => {
-          createAndInstallMockedPrebuiltRules(PREBUILT_RULES);
-
-          getRulesManagementTableRows().then((rows) => {
-            // modal window should show how many rules can be edit, how many not
-            selectAllRules();
-            clickAddTagsMenuItem();
-            waitForMixedRulesBulkEditModal(rows.length);
-
-            checkPrebuiltRulesCannotBeModified(PREBUILT_RULES.length);
-
-            // user cancels action and modal disappears
-            cancelConfirmationModal();
-          });
-        }
-      );
 
       it('should not lose rules selection after edit action', () => {
         const rulesToUpdate = [RULE_NAME, 'New EQL Rule', 'New Terms Rule'] as const;
@@ -313,7 +243,7 @@ describe(
           });
       });
 
-      it('Add tags to custom rules', () => {
+      it('Add tags', () => {
         getRulesManagementTableRows().then((rows) => {
           const tagsToBeAdded = ['tag-to-add-1', 'tag-to-add-2'];
           const resultingTags = [...prePopulatedTags, ...tagsToBeAdded];
@@ -356,7 +286,7 @@ describe(
         });
       });
 
-      it('Overwrite tags in custom rules', () => {
+      it('Overwrite tags', () => {
         getRulesManagementTableRows().then((rows) => {
           const tagsToOverwrite = ['overwrite-tag-1'];
 
@@ -386,7 +316,7 @@ describe(
         });
       });
 
-      it('Delete tags from custom rules', () => {
+      it('Delete tags from', () => {
         getRulesManagementTableRows().then((rows) => {
           const tagsToDelete = prePopulatedTags.slice(0, 1);
           const resultingTags = prePopulatedTags.slice(1);
@@ -412,7 +342,7 @@ describe(
     });
 
     describe('Index patterns', () => {
-      it('Index pattern action applied to custom rules, including machine learning: user proceeds with edit of custom non machine learning rule', () => {
+      it('Index pattern action applied, including machine learning: user proceeds with edit of non machine learning rule', () => {
         getRulesManagementTableRows().then((rows) => {
           const indexPattersToBeAdded = ['index-to-add-1-*', 'index-to-add-2-*'];
           const resultingIndexPatterns = [...prePopulatedIndexPatterns, ...indexPattersToBeAdded];
@@ -420,7 +350,7 @@ describe(
           selectAllRules();
           clickAddIndexPatternsMenuItem();
 
-          // confirm editing custom rules, that are not Machine Learning
+          // confirm editing all rules, that are not Machine Learning
           checkMachineLearningRulesCannotBeModified(expectedNumberOfMachineLearningRulesToBeEdited);
           cy.get(MODAL_CONFIRMATION_BTN).click();
 
@@ -437,18 +367,18 @@ describe(
         });
       });
 
-      it('Index pattern action applied to custom rules, including machine learning: user cancels action', () => {
+      it('Index pattern action applied to all rules, including machine learning: user cancels action', () => {
         selectAllRules();
         clickAddIndexPatternsMenuItem();
 
-        // confirm editing custom rules, that are not Machine Learning
+        // confirm editing all rules, that are not Machine Learning
         checkMachineLearningRulesCannotBeModified(expectedNumberOfMachineLearningRulesToBeEdited);
 
         // user cancels action and modal disappears
         cancelConfirmationModal();
       });
 
-      it('Add index patterns to custom rules', () => {
+      it('Add index patterns', () => {
         getRulesManagementTableRows().then((rows) => {
           const indexPattersToBeAdded = ['index-to-add-1-*', 'index-to-add-2-*'];
           const resultingIndexPatterns = [...prePopulatedIndexPatterns, ...indexPattersToBeAdded];
@@ -460,6 +390,8 @@ describe(
             'Threat Indicator Rule Test',
             'Threshold Rule',
             'New Terms Rule',
+            'Prebuilt rule 1',
+            'Prebuilt rule 2',
           ]);
 
           openBulkEditAddIndexPatternsForm();
@@ -487,6 +419,8 @@ describe(
             'Threat Indicator Rule Test',
             'Threshold Rule',
             'New Terms Rule',
+            'Prebuilt rule 1',
+            'Prebuilt rule 2',
           ]);
 
           openBulkEditAddIndexPatternsForm();
@@ -499,13 +433,15 @@ describe(
         });
       });
 
-      it('Overwrite index patterns in custom rules', () => {
+      it('Overwrite index patterns', () => {
         const rulesToSelect = [
           RULE_NAME,
           'New EQL Rule',
           'Threat Indicator Rule Test',
           'Threshold Rule',
           'New Terms Rule',
+          'Prebuilt rule 1',
+          'Prebuilt rule 2',
         ] as const;
         const indexPattersToWrite = ['index-to-write-1-*', 'index-to-write-2-*'];
 
@@ -531,13 +467,15 @@ describe(
         hasIndexPatterns(indexPattersToWrite.join(''));
       });
 
-      it('Delete index patterns from custom rules', () => {
+      it('Delete index patterns', () => {
         const rulesToSelect = [
           RULE_NAME,
           'New EQL Rule',
           'Threat Indicator Rule Test',
           'Threshold Rule',
           'New Terms Rule',
+          'Prebuilt rule 1',
+          'Prebuilt rule 2',
         ] as const;
         const indexPatternsToDelete = prePopulatedIndexPatterns.slice(0, 1);
         const resultingIndexPatterns = prePopulatedIndexPatterns.slice(1);
@@ -556,13 +494,15 @@ describe(
         hasIndexPatterns(resultingIndexPatterns.join(''));
       });
 
-      it('Delete all index patterns from custom rules', () => {
+      it('Delete all index patterns', () => {
         const rulesToSelect = [
           RULE_NAME,
           'New EQL Rule',
           'Threat Indicator Rule Test',
           'Threshold Rule',
           'New Terms Rule',
+          'Prebuilt rule 1',
+          'Prebuilt rule 2',
         ] as const;
 
         // select only rules that are not ML
@@ -582,14 +522,14 @@ describe(
     });
 
     describe('Investigation fields actions', () => {
-      it('Add investigation fields to custom rules', () => {
+      it('Add investigation fields', () => {
         getRulesManagementTableRows().then((rows) => {
           const fieldsToBeAdded = ['source.ip', 'destination.ip'];
           const resultingFields = [...prePopulatedInvestigationFields, ...fieldsToBeAdded];
 
           selectAllRules();
 
-          // open add custom highlighted fields form and add 2 new fields
+          // open add highlighted fields form and add 2 new fields
           openBulkEditAddInvestigationFieldsForm();
           typeInvestigationFields(fieldsToBeAdded);
           submitBulkEditForm();
@@ -601,7 +541,7 @@ describe(
         });
       });
 
-      it('Overwrite investigation fields in custom rules', () => {
+      it('Overwrite investigation fields', () => {
         getRulesManagementTableRows().then((rows) => {
           const fieldsToOverwrite = ['source.ip'];
 
@@ -626,7 +566,7 @@ describe(
         });
       });
 
-      it('Delete investigation fields from custom rules', () => {
+      it('Delete investigation fields', () => {
         getRulesManagementTableRows().then((rows) => {
           const fieldsToDelete = prePopulatedInvestigationFields.slice(0, 1);
           const resultingFields = prePopulatedInvestigationFields.slice(1);
@@ -645,7 +585,7 @@ describe(
         });
       });
 
-      it('Delete all investigation fields from custom rules', () => {
+      it('Delete all investigation fields', () => {
         getRulesManagementTableRows().then((rows) => {
           selectAllRules();
 
@@ -666,7 +606,7 @@ describe(
         loadPrepackagedTimelineTemplates();
       });
 
-      it('Apply timeline template to custom rules', () => {
+      it('Apply timeline template', () => {
         getRulesManagementTableRows().then((rows) => {
           const timelineTemplateName = 'Generic Endpoint Timeline';
 
@@ -688,7 +628,7 @@ describe(
         });
       });
 
-      it('Reset timeline template to None for custom rules', () => {
+      it('Reset timeline template to None', () => {
         getRulesManagementTableRows().then((rows) => {
           const noneTimelineTemplate = 'None';
 
@@ -722,7 +662,7 @@ describe(
         });
       });
 
-      it('Updates schedule for custom rules', () => {
+      it('Updates schedule', () => {
         getRulesManagementTableRows().then((rows) => {
           selectAllRules();
           clickUpdateScheduleMenuItem();
@@ -747,7 +687,7 @@ describe(
         });
       });
 
-      it('Validates invalid inputs when scheduling for custom rules', () => {
+      it('Validates invalid inputs when scheduling', () => {
         getRulesManagementTableRows().then((rows) => {
           selectAllRules();
           clickUpdateScheduleMenuItem();
@@ -834,7 +774,7 @@ describe('Detection rules, bulk edit, ES|QL rule type', { tags: ['@ess'] }, () =
         selectAllRules();
         clickAddIndexPatternsMenuItem();
 
-        // confirm editing custom rules, that are not Machine Learning
+        // confirm editing all rules, that are not Machine Learning
         checkEsqlRulesCannotBeModified(1);
 
         // user cancels action and modal disappears

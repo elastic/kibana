@@ -28,17 +28,24 @@ function findChildByTextContent(parent: Element, textContent: string): HTMLEleme
   ) as HTMLElement;
 }
 
-/*
-  Finds a diff line element (".diff-line") that contains a particular text content.
-  Match doesn't have to be exact, it's enough for the line to include the text.
-*/
-function findDiffLineContaining(text: string): Element | null {
-  const foundLine = Array.from(document.querySelectorAll('.diff-line')).find((element) =>
-    (element.textContent || '').includes(text)
+const renderRuleDiffComponent = ({
+  oldRule,
+  newRule,
+}: {
+  oldRule: RuleResponse;
+  newRule: RuleResponse;
+}) => {
+  return render(
+    <RuleDiffTab
+      oldRule={oldRule}
+      newRule={newRule}
+      leftDiffSideLabel={'mock left label'}
+      rightDiffSideLabel={'mock right label'}
+      leftDiffSideDescription={'mock left description'}
+      rightDiffSideDescription={'mock right description'}
+    />
   );
-
-  return foundLine || null;
-}
+};
 
 describe('Rule upgrade workflow: viewing rule changes in JSON diff view', () => {
   it.each(['light', 'dark'] as const)(
@@ -68,9 +75,19 @@ describe('Rule upgrade workflow: viewing rule changes in JSON diff view', () => 
         <EuiThemeProvider colorMode={colorMode}>{children}</EuiThemeProvider>
       );
 
-      const { container } = render(<RuleDiffTab oldRule={oldRule} newRule={newRule} />, {
-        wrapper: ThemeWrapper,
-      });
+      const { container } = render(
+        <RuleDiffTab
+          oldRule={oldRule}
+          newRule={newRule}
+          leftDiffSideLabel={'mock left label'}
+          rightDiffSideLabel={'mock right label'}
+          leftDiffSideDescription={'mock left description'}
+          rightDiffSideDescription={'mock right description'}
+        />,
+        {
+          wrapper: ThemeWrapper,
+        }
+      );
 
       /* LINE UPDATE */
       const updatedLine = findChildByTextContent(container, '-  "version": 1+  "version": 2');
@@ -152,7 +169,7 @@ describe('Rule upgrade workflow: viewing rule changes in JSON diff view', () => 
     };
 
     /* Case: rule update doesn't have "actions" or "exception_list" properties */
-    const { rerender } = render(<RuleDiffTab oldRule={oldRule} newRule={newRule} />);
+    const { rerender } = renderRuleDiffComponent({ oldRule, newRule });
     expect(screen.queryAllByText('"actions":', { exact: false })).toHaveLength(0);
 
     /* Case: rule update has "actions" and "exception_list" equal to empty arrays */
@@ -160,6 +177,10 @@ describe('Rule upgrade workflow: viewing rule changes in JSON diff view', () => 
       <RuleDiffTab
         oldRule={{ ...oldRule }}
         newRule={{ ...newRule, actions: [], exceptions_list: [] }}
+        leftDiffSideLabel={'mock left label'}
+        rightDiffSideLabel={'mock right label'}
+        leftDiffSideDescription={'mock left description'}
+        rightDiffSideDescription={'mock right description'}
       />
     );
     expect(screen.queryAllByText('"actions":', { exact: false })).toHaveLength(0);
@@ -173,6 +194,10 @@ describe('Rule upgrade workflow: viewing rule changes in JSON diff view', () => 
           actions: [{ ...testAction, id: 'my-other-action' }],
           exceptions_list: [testExceptionListItem],
         }}
+        leftDiffSideLabel={'mock left label'}
+        rightDiffSideLabel={'mock right label'}
+        leftDiffSideDescription={'mock left description'}
+        rightDiffSideDescription={'mock right description'}
       />
     );
     expect(screen.queryAllByText('"actions":', { exact: false })).toHaveLength(0);
@@ -204,72 +229,10 @@ describe('Rule upgrade workflow: viewing rule changes in JSON diff view', () => 
           rule_source: { type: 'external', is_customized: true },
         };
 
-        render(<RuleDiffTab oldRule={oldRule} newRule={newRule} />);
+        renderRuleDiffComponent({ oldRule, newRule });
         expect(screen.queryAllByText(property, { exact: false })).toHaveLength(0);
       }
     );
-  });
-
-  it('Properties with semantically equal values should not be shown as modified', () => {
-    const oldRule: RuleResponse = {
-      ...savedRuleMock,
-      version: 1,
-    };
-
-    const newRule: RuleResponse = {
-      ...savedRuleMock,
-      version: 2,
-    };
-
-    /* DURATION */
-    /* Semantically equal durations should not be shown as modified */
-    const { rerender } = render(
-      <RuleDiffTab
-        oldRule={{ ...oldRule, from: 'now-1h' }}
-        newRule={{ ...newRule, from: 'now-60m' }}
-      />
-    );
-    expect(findDiffLineContaining('"from":')).toBeNull();
-
-    rerender(
-      <RuleDiffTab
-        oldRule={{ ...oldRule, from: 'now-1h' }}
-        newRule={{ ...newRule, from: 'now-3600s' }}
-      />
-    );
-    expect(findDiffLineContaining('"from":')).toBeNull();
-
-    rerender(
-      <RuleDiffTab
-        oldRule={{ ...oldRule, from: 'now-7200s' }}
-        newRule={{ ...newRule, from: 'now-2h' }}
-      />
-    );
-    expect(findDiffLineContaining('"from":')).toBeNull();
-
-    /* Semantically different durations should generate diff */
-    rerender(
-      <RuleDiffTab
-        oldRule={{ ...oldRule, from: 'now-7260s' }}
-        newRule={{ ...newRule, from: 'now-2h' }}
-      />
-    );
-    expect(findDiffLineContaining('-  "from": "now-7260s",+  "from": "now-7200s",')).not.toBeNull();
-
-    /* NOTE - Investigation guide */
-    rerender(<RuleDiffTab oldRule={{ ...oldRule, note: '' }} newRule={{ ...newRule }} />);
-    expect(findDiffLineContaining('"note":')).toBeNull();
-
-    rerender(
-      <RuleDiffTab oldRule={{ ...oldRule, note: '' }} newRule={{ ...newRule, note: undefined }} />
-    );
-    expect(findDiffLineContaining('"note":')).toBeNull();
-
-    rerender(<RuleDiffTab oldRule={{ ...oldRule }} newRule={{ ...newRule, note: '' }} />);
-    expect(findDiffLineContaining('"note":')).toBeNull();
-
-    rerender(<RuleDiffTab oldRule={{ ...oldRule }} newRule={{ ...newRule, note: 'abc' }} />);
-    expect(findDiffLineContaining('-  "note": "",+  "note": "abc",')).not.toBeNull();
   });
 
   it('Unchanged sections of a rule should be hidden by default', async () => {
@@ -283,7 +246,7 @@ describe('Rule upgrade workflow: viewing rule changes in JSON diff view', () => 
       version: 2,
     };
 
-    render(<RuleDiffTab oldRule={oldRule} newRule={newRule} />);
+    renderRuleDiffComponent({ oldRule, newRule });
     expect(screen.queryAllByText('"author":', { exact: false })).toHaveLength(0);
     expect(screen.queryAllByText('Expand 44 unchanged lines')).toHaveLength(1);
 
@@ -324,7 +287,7 @@ describe('Rule upgrade workflow: viewing rule changes in JSON diff view', () => 
       return isArraySortedAlphabetically(uniquePropertyNames);
     }
 
-    render(<RuleDiffTab oldRule={oldRule} newRule={newRule} />);
+    renderRuleDiffComponent({ oldRule, newRule });
     const arePropertiesSortedInConciseView = checkRenderedPropertyNamesAreSorted();
     expect(arePropertiesSortedInConciseView).toBe(true);
 

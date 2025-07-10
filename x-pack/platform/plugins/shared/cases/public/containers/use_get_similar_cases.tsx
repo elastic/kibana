@@ -25,6 +25,7 @@ export const useGetSimilarCases = (params: {
   caseId: string;
   perPage: number;
   page: number;
+  enabled: boolean;
 }): UseQueryResult<CasesSimilarResponseUI> => {
   const toasts = useToasts();
 
@@ -39,6 +40,7 @@ export const useGetSimilarCases = (params: {
       });
     },
     {
+      enabled: params.enabled,
       keepPreviousData: true,
       onError: (error: ServerError) => {
         if (error.name !== 'AbortError') {

@@ -188,34 +188,37 @@ describe('getNetworkEvents', () => {
       Array [
         Array [
           Object {
-            "body": Object {
-              "query": Object {
-                "bool": Object {
-                  "filter": Array [
-                    Object {
-                      "term": Object {
-                        "synthetics.type": "journey/network_info",
-                      },
-                    },
-                    Object {
-                      "term": Object {
-                        "monitor.check_group": "my-fake-group",
-                      },
-                    },
-                    Object {
-                      "term": Object {
-                        "synthetics.step.index": 1,
-                      },
-                    },
-                  ],
-                },
-              },
-              "size": 1000,
-              "track_total_hits": true,
-            },
             "index": "synthetics-*",
+            "query": Object {
+              "bool": Object {
+                "filter": Array [
+                  Object {
+                    "term": Object {
+                      "synthetics.type": "journey/network_info",
+                    },
+                  },
+                  Object {
+                    "term": Object {
+                      "monitor.check_group": "my-fake-group",
+                    },
+                  },
+                  Object {
+                    "term": Object {
+                      "synthetics.step.index": 1,
+                    },
+                  },
+                ],
+              },
+            },
+            "size": 1000,
+            "track_total_hits": true,
           },
           Object {
+            "context": Object {
+              "loggingOptions": Object {
+                "loggerName": "synthetics",
+              },
+            },
             "meta": true,
           },
         ],

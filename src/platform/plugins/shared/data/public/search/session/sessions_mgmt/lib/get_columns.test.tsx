@@ -184,10 +184,9 @@ describe('Search Sessions Management table column factory', () => {
             ...mockSession,
             ...partialSession,
           };
-          const node = mount(
-            nameColumn.render!(session.name, session) as ReactElement
-          ).getDOMNode();
-          return !!node.querySelector('[data-test-subj="versionIncompatibleWarningTestSubj"]');
+          const node = mount(nameColumn.render!(session.name, session) as ReactElement);
+
+          return node.find('[data-test-subj="versionIncompatibleWarningTestSubj"]').exists();
         };
       });
 

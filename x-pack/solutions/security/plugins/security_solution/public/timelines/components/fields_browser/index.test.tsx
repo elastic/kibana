@@ -21,7 +21,7 @@ import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { defaultColumnHeaderType } from '../timeline/body/column_headers/default_headers';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../timeline/body/constants';
 import { EuiInMemoryTable } from '@elastic/eui';
-import type { BrowserFieldItem } from '@kbn/triggers-actions-ui-plugin/public/types';
+import type { BrowserFieldItem } from '@kbn/response-ops-alerts-fields-browser/types';
 
 let mockIndexPatternFieldEditor: Start;
 jest.mock('../../../common/lib/kibana');
@@ -94,6 +94,7 @@ describe('useFieldBrowserOptions', () => {
     mockIndexPatternFieldEditor.userPermissions.editIndexPattern = () => true;
     useKibanaMock().services.dataViewFieldEditor = mockIndexPatternFieldEditor;
     useKibanaMock().services.data.dataViews.get = () => new Promise(() => undefined);
+    useKibanaMock().services.data.dataViews.clearInstanceCache = () => undefined;
 
     useKibanaMock().services.application.capabilities = {
       ...useKibanaMock().services.application.capabilities,

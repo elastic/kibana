@@ -16,13 +16,10 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import type { AuditLogger } from '@kbn/security-plugin-types-server';
+import { getEntityAnalyticsEntityTypes } from '../../../../../common/entity_analytics/utils';
+import type { EntityType } from '../../../../../common/search_strategy';
 import type { ExperimentalFeatures } from '../../../../../common';
 import type { AfterKeys } from '../../../../../common/api/entity_analytics/common';
-import {
-  type IdentifierType,
-  RiskScoreEntity,
-  SERVICE_RISK_SCORE_ENTITY,
-} from '../../../../../common/entity_analytics/risk_engine';
 import { type RiskScoreService, riskScoreServiceFactory } from '../risk_score_service';
 import { RiskEngineDataClient } from '../../risk_engine/risk_engine_data_client';
 import { RiskScoreDataClient } from '../risk_score_data_client';
@@ -280,6 +277,8 @@ export const runTask = async ({
       identifierType: configuredIdentifierType,
       range: configuredRange,
       pageSize,
+      excludeAlertStatuses,
+      excludeAlertTags,
       alertSampleSizePerShard,
     } = configuration;
     if (!enabled) {
@@ -292,14 +291,12 @@ export const runTask = async ({
       dataViewId,
     });
 
-    const identifierTypes: IdentifierType[] = configuredIdentifierType
+    const identifierTypes: EntityType[] = configuredIdentifierType
       ? [configuredIdentifierType]
-      : experimentalFeatures.serviceEntityStoreEnabled
-      ? [RiskScoreEntity.host, RiskScoreEntity.user, SERVICE_RISK_SCORE_ENTITY]
-      : [RiskScoreEntity.host, RiskScoreEntity.user];
+      : getEntityAnalyticsEntityTypes();
 
     const runs: Array<{
-      identifierType: IdentifierType;
+      identifierType: EntityType;
       scoresWritten: number;
       tookMs: number;
     }> = [];
@@ -319,6 +316,8 @@ export const runTask = async ({
           runtimeMappings,
           weights: [],
           alertSampleSizePerShard,
+          excludeAlertStatuses,
+          excludeAlertTags,
         });
         const tookMs = Date.now() - now;
 

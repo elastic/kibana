@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import { FtrConfigProviderContext } from '@kbn/test';
 export interface CreateTestConfigOptions {
   testFiles: string[];
@@ -20,6 +22,7 @@ export function createTestConfig(options: CreateTestConfigOptions) {
     );
     return {
       ...svlSharedConfig.getAll(),
+      testConfigCategory: ScoutTestRunConfigCategory.API_TEST,
       services: {
         ...services,
       },

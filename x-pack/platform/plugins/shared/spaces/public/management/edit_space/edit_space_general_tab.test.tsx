@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 
@@ -89,6 +89,7 @@ describe('EditSpaceSettings', () => {
           theme={theme}
           i18n={i18n}
           logger={logger}
+          enableSecurityLink=""
         >
           {children}
         </EditSpaceProviderRoot>
@@ -189,24 +190,22 @@ describe('EditSpaceSettings', () => {
       </TestComponent>
     );
 
-    await act(async () => {
-      // update the space name
-      const nameInput = screen.getByTestId('addSpaceName');
-      fireEvent.change(nameInput, { target: { value: 'Updated Name Of Space' } });
+    // update the space name
+    const nameInput = screen.getByTestId('addSpaceName');
+    fireEvent.change(nameInput, { target: { value: 'Updated Name Of Space' } });
 
-      expect(screen.queryByTestId('space-edit-page-user-impact-warning')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('confirmModalTitleText')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('space-edit-page-user-impact-warning')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('confirmModalTitleText')).not.toBeInTheDocument();
 
-      const updateButton = await screen.findByTestId('save-space-button'); // appears via re-render
-      await userEvent.click(updateButton);
+    const updateButton = await screen.findByTestId('save-space-button'); // appears via re-render
+    await userEvent.click(updateButton);
 
-      expect(updateSpaceSpy).toHaveBeenCalledWith({
-        ...spaceToUpdate,
-        name: 'Updated Name Of Space',
-        initials: 'UN',
-        imageUrl: '',
-        color: '#D6BF57',
-      });
+    expect(updateSpaceSpy).toHaveBeenCalledWith({
+      ...spaceToUpdate,
+      name: 'Updated Name Of Space',
+      initials: 'UN',
+      imageUrl: '',
+      color: '#FFC7DB',
     });
 
     expect(navigateSpy).toHaveBeenCalledTimes(1);
@@ -235,15 +234,13 @@ describe('EditSpaceSettings', () => {
       </TestComponent>
     );
 
-    await act(async () => {
-      const deleteButton = screen.getByTestId('delete-space-button');
-      await userEvent.click(deleteButton);
+    const deleteButton = screen.getByTestId('delete-space-button');
+    await userEvent.click(deleteButton);
 
-      const confirmButton = await screen.findByTestId('confirmModalConfirmButton'); // click delete confirm
-      await userEvent.click(confirmButton);
+    const confirmButton = await screen.findByTestId('confirmModalConfirmButton'); // click delete confirm
+    await userEvent.click(confirmButton);
 
-      expect(deleteSpaceSpy).toHaveBeenCalledWith(spaceToDelete);
-    });
+    expect(deleteSpaceSpy).toHaveBeenCalledWith(spaceToDelete);
   });
 
   it('sets calculated fields for existing spaces', async () => {
@@ -273,21 +270,19 @@ describe('EditSpaceSettings', () => {
       </TestComponent>
     );
 
-    await act(async () => {
-      // update the space name
-      const nameInput = screen.getByTestId('addSpaceName');
-      fireEvent.change(nameInput, { target: { value: 'Updated Existing Space' } });
+    // update the space name
+    const nameInput = screen.getByTestId('addSpaceName');
+    fireEvent.change(nameInput, { target: { value: 'Updated Existing Space' } });
 
-      const updateButton = await screen.findByTestId('save-space-button'); // appears via re-render
-      await userEvent.click(updateButton);
+    const updateButton = await screen.findByTestId('save-space-button'); // appears via re-render
+    await userEvent.click(updateButton);
 
-      expect(updateSpaceSpy).toHaveBeenCalledWith({
-        ...spaceToUpdate,
-        name: 'Updated Existing Space',
-        color: '#D6BF57',
-        initials: 'UE',
-        imageUrl: '',
-      });
+    expect(updateSpaceSpy).toHaveBeenCalledWith({
+      ...spaceToUpdate,
+      name: 'Updated Existing Space',
+      color: '#FFC7DB',
+      initials: 'UE',
+      imageUrl: '',
     });
   });
 
@@ -316,30 +311,28 @@ describe('EditSpaceSettings', () => {
     );
 
     // update the space solution view
-    await act(async () => {
-      const solutionViewPicker = screen.getByTestId('solutionViewSelect');
-      await userEvent.click(solutionViewPicker);
+    const solutionViewPicker = screen.getByTestId('solutionViewSelect');
+    await userEvent.click(solutionViewPicker);
 
-      const esSolutionOption = await screen.findByTestId('solutionViewEsOption'); // appears via re-render
-      await userEvent.click(esSolutionOption);
+    const esSolutionOption = await screen.findByTestId('solutionViewEsOption'); // appears via re-render
+    await userEvent.click(esSolutionOption);
 
-      expect(screen.getByTestId('space-edit-page-user-impact-warning')).toBeInTheDocument();
-      expect(screen.queryByTestId('confirmModalTitleText')).not.toBeInTheDocument();
+    expect(screen.getByTestId('space-edit-page-user-impact-warning')).toBeInTheDocument();
+    expect(screen.queryByTestId('confirmModalTitleText')).not.toBeInTheDocument();
 
-      const updateButton = screen.getByTestId('save-space-button');
-      await userEvent.click(updateButton);
+    const updateButton = screen.getByTestId('save-space-button');
+    await userEvent.click(updateButton);
 
-      expect(screen.getByTestId('confirmModalTitleText')).toBeInTheDocument();
+    expect(screen.getByTestId('confirmModalTitleText')).toBeInTheDocument();
 
-      const confirmButton = screen.getByTestId('confirmModalConfirmButton');
-      await userEvent.click(confirmButton);
+    const confirmButton = screen.getByTestId('confirmModalConfirmButton');
+    await userEvent.click(confirmButton);
 
-      await waitFor(() => {
-        expect(updateSpaceSpy).toHaveBeenCalledWith({
-          ...spaceToUpdate,
-          imageUrl: '',
-          solution: 'es',
-        });
+    await waitFor(() => {
+      expect(updateSpaceSpy).toHaveBeenCalledWith({
+        ...spaceToUpdate,
+        imageUrl: '',
+        solution: 'es',
       });
     });
 
@@ -381,32 +374,30 @@ describe('EditSpaceSettings', () => {
     );
 
     // update the space visible features
-    await act(async () => {
-      const feature1Checkbox = screen.getByTestId('featureCheckbox_feature-1');
-      expect(feature1Checkbox).toBeChecked();
+    const feature1Checkbox = screen.getByTestId('featureCheckbox_feature-1');
+    expect(feature1Checkbox).toBeChecked();
 
-      await userEvent.click(feature1Checkbox);
-      await waitFor(() => {
-        expect(feature1Checkbox).not.toBeChecked();
-      });
+    await userEvent.click(feature1Checkbox);
+    await waitFor(() => {
+      expect(feature1Checkbox).not.toBeChecked();
+    });
 
-      expect(screen.getByTestId('space-edit-page-user-impact-warning')).toBeInTheDocument();
-      expect(screen.queryByTestId('confirmModalTitleText')).not.toBeInTheDocument();
+    expect(screen.getByTestId('space-edit-page-user-impact-warning')).toBeInTheDocument();
+    expect(screen.queryByTestId('confirmModalTitleText')).not.toBeInTheDocument();
 
-      const updateButton = screen.getByTestId('save-space-button');
-      await userEvent.click(updateButton);
+    const updateButton = screen.getByTestId('save-space-button');
+    await userEvent.click(updateButton);
 
-      expect(screen.getByTestId('confirmModalTitleText')).toBeInTheDocument();
+    expect(screen.getByTestId('confirmModalTitleText')).toBeInTheDocument();
 
-      const confirmButton = screen.getByTestId('confirmModalConfirmButton');
-      await userEvent.click(confirmButton);
+    const confirmButton = screen.getByTestId('confirmModalConfirmButton');
+    await userEvent.click(confirmButton);
 
-      await waitFor(() => {
-        expect(updateSpaceSpy).toHaveBeenCalledWith({
-          ...spaceToUpdate,
-          imageUrl: '',
-          disabledFeatures: ['feature-1'],
-        });
+    await waitFor(() => {
+      expect(updateSpaceSpy).toHaveBeenCalledWith({
+        ...spaceToUpdate,
+        imageUrl: '',
+        disabledFeatures: ['feature-1'],
       });
     });
 
@@ -450,9 +441,7 @@ describe('EditSpaceSettings', () => {
     // update the space visible features
     const feature1Checkbox = screen.getByTestId('featureCheckbox_feature-1');
     expect(feature1Checkbox).toBeChecked();
-    await act(async () => {
-      await userEvent.click(feature1Checkbox);
-    });
+    await userEvent.click(feature1Checkbox);
     await waitFor(() => {
       expect(feature1Checkbox).not.toBeChecked();
     });
@@ -461,16 +450,12 @@ describe('EditSpaceSettings', () => {
     expect(screen.queryByTestId('confirmModalTitleText')).not.toBeInTheDocument();
 
     const updateButton = screen.getByTestId('save-space-button');
-    await act(async () => {
-      await userEvent.click(updateButton);
-    });
+    await userEvent.click(updateButton);
 
     expect(screen.getByTestId('confirmModalTitleText')).toBeInTheDocument();
 
     const confirmButton = screen.getByTestId('confirmModalConfirmButton');
-    await act(async () => {
-      await userEvent.click(confirmButton);
-    });
+    await userEvent.click(confirmButton);
 
     await waitFor(() => {
       expect(updateSpaceSpy).toHaveBeenCalledWith({
@@ -518,45 +503,39 @@ describe('EditSpaceSettings', () => {
     );
 
     // customize the space visible features to disable feature-1
-    await act(async () => {
-      const feature1Checkbox = screen.getByTestId('featureCheckbox_feature-1');
-      expect(feature1Checkbox).toBeChecked();
+    const feature1Checkbox = screen.getByTestId('featureCheckbox_feature-1');
+    expect(feature1Checkbox).toBeChecked();
 
-      await userEvent.click(feature1Checkbox);
-      await waitFor(() => {
-        expect(feature1Checkbox).not.toBeChecked();
-      });
-
-      expect(screen.getByTestId('space-edit-page-user-impact-warning')).toBeInTheDocument();
-      expect(screen.queryByTestId('confirmModalTitleText')).not.toBeInTheDocument();
+    await userEvent.click(feature1Checkbox);
+    await waitFor(() => {
+      expect(feature1Checkbox).not.toBeChecked();
     });
+
+    expect(screen.getByTestId('space-edit-page-user-impact-warning')).toBeInTheDocument();
+    expect(screen.queryByTestId('confirmModalTitleText')).not.toBeInTheDocument();
 
     // change the selected solution view to es
-    await act(async () => {
-      const solutionViewPicker = screen.getByTestId('solutionViewSelect');
-      await userEvent.click(solutionViewPicker);
+    const solutionViewPicker = screen.getByTestId('solutionViewSelect');
+    await userEvent.click(solutionViewPicker);
 
-      const esSolutionOption = await screen.findByTestId('solutionViewEsOption'); // appears via re-render
-      await userEvent.click(esSolutionOption);
-    });
+    const esSolutionOption = await screen.findByTestId('solutionViewEsOption'); // appears via re-render
+    await userEvent.click(esSolutionOption);
 
     // perform the save
-    await act(async () => {
-      const updateButton = screen.getByTestId('save-space-button');
-      await userEvent.click(updateButton);
+    const updateButton = screen.getByTestId('save-space-button');
+    await userEvent.click(updateButton);
 
-      expect(screen.getByTestId('confirmModalTitleText')).toBeInTheDocument();
+    expect(screen.getByTestId('confirmModalTitleText')).toBeInTheDocument();
 
-      const confirmButton = screen.getByTestId('confirmModalConfirmButton');
-      await userEvent.click(confirmButton);
+    const confirmButton = screen.getByTestId('confirmModalConfirmButton');
+    await userEvent.click(confirmButton);
 
-      await waitFor(() => {
-        expect(updateSpaceSpy).toHaveBeenCalledWith({
-          ...spaceToUpdate,
-          imageUrl: '',
-          solution: 'es',
-          disabledFeatures: [], // "feature-1" became deselected
-        });
+    await waitFor(() => {
+      expect(updateSpaceSpy).toHaveBeenCalledWith({
+        ...spaceToUpdate,
+        imageUrl: '',
+        solution: 'es',
+        disabledFeatures: [], // "feature-1" became deselected
       });
     });
 

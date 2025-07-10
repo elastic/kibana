@@ -142,7 +142,7 @@ export const SecretFormRow: React.FC<{
             'This value will be stored as a secret, meaning once saved the value cannot be viewed again',
         })}
       >
-        <EuiIcon type="questionInCircle" />
+        <EuiIcon type="question" />
       </EuiToolTip>
     </>
   );
@@ -154,17 +154,7 @@ export const SecretFormRow: React.FC<{
         <EuiCallOut size="s" color="warning">
           <FormattedMessage
             id="xpack.fleet.settings.editOutputFlyout.sslKeySecretInputConvertedCalloutTitle"
-            defaultMessage="This field will be re-saved using secret storage from plain text storage. Secrets storage requires Fleet Server v8.12.0 and above. {revertLink}"
-            values={{
-              revertLink: (
-                <EuiLink onClick={() => onToggleSecretStorage(false)} color="primary">
-                  <FormattedMessage
-                    id="xpack.fleet.settings.editOutputFlyout.revertToPlaintextLink"
-                    defaultMessage="Click to use plain text storage instead"
-                  />
-                </EuiLink>
-              ),
-            }}
+            defaultMessage="This field will be re-saved using secret storage from plain text storage. Secrets storage requires Fleet Server v8.12.0 and above."
           />
         </EuiCallOut>
       );
@@ -173,21 +163,11 @@ export const SecretFormRow: React.FC<{
       return (
         <FormattedMessage
           id="xpack.fleet.settings.editOutputFlyout.sslKeySecretInputCalloutTitle"
-          defaultMessage="This field uses secret storage and requires Fleet Server v8.12.0 and above. {revertLink}"
-          values={{
-            revertLink: (
-              <EuiLink onClick={() => onToggleSecretStorage(false)} color="primary">
-                <FormattedMessage
-                  id="xpack.fleet.settings.editOutputFlyout.revertToPlaintextLink"
-                  defaultMessage="Click to use plain text storage instead"
-                />
-              </EuiLink>
-            ),
-          }}
+          defaultMessage="This field uses secret storage and requires Fleet Server v8.12.0 and above."
         />
       );
     return undefined;
-  }, [disabled, initialValue, isConvertedToSecret, onToggleSecretStorage]);
+  }, [disabled, initialValue, isConvertedToSecret]);
 
   const plainTextHelp = disabled ? null : (
     <FormattedMessage

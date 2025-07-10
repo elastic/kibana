@@ -79,12 +79,9 @@ export const flyoutSummaryText = i18n.translate('xpack.datasetQuality.flyoutSumm
   defaultMessage: 'Summary',
 });
 
-export const overviewDegradedDocsText = i18n.translate(
-  'xpack.datasetQuality.flyout.degradedDocsTitle',
-  {
-    defaultMessage: 'Degraded docs',
-  }
-);
+export const overviewTrendsDocsText = i18n.translate('xpack.datasetQuality.flyout.trendDocsTitle', {
+  defaultMessage: 'Document trends',
+});
 
 export const flyoutDegradedDocsTrendText = i18n.translate(
   'xpack.datasetQuality.flyoutDegradedDocsViz',
@@ -93,11 +90,26 @@ export const flyoutDegradedDocsTrendText = i18n.translate(
   }
 );
 
+export const flyoutFailedDocsTrendText = i18n.translate(
+  'xpack.datasetQuality.flyoutFailedDocsViz',
+  {
+    defaultMessage: 'Failed documents trend',
+  }
+);
+
 export const flyoutDegradedDocsPercentageText = i18n.translate(
   'xpack.datasetQuality.flyoutDegradedDocsPercentage',
   {
     defaultMessage: 'Degraded docs %',
     description: 'Tooltip label for the percentage of degraded documents chart.',
+  }
+);
+
+export const flyoutFailedDocsPercentageText = i18n.translate(
+  'xpack.datasetQuality.flyoutFailedDocsPercentage',
+  {
+    defaultMessage: 'Failed docs %',
+    description: 'Tooltip label for the percentage of failed documents chart.',
   }
 );
 
@@ -137,14 +149,14 @@ export const summaryPanelLast24hText = i18n.translate(
 export const summaryPanelQualityText = i18n.translate(
   'xpack.datasetQuality.summaryPanelQualityText',
   {
-    defaultMessage: 'Data Sets Quality',
+    defaultMessage: 'Data Set Quality',
   }
 );
 
 export const summaryPanelQualityTooltipText = i18n.translate(
   'xpack.datasetQuality.summaryPanelQualityTooltipText',
   {
-    defaultMessage: 'Quality is based on the percentage of degraded docs in a data set.',
+    defaultMessage: 'Quality is based on the percentage of degraded and failed docs in a data set.',
   }
 );
 
@@ -305,6 +317,13 @@ export const overviewPanelDatasetQualityIndicatorDegradedDocs = i18n.translate(
   }
 );
 
+export const overviewPanelDatasetQualityIndicatorFailedDocs = i18n.translate(
+  'xpack.datasetQuality.details.overviewPanel.datasetQuality.failedDocs',
+  {
+    defaultMessage: 'Failed docs',
+  }
+);
+
 export const overviewDegradedFieldsTableLoadingText = i18n.translate(
   'xpack.datasetQuality.details.degradedFieldsTableLoadingText',
   {
@@ -312,37 +331,37 @@ export const overviewDegradedFieldsTableLoadingText = i18n.translate(
   }
 );
 
-export const overviewDegradedFieldsTableNoData = i18n.translate(
-  'xpack.datasetQuality.details.degradedFieldsTableNoData',
+export const qualityIssuesTableNoData = i18n.translate(
+  'xpack.datasetQuality.details.qualityIssuesTableNoData',
   {
-    defaultMessage: 'No degraded fields found',
+    defaultMessage: 'No quality issues found',
   }
 );
 
-export const overviewDegradedFieldsSectionTitle = i18n.translate(
-  'xpack.datasetQuality.detail.degradedFieldsSectionTitle',
+export const overviewQualityIssuesSectionTitle = i18n.translate(
+  'xpack.datasetQuality.detail.qualityIssuesSectionTitle',
   {
     defaultMessage: 'Quality issues',
   }
 );
 
-export const overviewDegradedFieldToggleSwitch = i18n.translate(
-  'xpack.datasetQuality.details.degradedFieldToggleSwitch',
+export const currentIssuesToggleSwitch = i18n.translate(
+  'xpack.datasetQuality.details.currentIssuesToggleSwitch',
   {
     defaultMessage: 'Current quality issues only',
   }
 );
 
-export const overviewDegradedFieldToggleSwitchTooltip = i18n.translate(
-  'xpack.datasetQuality.details.degradedFieldToggleSwitchTooltip',
+export const currentIssuesToggleSwitchTooltip = i18n.translate(
+  'xpack.datasetQuality.details.currentIssuesToggleSwitchTooltip',
   {
     defaultMessage:
       'Enable to only show issues detected in the most recent version of the data set. Disable to show all issues detected within the configured time range.',
   }
 );
 
-export const overviewDegradedFieldsSectionTitleTooltip = i18n.translate(
-  'xpack.datasetQuality.details.degradedFieldsSectionTooltip',
+export const overviewQualityIssueSectionTitleTooltip = i18n.translate(
+  'xpack.datasetQuality.details.qualityIssueSectionTitleTooltip',
   {
     defaultMessage: 'A partial list of quality issues found in your data set.',
   }
@@ -386,18 +405,28 @@ export const integrationVersionText = i18n.translate(
     defaultMessage: 'Version',
   }
 );
-export const fieldColumnName = i18n.translate('xpack.datasetQuality.details.degradedField.field', {
-  defaultMessage: 'Field',
+export const issueColumnName = i18n.translate('xpack.datasetQuality.details.qualityIssues.issue', {
+  defaultMessage: 'Issue',
 });
 
-export const countColumnName = i18n.translate('xpack.datasetQuality.details.degradedField.count', {
-  defaultMessage: 'Docs count',
-});
+export const countColumnName = i18n.translate(
+  'xpack.datasetQuality.details.qualityIssues.docsCount',
+  {
+    defaultMessage: 'Docs count',
+  }
+);
 
 export const lastOccurrenceColumnName = i18n.translate(
-  'xpack.datasetQuality.details.degradedField.lastOccurrence',
+  'xpack.datasetQuality.details.qualityIssues.lastOccurrence',
   {
     defaultMessage: 'Last occurrence',
+  }
+);
+
+export const documentIndexFailed = i18n.translate(
+  'xpack.datasetQuality.details.qualityIssues.documentIndexFailed',
+  {
+    defaultMessage: 'Documents indexing failed',
   }
 );
 
@@ -665,3 +694,28 @@ export const manualMitigationCustomPipelineCreateEditPipelineLink = i18n.transla
     defaultMessage: 'create or edit the pipeline',
   }
 );
+
+export const failedDocsErrorsColumnName = i18n.translate(
+  'xpack.datasetQuality.details.failedDocs.errors',
+  {
+    defaultMessage: 'Error messages',
+  }
+);
+
+export const readMore = i18n.translate(
+  'xpack.datasetQuality.details.qualityIssue.flyout.message.readMore',
+  {
+    defaultMessage: 'Read more',
+  }
+);
+
+export const readLess = i18n.translate(
+  'xpack.datasetQuality.details.qualityIssue.flyout.message.readLess',
+  {
+    defaultMessage: 'Read less',
+  }
+);
+
+export const createAlertText = i18n.translate('xpack.datasetQuality.createAlert', {
+  defaultMessage: 'Create rule',
+});

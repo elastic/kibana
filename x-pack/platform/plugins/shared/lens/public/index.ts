@@ -92,6 +92,7 @@ export type {
   TimeScaleIndexPatternColumn,
   FormBasedLayer,
 } from './datasources/form_based/types';
+export type { TextBasedPersistedState } from './datasources/form_based/esql_layer/types';
 export type {
   XYArgs,
   XYRender,

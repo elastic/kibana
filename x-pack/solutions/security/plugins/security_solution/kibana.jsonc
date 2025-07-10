@@ -19,7 +19,6 @@
       "alerting",
       "cases",
       "cloud",
-      "cloudDefend",
       "cloudSecurityPosture",
       "contentManagement",
       "dashboard",
@@ -32,7 +31,6 @@
       "features",
       "fieldFormats",
       "inspector",
-      "kubernetesSecurity",
       "lens",
       "licensing",
       "maps",
@@ -41,7 +39,6 @@
       "sessionView",
       "spaces",
       "taskManager",
-      "threatIntelligence",
       "timelines",
       "triggersActionsUi",
       "uiActions",
@@ -59,7 +56,10 @@
       "charts",
       "entityManager",
       "inference",
-      "discoverShared"
+      "discoverShared",
+      "productDocBase",
+      "telemetry",
+      "elasticAssistantSharedState",
     ],
     "optionalPlugins": [
       "encryptedSavedObjects",
@@ -71,12 +71,11 @@
       "lists",
       "home",
       "management",
-      "telemetry",
       "dataViewFieldEditor",
       "osquery",
       "savedObjectsTaggingOss",
       "guidedOnboarding",
-      "integrationAssistant",
+      "automaticImport",
       "serverless"
     ],
     "requiredBundles": [
@@ -87,7 +86,8 @@
       "usageCollection",
       "lists",
       "ml",
-      "unifiedSearch"
+      "unifiedSearch",
+      "esql"
     ],
     "extraPublicDirs": [
       "common"

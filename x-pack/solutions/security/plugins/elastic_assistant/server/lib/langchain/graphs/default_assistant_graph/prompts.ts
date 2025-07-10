@@ -6,15 +6,9 @@
  */
 
 import { ChatPromptTemplate } from '@langchain/core/prompts';
-import {
-  BEDROCK_SYSTEM_PROMPT,
-  DEFAULT_SYSTEM_PROMPT,
-  GEMINI_SYSTEM_PROMPT,
-  GEMINI_USER_PROMPT,
-  STRUCTURED_SYSTEM_PROMPT,
-} from './nodes/translations';
+import { TOOL_CALLING_LLM_TYPES } from './agentRunnable';
 
-export const formatPrompt = (prompt: string, additionalPrompt?: string) =>
+const formatPromptToolcalling = (prompt: string, additionalPrompt?: string) =>
   ChatPromptTemplate.fromMessages([
     ['system', additionalPrompt ? `${prompt}\n\n${additionalPrompt}` : prompt],
     ['placeholder', '{knowledge_history}'],
@@ -23,21 +17,7 @@ export const formatPrompt = (prompt: string, additionalPrompt?: string) =>
     ['placeholder', '{agent_scratchpad}'],
   ]);
 
-export const systemPrompts = {
-  openai: DEFAULT_SYSTEM_PROMPT,
-  bedrock: `${DEFAULT_SYSTEM_PROMPT} ${BEDROCK_SYSTEM_PROMPT}`,
-  // The default prompt overwhelms gemini, do not prepend
-  gemini: GEMINI_SYSTEM_PROMPT,
-  structuredChat: STRUCTURED_SYSTEM_PROMPT,
-};
-
-export const openAIFunctionAgentPrompt = formatPrompt(systemPrompts.openai);
-
-export const bedrockToolCallingAgentPrompt = formatPrompt(systemPrompts.bedrock);
-
-export const geminiToolCallingAgentPrompt = formatPrompt(systemPrompts.gemini);
-
-export const formatPromptStructured = (prompt: string, additionalPrompt?: string) =>
+const formatPromptStructured = (prompt: string, additionalPrompt?: string) =>
   ChatPromptTemplate.fromMessages([
     ['system', additionalPrompt ? `${prompt}\n\n${additionalPrompt}` : prompt],
     ['placeholder', '{knowledge_history}'],
@@ -48,17 +28,17 @@ export const formatPromptStructured = (prompt: string, additionalPrompt?: string
     ],
   ]);
 
-export const structuredChatAgentPrompt = formatPromptStructured(systemPrompts.structuredChat);
-
-/**
- * If Gemini is the llmType,
- * Adds a user prompt for the latest message in a conversation
- * @param prompt
- * @param llmType
- */
-export const formatLatestUserMessage = (prompt: string, llmType?: string): string => {
-  if (llmType === 'gemini') {
-    return `${GEMINI_USER_PROMPT}${prompt}`;
+export const formatPrompt = ({
+  llmType,
+  prompt,
+  additionalPrompt,
+}: {
+  llmType: string | undefined;
+  prompt: string;
+  additionalPrompt?: string;
+}) => {
+  if (llmType && TOOL_CALLING_LLM_TYPES.has(llmType)) {
+    return formatPromptToolcalling(prompt, additionalPrompt);
   }
-  return prompt;
+  return formatPromptStructured(prompt, additionalPrompt);
 };

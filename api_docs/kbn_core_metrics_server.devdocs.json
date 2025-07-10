@@ -69,6 +69,59 @@
       },
       {
         "parentPluginId": "@kbn/core-metrics-server",
+        "id": "def-server.EluMetrics",
+        "type": "Interface",
+        "tags": [],
+        "label": "EluMetrics",
+        "description": [],
+        "path": "src/core/packages/metrics/server/src/metrics.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-metrics-server",
+            "id": "def-server.EluMetrics.long",
+            "type": "number",
+            "tags": [],
+            "label": "long",
+            "description": [
+              "\nThe long-term event loop utilization history."
+            ],
+            "path": "src/core/packages/metrics/server/src/metrics.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-metrics-server",
+            "id": "def-server.EluMetrics.medium",
+            "type": "number",
+            "tags": [],
+            "label": "medium",
+            "description": [
+              "\nThe medium-term event loop utilization history."
+            ],
+            "path": "src/core/packages/metrics/server/src/metrics.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-metrics-server",
+            "id": "def-server.EluMetrics.short",
+            "type": "number",
+            "tags": [],
+            "label": "short",
+            "description": [
+              "\nThe short-term event loop utilization history."
+            ],
+            "path": "src/core/packages/metrics/server/src/metrics.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-metrics-server",
         "id": "def-server.IEventLoopDelaysMonitor",
         "type": "Interface",
         "tags": [],
@@ -337,6 +390,28 @@
             "path": "src/core/packages/metrics/server/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-metrics-server",
+            "id": "def-server.MetricsServiceSetup.getEluMetrics$",
+            "type": "Function",
+            "tags": [],
+            "label": "getEluMetrics$",
+            "description": [
+              "\nRetrieve an observable emitting {@link EluMetrics}."
+            ],
+            "signature": [
+              "() => ",
+              "Observable",
+              "<",
+              "EluMetrics",
+              ">"
+            ],
+            "path": "src/core/packages/metrics/server/src/contracts.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "@kbn/core-metrics-server",

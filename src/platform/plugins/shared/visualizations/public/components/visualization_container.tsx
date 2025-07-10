@@ -8,10 +8,11 @@
  */
 
 import React, { ReactNode, Suspense, lazy } from 'react';
-import { EuiLoadingChart } from '@elastic/eui';
+import { EuiLoadingChart, euiScrollBarStyles, type UseEuiTheme } from '@elastic/eui';
 import classNames from 'classnames';
-
+import { css } from '@emotion/react';
 import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 
 export interface VisualizationContainerProps {
   'data-test-subj'?: string;
@@ -26,6 +27,15 @@ export interface VisualizationContainerProps {
 const VisualizationNoResults = lazy(() => import('./visualization_noresults'));
 const VisualizationError = lazy(() => import('./visualization_error'));
 
+const visualizationContainerStyles = {
+  inEmbPanel: (euiThemeContext: UseEuiTheme) =>
+    css`
+      .embPanel & {
+        ${euiScrollBarStyles(euiThemeContext)}; /* Force a better looking scrollbar */
+      }
+    `,
+};
+
 export const VisualizationContainer = ({
   'data-test-subj': dataTestSubj = '',
   className,
@@ -35,16 +45,17 @@ export const VisualizationContainer = ({
   error,
   renderComplete,
 }: VisualizationContainerProps) => {
+  const styles = useMemoCss(visualizationContainerStyles);
   const classes = classNames('visualization', className);
 
   const fallBack = (
     <div className="visChart__spinner">
-      <EuiLoadingChart mono size="l" />
+      <EuiLoadingChart size="l" />
     </div>
   );
 
   return (
-    <div data-test-subj={dataTestSubj} className={classes}>
+    <div data-test-subj={dataTestSubj} className={classes} css={styles.inEmbPanel}>
       <Suspense fallback={fallBack}>
         {error ? (
           <VisualizationError onInit={() => handlers.done()} error={error} />

@@ -56,7 +56,7 @@ Array [
           >
             <a
               aria-label="Elastic home"
-              css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+              class="css-4ghmd2-logoCss"
               data-test-subj="logo"
               href="/"
             >
@@ -69,7 +69,7 @@ Array [
               <svg
                 aria-hidden="true"
                 aria-labelledby="elasticMark"
-                css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+                class="css-1ks1hwq-logoMarkCss"
                 data-test-subj="logoMark"
                 fill="none"
                 height="19"
@@ -129,7 +129,7 @@ Array [
                       class="euiHeaderSectionItemButton__content emotion-euiHeaderSectionItemButton__content"
                     >
                       <span
-                        data-euiicon-type="help"
+                        data-euiicon-type="question"
                       />
                     </span>
                   </span>
@@ -180,29 +180,34 @@ Array [
             </button>
           </div>
         </div>
-        <nav
-          aria-label="Breadcrumbs"
-          class="euiBreadcrumbs euiHeaderBreadcrumbs emotion-euiHeaderBreadcrumbs"
-          data-test-subj="breadcrumbs"
+        <div
+          class="css-2tq5q7-redirectAppLinksStyles-Header"
+          data-test-subj="kbnRedirectAppLink"
         >
-          <ol
-            class="euiBreadcrumbs__list emotion-euiBreadcrumbs__list-isTruncated"
+          <nav
+            aria-label="Breadcrumbs"
+            class="euiBreadcrumbs euiHeaderBreadcrumbs emotion-euiHeaderBreadcrumbs"
+            data-test-subj="breadcrumbs"
           >
-            <li
-              class="euiBreadcrumb emotion-euiBreadcrumb-application-isTruncated"
-              data-test-subj="euiBreadcrumb"
+            <ol
+              class="euiBreadcrumbs__list emotion-euiBreadcrumbs__list-isTruncated"
             >
-              <span
-                aria-current="page"
-                class="euiBreadcrumb__content emotion-euiBreadcrumb__content-application-onlyChild-isTruncatedLast"
-                data-test-subj="breadcrumb first last"
-                title="test"
+              <li
+                class="euiBreadcrumb emotion-euiBreadcrumb-application-isTruncated"
+                data-test-subj="euiBreadcrumb"
               >
-                test
-              </span>
-            </li>
-          </ol>
-        </nav>
+                <span
+                  aria-current="page"
+                  class="euiBreadcrumb__content emotion-euiBreadcrumb__content-application-onlyChild-isTruncatedLast"
+                  data-test-subj="breadcrumb first last"
+                  title="test"
+                >
+                  test
+                </span>
+              </li>
+            </ol>
+          </nav>
+        </div>
         <div
           class="euiHeaderSection emotion-euiHeaderSection-right"
         >

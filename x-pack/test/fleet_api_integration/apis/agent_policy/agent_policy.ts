@@ -47,6 +47,7 @@ export default function (providerContext: FtrProviderContext) {
         .send({
           name: 'Test policy 1',
           namespace: 'default',
+          force: true,
         })
         .expect(200);
       agentPolicyWithPPId = agentPolicyResponse.item.id;
@@ -160,8 +161,7 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/203346
-    describe.skip('POST /api/fleet/agent_policies', () => {
+    describe('POST /api/fleet/agent_policies', () => {
       let systemPkgVersion: string;
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
@@ -321,7 +321,7 @@ export default function (providerContext: FtrProviderContext) {
         expect(policyDocRes?.hits?.hits.length).to.eql(1);
         const source = policyDocRes?.hits?.hits[0]?._source as any;
         expect(source?.revision_idx).to.eql(1);
-        expect(source?.data?.inputs.length).to.eql(3);
+        expect(source?.data?.inputs.length).to.eql(4);
       });
 
       it('should return a 400 with an empty namespace', async () => {
@@ -426,6 +426,7 @@ export default function (providerContext: FtrProviderContext) {
                 package: {
                   name: 'system',
                 },
+                latest_revision: true,
               },
             })
           ),
@@ -464,6 +465,7 @@ export default function (providerContext: FtrProviderContext) {
             package: {
               name: 'system',
             },
+            latest_revision: true,
           },
         });
         packagePoliciesToDeleteIds.push('package-policy-1');
@@ -476,6 +478,7 @@ export default function (providerContext: FtrProviderContext) {
             package: {
               name: 'system',
             },
+            latest_revision: true,
           },
         });
         packagePoliciesToDeleteIds.push('package-policy-2');
@@ -614,6 +617,38 @@ export default function (providerContext: FtrProviderContext) {
             },
           },
         });
+      });
+
+      it('should return 400 if setting data output to non-local ES for agentless policy', async () => {
+        const { body: outputResponse } = await supertest
+          .post(`/api/fleet/outputs`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'logstash-output',
+            type: 'logstash',
+            hosts: ['test.fr:443'],
+            ssl: {
+              certificate: 'CERTIFICATE',
+              key: 'KEY',
+              certificate_authorities: ['CA1', 'CA2'],
+            },
+          })
+          .expect(200);
+
+        const response = await supertest
+          .post(`/api/fleet/agent_policies?sys_monitoring=false`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'test-agentless-policy',
+            namespace: 'default',
+            supports_agentless: true,
+            data_output_id: outputResponse.item.id,
+          })
+          .expect(400);
+
+        expect(response.body.message).to.eql(
+          'Output of type "logstash" is not usable with policy "test-agentless-policy".'
+        );
       });
     });
 
@@ -848,6 +883,7 @@ export default function (providerContext: FtrProviderContext) {
               package: {
                 name: 'system',
               },
+              latest_revision: true,
             },
           }),
         ]);
@@ -932,6 +968,7 @@ export default function (providerContext: FtrProviderContext) {
               package: {
                 name: 'system',
               },
+              latest_revision: true,
             },
           }),
         ]);
@@ -1126,6 +1163,7 @@ export default function (providerContext: FtrProviderContext) {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
         await kibanaServer.savedObjects.cleanStandardList();
+        await fleetAndAgents.setup();
         await createAgentPolicyWithPackagePolicy();
         createdPolicyIds.push(agentPolicyWithPPId!);
       });
@@ -1536,6 +1574,141 @@ export default function (providerContext: FtrProviderContext) {
 
         expect(updatedPolicy.global_data_tags).to.eql([{ name: 'newTag', value: 'newValue' }]);
       });
+
+      it('should allow to set required_versions', async () => {
+        const {
+          body: { item: originalPolicy },
+        } = await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `Override Test ${Date.now()}`,
+            description: 'Initial description',
+            namespace: 'default',
+          })
+          .expect(200);
+        agentPolicyId = originalPolicy.id;
+        createdPolicyIds.push(agentPolicyId as string);
+        const {
+          body: { item: updatedPolicy },
+        } = await supertest
+          .put(`/api/fleet/agent_policies/${agentPolicyId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: originalPolicy.name,
+            description: originalPolicy.description,
+            namespace: 'default',
+            required_versions: [
+              {
+                version: '9.0.0',
+                percentage: 10,
+              },
+            ],
+          })
+          .expect(200);
+
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        const { id, updated_at, version, ...newPolicy } = updatedPolicy;
+
+        expect(newPolicy).to.eql({
+          status: 'active',
+          name: originalPolicy.name,
+          description: originalPolicy.description,
+          namespace: 'default',
+          is_managed: false,
+          revision: 2,
+          schema_version: FLEET_AGENT_POLICIES_SCHEMA_VERSION,
+          updated_by: 'elastic',
+          inactivity_timeout: 1209600,
+          package_policies: [],
+          is_protected: false,
+          space_ids: [],
+          required_versions: [
+            {
+              version: '9.0.0',
+              percentage: 10,
+            },
+          ],
+        });
+      });
+
+      it('should not allow to set invalid required_versions', async () => {
+        const {
+          body: { item: originalPolicy },
+        } = await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `Override Test ${Date.now()}`,
+            description: 'Initial description',
+            namespace: 'default',
+          })
+          .expect(200);
+        agentPolicyId = originalPolicy.id;
+        createdPolicyIds.push(agentPolicyId as string);
+        await supertest
+          .put(`/api/fleet/agent_policies/${agentPolicyId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `Override Test ${Date.now()}`,
+            description: 'Updated description',
+            namespace: 'default',
+            required_versions: [
+              {
+                version: '9.0.0',
+                percentage: 50,
+              },
+              {
+                version: '9.1.0',
+                percentage: 60,
+              },
+            ],
+          })
+          .expect(400);
+      });
+
+      it('should return 400 if updating data output to non-local ES for agentless policy', async () => {
+        const { body: outputResponse } = await supertest
+          .post(`/api/fleet/outputs`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'logstash-output',
+            type: 'logstash',
+            hosts: ['test.fr:443'],
+            ssl: {
+              certificate: 'CERTIFICATE',
+              key: 'KEY',
+              certificate_authorities: ['CA1', 'CA2'],
+            },
+          })
+          .expect(200);
+
+        const agentPolicyResponse = await supertest
+          .post(`/api/fleet/agent_policies?sys_monitoring=false`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'test-agentless-policy',
+            namespace: 'default',
+          })
+          .expect(200);
+
+        const agentPolicy = agentPolicyResponse.body.item;
+
+        const response = await supertest
+          .put(`/api/fleet/agent_policies/${agentPolicy.id}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'test-agentless-policy',
+            namespace: 'default',
+            supports_agentless: true,
+            data_output_id: outputResponse.item.id,
+          })
+          .expect(400);
+
+        expect(response.body.message).to.eql(
+          'Output of type "logstash" is not usable with policy "test-agentless-policy".'
+        );
+      });
     });
 
     describe('POST /api/fleet/agent_policies/delete', () => {
@@ -1824,6 +1997,406 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
 
         expect(items.length).equal(1);
+      });
+    });
+
+    describe('GET /api/fleet/agent_policies/{id}/auto_upgrade_agents_status', () => {
+      it('should get auto upgrade agents status', async () => {
+        const {
+          body: { item: policyWithAgents },
+        } = await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Policy with agents 2',
+            namespace: 'default',
+          })
+          .expect(200);
+        await generateAgent(providerContext, 'healhty', 'agent-1', policyWithAgents.id, '8.16.1');
+        await generateAgent(providerContext, 'healhty', 'agent-2', policyWithAgents.id, '8.16.1', {
+          state: 'UPG_FAILED',
+          target_version: '8.16.3',
+        });
+        await generateAgent(
+          providerContext,
+          'uninstalled',
+          'agent-3',
+          policyWithAgents.id,
+          '8.16.1'
+        );
+        const { body } = await supertest
+          .get(`/api/fleet/agent_policies/${policyWithAgents.id}/auto_upgrade_agents_status`)
+          .set('kbn-xsrf', 'xxx')
+          .expect(200);
+
+        expect(body).to.eql({
+          currentVersions: [
+            {
+              agents: 2,
+              failedUpgradeAgents: 0,
+              version: '8.16.1',
+            },
+            {
+              agents: 0,
+              failedUpgradeAgents: 1,
+              version: '8.16.3',
+            },
+          ],
+          totalAgents: 2,
+        });
+
+        await supertest.delete(`/api/fleet/agents/agent-1`).set('kbn-xsrf', 'xx').expect(200);
+        await supertest.delete(`/api/fleet/agents/agent-2`).set('kbn-xsrf', 'xx').expect(200);
+      });
+    });
+
+    describe('fleet server policies validate output', () => {
+      let esOutputId: string;
+      let logstashOutputId: string;
+      before(async () => {
+        await kibanaServer.savedObjects.cleanStandardList();
+        await fleetAndAgents.setup();
+
+        const { body: esApiResponse } = await supertest
+          .post(`/api/fleet/outputs`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Elastic output',
+            type: 'elasticsearch',
+            hosts: ['http://localhost'],
+          })
+          .expect(200);
+        esOutputId = esApiResponse.item.id;
+
+        const { body: logstashApiResponse } = await supertest
+          .post(`/api/fleet/outputs`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Default logstash',
+            type: 'logstash',
+            hosts: ['logstash'],
+            ssl: { certificate: 'CERTIFICATE', key: 'KEY', certificate_authorities: [] },
+            is_default: true,
+            is_default_monitoring: true,
+          })
+          .expect(200);
+
+        logstashOutputId = logstashApiResponse.item.id;
+      });
+
+      after(async () => {
+        await kibanaServer.savedObjects.cleanStandardList();
+      });
+
+      async function assertPolicyDoNotExists(id: string) {
+        await supertest.get(`/api/fleet/agent_policies/${id}`).expect(404);
+      }
+
+      it('should not allow to create a fleet server policies if default output is not an ES output', async () => {
+        const policyId = `fleet-server-${Date.now()}`;
+        const { statusCode } = await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'kibana')
+          .send({
+            id: policyId,
+            name: 'Fleet Server policy ' + Date.now(),
+            namespace: 'default',
+            has_fleet_server: true,
+          });
+
+        expect(statusCode).to.eql(400);
+
+        await assertPolicyDoNotExists(policyId);
+      });
+
+      it('should not allow to create a fleet server policies if provided output is not an ES output', async () => {
+        const policyId = `fleet-server-${Date.now()}`;
+        const { statusCode, body } = await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'kibana')
+          .send({
+            id: policyId,
+            name: 'Fleet Server policy ' + Date.now(),
+            namespace: 'default',
+            has_fleet_server: true,
+            data_output_id: logstashOutputId,
+          });
+
+        expect(statusCode).to.eql(400);
+        expect(body.message).to.match(/Output of type "logstash" is not usable with policy/);
+
+        await assertPolicyDoNotExists(policyId);
+      });
+
+      it('should allow to create a fleet server policies if provided output is an ES output', async () => {
+        const policyId = `fleet-server-${Date.now()}`;
+        await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'kibana')
+          .send({
+            id: policyId,
+            name: 'Fleet Server policy ' + Date.now(),
+            namespace: 'default',
+            has_fleet_server: true,
+            data_output_id: esOutputId,
+          })
+          .expect(200);
+      });
+    });
+
+    // FLAKY: https://github.com/elastic/kibana/issues/213370
+    describe.skip('POST /internal/fleet/agent_and_package_policies', () => {
+      before(async () => {
+        await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+        await kibanaServer.savedObjects.cleanStandardList();
+        await fleetAndAgents.setup();
+      });
+
+      after(async () => {
+        await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+      });
+
+      afterEach(async () => {
+        await kibanaServer.savedObjects.cleanStandardList();
+      });
+
+      it('should create agent and package policy successfully when not given ids', async () => {
+        const requestBody = {
+          name: 'Test Agent Policy',
+          namespace: 'default',
+          description: 'Test description',
+          package_policies: [
+            {
+              name: 'Test Package Policy',
+              namespace: 'default',
+              policy_ids: [],
+              enabled: true,
+              inputs: [
+                {
+                  enabled: true,
+                  streams: [],
+                  type: 'single_input',
+                },
+              ],
+              package: {
+                name: 'filetest',
+                title: 'For File Tests',
+                version: '0.1.0',
+              },
+            },
+          ],
+        };
+
+        const {
+          body: { item: createdPolicy },
+        } = await supertest
+          .post('/internal/fleet/agent_and_package_policies')
+          .set('kbn-xsrf', 'xxxx')
+          .send(requestBody)
+          .expect(200);
+
+        expect(createdPolicy.name).to.eql('Test Agent Policy');
+        expect(createdPolicy.package_policies[0].name).to.eql('Test Package Policy');
+        expect(createdPolicy.package_policies[0].policy_ids).to.eql([createdPolicy.id]);
+      });
+
+      it('should create agent and package policy successfully when given ids', async () => {
+        const requestBody = {
+          id: 'test-agent-policy-with-id',
+          name: 'Test Agent Policy',
+          namespace: 'default',
+          description: 'Test description',
+          package_policies: [
+            {
+              id: 'test-package-policy-with-id',
+              name: 'Test Package Policy',
+              namespace: 'default',
+              policy_ids: ['test-agent-policy-with-id'],
+              enabled: true,
+              inputs: [
+                {
+                  enabled: true,
+                  streams: [],
+                  type: 'single_input',
+                },
+              ],
+              package: {
+                name: 'filetest',
+                title: 'For File Tests',
+                version: '0.1.0',
+              },
+            },
+            {
+              id: 'test-package-policy-with-id-2',
+              name: 'Test Package Policy 2',
+              namespace: 'default',
+              policy_ids: ['test-agent-policy-with-id'],
+              enabled: true,
+              inputs: [
+                {
+                  enabled: true,
+                  streams: [],
+                  type: 'single_input',
+                },
+              ],
+              package: {
+                name: 'filetest',
+                title: 'For File Tests',
+                version: '0.1.0',
+              },
+            },
+          ],
+        };
+
+        const {
+          body: { item: createdPolicy },
+        } = await supertest
+          .post('/internal/fleet/agent_and_package_policies')
+          .set('kbn-xsrf', 'xxxx')
+          .send(requestBody)
+          .expect(200);
+
+        expect(createdPolicy.id).to.eql(requestBody.id);
+        expect(createdPolicy.package_policies[0].id).to.eql(requestBody.package_policies[0].id);
+        expect(createdPolicy.package_policies[0].policy_ids).to.eql(
+          requestBody.package_policies[0].policy_ids
+        );
+        expect(createdPolicy.package_policies[1].id).to.eql(requestBody.package_policies[1].id);
+        expect(createdPolicy.package_policies[1].policy_ids).to.eql(
+          requestBody.package_policies[1].policy_ids
+        );
+      });
+
+      it('should create agent and package policy with consistent ids when given a mix', async () => {
+        const requestBody = {
+          name: 'Test Agent Policy',
+          namespace: 'default',
+          description: 'Test description',
+          package_policies: [
+            {
+              id: 'test-package-policy-mixed-id',
+              name: 'Test Package Policy',
+              namespace: 'default',
+              policy_id: 'some-invalid-id',
+              enabled: true,
+              inputs: [
+                {
+                  enabled: true,
+                  streams: [],
+                  type: 'single_input',
+                },
+              ],
+              package: {
+                name: 'filetest',
+                title: 'For File Tests',
+                version: '0.1.0',
+              },
+            },
+          ],
+        };
+
+        const {
+          body: { item: createdPolicy },
+        } = await supertest
+          .post('/internal/fleet/agent_and_package_policies')
+          .set('kbn-xsrf', 'xxxx')
+          .send(requestBody)
+          .expect(200);
+
+        expect(createdPolicy.name).to.eql('Test Agent Policy');
+        expect(createdPolicy.package_policies[0].id).to.eql(requestBody.package_policies[0].id);
+        expect(createdPolicy.package_policies[0].policy_id).to.be(createdPolicy.id);
+        expect(createdPolicy.package_policies[0].policy_ids).to.eql([createdPolicy.id]);
+      });
+
+      it('should delete created agent policy and package policies if create package policy fails', async () => {
+        const requestBody = {
+          id: 'test-agent-policy-for-rollback',
+          name: 'Test Agent Policy',
+          namespace: 'default',
+          description: 'Test description',
+          package_policies: [
+            {
+              id: 'test-package-policy-for-rollback-1',
+              name: 'Test Package Policy',
+              namespace: 'default',
+              policy_ids: ['test-agent-policy-for-rollback'],
+              enabled: true,
+              inputs: [
+                {
+                  enabled: true,
+                  streams: [],
+                  type: 'single_input',
+                },
+              ],
+              package: {
+                name: 'filetest',
+                title: 'For File Tests',
+                version: '0.1.0',
+              },
+            },
+            {
+              id: 'test-package-policy-for-rollback-2',
+              name: 'Test Package Policy 2',
+              namespace: 'default',
+              policy_ids: ['test-agent-policy-for-rollback'],
+              enabled: true,
+              inputs: [
+                {
+                  enabled: true,
+                  streams: [],
+                  type: 'single_input',
+                },
+              ],
+              package: {
+                name: 'filetest',
+                title: 'For File Tests',
+                version: '0.1.0',
+              },
+            },
+            {
+              id: 'test-package-policy-for-rollback-3',
+              name: 'Test Package Policy 3',
+              namespace: 'default',
+              policy_ids: ['test-agent-policy-for-rollback'],
+              enabled: true,
+              inputs: [
+                {
+                  enabled: true,
+                  streams: [],
+                  type: 'single_input',
+                },
+              ],
+              package: {
+                name: 'filetest',
+                title: 'For File Tests',
+                version: '0.1.0-badversion', // to trigger error
+              },
+            },
+          ],
+        };
+
+        const response = await supertest
+          .post('/internal/fleet/agent_and_package_policies')
+          .set('kbn-xsrf', 'xxxx')
+          .send(requestBody);
+
+        expect(response.status).to.not.be(200);
+        expect(response.body.error).to.not.be.empty();
+
+        // Verify that the valid created policies were deleted
+        await supertest
+          .get(`/api/fleet/package_policies/${requestBody.package_policies[0].id}`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(404);
+        await supertest
+          .get(`/api/fleet/package_policies/${requestBody.package_policies[1].id}`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(404);
+        await supertest
+          .get(`/api/fleet/agent_policies/${requestBody.id}`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(404);
       });
     });
   });

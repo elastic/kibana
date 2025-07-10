@@ -15,7 +15,7 @@ import { createFleetTestRendererMock } from '../../../../../../mock';
 import type { LicenseService } from '../../../../services';
 import { ExperimentalFeaturesService } from '../../../../services';
 import { AgentReassignAgentPolicyModal } from '../../components/agent_reassign_policy_modal';
-
+import { useAuthz } from '../../../../../../hooks/use_authz';
 import { useLicense } from '../../../../../../hooks/use_license';
 
 import { AgentBulkActions } from './bulk_actions';
@@ -24,6 +24,7 @@ jest.mock('../../../../../../services/experimental_features');
 const mockedExperimentalFeaturesService = jest.mocked(ExperimentalFeaturesService);
 
 jest.mock('../../../../../../hooks/use_license');
+jest.mock('../../../../../../hooks/use_authz');
 const mockedUseLicence = useLicense as jest.MockedFunction<typeof useLicense>;
 
 jest.mock('../../components/agent_reassign_policy_modal');
@@ -49,7 +50,14 @@ const defaultProps = {
 describe('AgentBulkActions', () => {
   beforeAll(() => {
     mockedExperimentalFeaturesService.get.mockReturnValue({
-      diagnosticFileUploadEnabled: true,
+      enableAgentMigrations: true,
+    } as any);
+    jest.mocked(useAuthz).mockReturnValue({
+      fleet: {
+        allAgents: true,
+        readAgents: true,
+      },
+      integrations: {},
     } as any);
   });
 
@@ -87,6 +95,7 @@ describe('AgentBulkActions', () => {
       expect(
         results.getByText('Request diagnostics for 2 agents').closest('button')!
       ).toBeEnabled();
+      expect(results.getByText('Migrate 2 agents').closest('button')!).toBeEnabled();
     });
 
     it('should allow scheduled upgrades if the license allows it', async () => {
@@ -203,6 +212,20 @@ describe('AgentBulkActions', () => {
         }),
         expect.anything()
       );
+    });
+
+    it('should not show the migrate button when agent migrations flag is disabled', async () => {
+      mockedExperimentalFeaturesService.get.mockReturnValue({
+        enableAgentMigrations: false,
+      } as any);
+
+      const results = render({
+        ...defaultProps,
+        selectedAgents: [{ id: 'agent1', tags: ['oldTag'] }, { id: 'agent2' }] as Agent[],
+      });
+
+      const bulkActionsButton = results.queryByTestId('agentBulkActionsBulkMigrate');
+      expect(bulkActionsButton).not.toBeInTheDocument();
     });
   });
 });

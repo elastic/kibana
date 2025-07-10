@@ -12,13 +12,10 @@ import { Vis } from '../../types';
 import type {
   VisualizeInput,
   VisualizeEmbeddable,
-  VisualizeByValueInput,
-  VisualizeByReferenceInput,
-  VisualizeSavedObjectAttributes,
   VisualizeEmbeddableDeps,
 } from './visualize_embeddable';
 import { getHttp, getTimeFilter, getCapabilities } from '../../services';
-import { urlFor } from '../../utils/saved_visualize_utils';
+import { urlFor } from '../..';
 import { createVisualizeEmbeddableAsync } from './visualize_embeddable_async';
 import { AttributeService } from './attribute_service';
 import { ErrorEmbeddable } from './error_embeddable';
@@ -32,11 +29,7 @@ export const createVisEmbeddableFromObject =
   async (
     vis: Vis,
     input: Partial<VisualizeInput> & { id: string },
-    attributeService?: AttributeService<
-      VisualizeSavedObjectAttributes,
-      VisualizeByValueInput,
-      VisualizeByReferenceInput
-    >
+    attributeService?: AttributeService
   ): Promise<VisualizeEmbeddable | ErrorEmbeddable> => {
     try {
       const visId = vis.id as string;
@@ -58,9 +51,9 @@ export const createVisEmbeddableFromObject =
       }
 
       const capabilities = {
-        visualizeSave: Boolean(getCapabilities().visualize.save),
-        dashboardSave: Boolean(getCapabilities().dashboard?.showWriteControls),
-        visualizeOpen: Boolean(getCapabilities().visualize?.show),
+        visualizeSave: Boolean(getCapabilities().visualize_v2.save),
+        dashboardSave: Boolean(getCapabilities().dashboard_v2?.showWriteControls),
+        visualizeOpen: Boolean(getCapabilities().visualize_v2?.show),
       };
 
       return createVisualizeEmbeddableAsync(

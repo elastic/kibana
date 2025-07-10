@@ -11,9 +11,6 @@ import {
   RISK_SCORE_ERROR_PANEL,
   RISK_SCORE_STATUS,
 } from '../../screens/entity_analytics_management';
-
-import { deleteRiskScore, installRiskScoreModule } from '../../tasks/api_calls/risk_scores';
-import { RiskScoreEntity } from '../../tasks/risk_scores/common';
 import { login } from '../../tasks/login';
 import { visit } from '../../tasks/navigation';
 import { ENTITY_ANALYTICS_MANAGEMENT_URL } from '../../urls/navigation';
@@ -25,11 +22,7 @@ import {
   interceptRiskPreviewSuccess,
   interceptRiskInitError,
 } from '../../tasks/api_calls/risk_engine';
-import {
-  riskEngineStatusChange,
-  upgradeRiskEngine,
-  previewErrorButtonClick,
-} from '../../tasks/entity_analytics';
+import { riskEngineStatusChange, previewErrorButtonClick } from '../../tasks/entity_analytics';
 
 describe(
   'Entity analytics management page',
@@ -53,7 +46,7 @@ describe(
     });
 
     it('renders page as expected', () => {
-      cy.get(PAGE_TITLE).should('have.text', 'Entity Risk Score');
+      cy.get(PAGE_TITLE).should('have.text', 'Entity risk score');
     });
 
     describe('Risk preview', () => {
@@ -99,17 +92,6 @@ describe(
         riskEngineStatusChange();
 
         cy.get(RISK_SCORE_ERROR_PANEL).contains('There was an error');
-      });
-
-      it('should update if there legacy risk score installed', () => {
-        installRiskScoreModule();
-        visit(ENTITY_ANALYTICS_MANAGEMENT_URL);
-
-        cy.get(RISK_SCORE_STATUS).should('not.exist');
-
-        upgradeRiskEngine();
-
-        deleteRiskScore({ riskScoreEntity: RiskScoreEntity.host, spaceId: 'default' });
       });
     });
   }

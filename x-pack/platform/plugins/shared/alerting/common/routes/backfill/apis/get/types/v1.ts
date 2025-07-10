@@ -6,7 +6,7 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import { getParamsSchemaV1, getResponseSchemaV1 } from '..';
+import type { getParamsSchemaV1, getResponseSchemaV1 } from '..';
 
 export type GetBackfillRequestParams = TypeOf<typeof getParamsSchemaV1>;
 export type GetBackfillResponseBody = TypeOf<typeof getResponseSchemaV1>;

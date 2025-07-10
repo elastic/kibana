@@ -10,7 +10,7 @@ import { useMutation } from '@tanstack/react-query';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { deleteBackfill } from '../api';
 import { useInvalidateFindBackfillQuery } from './use_find_backfills_for_rules';
-
+import { useInvalidateFindGapsQuery } from './use_find_gaps_for_rule';
 export const DELETE_BACKFILL_MUTATION_KEY = ['POST', ' DELETE_BACKFILL_MUTATION_KEY'];
 
 export const useDeleteBackfill = (
@@ -23,12 +23,13 @@ export const useDeleteBackfill = (
   >
 ) => {
   const invalidateBackfillQuery = useInvalidateFindBackfillQuery();
-
+  const invalidateFindGapsQuery = useInvalidateFindGapsQuery();
   return useMutation(deleteBackfill, {
     ...options,
     mutationKey: DELETE_BACKFILL_MUTATION_KEY,
     onSettled: (...args) => {
       invalidateBackfillQuery();
+      invalidateFindGapsQuery();
       if (options?.onSettled) {
         options.onSettled(...args);
       }

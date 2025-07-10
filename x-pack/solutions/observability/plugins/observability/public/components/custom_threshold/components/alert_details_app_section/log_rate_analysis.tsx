@@ -15,6 +15,7 @@ import {
 } from '@kbn/aiops-log-rate-analysis/log_rate_analysis_type';
 import { getLogRateAnalysisParametersFromAlert } from '@kbn/aiops-log-rate-analysis/get_log_rate_analysis_parameters_from_alert';
 import { LogRateAnalysisContent, type LogRateAnalysisResultsData } from '@kbn/aiops-plugin/public';
+import { getEsQueryConfig } from '@kbn/data-service';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -43,6 +44,7 @@ export function LogRateAnalysis({ alert, dataView, services }: AlertDetailsLogRa
       ObservabilityAIAssistantContextualInsight,
       getContextualInsightMessages,
     },
+    uiSettings,
   } = services;
   const [esSearchQuery, setEsSearchQuery] = useState<QueryDslQueryContainer | undefined>();
   const [logRateAnalysisParams, setLogRateAnalysisParams] = useState<
@@ -52,12 +54,12 @@ export function LogRateAnalysis({ alert, dataView, services }: AlertDetailsLogRa
   const ruleParams = alert.fields[ALERT_RULE_PARAMETERS];
 
   useEffect(() => {
-    const esSearchRequest = getLogRateAnalysisEQQuery(alert);
+    const esSearchRequest = getLogRateAnalysisEQQuery(alert, getEsQueryConfig(uiSettings));
 
     if (esSearchRequest) {
       setEsSearchQuery(esSearchRequest);
     }
-  }, [alert]);
+  }, [alert, uiSettings]);
 
   const { timeRange, windowParameters } = useMemo(() => {
     const alertStartedAt = moment(alert.start).toISOString();

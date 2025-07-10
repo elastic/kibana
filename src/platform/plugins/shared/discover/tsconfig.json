@@ -36,7 +36,6 @@
     "@kbn/data-view-editor-plugin",
     "@kbn/triggers-actions-ui-plugin",
     "@kbn/saved-objects-tagging-oss-plugin",
-    "@kbn/unified-histogram-plugin",
     "@kbn/analytics",
     "@kbn/saved-objects-management-plugin",
     "@kbn/lens-plugin",
@@ -96,9 +95,23 @@
     "@kbn/fields-metadata-plugin",
     "@kbn/discover-contextual-components",
     "@kbn/logs-data-access-plugin",
+    "@kbn/apm-sources-access-plugin",
     "@kbn/core-lifecycle-browser",
     "@kbn/esql-ast",
-    "@kbn/discover-shared-plugin"
+    "@kbn/discover-shared-plugin",
+    "@kbn/response-ops-rule-form",
+    "@kbn/embeddable-enhanced-plugin",
+    "@kbn/shared-ux-page-analytics-no-data-types",
+    "@kbn/core-application-browser-mocks",
+    "@kbn/rison",
+    "@kbn/unified-tabs",
+    "@kbn/unified-histogram",
+    "@kbn/alerts-ui-shared",
+    "@kbn/core-pricing-browser-mocks",
+    "@kbn/css-utils",
+    "@kbn/restorable-state"
   ],
-  "exclude": ["target/**/*"]
+  "exclude": [
+    "target/**/*"
+  ]
 }

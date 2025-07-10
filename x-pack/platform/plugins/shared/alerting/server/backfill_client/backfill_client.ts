@@ -5,43 +5,50 @@
  * 2.0.
  */
 
-import {
+import type {
+  ISavedObjectsRepository,
   Logger,
   SavedObject,
   SavedObjectReference,
   SavedObjectsBulkCreateObject,
   SavedObjectsClientContract,
-  SavedObjectsErrorHelpers,
   SavedObjectsFindResult,
 } from '@kbn/core/server';
-import { AuditLogger } from '@kbn/security-plugin/server';
-import {
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import type { AuditLogger } from '@kbn/security-plugin/server';
+import type {
   RunContext,
   TaskInstance,
   TaskManagerSetupContract,
   TaskManagerStartContract,
-  TaskPriority,
 } from '@kbn/task-manager-plugin/server';
+import { TaskPriority } from '@kbn/task-manager-plugin/server';
+import type { IEventLogger, IEventLogClient } from '@kbn/event-log-plugin/server';
 import { isNumber } from 'lodash';
-import {
+import type { ActionsClient } from '@kbn/actions-plugin/server';
+import { withSpan } from '@kbn/apm-utils';
+import type {
   ScheduleBackfillError,
-  ScheduleBackfillParam,
   ScheduleBackfillParams,
   ScheduleBackfillResult,
   ScheduleBackfillResults,
 } from '../application/backfill/methods/schedule/types';
-import { Backfill } from '../application/backfill/result/types';
+import type { Backfill } from '../application/backfill/result/types';
 import {
   transformBackfillParamToAdHocRun,
   transformAdHocRunToBackfillResult,
 } from '../application/backfill/transforms';
-import { RuleDomain } from '../application/rule/types';
-import { AdHocRunSO } from '../data/ad_hoc_run/types';
+import type { RuleDomain } from '../application/rule/types';
+import type { AdHocRunSO } from '../data/ad_hoc_run/types';
 import { AdHocRunAuditAction, adHocRunAuditEvent } from '../rules_client/common/audit_events';
 import { AD_HOC_RUN_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
-import { TaskRunnerFactory } from '../task_runner';
-import { RuleTypeRegistry } from '../types';
+import type { TaskRunnerFactory } from '../task_runner';
+import type { RuleTypeRegistry } from '../types';
 import { createBackfillError } from './lib';
+import { updateGaps } from '../lib/rule_gaps/update/update_gaps';
+import { denormalizeActions } from '../rules_client/lib/denormalize_actions';
+import type { DenormalizedAction, NormalizedAlertActionWithGeneratedValues } from '../rules_client';
+import type { Gap } from '../lib/rule_gaps/gap';
 
 export const BACKFILL_TASK_TYPE = 'ad_hoc_run-backfill';
 
@@ -53,12 +60,17 @@ interface ConstructorOpts {
 }
 
 interface BulkQueueOpts {
+  actionsClient: ActionsClient;
   auditLogger?: AuditLogger;
   params: ScheduleBackfillParams;
   rules: RuleDomain[];
   ruleTypeRegistry: RuleTypeRegistry;
   spaceId: string;
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
+  eventLogClient: IEventLogClient;
+  internalSavedObjectsRepository: ISavedObjectsRepository;
+  eventLogger: IEventLogger | undefined;
+  gaps?: Gap[];
 }
 
 interface DeleteBackfillForRulesOpts {
@@ -86,12 +98,17 @@ export class BackfillClient {
   }
 
   public async bulkQueue({
+    actionsClient,
     auditLogger,
     params,
     rules,
     ruleTypeRegistry,
     spaceId,
     unsecuredSavedObjectsClient,
+    eventLogClient,
+    internalSavedObjectsRepository,
+    eventLogger,
+    gaps,
   }: BulkQueueOpts): Promise<ScheduleBackfillResults> {
     const adHocSOsToCreate: Array<SavedObjectsBulkCreateObject<AdHocRunSO>> = [];
 
@@ -117,10 +134,16 @@ export class BackfillClient {
      */
 
     const soToCreateIndexOrErrorMap: Map<number, number | ScheduleBackfillError> = new Map();
+    const rulesWithUnsupportedActions = new Set<number>();
 
-    params.forEach((param: ScheduleBackfillParam, ndx: number) => {
+    for (let ndx = 0; ndx < params.length; ndx++) {
+      const param = params[ndx];
       // For this schedule request, look up the rule or return error
-      const { rule, error } = getRuleOrError(param.ruleId, rules, ruleTypeRegistry);
+      const { rule, error } = getRuleOrError({
+        ruleId: param.ruleId,
+        rules,
+        ruleTypeRegistry,
+      });
       if (rule) {
         // keep track of index of this request in the adHocSOsToCreate array
         soToCreateIndexOrErrorMap.set(ndx, adHocSOsToCreate.length);
@@ -129,22 +152,31 @@ export class BackfillClient {
           name: `rule`,
           type: RULE_SAVED_OBJECT_TYPE,
         };
+
+        const { actions, hasUnsupportedActions, references } = await extractRuleActions({
+          actionsClient,
+          rule,
+          runActions: param.runActions,
+        });
+
+        if (hasUnsupportedActions) {
+          rulesWithUnsupportedActions.add(ndx);
+        }
+
         adHocSOsToCreate.push({
           type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
-          attributes: transformBackfillParamToAdHocRun(param, rule, spaceId),
-          references: [reference],
+          attributes: transformBackfillParamToAdHocRun(param, rule, actions, spaceId),
+          references: [reference, ...references],
         });
       } else if (error) {
         // keep track of the error encountered for this request by index so
         // we can return it in order
         soToCreateIndexOrErrorMap.set(ndx, error);
         this.logger.warn(
-          `No rule found for ruleId ${param.ruleId} - not scheduling backfill for ${JSON.stringify(
-            param
-          )}`
+          `Error for ruleId ${param.ruleId} - not scheduling backfill for ${JSON.stringify(param)}`
         );
       }
-    });
+    }
 
     // Every request encountered an error, so short-circuit the logic here
     if (!adHocSOsToCreate.length) {
@@ -153,12 +185,19 @@ export class BackfillClient {
       );
     }
 
-    // Bulk create the saved object
-    const bulkCreateResponse = await unsecuredSavedObjectsClient.bulkCreate<AdHocRunSO>(
-      adHocSOsToCreate
-    );
+    // Bulk create the saved objects in chunks of 10 to manage resource usage
+    const chunkSize = 10;
+    const allSavedObjects: Array<SavedObject<AdHocRunSO>> = [];
 
-    const transformedResponse: ScheduleBackfillResults = bulkCreateResponse.saved_objects.map(
+    for (let i = 0; i < adHocSOsToCreate.length; i += chunkSize) {
+      const chunk = adHocSOsToCreate.slice(i, i + chunkSize);
+      const bulkCreateChunkResponse = await unsecuredSavedObjectsClient.bulkCreate<AdHocRunSO>(
+        chunk
+      );
+      allSavedObjects.push(...bulkCreateChunkResponse.saved_objects);
+    }
+
+    const transformedResponse: ScheduleBackfillResults = allSavedObjects.map(
       (so: SavedObject<AdHocRunSO>, index: number) => {
         if (so.error) {
           auditLogger?.log(
@@ -175,7 +214,11 @@ export class BackfillClient {
             })
           );
         }
-        return transformAdHocRunToBackfillResult(so, adHocSOsToCreate?.[index]);
+        return transformAdHocRunToBackfillResult({
+          adHocRunSO: so,
+          isSystemAction: (id: string) => actionsClient.isSystemAction(id),
+          originalSO: adHocSOsToCreate?.[index],
+        });
       }
     );
 
@@ -202,7 +245,16 @@ export class BackfillClient {
 
       if (isNumber(indexOrError)) {
         // This number is the index of the response from the savedObjects bulkCreate function
-        return transformedResponse[indexOrError];
+        const response = transformedResponse[indexOrError];
+        if (rulesWithUnsupportedActions.has(indexOrError)) {
+          return {
+            ...response,
+            warnings: [
+              `Rule has actions that are not supported for backfill. Those actions will be skipped.`,
+            ],
+          };
+        }
+        return response;
       } else {
         // Return the error we encountered
         return indexOrError as ScheduleBackfillError;
@@ -211,10 +263,11 @@ export class BackfillClient {
 
     // Build array of tasks to schedule
     const adHocTasksToSchedule: TaskInstance[] = [];
+    const backfillSOs: Backfill[] = [];
     createSOResult.forEach((result: ScheduleBackfillResult) => {
       if (!(result as ScheduleBackfillError).error) {
         const createdSO = result as Backfill;
-
+        backfillSOs.push(createdSO);
         const ruleTypeTimeout = ruleTypeRegistry.get(createdSO.rule.alertTypeId).ruleTaskTimeout;
         adHocTasksToSchedule.push({
           id: createdSO.id,
@@ -226,6 +279,38 @@ export class BackfillClient {
             spaceId,
           },
         });
+      }
+    });
+
+    await withSpan({ name: 'backfillClient.bulkQueue.updateGaps', type: 'rule' }, async () => {
+      try {
+        // Process backfills in chunks of 10 to manage resource usage
+        for (let i = 0; i < backfillSOs.length; i += 10) {
+          const chunk = backfillSOs.slice(i, i + 10);
+          await Promise.all(
+            chunk.map((backfill) =>
+              updateGaps({
+                backfillSchedule: backfill.schedule,
+                ruleId: backfill.rule.id,
+                start: new Date(backfill.start),
+                end: backfill?.end ? new Date(backfill.end) : new Date(),
+                eventLogger,
+                eventLogClient,
+                savedObjectsRepository: internalSavedObjectsRepository,
+                logger: this.logger,
+                backfillClient: this,
+                actionsClient,
+                gaps,
+              })
+            )
+          );
+        }
+      } catch {
+        this.logger.warn(
+          `Error updating gaps for backfill jobs: ${backfillSOs
+            .map((backfill) => backfill.id)
+            .join(', ')}`
+        );
       }
     });
 
@@ -299,13 +384,62 @@ export class BackfillClient {
       );
     }
   }
+
+  public async findOverlappingBackfills({
+    ruleId,
+    start,
+    end,
+    savedObjectsRepository,
+    actionsClient,
+  }: {
+    ruleId: string;
+    start: Date;
+    end: Date;
+    savedObjectsRepository: ISavedObjectsRepository;
+    actionsClient: ActionsClient;
+  }) {
+    const adHocRuns: Array<SavedObjectsFindResult<AdHocRunSO>> = [];
+
+    // Create a point in time finder for efficient pagination
+    const adHocRunFinder = await savedObjectsRepository.createPointInTimeFinder<AdHocRunSO>({
+      type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
+      perPage: 100,
+      hasReference: [{ id: ruleId, type: RULE_SAVED_OBJECT_TYPE }],
+      filter: `
+        ad_hoc_run_params.attributes.start <= "${end.toISOString()}" and
+        ad_hoc_run_params.attributes.end >= "${start.toISOString()}"
+      `,
+    });
+
+    try {
+      // Collect all results using async iterator
+      for await (const response of adHocRunFinder.find()) {
+        adHocRuns.push(...response.saved_objects);
+      }
+    } finally {
+      // Make sure we always close the finder
+      await adHocRunFinder.close();
+    }
+
+    return adHocRuns.map((data) =>
+      transformAdHocRunToBackfillResult({
+        adHocRunSO: data,
+        isSystemAction: (connectorId: string) => actionsClient.isSystemAction(connectorId),
+      })
+    );
+  }
 }
 
-function getRuleOrError(
-  ruleId: string,
-  rules: RuleDomain[],
-  ruleTypeRegistry: RuleTypeRegistry
-): { rule?: RuleDomain; error?: ScheduleBackfillError } {
+interface GetRuleOrErrorOpts {
+  ruleId: string;
+  rules: RuleDomain[];
+  ruleTypeRegistry: RuleTypeRegistry;
+}
+
+function getRuleOrError({ ruleId, rules, ruleTypeRegistry }: GetRuleOrErrorOpts): {
+  rule?: RuleDomain;
+  error?: ScheduleBackfillError;
+} {
   const rule = rules.find((r: RuleDomain) => r.id === ruleId);
 
   // if rule not found, return not found error
@@ -344,4 +478,56 @@ function getRuleOrError(
   }
 
   return { rule };
+}
+
+interface ExtractRuleActions {
+  actionsClient: ActionsClient;
+  rule: RuleDomain;
+  runActions?: boolean;
+}
+
+interface ExtractRuleActionsResult {
+  actions: DenormalizedAction[];
+  hasUnsupportedActions: boolean;
+  references: SavedObjectReference[];
+}
+
+async function extractRuleActions({
+  actionsClient,
+  rule,
+  runActions,
+}: ExtractRuleActions): Promise<ExtractRuleActionsResult> {
+  // defauts to true if not specified
+  const shouldRunActions = runActions !== undefined ? runActions : true;
+
+  if (!shouldRunActions) {
+    return { hasUnsupportedActions: false, actions: [], references: [] };
+  }
+
+  const ruleLevelNotifyWhen = rule.notifyWhen;
+  const normalizedActions = [];
+  for (const action of rule.actions) {
+    // if action level frequency is not defined and rule level notifyWhen is, set the action level frequency
+    if (!action.frequency && ruleLevelNotifyWhen) {
+      normalizedActions.push({
+        ...action,
+        frequency: { notifyWhen: ruleLevelNotifyWhen, summary: false, throttle: null },
+      });
+    } else {
+      normalizedActions.push(action);
+    }
+  }
+
+  const hasUnsupportedActions = normalizedActions.some(
+    (action) => action.frequency?.notifyWhen !== 'onActiveAlert'
+  );
+
+  const allActions = [
+    ...normalizedActions.filter((action) => action.frequency?.notifyWhen === 'onActiveAlert'),
+    ...(rule.systemActions ?? []),
+  ] as NormalizedAlertActionWithGeneratedValues[];
+
+  const { references, actions } = await denormalizeActions(actionsClient, allActions);
+
+  return { hasUnsupportedActions, actions, references };
 }

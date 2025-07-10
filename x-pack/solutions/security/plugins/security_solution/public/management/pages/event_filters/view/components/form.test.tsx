@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 import { act, cleanup, fireEvent } from '@testing-library/react';
 import { stubIndexPattern } from '@kbn/data-plugin/common/stubs';
 import { useFetchIndex } from '../../../../../common/containers/source';
@@ -17,20 +17,18 @@ import userEvent from '@testing-library/user-event';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
 import { ENDPOINT_EVENT_FILTERS_LIST_ID } from '@kbn/securitysolution-list-constants';
-import type {
-  ArtifactFormComponentOnChangeCallbackProps,
-  ArtifactFormComponentProps,
-} from '../../../../components/artifact_list_page';
+import type { ArtifactFormComponentProps } from '../../../../components/artifact_list_page';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { EventFiltersForm } from './form';
-import { EndpointDocGenerator } from '../../../../../../common/endpoint/generate_data';
-import type { PolicyData } from '../../../../../../common/endpoint/types';
 import { MAX_COMMENT_LENGTH } from '../../../../../../common/constants';
 import {
-  BY_POLICY_ARTIFACT_TAG_PREFIX,
   FILTER_PROCESS_DESCENDANTS_TAG,
   GLOBAL_ARTIFACT_TAG,
 } from '../../../../../../common/endpoint/service/artifacts/constants';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
+import { buildPerPolicyTag } from '../../../../../../common/endpoint/service/artifacts/utils';
+
+jest.setTimeout(15_000); // Costly tests, hitting 2 seconds execution time locally
 
 jest.mock('../../../../../common/lib/kibana');
 jest.mock('../../../../../common/containers/source');
@@ -47,16 +45,49 @@ jest.mock('../../../../../common/hooks/use_license', () => {
   };
 });
 
+/** When some props and states change, `EventFilterForm` will recreate its internal `processChanged` function,
+ * and therefore will call it from a `useEffect` hook.
+ *
+ * Amongst the aforementioned props is the item itself, which comes from the outside - the test environment.
+ * Amongst the aforementioned states is the `hasFormChanged` state, which will change from `false` to `true`
+ * on the first user action.
+ *
+ * In the browser, the `item` prop is a state, a state from the parent component, therefore both
+ * `item` and `hasFormChange` will change at the same re-render, which ensures that the `useEffect` will
+ * call `processChanged` with consistent data.
+ *
+ * In the test environment, however, we need a trick to make sure that the data is updated in the same re-render
+ * both outside and inside the component, in order to not receive additional calls from `processChanged` with outdated
+ * data.
+ *
+ * This `TestComponentWrapper` component is meant to provide this kind of syncronisation, by turning the `item` prop
+ * into a state.
+ *
+ */
+const TestComponentWrapper: typeof EventFiltersForm = (formProps: ArtifactFormComponentProps) => {
+  const [item, setItem] = useState(formProps.item);
+
+  const handleOnChange: ArtifactFormComponentProps['onChange'] = useCallback(
+    (formStatus) => {
+      setItem(formStatus.item);
+      formProps.onChange(formStatus);
+    },
+    [formProps]
+  );
+
+  return <EventFiltersForm {...formProps} item={item} onChange={handleOnChange} />;
+};
+
 describe('Event filter form', () => {
   const formPrefix = 'eventFilters-form';
-  const generator = new EndpointDocGenerator('effected-policy-select');
 
   let formProps: jest.Mocked<ArtifactFormComponentProps>;
   let mockedContext: AppContextTestRender;
   let renderResult: ReturnType<AppContextTestRender['render']>;
   let latestUpdatedItem: ArtifactFormComponentProps['item'];
+  let isLatestUpdatedItemValid: boolean;
 
-  const getUI = () => <EventFiltersForm {...formProps} />;
+  const getUI = () => <TestComponentWrapper {...formProps} />;
   const render = () => {
     return (renderResult = mockedContext.render(getUI()));
   };
@@ -101,31 +132,13 @@ describe('Event filter form', () => {
     };
   }
 
-  function createOnChangeArgs(
-    overrides: Partial<ArtifactFormComponentOnChangeCallbackProps>
-  ): ArtifactFormComponentOnChangeCallbackProps {
-    const defaults = {
-      item: createItem(),
-      isValid: false,
-    };
-    return {
-      ...defaults,
-      ...overrides,
-    };
-  }
-
-  function createPolicies(): PolicyData[] {
-    const policies = [
-      generator.generatePolicyPackagePolicy(),
-      generator.generatePolicyPackagePolicy(),
+  const setValidItemForEditing = () => {
+    formProps.mode = 'edit';
+    formProps.item.name = 'item name';
+    formProps.item.entries = [
+      { field: 'test.field', operator: 'included', type: 'match', value: 'test value' },
     ];
-    policies.map((p, i) => {
-      p.id = `id-${i}`;
-      p.name = `some-policy-${Math.random().toString(36).split('.').pop()}`;
-      return p;
-    });
-    return policies;
-  }
+  };
 
   beforeEach(async () => {
     (useCurrentUser as jest.Mock).mockReturnValue({ username: 'test-username' });
@@ -152,11 +165,10 @@ describe('Event filter form', () => {
       mode: 'create',
       disabled: false,
       error: undefined,
-      policiesIsLoading: false,
       onChange: jest.fn((updates) => {
         latestUpdatedItem = updates.item;
+        isLatestUpdatedItemValid = updates.isValid;
       }),
-      policies: [],
     };
   });
 
@@ -165,27 +177,12 @@ describe('Event filter form', () => {
   });
 
   describe('Details and Conditions', () => {
-    it('should render correctly without data', () => {
-      formProps.policies = createPolicies();
-      formProps.policiesIsLoading = true;
-      formProps.item.tags = [formProps.policies.map((p) => `policy:${p.id}`)[0]];
-      formProps.item.entries = [];
-      render();
-      expect(renderResult.getByTestId('loading-spinner')).not.toBeNull();
-    });
-
-    it('should render correctly with data', async () => {
-      formProps.policies = createPolicies();
-      render();
-      expect(renderResult.queryByTestId('loading-spinner')).toBeNull();
-      expect(renderResult.getByTestId('exceptionsBuilderWrapper')).not.toBeNull();
-    });
-
     it('should display sections', async () => {
       render();
       expect(renderResult.queryByText('Details')).not.toBeNull();
       expect(renderResult.queryByText('Conditions')).not.toBeNull();
       expect(renderResult.queryByText('Comments')).not.toBeNull();
+      expect(renderResult.getByTestId('eventFilters-form-effectedPolicies')).toBeTruthy();
     });
 
     it('should display name error only when on blur and empty name', async () => {
@@ -201,14 +198,7 @@ describe('Event filter form', () => {
       render();
       const nameInput = renderResult.getByTestId(`${formPrefix}-name-input`);
 
-      act(() => {
-        fireEvent.change(nameInput, {
-          target: {
-            value: 'Exception name',
-          },
-        });
-        fireEvent.blur(nameInput);
-      });
+      await userEvent.type(nameInput, 'Exception name');
       rerenderWithLatestProps();
 
       expect(formProps.item?.name).toBe('Exception name');
@@ -219,14 +209,8 @@ describe('Event filter form', () => {
       render();
       const nameInput = renderResult.getByTestId(`${formPrefix}-name-input`);
 
-      act(() => {
-        fireEvent.change(nameInput, {
-          target: {
-            value: '   ',
-          },
-        });
-        fireEvent.blur(nameInput);
-      });
+      await userEvent.type(nameInput, '   ');
+      fireEvent.blur(nameInput);
       rerenderWithLatestProps();
 
       expect(formProps.item.name).toBe('');
@@ -235,16 +219,9 @@ describe('Event filter form', () => {
 
     it('should change description', async () => {
       render();
-      const nameInput = renderResult.getByTestId(`${formPrefix}-description-input`);
+      const descriptionInput = renderResult.getByTestId(`${formPrefix}-description-input`);
 
-      act(() => {
-        fireEvent.change(nameInput, {
-          target: {
-            value: 'Exception description',
-          },
-        });
-        fireEvent.blur(nameInput);
-      });
+      await userEvent.type(descriptionInput, 'Exception description');
       rerenderWithLatestProps();
 
       expect(formProps.item.description).toBe('Exception description');
@@ -254,175 +231,51 @@ describe('Event filter form', () => {
       render();
       const commentInput = renderResult.getByLabelText('Comment Input');
 
-      act(() => {
-        fireEvent.change(commentInput, {
-          target: {
-            value: 'Exception comment',
-          },
-        });
-        fireEvent.blur(commentInput);
-      });
+      await userEvent.type(commentInput, 'Exception comment');
       rerenderWithLatestProps();
 
       expect(formProps.item.comments).toEqual([{ comment: 'Exception comment' }]);
     });
-  });
 
-  describe('Policy section', () => {
-    beforeEach(() => {
-      formProps.policies = createPolicies();
-    });
-
-    afterEach(() => {
-      cleanup();
-    });
-
-    it('should display loader when policies are still loading', () => {
-      formProps.policiesIsLoading = true;
-      formProps.item.tags = [formProps.policies.map((p) => `policy:${p.id}`)[0]];
-      render();
-      expect(renderResult.getByTestId('loading-spinner')).not.toBeNull();
-    });
-
-    it('should display the policy list when "per policy" is selected', async () => {
-      render();
-      await userEvent.click(
-        renderResult.getByTestId('eventFilters-form-effectedPolicies-perPolicy')
-      );
-      rerenderWithLatestProps();
-      // policy selector should show up
-      expect(
-        renderResult.getByTestId(`${formPrefix}-effectedPolicies-policiesSelectable`)
-      ).toBeTruthy();
-    });
-
-    it('should call onChange when a policy is selected from the policy selection', async () => {
-      formProps.item.tags = [formProps.policies.map((p) => `policy:${p.id}`)[0]];
-      render();
-      const policyId = formProps.policies[0].id;
-      await userEvent.click(renderResult.getByTestId(`${formPrefix}-effectedPolicies-perPolicy`));
-      await userEvent.click(renderResult.getByTestId(`policy-${policyId}`));
-      formProps.item.tags = formProps.onChange.mock.calls[0][0].item.tags;
-      rerender();
-      const expected = createOnChangeArgs({
-        item: {
-          ...formProps.item,
-          tags: [`policy:${policyId}`],
-        },
+    describe('when opened for editing', () => {
+      beforeEach(() => {
+        setValidItemForEditing();
       });
-      expect(formProps.onChange).toHaveBeenCalledWith(expected);
-    });
 
-    it('should have global policy by default', async () => {
-      render();
-      expect(renderResult.getByTestId('eventFilters-form-effectedPolicies-global')).toHaveAttribute(
-        'aria-pressed',
-        'true'
-      );
-      expect(
-        renderResult.getByTestId('eventFilters-form-effectedPolicies-perPolicy')
-      ).toHaveAttribute('aria-pressed', 'false');
-    });
-
-    it('should retain the previous policy selection when switching from per-policy to global', async () => {
-      formProps.item.tags = [formProps.policies.map((p) => `policy:${p.id}`)[0]];
-      render();
-      const policyId = formProps.policies[0].id;
-      // move to per-policy and select the first
-      await userEvent.click(
-        renderResult.getByTestId('eventFilters-form-effectedPolicies-perPolicy')
-      );
-      await userEvent.click(renderResult.getByTestId(`policy-${policyId}`));
-      formProps.item.tags = formProps.onChange.mock.calls[0][0].item.tags;
-      rerender();
-      expect(
-        renderResult.queryByTestId(`${formPrefix}-effectedPolicies-policiesSelectable`)
-      ).toBeTruthy();
-      expect(formProps.item.tags).toEqual([`policy:${policyId}`]);
-
-      // move back to global
-      await userEvent.click(renderResult.getByTestId('eventFilters-form-effectedPolicies-global'));
-      // eslint-disable-next-line require-atomic-updates
-      formProps.item.tags = [GLOBAL_ARTIFACT_TAG];
-      rerenderWithLatestProps();
-      expect(formProps.item.tags).toEqual([GLOBAL_ARTIFACT_TAG]);
-      expect(
-        renderResult.queryByTestId(`${formPrefix}-effectedPolicies-policiesSelectable`)
-      ).toBeFalsy();
-
-      // move back to per-policy
-      await userEvent.click(
-        renderResult.getByTestId('eventFilters-form-effectedPolicies-perPolicy')
-      );
-      // eslint-disable-next-line require-atomic-updates
-      formProps.item.tags = [`policy:${policyId}`];
-      rerender();
-      // on change called with the previous policy
-      expect(formProps.item.tags).toEqual([`policy:${policyId}`]);
-      // the previous selected policy should be selected
-      // expect(renderResult.getByTestId(`policy-${policyId}`)).toHaveAttribute(
-      //   'data-test-selected',
-      //   'true'
-      // );
-    });
-  });
-
-  describe('Policy section with downgraded license', () => {
-    beforeEach(() => {
-      const policies = createPolicies();
-      formProps.policies = policies;
-      formProps.item.tags = [policies.map((p) => `policy:${p.id}`)[0]];
-      formProps.mode = 'edit';
-      // downgrade license
-      (licenseService.isPlatinumPlus as jest.Mock).mockReturnValue(false);
-    });
-
-    it('should hide assignment section when no license', () => {
-      render();
-      formProps.item.tags = [GLOBAL_ARTIFACT_TAG];
-      rerender();
-      expect(renderResult.queryByTestId(`${formPrefix}-effectedPolicies`)).toBeNull();
-    });
-
-    it('should hide assignment section when create mode and no license even with by policy', () => {
-      render();
-      formProps.mode = 'create';
-      rerender();
-      expect(renderResult.queryByTestId(`${formPrefix}-effectedPolicies`)).toBeNull();
-    });
-
-    it('should show disabled assignment section when edit mode and no license with by policy', async () => {
-      render();
-      formProps.item.tags = ['policy:id-0'];
-      rerender();
-
-      expect(
-        renderResult.queryByTestId('eventFilters-form-effectedPolicies-perPolicy')
-      ).not.toBeNull();
-      expect(renderResult.getByTestId('policy-id-0').getAttribute('aria-disabled')).toBe('true');
-    });
-
-    it("allows the user to set the event filter entry to 'Global' in the edit option", async () => {
-      render();
-      const globalButtonInput = renderResult.getByTestId(
-        'eventFilters-form-effectedPolicies-global'
-      ) as HTMLButtonElement;
-      await userEvent.click(globalButtonInput);
-      formProps.item.tags = [GLOBAL_ARTIFACT_TAG];
-      rerender();
-      const expected = createOnChangeArgs({
-        item: {
-          ...formProps.item,
-          tags: [GLOBAL_ARTIFACT_TAG],
-        },
+      it('item should not be valid when opened for editing', async () => {
+        render();
+        expect(isLatestUpdatedItemValid).toBe(false);
       });
-      expect(formProps.onChange).toHaveBeenCalledWith(expected);
 
-      const policyItem = formProps.onChange.mock.calls[0][0].item.tags
-        ? formProps.onChange.mock.calls[0][0].item.tags[0]
-        : '';
+      it('item should be valid after editing name', async () => {
+        render();
+        const nameInput = renderResult.getByTestId(`${formPrefix}-name-input`);
 
-      expect(policyItem).toBe(GLOBAL_ARTIFACT_TAG);
+        await userEvent.type(nameInput, '2');
+
+        expect(latestUpdatedItem.name).toBe('item name2');
+        expect(isLatestUpdatedItemValid).toBe(true);
+      });
+
+      it('item should be valid after editing description', async () => {
+        render();
+        const descriptionInput = renderResult.getByTestId(`${formPrefix}-description-input`);
+
+        await userEvent.type(descriptionInput, 'd');
+
+        expect(latestUpdatedItem.description).toBe('d');
+        expect(isLatestUpdatedItemValid).toBe(true);
+      });
+
+      it('item should be valid after editing comment', async () => {
+        render();
+        const commentInput = renderResult.getByLabelText('Comment Input');
+
+        await userEvent.type(commentInput, 'c');
+
+        expect(latestUpdatedItem.comments).toEqual([{ comment: 'c' }]);
+        expect(isLatestUpdatedItemValid).toBe(true);
+      });
     });
   });
 
@@ -502,26 +355,20 @@ describe('Event filter form', () => {
     });
 
     it('should add the tag always after policy assignment tags', async () => {
-      formProps.policies = createPolicies();
-      const perPolicyTags = formProps.policies.map(
-        (p) => `${BY_POLICY_ARTIFACT_TAG_PREFIX}${p.id}`
-      );
-      formProps.item.tags = perPolicyTags;
+      const perPolicyTag = buildPerPolicyTag('foo');
+      formProps.item.tags = [perPolicyTag];
       render();
 
       await userEvent.click(
         renderResult.getByTestId(`${formPrefix}-filterProcessDescendantsButton`)
       );
-      expect(latestUpdatedItem.tags).toStrictEqual([
-        ...perPolicyTags,
-        FILTER_PROCESS_DESCENDANTS_TAG,
-      ]);
+      expect(latestUpdatedItem.tags).toStrictEqual([perPolicyTag, FILTER_PROCESS_DESCENDANTS_TAG]);
 
       rerenderWithLatestProps();
       await userEvent.click(renderResult.getByTestId(`${formPrefix}-effectedPolicies-global`));
       expect(latestUpdatedItem.tags).toStrictEqual([
-        GLOBAL_ARTIFACT_TAG,
         FILTER_PROCESS_DESCENDANTS_TAG,
+        GLOBAL_ARTIFACT_TAG,
       ]);
 
       rerenderWithLatestProps();
@@ -541,10 +388,7 @@ describe('Event filter form', () => {
       await userEvent.click(
         renderResult.getByTestId('eventFilters-form-effectedPolicies-perPolicy')
       );
-      expect(latestUpdatedItem.tags).toStrictEqual([
-        ...perPolicyTags,
-        FILTER_PROCESS_DESCENDANTS_TAG,
-      ]);
+      expect(latestUpdatedItem.tags).toStrictEqual([FILTER_PROCESS_DESCENDANTS_TAG, perPolicyTag]);
     });
 
     it('should display a tooltip to the user', async () => {
@@ -558,6 +402,36 @@ describe('Event filter form', () => {
       await userEvent.hover(renderResult.getByTestId(tooltipIconSelector));
 
       expect(await renderResult.findByTestId(tooltipTextSelector)).toBeInTheDocument();
+    });
+
+    describe('when opened for editing', () => {
+      beforeEach(() => {
+        setValidItemForEditing();
+      });
+
+      it('item should be valid after changing to event filtering', async () => {
+        formProps.item.tags = [FILTER_PROCESS_DESCENDANTS_TAG];
+        render();
+        expect(isLatestUpdatedItemValid).toBe(false);
+
+        await userEvent.click(renderResult.getByTestId(`${formPrefix}-filterEventsButton`));
+
+        expect(isLatestUpdatedItemValid).toBe(true);
+        expect(latestUpdatedItem.tags).toEqual([]);
+      });
+
+      it('item should be valid after changing to process descendant filtering', async () => {
+        formProps.item.tags = [];
+        render();
+        expect(isLatestUpdatedItemValid).toBe(false);
+
+        await userEvent.click(
+          renderResult.getByTestId(`${formPrefix}-filterProcessDescendantsButton`)
+        );
+
+        expect(isLatestUpdatedItemValid).toBe(true);
+        expect(latestUpdatedItem.tags).toEqual([FILTER_PROCESS_DESCENDANTS_TAG]);
+      });
     });
   });
 
@@ -883,6 +757,14 @@ describe('Event filter form', () => {
           `The length of the comment is too long. The maximum length is ${MAX_COMMENT_LENGTH} characters.`
         )
       ).not.toBeNull();
+    });
+
+    it('should display form submission errors', () => {
+      const message = 'oh oh - error';
+      formProps.error = new Error(message) as IHttpFetchError;
+      const { getByTestId } = render();
+
+      expect(getByTestId('eventFilters-form-submitError').textContent).toMatch(message);
     });
   });
 });

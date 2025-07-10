@@ -16,7 +16,8 @@
       "user_provided_metadata": {},
       "enrolled_at": "2022-06-21T12:14:25Z",
       "last_checkin": "2022-06-27T12:26:29Z",
-      "tags": ["existingTag", "tag1"]
+      "tags": ["existingTag", "tag1"],
+      "agent": {"id": "agent1", "version": "9.0.0"}
     }
   }
 }
@@ -35,7 +36,8 @@
       "user_provided_metadata": {},
       "enrolled_at": "2022-06-21T12:14:25Z",
       "last_checkin": "2022-06-27T12:27:29Z",
-      "tags": ["existingTag"]
+      "tags": ["existingTag"],
+      "agent": {"id": "agent2", "version": "9.0.0"}
     }
   }
 }
@@ -55,7 +57,8 @@
       "enrolled_at": "2022-06-21T12:14:25Z",
       "last_checkin": "2022-06-27T12:28:29Z",
       "last_checkin": "2022-06-27T12:28:29Z",
-      "tags": ["tag1"]
+      "tags": ["tag1"],
+      "agent": {"id": "agent3", "version": "9.0.0"}
     }
   }
 }
@@ -73,7 +76,8 @@
       "local_metadata": { "host": {"hostname": "host4"}},
       "user_provided_metadata": {},
       "enrolled_at": "2022-06-21T12:17:25Z",
-      "last_checkin": "2022-06-27T12:29:29Z"
+      "last_checkin": "2022-06-27T12:29:29Z",
+      "agent": {"id": "agent4", "version": "9.0.0"}
     }
   }
 }

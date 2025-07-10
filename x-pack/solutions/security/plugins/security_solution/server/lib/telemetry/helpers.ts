@@ -12,7 +12,7 @@ import { merge } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
 import type { Logger, LogMeta } from '@kbn/core/server';
 import { sha256 } from 'js-sha256';
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 import { copyAllowlistedFields, filterList } from './filterlists';
 import type { PolicyConfig, PolicyData, SafeEndpointEvent } from '../../../common/endpoint/types';
 import type { ITelemetryReceiver } from './receiver';
@@ -24,6 +24,8 @@ import type {
   ExtraInfo,
   ListTemplate,
   Nullable,
+  ResponseActionsRuleTelemetryTemplate,
+  ResponseActionRules,
   TelemetryEvent,
   TimeFrame,
   TimelineResult,
@@ -234,6 +236,34 @@ export const templateExceptionList = (
 
     return null;
   });
+};
+
+/**
+ * Constructs the response actions custom rule telemetry schema from a list of rule params
+ * */
+export const responseActionsCustomRuleTelemetryData = (
+  responseActionsRules: ResponseActionRules,
+  clusterInfo: ESClusterInfo,
+  licenseInfo: Nullable<ESLicense>
+): ResponseActionsRuleTelemetryTemplate => {
+  const baseTelemetryData: ResponseActionsRuleTelemetryTemplate = {
+    '@timestamp': moment().toISOString(),
+    cluster_uuid: clusterInfo.cluster_uuid,
+    cluster_name: clusterInfo.cluster_name,
+    license_id: licenseInfo?.uid,
+    response_actions_rules: {
+      endpoint: 0,
+      osquery: 0,
+    },
+  };
+
+  return {
+    ...baseTelemetryData,
+    response_actions_rules: {
+      endpoint: responseActionsRules.endpoint,
+      osquery: responseActionsRules.osquery,
+    },
+  };
 };
 
 /**

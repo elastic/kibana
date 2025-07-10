@@ -2,7 +2,7 @@
   "type": "plugin",
   "id": "@kbn/unified-search-plugin",
   "owner": [
-    "@elastic/kibana-visualizations"
+    "@elastic/kibana-presentation"
   ],
   "group": "platform",
   "visibility": "shared",

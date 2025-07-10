@@ -23,8 +23,6 @@ import { useAuthz } from '../../../../../hooks';
 
 import { ConfiguredSettings } from '../../../components/form_settings';
 
-import { ExperimentalFeaturesService } from '../../../../../services';
-
 import { AgentPolicyAdvancedOptionsContent } from './agent_policy_advanced_fields';
 import { AgentPolicyGeneralFields } from './agent_policy_general_fields';
 import { AgentPolicyFormSystemMonitoringCheckbox } from './agent_policy_system_monitoring_field';
@@ -73,8 +71,6 @@ export const AgentPolicyForm: React.FunctionComponent<Props> = ({
 }) => {
   const authz = useAuthz();
   const isDisabled = !authz.fleet.allAgentPolicies;
-
-  const { advancedPolicySettings } = ExperimentalFeaturesService.get();
 
   const generalSettingsWrapper = (children: JSX.Element[]) => (
     <EuiDescribedFormGroup
@@ -152,37 +148,6 @@ export const AgentPolicyForm: React.FunctionComponent<Props> = ({
                 updateAgentPolicy={updateAgentPolicy}
                 validation={validation}
               />
-
-              {advancedPolicySettings ? (
-                <>
-                  <EuiSpacer size="xl" />
-
-                  <EuiTitle>
-                    <h3>
-                      <FormattedMessage
-                        id="xpack.fleet.agentPolicyForm.advancedSettingsTitle"
-                        defaultMessage="Advanced settings"
-                      />
-                    </h3>
-                  </EuiTitle>
-                  <EuiSpacer size="m" />
-                  <ConfiguredSettings
-                    configuredSettings={AGENT_POLICY_ADVANCED_SETTINGS}
-                    disabled={isDisabled}
-                  />
-                </>
-              ) : null}
-            </StyledEuiAccordion>
-          </>
-        ) : (
-          <>
-            <AgentPolicyAdvancedOptionsContent
-              agentPolicy={agentPolicy}
-              updateAgentPolicy={updateAgentPolicy}
-              validation={validation}
-              disabled={isDisabled}
-            />
-            {advancedPolicySettings ? (
               <>
                 <EuiSpacer size="xl" />
 
@@ -197,10 +162,38 @@ export const AgentPolicyForm: React.FunctionComponent<Props> = ({
                 <EuiSpacer size="m" />
                 <ConfiguredSettings
                   configuredSettings={AGENT_POLICY_ADVANCED_SETTINGS}
-                  disabled={isDisabled || !!agentPolicy?.supports_agentless}
+                  disabled={isDisabled}
                 />
               </>
-            ) : null}
+            </StyledEuiAccordion>
+          </>
+        ) : (
+          <>
+            <AgentPolicyAdvancedOptionsContent
+              agentPolicy={agentPolicy}
+              updateAgentPolicy={updateAgentPolicy}
+              validation={validation}
+              disabled={isDisabled}
+            />
+            <>
+              <EuiSpacer size="xl" />
+
+              <EuiTitle>
+                <h3>
+                  <FormattedMessage
+                    id="xpack.fleet.agentPolicyForm.advancedSettingsTitle"
+                    defaultMessage="Advanced settings"
+                  />
+                </h3>
+              </EuiTitle>
+              <EuiSpacer size="m" />
+              <ConfiguredSettings
+                configuredSettings={AGENT_POLICY_ADVANCED_SETTINGS}
+                disabled={
+                  isDisabled || !!agentPolicy?.supports_agentless || !!agentPolicy?.is_managed
+                }
+              />
+            </>
             <EuiSpacer size="xl" />
           </>
         )}

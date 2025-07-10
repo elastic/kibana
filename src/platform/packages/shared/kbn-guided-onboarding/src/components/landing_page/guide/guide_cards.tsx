@@ -22,7 +22,7 @@ export type GuideCardSolutions = 'search' | 'observability' | 'security';
 
 export interface GuideCardsProps {
   activateGuide: (guideId: GuideId, guideState?: GuideState) => Promise<void>;
-  navigateToApp: ApplicationStart['navigateToApp'];
+  navigateToUrl: ApplicationStart['navigateToUrl'];
   activeFilter: GuideFilterValues;
   guidesState: GuideState[];
   filteredCards?: GuideCardConstants[];

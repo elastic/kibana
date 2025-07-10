@@ -18,34 +18,66 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { ViewMode } from '@kbn/presentation-publishing';
-import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { SerializedPanelState, ViewMode } from '@kbn/presentation-publishing';
+import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
+import { BehaviorSubject, of } from 'rxjs';
 import { SAVED_BOOK_ID } from '../../react_embeddables/saved_book/constants';
-import {
-  BookApi,
-  BookRuntimeState,
-  BookSerializedState,
-} from '../../react_embeddables/saved_book/types';
-import { lastSavedStateSessionStorage } from './last_saved_state';
-import { unsavedChangesSessionStorage } from './unsaved_changes';
+import { BookApi, BookSerializedState } from '../../react_embeddables/saved_book/types';
+import { savedStateManager, unsavedStateManager } from './session_storage';
+
+const BOOK_EMBEDDABLE_ID = 'BOOK_EMBEDDABLE_ID';
 
 export const StateManagementExample = ({ uiActions }: { uiActions: UiActionsStart }) => {
-  const saveNotification$ = useMemo(() => {
-    return new Subject<void>();
-  }, []);
-
   const [bookApi, setBookApi] = useState<BookApi | undefined>();
-  const [isSaving, setIsSaving] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
+  const parentApi = useMemo(() => {
+    const unsavedSavedBookState = unsavedStateManager.get();
+    const lastSavedbookState = savedStateManager.get();
+    const lastSavedBookState$ = new BehaviorSubject(lastSavedbookState);
+
+    return {
+      viewMode$: new BehaviorSubject<ViewMode>('edit'),
+      getSerializedStateForChild: (childId: string) => {
+        if (childId === BOOK_EMBEDDABLE_ID) {
+          return unsavedSavedBookState ? unsavedSavedBookState : lastSavedbookState;
+        }
+
+        return {
+          rawState: {},
+          references: [],
+        };
+      },
+      lastSavedStateForChild$: (childId: string) => {
+        return childId === BOOK_EMBEDDABLE_ID ? lastSavedBookState$ : of(undefined);
+      },
+      getLastSavedStateForChild: (childId: string) => {
+        return childId === BOOK_EMBEDDABLE_ID
+          ? lastSavedBookState$.value
+          : {
+              rawState: {},
+              references: [],
+            };
+      },
+      setLastSavedBookState: (savedState: SerializedPanelState<BookSerializedState>) => {
+        lastSavedBookState$.next(savedState);
+      },
+    };
+  }, []);
+
   useEffect(() => {
-    if (!bookApi || !bookApi.unsavedChanges) {
+    if (!bookApi) {
       return;
     }
-    const subscription = bookApi.unsavedChanges.subscribe((unsavedChanges) => {
-      setHasUnsavedChanges(unsavedChanges !== undefined);
-      unsavedChangesSessionStorage.save(unsavedChanges ?? {});
+    const subscription = bookApi.hasUnsavedChanges$.subscribe((nextHasUnsavedChanges) => {
+      if (!nextHasUnsavedChanges) {
+        unsavedStateManager.clear();
+        setHasUnsavedChanges(false);
+        return;
+      }
+
+      unsavedStateManager.set(bookApi.serializeState());
+      setHasUnsavedChanges(true);
     });
 
     return () => {
@@ -58,38 +90,38 @@ export const StateManagementExample = ({ uiActions }: { uiActions: UiActionsStar
       <EuiCallOut>
         <p>
           Each embeddable manages its own state. The page is only responsible for persisting and
-          providing the last persisted state to the embeddable.
+          providing the last saved state or last unsaved state to the embeddable.
         </p>
 
         <p>
-          The page renders the embeddable with <strong>ReactEmbeddableRenderer</strong> component.
-          On mount, ReactEmbeddableRenderer component calls{' '}
-          <strong>pageApi.getSerializedStateForChild</strong> to get the last saved state.
-          ReactEmbeddableRenderer component then calls{' '}
-          <strong>pageApi.getRuntimeStateForChild</strong> to get the last session&apos;s unsaved
-          changes. ReactEmbeddableRenderer merges last saved state with unsaved changes and passes
-          the merged state to the embeddable factory. ReactEmbeddableRender passes the embeddableApi
-          to the page by calling <strong>onApiAvailable</strong>.
+          The page renders the embeddable with <strong>EmbeddableRenderer</strong> component.
+          EmbeddableRender passes the embeddableApi to the page by calling{' '}
+          <strong>onApiAvailable</strong>.
         </p>
 
         <p>
-          The page subscribes to <strong>embeddableApi.unsavedChanges</strong> to receive embeddable
+          The page subscribes to <strong>embeddableApi.hasUnsavedChanges</strong> to by notified of
           unsaved changes. The page persists unsaved changes in session storage. The page provides
-          unsaved changes to the embeddable with <strong>pageApi.getRuntimeStateForChild</strong>.
+          unsaved changes to the embeddable with <strong>pageApi.getSerializedStateForChild</strong>
+          .
         </p>
 
         <p>
           The page gets embeddable state by calling <strong>embeddableApi.serializeState</strong>.
-          The page persists embeddable state in session storage. The page provides last saved state
-          to the embeddable with <strong>pageApi.getSerializedStateForChild</strong>.
+          The page persists embeddable state in session storage.
+        </p>
+
+        <p>
+          The page provides unsaved state or last saved state to the embeddable with{' '}
+          <strong>pageApi.getSerializedStateForChild</strong>.
         </p>
 
         <p>
           <EuiButtonEmpty
             color={'warning'}
             onClick={() => {
-              lastSavedStateSessionStorage.clear();
-              unsavedChangesSessionStorage.clear();
+              savedStateManager.clear();
+              unsavedStateManager.clear();
               window.location.reload();
             }}
           >
@@ -108,9 +140,9 @@ export const StateManagementExample = ({ uiActions }: { uiActions: UiActionsStar
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                disabled={isSaving || !bookApi}
+                disabled={!bookApi}
                 onClick={() => {
-                  bookApi?.resetUnsavedChanges?.();
+                  bookApi?.resetUnsavedChanges();
                 }}
               >
                 Reset
@@ -120,18 +152,16 @@ export const StateManagementExample = ({ uiActions }: { uiActions: UiActionsStar
         )}
         <EuiFlexItem grow={false}>
           <EuiButton
-            disabled={isSaving || !hasUnsavedChanges}
+            disabled={!hasUnsavedChanges}
             onClick={() => {
               if (!bookApi) {
                 return;
               }
 
-              setIsSaving(true);
-              const bookSerializedState = bookApi.serializeState();
-              lastSavedStateSessionStorage.save(bookSerializedState);
-              saveNotification$.next(); // signals embeddable unsaved change tracking to update last saved state
-              setHasUnsavedChanges(false);
-              setIsSaving(false);
+              const savedState = bookApi.serializeState();
+              parentApi.setLastSavedBookState(savedState);
+              savedStateManager.set(savedState);
+              unsavedStateManager.clear();
             }}
           >
             Save
@@ -141,26 +171,10 @@ export const StateManagementExample = ({ uiActions }: { uiActions: UiActionsStar
 
       <EuiSpacer size="m" />
 
-      <ReactEmbeddableRenderer<BookSerializedState, BookRuntimeState, BookApi>
+      <EmbeddableRenderer<BookSerializedState, BookApi>
         type={SAVED_BOOK_ID}
-        getParentApi={() => {
-          return {
-            /**
-             * return last saved embeddable state
-             */
-            getSerializedStateForChild: (childId: string) => {
-              return lastSavedStateSessionStorage.load();
-            },
-            /**
-             * return previous session's unsaved changes for embeddable
-             */
-            getRuntimeStateForChild: (childId: string) => {
-              return unsavedChangesSessionStorage.load();
-            },
-            saveNotification$,
-            viewMode: new BehaviorSubject<ViewMode>('edit'),
-          };
-        }}
+        maybeId={BOOK_EMBEDDABLE_ID}
+        getParentApi={() => parentApi}
         onApiAvailable={(api) => {
           setBookApi(api);
         }}

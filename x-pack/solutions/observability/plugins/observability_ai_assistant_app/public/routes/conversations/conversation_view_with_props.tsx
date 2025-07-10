@@ -6,14 +6,22 @@
  */
 
 import React from 'react';
-import { ConversationView } from '@kbn/ai-assistant';
+import { ConversationView, FlyoutPositionMode } from '@kbn/ai-assistant';
+import { ObservabilityAIAssistantFlyoutStateProvider } from '@kbn/observability-ai-assistant-plugin/public';
 import { useObservabilityAIAssistantParams } from '../../hooks/use_observability_ai_assistant_params';
 import { useObservabilityAIAssistantRouter } from '../../hooks/use_observability_ai_assistant_router';
+import { useLocalStorage } from '../../hooks/use_local_storage';
 
 export function ConversationViewWithProps() {
   const { path } = useObservabilityAIAssistantParams('/conversations/*');
   const conversationId = 'conversationId' in path ? path.conversationId : undefined;
   const observabilityAIAssistantRouter = useObservabilityAIAssistantRouter();
+
+  const [flyoutSettings] = useLocalStorage('observabilityAIAssistant.flyoutSettings', {
+    mode: FlyoutPositionMode.OVERLAY,
+    isOpen: false,
+  });
+
   function navigateToConversation(nextConversationId?: string) {
     if (nextConversationId) {
       observabilityAIAssistantRouter.push('/conversations/{conversationId}', {
@@ -26,19 +34,22 @@ export function ConversationViewWithProps() {
       observabilityAIAssistantRouter.push('/conversations/new', { path: {}, query: {} });
     }
   }
+
   return (
-    <ConversationView
-      conversationId={conversationId}
-      navigateToConversation={navigateToConversation}
-      newConversationHref={observabilityAIAssistantRouter.link('/conversations/new')}
-      getConversationHref={(id: string) =>
-        observabilityAIAssistantRouter.link(`/conversations/{conversationId}`, {
-          path: {
-            conversationId: id,
-          },
-        })
-      }
-      scopes={['observability']}
-    />
+    <ObservabilityAIAssistantFlyoutStateProvider isFlyoutOpen={flyoutSettings.isOpen}>
+      <ConversationView
+        conversationId={conversationId}
+        navigateToConversation={navigateToConversation}
+        newConversationHref={observabilityAIAssistantRouter.link('/conversations/new')}
+        getConversationHref={(id: string) =>
+          observabilityAIAssistantRouter.link(`/conversations/{conversationId}`, {
+            path: {
+              conversationId: id,
+            },
+          })
+        }
+        scopes={['observability']}
+      />
+    </ObservabilityAIAssistantFlyoutStateProvider>
   );
 }

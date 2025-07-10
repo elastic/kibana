@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiConfirmModal } from '@elastic/eui';
+import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import * as i18n from '../custom_fields/translations';
 
 interface ConfirmDeleteCaseModalProps {
@@ -22,6 +22,8 @@ const DeleteConfirmationModalComponent: React.FC<ConfirmDeleteCaseModalProps> = 
   onCancel,
   onConfirm,
 }) => {
+  const titleId = useGeneratedHtmlId();
+
   return (
     <EuiConfirmModal
       buttonColor="danger"
@@ -31,7 +33,11 @@ const DeleteConfirmationModalComponent: React.FC<ConfirmDeleteCaseModalProps> = 
       onCancel={onCancel}
       onConfirm={onConfirm}
       title={title}
+      titleProps={{
+        id: titleId,
+      }}
       confirmButtonText={i18n.DELETE}
+      aria-labelledby={titleId}
     >
       {message}
     </EuiConfirmModal>

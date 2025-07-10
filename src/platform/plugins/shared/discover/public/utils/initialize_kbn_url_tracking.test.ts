@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AppUpdater } from '@kbn/core/public';
+import type { AppUpdater } from '@kbn/core/public';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
-import { DiscoverSetupPlugins } from '../types';
+import type { DiscoverSetupPlugins } from '../types';
 import { initializeKbnUrlTracking } from './initialize_kbn_url_tracking';
 
 describe('initializeKbnUrlTracking', () => {

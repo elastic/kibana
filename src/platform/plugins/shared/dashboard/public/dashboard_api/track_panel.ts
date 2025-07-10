@@ -7,13 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 
-export function initializeTrackPanel(untilEmbeddableLoaded: (id: string) => Promise<undefined>) {
+export const highlightAnimationDuration = 2000;
+
+export function initializeTrackPanel(untilLoaded: (id: string) => Promise<undefined>) {
   const expandedPanelId$ = new BehaviorSubject<string | undefined>(undefined);
   const focusedPanelId$ = new BehaviorSubject<string | undefined>(undefined);
   const highlightPanelId$ = new BehaviorSubject<string | undefined>(undefined);
   const scrollToPanelId$ = new BehaviorSubject<string | undefined>(undefined);
+  const scrollToBottom$ = new Subject<void>();
   let scrollPosition: number | undefined;
 
   function setScrollToPanelId(id: string | undefined) {
@@ -25,7 +28,7 @@ export function initializeTrackPanel(untilEmbeddableLoaded: (id: string) => Prom
   }
 
   return {
-    expandedPanelId: expandedPanelId$,
+    expandedPanelId$,
     expandPanel: (panelId: string) => {
       const isPanelExpanded = panelId === expandedPanelId$.value;
 
@@ -36,9 +39,7 @@ export function initializeTrackPanel(untilEmbeddableLoaded: (id: string) => Prom
       }
 
       setExpandedPanelId(panelId);
-      if (window.scrollY > 0) {
-        scrollPosition = window.scrollY;
-      }
+      scrollPosition = window.scrollY;
     },
     focusedPanelId$,
     highlightPanelId$,
@@ -46,12 +47,13 @@ export function initializeTrackPanel(untilEmbeddableLoaded: (id: string) => Prom
       const id = highlightPanelId$.value;
 
       if (id && panelRef) {
-        untilEmbeddableLoaded(id).then(() => {
-          panelRef.classList.add('dshDashboardGrid__item--highlighted');
+        untilLoaded(id).then(() => {
+          // Adds the highlight class in the next event loop to allow the DOM to update
+          setTimeout(() => panelRef.classList.add('dshDashboardGrid__item--highlighted'), 0);
           // Removes the class after the highlight animation finishes
           setTimeout(() => {
             panelRef.classList.remove('dshDashboardGrid__item--highlighted');
-          }, 5000);
+          }, highlightAnimationDuration);
         });
       }
       highlightPanelId$.next(undefined);
@@ -61,23 +63,22 @@ export function initializeTrackPanel(untilEmbeddableLoaded: (id: string) => Prom
       const id = scrollToPanelId$.value;
       if (!id) return;
 
-      untilEmbeddableLoaded(id).then(() => {
+      untilLoaded(id).then(() => {
         setScrollToPanelId(undefined);
-        if (scrollPosition) {
-          panelRef.ontransitionend = () => {
-            // Scroll to the last scroll position after the transition ends to ensure the panel is back in the right position before scrolling
-            // This is necessary because when an expanded panel collapses, it takes some time for the panel to return to its original position
-            window.scrollTo({ top: scrollPosition });
-            scrollPosition = undefined;
-            panelRef.ontransitionend = null;
-          };
-          return;
+        if (scrollPosition !== undefined) {
+          window.scrollTo({ top: scrollPosition, behavior: 'smooth' });
+          scrollPosition = undefined;
+        } else {
+          panelRef.scrollIntoView({ block: 'start', behavior: 'smooth' });
         }
-        panelRef.scrollIntoView({ block: 'start' });
       });
     },
     scrollToTop: () => {
-      window.scroll(0, 0);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    },
+    scrollToBottom$,
+    scrollToBottom: () => {
+      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
     },
     setFocusedPanelId: (id: string | undefined) => {
       if (focusedPanelId$.value !== id) focusedPanelId$.next(id);

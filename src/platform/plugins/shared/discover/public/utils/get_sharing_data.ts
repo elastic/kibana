@@ -18,14 +18,12 @@ import type { Filter } from '@kbn/es-query';
 import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
+  getSortForSearchSource,
   isNestedFieldParent,
   SORT_DEFAULT_ORDER_SETTING,
 } from '@kbn/discover-utils';
-import {
-  DiscoverAppState,
-  isEqualFilters,
-} from '../application/main/state_management/discover_app_state_container';
-import { getSortForSearchSource } from './sorting';
+import type { DiscoverAppState } from '../application/main/state_management/discover_app_state_container';
+import { isEqualFilters } from '../application/main/state_management/discover_app_state_container';
 
 /**
  * Preparing data to share the current state as link or CSV/Report
@@ -137,15 +135,14 @@ export async function getSharingData(
 export interface DiscoverCapabilities {
   createShortUrl?: boolean;
   save?: boolean;
-  saveQuery?: boolean;
   show?: boolean;
   storeSearchSession?: boolean;
 }
 
 export const showPublicUrlSwitch = (anonymousUserCapabilities: Capabilities) => {
-  if (!anonymousUserCapabilities.discover) return false;
+  if (!anonymousUserCapabilities.discover_v2) return false;
 
-  const discover = anonymousUserCapabilities.discover as unknown as DiscoverCapabilities;
+  const discover = anonymousUserCapabilities.discover_v2 as unknown as DiscoverCapabilities;
 
   return !!discover.show;
 };

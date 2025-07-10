@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Story, DecoratorFn } from '@storybook/react';
+import type { StoryObj, Meta } from '@storybook/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
@@ -27,7 +27,7 @@ export default {
   component: AnalyzeDataButton,
   decorators: [
     (StoryComponent, { args }) => {
-      const { agentName, canShowDashboard, environment, serviceName } = args;
+      const { agentName, canShowDashboard, environment, serviceName } = args as unknown as Args;
 
       return (
         <MemoryRouter
@@ -42,7 +42,7 @@ export default {
               {
                 core: {
                   application: {
-                    capabilities: { dashboard: { show: canShowDashboard } },
+                    capabilities: { dashboard_v2: { show: canShowDashboard } },
                   },
                   http: { basePath: { get: () => '' } },
                 },
@@ -57,7 +57,6 @@ export default {
                 serviceName,
                 fallbackToTransactions: false,
                 serviceAgentStatus: FETCH_STATUS.SUCCESS,
-                serviceEntitySummaryStatus: FETCH_STATUS.SUCCESS,
               }}
             >
               <StoryComponent />
@@ -66,15 +65,18 @@ export default {
         </MemoryRouter>
       );
     },
-  ] as DecoratorFn[],
-};
+  ],
+} as Meta;
 
-export const Example: Story<Args> = () => {
-  return <AnalyzeDataButton />;
-};
-Example.args = {
-  agentName: 'iOS/swift',
-  canShowDashboard: true,
-  environment: 'testEnvironment',
-  serviceName: 'testServiceName',
+export const Example: StoryObj<Args> = {
+  render: () => {
+    return <AnalyzeDataButton />;
+  },
+
+  args: {
+    agentName: 'iOS/swift',
+    canShowDashboard: true,
+    environment: 'testEnvironment',
+    serviceName: 'testServiceName',
+  },
 };

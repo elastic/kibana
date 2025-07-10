@@ -8,13 +8,16 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { GetLensAttributes } from '../../common/components/visualization_actions/types';
 
-const internalReferenceIdMapping: Record<string, string> = { host: uuidv4(), user: uuidv4() };
+const internalReferenceIdMapping: Record<string, string> = {
+  host: `host-${uuidv4()}`,
+  user: `user-${uuidv4()}`,
+};
 
 export const getRiskScoreDonutAttributes: GetLensAttributes = ({
   stackByField = 'host',
   extraOptions = { spaceId: 'default' },
 }) => {
-  const layerId = uuidv4();
+  const layerId = `layer-id-${uuidv4()}`;
   const internalReferenceId = internalReferenceIdMapping[stackByField];
   return {
     title: `${stackByField} risk donut`,
@@ -131,14 +134,14 @@ export const getRiskScoreDonutAttributes: GetLensAttributes = ({
       adHocDataViews: {
         [internalReferenceId]: {
           id: internalReferenceId,
-          title: `ml_${stackByField}_risk_score_latest_${extraOptions.spaceId}`,
+          title: `ea_${stackByField}_risk_score_latest_${extraOptions.spaceId}`,
           timeFieldName: '',
           sourceFilters: [],
           fieldFormats: {},
           runtimeFieldMap: {},
           fieldAttrs: {},
           allowNoIndex: false,
-          name: `ml_${stackByField}_risk_score_latest_${extraOptions.spaceId}_no_timestamp`,
+          name: `ea_${stackByField}_risk_score_latest_${extraOptions.spaceId}_no_timestamp`,
         },
       },
     },

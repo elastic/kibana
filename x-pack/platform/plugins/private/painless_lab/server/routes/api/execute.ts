@@ -34,7 +34,7 @@ export function registerExecuteRoute({ router, license }: RouteDependencies) {
         const client = (await ctx.core).elasticsearch.client.asCurrentUser;
         const response = await client.scriptsPainlessExecute(
           {
-            // @ts-expect-error `ExecutePainlessScriptRequest.body` does not allow `string`
+            // Should this be `script` instead?
             body,
           },
           {

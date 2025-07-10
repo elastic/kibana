@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FunctionParameterType } from '../../definitions/types';
-import { setTestFunctions } from '../../shared/test_functions';
+import { type FunctionParameterType, FunctionDefinitionTypes } from '@kbn/esql-ast';
+import { Location } from '@kbn/esql-ast/src/commands_registry/types';
+import { setTestFunctions } from '@kbn/esql-ast/src/definitions/utils/test_functions';
 import { setup } from './helpers';
 
-describe('field and variable escaping', () => {
+describe('field and userDefinedColumn escaping', () => {
   it('recognizes escaped fields', async () => {
     const { expectErrors } = await setup();
     // command level
@@ -34,7 +35,7 @@ describe('field and variable escaping', () => {
     );
   });
 
-  it('recognizes escaped variables', async () => {
+  it('recognizes escaped userDefinedColumns', async () => {
     const { expectErrors } = await setup();
     // command level
     await expectErrors('ROW `var$iable` = 1 | EVAL `var$iable`', []);
@@ -51,12 +52,12 @@ describe('field and variable escaping', () => {
       []
     );
 
-    // expression variable
+    // expression userDefinedColumn
     await expectErrors('FROM index | EVAL doubleField + 20 | EVAL `doubleField + 20`', []);
     await expectErrors('ROW 21 + 20 | STATS AVG(`21 + 20`)', []);
   });
 
-  it('recognizes variables with spaces and comments', async () => {
+  it('recognizes userDefinedColumns with spaces and comments', async () => {
     const { expectErrors } = await setup();
     // command level
     await expectErrors(
@@ -109,28 +110,28 @@ describe('field and variable escaping', () => {
   });
 });
 
-describe('variable support', () => {
-  describe('variable data type detection', () => {
+describe('userDefinedColumn support', () => {
+  describe('userDefinedColumn data type detection', () => {
     // most of these tests are aspirational (and skipped) because we don't have
     // a good way to compute the type of an expression yet.
     beforeAll(() => {
       setTestFunctions([
-        // this test function is just used to test the type of the variable
+        // this test function is just used to test the type of the userDefinedColumn
         {
-          type: 'eval',
+          type: FunctionDefinitionTypes.SCALAR,
           description: 'Test function',
-          supportedCommands: ['eval'],
+          locationsAvailable: [Location.EVAL],
           name: 'test',
           signatures: [
             { params: [{ name: 'arg', type: 'cartesian_point' }], returnType: 'cartesian_point' },
           ],
         },
         // this test function is used to check that the correct return type is used
-        // when determining variable types
+        // when determining userDefinedColumn types
         {
-          type: 'eval',
+          type: FunctionDefinitionTypes.SCALAR,
           description: 'Test function',
-          supportedCommands: ['eval'],
+          locationsAvailable: [Location.EVAL],
           name: 'return_value',
           signatures: [
             { params: [{ name: 'arg', type: 'text' }], returnType: 'text' },
@@ -170,10 +171,10 @@ describe('variable support', () => {
     });
 
     // @todo unskip after https://github.com/elastic/kibana/issues/195682
-    test.skip('variables', async () => {
+    test.skip('userDefinedColumns', async () => {
       const { expectErrors } = await setup();
-      await expectErrors('FROM index | EVAL var = textField, var2 = var, TEST(var2)', [
-        `Argument of [test] must be [cartesian_point], found value [var2] type [text]`,
+      await expectErrors('FROM index | EVAL var = textField, col2 = var, TEST(col2)', [
+        `Argument of [test] must be [cartesian_point], found value [col2] type [text]`,
       ]);
     });
 

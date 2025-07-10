@@ -18,7 +18,7 @@ import {
   listFleetProxies,
   updateFleetProxy,
 } from '../fleet_proxies';
-import { listFleetServerHostsForProxyId } from '../fleet_server_host';
+import { fleetServerHostService } from '../fleet_server_host';
 import { agentPolicyService } from '../agent_policy';
 import { outputService } from '../output';
 
@@ -96,7 +96,7 @@ async function createOrUpdatePreconfiguredFleetProxies(
         );
         // Bump all the agent policy that use that proxy
         const [{ items: fleetServerHosts }, { items: outputs }] = await Promise.all([
-          listFleetServerHostsForProxyId(soClient, id),
+          fleetServerHostService.listAllForProxyId(soClient, id),
           outputService.listAllForProxyId(soClient, id),
         ]);
         if (
@@ -146,7 +146,7 @@ async function cleanPreconfiguredFleetProxies(
     }
 
     const [{ items: fleetServerHosts }, { items: outputs }] = await Promise.all([
-      listFleetServerHostsForProxyId(soClient, existingFleetProxy.id),
+      fleetServerHostService.listAllForProxyId(soClient, existingFleetProxy.id),
       outputService.listAllForProxyId(soClient, existingFleetProxy.id),
     ]);
     const isUsed = fleetServerHosts.length > 0 || outputs.length > 0;

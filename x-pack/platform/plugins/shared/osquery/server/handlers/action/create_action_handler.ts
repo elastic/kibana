@@ -8,11 +8,10 @@
 import { v4 as uuidv4 } from 'uuid';
 import moment from 'moment';
 import { filter, isEmpty, isNumber, map, omit, pick, pickBy, some } from 'lodash';
-import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
 import type { CreateLiveQueryRequestBodySchema } from '../../../common/api';
 import { createDynamicQueries, replacedQueries } from './create_queries';
-import { getInternalSavedObjectsClient } from '../../routes/utils';
 import { parseAgentSelection } from '../../lib/parse_agent_groups';
 import { packSavedObjectType } from '../../../common/types';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
@@ -21,13 +20,14 @@ import { ACTIONS_INDEX, QUERY_TIMEOUT } from '../../../common/constants';
 import { TELEMETRY_EBT_LIVE_QUERY_EVENT } from '../../lib/telemetry/constants';
 import type { PackSavedObject } from '../../common/types';
 import { CustomHttpRequestError } from '../../common/error';
+import { getInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
 
 interface Metadata {
   currentUser: string | undefined;
 }
 
 interface CreateActionHandlerOptions {
-  soClient?: SavedObjectsClientContract;
+  space?: { id: string };
   metadata?: Metadata;
   alertData?: ParsedTechnicalFields & { _index: string };
   error?: string;
@@ -40,24 +40,30 @@ export const createActionHandler = async (
 ) => {
   const [coreStartServices] = await osqueryContext.getStartServices();
   const esClientInternal = coreStartServices.elasticsearch.client.asInternalUser;
-  const internalSavedObjectsClient = await getInternalSavedObjectsClient(
-    osqueryContext.getStartServices
+
+  const spaceScopedInternalSavedObjectsClient = getInternalSavedObjectsClientForSpaceId(
+    coreStartServices,
+    options.space?.id ?? DEFAULT_SPACE_ID
   );
 
-  const { soClient, metadata, alertData, error } = options;
-  const savedObjectsClient = soClient ?? coreStartServices.savedObjects.createInternalRepository();
+  const { metadata, alertData, error } = options;
   const elasticsearchClient = coreStartServices.elasticsearch.client.asInternalUser;
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { agent_all, agent_ids, agent_platforms, agent_policy_ids } = params;
+  const {
+    agent_all: agentAll,
+    agent_ids: agentIds,
+    agent_platforms: agentPlatforms,
+    agent_policy_ids: agentPolicyIds,
+  } = params;
   const selectedAgents = await parseAgentSelection(
-    internalSavedObjectsClient,
+    spaceScopedInternalSavedObjectsClient,
     elasticsearchClient,
     osqueryContext,
     {
-      agents: agent_ids,
-      allAgentsSelected: !!agent_all,
-      platformsSelected: agent_platforms,
-      policiesSelected: agent_policy_ids,
+      agents: agentIds,
+      allAgentsSelected: !!agentAll,
+      platformsSelected: agentPlatforms,
+      policiesSelected: agentPolicyIds,
+      spaceId: options.space?.id ?? DEFAULT_SPACE_ID,
     }
   );
 
@@ -68,7 +74,10 @@ export const createActionHandler = async (
   let packSO;
 
   if (params.pack_id) {
-    packSO = await savedObjectsClient.get<PackSavedObject>(packSavedObjectType, params.pack_id);
+    packSO = await spaceScopedInternalSavedObjectsClient.get<PackSavedObject>(
+      packSavedObjectType,
+      params.pack_id
+    );
   }
 
   const osqueryAction = {
@@ -92,6 +101,7 @@ export const createActionHandler = async (
     pack_prebuilt: params.pack_id
       ? some(packSO?.references, ['type', 'osquery-pack-asset'])
       : undefined,
+    space_id: options.space?.id ?? DEFAULT_SPACE_ID,
     queries: packSO
       ? map(convertSOQueriesToPack(packSO.attributes.queries), (packQuery, packQueryId) => {
           const replacedQuery = replacedQueries(packQuery.query, alertData);
@@ -117,6 +127,8 @@ export const createActionHandler = async (
           agents: selectedAgents,
           osqueryContext,
           error,
+          spaceId: options.space?.id ?? DEFAULT_SPACE_ID,
+          spaceScopedClient: spaceScopedInternalSavedObjectsClient,
         }),
   };
 

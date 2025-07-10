@@ -17,8 +17,10 @@ const createDetectionRulesClientMock = () => {
     patchRule: jest.fn(),
     deleteRule: jest.fn(),
     upgradePrebuiltRule: jest.fn(),
+    revertPrebuiltRule: jest.fn(),
     importRule: jest.fn(),
     importRules: jest.fn(),
+    getRuleCustomizationStatus: jest.fn(),
   };
   return mocked;
 };

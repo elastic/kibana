@@ -19,7 +19,7 @@ import { CiStatsClient, TestGroupRunOrderResponse } from './client';
 
 import DISABLED_JEST_CONFIGS from '../../disabled_jest_configs.json';
 import { serverless, stateful } from '../../ftr_configs_manifests.json';
-import { expandAgentQueue } from '#pipeline-utils';
+import { collectEnvFromLabels, expandAgentQueue } from '#pipeline-utils';
 
 const ALL_FTR_MANIFEST_REL_PATHS = serverless.concat(stateful);
 
@@ -193,32 +193,6 @@ function getEnabledFtrConfigs(patterns?: string[]) {
   } catch (_) {
     const error = _ instanceof Error ? _ : new Error(`${_} thrown`);
     throw new Error(`unable to collect enabled FTR configs: ${error.message}`);
-  }
-}
-
-/**
- * Collects environment variables from labels on the PR
- * TODO: extract this (and other functions from this big file) to a separate module
- */
-function collectEnvFromLabels() {
-  const LABEL_MAPPING: Record<string, Record<string, string>> = {
-    'ci:use-chrome-beta': {
-      USE_CHROME_BETA: 'true',
-    },
-  };
-
-  const envFromlabels: Record<string, string> = {};
-  if (!process.env.GITHUB_PR_LABELS) {
-    return envFromlabels;
-  } else {
-    const labels = process.env.GITHUB_PR_LABELS.split(',');
-    labels.forEach((label) => {
-      const env = LABEL_MAPPING[label];
-      if (env) {
-        Object.assign(envFromlabels, env);
-      }
-    });
-    return envFromlabels;
   }
 }
 
@@ -487,7 +461,7 @@ export async function pickTestGroupRunOrder() {
             key: 'jest',
             agents: {
               ...expandAgentQueue('n2-4-spot'),
-              diskSizeGb: 75,
+              diskSizeGb: 80,
             },
             retry: {
               automatic: [
@@ -558,6 +532,60 @@ export async function pickTestGroupRunOrder() {
               ),
           }
         : [],
+    ].flat()
+  );
+}
+
+export async function pickScoutTestGroupRunOrder(scoutConfigsPath: string) {
+  const bk = new BuildkiteClient();
+  const envFromlabels: Record<string, string> = collectEnvFromLabels();
+
+  if (!Fs.existsSync(scoutConfigsPath)) {
+    throw new Error(`Scout configs file not found at ${scoutConfigsPath}`);
+  }
+
+  const rawScoutConfigs = JSON.parse(Fs.readFileSync(scoutConfigsPath, 'utf-8'));
+  const pluginsWithScoutConfigs: string[] = Object.keys(rawScoutConfigs);
+
+  if (pluginsWithScoutConfigs.length === 0) {
+    // no scout configs found, nothing to need to upload steps
+    return;
+  }
+
+  const scoutGroups = pluginsWithScoutConfigs.map((plugin) => ({
+    title: plugin,
+    key: plugin,
+    usesParallelWorkers: rawScoutConfigs[plugin].usesParallelWorkers,
+    group: rawScoutConfigs[plugin].group,
+  }));
+
+  // upload the step definitions to Buildkite
+  bk.uploadSteps(
+    [
+      {
+        group: 'Scout Configs',
+        key: 'scout-configs',
+        depends_on: ['build'],
+        steps: scoutGroups.map(
+          ({ title, key, group, usesParallelWorkers }): BuildkiteStep => ({
+            label: `Scout: [ ${group} / ${title} ] plugin`,
+            command: getRequiredEnv('SCOUT_CONFIGS_SCRIPT'),
+            timeout_in_minutes: 60,
+            agents: expandAgentQueue(usesParallelWorkers ? 'n2-8-spot' : 'n2-4-spot'),
+            env: {
+              SCOUT_CONFIG_GROUP_KEY: key,
+              SCOUT_CONFIG_GROUP_TYPE: group,
+              ...envFromlabels,
+            },
+            retry: {
+              automatic: [
+                { exit_status: '-1', limit: 1 },
+                { exit_status: '*', limit: 0 },
+              ],
+            },
+          })
+        ),
+      },
     ].flat()
   );
 }

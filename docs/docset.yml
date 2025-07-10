@@ -1,0 +1,64 @@
+project: 'Kibana docs'
+products:
+  - id: kibana
+exclude:
+  - settings-gen/readme.md
+  - development/plugins/expressions/public/kibana-plugin-plugins-expressions-public.createdefaultinspectoradapters.md
+cross_links:
+  - apm-agent-nodejs
+  - apm-agent-rum-js
+  - docs-content
+  - ecs
+  - elasticsearch
+toc:
+  - toc: reference
+  - toc: release-notes
+  - toc: extend
+subs:
+  version: "9.0.0"
+  branch: "9.0"
+  ecloud:   "Elastic Cloud"
+  ech:   "Elastic Cloud Hosted"
+  ess:   "Elasticsearch Service"
+  ece:   "Elastic Cloud Enterprise"
+  serverless-full:   "Elastic Cloud Serverless"
+  security-app:   "Elastic Security app"
+  stack-manage-app:   "Stack Management"
+  stack-monitor-app:   "Stack Monitoring"
+  rules-ui:   "Rules"
+  connectors-ui:   "Connectors"
+  connectors-feature:   "Actions and Connectors"
+  hosted-ems:   "Elastic Maps Server"
+  data-sources:   "data views"
+  agent:   "Elastic Agent"
+  agents:   "Elastic Agents"
+  fleet:   "Fleet"
+  fleet-server:   "Fleet Server"
+  package-manager:   "Elastic Package Manager"
+  stack:   "Elastic Stack"
+  es:   "Elasticsearch"
+  kib:   "Kibana"
+  ls:   "Logstash"
+  security-features:   "security features"
+  stack-security-features:   "Elastic Stack security features"
+  endpoint-sec:   "Endpoint Security"
+  swimlane:   "Swimlane"
+  sn:   "ServiceNow"
+  sn-itsm:   "ServiceNow ITSM"
+  sn-itom:   "ServiceNow ITOM"
+  sn-sir:   "ServiceNow SecOps"
+  ibm-r:   "IBM Resilient"
+  webhook:   "Webhook"
+  webhook-cm:   "Webhook - Case Management"
+  opsgenie:   "Opsgenie"
+  bedrock:   "Amazon Bedrock"
+  gemini:   "Google Gemini"
+  hive:   "TheHive"
+  xsoar:   "XSOAR"
+  report-features:   "reporting features"
+  ml:   "machine learning"
+  ccs:   "cross-cluster search"
+  anomaly-job:   "anomaly detection job"
+  observability:   "Observability"
+  kib-repo:   "https://github.com/elastic/kibana/"
+  kib-pull: "https://github.com/elastic/kibana/pull/"

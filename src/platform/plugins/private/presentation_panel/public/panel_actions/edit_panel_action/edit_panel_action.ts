@@ -23,8 +23,8 @@ import {
   FrequentCompatibilityChangeAction,
   IncompatibleActionError,
 } from '@kbn/ui-actions-plugin/public';
-
-export const ACTION_EDIT_PANEL = 'editPanel';
+import { map } from 'rxjs';
+import { ACTION_EDIT_PANEL } from './constants';
 
 export type EditPanelActionApi = CanAccessViewMode & HasEditCapabilities;
 
@@ -44,25 +44,17 @@ export class EditPanelAction
   public getDisplayName({ embeddable }: EmbeddableApiContext) {
     if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
     return i18n.translate('presentationPanel.action.editPanel.displayName', {
-      defaultMessage: 'Edit {value}',
+      defaultMessage: 'Edit {value} configuration',
       values: {
         value: embeddable.getTypeDisplayName(),
       },
     });
   }
 
-  public subscribeToCompatibilityChanges(
-    { embeddable }: EmbeddableApiContext,
-    onChange: (isCompatible: boolean, action: Action<EmbeddableApiContext>) => void
-  ) {
-    if (!isApiCompatible(embeddable)) return;
-    return getViewModeSubject(embeddable)?.subscribe((viewMode) => {
-      if (viewMode === 'edit' && isApiCompatible(embeddable) && embeddable.isEditingEnabled()) {
-        onChange(true, this);
-        return;
-      }
-      onChange(false, this);
-    });
+  public getCompatibilityChangesSubject({ embeddable }: EmbeddableApiContext) {
+    return isApiCompatible(embeddable)
+      ? getViewModeSubject(embeddable)?.pipe(map(() => undefined))
+      : undefined;
   }
 
   public couldBecomeCompatible({ embeddable }: EmbeddableApiContext) {

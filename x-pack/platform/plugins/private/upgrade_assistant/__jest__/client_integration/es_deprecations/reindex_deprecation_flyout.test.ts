@@ -21,6 +21,10 @@ const defaultReindexStatusMeta: ReindexStatusResponse['meta'] = {
   indexName: 'foo',
   reindexName: 'reindexed-foo',
   aliases: [],
+  isFrozen: false,
+  isReadonly: false,
+  isInDataStream: false,
+  isFollowerIndex: false,
 };
 
 describe('Reindex deprecation flyout', () => {
@@ -67,36 +71,22 @@ describe('Reindex deprecation flyout', () => {
     testBed.component.update();
   });
 
-  it('renders a flyout with reindexing details', async () => {
-    const reindexDeprecation = esDeprecationsMockResponse.deprecations[3];
-    const { actions, find, exists } = testBed;
-
-    await actions.table.clickDeprecationRowAt('reindex', 0);
-
-    expect(exists('reindexDetails')).toBe(true);
-    expect(find('reindexDetails.flyoutTitle').text()).toContain(
-      `Reindex ${reindexDeprecation.index}`
-    );
-  });
-
   it('renders error callout when reindex fails', async () => {
-    await act(async () => {
-      testBed = await setupElasticsearchPage(httpSetup);
-    });
-
-    testBed.component.update();
-
-    const { actions, exists } = testBed;
-
-    await actions.table.clickDeprecationRowAt('reindex', 0);
-
     httpRequestsMockHelpers.setStartReindexingResponse(MOCK_REINDEX_DEPRECATION.index!, undefined, {
       statusCode: 404,
       message: 'no such index [test]',
     });
 
-    await actions.reindexDeprecationFlyout.clickReindexButton();
+    const { actions, exists } = testBed;
 
+    await actions.table.clickDeprecationRowAt({
+      deprecationType: 'reindex',
+      index: 0,
+      action: 'reindex',
+    });
+    await actions.reindexDeprecationFlyout.clickReindexButton(); // details step
+    await actions.reindexDeprecationFlyout.clickReindexButton(); // warning step
+    expect(exists('reindexDetails')).toBe(true);
     expect(exists('reindexDetails.reindexingFailedCallout')).toBe(true);
   });
 
@@ -106,28 +96,34 @@ describe('Reindex deprecation flyout', () => {
       message: 'no such index [test]',
     });
 
-    await act(async () => {
-      testBed = await setupElasticsearchPage(httpSetup);
-    });
-
-    testBed.component.update();
-
     const { actions, exists } = testBed;
 
-    await actions.table.clickDeprecationRowAt('reindex', 0);
+    await actions.table.clickDeprecationRowAt({
+      deprecationType: 'reindex',
+      index: 0,
+      action: 'reindex',
+    });
+    await actions.reindexDeprecationFlyout.clickReindexButton(); // warning step
 
     expect(exists('reindexDetails.fetchFailedCallout')).toBe(true);
   });
 
   describe('reindexing progress', () => {
-    it('has not started yet', async () => {
+    it('renders a flyout with index confirm step for reindex', async () => {
+      const reindexDeprecation = esDeprecationsMockResponse.migrationsDeprecations[3];
       const { actions, find, exists } = testBed;
 
-      await actions.table.clickDeprecationRowAt('reindex', 0);
-      expect(find('reindexChecklistTitle').text()).toEqual('Reindexing process');
-      expect(exists('cancelReindexingDocumentsButton')).toBe(false);
-    });
+      await actions.table.clickDeprecationRowAt({
+        deprecationType: 'reindex',
+        index: 0,
+        action: 'reindex',
+      });
 
+      expect(exists('reindexDetails')).toBe(true);
+      expect(find('reindexDetails.flyoutTitle').text()).toContain(
+        `Reindex ${reindexDeprecation.index}`
+      );
+    });
     it('has started but not yet reindexing documents', async () => {
       httpRequestsMockHelpers.setReindexStatusResponse(MOCK_REINDEX_DEPRECATION.index!, {
         reindexOp: {
@@ -140,14 +136,15 @@ describe('Reindex deprecation flyout', () => {
         meta: defaultReindexStatusMeta,
       });
 
-      await act(async () => {
-        testBed = await setupElasticsearchPage(httpSetup);
-      });
-
-      testBed.component.update();
       const { actions, find, exists } = testBed;
 
-      await actions.table.clickDeprecationRowAt('reindex', 0);
+      await actions.table.clickDeprecationRowAt({
+        deprecationType: 'reindex',
+        index: 0,
+        action: 'reindex',
+      });
+      await actions.reindexDeprecationFlyout.clickReindexButton(); // details step
+      await actions.reindexDeprecationFlyout.clickReindexButton(); // warning step
 
       expect(find('reindexChecklistTitle').text()).toEqual('Reindexing in progress… 5%');
       expect(exists('cancelReindexingDocumentsButton')).toBe(false);
@@ -165,14 +162,15 @@ describe('Reindex deprecation flyout', () => {
         meta: defaultReindexStatusMeta,
       });
 
-      await act(async () => {
-        testBed = await setupElasticsearchPage(httpSetup);
-      });
-
-      testBed.component.update();
       const { actions, find, exists } = testBed;
 
-      await actions.table.clickDeprecationRowAt('reindex', 0);
+      await actions.table.clickDeprecationRowAt({
+        deprecationType: 'reindex',
+        index: 0,
+        action: 'reindex',
+      });
+      await actions.reindexDeprecationFlyout.clickReindexButton(); // details step
+      await actions.reindexDeprecationFlyout.clickReindexButton(); // warning step
 
       expect(find('reindexChecklistTitle').text()).toEqual('Reindexing in progress… 30%');
       expect(exists('cancelReindexingDocumentsButton')).toBe(true);
@@ -190,14 +188,15 @@ describe('Reindex deprecation flyout', () => {
         meta: defaultReindexStatusMeta,
       });
 
-      await act(async () => {
-        testBed = await setupElasticsearchPage(httpSetup);
-      });
-
-      testBed.component.update();
       const { actions, find, exists } = testBed;
 
-      await actions.table.clickDeprecationRowAt('reindex', 0);
+      await actions.table.clickDeprecationRowAt({
+        deprecationType: 'reindex',
+        index: 0,
+        action: 'reindex',
+      });
+      await actions.reindexDeprecationFlyout.clickReindexButton(); // details step
+      await actions.reindexDeprecationFlyout.clickReindexButton(); // warning step
 
       expect(find('reindexChecklistTitle').text()).toEqual('Reindexing in progress… 90%');
       expect(exists('cancelReindexingDocumentsButton')).toBe(false);
@@ -215,14 +214,15 @@ describe('Reindex deprecation flyout', () => {
         meta: defaultReindexStatusMeta,
       });
 
-      await act(async () => {
-        testBed = await setupElasticsearchPage(httpSetup);
-      });
-
       const { actions, find, exists, component } = testBed;
-      component.update();
 
-      await actions.table.clickDeprecationRowAt('reindex', 0);
+      await actions.table.clickDeprecationRowAt({
+        deprecationType: 'reindex',
+        index: 0,
+        action: 'reindex',
+      });
+      await actions.reindexDeprecationFlyout.clickReindexButton(); // details step
+      await actions.reindexDeprecationFlyout.clickReindexButton(); // warning step
 
       expect(find('reindexChecklistTitle').text()).toEqual('Reindexing in progress… 95%');
       expect(exists('cancelReindexingDocumentsButton')).toBe(false);
@@ -250,14 +250,15 @@ describe('Reindex deprecation flyout', () => {
         },
       ]);
 
-      await act(async () => {
-        testBed = await setupElasticsearchPage(httpSetup);
-      });
-
-      testBed.component.update();
       const { actions, find } = testBed;
 
-      await actions.table.clickDeprecationRowAt('reindex', 0);
+      await actions.table.clickDeprecationRowAt({
+        deprecationType: 'reindex',
+        index: 0,
+        action: 'reindex',
+      });
+      await actions.reindexDeprecationFlyout.clickReindexButton(); // details step
+      await actions.reindexDeprecationFlyout.clickReindexButton(); // warning step
 
       expect(find('lowDiskSpaceCallout').text()).toContain('Nodes with low disk space');
       expect(find('impactedNodeListItem').length).toEqual(1);

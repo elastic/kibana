@@ -5,10 +5,20 @@
  * 2.0.
  */
 
-import React, { memo, useState, useCallback } from 'react';
+import React, { memo, useState, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiSelect, EuiFormLabel, EuiButtonEmpty, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import {
+  EuiSelect,
+  EuiButtonEmpty,
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiTitle,
+  EuiText,
+  EuiCode,
+  EuiSpacer,
+  EuiLink,
+} from '@elastic/eui';
 import semverGte from 'semver/functions/gte';
 
 import type { Agent } from '../../../../../types';
@@ -19,7 +29,7 @@ import { AGENT_LOG_LEVELS, DEFAULT_LOG_LEVEL } from '../../../../../../../../com
 export const SelectLogLevel: React.FC<{ agent: Agent; agentPolicyLogLevel?: string }> = memo(
   ({ agent, agentPolicyLogLevel = DEFAULT_LOG_LEVEL }) => {
     const authz = useAuthz();
-    const { notifications } = useStartServices();
+    const { notifications, docLinks } = useStartServices();
     const [isSetLevelLoading, setIsSetLevelLoading] = useState(false);
     const [isResetLevelLoading, setIsResetLevelLoading] = useState(false);
     const canResetLogLevel = semverGte(
@@ -108,21 +118,52 @@ export const SelectLogLevel: React.FC<{ agent: Agent; agentPolicyLogLevel?: stri
       send();
     }, [notifications, selectedLogLevel, agent.id]);
 
+    useEffect(() => {
+      if (selectedLogLevel !== agentLogLevel) {
+        onClickApply();
+      }
+    }, [selectedLogLevel, agentLogLevel, onClickApply]);
+
     return (
       <>
-        <EuiFlexGroup gutterSize="m" alignItems="center">
+        <EuiTitle size="s">
+          <h2>
+            <FormattedMessage
+              id="xpack.fleet.agentLogs.selectLogLevelLabelText"
+              defaultMessage="Agent logging level"
+            />
+          </h2>
+        </EuiTitle>
+        <EuiSpacer size="s" />
+        <EuiFlexGroup alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiFormLabel htmlFor="selectAgentLogLevel">
+            <EuiText>
               <FormattedMessage
                 id="xpack.fleet.agentLogs.selectLogLevelLabelText"
-                defaultMessage="Agent logging level"
+                defaultMessage="Sets the log level for the agent. The default log level is {infoText}. {guideLink}"
+                values={{
+                  infoText: <EuiCode>info</EuiCode>,
+                  guideLink: (
+                    <EuiLink
+                      target="_blank"
+                      external={true}
+                      href={docLinks.links.fleet.agentLevelLogging}
+                    >
+                      <FormattedMessage
+                        id="xpack.fleet.agentLogs.levelGuideLinkText"
+                        defaultMessage="Learn More"
+                      />
+                    </EuiLink>
+                  ),
+                }}
               />
-            </EuiFormLabel>
+            </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiSelect
               disabled={isSetLevelLoading || !authz.fleet.allAgents}
               compressed={true}
+              fullWidth={true}
               id="selectAgentLogLevel"
               data-test-subj="selectAgentLogLevel"
               value={selectedLogLevel}
@@ -134,29 +175,6 @@ export const SelectLogLevel: React.FC<{ agent: Agent; agentPolicyLogLevel?: stri
                 text: level,
               }))}
             />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              flush="both"
-              size="xs"
-              disabled={!authz.fleet.allAgents}
-              isLoading={isSetLevelLoading || isResetLevelLoading}
-              iconType="check"
-              onClick={onClickApply}
-              data-test-subj="applyLogLevelBtn"
-            >
-              {isSetLevelLoading ? (
-                <FormattedMessage
-                  id="xpack.fleet.agentLogs.updateButtonLoadingText"
-                  defaultMessage="Applying changes..."
-                />
-              ) : (
-                <FormattedMessage
-                  id="xpack.fleet.agentLogs.updateButtonText"
-                  defaultMessage="Apply changes"
-                />
-              )}
-            </EuiButtonEmpty>
           </EuiFlexItem>
           {canResetLogLevel && (
             <EuiFlexItem grow={false}>

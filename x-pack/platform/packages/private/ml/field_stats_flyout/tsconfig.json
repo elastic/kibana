@@ -23,7 +23,6 @@
     "@kbn/i18n",
     "@kbn/react-field",
     "@kbn/ml-anomaly-utils",
-    "@kbn/ml-data-grid",
     "@kbn/ml-string-hash",
     "@kbn/ml-is-populated-object",
     "@kbn/ml-query-utils",

@@ -146,7 +146,7 @@ export const RepositoryFormStepOne: React.FunctionComponent<Props> = ({
               href={getRepositoryTypeDocUrl(docLinks, type)}
               target="_blank"
               size="xs"
-              iconType="iInCircle"
+              iconType="info"
             >
               <FormattedMessage
                 id="xpack.snapshotRestore.repositoryForm.fields.typeDocsLinkText"
@@ -352,6 +352,7 @@ export const RepositoryFormStepOne: React.FunctionComponent<Props> = ({
               defaultMessage="Fix errors before continuing."
             />
           }
+          role="alert"
           color="danger"
           data-test-subj="repositoryFormError"
         />

@@ -7,7 +7,7 @@
 
 import { getRandomString } from '@kbn/test-jest-helpers';
 
-import { SNIFF_MODE } from '../common/constants';
+import { SECURITY_MODEL, SNIFF_MODE } from '../common/constants';
 
 export const getRemoteClusterMock = ({
   name = getRandomString(),
@@ -19,7 +19,7 @@ export const getRemoteClusterMock = ({
   mode = SNIFF_MODE,
   proxyAddress,
   hasDeprecatedProxySetting = false,
-  securityModel = 'certificate',
+  securityModel = SECURITY_MODEL.CERTIFICATE,
 } = {}) => ({
   name,
   seeds,

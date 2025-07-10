@@ -11,11 +11,39 @@ import React from 'react';
 
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { HasUniqueId, EmbeddableApiContext } from '@kbn/presentation-publishing';
+import {
+  type HasUniqueId,
+  type EmbeddableApiContext,
+  type HasType,
+  type HasParentApi,
+  type PublishesViewMode,
+  apiHasType,
+  apiHasUniqueId,
+  apiHasParentApi,
+  apiCanAccessViewMode,
+  apiIsOfType,
+  getInheritedViewMode,
+} from '@kbn/presentation-publishing';
 import { IncompatibleActionError, type Action } from '@kbn/ui-actions-plugin/public';
 
-import { ACTION_DELETE_CONTROL } from '.';
-import { coreServices } from '../services/kibana_services';
+import { PresentationContainer, apiIsPresentationContainer } from '@kbn/presentation-containers';
+import { CONTROL_GROUP_TYPE } from '../../common';
+import { ACTION_DELETE_CONTROL } from './constants';
+import { confirmDeleteControl } from '../common';
+
+type DeleteControlActionApi = HasType &
+  HasUniqueId &
+  HasParentApi<PresentationContainer & PublishesViewMode & HasType>;
+
+export const compatibilityCheck = (api: unknown | null): api is DeleteControlActionApi =>
+  Boolean(
+    apiHasType(api) &&
+      apiHasUniqueId(api) &&
+      apiHasParentApi(api) &&
+      apiCanAccessViewMode(api.parentApi) &&
+      apiIsOfType(api.parentApi, CONTROL_GROUP_TYPE) &&
+      apiIsPresentationContainer(api.parentApi)
+  );
 
 export class DeleteControlAction implements Action<EmbeddableApiContext> {
   public readonly type = ACTION_DELETE_CONTROL;
@@ -49,36 +77,16 @@ export class DeleteControlAction implements Action<EmbeddableApiContext> {
   }
 
   public async isCompatible({ embeddable }: EmbeddableApiContext) {
-    const { isCompatible } = await import('./delete_control_action_compatibility_check');
-    return isCompatible(embeddable);
+    return compatibilityCheck(embeddable) && getInheritedViewMode(embeddable.parentApi) === 'edit';
   }
 
   public async execute({ embeddable }: EmbeddableApiContext) {
-    const { compatibilityCheck } = await import('./delete_control_action_compatibility_check');
     if (!compatibilityCheck(embeddable)) throw new IncompatibleActionError();
 
-    coreServices.overlays
-      .openConfirm(
-        i18n.translate('controls.controlGroup.management.delete.sub', {
-          defaultMessage: 'Controls are not recoverable once removed.',
-        }),
-        {
-          confirmButtonText: i18n.translate('controls.controlGroup.management.delete.confirm', {
-            defaultMessage: 'Delete',
-          }),
-          cancelButtonText: i18n.translate('controls.controlGroup.management.delete.cancel', {
-            defaultMessage: 'Cancel',
-          }),
-          title: i18n.translate('controls.controlGroup.management.delete.deleteTitle', {
-            defaultMessage: 'Delete control?',
-          }),
-          buttonColor: 'danger',
-        }
-      )
-      .then((confirmed) => {
-        if (confirmed) {
-          embeddable.parentApi.removePanel(embeddable.uuid);
-        }
-      });
+    confirmDeleteControl().then((confirmed) => {
+      if (confirmed) {
+        embeddable.parentApi.removePanel(embeddable.uuid);
+      }
+    });
   }
 }

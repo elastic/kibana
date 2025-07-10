@@ -14,7 +14,7 @@ interface StylesDeps {
 }
 
 export const useStyles = ({ hasSearchResults }: StylesDeps) => {
-  const { euiTheme, euiVars } = useEuiTheme();
+  const { euiTheme } = useEuiTheme();
 
   const cached = useMemo(() => {
     const pagination: CSSObject = {
@@ -38,7 +38,7 @@ export const useStyles = ({ hasSearchResults }: StylesDeps) => {
 
     const searchBar: CSSObject = {
       position: 'relative',
-      backgroundColor: euiVars.euiFormBackgroundColor,
+      backgroundColor: euiTheme.components.forms.background,
       input: {
         paddingRight: hasSearchResults ? '200px' : euiTheme.size.xxl,
       },
@@ -49,7 +49,7 @@ export const useStyles = ({ hasSearchResults }: StylesDeps) => {
       searchBar,
       noResults,
     };
-  }, [euiTheme, euiVars, hasSearchResults]);
+  }, [euiTheme, hasSearchResults]);
 
   return cached;
 };

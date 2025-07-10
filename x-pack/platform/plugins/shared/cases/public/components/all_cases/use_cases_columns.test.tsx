@@ -6,19 +6,19 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 
 import type { GetCasesColumn } from './use_cases_columns';
 import { ExternalServiceColumn, useCasesColumns } from './use_cases_columns';
 import { useGetCasesMockState } from '../../containers/mock';
 import { connectors, useCaseConfigureResponse } from '../configure_cases/__mock__';
-import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer, readCasesPermissions, TestProviders } from '../../common/mock';
-import { renderHook } from '@testing-library/react';
+
+import { readCasesPermissions, renderWithTestingProviders, TestProviders } from '../../common/mock';
+import { renderHook, screen } from '@testing-library/react';
 import { CaseStatuses, CustomFieldTypes } from '../../../common/types/domain';
 import { userProfilesMap } from '../../containers/user_profiles/api.mock';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
+import { coreMock } from '@kbn/core/public/mocks';
 
 jest.mock('../../containers/configure/use_get_case_configuration');
 
@@ -40,17 +40,17 @@ const DEFAULT_SELECTED_COLUMNS = [
 ];
 
 describe('useCasesColumns ', () => {
-  let appMockRender: AppMockRenderer;
   const useCasesColumnsProps: GetCasesColumn = {
     filterStatus: [CaseStatuses.open],
     userProfiles: userProfilesMap,
     isSelectorView: false,
     selectedColumns: DEFAULT_SELECTED_COLUMNS,
+    settings: { displayIncrementalCaseId: true },
   };
 
   beforeEach(() => {
     jest.clearAllMocks();
-    appMockRender = createAppMockRenderer();
+
     useGetCaseConfigurationMock.mockImplementation(() => useCaseConfigureResponse);
   });
 
@@ -58,8 +58,6 @@ describe('useCasesColumns ', () => {
     const license = licensingMock.createLicense({
       license: { type: 'platinum' },
     });
-
-    appMockRender = createAppMockRenderer({ license });
 
     const { result } = renderHook(
       () =>
@@ -71,7 +69,7 @@ describe('useCasesColumns ', () => {
           })),
         }),
       {
-        wrapper: appMockRender.AppWrapper,
+        wrapper: (props) => <TestProviders {...props} license={license} />,
       }
     );
 
@@ -176,10 +174,8 @@ describe('useCasesColumns ', () => {
       license: { type: 'platinum' },
     });
 
-    appMockRender = createAppMockRenderer({ license });
-
     const { result } = renderHook(() => useCasesColumns(useCasesColumnsProps), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: (props) => <TestProviders {...props} license={license} />,
     });
 
     expect(result.current).toMatchInlineSnapshot(`
@@ -276,12 +272,10 @@ describe('useCasesColumns ', () => {
       license: { type: 'platinum' },
     });
 
-    appMockRender = createAppMockRenderer({ license });
-
     const { result } = renderHook(
       () => useCasesColumns({ ...useCasesColumnsProps, isSelectorView: true }),
       {
-        wrapper: appMockRender.AppWrapper,
+        wrapper: (props) => <TestProviders {...props} license={license} />,
       }
     );
 
@@ -319,7 +313,7 @@ describe('useCasesColumns ', () => {
           Object {
             "align": "right",
             "render": [Function],
-            "width": "70px",
+            "width": "120px",
           },
         ],
         "isLoadingColumns": false,
@@ -332,7 +326,7 @@ describe('useCasesColumns ', () => {
     const { result } = renderHook(
       () => useCasesColumns({ ...useCasesColumnsProps, isSelectorView: true }),
       {
-        wrapper: appMockRender.AppWrapper,
+        wrapper: TestProviders,
       }
     );
 
@@ -370,7 +364,7 @@ describe('useCasesColumns ', () => {
           Object {
             "align": "right",
             "render": [Function],
-            "width": "70px",
+            "width": "120px",
           },
         ],
         "isLoadingColumns": false,
@@ -383,7 +377,7 @@ describe('useCasesColumns ', () => {
     const { result } = renderHook(
       () => useCasesColumns({ ...useCasesColumnsProps, isSelectorView: true }),
       {
-        wrapper: appMockRender.AppWrapper,
+        wrapper: TestProviders,
       }
     );
 
@@ -421,7 +415,7 @@ describe('useCasesColumns ', () => {
           Object {
             "align": "right",
             "render": [Function],
-            "width": "70px",
+            "width": "120px",
           },
         ],
         "isLoadingColumns": false,
@@ -431,10 +425,8 @@ describe('useCasesColumns ', () => {
   });
 
   it('does not shows the actions if the user does not have the right permissions', async () => {
-    appMockRender = createAppMockRenderer({ permissions: readCasesPermissions() });
-
     const { result } = renderHook(() => useCasesColumns(useCasesColumnsProps), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: (props) => <TestProviders {...props} permissions={readCasesPermissions()} />,
     });
 
     expect(result.current).toMatchInlineSnapshot(`
@@ -521,7 +513,6 @@ describe('useCasesColumns ', () => {
     const textLabel = 'Text Label';
     const toggleLabel = 'Toggle Label';
 
-    appMockRender = createAppMockRenderer({ permissions: readCasesPermissions() });
     useGetCaseConfigurationMock.mockImplementation(() => ({
       data: {
         ...useCaseConfigureResponse.data,
@@ -544,7 +535,7 @@ describe('useCasesColumns ', () => {
           ],
         }),
       {
-        wrapper: appMockRender.AppWrapper,
+        wrapper: (props) => <TestProviders {...props} permissions={readCasesPermissions()} />,
       }
     );
 
@@ -639,99 +630,87 @@ describe('useCasesColumns ', () => {
 
   describe('ExternalServiceColumn ', () => {
     it('Not pushed render', () => {
-      const wrapper = mount(
-        <TestProviders>
-          <ExternalServiceColumn
-            theCase={useGetCasesMockState.data.cases[0]}
-            connectors={connectors}
-          />
-        </TestProviders>
+      renderWithTestingProviders(
+        <ExternalServiceColumn
+          theCase={useGetCasesMockState.data.cases[0]}
+          connectors={connectors}
+        />
       );
 
-      expect(
-        wrapper.find(`[data-test-subj="case-table-column-external-notPushed"]`).last().exists()
-      ).toBeTruthy();
+      expect(screen.getByTestId('case-table-column-external-notPushed')).toBeInTheDocument();
     });
 
     it('Up to date', () => {
-      const wrapper = mount(
-        <TestProviders>
-          <ExternalServiceColumn
-            theCase={useGetCasesMockState.data.cases[1]}
-            connectors={connectors}
-          />
-        </TestProviders>
+      renderWithTestingProviders(
+        <ExternalServiceColumn
+          theCase={useGetCasesMockState.data.cases[1]}
+          connectors={connectors}
+        />
       );
 
-      expect(
-        wrapper.find(`[data-test-subj="case-table-column-external-upToDate"]`).last().exists()
-      ).toBeTruthy();
+      expect(screen.getByTestId('case-table-column-external-upToDate')).toBeInTheDocument();
     });
 
     it('Needs update', () => {
-      const wrapper = mount(
-        <TestProviders>
-          <ExternalServiceColumn
-            theCase={useGetCasesMockState.data.cases[2]}
-            connectors={connectors}
-          />
-        </TestProviders>
+      renderWithTestingProviders(
+        <ExternalServiceColumn
+          theCase={useGetCasesMockState.data.cases[2]}
+          connectors={connectors}
+        />
       );
 
-      expect(
-        wrapper.find(`[data-test-subj="case-table-column-external-requiresUpdate"]`).last().exists()
-      ).toBeTruthy();
+      expect(screen.getByTestId('case-table-column-external-requiresUpdate')).toBeInTheDocument();
     });
 
     it('it does not throw when accessing the icon if the connector type is not registered', () => {
       // If the component throws the test will fail
       expect(() =>
-        mount(
-          <TestProviders>
-            <ExternalServiceColumn
-              theCase={useGetCasesMockState.data.cases[2]}
-              connectors={[
-                {
-                  id: 'none',
-                  actionTypeId: '.none',
-                  name: 'None',
-                  config: {},
-                  isPreconfigured: false,
-                  isSystemAction: false,
-                  isDeprecated: false,
-                },
-              ]}
-            />
-          </TestProviders>
+        renderWithTestingProviders(
+          <ExternalServiceColumn
+            theCase={useGetCasesMockState.data.cases[2]}
+            connectors={[
+              {
+                id: 'none',
+                actionTypeId: '.none',
+                name: 'None',
+                config: {},
+                isPreconfigured: false,
+                isSystemAction: false,
+                isDeprecated: false,
+              },
+            ]}
+          />
         )
       ).not.toThrowError();
     });
 
     it('shows the connectors icon if the user has read access to actions', async () => {
-      const result = appMockRender.render(
+      renderWithTestingProviders(
         <ExternalServiceColumn
           theCase={useGetCasesMockState.data.cases[1]}
           connectors={connectors}
         />
       );
 
-      expect(result.getByTestId('cases-table-connector-icon')).toBeInTheDocument();
+      expect(screen.getByTestId('cases-table-connector-icon')).toBeInTheDocument();
     });
 
     it('hides the connectors icon if the user does not have read access to actions', async () => {
-      appMockRender.coreStart.application.capabilities = {
-        ...appMockRender.coreStart.application.capabilities,
+      const coreStart = coreMock.createStart();
+      coreStart.application.capabilities = {
+        ...coreStart.application.capabilities,
         actions: { save: false, show: false },
       };
 
-      const result = appMockRender.render(
+      renderWithTestingProviders(
         <ExternalServiceColumn
           theCase={useGetCasesMockState.data.cases[1]}
           connectors={connectors}
-        />
+        />,
+        { wrapperProps: { coreStart } }
       );
 
-      expect(result.queryByTestId('cases-table-connector-icon')).toBe(null);
+      expect(screen.queryByTestId('cases-table-connector-icon')).toBe(null);
     });
   });
 });

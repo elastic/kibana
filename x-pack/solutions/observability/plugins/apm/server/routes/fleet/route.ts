@@ -36,7 +36,13 @@ function throwNotFoundIfFleetMigrationNotAvailable(featureFlags: ApmFeatureFlags
 
 const hasFleetDataRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/fleet/has_apm_policies',
-  options: { tags: [] },
+  security: {
+    authz: {
+      enabled: false,
+      reason:
+        "It's being used in the tutorial page, so it needs to be available for users even if they don't have APM permissions.",
+    },
+  },
   handler: async ({ core, plugins }): Promise<{ hasApmPolicies: boolean }> => {
     const fleetPluginStart = await plugins.fleet?.start();
     if (!fleetPluginStart) {
@@ -53,7 +59,13 @@ const hasFleetDataRoute = createApmServerRoute({
 
 const fleetAgentsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/fleet/agents',
-  options: { tags: [] },
+  security: {
+    authz: {
+      enabled: false,
+      reason:
+        "It's being used in the tutorial page, so it needs to be available for users even if they don't have APM permissions.",
+    },
+  },
   handler: async ({ core, plugins }): Promise<FleetAgentResponse> => {
     return getFleetAgents({
       coreStart: await core.start(),
@@ -86,7 +98,7 @@ const saveApmServerSchemaRoute = createApmServerRoute({
       { schemaJson: JSON.stringify(schema) },
       { id: APM_SERVER_SCHEMA_SAVED_OBJECT_ID, overwrite: true }
     );
-    logger.info(`Stored apm-server schema.`);
+    logger.debug(`Stored apm-server schema.`);
   },
 });
 
@@ -182,7 +194,13 @@ const createCloudApmPackagePolicyRoute = createApmServerRoute({
 
 const javaAgentVersions = createApmServerRoute({
   endpoint: 'GET /internal/apm/fleet/java_agent_versions',
-  options: { tags: [] },
+  security: {
+    authz: {
+      enabled: false,
+      reason:
+        'It returns static information stored in a public file in https://repo1.maven.org/maven2/co/elastic/apm/elastic-apm-agent/maven-metadata.xml',
+    },
+  },
   handler: async (): Promise<{ versions: string[] | undefined }> => {
     const versions = await getJavaAgentVersionsFromRegistry();
     return {

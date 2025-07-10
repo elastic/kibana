@@ -40,10 +40,6 @@ export function registerReindexIndicesRoutes(
           reason: 'Relies on es and saved object clients for authorization',
         },
       },
-      options: {
-        access: 'public',
-        summary: `Start or resume reindex`,
-      },
       validate: {
         params: schema.object({
           indexName: schema.string(),
@@ -87,9 +83,11 @@ export function registerReindexIndicesRoutes(
   router.get(
     {
       path: `${BASE_PATH}/{indexName}`,
-      options: {
-        access: 'public',
-        summary: `Get reindex status`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es and saved object clients for authorization',
+        },
       },
       validate: {
         params: schema.object({
@@ -107,7 +105,8 @@ export function registerReindexIndicesRoutes(
       const asCurrentUser = esClient.asCurrentUser;
       const reindexActions = reindexActionsFactory(
         getClient({ includedHiddenTypes: [REINDEX_OP_TYPE] }),
-        asCurrentUser
+        asCurrentUser,
+        log
       );
       const reindexService = reindexServiceFactory(asCurrentUser, reindexActions, log, licensing);
 
@@ -119,7 +118,9 @@ export function registerReindexIndicesRoutes(
           ? await reindexService.detectReindexWarnings(indexName)
           : [];
 
-        const indexAliases = await reindexService.getIndexAliases(indexName);
+        const isTruthy = (value?: string | boolean): boolean => value === true || value === 'true';
+        const { aliases, settings, isInDataStream, isFollowerIndex } =
+          await reindexService.getIndexInfo(indexName);
 
         const body: ReindexStatusResponse = {
           reindexOp: reindexOp ? reindexOp.attributes : undefined,
@@ -128,7 +129,11 @@ export function registerReindexIndicesRoutes(
           meta: {
             indexName,
             reindexName: generateNewIndexName(indexName),
-            aliases: Object.keys(indexAliases),
+            aliases: Object.keys(aliases),
+            isFrozen: isTruthy(settings?.frozen),
+            isReadonly: isTruthy(settings?.verified_read_only),
+            isInDataStream,
+            isFollowerIndex,
           },
         };
 
@@ -148,9 +153,11 @@ export function registerReindexIndicesRoutes(
   router.post(
     {
       path: `${BASE_PATH}/{indexName}/cancel`,
-      options: {
-        access: 'public',
-        summary: `Cancel reindex`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es and saved object clients for authorization',
+        },
       },
       validate: {
         params: schema.object({
@@ -168,7 +175,8 @@ export function registerReindexIndicesRoutes(
       const callAsCurrentUser = esClient.asCurrentUser;
       const reindexActions = reindexActionsFactory(
         getClient({ includedHiddenTypes: [REINDEX_OP_TYPE] }),
-        callAsCurrentUser
+        callAsCurrentUser,
+        log
       );
       const reindexService = reindexServiceFactory(
         callAsCurrentUser,

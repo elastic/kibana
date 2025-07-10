@@ -15,6 +15,7 @@ import {
   getLensRuntimeStateMock,
   createUnifiedSearchApi,
   getLensInternalApiMock,
+  mockDynamicActionsManager,
 } from '../mocks';
 import { createEmptyLensState } from '../helper';
 const DATAVIEW_ID = 'myDataView';
@@ -58,7 +59,6 @@ function setupActionsApi(
     () => runtimeState,
     createUnifiedSearchApi(),
     pick(apiMock, ['timeRange$']),
-    pick(apiMock, ['panelTitle']),
     internalApi,
     {
       ...services,
@@ -66,7 +66,8 @@ function setupActionsApi(
         ...services.data,
         nowProvider: { ...services.data.nowProvider, get: jest.fn(() => new Date()) },
       },
-    }
+    },
+    mockDynamicActionsManager()
   );
   return api;
 }

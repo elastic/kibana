@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { storiesOf } from '@storybook/react';
 import React from 'react';
+import type { Meta } from '@storybook/react';
 import moment from 'moment';
 import { FiltersGroup } from '../filters_group.component';
 import { FiltersGroup as FiltersGroupType } from '../types';
@@ -39,9 +39,18 @@ const filtersGroup: FiltersGroupType = {
   ],
 };
 
-storiesOf('components/WorkpadFilters/FiltersGroupComponent', module)
-  .addDecorator((story) => <div className="canvasLayout__sidebar">{story()}</div>)
-  .add('default', () => <FiltersGroup filtersGroup={filtersGroup} id="0" />)
-  .add('empty group', () => (
-    <FiltersGroup filtersGroup={{ name: 'Group 1', filters: [] }} id="0" />
-  ));
+export default {
+  title: 'components/WorkpadFilters/FiltersGroupComponent',
+  decorators: [(story) => <div className="canvasLayout__sidebar">{story()}</div>],
+} as Meta;
+
+export const Default = {
+  render: () => <FiltersGroup filtersGroup={filtersGroup} id="0" />,
+  name: 'default',
+};
+
+export const EmptyGroup = {
+  render: () => <FiltersGroup filtersGroup={{ name: 'Group 1', filters: [] }} id="0" />,
+
+  name: 'empty group',
+};

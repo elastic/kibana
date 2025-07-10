@@ -53,7 +53,7 @@ export function setupSavedObjects(savedObjects: SavedObjectsServiceSetup) {
       },
       getInAppUrl(obj) {
         return {
-          path: `/app/ml/supplied_configurations/?_a=${encodeURIComponent(
+          path: `/app/management/ml/anomaly_detection/ad_supplied_configurations?_a=${encodeURIComponent(
             rison.encode({ supplied_configurations: { queryText: obj.attributes.title } })
           )}`,
           uiCapabilitiesPath: 'ml.canGetJobs',

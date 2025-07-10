@@ -32,15 +32,9 @@ const getTestSubj = (selectedNode: PanelSelectedNode | null): string | undefined
   });
 };
 
-const getTargetTestSubj = (target: EventTarget | null): string | undefined => {
-  if (!target) return;
-
-  return (target as HTMLElement).dataset.testSubj;
-};
-
 export const NavigationPanel: FC = () => {
   const { euiTheme } = useEuiTheme();
-  const { isOpen, close, getContent, selectedNode } = usePanel();
+  const { isOpen, close, getContent, selectedNode, selectedNodeEl } = usePanel();
 
   // ESC key closes PanelNav
   const onKeyDown = useCallback(
@@ -54,26 +48,24 @@ export const NavigationPanel: FC = () => {
 
   const onOutsideClick = useCallback(
     ({ target }: Event) => {
+      if (!target) {
+        close();
+        return;
+      }
+
       let doClose = true;
 
-      if (target) {
-        // Only close if we are not clicking on the currently selected nav node
-        const testSubj =
-          getTargetTestSubj(target) ?? getTargetTestSubj((target as HTMLElement).parentNode);
-
-        if (
-          testSubj?.includes(`nav-item-${selectedNode?.path}`) ||
-          testSubj?.includes(`panelOpener-${selectedNode?.path}`)
-        ) {
-          doClose = false;
-        }
+      // Do not close if clicking on the button (or child of the button) of the currently selected node,
+      // because we must defer to allowing the button's click handler to manage toggling.
+      if (selectedNodeEl && selectedNodeEl.current?.contains(target as Node)) {
+        doClose = false;
       }
 
       if (doClose) {
         close();
       }
     },
-    [close, selectedNode]
+    [close, selectedNodeEl]
   );
 
   const panelWrapperClasses = getPanelWrapperStyles();
@@ -94,7 +86,7 @@ export const NavigationPanel: FC = () => {
               className={panelClasses}
               hasShadow
               borderRadius="none"
-              paddingSize="m"
+              paddingSize="none"
               data-test-subj={getTestSubj(selectedNode)}
             >
               {getContent()}

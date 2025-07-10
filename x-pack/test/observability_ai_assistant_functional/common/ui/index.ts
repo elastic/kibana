@@ -9,7 +9,7 @@ import type { PathsOf, TypeAsArgs, TypeOf } from '@kbn/typed-react-router-config
 import { kbnTestConfig } from '@kbn/test';
 import type { ObservabilityAIAssistantRoutes } from '@kbn/observability-ai-assistant-app-plugin/public/routes/config';
 import qs from 'query-string';
-import { User } from '../../../observability_ai_assistant_api_integration/common/users/users';
+import { User } from '../users/users';
 import type { InheritedFtrProviderContext } from '../../ftr_provider_context';
 
 export interface ObservabilityAIAssistantUIService {
@@ -31,15 +31,43 @@ const pages = {
     table: 'knowledgeBaseTable',
     tableTitleCell: 'knowledgeBaseTableTitleCell',
     tableAuthorCell: 'knowledgeBaseTableAuthorCell',
+    editUserInstructionButton:
+      'observabilityAiAssistantManagementKnowledgeBaseTabEditInstructionsButton',
+    entryMarkdownEditor: 'knowledgeBaseEditManualEntryFlyoutMarkdownEditor',
+    editEntryCancelButton: 'knowledgeBaseEditManualEntryFlyoutCancelButton',
+    saveEntryButton: 'knowledgeBaseEditManualEntryFlyoutSaveButton',
+    newEntryButton: 'knowledgeBaseNewEntryButton',
+    bulkImportEntryButton: 'knowledgeBaseBulkImportContextMenuItem',
+    bulkImportSaveButton: 'knowledgeBaseBulkImportFlyoutSaveButton',
+    bulkImportCancelButton: 'knowledgeBaseBulkImportFlyoutCancelButton',
+    bulkImportFlyout: 'knowledgeBaseBulkImportFlyout',
+    toastTitle: 'euiToastHeader__title',
   },
   conversations: {
-    setupGenAiConnectorsButtonSelector: `observabilityAiAssistantInitialSetupPanelSetUpGenerativeAiConnectorButton`,
+    setupGenAiConnectorsButtonSelector:
+      'observabilityAiAssistantInitialSetupPanelSetUpGenerativeAiConnectorButton',
     chatInput: 'observabilityAiAssistantChatPromptEditorTextArea',
-    retryButton: 'observabilityAiAssistantWelcomeMessageSetUpKnowledgeBaseButton',
+    installKnowledgeBaseButton: 'observabilityAiAssistantWelcomeMessageSetUpKnowledgeBaseButton',
+    settingUpKnowledgeBase: 'observabilityAiAssistantWelcomeMessageSettingUpKnowledgeBaseText',
+    selectModelDropdown: 'observabilityAiAssistantKnowledgeBaseModelDropdown',
+    pendingModelText: 'observabilityAiAssistantKnowledgeBaseModelPendingText',
+    redeployModelButton: 'observabilityAiAssistantKnowledgeBaseReDeployModelButton',
     conversationLink: 'observabilityAiAssistantConversationsLink',
     positiveFeedbackButton: 'observabilityAiAssistantFeedbackButtonsPositiveButton',
     connectorsErrorMsg: 'observabilityAiAssistantConnectorsError',
     conversationsPage: 'observabilityAiAssistantConversationsPage',
+    access: {
+      shareButton: 'observabilityAiAssistantChatAccessBadge',
+      sharedOption: 'observabilityAiAssistantChatSharedOption',
+      privateOption: 'observabilityAiAssistantChatPrivateOption',
+      loadingBadge: 'observabilityAiAssistantChatAccessLoadingBadge',
+    },
+    contextMenu: {
+      button: 'observabilityAiAssistantChatContextMenuButtonIcon',
+      archiveOption: 'observabilityAiAssistantContextMenuArchive',
+      unarchiveOption: 'observabilityAiAssistantContextMenuUnarchive',
+    },
+    archivedBadge: 'observabilityAiAssistantArchivedBadge',
   },
   createConnectorFlyout: {
     flyout: 'create-connector-flyout',
@@ -67,12 +95,13 @@ const pages = {
       'management-settings-editField-observability:aiAssistantSearchConnectorIndexPattern',
     saveButton: 'observabilityAiAssistantManagementBottomBarActionsButton',
     aiAssistantCard: 'aiAssistantSelectionPageObservabilityCard',
+    resetToDefaultLink:
+      'management-settings-resetField-observability:aiAssistantSearchConnectorIndexPattern',
   },
 };
 
 export async function ObservabilityAIAssistantUIProvider({
   getPageObjects,
-  getService,
 }: InheritedFtrProviderContext): Promise<ObservabilityAIAssistantUIService> {
   const pageObjects = getPageObjects(['common', 'security']);
 

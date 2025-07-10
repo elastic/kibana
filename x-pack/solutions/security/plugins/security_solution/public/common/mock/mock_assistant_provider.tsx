@@ -13,7 +13,8 @@ import { AssistantProvider } from '@kbn/elastic-assistant';
 import type { UserProfileService } from '@kbn/core/public';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { of } from 'rxjs';
-import { BASE_SECURITY_CONVERSATIONS } from '../../assistant/content/conversations';
+import { useAssistantContextValue } from '@kbn/elastic-assistant/impl/assistant_context';
+import { docLinksServiceMock } from '@kbn/core/public/mocks';
 
 interface Props {
   assistantAvailability?: AssistantAvailability;
@@ -32,41 +33,44 @@ export const MockAssistantProviderComponent: React.FC<Props> = ({
   const mockHttp = httpServiceMock.createStartContract({ basePath: '/test' });
   const mockNavigateToApp = jest.fn();
   const defaultAssistantAvailability: AssistantAvailability = {
+    hasSearchAILakeConfigurations: false,
     hasAssistantPrivilege: false,
     hasConnectorsAllPrivilege: true,
     hasConnectorsReadPrivilege: true,
     hasUpdateAIAssistantAnonymization: true,
     hasManageGlobalKnowledgeBase: true,
     isAssistantEnabled: true,
+    isStarterPromptsEnabled: true,
   };
   const chrome = chromeServiceMock.createStartContract();
   chrome.getChromeStyle$.mockReturnValue(of('classic'));
+  const docLinks = docLinksServiceMock.createStartContract();
 
   const mockUserProfileService = {
     getCurrent: jest.fn(() => Promise.resolve({ avatar: 'avatar' })),
   } as unknown as UserProfileService;
 
-  return (
-    <AssistantProvider
-      actionTypeRegistry={actionTypeRegistry}
-      assistantAvailability={assistantAvailability ?? defaultAssistantAvailability}
-      augmentMessageCodeBlocks={jest.fn(() => [])}
-      basePath={'https://localhost:5601/kbn'}
-      docLinks={{
-        ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
-        DOC_LINK_VERSION: 'current',
-      }}
-      getComments={jest.fn(() => [])}
-      http={mockHttp}
-      navigateToApp={mockNavigateToApp}
-      baseConversations={BASE_SECURITY_CONVERSATIONS}
-      currentAppId={'test'}
-      userProfileService={mockUserProfileService}
-      chrome={chrome}
-    >
-      {children}
-    </AssistantProvider>
-  );
+  const assistantContextValue = useAssistantContextValue({
+    actionTypeRegistry,
+    assistantAvailability: assistantAvailability ?? defaultAssistantAvailability,
+    augmentMessageCodeBlocks: {
+      mount: jest.fn().mockReturnValue(() => {}),
+    },
+    basePath: 'https://localhost:5601/kbn',
+    docLinks,
+    getComments: jest.fn(() => []),
+    http: mockHttp,
+    navigateToApp: mockNavigateToApp,
+    currentAppId: 'test',
+    productDocBase: {
+      installation: { getStatus: jest.fn(), install: jest.fn(), uninstall: jest.fn() },
+    },
+    userProfileService: mockUserProfileService,
+    chrome,
+    getUrlForApp: jest.fn(),
+  });
+
+  return <AssistantProvider value={assistantContextValue}>{children}</AssistantProvider>;
 };
 
 MockAssistantProviderComponent.displayName = 'MockAssistantProviderComponent';

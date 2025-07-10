@@ -53,7 +53,11 @@
     "@kbn/search-types",
     "@kbn/safer-lodash-set",
     "@kbn/esql-utils",
-    "@kbn/shared-ux-table-persist"
+    "@kbn/shared-ux-table-persist",
+    "@kbn/core-execution-context-common",
+    "@kbn/logging",
+    "@kbn/core-execution-context-server",
+    "@kbn/data-service-server",
   ],
   "exclude": [
     "target/**/*",

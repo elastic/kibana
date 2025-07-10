@@ -46,7 +46,19 @@ export const AgentStatuses = [
   'unenrolled',
   'updating',
   'degraded',
+  'uninstalled',
+  'orphaned',
 ] as const;
+
+export const ActiveAgentStatuses = [
+  'online',
+  'offline',
+  'enrolling',
+  'updating',
+  'degraded',
+  'error',
+  'orphaned',
+]; // excluded: unenrolling, unenrolled, inactive, uninstalled
 
 // Kueries for finding unprivileged and privileged agents
 // Privileged is `not` because the metadata field can be undefined

@@ -8,6 +8,7 @@
 import React, { useState } from 'react';
 import {
   EuiBadge,
+  EuiBasicTableColumn,
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
@@ -18,12 +19,12 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useDispatch } from 'react-redux';
 import { Criteria } from '@elastic/eui/src/components/basic_table/basic_table';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { CopyName } from './copy_name';
 import { ViewLocationMonitors } from './view_location_monitors';
 import { TableTitle } from '../../common/components/table_title';
 import { TAGS_LABEL } from '../components/tags_field';
 import { useSyntheticsSettingsContext } from '../../../contexts';
-import { setAddingNewPrivateLocation } from '../../../state/private_locations';
 import { PrivateLocationDocsLink, START_ADDING_LOCATIONS_DESCRIPTION } from './empty_locations';
 import { PrivateLocation } from '../../../../../../common/runtime_types';
 import { NoPermissionsTooltip } from '../../common/components/permissions';
@@ -31,6 +32,8 @@ import { DeleteLocation } from './delete_location';
 import { useLocationMonitors } from './hooks/use_location_monitors';
 import { PolicyName } from './policy_name';
 import { LOCATION_NAME_LABEL } from './location_form';
+import { setIsPrivateLocationFlyoutVisible } from '../../../state/private_locations/actions';
+import { ClientPluginsStart } from '../../../../../plugin';
 
 interface ListItem extends PrivateLocation {
   monitors: number;
@@ -39,10 +42,12 @@ interface ListItem extends PrivateLocation {
 export const PrivateLocationsTable = ({
   deleteLoading,
   onDelete,
+  onEdit,
   privateLocations,
 }: {
-  deleteLoading: boolean;
+  deleteLoading?: boolean;
   onDelete: (id: string) => void;
+  onEdit: (privateLocation: PrivateLocation) => void;
   privateLocations: PrivateLocation[];
 }) => {
   const dispatch = useDispatch();
@@ -54,12 +59,16 @@ export const PrivateLocationsTable = ({
 
   const { canSave, canManagePrivateLocations } = useSyntheticsSettingsContext();
 
+  const { services } = useKibana<ClientPluginsStart>();
+
+  const LazySpaceList = services.spaces?.ui.components.getSpaceList ?? (() => null);
+
   const tagsList = privateLocations.reduce((acc, item) => {
     const tags = item.tags || [];
     return new Set([...acc, ...tags]);
   }, new Set<string>());
 
-  const columns = [
+  const columns: Array<EuiBasicTableColumn<ListItem>> = [
     {
       field: 'label',
       name: LOCATION_NAME_LABEL,
@@ -98,8 +107,25 @@ export const PrivateLocationsTable = ({
       },
     },
     {
+      name: 'Spaces',
+      field: 'spaces',
+      sortable: true,
+      render: (spaces: string[]) => {
+        return <LazySpaceList namespaces={spaces} behaviorContext="outside-space" />;
+      },
+    },
+    {
       name: ACTIONS_LABEL,
       actions: [
+        {
+          name: EDIT_LOCATION,
+          description: EDIT_LOCATION,
+          isPrimary: true,
+          'data-test-subj': 'action-edit',
+          onClick: onEdit,
+          icon: 'pencil',
+          type: 'icon',
+        },
         {
           name: DELETE_LOCATION,
           description: DELETE_LOCATION,
@@ -124,7 +150,7 @@ export const PrivateLocationsTable = ({
     monitors: locationMonitors?.find((l) => l.id === location.id)?.count ?? 0,
   }));
 
-  const setIsAddingNew = (val: boolean) => dispatch(setAddingNewPrivateLocation(val));
+  const openFlyout = () => dispatch(setIsPrivateLocationFlyoutVisible(true));
 
   const renderToolRight = () => {
     return [
@@ -138,7 +164,7 @@ export const PrivateLocationsTable = ({
           data-test-subj={'addPrivateLocationButton'}
           isLoading={loading}
           disabled={!canSave || !canManagePrivateLocations}
-          onClick={() => setIsAddingNew(true)}
+          onClick={openFlyout}
           iconType="plusInCircle"
         >
           {ADD_LABEL}
@@ -221,6 +247,10 @@ const DELETE_LOCATION = i18n.translate(
     defaultMessage: 'Delete private location',
   }
 );
+
+const EDIT_LOCATION = i18n.translate('xpack.synthetics.settingsRoute.privateLocations.editLabel', {
+  defaultMessage: 'Edit private location',
+});
 
 const ADD_LABEL = i18n.translate('xpack.synthetics.monitorManagement.createLocation', {
   defaultMessage: 'Create location',

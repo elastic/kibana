@@ -7,10 +7,11 @@
 
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { RuleExecutionStatus } from '../../api/detection_engine';
-import { RuleExecutionStatusEnum } from '../../api/detection_engine';
+import { RuleCustomizationStatus, RuleExecutionStatusEnum } from '../../api/detection_engine';
 import { prepareKQLStringParam } from '../../utils/kql';
 import {
   ENABLED_FIELD,
+  IS_CUSTOMIZED_FIELD,
   LAST_RUN_OUTCOME_FIELD,
   PARAMS_IMMUTABLE_FIELD,
   PARAMS_TYPE_FIELD,
@@ -23,6 +24,8 @@ export const KQL_FILTER_IMMUTABLE_RULES = `${PARAMS_IMMUTABLE_FIELD}: true`;
 export const KQL_FILTER_MUTABLE_RULES = `${PARAMS_IMMUTABLE_FIELD}: false`;
 export const KQL_FILTER_ENABLED_RULES = `${ENABLED_FIELD}: true`;
 export const KQL_FILTER_DISABLED_RULES = `${ENABLED_FIELD}: false`;
+export const KQL_FILTER_CUSTOMIZED_RULES = `${IS_CUSTOMIZED_FIELD}: true`;
+export const KQL_FILTER_NOT_CUSTOMIZED_RULES = `${IS_CUSTOMIZED_FIELD}: false`;
 
 interface RulesFilterOptions {
   filter: string;
@@ -32,6 +35,9 @@ interface RulesFilterOptions {
   tags: string[];
   excludeRuleTypes: Type[];
   ruleExecutionStatus: RuleExecutionStatus;
+  customizationStatus: RuleCustomizationStatus;
+  ruleIds: string[];
+  includeRuleTypes?: Type[];
 }
 
 /**
@@ -49,6 +55,8 @@ export function convertRulesFilterToKQL({
   tags,
   excludeRuleTypes = [],
   ruleExecutionStatus,
+  customizationStatus,
+  includeRuleTypes = [],
 }: Partial<RulesFilterOptions>): string {
   const kql: string[] = [];
 
@@ -76,12 +84,22 @@ export function convertRulesFilterToKQL({
     kql.push(`NOT ${convertRuleTypesToKQL(excludeRuleTypes)}`);
   }
 
+  if (includeRuleTypes.length) {
+    kql.push(convertRuleTypesToKQL(includeRuleTypes));
+  }
+
   if (ruleExecutionStatus === RuleExecutionStatusEnum.succeeded) {
     kql.push(`${LAST_RUN_OUTCOME_FIELD}: "succeeded"`);
   } else if (ruleExecutionStatus === RuleExecutionStatusEnum['partial failure']) {
     kql.push(`${LAST_RUN_OUTCOME_FIELD}: "warning"`);
   } else if (ruleExecutionStatus === RuleExecutionStatusEnum.failed) {
     kql.push(`${LAST_RUN_OUTCOME_FIELD}: "failed"`);
+  }
+
+  if (customizationStatus === RuleCustomizationStatus.CUSTOMIZED) {
+    kql.push(KQL_FILTER_CUSTOMIZED_RULES);
+  } else if (customizationStatus === RuleCustomizationStatus.NOT_CUSTOMIZED) {
+    kql.push(KQL_FILTER_NOT_CUSTOMIZED_RULES);
   }
 
   return kql.join(' AND ');

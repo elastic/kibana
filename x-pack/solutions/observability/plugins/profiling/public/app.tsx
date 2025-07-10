@@ -8,6 +8,7 @@
 import type { AppMountParameters, CoreSetup, CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { PerformanceContextProvider } from '@kbn/ebt-tools';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
@@ -91,29 +92,31 @@ function App({
         <i18nCore.Context>
           <RedirectAppLinks coreStart={coreStart} currentAppId="profiling">
             <RouterProvider router={profilingRouter as any} history={history}>
-              <RouterErrorBoundary>
-                <TimeRangeContextProvider>
-                  <ProfilingDependenciesContextProvider value={profilingDependencies}>
-                    <ProfilingSetupStatusContextProvider>
-                      <LicenseProvider>
-                        <>
-                          <CheckSetup>
-                            <RedirectWithDefaultDateRange>
-                              <RouteBreadcrumbsContextProvider>
-                                <RouteRenderer />
-                              </RouteBreadcrumbsContextProvider>
-                            </RedirectWithDefaultDateRange>
-                          </CheckSetup>
-                          <MountProfilingActionMenu
-                            setHeaderActionMenu={setHeaderActionMenu}
-                            theme$={theme$}
-                          />
-                        </>
-                      </LicenseProvider>
-                    </ProfilingSetupStatusContextProvider>
-                  </ProfilingDependenciesContextProvider>
-                </TimeRangeContextProvider>
-              </RouterErrorBoundary>
+              <PerformanceContextProvider>
+                <RouterErrorBoundary>
+                  <TimeRangeContextProvider>
+                    <ProfilingDependenciesContextProvider value={profilingDependencies}>
+                      <ProfilingSetupStatusContextProvider>
+                        <LicenseProvider>
+                          <>
+                            <CheckSetup>
+                              <RedirectWithDefaultDateRange>
+                                <RouteBreadcrumbsContextProvider>
+                                  <RouteRenderer />
+                                </RouteBreadcrumbsContextProvider>
+                              </RedirectWithDefaultDateRange>
+                            </CheckSetup>
+                            <MountProfilingActionMenu
+                              setHeaderActionMenu={setHeaderActionMenu}
+                              theme$={theme$}
+                            />
+                          </>
+                        </LicenseProvider>
+                      </ProfilingSetupStatusContextProvider>
+                    </ProfilingDependenciesContextProvider>
+                  </TimeRangeContextProvider>
+                </RouterErrorBoundary>
+              </PerformanceContextProvider>
             </RouterProvider>
           </RedirectAppLinks>
         </i18nCore.Context>

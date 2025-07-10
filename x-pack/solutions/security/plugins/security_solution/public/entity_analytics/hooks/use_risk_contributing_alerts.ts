@@ -8,18 +8,16 @@
 import { useEffect } from 'react';
 import type { ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 
+import type { EntityType } from '../../../common/entity_analytics/types';
 import type { RiskScoreInput } from '../../../common/api/entity_analytics/common';
 import { useQueryAlerts } from '../../detections/containers/detection_engine/alerts/use_query';
 import { ALERTS_QUERY_NAMES } from '../../detections/containers/detection_engine/alerts/constants';
 
-import type {
-  UserRiskScore,
-  HostRiskScore,
-} from '../../../common/search_strategy/security_solution/risk_score/all';
-import { isUserRiskScore } from '../../../common/search_strategy/security_solution/risk_score/all';
+import type { EntityRiskScore } from '../../../common/search_strategy/security_solution/risk_score/all';
 
-interface UseRiskContributingAlerts {
-  riskScore: UserRiskScore | HostRiskScore | undefined;
+interface UseRiskContributingAlerts<T extends EntityType> {
+  entityType: T;
+  riskScore: EntityRiskScore<T> | undefined;
 }
 
 interface AlertData {
@@ -48,15 +46,16 @@ export interface UseRiskContributingAlertsResult {
 /**
  * Fetches alerts related to the risk score
  */
-export const useRiskContributingAlerts = ({
+export const useRiskContributingAlerts = <T extends EntityType>({
   riskScore,
-}: UseRiskContributingAlerts): UseRiskContributingAlertsResult => {
+  entityType,
+}: UseRiskContributingAlerts<T>): UseRiskContributingAlertsResult => {
   const { loading, data, setQuery } = useQueryAlerts<AlertHit, unknown>({
     query: {},
     queryName: ALERTS_QUERY_NAMES.BY_ID,
   });
 
-  const inputs = getInputs(riskScore);
+  const inputs = getInputs(riskScore, entityType);
 
   useEffect(() => {
     if (!riskScore) return;
@@ -84,14 +83,13 @@ export const useRiskContributingAlerts = ({
   };
 };
 
-const getInputs = (riskScore?: UserRiskScore | HostRiskScore) => {
+const getInputs = <T extends EntityType>(
+  riskScore: EntityRiskScore<T> | undefined,
+  entityType: T
+) => {
   if (!riskScore) {
     return [];
   }
 
-  if (isUserRiskScore(riskScore)) {
-    return riskScore.user.risk.inputs;
-  }
-
-  return riskScore.host.risk.inputs;
+  return riskScore[entityType].risk.inputs;
 };

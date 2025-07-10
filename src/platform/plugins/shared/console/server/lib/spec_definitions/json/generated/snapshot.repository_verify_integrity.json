@@ -5,14 +5,22 @@
       "filter_path": [],
       "human": "__flag__",
       "pretty": "__flag__",
-      "meta_thread_pool_concurrency": "",
-      "blob_thread_pool_concurrency": "",
-      "snapshot_verification_concurrency": "",
+      "blob_thread_pool_concurrency": [
+        "1"
+      ],
+      "index_snapshot_verification_concurrency": [
+        "1"
+      ],
       "index_verification_concurrency": "",
-      "index_snapshot_verification_concurrency": "",
-      "max_failed_shard_snapshots": "",
-      "verify_blob_contents": "__flag__",
-      "max_bytes_per_sec": ""
+      "max_bytes_per_sec": [
+        "10mb"
+      ],
+      "max_failed_shard_snapshots": [
+        "10000"
+      ],
+      "meta_thread_pool_concurrency": "",
+      "snapshot_verification_concurrency": "",
+      "verify_blob_contents": "__flag__"
     },
     "methods": [
       "POST"
@@ -20,9 +28,9 @@
     "patterns": [
       "_snapshot/{repository}/_verify_integrity"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/modules-snapshots.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-snapshot-repository-verify-integrity",
     "availability": {
-      "stack": false,
+      "stack": true,
       "serverless": false
     }
   }

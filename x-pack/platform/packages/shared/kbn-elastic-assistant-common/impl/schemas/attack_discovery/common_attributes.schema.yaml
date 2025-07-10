@@ -42,7 +42,7 @@ components:
           type: string
         timestamp:
           description: The time the attack discovery was generated
-          $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+          $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyTimestamp'
     AttackDiscoveries:
       type: array
       description: Array of attack discoveries
@@ -114,7 +114,6 @@ components:
           items:
             $ref: '#/components/schemas/AttackDiscoveryStat'
 
-
     AttackDiscoveryResponse:
       type: object
       required:
@@ -142,8 +141,8 @@ components:
           description: The last time attack discovery was viewed in the browser.
           type: string
         alertsContextCount:
-            type: integer
-            description: The number of alerts in the context.
+          type: integer
+          description: The number of alerts in the context.
         createdAt:
           description: The time attack discovery was created.
           type: string
@@ -242,3 +241,138 @@ components:
         replacements:
           $ref: '../conversations/common_attributes.schema.yaml#/components/schemas/Replacements'
 
+    CreateAttackDiscoveryAlertsParams:
+      type: object
+      required:
+        - alertsContextCount
+        - anonymizedAlerts
+        - apiConfig
+        - attackDiscoveries
+        - connectorName
+        - generationUuid
+      properties:
+        alertsContextCount:
+          description: The number of alerts provided as context to the LLM
+          type: integer
+        anonymizedAlerts:
+          description: The anonymized alerts that were used to generate the attack discovery
+          type: array
+          items:
+            required:
+              - metadata
+              - pageContent
+            properties:
+              id:
+                type: string
+              metadata:
+                type: object
+              pageContent:
+                type: string
+            type: object
+        apiConfig:
+          description: LLM API configuration
+          $ref: '../conversations/common_attributes.schema.yaml#/components/schemas/ApiConfig'
+        attackDiscoveries:
+          description: The generated Attack discoveries
+          $ref: '#/components/schemas/AttackDiscoveries'
+        connectorName:
+          description: The name of the connector that generated the attack discovery
+          type: string
+        generationUuid:
+          description: The generation ID of the run that created the attack discovery
+          type: string
+        replacements:
+          description: Replacements enable anonymization of data sent to the LLM. When Attack discoveries are added to an assistant conversation, replacements must be provided at the same time.
+          $ref: '../conversations/common_attributes.schema.yaml#/components/schemas/Replacements'
+
+    FindAttackDiscoveryAlertsParams:
+      type: object
+      properties:
+        alertIds:
+          description: filter by alert IDs within Attack discovery
+          type: array
+          items:
+            type: string
+        connectorNames:
+          description: filter by connector names
+          type: array
+          items:
+            type: string
+        end:
+          description: filter by end date (relative or absolute)
+          type: string
+        ids:
+          description: filter by Attack discovery IDs
+          type: array
+          items:
+            type: string
+        page:
+          default: 1
+          minimum: 1
+          type: integer
+        perPage:
+          default: 10
+          minimum: 0
+          type: integer
+        search:
+          description: filter by search query
+          type: string
+        shared:
+          description: '`undefined`: show both shared, and only visible to me Attack discoveries. `true`: show only shared Attack discoveries. `false`: show only visible to me Attack discoveries.'
+          type: boolean
+        sortField:
+          default: '@timestamp'
+          type: string
+        sortOrder:
+          type: string
+        start:
+          description: filter by start date (relative or absolute)
+          type: string
+        status:
+          description: filter by kibana.alert.workflow.status
+          type: array
+          items:
+            type: string
+
+    AttackDiscoveryGenerationConfig:
+      type: object
+      required:
+        - apiConfig
+        - alertsIndexPattern
+        - anonymizationFields
+        - size
+        - subAction
+      properties:
+        alertsIndexPattern:
+          type: string
+        anonymizationFields:
+          items:
+            $ref: '../anonymization_fields/bulk_crud_anonymization_fields_route.schema.yaml#/components/schemas/AnonymizationFieldResponse'
+          type: array
+        apiConfig:
+          $ref: '../conversations/common_attributes.schema.yaml#/components/schemas/ApiConfig'
+          description: LLM API configuration.
+        connectorName:
+          type: string
+        end:
+          type: string
+        filter:
+          type: object
+          additionalProperties: true
+        langSmithProject:
+          type: string
+        langSmithApiKey:
+          type: string
+        model:
+          type: string
+        replacements:
+          $ref: '../conversations/common_attributes.schema.yaml#/components/schemas/Replacements'
+        size:
+          type: number
+        start:
+          type: string
+        subAction:
+          type: string
+          enum:
+            - invokeAI
+            - invokeStream

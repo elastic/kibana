@@ -106,16 +106,18 @@ export const createIndexPatternService = ({
       if (contextDataViewSpec && contextDataViewSpec.id !== dataView.id) {
         dataViews.clearInstanceCache(dataView.id);
       }
-      const loadedPatterns = await loadIndexPatterns({
-        dataViews,
-        patterns: [newDataView.id!],
-        cache: {},
-      });
+      const [loadedPatterns, action] = await Promise.all([
+        loadIndexPatterns({
+          dataViews,
+          patterns: [newDataView.id!],
+          cache: {},
+        }),
+        uiActions.getAction(UPDATE_FILTER_REFERENCES_ACTION),
+      ]);
       replaceIndexPattern(loadedPatterns[newDataView.id!], dataView.id!, {
         applyImmediately: true,
       });
       const trigger = uiActions.getTrigger(UPDATE_FILTER_REFERENCES_TRIGGER);
-      const action = uiActions.getAction(UPDATE_FILTER_REFERENCES_ACTION);
 
       action?.execute({
         trigger,

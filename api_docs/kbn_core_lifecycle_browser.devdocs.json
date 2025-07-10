@@ -347,13 +347,7 @@
               "{@link ChromeStart}"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-chrome-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-public.ChromeStart",
-                "text": "ChromeStart"
-              }
+              "ChromeStart"
             ],
             "path": "src/core/packages/lifecycle/browser/src/core_start.ts",
             "deprecated": false,
@@ -470,10 +464,6 @@
                 "path": "src/core/packages/root/browser-internal/src/core_system.ts"
               },
               {
-                "plugin": "home",
-                "path": "src/platform/plugins/shared/home/public/plugin.ts"
-              },
-              {
                 "plugin": "unifiedSearch",
                 "path": "src/platform/plugins/shared/unified_search/public/types.ts"
               },
@@ -486,20 +476,12 @@
                 "path": "x-pack/platform/plugins/private/file_upload/public/kibana_services.ts"
               },
               {
-                "plugin": "transform",
-                "path": "x-pack/platform/plugins/private/transform/public/app/mount_management_section.ts"
-              },
-              {
                 "plugin": "dashboardEnhanced",
                 "path": "x-pack/platform/plugins/shared/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/components/collect_config_container.tsx"
               },
               {
                 "plugin": "dashboardEnhanced",
                 "path": "x-pack/platform/plugins/shared/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/components/collect_config_container.tsx"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/platform/plugins/shared/discover/public/application/main/state_management/discover_state.test.ts"
               },
               {
                 "plugin": "@kbn/core",
@@ -667,6 +649,22 @@
           },
           {
             "parentPluginId": "@kbn/core-lifecycle-browser",
+            "id": "def-public.CoreStart.pricing",
+            "type": "Object",
+            "tags": [],
+            "label": "pricing",
+            "description": [
+              "{@link PricingServiceStart}"
+            ],
+            "signature": [
+              "PricingServiceStart"
+            ],
+            "path": "src/core/packages/lifecycle/browser/src/core_start.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-lifecycle-browser",
             "id": "def-public.CoreStart.security",
             "type": "Object",
             "tags": [],
@@ -692,6 +690,22 @@
             ],
             "signature": [
               "UserProfileService"
+            ],
+            "path": "src/core/packages/lifecycle/browser/src/core_start.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-lifecycle-browser",
+            "id": "def-public.CoreStart.rendering",
+            "type": "Object",
+            "tags": [],
+            "label": "rendering",
+            "description": [
+              "{@link RenderingService}"
+            ],
+            "signature": [
+              "RenderingService"
             ],
             "path": "src/core/packages/lifecycle/browser/src/core_start.ts",
             "deprecated": false,

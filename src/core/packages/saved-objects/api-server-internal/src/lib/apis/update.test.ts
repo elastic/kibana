@@ -11,7 +11,7 @@
 
 import { mockGetCurrentTime, mockPreflightCheckForCreate } from '../repository.test.mock';
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import {
   type SavedObjectUnsanitizedDoc,
   type SavedObjectReference,
@@ -190,7 +190,7 @@ describe('#update', () => {
         expect(client.index).toHaveBeenCalledTimes(1);
         expect(client.index).toHaveBeenCalledWith(
           expect.objectContaining({
-            body: expect.objectContaining({
+            document: expect.objectContaining({
               globalType: {
                 foo: 'bar',
                 title: 'Testing',
@@ -219,7 +219,7 @@ describe('#update', () => {
         expect(client.index).toHaveBeenCalledTimes(1);
         expect(client.index).toHaveBeenCalledWith(
           expect.objectContaining({
-            body: expect.objectContaining({
+            document: expect.objectContaining({
               globalType: {
                 foo: 'bar',
               },
@@ -250,8 +250,8 @@ describe('#update', () => {
         migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc }));
         await updateSuccess(client, repository, registry, type, id, attributes);
         expect(
-          (client.index.mock.calls[0][0] as estypes.CreateRequest<SavedObjectsRawDocSource>).body!
-            .references
+          (client.index.mock.calls[0][0] as estypes.CreateRequest<SavedObjectsRawDocSource>)
+            .document!.references
         ).toEqual([]); // we're indexing a full new doc, serializer adds default if not defined
       });
 
@@ -262,8 +262,8 @@ describe('#update', () => {
             references,
           });
           expect(
-            (client.index.mock.calls[0][0] as estypes.CreateRequest<SavedObjectsRawDocSource>).body!
-              .references
+            (client.index.mock.calls[0][0] as estypes.CreateRequest<SavedObjectsRawDocSource>)
+              .document!.references
           ).toEqual(references);
           client.index.mockClear();
         };
@@ -277,8 +277,8 @@ describe('#update', () => {
             references,
           });
           expect(
-            (client.index.mock.calls[0][0] as estypes.CreateRequest<SavedObjectsRawDocSource>).body!
-              .references
+            (client.index.mock.calls[0][0] as estypes.CreateRequest<SavedObjectsRawDocSource>)
+              .document!.references
           ).toEqual(references);
           client.index.mockClear();
         };
@@ -292,8 +292,8 @@ describe('#update', () => {
             references,
           });
           expect(
-            (client.index.mock.calls[0][0] as estypes.CreateRequest<SavedObjectsRawDocSource>).body!
-              .references
+            (client.index.mock.calls[0][0] as estypes.CreateRequest<SavedObjectsRawDocSource>)
+              .document!.references
           ).toEqual(references);
           client.index.mockClear();
         };
@@ -324,7 +324,8 @@ describe('#update', () => {
           ...mockTimestampFieldsWithCreated,
         };
         expect(
-          (client.create.mock.calls[0][0] as estypes.CreateRequest<SavedObjectsRawDocSource>).body!
+          (client.create.mock.calls[0][0] as estypes.CreateRequest<SavedObjectsRawDocSource>)
+            .document!
         ).toEqual(expected);
       });
 
@@ -357,7 +358,8 @@ describe('#update', () => {
           ...mockTimestampFieldsWithCreated,
         };
         expect(
-          (client.create.mock.calls[0][0] as estypes.CreateRequest<SavedObjectsRawDocSource>).body!
+          (client.create.mock.calls[0][0] as estypes.CreateRequest<SavedObjectsRawDocSource>)
+            .document!
         ).toEqual(expectedType);
       });
 
@@ -383,7 +385,7 @@ describe('#update', () => {
             index: '.kibana-test_8.0.0-testing',
             refresh: 'wait_for',
             require_alias: true,
-            body: expect.objectContaining({
+            document: expect.objectContaining({
               multiNamespaceIsolatedType: { title: 'Testing' },
               namespaces: ['default'],
               references: [],
@@ -403,8 +405,8 @@ describe('#update', () => {
             references,
           });
           expect(
-            (client.index.mock.calls[0][0] as estypes.CreateRequest<SavedObjectsRawDocSource>).body!
-              .references
+            (client.index.mock.calls[0][0] as estypes.CreateRequest<SavedObjectsRawDocSource>)
+              .document!.references
           ).toEqual([]);
           client.index.mockClear();
           client.create.mockClear();
@@ -521,7 +523,10 @@ describe('#update', () => {
       });
 
       it(`prepends namespace to the id when providing namespace for single-namespace type`, async () => {
-        await updateSuccess(client, repository, registry, type, id, attributes, { namespace });
+        const res = await updateSuccess(client, repository, registry, type, id, attributes, {
+          namespace,
+        });
+        expect(res.namespaces).toEqual([namespace]);
         expect(client.get).toHaveBeenCalledTimes(1);
         expect(mockPreflightCheckForCreate).not.toHaveBeenCalled();
         expect(client.index).toHaveBeenCalledWith(
@@ -531,7 +536,10 @@ describe('#update', () => {
       });
 
       it(`doesn't prepend namespace to the id when providing no namespace for single-namespace type`, async () => {
-        await updateSuccess(client, repository, registry, type, id, attributes, { references });
+        const res = await updateSuccess(client, repository, registry, type, id, attributes, {
+          references,
+        });
+        expect(res.namespaces).toEqual(['default']);
         expect(client.index).toHaveBeenCalledWith(
           expect.objectContaining({ id: expect.stringMatching(`${type}:${id}`) }),
           expect.anything()
@@ -539,14 +547,19 @@ describe('#update', () => {
       });
 
       it(`normalizes options.namespace from 'default' to undefined`, async () => {
-        await updateSuccess(client, repository, registry, type, id, attributes, {
+        const res = await updateSuccess(client, repository, registry, type, id, attributes, {
           references,
           namespace: 'default',
         });
+        expect(res.namespaces).toEqual(['default']);
         expect(client.index).toHaveBeenCalledWith(
-          expect.objectContaining({ id: expect.stringMatching(`${type}:${id}`) }),
+          expect.objectContaining({
+            id: expect.stringMatching(`${type}:${id}`),
+          }),
           expect.anything()
         );
+        // Assert that 'namespace' does not exist at all
+        expect(client.index.mock.calls[0][0]).not.toHaveProperty('namespace');
       });
 
       it(`doesn't prepend namespace to the id when using agnostic-namespace type`, async () => {

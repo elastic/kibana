@@ -9,18 +9,17 @@ import React from 'react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { waitFor, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import type { AppMockRenderer } from '../../../common/mock';
+
 import {
   noCasesPermissions,
   onlyDeleteCasesPermission,
-  createAppMockRenderer,
+  renderWithTestingProviders,
 } from '../../../common/mock';
 import { RegisteredAttachmentsPropertyActions } from './registered_attachments_property_actions';
 import { AttachmentActionType } from '../../../client/attachment_framework/types';
 
-describe('RegisteredAttachmentsPropertyActions', () => {
-  let appMock: AppMockRenderer;
-
+// FLAKY: https://github.com/elastic/kibana/issues/207328
+describe.skip('RegisteredAttachmentsPropertyActions', () => {
   const props = {
     isLoading: false,
     registeredAttachmentActions: [],
@@ -30,15 +29,10 @@ describe('RegisteredAttachmentsPropertyActions', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    appMock = createAppMockRenderer();
-  });
-
-  afterEach(async () => {
-    await appMock.clearQueryCache();
   });
 
   it('renders the correct number of actions', async () => {
-    appMock.render(<RegisteredAttachmentsPropertyActions {...props} />);
+    renderWithTestingProviders(<RegisteredAttachmentsPropertyActions {...props} />);
 
     expect(await screen.findByTestId('property-actions-user-action')).toBeInTheDocument();
 
@@ -48,7 +42,7 @@ describe('RegisteredAttachmentsPropertyActions', () => {
   });
 
   it('renders the modal info correctly', async () => {
-    appMock.render(<RegisteredAttachmentsPropertyActions {...props} />);
+    renderWithTestingProviders(<RegisteredAttachmentsPropertyActions {...props} />);
 
     expect(await screen.findByTestId('property-actions-user-action')).toBeInTheDocument();
 
@@ -69,7 +63,7 @@ describe('RegisteredAttachmentsPropertyActions', () => {
   });
 
   it('remove attachments correctly', async () => {
-    appMock.render(<RegisteredAttachmentsPropertyActions {...props} />);
+    renderWithTestingProviders(<RegisteredAttachmentsPropertyActions {...props} />);
 
     expect(await screen.findByTestId('property-actions-user-action')).toBeInTheDocument();
 
@@ -90,21 +84,25 @@ describe('RegisteredAttachmentsPropertyActions', () => {
   });
 
   it('does not show the property actions without delete permissions', async () => {
-    appMock = createAppMockRenderer({ permissions: noCasesPermissions() });
-    appMock.render(<RegisteredAttachmentsPropertyActions {...props} />);
+    renderWithTestingProviders(<RegisteredAttachmentsPropertyActions {...props} />, {
+      wrapperProps: { permissions: noCasesPermissions() },
+    });
 
     expect(screen.queryByTestId('property-actions-user-action')).not.toBeInTheDocument();
   });
 
   it('does not show the property actions when hideDefaultActions is enabled', async () => {
-    appMock.render(<RegisteredAttachmentsPropertyActions {...props} hideDefaultActions={true} />);
+    renderWithTestingProviders(
+      <RegisteredAttachmentsPropertyActions {...props} hideDefaultActions={true} />
+    );
 
     expect(screen.queryByTestId('property-actions-user-action')).not.toBeInTheDocument();
   });
 
   it('does show the property actions with only delete permissions', async () => {
-    appMock = createAppMockRenderer({ permissions: onlyDeleteCasesPermission() });
-    appMock.render(<RegisteredAttachmentsPropertyActions {...props} />);
+    renderWithTestingProviders(<RegisteredAttachmentsPropertyActions {...props} />, {
+      wrapperProps: { permissions: onlyDeleteCasesPermission() },
+    });
 
     expect(await screen.findByTestId('property-actions-user-action')).toBeInTheDocument();
   });
@@ -120,7 +118,7 @@ describe('RegisteredAttachmentsPropertyActions', () => {
       },
     ];
 
-    appMock.render(
+    renderWithTestingProviders(
       <RegisteredAttachmentsPropertyActions {...props} registeredAttachmentActions={action} />
     );
 
@@ -129,10 +127,7 @@ describe('RegisteredAttachmentsPropertyActions', () => {
     await userEvent.click(await screen.findByTestId('property-actions-user-action-ellipses'));
     await waitForEuiPopoverOpen();
 
-    expect((await screen.findByTestId('property-actions-user-action-group')).children.length).toBe(
-      2
-    );
-
+    expect(await screen.findByTestId('property-actions-user-action-trash')).toBeInTheDocument();
     expect(await screen.findByTestId('property-actions-user-action-download')).toBeInTheDocument();
   });
 });

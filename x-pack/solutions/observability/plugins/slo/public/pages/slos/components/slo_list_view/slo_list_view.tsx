@@ -6,7 +6,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React from 'react';
 import { useFetchActiveAlerts } from '../../../../hooks/use_fetch_active_alerts';
 import { useFetchHistoricalSummary } from '../../../../hooks/use_fetch_historical_summary';
@@ -22,9 +22,7 @@ export interface Props {
 }
 
 export function SloListView({ sloList, loading, error }: Props) {
-  const sloIdsAndInstanceIds = sloList.map(
-    (slo) => [slo.id, slo.instanceId ?? ALL_VALUE] as [string, string]
-  );
+  const sloIdsAndInstanceIds = sloList.map((slo) => [slo.id, slo.instanceId] as [string, string]);
   const { data: activeAlertsBySlo } = useFetchActiveAlerts({ sloIdsAndInstanceIds });
   const { data: rulesBySlo, refetchRules } = useFetchRulesForSlo({
     sloIds: sloIdsAndInstanceIds.map((item) => item[0]),
@@ -33,6 +31,10 @@ export function SloListView({ sloList, loading, error }: Props) {
     useFetchHistoricalSummary({
       sloList,
     });
+
+  const historicalSummariesBySlo = new Map(
+    historicalSummaries.map((summary) => [`${summary.sloId}-${summary.instanceId}`, summary.data])
+  );
 
   if (!loading && !error && sloList.length === 0) {
     return <SloListEmpty />;
@@ -45,17 +47,11 @@ export function SloListView({ sloList, loading, error }: Props) {
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       {sloList.map((slo) => (
-        <EuiFlexItem key={`${slo.id}-${slo.instanceId ?? ALL_VALUE}`}>
+        <EuiFlexItem key={`${slo.id}-${slo.instanceId}`}>
           <SloListItem
             activeAlerts={activeAlertsBySlo.get(slo)}
             rules={rulesBySlo?.[slo.id]}
-            historicalSummary={
-              historicalSummaries.find(
-                (historicalSummary) =>
-                  historicalSummary.sloId === slo.id &&
-                  historicalSummary.instanceId === (slo.instanceId ?? ALL_VALUE)
-              )?.data
-            }
+            historicalSummary={historicalSummariesBySlo.get(`${slo.id}-${slo.instanceId}`)}
             historicalSummaryLoading={historicalSummaryLoading}
             slo={slo}
             refetchRules={refetchRules}

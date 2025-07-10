@@ -45,7 +45,7 @@ export const OverviewPanel: FC<PropsWithChildren<OverviewPanelProps>> = ({
       <EuiFlexGroup alignItems="flexStart" gutterSize="xl">
         {leftPanelContent && <EuiFlexItem grow={6}>{leftPanelContent}</EuiFlexItem>}
         <EuiFlexItem grow={4}>
-          <EuiPanel paddingSize="none" color="subdued" {...overviewPanelProps}>
+          <EuiPanel paddingSize="none" color="transparent" {...overviewPanelProps}>
             <EuiTitle size="s">
               <h2>{title}</h2>
             </EuiTitle>

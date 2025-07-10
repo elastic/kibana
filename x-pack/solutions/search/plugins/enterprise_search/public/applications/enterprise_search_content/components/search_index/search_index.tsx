@@ -22,7 +22,7 @@ import { KibanaLogic } from '../../../shared/kibana';
 import { SEARCH_INDEX_PATH, SEARCH_INDEX_TAB_PATH } from '../../routes';
 
 import { ElasticsearchViewIndex } from '../../types';
-import { isConnectorIndex, isCrawlerIndex } from '../../utils/indices';
+import { isConnectorIndex } from '../../utils/indices';
 import { ConnectorConfiguration } from '../connector_detail/connector_configuration';
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 
@@ -32,17 +32,11 @@ import { getHeaderActions } from '../shared/header_actions/header_actions';
 
 import { ConnectorScheduling } from './connector/connector_scheduling';
 import { ConnectorSyncRules } from './connector/sync_rules/connector_rules';
-import { AutomaticCrawlScheduler } from './crawler/automatic_crawl_scheduler/automatic_crawl_scheduler';
-import { CrawlCustomSettingsFlyout } from './crawler/crawl_custom_settings_flyout/crawl_custom_settings_flyout';
-import { CrawlerConfiguration } from './crawler/crawler_configuration/crawler_configuration';
-import { SearchIndexDomainManagement } from './crawler/domain_management/domain_management';
-import { NoConnectorRecord } from './crawler/no_connector_record';
 import { SearchIndexDocuments } from './documents';
 import { IndexError } from './index_error';
 import { SearchIndexIndexMappings } from './index_mappings';
 import { IndexNameLogic } from './index_name_logic';
 import { IndexViewLogic } from './index_view_logic';
-import { useIndicesNav } from './indices/indices_nav';
 import { SearchIndexOverview } from './overview';
 import { SearchIndexPipelines } from './pipelines/pipelines';
 
@@ -56,9 +50,6 @@ export enum SearchIndexTabId {
   CONFIGURATION = 'configuration',
   SYNC_RULES = 'sync_rules',
   SCHEDULING = 'scheduling',
-  // crawler indices
-  DOMAIN_MANAGEMENT = 'domain_management',
-  CRAWLER_CONFIGURATION = 'crawler_configuration',
 }
 
 export const SearchIndex: React.FC = () => {
@@ -82,30 +73,6 @@ export const SearchIndex: React.FC = () => {
     updateSideNavDefinition,
   } = useValues(KibanaLogic);
 
-  const indicesItems = useIndicesNav();
-
-  useEffect(() => {
-    const subscription = guidedOnboarding?.guidedOnboardingApi
-      ?.isGuideStepActive$('appSearch', 'add_data')
-      .subscribe((isStepActive) => {
-        if (isStepActive && index?.count) {
-          guidedOnboarding?.guidedOnboardingApi?.completeGuideStep('appSearch', 'add_data');
-        }
-      });
-    return () => subscription?.unsubscribe();
-  }, [guidedOnboarding, index?.count]);
-
-  useEffect(() => {
-    const subscription = guidedOnboarding?.guidedOnboardingApi
-      ?.isGuideStepActive$('websiteSearch', 'add_data')
-      .subscribe((isStepActive) => {
-        if (isStepActive && index?.count) {
-          guidedOnboarding?.guidedOnboardingApi?.completeGuideStep('websiteSearch', 'add_data');
-        }
-      });
-    return () => subscription?.unsubscribe();
-  }, [guidedOnboarding, index?.count]);
-
   useEffect(() => {
     const subscription = guidedOnboarding?.guidedOnboardingApi
       ?.isGuideStepActive$('databaseSearch', 'add_data')
@@ -116,11 +83,6 @@ export const SearchIndex: React.FC = () => {
       });
     return () => subscription?.unsubscribe();
   }, [guidedOnboarding, index?.count]);
-
-  useEffect(() => {
-    // We update the new side nav definition with the selected indices items
-    updateSideNavDefinition({ indices: indicesItems });
-  }, [indicesItems, updateSideNavDefinition]);
 
   useEffect(() => {
     return () => {
@@ -206,49 +168,6 @@ export const SearchIndex: React.FC = () => {
     },
   ];
 
-  const CRAWLER_TABS: EuiTabbedContentTab[] = [
-    {
-      content: (
-        <>
-          <EuiSpacer size="l" />
-          <SearchIndexDomainManagement />
-        </>
-      ),
-      id: SearchIndexTabId.DOMAIN_MANAGEMENT,
-      name: i18n.translate('xpack.enterpriseSearch.content.searchIndex.domainManagementTabLabel', {
-        defaultMessage: 'Manage Domains',
-      }),
-    },
-    {
-      content: (
-        <>
-          <EuiSpacer size="l" />
-          <CrawlerConfiguration />
-        </>
-      ),
-      id: SearchIndexTabId.CRAWLER_CONFIGURATION,
-      name: i18n.translate(
-        'xpack.enterpriseSearch.content.searchIndex.crawlerConfigurationTabLabel',
-        {
-          defaultMessage: 'Configuration',
-        }
-      ),
-    },
-    {
-      content: (
-        <>
-          <EuiSpacer size="l" />
-          <AutomaticCrawlScheduler />
-        </>
-      ),
-      'data-test-subj': 'entSearchContent-index-crawler-scheduler-tab',
-      id: SearchIndexTabId.SCHEDULING,
-      name: i18n.translate('xpack.enterpriseSearch.content.searchIndex.schedulingTabLabel', {
-        defaultMessage: 'Scheduling',
-      }),
-    },
-  ];
-
   const PIPELINES_TAB: EuiTabbedContentTab = {
     content: (
       <>
@@ -265,7 +184,6 @@ export const SearchIndex: React.FC = () => {
   const tabs: EuiTabbedContentTab[] = [
     ...ALL_INDICES_TABS,
     ...(isConnectorIndex(index) ? CONNECTOR_TABS : []),
-    ...(isCrawlerIndex(index) ? CRAWLER_TABS : []),
     ...(hasDefaultIngestPipeline ? [PIPELINES_TAB] : []),
   ];
 
@@ -310,13 +228,7 @@ const Content: React.FC<ContentProps> = ({ index, tabs, tabId }) => {
     );
   };
 
-  if (isCrawlerIndex(index) && !index.connector) {
-    return <NoConnectorRecord />;
-  }
   return (
-    <>
-      <EuiTabbedContent size="l" tabs={tabs} selectedTab={selectedTab} onTabClick={onTabClick} />
-      {isCrawlerIndex(index) && <CrawlCustomSettingsFlyout />}
-    </>
+    <EuiTabbedContent size="l" tabs={tabs} selectedTab={selectedTab} onTabClick={onTabClick} />
   );
 };

@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { ReplaySubject, firstValueFrom, combineLatest } from 'rxjs';
-
 import type {
   SearchHit,
   UpdateResponse,
@@ -14,16 +12,30 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
 import type { DataStreamSpacesAdapter } from '@kbn/data-stream-adapter';
-import type { DefendInsight, DefendInsightsPostRequestBody } from '@kbn/elastic-assistant-common';
-
 import type {
-  SearchParams,
-  SecurityWorkflowInsight,
+  DefendInsight,
+  DefendInsightsGetRequestQuery,
+  DefendInsightsPostRequestBody,
+} from '@kbn/elastic-assistant-common';
+import { CallbackIds } from '@kbn/elastic-assistant-plugin/server/types';
+import { combineLatest, firstValueFrom, ReplaySubject } from 'rxjs';
+import { cloneDeep } from 'lodash';
+
+import {
+  ActionType,
+  type SearchParams,
+  type SecurityWorkflowInsight,
 } from '../../../../common/endpoint/types/workflow_insights';
 import type { EndpointAppContextService } from '../../endpoint_app_context_services';
-
 import { SecurityWorkflowInsightsFailedInitialized } from './errors';
-import { buildEsQueryParams, createDatastream, createPipeline, generateInsightId } from './helpers';
+import {
+  buildEsQueryParams,
+  checkIfRemediationExists,
+  createDatastream,
+  createPipeline,
+  generateInsightId,
+  getUniqueInsights,
+} from './helpers';
 import { DATA_STREAM_NAME } from './constants';
 import { buildWorkflowInsights } from './builders';
 
@@ -38,6 +50,7 @@ interface SetupInterface {
 
 interface StartInterface {
   esClient: ElasticsearchClient;
+  registerDefendInsightsCallback: (callbackId: CallbackIds, callback: Function) => void;
 }
 
 class SecurityWorkflowInsightsService {
@@ -52,6 +65,10 @@ class SecurityWorkflowInsightsService {
     combineLatest<[void, void]>([this.setup$, this.start$])
   );
   private isFeatureEnabled = false;
+
+  /**
+   * Lifecycle
+   */
 
   public get isInitialized() {
     return this._isInitialized;
@@ -76,7 +93,7 @@ class SecurityWorkflowInsightsService {
     this.setup$.next();
   }
 
-  public async start({ esClient }: StartInterface) {
+  public async start({ esClient, registerDefendInsightsCallback }: StartInterface) {
     if (!this.isFeatureEnabled) {
       return;
     }
@@ -85,6 +102,7 @@ class SecurityWorkflowInsightsService {
     await firstValueFrom(this.setup$);
 
     try {
+      this.registerDefendInsightsCallbacks(registerDefendInsightsCallback);
       await createPipeline(esClient);
       await this.ds?.install({
         logger: this.logger,
@@ -118,65 +136,55 @@ class SecurityWorkflowInsightsService {
     this.stop$.complete();
   }
 
-  public async createFromDefendInsights(
-    defendInsights: DefendInsight[],
-    request: KibanaRequest<unknown, unknown, DefendInsightsPostRequestBody>
-  ): Promise<WriteResponseBase[]> {
+  /**
+   * Basic CRUD operations
+   */
+
+  public async create(insight: SecurityWorkflowInsight): Promise<WriteResponseBase | void> {
     await this.isInitialized;
 
-    const workflowInsights = await buildWorkflowInsights({
-      defendInsights,
-      request,
-      endpointMetadataService: this.endpointContext.getEndpointMetadataService(),
+    const insightToCreate = cloneDeep(insight);
+
+    const remediationExists = await checkIfRemediationExists({
+      insight: insightToCreate,
+      exceptionListsClient: this.endpointContext.getExceptionListsClient(),
+      endpointMetadataClient: this.endpointContext.getEndpointMetadataService(),
     });
-    return Promise.all(workflowInsights.map((insight) => this.create(insight)));
-  }
 
-  public async create(insight: SecurityWorkflowInsight): Promise<WriteResponseBase> {
-    await this.isInitialized;
+    if (remediationExists) {
+      insightToCreate.action.type = ActionType.Remediated;
+    }
 
-    const id = generateInsightId(insight);
+    const id = generateInsightId(insightToCreate);
 
     // if insight already exists, update instead
     const existingInsights = await this.fetch({ ids: [id] });
     if (existingInsights.length) {
-      return this.update(id, insight, existingInsights[0]._index);
+      return this.update(id, insightToCreate, existingInsights[0]._index);
     }
 
-    const response = await this.esClient.index<SecurityWorkflowInsight>({
+    return this.esClient.index<SecurityWorkflowInsight>({
       index: DATA_STREAM_NAME,
-      body: { ...insight, id },
+      id,
+      document: insightToCreate,
       refresh: 'wait_for',
+      op_type: 'create',
     });
-
-    return response;
   }
 
   public async update(
     id: string,
     insight: Partial<SecurityWorkflowInsight>,
-    backingIndex?: string
+    backingIndex: string
   ): Promise<UpdateResponse> {
     await this.isInitialized;
 
-    let index = backingIndex;
-    if (!index) {
-      const retrievedInsight = (await this.fetch({ ids: [id] }))[0];
-      index = retrievedInsight?._index;
-    }
-
-    if (!index) {
-      throw new Error('invalid backing index for updating workflow insight');
-    }
-
-    const response = await this.esClient.update<SecurityWorkflowInsight>({
-      index,
+    return this.esClient.update<SecurityWorkflowInsight>({
+      index: backingIndex,
       id,
-      body: { doc: insight },
+      doc: insight,
       refresh: 'wait_for',
     });
-
-    return response;
   }
 
   public async fetch(params?: SearchParams): Promise<Array<SearchHit<SecurityWorkflowInsight>>> {
@@ -188,19 +196,21 @@ class SecurityWorkflowInsightsService {
     const termFilters = params ? buildEsQueryParams(params) : [];
     const response = await this.esClient.search<SecurityWorkflowInsight>({
       index: DATA_STREAM_NAME,
-      body: {
-        query: {
-          bool: {
-            must: termFilters,
-          },
+      query: {
+        bool: {
+          must: termFilters,
         },
-        size,
-        from,
       },
+      size,
+      from,
     });
 
     return response?.hits?.hits ?? [];
   }
+
+  /**
+   * Helper functions
+   */
 
   private get esClient(): ElasticsearchClient {
     if (!this._esClient) {
@@ -224,6 +234,70 @@ class SecurityWorkflowInsightsService {
     }
 
     return this._endpointContext;
+  }
+
+  /**
+   * Plugin callbacks called from elastic_assistant plugin
+   */
+
+  private registerDefendInsightsCallbacks(
+    registerCallback: (callbackId: CallbackIds, callback: Function) => void
+  ): void {
+    registerCallback(
+      CallbackIds.DefendInsightsPostCreate,
+      this.createFromDefendInsights.bind(this)
+    );
+    registerCallback(CallbackIds.DefendInsightsPreCreate, this.onBeforeCreate.bind(this));
+    registerCallback(CallbackIds.DefendInsightsPostFetch, this.onAfterFetch.bind(this));
+  }
+
+  public async onAfterFetch(
+    request: KibanaRequest<unknown, unknown, DefendInsightsGetRequestQuery>,
+    agentIds: string[]
+  ): Promise<void> {
+    await this.ensureAgentIdsInCurrentSpace(request, agentIds);
+  }
+
+  public async onBeforeCreate(
+    request: KibanaRequest<unknown, unknown, DefendInsightsPostRequestBody>
+  ): Promise<void> {
+    const agentIds = request.body?.endpointIds ?? [];
+    await this.ensureAgentIdsInCurrentSpace(request, agentIds);
+  }
+
+  public async createFromDefendInsights(
+    defendInsights: DefendInsight[],
+    request: KibanaRequest<unknown, unknown, DefendInsightsPostRequestBody>
+  ): Promise<Array<Awaited<WriteResponseBase | void>>> {
+    if (!defendInsights || !defendInsights.length) {
+      return [];
+    }
+
+    await this.isInitialized;
+
+    const workflowInsights = await buildWorkflowInsights({
+      defendInsights,
+      request,
+      endpointMetadataService: this.endpointContext.getEndpointMetadataService(),
+      esClient: this.esClient,
+    });
+    const uniqueInsights = getUniqueInsights(workflowInsights);
+
+    return Promise.all(uniqueInsights.map((insight) => this.create(insight)));
+  }
+
+  public async ensureAgentIdsInCurrentSpace(
+    request: KibanaRequest,
+    agentIds: string[] = []
+  ): Promise<void> {
+    const { endpointManagementSpaceAwarenessEnabled } = this.endpointContext.experimentalFeatures;
+    if (!endpointManagementSpaceAwarenessEnabled) {
+      return;
+    }
+
+    const { id: spaceId } = await this.endpointContext.getActiveSpace(request);
+    const fleetServices = this.endpointContext.getInternalFleetServices(spaceId);
+    await fleetServices.ensureInCurrentSpace({ agentIds });
   }
 }
 

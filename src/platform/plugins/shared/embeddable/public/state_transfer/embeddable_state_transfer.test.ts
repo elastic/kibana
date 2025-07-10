@@ -125,13 +125,13 @@ describe('embeddable state transfer', () => {
 
   it('can send an outgoing embeddable package state', async () => {
     await stateTransfer.navigateToWithEmbeddablePackage(destinationApp, {
-      state: { type: 'coolestType', input: { savedObjectId: '150' } },
+      state: { type: 'coolestType', serializedState: { rawState: { savedObjectId: '150' } } },
     });
     expect(store.set).toHaveBeenCalledWith(EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY, {
       [EMBEDDABLE_PACKAGE_STATE_KEY]: {
         [destinationApp]: {
           type: 'coolestType',
-          input: { savedObjectId: '150' },
+          serializedState: { rawState: { savedObjectId: '150' } },
         },
       },
     });
@@ -145,14 +145,14 @@ describe('embeddable state transfer', () => {
       kibanaIsNowForSports: 'extremeSportsKibana',
     });
     await stateTransfer.navigateToWithEmbeddablePackage(destinationApp, {
-      state: { type: 'coolestType', input: { savedObjectId: '150' } },
+      state: { type: 'coolestType', serializedState: { rawState: { savedObjectId: '150' } } },
     });
     expect(store.set).toHaveBeenCalledWith(EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY, {
       kibanaIsNowForSports: 'extremeSportsKibana',
       [EMBEDDABLE_PACKAGE_STATE_KEY]: {
         [destinationApp]: {
           type: 'coolestType',
-          input: { savedObjectId: '150' },
+          serializedState: { rawState: { savedObjectId: '150' } },
         },
       },
     });
@@ -163,7 +163,7 @@ describe('embeddable state transfer', () => {
 
   it('sets isTransferInProgress to true when sending an outgoing embeddable package state', async () => {
     await stateTransfer.navigateToWithEmbeddablePackage(destinationApp, {
-      state: { type: 'coolestType', input: { savedObjectId: '150' } },
+      state: { type: 'coolestType', serializedState: { rawState: { savedObjectId: '150' } } },
     });
     expect(stateTransfer.isTransferInProgress).toEqual(true);
     currentAppId$.next(destinationApp);
@@ -220,12 +220,15 @@ describe('embeddable state transfer', () => {
       [EMBEDDABLE_PACKAGE_STATE_KEY]: {
         [testAppId]: {
           type: 'skisEmbeddable',
-          input: { savedObjectId: '123' },
+          serializedState: { rawState: { savedObjectId: '123' } },
         },
       },
     });
     const fetchedState = stateTransfer.getIncomingEmbeddablePackage(testAppId);
-    expect(fetchedState).toEqual({ type: 'skisEmbeddable', input: { savedObjectId: '123' } });
+    expect(fetchedState).toEqual({
+      type: 'skisEmbeddable',
+      serializedState: { rawState: { savedObjectId: '123' } },
+    });
   });
 
   it('can fetch an incoming embeddable package state and ignore state for other apps', async () => {
@@ -233,21 +236,24 @@ describe('embeddable state transfer', () => {
       [EMBEDDABLE_PACKAGE_STATE_KEY]: {
         [testAppId]: {
           type: 'skisEmbeddable',
-          input: { savedObjectId: '123' },
+          serializedState: { rawState: { savedObjectId: '123' } },
         },
         testApp2: {
           type: 'crossCountryEmbeddable',
-          input: { savedObjectId: '456' },
+          serializedState: { rawState: { savedObjectId: '456' } },
         },
       },
     });
     const fetchedState = stateTransfer.getIncomingEmbeddablePackage(testAppId);
-    expect(fetchedState).toEqual({ type: 'skisEmbeddable', input: { savedObjectId: '123' } });
+    expect(fetchedState).toEqual({
+      type: 'skisEmbeddable',
+      serializedState: { rawState: { savedObjectId: '123' } },
+    });
 
     const fetchedState2 = stateTransfer.getIncomingEmbeddablePackage('testApp2');
     expect(fetchedState2).toEqual({
       type: 'crossCountryEmbeddable',
-      input: { savedObjectId: '456' },
+      serializedState: { rawState: { savedObjectId: '456' } },
     });
   });
 
@@ -268,7 +274,7 @@ describe('embeddable state transfer', () => {
       [EMBEDDABLE_PACKAGE_STATE_KEY]: {
         [testAppId]: {
           type: 'coolestType',
-          input: { savedObjectId: '150' },
+          serializedState: { rawState: { savedObjectId: '150' } },
         },
       },
       iSHouldStillbeHere: 'doing the sports thing',

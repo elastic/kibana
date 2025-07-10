@@ -11,12 +11,7 @@ import type { FleetRequestHandlerContext } from '../..';
 import { xpackMocks } from '../../mocks';
 import { ListResponseSchema } from '../schema/utils';
 import { FleetServerHostSchema, FleetServerHostResponseSchema } from '../../types';
-import {
-  createFleetServerHost,
-  getFleetServerHost,
-  listFleetServerHosts,
-  updateFleetServerHost,
-} from '../../services/fleet_server_host';
+import { fleetServerHostService } from '../../services';
 
 import {
   getAllFleetServerHostsHandler,
@@ -33,13 +28,13 @@ jest.mock('../../services', () => ({
   agentPolicyService: {
     bumpAllAgentPolicies: jest.fn().mockResolvedValue({}),
   },
-}));
-
-jest.mock('../../services/fleet_server_host', () => ({
-  listFleetServerHosts: jest.fn(),
-  createFleetServerHost: jest.fn(),
-  updateFleetServerHost: jest.fn(),
-  getFleetServerHost: jest.fn(),
+  fleetServerHostService: {
+    list: jest.fn(),
+    get: jest.fn(),
+    create: jest.fn(),
+    update: jest.fn().mockResolvedValue({}),
+    delete: jest.fn(),
+  },
 }));
 
 describe('schema validation', () => {
@@ -68,7 +63,7 @@ describe('schema validation', () => {
       page: 1,
       perPage: 20,
     };
-    (listFleetServerHosts as jest.Mock).mockResolvedValue(expectedResponse);
+    (fleetServerHostService.list as jest.Mock).mockResolvedValue(expectedResponse);
     await getAllFleetServerHostsHandler(context, {} as any, response);
 
     expect(response.ok).toHaveBeenCalledWith({
@@ -89,7 +84,7 @@ describe('schema validation', () => {
         proxy_id: 'proxy1',
       },
     };
-    (createFleetServerHost as jest.Mock).mockResolvedValue(expectedResponse.item);
+    (fleetServerHostService.create as jest.Mock).mockResolvedValue(expectedResponse.item);
     await postFleetServerHost(
       context,
       {
@@ -119,7 +114,7 @@ describe('schema validation', () => {
         proxy_id: null,
       },
     };
-    (updateFleetServerHost as jest.Mock).mockResolvedValue(expectedResponse.item);
+    (fleetServerHostService.update as jest.Mock).mockResolvedValue(expectedResponse.item);
     await putFleetServerHostHandler(
       context,
       {
@@ -150,7 +145,7 @@ describe('schema validation', () => {
         proxy_id: null,
       },
     };
-    (getFleetServerHost as jest.Mock).mockResolvedValue(expectedResponse.item);
+    (fleetServerHostService.get as jest.Mock).mockResolvedValue(expectedResponse.item);
     await getFleetServerHostHandler(
       context,
       { body: {}, params: { itemId: 'host1' } } as any,

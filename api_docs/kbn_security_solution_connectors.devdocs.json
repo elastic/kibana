@@ -1,0 +1,200 @@
+{
+  "id": "@kbn/security-solution-connectors",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/security-solution-connectors",
+        "id": "def-public.ConnectorSelector",
+        "type": "Function",
+        "tags": [],
+        "label": "ConnectorSelector",
+        "description": [],
+        "signature": [
+          "React.NamedExoticComponent<",
+          {
+            "pluginId": "@kbn/security-solution-connectors",
+            "scope": "public",
+            "docId": "kibKbnSecuritySolutionConnectorsPluginApi",
+            "section": "def-public.ConnectorSelectorProps",
+            "text": "ConnectorSelectorProps"
+          },
+          ">"
+        ],
+        "path": "x-pack/solutions/security/packages/connectors/src/connector_selector.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-solution-connectors",
+            "id": "def-public.ConnectorSelector.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/security-solution-connectors",
+        "id": "def-public.ConnectorSelectorProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "ConnectorSelectorProps",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/security-solution-connectors",
+            "scope": "public",
+            "docId": "kibKbnSecuritySolutionConnectorsPluginApi",
+            "section": "def-public.ConnectorSelectorProps",
+            "text": "ConnectorSelectorProps"
+          },
+          " extends Partial<Pick<",
+          "EuiSuperSelectProps",
+          "<string>, \"isLoading\" | \"isInvalid\">>"
+        ],
+        "path": "x-pack/solutions/security/packages/connectors/src/connector_selector.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-solution-connectors",
+            "id": "def-public.ConnectorSelectorProps.connectors",
+            "type": "Array",
+            "tags": [],
+            "label": "connectors",
+            "description": [],
+            "signature": [
+              "ConnectorDetails",
+              "[]"
+            ],
+            "path": "x-pack/solutions/security/packages/connectors/src/connector_selector.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-solution-connectors",
+            "id": "def-public.ConnectorSelectorProps.onChange",
+            "type": "Function",
+            "tags": [],
+            "label": "onChange",
+            "description": [],
+            "signature": [
+              "(connectorId: string) => void"
+            ],
+            "path": "x-pack/solutions/security/packages/connectors/src/connector_selector.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/security-solution-connectors",
+                "id": "def-public.ConnectorSelectorProps.onChange.$1",
+                "type": "string",
+                "tags": [],
+                "label": "connectorId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/solutions/security/packages/connectors/src/connector_selector.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/security-solution-connectors",
+            "id": "def-public.ConnectorSelectorProps.selectedId",
+            "type": "string",
+            "tags": [],
+            "label": "selectedId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/solutions/security/packages/connectors/src/connector_selector.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-solution-connectors",
+            "id": "def-public.ConnectorSelectorProps.onNewConnectorClicked",
+            "type": "Function",
+            "tags": [],
+            "label": "onNewConnectorClicked",
+            "description": [],
+            "signature": [
+              "(() => void) | undefined"
+            ],
+            "path": "x-pack/solutions/security/packages/connectors/src/connector_selector.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/security-solution-connectors",
+            "id": "def-public.ConnectorSelectorProps.isDisabled",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isDisabled",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/solutions/security/packages/connectors/src/connector_selector.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-solution-connectors",
+            "id": "def-public.ConnectorSelectorProps.mode",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "mode",
+            "description": [],
+            "signature": [
+              "\"default\" | \"combobox\" | undefined"
+            ],
+            "path": "x-pack/solutions/security/packages/connectors/src/connector_selector.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

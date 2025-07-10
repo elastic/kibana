@@ -15,11 +15,6 @@ jest.mock('../../../../common/containers/use_search_strategy', () => ({
   useSearchStrategy: jest.fn(),
 }));
 
-jest.mock('../../../../entity_analytics/api/hooks/use_risk_engine_status', () => ({
-  useIsNewRiskScoreModuleInstalled: jest
-    .fn()
-    .mockReturnValue({ isLoading: false, installed: true }),
-}));
 const mockUseSearchStrategy = useSearchStrategy as jest.Mock;
 const mockSearch = jest.fn();
 

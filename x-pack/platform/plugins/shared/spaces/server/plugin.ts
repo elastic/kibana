@@ -6,7 +6,7 @@
  */
 
 import type { Observable } from 'rxjs';
-import { map } from 'rxjs';
+import { map, take } from 'rxjs';
 
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type {
@@ -63,17 +63,17 @@ export interface SpacesPluginSetup {
 
   /**
    * Registries exposed for the security plugin to transparently provide authorization and audit logging.
-   * @private
+   * @internal
    */
   spacesClient: {
     /**
      * Sets the client repository factory.
-     * @private
+     * @internal
      */
     setClientRepositoryFactory: (factory: SpacesClientRepositoryFactory) => void;
     /**
      * Registers a client wrapper.
-     * @private
+     * @internal
      */
     registerClientWrapper: (wrapper: SpacesClientWrapper) => void;
   };
@@ -155,6 +155,12 @@ export class SpacesPlugin
 
     const { license } = this.spacesLicenseService.setup({ license$: plugins.licensing.license$ });
 
+    let defaultSolution;
+
+    this.config$.pipe(take(1)).subscribe((config) => {
+      defaultSolution = config.defaultSolution;
+    });
+
     this.defaultSpaceService = new DefaultSpaceService();
     this.defaultSpaceService.setup({
       coreStatus: core.status,
@@ -162,7 +168,7 @@ export class SpacesPlugin
       license$: plugins.licensing.license$,
       spacesLicense: license,
       logger: this.log,
-      solution: plugins.cloud?.onboarding?.defaultSolution,
+      solution: plugins.cloud?.onboarding?.defaultSolution || defaultSolution,
     });
 
     initSpacesViewsRoutes({
@@ -191,7 +197,7 @@ export class SpacesPlugin
       http: core.http,
       log: this.log,
       getSpacesService,
-      features: plugins.features,
+      getFeatures: async () => (await core.getStartServices())[1].features,
     });
 
     setupCapabilities(core, getSpacesService, this.log);

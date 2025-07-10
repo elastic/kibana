@@ -6,25 +6,24 @@
  */
 
 import React from 'react';
-import { type AppMockRenderer, createAppMockRenderer } from '../../common/mock';
+import { screen } from '@testing-library/react';
 import type { AddObservableProps } from './add_observable';
 import { mockCase } from '../../containers/mock';
 import { ObservablesUtilityBar } from './observables_utility_bar';
+import { renderWithTestingProviders } from '../../common/mock';
 
 describe('ObservablesUtilityBar', () => {
-  let appMock: AppMockRenderer;
   const props: AddObservableProps = {
     caseData: mockCase,
   };
 
   beforeEach(() => {
-    appMock = createAppMockRenderer();
     jest.clearAllMocks();
   });
 
   it('renders correctly', async () => {
-    const result = appMock.render(<ObservablesUtilityBar {...props} />);
+    renderWithTestingProviders(<ObservablesUtilityBar {...props} />);
 
-    expect(result.getByTestId('cases-observables-add')).toBeInTheDocument();
+    expect(screen.getByTestId('cases-observables-add')).toBeInTheDocument();
   });
 });

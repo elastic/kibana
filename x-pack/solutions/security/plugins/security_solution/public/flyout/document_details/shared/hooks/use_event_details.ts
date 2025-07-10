@@ -8,7 +8,7 @@
 import type { BrowserFields, TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
-import { type DataViewSpec } from '@kbn/data-plugin/common';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { DEFAULT_ALERTS_INDEX, DEFAULT_PREVIEW_INDEX } from '../../../../../common/constants';
 import type { RunTimeMappings } from '../../../../../common/api/search_strategy';
 import { useSpaceId } from '../../../../common/hooks/use_space_id';
@@ -19,6 +19,8 @@ import { useTimelineEventsDetails } from '../../../../timelines/containers/detai
 import type { SearchHit } from '../../../../../common/search_strategy';
 import type { GetFieldsData } from './use_get_fields_data';
 import { useGetFieldsData } from './use_get_fields_data';
+import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
+import { useBrowserFields } from '../../../../data_view_manager/hooks/use_browser_fields';
 
 /**
  * The referenced alert _index in the flyout uses the `.internal.` such as `.internal.alerts-security.alerts-spaceId` in the alert page flyout and .internal.preview.alerts-security.alerts-spaceId` in the rule creation preview flyout,
@@ -64,10 +66,6 @@ export interface UseEventDetailsResult {
    */
   getFieldsData: GetFieldsData;
   /**
-   * Index pattern for rule details
-   */
-  indexPattern?: DataViewSpec;
-  /**
    * Whether the data is loading
    */
   loading: boolean;
@@ -97,22 +95,36 @@ export const useEventDetails = ({
     pageName === SecurityPageName.detections
       ? SourcererScopeName.detections
       : SourcererScopeName.default;
+
   const sourcererDataView = useSourcererDataView(sourcererScope);
+
+  const oldRuntimeMappings: RunTimeMappings = sourcererDataView.sourcererDataView
+    .runtimeFieldMap as RunTimeMappings;
+  const oldBrowserFields = sourcererDataView.browserFields;
+
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+  const { dataView } = useDataView(sourcererScope);
+  const experimentalBrowserFields = useBrowserFields(sourcererScope);
+
+  const runtimeMappings = newDataViewPickerEnabled
+    ? (dataView?.getRuntimeMappings() as RunTimeMappings)
+    : oldRuntimeMappings;
+  const browserFields = newDataViewPickerEnabled ? experimentalBrowserFields : oldBrowserFields;
+
   const [loading, dataFormattedForFieldBrowser, searchHit, dataAsNestedObject, refetchFlyoutData] =
     useTimelineEventsDetails({
       indexName: eventIndex,
       eventId: eventId ?? '',
-      runtimeMappings: sourcererDataView.sourcererDataView.runtimeFieldMap as RunTimeMappings,
+      runtimeMappings,
       skip: !eventId,
     });
   const { getFieldsData } = useGetFieldsData({ fieldsData: searchHit?.fields });
 
   return {
-    browserFields: sourcererDataView.browserFields,
+    browserFields,
     dataAsNestedObject,
     dataFormattedForFieldBrowser,
     getFieldsData,
-    indexPattern: sourcererDataView.sourcererDataView,
     loading,
     refetchFlyoutData,
     searchHit,

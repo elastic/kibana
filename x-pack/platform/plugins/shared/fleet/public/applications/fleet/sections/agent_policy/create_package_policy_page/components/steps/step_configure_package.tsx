@@ -27,6 +27,8 @@ import { doesPackageHaveIntegrations } from '../../../../../services';
 
 import type { PackagePolicyValidationResults } from '../../services';
 
+import { AGENTLESS_DISABLED_INPUTS } from '../../../../../../../../common/constants';
+
 import { PackagePolicyInputPanel } from './components';
 
 export const StepConfigurePackagePolicy: React.FunctionComponent<{
@@ -38,6 +40,7 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
   submitAttempted: boolean;
   noTopRule?: boolean;
   isEditPage?: boolean;
+  isAgentlessSelected?: boolean;
 }> = ({
   packageInfo,
   showOnlyIntegration,
@@ -47,6 +50,7 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
   submitAttempted,
   noTopRule = false,
   isEditPage = false,
+  isAgentlessSelected = false,
 }) => {
   const hasIntegrations = useMemo(() => doesPackageHaveIntegrations(packageInfo), [packageInfo]);
   const packagePolicyTemplates = useMemo(
@@ -66,8 +70,9 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
         <EuiFlexGroup direction="column" gutterSize="none">
           {packagePolicyTemplates.map((policyTemplate) => {
             const inputs = getNormalizedInputs(policyTemplate);
+            const packagePolicyInputs = packagePolicy.inputs;
             return inputs.map((packageInput) => {
-              const packagePolicyInput = packagePolicy.inputs.find(
+              const packagePolicyInput = packagePolicyInputs.find(
                 (input) =>
                   input.type === packageInput.type &&
                   (hasIntegrations ? input.policy_template === policyTemplate.name : true)
@@ -79,28 +84,35 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
                   ? policyTemplate.data_streams
                   : []
               );
-              return packagePolicyInput ? (
+
+              const updatePackagePolicyInput = (updatedInput: Partial<NewPackagePolicyInput>) => {
+                const indexOfUpdatedInput = packagePolicyInputs.findIndex(
+                  (input) =>
+                    input.type === packageInput.type &&
+                    (hasIntegrations ? input.policy_template === policyTemplate.name : true)
+                );
+                const newInputs = [...packagePolicyInputs];
+                newInputs[indexOfUpdatedInput] = {
+                  ...newInputs[indexOfUpdatedInput],
+                  ...updatedInput,
+                };
+                updatePackagePolicy({
+                  inputs: newInputs,
+                });
+              };
+
+              return packagePolicyInput &&
+                !(
+                  (isAgentlessSelected || packagePolicy.supports_agentless === true) &&
+                  AGENTLESS_DISABLED_INPUTS.includes(packagePolicyInput.type)
+                ) ? (
                 <EuiFlexItem key={packageInput.type}>
                   <PackagePolicyInputPanel
                     packageInput={packageInput}
                     packageInfo={packageInfo}
                     packageInputStreams={packageInputStreams}
                     packagePolicyInput={packagePolicyInput}
-                    updatePackagePolicyInput={(updatedInput: Partial<NewPackagePolicyInput>) => {
-                      const indexOfUpdatedInput = packagePolicy.inputs.findIndex(
-                        (input) =>
-                          input.type === packageInput.type &&
-                          (hasIntegrations ? input.policy_template === policyTemplate.name : true)
-                      );
-                      const newInputs = [...packagePolicy.inputs];
-                      newInputs[indexOfUpdatedInput] = {
-                        ...newInputs[indexOfUpdatedInput],
-                        ...updatedInput,
-                      };
-                      updatePackagePolicy({
-                        inputs: newInputs,
-                      });
-                    }}
+                    updatePackagePolicyInput={updatePackagePolicyInput}
                     inputValidationResults={
                       validationResults?.inputs?.[
                         hasIntegrations

@@ -6,50 +6,53 @@
  */
 
 import { EuiIcon, EuiText, EuiToolTip } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedNumber } from '@kbn/i18n-react';
 import React from 'react';
 
-const FEW_DEGRADED_DOCS_THRESHOLD = 0.0005;
+const FEW_QUALITY_STATS_DOCS_THRESHOLD = 0.0005;
 
 export function QualityPercentageIndicator({
   percentage,
-  degradedDocsCount,
+  docsCount = 0,
+  fewDocsTooltipContent,
 }: {
   percentage: number;
-  degradedDocsCount?: number;
+  docsCount?: number;
+  fewDocsTooltipContent: (docsCount: number) => string;
 }) {
-  const isFewDegradedDocsAvailable = percentage && percentage < FEW_DEGRADED_DOCS_THRESHOLD;
+  const isFewDocsAvailable = percentage && percentage < FEW_QUALITY_STATS_DOCS_THRESHOLD;
 
-  return isFewDegradedDocsAvailable ? (
-    <DatasetWithFewDegradedDocs degradedDocsCount={degradedDocsCount} />
+  return isFewDocsAvailable ? (
+    <DatasetWithFewQualityStatsDocs
+      docsCount={docsCount}
+      fewDocsTooltipContent={fewDocsTooltipContent}
+    />
   ) : (
-    <DatasetWithManyDegradedDocs percentage={percentage} />
+    <DatasetWithManyQualityStatsDocs percentage={percentage} />
   );
 }
 
-const DatasetWithFewDegradedDocs = ({ degradedDocsCount }: { degradedDocsCount?: number }) => {
+const DatasetWithFewQualityStatsDocs = ({
+  docsCount,
+  fewDocsTooltipContent,
+}: {
+  docsCount: number;
+  fewDocsTooltipContent: (docsCount: number) => string;
+}) => {
   return (
     <EuiText size="s">
       ~0%{' '}
-      <EuiToolTip
-        content={i18n.translate('xpack.datasetQuality.fewDegradedDocsTooltip', {
-          defaultMessage: '{degradedDocsCount} degraded docs in this data set.',
-          values: {
-            degradedDocsCount,
-          },
-        })}
-      >
+      <EuiToolTip content={fewDocsTooltipContent(docsCount)}>
         <EuiIcon type="warning" color="warning" size="s" />
       </EuiToolTip>
     </EuiText>
   );
 };
 
-const DatasetWithManyDegradedDocs = ({ percentage }: { percentage: number }) => {
+const DatasetWithManyQualityStatsDocs = ({ percentage }: { percentage: number }) => {
   return (
     <EuiText size="s">
-      <FormattedNumber value={percentage} />%
+      <FormattedNumber value={Number(percentage.toFixed(2))} />%
     </EuiText>
   );
 };

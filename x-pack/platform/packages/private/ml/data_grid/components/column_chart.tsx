@@ -7,10 +7,11 @@
 
 import React, { type FC } from 'react';
 
-import { BarSeries, Chart, Settings, ScaleType, LEGACY_LIGHT_THEME } from '@elastic/charts';
+import { BarSeries, Chart, Settings, ScaleType } from '@elastic/charts';
 import { mathWithUnits, type UseEuiTheme, type EuiDataGridColumn } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import { useElasticChartsTheme } from '@kbn/charts-theme';
 import type { ChartData } from '../lib/field_histograms';
 import { isUnsupportedChartData } from '../lib/field_histograms';
 
@@ -62,7 +63,7 @@ export const ColumnChart: FC<Props> = ({
   maxChartColumns,
 }) => {
   const { data, legendText } = useColumnChart(chartData, columnType, maxChartColumns);
-
+  const chartBaseTheme = useElasticChartsTheme();
   return (
     <div data-test-subj={dataTestSubj}>
       {!isUnsupportedChartData(chartData) && data.length > 0 && (
@@ -70,8 +71,7 @@ export const ColumnChart: FC<Props> = ({
           <Chart>
             <Settings
               theme={columnChartTheme}
-              // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
-              baseTheme={LEGACY_LIGHT_THEME}
+              baseTheme={chartBaseTheme}
               locale={i18n.getLocale()}
             />
             <BarSeries

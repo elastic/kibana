@@ -27,7 +27,7 @@ export const ImportRulesRequestQuery = z.object({
    */
   overwrite: BooleanFromString.optional().default(false),
   /**
-   * Determines whether existing exception lists with the same `list_id` are overwritten.
+   * Determines whether existing exception lists with the same `list_id` are overwritten. Both the exception list container and its items are overwritten.
    */
   overwrite_exceptions: BooleanFromString.optional().default(false),
   /**

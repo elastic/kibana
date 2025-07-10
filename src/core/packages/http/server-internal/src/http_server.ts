@@ -37,10 +37,11 @@ import type {
   IAuthHeadersStorage,
   RouterDeprecatedApiDetails,
   RouteMethod,
+  VersionedRouterRoute,
 } from '@kbn/core-http-server';
 import { performance } from 'perf_hooks';
 import { isBoom } from '@hapi/boom';
-import { identity, isObject } from 'lodash';
+import { identity, isNil, isObject, omitBy } from 'lodash';
 import { IHttpEluMonitorConfig } from '@kbn/core-http-server/src/elu_monitor';
 import { Env } from '@kbn/config';
 import { CoreContext } from '@kbn/core-base-server-internal';
@@ -104,7 +105,7 @@ function startEluMeasurement<T>(
           active
         )}ms out of ${Math.round(duration)}ms) and ${eluThreshold * 100}% (${Math.round(
           utilization * 100
-        )}%) `,
+        )}%). Run \`node scripts/profile.js\` to find out why.`,
         {
           labels: {
             request_path: path,
@@ -140,6 +141,7 @@ export interface HttpServerSetup {
   staticAssets: InternalStaticAssets;
   basePath: HttpServiceSetup['basePath'];
   csp: HttpServiceSetup['csp'];
+  prototypeHardening: boolean;
   createCookieSessionStorageFactory: HttpServiceSetup['createCookieSessionStorageFactory'];
   registerOnPreRouting: HttpServiceSetup['registerOnPreRouting'];
   registerOnPreAuth: HttpServiceSetup['registerOnPreAuth'];
@@ -306,6 +308,7 @@ export class HttpServer {
         ),
       basePath: basePathService,
       csp: config.csp,
+      prototypeHardening: config.prototypeHardening,
       auth: {
         get: this.authState.get,
         isAuthenticated: this.authState.isAuthenticated,
@@ -410,10 +413,12 @@ export class HttpServer {
           .map((route) => {
             const access = route.options.access;
             if (route.isVersioned === true) {
-              return [...route.handlers.entries()].map(([_, { options }]) => {
-                const deprecated = options.options?.deprecated;
-                return { route, version: `${options.version}`, deprecated, access };
-              });
+              return [...(route as VersionedRouterRoute).handlers.entries()].map(
+                ([_, { options }]) => {
+                  const deprecated = options.options?.deprecated;
+                  return { route, version: `${options.version}`, deprecated, access };
+                }
+              );
             }
 
             return { route, version: undefined, deprecated: route.options.deprecated, access };
@@ -553,15 +558,14 @@ export class HttpServer {
 
       executionContext?.setRequestId(requestId);
 
-      request.app = {
-        ...(request.app ?? {}),
-        requestId,
-        requestUuid: uuidv4(),
-        measureElu: stop,
-        // Kibana stores trace.id until https://github.com/elastic/apm-agent-nodejs/issues/2353 is resolved
-        // The current implementation of the APM agent ends a request transaction before "response" log is emitted.
-        traceId: apm.currentTraceIds['trace.id'],
-      } as KibanaRequestState;
+      const app: KibanaRequestState = request.app as KibanaRequestState;
+      app.requestId = requestId;
+      app.requestUuid = uuidv4();
+      app.measureElu = stop;
+      // Kibana stores trace.id until https://github.com/elastic/apm-agent-nodejs/issues/2353 is resolved
+      // The current implementation of the APM agent ends a request transaction before "response" log is emitted.
+      app.traceId = apm.currentTraceIds['trace.id'];
+
       return responseToolkit.continue;
     });
   }
@@ -732,7 +736,15 @@ export class HttpServer {
         },
       },
       options: {
-        app: { access: 'public' },
+        app: {
+          access: 'public',
+          security: {
+            authz: {
+              enabled: false,
+              reason: 'Route serves static assets',
+            },
+          },
+        },
         auth: false,
         cache: {
           privacy: 'public',
@@ -764,6 +776,7 @@ export class HttpServer {
       access: route.options.access ?? 'internal',
       deprecated,
       security: route.security,
+      ...omitBy({ excludeFromRateLimiter: route.options.excludeFromRateLimiter }, isNil),
     };
     // Log HTTP API target consumer.
     optionsLogger.debug(

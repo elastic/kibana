@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { SiemMigrationTaskStatus } from '../../../../../../../common/siem_migrations/constants';
 import type { RuleMigrationStats } from '../../../../../../siem_migrations/rules/types';
 import { UploadRulesPanel } from './upload_rules_panel';
@@ -22,33 +22,73 @@ export interface RuleMigrationsPanelsProps {
 }
 export const RuleMigrationsPanels = React.memo<RuleMigrationsPanelsProps>(
   ({ migrationsStats, isConnectorsCardComplete, expandConnectorsCard }) => {
-    if (migrationsStats.length === 0) {
-      return isConnectorsCardComplete ? (
-        <UploadRulesPanel />
-      ) : (
-        <MissingAIConnectorCallout onExpandAiConnectorsCard={expandConnectorsCard} />
-      );
-    }
+    const latestMigrationsStats = useMemo(
+      () => migrationsStats.slice().reverse(),
+      [migrationsStats]
+    );
+
+    const [expandedCardId, setExpandedCardId] = useState<string | undefined>(() => {
+      if (latestMigrationsStats[0]?.status === SiemMigrationTaskStatus.FINISHED) {
+        return latestMigrationsStats[0]?.id;
+      }
+      return undefined;
+    });
+
+    useEffect(() => {
+      if (!expandedCardId && latestMigrationsStats.length > 0) {
+        const runningMigration = latestMigrationsStats.find(
+          ({ status }) => status === SiemMigrationTaskStatus.RUNNING
+        );
+        if (runningMigration) {
+          setExpandedCardId(runningMigration.id); // Set the next migration to be expanded when it finishes
+        }
+      }
+    }, [latestMigrationsStats, expandedCardId]);
+
+    const getOnToggleCollapsed = useCallback(
+      (id: string) => (isCollapsed: boolean) => {
+        setExpandedCardId(isCollapsed ? undefined : id);
+      },
+      []
+    );
 
     return (
-      <EuiFlexGroup direction="column" gutterSize="m">
+      <EuiFlexGroup data-test-subj="ruleMigrationPanelGroup" direction="column" gutterSize="m">
         <EuiFlexItem grow={false}>
-          {isConnectorsCardComplete ? (
-            <UploadRulesPanel isUploadMore />
-          ) : (
-            <MissingAIConnectorCallout onExpandAiConnectorsCard={expandConnectorsCard} />
+          {!isConnectorsCardComplete && (
+            <>
+              <MissingAIConnectorCallout onExpandAiConnectorsCard={expandConnectorsCard} />
+              <EuiSpacer size="s" />
+            </>
           )}
+          <UploadRulesPanel
+            isUploadMore={latestMigrationsStats.length > 0}
+            isDisabled={!isConnectorsCardComplete}
+          />
         </EuiFlexItem>
-        {migrationsStats.map((migrationStats) => (
-          <EuiFlexItem grow={false} key={migrationStats.id}>
-            {migrationStats.status === SiemMigrationTaskStatus.READY && (
+
+        {latestMigrationsStats.map((migrationStats) => (
+          <EuiFlexItem
+            data-test-subj={`migration-${migrationStats.id}`}
+            grow={false}
+            key={migrationStats.id}
+          >
+            {[
+              SiemMigrationTaskStatus.READY,
+              SiemMigrationTaskStatus.INTERRUPTED,
+              SiemMigrationTaskStatus.STOPPED,
+            ].includes(migrationStats.status) && (
               <MigrationReadyPanel migrationStats={migrationStats} />
             )}
             {migrationStats.status === SiemMigrationTaskStatus.RUNNING && (
               <MigrationProgressPanel migrationStats={migrationStats} />
             )}
             {migrationStats.status === SiemMigrationTaskStatus.FINISHED && (
-              <MigrationResultPanel migrationStats={migrationStats} />
+              <MigrationResultPanel
+                migrationStats={migrationStats}
+                isCollapsed={migrationStats.id !== expandedCardId}
+                onToggleCollapsed={getOnToggleCollapsed(migrationStats.id)}
+              />
             )}
           </EuiFlexItem>
         ))}

@@ -24,53 +24,61 @@ import type {
   ThresholdRuleCreateProps,
 } from '@kbn/security-solution-plugin/common/api/detection_engine/model';
 import type { Actions, AlertsFilter } from '../objects/types';
-// For some reason importing these functions from ../../public/detections/pages/detection_engine/rules/helpers
+// For some reason importing these functions from ../../public/detection_engine/common/helpers
 // causes a "Webpack Compilation Error" in this file specifically, even though it imports fine in the test files
 // in ../e2e/*, so we have a copy of the implementations in the cypress helpers.
 import { convertHistoryStartToSize, getHumanizedDuration } from '../helpers/rules';
 
 import {
   ABOUT_CONTINUE_BTN,
-  ALERT_SUPPRESSION_FIELDS,
-  ALERT_SUPPRESSION_FIELDS_INPUT,
-  ALERT_SUPPRESSION_FIELDS_COMBO_BOX,
-  ALERT_SUPPRESSION_MISSING_FIELDS_DO_NOT_SUPPRESS,
-  THRESHOLD_ENABLE_SUPPRESSION_CHECKBOX,
-  ALERT_SUPPRESSION_DURATION_PER_RULE_EXECUTION,
-  ALERT_SUPPRESSION_DURATION_PER_TIME_INTERVAL,
   ABOUT_EDIT_TAB,
   ACTIONS_EDIT_TAB,
   ADD_FALSE_POSITIVE_BTN,
   ADD_REFERENCE_URL_BTN,
   ADVANCED_SETTINGS_BTN,
+  ALERT_SUPPRESSION_DURATION_PER_RULE_EXECUTION,
+  ALERT_SUPPRESSION_DURATION_PER_TIME_INTERVAL,
+  ALERT_SUPPRESSION_DURATION_UNIT_INPUT,
+  ALERT_SUPPRESSION_DURATION_VALUE_INPUT,
+  ALERT_SUPPRESSION_FIELDS,
+  ALERT_SUPPRESSION_FIELDS_COMBO_BOX,
+  ALERT_SUPPRESSION_FIELDS_INPUT,
+  ALERT_SUPPRESSION_MISSING_FIELDS_DO_NOT_SUPPRESS,
+  ALERTS_INDEX_BUTTON,
   ANOMALY_THRESHOLD_INPUT,
   APPLY_SELECTED_SAVED_QUERY_BUTTON,
   AT_LEAST_ONE_INDEX_PATTERN,
   AT_LEAST_ONE_VALID_MATCH,
   COMBO_BOX_CLEAR_BTN,
   CREATE_AND_ENABLE_BTN,
+  CREATE_WITHOUT_ENABLING_BTN,
+  CUSTOM_INDEX_PATTERN_INPUT,
   CUSTOM_QUERY_INPUT,
   CUSTOM_QUERY_REQUIRED,
+  DATA_VIEW_COMBO_BOX,
+  DATA_VIEW_OPTION,
   DEFAULT_RISK_SCORE_INPUT,
   DEFINE_CONTINUE_BUTTON,
   EQL_QUERY_INPUT,
   EQL_QUERY_VALIDATION_SPINNER,
   EQL_TYPE,
-  ESQL_TYPE,
   ESQL_QUERY_BAR,
   ESQL_QUERY_BAR_INPUT_AREA,
+  ESQL_TYPE,
   FALSE_POSITIVES_INPUT,
   IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK,
   INDICATOR_MATCH_TYPE,
   INPUT,
   INVALID_MATCH_CONTENT,
   INVESTIGATION_NOTES_TEXTAREA,
+  INVESTIGATIONS_INPUT,
   LOAD_QUERY_DYNAMICALLY_CHECKBOX,
   LOAD_SAVED_QUERIES_LIST_BUTTON,
   LOOK_BACK_INTERVAL,
   LOOK_BACK_TIME_TYPE,
   MACHINE_LEARNING_DROPDOWN_INPUT,
   MACHINE_LEARNING_TYPE,
+  MAX_SIGNALS_INPUT,
   MITRE_ATTACK_ADD_SUBTECHNIQUE_BUTTON,
   MITRE_ATTACK_ADD_TACTIC_BUTTON,
   MITRE_ATTACK_ADD_TECHNIQUE_BUTTON,
@@ -78,12 +86,24 @@ import {
   MITRE_ATTACK_TACTIC_DROPDOWN,
   MITRE_ATTACK_TECHNIQUE_DROPDOWN,
   MITRE_TACTIC,
+  NEW_TERMS_HISTORY_SIZE,
+  NEW_TERMS_HISTORY_TIME_TYPE,
+  NEW_TERMS_INPUT_AREA,
+  NEW_TERMS_TYPE,
+  PREVIEW_HISTOGRAM,
+  PREVIEW_LOGGED_REQUESTS_ACCORDION_BUTTON,
+  PREVIEW_LOGGED_REQUESTS_CHECKBOX,
+  PREVIEW_LOGGED_REQUESTS_ITEM_ACCORDION_BUTTON,
+  PREVIEW_LOGGED_REQUESTS_PAGE_ACCORDION_BUTTON,
   QUERY_BAR,
+  QUERY_BAR_ADD_FILTER,
   REFERENCE_URLS_INPUT,
+  RELATED_INTEGRATION_COMBO_BOX_INPUT,
   REQUIRED_FIELD_COMBO_BOX_INPUT,
   RISK_MAPPING_OVERRIDE_OPTION,
   RISK_OVERRIDE,
   RULE_DESCRIPTION_INPUT,
+  RULE_INDICES,
   RULE_NAME_INPUT,
   RULE_NAME_OVERRIDE,
   RULE_NAME_OVERRIDE_FOR_ESQL,
@@ -93,9 +113,12 @@ import {
   RULES_CREATION_PREVIEW_REFRESH_BUTTON,
   RUNS_EVERY_INTERVAL,
   RUNS_EVERY_TIME_TYPE,
+  SAVE_WITH_ERRORS_MODAL,
+  SAVE_WITH_ERRORS_MODAL_CONFIRM_BTN,
   savedQueryByName,
   SCHEDULE_CONTINUE_BUTTON,
   SCHEDULE_EDIT_TAB,
+  SETUP_GUIDE_TEXTAREA,
   SEVERITY_DROPDOWN,
   SEVERITY_MAPPING_OVERRIDE_OPTION,
   SEVERITY_OVERRIDE_ROW,
@@ -106,58 +129,38 @@ import {
   THREAT_MAPPING_COMBO_BOX_INPUT,
   THREAT_MATCH_AND_BUTTON,
   THREAT_MATCH_CUSTOM_QUERY_INPUT,
-  CUSTOM_INDEX_PATTERN_INPUT,
   THREAT_MATCH_INDICATOR_INDICATOR_INDEX,
   THREAT_MATCH_OR_BUTTON,
   THREAT_MATCH_QUERY_INPUT,
+  THREAT_MATCH_QUERY_REQUIRED,
+  THRESHOLD_ENABLE_SUPPRESSION_CHECKBOX,
   THRESHOLD_INPUT_AREA,
   THRESHOLD_TYPE,
-  PREVIEW_HISTOGRAM,
-  DATA_VIEW_COMBO_BOX,
-  DATA_VIEW_OPTION,
-  NEW_TERMS_TYPE,
-  NEW_TERMS_HISTORY_SIZE,
-  NEW_TERMS_HISTORY_TIME_TYPE,
-  NEW_TERMS_INPUT_AREA,
-  CREATE_WITHOUT_ENABLING_BTN,
-  RULE_INDICES,
-  ALERTS_INDEX_BUTTON,
-  INVESTIGATIONS_INPUT,
-  QUERY_BAR_ADD_FILTER,
-  MAX_SIGNALS_INPUT,
-  SETUP_GUIDE_TEXTAREA,
-  RELATED_INTEGRATION_COMBO_BOX_INPUT,
-  SAVE_WITH_ERRORS_MODAL,
-  SAVE_WITH_ERRORS_MODAL_CONFIRM_BTN,
-  PREVIEW_LOGGED_REQUESTS_ACCORDION_BUTTON,
-  PREVIEW_LOGGED_REQUESTS_ITEM_ACCORDION_BUTTON,
-  PREVIEW_LOGGED_REQUESTS_CHECKBOX,
-  ALERT_SUPPRESSION_DURATION_VALUE_INPUT,
-  ALERT_SUPPRESSION_DURATION_UNIT_INPUT,
-  THREAT_MATCH_QUERY_REQUIRED,
 } from '../screens/create_new_rule';
 import {
-  INDEX_SELECTOR,
+  ACTIONS_ALERTS_QUERY_FILTER_BUTTON,
+  ACTIONS_ALERTS_QUERY_FILTER_INPUT,
+  ACTIONS_ALERTS_TIMEFRAME_END_INPUT,
+  ACTIONS_ALERTS_TIMEFRAME_FILTER_BUTTON,
+  ACTIONS_ALERTS_TIMEFRAME_START_INPUT,
+  ACTIONS_ALERTS_TIMEFRAME_TIMEZONE_INPUT,
+  ACTIONS_ALERTS_TIMEFRAME_WEEKDAY_BUTTON,
+  CASES_SYSTEM_ACTION_BTN,
   CREATE_ACTION_CONNECTOR_BTN,
   EMAIL_ACTION_BTN,
-  ACTIONS_ALERTS_QUERY_FILTER_BUTTON,
-  ACTIONS_ALERTS_TIMEFRAME_FILTER_BUTTON,
-  ACTIONS_ALERTS_QUERY_FILTER_INPUT,
-  ACTIONS_ALERTS_TIMEFRAME_WEEKDAY_BUTTON,
-  ACTIONS_ALERTS_TIMEFRAME_START_INPUT,
-  ACTIONS_ALERTS_TIMEFRAME_END_INPUT,
-  ACTIONS_ALERTS_TIMEFRAME_TIMEZONE_INPUT,
+  INDEX_SELECTOR,
 } from '../screens/common/rule_actions';
-import { fillIndexConnectorForm, fillEmailConnectorForm } from './common/rule_actions';
+import { fillEmailConnectorForm, fillIndexConnectorForm } from './common/rule_actions';
 import { TOAST_ERROR } from '../screens/shared';
 import { ALERTS_TABLE_COUNT } from '../screens/timeline';
 import { TIMELINE } from '../screens/timelines';
-import { EUI_FILTER_SELECT_ITEM, COMBO_BOX_INPUT } from '../screens/common/controls';
+import { COMBO_BOX_INPUT, EUI_FILTER_SELECT_ITEM } from '../screens/common/controls';
 import { ruleFields } from '../data/detection_engine';
 import { waitForAlerts } from './alerts';
 import { refreshPage } from './security_header';
 import { COMBO_BOX_OPTION, TOOLTIP } from '../screens/common';
 import { EMPTY_ALERT_TABLE } from '../screens/alerts';
+import { fillComboBox } from './eui_form_interactions';
 
 export const createAndEnableRule = () => {
   cy.get(CREATE_AND_ENABLE_BTN).click();
@@ -462,7 +465,7 @@ export const removeAlertsIndex = () => {
 export const fillDefineCustomRule = (rule: QueryRuleCreateProps) => {
   if (rule.data_view_id !== undefined) {
     cy.get(DATA_VIEW_OPTION).click();
-    cy.get(DATA_VIEW_COMBO_BOX).type(`${rule.data_view_id}{enter}`);
+    fillComboBox({ parentSelector: DATA_VIEW_COMBO_BOX, options: rule.data_view_id });
   }
   cy.get(CUSTOM_QUERY_INPUT)
     .first()
@@ -538,6 +541,10 @@ export const fillRuleAction = (actions: Actions) => {
         break;
     }
   });
+};
+
+export const createCasesAction = () => {
+  cy.get(CASES_SYSTEM_ACTION_BTN).click();
 };
 
 export const fillRuleActionFilters = (alertsFilter: AlertsFilter) => {
@@ -973,27 +980,17 @@ export const openSuppressionFieldsTooltipAndCheckLicense = () => {
 };
 
 /**
- * intercepts /internal/bsearch request that contains esqlQuery and adds alias to it
+ * intercepts esql_async request that contains esqlQuery and adds alias to it
  */
 export const interceptEsqlQueryFieldsRequest = (
   esqlQuery: string,
   alias: string = 'esqlQueryFields'
 ) => {
-  const isServerless = Cypress.env('IS_SERVERLESS');
-  // bfetch is disabled in serverless, so we need to watch another request
-  if (isServerless) {
-    cy.intercept('POST', '/internal/search/esql_async', (req) => {
-      if (req.body?.params?.query?.includes?.(esqlQuery)) {
-        req.alias = alias;
-      }
-    });
-  } else {
-    cy.intercept('POST', '/internal/search?*', (req) => {
-      if (req.body?.batch?.[0]?.request?.params?.query?.includes?.(esqlQuery)) {
-        req.alias = alias;
-      }
-    });
-  }
+  cy.intercept('POST', '/internal/search/esql_async', (req) => {
+    if (req.body?.params?.query?.includes?.(esqlQuery)) {
+      req.alias = alias;
+    }
+  });
 };
 
 export const checkLoadQueryDynamically = () => {
@@ -1017,6 +1014,10 @@ export const checkEnableLoggedRequests = () => {
 
 export const submitRulePreview = () => {
   cy.get(RULES_CREATION_PREVIEW_REFRESH_BUTTON).click();
+};
+
+export const toggleLoggedRequestsPageAccordion = () => {
+  cy.get(PREVIEW_LOGGED_REQUESTS_PAGE_ACCORDION_BUTTON).first().click();
 };
 
 export const toggleLoggedRequestsAccordion = () => {

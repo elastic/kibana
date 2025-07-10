@@ -12,10 +12,14 @@ import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import type { InfraPluginRequestHandlerContext } from '../../../types';
 import type { KibanaFramework } from '../../../lib/adapters/framework/kibana_framework_adapter';
 import type { InfraSourceConfiguration } from '../../../lib/sources';
-import type { InfraMetadataInfo } from '../../../../common/http_api/metadata_api';
+import type {
+  InfraMetadataFields,
+  InfraMetadataInfo,
+} from '../../../../common/http_api/metadata_api';
 import { getPodNodeName } from './get_pod_node_name';
 import { CLOUD_METRICS_MODULES } from '../../../lib/constants';
 import { TIMESTAMP_FIELD } from '../../../../common/constants';
+import { unflattenMetadataInfoFields } from './unflatten_metadata_info_fileds';
 
 export const getNodeInfo = async (
   framework: KibanaFramework,
@@ -59,7 +63,7 @@ export const getNodeInfo = async (
     index: sourceConfiguration.metricAlias,
     body: {
       size: 1,
-      _source: ['host.*', 'cloud.*', 'agent.*', 'container.*', TIMESTAMP_FIELD],
+      fields: ['host.*', 'cloud.*', 'agent.*', 'container.*', TIMESTAMP_FIELD],
       sort: [{ [TIMESTAMP_FIELD]: 'desc' }],
       query: {
         bool: {
@@ -86,14 +90,16 @@ export const getNodeInfo = async (
       CLOUD_METRICS_MODULES.map((module) => ({ match: { 'event.module': module } }))
     );
   }
-  const response = await framework.callWithRequest<{ _source: InfraMetadataInfo }, {}>(
+  const response = await framework.callWithRequest<InfraMetadataFields, {}>(
     requestContext,
     'search',
     params
   );
   const firstHit = first(response.hits.hits);
   if (firstHit) {
-    return firstHit._source;
+    const unflattenedFields = {};
+    unflattenMetadataInfoFields(unflattenedFields, firstHit);
+    return unflattenedFields;
   }
   return {};
 };

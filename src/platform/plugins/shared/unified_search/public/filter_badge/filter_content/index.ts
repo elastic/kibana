@@ -14,7 +14,10 @@ import { withSuspense } from '@kbn/shared-ux-utility';
  * The Lazily-loaded `FilterContent` component.  Consumers should use `React.Suspense` or
  * the withSuspense` HOC to load this component.
  */
-export const FilterContentLazy = React.lazy(() => import('./filter_content'));
+export const FilterContentLazy = React.lazy(async () => {
+  const { FilterContent } = await import('../../ui_module');
+  return { default: FilterContent };
+});
 
 /**
  * A `FilterContent` component that is wrapped by the `withSuspense` HOC. This component can

@@ -11,44 +11,10 @@ import React from 'react';
 import classNames from 'classnames';
 import { EuiToken, EuiTokenProps } from '@elastic/eui';
 
-export interface FieldIconProps extends Omit<EuiTokenProps, 'iconType'> {
-  type:
-    | 'binary'
-    | 'boolean'
-    | 'conflict'
-    | 'date'
-    | 'date_range'
-    | 'dense_vector'
-    | 'geo_point'
-    | 'geo_shape'
-    | 'ip'
-    | 'ip_range'
-    | 'flattened'
-    | 'match_only_text'
-    | 'murmur3'
-    | 'number'
-    | 'number_range'
-    | 'rank_feature'
-    | 'rank_features'
-    | '_source'
-    | 'point'
-    | 'shape'
-    | 'sparse_vector'
-    | 'semantic_text'
-    | 'string'
-    | string
-    | 'nested'
-    | 'gauge'
-    | 'counter'
-    | 'version';
-  label?: string;
-  scripted?: boolean;
-}
-
 // defaultIcon => a unknown datatype
-const defaultIcon = { iconType: 'questionInCircle', color: 'gray' };
+const defaultIcon = { iconType: 'question', color: 'gray' };
 
-export const typeToEuiIconMap: Partial<Record<string, EuiTokenProps>> = {
+export const typeToEuiIconMap = {
   binary: { iconType: 'tokenBinary' },
   boolean: { iconType: 'tokenBoolean' },
   // icon for an index pattern mapping conflict in discover
@@ -62,10 +28,20 @@ export const typeToEuiIconMap: Partial<Record<string, EuiTokenProps>> = {
   ip_range: { iconType: 'tokenIP' },
   flattened: { iconType: 'tokenFlattened' },
   match_only_text: { iconType: 'tokenString' },
-  // is a plugin's data type https://www.elastic.co/guide/en/elasticsearch/plugins/current/mapper-murmur3-usage.html
-  murmur3: { iconType: 'tokenSearchType' },
+  // Numeric types
   number: { iconType: 'tokenNumber' },
   number_range: { iconType: 'tokenNumber' },
+  byte: { iconType: 'tokenNumber' },
+  double: { iconType: 'tokenNumber' },
+  float: { iconType: 'tokenNumber' },
+  half_float: { iconType: 'tokenNumber' },
+  integer: { iconType: 'tokenNumber' },
+  long: { iconType: 'tokenNumber' },
+  scaled_float: { iconType: 'tokenNumber' },
+  short: { iconType: 'tokenNumber' },
+  unsigned_long: { iconType: 'tokenNumber' },
+  // is a plugin's data type https://www.elastic.co/guide/en/elasticsearch/plugins/current/mapper-murmur3-usage.html
+  murmur3: { iconType: 'tokenSearchType' },
   rank_feature: { iconType: 'tokenRankFeature' },
   rank_features: { iconType: 'tokenRankFeatures' },
   histogram: { iconType: 'tokenHistogram' },
@@ -81,7 +57,15 @@ export const typeToEuiIconMap: Partial<Record<string, EuiTokenProps>> = {
   counter: { iconType: 'tokenMetricCounter' },
   nested: { iconType: 'tokenNested' },
   version: { iconType: 'tokenTag' },
-};
+} as const;
+
+type AllowedIconType = keyof typeof typeToEuiIconMap;
+
+export interface FieldIconProps extends Omit<EuiTokenProps, 'iconType'> {
+  type: AllowedIconType | (string & {});
+  label?: string;
+  scripted?: boolean;
+}
 
 /**
  * Field token icon used across the app
@@ -94,7 +78,7 @@ export function FieldIcon({
   className,
   ...rest
 }: FieldIconProps) {
-  const token = typeToEuiIconMap[type] || defaultIcon;
+  const token = typeToEuiIconMap[type as AllowedIconType] || defaultIcon;
 
   return (
     <EuiToken

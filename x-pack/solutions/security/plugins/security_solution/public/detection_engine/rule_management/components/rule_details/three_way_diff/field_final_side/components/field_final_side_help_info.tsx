@@ -9,7 +9,7 @@ import React from 'react';
 import useToggle from 'react-use/lib/useToggle';
 import { EuiPopover, EuiText, EuiButtonIcon } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import * as i18n from '../../../../../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/translations';
+import * as i18n from './translations';
 
 /**
  * Theme doesn't expose width variables. Using provided size variables will require
@@ -24,11 +24,7 @@ export function FieldFinalSideHelpInfo(): JSX.Element {
   const [isPopoverOpen, togglePopover] = useToggle(false);
 
   const button = (
-    <EuiButtonIcon
-      iconType="questionInCircle"
-      onClick={togglePopover}
-      aria-label="Open help popover"
-    />
+    <EuiButtonIcon iconType="question" onClick={togglePopover} aria-label="Open help popover" />
   );
 
   return (
@@ -36,9 +32,9 @@ export function FieldFinalSideHelpInfo(): JSX.Element {
       <EuiText style={{ width: POPOVER_WIDTH }} size="s">
         <FormattedMessage
           id="xpack.securitySolution.detectionEngine.rules.upgradeRules.upgradeHelpText"
-          defaultMessage="The Final Update section lets you preview and edit the final value of a field. This is the value the rule will have after you click {updateButtonLabel}."
+          defaultMessage="The {finalUpdateSectionLabel} section lets you preview and edit the final value of a field. This value is fully applied when you update the rule."
           values={{
-            updateButtonLabel: <strong>{i18n.UPDATE_BUTTON_LABEL}</strong>,
+            finalUpdateSectionLabel: <strong>{i18n.FINAL_UPDATE}</strong>,
           }}
         />
       </EuiText>

@@ -12,7 +12,8 @@ import {
   SPACE_IDS,
   ALERT_RULE_TYPE_ID,
 } from '@kbn/rule-data-utils';
-import { AlertsClient, ConstructorOptions } from '../alerts_client';
+import type { ConstructorOptions } from '../alerts_client';
+import { AlertsClient } from '../alerts_client';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { alertingAuthorizationMock } from '@kbn/alerting-plugin/server/authorization/alerting_authorization.mock';
@@ -122,56 +123,57 @@ describe('get()', () => {
     expect(esClientMock.search.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
-          "body": Object {
-            "_source": undefined,
-            "aggs": undefined,
-            "fields": Array [
-              "kibana.alert.rule.rule_type_id",
-              "kibana.alert.rule.consumer",
-              "kibana.alert.workflow_status",
-              "kibana.space_ids",
-            ],
-            "query": Object {
-              "bool": Object {
-                "filter": Array [
-                  Object {
-                    "bool": Object {
-                      "minimum_should_match": 1,
-                      "should": Array [
-                        Object {
-                          "match": Object {
-                            "_id": "1",
-                          },
-                        },
-                      ],
-                    },
-                  },
-                  Object {
-                    "term": Object {
-                      "kibana.space_ids": "test_default_space_id",
-                    },
-                  },
-                ],
-                "must": Array [],
-                "must_not": Array [],
-                "should": Array [],
-              },
-            },
-            "runtime_mappings": undefined,
-            "size": undefined,
-            "sort": Array [
-              Object {
-                "@timestamp": Object {
-                  "order": "asc",
-                  "unmapped_type": "date",
-                },
-              },
-            ],
-            "track_total_hits": undefined,
-          },
+          "_source": undefined,
+          "aggs": undefined,
+          "fields": Array [
+            "kibana.alert.rule.rule_type_id",
+            "kibana.alert.rule.consumer",
+            "kibana.alert.workflow_status",
+            "kibana.space_ids",
+          ],
           "ignore_unavailable": true,
           "index": ".alerts-observability.apm.alerts",
+          "query": Object {
+            "bool": Object {
+              "filter": Array [
+                Object {
+                  "bool": Object {
+                    "minimum_should_match": 1,
+                    "should": Array [
+                      Object {
+                        "match": Object {
+                          "_id": "1",
+                        },
+                      },
+                    ],
+                  },
+                },
+                Object {
+                  "terms": Object {
+                    "kibana.space_ids": Array [
+                      "test_default_space_id",
+                      "*",
+                    ],
+                  },
+                },
+              ],
+              "must": Array [],
+              "must_not": Array [],
+              "should": Array [],
+            },
+          },
+          "runtime_mappings": undefined,
           "seq_no_primary_term": true,
+          "size": undefined,
+          "sort": Array [
+            Object {
+              "@timestamp": Object {
+                "order": "asc",
+                "unmapped_type": "date",
+              },
+            },
+          ],
+          "track_total_hits": undefined,
         },
       ]
     `);

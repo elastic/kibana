@@ -6,6 +6,7 @@
  */
 
 import type { Role } from '@kbn/security-plugin/common';
+import { SECURITY_FEATURE_ID } from '../../../../common/constants';
 
 export const getEndpointOperationsAnalyst: () => Omit<Role, 'name'> = () => {
   // IMPORTANT
@@ -40,6 +41,8 @@ export const getEndpointOperationsAnalyst: () => Omit<Role, 'name'> = () => {
             '.siem-signals-*',
             '.preview.alerts-security*',
             '.internal.preview.alerts-security*',
+            '.adhoc.alerts-security*',
+            '.internal.adhoc.alerts-security*',
           ],
           privileges: ['read', 'write'],
         },
@@ -55,13 +58,14 @@ export const getEndpointOperationsAnalyst: () => Omit<Role, 'name'> = () => {
           fleet: ['all'],
           fleetv2: ['all'],
           osquery: ['all'],
-          securitySolutionCasesV2: ['all'],
+          securitySolutionCasesV3: ['all'],
           builtinAlerts: ['all'],
-          siem: [
+          [SECURITY_FEATURE_ID]: [
             'all',
             'read_alerts',
             'policy_management_all',
             'endpoint_list_all',
+            'global_artifact_management_all',
             'trusted_applications_all',
             'event_filters_all',
             'host_isolation_exceptions_all',
@@ -74,6 +78,8 @@ export const getEndpointOperationsAnalyst: () => Omit<Role, 'name'> = () => {
             'scan_operations_all',
             'workflow_insights_all',
           ],
+          securitySolutionTimeline: ['all'],
+          securitySolutionNotes: ['all'],
         },
         spaces: ['*'],
       },

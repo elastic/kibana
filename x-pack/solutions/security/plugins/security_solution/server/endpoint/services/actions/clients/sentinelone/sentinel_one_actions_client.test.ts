@@ -51,7 +51,13 @@ import type {
   SentinelOneGetRemoteScriptStatusApiResponse,
   SentinelOneRemoteScriptExecutionStatus,
 } from '@kbn/stack-connectors-plugin/common/sentinelone/types';
-import { ENDPOINT_RESPONSE_ACTION_STATUS_CHANGE_EVENT } from '../../../../../lib/telemetry/event_based/events';
+import {
+  ENDPOINT_RESPONSE_ACTION_SENT_EVENT,
+  ENDPOINT_RESPONSE_ACTION_STATUS_CHANGE_EVENT,
+} from '../../../../../lib/telemetry/event_based/events';
+import { FleetPackagePolicyGenerator } from '../../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
+import { SENTINEL_ONE_AGENT_INDEX_PATTERN } from '../../../../../../common/endpoint/service/response_actions/sentinel_one';
+import { AgentNotFoundError } from '@kbn/fleet-plugin/server';
 
 jest.mock('../../action_details_by_id', () => {
   const originalMod = jest.requireActual('../../action_details_by_id');
@@ -235,6 +241,23 @@ describe('SentinelOneActionsClient class', () => {
 
       expect(classConstructorOptions.casesClient?.attachments.bulkCreate).toHaveBeenCalled();
     });
+
+    describe('telemetry events', () => {
+      it('should send `isolate` action creation telemetry event', async () => {
+        await s1ActionsClient.isolate(createS1IsolationOptions());
+
+        expect(
+          classConstructorOptions.endpointService.getTelemetryService().reportEvent
+        ).toHaveBeenCalledWith(ENDPOINT_RESPONSE_ACTION_SENT_EVENT.eventType, {
+          responseActions: {
+            actionId: expect.any(String),
+            agentType: 'sentinel_one',
+            command: 'isolate',
+            isAutomated: false,
+          },
+        });
+      });
+    });
   });
 
   describe('#release()', () => {
@@ -368,6 +391,23 @@ describe('SentinelOneActionsClient class', () => {
 
       expect(classConstructorOptions.casesClient?.attachments.bulkCreate).toHaveBeenCalled();
     });
+
+    describe('telemetry events', () => {
+      it('should send `release` action creation telemetry event', async () => {
+        await s1ActionsClient.release(createS1IsolationOptions());
+
+        expect(
+          classConstructorOptions.endpointService.getTelemetryService().reportEvent
+        ).toHaveBeenCalledWith(ENDPOINT_RESPONSE_ACTION_SENT_EVENT.eventType, {
+          responseActions: {
+            actionId: expect.any(String),
+            agentType: 'sentinel_one',
+            command: 'unisolate',
+            isAutomated: false,
+          },
+        });
+      });
+    });
   });
 
   describe('#processPendingActions()', () => {
@@ -439,7 +479,9 @@ describe('SentinelOneActionsClient class', () => {
         applyEsClientSearchMock({
           esClientMock: classConstructorOptions.esClient,
           index: ENDPOINT_ACTIONS_INDEX,
-          response: actionRequestsSearchResponse,
+          response: jest
+            .fn(() => s1DataGenerator.toEsSearchResponse([]))
+            .mockReturnValueOnce(actionRequestsSearchResponse),
           pitUsage: true,
         });
 
@@ -462,7 +504,7 @@ describe('SentinelOneActionsClient class', () => {
         expect(processPendingActionsOptions.addToQueue).toHaveBeenCalledWith({
           '@timestamp': expect.any(String),
           EndpointActions: {
-            action_id: '1d6e6796-b0af-496f-92b0-25fcb06db499',
+            action_id: '90d62689-f72d-4a05-b5e3-500cad0dc366',
             completed_at: expect.any(String),
             data: {
               command: 'isolate',
@@ -476,9 +518,9 @@ describe('SentinelOneActionsClient class', () => {
           error: undefined,
           meta: {
             activityLogEntryDescription: 'Some description here',
-            activityLogEntryId: 'd78282bc-e413-468d-9df6-570b91756a6d',
+            activityLogEntryId: 'f4ab34cb-56f9-412d-9202-7691c3a6d70c',
             activityLogEntryType: 1001,
-            elasticDocId: '85f7f003-ebed-4157-b8e6-16ae44fc4be7',
+            elasticDocId: 'f28861a0-9771-4647-bb3f-b5a8e32a6126',
           },
         });
       });
@@ -648,7 +690,9 @@ describe('SentinelOneActionsClient class', () => {
         applyEsClientSearchMock({
           esClientMock: classConstructorOptions.esClient,
           index: ENDPOINT_ACTIONS_INDEX,
-          response: actionRequestsSearchResponse,
+          response: jest
+            .fn(() => s1DataGenerator.toEsSearchResponse([]))
+            .mockReturnValueOnce(actionRequestsSearchResponse),
           pitUsage: true,
         });
 
@@ -728,7 +772,7 @@ describe('SentinelOneActionsClient class', () => {
         expect(processPendingActionsOptions.addToQueue).toHaveBeenCalledWith({
           '@timestamp': expect.any(String),
           EndpointActions: {
-            action_id: '1d6e6796-b0af-496f-92b0-25fcb06db499',
+            action_id: '90d62689-f72d-4a05-b5e3-500cad0dc366',
             completed_at: expect.any(String),
             data: {
               command: 'get-file',
@@ -751,8 +795,8 @@ describe('SentinelOneActionsClient class', () => {
           error: undefined,
           meta: {
             activityLogEntryId: 'activity-222',
-            downloadUrl: '/agents/5173897/uploads/40558796',
-            elasticDocId: '16ae44fc-4be7-446c-8e8f-a5c082dda918',
+            downloadUrl: '/agents/20793397/uploads/821770',
+            elasticDocId: 'b5a8e32a-6126-45f7-b003-ebedf157b8e6',
             createdAt: expect.any(String),
             filename: 'file.zip',
           },
@@ -793,7 +837,9 @@ describe('SentinelOneActionsClient class', () => {
         applyEsClientSearchMock({
           esClientMock: classConstructorOptions.esClient,
           index: ENDPOINT_ACTIONS_INDEX,
-          response: actionRequestsSearchResponse,
+          response: jest
+            .fn(() => s1DataGenerator.toEsSearchResponse([]))
+            .mockReturnValueOnce(actionRequestsSearchResponse),
           pitUsage: true,
         });
 
@@ -812,7 +858,7 @@ describe('SentinelOneActionsClient class', () => {
         expect(processPendingActionsOptions.addToQueue).toHaveBeenCalledWith({
           '@timestamp': expect.any(String),
           EndpointActions: {
-            action_id: '1d6e6796-b0af-496f-92b0-25fcb06db499',
+            action_id: '90d62689-f72d-4a05-b5e3-500cad0dc366',
             completed_at: expect.any(String),
             data: {
               command: requestData.command,
@@ -906,12 +952,7 @@ describe('SentinelOneActionsClient class', () => {
       });
     });
 
-    describe('Telemetry', () => {
-      beforeEach(() => {
-        // @ts-expect-error
-        classConstructorOptions.endpointService.experimentalFeatures.responseActionsTelemetryEnabled =
-          true;
-      });
+    describe('telemetry events', () => {
       describe('for Isolate and Release', () => {
         let s1ActivityHits: Array<SearchHit<SentinelOneActivityEsDoc>>;
 
@@ -949,7 +990,9 @@ describe('SentinelOneActionsClient class', () => {
           applyEsClientSearchMock({
             esClientMock: classConstructorOptions.esClient,
             index: ENDPOINT_ACTIONS_INDEX,
-            response: actionRequestsSearchResponse,
+            response: jest
+              .fn(() => s1DataGenerator.toEsSearchResponse([]))
+              .mockReturnValueOnce(actionRequestsSearchResponse),
             pitUsage: true,
           });
 
@@ -1049,7 +1092,9 @@ describe('SentinelOneActionsClient class', () => {
           applyEsClientSearchMock({
             esClientMock: classConstructorOptions.esClient,
             index: ENDPOINT_ACTIONS_INDEX,
-            response: actionRequestsSearchResponse,
+            response: jest
+              .fn(() => s1DataGenerator.toEsSearchResponse([]))
+              .mockReturnValueOnce(actionRequestsSearchResponse),
             pitUsage: true,
           });
 
@@ -1133,7 +1178,9 @@ describe('SentinelOneActionsClient class', () => {
           applyEsClientSearchMock({
             esClientMock: classConstructorOptions.esClient,
             index: ENDPOINT_ACTIONS_INDEX,
-            response: actionRequestsSearchResponse,
+            response: jest
+              .fn(() => s1DataGenerator.toEsSearchResponse([]))
+              .mockReturnValueOnce(actionRequestsSearchResponse),
             pitUsage: true,
           });
 
@@ -1392,6 +1439,23 @@ describe('SentinelOneActionsClient class', () => {
 
       expect(classConstructorOptions.casesClient?.attachments.bulkCreate).toHaveBeenCalled();
     });
+
+    describe('telemetry events', () => {
+      it('should send `get-file` action creation telemetry event', async () => {
+        await s1ActionsClient.getFile(getFileReqOptions);
+
+        expect(
+          classConstructorOptions.endpointService.getTelemetryService().reportEvent
+        ).toHaveBeenCalledWith(ENDPOINT_RESPONSE_ACTION_SENT_EVENT.eventType, {
+          responseActions: {
+            actionId: expect.any(String),
+            agentType: 'sentinel_one',
+            command: 'get-file',
+            isAutomated: false,
+          },
+        });
+      });
+    });
   });
 
   describe('#getFileInfo()', () => {
@@ -1570,7 +1634,7 @@ describe('SentinelOneActionsClient class', () => {
         response: s1DataGenerator.toEsSearchResponse([]),
       });
       await expect(s1ActionsClient.getFileDownload('abc', '123')).rejects.toThrow(
-        'Action ID [abc] for agent ID [abc] is still pending'
+        'Action ID [abc] for agent ID [123] is still pending'
       );
     });
 
@@ -1786,6 +1850,23 @@ describe('SentinelOneActionsClient class', () => {
 
       expect(classConstructorOptions.casesClient?.attachments.bulkCreate).toHaveBeenCalled();
     });
+
+    describe('telemetry events', () => {
+      it('should send `kill-process` action creation telemetry event', async () => {
+        await s1ActionsClient.killProcess(killProcessActionRequest);
+
+        expect(
+          classConstructorOptions.endpointService.getTelemetryService().reportEvent
+        ).toHaveBeenCalledWith(ENDPOINT_RESPONSE_ACTION_SENT_EVENT.eventType, {
+          responseActions: {
+            actionId: expect.any(String),
+            agentType: 'sentinel_one',
+            command: 'kill-process',
+            isAutomated: false,
+          },
+        });
+      });
+    });
   });
 
   describe('#runningProcesses()', () => {
@@ -1945,5 +2026,178 @@ describe('SentinelOneActionsClient class', () => {
         { meta: true }
       );
     });
+
+    describe('telemetry events', () => {
+      it('should send `kill-process` action creation telemetry event', async () => {
+        await s1ActionsClient.runningProcesses(processesActionRequest);
+
+        expect(
+          classConstructorOptions.endpointService.getTelemetryService().reportEvent
+        ).toHaveBeenCalledWith(ENDPOINT_RESPONSE_ACTION_SENT_EVENT.eventType, {
+          responseActions: {
+            actionId: expect.any(String),
+            agentType: 'sentinel_one',
+            command: 'running-processes',
+            isAutomated: false,
+          },
+        });
+      });
+    });
+  });
+
+  describe('and space awareness is enabled', () => {
+    beforeEach(() => {
+      // @ts-expect-error assignment to readonly prop
+      classConstructorOptions.endpointService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled =
+        true;
+
+      getActionDetailsByIdMock.mockResolvedValue({});
+
+      (
+        classConstructorOptions.endpointService.getInternalFleetServices().packagePolicy
+          .list as jest.Mock
+      ).mockResolvedValue({
+        items: [
+          new FleetPackagePolicyGenerator('seed').generate({
+            package: {
+              name: 'sentinel_one',
+              title: 'sentinelone',
+              version: '1.0.0',
+            },
+            namespace: 'foo',
+          }),
+        ],
+        page: 1,
+        perPage: 10,
+        total: 1,
+      });
+
+      const generator = new SentinelOneDataGenerator('seed');
+      const agentSearchHit = generator.generateAgentEsSearchHit();
+
+      agentSearchHit.inner_hits = {
+        most_recent: {
+          hits: {
+            hits: [
+              {
+                _index: '',
+                _source: {
+                  agent: {
+                    id: 'elastic-agent-id-1',
+                  },
+                  sentinel_one: {
+                    agent: {
+                      agent: {
+                        id: '1-2-3',
+                      },
+                    },
+                  },
+                },
+              },
+            ],
+          },
+        },
+      };
+
+      applyEsClientSearchMock({
+        esClientMock: classConstructorOptions.esClient,
+        index: SENTINEL_ONE_AGENT_INDEX_PATTERN,
+        response: generator.generateAgentEsSearchResponse([agentSearchHit]),
+      });
+    });
+
+    afterEach(() => {
+      getActionDetailsByIdMock.mockReset();
+    });
+
+    it('should error is unable to build sentinelone agent index names', async () => {
+      (
+        classConstructorOptions.endpointService.getInternalFleetServices().packagePolicy
+          .list as jest.Mock
+      ).mockResolvedValue({ items: [] });
+
+      await expect(s1ActionsClient.isolate(createS1IsolationOptions())).rejects.toThrow(
+        'Unable to build list of indexes while retrieving policy information for SentinelOne agents [1-2-3]. Check to ensure at least one integration policy exists.'
+      );
+    });
+
+    it('should search sentinelone agent index with correct index name', async () => {
+      await expect(s1ActionsClient.isolate(createS1IsolationOptions())).resolves.toBeTruthy();
+
+      expect(classConstructorOptions.esClient.search).toHaveBeenCalledWith({
+        _source: false,
+        collapse: {
+          field: 'sentinel_one.agent.agent.id',
+          inner_hits: {
+            _source: ['agent', 'sentinel_one.agent.agent.id', 'event.created'],
+            name: 'most_recent',
+            size: 1,
+            sort: [{ 'event.created': 'desc' }],
+          },
+        },
+        ignore_unavailable: true,
+        index: ['logs-sentinel_one.agent-foo'], // << Important: should NOT contain a index pattern
+        query: {
+          bool: { filter: [{ terms: { 'sentinel_one.agent.agent.id': ['1-2-3'] } }] },
+        },
+      });
+    });
+
+    it('should error if S1 agent id is not found in SentinelOne agent index', async () => {
+      applyEsClientSearchMock({
+        esClientMock: classConstructorOptions.esClient,
+        index: SENTINEL_ONE_AGENT_INDEX_PATTERN,
+        response: SentinelOneDataGenerator.toEsSearchResponse([]),
+      });
+
+      await expect(s1ActionsClient.isolate(createS1IsolationOptions())).rejects.toThrow(
+        'Unable to find elastic agent IDs for SentinelOne agent ids: [1-2-3]'
+      );
+    });
+
+    it('should include agent policy info. when action request is written to index', async () => {
+      await expect(s1ActionsClient.isolate(createS1IsolationOptions())).resolves.toBeTruthy();
+
+      expect(classConstructorOptions.esClient.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          document: expect.objectContaining({
+            agent: {
+              id: ['1-2-3'],
+              // FYI: mock that enables this to be generated is located in:
+              // `x-pack/solutions/security/plugins/security_solution/server/endpoint/services/actions/clients/mocks.ts`
+              policy: [
+                {
+                  agentId: '1-2-3',
+                  agentPolicyId: '6f12b025-fcb0-4db4-99e5-4927e3502bb8',
+                  elasticAgentId: 'elastic-agent-id-1',
+                  integrationPolicyId: '90d62689-f72d-4a05-b5e3-500cad0dc366',
+                },
+              ],
+            },
+          }),
+        }),
+        expect.anything()
+      );
+    });
+
+    it.each(responseActionsClientMock.getClientSupportedResponseActionMethodNames('sentinel_one'))(
+      'should error when %s is called with agents not valid for active space',
+      async (methodName) => {
+        (
+          classConstructorOptions.endpointService.getInternalFleetServices().agent
+            .getByIds as jest.Mock
+        ).mockImplementation(async () => {
+          throw new AgentNotFoundError('Agent some-id not found');
+        });
+        const options = sentinelOneMock.getOptionsForResponseActionMethod(methodName);
+
+        // @ts-expect-error `options` type is too broad because we're getting it from a helper
+        await expect(s1ActionsClient[methodName](options)).rejects.toThrow(
+          'Agent some-id not found'
+        );
+
+        expect(classConstructorOptions.connectorActions.execute).not.toHaveBeenCalled();
+      }
+    );
   });
 });

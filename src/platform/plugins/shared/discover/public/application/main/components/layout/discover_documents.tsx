@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { memo, useCallback, useMemo } from 'react';
+import React, { memo, useCallback, useMemo, useRef } from 'react';
 import {
   EuiFlexItem,
   EuiLoadingSpinner,
@@ -18,20 +18,23 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
-import { DataView } from '@kbn/data-views-plugin/public';
-import { SortOrder } from '@kbn/saved-search-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { SearchResponseWarningsCallout } from '@kbn/search-response-warnings';
+import type {
+  DataGridDensity,
+  UnifiedDataTableProps,
+  UnifiedDataTableRestorableState,
+  UseColumnsProps,
+} from '@kbn/unified-data-table';
 import {
   DataLoadingState,
   useColumns,
   type DataTableColumnsMeta,
   getTextBasedColumnsMeta,
   getRenderCustomToolbarWithElements,
-  DataGridDensity,
-  UnifiedDataTableProps,
-  UseColumnsProps,
   getDataGridDensity,
   getRowHeight,
 } from '@kbn/unified-data-table';
@@ -44,16 +47,15 @@ import {
 } from '@kbn/discover-utils';
 import useObservable from 'react-use/lib/useObservable';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-import { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
+import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import { useQuerySubscriber } from '@kbn/unified-field-list';
-import { map } from 'rxjs';
+import type { DocViewerApi } from '@kbn/unified-doc-viewer';
 import { DiscoverGrid } from '../../../../components/discover_grid';
 import { getDefaultRowsPerPage } from '../../../../../common/constants';
-import { useInternalStateSelector } from '../../state_management/discover_internal_state_container';
 import { useAppStateSelector } from '../../state_management/discover_app_state_container';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { FetchStatus } from '../../../types';
-import { DiscoverStateContainer } from '../../state_management/discover_state';
+import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { useDataState } from '../../hooks/use_data_state';
 import {
   getMaxAllowedSampleSize,
@@ -68,20 +70,20 @@ import { onResizeGridColumn } from '../../../../utils/on_resize_grid_column';
 import { useContextualGridCustomisations } from '../../hooks/grid_customisations';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import { useAdditionalFieldGroups } from '../../hooks/sidebar/use_additional_field_groups';
+import type { CellRenderersExtensionParams } from '../../../../context_awareness';
 import {
-  CellRenderersExtensionParams,
   DISCOVER_CELL_ACTIONS_TRIGGER,
   useAdditionalCellActions,
   useProfileAccessor,
 } from '../../../../context_awareness';
-
-const containerStyles = css`
-  position: relative;
-`;
-
-const progressStyle = css`
-  z-index: 2;
-`;
+import {
+  internalStateActions,
+  useCurrentTabAction,
+  useCurrentTabSelector,
+  useInternalStateDispatch,
+  useInternalStateSelector,
+} from '../../state_management/redux';
+import { useScopedServices } from '../../../../components/scoped_services_provider';
 
 const DiscoverGridMemoized = React.memo(DiscoverGrid);
 
@@ -109,9 +111,12 @@ function DiscoverDocumentsComponent({
   onFieldEdited?: () => void;
 }) {
   const services = useDiscoverServices();
+  const { scopedEBTManager } = useScopedServices();
+  const dispatch = useInternalStateDispatch();
   const documents$ = stateContainer.dataState.data$.documents$;
   const savedSearch = useSavedSearchInitial();
-  const { dataViews, capabilities, uiSettings, uiActions, ebtManager, fieldsMetadata } = services;
+  const { dataViews, capabilities, uiSettings, uiActions, fieldsMetadata } = services;
+  const requestParams = useCurrentTabSelector((state) => state.dataRequestParams);
   const [
     dataSource,
     query,
@@ -138,6 +143,7 @@ function DiscoverDocumentsComponent({
     ];
   });
   const expandedDoc = useInternalStateSelector((state) => state.expandedDoc);
+  const initialDocViewerTabId = useInternalStateSelector((state) => state.initialDocViewerTabId);
   const isEsqlMode = useIsEsqlMode();
   const documentState = useDataState(documents$);
   const isDataLoading =
@@ -154,7 +160,7 @@ function DiscoverDocumentsComponent({
   // 5. this is propagated to Discover's URL and causes an unwanted change of state to an unsorted state
   // This solution switches to the loading state in this component when the URL index doesn't match the dataView.id
   const isDataViewLoading =
-    useInternalStateSelector((state) => state.isDataViewLoading) && !isEsqlMode;
+    useCurrentTabSelector((state) => state.isDataViewLoading) && !isEsqlMode;
   const isEmptyDataResult =
     isEsqlMode || !documentState.result || documentState.result.length === 0;
   const rows = useMemo(() => documentState.result || [], [documentState.result]);
@@ -189,24 +195,33 @@ function DiscoverDocumentsComponent({
   const onAddColumnWithTracking = useCallback(
     (columnName: string) => {
       onAddColumn(columnName);
-      void ebtManager.trackDataTableSelection({ fieldName: columnName, fieldsMetadata });
+      void scopedEBTManager.trackDataTableSelection({ fieldName: columnName, fieldsMetadata });
     },
-    [onAddColumn, ebtManager, fieldsMetadata]
+    [onAddColumn, scopedEBTManager, fieldsMetadata]
   );
 
   const onRemoveColumnWithTracking = useCallback(
     (columnName: string) => {
       onRemoveColumn(columnName);
-      void ebtManager.trackDataTableRemoval({ fieldName: columnName, fieldsMetadata });
+      void scopedEBTManager.trackDataTableRemoval({ fieldName: columnName, fieldsMetadata });
     },
-    [onRemoveColumn, ebtManager, fieldsMetadata]
+    [onRemoveColumn, scopedEBTManager, fieldsMetadata]
   );
 
+  const docViewerRef = useRef<DocViewerApi>(null);
   const setExpandedDoc = useCallback(
-    (doc: DataTableRecord | undefined) => {
-      stateContainer.internalState.transitions.setExpandedDoc(doc);
+    (doc: DataTableRecord | undefined, options?: { initialTabId?: string }) => {
+      dispatch(
+        internalStateActions.setExpandedDoc({
+          expandedDoc: doc,
+          initialDocViewerTabId: options?.initialTabId,
+        })
+      );
+      if (options?.initialTabId) {
+        docViewerRef.current?.setSelectedTabId(options.initialTabId);
+      }
     },
-    [stateContainer]
+    [dispatch]
   );
 
   const onResizeDataGrid = useCallback<NonNullable<UnifiedDataTableProps['onResize']>>(
@@ -269,20 +284,14 @@ function DiscoverDocumentsComponent({
         : undefined,
     [documentState.esqlQueryColumns]
   );
-
   const { filters } = useQuerySubscriber({ data: services.data });
-
-  const timeRange = useObservable(
-    services.timefilter.getTimeUpdate$().pipe(map(() => services.timefilter.getTime())),
-    services.timefilter.getTime()
-  );
 
   const cellActionsMetadata = useAdditionalCellActions({
     dataSource,
     dataView,
     query,
     filters,
-    timeRange,
+    timeRange: requestParams.timeRangeAbsolute,
   });
 
   const renderDocumentView = useCallback(
@@ -306,16 +315,19 @@ function DiscoverDocumentsComponent({
         onClose={() => setExpandedDoc(undefined)}
         setExpandedDoc={setExpandedDoc}
         query={query}
+        initialTabId={initialDocViewerTabId}
+        docViewerRef={docViewerRef}
       />
     ),
     [
       dataView,
-      onAddColumnWithTracking,
+      savedSearch.id,
       onAddFilter,
       onRemoveColumnWithTracking,
-      query,
-      savedSearch.id,
+      onAddColumnWithTracking,
       setExpandedDoc,
+      query,
+      initialDocViewerTabId,
     ]
   );
 
@@ -336,8 +348,7 @@ function DiscoverDocumentsComponent({
   );
 
   const { rowAdditionalLeadingControls } = useDiscoverCustomization('data_table') || {};
-  const { customCellRenderer, customGridColumnsConfiguration } =
-    useContextualGridCustomisations(cellRendererParams) || {};
+  const { customCellRenderer } = useContextualGridCustomisations(cellRendererParams) || {};
   const additionalFieldGroups = useAdditionalFieldGroups();
 
   const getCellRenderersAccessor = useProfileAccessor('getCellRenderers');
@@ -370,7 +381,7 @@ function DiscoverDocumentsComponent({
           size="xs"
           color="accent"
           position="absolute"
-          css={progressStyle}
+          css={styles.progress}
         />
       ) : null,
     [isDataLoading]
@@ -390,9 +401,18 @@ function DiscoverDocumentsComponent({
     [viewModeToggle, callouts, loadingIndicator]
   );
 
+  const dataGridUiState = useCurrentTabSelector((state) => state.uiState.dataGrid);
+  const setDataGridUiState = useCurrentTabAction(internalStateActions.setDataGridUiState);
+  const onInitialStateChange = useCallback(
+    (newDataGridUiState: Partial<UnifiedDataTableRestorableState>) =>
+      dispatch(setDataGridUiState({ dataGridUiState: newDataGridUiState })),
+    [dispatch, setDataGridUiState]
+  );
+
   if (isDataViewLoading || (isEmptyDataResult && isDataLoading)) {
     return (
-      <div className="dscDocuments__loading">
+      // class is used in tests
+      <div className="dscDocuments__loading" css={styles.dscDocumentsLoading}>
         <EuiText size="xs" color="subdued">
           <EuiLoadingSpinner />
           <EuiSpacer size="s" />
@@ -403,7 +423,8 @@ function DiscoverDocumentsComponent({
   }
 
   return (
-    <EuiFlexItem className="dscTable" aria-labelledby="documentsAriaLabel" css={containerStyles}>
+    // class is used in tests
+    <EuiFlexItem className="dscTable" aria-labelledby="documentsAriaLabel" css={styles.container}>
       <EuiScreenReaderOnly>
         <h2 id="documentsAriaLabel">
           <FormattedMessage id="discover.documentsAriaLabel" defaultMessage="Documents" />
@@ -458,7 +479,6 @@ function DiscoverDocumentsComponent({
             totalHits={totalHits}
             onFetchMoreRecords={onFetchMoreRecords}
             externalCustomRenderers={cellRenderers}
-            customGridColumnsConfiguration={customGridColumnsConfiguration}
             rowAdditionalLeadingControls={rowAdditionalLeadingControls}
             additionalFieldGroups={additionalFieldGroups}
             dataGridDensityState={density}
@@ -468,6 +488,8 @@ function DiscoverDocumentsComponent({
             cellActionsTriggerId={DISCOVER_CELL_ACTIONS_TRIGGER.id}
             cellActionsMetadata={cellActionsMetadata}
             cellActionsHandling="append"
+            initialState={dataGridUiState}
+            onInitialStateChange={onInitialStateChange}
           />
         </CellActionsProvider>
       </div>
@@ -476,3 +498,21 @@ function DiscoverDocumentsComponent({
 }
 
 export const DiscoverDocuments = memo(DiscoverDocumentsComponent);
+
+const styles = {
+  container: css({
+    position: 'relative',
+    minHeight: 0,
+  }),
+  progress: css({
+    zIndex: 2,
+  }),
+  dscDocumentsLoading: css({
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    textAlign: 'center',
+    height: '100%',
+    width: '100%',
+  }),
+};

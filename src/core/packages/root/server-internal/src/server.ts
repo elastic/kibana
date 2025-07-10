@@ -45,6 +45,7 @@ import type {
   PrebootRequestHandlerContext,
 } from '@kbn/core-http-request-handler-context-server';
 import { RenderingService } from '@kbn/core-rendering-server-internal';
+import { HttpRateLimiterService } from '@kbn/core-http-rate-limiter-internal';
 import { HttpResourcesService } from '@kbn/core-http-resources-server-internal';
 import type {
   InternalCorePreboot,
@@ -55,6 +56,7 @@ import { DiscoveredPlugins, PluginsService } from '@kbn/core-plugins-server-inte
 import { CoreAppsService } from '@kbn/core-apps-server-internal';
 import { SecurityService } from '@kbn/core-security-server-internal';
 import { UserProfileService } from '@kbn/core-user-profile-server-internal';
+import { PricingService } from '@kbn/core-pricing-server-internal';
 import { registerServiceConfig } from './register_service_config';
 import { MIGRATION_EXCEPTION_CODE } from './constants';
 import { coreConfig, type CoreConfigType } from './core_config';
@@ -80,6 +82,7 @@ export class Server {
   private readonly environment: EnvironmentService;
   private readonly node: NodeService;
   private readonly metrics: MetricsService;
+  private readonly httpRateLimiter: HttpRateLimiterService;
   private readonly httpResources: HttpResourcesService;
   private readonly status: StatusService;
   private readonly logging: LoggingService;
@@ -89,6 +92,7 @@ export class Server {
   private readonly deprecations: DeprecationsService;
   private readonly executionContext: ExecutionContextService;
   private readonly prebootService: PrebootService;
+  private readonly pricing: PricingService;
   private readonly docLinks: DocLinksService;
   private readonly customBranding: CustomBrandingService;
   private readonly userSettingsService: UserSettingsService;
@@ -133,6 +137,7 @@ export class Server {
     this.metrics = new MetricsService(core);
     this.status = new StatusService(core);
     this.coreApp = new CoreAppsService(core);
+    this.httpRateLimiter = new HttpRateLimiterService();
     this.httpResources = new HttpResourcesService(core);
     this.logging = new LoggingService(core);
     this.coreUsageData = new CoreUsageDataService(core);
@@ -140,6 +145,7 @@ export class Server {
     this.deprecations = new DeprecationsService(core);
     this.executionContext = new ExecutionContextService(core);
     this.prebootService = new PrebootService(core);
+    this.pricing = new PricingService(core);
     this.docLinks = new DocLinksService(core);
     this.customBranding = new CustomBrandingService(core);
     this.userSettingsService = new UserSettingsService(core);
@@ -202,6 +208,8 @@ export class Server {
       const i18nPreboot = await this.i18n.preboot({ http: httpPreboot, pluginPaths });
 
       this.capabilities.preboot({ http: httpPreboot });
+
+      this.pricing.preboot({ http: httpPreboot });
 
       const elasticsearchServicePreboot = await this.elasticsearch.preboot();
 
@@ -299,9 +307,13 @@ export class Server {
       changedDeprecatedConfigPath$: this.configService.getDeprecatedConfigPath$(),
     });
 
+    const loggingSetup = this.logging.setup();
+
     const deprecationsSetup = await this.deprecations.setup({
       http: httpSetup,
       coreUsageData: coreUsageDataSetup,
+      logging: loggingSetup,
+      docLinks: docLinksSetup,
     });
 
     const savedObjectsSetup = await this.savedObjects.setup({
@@ -343,12 +355,16 @@ export class Server {
       i18n: i18nServiceSetup,
     });
 
+    this.httpRateLimiter.setup({
+      http: httpSetup,
+      metrics: metricsSetup,
+    });
     const httpResourcesSetup = this.httpResources.setup({
       http: httpSetup,
       rendering: renderingSetup,
     });
 
-    const loggingSetup = this.logging.setup();
+    const pricingSetup = await this.pricing.setup({ http: httpSetup });
 
     const coreSetup: InternalCoreSetup = {
       analytics: analyticsSetup,
@@ -371,6 +387,7 @@ export class Server {
       metrics: metricsSetup,
       deprecations: deprecationsSetup,
       coreUsageData: coreUsageDataSetup,
+      pricing: pricingSetup,
       userSettings: userSettingsServiceSetup,
       security: securitySetup,
       userProfile: userProfileSetup,
@@ -378,6 +395,13 @@ export class Server {
 
     const pluginsSetup = await this.plugins.setup(coreSetup);
     this.#pluginsInitialized = pluginsSetup.initialized;
+    /**
+     * This is a necessary step to ensure that the pricing service is ready to be used.
+     * It must be called after all plugins have been setup.
+     * This guarantee that all plugins checking for a feature availability with isFeatureAvailable
+     * in the server setup contract get the right access to the feature availability.
+     */
+    pricingSetup.evaluateProductFeatures();
 
     this.registerCoreContext(coreSetup);
     await this.coreApp.setup(coreSetup, uiPlugins);
@@ -442,7 +466,14 @@ export class Server {
 
     const featureFlagsStart = this.featureFlags.start();
 
+    const pricingStart = this.pricing.start();
+
+    this.httpRateLimiter.start();
     this.status.start();
+
+    this.rendering.start({
+      featureFlags: featureFlagsStart,
+    });
 
     this.coreStart = {
       analytics: analyticsStart,
@@ -460,6 +491,7 @@ export class Server {
       deprecations: deprecationsStart,
       security: securityStart,
       userProfile: userProfileStart,
+      pricing: pricingStart,
     };
 
     this.coreApp.start(this.coreStart);
@@ -484,6 +516,7 @@ export class Server {
     this.log.debug('stopping server');
 
     this.coreApp.stop();
+    this.httpRateLimiter.stop();
     await this.analytics.stop();
     await this.http.stop(); // HTTP server has to stop before savedObjects and ES clients are closed to be able to gracefully attempt to resolve any pending requests
     await this.plugins.stop();
@@ -506,7 +539,10 @@ export class Server {
     try {
       await ensureValidConfiguration(this.configService);
     } catch (validationError) {
-      if (this.env.packageInfo.buildFlavor !== 'serverless') {
+      const config = await firstValueFrom(
+        this.configService.atPath<CoreConfigType>(coreConfig.path)
+      );
+      if (!config.enableStripUnknownConfigWorkaround) {
         throw validationError;
       }
       // When running on serverless, we may allow unknown keys, but stripping them from the final config object.

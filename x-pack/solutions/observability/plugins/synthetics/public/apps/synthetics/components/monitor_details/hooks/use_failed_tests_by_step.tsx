@@ -24,50 +24,48 @@ export function useFailedTestByStep({ to, from }: { to: string; from: string }) 
 
   const params = createEsQuery({
     index: SYNTHETICS_INDEX_PATTERN,
-    body: {
-      size: 0,
-      track_total_hits: true,
-      query: {
-        bool: {
-          filter: [
-            {
-              range: {
-                '@timestamp': {
-                  lte: to,
-                  gte: from,
-                },
+    size: 0,
+    track_total_hits: true,
+    query: {
+      bool: {
+        filter: [
+          {
+            range: {
+              '@timestamp': {
+                lte: to,
+                gte: from,
               },
             },
-            STEP_END_FILTER,
-            {
-              term: {
-                'synthetics.step.status': 'failed',
-              },
-            },
-            {
-              term: {
-                'observer.geo.name': selectedLocation?.label,
-              },
-            },
-            {
-              term: {
-                config_id: monitorId,
-              },
-            },
-          ],
-        },
-      },
-      aggs: {
-        steps: {
-          terms: {
-            field: 'synthetics.step.name.keyword',
-            size: 1000,
           },
-          aggs: {
-            doc: {
-              top_hits: {
-                size: 1,
-              },
+          STEP_END_FILTER,
+          {
+            term: {
+              'synthetics.step.status': 'failed',
+            },
+          },
+          {
+            term: {
+              'observer.geo.name': selectedLocation?.label,
+            },
+          },
+          {
+            term: {
+              config_id: monitorId,
+            },
+          },
+        ],
+      },
+    },
+    aggs: {
+      steps: {
+        terms: {
+          field: 'synthetics.step.name.keyword',
+          size: 1000,
+        },
+        aggs: {
+          doc: {
+            top_hits: {
+              size: 1,
             },
           },
         },

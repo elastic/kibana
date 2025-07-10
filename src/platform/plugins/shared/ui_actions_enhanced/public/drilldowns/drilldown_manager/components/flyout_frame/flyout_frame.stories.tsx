@@ -11,30 +11,58 @@
 
 import * as React from 'react';
 import { EuiFlyout, EuiButton } from '@elastic/eui';
-import { storiesOf } from '@storybook/react';
 import { FlyoutFrame } from '.';
 
-storiesOf('components/FlyoutFrame', module)
-  .add('default', () => {
+export default {
+  title: 'components/FlyoutFrame',
+};
+
+export const Default = {
+  render: () => {
     return <FlyoutFrame>test</FlyoutFrame>;
-  })
-  .add('with title', () => {
+  },
+
+  name: 'default',
+};
+
+export const WithTitle = {
+  render: () => {
     return <FlyoutFrame title="Hello world">test</FlyoutFrame>;
-  })
-  .add('with onClose', () => {
+  },
+
+  name: 'with title',
+};
+
+export const WithOnClose = {
+  render: () => {
     return <FlyoutFrame onClose={() => console.log('onClose')}>test</FlyoutFrame>;
-  })
-  .add('with onBack', () => {
+  },
+
+  name: 'with onClose',
+};
+
+export const WithOnBack = {
+  render: () => {
     return (
       <FlyoutFrame onBack={() => console.log('onClose')} title={'Title'}>
         test
       </FlyoutFrame>
     );
-  })
-  .add('custom footer', () => {
+  },
+
+  name: 'with onBack',
+};
+
+export const CustomFooter = {
+  render: () => {
     return <FlyoutFrame footer={<button>click me!</button>}>test</FlyoutFrame>;
-  })
-  .add('open in flyout', () => {
+  },
+
+  name: 'custom footer',
+};
+
+export const OpenInFlyout = {
+  render: () => {
     return (
       <EuiFlyout onClose={() => {}}>
         <FlyoutFrame
@@ -46,4 +74,7 @@ storiesOf('components/FlyoutFrame', module)
         </FlyoutFrame>
       </EuiFlyout>
     );
-  });
+  },
+
+  name: 'open in flyout',
+};

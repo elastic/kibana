@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { AxiosResponse } from 'axios';
-import { SubActionConnector } from '@kbn/actions-plugin/server';
-import { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
-import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/usage';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+import type { AxiosResponse } from 'axios';
+import type { SubActionConnector } from '@kbn/actions-plugin/server';
+import type { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
+import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/usage';
 
 /**
  * Create an Axios response object mock

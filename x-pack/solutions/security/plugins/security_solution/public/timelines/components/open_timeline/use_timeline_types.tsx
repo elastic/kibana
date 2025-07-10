@@ -88,12 +88,7 @@ export const useTimelineTypes = ({
 
   const onFilterClicked = useCallback(
     (tabId: TimelineType, tabStyle: TimelineTabsStyle) => {
-      setTimelineTypes((prevTimelineTypes) => {
-        if (prevTimelineTypes !== tabId) {
-          setTimelineTypes(tabId);
-        }
-        return prevTimelineTypes;
-      });
+      setTimelineTypes(tabId);
     },
     [setTimelineTypes]
   );

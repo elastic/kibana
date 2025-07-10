@@ -1,12 +1,7 @@
 {
   "type": "shared-browser",
   "id": "@kbn/inference-endpoint-ui-common",
-  "owner": [
-    "@elastic/response-ops",
-    "@elastic/appex-ai-infra",
-    "@elastic/obs-ai-assistant",
-    "@elastic/security-generative-ai"
-  ],
+  "owner": ["@elastic/appex-ai-infra"],
   "group": "platform",
   "visibility": "shared"
 }

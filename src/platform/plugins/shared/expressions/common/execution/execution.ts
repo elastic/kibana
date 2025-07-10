@@ -59,6 +59,7 @@ type UnwrapReturnType<Function extends (...args: any[]) => unknown> =
 export interface FunctionCacheItem {
   value: unknown;
   time: number;
+  sideEffectFn?: () => void;
 }
 /**
  * The result returned after an expression function execution.
@@ -125,7 +126,7 @@ function throttle<T>(timeout: number) {
 
       const emit = () => {
         if (hasValue) {
-          subscriber.next(latest);
+          subscriber.next(latest!);
           hasValue = false;
           latest = undefined;
         }
@@ -239,7 +240,7 @@ export class Execution<
   /**
    * Keeping track of any child executions
    * Needed to cancel child executions in case parent execution is canceled
-   * @private
+   * @internal
    */
   private readonly childExecutions: Execution[] = [];
   private cacheTimeout: number = 30000;
@@ -475,21 +476,19 @@ export class Execution<
       .pipe(
         map((currentInput) => this.cast(currentInput, fn.inputTypes)),
         switchMap((normalizedInput) => {
-          if (fn.allowCache && this.context.allowCache) {
-            hash = calculateObjectHash([
-              fn.name,
-              normalizedInput,
-              args,
-              this.context.getSearchContext(),
-            ]);
+          const {
+            hash: fnHash,
+            value: cachedValue,
+            valid: cacheValid,
+          } = this.#canUseCachedResult(fn, normalizedInput, args);
+          hash = fnHash;
+          if (cacheValid) {
+            cachedValue.sideEffectFn?.();
+            return of(cachedValue.value);
           }
-          if (hash && this.functionCache.has(hash)) {
-            const cached = this.functionCache.get(hash);
-            if (cached && Date.now() - cached.time < this.cacheTimeout) {
-              return of(cached.value);
-            }
-          }
-          return of(fn.fn(normalizedInput, args, this.context));
+          const output = fn.fn(normalizedInput, args, this.context);
+
+          return of(output);
         }),
         switchMap((fnResult) => {
           return (
@@ -524,10 +523,15 @@ export class Execution<
         }),
         finalize(() => {
           if (completionFlag && hash) {
+            const sideEffectResult = this.#getSideEffectFn(fn, args);
             while (this.functionCache.size >= maxCacheSize) {
               this.functionCache.delete(this.functionCache.keys().next().value);
             }
-            this.functionCache.set(hash, { value: lastValue, time: Date.now() });
+            this.functionCache.set(hash, {
+              value: lastValue,
+              time: Date.now(),
+              sideEffectFn: sideEffectResult,
+            });
           }
         })
       )
@@ -713,5 +717,42 @@ export class Execution<
       default:
         return throwError(new Error(`Unknown AST object: ${JSON.stringify(ast)}`));
     }
+  }
+
+  #canUseCachedResult<Fn extends ExpressionFunction>(
+    fn: Fn,
+    input: unknown,
+    args: Record<string, unknown>
+  ):
+    | { hash: string; value: FunctionCacheItem; valid: boolean }
+    | { hash: string | undefined; value: undefined; valid: false } {
+    if (!fn.allowCache || !this.context.allowCache) {
+      return { hash: undefined, value: undefined, valid: false };
+    }
+    const hash = calculateObjectHash([fn.name, input, args, this.context.getSearchContext()]);
+
+    const cached = this.functionCache.get(hash);
+    if (hash && cached) {
+      return {
+        hash,
+        value: cached,
+        valid: Boolean(cached && Date.now() - cached.time < this.cacheTimeout),
+      };
+    }
+    return {
+      hash,
+      value: undefined,
+      valid: false,
+    };
+  }
+
+  #getSideEffectFn<Fn extends ExpressionFunction>(
+    fn: Fn,
+    args: Record<string, unknown>
+  ): undefined | (() => void) {
+    if (!fn.allowCache || typeof fn.allowCache === 'boolean') {
+      return undefined;
+    }
+    return fn.allowCache.withSideEffects?.(args, this.context);
   }
 }

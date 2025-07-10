@@ -172,7 +172,7 @@ export const TTYPlayerControls = ({
             />
           </EuiToolTip>
         </EuiFlexItem>
-        <EuiFlexItem style={{ position: 'relative' }}>
+        <EuiFlexItem css={{ position: 'relative' }}>
           <TTYPlayerControlsMarkers
             processStartMarkers={processStartMarkers}
             linesLength={linesLength}

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { SECURITY_FEATURE_ID } from '../../../../common/constants';
 import { getEndpointSecurityPolicyManager } from '../../../../scripts/endpoint/common/roles_users';
 
 export const getRoleWithArtifactReadPrivilege = (privilegePrefix: string) => {
@@ -17,8 +18,8 @@ export const getRoleWithArtifactReadPrivilege = (privilegePrefix: string) => {
         ...endpointSecurityPolicyManagerRole.kibana[0],
         feature: {
           ...endpointSecurityPolicyManagerRole.kibana[0].feature,
-          siem: [
-            ...endpointSecurityPolicyManagerRole.kibana[0].feature.siem.filter(
+          [SECURITY_FEATURE_ID]: [
+            ...endpointSecurityPolicyManagerRole.kibana[0].feature[SECURITY_FEATURE_ID].filter(
               (privilege) => privilege !== `${privilegePrefix}all`
             ),
             `${privilegePrefix}read`,

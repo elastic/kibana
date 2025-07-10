@@ -1,13 +1,11 @@
 openapi: 3.0.0
 info:
   title: Manage Knowledge Base Entries API endpoint
-  version: '1'
+  version: '2023-10-31'
 paths:
-  /internal/elastic_assistant/knowledge_base/entries:
+  /api/security_ai_assistant/knowledge_base/entries:
     post:
       x-codegen-enabled: true
-      # Targeted to update to public by 8.18
-      x-internal: true
       x-labels: [ess, serverless]
       operationId: CreateKnowledgeBaseEntry
       description: Create a Knowledge Base Entry
@@ -20,6 +18,10 @@ paths:
           application/json:
             schema:
               $ref: './common_attributes.schema.yaml#/components/schemas/KnowledgeBaseEntryCreateProps'
+            example:
+              title: "How to reset a password"
+              content: "To reset your password, go to the settings page and click 'Reset Password'."
+              tags: ["password", "reset", "help"]
       responses:
         200:
           description: Successful request returning Knowledge Base Entries
@@ -27,21 +29,27 @@ paths:
             application/json:
               schema:
                 $ref: './common_attributes.schema.yaml#/components/schemas/KnowledgeBaseEntryResponse'
+              example:
+                id: "12345"
+                title: "How to reset a password"
+                content: "To reset your password, go to the settings page and click 'Reset Password'."
+                tags: ["password", "reset", "help"]
         400:
-          description: Generic Error
+          description: A generic error occurred, such as invalid input or missing required fields.
           content:
             application/json:
               schema:
                 $ref: './common_attributes.schema.yaml#/components/schemas/KnowledgeBaseEntryErrorSchema'
+              example:
+                error: "Invalid input"
+                message: "The 'title' field is required."
 
-  /internal/elastic_assistant/knowledge_base/entries/{id}:
+  /api/security_ai_assistant/knowledge_base/entries/{id}:
     get:
       x-codegen-enabled: true
-      # Targeted to update to public by 8.18
-      x-internal: true
       x-labels: [ess, serverless]
       operationId: ReadKnowledgeBaseEntry
-      description: Read a Knowledge Base Entry
+      description: Retrieve a Knowledge Base Entry by its unique `id`.
       summary: Read a Knowledge Base Entry
       tags:
         - Knowledge Base Entries API
@@ -49,29 +57,36 @@ paths:
         - name: id
           in: path
           required: true
-          description: The Knowledge Base Entry's `id` value.
+          description: The unique identifier (`id`) of the Knowledge Base Entry to retrieve.
           schema:
             $ref: '../../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+          example: "12345"
       responses:
         200:
-          description: Successful request returning a Knowledge Base Entry
+          description: Successful request returning the requested Knowledge Base Entry.
           content:
             application/json:
               schema:
                 $ref: './common_attributes.schema.yaml#/components/schemas/KnowledgeBaseEntryResponse'
+              example:
+                id: "12345"
+                title: "How to reset a password"
+                content: "To reset your password, go to the settings page and click 'Reset Password'."
+                tags: ["password", "reset", "help"]
         400:
-          description: Generic Error
+          description: A generic error occurred, such as an invalid `id` or the entry not being found.
           content:
             application/json:
               schema:
                 $ref: './common_attributes.schema.yaml#/components/schemas/KnowledgeBaseEntryErrorSchema'
+              example:
+                error: "Not Found"
+                message: "No Knowledge Base Entry found with the provided `id`."
     put:
       x-codegen-enabled: true
-      # Targeted to update to public by 8.18
-      x-internal: true
       x-labels: [ess, serverless]
       operationId: UpdateKnowledgeBaseEntry
-      description: Update a Knowledge Base Entry
+      description: Update an existing Knowledge Base Entry by its unique `id`.
       summary: Update a Knowledge Base Entry
       tags:
         - Knowledge Base Entries API
@@ -79,35 +94,46 @@ paths:
         - name: id
           in: path
           required: true
-          description: The Knowledge Base Entry's `id` value
+          description: The unique identifier (`id`) of the Knowledge Base Entry to update.
           schema:
             $ref: '../../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+          example: "12345"
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: './common_attributes.schema.yaml#/components/schemas/KnowledgeBaseEntryUpdateProps'
+              $ref: './common_attributes.schema.yaml#/components/schemas/KnowledgeBaseEntryUpdateRouteProps'
+            example:
+              title: "How to reset a password (updated)"
+              content: "To reset your password, go to the settings page, click 'Reset Password', and follow the instructions."
+              tags: ["password", "reset", "help", "update"]
       responses:
         200:
-          description: Successful request returning the updated Knowledge Base Entry
+          description: Successful request returning the updated Knowledge Base Entry.
           content:
             application/json:
               schema:
                 $ref: './common_attributes.schema.yaml#/components/schemas/KnowledgeBaseEntryResponse'
+              example:
+                id: "12345"
+                title: "How to reset a password (updated)"
+                content: "To reset your password, go to the settings page, click 'Reset Password', and follow the instructions."
+                tags: ["password", "reset", "help", "update"]
         400:
-          description: Generic Error
+          description: A generic error occurred, such as invalid input or the entry not being found.
           content:
             application/json:
               schema:
                 $ref: './common_attributes.schema.yaml#/components/schemas/KnowledgeBaseEntryErrorSchema'
+              example:
+                error: "Invalid input"
+                message: "The 'content' field cannot be empty."
     delete:
       x-codegen-enabled: true
-      # Targeted to update to public by 8.18
-      x-internal: true
       x-labels: [ess, serverless]
       operationId: DeleteKnowledgeBaseEntry
-      description: Deletes a single Knowledge Base Entry using the `id` field
+      description: Delete a Knowledge Base Entry by its unique `id`.
       summary: Deletes a single Knowledge Base Entry using the `id` field
       tags:
         - Knowledge Base Entries API
@@ -115,20 +141,26 @@ paths:
         - name: id
           in: path
           required: true
-          description: The Knowledge Base Entry's `id` value
+          description: The unique identifier (`id`) of the Knowledge Base Entry to delete.
           schema:
             $ref: '../../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+          example: "12345"
       responses:
         200:
-          description: Successful request returning the deleted Knowledge Base Entry
+          description: Successful request returning the `id` of the deleted Knowledge Base Entry.
           content:
             application/json:
               schema:
-                $ref: './common_attributes.schema.yaml#/components/schemas/KnowledgeBaseEntryResponse'
+                $ref: './common_attributes.schema.yaml#/components/schemas/DeleteResponseFields'
+              example:
+                id: "12345"
+                message: "Knowledge Base Entry successfully deleted."
         400:
-          description: Generic Error
+          description: A generic error occurred, such as an invalid `id` or the entry not being found.
           content:
             application/json:
               schema:
                 $ref: './common_attributes.schema.yaml#/components/schemas/KnowledgeBaseEntryErrorSchema'
-
+              example:
+                error: "Not Found"
+                message: "No Knowledge Base Entry found with the provided `id`."

@@ -5,33 +5,30 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiToolTip } from '@elastic/eui';
+import { EuiBadge, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import styled from '@emotion/styled';
-import { truncate, unit } from '../../../../utils/style';
-import { HttpStatusBadge } from '../http_status_badge';
+import { css } from '@emotion/react';
+import { HttpStatusCode } from '@kbn/apm-ui-shared';
+import { unit } from '../../../../utils/style';
 
-const HttpInfoBadge = styled(EuiBadge)`
-  margin-right: ${({ theme }) => theme.euiTheme.size.xs};
-`;
-
-const Url = styled('span')`
+const urlStyles = css`
   display: inline-block;
   vertical-align: bottom;
-  ${truncate(unit * 24)};
+  max-width: ${unit * 24}px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 `;
 interface HttpInfoProps {
   method?: string;
   status?: number;
-  url: string;
+  url?: string;
 }
 
-const Span = styled('span')`
-  white-space: nowrap;
-`;
-
 export function HttpInfoSummaryItem({ status, method, url }: HttpInfoProps) {
+  const { euiTheme } = useEuiTheme();
+
   if (!url) {
     return null;
   }
@@ -41,18 +38,31 @@ export function HttpInfoSummaryItem({ status, method, url }: HttpInfoProps) {
   });
 
   return (
-    <Span>
-      <HttpInfoBadge title={undefined}>
+    <span
+      css={css`
+        whitespace: nowrap;
+      `}
+    >
+      <EuiBadge
+        title={undefined}
+        css={{
+          marginRight: `${euiTheme.size.xs}`,
+        }}
+      >
         {method && (
           <EuiToolTip content={methodLabel}>
-            <>{method.toUpperCase()}</>
+            <span data-test-subj="apmHttpInfoRequestMethod">{method.toUpperCase()}</span>
           </EuiToolTip>
         )}{' '}
-        <EuiToolTip content={url}>
-          <Url>{url}</Url>
-        </EuiToolTip>
-      </HttpInfoBadge>
-      {status && <HttpStatusBadge status={status} />}
-    </Span>
+        {url && (
+          <EuiToolTip content={url}>
+            <span data-test-subj="apmHttpInfoUrl" css={urlStyles}>
+              {url}
+            </span>
+          </EuiToolTip>
+        )}
+      </EuiBadge>
+      {status && <HttpStatusCode code={status} showTooltip />}
+    </span>
   );
 }

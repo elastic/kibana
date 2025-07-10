@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
+import type { LogMeta, Logger } from '@kbn/core/server';
 import { FLEET_ENDPOINT_PACKAGE } from '@kbn/fleet-plugin/common';
 import type { ITelemetryEventsSender } from '../sender';
 import {
@@ -64,7 +64,7 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
       const log = newTelemetryLogger(logger.get('endpoint'), mdc);
       const trace = taskMetricsService.start(taskType);
 
-      log.l('Running telemetry task');
+      log.debug('Running telemetry task');
 
       try {
         const processor = new EndpointMetadataProcessor(log, receiver);
@@ -80,10 +80,10 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
           incrementBy: documents.length,
         });
 
-        log.l('Sending endpoint telemetry', {
+        log.debug('Sending endpoint telemetry', {
           num_docs: documents.length,
           async_sender: telemetryConfiguration.use_async_sender,
-        });
+        } as LogMeta);
 
         // STAGE 6 - Send the documents
         if (telemetryConfiguration.use_async_sender) {
@@ -97,11 +97,9 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
         await taskMetricsService.end(trace);
 
         return documents.length;
-      } catch (err) {
-        log.l(`Error running endpoint alert telemetry task`, {
-          error: JSON.stringify(err),
-        });
-        await taskMetricsService.end(trace, err);
+      } catch (error) {
+        log.warn(`Error running endpoint alert telemetry task`, { error });
+        await taskMetricsService.end(trace, error);
         return 0;
       }
     },
@@ -127,7 +125,7 @@ class EndpointMetadataProcessor {
     const endpointMetrics = await this.receiver.fetchEndpointMetricsAbstract(last, current);
     //  If no metrics exist, early (and successfull) exit
     if (endpointMetrics.totalEndpoints === 0) {
-      this.logger.l('no endpoint metrics to report');
+      this.logger.debug('no endpoint metrics to report');
       return [];
     }
 
@@ -143,10 +141,8 @@ class EndpointMetadataProcessor {
         policies.delete(DefaultEndpointPolicyIdToIgnore);
         return policies;
       })
-      .catch((e) => {
-        this.logger.l('Error fetching fleet agents, using an empty value', {
-          error: JSON.stringify(e),
-        });
+      .catch((error) => {
+        this.logger.warn('Error fetching fleet agents, using an empty value', { error });
         return new Map();
       });
     const endpointPolicyById = await this.endpointPolicies(policyIdByFleetAgentId.values());
@@ -158,14 +154,12 @@ class EndpointMetadataProcessor {
       .fetchEndpointPolicyResponses(last, current)
       .then((response) => {
         if (response.size === 0) {
-          this.logger.l('no endpoint policy responses to report');
+          this.logger.info('no endpoint policy responses to report');
         }
         return response;
       })
-      .catch((e) => {
-        this.logger.l('Error fetching policy responses, using an empty value', {
-          error: JSON.stringify(e),
-        });
+      .catch((error) => {
+        this.logger.warn('Error fetching policy responses, using an empty value', { error });
         return new Map();
       });
 
@@ -176,14 +170,12 @@ class EndpointMetadataProcessor {
       .fetchEndpointMetadata(last, current)
       .then((response) => {
         if (response.size === 0) {
-          this.logger.l('no endpoint metadata to report');
+          this.logger.debug('no endpoint metadata to report');
         }
         return response;
       })
-      .catch((e) => {
-        this.logger.l('Error fetching endpoint metadata, using an empty value', {
-          error: JSON.stringify(e),
-        });
+      .catch((error) => {
+        this.logger.warn('Error fetching endpoint metadata, using an empty value', { error });
         return new Map();
       });
 
@@ -212,12 +204,12 @@ class EndpointMetadataProcessor {
         );
         telemetryPayloads.push(...payloads);
       }
-    } catch (e) {
+    } catch (error) {
       // something happened in the middle of the pagination, log the error
       // and return what we collect so far instead of aborting the
       // whole execution
-      this.logger.l('Error fetching endpoint metrics by id', {
-        error: JSON.stringify(e),
+      this.logger.warn('Error fetching endpoint metrics by id', {
+        error,
       });
     }
 
@@ -244,7 +236,7 @@ class EndpointMetadataProcessor {
     for (const policyId of policies) {
       if (!endpointPolicyCache.has(policyId)) {
         const agentPolicy = await this.receiver.fetchPolicyConfigs(policyId).catch((e) => {
-          this.logger.l(`error fetching policy config due to ${e?.message}`);
+          this.logger.warn(`error fetching policy config due to ${e?.message}`);
           return null;
         });
 
@@ -312,6 +304,7 @@ class EndpointMetadataProcessor {
       system_impact: systemImpact,
       threads,
       event_filter: eventFilter,
+      top_process_trees: topProcessTrees,
     } = endpointMetric.Endpoint.metrics;
     const endpointPolicyDetail = extractEndpointPolicyConfig(policyConfig);
     if (endpointPolicyDetail) {
@@ -336,6 +329,7 @@ class EndpointMetadataProcessor {
         systemImpact,
         threads,
         eventFilter,
+        topProcessTrees,
       },
       endpoint_meta: {
         os: endpointMetric.host.os,

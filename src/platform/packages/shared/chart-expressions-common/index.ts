@@ -15,4 +15,4 @@ export {
 } from './utils';
 export type { Simplify, MakeOverridesSerializable, ChartSizeSpec, ChartSizeEvent } from './types';
 export { isChartSizeEvent } from './types';
-export { getColorCategories } from './color_categories';
+export { getColorCategories, getLegacyColorCategories } from './color_categories';

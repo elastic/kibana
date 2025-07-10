@@ -18,6 +18,7 @@ import { dateSchema } from './date_schema';
 import { notifyWhenSchema } from './notify_when_schema';
 import { actionSchema, systemActionSchema } from './action_schemas';
 import { flappingSchema } from './flapping_schema';
+import { artifactsSchema } from './artifacts_schema';
 
 export const mappedParamsSchema = schema.recordOf(schema.string(), schema.maybe(schema.any()));
 
@@ -125,6 +126,14 @@ export const monitoringSchema = schema.object({
         total_alerts_detected: schema.maybe(schema.nullable(schema.number())),
         total_alerts_created: schema.maybe(schema.nullable(schema.number())),
         gap_duration_s: schema.maybe(schema.nullable(schema.number())),
+        gap_range: schema.maybe(
+          schema.nullable(
+            schema.object({
+              gte: schema.string(),
+              lte: schema.string(),
+            })
+          )
+        ),
       }),
     }),
   }),
@@ -181,6 +190,7 @@ export const ruleDomainSchema = schema.object({
   alertDelay: schema.maybe(alertDelaySchema),
   legacyId: schema.maybe(schema.nullable(schema.string())),
   flapping: schema.maybe(schema.nullable(flappingSchema)),
+  artifacts: schema.maybe(artifactsSchema),
 });
 
 /**
@@ -222,4 +232,5 @@ export const ruleSchema = schema.object({
   alertDelay: schema.maybe(alertDelaySchema),
   legacyId: schema.maybe(schema.nullable(schema.string())),
   flapping: schema.maybe(schema.nullable(flappingSchema)),
+  artifacts: schema.maybe(artifactsSchema),
 });

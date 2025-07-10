@@ -11,7 +11,7 @@ import React, { useState, useMemo } from 'react';
 import { SUPPORTED_PYTORCH_TASKS } from '@kbn/ml-trained-models-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFormRow, EuiSelect, EuiSpacer, EuiTab, EuiTabs, useEuiPaddingSize } from '@elastic/eui';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type { TrainedModelItem } from '../../../../common/types/trained_models';
 import { isNLPModelItem } from '../../../../common/types/trained_models';
 import { SelectedModel } from './selected_model';

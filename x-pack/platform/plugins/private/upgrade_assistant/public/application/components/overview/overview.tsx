@@ -10,12 +10,13 @@ import React, { useEffect, useState } from 'react';
 import {
   EuiSteps,
   EuiPageHeader,
-  EuiButtonEmpty,
   EuiSpacer,
   EuiLink,
   EuiPageBody,
   EuiPageSection,
   EuiText,
+  EuiToolTip,
+  EuiIcon,
 } from '@elastic/eui';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 
@@ -24,6 +25,7 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 
+import { LATEST_VERSION, MIN_VERSION_TO_UPGRADE_TO_LATEST } from '../../../../common/constants';
 import { useAppContext } from '../../app_context';
 import { uiMetricService, UIM_OVERVIEW_PAGE_LOAD } from '../../lib/ui_metric';
 import { getBackupStep } from './backup_step';
@@ -42,7 +44,10 @@ export const Overview = withRouter(({ history }: RouteComponentProps) => {
       core: { docLinks },
     },
     plugins: { cloud },
+    kibanaVersionInfo: { currentMajor, currentMinor, currentPatch },
   } = useAppContext();
+
+  const currentVersion = `${currentMajor}.${currentMinor}.${currentPatch}`;
 
   useEffect(() => {
     uiMetricService.trackUiMetric(METRIC_TYPE.LOADED, UIM_OVERVIEW_PAGE_LOAD);
@@ -67,37 +72,57 @@ export const Overview = withRouter(({ history }: RouteComponentProps) => {
     });
   };
 
+  const versionTooltipContent = () => {
+    if (currentVersion >= MIN_VERSION_TO_UPGRADE_TO_LATEST) {
+      return null;
+    }
+
+    return (
+      <EuiToolTip
+        position="right"
+        content={
+          <FormattedMessage
+            id="xpack.upgradeAssistant.overview.latestMinVersionTooltip"
+            defaultMessage="Upgrading to v{latestVersion} requires v{minVersionToUpgradeToLatest}."
+            values={{
+              latestVersion: LATEST_VERSION,
+              minVersionToUpgradeToLatest: MIN_VERSION_TO_UPGRADE_TO_LATEST,
+            }}
+          />
+        }
+      >
+        <EuiIcon type="info" size="s" />
+      </EuiToolTip>
+    );
+  };
+
   return (
     <EuiPageBody restrictWidth={true} data-test-subj="overview">
       <EuiPageSection color="transparent" paddingSize="none">
         <EuiPageHeader
           bottomBorder
+          data-test-subj="overviewPageHeader"
           pageTitle={i18n.translate('xpack.upgradeAssistant.overview.pageTitle', {
             defaultMessage: 'Upgrade Assistant',
           })}
-          description={i18n.translate('xpack.upgradeAssistant.overview.pageDescription', {
-            defaultMessage: 'Get ready for the next version of the Elastic Stack!',
-          })}
-          rightSideItems={[
-            <EuiButtonEmpty
-              href={docLinks.links.upgradeAssistant.overview}
-              target="_blank"
-              iconType="help"
-              data-test-subj="documentationLink"
-            >
-              <FormattedMessage
-                id="xpack.upgradeAssistant.overview.documentationLinkText"
-                defaultMessage="Documentation"
-              />
-            </EuiButtonEmpty>,
-          ]}
+          description={
+            <FormattedMessage
+              id="xpack.upgradeAssistant.overview.versionInfo"
+              defaultMessage="Current version: {currentVersion} | Latest available version: {latestVersion} {versionTooltip}"
+              values={{
+                currentVersion: <strong>{currentVersion}</strong>,
+                latestVersion: <strong>{LATEST_VERSION}</strong>,
+                versionTooltip: versionTooltipContent(),
+              }}
+            />
+          }
         >
           <EuiText>
             <FormattedMessage
-              id="xpack.upgradeAssistant.overview.upgradeToLatestMinorBeforeMajorMessage"
-              defaultMessage="Check the {link}. Before upgrading to a new major version, you must first upgrade to the latest minor of this major version."
+              id="xpack.upgradeAssistant.overview.linkToReleaseNotes"
+              defaultMessage="{linkToReleaseNotes}"
               values={{
-                link: (
+                linkToReleaseNotes: (
                   <EuiLink
                     data-test-subj="whatsNewLink"
                     href={docLinks.links.elasticsearch.latestReleaseHighlights}
@@ -105,7 +130,10 @@ export const Overview = withRouter(({ history }: RouteComponentProps) => {
                   >
                     <FormattedMessage
                       id="xpack.upgradeAssistant.overview.minorOfLatestMajorReleaseNotes"
-                      defaultMessage="latest release highlights"
+                      defaultMessage="What's new in version v{latestVersion}"
+                      values={{
+                        latestVersion: LATEST_VERSION,
+                      }}
                     />
                   </EuiLink>
                 ),
@@ -135,7 +163,6 @@ export const Overview = withRouter(({ history }: RouteComponentProps) => {
               getLogsStep({
                 isComplete: isStepComplete('logs'),
                 setIsComplete: setCompletedStep.bind(null, 'logs'),
-                navigateToEsDeprecationLogs: () => history.push('/es_deprecation_logs'),
               }),
               getUpgradeStep(),
             ].filter(Boolean) as EuiStepProps[]

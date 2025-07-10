@@ -7,15 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DashboardContainerInput } from '../../../../common';
 import { getSampleDashboardState } from '../../../mocks';
-import {
-  contentManagementService,
-  coreServices,
-  dataService,
-  embeddableService,
-} from '../../kibana_services';
+import { contentManagementService, coreServices, dataService } from '../../kibana_services';
 import { saveDashboardState } from './save_dashboard_state';
+import { DashboardPanel } from '../../../../server';
 
 contentManagementService.client.create = jest.fn().mockImplementation(({ options }) => {
   if (options.id === undefined) {
@@ -36,10 +31,6 @@ dataService.query.timefilter.timefilter.getTime = jest
   .fn()
   .mockReturnValue({ from: 'then', to: 'now' });
 
-embeddableService.extract = jest
-  .fn()
-  .mockImplementation((attributes) => ({ state: attributes, references: [] }));
-
 describe('Save dashboard state', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -50,7 +41,7 @@ describe('Save dashboard state', () => {
       dashboardState: {
         ...getSampleDashboardState(),
         title: 'BOO',
-      } as unknown as DashboardContainerInput,
+      },
       lastSavedId: 'Boogaloo',
       saveOptions: {},
     });
@@ -71,7 +62,7 @@ describe('Save dashboard state', () => {
       dashboardState: {
         ...getSampleDashboardState(),
         title: 'BooToo',
-      } as unknown as DashboardContainerInput,
+      },
       lastSavedId: 'Boogaloonie',
       saveOptions: { saveAsCopy: true },
     });
@@ -95,8 +86,8 @@ describe('Save dashboard state', () => {
       dashboardState: {
         ...getSampleDashboardState(),
         title: 'BooThree',
-        panels: { aVerySpecialVeryUniqueId: { type: 'boop' } },
-      } as unknown as DashboardContainerInput,
+        panels: [{ type: 'boop', panelIndex: 'idOne' } as DashboardPanel],
+      },
       lastSavedId: 'Boogatoonie',
       saveOptions: { saveAsCopy: true },
     });
@@ -121,8 +112,8 @@ describe('Save dashboard state', () => {
       dashboardState: {
         ...getSampleDashboardState(),
         title: 'BooFour',
-        panels: { idOne: { type: 'boop' } },
-      } as unknown as DashboardContainerInput,
+        panels: [{ type: 'boop', panelIndex: 'idOne' } as DashboardPanel],
+      },
       panelReferences: [{ name: 'idOne:panel_idOne', type: 'boop', id: 'idOne' }],
       lastSavedId: 'Boogatoonie',
       saveOptions: { saveAsCopy: true },
@@ -149,8 +140,8 @@ describe('Save dashboard state', () => {
       dashboardState: {
         ...getSampleDashboardState(),
         title: 'BooThree',
-        panels: { idOne: { type: 'boop' } },
-      } as unknown as DashboardContainerInput,
+        panels: [{ type: 'boop', panelIndex: 'idOne' } as DashboardPanel],
+      },
       lastSavedId: 'Boogatoonie',
       saveOptions: { saveAsCopy: true },
     });

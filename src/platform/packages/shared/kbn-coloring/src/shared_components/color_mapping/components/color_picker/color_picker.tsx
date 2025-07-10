@@ -46,12 +46,20 @@ export function ColorPicker({
         }}
       >
         <EuiTabs size="m" expand>
-          <EuiTab onClick={() => setTab('palette')} isSelected={tab === 'palette'}>
+          <EuiTab
+            data-test-subj="lns-colorMapping-colorPicker-tab-colors"
+            onClick={() => setTab('palette')}
+            isSelected={tab === 'palette'}
+          >
             {i18n.translate('coloring.colorMapping.colorPicker.paletteTabLabel', {
               defaultMessage: 'Colors',
             })}
           </EuiTab>
-          <EuiTab onClick={() => setTab('custom')} isSelected={tab === 'custom'}>
+          <EuiTab
+            data-test-subj="lns-colorMapping-colorPicker-tab-custom"
+            onClick={() => setTab('custom')}
+            isSelected={tab === 'custom'}
+          >
             {i18n.translate('coloring.colorMapping.colorPicker.customTabLabel', {
               defaultMessage: 'Custom',
             })}

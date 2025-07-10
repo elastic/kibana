@@ -8,9 +8,9 @@
 import moment from 'moment';
 import sinon from 'sinon';
 import type { TransportResult } from '@elastic/elasticsearch';
+import type { FieldCapsResponse } from '@elastic/elasticsearch/lib/api/types';
 import { ALERT_REASON, ALERT_RULE_PARAMETERS, ALERT_UUID, TIMESTAMP } from '@kbn/rule-data-utils';
 
-import type { RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
 import type { SanitizedRuleAction } from '@kbn/alerting-plugin/common';
 
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
@@ -27,19 +27,13 @@ import {
   parseInterval,
   getGapBetweenRuns,
   getNumCatchupIntervals,
-  errorAggregator,
-  getListsClient,
   getRuleRangeTuples,
   getExceptions,
   hasTimestampFields,
-  wrapBuildingBlocks,
-  generateSignalId,
   createErrorsFromShard,
   createSearchAfterReturnTypeFromResponse,
   createSearchAfterReturnType,
   mergeReturns,
-  lastValidDate,
-  buildChunkedOrFilter,
   getValidDateFromDoc,
   calculateTotal,
   getTotalHitsValue,
@@ -49,18 +43,14 @@ import {
   getUnprocessedExceptionsWarnings,
   getDisabledActionsWarningText,
   calculateFromValue,
+  stringifyAfterKey,
 } from './utils';
-import type { BulkResponseErrorAggregation, SearchAfterAndBulkCreateReturnType } from '../types';
+import type { SearchAfterAndBulkCreateReturnType } from '../types';
 import {
-  sampleBulkResponse,
-  sampleEmptyBulkResponse,
-  sampleBulkError,
-  sampleBulkErrorItem,
   sampleSignalHit,
   sampleDocSearchResultsWithSortId,
   sampleEmptyDocSearchResults,
   sampleDocSearchResultsNoSortIdNoHits,
-  sampleDocSearchResultsNoSortId,
   sampleDocNoSortId,
   sampleAlertDocNoSortIdWithTimestamp,
   sampleAlertDocAADNoSortIdWithTimestamp,
@@ -68,7 +58,7 @@ import {
 import type { ShardError } from '../../../types';
 import { ruleExecutionLogMock } from '../../rule_monitoring/mocks';
 import type { GenericBulkCreateResponse } from '../factories';
-import type { BaseFieldsLatest } from '../../../../../common/api/detection_engine/model/alerts';
+import type { DetectionAlertLatest } from '../../../../../common/api/detection_engine/model/alerts';
 import type { AlertingServerSetup } from '@kbn/alerting-plugin/server';
 
 describe('utils', () => {
@@ -215,237 +205,6 @@ describe('utils', () => {
     });
   });
 
-  describe('errorAggregator', () => {
-    test('it should aggregate with an empty object when given an empty bulk response', () => {
-      const empty = sampleEmptyBulkResponse();
-      const aggregated = errorAggregator(empty, []);
-      const expected: BulkResponseErrorAggregation = {};
-      expect(aggregated).toEqual(expected);
-    });
-
-    test('it should aggregate with an empty create object', () => {
-      const empty = sampleBulkResponse();
-      empty.items = [{}];
-      const aggregated = errorAggregator(empty, []);
-      const expected: BulkResponseErrorAggregation = {};
-      expect(aggregated).toEqual(expected);
-    });
-
-    test('it should aggregate with an empty object when given a valid bulk response with no errors', () => {
-      const validResponse = sampleBulkResponse();
-      const aggregated = errorAggregator(validResponse, []);
-      const expected: BulkResponseErrorAggregation = {};
-      expect(aggregated).toEqual(expected);
-    });
-
-    test('it should aggregate with a single error when given a single error item', () => {
-      const singleError = sampleBulkError();
-      const aggregated = errorAggregator(singleError, []);
-      const expected: BulkResponseErrorAggregation = {
-        'Invalid call': {
-          count: 1,
-          statusCode: 400,
-        },
-      };
-      expect(aggregated).toEqual(expected);
-    });
-
-    test('it should aggregate two errors with a correct count when given the same two error items', () => {
-      const twoAggregatedErrors = sampleBulkError();
-      const item1 = sampleBulkErrorItem();
-      const item2 = sampleBulkErrorItem();
-      twoAggregatedErrors.items = [item1, item2];
-      const aggregated = errorAggregator(twoAggregatedErrors, []);
-      const expected: BulkResponseErrorAggregation = {
-        'Invalid call': {
-          count: 2,
-          statusCode: 400,
-        },
-      };
-      expect(aggregated).toEqual(expected);
-    });
-
-    test('it should aggregate three errors with a correct count when given the same two error items', () => {
-      const twoAggregatedErrors = sampleBulkError();
-      const item1 = sampleBulkErrorItem();
-      const item2 = sampleBulkErrorItem();
-      const item3 = sampleBulkErrorItem();
-      twoAggregatedErrors.items = [item1, item2, item3];
-      const aggregated = errorAggregator(twoAggregatedErrors, []);
-      const expected: BulkResponseErrorAggregation = {
-        'Invalid call': {
-          count: 3,
-          statusCode: 400,
-        },
-      };
-      expect(aggregated).toEqual(expected);
-    });
-
-    test('it should aggregate two distinct errors with the correct count of 1 for each error type', () => {
-      const twoAggregatedErrors = sampleBulkError();
-      const item1 = sampleBulkErrorItem({ status: 400, reason: 'Parse Error' });
-      const item2 = sampleBulkErrorItem({ status: 500, reason: 'Bad Network' });
-      twoAggregatedErrors.items = [item1, item2];
-      const aggregated = errorAggregator(twoAggregatedErrors, []);
-      const expected: BulkResponseErrorAggregation = {
-        'Parse Error': {
-          count: 1,
-          statusCode: 400,
-        },
-        'Bad Network': {
-          count: 1,
-          statusCode: 500,
-        },
-      };
-      expect(aggregated).toEqual(expected);
-    });
-
-    test('it should aggregate two of the same errors with the correct count of 2 for each error type', () => {
-      const twoAggregatedErrors = sampleBulkError();
-      const item1 = sampleBulkErrorItem({ status: 400, reason: 'Parse Error' });
-      const item2 = sampleBulkErrorItem({ status: 400, reason: 'Parse Error' });
-      const item3 = sampleBulkErrorItem({ status: 500, reason: 'Bad Network' });
-      const item4 = sampleBulkErrorItem({ status: 500, reason: 'Bad Network' });
-      twoAggregatedErrors.items = [item1, item2, item3, item4];
-      const aggregated = errorAggregator(twoAggregatedErrors, []);
-      const expected: BulkResponseErrorAggregation = {
-        'Parse Error': {
-          count: 2,
-          statusCode: 400,
-        },
-        'Bad Network': {
-          count: 2,
-          statusCode: 500,
-        },
-      };
-      expect(aggregated).toEqual(expected);
-    });
-
-    test('it should aggregate three of the same errors with the correct count of 2 for each error type', () => {
-      const twoAggregatedErrors = sampleBulkError();
-      const item1 = sampleBulkErrorItem({ status: 400, reason: 'Parse Error' });
-      const item2 = sampleBulkErrorItem({ status: 400, reason: 'Parse Error' });
-      const item3 = sampleBulkErrorItem({ status: 500, reason: 'Bad Network' });
-      const item4 = sampleBulkErrorItem({ status: 500, reason: 'Bad Network' });
-      const item5 = sampleBulkErrorItem({ status: 502, reason: 'Bad Gateway' });
-      const item6 = sampleBulkErrorItem({ status: 502, reason: 'Bad Gateway' });
-      twoAggregatedErrors.items = [item1, item2, item3, item4, item5, item6];
-      const aggregated = errorAggregator(twoAggregatedErrors, []);
-      const expected: BulkResponseErrorAggregation = {
-        'Parse Error': {
-          count: 2,
-          statusCode: 400,
-        },
-        'Bad Network': {
-          count: 2,
-          statusCode: 500,
-        },
-        'Bad Gateway': {
-          count: 2,
-          statusCode: 502,
-        },
-      };
-      expect(aggregated).toEqual(expected);
-    });
-
-    test('it should aggregate a mix of errors with the correct aggregate count of each', () => {
-      const twoAggregatedErrors = sampleBulkError();
-      const item1 = sampleBulkErrorItem({ status: 400, reason: 'Parse Error' });
-      const item2 = sampleBulkErrorItem({ status: 500, reason: 'Bad Network' });
-      const item3 = sampleBulkErrorItem({ status: 500, reason: 'Bad Network' });
-      const item4 = sampleBulkErrorItem({ status: 502, reason: 'Bad Gateway' });
-      const item5 = sampleBulkErrorItem({ status: 502, reason: 'Bad Gateway' });
-      const item6 = sampleBulkErrorItem({ status: 502, reason: 'Bad Gateway' });
-      twoAggregatedErrors.items = [item1, item2, item3, item4, item5, item6];
-      const aggregated = errorAggregator(twoAggregatedErrors, []);
-      const expected: BulkResponseErrorAggregation = {
-        'Parse Error': {
-          count: 1,
-          statusCode: 400,
-        },
-        'Bad Network': {
-          count: 2,
-          statusCode: 500,
-        },
-        'Bad Gateway': {
-          count: 3,
-          statusCode: 502,
-        },
-      };
-      expect(aggregated).toEqual(expected);
-    });
-
-    test('it will ignore error single codes such as 409', () => {
-      const twoAggregatedErrors = sampleBulkError();
-      const item1 = sampleBulkErrorItem({ status: 409, reason: 'Conflict Error' });
-      const item2 = sampleBulkErrorItem({ status: 409, reason: 'Conflict Error' });
-      const item3 = sampleBulkErrorItem({ status: 500, reason: 'Bad Network' });
-      const item4 = sampleBulkErrorItem({ status: 502, reason: 'Bad Gateway' });
-      const item5 = sampleBulkErrorItem({ status: 502, reason: 'Bad Gateway' });
-      const item6 = sampleBulkErrorItem({ status: 502, reason: 'Bad Gateway' });
-      twoAggregatedErrors.items = [item1, item2, item3, item4, item5, item6];
-      const aggregated = errorAggregator(twoAggregatedErrors, [409]);
-      const expected: BulkResponseErrorAggregation = {
-        'Bad Network': {
-          count: 1,
-          statusCode: 500,
-        },
-        'Bad Gateway': {
-          count: 3,
-          statusCode: 502,
-        },
-      };
-      expect(aggregated).toEqual(expected);
-    });
-
-    test('it will ignore two error codes such as 409 and 502', () => {
-      const twoAggregatedErrors = sampleBulkError();
-      const item1 = sampleBulkErrorItem({ status: 409, reason: 'Conflict Error' });
-      const item2 = sampleBulkErrorItem({ status: 409, reason: 'Conflict Error' });
-      const item3 = sampleBulkErrorItem({ status: 500, reason: 'Bad Network' });
-      const item4 = sampleBulkErrorItem({ status: 502, reason: 'Bad Gateway' });
-      const item5 = sampleBulkErrorItem({ status: 502, reason: 'Bad Gateway' });
-      const item6 = sampleBulkErrorItem({ status: 502, reason: 'Bad Gateway' });
-      twoAggregatedErrors.items = [item1, item2, item3, item4, item5, item6];
-      const aggregated = errorAggregator(twoAggregatedErrors, [409, 502]);
-      const expected: BulkResponseErrorAggregation = {
-        'Bad Network': {
-          count: 1,
-          statusCode: 500,
-        },
-      };
-      expect(aggregated).toEqual(expected);
-    });
-
-    test('it will return an empty object given valid inputs and status codes to ignore', () => {
-      const bulkResponse = sampleBulkResponse();
-      const aggregated = errorAggregator(bulkResponse, [409, 502]);
-      const expected: BulkResponseErrorAggregation = {};
-      expect(aggregated).toEqual(expected);
-    });
-  });
-
-  describe('#getListsClient', () => {
-    let alertServices: RuleExecutorServicesMock;
-
-    beforeEach(() => {
-      alertServices = alertsMock.createRuleExecutorServices();
-    });
-
-    test('it successfully returns list and exceptions list client', async () => {
-      const { listClient, exceptionsClient } = getListsClient({
-        services: alertServices,
-        savedObjectClient: alertServices.savedObjectsClient,
-        updatedByUser: 'some_user',
-        spaceId: '',
-        lists: listMock.createSetup(),
-      });
-
-      expect(listClient).toBeDefined();
-      expect(exceptionsClient).toBeDefined();
-    });
-  });
-
   describe('getRuleRangeTuples', () => {
     let alerting: AlertingServerSetup;
 
@@ -491,9 +250,11 @@ describe('utils', () => {
     });
 
     test('should return two tuples if gap and previouslyStartedAt', async () => {
-      const { tuples, remainingGap, warningStatusMessage } = await getRuleRangeTuples({
-        previousStartedAt: moment().subtract(65, 's').toDate(),
-        startedAt: moment().toDate(),
+      const previouslyStartedAt = moment().subtract(65, 's').toDate();
+      const startedAt = moment().toDate();
+      const { tuples, remainingGap, warningStatusMessage, gap } = await getRuleRangeTuples({
+        previousStartedAt: previouslyStartedAt,
+        startedAt,
         interval: '50s',
         from: 'now-55s',
         to: 'now',
@@ -505,12 +266,15 @@ describe('utils', () => {
       expect(moment(someTuple.to).diff(moment(someTuple.from), 's')).toEqual(55);
       expect(remainingGap.asMilliseconds()).toEqual(0);
       expect(warningStatusMessage).toEqual(undefined);
+      expect(gap).toEqual(undefined);
     });
 
     test('should return five tuples when give long gap', async () => {
-      const { tuples, remainingGap, warningStatusMessage } = await getRuleRangeTuples({
-        previousStartedAt: moment().subtract(65, 's').toDate(), // 64 is 5 times the interval + lookback, which will trigger max lookback
-        startedAt: moment().toDate(),
+      const previousStartedAt = moment().subtract(65, 's').toDate(); // 64 is 5 times the interval + lookback, which will trigger max lookback
+      const startedAt = moment().toDate();
+      const { tuples, remainingGap, warningStatusMessage, gap } = await getRuleRangeTuples({
+        previousStartedAt,
+        startedAt,
         interval: '10s',
         from: 'now-13s',
         to: 'now',
@@ -529,6 +293,8 @@ describe('utils', () => {
       });
       expect(remainingGap.asMilliseconds()).toEqual(12000);
       expect(warningStatusMessage).toEqual(undefined);
+      expect(gap?.gte).toEqual(previousStartedAt.toISOString());
+      expect(gap?.lte).toEqual(moment(previousStartedAt).add(remainingGap, 'ms').toISOString());
     });
 
     test('should return a single tuple when give a negative gap (rule ran sooner than expected)', async () => {
@@ -695,8 +461,7 @@ describe('utils', () => {
   describe('hasTimestampFields', () => {
     test('returns true when missing timestamp override field', async () => {
       const timestampField = 'event.ingested';
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const timestampFieldCapsResponse: Partial<TransportResult<Record<string, any>, unknown>> = {
+      const timestampFieldCapsResponse: Partial<TransportResult<FieldCapsResponse, unknown>> = {
         body: {
           indices: ['myfakeindex-1', 'myfakeindex-2', 'myfakeindex-3', 'myfakeindex-4'],
           fields: {
@@ -721,8 +486,8 @@ describe('utils', () => {
       const { foundNoIndices } = await hasTimestampFields({
         timestampField,
         timestampFieldCapsResponse: timestampFieldCapsResponse as TransportResult<
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          Record<string, any>
+          FieldCapsResponse,
+          unknown
         >,
         inputIndices: ['myfa*'],
         ruleExecutionLogger,
@@ -738,8 +503,7 @@ describe('utils', () => {
 
     test('returns true when missing timestamp field', async () => {
       const timestampField = '@timestamp';
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const timestampFieldCapsResponse: Partial<TransportResult<Record<string, any>, unknown>> = {
+      const timestampFieldCapsResponse: Partial<TransportResult<FieldCapsResponse, unknown>> = {
         body: {
           indices: ['myfakeindex-1', 'myfakeindex-2', 'myfakeindex-3', 'myfakeindex-4'],
           fields: {
@@ -764,8 +528,8 @@ describe('utils', () => {
       const { foundNoIndices } = await hasTimestampFields({
         timestampField,
         timestampFieldCapsResponse: timestampFieldCapsResponse as TransportResult<
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          Record<string, any>
+          FieldCapsResponse,
+          unknown
         >,
         inputIndices: ['myfa*'],
         ruleExecutionLogger,
@@ -781,8 +545,7 @@ describe('utils', () => {
 
     test('returns true when missing logs-endpoint.alerts-* index and rule name is Endpoint Security', async () => {
       const timestampField = '@timestamp';
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const timestampFieldCapsResponse: Partial<TransportResult<Record<string, any>, unknown>> = {
+      const timestampFieldCapsResponse: Partial<TransportResult<FieldCapsResponse, unknown>> = {
         body: {
           indices: [],
           fields: {},
@@ -796,8 +559,8 @@ describe('utils', () => {
       const { foundNoIndices } = await hasTimestampFields({
         timestampField,
         timestampFieldCapsResponse: timestampFieldCapsResponse as TransportResult<
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          Record<string, any>
+          FieldCapsResponse,
+          unknown
         >,
         inputIndices: ['logs-endpoint.alerts-*'],
         ruleExecutionLogger,
@@ -813,8 +576,7 @@ describe('utils', () => {
 
     test('returns true when missing logs-endpoint.alerts-* index and rule name is NOT Endpoint Security', async () => {
       const timestampField = '@timestamp';
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const timestampFieldCapsResponse: Partial<TransportResult<Record<string, any>, unknown>> = {
+      const timestampFieldCapsResponse: Partial<TransportResult<FieldCapsResponse, unknown>> = {
         body: {
           indices: [],
           fields: {},
@@ -829,8 +591,8 @@ describe('utils', () => {
       const { foundNoIndices } = await hasTimestampFields({
         timestampField,
         timestampFieldCapsResponse: timestampFieldCapsResponse as TransportResult<
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          Record<string, any>
+          FieldCapsResponse,
+          unknown
         >,
         inputIndices: ['logs-endpoint.alerts-*'],
         ruleExecutionLogger,
@@ -842,56 +604,6 @@ describe('utils', () => {
         message:
           'This rule is attempting to query data from Elasticsearch indices listed in the "Index patterns" section of the rule definition, however no index matching: ["logs-endpoint.alerts-*"] was found. This warning will continue to appear until a matching index is created or this rule is disabled.',
       });
-    });
-  });
-
-  describe('wrapBuildingBlocks', () => {
-    it('should generate a unique id for each building block', () => {
-      const wrappedBlocks = wrapBuildingBlocks(
-        [sampleSignalHit(), sampleSignalHit()],
-        'test-index'
-      );
-      const blockIds: string[] = [];
-      wrappedBlocks.forEach((block) => {
-        expect(blockIds.includes(block._id)).toEqual(false);
-        blockIds.push(block._id);
-      });
-    });
-
-    it('should generate different ids for identical documents in different sequences', () => {
-      const wrappedBlockSequence1 = wrapBuildingBlocks([sampleSignalHit()], 'test-index');
-      const wrappedBlockSequence2 = wrapBuildingBlocks(
-        [sampleSignalHit(), sampleSignalHit()],
-        'test-index'
-      );
-      const blockId = wrappedBlockSequence1[0]._id;
-      wrappedBlockSequence2.forEach((block) => {
-        expect(block._id).not.toEqual(blockId);
-      });
-    });
-
-    it('should generate the same ids when given the same sequence twice', () => {
-      const wrappedBlockSequence1 = wrapBuildingBlocks(
-        [sampleSignalHit(), sampleSignalHit()],
-        'test-index'
-      );
-      const wrappedBlockSequence2 = wrapBuildingBlocks(
-        [sampleSignalHit(), sampleSignalHit()],
-        'test-index'
-      );
-      wrappedBlockSequence1.forEach((block, idx) => {
-        expect(block._id).toEqual(wrappedBlockSequence2[idx]._id);
-      });
-    });
-  });
-
-  describe('generateSignalId', () => {
-    it('generates a unique signal id for same signal with different rule id', () => {
-      const signalId1 = generateSignalId(sampleSignalHit().signal);
-      const modifiedSignal = sampleSignalHit();
-      modifiedSignal.signal.rule.id = 'some other rule id';
-      const signalIdModified = generateSignalId(modifiedSignal.signal);
-      expect(signalId1).not.toEqual(signalIdModified);
     });
   });
 
@@ -1027,7 +739,6 @@ describe('utils', () => {
         createdSignalsCount: 0,
         createdSignals: [],
         errors: [],
-        lastLookBackDate: null,
         searchAfterTimes: [],
         success: true,
         warning: false,
@@ -1049,7 +760,6 @@ describe('utils', () => {
         createdSignalsCount: 0,
         createdSignals: [],
         errors: [],
-        lastLookBackDate: new Date('2020-04-20T21:27:45.000Z'),
         searchAfterTimes: [],
         success: true,
         warning: false,
@@ -1123,123 +833,6 @@ describe('utils', () => {
         primaryTimestamp: 'event.ingested',
       });
       expect(success).toEqual(true);
-    });
-
-    test('It will not set an invalid date time stamp from a non-existent @timestamp when the index is not 100% ECS compliant', () => {
-      const searchResult = sampleDocSearchResultsNoSortId();
-      (searchResult.hits.hits[0]._source['@timestamp'] as unknown) = undefined;
-      if (searchResult.hits.hits[0].fields != null) {
-        (searchResult.hits.hits[0].fields['@timestamp'] as unknown) = undefined;
-      }
-      const { lastLookBackDate } = createSearchAfterReturnTypeFromResponse({
-        searchResult,
-        primaryTimestamp: TIMESTAMP,
-      });
-      expect(lastLookBackDate).toEqual(null);
-    });
-
-    test('It will not set an invalid date time stamp from a null @timestamp when the index is not 100% ECS compliant', () => {
-      const searchResult = sampleDocSearchResultsNoSortId();
-      (searchResult.hits.hits[0]._source['@timestamp'] as unknown) = null;
-      if (searchResult.hits.hits[0].fields != null) {
-        (searchResult.hits.hits[0].fields['@timestamp'] as unknown) = null;
-      }
-      const { lastLookBackDate } = createSearchAfterReturnTypeFromResponse({
-        searchResult,
-        primaryTimestamp: TIMESTAMP,
-      });
-      expect(lastLookBackDate).toEqual(null);
-    });
-
-    test('It will not set an invalid date time stamp from an invalid @timestamp string', () => {
-      const searchResult = sampleDocSearchResultsNoSortId();
-      (searchResult.hits.hits[0]._source['@timestamp'] as unknown) = 'invalid';
-      if (searchResult.hits.hits[0].fields != null) {
-        (searchResult.hits.hits[0].fields['@timestamp'] as unknown) = ['invalid'];
-      }
-      const { lastLookBackDate } = createSearchAfterReturnTypeFromResponse({
-        searchResult,
-        primaryTimestamp: TIMESTAMP,
-      });
-      expect(lastLookBackDate).toEqual(null);
-    });
-  });
-
-  describe('lastValidDate', () => {
-    test('It returns undefined if the search result contains a null timestamp', () => {
-      const searchResult = sampleDocSearchResultsNoSortId();
-      (searchResult.hits.hits[0]._source['@timestamp'] as unknown) = null;
-      if (searchResult.hits.hits[0].fields != null) {
-        (searchResult.hits.hits[0].fields['@timestamp'] as unknown) = null;
-      }
-      const date = lastValidDate({ searchResult, primaryTimestamp: TIMESTAMP });
-      expect(date).toEqual(undefined);
-    });
-
-    test('It returns undefined if the search result contains a undefined timestamp', () => {
-      const searchResult = sampleDocSearchResultsNoSortId();
-      (searchResult.hits.hits[0]._source['@timestamp'] as unknown) = undefined;
-      if (searchResult.hits.hits[0].fields != null) {
-        (searchResult.hits.hits[0].fields['@timestamp'] as unknown) = undefined;
-      }
-      const date = lastValidDate({ searchResult, primaryTimestamp: TIMESTAMP });
-      expect(date).toEqual(undefined);
-    });
-
-    test('It returns undefined if the search result contains an invalid string value', () => {
-      const searchResult = sampleDocSearchResultsNoSortId();
-      (searchResult.hits.hits[0]._source['@timestamp'] as unknown) = 'invalid value';
-      if (searchResult.hits.hits[0].fields != null) {
-        (searchResult.hits.hits[0].fields['@timestamp'] as unknown) = ['invalid value'];
-      }
-      const date = lastValidDate({ searchResult, primaryTimestamp: TIMESTAMP });
-      expect(date).toEqual(undefined);
-    });
-
-    test('It returns normal date time if set', () => {
-      const searchResult = sampleDocSearchResultsNoSortId();
-      const date = lastValidDate({ searchResult, primaryTimestamp: TIMESTAMP });
-      expect(date?.toISOString()).toEqual('2020-04-20T21:27:45.000Z');
-    });
-
-    test('It returns date time from field if set there', () => {
-      const timestamp = '2020-10-07T19:27:19.136Z';
-      const searchResult = sampleDocSearchResultsNoSortId();
-      if (searchResult.hits.hits[0] == null) {
-        throw new TypeError('Test requires one element');
-      }
-      searchResult.hits.hits[0] = {
-        ...searchResult.hits.hits[0],
-        fields: {
-          '@timestamp': [timestamp],
-        },
-      };
-      const date = lastValidDate({ searchResult, primaryTimestamp: TIMESTAMP });
-      expect(date?.toISOString()).toEqual(timestamp);
-    });
-
-    test('It returns timestampOverride date time if set', () => {
-      const override = '2020-10-07T19:20:28.049Z';
-      const searchResult = sampleDocSearchResultsNoSortId();
-      searchResult.hits.hits[0]._source.different_timestamp = new Date(override).toISOString();
-      const date = lastValidDate({ searchResult, primaryTimestamp: 'different_timestamp' });
-      expect(date?.toISOString()).toEqual(override);
-    });
-
-    test('It returns timestampOverride date time from fields if set on it', () => {
-      const override = '2020-10-07T19:36:31.110Z';
-      const searchResult = sampleDocSearchResultsNoSortId();
-      if (searchResult.hits.hits[0] == null) {
-        throw new TypeError('Test requires one element');
-      }
-      searchResult.hits.hits[0] = {
-        ...searchResult.hits.hits[0],
-        fields: {
-          different_timestamp: [override],
-        },
-      };
-      const date = lastValidDate({ searchResult, primaryTimestamp: 'different_timestamp' });
-      expect(date?.toISOString()).toEqual(override);
     });
   });
 
@@ -1369,7 +962,6 @@ describe('utils', () => {
         createdSignalsCount: 0,
         createdSignals: [],
         errors: [],
-        lastLookBackDate: null,
         searchAfterTimes: [],
         success: true,
         warning: false,
@@ -1386,7 +978,6 @@ describe('utils', () => {
         createdSignalsCount: 5,
         createdSignals: Array(5).fill(sampleSignalHit()),
         errors: ['error 1'],
-        lastLookBackDate: new Date('2020-09-21T18:51:25.193Z'),
         searchAfterTimes: ['123'],
         success: false,
         warning: true,
@@ -1398,7 +989,6 @@ describe('utils', () => {
         createdSignalsCount: 5,
         createdSignals: Array(5).fill(sampleSignalHit()),
         errors: ['error 1'],
-        lastLookBackDate: new Date('2020-09-21T18:51:25.193Z'),
         searchAfterTimes: ['123'],
         success: false,
         warning: true,
@@ -1420,7 +1010,6 @@ describe('utils', () => {
         createdSignalsCount: 5,
         createdSignals: Array(5).fill(sampleSignalHit()),
         errors: ['error 1'],
-        lastLookBackDate: null,
         searchAfterTimes: [],
         success: true,
         warning: false,
@@ -1440,7 +1029,6 @@ describe('utils', () => {
         createdSignalsCount: 0,
         createdSignals: [],
         errors: [],
-        lastLookBackDate: null,
         searchAfterTimes: [],
         success: true,
         warning: false,
@@ -1466,30 +1054,6 @@ describe('utils', () => {
       expect(success).toEqual(false);
     });
 
-    test('it merges search where the lastLookBackDate is the "next" date when given', () => {
-      const { lastLookBackDate } = mergeReturns([
-        createSearchAfterReturnType({
-          lastLookBackDate: new Date('2020-08-21T19:21:46.194Z'),
-        }),
-        createSearchAfterReturnType({
-          lastLookBackDate: new Date('2020-09-21T19:21:46.194Z'),
-        }),
-      ]);
-      expect(lastLookBackDate).toEqual(new Date('2020-09-21T19:21:46.194Z'));
-    });
-
-    test('it merges search where the lastLookBackDate is the "prev" if given undefined for "next', () => {
-      const { lastLookBackDate } = mergeReturns([
-        createSearchAfterReturnType({
-          lastLookBackDate: new Date('2020-08-21T19:21:46.194Z'),
-        }),
-        createSearchAfterReturnType({
-          lastLookBackDate: undefined,
-        }),
-      ]);
-      expect(lastLookBackDate).toEqual(new Date('2020-08-21T19:21:46.194Z'));
-    });
-
     test('it merges search where values from "next" and "prev" are computed together', () => {
       const merged = mergeReturns([
         createSearchAfterReturnType({
@@ -1498,7 +1062,6 @@ describe('utils', () => {
           createdSignalsCount: 3,
           createdSignals: Array(3).fill(sampleSignalHit()),
           errors: ['error 1', 'error 2'],
-          lastLookBackDate: new Date('2020-08-21T18:51:25.193Z'),
           searchAfterTimes: ['123'],
           success: true,
           warningMessages: ['warning1'],
@@ -1509,7 +1072,6 @@ describe('utils', () => {
           createdSignalsCount: 2,
           createdSignals: Array(2).fill(sampleSignalHit()),
           errors: ['error 3'],
-          lastLookBackDate: new Date('2020-09-21T18:51:25.193Z'),
           searchAfterTimes: ['567'],
           success: true,
           warningMessages: ['warning2'],
@@ -1522,7 +1084,6 @@ describe('utils', () => {
         createdSignalsCount: 5, // Adds the 3 and 2 together
         createdSignals: Array(5).fill(sampleSignalHit()),
         errors: ['error 1', 'error 2', 'error 3'], // concatenates the prev and next together
-        lastLookBackDate: new Date('2020-09-21T18:51:25.193Z'), // takes the next lastLookBackDate
         searchAfterTimes: ['123', '567'], // concatenates the searchAfterTimes together
         success: true, // Defaults to success true is all of it was successful
         warning: true,
@@ -1536,7 +1097,7 @@ describe('utils', () => {
   describe('addToSearchAfterReturn', () => {
     test('merges the values from bulk create response into search after return type', () => {
       const current = createSearchAfterReturnType();
-      const next: GenericBulkCreateResponse<BaseFieldsLatest> = {
+      const next: GenericBulkCreateResponse<DetectionAlertLatest> = {
         success: false,
         bulkCreateDuration: '100',
         enrichmentDuration: '0',
@@ -1554,7 +1115,7 @@ describe('utils', () => {
 
     test('does not duplicate error messages', () => {
       const current = createSearchAfterReturnType({ errors: ['error 1'] });
-      const next: GenericBulkCreateResponse<BaseFieldsLatest> = {
+      const next: GenericBulkCreateResponse<DetectionAlertLatest> = {
         success: true,
         bulkCreateDuration: '0',
         enrichmentDuration: '0',
@@ -1570,7 +1131,7 @@ describe('utils', () => {
 
     test('adds new error messages', () => {
       const current = createSearchAfterReturnType({ errors: ['error 1'] });
-      const next: GenericBulkCreateResponse<BaseFieldsLatest> = {
+      const next: GenericBulkCreateResponse<DetectionAlertLatest> = {
         success: true,
         bulkCreateDuration: '0',
         enrichmentDuration: '0',
@@ -1582,28 +1143,6 @@ describe('utils', () => {
       addToSearchAfterReturn({ current, next });
 
       expect(current.errors).toEqual(['error 1', 'error 2']);
-    });
-  });
-
-  describe('buildChunkedOrFilter', () => {
-    test('should return undefined if no values are provided', () => {
-      const filter = buildChunkedOrFilter('field.name', []);
-      expect(filter).toEqual(undefined);
-    });
-
-    test('should return a filter with a single value', () => {
-      const filter = buildChunkedOrFilter('field.name', ['id-1']);
-      expect(filter).toEqual('field.name: ("id-1")');
-    });
-
-    test('should return a filter with a multiple values', () => {
-      const filter = buildChunkedOrFilter('field.name', ['id-1', 'id-2']);
-      expect(filter).toEqual('field.name: ("id-1" OR "id-2")');
-    });
-
-    test('should return a filter with a multiple values chunked', () => {
-      const filter = buildChunkedOrFilter('field.name', ['id-1', 'id-2', 'id-3'], 2);
-      expect(filter).toEqual('field.name: ("id-1" OR "id-2") OR field.name: ("id-3")');
     });
   });
 
@@ -1754,6 +1293,20 @@ describe('utils', () => {
           getExceptionListItemSchemaMock().name
         }`
       );
+    });
+  });
+
+  describe('stringifyAfterKey', () => {
+    it('should stringify after_key object with single key value', () => {
+      expect(stringifyAfterKey({ 'agent.name': 'test' })).toBe('agent.name: test');
+    });
+    it('should stringify after_key object with multiple key values', () => {
+      expect(stringifyAfterKey({ 'agent.name': 'test', 'destination.ip': '127.0.0.1' })).toBe(
+        'agent.name: test, destination.ip: 127.0.0.1'
+      );
+    });
+    it('should return undefined if after_key is undefined', () => {
+      expect(stringifyAfterKey(undefined)).toBeUndefined();
     });
   });
 

@@ -52,7 +52,7 @@ export function ClassicServiceLogsStream() {
 
   const {
     query: { environment, kuery, rangeFrom, rangeTo },
-  } = useAnyOfApmParams('/services/{serviceName}/logs');
+  } = useAnyOfApmParams('/services/{serviceName}/logs', '/mobile-services/{serviceName}/logs');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
@@ -79,13 +79,14 @@ export function ClassicServiceLogsStream() {
 
   const timeRange = useMemo(() => ({ from: start, to: end }), [start, end]);
 
-  const query = useMemo(
-    () => ({
+  const query = useMemo(() => {
+    const baseFilter = getInfrastructureKQLFilter({ data, serviceName, environment });
+    const hasKuery = Boolean(kuery && kuery.trim().length);
+    return {
       language: 'kuery',
-      query: getInfrastructureKQLFilter({ data, serviceName, environment }),
-    }),
-    [data, serviceName, environment]
-  );
+      query: hasKuery ? `${baseFilter} and (${kuery})` : baseFilter,
+    };
+  }, [data, serviceName, environment, kuery]);
 
   return logSources.value ? (
     <LazySavedSearchComponent
@@ -93,8 +94,9 @@ export function ClassicServiceLogsStream() {
       index={logSources.value}
       timeRange={timeRange}
       query={query}
-      height={'60vh'}
+      height="60vh"
       displayOptions={{
+        solutionNavIdOverride: 'oblt',
         enableDocumentViewer: true,
         enableFilters: false,
       }}

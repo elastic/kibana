@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TypeOf } from '@kbn/config-schema';
-import { cloneRuleParamsSchema } from '../schemas';
+import type { TypeOf } from '@kbn/config-schema';
+import type { cloneRuleParamsSchema } from '../schemas';
 
 export type CloneRuleParams = TypeOf<typeof cloneRuleParamsSchema>;

@@ -52,6 +52,20 @@
             "path": "src/platform/packages/shared/kbn-es-types/src/search.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/es-types",
+            "id": "def-common.ESQLColumn.original_types",
+            "type": "Array",
+            "tags": [],
+            "label": "original_types",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-es-types/src/search.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -143,7 +157,7 @@
             "description": [],
             "signature": [
               "ScalarValue",
-              "[] | Record<string, string | undefined>[] | undefined"
+              "[] | Record<string, string | number | Record<string, string | number> | undefined>[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-es-types/src/search.ts",
             "deprecated": false,
@@ -586,21 +600,6 @@
       },
       {
         "parentPluginId": "@kbn/es-types",
-        "id": "def-common.ESSearchRequestWithoutBody",
-        "type": "Type",
-        "tags": [],
-        "label": "ESSearchRequestWithoutBody",
-        "description": [],
-        "signature": [
-          "SearchRequest"
-        ],
-        "path": "src/platform/packages/shared/kbn-es-types/src/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/es-types",
         "id": "def-common.ESSearchResponse",
         "type": "Type",
         "tags": [],
@@ -611,11 +610,9 @@
           "SearchResponse",
           "<TDocument, Record<string, ",
           "AggregationsAggregate",
-          ">>, \"aggregations\" | \"hits\"> & (TSearchRequest[\"body\"] extends TopLevelAggregationRequest ? WrapAggregationResponse<SubAggregateOf<TSearchRequest[\"body\"], TDocument>> : TSearchRequest extends TopLevelAggregationRequest ? WrapAggregationResponse<SubAggregateOf<TSearchRequest, TDocument>> : { aggregations?: unknown; }) & { hits: Omit<",
+          ">>, \"aggregations\" | \"hits\"> & (TSearchRequest extends TopLevelAggregationRequest ? WrapAggregationResponse<SubAggregateOf<TSearchRequest, TDocument>> : { aggregations?: unknown; }) & { hits: Omit<",
           "SearchHitsMetadata",
-          "<TDocument>, \"total\" | \"hits\"> & (TOptions[\"restTotalHitsAsInt\"] extends true ? { total: number; } : { total: { value: number; relation: \"gte\" | \"eq\"; }; }) & { hits: HitsOf<TSearchRequest extends ",
-          "SearchRequest",
-          " ? TSearchRequest[\"body\"] : TSearchRequest, TDocument>; }; }"
+          "<TDocument>, \"total\" | \"hits\"> & (TOptions[\"restTotalHitsAsInt\"] extends true ? { total: number; } : { total: { value: number; relation: \"gte\" | \"eq\"; }; }) & { hits: HitsOf<TSearchRequest, TDocument>; }; }"
         ],
         "path": "src/platform/packages/shared/kbn-es-types/src/index.ts",
         "deprecated": false,
@@ -649,11 +646,9 @@
           "SearchResponse",
           "<TDocument, Record<string, ",
           "AggregationsAggregate",
-          ">>, \"aggregations\" | \"hits\"> & (TSearchRequest[\"body\"] extends TopLevelAggregationRequest ? WrapAggregationResponse<SubAggregateOf<TSearchRequest[\"body\"], TDocument>> : TSearchRequest extends TopLevelAggregationRequest ? WrapAggregationResponse<SubAggregateOf<TSearchRequest, TDocument>> : { aggregations?: unknown; }) & { hits: Omit<",
+          ">>, \"aggregations\" | \"hits\"> & (TSearchRequest extends TopLevelAggregationRequest ? WrapAggregationResponse<SubAggregateOf<TSearchRequest, TDocument>> : { aggregations?: unknown; }) & { hits: Omit<",
           "SearchHitsMetadata",
-          "<TDocument>, \"total\" | \"hits\"> & (TOptions[\"restTotalHitsAsInt\"] extends true ? { total: number; } : { total: { value: number; relation: \"gte\" | \"eq\"; }; }) & { hits: HitsOf<TSearchRequest extends ",
-          "SearchRequest",
-          " ? TSearchRequest[\"body\"] : TSearchRequest, TDocument>; }; }"
+          "<TDocument>, \"total\" | \"hits\"> & (TOptions[\"restTotalHitsAsInt\"] extends true ? { total: number; } : { total: { value: number; relation: \"gte\" | \"eq\"; }; }) & { hits: HitsOf<TSearchRequest, TDocument>; }; }"
         ],
         "path": "src/platform/packages/shared/kbn-es-types/src/search.ts",
         "deprecated": false,
@@ -703,7 +698,7 @@
           "SearchHit",
           "<unknown>, \"fields\" | \"_source\"> & (TSource extends false ? {} : { _source: TSource; }) & (TFields extends (string | ",
           "QueryDslFieldAndFormat",
-          ")[] ? { fields: Partial<Record<ValueTypeOfField<TFields>, unknown[]>>; } : { fields?: Record<string, unknown[]> | undefined; }) & (TDocValueFields extends DocValueFields ? { fields: Partial<Record<ValueTypeOfField<TDocValueFields>, unknown[]>>; } : {})"
+          ")[] ? { fields: Partial<Record<ValueTypeOfField<TFields>, unknown[]>>; } : { fields?: Record<string, unknown[] | undefined> | undefined; }) & (TDocValueFields extends DocValueFields ? { fields: Partial<Record<ValueTypeOfField<TDocValueFields>, unknown[]>>; } : {})"
         ],
         "path": "src/platform/packages/shared/kbn-es-types/src/search.ts",
         "deprecated": false,

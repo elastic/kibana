@@ -7,6 +7,7 @@
 
 import React, { useMemo } from 'react';
 import type { ITooltipProperty } from '@kbn/maps-plugin/public/classes/tooltips/tooltip_property';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { sourceDestinationFieldMappings } from '../map_config';
 import {
   getEmptyTagValue,
@@ -16,6 +17,7 @@ import { DescriptionListStyled } from '../../../../../common/components/page';
 import { HostDetailsLink, NetworkDetailsLink } from '../../../../../common/components/links';
 import { DefaultFieldRenderer } from '../../../../../timelines/components/field_renderers/default_renderer';
 import type { FlowTarget } from '../../../../../../common/search_strategy';
+import { SourcererScopeName } from '../../../../../sourcerer/store/model';
 
 interface PointToolTipContentProps {
   contextId: string;
@@ -26,6 +28,8 @@ export const PointToolTipContentComponent = ({
   contextId,
   featureProps,
 }: PointToolTipContentProps) => {
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+
   const featureDescriptionListItems = useMemo(
     () =>
       featureProps.map((featureProp) => {
@@ -42,6 +46,11 @@ export const PointToolTipContentComponent = ({
                   attrName={key}
                   idPrefix={`map-point-tooltip-${contextId}-${key}-${value}`}
                   render={(item) => getRenderedFieldValue(key, item)}
+                  scopeId={
+                    newDataViewPickerEnabled
+                      ? SourcererScopeName.explore
+                      : SourcererScopeName.default
+                  }
                 />
               ) : (
                 getEmptyTagValue()
@@ -50,7 +59,7 @@ export const PointToolTipContentComponent = ({
           ),
         };
       }),
-    [contextId, featureProps]
+    [contextId, featureProps, newDataViewPickerEnabled]
   );
 
   return <DescriptionListStyled listItems={featureDescriptionListItems} />;

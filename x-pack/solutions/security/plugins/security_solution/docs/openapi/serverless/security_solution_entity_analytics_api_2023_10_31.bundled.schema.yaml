@@ -17,6 +17,7 @@ paths:
       operationId: DeleteAssetCriticalityRecord
       parameters:
         - description: The ID value of the asset.
+          example: my_host
           in: query
           name: id_value
           required: true
@@ -65,6 +66,7 @@ paths:
       operationId: GetAssetCriticalityRecord
       parameters:
         - description: The ID value of the asset.
+          example: my_host
           in: query
           name: id_value
           required: true
@@ -115,6 +117,10 @@ paths:
                       enum:
                         - wait_for
                       type: string
+              example:
+                criticality_level: high_impact
+                id_field: host.name
+                id_value: my_host
         required: true
       responses:
         '200':
@@ -155,7 +161,15 @@ paths:
               properties:
                 records:
                   items:
-                    $ref: '#/components/schemas/CreateAssetCriticalityRecord'
+                    allOf:
+                      - $ref: '#/components/schemas/AssetCriticalityRecordIdParts'
+                      - type: object
+                        properties:
+                          criticality_level:
+                            $ref: >-
+                              #/components/schemas/AssetCriticalityLevelsForBulkUpload
+                        required:
+                          - criticality_level
                   maxItems: 1000
                   minItems: 1
                   type: array
@@ -242,6 +256,31 @@ paths:
           content:
             application/json:
               schema:
+                example:
+                  page: 1
+                  per_page: 10
+                  records:
+                    - '@timestamp': '2024-08-02T14:40:35.705Z'
+                      asset:
+                        criticality: medium_impact
+                      criticality_level: medium_impact
+                      host:
+                        asset:
+                          criticality: medium_impact
+                        name: my_other_host
+                      id_field: host.name
+                      id_value: my_other_host
+                    - '@timestamp': '2024-08-02T11:15:34.290Z'
+                      asset:
+                        criticality: high_impact
+                      criticality_level: high_impact
+                      host:
+                        asset:
+                          criticality: high_impact
+                        name: my_host
+                      id_field: host.name
+                      id_value: my_host
+                  total: 2
                 type: object
                 properties:
                   page:
@@ -263,8 +302,261 @@ paths:
                   - page
                   - per_page
                   - total
-          description: Bulk upload successful
+          description: Successfully retrieved asset criticality records
       summary: List asset criticality records
+      tags:
+        - Security Entity Analytics API
+  /api/entity_analytics/monitoring/engine/init:
+    post:
+      operationId: InitMonitoringEngine
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MonitoringEngineDescriptor'
+          description: Successful response
+      summary: Initialize the Privilege Monitoring Engine
+      tags:
+        - Security Entity Analytics API
+  /api/entity_analytics/monitoring/privileges/health:
+    get:
+      operationId: PrivMonHealth
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                    required:
+                      - status
+                  status:
+                    oneOf:
+                      - $ref: '#/components/schemas/EngineStatus'
+                      - enum:
+                          - not_found
+                        type: string
+                required:
+                  - status
+          description: Successful response
+      summary: Health check on Privilege Monitoring
+      tags:
+        - Security Entity Analytics API
+  /api/entity_analytics/monitoring/users:
+    post:
+      operationId: CreatePrivMonUser
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserName'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MonitoredUserDoc'
+          description: User created successfully
+      summary: Create a new monitored user
+      tags:
+        - Security Entity Analytics API
+  /api/entity_analytics/monitoring/users/_csv:
+    post:
+      operationId: PrivmonBulkUploadUsersCSV
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  description: The CSV file to upload.
+                  format: binary
+                  type: string
+              required:
+                - file
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                example:
+                  errors:
+                    - index: 1
+                      message: Invalid monitored field
+                      username: john.doe
+                  stats:
+                    failed: 1
+                    successful: 1
+                    total: 2
+                type: object
+                properties:
+                  errors:
+                    items:
+                      $ref: '#/components/schemas/PrivmonUserCsvUploadErrorItem'
+                    type: array
+                  stats:
+                    $ref: '#/components/schemas/PrivmonUserCsvUploadStats'
+                required:
+                  - errors
+                  - stats
+          description: Bulk upload successful
+        '413':
+          description: File too large
+      summary: Upsert multiple monitored users via CSV upload
+      tags:
+        - Security Entity Analytics API
+  /api/entity_analytics/monitoring/users/{id}:
+    delete:
+      operationId: DeletePrivMonUser
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  aknowledged:
+                    description: Indicates if the deletion was successful
+                    type: boolean
+                  message:
+                    description: >-
+                      A message providing additional information about the
+                      deletion status
+                    type: string
+                required:
+                  - success
+          description: User deleted successfully
+      summary: Delete a monitored user
+      tags:
+        - Security Entity Analytics API
+    put:
+      operationId: UpdatePrivMonUser
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MonitoredUserDoc'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MonitoredUserDoc'
+          description: User updated successfully
+      summary: Update a monitored user
+      tags:
+        - Security Entity Analytics API
+  /api/entity_analytics/monitoring/users/list:
+    get:
+      operationId: ListPrivMonUsers
+      parameters:
+        - description: KQL query to filter the list of monitored users
+          in: query
+          name: kql
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/MonitoredUserDoc'
+                type: array
+          description: List of monitored users
+      summary: List all monitored users
+      tags:
+        - Security Entity Analytics API
+  /api/entity_analytics/privileged_user_monitoring/pad/install:
+    post:
+      operationId: InstallPrivilegedAccessDetectionPackage
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                required:
+                  - message
+          description: Successful response
+      summary: >-
+        Installs the privileged access detection package for the Entity
+        Analytics privileged user monitoring experience
+      tags:
+        - Security Entity Analytics API
+  /api/entity_analytics/privileged_user_monitoring/pad/status:
+    get:
+      operationId: GetPrivilegedAccessDetectionPackageStatus
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  jobs:
+                    items:
+                      type: object
+                      properties:
+                        description:
+                          type: string
+                        job_id:
+                          type: string
+                        state:
+                          enum:
+                            - closing
+                            - closed
+                            - opened
+                            - failed
+                            - opening
+                          type: string
+                      required:
+                        - job_id
+                        - state
+                    type: array
+                  ml_module_setup_status:
+                    enum:
+                      - complete
+                      - incomplete
+                    type: string
+                  package_installation_status:
+                    enum:
+                      - complete
+                      - incomplete
+                    type: string
+                required:
+                  - package_installation_status
+                  - ml_module_setup_status
+                  - jobs
+          description: Privileged access detection status retrieved
+      summary: >-
+        Gets the status of the privileged access detection package for the
+        Entity Analytics privileged user monitoring experience
       tags:
         - Security Entity Analytics API
   /api/entity_store/enable:
@@ -276,14 +568,56 @@ paths:
             schema:
               type: object
               properties:
+                delay:
+                  default: 1m
+                  description: The delay before the transform will run.
+                  pattern: '[smdh]$'
+                  type: string
+                docsPerSecond:
+                  default: -1
+                  description: The number of documents per second to process.
+                  type: integer
+                enrichPolicyExecutionInterval:
+                  $ref: '#/components/schemas/Interval'
+                entityTypes:
+                  items:
+                    $ref: '#/components/schemas/EntityType'
+                  type: array
                 fieldHistoryLength:
                   default: 10
                   description: The number of historical values to keep for each field.
                   type: integer
                 filter:
                   type: string
+                frequency:
+                  default: 1m
+                  description: The frequency at which the transform will run.
+                  pattern: '[smdh]$'
+                  type: string
                 indexPattern:
                   $ref: '#/components/schemas/IndexPattern'
+                lookbackPeriod:
+                  default: 3h
+                  description: >-
+                    The amount of time the transform looks back to calculate the
+                    aggregations.
+                  pattern: '[smdh]$'
+                  type: string
+                maxPageSearchSize:
+                  default: 500
+                  description: >-
+                    The initial page size to use for the composite aggregation
+                    of each checkpoint.
+                  type: integer
+                timeout:
+                  default: 180s
+                  description: The timeout for initializing the aggregating transform.
+                  pattern: '[smdh]$'
+                  type: string
+                timestampField:
+                  default: '@timestamp'
+                  description: The field to use as the timestamp.
+                  type: string
         description: Schema for the entity store initialization
         required: true
       responses:
@@ -300,6 +634,8 @@ paths:
                   succeeded:
                     type: boolean
           description: Successful response
+        '400':
+          description: Invalid request
       summary: Initialize the Entity Store
       tags:
         - Security Entity Analytics API
@@ -375,7 +711,7 @@ paths:
     post:
       operationId: InitEntityEngine
       parameters:
-        - description: The entity type of the engine (either 'user' or 'host').
+        - description: The entity type of the engine.
           in: path
           name: entityType
           required: true
@@ -387,14 +723,52 @@ paths:
             schema:
               type: object
               properties:
+                delay:
+                  default: 1m
+                  description: The delay before the transform will run.
+                  pattern: '[smdh]$'
+                  type: string
+                docsPerSecond:
+                  default: -1
+                  description: The number of documents per second to process.
+                  type: integer
+                enrichPolicyExecutionInterval:
+                  $ref: '#/components/schemas/Interval'
                 fieldHistoryLength:
                   default: 10
                   description: The number of historical values to keep for each field.
                   type: integer
                 filter:
                   type: string
+                frequency:
+                  default: 1m
+                  description: The frequency at which the transform will run.
+                  pattern: '[smdh]$'
+                  type: string
                 indexPattern:
                   $ref: '#/components/schemas/IndexPattern'
+                lookbackPeriod:
+                  default: 3h
+                  description: >-
+                    The amount of time the transform looks back to calculate the
+                    aggregations.
+                  pattern: '[smdh]$'
+                  type: string
+                maxPageSearchSize:
+                  default: 500
+                  description: >-
+                    The initial page size to use for the composite aggregation
+                    of each checkpoint.
+                  type: integer
+                timeout:
+                  default: 180s
+                  description: The timeout for initializing the aggregating transform.
+                  pattern: '[smdh]$'
+                  type: string
+                timestampField:
+                  default: '@timestamp'
+                  description: The field to use as the timestamp for the entity type.
+                  type: string
         description: Schema for the engine initialization
         required: true
       responses:
@@ -404,6 +778,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/EngineDescriptor'
           description: Successful response
+        '400':
+          description: Invalid request
       summary: Initialize an Entity Engine
       tags:
         - Security Entity Analytics API
@@ -411,7 +787,7 @@ paths:
     post:
       operationId: StartEntityEngine
       parameters:
-        - description: The entity type of the engine (either 'user' or 'host').
+        - description: The entity type of the engine
           in: path
           name: entityType
           required: true
@@ -539,7 +915,7 @@ paths:
           schema:
             type: string
         - in: query
-          name: entities_types
+          name: entity_types
           required: true
           schema:
             items:
@@ -763,6 +1139,18 @@ components:
         - high_impact
         - extreme_impact
       type: string
+    AssetCriticalityLevelsForBulkUpload:
+      description: >-
+        The criticality level of the asset for bulk upload. The value
+        `unassigned` is used to indicate that the criticality level is not
+        assigned and is only used for bulk upload.
+      enum:
+        - low_impact
+        - medium_impact
+        - high_impact
+        - extreme_impact
+        - unassigned
+      type: string
     AssetCriticalityRecord:
       allOf:
         - $ref: '#/components/schemas/CreateAssetCriticalityRecord'
@@ -776,6 +1164,17 @@ components:
               type: string
           required:
             - '@timestamp'
+      example:
+        '@timestamp': '2024-08-02T11:15:34.290Z'
+        asset:
+          criticality: high_impact
+        criticality_level: high_impact
+        host:
+          asset:
+            criticality: high_impact
+          name: my_host
+        id_field: host.name
+        id_value: my_host
     AssetCriticalityRecordEcsParts:
       type: object
       properties:
@@ -786,6 +1185,20 @@ components:
               $ref: '#/components/schemas/AssetCriticalityLevel'
           required:
             - asset
+        entity:
+          type: object
+          properties:
+            asset:
+              type: object
+              properties:
+                criticality:
+                  $ref: '#/components/schemas/AssetCriticalityLevel'
+              required:
+                - criticality
+            id:
+              type: string
+          required:
+            - id
         host:
           type: object
           properties:
@@ -929,6 +1342,8 @@ components:
           type: string
         installed:
           type: boolean
+        metadata:
+          $ref: '#/components/schemas/Metadata'
         resource:
           $ref: '#/components/schemas/EngineComponentResource'
       required:
@@ -952,16 +1367,46 @@ components:
     EngineDescriptor:
       type: object
       properties:
+        delay:
+          default: 1m
+          pattern: '[smdh]$'
+          type: string
+        docsPerSecond:
+          type: integer
         error:
           type: object
+          properties:
+            action:
+              enum:
+                - init
+              type: string
+            message:
+              type: string
+          required:
+            - message
+            - action
         fieldHistoryLength:
           type: integer
         filter:
           type: string
+        frequency:
+          default: 1m
+          pattern: '[smdh]$'
+          type: string
         indexPattern:
           $ref: '#/components/schemas/IndexPattern'
+        lookbackPeriod:
+          default: 24h
+          pattern: '[smdh]$'
+          type: string
         status:
           $ref: '#/components/schemas/EngineStatus'
+        timeout:
+          default: 180s
+          pattern: '[smdh]$'
+          type: string
+        timestampField:
+          type: string
         type:
           $ref: '#/components/schemas/EntityType'
       required:
@@ -969,6 +1414,13 @@ components:
         - indexPattern
         - status
         - fieldHistoryLength
+    EngineMetadata:
+      type: object
+      properties:
+        Type:
+          type: string
+      required:
+        - Type
     EngineStatus:
       enum:
         - installing
@@ -981,6 +1433,8 @@ components:
       oneOf:
         - $ref: '#/components/schemas/UserEntity'
         - $ref: '#/components/schemas/HostEntity'
+        - $ref: '#/components/schemas/ServiceEntity'
+        - $ref: '#/components/schemas/GenericEntity'
     EntityRiskLevels:
       enum:
         - Unknown
@@ -1075,8 +1529,42 @@ components:
         - user
         - host
         - service
-        - universal
+        - generic
       type: string
+    GenericEntity:
+      type: object
+      properties:
+        '@timestamp':
+          format: date-time
+          type: string
+        asset:
+          type: object
+          properties:
+            criticality:
+              $ref: '#/components/schemas/AssetCriticalityLevel'
+          required:
+            - criticality
+        entity:
+          type: object
+          properties:
+            category:
+              type: string
+            EngineMetadata:
+              $ref: '#/components/schemas/EngineMetadata'
+            id:
+              type: string
+            name:
+              type: string
+            source:
+              type: string
+            type:
+              type: string
+          required:
+            - id
+            - name
+            - type
+      required:
+        - entity
     HostEntity:
       type: object
       properties:
@@ -1093,13 +1581,24 @@ components:
         entity:
           type: object
           properties:
+            EngineMetadata:
+              $ref: '#/components/schemas/EngineMetadata'
             name:
               type: string
             source:
               type: string
+            type:
+              type: string
           required:
             - name
             - source
+            - type
+        event:
+          type: object
+          properties:
+            ingested:
+              format: date-time
+              type: string
         host:
           type: object
           properties:
@@ -1138,7 +1637,6 @@ components:
           required:
             - name
       required:
-        - '@timestamp'
         - host
         - entity
     IdField:
@@ -1146,7 +1644,7 @@ components:
         - host.name
         - user.name
         - service.name
-        - related.entity
+        - entity.id
       type: string
     IndexPattern:
       type: string
@@ -1164,6 +1662,106 @@ components:
       required:
         - dsl
         - response
+    Interval:
+      description: >-
+        Interval in which enrich policy runs. For example, `"1h"` means the rule
+        runs every hour. Must be less than or equal to half the duration of the
+        lookback period,
+      example: 1h
+      pattern: ^[1-9]\d*[smh]$
+      type: string
+    Metadata:
+      $ref: '#/components/schemas/TransformStatsMetadata'
+    MonitoredUserDoc:
+      type: object
+      properties:
+        '@timestamp':
+          format: date-time
+          type: string
+        entity_analytics_monitoring:
+          type: object
+          properties:
+            labels:
+              items:
+                type: object
+                properties:
+                  field:
+                    type: string
+                  source:
+                    type: string
+                  value:
+                    type: string
+              type: array
+        event:
+          type: object
+          properties:
+            ingested:
+              format: date-time
+              type: string
+        id:
+          type: string
+        labels:
+          type: object
+          properties:
+            source_indices:
+              items:
+                type: string
+              type: array
+            source_integrations:
+              items:
+                type: string
+              type: array
+            sources:
+              items:
+                enum:
+                  - csv
+                  - index_sync
+                  - api
+              type: array
+        user:
+          type: object
+          properties:
+            is_privileged:
+              description: Indicates if the user is privileged.
+              type: boolean
+            name:
+              type: string
+    MonitoringEngineDescriptor:
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/EngineStatus'
+      required:
+        - type
+        - status
+    PrivmonUserCsvUploadErrorItem:
+      type: object
+      properties:
+        index:
+          nullable: true
+          type: integer
+        message:
+          type: string
+        username:
+          nullable: true
+          type: string
+      required:
+        - message
+        - index
+        - username
+    PrivmonUserCsvUploadStats:
+      type: object
+      properties:
+        failed:
+          type: integer
+        successful:
+          type: integer
+        total:
+          type: integer
+      required:
+        - successful
+        - failed
+        - total
     RiskEngineScheduleNowErrorResponse:
       type: object
       properties:
@@ -1217,6 +1815,52 @@ components:
         - index
         - description
         - category
+    ServiceEntity:
+      type: object
+      properties:
+        '@timestamp':
+          format: date-time
+          type: string
+        asset:
+          type: object
+          properties:
+            criticality:
+              $ref: '#/components/schemas/AssetCriticalityLevel'
+          required:
+            - criticality
+        entity:
+          type: object
+          properties:
+            EngineMetadata:
+              $ref: '#/components/schemas/EngineMetadata'
+            name:
+              type: string
+            source:
+              type: string
+            type:
+              type: string
+          required:
+            - name
+            - source
+            - type
+        event:
+          type: object
+          properties:
+            ingested:
+              format: date-time
+              type: string
+        service:
+          type: object
+          properties:
+            name:
+              type: string
+            risk:
+              $ref: '#/components/schemas/EntityRiskScoreRecord'
+          required:
+            - name
+      required:
+        - service
+        - entity
     StoreStatus:
       enum:
         - not_installed
@@ -1237,6 +1881,59 @@ components:
       required:
         - status_code
         - message
+    TransformStatsMetadata:
+      type: object
+      properties:
+        delete_time_in_ms:
+          type: integer
+        documents_deleted:
+          type: integer
+        documents_indexed:
+          type: integer
+        documents_processed:
+          type: integer
+        exponential_avg_checkpoint_duration_ms:
+          type: integer
+        exponential_avg_documents_indexed:
+          type: integer
+        exponential_avg_documents_processed:
+          type: integer
+        index_failures:
+          type: integer
+        index_time_in_ms:
+          type: integer
+        index_total:
+          type: integer
+        pages_processed:
+          type: integer
+        processing_time_in_ms:
+          type: integer
+        processing_total:
+          type: integer
+        search_failures:
+          type: integer
+        search_time_in_ms:
+          type: integer
+        search_total:
+          type: integer
+        trigger_count:
+          type: integer
+      required:
+        - pages_processed
+        - documents_processed
+        - documents_indexed
+        - trigger_count
+        - index_time_in_ms
+        - index_total
+        - index_failures
+        - search_time_in_ms
+        - search_total
+        - search_failures
+        - processing_time_in_ms
+        - processing_total
+        - exponential_avg_checkpoint_duration_ms
+        - exponential_avg_documents_indexed
+        - exponential_avg_documents_processed
     UserEntity:
       type: object
       properties:
@@ -1253,13 +1950,24 @@ components:
         entity:
           type: object
           properties:
+            EngineMetadata:
+              $ref: '#/components/schemas/EngineMetadata'
             name:
               type: string
             source:
               type: string
+            type:
+              type: string
           required:
             - name
             - source
+            - type
+        event:
+          type: object
+          properties:
+            ingested:
+              format: date-time
+              type: string
         user:
           type: object
           properties:
@@ -1294,9 +2002,17 @@ components:
           required:
             - name
       required:
-        - '@timestamp'
         - user
         - entity
+    UserName:
+      type: object
+      properties:
+        user:
+          type: object
+          properties:
+            name:
+              description: The name of the user.
+              type: string
   securitySchemes:
     BasicAuth:
       scheme: basic

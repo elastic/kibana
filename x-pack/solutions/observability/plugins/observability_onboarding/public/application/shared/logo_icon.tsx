@@ -35,7 +35,8 @@ export type SupportedLogo =
   | 'apache_tomcat'
   | 'firehose'
   | 'linux'
-  | 'apple';
+  | 'apple_black'
+  | 'apple_white';
 
 export function isSupportedLogo(logo: string): logo is SupportedLogo {
   return [

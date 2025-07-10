@@ -231,9 +231,193 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "share",
+        "id": "def-public.useShareTypeContext",
+        "type": "Function",
+        "tags": [],
+        "label": "useShareTypeContext",
+        "description": [],
+        "signature": [
+          "<T extends \"link\" | \"embed\" | \"integration\", G extends T extends \"integration\" ? string : never>(shareType: T, groupId?: G | undefined) => { objectTypeMeta: Omit<Partial<{ link: ",
+          "LinkShareUIConfig",
+          "; embed: ",
+          "EmbedShareUIConfig",
+          "; integration: { [key: string]: ShareActionUserInputBase<Record<string, unknown>>; export: ExportShareUIConfig; }; }>, \"config\"> & { config: T extends \"integration\" ? { [key: string]: ShareActionUserInputBase<Record<string, unknown>>; export: ExportShareUIConfig; }[G] | undefined : Partial<{ link: ",
+          "LinkShareUIConfig",
+          "; embed: ",
+          "EmbedShareUIConfig",
+          "; integration: { [key: string]: ShareActionUserInputBase<Record<string, unknown>>; export: ExportShareUIConfig; }; }>[T]; }; shareMenuItems: T extends \"integration\" ? (Extract<",
+          "LinkShareConfig",
+          ", { shareType: T; groupId?: G | undefined; }> | Extract<",
+          "EmbedShareConfig",
+          ", { shareType: T; groupId?: G | undefined; }> | Extract<",
+          "ShareIntegrationConfig",
+          ", { shareType: T; groupId?: G | undefined; }> | Extract<",
+          "ExportShareConfig",
+          ", { shareType: T; groupId?: G | undefined; }> | Extract<",
+          "ExportShareDerivativesConfig",
+          ", { shareType: T; groupId?: G | undefined; }> | Extract<",
+          "LegacyIntegrationConfig",
+          ", { shareType: T; groupId?: G | undefined; }>)[] : Extract<",
+          "LinkShareConfig",
+          ", { shareType: T; }> | Extract<",
+          "EmbedShareConfig",
+          ", { shareType: T; }> | Extract<",
+          "ShareIntegrationConfig",
+          ", { shareType: T; }> | Extract<",
+          "ExportShareConfig",
+          ", { shareType: T; }> | Extract<",
+          "ExportShareDerivativesConfig",
+          ", { shareType: T; }> | Extract<",
+          "LegacyIntegrationConfig",
+          ", { shareType: T; }>; onClose: () => void; objectType: string; objectTypeAlias?: string | undefined; objectId?: string | undefined; shareableUrl?: string | undefined; shareableUrlForSavedObject?: string | undefined; shareableUrlLocatorParams?: { locator: ",
+          {
+            "pluginId": "share",
+            "scope": "common",
+            "docId": "kibSharePluginApi",
+            "section": "def-common.LocatorPublic",
+            "text": "LocatorPublic"
+          },
+          "<any>; params: any; } | undefined; sharingData: { [key: string]: unknown; }; isDirty: boolean; asExport?: boolean | undefined; anchorElement?: HTMLElement | undefined; allowShortUrl: boolean; publicAPIEnabled?: boolean | undefined; }"
+        ],
+        "path": "src/platform/plugins/shared/share/public/components/context/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "share",
+            "id": "def-public.useShareTypeContext.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "shareType",
+            "description": [],
+            "signature": [
+              "T"
+            ],
+            "path": "src/platform/plugins/shared/share/public/components/context/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "share",
+            "id": "def-public.useShareTypeContext.$2",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "groupId",
+            "description": [],
+            "signature": [
+              "G | undefined"
+            ],
+            "path": "src/platform/plugins/shared/share/public/components/context/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [
+      {
+        "parentPluginId": "share",
+        "id": "def-public.ExportShare",
+        "type": "Interface",
+        "tags": [
+          "description"
+        ],
+        "label": "ExportShare",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "share",
+            "scope": "public",
+            "docId": "kibSharePluginApi",
+            "section": "def-public.ExportShare",
+            "text": "ExportShare"
+          },
+          " extends { id: string; groupId?: string | undefined; shareType: \"integration\"; config: (ctx: ShareActionConfigArgs) => { name?: string | undefined; icon?: ",
+          "IconType",
+          " | undefined; sortOrder?: number | undefined; toolTipContent?: string | undefined; label: string; exportType: string; disabled?: boolean | undefined; helpText?: React.ReactNode; generateExportButtonLabel?: React.ReactNode; generateAssetExport: (args: ",
+          "ExportGenerationOpts",
+          ") => Promise<unknown>; renderCopyURIButton?: boolean | undefined; warnings?: { title: string; message: string; }[] | undefined; requiresSavedState?: boolean | undefined; supportedLayoutOptions?: \"print\"[] | undefined; renderLayoutOptionSwitch?: boolean | undefined; } & ({ generateAssetComponent?: undefined; copyAssetURIConfig: { headingText: string; helpText?: string | undefined; contentType: string | undefined; generateAssetURIValue: (args: ",
+          "ExportGenerationOpts",
+          ") => string | undefined; }; } | { generateAssetComponent: React.ReactNode; copyAssetURIConfig?: undefined; } | { generateAssetComponent?: undefined; copyAssetURIConfig?: undefined; }); prerequisiteCheck?: ((args: { capabilities: ",
+          "Capabilities",
+          "; objectType: string; license?: ",
+          "ILicense",
+          " | undefined; }) => boolean) | undefined; }"
+        ],
+        "path": "src/platform/plugins/shared/share/public/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "share",
+            "id": "def-public.ExportShare.groupId",
+            "type": "string",
+            "tags": [],
+            "label": "groupId",
+            "description": [],
+            "signature": [
+              "\"export\""
+            ],
+            "path": "src/platform/plugins/shared/share/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "share",
+        "id": "def-public.ExportShareDerivatives",
+        "type": "Interface",
+        "tags": [
+          "description"
+        ],
+        "label": "ExportShareDerivatives",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "share",
+            "scope": "public",
+            "docId": "kibSharePluginApi",
+            "section": "def-public.ExportShareDerivatives",
+            "text": "ExportShareDerivatives"
+          },
+          " extends { id: string; groupId?: string | undefined; shareType: \"integration\"; config: (ctx: ShareActionConfigArgs) => { label: React.FC<{ openFlyout: () => void; }>; toolTipContent?: React.ReactNode; flyoutContent: React.FC<{ closeFlyout: () => void; flyoutRef: React.RefObject<HTMLDivElement>; }>; flyoutSizing?: Pick<",
+          "EuiFlyoutProps",
+          "<\"div\">, \"size\" | \"maxWidth\"> | undefined; }; prerequisiteCheck?: ((args: { capabilities: ",
+          "Capabilities",
+          "; objectType: string; license?: ",
+          "ILicense",
+          " | undefined; }) => boolean) | undefined; }"
+        ],
+        "path": "src/platform/plugins/shared/share/public/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "share",
+            "id": "def-public.ExportShareDerivatives.groupId",
+            "type": "string",
+            "tags": [],
+            "label": "groupId",
+            "description": [],
+            "signature": [
+              "\"exportDerivatives\""
+            ],
+            "path": "src/platform/plugins/shared/share/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "share",
         "id": "def-public.KibanaLocation",
@@ -832,7 +1016,25 @@
             "type": "string",
             "tags": [],
             "label": "objectType",
-            "description": [],
+            "description": [
+              "\nThe type of the object to share. for example lens, dashboard, etc."
+            ],
+            "path": "src/platform/plugins/shared/share/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "share",
+            "id": "def-public.ShareContext.objectTypeAlias",
+            "type": "string",
+            "tags": [],
+            "label": "objectTypeAlias",
+            "description": [
+              "\nAn alias of type of the object to share, that's more human friendly."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/platform/plugins/shared/share/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -847,9 +1049,11 @@
               "\nAllows for passing contextual information that each consumer can provide to customize the share menu"
             ],
             "signature": [
-              "{ title: string; config?: Partial<Record<\"link\" | \"embed\" | \"export\", ",
-              "ShareContextObjectTypeConfig",
-              ">> | undefined; }"
+              "{ title: string; config: Partial<{ link: ",
+              "LinkShareUIConfig",
+              "; embed: ",
+              "EmbedShareUIConfig",
+              "; integration: { [key: string]: ShareActionUserInputBase<Record<string, unknown>>; export: ExportShareUIConfig; }; }>; }"
             ],
             "path": "src/platform/plugins/shared/share/public/types.ts",
             "deprecated": false,
@@ -861,7 +1065,9 @@
             "type": "string",
             "tags": [],
             "label": "objectId",
-            "description": [],
+            "description": [
+              "\nId of the object that's been attempted to be shared"
+            ],
             "signature": [
               "string | undefined"
             ],
@@ -902,12 +1108,16 @@
             "trackAdoption": false,
             "references": [
               {
+                "plugin": "discover",
+                "path": "src/platform/plugins/shared/discover/public/application/main/components/top_nav/app_menu_actions/get_share.tsx"
+              },
+              {
                 "plugin": "@kbn/reporting-public",
                 "path": "src/platform/packages/private/kbn-reporting/public/share/share_context_menu/register_pdf_png_modal_reporting.tsx"
               },
               {
-                "plugin": "discover",
-                "path": "src/platform/plugins/shared/discover/public/application/main/components/top_nav/app_menu_actions/get_share.tsx"
+                "plugin": "@kbn/reporting-public",
+                "path": "src/platform/packages/private/kbn-reporting/public/share/share_context_menu/register_pdf_png_modal_reporting.tsx"
               }
             ]
           },
@@ -932,26 +1142,6 @@
             "path": "src/platform/plugins/shared/share/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
-          },
-          {
-            "parentPluginId": "share",
-            "id": "def-public.ShareContext.delegatedShareUrlHandler",
-            "type": "Function",
-            "tags": [
-              "description"
-            ],
-            "label": "delegatedShareUrlHandler",
-            "description": [
-              "\n"
-            ],
-            "signature": [
-              "(() => string) | undefined"
-            ],
-            "path": "src/platform/plugins/shared/share/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
           },
           {
             "parentPluginId": "share",
@@ -993,68 +1183,6 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": []
-          },
-          {
-            "parentPluginId": "share",
-            "id": "def-public.ShareContext.showPublicUrlSwitch",
-            "type": "Function",
-            "tags": [],
-            "label": "showPublicUrlSwitch",
-            "description": [],
-            "signature": [
-              "((anonymousUserCapabilities: ",
-              "Capabilities",
-              ") => boolean) | undefined"
-            ],
-            "path": "src/platform/plugins/shared/share/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "share",
-                "id": "def-public.ShareContext.showPublicUrlSwitch.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "anonymousUserCapabilities",
-                "description": [],
-                "signature": [
-                  "Capabilities"
-                ],
-                "path": "src/platform/plugins/shared/share/public/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "share",
-            "id": "def-public.ShareContext.disabledShareUrl",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "disabledShareUrl",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/platform/plugins/shared/share/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "share",
-            "id": "def-public.ShareContext.toasts",
-            "type": "Object",
-            "tags": [],
-            "label": "toasts",
-            "description": [],
-            "signature": [
-              "IToasts"
-            ],
-            "path": "src/platform/plugins/shared/share/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1151,272 +1279,6 @@
       },
       {
         "parentPluginId": "share",
-        "id": "def-public.ShareMenuItemV2",
-        "type": "Interface",
-        "tags": [],
-        "label": "ShareMenuItemV2",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "share",
-            "scope": "public",
-            "docId": "kibSharePluginApi",
-            "section": "def-public.ShareMenuItemV2",
-            "text": "ShareMenuItemV2"
-          },
-          " extends ShareMenuItemBase"
-        ],
-        "path": "src/platform/plugins/shared/share/public/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "share",
-            "id": "def-public.ShareMenuItemV2.label",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "label",
-            "description": [],
-            "signature": [
-              "\"PDF\" | \"CSV\" | \"PNG\""
-            ],
-            "path": "src/platform/plugins/shared/share/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "share",
-            "id": "def-public.ShareMenuItemV2.reportType",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "reportType",
-            "description": [],
-            "signature": [
-              "SupportedExportTypes",
-              " | undefined"
-            ],
-            "path": "src/platform/plugins/shared/share/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "share",
-            "id": "def-public.ShareMenuItemV2.requiresSavedState",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "requiresSavedState",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/platform/plugins/shared/share/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "share",
-            "id": "def-public.ShareMenuItemV2.helpText",
-            "type": "Object",
-            "tags": [],
-            "label": "helpText",
-            "description": [],
-            "signature": [
-              "React.ReactElement<any, string | React.JSXElementConstructor<any>> | undefined"
-            ],
-            "path": "src/platform/plugins/shared/share/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "share",
-            "id": "def-public.ShareMenuItemV2.copyURLButton",
-            "type": "Object",
-            "tags": [],
-            "label": "copyURLButton",
-            "description": [],
-            "signature": [
-              "{ id: string; dataTestSubj: string; label: string; } | undefined"
-            ],
-            "path": "src/platform/plugins/shared/share/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "share",
-            "id": "def-public.ShareMenuItemV2.generateExportButton",
-            "type": "Object",
-            "tags": [],
-            "label": "generateExportButton",
-            "description": [],
-            "signature": [
-              "React.ReactElement<any, string | React.JSXElementConstructor<any>> | undefined"
-            ],
-            "path": "src/platform/plugins/shared/share/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "share",
-            "id": "def-public.ShareMenuItemV2.generateExport",
-            "type": "Function",
-            "tags": [],
-            "label": "generateExport",
-            "description": [
-              "\nFunction to trigger an export"
-            ],
-            "signature": [
-              "(args: ",
-              "ScreenshotExportOpts",
-              ") => Promise<unknown>"
-            ],
-            "path": "src/platform/plugins/shared/share/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "share",
-                "id": "def-public.ShareMenuItemV2.generateExport.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "args",
-                "description": [],
-                "signature": [
-                  "ScreenshotExportOpts"
-                ],
-                "path": "src/platform/plugins/shared/share/public/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "share",
-            "id": "def-public.ShareMenuItemV2.generateExportUrl",
-            "type": "Function",
-            "tags": [],
-            "label": "generateExportUrl",
-            "description": [
-              "\nFunction to generate a URL to be used for automating export\nNot applicable for exports that do not call a remote API (i.e Lens CSV export)"
-            ],
-            "signature": [
-              "((args: ",
-              "ScreenshotExportOpts",
-              ") => string | undefined) | undefined"
-            ],
-            "path": "src/platform/plugins/shared/share/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "share",
-                "id": "def-public.ShareMenuItemV2.generateExportUrl.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "args",
-                "description": [],
-                "signature": [
-                  "ScreenshotExportOpts"
-                ],
-                "path": "src/platform/plugins/shared/share/public/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "share",
-            "id": "def-public.ShareMenuItemV2.theme",
-            "type": "Object",
-            "tags": [],
-            "label": "theme",
-            "description": [],
-            "signature": [
-              "ThemeServiceSetup",
-              " | undefined"
-            ],
-            "path": "src/platform/plugins/shared/share/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "share",
-            "id": "def-public.ShareMenuItemV2.renderLayoutOptionSwitch",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "renderLayoutOptionSwitch",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/platform/plugins/shared/share/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "share",
-            "id": "def-public.ShareMenuItemV2.layoutOption",
-            "type": "string",
-            "tags": [],
-            "label": "layoutOption",
-            "description": [],
-            "signature": [
-              "\"print\" | undefined"
-            ],
-            "path": "src/platform/plugins/shared/share/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "share",
-            "id": "def-public.ShareMenuItemV2.generateCopyUrl",
-            "type": "Object",
-            "tags": [],
-            "label": "generateCopyUrl",
-            "description": [],
-            "signature": [
-              "URL | undefined"
-            ],
-            "path": "src/platform/plugins/shared/share/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "share",
-            "id": "def-public.ShareMenuItemV2.renderCopyURLButton",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "renderCopyURLButton",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/platform/plugins/shared/share/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "share",
-            "id": "def-public.ShareMenuItemV2.warnings",
-            "type": "Array",
-            "tags": [],
-            "label": "warnings",
-            "description": [],
-            "signature": [
-              "{ title: string; message: string; }[] | undefined"
-            ],
-            "path": "src/platform/plugins/shared/share/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "share",
         "id": "def-public.ShowShareMenuOptions",
         "type": "Interface",
         "tags": [],
@@ -1446,13 +1308,13 @@
         "children": [
           {
             "parentPluginId": "share",
-            "id": "def-public.ShowShareMenuOptions.anchorElement",
-            "type": "Object",
+            "id": "def-public.ShowShareMenuOptions.asExport",
+            "type": "CompoundType",
             "tags": [],
-            "label": "anchorElement",
+            "label": "asExport",
             "description": [],
             "signature": [
-              "HTMLElement"
+              "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/share/public/types.ts",
             "deprecated": false,
@@ -1460,11 +1322,14 @@
           },
           {
             "parentPluginId": "share",
-            "id": "def-public.ShowShareMenuOptions.allowEmbed",
-            "type": "boolean",
+            "id": "def-public.ShowShareMenuOptions.anchorElement",
+            "type": "Object",
             "tags": [],
-            "label": "allowEmbed",
+            "label": "anchorElement",
             "description": [],
+            "signature": [
+              "HTMLElement | undefined"
+            ],
             "path": "src/platform/plugins/shared/share/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1476,35 +1341,6 @@
             "tags": [],
             "label": "allowShortUrl",
             "description": [],
-            "path": "src/platform/plugins/shared/share/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "share",
-            "id": "def-public.ShowShareMenuOptions.embedUrlParamExtensions",
-            "type": "Array",
-            "tags": [],
-            "label": "embedUrlParamExtensions",
-            "description": [],
-            "signature": [
-              "UrlParamExtension",
-              "[] | undefined"
-            ],
-            "path": "src/platform/plugins/shared/share/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "share",
-            "id": "def-public.ShowShareMenuOptions.snapshotShareWarning",
-            "type": "string",
-            "tags": [],
-            "label": "snapshotShareWarning",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
             "path": "src/platform/plugins/shared/share/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1571,7 +1407,7 @@
         "label": "ConfigSchema",
         "description": [],
         "signature": [
-          "{ readonly new_version: Readonly<{} & { enabled: boolean; }>; }"
+          "{ readonly new_version: Readonly<{} & { enabled: boolean; }>; readonly url_expiration: Readonly<{} & { enabled: boolean; duration: moment.Duration; check_interval: moment.Duration; url_limit: number; }>; }"
         ],
         "path": "src/platform/plugins/shared/share/server/config.ts",
         "deprecated": false,
@@ -1622,73 +1458,158 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "share",
-        "id": "def-public.ShareMenuProvider",
-        "type": "Type",
-        "tags": [],
-        "label": "ShareMenuProvider",
-        "description": [],
-        "signature": [
-          "ShareMenuProviderV2",
-          " | ",
-          "ShareMenuProviderLegacy"
-        ],
-        "path": "src/platform/plugins/shared/share/public/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
       }
     ],
     "objects": [],
     "setup": {
       "parentPluginId": "share",
       "id": "def-public.SharePublicSetup",
-      "type": "Type",
+      "type": "Interface",
       "tags": [],
       "label": "SharePublicSetup",
       "description": [],
       "signature": [
-        "{ register: (shareMenuProvider: ",
         {
           "pluginId": "share",
           "scope": "public",
           "docId": "kibSharePluginApi",
-          "section": "def-public.ShareMenuProvider",
-          "text": "ShareMenuProvider"
+          "section": "def-public.SharePublicSetup",
+          "text": "SharePublicSetup"
         },
-        ") => void; } & { url: ",
-        {
-          "pluginId": "share",
-          "scope": "public",
-          "docId": "kibSharePluginApi",
-          "section": "def-public.BrowserUrlService",
-          "text": "BrowserUrlService"
-        },
-        "; navigate(options: ",
-        "RedirectOptions",
-        "<",
-        {
-          "pluginId": "@kbn/utility-types",
-          "scope": "common",
-          "docId": "kibKbnUtilityTypesPluginApi",
-          "section": "def-common.SerializableRecord",
-          "text": "SerializableRecord"
-        },
-        ">): void; setAnonymousAccessServiceProvider: (provider: () => ",
-        {
-          "pluginId": "share",
-          "scope": "common",
-          "docId": "kibSharePluginApi",
-          "section": "def-common.AnonymousAccessServiceContract",
-          "text": "AnonymousAccessServiceContract"
-        },
-        ") => void; }"
+        " extends { register: (value: ",
+        "ShareMenuProviderLegacy",
+        ") => void; registerShareIntegration: <I extends { id: string; groupId?: string | undefined; shareType: \"integration\"; config: (ctx: ShareActionConfigArgs) => Record<string, unknown>; prerequisiteCheck?: ((args: { capabilities: ",
+        "Capabilities",
+        "; objectType: string; license?: ",
+        "ILicense",
+        " | undefined; }) => boolean) | undefined; }>(...args: [string, Omit<I, \"shareType\">] | [Omit<I, \"shareType\">]) => void; }"
       ],
       "path": "src/platform/plugins/shared/share/public/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "share",
+          "id": "def-public.SharePublicSetup.url",
+          "type": "Object",
+          "tags": [],
+          "label": "url",
+          "description": [
+            "\nUtilities to work with URL locators and short URLs."
+          ],
+          "signature": [
+            "UrlService",
+            "<null, ",
+            "BrowserShortUrlClient",
+            ">"
+          ],
+          "path": "src/platform/plugins/shared/share/public/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "share",
+          "id": "def-public.SharePublicSetup.navigate",
+          "type": "Function",
+          "tags": [],
+          "label": "navigate",
+          "description": [
+            "\nAccepts serialized values for extracting a locator, migrating state from a provided version against\nthe locator, then using the locator to navigate."
+          ],
+          "signature": [
+            "(options: ",
+            "RedirectOptions",
+            "<",
+            {
+              "pluginId": "@kbn/utility-types",
+              "scope": "common",
+              "docId": "kibKbnUtilityTypesPluginApi",
+              "section": "def-common.SerializableRecord",
+              "text": "SerializableRecord"
+            },
+            ">) => void"
+          ],
+          "path": "src/platform/plugins/shared/share/public/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "share",
+              "id": "def-public.SharePublicSetup.navigate.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "options",
+              "description": [],
+              "signature": [
+                "RedirectOptions",
+                "<",
+                {
+                  "pluginId": "@kbn/utility-types",
+                  "scope": "common",
+                  "docId": "kibKbnUtilityTypesPluginApi",
+                  "section": "def-common.SerializableRecord",
+                  "text": "SerializableRecord"
+                },
+                ">"
+              ],
+              "path": "src/platform/plugins/shared/share/public/plugin.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "share",
+          "id": "def-public.SharePublicSetup.setAnonymousAccessServiceProvider",
+          "type": "Function",
+          "tags": [],
+          "label": "setAnonymousAccessServiceProvider",
+          "description": [
+            "\nSets the provider for the anonymous access service; this is consumed by the Security plugin to avoid a circular dependency."
+          ],
+          "signature": [
+            "(provider: () => ",
+            {
+              "pluginId": "share",
+              "scope": "common",
+              "docId": "kibSharePluginApi",
+              "section": "def-common.AnonymousAccessServiceContract",
+              "text": "AnonymousAccessServiceContract"
+            },
+            ") => void"
+          ],
+          "path": "src/platform/plugins/shared/share/public/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "share",
+              "id": "def-public.SharePublicSetup.setAnonymousAccessServiceProvider.$1",
+              "type": "Function",
+              "tags": [],
+              "label": "provider",
+              "description": [],
+              "signature": [
+                "() => ",
+                {
+                  "pluginId": "share",
+                  "scope": "common",
+                  "docId": "kibSharePluginApi",
+                  "section": "def-common.AnonymousAccessServiceContract",
+                  "text": "AnonymousAccessServiceContract"
+                }
+              ],
+              "path": "src/platform/plugins/shared/share/public/plugin.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        }
+      ],
       "lifecycle": "setup",
       "initialIsOpen": true
     },
@@ -1726,7 +1647,9 @@
           "section": "def-common.SerializableRecord",
           "text": "SerializableRecord"
         },
-        ">): void; }"
+        ">): void; availableIntegrations: (objectType: string, groupId?: string | undefined) => ",
+        "ShareActionIntents",
+        "[]; }"
       ],
       "path": "src/platform/plugins/shared/share/public/plugin.ts",
       "deprecated": false,
@@ -1737,7 +1660,452 @@
   },
   "server": {
     "classes": [],
-    "functions": [],
+    "functions": [
+      {
+        "parentPluginId": "share",
+        "id": "def-server.deleteUnusedUrls",
+        "type": "Function",
+        "tags": [],
+        "label": "deleteUnusedUrls",
+        "description": [],
+        "signature": [
+          "({ savedObjectsRepository, unusedUrls, namespace, logger, }: { savedObjectsRepository: ",
+          "ISavedObjectsRepository",
+          "; unusedUrls: ",
+          "SavedObjectsBulkDeleteObject",
+          "[]; namespace: string; logger: ",
+          {
+            "pluginId": "@kbn/logging",
+            "scope": "common",
+            "docId": "kibKbnLoggingPluginApi",
+            "section": "def-common.Logger",
+            "text": "Logger"
+          },
+          "; }) => Promise<void>"
+        ],
+        "path": "src/platform/plugins/shared/share/server/unused_urls_task/task.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "share",
+            "id": "def-server.deleteUnusedUrls.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  savedObjectsRepository,\n  unusedUrls,\n  namespace,\n  logger,\n}",
+            "description": [],
+            "path": "src/platform/plugins/shared/share/server/unused_urls_task/task.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "share",
+                "id": "def-server.deleteUnusedUrls.$1.savedObjectsRepository",
+                "type": "Object",
+                "tags": [],
+                "label": "savedObjectsRepository",
+                "description": [],
+                "signature": [
+                  "ISavedObjectsRepository"
+                ],
+                "path": "src/platform/plugins/shared/share/server/unused_urls_task/task.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "share",
+                "id": "def-server.deleteUnusedUrls.$1.unusedUrls",
+                "type": "Array",
+                "tags": [],
+                "label": "unusedUrls",
+                "description": [],
+                "signature": [
+                  "SavedObjectsBulkDeleteObject",
+                  "[]"
+                ],
+                "path": "src/platform/plugins/shared/share/server/unused_urls_task/task.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "share",
+                "id": "def-server.deleteUnusedUrls.$1.namespace",
+                "type": "string",
+                "tags": [],
+                "label": "namespace",
+                "description": [],
+                "path": "src/platform/plugins/shared/share/server/unused_urls_task/task.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "share",
+                "id": "def-server.deleteUnusedUrls.$1.logger",
+                "type": "Object",
+                "tags": [],
+                "label": "logger",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/logging",
+                    "scope": "common",
+                    "docId": "kibKbnLoggingPluginApi",
+                    "section": "def-common.Logger",
+                    "text": "Logger"
+                  }
+                ],
+                "path": "src/platform/plugins/shared/share/server/unused_urls_task/task.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "share",
+        "id": "def-server.durationToSeconds",
+        "type": "Function",
+        "tags": [],
+        "label": "durationToSeconds",
+        "description": [],
+        "signature": [
+          "(duration: moment.Duration) => string"
+        ],
+        "path": "src/platform/plugins/shared/share/server/unused_urls_task/task.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "share",
+            "id": "def-server.durationToSeconds.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "duration",
+            "description": [],
+            "signature": [
+              "moment.Duration"
+            ],
+            "path": "src/platform/plugins/shared/share/server/unused_urls_task/task.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "share",
+        "id": "def-server.fetchUnusedUrlsFromFirstNamespace",
+        "type": "Function",
+        "tags": [],
+        "label": "fetchUnusedUrlsFromFirstNamespace",
+        "description": [],
+        "signature": [
+          "({ savedObjectsRepository, urlExpirationDuration, urlLimit, }: { savedObjectsRepository: ",
+          "ISavedObjectsRepository",
+          "; urlExpirationDuration: moment.Duration; urlLimit: number; }) => Promise<{ unusedUrls: { id: string; type: string; }[]; hasMore: boolean; namespace: string; }>"
+        ],
+        "path": "src/platform/plugins/shared/share/server/unused_urls_task/task.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "share",
+            "id": "def-server.fetchUnusedUrlsFromFirstNamespace.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  savedObjectsRepository,\n  urlExpirationDuration,\n  urlLimit,\n}",
+            "description": [],
+            "path": "src/platform/plugins/shared/share/server/unused_urls_task/task.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "share",
+                "id": "def-server.fetchUnusedUrlsFromFirstNamespace.$1.savedObjectsRepository",
+                "type": "Object",
+                "tags": [],
+                "label": "savedObjectsRepository",
+                "description": [],
+                "signature": [
+                  "ISavedObjectsRepository"
+                ],
+                "path": "src/platform/plugins/shared/share/server/unused_urls_task/task.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "share",
+                "id": "def-server.fetchUnusedUrlsFromFirstNamespace.$1.urlExpirationDuration",
+                "type": "Object",
+                "tags": [],
+                "label": "urlExpirationDuration",
+                "description": [],
+                "signature": [
+                  "moment.Duration"
+                ],
+                "path": "src/platform/plugins/shared/share/server/unused_urls_task/task.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "share",
+                "id": "def-server.fetchUnusedUrlsFromFirstNamespace.$1.urlLimit",
+                "type": "number",
+                "tags": [],
+                "label": "urlLimit",
+                "description": [],
+                "path": "src/platform/plugins/shared/share/server/unused_urls_task/task.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "share",
+        "id": "def-server.getDeleteUnusedUrlTaskInstance",
+        "type": "Function",
+        "tags": [],
+        "label": "getDeleteUnusedUrlTaskInstance",
+        "description": [],
+        "signature": [
+          "(interval: moment.Duration) => ",
+          "TaskInstanceWithId"
+        ],
+        "path": "src/platform/plugins/shared/share/server/unused_urls_task/task.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "share",
+            "id": "def-server.getDeleteUnusedUrlTaskInstance.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "interval",
+            "description": [],
+            "signature": [
+              "moment.Duration"
+            ],
+            "path": "src/platform/plugins/shared/share/server/unused_urls_task/task.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "share",
+        "id": "def-server.runDeleteUnusedUrlsTask",
+        "type": "Function",
+        "tags": [],
+        "label": "runDeleteUnusedUrlsTask",
+        "description": [],
+        "signature": [
+          "({ core, urlExpirationDuration, urlLimit, logger, isEnabled, }: { core: ",
+          "CoreSetup",
+          "<{}, unknown>; urlExpirationDuration: moment.Duration; urlLimit: number; logger: ",
+          {
+            "pluginId": "@kbn/logging",
+            "scope": "common",
+            "docId": "kibKbnLoggingPluginApi",
+            "section": "def-common.Logger",
+            "text": "Logger"
+          },
+          "; isEnabled: boolean; }) => Promise<{ deletedCount: number; }>"
+        ],
+        "path": "src/platform/plugins/shared/share/server/unused_urls_task/task.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "share",
+            "id": "def-server.runDeleteUnusedUrlsTask.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  core,\n  urlExpirationDuration,\n  urlLimit,\n  logger,\n  isEnabled,\n}",
+            "description": [],
+            "path": "src/platform/plugins/shared/share/server/unused_urls_task/task.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "share",
+                "id": "def-server.runDeleteUnusedUrlsTask.$1.core",
+                "type": "Object",
+                "tags": [],
+                "label": "core",
+                "description": [],
+                "signature": [
+                  "CoreSetup",
+                  "<{}, unknown>"
+                ],
+                "path": "src/platform/plugins/shared/share/server/unused_urls_task/task.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "share",
+                "id": "def-server.runDeleteUnusedUrlsTask.$1.urlExpirationDuration",
+                "type": "Object",
+                "tags": [],
+                "label": "urlExpirationDuration",
+                "description": [],
+                "signature": [
+                  "moment.Duration"
+                ],
+                "path": "src/platform/plugins/shared/share/server/unused_urls_task/task.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "share",
+                "id": "def-server.runDeleteUnusedUrlsTask.$1.urlLimit",
+                "type": "number",
+                "tags": [],
+                "label": "urlLimit",
+                "description": [],
+                "path": "src/platform/plugins/shared/share/server/unused_urls_task/task.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "share",
+                "id": "def-server.runDeleteUnusedUrlsTask.$1.logger",
+                "type": "Object",
+                "tags": [],
+                "label": "logger",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/logging",
+                    "scope": "common",
+                    "docId": "kibKbnLoggingPluginApi",
+                    "section": "def-common.Logger",
+                    "text": "Logger"
+                  }
+                ],
+                "path": "src/platform/plugins/shared/share/server/unused_urls_task/task.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "share",
+                "id": "def-server.runDeleteUnusedUrlsTask.$1.isEnabled",
+                "type": "boolean",
+                "tags": [],
+                "label": "isEnabled",
+                "description": [],
+                "path": "src/platform/plugins/shared/share/server/unused_urls_task/task.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "share",
+        "id": "def-server.scheduleUnusedUrlsCleanupTask",
+        "type": "Function",
+        "tags": [],
+        "label": "scheduleUnusedUrlsCleanupTask",
+        "description": [],
+        "signature": [
+          "({ taskManager, checkInterval, isEnabled, }: { taskManager: ",
+          {
+            "pluginId": "taskManager",
+            "scope": "server",
+            "docId": "kibTaskManagerPluginApi",
+            "section": "def-server.TaskManagerStartContract",
+            "text": "TaskManagerStartContract"
+          },
+          "; checkInterval: moment.Duration; isEnabled: boolean; }) => Promise<void>"
+        ],
+        "path": "src/platform/plugins/shared/share/server/unused_urls_task/task.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "share",
+            "id": "def-server.scheduleUnusedUrlsCleanupTask.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  taskManager,\n  checkInterval,\n  isEnabled,\n}",
+            "description": [],
+            "path": "src/platform/plugins/shared/share/server/unused_urls_task/task.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "share",
+                "id": "def-server.scheduleUnusedUrlsCleanupTask.$1.taskManager",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "taskManager",
+                "description": [],
+                "signature": [
+                  "Pick<",
+                  "TaskScheduling",
+                  ", \"schedule\" | \"runSoon\" | \"bulkEnable\" | \"ensureScheduled\" | \"bulkUpdateSchedules\" | \"bulkDisable\" | \"bulkSchedule\" | \"bulkUpdateState\"> & Pick<",
+                  "TaskStore",
+                  ", \"get\" | \"aggregate\" | \"fetch\" | \"remove\" | \"bulkRemove\"> & { removeIfExists: (id: string) => Promise<void>; } & { getRegisteredTypes: () => string[]; registerEncryptedSavedObjectsClient: (client: ",
+                  {
+                    "pluginId": "@kbn/encrypted-saved-objects-shared",
+                    "scope": "common",
+                    "docId": "kibKbnEncryptedSavedObjectsSharedPluginApi",
+                    "section": "def-common.EncryptedSavedObjectsClient",
+                    "text": "EncryptedSavedObjectsClient"
+                  },
+                  ") => void; }"
+                ],
+                "path": "src/platform/plugins/shared/share/server/unused_urls_task/task.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "share",
+                "id": "def-server.scheduleUnusedUrlsCleanupTask.$1.checkInterval",
+                "type": "Object",
+                "tags": [],
+                "label": "checkInterval",
+                "description": [],
+                "signature": [
+                  "moment.Duration"
+                ],
+                "path": "src/platform/plugins/shared/share/server/unused_urls_task/task.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "share",
+                "id": "def-server.scheduleUnusedUrlsCleanupTask.$1.isEnabled",
+                "type": "boolean",
+                "tags": [],
+                "label": "isEnabled",
+                "description": [],
+                "path": "src/platform/plugins/shared/share/server/unused_urls_task/task.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [],
     "enums": [],
     "misc": [
@@ -1767,6 +2135,81 @@
           "\"csv:separator\""
         ],
         "path": "src/platform/plugins/shared/share/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "share",
+        "id": "def-server.DEFAULT_URL_EXPIRATION_CHECK_INTERVAL",
+        "type": "string",
+        "tags": [],
+        "label": "DEFAULT_URL_EXPIRATION_CHECK_INTERVAL",
+        "description": [],
+        "signature": [
+          "\"7d\""
+        ],
+        "path": "src/platform/plugins/shared/share/server/unused_urls_task/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "share",
+        "id": "def-server.DEFAULT_URL_EXPIRATION_DURATION",
+        "type": "string",
+        "tags": [],
+        "label": "DEFAULT_URL_EXPIRATION_DURATION",
+        "description": [],
+        "signature": [
+          "\"1y\""
+        ],
+        "path": "src/platform/plugins/shared/share/server/unused_urls_task/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "share",
+        "id": "def-server.DEFAULT_URL_LIMIT",
+        "type": "number",
+        "tags": [],
+        "label": "DEFAULT_URL_LIMIT",
+        "description": [],
+        "signature": [
+          "10000"
+        ],
+        "path": "src/platform/plugins/shared/share/server/unused_urls_task/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "share",
+        "id": "def-server.SAVED_OBJECT_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "SAVED_OBJECT_TYPE",
+        "description": [],
+        "signature": [
+          "\"url\""
+        ],
+        "path": "src/platform/plugins/shared/share/server/unused_urls_task/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "share",
+        "id": "def-server.TASK_ID",
+        "type": "string",
+        "tags": [],
+        "label": "TASK_ID",
+        "description": [],
+        "signature": [
+          "\"unusedUrlsCleanupTask\""
+        ],
+        "path": "src/platform/plugins/shared/share/server/unused_urls_task/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

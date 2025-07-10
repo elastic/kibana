@@ -1,16 +1,20 @@
 {
   "extends": "../../../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "target/types",
+    "outDir": "target/types"
   },
   "include": [
     "common/**/*",
     "public/**/*",
     "server/**/*",
+    "scripts/**/*",
     "../../../../../typings/**/*"
   ],
   "kbn_references": [
     "@kbn/core",
+    {
+      "path": "../../../../../src/setup_node_env/tsconfig.json"
+    },
     // optionalPlugins from ./kibana.json
     "@kbn/lens-plugin",
     "@kbn/security-plugin",
@@ -38,7 +42,6 @@
     "@kbn/licensing-plugin",
     "@kbn/user-profile-components",
     "@kbn/rule-data-utils",
-    "@kbn/ui-theme",
     "@kbn/std",
     "@kbn/test-jest-helpers",
     "@kbn/config-schema",
@@ -58,7 +61,6 @@
     "@kbn/shared-ux-file-upload",
     "@kbn/shared-ux-file-mocks",
     "@kbn/saved-objects-finder-plugin",
-    "@kbn/utility-types-jest",
     "@kbn/ui-actions-plugin",
     "@kbn/core-lifecycle-browser",
     "@kbn/core-saved-objects-api-server-mocks",
@@ -77,13 +79,21 @@
     "@kbn/securitysolution-rules",
     "@kbn/alerts-ui-shared",
     "@kbn/cloud-plugin",
+    "@kbn/response-ops-alerts-table",
+    "@kbn/field-formats-plugin",
     "@kbn/core-http-server-mocks",
     "@kbn/core-http-server-utils",
     "@kbn/code-editor-mock",
     "@kbn/monaco",
     "@kbn/code-editor",
+    "@kbn/logging",
+    "@kbn/core-elasticsearch-client-server-mocks",
+    "@kbn/core-test-helpers-model-versions",
+    "@kbn/alerting-types",
+    "@kbn/elastic-assistant-common",
+    "@kbn/test",
+    "@kbn/dev-utils",
+    "@kbn/tooling-log"
   ],
-  "exclude": [
-    "target/**/*",
-  ]
+  "exclude": ["target/**/*"]
 }

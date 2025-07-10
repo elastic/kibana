@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import type { ShallowWrapper } from 'enzyme';
-import { shallow } from 'enzyme';
 import React from 'react';
+import { render, screen } from '@testing-library/react';
+import { matchers } from '@emotion/jest';
+
 import { ChartPlaceHolder } from './chart_place_holder';
 import type { ChartSeriesData } from './common';
 
+expect.extend(matchers);
+
 describe('ChartPlaceHolder', () => {
-  let shallowWrapper: ShallowWrapper;
   const mockDataAllZeros = [
     {
       key: 'mockKeyA',
@@ -50,51 +52,28 @@ describe('ChartPlaceHolder', () => {
     },
   ];
 
-  it('should render with default props', () => {
-    const height = `100%`;
-    const width = `100%`;
-    shallowWrapper = shallow(<ChartPlaceHolder data={mockDataAllZeros} />);
-    expect(shallowWrapper.props()).toMatchObject({
-      height,
-      width,
-    });
+  it('should render width and height from defaults', () => {
+    render(<ChartPlaceHolder data={mockDataAllZeros} />);
+    expect(screen.getByTestId('chartPlaceHolder')).toHaveStyle({ height: '100%', width: '100%' });
   });
 
   it('should render with given props', () => {
-    const height = `100px`;
-    const width = `100px`;
-    shallowWrapper = shallow(
-      <ChartPlaceHolder height={height} width={width} data={mockDataAllZeros} />
-    );
-    expect(shallowWrapper.props()).toMatchObject({
-      height,
-      width,
+    const height = '100px';
+    const width = '100px';
+    render(<ChartPlaceHolder height={height} width={width} data={mockDataAllZeros} />);
+    expect(screen.getByTestId('chartPlaceHolder')).toHaveStyle({
+      height: '100px',
+      width: '100px',
     });
   });
 
   it('should render correct wording when all values returned zero', () => {
-    const height = `100px`;
-    const width = `100px`;
-    shallowWrapper = shallow(
-      <ChartPlaceHolder height={height} width={width} data={mockDataAllZeros} />
-    );
-    expect(shallowWrapper.find(`[data-test-subj="chartHolderText"]`).childAt(0).text()).toEqual(
-      'All values returned zero'
-    );
+    render(<ChartPlaceHolder data={mockDataAllZeros} />);
+    expect(screen.getByTestId('chartHolderText')).toHaveTextContent('All values returned zero');
   });
 
   it('should render correct wording when unexpected value exists', () => {
-    const height = `100px`;
-    const width = `100px`;
-    shallowWrapper = shallow(
-      <ChartPlaceHolder
-        height={height}
-        width={width}
-        data={mockDataUnexpectedValue as ChartSeriesData[]}
-      />
-    );
-    expect(shallowWrapper.find(`[data-test-subj="chartHolderText"]`).childAt(0).text()).toEqual(
-      'Chart Data Not Available'
-    );
+    render(<ChartPlaceHolder data={mockDataUnexpectedValue as ChartSeriesData[]} />);
+    expect(screen.getByTestId('chartHolderText')).toHaveTextContent('Chart Data Not Available');
   });
 });

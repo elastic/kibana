@@ -6,33 +6,33 @@
  */
 
 import React, { useState, useCallback, useMemo } from 'react';
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   formatDate,
-  EuiBasicTableColumn,
   EuiFlexGroup,
   EuiFlexItem,
   EuiBadge,
-  useEuiTheme,
   EuiButton,
   EuiBasicTable,
   EuiFieldSearch,
   EuiSpacer,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { UI_SETTINGS } from '@kbn/data-plugin/common';
+
 import * as i18n from '../translations';
 import { useEditMaintenanceWindowsNavigation } from '../../../hooks/use_navigation';
 import { STATUS_DISPLAY, STATUS_SORT } from '../constants';
 import { UpcomingEventsPopover } from './upcoming_events_popover';
-import {
-  MaintenanceWindowStatus,
-  MAINTENANCE_WINDOW_DATE_FORMAT,
-  MaintenanceWindow,
-} from '../../../../common';
+import type { MaintenanceWindowStatus, MaintenanceWindow } from '../../../../common';
+import { MAINTENANCE_WINDOW_DATE_FORMAT } from '../../../../common';
 import { StatusFilter } from './status_filter';
-import { TableActionsPopover, TableActionsPopoverProps } from './table_actions_popover';
+import type { TableActionsPopoverProps } from './table_actions_popover';
+import { TableActionsPopover } from './table_actions_popover';
 import { useFinishMaintenanceWindow } from '../../../hooks/use_finish_maintenance_window';
 import { useArchiveMaintenanceWindow } from '../../../hooks/use_archive_maintenance_window';
 import { useFinishAndArchiveMaintenanceWindow } from '../../../hooks/use_finish_and_archive_maintenance_window';
+import { useUiSetting } from '../../../utils/kibana_react';
+import { useDeleteMaintenanceWindow } from '../../../hooks/use_delete_maintenance_window';
 
 interface MaintenanceWindowsListProps {
   isLoading: boolean;
@@ -48,7 +48,11 @@ interface MaintenanceWindowsListProps {
   onSearchChange: (value: string) => void;
 }
 
-const COLUMNS: Array<EuiBasicTableColumn<MaintenanceWindow>> = [
+const getColumns = ({
+  dateFormat,
+}: {
+  dateFormat: string;
+}): Array<EuiBasicTableColumn<MaintenanceWindow>> => [
   {
     field: 'title',
     name: i18n.NAME,
@@ -72,9 +76,7 @@ const COLUMNS: Array<EuiBasicTableColumn<MaintenanceWindow>> = [
     render: (startDate: string, item: MaintenanceWindow) => {
       return (
         <EuiFlexGroup responsive={false} alignItems="center">
-          <EuiFlexItem grow={false}>
-            {formatDate(startDate, MAINTENANCE_WINDOW_DATE_FORMAT)}
-          </EuiFlexItem>
+          <EuiFlexItem grow={false}>{formatDate(startDate, dateFormat)}</EuiFlexItem>
           {item.events.length > 1 ? (
             <EuiFlexItem grow={false}>
               <UpcomingEventsPopover maintenanceWindowFindResponse={item} />
@@ -89,7 +91,7 @@ const COLUMNS: Array<EuiBasicTableColumn<MaintenanceWindow>> = [
     field: 'eventEndTime',
     name: i18n.TABLE_END_TIME,
     dataType: 'date',
-    render: (endDate: string) => formatDate(endDate, MAINTENANCE_WINDOW_DATE_FORMAT),
+    render: (endDate: string) => formatDate(endDate, dateFormat),
   },
 ];
 
@@ -112,8 +114,11 @@ export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
     onStatusChange,
     onSearchChange,
   }) => {
-    const { euiTheme } = useEuiTheme();
     const [search, setSearch] = useState<string>('');
+    const systemDateFormat = useUiSetting<string>(
+      UI_SETTINGS.DATE_FORMAT,
+      MAINTENANCE_WINDOW_DATE_FORMAT
+    );
 
     const { navigateToEditMaintenanceWindows } = useEditMaintenanceWindowsNavigation();
     const onEdit = useCallback<TableActionsPopoverProps['onEdit']>(
@@ -145,19 +150,24 @@ export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
       [finishAndArchiveMaintenanceWindow, refreshData]
     );
 
-    const isMutatingOrLoading = useMemo(() => {
-      return isLoadingFinish || isLoadingArchive || isLoadingFinishAndArchive || isLoading;
-    }, [isLoadingFinish, isLoadingArchive, isLoadingFinishAndArchive, isLoading]);
+    const { mutate: deleteMaintenanceWindow, isLoading: isLoadingDelete } =
+      useDeleteMaintenanceWindow();
 
-    const tableCss = useMemo(() => {
-      return css`
-        .euiTableRow {
-          &.running {
-            background-color: ${euiTheme.colors.highlight};
-          }
-        }
-      `;
-    }, [euiTheme.colors.highlight]);
+    const onDelete = useCallback(
+      (id: string) =>
+        deleteMaintenanceWindow({ maintenanceWindowId: id }, { onSuccess: () => refreshData() }),
+      [deleteMaintenanceWindow, refreshData]
+    );
+
+    const isMutatingOrLoading = useMemo(() => {
+      return (
+        isLoadingFinish ||
+        isLoadingArchive ||
+        isLoadingFinishAndArchive ||
+        isLoadingDelete ||
+        isLoading
+      );
+    }, [isLoadingFinish, isLoadingArchive, isLoadingFinishAndArchive, isLoadingDelete, isLoading]);
 
     const actions: Array<EuiBasicTableColumn<MaintenanceWindow>> = useMemo(
       () => [
@@ -173,18 +183,19 @@ export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
                 onCancel={onCancel}
                 onArchive={onArchive}
                 onCancelAndArchive={onCancelAndArchive}
+                onDelete={onDelete}
               />
             );
           },
         },
       ],
-      [isMutatingOrLoading, onArchive, onCancel, onCancelAndArchive, onEdit]
+      [isMutatingOrLoading, onArchive, onCancel, onCancelAndArchive, onDelete, onEdit]
     );
 
-    const columns = useMemo(
-      () => (readOnly ? COLUMNS : COLUMNS.concat(actions)),
-      [actions, readOnly]
-    );
+    const columns = useMemo(() => {
+      const result = getColumns({ dateFormat: systemDateFormat });
+      return readOnly ? result : result.concat(actions);
+    }, [actions, readOnly, systemDateFormat]);
 
     const onInputChange = useCallback(
       (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -232,7 +243,6 @@ export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
             <EuiFlexItem>
               <EuiBasicTable
                 data-test-subj="maintenance-windows-table"
-                css={tableCss}
                 itemId="id"
                 loading={isMutatingOrLoading}
                 tableCaption="Maintenance Windows List"

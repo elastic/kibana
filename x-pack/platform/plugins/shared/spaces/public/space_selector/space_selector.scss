@@ -1,32 +1,4 @@
-.spcSpaceSelector {
-  background: transparent;
-}
-
-.spcSelectorBackground {
-  @include kibanaFullScreenGraphics;
-}
-
 .spcSelectorBackground__nonMixinAttributes {
   z-index: -1;
   pointer-events: none;
-}
-
-// Fix forced focus outline on text that isn't a link to just be an underline
-.spcSpaceSelector__pageHeader {
-  &:focus {
-    outline: none;
-    text-decoration: underline;
-  }
-}
-
-.spcSpaceSelector__searchHolder {
-  width: $euiFormMaxWidth; // make sure it's as wide as our default form element width
-  max-width: 100%;
-  margin-inline: auto;
-}
-
-.spcSpaceSelector__errorPanel {
-  text-align: center;
-  margin-inline: auto;
-  max-width: 700px;
 }

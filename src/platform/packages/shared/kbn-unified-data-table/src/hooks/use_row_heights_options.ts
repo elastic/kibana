@@ -22,8 +22,6 @@ interface UseRowHeightProps {
 const deserializeRowHeight = (number: number): EuiDataGridRowHeightOption | undefined => {
   if (number === ROWS_HEIGHT_OPTIONS.auto) {
     return 'auto';
-  } else if (number === ROWS_HEIGHT_OPTIONS.single) {
-    return undefined;
   }
 
   return { lineCount: number }; // custom

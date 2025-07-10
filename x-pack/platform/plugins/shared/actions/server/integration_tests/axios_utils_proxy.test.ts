@@ -17,11 +17,12 @@ import getPort from 'get-port';
 
 import { request } from '../lib/axios_utils';
 import { ByteSizeValue } from '@kbn/config-schema';
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { createReadySignal } from '@kbn/event-log-plugin/server/lib/ready_signal';
-import { ActionsConfig, DEFAULT_USAGE_API_URL } from '../config';
-import { ActionsConfigurationUtilities, getActionsConfigurationUtilities } from '../actions_config';
+import type { ActionsConfig } from '../config';
+import type { ActionsConfigurationUtilities } from '../actions_config';
+import { getActionsConfigurationUtilities } from '../actions_config';
 import { resolveCustomHosts } from '../lib/custom_host_settings';
 import {
   DEFAULT_MICROSOFT_GRAPH_API_URL,
@@ -31,7 +32,7 @@ import {
 
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
-const CERT_DIR = '../../../../../../../../packages/kbn-dev-utils/certs';
+const CERT_DIR = '../../../../../../../../src/platform/packages/shared/kbn-dev-utils/certs';
 
 const KIBANA_CRT_FILE = pathResolve(__filename, pathJoin(CERT_DIR, 'kibana.crt'));
 const KIBANA_KEY_FILE = pathResolve(__filename, pathJoin(CERT_DIR, 'kibana.key'));
@@ -49,6 +50,7 @@ const ServerResponse = 'A unique response returned by the server!';
 describe('axios connections', () => {
   let testServer: http.Server | https.Server | null;
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let savedAxiosDefaultsAdapter: any;
 
   beforeEach(() => {
@@ -594,9 +596,6 @@ const BaseActionsConfig: ActionsConfig = {
   microsoftGraphApiUrl: DEFAULT_MICROSOFT_GRAPH_API_URL,
   microsoftGraphApiScope: DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
   microsoftExchangeUrl: DEFAULT_MICROSOFT_EXCHANGE_URL,
-  usage: {
-    url: DEFAULT_USAGE_API_URL,
-  },
 };
 
 function getACUfromConfig(config: Partial<ActionsConfig> = {}): ActionsConfigurationUtilities {

@@ -40,7 +40,7 @@
           ") => ",
           "EuiThemeColorModeStandard"
         ],
-        "path": "packages/react/kibana_context/common/color_mode.ts",
+        "path": "src/platform/packages/shared/react/kibana_context/common/color_mode.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -62,7 +62,7 @@
                 "text": "KibanaTheme"
               }
             ],
-            "path": "packages/react/kibana_context/common/color_mode.ts",
+            "path": "src/platform/packages/shared/react/kibana_context/common/color_mode.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -91,7 +91,7 @@
           },
           " | null"
         ],
-        "path": "packages/react/kibana_context/common/theme.ts",
+        "path": "src/platform/packages/shared/react/kibana_context/common/theme.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -105,7 +105,7 @@
             "signature": [
               "string"
             ],
-            "path": "packages/react/kibana_context/common/theme.ts",
+            "path": "src/platform/packages/shared/react/kibana_context/common/theme.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -125,7 +125,7 @@
         "description": [
           "\nThe representation of the Kibana theme, (not to be confused with the EUI theme)."
         ],
-        "path": "packages/react/kibana_context/common/types.ts",
+        "path": "src/platform/packages/shared/react/kibana_context/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -138,7 +138,7 @@
             "description": [
               "is dark mode enabled or not"
             ],
-            "path": "packages/react/kibana_context/common/types.ts",
+            "path": "src/platform/packages/shared/react/kibana_context/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -151,7 +151,7 @@
             "description": [
               "\nName of the active theme"
             ],
-            "path": "packages/react/kibana_context/common/types.ts",
+            "path": "src/platform/packages/shared/react/kibana_context/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -165,7 +165,7 @@
         "tags": [],
         "label": "ThemeConfig",
         "description": [],
-        "path": "packages/react/kibana_context/common/theme.ts",
+        "path": "src/platform/packages/shared/react/kibana_context/common/theme.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -178,12 +178,16 @@
             "description": [],
             "signature": [
               "{ root: ",
-              "EuiThemeShape",
-              "; model: ",
-              "EuiThemeShape",
-              "; key: string; }"
+              "EuiThemeShapeBase",
+              " & { overrides?: ",
+              "_EuiThemeOverrides",
+              " | undefined; }; model: ",
+              "EuiThemeShapeBase",
+              " & { overrides?: ",
+              "_EuiThemeOverrides",
+              " | undefined; }; key: string; }"
             ],
-            "path": "packages/react/kibana_context/common/theme.ts",
+            "path": "src/platform/packages/shared/react/kibana_context/common/theme.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -199,7 +203,7 @@
         "description": [
           "\nThe `ThemeService` start contract, provided to plugins during the `start` lifecycle."
         ],
-        "path": "packages/react/kibana_context/common/types.ts",
+        "path": "src/platform/packages/shared/react/kibana_context/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -222,7 +226,7 @@
               },
               ">"
             ],
-            "path": "packages/react/kibana_context/common/types.ts",
+            "path": "src/platform/packages/shared/react/kibana_context/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -244,7 +248,7 @@
               },
               ") | undefined"
             ],
-            "path": "packages/react/kibana_context/common/types.ts",
+            "path": "src/platform/packages/shared/react/kibana_context/common/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -273,7 +277,7 @@
             "text": "ThemeConfig"
           }
         ],
-        "path": "packages/react/kibana_context/common/theme.ts",
+        "path": "src/platform/packages/shared/react/kibana_context/common/theme.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -287,7 +291,7 @@
         "description": [
           "\nThe default `KibanaTheme` for use in Storybook, Jest, or initialization.  At\nruntime, the theme should always be provided by the `ThemeService`."
         ],
-        "path": "packages/react/kibana_context/common/index.ts",
+        "path": "src/platform/packages/shared/react/kibana_context/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -301,7 +305,7 @@
             "signature": [
               "false"
             ],
-            "path": "packages/react/kibana_context/common/index.ts",
+            "path": "src/platform/packages/shared/react/kibana_context/common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -312,7 +316,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "packages/react/kibana_context/common/index.ts",
+            "path": "src/platform/packages/shared/react/kibana_context/common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }

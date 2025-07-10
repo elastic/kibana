@@ -6,10 +6,9 @@
  */
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 
 import { EuiFlexGroup, EuiFlexItem, EuiSelect, EuiSpacer } from '@elastic/eui';
-import type { AggregationsTermsAggregateBase } from '@elastic/elasticsearch/lib/api/types';
 import { isString } from 'lodash/fp';
 import * as i18n from './translations';
 import { HeaderSection } from '../header_section';
@@ -20,9 +19,7 @@ import type {
   MatrixHistogramQueryProps,
   MatrixHistogramConfigs,
 } from './types';
-import type { GlobalTimeArgs } from '../../containers/use_global_time';
 import { HoverVisibilityContainer } from '../hover_visibility_container';
-import type { VisualizationResponse } from '../visualization_actions/types';
 import { useQueryToggle } from '../../containers/query_toggle';
 import { VISUALIZATION_ACTIONS_BUTTON_CLASS } from '../visualization_actions/utils';
 import { VisualizationEmbeddable } from '../visualization_actions/visualization_embeddable';
@@ -36,7 +33,6 @@ export type MatrixHistogramComponentProps = MatrixHistogramQueryProps &
     hideHistogramIfEmpty?: boolean;
     id: string;
     showSpacer?: boolean;
-    setQuery: GlobalTimeArgs['setQuery'];
     sourcererScopeId?: SourcererScopeName;
     hideQueryToggle?: boolean;
     applyGlobalQueriesAndFilters?: boolean;
@@ -52,17 +48,6 @@ const HistogramPanel = styled(Panel)<{ height?: number }>`
 
 const CHART_HEIGHT = 150;
 
-const visualizationResponseHasData = (response: VisualizationResponse[]): boolean => {
-  if (response.length === 0) {
-    return false;
-  }
-  return Object.values<AggregationsTermsAggregateBase<unknown[]>>(
-    response[0].aggregations ?? {}
-  ).some(
-    ({ buckets }) => (Array.isArray(buckets) ? buckets.length : Object.keys(buckets).length) > 0
-  );
-};
-
 export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> = ({
   chartHeight,
   defaultStackByOption,
@@ -76,7 +61,6 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
   lensAttributes,
   paddingSize = 'm',
   panelHeight = DEFAULT_PANEL_HEIGHT,
-  setQuery,
   showSpacer = true,
   stackByOptions,
   startDate,
@@ -119,36 +103,31 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
     () => (title != null && typeof title === 'function' ? title(selectedStackByOption) : title),
     [title, selectedStackByOption]
   );
-  const { responses: visualizationResponses } = useVisualizationResponse({ visualizationId });
-  const visualizationTotalCount: number | null = useMemo(() => {
-    if (!visualizationResponses || !visualizationResponseHasData(visualizationResponses)) {
-      return 0;
-    }
-    return visualizationResponses[0].hits.total;
-  }, [visualizationResponses]);
+  const { tables } = useVisualizationResponse({ visualizationId });
+  const visualizationTotalCount: number | undefined = tables && tables.meta.statistics.totalCount;
 
-  const subtitleWithCounts = useMemo(() => {
+  const subtitleWithCounts: string | undefined = useMemo(() => {
     if (isInitialLoading) {
-      return null;
+      return undefined;
     }
 
     if (typeof subtitle === 'function') {
-      return visualizationTotalCount >= 0 ? subtitle(visualizationTotalCount) : null;
+      return visualizationTotalCount ? subtitle(visualizationTotalCount) : undefined;
     }
 
     return subtitle;
   }, [isInitialLoading, subtitle, visualizationTotalCount]);
 
   const hideHistogram = useMemo(
-    () => ((visualizationTotalCount ?? 0) <= 0 && hideHistogramIfEmpty ? true : false),
+    () => ((visualizationTotalCount ?? 0) === 0 && hideHistogramIfEmpty ? true : false),
     [hideHistogramIfEmpty, visualizationTotalCount]
   );
 
   useEffect(() => {
-    if (isInitialLoading && !!visualizationResponses) {
+    if (isInitialLoading && tables) {
       setIsInitialLoading(false);
     }
-  }, [id, isInitialLoading, visualizationResponses, setIsInitialLoading, setQuery]);
+  }, [isInitialLoading, tables]);
 
   const timerange = useMemo(() => ({ from: startDate, to: endDate }), [startDate, endDate]);
   const extraVisualizationOptions = useMemo(

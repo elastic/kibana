@@ -11,6 +11,8 @@ import type { StartPlugins } from '../../../plugin';
 import { scheduleAssetCriticalityEcsCompliancyMigration } from '../asset_criticality/migrations/schedule_ecs_compliancy_migration';
 import { updateAssetCriticalityMappings } from '../asset_criticality/migrations/update_asset_criticality_mappings';
 import { updateRiskScoreMappings } from '../risk_engine/migrations/update_risk_score_mappings';
+import { renameRiskScoreComponentTemplate } from '../risk_engine/migrations/rename_risk_score_component_templates';
+import { createEventIngestedPipelineInAllNamespaces } from '../utils/event_ingested_pipeline';
 
 export interface EntityAnalyticsMigrationsParams {
   taskManager?: TaskManagerSetupContract;
@@ -37,9 +39,13 @@ export interface EntityAnalyticsMigrationsParams {
  * note: If you change the `latest` property, the transform will reinstall after the engine task runs.
  */
 export const scheduleEntityAnalyticsMigration = async (params: EntityAnalyticsMigrationsParams) => {
-  const scopedLogger = params.logger.get('entityAnalytics.migration');
-
-  await updateAssetCriticalityMappings({ ...params, logger: scopedLogger });
-  await scheduleAssetCriticalityEcsCompliancyMigration({ ...params, logger: scopedLogger });
-  await updateRiskScoreMappings({ ...params, logger: scopedLogger });
+  const paramsWithScopedLogger = {
+    ...params,
+    logger: params.logger.get('entityAnalytics.migration'),
+  };
+  await createEventIngestedPipelineInAllNamespaces(paramsWithScopedLogger);
+  await updateAssetCriticalityMappings(paramsWithScopedLogger);
+  await scheduleAssetCriticalityEcsCompliancyMigration(paramsWithScopedLogger);
+  await renameRiskScoreComponentTemplate(paramsWithScopedLogger);
+  await updateRiskScoreMappings(paramsWithScopedLogger);
 };

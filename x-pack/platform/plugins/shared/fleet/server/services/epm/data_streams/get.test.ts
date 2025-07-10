@@ -14,7 +14,7 @@ import { getDataStreams } from './get';
 jest.mock('../../data_streams', () => {
   return {
     dataStreamService: {
-      getMatchingDataStreams: jest.fn().mockImplementation(() => {
+      getMatchingDataStreams: jest.fn().mockImplementation(async () => {
         return [
           {
             name: 'logs-elastic_agent-default',

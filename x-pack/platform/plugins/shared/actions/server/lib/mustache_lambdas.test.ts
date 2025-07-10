@@ -246,4 +246,52 @@ describe('mustache lambdas', () => {
       expect(logger.warn).toHaveBeenCalledWith(`mustache render error: invalid number: 'nope'`);
     });
   });
+
+  describe('EncodeURI', () => {
+    it('valid string is successful', () => {
+      const uri = 'https://www.elastic.co?foo=bar&baz= qux'; // note the space
+      const template = dedent`
+          {{#EncodeURI}}{{uri}}{{/EncodeURI}}
+        `.trim();
+
+      expect(renderMustacheString(logger, template, { uri }, 'none')).toEqual(
+        'https://www.elastic.co?foo=bar&baz=%20qux'
+      );
+    });
+
+    it('logs an error message and returns the error message on errors', () => {
+      const uri = '\uDC00'; // invalid UTF-8
+      const template = dedent`
+          {{#EncodeURI}} {{uri}} {{/EncodeURI}}
+        `.trim();
+
+      const errMessage = `error evaluating encodeURI(\" ${uri} \"): URI malformed`;
+      expect(renderMustacheString(logger, template, { uri }, 'none')).toBe(errMessage);
+      expect(logger.warn).toHaveBeenCalledWith(`mustache render error: ${errMessage}`);
+    });
+  });
+
+  describe('EncodeURIComponent', () => {
+    it('valid string is successful', () => {
+      const uri = 'https://www.elastic.co?foo=bar&baz= qux'; // note the space
+      const template = dedent`
+          {{#EncodeURIComponent}}{{uri}} {{/EncodeURIComponent}}
+        `.trim();
+
+      expect(renderMustacheString(logger, template, { uri }, 'none')).toEqual(
+        'https%3A%2F%2Fwww.elastic.co%3Ffoo%3Dbar%26baz%3D%20qux%20'
+      );
+    });
+
+    it('logs an error message and returns the error message on errors', () => {
+      const uri = '\uDC00'; // invalid UTF-8
+      const template = dedent`
+          {{#EncodeURIComponent}} {{uri}} {{/EncodeURIComponent}}
+        `.trim();
+
+      const errMessage = `error evaluating encodeURIComponent(\" ${uri} \"): URI malformed`;
+      expect(renderMustacheString(logger, template, { uri }, 'none')).toBe(errMessage);
+      expect(logger.warn).toHaveBeenCalledWith(`mustache render error: ${errMessage}`);
+    });
+  });
 });

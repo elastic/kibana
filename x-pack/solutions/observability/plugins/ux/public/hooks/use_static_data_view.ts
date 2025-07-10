@@ -12,6 +12,7 @@ export function useStaticDataView() {
   const { exploratoryView } = useKibanaServices();
   const { data, loading } = useFetcher(async () => {
     return exploratoryView.getAppDataView('ux');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return {

@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import type { SecuritySubPlugin } from '../app/types';
 import { routes } from './routes';
 
 export class ThreatIntelligence {
-  public setup() {}
-
-  public start(): SecuritySubPlugin {
+  public start() {
     return {
       routes,
     };
   }
+
+  public stop() {}
 }

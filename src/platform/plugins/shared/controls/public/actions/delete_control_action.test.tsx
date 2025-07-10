@@ -12,12 +12,12 @@ import { BehaviorSubject } from 'rxjs';
 import { ViewMode } from '@kbn/presentation-publishing';
 import { getOptionsListControlFactory } from '../controls/data_controls/options_list_control/get_options_list_control_factory';
 import { OptionsListControlApi } from '../controls/data_controls/options_list_control/types';
-import { getMockedBuildApi, getMockedControlGroupApi } from '../controls/mocks/control_mocks';
+import { getMockedControlGroupApi, getMockedFinalizeApi } from '../controls/mocks/control_mocks';
 import { coreServices } from '../services/kibana_services';
 import { DeleteControlAction } from './delete_control_action';
 
 const dashboardApi = {
-  viewMode: new BehaviorSubject<ViewMode>('view'),
+  viewMode$: new BehaviorSubject<ViewMode>('view'),
 };
 const controlGroupApi = getMockedControlGroupApi(dashboardApi, {
   removePanel: jest.fn(),
@@ -31,18 +31,18 @@ beforeAll(async () => {
   const controlFactory = getOptionsListControlFactory();
 
   const uuid = 'testControl';
-  const control = await controlFactory.buildControl(
-    {
+  const control = await controlFactory.buildControl({
+    initialState: {
       dataViewId: 'test-data-view',
       title: 'test',
       fieldName: 'test-field',
       width: 'medium',
       grow: false,
     },
-    getMockedBuildApi(uuid, controlFactory, controlGroupApi),
+    finalizeApi: getMockedFinalizeApi(uuid, controlFactory, controlGroupApi),
     uuid,
-    controlGroupApi
-  );
+    controlGroupApi,
+  });
 
   controlApi = control.api;
 });

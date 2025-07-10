@@ -9,6 +9,7 @@ import type { PropsWithChildren } from 'react';
 import React, { memo, useState, useCallback } from 'react';
 import { EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useEnableExperimental } from '../../../../../common/hooks/use_experimental_features';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { updateAntivirusRegistrationEnabled } from '../../../../../../common/endpoint/utils/update_antivirus_registration_enabled';
 import { useGetProtectionsUnavailableComponent } from './hooks/use_get_protections_unavailable_component';
@@ -26,7 +27,6 @@ import { MalwareProtectionsCard } from './components/cards/malware_protections_c
 import type { PolicyFormComponentCommonProps } from './types';
 import { AdvancedSection } from './components/advanced_section';
 import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
-import { ALLOW_SHOWING_EVENT_MERGING_BANNER } from './constants';
 
 const PROTECTIONS_SECTION_TITLE = i18n.translate(
   'xpack.securitySolution.endpoint.policy.details.protections',
@@ -45,8 +45,10 @@ export const PolicySettingsForm = memo<PolicySettingsFormProps>((props) => {
   const ProtectionsUpSellingComponent = useGetProtectionsUnavailableComponent();
 
   const { storage } = useKibana().services;
+
+  const { eventCollectionDataReductionBannerEnabled } = useEnableExperimental();
   const [showEventMergingBanner, setShowEventMergingBanner] = useState(
-    ALLOW_SHOWING_EVENT_MERGING_BANNER &&
+    eventCollectionDataReductionBannerEnabled &&
       (storage.get('securitySolution.showEventMergingBanner') ?? true)
   );
   const onBannerDismiss = useCallback(() => {

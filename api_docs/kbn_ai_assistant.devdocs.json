@@ -11,11 +11,11 @@
         "label": "ChatBody",
         "description": [],
         "signature": [
-          "({\n  connectors,\n  currentUser,\n  flyoutPositionMode,\n  initialConversationId,\n  initialMessages,\n  initialTitle,\n  knowledgeBase,\n  showLinkToConversationsApp,\n  onConversationUpdate,\n  onToggleFlyoutPositionMode,\n  navigateToConversation,\n}: { connectors: ",
+          "({\n  connectors,\n  currentUser,\n  flyoutPositionMode,\n  initialConversationId,\n  initialMessages,\n  initialTitle,\n  knowledgeBase,\n  showLinkToConversationsApp,\n  onConversationUpdate,\n  onToggleFlyoutPositionMode,\n  navigateToConversation,\n  setIsUpdatingConversationList,\n  refreshConversations,\n  updateDisplayedConversation,\n  onConversationDuplicate,\n}: { connectors: ",
           "UseGenAIConnectorsResult",
           "; currentUser?: Pick<",
           "AuthenticatedUser",
-          ", \"username\" | \"full_name\"> | undefined; flyoutPositionMode?: ",
+          ", \"username\" | \"full_name\" | \"profile_uid\"> | undefined; flyoutPositionMode?: ",
           {
             "pluginId": "@kbn/ai-assistant",
             "scope": "public",
@@ -39,9 +39,15 @@
             "section": "def-public.UseKnowledgeBaseResult",
             "text": "UseKnowledgeBaseResult"
           },
-          "; showLinkToConversationsApp: boolean; onConversationUpdate: (conversation: { conversation: { id: string; title: string; last_updated: string; token_count?: ",
-          "TokenCount",
-          " | undefined; }; }) => void; onToggleFlyoutPositionMode?: ((flyoutPositionMode: ",
+          "; showLinkToConversationsApp: boolean; onConversationUpdate: (conversation: { conversation: { id: string; title: string; last_updated: string; }; }) => void; onConversationDuplicate: (conversation: ",
+          {
+            "pluginId": "observabilityAIAssistant",
+            "scope": "common",
+            "docId": "kibObservabilityAIAssistantPluginApi",
+            "section": "def-common.Conversation",
+            "text": "Conversation"
+          },
+          ") => void; onToggleFlyoutPositionMode?: ((flyoutPositionMode: ",
           {
             "pluginId": "@kbn/ai-assistant",
             "scope": "public",
@@ -49,7 +55,7 @@
             "section": "def-public.FlyoutPositionMode",
             "text": "FlyoutPositionMode"
           },
-          ") => void) | undefined; navigateToConversation?: ((conversationId?: string | undefined) => void) | undefined; }) => React.JSX.Element"
+          ") => void) | undefined; navigateToConversation?: ((conversationId?: string | undefined) => void) | undefined; setIsUpdatingConversationList: (isUpdating: boolean) => void; refreshConversations: () => void; updateDisplayedConversation: (id?: string | undefined) => void; }) => React.JSX.Element"
         ],
         "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_body.tsx",
         "deprecated": false,
@@ -60,7 +66,7 @@
             "id": "def-public.ChatBody.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  connectors,\n  currentUser,\n  flyoutPositionMode,\n  initialConversationId,\n  initialMessages,\n  initialTitle,\n  knowledgeBase,\n  showLinkToConversationsApp,\n  onConversationUpdate,\n  onToggleFlyoutPositionMode,\n  navigateToConversation,\n}",
+            "label": "{\n  connectors,\n  currentUser,\n  flyoutPositionMode,\n  initialConversationId,\n  initialMessages,\n  initialTitle,\n  knowledgeBase,\n  showLinkToConversationsApp,\n  onConversationUpdate,\n  onToggleFlyoutPositionMode,\n  navigateToConversation,\n  setIsUpdatingConversationList,\n  refreshConversations,\n  updateDisplayedConversation,\n  onConversationDuplicate,\n}",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_body.tsx",
             "deprecated": false,
@@ -90,7 +96,7 @@
                 "signature": [
                   "Pick<",
                   "AuthenticatedUser",
-                  ", \"username\" | \"full_name\"> | undefined"
+                  ", \"username\" | \"full_name\" | \"profile_uid\"> | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_body.tsx",
                 "deprecated": false,
@@ -205,9 +211,7 @@
                 "label": "onConversationUpdate",
                 "description": [],
                 "signature": [
-                  "(conversation: { conversation: { id: string; title: string; last_updated: string; token_count?: ",
-                  "TokenCount",
-                  " | undefined; }; }) => void"
+                  "(conversation: { conversation: { id: string; title: string; last_updated: string; }; }) => void"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_body.tsx",
                 "deprecated": false,
@@ -232,15 +236,59 @@
                         "label": "conversation",
                         "description": [],
                         "signature": [
-                          "{ id: string; title: string; last_updated: string; token_count?: ",
-                          "TokenCount",
-                          " | undefined; }"
+                          "{ id: string; title: string; last_updated: string; }"
                         ],
                         "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_body.tsx",
                         "deprecated": false,
                         "trackAdoption": false
                       }
                     ]
+                  }
+                ],
+                "returnComment": []
+              },
+              {
+                "parentPluginId": "@kbn/ai-assistant",
+                "id": "def-public.ChatBody.$1.onConversationDuplicate",
+                "type": "Function",
+                "tags": [],
+                "label": "onConversationDuplicate",
+                "description": [],
+                "signature": [
+                  "(conversation: ",
+                  {
+                    "pluginId": "observabilityAIAssistant",
+                    "scope": "common",
+                    "docId": "kibObservabilityAIAssistantPluginApi",
+                    "section": "def-common.Conversation",
+                    "text": "Conversation"
+                  },
+                  ") => void"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_body.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/ai-assistant",
+                    "id": "def-public.ChatBody.$1.onConversationDuplicate.$1",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "conversation",
+                    "description": [],
+                    "signature": [
+                      {
+                        "pluginId": "observabilityAIAssistant",
+                        "scope": "common",
+                        "docId": "kibObservabilityAIAssistantPluginApi",
+                        "section": "def-common.Conversation",
+                        "text": "Conversation"
+                      }
+                    ],
+                    "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_body.tsx",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "isRequired": true
                   }
                 ],
                 "returnComment": []
@@ -322,6 +370,86 @@
                   }
                 ],
                 "returnComment": []
+              },
+              {
+                "parentPluginId": "@kbn/ai-assistant",
+                "id": "def-public.ChatBody.$1.setIsUpdatingConversationList",
+                "type": "Function",
+                "tags": [],
+                "label": "setIsUpdatingConversationList",
+                "description": [],
+                "signature": [
+                  "(isUpdating: boolean) => void"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_body.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/ai-assistant",
+                    "id": "def-public.ChatBody.$1.setIsUpdatingConversationList.$1",
+                    "type": "boolean",
+                    "tags": [],
+                    "label": "isUpdating",
+                    "description": [],
+                    "signature": [
+                      "boolean"
+                    ],
+                    "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_body.tsx",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "isRequired": true
+                  }
+                ],
+                "returnComment": []
+              },
+              {
+                "parentPluginId": "@kbn/ai-assistant",
+                "id": "def-public.ChatBody.$1.refreshConversations",
+                "type": "Function",
+                "tags": [],
+                "label": "refreshConversations",
+                "description": [],
+                "signature": [
+                  "() => void"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_body.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [],
+                "returnComment": []
+              },
+              {
+                "parentPluginId": "@kbn/ai-assistant",
+                "id": "def-public.ChatBody.$1.updateDisplayedConversation",
+                "type": "Function",
+                "tags": [],
+                "label": "updateDisplayedConversation",
+                "description": [],
+                "signature": [
+                  "(id?: string | undefined) => void"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_body.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/ai-assistant",
+                    "id": "def-public.ChatBody.$1.updateDisplayedConversation.$1",
+                    "type": "string",
+                    "tags": [],
+                    "label": "id",
+                    "description": [],
+                    "signature": [
+                      "string | undefined"
+                    ],
+                    "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_body.tsx",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "isRequired": false
+                  }
+                ],
+                "returnComment": []
               }
             ]
           }
@@ -337,7 +465,7 @@
         "label": "ChatFlyout",
         "description": [],
         "signature": [
-          "({\n  initialTitle,\n  initialMessages,\n  initialFlyoutPositionMode,\n  onFlyoutPositionModeChange,\n  isOpen,\n  onClose,\n  navigateToConversation,\n  hideConversationList,\n}: { initialTitle: string; initialMessages: ",
+          "({\n  initialTitle,\n  initialMessages: initialMessagesFromProps,\n  initialFlyoutPositionMode,\n  onFlyoutPositionModeChange,\n  isOpen,\n  onClose,\n  navigateToConversation,\n  hideConversationList,\n}: { initialTitle: string; initialMessages: ",
           {
             "pluginId": "observabilityAIAssistant",
             "scope": "common",
@@ -372,7 +500,7 @@
             "id": "def-public.ChatFlyout.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  initialTitle,\n  initialMessages,\n  initialFlyoutPositionMode,\n  onFlyoutPositionModeChange,\n  isOpen,\n  onClose,\n  navigateToConversation,\n  hideConversationList,\n}",
+            "label": "{\n  initialTitle,\n  initialMessages: initialMessagesFromProps,\n  initialFlyoutPositionMode,\n  onFlyoutPositionModeChange,\n  isOpen,\n  onClose,\n  navigateToConversation,\n  hideConversationList,\n}",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_flyout.tsx",
             "deprecated": false,
@@ -655,7 +783,7 @@
         "label": "ConversationList",
         "description": [],
         "signature": [
-          "({\n  conversations,\n  isLoading,\n  selectedConversationId,\n  onConversationSelect,\n  onConversationDeleteClick,\n  newConversationHref,\n  getConversationHref,\n}: { conversations: ",
+          "({\n  conversations,\n  isLoading,\n  selectedConversationId,\n  currentUser,\n  onConversationSelect,\n  newConversationHref,\n  getConversationHref,\n  setIsUpdatingConversationList,\n  refreshConversations,\n  updateDisplayedConversation,\n}: { conversations: ",
           {
             "pluginId": "observabilityAIAssistant",
             "scope": "public",
@@ -671,7 +799,9 @@
             "section": "def-common.Conversation",
             "text": "Conversation"
           },
-          "[]; }>; isLoading: boolean; selectedConversationId?: string | undefined; onConversationSelect?: ((conversationId?: string | undefined) => void) | undefined; onConversationDeleteClick: (conversationId: string) => void; newConversationHref?: string | undefined; getConversationHref?: ((conversationId: string) => string) | undefined; }) => React.JSX.Element"
+          "[]; }>; isLoading: boolean; selectedConversationId?: string | undefined; currentUser: Pick<",
+          "AuthenticatedUser",
+          ", \"username\" | \"full_name\" | \"profile_uid\">; onConversationSelect?: ((conversationId?: string | undefined) => void) | undefined; newConversationHref?: string | undefined; getConversationHref?: ((conversationId: string) => string) | undefined; setIsUpdatingConversationList: (isUpdating: boolean) => void; refreshConversations: () => void; updateDisplayedConversation: (id?: string | undefined) => void; }) => React.JSX.Element"
         ],
         "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/conversation_list.tsx",
         "deprecated": false,
@@ -682,7 +812,7 @@
             "id": "def-public.ConversationList.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  conversations,\n  isLoading,\n  selectedConversationId,\n  onConversationSelect,\n  onConversationDeleteClick,\n  newConversationHref,\n  getConversationHref,\n}",
+            "label": "{\n  conversations,\n  isLoading,\n  selectedConversationId,\n  currentUser,\n  onConversationSelect,\n  newConversationHref,\n  getConversationHref,\n  setIsUpdatingConversationList,\n  refreshConversations,\n  updateDisplayedConversation,\n}",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/conversation_list.tsx",
             "deprecated": false,
@@ -737,6 +867,20 @@
               },
               {
                 "parentPluginId": "@kbn/ai-assistant",
+                "id": "def-public.ConversationList.$1.currentUser",
+                "type": "Object",
+                "tags": [],
+                "label": "currentUser",
+                "description": [],
+                "signature": [
+                  "{ username: string; full_name?: string | undefined; profile_uid?: string | undefined; }"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/conversation_list.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/ai-assistant",
                 "id": "def-public.ConversationList.$1.onConversationSelect",
                 "type": "Function",
                 "tags": [],
@@ -763,38 +907,6 @@
                     "deprecated": false,
                     "trackAdoption": false,
                     "isRequired": false
-                  }
-                ],
-                "returnComment": []
-              },
-              {
-                "parentPluginId": "@kbn/ai-assistant",
-                "id": "def-public.ConversationList.$1.onConversationDeleteClick",
-                "type": "Function",
-                "tags": [],
-                "label": "onConversationDeleteClick",
-                "description": [],
-                "signature": [
-                  "(conversationId: string) => void"
-                ],
-                "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/conversation_list.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "children": [
-                  {
-                    "parentPluginId": "@kbn/ai-assistant",
-                    "id": "def-public.ConversationList.$1.onConversationDeleteClick.$1",
-                    "type": "string",
-                    "tags": [],
-                    "label": "conversationId",
-                    "description": [],
-                    "signature": [
-                      "string"
-                    ],
-                    "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/conversation_list.tsx",
-                    "deprecated": false,
-                    "trackAdoption": false,
-                    "isRequired": true
                   }
                 ],
                 "returnComment": []
@@ -841,6 +953,86 @@
                     "deprecated": false,
                     "trackAdoption": false,
                     "isRequired": true
+                  }
+                ],
+                "returnComment": []
+              },
+              {
+                "parentPluginId": "@kbn/ai-assistant",
+                "id": "def-public.ConversationList.$1.setIsUpdatingConversationList",
+                "type": "Function",
+                "tags": [],
+                "label": "setIsUpdatingConversationList",
+                "description": [],
+                "signature": [
+                  "(isUpdating: boolean) => void"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/conversation_list.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/ai-assistant",
+                    "id": "def-public.ConversationList.$1.setIsUpdatingConversationList.$1",
+                    "type": "boolean",
+                    "tags": [],
+                    "label": "isUpdating",
+                    "description": [],
+                    "signature": [
+                      "boolean"
+                    ],
+                    "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/conversation_list.tsx",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "isRequired": true
+                  }
+                ],
+                "returnComment": []
+              },
+              {
+                "parentPluginId": "@kbn/ai-assistant",
+                "id": "def-public.ConversationList.$1.refreshConversations",
+                "type": "Function",
+                "tags": [],
+                "label": "refreshConversations",
+                "description": [],
+                "signature": [
+                  "() => void"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/conversation_list.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [],
+                "returnComment": []
+              },
+              {
+                "parentPluginId": "@kbn/ai-assistant",
+                "id": "def-public.ConversationList.$1.updateDisplayedConversation",
+                "type": "Function",
+                "tags": [],
+                "label": "updateDisplayedConversation",
+                "description": [],
+                "signature": [
+                  "(id?: string | undefined) => void"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/conversation_list.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/ai-assistant",
+                    "id": "def-public.ConversationList.$1.updateDisplayedConversation.$1",
+                    "type": "string",
+                    "tags": [],
+                    "label": "id",
+                    "description": [],
+                    "signature": [
+                      "string | undefined"
+                    ],
+                    "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/conversation_list.tsx",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "isRequired": false
                   }
                 ],
                 "returnComment": []
@@ -1073,6 +1265,279 @@
       },
       {
         "parentPluginId": "@kbn/ai-assistant",
+        "id": "def-public.useConfirmModal",
+        "type": "Function",
+        "tags": [],
+        "label": "useConfirmModal",
+        "description": [],
+        "signature": [
+          "({\n  title,\n  children,\n  confirmButtonText,\n}: { title: React.ReactNode; children: React.ReactNode; confirmButtonText: React.ReactNode; }) => { element: React.ReactNode; confirm: () => Promise<boolean>; }"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_confirm_modal.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ai-assistant",
+            "id": "def-public.useConfirmModal.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  title,\n  children,\n  confirmButtonText,\n}",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_confirm_modal.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ai-assistant",
+                "id": "def-public.useConfirmModal.$1.title",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "signature": [
+                  "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_confirm_modal.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/ai-assistant",
+                "id": "def-public.useConfirmModal.$1.children",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "children",
+                "description": [],
+                "signature": [
+                  "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_confirm_modal.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/ai-assistant",
+                "id": "def-public.useConfirmModal.$1.confirmButtonText",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "confirmButtonText",
+                "description": [],
+                "signature": [
+                  "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_confirm_modal.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ai-assistant",
+        "id": "def-public.useConversationContextMenu",
+        "type": "Function",
+        "tags": [],
+        "label": "useConversationContextMenu",
+        "description": [],
+        "signature": [
+          "({\n  setIsUpdatingConversationList,\n  refreshConversations,\n}: { setIsUpdatingConversationList: (isUpdating: boolean) => void; refreshConversations: () => void; }) => ",
+          {
+            "pluginId": "@kbn/ai-assistant",
+            "scope": "public",
+            "docId": "kibKbnAiAssistantPluginApi",
+            "section": "def-public.UseConversationContextMenuResult",
+            "text": "UseConversationContextMenuResult"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_conversation_context_menu.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ai-assistant",
+            "id": "def-public.useConversationContextMenu.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  setIsUpdatingConversationList,\n  refreshConversations,\n}",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_conversation_context_menu.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ai-assistant",
+                "id": "def-public.useConversationContextMenu.$1.setIsUpdatingConversationList",
+                "type": "Function",
+                "tags": [],
+                "label": "setIsUpdatingConversationList",
+                "description": [],
+                "signature": [
+                  "(isUpdating: boolean) => void"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_conversation_context_menu.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/ai-assistant",
+                    "id": "def-public.useConversationContextMenu.$1.setIsUpdatingConversationList.$1",
+                    "type": "boolean",
+                    "tags": [],
+                    "label": "isUpdating",
+                    "description": [],
+                    "signature": [
+                      "boolean"
+                    ],
+                    "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_conversation_context_menu.ts",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "isRequired": true
+                  }
+                ],
+                "returnComment": []
+              },
+              {
+                "parentPluginId": "@kbn/ai-assistant",
+                "id": "def-public.useConversationContextMenu.$1.refreshConversations",
+                "type": "Function",
+                "tags": [],
+                "label": "refreshConversations",
+                "description": [],
+                "signature": [
+                  "() => void"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_conversation_context_menu.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [],
+                "returnComment": []
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ai-assistant",
+        "id": "def-public.useConversationsByDate",
+        "type": "Function",
+        "tags": [],
+        "label": "useConversationsByDate",
+        "description": [],
+        "signature": [
+          "(conversations: ",
+          {
+            "pluginId": "observabilityAIAssistant",
+            "scope": "common",
+            "docId": "kibObservabilityAIAssistantPluginApi",
+            "section": "def-common.Conversation",
+            "text": "Conversation"
+          },
+          "[], getConversationHref: ((id: string) => string) | undefined) => Record<string, { id: string; label: string; lastUpdated: string; href?: string | undefined; public: boolean; conversation: ",
+          {
+            "pluginId": "observabilityAIAssistant",
+            "scope": "common",
+            "docId": "kibObservabilityAIAssistantPluginApi",
+            "section": "def-common.Conversation",
+            "text": "Conversation"
+          },
+          "; }[]>"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_conversations_by_date.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ai-assistant",
+            "id": "def-public.useConversationsByDate.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "conversations",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "observabilityAIAssistant",
+                "scope": "common",
+                "docId": "kibObservabilityAIAssistantPluginApi",
+                "section": "def-common.Conversation",
+                "text": "Conversation"
+              },
+              "[]"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_conversations_by_date.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/ai-assistant",
+            "id": "def-public.useConversationsByDate.$2",
+            "type": "Function",
+            "tags": [],
+            "label": "getConversationHref",
+            "description": [],
+            "signature": [
+              "((id: string) => string) | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_conversations_by_date.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ai-assistant",
+        "id": "def-public.useGenAIConnectors",
+        "type": "Function",
+        "tags": [],
+        "label": "useGenAIConnectors",
+        "description": [],
+        "signature": [
+          "() => ",
+          "UseGenAIConnectorsResult"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_genai_connectors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ai-assistant",
+        "id": "def-public.useInferenceEndpoints",
+        "type": "Function",
+        "tags": [],
+        "label": "useInferenceEndpoints",
+        "description": [],
+        "signature": [
+          "() => { inferenceEndpoints: ",
+          {
+            "pluginId": "@kbn/ml-trained-models-utils",
+            "scope": "common",
+            "docId": "kibKbnMlTrainedModelsUtilsPluginApi",
+            "section": "def-common.InferenceAPIConfigResponse",
+            "text": "InferenceAPIConfigResponse"
+          },
+          "[]; isLoading: boolean; error: Error | undefined; }"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_inference_endpoints.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ai-assistant",
         "id": "def-public.useKnowledgeBase",
         "type": "Function",
         "tags": [],
@@ -1124,6 +1589,240 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/ai-assistant",
+        "id": "def-public.CopyConversationToClipboardParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "CopyConversationToClipboardParams",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_conversation_context_menu.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ai-assistant",
+            "id": "def-public.CopyConversationToClipboardParams.conversation",
+            "type": "Object",
+            "tags": [],
+            "label": "conversation",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "observabilityAIAssistant",
+                "scope": "common",
+                "docId": "kibObservabilityAIAssistantPluginApi",
+                "section": "def-common.Conversation",
+                "text": "Conversation"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_conversation_context_menu.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ai-assistant",
+            "id": "def-public.CopyConversationToClipboardParams.messages",
+            "type": "Array",
+            "tags": [],
+            "label": "messages",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "observabilityAIAssistant",
+                "scope": "common",
+                "docId": "kibObservabilityAIAssistantPluginApi",
+                "section": "def-common.Message",
+                "text": "Message"
+              },
+              "[]"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_conversation_context_menu.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ai-assistant",
+        "id": "def-public.UseConversationContextMenuResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "UseConversationContextMenuResult",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_conversation_context_menu.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ai-assistant",
+            "id": "def-public.UseConversationContextMenuResult.deleteConversation",
+            "type": "Function",
+            "tags": [],
+            "label": "deleteConversation",
+            "description": [],
+            "signature": [
+              "(id: string) => Promise<void>"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_conversation_context_menu.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ai-assistant",
+                "id": "def-public.UseConversationContextMenuResult.deleteConversation.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_conversation_context_menu.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ai-assistant",
+            "id": "def-public.UseConversationContextMenuResult.copyConversationToClipboard",
+            "type": "Function",
+            "tags": [],
+            "label": "copyConversationToClipboard",
+            "description": [],
+            "signature": [
+              "(conversation: ",
+              {
+                "pluginId": "observabilityAIAssistant",
+                "scope": "common",
+                "docId": "kibObservabilityAIAssistantPluginApi",
+                "section": "def-common.Conversation",
+                "text": "Conversation"
+              },
+              ") => void"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_conversation_context_menu.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ai-assistant",
+                "id": "def-public.UseConversationContextMenuResult.copyConversationToClipboard.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "conversation",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "observabilityAIAssistant",
+                    "scope": "common",
+                    "docId": "kibObservabilityAIAssistantPluginApi",
+                    "section": "def-common.Conversation",
+                    "text": "Conversation"
+                  }
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_conversation_context_menu.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ai-assistant",
+            "id": "def-public.UseConversationContextMenuResult.copyUrl",
+            "type": "Function",
+            "tags": [],
+            "label": "copyUrl",
+            "description": [],
+            "signature": [
+              "(id: string) => void"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_conversation_context_menu.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ai-assistant",
+                "id": "def-public.UseConversationContextMenuResult.copyUrl.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_conversation_context_menu.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ai-assistant",
+            "id": "def-public.UseConversationContextMenuResult.archiveConversation",
+            "type": "Function",
+            "tags": [],
+            "label": "archiveConversation",
+            "description": [],
+            "signature": [
+              "(id: string, isArchived: boolean) => Promise<",
+              {
+                "pluginId": "observabilityAIAssistant",
+                "scope": "common",
+                "docId": "kibObservabilityAIAssistantPluginApi",
+                "section": "def-common.Conversation",
+                "text": "Conversation"
+              },
+              ">"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_conversation_context_menu.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ai-assistant",
+                "id": "def-public.UseConversationContextMenuResult.archiveConversation.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_conversation_context_menu.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/ai-assistant",
+                "id": "def-public.UseConversationContextMenuResult.archiveConversation.$2",
+                "type": "boolean",
+                "tags": [],
+                "label": "isArchived",
+                "description": [],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_conversation_context_menu.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ai-assistant",
         "id": "def-public.UseKnowledgeBaseResult",
         "type": "Interface",
         "tags": [],
@@ -1141,14 +1840,106 @@
             "label": "status",
             "description": [],
             "signature": [
-              "State<{ errorMessage?: string | undefined; ready: boolean; enabled: boolean; endpoint?: Partial<",
+              "State<{ errorMessage?: string | undefined; enabled: boolean; endpoint?: ",
               "InferenceInferenceEndpointInfo",
-              "> | undefined; model_stats?: { deployment_state: ",
-              "MlDeploymentAssignmentState",
-              " | undefined; allocation_state: ",
-              "MlDeploymentAllocationState",
-              " | undefined; } | undefined; }> & { refresh: () => void; }"
+              " | undefined; modelStats?: Partial<",
+              "MlTrainedModelStats",
+              "> | undefined; kbState: ",
+              {
+                "pluginId": "observabilityAIAssistant",
+                "scope": "common",
+                "docId": "kibObservabilityAIAssistantPluginApi",
+                "section": "def-common.KnowledgeBaseState",
+                "text": "KnowledgeBaseState"
+              },
+              "; currentInferenceId?: string | undefined; concreteWriteIndex: string | undefined; isReIndexing: boolean; }> & { refresh: () => void; }"
             ],
+            "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_knowledge_base.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ai-assistant",
+            "id": "def-public.UseKnowledgeBaseResult.isPolling",
+            "type": "boolean",
+            "tags": [],
+            "label": "isPolling",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_knowledge_base.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ai-assistant",
+            "id": "def-public.UseKnowledgeBaseResult.install",
+            "type": "Function",
+            "tags": [],
+            "label": "install",
+            "description": [],
+            "signature": [
+              "(inferenceId: string) => Promise<void>"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_knowledge_base.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ai-assistant",
+                "id": "def-public.UseKnowledgeBaseResult.install.$1",
+                "type": "string",
+                "tags": [],
+                "label": "inferenceId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_knowledge_base.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ai-assistant",
+            "id": "def-public.UseKnowledgeBaseResult.warmupModel",
+            "type": "Function",
+            "tags": [],
+            "label": "warmupModel",
+            "description": [],
+            "signature": [
+              "(inferenceId: string) => Promise<void>"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_knowledge_base.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ai-assistant",
+                "id": "def-public.UseKnowledgeBaseResult.warmupModel.$1",
+                "type": "string",
+                "tags": [],
+                "label": "inferenceId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_knowledge_base.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ai-assistant",
+            "id": "def-public.UseKnowledgeBaseResult.isWarmingUpModel",
+            "type": "boolean",
+            "tags": [],
+            "label": "isWarmingUpModel",
+            "description": [],
             "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_knowledge_base.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -1163,36 +1954,6 @@
             "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_knowledge_base.tsx",
             "deprecated": false,
             "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/ai-assistant",
-            "id": "def-public.UseKnowledgeBaseResult.installError",
-            "type": "Object",
-            "tags": [],
-            "label": "installError",
-            "description": [],
-            "signature": [
-              "Error | undefined"
-            ],
-            "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_knowledge_base.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/ai-assistant",
-            "id": "def-public.UseKnowledgeBaseResult.install",
-            "type": "Function",
-            "tags": [],
-            "label": "install",
-            "description": [],
-            "signature": [
-              "() => Promise<void>"
-            ],
-            "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_knowledge_base.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -1230,6 +1991,18 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/service/create_app_service.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ai-assistant",
+        "id": "def-public.UseGenAIConnectorsResult",
+        "type": "Type",
+        "tags": [],
+        "label": "UseGenAIConnectorsResult",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_genai_connectors.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

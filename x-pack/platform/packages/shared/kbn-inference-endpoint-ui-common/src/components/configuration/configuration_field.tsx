@@ -11,6 +11,7 @@ import {
   EuiAccordion,
   EuiFieldText,
   EuiFieldPassword,
+  EuiFormControlLayout,
   EuiSwitch,
   EuiTextArea,
   EuiFieldNumber,
@@ -24,19 +25,24 @@ interface ConfigurationFieldProps {
   configEntry: ConfigEntryView;
   isLoading: boolean;
   setConfigValue: (value: number | string | boolean | null) => void;
+  isEdit?: boolean;
+  isPreconfigured?: boolean;
 }
 
 interface ConfigInputFieldProps {
   configEntry: ConfigEntryView;
   isLoading: boolean;
   validateAndSetConfigValue: (value: string | boolean) => void;
+  isEdit?: boolean;
+  isPreconfigured?: boolean;
 }
 export const ConfigInputField: React.FC<ConfigInputFieldProps> = ({
   configEntry,
   isLoading,
   validateAndSetConfigValue,
+  isEdit,
 }) => {
-  const { isValid, value, default_value: defaultValue, key } = configEntry;
+  const { isValid, value, default_value: defaultValue, key, updatable } = configEntry;
   const [innerValue, setInnerValue] = useState(
     !value || value.toString().length === 0 ? defaultValue : value
   );
@@ -46,7 +52,7 @@ export const ConfigInputField: React.FC<ConfigInputFieldProps> = ({
   }, [defaultValue, value]);
   return (
     <EuiFieldText
-      disabled={isLoading}
+      disabled={isLoading || (isEdit && !updatable)}
       data-test-subj={`${key}-input`}
       fullWidth
       value={ensureStringType(innerValue)}
@@ -87,15 +93,16 @@ export const ConfigInputTextArea: React.FC<ConfigInputFieldProps> = ({
   isLoading,
   configEntry,
   validateAndSetConfigValue,
+  isEdit,
 }) => {
-  const { isValid, value, default_value: defaultValue, key } = configEntry;
+  const { isValid, value, default_value: defaultValue, key, updatable } = configEntry;
   const [innerValue, setInnerValue] = useState(value ?? defaultValue);
   useEffect(() => {
     setInnerValue(value ?? '');
   }, [defaultValue, value]);
   return (
     <EuiTextArea
-      disabled={isLoading}
+      disabled={isLoading || (isEdit && !updatable)}
       fullWidth
       data-test-subj={`${key}-textarea`}
       value={ensureStringType(innerValue)}
@@ -112,25 +119,38 @@ export const ConfigNumberField: React.FC<ConfigInputFieldProps> = ({
   configEntry,
   isLoading,
   validateAndSetConfigValue,
+  isEdit,
+  isPreconfigured,
 }) => {
-  const { isValid, value, default_value: defaultValue, key } = configEntry;
+  const { isValid, value, default_value: defaultValue, key, updatable } = configEntry;
   const [innerValue, setInnerValue] = useState(value ?? defaultValue);
   useEffect(() => {
     setInnerValue(!value || value.toString().length === 0 ? defaultValue : value);
   }, [defaultValue, value]);
   return (
-    <EuiFieldNumber
+    <EuiFormControlLayout
       fullWidth
-      disabled={isLoading}
-      data-test-subj={`${key}-number`}
-      value={innerValue as number}
-      isInvalid={!isValid}
-      onChange={(event) => {
-        const newValue = isEmpty(event.target.value) ? '0' : event.target.value;
-        setInnerValue(newValue);
-        validateAndSetConfigValue(newValue);
+      clear={{
+        onClick: (e) => {
+          validateAndSetConfigValue('');
+          setInnerValue('');
+        },
       }}
-    />
+    >
+      <EuiFieldNumber
+        min={0}
+        fullWidth
+        disabled={isLoading || (isEdit && !updatable) || isPreconfigured}
+        data-test-subj={`${key}-number`}
+        value={innerValue as number}
+        isInvalid={!isValid}
+        onChange={(event) => {
+          const newValue = isEmpty(event.target.value) ? '0' : event.target.value;
+          setInnerValue(newValue);
+          validateAndSetConfigValue(newValue);
+        }}
+      />
+    </EuiFormControlLayout>
   );
 };
 
@@ -182,6 +202,8 @@ export const ConfigurationField: React.FC<ConfigurationFieldProps> = ({
   configEntry,
   isLoading,
   setConfigValue,
+  isEdit,
+  isPreconfigured,
 }) => {
   const validateAndSetConfigValue = (value: number | string | boolean) => {
     setConfigValue(ensureCorrectTyping(configEntry.type, value));
@@ -197,6 +219,8 @@ export const ConfigurationField: React.FC<ConfigurationFieldProps> = ({
           isLoading={isLoading}
           configEntry={configEntry}
           validateAndSetConfigValue={validateAndSetConfigValue}
+          isEdit={isEdit}
+          isPreconfigured={isPreconfigured}
         />
       );
 
@@ -222,6 +246,7 @@ export const ConfigurationField: React.FC<ConfigurationFieldProps> = ({
           isLoading={isLoading}
           configEntry={configEntry}
           validateAndSetConfigValue={validateAndSetConfigValue}
+          isEdit={isEdit}
         />
       );
   }

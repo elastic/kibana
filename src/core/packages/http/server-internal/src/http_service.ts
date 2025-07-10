@@ -129,6 +129,7 @@ export class HttpService
     this.internalPreboot = {
       externalUrl: new ExternalUrlConfig(config.externalUrl),
       csp: prebootSetup.csp,
+      prototypeHardening: prebootSetup.prototypeHardening,
       staticAssets: prebootSetup.staticAssets,
       basePath: prebootSetup.basePath,
       registerStaticDir: prebootSetup.registerStaticDir.bind(prebootSetup),
@@ -147,7 +148,7 @@ export class HttpService
           this.log,
           prebootServerRequestHandlerContext.createHandler.bind(null, this.coreContext.coreId),
           {
-            isDev: this.env.mode.dev,
+            env: this.env,
             versionedRouterOptions: getVersionedRouterOptions(config),
           }
         );
@@ -185,6 +186,7 @@ export class HttpService
 
     this.internalSetup = {
       ...serverContract,
+      rateLimiter: config.rateLimiter,
       registerOnPostValidation: (cb) => {
         Router.on('onPostValidate', cb);
       },
@@ -196,7 +198,7 @@ export class HttpService
       ) => {
         const enhanceHandler = this.requestHandlerContext!.createHandler.bind(null, pluginId);
         const router = new Router<Context>(path, this.log, enhanceHandler, {
-          isDev: this.env.mode.dev,
+          env: this.env,
           versionedRouterOptions: getVersionedRouterOptions(config),
           pluginId,
         });
@@ -271,7 +273,7 @@ export class HttpService
       version: schema.maybe(schema.string()),
       excludePathsMatching: schema.maybe(stringOrStringArraySchema),
       pathStartsWith: schema.maybe(stringOrStringArraySchema),
-      pluginId: schema.maybe(schema.string()),
+      pluginId: schema.maybe(schema.string()), // i.e. `@kbn/lens-plugin`
     });
 
     server.route({
@@ -302,13 +304,14 @@ export class HttpService
             mergeMap(async () => {
               try {
                 // Potentially quite expensive
-                const result = generateOpenApiDocument(
+                const result = await generateOpenApiDocument(
                   this.httpServer.getRouters({ pluginId: query.pluginId }),
                   {
                     baseUrl,
                     title: 'Kibana HTTP APIs',
                     version: '0.0.0', // TODO get a better version here
                     filters,
+                    env: { serverless: this.env.packageInfo.buildFlavor === 'serverless' },
                   }
                 );
                 return h.response(result);
@@ -321,7 +324,15 @@ export class HttpService
         );
       },
       options: {
-        app: { access: 'public' },
+        app: {
+          access: 'public',
+          security: {
+            authz: {
+              enabled: false,
+              reason: 'Dev only route',
+            },
+          },
+        },
         auth: false,
         cache: {
           privacy: 'public',

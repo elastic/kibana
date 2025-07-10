@@ -56,16 +56,16 @@ export const registerExistingIndicesPath = (router: IRouter): void => {
     .get({
       path: EXISTING_INDICES_PATH,
       access: 'internal',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
     })
     .addVersion(
       {
         version,
-        security: {
-          authz: {
-            enabled: false,
-            reason: 'This route is opted out from authorization',
-          },
-        },
         validate: {
           request: {
             query: schema.object({

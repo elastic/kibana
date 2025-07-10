@@ -7,13 +7,15 @@
 
 import { JsonOutputParser } from '@langchain/core/output_parsers';
 import type { RuleMigrationsRetriever } from '../../../../../retrievers';
+import type { SiemMigrationTelemetryClient } from '../../../../../rule_migrations_telemetry_client';
 import type { ChatModel } from '../../../../../util/actions_client_chat';
+import { cleanMarkdown, generateAssistantComment } from '../../../../../util/comments';
 import type { GraphNode } from '../../types';
 import { MATCH_INTEGRATION_PROMPT } from './prompts';
-import { cleanMarkdown } from '../../../../../util/comments';
 
 interface GetRetrieveIntegrationsNodeParams {
   model: ChatModel;
+  telemetryClient: SiemMigrationTelemetryClient;
   ruleMigrationsRetriever: RuleMigrationsRetriever;
 }
 
@@ -25,13 +27,19 @@ interface GetMatchedIntegrationResponse {
 export const getRetrieveIntegrationsNode = ({
   model,
   ruleMigrationsRetriever,
+  telemetryClient,
 }: GetRetrieveIntegrationsNodeParams): GraphNode => {
   return async (state) => {
     const query = state.semantic_query;
-
-    const integrations = await ruleMigrationsRetriever.integrations.getIntegrations(query);
+    const integrations = await ruleMigrationsRetriever.integrations.search(query);
     if (integrations.length === 0) {
-      return { comments: ['## Integration Matching Summary\nNo related integration found.'] };
+      telemetryClient.reportIntegrationsMatch({
+        preFilterIntegrations: [],
+      });
+      const comment = '## Integration Matching Summary\n\nNo related integration found.';
+      return {
+        comments: [generateAssistantComment(comment)],
+      };
     }
 
     const outputParser = new JsonOutputParser();
@@ -54,11 +62,16 @@ export const getRetrieveIntegrationsNode = ({
       integrations: integrationsJson,
       splunk_rule: JSON.stringify(splunkRule, null, 2),
     })) as GetMatchedIntegrationResponse;
-
-    const comments = response.summary ? [cleanMarkdown(response.summary)] : undefined;
+    const comments = response.summary
+      ? [generateAssistantComment(cleanMarkdown(response.summary))]
+      : undefined;
 
     if (response.match) {
       const matchedIntegration = integrations.find((r) => r.title === response.match);
+      telemetryClient.reportIntegrationsMatch({
+        preFilterIntegrations: integrations,
+        postFilterIntegration: matchedIntegration,
+      });
       if (matchedIntegration) {
         return { integration: matchedIntegration, comments };
       }

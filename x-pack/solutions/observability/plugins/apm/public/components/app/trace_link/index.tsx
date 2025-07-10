@@ -29,7 +29,7 @@ export function TraceLink() {
   const timeRange = dataService.query.timefilter.timefilter.getTime();
   const {
     path: { traceId },
-    query: { rangeFrom = timeRange.from, rangeTo = timeRange.to },
+    query: { rangeFrom = timeRange.from, rangeTo = timeRange.to, waterfallItemId },
   } = useApmParams('/link-to/trace/{traceId}');
 
   const { start, end } = useTimeRange({
@@ -53,6 +53,7 @@ export function TraceLink() {
           transaction: data.transaction,
           rangeFrom,
           rangeTo,
+          waterfallItemId,
         })
       : getRedirectToTracePageUrl({ traceId, rangeFrom, rangeTo });
     return <Redirect to={to} />;

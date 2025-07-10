@@ -10,7 +10,7 @@ import { buildPhrasesFilter, PhrasesFilter } from '@kbn/es-query';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiLink, EuiSpacer, EuiText, EuiButton } from '@elastic/eui';
 import { DataView } from '@kbn/data-views-plugin/common';
 import {
   APPS_WITH_DEPRECATION_LOGS,
@@ -25,6 +25,8 @@ import { DEPRECATION_LOGS_INDEX_PATTERN } from '../../../../../common/constants'
 interface Props {
   checkpoint: string;
   deprecationDataView: DataView;
+  isButtonFormat: boolean;
+  showInfoParagraph: boolean;
 }
 
 export const getDeprecationDataView = async (dataService: DataPublicPluginStart) => {
@@ -56,7 +58,11 @@ export const getDeprecationDataView = async (dataService: DataPublicPluginStart)
   }
 };
 
-const DiscoverAppLink: FunctionComponent<Props> = ({ checkpoint, deprecationDataView }) => {
+const DiscoverAppLink: FunctionComponent<Omit<Props, 'showInfoParagraph'>> = ({
+  checkpoint,
+  deprecationDataView,
+  isButtonFormat,
+}) => {
   const {
     services: { data: dataService },
     plugins: { share },
@@ -104,25 +110,39 @@ const DiscoverAppLink: FunctionComponent<Props> = ({ checkpoint, deprecationData
     return null;
   }
 
-  return (
+  const handleClick = () => {
+    uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, UIM_DISCOVER_CLICK);
+  };
+
+  const content = (
+    <FormattedMessage
+      id="xpack.upgradeAssistant.overview.viewDiscoverResultsAction"
+      defaultMessage="Analyze logs in Discover"
+    />
+  );
+
+  return isButtonFormat ? (
     // eslint-disable-next-line @elastic/eui/href-or-on-click
-    <EuiLink
+    <EuiButton
       href={discoveryUrl}
-      onClick={() => {
-        uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, UIM_DISCOVER_CLICK);
-      }}
-      data-test-subj="viewDiscoverLogs"
+      onClick={handleClick}
+      data-test-subj="viewDiscoverLogsButton"
+      fill
     >
-      <FormattedMessage
-        id="xpack.upgradeAssistant.overview.viewDiscoverResultsAction"
-        defaultMessage="Analyze logs in Discover"
-      />
+      {content}
+    </EuiButton>
+  ) : (
+    // eslint-disable-next-line @elastic/eui/href-or-on-click
+    <EuiLink href={discoveryUrl} onClick={handleClick} data-test-subj="viewDiscoverLogs">
+      <EuiText> {content}</EuiText>
     </EuiLink>
   );
 };
 
-export const ExternalLinks: FunctionComponent<Omit<Props, 'deprecationDataView'>> = ({
+export const DiscoverExternalLinks: FunctionComponent<Omit<Props, 'deprecationDataView'>> = ({
   checkpoint,
+  showInfoParagraph,
+  isButtonFormat,
 }) => {
   const {
     services: { data: dataService },
@@ -140,19 +160,27 @@ export const ExternalLinks: FunctionComponent<Omit<Props, 'deprecationDataView'>
   }, [dataService, checkpoint, share.url.locators]);
 
   return (
-    <>
-      <EuiText size="s">
-        <p>
-          <FormattedMessage
-            id="xpack.upgradeAssistant.overview.observe.discoveryDescription"
-            defaultMessage="Search and filter the deprecation logs to understand the types of changes you need to make."
-          />
-        </p>
-      </EuiText>
-      <EuiSpacer size="m" />
+    <React.Fragment>
+      {showInfoParagraph && (
+        <>
+          <EuiText>
+            <p>
+              <FormattedMessage
+                id="xpack.upgradeAssistant.overview.observe.discoveryDescription"
+                defaultMessage="Search and filter the deprecation logs to understand the types of changes you need to make."
+              />
+            </p>
+          </EuiText>
+          <EuiSpacer size="m" />
+        </>
+      )}
       {deprecationDataView ? (
-        <DiscoverAppLink checkpoint={checkpoint} deprecationDataView={deprecationDataView} />
+        <DiscoverAppLink
+          checkpoint={checkpoint}
+          deprecationDataView={deprecationDataView}
+          isButtonFormat={isButtonFormat}
+        />
       ) : null}
-    </>
+    </React.Fragment>
   );
 };

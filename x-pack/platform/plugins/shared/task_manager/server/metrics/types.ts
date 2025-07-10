@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TaskLifecycleEvent } from '../polling_lifecycle';
+import type { TaskLifecycleEvent } from '../polling_lifecycle';
 
 export interface ITaskMetricsAggregator<T> {
   initialMetric: () => T;

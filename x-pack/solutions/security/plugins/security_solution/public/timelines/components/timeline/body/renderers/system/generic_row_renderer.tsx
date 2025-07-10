@@ -39,12 +39,11 @@ export const createGenericSystemRowRenderer = ({
       action.toLowerCase() === actionName
     );
   },
-  renderRow: ({ data, isDraggable, scopeId }) => (
+  renderRow: ({ data, scopeId }) => (
     <RowRendererContainer>
       <SystemGenericDetails
         contextId={`${actionName}-${scopeId}`}
         data={data}
-        isDraggable={isDraggable}
         text={text}
         timelineId={scopeId}
       />
@@ -70,15 +69,14 @@ export const createEndgameProcessRowRenderer = ({
       action?.toLowerCase() === actionName
     );
   },
-  renderRow: ({ data, isDraggable, scopeId }) => (
+  renderRow: ({ data, scopeId }) => (
     <RowRendererContainer>
       <SystemGenericFileDetails
         data={data}
         contextId={`endgame-process-${actionName}-${scopeId}`}
-        isDraggable={isDraggable}
         showMessage={false}
         text={text}
-        timelineId={scopeId}
+        scopeId={scopeId}
       />
     </RowRendererContainer>
   ),
@@ -101,15 +99,14 @@ export const createFimRowRenderer = ({
       action?.toLowerCase() === actionName
     );
   },
-  renderRow: ({ data, isDraggable, scopeId }) => (
+  renderRow: ({ data, scopeId }) => (
     <RowRendererContainer>
       <SystemGenericFileDetails
         data={data}
         contextId={`fim-${actionName}-${scopeId}`}
-        isDraggable={isDraggable}
         showMessage={false}
         text={text}
-        timelineId={scopeId}
+        scopeId={scopeId}
       />
     </RowRendererContainer>
   ),
@@ -150,17 +147,16 @@ export const createEndpointAlertsRowRenderer = ({
       eventActionMatches
     );
   },
-  renderRow: ({ data, isDraggable, scopeId }) => (
+  renderRow: ({ data, scopeId }) => (
     <RowRendererContainer>
       <SystemGenericFileDetails
         contextId={`endpoint-alerts-row-renderer-${eventAction}-${eventCategory}-${eventType}-${scopeId}`}
         data={data}
-        isDraggable={isDraggable}
         showMessage={false}
         skipRedundantFileDetails={skipRedundantFileDetails}
         skipRedundantProcessDetails={skipRedundantProcessDetails}
         text={text}
-        timelineId={scopeId}
+        scopeId={scopeId}
       />
     </RowRendererContainer>
   ),
@@ -181,15 +177,14 @@ export const createEndpointLibraryRowRenderer = ({
       dataset?.toLowerCase() === 'endpoint.events.library' && action?.toLowerCase() === actionName
     );
   },
-  renderRow: ({ data, isDraggable, scopeId }) => (
+  renderRow: ({ data, scopeId }) => (
     <RowRendererContainer>
       <SystemGenericFileDetails
         contextId={`library-row-renderer-${actionName}-${scopeId}`}
         data={data}
-        isDraggable={isDraggable}
         showMessage={false}
         text={text}
-        timelineId={scopeId}
+        scopeId={scopeId}
       />
     </RowRendererContainer>
   ),
@@ -213,14 +208,13 @@ export const createGenericFileRowRenderer = ({
       action.toLowerCase() === actionName
     );
   },
-  renderRow: ({ data, isDraggable, scopeId }) => (
+  renderRow: ({ data, scopeId }) => (
     <RowRendererContainer>
       <SystemGenericFileDetails
         contextId={`${actionName}-${scopeId}`}
         data={data}
-        isDraggable={isDraggable}
         text={text}
-        timelineId={scopeId}
+        scopeId={scopeId}
       />
     </RowRendererContainer>
   ),
@@ -238,14 +232,13 @@ export const createSocketRowRenderer = ({
     const action: string | null | undefined = get('event.action[0]', ecs);
     return action != null && action.toLowerCase() === actionName;
   },
-  renderRow: ({ data, isDraggable, scopeId }) => (
+  renderRow: ({ data, scopeId }) => (
     <RowRendererContainer>
       <SystemGenericFileDetails
         contextId={`socket-${actionName}-${scopeId}`}
         data={data}
-        isDraggable={isDraggable}
         text={text}
-        timelineId={scopeId}
+        scopeId={scopeId}
       />
     </RowRendererContainer>
   ),
@@ -267,12 +260,11 @@ export const createSecurityEventRowRenderer = ({
       action?.toLowerCase() === actionName
     );
   },
-  renderRow: ({ data, isDraggable, scopeId }) => (
+  renderRow: ({ data, scopeId }) => (
     <RowRendererContainer>
       <EndgameSecurityEventDetails
         contextId={`authentication-${actionName}-${scopeId}`}
         data={data}
-        isDraggable={isDraggable}
         timelineId={scopeId}
       />
     </RowRendererContainer>
@@ -286,12 +278,11 @@ export const createDnsRowRenderer = (): RowRenderer => ({
     const dnsQuestionName: string | null | undefined = get('dns.question.name[0]', ecs);
     return !isNillEmptyOrNotFinite(dnsQuestionType) && !isNillEmptyOrNotFinite(dnsQuestionName);
   },
-  renderRow: ({ data, isDraggable, scopeId }) => (
+  renderRow: ({ data, scopeId }) => (
     <RowRendererContainer>
       <DnsRequestEventDetails
         contextId={`dns-request-${scopeId}`}
         data={data}
-        isDraggable={isDraggable}
         timelineId={scopeId}
       />
     </RowRendererContainer>
@@ -314,13 +305,13 @@ export const createEndpointRegistryRowRenderer = ({
       dataset?.toLowerCase() === 'endpoint.events.registry' && action?.toLowerCase() === actionName
     );
   },
-  renderRow: ({ data, isDraggable, scopeId }) => (
+  renderRow: ({ data, scopeId }) => (
     <RowRendererContainer>
       <RegistryEventDetails
         contextId={`registry-event-${scopeId}`}
         data={data}
-        isDraggable={isDraggable}
         text={text}
+        scopeId={scopeId}
       />
     </RowRendererContainer>
   ),

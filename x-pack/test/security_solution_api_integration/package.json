@@ -17,9 +17,14 @@
     "initialize-server:ea:basic_essentials": "node ./scripts/index.js server entity_analytics basic_license_essentials_tier",
     "run-tests:ea:basic_essentials": "node ./scripts/index.js runner entity_analytics basic_license_essentials_tier",
 
+    "initialize-server:asset_inventory:trial_complete": "node ./scripts/index.js server asset_inventory trial_license_complete_tier",
+    "run-tests:asset_inventory:trial_complete": "node ./scripts/index.js runner asset_inventory trial_license_complete_tier",
+
+    "asset_inventory:entity_store:server:ess": "npm run initialize-server:asset_inventory:trial_complete entity_store ess",
+    "asset_inventory:entity_store:runner:ess": "npm run run-tests:asset_inventory:trial_complete entity_store ess essEnv --",
+
     "initialize-server:dr": "node ./scripts/index.js server detections_response trial_license_complete_tier",
     "run-tests:dr": "node ./scripts/index.js runner detections_response trial_license_complete_tier",
-
 
     "initialize-server:de": "node ./scripts/index.js server detections_response/detection_engine trial_license_complete_tier",
     "run-tests:de": "node ./scripts/index.js runner detections_response/detection_engine trial_license_complete_tier",
@@ -27,8 +32,12 @@
     "initialize-server:de:basic_essentials": "node ./scripts/index.js server detections_response/detection_engine basic_license_essentials_tier",
     "run-tests:de:basic_essentials": "node ./scripts/index.js runner detections_response/detection_engine basic_license_essentials_tier",
 
-    "initialize-server:rm": "node ./scripts/index.js server detections_response/rules_management trial_license_complete_tier ",
+    "initialize-server:rm": "node ./scripts/index.js server detections_response/rules_management trial_license_complete_tier",
     "run-tests:rm": "node ./scripts/index.js runner detections_response/rules_management trial_license_complete_tier",
+    "initialize-server:rm:prebuilt_rules:customization_disabled": "node ./scripts/index.js server detections_response/rules_management/prebuilt_rules/customization_disabled .",
+    "run-tests:rm:prebuilt_rules:customization_disabled": "node ./scripts/index.js runner detections_response/rules_management/prebuilt_rules/customization_disabled .",
+    "initialize-server:rm:prebuilt_rules:customization_enabled": "node ./scripts/index.js server detections_response/rules_management/prebuilt_rules/customization_enabled .",
+    "run-tests:rm:prebuilt_rules:customization_enabled": "node ./scripts/index.js runner detections_response/rules_management/prebuilt_rules/customization_enabled .",
 
     "initialize-server:rm:basic_essentials": "node ./scripts/index.js server detections_response/rules_management basic_license_essentials_tier ",
     "run-tests:rm:basic_essentials": "node ./scripts/index.js runner detections_response/rules_management basic_license_essentials_tier",
@@ -51,6 +60,23 @@
 
     "intialize-server:explore": "node scripts/index.js server explore trial_license_complete_tier",
     "run-tests:explore": "node scripts/index.js runner explore trial_license_complete_tier",
+
+    "initialize-server:siem_migrations:trial_complete": "node ./scripts/index.js server siem_migrations trial_license_complete_tier",
+    "run-tests:siem_migrations:trial_complete": "node ./scripts/index.js runner siem_migrations trial_license_complete_tier",
+
+    "initialize-server:ai4dsoc": "node ./scripts/index.js server ai4dsoc search_ai_lake_tier",
+    "run-tests:ai4dsoc": "node ./scripts/index.js runner ai4dsoc search_ai_lake_tier",
+
+    "ai4dsoc_cases:server:serverless": "npm run initialize-server:ai4dsoc cases serverless",
+    "ai4dsoc_cases:runner:serverless": "npm run run-tests:ai4dsoc cases serverless serverlessEnv",
+    "ai4dsoc_cases:qa:serverless": "npm run run-tests:ai4dsoc cases serverless qaPeriodicEnv",
+
+    "ai4dsoc_nlp_cleanup_task:server:serverless": "npm run initialize-server:ai4dsoc nlp_cleanup_task serverless",
+    "ai4dsoc_nlp_cleanup_task:runner:serverless": "npm run run-tests:ai4dsoc nlp_cleanup_task serverless serverlessEnv",
+    "ai4dsoc_nlp_cleanup_task:qa:serverless": "npm run run-tests:ai4dsoc nlp_cleanup_task serverless qaPeriodicEnv",
+
+    "genai_evals:server:ess": "npm run initialize-server:genai:trial_complete evaluations ess",
+    "genai_evals:runner:ess": "npm run run-tests:genai:trial_complete evaluations ess essEnv",
 
     "genai_kb_entries:server:serverless": "npm run initialize-server:genai:trial_complete knowledge_base/entries serverless",
     "genai_kb_entries:runner:serverless": "npm run run-tests:genai:trial_complete knowledge_base/entries serverless serverlessEnv",
@@ -89,6 +115,13 @@
     "entity_analytics:entity_store:qa:serverless:release": "npm run run-tests:ea:trial_complete entity_store serverless qaEnv",
     "entity_analytics:entity_store:server:ess": "npm run initialize-server:ea:trial_complete entity_store ess",
     "entity_analytics:entity_store:runner:ess": "npm run run-tests:ea:trial_complete entity_store ess essEnv --",
+
+    "entity_analytics:monitoring:server:serverless": "npm run initialize-server:ea:trial_complete monitoring serverless",
+    "entity_analytics:monitoring:runner:serverless": "npm run run-tests:ea:trial_complete monitoring serverless serverlessEnv",
+    "entity_analytics:monitoring:qa:serverless": "npm run run-tests:ea:trial_complete monitoring serverless qaPeriodicEnv",
+    "entity_analytics:monitoring:qa:serverless:release": "npm run run-tests:ea:trial_complete monitoring serverless qaEnv",
+    "entity_analytics:monitoring:server:ess": "npm run initialize-server:ea:trial_complete monitoring ess",
+    "entity_analytics:monitoring:runner:ess": "npm run run-tests:ea:trial_complete monitoring ess essEnv --",
 
     "edr_workflows:artifacts:server:serverless": "npm run initialize-server:edr-workflows artifacts serverless",
     "edr_workflows:artifacts:runner:serverless": "npm run run-tests:edr-workflows artifacts serverless serverlessEnv",
@@ -287,6 +320,16 @@
     "rule_execution_logic:general_logic:server:ess": "npm run initialize-server:de rule_execution_logic/general_logic ess",
     "rule_execution_logic:general_logic:runner:ess": "npm run run-tests:de rule_execution_logic/general_logic ess essEnv",
 
+    "rule_execution_logic:frozen_indices_handling:server:ess": "npm run initialize-server:de rule_execution_logic/frozen_indices_handling ess",
+    "rule_execution_logic:frozen_indices_handling:runner:ess": "npm run run-tests:de rule_execution_logic/frozen_indices_handling ess essEnv",
+
+    "rule_execution_logic:general_logic:essentials:server:serverless": "npm run initialize-server:de:basic_essentials rule_execution_logic/general_logic serverless",
+    "rule_execution_logic:general_logic:essentials:runner:serverless": "npm run run-tests:de:basic_essentials rule_execution_logic/general_logic serverless serverlessEnv",
+    "rule_execution_logic:general_logic:essentials:qa:serverless": "npm run run-tests:de:basic_essentials rule_execution_logic/general_logic serverless qaPeriodicEnv",
+    "rule_execution_logic:general_logic:essentials:qa:serverless:release": "npm run run-tests:de:basic_essentials rule_execution_logic/general_logic serverless qaEnv",
+    "rule_execution_logic:general_logic:basic:server:ess": "npm run initialize-server:de:basic_essentials rule_execution_logic/general_logic ess",
+    "rule_execution_logic:general_logic:basic:runner:ess": "npm run run-tests:de:basic_essentials rule_execution_logic/general_logic ess essEnv",
+
     "rule_execution_logic:indicator_match:server:serverless": "npm run initialize-server:de rule_execution_logic/indicator_match serverless",
     "rule_execution_logic:indicator_match:runner:serverless": "npm run run-tests:de rule_execution_logic/indicator_match serverless serverlessEnv",
     "rule_execution_logic:indicator_match:qa:serverless": "npm run run-tests:de rule_execution_logic/indicator_match serverless qaPeriodicEnv",
@@ -371,33 +414,33 @@
     "rule_patch:basic:server:ess": "npm run initialize-server:rm:basic_essentials rule_patch ess",
     "rule_patch:basic:runner:ess": "npm run run-tests:rm:basic_essentials rule_patch ess essEnv",
 
-    "prebuilt_rules_management:server:serverless": "npm run initialize-server:rm prebuilt_rules/management serverless",
-    "prebuilt_rules_management:runner:serverless": "npm run run-tests:rm prebuilt_rules/management serverless serverlessEnv",
-    "prebuilt_rules_management:qa:serverless": "npm run run-tests:rm prebuilt_rules/management serverless qaPeriodicEnv",
-    "prebuilt_rules_management:qa:serverless:release": "npm run run-tests:rm prebuilt_rules/management serverless qaEnv",
-    "prebuilt_rules_management:server:ess": "npm run initialize-server:rm prebuilt_rules/management ess",
-    "prebuilt_rules_management:runner:ess": "npm run run-tests:rm prebuilt_rules/management ess essEnv",
+    "prebuilt_rules_management:customization_disabled:server:serverless": "npm run initialize-server:rm:prebuilt_rules:customization_disabled . serverless_essentials_tier",
+    "prebuilt_rules_management:customization_disabled:runner:serverless": "npm run run-tests:rm:prebuilt_rules:customization_disabled . serverless_essentials_tier serverlessEnv",
+    "prebuilt_rules_management:customization_disabled:qa:serverless": "npm run run-tests:rm:prebuilt_rules:customization_disabled . serverless_essentials_tier qaPeriodicEnv",
+    "prebuilt_rules_management:customization_disabled:qa:serverless:release": "npm run run-tests:rm:prebuilt_rules:customization_disabled . serverless_essentials_tier qaEnv",
+    "prebuilt_rules_management:customization_disabled:server:ess": "npm run initialize-server:rm:prebuilt_rules:customization_disabled . ess_basic_license",
+    "prebuilt_rules_management:customization_disabled:runner:ess": "npm run run-tests:rm:prebuilt_rules:customization_disabled . ess_basic_license essEnv",
 
-    "prebuilt_rules_bundled_prebuilt_rules_package:server:serverless": "npm run initialize-server:rm prebuilt_rules/bundled_prebuilt_rules_package serverless",
-    "prebuilt_rules_bundled_prebuilt_rules_package:runner:serverless": "npm run run-tests:rm prebuilt_rules/bundled_prebuilt_rules_package serverless serverlessEnv",
-    "prebuilt_rules_bundled_prebuilt_rules_package:qa:serverless": "npm run run-tests:rm prebuilt_rules/bundled_prebuilt_rules_package serverless qaPeriodicEnv",
-    "prebuilt_rules_bundled_prebuilt_rules_package:qa:serverless:release": "npm run run-tests:rm prebuilt_rules/bundled_prebuilt_rules_package serverless qaEnv",
-    "prebuilt_rules_bundled_prebuilt_rules_package:server:ess": "npm run initialize-server:rm prebuilt_rules/bundled_prebuilt_rules_package ess",
-    "prebuilt_rules_bundled_prebuilt_rules_package:runner:ess": "npm run run-tests:rm prebuilt_rules/bundled_prebuilt_rules_package ess essEnv",
+    "prebuilt_rules_management:customization_enabled:server:serverless": "npm run initialize-server:rm:prebuilt_rules:customization_enabled . serverless",
+    "prebuilt_rules_management:customization_enabled:runner:serverless": "npm run run-tests:rm:prebuilt_rules:customization_enabled . serverless serverlessEnv",
+    "prebuilt_rules_management:customization_enabled:qa:serverless": "npm run run-tests:rm:prebuilt_rules:customization_enabled . serverless qaPeriodicEnv",
+    "prebuilt_rules_management:customization_enabled:qa:serverless:release": "npm run run-tests:rm:prebuilt_rules:customization_enabled . serverless qaEnv",
+    "prebuilt_rules_management:customization_enabled:server:ess": "npm run initialize-server:rm:prebuilt_rules:customization_enabled . ess",
+    "prebuilt_rules_management:customization_enabled:runner:ess": "npm run run-tests:rm:prebuilt_rules:customization_enabled . ess essEnv",
 
-    "prebuilt_rules_large_prebuilt_rules_package:server:serverless": "npm run initialize-server:rm prebuilt_rules/large_prebuilt_rules_package serverless",
-    "prebuilt_rules_large_prebuilt_rules_package:runner:serverless": "npm run run-tests:rm prebuilt_rules/large_prebuilt_rules_package serverless serverlessEnv",
-    "prebuilt_rules_large_prebuilt_rules_package:qa:serverless": "npm run run-tests:rm prebuilt_rules/large_prebuilt_rules_package serverless qaPeriodicEnv",
-    "prebuilt_rules_large_prebuilt_rules_package:qa:serverless:release": "npm run run-tests:rm prebuilt_rules/large_prebuilt_rules_package serverless qaEnv",
-    "prebuilt_rules_large_prebuilt_rules_package:server:ess": "npm run initialize-server:rm prebuilt_rules/large_prebuilt_rules_package ess",
-    "prebuilt_rules_large_prebuilt_rules_package:runner:ess": "npm run run-tests:rm prebuilt_rules/large_prebuilt_rules_package ess essEnv",
+    "prebuilt_rules_upgrade_common_fields:customization_enabled:server:serverless": "npm run initialize-server:rm:prebuilt_rules:customization_enabled upgrade_prebuilt_rules/diffable_rule_fields/common_fields serverless",
+    "prebuilt_rules_upgrade_common_fields:customization_enabled:runner:serverless": "npm run run-tests:rm:prebuilt_rules:customization_enabled upgrade_prebuilt_rules/diffable_rule_fields/common_fields serverless serverlessEnv",
+    "prebuilt_rules_upgrade_common_fields:customization_enabled:qa:serverless": "npm run run-tests:rm:prebuilt_rules:customization_enabled upgrade_prebuilt_rules/diffable_rule_fields/common_fields serverless qaPeriodicEnv",
+    "prebuilt_rules_upgrade_common_fields:customization_enabled:qa:serverless:release": "npm run run-tests:rm:prebuilt_rules:customization_enabled upgrade_prebuilt_rules/diffable_rule_fields/common_fields serverless qaEnv",
+    "prebuilt_rules_upgrade_common_fields:customization_enabled:server:ess": "npm run initialize-server:rm:prebuilt_rules:customization_enabled upgrade_prebuilt_rules/diffable_rule_fields/common_fields ess",
+    "prebuilt_rules_upgrade_common_fields:customization_enabled:runner:ess": "npm run run-tests:rm:prebuilt_rules:customization_enabled upgrade_prebuilt_rules/diffable_rule_fields/common_fields ess essEnv",
 
-    "prebuilt_rules_update_prebuilt_rules_package:server:serverless": "npm run initialize-server:rm prebuilt_rules/update_prebuilt_rules_package serverless",
-    "prebuilt_rules_update_prebuilt_rules_package:runner:serverless": "npm run run-tests:rm prebuilt_rules/update_prebuilt_rules_package serverless serverlessEnv",
-    "prebuilt_rules_update_prebuilt_rules_package:qa:serverless": "npm run run-tests:rm prebuilt_rules/update_prebuilt_rules_package serverless qaPeriodicEnv",
-    "prebuilt_rules_update_prebuilt_rules_package:qa:serverless:release": "npm run run-tests:rm prebuilt_rules/update_prebuilt_rules_package serverless qaEnv",
-    "prebuilt_rules_update_prebuilt_rules_package:server:ess": "npm run initialize-server:rm prebuilt_rules/update_prebuilt_rules_package ess",
-    "prebuilt_rules_update_prebuilt_rules_package:runner:ess": "npm run run-tests:rm prebuilt_rules/update_prebuilt_rules_package ess essEnv",
+    "prebuilt_rules_upgrade_type_specific_fields:customization_enabled:server:serverless": "npm run initialize-server:rm:prebuilt_rules:customization_enabled upgrade_prebuilt_rules/diffable_rule_fields/type_specific_fields serverless",
+    "prebuilt_rules_upgrade_type_specific_fields:customization_enabled:runner:serverless": "npm run run-tests:rm:prebuilt_rules:customization_enabled upgrade_prebuilt_rules/diffable_rule_fields/type_specific_fields serverless serverlessEnv",
+    "prebuilt_rules_upgrade_type_specific_fields:customization_enabled:qa:serverless": "npm run run-tests:rm:prebuilt_rules:customization_enabled upgrade_prebuilt_rules/diffable_rule_fields/type_specific_fields serverless qaPeriodicEnv",
+    "prebuilt_rules_upgrade_type_specific_fields:customization_enabled:qa:serverless:release": "npm run run-tests:rm:prebuilt_rules:customization_enabled upgrade_prebuilt_rules/diffable_rule_fields/type_specific_fields serverless qaEnv",
+    "prebuilt_rules_upgrade_type_specific_fields:customization_enabled:server:ess": "npm run initialize-server:rm:prebuilt_rules:customization_enabled upgrade_prebuilt_rules/diffable_rule_fields/type_specific_fields ess",
+    "prebuilt_rules_upgrade_type_specific_fields:customization_enabled:runner:ess": "npm run run-tests:rm:prebuilt_rules:customization_enabled upgrade_prebuilt_rules/diffable_rule_fields/type_specific_fields ess essEnv",
 
     "rule_delete:server:serverless": "npm run initialize-server:rm rule_delete serverless",
     "rule_delete:runner:serverless": "npm run run-tests:rm rule_delete serverless serverlessEnv",
@@ -517,6 +560,13 @@
     "explore:users:runner:qa:serverless": "npm run run-tests:explore users serverless qaPeriodicEnv",
     "explore:users:runner:qa:serverless:release": "npm run run-tests:explore users serverless qaEnv",
     "explore:users:server:ess": "npm run intialize-server:explore users ess",
-    "explore:users:runner:ess": "npm run run-tests:explore users ess essEnv"
+    "explore:users:runner:ess": "npm run run-tests:explore users ess essEnv",
+
+    "siem_migrations_rules:server:serverless": "npm run initialize-server:siem_migrations:trial_complete rules serverless",
+    "siem_migrations_rules:runner:serverless": "npm run run-tests:siem_migrations:trial_complete rules serverless serverlessEnv",
+    "siem_migrations_rules:qa:serverless": "npm run run-tests:siem_migrations:trial_complete rules serverless qaPeriodicEnv",
+    "siem_migrations_rules:qa:serverless:release": "npm run run-tests:siem_migrations:trial_complete rules serverless qaEnv",
+    "siem_migrations_rules:server:ess": "npm run initialize-server:siem_migrations:trial_complete rules ess",
+    "siem_migrations_rules:runner:ess": "npm run run-tests:siem_migrations:trial_complete rules ess essEnv"
   }
 }

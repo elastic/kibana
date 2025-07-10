@@ -25,9 +25,10 @@ const registerUsageCountersRollupsMock = registerUsageCountersRollups as jest.Mo
   typeof registerUsageCountersRollups
 >;
 
-const tick = () => {
+// optionally advance test timers after a delay
+const tickWithDelay = (delay = 1) => {
   jest.useRealTimers();
-  return new Promise((resolve) => setTimeout(resolve, 1));
+  return new Promise((resolve) => setTimeout(resolve, delay));
 };
 
 describe('UsageCountersService', () => {
@@ -188,51 +189,62 @@ describe('UsageCountersService', () => {
       ]
     `);
   });
+  //  requires extended test runtime because of exponential backoff delay for retries
+  it(
+    'retries errors by `retryCount` times before failing to store',
+    async () => {
+      const retryConst = 2;
+      const usageCountersService = new UsageCountersService({
+        logger,
+        retryCount: retryConst,
+        bufferDurationMs: 50000,
+      });
 
-  it('retries errors by `retryCount` times before failing to store', async () => {
-    const usageCountersService = new UsageCountersService({
-      logger,
-      retryCount: 1,
-      bufferDurationMs,
-    });
+      const mockRepository = coreStart.savedObjects.createInternalRepository();
+      const mockError = new Error('failed');
+      const mockIncrementCounter = jest.fn().mockImplementation((_, key) => {
+        switch (key) {
+          case 'test-counter:counterA:count:server:20210409':
+            throw mockError;
+          case 'test-counter:counterB:count:server:20210409':
+            return 'pass';
+          default:
+            throw new Error(`unknown key ${key}`);
+        }
+      });
 
-    const mockRepository = coreStart.savedObjects.createInternalRepository();
-    const mockError = new Error('failed.');
-    const mockIncrementCounter = jest.fn().mockImplementation((_, key) => {
-      switch (key) {
-        case 'test-counter:counterA:count:server:20210409':
-          throw mockError;
-        case 'test-counter:counterB:count:server:20210409':
-          return 'pass';
-        default:
-          throw new Error(`unknown key ${key}`);
-      }
-    });
+      mockRepository.incrementCounter = mockIncrementCounter;
 
-    mockRepository.incrementCounter = mockIncrementCounter;
+      coreStart.savedObjects.createInternalRepository.mockReturnValue(mockRepository);
+      const { createUsageCounter } = usageCountersService.setup(coreSetup);
+      jest.useFakeTimers();
+      const usageCounter = createUsageCounter('test-counter');
 
-    coreStart.savedObjects.createInternalRepository.mockReturnValue(mockRepository);
-    const { createUsageCounter } = usageCountersService.setup(coreSetup);
-    jest.useFakeTimers();
-    const usageCounter = createUsageCounter('test-counter');
+      usageCountersService.start(coreStart);
+      usageCounter.incrementCounter({ counterName: 'counterA' });
+      usageCounter.incrementCounter({ counterName: 'counterB' });
+      jest.runOnlyPendingTimers();
 
-    usageCountersService.start(coreStart);
-    usageCounter.incrementCounter({ counterName: 'counterA' });
-    usageCounter.incrementCounter({ counterName: 'counterB' });
-    jest.runOnlyPendingTimers();
-
-    // wait for retries to kick in on next scheduler call
-    await tick();
-    // number of incrementCounter calls + number of retries
-    expect(mockIncrementCounter).toBeCalledTimes(2 + 1);
-    expect(logger.debug).toHaveBeenNthCalledWith(1, 'Store counters into savedObjects', {
-      kibana: {
-        usageCounters: {
-          results: [mockError, 'pass'],
+      // wait for retries to kick in on next scheduler call
+      await tickWithDelay(5000);
+      // number of incrementCounter calls + number of retries
+      expect(mockIncrementCounter).toBeCalledTimes(2 + retryConst);
+      // assert counterA increment error warning logs
+      expect(logger.debug).toHaveBeenNthCalledWith(
+        2,
+        `${mockError}, retrying attempt ${retryConst}`
+      );
+      expect(logger.warn).toHaveBeenNthCalledWith(1, mockError);
+      expect(logger.debug).toHaveBeenNthCalledWith(3, 'Store counters into savedObjects', {
+        kibana: {
+          usageCounters: {
+            results: [mockError, 'pass'],
+          },
         },
-      },
-    });
-  });
+      });
+    },
+    10 * 1000
+  );
 
   it('buffers counters within `bufferDurationMs` time', async () => {
     const usageCountersService = new UsageCountersService({
@@ -264,7 +276,7 @@ describe('UsageCountersService', () => {
     jest.runOnlyPendingTimers();
 
     // wait for debounce to kick in on next scheduler call
-    await tick();
+    await tickWithDelay();
     expect(mockIncrementCounter).toBeCalledTimes(2);
     expect(mockIncrementCounter.mock.results.map(({ value }) => value)).toMatchInlineSnapshot(`
       Array [

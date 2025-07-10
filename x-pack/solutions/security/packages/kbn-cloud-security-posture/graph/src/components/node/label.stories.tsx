@@ -9,8 +9,9 @@ import React from 'react';
 import { ThemeProvider } from '@emotion/react';
 import { pick } from 'lodash';
 import { ReactFlow, Controls, Background } from '@xyflow/react';
-import { Story } from '@storybook/react';
+import type { StoryFn, StoryObj } from '@storybook/react';
 import { NodeViewModel } from '../types';
+import { GlobalStylesStorybookDecorator } from '../../../.storybook/decorators';
 import { HexagonNode, PentagonNode, EllipseNode, RectangleNode, DiamondNode, LabelNode } from '.';
 
 import '@xyflow/react/dist/style.css';
@@ -29,6 +30,7 @@ export default {
     },
     expandButtonClick: { action: 'expandButtonClick' },
   },
+  decorators: [GlobalStylesStorybookDecorator],
 };
 
 const nodeTypes = {
@@ -40,7 +42,7 @@ const nodeTypes = {
   label: LabelNode,
 };
 
-const Template: Story<NodeViewModel> = (args: NodeViewModel) => (
+const Template: StoryFn<NodeViewModel> = (args: NodeViewModel) => (
   <ThemeProvider theme={{ darkMode: false }}>
     <ReactFlow
       fitView
@@ -61,57 +63,67 @@ const Template: Story<NodeViewModel> = (args: NodeViewModel) => (
   </ThemeProvider>
 );
 
-export const ShortLabel = Template.bind({});
+export const ShortLabel: StoryObj<NodeViewModel> = {
+  render: Template,
 
-ShortLabel.args = {
-  id: 'siem-windows',
-  label: '',
-  color: 'primary',
-  shape: 'hexagon',
-  icon: 'okta',
-  interactive: true,
+  args: {
+    id: 'siem-windows',
+    label: '',
+    color: 'primary',
+    shape: 'hexagon',
+    icon: 'okta',
+    interactive: true,
+  },
 };
 
-export const ArnLabel = Template.bind({});
+export const ArnLabel: StoryObj<NodeViewModel> = {
+  render: Template,
 
-ArnLabel.args = {
-  id: 'siem-windows',
-  label: 'arn:aws:iam::1234567890:user/lorem-ipsumdol-sitamet-user-1234',
-  color: 'primary',
-  shape: 'hexagon',
-  icon: 'okta',
-  interactive: true,
+  args: {
+    id: 'siem-windows',
+    label: 'arn:aws:iam::1234567890:user/lorem-ipsumdol-sitamet-user-1234',
+    color: 'primary',
+    shape: 'hexagon',
+    icon: 'okta',
+    interactive: true,
+  },
 };
 
-export const DashedLabel = Template.bind({});
+export const DashedLabel: StoryObj<NodeViewModel> = {
+  render: Template,
 
-DashedLabel.args = {
-  id: 'siem-windows',
-  label: 'lore-ipsumdol-sitameta-consectetu-adipis342',
-  color: 'primary',
-  shape: 'hexagon',
-  icon: 'okta',
-  interactive: true,
+  args: {
+    id: 'siem-windows',
+    label: 'lore-ipsumdol-sitameta-consectetu-adipis342',
+    color: 'primary',
+    shape: 'hexagon',
+    icon: 'okta',
+    interactive: true,
+  },
 };
 
-export const NoSpacesLabel = Template.bind({});
+export const NoSpacesLabel: StoryObj<NodeViewModel> = {
+  render: Template,
 
-NoSpacesLabel.args = {
-  id: 'siem-windows',
-  label: 'LoremIpsumDolorSitAmetConsectetur123',
-  color: 'primary',
-  shape: 'hexagon',
-  icon: 'okta',
-  interactive: true,
+  args: {
+    id: 'siem-windows',
+    label: 'LoremIpsumDolorSitAmetConsectetur123',
+    color: 'primary',
+    shape: 'hexagon',
+    icon: 'okta',
+    interactive: true,
+  },
 };
 
-export const NoSpacesAllLoweredLabel = Template.bind({});
+export const NoSpacesAllLoweredLabel: StoryObj<NodeViewModel> = {
+  render: Template,
 
-NoSpacesAllLoweredLabel.args = {
-  id: 'siem-windows',
-  label: 'loremipsumdolorsitametconsectetur123',
-  color: 'primary',
-  shape: 'hexagon',
-  icon: 'okta',
-  interactive: true,
+  args: {
+    id: 'siem-windows',
+    label: 'loremipsumdolorsitametconsectetur123',
+    color: 'primary',
+    shape: 'hexagon',
+    icon: 'okta',
+    interactive: true,
+  },
 };

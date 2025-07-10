@@ -25,6 +25,11 @@ import {
   generateMultipleCspFindings,
   rulesGetStatesHandler,
 } from './configurations.handlers.mock';
+import { useExpandableFlyoutCsp } from '../../common/hooks/use_expandable_flyout_csp';
+
+jest.mock('../../common/hooks/use_expandable_flyout_csp', () => ({
+  useExpandableFlyoutCsp: jest.fn(),
+}));
 
 const server = setupMockServer();
 
@@ -40,6 +45,10 @@ const renderFindingsPage = (dependencies = getMockServerDependencies()) => {
 describe('<Findings />', () => {
   startMockServer(server);
 
+  (useExpandableFlyoutCsp as jest.Mock).mockReturnValue({
+    onExpandDocClick: jest.fn(),
+  });
+
   beforeEach(() => {
     server.use(rulesGetStatesHandler);
   });
@@ -51,6 +60,24 @@ describe('<Findings />', () => {
     expect(screen.getByText(/loading/i)).toBeInTheDocument();
     await waitFor(() => expect(screen.getByText(/add cspm integration/i)).toBeInTheDocument());
     expect(screen.getByText(/add kspm integration/i)).toBeInTheDocument();
+  });
+
+  it('verifies CSPM and KSPM integration buttons have link and are clickable', async () => {
+    server.use(statusHandlers.notInstalledHandler);
+    renderFindingsPage();
+
+    expect(screen.getByText(/loading/i)).toBeInTheDocument();
+    const cspmButton = await waitFor(() =>
+      screen.getByRole('link', { name: /add cspm integration/i })
+    );
+    const kspmButton = await waitFor(() =>
+      screen.getByRole('link', { name: /add kspm integration/i })
+    );
+
+    expect(cspmButton).toHaveAttribute('href', expect.stringContaining('add-integration/cspm'));
+    expect(cspmButton).toBeEnabled();
+    expect(kspmButton).toHaveAttribute('href', expect.stringContaining('add-integration/kspm'));
+    expect(kspmButton).toBeEnabled();
   });
 
   it("renders the 'latest misconfigurations findings' DataTable component when the CSPM/KSPM integration status is not installed but there are findings", async () => {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, useState, useEffect } from 'react';
 import { useRouteMatch, useLocation } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiText, EuiSpacer } from '@elastic/eui';
@@ -23,10 +23,12 @@ import {
   useBreadcrumbs,
   useStartServices,
   useIntraAppState,
+  useUrlParams,
+  sendGetAgentTags,
 } from '../../../hooks';
 import { WithHeaderLayout } from '../../../layouts';
 
-import { ExperimentalFeaturesService } from '../../../services';
+import { TagsAddRemove } from '../agent_list_page/components';
 
 import { AgentRefreshContext } from './hooks';
 import {
@@ -35,13 +37,15 @@ import {
   AgentDetailsContent,
   AgentDiagnosticsTab,
 } from './components';
+import { AgentSettings } from './components/agent_settings';
 
 export const AgentDetailsPage: React.FunctionComponent = () => {
   const {
     params: { agentId, tabId = '' },
   } = useRouteMatch<{ agentId: string; tabId?: string }>();
   const { getHref } = useLink();
-  const { displayAgentMetrics } = ExperimentalFeaturesService.get();
+  const { urlParams } = useUrlParams();
+  const showAgentless = urlParams.showAgentless === 'true';
   const {
     isLoading,
     isInitialRequest,
@@ -51,7 +55,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
   } = useGetOneAgent(agentId, {
     pollIntervalMs: 5000,
     query: {
-      withMetrics: displayAgentMetrics,
+      withMetrics: true,
     },
   });
   const {
@@ -62,6 +66,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
 
   const {
     application: { navigateToApp },
+    notifications,
   } = useStartServices();
   const routeState = useIntraAppState<AgentDetailsReassignPolicyAction>();
   const queryParams = new URLSearchParams(useLocation().search);
@@ -72,9 +77,13 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
       navigateToApp(routeState.onDoneNavigateTo[0], routeState.onDoneNavigateTo[1]);
     }
   }, [routeState, navigateToApp]);
-  const { diagnosticFileUploadEnabled } = ExperimentalFeaturesService.get();
 
-  const host = agentData?.item?.local_metadata?.host;
+  const agent =
+    agentData?.item &&
+    (showAgentless || !agentData.item.local_metadata?.host?.hostname?.startsWith('agentless-')) // Hide agentless agents
+      ? agentData.item
+      : null;
+  const host = agent && agent.local_metadata?.host;
 
   const headerLeftContent = useMemo(
     () => (
@@ -111,16 +120,47 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
     [host, agentId, getHref, isInitialRequest, isLoading]
   );
 
+  const [tagsPopoverButton, setTagsPopoverButton] = useState<HTMLElement>();
+  const [showTagsAddRemove, setShowTagsAddRemove] = useState(false);
+
+  const [allTags, setAllTags] = useState<string[]>();
+
+  useEffect(() => {
+    // Fetch all tags when the component mounts
+    const fetchTags = async () => {
+      try {
+        const agentTagsResponse = await sendGetAgentTags({
+          showInactive: agent?.status === 'inactive',
+        });
+        if (agentTagsResponse.error) {
+          throw agentTagsResponse.error;
+        }
+        const newAllTags = agentTagsResponse?.data?.items ?? [];
+        setAllTags(newAllTags);
+      } catch (err) {
+        notifications.toasts.addError(err, {
+          title: i18n.translate('xpack.fleet.agentList.errorFetchingTagsTitle', {
+            defaultMessage: 'Error fetching tags',
+          }),
+        });
+      }
+    };
+
+    if (agent?.active) {
+      fetchTags();
+    }
+  }, [setAllTags, notifications, agent]);
+
   const headerRightContent = useMemo(
     () =>
-      agentData && agentData.item ? (
+      agent ? (
         <>
           <EuiSpacer size="m" />
           <EuiFlexGroup justifyContent="flexEnd" alignItems="center" gutterSize="s" direction="row">
             {!isAgentPolicyLoading && (
               <EuiFlexItem grow={false}>
                 <AgentDetailsActionMenu
-                  agent={agentData.item}
+                  agent={agent}
                   agentPolicy={agentPolicyData?.item}
                   assignFlyoutOpenByDefault={openReassignFlyoutOpenByDefault}
                   onCancelReassign={
@@ -128,6 +168,10 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
                       ? reassignCancelClickHandler
                       : undefined
                   }
+                  onAddRemoveTagsClick={(button) => {
+                    setTagsPopoverButton(button);
+                    setShowTagsAddRemove(!showTagsAddRemove);
+                  }}
                 />
               </EuiFlexItem>
             )}
@@ -156,19 +200,25 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
         href: getHref('agent_details_logs', { agentId, tabId: 'logs' }),
         isSelected: tabId === 'logs',
       },
-    ];
-    if (diagnosticFileUploadEnabled) {
-      tabs.push({
+      {
         id: 'diagnostics',
         name: i18n.translate('xpack.fleet.agentDetails.subTabs.diagnosticsTab', {
           defaultMessage: 'Diagnostics',
         }),
         href: getHref('agent_details_diagnostics', { agentId, tabId: 'diagnostics' }),
         isSelected: tabId === 'diagnostics',
-      });
-    }
+      },
+      {
+        id: 'settings',
+        name: i18n.translate('xpack.fleet.agentDetails.subTabs.settingsTab', {
+          defaultMessage: 'Settings',
+        }),
+        href: getHref('agent_details_settings', { agentId, tabId: 'settings' }),
+        isSelected: tabId === 'settings',
+      },
+    ];
     return tabs;
-  }, [getHref, agentId, tabId, diagnosticFileUploadEnabled]);
+  }, [getHref, agentId, tabId]);
 
   return (
     <AgentRefreshContext.Provider
@@ -196,8 +246,27 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
             }
             error={error}
           />
-        ) : agentData && agentData.item ? (
-          <AgentDetailsPageContent agent={agentData.item} agentPolicy={agentPolicyData?.item} />
+        ) : agent ? (
+          <>
+            <AgentDetailsPageContent agent={agent} agentPolicy={agentPolicyData?.item} />
+            {showTagsAddRemove && (
+              <TagsAddRemove
+                agentId={agent?.id!}
+                allTags={allTags ?? []}
+                selectedTags={agent?.tags ?? []}
+                button={tagsPopoverButton!}
+                onTagsUpdated={(tagsToAdd: string[]) => {
+                  sendAgentRequest();
+                  if (tagsToAdd.length > 0) {
+                    setAllTags([...new Set([...(allTags ?? []), ...tagsToAdd])].sort());
+                  }
+                }}
+                onClosePopover={() => {
+                  setShowTagsAddRemove(false);
+                }}
+              />
+            )}
+          </>
         ) : (
           <Error
             title={
@@ -242,6 +311,12 @@ const AgentDetailsPageContent: React.FunctionComponent<{
         path={FLEET_ROUTING_PATHS.agent_details_diagnostics}
         render={() => {
           return <AgentDiagnosticsTab agent={agent} />;
+        }}
+      />
+      <Route
+        path={FLEET_ROUTING_PATHS.agent_details_settings}
+        render={() => {
+          return <AgentSettings agent={agent} agentPolicy={agentPolicy} />;
         }}
       />
       <Route

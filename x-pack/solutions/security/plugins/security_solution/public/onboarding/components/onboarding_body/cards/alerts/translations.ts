@@ -18,7 +18,7 @@ export const ALERTS_CARD_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.onboarding.alertsCard.description',
   {
     defaultMessage:
-      'Visualize, sort, filter, and investigate alerts from across your infrastructure. Examine individual alerts of interest, and discover general patterns in alert volume and severity.',
+      'Visualize, sort, filter, and investigate alerts from across your infrastructure.',
   }
 );
 
@@ -40,5 +40,12 @@ export const ALERTS_CARD_VIEW_ALERTS_BUTTON = i18n.translate(
   'xpack.securitySolution.onboarding.alertsCard.viewAlertsButton',
   {
     defaultMessage: 'View alerts',
+  }
+);
+
+export const ALERTS_CARD_STEP_SELECTOR_TITLE = i18n.translate(
+  'xpack.securitySolution.onboarding.alertsCard.stepSelectorTitle',
+  {
+    defaultMessage: 'Here are four ways to use alerts',
   }
 );

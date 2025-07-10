@@ -40,7 +40,15 @@ Array [
   },
   Object {
     "cost": 1,
+    "taskType": "actions:.inference",
+  },
+  Object {
+    "cost": 1,
     "taskType": "actions:.jira",
+  },
+  Object {
+    "cost": 1,
+    "taskType": "actions:.microsoft_defender_endpoint",
   },
   Object {
     "cost": 1,
@@ -113,6 +121,10 @@ Array [
   Object {
     "cost": 1,
     "taskType": "actions:.xmatters",
+  },
+  Object {
+    "cost": 1,
+    "taskType": "actions:.xsoar",
   },
   Object {
     "cost": 10,

@@ -436,6 +436,62 @@
           },
           {
             "parentPluginId": "expressionMetricVis",
+            "id": "def-common.MetricArguments.secondaryColor",
+            "type": "string",
+            "tags": [],
+            "label": "secondaryColor",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/plugins/shared/chart_expressions/expression_metric/common/types/expression_functions.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressionMetricVis",
+            "id": "def-common.MetricArguments.secondaryTrendVisuals",
+            "type": "string",
+            "tags": [],
+            "label": "secondaryTrendVisuals",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/plugins/shared/chart_expressions/expression_metric/common/types/expression_functions.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressionMetricVis",
+            "id": "def-common.MetricArguments.secondaryTrendBaseline",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "secondaryTrendBaseline",
+            "description": [],
+            "signature": [
+              "string | number | undefined"
+            ],
+            "path": "src/platform/plugins/shared/chart_expressions/expression_metric/common/types/expression_functions.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressionMetricVis",
+            "id": "def-common.MetricArguments.secondaryTrendPalette",
+            "type": "Object",
+            "tags": [],
+            "label": "secondaryTrendPalette",
+            "description": [],
+            "signature": [
+              "[string, string, string] | undefined"
+            ],
+            "path": "src/platform/plugins/shared/chart_expressions/expression_metric/common/types/expression_functions.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressionMetricVis",
             "id": "def-common.MetricArguments.progressDirection",
             "type": "CompoundType",
             "tags": [],
@@ -739,6 +795,34 @@
           },
           {
             "parentPluginId": "expressionMetricVis",
+            "id": "def-common.MetricVisParam.secondaryColor",
+            "type": "string",
+            "tags": [],
+            "label": "secondaryColor",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/plugins/shared/chart_expressions/expression_metric/common/types/expression_renderers.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressionMetricVis",
+            "id": "def-common.MetricVisParam.secondaryTrend",
+            "type": "Object",
+            "tags": [],
+            "label": "secondaryTrend",
+            "description": [],
+            "signature": [
+              "{ visuals?: string | undefined; baseline?: string | number | undefined; palette?: [string, string, string] | undefined; }"
+            ],
+            "path": "src/platform/plugins/shared/chart_expressions/expression_metric/common/types/expression_renderers.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressionMetricVis",
             "id": "def-common.MetricVisParam.color",
             "type": "string",
             "tags": [],
@@ -1000,33 +1084,33 @@
               "RecursivePartial",
               "<",
               "Theme",
-              ">[] | undefined>; showLegend?: boolean | undefined; legendPosition?: ",
+              ">[] | undefined>; rendering?: ",
+              "Rendering",
+              " | undefined; showLegend?: boolean | undefined; legendPosition?: ",
               "Position",
               " | ",
               "LegendPositionConfig",
               " | undefined; rotation?: ",
               "Rotation",
-              " | undefined; debug?: boolean | undefined; locale?: string | undefined; rendering?: ",
-              "Rendering",
               " | undefined; animateData?: boolean | undefined; externalPointerEvents?: ",
               "MakeOverridesSerializable",
               "<",
               "ExternalPointerEventsSettings",
-              " | undefined>; pointBuffer?: ",
+              " | undefined>; debug?: boolean | undefined; pointBuffer?: ",
               "MarkBuffer",
               " | undefined; pointerUpdateTrigger?: ",
               "PointerUpdateTrigger",
               " | undefined; brushAxis?: ",
               "BrushAxis",
-              " | undefined; minBrushDelta?: number | undefined; allowBrushingLastHistogramBin?: boolean | undefined; ariaLabelHeadingLevel?: \"h1\" | \"h2\" | \"h3\" | \"h4\" | \"h5\" | \"h6\" | \"p\" | undefined; ariaUseDefaultSummary?: boolean | undefined; dow?: number | undefined; legendValues?: ",
+              " | undefined; minBrushDelta?: number | undefined; allowBrushingLastHistogramBin?: boolean | undefined; ariaLabelHeadingLevel?: \"h1\" | \"h2\" | \"h3\" | \"h4\" | \"h5\" | \"h6\" | \"p\" | undefined; ariaUseDefaultSummary?: boolean | undefined; locale?: string | undefined; dow?: number | undefined; legendValues?: ",
               "MakeOverridesSerializable",
               "<",
               "LegendValue",
-              "[] | undefined>; legendMaxDepth?: number | undefined; legendSize?: number | undefined; flatLegend?: boolean | undefined; ariaDescription?: string | undefined; ariaLabel?: string | undefined; xDomain?: ",
+              "[] | undefined>; legendMaxDepth?: number | undefined; legendSize?: number | undefined; flatLegend?: boolean | undefined; debugState?: boolean | undefined; onProjectionClick?: \"ignore\" | undefined; onElementClick?: \"ignore\" | undefined; onElementOver?: \"ignore\" | undefined; onElementOut?: \"ignore\" | undefined; onBrushEnd?: \"ignore\" | undefined; onWillRender?: \"ignore\" | undefined; onProjectionAreaChange?: \"ignore\" | undefined; xDomain?: ",
               "MakeOverridesSerializable",
               "<",
               "CustomXDomain",
-              " | undefined>; debugState?: boolean | undefined; onProjectionClick?: \"ignore\" | undefined; onElementClick?: \"ignore\" | undefined; onElementOver?: \"ignore\" | undefined; onElementOut?: \"ignore\" | undefined; onBrushEnd?: \"ignore\" | undefined; onWillRender?: \"ignore\" | undefined; onProjectionAreaChange?: \"ignore\" | undefined; onAnnotationClick?: \"ignore\" | undefined; resizeDebounce?: number | undefined; pointerUpdateDebounce?: number | undefined; roundHistogramBrushValues?: boolean | undefined; renderingSort?: \"ignore\" | undefined; noResults?: React.ComponentType<{}> | React.ReactChild | undefined; ariaLabelledBy?: string | undefined; ariaDescribedBy?: string | undefined; ariaTableCaption?: string | undefined; legendStrategy?: ",
+              " | undefined>; onAnnotationClick?: \"ignore\" | undefined; resizeDebounce?: number | undefined; pointerUpdateDebounce?: number | undefined; roundHistogramBrushValues?: boolean | undefined; renderingSort?: \"ignore\" | undefined; noResults?: React.ComponentType<{}> | React.ReactChild | undefined; ariaLabel?: string | undefined; ariaLabelledBy?: string | undefined; ariaDescription?: string | undefined; ariaDescribedBy?: string | undefined; ariaTableCaption?: string | undefined; legendStrategy?: ",
               "LegendStrategy",
               " | undefined; onLegendItemOver?: \"ignore\" | undefined; onLegendItemOut?: \"ignore\" | undefined; onLegendItemClick?: \"ignore\" | undefined; onLegendItemPlusClick?: \"ignore\" | undefined; onLegendItemMinusClick?: \"ignore\" | undefined; legendAction?: \"ignore\" | undefined; legendSort?: \"ignore\" | undefined; customLegend?: \"ignore\" | undefined; legendTitle?: string | undefined; }>> & Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>>) | undefined"
             ],
@@ -1138,7 +1222,7 @@
         "label": "AvailableMetricIcon",
         "description": [],
         "signature": [
-          "\"alert\" | \"tag\" | \"temperature\" | \"asterisk\" | \"bell\" | \"bolt\" | \"bug\" | \"compute\" | \"editorComment\" | \"empty\" | \"flag\" | \"globe\" | \"heart\" | \"mapMarker\" | \"pin\" | \"sortDown\" | \"sortUp\" | \"starEmpty\""
+          "\"alert\" | \"tag\" | \"asterisk\" | \"bell\" | \"bolt\" | \"bug\" | \"compute\" | \"editorComment\" | \"empty\" | \"flag\" | \"globe\" | \"heart\" | \"mapMarker\" | \"pin\" | \"sortDown\" | \"sortUp\" | \"starEmpty\" | \"temperature\""
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_metric/common/types/expression_functions.ts",
         "deprecated": false,

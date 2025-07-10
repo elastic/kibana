@@ -9,6 +9,8 @@
 
 import { useRef } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
+import { UseEuiTheme, euiShadow } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { monaco } from '@kbn/monaco';
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
@@ -61,15 +63,27 @@ export const useDebounceWithOptions = (
   );
 };
 
-const quotedWarningMessageRegexp = /"(.*?)"/g;
+/**
+ * Quotes can be used as separators for multiple warnings unless
+ * they are escaped with backslashes. This regexp will match any
+ * quoted string that is not escaped.
+ *
+ * The warning comes from ES and a user can't change it.
+ * This function is used to parse the warning message and format it
+ * so it can be displayed in the editor.
+ **/
+const quotedWarningMessageRegexp = /"([^"\\]|\\.)*"/g;
+const maxWarningLength = 1000;
 
 export const parseWarning = (warning: string): MonacoMessage[] => {
-  if (quotedWarningMessageRegexp.test(warning)) {
-    const matches = warning.match(quotedWarningMessageRegexp);
+  // we limit the length to reduce ReDoS risks
+  const truncatedWarning = warning.substring(0, maxWarningLength);
+  if (quotedWarningMessageRegexp.test(truncatedWarning)) {
+    const matches = truncatedWarning.match(quotedWarningMessageRegexp);
     if (matches) {
       return matches.map((message) => {
-        // start extracting the quoted message and with few default positioning
-        let warningMessage = message.replace(/"/g, '');
+        // replaces the quotes only if they are not escaped,
+        let warningMessage = message.replace(/(?<!\\)"|\\/g, '');
         let startColumn = 1;
         let startLineNumber = 1;
         // initialize the length to 10 in case no error word found
@@ -182,7 +196,13 @@ export const getIndicesList = async (dataViews: DataViewsPublicPluginStart) => {
   });
 };
 
-export const getRemoteIndicesList = async (dataViews: DataViewsPublicPluginStart) => {
+export const getRemoteIndicesList = async (
+  dataViews: DataViewsPublicPluginStart,
+  areRemoteIndicesAvailable: boolean
+) => {
+  if (!areRemoteIndicesAvailable) {
+    return [];
+  }
   const indices = await dataViews.getIndices({
     showAllIndices: false,
     pattern: '*:*',
@@ -211,7 +231,7 @@ export const clearCacheWhenOld = (cache: MapCache, esqlQuery: string) => {
   }
 };
 
-const getIntegrations = async (core: CoreStart) => {
+const getIntegrations = async (core: Pick<CoreStart, 'application' | 'http'>) => {
   const fleetCapabilities = core.application.capabilities.fleet;
   if (!fleetCapabilities?.read) {
     return [];
@@ -241,9 +261,13 @@ const getIntegrations = async (core: CoreStart) => {
   );
 };
 
-export const getESQLSources = async (dataViews: DataViewsPublicPluginStart, core: CoreStart) => {
+export const getESQLSources = async (
+  dataViews: DataViewsPublicPluginStart,
+  core: Pick<CoreStart, 'application' | 'http'>,
+  areRemoteIndicesAvailable: boolean
+) => {
   const [remoteIndices, localIndices, integrations] = await Promise.all([
-    getRemoteIndicesList(dataViews),
+    getRemoteIndicesList(dataViews, areRemoteIndicesAvailable),
     getIndicesList(dataViews),
     getIntegrations(core),
   ]);
@@ -309,4 +333,49 @@ export const onKeyDownResizeHandler = (
       setSecondPanelHeight?.(secondPanelHeightValidated);
     }
   }
+};
+
+export const getEditorOverwrites = (theme: UseEuiTheme<{}>) => {
+  return css`
+    .monaco-hover {
+      display: block !important;
+    }
+    .hover-row.status-bar {
+      display: none;
+    }
+    .margin-view-overlays .line-numbers {
+      color: ${theme.euiTheme.colors.textDisabled};
+    }
+    .current-line ~ .line-numbers {
+      color: ${theme.euiTheme.colors.textSubdued};
+    }
+
+    .suggest-widget,
+    .suggest-details-container {
+      border-radius: ${theme.euiTheme.border.radius.medium};
+      ${euiShadow(theme, 'l')}
+    }
+
+    .suggest-details-container {
+      background-color: ${theme.euiTheme.colors.backgroundBasePlain};
+      line-height: 1.5rem;
+    }
+    .suggest-details {
+      padding-left: ${theme.euiTheme.size.s};
+    }
+    .monaco-list .monaco-scrollable-element .monaco-list-row.focused {
+      border-radius: ${theme.euiTheme.border.radius.medium};
+    }
+    // fixes the bug with the broken suggestion details https://github.com/elastic/kibana/issues/217998
+    .suggest-details > .monaco-scrollable-element > .body > .header > .type {
+      white-space: normal !important;
+    }
+  `;
+};
+
+export const filterDataErrors = (errors: MonacoMessage[]): MonacoMessage[] => {
+  return errors.filter((error) => {
+    const code = typeof error.code === 'object' ? error.code.value : error.code;
+    return code !== 'unknownIndex' && code !== 'unknownColumn';
+  });
 };

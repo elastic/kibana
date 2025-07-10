@@ -159,7 +159,7 @@
               "\nCurrent session management\n{@link ISessionService}"
             ],
             "signature": [
-              "{ start: () => string; clear: () => void; destroy: () => void; save: () => Promise<void>; readonly state$: ",
+              "{ start: () => string; clear: () => void; save: () => Promise<void>; destroy: () => void; readonly state$: ",
               "Observable",
               "<",
               {
@@ -631,7 +631,7 @@
               "\nCurrent session management\n{@link ISessionService}"
             ],
             "signature": [
-              "{ start: () => string; clear: () => void; destroy: () => void; save: () => Promise<void>; readonly state$: ",
+              "{ start: () => string; clear: () => void; save: () => Promise<void>; destroy: () => void; readonly state$: ",
               "Observable",
               "<",
               {
@@ -1133,7 +1133,7 @@
         "label": "ISessionService",
         "description": [],
         "signature": [
-          "{ start: () => string; clear: () => void; destroy: () => void; save: () => Promise<void>; readonly state$: ",
+          "{ start: () => string; clear: () => void; save: () => Promise<void>; destroy: () => void; readonly state$: ",
           "Observable",
           "<",
           {
@@ -6660,7 +6660,7 @@
                   },
                   "; history: ",
                   "SearchRequest",
-                  "<Record<string, any>>[]; destroy: () => void; setOverwriteDataViewType: (overwriteType: string | false | undefined) => void; setField: <K extends keyof ",
+                  "<Record<string, any>>[]; setOverwriteDataViewType: (overwriteType: string | false | undefined) => void; setField: <K extends keyof ",
                   {
                     "pluginId": "data",
                     "scope": "common",
@@ -6838,7 +6838,7 @@
                     "section": "def-common.SearchSourceSearchOptions",
                     "text": "SearchSourceSearchOptions"
                   },
-                  " | undefined) => Promise<unknown>) => void; getSearchRequestBody: () => any; loadDataViewFields: (dataView: ",
+                  " | undefined) => Promise<unknown>) => void; getSearchRequestBody: () => any; destroy: () => void; loadDataViewFields: (dataView: ",
                   {
                     "pluginId": "dataViews",
                     "scope": "common",
@@ -7228,60 +7228,6 @@
                 "trackAdoption": false
               }
             ]
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.AggType.Unnamed",
-            "type": "Function",
-            "tags": [
-              "class",
-              "private"
-            ],
-            "label": "Constructor",
-            "description": [
-              "\nGeneric AggType Constructor\n\nUsed to create the values exposed by the agg_types module.\n"
-            ],
-            "signature": [
-              "any"
-            ],
-            "path": "src/platform/plugins/shared/data/common/search/aggs/agg_type.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "data",
-                "id": "def-common.AggType.Unnamed.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "config",
-                "description": [
-                  "- used to set the properties of the AggType"
-                ],
-                "signature": [
-                  {
-                    "pluginId": "data",
-                    "scope": "common",
-                    "docId": "kibDataSearchPluginApi",
-                    "section": "def-common.AggTypeConfig",
-                    "text": "AggTypeConfig"
-                  },
-                  "<TAggConfig, ",
-                  {
-                    "pluginId": "data",
-                    "scope": "common",
-                    "docId": "kibDataSearchPluginApi",
-                    "section": "def-common.AggParamType",
-                    "text": "AggParamType"
-                  },
-                  "<TAggConfig>>"
-                ],
-                "path": "src/platform/plugins/shared/data/common/search/aggs/agg_type.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -8981,20 +8927,141 @@
         "tags": [],
         "label": "MultiFieldKey",
         "description": [],
+        "signature": [
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.MultiFieldKey",
+            "text": "MultiFieldKey"
+          },
+          " extends ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataPluginApi",
+            "section": "def-common.SerializableField",
+            "text": "SerializableField"
+          },
+          "<",
+          "SerializedMultiFieldKey",
+          ">"
+        ],
         "path": "src/platform/plugins/shared/data/common/search/aggs/buckets/multi_field_key.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "data",
-            "id": "def-common.MultiFieldKey.id",
-            "type": "string",
+            "id": "def-common.MultiFieldKey.isInstance",
+            "type": "Function",
             "tags": [],
-            "label": "[id]",
+            "label": "isInstance",
             "description": [],
+            "signature": [
+              "(field: unknown) => field is ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.MultiFieldKey",
+                "text": "MultiFieldKey"
+              }
+            ],
             "path": "src/platform/plugins/shared/data/common/search/aggs/buckets/multi_field_key.ts",
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-common.MultiFieldKey.isInstance.$1",
+                "type": "Unknown",
+                "tags": [],
+                "label": "field",
+                "description": [],
+                "signature": [
+                  "unknown"
+                ],
+                "path": "src/platform/plugins/shared/data/common/search/aggs/buckets/multi_field_key.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.MultiFieldKey.deserialize",
+            "type": "Function",
+            "tags": [],
+            "label": "deserialize",
+            "description": [],
+            "signature": [
+              "(value: ",
+              "SerializedMultiFieldKey",
+              ") => ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.MultiFieldKey",
+                "text": "MultiFieldKey"
+              }
+            ],
+            "path": "src/platform/plugins/shared/data/common/search/aggs/buckets/multi_field_key.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-common.MultiFieldKey.deserialize.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "SerializedMultiFieldKey"
+                ],
+                "path": "src/platform/plugins/shared/data/common/search/aggs/buckets/multi_field_key.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.MultiFieldKey.idBucket",
+            "type": "Function",
+            "tags": [],
+            "label": "idBucket",
+            "description": [],
+            "signature": [
+              "(bucket: unknown) => string"
+            ],
+            "path": "src/platform/plugins/shared/data/common/search/aggs/buckets/multi_field_key.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-common.MultiFieldKey.idBucket.$1",
+                "type": "Unknown",
+                "tags": [],
+                "label": "bucket",
+                "description": [],
+                "signature": [
+                  "unknown"
+                ],
+                "path": "src/platform/plugins/shared/data/common/search/aggs/buckets/multi_field_key.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "data",
@@ -9044,38 +9111,6 @@
           },
           {
             "parentPluginId": "data",
-            "id": "def-common.MultiFieldKey.idBucket",
-            "type": "Function",
-            "tags": [],
-            "label": "idBucket",
-            "description": [],
-            "signature": [
-              "(bucket: unknown) => string"
-            ],
-            "path": "src/platform/plugins/shared/data/common/search/aggs/buckets/multi_field_key.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "data",
-                "id": "def-common.MultiFieldKey.idBucket.$1",
-                "type": "Unknown",
-                "tags": [],
-                "label": "bucket",
-                "description": [],
-                "signature": [
-                  "unknown"
-                ],
-                "path": "src/platform/plugins/shared/data/common/search/aggs/buckets/multi_field_key.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "data",
             "id": "def-common.MultiFieldKey.toString",
             "type": "Function",
             "tags": [],
@@ -9083,6 +9118,23 @@
             "description": [],
             "signature": [
               "() => string"
+            ],
+            "path": "src/platform/plugins/shared/data/common/search/aggs/buckets/multi_field_key.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.MultiFieldKey.serialize",
+            "type": "Function",
+            "tags": [],
+            "label": "serialize",
+            "description": [],
+            "signature": [
+              "() => ",
+              "SerializedMultiFieldKey"
             ],
             "path": "src/platform/plugins/shared/data/common/search/aggs/buckets/multi_field_key.ts",
             "deprecated": false,
@@ -9181,6 +9233,347 @@
                 "isRequired": true
               }
             ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.RangeKey",
+        "type": "Class",
+        "tags": [],
+        "label": "RangeKey",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.RangeKey",
+            "text": "RangeKey"
+          },
+          " extends ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataPluginApi",
+            "section": "def-common.SerializableField",
+            "text": "SerializableField"
+          },
+          "<",
+          "SerializedRangeKey",
+          ">"
+        ],
+        "path": "src/platform/plugins/shared/data/common/search/aggs/buckets/range_key.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.RangeKey.isInstance",
+            "type": "Function",
+            "tags": [],
+            "label": "isInstance",
+            "description": [],
+            "signature": [
+              "(field: unknown) => field is ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.RangeKey",
+                "text": "RangeKey"
+              }
+            ],
+            "path": "src/platform/plugins/shared/data/common/search/aggs/buckets/range_key.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-common.RangeKey.isInstance.$1",
+                "type": "Unknown",
+                "tags": [],
+                "label": "field",
+                "description": [],
+                "signature": [
+                  "unknown"
+                ],
+                "path": "src/platform/plugins/shared/data/common/search/aggs/buckets/range_key.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.RangeKey.deserialize",
+            "type": "Function",
+            "tags": [],
+            "label": "deserialize",
+            "description": [],
+            "signature": [
+              "(value: ",
+              "SerializedRangeKey",
+              ") => ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.RangeKey",
+                "text": "RangeKey"
+              }
+            ],
+            "path": "src/platform/plugins/shared/data/common/search/aggs/buckets/range_key.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-common.RangeKey.deserialize.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "SerializedRangeKey"
+                ],
+                "path": "src/platform/plugins/shared/data/common/search/aggs/buckets/range_key.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.RangeKey.idBucket",
+            "type": "Function",
+            "tags": [],
+            "label": "idBucket",
+            "description": [],
+            "signature": [
+              "(bucket: unknown) => string"
+            ],
+            "path": "src/platform/plugins/shared/data/common/search/aggs/buckets/range_key.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-common.RangeKey.idBucket.$1",
+                "type": "Unknown",
+                "tags": [],
+                "label": "bucket",
+                "description": [],
+                "signature": [
+                  "unknown"
+                ],
+                "path": "src/platform/plugins/shared/data/common/search/aggs/buckets/range_key.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.RangeKey.isRangeKeyString",
+            "type": "Function",
+            "tags": [],
+            "label": "isRangeKeyString",
+            "description": [],
+            "signature": [
+              "(rangeKey: string) => boolean"
+            ],
+            "path": "src/platform/plugins/shared/data/common/search/aggs/buckets/range_key.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-common.RangeKey.isRangeKeyString.$1",
+                "type": "string",
+                "tags": [],
+                "label": "rangeKey",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/plugins/shared/data/common/search/aggs/buckets/range_key.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.RangeKey.fromString",
+            "type": "Function",
+            "tags": [],
+            "label": "fromString",
+            "description": [
+              "\nReturns `RangeKey` from stringified form. Cannot extract labels from stringified form.\n\nOnly supports numerical (non-string) values."
+            ],
+            "signature": [
+              "(rangeKey: string) => ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.RangeKey",
+                "text": "RangeKey"
+              }
+            ],
+            "path": "src/platform/plugins/shared/data/common/search/aggs/buckets/range_key.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-common.RangeKey.fromString.$1",
+                "type": "string",
+                "tags": [],
+                "label": "rangeKey",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/plugins/shared/data/common/search/aggs/buckets/range_key.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.RangeKey.gte",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "gte",
+            "description": [],
+            "signature": [
+              "string | number"
+            ],
+            "path": "src/platform/plugins/shared/data/common/search/aggs/buckets/range_key.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.RangeKey.lt",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "lt",
+            "description": [],
+            "signature": [
+              "string | number"
+            ],
+            "path": "src/platform/plugins/shared/data/common/search/aggs/buckets/range_key.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.RangeKey.label",
+            "type": "string",
+            "tags": [],
+            "label": "label",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/plugins/shared/data/common/search/aggs/buckets/range_key.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.RangeKey.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/platform/plugins/shared/data/common/search/aggs/buckets/range_key.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-common.RangeKey.Unnamed.$1",
+                "type": "Unknown",
+                "tags": [],
+                "label": "bucket",
+                "description": [],
+                "signature": [
+                  "unknown"
+                ],
+                "path": "src/platform/plugins/shared/data/common/search/aggs/buckets/range_key.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-common.RangeKey.Unnamed.$2",
+                "type": "Array",
+                "tags": [],
+                "label": "allRanges",
+                "description": [],
+                "signature": [
+                  "Ranges | undefined"
+                ],
+                "path": "src/platform/plugins/shared/data/common/search/aggs/buckets/range_key.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.RangeKey.toString",
+            "type": "Function",
+            "tags": [],
+            "label": "toString",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "src/platform/plugins/shared/data/common/search/aggs/buckets/range_key.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.RangeKey.serialize",
+            "type": "Function",
+            "tags": [],
+            "label": "serialize",
+            "description": [],
+            "signature": [
+              "() => ",
+              "SerializedRangeKey"
+            ],
+            "path": "src/platform/plugins/shared/data/common/search/aggs/buckets/range_key.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
             "returnComment": []
           }
         ],
@@ -10537,7 +10930,7 @@
                 "section": "def-common.SerializedSearchSourceFields",
                 "text": "SerializedSearchSourceFields"
               },
-              " & { indexRefName: string; }, references: ",
+              " & { indexRefName?: string | undefined; }, references: ",
               "SavedObjectReference",
               "[]) => ",
               {
@@ -15210,7 +15603,7 @@
             "section": "def-common.SerializedSearchSourceFields",
             "text": "SerializedSearchSourceFields"
           },
-          " & { indexRefName: string; }, references: ",
+          " & { indexRefName?: string | undefined; }, references: ",
           "SavedObjectReference",
           "[]) => ",
           {
@@ -15240,7 +15633,7 @@
                 "section": "def-common.SerializedSearchSourceFields",
                 "text": "SerializedSearchSourceFields"
               },
-              " & { indexRefName: string; }"
+              " & { indexRefName?: string | undefined; }"
             ],
             "path": "src/platform/plugins/shared/data/common/search/search_source/inject_references.ts",
             "deprecated": false,
@@ -15604,39 +15997,6 @@
               "any"
             ],
             "path": "src/platform/plugins/shared/data/common/search/aggs/metrics/metric_agg_type.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-common.isMultiFieldKey",
-        "type": "Function",
-        "tags": [],
-        "label": "isMultiFieldKey",
-        "description": [],
-        "signature": [
-          "(field: unknown) => boolean"
-        ],
-        "path": "src/platform/plugins/shared/data/common/search/aggs/buckets/multi_field_key.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-common.isMultiFieldKey.$1",
-            "type": "Unknown",
-            "tags": [],
-            "label": "field",
-            "description": [],
-            "signature": [
-              "unknown"
-            ],
-            "path": "src/platform/plugins/shared/data/common/search/aggs/buckets/multi_field_key.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -26425,13 +26785,7 @@
             "text": "IKibanaSearchRequest"
           },
           "<",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.EqlRequestParams",
-            "text": "EqlRequestParams"
-          },
+          "EqlSearchRequest",
           ">"
         ],
         "path": "src/platform/plugins/shared/data/common/search/strategies/eql_search/types.ts",
@@ -29190,7 +29544,7 @@
                 "section": "def-common.DataViewLazy",
                 "text": "DataViewLazy"
               },
-              "[]>; clearCache: () => void; clearInstanceCache: (id?: string | undefined) => void; getCache: () => Promise<",
+              "[]>; clearCache: () => void; clearInstanceCache: (id?: string | undefined) => void; clearDataViewLazyCache: (id: string) => void; getCache: () => Promise<",
               "SavedObject",
               "<",
               {
@@ -29248,7 +29602,7 @@
                 "section": "def-common.GetFieldsOptions",
                 "text": "GetFieldsOptions"
               },
-              ", \"allowNoIndex\"> | undefined) => Promise<",
+              ", \"allowNoIndex\" | \"pattern\"> | undefined) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -31364,8 +31718,6 @@
         "label": "EqlRequestParams",
         "description": [],
         "signature": [
-          "EqlSearchRequest",
-          " | ",
           "EqlSearchRequest"
         ],
         "path": "src/platform/plugins/shared/data/common/search/strategies/eql_search/types.ts",
@@ -33185,16 +33537,16 @@
             "pluginId": "data",
             "scope": "common",
             "docId": "kibDataSearchPluginApi",
-            "section": "def-common.CidrMaskIpRangeAggKey",
-            "text": "CidrMaskIpRangeAggKey"
+            "section": "def-common.RangeIpRangeAggKey",
+            "text": "RangeIpRangeAggKey"
           },
           " | ",
           {
             "pluginId": "data",
             "scope": "common",
             "docId": "kibDataSearchPluginApi",
-            "section": "def-common.RangeIpRangeAggKey",
-            "text": "RangeIpRangeAggKey"
+            "section": "def-common.CidrMaskIpRangeAggKey",
+            "text": "CidrMaskIpRangeAggKey"
           }
         ],
         "path": "src/platform/plugins/shared/data/common/search/aggs/buckets/lib/ip_range.ts",
@@ -33244,7 +33596,7 @@
           },
           "; history: ",
           "SearchRequest",
-          "<Record<string, any>>[]; destroy: () => void; setOverwriteDataViewType: (overwriteType: string | false | undefined) => void; setField: <K extends keyof ",
+          "<Record<string, any>>[]; setOverwriteDataViewType: (overwriteType: string | false | undefined) => void; setField: <K extends keyof ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -33422,7 +33774,7 @@
             "section": "def-common.SearchSourceSearchOptions",
             "text": "SearchSourceSearchOptions"
           },
-          " | undefined) => Promise<unknown>) => void; getSearchRequestBody: () => any; loadDataViewFields: (dataView: ",
+          " | undefined) => Promise<unknown>) => void; getSearchRequestBody: () => any; destroy: () => void; loadDataViewFields: (dataView: ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -39759,7 +40111,15 @@
                 "section": "def-common.TimeRange",
                 "text": "TimeRange"
               },
-              " | undefined; disableWarningToasts?: boolean | undefined; }"
+              " | undefined; disableWarningToasts?: boolean | undefined; esqlVariables?: ",
+              {
+                "pluginId": "@kbn/esql-types",
+                "scope": "common",
+                "docId": "kibKbnEsqlTypesPluginApi",
+                "section": "def-common.ESQLControlVariable",
+                "text": "ESQLControlVariable"
+              },
+              "[] | undefined; }"
             ],
             "path": "src/platform/plugins/shared/data/common/search/expressions/remove_filter.ts",
             "deprecated": false,
@@ -40102,7 +40462,15 @@
                 "section": "def-common.TimeRange",
                 "text": "TimeRange"
               },
-              " | undefined; disableWarningToasts?: boolean | undefined; }"
+              " | undefined; disableWarningToasts?: boolean | undefined; esqlVariables?: ",
+              {
+                "pluginId": "@kbn/esql-types",
+                "scope": "common",
+                "docId": "kibKbnEsqlTypesPluginApi",
+                "section": "def-common.ESQLControlVariable",
+                "text": "ESQLControlVariable"
+              },
+              "[] | undefined; }"
             ],
             "path": "src/platform/plugins/shared/data/common/search/expressions/select_filter.ts",
             "deprecated": false,

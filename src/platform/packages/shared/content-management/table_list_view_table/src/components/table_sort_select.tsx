@@ -30,7 +30,7 @@ type SortItem = EuiSelectableOption & {
   direction: Direction;
 };
 
-export type SortColumnField = 'updatedAt' | 'attributes.title' | 'accessedAt';
+export type SortColumnField = 'updatedAt' | 'attributes.title' | 'accessedAt' | string;
 
 const i18nText = {
   accessedDescSort: i18n.translate(
@@ -40,24 +40,24 @@ const i18nText = {
     }
   ),
   nameAscSort: i18n.translate('contentManagement.tableList.listing.tableSortSelect.nameAscLabel', {
-    defaultMessage: 'Name A-Z',
+    defaultMessage: 'A-Z',
   }),
   nameDescSort: i18n.translate(
     'contentManagement.tableList.listing.tableSortSelect.nameDescLabel',
     {
-      defaultMessage: 'Name Z-A',
+      defaultMessage: 'Z-A',
     }
   ),
   updatedAtAscSort: i18n.translate(
     'contentManagement.tableList.listing.tableSortSelect.updatedAtAscLabel',
     {
-      defaultMessage: 'Least recently updated',
+      defaultMessage: 'Old-Recent',
     }
   ),
   updatedAtDescSort: i18n.translate(
     'contentManagement.tableList.listing.tableSortSelect.updatedAtDescLabel',
     {
-      defaultMessage: 'Recently updated',
+      defaultMessage: 'Recent-Old',
     }
   ),
   headerSort: i18n.translate('contentManagement.tableList.listing.tableSortSelect.headerLabel', {
@@ -65,15 +65,26 @@ const i18nText = {
   }),
 };
 
+export interface CustomSortingOptions {
+  field: string;
+  sortingLabels: TableColumnSortSelectOption[];
+}
+interface TableColumnSortSelectOption {
+  label: string;
+  direction: 'asc' | 'desc';
+}
+
 interface Props {
   hasUpdatedAtMetadata: boolean;
   hasRecentlyAccessedMetadata: boolean;
   tableSort: State['tableSort'];
+  customSortingOptions?: CustomSortingOptions;
   onChange?: (column: SortColumnField, direction: Direction) => void;
 }
 
 export function TableSortSelect({
   tableSort,
+  customSortingOptions,
   hasUpdatedAtMetadata,
   hasRecentlyAccessedMetadata,
   onChange,
@@ -97,6 +108,19 @@ export function TableSortSelect({
       },
     ];
 
+    if (customSortingOptions) {
+      opts = opts.concat(
+        customSortingOptions.sortingLabels.map(({ label, direction }) => {
+          return {
+            column: customSortingOptions.field,
+            label,
+            direction,
+            append: direction === 'asc' ? <EuiIcon type="sortUp" /> : <EuiIcon type="sortDown" />,
+          };
+        })
+      );
+    }
+
     if (hasRecentlyAccessedMetadata) {
       opts = [
         {
@@ -116,7 +140,7 @@ export function TableSortSelect({
               color="inherit"
               iconProps={{ style: { verticalAlign: 'text-bottom', marginLeft: 2 } }}
               css={{ textWrap: 'balance' }}
-              type={'questionInCircle'}
+              type={'question'}
               content={i18n.translate(
                 'contentManagement.tableList.listing.tableSortSelect.recentlyAccessedTip',
                 {
@@ -171,6 +195,7 @@ export function TableSortSelect({
     <EuiFilterButton
       iconType="arrowDown"
       iconSide="right"
+      isSelected={isPopoverOpen}
       onClick={togglePopOver}
       data-test-subj="tableSortSelectBtn"
       grow
@@ -202,7 +227,7 @@ export function TableSortSelect({
         };
       });
     });
-  }, [tableSort]);
+  }, [customSortingOptions, tableSort]);
 
   return (
     <EuiPopover

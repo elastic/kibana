@@ -25,9 +25,16 @@ export const CASE_USER_ACTION_SAVED_OBJECT = 'cases-user-actions' as const;
 export const CASE_COMMENT_SAVED_OBJECT = 'cases-comments' as const;
 export const CASE_CONFIGURE_SAVED_OBJECT = 'cases-configure' as const;
 export const CASE_RULES_SAVED_OBJECT = 'cases-rules' as const;
+export const CASE_ID_INCREMENTER_SAVED_OBJECT = 'cases-incrementing-id' as const;
 
 /**
- * If more values are added here please also add them here: x-pack/test/cases_api_integration/common/plugins
+ * UI settings
+ */
+
+export const CASES_UI_SETTING_ID_DISPLAY_INCREMENTAL_ID = 'cases:incrementalIdDisplay:enabled';
+
+/**
+ * If more values are added here please also add them here: x-pack/platform/test/cases_api_integration/common/plugins
  */
 export const SAVED_OBJECT_TYPES = [
   CASE_SAVED_OBJECT,
@@ -54,7 +61,6 @@ export const CASE_COMMENT_DETAILS_URL = `${CASE_DETAILS_URL}/comments/{comment_i
 export const CASE_COMMENT_DELETE_URL = `${CASE_DETAILS_URL}/comments/{comment_id}` as const;
 export const CASE_PUSH_URL = `${CASE_DETAILS_URL}/connector/{connector_id}/_push` as const;
 export const CASE_REPORTERS_URL = `${CASES_URL}/reporters` as const;
-export const CASE_STATUS_URL = `${CASES_URL}/status` as const;
 export const CASE_TAGS_URL = `${CASES_URL}/tags` as const;
 export const CASE_USER_ACTIONS_URL = `${CASE_DETAILS_URL}/user_actions` as const;
 export const CASE_FIND_USER_ACTIONS_URL = `${CASE_USER_ACTIONS_URL}/_find` as const;
@@ -92,6 +98,8 @@ export const INTERNAL_CASE_OBSERVABLES_PATCH_URL =
   `${INTERNAL_CASE_OBSERVABLES_URL}/{observable_id}` as const;
 export const INTERNAL_CASE_OBSERVABLES_DELETE_URL =
   `${INTERNAL_CASE_OBSERVABLES_URL}/{observable_id}` as const;
+export const INTERNAL_CASE_FIND_USER_ACTIONS_URL =
+  `${CASES_INTERNAL_URL}/{case_id}/user_actions/_find` as const;
 
 /**
  * Action routes
@@ -127,6 +135,8 @@ export const MAX_SUPPORTED_CONNECTORS_RETURNED = 1000 as const;
  */
 
 export const MAX_TITLE_LENGTH = 160 as const;
+export const MAX_RULE_NAME_LENGTH = 100 as const;
+export const MAX_SUFFIX_LENGTH = 60 as const;
 export const MAX_CATEGORY_LENGTH = 50 as const;
 export const MAX_DESCRIPTION_LENGTH = 30000 as const;
 export const MAX_COMMENT_LENGTH = 30000 as const;
@@ -158,6 +168,7 @@ export const MAX_CUSTOM_OBSERVABLE_TYPES_LABEL_LENGTH = 50 as const;
 export const DEFAULT_FEATURES: CasesFeaturesAllRequired = Object.freeze({
   alerts: { sync: true, enabled: true, isExperimental: false },
   metrics: [],
+  observables: { enabled: true },
 });
 
 /**
@@ -184,6 +195,7 @@ export const CASES_SETTINGS_CAPABILITY = 'cases_settings' as const;
 export const CASES_CONNECTORS_CAPABILITY = 'cases_connectors' as const;
 export const CASES_REOPEN_CAPABILITY = 'case_reopen' as const;
 export const CREATE_COMMENT_CAPABILITY = 'create_comment' as const;
+export const ASSIGN_CASE_CAPABILITY = 'cases_assign' as const;
 
 /**
  * Cases API Tags
@@ -240,7 +252,7 @@ export const NONE_CONNECTOR_ID: string = 'none';
 export const CASES_CONNECTOR_ID = '.cases';
 export const CASES_CONNECTOR_TITLE = 'Cases';
 
-export const CASES_CONNECTOR_TIME_WINDOW_REGEX = '^[1-9][0-9]*[d,w]$';
+export const CASES_CONNECTOR_TIME_WINDOW_REGEX = '^[1-9][0-9]*[d,w,h,m]$';
 
 /**
  * This field is used for authorization of the entities within the cases plugin. Each entity within Cases will have the owner field
@@ -331,3 +343,8 @@ export const OBSERVABLE_TYPES_BUILTIN = [
 ];
 
 export const OBSERVABLE_TYPES_BUILTIN_KEYS = OBSERVABLE_TYPES_BUILTIN.map(({ key }) => key);
+
+/**
+ * EBT events
+ */
+export const CASE_PAGE_VIEW_EVENT_TYPE = 'case_page_view';

@@ -7,9 +7,12 @@
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 
-import { getAllowedOutputTypesForIntegration } from '../../../common/services/output_helpers';
+import {
+  getAllowedOutputTypesForIntegration,
+  getAllowedOutputTypesForPackagePolicy,
+} from '../../../common/services/output_helpers';
 
-import type { AgentPolicySOAttributes, AgentPolicy } from '../../types';
+import type { AgentPolicySOAttributes, AgentPolicy, PackagePolicy } from '../../types';
 import { LICENCE_FOR_PER_POLICY_OUTPUT, outputType } from '../../../common/constants';
 import { policyHasFleetServer, policyHasSyntheticsIntegration } from '../../../common/services';
 import { appContextService } from '..';
@@ -51,6 +54,7 @@ export async function validateOutputForPolicy(
   allowedOutputTypeForPolicy: string[] = Object.values(outputType)
 ) {
   if (
+    Object.keys(existingData).length !== 0 &&
     newData.data_output_id === existingData.data_output_id &&
     newData.monitoring_output_id === existingData.monitoring_output_id
   ) {
@@ -63,7 +67,15 @@ export async function validateOutputForPolicy(
     allowedOutputTypeForPolicy.length !== Object.values(outputType).length;
 
   if (isOutputTypeRestricted) {
-    const dataOutput = await getDataOutputForAgentPolicy(soClient, data);
+    const dataOutput = await getDataOutputForAgentPolicy(soClient, data).catch((err) => {
+      if (err instanceof OutputNotFoundError) {
+        return;
+      }
+      throw err;
+    });
+    if (!dataOutput) {
+      return;
+    }
     if (!allowedOutputTypeForPolicy.includes(dataOutput.type)) {
       throw new OutputInvalidError(
         `Output of type "${dataOutput.type}" is not usable with policy "${data.name}".`
@@ -99,16 +111,29 @@ export async function validateOutputForPolicy(
 export async function validateAgentPolicyOutputForIntegration(
   soClient: SavedObjectsClientContract,
   agentPolicy: AgentPolicy,
+  packagePolicy: Pick<PackagePolicy, 'supports_agentless'>,
   packageName: string,
   isNewPackagePolicy: boolean = true
 ) {
-  const allowedOutputTypeForPolicy = getAllowedOutputTypesForIntegration(packageName);
+  const allowedOutputTypeForIntegration = getAllowedOutputTypesForIntegration(packageName);
+  const allowedOutputTypeForPackagePolicy = getAllowedOutputTypesForPackagePolicy(packagePolicy);
+  const allowedOutputTypeForPolicy = allowedOutputTypeForIntegration.filter((type) =>
+    allowedOutputTypeForPackagePolicy.includes(type)
+  );
 
   const isOutputTypeRestricted =
     allowedOutputTypeForPolicy.length !== Object.values(outputType).length;
 
   if (isOutputTypeRestricted) {
-    const dataOutput = await getDataOutputForAgentPolicy(soClient, agentPolicy);
+    const dataOutput = await getDataOutputForAgentPolicy(soClient, agentPolicy).catch((err) => {
+      if (err instanceof OutputNotFoundError) {
+        return;
+      }
+      throw err;
+    });
+    if (!dataOutput) {
+      return;
+    }
     if (!allowedOutputTypeForPolicy.includes(dataOutput.type)) {
       if (isNewPackagePolicy) {
         throw new OutputInvalidError(

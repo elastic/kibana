@@ -13,7 +13,12 @@ import type {
   FunctionCallingMode,
   Message,
   ToolOptions,
+  ChatCompleteMetadata,
+  AnonymizationRule,
 } from '@kbn/inference-common';
+import { KibanaRequest } from '@kbn/core/server';
+import { PluginStartContract as ActionsPluginsStart } from '@kbn/actions-plugin/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import type { InferenceExecutor } from './utils';
 
 /**
@@ -24,16 +29,26 @@ import type { InferenceExecutor } from './utils';
  */
 export interface InferenceConnectorAdapter {
   chatComplete: (
-    options: {
-      executor: InferenceExecutor;
-      messages: Message[];
-      system?: string;
-      functionCalling?: FunctionCallingMode;
-      abortSignal?: AbortSignal;
-      logger: Logger;
-    } & ToolOptions
+    options: InferenceAdapterChatCompleteOptions
   ) => Observable<InferenceConnectorAdapterChatCompleteEvent>;
 }
+
+/**
+ * Options for {@link InferenceConnectorAdapter.chatComplete}
+ *
+ * @internal
+ */
+export type InferenceAdapterChatCompleteOptions = {
+  executor: InferenceExecutor;
+  messages: Message[];
+  logger: Logger;
+  system?: string;
+  functionCalling?: FunctionCallingMode;
+  temperature?: number;
+  modelName?: string;
+  abortSignal?: AbortSignal;
+  metadata?: ChatCompleteMetadata;
+} & ToolOptions;
 
 /**
  * Events that can be emitted by the observable returned from {@link InferenceConnectorAdapter.chatComplete}
@@ -43,3 +58,15 @@ export interface InferenceConnectorAdapter {
 export type InferenceConnectorAdapterChatCompleteEvent =
   | ChatCompletionChunkEvent
   | ChatCompletionTokenCountEvent;
+
+/**
+ * Options for createChatCompleteApi
+ */
+
+export interface CreateChatCompleteApiOptions {
+  request: KibanaRequest;
+  actions: ActionsPluginsStart;
+  logger: Logger;
+  anonymizationRulesPromise: Promise<AnonymizationRule[]>;
+  esClient: ElasticsearchClient;
+}

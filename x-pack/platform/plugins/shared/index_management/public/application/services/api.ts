@@ -9,7 +9,7 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import type { SerializedEnrichPolicy } from '@kbn/index-management-shared-types';
 import { IndicesStatsResponse } from '@elastic/elasticsearch/lib/api/types';
 import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
-import { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import {
   API_BASE_PATH,
   INTERNAL_API_BASE_PATH,
@@ -106,6 +106,21 @@ export async function updateDataRetention(
 
   return sendRequest({
     path: `${API_BASE_PATH}/data_streams/data_retention`,
+    method: 'put',
+    body,
+  });
+}
+
+export async function updateDSFailureStore(
+  dataStreams: string[],
+  data: {
+    dsFailureStore: boolean;
+  }
+) {
+  const body = { dsFailureStore: data.dsFailureStore, dataStreams };
+
+  return sendRequest({
+    path: `${API_BASE_PATH}/data_streams/configure_failure_store`,
     method: 'put',
     body,
   });
@@ -435,12 +450,13 @@ export function useLoadIndexSettings(indexName: string) {
   });
 }
 
-export function createIndex(indexName: string) {
+export function createIndex(indexName: string, indexMode: string) {
   return sendRequest({
     path: `${INTERNAL_API_BASE_PATH}/indices/create`,
     method: 'put',
     body: JSON.stringify({
       indexName,
+      indexMode,
     }),
   });
 }

@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { OpenShardFailureFlyoutButton } from './open_shard_failure_flyout_button';

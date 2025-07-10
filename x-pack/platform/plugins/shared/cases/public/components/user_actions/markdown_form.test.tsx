@@ -9,8 +9,7 @@ import React from 'react';
 import { waitFor, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer } from '../../common/mock';
+import { renderWithTestingProviders } from '../../common/mock';
 import { UserActionMarkdown } from './markdown_form';
 import { MAX_COMMENT_LENGTH } from '../../../common/constants';
 
@@ -33,10 +32,8 @@ const defaultProps = {
 };
 
 describe('UserActionMarkdown ', () => {
-  let appMockRenderer: AppMockRenderer;
   beforeEach(() => {
     jest.clearAllMocks();
-    appMockRenderer = createAppMockRenderer();
   });
 
   afterEach(() => {
@@ -44,7 +41,7 @@ describe('UserActionMarkdown ', () => {
   });
 
   it('Renders markdown correctly when not in edit mode', async () => {
-    appMockRenderer.render(<UserActionMarkdown {...{ ...defaultProps, isEditable: false }} />);
+    renderWithTestingProviders(<UserActionMarkdown {...{ ...defaultProps, isEditable: false }} />);
 
     expect(screen.getByTestId('scrollable-markdown')).toBeInTheDocument();
     expect(screen.getByTestId('markdown-link')).toBeInTheDocument();
@@ -53,7 +50,7 @@ describe('UserActionMarkdown ', () => {
   });
 
   it('Renders markdown correctly when in edit mode', async () => {
-    appMockRenderer.render(<UserActionMarkdown {...{ ...defaultProps, isEditable: true }} />);
+    renderWithTestingProviders(<UserActionMarkdown {...{ ...defaultProps, isEditable: true }} />);
 
     expect(screen.getByTestId('editable-save-markdown')).toBeInTheDocument();
     expect(screen.getByTestId('editable-cancel-markdown')).toBeInTheDocument();
@@ -61,18 +58,19 @@ describe('UserActionMarkdown ', () => {
 
   describe('errors', () => {
     it('Shows error message and save button disabled if current text is empty', async () => {
-      appMockRenderer.render(<UserActionMarkdown {...{ ...defaultProps, isEditable: true }} />);
+      renderWithTestingProviders(<UserActionMarkdown {...{ ...defaultProps, isEditable: true }} />);
 
       await userEvent.clear(screen.getByTestId('euiMarkdownEditorTextArea'));
 
       await waitFor(() => {
         expect(screen.getByText('Empty comments are not allowed.')).toBeInTheDocument();
-        expect(screen.getByTestId('editable-save-markdown')).toHaveProperty('disabled');
       });
+
+      expect(screen.getByTestId('editable-save-markdown')).toHaveProperty('disabled');
     });
 
     it('Shows error message and save button disabled if current text is of empty characters', async () => {
-      appMockRenderer.render(<UserActionMarkdown {...{ ...defaultProps, isEditable: true }} />);
+      renderWithTestingProviders(<UserActionMarkdown {...{ ...defaultProps, isEditable: true }} />);
 
       await userEvent.clear(screen.getByTestId('euiMarkdownEditorTextArea'));
 
@@ -80,14 +78,15 @@ describe('UserActionMarkdown ', () => {
 
       await waitFor(() => {
         expect(screen.getByText('Empty comments are not allowed.')).toBeInTheDocument();
-        expect(screen.getByTestId('editable-save-markdown')).toHaveProperty('disabled');
       });
+
+      expect(screen.getByTestId('editable-save-markdown')).toHaveProperty('disabled');
     });
 
     it('Shows error message and save button disabled if current text is too long', async () => {
       const longComment = 'b'.repeat(MAX_COMMENT_LENGTH + 1);
 
-      appMockRenderer.render(<UserActionMarkdown {...{ ...defaultProps, isEditable: true }} />);
+      renderWithTestingProviders(<UserActionMarkdown {...{ ...defaultProps, isEditable: true }} />);
 
       const markdown = screen.getByTestId('euiMarkdownEditorTextArea');
 
@@ -100,8 +99,9 @@ describe('UserActionMarkdown ', () => {
             'The length of the comment is too long. The maximum length is 30000 characters.'
           )
         ).toBeInTheDocument();
-        expect(screen.getByTestId('editable-save-markdown')).toHaveProperty('disabled');
       });
+
+      expect(screen.getByTestId('editable-save-markdown')).toHaveProperty('disabled');
     });
   });
 
@@ -134,12 +134,13 @@ describe('UserActionMarkdown ', () => {
           </div>
         );
       };
-      const result = appMockRenderer.render(<TestComponent />);
-      expect(result.getByTestId('editable-markdown-form')).toBeTruthy();
+
+      renderWithTestingProviders(<TestComponent />);
+      expect(screen.getByTestId('editable-markdown-form')).toBeTruthy();
 
       // append content and save
-      await userEvent.type(result.container.querySelector('textarea')!, appendContent);
-      await userEvent.click(result.getByTestId('editable-save-markdown'));
+      await userEvent.type(screen.getByTestId('euiMarkdownEditorTextArea')!, appendContent);
+      await userEvent.click(screen.getByTestId('editable-save-markdown'));
 
       // wait for the state to update
       await waitFor(() => {
@@ -147,15 +148,15 @@ describe('UserActionMarkdown ', () => {
       });
 
       // toggle to non-edit state
-      await userEvent.click(result.getByTestId('test-button'));
-      expect(result.getByTestId('scrollable-markdown')).toBeTruthy();
+      await userEvent.click(screen.getByTestId('test-button'));
+      expect(screen.getByTestId('scrollable-markdown')).toBeTruthy();
 
       // toggle to edit state again
-      await userEvent.click(result.getByTestId('test-button'));
+      await userEvent.click(screen.getByTestId('test-button'));
 
       // this is the correct behaviour. The textarea holds the new content
-      expect(result.container.querySelector('textarea')!.value).toEqual(newContent);
-      expect(result.container.querySelector('textarea')!.value).not.toEqual(oldContent);
+      expect(screen.getByTestId('euiMarkdownEditorTextArea').textContent).toEqual(newContent);
+      expect(screen.getByTestId('euiMarkdownEditorTextArea').textContent).not.toEqual(oldContent);
     });
   });
 });

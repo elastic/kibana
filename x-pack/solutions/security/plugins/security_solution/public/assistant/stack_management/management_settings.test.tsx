@@ -10,11 +10,7 @@ import '@testing-library/jest-dom';
 import { MemoryRouter } from '@kbn/shared-ux-router';
 import { ManagementSettings } from './management_settings';
 import type { Conversation } from '@kbn/elastic-assistant';
-import {
-  useAssistantContext,
-  useFetchCurrentUserConversations,
-  WELCOME_CONVERSATION_TITLE,
-} from '@kbn/elastic-assistant';
+import { useAssistantContext, useFetchCurrentUserConversations } from '@kbn/elastic-assistant';
 import { useKibana } from '../../common/lib/kibana';
 import { useConversation } from '@kbn/elastic-assistant/impl/assistant/use_conversation';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -23,8 +19,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 jest.mock('@kbn/elastic-assistant', () => ({
   useAssistantContext: jest.fn(),
   useFetchCurrentUserConversations: jest.fn(),
-  mergeBaseWithPersistedConversations: jest.fn(),
-  WELCOME_CONVERSATION_TITLE: 'Welcome Conversation',
+  Welcome: 'Welcome Conversation',
 }));
 jest.mock('@kbn/elastic-assistant/impl/assistant/settings/assistant_settings_management', () => ({
   AssistantSettingsManagement: jest.fn(() => <div data-test-subj="AssistantSettingsManagement" />),
@@ -35,6 +30,9 @@ jest.mock('@kbn/elastic-assistant/impl/assistant/use_conversation', () => ({
 jest.mock('../../common/lib/kibana', () => ({
   useKibana: jest.fn(),
 }));
+jest.mock('../../common/hooks/use_space_id', () => ({
+  useSpaceId: jest.fn().mockReturnValue('default'),
+}));
 
 const useAssistantContextMock = useAssistantContext as jest.Mock;
 const useFetchCurrentUserConversationsMock = useFetchCurrentUserConversations as jest.Mock;
@@ -43,14 +41,19 @@ const useConversationMock = useConversation as jest.Mock;
 
 describe('ManagementSettings', () => {
   const queryClient = new QueryClient();
-  const baseConversations = { base: 'conversation' };
   const http = {};
   const getDefaultConversation = jest.fn();
   const setCurrentUserAvatar = jest.fn();
   const navigateToApp = jest.fn();
   const mockConversations = {
-    [WELCOME_CONVERSATION_TITLE]: { title: WELCOME_CONVERSATION_TITLE },
-  } as Record<string, Conversation>;
+    Welcome: {
+      title: 'Welcome',
+      id: 'Welcome',
+      messages: [],
+      replacements: {},
+      category: 'assistant',
+    },
+  } as unknown as Record<string, Conversation>;
 
   const renderComponent = ({
     isAssistantEnabled = true,
@@ -60,7 +63,6 @@ describe('ManagementSettings', () => {
     conversations: Record<string, Conversation>;
   }) => {
     useAssistantContextMock.mockReturnValue({
-      baseConversations,
       http,
       assistantAvailability: { isAssistantEnabled },
       setCurrentUserAvatar,

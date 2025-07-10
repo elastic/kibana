@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { RuleNotifyWhenType } from '../../../../common';
+import type { RuleNotifyWhenType } from '../../../../common';
 
 /**
  * Given a throttle from a "security_solution" rule this will transform it into an "alerting" notifyWhen

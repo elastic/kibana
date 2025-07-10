@@ -8,7 +8,7 @@
 import type { FC } from 'react';
 import React, { memo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { useEuiTheme, type EuiComboBoxOptionOption } from '@elastic/eui';
+import { useEuiTheme, useGeneratedHtmlId, type EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox } from '@elastic/eui';
 import type { Validation } from '../job_validator';
 import { tabColor } from '../../../../../../common/util/group_color_utils';
@@ -24,7 +24,7 @@ export interface JobGroupsInputProps {
 export const JobGroupsInput: FC<JobGroupsInputProps> = memo(
   ({ existingGroups, selectedGroups, onChange, validation }) => {
     const { euiTheme } = useEuiTheme();
-
+    const titleId = useGeneratedHtmlId({ prefix: 'jobGroupsInput' });
     const options = existingGroups.map<EuiComboBoxOptionOption>((g) => ({
       label: g,
       color: tabColor(g, euiTheme),
@@ -63,7 +63,7 @@ export const JobGroupsInput: FC<JobGroupsInputProps> = memo(
     }
 
     return (
-      <Description validation={validation}>
+      <Description validation={validation} titleId={titleId}>
         <EuiComboBox
           placeholder={i18n.translate(
             'xpack.ml.newJob.wizard.jobDetailsStep.jobGroupSelect.placeholder',

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { RiskScoreEntity } from '../../../common/entity_analytics/risk_engine';
 import { renderHook } from '@testing-library/react';
 import { getRiskScoreSummaryAttributes } from './risk_score_summary';
 import { RiskSeverity } from '../../../common/search_strategy';
@@ -13,6 +12,7 @@ import type { MetricVisualizationState } from '@kbn/lens-plugin/public';
 import { wrapper } from '../../common/components/visualization_actions/mocks';
 import { useLensAttributes } from '../../common/components/visualization_actions/use_lens_attributes';
 import type { Query } from '@kbn/es-query';
+import { EntityType } from '../../../common/entity_analytics/types';
 
 jest.mock('../../sourcerer/containers', () => ({
   useSourcererDataView: jest.fn().mockReturnValue({
@@ -24,7 +24,7 @@ jest.mock('../../sourcerer/containers', () => ({
 }));
 
 jest.mock('uuid', () => ({
-  v4: jest.fn().mockReturnValue('2cc5663b-f062-43f8-8688-fc8166c2ca8e'),
+  v4: jest.fn().mockReturnValue('generated-uuid'),
 }));
 
 describe('getRiskScoreSummaryAttributes', () => {
@@ -36,7 +36,7 @@ describe('getRiskScoreSummaryAttributes', () => {
             severity: RiskSeverity.Low,
             query: `user.name: test.user`,
             spaceId: 'default',
-            riskEntity: RiskScoreEntity.user,
+            riskEntity: EntityType.user,
           }),
         }),
       { wrapper }
@@ -53,7 +53,7 @@ describe('getRiskScoreSummaryAttributes', () => {
             severity: RiskSeverity.Low,
             query: `user.name: test.user`,
             spaceId: 'default',
-            riskEntity: RiskScoreEntity.user,
+            riskEntity: EntityType.user,
           }),
         }),
       { wrapper }
@@ -72,8 +72,9 @@ describe('getRiskScoreSummaryAttributes', () => {
             severity: RiskSeverity.Low,
             query,
             spaceId: 'default',
-            riskEntity: RiskScoreEntity.user,
+            riskEntity: EntityType.user,
           }),
+
           applyGlobalQueriesAndFilters: false,
         }),
       { wrapper }

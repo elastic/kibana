@@ -12,6 +12,8 @@ import { Provider } from 'react-redux';
 import { type EnhancedStore, configureStore } from '@reduxjs/toolkit';
 import { isEqual } from 'lodash';
 import { KbnPalettes } from '@kbn/palettes';
+import { IFieldFormat } from '@kbn/field-formats-plugin/common';
+import { SerializedValue } from '@kbn/data-plugin/common';
 import { colorMappingReducer, updateModel } from './state/color_mapping';
 import { Container } from './components/container/container';
 import { ColorMapping } from './config';
@@ -19,8 +21,10 @@ import { uiReducer } from './state/ui';
 
 export interface ColorMappingInputCategoricalData {
   type: 'categories';
-  /** an ORDERED array of categories rendered in the visualization  */
-  categories: Array<string | string[]>;
+  /**
+   * An **ordered** array of serialized categories rendered in the visualization
+   */
+  categories: SerializedValue[];
 }
 
 export interface ColorMappingInputContinuousData {
@@ -42,18 +46,38 @@ export type ColorMappingInputData =
  * The props of the CategoricalColorMapping component
  */
 export interface ColorMappingProps {
-  /** The initial color mapping model, usually coming from a the visualization saved object */
+  /**
+   * The initial color mapping model, usually coming from a the visualization saved object
+   */
   model: ColorMapping.Config;
-  /** A collection of palette configurations */
+  /**
+   * A collection of palette configurations
+   */
   palettes: KbnPalettes;
-  /** A data description of what needs to be colored */
+  /**
+   * A data description of what needs to be colored
+   */
   data: ColorMappingInputData;
-  /** Theme dark mode */
+  /**
+   * Theme dark mode
+   */
   isDarkMode: boolean;
-  /** A map between original and formatted tokens used to handle special cases, like the Other bucket and the empty bucket */
+  /**
+   * A map between original and formatted tokens used to handle special cases, like the Other bucket and the empty bucket
+   */
   specialTokens: Map<string, string>;
-  /** A function called at every change in the model */
+  /**
+   * A function called at every change in the model
+   */
   onModelUpdate: (model: ColorMapping.Config) => void;
+  /**
+   * Formatter for raw value assignments
+   */
+  formatter?: IFieldFormat;
+  /**
+   * Allow custom match rule when no other option is found
+   */
+  allowCustomMatch?: boolean;
 }
 
 /**
@@ -88,7 +112,7 @@ export class CategoricalColorMapping extends React.Component<ColorMappingProps> 
     }
   }
   render() {
-    const { palettes, data, isDarkMode, specialTokens } = this.props;
+    const { palettes, data, isDarkMode, specialTokens, formatter, allowCustomMatch } = this.props;
     return (
       <Provider store={this.store}>
         <Container
@@ -96,6 +120,8 @@ export class CategoricalColorMapping extends React.Component<ColorMappingProps> 
           data={data}
           isDarkMode={isDarkMode}
           specialTokens={specialTokens}
+          formatter={formatter}
+          allowCustomMatch={allowCustomMatch}
         />
       </Provider>
     );

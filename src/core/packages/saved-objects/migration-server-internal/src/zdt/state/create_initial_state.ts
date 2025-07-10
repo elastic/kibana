@@ -23,6 +23,7 @@ export const createInitialState = (context: MigratorContext): State => {
     controlState: 'INIT',
     logs: [],
     retryCount: 0,
+    skipRetryReset: false,
     retryDelay: 0,
     skipDocumentMigration: !runDocumentMigration,
   };

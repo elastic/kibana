@@ -23,6 +23,7 @@ import type {
 } from '../types';
 import type { ProductFeaturesService } from '../../lib/product_features_service/product_features_service';
 import { createProductFeaturesServiceMock } from '../../lib/product_features_service/mocks';
+import { createTelemetryConfigProviderMock } from '../../../common/telemetry_config/mocks';
 
 describe('Create Default Policy tests ', () => {
   const cloud = cloudMock.createSetup();
@@ -33,14 +34,22 @@ describe('Create Default Policy tests ', () => {
   let licenseEmitter: Subject<ILicense>;
   let licenseService: LicenseService;
   let productFeaturesService: ProductFeaturesService;
+  const telemetryConfigProviderMock = createTelemetryConfigProviderMock();
 
   const createDefaultPolicyCallback = async (
-    config: AnyPolicyCreateConfig | undefined
+    config?: AnyPolicyCreateConfig
   ): Promise<PolicyConfig> => {
     const esClientInfo = await elasticsearchServiceMock.createClusterClient().asInternalUser.info();
     esClientInfo.cluster_name = '';
     esClientInfo.cluster_uuid = '';
-    return createDefaultPolicy(licenseService, config, cloud, esClientInfo, productFeaturesService);
+    return createDefaultPolicy(
+      licenseService,
+      config,
+      cloud,
+      esClientInfo,
+      productFeaturesService,
+      telemetryConfigProviderMock
+    );
   };
 
   beforeEach(() => {
@@ -118,7 +127,11 @@ describe('Create Default Policy tests ', () => {
       };
     };
 
-    const defaultEventsDisabled = () => ({
+    const defaultEventsDisabled = (): {
+      linux: PolicyConfig['linux']['events'];
+      mac: PolicyConfig['mac']['events'];
+      windows: PolicyConfig['windows']['events'];
+    } => ({
       linux: {
         process: false,
         file: false,
@@ -127,11 +140,14 @@ describe('Create Default Policy tests ', () => {
         tty_io: false,
       },
       mac: {
+        dns: false,
         process: false,
         file: false,
         network: false,
+        security: false,
       },
       windows: {
+        credential_access: false,
         process: false,
         file: false,
         network: false,
@@ -202,11 +218,15 @@ describe('Create Default Policy tests ', () => {
     it('Should return the default config when preset is EDR Complete', async () => {
       const config = createEndpointConfig({ preset: 'EDRComplete' });
       const policy = await createDefaultPolicyCallback(config);
-      const licenseType = 'platinum';
+      const license = 'platinum';
       const isCloud = true;
-      const defaultPolicy = policyFactory(licenseType, isCloud);
+      const defaultPolicy = policyFactory({
+        license,
+        cloud: isCloud,
+        isGlobalTelemetryEnabled: true,
+      });
       // update defaultPolicy w/ platinum license & cloud info
-      defaultPolicy.meta.license = licenseType;
+      defaultPolicy.meta.license = license;
       defaultPolicy.meta.cloud = isCloud;
       expect(policy).toMatchObject(defaultPolicy);
     });
@@ -277,6 +297,24 @@ describe('Create Default Policy tests ', () => {
       });
       // Ransomware is windows only
       expect(policy.windows.ransomware.mode).toBe('off');
+    });
+  });
+
+  describe('Global Telemetry Config', () => {
+    it('should save telemetry config state in policy based on telemetry config provider', async () => {
+      telemetryConfigProviderMock.getIsOptedIn.mockReturnValue(false);
+      let policyConfig = await createDefaultPolicyCallback();
+      expect(policyConfig.global_telemetry_enabled).toBe(false);
+
+      telemetryConfigProviderMock.getIsOptedIn.mockReturnValue(true);
+      policyConfig = await createDefaultPolicyCallback();
+      expect(policyConfig.global_telemetry_enabled).toBe(true);
+    });
+
+    it('should fallback to `false` when global telemetry config is unavailable', async () => {
+      telemetryConfigProviderMock.getIsOptedIn.mockReturnValue(undefined);
+      const policyConfig = await createDefaultPolicyCallback();
+      expect(policyConfig.global_telemetry_enabled).toBe(false);
     });
   });
 });

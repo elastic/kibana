@@ -9,10 +9,17 @@ import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { BulkActionsDryRunErrCode } from '../../../../../../common/constants';
-import { BulkActionTypeEnum } from '../../../../../../common/api/detection_engine/rule_management';
-
+import type { BulkActionsDryRunErrCode } from '../../../../../../common/api/detection_engine/rule_management';
+import {
+  BulkActionTypeEnum,
+  BulkActionsDryRunErrCodeEnum,
+} from '../../../../../../common/api/detection_engine/rule_management';
+import {
+  BULK_ACTION_SET_ALERT_SUPPRESSION,
+  BULK_ACTION_SET_ALERT_SUPPRESSION_FOR_THRESHOLD,
+} from '../../../../common/translations';
 import type { DryRunResult, BulkActionForConfirmation } from './types';
+import { usePrebuiltRuleCustomizationUpsellingMessage } from '../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rule_customization_upselling_message';
 
 interface BulkActionRuleErrorItemProps {
   errorCode: BulkActionsDryRunErrCode | undefined;
@@ -25,8 +32,12 @@ const BulkEditRuleErrorItem = ({
   message,
   rulesCount,
 }: BulkActionRuleErrorItemProps) => {
+  const upsellingMessage = usePrebuiltRuleCustomizationUpsellingMessage(
+    'prebuilt_rule_customization'
+  );
+
   switch (errorCode) {
-    case BulkActionsDryRunErrCode.IMMUTABLE:
+    case BulkActionsDryRunErrCodeEnum.IMMUTABLE:
       return (
         <li key={message}>
           <FormattedMessage
@@ -36,7 +47,17 @@ const BulkEditRuleErrorItem = ({
           />
         </li>
       );
-    case BulkActionsDryRunErrCode.MACHINE_LEARNING_INDEX_PATTERN:
+    case BulkActionsDryRunErrCodeEnum.PREBUILT_CUSTOMIZATION_LICENSE:
+      return (
+        <li key={message}>
+          <FormattedMessage
+            id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.prebuiltRulesLicenseDescription"
+            defaultMessage="{rulesCount, plural, =1 {# prebuilt rule} other {# prebuilt rules}} ({upsellingMessage})"
+            values={{ rulesCount, upsellingMessage }}
+          />
+        </li>
+      );
+    case BulkActionsDryRunErrCodeEnum.MACHINE_LEARNING_INDEX_PATTERN:
       return (
         <li key={message}>
           <FormattedMessage
@@ -46,7 +67,7 @@ const BulkEditRuleErrorItem = ({
           />
         </li>
       );
-    case BulkActionsDryRunErrCode.MACHINE_LEARNING_AUTH:
+    case BulkActionsDryRunErrCodeEnum.MACHINE_LEARNING_AUTH:
       return (
         <li key={message}>
           <FormattedMessage
@@ -56,13 +77,39 @@ const BulkEditRuleErrorItem = ({
           />
         </li>
       );
-    case BulkActionsDryRunErrCode.ESQL_INDEX_PATTERN:
+    case BulkActionsDryRunErrCodeEnum.ESQL_INDEX_PATTERN:
       return (
         <li key={message}>
           <FormattedMessage
             id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.esqlRulesIndexEditDescription"
             defaultMessage="{rulesCount, plural, =1 {# ES|QL rule} other {# ES|QL rules}} (these rules don't have index patterns)"
             values={{ rulesCount }}
+          />
+        </li>
+      );
+    case BulkActionsDryRunErrCodeEnum.THRESHOLD_RULE_TYPE_IN_SUPPRESSION:
+      return (
+        <li key={message}>
+          <FormattedMessage
+            id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.thresholdRuleInSuppressionDescription"
+            defaultMessage="{rulesCount, plural, =1 {# threshold rule} other {# threshold rules}} can't be edited. To bulk-apply alert suppression {rulesCount, plural, =1 {to this rule} other {to these rules}}, use the {actionStrong} option."
+            values={{
+              rulesCount,
+              actionStrong: <strong>{BULK_ACTION_SET_ALERT_SUPPRESSION_FOR_THRESHOLD}</strong>,
+            }}
+          />
+        </li>
+      );
+    case BulkActionsDryRunErrCodeEnum.UNSUPPORTED_RULE_IN_SUPPRESSION_FOR_THRESHOLD:
+      return (
+        <li key={message}>
+          <FormattedMessage
+            id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.unsupportedRulesInThresholdSuppressionDescription"
+            defaultMessage="{rulesCount, plural, =1 {# rule} other {# rules}} can't be edited. To bulk-apply alert suppression {rulesCount, plural, =1 {to this rule} other {to these rules}}, use the {actionStrong} option."
+            values={{
+              rulesCount,
+              actionStrong: <strong>{BULK_ACTION_SET_ALERT_SUPPRESSION}</strong>,
+            }}
           />
         </li>
       );
@@ -85,7 +132,7 @@ const BulkExportRuleErrorItem = ({
   rulesCount,
 }: BulkActionRuleErrorItemProps) => {
   switch (errorCode) {
-    case BulkActionsDryRunErrCode.IMMUTABLE:
+    case BulkActionsDryRunErrCodeEnum.IMMUTABLE:
       return (
         <li key={message}>
           <FormattedMessage
@@ -114,7 +161,7 @@ const BulkManualRuleRunErrorItem = ({
   rulesCount,
 }: BulkActionRuleErrorItemProps) => {
   switch (errorCode) {
-    case BulkActionsDryRunErrCode.MANUAL_RULE_RUN_FEATURE:
+    case BulkActionsDryRunErrCodeEnum.MANUAL_RULE_RUN_FEATURE:
       return (
         <li key={message}>
           <FormattedMessage
@@ -124,7 +171,7 @@ const BulkManualRuleRunErrorItem = ({
           />
         </li>
       );
-    case BulkActionsDryRunErrCode.MANUAL_RULE_RUN_DISABLED_RULE:
+    case BulkActionsDryRunErrCodeEnum.MANUAL_RULE_RUN_DISABLED_RULE:
       return (
         <li key={message}>
           <FormattedMessage
@@ -140,6 +187,35 @@ const BulkManualRuleRunErrorItem = ({
           <FormattedMessage
             id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.defaultScheduleRuleRunFailureDescription"
             defaultMessage="{rulesCount, plural, =1 {# rule} other {# rules}} can't be scheduled ({message})"
+            values={{ rulesCount, message }}
+          />
+        </li>
+      );
+  }
+};
+
+const BulkFillRuleGapsErrorItem = ({
+  errorCode,
+  message,
+  rulesCount,
+}: BulkActionRuleErrorItemProps) => {
+  switch (errorCode) {
+    case BulkActionsDryRunErrCodeEnum.RULE_FILL_GAPS_DISABLED_RULE:
+      return (
+        <li key={message}>
+          <FormattedMessage
+            id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.fillGapsDisabledRuleDescription"
+            defaultMessage="{rulesCount, plural, =1 {# rule} other {# rules}} (Cannot fill gaps for disabled rules)"
+            values={{ rulesCount }}
+          />
+        </li>
+      );
+    default:
+      return (
+        <li key={message}>
+          <FormattedMessage
+            id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.defaultScheduleRuleRunFailureDescription"
+            defaultMessage="Cannot fill gaps for {rulesCount, plural, =1 {# rule} other {# rules}} ({message})"
             values={{ rulesCount, message }}
           />
         </li>
@@ -192,6 +268,15 @@ const BulkActionRuleErrorsListComponent = ({
             case BulkActionTypeEnum.run:
               return (
                 <BulkManualRuleRunErrorItem
+                  message={message}
+                  errorCode={errorCode}
+                  rulesCount={rulesCount}
+                />
+              );
+
+            case BulkActionTypeEnum.fill_gaps:
+              return (
+                <BulkFillRuleGapsErrorItem
                   message={message}
                   errorCode={errorCode}
                   rulesCount={rulesCount}

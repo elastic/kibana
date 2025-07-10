@@ -9,10 +9,10 @@ import React from 'react';
 import { EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { PanelText } from '../../../../common/components/panel_text';
-import { useKibana } from '../../../../common/lib/kibana/kibana_react';
+import { useKibana } from '../../../../common/lib/kibana/use_kibana';
 
 export const RuleMigrationsReadMore = React.memo(() => {
-  const docLink = useKibana().services.docLinks.links.siem.gettingStarted;
+  const docLink = useKibana().services.docLinks.links.securitySolution.siemMigrations;
   return (
     <PanelText size="xs" subdued>
       <p>

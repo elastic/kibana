@@ -23,7 +23,9 @@ export const getQuery = (indexName: string[]) => ({
   aggs: {
     latest: {
       terms: { field: 'indexName', size: 10000 }, // big enough to get all indexNames, but under `index.max_terms_count` (default 65536)
-      aggs: { latest_doc: { top_hits: { size: 1, sort: [{ '@timestamp': { order: 'desc' } }] } } },
+      aggs: {
+        latest_doc: { top_hits: { size: 1, sort: [{ '@timestamp': { order: 'desc' as const } }] } },
+      },
     },
   },
 });

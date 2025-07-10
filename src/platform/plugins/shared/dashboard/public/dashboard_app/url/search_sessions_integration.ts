@@ -7,23 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { map } from 'rxjs';
-import { History } from 'history';
-
-import {
-  getQueryParams,
-  IKbnUrlStateStorage,
-  createQueryParamObservable,
-} from '@kbn/kibana-utils-plugin/public';
-import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/common';
-import type { Query } from '@kbn/es-query';
 import { SearchSessionInfoProvider } from '@kbn/data-plugin/public';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
-import { SEARCH_SESSION_ID } from '../../dashboard_constants';
-import { DashboardLocatorParams } from '../../dashboard_container';
-import { convertPanelMapToPanelsArray } from '../../../common';
+import type { Query } from '@kbn/es-query';
+import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/common';
+import {
+  IKbnUrlStateStorage,
+  createQueryParamObservable,
+  getQueryParams,
+} from '@kbn/kibana-utils-plugin/public';
+import { History } from 'history';
+import { map } from 'rxjs';
+import { SEARCH_SESSION_ID } from '../../../common/constants';
+import { DashboardLocatorParams } from '../../../common/types';
+import { DashboardApi, DashboardInternalApi } from '../../dashboard_api/types';
 import { dataService } from '../../services/kibana_services';
-import { DashboardApi } from '../../dashboard_api/types';
 
 export const removeSearchSessionIdFromURL = (kbnUrlStateStorage: IKbnUrlStateStorage) => {
   kbnUrlStateStorage.kbnUrlControls.updateAsync((nextUrl) => {
@@ -46,15 +44,24 @@ export const getSessionURLObservable = (history: History) =>
   );
 
 export function createSessionRestorationDataProvider(
-  dashboardApi: DashboardApi
+  dashboardApi: DashboardApi,
+  dashboardInternalApi: DashboardInternalApi
 ): SearchSessionInfoProvider<DashboardLocatorParams> {
   return {
     getName: async () =>
-      dashboardApi.panelTitle.value ?? dashboardApi.savedObjectId.value ?? dashboardApi.uuid,
+      dashboardApi.title$.value ?? dashboardApi.savedObjectId$.value ?? dashboardApi.uuid,
     getLocatorData: async () => ({
       id: DASHBOARD_APP_LOCATOR,
-      initialState: getLocatorParams({ dashboardApi, shouldRestoreSearchSession: false }),
-      restoreState: getLocatorParams({ dashboardApi, shouldRestoreSearchSession: true }),
+      initialState: getLocatorParams({
+        dashboardApi,
+        dashboardInternalApi,
+        shouldRestoreSearchSession: false,
+      }),
+      restoreState: getLocatorParams({
+        dashboardApi,
+        dashboardInternalApi,
+        shouldRestoreSearchSession: true,
+      }),
     }),
   };
 }
@@ -65,14 +72,22 @@ export function createSessionRestorationDataProvider(
  */
 function getLocatorParams({
   dashboardApi,
+  dashboardInternalApi,
   shouldRestoreSearchSession,
 }: {
   dashboardApi: DashboardApi;
+  dashboardInternalApi: DashboardInternalApi;
   shouldRestoreSearchSession: boolean;
 }): DashboardLocatorParams {
-  const savedObjectId = dashboardApi.savedObjectId.value;
+  const savedObjectId = dashboardApi.savedObjectId$.value;
+  const panels = savedObjectId
+    ? (dashboardInternalApi.serializeLayout() as Pick<
+        DashboardLocatorParams,
+        'panels' | 'references'
+      >)
+    : undefined;
   return {
-    viewMode: dashboardApi.viewMode.value ?? 'view',
+    viewMode: dashboardApi.viewMode$.value ?? 'view',
     useHash: false,
     preserveSavedFilters: false,
     filters: dataService.query.filterManager.getFilters(),
@@ -90,10 +105,6 @@ function getLocatorParams({
           value: 0,
         }
       : undefined,
-    panels: savedObjectId
-      ? undefined
-      : (convertPanelMapToPanelsArray(
-          dashboardApi.panels$.value
-        ) as DashboardLocatorParams['panels']),
+    ...panels,
   };
 }

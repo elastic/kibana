@@ -18,7 +18,6 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
-import type { IntegrationAssistantPluginStart } from '@kbn/integration-assistant-plugin/public';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 
 import type {
@@ -54,6 +53,9 @@ import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 
 import { Subject } from 'rxjs';
 
+import type { AutomaticImportPluginStart } from '@kbn/automatic-import-plugin/public';
+import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
+
 import type { FleetAuthz } from '../common';
 import { appRoutesService, INTEGRATIONS_PLUGIN_ID, PLUGIN_ID, setupRouteService } from '../common';
 import {
@@ -75,7 +77,10 @@ import { CUSTOM_LOGS_INTEGRATION_NAME, INTEGRATIONS_BASE_PATH } from './constant
 import type { RequestError } from './hooks';
 import { licenseService, sendGetBulkAssets } from './hooks';
 import { setHttpClient } from './hooks/use_request';
-import { createPackageSearchProvider } from './search_provider';
+import {
+  createCustomIntegrationsSearchProvider,
+  createPackageSearchProvider,
+} from './search_provider';
 import { TutorialDirectoryHeaderLink, TutorialModuleNotice } from './components/home_integration';
 import { createExtensionRegistrationCallback } from './services/ui_extensions';
 import { ExperimentalFeaturesService } from './services/experimental_features';
@@ -88,6 +93,7 @@ import type {
 import { LazyCustomLogsAssetsExtension } from './lazy_custom_logs_assets_extension';
 import { setCustomIntegrations, setCustomIntegrationsStart } from './services/custom_integrations';
 import { getFleetDeepLinks } from './deep_links';
+import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 
 export type { FleetConfigType } from '../common/types';
 
@@ -132,17 +138,19 @@ export interface FleetStartDeps {
   navigation: NavigationPublicPluginStart;
   customIntegrations: CustomIntegrationsStart;
   share: SharePluginStart;
-  integrationAssistant?: IntegrationAssistantPluginStart;
+  automaticImport?: AutomaticImportPluginStart;
   cloud?: CloudStart;
   usageCollection?: UsageCollectionStart;
   guidedOnboarding?: GuidedOnboardingPluginStart;
+  embeddable: EmbeddableStart;
+  logsDataAccess: LogsDataAccessPluginStart;
 }
 
 export interface FleetStartServices extends CoreStart, Exclude<FleetStartDeps, 'cloud'> {
   storage: Storage;
   share: SharePluginStart;
   dashboard: DashboardStart;
-  integrationAssistant?: IntegrationAssistantPluginStart;
+  automaticImport?: AutomaticImportPluginStart;
   cloud?: CloudSetup & CloudStart;
   discover?: DiscoverStart;
   spaces?: SpacesPluginStart;
@@ -290,6 +298,9 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
 
     if (deps.globalSearch) {
       deps.globalSearch.registerResultProvider(createPackageSearchProvider(core));
+      deps.globalSearch.registerResultProvider(
+        createCustomIntegrationsSearchProvider(deps.customIntegrations)
+      );
     }
 
     return {};
@@ -333,7 +344,7 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
           all: capabilities.fleet.all as boolean,
           read: capabilities.fleet.read as boolean,
         },
-        subfeatureEnabled: this.experimentalFeatures.subfeaturePrivileges ?? false,
+        subfeatureEnabled: true,
       }),
       packagePrivileges: calculatePackagePrivilegesFromCapabilities(capabilities),
       endpointExceptionsPrivileges:

@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n-react';
 import semverLt from 'semver/functions/lt';
 
 import {
-  EuiCallOut,
   EuiTitle,
   EuiFlexGroup,
   EuiFlexItem,
@@ -42,14 +41,16 @@ import {
   SO_SEARCH_LIMIT,
 } from '../../../../../constants';
 import { SideBarColumn } from '../../../components/side_bar_column';
-
 import { KeepPoliciesUpToDateSwitch } from '../components';
+import { useChangelog } from '../hooks';
 
 import { InstallButton } from './install_button';
 import { ReinstallButton } from './reinstall_button';
 import { UpdateButton } from './update_button';
 import { UninstallButton } from './uninstall_button';
 import { ChangelogModal } from './changelog_modal';
+import { UpdateAvailableCallout } from './update_available_callout';
+import { BreakingChangesFlyout } from './breaking_changes_flyout';
 
 const SettingsTitleCell = styled.td`
   padding-right: ${(props) => props.theme.eui.euiSizeXL};
@@ -63,37 +64,6 @@ const NoteLabel = () => (
       defaultMessage="Note:"
     />
   </strong>
-);
-const UpdatesAvailableMsg = ({
-  latestVersion,
-  toggleChangelogModal,
-}: {
-  latestVersion: string;
-  toggleChangelogModal: () => void;
-}) => (
-  <EuiCallOut
-    color="warning"
-    iconType="warning"
-    title={i18n.translate('xpack.fleet.integrations.settings.versionInfo.updatesAvailable', {
-      defaultMessage: 'New version available',
-    })}
-  >
-    <FormattedMessage
-      id="xpack.fleet.integration.settings.versionInfo.updatesAvailableBody"
-      defaultMessage="Upgrade to version {latestVersion} to get the latest features. {changelogLink}"
-      values={{
-        latestVersion,
-        changelogLink: (
-          <EuiLink onClick={toggleChangelogModal}>
-            <FormattedMessage
-              id="xpack.fleet.integration.settings.versionInfo.updatesAvailableChangelogLink"
-              defaultMessage="View changelog."
-            />
-          </EuiLink>
-        ),
-      }}
-    />
-  </EuiCallOut>
 );
 
 const LatestVersionLink = ({ name, version }: { name: string; version: string }) => {
@@ -115,14 +85,17 @@ interface Props {
   packageInfo: PackageInfo;
   packageMetadata?: PackageMetadata;
   startServices: Pick<FleetStartServices, 'analytics' | 'i18n' | 'theme'>;
+  isCustomPackage: boolean;
 }
 
 export const SettingsPage: React.FC<Props> = memo(
-  ({ packageInfo, packageMetadata, startServices }: Props) => {
+  ({ packageInfo, packageMetadata, startServices, isCustomPackage }: Props) => {
     const authz = useAuthz();
     const { name, title, latestVersion, version, keepPoliciesUpToDate } = packageInfo;
     const [isUpgradingPackagePolicies, setIsUpgradingPackagePolicies] = useState<boolean>(false);
     const [isChangelogModalOpen, setIsChangelogModalOpen] = useState(false);
+    const [isBreakingChangesUnderstood, setIsBreakingChangesUnderstood] = useState(false);
+    const [isBreakingChangesFlyoutOpen, setIsBreakingChangesFlyoutOpen] = useState(false);
 
     const toggleChangelogModal = useCallback(() => {
       setIsChangelogModalOpen(!isChangelogModalOpen);
@@ -134,6 +107,13 @@ export const SettingsPage: React.FC<Props> = memo(
       page: 1,
       kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${name}`,
     });
+
+    const {
+      changelog,
+      breakingChanges,
+      isLoading: isChangelogLoading,
+      error: changelogError,
+    } = useChangelog(name, latestVersion, version);
 
     const packagePolicyIds = useMemo(
       () => packagePoliciesData?.items.map(({ id }) => id),
@@ -238,6 +218,16 @@ export const SettingsPage: React.FC<Props> = memo(
 
     const isUpdating = installationStatus === InstallStatus.installing && installedVersion;
 
+    useEffect(() => {
+      if (changelogError) {
+        notifications.toasts.addError(changelogError, {
+          title: i18n.translate('xpack.fleet.epm.errorLoadingChangelog', {
+            defaultMessage: 'Error loading changelog information',
+          }),
+        });
+      }
+    }, [changelogError, notifications.toasts]);
+
     return (
       <>
         <EuiFlexGroup alignItems="flexStart">
@@ -310,9 +300,20 @@ export const SettingsPage: React.FC<Props> = memo(
 
                   {(updateAvailable || isUpgradingPackagePolicies) && (
                     <>
-                      <UpdatesAvailableMsg
-                        latestVersion={latestVersion}
+                      <UpdateAvailableCallout
+                        version={latestVersion}
                         toggleChangelogModal={toggleChangelogModal}
+                        breakingChanges={
+                          breakingChanges
+                            ? {
+                                changelog: breakingChanges,
+                                isUnderstood: isBreakingChangesUnderstood,
+                                toggleIsUnderstood: () =>
+                                  setIsBreakingChangesUnderstood((prev) => !prev),
+                                onOpen: () => setIsBreakingChangesFlyoutOpen(true),
+                              }
+                            : null
+                        }
                       />
                       <EuiSpacer size="l" />
                       <p>
@@ -325,6 +326,7 @@ export const SettingsPage: React.FC<Props> = memo(
                           isUpgradingPackagePolicies={isUpgradingPackagePolicies}
                           setIsUpgradingPackagePolicies={setIsUpgradingPackagePolicies}
                           startServices={startServices}
+                          isDisabled={Boolean(breakingChanges) && !isBreakingChangesUnderstood}
                         />
                       </p>
                     </>
@@ -440,6 +442,7 @@ export const SettingsPage: React.FC<Props> = memo(
                                   ? packageInfo.installationInfo.install_source
                                   : ''
                               }
+                              isCustomPackage={isCustomPackage}
                             />
                           </div>
                         </EuiFlexItem>
@@ -487,13 +490,18 @@ export const SettingsPage: React.FC<Props> = memo(
         <EuiPortal>
           {isChangelogModalOpen && (
             <ChangelogModal
-              currentVersion={version}
-              latestVersion={latestVersion}
-              packageName={name}
+              changelog={changelog}
+              isLoading={isChangelogLoading}
               onClose={toggleChangelogModal}
             />
           )}
         </EuiPortal>
+        {isBreakingChangesFlyoutOpen && breakingChanges && (
+          <BreakingChangesFlyout
+            breakingChanges={breakingChanges}
+            onClose={() => setIsBreakingChangesFlyoutOpen(false)}
+          />
+        )}
       </>
     );
   }

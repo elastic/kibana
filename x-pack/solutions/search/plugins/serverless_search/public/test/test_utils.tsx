@@ -16,12 +16,12 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { userProfileMock } from '@kbn/security-plugin/common/model/user_profile.mock';
-import { searchConnectorsMock } from '@kbn/search-connectors-plugin/public/plugin.mock';
+import { searchConnectorsMock } from '@kbn/content-connectors-plugin/public/plugin.mock';
 
 export const core = coreMock.createStart();
 export const services = {
   cloud: cloudMock.createStart(),
-  searchConnectors: searchConnectorsMock.createStart(),
+  contentConnectors: searchConnectorsMock.createStart(),
   share: sharePluginMock.createStartContract(),
   userProfile: userProfileMock.createWithSecurity(),
 };

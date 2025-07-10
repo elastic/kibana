@@ -11,7 +11,7 @@ import type {
   CriteriaWithPagination,
   EuiTableSelectionType,
 } from '@elastic/eui';
-import { EuiText, EuiLink } from '@elastic/eui';
+import { EuiText, EuiLink, EuiScreenReaderOnly } from '@elastic/eui';
 import createContainer from 'constate';
 import useAsync from 'react-use/lib/useAsync';
 import { isEqual } from 'lodash';
@@ -21,6 +21,7 @@ import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import { EuiToolTip } from '@elastic/eui';
 import { EuiBadge } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { APM_HOST_TROUBLESHOOTING_LINK } from '../../../../components/asset_details/constants';
 import { Popover } from '../../../../components/asset_details/tabs/common/popover';
 import { HOST_NAME_FIELD } from '../../../../../common/constants';
@@ -310,7 +311,7 @@ export const useHostsTable = () => {
                 }
                 return (
                   <Popover
-                    icon="questionInCircle"
+                    icon="question"
                     data-test-subj="hostsView-tableRow-hasSystemMetrics-popover"
                   >
                     <EuiText size="xs">
@@ -446,11 +447,20 @@ export const useHostsTable = () => {
       },
       {
         name: (
-          <ColumnHeader
-            label={TABLE_COLUMN_LABEL.rx}
-            toolTip={METRICS_TOOLTIP.rx}
-            formula={formulas?.rx.value}
-          />
+          <>
+            <EuiScreenReaderOnly>
+              <span>
+                {i18n.translate('xpack.infra.hostsViewPage.table.rx.screenReaderOnlyLabel', {
+                  defaultMessage: 'Network Inbound',
+                })}
+              </span>
+            </EuiScreenReaderOnly>
+            <ColumnHeader
+              label={TABLE_COLUMN_LABEL.rx}
+              toolTip={METRICS_TOOLTIP.rx}
+              formula={formulas?.rx.value}
+            />
+          </>
         ),
         width: '12%',
         field: 'rxV2',
@@ -462,11 +472,20 @@ export const useHostsTable = () => {
       },
       {
         name: (
-          <ColumnHeader
-            label={TABLE_COLUMN_LABEL.tx}
-            toolTip={METRICS_TOOLTIP.tx}
-            formula={formulas?.tx.value}
-          />
+          <>
+            <EuiScreenReaderOnly>
+              <span>
+                {i18n.translate('xpack.infra.hostsViewPage.table.tx.screenReaderOnlyLabel', {
+                  defaultMessage: 'Network Outbound',
+                })}
+              </span>
+            </EuiScreenReaderOnly>
+            <ColumnHeader
+              label={TABLE_COLUMN_LABEL.tx}
+              toolTip={METRICS_TOOLTIP.tx}
+              formula={formulas?.tx.value}
+            />
+          </>
         ),
         width: '12%',
         field: 'txV2',

@@ -17,6 +17,8 @@ import type {
   PackageInfo,
   RegistryStream,
   RegistryVarsEntry,
+  RegistryRequiredVars,
+  NewPackagePolicyInputStream,
 } from '../types';
 
 import { DATASET_VAR_NAME } from '../constants';
@@ -33,8 +35,14 @@ import { isValidDataset } from './is_valid_namespace';
 type Errors = string[] | null;
 
 type ValidationEntry = Record<string, Errors>;
+interface ValidationRequiredVarsEntry {
+  name: string;
+  invalid: boolean;
+}
+type ValidationRequiredVars = Record<string, ValidationRequiredVarsEntry[]>;
 
 export interface PackagePolicyConfigValidationResults {
+  required_vars?: ValidationRequiredVars | null;
   vars?: ValidationEntry;
 }
 
@@ -46,8 +54,64 @@ export type PackagePolicyValidationResults = {
   name: Errors;
   description: Errors;
   namespace: Errors;
+  additional_datastreams_permissions: Errors;
   inputs: Record<PackagePolicyInput['type'], PackagePolicyInputValidationResults> | null;
 } & PackagePolicyConfigValidationResults;
+
+const validatePackageRequiredVars = (
+  streamOrInput: Pick<NewPackagePolicyInputStream | PackagePolicyInput, 'vars' | 'enabled'>,
+  requiredVars?: RegistryRequiredVars
+) => {
+  const evaluatedRequiredVars: ValidationRequiredVars = {};
+
+  if (!requiredVars || !streamOrInput.vars || !streamOrInput.enabled) {
+    return null;
+  }
+
+  let hasMetRequiredCriteria = false;
+
+  for (const [requiredVarDefinitionName, requiredVarDefinitionConstraints] of Object.entries(
+    requiredVars
+  )) {
+    evaluatedRequiredVars[requiredVarDefinitionName] =
+      requiredVarDefinitionConstraints?.map((constraint) => {
+        return {
+          name: constraint.name,
+          invalid: true,
+        };
+      }) || [];
+
+    if (evaluatedRequiredVars[requiredVarDefinitionName]) {
+      requiredVarDefinitionConstraints.forEach((requiredCondition) => {
+        if (streamOrInput.vars && streamOrInput.vars[requiredCondition.name]) {
+          const varItem = streamOrInput.vars[requiredCondition.name];
+
+          if (varItem) {
+            if (
+              (!requiredCondition.value && varItem.value) ||
+              (requiredCondition.value &&
+                varItem.value &&
+                requiredCondition.value === varItem.value)
+            ) {
+              evaluatedRequiredVars[requiredVarDefinitionName] = evaluatedRequiredVars[
+                requiredVarDefinitionName
+              ].filter((item) => item.name !== requiredCondition.name);
+            }
+          }
+        }
+      });
+    }
+
+    if (evaluatedRequiredVars[requiredVarDefinitionName]?.length === 0) {
+      hasMetRequiredCriteria = true;
+    }
+  }
+
+  return hasMetRequiredCriteria ? null : evaluatedRequiredVars;
+};
+
+const VALIDATE_DATASTREAMS_PERMISSION_REGEX =
+  /^(logs)|(metrics)|(traces)|(synthetics)|(profiling)-(.*)$/;
 
 /*
  * Returns validation information for a given package policy and package info
@@ -64,6 +128,7 @@ export const validatePackagePolicy = (
     name: null,
     description: null,
     namespace: null,
+    additional_datastreams_permissions: null,
     inputs: {},
     vars: {},
   };
@@ -86,9 +151,28 @@ export const validatePackagePolicy = (
     }
   }
 
+  if (packagePolicy?.additional_datastreams_permissions) {
+    validationResults.additional_datastreams_permissions =
+      packagePolicy?.additional_datastreams_permissions.reduce<null | string[]>(
+        (acc, additionalDatastreamsPermission) => {
+          if (!additionalDatastreamsPermission.match(VALIDATE_DATASTREAMS_PERMISSION_REGEX)) {
+            if (!acc) {
+              acc = [];
+            }
+            acc.push(
+              `${additionalDatastreamsPermission} is not valid, should match ${VALIDATE_DATASTREAMS_PERMISSION_REGEX.toString()}`
+            );
+          }
+          return acc;
+        },
+        null
+      );
+  }
+
   // Validate package-level vars
   const packageVarsByName = keyBy(packageInfo.vars || [], 'name');
   const packageVars = Object.entries(packagePolicy.vars || {});
+
   if (packageVars.length) {
     validationResults.vars = packageVars.reduce((results, [name, varEntry]) => {
       results[name] = validatePackagePolicyConfig(
@@ -120,6 +204,21 @@ export const validatePackagePolicy = (
     });
     return varDefs;
   }, {});
+  const inputRequiredVarsDefsByPolicyTemplateAndType = packageInfo.policy_templates.reduce<
+    Record<string, RegistryRequiredVars | undefined>
+  >((reqVarDefs, policyTemplate) => {
+    const inputs = getNormalizedInputs(policyTemplate);
+    inputs.forEach((input) => {
+      const requiredVarDefKey = hasIntegrations
+        ? `${policyTemplate.name}-${input.type}`
+        : input.type;
+
+      if ((input.vars || []).length) {
+        reqVarDefs[requiredVarDefKey] = input.required_vars;
+      }
+    });
+    return reqVarDefs;
+  }, {});
 
   const dataStreams = getNormalizedDataStreams(packageInfo);
   const streamsByDatasetAndInput = dataStreams.reduce<Record<string, RegistryStream>>(
@@ -138,6 +237,13 @@ export const validatePackagePolicy = (
     return varDefs;
   }, {});
 
+  const streamRequiredVarsDefsByDataAndInput = Object.entries(streamsByDatasetAndInput).reduce<
+    Record<string, RegistryRequiredVars | undefined>
+  >((reqVarDefs, [path, stream]) => {
+    reqVarDefs[path] = stream.required_vars;
+    return reqVarDefs;
+  }, {});
+
   // Validate each package policy input with either its own var fields and stream vars
   packagePolicy.inputs.forEach((input) => {
     if (!input.vars && !input.streams) {
@@ -146,6 +252,7 @@ export const validatePackagePolicy = (
     const inputKey = hasIntegrations ? `${input.policy_template}-${input.type}` : input.type;
     const inputValidationResults: PackagePolicyInputValidationResults = {
       vars: undefined,
+      required_vars: undefined,
       streams: {},
     };
 
@@ -163,8 +270,18 @@ export const validatePackagePolicy = (
           : null;
         return results;
       }, {} as ValidationEntry);
+
+      const requiredVars =
+        input.enabled &&
+        validatePackageRequiredVars(input, inputRequiredVarsDefsByPolicyTemplateAndType[inputKey]);
+      if (requiredVars) {
+        inputValidationResults.required_vars = requiredVars;
+      } else {
+        delete inputValidationResults.required_vars;
+      }
     } else {
       delete inputValidationResults.vars;
+      delete inputValidationResults.required_vars;
     }
 
     // Validate each input stream with var definitions
@@ -174,7 +291,6 @@ export const validatePackagePolicy = (
 
         const streamVarDefs =
           streamVarDefsByDatasetAndInput[`${stream.data_stream.dataset}-${input.type}`];
-
         if (streamVarDefs && Object.keys(streamVarDefs).length) {
           streamValidationResults.vars = Object.keys(streamVarDefs).reduce((results, name) => {
             const configEntry = stream?.vars?.[name];
@@ -192,6 +308,16 @@ export const validatePackagePolicy = (
 
             return results;
           }, {} as ValidationEntry);
+        }
+
+        if (stream.vars && stream.enabled) {
+          const requiredVars = validatePackageRequiredVars(
+            stream,
+            streamRequiredVarsDefsByDataAndInput[`${stream.data_stream.dataset}-${input.type}`]
+          );
+          if (requiredVars) {
+            streamValidationResults.required_vars = requiredVars;
+          }
         }
 
         inputValidationResults.streams![stream.data_stream.dataset] = streamValidationResults;
@@ -251,19 +377,42 @@ export const validatePackagePolicyConfig = (
   }
 
   if (varDef.secret === true && parsedValue && parsedValue.isSecretRef === true) {
-    if (
-      parsedValue.id === undefined ||
-      parsedValue.id === '' ||
-      typeof parsedValue.id !== 'string'
-    ) {
+    if (!parsedValue.id && (!parsedValue.ids || parsedValue.ids.length === 0)) {
+      errors.push(
+        i18n.translate('xpack.fleet.packagePolicyValidation.invalidSecretReference', {
+          defaultMessage: 'Secret reference is invalid, id or ids must be provided',
+        })
+      );
+      return errors;
+    }
+
+    if (parsedValue.id && parsedValue.ids) {
+      errors.push(
+        i18n.translate('xpack.fleet.packagePolicyValidation.invalidSecretReference', {
+          defaultMessage: 'Secret reference is invalid, id or ids cannot both be provided',
+        })
+      );
+      return errors;
+    }
+
+    if (parsedValue.id && typeof parsedValue.id !== 'string') {
       errors.push(
         i18n.translate('xpack.fleet.packagePolicyValidation.invalidSecretReference', {
           defaultMessage: 'Secret reference is invalid, id must be a string',
         })
       );
-
       return errors;
     }
+
+    if (parsedValue.ids && !parsedValue.ids.every((id: string) => typeof id === 'string')) {
+      errors.push(
+        i18n.translate('xpack.fleet.packagePolicyValidation.invalidSecretReference', {
+          defaultMessage: 'Secret reference is invalid, ids must be an array of strings',
+        })
+      );
+      return errors;
+    }
+
     return null;
   }
 
@@ -293,7 +442,8 @@ export const validatePackagePolicyConfig = (
     }
     if (varDef.required && Array.isArray(parsedValue)) {
       const hasEmptyString =
-        varDef.type === 'text' && parsedValue.some((item) => item.trim() === '');
+        varDef.type === 'text' &&
+        parsedValue.some((item) => typeof item === 'string' && item.trim() === '');
 
       if (hasEmptyString || parsedValue.length === 0) {
         errors.push(
@@ -396,9 +546,24 @@ export const countValidationErrors = (
     | PackagePolicyInputValidationResults
     | PackagePolicyConfigValidationResults
 ): number => {
-  const flattenedValidation = getFlattenedObject(validationResults);
-  const errors = Object.values(flattenedValidation).filter((value) => Boolean(value)) || [];
-  return errors.length;
+  const requiredVarGroupErrorKeys: Record<string, boolean> = {};
+  let otherErrors = 0;
+
+  // Flatten validation results and map to retrieve required var group errors vs other errors
+  // because required var groups should only count as 1 error
+  const flattenedValidation = getFlattenedObject(validationResults ?? {});
+  Object.entries(flattenedValidation).forEach(([key, value]) => {
+    if (key.startsWith('required_vars.')) {
+      requiredVarGroupErrorKeys.required_vars = true;
+    } else if (key.includes('.required_vars.')) {
+      const groupKey = key.replace(/^(.*)\.required_vars\..*$/, '$1');
+      requiredVarGroupErrorKeys[groupKey] = true;
+    } else if (Boolean(value)) {
+      otherErrors++;
+    }
+  });
+
+  return otherErrors + Object.keys(requiredVarGroupErrorKeys).length;
 };
 
 export const validationHasErrors = (

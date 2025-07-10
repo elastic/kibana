@@ -17,6 +17,7 @@ import {
   SavedObjectsRawDoc,
   SavedObjectsRawDocSource,
   SavedObjectSanitizedDoc,
+  WithAuditName,
 } from '@kbn/core-saved-objects-server';
 import { ALL_NAMESPACES_STRING, SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import { encodeVersion } from '@kbn/core-saved-objects-base-server-internal';
@@ -149,16 +150,17 @@ export const performBulkUpdate = async <T>(
     };
   }
 
-  // `objectNamespace` is a namespace string, while `namespace` is a namespace ID.
-  // The object namespace string, if defined, will supersede the operation's namespace ID.
-  const namespaceString = SavedObjectsUtils.namespaceIdToString(namespace);
-
+  /*
+   * Gets the namespace ID for a given object defaulting to the current namespace.
+   *
+   * If the `objectNamespace` is defined, it will convert it to an ID using
+   * `SavedObjectsUtils.namespaceStringToId()`. Otherwise, it will use the current
+   * namespace ID.
+   */
   const getNamespaceId = (objectNamespace?: string) =>
     objectNamespace !== undefined
       ? SavedObjectsUtils.namespaceStringToId(objectNamespace)
       : namespace;
-
-  const getNamespaceString = (objectNamespace?: string) => objectNamespace ?? namespaceString;
 
   const bulkGetDocs = validObjects.map(({ value: { type, id, objectNamespace } }) => ({
     _id: serializer.generateRawId(getNamespaceId(objectNamespace), type, id),
@@ -168,7 +170,7 @@ export const performBulkUpdate = async <T>(
 
   const bulkGetResponse = bulkGetDocs.length
     ? await client.mget<SavedObjectsRawDocSource>(
-        { body: { docs: bulkGetDocs } },
+        { docs: bulkGetDocs },
         { ignore: [404], meta: true }
       )
     : undefined;
@@ -183,15 +185,19 @@ export const performBulkUpdate = async <T>(
     throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError();
   }
 
-  const authObjects: AuthorizeUpdateObject[] = validObjects.map((element) => {
-    const { type, id, objectNamespace, esRequestIndex: index } = element.value;
+  const authObjects: Array<WithAuditName<AuthorizeUpdateObject>> = validObjects.map((element) => {
+    const { type, id, objectNamespace, esRequestIndex: index, documentToSave } = element.value;
     const preflightResult = bulkGetResponse!.body.docs[index];
+    const name = SavedObjectsUtils.getName(registry.getNameAttribute(type), {
+      attributes: documentToSave[type] as SavedObject<T>,
+    });
 
     if (registry.isMultiNamespace(type)) {
       return {
         type,
         id,
         objectNamespace,
+        name,
         // @ts-expect-error MultiGetHit._source is optional
         existingNamespaces: preflightResult._source?.namespaces ?? [],
       };
@@ -200,6 +206,7 @@ export const performBulkUpdate = async <T>(
         type,
         id,
         objectNamespace,
+        name,
         existingNamespaces: [],
       };
     }
@@ -229,7 +236,6 @@ export const performBulkUpdate = async <T>(
         mergeAttributes,
       } = expectedBulkGetResult.value;
 
-      let namespaces: string[] | undefined;
       const versionProperties = getExpectedVersionProperties(version);
       const indexFound = bulkGetResponse?.statusCode !== 404;
       const actualResult = indexFound ? bulkGetResponse?.body.docs[esRequestIndex] : undefined;
@@ -252,15 +258,18 @@ export const performBulkUpdate = async <T>(
         });
       }
 
+      let savedObjectNamespace: string | undefined;
+      let savedObjectNamespaces: string[] | undefined;
+
       if (isMultiNS) {
         // @ts-expect-error MultiGetHit is incorrectly missing _id, _source
-        namespaces = actualResult!._source.namespaces ?? [
+        savedObjectNamespaces = actualResult!._source.namespaces ?? [
           // @ts-expect-error MultiGetHit is incorrectly missing _id, _source
           SavedObjectsUtils.namespaceIdToString(actualResult!._source.namespace),
         ];
       } else if (registry.isSingleNamespace(type)) {
         // if `objectNamespace` is undefined, fall back to `options.namespace`
-        namespaces = [getNamespaceString(objectNamespace)];
+        savedObjectNamespace = getNamespaceId(objectNamespace);
       }
 
       const document = getSavedObjectFromSource<T>(
@@ -304,8 +313,8 @@ export const performBulkUpdate = async <T>(
         ...migrated!,
         id,
         type,
-        namespace,
-        namespaces,
+        ...(savedObjectNamespace && { namespace: savedObjectNamespace }),
+        ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
         attributes: updatedAttributes,
         updated_at: time,
         updated_by: updatedBy,
@@ -314,6 +323,9 @@ export const performBulkUpdate = async <T>(
       const updatedMigratedDocumentToSave = serializer.savedObjectToRaw(
         migratedUpdatedSavedObjectDoc as SavedObjectSanitizedDoc
       );
+
+      const namespaces =
+        savedObjectNamespaces ?? (savedObjectNamespace ? [savedObjectNamespace] : []);
 
       const expectedResult = {
         type,
@@ -344,7 +356,7 @@ export const performBulkUpdate = async <T>(
   const bulkUpdateResponse = bulkUpdateParams.length
     ? await client.bulk({
         refresh,
-        body: bulkUpdateParams,
+        operations: bulkUpdateParams,
         _source_includes: ['originId'],
         require_alias: true,
       })
@@ -356,7 +368,7 @@ export const performBulkUpdate = async <T>(
         return expectedResult.value as any;
       }
 
-      const { type, id, namespaces, documentToSave, esRequestIndex, rawMigratedUpdatedDoc } =
+      const { type, id, documentToSave, esRequestIndex, rawMigratedUpdatedDoc } =
         expectedResult.value;
       const response = bulkUpdateResponse?.items[esRequestIndex] ?? {};
       const rawResponse = Object.values(response)[0] as any;
@@ -371,11 +383,18 @@ export const performBulkUpdate = async <T>(
       // eslint-disable-next-line @typescript-eslint/naming-convention
       const { [type]: attributes, references, updated_at, updated_by } = documentToSave;
 
-      const { originId } = rawMigratedUpdatedDoc._source;
+      const {
+        originId,
+        namespaces: docNamespaces,
+        namespace: docNamespace,
+      } = rawMigratedUpdatedDoc._source;
       return {
         id,
         type,
-        ...(namespaces && { namespaces }),
+        ...(registry.isMultiNamespace(type) && { namespaces: docNamespaces }),
+        ...(registry.isSingleNamespace(type) && {
+          namespaces: [SavedObjectsUtils.namespaceIdToString(docNamespace)],
+        }),
         ...(originId && { originId }),
         updated_at,
         updated_by,

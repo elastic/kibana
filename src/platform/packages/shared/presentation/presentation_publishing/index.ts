@@ -10,18 +10,20 @@
 export { isEmbeddableApiContext, type EmbeddableApiContext } from './embeddable_api_context';
 
 export {
-  getInitialValuesFromComparators,
-  getUnchangingComparator,
-  runComparators,
-  type ComparatorDefinition,
   type ComparatorFunction,
   type StateComparators,
-} from './comparators';
+  type WithAllKeys,
+  runComparator,
+  areComparatorsEqual,
+  diffComparators,
+  initializeStateManager,
+  shouldLogStateDiff,
+  logStateDiff,
+} from './state_manager';
 export {
   apiCanAccessViewMode,
   getInheritedViewMode,
   getViewModeSubject,
-  useInheritedViewMode,
   type CanAccessViewMode,
 } from './interfaces/can_access_view_mode';
 export {
@@ -30,9 +32,10 @@ export {
 } from './interfaces/can_lock_hover_actions';
 export { fetch$, useFetchContext, type FetchContext } from './interfaces/fetch/fetch';
 export {
-  initializeTimeRange,
+  initializeTimeRangeManager,
+  timeRangeComparators,
   type SerializedTimeRange,
-} from './interfaces/fetch/initialize_time_range';
+} from './interfaces/fetch/time_range_manager';
 export { apiPublishesReload, type PublishesReload } from './interfaces/fetch/publishes_reload';
 export {
   apiPublishesFilters,
@@ -60,18 +63,23 @@ export {
 } from './interfaces/has_disable_triggers';
 export { hasEditCapabilities, type HasEditCapabilities } from './interfaces/has_edit_capabilities';
 export {
+  hasReadOnlyCapabilities,
+  type HasReadOnlyCapabilities,
+} from './interfaces/has_read_only_capabilities';
+export {
   apiHasExecutionContext,
   type HasExecutionContext,
 } from './interfaces/has_execution_context';
 export {
-  apiHasInPlaceLibraryTransforms,
-  apiHasLegacyLibraryTransforms,
   apiHasLibraryTransforms,
-  type HasInPlaceLibraryTransforms,
-  type HasLegacyLibraryTransforms,
   type HasLibraryTransforms,
 } from './interfaces/has_library_transforms';
 export { apiHasParentApi, type HasParentApi } from './interfaces/has_parent_api';
+export {
+  apiHasSerializableState,
+  type HasSerializableState,
+  type SerializedPanelState,
+} from './interfaces/has_serializable_state';
 export {
   apiHasSupportedTriggers,
   type HasSupportedTriggers,
@@ -124,24 +132,26 @@ export {
   type ViewMode,
 } from './interfaces/publishes_view_mode';
 export {
-  apiPublishesPanelDescription,
-  apiPublishesWritablePanelDescription,
-  getPanelDescription,
-  type PublishesPanelDescription,
-  type PublishesWritablePanelDescription,
-} from './interfaces/titles/publishes_panel_description';
+  apiPublishesDescription,
+  apiPublishesWritableDescription,
+  getDescription,
+  type PublishesDescription,
+  type PublishesWritableDescription,
+} from './interfaces/titles/publishes_description';
 export {
-  apiPublishesPanelTitle,
-  apiPublishesWritablePanelTitle,
-  getPanelTitle,
-  type PublishesPanelTitle,
-  type PublishesWritablePanelTitle,
-} from './interfaces/titles/publishes_panel_title';
+  apiPublishesTitle,
+  apiPublishesWritableTitle,
+  getTitle,
+  type PublishesTitle,
+  type PublishesWritableTitle,
+} from './interfaces/titles/publishes_title';
 export {
-  initializeTitles,
+  initializeTitleManager,
   stateHasTitles,
+  titleComparators,
+  type TitlesApi,
   type SerializedTitles,
-} from './interfaces/titles/titles_api';
+} from './interfaces/titles/title_manager';
 export {
   useBatchedOptionalPublishingSubjects,
   useBatchedPublishingSubjects,

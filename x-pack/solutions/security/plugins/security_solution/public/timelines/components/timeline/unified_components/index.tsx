@@ -5,10 +5,9 @@
  * 2.0.
  */
 import type { EuiDataGridProps } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiHideFor } from '@elastic/eui';
-import React, { useMemo, useCallback, useState, useRef, useEffect } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiHideFor, useEuiTheme } from '@elastic/eui';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
-
 import { generateFilters } from '@kbn/data-plugin/public';
 import type { DataView, DataViewField } from '@kbn/data-plugin/common';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
@@ -16,8 +15,9 @@ import type { DataLoadingState, UnifiedDataTableProps } from '@kbn/unified-data-
 import { useColumns } from '@kbn/unified-data-table';
 import { popularizeField } from '@kbn/unified-data-table/src/utils/popularize_field';
 import type { DropType } from '@kbn/dom-drag-drop';
+import { DropOverlayWrapper, Droppable, useDragDropContext } from '@kbn/dom-drag-drop';
 import styled from 'styled-components';
-import { Droppable, DropOverlayWrapper, useDragDropContext } from '@kbn/dom-drag-drop';
+import { css } from '@emotion/react';
 import type {
   UnifiedFieldListSidebarContainerApi,
   UnifiedFieldListSidebarContainerProps,
@@ -26,8 +26,6 @@ import { UnifiedFieldListSidebarContainer } from '@kbn/unified-field-list';
 import type { EuiTheme } from '@kbn/react-kibana-context-styled';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import { withDataView } from '../../../../common/components/with_data_view';
 import { EventDetailsWidthProvider } from '../../../../common/components/events_viewer/event_details_width_context';
 import type { TimelineItem } from '../../../../../common/search_strategy';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -40,14 +38,13 @@ import type {
 } from '../../../../../common/types/timeline';
 import type { inputsModel } from '../../../../common/store';
 import { getColumnHeader } from '../body/column_headers/helpers';
-import { StyledPageContentWrapper, StyledMainEuiPanel, StyledSplitFlexItem } from './styles';
+import { StyledMainEuiPanel, StyledPageContentWrapper } from './styles';
 import { DRAG_DROP_FIELD } from './data_table/translations';
 import { TimelineResizableLayout } from './resizable_layout';
 import TimelineDataTable from './data_table';
 import { timelineActions } from '../../../store';
 import { getFieldsListCreationOptions } from './get_fields_list_creation_options';
 import { defaultUdtHeaders } from '../body/column_headers/default_headers';
-import { getTimelineShowStatusByIdSelector } from '../../../store/selectors';
 
 const TimelineBodyContainer = styled.div.attrs(({ className = '' }) => ({
   className: `${className}`,
@@ -81,6 +78,7 @@ const SidebarPanelFlexGroup = styled(EuiFlexGroup)`
       .euiFlexItem:last-child {
         /* padding-right: ${(props) => (props.theme as EuiTheme).eui.euiSizeS}; */
       }
+
       .unifiedFieldListSidebar__list {
         padding-left: 0px;
       }
@@ -138,6 +136,7 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
   leadingControlColumns,
   onUpdatePageIndex,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const dispatch = useDispatch();
   const unifiedFieldListContainerRef = useRef<UnifiedFieldListSidebarContainerApi>(null);
 
@@ -186,7 +185,6 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
     ]
   );
 
-  const [sidebarContainer, setSidebarContainer] = useState<HTMLDivElement | null>(null);
   const [, setMainContainer] = useState<HTMLDivElement | null>(null);
 
   const columnIds = useMemo(() => {
@@ -345,40 +343,14 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
     onFieldEdited();
   }, [onFieldEdited]);
 
-  // PERFORMANCE ONLY CODE BLOCK
-  /**
-   * We check for the timeline open status to request the fields for the fields browser as the fields request
-   * is often a much longer running request for customers with a significant number of indices and fields in those indices.
-   * This request should only be made after the user has decided to interact with timeline to prevent any performance impacts
-   * to the underlying security solution views, as this query will always run when the timeline exists on the page.
-   *
-   * `hasTimelineBeenOpenedOnce` - We want to keep timeline loading times as fast as possible after the user
-   * has chosen to interact with timeline at least once, so we use this flag to prevent re-requesting of this fields data
-   * every time timeline is closed and re-opened after the first interaction.
-   */
-
-  const getTimelineShowStatus = useMemo(() => getTimelineShowStatusByIdSelector(), []);
-  const { show } = useDeepEqualSelector((state) => getTimelineShowStatus(state, timelineId));
-
-  const [hasTimelineBeenOpenedOnce, setHasTimelineBeenOpenedOnce] = useState(false);
-
-  useEffect(() => {
-    if (!hasTimelineBeenOpenedOnce && show) {
-      setHasTimelineBeenOpenedOnce(true);
-    }
-  }, [hasTimelineBeenOpenedOnce, show]);
-
-  // END PERFORMANCE ONLY CODE BLOCK
-
   return (
-    <TimelineBodyContainer className="timelineBodyContainer" ref={setSidebarContainer}>
+    <TimelineBodyContainer className="timelineBodyContainer">
       <TimelineResizableLayout
-        container={sidebarContainer}
         unifiedFieldListSidebarContainerApi={unifiedFieldListContainerRef.current}
         sidebarPanel={
           <SidebarPanelFlexGroup gutterSize="none">
             <EuiFlexItem className="sidebarContainer">
-              {dataView && hasTimelineBeenOpenedOnce ? (
+              {dataView && (
                 <UnifiedFieldListSidebarContainer
                   ref={unifiedFieldListContainerRef}
                   showFieldList
@@ -394,10 +366,15 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
                   onAddFilter={onAddFilter}
                   onFieldEdited={wrappedOnFieldEdited}
                 />
-              ) : null}
+              )}
             </EuiFlexItem>
             <EuiHideFor sizes={HIDE_FOR_SIZES}>
-              <StyledSplitFlexItem grow={false} className="thinBorderSplit" />
+              <EuiFlexItem
+                grow={false}
+                css={css`
+                  border-right: ${euiTheme.border.thin};
+                `}
+              />
             </EuiHideFor>
           </SidebarPanelFlexGroup>
         }
@@ -423,6 +400,7 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
                     <DataGridMemoized
                       columns={columns}
                       columnIds={currentColumnIds}
+                      dataView={dataView}
                       rowRenderers={rowRenderers}
                       timelineId={timelineId}
                       isSortEnabled={isSortEnabled}
@@ -456,6 +434,6 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
   );
 };
 
-export const UnifiedTimeline = React.memo(withDataView<Props>(UnifiedTimelineComponent));
+export const UnifiedTimeline = React.memo(UnifiedTimelineComponent);
 // eslint-disable-next-line import/no-default-export
 export { UnifiedTimeline as default };

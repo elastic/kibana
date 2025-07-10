@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 
 import { css } from '@emotion/react';
 
@@ -31,13 +31,13 @@ import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 
+import { errorToText } from '../../../../../../common/utils/error_to_text';
 import { HttpLogic } from '../../../../shared/http';
 import { KibanaLogic } from '../../../../shared/kibana';
 
 import { AddConnectorApiLogic } from '../../../api/connector/add_connector_api_logic';
 import { EnterpriseSearchContentPageTemplate } from '../../layout';
 import { NewConnectorLogic } from '../../new_index/method_connector/new_connector_logic';
-import { errorToText } from '../../new_index/utils/error_to_text';
 import { connectorsBreadcrumbs } from '../connectors';
 
 import { generateStepState } from '../utils/generate_step_state';
@@ -51,6 +51,7 @@ import { StartStep } from './start_step';
 
 export type ConnectorCreationSteps = 'start' | 'deployment' | 'configure' | 'finish';
 export type SelfManagePreference = 'native' | 'selfManaged';
+
 export const CreateConnector: React.FC = () => {
   const { overlays } = useKibana().services;
 
@@ -59,23 +60,12 @@ export const CreateConnector: React.FC = () => {
 
   const { error } = useValues(AddConnectorApiLogic);
   const { euiTheme } = useEuiTheme();
-  const [selfManagePreference, setSelfManagePreference] = useState<SelfManagePreference>('native');
+  const [selfManagePreference, setSelfManagePreference] =
+    useState<SelfManagePreference>('selfManaged');
 
   const { selectedConnector, currentStep, isFormDirty } = useValues(NewConnectorLogic);
   const { setCurrentStep } = useActions(NewConnectorLogic);
   const stepStates = generateStepState(currentStep);
-
-  const { config } = useValues(KibanaLogic);
-  const isRunningLocally = (config.host ?? '').includes('localhost');
-
-  useEffect(() => {
-    if (
-      (selectedConnector && !selectedConnector.isNative && selfManagePreference === 'native') ||
-      isRunningLocally
-    ) {
-      setSelfManagePreference('selfManaged');
-    }
-  }, [selectedConnector]);
 
   const getSteps = (selfManaged: boolean): EuiContainedStepProps[] => {
     return [
@@ -146,7 +136,6 @@ export const CreateConnector: React.FC = () => {
           setSelfManagePreference(preference);
         }}
         error={errorToText(error)}
-        isRunningLocally={isRunningLocally}
       />
     ),
   };
@@ -196,6 +185,7 @@ export const CreateConnector: React.FC = () => {
           defaultMessage: 'Create a connector',
         }),
       }}
+      data-test-subj="searchCreateConnectorPage"
     >
       <EuiFlexGroup gutterSize="m">
         {/* Col 1 */}
@@ -212,7 +202,7 @@ export const CreateConnector: React.FC = () => {
               background-size: contain;
               background-repeat: no-repeat;
               background-position: bottom center;
-              min-height: 550px;
+              min-height: 466px;
               border: 1px solid ${euiTheme.colors.lightShade};
             `}
           >

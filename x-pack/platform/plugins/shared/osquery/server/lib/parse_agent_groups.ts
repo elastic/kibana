@@ -8,6 +8,7 @@
 import { uniq } from 'lodash';
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { AGENTS_INDEX, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import { OSQUERY_INTEGRATION_NAME } from '../../common';
 import type { OsqueryAppContext } from './osquery_app_context_services';
 
@@ -16,6 +17,7 @@ export interface AgentSelection {
   allAgentsSelected?: boolean;
   platformsSelected?: string[];
   policiesSelected?: string[];
+  spaceId: string;
 }
 
 const PER_PAGE = 9000;
@@ -24,9 +26,9 @@ export const aggregateResults = async (
   generator: (
     page: number,
     perPage: number,
-    searchAfter?: unknown[],
+    searchAfter?: SortResults,
     pitId?: string
-  ) => Promise<{ results: string[]; total: number; searchAfter?: unknown[] }>,
+  ) => Promise<{ results: string[]; total: number; searchAfter?: SortResults }>,
   esClient: ElasticsearchClient,
   context: OsqueryAppContext
 ) => {
@@ -41,7 +43,7 @@ export const aggregateResults = async (
       index: AGENTS_INDEX,
       keep_alive: '10m',
     });
-    let currentSort: unknown[] | undefined;
+    let currentSort: SortResults | undefined;
     // Refetch first page with PIT
     const { results: pitInitialResults, searchAfter } = await generator(
       1,
@@ -89,7 +91,9 @@ export const parseAgentSelection = async (
     policiesSelected = [],
     agents = [],
   } = agentSelection;
-  const agentService = context.service.getAgentService()?.asInternalUser;
+  const agentService = context.service
+    .getAgentService()
+    ?.asInternalScopedUser(agentSelection.spaceId);
   const packagePolicyService = context.service.getPackagePolicyService();
   const kueryFragments = ['status:online'];
 
@@ -111,7 +115,7 @@ export const parseAgentSelection = async (
     if (allAgentsSelected) {
       const kuery = kueryFragments.join(' and ');
       const fetchedAgents = await aggregateResults(
-        async (page, perPage, searchAfter?: unknown[], pitId?: string) => {
+        async (page, perPage, searchAfter?: SortResults, pitId?: string) => {
           const res = await agentService.listAgents({
             ...(searchAfter ? { searchAfter } : {}),
             ...(pitId ? { pitId } : {}),
@@ -145,7 +149,7 @@ export const parseAgentSelection = async (
         kueryFragments.push(`(${groupFragments.join(' or ')})`);
         const kuery = kueryFragments.join(' and ');
         const fetchedAgents = await aggregateResults(
-          async (page, perPage, searchAfter?: unknown[], pitId?: string) => {
+          async (page, perPage, searchAfter?: SortResults, pitId?: string) => {
             const res = await agentService.listAgents({
               ...(searchAfter ? { searchAfter } : {}),
               ...(pitId ? { pitId } : {}),
@@ -171,5 +175,16 @@ export const parseAgentSelection = async (
 
   agents.forEach(addAgent);
 
-  return Array.from(selectedAgents);
+  const selectedAgentsArray = Array.from(selectedAgents);
+
+  // validate if all selected agents are in current space. If not, getByIds will throw an error, caught by caller
+  try {
+    await agentService?.getByIds(selectedAgentsArray, { ignoreMissing: false });
+
+    return selectedAgentsArray;
+  } catch (error) {
+    context.logFactory.get().error(error);
+
+    return [];
+  }
 };

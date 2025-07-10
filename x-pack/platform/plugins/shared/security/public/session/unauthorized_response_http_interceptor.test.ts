@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-// @ts-ignore
-import fetchMock from 'fetch-mock/es5/client';
+import fetchMock from 'fetch-mock';
 
 import type { HttpSetup } from '@kbn/core/public';
 import { applicationServiceMock } from '@kbn/core/public/mocks';

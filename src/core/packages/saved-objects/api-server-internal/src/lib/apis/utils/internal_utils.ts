@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type { Payload } from '@hapi/boom';
 import {
   SavedObjectsErrorHelpers,
@@ -38,7 +38,7 @@ export function getBulkOperationError(
   id: string,
   rawResponse: {
     status: number;
-    error?: { type: string; reason?: string; index: string };
+    error?: { type: string; reason?: string | null; index: string };
     // Other fields are present on a bulk operation result but they are irrelevant for this function
   }
 ): Payload | undefined {

@@ -5,40 +5,70 @@
  * 2.0.
  */
 
-import { Page } from '@playwright/test';
+import type { Page, Locator } from '@playwright/test';
 
 export class OnboardingHomePage {
   page: Page;
 
+  private readonly useCaseHost: Locator;
+  private readonly useCaseKubernetes: Locator;
+  readonly useCaseCloud: Locator;
+
+  private readonly otelKubernetesQuickStartCard: Locator;
+  private readonly kubernetesQuickStartCard: Locator;
+  private readonly autoDetectElasticAgent: Locator;
+  private readonly otelHostCard: Locator;
+  readonly awsCollectionCard: Locator;
+  readonly firehoseQuickstartCard: Locator;
+
   constructor(page: Page) {
     this.page = page;
+
+    this.useCaseHost = this.page
+      .getByTestId('observabilityOnboardingUseCaseCard-host')
+      .getByRole('radio');
+
+    this.useCaseKubernetes = this.page
+      .getByTestId('observabilityOnboardingUseCaseCard-kubernetes')
+      .getByRole('radio');
+
+    this.useCaseCloud = this.page
+      .getByTestId('observabilityOnboardingUseCaseCard-cloud')
+      .getByRole('radio');
+
+    this.otelKubernetesQuickStartCard = this.page.getByTestId('integration-card:otel-kubernetes');
+
+    this.kubernetesQuickStartCard = this.page.getByTestId(
+      'integration-card:kubernetes-quick-start'
+    );
+
+    this.autoDetectElasticAgent = this.page.getByTestId('integration-card:auto-detect-logs');
+    this.otelHostCard = this.page.getByTestId('integration-card:otel-logs');
+    this.awsCollectionCard = this.page.getByTestId('integration-card:aws-logs-virtual');
+    this.firehoseQuickstartCard = this.page.getByTestId('integration-card:firehose-quick-start');
   }
 
-  private readonly useCaseKubernetes = () =>
-    this.page.getByTestId('observabilityOnboardingUseCaseCard-kubernetes').getByRole('radio');
-
-  private readonly kubernetesQuickStartCard = () =>
-    this.page.getByTestId('integration-card:kubernetes-quick-start');
-
-  private readonly useCaseHost = () =>
-    this.page.getByTestId('observabilityOnboardingUseCaseCard-host').getByRole('radio');
-
-  private readonly autoDetectElasticAgent = () =>
-    this.page.getByTestId('integration-card:auto-detect-logs');
-
   public async selectHostUseCase() {
-    await this.useCaseHost().click();
+    await this.useCaseHost.click();
   }
 
   public async selectKubernetesUseCase() {
-    await this.useCaseKubernetes().click();
+    await this.useCaseKubernetes.click();
   }
 
   public async selectAutoDetectWithElasticAgent() {
-    await this.autoDetectElasticAgent().click();
+    await this.autoDetectElasticAgent.click();
   }
 
   public async selectKubernetesQuickstart() {
-    await this.kubernetesQuickStartCard().click();
+    await this.kubernetesQuickStartCard.click();
+  }
+
+  public async selectOtelKubernetesQuickstart() {
+    await this.otelKubernetesQuickStartCard.click();
+  }
+
+  public async selectOtelHostQuickstart() {
+    await this.otelHostCard.click();
   }
 }

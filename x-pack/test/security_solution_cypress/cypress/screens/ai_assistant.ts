@@ -41,7 +41,6 @@ export const QUICK_PROMPT_TITLE_INPUT =
 export const QUICK_PROMPT_BADGE = (b: string) => `[data-test-subj="quickPrompt-${b}"]`;
 export const QUICK_PROMPT_BODY_INPUT = '[data-test-subj="quick-prompt-prompt"]';
 export const SEND_TO_TIMELINE_BUTTON = '[data-test-subj="sendToTimelineEmptyButton"]';
-export const SHOW_ANONYMIZED_BUTTON = '[data-test-subj="showAnonymizedValues"]';
 export const SUBMIT_CHAT = '[data-test-subj="submit-chat"]';
 export const SYSTEM_PROMPT = '[data-test-subj="promptSuperSelect"]';
 export const SYSTEM_PROMPT_BODY_INPUT = '[data-test-subj="systemPromptModalPromptText"]';
@@ -51,3 +50,5 @@ export const SYSTEM_PROMPT_SELECT = (c: string) => `[data-test-subj="systemPromp
 export const UPGRADE_CTA = '[data-test-subj="upgradeLicenseCallToAction"]';
 export const USER_PROMPT = '[data-test-subj="prompt-textarea"]';
 export const WELCOME_SETUP = '[data-test-subj="welcome-setup"]';
+export const OPENAI_CONNECTOR_OPTION = '[data-test-subj="action-option-OpenAI"]';
+export const SECRETS_APIKEY_INPUT = '[data-test-subj="secrets.apiKey-input"]';

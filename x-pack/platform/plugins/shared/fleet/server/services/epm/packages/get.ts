@@ -16,7 +16,7 @@ import type {
 import semverGte from 'semver/functions/gte';
 import type { Logger } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
-
+import { errors } from '@elastic/elasticsearch';
 import type { IndicesDataStream, SortResults } from '@elastic/elasticsearch/lib/api/types';
 
 import { nodeBuilder } from '@kbn/es-query';
@@ -38,6 +38,7 @@ import type {
   InstalledPackage,
   PackageSpecManifest,
   AssetsMap,
+  PackagePolicyAssetsMap,
 } from '../../../../common/types';
 import {
   PACKAGES_SAVED_OBJECT_TYPE,
@@ -56,6 +57,7 @@ import {
   PackageNotFoundError,
   RegistryResponseError,
   PackageInvalidArchiveError,
+  FleetUnauthorizedError,
 } from '../../../errors';
 import { appContextService } from '../..';
 import { dataStreamService } from '../../data_streams';
@@ -67,7 +69,7 @@ import { getPackagePolicySavedObjectType } from '../../package_policy';
 import { auditLoggingService } from '../../audit_logging';
 
 import { getFilteredSearchPackages } from '../filtered_packages';
-
+import { filterAssetPathForParseAndVerifyArchive } from '../archive/parse';
 import { airGappedUtils } from '../airgapped';
 
 import { createInstallableFrom } from '.';
@@ -76,6 +78,8 @@ import {
   setPackageAssetsMapCache,
   getPackageInfoCache,
   setPackageInfoCache,
+  getAgentTemplateAssetsMapCache,
+  setAgentTemplateAssetsMapCache,
 } from './cache';
 
 export { getFile } from '../registry';
@@ -138,6 +142,11 @@ export async function getPackages(
               );
               return null;
             }
+            // ignoring errors of type PackageNotFoundError to avoid blocking the UI over a package not found in the registry
+            if (err instanceof PackageNotFoundError) {
+              logger.warn(`Package ${pkg.id} ${pkg.attributes.version} not found in registry`);
+              return null;
+            }
             throw err;
           }
         } else {
@@ -167,6 +176,7 @@ export async function getPackages(
     auditLoggingService.writeCustomSoAuditLog({
       action: 'get',
       id: pkg.id,
+      name: pkg.name,
       savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
     });
   }
@@ -203,10 +213,22 @@ export async function getInstalledPackages(options: GetInstalledPackagesOptions)
   const { savedObjectsClient, esClient, showOnlyActiveDataStreams, ...otherOptions } = options;
   const { dataStreamType } = otherOptions;
 
-  const [packageSavedObjects, allFleetDataStreams] = await Promise.all([
-    getInstalledPackageSavedObjects(savedObjectsClient, otherOptions),
-    showOnlyActiveDataStreams ? dataStreamService.getAllFleetDataStreams(esClient) : undefined,
-  ]);
+  const packageSavedObjects = await getInstalledPackageSavedObjects(
+    savedObjectsClient,
+    otherOptions
+  );
+
+  let allFleetDataStreams: IndicesDataStream[] | undefined;
+
+  if (showOnlyActiveDataStreams) {
+    allFleetDataStreams = await dataStreamService.getAllFleetDataStreams(esClient).catch((err) => {
+      const isResponseError = err instanceof errors.ResponseError;
+      if (isResponseError && err?.body?.error?.type === 'security_exception') {
+        throw new FleetUnauthorizedError(`Unauthorized to query fleet datastreams: ${err.message}`);
+      }
+      throw err;
+    });
+  }
 
   const integrations = packageSavedObjects.saved_objects.map((integrationSavedObject) => {
     const {
@@ -283,6 +305,7 @@ export async function getLimitedPackages(options: {
     auditLoggingService.writeCustomSoAuditLog({
       action: 'find',
       id: pkg.id,
+      name: pkg.name,
       savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
     });
   }
@@ -304,6 +327,7 @@ export async function getPackageSavedObjects(
     auditLoggingService.writeCustomSoAuditLog({
       action: 'find',
       id: savedObject.id,
+      name: savedObject.attributes.name,
       savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
     });
   }
@@ -311,7 +335,7 @@ export async function getPackageSavedObjects(
   return result;
 }
 
-async function getInstalledPackageSavedObjects(
+export async function getInstalledPackageSavedObjects(
   savedObjectsClient: SavedObjectsClientContract,
   options: Omit<GetInstalledPackagesOptions, 'savedObjectsClient' | 'esClient'>
 ) {
@@ -334,15 +358,15 @@ async function getInstalledPackageSavedObjects(
         `${PACKAGES_SAVED_OBJECT_TYPE}.attributes.install_status`,
         installationStatuses.Installed
       ),
-      // Filter for a "queryable" marker
-      buildFunctionNode(
-        'nested',
-        `${PACKAGES_SAVED_OBJECT_TYPE}.attributes.installed_es`,
-        nodeBuilder.is('type', 'index_template')
-      ),
-      // "Type" filter
       ...(dataStreamType
         ? [
+            // Filter for a "queryable" marker
+            buildFunctionNode(
+              'nested',
+              `${PACKAGES_SAVED_OBJECT_TYPE}.attributes.installed_es`,
+              nodeBuilder.is('type', 'index_template')
+            ),
+            // "Type" filter
             buildFunctionNode(
               'nested',
               `${PACKAGES_SAVED_OBJECT_TYPE}.attributes.installed_es`,
@@ -357,6 +381,7 @@ async function getInstalledPackageSavedObjects(
     auditLoggingService.writeCustomSoAuditLog({
       action: 'find',
       id: savedObject.id,
+      name: savedObject.attributes.name,
       savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
     });
   }
@@ -552,6 +577,7 @@ export const getPackageUsageStats = async ({
       auditLoggingService.writeCustomSoAuditLog({
         action: 'find',
         id: packagePolicy.id,
+        name: packagePolicy.attributes.name,
         savedObjectType: packagePolicySavedObjectType,
       });
     }
@@ -670,6 +696,7 @@ export async function getInstallationObject(options: {
   auditLoggingService.writeCustomSoAuditLog({
     action: 'find',
     id: installation.id,
+    name: installation.attributes.name,
     savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
   });
 
@@ -691,6 +718,7 @@ async function getInstallationObjects(options: {
     auditLoggingService.writeCustomSoAuditLog({
       action: 'find',
       id: installation.id,
+      name: installation.attributes.name,
       savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
     });
   }
@@ -715,15 +743,23 @@ export async function getInstalledPackageWithAssets(options: {
   pkgName: string;
   logger?: Logger;
   ignoreUnverified?: boolean;
+  assetsFilter?: (path: string) => boolean;
 }) {
   const installation = await getInstallation(options);
   if (!installation) {
     return;
   }
+  const assetsReference =
+    (typeof options.assetsFilter !== 'undefined'
+      ? installation.package_assets?.filter(({ path }) =>
+          typeof path !== 'undefined' ? options.assetsFilter!(path) : true
+        )
+      : installation.package_assets) ?? [];
+
   const esPackage = await getEsPackage(
     installation.name,
     installation.version,
-    installation.package_assets ?? [],
+    assetsReference,
     options.savedObjectsClient
   );
 
@@ -797,6 +833,59 @@ export async function getPackageAssetsMap({
     return assetsMap;
   } catch (error) {
     logger.warn(`getPackageAssetsMap error: ${error}`);
+    throw error;
+  }
+}
+
+/**
+ * Return assets agent template assets map for package policies operation
+ */
+export async function getAgentTemplateAssetsMap({
+  savedObjectsClient,
+  packageInfo,
+  logger,
+  ignoreUnverified,
+}: {
+  savedObjectsClient: SavedObjectsClientContract;
+  packageInfo: PackageInfo;
+  logger: Logger;
+  ignoreUnverified?: boolean;
+}): Promise<PackagePolicyAssetsMap> {
+  const cache = getAgentTemplateAssetsMapCache(packageInfo.name, packageInfo.version);
+  if (cache) {
+    return cache;
+  }
+  const assetsFilter = (path: string) =>
+    filterAssetPathForParseAndVerifyArchive(path) || !!path.match(/\/agent\/.*\.hbs/);
+  const installedPackageWithAssets = await getInstalledPackageWithAssets({
+    savedObjectsClient,
+    pkgName: packageInfo.name,
+    logger,
+    assetsFilter,
+  });
+
+  try {
+    let assetsMap: PackagePolicyAssetsMap | undefined;
+    if (installedPackageWithAssets?.installation.version !== packageInfo.version) {
+      // Try to get from registry
+      const pkg = await Registry.getPackage(packageInfo.name, packageInfo.version, {
+        ignoreUnverified,
+        useStreaming: true,
+      });
+      assetsMap = new Map() as PackagePolicyAssetsMap;
+      await pkg.archiveIterator.traverseEntries(async (entry) => {
+        if (entry.buffer) {
+          assetsMap!.set(entry.path, entry.buffer);
+        }
+      }, assetsFilter);
+    } else {
+      assetsMap = installedPackageWithAssets.assetsMap as PackagePolicyAssetsMap;
+    }
+    setAgentTemplateAssetsMapCache(packageInfo.name, packageInfo.version, assetsMap);
+
+    return assetsMap as PackagePolicyAssetsMap;
+  } catch (error) {
+    logger.warn(`getAgentTemplateAssetsMap error: ${error}`);
     throw error;
   }
 }

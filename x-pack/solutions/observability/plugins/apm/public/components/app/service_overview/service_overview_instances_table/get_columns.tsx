@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import type { ReactNode } from 'react';
 import React from 'react';
 import { ActionMenu } from '@kbn/observability-shared-plugin/public';
+import type { TypeOf } from '@kbn/typed-react-router-config';
 import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
 import type { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import { getServiceNodeName, SERVICE_NODE_NAME_MISSING } from '../../../../../common/service_nodes';
@@ -26,6 +27,7 @@ import { getLatencyColumnLabel } from '../../../shared/transactions_table/get_la
 import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
 import { InstanceActionsMenu } from './instance_actions_menu';
 import { ChartType, getTimeSeriesColor } from '../../../shared/charts/helper/get_timeseries_color';
+import type { ApmRoutes } from '../../../routing/apm_route_config';
 
 type ServiceInstanceMainStatistics =
   APIReturnType<'GET /internal/apm/services/{serviceName}/service_overview_instances/main_statistics'>;
@@ -46,6 +48,7 @@ export function getColumns({
   itemIdToOpenActionMenuRowMap,
   offset,
   shouldShowSparkPlots = true,
+  query,
 }: {
   serviceName: string;
   kuery: string;
@@ -59,6 +62,7 @@ export function getColumns({
   toggleRowActionMenu: (selectedServiceNodeName: string) => void;
   itemIdToOpenActionMenuRowMap: Record<string, boolean>;
   shouldShowSparkPlots?: boolean;
+  query: Omit<TypeOf<ApmRoutes, '/services/{serviceName}/metrics'>['query'], 'kuery'>;
 }): Array<EuiBasicTableColumn<MainStatsServiceInstanceItem>> {
   return [
     {
@@ -75,12 +79,12 @@ export function getColumns({
         const link = (
           <MetricOverviewLink
             serviceName={serviceName}
-            mergeQuery={(query) => ({
+            query={{
               ...query,
               kuery: isMissingServiceNodeName
                 ? `NOT (service.node.name:*)`
                 : `service.node.name:"${item.serviceNodeName}"`,
-            })}
+            }}
           >
             {text}
           </MetricOverviewLink>

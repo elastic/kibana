@@ -18,7 +18,7 @@ import type {
   SavedObjectsBulkDeleteOptions,
 } from '@kbn/core/server';
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { nodeBuilder } from '@kbn/es-query';
 
 import type { Case, CaseStatuses, User } from '../../../common/types/domain';
@@ -181,7 +181,7 @@ export class CasesService {
       return accMap;
     }, new Map<string, SavedObjectsFindResult<CaseTransformedAttributes>>());
 
-    const commentTotals = await this.attachmentService.getter.getCaseCommentStats({
+    const commentTotals = await this.attachmentService.getter.getCaseAttatchmentStats({
       caseIds: Array.from(casesMap.keys()),
     });
 
@@ -594,8 +594,8 @@ export class CasesService {
       const decodedAttributes = decodeOrThrow(CaseTransformedAttributesRt)(attributes);
       const transformedAttributes = transformAttributesToESModel(decodedAttributes);
 
-      transformedAttributes.attributes.total_alerts = -1;
-      transformedAttributes.attributes.total_comments = -1;
+      transformedAttributes.attributes.total_alerts = 0;
+      transformedAttributes.attributes.total_comments = 0;
 
       const createdCase = await this.unsecuredSavedObjectsClient.create<CasePersistedAttributes>(
         CASE_SAVED_OBJECT,
@@ -626,8 +626,8 @@ export class CasesService {
         const { attributes: transformedAttributes, referenceHandler } =
           transformAttributesToESModel(decodedAttributes);
 
-        transformedAttributes.total_alerts = -1;
-        transformedAttributes.total_comments = -1;
+        transformedAttributes.total_alerts = 0;
+        transformedAttributes.total_comments = 0;
 
         return {
           type: CASE_SAVED_OBJECT,

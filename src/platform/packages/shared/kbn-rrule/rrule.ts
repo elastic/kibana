@@ -9,13 +9,10 @@
 
 import moment, { type Moment } from 'moment-timezone';
 
+import type { ConstructorOptions } from './types';
 import { Frequency, Weekday, type WeekdayStr, type Options, type IterOptions } from './types';
 import { sanitizeOptions } from './sanitize';
-
-type ConstructorOptions = Omit<Options, 'byweekday' | 'wkst'> & {
-  byweekday?: Array<string | number> | null;
-  wkst?: Weekday | WeekdayStr | number | null;
-};
+import { validateOptions } from './validate';
 
 const ISO_WEEKDAYS = [
   Weekday.MO,
@@ -36,6 +33,7 @@ const TIMEOUT_LIMIT = 100000;
 
 export class RRule {
   private options: Options;
+
   constructor(options: ConstructorOptions) {
     this.options = sanitizeOptions(options as Options);
     if (typeof options.wkst === 'string') {
@@ -132,6 +130,16 @@ export class RRule {
     else {
       dates.hasMore = true;
       return dates;
+    }
+  }
+
+  static isValid(options: ConstructorOptions): boolean {
+    try {
+      validateOptions(options);
+
+      return true;
+    } catch (e) {
+      return false;
     }
   }
 }

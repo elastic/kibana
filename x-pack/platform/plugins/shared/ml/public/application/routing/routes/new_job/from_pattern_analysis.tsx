@@ -38,9 +38,9 @@ const PageWrapper: FC<PageProps> = ({ location }) => {
   const {
     services: {
       data,
-      dashboard: dashboardService,
       uiSettings: kibanaConfig,
       mlServices: { mlApi },
+      share,
     },
   } = useMlKibana();
 
@@ -51,7 +51,7 @@ const PageWrapper: FC<PageProps> = ({ location }) => {
           mlApi,
           timeFilter: data.query.timefilter.timefilter,
           kibanaConfig,
-          dashboardService,
+          share,
           data,
         },
         categorizationType,

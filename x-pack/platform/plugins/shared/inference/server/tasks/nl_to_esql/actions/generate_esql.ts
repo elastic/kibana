@@ -16,10 +16,11 @@ import {
   MessageRole,
   OutputCompleteEvent,
   OutputEventType,
-  FunctionCallingMode,
+  ChatCompleteMetadata,
+  ChatCompleteOptions,
+  ChatCompleteAPI,
 } from '@kbn/inference-common';
 import { correctCommonEsqlMistakes, generateFakeToolCallId } from '../../../../common';
-import { InferenceClient } from '../../..';
 import { INLINE_ESQL_QUERY_REGEX } from '../../../../common/tasks/nl_to_esql/constants';
 import { EsqlDocumentBase } from '../doc_base';
 import { requestDocumentationSchema } from './shared';
@@ -33,19 +34,22 @@ export const generateEsqlTask = <TToolOptions extends ToolOptions>({
   toolOptions: { tools, toolChoice },
   docBase,
   functionCalling,
+  maxRetries,
+  retryConfiguration,
   logger,
   system,
+  metadata,
 }: {
   connectorId: string;
   systemMessage: string;
   messages: Message[];
   toolOptions: ToolOptions;
-  chatCompleteApi: InferenceClient['chatComplete'];
+  chatCompleteApi: ChatCompleteAPI;
   docBase: EsqlDocumentBase;
-  functionCalling?: FunctionCallingMode;
   logger: Pick<Logger, 'debug'>;
+  metadata?: ChatCompleteMetadata;
   system?: string;
-}) => {
+} & Pick<ChatCompleteOptions, 'maxRetries' | 'retryConfiguration' | 'functionCalling'>) => {
   return function askLlmToRespond({
     documentationRequest: { commands, functions },
   }: {
@@ -73,6 +77,9 @@ export const generateEsqlTask = <TToolOptions extends ToolOptions>({
       chatCompleteApi({
         connectorId,
         functionCalling,
+        maxRetries,
+        retryConfiguration,
+        metadata,
         stream: true,
         system: `${systemMessage}
 

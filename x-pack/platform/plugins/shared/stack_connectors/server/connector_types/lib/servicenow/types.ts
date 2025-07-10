@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import { AxiosError, AxiosInstance, AxiosResponse } from 'axios';
-import { TypeOf } from '@kbn/config-schema';
-import { Logger } from '@kbn/core/server';
-import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
-import { ConnectorUsageCollector, ValidatorServices } from '@kbn/actions-plugin/server/types';
-import {
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+import type { AxiosError, AxiosInstance, AxiosResponse } from 'axios';
+import type { TypeOf } from '@kbn/config-schema';
+import type { Logger } from '@kbn/core/server';
+import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
+import type { ConnectorUsageCollector, ValidatorServices } from '@kbn/actions-plugin/server/types';
+import type {
   ExecutorParamsSchemaITSM,
   ExecutorSubActionCommonFieldsParamsSchema,
   ExecutorSubActionGetIncidentParamsSchema,
@@ -26,7 +28,7 @@ import {
   ExternalIncidentServiceConfigurationBaseSchema,
   ExecutorSubActionCloseIncidentParamsSchema,
 } from './schema';
-import { SNProductsConfigValue } from '../../../../common/servicenow_config';
+import type { SNProductsConfigValue } from '../../../../common/servicenow_config';
 
 export type { SNProductsConfigValue, SNProductsConfig } from '../../../../common/servicenow_config';
 

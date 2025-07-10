@@ -27,12 +27,16 @@ import { MissingPrivilegesToolTip } from '../../../../../../components/missing_p
 import { getLogstashPipeline, LOGSTASH_CONFIG_PIPELINES } from './helpers';
 import { useLogstashApiKey } from './hooks';
 
-export const LogstashInstructions = () => {
+interface LogstashInstructionsProps {
+  isSSLEnabled: boolean;
+}
+
+export const LogstashInstructions = ({ isSSLEnabled }: LogstashInstructionsProps) => {
   const { docLinks } = useStartServices();
 
   return (
     <CollapsibleCallout
-      iconType="iInCircle"
+      iconType="info"
       title={
         <FormattedMessage
           id="xpack.fleet.settings.logstashInstructions.calloutTitle"
@@ -57,7 +61,7 @@ export const LogstashInstructions = () => {
           }}
         />
         <EuiSpacer size="m" />
-        <LogstashInstructionSteps />
+        <LogstashInstructionSteps isSSLEnabled={isSSLEnabled} />
       </>
     </CollapsibleCallout>
   );
@@ -100,7 +104,10 @@ const CollapsibleCallout: React.FunctionComponent<EuiCallOutProps> = ({ children
   );
 };
 
-const LogstashInstructionSteps = () => {
+interface LogstashInstructionStepsProps {
+  isSSLEnabled: boolean;
+}
+const LogstashInstructionSteps = ({ isSSLEnabled }: LogstashInstructionStepsProps) => {
   const { docLinks } = useStartServices();
   const logstashApiKey = useLogstashApiKey();
   const authz = useAuthz();
@@ -170,7 +177,7 @@ const LogstashInstructionSteps = () => {
             />
             <EuiSpacer size="m" />
             <EuiCodeBlock paddingSize="m" language="yaml" isCopyable>
-              {getLogstashPipeline(logstashApiKey.apiKey)}
+              {getLogstashPipeline(isSSLEnabled, logstashApiKey.apiKey)}
             </EuiCodeBlock>
           </>
         ),
@@ -225,7 +232,7 @@ const LogstashInstructionSteps = () => {
         ),
       },
     ],
-    [logstashApiKey, docLinks, hasAllSettings]
+    [logstashApiKey, docLinks, hasAllSettings, isSSLEnabled]
   );
 
   return (

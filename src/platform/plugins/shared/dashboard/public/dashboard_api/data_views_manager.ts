@@ -7,35 +7,34 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { uniqBy } from 'lodash';
-import { BehaviorSubject, combineLatest, Observable, of, switchMap } from 'rxjs';
-
+import { ControlGroupApi } from '@kbn/controls-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/common';
+import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import { combineCompatibleChildrenApis } from '@kbn/presentation-containers';
 import {
   apiPublishesDataViews,
   PublishesDataViews,
   PublishingSubject,
 } from '@kbn/presentation-publishing';
-
-import { ControlGroupApi } from '@kbn/controls-plugin/public';
+import { uniqBy } from 'lodash';
+import { BehaviorSubject, combineLatest, Observable, of, switchMap } from 'rxjs';
 import { dataService } from '../services/kibana_services';
 
 export function initializeDataViewsManager(
   controlGroupApi$: PublishingSubject<ControlGroupApi | undefined>,
-  children$: PublishingSubject<{ [key: string]: unknown }>
+  children$: PublishingSubject<{ [key: string]: DefaultEmbeddableApi }>
 ) {
-  const dataViews = new BehaviorSubject<DataView[] | undefined>([]);
+  const dataViews$ = new BehaviorSubject<DataView[] | undefined>([]);
 
   const controlGroupDataViewsPipe: Observable<DataView[] | undefined> = controlGroupApi$.pipe(
     switchMap((controlGroupApi) => {
-      return controlGroupApi ? controlGroupApi.dataViews : of([]);
+      return controlGroupApi ? controlGroupApi.dataViews$ : of([]);
     })
   );
 
   const childDataViewsPipe = combineCompatibleChildrenApis<PublishesDataViews, DataView[]>(
     { children$ },
-    'dataViews',
+    'dataViews$',
     apiPublishesDataViews,
     []
   );
@@ -43,7 +42,10 @@ export function initializeDataViewsManager(
   const dataViewsSubscription = combineLatest([controlGroupDataViewsPipe, childDataViewsPipe])
     .pipe(
       switchMap(async ([controlGroupDataViews, childDataViews]) => {
-        const allDataViews = [...(controlGroupDataViews ?? []), ...childDataViews];
+        const allDataViews = [...(controlGroupDataViews ?? []), ...childDataViews].filter(
+          (dataView) => dataView.isPersisted()
+        );
+
         if (allDataViews.length === 0) {
           try {
             const defaultDataView = await dataService.dataViews.getDefaultDataView();
@@ -57,13 +59,13 @@ export function initializeDataViewsManager(
         return uniqBy(allDataViews, 'id');
       })
     )
-    .subscribe((newDataViews) => {
-      dataViews.next(newDataViews);
+    .subscribe((nextDataViews) => {
+      dataViews$.next(nextDataViews);
     });
 
   return {
     api: {
-      dataViews,
+      dataViews$,
     },
     cleanup: () => {
       dataViewsSubscription.unsubscribe();

@@ -56,7 +56,10 @@ export const CollapsibleIndicesList: React.FunctionComponent<Props> = ({ indices
                 values={{ count: hiddenItemsCount }}
               />
             )}{' '}
-            <EuiIcon type={isShowingFullList ? 'arrowUp' : 'arrowDown'} />
+            <EuiIcon
+              type={isShowingFullList ? 'arrowUp' : 'arrowDown'}
+              data-test-subj="collapsibleIndicesArrow"
+            />
           </EuiLink>
         </>
       ) : null}

@@ -26,23 +26,26 @@ export const analyzeFileQuerySchema = schema.object({
   timestamp_format: schema.maybe(schema.string()),
 });
 
-export const importFileQuerySchema = schema.object({
-  id: schema.maybe(schema.string()),
+const ingestPipeline = schema.object({
+  id: schema.string(),
+  pipeline: schema.maybe(schema.any()),
+});
+
+export const initializeImportFileBodySchema = schema.object({
+  index: schema.string(),
+  /* Index settings */
+  settings: schema.maybe(schema.any()),
+  /** Mappings */
+  mappings: schema.any(),
+  /** Ingest pipeline definition */
+  ingestPipelines: schema.arrayOf(ingestPipeline),
+  existingIndex: schema.maybe(schema.boolean()),
 });
 
 export const importFileBodySchema = schema.object({
   index: schema.string(),
   data: schema.arrayOf(schema.any()),
-  settings: schema.maybe(schema.any()),
-  /** Mappings */
-  mappings: schema.any(),
-  /** Ingest pipeline definition */
-  ingestPipeline: schema.maybe(
-    schema.object({
-      id: schema.maybe(schema.string()),
-      pipeline: schema.maybe(schema.any()),
-    })
-  ),
+  ingestPipelineId: schema.maybe(schema.string()),
 });
 
 export const runtimeMappingsSchema = schema.object(

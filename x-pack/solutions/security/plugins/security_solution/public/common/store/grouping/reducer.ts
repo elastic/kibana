@@ -6,19 +6,21 @@
  */
 
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
-import { getDefaultGroupingOptions } from '../../utils/alerts';
+import { DEFAULT_GROUPING_OPTIONS } from '../../../detections/components/alerts_table/alerts_grouping';
 import { updateGroups } from './actions';
 import type { Groups } from './types';
 
 export const initialGroupingState: Groups = {};
+
+const EMPTY_ACTIVE_GROUP: string[] = [];
 
 export const groupsReducer = reducerWithInitialState(initialGroupingState).case(
   updateGroups,
   (state, { tableId, ...rest }) => ({
     ...state,
     [tableId]: {
-      activeGroups: [],
-      options: getDefaultGroupingOptions(tableId),
+      activeGroups: EMPTY_ACTIVE_GROUP,
+      options: DEFAULT_GROUPING_OPTIONS,
       ...(state[tableId] ? state[tableId] : {}),
       ...rest,
     },

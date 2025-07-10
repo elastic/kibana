@@ -21,6 +21,7 @@ import {
   tap,
   shareReplay,
   map,
+  first,
 } from 'rxjs';
 
 import { ElasticV3ServerShipper } from '@elastic/ebt/shippers/elastic_v3/server';
@@ -91,9 +92,23 @@ export interface TelemetryPluginStart {
    * Resolves `false` if the user explicitly opted out of sending usage data to Elastic
    * or did not choose to opt-in or out -yet- after a minor or major upgrade (only when previously opted-out).
    *
-   * @track-adoption
+   * @deprecated Use {@link TelemetryPluginStart.isOptedIn$ | isOptedIn$} instead.
    */
   getIsOptedIn: () => Promise<boolean>;
+
+  /**
+   * An Observable object that can be subscribed to for changes in global telemetry config.
+   *
+   * Pushes `true` when sending usage to Elastic is enabled.
+   * Pushes `false` when the user explicitly opts out of sending usage data to Elastic.
+   *
+   * Additionally, pushes the actual value on Kibana startup, except if the (previously opted-out) user
+   * haven't chosen yet to opt-in or out after a minor or major upgrade. In that case, pushing the new
+   * value waits until the user decides.
+   *
+   * @track-adoption
+   */
+  isOptedIn$: Observable<boolean>;
 }
 
 export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPluginStart> {
@@ -107,12 +122,12 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
   private readonly fetcherTask: FetcherTask;
   private readonly shouldStartSnapshotTelemetryFetcher: boolean;
   /**
-   * @private Used to mark the completion of the old UI Settings migration
+   * @internal Used to mark the completion of the old UI Settings migration
    */
   private savedObjectsInternalRepository?: ISavedObjectsRepository;
 
   /**
-   * @private
+   * @internal
    * Used to interact with the Telemetry Saved Object.
    * Some users may not have access to the document but some queries
    * are still relevant to them like fetching when was the last time it was reported.
@@ -157,9 +172,11 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
   }
 
   public setup(
-    { analytics, docLinks, http, savedObjects }: CoreSetup,
+    coreSetup: CoreSetup,
     { usageCollection, telemetryCollectionManager }: TelemetryPluginsDepsSetup
   ): TelemetryPluginSetup {
+    const { analytics, docLinks, http, savedObjects } = coreSetup;
+
     this.isOptedIn$.subscribe((optedIn) => {
       const optInStatusMsg = optedIn ? 'enabled' : 'disabled';
       this.logger.info(
@@ -219,6 +236,17 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     registerTelemetrySavedObject((opts) => savedObjects.registerType(opts));
     this.registerUsageCollectors(usageCollection);
 
+    config$
+      .pipe(
+        filter((cfg) => cfg.localShipper === true),
+        first(),
+        map(async () => {
+          const { initializeLocalShipper } = await import('./local_shipper');
+          initializeLocalShipper(this.logger.get('local-shipper'), coreSetup);
+        })
+      )
+      .subscribe();
+
     return {
       getTelemetryUrl: async () => {
         const { appendServerlessChannelsSuffix, sendUsageTo } = await firstValueFrom(config$);
@@ -256,6 +284,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
 
     return {
       getIsOptedIn: async () => this.isOptedIn === true,
+      isOptedIn$: this.isOptedIn$,
     };
   }
 

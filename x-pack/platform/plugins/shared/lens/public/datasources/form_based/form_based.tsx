@@ -163,7 +163,21 @@ export function columnToOperation(
   uniqueLabel?: string,
   dataView?: IndexPattern | DataView
 ): OperationDescriptor {
-  const { dataType, label, isBucketed, scale, operationType, timeShift, reducedTimeRange } = column;
+  const { dataType, label, isBucketed, operationType, timeShift, reducedTimeRange } = column;
+
+  const operationDefinition = operationDefinitionMap[operationType];
+  if (!operationDefinition) {
+    throw new Error(
+      i18n.translate('xpack.lens.indexPattern.operationNotFoundErrorMessage', {
+        defaultMessage: 'Operation {operationType} not found',
+        values: { operationType },
+      })
+    );
+  }
+
+  const scale = operationDefinition.scale
+    ? operationDefinition.scale(column, dataView as IndexPattern)
+    : 'ratio';
 
   return {
     dataType: normalizeOperationDataType(dataType),
@@ -177,6 +191,9 @@ export function columnToOperation(
     interval: isColumnOfType<DateHistogramIndexPatternColumn>('date_histogram', column)
       ? column.params.interval
       : undefined,
+    hasArraySupport:
+      isColumnOfType<LastValueIndexPatternColumn>('last_value', column) &&
+      column.params.showArrayValues,
   };
 }
 
@@ -211,7 +228,7 @@ export function getFormBasedDatasource({
   dataViewFieldEditor: IndexPatternFieldEditorStart;
   uiActions: UiActionsStart;
 }) {
-  const { uiSettings } = core;
+  const { uiSettings, featureFlags } = core;
 
   const DATASOURCE_ID = 'formBased';
   const ALIAS_IDS = ['indexpattern'];
@@ -464,6 +481,7 @@ export function getFormBasedDatasource({
         layerId,
         indexPatterns,
         uiSettings,
+        featureFlags,
         dateRange,
         nowInstant,
         searchSessionId,
@@ -930,7 +948,7 @@ function blankLayer(indexPatternId: string, linkToLayers?: string[]): FormBasedL
 function getLayerErrorMessages(
   state: FormBasedPrivateState,
   framePublicAPI: FramePublicAPI,
-  setState: StateSetter<FormBasedPrivateState, unknown>,
+  setState: StateSetter<FormBasedPrivateState, unknown> | undefined,
   core: CoreStart,
   data: DataPublicPluginStart
 ): UserMessage[] {
@@ -958,7 +976,7 @@ function getLayerErrorMessages(
             ) : (
               <>
                 {error.message}
-                {error.fixAction && (
+                {error.fixAction && setState && (
                   <EuiButton
                     data-test-subj="errorFixAction"
                     onClick={async () => {

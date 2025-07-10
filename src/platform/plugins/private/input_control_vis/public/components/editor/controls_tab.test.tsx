@@ -13,11 +13,16 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { getDepsMock, getIndexPatternMock } from '../../test_utils';
 import ControlsTab, { ControlsTabProps } from './controls_tab';
 import { Vis } from '@kbn/visualizations-plugin/public';
+import { EuiThemeProvider } from '@elastic/eui';
 
 const indexPatternsMock = {
   get: getIndexPatternMock,
 };
 let props: ControlsTabProps;
+
+const mountWithThemeProvider = (component: React.ReactElement) => {
+  return mountWithIntl(<EuiThemeProvider>{component}</EuiThemeProvider>);
+};
 
 beforeEach(() => {
   props = {
@@ -77,7 +82,7 @@ test('renders ControlsTab', () => {
 
 describe('behavior', () => {
   test('add control button', () => {
-    const component = mountWithIntl(<ControlsTab {...props} />);
+    const component = mountWithThemeProvider(<ControlsTab {...props} />);
 
     findTestSubject(component, 'inputControlEditorAddBtn').simulate('click');
 
@@ -90,7 +95,7 @@ describe('behavior', () => {
   });
 
   test('remove control button', () => {
-    const component = mountWithIntl(<ControlsTab {...props} />);
+    const component = mountWithThemeProvider(<ControlsTab {...props} />);
     findTestSubject(component, 'inputControlEditorRemoveControl0').simulate('click');
     const expectedParams = [
       'controls',
@@ -113,7 +118,7 @@ describe('behavior', () => {
   });
 
   test('move down control button', () => {
-    const component = mountWithIntl(<ControlsTab {...props} />);
+    const component = mountWithThemeProvider(<ControlsTab {...props} />);
     findTestSubject(component, 'inputControlEditorMoveDownControl0').simulate('click');
     const expectedParams = [
       'controls',
@@ -150,7 +155,7 @@ describe('behavior', () => {
   });
 
   test('move up control button', () => {
-    const component = mountWithIntl(<ControlsTab {...props} />);
+    const component = mountWithThemeProvider(<ControlsTab {...props} />);
     findTestSubject(component, 'inputControlEditorMoveUpControl1').simulate('click');
     const expectedParams = [
       'controls',

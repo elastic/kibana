@@ -8,18 +8,15 @@
  */
 
 import { ContentInsightsClient } from '@kbn/content-management-content-insights-public';
-import { DashboardPanelMap } from '../../common';
+import { DashboardState } from '../../common';
+import { getDashboardBackupService } from '../services/dashboard_backup_service';
 import { getDashboardContentManagementService } from '../services/dashboard_content_management_service';
-import { DashboardCreationOptions, DashboardState } from './types';
-import { getDashboardApi } from './get_dashboard_api';
-import { startQueryPerformanceTracking } from '../dashboard_container/embeddable/create/performance/query_performance_tracking';
 import { coreServices } from '../services/kibana_services';
-import {
-  PANELS_CONTROL_GROUP_KEY,
-  getDashboardBackupService,
-} from '../services/dashboard_backup_service';
-import { UnsavedPanelState } from '../dashboard_container/types';
-import { DEFAULT_DASHBOARD_INPUT } from '../dashboard_constants';
+import { logger } from '../services/logger';
+import { DEFAULT_DASHBOARD_STATE } from './default_dashboard_state';
+import { getDashboardApi } from './get_dashboard_api';
+import { startQueryPerformanceTracking } from './performance/query_performance_tracking';
+import { DashboardCreationOptions } from './types';
 
 export async function loadDashboardApi({
   getCreationOptions,
@@ -50,51 +47,28 @@ export async function loadDashboardApi({
   // --------------------------------------------------------------------------------------
   // Combine saved object state and session storage state
   // --------------------------------------------------------------------------------------
-  const dashboardBackupState = getDashboardBackupService().getState(savedObjectResult.dashboardId);
-  const initialPanelsRuntimeState: UnsavedPanelState = creationOptions?.useSessionStorageIntegration
-    ? dashboardBackupState?.panels ?? {}
-    : {};
-
   const sessionStorageInput = ((): Partial<DashboardState> | undefined => {
     if (!creationOptions?.useSessionStorageIntegration) return;
-    return dashboardBackupState?.dashboardState;
+    return getDashboardBackupService().getState(savedObjectResult.dashboardId);
   })();
 
   const combinedSessionState: DashboardState = {
-    ...DEFAULT_DASHBOARD_INPUT,
+    ...DEFAULT_DASHBOARD_STATE,
     ...(savedObjectResult?.dashboardInput ?? {}),
     ...sessionStorageInput,
   };
+  combinedSessionState.references = sessionStorageInput?.references?.length
+    ? sessionStorageInput?.references
+    : savedObjectResult?.references;
 
   // --------------------------------------------------------------------------------------
   // Combine state with overrides.
   // --------------------------------------------------------------------------------------
-  const overrideState = creationOptions?.getInitialInput?.();
-  if (overrideState?.panels) {
-    const overridePanels: DashboardPanelMap = {};
-    for (const panel of Object.values(overrideState?.panels)) {
-      overridePanels[panel.explicitInput.id] = {
-        ...panel,
+  const { viewMode, ...overrideState } = creationOptions?.getInitialInput?.() ?? {};
 
-        /**
-         * here we need to keep the state of the panel that was already in the Dashboard if one exists.
-         * This is because this state will become the "last saved state" for this panel.
-         */
-        ...(combinedSessionState.panels[panel.explicitInput.id] ?? []),
-      };
-      /**
-       * We also need to add the state of this react embeddable into the runtime state to be restored.
-       */
-      initialPanelsRuntimeState[panel.explicitInput.id] = panel.explicitInput;
-    }
-    overrideState.panels = overridePanels;
-  }
   // Back up any view mode passed in explicitly.
-  if (overrideState?.viewMode) {
-    getDashboardBackupService().storeViewMode(overrideState?.viewMode);
-  }
-  if (overrideState?.controlGroupState) {
-    initialPanelsRuntimeState[PANELS_CONTROL_GROUP_KEY] = overrideState.controlGroupState;
+  if (viewMode) {
+    getDashboardBackupService().storeViewMode(viewMode);
   }
 
   // --------------------------------------------------------------------------------------
@@ -107,7 +81,6 @@ export async function loadDashboardApi({
       ...combinedSessionState,
       ...overrideState,
     },
-    initialPanelsRuntimeState,
     savedObjectResult,
     savedObjectId,
   });
@@ -123,7 +96,7 @@ export async function loadDashboardApi({
     // however, there is an edge case that we now count a new view when a user is editing a dashboard and is returning from an editor by canceling
     // TODO: this should be revisited by making embeddable transfer support canceling logic https://github.com/elastic/kibana/issues/190485
     const contentInsightsClient = new ContentInsightsClient(
-      { http: coreServices.http },
+      { http: coreServices.http, logger },
       { domainId: 'dashboard' }
     );
     contentInsightsClient.track(savedObjectId, 'viewed');

@@ -7,16 +7,10 @@
 
 import { EuiButton } from '@elastic/eui';
 import { InternalChromeStart } from '@kbn/core-chrome-browser-internal';
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { ProjectSwitcher, ProjectSwitcherKibanaProvider } from '@kbn/serverless-project-switcher';
-import { ProjectType } from '@kbn/serverless-types';
 import React from 'react';
-import ReactDOM from 'react-dom';
-import { API_SWITCH_PROJECT as projectChangeAPIUrl } from '../common';
-import { ServerlessConfig } from './config';
 import {
   generateManageOrgMembersNavCard,
   manageOrgMembersNavCardName,
@@ -38,11 +32,7 @@ export class ServerlessPlugin
       ServerlessPluginStartDependencies
     >
 {
-  private readonly config: ServerlessConfig;
-
-  constructor(private readonly initializerContext: PluginInitializerContext) {
-    this.config = this.initializerContext.config.get<ServerlessConfig>();
-  }
+  constructor() {}
 
   public setup(
     _core: CoreSetup,
@@ -55,22 +45,13 @@ export class ServerlessPlugin
     core: CoreStart,
     dependencies: ServerlessPluginStartDependencies
   ): ServerlessPluginStart {
-    const { developer } = this.config;
+    const { chrome, rendering } = core;
 
-    if (developer && developer.projectSwitcher && developer.projectSwitcher.enabled) {
-      const { currentType } = developer.projectSwitcher;
-
-      core.chrome.navControls.registerRight({
-        order: 5000,
-        mount: (target) => this.mountProjectSwitcher(target, core, currentType),
-      });
-    }
-
-    core.chrome.setChromeStyle('project');
-
-    // Casting the "chrome.projects" service to an "internal" type: this is intentional to obscure the property from Typescript.
-    const { project } = core.chrome as InternalChromeStart;
+    // Casting the "chrome.project" service to an "internal" type: this is intentional to obscure the property from Typescript.
+    const { project } = chrome as InternalChromeStart;
     const { cloud } = dependencies;
+
+    chrome.setChromeStyle('project');
 
     if (cloud.serverless.projectName) {
       project.setProjectName(cloud.serverless.projectName);
@@ -80,43 +61,34 @@ export class ServerlessPlugin
     const activeNavigationNodes$ = project.getActiveNavigationNodes$();
     const navigationTreeUi$ = project.getNavigationTreeUi$();
 
-    core.chrome.navControls.registerRight({
+    chrome.navControls.registerRight({
       order: 1,
       mount: toMountPoint(
-        <KibanaRenderContextProvider {...core}>
-          <EuiButton
-            href="https://ela.st/serverless-feedback"
-            size={'s'}
-            color={'warning'}
-            iconType={'popout'}
-            iconSide={'right'}
-            target={'_blank'}
-          >
-            {i18n.translate('xpack.serverless.header.giveFeedbackBtn.label', {
-              defaultMessage: 'Give feedback',
-            })}
-          </EuiButton>
-        </KibanaRenderContextProvider>,
-        { ...core }
+        <EuiButton
+          href="https://ela.st/serverless-feedback"
+          size={'s'}
+          color={'warning'}
+          iconType={'popout'}
+          iconSide={'right'}
+          target={'_blank'}
+        >
+          {i18n.translate('xpack.serverless.header.giveFeedbackBtn.label', {
+            defaultMessage: 'Give feedback',
+          })}
+        </EuiButton>,
+        rendering
       ),
     });
 
     return {
       setSideNavComponentDeprecated: (sideNavigationComponent) =>
         project.setSideNavComponent(sideNavigationComponent),
-      initNavigation: (id, navigationTree$, { panelContentProvider, dataTestSubj } = {}) => {
+      initNavigation: (id, navigationTree$, { dataTestSubj } = {}) => {
         project.initNavigation(id, navigationTree$);
         project.setSideNavComponent(() => (
           <SideNavComponent
-            navProps={{
-              navigationTree$: navigationTreeUi$,
-              dataTestSubj,
-              panelContentProvider,
-            }}
-            deps={{
-              core,
-              activeNodes$: activeNavigationNodes$,
-            }}
+            navProps={{ navigationTree$: navigationTreeUi$, dataTestSubj }}
+            deps={{ core, activeNodes$: activeNavigationNodes$ }}
           />
         ));
       },
@@ -136,21 +108,4 @@ export class ServerlessPlugin
   }
 
   public stop() {}
-
-  private mountProjectSwitcher(
-    targetDomElement: HTMLElement,
-    coreStart: CoreStart,
-    currentProjectType: ProjectType
-  ) {
-    ReactDOM.render(
-      <KibanaRenderContextProvider {...coreStart}>
-        <ProjectSwitcherKibanaProvider {...{ coreStart, projectChangeAPIUrl }}>
-          <ProjectSwitcher {...{ currentProjectType }} />
-        </ProjectSwitcherKibanaProvider>
-      </KibanaRenderContextProvider>,
-      targetDomElement
-    );
-
-    return () => ReactDOM.unmountComponentAtNode(targetDomElement);
-  }
 }

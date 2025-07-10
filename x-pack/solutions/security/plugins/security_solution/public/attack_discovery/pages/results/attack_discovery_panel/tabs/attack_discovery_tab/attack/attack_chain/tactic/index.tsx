@@ -12,26 +12,22 @@ import React, { useMemo } from 'react';
 import { AxisTick } from '../axis_tick';
 
 const INNER_CIRCLE_LEFT_JUSTIFY_X_OFFSET = 0; // px
-const INNER_CIRCLE_RIGHT_JUSTIFY_X_OFFSET = 232; // px
-
 const OUTER_CIRCLE_LEFT_JUSTIFY_X_OFFSET = -4; // px
-const OUTER_CIRCLE_RIGHT_JUSTIFY_X_OFFSET = 228; // px
 
 interface Props {
   detected: boolean;
-  rightJustify?: boolean;
   tactic: string;
 }
 
-const TacticComponent: React.FC<Props> = ({ detected, rightJustify = false, tactic }) => {
+const TacticComponent: React.FC<Props> = ({ detected, tactic }) => {
   const { euiTheme } = useEuiTheme();
 
-  const WIDTH = 120; // px
-  const TICK_COUNT = 10;
+  const WIDTH = 144; // px
+  const TICK_COUNT = 12;
 
   const ticks = useMemo(
     () => (
-      <EuiFlexGroup data-tests-subj="ticks" gutterSize="none">
+      <EuiFlexGroup data-tests-subj="ticks" gutterSize="none" responsive={false} wrap={false}>
         <div
           css={css`
             overflow: hidden;
@@ -49,13 +45,6 @@ const TacticComponent: React.FC<Props> = ({ detected, rightJustify = false, tact
   );
 
   const color = detected ? euiTheme.colors.danger : euiTheme.colors.subduedText;
-  const innerCircleXOffset = rightJustify
-    ? INNER_CIRCLE_RIGHT_JUSTIFY_X_OFFSET
-    : INNER_CIRCLE_LEFT_JUSTIFY_X_OFFSET;
-
-  const outerCircleXOffset = rightJustify
-    ? OUTER_CIRCLE_RIGHT_JUSTIFY_X_OFFSET
-    : OUTER_CIRCLE_LEFT_JUSTIFY_X_OFFSET;
 
   return (
     <div
@@ -64,10 +53,10 @@ const TacticComponent: React.FC<Props> = ({ detected, rightJustify = false, tact
       `}
     >
       <EuiFlexGroup
-        alignItems={rightJustify ? 'flexEnd' : undefined}
         data-test-subj="tactic"
         direction="column"
         gutterSize="none"
+        responsive={false}
         wrap={false}
       >
         <EuiFlexItem
@@ -78,18 +67,20 @@ const TacticComponent: React.FC<Props> = ({ detected, rightJustify = false, tact
           grow={false}
         >
           <div
+            // eslint-disable-next-line @elastic/eui/no-css-color -- euiTheme.colors.danger is a string
             css={css`
               background: transparent;
               border: 2px solid ${color};
               border-radius: 50%;
               height: 8px;
               position: absolute;
-              transform: translate(${innerCircleXOffset}px, -2px);
+              transform: translate(${INNER_CIRCLE_LEFT_JUSTIFY_X_OFFSET}px, -2px);
               width: 8px;
             `}
             data-test-subj="innerCircle"
           />
           <div
+            // eslint-disable-next-line @elastic/eui/no-css-color -- euiTheme.colors.danger is a string
             css={css`
               background: transparent;
               border: 2px solid ${color};
@@ -97,7 +88,7 @@ const TacticComponent: React.FC<Props> = ({ detected, rightJustify = false, tact
               height: 16px;
               opacity: ${detected ? 25 : 0}%;
               position: absolute;
-              transform: translate(${outerCircleXOffset}px, -6px);
+              transform: translate(${OUTER_CIRCLE_LEFT_JUSTIFY_X_OFFSET}px, -6px);
               width: 16px;
             `}
             data-test-subj="outerCircle"

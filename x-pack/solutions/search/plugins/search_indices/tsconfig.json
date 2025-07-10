@@ -39,7 +39,9 @@
     "@kbn/deeplinks-search",
     "@kbn/core-chrome-browser",
     "@kbn/serverless",
-    "@kbn/utility-types"
+    "@kbn/utility-types",
+    "@kbn/search-navigation",
+    "@kbn/search-queries",
   ],
   "exclude": [
     "target/**/*",

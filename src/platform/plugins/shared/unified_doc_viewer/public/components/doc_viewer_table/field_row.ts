@@ -10,6 +10,7 @@
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type { DataTableColumnsMeta, DataTableRecord } from '@kbn/discover-utils/types';
 import {
+  convertValueToString,
   formatFieldValue,
   getIgnoredReason,
   IgnoredReason,
@@ -17,9 +18,11 @@ import {
 } from '@kbn/discover-utils';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { getFieldIconType, getTextBasedColumnIconType } from '@kbn/field-utils';
+import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
 
 export class FieldRow {
   readonly name: string;
+  readonly displayNameOverride: string | undefined;
   readonly flattenedValue: unknown;
   readonly dataViewField: DataViewField | undefined;
   readonly isPinned: boolean;
@@ -39,6 +42,7 @@ export class FieldRow {
 
   constructor({
     name,
+    displayNameOverride,
     flattenedValue,
     hit,
     dataView,
@@ -47,6 +51,7 @@ export class FieldRow {
     columnsMeta,
   }: {
     name: string;
+    displayNameOverride?: string;
     flattenedValue: unknown;
     hit: DataTableRecord;
     dataView: DataView;
@@ -61,8 +66,13 @@ export class FieldRow {
     this.#isFormattedAsText = false;
 
     this.name = name;
+    this.displayNameOverride = displayNameOverride;
     this.flattenedValue = flattenedValue;
-    this.dataViewField = dataView.getFieldByName(name);
+    this.dataViewField = getDataViewFieldOrCreateFromColumnMeta({
+      dataView,
+      fieldName: name,
+      columnMeta: columnsMeta?.[name],
+    });
     this.isPinned = isPinned;
     this.columnsMeta = columnsMeta;
   }
@@ -87,16 +97,16 @@ export class FieldRow {
   // format as text in a lazy way
   public get formattedAsText(): string | undefined {
     if (!this.#isFormattedAsText) {
-      this.#formattedAsText = String(
-        formatFieldValue(
-          this.flattenedValue,
-          this.#hit.raw,
-          this.#fieldFormats,
-          this.#dataView,
-          this.dataViewField,
-          'text'
-        )
-      );
+      this.#formattedAsText = convertValueToString({
+        dataView: this.#dataView,
+        dataViewField: this.dataViewField,
+        flattenedValue: this.flattenedValue,
+        dataTableRecord: this.#hit,
+        fieldFormats: this.#fieldFormats,
+        options: {
+          compatibleWithCSV: true,
+        },
+      }).formattedString;
       this.#isFormattedAsText = true;
     }
 

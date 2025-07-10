@@ -10,10 +10,12 @@ import { INTERNAL_CASE_OBSERVABLES_PATCH_URL } from '../../../../common/constant
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
 import type { observableApiV1 } from '../../../../common/types/api';
+import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
 
 export const patchObservableRoute = createCasesRoute({
   method: 'patch',
   path: INTERNAL_CASE_OBSERVABLES_PATCH_URL,
+  security: DEFAULT_CASES_ROUTE_SECURITY,
   params: {
     params: schema.object({
       case_id: schema.string(),

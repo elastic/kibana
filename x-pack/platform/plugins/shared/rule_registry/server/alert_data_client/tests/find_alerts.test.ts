@@ -11,13 +11,14 @@ import {
   SPACE_IDS,
   ALERT_WORKFLOW_STATUS,
 } from '@kbn/rule-data-utils';
-import { AlertsClient, ConstructorOptions } from '../alerts_client';
+import type { ConstructorOptions } from '../alerts_client';
+import { AlertsClient } from '../alerts_client';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { alertingAuthorizationMock } from '@kbn/alerting-plugin/server/authorization/alerting_authorization.mock';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { ruleDataServiceMock } from '../../rule_data_plugin_service/rule_data_plugin_service.mock';
-import { JsonObject } from '@kbn/utility-types';
+import type { JsonObject } from '@kbn/utility-types';
 
 describe('find()', () => {
   const alertingAuthMock = alertingAuthorizationMock.create();
@@ -215,139 +216,140 @@ describe('find()', () => {
     expect(esClientMock.search.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
-          "body": Object {
-            "_source": undefined,
-            "aggs": undefined,
-            "fields": Array [
-              "kibana.alert.rule.rule_type_id",
-              "kibana.alert.rule.consumer",
-              "kibana.alert.workflow_status",
-              "kibana.space_ids",
-            ],
-            "query": Object {
-              "bool": Object {
-                "filter": Array [
-                  Object {
-                    "bool": Object {
-                      "filter": Array [
-                        Object {
-                          "bool": Object {
-                            "minimum_should_match": 1,
-                            "should": Array [
-                              Object {
-                                "bool": Object {
-                                  "filter": Array [
-                                    Object {
-                                      "bool": Object {
-                                        "minimum_should_match": 1,
-                                        "should": Array [
-                                          Object {
-                                            "match": Object {
-                                              "kibana.alert.rule.rule_type_id": ".es-query",
-                                            },
-                                          },
-                                        ],
-                                      },
-                                    },
-                                    Object {
-                                      "bool": Object {
-                                        "minimum_should_match": 1,
-                                        "should": Array [
-                                          Object {
-                                            "bool": Object {
-                                              "minimum_should_match": 1,
-                                              "should": Array [
-                                                Object {
-                                                  "match": Object {
-                                                    "kibana.alert.rule.consumer": "stackAlerts",
-                                                  },
-                                                },
-                                              ],
-                                            },
-                                          },
-                                          Object {
-                                            "bool": Object {
-                                              "minimum_should_match": 1,
-                                              "should": Array [
-                                                Object {
-                                                  "match": Object {
-                                                    "kibana.alert.rule.consumer": "alerts",
-                                                  },
-                                                },
-                                              ],
-                                            },
-                                          },
-                                        ],
-                                      },
-                                    },
-                                  ],
-                                },
-                              },
-                            ],
-                          },
-                        },
-                        Object {
-                          "term": Object {
-                            "kibana.space_ids": "default",
-                          },
-                        },
-                        Object {
-                          "terms": Object {
-                            "kibana.alert.rule.rule_type_id": Array [
-                              ".es-query",
-                            ],
-                          },
-                        },
-                      ],
-                    },
-                  },
-                  Object {
-                    "term": Object {
-                      "kibana.space_ids": "test_default_space_id",
-                    },
-                  },
-                  Object {
-                    "terms": Object {
-                      "kibana.alert.rule.rule_type_id": Array [
-                        "siem.esqlRule",
-                        "siem.eqlRule",
-                      ],
-                    },
-                  },
-                  Object {
-                    "terms": Object {
-                      "kibana.alert.rule.consumer": Array [
-                        "siem",
-                      ],
-                    },
-                  },
-                ],
-                "must": Array [
-                  Object {
-                    "match": Object {
-                      "kibana.alert.workflow_status": "open",
-                    },
-                  },
-                ],
-                "must_not": Array [],
-                "should": Array [],
-              },
-            },
-            "runtime_mappings": undefined,
-            "size": undefined,
-            "sort": Array [
-              Object {
-                "@timestamp": Object {
-                  "order": "asc",
-                  "unmapped_type": "date",
-                },
-              },
-            ],
-            "track_total_hits": undefined,
-          },
+          "_source": undefined,
+          "aggs": undefined,
+          "fields": Array [
+            "kibana.alert.rule.rule_type_id",
+            "kibana.alert.rule.consumer",
+            "kibana.alert.workflow_status",
+            "kibana.space_ids",
+          ],
           "ignore_unavailable": true,
           "index": ".alerts-observability.apm.alerts",
+          "query": Object {
+            "bool": Object {
+              "filter": Array [
+                Object {
+                  "bool": Object {
+                    "filter": Array [
+                      Object {
+                        "bool": Object {
+                          "minimum_should_match": 1,
+                          "should": Array [
+                            Object {
+                              "bool": Object {
+                                "filter": Array [
+                                  Object {
+                                    "bool": Object {
+                                      "minimum_should_match": 1,
+                                      "should": Array [
+                                        Object {
+                                          "match": Object {
+                                            "kibana.alert.rule.rule_type_id": ".es-query",
+                                          },
+                                        },
+                                      ],
+                                    },
+                                  },
+                                  Object {
+                                    "bool": Object {
+                                      "minimum_should_match": 1,
+                                      "should": Array [
+                                        Object {
+                                          "bool": Object {
+                                            "minimum_should_match": 1,
+                                            "should": Array [
+                                              Object {
+                                                "match": Object {
+                                                  "kibana.alert.rule.consumer": "stackAlerts",
+                                                },
+                                              },
+                                            ],
+                                          },
+                                        },
+                                        Object {
+                                          "bool": Object {
+                                            "minimum_should_match": 1,
+                                            "should": Array [
+                                              Object {
+                                                "match": Object {
+                                                  "kibana.alert.rule.consumer": "alerts",
+                                                },
+                                              },
+                                            ],
+                                          },
+                                        },
+                                      ],
+                                    },
+                                  },
+                                ],
+                              },
+                            },
+                          ],
+                        },
+                      },
+                      Object {
+                        "term": Object {
+                          "kibana.space_ids": "default",
+                        },
+                      },
+                      Object {
+                        "terms": Object {
+                          "kibana.alert.rule.rule_type_id": Array [
+                            ".es-query",
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+                Object {
+                  "terms": Object {
+                    "kibana.space_ids": Array [
+                      "test_default_space_id",
+                      "*",
+                    ],
+                  },
+                },
+                Object {
+                  "terms": Object {
+                    "kibana.alert.rule.rule_type_id": Array [
+                      "siem.esqlRule",
+                      "siem.eqlRule",
+                    ],
+                  },
+                },
+                Object {
+                  "terms": Object {
+                    "kibana.alert.rule.consumer": Array [
+                      "siem",
+                    ],
+                  },
+                },
+              ],
+              "must": Array [
+                Object {
+                  "match": Object {
+                    "kibana.alert.workflow_status": "open",
+                  },
+                },
+              ],
+              "must_not": Array [],
+              "should": Array [],
+            },
+          },
+          "runtime_mappings": undefined,
           "seq_no_primary_term": true,
+          "size": undefined,
+          "sort": Array [
+            Object {
+              "@timestamp": Object {
+                "order": "asc",
+                "unmapped_type": "date",
+              },
+            },
+          ],
+          "track_total_hits": undefined,
         },
       ]
     `);
@@ -437,121 +439,122 @@ describe('find()', () => {
     expect(esClientMock.search.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
-          "body": Object {
-            "_source": undefined,
-            "aggs": undefined,
-            "fields": Array [
-              "kibana.alert.rule.rule_type_id",
-              "kibana.alert.rule.consumer",
-              "kibana.alert.workflow_status",
-              "kibana.space_ids",
-            ],
-            "query": Object {
-              "bool": Object {
-                "filter": Array [
-                  Object {
-                    "bool": Object {
-                      "filter": Array [
-                        Object {
-                          "bool": Object {
-                            "minimum_should_match": 1,
-                            "should": Array [
-                              Object {
-                                "bool": Object {
-                                  "filter": Array [
-                                    Object {
-                                      "bool": Object {
-                                        "minimum_should_match": 1,
-                                        "should": Array [
-                                          Object {
-                                            "match": Object {
-                                              "kibana.alert.rule.rule_type_id": ".es-query",
-                                            },
-                                          },
-                                        ],
-                                      },
-                                    },
-                                    Object {
-                                      "bool": Object {
-                                        "minimum_should_match": 1,
-                                        "should": Array [
-                                          Object {
-                                            "bool": Object {
-                                              "minimum_should_match": 1,
-                                              "should": Array [
-                                                Object {
-                                                  "match": Object {
-                                                    "kibana.alert.rule.consumer": "stackAlerts",
-                                                  },
-                                                },
-                                              ],
-                                            },
-                                          },
-                                          Object {
-                                            "bool": Object {
-                                              "minimum_should_match": 1,
-                                              "should": Array [
-                                                Object {
-                                                  "match": Object {
-                                                    "kibana.alert.rule.consumer": "alerts",
-                                                  },
-                                                },
-                                              ],
-                                            },
-                                          },
-                                        ],
-                                      },
-                                    },
-                                  ],
-                                },
-                              },
-                            ],
-                          },
-                        },
-                        Object {
-                          "term": Object {
-                            "kibana.space_ids": "default",
-                          },
-                        },
-                        Object {
-                          "terms": Object {
-                            "kibana.alert.rule.rule_type_id": Array [
-                              ".es-query",
-                            ],
-                          },
-                        },
-                      ],
-                    },
-                  },
-                  Object {
-                    "term": Object {
-                      "kibana.space_ids": "test_default_space_id",
-                    },
-                  },
-                ],
-                "must": Array [
-                  Object {
-                    "match": Object {
-                      "kibana.alert.workflow_status": "open",
-                    },
-                  },
-                ],
-                "must_not": Array [],
-                "should": Array [],
-              },
-            },
-            "runtime_mappings": undefined,
-            "size": undefined,
-            "sort": Array [
-              Object {
-                "@timestamp": "desc",
-              },
-            ],
-            "track_total_hits": undefined,
-          },
+          "_source": undefined,
+          "aggs": undefined,
+          "fields": Array [
+            "kibana.alert.rule.rule_type_id",
+            "kibana.alert.rule.consumer",
+            "kibana.alert.workflow_status",
+            "kibana.space_ids",
+          ],
           "ignore_unavailable": true,
           "index": ".alerts-observability.apm.alerts",
+          "query": Object {
+            "bool": Object {
+              "filter": Array [
+                Object {
+                  "bool": Object {
+                    "filter": Array [
+                      Object {
+                        "bool": Object {
+                          "minimum_should_match": 1,
+                          "should": Array [
+                            Object {
+                              "bool": Object {
+                                "filter": Array [
+                                  Object {
+                                    "bool": Object {
+                                      "minimum_should_match": 1,
+                                      "should": Array [
+                                        Object {
+                                          "match": Object {
+                                            "kibana.alert.rule.rule_type_id": ".es-query",
+                                          },
+                                        },
+                                      ],
+                                    },
+                                  },
+                                  Object {
+                                    "bool": Object {
+                                      "minimum_should_match": 1,
+                                      "should": Array [
+                                        Object {
+                                          "bool": Object {
+                                            "minimum_should_match": 1,
+                                            "should": Array [
+                                              Object {
+                                                "match": Object {
+                                                  "kibana.alert.rule.consumer": "stackAlerts",
+                                                },
+                                              },
+                                            ],
+                                          },
+                                        },
+                                        Object {
+                                          "bool": Object {
+                                            "minimum_should_match": 1,
+                                            "should": Array [
+                                              Object {
+                                                "match": Object {
+                                                  "kibana.alert.rule.consumer": "alerts",
+                                                },
+                                              },
+                                            ],
+                                          },
+                                        },
+                                      ],
+                                    },
+                                  },
+                                ],
+                              },
+                            },
+                          ],
+                        },
+                      },
+                      Object {
+                        "term": Object {
+                          "kibana.space_ids": "default",
+                        },
+                      },
+                      Object {
+                        "terms": Object {
+                          "kibana.alert.rule.rule_type_id": Array [
+                            ".es-query",
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+                Object {
+                  "terms": Object {
+                    "kibana.space_ids": Array [
+                      "test_default_space_id",
+                      "*",
+                    ],
+                  },
+                },
+              ],
+              "must": Array [
+                Object {
+                  "match": Object {
+                    "kibana.alert.workflow_status": "open",
+                  },
+                },
+              ],
+              "must_not": Array [],
+              "should": Array [],
+            },
+          },
+          "runtime_mappings": undefined,
           "seq_no_primary_term": true,
+          "size": undefined,
+          "sort": Array [
+            Object {
+              "@timestamp": "desc",
+            },
+          ],
+          "track_total_hits": undefined,
         },
       ]
     `);

@@ -6,6 +6,6 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import { getConnectorParamsSchemaV1 } from '..';
+import type { getConnectorParamsSchemaV1 } from '..';
 
 export type GetConnectorParams = TypeOf<typeof getConnectorParamsSchemaV1>;

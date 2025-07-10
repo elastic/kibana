@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  title: Read list item API endpoint
+  title: Read value list item API endpoint
   version: '2023-10-31'
 paths:
   /api/lists/items:
@@ -8,27 +8,28 @@ paths:
       x-labels: [serverless, ess]
       operationId: ReadListItem
       x-codegen-enabled: true
-      summary: Get a list item
-      description: Get the details of a list item.
+      summary: Get a value list item
+      description: Get the details of a value list item.
       parameters:
         - name: id
           in: query
           required: false
-          description: Required if `list_id` and `value` are not specified
+          description: Value list item identifier. Required if `list_id` and `value` are not specified.
           schema:
             $ref: '../model/list_common.schema.yaml#/components/schemas/ListId'
         - name: list_id
           in: query
           required: false
-          description: Required if `id` is not specified
+          description: Value list item list's `id` identfier. Required if `id` is not specified.
           schema:
             $ref: '../model/list_common.schema.yaml#/components/schemas/ListId'
         - name: value
           in: query
           required: false
-          description: Required if `id` is not specified
+          description: The value used to evaluate exceptions. Required if `id` is not specified.
           schema:
             type: string
+            example: 127.0.0.2
       responses:
         200:
           description: Successful response
@@ -40,6 +41,20 @@ paths:
                   - type: array
                     items:
                       $ref: '../model/list_schemas.schema.yaml#/components/schemas/ListItem'
+              examples:
+                ip:
+                  value:
+                    id: qN1XRJQBs4HAK3VQs3Gc
+                    type: ip
+                    list_id: ip_list
+                    value: 127.0.0.2
+                    '@timestamp': 2025-01-08T05:16:25.882Z
+                    _version: WzExLDFd
+                    tie_breaker_id: a9a34c02-a385-436e-86a0-02a3942f3537
+                    created_at: 2025-01-08T05:16:25.882Z
+                    created_by: elastic
+                    updated_at: 2025-01-08T05:16:25.882Z
+                    updated_by: elastic
         400:
           description: Invalid input data response
           content:
@@ -48,27 +63,54 @@ paths:
                 oneOf:
                   - $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
                   - $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+              examples:
+                badRequest:
+                  value:
+                    message: 'Either \"list_id\" or \"id\" needs to be defined in the request'
+                    status_code: 400
         401:
           description: Unsuccessful authentication response
           content:
             application/json:
               schema:
                 $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+              examples:
+                unauthorized:
+                  value:
+                    statusCode: 401
+                    error: Unauthorized
+                    message: '[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]'
         403:
           description: Not enough privileges response
           content:
             application/json:
               schema:
                 $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+              examples:
+                forbidden:
+                  value:
+                    statusCode: 403
+                    error: Forbidden
+                    message: 'API [GET /api/lists/items?id=qN1XRJQBs4HAK3VQs3Gc] is unauthorized for user, this action is granted by the Kibana privileges [lists-read]'
         404:
           description: List item not found response
           content:
             application/json:
               schema:
                 $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+              examples:
+                notFound:
+                  value:
+                    message: 'list item id: \"foo\" not found'
+                    status_code: 404
         500:
           description: Internal server error response
           content:
             application/json:
               schema:
                 $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500

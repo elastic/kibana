@@ -6,14 +6,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { IScopedClusterClient } from '@kbn/core/server';
-import { EnrichedDeprecationInfo } from '../../../common/types';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type { EnrichedDeprecationInfo } from '../../../common/types';
 
 export async function getHealthIndicators(
-  dataClient: IScopedClusterClient
+  dataClient: ElasticsearchClient
 ): Promise<EnrichedDeprecationInfo[]> {
-  const healthIndicators = await dataClient.asCurrentUser.healthReport();
+  const healthIndicators = await dataClient.healthReport();
   const isStatusNotGreen = (indicator?: estypes.HealthReportBaseIndicator): boolean => {
     return !!(indicator?.status && indicator?.status !== 'green');
   };
@@ -34,7 +34,7 @@ export async function getHealthIndicators(
           details: symptom,
           message: cause,
           url: help_url,
-          isCritical: status === 'red',
+          level: status === 'red' ? 'critical' : 'warning',
           resolveDuringUpgrade: false,
           correctiveAction: { type: 'healthIndicator', cause, action, impacts },
         }));
@@ -44,7 +44,7 @@ export async function getHealthIndicators(
       .flatMap(({ status, symptom, details }) => {
         return {
           type: 'health_indicator',
-          isCritical: status === 'red',
+          level: status === 'red' ? 'critical' : 'warning',
           ...getShardCapacityDeprecationInfo({ symptom, details }),
         };
       }),

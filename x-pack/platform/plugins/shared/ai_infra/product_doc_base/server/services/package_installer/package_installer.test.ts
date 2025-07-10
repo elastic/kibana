@@ -10,12 +10,13 @@ import {
   createIndexMock,
   populateIndexMock,
   loadMappingFileMock,
+  loadManifestFileMock,
   openZipArchiveMock,
   validateArtifactArchiveMock,
   fetchArtifactVersionsMock,
   ensureDefaultElserDeployedMock,
 } from './package_installer.test.mocks';
-
+import { cloneDeep } from 'lodash';
 import {
   getArtifactName,
   getProductDocIndexName,
@@ -27,6 +28,8 @@ import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import { installClientMock } from '../doc_install_status/service.mock';
 import type { ProductInstallState } from '../../../common/install_status';
 import { PackageInstaller } from './package_installer';
+import { defaultInferenceEndpoints } from '@kbn/inference-common';
+import { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 
 const artifactsFolder = '/lost';
 const artifactRepositoryUrl = 'https://repository.com';
@@ -35,6 +38,8 @@ const kibanaVersion = '8.16.3';
 const callOrder = (fn: { mock: { invocationCallOrder: number[] } }): number => {
   return fn.mock.invocationCallOrder[0];
 };
+
+const TEST_FORMAT_VERSION = '2.0.0';
 
 describe('PackageInstaller', () => {
   let logger: MockedLogger;
@@ -55,6 +60,12 @@ describe('PackageInstaller', () => {
       artifactRepositoryUrl,
       kibanaVersion,
     });
+
+    loadManifestFileMock.mockResolvedValue({
+      formatVersion: TEST_FORMAT_VERSION,
+      productName: 'kibana',
+      productVersion: '8.17',
+    });
   });
 
   afterEach(() => {
@@ -62,6 +73,7 @@ describe('PackageInstaller', () => {
     createIndexMock.mockReset();
     populateIndexMock.mockReset();
     loadMappingFileMock.mockReset();
+    loadManifestFileMock.mockReset();
     openZipArchiveMock.mockReset();
     validateArtifactArchiveMock.mockReset();
     fetchArtifactVersionsMock.mockReset();
@@ -75,7 +87,15 @@ describe('PackageInstaller', () => {
       };
       openZipArchiveMock.mockResolvedValue(zipArchive);
 
-      const mappings = Symbol('mappings');
+      const mappings = {
+        properties: {
+          semantic: {
+            inference_id: '.elser',
+            type: 'semantic_text',
+            model_settings: {},
+          },
+        },
+      };
       loadMappingFileMock.mockResolvedValue(mappings);
 
       await packageInstaller.installPackage({ productName: 'kibana', productVersion: '8.16' });
@@ -99,10 +119,16 @@ describe('PackageInstaller', () => {
       expect(loadMappingFileMock).toHaveBeenCalledTimes(1);
       expect(loadMappingFileMock).toHaveBeenCalledWith(zipArchive);
 
+      expect(loadManifestFileMock).toHaveBeenCalledTimes(1);
+      expect(loadManifestFileMock).toHaveBeenCalledWith(zipArchive);
+
       expect(createIndexMock).toHaveBeenCalledTimes(1);
+      const modifiedMappings = cloneDeep(mappings);
+      modifiedMappings.properties.semantic.inference_id = defaultInferenceEndpoints.ELSER;
       expect(createIndexMock).toHaveBeenCalledWith({
         indexName,
-        mappings,
+        mappings: modifiedMappings,
+        manifestVersion: TEST_FORMAT_VERSION,
         esClient,
         log: logger,
       });
@@ -111,12 +137,18 @@ describe('PackageInstaller', () => {
       expect(populateIndexMock).toHaveBeenCalledWith({
         indexName,
         archive: zipArchive,
+        manifestVersion: TEST_FORMAT_VERSION,
+        inferenceId: defaultInferenceEndpoints.ELSER,
         esClient,
         log: logger,
       });
 
       expect(productDocClient.setInstallationSuccessful).toHaveBeenCalledTimes(1);
-      expect(productDocClient.setInstallationSuccessful).toHaveBeenCalledWith('kibana', indexName);
+      expect(productDocClient.setInstallationSuccessful).toHaveBeenCalledWith(
+        'kibana',
+        indexName,
+        defaultInferenceEndpoints.ELSER
+      );
 
       expect(zipArchive.close).toHaveBeenCalledTimes(1);
 
@@ -130,6 +162,7 @@ describe('PackageInstaller', () => {
       expect(callOrder(downloadToDiskMock)).toBeLessThan(callOrder(openZipArchiveMock));
       expect(callOrder(openZipArchiveMock)).toBeLessThan(callOrder(loadMappingFileMock));
       expect(callOrder(loadMappingFileMock)).toBeLessThan(callOrder(createIndexMock));
+      expect(callOrder(loadManifestFileMock)).toBeLessThan(callOrder(createIndexMock));
       expect(callOrder(createIndexMock)).toBeLessThan(callOrder(populateIndexMock));
       expect(callOrder(populateIndexMock)).toBeLessThan(
         callOrder(productDocClient.setInstallationSuccessful)
@@ -147,7 +180,16 @@ describe('PackageInstaller', () => {
       });
 
       await expect(
-        packageInstaller.installPackage({ productName: 'kibana', productVersion: '8.16' })
+        packageInstaller.installPackage({
+          productName: 'kibana',
+          productVersion: '8.16',
+          customInference: {
+            inference_id: defaultInferenceEndpoints.ELSER,
+            task_type: 'text_embedding' as InferenceTaskType,
+            service: 'elser',
+            service_settings: {},
+          },
+        })
       ).rejects.toThrowError();
 
       expect(productDocClient.setInstallationSuccessful).not.toHaveBeenCalled();
@@ -162,7 +204,8 @@ describe('PackageInstaller', () => {
       expect(productDocClient.setInstallationFailed).toHaveBeenCalledTimes(1);
       expect(productDocClient.setInstallationFailed).toHaveBeenCalledWith(
         'kibana',
-        'something bad'
+        'something bad',
+        defaultInferenceEndpoints.ELSER
       );
     });
   });
@@ -176,7 +219,7 @@ describe('PackageInstaller', () => {
         elasticsearch: ['8.15'],
       });
 
-      await packageInstaller.installAll({});
+      await packageInstaller.installAll({ inferenceId: defaultInferenceEndpoints.ELSER });
 
       expect(packageInstaller.installPackage).toHaveBeenCalledTimes(2);
 
@@ -207,7 +250,7 @@ describe('PackageInstaller', () => {
 
       jest.spyOn(packageInstaller, 'installPackage');
 
-      await packageInstaller.ensureUpToDate({});
+      await packageInstaller.ensureUpToDate({ inferenceId: defaultInferenceEndpoints.ELSER });
 
       expect(packageInstaller.installPackage).toHaveBeenCalledTimes(1);
       expect(packageInstaller.installPackage).toHaveBeenCalledWith({
@@ -230,7 +273,7 @@ describe('PackageInstaller', () => {
       );
 
       expect(productDocClient.setUninstalled).toHaveBeenCalledTimes(1);
-      expect(productDocClient.setUninstalled).toHaveBeenCalledWith('kibana');
+      expect(productDocClient.setUninstalled).toHaveBeenCalledWith('kibana', undefined);
     });
   });
 

@@ -6,10 +6,11 @@
  */
 
 import type { ISavedObjectsRepository } from '@kbn/core/server';
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { BACKGROUND_TASK_NODE_SO_NAME } from '../saved_objects';
-import { BackgroundTaskNode } from '../saved_objects/schemas/background_task_node';
-import { DISCOVERY_INTERVAL_AFTER_BLOCK_EXCEPTION_MS, TaskManagerConfig } from '../config';
+import type { BackgroundTaskNode } from '../saved_objects/schemas/background_task_node';
+import type { TaskManagerConfig } from '../config';
+import { DISCOVERY_INTERVAL_AFTER_BLOCK_EXCEPTION_MS } from '../config';
 import { isClusterBlockException } from '../lib/bulk_update_error';
 
 interface DiscoveryServiceParams {

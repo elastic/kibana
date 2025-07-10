@@ -59,32 +59,28 @@ export class SyntheticsServices {
   async addTestMonitor(
     name: string,
     data: Record<string, any> = { type: 'browser' },
-    configId?: string
+    configId?: string,
+    options: { tls: { enabled: boolean } } = { tls: { enabled: false } }
   ) {
     const testData = {
-      alert: { status: { enabled: true } },
+      alert: { status: { enabled: true }, tls: options.tls },
       locations: [{ id: 'us_central', isServiceManaged: true }],
       ...(data?.type !== 'browser' ? {} : data),
       ...(data || {}),
       name,
     };
-    try {
-      const response = await axios.post(
-        this.kibanaUrl +
-          (configId
-            ? `${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}?id=${configId}`
-            : SYNTHETICS_API_URLS.SYNTHETICS_MONITORS),
-        testData,
-        {
-          auth: { username: 'elastic', password: 'changeme' },
-          headers: { 'kbn-xsrf': 'true', 'x-elastic-internal-origin': 'synthetics-e2e' },
-        }
-      );
-      return response.data.id;
-    } catch (e) {
-      // eslint-disable-next-line no-console
-      console.log(JSON.stringify(e));
-    }
+    const response = await axios.post(
+      this.kibanaUrl +
+        (configId
+          ? `${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}?id=${configId}`
+          : SYNTHETICS_API_URLS.SYNTHETICS_MONITORS),
+      testData,
+      {
+        auth: { username: 'elastic', password: 'changeme' },
+        headers: { 'kbn-xsrf': 'true', 'x-elastic-internal-origin': 'synthetics-e2e' },
+      }
+    );
+    return response.data.id;
   }
 
   async deleteTestMonitorByQuery(query: string) {
@@ -125,6 +121,8 @@ export class SyntheticsServices {
     stepIndex = 1,
     locationName,
     configId,
+    tlsNotBefore,
+    tlsNotAfter,
   }: {
     monitorId?: string;
     docType?: 'summaryUp' | 'summaryDown' | 'journeyStart' | 'journeyEnd' | 'stepEnd';
@@ -134,6 +132,8 @@ export class SyntheticsServices {
     stepIndex?: number;
     locationName?: string;
     configId?: string;
+    tlsNotBefore?: string;
+    tlsNotAfter?: string;
   } = {}) {
     const getService = this.params.getService;
     const es: Client = getService('es');
@@ -154,6 +154,8 @@ export class SyntheticsServices {
       },
       configId,
       monitorId: monitorId ?? configId,
+      tlsNotAfter,
+      tlsNotBefore,
     };
 
     switch (docType) {
@@ -195,20 +197,22 @@ export class SyntheticsServices {
     });
   }
 
-  async cleaUp() {
+  async cleanUp() {
     try {
       const getService = this.params.getService;
       const server = getService('kibanaServer');
 
-      await server.savedObjects.clean({ types: ['synthetics-monitor', 'alert'] });
-      await this.cleaUpAlerts();
+      await server.savedObjects.clean({
+        types: ['synthetics-monitor', 'synthetics-monitor-multi-space', 'alert'],
+      });
+      await this.cleanUpAlerts();
     } catch (e) {
       // eslint-disable-next-line no-console
       console.log(e);
     }
   }
 
-  async cleaUpAlerts() {
+  async cleanUpAlerts() {
     try {
       const getService = this.params.getService;
       const es: Client = getService('es');

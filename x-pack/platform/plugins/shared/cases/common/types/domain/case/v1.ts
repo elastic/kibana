@@ -127,6 +127,15 @@ export const CaseAttributesRt = rt.intersection([
     updated_at: rt.union([rt.string, rt.null]),
     updated_by: rt.union([UserRt, rt.null]),
   }),
+  rt.exact(
+    rt.partial({
+      incremental_id: rt.union([rt.number, rt.null]),
+      in_progress_at: rt.union([rt.string, rt.null]),
+      time_to_acknowledge: rt.union([rt.number, rt.null]),
+      time_to_investigate: rt.union([rt.number, rt.null]),
+      time_to_resolve: rt.union([rt.number, rt.null]),
+    })
+  ),
 ]);
 
 export const CaseRt = rt.intersection([
@@ -162,6 +171,7 @@ export const RelatedCaseRt = rt.strict({
 
 export const SimilarityRt = rt.strict({
   typeKey: rt.string,
+  typeLabel: rt.string,
   value: rt.string,
 });
 

@@ -9,7 +9,7 @@
 
 import { isEmpty } from 'lodash';
 
-import { CONTROL_GROUP_TYPE } from '@kbn/controls-plugin/common';
+import { CONTROLS_GROUP_TYPE } from '@kbn/controls-constants';
 import {
   initializeControlGroupTelemetry,
   type ControlGroupTelemetry,
@@ -85,7 +85,6 @@ export const collectPanelsByType = (
     collectorData.panels.by_type[type].details = embeddableService.telemetry(
       {
         ...panel.embeddableConfig,
-        id: panel.id || '',
         type: panel.type,
       },
       collectorData.panels.by_type[type].details
@@ -100,8 +99,7 @@ export const controlsCollectorFactory =
       collectorData.controls = embeddableService.telemetry(
         {
           ...attributes.controlGroupInput,
-          type: CONTROL_GROUP_TYPE,
-          id: `DASHBOARD_${CONTROL_GROUP_TYPE}`,
+          type: CONTROLS_GROUP_TYPE,
         },
         collectorData.controls
       ) as ControlGroupTelemetry;

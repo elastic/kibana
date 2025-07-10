@@ -17,16 +17,13 @@ const ListingTableLoadingIndicator = () => {
   return <EuiEmptyPrompt icon={<EuiLoadingSpinner size="l" />} />;
 };
 
-const LazyDashboardListing = React.lazy(() =>
-  (async () => {
-    const modulePromise = import('./dashboard_listing_table');
-    const [module] = await Promise.all([modulePromise, untilPluginStartServicesReady()]);
-
-    return {
-      default: module.DashboardListingTable,
-    };
-  })().then((module) => module)
-);
+const LazyDashboardListing = React.lazy(async () => {
+  const [{ DashboardListingTable }] = await Promise.all([
+    import('../dashboard_renderer/dashboard_module'),
+    untilPluginStartServicesReady(),
+  ]);
+  return { default: DashboardListingTable };
+});
 
 export const DashboardListingTable = (props: DashboardListingProps) => {
   return (

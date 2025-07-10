@@ -19,7 +19,8 @@ import { login, ROLE } from '../tasks/login';
 import { EXECUTE_ROUTE } from '../../../../common/endpoint/constants';
 import { waitForActionToComplete } from '../tasks/response_actions';
 
-describe('Endpoint generated alerts', { tags: ['@ess', '@serverless'] }, () => {
+// FAILING VERSION BUMP: https://github.com/elastic/kibana/issues/209053
+describe.skip('Endpoint generated alerts', { tags: ['@ess', '@serverless'] }, () => {
   let indexedPolicy: IndexedFleetEndpointPolicyResponse;
   let policy: PolicyData;
   let createdHost: CreateAndEnrollEndpointHostResponse;

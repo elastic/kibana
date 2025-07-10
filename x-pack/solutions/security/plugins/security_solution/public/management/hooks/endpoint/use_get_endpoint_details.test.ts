@@ -24,8 +24,7 @@ jest.mock('@tanstack/react-query', () => {
   };
 });
 
-// FLAKY: https://github.com/elastic/kibana/issues/192435
-describe.skip('useGetEndpointDetails hook', () => {
+describe('useGetEndpointDetails hook', () => {
   let renderReactQueryHook: ReactQueryHookRenderer<
     Parameters<typeof useGetEndpointDetails>[number],
     ReturnType<typeof useGetEndpointDetails>
@@ -43,7 +42,7 @@ describe.skip('useGetEndpointDetails hook', () => {
   });
 
   it('should call the proper API', async () => {
-    await renderReactQueryHook(() => useGetEndpointDetails('123'));
+    await renderReactQueryHook(() => useGetEndpointDetails('123'), 'isSuccess', {}, 5000);
 
     expect(apiMocks.responseProvider.metadataDetails).toHaveBeenCalledWith({
       path: resolvePathVariables(HOST_METADATA_GET_ROUTE, { id: '123' }),
@@ -52,7 +51,7 @@ describe.skip('useGetEndpointDetails hook', () => {
   });
 
   it('should call api with `undefined` for endpoint id if it was not defined on input', async () => {
-    await renderReactQueryHook(() => useGetEndpointDetails(''));
+    await renderReactQueryHook(() => useGetEndpointDetails(''), 'isSuccess', {}, 5000);
 
     expect(apiMocks.responseProvider.metadataDetails).toHaveBeenCalledWith({
       path: resolvePathVariables(HOST_METADATA_GET_ROUTE, {

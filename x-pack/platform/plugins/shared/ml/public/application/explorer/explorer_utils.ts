@@ -24,7 +24,7 @@ import {
   type MlRecordForInfluencer,
   ML_JOB_AGGREGATION,
 } from '@kbn/ml-anomaly-utils';
-import type { InfluencersFilterQuery } from '@kbn/ml-anomaly-utils';
+import type { InfluencersFilterQuery, MlAnomaliesTableRecordExtended } from '@kbn/ml-anomaly-utils';
 import type { TimeRangeBounds } from '@kbn/ml-time-buckets';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import { parseInterval } from '@kbn/ml-parse-interval';
@@ -56,6 +56,7 @@ import { useMlKibana } from '../contexts/kibana';
 import type { MlApi } from '../services/ml_api_service';
 import { ML_RESULTS_INDEX_PATTERN } from '../../../common/constants/index_patterns';
 import type { GroupObj } from '../components/job_selector/job_selector';
+import type { TableSeverityState } from '../components/controls/select_severity';
 
 export interface ExplorerJob {
   id: string;
@@ -108,8 +109,8 @@ interface SelectionTimeRange {
 
 export interface AnomaliesTableData {
   anomalies: any[];
-  interval: number;
-  examplesByJobId: string[];
+  interval: number | string;
+  examplesByJobId: Record<string, Record<string, string[]>>;
   showViewSeriesLink: boolean;
   jobIds: string[];
 }
@@ -488,7 +489,7 @@ export async function loadAnomaliesTableData(
   bounds: Required<TimeRangeBounds>,
   fieldName: string,
   tableInterval: string,
-  tableSeverity: number,
+  tableSeverity: TableSeverityState,
   influencersFilterQuery?: InfluencersFilterQuery
 ): Promise<AnomaliesTableData> {
   const jobIds = getSelectionJobIds(selectedCells, selectedJobs);
@@ -503,7 +504,7 @@ export async function loadAnomaliesTableData(
         [],
         influencers,
         tableInterval,
-        tableSeverity,
+        tableSeverity.val,
         timeRange.earliestMs,
         timeRange.latestMs,
         dateFormatTz,
@@ -513,16 +514,20 @@ export async function loadAnomaliesTableData(
       )
       .toPromise()
       .then((resp) => {
-        const anomalies = resp.anomalies;
+        if (!resp) return null;
+
         const detectorsByJob = mlJobService.detectorsByJob;
-        // @ts-ignore
-        anomalies.forEach((anomaly) => {
+
+        const anomalies = resp.anomalies.map((anomaly) => {
           // Add a detector property to each anomaly.
           // Default to functionDescription if no description available.
           // TODO - when job_service is moved server_side, move this to server endpoint.
           const jobId = anomaly.jobId;
           const detector = get(detectorsByJob, [jobId, anomaly.detectorIndex]);
-          anomaly.detector = get(
+
+          const extendedAnomaly = { ...anomaly } as MlAnomaliesTableRecordExtended;
+
+          extendedAnomaly.detector = get(
             detector,
             ['detector_description'],
             anomaly.source.function_description
@@ -530,7 +535,7 @@ export async function loadAnomaliesTableData(
 
           // For detectors with rules, add a property with the rule count.
           if (detector !== undefined && detector.custom_rules !== undefined) {
-            anomaly.rulesLength = detector.custom_rules.length;
+            extendedAnomaly.rulesLength = detector.custom_rules.length;
           }
 
           // Add properties used for building the links menu.
@@ -548,19 +553,22 @@ export async function loadAnomaliesTableData(
             isChartable = isModelPlotEnabled(job, anomaly.detectorIndex, entityFields);
           }
 
-          anomaly.isTimeSeriesViewRecord = isChartable;
-          anomaly.isGeoRecord =
+          extendedAnomaly.isTimeSeriesViewRecord = isChartable;
+
+          extendedAnomaly.isGeoRecord =
             detector !== undefined && detector.function === ML_JOB_AGGREGATION.LAT_LONG;
 
           if (mlJobService.customUrlsByJob[jobId] !== undefined) {
-            anomaly.customUrls = mlJobService.customUrlsByJob[jobId];
+            extendedAnomaly.customUrls = mlJobService.customUrlsByJob[jobId];
           }
+
+          return extendedAnomaly;
         });
 
         resolve({
           anomalies,
           interval: resp.interval,
-          examplesByJobId: resp.examplesByJobId,
+          examplesByJobId: resp.examplesByJobId ?? {},
           showViewSeriesLink: true,
           jobIds,
         });

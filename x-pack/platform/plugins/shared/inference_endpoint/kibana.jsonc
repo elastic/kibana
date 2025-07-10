@@ -1,0 +1,20 @@
+{
+  "type": "plugin",
+  "id": "@kbn/inference-endpoint-plugin",
+  "owner": "@elastic/ml-ui",
+  "group": "platform",
+  "visibility": "shared",
+  "plugin": {
+    "id": "inferenceEndpoint",
+    "server": true,
+    "browser": false,
+    "configPath": ["xpack", "inference_endpoint"],
+    "requiredPlugins": [
+      "navigation"
+    ],
+    "requiredBundles": [
+    ],
+    "optionalPlugins": [],
+    "extraPublicDirs": []
+  }
+}

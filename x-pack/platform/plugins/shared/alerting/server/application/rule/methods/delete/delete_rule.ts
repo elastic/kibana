@@ -6,16 +6,17 @@
  */
 
 import Boom from '@hapi/boom';
+import type { SavedObject } from '@kbn/core/server';
 import { AlertConsumers } from '@kbn/rule-data-utils';
-import { RawRule } from '../../../../types';
+import type { RawRule } from '../../../../types';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
 import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
 import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
-import { RulesClientContext } from '../../../../rules_client/types';
-import { untrackRuleAlerts, migrateLegacyActions } from '../../../../rules_client/lib';
+import type { RulesClientContext } from '../../../../rules_client/types';
+import { untrackRuleAlerts, bulkMigrateLegacyActions } from '../../../../rules_client/lib';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
-import { DeleteRuleParams } from './types';
+import type { DeleteRuleParams } from './types';
 import { deleteRuleParamsSchema } from './schemas';
 import { deleteRuleSo, getDecryptedRuleSo, getRuleSo } from '../../../../data/rule';
 
@@ -40,6 +41,7 @@ async function deleteRuleWithOCC(context: RulesClientContext, { id }: { id: stri
   let apiKeyToInvalidate: string | null = null;
   let apiKeyCreatedByUser: boolean | undefined | null = false;
   let attributes: RawRule;
+  let rule: SavedObject<RawRule>;
 
   try {
     const decryptedRule = await getDecryptedRuleSo({
@@ -53,6 +55,7 @@ async function deleteRuleWithOCC(context: RulesClientContext, { id }: { id: stri
     apiKeyCreatedByUser = decryptedRule.attributes.apiKeyCreatedByUser;
     taskIdToRemove = decryptedRule.attributes.scheduledTaskId;
     attributes = decryptedRule.attributes;
+    rule = decryptedRule;
   } catch (e) {
     // We'll skip invalidating the API key since we failed to load the decrypted saved object
     context.logger.error(
@@ -60,7 +63,7 @@ async function deleteRuleWithOCC(context: RulesClientContext, { id }: { id: stri
     );
 
     // Still attempt to load the scheduledTaskId using SOC
-    const rule = await getRuleSo({
+    rule = await getRuleSo({
       savedObjectsClient: context.unsecuredSavedObjectsClient,
       id,
     });
@@ -92,11 +95,7 @@ async function deleteRuleWithOCC(context: RulesClientContext, { id }: { id: stri
   // TODO (http-versioning): Remove this cast, this enables us to move forward
   // without fixing all of other solution types
   if (attributes.consumer === AlertConsumers.SIEM) {
-    await migrateLegacyActions(context, {
-      ruleId: id,
-      attributes: attributes as RawRule,
-      skipActionsValidation: true,
-    });
+    await bulkMigrateLegacyActions({ context, rules: [rule], skipActionsValidation: true });
   }
 
   context.auditLogger?.log(

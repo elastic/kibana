@@ -22,7 +22,6 @@ const AuditdFileExampleComponent: React.FC = () => {
     <>
       {auditdFileRowRenderer.renderRow({
         data: demoTimelineData[27].ecs,
-        isDraggable: false,
         scopeId: ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID,
       })}
     </>

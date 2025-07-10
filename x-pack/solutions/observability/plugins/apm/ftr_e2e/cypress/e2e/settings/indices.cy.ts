@@ -14,7 +14,9 @@ const getAbleToModifyCase = () => {
     const input = cy.get('input[name="error"]');
     input.should('not.be.disabled');
     input.clear().type(newErrorIndex);
-    cy.intercept('POST', '/internal/apm/settings/apm-indices/save*').as('internalApiRequest');
+    cy.intercept('POST', '/internal/apm-sources/settings/apm-indices/save*').as(
+      'internalApiRequest'
+    );
     cy.contains('Apply changes').should('not.be.disabled').click();
     cy.wait('@internalApiRequest').its('response.statusCode').should('eq', 200);
   });

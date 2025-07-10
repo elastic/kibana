@@ -3,57 +3,61 @@
 
 product: Kibana
 collection: Alerting and action settings in Kibana
+id: alert-action-settings-kb
 page_description: |
-  Alerting and actions are enabled by default in {kib}, but require you to configure the following:
-  . <<using-kibana-with-security,Set up {kib} to work with {stack} {security-features}>>.
-  . <<configuring-tls-kib-es,Set up TLS encryption between {kib} and {es}>>.
-  . If you are using an *on-premises* Elastic Stack deployment, <<general-alert-action-settings,specify a value for `xpack.encryptedSavedObjects.encryptionKey`>>.
-  You can configure the following settings in the `kibana.yml` file.
+  Alerting and actions are enabled by default in {{kib}}, but require you to configure the following:
 
+  1. [Set up {{kib}} to work with {{stack}} {{security-features}}](docs-content://deploy-manage/security/secure-your-cluster-deployment.md).
+  2. [Set up TLS encryption between {{kib}} and {{es}}](docs-content://deploy-manage/security/set-up-basic-security-plus-https.  md#encrypt-kibana-http).
+  3. If you are using an **on-premises** Elastic Stack deployment, [specify a value for `xpack.encryptedSavedObjects.encryptionKey`](#general-alert-action-settings).
+
+note: 'If a setting is applicable to {{ech}} environments, its name is followed by this icon: ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on Elastic Cloud Hosted")'
 
 groups:
   - group: General settings
     id: general-alert-action-settings
     # description: |
-    #  - ""
-    # example: example-group-name.asciidoc
+    # example: |
     settings:
 
       - setting: xpack.encryptedSavedObjects.encryptionKey
         # id:
         description: |
-          A string of 32 or more characters used to encrypt sensitive properties on alerting rules and actions before they're stored in Elasticsearch. Third party credentials &mdash; such as the username and password used to connect to an SMTP service &mdash; are an example of encrypted properties.
-          Kibana offers a <<kibana-encryption-keys, CLI tool>> to help generate this encryption key.
+          A string of 32 or more characters used to encrypt sensitive properties on alerting rules and actions before they're stored in Elasticsearch. Third party credentials — such as the username and password used to connect to an SMTP service — are an example of encrypted properties.
+
+          Kibana offers a [CLI tool](/kibana/docs/reference/commands/kibana-encryption-keys.md) to help generate this encryption key.
+
           If not set, Kibana will generate a random key on startup, but all alerting and action functions will be blocked. Generated keys are not allowed for alerting and actions because when a new key is generated on restart, existing encrypted data becomes inaccessible. For the same reason, alerting and actions in high-availability deployments of Kibana will behave unexpectedly if the key isn't the same on all instances of Kibana.
 
-          Although the key can be specified in clear text in `kibana.yml`, it's recommended to store this key securely in the <<secure-settings,Kibana Keystore>>. Be sure to back up the encryption key value somewhere safe, as your alerting rules and actions will cease to function due to decryption failures should you lose it.  If you want to rotate the encryption key, be sure to follow the instructions on <<encryption-key-rotation, encryption key rotation>>.
+          Although the key can be specified in clear text in `kibana.yml`, it's recommended to store this key securely in the [Kibana Keystore](docs-content://deploy-manage/security/secure-settings.md). Be sure to back up the encryption key value somewhere safe, as your alerting rules and actions will cease to function due to decryption failures should you lose it.  If you want to rotate the encryption key, be sure to follow the instructions on [encryption key rotation](docs-content://deploy-manage/security/secure-saved-objects.md#encryption-key-rotation).
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
         # note: ""
         # tip: ""
         # warning: ""
         # important: ""
-        datatype: "string"
+        datatype: string
         # default:
         # options:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          deployment:
+            self: all
          # example: |
 
   - group: Action settings
     id: action-settings
     # description: |
-    #  - ""
-    # example: example-group-name.asciidoc
+    # example: |
     settings:
 
       - setting: xpack.actions.allowedHosts
         # id:
         description: |
           A list of hostnames that Kibana is allowed to connect to when built-in actions are triggered. It defaults to `["*"]`, allowing any host, but keep in mind the potential for SSRF attacks when hosts are not explicitly added to the allowed hosts. An empty list `[]` can be used to block built-in actions from making any external connections.
+
           Note that hosts associated with built-in actions, such as Slack and PagerDuty, are not automatically added to allowed hosts. If you are not using the default `["*"]` setting, you must ensure that the corresponding endpoints are added to the allowed hosts as well.
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
@@ -67,15 +71,19 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        platforms:
-          - cloud
+        applies_to:
+          deployment:
+            self: all
+            ess: all
          # example: |
 
       - setting: xpack.actions.customHostSettings
         # id:
         description: |
           A list of custom host settings to override existing global settings.
+
           Each entry in the list must have a `url` property, to associate a connection type (mail or https), hostname and port with the remaining options in the entry.
+
           The settings in `xpack.actions.customHostSettings` can be used to override the global option `xpack.actions.ssl.verificationMode` and provide customized TLS settings on a per-server basis. Set `xpack.actions.ssl.verificationMode` to the value to be used by default for all servers, then add an entry in `xpack.actions.customHostSettings` for every server that requires customized settings.
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
@@ -89,21 +97,14 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        platforms:
-          - cloud
+        applies_to:
+          deployment:
+            self: all
+            ess: all
         example: |
-          In the following example, two custom host settings
-          are defined.  The first provides a custom host setting for mail server
-          `mail.example.com` using port 465 that supplies server certificate authentication
-          data from both a file and inline, and requires TLS for the
-          connection.  The second provides a custom host setting for https server
-          `webhook.example.com` which turns off server certificate authentication,
-          that will allow Kibana to connect to the server if it's using a self-signed
-          certificate.  The individual properties that can be used in the settings are
-          documented below.
+          In the following example, two custom host settings are defined.  The first provides a custom host setting for mail server `mail.example.com` using port 465 that supplies server certificate authentication data from both a file and inline, and requires TLS for the connection.  The second provides a custom host setting for https server `webhook.example.com` which turns off server certificate authentication, that will allow Kibana to connect to the server if it's using a self-signed certificate.  The individual properties that can be used in the settings are documented below.
 
-          [source,yaml]
-          --
+          ```yaml
           xpack.actions.customHostSettings:
             - url: smtp://mail.example.com:465
               ssl:
@@ -120,13 +121,15 @@ groups:
             - url: https://webhook.example.com
               ssl:
                 verificationMode: 'none'
-          --
+          ```
 
       - setting: xpack.actions.customHostSettings[n].url
         # id:
         description: |
           A URL associated with this custom host setting.  Should be in the form of `protocol://hostname:port`, where `protocol` is `https` or `smtp`.  If the port is not provided, 443 is used for `https` and 25 is used for `smtp`.  The `smtp` URLs are used for the Email actions that use this server, and the `https` URLs are used for actions which use `https` to connect to services.
+
           Entries with `https` URLs can use the `ssl` options, and entries with `smtp` URLs can use both the `ssl` and `smtp` options.
+
           No other URL values should be part of this URL, including paths, query strings, and authentication information.  When an http or smtp request is made as part of running an action, only the protocol, hostname, and port of the URL for that request are used to look up these configuration values.
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
@@ -140,8 +143,10 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        platforms:
-          - cloud
+        applies_to:
+          deployment:
+            self: all
+            ess: all
          # example: |
 
       - setting: xpack.actions.customHostSettings[n].smtp.ignoreTLS
@@ -160,8 +165,10 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        platforms:
-          - cloud
+        applies_to:
+          deployment:
+            self: all
+            ess: all
          # example: |
 
       - setting: xpack.actions.customHostSettings[n].smtp.requireTLS
@@ -180,14 +187,16 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        platforms:
-          - cloud
+        applies_to:
+          deployment:
+            self: all
+            ess: all
          # example: |
 
       - setting: xpack.actions.customHostSettings[n].ssl.verificationMode
         id: action-config-custom-host-verification-mode
         description: |
-          Controls the verification of the server certificate that Kibana receives when making an outbound SSL/TLS connection to the host server. Valid values are `full`, `certificate`, and `none`. Use `full` to perform hostname verification, `certificate` to skip hostname verification, and `none` to skip verification. Default: `full`. <<elasticsearch-ssl-verificationMode,Equivalent Kibana setting>>. Overrides the general `xpack.actions.ssl.verificationMode` configuration for requests made for this hostname/port.
+          Controls the verification of the server certificate that Kibana receives when making an outbound SSL/TLS connection to the host server. Valid values are `full`, `certificate`, and `none`. Use `full` to perform hostname verification, `certificate` to skip hostname verification, and `none` to skip verification. Default: `full`. [Equivalent Kibana setting](/kibana/docs/reference/configuration-reference/general-settings.md#elasticsearch-ssl-verificationMode). Overrides the general `xpack.actions.ssl.verificationMode` configuration for requests made for this hostname/port.
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
         # note: ""
@@ -202,8 +211,10 @@ groups:
         - option: none
         #     description: ""
         # type: static/dynamic
-        platforms:
-          - cloud
+        applies_to:
+          deployment:
+            self: all
+            ess: all
          # example: |
 
       - setting: xpack.actions.customHostSettings[n].ssl.certificateAuthoritiesFiles
@@ -222,8 +233,9 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          deployment:
+            self: all
          # example: |
 
       - setting: xpack.actions.customHostSettings[n].ssl.certificateAuthoritiesData
@@ -242,8 +254,10 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        platforms:
-          - cloud
+        applies_to:
+          deployment:
+            self: all
+            ess: all
          # example: |
 
       - setting: xpack.actions.email.domain_allowlist
@@ -262,8 +276,102 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        platforms:
-         - cloud
+        applies_to:
+          deployment:
+            self: all
+            ess: all
+         # example: |
+
+      - setting: xpack.actions.email.recipient_allowlist
+        id: action-config-email-recipient-allowlist
+        description: |
+          A list of allowed email recipient (`to`, `cc`, or `bcc`) patterns that can be used with email connectors. If you attempt to send an email to a recipient that does not match the allowed patterns, the action will fail. The failure message indicates that the email is not allowed.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        warning: "This setting cannot be used with `xpack.actions.email.domain_allowlist`."
+        # important: ""
+        datatype: string
+        # default:
+        applies_to:
+          stack: ga 9.2
+          deployment:
+            self: ga
+            ess: ga
+        example: |
+          For example:
+
+          ```yaml
+          xpack.actions.email.recipient_allowlist:["admin-*@company.org", "sales-*@example.com"]
+          ```
+
+          Only "to", "cc", or "bcc" email addresses that match the listed patterns will be accepted. For example, "admin-network@company.org" or "sales-north@example.com".
+
+      - setting: xpack.actions.email.services.ses.host
+        id: action-config-email-services-ses-host
+        description: |
+          The SMTP endpoint for an Amazon Simple Email Service (SES) service provider that can be used by email connectors.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        warning: "This setting alone is insufficient for overriding system defaults for the SES SMTP endpoint. You must also configure the `xpack.actions.email.services.ses.port` setting"
+        # important: ""
+        datatype: string
+        default: "email-smtp.us-east-1.amazonaws.com"
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+            ess: all
+         # example: |
+
+      - setting: xpack.actions.email.services.ses.port
+        id: action-config-email-services-ses-port
+        description: |
+          The port number for an Amazon Simple Email Service (SES) service provider that can be used by email connectors.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: int
+        default: 465
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+            ess: all
+         # example: |
+
+      - setting: xpack.actions.email.services.enabled
+        id: action-config-email-services-
+        description: |
+          An array of strings indicating all email services that are enabled. Available options are `elastic-cloud`, `google-mail`, `microsoft-outlook`, `amazon-ses`, `microsoft-exchange`, and `other`. If the array is empty, no email services are enabled. The default value is `["*"]`, which enables all email services.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: enum
+        default: ["*"]
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+            ess: all
          # example: |
 
       - setting: xpack.actions.enableFooterInEmail
@@ -282,29 +390,34 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        platforms:
-         - cloud
+        applies_to:
+          deployment:
+            self: all
+            ess: all
          # example: |
 
       - setting: xpack.actions.enabledActionTypes
         # id:
         description: |
           A list of action types that are enabled. It defaults to `["*"]`, enabling all types. The names for built-in Kibana action types are prefixed with a `.` and include: `.email`, `.index`, `.jira`, `.opsgenie`, `.pagerduty`, `.resilient`, `.server-log`, `.servicenow`, .`servicenow-itom`, `.servicenow-sir`, `.slack`, `.swimlane`, `.teams`, `.tines`, `.torq`, `.xmatters`,  `.gen-ai`,  `.bedrock`, `.gemini`,  `.d3security`, and `.webhook`. An empty list `[]` will disable all action types.
+
           Disabled action types will not appear as an option when creating new connectors, but existing connectors and actions of that type will remain in Kibana and will not function.
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
         # note: ""
         # tip: ""
         # warning: ""
-        important: "<<pre-configured-connectors,Preconfigured connectors>> are not affected by this setting."
+        important: "[Preconfigured connectors](/kibana/docs/reference/connectors-kibana/pre-configured-connectors.md) are not affected by this setting."
         datatype: string
         default: ["*"]
         # options:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        platforms:
-          - cloud
+        applies_to:
+          deployment:
+            self: all
+            ess: all
          # example: |
 
       - setting: xpack.actions.microsoftExchangeUrl
@@ -323,8 +436,9 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          deployment:
+            self: all
          # example: |
 
       - setting: xpack.actions.microsoftGraphApiUrl
@@ -343,8 +457,9 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          deployment:
+            self: all
          # example: |
 
       - setting: xpack.actions.microsoftGraphApiScope
@@ -363,16 +478,20 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          deployment:
+            self: all
          # example: |
 
       - setting: xpack.actions.proxyUrl
         # id:
         description: |
           Specifies the proxy URL to use, if using a proxy for actions. By default, no proxy is used.
+
           Proxies may be used to proxy http or https requests through a proxy using the http or https protocol.  Kibana only uses proxies in "CONNECT" mode (sometimes referred to as "tunneling" TCP mode, compared to HTTP mode).  That is, Kibana will always make requests through a proxy using the HTTP `CONNECT` method.
+
           If your proxy is using the https protocol (vs the http protocol), the setting `xpack.actions.ssl.proxyVerificationMode: none` will likely be needed, unless your proxy's certificates are signed using a publicly available certificate authority.
+
           There is currently no support for using basic authentication with a proxy (authentication for the proxy itself, not the URL being requested through the proxy).
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
@@ -386,21 +505,22 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        platforms:
-          - cloud
+        applies_to:
+          deployment:
+            self: all
+            ess: all
         example: |
-          To help diagnose problems using a proxy, you can use the `curl` command with options to use your proxy, and log debug information, with the following command, replacing the proxy and target URLs as appropriate.  This will force the request to be made to the
-          proxy in tunneling mode, and display some of the interaction between the client and the proxy.
-          
-          [source,sh]
-          --
+          To help diagnose problems using a proxy, you can use the `curl` command with options to use your proxy, and log debug information, with the following command, replacing the proxy and target URLs as appropriate.  This will force the request to be made to the proxy in tunneling mode, and display some of the interaction between the client and the proxy.
+
+          ```sh
           curl --verbose --proxytunnel --proxy http://localhost:8080 http://example.com
-          --
+          ```
 
       - setting: xpack.actions.proxyBypassHosts
         # id:
         description: |
           Specifies hostnames which should not use the proxy, if using a proxy for actions. The value is an array of hostnames as strings.
+
           By default, all hosts will use the proxy, but if an action's hostname is in this list, the proxy will not be used.  The settings `xpack.actions.proxyBypassHosts` and `xpack.actions.proxyOnlyHosts` cannot be used at the same time.
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
@@ -414,16 +534,17 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        platforms:
-          - cloud
+        applies_to:
+          deployment:
+            self: all
+            ess: all
         example: |
           For example:
-          
-          [source,yaml]
-          ----
+
+          ```yaml
           xpack.actions.proxyBypassHosts: [ "events.pagerduty.com" ]
-          ----
-          
+          ```
+
           If applicable, include the subdomain in the hostname
 
 
@@ -431,6 +552,7 @@ groups:
         # id:
         description: |
           Specifies hostnames which should only use the proxy, if using a proxy for actions. The value is an array of hostnames as strings.
+
           By default, no hosts will use the proxy, but if an action's hostname is in this list, the proxy will be used.  The settings `xpack.actions.proxyBypassHosts` and `xpack.actions.proxyOnlyHosts` cannot be used at the same time.
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
@@ -444,15 +566,16 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        platforms:
-          - cloud
+        applies_to:
+          deployment:
+            self: all
+            ess: all
         example: |
           For example:
-          
-          [source,yaml]
-          ----
+
+          ```yaml
           xpack.actions.proxyOnlyHosts: [ "events.pagerduty.com" ]
-          ----
+          ```
 
           If applicable, include the subdomain in the hostname
 
@@ -472,16 +595,20 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        platforms:
-          - cloud
+        applies_to:
+          deployment:
+            self: all
+            ess: all
          # example: |
 
       - setting: xpack.actions.ssl.proxyVerificationMode
         id: action-config-proxy-verification-mode
         description: |
           Controls the verification for the proxy server certificate that Kibana receives when making an outbound SSL/TLS connection to the proxy server.
+
           Use `full` to perform hostname verification, `certificate` to skip hostname verification, and `none` to skip verification.
-          <<elasticsearch-ssl-verificationMode,Equivalent Kibana setting>>
+
+          [Equivalent Kibana setting](/kibana/docs/reference/configuration-reference/general-settings.md#elasticsearch-ssl-verificationMode)
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
         # note: ""
@@ -496,15 +623,19 @@ groups:
           - option: none
         #     description: ""
         # type: static/dynamic
-        platforms:
-          - cloud
+        applies_to:
+          deployment:
+            self: all
+            ess: all
          # example: |
 
       - setting: xpack.actions.ssl.verificationMode
         id: action-config-verification-mode
         description: |
           Controls the verification for the server certificate that Elastic Maps Server receives when making an outbound SSL/TLS connection for actions. Valid values are `full`, `certificate`, and `none`. Use `full` to perform hostname verification, `certificate` to skip hostname verification, and `none` to skip verification.
-          <<elasticsearch-ssl-verificationMode,Equivalent Kibana setting>>
+
+          [Equivalent Kibana setting](/kibana/docs/reference/configuration-reference/general-settings.md#elasticsearch-ssl-verificationMode)
+
           This setting can be overridden for specific URLs by using the setting `xpack.actions.customHostSettings[n].ssl.verificationMode` (described above) to a different value.
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
@@ -520,8 +651,10 @@ groups:
           - option: none
         #     description: ""
         # type: static/dynamic
-        platforms:
-          - cloud
+        applies_to:
+          deployment:
+            self: all
+            ess: all
          # example: |
 
       - setting: xpack.actions.maxResponseContentLength
@@ -540,8 +673,10 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        platforms:
-          - cloud
+        applies_to:
+          deployment:
+            self: all
+            ess: all
          # example: |
 
       - setting: xpack.actions.responseTimeout
@@ -560,8 +695,10 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        platforms:
-          - cloud
+        applies_to:
+          deployment:
+            self: all
+            ess: all
          # example: |
 
       - setting: xpack.actions.run.maxAttempts
@@ -580,8 +717,10 @@ groups:
           - option: minimum 1 and maximum 10
         #     description: ""
         # type: static/dynamic
-        platforms:
-          - cloud
+        applies_to:
+          deployment:
+            self: all
+            ess: all
          # example: |
 
       - setting: xpack.actions.run.connectorTypeOverrides
@@ -600,19 +739,20 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        platforms:
-          - cloud
+        applies_to:
+          deployment:
+            self: all
+            ess: all
         example: |
           For example:
 
-          [source,yaml]
-          --
+          ```yaml
           xpack.actions.run:
               maxAttempts: 1
               connectorTypeOverrides:
                   - id: '.server-log'
                     maxAttempts: 5
-          --
+          ```
 
       - setting: xpack.actions.queued.max
         # id:
@@ -630,8 +770,10 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        platforms:
-          - cloud
+        applies_to:
+          deployment:
+            self: all
+            ess: all
          # example: |
 
   - group: Preconfigured connector settings
@@ -640,23 +782,22 @@ groups:
       These settings vary depending on which type of preconfigured connector you're adding.
     example: |
       For example:
-      
-      [source,yaml]
-      ----------------------------------------
+
+      ```yaml
       xpack.actions.preconfigured:
         my-server-log:
           name: preconfigured-server-log-connector-type
           actionTypeId: .server-log
-      ----------------------------------------
-      
-      For more examples, go to <<pre-configured-connectors>>.
+      ```
+
+      For more examples, go to [Preconfigured connectors](/kibana/docs/reference/connectors-kibana/pre-configured-connectors.md).
 
     settings:
 
       - setting: xpack.actions.preconfiguredAlertHistoryEsIndex
         # id:
         description: |
-          Enables a preconfigured alert history Elasticsearch <<index-action-type, Index>> connector.
+          Enables a preconfigured alert history Elasticsearch [Index](/kibana/docs/reference/connectors-kibana/index-action-type.md) connector.
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
         # note: ""
@@ -669,8 +810,10 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        platforms:
-          - cloud
+        applies_to:
+          deployment:
+            self: all
+            ess: all
          # example: |
 
       - setting: xpack.actions.preconfigured
@@ -689,8 +832,9 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          deployment:
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.actionTypeId
@@ -715,8 +859,9 @@ groups:
           - option: .webhook
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          deployment:
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config
@@ -735,14 +880,15 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          deployment:
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.apiProvider
         # id:
         description: |
-          For a <<openai-action-type,OpenAI connector>>, specifies the OpenAI API provider.
+          For a [OpenAI connector](/kibana/docs/reference/connectors-kibana/openai-action-type.md), specifies the OpenAI API provider.
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
         # note: ""
@@ -756,23 +902,25 @@ groups:
           - option: Azure OpenAI
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          deployment:
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.apiUrl
         # id:
         description: |
           A configuration URL that varies by connector:
-          * For an <<bedrock-action-type,{bedrock} connector>>, specifies the {bedrock} request URL.
-          * For an <<gemini-action-type,{gemini} connector>>, specifies the {gemini} request URL.
-          * For a <<openai-action-type,OpenAI connector>>, specifies the OpenAI request URL.
-          * For a <<resilient-action-type,{ibm-r} connector>>, specifies the {ibm-r} instance URL.
-          * For a <<jira-action-type,Jira connector>>, specifies the Jira instance URL.
-          * For an <<opsgenie-action-type,{opsgenie} connector>>, specifies the {opsgenie} URL. For example, `https://api.opsgenie.com` or `https://api.eu.opsgenie.com`.
-          * For a <<pagerduty-action-type,PagerDuty connector>>, specifies the PagerDuty event URL. Defaults to `https://events.pagerduty.com/v2/enqueue`.
-          * For a <<servicenow-action-type,{sn-itsm}>>, <<servicenow-sir-action-type,{sn-sir}>>, or <<servicenow-itom-action-type,{sn-itom} connector>> specifies the ServiceNow instance URL.
-          * For a <<swimlane-action-type,{swimlane} connector>>, specifies the {swimlane} instance URL.
+
+          * For an [{{bedrock}} connector](/kibana/docs/reference/connectors-kibana/bedrock-action-type.md), specifies the {{bedrock}} request URL.
+          * For an [{{gemini}} connector](/kibana/docs/reference/connectors-kibana/gemini-action-type.md), specifies the {{gemini}} request URL.
+          * For a [OpenAI connector](/kibana/docs/reference/connectors-kibana/openai-action-type.md), specifies the OpenAI request URL.
+          * For a [{{ibm-r}} connector](/kibana/docs/reference/connectors-kibana/resilient-action-type.md), specifies the {{ibm-r}} instance URL.
+          * For a [Jira connector](/kibana/docs/reference/connectors-kibana/jira-action-type.md), specifies the Jira instance URL.
+          * For an [{{opsgenie}} connector](/kibana/docs/reference/connectors-kibana/opsgenie-action-type.md), specifies the {{opsgenie}} URL. For example, `https://api.opsgenie.com` or `https://api.eu.opsgenie.com`.
+          * For a [PagerDuty connector](/kibana/docs/reference/connectors-kibana/pagerduty-action-type.md), specifies the PagerDuty event URL. Defaults to `https://events.pagerduty.com/v2/enqueue`.
+          * For a [{{sn-itsm}}](/kibana/docs/reference/connectors-kibana/servicenow-action-type.md), [{{sn-sir}}](/kibana/docs/reference/connectors-kibana/servicenow-sir-action-type.md), or [{{sn-itom}} connector](/kibana/docs/reference/connectors-kibana/servicenow-itom-action-type.md) specifies the ServiceNow instance URL.
+          * For a [{{swimlane}} connector](/kibana/docs/reference/connectors-kibana/swimlane-action-type.md), specifies the {{swimlane}} instance URL.
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
         note: "If you are using the `xpack.actions.allowedHosts` setting, make sure the hostname in the URL is added to the allowed hosts."
@@ -785,15 +933,17 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          deployment:
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.appId
         # id:
         description: |
           An application ID that varies by connector:
-          * For a <<swimlane-action-type,{swimlane} connector>>, specifies a {swimlane} application identifier.
+
+          * For a [{{swimlane}} connector](/kibana/docs/reference/connectors-kibana/swimlane-action-type.md), specifies a {{swimlane}} application identifier.
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
         # note: ""
@@ -806,16 +956,18 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          deployment:
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.clientId
         # id:
         description: |
           A client identifier that varies by connector:
-          * For an <<email-action-type,email connector>>, specifies a GUID format value that corresponds to the client ID, which is a part of OAuth 2.0 client credentials authentication.
-          * For a <<servicenow-itom-action-type,{sn-itom}>>, <<servicenow-action-type,{sn-itsm}>>, or <<servicenow-sir-action-type,{sn-sir} connector>> specifies the client identifier assigned to the OAuth application.
+
+          * For an [email connector](/kibana/docs/reference/connectors-kibana/email-action-type.md), specifies a GUID format value that corresponds to the client ID, which is a part of OAuth 2.0 client credentials authentication.
+          * For a [{{sn-itom}}](/kibana/docs/reference/connectors-kibana/servicenow-itom-action-type.md), [{{sn-itsm}}](/kibana/docs/reference/connectors-kibana/servicenow-action-type.md), or [{{sn-sir}} connector](/kibana/docs/reference/connectors-kibana/servicenow-sir-action-type.md) specifies the client identifier assigned to the OAuth application.
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
         # note: ""
@@ -828,14 +980,15 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          deployment:
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.configUrl
         # id:
         description: |
-          For an <<xmatters-action-type,xMatters connector>> with basic authentication, specifies the request URL for the Elastic Alerts trigger in xMatters.
+          For an [xMatters connector](/kibana/docs/reference/connectors-kibana/xmatters-action-type.md) with basic authentication, specifies the request URL for the Elastic Alerts trigger in xMatters.
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
         # note: ""
@@ -848,14 +1001,15 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          deployment:
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.createCommentJson
         # id:
         description: |
-          For a <<cases-webhook-action-type,{webhook-cm} connector>>, specifies a stringified JSON payload with Mustache variables that is sent to the create comment URL to create a case comment. The required variable is `case.description`.
+          For a [{{webhook-cm}} connector](/kibana/docs/reference/connectors-kibana/cases-webhook-action-type.md), specifies a stringified JSON payload with Mustache variables that is sent to the create comment URL to create a case comment. The required variable is `case.description`.
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
         note: "The JSON is validated after the Mustache variables have been placed when the REST method runs. You should manually ensure that the JSON is valid, disregarding the Mustache variables, so the later validation will pass."
@@ -868,14 +1022,15 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          deployment:
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.createCommentMethod
         # id:
         description: |
-          For a <<cases-webhook-action-type,{webhook-cm} connector>>, specifies the REST API HTTP request method to create a case comment in the third-party system.
+          For a [{{webhook-cm}} connector](/kibana/docs/reference/connectors-kibana/cases-webhook-action-type.md), specifies the REST API HTTP request method to create a case comment in the third-party system.
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
         # note: ""
@@ -890,14 +1045,15 @@ groups:
           - option: patch
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          deployment:
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.createCommentUrl
         # id:
         description: |
-          For a <<cases-webhook-action-type,{webhook-cm} connector>>, specifies a REST API URL string to create a case comment by ID in the third-party system.
+          For a [{{webhook-cm}} connector](/kibana/docs/reference/connectors-kibana/cases-webhook-action-type.md), specifies a REST API URL string to create a case comment by ID in the third-party system.
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
         note: "If you are using the `xpack.actions.allowedHosts` setting, make sure the hostname in the URL is added to the allowed hosts."
@@ -910,14 +1066,15 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          deployment:
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.createIncidentJson
         # id:
         description: |
-          For a <<cases-webhook-action-type,{webhook-cm} connector>>, specifies a stringified JSON payload with Mustache variables that is sent to the create case URL to create a case. Required variables are `case.title` and `case.description`.
+          For a [{{webhook-cm}} connector](/kibana/docs/reference/connectors-kibana/cases-webhook-action-type.md), specifies a stringified JSON payload with Mustache variables that is sent to the create case URL to create a case. Required variables are `case.title` and `case.description`.
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
         note: "The JSON is validated after the Mustache variables have been placed when the REST method runs. You should manually ensure that the JSON is valid, disregarding the Mustache variables, so the later validation will pass."
@@ -930,14 +1087,15 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          deployment:
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.createIncidentMethod
         # id:
         description: |
-          For a <<cases-webhook-action-type,{webhook-cm} connector>>, specifies the REST API HTTP request method to create a case in the third-party system
+          For a [{{webhook-cm}} connector](/kibana/docs/reference/connectors-kibana/cases-webhook-action-type.md), specifies the REST API HTTP request method to create a case in the third-party system.
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
         # note: ""
@@ -952,14 +1110,15 @@ groups:
           - option: patch
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          deployment:
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.createIncidentUrl
         # id:
         description: |
-          For a <<cases-webhook-action-type,{webhook-cm} connector>>, specifies a REST API URL string to create a case in the third-party system.
+          For a [{{webhook-cm}} connector](/kibana/docs/reference/connectors-kibana/cases-webhook-action-type.md), specifies a REST API URL string to create a case in the third-party system.
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
         note: "If you are using the `xpack.actions.allowedHosts` setting, make sure the hostname in the URL is added to the allowed hosts."
@@ -972,14 +1131,15 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          deployment:
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.createIncidentResponseKey
         # id:
         description: |
-          For a <<cases-webhook-action-type,{webhook-cm} connector>>, specifies a string from the response body of the create case method that corresponds to the external service identifier.
+          For a [{{webhook-cm}} connector](/kibana/docs/reference/connectors-kibana/cases-webhook-action-type.md), specifies a string from the response body of the create case method that corresponds to the external service identifier.
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
         # note: ""
@@ -992,17 +1152,22 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          deployment:
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.defaultModel
         # id:
         description: |
           The default model to use for requests, which varies by connector:
-          * For an <<bedrock-action-type,{bedrock} connector>>, current support is for the Anthropic Claude models. Defaults to `anthropic.claude-3-5-sonnet-20240620-v1:0`.
-          * For a <<gemini-action-type,{gemini} connector>>, current support is for the Gemini models. Defaults to `gemini-1.5-pro-002`.
-          * For a <<openai-action-type,OpenAI connector>>, it is optional and applicable only when `xpack.actions.preconfigured.<connector-id>.config.apiProvider` is `OpenAI`.
+
+          * For an [{{bedrock}} connector](/kibana/docs/reference/connectors-kibana/bedrock-action-type.md), current support is for the Anthropic Claude models.
+            * In {{serverless-full}}, the default is `us.anthropic.claude-3-7-sonnet-20250219-v1:0`.
+            * In {{stack}} 9.0, the default is `anthropic.claude-3-5-sonnet-20240620-v1:0`.
+            * In {{stack}} 9.1 and later, the default is `us.anthropic.claude-3-7-sonnet-20250219-v1:0`. {applies_to}`stack: ga 9.1`
+          * For a [{{gemini}} connector](/kibana/docs/reference/connectors-kibana/gemini-action-type.md), current support is for the Gemini models. Defaults to `gemini-2.5-pro`.
+          * For a [OpenAI connector](/kibana/docs/reference/connectors-kibana/openai-action-type.md), it is optional and applicable only when `xpack.actions.preconfigured.<connector-id>.config.apiProvider` is `OpenAI`.
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
         # note: ""
@@ -1015,14 +1180,15 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          deployment:
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.executionTimeField
         # id:
         description: |
-          For an <<index-action-type,index connector>>, a field that indicates when the document was indexed.
+          For an [index connector](/kibana/docs/reference/connectors-kibana/index-action-type.md), a field that indicates when the document was indexed.
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
         # note: ""
@@ -1035,14 +1201,15 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          deployment:
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.from
         # id:
         description: |
-          For an <<email-action-type,email connector>>, specifies the from address for all emails sent by the connector. It must be specified in `user@host-name` format.
+          For an [email connector](/kibana/docs/reference/connectors-kibana/email-action-type.md), specifies the from address for all emails sent by the connector. It must be specified in `user@host-name` format.
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
         # note: ""
@@ -1055,14 +1222,15 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          deployment:
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.getIncidentResponseExternalTitleKey
         # id:
         description: |
-          - "For a <<cases-webhook-action-type,{webhook-cm} connector>>, specifies a string from the response body of the get case method that corresponds to the external service title."
+          For a [{{webhook-cm}} connector](/kibana/docs/reference/connectors-kibana/cases-webhook-action-type.md), specifies a string from the response body of the get case method that corresponds to the external service title.
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
         # note: ""
@@ -1075,17 +1243,18 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          deployment:
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.getIncidentUrl
         # id:
         description: |
-          For a <<cases-webhook-action-type,{webhook-cm} connector>>, specifies a REST API URL string with an external service ID Mustache variable to get the case from the third-party system.
+          For a [{{webhook-cm}} connector](/kibana/docs/reference/connectors-kibana/cases-webhook-action-type.md), specifies a REST API URL string with an external service ID Mustache variable to get the case from the third-party system.
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
-        note: "If you are using the `xpack.actions.allowedHosts` setting, make sure the hostname in the URL is added to the allowed hosts. "
+        note: "If you are using the `xpack.actions.allowedHosts` setting, make sure the hostname in the URL is added to the allowed hosts."
         # tip: ""
         # warning: ""
         # important: ""
@@ -1095,14 +1264,15 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          deployment:
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.hasAuth
         # id:
         description: |
-          For an <<email-action-type,email>>, <<webhook-action-type,webhook>>, or <<cases-webhook-action-type,{webhook-cm} connector>>, specifies whether a user and password are required inside the secrets configuration.
+          For an [email](/kibana/docs/reference/connectors-kibana/email-action-type.md), [webhook](/kibana/docs/reference/connectors-kibana/webhook-action-type.md), or [{{webhook-cm}} connector](/kibana/docs/reference/connectors-kibana/cases-webhook-action-type.md), specifies whether a user and password are required inside the secrets configuration.
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
         # note: ""
@@ -1115,14 +1285,15 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          deployment:
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.headers
         # id:
         description: |
-          For a <<webhook-action-type,webhook>> or <<cases-webhook-action-type,{webhook-cm} connector>>, specifies a set of key-value pairs sent as headers with the request.
+          For a [webhook](/kibana/docs/reference/connectors-kibana/webhook-action-type.md) or [{{webhook-cm}} connector](/kibana/docs/reference/connectors-kibana/cases-webhook-action-type.md), specifies a set of key-value pairs sent as headers with the request.
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
         # note: ""
@@ -1135,14 +1306,15 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          deployment:
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.host
         # id:
         description: |
-          For an <<email-action-type,email connector>>, specifies the host name of the service provider.
+          For an [email connector](/kibana/docs/reference/connectors-kibana/email-action-type.md), specifies the host name of the service provider.
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
         # note: ""
@@ -1155,14 +1327,15 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          deployment:
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.index
         # id:
         description: |
-          For an <<index-action-type,index connector>>, specifies the Elasticsearch index.
+          For an [index connector](/kibana/docs/reference/connectors-kibana/index-action-type.md), specifies the Elasticsearch index.
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
         # note: ""
@@ -1175,14 +1348,15 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          deployment:
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.isOAuth
         # id:
         description: |
-          For a <<servicenow-action-type,{sn-itsm}>>, <<servicenow-sir-action-type,{sn-sir}>>, or <<servicenow-itom-action-type,{sn-itom} connector>>, specifies whether to use basic or OAuth authentication.
+          For a [{{sn-itsm}}](/kibana/docs/reference/connectors-kibana/servicenow-action-type.md), [{{sn-sir}}](/kibana/docs/reference/connectors-kibana/servicenow-sir-action-type.md), or [{{sn-itom}} connector](/kibana/docs/reference/connectors-kibana/servicenow-itom-action-type.md), specifies whether to use basic or OAuth authentication.
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
         # note: ""
@@ -1195,14 +1369,15 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          deployment:
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.jwtKeyId
         # id:
         description: |
-          For a <<servicenow-action-type,{sn-itsm}>>, <<servicenow-sir-action-type,{sn-sir}>>, or <<servicenow-itom-action-type,{sn-itom} connector>>, specifies the key ID assigned to the JWT verifier map of your OAuth application. It is required when `xpack.actions.preconfigured.<connector-id>.config.isOAuth` is `true`.
+          For a [{{sn-itsm}}](/kibana/docs/reference/connectors-kibana/servicenow-action-type.md), [{{sn-sir}}](/kibana/docs/reference/connectors-kibana/servicenow-sir-action-type.md), or [{{sn-itom}} connector](/kibana/docs/reference/connectors-kibana/servicenow-itom-action-type.md), specifies the key ID assigned to the JWT verifier map of your OAuth application. It is required when `xpack.actions.preconfigured.<connector-id>.config.isOAuth` is `true`.
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
         # note: ""
@@ -1215,14 +1390,15 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          deployment:
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.mappings
         # id:
         description: |
-          For a <<swimlane-action-type,Swimlane connector>>, specifies field mappings.
+          For a [Swimlane connector](/kibana/docs/reference/connectors-kibana/swimlane-action-type.md), specifies field mappings.
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
         # note: ""
@@ -1235,14 +1411,15 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          deployment:
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.mappings.alertIdConfig
         # id:
         description: |
-          For a <<swimlane-action-type,Swimlane connector>>, field mapping for the alert identifier. You must provide `fieldtype`, `id`, `key`, and `name` values.
+          For a [Swimlane connector](/kibana/docs/reference/connectors-kibana/swimlane-action-type.md), field mapping for the alert identifier. You must provide `fieldtype`, `id`, `key`, and `name` values.
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
         # note: ""
@@ -1255,14 +1432,15 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          deployment:
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.mappings.caseIdConfig
         # id:
         description: |
-          For a <<swimlane-action-type,Swimlane connector>>, field mapping for the case identifier. You must provide `fieldtype`, `id`, `key`, and `name` values.
+          For a [Swimlane connector](/kibana/docs/reference/connectors-kibana/swimlane-action-type.md), field mapping for the case identifier. You must provide `fieldtype`, `id`, `key`, and `name` values.
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
         # note: ""
@@ -1275,14 +1453,15 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          deployment:
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.mappings.caseNameConfig
         # id:
         description: |
-          For a <<swimlane-action-type,Swimlane connector>>, field mapping for the case name. You must provide `fieldtype`, `id`, `key`, and `name` values.
+          For a [Swimlane connector](/kibana/docs/reference/connectors-kibana/swimlane-action-type.md), field mapping for the case name. You must provide `fieldtype`, `id`, `key`, and `name` values.
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
         # note: ""
@@ -1295,14 +1474,15 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          deployment:
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.mappings.commentsConfig
         # id:
         description: |
-          For a <<swimlane-action-type,Swimlane connector>>, field mapping for the case comments. You must provide `fieldtype`, `id`, `key`, and `name` values.
+          For a [Swimlane connector](/kibana/docs/reference/connectors-kibana/swimlane-action-type.md), field mapping for the case comments. You must provide `fieldtype`, `id`, `key`, and `name` values.
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
         # note: ""
@@ -1315,14 +1495,15 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          deployment:
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.mappings.descriptionConfig
         # id:
         description: |
-          For a <<swimlane-action-type,Swimlane connector>>, field mapping for the case description. You must provide `fieldtype`, `id`, `key`, and `name` values.
+          For a [Swimlane connector](/kibana/docs/reference/connectors-kibana/swimlane-action-type.md), field mapping for the case description. You must provide `fieldtype`, `id`, `key`, and `name` values.
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
         # note: ""
@@ -1335,14 +1516,15 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          deployment:
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.mappings.ruleNameConfig
         # id:
         description: |
-          For a <<swimlane-action-type,Swimlane connector>>, field mapping for the rule name. You must provide `fieldtype`, `id`, `key`, and `name` values.
+          For a [Swimlane connector](/kibana/docs/reference/connectors-kibana/swimlane-action-type.md), field mapping for the rule name. You must provide `fieldtype`, `id`, `key`, and `name` values.
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
         # note: ""
@@ -1355,14 +1537,15 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          deployment:
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.mappings.severityConfig
         # id:
         description: |
-          For a <<swimlane-action-type,Swimlane connector>>, specifies a field mapping for the severity. You must provide `fieldtype`, `id`, `key`, and `name` values.
+          For a [Swimlane connector](/kibana/docs/reference/connectors-kibana/swimlane-action-type.md), specifies a field mapping for the severity. You must provide `fieldtype`, `id`, `key`, and `name` values.
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
         # note: ""
@@ -1375,14 +1558,15 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          deployment:
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.method
         # id:
         description: |
-          For a <<webhook-action-type,webhook connector>>, specifies the HTTP request method, either `post` or `put`. Defaults to `post`.
+          For a [webhook connector](/kibana/docs/reference/connectors-kibana/webhook-action-type.md), specifies the HTTP request method, either `post` or `put`. Defaults to `post`.
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
         # note: ""
@@ -1396,14 +1580,15 @@ groups:
           - option: put
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          deployment:
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.orgId
         # id:
         description: |
-          For an <<resilient-action-type,{ibm-r} connector>>, specifies the {ibm-r} organization identifier.
+          For an [{{ibm-r}} connector](/kibana/docs/reference/connectors-kibana/resilient-action-type.md), specifies the {{ibm-r}} organization identifier.
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
         # note: ""
@@ -1416,14 +1601,15 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          deployment:
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.port
         # id:
         description: |
-          For an <<email-action-type,email connector>>, specifies the port to connect to on the service provider.
+          For an [email connector](/kibana/docs/reference/connectors-kibana/email-action-type.md), specifies the port to connect to on the service provider.
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
         # note: ""
@@ -1436,14 +1622,15 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          deployment:
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.projectKey
         # id:
         description: |
-          For a <<jira-action-type,Jira connector>>, specifies the Jira project key.
+          For a [Jira connector](/kibana/docs/reference/connectors-kibana/jira-action-type.md), specifies the Jira project key.
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
         # note: ""
@@ -1456,14 +1643,15 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          deployment:
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.secure
         # id:
         description: |
-          For an <<email-action-type,email connector>>, specifies whether the connection will use TLS when connecting to the service provider. If not true, the connection will initially connect over TCP then attempt to switch to TLS via the SMTP STARTTLS command.
+          For an [email connector](/kibana/docs/reference/connectors-kibana/email-action-type.md), specifies whether the connection will use TLS when connecting to the service provider. If not true, the connection will initially connect over TCP then attempt to switch to TLS via the SMTP STARTTLS command.
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
         # note: ""
@@ -1476,14 +1664,15 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          deployment:
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.service
         # id:
         description: |
-          For an <<email-action-type,email connector>>, specifies the name of the email service. For example, `elastic_cloud`, `exchange_server`, `gmail`, `other`, `outlook365`, or `ses`.
+          For an [email connector](/kibana/docs/reference/connectors-kibana/email-action-type.md), specifies the name of the email service. For example, `elastic_cloud`, `exchange_server`, `gmail`, `other`, `outlook365`, or `ses`.
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
         # note: ""
@@ -1496,14 +1685,15 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          deployment:
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.tenantId
         # id:
         description: |
-          For an <<email-action-type,email connector>>, specifies a GUID format value that corresponds to a tenant ID, which is a part of OAuth 2.0 client credentials authentication.
+          For an [email connector](/kibana/docs/reference/connectors-kibana/email-action-type.md), specifies a GUID format value that corresponds to a tenant ID, which is a part of OAuth 2.0 client credentials authentication.
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
         # note: ""
@@ -1516,14 +1706,15 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          deployment:
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.updateIncidentJson
         # id:
         description: |
-          For a <<cases-webhook-action-type,{webhook-cm} connector>>, specifies a stringified JSON payload with Mustache variables that is sent to the update case URL to update a case. Required variables are `case.title` and `case.description`.
+          For a [{{webhook-cm}} connector](/kibana/docs/reference/connectors-kibana/cases-webhook-action-type.md), specifies a stringified JSON payload with Mustache variables that is sent to the update case URL to update a case. Required variables are `case.title` and `case.description`.
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
         note: "The JSON is validated after the Mustache variables have been placed when the REST method runs. You should manually ensure that the JSON is valid, disregarding the Mustache variables, so the later validation will pass."
@@ -1536,14 +1727,15 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          deployment:
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.updateIncidentMethod
         # id:
         description: |
-          For a <<cases-webhook-action-type,{webhook-cm} connector>>, specifies the REST API HTTP request method to update the case in the third-party system.
+          For a [{{webhook-cm}} connector](/kibana/docs/reference/connectors-kibana/cases-webhook-action-type.md), specifies the REST API HTTP request method to update the case in the third-party system.
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
         # note: ""
@@ -1558,14 +1750,15 @@ groups:
           - option: patch
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          deployment:
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.updateIncidentUrl
         # id:
         description: |
-          For a <<cases-webhook-action-type,{webhook-cm} connector>>, specifies the REST API URL to update the case by ID in the third-party system.
+          For a [{{webhook-cm}} connector](/kibana/docs/reference/connectors-kibana/cases-webhook-action-type.md), specifies the REST API URL to update the case by ID in the third-party system.
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
         note: "If you are using the `xpack.actions.allowedHosts` setting, make sure the hostname in the URL is added to the allowed hosts."
@@ -1578,17 +1771,19 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          deployment:
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.url
         # id:
         description: |
           A configuration URL that varies by connector:
-          * For a <<d3security-action-type,D3 Security connector>>, specifies the D3 Security API request URL.
-          * For a <<tines-action-type,Tines connector>>, specifies the Tines tenant URL.
-          * For a <<webhook-action-type,webhook connector>>, specifies the web service request URL.
+
+          * For a [D3 Security connector](/kibana/docs/reference/connectors-kibana/d3security-action-type.md), specifies the D3 Security API request URL.
+          * For a [Tines connector](/kibana/docs/reference/connectors-kibana/tines-action-type.md), specifies the Tines tenant URL.
+          * For a [webhook connector](/kibana/docs/reference/connectors-kibana/webhook-action-type.md), specifies the web service request URL.
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
         note: "If you are using the `xpack.actions.allowedHosts` setting, make sure this hostname is added to the allowed hosts."
@@ -1601,14 +1796,15 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          deployment:
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.userIdentifierValue
         # id:
         description: |
-          For a <<servicenow-action-type,{sn-itsm}>>, <<servicenow-sir-action-type,{sn-sir}>>, or <<servicenow-itom-action-type,{sn-itom} connector>>, specifies the user identifier. It is required when required when `xpack.actions.preconfigured.<connector-id>.config.isOAuth` is `true`.
+          For a [{{sn-itsm}}](/kibana/docs/reference/connectors-kibana/servicenow-action-type.md), [{{sn-sir}}](/kibana/docs/reference/connectors-kibana/servicenow-sir-action-type.md), or [{{sn-itom}} connector](/kibana/docs/reference/connectors-kibana/servicenow-itom-action-type.md), specifies the user identifier. It is required when required when `xpack.actions.preconfigured.<connector-id>.config.isOAuth` is `true`.
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
         # note: ""
@@ -1621,14 +1817,15 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          deployment:
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.usesBasic
         # id:
         description: |
-          For an <<xmatters-action-type,xMatters connector>>, specifies whether it uses HTTP basic authentication.
+          For an [xMatters connector](/kibana/docs/reference/connectors-kibana/xmatters-action-type.md), specifies whether it uses HTTP basic authentication.
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
         # note: ""
@@ -1641,14 +1838,15 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          deployment:
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.usesTableApi
         # id:
         description: |
-          For a <<servicenow-action-type,{sn-itsm}>> or <<servicenow-sir-action-type,{sn-sir} connector>>, specifies whether the connector uses the Table API or the Import Set API. If set to `false`, the Elastic application should be installed in ServiceNow.
+          For a [{{sn-itsm}}](/kibana/docs/reference/connectors-kibana/servicenow-action-type.md) or [{{sn-sir}} connector](/kibana/docs/reference/connectors-kibana/servicenow-sir-action-type.md), specifies whether the connector uses the Table API or the Import Set API. If set to `false`, the Elastic application should be installed in ServiceNow.
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
         # note: ""
@@ -1661,14 +1859,15 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          deployment:
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.viewIncidentUrl
         # id:
         description: |
-          For a <<cases-webhook-action-type,{webhook-cm} connector>>, specifies a URL string with either the external service ID or external service title Mustache variable to view a case in the external system.
+          For a [{{webhook-cm}} connector](/kibana/docs/reference/connectors-kibana/cases-webhook-action-type.md), specifies a URL string with either the external service ID or external service title Mustache variable to view a case in the external system.
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
         # note: ""
@@ -1681,14 +1880,15 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          deployment:
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.webhookIntegrationUrl
         # id:
         description: |
-          For a <<torq-action-type,Torq connector>>, specifies the endpoint URL of the Elastic Security integration in Torq.
+          For a [Torq connector](/kibana/docs/reference/connectors-kibana/torq-action-type.md), specifies the endpoint URL of the Elastic Security integration in Torq.
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
         # note: ""
@@ -1701,8 +1901,9 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          deployment:
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.name
@@ -1721,8 +1922,9 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          deployment:
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets
@@ -1732,7 +1934,7 @@ groups:
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
         # note: ""
-        tip: "Sensitive properties, such as passwords, should be stored in the <<creating-keystore,Kibana keystore>>."
+        tip: "Sensitive properties, such as passwords, should be stored in the [Kibana keystore](docs-content://deploy-manage/security/secure-settings.md#creating-keystore)."
         # warning: ""
         # important: ""
         datatype: string
@@ -1741,14 +1943,15 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          deployment:
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets.accessKey
         # id:
         description: |
-          For an <<bedrock-action-type,{bedrock} connector>>, specifies the AWS access key for authentication.
+          For an [{{bedrock}} connector](/kibana/docs/reference/connectors-kibana/bedrock-action-type.md), specifies the AWS access key for authentication.
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
         # note: ""
@@ -1761,8 +1964,9 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          deployment:
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets.apikey
@@ -1781,16 +1985,18 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          deployment:
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets.credentialsJson
         # id:
         description: |
-          For an <<gemini-action-type,{gemini} connector>>, specifies the GCP service account credentials JSON file for authentication.
-          * For a <<openai-action-type,OpenAI connector>>, specifies the OpenAI or Azure OpenAI API key for authentication.
-          * For an <<opsgenie-action-type,{opsgenie} connector>>, specifies the {opsgenie} API authentication key for HTTP basic authentication.
+          For an [{{gemini}} connector](/kibana/docs/reference/connectors-kibana/gemini-action-type.md), specifies the GCP service account credentials JSON file for authentication.
+
+          * For a [OpenAI connector](/kibana/docs/reference/connectors-kibana/openai-action-type.md), specifies the OpenAI or Azure OpenAI API key for authentication.
+          * For an [{{opsgenie}} connector](/kibana/docs/reference/connectors-kibana/opsgenie-action-type.md), specifies the {{opsgenie}} API authentication key for HTTP basic authentication.
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
         # note: ""
@@ -1803,14 +2009,15 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          deployment:
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets.apiKeyId
         # id:
         description: |
-          For an <<resilient-action-type,{ibm-r} connector>>, specifies the authentication key ID for HTTP basic authentication.
+          For an [{{ibm-r}} connector](/kibana/docs/reference/connectors-kibana/resilient-action-type.md), specifies the authentication key ID for HTTP basic authentication.
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
         # note: ""
@@ -1823,14 +2030,15 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          deployment:
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets.apiKeySecret
         # id:
         description: |
-          For an <<resilient-action-type,{ibm-r} connector>>, specifies the authentication key secret for HTTP basic authentication.
+          For an [{{ibm-r}} connector](/kibana/docs/reference/connectors-kibana/resilient-action-type.md), specifies the authentication key secret for HTTP basic authentication.
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
         # note: ""
@@ -1843,14 +2051,15 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          deployment:
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets.apiToken
         # id:
         description: |
-          For a <<jira-action-type,Jira>> or <<swimlane-action-type,{swimlane} connector>>, specifies the API authentication token for HTTP basic authentication.
+          For a [Jira](/kibana/docs/reference/connectors-kibana/jira-action-type.md) or [{{swimlane}} connector](/kibana/docs/reference/connectors-kibana/swimlane-action-type.md), specifies the API authentication token for HTTP basic authentication.
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
         # note: ""
@@ -1863,16 +2072,18 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          deployment:
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets.clientSecret
         # id:
         description: |
           A client secret that varies by connector:
-          * For an <<email-action-type,email connector>>, specifies the client secret that you generated for your app in the app registration portal. It is required when the email service is `exchange_server`, which uses OAuth 2.0 client credentials authentication.
-          * For a <<servicenow-action-type,{sn-itsm}>>, <<servicenow-sir-action-type,{sn-sir}>>, or <<servicenow-itom-action-type,{sn-itom} connector>>, specifies the client secret assigned to the OAuth application. It is required when `xpack.actions.preconfigured.<connector-id>.config.isOAuth` is `true`.
+
+          * For an [email connector](/kibana/docs/reference/connectors-kibana/email-action-type.md), specifies the client secret that you generated for your app in the app registration portal. It is required when the email service is `exchange_server`, which uses OAuth 2.0 client credentials authentication.
+          * For a [{{sn-itsm}}](/kibana/docs/reference/connectors-kibana/servicenow-action-type.md), [{{sn-sir}}](/kibana/docs/reference/connectors-kibana/servicenow-sir-action-type.md), or [{{sn-itom}} connector](/kibana/docs/reference/connectors-kibana/servicenow-itom-action-type.md), specifies the client secret assigned to the OAuth application. It is required when `xpack.actions.preconfigured.<connector-id>.config.isOAuth` is `true`.
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
         note: "The client secret must be URL-encoded."
@@ -1885,16 +2096,18 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          deployment:
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets.email
         # id:
         description: |
           An email address that varies by connector:
-          * For a <<jira-action-type,Jira connector>>, specifies the account email for HTTP basic authentication.
-          * For a <<tines-action-type,Tines connector>>, specifies the email used to sign in to Tines.
+
+          * For a [Jira connector](/kibana/docs/reference/connectors-kibana/jira-action-type.md), specifies the account email for HTTP basic authentication.
+          * For a [Tines connector](/kibana/docs/reference/connectors-kibana/tines-action-type.md), specifies the email used to sign in to Tines.
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
         # note: ""
@@ -1907,17 +2120,19 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          deployment:
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets.password
         # id:
         description: |
           A password secret that varies by connector:
-          * For an <<email-action-type,email>>, <<webhook-action-type,webhook>>, or <<cases-webhook-action-type,{webhook-cm} connector>>, specifies a password that is required when `xpack.actions.preconfigured.<connector-id>.config.hasAuth` is `true`.
-          * For a <<servicenow-action-type,{sn-itsm}>>, <<servicenow-sir-action-type,{sn-sir}>>, or <<servicenow-itom-action-type,{sn-itom} connector>>, specifies a password that is required when `xpack.actions.preconfigured.<connector-id>.config.isOAuth` is `false`.
-          * For an <<xmatters-action-type,xMatters connector>>, specifies a password that is required when `xpack.actions.preconfigured.<connector-id>.config.usesBasic` is `true`.
+
+          * For an [email](/kibana/docs/reference/connectors-kibana/email-action-type.md), [webhook](/kibana/docs/reference/connectors-kibana/webhook-action-type.md), or [{{webhook-cm}} connector](/kibana/docs/reference/connectors-kibana/cases-webhook-action-type.md), specifies a password that is required when `xpack.actions.preconfigured.<connector-id>.config.hasAuth` is `true`.
+          * For a [{{sn-itsm}}](/kibana/docs/reference/connectors-kibana/servicenow-action-type.md), [{{sn-sir}}](/kibana/docs/reference/connectors-kibana/servicenow-sir-action-type.md), or [{{sn-itom}} connector](/kibana/docs/reference/connectors-kibana/servicenow-itom-action-type.md), specifies a password that is required when `xpack.actions.preconfigured.<connector-id>.config.isOAuth` is `false`.
+          * For an [xMatters connector](/kibana/docs/reference/connectors-kibana/xmatters-action-type.md), specifies a password that is required when `xpack.actions.preconfigured.<connector-id>.config.usesBasic` is `true`.
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
         # note: ""
@@ -1930,14 +2145,15 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          deployment:
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets.privateKey
         # id:
         description: |
-          For a <<servicenow-action-type,{sn-itsm}>>, <<servicenow-sir-action-type,{sn-sir}>>, or <<servicenow-itom-action-type,{sn-itom} connector>>, specifies the RSA private key. It is required when `xpack.actions.preconfigured.<connector-id>.config.isOAuth` is `true`.
+          For a [{{sn-itsm}}](/kibana/docs/reference/connectors-kibana/servicenow-action-type.md), [{{sn-sir}}](/kibana/docs/reference/connectors-kibana/servicenow-sir-action-type.md), or [{{sn-itom}} connector](/kibana/docs/reference/connectors-kibana/servicenow-itom-action-type.md), specifies the RSA private key. It is required when `xpack.actions.preconfigured.<connector-id>.config.isOAuth` is `true`.
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
         # note: ""
@@ -1950,14 +2166,15 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          deployment:
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets.privateKeyPassword
         # id:
         description: |
-          For a <<servicenow-action-type,{sn-itsm}>>, <<servicenow-sir-action-type,{sn-sir}>>, or <<servicenow-itom-action-type,{sn-itom} connector>>, specifies the password for the RSA private key.
+          For a [{{sn-itsm}}](/kibana/docs/reference/connectors-kibana/servicenow-action-type.md), [{{sn-sir}}](/kibana/docs/reference/connectors-kibana/servicenow-sir-action-type.md), or [{{sn-itom}} connector](/kibana/docs/reference/connectors-kibana/servicenow-itom-action-type.md), specifies the password for the RSA private key.
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
         # note: ""
@@ -1970,14 +2187,15 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          deployment:
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets.routingKey
         # id:
         description: |
-          For a <<pagerduty-action-type,PagerDuty connector>>, specifies the 32 character PagerDuty Integration Key for an integration on a service, also referred to as the routing key.
+          For a [PagerDuty connector](/kibana/docs/reference/connectors-kibana/pagerduty-action-type.md), specifies the 32 character PagerDuty Integration Key for an integration on a service, also referred to as the routing key.
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
         # note: ""
@@ -1990,14 +2208,15 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          deployment:
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets.secret
         # id:
         description: |
-          For an <<bedrock-action-type,{bedrock} connector>>, specifies the AWS secret for authentication.
+          For an [{{bedrock}} connector](/kibana/docs/reference/connectors-kibana/bedrock-action-type.md), specifies the AWS secret for authentication.
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
         # note: ""
@@ -2010,14 +2229,15 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          deployment:
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets.secretsUrl
         # id:
         description: |
-          For an <<xmatters-action-type,xMatters connector>> with URL authentication, specifies the request URL for the Elastic Alerts trigger in xMatters with the API key included in the URL. It is used only when `xpack.actions.preconfigured.<connector-id>.config.usesBasic` is `false`.
+          For an [xMatters connector](/kibana/docs/reference/connectors-kibana/xmatters-action-type.md) with URL authentication, specifies the request URL for the Elastic Alerts trigger in xMatters with the API key included in the URL. It is used only when `xpack.actions.preconfigured.<connector-id>.config.usesBasic` is `false`.
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
         note: "If you are using the `xpack.actions.allowedHosts` setting, make sure this hostname is added to the allowed hosts."
@@ -2030,18 +2250,20 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          deployment:
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets.token
         # id:
         description: |
           A token secret that varies by connector:
-          * For a <<d3security-action-type,D3 Security conector>>, specifies the D3 Security token.
-          * For a <<slack-action-type,Slack connector>>, specifies the Slack bot user OAuth token.
-          * For a <<tines-action-type,Tines connector>>, specifies the Tines API token.
-          * For a <<torq-action-type,Torq connector>>, specifies the secret of the webhook authentication header.
+
+          * For a [D3 Security conector](/kibana/docs/reference/connectors-kibana/d3security-action-type.md), specifies the D3 Security token.
+          * For a [Slack connector](/kibana/docs/reference/connectors-kibana/slack-action-type.md), specifies the Slack bot user OAuth token.
+          * For a [Tines connector](/kibana/docs/reference/connectors-kibana/tines-action-type.md), specifies the Tines API token.
+          * For a [Torq connector](/kibana/docs/reference/connectors-kibana/torq-action-type.md), specifies the secret of the webhook authentication header.
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
         # note: ""
@@ -2054,16 +2276,19 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          deployment:
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets.user
         # id:
         description: |
           A user name secret that varies by connector:
-          * For an <<email-action-type,email>>, <<webhook-action-type,webhook>>, or <<cases-webhook-action-type,{webhook-cm} connector>>, specifies a user name that is required when `xpack.actions.preconfigured.<connector-id>.config.hasAuth` is `true`.
-          * For an <<xmatters-action-type,xMatters connector>>, specifies a user name that is required when `xpack.actions.preconfigured.<connector-id>.config.usesBasic` is `true`.
+
+          * For an [email](/kibana/docs/reference/connectors-kibana/email-action-type.md), [webhook](/kibana/docs/reference/connectors-kibana/webhook-action-type.md), or [{{webhook-cm}} connector](/kibana/docs/reference/connectors-kibana/cases-webhook-action-type.md), specifies a user name that is required when `xpack.actions.preconfigured.<connector-id>.config.hasAuth` is `true`.
+          * For an [xMatters connector](/kibana/docs/reference/connectors-kibana/xmatters-action-type.md), specifies a user name that is required when `xpack.actions.preconfigured.<connector-id>.config.usesBasic` is `true`.
+
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
         # note: ""
@@ -2076,16 +2301,18 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          deployment:
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets.webhookUrl
         # id:
         description: |
           A URL that varies by connector:
-          * For a <<teams-action-type,Microsoft Teams>>, specifies the URL of the incoming webhook.
-          * For a <<slack-action-type,Slack connector>>, specifies the Slack webhook URL.
+
+          * For a [Microsoft Teams](/kibana/docs/reference/connectors-kibana/teams-action-type.md), specifies the URL of the incoming webhook.
+          * For a [Slack connector](/kibana/docs/reference/connectors-kibana/slack-action-type.md), specifies the Slack webhook URL.
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
         note: "If you are using the `xpack.actions.allowedHosts` setting, make sure the hostname is added to the allowed hosts."
@@ -2098,14 +2325,15 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          deployment:
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets.username
         # id:
         description: |
-          For a <<servicenow-action-type,{sn-itsm}>>, <<servicenow-sir-action-type,{sn-sir}>>, or <<servicenow-itom-action-type,{sn-itom} connector>>, specifies a user name that is required when `xpack.actions.preconfigured.<connector-id>.config.isOAuth` is `false`.
+          For a [{{sn-itsm}}](/kibana/docs/reference/connectors-kibana/servicenow-action-type.md), [{{sn-sir}}](/kibana/docs/reference/connectors-kibana/servicenow-sir-action-type.md), or [{{sn-itom}} connector](/kibana/docs/reference/connectors-kibana/servicenow-itom-action-type.md), specifies a user name that is required when `xpack.actions.preconfigured.<connector-id>.config.isOAuth` is `false`.
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
         # note: ""
@@ -2118,8 +2346,30 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          deployment:
+            self: all
+         # example: |
+
+      - setting: xpack.actions.webhook.ssl.pfx.enabled
+        # id:
+        description: |
+          Disable PFX file support for SSL client authentication. When set to `false`, the application will not accept PFX certificate files and will require separate certificate and private key files instead. Only applies to the [Webhook connector](/reference/connectors-kibana/webhook-action-type.md).
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: bool
+        default: true
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
          # example: |
 
   - group: Alerting settings
@@ -2144,12 +2394,14 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        platforms:
-          - cloud
+        applies_to:
+          deployment:
+            self: all
+            ess: all
          # example: |
 
       - setting: xpack.alerting.rules.maxScheduledPerMinute
-        # id: 
+        # id:
         description: |
           Specifies the maximum number of rules to run per minute.
         # state: deprecated/hidden/tech-preview
@@ -2164,8 +2416,9 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          deployment:
+            self: all
          # example: |
 
       - setting: xpack.alerting.rules.minimumScheduleInterval.value
@@ -2184,8 +2437,10 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        platforms:
-          - cloud
+        applies_to:
+          deployment:
+            self: all
+            ess: all
          # example: |
 
       - setting: xpack.alerting.rules.minimumScheduleInterval.enforce
@@ -2204,8 +2459,10 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        platforms:
-          - cloud
+        applies_to:
+          deployment:
+            self: all
+            ess: all
          # example: |
 
       - setting: xpack.alerting.rules.run.actions.max
@@ -2224,8 +2481,10 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        platforms:
-          - cloud
+        applies_to:
+          deployment:
+            self: all
+            ess: all
          # example: |
 
       - setting: xpack.alerting.rules.run.alerts.max
@@ -2244,8 +2503,10 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        platforms:
-          - cloud
+        applies_to:
+          deployment:
+            self: all
+            ess: all
          # example: |
 
       - setting: xpack.alerting.rules.run.timeout
@@ -2264,8 +2525,10 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        platforms:
-          - cloud
+        applies_to:
+          deployment:
+            self: all
+            ess: all
          # example: |
 
       - setting: xpack.alerting.rules.run.ruleTypeOverrides
@@ -2284,19 +2547,20 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        platforms:
-          - cloud
+        applies_to:
+          deployment:
+            self: all
+            ess: all
         example: |
           For example:
-          
-          [source,yaml]
-          --
+
+          ```yaml
           xpack.alerting.rules.run:
               timeout: '5m'
               ruleTypeOverrides:
                   - id: '.index-threshold'
                     timeout: '15m'
-          --
+          ```
 
       - setting: xpack.alerting.rules.run.actions.connectorTypeOverrides
         # id:
@@ -2314,17 +2578,18 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        platforms:
-          - cloud
+        applies_to:
+          deployment:
+            self: all
+            ess: all
         example: |
           For example:
-          
-          [source,yaml]
-          --
+
+          ```yaml
           xpack.alerting.rules.run:
               actions:
                   max: 10
                   connectorTypeOverrides:
                       - id: '.server-log'
                         max: 5
-          --
+          ```

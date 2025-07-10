@@ -4,10 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { isCCSRemoteIndexName } from '@kbn/es-query';
+import { ALL_VALUE } from '@kbn/slo-schema';
 import { CollectorFetchContext } from '@kbn/usage-collection-plugin/server';
 import { StoredSLODefinition } from '../../domain/models';
 import { SO_SLO_TYPE } from '../../saved_objects';
 import { Usage } from './type';
+import { SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../common/constants';
 
 export const fetcher = async (context: CollectorFetchContext) => {
   const finder = context.soClient.createPointInTimeFinder<StoredSLODefinition>({
@@ -15,8 +18,31 @@ export const fetcher = async (context: CollectorFetchContext) => {
     perPage: 100,
   });
 
+  const totalInstances = await context.esClient.count({
+    index: SUMMARY_DESTINATION_INDEX_PATTERN,
+    query: {
+      bool: {
+        filter: [
+          {
+            term: {
+              isTempDoc: false,
+            },
+          },
+        ],
+      },
+    },
+  });
+
   let usage: Usage['slo'] = {
     total: 0,
+    definitions: {
+      total: 0,
+      total_with_ccs: 0,
+      total_with_groups: 0,
+    },
+    instances: {
+      total: totalInstances?.count ?? 0,
+    },
     by_status: {
       enabled: 0,
       disabled: 0,
@@ -34,7 +60,16 @@ export const fetcher = async (context: CollectorFetchContext) => {
     usage = response.saved_objects.reduce((acc, so) => {
       return {
         ...acc,
-        total: acc.total + 1,
+        total: acc.total + 1, // deprecated in favor of definitions.total
+        definitions: {
+          total: acc.definitions.total + 1,
+          total_with_ccs: isCCSRemoteIndexName(so.attributes.indicator.params.index)
+            ? acc.definitions.total_with_ccs + 1
+            : acc.definitions.total_with_ccs,
+          total_with_groups: [so.attributes.groupBy].flat().includes(ALL_VALUE)
+            ? acc.definitions.total_with_groups
+            : acc.definitions.total_with_groups + 1,
+        },
         by_status: {
           ...acc.by_status,
           ...(so.attributes.enabled && { enabled: acc.by_status.enabled + 1 }),

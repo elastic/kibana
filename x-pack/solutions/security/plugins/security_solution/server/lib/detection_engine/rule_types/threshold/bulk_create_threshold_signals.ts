@@ -7,39 +7,25 @@
 
 import { TIMESTAMP } from '@kbn/rule-data-utils';
 
-import type {
-  AlertInstanceContext,
-  AlertInstanceState,
-  RuleExecutorServices,
-} from '@kbn/alerting-plugin/server';
 import type { ThresholdNormalized } from '../../../../../common/api/detection_engine/model/rule_schema';
 import type { GenericBulkCreateResponse } from '../factories/bulk_create_factory';
 import { calculateThresholdSignalUuid } from './utils';
 import { buildReasonMessageForThresholdAlert } from '../utils/reason_formatters';
-import type { ThresholdSignalHistory, ThresholdBucket } from './types';
-import type { BulkCreate, WrapHits } from '../types';
-import type { CompleteRule, ThresholdRuleParams } from '../../rule_schema';
-import type { BaseFieldsLatest } from '../../../../../common/api/detection_engine/model/alerts';
-import { createEnrichEventsFunction } from '../utils/enrichments';
-import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
+import type { ThresholdCompositeBucket } from './types';
+import type { SecurityRuleServices, SecuritySharedParams } from '../types';
+import type { ThresholdRuleParams } from '../../rule_schema';
+import type { DetectionAlertLatest } from '../../../../../common/api/detection_engine/model/alerts';
+import { bulkCreate, wrapHits } from '../factories';
 
 interface BulkCreateThresholdSignalsParams {
-  buckets: ThresholdBucket[];
-  completeRule: CompleteRule<ThresholdRuleParams>;
-  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
-  inputIndexPattern: string[];
-  filter: unknown;
-  signalsIndex: string;
+  sharedParams: SecuritySharedParams<ThresholdRuleParams>;
+  buckets: ThresholdCompositeBucket[];
+  services: SecurityRuleServices;
   startedAt: Date;
-  from: Date;
-  signalHistory: ThresholdSignalHistory;
-  bulkCreate: BulkCreate;
-  wrapHits: WrapHits;
-  ruleExecutionLogger: IRuleExecutionLogForExecutors;
 }
 
 export const transformBucketIntoHit = (
-  bucket: ThresholdBucket,
+  bucket: ThresholdCompositeBucket,
   inputIndex: string,
   startedAt: Date,
   from: Date,
@@ -79,7 +65,7 @@ export const transformBucketIntoHit = (
 };
 
 export const getTransformedHits = (
-  buckets: ThresholdBucket[],
+  buckets: ThresholdCompositeBucket[],
   inputIndex: string,
   startedAt: Date,
   from: Date,
@@ -90,25 +76,25 @@ export const getTransformedHits = (
     return transformBucketIntoHit(bucket, inputIndex, startedAt, from, threshold, ruleId);
   });
 
-export const bulkCreateThresholdSignals = async (
-  params: BulkCreateThresholdSignalsParams
-): Promise<GenericBulkCreateResponse<BaseFieldsLatest>> => {
-  const ruleParams = params.completeRule.ruleParams;
+export const bulkCreateThresholdSignals = async ({
+  sharedParams,
+  buckets,
+  services,
+  startedAt,
+}: BulkCreateThresholdSignalsParams): Promise<GenericBulkCreateResponse<DetectionAlertLatest>> => {
+  const ruleParams = sharedParams.completeRule.ruleParams;
   const ecsResults = getTransformedHits(
-    params.buckets,
-    params.inputIndexPattern.join(','),
-    params.startedAt,
-    params.from,
+    buckets,
+    sharedParams.inputIndex.join(','),
+    startedAt,
+    sharedParams.tuple.from.toDate(),
     ruleParams.threshold,
     ruleParams.ruleId
   );
 
-  return params.bulkCreate(
-    params.wrapHits(ecsResults, buildReasonMessageForThresholdAlert),
-    undefined,
-    createEnrichEventsFunction({
-      services: params.services,
-      logger: params.ruleExecutionLogger,
-    })
-  );
+  return bulkCreate({
+    wrappedAlerts: wrapHits(sharedParams, ecsResults, buildReasonMessageForThresholdAlert),
+    sharedParams,
+    services,
+  });
 };

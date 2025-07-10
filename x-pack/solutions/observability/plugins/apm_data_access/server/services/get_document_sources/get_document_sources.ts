@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { RollupInterval } from '../../../common/rollup';
 import type { TimeRangeMetadata } from '../../../common/time_range_metadata';
 import { isDurationSummaryNotSupportedFilter } from '../../lib/helpers/transactions';
@@ -23,8 +23,6 @@ export interface DocumentSourcesRequest {
   start: number;
   end: number;
   kuery: string;
-  enableServiceTransactionMetrics: boolean;
-  enableContinuousRollups: boolean;
 }
 
 const getRequest = ({
@@ -36,7 +34,7 @@ const getRequest = ({
   rollupInterval: RollupInterval;
   filters: estypes.QueryDslQueryContainer[];
 }) => {
-  const searchParams = {
+  return {
     apm: {
       sources: [
         {
@@ -45,20 +43,12 @@ const getRequest = ({
         },
       ],
     },
-    body: {
-      track_total_hits: 1,
-      size: 0,
-      terminate_after: 1,
-    },
-  };
-  return {
-    ...searchParams,
-    body: {
-      ...searchParams.body,
-      query: {
-        bool: {
-          filter: filters,
-        },
+    track_total_hits: 1,
+    size: 0,
+    terminate_after: 1,
+    query: {
+      bool: {
+        filter: filters,
       },
     },
   };
@@ -69,18 +59,14 @@ export async function getDocumentSources({
   start,
   end,
   kuery,
-  enableServiceTransactionMetrics,
-  enableContinuousRollups,
 }: {
   apmEventClient: APMEventClient;
   start: number;
   end: number;
   kuery: string;
-  enableServiceTransactionMetrics: boolean;
-  enableContinuousRollups: boolean;
 }): Promise<TimeRangeMetadata['sources']> {
   const documentTypesToCheck = [
-    ...(enableServiceTransactionMetrics ? [ApmDocumentType.ServiceTransactionMetric as const] : []),
+    ApmDocumentType.ServiceTransactionMetric as const,
     ApmDocumentType.TransactionMetric as const,
   ];
 
@@ -89,7 +75,6 @@ export async function getDocumentSources({
     start,
     end,
     kuery,
-    enableContinuousRollups,
     documentTypesToCheck,
   });
 
@@ -109,18 +94,15 @@ const getDocumentTypesInfo = async ({
   start,
   end,
   kuery,
-  enableContinuousRollups,
   documentTypesToCheck,
 }: {
   apmEventClient: APMEventClient;
   start: number;
   end: number;
   kuery: string;
-  enableContinuousRollups: boolean;
   documentTypesToCheck: ApmDocumentType[];
 }): Promise<TimeRangeMetadata['sources']> => {
   const getRequests = getDocumentTypeRequestsFn({
-    enableContinuousRollups,
     start,
     end,
     kuery,
@@ -164,24 +146,12 @@ const getDocumentTypesInfo = async ({
 };
 
 const getDocumentTypeRequestsFn =
-  ({
-    enableContinuousRollups,
-    start,
-    end,
-    kuery,
-  }: {
-    enableContinuousRollups: boolean;
-    start: number;
-    end: number;
-    kuery: string;
-  }) =>
+  ({ start, end, kuery }: { start: number; end: number; kuery: string }) =>
   (documentType: ApmDocumentType) => {
     const currentRange = rangeQuery(start, end);
     const kql = kqlQuery(kuery);
 
-    const rollupIntervals = enableContinuousRollups
-      ? getConfigForDocumentType(documentType).rollupIntervals
-      : [RollupInterval.OneMinute];
+    const rollupIntervals = getConfigForDocumentType(documentType).rollupIntervals;
 
     return rollupIntervals.map((rollupInterval) => ({
       documentType,

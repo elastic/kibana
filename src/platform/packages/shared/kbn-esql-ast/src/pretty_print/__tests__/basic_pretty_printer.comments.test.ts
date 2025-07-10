@@ -99,9 +99,28 @@ describe('inline cast expression', () => {
   });
 });
 
-describe('list literal expression', () => {
-  test('can print source left comment', () => {
-    assertPrint('FROM a | STATS /* 1 */ /* 2 */ [1, 2, 3] /* 3 */');
+describe('list expressions', () => {
+  describe('literal list', () => {
+    test('can print source left comment', () => {
+      assertPrint('FROM a | STATS /* 1 */ /* 2 */ [1, 2, 3] /* 3 */');
+    });
+  });
+
+  describe('tuple list', () => {
+    test('can print comments around the tuple', () => {
+      assertPrint('FROM a | WHERE b IN /* 1 */ /* 2 */ (1, 2, 3) /* 3 */');
+      assertPrint('FROM a | WHERE b NOT IN /* 1 */ /* 2 */ (1, 2, 3) /* 3 */');
+    });
+
+    test('can print comments inside the tuple', () => {
+      assertPrint('FROM a | WHERE b IN (/* 1 */ 1 /* 2 */, /* 3 */ 2 /* 4 */, /* 5 */ 3 /* 6 */)');
+      assertPrint(
+        'FROM a | WHERE b NOT IN (/* 1 */ 1 /* 2 */, /* 3 */ 2 /* 4 */, /* 5 */ 3 /* 6 */)'
+      );
+      assertPrint(
+        'FROM a | WHERE b IN /* 0 */ (/* 1 */ 1 /* 2 */, /* 3 */ 2 /* 4 */, /* 5 */ 3 /* 6 */) /* 7 */'
+      );
+    });
   });
 });
 
@@ -135,6 +154,24 @@ describe('function call expressions', () => {
   });
 });
 
+describe('map expression', () => {
+  test('comments around map', () => {
+    assertPrint('ROW F(0, /*1*/ {"a": 1} /*2*/)');
+  });
+
+  test('comments around map key', () => {
+    assertPrint('ROW F(0, {/*1*/ "a" /*2*/: 1})');
+  });
+
+  test('comments around map value', () => {
+    assertPrint('ROW F(0, {"a": /*1*/ 1 /*2*/})');
+  });
+
+  test('comments around multiple map fields', () => {
+    assertPrint('ROW F(0, /*1*/ {/*2*/ "a": /*3*/ "b" /*4*/, /*5*/ "c": /*6*/ "d" /*7*/} /*8*/)');
+  });
+});
+
 describe('binary expressions', () => {
   test('around binary expression operands', () => {
     assertPrint('FROM a | STATS /* a */ 1 /* b */ + /* c */ 2 /* d */');
@@ -148,6 +185,32 @@ describe('binary expressions', () => {
     assertPrint(
       'FROM a | STATS /* a */ /* a.2 */ 1 /* b */ + /* c */ 2 /* d */ + /* e */ 3 /* f */ + /* g */ 4 /* h */ /* h.2 */'
     );
+  });
+
+  describe('grouping', () => {
+    test('AND has higher precedence than OR', () => {
+      assertPrint('FROM a | WHERE /* a */ b /* b */ AND (c /* d */ OR /* e */ d)');
+      assertPrint('FROM a | WHERE (b /* a */ OR /* b */ c) AND /* c */ d');
+    });
+
+    test('addition has higher precedence than AND', () => {
+      assertPrint('FROM a | WHERE b /* a */ + (/* b */ c /* c */ AND /* d */ d /* e */)');
+      assertPrint('FROM a | WHERE (/* a */ b /* b */ AND /* c */ c /* d */) + /* e */ d /* f */');
+    });
+
+    test('multiplication (division) has higher precedence than addition (subtraction)', () => {
+      assertPrint(
+        'FROM a | WHERE /* a */ b /* b */ / (/* c */ c /* d */ - /* e */ d /* f */) /* h */'
+      );
+      assertPrint('FROM a | WHERE (/* a */ b /* b */ - /* c */ c /* d */) / /* e */ d /* f */');
+    });
+
+    test('issue: https://github.com/elastic/kibana/issues/224990', () => {
+      assertPrint('FROM a | WHERE b AND (c OR d)');
+      assertPrint(
+        'FROM kibana_sample_data_logs | WHERE agent.keyword /* a */ == /* b */ "meow" AND (geo.dest == "GR" /* c */ OR geo.dest == "ES")'
+      );
+    });
   });
 });
 
@@ -188,11 +251,29 @@ describe('rename expressions', () => {
 describe('commands', () => {
   describe('JOIN', () => {
     test('around JOIN targets', () => {
-      assertPrint('FROM a | LEFT JOIN /*1*/ a /*2*/ AS /*3*/ b /*4*/ ON c');
+      assertPrint('FROM a | LEFT JOIN /*1*/ a /*2*/ /*3*/ /*4*/');
     });
 
     test('around JOIN conditions', () => {
-      assertPrint('FROM a | LEFT JOIN a AS b ON /*1*/ c /*2*/, /*3*/ d /*4*/');
+      assertPrint('FROM a | LEFT JOIN a /*1*/ /*2*/ /*3*/ /*4*/');
+    });
+  });
+
+  /**
+   * @todo Tests skipped, while RERANK command grammar is being stabilized. We will
+   * get back to it after 9.1 release.
+   */
+  describe.skip('RERANK', () => {
+    test('comments around all elements', () => {
+      assertPrint(
+        'FROM a | /*0*/ RERANK /*1*/ "query" /*2*/ ON /*3*/ field /*4*/ WITH /*5*/ id /*6*/'
+      );
+    });
+
+    test('comments around all elements, two fields', () => {
+      assertPrint(
+        'FROM a | /*0*/ RERANK /*1*/ "query" /*2*/ ON /*3*/ field1 /*4*/, /*5*/ field2 /*6*/ WITH /*7*/ id1 /*8*/'
+      );
     });
   });
 });

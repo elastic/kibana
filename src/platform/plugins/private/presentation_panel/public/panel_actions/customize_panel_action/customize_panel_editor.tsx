@@ -34,8 +34,8 @@ import {
   apiPublishesTimeRange,
   apiPublishesUnifiedSearch,
   getInheritedViewMode,
-  getPanelDescription,
-  getPanelTitle,
+  getDescription,
+  getTitle,
   PublishesUnifiedSearch,
 } from '@kbn/presentation-publishing';
 
@@ -63,9 +63,9 @@ export const CustomizePanelEditor = ({
    * For now, we copy the state here with `useState` initializing it to the latest value.
    */
   const editMode = getInheritedViewMode(api) === 'edit';
-  const [hideTitle, setHideTitle] = useState(api.hidePanelTitle?.value);
-  const [panelTitle, setPanelTitle] = useState(getPanelTitle(api));
-  const [panelDescription, setPanelDescription] = useState(getPanelDescription(api));
+  const [hideTitle, setHideTitle] = useState(api.hideTitle$?.value);
+  const [panelTitle, setPanelTitle] = useState(getTitle(api));
+  const [panelDescription, setPanelDescription] = useState(getDescription(api));
   const [timeRange, setTimeRange] = useState(
     api.timeRange$?.value ?? api.parentApi?.timeRange$?.value
   );
@@ -99,10 +99,15 @@ export const CustomizePanelEditor = ({
   const dateFormat = useMemo(() => core.uiSettings.get<string>(UI_SETTINGS.DATE_FORMAT), []);
 
   const save = () => {
-    if (panelTitle !== api.panelTitle?.value) api.setPanelTitle?.(panelTitle);
-    if (hideTitle !== api.hidePanelTitle?.value) api.setHidePanelTitle?.(hideTitle);
-    if (panelDescription !== api.panelDescription?.value)
-      api.setPanelDescription?.(panelDescription);
+    // If the panel title matches the default title, we set api.title to undefined to indicate there's no custom title.
+    // This ensures the panel stays in sync with the centrally saved object's title and reflects any updates to its title.
+    if (panelTitle === api?.defaultTitle$?.value) {
+      api.setTitle?.(undefined);
+    } else if (panelTitle !== api.title$?.value) {
+      api.setTitle?.(panelTitle);
+    }
+    if (hideTitle !== api.hideTitle$?.value) api.setHideTitle?.(hideTitle);
+    if (panelDescription !== api.description$?.value) api.setDescription?.(panelDescription);
 
     const newTimeRange = hasOwnTimeRange ? timeRange : undefined;
     if (newTimeRange !== api.timeRange$?.value) {
@@ -139,12 +144,12 @@ export const CustomizePanelEditor = ({
             />
           }
           labelAppend={
-            api?.defaultPanelTitle?.value && (
+            api?.defaultTitle$?.value && (
               <EuiButtonEmpty
                 size="xs"
                 data-test-subj="resetCustomEmbeddablePanelTitleButton"
-                onClick={() => setPanelTitle(api.defaultPanelTitle?.value)}
-                disabled={hideTitle || panelTitle === api?.defaultPanelTitle?.value}
+                onClick={() => setPanelTitle(api.defaultTitle$?.value)}
+                disabled={hideTitle || panelTitle === api?.defaultTitle$?.value}
                 aria-label={i18n.translate(
                   'presentationPanel.action.customizePanel.flyout.optionsMenuForm.resetCustomTitleButtonAriaLabel',
                   {
@@ -186,12 +191,12 @@ export const CustomizePanelEditor = ({
             />
           }
           labelAppend={
-            api.defaultPanelDescription?.value && (
+            api.defaultDescription$?.value && (
               <EuiButtonEmpty
                 size="xs"
                 data-test-subj="resetCustomEmbeddablePanelDescriptionButton"
-                onClick={() => setPanelDescription(api.defaultPanelDescription?.value)}
-                disabled={api.defaultPanelDescription?.value === panelDescription}
+                onClick={() => setPanelDescription(api.defaultDescription$?.value)}
+                disabled={api.defaultDescription$?.value === panelDescription}
                 aria-label={i18n.translate(
                   'presentationPanel.action.customizePanel.flyout.optionsMenuForm.resetCustomDescriptionButtonAriaLabel',
                   {

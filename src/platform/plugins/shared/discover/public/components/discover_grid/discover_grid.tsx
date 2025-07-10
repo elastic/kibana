@@ -9,13 +9,14 @@
 
 import React, { useMemo } from 'react';
 import {
+  DEFAULT_PAGINATION_MODE,
   renderCustomToolbar,
   UnifiedDataTable,
   type UnifiedDataTableProps,
 } from '@kbn/unified-data-table';
 import { useProfileAccessor } from '../../context_awareness';
-import { DiscoverAppState } from '../../application/main/state_management/discover_app_state_container';
-import { DiscoverStateContainer } from '../../application/main/state_management/discover_state';
+import type { DiscoverAppState } from '../../application/main/state_management/discover_app_state_container';
+import type { DiscoverStateContainer } from '../../application/main/state_management/discover_state';
 
 export interface DiscoverGridProps extends UnifiedDataTableProps {
   query?: DiscoverAppState['query'];
@@ -32,7 +33,7 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = ({
   rowAdditionalLeadingControls: customRowAdditionalLeadingControls,
   ...props
 }) => {
-  const { dataView } = props;
+  const { dataView, setExpandedDoc, renderDocumentView } = props;
   const getRowIndicatorProvider = useProfileAccessor('getRowIndicatorProvider');
   const getRowIndicator = useMemo(() => {
     return getRowIndicatorProvider(() => undefined)({ dataView: props.dataView });
@@ -43,9 +44,12 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = ({
   );
   const rowAdditionalLeadingControls = useMemo(() => {
     return getRowAdditionalLeadingControlsAccessor(() => customRowAdditionalLeadingControls)({
+      actions: {
+        updateESQLQuery: onUpdateESQLQuery,
+        setExpandedDoc: renderDocumentView ? setExpandedDoc : undefined,
+      },
       dataView,
       query,
-      updateESQLQuery: onUpdateESQLQuery,
     });
   }, [
     customRowAdditionalLeadingControls,
@@ -53,17 +57,34 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = ({
     getRowAdditionalLeadingControlsAccessor,
     onUpdateESQLQuery,
     query,
+    setExpandedDoc,
+    renderDocumentView,
   ]);
+
+  const getPaginationConfigAccessor = useProfileAccessor('getPaginationConfig');
+  const paginationModeConfig = useMemo(() => {
+    return getPaginationConfigAccessor(() => ({
+      paginationMode: DEFAULT_PAGINATION_MODE,
+    }))();
+  }, [getPaginationConfigAccessor]);
+
+  const getColumnsConfigurationAccessor = useProfileAccessor('getColumnsConfiguration');
+  const customGridColumnsConfiguration = useMemo(() => {
+    return getColumnsConfigurationAccessor(() => ({}))();
+  }, [getColumnsConfigurationAccessor]);
 
   return (
     <UnifiedDataTable
       showColumnTokens
       canDragAndDropColumns
       enableComparisonMode
+      enableInTableSearch
       renderCustomToolbar={renderCustomToolbar}
       getRowIndicator={getRowIndicator}
       rowAdditionalLeadingControls={rowAdditionalLeadingControls}
       visibleCellActions={3} // this allows to show up to 3 actions on cell hover if available (filter in, filter out, and copy)
+      paginationMode={paginationModeConfig.paginationMode}
+      customGridColumnsConfiguration={customGridColumnsConfiguration}
       {...props}
     />
   );

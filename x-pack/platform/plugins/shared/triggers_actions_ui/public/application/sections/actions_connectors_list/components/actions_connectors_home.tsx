@@ -25,6 +25,7 @@ import { CreateConnectorFlyout } from '../../action_connector_form/create_connec
 import { EditConnectorFlyout } from '../../action_connector_form/edit_connector_flyout';
 import { EditConnectorProps } from './types';
 import { loadAllActions } from '../../../lib/action_connector_api';
+import { hasSaveActionsCapability } from '../../../lib/capabilities';
 
 const ConnectorsList = lazy(() => import('./actions_connectors_list'));
 
@@ -45,6 +46,7 @@ export const ActionsConnectorsHome: React.FunctionComponent<RouteComponentProps<
     actionTypeRegistry,
     http,
     notifications: { toasts },
+    application: { capabilities },
   } = useKibana().services;
 
   const location = useLocation();
@@ -169,7 +171,7 @@ export const ActionsConnectorsHome: React.FunctionComponent<RouteComponentProps<
       key="documentation-button"
       target="_blank"
       href={docLinks.links.alerting.actionTypes}
-      iconType="help"
+      iconType="question"
     >
       <FormattedMessage
         id="xpack.triggersActionsUI.connectors.home.documentationButtonLabel"
@@ -187,7 +189,12 @@ export const ActionsConnectorsHome: React.FunctionComponent<RouteComponentProps<
     }) ||
     matchPath(location.pathname, { path: routeToConnectorEdit, exact: true })
   ) {
-    topRightSideButtons = [createConnectorButton, documentationButton];
+    topRightSideButtons = [];
+    const canSave = hasSaveActionsCapability(capabilities);
+    if (canSave) {
+      topRightSideButtons.push(createConnectorButton);
+    }
+    topRightSideButtons.push(documentationButton);
   } else if (matchPath(location.pathname, { path: routeToLogs, exact: true })) {
     topRightSideButtons = [documentationButton];
   }

@@ -1,14 +1,9 @@
 {
   "extends": "../../../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "target/types",
+    "outDir": "target/types"
   },
-  "include": [
-    "server/**/*",
-    "server/**/*.json",
-    "public/**/*",
-    "common/*"
-  ],
+  "include": ["server/**/*", "server/**/*.json", "public/**/*", "common/**/*"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/alerting-plugin",
@@ -40,7 +35,6 @@
     "@kbn/alerts-as-data-utils",
     "@kbn/esql",
     "@kbn/esql-editor",
-    "@kbn/expressions-plugin",
     "@kbn/core-http-browser",
     "@kbn/core-doc-links-browser",
     "@kbn/core-ui-settings-server",
@@ -55,9 +49,11 @@
     "@kbn/task-manager-plugin",
     "@kbn/core-logging-server-mocks",
     "@kbn/core-saved-objects-server",
-    "@kbn/observability-alerting-rule-utils"
+    "@kbn/alerting-rule-utils",
+    "@kbn/response-ops-rule-params",
+    "@kbn/object-utils",
+    "@kbn/expressions-plugin",
+    "@kbn/esql-ast",
   ],
-  "exclude": [
-    "target/**/*",
-  ]
+  "exclude": ["target/**/*"]
 }

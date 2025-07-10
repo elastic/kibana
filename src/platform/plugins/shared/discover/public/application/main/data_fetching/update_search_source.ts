@@ -7,13 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ISearchSource } from '@kbn/data-plugin/public';
-import { DataViewType, DataView } from '@kbn/data-views-plugin/public';
-import { Filter } from '@kbn/es-query';
+import type { ISearchSource } from '@kbn/data-plugin/public';
+import { DataViewType, type DataView } from '@kbn/data-views-plugin/public';
+import type { TimeRange } from '@kbn/es-query';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
-import { SORT_DEFAULT_ORDER_SETTING } from '@kbn/discover-utils';
-import { DiscoverServices } from '../../../build_services';
-import { getSortForSearchSource } from '../../../utils/sorting';
+import { SORT_DEFAULT_ORDER_SETTING, getSortForSearchSource } from '@kbn/discover-utils';
+import type { DiscoverServices } from '../../../build_services';
 
 /**
  * Helper function to update the given searchSource before fetching/sharing/persisting
@@ -24,12 +23,12 @@ export function updateVolatileSearchSource(
     dataView,
     services,
     sort,
-    customFilters,
+    inputTimeRange,
   }: {
     dataView: DataView;
     services: DiscoverServices;
     sort?: SortOrder[];
-    customFilters: Filter[];
+    inputTimeRange?: TimeRange;
   }
 ) {
   const { uiSettings, data } = services;
@@ -44,15 +43,13 @@ export function updateVolatileSearchSource(
 
   searchSource.setField('trackTotalHits', true);
 
-  let filters = [...customFilters];
-
   if (dataView.type !== DataViewType.ROLLUP) {
     // Set the date range filter fields from timeFilter using the absolute format. Search sessions requires that it be converted from a relative range
-    const timeFilter = data.query.timefilter.timefilter.createFilter(dataView);
-    filters = timeFilter ? [...filters, timeFilter] : filters;
+    searchSource.setField(
+      'filter',
+      data.query.timefilter.timefilter.createFilter(dataView, inputTimeRange)
+    );
   }
-
-  searchSource.setField('filter', filters);
 
   searchSource.removeField('fieldsFromSource');
   searchSource.setField('fields', [{ field: '*', include_unmapped: true }]);

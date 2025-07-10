@@ -9,6 +9,8 @@ import type {
   ExceptionsListPreUpdateItemServerExtension,
   UpdateExceptionListItemOptions,
 } from '@kbn/lists-plugin/server';
+import { GLOBAL_ARTIFACT_TAG } from '../../../../common/endpoint/service/artifacts';
+import { EndpointArtifactExceptionValidationError } from '../validators/errors';
 import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
 import type { ExceptionItemLikeOptions } from '../types';
 import {
@@ -18,11 +20,15 @@ import {
   HostIsolationExceptionsValidator,
   TrustedAppValidator,
 } from '../validators';
+import {
+  hasArtifactOwnerSpaceId,
+  hasGlobalOrPerPolicyTag,
+  setArtifactOwnerSpaceId,
+} from '../../../../common/endpoint/service/artifacts/utils';
 
-type ValidatorCallback = ExceptionsListPreUpdateItemServerExtension['callback'];
 export const getExceptionsPreUpdateItemHandler = (
   endpointAppContextService: EndpointAppContextService
-): ValidatorCallback => {
+): ExceptionsListPreUpdateItemServerExtension['callback'] => {
   return async function ({
     data,
     context: { request, exceptionListClient },
@@ -31,6 +37,8 @@ export const getExceptionsPreUpdateItemHandler = (
       return data;
     }
 
+    let isEndpointArtifact = false;
+    let validatedItem = data;
     const currentSavedItem = await exceptionListClient.getExceptionListItem({
       id: data.id,
       itemId: data.itemId,
@@ -47,36 +55,37 @@ export const getExceptionsPreUpdateItemHandler = (
 
     // Validate Trusted Applications
     if (TrustedAppValidator.isTrustedApp({ listId })) {
+      isEndpointArtifact = true;
       const trustedAppValidator = new TrustedAppValidator(endpointAppContextService, request);
-      const validatedItem = await trustedAppValidator.validatePreUpdateItem(data, currentSavedItem);
+      validatedItem = await trustedAppValidator.validatePreUpdateItem(data, currentSavedItem);
       trustedAppValidator.notifyFeatureUsage(
         data as ExceptionItemLikeOptions,
         'TRUSTED_APP_BY_POLICY'
       );
-      return validatedItem;
     }
 
     // Validate Event Filters
     if (EventFilterValidator.isEventFilter({ listId })) {
+      isEndpointArtifact = true;
       const eventFilterValidator = new EventFilterValidator(endpointAppContextService, request);
-      const validatedItem = await eventFilterValidator.validatePreUpdateItem(
-        data,
-        currentSavedItem
-      );
+      validatedItem = await eventFilterValidator.validatePreUpdateItem(data, currentSavedItem);
       eventFilterValidator.notifyFeatureUsage(
         data as ExceptionItemLikeOptions,
         'EVENT_FILTERS_BY_POLICY'
       );
-      return validatedItem;
     }
 
     // Validate host isolation
     if (HostIsolationExceptionsValidator.isHostIsolationException({ listId })) {
+      isEndpointArtifact = true;
       const hostIsolationExceptionValidator = new HostIsolationExceptionsValidator(
         endpointAppContextService,
         request
       );
-      const validatedItem = await hostIsolationExceptionValidator.validatePreUpdateItem(data);
+      validatedItem = await hostIsolationExceptionValidator.validatePreUpdateItem(
+        data,
+        currentSavedItem
+      );
       hostIsolationExceptionValidator.notifyFeatureUsage(
         data as ExceptionItemLikeOptions,
         'HOST_ISOLATION_EXCEPTION_BY_POLICY'
@@ -85,34 +94,59 @@ export const getExceptionsPreUpdateItemHandler = (
         data as ExceptionItemLikeOptions,
         'HOST_ISOLATION_EXCEPTION'
       );
-      return validatedItem;
     }
 
     // Validate Blocklists
     if (BlocklistValidator.isBlocklist({ listId })) {
+      isEndpointArtifact = true;
       const blocklistValidator = new BlocklistValidator(endpointAppContextService, request);
-      const validatedItem = await blocklistValidator.validatePreUpdateItem(data, currentSavedItem);
+      validatedItem = await blocklistValidator.validatePreUpdateItem(data, currentSavedItem);
       blocklistValidator.notifyFeatureUsage(
         data as ExceptionItemLikeOptions,
         'BLOCKLIST_BY_POLICY'
       );
-      return validatedItem;
     }
 
     // Validate Endpoint Exceptions
     if (EndpointExceptionsValidator.isEndpointException({ listId })) {
+      isEndpointArtifact = true;
       const endpointExceptionValidator = new EndpointExceptionsValidator(
         endpointAppContextService,
         request
       );
-      const validatedItem = await endpointExceptionValidator.validatePreUpdateItem(data);
+      validatedItem = await endpointExceptionValidator.validatePreUpdateItem(
+        data,
+        currentSavedItem
+      );
+
+      // If artifact does not have an assignment tag, then add it now. This is in preparation for
+      // adding per-policy support to Endpoint Exceptions as well as to support space awareness
+      if (!hasGlobalOrPerPolicyTag(validatedItem)) {
+        validatedItem.tags = validatedItem.tags ?? [];
+        validatedItem.tags.push(GLOBAL_ARTIFACT_TAG);
+      }
+
       endpointExceptionValidator.notifyFeatureUsage(
         data as ExceptionItemLikeOptions,
         'ENDPOINT_EXCEPTIONS'
       );
+    }
+
+    if (
+      isEndpointArtifact &&
+      endpointAppContextService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled
+    ) {
+      if (!hasArtifactOwnerSpaceId(validatedItem)) {
+        if (!request) {
+          throw new EndpointArtifactExceptionValidationError(`Missing HTTP Request object`);
+        }
+        const spaceId = (await endpointAppContextService.getActiveSpace(request)).id;
+        setArtifactOwnerSpaceId(validatedItem, spaceId);
+      }
+
       return validatedItem;
     }
 
-    return data;
+    return isEndpointArtifact ? validatedItem : data;
   };
 };

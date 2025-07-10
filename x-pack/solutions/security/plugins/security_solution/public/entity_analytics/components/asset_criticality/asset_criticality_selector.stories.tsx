@@ -5,20 +5,17 @@
  * 2.0.
  */
 
-import type { Story } from '@storybook/react';
-import { addDecorator } from '@storybook/react';
+import type { StoryFn, Meta } from '@storybook/react';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
 import { euiLightVars } from '@kbn/ui-theme';
 
 import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
+import { EntityType } from '../../../../common/entity_analytics/types';
 import { StorybookProviders } from '../../../common/mock/storybook_providers';
 import { AssetCriticalitySelector } from './asset_criticality_selector';
 import type { State } from './use_asset_criticality';
 
-addDecorator((storyFn) => (
-  <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>{storyFn()}</ThemeProvider>
-));
 const criticality = {
   status: 'create',
   query: {},
@@ -34,16 +31,23 @@ const criticalityLoading = {
 export default {
   component: AssetCriticalitySelector,
   title: 'Components/AssetCriticalitySelector',
-};
+  decorators: [
+    (storyFn) => (
+      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+        {storyFn()}
+      </ThemeProvider>
+    ),
+  ],
+} as Meta;
 
-export const Default: Story<void> = () => {
+export const Default: StoryFn = () => {
   return (
     <StorybookProviders>
       <TestProvider>
         <div style={{ maxWidth: '300px' }}>
           <AssetCriticalitySelector
             criticality={criticality}
-            entity={{ type: 'host' as const, name: 'My test Host' }}
+            entity={{ type: EntityType.host, name: 'My test Host' }}
           />
         </div>
       </TestProvider>
@@ -51,14 +55,14 @@ export const Default: Story<void> = () => {
   );
 };
 
-export const Compressed: Story<void> = () => {
+export const Compressed: StoryFn = () => {
   return (
     <StorybookProviders>
       <TestProvider>
         <div style={{ maxWidth: '300px' }}>
           <AssetCriticalitySelector
             criticality={criticality}
-            entity={{ type: 'host' as const, name: 'My test Host' }}
+            entity={{ type: EntityType.host as const, name: 'My test Host' }}
             compressed
           />
         </div>
@@ -67,14 +71,14 @@ export const Compressed: Story<void> = () => {
   );
 };
 
-export const Loading: Story<void> = () => {
+export const Loading: StoryFn = () => {
   return (
     <StorybookProviders>
       <TestProvider>
         <div style={{ maxWidth: '300px' }}>
           <AssetCriticalitySelector
             criticality={criticalityLoading}
-            entity={{ type: 'host' as const, name: 'My test Host' }}
+            entity={{ type: EntityType.host as const, name: 'My test Host' }}
           />
         </div>
       </TestProvider>

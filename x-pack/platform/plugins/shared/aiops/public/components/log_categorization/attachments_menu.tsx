@@ -28,13 +28,17 @@ import {
 import React, { useCallback, useState } from 'react';
 import { useMemo } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { EMBEDDABLE_PATTERN_ANALYSIS_TYPE } from '@kbn/aiops-log-pattern-analysis/constants';
+import {
+  EMBEDDABLE_PATTERN_ANALYSIS_TYPE,
+  PATTERN_ANALYSIS_DATA_VIEW_REF_NAME,
+} from '@kbn/aiops-log-pattern-analysis/constants';
 import { useTimeRangeUpdates } from '@kbn/ml-date-picker';
 import type { PatternAnalysisEmbeddableState } from '../../embeddables/pattern_analysis/types';
 import type { RandomSamplerOption, RandomSamplerProbability } from './sampling_menu/random_sampler';
 import { useCasesModal } from '../../hooks/use_cases_modal';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { CASES_TOAST_MESSAGES_TITLES } from '../../cases/constants';
+import { getDataviewReferences } from '../../embeddables/get_dataview_references';
 
 const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
 
@@ -74,7 +78,7 @@ export const AttachmentsMenu = ({
 
   const timeRange = useTimeRangeUpdates();
 
-  const canEditDashboards = capabilities.dashboard.createNew;
+  const canEditDashboards = capabilities.dashboard_v2.createNew;
 
   const onSave: SaveModalDashboardProps['onSave'] = useCallback(
     ({ dashboardId, newTitle, newDescription }) => {
@@ -92,7 +96,10 @@ export const AttachmentsMenu = ({
       };
 
       const state = {
-        input: embeddableInput,
+        serializedState: {
+          rawState: embeddableInput,
+          references: getDataviewReferences(dataView.id, PATTERN_ANALYSIS_DATA_VIEW_REF_NAME),
+        },
         type: EMBEDDABLE_PATTERN_ANALYSIS_TYPE,
       };
 

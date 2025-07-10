@@ -123,6 +123,7 @@ jest.mock(
             : Promise.resolve(packagePolicy)
         ),
         upgrade: jest.fn(),
+        bulkUpgrade: jest.fn(),
         getUpgradeDryRunDiff: jest.fn(),
         enrichPolicyWithDefaultsFromPackage: jest
           .fn()
@@ -403,9 +404,6 @@ describe('When calling package policy', () => {
         inputs: [],
       });
       jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
-      jest
-        .spyOn(appContextService, 'getExperimentalFeatures')
-        .mockReturnValue({ enableReusableIntegrationPolicies: true } as any);
       const request = getUpdateKibanaRequest({ policy_ids: ['1', '2'] } as any);
 
       await expect(() => routeHandler(context, request, response)).rejects.toThrow(
@@ -812,7 +810,7 @@ describe('When calling package policy', () => {
           },
         },
       ];
-      packagePolicyServiceMock.upgrade.mockResolvedValue(responseBody);
+      packagePolicyServiceMock.bulkUpgrade.mockResolvedValue(responseBody);
       const request = httpServerMock.createKibanaRequest({
         body: {
           packagePolicyIds: ['1'],

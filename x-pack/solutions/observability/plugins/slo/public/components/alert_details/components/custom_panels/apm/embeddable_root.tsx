@@ -7,7 +7,7 @@
 import React from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { buildQueryFromFilters, Filter } from '@kbn/es-query';
-import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
+import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import {
   GetSLOResponse,
   apmTransactionDurationIndicatorSchema,
@@ -79,8 +79,12 @@ export function APMEmbeddableRoot({
     ...groupingsInput.input,
   };
 
+  if (!input.serviceName || !input.transactionType) {
+    return null;
+  }
+
   return (
-    <ReactEmbeddableRenderer
+    <EmbeddableRenderer
       type={embeddableId}
       getParentApi={() => ({ getSerializedStateForChild: () => ({ rawState: input }) })}
       hidePanelChrome={true}

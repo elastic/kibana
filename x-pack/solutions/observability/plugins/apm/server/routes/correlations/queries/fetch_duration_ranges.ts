@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { sumBy } from 'lodash';
 import type { LatencyDistributionChartType } from '../../../../common/latency_distribution_chart_types';
 import { getCommonCorrelationsQuery } from './get_common_correlations_query';
@@ -24,6 +24,7 @@ export const fetchDurationRanges = async ({
   query,
   chartType,
   searchMetrics,
+  isOtel = false,
 }: {
   rangeSteps: number[];
   apmEventClient: APMEventClient;
@@ -34,6 +35,7 @@ export const fetchDurationRanges = async ({
   query: estypes.QueryDslQueryContainer;
   chartType: LatencyDistributionChartType;
   searchMetrics: boolean;
+  isOtel?: boolean;
 }): Promise<{
   totalDocCount: number;
   durationRanges: Array<{ key: number; doc_count: number }>;
@@ -59,11 +61,12 @@ export const fetchDurationRanges = async ({
     ranges.push({ from: ranges[ranges.length - 1].to });
   }
 
-  const resp = await apmEventClient.search('get_duration_ranges', {
-    apm: {
-      events: [getEventType(chartType, searchMetrics)],
-    },
-    body: {
+  const resp = await apmEventClient.search(
+    'get_duration_ranges',
+    {
+      apm: {
+        events: [getEventType(chartType, searchMetrics)],
+      },
       track_total_hits: false,
       size: 0,
       query: getCommonCorrelationsQuery({
@@ -76,13 +79,14 @@ export const fetchDurationRanges = async ({
       aggs: {
         logspace_ranges: {
           range: {
-            field: getDurationField(chartType, searchMetrics),
+            field: getDurationField(chartType, searchMetrics, isOtel),
             ranges,
           },
         },
       },
     },
-  });
+    { skipProcessorEventFilter: isOtel }
+  );
 
   const durationRanges =
     resp.aggregations?.logspace_ranges.buckets

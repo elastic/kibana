@@ -189,9 +189,7 @@ describe('SavedObjectsRepository', () => {
         await successResponse('abc123');
         expect(client.closePointInTime).toHaveBeenCalledWith(
           expect.objectContaining({
-            body: expect.objectContaining({
-              id: 'abc123',
-            }),
+            id: 'abc123',
           }),
           expect.anything()
         );

@@ -8,6 +8,7 @@ export {
   OPEN_TELEMETRY_AGENT_NAMES,
   AGENT_NAMES,
   isOpenTelemetryAgentName,
+  isEDOTAgentName,
   hasOpenTelemetryPrefix,
   JAVA_AGENT_NAMES,
   isJavaAgentName,

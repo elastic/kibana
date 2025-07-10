@@ -13,31 +13,18 @@ import { tracksOverlays } from '@kbn/presentation-containers';
 import { apiHasParentApi } from '@kbn/presentation-publishing';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import React from 'react';
-import { BehaviorSubject } from 'rxjs';
 
-import { ControlStateManager } from '../controls/types';
+import { StateManager } from '@kbn/presentation-publishing/state_manager/types';
 import { ControlGroupEditor } from './components/control_group_editor';
 import { ControlGroupApi, ControlGroupEditorState } from './types';
 import { coreServices } from '../services/kibana_services';
+import { confirmDeleteAllControls } from '../common/confirm_delete_control';
 
 export const openEditControlGroupFlyout = (
   controlGroupApi: ControlGroupApi,
-  stateManager: ControlStateManager<ControlGroupEditorState>
+  stateManager: StateManager<ControlGroupEditorState>
 ) => {
-  /**
-   * Duplicate all state into a new manager because we do not want to actually apply the changes
-   * to the control group until the user hits save.
-   */
-  const editorStateManager: ControlStateManager<ControlGroupEditorState> = Object.keys(
-    stateManager
-  ).reduce((prev, key) => {
-    return {
-      ...prev,
-      [key as keyof ControlGroupEditorState]: new BehaviorSubject(
-        stateManager[key as keyof ControlGroupEditorState].getValue()
-      ),
-    };
-  }, {} as ControlStateManager<ControlGroupEditorState>);
+  const lastSavedState = stateManager.getLatestState();
 
   const closeOverlay = (overlayRef: OverlayRef) => {
     if (apiHasParentApi(controlGroupApi) && tracksOverlays(controlGroupApi.parentApi)) {
@@ -47,50 +34,28 @@ export const openEditControlGroupFlyout = (
   };
 
   const onDeleteAll = (ref: OverlayRef) => {
-    coreServices.overlays
-      .openConfirm(
-        i18n.translate('controls.controlGroup.management.delete.sub', {
-          defaultMessage: 'Controls are not recoverable once removed.',
-        }),
-        {
-          confirmButtonText: i18n.translate('controls.controlGroup.management.delete.confirm', {
-            defaultMessage: 'Delete',
-          }),
-          cancelButtonText: i18n.translate('controls.controlGroup.management.delete.cancel', {
-            defaultMessage: 'Cancel',
-          }),
-          title: i18n.translate('controls.controlGroup.management.delete.deleteAllTitle', {
-            defaultMessage: 'Delete all controls?',
-          }),
-          buttonColor: 'danger',
-        }
-      )
-      .then((confirmed) => {
-        if (confirmed)
-          Object.keys(controlGroupApi.children$.getValue()).forEach((childId) => {
-            controlGroupApi.removePanel(childId);
-          });
-        closeOverlay(ref);
-      });
+    confirmDeleteAllControls().then((confirmed) => {
+      if (confirmed)
+        Object.keys(controlGroupApi.children$.getValue()).forEach((childId) => {
+          controlGroupApi.removePanel(childId);
+        });
+      closeOverlay(ref);
+    });
   };
 
   const overlay = coreServices.overlays.openFlyout(
     toMountPoint(
       <ControlGroupEditor
         api={controlGroupApi}
-        stateManager={editorStateManager}
+        stateManager={stateManager}
         onSave={() => {
-          Object.keys(stateManager).forEach((key) => {
-            (
-              stateManager[key as keyof ControlGroupEditorState] as BehaviorSubject<
-                ControlGroupEditorState[keyof ControlGroupEditorState]
-              >
-            ).next(editorStateManager[key as keyof ControlGroupEditorState].getValue());
-          });
           closeOverlay(overlay);
         }}
         onDeleteAll={() => onDeleteAll(overlay)}
-        onCancel={() => closeOverlay(overlay)}
+        onCancel={() => {
+          stateManager.reinitializeState(lastSavedState);
+          closeOverlay(overlay);
+        }}
       />,
       coreServices
     ),

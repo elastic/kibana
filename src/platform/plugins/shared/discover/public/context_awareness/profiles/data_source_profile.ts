@@ -10,11 +10,8 @@
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import type { DiscoverDataSource } from '../../../common/data_sources';
-import {
-  AsyncProfileProvider,
-  AsyncProfileService,
-  ContextWithProfileId,
-} from '../profile_service';
+import type { AsyncProfileProvider, ContextWithProfileId } from '../profile_service';
+import { AsyncProfileService } from '../profile_service';
 import type { Profile } from '../types';
 import type { RootContext } from './root_profile';
 
@@ -22,6 +19,7 @@ import type { RootContext } from './root_profile';
  * Indicates the category of the data source (e.g. logs, alerts, etc.)
  */
 export enum DataSourceCategory {
+  Traces = 'traces',
   Logs = 'logs',
   Default = 'default',
 }

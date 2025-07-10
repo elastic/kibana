@@ -6,8 +6,10 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 
+import { DataStreamOptions } from '../../../../common/types/data_streams';
+import { serializeComponentTemplate } from '../../../../common/lib';
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '..';
 import { componentTemplateSchema } from './schema_validation';
@@ -37,20 +39,35 @@ export const registerUpdateRoute = ({
     async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
       const { name } = request.params;
-      const { template, version, _meta, deprecated } = request.body;
 
       try {
         // Verify component exists; ES will throw 404 if not
-        await client.asCurrentUser.cluster.getComponentTemplate({ name });
+        const existingComponentTemplate = await client.asCurrentUser.transport.request<{
+          component_templates?: Array<{
+            component_template?: { template?: { data_stream_options?: unknown } };
+          }>;
+        }>({
+          method: 'GET',
+          path: `/_component_template/${name}`,
+        });
+        // TODO: Replace with the following when the client includes data_stream_options in ClusterComponentTemplateSummary
+        // https://github.com/elastic/kibana/issues/220614
+        // const existingComponentTemplate = await client.asCurrentUser.cluster.getComponentTemplate({
+        //   name,
+        // });
+        const existingDataStreamOptions =
+          existingComponentTemplate?.component_templates?.[0]?.component_template?.template
+            ?.data_stream_options ?? undefined;
+
+        const serializedComponentTemplate = serializeComponentTemplate(
+          request.body,
+          existingDataStreamOptions as DataStreamOptions | undefined
+        );
 
         const responseBody = await client.asCurrentUser.cluster.putComponentTemplate({
           name,
-          body: {
-            template: template as estypes.IndicesIndexState,
-            version,
-            _meta,
-            deprecated,
-          },
+          ...serializedComponentTemplate,
+          template: serializedComponentTemplate.template as estypes.IndicesIndexState,
         });
 
         return response.ok({ body: responseBody });

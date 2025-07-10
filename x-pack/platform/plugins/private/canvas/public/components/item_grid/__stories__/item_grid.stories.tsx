@@ -6,28 +6,46 @@
  */
 
 import { EuiIcon, IconType } from '@elastic/eui';
-import { storiesOf } from '@storybook/react';
 import React from 'react';
 import { readableColor } from '../../../lib/readable_color';
 import { ColorDot } from '../../color_dot';
 import { ItemGrid } from '../item_grid';
 
-storiesOf('components/ItemGrid', module)
-  .add('simple grid', () => (
+export default {
+  title: 'components/ItemGrid',
+};
+
+export const SimpleGrid = {
+  render: () => (
     <ItemGrid items={['a', 'b', 'c']} children={(item) => <div key={item}>{item}</div>} />
-  ))
-  .add('icon grid', () => (
+  ),
+
+  name: 'simple grid',
+};
+
+export const IconGrid = {
+  render: () => (
     <ItemGrid
       items={['plusInCircle', 'minusInCircle', 'check']}
       children={(item) => <EuiIcon key={item} type={item} />}
     />
-  ))
-  .add('color dot grid', () => (
+  ),
+
+  name: 'icon grid',
+};
+
+export const ColorDotGrid = {
+  render: () => (
     <ItemGrid items={['#fff', '#666', '#000']}>
       {(item) => <ColorDot key={item} value={item} />}
     </ItemGrid>
-  ))
-  .add('complex grid', () => (
+  ),
+
+  name: 'color dot grid',
+};
+
+export const ComplexGrid = {
+  render: () => (
     <ItemGrid
       items={
         [
@@ -43,4 +61,7 @@ storiesOf('components/ItemGrid', module)
         </ColorDot>
       )}
     </ItemGrid>
-  ));
+  ),
+
+  name: 'complex grid',
+};

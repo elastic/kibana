@@ -21,6 +21,22 @@ const configSchema = schema.object({
     serverless: schema.boolean({ defaultValue: true }),
   }),
 
+  /**
+   * Exlcude certain data streams or indices from getting certain correctiveActions.
+   * The key is the data source name or pattern and the value is an array of corrective actions to exclude.
+   *
+   * Exclude readOnly data sources from getting read-only corrective actions.
+   * This is needed to avoid breaking certain built-in/system functionality that might rely on writing to these data sources.
+   * Example (excludes read-only corrective actions for 7_17_data_stream):
+   * xpack.upgrade_assistant.dataSourceExclusions:
+   *    7_17_data_stream: ["readOnly"]
+   */
+  dataSourceExclusions: schema.recordOf(
+    schema.string(),
+    schema.arrayOf(schema.oneOf([schema.literal('readOnly'), schema.literal('reindex')])),
+    { defaultValue: {} }
+  ),
+
   featureSet: schema.object({
     /**
      * Ml Snapshot should only be enabled for major version upgrades. Currently this
@@ -33,12 +49,12 @@ const configSchema = schema.object({
      * to change the constant `MachineLearningField.MIN_CHECKED_SUPPORTED_SNAPSHOT_VERSION`
      * to something higher than 7.0.0 in the Elasticsearch code.
      */
-    mlSnapshots: schema.boolean({ defaultValue: false }),
+    mlSnapshots: schema.boolean({ defaultValue: true }),
     /**
      * Migrating system indices should only be enabled for major version upgrades.
      * Currently this is manually set to `true` on every `x.last` version.
      */
-    migrateSystemIndices: schema.boolean({ defaultValue: false }),
+    migrateSystemIndices: schema.boolean({ defaultValue: true }),
     /**
      * Deprecations with reindexing corrective actions are only enabled for major version upgrades.
      * Currently this is manually set to `true` on every `x.last` version.
@@ -46,18 +62,18 @@ const configSchema = schema.object({
      * The reindex action includes some logic that is specific to the 8.0 upgrade
      * End users could get into a bad situation if this is enabled before this logic is fixed.
      */
-    reindexCorrectiveActions: schema.boolean({ defaultValue: false }),
+    reindexCorrectiveActions: schema.boolean({ defaultValue: true }),
     /**
      * Migrating deprecated data streams should only be enabled for major version upgrades.
      * Currently this is manually set to `true` on every `x.last` version.
      */
-    migrateDataStreams: schema.boolean({ defaultValue: false }),
+    migrateDataStreams: schema.boolean({ defaultValue: true }),
   }),
   /**
    * This config allows to hide the UI without disabling the plugin.
    */
   ui: schema.object({
-    enabled: schema.boolean({ defaultValue: true }),
+    enabled: schema.boolean({ defaultValue: false }),
   }),
 });
 

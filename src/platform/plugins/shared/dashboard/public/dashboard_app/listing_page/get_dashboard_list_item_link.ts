@@ -10,12 +10,9 @@
 import type { QueryState } from '@kbn/data-plugin/public';
 import { IKbnUrlStateStorage, setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 
-import {
-  DASHBOARD_APP_ID,
-  GLOBAL_STATE_STORAGE_KEY,
-  createDashboardEditUrl,
-} from '../../dashboard_constants';
+import { DASHBOARD_APP_ID } from '../../../common/constants';
 import { coreServices } from '../../services/kibana_services';
+import { GLOBAL_STATE_STORAGE_KEY, createDashboardEditUrl } from '../../utils/urls';
 
 export const getDashboardListItemLink = (
   kbnUrlStateStorage: IKbnUrlStateStorage,

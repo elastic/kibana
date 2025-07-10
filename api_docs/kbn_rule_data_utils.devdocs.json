@@ -170,7 +170,7 @@
         "signature": [
           "(sortIds: ",
           "SortResults",
-          " | null | undefined) => any[] | null | undefined"
+          " | null | undefined) => (string | number)[] | undefined"
         ],
         "path": "src/platform/packages/shared/kbn-rule-data-utils/src/alerts_as_data_rbac.ts",
         "deprecated": false,
@@ -535,6 +535,21 @@
       },
       {
         "parentPluginId": "@kbn/rule-data-utils",
+        "id": "def-common.ALERT_GROUPING",
+        "type": "string",
+        "tags": [],
+        "label": "ALERT_GROUPING",
+        "description": [],
+        "signature": [
+          "\"kibana.alert.grouping\""
+        ],
+        "path": "src/platform/packages/shared/kbn-rule-data-utils/src/technical_field_names.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/rule-data-utils",
         "id": "def-common.ALERT_INSTANCE_ID",
         "type": "string",
         "tags": [],
@@ -559,6 +574,21 @@
           "\"kibana.alert.intended_timestamp\""
         ],
         "path": "src/platform/packages/shared/kbn-rule-data-utils/src/default_alerts_as_data.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/rule-data-utils",
+        "id": "def-common.ALERT_KEY_JOINER",
+        "type": "string",
+        "tags": [],
+        "label": "ALERT_KEY_JOINER",
+        "description": [],
+        "signature": [
+          "\",\""
+        ],
+        "path": "src/platform/packages/shared/kbn-rule-data-utils/src/rule_constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -602,6 +632,21 @@
         "description": [],
         "signature": [
           "\"kibana.alert\""
+        ],
+        "path": "src/platform/packages/shared/kbn-rule-data-utils/src/default_alerts_as_data.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/rule-data-utils",
+        "id": "def-common.ALERT_PENDING_RECOVERED_COUNT",
+        "type": "string",
+        "tags": [],
+        "label": "ALERT_PENDING_RECOVERED_COUNT",
+        "description": [],
+        "signature": [
+          "\"kibana.alert.pending_recovered_count\""
         ],
         "path": "src/platform/packages/shared/kbn-rule-data-utils/src/default_alerts_as_data.ts",
         "deprecated": false,
@@ -1540,6 +1585,51 @@
       },
       {
         "parentPluginId": "@kbn/rule-data-utils",
+        "id": "def-common.ALERT_UPDATED_AT",
+        "type": "string",
+        "tags": [],
+        "label": "ALERT_UPDATED_AT",
+        "description": [],
+        "signature": [
+          "\"kibana.alert.updated_at\""
+        ],
+        "path": "src/platform/packages/shared/kbn-rule-data-utils/src/default_alerts_as_data.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/rule-data-utils",
+        "id": "def-common.ALERT_UPDATED_BY_USER_ID",
+        "type": "string",
+        "tags": [],
+        "label": "ALERT_UPDATED_BY_USER_ID",
+        "description": [],
+        "signature": [
+          "\"kibana.alert.updated_by.user.id\""
+        ],
+        "path": "src/platform/packages/shared/kbn-rule-data-utils/src/default_alerts_as_data.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/rule-data-utils",
+        "id": "def-common.ALERT_UPDATED_BY_USER_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "ALERT_UPDATED_BY_USER_NAME",
+        "description": [],
+        "signature": [
+          "\"kibana.alert.updated_by.user.name\""
+        ],
+        "path": "src/platform/packages/shared/kbn-rule-data-utils/src/default_alerts_as_data.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/rule-data-utils",
         "id": "def-common.ALERT_URL",
         "type": "string",
         "tags": [],
@@ -1666,7 +1756,7 @@
         "label": "AlertConsumers",
         "description": [],
         "signature": [
-          "\"ml\" | \"monitoring\" | \"uptime\" | \"siem\" | \"observability\" | \"stackAlerts\" | \"alerts\" | \"apm\" | \"logs\" | \"infrastructure\" | \"slo\" | \"discover\" | \"AlertingExample\""
+          "\"ml\" | \"monitoring\" | \"uptime\" | \"siem\" | \"observability\" | \"stackAlerts\" | \"alerts\" | \"apm\" | \"logs\" | \"infrastructure\" | \"slo\" | \"discover\" | \"streams\" | \"AlertingExample\""
         ],
         "path": "src/platform/packages/shared/kbn-rule-data-utils/src/alerts_as_data_rbac.ts",
         "deprecated": false,
@@ -1748,9 +1838,39 @@
         "label": "DefaultAlertFieldName",
         "description": [],
         "signature": [
-          "\"@timestamp\" | \"kibana\" | \"kibana.alert.rule.rule_type_id\" | \"kibana.alert.rule.consumer\" | \"kibana.alert.rule.execution.uuid\" | \"kibana.alert.instance.id\" | \"kibana.alert.rule.category\" | \"kibana.alert.rule.name\" | \"kibana.alert.rule.producer\" | \"kibana.alert.rule.revision\" | \"kibana.alert.rule.uuid\" | \"kibana.alert.status\" | \"kibana.alert.uuid\" | \"kibana.space_ids\" | \"kibana.alert.action_group\" | \"kibana.alert.case_ids\" | \"kibana.alert.consecutive_matches\" | \"kibana.alert.duration.us\" | \"kibana.alert.end\" | \"kibana.alert.flapping\" | \"kibana.alert.flapping_history\" | \"kibana.alert.intended_timestamp\" | \"kibana.alert.last_detected\" | \"kibana.alert.maintenance_window_ids\" | \"kibana.alert.previous_action_group\" | \"kibana.alert.reason\" | \"kibana.alert.rule.execution.timestamp\" | \"kibana.alert.rule.execution.type\" | \"kibana.alert.rule.parameters\" | \"kibana.alert.rule.tags\" | \"kibana.alert.severity_improving\" | \"kibana.alert.start\" | \"kibana.alert.time_range\" | \"kibana.alert.url\" | \"kibana.alert.workflow_assignee_ids\" | \"kibana.alert.workflow_status\" | \"kibana.alert.workflow_tags\" | \"kibana.version\" | \"kibana.alert\" | \"kibana.alert.rule\""
+          "\"@timestamp\" | \"kibana\" | \"kibana.alert.rule.rule_type_id\" | \"kibana.alert.rule.consumer\" | \"kibana.alert.rule.execution.uuid\" | \"kibana.alert.instance.id\" | \"kibana.alert.rule.category\" | \"kibana.alert.rule.name\" | \"kibana.alert.rule.producer\" | \"kibana.alert.rule.revision\" | \"kibana.alert.rule.uuid\" | \"kibana.alert.status\" | \"kibana.alert.uuid\" | \"kibana.space_ids\" | \"kibana.alert.action_group\" | \"kibana.alert.case_ids\" | \"kibana.alert.consecutive_matches\" | \"kibana.alert.duration.us\" | \"kibana.alert.end\" | \"kibana.alert.flapping\" | \"kibana.alert.flapping_history\" | \"kibana.alert.intended_timestamp\" | \"kibana.alert.last_detected\" | \"kibana.alert.maintenance_window_ids\" | \"kibana.alert.pending_recovered_count\" | \"kibana.alert.previous_action_group\" | \"kibana.alert.reason\" | \"kibana.alert.rule.execution.timestamp\" | \"kibana.alert.rule.execution.type\" | \"kibana.alert.rule.parameters\" | \"kibana.alert.rule.tags\" | \"kibana.alert.severity_improving\" | \"kibana.alert.start\" | \"kibana.alert.time_range\" | \"kibana.alert.updated_at\" | \"kibana.alert.updated_by.user.id\" | \"kibana.alert.updated_by.user.name\" | \"kibana.alert.url\" | \"kibana.alert.workflow_assignee_ids\" | \"kibana.alert.workflow_status\" | \"kibana.alert.workflow_tags\" | \"kibana.version\" | \"kibana.alert\" | \"kibana.alert.rule\""
         ],
         "path": "src/platform/packages/shared/kbn-rule-data-utils/src/default_alerts_as_data.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/rule-data-utils",
+        "id": "def-common.DEGRADED_DOCS_RULE_TYPE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "DEGRADED_DOCS_RULE_TYPE_ID",
+        "description": [],
+        "signature": [
+          "\"datasetQuality.degradedDocs\""
+        ],
+        "path": "src/platform/packages/shared/kbn-rule-data-utils/src/rule_types/stack_rules.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/rule-data-utils",
+        "id": "def-common.DEPRECATED_ALERTING_CONSUMERS",
+        "type": "Array",
+        "tags": [],
+        "label": "DEPRECATED_ALERTING_CONSUMERS",
+        "description": [],
+        "signature": [
+          "\"observability\"[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-rule-data-utils/src/alerts_as_data_rbac.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2156,6 +2276,38 @@
       },
       {
         "parentPluginId": "@kbn/rule-data-utils",
+        "id": "def-common.STREAMS_ESQL_RULE_TYPE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "STREAMS_ESQL_RULE_TYPE_ID",
+        "description": [
+          "\nESQL rule types"
+        ],
+        "signature": [
+          "\"streams.rules.esql\""
+        ],
+        "path": "src/platform/packages/shared/kbn-rule-data-utils/src/rule_types/o11y_rules.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/rule-data-utils",
+        "id": "def-common.STREAMS_RULE_TYPE_IDS",
+        "type": "Array",
+        "tags": [],
+        "label": "STREAMS_RULE_TYPE_IDS",
+        "description": [],
+        "signature": [
+          "string[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-rule-data-utils/src/rule_types/o11y_rules.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/rule-data-utils",
         "id": "def-common.SYNTHETICS_RULE_TYPE_IDS",
         "type": "Array",
         "tags": [],
@@ -2224,7 +2376,7 @@
         "label": "TechnicalRuleDataFieldName",
         "description": [],
         "signature": [
-          "\"@timestamp\" | \"event.action\" | \"tags\" | \"kibana\" | \"kibana.alert.rule.rule_type_id\" | \"kibana.alert.rule.consumer\" | \"kibana.alert.rule.execution.uuid\" | \"kibana.alert.instance.id\" | \"kibana.alert.rule.category\" | \"kibana.alert.rule.name\" | \"kibana.alert.rule.producer\" | \"kibana.alert.rule.uuid\" | \"kibana.alert.status\" | \"kibana.alert.uuid\" | \"kibana.space_ids\" | \"event.kind\" | \"kibana.alert.action_group\" | \"kibana.alert.case_ids\" | \"kibana.alert.duration.us\" | \"kibana.alert.end\" | \"kibana.alert.flapping\" | \"kibana.alert.maintenance_window_ids\" | \"kibana.alert.reason\" | \"kibana.alert.rule.parameters\" | \"kibana.alert.rule.tags\" | \"kibana.alert.start\" | \"kibana.alert.time_range\" | \"kibana.alert.workflow_assignee_ids\" | \"kibana.alert.workflow_status\" | \"kibana.alert.workflow_tags\" | \"kibana.version\" | \"kibana.alert.context\" | \"kibana.alert.evaluation.threshold\" | \"kibana.alert.evaluation.value\" | \"kibana.alert.evaluation.values\" | \"kibana.alert.group\" | \"ecs.version\" | \"kibana.alert.risk_score\" | \"kibana.alert.rule.author\" | \"kibana.alert.rule.created_at\" | \"kibana.alert.rule.created_by\" | \"kibana.alert.rule.description\" | \"kibana.alert.rule.enabled\" | \"kibana.alert.rule.from\" | \"kibana.alert.rule.interval\" | \"kibana.alert.rule.license\" | \"kibana.alert.rule.note\" | \"kibana.alert.rule.references\" | \"kibana.alert.rule.rule_id\" | \"kibana.alert.rule.rule_name_override\" | \"kibana.alert.rule.to\" | \"kibana.alert.rule.type\" | \"kibana.alert.rule.updated_at\" | \"kibana.alert.rule.updated_by\" | \"kibana.alert.rule.version\" | \"kibana.alert.severity\" | \"kibana.alert.suppression.docs_count\" | \"kibana.alert.suppression.end\" | \"kibana.alert.suppression.start\" | \"kibana.alert.suppression.terms.field\" | \"kibana.alert.suppression.terms.value\" | \"kibana.alert.system_status\" | \"kibana.alert.workflow_reason\" | \"kibana.alert.workflow_user\" | \"event.module\" | \"kibana.alert.rule.threat.framework\" | \"kibana.alert.rule.threat.tactic.id\" | \"kibana.alert.rule.threat.tactic.name\" | \"kibana.alert.rule.threat.tactic.reference\" | \"kibana.alert.rule.threat.technique.id\" | \"kibana.alert.rule.threat.technique.name\" | \"kibana.alert.rule.threat.technique.reference\" | \"kibana.alert.rule.threat.technique.subtechnique.id\" | \"kibana.alert.rule.threat.technique.subtechnique.name\" | \"kibana.alert.rule.threat.technique.subtechnique.reference\" | \"kibana.alert.building_block_type\" | \"kibana.alert\" | \"kibana.alert.rule\" | \"kibana.alert.suppression.terms\" | \"kibana.alert.group.field\" | \"kibana.alert.group.value\" | \"kibana.alert.rule.exceptions_list\" | \"kibana.alert.rule.namespace\""
+          "\"@timestamp\" | \"event.action\" | \"tags\" | \"kibana\" | \"kibana.alert.rule.rule_type_id\" | \"kibana.alert.rule.consumer\" | \"kibana.alert.rule.execution.uuid\" | \"kibana.alert.instance.id\" | \"kibana.alert.rule.category\" | \"kibana.alert.rule.name\" | \"kibana.alert.rule.producer\" | \"kibana.alert.rule.uuid\" | \"kibana.alert.status\" | \"kibana.alert.uuid\" | \"kibana.space_ids\" | \"event.kind\" | \"kibana.alert.action_group\" | \"kibana.alert.case_ids\" | \"kibana.alert.duration.us\" | \"kibana.alert.end\" | \"kibana.alert.flapping\" | \"kibana.alert.maintenance_window_ids\" | \"kibana.alert.reason\" | \"kibana.alert.rule.parameters\" | \"kibana.alert.rule.tags\" | \"kibana.alert.start\" | \"kibana.alert.time_range\" | \"kibana.alert.workflow_assignee_ids\" | \"kibana.alert.workflow_status\" | \"kibana.alert.workflow_tags\" | \"kibana.version\" | \"kibana.alert.context\" | \"kibana.alert.evaluation.threshold\" | \"kibana.alert.evaluation.value\" | \"kibana.alert.evaluation.values\" | \"kibana.alert.group\" | \"kibana.alert.grouping\" | \"ecs.version\" | \"kibana.alert.risk_score\" | \"kibana.alert.rule.author\" | \"kibana.alert.rule.created_at\" | \"kibana.alert.rule.created_by\" | \"kibana.alert.rule.description\" | \"kibana.alert.rule.enabled\" | \"kibana.alert.rule.from\" | \"kibana.alert.rule.interval\" | \"kibana.alert.rule.license\" | \"kibana.alert.rule.note\" | \"kibana.alert.rule.references\" | \"kibana.alert.rule.rule_id\" | \"kibana.alert.rule.rule_name_override\" | \"kibana.alert.rule.to\" | \"kibana.alert.rule.type\" | \"kibana.alert.rule.updated_at\" | \"kibana.alert.rule.updated_by\" | \"kibana.alert.rule.version\" | \"kibana.alert.severity\" | \"kibana.alert.suppression.docs_count\" | \"kibana.alert.suppression.end\" | \"kibana.alert.suppression.start\" | \"kibana.alert.suppression.terms.field\" | \"kibana.alert.suppression.terms.value\" | \"kibana.alert.system_status\" | \"kibana.alert.workflow_reason\" | \"kibana.alert.workflow_user\" | \"event.module\" | \"kibana.alert.rule.threat.framework\" | \"kibana.alert.rule.threat.tactic.id\" | \"kibana.alert.rule.threat.tactic.name\" | \"kibana.alert.rule.threat.tactic.reference\" | \"kibana.alert.rule.threat.technique.id\" | \"kibana.alert.rule.threat.technique.name\" | \"kibana.alert.rule.threat.technique.reference\" | \"kibana.alert.rule.threat.technique.subtechnique.id\" | \"kibana.alert.rule.threat.technique.subtechnique.name\" | \"kibana.alert.rule.threat.technique.subtechnique.reference\" | \"kibana.alert.building_block_type\" | \"kibana.alert\" | \"kibana.alert.rule\" | \"kibana.alert.suppression.terms\" | \"kibana.alert.group.field\" | \"kibana.alert.group.value\" | \"kibana.alert.rule.exceptions_list\" | \"kibana.alert.rule.namespace\""
         ],
         "path": "src/platform/packages/shared/kbn-rule-data-utils/src/technical_field_names.ts",
         "deprecated": false,
@@ -2286,7 +2438,7 @@
         "label": "ValidFeatureId",
         "description": [],
         "signature": [
-          "\"ml\" | \"monitoring\" | \"uptime\" | \"siem\" | \"observability\" | \"stackAlerts\" | \"alerts\" | \"apm\" | \"logs\" | \"infrastructure\" | \"slo\" | \"discover\" | \"AlertingExample\""
+          "\"ml\" | \"monitoring\" | \"uptime\" | \"siem\" | \"observability\" | \"stackAlerts\" | \"alerts\" | \"apm\" | \"logs\" | \"infrastructure\" | \"slo\" | \"discover\" | \"streams\" | \"AlertingExample\""
         ],
         "path": "src/platform/packages/shared/kbn-rule-data-utils/src/alerts_as_data_rbac.ts",
         "deprecated": false,
@@ -2335,11 +2487,599 @@
           "\nregistering a new instance of the rule data client\nin a new plugin will require updating the below data structure\nto include the index name where the alerts as data will be written to."
         ],
         "signature": [
-          "{ readonly APM: \"apm\"; readonly LOGS: \"logs\"; readonly INFRASTRUCTURE: \"infrastructure\"; readonly OBSERVABILITY: \"observability\"; readonly SLO: \"slo\"; readonly SIEM: \"siem\"; readonly UPTIME: \"uptime\"; readonly ML: \"ml\"; readonly STACK_ALERTS: \"stackAlerts\"; readonly EXAMPLE: \"AlertingExample\"; readonly MONITORING: \"monitoring\"; readonly ALERTS: \"alerts\"; readonly DISCOVER: \"discover\"; }"
+          "{ readonly APM: \"apm\"; readonly LOGS: \"logs\"; readonly INFRASTRUCTURE: \"infrastructure\"; readonly OBSERVABILITY: \"observability\"; readonly STREAMS: \"streams\"; readonly SLO: \"slo\"; readonly SIEM: \"siem\"; readonly UPTIME: \"uptime\"; readonly ML: \"ml\"; readonly STACK_ALERTS: \"stackAlerts\"; readonly EXAMPLE: \"AlertingExample\"; readonly MONITORING: \"monitoring\"; readonly ALERTS: \"alerts\"; readonly DISCOVER: \"discover\"; }"
         ],
         "path": "src/platform/packages/shared/kbn-rule-data-utils/src/alerts_as_data_rbac.ts",
         "deprecated": false,
         "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/rule-data-utils",
+        "id": "def-common.fields",
+        "type": "Object",
+        "tags": [],
+        "label": "fields",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-rule-data-utils/src/default_alerts_as_data.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/rule-data-utils",
+            "id": "def-common.fields.ALERT_ACTION_GROUP",
+            "type": "string",
+            "tags": [],
+            "label": "ALERT_ACTION_GROUP",
+            "description": [],
+            "signature": [
+              "\"kibana.alert.action_group\""
+            ],
+            "path": "src/platform/packages/shared/kbn-rule-data-utils/src/default_alerts_as_data.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/rule-data-utils",
+            "id": "def-common.fields.ALERT_CASE_IDS",
+            "type": "string",
+            "tags": [],
+            "label": "ALERT_CASE_IDS",
+            "description": [],
+            "signature": [
+              "\"kibana.alert.case_ids\""
+            ],
+            "path": "src/platform/packages/shared/kbn-rule-data-utils/src/default_alerts_as_data.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/rule-data-utils",
+            "id": "def-common.fields.ALERT_DURATION",
+            "type": "string",
+            "tags": [],
+            "label": "ALERT_DURATION",
+            "description": [],
+            "signature": [
+              "\"kibana.alert.duration.us\""
+            ],
+            "path": "src/platform/packages/shared/kbn-rule-data-utils/src/default_alerts_as_data.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/rule-data-utils",
+            "id": "def-common.fields.ALERT_END",
+            "type": "string",
+            "tags": [],
+            "label": "ALERT_END",
+            "description": [],
+            "signature": [
+              "\"kibana.alert.end\""
+            ],
+            "path": "src/platform/packages/shared/kbn-rule-data-utils/src/default_alerts_as_data.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/rule-data-utils",
+            "id": "def-common.fields.ALERT_FLAPPING",
+            "type": "string",
+            "tags": [],
+            "label": "ALERT_FLAPPING",
+            "description": [],
+            "signature": [
+              "\"kibana.alert.flapping\""
+            ],
+            "path": "src/platform/packages/shared/kbn-rule-data-utils/src/default_alerts_as_data.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/rule-data-utils",
+            "id": "def-common.fields.ALERT_FLAPPING_HISTORY",
+            "type": "string",
+            "tags": [],
+            "label": "ALERT_FLAPPING_HISTORY",
+            "description": [],
+            "signature": [
+              "\"kibana.alert.flapping_history\""
+            ],
+            "path": "src/platform/packages/shared/kbn-rule-data-utils/src/default_alerts_as_data.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/rule-data-utils",
+            "id": "def-common.fields.ALERT_MAINTENANCE_WINDOW_IDS",
+            "type": "string",
+            "tags": [],
+            "label": "ALERT_MAINTENANCE_WINDOW_IDS",
+            "description": [],
+            "signature": [
+              "\"kibana.alert.maintenance_window_ids\""
+            ],
+            "path": "src/platform/packages/shared/kbn-rule-data-utils/src/default_alerts_as_data.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/rule-data-utils",
+            "id": "def-common.fields.ALERT_PENDING_RECOVERED_COUNT",
+            "type": "string",
+            "tags": [],
+            "label": "ALERT_PENDING_RECOVERED_COUNT",
+            "description": [],
+            "signature": [
+              "\"kibana.alert.pending_recovered_count\""
+            ],
+            "path": "src/platform/packages/shared/kbn-rule-data-utils/src/default_alerts_as_data.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/rule-data-utils",
+            "id": "def-common.fields.ALERT_CONSECUTIVE_MATCHES",
+            "type": "string",
+            "tags": [],
+            "label": "ALERT_CONSECUTIVE_MATCHES",
+            "description": [],
+            "signature": [
+              "\"kibana.alert.consecutive_matches\""
+            ],
+            "path": "src/platform/packages/shared/kbn-rule-data-utils/src/default_alerts_as_data.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/rule-data-utils",
+            "id": "def-common.fields.ALERT_INSTANCE_ID",
+            "type": "string",
+            "tags": [],
+            "label": "ALERT_INSTANCE_ID",
+            "description": [],
+            "signature": [
+              "\"kibana.alert.instance.id\""
+            ],
+            "path": "src/platform/packages/shared/kbn-rule-data-utils/src/default_alerts_as_data.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/rule-data-utils",
+            "id": "def-common.fields.ALERT_LAST_DETECTED",
+            "type": "string",
+            "tags": [],
+            "label": "ALERT_LAST_DETECTED",
+            "description": [],
+            "signature": [
+              "\"kibana.alert.last_detected\""
+            ],
+            "path": "src/platform/packages/shared/kbn-rule-data-utils/src/default_alerts_as_data.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/rule-data-utils",
+            "id": "def-common.fields.ALERT_PREVIOUS_ACTION_GROUP",
+            "type": "string",
+            "tags": [],
+            "label": "ALERT_PREVIOUS_ACTION_GROUP",
+            "description": [],
+            "signature": [
+              "\"kibana.alert.previous_action_group\""
+            ],
+            "path": "src/platform/packages/shared/kbn-rule-data-utils/src/default_alerts_as_data.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/rule-data-utils",
+            "id": "def-common.fields.ALERT_REASON",
+            "type": "string",
+            "tags": [],
+            "label": "ALERT_REASON",
+            "description": [],
+            "signature": [
+              "\"kibana.alert.reason\""
+            ],
+            "path": "src/platform/packages/shared/kbn-rule-data-utils/src/default_alerts_as_data.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/rule-data-utils",
+            "id": "def-common.fields.ALERT_RULE_CATEGORY",
+            "type": "string",
+            "tags": [],
+            "label": "ALERT_RULE_CATEGORY",
+            "description": [],
+            "signature": [
+              "\"kibana.alert.rule.category\""
+            ],
+            "path": "src/platform/packages/shared/kbn-rule-data-utils/src/default_alerts_as_data.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/rule-data-utils",
+            "id": "def-common.fields.ALERT_RULE_CONSUMER",
+            "type": "string",
+            "tags": [],
+            "label": "ALERT_RULE_CONSUMER",
+            "description": [],
+            "signature": [
+              "\"kibana.alert.rule.consumer\""
+            ],
+            "path": "src/platform/packages/shared/kbn-rule-data-utils/src/default_alerts_as_data.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/rule-data-utils",
+            "id": "def-common.fields.ALERT_RULE_EXECUTION_TIMESTAMP",
+            "type": "string",
+            "tags": [],
+            "label": "ALERT_RULE_EXECUTION_TIMESTAMP",
+            "description": [],
+            "signature": [
+              "\"kibana.alert.rule.execution.timestamp\""
+            ],
+            "path": "src/platform/packages/shared/kbn-rule-data-utils/src/default_alerts_as_data.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/rule-data-utils",
+            "id": "def-common.fields.ALERT_RULE_EXECUTION_TYPE",
+            "type": "string",
+            "tags": [],
+            "label": "ALERT_RULE_EXECUTION_TYPE",
+            "description": [],
+            "signature": [
+              "\"kibana.alert.rule.execution.type\""
+            ],
+            "path": "src/platform/packages/shared/kbn-rule-data-utils/src/default_alerts_as_data.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/rule-data-utils",
+            "id": "def-common.fields.ALERT_INTENDED_TIMESTAMP",
+            "type": "string",
+            "tags": [],
+            "label": "ALERT_INTENDED_TIMESTAMP",
+            "description": [],
+            "signature": [
+              "\"kibana.alert.intended_timestamp\""
+            ],
+            "path": "src/platform/packages/shared/kbn-rule-data-utils/src/default_alerts_as_data.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/rule-data-utils",
+            "id": "def-common.fields.ALERT_RULE_EXECUTION_UUID",
+            "type": "string",
+            "tags": [],
+            "label": "ALERT_RULE_EXECUTION_UUID",
+            "description": [],
+            "signature": [
+              "\"kibana.alert.rule.execution.uuid\""
+            ],
+            "path": "src/platform/packages/shared/kbn-rule-data-utils/src/default_alerts_as_data.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/rule-data-utils",
+            "id": "def-common.fields.ALERT_RULE_NAME",
+            "type": "string",
+            "tags": [],
+            "label": "ALERT_RULE_NAME",
+            "description": [],
+            "signature": [
+              "\"kibana.alert.rule.name\""
+            ],
+            "path": "src/platform/packages/shared/kbn-rule-data-utils/src/default_alerts_as_data.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/rule-data-utils",
+            "id": "def-common.fields.ALERT_RULE_PARAMETERS",
+            "type": "string",
+            "tags": [],
+            "label": "ALERT_RULE_PARAMETERS",
+            "description": [],
+            "signature": [
+              "\"kibana.alert.rule.parameters\""
+            ],
+            "path": "src/platform/packages/shared/kbn-rule-data-utils/src/default_alerts_as_data.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/rule-data-utils",
+            "id": "def-common.fields.ALERT_RULE_PRODUCER",
+            "type": "string",
+            "tags": [],
+            "label": "ALERT_RULE_PRODUCER",
+            "description": [],
+            "signature": [
+              "\"kibana.alert.rule.producer\""
+            ],
+            "path": "src/platform/packages/shared/kbn-rule-data-utils/src/default_alerts_as_data.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/rule-data-utils",
+            "id": "def-common.fields.ALERT_RULE_REVISION",
+            "type": "string",
+            "tags": [],
+            "label": "ALERT_RULE_REVISION",
+            "description": [],
+            "signature": [
+              "\"kibana.alert.rule.revision\""
+            ],
+            "path": "src/platform/packages/shared/kbn-rule-data-utils/src/default_alerts_as_data.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/rule-data-utils",
+            "id": "def-common.fields.ALERT_RULE_TAGS",
+            "type": "string",
+            "tags": [],
+            "label": "ALERT_RULE_TAGS",
+            "description": [],
+            "signature": [
+              "\"kibana.alert.rule.tags\""
+            ],
+            "path": "src/platform/packages/shared/kbn-rule-data-utils/src/default_alerts_as_data.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/rule-data-utils",
+            "id": "def-common.fields.ALERT_RULE_TYPE_ID",
+            "type": "string",
+            "tags": [],
+            "label": "ALERT_RULE_TYPE_ID",
+            "description": [],
+            "signature": [
+              "\"kibana.alert.rule.rule_type_id\""
+            ],
+            "path": "src/platform/packages/shared/kbn-rule-data-utils/src/default_alerts_as_data.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/rule-data-utils",
+            "id": "def-common.fields.ALERT_RULE_UUID",
+            "type": "string",
+            "tags": [],
+            "label": "ALERT_RULE_UUID",
+            "description": [],
+            "signature": [
+              "\"kibana.alert.rule.uuid\""
+            ],
+            "path": "src/platform/packages/shared/kbn-rule-data-utils/src/default_alerts_as_data.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/rule-data-utils",
+            "id": "def-common.fields.ALERT_SEVERITY_IMPROVING",
+            "type": "string",
+            "tags": [],
+            "label": "ALERT_SEVERITY_IMPROVING",
+            "description": [],
+            "signature": [
+              "\"kibana.alert.severity_improving\""
+            ],
+            "path": "src/platform/packages/shared/kbn-rule-data-utils/src/default_alerts_as_data.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/rule-data-utils",
+            "id": "def-common.fields.ALERT_START",
+            "type": "string",
+            "tags": [],
+            "label": "ALERT_START",
+            "description": [],
+            "signature": [
+              "\"kibana.alert.start\""
+            ],
+            "path": "src/platform/packages/shared/kbn-rule-data-utils/src/default_alerts_as_data.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/rule-data-utils",
+            "id": "def-common.fields.ALERT_UPDATED_AT",
+            "type": "string",
+            "tags": [],
+            "label": "ALERT_UPDATED_AT",
+            "description": [],
+            "signature": [
+              "\"kibana.alert.updated_at\""
+            ],
+            "path": "src/platform/packages/shared/kbn-rule-data-utils/src/default_alerts_as_data.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/rule-data-utils",
+            "id": "def-common.fields.ALERT_UPDATED_BY_USER_ID",
+            "type": "string",
+            "tags": [],
+            "label": "ALERT_UPDATED_BY_USER_ID",
+            "description": [],
+            "signature": [
+              "\"kibana.alert.updated_by.user.id\""
+            ],
+            "path": "src/platform/packages/shared/kbn-rule-data-utils/src/default_alerts_as_data.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/rule-data-utils",
+            "id": "def-common.fields.ALERT_UPDATED_BY_USER_NAME",
+            "type": "string",
+            "tags": [],
+            "label": "ALERT_UPDATED_BY_USER_NAME",
+            "description": [],
+            "signature": [
+              "\"kibana.alert.updated_by.user.name\""
+            ],
+            "path": "src/platform/packages/shared/kbn-rule-data-utils/src/default_alerts_as_data.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/rule-data-utils",
+            "id": "def-common.fields.ALERT_STATUS",
+            "type": "string",
+            "tags": [],
+            "label": "ALERT_STATUS",
+            "description": [],
+            "signature": [
+              "\"kibana.alert.status\""
+            ],
+            "path": "src/platform/packages/shared/kbn-rule-data-utils/src/default_alerts_as_data.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/rule-data-utils",
+            "id": "def-common.fields.ALERT_TIME_RANGE",
+            "type": "string",
+            "tags": [],
+            "label": "ALERT_TIME_RANGE",
+            "description": [],
+            "signature": [
+              "\"kibana.alert.time_range\""
+            ],
+            "path": "src/platform/packages/shared/kbn-rule-data-utils/src/default_alerts_as_data.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/rule-data-utils",
+            "id": "def-common.fields.ALERT_URL",
+            "type": "string",
+            "tags": [],
+            "label": "ALERT_URL",
+            "description": [],
+            "signature": [
+              "\"kibana.alert.url\""
+            ],
+            "path": "src/platform/packages/shared/kbn-rule-data-utils/src/default_alerts_as_data.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/rule-data-utils",
+            "id": "def-common.fields.ALERT_UUID",
+            "type": "string",
+            "tags": [],
+            "label": "ALERT_UUID",
+            "description": [],
+            "signature": [
+              "\"kibana.alert.uuid\""
+            ],
+            "path": "src/platform/packages/shared/kbn-rule-data-utils/src/default_alerts_as_data.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/rule-data-utils",
+            "id": "def-common.fields.ALERT_WORKFLOW_ASSIGNEE_IDS",
+            "type": "string",
+            "tags": [],
+            "label": "ALERT_WORKFLOW_ASSIGNEE_IDS",
+            "description": [],
+            "signature": [
+              "\"kibana.alert.workflow_assignee_ids\""
+            ],
+            "path": "src/platform/packages/shared/kbn-rule-data-utils/src/default_alerts_as_data.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/rule-data-utils",
+            "id": "def-common.fields.ALERT_WORKFLOW_STATUS",
+            "type": "string",
+            "tags": [],
+            "label": "ALERT_WORKFLOW_STATUS",
+            "description": [],
+            "signature": [
+              "\"kibana.alert.workflow_status\""
+            ],
+            "path": "src/platform/packages/shared/kbn-rule-data-utils/src/default_alerts_as_data.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/rule-data-utils",
+            "id": "def-common.fields.ALERT_WORKFLOW_TAGS",
+            "type": "string",
+            "tags": [],
+            "label": "ALERT_WORKFLOW_TAGS",
+            "description": [],
+            "signature": [
+              "\"kibana.alert.workflow_tags\""
+            ],
+            "path": "src/platform/packages/shared/kbn-rule-data-utils/src/default_alerts_as_data.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/rule-data-utils",
+            "id": "def-common.fields.SPACE_IDS",
+            "type": "string",
+            "tags": [],
+            "label": "SPACE_IDS",
+            "description": [],
+            "signature": [
+              "\"kibana.space_ids\""
+            ],
+            "path": "src/platform/packages/shared/kbn-rule-data-utils/src/default_alerts_as_data.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/rule-data-utils",
+            "id": "def-common.fields.TIMESTAMP",
+            "type": "string",
+            "tags": [],
+            "label": "TIMESTAMP",
+            "description": [],
+            "signature": [
+              "\"@timestamp\""
+            ],
+            "path": "src/platform/packages/shared/kbn-rule-data-utils/src/default_alerts_as_data.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/rule-data-utils",
+            "id": "def-common.fields.VERSION",
+            "type": "string",
+            "tags": [],
+            "label": "VERSION",
+            "description": [],
+            "signature": [
+              "\"kibana.version\""
+            ],
+            "path": "src/platform/packages/shared/kbn-rule-data-utils/src/default_alerts_as_data.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
         "initialIsOpen": false
       },
       {

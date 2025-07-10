@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import sortBy from 'lodash/sortBy';
+import { sortBy } from 'lodash';
 import dateMath from '@elastic/datemath';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { RuleExecutorOptions } from '@kbn/alerting-plugin/server';
+import type { estypes } from '@elastic/elasticsearch';
+import {
+  shouldCreateAlertsInAllSpaces,
+  type RuleExecutorOptions,
+} from '@kbn/alerting-plugin/server';
 import { chunk, partition } from 'lodash';
 import {
   ALERT_INSTANCE_ID,
@@ -28,11 +31,12 @@ import {
 } from '@kbn/rule-data-utils';
 import { mapKeys, snakeCase } from 'lodash/fp';
 
+import type { UntypedRuleTypeAlerts } from '@kbn/alerting-plugin/server/types';
 import type { IRuleDataClient } from '..';
 import { getCommonAlertFields } from './get_common_alert_fields';
-import { CreatePersistenceRuleTypeWrapper } from './persistence_types';
+import type { CreatePersistenceRuleTypeWrapper } from './persistence_types';
 import { errorAggregator } from './utils';
-import { AlertWithSuppressionFields870 } from '../../common/schemas/8.7.0';
+import type { CommonAlertFields870, SuppressionFields870 } from '../../common/schemas';
 
 /**
  * Alerts returned from BE have date type coerced to ISO strings
@@ -41,13 +45,13 @@ import { AlertWithSuppressionFields870 } from '../../common/schemas/8.7.0';
  * AlertWithSuppressionFieldsLatest since we're reading alerts rather than writing,
  * so future versions of Kibana may read 8.7.0 version alerts and need to update them
  */
-export type BackendAlertWithSuppressionFields870<T> = Omit<
-  AlertWithSuppressionFields870<T>,
+export type BackendAlertWithSuppressionFields870 = Omit<
+  SuppressionFields870,
   typeof ALERT_SUPPRESSION_START | typeof ALERT_SUPPRESSION_END
 > & {
   [ALERT_SUPPRESSION_START]: string;
   [ALERT_SUPPRESSION_END]: string;
-};
+} & CommonAlertFields870;
 
 export const ALERT_GROUP_INDEX = `${ALERT_NAMESPACE}.group.index` as const;
 
@@ -56,13 +60,15 @@ const augmentAlerts = async <T>({
   options,
   kibanaVersion,
   currentTimeOverride,
+  dangerouslyCreateAlertsInAllSpaces,
 }: {
   alerts: Array<{ _id: string; _source: T }>;
   options: RuleExecutorOptions<any, any, any, any, any>;
   kibanaVersion: string;
   currentTimeOverride: Date | undefined;
+  dangerouslyCreateAlertsInAllSpaces?: boolean;
 }) => {
-  const commonRuleFields = getCommonAlertFields(options);
+  const commonRuleFields = getCommonAlertFields(options, dangerouslyCreateAlertsInAllSpaces);
   const maintenanceWindowIds: string[] =
     alerts.length > 0 ? await options.services.getMaintenanceWindowIds() : [];
 
@@ -108,22 +114,20 @@ const filterDuplicateAlerts = async <T extends { _id: string }>({
 
   for (const alertChunk of alertChunks) {
     const request: estypes.SearchRequest = {
-      body: {
-        query: {
-          ids: {
-            values: alertChunk.map((alert) => alert._id),
-          },
+      query: {
+        ids: {
+          values: alertChunk.map((alert) => alert._id),
         },
-        aggs: {
-          uuids: {
-            terms: {
-              field: ALERT_UUID,
-              size: CHUNK_SIZE,
-            },
-          },
-        },
-        size: 0,
       },
+      aggs: {
+        uuids: {
+          terms: {
+            field: ALERT_UUID,
+            size: CHUNK_SIZE,
+          },
+        },
+      },
+      size: 0,
     };
     const response = await ruleDataClient.getReader({ namespace: spaceId }).search(request);
     const uuidsMap: Record<string, boolean> = {};
@@ -207,7 +211,7 @@ export const suppressAlertsInMemory = <
 export const isExistingDateGtEqThanAlert = <
   T extends { [ALERT_SUPPRESSION_END]: Date; [ALERT_SUPPRESSION_START]: Date }
 >(
-  existingAlert: estypes.SearchHit<BackendAlertWithSuppressionFields870<{}>>,
+  existingAlert: estypes.SearchHit<BackendAlertWithSuppressionFields870>,
   alert: { _id: string; _source: T },
   property: typeof ALERT_SUPPRESSION_END | typeof ALERT_SUPPRESSION_START
 ) => {
@@ -224,7 +228,7 @@ interface SuppressionBoundaries {
  * returns updated suppression time boundaries
  */
 export const getUpdatedSuppressionBoundaries = <T extends SuppressionBoundaries>(
-  existingAlert: estypes.SearchHit<BackendAlertWithSuppressionFields870<{}>>,
+  existingAlert: estypes.SearchHit<BackendAlertWithSuppressionFields870>,
   alert: { _id: string; _source: T },
   executionId: string
 ): Partial<SuppressionBoundaries> => {
@@ -248,6 +252,11 @@ export const getUpdatedSuppressionBoundaries = <T extends SuppressionBoundaries>
 export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper =
   ({ logger, ruleDataClient, formatAlert }) =>
   (type) => {
+    const createAlertsInAllSpaces = shouldCreateAlertsInAllSpaces({
+      ruleTypeId: type.id,
+      ruleTypeAlertDef: type.alerts as unknown as UntypedRuleTypeAlerts,
+      logger,
+    });
     return {
       ...type,
       executor: async (options) => {
@@ -309,6 +318,7 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   options,
                   kibanaVersion: ruleDataClient.kibanaVersion,
                   currentTimeOverride: undefined,
+                  dangerouslyCreateAlertsInAllSpaces: createAlertsInAllSpaces,
                 });
 
                 const response = await ruleDataClientWriter.bulk({
@@ -413,59 +423,57 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                 }
 
                 const suppressionAlertSearchRequest = {
-                  body: {
-                    size: filteredDuplicates.length,
-                    query: {
-                      bool: {
-                        filter: [
-                          {
-                            range: {
-                              [ALERT_START]: {
-                                gte: suppressionWindowStart.toISOString(),
-                              },
+                  size: filteredDuplicates.length,
+                  query: {
+                    bool: {
+                      filter: [
+                        {
+                          range: {
+                            [ALERT_START]: {
+                              gte: suppressionWindowStart.toISOString(),
                             },
                           },
-                          {
-                            terms: {
-                              [ALERT_INSTANCE_ID]: filteredDuplicates.map(
-                                (alert) => alert._source[ALERT_INSTANCE_ID]
-                              ),
-                            },
-                          },
-                          {
-                            bool: {
-                              must_not: {
-                                term: {
-                                  [ALERT_WORKFLOW_STATUS]: 'closed',
-                                },
-                              },
-                            },
-                          },
-                        ],
-                      },
-                    },
-                    collapse: {
-                      field: ALERT_INSTANCE_ID,
-                    },
-                    sort: [
-                      {
-                        [ALERT_START]: {
-                          order: 'desc' as const,
                         },
-                      },
-                    ],
+                        {
+                          terms: {
+                            [ALERT_INSTANCE_ID]: filteredDuplicates.map(
+                              (alert) => alert._source[ALERT_INSTANCE_ID]
+                            ),
+                          },
+                        },
+                        {
+                          bool: {
+                            must_not: {
+                              term: {
+                                [ALERT_WORKFLOW_STATUS]: 'closed',
+                              },
+                            },
+                          },
+                        },
+                      ],
+                    },
                   },
+                  collapse: {
+                    field: ALERT_INSTANCE_ID,
+                  },
+                  sort: [
+                    {
+                      [ALERT_START]: {
+                        order: 'desc' as const,
+                      },
+                    },
+                  ],
                 };
 
                 const response = await ruleDataClient
                   .getReader({ namespace: options.spaceId })
                   .search<
                     typeof suppressionAlertSearchRequest,
-                    BackendAlertWithSuppressionFields870<{}>
+                    BackendAlertWithSuppressionFields870
                   >(suppressionAlertSearchRequest);
 
                 const existingAlertsByInstanceId = response.hits.hits.reduce<
-                  Record<string, estypes.SearchHit<BackendAlertWithSuppressionFields870<{}>>>
+                  Record<string, estypes.SearchHit<BackendAlertWithSuppressionFields870>>
                 >((acc, hit) => {
                   acc[hit._source[ALERT_INSTANCE_ID]] = hit;
                   return acc;
@@ -577,6 +585,7 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   options,
                   kibanaVersion: ruleDataClient.kibanaVersion,
                   currentTimeOverride,
+                  dangerouslyCreateAlertsInAllSpaces: createAlertsInAllSpaces,
                 });
 
                 const bulkResponse = await ruleDataClientWriter.bulk({

@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { createContext, useContext, useMemo } from 'react';
+import React, { createContext, useContext, useEffect, useMemo } from 'react';
 import { isEqual } from 'lodash';
 import { useBoolean } from '@kbn/react-hooks';
+import { useRulePreviewContext } from '../../../../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/rule_preview_context';
 import { assertUnreachable } from '../../../../../../../common/utility_types';
 import {
   ThreeWayDiffOutcome,
@@ -101,6 +102,16 @@ export function FieldUpgradeContextProvider({
   const [editing, { on: setEditMode, off: setReadOnlyMode }] = useBoolean(
     initialRightSideMode === FieldFinalSideMode.Edit
   );
+
+  const { setFieldEditing, setFieldReadonly } = useRulePreviewContext();
+
+  useEffect(() => {
+    if (editing) {
+      setFieldEditing(fieldName);
+    } else {
+      setFieldReadonly(fieldName);
+    }
+  }, [setFieldEditing, setFieldReadonly, editing, fieldName]);
 
   invariant(fieldDiff, `Field diff is not found for ${fieldName}.`);
 

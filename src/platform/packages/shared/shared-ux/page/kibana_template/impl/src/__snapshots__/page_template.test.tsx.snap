@@ -3,7 +3,7 @@
 exports[`KibanaPageTemplate render basic template 1`] = `
 <div
   class="euiPageTemplate kbnPageTemplate emotion-euiPageOuter-row-grow"
-  style="min-block-size:calc(100vh - var(--kbnAppHeadersOffset, var(--euiFixedHeadersOffset, 0)));padding-block-start:0"
+  style="min-block-size:var(--kbn-application--content-height);padding-block-start:0"
 >
   <main
     class="emotion-euiPageInner"
@@ -32,7 +32,7 @@ exports[`KibanaPageTemplate render basic template 1`] = `
             </div>
           </div>
           <div
-            class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-row-euiPageHeaderContent__rightSideItems"
+            class="euiFlexGroup emotion-euiFlexGroup-wrap-m-flexStart-stretch-row-euiPageHeaderContent__rightSideItems"
           >
             <div
               class="euiFlexItem emotion-euiFlexItem-growZero-euiPageHeaderContent__rightSideItem"

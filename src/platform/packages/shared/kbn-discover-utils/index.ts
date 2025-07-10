@@ -29,7 +29,10 @@ export {
   IgnoredReason,
   buildDataTableRecord,
   buildDataTableRecordList,
+  convertValueToString,
   createLogsContextService,
+  createTracesContextService,
+  createApmErrorsContextService,
   createDegradedDocsControl,
   createStacktraceControl,
   fieldConstants,
@@ -37,6 +40,8 @@ export {
   formatHit,
   getDocId,
   getLogDocumentOverview,
+  getTransactionDocumentOverview,
+  getSpanDocumentOverview,
   getIgnoredReason,
   getMessageFieldWithFallbacks,
   getShouldShowFieldHandler,
@@ -55,9 +60,22 @@ export {
   dismissAllFlyoutsExceptFor,
   dismissFlyouts,
   LogLevelBadge,
+  getDefaultSort,
+  getSort,
+  getSortArray,
+  getSortForSearchSource,
+  getEsQuerySort,
+  getTieBreakerFieldName,
 } from './src';
 
-export type { LogsContextService } from './src';
+export type {
+  LogsContextService,
+  TracesContextService,
+  ApmErrorsContextService,
+  SortOrder,
+  SortInput,
+  SortPair,
+} from './src';
 
 export * from './src/types';
 

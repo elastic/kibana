@@ -6,6 +6,7 @@
  */
 
 import { render, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { NewTimelineButton } from './new_timeline_button';
 import { TimelineId } from '../../../../../common/types';
@@ -15,13 +16,11 @@ import { RowRendererValues } from '../../../../../common/api/timeline';
 import { defaultUdtHeaders } from '../../timeline/body/column_headers/default_headers';
 
 jest.mock('../../../../common/components/discover_in_timeline/use_discover_in_timeline_context');
-jest.mock('../../../../common/hooks/use_selector');
 jest.mock('react-redux', () => {
   const original = jest.requireActual('react-redux');
 
   return {
     ...original,
-    useSelector: jest.fn(),
     useDispatch: () => jest.fn(),
   };
 });
@@ -40,7 +39,7 @@ describe('NewTimelineButton', () => {
     expect(button).toBeInTheDocument();
     expect(getByText('New')).toBeInTheDocument();
 
-    button.click();
+    await userEvent.click(button);
 
     expect(getByTestId('timeline-modal-new-timeline')).toBeInTheDocument();
     expect(getByTestId('timeline-modal-new-timeline')).toHaveTextContent('New Timeline');
@@ -52,15 +51,26 @@ describe('NewTimelineButton', () => {
   });
 
   it('should call the correct action with clicking on the new timeline button', async () => {
-    const dataViewId = '';
-    const selectedPatterns: string[] = [];
+    const dataViewId = 'security-solution';
+    const selectedPatterns: string[] = [
+      'apm-*-transaction*',
+      'auditbeat-*',
+      'endgame-*',
+      'filebeat-*',
+      'logs-*',
+      'packetbeat-*',
+      'traces-apm*',
+      'winlogbeat-*',
+      '-*elastic-cloud-logs-*',
+      '.siem-signals-spacename',
+    ];
 
     const spy = jest.spyOn(timelineActions, 'createTimeline');
 
     const { getByTestId } = renderNewTimelineButton();
 
-    getByTestId('timeline-modal-new-timeline-dropdown-button').click();
-    getByTestId('timeline-modal-new-timeline').click();
+    await userEvent.click(getByTestId('timeline-modal-new-timeline-dropdown-button'));
+    await userEvent.click(getByTestId('timeline-modal-new-timeline'));
 
     await waitFor(() => {
       expect(spy).toHaveBeenCalledWith({

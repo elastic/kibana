@@ -7,28 +7,21 @@
 
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type { GetThreatListOptions } from './types';
-import { getListClientMock } from '@kbn/lists-plugin/server/services/lists/list_client.mock';
-import { ruleExecutionLogMock } from '../../../rule_monitoring/mocks';
+import { getSharedParamsMock } from '../../__mocks__/shared_params';
+import { getThreatRuleParams } from '../../../rule_schema/mocks';
 
 const esClient = elasticsearchServiceMock.createElasticsearchClient();
-const ruleExecutionLogger = ruleExecutionLogMock.forExecutors.create();
 
 export const threatSearchParamsMock: GetThreatListOptions = {
+  sharedParams: getSharedParamsMock({ ruleParams: getThreatRuleParams() }),
   esClient,
-  query: '*:*',
-  language: 'kuery',
   threatFilters: [],
-  index: ['threats-*'],
-  ruleExecutionLogger,
   threatListConfig: {
     _source: false,
     fields: undefined,
   },
   pitId: 'mock',
   reassignPitId: jest.fn(),
-  listClient: getListClientMock(),
   searchAfter: undefined,
-  runtimeMappings: undefined,
-  exceptionFilter: undefined,
   indexFields: [],
 };

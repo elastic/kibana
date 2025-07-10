@@ -16,21 +16,18 @@ import { coreMock, scopedHistoryMock, themeServiceMock } from '@kbn/core/public/
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
-import { TriggersAndActionsUiServices } from '../../../application/rules_app';
-import {
-  RuleTypeRegistryContract,
-  ActionTypeRegistryContract,
-  AlertsTableConfigurationRegistryContract,
-} from '../../../types';
-import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
+import type { TriggersAndActionsUiServices } from '../../../application/rules_app';
+import type { RuleTypeRegistryContract, ActionTypeRegistryContract } from '../../../types';
+import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
+import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
 
 export const createStartServicesMock = (): TriggersAndActionsUiServices => {
   const core = coreMock.createStart();
   const licensingPluginMock = licensingMock.createStart();
   return {
     ...core,
-    actions: { validateEmailAddresses: jest.fn() },
+    actions: { validateEmailAddresses: jest.fn(), enabledEmailServices: ['*'] },
     ruleTypeRegistry: {
       has: jest.fn(),
       register: jest.fn(),
@@ -60,15 +57,6 @@ export const createStartServicesMock = (): TriggersAndActionsUiServices => {
       get: jest.fn(),
       list: jest.fn(),
     } as ActionTypeRegistryContract,
-    alertsTableConfigurationRegistry: {
-      has: jest.fn(),
-      register: jest.fn(),
-      get: jest.fn(),
-      getActions: jest.fn(),
-      list: jest.fn(),
-      update: jest.fn(),
-      getAlertConfigIdPerRuleTypes: jest.fn(),
-    } as AlertsTableConfigurationRegistryContract,
     charts: chartPluginMock.createStartContract(),
     isCloud: false,
     kibanaFeatures: [],
@@ -81,6 +69,7 @@ export const createStartServicesMock = (): TriggersAndActionsUiServices => {
     isServerless: false,
     fieldFormats: fieldFormatsServiceMock.createStartContract(),
     lens: lensPluginMock.createStartContract(),
+    fieldsMetadata: fieldsMetadataPluginPublicMock.createStartContract(),
   } as TriggersAndActionsUiServices;
 };
 

@@ -86,6 +86,7 @@ export function TopErrors() {
       }
     },
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       environment,
       kuery,
@@ -132,6 +133,7 @@ export function TopErrors() {
     },
     // only fetches agg results when requestId changes
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [requestId],
     { preservePreviousData: false }
   );

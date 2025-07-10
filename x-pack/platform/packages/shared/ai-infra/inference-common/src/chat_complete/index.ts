@@ -8,16 +8,14 @@
 export type {
   ChatCompleteCompositeResponse,
   ChatCompleteAPI,
+  ChatCompleteAPIResponse,
   ChatCompleteOptions,
   FunctionCallingMode,
   ChatCompleteStreamResponse,
   ChatCompleteResponse,
+  ChatCompleteRetryConfiguration,
 } from './api';
-export type {
-  BoundChatCompleteAPI,
-  BoundChatCompleteOptions,
-  UnboundChatCompleteOptions,
-} from './bound_api';
+export type { BoundChatCompleteAPI, UnboundChatCompleteOptions } from './bound_api';
 export {
   ChatCompletionEventType,
   type ChatCompletionMessageEvent,
@@ -43,6 +41,7 @@ export {
 export { type ToolSchema, type ToolSchemaType, type FromToolSchema } from './tool_schema';
 export {
   ToolChoiceType,
+  type ToolCallbacksOf,
   type ToolOptions,
   type ToolDefinition,
   type ToolCall,
@@ -50,6 +49,7 @@ export {
   type UnvalidatedToolCall,
   type ToolChoice,
 } from './tools';
+export type { ChatCompleteMetadata, ConnectorTelemetryMetadata } from './metadata';
 export {
   isChatCompletionChunkEvent,
   isChatCompletionEvent,
@@ -67,3 +67,16 @@ export {
   isTokenLimitReachedError,
   isToolNotFoundError,
 } from './errors';
+
+export type {
+  AnonymizationRule,
+  AnonymizationEntity,
+  Anonymization,
+  Deanonymization,
+  AnonymizationOutput,
+  DeanonymizationOutput,
+  DeanonymizedMessage,
+  RegexAnonymizationRule,
+  NamedEntityRecognitionRule,
+  AnonymizationSettings,
+} from './anonymization';

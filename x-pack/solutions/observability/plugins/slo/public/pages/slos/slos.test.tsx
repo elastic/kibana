@@ -45,7 +45,6 @@ jest.mock('../../hooks/use_delete_slo');
 jest.mock('../../hooks/use_delete_slo_instance');
 jest.mock('../../hooks/use_fetch_historical_summary');
 jest.mock('../../hooks/use_permissions');
-jest.mock('../../hooks/use_capabilities');
 jest.mock('../../hooks/use_create_data_view');
 jest.mock('@kbn/ebt-tools');
 
@@ -72,15 +71,18 @@ const mockDeleteSlo = jest.fn();
 const mockDeleteInstance = jest.fn();
 
 useCreateSloMock.mockReturnValue({ mutate: mockCreateSlo });
-useDeleteSloMock.mockReturnValue({ mutateAsync: mockDeleteSlo });
-useDeleteSloInstanceMock.mockReturnValue({ mutateAsync: mockDeleteInstance });
+useDeleteSloMock.mockReturnValue({ mutate: mockDeleteSlo });
+useDeleteSloInstanceMock.mockReturnValue({ mutate: mockDeleteInstance });
 useCreateDataViewMock.mockReturnValue({});
 
 const mockNavigate = jest.fn();
 const mockAddSuccess = jest.fn();
 const mockAddError = jest.fn();
 const mockLocator = jest.fn();
-const mockGetAddRuleFlyout = jest.fn().mockReturnValue(() => <div>Add rule flyout</div>);
+
+jest.mock('@kbn/response-ops-rule-form/flyout', () => ({
+  RuleFormFlyout: jest.fn(() => <div data-test-subj="add-rule-flyout">Add rule flyout</div>),
+}));
 
 const mockKibana = () => {
   useKibanaMock.mockReturnValue({
@@ -100,6 +102,9 @@ const mockKibana = () => {
       docLinks: {
         links: {
           query: {},
+          observability: {
+            slo: 'dummy_link',
+          },
         },
       },
       http: {
@@ -124,7 +129,7 @@ const mockKibana = () => {
       storage: {
         get: () => {},
       },
-      triggersActionsUi: { getAddRuleFlyout: mockGetAddRuleFlyout },
+      triggersActionsUi: {},
       uiSettings: {
         get: (settings: string) => {
           if (settings === 'dateFormat') return 'YYYY-MM-DD';
@@ -319,9 +324,11 @@ describe('SLOs Page', () => {
 
         expect(button).toBeTruthy();
 
-        button.click();
+        act(() => {
+          button.click();
+        });
 
-        expect(mockGetAddRuleFlyout).toBeCalled();
+        expect(screen.getByTestId('add-rule-flyout')).toBeInTheDocument();
       });
 
       it('allows managing rules for an SLO', async () => {
@@ -372,7 +379,9 @@ describe('SLOs Page', () => {
 
         expect(button).toBeTruthy();
 
-        button.click();
+        act(() => {
+          button.click();
+        });
 
         screen.getByTestId('observabilitySolutionSloDeleteModalConfirmButton').click();
 

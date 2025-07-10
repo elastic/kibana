@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import React from 'react';
 import { act, waitFor, renderHook } from '@testing-library/react';
 import { useUpdateCase } from './use_update_case';
 import { basicCase } from './mock';
 import * as api from './api';
 import type { UpdateKey } from './types';
 import { useToasts } from '../common/lib/kibana';
-import type { AppMockRenderer } from '../common/mock';
-import { createAppMockRenderer } from '../common/mock';
 import { casesQueriesKeys } from './constants';
+import { TestProviders, createTestQueryClient } from '../common/mock';
 
 jest.mock('./api');
 jest.mock('../common/lib/kibana');
@@ -25,11 +25,8 @@ describe('useUpdateCase', () => {
   const addError = jest.fn();
   (useToasts as jest.Mock).mockReturnValue({ addSuccess, addError });
 
-  let appMockRender: AppMockRenderer;
-
   beforeEach(() => {
     jest.clearAllMocks();
-    appMockRender = createAppMockRenderer();
   });
 
   const sampleUpdate = {
@@ -39,10 +36,11 @@ describe('useUpdateCase', () => {
   };
 
   it('patch case and refresh the case page', async () => {
-    const queryClientSpy = jest.spyOn(appMockRender.queryClient, 'invalidateQueries');
+    const queryClient = createTestQueryClient();
+    const queryClientSpy = jest.spyOn(queryClient, 'invalidateQueries');
 
     const { result } = renderHook(() => useUpdateCase(), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: (props) => <TestProviders {...props} queryClient={queryClient} />,
     });
 
     act(() => {
@@ -51,14 +49,15 @@ describe('useUpdateCase', () => {
 
     await waitFor(() => {
       expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.caseView());
-      expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.tags());
     });
+
+    expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.tags());
   });
 
   it('calls the api when invoked with the correct parameters', async () => {
     const patchCaseSpy = jest.spyOn(api, 'patchCase');
     const { result } = renderHook(() => useUpdateCase(), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: TestProviders,
     });
 
     act(() => {
@@ -76,7 +75,7 @@ describe('useUpdateCase', () => {
 
   it('shows a success toaster', async () => {
     const { result } = renderHook(() => useUpdateCase(), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: TestProviders,
     });
 
     act(() => {
@@ -95,7 +94,7 @@ describe('useUpdateCase', () => {
     jest.spyOn(api, 'patchCase').mockRejectedValue(new Error('useUpdateCase: Test error'));
 
     const { result } = renderHook(() => useUpdateCase(), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: TestProviders,
     });
 
     act(() => {

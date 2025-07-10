@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { MAX_ALERTS_PER_CASE, MAX_DOCS_PER_PAGE } from '../../../common/constants';
 import { CasesConnectorRunParamsSchema } from './schema';
 
 describe('CasesConnectorRunParamsSchema', () => {
@@ -25,9 +26,11 @@ describe('CasesConnectorRunParamsSchema', () => {
             "_index": "alert-index",
           },
         ],
+        "groupedAlerts": null,
         "groupingBy": Array [
           "host.name",
         ],
+        "internallyManagedAlerts": null,
         "maximumCasesToOpen": 5,
         "owner": "cases",
         "reopenClosedCases": false,
@@ -107,6 +110,12 @@ describe('CasesConnectorRunParamsSchema', () => {
       ).toThrow();
     });
 
+    it('throws if the timeWindow is less than 5 minutes', () => {
+      expect(() =>
+        CasesConnectorRunParamsSchema.validate(getParams({ timeWindow: '3m' }))
+      ).toThrow();
+    });
+
     it('throws if there is a non valid letter at the end', () => {
       expect(() =>
         CasesConnectorRunParamsSchema.validate(getParams({ timeWindow: '10d#' }))
@@ -137,13 +146,13 @@ describe('CasesConnectorRunParamsSchema', () => {
       ).not.toThrow();
     });
 
-    it.each(['s', 'm', 'H', 'h', 'M', 'y'])('does not allow time unit %s', (unit) => {
+    it.each(['s', 'y', 'M', 'H'])('does not allow time unit %s', (unit) => {
       expect(() =>
         CasesConnectorRunParamsSchema.validate(getParams({ timeWindow: `5${unit}` }))
       ).toThrow();
     });
 
-    it.each(['d', 'w'])('allows time unit %s', (unit) => {
+    it.each(['d', 'w', 'h', 'm'])('allows time unit %s', (unit) => {
       expect(() =>
         CasesConnectorRunParamsSchema.validate(getParams({ timeWindow: `5${unit}` }))
       ).not.toThrow();
@@ -183,13 +192,13 @@ describe('CasesConnectorRunParamsSchema', () => {
       ).toThrow();
     });
 
-    it('does not accept maximumCasesToOpen to be more than 10', () => {
+    it('does not accept maximumCasesToOpen to be more than 20', () => {
       const params = getParams();
 
       expect(() =>
         CasesConnectorRunParamsSchema.validate({
           ...params,
-          maximumCasesToOpen: 11,
+          maximumCasesToOpen: 21,
         })
       ).toThrow();
     });
@@ -205,6 +214,132 @@ describe('CasesConnectorRunParamsSchema', () => {
         CasesConnectorRunParamsSchema.validate(getParams({ templateId: 'case_template_key' }))
           .templateId
       ).toBe('case_template_key');
+    });
+  });
+
+  describe('groupedAlerts', () => {
+    it('defaults the groupedAlerts to null', () => {
+      expect(CasesConnectorRunParamsSchema.validate(getParams()).groupedAlerts).toBe(null);
+    });
+
+    it('accept empty groupedAlerts', () => {
+      expect(
+        CasesConnectorRunParamsSchema.validate(getParams({ groupedAlerts: [] })).groupedAlerts
+      ).toEqual([]);
+    });
+
+    it('accepts valid groupedAlerts', () => {
+      const groupedAlerts = [
+        {
+          alerts: [{ _id: 'alert-id-1', _index: 'alert-index-2' }],
+          comments: ['comment-1'],
+          grouping: { field_name: 'field_value' },
+          title: 'custom-title',
+        },
+      ];
+      expect(CasesConnectorRunParamsSchema.validate(getParams({ groupedAlerts })).groupedAlerts)
+        .toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "alerts": Array [
+              Object {
+                "_id": "alert-id-1",
+                "_index": "alert-index-2",
+              },
+            ],
+            "comments": Array [
+              "comment-1",
+            ],
+            "grouping": Object {
+              "field_name": "field_value",
+            },
+            "title": "custom-title",
+          },
+        ]
+      `);
+    });
+
+    it('does not accept undefined `grouping` field', () => {
+      const groupedAlerts = [
+        {
+          alerts: [{ _id: 'alert-id-1', _index: 'alert-index-2' }],
+          comments: ['comment-1'],
+          title: 'custom-title',
+        },
+      ];
+      expect(() => CasesConnectorRunParamsSchema.validate(getParams({ groupedAlerts }))).toThrow();
+    });
+
+    it('does not accept undefined `alerts` field', () => {
+      const groupedAlerts = [
+        {
+          comments: ['comment-1'],
+          grouping: { field_name: 'field_value' },
+          title: 'custom-title',
+        },
+      ];
+      expect(() => CasesConnectorRunParamsSchema.validate(getParams({ groupedAlerts }))).toThrow();
+    });
+
+    it('does not accept more than `MAX_ALERTS_PER_CASE` items in `alerts` field', () => {
+      const groupedAlerts = [
+        {
+          alerts: new Array(MAX_ALERTS_PER_CASE + 1).fill({
+            _id: 'alert-id-1',
+            _index: 'alert-index-2',
+          }),
+          comments: ['comment-1'],
+          grouping: { field_name: 'field_value' },
+          title: 'custom-title',
+        },
+      ];
+      expect(() => CasesConnectorRunParamsSchema.validate(getParams({ groupedAlerts }))).toThrow();
+    });
+
+    it('does not accept more than `MAX_DOCS_PER_PAGE / 2` items in `comments` field', () => {
+      const groupedAlerts = [
+        {
+          alerts: [{ _id: 'alert-id-1', _index: 'alert-index-2' }],
+          comments: new Array(MAX_DOCS_PER_PAGE / 2 + 1).fill('comment-1'),
+          grouping: { field_name: 'field_value' },
+          title: 'custom-title',
+        },
+      ];
+      expect(() => CasesConnectorRunParamsSchema.validate(getParams({ groupedAlerts }))).toThrow();
+    });
+
+    it('accept undefined `comments` field', () => {
+      const groupedAlerts = [
+        {
+          alerts: [{ _id: 'alert-id-1', _index: 'alert-index-2' }],
+          grouping: { field_name: 'field_value' },
+          title: 'custom-title',
+        },
+      ];
+      expect(() =>
+        CasesConnectorRunParamsSchema.validate(getParams({ groupedAlerts }))
+      ).not.toThrow();
+    });
+
+    it('accept undefined `title` field', () => {
+      const groupedAlerts = [
+        {
+          alerts: [{ _id: 'alert-id-1', _index: 'alert-index-2' }],
+          comments: ['comment-1'],
+          grouping: { field_name: 'field_value' },
+        },
+      ];
+      expect(() =>
+        CasesConnectorRunParamsSchema.validate(getParams({ groupedAlerts }))
+      ).not.toThrow();
+    });
+  });
+
+  describe('internallyManagedAlerts', () => {
+    it('defaults the internallyManagedAlerts to null', () => {
+      expect(CasesConnectorRunParamsSchema.validate(getParams()).internallyManagedAlerts).toBe(
+        null
+      );
     });
   });
 });

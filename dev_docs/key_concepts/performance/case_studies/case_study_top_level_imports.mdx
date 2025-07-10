@@ -50,7 +50,7 @@ First, I looked at `ml.visualizer.html` in the `target/public` directory of the 
 
 From there, we can see there's a great deal of `node_modules` being loaded, (the portions in green).  While this visualization is useful in determining the size of a chunk relative to others, another visualization tool, [Statoscope](https://statoscope.tech/), is better at showing what as well as _why_ things are included in a chunk:
   
-[![Statoscope showing the contents of the ml.chunk.23.js file](./assets/top_level_imports_stato_modules.png)](./assets/top_level_imports_stato_modules_.png)
+[![Statoscope showing the contents of the ml.chunk.23.js file](./assets/top_level_imports_stato_modules.png)](./assets/top_level_imports_stato_modules.png)
 
 Knowing what and why the module is large, now we need to find why it's being loaded.  
 

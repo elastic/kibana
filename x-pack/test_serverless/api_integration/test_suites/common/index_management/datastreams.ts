@@ -20,6 +20,8 @@ export default function ({ getService }: FtrProviderContext) {
   let roleAuthc: RoleCredentials;
   let internalReqHeader: InternalRequestHeader;
   const svlDatastreamsHelpers = getService('svlDatastreamsHelpers');
+  const supertest = getService('supertest');
+  const es = getService('es');
 
   describe('Data streams', function () {
     // see details: https://github.com/elastic/kibana/issues/187372
@@ -65,6 +67,7 @@ export default function ({ getService }: FtrProviderContext) {
           privileges: {
             delete_index: true,
             manage_data_stream_lifecycle: true,
+            read_failure_store: true,
           },
           timeStampField: { name: '@timestamp' },
           indices: [
@@ -80,6 +83,7 @@ export default function ({ getService }: FtrProviderContext) {
           health: 'green',
           indexTemplateName: testDataStreamName,
           hidden: false,
+          failureStoreEnabled: false,
           indexMode: 'standard',
         });
       });
@@ -101,6 +105,7 @@ export default function ({ getService }: FtrProviderContext) {
           privileges: {
             delete_index: true,
             manage_data_stream_lifecycle: true,
+            read_failure_store: true,
           },
           timeStampField: { name: '@timestamp' },
           indices: [
@@ -122,7 +127,48 @@ export default function ({ getService }: FtrProviderContext) {
           meteringDocsCount: 0,
           meteringStorageSize: '0b',
           meteringStorageSizeBytes: 0,
+          failureStoreEnabled: false,
           indexMode: 'standard',
+        });
+      });
+
+      describe('index mode of logs-*-* data streams', () => {
+        const logsdbDataStreamName = 'logs-test-ds';
+
+        before(async () => {
+          await svlDatastreamsHelpers.createDataStream(logsdbDataStreamName);
+        });
+
+        after(async () => {
+          await svlDatastreamsHelpers.deleteDataStream(logsdbDataStreamName);
+        });
+
+        const logsdbSettings: Array<{ enabled: boolean | null; indexMode: string }> = [
+          { enabled: true, indexMode: 'logsdb' },
+          { enabled: false, indexMode: 'standard' },
+          { enabled: null, indexMode: 'logsdb' }, // In serverless Kibana, the cluster.logsdb.enabled setting is true by default, so logsdb index mode
+        ];
+
+        logsdbSettings.forEach(({ enabled, indexMode }) => {
+          it(`returns ${indexMode} index mode if logsdb.enabled setting is ${enabled}`, async () => {
+            await es.cluster.putSettings({
+              persistent: {
+                cluster: {
+                  logsdb: {
+                    enabled,
+                  },
+                },
+              },
+            });
+
+            const { body: dataStream } = await supertest
+              .get(`${API_BASE_PATH}/data_streams/${logsdbDataStreamName}`)
+              .set(internalReqHeader)
+              .set(roleAuthc.apiKeyHeader)
+              .expect(200);
+
+            expect(dataStream.indexMode).to.eql(indexMode);
+          });
         });
       });
     });

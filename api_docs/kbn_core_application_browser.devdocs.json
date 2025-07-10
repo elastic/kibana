@@ -300,7 +300,7 @@
               "\nReturns a confirm action, resulting on prompting a message to the user before leaving the\napplication, allowing him to choose if he wants to stay on the app or confirm that he\nwants to leave.\n"
             ],
             "signature": [
-              "(text: string, title?: string | undefined, callback?: (() => void) | undefined, confirmButtonText?: string | undefined, buttonColor?: \"text\" | \"warning\" | \"success\" | \"primary\" | \"accent\" | \"accentSecondary\" | \"danger\" | undefined) => ",
+              "(text: string, title?: string | undefined, callback?: (() => void) | undefined, confirmButtonText?: string | undefined, buttonColor?: \"text\" | \"success\" | \"warning\" | \"primary\" | \"accent\" | \"accentSecondary\" | \"danger\" | \"neutral\" | \"risk\" | undefined) => ",
               "AppLeaveConfirmAction"
             ],
             "path": "src/core/packages/application/browser/src/app_leave.ts",
@@ -385,7 +385,7 @@
                   "(optional) color for the confirmation button\nso we can show to the user the right UX for him to saved his/her/their changes"
                 ],
                 "signature": [
-                  "\"text\" | \"warning\" | \"success\" | \"primary\" | \"accent\" | \"accentSecondary\" | \"danger\" | undefined"
+                  "\"text\" | \"success\" | \"warning\" | \"primary\" | \"accent\" | \"accentSecondary\" | \"danger\" | \"neutral\" | \"risk\" | undefined"
                 ],
                 "path": "src/core/packages/application/browser/src/app_leave.ts",
                 "deprecated": false,
@@ -492,7 +492,7 @@
             "label": "buttonColor",
             "description": [],
             "signature": [
-              "\"text\" | \"warning\" | \"success\" | \"primary\" | \"accent\" | \"accentSecondary\" | \"danger\" | undefined"
+              "\"text\" | \"success\" | \"warning\" | \"primary\" | \"accent\" | \"accentSecondary\" | \"danger\" | \"neutral\" | \"risk\" | undefined"
             ],
             "path": "src/core/packages/application/browser/src/app_leave.ts",
             "deprecated": false,
@@ -663,7 +663,7 @@
               "\nGets the read-only capabilities."
             ],
             "signature": [
-              "{ readonly [x: string]: Readonly<{ [x: string]: boolean | Readonly<{ [x: string]: boolean; }>; }>; readonly navLinks: Readonly<{ [x: string]: boolean; }>; readonly management: Readonly<{ [x: string]: Readonly<{ [x: string]: boolean; }>; }>; readonly catalogue: Readonly<{ [x: string]: boolean; }>; }"
+              "{ readonly [x: string]: Readonly<{ [x: string]: boolean | Readonly<{ [x: string]: boolean; }>; }>; readonly navLinks: Readonly<{ [x: string]: boolean; }>; readonly management: Readonly<{ [x: string]: Readonly<{ [x: string]: boolean; }>; }>; readonly catalogue: Readonly<{ [x: string]: boolean; }>; readonly discover?: Readonly<{}> | undefined; readonly dashboard?: Readonly<{}> | undefined; readonly maps?: Readonly<{}> | undefined; readonly visualize?: Readonly<{}> | undefined; }"
             ],
             "path": "src/core/packages/application/browser/src/contracts.ts",
             "deprecated": false,
@@ -1036,12 +1036,16 @@
                 "path": "src/platform/plugins/shared/management/public/application.tsx"
               },
               {
-                "plugin": "@kbn/core-application-browser-mocks",
-                "path": "packages/core/application/core-application-browser-mocks/src/application_service.mock.ts"
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/application/browser-mocks/src/application_service.mock.ts"
               },
               {
                 "plugin": "fleet",
                 "path": "x-pack/platform/plugins/shared/fleet/public/applications/integrations/index.tsx"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/functional_with_es_ssl/plugins/alerts/public/application.tsx"
               },
               {
                 "plugin": "security",
@@ -1050,6 +1054,14 @@
               {
                 "plugin": "kibanaOverview",
                 "path": "src/platform/plugins/private/kibana_overview/public/application.tsx"
+              },
+              {
+                "plugin": "@kbn/test-suites-src",
+                "path": "src/platform/test/plugin_functional/plugins/core_plugin_chromeless/public/application.tsx"
+              },
+              {
+                "plugin": "@kbn/test-suites-src",
+                "path": "src/platform/test/plugin_functional/plugins/kbn_top_nav/public/application.tsx"
               },
               {
                 "plugin": "@kbn/core",

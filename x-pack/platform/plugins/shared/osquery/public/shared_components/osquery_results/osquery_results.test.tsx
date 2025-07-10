@@ -57,7 +57,7 @@ const defaultPermissions = {
     runSavedQueries: false,
     readSavedQueries: false,
   },
-  discover: {
+  discover_v2: {
     show: true,
   },
 };

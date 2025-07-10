@@ -1,0 +1,29 @@
+# Chat Project Config
+
+# Make sure the plugins belonging to this project type are loaded
+plugins.allowlistPluginGroups: ['platform', 'chat']
+
+## Enable the Serverless Chat plugin
+xpack.serverless.chat.enabled: true
+
+## Cloud settings
+xpack.cloud.serverless.project_type: search
+
+## Set the home route
+uiSettings.overrides.defaultRoute: /app/workchat
+
+## Enable workchat plugins
+xpack.workchatFramework.enabled: true
+xpack.workchatApp.enabled: true
+xpack.wciSalesforce.enabled: true
+xpack.wciIndexSource.enabled: true
+xpack.wciExternalServer.enabled: true
+
+# Disable spaces
+xpack.spaces.maxSpaces: 1
+
+## Content Connectors in stack management
+xpack.contentConnectors.enabled: false
+
+## Disable Kibana Product Intercept
+xpack.product_intercept.enabled: false

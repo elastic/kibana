@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AggregationsBuckets } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { AggregationsBuckets } from '@elastic/elasticsearch/lib/api/types';
 import { replaceFirstAndLastDotSymbols } from '../actions_telemetry';
 
 export interface AvgActionRunOutcomeByConnectorTypeBucket {

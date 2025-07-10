@@ -1781,7 +1781,7 @@
             "section": "def-common.RangeFilter",
             "text": "RangeFilter"
           },
-          ") => { from: moment.Moment; to: moment.Moment; }"
+          ") => { from: string | moment.Moment; to: string | moment.Moment; }"
         ],
         "path": "src/platform/packages/shared/kbn-es-query/src/filters/helpers/convert_range_filter.ts",
         "deprecated": false,
@@ -2106,7 +2106,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[]; timeRangeFilter: ",
+          "[]; timeRangeFilter?: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -2803,7 +2803,7 @@
         "tags": [],
         "label": "isCCSRemoteIndexName",
         "description": [
-          "\nCheck whether the index expression represents a remote index (CCS) or not.\nThe index name is assumed to be individual index (no commas) but can contain `-`, wildcards,\ndatemath, remote cluster name and any other syntax permissible in index expression component.\n\n2024/10/11 Implementation taken from https://github.com/smalyshev/elasticsearch/blob/main/server/src/main/java/org/elasticsearch/transport/RemoteClusterAware.java\n"
+          "\nCheck whether the index expression represents a remote index (CCS) or not.\nThe index name is assumed to be individual index (no commas) but can contain `-`, wildcards,\ndatemath, remote cluster name and any other syntax permissible in index expression component.\n\n2025/01/21 Implementation taken from https://github.com/smalyshev/elasticsearch/blob/main/server/src/main/java/org/elasticsearch/transport/RemoteClusterAware.java\n"
         ],
         "signature": [
           "(indexExpression: string) => boolean"
@@ -4515,9 +4515,140 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es-query",
+        "id": "def-common.updateFilterReferences",
+        "type": "Function",
+        "tags": [],
+        "label": "updateFilterReferences",
+        "description": [],
+        "signature": [
+          "(filters: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[], fromDataView: string, toDataView: string | undefined) => ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-es-query/src/filters/helpers/update_filter_references.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/es-query",
+            "id": "def-common.updateFilterReferences.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "filters",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-es-query/src/filters/helpers/update_filter_references.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/es-query",
+            "id": "def-common.updateFilterReferences.$2",
+            "type": "string",
+            "tags": [],
+            "label": "fromDataView",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-es-query/src/filters/helpers/update_filter_references.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/es-query",
+            "id": "def-common.updateFilterReferences.$3",
+            "type": "string",
+            "tags": [],
+            "label": "toDataView",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-es-query/src/filters/helpers/update_filter_references.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [
+      {
+        "parentPluginId": "@kbn/es-query",
+        "id": "def-common.AbsoluteTimeRange",
+        "type": "Interface",
+        "tags": [],
+        "label": "AbsoluteTimeRange",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.AbsoluteTimeRange",
+            "text": "AbsoluteTimeRange"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.TimeRange",
+            "text": "TimeRange"
+          }
+        ],
+        "path": "src/platform/packages/shared/kbn-es-query/src/filters/helpers/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/es-query",
+            "id": "def-common.AbsoluteTimeRange.mode",
+            "type": "string",
+            "tags": [],
+            "label": "mode",
+            "description": [],
+            "signature": [
+              "\"absolute\""
+            ],
+            "path": "src/platform/packages/shared/kbn-es-query/src/filters/helpers/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/es-query",
         "id": "def-common.BoolQuery",
@@ -4883,6 +5014,27 @@
             "description": [],
             "signature": [
               "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-es-query/src/expressions/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/es-query",
+            "id": "def-common.ExecutionContextSearch.esqlVariables",
+            "type": "Array",
+            "tags": [],
+            "label": "esqlVariables",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/esql-types",
+                "scope": "common",
+                "docId": "kibKbnEsqlTypesPluginApi",
+                "section": "def-common.ESQLControlVariable",
+                "text": "ESQLControlVariable"
+              },
+              "[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-es-query/src/expressions/types.ts",
             "deprecated": false,
@@ -5310,6 +5462,121 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-es-query/src/filters/build_filters/range_filter.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es-query",
+        "id": "def-common.RelativeTimeRange",
+        "type": "Interface",
+        "tags": [],
+        "label": "RelativeTimeRange",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.RelativeTimeRange",
+            "text": "RelativeTimeRange"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.TimeRange",
+            "text": "TimeRange"
+          }
+        ],
+        "path": "src/platform/packages/shared/kbn-es-query/src/filters/helpers/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/es-query",
+            "id": "def-common.RelativeTimeRange.mode",
+            "type": "string",
+            "tags": [],
+            "label": "mode",
+            "description": [],
+            "signature": [
+              "\"relative\""
+            ],
+            "path": "src/platform/packages/shared/kbn-es-query/src/filters/helpers/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es-query",
+        "id": "def-common.TimeState",
+        "type": "Interface",
+        "tags": [],
+        "label": "TimeState",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-es-query/src/filters/helpers/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/es-query",
+            "id": "def-common.TimeState.timeRange",
+            "type": "Object",
+            "tags": [],
+            "label": "timeRange",
+            "description": [],
+            "signature": [
+              "{ from: string; to: string; mode?: \"absolute\" | \"relative\" | undefined; }"
+            ],
+            "path": "src/platform/packages/shared/kbn-es-query/src/filters/helpers/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/es-query",
+            "id": "def-common.TimeState.asAbsoluteTimeRange",
+            "type": "Object",
+            "tags": [],
+            "label": "asAbsoluteTimeRange",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.AbsoluteTimeRange",
+                "text": "AbsoluteTimeRange"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-es-query/src/filters/helpers/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/es-query",
+            "id": "def-common.TimeState.start",
+            "type": "number",
+            "tags": [],
+            "label": "start",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-es-query/src/filters/helpers/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/es-query",
+            "id": "def-common.TimeState.end",
+            "type": "number",
+            "tags": [],
+            "label": "end",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-es-query/src/filters/helpers/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }

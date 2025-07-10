@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { MakeSchemaFrom, UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { MakeSchemaFrom, UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { get } from 'lodash';
-import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import { AlertingUsage } from './types';
+import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import type { AlertingUsage } from './types';
 
 const byTypeSchema: MakeSchemaFrom<AlertingUsage>['count_by_type'] = {
   // TODO: Find out an automated way to populate the keys or reformat these into an array (and change the Remote Telemetry indexer accordingly)
@@ -205,6 +205,8 @@ export function createAlertingUsageCollector(
           count_rules_with_tags: 0,
           count_rules_snoozed: 0,
           count_rules_muted: 0,
+          count_rules_with_linked_dashboards: 0,
+          count_rules_with_investigation_guide: 0,
           count_mw_total: 0,
           count_mw_with_repeat_toggle_on: 0,
           count_mw_with_filter_alert_toggle_on: 0,
@@ -239,6 +241,14 @@ export function createAlertingUsageCollector(
           },
           count_alerts_total: 0,
           count_alerts_by_rule_type: {},
+          count_rules_snoozed_by_type: {},
+          count_rules_muted_by_type: {},
+          count_ignored_fields_by_rule_type: {},
+          count_backfill_executions: 0,
+          count_backfills_by_execution_status_per_day: {},
+          count_gaps: 0,
+          total_unfilled_gap_duration_ms: 0,
+          total_filled_gap_duration_ms: 0,
         };
       }
     },
@@ -294,6 +304,8 @@ export function createAlertingUsageCollector(
       count_rules_by_notify_when: byNotifyWhenSchema,
       count_rules_snoozed: { type: 'long' },
       count_rules_muted: { type: 'long' },
+      count_rules_with_linked_dashboards: { type: 'long' },
+      count_rules_with_investigation_guide: { type: 'long' },
       count_mw_total: { type: 'long' },
       count_mw_with_repeat_toggle_on: { type: 'long' },
       count_mw_with_filter_alert_toggle_on: { type: 'long' },
@@ -312,6 +324,14 @@ export function createAlertingUsageCollector(
       percentile_num_alerts_by_type_per_day: byPercentileSchemaByType,
       count_alerts_total: { type: 'long' },
       count_alerts_by_rule_type: byTypeSchema,
+      count_rules_snoozed_by_type: byTypeSchema,
+      count_rules_muted_by_type: byTypeSchema,
+      count_ignored_fields_by_rule_type: byTypeSchema,
+      count_backfill_executions: { type: 'long' },
+      count_backfills_by_execution_status_per_day: byStatusPerDaySchema,
+      count_gaps: { type: 'long' },
+      total_unfilled_gap_duration_ms: { type: 'long' },
+      total_filled_gap_duration_ms: { type: 'long' },
     },
   });
 }

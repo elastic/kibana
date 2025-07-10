@@ -66,20 +66,36 @@ export const MissingPrivilegesCallOutBody: React.FC<MissingPrivileges> = ({
               </ul>
             </>
           ) : null,
-        clusterPrivileges:
-          clusterPrivileges.length > 0 ? (
-            <>
-              <FormattedMessage
-                id="xpack.securitySolution.riskEngine.missingPrivilegesCallOut.messageBody.clusterPrivilegesTitle"
-                defaultMessage="Missing Elasticsearch cluster privileges:"
-              />
-              <ul>
-                {clusterPrivileges.map((privilege) => (
-                  <li key={privilege}>{privilege}</li>
-                ))}
-              </ul>
-            </>
-          ) : null,
+        clusterPrivileges: (
+          <>
+            {clusterPrivileges.enable.length > 0 && (
+              <>
+                <FormattedMessage
+                  id="xpack.securitySolution.riskEngine.missingPrivilegesCallOut.messageBody.clusterPrivilegesEnableTitle"
+                  defaultMessage="Missing Elasticsearch cluster privileges to enable Risk Score engine:"
+                />
+                <ul>
+                  {clusterPrivileges.enable.map((privilege) => (
+                    <li key={privilege}>{privilege}</li>
+                  ))}
+                </ul>
+              </>
+            )}
+            {clusterPrivileges.run.length > 0 && (
+              <>
+                <FormattedMessage
+                  id="xpack.securitySolution.riskEngine.missingPrivilegesCallOut.messageBody.clusterPrivilegesRunTitle"
+                  defaultMessage="Missing Elasticsearch cluster privileges to run Risk Score engine:"
+                />
+                <ul>
+                  {clusterPrivileges.run.map((privilege) => (
+                    <li key={privilege}>{privilege}</li>
+                  ))}
+                </ul>
+              </>
+            )}
+          </>
+        ),
       }}
     />
   );

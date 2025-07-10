@@ -21,6 +21,16 @@ jest.mock('@kbn/security-solution-features/product_features', () => ({
     baseKibanaSubFeatureIds: [],
     subFeaturesMap: new Map(),
   })),
+  getSecurityV2Feature: jest.fn(() => ({
+    baseKibanaFeature: {},
+    baseKibanaSubFeatureIds: [],
+    subFeaturesMap: new Map(),
+  })),
+  getSecurityV3Feature: jest.fn(() => ({
+    baseKibanaFeature: {},
+    baseKibanaSubFeatureIds: [],
+    subFeaturesMap: new Map(),
+  })),
   getCasesFeature: jest.fn(() => ({
     baseKibanaFeature: {},
     baseKibanaSubFeatureIds: [],
@@ -31,12 +41,32 @@ jest.mock('@kbn/security-solution-features/product_features', () => ({
     baseKibanaSubFeatureIds: [],
     subFeaturesMap: new Map(),
   })),
+  getCasesV3Feature: jest.fn(() => ({
+    baseKibanaFeature: {},
+    baseKibanaSubFeatureIds: [],
+    subFeaturesMap: new Map(),
+  })),
   getAssistantFeature: jest.fn(() => ({
     baseKibanaFeature: {},
     baseKibanaSubFeatureIds: [],
     subFeaturesMap: new Map(),
   })),
   getAttackDiscoveryFeature: jest.fn(() => ({
+    baseKibanaFeature: {},
+    baseKibanaSubFeatureIds: [],
+    subFeaturesMap: new Map(),
+  })),
+  getTimelineFeature: jest.fn(() => ({
+    baseKibanaFeature: {},
+    baseKibanaSubFeatureIds: [],
+    subFeaturesMap: new Map(),
+  })),
+  getNotesFeature: jest.fn(() => ({
+    baseKibanaFeature: {},
+    baseKibanaSubFeatureIds: [],
+    subFeaturesMap: new Map(),
+  })),
+  getSiemMigrationsFeature: jest.fn(() => ({
     baseKibanaFeature: {},
     baseKibanaSubFeatureIds: [],
     subFeaturesMap: new Map(),
@@ -126,6 +156,55 @@ export const createProductFeaturesServiceMock = (
                 read: {
                   ui: ['entity-analytics'],
                   api: [`test-entity-analytics`],
+                },
+              },
+            },
+          ])
+        )
+      ),
+      timeline: jest.fn().mockReturnValue(
+        new Map(
+          enabledFeatureKeys.map((key) => [
+            key,
+            {
+              privileges: {
+                all: {
+                  ui: ['entity-analytics'],
+                },
+                read: {
+                  ui: ['entity-analytics'],
+                },
+              },
+            },
+          ])
+        )
+      ),
+      notes: jest.fn().mockReturnValue(
+        new Map(
+          enabledFeatureKeys.map((key) => [
+            key,
+            {
+              privileges: {
+                all: {
+                  ui: ['entity-analytics'],
+                },
+                read: {
+                  ui: ['entity-analytics'],
+                },
+              },
+            },
+          ])
+        )
+      ),
+      siemMigrations: jest.fn().mockReturnValue(
+        new Map(
+          enabledFeatureKeys.map((key) => [
+            key,
+            {
+              privileges: {
+                all: {
+                  api: ['test-api-action'],
+                  ui: ['test-ui-action'],
                 },
               },
             },

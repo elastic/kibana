@@ -20,7 +20,7 @@ import type {
 } from './breadcrumb';
 import type { ChromeBadge, ChromeStyle, ChromeUserBanner } from './types';
 import type { ChromeGlobalHelpExtensionMenuLink } from './help_extension';
-import type { PanelSelectedNode } from './project_navigation';
+import type { PanelSelectedNode, SolutionId } from './project_navigation';
 
 /**
  * ChromeStart allows plugins to customize the global chrome header UI and
@@ -91,16 +91,16 @@ export interface ChromeStart {
   setBreadcrumbs(newBreadcrumbs: ChromeBreadcrumb[], params?: ChromeSetBreadcrumbsParams): void;
 
   /**
-   * Get an observable of the current extension appended to breadcrumbs
+   * Get an observable of the current extensions appended to breadcrumbs
    */
-  getBreadcrumbsAppendExtension$(): Observable<ChromeBreadcrumbsAppendExtension | undefined>;
+  getBreadcrumbsAppendExtensions$(): Observable<ChromeBreadcrumbsAppendExtension[]>;
 
   /**
    * Mount an element next to the last breadcrumb
    */
   setBreadcrumbsAppendExtension(
-    breadcrumbsAppendExtension?: ChromeBreadcrumbsAppendExtension
-  ): void;
+    breadcrumbsAppendExtension: ChromeBreadcrumbsAppendExtension
+  ): () => void;
 
   /**
    * Get an observable of the current custom nav link
@@ -149,11 +149,6 @@ export interface ChromeStart {
    * Get the support URL shown in the help menu
    */
   getHelpSupportUrl$(): Observable<string>;
-
-  /**
-   * Get an observable of the current locked state of the nav drawer.
-   */
-  getIsNavDrawerLocked$(): Observable<boolean>;
 
   /**
    * Set the banner that will appear on top of the chrome header.
@@ -219,5 +214,5 @@ export interface ChromeStart {
   /**
    * Get the id of the currently active project navigation or `null` otherwise.
    */
-  getActiveSolutionNavId$(): Observable<string | null>;
+  getActiveSolutionNavId$(): Observable<SolutionId | null>;
 }

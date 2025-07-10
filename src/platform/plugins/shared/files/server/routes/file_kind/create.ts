@@ -60,8 +60,10 @@ export function register(fileKindRouter: FileKindRouter, fileKind: FileKind) {
         validate: {
           ...rt,
         },
-        options: {
-          tags: fileKind.http.create.tags,
+        security: {
+          authz: {
+            requiredPrivileges: fileKind.http.create.requiredPrivileges,
+          },
         },
       },
       handler

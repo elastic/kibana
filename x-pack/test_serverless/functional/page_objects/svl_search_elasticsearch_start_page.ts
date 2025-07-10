@@ -23,11 +23,19 @@ export function SvlSearchElasticsearchStartPageProvider({ getService }: FtrProvi
         expect(await browser.getCurrentUrl()).contain('/app/elasticsearch/indices/index_details');
       });
     },
+    async expectToBeOnDiscoverPage() {
+      expect(await browser.getCurrentUrl()).contain('/app/discover');
+    },
     async expectToBeOnIndexListPage() {
       await retry.tryForTime(60 * 1000, async () => {
         expect(await browser.getCurrentUrl()).contain(
-          '/app/management/data/index_management/indices'
+          '/app/elasticsearch/index_management/indices'
         );
+      });
+    },
+    async expectToBeOnSearchHomepagePage() {
+      await retry.tryForTime(60 * 1000, async () => {
+        expect(await browser.getCurrentUrl()).contain('/app/elasticsearch/home');
       });
     },
     async expectToBeOnMLFileUploadPage() {
@@ -54,6 +62,7 @@ export function SvlSearchElasticsearchStartPageProvider({ getService }: FtrProvi
     },
     async clickSkipButton() {
       await testSubjects.existOrFail('createIndexSkipBtn');
+      await testSubjects.scrollIntoView('createIndexSkipBtn');
       await testSubjects.click('createIndexSkipBtn');
     },
     async expectCreateIndexButtonToExist() {
@@ -93,7 +102,7 @@ export function SvlSearchElasticsearchStartPageProvider({ getService }: FtrProvi
     async expectAnalyzeLogsLink() {
       await testSubjects.existOrFail('analyzeLogsBtn');
       expect(await testSubjects.getAttribute('analyzeLogsBtn', 'href')).equal(
-        'https://www.elastic.co/guide/en/serverless/current/elasticsearch-ingest-your-data.html'
+        'https://www.elastic.co/docs/manage-data/ingest'
       );
       expect(await testSubjects.getAttribute('analyzeLogsBtn', 'target')).equal('_blank');
     },
@@ -122,6 +131,10 @@ export function SvlSearchElasticsearchStartPageProvider({ getService }: FtrProvi
     async expectAPIKeyFormNotAvailable() {
       await testSubjects.missingOrFail('apiKeyHasNotBeenGenerated');
       await testSubjects.missingOrFail('apiKeyHasBeenGenerated');
+    },
+
+    async clearSkipEmptyStateStorageFlag() {
+      await browser.removeLocalStorageItem('search_onboarding_global_empty_state_skip');
     },
   };
 }

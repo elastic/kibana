@@ -46,8 +46,8 @@ export const useNavigateToLeftPanel = ({
   const { openLeftPanel, openFlyout } = useExpandableFlyoutApi();
   const { eventId, indexName, scopeId, isPreviewMode } = useDocumentDetailsContext();
 
-  const isNewNavigationEnabled = useIsExperimentalFeatureEnabled(
-    'newExpandableFlyoutNavigationEnabled'
+  const isNewNavigationEnabled = !useIsExperimentalFeatureEnabled(
+    'newExpandableFlyoutNavigationDisabled'
   );
 
   const isEnabled = isNewNavigationEnabled || (!isNewNavigationEnabled && !isPreviewMode);

@@ -47,7 +47,7 @@
           },
           ">>"
         ],
-        "path": "packages/response-ops/rule_form/src/common/apis/create_rule/create_rule.ts",
+        "path": "src/platform/packages/shared/response-ops/rule_form/src/common/apis/create_rule/create_rule.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -58,7 +58,7 @@
             "tags": [],
             "label": "{\n  http,\n  rule,\n}",
             "description": [],
-            "path": "packages/response-ops/rule_form/src/common/apis/create_rule/create_rule.ts",
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/common/apis/create_rule/create_rule.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -72,7 +72,7 @@
                 "signature": [
                   "HttpSetup"
                 ],
-                "path": "packages/response-ops/rule_form/src/common/apis/create_rule/create_rule.ts",
+                "path": "src/platform/packages/shared/response-ops/rule_form/src/common/apis/create_rule/create_rule.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -101,7 +101,7 @@
                   },
                   ">"
                 ],
-                "path": "packages/response-ops/rule_form/src/common/apis/create_rule/create_rule.ts",
+                "path": "src/platform/packages/shared/response-ops/rule_form/src/common/apis/create_rule/create_rule.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -125,7 +125,7 @@
           "UiConfig",
           ">"
         ],
-        "path": "packages/response-ops/rule_form/src/common/apis/fetch_ui_config/fetch_ui_config.ts",
+        "path": "src/platform/packages/shared/response-ops/rule_form/src/common/apis/fetch_ui_config/fetch_ui_config.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -136,7 +136,7 @@
             "tags": [],
             "label": "{ http }",
             "description": [],
-            "path": "packages/response-ops/rule_form/src/common/apis/fetch_ui_config/fetch_ui_config.ts",
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/common/apis/fetch_ui_config/fetch_ui_config.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -150,7 +150,7 @@
                 "signature": [
                   "HttpSetup"
                 ],
-                "path": "packages/response-ops/rule_form/src/common/apis/fetch_ui_config/fetch_ui_config.ts",
+                "path": "src/platform/packages/shared/response-ops/rule_form/src/common/apis/fetch_ui_config/fetch_ui_config.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -180,7 +180,7 @@
           },
           ">"
         ],
-        "path": "packages/response-ops/rule_form/src/common/apis/resolve_rule/resolve_rule.ts",
+        "path": "src/platform/packages/shared/response-ops/rule_form/src/common/apis/resolve_rule/resolve_rule.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -191,7 +191,7 @@
             "tags": [],
             "label": "{\n  http,\n  id,\n}",
             "description": [],
-            "path": "packages/response-ops/rule_form/src/common/apis/resolve_rule/resolve_rule.ts",
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/common/apis/resolve_rule/resolve_rule.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -205,7 +205,7 @@
                 "signature": [
                   "HttpSetup"
                 ],
-                "path": "packages/response-ops/rule_form/src/common/apis/resolve_rule/resolve_rule.ts",
+                "path": "src/platform/packages/shared/response-ops/rule_form/src/common/apis/resolve_rule/resolve_rule.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -216,7 +216,7 @@
                 "tags": [],
                 "label": "id",
                 "description": [],
-                "path": "packages/response-ops/rule_form/src/common/apis/resolve_rule/resolve_rule.ts",
+                "path": "src/platform/packages/shared/response-ops/rule_form/src/common/apis/resolve_rule/resolve_rule.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -238,7 +238,7 @@
           "RuleActionsAlertsFilterProps",
           ") => React.JSX.Element"
         ],
-        "path": "packages/response-ops/rule_form/src/rule_actions/rule_actions_alerts_filter.tsx",
+        "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_actions/rule_actions_alerts_filter.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -252,7 +252,7 @@
             "signature": [
               "RuleActionsAlertsFilterProps"
             ],
-            "path": "packages/response-ops/rule_form/src/rule_actions/rule_actions_alerts_filter.tsx",
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_actions/rule_actions_alerts_filter.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -273,7 +273,7 @@
           "RuleActionsAlertsFilterTimeframeProps",
           ") => React.JSX.Element"
         ],
-        "path": "packages/response-ops/rule_form/src/rule_actions/rule_actions_alerts_filter_timeframe.tsx",
+        "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_actions/rule_actions_alerts_filter_timeframe.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -287,7 +287,7 @@
             "signature": [
               "RuleActionsAlertsFilterTimeframeProps"
             ],
-            "path": "packages/response-ops/rule_form/src/rule_actions/rule_actions_alerts_filter_timeframe.tsx",
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_actions/rule_actions_alerts_filter_timeframe.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -308,7 +308,7 @@
           "RuleActionsNotifyWhenProps",
           ") => React.JSX.Element"
         ],
-        "path": "packages/response-ops/rule_form/src/rule_actions/rule_actions_notify_when.tsx",
+        "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_actions/rule_actions_notify_when.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -322,7 +322,7 @@
             "signature": [
               "RuleActionsNotifyWhenProps"
             ],
-            "path": "packages/response-ops/rule_form/src/rule_actions/rule_actions_notify_when.tsx",
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_actions/rule_actions_notify_when.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -339,11 +339,33 @@
         "label": "RuleForm",
         "description": [],
         "signature": [
-          "(props: ",
-          "RuleFormProps",
-          ") => React.JSX.Element"
+          "<MetaData extends ",
+          {
+            "pluginId": "@kbn/alerts-ui-shared",
+            "scope": "public",
+            "docId": "kibKbnAlertsUiSharedPluginApi",
+            "section": "def-public.RuleTypeMetaData",
+            "text": "RuleTypeMetaData"
+          },
+          " = ",
+          {
+            "pluginId": "@kbn/alerts-ui-shared",
+            "scope": "public",
+            "docId": "kibKbnAlertsUiSharedPluginApi",
+            "section": "def-public.RuleTypeMetaData",
+            "text": "RuleTypeMetaData"
+          },
+          ">(props: ",
+          {
+            "pluginId": "@kbn/response-ops-rule-form",
+            "scope": "public",
+            "docId": "kibKbnResponseOpsRuleFormPluginApi",
+            "section": "def-public.RuleFormProps",
+            "text": "RuleFormProps"
+          },
+          "<MetaData>) => React.JSX.Element"
         ],
-        "path": "packages/response-ops/rule_form/src/rule_form.tsx",
+        "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -355,9 +377,16 @@
             "label": "props",
             "description": [],
             "signature": [
-              "RuleFormProps"
+              {
+                "pluginId": "@kbn/response-ops-rule-form",
+                "scope": "public",
+                "docId": "kibKbnResponseOpsRuleFormPluginApi",
+                "section": "def-public.RuleFormProps",
+                "text": "RuleFormProps"
+              },
+              "<MetaData>"
             ],
-            "path": "packages/response-ops/rule_form/src/rule_form.tsx",
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -378,7 +407,7 @@
           "RuleTypeModalComponentProps",
           ") => React.JSX.Element"
         ],
-        "path": "packages/response-ops/rule_form/src/rule_type_modal/components/index.tsx",
+        "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_type_modal/components/index.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -392,7 +421,7 @@
             "signature": [
               "RuleTypeModalComponentProps"
             ],
-            "path": "packages/response-ops/rule_form/src/rule_type_modal/components/index.tsx",
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_type_modal/components/index.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -427,7 +456,7 @@
           },
           ">) => any"
         ],
-        "path": "packages/response-ops/rule_form/src/common/apis/create_rule/transform_create_rule_body.ts",
+        "path": "src/platform/packages/shared/response-ops/rule_form/src/common/apis/create_rule/transform_create_rule_body.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -456,7 +485,7 @@
               },
               ">"
             ],
-            "path": "packages/response-ops/rule_form/src/common/apis/create_rule/transform_create_rule_body.ts",
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/common/apis/create_rule/transform_create_rule_body.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -485,7 +514,7 @@
           },
           ">) => any"
         ],
-        "path": "packages/response-ops/rule_form/src/common/apis/update_rule/transform_update_rule_body.ts",
+        "path": "src/platform/packages/shared/response-ops/rule_form/src/common/apis/update_rule/transform_update_rule_body.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -508,7 +537,7 @@
               },
               ">"
             ],
-            "path": "packages/response-ops/rule_form/src/common/apis/update_rule/transform_update_rule_body.ts",
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/common/apis/update_rule/transform_update_rule_body.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -555,7 +584,7 @@
           },
           ">>"
         ],
-        "path": "packages/response-ops/rule_form/src/common/apis/update_rule/update_rule.ts",
+        "path": "src/platform/packages/shared/response-ops/rule_form/src/common/apis/update_rule/update_rule.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -566,7 +595,7 @@
             "tags": [],
             "label": "{\n  http,\n  rule,\n  id,\n}",
             "description": [],
-            "path": "packages/response-ops/rule_form/src/common/apis/update_rule/update_rule.ts",
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/common/apis/update_rule/update_rule.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -580,7 +609,7 @@
                 "signature": [
                   "HttpSetup"
                 ],
-                "path": "packages/response-ops/rule_form/src/common/apis/update_rule/update_rule.ts",
+                "path": "src/platform/packages/shared/response-ops/rule_form/src/common/apis/update_rule/update_rule.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -603,7 +632,7 @@
                   },
                   ">"
                 ],
-                "path": "packages/response-ops/rule_form/src/common/apis/update_rule/update_rule.ts",
+                "path": "src/platform/packages/shared/response-ops/rule_form/src/common/apis/update_rule/update_rule.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -614,7 +643,7 @@
                 "tags": [],
                 "label": "id",
                 "description": [],
-                "path": "packages/response-ops/rule_form/src/common/apis/update_rule/update_rule.ts",
+                "path": "src/platform/packages/shared/response-ops/rule_form/src/common/apis/update_rule/update_rule.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -643,7 +672,7 @@
           },
           "<Params>"
         ],
-        "path": "packages/response-ops/rule_form/src/common/apis/create_rule/types.ts",
+        "path": "src/platform/packages/shared/response-ops/rule_form/src/common/apis/create_rule/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -654,7 +683,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "packages/response-ops/rule_form/src/common/apis/create_rule/types.ts",
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/common/apis/create_rule/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -665,7 +694,7 @@
             "tags": [],
             "label": "ruleTypeId",
             "description": [],
-            "path": "packages/response-ops/rule_form/src/common/apis/create_rule/types.ts",
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/common/apis/create_rule/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -676,7 +705,7 @@
             "tags": [],
             "label": "enabled",
             "description": [],
-            "path": "packages/response-ops/rule_form/src/common/apis/create_rule/types.ts",
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/common/apis/create_rule/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -687,7 +716,7 @@
             "tags": [],
             "label": "consumer",
             "description": [],
-            "path": "packages/response-ops/rule_form/src/common/apis/create_rule/types.ts",
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/common/apis/create_rule/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -701,7 +730,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "packages/response-ops/rule_form/src/common/apis/create_rule/types.ts",
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/common/apis/create_rule/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -715,7 +744,7 @@
             "signature": [
               "Params"
             ],
-            "path": "packages/response-ops/rule_form/src/common/apis/create_rule/types.ts",
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/common/apis/create_rule/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -735,7 +764,7 @@
                 "text": "IntervalSchedule"
               }
             ],
-            "path": "packages/response-ops/rule_form/src/common/apis/create_rule/types.ts",
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/common/apis/create_rule/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -756,7 +785,7 @@
               },
               "[]"
             ],
-            "path": "packages/response-ops/rule_form/src/common/apis/create_rule/types.ts",
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/common/apis/create_rule/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -770,7 +799,7 @@
             "signature": [
               "string | null | undefined"
             ],
-            "path": "packages/response-ops/rule_form/src/common/apis/create_rule/types.ts",
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/common/apis/create_rule/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -784,7 +813,7 @@
             "signature": [
               "\"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\" | null | undefined"
             ],
-            "path": "packages/response-ops/rule_form/src/common/apis/create_rule/types.ts",
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/common/apis/create_rule/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -805,7 +834,7 @@
               },
               " | null | undefined"
             ],
-            "path": "packages/response-ops/rule_form/src/common/apis/create_rule/types.ts",
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/common/apis/create_rule/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -826,7 +855,28 @@
               },
               " | null | undefined"
             ],
-            "path": "packages/response-ops/rule_form/src/common/apis/create_rule/types.ts",
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/common/apis/create_rule/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-rule-form",
+            "id": "def-public.CreateRuleBody.artifacts",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "artifacts",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/alerting-types",
+                "scope": "common",
+                "docId": "kibKbnAlertingTypesPluginApi",
+                "section": "def-common.Artifacts",
+                "text": "Artifacts"
+              },
+              " | null | undefined"
+            ],
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/common/apis/create_rule/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1026,7 +1076,7 @@
           },
           "<Params>"
         ],
-        "path": "packages/response-ops/rule_form/src/types.ts",
+        "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1037,7 +1087,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "packages/response-ops/rule_form/src/types.ts",
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1051,7 +1101,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "packages/response-ops/rule_form/src/types.ts",
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1065,7 +1115,7 @@
             "signature": [
               "Params"
             ],
-            "path": "packages/response-ops/rule_form/src/types.ts",
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1085,7 +1135,7 @@
                 "text": "IntervalSchedule"
               }
             ],
-            "path": "packages/response-ops/rule_form/src/types.ts",
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1096,7 +1146,7 @@
             "tags": [],
             "label": "consumer",
             "description": [],
-            "path": "packages/response-ops/rule_form/src/types.ts",
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1117,7 +1167,7 @@
               },
               "[]"
             ],
-            "path": "packages/response-ops/rule_form/src/types.ts",
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1138,7 +1188,7 @@
               },
               " | null | undefined"
             ],
-            "path": "packages/response-ops/rule_form/src/types.ts",
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1152,7 +1202,7 @@
             "signature": [
               "\"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\" | null | undefined"
             ],
-            "path": "packages/response-ops/rule_form/src/types.ts",
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1166,7 +1216,7 @@
             "signature": [
               "string | null | undefined"
             ],
-            "path": "packages/response-ops/rule_form/src/types.ts",
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1180,7 +1230,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/response-ops/rule_form/src/types.ts",
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1201,7 +1251,28 @@
               },
               " | null | undefined"
             ],
-            "path": "packages/response-ops/rule_form/src/types.ts",
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-rule-form",
+            "id": "def-public.RuleFormData.artifacts",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "artifacts",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/alerting-types",
+                "scope": "common",
+                "docId": "kibKbnAlertingTypesPluginApi",
+                "section": "def-common.Artifacts",
+                "text": "Artifacts"
+              },
+              " | null | undefined"
+            ],
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1250,7 +1321,7 @@
         "tags": [],
         "label": "RuleFormPlugins",
         "description": [],
-        "path": "packages/response-ops/rule_form/src/types.ts",
+        "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1264,7 +1335,7 @@
             "signature": [
               "HttpSetup"
             ],
-            "path": "packages/response-ops/rule_form/src/types.ts",
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1278,7 +1349,7 @@
             "signature": [
               "I18nStart"
             ],
-            "path": "packages/response-ops/rule_form/src/types.ts",
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1292,7 +1363,7 @@
             "signature": [
               "ThemeServiceSetup"
             ],
-            "path": "packages/response-ops/rule_form/src/types.ts",
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1306,7 +1377,7 @@
             "signature": [
               "UserProfileService"
             ],
-            "path": "packages/response-ops/rule_form/src/types.ts",
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1320,7 +1391,7 @@
             "signature": [
               "ApplicationStart"
             ],
-            "path": "packages/response-ops/rule_form/src/types.ts",
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1334,7 +1405,7 @@
             "signature": [
               "NotificationsStart"
             ],
-            "path": "packages/response-ops/rule_form/src/types.ts",
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1354,7 +1425,7 @@
                 "text": "ChartsPluginSetup"
               }
             ],
-            "path": "packages/response-ops/rule_form/src/types.ts",
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1368,7 +1439,7 @@
             "signature": [
               "SettingsStart"
             ],
-            "path": "packages/response-ops/rule_form/src/types.ts",
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1388,7 +1459,7 @@
                 "text": "DataPublicPluginStart"
               }
             ],
-            "path": "packages/response-ops/rule_form/src/types.ts",
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1408,7 +1479,7 @@
                 "text": "DataViewsServicePublic"
               }
             ],
-            "path": "packages/response-ops/rule_form/src/types.ts",
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1428,7 +1499,7 @@
                 "text": "UnifiedSearchPublicPluginStart"
               }
             ],
-            "path": "packages/response-ops/rule_form/src/types.ts",
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1442,7 +1513,7 @@
             "signature": [
               "DocLinksStart"
             ],
-            "path": "packages/response-ops/rule_form/src/types.ts",
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1504,7 +1575,7 @@
               },
               ">) => void; has: (id: string) => boolean; }"
             ],
-            "path": "packages/response-ops/rule_form/src/types.ts",
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1542,7 +1613,413 @@
               },
               "<unknown, unknown, any>) => void; has: (id: string) => boolean; }"
             ],
-            "path": "packages/response-ops/rule_form/src/types.ts",
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-rule-form",
+            "id": "def-public.RuleFormPlugins.fieldsMetadata",
+            "type": "Object",
+            "tags": [],
+            "label": "fieldsMetadata",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "fieldsMetadata",
+                "scope": "public",
+                "docId": "kibFieldsMetadataPluginApi",
+                "section": "def-public.FieldsMetadataPublicStart",
+                "text": "FieldsMetadataPublicStart"
+              }
+            ],
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-rule-form",
+            "id": "def-public.RuleFormPlugins.contentManagement",
+            "type": "Object",
+            "tags": [],
+            "label": "contentManagement",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "contentManagement",
+                "scope": "public",
+                "docId": "kibContentManagementPluginApi",
+                "section": "def-public.ContentManagementPublicStart",
+                "text": "ContentManagementPublicStart"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/response-ops-rule-form",
+        "id": "def-public.RuleFormProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "RuleFormProps",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/response-ops-rule-form",
+            "scope": "public",
+            "docId": "kibKbnResponseOpsRuleFormPluginApi",
+            "section": "def-public.RuleFormProps",
+            "text": "RuleFormProps"
+          },
+          "<MetaData>"
+        ],
+        "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/response-ops-rule-form",
+            "id": "def-public.RuleFormProps.plugins",
+            "type": "Object",
+            "tags": [],
+            "label": "plugins",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/response-ops-rule-form",
+                "scope": "public",
+                "docId": "kibKbnResponseOpsRuleFormPluginApi",
+                "section": "def-public.RuleFormPlugins",
+                "text": "RuleFormPlugins"
+              }
+            ],
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-rule-form",
+            "id": "def-public.RuleFormProps.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-rule-form",
+            "id": "def-public.RuleFormProps.ruleTypeId",
+            "type": "string",
+            "tags": [],
+            "label": "ruleTypeId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-rule-form",
+            "id": "def-public.RuleFormProps.isFlyout",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isFlyout",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-rule-form",
+            "id": "def-public.RuleFormProps.onCancel",
+            "type": "Function",
+            "tags": [],
+            "label": "onCancel",
+            "description": [],
+            "signature": [
+              "(() => void) | undefined"
+            ],
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-rule-form",
+            "id": "def-public.RuleFormProps.onSubmit",
+            "type": "Function",
+            "tags": [],
+            "label": "onSubmit",
+            "description": [],
+            "signature": [
+              "((ruleId: string) => void) | undefined"
+            ],
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/response-ops-rule-form",
+                "id": "def-public.RuleFormProps.onSubmit.$1",
+                "type": "string",
+                "tags": [],
+                "label": "ruleId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-rule-form",
+            "id": "def-public.RuleFormProps.onChangeMetaData",
+            "type": "Function",
+            "tags": [],
+            "label": "onChangeMetaData",
+            "description": [],
+            "signature": [
+              "((metadata: MetaData) => void) | undefined"
+            ],
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/response-ops-rule-form",
+                "id": "def-public.RuleFormProps.onChangeMetaData.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "metadata",
+                "description": [],
+                "signature": [
+                  "MetaData"
+                ],
+                "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-rule-form",
+            "id": "def-public.RuleFormProps.consumer",
+            "type": "string",
+            "tags": [],
+            "label": "consumer",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-rule-form",
+            "id": "def-public.RuleFormProps.connectorFeatureId",
+            "type": "string",
+            "tags": [],
+            "label": "connectorFeatureId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-rule-form",
+            "id": "def-public.RuleFormProps.multiConsumerSelection",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "multiConsumerSelection",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/rule-data-utils",
+                "scope": "common",
+                "docId": "kibKbnRuleDataUtilsPluginApi",
+                "section": "def-common.RuleCreationValidConsumer",
+                "text": "RuleCreationValidConsumer"
+              },
+              " | null | undefined"
+            ],
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-rule-form",
+            "id": "def-public.RuleFormProps.hideInterval",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hideInterval",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-rule-form",
+            "id": "def-public.RuleFormProps.validConsumers",
+            "type": "Array",
+            "tags": [],
+            "label": "validConsumers",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/rule-data-utils",
+                "scope": "common",
+                "docId": "kibKbnRuleDataUtilsPluginApi",
+                "section": "def-common.RuleCreationValidConsumer",
+                "text": "RuleCreationValidConsumer"
+              },
+              "[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-rule-form",
+            "id": "def-public.RuleFormProps.filteredRuleTypes",
+            "type": "Array",
+            "tags": [],
+            "label": "filteredRuleTypes",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-rule-form",
+            "id": "def-public.RuleFormProps.shouldUseRuleProducer",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "shouldUseRuleProducer",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-rule-form",
+            "id": "def-public.RuleFormProps.canShowConsumerSelection",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "canShowConsumerSelection",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-rule-form",
+            "id": "def-public.RuleFormProps.showMustacheAutocompleteSwitch",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "showMustacheAutocompleteSwitch",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-rule-form",
+            "id": "def-public.RuleFormProps.initialValues",
+            "type": "Object",
+            "tags": [],
+            "label": "initialValues",
+            "description": [],
+            "signature": [
+              "Partial<Omit<",
+              {
+                "pluginId": "@kbn/response-ops-rule-form",
+                "scope": "public",
+                "docId": "kibKbnResponseOpsRuleFormPluginApi",
+                "section": "def-public.RuleFormData",
+                "text": "RuleFormData"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/alerts-ui-shared",
+                "scope": "public",
+                "docId": "kibKbnAlertsUiSharedPluginApi",
+                "section": "def-public.RuleTypeParams",
+                "text": "RuleTypeParams"
+              },
+              ">, \"ruleTypeId\">> | undefined"
+            ],
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-rule-form",
+            "id": "def-public.RuleFormProps.initialMetadata",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "initialMetadata",
+            "description": [],
+            "signature": [
+              "MetaData | undefined"
+            ],
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-rule-form",
+            "id": "def-public.RuleFormProps.initialEditStep",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "initialEditStep",
+            "description": [],
+            "signature": [
+              "RuleFormStepId",
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1564,9 +2041,9 @@
             "section": "def-public.RuleFormState",
             "text": "RuleFormState"
           },
-          "<Params>"
+          "<Params, MetaData>"
         ],
-        "path": "packages/response-ops/rule_form/src/types.ts",
+        "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1580,7 +2057,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/response-ops/rule_form/src/types.ts",
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1601,7 +2078,7 @@
               },
               "<Params>"
             ],
-            "path": "packages/response-ops/rule_form/src/types.ts",
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1621,7 +2098,7 @@
                 "text": "RuleFormPlugins"
               }
             ],
-            "path": "packages/response-ops/rule_form/src/types.ts",
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1642,7 +2119,7 @@
               },
               "<Record<string, unknown>, Record<string, unknown>>[]"
             ],
-            "path": "packages/response-ops/rule_form/src/types.ts",
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1663,16 +2140,16 @@
               },
               "[]"
             ],
-            "path": "packages/response-ops/rule_form/src/types.ts",
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/response-ops-rule-form",
-            "id": "def-public.RuleFormState.aadTemplateFields",
+            "id": "def-public.RuleFormState.alertFields",
             "type": "Array",
             "tags": [],
-            "label": "aadTemplateFields",
+            "label": "alertFields",
             "description": [],
             "signature": [
               {
@@ -1684,7 +2161,7 @@
               },
               "[]"
             ],
-            "path": "packages/response-ops/rule_form/src/types.ts",
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1705,7 +2182,7 @@
               },
               "[]"
             ],
-            "path": "packages/response-ops/rule_form/src/types.ts",
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1726,7 +2203,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/response-ops/rule_form/src/types.ts",
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1747,7 +2224,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/response-ops/rule_form/src/types.ts",
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1769,7 +2246,7 @@
               },
               "> | undefined"
             ],
-            "path": "packages/response-ops/rule_form/src/types.ts",
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1791,7 +2268,7 @@
               },
               "> | undefined"
             ],
-            "path": "packages/response-ops/rule_form/src/types.ts",
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1812,7 +2289,7 @@
               },
               "<string, string> & { description?: string | undefined; }"
             ],
-            "path": "packages/response-ops/rule_form/src/types.ts",
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1833,7 +2310,7 @@
               },
               "<Params>"
             ],
-            "path": "packages/response-ops/rule_form/src/types.ts",
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1854,7 +2331,7 @@
               },
               " | null | undefined"
             ],
-            "path": "packages/response-ops/rule_form/src/types.ts",
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1868,21 +2345,21 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/response-ops/rule_form/src/types.ts",
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/response-ops-rule-form",
             "id": "def-public.RuleFormState.metadata",
-            "type": "Object",
+            "type": "Uncategorized",
             "tags": [],
             "label": "metadata",
             "description": [],
             "signature": [
-              "Record<string, unknown> | undefined"
+              "MetaData | undefined"
             ],
-            "path": "packages/response-ops/rule_form/src/types.ts",
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1903,7 +2380,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/response-ops/rule_form/src/types.ts",
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1917,7 +2394,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/response-ops/rule_form/src/types.ts",
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1938,7 +2415,7 @@
               },
               "[]"
             ],
-            "path": "packages/response-ops/rule_form/src/types.ts",
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1959,7 +2436,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/response-ops/rule_form/src/types.ts",
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1973,7 +2450,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/response-ops/rule_form/src/types.ts",
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2353,7 +2830,7 @@
             "label": "setRuleProperty",
             "description": [],
             "signature": [
-              "<Prop extends \"params\" | \"id\" | \"consumer\" | \"name\" | \"monitoring\" | \"actions\" | \"tags\" | \"enabled\" | \"schedule\" | \"mapped_params\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"apiKeyCreatedByUser\" | \"throttle\" | \"muteAll\" | \"notifyWhen\" | \"mutedInstanceIds\" | \"executionStatus\" | \"snoozeSchedule\" | \"activeSnoozes\" | \"isSnoozedUntil\" | \"lastRun\" | \"nextRun\" | \"revision\" | \"running\" | \"viewInAppRelativeUrl\" | \"alertDelay\" | \"flapping\" | \"ruleTypeId\">(key: Prop, value: ",
+              "<Prop extends \"params\" | \"id\" | \"consumer\" | \"name\" | \"monitoring\" | \"tags\" | \"actions\" | \"enabled\" | \"schedule\" | \"mapped_params\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"apiKeyCreatedByUser\" | \"throttle\" | \"muteAll\" | \"notifyWhen\" | \"mutedInstanceIds\" | \"executionStatus\" | \"snoozeSchedule\" | \"activeSnoozes\" | \"isSnoozedUntil\" | \"lastRun\" | \"nextRun\" | \"revision\" | \"running\" | \"viewInAppRelativeUrl\" | \"alertDelay\" | \"flapping\" | \"artifacts\" | \"ruleTypeId\">(key: Prop, value: ",
               {
                 "pluginId": "@kbn/alerts-ui-shared",
                 "scope": "public",
@@ -2559,7 +3036,8 @@
                 "docId": "kibDataViewsPluginApi",
                 "section": "def-public.DataViewsServicePublic",
                 "text": "DataViewsServicePublic"
-              }
+              },
+              " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/rule_types.ts",
             "deprecated": false,
@@ -2595,7 +3073,7 @@
         "tags": [],
         "label": "ValidationResult",
         "description": [],
-        "path": "packages/response-ops/rule_form/src/types.ts",
+        "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2609,7 +3087,7 @@
             "signature": [
               "{ [x: string]: any; }"
             ],
-            "path": "packages/response-ops/rule_form/src/types.ts",
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2629,7 +3107,7 @@
         "signature": [
           "\"/rule/create/:ruleTypeId\""
         ],
-        "path": "packages/response-ops/rule_form/src/constants/index.ts",
+        "path": "src/platform/packages/shared/response-ops/rule_form/src/constants/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2644,7 +3122,7 @@
         "signature": [
           "\"/rule/edit/:id\""
         ],
-        "path": "packages/response-ops/rule_form/src/constants/index.ts",
+        "path": "src/platform/packages/shared/response-ops/rule_form/src/constants/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2689,9 +3167,25 @@
             "section": "def-public.RuleTypeParams",
             "text": "RuleTypeParams"
           },
-          ">, \"params\" | \"consumer\" | \"actions\" | \"tags\" | \"schedule\">"
+          ">, \"params\" | \"consumer\" | \"tags\" | \"actions\" | \"schedule\">"
         ],
-        "path": "packages/response-ops/rule_form/src/types.ts",
+        "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/response-ops-rule-form",
+        "id": "def-public.NOTIFY_WHEN_OPTIONS",
+        "type": "Array",
+        "tags": [],
+        "label": "NOTIFY_WHEN_OPTIONS",
+        "description": [],
+        "signature": [
+          "NotifyWhenSelectOptions",
+          "[]"
+        ],
+        "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_actions/rule_actions_notify_when.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2768,6 +3262,29 @@
       },
       {
         "parentPluginId": "@kbn/response-ops-rule-form",
+        "id": "def-public.RuleDashboardsPlugins",
+        "type": "Type",
+        "tags": [],
+        "label": "RuleDashboardsPlugins",
+        "description": [],
+        "signature": [
+          "{ contentManagement?: ",
+          {
+            "pluginId": "contentManagement",
+            "scope": "public",
+            "docId": "kibContentManagementPluginApi",
+            "section": "def-public.ContentManagementPublicStart",
+            "text": "ContentManagementPublicStart"
+          },
+          " | undefined; }"
+        ],
+        "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/response-ops-rule-form",
         "id": "def-public.RuleTypeIndexWithDescriptions",
         "type": "Type",
         "tags": [],
@@ -2783,6 +3300,21 @@
             "text": "RuleTypeWithDescription"
           },
           ">"
+        ],
+        "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/rule_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/response-ops-rule-form",
+        "id": "def-public.RuleTypeMetaData",
+        "type": "Type",
+        "tags": [],
+        "label": "RuleTypeMetaData",
+        "description": [],
+        "signature": [
+          "{ [x: string]: unknown; }"
         ],
         "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/rule_types.ts",
         "deprecated": false,
@@ -3000,7 +3532,7 @@
           },
           ">)[]"
         ],
-        "path": "packages/response-ops/rule_form/src/common/apis/update_rule/update_rule.ts",
+        "path": "src/platform/packages/shared/response-ops/rule_form/src/common/apis/update_rule/update_rule.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

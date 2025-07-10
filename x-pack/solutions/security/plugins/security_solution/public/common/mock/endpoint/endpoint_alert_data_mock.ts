@@ -70,7 +70,7 @@ const setAlertDetailsItemDataOverrides = (
   return data;
 };
 
-/** @private */
+/** @internal */
 const generateEndpointAlertDetailsItemDataMock = (
   overrides: AlertDetailsItemDataOverrides = {}
 ): TimelineEventsDetailsItem[] => {
@@ -145,7 +145,7 @@ const generateEndpointAlertDetailsItemDataMock = (
   return data;
 };
 
-/** @private */
+/** @internal */
 const generateSentinelOneAlertDetailsItemDataMock = (
   overrides: AlertDetailsItemDataOverrides = {}
 ): TimelineEventsDetailsItem[] => {
@@ -183,7 +183,41 @@ const generateSentinelOneAlertDetailsItemDataMock = (
   return data;
 };
 
-/** @private */
+const generateMicrosoftDefenderEndpointAlertDetailsItemDataMock = (
+  overrides: AlertDetailsItemDataOverrides = {}
+): TimelineEventsDetailsItem[] => {
+  const data = generateEndpointAlertDetailsItemDataMock();
+
+  data.forEach((itemData) => {
+    switch (itemData.field) {
+      case 'event.module':
+        itemData.values = ['microsoft_defender_endpoint'];
+        itemData.originalValue = ['microsoft_defender_endpoint'];
+        break;
+
+      case 'agent.type':
+        itemData.values = ['filebeat'];
+        itemData.originalValue = ['filebeat'];
+        break;
+    }
+
+    data.push({
+      category: parseEcsFieldPath(
+        RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELDS.microsoft_defender_endpoint[0]
+      ).category,
+      field: RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELDS.microsoft_defender_endpoint[0],
+      values: ['abfe4a35-d5b4-42a0-a539-bd054c791769'],
+      originalValue: ['abfe4a35-d5b4-42a0-a539-bd054c791769'],
+      isObjectArray: false,
+    });
+  });
+
+  setAlertDetailsItemDataOverrides(data, overrides);
+
+  return data;
+};
+
+/** @internal */
 const generateCrowdStrikeAlertDetailsItemDataMock = (
   overrides: AlertDetailsItemDataOverrides = {}
 ): TimelineEventsDetailsItem[] => {
@@ -249,6 +283,8 @@ const generateAlertDetailsItemDataForAgentTypeMock = (
       return generateSentinelOneAlertDetailsItemDataMock(overrides);
     case 'crowdstrike':
       return generateCrowdStrikeAlertDetailsItemDataMock(overrides);
+    case 'microsoft_defender_endpoint':
+      return generateMicrosoftDefenderEndpointAlertDetailsItemDataMock(overrides);
     default:
       return generateEndpointAlertDetailsItemDataMock({
         'agent.type': { values: [unSupportedAgentType], originalValue: [unSupportedAgentType] },
@@ -262,5 +298,7 @@ export const endpointAlertDataMock = Object.freeze({
   generateEndpointAlertDetailsItemData: generateEndpointAlertDetailsItemDataMock,
   generateSentinelOneAlertDetailsItemData: generateSentinelOneAlertDetailsItemDataMock,
   generateCrowdStrikeAlertDetailsItemData: generateCrowdStrikeAlertDetailsItemDataMock,
+  generateMicrosoftDefenderEndpointAlertDetailsItemData:
+    generateMicrosoftDefenderEndpointAlertDetailsItemDataMock,
   generateAlertDetailsItemDataForAgentType: generateAlertDetailsItemDataForAgentTypeMock,
 });

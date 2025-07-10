@@ -13,6 +13,7 @@ exports[`AuthSsh rendering it renders against shallow snapshot 1`] = `
       fieldType="keyword"
       iconType="document"
       isAggregatable={true}
+      scopeId="some_scope"
       value="[ssh-signature]"
     />
   </TokensFlexItem>
@@ -27,6 +28,7 @@ exports[`AuthSsh rendering it renders against shallow snapshot 1`] = `
       fieldType="keyword"
       iconType="document"
       isAggregatable={true}
+      scopeId="some_scope"
       value="[ssh-method]"
     />
   </TokensFlexItem>

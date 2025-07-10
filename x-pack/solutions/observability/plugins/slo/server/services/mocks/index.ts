@@ -26,6 +26,7 @@ const createTransformManagerMock = (): jest.Mocked<TransformManager> => {
     start: jest.fn(),
     stop: jest.fn(),
     inspect: jest.fn(),
+    getVersion: jest.fn(),
   };
 };
 
@@ -37,6 +38,7 @@ const createSummaryTransformManagerMock = (): jest.Mocked<TransformManager> => {
     start: jest.fn(),
     stop: jest.fn(),
     inspect: jest.fn(),
+    getVersion: jest.fn(),
   };
 };
 
@@ -48,7 +50,6 @@ const createSLORepositoryMock = (): jest.Mocked<SLORepository> => {
     findAllByIds: jest.fn(),
     deleteById: jest.fn(),
     search: jest.fn(),
-    exists: jest.fn(),
   };
 };
 

@@ -27,7 +27,7 @@
         "tags": [],
         "label": "Agent",
         "description": [],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/ui/fields/agent.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/ui/fields/agent.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -41,7 +41,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/ui/fields/agent.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/ui/fields/agent.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -53,9 +53,9 @@
             "label": "name",
             "description": [],
             "signature": [
-              "\"java\" | \"ruby\" | \"opentelemetry\" | \"dotnet\" | \"go\" | \"iOS/swift\" | \"js-base\" | \"nodejs\" | \"php\" | \"python\" | \"rum-js\" | \"android/java\" | \"otlp\" | `opentelemetry/${string}` | `otlp/${string}` | \"ios/swift\""
+              "\"ruby\" | \"opentelemetry\" | \"dotnet\" | \"go\" | \"iOS/swift\" | \"java\" | \"js-base\" | \"nodejs\" | \"php\" | \"python\" | \"rum-js\" | \"android/java\" | \"otlp\" | `opentelemetry/${string}` | `otlp/${string}` | \"ios/swift\""
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/ui/fields/agent.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/ui/fields/agent.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -69,7 +69,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/ui/fields/agent.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/ui/fields/agent.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -83,7 +83,7 @@
         "tags": [],
         "label": "APMBaseDoc",
         "description": [],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/apm_base_doc.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/apm_base_doc.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -94,7 +94,7 @@
             "tags": [],
             "label": "'@timestamp'",
             "description": [],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/apm_base_doc.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/apm_base_doc.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -108,7 +108,7 @@
             "signature": [
               "{ name: string; version?: string | undefined; }"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/apm_base_doc.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/apm_base_doc.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -122,7 +122,7 @@
             "signature": [
               "{ id?: string | undefined; } | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/apm_base_doc.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/apm_base_doc.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -136,7 +136,7 @@
             "signature": [
               "{ id?: string | undefined; } | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/apm_base_doc.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/apm_base_doc.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -150,7 +150,7 @@
             "signature": [
               "{ [key: string]: string | number | boolean; } | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/apm_base_doc.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/apm_base_doc.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -171,7 +171,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/apm_base_doc.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/apm_base_doc.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -202,7 +202,7 @@
             "text": "ErrorRaw"
           }
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/ui/apm_error.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/ui/apm_error.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -222,7 +222,7 @@
                 "text": "Agent"
               }
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/ui/apm_error.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/ui/apm_error.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -236,7 +236,7 @@
         "tags": [],
         "label": "Cloud",
         "description": [],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/fields/cloud.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/fields/cloud.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -250,7 +250,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/fields/cloud.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/fields/cloud.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -264,7 +264,7 @@
             "signature": [
               "{ name?: string | undefined; id?: string | undefined; } | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/fields/cloud.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/fields/cloud.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -278,7 +278,7 @@
             "signature": [
               "{ type?: string | undefined; } | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/fields/cloud.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/fields/cloud.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -292,7 +292,7 @@
             "signature": [
               "{ id?: string | undefined; name?: string | undefined; } | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/fields/cloud.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/fields/cloud.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -306,7 +306,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/fields/cloud.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/fields/cloud.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -320,7 +320,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/fields/cloud.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/fields/cloud.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -334,7 +334,7 @@
             "signature": [
               "{ id?: string | undefined; name?: string | undefined; } | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/fields/cloud.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/fields/cloud.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -348,7 +348,7 @@
             "signature": [
               "{ id?: string | undefined; } | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/fields/cloud.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/fields/cloud.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -362,7 +362,7 @@
             "signature": [
               "{ name?: string | undefined; } | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/fields/cloud.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/fields/cloud.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -376,7 +376,7 @@
         "tags": [],
         "label": "Container",
         "description": [],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/fields/container.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/fields/container.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -390,7 +390,7 @@
             "signature": [
               "string | null | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/fields/container.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/fields/container.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -404,7 +404,7 @@
             "signature": [
               "{ name?: string | undefined; } | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/fields/container.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/fields/container.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -435,7 +435,7 @@
             "text": "APMBaseDoc"
           }
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/error_raw.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/error_raw.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -455,7 +455,7 @@
                 "text": "Processor"
               }
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/error_raw.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/error_raw.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -475,7 +475,7 @@
                 "text": "TimestampUs"
               }
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/error_raw.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/error_raw.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -489,7 +489,7 @@
             "signature": [
               "{ id: string; sampled?: boolean | undefined; type: string; } | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/error_raw.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/error_raw.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -527,7 +527,7 @@
               },
               " | undefined; stack_trace?: string | undefined; custom?: Record<string, unknown> | undefined; }"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/error_raw.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/error_raw.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -548,7 +548,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/error_raw.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/error_raw.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -569,7 +569,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/error_raw.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/error_raw.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -590,7 +590,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/error_raw.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/error_raw.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -611,7 +611,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/error_raw.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/error_raw.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -632,7 +632,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/error_raw.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/error_raw.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -652,7 +652,7 @@
                 "text": "Service"
               }
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/error_raw.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/error_raw.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -673,7 +673,22 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/error_raw.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/error_raw.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/apm-types",
+            "id": "def-common.ErrorRaw.server",
+            "type": "Object",
+            "tags": [],
+            "label": "server",
+            "description": [],
+            "signature": [
+              "Server",
+              " | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/error_raw.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -694,7 +709,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/error_raw.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/error_raw.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -725,7 +740,7 @@
             "text": "EventRaw"
           }
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/ui/event.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/ui/event.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -745,7 +760,7 @@
                 "text": "Agent"
               }
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/ui/event.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/ui/event.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -776,7 +791,7 @@
             "text": "APMBaseDoc"
           }
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/event_raw.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/event_raw.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -796,7 +811,7 @@
                 "text": "TimestampUs"
               }
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/event_raw.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/event_raw.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -810,7 +825,7 @@
             "signature": [
               "{ id: string; sampled?: boolean | undefined; type: string; } | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/event_raw.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/event_raw.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -824,7 +839,7 @@
             "signature": [
               "{ message?: string | undefined; }"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/event_raw.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/event_raw.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -838,7 +853,7 @@
             "signature": [
               "{ action: string; category: string; }"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/event_raw.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/event_raw.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -852,7 +867,7 @@
         "tags": [],
         "label": "Exception",
         "description": [],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/error_raw.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/error_raw.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -866,7 +881,7 @@
             "signature": [
               "{ response?: string | undefined; } | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/error_raw.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/error_raw.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -880,7 +895,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/error_raw.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/error_raw.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -894,7 +909,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/error_raw.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/error_raw.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -908,7 +923,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/error_raw.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/error_raw.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -922,7 +937,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/error_raw.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/error_raw.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -936,7 +951,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/error_raw.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/error_raw.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -957,7 +972,7 @@
               },
               "[] | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/error_raw.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/error_raw.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -971,7 +986,7 @@
         "tags": [],
         "label": "Faas",
         "description": [],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/fields/faas.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/fields/faas.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -982,7 +997,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/fields/faas.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/fields/faas.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -996,7 +1011,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/fields/faas.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/fields/faas.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1010,7 +1025,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/fields/faas.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/fields/faas.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1024,7 +1039,7 @@
             "signature": [
               "{ type?: string | undefined; request_id?: string | undefined; } | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/fields/faas.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/fields/faas.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1038,7 +1053,7 @@
         "tags": [],
         "label": "Host",
         "description": [],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/fields/host.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/fields/host.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1052,7 +1067,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/fields/host.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/fields/host.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1066,7 +1081,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/fields/host.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/fields/host.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1080,7 +1095,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/fields/host.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/fields/host.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1094,7 +1109,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/fields/host.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/fields/host.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1108,7 +1123,7 @@
             "signature": [
               "{ platform?: string | undefined; } | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/fields/host.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/fields/host.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1122,7 +1137,7 @@
         "tags": [],
         "label": "Http",
         "description": [],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/fields/http.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/fields/http.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1136,7 +1151,7 @@
             "signature": [
               "{ method?: string | undefined; } | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/fields/http.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/fields/http.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1150,7 +1165,7 @@
             "signature": [
               "{ status_code?: number | undefined; } | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/fields/http.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/fields/http.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1164,7 +1179,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/fields/http.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/fields/http.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1178,7 +1193,7 @@
         "tags": [],
         "label": "Kubernetes",
         "description": [],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/fields/kubernetes.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/fields/kubernetes.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1192,7 +1207,7 @@
             "signature": [
               "{ uid?: string | null | undefined; name?: string | undefined; } | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/fields/kubernetes.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/fields/kubernetes.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1206,7 +1221,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/fields/kubernetes.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/fields/kubernetes.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1220,7 +1235,7 @@
             "signature": [
               "{ name?: string | undefined; } | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/fields/kubernetes.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/fields/kubernetes.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1234,7 +1249,7 @@
             "signature": [
               "{ name?: string | undefined; } | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/fields/kubernetes.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/fields/kubernetes.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1248,7 +1263,7 @@
             "signature": [
               "{ id?: string | undefined; name?: string | undefined; } | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/fields/kubernetes.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/fields/kubernetes.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1262,7 +1277,7 @@
         "tags": [],
         "label": "Log",
         "description": [],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/error_raw.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/error_raw.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1273,7 +1288,7 @@
             "tags": [],
             "label": "message",
             "description": [],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/error_raw.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/error_raw.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1294,7 +1309,7 @@
               },
               "[] | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/error_raw.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/error_raw.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1308,7 +1323,7 @@
         "tags": [],
         "label": "Observer",
         "description": [],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/fields/observer.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/fields/observer.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1322,7 +1337,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/fields/observer.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/fields/observer.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1336,7 +1351,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/fields/observer.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/fields/observer.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1350,7 +1365,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/fields/observer.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/fields/observer.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1364,7 +1379,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/fields/observer.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/fields/observer.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1378,7 +1393,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/fields/observer.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/fields/observer.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1392,7 +1407,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/fields/observer.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/fields/observer.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1406,7 +1421,49 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/fields/observer.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/fields/observer.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.OtelSpanLink",
+        "type": "Interface",
+        "tags": [],
+        "label": "OtelSpanLink",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/fields/span_links.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/apm-types",
+            "id": "def-common.OtelSpanLink.span_id",
+            "type": "Array",
+            "tags": [],
+            "label": "span_id",
+            "description": [],
+            "signature": [
+              "(string | undefined)[]"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/fields/span_links.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/apm-types",
+            "id": "def-common.OtelSpanLink.trace_id",
+            "type": "Array",
+            "tags": [],
+            "label": "trace_id",
+            "description": [],
+            "signature": [
+              "(string | undefined)[]"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/fields/span_links.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1420,7 +1477,7 @@
         "tags": [],
         "label": "Page",
         "description": [],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/fields/page.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/fields/page.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1434,7 +1491,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/fields/page.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/fields/page.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1448,7 +1505,7 @@
         "tags": [],
         "label": "Process",
         "description": [],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/fields/process.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/fields/process.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1462,7 +1519,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/fields/process.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/fields/process.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1473,7 +1530,7 @@
             "tags": [],
             "label": "pid",
             "description": [],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/fields/process.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/fields/process.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1487,7 +1544,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/fields/process.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/fields/process.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1501,7 +1558,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/fields/process.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/fields/process.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1515,7 +1572,7 @@
         "tags": [],
         "label": "Processor",
         "description": [],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/error_raw.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/error_raw.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1529,7 +1586,7 @@
             "signature": [
               "\"error\""
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/error_raw.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/error_raw.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1543,7 +1600,7 @@
             "signature": [
               "\"error\""
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/error_raw.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/error_raw.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1557,7 +1614,7 @@
         "tags": [],
         "label": "Service",
         "description": [],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/fields/service.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/fields/service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1568,7 +1625,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/fields/service.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/fields/service.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1582,7 +1639,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/fields/service.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/fields/service.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1596,7 +1653,7 @@
             "signature": [
               "{ name?: string | undefined; version?: string | undefined; } | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/fields/service.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/fields/service.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1610,7 +1667,7 @@
             "signature": [
               "{ name?: string | undefined; } | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/fields/service.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/fields/service.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1624,7 +1681,7 @@
             "signature": [
               "{ name?: string | undefined; version?: string | undefined; } | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/fields/service.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/fields/service.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1638,7 +1695,7 @@
             "signature": [
               "{ name?: string | undefined; version?: string | undefined; } | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/fields/service.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/fields/service.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1652,7 +1709,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/fields/service.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/fields/service.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1683,7 +1740,7 @@
             "text": "SpanRaw"
           }
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/ui/span.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/ui/span.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1703,7 +1760,7 @@
                 "text": "Agent"
               }
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/ui/span.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/ui/span.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1717,7 +1774,7 @@
         "tags": [],
         "label": "SpanLink",
         "description": [],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/fields/span_links.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/fields/span_links.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1731,7 +1788,7 @@
             "signature": [
               "{ id: string; }"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/fields/span_links.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/fields/span_links.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1745,7 +1802,7 @@
             "signature": [
               "{ id: string; }"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/fields/span_links.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/fields/span_links.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1776,7 +1833,7 @@
             "text": "APMBaseDoc"
           }
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/span_raw.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/span_raw.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1790,7 +1847,7 @@
             "signature": [
               "Processor"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/span_raw.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/span_raw.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1804,7 +1861,7 @@
             "signature": [
               "{ id: string; }"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/span_raw.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/span_raw.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1826,7 +1883,7 @@
               },
               " | undefined; } | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/span_raw.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/span_raw.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1840,7 +1897,7 @@
             "signature": [
               "{ name: string; environment?: string | undefined; }"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/span_raw.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/span_raw.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1870,7 +1927,7 @@
               },
               "[] | undefined; }"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/span_raw.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/span_raw.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1890,7 +1947,7 @@
                 "text": "TimestampUs"
               }
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/span_raw.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/span_raw.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1904,7 +1961,7 @@
             "signature": [
               "{ id: string; } | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/span_raw.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/span_raw.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1918,7 +1975,7 @@
             "signature": [
               "{ id: string[]; } | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/span_raw.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/span_raw.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1932,7 +1989,7 @@
             "signature": [
               "{ stacktrace?: string | undefined; } | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/span_raw.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/span_raw.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1953,7 +2010,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/span_raw.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/span_raw.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1974,7 +2031,22 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/span_raw.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/span_raw.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/apm-types",
+            "id": "def-common.SpanRaw.server",
+            "type": "Object",
+            "tags": [],
+            "label": "server",
+            "description": [],
+            "signature": [
+              "Server",
+              " | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/span_raw.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1988,7 +2060,7 @@
         "tags": [],
         "label": "TimestampUs",
         "description": [],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/fields/timestamp_us.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/fields/timestamp_us.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1999,7 +2071,7 @@
             "tags": [],
             "label": "us",
             "description": [],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/fields/timestamp_us.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/fields/timestamp_us.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2030,7 +2102,7 @@
             "text": "TransactionRaw"
           }
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/ui/transaction.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/ui/transaction.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2050,7 +2122,7 @@
                 "text": "Agent"
               }
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/ui/transaction.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/ui/transaction.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2064,7 +2136,7 @@
             "signature": [
               "InnerTransactionWithName"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/ui/transaction.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/ui/transaction.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2095,7 +2167,7 @@
             "text": "APMBaseDoc"
           }
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/transaction_raw.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/transaction_raw.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2109,7 +2181,7 @@
             "signature": [
               "Processor"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/transaction_raw.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/transaction_raw.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2129,7 +2201,7 @@
                 "text": "TimestampUs"
               }
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/transaction_raw.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/transaction_raw.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2143,7 +2215,7 @@
             "signature": [
               "{ id: string; }"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/transaction_raw.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/transaction_raw.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2165,7 +2237,7 @@
               },
               " | undefined; } | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/transaction_raw.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/transaction_raw.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2187,7 +2259,7 @@
               },
               " | undefined; result?: string | undefined; sampled: boolean; span_count?: { started?: number | undefined; dropped?: number | undefined; } | undefined; type: string; custom?: Record<string, unknown> | undefined; message?: { queue?: { name: string; } | undefined; age?: { ms: number; } | undefined; body?: string | undefined; headers?: Record<string, unknown> | undefined; } | undefined; }"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/transaction_raw.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/transaction_raw.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2208,7 +2280,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/transaction_raw.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/transaction_raw.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2222,7 +2294,7 @@
             "signature": [
               "{ version?: string | undefined; } | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/transaction_raw.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/transaction_raw.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2243,7 +2315,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/transaction_raw.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/transaction_raw.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2264,7 +2336,22 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/transaction_raw.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/transaction_raw.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/apm-types",
+            "id": "def-common.TransactionRaw.server",
+            "type": "Object",
+            "tags": [],
+            "label": "server",
+            "description": [],
+            "signature": [
+              "Server",
+              " | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/transaction_raw.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2285,7 +2372,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/transaction_raw.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/transaction_raw.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2306,7 +2393,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/transaction_raw.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/transaction_raw.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2326,7 +2413,7 @@
                 "text": "Service"
               }
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/transaction_raw.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/transaction_raw.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2347,7 +2434,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/transaction_raw.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/transaction_raw.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2368,7 +2455,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/transaction_raw.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/transaction_raw.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2389,7 +2476,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/transaction_raw.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/transaction_raw.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2410,7 +2497,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/transaction_raw.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/transaction_raw.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2431,7 +2518,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/transaction_raw.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/transaction_raw.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2453,7 +2540,7 @@
               },
               "[] | undefined; } | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/transaction_raw.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/transaction_raw.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2467,7 +2554,7 @@
         "tags": [],
         "label": "Url",
         "description": [],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/fields/url.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/fields/url.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2481,7 +2568,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/fields/url.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/fields/url.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2495,7 +2582,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/fields/url.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/fields/url.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2509,7 +2596,35 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/fields/url.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/fields/url.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/apm-types",
+            "id": "def-common.Url.scheme",
+            "type": "string",
+            "tags": [],
+            "label": "scheme",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/fields/url.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/apm-types",
+            "id": "def-common.Url.path",
+            "type": "string",
+            "tags": [],
+            "label": "path",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/fields/url.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2523,7 +2638,7 @@
         "tags": [],
         "label": "User",
         "description": [],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/fields/user.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/fields/user.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2537,7 +2652,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/fields/user.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/fields/user.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2551,7 +2666,7 @@
         "tags": [],
         "label": "UserAgent",
         "description": [],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/fields/user_agent.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/fields/user_agent.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2565,7 +2680,7 @@
             "signature": [
               "{ name: string; } | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/fields/user_agent.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/fields/user_agent.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2579,7 +2694,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/fields/user_agent.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/fields/user_agent.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2590,7 +2705,10 @@
             "tags": [],
             "label": "original",
             "description": [],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/fields/user_agent.ts",
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/fields/user_agent.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2604,7 +2722,7 @@
             "signature": [
               "{ name: string; version?: string | undefined; full?: string | undefined; } | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/fields/user_agent.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/fields/user_agent.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2618,7 +2736,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/fields/user_agent.ts",
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/fields/user_agent.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2638,7 +2756,7 @@
         "signature": [
           "\"agent\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2653,7 +2771,7 @@
         "signature": [
           "\"agent.activation_method\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2668,7 +2786,7 @@
         "signature": [
           "\"agent.name\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2683,7 +2801,7 @@
         "signature": [
           "\"agent.version\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2696,7 +2814,7 @@
         "label": "AgentName",
         "description": [],
         "signature": [
-          "\"java\" | \"ruby\" | \"opentelemetry\" | \"dotnet\" | \"go\" | \"iOS/swift\" | \"js-base\" | \"nodejs\" | \"php\" | \"python\" | \"rum-js\" | \"android/java\" | \"otlp\" | `opentelemetry/${string}` | `otlp/${string}` | \"ios/swift\""
+          "\"ruby\" | \"opentelemetry\" | \"dotnet\" | \"go\" | \"iOS/swift\" | \"java\" | \"js-base\" | \"nodejs\" | \"php\" | \"python\" | \"rum-js\" | \"android/java\" | \"otlp\" | `opentelemetry/${string}` | `otlp/${string}` | \"ios/swift\""
         ],
         "path": "src/platform/packages/shared/kbn-elastic-agent-utils/src/agent_names.ts",
         "deprecated": false,
@@ -2713,7 +2831,7 @@
         "signature": [
           "\"application.launch.time\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2728,7 +2846,7 @@
         "signature": [
           "\"@timestamp\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2743,7 +2861,7 @@
         "signature": [
           "\"child.id\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2758,7 +2876,7 @@
         "signature": [
           "\"client.geo.city_name\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2773,7 +2891,7 @@
         "signature": [
           "\"client.geo.country_iso_code\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2788,7 +2906,7 @@
         "signature": [
           "\"client.geo.country_name\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2803,7 +2921,7 @@
         "signature": [
           "\"client.geo.region_iso_code\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2818,7 +2936,7 @@
         "signature": [
           "\"client.geo.region_name\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2833,7 +2951,7 @@
         "signature": [
           "\"cloud\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2848,7 +2966,7 @@
         "signature": [
           "\"cloud.account.id\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2863,7 +2981,7 @@
         "signature": [
           "\"cloud.account.name\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2878,7 +2996,7 @@
         "signature": [
           "\"cloud.availability_zone\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2893,7 +3011,7 @@
         "signature": [
           "\"cloud.instance.id\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2908,7 +3026,7 @@
         "signature": [
           "\"cloud.instance.name\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2923,7 +3041,7 @@
         "signature": [
           "\"cloud.machine.type\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2938,7 +3056,7 @@
         "signature": [
           "\"cloud.project.name\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2953,7 +3071,7 @@
         "signature": [
           "\"cloud.provider\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2968,7 +3086,7 @@
         "signature": [
           "\"cloud.region\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2983,7 +3101,7 @@
         "signature": [
           "\"cloud.service.name\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2998,7 +3116,7 @@
         "signature": [
           "\"container\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3013,7 +3131,7 @@
         "signature": [
           "\"container.id\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3028,7 +3146,7 @@
         "signature": [
           "\"container.image.name\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3043,7 +3161,7 @@
         "signature": [
           "\"data_stream.type\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3058,7 +3176,7 @@
         "signature": [
           "\"destination.address\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3073,7 +3191,37 @@
         "signature": [
           "\"device.model.identifier\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.DURATION",
+        "type": "string",
+        "tags": [],
+        "label": "DURATION",
+        "description": [],
+        "signature": [
+          "\"duration\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/otel.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.ELASTIC_PROFILER_STACK_TRACE_IDS",
+        "type": "string",
+        "tags": [],
+        "label": "ELASTIC_PROFILER_STACK_TRACE_IDS",
+        "description": [],
+        "signature": [
+          "\"elastic.profiler_stack_trace_ids\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3088,7 +3236,7 @@
           "\nWe cannot mark these arrays as const and derive their type\nbecause we need to be able to assign them as mutable entities for ES queries."
         ],
         "signature": [
-          "\"java\" | \"ruby\" | \"dotnet\" | \"go\" | \"iOS/swift\" | \"js-base\" | \"nodejs\" | \"php\" | \"python\" | \"rum-js\" | \"android/java\""
+          "\"ruby\" | \"dotnet\" | \"go\" | \"iOS/swift\" | \"java\" | \"js-base\" | \"nodejs\" | \"php\" | \"python\" | \"rum-js\" | \"android/java\""
         ],
         "path": "src/platform/packages/shared/kbn-elastic-agent-utils/src/agent_names.ts",
         "deprecated": false,
@@ -3105,7 +3253,7 @@
         "signature": [
           "\"error.culprit\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3120,7 +3268,7 @@
         "signature": [
           "\"error.exception.handled\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3135,7 +3283,7 @@
         "signature": [
           "\"error.exception.message\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3150,7 +3298,7 @@
         "signature": [
           "\"error.exception.type\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3165,7 +3313,7 @@
         "signature": [
           "\"error.exception\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3180,7 +3328,7 @@
         "signature": [
           "\"error.grouping_key\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3195,7 +3343,7 @@
         "signature": [
           "\"error.grouping_name\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3210,7 +3358,7 @@
         "signature": [
           "\"error.id\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3225,7 +3373,7 @@
         "signature": [
           "\"error.log.level\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3240,7 +3388,22 @@
         "signature": [
           "\"error.log.message\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.ERROR_MESSAGE",
+        "type": "string",
+        "tags": [],
+        "label": "ERROR_MESSAGE",
+        "description": [],
+        "signature": [
+          "\"error.message\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/otel.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3255,7 +3418,7 @@
         "signature": [
           "\"error.page.url\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3270,7 +3433,7 @@
         "signature": [
           "\"error.stack_trace\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3285,7 +3448,7 @@
         "signature": [
           "\"error.type\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3300,7 +3463,7 @@
         "signature": [
           "\"event.name\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3315,7 +3478,7 @@
         "signature": [
           "\"event.outcome\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3330,7 +3493,7 @@
         "signature": [
           "\"event.success_count\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3345,7 +3508,37 @@
         "signature": [
           "\"unknown\" | \"success\" | \"failure\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/fields/event_outcome.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/fields/event_outcome.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.EXCEPTION_MESSAGE",
+        "type": "string",
+        "tags": [],
+        "label": "EXCEPTION_MESSAGE",
+        "description": [],
+        "signature": [
+          "\"exception.message\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/otel.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.EXCEPTION_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "EXCEPTION_TYPE",
+        "description": [],
+        "signature": [
+          "\"exception.type\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/otel.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3360,7 +3553,7 @@
         "signature": [
           "\"faas.billed_duration\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3375,7 +3568,7 @@
         "signature": [
           "\"faas.coldstart\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3390,7 +3583,7 @@
         "signature": [
           "\"faas.coldstart_duration\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3405,7 +3598,7 @@
         "signature": [
           "\"faas.duration\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3420,7 +3613,7 @@
         "signature": [
           "\"faas.id\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3435,7 +3628,7 @@
         "signature": [
           "\"faas.name\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3450,7 +3643,7 @@
         "signature": [
           "\"faas.trigger.type\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3465,7 +3658,7 @@
         "signature": [
           "\"host\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3480,7 +3673,7 @@
         "signature": [
           "\"host.architecture\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3495,7 +3688,7 @@
         "signature": [
           "\"host.hostname\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3510,7 +3703,7 @@
         "signature": [
           "\"host.name\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3525,7 +3718,7 @@
         "signature": [
           "\"host.os.platform\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3540,7 +3733,7 @@
         "signature": [
           "\"host.os.version\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3555,7 +3748,7 @@
         "signature": [
           "\"http.request.method\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3570,7 +3763,7 @@
         "signature": [
           "\"http.response.status_code\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3585,7 +3778,7 @@
         "signature": [
           "\"_index\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3600,7 +3793,7 @@
         "signature": [
           "\"kubernetes\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3615,7 +3808,7 @@
         "signature": [
           "\"kubernetes.container.id\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3630,7 +3823,7 @@
         "signature": [
           "\"kubernetes.container.name\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3645,7 +3838,7 @@
         "signature": [
           "\"kubernetes.deployment.name\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3660,7 +3853,7 @@
         "signature": [
           "\"kubernetes.namespace\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3675,7 +3868,7 @@
         "signature": [
           "\"kubernetes.node.name\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3690,7 +3883,7 @@
         "signature": [
           "\"kubernetes.pod.name\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3705,7 +3898,7 @@
         "signature": [
           "\"kubernetes.pod.uid\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3720,7 +3913,7 @@
         "signature": [
           "\"kubernetes.replicaset.name\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3735,7 +3928,7 @@
         "signature": [
           "\"labels.gc\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3750,7 +3943,7 @@
         "signature": [
           "\"labels.lifecycle_state\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3765,7 +3958,7 @@
         "signature": [
           "\"labels.name\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3780,7 +3973,7 @@
         "signature": [
           "\"labels.telemetry_auto_version\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3795,7 +3988,7 @@
         "signature": [
           "\"labels.type\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3810,7 +4003,7 @@
         "signature": [
           "\"log.level\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3833,7 +4026,7 @@
           },
           " | SystemMetric | JVMMetric"
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/ui/metric.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/ui/metric.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3848,7 +4041,7 @@
         "signature": [
           "\"system.process.cgroup.memory.mem.limit.bytes\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3863,7 +4056,7 @@
         "signature": [
           "\"system.process.cgroup.memory.mem.usage.bytes\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3878,7 +4071,7 @@
         "signature": [
           "\"jvm.gc.count\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3893,7 +4086,7 @@
         "signature": [
           "\"jvm.gc.time\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3908,7 +4101,7 @@
         "signature": [
           "\"jvm.memory.heap.committed\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3923,7 +4116,7 @@
         "signature": [
           "\"jvm.memory.heap.max\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3938,7 +4131,7 @@
         "signature": [
           "\"jvm.memory.heap.used\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3953,7 +4146,7 @@
         "signature": [
           "\"jvm.memory.non_heap.committed\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3968,7 +4161,7 @@
         "signature": [
           "\"jvm.memory.non_heap.max\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3983,7 +4176,7 @@
         "signature": [
           "\"jvm.memory.non_heap.used\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3998,7 +4191,7 @@
         "signature": [
           "\"jvm.thread.count\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4013,7 +4206,7 @@
         "signature": [
           "\"process.runtime.jvm.gc.duration\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4028,7 +4221,7 @@
         "signature": [
           "\"process.runtime.jvm.cpu.utilization\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4043,7 +4236,7 @@
         "signature": [
           "\"process.runtime.jvm.memory.committed\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4058,7 +4251,7 @@
         "signature": [
           "\"process.runtime.jvm.memory.limit\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4073,7 +4266,7 @@
         "signature": [
           "\"process.runtime.jvm.memory.usage\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4088,7 +4281,7 @@
         "signature": [
           "\"process.runtime.jvm.threads.count\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4103,7 +4296,7 @@
         "signature": [
           "\"process.runtime.jvm.system.cpu.utilization\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4118,7 +4311,7 @@
         "signature": [
           "\"system.cpu.utilization\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4133,7 +4326,7 @@
         "signature": [
           "\"system.memory.utilization\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4148,7 +4341,7 @@
         "signature": [
           "\"system.process.cpu.total.norm.pct\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4163,7 +4356,7 @@
         "signature": [
           "\"system.cpu.total.norm.pct\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4178,7 +4371,7 @@
         "signature": [
           "\"system.memory.actual.free\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4193,7 +4386,7 @@
         "signature": [
           "\"system.memory.total\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4216,7 +4409,7 @@
           },
           " | SystemMetric | JVMMetric"
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/metric_raw.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/metric_raw.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4231,7 +4424,7 @@
         "signature": [
           "\"metricset.interval\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4246,7 +4439,7 @@
         "signature": [
           "\"metricset.name\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4261,7 +4454,7 @@
         "signature": [
           "\"network.connection.type\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4276,7 +4469,7 @@
         "signature": [
           "\"observer.hostname\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4291,7 +4484,7 @@
         "signature": [
           "\"observer.listening\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4306,7 +4499,7 @@
         "signature": [
           "\"observer.version\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4321,7 +4514,7 @@
         "signature": [
           "\"observer.version_major\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4343,6 +4536,51 @@
       },
       {
         "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.OTEL_SPAN_LINKS",
+        "type": "string",
+        "tags": [],
+        "label": "OTEL_SPAN_LINKS",
+        "description": [],
+        "signature": [
+          "\"links\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.OTEL_SPAN_LINKS_SPAN_ID",
+        "type": "string",
+        "tags": [],
+        "label": "OTEL_SPAN_LINKS_SPAN_ID",
+        "description": [],
+        "signature": [
+          "\"links.span_id\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.OTEL_SPAN_LINKS_TRACE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "OTEL_SPAN_LINKS_TRACE_ID",
+        "description": [],
+        "signature": [
+          "\"links.trace_id\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
         "id": "def-common.PARENT_ID",
         "type": "string",
         "tags": [],
@@ -4351,7 +4589,7 @@
         "signature": [
           "\"parent.id\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4366,7 +4604,7 @@
         "signature": [
           "\"process.args\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4381,7 +4619,7 @@
         "signature": [
           "\"process.pid\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4396,7 +4634,7 @@
         "signature": [
           "\"processor.event\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4411,7 +4649,37 @@
         "signature": [
           "\"processor.name\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.SERVER_ADDRESS",
+        "type": "string",
+        "tags": [],
+        "label": "SERVER_ADDRESS",
+        "description": [],
+        "signature": [
+          "\"server.address\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.SERVER_PORT",
+        "type": "string",
+        "tags": [],
+        "label": "SERVER_PORT",
+        "description": [],
+        "signature": [
+          "\"server.port\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4426,7 +4694,7 @@
         "signature": [
           "\"service\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4441,7 +4709,7 @@
         "signature": [
           "\"service.environment\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4456,7 +4724,7 @@
         "signature": [
           "\"service.framework.name\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4471,7 +4739,7 @@
         "signature": [
           "\"service.framework.version\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4486,7 +4754,7 @@
         "signature": [
           "\"service.language.name\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4501,7 +4769,7 @@
         "signature": [
           "\"service.language.version\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4516,7 +4784,7 @@
         "signature": [
           "\"service.name\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4531,7 +4799,7 @@
         "signature": [
           "\"service.node.name\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4546,7 +4814,7 @@
         "signature": [
           "\"service_transaction.aggregation.overflow_count\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4561,7 +4829,7 @@
         "signature": [
           "\"service.runtime.name\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4576,7 +4844,7 @@
         "signature": [
           "\"service.runtime.version\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4591,7 +4859,7 @@
         "signature": [
           "\"service.target.type\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4606,7 +4874,7 @@
         "signature": [
           "\"service.version\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4621,7 +4889,7 @@
         "signature": [
           "\"session.id\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4636,7 +4904,7 @@
         "signature": [
           "\"span.action\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4651,7 +4919,7 @@
         "signature": [
           "\"span.composite.compression_strategy\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4666,7 +4934,7 @@
         "signature": [
           "\"span.composite.count\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4681,7 +4949,7 @@
         "signature": [
           "\"span.composite.sum.us\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4696,7 +4964,7 @@
         "signature": [
           "\"span.destination.service.resource\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4711,7 +4979,7 @@
         "signature": [
           "\"span.destination.service.response_time.count\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4726,7 +4994,7 @@
         "signature": [
           "\"span.destination.service.response_time.sum.us\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4741,7 +5009,7 @@
         "signature": [
           "\"span.duration.us\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4756,7 +5024,7 @@
         "signature": [
           "\"span.id\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4771,7 +5039,7 @@
         "signature": [
           "\"span.links\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4786,7 +5054,7 @@
         "signature": [
           "\"span.links.span.id\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4801,7 +5069,7 @@
         "signature": [
           "\"span.links.trace.id\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4816,7 +5084,7 @@
         "signature": [
           "\"span.name\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4831,7 +5099,7 @@
         "signature": [
           "\"span.self_time.sum.us\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4846,7 +5114,7 @@
         "signature": [
           "\"span.stacktrace\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4861,7 +5129,7 @@
         "signature": [
           "\"span.subtype\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4876,7 +5144,7 @@
         "signature": [
           "\"span.sync\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4891,7 +5159,7 @@
         "signature": [
           "\"span.type\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4953,7 +5221,7 @@
           },
           " | undefined; } & { span: { destination: { service: { resource: string; response_time: { count: number; sum: { us: number; }; }; }; }; }; }"
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/metric_raw.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/metric_raw.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4975,7 +5243,7 @@
             "text": "StackframeWithLineContext"
           }
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/fields/stackframe.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/fields/stackframe.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4990,7 +5258,22 @@
         "signature": [
           "StackframeBase & { line: Line & { context: string; }; }"
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/fields/stackframe.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/fields/stackframe.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.STATUS_CODE",
+        "type": "string",
+        "tags": [],
+        "label": "STATUS_CODE",
+        "description": [],
+        "signature": [
+          "\"status.code\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/otel.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5005,7 +5288,7 @@
         "signature": [
           "\"telemetry.sdk.language\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5020,7 +5303,7 @@
         "signature": [
           "\"telemetry.sdk.name\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5035,7 +5318,7 @@
         "signature": [
           "\"telemetry.sdk.version\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5050,7 +5333,7 @@
         "signature": [
           "\"_tier\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5065,7 +5348,7 @@
         "signature": [
           "\"timestamp.us\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5080,22 +5363,7 @@
         "signature": [
           "\"trace.id\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/apm-types",
-        "id": "def-common.TRANSACTION_AGENT_MARKS",
-        "type": "string",
-        "tags": [],
-        "label": "TRANSACTION_AGENT_MARKS",
-        "description": [],
-        "signature": [
-          "\"transaction.agent.marks\""
-        ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5110,7 +5378,7 @@
         "signature": [
           "\"transaction.duration.us\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5125,7 +5393,7 @@
         "signature": [
           "\"transaction.duration.histogram\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5140,7 +5408,7 @@
         "signature": [
           "\"transaction.duration.summary\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5155,7 +5423,7 @@
         "signature": [
           "\"transaction.failure_count\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5170,7 +5438,22 @@
         "signature": [
           "\"transaction.id\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.TRANSACTION_MARKS_AGENT",
+        "type": "string",
+        "tags": [],
+        "label": "TRANSACTION_MARKS_AGENT",
+        "description": [],
+        "signature": [
+          "\"transaction.marks.agent\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5185,7 +5468,7 @@
         "signature": [
           "\"transaction.name\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5200,7 +5483,7 @@
         "signature": [
           "\"transaction.aggregation.overflow_count\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5215,7 +5498,7 @@
         "signature": [
           "\"transaction.page.url\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5230,7 +5513,7 @@
         "signature": [
           "\"transaction.profiler_stack_trace_ids\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5245,7 +5528,7 @@
         "signature": [
           "\"transaction.result\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5260,7 +5543,7 @@
         "signature": [
           "\"transaction.root\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5275,7 +5558,7 @@
         "signature": [
           "\"transaction.sampled\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5290,7 +5573,7 @@
         "signature": [
           "\"transaction.success_count\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5305,7 +5588,7 @@
         "signature": [
           "\"transaction.type\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5320,7 +5603,37 @@
         "signature": [
           "\"url.full\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.URL_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "URL_PATH",
+        "description": [],
+        "signature": [
+          "\"url.path\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.URL_SCHEME",
+        "type": "string",
+        "tags": [],
+        "label": "URL_SCHEME",
+        "description": [],
+        "signature": [
+          "\"url.scheme\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5335,7 +5648,7 @@
         "signature": [
           "\"user_agent.name\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5350,7 +5663,22 @@
         "signature": [
           "\"user_agent.original\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.USER_AGENT_VERSION",
+        "type": "string",
+        "tags": [],
+        "label": "USER_AGENT_VERSION",
+        "description": [],
+        "signature": [
+          "\"user_agent.version\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5365,7 +5693,7 @@
         "signature": [
           "\"user.id\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5380,7 +5708,7 @@
         "signature": [
           "\"heap\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5395,7 +5723,7 @@
         "signature": [
           "\"non_heap\""
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_fields/apm.ts",
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

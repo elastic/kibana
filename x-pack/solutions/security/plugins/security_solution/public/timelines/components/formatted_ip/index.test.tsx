@@ -63,7 +63,6 @@ describe('FormattedIp', () => {
     eventId: 'test-event-id',
     isAggregatable: true,
     fieldType: 'ip',
-    isDraggable: false,
     fieldName: 'host.ip',
   };
 
@@ -75,20 +74,6 @@ describe('FormattedIp', () => {
     );
 
     expect(screen.getByText(props.value)).toBeInTheDocument();
-  });
-
-  test('should render DraggableWrapper if isDraggable is true', () => {
-    const testProps = {
-      ...props,
-      isDraggable: true,
-    };
-    render(
-      <TestProviders>
-        <FormattedIp {...testProps} />
-      </TestProviders>
-    );
-
-    expect(screen.getByTestId('DraggableWrapper')).toBeInTheDocument();
   });
 
   test('if enableIpDetailsFlyout, should open NetworkDetails expandable flyout', async () => {

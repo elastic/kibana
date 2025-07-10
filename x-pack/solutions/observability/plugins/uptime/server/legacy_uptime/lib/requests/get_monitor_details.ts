@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { CLIENT_ALERT_TYPES } from '../../../../common/constants/uptime_alerts';
 import { UMElasticsearchQueryFn } from '../adapters';
 import { MonitorDetails, Ping } from '../../../../common/runtime_types';
@@ -54,32 +54,30 @@ export const getMonitorAlerts = async ({
     );
 
     const esParams = createEsQuery({
-      body: {
-        query: {
-          bool: {
-            filter: [
-              {
-                term: {
-                  'monitor.id': monitorId,
-                },
+      query: {
+        bool: {
+          filter: [
+            {
+              term: {
+                'monitor.id': monitorId,
               },
-            ] as QueryDslQueryContainer[],
-          },
-        },
-        size: 0,
-        aggs: {
-          monitors: {
-            terms: {
-              field: 'monitor.id',
-              size: 1000,
             },
+          ] as QueryDslQueryContainer[],
+        },
+      },
+      size: 0,
+      aggs: {
+        monitors: {
+          terms: {
+            field: 'monitor.id',
+            size: 1000,
           },
         },
       },
     });
 
     if (parsedFilters) {
-      esParams.body.query.bool.filter.push(parsedFilters);
+      esParams.query.bool.filter.push(parsedFilters);
     }
 
     const { body: result } = await uptimeEsClient.search(
@@ -138,7 +136,7 @@ export const getMonitorDetails: UMElasticsearchQueryFn<
     ],
   };
 
-  const { body: result } = await uptimeEsClient.search({ body: params }, 'getMonitorDetails');
+  const { body: result } = await uptimeEsClient.search(params, 'getMonitorDetails');
 
   const data = result.hits.hits[0]?._source as Ping & { '@timestamp': string };
 

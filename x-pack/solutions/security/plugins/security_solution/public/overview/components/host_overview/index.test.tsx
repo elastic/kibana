@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
 import { render } from '@testing-library/react';
 import React from 'react';
+// Necessary until components being tested are migrated of styled-components https://github.com/elastic/kibana/issues/219037
+import 'jest-styled-components';
 import { TestProviders } from '../../../common/mock';
 
 import { HostOverview } from '.';
@@ -19,7 +20,7 @@ const defaultProps = {
   data: undefined,
   inspect: null,
   refetch: () => {},
-  isModuleEnabled: true,
+  hasEngineBeenInstalled: true,
   isAuthorized: true,
   loading: true,
 };
@@ -42,21 +43,23 @@ describe('Host Summary Component', () => {
     startDate: '2019-06-15T06:00:00.000Z',
     hostName: 'testHostName',
     jobNameById: {},
+    scopeId: 'default',
+    isFlyoutOpen: false,
   };
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseRiskScore.mockReturnValue({ ...defaultProps, isModuleEnabled: false });
+    mockUseRiskScore.mockReturnValue({ ...defaultProps, hasEngineBeenInstalled: false });
   });
 
   test('it renders the default Host Summary', () => {
-    const wrapper = shallow(
+    const { container } = render(
       <TestProviders>
         <HostOverview {...mockProps} />
       </TestProviders>
     );
 
-    expect(wrapper.find('HostOverview')).toMatchSnapshot();
+    expect(container.children[0]).toMatchSnapshot();
   });
 
   test('it renders the panel view Host Summary', () => {
@@ -65,13 +68,13 @@ describe('Host Summary Component', () => {
       isInDetailsSidePanel: true,
     };
 
-    const wrapper = shallow(
+    const { container } = render(
       <TestProviders>
         <HostOverview {...panelViewProps} />
       </TestProviders>
     );
 
-    expect(wrapper.find('HostOverview')).toMatchSnapshot();
+    expect(container.children[0]).toMatchSnapshot();
   });
 
   test('it renders host risk score and level', () => {

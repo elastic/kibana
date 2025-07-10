@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { getByTestId, fireEvent, getByText, act } from '@testing-library/react';
+import { getByTestId, fireEvent, getByText, act, waitFor } from '@testing-library/react';
 import type { MemoryHistory } from 'history';
+import { PerformanceContextProvider } from '@kbn/ebt-tools';
 import { createMemoryHistory } from 'history';
 import React from 'react';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
@@ -79,7 +80,9 @@ function setup({
         <UrlParamsProvider>
           <ApmTimeRangeMetadataContextProvider>
             <ApmServiceContextProvider>
-              <SearchBar showTransactionTypeSelector />
+              <PerformanceContextProvider>
+                <SearchBar showTransactionTypeSelector />
+              </PerformanceContextProvider>
             </ApmServiceContextProvider>
           </ApmTimeRangeMetadataContextProvider>
         </UrlParamsProvider>
@@ -96,7 +99,7 @@ describe('when transactionType is selected and multiple transaction types are gi
     jest.spyOn(history, 'replace');
   });
 
-  it('renders a radio group with transaction types', () => {
+  it('renders a radio group with transaction types', async () => {
     const { container } = setup({
       history,
       serviceTransactionTypes: ['firstType', 'secondType'],
@@ -108,14 +111,16 @@ describe('when transactionType is selected and multiple transaction types are gi
     });
 
     // transaction type selector
-    const dropdown = getByTestId(container, 'headerFilterTransactionType');
+    await waitFor(() => {
+      const dropdown = getByTestId(container, 'headerFilterTransactionType');
 
-    // both options should be listed
-    expect(getByText(dropdown, 'firstType')).toBeInTheDocument();
-    expect(getByText(dropdown, 'secondType')).toBeInTheDocument();
+      // both options should be listed
+      expect(getByText(dropdown, 'firstType')).toBeInTheDocument();
+      expect(getByText(dropdown, 'secondType')).toBeInTheDocument();
 
-    // second option should be selected
-    expect(dropdown).toHaveValue('secondType');
+      // second option should be selected
+      expect(dropdown).toHaveValue('secondType');
+    });
   });
 
   it('should update the URL when a transaction type is selected', async () => {

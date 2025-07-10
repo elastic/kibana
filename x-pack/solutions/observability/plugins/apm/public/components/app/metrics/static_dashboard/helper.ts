@@ -6,29 +6,34 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { DashboardPanelMap } from '@kbn/dashboard-plugin/common';
-import {
-  AGENT_NAME_DASHBOARD_FILE_MAPPING,
-  loadDashboardFile,
-} from './dashboards/dashboard_catalog';
-
+import type { DashboardState } from '@kbn/dashboard-plugin/common';
+import { existingDashboardFileNames, loadDashboardFile } from './dashboards/dashboard_catalog';
+import { getDashboardFileName } from './dashboards/get_dashboard_file_name';
 interface DashboardFileProps {
   agentName?: string;
   runtimeName?: string;
   serverlessType?: string;
+  telemetrySdkName?: string;
+  telemetrySdkLanguage?: string;
 }
 
 export interface MetricsDashboardProps extends DashboardFileProps {
   dataView: DataView;
 }
 
-export function hasDashboardFile(props: DashboardFileProps) {
-  return !!getDashboardFileName(props);
+function getDashboardFileNameFromProps({
+  agentName,
+  telemetrySdkName,
+  telemetrySdkLanguage,
+}: DashboardFileProps) {
+  const dashboardFile =
+    agentName && getDashboardFileName({ agentName, telemetrySdkName, telemetrySdkLanguage });
+  return dashboardFile;
 }
 
-function getDashboardFileName({ agentName }: DashboardFileProps) {
-  const dashboardFile = agentName && AGENT_NAME_DASHBOARD_FILE_MAPPING[agentName];
-  return dashboardFile;
+export function hasDashboard(props: DashboardFileProps) {
+  const dashboardFilename = getDashboardFileNameFromProps(props);
+  return !!dashboardFilename && existingDashboardFileNames.has(dashboardFilename);
 }
 
 const getAdhocDataView = (dataView: DataView) => {
@@ -42,11 +47,9 @@ const getAdhocDataView = (dataView: DataView) => {
 export async function convertSavedDashboardToPanels(
   props: MetricsDashboardProps,
   dataView: DataView
-): Promise<DashboardPanelMap | undefined> {
-  const dashboardFilename = getDashboardFileName(props);
-  const dashboardJSON = !!dashboardFilename
-    ? await loadDashboardFile(dashboardFilename)
-    : undefined;
+): Promise<DashboardState['panels'] | undefined> {
+  const dashboardFilename = getDashboardFileNameFromProps(props);
+  const dashboardJSON = !!dashboardFilename ? await loadDashboardFile(dashboardFilename) : false;
 
   if (!dashboardFilename || !dashboardJSON) {
     return undefined;
@@ -57,17 +60,14 @@ export async function convertSavedDashboardToPanels(
   const panels = panelsRawObjects.reduce((acc, panel) => {
     const { gridData, embeddableConfig, panelIndex, title } = panel;
     const { attributes } = embeddableConfig;
-    const { state } = attributes;
-    const {
-      datasourceStates: {
-        formBased: { layers },
-      },
-    } = state;
+    const datasourceStates = attributes?.state?.datasourceStates ?? {};
+    const layers = datasourceStates.formBased?.layers ?? datasourceStates.textBased?.layers ?? [];
 
-    acc[gridData.i] = {
+    acc.push({
       type: panel.type,
       gridData,
-      explicitInput: {
+      panelIndex,
+      panelConfig: {
         id: panelIndex,
         ...embeddableConfig,
         title,
@@ -75,7 +75,7 @@ export async function convertSavedDashboardToPanels(
           ...attributes,
           references: [],
           state: {
-            ...state,
+            ...(attributes?.state ?? {}),
             adHocDataViews: getAdhocDataView(dataView),
             internalReferences: Object.keys(layers).map((layerId) => ({
               id: dataView.id,
@@ -85,10 +85,10 @@ export async function convertSavedDashboardToPanels(
           },
         },
       },
-    };
+    });
 
     return acc;
-  }, {}) as DashboardPanelMap;
+  }, []);
 
   return panels;
 }

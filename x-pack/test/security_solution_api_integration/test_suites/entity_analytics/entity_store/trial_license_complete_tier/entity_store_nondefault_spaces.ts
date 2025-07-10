@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import { v4 as uuidv4 } from 'uuid';
+import { defaultOptions } from '@kbn/security-solution-plugin/server/lib/entity_analytics/entity_store/constants';
 import { FtrProviderContextWithSpaces } from '../../../../ftr_provider_context_with_spaces';
 import { EntityStoreUtils } from '../../utils';
 import { dataViewRouteHelpersFactory } from '../../utils/data_view';
@@ -73,11 +74,9 @@ export default ({ getService }: FtrProviderContextWithSpaces) => {
             .expect(200);
 
           expect(getResponse.body).to.eql({
+            ...defaultOptions,
             status: 'started',
             type: 'host',
-            filter: '',
-            fieldHistoryLength: 10,
-            indexPattern: '',
           });
         });
 
@@ -92,11 +91,9 @@ export default ({ getService }: FtrProviderContextWithSpaces) => {
             .expect(200);
 
           expect(getResponse.body).to.eql({
+            ...defaultOptions,
             status: 'started',
             type: 'user',
-            filter: '',
-            fieldHistoryLength: 10,
-            indexPattern: '',
           });
         });
       });
@@ -110,18 +107,14 @@ export default ({ getService }: FtrProviderContextWithSpaces) => {
 
           expect(sortedEngines).to.eql([
             {
+              ...defaultOptions,
               status: 'started',
               type: 'host',
-              filter: '',
-              fieldHistoryLength: 10,
-              indexPattern: '',
             },
             {
+              ...defaultOptions,
               status: 'started',
               type: 'user',
-              filter: '',
-              fieldHistoryLength: 10,
-              indexPattern: '',
             },
           ]);
         });

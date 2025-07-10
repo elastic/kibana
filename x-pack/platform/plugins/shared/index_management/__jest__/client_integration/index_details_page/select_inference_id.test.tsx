@@ -18,7 +18,6 @@ import {
 import React from 'react';
 import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 
-const createInferenceEndpointMock = jest.fn();
 const mockDispatch = jest.fn();
 const INFERENCE_LOCATOR = 'SEARCH_INFERENCE_ENDPOINTS';
 const createMockLocator = (id: string) => ({
@@ -36,6 +35,12 @@ jest.mock('../../../public/application/app_context', () => ({
         },
       },
     },
+    config: { enforceAdaptiveAllocations: false },
+    services: {
+      notificationService: {
+        toasts: {},
+      },
+    },
     docLinks: {
       links: {
         inferenceManagement: {
@@ -44,14 +49,6 @@ jest.mock('../../../public/application/app_context', () => ({
       },
     },
     plugins: {
-      ml: {
-        mlApi: {
-          trainedModels: {
-            getTrainedModels: jest.fn().mockResolvedValue([]),
-            getTrainedModelStats: jest.fn().mockResolvedValue([]),
-          },
-        },
-      },
       share: {
         url: {
           locators: {
@@ -120,7 +117,6 @@ describe('SelectInferenceId', () => {
   beforeAll(async () => {
     const defaultProps: SelectInferenceIdProps = {
       'data-test-subj': 'data-inference-endpoint-list',
-      createInferenceEndpoint: createInferenceEndpointMock,
     };
     const setup = registerTestBed(getTestForm(SelectInferenceId), {
       defaultProps,
@@ -142,6 +138,7 @@ describe('SelectInferenceId', () => {
     find('inferenceIdButton').simulate('click');
     expect(exists('learn-how-to-create-inference-endpoints')).toBe(true);
     expect(exists('manageInferenceEndpointButton')).toBe(true);
+    expect(exists('createInferenceEndpointButton')).toBe(true);
   });
 
   it('should display the inference endpoints in the combo', () => {

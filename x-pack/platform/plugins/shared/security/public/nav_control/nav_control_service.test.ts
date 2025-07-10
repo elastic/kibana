@@ -55,7 +55,7 @@ describe('SecurityNavControlService', () => {
     const license$ = new BehaviorSubject<ILicense>(validLicense);
     const coreStart = coreMock.createStart();
 
-    const navControlService = new SecurityNavControlService('traditional');
+    const navControlService = new SecurityNavControlService();
     navControlService.setup({
       securityLicense: new SecurityLicenseService().setup({ license$ }).license,
       logoutUrl: '/some/logout/url',
@@ -76,7 +76,7 @@ describe('SecurityNavControlService', () => {
     expect(target).toMatchInlineSnapshot(`
       <div>
         <div
-          css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+          class="css-qvyf25-redirectAppLinksStyles"
           data-test-subj="kbnRedirectAppLink"
         >
           <div
@@ -125,7 +125,7 @@ describe('SecurityNavControlService', () => {
     const license$ = new BehaviorSubject<ILicense>({} as ILicense);
     const coreStart = coreMock.createStart();
 
-    const navControlService = new SecurityNavControlService('traditional');
+    const navControlService = new SecurityNavControlService();
     navControlService.setup({
       securityLicense: new SecurityLicenseService().setup({ license$ }).license,
       logoutUrl: '/some/logout/url',
@@ -145,7 +145,7 @@ describe('SecurityNavControlService', () => {
     const license$ = new BehaviorSubject<ILicense>(validLicense);
     const coreStart = coreMock.createStart();
 
-    const navControlService = new SecurityNavControlService('traditional');
+    const navControlService = new SecurityNavControlService();
     navControlService.setup({
       securityLicense: new SecurityLicenseService().setup({ license$ }).license,
       logoutUrl: '/some/logout/url',
@@ -162,7 +162,7 @@ describe('SecurityNavControlService', () => {
     const license$ = new BehaviorSubject<ILicense>(validLicense);
     const coreStart = coreMock.createStart();
 
-    const navControlService = new SecurityNavControlService('traditional');
+    const navControlService = new SecurityNavControlService();
     navControlService.setup({
       securityLicense: new SecurityLicenseService().setup({ license$ }).license,
       logoutUrl: '/some/logout/url',
@@ -184,7 +184,7 @@ describe('SecurityNavControlService', () => {
     const license$ = new BehaviorSubject<ILicense>(validLicense);
     const coreStart = coreMock.createStart();
 
-    const navControlService = new SecurityNavControlService('traditional');
+    const navControlService = new SecurityNavControlService();
     navControlService.setup({
       securityLicense: new SecurityLicenseService().setup({ license$ }).license,
       logoutUrl: '/some/logout/url',
@@ -207,7 +207,7 @@ describe('SecurityNavControlService', () => {
       const coreSetup = coreMock.createSetup();
       const license$ = new BehaviorSubject<ILicense>({} as ILicense);
 
-      navControlService = new SecurityNavControlService('traditional');
+      navControlService = new SecurityNavControlService();
       navControlService.setup({
         securityLicense: new SecurityLicenseService().setup({ license$ }).license,
         logoutUrl: '/some/logout/url',

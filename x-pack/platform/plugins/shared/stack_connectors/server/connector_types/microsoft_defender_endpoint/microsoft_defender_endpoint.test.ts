@@ -5,39 +5,14 @@
  * 2.0.
  */
 
-import {
-  CreateMicrosoftDefenderConnectorMockResponse,
-  microsoftDefenderEndpointConnectorMocks,
-} from './mocks';
+import type { CreateMicrosoftDefenderConnectorMockResponse } from './mocks';
+import { microsoftDefenderEndpointConnectorMocks } from './mocks';
 
 describe('Microsoft Defender for Endpoint Connector', () => {
   let connectorMock: CreateMicrosoftDefenderConnectorMockResponse;
 
   beforeEach(() => {
     connectorMock = microsoftDefenderEndpointConnectorMocks.create();
-  });
-
-  describe('Access Token management', () => {
-    it('should call API to generate as new token', async () => {
-      await connectorMock.instanceMock.isolateHost(
-        { id: '1-2-3', comment: 'foo' },
-        connectorMock.usageCollector
-      );
-
-      expect(connectorMock.instanceMock.request).toHaveBeenCalledWith(
-        expect.objectContaining({
-          url: `${connectorMock.options.config.oAuthServerUrl}/${connectorMock.options.config.tenantId}/oauth2/v2.0/token`,
-          method: 'POST',
-          data: {
-            grant_type: 'client_credentials',
-            client_id: connectorMock.options.config.clientId,
-            scope: connectorMock.options.config.oAuthScope,
-            client_secret: connectorMock.options.secrets.clientSecret,
-          },
-        }),
-        connectorMock.usageCollector
-      );
-    });
   });
 
   describe('#testConnector', () => {
@@ -54,6 +29,7 @@ describe('Microsoft Defender for Endpoint Connector', () => {
           'API call to Machine Isolate was successful',
           'API call to Machine Release was successful',
           'API call to Machine Actions was successful',
+          'API call to Machine RunScript was successful',
         ],
       });
 
@@ -187,10 +163,13 @@ describe('Microsoft Defender for Endpoint Connector', () => {
     });
 
     it.each`
-      title                       | options                                                                           | expectedParams
-      ${'single value filters'}   | ${{ id: '123', status: 'Succeeded', machineId: 'abc', page: 2 }}                  | ${{ $count: true, $filter: 'id eq 123 AND status eq Succeeded AND machineId eq abc', $skip: 20, $top: 20 }}
-      ${'multiple value filters'} | ${{ id: ['123', '321'], type: ['Isolate', 'Unisolate'], page: 1, pageSize: 100 }} | ${{ $count: true, $filter: "id in ('123','321') AND type in ('Isolate','Unisolate')", $top: 100 }}
-      ${'page and page size'}     | ${{ id: ['123', '321'], type: ['Isolate', 'Unisolate'], page: 3, pageSize: 100 }} | ${{ $count: true, $filter: "id in ('123','321') AND type in ('Isolate','Unisolate')", $skip: 200, $top: 100 }}
+      title                                                      | options                                                                           | expectedParams
+      ${'single value filters'}                                  | ${{ id: '123', status: 'Succeeded', machineId: 'abc', page: 2 }}                  | ${{ $count: true, $filter: "id eq '123' AND status eq 'Succeeded' AND machineId eq 'abc'", $skip: 20, $top: 20 }}
+      ${'multiple value filters'}                                | ${{ id: ['123', '321'], type: ['Isolate', 'Unisolate'], page: 1, pageSize: 100 }} | ${{ $count: true, $filter: "id in ('123','321') AND type in ('Isolate','Unisolate')", $top: 100 }}
+      ${'page and page size'}                                    | ${{ id: ['123', '321'], type: ['Isolate', 'Unisolate'], page: 3, pageSize: 100 }} | ${{ $count: true, $filter: "id in ('123','321') AND type in ('Isolate','Unisolate')", $skip: 200, $top: 100 }}
+      ${'with sortDirection but no sortField'}                   | ${{ id: '123', sortDirection: 'asc' }}                                            | ${{ $count: true, $filter: "id eq '123'", $top: 20 }}
+      ${'with sortField and no sortDirection (desc is default)'} | ${{ id: '123', sortField: 'type' }}                                               | ${{ $count: true, $filter: "id eq '123'", $top: 20, $orderby: 'type desc' }}
+      ${'with sortField and sortDirection'}                      | ${{ id: '123', sortField: 'type', sortDirection: 'asc' }}                         | ${{ $count: true, $filter: "id eq '123'", $top: 20, $orderby: 'type asc' }}
     `(
       'should correctly build the oData URL params: $title',
       async ({ options, expectedParams }) => {
@@ -204,5 +183,149 @@ describe('Microsoft Defender for Endpoint Connector', () => {
         );
       }
     );
+  });
+
+  describe('#getAgentList()', () => {
+    it('should return expected response', async () => {
+      await expect(
+        connectorMock.instanceMock.getAgentList({ id: '1-2-3' }, connectorMock.usageCollector)
+      ).resolves.toEqual({
+        '@odata.context': 'https://api-us3.securitycenter.microsoft.com/api/$metadata#Machines',
+        '@odata.count': 1,
+        page: 1,
+        pageSize: 20,
+        total: 1,
+        value: [expect.any(Object)],
+      });
+    });
+
+    it('should call Microsoft API with expected query params', async () => {
+      await connectorMock.instanceMock.getAgentList({ id: '1-2-3' }, connectorMock.usageCollector);
+
+      expect(connectorMock.instanceMock.request).toHaveBeenCalledWith(
+        expect.objectContaining({
+          url: 'https://api.mock__microsoft.com/api/machines',
+          params: { $count: true, $filter: "id eq '1-2-3'", $top: 20 },
+        }),
+        connectorMock.usageCollector
+      );
+    });
+  });
+
+  describe('#getActionResults()', () => {
+    it('should call Microsoft Defender API to retrieve action results download link', async () => {
+      const actionId = 'test-action-123';
+      const mockDownloadUrl = 'https://download.microsoft.com/mock-download-url/results.json';
+
+      // Mock only the external download URL (Microsoft Defender API is mocked in mocks.ts)
+      connectorMock.apiMock[mockDownloadUrl] = () =>
+        microsoftDefenderEndpointConnectorMocks.createAxiosResponseMock({
+          pipe: jest.fn(),
+          on: jest.fn(),
+          read: jest.fn(),
+        });
+
+      await connectorMock.instanceMock.getActionResults(
+        { id: actionId },
+        connectorMock.usageCollector
+      );
+
+      expect(connectorMock.instanceMock.request).toHaveBeenCalledWith(
+        expect.objectContaining({
+          url: `https://api.mock__microsoft.com/api/machineactions/${actionId}/GetLiveResponseResultDownloadLink(index=0)`,
+          method: 'GET',
+        }),
+        connectorMock.usageCollector
+      );
+
+      expect(connectorMock.instanceMock.request).toHaveBeenCalledWith(
+        expect.objectContaining({
+          url: mockDownloadUrl,
+          method: 'get',
+          responseType: 'stream',
+        }),
+        connectorMock.usageCollector
+      );
+    });
+
+    it('should return a Stream for downloading the file', async () => {
+      const actionId = 'test-action-123';
+      const mockDownloadUrl = 'https://download.microsoft.com/mock-download-url/results.json';
+
+      // Mock external download URL to return a stream (Microsoft Defender API uses default mock)
+      const mockStream = { pipe: jest.fn(), on: jest.fn(), read: jest.fn() };
+      connectorMock.apiMock[mockDownloadUrl] = () =>
+        microsoftDefenderEndpointConnectorMocks.createAxiosResponseMock(mockStream);
+
+      const result = await connectorMock.instanceMock.getActionResults(
+        { id: actionId },
+        connectorMock.usageCollector
+      );
+
+      expect(result).toEqual(mockStream);
+      expect(connectorMock.instanceMock.request).toHaveBeenCalledWith(
+        expect.objectContaining({
+          url: mockDownloadUrl,
+          method: 'get',
+          responseType: 'stream',
+        }),
+        connectorMock.usageCollector
+      );
+    });
+
+    it('should error if download URL is not found in API response', async () => {
+      const actionId = 'test-action-123';
+
+      // Override the default mock to return null
+      connectorMock.apiMock[
+        `https://api.mock__microsoft.com/api/machineactions/${actionId}/GetLiveResponseResultDownloadLink(index=0)`
+      ] = () => microsoftDefenderEndpointConnectorMocks.createAxiosResponseMock({ value: null });
+
+      await expect(
+        connectorMock.instanceMock.getActionResults({ id: actionId }, connectorMock.usageCollector)
+      ).rejects.toThrow(`Download URL for script results of machineId [${actionId}] not found`);
+    });
+
+    it('should error if download URL is empty string in API response', async () => {
+      const actionId = 'test-action-123';
+
+      // Override the default mock to return empty string
+      connectorMock.apiMock[
+        `https://api.mock__microsoft.com/api/machineactions/${actionId}/GetLiveResponseResultDownloadLink(index=0)`
+      ] = () => microsoftDefenderEndpointConnectorMocks.createAxiosResponseMock({ value: '' });
+
+      await expect(
+        connectorMock.instanceMock.getActionResults({ id: actionId }, connectorMock.usageCollector)
+      ).rejects.toThrow(`Download URL for script results of machineId [${actionId}] not found`);
+    });
+
+    it('should handle Microsoft Defender API errors for download link retrieval', async () => {
+      const actionId = 'test-action-123';
+
+      // Override the default mock to throw an error
+      connectorMock.apiMock[
+        `https://api.mock__microsoft.com/api/machineactions/${actionId}/GetLiveResponseResultDownloadLink(index=0)`
+      ] = () => {
+        throw new Error('Microsoft Defender API error');
+      };
+
+      await expect(
+        connectorMock.instanceMock.getActionResults({ id: actionId }, connectorMock.usageCollector)
+      ).rejects.toThrow('Microsoft Defender API error');
+    });
+
+    it('should handle file download errors', async () => {
+      const actionId = 'test-action-123';
+      const mockDownloadUrl = 'https://download.microsoft.com/mock-download-url/results.json';
+
+      // Mock external download URL to throw an error (Microsoft Defender API uses default mock)
+      connectorMock.apiMock[mockDownloadUrl] = () => {
+        throw new Error('File download failed');
+      };
+
+      await expect(
+        connectorMock.instanceMock.getActionResults({ id: actionId }, connectorMock.usageCollector)
+      ).rejects.toThrow('File download failed');
+    });
   });
 });

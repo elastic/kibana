@@ -7,13 +7,12 @@
 
 import React, { Component } from 'react';
 import _ from 'lodash';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
 import { RangeFieldMeta } from '../../../../../../../common/descriptor_types';
 import { DynamicSizeProperty } from '../../../properties/dynamic_size_property';
-import { RightAlignedText } from '../right_aligned_text';
 import { getMaxLabel, getMinLabel } from './get_ordinal_label';
 import { type Marker, MarkerList } from './marker_list';
+import { MapMarker } from './map_marker';
 
 const FONT_SIZE = 10;
 const HALF_FONT_SIZE = FONT_SIZE / 2;
@@ -96,7 +95,6 @@ export class MarkerSizeLegend extends Component<Props, State> {
 
     const circleStyle = {
       fillOpacity: 0,
-      stroke: euiThemeVars.euiTextColor,
       strokeWidth: 1,
     };
 
@@ -110,25 +108,20 @@ export class MarkerSizeLegend extends Component<Props, State> {
       const textOffset = this.state.maxLabelWidth + HALF_FONT_SIZE;
       const rawTextY = circleTopY + HALF_FONT_SIZE;
       const textY = rawTextY > svgHeight ? svgHeight : rawTextY;
+
       return {
         svg: (
-          <g key={radius}>
-            <line
-              style={{ stroke: euiThemeVars.euiBorderColor }}
-              x1={circleCenterX}
-              y1={circleTopY}
-              x2={circleCenterX * 2.25}
-              y2={circleTopY}
-            />
-            <RightAlignedText
-              setWidth={this._onRightAlignedWidthChange}
-              style={{ fontSize: FONT_SIZE, fill: euiThemeVars.euiTextColor }}
-              x={circleCenterX * 2.25 + textOffset}
-              y={textY}
-              value={formattedValue}
-            />
-            <circle style={circleStyle} cx={circleCenterX} cy={circleCenterY} r={radius} />
-          </g>
+          <MapMarker
+            circleCenterX={circleCenterX}
+            circleCenterY={circleCenterY}
+            circleTopY={circleTopY}
+            circleStyle={circleStyle}
+            radius={radius}
+            textOffset={textOffset}
+            textY={textY}
+            formattedValue={formattedValue}
+            onWidthChange={this._onRightAlignedWidthChange}
+          />
         ),
         textY,
       };

@@ -23,7 +23,7 @@ import {
 import {
   deleteOutputHandler,
   getLatestOutputHealth,
-  getOneOuputHandler,
+  getOneOutputHandler,
   getOutputsHandler,
   postLogstashApiKeyHandler,
   postOutputHandler,
@@ -128,7 +128,7 @@ describe('schema validation', () => {
     };
     const expectedResponse = { item: output };
     outputServiceMock.get.mockResolvedValue(output);
-    await getOneOuputHandler(context, { params: { outputId: 'output1' } } as any, response);
+    await getOneOutputHandler(context, { params: { outputId: 'output1' } } as any, response);
 
     expect(response.ok).toHaveBeenCalledWith({
       body: expectedResponse,

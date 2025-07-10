@@ -18,6 +18,7 @@ import {
   HistoryAndStarredQueriesTabs,
 } from './history_starred_queries';
 import { of } from 'rxjs';
+import { act } from 'react-dom/test-utils';
 
 jest.mock('../history_local_storage', () => {
   const module = jest.requireActual('../history_local_storage');
@@ -78,6 +79,7 @@ describe('Starred and History queries components', () => {
           field: 'queryString',
           name: 'Query',
           render: expect.anything(),
+          css: expect.anything(),
         },
         {
           'data-test-subj': 'timeRan',
@@ -120,6 +122,7 @@ describe('Starred and History queries components', () => {
           field: 'queryString',
           name: 'Query',
           render: expect.anything(),
+          css: expect.anything(),
         },
         {
           'data-test-subj': 'timeRan',
@@ -171,6 +174,7 @@ describe('Starred and History queries components', () => {
         field: 'queryString',
         name: 'Query',
         render: expect.anything(),
+        css: expect.anything(),
       },
       {
         actions: [],
@@ -266,7 +270,9 @@ describe('Starred and History queries components', () => {
         </KibanaContextProvider>
       );
       // click the starred queries tab
-      screen.getByTestId('starred-queries-tab').click();
+      act(() => {
+        screen.getByTestId('starred-queries-tab').click();
+      });
 
       expect(screen.getByTestId('ESQLEditor-starredQueries')).toBeInTheDocument();
       expect(screen.getByTestId('ESQLEditor-history-starred-queries-helpText')).toHaveTextContent(

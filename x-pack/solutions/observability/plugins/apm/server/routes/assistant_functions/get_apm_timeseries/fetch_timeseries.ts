@@ -72,44 +72,42 @@ export async function fetchSeries<T extends ValueAggregationMap>({
     apm: {
       sources: [{ documentType, rollupInterval }],
     },
-    body: {
-      size: 0,
-      track_total_hits: false,
-      query: {
-        bool: {
-          filter,
-        },
+    size: 0,
+    track_total_hits: false,
+    query: {
+      bool: {
+        filter,
       },
-      aggs: {
-        groups: {
-          ...(groupByFields.length === 1
-            ? {
-                terms: {
-                  size: 20,
-                  field: groupByFields[0],
-                },
-              }
-            : {
-                multi_terms: {
-                  size: 20,
-                  terms: groupByFields.map((field) => ({ field })),
-                },
-              }),
-          aggs: {
-            ...aggs,
-            timeseries: {
-              date_histogram: {
-                field: '@timestamp',
-                fixed_interval: intervalString,
-                min_doc_count: 0,
-                extended_bounds: { min: start, max: end },
+    },
+    aggs: {
+      groups: {
+        ...(groupByFields.length === 1
+          ? {
+              terms: {
+                size: 20,
+                field: groupByFields[0],
               },
-              aggs,
+            }
+          : {
+              multi_terms: {
+                size: 20,
+                terms: groupByFields.map((field) => ({ field })),
+              },
+            }),
+        aggs: {
+          ...aggs,
+          timeseries: {
+            date_histogram: {
+              field: '@timestamp',
+              fixed_interval: intervalString,
+              min_doc_count: 0,
+              extended_bounds: { min: start, max: end },
             },
+            aggs,
+          },
+          change_point: {
             change_point: {
-              change_point: {
-                buckets_path: 'timeseries>value',
-              },
+              buckets_path: 'timeseries>value',
             },
           },
         },

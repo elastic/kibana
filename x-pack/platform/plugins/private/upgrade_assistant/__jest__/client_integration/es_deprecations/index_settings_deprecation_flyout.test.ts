@@ -20,7 +20,7 @@ describe('Index settings deprecation flyout', () => {
   let testBed: ElasticsearchTestBed;
   let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
   let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
-  const indexSettingDeprecation = esDeprecationsMockResponse.deprecations[1];
+  const indexSettingDeprecation = esDeprecationsMockResponse.migrationsDeprecations[1];
   beforeEach(async () => {
     const mockEnvironment = setupEnvironment();
     httpRequestsMockHelpers = mockEnvironment.httpRequestsMockHelpers;
@@ -50,7 +50,7 @@ describe('Index settings deprecation flyout', () => {
 
     const { actions, component } = testBed;
     component.update();
-    await actions.table.clickDeprecationRowAt('indexSetting', 0);
+    await actions.table.clickDeprecationRowAt({ deprecationType: 'indexSetting', index: 0 });
   });
 
   it('renders a flyout with deprecation details', async () => {
@@ -88,7 +88,7 @@ describe('Index settings deprecation flyout', () => {
     );
 
     // Reopen the flyout
-    await actions.table.clickDeprecationRowAt('indexSetting', 0);
+    await actions.table.clickDeprecationRowAt({ deprecationType: 'indexSetting', index: 0 });
 
     // Verify prompt to remove setting no longer displays
     expect(find('removeSettingsPrompt').length).toEqual(0);
@@ -125,7 +125,7 @@ describe('Index settings deprecation flyout', () => {
     );
 
     // Reopen the flyout
-    await actions.table.clickDeprecationRowAt('indexSetting', 0);
+    await actions.table.clickDeprecationRowAt({ deprecationType: 'indexSetting', index: 0 });
 
     // Verify the flyout shows an error message
     expect(find('indexSettingsDetails.deleteSettingsError').text()).toContain(

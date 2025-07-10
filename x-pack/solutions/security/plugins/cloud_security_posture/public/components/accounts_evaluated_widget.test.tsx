@@ -47,7 +47,30 @@ describe('AccountsEvaluatedWidget', () => {
         'cloud.provider': 'aws',
         'rule.benchmark.posture_type': 'cspm',
       },
-      ['cloud.account.name']
+      ['cloud.account.id']
+    );
+  });
+
+  it('calls navToFindingsByCloudProvider when a benchmark with provider and namespace is clicked', () => {
+    const { getByText } = render(
+      <TestProvider>
+        <AccountsEvaluatedWidget
+          activeNamespace="test-namespace"
+          benchmarkAssets={benchmarkAssets}
+          benchmarkAbbreviateAbove={999}
+        />
+      </TestProvider>
+    );
+
+    fireEvent.click(getByText('10'));
+
+    expect(mockNavToFindings).toHaveBeenCalledWith(
+      {
+        'data_stream.namespace': 'test-namespace',
+        'cloud.provider': 'aws',
+        'rule.benchmark.posture_type': 'cspm',
+      },
+      ['cloud.account.id']
     );
   });
 
@@ -64,7 +87,29 @@ describe('AccountsEvaluatedWidget', () => {
       {
         'rule.benchmark.id': 'cis_k8s',
       },
-      ['orchestrator.cluster.name']
+      ['orchestrator.cluster.id']
+    );
+  });
+
+  it('calls navToFindingsByCisBenchmark when a benchmark with benchmarkId and namespace is clicked', () => {
+    const { getByText } = render(
+      <TestProvider>
+        <AccountsEvaluatedWidget
+          benchmarkAssets={benchmarkAssets}
+          benchmarkAbbreviateAbove={999}
+          activeNamespace="test-namespace"
+        />
+      </TestProvider>
+    );
+
+    fireEvent.click(getByText('20'));
+
+    expect(mockNavToFindings).toHaveBeenCalledWith(
+      {
+        'rule.benchmark.id': 'cis_k8s',
+        'data_stream.namespace': 'test-namespace',
+      },
+      ['orchestrator.cluster.id']
     );
   });
 });

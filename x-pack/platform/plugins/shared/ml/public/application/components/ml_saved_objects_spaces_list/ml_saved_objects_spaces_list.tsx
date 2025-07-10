@@ -18,10 +18,11 @@ import { useToastNotificationService } from '../../services/toast_notification_s
 
 interface Props {
   spacesApi: SpacesPluginStart; // this component is only ever used when spaces is enabled
-  spaceIds: string[];
+  spaceIds?: string[];
   id: string;
   mlSavedObjectType: MlSavedObjectType;
   refresh(): void;
+  disabled?: boolean;
 }
 
 const ALL_SPACES_ID = '*';
@@ -33,12 +34,14 @@ const modelObjectNoun = i18n.translate('xpack.ml.management.jobsSpacesList.model
   defaultMessage: 'trained model',
 });
 
+const FALLBACK_SPACES_ID: string[] = [];
 export const MLSavedObjectsSpacesList: FC<Props> = ({
   spacesApi,
-  spaceIds,
+  spaceIds = FALLBACK_SPACES_ID,
   id,
   mlSavedObjectType,
   refresh,
+  disabled = false,
 }) => {
   const {
     savedObjects: { updateJobsSpaces, updateModelsSpaces },
@@ -107,9 +110,18 @@ export const MLSavedObjectsSpacesList: FC<Props> = ({
   return (
     <>
       <EuiButtonEmpty
+        disabled={disabled}
         onClick={() => setShowFlyout(true)}
         style={{ height: 'auto' }}
         data-test-subj="mlJobListRowManageSpacesButton"
+        aria-label={i18n.translate(
+          'xpack.ml.management.jobsSpacesList.manageSpacesButtonAriaLabel',
+          {
+            defaultMessage: 'Manage spaces for this {mlSavedObjectType}',
+            values: { mlSavedObjectType },
+          }
+        )}
+        tabIndex={spaceIds.length > 0 ? 0 : -1}
       >
         <LazySpaceList namespaces={spaceIds} displayLimit={0} behaviorContext="outside-space" />
       </EuiButtonEmpty>

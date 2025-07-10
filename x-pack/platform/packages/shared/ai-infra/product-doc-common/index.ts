@@ -6,7 +6,7 @@
  */
 
 export { getArtifactName, parseArtifactName } from './src/artifact';
-export { type ArtifactManifest } from './src/manifest';
+export { LATEST_MANIFEST_FORMAT_VERSION, type ArtifactManifest } from './src/manifest';
 export { DocumentationProduct, type ProductName } from './src/product';
 export { isArtifactContentFilePath } from './src/artifact_content';
 export {

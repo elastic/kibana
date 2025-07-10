@@ -13,7 +13,6 @@ import { createFleetTestRendererMock } from '../../../../../mock';
 
 import {
   useUIExtension,
-  sendGetAgentStatus,
   sendGetOneAgentPolicy,
   sendGetOnePackagePolicy,
   sendUpgradePackagePolicyDryRun,
@@ -24,6 +23,7 @@ import {
   useGetAgentPolicies,
   useMultipleAgentPolicies,
   useGetPackagePolicies,
+  sendBulkGetAgentPoliciesForRq,
 } from '../../../hooks';
 import { useGetOnePackagePolicy } from '../../../../integrations/hooks';
 
@@ -44,6 +44,7 @@ jest.mock('../../../hooks', () => {
   return {
     ...jest.requireActual('../../../hooks'),
     sendGetAgentStatus: jest.fn(),
+    sendBulkGetAgentPoliciesForRq: jest.fn(),
     sendUpdatePackagePolicy: jest.fn(),
     sendGetOnePackagePolicy: jest.fn(),
     sendGetOneAgentPolicy: jest.fn(),
@@ -230,7 +231,8 @@ const useMultipleAgentPoliciesMock = useMultipleAgentPolicies as jest.MockedFunc
 describe('edit package policy page', () => {
   let testRenderer: TestRenderer;
   let renderResult: ReturnType<typeof testRenderer.render>;
-  const render = () => (renderResult = testRenderer.render(<EditPackagePolicyPage />));
+  const render = () =>
+    (renderResult = testRenderer.render(<EditPackagePolicyPage />, { legacyRoot: true }));
 
   beforeEach(() => {
     testRenderer = createFleetTestRendererMock();
@@ -261,7 +263,7 @@ describe('edit package policy page', () => {
     (sendUpdatePackagePolicy as MockFn).mockResolvedValue({});
     (useStartServices().application.navigateToUrl as MockFn).mockReset();
     (useStartServices().notifications.toasts.addError as MockFn).mockReset();
-    (sendGetAgentStatus as MockFn).mockResolvedValue({ data: { results: { total: 0 } } });
+    (sendBulkGetAgentPoliciesForRq as MockFn).mockResolvedValue({ data: [] });
     (sendBulkGetAgentPolicies as MockFn).mockResolvedValue({
       data: { items: [{ id: 'agent-policy-1', name: 'Agent policy 1' }] },
     });
@@ -477,7 +479,7 @@ describe('edit package policy page', () => {
   });
 
   it('should not show confirmation modal if package is on agentless policy', async () => {
-    (sendGetAgentStatus as MockFn).mockResolvedValue({ data: { results: { total: 1 } } });
+    (sendBulkGetAgentPoliciesForRq as MockFn).mockResolvedValue({ data: [{ agents: 1 }] });
     (useGetOnePackagePolicy as MockFn).mockReturnValue({
       data: {
         item: mockPackagePolicyAgentless,
@@ -529,8 +531,8 @@ describe('edit package policy page', () => {
     beforeEach(() => {
       useMultipleAgentPoliciesMock.mockReturnValue({ canUseMultipleAgentPolicies: true });
 
-      (sendGetAgentStatus as jest.MockedFunction<any>).mockResolvedValue({
-        data: { results: { total: 0 } },
+      (sendBulkGetAgentPoliciesForRq as jest.MockedFunction<any>).mockResolvedValue({
+        data: [],
       });
       jest.clearAllMocks();
     });
@@ -569,7 +571,6 @@ describe('edit package policy page', () => {
             policy_ids: ['agent-policy-1', 'agent-policy-2'],
           })
         );
-        expect(sendGetAgentStatus).toHaveBeenCalledTimes(1);
       });
     });
 

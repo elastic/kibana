@@ -51,15 +51,13 @@ export function getEnterpriseSearchForClusters(
         size: 0,
         ignore_unavailable: true,
         filter_path: entSearchAggFilterPath,
-        body: {
-          query: createEnterpriseSearchQuery({
-            start,
-            end,
-            uuid: clusterUuid,
-            metric: EnterpriseSearchMetric.getMetricFields(),
-          }),
-          aggs: entSearchUuidsAgg(maxBucketSize),
-        },
+        query: createEnterpriseSearchQuery({
+          start,
+          end,
+          uuid: clusterUuid,
+          metric: EnterpriseSearchMetric.getMetricFields(),
+        }),
+        aggs: entSearchUuidsAgg(maxBucketSize),
       };
 
       const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');

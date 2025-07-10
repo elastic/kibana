@@ -537,9 +537,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
       this.extensions.securityExtension.auditClosePointInTime();
     }
 
-    return await this.client.closePointInTime({
-      body: { id },
-    });
+    return await this.client.closePointInTime({ id });
   }
 
   /**

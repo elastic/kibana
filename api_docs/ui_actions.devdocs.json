@@ -102,9 +102,9 @@
             "label": "actions",
             "description": [],
             "signature": [
-              "Map<string, ",
+              "Map<string, () => Promise<",
               "ActionInternal",
-              "<object>>"
+              "<object>>>"
             ],
             "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
             "deprecated": false,
@@ -278,7 +278,9 @@
             "parentPluginId": "uiActions",
             "id": "def-public.UiActionsService.registerAction",
             "type": "Function",
-            "tags": [],
+            "tags": [
+              "deprecated"
+            ],
             "label": "registerAction",
             "description": [],
             "signature": [
@@ -301,8 +303,46 @@
               "<Context>"
             ],
             "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
-            "deprecated": false,
+            "deprecated": true,
             "trackAdoption": false,
+            "references": [
+              {
+                "plugin": "uiActionsEnhanced",
+                "path": "src/platform/plugins/shared/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/public/ui_actions/index.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/public/ui_actions/index.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/public/ui_actions/index.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/public/ui_actions/index.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/public/ui_actions/index.ts"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/platform/plugins/shared/discover/public/context_awareness/hooks/use_additional_cell_actions.ts"
+              },
+              {
+                "plugin": "imageEmbeddable",
+                "path": "src/platform/plugins/private/image_embeddable/public/actions/create_image_action.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/app/actions/register_discover_histogram_actions.ts"
+              }
+            ],
             "children": [
               {
                 "parentPluginId": "uiActions",
@@ -320,6 +360,69 @@
                     "text": "ActionDefinition"
                   },
                   "<Context>"
+                ],
+                "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "uiActions",
+            "id": "def-public.UiActionsService.registerActionAsync",
+            "type": "Function",
+            "tags": [],
+            "label": "registerActionAsync",
+            "description": [],
+            "signature": [
+              "<Context extends object>(id: string, getDefinition: () => Promise<",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.ActionDefinition",
+                "text": "ActionDefinition"
+              },
+              "<Context>>) => void"
+            ],
+            "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.UiActionsService.registerActionAsync.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.UiActionsService.registerActionAsync.$2",
+                "type": "Function",
+                "tags": [],
+                "label": "getDefinition",
+                "description": [],
+                "signature": [
+                  "() => Promise<",
+                  {
+                    "pluginId": "uiActions",
+                    "scope": "public",
+                    "docId": "kibUiActionsPluginApi",
+                    "section": "def-public.ActionDefinition",
+                    "text": "ActionDefinition"
+                  },
+                  "<Context>>"
                 ],
                 "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
                 "deprecated": false,
@@ -491,11 +594,11 @@
             "parentPluginId": "uiActions",
             "id": "def-public.UiActionsService.addTriggerAction",
             "type": "Function",
-            "tags": [],
-            "label": "addTriggerAction",
-            "description": [
-              "\n`addTriggerAction` is similar to `attachAction` as it attaches action to a\ntrigger, but it also registers the action, if it has not been registered, yet."
+            "tags": [
+              "deprecated"
             ],
+            "label": "addTriggerAction",
+            "description": [],
             "signature": [
               "(triggerId: string, action: ",
               {
@@ -508,8 +611,158 @@
               "<any>) => void"
             ],
             "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
-            "deprecated": false,
+            "deprecated": true,
             "trackAdoption": false,
+            "references": [
+              {
+                "plugin": "data",
+                "path": "src/platform/plugins/shared/data/public/plugin.ts"
+              },
+              {
+                "plugin": "data",
+                "path": "src/platform/plugins/shared/data/public/plugin.ts"
+              },
+              {
+                "plugin": "data",
+                "path": "src/platform/plugins/shared/data/public/plugin.ts"
+              },
+              {
+                "plugin": "lens",
+                "path": "x-pack/platform/plugins/shared/lens/public/plugin.ts"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/public/components/visualizations/actions/register.ts"
+              },
+              {
+                "plugin": "aiops",
+                "path": "x-pack/platform/plugins/shared/aiops/public/ui_actions/index.ts"
+              },
+              {
+                "plugin": "aiops",
+                "path": "x-pack/platform/plugins/shared/aiops/public/ui_actions/index.ts"
+              },
+              {
+                "plugin": "aiops",
+                "path": "x-pack/platform/plugins/shared/aiops/public/ui_actions/index.ts"
+              },
+              {
+                "plugin": "aiops",
+                "path": "x-pack/platform/plugins/shared/aiops/public/ui_actions/index.ts"
+              },
+              {
+                "plugin": "aiops",
+                "path": "x-pack/platform/plugins/shared/aiops/public/ui_actions/index.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/public/ui_actions/index.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/public/ui_actions/index.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/public/ui_actions/index.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/public/ui_actions/index.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/public/ui_actions/index.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/public/ui_actions/index.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/public/ui_actions/index.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/public/ui_actions/index.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/public/ui_actions/index.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/public/ui_actions/index.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/public/ui_actions/index.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/public/ui_actions/index.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/public/ui_actions/index.ts"
+              },
+              {
+                "plugin": "reporting",
+                "path": "x-pack/platform/plugins/private/reporting/public/plugin.ts"
+              },
+              {
+                "plugin": "discoverEnhanced",
+                "path": "x-pack/platform/plugins/private/discover_enhanced/public/plugin.ts"
+              },
+              {
+                "plugin": "discoverEnhanced",
+                "path": "x-pack/platform/plugins/private/discover_enhanced/public/plugin.ts"
+              },
+              {
+                "plugin": "dashboardEnhanced",
+                "path": "x-pack/platform/plugins/shared/dashboard_enhanced/public/services/drilldowns/dashboard_drilldowns_services.ts"
+              },
+              {
+                "plugin": "dashboardEnhanced",
+                "path": "x-pack/platform/plugins/shared/dashboard_enhanced/public/services/drilldowns/dashboard_drilldowns_services.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/app/actions/register.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/app/actions/register.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/app/actions/register.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/app/actions/register.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/app/actions/register.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/app/actions/register.ts"
+              },
+              {
+                "plugin": "inputControlVis",
+                "path": "src/platform/plugins/private/input_control_vis/public/plugin.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-src",
+                "path": "src/platform/test/plugin_functional/plugins/kbn_sample_panel_action/public/plugin.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-src",
+                "path": "src/platform/test/plugin_functional/plugins/kbn_sample_panel_action/public/plugin.ts"
+              }
+            ],
             "children": [
               {
                 "parentPluginId": "uiActions",
@@ -553,13 +806,93 @@
           },
           {
             "parentPluginId": "uiActions",
+            "id": "def-public.UiActionsService.addTriggerActionAsync",
+            "type": "Function",
+            "tags": [],
+            "label": "addTriggerActionAsync",
+            "description": [
+              "\n`addTriggerAction` is similar to `attachAction` as it attaches action to a\ntrigger, but it also registers the action, if it has not been registered, yet."
+            ],
+            "signature": [
+              "(triggerId: string, actionId: string, getDefinition: () => Promise<",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.ActionDefinition",
+                "text": "ActionDefinition"
+              },
+              "<any>>) => void"
+            ],
+            "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.UiActionsService.addTriggerActionAsync.$1",
+                "type": "string",
+                "tags": [],
+                "label": "triggerId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.UiActionsService.addTriggerActionAsync.$2",
+                "type": "string",
+                "tags": [],
+                "label": "actionId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.UiActionsService.addTriggerActionAsync.$3",
+                "type": "Function",
+                "tags": [],
+                "label": "getDefinition",
+                "description": [],
+                "signature": [
+                  "() => Promise<",
+                  {
+                    "pluginId": "uiActions",
+                    "scope": "public",
+                    "docId": "kibUiActionsPluginApi",
+                    "section": "def-public.ActionDefinition",
+                    "text": "ActionDefinition"
+                  },
+                  "<any>>"
+                ],
+                "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "uiActions",
             "id": "def-public.UiActionsService.getAction",
             "type": "Function",
             "tags": [],
             "label": "getAction",
             "description": [],
             "signature": [
-              "(id: string) => ",
+              "(id: string) => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -567,7 +900,7 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<object>"
+              "<object>>"
             ],
             "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
             "deprecated": false,
@@ -599,7 +932,7 @@
             "label": "getTriggerActions",
             "description": [],
             "signature": [
-              "(triggerId: string) => ",
+              "(triggerId: string) => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -607,7 +940,7 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<object>[]"
+              "<object>[]>"
             ],
             "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
             "deprecated": false,
@@ -694,7 +1027,7 @@
             "label": "getFrequentlyChangingActionsForTrigger",
             "description": [],
             "signature": [
-              "(triggerId: string, context: object) => ",
+              "(triggerId: string, context: object) => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -702,7 +1035,7 @@
                 "section": "def-public.FrequentCompatibilityChangeAction",
                 "text": "FrequentCompatibilityChangeAction"
               },
-              "<object>[]"
+              "<object>[]>"
             ],
             "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
             "deprecated": false,
@@ -766,12 +1099,12 @@
                 "path": "src/platform/plugins/shared/data/public/utils/table_inspector_view/components/data_table.tsx"
               },
               {
-                "plugin": "imageEmbeddable",
-                "path": "src/platform/plugins/private/image_embeddable/public/components/image_embeddable.tsx"
-              },
-              {
                 "plugin": "discover",
                 "path": "src/platform/plugins/shared/discover/public/plugin.tsx"
+              },
+              {
+                "plugin": "imageEmbeddable",
+                "path": "src/platform/plugins/private/image_embeddable/public/components/image_embeddable.tsx"
               }
             ],
             "children": [
@@ -1328,25 +1661,15 @@
           },
           {
             "parentPluginId": "uiActions",
-            "id": "def-public.Action.subscribeToCompatibilityChanges",
+            "id": "def-public.Action.getCompatibilityChangesSubject",
             "type": "Function",
             "tags": [],
-            "label": "subscribeToCompatibilityChanges",
-            "description": [
-              "\nAllows this action to call a method when its compatibility changes."
-            ],
+            "label": "getCompatibilityChangesSubject",
+            "description": [],
             "signature": [
-              "((context: Context, onChange: (isCompatible: boolean, action: ",
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.Action",
-                "text": "Action"
-              },
-              "<Context>) => void) => ",
-              "Subscription",
-              " | undefined) | undefined"
+              "((context: Context) => ",
+              "Observable",
+              "<undefined> | undefined) | undefined"
             ],
             "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
             "deprecated": false,
@@ -1354,7 +1677,7 @@
             "children": [
               {
                 "parentPluginId": "uiActions",
-                "id": "def-public.Action.subscribeToCompatibilityChanges.$1",
+                "id": "def-public.Action.getCompatibilityChangesSubject.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "context",
@@ -1366,33 +1689,10 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
-              },
-              {
-                "parentPluginId": "uiActions",
-                "id": "def-public.Action.subscribeToCompatibilityChanges.$2",
-                "type": "Function",
-                "tags": [],
-                "label": "onChange",
-                "description": [],
-                "signature": [
-                  "(isCompatible: boolean, action: ",
-                  {
-                    "pluginId": "uiActions",
-                    "scope": "public",
-                    "docId": "kibUiActionsPluginApi",
-                    "section": "def-public.Action",
-                    "text": "Action"
-                  },
-                  "<Context>) => void"
-                ],
-                "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
               }
             ],
             "returnComment": [
-              "a subscription that can be used to unsubscribe from the changes."
+              "an Observable that emits when this action's compatibility changes."
             ]
           },
           {
@@ -1708,25 +2008,15 @@
           },
           {
             "parentPluginId": "uiActions",
-            "id": "def-public.ActionDefinition.subscribeToCompatibilityChanges",
+            "id": "def-public.ActionDefinition.getCompatibilityChangesSubject",
             "type": "Function",
             "tags": [],
-            "label": "subscribeToCompatibilityChanges",
-            "description": [
-              "\nAllows this action to call a method when its compatibility changes."
-            ],
+            "label": "getCompatibilityChangesSubject",
+            "description": [],
             "signature": [
-              "((context: Context, onChange: (isCompatible: boolean, action: ",
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.Action",
-                "text": "Action"
-              },
-              "<Context>) => void) => ",
-              "Subscription",
-              " | undefined) | undefined"
+              "((context: Context) => ",
+              "Observable",
+              "<undefined> | undefined) | undefined"
             ],
             "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
             "deprecated": false,
@@ -1734,7 +2024,7 @@
             "children": [
               {
                 "parentPluginId": "uiActions",
-                "id": "def-public.ActionDefinition.subscribeToCompatibilityChanges.$1",
+                "id": "def-public.ActionDefinition.getCompatibilityChangesSubject.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "context",
@@ -1746,33 +2036,10 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
-              },
-              {
-                "parentPluginId": "uiActions",
-                "id": "def-public.ActionDefinition.subscribeToCompatibilityChanges.$2",
-                "type": "Function",
-                "tags": [],
-                "label": "onChange",
-                "description": [],
-                "signature": [
-                  "(isCompatible: boolean, action: ",
-                  {
-                    "pluginId": "uiActions",
-                    "scope": "public",
-                    "docId": "kibUiActionsPluginApi",
-                    "section": "def-public.Action",
-                    "text": "Action"
-                  },
-                  "<Context>) => void"
-                ],
-                "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
               }
             ],
             "returnComment": [
-              "a subscription that can be used to unsubscribe from the changes."
+              "an Observable that emits when this action's compatibility should be recalculated."
             ]
           },
           {
@@ -1842,6 +2109,22 @@
                 "section": "def-common.Trigger",
                 "text": "Trigger"
               }
+            ],
+            "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "uiActions",
+            "id": "def-public.ActionExecutionMeta.event",
+            "type": "Object",
+            "tags": [],
+            "label": "event",
+            "description": [
+              "\nThe event that caused the action to execute (e.g., mouse click, keyboard event)"
+            ],
+            "signature": [
+              "React.MouseEvent<Element, MouseEvent> | undefined"
             ],
             "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
             "deprecated": false,
@@ -2590,7 +2873,7 @@
             "section": "def-public.Action",
             "text": "Action"
           },
-          "<Context>, \"subscribeToCompatibilityChanges\" | \"couldBecomeCompatible\">>"
+          "<Context>, \"getCompatibilityChangesSubject\" | \"couldBecomeCompatible\">>"
         ],
         "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
         "deprecated": false,
@@ -2918,7 +3201,7 @@
           "section": "def-public.Action",
           "text": "Action"
         },
-        "<Context>; readonly unregisterAction: (actionId: string) => void; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerAction: (triggerId: string, action: ",
+        "<Context>; readonly registerActionAsync: <Context extends object>(id: string, getDefinition: () => Promise<",
         {
           "pluginId": "uiActions",
           "scope": "public",
@@ -2926,7 +3209,23 @@
           "section": "def-public.ActionDefinition",
           "text": "ActionDefinition"
         },
-        "<any>) => void; }"
+        "<Context>>) => void; readonly unregisterAction: (actionId: string) => void; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerAction: (triggerId: string, action: ",
+        {
+          "pluginId": "uiActions",
+          "scope": "public",
+          "docId": "kibUiActionsPluginApi",
+          "section": "def-public.ActionDefinition",
+          "text": "ActionDefinition"
+        },
+        "<any>) => void; readonly addTriggerActionAsync: (triggerId: string, actionId: string, getDefinition: () => Promise<",
+        {
+          "pluginId": "uiActions",
+          "scope": "public",
+          "docId": "kibUiActionsPluginApi",
+          "section": "def-public.ActionDefinition",
+          "text": "ActionDefinition"
+        },
+        "<any>>) => void; }"
       ],
       "path": "src/platform/plugins/shared/ui_actions/public/plugin.ts",
       "deprecated": false,
@@ -2968,7 +3267,7 @@
           "section": "def-public.Action",
           "text": "Action"
         },
-        "<Context>; readonly unregisterAction: (actionId: string) => void; readonly hasAction: (actionId: string) => boolean; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerAction: (triggerId: string, action: ",
+        "<Context>; readonly registerActionAsync: <Context extends object>(id: string, getDefinition: () => Promise<",
         {
           "pluginId": "uiActions",
           "scope": "public",
@@ -2976,7 +3275,23 @@
           "section": "def-public.ActionDefinition",
           "text": "ActionDefinition"
         },
-        "<any>) => void; readonly getAction: (id: string) => ",
+        "<Context>>) => void; readonly unregisterAction: (actionId: string) => void; readonly hasAction: (actionId: string) => boolean; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerAction: (triggerId: string, action: ",
+        {
+          "pluginId": "uiActions",
+          "scope": "public",
+          "docId": "kibUiActionsPluginApi",
+          "section": "def-public.ActionDefinition",
+          "text": "ActionDefinition"
+        },
+        "<any>) => void; readonly addTriggerActionAsync: (triggerId: string, actionId: string, getDefinition: () => Promise<",
+        {
+          "pluginId": "uiActions",
+          "scope": "public",
+          "docId": "kibUiActionsPluginApi",
+          "section": "def-public.ActionDefinition",
+          "text": "ActionDefinition"
+        },
+        "<any>>) => void; readonly getAction: (id: string) => Promise<",
         {
           "pluginId": "uiActions",
           "scope": "public",
@@ -2984,7 +3299,7 @@
           "section": "def-public.Action",
           "text": "Action"
         },
-        "<object>; readonly getTriggerActions: (triggerId: string) => ",
+        "<object>>; readonly getTriggerActions: (triggerId: string) => Promise<",
         {
           "pluginId": "uiActions",
           "scope": "public",
@@ -2992,7 +3307,7 @@
           "section": "def-public.Action",
           "text": "Action"
         },
-        "<object>[]; readonly getTriggerCompatibleActions: (triggerId: string, context: object) => Promise<",
+        "<object>[]>; readonly getTriggerCompatibleActions: (triggerId: string, context: object) => Promise<",
         {
           "pluginId": "uiActions",
           "scope": "public",
@@ -3000,7 +3315,7 @@
           "section": "def-public.Action",
           "text": "Action"
         },
-        "<object>[]>; readonly getFrequentlyChangingActionsForTrigger: (triggerId: string, context: object) => ",
+        "<object>[]>; readonly getFrequentlyChangingActionsForTrigger: (triggerId: string, context: object) => Promise<",
         {
           "pluginId": "uiActions",
           "scope": "public",
@@ -3008,7 +3323,7 @@
           "section": "def-public.FrequentCompatibilityChangeAction",
           "text": "FrequentCompatibilityChangeAction"
         },
-        "<object>[]; readonly executeTriggerActions: (triggerId: string, context: object) => Promise<void>; readonly clear: () => void; readonly fork: () => ",
+        "<object>[]>; readonly executeTriggerActions: (triggerId: string, context: object) => Promise<void>; readonly clear: () => void; readonly fork: () => ",
         {
           "pluginId": "uiActions",
           "scope": "public",

@@ -8,22 +8,25 @@
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { MappingTypeMapping, MappingProperty } from '@elastic/elasticsearch/lib/api/types';
-import { internalElserInferenceId } from '../../../../common/consts';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import { isLegacySemanticTextVersion } from '../utils';
 
 export const createIndex = async ({
   esClient,
   indexName,
+  manifestVersion,
   mappings,
   log,
 }: {
   esClient: ElasticsearchClient;
   indexName: string;
+  manifestVersion: string;
   mappings: MappingTypeMapping;
   log: Logger;
 }) => {
   log.debug(`Creating index ${indexName}`);
 
-  overrideInferenceId(mappings, internalElserInferenceId);
+  const legacySemanticText = isLegacySemanticTextVersion(manifestVersion);
 
   await esClient.indices.create({
     index: indexName,
@@ -31,17 +34,28 @@ export const createIndex = async ({
     settings: {
       number_of_shards: 1,
       auto_expand_replicas: '0-1',
+      'index.mapping.semantic_text.use_legacy_format': legacySemanticText,
     },
   });
 };
 
-const overrideInferenceId = (mappings: MappingTypeMapping, inferenceId: string) => {
+export const overrideInferenceSettings = (
+  mappings: MappingTypeMapping,
+  inferenceId: string,
+  modelSettingsToOverride?: object
+) => {
   const recursiveOverride = (current: MappingTypeMapping | MappingProperty) => {
-    if ('type' in current && current.type === 'semantic_text') {
+    if (isPopulatedObject(current, ['type']) && current.type === 'semantic_text') {
       current.inference_id = inferenceId;
+      if (modelSettingsToOverride) {
+        // @ts-expect-error - model_settings is not typed, but exists for semantic_text field
+        current.model_settings = modelSettingsToOverride;
+      }
     }
-    if ('properties' in current && current.properties) {
-      for (const prop of Object.values(current.properties)) {
+    if (isPopulatedObject(current, ['properties'])) {
+      for (const prop of Object.values(
+        current.properties as Record<string, MappingTypeMapping | MappingProperty>
+      )) {
         recursiveOverride(prop);
       }
     }

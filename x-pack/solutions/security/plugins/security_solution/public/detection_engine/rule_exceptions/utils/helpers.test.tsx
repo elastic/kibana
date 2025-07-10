@@ -22,6 +22,7 @@ import {
   defaultEndpointExceptionItems,
   getFileCodeSignature,
   getProcessCodeSignature,
+  getDllCodeSignature,
   retrieveAlertOsTypes,
   getCodeSignatureValue,
   buildRuleExceptionWithConditions,
@@ -249,13 +250,40 @@ describe('Exception helpers', () => {
   });
 
   describe('#getCodeSignatureValue', () => {
-    test('it should return empty string if code_signature nested value are undefined', () => {
+    test('it should return undefined if code_signature nested value are undefined', () => {
       // Using the unsafe casting because with our types this shouldn't be possible but there have been issues with old data having undefined values in these fields
       const payload = [{ trusted: undefined, subject_name: undefined }] as unknown as Flattened<
         CodeSignature[]
       >;
-      const result = getCodeSignatureValue(payload);
-      expect(result).toEqual([{ trusted: '', subjectName: '' }]);
+      const result = getCodeSignatureValue(payload, 'field');
+      expect(result).toEqual([undefined]);
+    });
+
+    test('it should not return duplicate code signature entries', () => {
+      const payload = [
+        { subject_name: 'asdf', trusted: true },
+        { subject_name: 'asdf', trusted: true },
+      ];
+      expect(getCodeSignatureValue(payload, 'field')).toEqual([
+        {
+          field: 'field',
+          type: 'nested',
+          entries: [
+            {
+              field: 'subject_name',
+              operator: 'included',
+              type: 'match',
+              value: 'asdf',
+            },
+            {
+              field: 'trusted',
+              operator: 'included',
+              type: 'match',
+              value: 'true',
+            },
+          ],
+        },
+      ]);
     });
   });
 
@@ -380,56 +408,26 @@ describe('Exception helpers', () => {
       _id: 'test-id',
       file: { path: 'some-file-path', hash: { sha256: 'some-hash' } },
     };
-    test('it returns prepopulated fields with empty values', () => {
+    test('it does not return prepopulated fields with empty values', () => {
       const prepopulatedItem = getPrepopulatedEndpointException({
         listId: 'some_id',
         name: 'my rule',
-        codeSignature: { subjectName: '', trusted: '' },
         eventCode: '',
         alertEcsData: { ...alertDataMock, file: { path: '', hash: { sha256: '' } } },
       });
 
-      expect(prepopulatedItem.entries).toEqual([
-        {
-          entries: [
-            { id: '123', field: 'subject_name', operator: 'included', type: 'match', value: '' },
-            { id: '123', field: 'trusted', operator: 'included', type: 'match', value: '' },
-          ],
-          field: 'file.Ext.code_signature',
-          type: 'nested',
-          id: '123',
-        },
-        { id: '123', field: 'file.path.caseless', operator: 'included', type: 'match', value: '' },
-        { id: '123', field: 'file.hash.sha256', operator: 'included', type: 'match', value: '' },
-        { id: '123', field: 'event.code', operator: 'included', type: 'match', value: '' },
-      ]);
+      expect(prepopulatedItem.entries).toEqual([]);
     });
 
     test('it returns prepopulated items with actual values', () => {
       const prepopulatedItem = getPrepopulatedEndpointException({
         listId: 'some_id',
         name: 'my rule',
-        codeSignature: { subjectName: 'someSubjectName', trusted: 'false' },
         eventCode: 'some-event-code',
         alertEcsData: alertDataMock,
       });
 
       expect(prepopulatedItem.entries).toEqual([
-        {
-          entries: [
-            {
-              id: '123',
-              field: 'subject_name',
-              operator: 'included',
-              type: 'match',
-              value: 'someSubjectName',
-            },
-            { id: '123', field: 'trusted', operator: 'included', type: 'match', value: 'false' },
-          ],
-          field: 'file.Ext.code_signature',
-          type: 'nested',
-          id: '123',
-        },
         {
           id: '123',
           field: 'file.path.caseless',
@@ -463,13 +461,32 @@ describe('Exception helpers', () => {
           Ext: {
             code_signature: {
               subject_name: 'some_subject',
-              trusted: 'false',
+              trusted: true,
             },
           },
         },
       });
 
-      expect(codeSignatures).toEqual([{ subjectName: 'some_subject', trusted: 'false' }]);
+      expect(codeSignatures).toEqual([
+        {
+          field: 'file.Ext.code_signature',
+          type: 'nested',
+          entries: [
+            {
+              field: 'subject_name',
+              operator: 'included',
+              type: 'match',
+              value: 'some_subject',
+            },
+            {
+              field: 'trusted',
+              operator: 'included',
+              type: 'match',
+              value: 'true',
+            },
+          ],
+        },
+      ]);
     });
 
     test('it works when file.Ext.code_signature is nested type', () => {
@@ -478,36 +495,112 @@ describe('Exception helpers', () => {
         file: {
           Ext: {
             code_signature: [
-              { subject_name: 'some_subject', trusted: 'false' },
-              { subject_name: 'some_subject_2', trusted: 'true' },
+              { subject_name: 'some_subject', trusted: true },
+              { subject_name: 'some_subject_2', trusted: true },
             ],
           },
         },
       });
 
       expect(codeSignatures).toEqual([
-        { subjectName: 'some_subject', trusted: 'false' },
         {
-          subjectName: 'some_subject_2',
-          trusted: 'true',
+          field: 'file.Ext.code_signature',
+          type: 'nested',
+          entries: [
+            {
+              field: 'subject_name',
+              operator: 'included',
+              type: 'match',
+              value: 'some_subject',
+            },
+            {
+              field: 'trusted',
+              operator: 'included',
+              type: 'match',
+              value: 'true',
+            },
+          ],
+        },
+        {
+          field: 'file.Ext.code_signature',
+          type: 'nested',
+          entries: [
+            {
+              field: 'subject_name',
+              operator: 'included',
+              type: 'match',
+              value: 'some_subject_2',
+            },
+            {
+              field: 'trusted',
+              operator: 'included',
+              type: 'match',
+              value: 'true',
+            },
+          ],
         },
       ]);
     });
 
-    test('it returns default when file.Ext.code_signatures values are empty', () => {
-      const codeSignatures = getFileCodeSignature({
+    test('it returns an exception entry when file.Ext.code_signature is undefined but file.code_signature is defined', () => {
+      const codeSignature = getFileCodeSignature({
         _id: '123',
         file: {
-          Ext: {
-            code_signature: { subject_name: '', trusted: '' },
-          },
+          code_signature: { subject_name: 'some_subject', trusted: true },
         },
       });
 
-      expect(codeSignatures).toEqual([{ subjectName: '', trusted: '' }]);
+      expect(codeSignature).toEqual([
+        {
+          field: 'file.code_signature.subject_name',
+          operator: 'included',
+          type: 'match',
+          value: 'some_subject',
+        },
+        {
+          field: 'file.code_signature.trusted',
+          operator: 'included',
+          type: 'match',
+          value: 'true',
+        },
+      ]);
     });
 
-    test('it returns default when file.Ext.code_signatures is empty array', () => {
+    test('it does not return an exception entry when code signature "trusted: false"', () => {
+      const extCodeSignatures = getFileCodeSignature({
+        _id: '123',
+        file: {
+          Ext: {
+            code_signature: [
+              { subject_name: 'some_subject', trusted: false },
+              { subject_name: 'some_subject_2', trusted: false },
+            ],
+          },
+        },
+      });
+      const codeSignature = getFileCodeSignature({
+        _id: '123',
+        file: {
+          code_signature: { subject_name: 'some_subject', trusted: false },
+        },
+      });
+
+      expect(extCodeSignatures).toEqual([]);
+      expect(codeSignature).toEqual(undefined);
+    });
+
+    test('it returns undefined when file.Ext.code_signatures values are empty', () => {
+      const codeSignatures = getFileCodeSignature({
+        _id: '123',
+        file: {
+          Ext: {},
+        },
+      });
+
+      expect(codeSignatures).toEqual(undefined);
+    });
+
+    test('it returns undefined when file.Ext.code_signatures is empty array', () => {
       const codeSignatures = getFileCodeSignature({
         _id: '123',
         file: {
@@ -517,71 +610,166 @@ describe('Exception helpers', () => {
         },
       });
 
-      expect(codeSignatures).toEqual([{ subjectName: '', trusted: '' }]);
+      expect(codeSignatures).toEqual(undefined);
     });
 
-    test('it returns default when file.Ext.code_signatures does not exist', () => {
+    test('it returns undefined when file.Ext.code_signatures does not exist', () => {
       const codeSignatures = getFileCodeSignature({
         _id: '123',
       });
 
-      expect(codeSignatures).toEqual([{ subjectName: '', trusted: '' }]);
+      expect(codeSignatures).toEqual(undefined);
     });
   });
 
   describe('getProcessCodeSignature', () => {
-    test('it works when file.Ext.code_signature is an object', () => {
+    test('it works when process.Ext.code_signature is an object', () => {
       const codeSignatures = getProcessCodeSignature({
         _id: '123',
         process: {
           Ext: {
             code_signature: {
               subject_name: 'some_subject',
-              trusted: 'false',
+              trusted: true,
             },
           },
         },
       });
 
-      expect(codeSignatures).toEqual([{ subjectName: 'some_subject', trusted: 'false' }]);
+      expect(codeSignatures).toEqual([
+        {
+          field: 'process.Ext.code_signature',
+          type: 'nested',
+          entries: [
+            {
+              field: 'subject_name',
+              operator: 'included',
+              type: 'match',
+              value: 'some_subject',
+            },
+            {
+              field: 'trusted',
+              operator: 'included',
+              type: 'match',
+              value: 'true',
+            },
+          ],
+        },
+      ]);
     });
 
-    test('it works when file.Ext.code_signature is nested type', () => {
+    test('it works when process.Ext.code_signature is nested type', () => {
       const codeSignatures = getProcessCodeSignature({
         _id: '123',
         process: {
           Ext: {
             code_signature: [
-              { subject_name: 'some_subject', trusted: 'false' },
-              { subject_name: 'some_subject_2', trusted: 'true' },
+              { subject_name: 'some_subject', trusted: true },
+              { subject_name: 'some_subject_2', trusted: true },
             ],
           },
         },
       });
 
       expect(codeSignatures).toEqual([
-        { subjectName: 'some_subject', trusted: 'false' },
         {
-          subjectName: 'some_subject_2',
-          trusted: 'true',
+          field: 'process.Ext.code_signature',
+          type: 'nested',
+          entries: [
+            {
+              field: 'subject_name',
+              operator: 'included',
+              type: 'match',
+              value: 'some_subject',
+            },
+            {
+              field: 'trusted',
+              operator: 'included',
+              type: 'match',
+              value: 'true',
+            },
+          ],
+        },
+        {
+          field: 'process.Ext.code_signature',
+          type: 'nested',
+          entries: [
+            {
+              field: 'subject_name',
+              operator: 'included',
+              type: 'match',
+              value: 'some_subject_2',
+            },
+            {
+              field: 'trusted',
+              operator: 'included',
+              type: 'match',
+              value: 'true',
+            },
+          ],
         },
       ]);
     });
 
-    test('it returns default when file.Ext.code_signatures values are empty', () => {
-      const codeSignatures = getProcessCodeSignature({
+    test('it returns an exception entry when process.Ext.code_signature is undefined but process.code_signature is defined', () => {
+      const codeSignature = getProcessCodeSignature({
         _id: '123',
         process: {
-          Ext: {
-            code_signature: { subject_name: '', trusted: '' },
-          },
+          code_signature: { subject_name: 'some_subject', trusted: true },
         },
       });
 
-      expect(codeSignatures).toEqual([{ subjectName: '', trusted: '' }]);
+      expect(codeSignature).toEqual([
+        {
+          field: 'process.code_signature.subject_name',
+          operator: 'included',
+          type: 'match',
+          value: 'some_subject',
+        },
+        {
+          field: 'process.code_signature.trusted',
+          operator: 'included',
+          type: 'match',
+          value: 'true',
+        },
+      ]);
     });
 
-    test('it returns default when file.Ext.code_signatures is empty array', () => {
+    test('it does not return an exception entry when code signature "trusted: false"', () => {
+      const extCodeSignatures = getProcessCodeSignature({
+        _id: '123',
+        process: {
+          Ext: {
+            code_signature: [
+              { subject_name: 'some_subject', trusted: false },
+              { subject_name: 'some_subject_2', trusted: false },
+            ],
+          },
+        },
+      });
+      const codeSignature = getProcessCodeSignature({
+        _id: '123',
+        file: {
+          code_signature: { subject_name: 'some_subject', trusted: false },
+        },
+      });
+
+      expect(extCodeSignatures).toEqual([]);
+      expect(codeSignature).toEqual(undefined);
+    });
+
+    test('it returns undefined when process.Ext.code_signatures values are empty', () => {
+      const codeSignatures = getProcessCodeSignature({
+        _id: '123',
+        process: {
+          Ext: {},
+        },
+      });
+
+      expect(codeSignatures).toEqual(undefined);
+    });
+
+    test('it returns undefined when process.Ext.code_signatures is empty array', () => {
       const codeSignatures = getProcessCodeSignature({
         _id: '123',
         process: {
@@ -591,15 +779,184 @@ describe('Exception helpers', () => {
         },
       });
 
-      expect(codeSignatures).toEqual([{ subjectName: '', trusted: '' }]);
+      expect(codeSignatures).toEqual(undefined);
     });
 
-    test('it returns default when file.Ext.code_signatures does not exist', () => {
+    test('it returns undefined when process.Ext.code_signatures does not exist', () => {
       const codeSignatures = getProcessCodeSignature({
         _id: '123',
       });
 
-      expect(codeSignatures).toEqual([{ subjectName: '', trusted: '' }]);
+      expect(codeSignatures).toEqual(undefined);
+    });
+  });
+
+  describe('getDllCodeSignature', () => {
+    test('it works when dll.Ext.code_signature is an object', () => {
+      const codeSignatures = getDllCodeSignature({
+        _id: '123',
+        dll: {
+          Ext: {
+            code_signature: {
+              subject_name: 'some_subject',
+              trusted: true,
+            },
+          },
+        },
+      });
+
+      expect(codeSignatures).toEqual([
+        {
+          field: 'dll.Ext.code_signature',
+          type: 'nested',
+          entries: [
+            {
+              field: 'subject_name',
+              operator: 'included',
+              type: 'match',
+              value: 'some_subject',
+            },
+            {
+              field: 'trusted',
+              operator: 'included',
+              type: 'match',
+              value: 'true',
+            },
+          ],
+        },
+      ]);
+    });
+
+    test('it works when dll.Ext.code_signature is nested type', () => {
+      const codeSignatures = getDllCodeSignature({
+        _id: '123',
+        dll: {
+          Ext: {
+            code_signature: [
+              { subject_name: 'some_subject', trusted: true },
+              { subject_name: 'some_subject_2', trusted: true },
+            ],
+          },
+        },
+      });
+
+      expect(codeSignatures).toEqual([
+        {
+          field: 'dll.Ext.code_signature',
+          type: 'nested',
+          entries: [
+            {
+              field: 'subject_name',
+              operator: 'included',
+              type: 'match',
+              value: 'some_subject',
+            },
+            {
+              field: 'trusted',
+              operator: 'included',
+              type: 'match',
+              value: 'true',
+            },
+          ],
+        },
+        {
+          field: 'dll.Ext.code_signature',
+          type: 'nested',
+          entries: [
+            {
+              field: 'subject_name',
+              operator: 'included',
+              type: 'match',
+              value: 'some_subject_2',
+            },
+            {
+              field: 'trusted',
+              operator: 'included',
+              type: 'match',
+              value: 'true',
+            },
+          ],
+        },
+      ]);
+    });
+
+    test('it returns an exception entry when dll.Ext.code_signature is undefined but dll.code_signature is defined', () => {
+      const codeSignature = getDllCodeSignature({
+        _id: '123',
+        dll: {
+          code_signature: { subject_name: 'some_subject', trusted: true },
+        },
+      });
+
+      expect(codeSignature).toEqual([
+        {
+          field: 'dll.code_signature.subject_name',
+          operator: 'included',
+          type: 'match',
+          value: 'some_subject',
+        },
+        {
+          field: 'dll.code_signature.trusted',
+          operator: 'included',
+          type: 'match',
+          value: 'true',
+        },
+      ]);
+    });
+
+    test('it does not return an exception entry when code signature "trusted: false"', () => {
+      const extCodeSignatures = getDllCodeSignature({
+        _id: '123',
+        dll: {
+          Ext: {
+            code_signature: [
+              { subject_name: 'some_subject', trusted: false },
+              { subject_name: 'some_subject_2', trusted: false },
+            ],
+          },
+        },
+      });
+      const codeSignature = getDllCodeSignature({
+        _id: '123',
+        file: {
+          code_signature: { subject_name: 'some_subject', trusted: false },
+        },
+      });
+
+      expect(extCodeSignatures).toEqual([]);
+      expect(codeSignature).toEqual(undefined);
+    });
+
+    test('it returns undefined when dll.Ext.code_signatures values are empty', () => {
+      const codeSignatures = getDllCodeSignature({
+        _id: '123',
+        dll: {
+          Ext: {},
+        },
+      });
+
+      expect(codeSignatures).toEqual(undefined);
+    });
+
+    test('it returns undefined when dll.Ext.code_signatures is empty array', () => {
+      const codeSignatures = getDllCodeSignature({
+        _id: '123',
+        dll: {
+          Ext: {
+            code_signature: [],
+          },
+        },
+      });
+
+      expect(codeSignatures).toEqual(undefined);
+    });
+
+    test('it returns undefined when dll.Ext.code_signatures does not exist', () => {
+      const codeSignatures = getDllCodeSignature({
+        _id: '123',
+      });
+
+      expect(codeSignatures).toEqual(undefined);
     });
   });
 
@@ -610,8 +967,8 @@ describe('Exception helpers', () => {
         file: {
           Ext: {
             code_signature: [
-              { subject_name: 'some_subject', trusted: 'false' },
-              { subject_name: 'some_subject_2', trusted: 'true' },
+              { subject_name: 'some_subject', trusted: false },
+              { subject_name: 'some_subject_2', trusted: true },
             ],
           },
           path: 'some file path',
@@ -626,21 +983,6 @@ describe('Exception helpers', () => {
       });
 
       expect(defaultItems[0].entries).toEqual([
-        {
-          entries: [
-            {
-              id: '123',
-              field: 'subject_name',
-              operator: 'included',
-              type: 'match',
-              value: 'some_subject',
-            },
-            { id: '123', field: 'trusted', operator: 'included', type: 'match', value: 'false' },
-          ],
-          field: 'file.Ext.code_signature',
-          type: 'nested',
-          id: '123',
-        },
         {
           id: '123',
           field: 'file.path.caseless',
@@ -662,8 +1004,6 @@ describe('Exception helpers', () => {
           type: 'match',
           value: 'some event code',
         },
-      ]);
-      expect(defaultItems[1].entries).toEqual([
         {
           entries: [
             {
@@ -679,9 +1019,75 @@ describe('Exception helpers', () => {
           type: 'nested',
           id: '123',
         },
+      ]);
+    });
+
+    test('it should skip empty fields and "trusted:false" code signature fields"', () => {
+      const defaultItems = defaultEndpointExceptionItems('list_id', 'my_rule', {
+        _id: '123',
+        file: {
+          Ext: {
+            code_signature: [{ subject_name: 'some_subject', trusted: false }],
+          },
+          path: '',
+          hash: {
+            sha256: 'some hash',
+          },
+        },
+        event: {
+          code: 'some event code',
+        },
+        'event.code': 'some event code',
+      });
+
+      expect(defaultItems[0].entries).toEqual([
         {
           id: '123',
-          field: 'file.path.caseless',
+          field: 'file.hash.sha256',
+          operator: 'included',
+          type: 'match',
+          value: 'some hash',
+        },
+        {
+          id: '123',
+          field: 'event.code',
+          operator: 'included',
+          type: 'match',
+          value: 'some event code',
+        },
+      ]);
+    });
+
+    test('it should not return code signature fields for linux hosts', () => {
+      const defaultItems = defaultEndpointExceptionItems('list_id', 'my_rule', {
+        _id: '123',
+        host: {
+          os: {
+            name: 'Linux',
+          },
+        },
+        file: {
+          Ext: {
+            code_signature: [
+              { subject_name: 'some_subject', trusted: true },
+              { subject_name: 'some_subject_2', trusted: true },
+            ],
+          },
+          path: 'some file path',
+          hash: {
+            sha256: 'some hash',
+          },
+        },
+        event: {
+          code: 'some event code',
+        },
+        'event.code': 'some event code',
+      });
+
+      expect(defaultItems[0].entries).toEqual([
+        {
+          id: '123',
+          field: 'file.path',
           operator: 'included',
           type: 'match',
           value: 'some file path',
@@ -710,8 +1116,8 @@ describe('Exception helpers', () => {
         process: {
           Ext: {
             code_signature: [
-              { subject_name: 'some_subject', trusted: 'false' },
-              { subject_name: 'some_subject_2', trusted: 'true' },
+              { subject_name: 'some_subject', trusted: false },
+              { subject_name: 'some_subject_2', trusted: true },
             ],
           },
           executable: 'some file path',
@@ -729,21 +1135,6 @@ describe('Exception helpers', () => {
       });
 
       expect(defaultItems[0].entries).toEqual([
-        {
-          entries: [
-            {
-              id: '123',
-              field: 'subject_name',
-              operator: 'included',
-              type: 'match',
-              value: 'some_subject',
-            },
-            { id: '123', field: 'trusted', operator: 'included', type: 'match', value: 'false' },
-          ],
-          field: 'process.Ext.code_signature',
-          type: 'nested',
-          id: '123',
-        },
         {
           id: '123',
           field: 'process.executable',
@@ -772,8 +1163,6 @@ describe('Exception helpers', () => {
           type: 'match',
           value: 'ransomware',
         },
-      ]);
-      expect(defaultItems[1].entries).toEqual([
         {
           entries: [
             {
@@ -789,6 +1178,82 @@ describe('Exception helpers', () => {
           type: 'nested',
           id: '123',
         },
+      ]);
+    });
+
+    test('it should skip empty fields and "trusted:false" code signature fields', () => {
+      const defaultItems = defaultEndpointExceptionItems('list_id', 'my_rule', {
+        _id: '123',
+        process: {
+          Ext: {
+            code_signature: [{ subject_name: 'some_subject', trusted: false }],
+          },
+          executable: 'some file path',
+          hash: {
+            sha256: '',
+          },
+        },
+        Ransomware: {
+          feature: 'some ransomware feature',
+        },
+        event: {
+          code: 'ransomware',
+        },
+        'event.code': 'ransomware',
+      });
+
+      expect(defaultItems[0].entries).toEqual([
+        {
+          id: '123',
+          field: 'process.executable',
+          operator: 'included',
+          type: 'match',
+          value: 'some file path',
+        },
+        {
+          id: '123',
+          field: 'Ransomware.feature',
+          operator: 'included',
+          type: 'match',
+          value: 'some ransomware feature',
+        },
+        {
+          id: '123',
+          field: 'event.code',
+          operator: 'included',
+          type: 'match',
+          value: 'ransomware',
+        },
+      ]);
+    });
+
+    it('should not return code signatures for linux hosts', () => {
+      const defaultItems = defaultEndpointExceptionItems('list_id', 'my_rule', {
+        _id: '123',
+        host: {
+          os: {
+            name: 'Linux',
+          },
+        },
+        process: {
+          Ext: {
+            code_signature: [{ subject_name: 'some_subject', trusted: true }],
+          },
+          executable: 'some file path',
+          hash: {
+            sha256: 'some hash',
+          },
+        },
+        Ransomware: {
+          feature: 'some ransomware feature',
+        },
+        event: {
+          code: 'ransomware',
+        },
+        'event.code': 'ransomware',
+      });
+
+      expect(defaultItems[0].entries).toEqual([
         {
           id: '123',
           field: 'process.executable',
@@ -1077,7 +1542,7 @@ describe('Exception helpers', () => {
           },
           code_signature: {
             subject_name: 'subject-name',
-            trusted: 'true',
+            trusted: true,
           },
         },
         event: {
@@ -1105,7 +1570,7 @@ describe('Exception helpers', () => {
           path: 'dll-path',
           code_signature: {
             subject_name: 'dll-code-signature-subject-name',
-            trusted: 'false',
+            trusted: true,
           },
           pe: {
             original_file_name: 'dll-pe-original-file-name',
@@ -1150,13 +1615,6 @@ describe('Exception helpers', () => {
           operator: 'included' as const,
           type: 'match' as const,
           value: 'parent file path',
-        },
-        {
-          id: '123',
-          field: 'process.code_signature.subject_name',
-          operator: 'included' as const,
-          type: 'match' as const,
-          value: 'subject-name',
         },
         {
           id: '123',
@@ -1216,13 +1674,6 @@ describe('Exception helpers', () => {
         },
         {
           id: '123',
-          field: 'dll.code_signature.subject_name',
-          operator: 'included' as const,
-          type: 'match' as const,
-          value: 'dll-code-signature-subject-name',
-        },
-        {
-          id: '123',
           field: 'dll.pe.original_file_name',
           operator: 'included' as const,
           type: 'match' as const,
@@ -1249,9 +1700,37 @@ describe('Exception helpers', () => {
           type: 'match' as const,
           value: '0987',
         },
+        {
+          id: '123',
+          field: 'process.code_signature.subject_name',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: 'subject-name',
+        },
+        {
+          id: '123',
+          field: 'process.code_signature.trusted',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: 'true',
+        },
+        {
+          id: '123',
+          field: 'dll.code_signature.subject_name',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: 'dll-code-signature-subject-name',
+        },
+        {
+          id: '123',
+          field: 'dll.code_signature.trusted',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: 'true',
+        },
       ]);
     });
-    test('it should return pre-populated behavior protection fields and skip empty', () => {
+    test('it should skip empty fields and "trusted: false" code signature fields', () => {
       const defaultItems = defaultEndpointExceptionItems('list_id', 'my_rule', {
         _id: '123',
         rule: {
@@ -1265,7 +1744,7 @@ describe('Exception helpers', () => {
           },
           code_signature: {
             subject_name: 'subject-name',
-            trusted: 'true',
+            trusted: true,
           },
         },
         event: {
@@ -1294,7 +1773,7 @@ describe('Exception helpers', () => {
           path: 'dll-path',
           code_signature: {
             subject_name: 'dll-code-signature-subject-name',
-            trusted: 'false',
+            trusted: false,
           },
           pe: {
             original_file_name: 'dll-pe-original-file-name',
@@ -1335,13 +1814,6 @@ describe('Exception helpers', () => {
         },
         {
           id: '123',
-          field: 'process.code_signature.subject_name',
-          operator: 'included' as const,
-          type: 'match' as const,
-          value: 'subject-name',
-        },
-        {
-          id: '123',
           field: 'file.name',
           operator: 'included' as const,
           type: 'match' as const,
@@ -1370,10 +1842,197 @@ describe('Exception helpers', () => {
         },
         {
           id: '123',
-          field: 'dll.code_signature.subject_name',
+          field: 'dll.pe.original_file_name',
           operator: 'included' as const,
           type: 'match' as const,
-          value: 'dll-code-signature-subject-name',
+          value: 'dll-pe-original-file-name',
+        },
+        {
+          id: '123',
+          field: 'dns.question.name',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: 'dns-question-name',
+        },
+        {
+          id: '123',
+          field: 'dns.question.type',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: 'dns-question-type',
+        },
+        {
+          id: '123',
+          field: 'user.id',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: '0987',
+        },
+        {
+          id: '123',
+          field: 'process.code_signature.subject_name',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: 'subject-name',
+        },
+        {
+          id: '123',
+          field: 'process.code_signature.trusted',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: 'true',
+        },
+      ]);
+    });
+
+    test('it should not return code signature fields for linux hosts', () => {
+      const defaultItems = defaultEndpointExceptionItems('list_id', 'my_rule', {
+        _id: '123',
+        rule: {
+          id: '123',
+        },
+        host: {
+          os: {
+            name: 'Linux',
+          },
+        },
+        process: {
+          command_line: 'command_line',
+          executable: 'some file path',
+          parent: {
+            executable: 'parent file path',
+          },
+          code_signature: {
+            subject_name: 'subject-name',
+            trusted: true,
+          },
+        },
+        event: {
+          code: 'behavior',
+        },
+        'event.code': 'behavior',
+        file: {
+          path: 'fake-file-path',
+          name: 'fake-file-name',
+        },
+        source: {
+          ip: '0.0.0.0',
+        },
+        destination: {
+          ip: '0.0.0.0',
+        },
+        registry: {
+          path: 'registry-path',
+          value: 'registry-value',
+          data: {
+            strings: 'registry-strings',
+          },
+        },
+        dll: {
+          path: 'dll-path',
+          code_signature: {
+            subject_name: 'dll-code-signature-subject-name',
+            trusted: true,
+          },
+          pe: {
+            original_file_name: 'dll-pe-original-file-name',
+          },
+        },
+        dns: {
+          question: {
+            name: 'dns-question-name',
+            type: 'dns-question-type',
+          },
+        },
+        user: {
+          id: '0987',
+        },
+      });
+
+      expect(defaultItems[0].entries).toEqual([
+        {
+          id: '123',
+          field: 'rule.id',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: '123',
+        },
+        {
+          id: '123',
+          field: 'process.executable.caseless',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: 'some file path',
+        },
+        {
+          id: '123',
+          field: 'process.command_line',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: 'command_line',
+        },
+        {
+          id: '123',
+          field: 'process.parent.executable',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: 'parent file path',
+        },
+        {
+          id: '123',
+          field: 'file.path',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: 'fake-file-path',
+        },
+        {
+          id: '123',
+          field: 'file.name',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: 'fake-file-name',
+        },
+        {
+          id: '123',
+          field: 'source.ip',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: '0.0.0.0',
+        },
+        {
+          id: '123',
+          field: 'destination.ip',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: '0.0.0.0',
+        },
+        {
+          id: '123',
+          field: 'registry.path',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: 'registry-path',
+        },
+        {
+          id: '123',
+          field: 'registry.value',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: 'registry-value',
+        },
+        {
+          id: '123',
+          field: 'registry.data.strings',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: 'registry-strings',
+        },
+        {
+          id: '123',
+          field: 'dll.path',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: 'dll-path',
         },
         {
           id: '123',
@@ -1795,6 +2454,10 @@ describe('Exception helpers', () => {
     describe('getAlertHighlightedFields', () => {
       const baseGeneratedAlertHighlightedFields = [
         {
+          id: 'kibana.alert.ancestors.id',
+          overrideField: 'Source event',
+        },
+        {
           id: 'host.name',
         },
         // Fields used in support of Response Actions
@@ -1805,6 +2468,9 @@ describe('Exception helpers', () => {
             label: 'Agent status',
           };
         }),
+        {
+          id: 'Endpoint.policy.applied.artifacts.global.channel',
+        },
         {
           id: 'user.name',
         },

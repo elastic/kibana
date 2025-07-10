@@ -8,25 +8,15 @@
 export type ExperimentalFeatures = typeof allowedExperimentalValues;
 
 const _allowedExperimentalValues = {
-  createPackagePolicyMultiPageLayout: true,
-  packageVerification: true,
-  diagnosticFileUploadEnabled: true,
-  displayAgentMetrics: true,
-  showIntegrationsSubcategories: true,
-  agentFqdnMode: true,
   showExperimentalShipperOptions: false,
-  agentTamperProtectionEnabled: true,
-  secretsStorage: true,
-  kafkaOutput: true,
-  outputSecretsStorage: true,
-  remoteESOutput: true,
-  enableStrictKQLValidation: true,
-  subfeaturePrivileges: true,
-  advancedPolicySettings: true,
   useSpaceAwareness: false,
-  enableReusableIntegrationPolicies: true,
-  asyncDeployPolicies: true,
-  enableExportCSV: true,
+  enableAutomaticAgentUpgrades: true,
+  enableSyncIntegrationsOnRemote: true,
+  enableSSLSecrets: false,
+  installedIntegrationsTabularUI: true,
+  enabledUpgradeAgentlessDeploymentsTask: true,
+  enableAgentMigrations: false,
+  enablePackageRollback: false,
 };
 
 /**

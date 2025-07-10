@@ -15,6 +15,7 @@ import {
   ALERT_INSTANCE_ID,
   ALERT_MAINTENANCE_WINDOW_IDS,
   ALERT_CONSECUTIVE_MATCHES,
+  ALERT_PENDING_RECOVERED_COUNT,
   ALERT_RULE_TAGS,
   ALERT_START,
   ALERT_STATUS,
@@ -29,10 +30,11 @@ import {
   VERSION,
   ALERT_RULE_EXECUTION_TIMESTAMP,
   ALERT_SEVERITY_IMPROVING,
+  ALERT_STATUS_ACTIVE,
 } from '@kbn/rule-data-utils';
-import { DeepPartial } from '@kbn/utility-types';
-import { Alert as LegacyAlert } from '../../alert/alert';
-import { AlertInstanceContext, AlertInstanceState, RuleAlertData } from '../../types';
+import type { DeepPartial } from '@kbn/utility-types';
+import type { Alert as LegacyAlert } from '../../alert/alert';
+import type { AlertInstanceContext, AlertInstanceState, RuleAlertData } from '../../types';
 import type { AlertRule } from '../types';
 import { stripFrameworkFields } from './strip_framework_fields';
 import { nanosToMicros } from './nanos_to_micros';
@@ -50,6 +52,7 @@ interface BuildNewAlertOpts<
   runTimestamp?: string;
   timestamp: string;
   kibanaVersion: string;
+  dangerouslyCreateAlertsInAllSpaces?: boolean;
 }
 
 /**
@@ -70,6 +73,7 @@ export const buildNewAlert = <
   timestamp,
   payload,
   kibanaVersion,
+  dangerouslyCreateAlertsInAllSpaces,
 }: BuildNewAlertOpts<
   AlertData,
   LegacyState,
@@ -93,7 +97,8 @@ export const buildNewAlert = <
         [ALERT_INSTANCE_ID]: legacyAlert.getId(),
         [ALERT_MAINTENANCE_WINDOW_IDS]: legacyAlert.getMaintenanceWindowIds(),
         [ALERT_CONSECUTIVE_MATCHES]: legacyAlert.getActiveCount(),
-        [ALERT_STATUS]: 'active',
+        [ALERT_PENDING_RECOVERED_COUNT]: legacyAlert.getPendingRecoveredCount(),
+        [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
         [ALERT_UUID]: legacyAlert.getUuid(),
         [ALERT_SEVERITY_IMPROVING]: false,
         [ALERT_WORKFLOW_STATUS]: get(cleanedPayload, ALERT_WORKFLOW_STATUS, 'open'),
@@ -106,7 +111,7 @@ export const buildNewAlert = <
               [ALERT_TIME_RANGE]: { gte: legacyAlert.getState().start },
             }
           : {}),
-        [SPACE_IDS]: rule[SPACE_IDS],
+        [SPACE_IDS]: dangerouslyCreateAlertsInAllSpaces === true ? ['*'] : rule[SPACE_IDS],
         [VERSION]: kibanaVersion,
         [TAGS]: Array.from(
           new Set([...((cleanedPayload?.tags as string[]) ?? []), ...(rule[ALERT_RULE_TAGS] ?? [])])

@@ -45,7 +45,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await navigationalSearch.focus();
           await navigationalSearch.searchFor('type:lens lnsTableVis');
           await navigationalSearch.clickOnOption(0);
-          await lens.waitForWorkspaceWithVisualization();
+          await lens.waitForDatatableVisualization();
         });
         it('filters, time and query reflect the visualization state', async () => {
           expect(await lens.getDatatableHeaderText(1)).to.equal('404 › Median of bytes');

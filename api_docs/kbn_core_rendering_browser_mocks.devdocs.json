@@ -14,10 +14,28 @@
         "tags": [],
         "label": "renderingServiceMock",
         "description": [],
-        "path": "packages/core/rendering/core-rendering-browser-mocks/src/rendering_service.mock.ts",
+        "path": "src/core/packages/rendering/browser-mocks/src/rendering_service.mock.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
+          {
+            "parentPluginId": "@kbn/core-rendering-browser-mocks",
+            "id": "def-public.renderingServiceMock.createInternal",
+            "type": "Function",
+            "tags": [],
+            "label": "createInternal",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              "RenderingServiceInternal",
+              ">"
+            ],
+            "path": "src/core/packages/rendering/browser-mocks/src/rendering_service.mock.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
           {
             "parentPluginId": "@kbn/core-rendering-browser-mocks",
             "id": "def-public.renderingServiceMock.create",
@@ -26,9 +44,11 @@
             "label": "create",
             "description": [],
             "signature": [
-              "() => jest.Mocked<RenderingServiceContract>"
+              "() => jest.Mocked<",
+              "RenderingService",
+              ">"
             ],
-            "path": "packages/core/rendering/core-rendering-browser-mocks/src/rendering_service.mock.ts",
+            "path": "src/core/packages/rendering/browser-mocks/src/rendering_service.mock.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],

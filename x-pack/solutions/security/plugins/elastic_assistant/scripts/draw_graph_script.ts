@@ -18,6 +18,20 @@ import type { Logger } from '@kbn/logging';
 import { ChatPromptTemplate } from '@langchain/core/prompts';
 import { FakeLLM } from '@langchain/core/utils/testing';
 import { createOpenAIFunctionsAgent } from 'langchain/agents';
+import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
+import { coreMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { newContentReferencesStoreMock } from '@kbn/elastic-assistant-common/impl/content_references/content_references_store/__mocks__/content_references_store.mock';
+import {
+  ATTACK_DISCOVERY_GENERATION_DETAILS_MARKDOWN,
+  ATTACK_DISCOVERY_GENERATION_ENTITY_SUMMARY_MARKDOWN,
+  ATTACK_DISCOVERY_GENERATION_INSIGHTS,
+  ATTACK_DISCOVERY_GENERATION_MITRE_ATTACK_TACTICS,
+  ATTACK_DISCOVERY_GENERATION_SUMMARY_MARKDOWN,
+  ATTACK_DISCOVERY_GENERATION_TITLE,
+  ATTACK_DISCOVERY_CONTINUE,
+  ATTACK_DISCOVERY_DEFAULT,
+  ATTACK_DISCOVERY_REFINE,
+} from '../server/lib/prompt/prompts';
 import { getDefaultAssistantGraph } from '../server/lib/langchain/graphs/default_assistant_graph/graph';
 import { getDefaultAttackDiscoveryGraph } from '../server/lib/attack_discovery/graphs/default_attack_discovery_graph';
 
@@ -38,7 +52,7 @@ const mockLlm = new FakeLLM({
 }) as unknown as ActionsClientChatOpenAI | ActionsClientSimpleChatModel;
 
 const createLlmInstance = () => {
-  return mockLlm;
+  return Promise.resolve(mockLlm);
 };
 
 async function getAssistantGraph(logger: Logger): Promise<Drawable> {
@@ -49,11 +63,15 @@ async function getAssistantGraph(logger: Logger): Promise<Drawable> {
     streamRunnable: false,
   });
   const graph = getDefaultAssistantGraph({
+    actionsClient: actionsClientMock.create(),
     agentRunnable,
     logger,
     createLlmInstance,
     tools: [],
     replacements: {},
+    savedObjectsClient: savedObjectsClientMock.create(),
+    contentReferencesStore: newContentReferencesStoreMock(),
+    telemetry: coreMock.createSetup().analytics,
   });
   return graph.getGraph();
 }
@@ -67,6 +85,17 @@ async function getAttackDiscoveryGraph(logger: Logger): Promise<Drawable> {
     llm: mockLlm as unknown as ActionsClientLlm,
     logger,
     replacements: {},
+    prompts: {
+      default: ATTACK_DISCOVERY_DEFAULT,
+      refine: ATTACK_DISCOVERY_REFINE,
+      continue: ATTACK_DISCOVERY_CONTINUE,
+      detailsMarkdown: ATTACK_DISCOVERY_GENERATION_DETAILS_MARKDOWN,
+      entitySummaryMarkdown: ATTACK_DISCOVERY_GENERATION_ENTITY_SUMMARY_MARKDOWN,
+      mitreAttackTactics: ATTACK_DISCOVERY_GENERATION_MITRE_ATTACK_TACTICS,
+      summaryMarkdown: ATTACK_DISCOVERY_GENERATION_SUMMARY_MARKDOWN,
+      title: ATTACK_DISCOVERY_GENERATION_TITLE,
+      insights: ATTACK_DISCOVERY_GENERATION_INSIGHTS,
+    },
     size: 20,
   });
 

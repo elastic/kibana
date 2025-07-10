@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { LicenseType } from '@kbn/licensing-plugin/server';
+import type { LicenseType } from '@kbn/licensing-plugin/server';
 
 export const PLUGIN = {
   ID: 'actions',
   MINIMUM_LICENSE_REQUIRED: 'basic' as LicenseType, // TODO: supposed to be changed up on requirements
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   getI18nName: (i18n: any): string =>
     i18n.translate('xpack.actions.appName', {
       defaultMessage: 'Actions',

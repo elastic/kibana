@@ -26,7 +26,7 @@ describe('RenderEndpoint component tests', () => {
       task_settings: {},
     } as any;
 
-    render(<EndpointInfo inferenceId={'cohere-2'} provider={mockProvider} />);
+    render(<EndpointInfo inferenceId={'cohere-2'} endpointInfo={mockProvider} />);
 
     expect(screen.getByText('cohere-2')).toBeInTheDocument();
   });
@@ -42,7 +42,7 @@ describe('RenderEndpoint component tests', () => {
       },
     } as any;
 
-    render(<EndpointInfo inferenceId={'azure-openai-1'} provider={mockProvider} />);
+    render(<EndpointInfo inferenceId={'azure-openai-1'} endpointInfo={mockProvider} />);
 
     expect(screen.getByText('azure-openai-1')).toBeInTheDocument();
   });
@@ -62,7 +62,7 @@ describe('RenderEndpoint component tests', () => {
       },
     } as any;
 
-    render(<EndpointInfo inferenceId={'elastic-rerank'} provider={mockProvider} />);
+    render(<EndpointInfo inferenceId={'elastic-rerank'} endpointInfo={mockProvider} />);
 
     expect(screen.getByText('elastic-rerank')).toBeInTheDocument();
     expect(screen.getByText('TECH PREVIEW')).toBeInTheDocument();

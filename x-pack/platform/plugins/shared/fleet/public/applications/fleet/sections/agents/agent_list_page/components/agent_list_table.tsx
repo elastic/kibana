@@ -17,17 +17,18 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
+import { FormattedDate, FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
+import { css } from '@emotion/css';
 
 import type { Agent, AgentPolicy } from '../../../../types';
-import { isAgentUpgradeable, ExperimentalFeaturesService } from '../../../../services';
+import { isAgentUpgradeable } from '../../../../services';
 import { AgentHealth } from '../../components';
 
 import type { Pagination } from '../../../../hooks';
 import { useAgentVersion } from '../../../../hooks';
 import { useLink, useAuthz } from '../../../../hooks';
 
-import { AgentPolicySummaryLine } from '../../../../components';
+import { AgentPolicySummaryLine } from '../../../../../../components';
 import { Tags } from '../../components/tags';
 import type { AgentMetrics } from '../../../../../../../common/types';
 import { formatAgentCPU, formatAgentMemory } from '../../services/agent_metrics';
@@ -99,7 +100,6 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
   } = props;
 
   const authz = useAuthz();
-  const { displayAgentMetrics } = ExperimentalFeaturesService.get();
 
   const { getHref } = useLink();
   const latestAgentVersion = useAgentVersion();
@@ -196,93 +196,70 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
       name: i18n.translate('xpack.fleet.agentList.policyColumnTitle', {
         defaultMessage: 'Agent policy',
       }),
-      width: '185px',
+      width: '220px',
       render: (policyId: string, agent: Agent) => {
         const agentPolicy = agentPoliciesIndexedById[policyId];
-        const showWarning = agent.policy_revision && agentPolicy?.revision > agent.policy_revision;
 
         return (
-          <EuiFlexGroup gutterSize="m" style={{ minWidth: 0 }} alignItems="center">
-            {agentPolicy && (
-              <EuiFlexItem grow={false}>
-                <AgentPolicySummaryLine direction="column" policy={agentPolicy} agent={agent} />
-              </EuiFlexItem>
-            )}
-            {showWarning && (
-              <EuiFlexItem grow={false}>
-                <EuiText color="subdued" size="xs" className="eui-textNoWrap">
-                  <EuiIcon size="m" type="warning" color="warning" />
-                  &nbsp;
-                  <FormattedMessage
-                    id="xpack.fleet.agentList.outOfDateLabel"
-                    defaultMessage="Outdated policy"
-                  />
-                </EuiText>
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
+          agentPolicy && (
+            <AgentPolicySummaryLine direction="column" policy={agentPolicy} agent={agent} />
+          )
         );
       },
     },
-    ...(displayAgentMetrics
-      ? [
-          {
-            field: AGENTS_TABLE_FIELDS.METRICS,
-            sortable: false,
-            name: (
-              <EuiToolTip
-                content={
-                  <FormattedMessage
-                    id="xpack.fleet.agentList.cpuTooltip"
-                    defaultMessage="Average CPU usage in the last 5 minutes. This includes usage from the Agent and the component it supervises. Possible value ranges from 0 to (number of available CPU cores * 100)"
-                  />
-                }
-              >
-                <span>
-                  <FormattedMessage id="xpack.fleet.agentList.cpuTitle" defaultMessage="CPU" />
-                  &nbsp;
-                  <EuiIcon type="iInCircle" />
-                </span>
-              </EuiToolTip>
-            ),
-            width: '75px',
-            render: (metrics: AgentMetrics | undefined, agent: Agent) =>
-              formatAgentCPU(
-                agent.metrics,
-                agent.policy_id ? agentPoliciesIndexedById[agent.policy_id] : undefined
-              ),
-          },
-          {
-            field: AGENTS_TABLE_FIELDS.METRICS,
-            sortable: false,
-            name: (
-              <EuiToolTip
-                content={
-                  <FormattedMessage
-                    id="xpack.fleet.agentList.memoryTooltip"
-                    defaultMessage="Average memory usage in the last 5 minutes"
-                  />
-                }
-              >
-                <span>
-                  <FormattedMessage
-                    id="xpack.fleet.agentList.memoryTitle"
-                    defaultMessage="Memory"
-                  />
-                  &nbsp;
-                  <EuiIcon type="iInCircle" />
-                </span>
-              </EuiToolTip>
-            ),
-            width: '90px',
-            render: (metrics: AgentMetrics | undefined, agent: Agent) =>
-              formatAgentMemory(
-                agent.metrics,
-                agent.policy_id ? agentPoliciesIndexedById[agent.policy_id] : undefined
-              ),
-          },
-        ]
-      : []),
+
+    {
+      field: AGENTS_TABLE_FIELDS.METRICS,
+      sortable: false,
+      name: (
+        <EuiToolTip
+          content={
+            <FormattedMessage
+              id="xpack.fleet.agentList.cpuTooltip"
+              defaultMessage="Average CPU usage in the last 5 minutes. This includes usage from the Agent and the component it supervises. Possible value ranges from 0 to (number of available CPU cores * 100)"
+            />
+          }
+        >
+          <span>
+            <FormattedMessage id="xpack.fleet.agentList.cpuTitle" defaultMessage="CPU" />
+            &nbsp;
+            <EuiIcon type="info" />
+          </span>
+        </EuiToolTip>
+      ),
+      width: '75px',
+      render: (metrics: AgentMetrics | undefined, agent: Agent) =>
+        formatAgentCPU(
+          agent.metrics,
+          agent.policy_id ? agentPoliciesIndexedById[agent.policy_id] : undefined
+        ),
+    },
+    {
+      field: AGENTS_TABLE_FIELDS.METRICS,
+      sortable: false,
+      name: (
+        <EuiToolTip
+          content={
+            <FormattedMessage
+              id="xpack.fleet.agentList.memoryTooltip"
+              defaultMessage="Average memory usage in the last 5 minutes"
+            />
+          }
+        >
+          <span>
+            <FormattedMessage id="xpack.fleet.agentList.memoryTitle" defaultMessage="Memory" />
+            &nbsp;
+            <EuiIcon type="info" />
+          </span>
+        </EuiToolTip>
+      ),
+      width: '90px',
+      render: (metrics: AgentMetrics | undefined, agent: Agent) =>
+        formatAgentMemory(
+          agent.metrics,
+          agent.policy_id ? agentPoliciesIndexedById[agent.policy_id] : undefined
+        ),
+    },
     {
       field: AGENTS_TABLE_FIELDS.LAST_CHECKIN,
       sortable: true,
@@ -291,7 +268,31 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
       }),
       width: '100px',
       render: (lastCheckin: string) =>
-        lastCheckin ? <FormattedRelative value={lastCheckin} /> : undefined,
+        lastCheckin ? (
+          <EuiToolTip
+            content={
+              <FormattedMessage
+                id="xpack.fleet.agentList.lastActivityTooltip"
+                defaultMessage="Last checked in at {lastCheckin}"
+                values={{
+                  lastCheckin: (
+                    <FormattedDate
+                      value={lastCheckin}
+                      year="numeric"
+                      month="short"
+                      day="2-digit"
+                      timeZoneName="short"
+                      hour="numeric"
+                      minute="numeric"
+                    />
+                  ),
+                }}
+              />
+            }
+          >
+            <FormattedRelative value={lastCheckin} />
+          </EuiToolTip>
+        ) : undefined,
     },
     {
       field: AGENTS_TABLE_FIELDS.VERSION,
@@ -301,7 +302,13 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
         defaultMessage: 'Version',
       }),
       render: (version: string, agent: Agent) => (
-        <EuiFlexGroup gutterSize="none" style={{ minWidth: 0 }} direction="column">
+        <EuiFlexGroup
+          gutterSize="none"
+          css={css`
+            min-width: 0;
+          `}
+          direction="column"
+        >
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="s" alignItems="center" wrap>
               <EuiFlexItem grow={false}>
@@ -349,25 +356,21 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
         totalItemCount: totalAgents,
         pageSizeOptions,
       }}
-      selection={
-        !authz.fleet.allAgents
-          ? undefined
-          : {
-              selected,
-              onSelectionChange,
-              selectable: isAgentSelectable,
-              selectableMessage: (selectable, agent) => {
-                if (selectable) return '';
-                if (!agent.active) {
-                  return 'This agent is not active';
-                }
-                if (agent.policy_id && agentPoliciesIndexedById[agent.policy_id].is_managed) {
-                  return 'This action is not available for agents enrolled in an externally managed agent policy';
-                }
-                return '';
-              },
-            }
-      }
+      selection={{
+        selected,
+        onSelectionChange,
+        selectable: isAgentSelectable,
+        selectableMessage: (selectable, agent) => {
+          if (selectable) return '';
+          if (!agent.active) {
+            return 'This agent is not active';
+          }
+          if (agent.policy_id && agentPoliciesIndexedById[agent.policy_id].is_managed) {
+            return 'This action is not available for agents enrolled in an externally managed agent policy';
+          }
+          return '';
+        },
+      }}
       onChange={onTableChange}
       sorting={sorting}
     />

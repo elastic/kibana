@@ -9,13 +9,13 @@ import React, { useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
-import { ChatForm, ChatFormFields } from '../../types';
+import { PlaygroundForm, PlaygroundFormFields } from '../../types';
 import { SelectIndicesFlyout } from '../select_indices_flyout';
 
 export const AddDataSources: React.FC = () => {
   const [showFlyout, setShowFlyout] = useState(false);
-  const { getValues } = useFormContext<ChatForm>();
-  const hasSelectedIndices: boolean = !!getValues(ChatFormFields.indices)?.length;
+  const { getValues } = useFormContext<PlaygroundForm>();
+  const hasSelectedIndices: boolean = !!getValues(PlaygroundFormFields.indices)?.length;
   const handleFlyoutClose = () => {
     setShowFlyout(false);
   };
@@ -37,7 +37,6 @@ export const AddDataSources: React.FC = () => {
         </EuiButtonEmpty>
       ) : (
         <EuiButton
-          fill
           iconType="plusInCircle"
           onClick={() => setShowFlyout(true)}
           data-test-subj="addDataSourcesButton"

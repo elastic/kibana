@@ -25,6 +25,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'timePicker',
     'unifiedFieldList',
   ]);
+  const dataViews = getService('dataViews');
   const security = getService('security');
   const defaultSettings = {
     defaultIndex: 'logstash-*',
@@ -34,13 +35,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('discover unsaved changes badge', function describeIndexTests() {
     before(async () => {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
-      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
-      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
+      await esArchiver.loadIfNeeded(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
+      await kibanaServer.importExport.load(
+        'src/platform/test/functional/fixtures/kbn_archiver/discover'
+      );
       await PageObjects.svlCommonPage.loginWithPrivilegedRole();
     });
 
     after(async () => {
-      await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
+      await kibanaServer.importExport.unload(
+        'src/platform/test/functional/fixtures/kbn_archiver/discover'
+      );
       await kibanaServer.uiSettings.replace({});
       await kibanaServer.savedObjects.cleanStandardList();
     });
@@ -65,6 +72,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should show the badge only after changes to a persisted saved search', async () => {
+      await dataViews.createFromSearchBar({
+        name: 'lo', // Must be anything but log/logs, since pagination is disabled for log sources
+        adHoc: true,
+        hasTimeField: true,
+      });
       await PageObjects.discover.saveSearch(SAVED_SEARCH_NAME);
       await PageObjects.discover.waitUntilSearchingHasFinished();
 

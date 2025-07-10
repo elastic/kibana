@@ -18,59 +18,7 @@
   },
   "common": {
     "classes": [],
-    "functions": [
-      {
-        "parentPluginId": "@kbn/react-kibana-context-render",
-        "id": "def-common.KibanaRenderContextProvider",
-        "type": "Function",
-        "tags": [],
-        "label": "KibanaRenderContextProvider",
-        "description": [
-          "\nThe `KibanaRenderContextProvider` provides the necessary context for an out-of-current\nReact render, such as using `ReactDOM.render()`."
-        ],
-        "signature": [
-          "({ children, ...props }: React.PropsWithChildren<",
-          {
-            "pluginId": "@kbn/react-kibana-context-render",
-            "scope": "common",
-            "docId": "kibKbnReactKibanaContextRenderPluginApi",
-            "section": "def-common.KibanaRenderContextProviderProps",
-            "text": "KibanaRenderContextProviderProps"
-          },
-          ">) => React.JSX.Element"
-        ],
-        "path": "packages/react/kibana_context/render/render_provider.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/react-kibana-context-render",
-            "id": "def-common.KibanaRenderContextProvider.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "{ children, ...props }",
-            "description": [],
-            "signature": [
-              "React.PropsWithChildren<",
-              {
-                "pluginId": "@kbn/react-kibana-context-render",
-                "scope": "common",
-                "docId": "kibKbnReactKibanaContextRenderPluginApi",
-                "section": "def-common.KibanaRenderContextProviderProps",
-                "text": "KibanaRenderContextProviderProps"
-              },
-              ">"
-            ],
-            "path": "packages/react/kibana_context/render/render_provider.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      }
-    ],
+    "functions": [],
     "interfaces": [],
     "enums": [],
     "misc": [
@@ -100,15 +48,17 @@
           },
           "; userProfile?: Pick<",
           "UserProfileService",
-          ", \"getUserProfile$\"> | undefined; modify?: ",
+          ", \"getUserProfile$\"> | undefined; colorMode?: ",
+          "EuiThemeColorMode",
+          " | undefined; modify?: ",
           "RecursivePartial",
           "<",
-          "EuiThemeShape",
-          "> | undefined; colorMode?: ",
-          "EuiThemeColorMode",
-          " | undefined; }"
+          "EuiThemeShapeBase",
+          " & { overrides?: ",
+          "_EuiThemeOverrides",
+          " | undefined; }> | undefined; }"
         ],
-        "path": "packages/react/kibana_context/render/render_provider.tsx",
+        "path": "src/platform/packages/shared/react/kibana_context/render/render_provider.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -31,64 +31,97 @@ export const appendConversationMessages = async ({
     ...(existingConversation.messages ?? []),
     ...messages,
   ]);
-  try {
-    const response = await esClient.updateByQuery({
-      conflicts: 'proceed',
-      index: conversationIndex,
-      query: {
-        ids: {
-          values: [existingConversation.id ?? ''],
-        },
-      },
-      refresh: true,
-      script: {
-        lang: 'painless',
-        params: {
-          ...params,
-        },
-        source: `
-          if (params.assignEmpty == true || params.containsKey('messages')) {
-            def messages = [];
-            for (message in params.messages) {
-              def newMessage = [:];
-              newMessage['@timestamp'] = message['@timestamp'];
-              newMessage.content = message.content;
-              newMessage.is_error = message.is_error;
-              newMessage.reader = message.reader;
-              newMessage.role = message.role;
-              if (message.trace_data != null) {
-                newMessage.trace_data = message.trace_data;
-              }
-              messages.add(newMessage);
-            }
-            ctx._source.messages = messages;
-          }
-          ctx._source.updated_at = params.updated_at;
-        `,
-      },
-    });
-    if (response.failures && response.failures.length > 0) {
-      logger.error(
-        `Error appending conversation messages: ${response.failures.map(
-          (f) => f.id
-        )} for conversation by ID: ${existingConversation.id}`
-      );
-      return null;
-    }
 
-    const updatedConversation = await getConversation({
-      esClient,
-      conversationIndex,
-      id: existingConversation.id,
-      logger,
-    });
-    return updatedConversation;
-  } catch (err) {
-    logger.error(
-      `Error appending conversation messages: ${err} for conversation by ID: ${existingConversation.id}`
-    );
-    throw err;
+  const maxRetries = 3;
+  let attempt = 0;
+  let response;
+  while (attempt < maxRetries) {
+    try {
+      response = await esClient.updateByQuery({
+        conflicts: 'proceed',
+        index: conversationIndex,
+        query: {
+          ids: {
+            values: [existingConversation.id ?? ''],
+          },
+        },
+        refresh: true,
+        script: {
+          lang: 'painless',
+          params: {
+            ...params,
+          },
+          source: `
+            if (params.assignEmpty == true || params.containsKey('messages')) {
+              def messages = [];
+              for (message in params.messages) {
+                def newMessage = [:];
+                newMessage['@timestamp'] = message['@timestamp'];
+                newMessage.content = message.content;
+                newMessage.is_error = message.is_error;
+                newMessage.reader = message.reader;
+                newMessage.role = message.role;
+                if (message.trace_data != null) {
+                  newMessage.trace_data = message.trace_data;
+                }
+                if (message.metadata != null) {
+                  newMessage.metadata = message.metadata;
+                }
+                messages.add(newMessage);
+              }
+              ctx._source.messages = messages;
+            }
+            ctx._source.updated_at = params.updated_at;
+          `,
+        },
+      });
+      if (
+        (response?.updated && response?.updated > 0) ||
+        (response?.failures && response?.failures.length > 0)
+      ) {
+        break;
+      }
+      if (
+        response?.version_conflicts &&
+        response?.version_conflicts > 0 &&
+        response?.updated === 0
+      ) {
+        attempt++;
+        if (attempt < maxRetries) {
+          logger.warn(
+            `Version conflict detected, retrying appendConversationMessages (attempt ${
+              attempt + 1
+            }) for conversation ID: ${existingConversation.id}`
+          );
+          await new Promise((resolve) => setTimeout(resolve, 100 * attempt)); // Exponential backoff
+        }
+      } else {
+        break;
+      }
+    } catch (err) {
+      logger.error(
+        `Error appending conversation messages: ${err} for conversation by ID: ${existingConversation.id}`
+      );
+      throw err;
+    }
   }
+
+  if (response && response?.failures && response?.failures.length > 0) {
+    logger.error(
+      `Error appending conversation messages: ${response?.failures.map(
+        (f) => f.id
+      )} for conversation by ID: ${existingConversation.id}`
+    );
+    return null;
+  }
+
+  const updatedConversation = await getConversation({
+    esClient,
+    conversationIndex,
+    id: existingConversation.id,
+    logger,
+  });
+  return updatedConversation;
 };
 
 export const transformToUpdateScheme = (updatedAt: string, messages: Message[]) => {
@@ -100,6 +133,15 @@ export const transformToUpdateScheme = (updatedAt: string, messages: Message[]) 
       is_error: message.isError,
       reader: message.reader,
       role: message.role,
+      ...(message.metadata
+        ? {
+            metadata: {
+              ...(message.metadata.contentReferences
+                ? { content_references: message.metadata.contentReferences }
+                : {}),
+            },
+          }
+        : {}),
       ...(message.traceData
         ? {
             trace_data: {

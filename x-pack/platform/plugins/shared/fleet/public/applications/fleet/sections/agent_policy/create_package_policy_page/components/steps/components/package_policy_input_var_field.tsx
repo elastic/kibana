@@ -89,6 +89,7 @@ export const PackagePolicyInputVarField: React.FunctionComponent<InputFieldProps
   }) => {
     const fleetStatus = useFleetStatus();
     const [isDirty, setIsDirty] = useState<boolean>(false);
+
     const { required, type, title, name, description } = varDef;
     const isInvalid = Boolean((isDirty || forceShowErrors) && !!varErrors?.length);
     const errors = isInvalid ? varErrors : null;
@@ -107,6 +108,8 @@ export const PackagePolicyInputVarField: React.FunctionComponent<InputFieldProps
           datastreams={datastreams}
           value={value}
           onChange={onChange}
+          errors={errors}
+          isInvalid={isInvalid}
           isDisabled={isEditPage}
           fieldLabel={fieldLabel}
           description={description}
@@ -171,7 +174,7 @@ export const PackagePolicyInputVarField: React.FunctionComponent<InputFieldProps
       </FormRow>
     );
 
-    return useSecretsUi ? <SecretFieldWrapper>{formRow}</SecretFieldWrapper> : formRow;
+    return <>{useSecretsUi ? <SecretFieldWrapper>{formRow}</SecretFieldWrapper> : formRow}</>;
   }
 );
 
@@ -186,6 +189,7 @@ function getInputComponent({
   setIsDirty,
 }: InputComponentProps) {
   const { multi, type, options, full_width: fullWidth } = varDef;
+
   if (multi) {
     return (
       <MultiTextInput
@@ -213,39 +217,49 @@ function getInputComponent({
         />
       );
     case 'yaml':
-      return frozen ? (
-        <EuiCodeBlock language="yaml" isCopyable={false} paddingSize="s">
-          <pre>{value}</pre>
-        </EuiCodeBlock>
-      ) : (
-        <FixedHeightDiv>
-          <CodeEditor
-            languageId="yaml"
-            width="100%"
-            height="300px"
-            value={value}
-            onChange={onChange}
-            options={{
-              minimap: {
-                enabled: false,
-              },
-              ariaLabel: i18n.translate('xpack.fleet.packagePolicyField.yamlCodeEditor', {
-                defaultMessage: 'YAML Code Editor',
-              }),
-              scrollBeyondLastLine: false,
-              wordWrap: 'off',
-              wrappingIndent: 'indent',
-              tabSize: 2,
-              // To avoid left margin
-              lineNumbers: 'off',
-              lineNumbersMinChars: 0,
-              glyphMargin: false,
-              folding: false,
-              lineDecorationsWidth: 0,
-              overviewRulerBorder: false,
-            }}
-          />
-        </FixedHeightDiv>
+      return (
+        <>
+          {frozen ? (
+            <EuiCodeBlock language="yaml" isCopyable={false} paddingSize="s">
+              <pre>{value}</pre>
+            </EuiCodeBlock>
+          ) : (
+            <>
+              <FixedHeightDiv>
+                <CodeEditor
+                  languageId="yaml"
+                  width="100%"
+                  height="300px"
+                  value={value}
+                  allowFullScreen={true}
+                  placeholder={i18n.translate('xpack.fleet.packagePolicyField.yamlPlaceholder', {
+                    defaultMessage: 'Enter YAML Configuration',
+                  })}
+                  onChange={onChange}
+                  options={{
+                    minimap: {
+                      enabled: false,
+                    },
+                    ariaLabel: i18n.translate('xpack.fleet.packagePolicyField.yamlCodeEditor', {
+                      defaultMessage: 'YAML Code Editor',
+                    }),
+                    scrollBeyondLastLine: false,
+                    wordWrap: 'off',
+                    wrappingIndent: 'indent',
+                    tabSize: 2,
+                    // To avoid left margin
+                    lineNumbers: 'off',
+                    lineNumbersMinChars: 0,
+                    glyphMargin: false,
+                    folding: false,
+                    lineDecorationsWidth: 0,
+                    overviewRulerBorder: false,
+                  }}
+                />
+              </FixedHeightDiv>
+            </>
+          )}
+        </>
       );
     case 'bool':
       return (
@@ -340,7 +354,7 @@ const SecretFieldLabel = ({ fieldLabel }: { fieldLabel: string }) => {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiIconTip
-            type="iInCircle"
+            type="info"
             position="top"
             content={
               <FormattedMessage
@@ -416,7 +430,11 @@ function SecretInputField({
         </EuiText>
         <EuiSpacer size="s" />
         <EuiButtonEmpty
-          onClick={() => setIsReplacing(true)}
+          onClick={() => {
+            setIsReplacing(true);
+            setIsDirty(false);
+            onChange('');
+          }}
           color="primary"
           iconType="refresh"
           iconSide="left"
@@ -459,7 +477,7 @@ function SecretInputField({
     );
     return (
       <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
-        <EuiFlexItem grow={false} style={{ width: '100%' }}>
+        <EuiFlexItem grow={false} css={{ width: '100%' }}>
           {inputComponent}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>{cancelButton}</EuiFlexItem>

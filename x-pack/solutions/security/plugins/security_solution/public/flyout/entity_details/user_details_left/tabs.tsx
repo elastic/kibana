@@ -21,7 +21,7 @@ import type {
 import { ENTRA_TAB_TEST_ID, OKTA_TAB_TEST_ID } from './test_ids';
 import { AssetDocumentTab } from './tabs/asset_document';
 import { DocumentDetailsProvider } from '../../document_details/shared/context';
-import { RiskScoreEntity } from '../../../../common/search_strategy';
+import { EntityIdentifierFields, EntityType } from '../../../../common/entity_analytics/types';
 import type { LeftPanelTabsType } from '../shared/components/left_panel/left_panel_header';
 import { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_panel_header';
 
@@ -42,7 +42,7 @@ export const useTabs = (
       tabs.push(
         getRiskInputTab({
           entityName: name,
-          entityType: RiskScoreEntity.user,
+          entityType: EntityType.user,
           scopeId,
         })
       );
@@ -57,7 +57,7 @@ export const useTabs = (
     }
 
     if (hasMisconfigurationFindings || hasNonClosedAlerts) {
-      tabs.push(getInsightsInputTab({ name, fieldName: 'user.name' }));
+      tabs.push(getInsightsInputTab({ name, fieldName: EntityIdentifierFields.userName, scopeId }));
     }
 
     return tabs;

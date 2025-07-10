@@ -103,7 +103,7 @@ describe('getDescriptorWithUpdatedStyleProps', () => {
       expect(hasChanges).toBe(true);
       expect(nextStyleDescriptor.properties[VECTOR_STYLES.LINE_COLOR]).toEqual({
         options: {
-          color: '#41937c',
+          color: '#009490',
         },
         type: 'STATIC',
       });

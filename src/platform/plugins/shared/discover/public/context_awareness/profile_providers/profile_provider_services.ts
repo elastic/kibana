@@ -7,8 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createLogsContextService, LogsContextService } from '@kbn/discover-utils';
+import {
+  createLogsContextService,
+  type LogsContextService,
+  createTracesContextService,
+  type TracesContextService,
+  createApmErrorsContextService,
+  type ApmErrorsContextService,
+} from '@kbn/discover-utils';
+
 import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
+import type { ApmSourceAccessPluginStart } from '@kbn/apm-sources-access-plugin/public';
 import type { DiscoverServices } from '../../build_services';
 
 /**
@@ -16,6 +25,7 @@ import type { DiscoverServices } from '../../build_services';
  */
 export interface ProfileProviderDeps extends DiscoverServices {
   logsDataAccess?: LogsDataAccessPluginStart;
+  apmSourcesAccess?: ApmSourceAccessPluginStart;
 }
 
 /**
@@ -26,6 +36,8 @@ export interface ProfileProviderServices extends DiscoverServices {
    * A service containing methods used for logs profiles
    */
   logsContextService: LogsContextService;
+  tracesContextService: TracesContextService;
+  apmErrorsContextService: ApmErrorsContextService;
 }
 
 /**
@@ -40,6 +52,12 @@ export const createProfileProviderServices = async (
     ...discoverServices,
     logsContextService: await createLogsContextService({
       logsDataAccess: discoverServices.logsDataAccess,
+    }),
+    tracesContextService: await createTracesContextService({
+      apmSourcesAccess: discoverServices.apmSourcesAccess,
+    }),
+    apmErrorsContextService: await createApmErrorsContextService({
+      apmSourcesAccess: discoverServices.apmSourcesAccess,
     }),
   };
 };

@@ -1593,8 +1593,10 @@
               "The objects to authorize"
             ],
             "signature": [
+              "WithAuditName",
+              "<",
               "SavedObjectReferenceWithContext",
-              "[]"
+              ">[]"
             ],
             "path": "src/core/packages/saved-objects/server/src/extensions/security.ts",
             "deprecated": false,
@@ -3774,6 +3776,24 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.ISavedObjectsSecurityExtension.includeSavedObjectNames",
+            "type": "Function",
+            "tags": [],
+            "label": "includeSavedObjectNames",
+            "description": [
+              "\nRetrieves whether we need to include save objects names in the audit out"
+            ],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "src/core/packages/saved-objects/server/src/extensions/security.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -4228,6 +4248,24 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.ISavedObjectTypeRegistry.getLegacyTypes",
+            "type": "Function",
+            "tags": [],
+            "label": "getLegacyTypes",
+            "description": [
+              "Return legacy types, this types can't be registered"
+            ],
+            "signature": [
+              "() => string[]"
+            ],
+            "path": "src/core/packages/saved-objects/server/src/type_registry.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
             "id": "def-server.ISavedObjectTypeRegistry.getType",
             "type": "Function",
             "tags": [],
@@ -4613,6 +4651,40 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.ISavedObjectTypeRegistry.getNameAttribute",
+            "type": "Function",
+            "tags": [],
+            "label": "getNameAttribute",
+            "description": [
+              "\nReturns the `nameAttribute` property for given type, or `unknown` if\nthe property/type is not registered."
+            ],
+            "signature": [
+              "(type: string) => string"
+            ],
+            "path": "src/core/packages/saved-objects/server/src/type_registry.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-server.ISavedObjectTypeRegistry.getNameAttribute.$1",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/core/packages/saved-objects/server/src/type_registry.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -4885,12 +4957,20 @@
                 "path": "src/core/packages/saved-objects/import-export-server-internal/src/import/lib/collect_saved_objects.ts"
               },
               {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/saved-objects/server-internal/src/routes/legacy_import_export/lib/import_dashboards.ts"
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/kibana/assets/install.ts"
               },
               {
-                "plugin": "@kbn/core-saved-objects-browser-mocks",
-                "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts"
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/kibana/assets/install.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/kibana/assets/install.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/saved-objects/browser-mocks/src/simple_saved_object.mock.ts"
               },
               {
                 "plugin": "graph",
@@ -4905,124 +4985,8 @@
                 "path": "x-pack/platform/plugins/private/graph/server/sample_data/flights.ts"
               },
               {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/kibana/assets/install.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/kibana/assets/install.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/kibana/assets/install.ts"
-              },
-              {
                 "plugin": "osquery",
                 "path": "x-pack/platform/plugins/shared/osquery/server/routes/pack/read_pack_route.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/platform/plugins/shared/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/platform/plugins/shared/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/platform/plugins/shared/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/platform/plugins/shared/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/platform/plugins/shared/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
               },
               {
                 "plugin": "fleet",
@@ -5047,6 +5011,18 @@
               {
                 "plugin": "lists",
                 "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client.mock.ts"
+              },
+              {
+                "plugin": "searchPlayground",
+                "path": "x-pack/solutions/search/plugins/search_playground/server/utils/playgrounds.test.ts"
+              },
+              {
+                "plugin": "searchPlayground",
+                "path": "x-pack/solutions/search/plugins/search_playground/server/utils/playgrounds.test.ts"
+              },
+              {
+                "plugin": "searchPlayground",
+                "path": "x-pack/solutions/search/plugins/search_playground/server/utils/playgrounds.test.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -5177,66 +5153,6 @@
             "path": "src/core/server/index.ts"
           },
           {
-            "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/types/types.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/types/types.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/types/types.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/types.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/types.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/types.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/update/types/types.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/update/types/types.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/update/types/types.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/update/update.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/update/update.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/update/update.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/create.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/create.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/create.ts"
-          },
-          {
             "plugin": "@kbn/alerting-types",
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts"
           },
@@ -5297,6 +5213,66 @@
             "path": "x-pack/platform/plugins/shared/alerting/common/rule.ts"
           },
           {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/update/types/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/update/types/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/update/types/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/update/update.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/update/update.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/update/update.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/types/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/types/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/types/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/create.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/create.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/create.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/types.ts"
+          },
+          {
             "plugin": "alerting",
             "path": "x-pack/platform/plugins/shared/alerting/server/rules_client/common/inject_references.ts"
           },
@@ -5353,6 +5329,22 @@
             "path": "x-pack/platform/plugins/private/canvas/server/routes/workpad/has_workpads.ts"
           },
           {
+            "plugin": "taskManager",
+            "path": "x-pack/platform/plugins/shared/task_manager/server/task_store.test.ts"
+          },
+          {
+            "plugin": "taskManager",
+            "path": "x-pack/platform/plugins/shared/task_manager/server/task_store.test.ts"
+          },
+          {
+            "plugin": "taskManager",
+            "path": "x-pack/platform/plugins/shared/task_manager/server/task_store.test.ts"
+          },
+          {
+            "plugin": "taskManager",
+            "path": "x-pack/platform/plugins/shared/task_manager/server/task_store.test.ts"
+          },
+          {
             "plugin": "securitySolution",
             "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_actions_legacy/logic/rule_actions/legacy_types.ts"
           },
@@ -5367,18 +5359,6 @@
           {
             "plugin": "securitySolution",
             "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_actions_legacy/logic/rule_actions/legacy_migrations.ts"
-          },
-          {
-            "plugin": "taskManager",
-            "path": "x-pack/platform/plugins/shared/task_manager/server/task_store.test.ts"
-          },
-          {
-            "plugin": "taskManager",
-            "path": "x-pack/platform/plugins/shared/task_manager/server/task_store.test.ts"
-          },
-          {
-            "plugin": "taskManager",
-            "path": "x-pack/platform/plugins/shared/task_manager/server/task_store.test.ts"
           },
           {
             "plugin": "enterpriseSearch",
@@ -5407,14 +5387,6 @@
           {
             "plugin": "alerting",
             "path": "x-pack/platform/plugins/shared/alerting/server/saved_objects/migrations/7.15/index.ts"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/saved-objects/server-internal/src/routes/legacy_import_export/lib/collect_references_deep.test.ts"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/saved-objects/server-internal/src/routes/legacy_import_export/lib/collect_references_deep.test.ts"
           }
         ],
         "children": [
@@ -7144,11 +7116,7 @@
         "tags": [],
         "label": "SavedObjectsModelUnsafeTransformChange",
         "description": [
-          "\nA {@link SavedObjectsModelChange | model change} executing an arbitrary transformation function.\n"
-        ],
-        "signature": [
-          "SavedObjectsModelUnsafeTransformChange",
-          "<PreviousAttributes, NewAttributes>"
+          "\nA {@link SavedObjectsModelChange | model change} executing an arbitrary transformation function.\nPlease define your transform function on a separate const.\nUse explicit types for the generic arguments, as shown below.\nThis will reduce the chances of introducing bugs."
         ],
         "path": "src/core/packages/saved-objects/server/src/model_version/model_change.ts",
         "deprecated": false,
@@ -7178,51 +7146,39 @@
               "\nThe transform function to execute."
             ],
             "signature": [
-              "(document: ",
-              "SavedObjectModelTransformationDoc",
-              "<PreviousAttributes>, context: ",
-              "SavedObjectModelTransformationContext",
-              ") => ",
-              "SavedObjectModelTransformationResult",
-              "<NewAttributes>"
+              "(typeSafeGuard: <PreviousAttributes, NewAttributes>(fn: ",
+              "SavedObjectModelUnsafeTransformFn",
+              "<PreviousAttributes, NewAttributes>) => ",
+              "SavedObjectModelTransformationFn",
+              "<unknown, unknown>) => ",
+              "SavedObjectModelTransformationFn",
+              "<unknown, unknown>"
             ],
             "path": "src/core/packages/saved-objects/server/src/model_version/model_change.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-server",
                 "id": "def-server.SavedObjectsModelUnsafeTransformChange.transformFn.$1",
-                "type": "CompoundType",
+                "type": "Function",
                 "tags": [],
-                "label": "document",
+                "label": "typeSafeGuard",
                 "description": [],
                 "signature": [
-                  "SavedObjectDoc",
-                  "<InputAttributes> & { references?: ",
-                  "SavedObjectReference",
-                  "[] | undefined; }"
+                  "<PreviousAttributes, NewAttributes>(fn: ",
+                  "SavedObjectModelUnsafeTransformFn",
+                  "<PreviousAttributes, NewAttributes>) => ",
+                  "SavedObjectModelTransformationFn",
+                  "<unknown, unknown>"
                 ],
-                "path": "src/core/packages/saved-objects/server/src/model_version/transformations.ts",
+                "path": "src/core/packages/saved-objects/server/src/model_version/model_change.ts",
                 "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/core-saved-objects-server",
-                "id": "def-server.SavedObjectsModelUnsafeTransformChange.transformFn.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "context",
-                "description": [],
-                "signature": [
-                  "SavedObjectModelTransformationContext"
-                ],
-                "path": "src/core/packages/saved-objects/server/src/model_version/transformations.ts",
-                "deprecated": false,
-                "trackAdoption": false
+                "trackAdoption": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -7269,37 +7225,6 @@
             "signature": [
               "SavedObjectsModelVersionSchemaDefinitions",
               " | undefined"
-            ],
-            "path": "src/core/packages/saved-objects/server/src/model_version/model_version.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/core-saved-objects-server",
-        "id": "def-server.SavedObjectsModelVersionMap",
-        "type": "Interface",
-        "tags": [],
-        "label": "SavedObjectsModelVersionMap",
-        "description": [
-          "\nA record of {@link SavedObjectsModelVersion | model versions} for a given savedObjects type.\nThe record's keys must be integers, starting with 1 for the first entry, and there shouldn't be gaps.\n"
-        ],
-        "path": "src/core/packages/saved-objects/server/src/model_version/model_version.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/core-saved-objects-server",
-            "id": "def-server.SavedObjectsModelVersionMap.Unnamed",
-            "type": "IndexSignature",
-            "tags": [],
-            "label": "[modelVersion: string]: SavedObjectsModelVersion",
-            "description": [],
-            "signature": [
-              "[modelVersion: string]:  ",
-              "SavedObjectsModelVersion"
             ],
             "path": "src/core/packages/saved-objects/server/src/model_version/model_version.ts",
             "deprecated": false,
@@ -8789,6 +8714,22 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsType.nameAttribute",
+            "type": "string",
+            "tags": [],
+            "label": "nameAttribute",
+            "description": [
+              "\nThe attribute path to the saved object's name"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/core/packages/saved-objects/server/src/saved_objects_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
             "id": "def-server.SavedObjectsType.hidden",
             "type": "boolean",
             "tags": [],
@@ -8924,10 +8865,6 @@
               },
               {
                 "plugin": "@kbn/core",
-                "path": "src/core/packages/saved-objects/server/src/saved_objects_type.ts"
-              },
-              {
-                "plugin": "@kbn/core",
                 "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/version_map.ts"
               },
               {
@@ -8983,28 +8920,28 @@
                 "path": "src/core/packages/usage-data/server-internal/src/saved_objects/core_usage_stats.ts"
               },
               {
-                "plugin": "spaces",
-                "path": "x-pack/platform/plugins/shared/spaces/server/saved_objects/saved_objects_service.ts"
-              },
-              {
-                "plugin": "spaces",
-                "path": "x-pack/platform/plugins/shared/spaces/server/saved_objects/saved_objects_service.ts"
-              },
-              {
                 "plugin": "taskManager",
                 "path": "x-pack/platform/plugins/shared/task_manager/server/saved_objects/index.ts"
               },
               {
-                "plugin": "share",
-                "path": "src/platform/plugins/shared/share/server/url_service/saved_objects/register_url_service_saved_object_type.ts"
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/server/saved_objects/saved_objects.ts"
               },
               {
-                "plugin": "actions",
-                "path": "x-pack/platform/plugins/shared/actions/server/saved_objects/index.ts"
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/server/saved_objects/saved_objects.ts"
               },
               {
-                "plugin": "actions",
-                "path": "x-pack/platform/plugins/shared/actions/server/saved_objects/index.ts"
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/server/saved_objects/saved_objects.ts"
+              },
+              {
+                "plugin": "spaces",
+                "path": "x-pack/platform/plugins/shared/spaces/server/saved_objects/saved_objects_service.ts"
+              },
+              {
+                "plugin": "spaces",
+                "path": "x-pack/platform/plugins/shared/spaces/server/saved_objects/saved_objects_service.ts"
               },
               {
                 "plugin": "dataViews",
@@ -9023,6 +8960,46 @@
                 "path": "src/platform/plugins/shared/data/server/search/saved_objects/search_session.ts"
               },
               {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/saved_objects/index.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/saved_objects/index.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/saved_objects/index.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/saved_objects/index.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/saved_objects/index.ts"
+              },
+              {
+                "plugin": "apmSourcesAccess",
+                "path": "x-pack/platform/plugins/shared/apm_sources_access/server/saved_objects/apm_indices.ts"
+              },
+              {
+                "plugin": "actions",
+                "path": "x-pack/platform/plugins/shared/actions/server/saved_objects/index.ts"
+              },
+              {
+                "plugin": "actions",
+                "path": "x-pack/platform/plugins/shared/actions/server/saved_objects/index.ts"
+              },
+              {
+                "plugin": "share",
+                "path": "src/platform/plugins/shared/share/server/url_service/saved_objects/register_url_service_saved_object_type.ts"
+              },
+              {
+                "plugin": "lens",
+                "path": "x-pack/platform/plugins/shared/lens/server/saved_objects.ts"
+              },
+              {
                 "plugin": "alerting",
                 "path": "x-pack/platform/plugins/shared/alerting/server/saved_objects/index.ts"
               },
@@ -9031,24 +9008,12 @@
                 "path": "src/platform/plugins/shared/dashboard/server/dashboard_saved_object/dashboard_saved_object.ts"
               },
               {
-                "plugin": "ml",
-                "path": "x-pack/platform/plugins/shared/ml/server/saved_objects/saved_objects.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/platform/plugins/shared/ml/server/saved_objects/saved_objects.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/platform/plugins/shared/ml/server/saved_objects/saved_objects.ts"
-              },
-              {
-                "plugin": "@kbn/core-saved-objects-migration-server-mocks",
-                "path": "packages/core/saved-objects/core-saved-objects-migration-server-mocks/src/kibana_migrator.mock.ts"
-              },
-              {
                 "plugin": "savedSearch",
                 "path": "src/platform/plugins/shared/saved_search/server/saved_objects/search.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/saved-objects/migration-server-mocks/src/kibana_migrator.mock.ts"
               },
               {
                 "plugin": "canvas",
@@ -9065,10 +9030,6 @@
               {
                 "plugin": "graph",
                 "path": "x-pack/platform/plugins/private/graph/server/saved_objects/graph_workspace.ts"
-              },
-              {
-                "plugin": "lens",
-                "path": "x-pack/platform/plugins/shared/lens/server/saved_objects.ts"
               },
               {
                 "plugin": "cases",
@@ -9091,28 +9052,12 @@
                 "path": "x-pack/platform/plugins/shared/cases/server/saved_object_types/connector_mappings.ts"
               },
               {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/saved_objects/index.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/saved_objects/index.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/saved_objects/index.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/saved_objects/index.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/saved_objects/index.ts"
-              },
-              {
                 "plugin": "maps",
                 "path": "x-pack/platform/plugins/shared/maps/server/saved_objects/setup_saved_objects.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin/server/index.ts"
               },
               {
                 "plugin": "lists",
@@ -9143,10 +9088,6 @@
                 "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/lib/artifacts/saved_object_mappings.ts"
               },
               {
-                "plugin": "apmDataAccess",
-                "path": "x-pack/solutions/observability/plugins/apm_data_access/server/saved_objects/apm_indices.ts"
-              },
-              {
                 "plugin": "apm",
                 "path": "x-pack/solutions/observability/plugins/apm/server/saved_objects/apm_service_groups.ts"
               },
@@ -9164,7 +9105,7 @@
               },
               {
                 "plugin": "synthetics",
-                "path": "x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetics_monitor.ts"
+                "path": "x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetics_monitor/legacy_synthetics_monitor.ts"
               },
               {
                 "plugin": "uptime",
@@ -9317,22 +9258,6 @@
               {
                 "plugin": "@kbn/core",
                 "path": "src/core/packages/saved-objects/api-server-internal/src/lib/repository_create_repository.test.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/version_map.test.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/version_map.test.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/version_map.test.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/version_map.test.ts"
               },
               {
                 "plugin": "@kbn/core",
@@ -9834,20 +9759,28 @@
                 "path": "src/core/packages/saved-objects/migration-server-internal/src/document_migrator/validate_migrations.ts"
               },
               {
-                "plugin": "actions",
-                "path": "x-pack/platform/plugins/shared/actions/server/saved_objects/index.ts"
-              },
-              {
-                "plugin": "actions",
-                "path": "x-pack/platform/plugins/shared/actions/server/saved_objects/index.ts"
-              },
-              {
                 "plugin": "dataViews",
                 "path": "src/platform/plugins/shared/data_views/server/saved_objects/data_views.ts"
               },
               {
                 "plugin": "data",
                 "path": "src/platform/plugins/shared/data/server/saved_objects/query.ts"
+              },
+              {
+                "plugin": "savedObjectsTagging",
+                "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/saved_objects/tag.ts"
+              },
+              {
+                "plugin": "actions",
+                "path": "x-pack/platform/plugins/shared/actions/server/saved_objects/index.ts"
+              },
+              {
+                "plugin": "actions",
+                "path": "x-pack/platform/plugins/shared/actions/server/saved_objects/index.ts"
+              },
+              {
+                "plugin": "lens",
+                "path": "x-pack/platform/plugins/shared/lens/server/saved_objects.ts"
               },
               {
                 "plugin": "alerting",
@@ -9874,10 +9807,6 @@
                 "path": "x-pack/platform/plugins/private/graph/server/saved_objects/graph_workspace.ts"
               },
               {
-                "plugin": "lens",
-                "path": "x-pack/platform/plugins/shared/lens/server/saved_objects.ts"
-              },
-              {
                 "plugin": "cases",
                 "path": "x-pack/platform/plugins/shared/cases/server/saved_object_types/cases/cases.ts"
               },
@@ -9898,12 +9827,12 @@
                 "path": "x-pack/platform/plugins/shared/cases/server/saved_object_types/connector_mappings.ts"
               },
               {
-                "plugin": "savedObjectsTagging",
-                "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/saved_objects/tag.ts"
-              },
-              {
                 "plugin": "maps",
                 "path": "x-pack/platform/plugins/shared/maps/server/saved_objects/setup_saved_objects.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin/server/index.ts"
               },
               {
                 "plugin": "lists",
@@ -10073,19 +10002,37 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-server",
-            "id": "def-server.SavedObjectsType.switchToModelVersionAt",
-            "type": "string",
+            "id": "def-server.SavedObjectsType.getTitle",
+            "type": "Function",
             "tags": [],
-            "label": "switchToModelVersionAt",
+            "label": "getTitle",
             "description": [
-              "\nAllows to opt-in to the model version API.\n\nMust be a valid semver version (with the patch version being necessarily 0)\n\nWhen specified, the type will switch from using the {@link SavedObjectsType.migrations | legacy migration API}\nto use the {@link SavedObjectsType.modelVersions | modelVersion API} after the specified version.\n\nOnce opted in, it will no longer be possible to use the legacy migration API after the specified version.\n"
+              "\nFunction returning the title to display in the management table.\nIf not defined, will use the object's type and id to generate a label."
             ],
             "signature": [
-              "string | undefined"
+              "((savedObject: Attributes) => string) | undefined"
             ],
             "path": "src/core/packages/saved-objects/server/src/saved_objects_type.ts",
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-server.SavedObjectsType.getTitle.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "savedObject",
+                "description": [],
+                "signature": [
+                  "Attributes"
+                ],
+                "path": "src/core/packages/saved-objects/server/src/saved_objects_type.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -11315,10 +11262,66 @@
           "<any, any> | ",
           "SavedObjectsModelDataRemovalChange",
           " | ",
-          "SavedObjectsModelUnsafeTransformChange",
-          "<any, any>"
+          "SavedObjectsModelUnsafeTransformChange"
         ],
         "path": "src/core/packages/saved-objects/server/src/model_version/model_change.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-server.SavedObjectsModelVersionMap",
+        "type": "Type",
+        "tags": [],
+        "label": "SavedObjectsModelVersionMap",
+        "description": [
+          "\nA record of {@link SavedObjectsModelVersion | model versions} for a given savedObjects type.\nThe record's keys must be integers, starting with 1 for the first entry, and there shouldn't be gaps.\n"
+        ],
+        "signature": [
+          "{ 1?: ",
+          "SavedObjectsModelVersion",
+          " | undefined; 7?: ",
+          "SavedObjectsModelVersion",
+          " | undefined; 6?: ",
+          "SavedObjectsModelVersion",
+          " | undefined; 5?: ",
+          "SavedObjectsModelVersion",
+          " | undefined; 4?: ",
+          "SavedObjectsModelVersion",
+          " | undefined; 3?: ",
+          "SavedObjectsModelVersion",
+          " | undefined; 2?: ",
+          "SavedObjectsModelVersion",
+          " | undefined; 8?: ",
+          "SavedObjectsModelVersion",
+          " | undefined; 9?: ",
+          "SavedObjectsModelVersion",
+          " | undefined; 10?: ",
+          "SavedObjectsModelVersion",
+          " | undefined; 11?: ",
+          "SavedObjectsModelVersion",
+          " | undefined; 12?: ",
+          "SavedObjectsModelVersion",
+          " | undefined; 13?: ",
+          "SavedObjectsModelVersion",
+          " | undefined; 14?: ",
+          "SavedObjectsModelVersion",
+          " | undefined; 15?: ",
+          "SavedObjectsModelVersion",
+          " | undefined; 16?: ",
+          "SavedObjectsModelVersion",
+          " | undefined; 17?: ",
+          "SavedObjectsModelVersion",
+          " | undefined; 18?: ",
+          "SavedObjectsModelVersion",
+          " | undefined; 19?: ",
+          "SavedObjectsModelVersion",
+          " | undefined; 20?: ",
+          "SavedObjectsModelVersion",
+          " | undefined; }"
+        ],
+        "path": "src/core/packages/saved-objects/server/src/model_version/model_version.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -11527,6 +11530,18 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-server.SEARCH_SOLUTION_SAVED_OBJECT_INDEX",
+        "type": "string",
+        "tags": [],
+        "label": "SEARCH_SOLUTION_SAVED_OBJECT_INDEX",
+        "description": [],
+        "path": "src/core/packages/saved-objects/server/src/saved_objects_index_pattern.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
         "id": "def-server.SECURITY_EXTENSION_ID",
         "type": "string",
         "tags": [],
@@ -11587,6 +11602,21 @@
         "label": "USAGE_COUNTERS_SAVED_OBJECT_INDEX",
         "description": [],
         "path": "src/core/packages/saved-objects/server/src/saved_objects_index_pattern.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-server.WithAuditName",
+        "type": "Type",
+        "tags": [],
+        "label": "WithAuditName",
+        "description": [],
+        "signature": [
+          "T & { name?: string | undefined; }"
+        ],
+        "path": "src/core/packages/saved-objects/server/src/extensions/security.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

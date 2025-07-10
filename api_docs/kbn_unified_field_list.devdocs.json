@@ -154,9 +154,9 @@
           "<T extends ",
           {
             "pluginId": "@kbn/field-utils",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnFieldUtilsPluginApi",
-            "section": "def-common.FieldBase",
+            "section": "def-public.FieldBase",
             "text": "FieldBase"
           },
           " = ",
@@ -217,9 +217,9 @@
           "<T extends ",
           {
             "pluginId": "@kbn/field-utils",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnFieldUtilsPluginApi",
-            "section": "def-common.FieldBase",
+            "section": "def-public.FieldBase",
             "text": "FieldBase"
           },
           " = ",
@@ -593,9 +593,9 @@
           "<",
           {
             "pluginId": "@kbn/field-utils",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnFieldUtilsPluginApi",
-            "section": "def-common.FieldBase",
+            "section": "def-public.FieldBase",
             "text": "FieldBase"
           },
           "> | undefined) => string[]"
@@ -622,9 +622,9 @@
               "<",
               {
                 "pluginId": "@kbn/field-utils",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnFieldUtilsPluginApi",
-                "section": "def-common.FieldBase",
+                "section": "def-public.FieldBase",
                 "text": "FieldBase"
               },
               "> | undefined"
@@ -659,9 +659,9 @@
           "<",
           {
             "pluginId": "@kbn/field-utils",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnFieldUtilsPluginApi",
-            "section": "def-common.FieldBase",
+            "section": "def-public.FieldBase",
             "text": "FieldBase"
           },
           "> | undefined) => string[]"
@@ -703,9 +703,9 @@
               "<",
               {
                 "pluginId": "@kbn/field-utils",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnFieldUtilsPluginApi",
-                "section": "def-common.FieldBase",
+                "section": "def-public.FieldBase",
                 "text": "FieldBase"
               },
               "> | undefined"
@@ -740,9 +740,9 @@
           "<",
           {
             "pluginId": "@kbn/field-utils",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnFieldUtilsPluginApi",
-            "section": "def-common.FieldBase",
+            "section": "def-public.FieldBase",
             "text": "FieldBase"
           },
           "> | undefined, delimiter?: string) => string"
@@ -784,9 +784,9 @@
               "<",
               {
                 "pluginId": "@kbn/field-utils",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnFieldUtilsPluginApi",
-                "section": "def-common.FieldBase",
+                "section": "def-public.FieldBase",
                 "text": "FieldBase"
               },
               "> | undefined"
@@ -1589,7 +1589,23 @@
             "section": "def-common.DataViewField",
             "text": "DataViewField"
           },
-          ") => boolean) | undefined; onFieldEdited?: ((options?: { removedFieldName?: string | undefined; editedFieldName?: string | undefined; } | undefined) => Promise<void>) | undefined; } & ",
+          ") => boolean) | undefined; onFieldEdited?: ((options?: { removedFieldName?: string | undefined; editedFieldName?: string | undefined; } | undefined) => Promise<void>) | undefined; initialState?: Partial<",
+          {
+            "pluginId": "@kbn/unified-field-list",
+            "scope": "public",
+            "docId": "kibKbnUnifiedFieldListPluginApi",
+            "section": "def-public.UnifiedFieldListRestorableState",
+            "text": "UnifiedFieldListRestorableState"
+          },
+          "> | undefined; onInitialStateChange?: ((initialState: Partial<",
+          {
+            "pluginId": "@kbn/unified-field-list",
+            "scope": "public",
+            "docId": "kibKbnUnifiedFieldListPluginApi",
+            "section": "def-public.UnifiedFieldListRestorableState",
+            "text": "UnifiedFieldListRestorableState"
+          },
+          ">) => void) | undefined; } & ",
           {
             "pluginId": "@kbn/shared-ux-utility",
             "scope": "common",
@@ -2893,7 +2909,14 @@
             "label": "size",
             "description": [],
             "signature": [
-              "\"s\" | \"xs\" | undefined"
+              {
+                "pluginId": "@kbn/react-field",
+                "scope": "public",
+                "docId": "kibKbnReactFieldPluginApi",
+                "section": "def-public.ButtonSize",
+                "text": "ButtonSize"
+              },
+              " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-field-list/src/components/field_item_button/field_item_button.tsx",
             "deprecated": false,
@@ -3170,6 +3193,38 @@
                 "trackAdoption": false
               }
             ]
+          },
+          {
+            "parentPluginId": "@kbn/unified-field-list",
+            "id": "def-public.FieldListFiltersProps.onFieldNameSearchFocus",
+            "type": "Function",
+            "tags": [],
+            "label": "onFieldNameSearchFocus",
+            "description": [],
+            "signature": [
+              "(() => void) | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-field-list/src/components/field_list_filters/field_list_filters.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/unified-field-list",
+            "id": "def-public.FieldListFiltersProps.onFieldNameSearchBlur",
+            "type": "Function",
+            "tags": [],
+            "label": "onFieldNameSearchBlur",
+            "description": [],
+            "signature": [
+              "(() => void) | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-field-list/src/components/field_list_filters/field_list_filters.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "@kbn/unified-field-list",
@@ -3451,6 +3506,20 @@
             "description": [],
             "signature": [
               "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-field-list/src/components/field_list_grouped/field_list_grouped.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-field-list",
+            "id": "def-public.FieldListGroupedProps.muteScreenReader",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "muteScreenReader",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-field-list/src/components/field_list_grouped/field_list_grouped.tsx",
             "deprecated": false,
@@ -4811,7 +4880,7 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<Context>; readonly unregisterAction: (actionId: string) => void; readonly hasAction: (actionId: string) => boolean; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerAction: (triggerId: string, action: ",
+              "<Context>; readonly registerActionAsync: <Context extends object>(id: string, getDefinition: () => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -4819,7 +4888,23 @@
                 "section": "def-public.ActionDefinition",
                 "text": "ActionDefinition"
               },
-              "<any>) => void; readonly getAction: (id: string) => ",
+              "<Context>>) => void; readonly unregisterAction: (actionId: string) => void; readonly hasAction: (actionId: string) => boolean; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerAction: (triggerId: string, action: ",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.ActionDefinition",
+                "text": "ActionDefinition"
+              },
+              "<any>) => void; readonly addTriggerActionAsync: (triggerId: string, actionId: string, getDefinition: () => Promise<",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.ActionDefinition",
+                "text": "ActionDefinition"
+              },
+              "<any>>) => void; readonly getAction: (id: string) => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -4827,7 +4912,7 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<object>; readonly getTriggerActions: (triggerId: string) => ",
+              "<object>>; readonly getTriggerActions: (triggerId: string) => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -4835,7 +4920,7 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<object>[]; readonly getTriggerCompatibleActions: (triggerId: string, context: object) => Promise<",
+              "<object>[]>; readonly getTriggerCompatibleActions: (triggerId: string, context: object) => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -4843,7 +4928,7 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<object>[]>; readonly getFrequentlyChangingActionsForTrigger: (triggerId: string, context: object) => ",
+              "<object>[]>; readonly getFrequentlyChangingActionsForTrigger: (triggerId: string, context: object) => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -4851,7 +4936,7 @@
                 "section": "def-public.FrequentCompatibilityChangeAction",
                 "text": "FrequentCompatibilityChangeAction"
               },
-              "<object>[]; readonly executeTriggerActions: (triggerId: string, context: object) => Promise<void>; readonly clear: () => void; readonly fork: () => ",
+              "<object>[]>; readonly executeTriggerActions: (triggerId: string, context: object) => Promise<void>; readonly clear: () => void; readonly fork: () => ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -5676,6 +5761,104 @@
       },
       {
         "parentPluginId": "@kbn/unified-field-list",
+        "id": "def-public.UnifiedFieldListRestorableState",
+        "type": "Interface",
+        "tags": [],
+        "label": "UnifiedFieldListRestorableState",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-unified-field-list/src/restorable_state.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/unified-field-list",
+            "id": "def-public.UnifiedFieldListRestorableState.isCollapsed",
+            "type": "boolean",
+            "tags": [],
+            "label": "isCollapsed",
+            "description": [
+              "\nWhether the field list is collapsed or expanded"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-field-list/src/restorable_state.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-field-list",
+            "id": "def-public.UnifiedFieldListRestorableState.nameFilter",
+            "type": "string",
+            "tags": [],
+            "label": "nameFilter",
+            "description": [
+              "\nField search"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-field-list/src/restorable_state.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-field-list",
+            "id": "def-public.UnifiedFieldListRestorableState.selectedFieldTypes",
+            "type": "Array",
+            "tags": [],
+            "label": "selectedFieldTypes",
+            "description": [
+              "\nField type filters"
+            ],
+            "signature": [
+              "string[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-field-list/src/restorable_state.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-field-list",
+            "id": "def-public.UnifiedFieldListRestorableState.pageSize",
+            "type": "number",
+            "tags": [],
+            "label": "pageSize",
+            "description": [
+              "\nThe number of actually rendered (visible) fields"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-field-list/src/restorable_state.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-field-list",
+            "id": "def-public.UnifiedFieldListRestorableState.scrollPosition",
+            "type": "number",
+            "tags": [],
+            "label": "scrollPosition",
+            "description": [
+              "\nScroll position of the field list"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-field-list/src/restorable_state.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-field-list",
+            "id": "def-public.UnifiedFieldListRestorableState.accordionState",
+            "type": "Object",
+            "tags": [],
+            "label": "accordionState",
+            "description": [
+              "\nWhich sections of the field list are expanded"
+            ],
+            "signature": [
+              "{ [x: string]: boolean; }"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-field-list/src/restorable_state.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/unified-field-list",
         "id": "def-public.UnifiedFieldListSidebarContainerApi",
         "type": "Interface",
         "tags": [],
@@ -6031,9 +6214,9 @@
         "signature": [
           {
             "pluginId": "@kbn/field-utils",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnFieldUtilsPluginApi",
-            "section": "def-common.FieldBase",
+            "section": "def-public.FieldBase",
             "text": "FieldBase"
           }
         ],
@@ -6078,6 +6261,69 @@
         "path": "src/platform/packages/shared/kbn-unified-field-list/src/components/field_stats/field_stats.tsx",
         "deprecated": false,
         "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/unified-field-list",
+        "id": "def-public.GenericFieldItemButtonType",
+        "type": "Type",
+        "tags": [],
+        "label": "GenericFieldItemButtonType",
+        "description": [],
+        "signature": [
+          "<T extends ",
+          {
+            "pluginId": "@kbn/field-utils",
+            "scope": "public",
+            "docId": "kibKbnFieldUtilsPluginApi",
+            "section": "def-public.FieldBase",
+            "text": "FieldBase"
+          },
+          " = ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewField",
+            "text": "DataViewField"
+          },
+          ">({ field, fieldSearchHighlight, isSelected, isActive, isEmpty, infoIcon, className, getCustomFieldType, dataTestSubj, size, withDragIcon, onClick, shouldAlwaysShowAction, buttonAddFieldToWorkspaceProps, buttonRemoveFieldFromWorkspaceProps, onAddFieldToWorkspace, onRemoveFieldFromWorkspace, ...otherProps }: ",
+          {
+            "pluginId": "@kbn/unified-field-list",
+            "scope": "public",
+            "docId": "kibKbnUnifiedFieldListPluginApi",
+            "section": "def-public.FieldItemButtonProps",
+            "text": "FieldItemButtonProps"
+          },
+          "<T>) => React.JSX.Element"
+        ],
+        "path": "src/platform/packages/shared/kbn-unified-field-list/src/components/field_item_button/field_item_button.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/unified-field-list",
+            "id": "def-public.GenericFieldItemButtonType.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "__0",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/unified-field-list",
+                "scope": "public",
+                "docId": "kibKbnUnifiedFieldListPluginApi",
+                "section": "def-public.FieldItemButtonProps",
+                "text": "FieldItemButtonProps"
+              },
+              "<T>"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-field-list/src/components/field_item_button/field_item_button.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -6181,7 +6427,23 @@
             "section": "def-common.DataViewField",
             "text": "DataViewField"
           },
-          ") => boolean) | undefined; onFieldEdited?: ((options?: { removedFieldName?: string | undefined; editedFieldName?: string | undefined; } | undefined) => Promise<void>) | undefined; }"
+          ") => boolean) | undefined; onFieldEdited?: ((options?: { removedFieldName?: string | undefined; editedFieldName?: string | undefined; } | undefined) => Promise<void>) | undefined; initialState?: Partial<",
+          {
+            "pluginId": "@kbn/unified-field-list",
+            "scope": "public",
+            "docId": "kibKbnUnifiedFieldListPluginApi",
+            "section": "def-public.UnifiedFieldListRestorableState",
+            "text": "UnifiedFieldListRestorableState"
+          },
+          "> | undefined; onInitialStateChange?: ((initialState: Partial<",
+          {
+            "pluginId": "@kbn/unified-field-list",
+            "scope": "public",
+            "docId": "kibKbnUnifiedFieldListPluginApi",
+            "section": "def-public.UnifiedFieldListRestorableState",
+            "text": "UnifiedFieldListRestorableState"
+          },
+          ">) => void) | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-unified-field-list/src/containers/unified_field_list_sidebar/field_list_sidebar_container.tsx",
         "deprecated": false,

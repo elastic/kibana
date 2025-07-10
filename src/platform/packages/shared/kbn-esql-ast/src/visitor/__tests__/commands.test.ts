@@ -57,7 +57,7 @@ test('can visit JOIN command arguments', () => {
   const { ast } = EsqlQuery.fromSrc(`
     FROM index
       | STATS 1, "str", [true], a = b BY field
-      | RIGHT JOIN abc AS xxx ON xyz
+      | RIGHT JOIN abc ON xyz
       | LIMIT 123
   `);
   const visitor = new Visitor()
@@ -82,14 +82,14 @@ test('can visit JOIN command arguments', () => {
     });
   const list = visitor.visitQuery(ast).flat().filter(Boolean);
 
-  expect(list).toMatchObject(['as']);
+  expect(list).toMatchObject([]);
 });
 
 test('can visit JOIN ON option', () => {
   const { ast } = EsqlQuery.fromSrc(`
     FROM index
       | STATS 1, "str", [true], a = b BY field
-      | RIGHT JOIN abc AS xxx ON xyz
+      | RIGHT JOIN abc ON xyz
       | LIMIT 123
   `);
   const visitor = new Visitor()
@@ -114,4 +114,76 @@ test('can visit JOIN ON option', () => {
   const list = visitor.visitQuery(ast).flat().filter(Boolean);
 
   expect(list).toMatchObject(['xyz']);
+});
+
+test('can visit CHANGE_POINT command', () => {
+  const { ast } = EsqlQuery.fromSrc(`
+    FROM k8s
+      | STATS count=COUNT() BY @timestamp=BUCKET(@timestamp, 1 MINUTE)
+      | CHANGE_POINT count ON @timestamp AS type, pvalue
+      | LIMIT 123
+  `);
+  const visitor = new Visitor()
+    .on('visitExpression', (ctx) => {
+      return null;
+    })
+    .on('visitChangePointCommand', (ctx) => {
+      return 'CHANGE_POINT';
+    })
+    .on('visitCommand', (ctx) => {
+      return null;
+    })
+    .on('visitQuery', (ctx) => {
+      return [...ctx.visitCommands()].flat();
+    });
+  const list = visitor.visitQuery(ast).flat().filter(Boolean);
+
+  expect(list).toEqual(['CHANGE_POINT']);
+});
+
+test('can visit RERANK command', () => {
+  const { ast } = EsqlQuery.fromSrc(`
+    FROM k8s
+      | RERANK "test" ON field WITH id
+      | LIMIT 123
+  `);
+  const visitor = new Visitor()
+    .on('visitExpression', (ctx) => {
+      return null;
+    })
+    .on('visitRerankCommand', (ctx) => {
+      return 'RERANK';
+    })
+    .on('visitCommand', (ctx) => {
+      return null;
+    })
+    .on('visitQuery', (ctx) => {
+      return [...ctx.visitCommands()].flat();
+    });
+  const list = visitor.visitQuery(ast).flat().filter(Boolean);
+
+  expect(list).toEqual(['RERANK']);
+});
+
+test('can visit COMPLETION command', () => {
+  const { ast } = EsqlQuery.fromSrc(`
+    FROM index
+      | COMPLETION "test" WITH inferenceId
+  `);
+  const visitor = new Visitor()
+    .on('visitExpression', (ctx) => {
+      return null;
+    })
+    .on('visitCompletionCommand', (ctx) => {
+      return 'COMPLETION';
+    })
+    .on('visitCommand', (ctx) => {
+      return null;
+    })
+    .on('visitQuery', (ctx) => {
+      return [...ctx.visitCommands()].flat();
+    });
+  const list = visitor.visitQuery(ast).flat().filter(Boolean);
+
+  expect(list).toEqual(['COMPLETION']);
 });

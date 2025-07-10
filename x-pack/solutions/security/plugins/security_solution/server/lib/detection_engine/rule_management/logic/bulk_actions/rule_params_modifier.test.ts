@@ -7,10 +7,8 @@
 
 import { addItemsToArray, deleteItemsFromArray, ruleParamsModifier } from './rule_params_modifier';
 import { BulkActionEditTypeEnum } from '../../../../../../common/api/detection_engine/rule_management';
+import { AlertSuppressionMissingFieldsStrategyEnum } from '../../../../../../common/api/detection_engine/model/rule_schema/common_attributes.gen';
 import type { RuleAlertType } from '../../../rule_schema';
-import type { ExperimentalFeatures } from '../../../../../../common';
-
-const mockExperimentalFeatures = {} as ExperimentalFeatures;
 
 describe('addItemsToArray', () => {
   test('should add single item to array', () => {
@@ -48,30 +46,22 @@ describe('ruleParamsModifier', () => {
   } as RuleAlertType['params'];
 
   test('should increment version if rule is custom (immutable === false)', () => {
-    const { modifiedParams } = ruleParamsModifier(
-      ruleParamsMock,
-      [
-        {
-          type: BulkActionEditTypeEnum.add_index_patterns,
-          value: ['my-index-*'],
-        },
-      ],
-      mockExperimentalFeatures
-    );
+    const { modifiedParams } = ruleParamsModifier(ruleParamsMock, [
+      {
+        type: BulkActionEditTypeEnum.add_index_patterns,
+        value: ['my-index-*'],
+      },
+    ]);
     expect(modifiedParams).toHaveProperty('version', ruleParamsMock.version + 1);
   });
 
   test('should not increment version if rule is prebuilt (immutable === true)', () => {
-    const { modifiedParams } = ruleParamsModifier(
-      { ...ruleParamsMock, immutable: true },
-      [
-        {
-          type: BulkActionEditTypeEnum.add_index_patterns,
-          value: ['my-index-*'],
-        },
-      ],
-      mockExperimentalFeatures
-    );
+    const { modifiedParams } = ruleParamsModifier({ ...ruleParamsMock, immutable: true }, [
+      {
+        type: BulkActionEditTypeEnum.add_index_patterns,
+        value: ['my-index-*'],
+      },
+    ]);
     expect(modifiedParams).toHaveProperty('version', ruleParamsMock.version);
   });
 
@@ -144,8 +134,7 @@ describe('ruleParamsModifier', () => {
                 type: BulkActionEditTypeEnum.add_index_patterns,
                 value: indexPatternsToAdd,
               },
-            ],
-            mockExperimentalFeatures
+            ]
           );
           expect(modifiedParams).toHaveProperty('index', resultingIndexPatterns);
           expect(isParamsUpdateSkipped).toBe(isUpdateSkipped);
@@ -209,8 +198,7 @@ describe('ruleParamsModifier', () => {
                 type: BulkActionEditTypeEnum.delete_index_patterns,
                 value: indexPatternsToDelete,
               },
-            ],
-            mockExperimentalFeatures
+            ]
           );
           expect(modifiedParams).toHaveProperty('index', resultingIndexPatterns);
           expect(isParamsUpdateSkipped).toBe(isUpdateSkipped);
@@ -265,8 +253,7 @@ describe('ruleParamsModifier', () => {
                 type: BulkActionEditTypeEnum.set_index_patterns,
                 value: indexPatternsToOverwrite,
               },
-            ],
-            mockExperimentalFeatures
+            ]
           );
           expect(modifiedParams).toHaveProperty('index', resultingIndexPatterns);
           expect(isParamsUpdateSkipped).toBe(isUpdateSkipped);
@@ -284,8 +271,7 @@ describe('ruleParamsModifier', () => {
             type: BulkActionEditTypeEnum.delete_index_patterns,
             value: ['index-2-*'],
           },
-        ],
-        mockExperimentalFeatures
+        ]
       );
       expect(modifiedParams).not.toHaveProperty('index');
       expect(isParamsUpdateSkipped).toBe(true);
@@ -300,8 +286,7 @@ describe('ruleParamsModifier', () => {
             value: ['index'],
             overwrite_data_views: true,
           },
-        ],
-        mockExperimentalFeatures
+        ]
       );
       expect(modifiedParams).toHaveProperty('dataViewId', undefined);
       expect(isParamsUpdateSkipped).toBe(false);
@@ -316,8 +301,7 @@ describe('ruleParamsModifier', () => {
             value: ['index'],
             overwrite_data_views: true,
           },
-        ],
-        mockExperimentalFeatures
+        ]
       );
       expect(modifiedParams).toHaveProperty('dataViewId', undefined);
       expect(isParamsUpdateSkipped).toBe(false);
@@ -332,8 +316,7 @@ describe('ruleParamsModifier', () => {
             value: ['index'],
             overwrite_data_views: true,
           },
-        ],
-        mockExperimentalFeatures
+        ]
       );
       expect(modifiedParams).toHaveProperty('dataViewId', undefined);
       expect(modifiedParams).toHaveProperty('index', ['test-*']);
@@ -349,8 +332,7 @@ describe('ruleParamsModifier', () => {
             value: ['index'],
             overwrite_data_views: true,
           },
-        ],
-        mockExperimentalFeatures
+        ]
       );
       expect(modifiedParams).toHaveProperty('dataViewId', undefined);
       expect(modifiedParams).toHaveProperty('index', undefined);
@@ -359,16 +341,12 @@ describe('ruleParamsModifier', () => {
 
     test('should throw error on adding index pattern if rule is of machine learning type', () => {
       expect(() =>
-        ruleParamsModifier(
-          { type: 'machine_learning' } as RuleAlertType['params'],
-          [
-            {
-              type: BulkActionEditTypeEnum.add_index_patterns,
-              value: ['my-index-*'],
-            },
-          ],
-          mockExperimentalFeatures
-        )
+        ruleParamsModifier({ type: 'machine_learning' } as RuleAlertType['params'], [
+          {
+            type: BulkActionEditTypeEnum.add_index_patterns,
+            value: ['my-index-*'],
+          },
+        ])
       ).toThrow(
         "Index patterns can't be added. Machine learning rule doesn't have index patterns property"
       );
@@ -376,16 +354,12 @@ describe('ruleParamsModifier', () => {
 
     test('should throw error on deleting index pattern if rule is of machine learning type', () => {
       expect(() =>
-        ruleParamsModifier(
-          { type: 'machine_learning' } as RuleAlertType['params'],
-          [
-            {
-              type: BulkActionEditTypeEnum.delete_index_patterns,
-              value: ['my-index-*'],
-            },
-          ],
-          mockExperimentalFeatures
-        )
+        ruleParamsModifier({ type: 'machine_learning' } as RuleAlertType['params'], [
+          {
+            type: BulkActionEditTypeEnum.delete_index_patterns,
+            value: ['my-index-*'],
+          },
+        ])
       ).toThrow(
         "Index patterns can't be deleted. Machine learning rule doesn't have index patterns property"
       );
@@ -393,16 +367,12 @@ describe('ruleParamsModifier', () => {
 
     test('should throw error on overwriting index pattern if rule is of machine learning type', () => {
       expect(() =>
-        ruleParamsModifier(
-          { type: 'machine_learning' } as RuleAlertType['params'],
-          [
-            {
-              type: BulkActionEditTypeEnum.set_index_patterns,
-              value: ['my-index-*'],
-            },
-          ],
-          mockExperimentalFeatures
-        )
+        ruleParamsModifier({ type: 'machine_learning' } as RuleAlertType['params'], [
+          {
+            type: BulkActionEditTypeEnum.set_index_patterns,
+            value: ['my-index-*'],
+          },
+        ])
       ).toThrow(
         "Index patterns can't be overwritten. Machine learning rule doesn't have index patterns property"
       );
@@ -410,46 +380,34 @@ describe('ruleParamsModifier', () => {
 
     test('should throw error on adding index pattern if rule is of ES|QL type', () => {
       expect(() =>
-        ruleParamsModifier(
-          { type: 'esql' } as RuleAlertType['params'],
-          [
-            {
-              type: BulkActionEditTypeEnum.add_index_patterns,
-              value: ['my-index-*'],
-            },
-          ],
-          mockExperimentalFeatures
-        )
+        ruleParamsModifier({ type: 'esql' } as RuleAlertType['params'], [
+          {
+            type: BulkActionEditTypeEnum.add_index_patterns,
+            value: ['my-index-*'],
+          },
+        ])
       ).toThrow("Index patterns can't be added. ES|QL rule doesn't have index patterns property");
     });
 
     test('should throw error on deleting index pattern if rule is of ES|QL type', () => {
       expect(() =>
-        ruleParamsModifier(
-          { type: 'esql' } as RuleAlertType['params'],
-          [
-            {
-              type: BulkActionEditTypeEnum.delete_index_patterns,
-              value: ['my-index-*'],
-            },
-          ],
-          mockExperimentalFeatures
-        )
+        ruleParamsModifier({ type: 'esql' } as RuleAlertType['params'], [
+          {
+            type: BulkActionEditTypeEnum.delete_index_patterns,
+            value: ['my-index-*'],
+          },
+        ])
       ).toThrow("Index patterns can't be deleted. ES|QL rule doesn't have index patterns property");
     });
 
     test('should throw error on overwriting index pattern if rule is of ES|QL type', () => {
       expect(() =>
-        ruleParamsModifier(
-          { type: 'esql' } as RuleAlertType['params'],
-          [
-            {
-              type: BulkActionEditTypeEnum.set_index_patterns,
-              value: ['my-index-*'],
-            },
-          ],
-          mockExperimentalFeatures
-        )
+        ruleParamsModifier({ type: 'esql' } as RuleAlertType['params'], [
+          {
+            type: BulkActionEditTypeEnum.set_index_patterns,
+            value: ['my-index-*'],
+          },
+        ])
       ).toThrow(
         "Index patterns can't be overwritten. ES|QL rule doesn't have index patterns property"
       );
@@ -549,8 +507,7 @@ describe('ruleParamsModifier', () => {
                 type: BulkActionEditTypeEnum.add_investigation_fields,
                 value: investigationFieldsToAdd,
               },
-            ],
-            mockExperimentalFeatures
+            ]
           );
           expect(modifiedParams).toHaveProperty(
             'investigationFields',
@@ -638,8 +595,7 @@ describe('ruleParamsModifier', () => {
                 type: BulkActionEditTypeEnum.delete_investigation_fields,
                 value: investigationFieldsToDelete,
               },
-            ],
-            mockExperimentalFeatures
+            ]
           );
           expect(modifiedParams).toHaveProperty(
             'investigationFields',
@@ -718,8 +674,7 @@ describe('ruleParamsModifier', () => {
                 type: BulkActionEditTypeEnum.set_investigation_fields,
                 value: investigationFieldsToOverwrite,
               },
-            ],
-            mockExperimentalFeatures
+            ]
           );
           expect(modifiedParams).toHaveProperty(
             'investigationFields',
@@ -731,21 +686,322 @@ describe('ruleParamsModifier', () => {
     });
   });
 
-  describe('timeline', () => {
-    test('should set timeline', () => {
-      const { modifiedParams, isParamsUpdateSkipped } = ruleParamsModifier(
-        ruleParamsMock,
+  describe('alert_suppression', () => {
+    describe('delete_alert_suppression action', () => {
+      test.each([
         [
+          'removes alert suppression',
           {
-            type: BulkActionEditTypeEnum.set_timeline,
-            value: {
-              timeline_id: '91832785-286d-4ebe-b884-1a208d111a70',
-              timeline_title: 'Test timeline',
+            existingAlertSuppression: {
+              groupBy: ['field-1', 'field-2', 'field-3'],
+              missingFieldsStrategy: AlertSuppressionMissingFieldsStrategyEnum.suppress,
             },
+            resultingAlertSuppression: undefined,
+            isParamsUpdateSkipped: false,
+            ruleType: 'query',
           },
         ],
-        mockExperimentalFeatures
+        [
+          'skips updates if suppression is not configured',
+          {
+            existingAlertSuppression: undefined,
+            resultingAlertSuppression: undefined,
+            isParamsUpdateSkipped: true,
+            ruleType: 'query',
+          },
+        ],
+        [
+          'removes alert suppression in threshold rule',
+          {
+            existingAlertSuppression: {
+              duration: { value: 5, unit: 'h' },
+            },
+            resultingAlertSuppression: undefined,
+            isParamsUpdateSkipped: false,
+            ruleType: 'threshold',
+          },
+        ],
+        [
+          'skips updates if suppression is not configured in threshold rule',
+          {
+            existingAlertSuppression: undefined,
+            resultingAlertSuppression: undefined,
+            isParamsUpdateSkipped: true,
+            ruleType: 'query',
+          },
+        ],
+      ])(
+        'should delete alert suppression, case:"%s"',
+        (
+          caseName,
+          { existingAlertSuppression, resultingAlertSuppression, isParamsUpdateSkipped, ruleType }
+        ) => {
+          const { modifiedParams, isParamsUpdateSkipped: isUpdateSkipped } = ruleParamsModifier(
+            {
+              ...ruleParamsMock,
+              alertSuppression: existingAlertSuppression,
+              type: ruleType,
+            } as RuleAlertType['params'],
+            [
+              {
+                type: BulkActionEditTypeEnum.delete_alert_suppression,
+              },
+            ]
+          );
+          expect(modifiedParams).toHaveProperty('alertSuppression', resultingAlertSuppression);
+          expect(isParamsUpdateSkipped).toBe(isUpdateSkipped);
+        }
       );
+    });
+
+    describe('set_alert_suppression action', () => {
+      test.each([
+        [
+          '3 existing groupBy fields overwritten with 2 of them = 2 groupBy fields',
+          {
+            existingAlertSuppression: {
+              groupBy: ['field-1', 'field-2', 'field-3'],
+              duration: { value: 1, unit: 'h' },
+              missingFieldsStrategy: AlertSuppressionMissingFieldsStrategyEnum.suppress,
+            },
+            alertSuppressionToSet: {
+              group_by: ['field-2', 'field-3'],
+              missingFieldsStrategy: AlertSuppressionMissingFieldsStrategyEnum.suppress,
+            },
+            resultingAlertSuppression: {
+              groupBy: ['field-2', 'field-3'],
+              missingFieldsStrategy: AlertSuppressionMissingFieldsStrategyEnum.suppress,
+            },
+            isParamsUpdateSkipped: false,
+            ruleType: 'query',
+          },
+        ],
+        [
+          '`undefined` existing alert suppression overwritten with 2 groupBy fields = 2 groupBy fields',
+          {
+            existingAlertSuppression: undefined,
+            alertSuppressionToSet: {
+              group_by: ['field-1', 'field-2'],
+              duration: { value: 5, unit: 'h' as const },
+              missingFieldsStrategy: AlertSuppressionMissingFieldsStrategyEnum.suppress,
+            },
+            resultingAlertSuppression: {
+              groupBy: ['field-1', 'field-2'],
+              duration: { value: 5, unit: 'h' },
+              missingFieldsStrategy: AlertSuppressionMissingFieldsStrategyEnum.suppress,
+            },
+            isParamsUpdateSkipped: false,
+            ruleType: 'query',
+          },
+        ],
+        [
+          'sets missingFieldsStrategy to default when it is not set in action',
+          {
+            existingAlertSuppression: {
+              groupBy: ['field-1', 'field-2', 'field-3'],
+              missingFieldsStrategy: AlertSuppressionMissingFieldsStrategyEnum.doNotSuppress,
+            },
+            alertSuppressionToSet: {
+              group_by: ['field-x'],
+            },
+            resultingAlertSuppression: {
+              groupBy: ['field-x'],
+              missingFieldsStrategy: AlertSuppressionMissingFieldsStrategyEnum.suppress,
+            },
+            isParamsUpdateSkipped: false,
+            ruleType: 'query',
+          },
+        ],
+        [
+          'skips update when existing alert suppression is the same as action',
+          {
+            existingAlertSuppression: {
+              groupBy: ['field-1', 'field-2'],
+              duration: { value: 5, unit: 'h' },
+              missingFieldsStrategy: AlertSuppressionMissingFieldsStrategyEnum.suppress,
+            },
+            alertSuppressionToSet: {
+              group_by: ['field-1', 'field-2'],
+              missing_fields_strategy: AlertSuppressionMissingFieldsStrategyEnum.suppress,
+              duration: { value: 5, unit: 'h' as const },
+            },
+            resultingAlertSuppression: {
+              groupBy: ['field-1', 'field-2'],
+              duration: { value: 5, unit: 'h' },
+              missingFieldsStrategy: AlertSuppressionMissingFieldsStrategyEnum.suppress,
+            },
+            isParamsUpdateSkipped: true,
+            ruleType: 'query',
+          },
+        ],
+        [
+          'skips update when existing alert suppression is the same as action for absent duration',
+          {
+            existingAlertSuppression: {
+              groupBy: ['field-1', 'field-2', 'field-3'],
+              missingFieldsStrategy: AlertSuppressionMissingFieldsStrategyEnum.suppress,
+            },
+            alertSuppressionToSet: {
+              group_by: ['field-1', 'field-2', 'field-3'],
+              missing_fields_strategy: AlertSuppressionMissingFieldsStrategyEnum.suppress,
+            },
+            resultingAlertSuppression: {
+              groupBy: ['field-1', 'field-2', 'field-3'],
+              missingFieldsStrategy: AlertSuppressionMissingFieldsStrategyEnum.suppress,
+            },
+            isParamsUpdateSkipped: true,
+            ruleType: 'query',
+          },
+        ],
+      ])(
+        'should set alert suppression, case:"%s"',
+        (
+          caseName,
+          {
+            existingAlertSuppression,
+            alertSuppressionToSet,
+            resultingAlertSuppression,
+            isParamsUpdateSkipped,
+            ruleType,
+          }
+        ) => {
+          const { modifiedParams, isParamsUpdateSkipped: isUpdateSkipped } = ruleParamsModifier(
+            {
+              ...ruleParamsMock,
+              alertSuppression: existingAlertSuppression,
+              type: ruleType,
+            } as RuleAlertType['params'],
+            [
+              {
+                type: BulkActionEditTypeEnum.set_alert_suppression,
+                value: alertSuppressionToSet,
+              },
+            ]
+          );
+          expect(modifiedParams).toHaveProperty('alertSuppression', resultingAlertSuppression);
+          expect(isParamsUpdateSkipped).toBe(isUpdateSkipped);
+        }
+      );
+
+      test('should throw error when applied to threshold rule', () => {
+        expect(() =>
+          ruleParamsModifier({ type: 'threshold' } as RuleAlertType['params'], [
+            {
+              type: BulkActionEditTypeEnum.set_alert_suppression,
+              value: {
+                group_by: ['field-1', 'field-2', 'field-3'],
+                missing_fields_strategy: AlertSuppressionMissingFieldsStrategyEnum.suppress,
+              },
+            },
+          ])
+        ).toThrow(
+          "Threshold rule doesn't support this action. Use 'set_alert_suppression_for_threshold' action instead"
+        );
+      });
+    });
+
+    describe('set_alert_suppression_for_threshold action', () => {
+      test.each([
+        [
+          'overwrites existing alert suppression with new duration',
+          {
+            existingAlertSuppression: {
+              duration: { value: 1, unit: 'h' },
+            },
+            alertSuppressionToSet: {
+              duration: { value: 30, unit: 'm' as const },
+            },
+            resultingAlertSuppression: {
+              duration: { value: 30, unit: 'm' },
+            },
+            isParamsUpdateSkipped: false,
+          },
+        ],
+        [
+          'set new duration when existing suppression is undefined',
+          {
+            existingAlertSuppression: undefined,
+            alertSuppressionToSet: {
+              duration: { value: 5, unit: 'h' as const },
+            },
+            resultingAlertSuppression: {
+              duration: { value: 5, unit: 'h' },
+            },
+            isParamsUpdateSkipped: false,
+          },
+        ],
+        [
+          'skips update when existing alert suppression is the same as action',
+          {
+            existingAlertSuppression: {
+              duration: { value: 5, unit: 'h' },
+            },
+            alertSuppressionToSet: {
+              duration: { value: 5, unit: 'h' as const },
+            },
+            resultingAlertSuppression: {
+              duration: { value: 5, unit: 'h' },
+            },
+            isParamsUpdateSkipped: true,
+            ruleType: 'query',
+          },
+        ],
+      ])(
+        'should set alert suppression, case:"%s"',
+        (
+          caseName,
+          {
+            existingAlertSuppression,
+            alertSuppressionToSet,
+            resultingAlertSuppression,
+            isParamsUpdateSkipped,
+          }
+        ) => {
+          const { modifiedParams, isParamsUpdateSkipped: isUpdateSkipped } = ruleParamsModifier(
+            {
+              ...ruleParamsMock,
+              alertSuppression: existingAlertSuppression,
+              type: 'threshold',
+            } as RuleAlertType['params'],
+            [
+              {
+                type: BulkActionEditTypeEnum.set_alert_suppression_for_threshold,
+                value: alertSuppressionToSet,
+              },
+            ]
+          );
+          expect(modifiedParams).toHaveProperty('alertSuppression', resultingAlertSuppression);
+          expect(isParamsUpdateSkipped).toBe(isUpdateSkipped);
+        }
+      );
+
+      test('should throw error when applied not to threshold rule', () => {
+        expect(() =>
+          ruleParamsModifier({ type: 'new_terms' } as RuleAlertType['params'], [
+            {
+              type: BulkActionEditTypeEnum.set_alert_suppression_for_threshold,
+              value: {
+                duration: { value: 30, unit: 'm' as const },
+              },
+            },
+          ])
+        ).toThrow(
+          "new_terms rule type doesn't support this action. Use 'set_alert_suppression' action instead."
+        );
+      });
+    });
+  });
+  describe('timeline', () => {
+    test('should set timeline', () => {
+      const { modifiedParams, isParamsUpdateSkipped } = ruleParamsModifier(ruleParamsMock, [
+        {
+          type: BulkActionEditTypeEnum.set_timeline,
+          value: {
+            timeline_id: '91832785-286d-4ebe-b884-1a208d111a70',
+            timeline_title: 'Test timeline',
+          },
+        },
+      ]);
 
       expect(modifiedParams.timelineId).toBe('91832785-286d-4ebe-b884-1a208d111a70');
       expect(modifiedParams.timelineTitle).toBe('Test timeline');
@@ -758,19 +1014,15 @@ describe('ruleParamsModifier', () => {
       const INTERVAL_IN_MINUTES = 5;
       const LOOKBACK_IN_MINUTES = 1;
       const FROM_IN_SECONDS = (INTERVAL_IN_MINUTES + LOOKBACK_IN_MINUTES) * 60;
-      const { modifiedParams, isParamsUpdateSkipped } = ruleParamsModifier(
-        ruleParamsMock,
-        [
-          {
-            type: BulkActionEditTypeEnum.set_schedule,
-            value: {
-              interval: `${INTERVAL_IN_MINUTES}m`,
-              lookback: `${LOOKBACK_IN_MINUTES}m`,
-            },
+      const { modifiedParams, isParamsUpdateSkipped } = ruleParamsModifier(ruleParamsMock, [
+        {
+          type: BulkActionEditTypeEnum.set_schedule,
+          value: {
+            interval: `${INTERVAL_IN_MINUTES}m`,
+            lookback: `${LOOKBACK_IN_MINUTES}m`,
           },
-        ],
-        mockExperimentalFeatures
-      );
+        },
+      ]);
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       expect((modifiedParams as any).interval).toBeUndefined();

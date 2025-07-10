@@ -40,17 +40,17 @@ export const CertificateFingerprint = React.memo<{
   certificateType: CertificateType;
   contextId: string;
   fieldName: string;
-  isDraggable?: boolean;
   value?: string | null;
-}>(({ eventId, certificateType, contextId, fieldName, isDraggable, value }) => {
+  scopeId: string;
+}>(({ eventId, certificateType, contextId, fieldName, value, scopeId }) => {
   return (
     <DraggableBadge
+      scopeId={scopeId}
       contextId={contextId}
       data-test-subj={`${certificateType}-certificate-fingerprint`}
       eventId={eventId}
       field={fieldName}
       iconType="snowflake"
-      isDraggable={isDraggable}
       tooltipContent={
         <EuiText size="xs">
           <span>{fieldName}</span>

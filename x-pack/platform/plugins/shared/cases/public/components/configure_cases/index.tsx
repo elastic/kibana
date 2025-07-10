@@ -58,6 +58,7 @@ import type { CasesConfigurationUI, CaseUI } from '../../containers/types';
 import { builderMap as customFieldsBuilderMap } from '../custom_fields/builder';
 import { ObservableTypes } from '../observable_types';
 import { ObservableTypesForm } from '../observable_types/form';
+import { useCasesFeatures } from '../../common/use_cases_features';
 
 const sectionWrapperCss = css`
   box-sizing: content-box;
@@ -119,6 +120,8 @@ export const ConfigureCases: React.FC = React.memo(() => {
   const license = useLicense();
   const hasMinimumLicensePermissions = license.isAtLeastGold();
   const hasMinimumLicensePermissionsForObservables = license.isAtLeastPlatinum();
+
+  const { isObservablesFeatureEnabled } = useCasesFeatures();
 
   const [connectorIsValid, setConnectorIsValid] = useState(true);
   const [flyOutVisibility, setFlyOutVisibility] = useState<Flyout | null>(null);
@@ -623,11 +626,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
 
   return (
     <EuiPageSection restrictWidth={true}>
-      <HeaderPage
-        showBackButton={true}
-        data-test-subj="case-configure-title"
-        title={i18n.CONFIGURE_CASES_PAGE_TITLE}
-      />
+      <HeaderPage data-test-subj="case-configure-title" title={i18n.CONFIGURE_CASES_PAGE_TITLE} />
       <EuiPageBody restrictWidth={true}>
         <div css={getFormWrapperCss(euiTheme)}>
           {hasMinimumLicensePermissions && (
@@ -638,7 +637,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
                     <EuiCallOut
                       title={i18n.WARNING_NO_CONNECTOR_TITLE}
                       color="warning"
-                      iconType="help"
+                      iconType="question"
                       data-test-subj="configure-cases-warning-callout"
                     >
                       <FormattedMessage
@@ -716,7 +715,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
             </EuiFlexItem>
           </div>
 
-          {hasMinimumLicensePermissionsForObservables && (
+          {hasMinimumLicensePermissionsForObservables && isObservablesFeatureEnabled && (
             <>
               <EuiSpacer size="xl" />
 

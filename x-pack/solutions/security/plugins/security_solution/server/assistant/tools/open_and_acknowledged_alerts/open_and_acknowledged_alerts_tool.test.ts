@@ -12,10 +12,20 @@ import type { DynamicTool } from '@langchain/core/tools';
 import { OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL } from './open_and_acknowledged_alerts_tool';
 import type { RetrievalQAChain } from 'langchain/chains';
 import { mockAlertsFieldsApi } from '@kbn/elastic-assistant-plugin/server/__mocks__/alerts';
-import type { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common/impl/schemas/actions_connector/post_actions_connector_execute_route.gen';
+import type { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common/impl/schemas';
 import { loggerMock } from '@kbn/logging-mocks';
+import type {
+  ContentReferencesStore,
+  SecurityAlertContentReference,
+} from '@kbn/elastic-assistant-common';
+import { newContentReferencesStoreMock } from '@kbn/elastic-assistant-common/impl/content_references/content_references_store/__mocks__/content_references_store.mock';
 
 const MAX_SIZE = 10000;
+
+jest.mock('@kbn/elastic-assistant-common', () => ({
+  transformRawData: jest.fn(() => 'transformedData'),
+  ...jest.requireActual('@kbn/elastic-assistant-common'),
+}));
 
 describe('OpenAndAcknowledgedAlertsTool', () => {
   const alertsIndexPattern = 'alerts-index';
@@ -34,11 +44,13 @@ describe('OpenAndAcknowledgedAlertsTool', () => {
   const isEnabledKnowledgeBase = true;
   const chain = {} as unknown as RetrievalQAChain;
   const logger = loggerMock.create();
+  const contentReferencesStore = newContentReferencesStoreMock();
   const rest = {
     isEnabledKnowledgeBase,
     esClient,
     chain,
     logger,
+    contentReferencesStore,
   };
 
   const anonymizationFields = [
@@ -125,7 +137,7 @@ describe('OpenAndAcknowledgedAlertsTool', () => {
   });
   describe('getTool', () => {
     it('returns a `DynamicTool` with a `func` that calls `esClient.search()` with the expected query', async () => {
-      const tool: DynamicTool = OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL.getTool({
+      const tool: DynamicTool = (await OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL.getTool({
         alertsIndexPattern,
         anonymizationFields,
         onNewReplacements: jest.fn(),
@@ -133,97 +145,126 @@ describe('OpenAndAcknowledgedAlertsTool', () => {
         request,
         size: request.body.size,
         ...rest,
-      }) as DynamicTool;
+      })) as DynamicTool;
 
       await tool.func('');
 
       expect(esClient.search).toHaveBeenCalledWith({
         allow_no_indices: true,
-        body: {
-          _source: false,
-          fields: [
-            {
-              field: '@timestamp',
-              include_unmapped: true,
-            },
-            {
-              field: 'cloud.availability_zone',
-              include_unmapped: true,
-            },
-            {
-              field: 'user.name',
-              include_unmapped: true,
-            },
-          ],
-          query: {
-            bool: {
-              filter: [
-                {
-                  bool: {
-                    filter: [
-                      {
-                        bool: {
-                          should: [
-                            {
-                              match_phrase: {
-                                'kibana.alert.workflow_status': 'open',
-                              },
+        _source: false,
+        fields: [
+          {
+            field: '@timestamp',
+            include_unmapped: true,
+          },
+          {
+            field: 'cloud.availability_zone',
+            include_unmapped: true,
+          },
+          {
+            field: 'user.name',
+            include_unmapped: true,
+          },
+        ],
+        query: {
+          bool: {
+            filter: [
+              {
+                bool: {
+                  filter: [
+                    {
+                      bool: {
+                        should: [
+                          {
+                            match_phrase: {
+                              'kibana.alert.workflow_status': 'open',
                             },
-                            {
-                              match_phrase: {
-                                'kibana.alert.workflow_status': 'acknowledged',
-                              },
-                            },
-                          ],
-                          minimum_should_match: 1,
-                        },
-                      },
-                      {
-                        range: {
-                          '@timestamp': {
-                            format: 'strict_date_optional_time',
-                            gte: 'now-24h',
-                            lte: 'now',
                           },
+                          {
+                            match_phrase: {
+                              'kibana.alert.workflow_status': 'acknowledged',
+                            },
+                          },
+                        ],
+                        minimum_should_match: 1,
+                      },
+                    },
+                    {
+                      range: {
+                        '@timestamp': {
+                          format: 'strict_date_optional_time',
+                          gte: 'now-24h',
+                          lte: 'now',
                         },
                       },
-                    ],
-                    must: [],
-                    must_not: [
-                      {
-                        exists: {
-                          field: 'kibana.alert.building_block_type',
-                        },
+                    },
+                  ],
+                  must: [],
+                  must_not: [
+                    {
+                      exists: {
+                        field: 'kibana.alert.building_block_type',
                       },
-                    ],
-                    should: [],
-                  },
+                    },
+                  ],
+                  should: [],
                 },
-              ],
+              },
+            ],
+          },
+        },
+        runtime_mappings: {},
+        size: 20,
+        sort: [
+          {
+            'kibana.alert.risk_score': {
+              order: 'desc',
             },
           },
-          runtime_mappings: {},
-          size: 20,
-          sort: [
-            {
-              'kibana.alert.risk_score': {
-                order: 'desc',
-              },
+          {
+            '@timestamp': {
+              order: 'desc',
             },
-            {
-              '@timestamp': {
-                order: 'desc',
-              },
-            },
-          ],
-        },
+          },
+        ],
         ignore_unavailable: true,
         index: ['alerts-index'],
       });
     });
 
-    it('returns null when alertsIndexPattern is undefined', () => {
-      const tool = OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL.getTool({
+    it('includes citations', async () => {
+      const tool: DynamicTool = (await OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL.getTool({
+        alertsIndexPattern,
+        anonymizationFields,
+        onNewReplacements: jest.fn(),
+        replacements,
+        request,
+        size: request.body.size,
+        ...rest,
+      })) as DynamicTool;
+
+      (esClient.search as jest.Mock).mockResolvedValue({
+        hits: {
+          hits: [{ _id: 4 }],
+        },
+      });
+
+      (contentReferencesStore.add as jest.Mock).mockImplementation(
+        (creator: Parameters<ContentReferencesStore['add']>[0]) => {
+          const reference = creator({ id: 'exampleContentReferenceId' });
+          expect(reference.type).toEqual('SecurityAlert');
+          expect((reference as SecurityAlertContentReference).alertId).toEqual(4);
+          return reference;
+        }
+      );
+
+      const result = await tool.func('');
+
+      expect(result).toContain('Citation,{reference(exampleContentReferenceId)}');
+    });
+
+    it('returns null when alertsIndexPattern is undefined', async () => {
+      const tool = await OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL.getTool({
         // alertsIndexPattern is undefined
         anonymizationFields,
         onNewReplacements: jest.fn(),
@@ -236,8 +277,8 @@ describe('OpenAndAcknowledgedAlertsTool', () => {
       expect(tool).toBeNull();
     });
 
-    it('returns null when size is undefined', () => {
-      const tool = OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL.getTool({
+    it('returns null when size is undefined', async () => {
+      const tool = await OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL.getTool({
         alertsIndexPattern,
         anonymizationFields,
         onNewReplacements: jest.fn(),
@@ -250,8 +291,8 @@ describe('OpenAndAcknowledgedAlertsTool', () => {
       expect(tool).toBeNull();
     });
 
-    it('returns null when size out of range', () => {
-      const tool = OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL.getTool({
+    it('returns null when size out of range', async () => {
+      const tool = await OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL.getTool({
         alertsIndexPattern,
         anonymizationFields,
         onNewReplacements: jest.fn(),
@@ -264,8 +305,8 @@ describe('OpenAndAcknowledgedAlertsTool', () => {
       expect(tool).toBeNull();
     });
 
-    it('returns a tool instance with the expected tags', () => {
-      const tool = OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL.getTool({
+    it('returns a tool instance with the expected tags', async () => {
+      const tool = (await OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL.getTool({
         alertsIndexPattern,
         anonymizationFields,
         onNewReplacements: jest.fn(),
@@ -273,7 +314,7 @@ describe('OpenAndAcknowledgedAlertsTool', () => {
         request,
         size: request.body.size,
         ...rest,
-      }) as DynamicTool;
+      })) as DynamicTool;
 
       expect(tool.tags).toEqual(['alerts', 'open-and-acknowledged-alerts']);
     });

@@ -9,13 +9,28 @@ paths:
       x-codegen-enabled: true
       operationId: PerformRulesBulkAction
       summary: Apply a bulk action to detection rules
-      description: Apply a bulk action, such as bulk edit, duplicate, or delete, to multiple detection rules. The bulk action is applied to all rules that match the query or to the rules listed by their IDs.
+      description: |
+        Apply a bulk action, such as bulk edit, duplicate, or delete, to multiple detection rules. The bulk action is applied to all rules that match the query or to the rules listed by their IDs.
+
+        The edit action allows you to add, delete, or set tags, index patterns, investigation fields, rule actions and schedules for multiple rules at once. 
+        The edit action is idempotent, meaning that if you add a tag to a rule that already has that tag, no changes are made. The same is true for other edit actions, for example removing an index pattern that is not specified in a rule will not result in any changes. The only exception is the `add_rule_actions` and `set_rule_actions` action, which is non-idempotent. This means that if you add or set a rule action to a rule that already has that action, a new action is created with a new unique ID.
+        > warn
+        > When used with  [API key](https://www.elastic.co/guide/en/kibana/current/api-keys.html) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
+
+        > If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
       tags:
         - Bulk API
       parameters:
         - name: dry_run
           in: query
-          description: Enables dry run mode for the request call.
+          description: |
+            Enables dry run mode for the request call.
+
+            Enable dry run mode to verify that bulk actions can be applied to specified rules. Certain rules, such as prebuilt Elastic rules on a Basic subscription, can’t be edited and will return errors in the request response. Error details will contain an explanation, the rule name and/or ID, and additional troubleshooting information.
+
+            To enable dry run mode on a request, add the query parameter `dry_run=true` to the end of the request URL. Rules specified in the request will be temporarily updated. These updates won’t be written to Elasticsearch.
+            > info
+            > Dry run mode is not supported for the `export` bulk action. A 400 error will be returned in the request response.
           required: false
           schema:
             type: boolean
@@ -30,7 +45,373 @@ paths:
                 - $ref: '#/components/schemas/BulkExportRules'
                 - $ref: '#/components/schemas/BulkDuplicateRules'
                 - $ref: '#/components/schemas/BulkManualRuleRun'
+                - $ref: '#/components/schemas/BulkManualRuleFillGaps'
                 - $ref: '#/components/schemas/BulkEditRules'
+            examples:
+              example01:
+                summary: Enable - Enable all rules with the test tag
+                description: The following request activates all rules with the test tag.
+                value:
+                  query: 'alert.attributes.tags: "test"'
+                  action: 'enable'
+              example02:
+                summary: Enable - Enable a specific rule by ID.
+                description: The following request enables the rule with the specified ID.
+                value:
+                  action: 'enable'
+                  ids:
+                    - '748694f0-6977-4ea5-8384-cd2e39730779'
+              example03:
+                summary: Disable - Disable a specific rule by ID
+                description: The following request disables the rule with the specified ID.
+                value:
+                  action: 'disable'
+                  ids:
+                    - '748694f0-6977-4ea5-8384-cd2e39730779'
+              example04:
+                summary: Duplicate - Duplicate rules with specific IDs
+                description: The following request duplicates rules with the specified IDs, including exceptions but not expired exceptions.
+                value:
+                  action: 'duplicate'
+                  ids:
+                    - '748694f0-6977-4ea5-8384-cd2e39730779'
+                    - '461a4c22-416e-4009-a9a7-cf79656454bf'
+                  duplicate:
+                    include_exceptions: true
+                    include_expired_exceptions: false
+              example05:
+                summary: Delete - Delete a specific rule by ID
+                description: The following request deletes the rule with the specified ID.
+                value:
+                  action: 'delete'
+                  ids:
+                    - 'cf4abfd1-7c37-4519-ab0f-5ea5c75fac60'
+              example06:
+                summary: Run - Run a specific rule by ID
+                description: The following request runs the rule with the specified ID within the given date range.
+                value:
+                  action: 'run'
+                  ids:
+                    - '748694f0-6977-4ea5-8384-cd2e39730779'
+                  run:
+                    start_date: '2025-03-01T00:00:00.000Z'
+                    end_date: '2025-03-10T23:59:59.999Z'
+              example07:
+                summary: Export - Export specific rules by ID
+                description: The following request exports the rules with the specified IDs.
+                value:
+                  action: 'export'
+                  ids:
+                    - '748694f0-6977-4ea5-8384-cd2e39730779'
+              example08:
+                summary: Edit - dry run - Validate add_index_patterns bulk action
+                description: The following request will validate that the add_index_patterns bulk action can be successfully applied to three rules. The dry_run parameter is specified in query parameters, e.g. POST api/detection_engine/rules/_bulk_action?dry_run=true
+                value:
+                  action: 'edit'
+                  edit:
+                    - value:
+                        - 'test-*'
+                      type: 'add_index_patterns'
+                  ids:
+                    - '81aa0480-06af-11ed-94fb-dd1a0597d8d2'
+                    - 'dc015d10-0831-11ed-ac8b-05a222bd8d4a'
+                    - 'de8f5af0-0831-11ed-ac8b-05a222bd8d4a'
+              example09:
+                summary: Edit - Add a tag to rules (idempotent)
+                description: The following request adds the tag "tag-1" to the rules with the specified IDs. If the tag already exists for a rule, no changes are made.
+                value:
+                  ids:
+                    - '8bc7dad0-9320-11ec-9265-8b772383a08d'
+                    - '8e5c1a40-9320-11ec-9265-8b772383a08d'
+                  action: 'edit'
+                  edit:
+                    - type: 'add_tags'
+                      value:
+                        - 'tag-1'
+              example10:
+                summary: Edit - Add two tags to rules (idempotent)
+                description: The following request adds two tags at the same time, tag-1 and tag-2, to the rules that have the IDs sent in the payload. If the tags already exist for a rule, no changes are made.
+                value:
+                  ids:
+                    - '8bc7dad0-9320-11ec-9265-8b772383a08d'
+                    - '8e5c1a40-9320-11ec-9265-8b772383a08d'
+                  action: 'edit'
+                  edit:
+                    - type: 'add_tags'
+                      value:
+                        - 'tag-1'
+                        - 'tag-2'
+              example11:
+                summary: Edit - Delete a tag from rules (idempotent)
+                description: The following request removes the tag "tag-1" from the rules with the specified IDs. If the tag does not exist for a rule, no changes are made.
+                value:
+                  ids:
+                    - '8bc7dad0-9320-11ec-9265-8b772383a08d'
+                    - '8e5c1a40-9320-11ec-9265-8b772383a08d'
+                  action: 'edit'
+                  edit:
+                    - type: 'delete_tags'
+                      value:
+                        - 'tag-1'
+              example12:
+                summary: Edit - Set (overwrite existing) tags for rules (idempotent)
+                description: The following request sets the tags "tag-1" and "tag-2" for the rules with the specified IDs, overwriting any existing tags. If the set of tags is the same as the existing tags, no changes are made.
+                value:
+                  ids:
+                    - '8bc7dad0-9320-11ec-9265-8b772383a08d'
+                    - '8e5c1a40-9320-11ec-9265-8b772383a08d'
+                  action: 'edit'
+                  edit:
+                    - type: 'set_tags'
+                      value:
+                        - 'tag-1'
+                        - 'tag-2'
+              example13:
+                summary: Edit - Add index patterns to rules (idempotent)
+                description: The following request adds the index pattern "test-*" to the rules with the specified IDs. If the index pattern already exists for a rule, no changes are made.
+                value:
+                  ids:
+                    - '81aa0480-06af-11ed-94fb-dd1a0597d8d2'
+                    - 'dc015d10-0831-11ed-ac8b-05a222bd8d4a'
+                  action: 'edit'
+                  edit:
+                    - type: 'add_index_patterns'
+                      value:
+                        - 'test-*'
+              example14:
+                summary: Edit - Remove index patterns from rules (idempotent)
+                description: The following request removes the index pattern "test-*" from the rules with the specified IDs. If the index pattern does not exist for a rule, no changes are made.
+                value:
+                  ids:
+                    - '81aa0480-06af-11ed-94fb-dd1a0597d8d2'
+                    - 'dc015d10-0831-11ed-ac8b-05a222bd8d4a'
+                  action: 'edit'
+                  edit:
+                    - type: 'delete_index_patterns'
+                      value:
+                        - 'test-*'
+              example15:
+                summary: Edit - Set (overwrite existing) index patterns for rules patterns (idempotent)
+                description: The following request sets the index patterns "test-*" and "prod-*" for the rules with the specified IDs, overwriting any existing index patterns. If the set of index patterns is the same as the existing index patterns, no changes are made.
+                value:
+                  ids:
+                    - '81aa0480-06af-11ed-94fb-dd1a0597d8d2'
+                    - 'dc015d10-0831-11ed-ac8b-05a222bd8d4a'
+                  action: 'edit'
+                  edit:
+                    - type: 'set_index_patterns'
+                      value:
+                        - 'test-*'
+              example16:
+                summary: Edit - Add investigation field to rules
+                description: The following request adds investigation field to the rules with the specified IDs.
+                value:
+                  ids:
+                    - '12345678-1234-1234-1234-1234567890ab'
+                    - '87654321-4321-4321-4321-0987654321ba'
+                  action: 'edit'
+                  edit:
+                    - type: 'add_investigation_fields'
+                      value:
+                        field_names:
+                          - 'alert.status'
+              example17:
+                summary: Edit - Delete investigation fields from rules (idempotent)
+                description: The following request deletes investigation fields from the rules with the specified IDs. If the field does not exist for a rule, no changes are made.
+                value:
+                  ids:
+                    - '12345678-1234-1234-1234-1234567890ab'
+                    - '87654321-4321-4321-4321-0987654321ba'
+                  action: 'edit'
+                  edit:
+                    - type: 'delete_investigation_fields'
+                  value:
+                    - 'field1'
+                    - 'field2'
+              example18:
+                summary: Edit - Set (overwrite existing) investigation fields for rules (idempotent)
+                description: The following request sets investigation fields for the rules with the specified IDs, overwriting any existing investigation fields. If the set of investigation fields is the same as the existing investigation fields, no changes are made.
+                value:
+                  ids:
+                    - '12345678-1234-1234-1234-1234567890ab'
+                    - '87654321-4321-4321-4321-0987654321ba'
+                  action: 'edit'
+                  edit:
+                    - type: 'set_investigation_fields'
+                      value:
+                        - 'field1'
+                        - 'field2'
+              example19:
+                summary: Edit - Set (overwrite existing) timeline template for rules (idempotent)
+                description: The following request sets a timeline template for the rules with the specified IDs. If the same timeline template is already set for a rule, no changes are made.
+                value:
+                  action: edit
+                  ids:
+                    - eacdfc95-e007-41c9-986e-4b2cbdfdc71b
+                  edit:
+                    - type: set_timeline
+                      value:
+                        timeline_id: 3e827bab-838a-469f-bd1e-5e19a2bff2fd
+                        timeline_title: Alerts Involving a Single User Timeline
+              example20:
+                summary: Edit - Set (overwrite existing) schedule for rules (idempotent)
+                description: The following request sets a schedule for the rules with the specified IDs. If the same schedule is already set for a rule, no changes are made.
+                value:
+                  ids:
+                    - '99887766-5544-3322-1100-aabbccddeeff'
+                  action: 'edit'
+                  edit:
+                    - type: 'set_schedule'
+                      value:
+                        interval: '1h'
+                        lookback: '30m'
+              example21:
+                summary: Edit - Add rule actions to rules (non-idempotent)
+                description: The following request adds rule actions to the rules with the specified IDs. Each new action receives its own unique ID.
+                value:
+                  action: edit
+                  ids:
+                    - 9e946bfc-3118-4c77-bb25-67d781191928
+                  edit:
+                    - type: add_rule_actions
+                      value:
+                        actions:
+                          - id: 20fbf986-a270-460e-80f3-7b83c08b430f
+                            params:
+                              body: The message body
+                            group: default
+              example22:
+                summary: Edit - Set (overwrite existing) rule actions for rules (non-idempotent)
+                description: The following request sets rule actions for the rules with the specified IDs. Each action receives its own unique ID.
+                value:
+                  action: edit
+                  ids:
+                    - 9e946bfc-3118-4c77-bb25-67d781191928
+                  edit:
+                    - type: set_rule_actions
+                      value:
+                        actions:
+                          - id: 20fbf986-a270-460e-80f3-7b83c08b430f
+                            params:
+                              body: The message body
+                            group: default
+              example23:
+                summary: Edit - Add rule actions to rules for a webhook connector
+                description: The following request adds rule actions to the rules with the specified IDs. Each new action receives its own unique ID.
+                value:
+                  action: edit
+                  ids:
+                    - 9e946bfc-3118-4c77-bb25-67d781191921
+                  edit:
+                    - type: add_rule_actions
+                      value:
+                        actions:
+                          - id: 20fbf986-a270-460e-80f3-7b83c08b430f
+                            params:
+                              body: The message body
+                            group: default3
+              example24:
+                summary: Edit - Add rule actions to rules for an email connector
+                description: The following request adds rule actions to the rules with the specified IDs. Each new action receives its own unique ID.
+                value:
+                  action: edit
+                  ids:
+                    - 9e946bfc-3118-4c77-bb25-67d781191921
+                  edit:
+                    - type: add_rule_actions
+                      value:
+                        actions:
+                          - id: 20fbf986-a270-460e-80f3-7b83c08b430f
+                            params:
+                              to: address@domain.com
+                              subject: Subject
+                              message: The message body
+                            group: default3
+              example25:
+                summary: Edit - Add rule actions to rules for a slack connector
+                description: The following request adds rule actions to the rules with the specified IDs. Each new action receives its own unique ID.
+                value:
+                  action: edit
+                  ids:
+                    - 9e946bfc-3118-4c77-bb25-67d781191921
+                  edit:
+                    - type: add_rule_actions
+                      value:
+                        actions:
+                          - id: 20fbf986-a270-460e-80f3-7b83c08b430f
+                            params:
+                              message: The content of the message
+                            group: default3
+              example26:
+                summary: Edit - Add rule actions to rules for a PagerDuty connector
+                description: The following request adds rule actions to the rules with the specified IDs. Each new action receives its own unique ID.
+                value:
+                  action: edit
+                  ids:
+                    - 9e946bfc-3118-4c77-bb25-67d781191921
+                  edit:
+                    - type: add_rule_actions
+                      value:
+                        actions:
+                          - id: 20fbf986-a270-460e-80f3-7b83c08b430f
+                            params:
+                              severity: critical
+                              summary: The message body
+                              eventAction: trigger
+                              timestamp: 2023-10-31T00:00:00Z
+                            group: default3
+              example27:
+                summary: Edit - Set alert suppression to rules (idempotent)
+                description: The following request set alert suppression to the rules with the specified IDs.
+                value:
+                  ids:
+                    - '12345678-1234-1234-1234-1234567890ab'
+                    - '87654321-4321-4321-4321-0987654321ba'
+                  action: 'edit'
+                  edit:
+                    - type: 'set_alert_suppression'
+                      value:
+                        group_by:
+                          - 'source.ip'
+                        duration:
+                          value: 1
+                          unit: 'h'
+                        missing_fields_strategy: 'suppress'    
+              example28:
+                summary: Edit - Set alert suppression to threshold rules (idempotent)
+                description: The following request set alert suppression to threshold rules with the specified IDs.
+                value:
+                  ids:
+                    - '12345678-1234-1234-1234-1234567890ab'
+                    - '87654321-4321-4321-4321-0987654321ba'
+                  action: 'edit'
+                  edit:
+                    - type: 'set_alert_suppression_for_threshold'
+                      value:
+                        duration:
+                          value: 1
+                          unit: 'h'
+              example29:
+                summary: Edit - Removes alert suppression from rules (idempotent)
+                description: The following request removes alert suppression from the rules with the specified IDs. If the rules do not have alert suppression, no changes are made.
+                value:
+                  ids:
+                    - '12345678-1234-1234-1234-1234567890ab'
+                    - '87654321-4321-4321-4321-0987654321ba'
+                  action: 'edit'
+                  edit:
+                    - type: 'delete_alert_suppression'
+              example30:
+                summary: Fill Gaps - Manually trigger the filling of gaps for specified rules
+                description: The following request triggers the filling of gaps for the specified rule ids and time range
+                value:
+                  action: 'fill_gaps'
+                  ids:
+                    - '748694f0-6977-4ea5-8384-cd2e39730779'
+                    - '164d0918-f720-4c9f-9f5c-c5122587cf19'
+                  run:
+                    start_date: '2025-03-01T00:00:00.000Z'
+                    end_date: '2025-03-10T23:59:59.999Z'
       responses:
         200:
           description: OK
@@ -40,13 +421,649 @@ paths:
                 oneOf:
                   - $ref: '#/components/schemas/BulkEditActionResponse'
                   - $ref: '#/components/schemas/BulkExportActionResponse'
-
+              examples:
+                example01:
+                  summary: Successful response
+                  description: In this response one rule was updated and one was skipped. Objects returned in attributes.results.skipped will only include rules' id, name, and skip_reason.
+                  value:
+                    success: true
+                    rules_count: 1
+                    attributes:
+                      results:
+                        updated:
+                          - id: '8bc7dad0-9320-11ec-9265-8b772383a08d'
+                            updated_at: '2022-02-21T17:05:50.883Z'
+                            updated_by: 'elastic'
+                            created_at: '2022-02-21T14:14:13.801Z'
+                            created_by: 'elastic'
+                            name: 'DNS Tunneling [Duplicate]'
+                            tags:
+                              - 'Elastic'
+                              - 'Network'
+                              - 'Threat Detection'
+                              - 'ML'
+                            interval: '15m'
+                            enabled: true
+                            description: 'A machine learning job detected unusually large numbers of DNS queries for a single top-level DNS domain, which is often used for DNS tunneling. DNS tunneling can be used for command-and-control, persistence, or data exfiltration activity. For example, dnscat tends to generate many DNS questions for a top-level domain as it uses the DNS protocol to tunnel data.'
+                            risk_score: 21
+                            severity: 'low'
+                            license: 'Elastic License v2'
+                            author:
+                              - 'Elastic'
+                            false_positives:
+                              - 'DNS domains that use large numbers of child domains, such as software or content distribution networks, can trigger this alert and such parent domains can be excluded.'
+                            from: 'now-45m'
+                            rule_id: '7289bf08-4e91-4c70-bf01-e04c4c5d7756'
+                            max_signals: 100
+                            risk_score_mapping: []
+                            severity_mapping: []
+                            threat: []
+                            to: 'now'
+                            references:
+                              - 'https://www.elastic.co/guide/en/security/current/prebuilt-ml-jobs.html'
+                            version: 6
+                            exceptions_list: []
+                            immutable: false
+                            related_integrations: []
+                            required_fields: []
+                            setup: ''
+                            type: 'machine_learning'
+                            anomaly_threshold: 50
+                            machine_learning_job_id:
+                              - 'packetbeat_dns_tunneling'
+                            execution_summary:
+                              last_execution:
+                                date: '2022-03-23T16:06:12.787Z'
+                                status: 'partial failure'
+                                status_order: 20
+                                message: 'This rule attempted to query data from Elasticsearch indices listed in the "Index pattern" section of the rule definition, but no matching index was found.'
+                                metrics:
+                                  total_search_duration_ms: 135
+                                  total_indexing_duration_ms: 15
+                                  execution_gap_duration_s: 0
+                        created: []
+                        deleted: []
+                        skipped:
+                          - id: '51658332-a15e-4c9e-912a-67214e2e2359'
+                            name: 'Skipped rule'
+                            skip_reason: 'RULE_NOT_MODIFIED'
+                      summary:
+                        failed: 0
+                        skipped: 1
+                        succeeded: 1
+                        total: 2
+                example02:
+                  summary: Partial failure
+                  description: If processing of any rule fails, a partial error outputs the ID and/or name of the affected rule and the corresponding error, as well as successfully processed rules (in the same format as a successful 200 request).
+                  value:
+                    value:
+                      success: false
+                      status_code: 500
+                      message: 'Bulk edit partially failed'
+                      rules_count: 2
+                      attributes:
+                        results:
+                          updated:
+                            - id: '8e5c1a40-9320-11ec-9265-8b772383a08d'
+                              updated_at: '2022-02-21T16:56:22.818Z'
+                              updated_by: 'elastic'
+                              created_at: '2022-02-21T14:14:17.883Z'
+                              created_by: 'elastic'
+                              name: 'External Alerts [Duplicate]'
+                              tags:
+                                - 'Elastic'
+                                - 'Network'
+                                - 'Windows'
+                                - 'APM'
+                                - 'macOS'
+                                - 'Linux'
+                              interval: '5m'
+                              enabled: true
+                              description: 'Generates a detection alert for each external alert written to the configured indices. Enabling this rule allows you to immediately begin investigating external alerts in the app.'
+                              risk_score: 47
+                              severity: 'medium'
+                              license: 'Elastic License v2'
+                              rule_name_override: 'message'
+                              timestamp_override: 'event.ingested'
+                              author:
+                                - 'Elastic'
+                              false_positives: []
+                              from: 'now-6m'
+                              rule_id: '941faf98-0cdc-4569-b16d-4af962914d61'
+                              max_signals: 10000
+                              risk_score_mapping:
+                                - field: 'event.risk_score'
+                                  value: ''
+                                  operator: 'equals'
+                              severity_mapping:
+                                - severity: 'low'
+                                  field: 'event.severity'
+                                  value: '21'
+                                  operator: 'equals'
+                                - severity: 'medium'
+                                  field: 'event.severity'
+                                  value: '47'
+                                  operator: 'equals'
+                                - severity: 'high'
+                                  field: 'event.severity'
+                                  value: '73'
+                                  operator: 'equals'
+                                - severity: 'critical'
+                                  field: 'event.severity'
+                                  value: '99'
+                                  operator: 'equals'
+                              threat: []
+                              to: 'now'
+                              references: []
+                              version: 5
+                              exceptions_list: []
+                              immutable: false
+                              related_integrations: []
+                              required_fields: []
+                              setup: ''
+                              type: 'query'
+                              language: 'kuery'
+                              index:
+                                - 'apm-*-transaction*'
+                                - 'traces-apm*'
+                                - 'auditbeat-*'
+                                - 'filebeat-*'
+                                - 'logs-*'
+                                - 'packetbeat-*'
+                                - 'winlogbeat-*'
+                                - 'added-by-id-*'
+                              query: "event.kind:alert and not event.module:(endgame or endpoint)\n"
+                              actions: []
+                              execution_summary:
+                                last_execution:
+                                  date: '2022-03-23T16:06:12.787Z'
+                                  status: 'partial failure'
+                                  status_order: 20
+                                  message: 'This rule attempted to query data from Elasticsearch indices listed in the "Index pattern" section of the rule definition, but no matching index was found.'
+                                  metrics:
+                                    total_search_duration_ms: 135
+                                    total_indexing_duration_ms: 15
+                                    execution_gap_duration_s: 0
+                          created: []
+                          deleted: []
+                          skipped: []
+                        summary:
+                          failed: 1
+                          succeeded: 1
+                          skipped: 0
+                          total: 2
+                        errors:
+                          - message: "Index patterns can't be added. Machine learning rule doesn't have index patterns property"
+                            status_code: 500
+                            rules:
+                              - id: '8bc7dad0-9320-11ec-9265-8b772383a08d'
+                                name: 'DNS Tunneling [Duplicate]'
+                example03:
+                  summary: Dry run
+                  description: The attributes.errors section of the response shows that two rules failed to update and one succeeded. The same results would be returned if you ran the request without dry run mode enabled. Notice that there are no arrays in attributes.results. In dry run mode, rule updates are not applied and saved to Elasticsearch, so the endpoint wouldn’t return results for rules that have been updated, created, or deleted.
+                  value:
+                    message: 'Bulk edit partially failed'
+                    status_code: 500
+                    attributes:
+                      errors:
+                        - message: "Elastic rule can't be edited"
+                          status_code: 500
+                          err_code: 'IMMUTABLE'
+                          rules:
+                            - id: '81aa0480-06af-11ed-94fb-dd1a0597d8d2'
+                              name: 'Unusual AWS Command for a User'
+                        - message: "Machine learning rule doesn't have index patterns"
+                          status_code: 500
+                          err_code: 'MACHINE_LEARNING_INDEX_PATTERN'
+                          rules:
+                            - id: 'dc015d10-0831-11ed-ac8b-05a222bd8d4a'
+                              name: 'Suspicious Powershell Script [Duplicate]'
+                      results:
+                        updated: []
+                        created: []
+                        deleted: []
+                        skipped: []
+                      summary:
+                        failed: 2
+                        succeeded: 1
+                        skipped: 0
+                        total: 3
+                example04:
+                  summary: Set tags successsully for 2 rules
+                  description: This example presents the successful setting of tags for 2 rules. There was a difference between the set of tags that were being added and the tags that were already set in the rules, that's why the rules were updated.
+                  value:
+                    success: true
+                    rules_count: 2
+                    attributes:
+                      results:
+                        updated:
+                          - id: 738112cd-6cfa-414a-8457-2a658845d6ba
+                            updated_at: '2025-03-25T11:47:11.350Z'
+                            updated_by: elastic
+                            created_at: '2025-03-25T11:46:41.899Z'
+                            created_by: elastic
+                            name: Rule 1
+                            tags:
+                              - tag-1
+                              - tag-2
+                            interval: 5m
+                            enabled: false
+                            revision: 1
+                            description: test
+                            risk_score: 21
+                            severity: low
+                            license: ''
+                            output_index: ''
+                            meta:
+                              kibana_siem_app_url: http://localhost:5601/kbn/app/security
+                            author: []
+                            false_positives: []
+                            from: now-6m
+                            rule_id: 6fb746a0-dfe5-40fa-b03f-5cbb84f3e32e
+                            max_signals: 100
+                            risk_score_mapping: []
+                            severity_mapping: []
+                            threat: []
+                            to: now
+                            references: []
+                            version: 2
+                            exceptions_list: []
+                            immutable: false
+                            rule_source:
+                              type: internal
+                            related_integrations: []
+                            required_fields: []
+                            setup: ''
+                            type: query
+                            language: kuery
+                            index:
+                              - apm-*-transaction*
+                              - auditbeat-*
+                              - endgame-*
+                              - filebeat-*
+                              - logs-*
+                              - packetbeat-*
+                              - traces-apm*
+                              - winlogbeat-*
+                              - '-*elastic-cloud-logs-*'
+                            query: '*'
+                            filters: []
+                            actions: []
+                          - id: eacdfc95-e007-41c9-986e-4b2cbdfdc71b
+                            updated_at: '2025-03-25T11:47:11.357Z'
+                            updated_by: elastic
+                            created_at: '2025-03-25T09:49:08.343Z'
+                            created_by: elastic
+                            name: Rule 2
+                            tags:
+                              - tag-1
+                              - tag-2
+                            interval: 3m
+                            enabled: false
+                            revision: 33
+                            description: test
+                            risk_score: 21
+                            severity: low
+                            license: ''
+                            output_index: ''
+                            timeline_id: 3e827bab-838a-469f-bd1e-5e19a2bff2fd
+                            timeline_title: Alerts Involving a Single User Timeline
+                            meta:
+                              kibana_siem_app_url: http://localhost:5601/kbn/app/security
+                              from: 3m
+                            investigation_fields:
+                              field_names:
+                                - alert.status
+                                - Endpoint.policy.applied.artifacts.global.channel
+                            author: []
+                            false_positives: []
+                            from: now-360s
+                            rule_id: 43250a55-53a3-4ddd-96cb-82a1bd720180
+                            max_signals: 100
+                            risk_score_mapping: []
+                            severity_mapping: []
+                            threat: []
+                            to: now
+                            references: []
+                            version: 24
+                            exceptions_list: []
+                            immutable: false
+                            rule_source:
+                              type: internal
+                            related_integrations: []
+                            required_fields: []
+                            setup: ''
+                            type: query
+                            language: kuery
+                            index:
+                              - apm-*-transaction*
+                              - auditbeat-*
+                              - endgame-*
+                              - filebeat-*
+                              - logs-*
+                              - packetbeat-*
+                              - traces-apm*
+                              - winlogbeat-*
+                              - '-*elastic-cloud-logs-*'
+                            query: '*'
+                            filters: []
+                            actions:
+                              - id: 20fbf986-a270-460e-80f3-7b83c08b430f
+                                params:
+                                  body: Hello
+                                action_type_id: '.webhook'
+                                uuid: 580e2e16-5e91-411c-999b-7b75a11ed441
+                                frequency:
+                                  summary: true
+                                  notifyWhen: onActiveAlert
+                                  throttle:
+                                group: default
+                        created: []
+                        deleted: []
+                        skipped: []
+                      summary:
+                        failed: 0
+                        succeeded: 2
+                        skipped: 0
+                        total: 2
+                example05:
+                  summary: Idempotent behavior of set_tags
+                  description: This example presents the idempotent behavior of the edit action with set_tags request. Both rules already had exactly the same tags that were being added, so no changes were made in any of them.
+                  value:
+                    success: true
+                    rules_count: 2
+                    attributes:
+                      results:
+                        updated: []
+                        created: []
+                        deleted: []
+                        skipped:
+                          - id: eacdfc95-e007-41c9-986e-4b2cbdfdc71b
+                            name: Rule 1
+                            skip_reason: RULE_NOT_MODIFIED
+                          - id: 738112cd-6cfa-414a-8457-2a658845d6ba
+                            name: Rule 2
+                            skip_reason: RULE_NOT_MODIFIED
+                      summary:
+                        failed: 0
+                        succeeded: 0
+                        skipped: 2
+                        total: 2
+                example06:
+                  summary: Idempotent behavior of add_tags
+                  description: This example presents the idempotent behavior of the edit action with add_tags request. One rule was updated and one was skipped. The rule that was skipped already had all the tags that were being added.
+                  value:
+                    success: true
+                    rules_count: 2
+                    attributes:
+                      results:
+                        updated:
+                          - id: eacdfc95-e007-41c9-986e-4b2cbdfdc71b
+                            updated_at: '2025-03-25T11:55:12.752Z'
+                            updated_by: elastic
+                            created_at: '2025-03-25T09:49:08.343Z'
+                            created_by: elastic
+                            name: Test rule
+                            tags:
+                              - tag-1
+                              - tag-2
+                              - tag-4
+                            interval: 3m
+                            enabled: false
+                            revision: 34
+                            description: test
+                            risk_score: 21
+                            severity: low
+                            license: ''
+                            output_index: ''
+                            timeline_id: 3e827bab-838a-469f-bd1e-5e19a2bff2fd
+                            timeline_title: Alerts Involving a Single User Timeline
+                            meta:
+                              kibana_siem_app_url: http://localhost:5601/kbn/app/security
+                              from: 3m
+                            investigation_fields:
+                              field_names:
+                                - alert.status
+                                - Endpoint.policy.applied.artifacts.global.channel
+                            author: []
+                            false_positives: []
+                            from: now-360s
+                            rule_id: 43250a55-53a3-4ddd-96cb-82a1bd720180
+                            max_signals: 100
+                            risk_score_mapping: []
+                            severity_mapping: []
+                            threat: []
+                            to: now
+                            references: []
+                            version: 25
+                            exceptions_list: []
+                            immutable: false
+                            rule_source:
+                              type: internal
+                            related_integrations: []
+                            required_fields: []
+                            setup: ''
+                            type: query
+                            language: kuery
+                            index:
+                              - apm-*-transaction*
+                              - auditbeat-*
+                              - endgame-*
+                              - filebeat-*
+                              - logs-*
+                              - packetbeat-*
+                              - traces-apm*
+                              - winlogbeat-*
+                              - '-*elastic-cloud-logs-*'
+                            query: '*'
+                            filters: []
+                            actions:
+                              - id: 20fbf986-a270-460e-80f3-7b83c08b430f
+                                params:
+                                  body: Hello
+                                action_type_id: '.webhook'
+                                uuid: 580e2e16-5e91-411c-999b-7b75a11ed441
+                                frequency:
+                                  summary: true
+                                  notifyWhen: onActiveAlert
+                                  throttle:
+                                group: default
+                        created: []
+                        deleted: []
+                        skipped:
+                          - id: 738112cd-6cfa-414a-8457-2a658845d6ba
+                            name: Test Rule 2
+                            skip_reason: RULE_NOT_MODIFIED
+                      summary:
+                        failed: 0
+                        succeeded: 1
+                        skipped: 1
+                        total: 2
+                example07:
+                  summary: Non-idempotent behavior for set_rule_actions
+                  description: This example shows a non-idempotent nature of the set_rule_actions requests. Regardless if the actions are the same as the existing actions for a rule, the actions are always set in the rule and receive a new unique ID.
+                  value:
+                    success: true
+                    rules_count: 1
+                    attributes:
+                      results:
+                        updated:
+                          - id: eacdfc95-e007-41c9-986e-4b2cbdfdc71b
+                            updated_at: '2025-03-25T12:17:40.528Z'
+                            updated_by: elastic
+                            created_at: '2025-03-25T09:49:08.343Z'
+                            created_by: elastic
+                            name: Test rule
+                            tags:
+                              - tag-1
+                              - tag-2
+                              - tag-4
+                            interval: 3m
+                            enabled: false
+                            revision: 39
+                            description: test
+                            risk_score: 21
+                            severity: low
+                            license: ''
+                            output_index: ''
+                            timeline_id: 3e827bab-838a-469f-bd1e-5e19a2bff2fd
+                            timeline_title: Alerts Involving a Single User Timeline
+                            meta:
+                              kibana_siem_app_url: http://localhost:5601/kbn/app/security
+                              from: 3m
+                            investigation_fields:
+                              field_names:
+                                - alert.status
+                                - Endpoint.policy.applied.artifacts.global.channel
+                            author: []
+                            false_positives: []
+                            from: now-360s
+                            rule_id: 43250a55-53a3-4ddd-96cb-82a1bd720180
+                            max_signals: 100
+                            risk_score_mapping: []
+                            severity_mapping: []
+                            threat: []
+                            to: now
+                            references: []
+                            version: 30
+                            exceptions_list: []
+                            immutable: false
+                            rule_source:
+                              type: internal
+                            related_integrations: []
+                            required_fields: []
+                            setup: ''
+                            type: query
+                            language: kuery
+                            index:
+                              - apm-*-transaction*
+                              - auditbeat-*
+                              - endgame-*
+                              - filebeat-*
+                              - logs-*
+                              - packetbeat-*
+                              - traces-apm*
+                              - winlogbeat-*
+                              - '-*elastic-cloud-logs-*'
+                            query: '*'
+                            filters: []
+                            actions:
+                              - id: 20fbf986-a270-460e-80f3-7b83c08b430f
+                                params:
+                                  body: Hello
+                                action_type_id: '.webhook'
+                                uuid: e48428e5-efac-4856-b8ad-b271c14eaa91
+                                frequency:
+                                  summary: true
+                                  notifyWhen: onActiveAlert
+                                  throttle:
+                                group: default
+                        created: []
+                        deleted: []
+                        skipped: []
+                      summary:
+                        failed: 0
+                        succeeded: 1
+                        skipped: 0
+                        total: 1
+                example08:
+                  summary: Non-idempotent behavior for add_rule_actions
+                  description: This example shows a non-idempotent nature of the add_rule_actions requests. Regardless if the added action is the same as another existing action for a rule, the new action is added to the rule and receives a new unique ID.
+                  value:
+                    success: true
+                    rules_count: 1
+                    attributes:
+                      results:
+                        updated:
+                          - id: 0d3eb0cd-88c4-4651-ac87-6d9f0cb87217
+                            updated_at: '2025-04-02T12:51:40.215Z'
+                            updated_by: elastic
+                            created_at: '2025-04-02T12:42:03.400Z'
+                            created_by: elastic
+                            name: Jacek test rule
+                            tags: []
+                            interval: 5m
+                            enabled: false
+                            revision: 2
+                            description: test
+                            risk_score: 21
+                            severity: low
+                            license: ''
+                            output_index: ''
+                            meta:
+                              kibana_siem_app_url: http://localhost:5601/kbn/app/security
+                            author: []
+                            false_positives: []
+                            from: now-6m
+                            rule_id: 2684c020-1370-4719-ac27-eafe6428fe10
+                            max_signals: 100
+                            risk_score_mapping: []
+                            severity_mapping: []
+                            threat: []
+                            to: now
+                            references: []
+                            version: 2
+                            exceptions_list: []
+                            immutable: false
+                            rule_source:
+                              type: internal
+                            related_integrations: []
+                            required_fields: []
+                            setup: ''
+                            type: query
+                            language: kuery
+                            index:
+                              - apm-*-transaction*
+                              - auditbeat-*
+                              - endgame-*
+                              - filebeat-*
+                              - logs-*
+                              - packetbeat-*
+                              - traces-apm*
+                              - winlogbeat-*
+                              - '-*elastic-cloud-logs-*'
+                            query: '*'
+                            filters: []
+                            actions:
+                              - id: 76af173d-38d8-4a9a-b2cc-a3c695b845b4
+                                params:
+                                  body: Message body
+                                action_type_id: '.webhook'
+                                uuid: '0309347e-3954-429c-9168-5da2663389af'
+                                frequency:
+                                  summary: true
+                                  notifyWhen: onActiveAlert
+                                  throttle:
+                                group: default
+                              - id: 76af173d-38d8-4a9a-b2cc-a3c695b845b4
+                                params:
+                                  body: Message body
+                                action_type_id: '.webhook'
+                                uuid: 49ddaa94-d63d-410e-90dc-8c1bad9552bd
+                                frequency:
+                                  summary: true
+                                  notifyWhen: onActiveAlert
+                                  throttle:
+                                group: default
+                        created: []
+                        deleted: []
+                        skipped: []
+                      summary:
+                        failed: 0
+                        succeeded: 1
+                        skipped: 0
+                        total: 1
 components:
   schemas:
     BulkEditSkipReason:
       type: string
       enum:
         - RULE_NOT_MODIFIED
+    
+    BulkGapsFillingSkipReason:
+      type: string
+      enum:
+        - NO_GAPS_TO_FILL
 
     BulkActionSkipResult:
       type: object
@@ -56,7 +1073,9 @@ components:
         name:
           type: string
         skip_reason:
-          $ref: '#/components/schemas/BulkEditSkipReason'
+          oneOf:
+            - $ref: '#/components/schemas/BulkEditSkipReason'
+            - $ref: '#/components/schemas/BulkGapsFillingSkipReason'
       required:
         - id
         - skip_reason
@@ -75,11 +1094,15 @@ components:
       type: string
       enum:
         - IMMUTABLE
+        - PREBUILT_CUSTOMIZATION_LICENSE
         - MACHINE_LEARNING_AUTH
         - MACHINE_LEARNING_INDEX_PATTERN
         - ESQL_INDEX_PATTERN
         - MANUAL_RULE_RUN_FEATURE
         - MANUAL_RULE_RUN_DISABLED_RULE
+        - THRESHOLD_RULE_TYPE_IN_SUPPRESSION
+        - UNSUPPORTED_RULE_IN_SUPPRESSION_FOR_THRESHOLD
+        - RULE_FILL_GAPS_DISABLED_RULE
 
     NormalizedRuleError:
       type: object
@@ -126,6 +1149,7 @@ components:
 
     BulkEditActionSummary:
       type: object
+      description: A rule can only be skipped when the bulk action to be performed on it results in nothing being done. For example, if the `edit` action is used to add a tag to a rule that already has that tag, or to delete an index pattern that is not specified in a rule. Objects returned in `attributes.results.skipped` will only include rules' `id`, `name`, and `skip_reason`.
       properties:
         failed:
           type: integer
@@ -178,13 +1202,19 @@ components:
       properties:
         query:
           type: string
-          description: Query to filter rules
+          description: Query to filter rules.
         ids:
           type: array
-          description: Array of rule IDs
+          description: Array of rule IDs. Array of rule IDs to which a bulk action will be applied. Only valid when query property is undefined.
           minItems: 1
           items:
             type: string
+        gaps_range_start:
+          description: Gaps range start, valid only when query is provided
+          type: string
+        gaps_range_end:
+          description: Gaps range end, valid only when query is provided
+          type: string
 
     BulkDeleteRules:
       allOf:
@@ -240,6 +1270,7 @@ components:
               enum: [duplicate]
             duplicate:
               type: object
+              description: Duplicate object that describes applying an update action.
               properties:
                 include_exceptions:
                   type: boolean
@@ -263,6 +1294,7 @@ components:
               enum: [run]
             run:
               type: object
+              description: Object that describes applying a manual rule run action.
               properties:
                 start_date:
                   type: string
@@ -272,13 +1304,43 @@ components:
                   description: End date of the manual rule run
               required:
                 - start_date
+                - end_date
           required:
             - action
             - run
+    
+    BulkManualRuleFillGaps:
+      allOf:
+        - $ref: '#/components/schemas/BulkActionBase'
+        - type: object
+          properties:
+            action:
+              type: string
+              enum: [fill_gaps]
+            fill_gaps:
+              type: object
+              description: Object that describes applying a manual gap fill action for the specified time range.
+              properties:
+                start_date:
+                  type: string
+                  description: Start date of the manual gap fill
+                end_date:
+                  type: string
+                  description: End date of the manual gap fill
+              required:
+                - start_date
+                - end_date
+          required:
+            - action
+            - fill_gaps
 
     ThrottleForBulkActions:
       type: string
-      description: "The condition for throttling the notification: 'rule', 'no_actions', or time duration"
+      description: |
+        Defines the maximum interval in which a rule’s actions are executed.
+        > info
+        > The rule level `throttle` field is deprecated in Elastic Security 8.8 and will remain active for at least the next 12 months.
+        > In Elastic Security 8.8 and later, you can use the `frequency` field to define frequencies for individual actions. Actions without frequencies will acquire a converted version of the rule’s `throttle` field. In the response, the converted `throttle` setting appears in the individual actions' `frequency` field.
       enum:
         - rule
         - 1h
@@ -295,6 +1357,7 @@ components:
         - duplicate
         - edit
         - run
+        - fill_gaps
 
     BulkActionEditType:
       type: string
@@ -312,6 +1375,9 @@ components:
         - add_investigation_fields
         - delete_investigation_fields
         - set_investigation_fields
+        - delete_alert_suppression
+        - set_alert_suppression
+        - set_alert_suppression_for_threshold
 
     # Per rulesClient.bulkEdit rules actions operation contract (x-pack/platform/plugins/shared/alerting/server/rules_client/rules_client.ts) normalized rule action object is expected (NormalizedAlertAction) as value for the edit operation
     NormalizedRuleAction:
@@ -334,6 +1400,11 @@ components:
 
     BulkActionEditPayloadRuleActions:
       type: object
+      description: |
+        Edits rule actions of rules.
+
+        - `add_rule_actions` adds rule actions to rules. This action is non-idempotent, meaning that even if the same rule action already exists for a rule, it will be added again with a new unique ID.
+        - `set_rule_actions` sets rule actions for rules. This action is non-idempotent, meaning that even if the same set of rule actions already exists for a rule, it will be set again and the actions will receive new unique IDs.
       properties:
         type:
           type: string
@@ -355,6 +1426,12 @@ components:
 
     BulkActionEditPayloadSchedule:
       type: object
+      description: |
+        Overwrites schedule of rules. 
+
+        - `set_schedule` sets a schedule for rules. If the same schedule already exists for a rule, no changes are made.
+
+        Both `interval` and `lookback` have a format of "{integer}{time_unit}", where accepted time units are `s` for seconds, `m` for minutes, and `h` for hours. The integer must be positive and larger than 0. Examples: "45s", "30m", "6h"
       properties:
         type:
           type: string
@@ -369,7 +1446,10 @@ components:
               example: '1h'
             lookback:
               type: string
-              description: Lookback time for the rule
+              description: |
+                Lookback time for the rules.
+
+                Additional look-back time that the rule analyzes. For example, "10m" means the rule analyzes the last 10 minutes of data in addition to the frequency interval.
               pattern: '^[1-9]\d*[smh]$' # any number except zero followed by one of the suffixes 's', 'm', 'h'
               example: '1h'
           required:
@@ -381,6 +1461,12 @@ components:
 
     BulkActionEditPayloadIndexPatterns:
       type: object
+      description: |
+        Edits index patterns of rulesClient.
+
+        - `add_index_patterns` adds index patterns to rules. If an index pattern already exists for a rule, no changes are made.
+        - `delete_index_patterns` removes index patterns from rules. If an index pattern does not exist for a rule, no changes are made.
+        - `set_index_patterns` sets index patterns for rules, overwriting any existing index patterns. If the set of index patterns is the same as the existing index patterns, no changes are made.
       properties:
         type:
           type: string
@@ -392,12 +1478,19 @@ components:
           $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/IndexPatternArray'
         overwrite_data_views:
           type: boolean
+          description: Resets the data view for the rule.
       required:
         - type
         - value
 
     BulkActionEditPayloadTags:
       type: object
+      description: |
+        Edits tags of rules.
+
+        - `add_tags` adds tags to rules. If a tag already exists for a rule, no changes are made.
+        - `delete_tags` removes tags from rules. If a tag does not exist for a rule, no changes are made.
+        - `set_tags` sets tags for rules, overwriting any existing tags. If the set of tags is the same as the existing tags, no changes are made.
       properties:
         type:
           type: string
@@ -413,6 +1506,12 @@ components:
 
     BulkActionEditPayloadInvestigationFields:
       type: object
+      description: |
+        Edits investigation fields of rules.
+
+        - `add_investigation_fields` adds investigation fields to rules. If an investigation field already exists for a rule, no changes are made.
+        - `delete_investigation_fields` removes investigation fields from rules. If an investigation field does not exist for a rule, no changes are made.
+        - `set_investigation_fields` sets investigation fields for rules. If the set of investigation fields is the same as the existing investigation fields, no changes are made.
       properties:
         type:
           type: string
@@ -428,6 +1527,10 @@ components:
 
     BulkActionEditPayloadTimeline:
       type: object
+      description: |
+        Edits timeline of rules.
+
+        - `set_timeline` sets a timeline for rules. If the same timeline already exists for a rule, no changes are made.
       properties:
         type:
           type: string
@@ -447,6 +1550,48 @@ components:
         - type
         - value
 
+    BulkActionEditPayloadSetAlertSuppression:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - set_alert_suppression
+        value:
+          $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/AlertSuppression'
+      required:
+        - type
+        - value
+
+    BulkActionEditPayloadSetAlertSuppressionForThreshold:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - set_alert_suppression_for_threshold
+        value:
+          $ref: '../../model/rule_schema/specific_attributes/threshold_attributes.schema.yaml#/components/schemas/ThresholdAlertSuppression'
+      required:
+        - type
+        - value
+
+    BulkActionEditPayloadDeleteAlertSuppression:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - delete_alert_suppression
+      required:
+        - type
+
+    BulkActionEditPayloadAlertSuppression:
+      anyOf:
+        - $ref: '#/components/schemas/BulkActionEditPayloadSetAlertSuppression'
+        - $ref: '#/components/schemas/BulkActionEditPayloadSetAlertSuppressionForThreshold'
+        - $ref: '#/components/schemas/BulkActionEditPayloadDeleteAlertSuppression'
+
     BulkActionEditPayload:
       anyOf:
         - $ref: '#/components/schemas/BulkActionEditPayloadTags'
@@ -455,6 +1600,8 @@ components:
         - $ref: '#/components/schemas/BulkActionEditPayloadTimeline'
         - $ref: '#/components/schemas/BulkActionEditPayloadRuleActions'
         - $ref: '#/components/schemas/BulkActionEditPayloadSchedule'
+        - $ref: '#/components/schemas/BulkActionEditPayloadAlertSuppression'
+
 
     BulkEditRules:
       allOf:

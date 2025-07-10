@@ -30,8 +30,11 @@ export const connectorTypes: string[] = [
   '.d3security',
   '.resilient',
   '.thehive',
+  '.xsoar',
   '.sentinelone',
   '.crowdstrike',
+  '.inference',
+  '.microsoft_defender_endpoint',
   '.cases',
   '.observability-ai-assistant',
 ];

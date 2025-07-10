@@ -82,7 +82,7 @@ describe('LogstashAgentMonitoring', () => {
         {} as any
       );
       const { args } = searchMock.firstCall;
-      const [{ body }] = args;
+      const [body] = args;
 
       expect(body.from).toEqual(0);
       expect(body.size).toEqual(10000);
@@ -125,7 +125,7 @@ describe('LogstashAgentMonitoring', () => {
         {} as any
       );
       const { args } = searchMock.firstCall;
-      const [{ body }] = args;
+      const [body] = args;
       expect(body.query).toEqual(expected);
     });
   });
@@ -204,7 +204,7 @@ describe('LogstashAgentMonitoring', () => {
           count: 1,
           cluster_stats: {
             collection_types: {
-              filebeat: 1,
+              agent: 1,
             },
             monitoringClusterUuid: 'FlV4ckTxQ0a78hmBkzzc9A',
             pipelines: {
@@ -288,7 +288,7 @@ describe('LogstashAgentMonitoring', () => {
           count: 1,
           cluster_stats: {
             collection_types: {
-              filebeat: 1,
+              agent: 1,
             },
             monitoringClusterUuid: 'FlV4ckTxQ0a78hmBkzzc9A',
             pipelines: {
@@ -491,7 +491,7 @@ describe('LogstashAgentMonitoring', () => {
         '1n1p': {
           cluster_stats: {
             collection_types: {
-              filebeat: 1,
+              agent: 1,
             },
             monitoringClusterUuid: 'monitoringClusterUuid',
             pipelines: {
@@ -523,7 +523,7 @@ describe('LogstashAgentMonitoring', () => {
         '1nmp': {
           cluster_stats: {
             collection_types: {
-              filebeat: 2,
+              agent: 2,
             },
             monitoringClusterUuid: 'monitoringClusterUuid',
             pipelines: {
@@ -547,7 +547,7 @@ describe('LogstashAgentMonitoring', () => {
         mnmp: {
           cluster_stats: {
             collection_types: {
-              filebeat: 3,
+              agent: 3,
             },
             monitoringClusterUuid: 'monitoringClusterUuid',
             pipelines: {

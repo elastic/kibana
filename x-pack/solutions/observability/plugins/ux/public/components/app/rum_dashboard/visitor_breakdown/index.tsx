@@ -8,7 +8,7 @@
 import React, { useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { EuiLoadingChart } from '@elastic/eui';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { UxLocalUIFilterName, uxLocalUIFilterNames } from '../../../../../common/ux_ui_filter';
 import { VisitorBreakdownChart, VisitorBreakdownMetric } from '../charts/visitor_breakdown_chart';
 import { I18LABELS, VisitorBreakdownLabel } from '../translations';
@@ -91,7 +91,7 @@ export function VisitorBreakdown() {
           {!dataView?.id ? (
             <EuiLoadingEmbeddable justifyContent="spaceAround" alignItems={'center'}>
               <EuiFlexItem grow={false}>
-                <EuiLoadingChart size="l" mono />
+                <EuiLoadingChart size="l" />
               </EuiFlexItem>
             </EuiLoadingEmbeddable>
           ) : (
@@ -114,7 +114,7 @@ export function VisitorBreakdown() {
           {!dataView?.id ? (
             <EuiLoadingEmbeddable justifyContent="spaceAround" alignItems={'center'}>
               <EuiFlexItem grow={false}>
-                <EuiLoadingChart size="l" mono />
+                <EuiLoadingChart size="l" />
               </EuiFlexItem>
             </EuiLoadingEmbeddable>
           ) : (

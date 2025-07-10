@@ -10,6 +10,7 @@ import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../common/constants';
 
+// TODO: This should be changed to createContext<DataView | undefined> because this is the type returned by useFetcher, not changing it because not sure of the side effects
 export const SyntheticsDataViewContext = createContext({} as DataView);
 
 export const SyntheticsDataViewContextProvider: FC<

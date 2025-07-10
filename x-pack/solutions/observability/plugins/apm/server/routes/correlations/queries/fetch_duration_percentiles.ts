@@ -23,11 +23,13 @@ export const fetchDurationPercentiles = async ({
   query,
   percents,
   searchMetrics,
+  isOtel = false,
 }: CommonCorrelationsQueryParams & {
   chartType: LatencyDistributionChartType;
   apmEventClient: APMEventClient;
   percents?: number[];
   searchMetrics: boolean;
+  isOtel?: boolean;
 }): Promise<{
   totalDocs: number;
   percentiles: Record<string, number>;
@@ -43,30 +45,30 @@ export const fetchDurationPercentiles = async ({
 
   const params = {
     apm: { events: [getEventType(chartType, searchMetrics)] },
-    body: {
-      track_total_hits: true,
-      query: getCommonCorrelationsQuery({
-        start,
-        end,
-        environment,
-        kuery,
-        query: filteredQuery,
-      }),
-      size: 0,
-      aggs: {
-        duration_percentiles: {
-          percentiles: {
-            hdr: {
-              number_of_significant_value_digits: SIGNIFICANT_VALUE_DIGITS,
-            },
-            field: getDurationField(chartType, searchMetrics),
-            ...(Array.isArray(percents) ? { percents } : {}),
+    track_total_hits: true,
+    query: getCommonCorrelationsQuery({
+      start,
+      end,
+      environment,
+      kuery,
+      query: filteredQuery,
+    }),
+    size: 0,
+    aggs: {
+      duration_percentiles: {
+        percentiles: {
+          hdr: {
+            number_of_significant_value_digits: SIGNIFICANT_VALUE_DIGITS,
           },
+          field: getDurationField(chartType, searchMetrics, isOtel),
+          ...(Array.isArray(percents) ? { percents } : {}),
         },
       },
     },
   };
-  const response = await apmEventClient.search('get_duration_percentiles', params);
+  const response = await apmEventClient.search('get_duration_percentiles', params, {
+    skipProcessorEventFilter: isOtel,
+  });
 
   // return early with no results if the search didn't return any documents
   if (!response.aggregations || response.hits.total.value === 0) {

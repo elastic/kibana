@@ -22,6 +22,7 @@ import type { OpsgenieActionParams } from '../../../../server/connector_types';
 import { RULE_TAGS_TEMPLATE } from '../../../../common/opsgenie';
 import * as i18n from './translations';
 import { EditActionCallback } from '../types';
+import { OptionalFieldLabel } from '../../../common/optional_field_label';
 
 interface TagsProps {
   onChange: EditActionCallback;
@@ -82,7 +83,9 @@ const TagsComponent: React.FC<TagsProps> = ({ onChange, values, executionMode })
       data-test-subj="opsgenie-tags-row"
       fullWidth
       label={i18n.TAGS_FIELD_LABEL}
+      labelAppend={OptionalFieldLabel}
       helpText={i18n.TAGS_HELP}
+      aria-label={i18n.TAGS_FIELD_LABEL}
     >
       <EuiComboBox
         rowHeight={50}

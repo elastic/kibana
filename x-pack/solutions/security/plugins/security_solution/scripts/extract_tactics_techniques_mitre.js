@@ -19,7 +19,7 @@ const OUTPUT_DIRECTORY = resolve('public', 'detections', 'mitre');
 // Every release we should update the version of MITRE ATT&CK content and regenerate the model in our code.
 // This version must correspond to the one used for prebuilt rules in https://github.com/elastic/detection-rules.
 // This version is basically a tag on https://github.com/mitre/cti/tags, or can be a branch name like `master`.
-const MITRE_CONTENT_VERSION = 'ATT&CK-v15.1'; // last updated when preparing for 8.15.0 release
+const MITRE_CONTENT_VERSION = 'ATT&CK-v16.1'; // last updated when preparing for 8.18.1 release
 const MITRE_CONTENT_URL = `https://raw.githubusercontent.com/mitre/cti/${MITRE_CONTENT_VERSION}/enterprise-attack/enterprise-attack.json`;
 
 /**
@@ -80,12 +80,28 @@ const getSubtechniquesOptions = (subtechniques) =>
 }`.replace(/(\r\n|\n|\r)/gm, ' ')
   );
 
+const normalizeThreatReference = (reference) => {
+  try {
+    const parsed = new URL(reference);
+
+    if (!parsed.pathname.endsWith('/')) {
+      // Adds a trailing backslash in urls if it doesn't exist to account for
+      // any inconsistencies between our script generated data and prebuilt rules packages
+      parsed.pathname = `${parsed.pathname}/`;
+    }
+
+    return parsed.toString();
+  } catch {
+    return reference;
+  }
+};
+
 const getIdReference = (references) => {
   const ref = references.find((r) => r.source_name === 'mitre-attack');
   if (ref != null) {
     return {
       id: ref.external_id,
-      reference: ref.url,
+      reference: normalizeThreatReference(ref.url),
     };
   } else {
     return { id: '', reference: '' };

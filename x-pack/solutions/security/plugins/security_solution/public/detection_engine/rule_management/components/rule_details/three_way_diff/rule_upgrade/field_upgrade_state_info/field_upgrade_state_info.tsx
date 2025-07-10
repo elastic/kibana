@@ -23,7 +23,7 @@ export function FieldUpgradeStateInfo({ state }: FieldUpgradeStateInfoProps): JS
     switch (state) {
       case FieldUpgradeStateEnum.NoUpdate:
         return {
-          color: 'success',
+          color: 'default',
           title: i18n.NO_UPDATE,
           description: i18n.NO_UPDATE_DESCRIPTION,
         };

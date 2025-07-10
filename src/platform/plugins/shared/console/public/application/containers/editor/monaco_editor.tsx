@@ -11,16 +11,16 @@ import React, { CSSProperties, useCallback, useMemo, useRef, useState, useEffect
 import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { CodeEditor } from '@kbn/code-editor';
-import { CONSOLE_LANG_ID, CONSOLE_THEME_ID, monaco } from '@kbn/monaco';
+import { CONSOLE_LANG_ID, CONSOLE_THEME_ID, ConsoleLang, ESQLCallbacks, monaco } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
-import { useSetInputEditor } from '../../hooks';
-import { ContextMenu } from './components';
-import {
-  useServicesContext,
-  useEditorReadContext,
-  useRequestActionContext,
-  useEditorActionContext,
-} from '../../contexts';
+import { getESQLSources } from '@kbn/esql-editor/src/helpers';
+import { isEqual } from 'lodash';
+import { ILicense } from '@kbn/licensing-plugin/common/types';
+import { getESQLQueryColumns } from '@kbn/esql-utils';
+import { FieldType } from '@kbn/esql-ast/src/definitions/types';
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
+import { MonacoEditorActionsProvider } from './monaco_editor_actions_provider';
+import type { EditorRequest } from './types';
 import {
   useSetInitialValue,
   useSetupAutocompletePolling,
@@ -28,9 +28,14 @@ import {
   useResizeCheckerUtils,
   useKeyboardCommandsUtils,
 } from './hooks';
-import type { EditorRequest } from './types';
-import { MonacoEditorActionsProvider } from './monaco_editor_actions_provider';
-import { getSuggestionProvider } from './monaco_editor_suggestion_provider';
+import {
+  useServicesContext,
+  useEditorReadContext,
+  useRequestActionContext,
+  useEditorActionContext,
+} from '../../contexts';
+import { ContextMenu } from './components';
+import { useSetInputEditor } from '../../hooks';
 
 export interface EditorProps {
   localStorageValue: string | undefined;
@@ -41,7 +46,16 @@ export interface EditorProps {
 export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps) => {
   const context = useServicesContext();
   const {
-    services: { notifications, settings: settingsService, autocompleteInfo },
+    services: {
+      http,
+      notifications,
+      settings: settingsService,
+      autocompleteInfo,
+      dataViews,
+      data,
+      licensing,
+      application,
+    },
     docLinkVersion,
     config: { isDevMode },
   } = context;
@@ -54,6 +68,7 @@ export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps
   const [editorInstance, setEditorInstace] = useState<
     monaco.editor.IStandaloneCodeEditor | undefined
   >();
+  const [license, setLicense] = useState<ILicense | undefined>(undefined);
 
   const divRef = useRef<HTMLDivElement | null>(null);
   const { setupResizeChecker, destroyResizeChecker } = useResizeCheckerUtils();
@@ -76,12 +91,16 @@ export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps
   }, [docLinkVersion]);
 
   const autoIndentCallback = useCallback(async () => {
-    return actionsProvider.current!.autoIndent();
-  }, []);
+    return actionsProvider.current!.autoIndent(context);
+  }, [context]);
 
   const sendRequestsCallback = useCallback(async () => {
     await actionsProvider.current?.sendRequests(dispatch, context);
   }, [dispatch, context]);
+
+  const isKbnRequestSelectedCallback = useCallback(async () => {
+    return actionsProvider.current!.isKbnRequestSelected();
+  }, []);
 
   const editorDidMountCallback = useCallback(
     (editor: monaco.editor.IStandaloneCodeEditor) => {
@@ -95,11 +114,25 @@ export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps
   );
 
   useEffect(() => {
+    async function fetchLicense() {
+      try {
+        const ls = await licensing?.getLicense();
+        if (!isEqual(license, ls)) {
+          setLicense(ls);
+        }
+      } catch (error) {
+        // failed to fetch
+      }
+    }
+    fetchLicense();
+  }, [licensing, license]);
+
+  useEffect(() => {
     if (settings.isKeyboardShortcutsEnabled && editorInstance) {
       registerKeyboardCommands({
         editor: editorInstance,
         sendRequest: sendRequestsCallback,
-        autoIndent: async () => await actionsProvider.current?.autoIndent(),
+        autoIndent: async () => await actionsProvider.current?.autoIndent(context),
         getDocumentationLink: getDocumenationLink,
         moveToPreviousRequestEdge: async () =>
           await actionsProvider.current?.moveToPreviousRequestEdge(),
@@ -115,6 +148,7 @@ export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps
     registerKeyboardCommands,
     unregisterKeyboardCommands,
     settings.isKeyboardShortcutsEnabled,
+    context,
   ]);
 
   const editorWillUnmountCallback = useCallback(() => {
@@ -122,9 +156,44 @@ export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps
     unregisterKeyboardCommands();
   }, [destroyResizeChecker, unregisterKeyboardCommands]);
 
-  const suggestionProvider = useMemo(() => {
-    return getSuggestionProvider(actionsProvider);
-  }, []);
+  const esqlCallbacks: ESQLCallbacks = useMemo(() => {
+    const callbacks: ESQLCallbacks = {
+      getSources: async () => {
+        const ccrFeature = license?.getFeature('ccr');
+        const areRemoteIndicesAvailable = ccrFeature?.isAvailable ?? false;
+        return await getESQLSources(dataViews, { application, http }, areRemoteIndicesAvailable);
+      },
+      getColumnsFor: async ({ query: queryToExecute }: { query?: string } | undefined = {}) => {
+        if (queryToExecute) {
+          try {
+            const columns = await getESQLQueryColumns({
+              esqlQuery: queryToExecute,
+              search: data.search.search,
+            });
+            return (
+              columns?.map((c) => {
+                return {
+                  name: c.name,
+                  type: c.meta.esType as FieldType,
+                  hasConflict: c.meta.type === KBN_FIELD_TYPES.CONFLICT,
+                };
+              }) || []
+            );
+          } catch (error) {
+            // Handle error
+            return [];
+          }
+        }
+        return [];
+      },
+    };
+    return callbacks;
+  }, [license, dataViews, application, http, data.search.search]);
+
+  const suggestionProvider = useMemo(
+    () => ConsoleLang.getSuggestionProvider?.(esqlCallbacks, actionsProvider),
+    [esqlCallbacks]
+  );
 
   useSetInitialValue({ localStorageValue, setValue, toasts });
 
@@ -195,6 +264,7 @@ export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps
             getDocumentation={getDocumenationLink}
             autoIndent={autoIndentCallback}
             notifications={notifications}
+            getIsKbnRequestSelected={isKbnRequestSelectedCallback}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -219,6 +289,7 @@ export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps
         }}
         suggestionProvider={suggestionProvider}
         enableFindAction={true}
+        enableCustomContextMenu={true}
       />
     </div>
   );

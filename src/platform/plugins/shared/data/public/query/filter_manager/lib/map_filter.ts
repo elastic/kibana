@@ -75,7 +75,7 @@ export function mapFilter(filter: Filter) {
   mappedFilter.meta.params = mapped.params;
   mappedFilter.meta.disabled = Boolean(mappedFilter.meta.disabled);
   mappedFilter.meta.negate = Boolean(mappedFilter.meta.negate);
-  mappedFilter.meta.alias = mappedFilter.meta.alias || null;
+  mappedFilter.meta.alias = mappedFilter.meta.alias;
 
   return mappedFilter;
 }

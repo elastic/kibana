@@ -24,7 +24,7 @@
     "patterns": [
       "_sql/async/{id}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/get-async-sql-search-api.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-sql-get-async",
     "availability": {
       "stack": true,
       "serverless": true

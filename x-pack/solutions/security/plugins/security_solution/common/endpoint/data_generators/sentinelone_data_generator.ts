@@ -18,6 +18,7 @@ import type {
   SentinelOneGetRemoteScriptStatusApiResponse,
   SentinelOneRemoteScriptExecutionStatus,
 } from '@kbn/stack-connectors-plugin/common/sentinelone/types';
+import { buildIndexNameWithNamespace } from '../utils/index_name_utilities';
 import { EndpointActionGenerator } from './endpoint_action_generator';
 import { SENTINEL_ONE_ACTIVITY_INDEX_PATTERN } from '../..';
 import type {
@@ -26,7 +27,9 @@ import type {
   EndpointActionDataParameterTypes,
   EndpointActionResponseDataOutput,
   SentinelOneActivityDataForType80,
+  SentinelOneAgentEsDoc,
 } from '../types';
+import { SENTINEL_ONE_AGENT_INDEX_PATTERN } from '../service/response_actions/sentinel_one';
 
 export class SentinelOneDataGenerator extends EndpointActionGenerator {
   static readonly scriptExecutionStatusValues: Readonly<
@@ -427,6 +430,45 @@ export class SentinelOneDataGenerator extends EndpointActionGenerator {
       data: [merge(scriptExecutionStatus, overrides)],
       pagination: { totalItems: 1, nextCursor: undefined },
     };
+  }
+
+  /**
+   * Generate a SentinelOne Agent record that is ingested into Elasticsearch by the
+   * integration into `logs-sentinel_one.agent-`
+   */
+  generateAgentEsDoc(overrides: DeepPartial<SentinelOneAgentEsDoc> = {}): SentinelOneAgentEsDoc {
+    return merge(
+      {
+        agent: {
+          id: '1-2-3',
+          type: 'filebeat',
+          version: '9.1.0',
+        },
+        sentinel_one: {
+          agent: {
+            agent: {
+              id: 's1-agent-1',
+            },
+          },
+        },
+      },
+      overrides
+    );
+  }
+
+  generateAgentEsSearchHit(
+    overrides: DeepPartial<SentinelOneAgentEsDoc> = {}
+  ): SearchHit<SentinelOneAgentEsDoc> {
+    return this.toEsSearchHit(
+      this.generateAgentEsDoc(overrides),
+      buildIndexNameWithNamespace(SENTINEL_ONE_AGENT_INDEX_PATTERN, 'default')
+    );
+  }
+
+  generateAgentEsSearchResponse(
+    docs: Array<SearchHit<SentinelOneAgentEsDoc>> = [this.generateAgentEsSearchHit()]
+  ): SearchResponse<SentinelOneAgentEsDoc> {
+    return this.toEsSearchResponse<SentinelOneAgentEsDoc>(docs);
   }
 }
 

@@ -62,8 +62,16 @@ export const LimitOptions = ({ limit, onChange }: Props) => {
           })}
           anchorClassName="eui-fullWidth"
         >
-          <button data-test-subj="hostsViewLimitOptionsButton">
-            <EuiIcon type="iInCircle" />
+          <button
+            aria-label={i18n.translate(
+              'xpack.infra.hostsViewPage.hostLimit.infoIconButtonAriaLabel',
+              {
+                defaultMessage: 'Host limit info button',
+              }
+            )}
+            data-test-subj="hostsViewLimitOptionsButton"
+          >
+            <EuiIcon type="info" />
           </button>
         </EuiToolTip>
       </EuiFlexItem>

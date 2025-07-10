@@ -259,10 +259,10 @@
     "title": "dash for tooltip filter action test",
     "version": 1
   },
-  "coreMigrationVersion": "8.0.0",
+  "coreMigrationVersion": "7.10.0",
   "id": "03c7cbf0-8eae-11e9-b674-69d1999628e4",
   "migrationVersion": {
-    "dashboard": "7.14.0"
+    "dashboard": "7.10.0"
   },
   "references": [
     {

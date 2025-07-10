@@ -13,13 +13,18 @@ import {
   useInput,
   useSwitchInput,
   validateInputs,
+  useSecretInput,
+  useRadioInput,
 } from '../../../hooks';
 import type { FleetServerHost } from '../../../types';
 
+import type { FleetServerHostSSLInputsType } from '../../../sections/settings/components/fleet_server_hosts_flyout/use_fleet_server_host_form';
 import {
   validateName,
   validateFleetServerHosts,
 } from '../../../sections/settings/components/fleet_server_hosts_flyout/use_fleet_server_host_form';
+import type { ClientAuth, NewFleetServerHost, ValueOf } from '../../../../../../common/types';
+import { clientAuth } from '../../../../../../common/types';
 
 export interface FleetServerHostForm {
   fleetServerHosts: FleetServerHost[];
@@ -28,11 +33,7 @@ export interface FleetServerHostForm {
   fleetServerHost?: FleetServerHost | null;
   setFleetServerHost: React.Dispatch<React.SetStateAction<FleetServerHost | undefined | null>>;
   error?: string;
-  inputs: {
-    hostUrlsInput: ReturnType<typeof useComboInput>;
-    nameInput: ReturnType<typeof useInput>;
-    isDefaultInput: ReturnType<typeof useSwitchInput>;
-  };
+  inputs: FleetServerHostSSLInputsType;
 }
 
 export const useFleetServerHost = (): FleetServerHostForm => {
@@ -44,16 +45,82 @@ export const useFleetServerHost = (): FleetServerHostForm => {
   const isDefaultInput = useSwitchInput(false, isPreconfigured || fleetServerHost?.is_default);
   const hostUrlsInput = useComboInput('hostUrls', [], validateFleetServerHosts, isPreconfigured);
 
-  const inputs = useMemo(
+  const sslCertificateAuthoritiesInput = useComboInput(
+    'sslCertificateAuthoritiesComboxBox',
+    fleetServerHost?.ssl?.certificate_authorities ?? [],
+    undefined,
+    undefined
+  );
+  const sslCertificateInput = useInput(
+    fleetServerHost?.ssl?.certificate ?? '',
+    () => undefined,
+    undefined
+  );
+
+  const sslEsCertificateAuthoritiesInput = useComboInput(
+    'sslEsCertificateAuthoritiesComboxBox',
+    fleetServerHost?.ssl?.es_certificate_authorities ?? [],
+    undefined,
+    undefined
+  );
+  const sslEsCertificateInput = useInput(
+    fleetServerHost?.ssl?.es_certificate ?? '',
+    () => undefined,
+    undefined
+  );
+
+  const sslClientAuthInput = useRadioInput(
+    fleetServerHost?.ssl?.client_auth ?? clientAuth.None,
+    undefined
+  );
+
+  const sslKeyInput = useInput(fleetServerHost?.ssl?.key ?? '', undefined, undefined);
+  const sslESKeyInput = useInput(fleetServerHost?.ssl?.es_key ?? '', undefined, undefined);
+
+  const sslKeySecretInput = useSecretInput(
+    (fleetServerHost as FleetServerHost)?.secrets?.ssl?.key,
+    undefined,
+    undefined
+  );
+
+  const sslESKeySecretInput = useSecretInput(
+    (fleetServerHost as FleetServerHost)?.secrets?.ssl?.es_key,
+    undefined,
+    undefined
+  );
+
+  const inputs: FleetServerHostSSLInputsType = useMemo(
     () => ({
       nameInput,
       isDefaultInput,
       hostUrlsInput,
+      sslCertificateAuthoritiesInput,
+      sslCertificateInput,
+      sslEsCertificateAuthoritiesInput,
+      sslEsCertificateInput,
+      sslKeyInput,
+      sslESKeyInput,
+      sslKeySecretInput,
+      sslESKeySecretInput,
+      sslClientAuthInput,
     }),
-    [nameInput, isDefaultInput, hostUrlsInput]
+    [
+      nameInput,
+      isDefaultInput,
+      hostUrlsInput,
+      sslCertificateAuthoritiesInput,
+      sslCertificateInput,
+      sslEsCertificateAuthoritiesInput,
+      sslEsCertificateInput,
+      sslKeyInput,
+      sslESKeyInput,
+      sslKeySecretInput,
+      sslESKeySecretInput,
+      sslClientAuthInput,
+    ]
   );
 
-  const validate = useCallback(() => validateInputs(inputs), [inputs]);
+  const validate = useCallback(() => validateInputs({ ...inputs }), [inputs]);
 
   const { data, resendRequest: refreshGetFleetServerHosts } = useGetFleetServerHosts();
 
@@ -76,12 +143,33 @@ export const useFleetServerHost = (): FleetServerHostForm => {
       return;
     }
     setIsFleetServerHostSubmitted(false);
-    const newFleetServerHost = {
-      name: inputs.nameInput.value,
-      host_urls: inputs.hostUrlsInput.value,
-      is_default: inputs.isDefaultInput.value,
+    const newFleetServerHost: Partial<NewFleetServerHost> = {
+      name: nameInput.value,
+      host_urls: hostUrlsInput.value,
+      is_default: isDefaultInput.value,
+      ssl: {
+        certificate: sslCertificateInput.value,
+        key: sslKeyInput.value || undefined,
+        certificate_authorities: sslCertificateAuthoritiesInput.value.filter((val) => val !== ''),
+        es_certificate: sslEsCertificateInput.value,
+        es_key: sslESKeyInput.value || undefined,
+        es_certificate_authorities: sslEsCertificateAuthoritiesInput.value.filter(
+          (val) => val !== ''
+        ),
+        ...(sslClientAuthInput.value !== clientAuth.None && {
+          client_auth: sslClientAuthInput.value as ValueOf<ClientAuth>,
+        }),
+      },
+      ...(((!sslKeyInput.value && sslKeySecretInput.value) ||
+        (!sslESKeyInput.value && sslESKeySecretInput.value)) && {
+        secrets: {
+          ssl: {
+            key: sslKeySecretInput.value || undefined,
+            es_key: sslESKeySecretInput.value || undefined,
+          },
+        },
+      }),
     };
-
     const res = await sendPostFleetServerHost(newFleetServerHost);
     if (res.error) {
       throw res.error;
@@ -97,10 +185,19 @@ export const useFleetServerHost = (): FleetServerHostForm => {
     return res.data.item;
   }, [
     validate,
+    nameInput.value,
+    hostUrlsInput.value,
+    isDefaultInput.value,
+    sslCertificateInput.value,
+    sslKeyInput.value,
+    sslCertificateAuthoritiesInput.value,
+    sslEsCertificateInput.value,
+    sslESKeyInput.value,
+    sslEsCertificateAuthoritiesInput.value,
+    sslClientAuthInput.value,
+    sslKeySecretInput.value,
+    sslESKeySecretInput.value,
     refreshGetFleetServerHosts,
-    inputs.nameInput.value,
-    inputs.hostUrlsInput.value,
-    inputs.isDefaultInput.value,
   ]);
 
   return {

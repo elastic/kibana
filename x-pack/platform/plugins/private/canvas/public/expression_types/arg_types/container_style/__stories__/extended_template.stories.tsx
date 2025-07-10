@@ -6,7 +6,7 @@
  */
 
 import { action } from '@storybook/addon-actions';
-import { storiesOf } from '@storybook/react';
+import type { Meta } from '@storybook/react';
 import React from 'react';
 // @ts-expect-error untyped local
 import { getDefaultWorkpad } from '../../../../state/defaults';
@@ -55,31 +55,48 @@ const getArgValue: <T extends keyof Arguments>(arg: T) => Arguments[T] = (arg) =
   return defaultValues[arg];
 };
 
-storiesOf('arguments/ContainerStyle', module)
-  .addDecorator((story) => (
-    <div style={{ width: '323px', padding: '16px', background: '#fff' }}>{story()}</div>
-  ))
-  .add('extended', () => <Interactive />);
+export default {
+  title: 'arguments/ContainerStyle',
 
-storiesOf('arguments/ContainerStyle/components', module)
-  .addDecorator((story) => (
-    <div style={{ width: '323px', padding: '16px', background: '#fff' }}>{story()}</div>
-  ))
-  .add('appearance form', () => (
+  decorators: [
+    (story) => <div style={{ width: '323px', padding: '16px', background: '#fff' }}>{story()}</div>,
+  ],
+} as Meta;
+
+export const Extended = {
+  render: () => <Interactive />,
+  name: 'extended',
+};
+
+export const _AppearanceForm = {
+  render: () => (
     <AppearanceForm onChange={action('onChange')} padding="4" opacity="1" overflow="visible" />
-  ))
-  .add('border form', () => (
+  ),
+
+  name: 'appearance form',
+};
+
+export const _BorderForm = {
+  render: () => (
     <BorderForm
       onChange={action('onChange')}
       colors={getDefaultWorkpad().colors}
       value="1px dotted #000"
       radius="1"
     />
-  ))
-  .add('extended template', () => (
+  ),
+
+  name: 'border form',
+};
+
+export const _ExtendedTemplate = {
+  render: () => (
     <ExtendedTemplate
       getArgValue={getArgValue}
       setArgValue={action('setArgValue')}
       workpad={getDefaultWorkpad()}
     />
-  ));
+  ),
+
+  name: 'extended template',
+};

@@ -98,6 +98,7 @@ const createRequestHandlerContextMock = () => {
       logger: {
         log: jest.fn(),
         enabled: true,
+        includeSavedObjectNames: false,
       },
     },
   };

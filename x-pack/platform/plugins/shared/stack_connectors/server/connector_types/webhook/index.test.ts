@@ -5,14 +5,21 @@
  * 2.0.
  */
 
-import { ConnectorUsageCollector, Services } from '@kbn/actions-plugin/server/types';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+import type { Services } from '@kbn/actions-plugin/server/types';
+import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import { validateConfig, validateParams, validateSecrets } from '@kbn/actions-plugin/server/lib';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
-import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
-import { Logger } from '@kbn/core/server';
+import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
+import type { Logger } from '@kbn/core/server';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import axios from 'axios';
-import { ConnectorTypeConfigType, ConnectorTypeSecretsType, WebhookConnectorType } from './types';
+import type {
+  ConnectorTypeConfigType,
+  ConnectorTypeSecretsType,
+  WebhookConnectorType,
+} from './types';
 
 import { getConnectorType } from '.';
 
@@ -215,7 +222,7 @@ describe('config validation', () => {
     expect(() => {
       validateConfig(connectorType, config, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
-      '"error validating action type config: error configuring webhook action: unable to parse url: TypeError: Invalid URL: example.com/do-something"'
+      `"error validating action type config: error validation webhook action config: unable to parse url: TypeError: Invalid URL: example.com/do-something"`
     );
   });
 
@@ -288,7 +295,25 @@ describe('config validation', () => {
     expect(() => {
       validateConfig(connectorType, config, { configurationUtilities: configUtils });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type config: error configuring webhook action: target url is not present in allowedHosts"`
+      `"error validating action type config: error validation webhook action config: target url is not present in allowedHosts"`
+    );
+  });
+
+  test('config validation fails when using disabled pfx certType', () => {
+    const config: Record<string, string | boolean> = {
+      url: 'https://mylisteningserver:9200/endpoint',
+      method: WebhookMethods.POST,
+      authType: AuthType.SSL,
+      certType: SSLCertType.PFX,
+      hasAuth: true,
+    };
+    configurationUtilities.getWebhookSettings = jest.fn(() => ({
+      ssl: { pfx: { enabled: false } },
+    }));
+    expect(() => {
+      validateConfig(connectorType, config, { configurationUtilities });
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action type config: error validation webhook action config: certType \\"ssl-pfx\\" is disabled"`
     );
   });
 });

@@ -7,7 +7,7 @@
   "include": [
     "**/*",
     "../../../typings/**/*",
-    "../../../packages/kbn-test/types/ftr_globals/**/*",
+    "../../../src/platform/packages/shared/kbn-test/types/ftr_globals/**/*",
   ],
   "exclude": [
     "target/**/*"
@@ -49,9 +49,15 @@
     "@kbn/elastic-assistant-common",
     "@kbn/search-types",
     "@kbn/security-plugin",
-    "@kbn/ftr-common-functional-ui-services",
     "@kbn/spaces-plugin",
     "@kbn/elastic-assistant-plugin",
     "@kbn/test-suites-src",
+    "@kbn/openapi-common",
+    "@kbn/scout-info",
+    "@kbn/security-plugin-types-common",
+    "@kbn/babel-register",
+    "@kbn/config-schema",
+    "@kbn/test-suites-xpack-platform",
+    "@kbn/response-ops-rule-params",
   ]
 }

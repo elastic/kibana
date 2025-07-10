@@ -33,6 +33,10 @@ import { isResponseError } from '@kbn/es-errors';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 
+import type { Logger } from '@kbn/logging';
+
+import { catchAndSetErrorStackTrace } from '../../../errors/utils';
+
 import type { AgentPolicySOAttributes } from '../../../types';
 import { UninstallTokenError } from '../../../../common/errors';
 import type { GetUninstallTokensMetadataResponse } from '../../../../common/types/rest_spec/uninstall_token';
@@ -190,6 +194,10 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
     }
   }
 
+  protected getLogger(...childContextPaths: string[]): Logger {
+    return appContextService.getLogger().get('UninstallTokenService', ...childContextPaths);
+  }
+
   public scoped(spaceId?: string) {
     return new UninstallTokenService(
       this.esoClient,
@@ -231,6 +239,11 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
       : undefined;
   }
 
+  private prepareExactPolicyIdQuery(policyId: string | undefined): string | undefined {
+    if (!policyId) return undefined;
+    // Escape special characters but don't add wildcards for exact matching
+    return this.prepareSearchString(policyId, /[@#&*+()\[\]{}|.?~"<]/, '');
+  }
   private prepareRegexpQuery(str: string | undefined): string | undefined {
     return this.prepareSearchString(str, /[@#&*+()[\]{}|.?~"<]/, '.*');
   }
@@ -240,14 +253,20 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
   }
 
   private async searchPoliciesByName(policyNameSearchString: string): Promise<string[]> {
+    const logger = this.getLogger('searchPoliciesByName');
+
+    logger.debug(`retrieving policies for [${policyNameSearchString}]`);
+
     const agentPolicySavedObjectType = await getAgentPolicySavedObjectType();
 
     const policyNameFilter = `${agentPolicySavedObjectType}.attributes.name:${policyNameSearchString}`;
 
-    const agentPoliciesSOs = await this.soClient.find<AgentPolicySOAttributes>({
-      type: agentPolicySavedObjectType,
-      filter: policyNameFilter,
-    });
+    const agentPoliciesSOs = await this.soClient
+      .find<AgentPolicySOAttributes>({
+        type: agentPolicySavedObjectType,
+        filter: policyNameFilter,
+      })
+      .catch(catchAndSetErrorStackTrace);
 
     return agentPoliciesSOs.saved_objects.map((attr) => attr.id);
   }
@@ -259,7 +278,16 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
     perPage = 20,
     excludedPolicyIds?: string[]
   ): Promise<GetUninstallTokensMetadataResponse> {
-    const policyIdFilter = this.prepareRegexpQuery(policyIdSearchTerm);
+    const logger = this.getLogger('getTokenMetadata');
+
+    logger.debug(
+      `getting token metadata with policyIdSearchTerm [${policyIdSearchTerm}] and poliyNameSearchTerm [${policyNameSearchTerm}] and excluded policy ids [${excludedPolicyIds}]`
+    );
+
+    // If theres a search term and not just a policy id, then we use partial, otherwise, use exact matching
+    const policyIdFilter = policyNameSearchTerm
+      ? this.prepareRegexpQuery(policyIdSearchTerm)
+      : this.prepareExactPolicyIdQuery(policyIdSearchTerm);
 
     let policyIdsFoundByName: string[] | undefined;
     const policyNameSearchString = this.prepareQueryStringQuery(policyNameSearchTerm);
@@ -305,14 +333,33 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
   }
 
   private async getPolicyIdNameDictionary(policyIds: string[]): Promise<Record<string, string>> {
+    const logger = this.getLogger('getPolicyIdNameDictionary');
+
+    logger.debug(() => `building policy id name dictionary for [${policyIds.join('|')}]`);
+
     const agentPolicies = await agentPolicyService.getByIds(this.soClient, policyIds, {
       ignoreMissing: true,
     });
 
-    return agentPolicies.reduce((dict, policy) => {
-      dict[policy.id] = policy.name;
+    const warnings: string[] = [];
+
+    const response = policyIds.reduce((dict, policyId) => {
+      const policy = agentPolicies.find((agentPolicy) => agentPolicy.id === policyId);
+
+      if (policy) {
+        dict[policyId] = policy.name;
+      } else {
+        warnings.push(`Policy id [${policyId}] was not found!`);
+      }
+
       return dict;
     }, {} as Record<string, string>);
+
+    if (warnings.length > 0) {
+      this.getLogger('getPolicyIdNameDictionary').warn(warnings.join('\n'));
+    }
+
+    return response;
   }
 
   private async getDecryptedTokensForPolicyIds(policyIds: string[]): Promise<UninstallToken[]> {
@@ -431,6 +478,10 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
     include?: AggregationsTermsInclude,
     exclude?: AggregationsTermsExclude
   ): Promise<Array<SearchHit<any>>> {
+    const logger = this.getLogger('getTokenObjectsByPolicyIdFilter');
+
+    logger.debug(`Retrieving tokens objects using Include [${include}] and exclude [${exclude}]`);
+
     const bucketSize = 10000;
 
     const useSpaceAwareness = await isSpaceAwarenessEnabled();
@@ -465,6 +516,8 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
       },
     };
 
+    logger.debug(() => `Creating SO point in time finder using query:\n${JSON.stringify(query)}`);
+
     // encrypted saved objects doesn't decrypt aggregation values so we get
     // the ids first from saved objects to use with encrypted saved objects
     const idFinder = this.soClient.createPointInTimeFinder<
@@ -490,6 +543,9 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
     // sorting and paginating buckets is done here instead of ES,
     // because SO query doesn't support `bucket_sort`
     aggResults.sort((a, b) => getCreatedAt(b) - getCreatedAt(a));
+
+    logger.debug(`Returning [${aggResults.length}] aggregated results`);
+
     return aggResults.map((bucket) => bucket.latest.hits.hits[0]);
   }
 
@@ -520,9 +576,7 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
     policyIds: string[],
     force: boolean = false
   ): Promise<void> {
-    const { agentTamperProtectionEnabled } = appContextService.getExperimentalFeatures();
-
-    if (!agentTamperProtectionEnabled || !policyIds.length) {
+    if (!policyIds.length) {
       return;
     }
 

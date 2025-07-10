@@ -49,7 +49,7 @@ export async function enrollAgent(
           '-p',
           '8220:8220',
           '--rm',
-          `docker.elastic.co/beats/elastic-agent:${version}`,
+          `docker.elastic.co/elastic-agent/elastic-agent:${version}`,
         ],
         {
           shell: true,
@@ -77,7 +77,7 @@ export async function enrollAgent(
       '-e',
       'FLEET_INSECURE=1',
       '--rm',
-      `docker.elastic.co/beats/elastic-agent-complete:${version}`,
+      `docker.elastic.co/elastic-agent/elastic-agent-complete:${version}`,
     ],
     {
       stdio: 'inherit',

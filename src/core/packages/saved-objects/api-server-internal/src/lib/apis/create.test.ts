@@ -16,7 +16,7 @@ import {
   mockGetSearchDsl,
 } from '../repository.test.mock';
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 
 import type { SavedObjectsCreateOptions } from '@kbn/core-saved-objects-api-server';
 import {
@@ -234,8 +234,8 @@ describe('#create', () => {
       it(`defaults to empty references array`, async () => {
         await createSuccess(type, attributes, { id });
         expect(
-          (client.create.mock.calls[0][0] as estypes.CreateRequest<SavedObjectsRawDocSource>).body!
-            .references
+          (client.create.mock.calls[0][0] as estypes.CreateRequest<SavedObjectsRawDocSource>)
+            .document!.references
         ).toEqual([]);
       });
 
@@ -244,7 +244,7 @@ describe('#create', () => {
           await createSuccess(type, attributes, { id, references });
           expect(
             (client.create.mock.calls[0][0] as estypes.CreateRequest<SavedObjectsRawDocSource>)
-              .body!.references
+              .document!.references
           ).toEqual(references);
           client.create.mockClear();
         };
@@ -259,7 +259,7 @@ describe('#create', () => {
           await createSuccess(type, attributes, { id, references });
           expect(
             (client.create.mock.calls[0][0] as estypes.CreateRequest<SavedObjectsRawDocSource>)
-              .body!.references
+              .document!.references
           ).not.toBeDefined();
           client.create.mockClear();
         };
@@ -286,9 +286,7 @@ describe('#create', () => {
           it(`${objType} defaults to no originId`, async () => {
             await createSuccess(objType, attributes, { id });
             expect(client.create).toHaveBeenCalledWith(
-              expect.objectContaining({
-                body: expect.not.objectContaining({ originId: expect.anything() }),
-              }),
+              expect.not.objectContaining({ originId: expect.anything() }),
               expect.anything()
             );
           });
@@ -310,7 +308,7 @@ describe('#create', () => {
               await createSuccess(objType, attributes, { id, originId: 'some-originId' });
               expect(client.create).toHaveBeenCalledWith(
                 expect.objectContaining({
-                  body: expect.objectContaining({ originId: 'some-originId' }),
+                  document: expect.objectContaining({ originId: 'some-originId' }),
                 }),
                 expect.anything()
               );
@@ -321,7 +319,7 @@ describe('#create', () => {
               await createSuccess(objType, attributes, { id, originId: undefined });
               expect(client.create).toHaveBeenCalledWith(
                 expect.objectContaining({
-                  body: expect.not.objectContaining({ originId: expect.anything() }),
+                  document: expect.not.objectContaining({ originId: expect.anything() }),
                 }),
                 expect.anything()
               );
@@ -331,7 +329,7 @@ describe('#create', () => {
               await createSuccess(objType, attributes, { id });
               expect(client.create).toHaveBeenCalledWith(
                 expect.objectContaining({
-                  body: expect.objectContaining({ originId: 'existing-originId' }),
+                  document: expect.objectContaining({ originId: 'existing-originId' }),
                 }),
                 expect.anything()
               );
@@ -384,33 +382,36 @@ describe('#create', () => {
       });
 
       it(`prepends namespace to the id and adds namespace to the body when providing namespace for single-namespace type`, async () => {
-        await createSuccess(type, attributes, { id, namespace });
+        const res = await createSuccess(type, attributes, { id, namespace });
+        expect(res.namespaces).toEqual([namespace]);
         expect(client.create).toHaveBeenCalledWith(
           expect.objectContaining({
             id: `${namespace}:${type}:${id}`,
-            body: expect.objectContaining({ namespace }),
+            document: expect.objectContaining({ namespace }),
           }),
           expect.anything()
         );
       });
 
       it(`doesn't prepend namespace to the id or add namespace to the body when providing no namespace for single-namespace type`, async () => {
-        await createSuccess(type, attributes, { id });
+        const res = await createSuccess(type, attributes, { id });
+        expect(res.namespaces).toEqual(['default']);
         expect(client.create).toHaveBeenCalledWith(
           expect.objectContaining({
             id: `${type}:${id}`,
-            body: expect.not.objectContaining({ namespace: expect.anything() }),
+            document: expect.not.objectContaining({ namespace: expect.anything() }),
           }),
           expect.anything()
         );
       });
 
       it(`normalizes options.namespace from 'default' to undefined`, async () => {
-        await createSuccess(type, attributes, { id, namespace: 'default' });
+        const res = await createSuccess(type, attributes, { id, namespace: 'default' });
+        expect(res.namespaces).toEqual(['default']);
         expect(client.create).toHaveBeenCalledWith(
           expect.objectContaining({
             id: `${type}:${id}`,
-            body: expect.not.objectContaining({ namespace: expect.anything() }),
+            document: expect.not.objectContaining({ namespace: expect.anything() }),
           }),
           expect.anything()
         );
@@ -457,7 +458,7 @@ describe('#create', () => {
         expect(client.create).toHaveBeenCalledWith(
           expect.objectContaining({
             id: `${MULTI_NAMESPACE_TYPE}:${id}`,
-            body: expect.objectContaining({ namespaces: [namespace] }),
+            document: expect.objectContaining({ namespaces: [namespace] }),
           }),
           expect.anything()
         );
@@ -465,7 +466,7 @@ describe('#create', () => {
         expect(client.index).toHaveBeenCalledWith(
           expect.objectContaining({
             id: `${MULTI_NAMESPACE_ISOLATED_TYPE}:${id}`,
-            body: expect.objectContaining({ namespaces: ['*'] }),
+            document: expect.objectContaining({ namespaces: ['*'] }),
           }),
           expect.anything()
         );
@@ -524,7 +525,7 @@ describe('#create', () => {
           1,
           expect.objectContaining({
             id: `${ns2}:dashboard:${id}`,
-            body: expect.objectContaining({ namespace: ns2 }),
+            document: expect.objectContaining({ namespace: ns2 }),
           }),
           expect.anything()
         );
@@ -532,7 +533,7 @@ describe('#create', () => {
           2,
           expect.objectContaining({
             id: `${MULTI_NAMESPACE_TYPE}:${id}`,
-            body: expect.objectContaining({ namespaces: [ns2, ns3] }),
+            document: expect.objectContaining({ namespaces: [ns2, ns3] }),
           }),
           expect.anything()
         );
@@ -540,7 +541,7 @@ describe('#create', () => {
         expect(client.index).toHaveBeenCalledWith(
           expect.objectContaining({
             id: `${MULTI_NAMESPACE_ISOLATED_TYPE}:${id}`,
-            body: expect.objectContaining({ namespaces: [ns2] }),
+            document: expect.objectContaining({ namespaces: [ns2] }),
           }),
           expect.anything()
         );
@@ -558,7 +559,7 @@ describe('#create', () => {
           1,
           expect.objectContaining({
             id: `dashboard:${id}`,
-            body: expect.not.objectContaining({ namespace: 'default' }),
+            document: expect.not.objectContaining({ namespace: 'default' }),
           }),
           expect.anything()
         );
@@ -569,7 +570,7 @@ describe('#create', () => {
         expect(client.create).toHaveBeenCalledWith(
           expect.objectContaining({
             id: `${NAMESPACE_AGNOSTIC_TYPE}:${id}`,
-            body: expect.not.objectContaining({
+            document: expect.not.objectContaining({
               namespace: expect.anything(),
               namespaces: expect.anything(),
             }),

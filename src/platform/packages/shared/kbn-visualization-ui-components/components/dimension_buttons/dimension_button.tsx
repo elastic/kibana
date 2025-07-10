@@ -68,16 +68,19 @@ function DimensionButtonImpl({
         gap: ${euiTheme.size.s};
         min-height: ${euiTheme.size.xl};
         padding: ${euiTheme.size.xs} ${euiTheme.size.s};
-        background-color: ${euiTheme.colors.backgroundBaseSubdued};
+        background-color: ${euiTheme.colors.backgroundBaseHighlighted};
       `}
     >
       <EuiFlexGroup direction="row" alignItems="center" gutterSize="none" responsive={false}>
         <EuiFlexItem>
           <EuiToolTip content={message?.content} position="left">
             <EuiLink
-              className="lnsLayerPanel__dimensionLink"
               css={css`
                 width: 100%;
+                &:focus {
+                  background-color: transparent;
+                  text-decoration-thickness: ${euiTheme.border.thin} !important;
+                }
                 &:hover {
                   text-decoration: none;
                 }

@@ -110,7 +110,7 @@
             "section": "def-common.Type",
             "text": "Type"
           },
-          "<Record<string, Readonly<{} & { kibana: Readonly<{ base?: string[] | undefined; feature?: Record<string, string[]> | undefined; } & { spaces: string[] | \"*\"[]; }>[]; elasticsearch: Readonly<{ cluster?: string[] | undefined; indices?: Readonly<{ query?: string | undefined; field_security?: Record<\"except\" | \"grant\", string[]> | undefined; allow_restricted_indices?: boolean | undefined; } & { names: string[]; privileges: string[]; }>[] | undefined; remote_cluster?: Readonly<{} & { privileges: string[]; clusters: string[]; }>[] | undefined; remote_indices?: Readonly<{ query?: string | undefined; field_security?: Record<\"except\" | \"grant\", string[]> | undefined; allow_restricted_indices?: boolean | undefined; } & { names: string[]; privileges: string[]; clusters: string[]; }>[] | undefined; run_as?: string[] | undefined; } & {}>; }>>>; }>"
+          "<Record<string, Readonly<{} & { kibana: Readonly<{ base?: string[] | undefined; feature?: Record<string, string[]> | undefined; } & { spaces: string[] | \"*\"[]; }>[]; elasticsearch: Readonly<{ cluster?: string[] | undefined; indices?: Readonly<{ query?: string | undefined; field_security?: Record<\"grant\" | \"except\", string[]> | undefined; allow_restricted_indices?: boolean | undefined; } & { names: string[]; privileges: string[]; }>[] | undefined; remote_cluster?: Readonly<{} & { privileges: string[]; clusters: string[]; }>[] | undefined; remote_indices?: Readonly<{ query?: string | undefined; field_security?: Record<\"grant\" | \"except\", string[]> | undefined; allow_restricted_indices?: boolean | undefined; } & { names: string[]; privileges: string[]; clusters: string[]; }>[] | undefined; run_as?: string[] | undefined; } & {}>; }>>>; }>"
         ],
         "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authentication/api_keys/api_keys.ts",
         "deprecated": false,
@@ -191,7 +191,7 @@
             "section": "def-common.Type",
             "text": "Type"
           },
-          "<Record<string, Readonly<{} & { kibana: Readonly<{ base?: string[] | undefined; feature?: Record<string, string[]> | undefined; } & { spaces: string[] | \"*\"[]; }>[]; elasticsearch: Readonly<{ cluster?: string[] | undefined; indices?: Readonly<{ query?: string | undefined; field_security?: Record<\"except\" | \"grant\", string[]> | undefined; allow_restricted_indices?: boolean | undefined; } & { names: string[]; privileges: string[]; }>[] | undefined; remote_cluster?: Readonly<{} & { privileges: string[]; clusters: string[]; }>[] | undefined; remote_indices?: Readonly<{ query?: string | undefined; field_security?: Record<\"except\" | \"grant\", string[]> | undefined; allow_restricted_indices?: boolean | undefined; } & { names: string[]; privileges: string[]; clusters: string[]; }>[] | undefined; run_as?: string[] | undefined; } & {}>; }>>>; }>"
+          "<Record<string, Readonly<{} & { kibana: Readonly<{ base?: string[] | undefined; feature?: Record<string, string[]> | undefined; } & { spaces: string[] | \"*\"[]; }>[]; elasticsearch: Readonly<{ cluster?: string[] | undefined; indices?: Readonly<{ query?: string | undefined; field_security?: Record<\"grant\" | \"except\", string[]> | undefined; allow_restricted_indices?: boolean | undefined; } & { names: string[]; privileges: string[]; }>[] | undefined; remote_cluster?: Readonly<{} & { privileges: string[]; clusters: string[]; }>[] | undefined; remote_indices?: Readonly<{ query?: string | undefined; field_security?: Record<\"grant\" | \"except\", string[]> | undefined; allow_restricted_indices?: boolean | undefined; } & { names: string[]; privileges: string[]; clusters: string[]; }>[] | undefined; run_as?: string[] | undefined; } & {}>; }>>>; }>"
         ],
         "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authentication/api_keys/api_keys.ts",
         "deprecated": false,
@@ -529,13 +529,7 @@
             "description": [],
             "signature": [
               "{ (operation: ",
-              {
-                "pluginId": "@kbn/security-plugin-types-server",
-                "scope": "server",
-                "docId": "kibKbnSecurityPluginTypesServerPluginApi",
-                "section": "def-server.ApiOperation",
-                "text": "ApiOperation"
-              },
+              "ApiOperation",
               ", subject: string): string; (subject: string): string; }"
             ],
             "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/actions/api.ts",
@@ -550,13 +544,7 @@
                 "label": "operation",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/security-plugin-types-server",
-                    "scope": "server",
-                    "docId": "kibKbnSecurityPluginTypesServerPluginApi",
-                    "section": "def-server.ApiOperation",
-                    "text": "ApiOperation"
-                  }
+                  "ApiOperation"
                 ],
                 "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/actions/api.ts",
                 "deprecated": false,
@@ -592,23 +580,13 @@
             "description": [],
             "signature": [
               "{ (operation: ",
-              {
-                "pluginId": "@kbn/security-plugin-types-server",
-                "scope": "server",
-                "docId": "kibKbnSecurityPluginTypesServerPluginApi",
-                "section": "def-server.ApiOperation",
-                "text": "ApiOperation"
-              },
+              "ApiOperation",
               ", subject: string): string; (subject: string): string; }"
             ],
             "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/actions/api.ts",
             "deprecated": true,
             "trackAdoption": false,
             "references": [
-              {
-                "plugin": "security",
-                "path": "x-pack/platform/plugins/shared/security/server/authorization/api_authorization.ts"
-              },
               {
                 "plugin": "security",
                 "path": "x-pack/platform/plugins/shared/security/server/authorization/api_authorization.ts"
@@ -667,7 +645,19 @@
               },
               {
                 "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/routes/epm/kibana_assets_handler.ts"
+              },
+              {
+                "plugin": "fleet",
                 "path": "x-pack/platform/plugins/shared/fleet/server/routes/app/index.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/lib/has_required_privilege_granted_in_all_spaces.ts"
+              },
+              {
+                "plugin": "reporting",
+                "path": "x-pack/platform/plugins/private/reporting/server/core.ts"
               },
               {
                 "plugin": "profiling",
@@ -728,6 +718,14 @@
               {
                 "plugin": "@kbn/security-authorization-core",
                 "path": "x-pack/platform/packages/private/security/authorization_core/src/actions/api.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
@@ -2298,6 +2296,19 @@
             "path": "src/core/packages/security/server/src/audit_logging/audit_logger.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-server",
+            "id": "def-server.AuditLogger.includeSavedObjectNames",
+            "type": "boolean",
+            "tags": [],
+            "label": "includeSavedObjectNames",
+            "description": [
+              "\nIndicates whether to include saved objects names in audit log"
+            ],
+            "path": "src/core/packages/security/server/src/audit_logging/audit_logger.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3651,7 +3662,7 @@
             "label": "indices",
             "description": [],
             "signature": [
-              "{ names: string[]; field_security?: Record<\"except\" | \"grant\", string[]> | undefined; privileges: string[]; query?: string | undefined; allow_restricted_indices?: boolean | undefined; }[] | undefined"
+              "{ names: string[]; field_security?: Record<\"grant\" | \"except\", string[]> | undefined; privileges: string[]; query?: string | undefined; allow_restricted_indices?: boolean | undefined; }[] | undefined"
             ],
             "path": "src/core/packages/security/server/src/roles/schema.ts",
             "deprecated": false,
@@ -3665,7 +3676,7 @@
             "label": "remote_indices",
             "description": [],
             "signature": [
-              "{ clusters: string[]; names: string[]; field_security?: Record<\"except\" | \"grant\", string[]> | undefined; privileges: string[]; query?: string | undefined; allow_restricted_indices?: boolean | undefined; }[] | undefined"
+              "{ clusters: string[]; names: string[]; field_security?: Record<\"grant\" | \"except\", string[]> | undefined; privileges: string[]; query?: string | undefined; allow_restricted_indices?: boolean | undefined; }[] | undefined"
             ],
             "path": "src/core/packages/security/server/src/roles/schema.ts",
             "deprecated": false,
@@ -3923,7 +3934,7 @@
               "\nDetails about these errors. This field is not present in the response when error_count is 0."
             ],
             "signature": [
-              "{ type?: string | undefined; reason?: string | undefined; caused_by?: { type?: string | undefined; reason?: string | undefined; } | undefined; }[] | undefined"
+              "{ type?: string | undefined; reason?: string | null | undefined; caused_by?: { type?: string | undefined; reason?: string | null | undefined; } | undefined; }[] | undefined"
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
             "deprecated": false,
@@ -4254,6 +4265,14 @@
                 "path": "src/platform/plugins/shared/files/server/file_service/file_service_factory.ts"
               },
               {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/audit_logging.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/audit_logging.ts"
+              },
+              {
                 "plugin": "actions",
                 "path": "x-pack/platform/plugins/shared/actions/server/plugin.ts"
               },
@@ -4264,6 +4283,10 @@
               {
                 "plugin": "alerting",
                 "path": "x-pack/platform/plugins/shared/alerting/server/rules_client_factory.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/plugin.ts"
               },
               {
                 "plugin": "ruleRegistry",
@@ -4278,16 +4301,16 @@
                 "path": "x-pack/platform/plugins/shared/cases/server/client/factory.ts"
               },
               {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/services/audit_logging.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/services/audit_logging.ts"
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/request_context_factory.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/request_context_factory.ts"
+                "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -4366,6 +4389,22 @@
                 "path": "x-pack/platform/plugins/shared/security/server/plugin.ts"
               },
               {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/api_keys/security.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/api_keys/transform_api_keys.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/setup/fleet_server_policies_enrollment_keys.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/routes/setup/handlers.ts"
+              },
+              {
                 "plugin": "alerting",
                 "path": "x-pack/platform/plugins/shared/alerting/server/rules_client_factory.ts"
               },
@@ -4383,7 +4422,7 @@
               },
               {
                 "plugin": "observabilityAIAssistant",
-                "path": "x-pack/platform/plugins/shared/observability_solution/observability_ai_assistant/server/service/index.ts"
+                "path": "x-pack/platform/plugins/shared/observability_ai_assistant/server/service/index.ts"
               },
               {
                 "plugin": "transform",
@@ -4400,22 +4439,6 @@
               {
                 "plugin": "upgradeAssistant",
                 "path": "x-pack/platform/plugins/private/upgrade_assistant/server/lib/reindexing/credential_store.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/services/api_keys/security.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/services/api_keys/transform_api_keys.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/services/setup/fleet_server_policies_enrollment_keys.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/routes/setup/handlers.ts"
               },
               {
                 "plugin": "entityManager",
@@ -4452,6 +4475,22 @@
               {
                 "plugin": "fleet",
                 "path": "x-pack/platform/plugins/shared/fleet/server/routes/setup/handlers.test.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/alerting_api_integration/common/plugins/alerts/server/routes.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/alerting_api_integration/common/plugins/alerts/server/routes.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/alerting_api_integration/common/plugins/alerts/server/routes.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/privilege_monitoring/auth/api_key.ts"
               },
               {
                 "plugin": "synthetics",
@@ -4612,9 +4651,7 @@
             "label": "get",
             "description": [],
             "signature": [
-              "(featureId: keyof ",
-              "Capabilities",
-              ", ...uiCapabilityParts: string[]) => string"
+              "(featureId: string | number, ...uiCapabilityParts: string[]) => string"
             ],
             "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/actions/ui.ts",
             "deprecated": false,
@@ -4628,8 +4665,7 @@
                 "label": "featureId",
                 "description": [],
                 "signature": [
-                  "keyof ",
-                  "Capabilities"
+                  "string | number"
                 ],
                 "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/actions/ui.ts",
                 "deprecated": false,
@@ -5186,20 +5222,7 @@
         "initialIsOpen": false
       }
     ],
-    "enums": [
-      {
-        "parentPluginId": "@kbn/security-plugin-types-server",
-        "id": "def-server.ApiOperation",
-        "type": "Enum",
-        "tags": [],
-        "label": "ApiOperation",
-        "description": [],
-        "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/actions/api.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      }
-    ],
+    "enums": [],
     "misc": [
       {
         "parentPluginId": "@kbn/security-plugin-types-server",
@@ -5725,7 +5748,7 @@
             "section": "def-common.Type",
             "text": "Type"
           },
-          "<Readonly<{ query?: string | undefined; field_security?: Record<\"except\" | \"grant\", string[]> | undefined; allow_restricted_indices?: boolean | undefined; } & { names: string[]; privileges: string[]; }>[] | undefined>; remote_indices: ",
+          "<Readonly<{ query?: string | undefined; field_security?: Record<\"grant\" | \"except\", string[]> | undefined; allow_restricted_indices?: boolean | undefined; } & { names: string[]; privileges: string[]; }>[] | undefined>; remote_indices: ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "common",
@@ -5733,7 +5756,7 @@
             "section": "def-common.Type",
             "text": "Type"
           },
-          "<Readonly<{ query?: string | undefined; field_security?: Record<\"except\" | \"grant\", string[]> | undefined; allow_restricted_indices?: boolean | undefined; } & { names: string[]; privileges: string[]; clusters: string[]; }>[] | undefined>; run_as: ",
+          "<Readonly<{ query?: string | undefined; field_security?: Record<\"grant\" | \"except\", string[]> | undefined; allow_restricted_indices?: boolean | undefined; } & { names: string[]; privileges: string[]; clusters: string[]; }>[] | undefined>; run_as: ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "common",

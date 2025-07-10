@@ -758,276 +758,6 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-server-internal",
-        "id": "def-server.registerLegacyExportRoute",
-        "type": "Function",
-        "tags": [],
-        "label": "registerLegacyExportRoute",
-        "description": [],
-        "signature": [
-          "(router: ",
-          "InternalSavedObjectRouter",
-          ", { kibanaVersion, coreUsageData, logger, access, legacyDeprecationInfo, }: { kibanaVersion: string; coreUsageData: ",
-          "InternalCoreUsageDataSetup",
-          "; logger: ",
-          {
-            "pluginId": "@kbn/logging",
-            "scope": "common",
-            "docId": "kibKbnLoggingPluginApi",
-            "section": "def-common.Logger",
-            "text": "Logger"
-          },
-          "; access: ",
-          "RouteAccess",
-          "; legacyDeprecationInfo: ",
-          "RouteDeprecationInfo",
-          "; }) => void"
-        ],
-        "path": "src/core/packages/saved-objects/server-internal/src/routes/legacy_import_export/export.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/core-saved-objects-server-internal",
-            "id": "def-server.registerLegacyExportRoute.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "router",
-            "description": [],
-            "signature": [
-              "InternalSavedObjectRouter"
-            ],
-            "path": "src/core/packages/saved-objects/server-internal/src/routes/legacy_import_export/export.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/core-saved-objects-server-internal",
-            "id": "def-server.registerLegacyExportRoute.$2",
-            "type": "Object",
-            "tags": [],
-            "label": "{\n    kibanaVersion,\n    coreUsageData,\n    logger,\n    access,\n    legacyDeprecationInfo,\n  }",
-            "description": [],
-            "path": "src/core/packages/saved-objects/server-internal/src/routes/legacy_import_export/export.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/core-saved-objects-server-internal",
-                "id": "def-server.registerLegacyExportRoute.$2.kibanaVersion",
-                "type": "string",
-                "tags": [],
-                "label": "kibanaVersion",
-                "description": [],
-                "path": "src/core/packages/saved-objects/server-internal/src/routes/legacy_import_export/export.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/core-saved-objects-server-internal",
-                "id": "def-server.registerLegacyExportRoute.$2.coreUsageData",
-                "type": "Object",
-                "tags": [],
-                "label": "coreUsageData",
-                "description": [],
-                "signature": [
-                  "InternalCoreUsageDataSetup"
-                ],
-                "path": "src/core/packages/saved-objects/server-internal/src/routes/legacy_import_export/export.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/core-saved-objects-server-internal",
-                "id": "def-server.registerLegacyExportRoute.$2.logger",
-                "type": "Object",
-                "tags": [],
-                "label": "logger",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/logging",
-                    "scope": "common",
-                    "docId": "kibKbnLoggingPluginApi",
-                    "section": "def-common.Logger",
-                    "text": "Logger"
-                  }
-                ],
-                "path": "src/core/packages/saved-objects/server-internal/src/routes/legacy_import_export/export.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/core-saved-objects-server-internal",
-                "id": "def-server.registerLegacyExportRoute.$2.access",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "access",
-                "description": [],
-                "signature": [
-                  "\"internal\" | \"public\""
-                ],
-                "path": "src/core/packages/saved-objects/server-internal/src/routes/legacy_import_export/export.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/core-saved-objects-server-internal",
-                "id": "def-server.registerLegacyExportRoute.$2.legacyDeprecationInfo",
-                "type": "Object",
-                "tags": [],
-                "label": "legacyDeprecationInfo",
-                "description": [],
-                "signature": [
-                  "RouteDeprecationInfo"
-                ],
-                "path": "src/core/packages/saved-objects/server-internal/src/routes/legacy_import_export/export.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/core-saved-objects-server-internal",
-        "id": "def-server.registerLegacyImportRoute",
-        "type": "Function",
-        "tags": [],
-        "label": "registerLegacyImportRoute",
-        "description": [],
-        "signature": [
-          "(router: ",
-          "InternalSavedObjectRouter",
-          ", { maxImportPayloadBytes, coreUsageData, logger, access, legacyDeprecationInfo, }: { maxImportPayloadBytes: number; coreUsageData: ",
-          "InternalCoreUsageDataSetup",
-          "; logger: ",
-          {
-            "pluginId": "@kbn/logging",
-            "scope": "common",
-            "docId": "kibKbnLoggingPluginApi",
-            "section": "def-common.Logger",
-            "text": "Logger"
-          },
-          "; access: ",
-          "RouteAccess",
-          "; legacyDeprecationInfo: ",
-          "RouteDeprecationInfo",
-          "; }) => void"
-        ],
-        "path": "src/core/packages/saved-objects/server-internal/src/routes/legacy_import_export/import.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/core-saved-objects-server-internal",
-            "id": "def-server.registerLegacyImportRoute.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "router",
-            "description": [],
-            "signature": [
-              "InternalSavedObjectRouter"
-            ],
-            "path": "src/core/packages/saved-objects/server-internal/src/routes/legacy_import_export/import.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/core-saved-objects-server-internal",
-            "id": "def-server.registerLegacyImportRoute.$2",
-            "type": "Object",
-            "tags": [],
-            "label": "{\n    maxImportPayloadBytes,\n    coreUsageData,\n    logger,\n    access,\n    legacyDeprecationInfo,\n  }",
-            "description": [],
-            "path": "src/core/packages/saved-objects/server-internal/src/routes/legacy_import_export/import.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/core-saved-objects-server-internal",
-                "id": "def-server.registerLegacyImportRoute.$2.maxImportPayloadBytes",
-                "type": "number",
-                "tags": [],
-                "label": "maxImportPayloadBytes",
-                "description": [],
-                "path": "src/core/packages/saved-objects/server-internal/src/routes/legacy_import_export/import.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/core-saved-objects-server-internal",
-                "id": "def-server.registerLegacyImportRoute.$2.coreUsageData",
-                "type": "Object",
-                "tags": [],
-                "label": "coreUsageData",
-                "description": [],
-                "signature": [
-                  "InternalCoreUsageDataSetup"
-                ],
-                "path": "src/core/packages/saved-objects/server-internal/src/routes/legacy_import_export/import.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/core-saved-objects-server-internal",
-                "id": "def-server.registerLegacyImportRoute.$2.logger",
-                "type": "Object",
-                "tags": [],
-                "label": "logger",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/logging",
-                    "scope": "common",
-                    "docId": "kibKbnLoggingPluginApi",
-                    "section": "def-common.Logger",
-                    "text": "Logger"
-                  }
-                ],
-                "path": "src/core/packages/saved-objects/server-internal/src/routes/legacy_import_export/import.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/core-saved-objects-server-internal",
-                "id": "def-server.registerLegacyImportRoute.$2.access",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "access",
-                "description": [],
-                "signature": [
-                  "\"internal\" | \"public\""
-                ],
-                "path": "src/core/packages/saved-objects/server-internal/src/routes/legacy_import_export/import.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/core-saved-objects-server-internal",
-                "id": "def-server.registerLegacyImportRoute.$2.legacyDeprecationInfo",
-                "type": "Object",
-                "tags": [],
-                "label": "legacyDeprecationInfo",
-                "description": [],
-                "signature": [
-                  "RouteDeprecationInfo"
-                ],
-                "path": "src/core/packages/saved-objects/server-internal/src/routes/legacy_import_export/import.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/core-saved-objects-server-internal",
         "id": "def-server.registerMigrateRoute",
         "type": "Function",
         "tags": [],
@@ -1233,7 +963,40 @@
     ],
     "interfaces": [],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server-internal",
+        "id": "def-server.REMOVED_TYPES",
+        "type": "Array",
+        "tags": [],
+        "label": "REMOVED_TYPES",
+        "description": [
+          "\nTypes that are no longer registered and need to be removed\nAs of 8.8, no new types are allowed to be removed.\nRemoving saved object types is not backward compatible"
+        ],
+        "signature": [
+          "string[]"
+        ],
+        "path": "src/core/packages/saved-objects/server-internal/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server-internal",
+        "id": "def-server.SAVED_OBJECT_TYPES_COUNT",
+        "type": "number",
+        "tags": [],
+        "label": "SAVED_OBJECT_TYPES_COUNT",
+        "description": [],
+        "signature": [
+          "137"
+        ],
+        "path": "src/core/packages/saved-objects/server-internal/src/object_types/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": [
       {
         "parentPluginId": "@kbn/core-saved-objects-server-internal",

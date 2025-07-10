@@ -13,6 +13,7 @@ import {
   catchError,
   combineLatest,
   debounceTime,
+  distinctUntilChanged,
   EMPTY,
   from,
   map,
@@ -40,8 +41,8 @@ const FETCH_RESULTS_DEBOUNCE_MS = 500;
 export const initializeSwimLaneDataFetcher = (
   swimLaneApi: AnomalySwimLaneEmbeddableApi,
   chartWidth$: Observable<number | undefined>,
-  dataLoading: BehaviorSubject<boolean | undefined>,
-  blockingError: BehaviorSubject<Error | undefined>,
+  dataLoading$: BehaviorSubject<boolean | undefined>,
+  blockingError$: BehaviorSubject<Error | undefined>,
   appliedTimeRange$: Observable<TimeRange | undefined>,
   query$: PublishesUnifiedSearch['query$'],
   filters$: PublishesUnifiedSearch['filters$'],
@@ -53,7 +54,7 @@ export const initializeSwimLaneDataFetcher = (
   const swimLaneData$ = new BehaviorSubject<OverallSwimlaneData | undefined>(undefined);
 
   const selectedJobs$ = getJobsObservable(swimLaneApi.jobIds, anomalyDetectorService, (error) => {
-    blockingError.next(error);
+    blockingError$.next(error);
   }).pipe(shareReplay(1));
 
   const swimLaneInput$ = combineLatest({
@@ -64,7 +65,11 @@ export const initializeSwimLaneDataFetcher = (
     fromPage: swimLaneApi.fromPage,
   });
 
-  const bucketInterval$ = combineLatest([selectedJobs$, chartWidth$, appliedTimeRange$]).pipe(
+  const bucketInterval$ = combineLatest([
+    selectedJobs$,
+    chartWidth$.pipe(distinctUntilChanged()),
+    appliedTimeRange$,
+  ]).pipe(
     skipWhile(([jobs, width]) => {
       return !Array.isArray(jobs) || !width;
     }),
@@ -84,7 +89,7 @@ export const initializeSwimLaneDataFetcher = (
   ])
     .pipe(
       tap(() => {
-        dataLoading.next(true);
+        dataLoading$.next(true);
       }),
       debounceTime(FETCH_RESULTS_DEBOUNCE_MS),
       switchMap(([explorerJobs, input, query, filters, bucketInterval]) => {
@@ -102,7 +107,7 @@ export const initializeSwimLaneDataFetcher = (
           }
         } catch (e) {
           // handle query syntax errors
-          blockingError.next(e);
+          blockingError$.next(e);
           return EMPTY;
         }
 
@@ -141,7 +146,7 @@ export const initializeSwimLaneDataFetcher = (
             return of(overallSwimlaneData);
           }),
           catchError((error) => {
-            blockingError.next(error);
+            blockingError$.next(error);
             return EMPTY;
           })
         );
@@ -150,8 +155,8 @@ export const initializeSwimLaneDataFetcher = (
     .subscribe((data) => {
       swimLaneApi.setInterval(data?.interval);
 
-      dataLoading.next(false);
-      blockingError.next(undefined);
+      dataLoading$.next(false);
+      blockingError$.next(undefined);
       swimLaneData$.next(data);
     });
 

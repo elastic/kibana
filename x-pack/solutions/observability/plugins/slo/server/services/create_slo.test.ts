@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import { SecurityHasPrivilegesResponse } from '@elastic/elasticsearch/lib/api/types';
+import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import {
-  ElasticsearchClientMock,
   elasticsearchServiceMock,
   httpServiceMock,
   loggingSystemMock,
@@ -23,11 +25,10 @@ import {
 } from './mocks';
 import { SLORepository } from './slo_repository';
 import { TransformManager } from './transform_manager';
-import { SecurityHasPrivilegesResponse } from '@elastic/elasticsearch/lib/api/types';
 
 describe('CreateSLO', () => {
-  let mockEsClient: ElasticsearchClientMock;
   let mockScopedClusterClient: ScopedClusterClientMock;
+  let mockSavedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
   let mockLogger: jest.Mocked<MockedLogger>;
   let mockRepository: jest.Mocked<SLORepository>;
   let mockTransformManager: jest.Mocked<TransformManager>;
@@ -37,30 +38,36 @@ describe('CreateSLO', () => {
   jest.useFakeTimers().setSystemTime(new Date('2024-01-01'));
 
   beforeEach(() => {
-    mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
     mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+    mockSavedObjectsClient = savedObjectsClientMock.create();
     mockLogger = loggingSystemMock.createLogger();
     mockRepository = createSLORepositoryMock();
     mockTransformManager = createTransformManagerMock();
     mockSummaryTransformManager = createSummaryTransformManagerMock();
     createSLO = new CreateSLO(
-      mockEsClient,
       mockScopedClusterClient,
       mockRepository,
+      mockSavedObjectsClient,
       mockTransformManager,
       mockSummaryTransformManager,
       mockLogger,
       'some-space',
-      httpServiceMock.createStartContract().basePath
+      httpServiceMock.createStartContract().basePath,
+      'some-user-id'
     );
   });
 
   describe('happy path', () => {
     beforeEach(() => {
-      mockRepository.exists.mockResolvedValue(false);
-      mockEsClient.security.hasPrivileges.mockResolvedValue({
+      mockScopedClusterClient.asCurrentUser.security.hasPrivileges.mockResolvedValue({
         has_all_requested: true,
       } as SecurityHasPrivilegesResponse);
+      mockSavedObjectsClient.find.mockResolvedValue({
+        saved_objects: [],
+        per_page: 20,
+        page: 0,
+        total: 0,
+      });
     });
 
     it('calls the expected services', async () => {
@@ -97,7 +104,7 @@ describe('CreateSLO', () => {
         mockScopedClusterClient.asSecondaryAuthUser.ingest.putPipeline.mock.calls[0]
       ).toMatchSnapshot();
       expect(mockSummaryTransformManager.install).toHaveBeenCalled();
-      expect(mockEsClient.index.mock.calls[0]).toMatchSnapshot();
+      expect(mockScopedClusterClient.asCurrentUser.index.mock.calls[0]).toMatchSnapshot();
 
       expect(response).toEqual(expect.objectContaining({ id: 'unique-id' }));
     });
@@ -167,22 +174,19 @@ describe('CreateSLO', () => {
 
   describe('unhappy path', () => {
     beforeEach(() => {
-      mockRepository.exists.mockResolvedValue(false);
-      mockEsClient.security.hasPrivileges.mockResolvedValue({
+      mockScopedClusterClient.asCurrentUser.security.hasPrivileges.mockResolvedValue({
         has_all_requested: true,
       } as SecurityHasPrivilegesResponse);
-    });
-
-    it('throws a SLOIdConflict error when the SLO already exists', async () => {
-      mockRepository.exists.mockResolvedValue(true);
-
-      const sloParams = createSLOParams({ indicator: createAPMTransactionErrorRateIndicator() });
-
-      await expect(createSLO.execute(sloParams)).rejects.toThrowError(/SLO \[.*\] already exists/);
+      mockSavedObjectsClient.find.mockResolvedValue({
+        saved_objects: [],
+        per_page: 20,
+        page: 0,
+        total: 0,
+      });
     });
 
     it('throws a SecurityException error when the user does not have the required privileges', async () => {
-      mockEsClient.security.hasPrivileges.mockResolvedValue({
+      mockScopedClusterClient.asCurrentUser.security.hasPrivileges.mockResolvedValue({
         has_all_requested: false,
       } as SecurityHasPrivilegesResponse);
 
@@ -206,9 +210,7 @@ describe('CreateSLO', () => {
         mockScopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline
       ).toHaveBeenCalledTimes(2);
 
-      expect(mockSummaryTransformManager.stop).toHaveBeenCalledTimes(0);
       expect(mockSummaryTransformManager.uninstall).toHaveBeenCalledTimes(1);
-      expect(mockTransformManager.stop).toHaveBeenCalledTimes(0);
       expect(mockTransformManager.uninstall).toHaveBeenCalledTimes(1);
     });
 
@@ -223,18 +225,17 @@ describe('CreateSLO', () => {
       );
 
       expect(mockRepository.deleteById).toHaveBeenCalled();
-      expect(mockTransformManager.stop).not.toHaveBeenCalled();
       expect(mockTransformManager.uninstall).toHaveBeenCalled();
       expect(
         mockScopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline
       ).toHaveBeenCalledTimes(2);
       expect(mockSummaryTransformManager.uninstall).toHaveBeenCalled();
-
-      expect(mockSummaryTransformManager.stop).not.toHaveBeenCalled();
     });
 
     it('rollbacks completed operations when create temporary document fails', async () => {
-      mockEsClient.index.mockRejectedValue(new Error('temporary document index failed'));
+      mockScopedClusterClient.asCurrentUser.index.mockRejectedValue(
+        new Error('temporary document index failed')
+      );
       const sloParams = createSLOParams({ indicator: createAPMTransactionErrorRateIndicator() });
 
       await expect(createSLO.execute(sloParams)).rejects.toThrowError(
@@ -242,12 +243,10 @@ describe('CreateSLO', () => {
       );
 
       expect(mockRepository.deleteById).toHaveBeenCalled();
-      expect(mockTransformManager.stop).not.toHaveBeenCalled();
       expect(mockTransformManager.uninstall).toHaveBeenCalled();
       expect(
         mockScopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline
       ).toHaveBeenCalledTimes(2);
-      expect(mockSummaryTransformManager.stop).not.toHaveBeenCalled();
       expect(mockSummaryTransformManager.uninstall).toHaveBeenCalled();
     });
   });

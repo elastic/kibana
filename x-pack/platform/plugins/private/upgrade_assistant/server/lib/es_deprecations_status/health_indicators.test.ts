@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock, ScopedClusterClientMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock, type ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import { getHealthIndicators } from './health_indicators';
 import * as healthIndicatorsMock from '../__fixtures__/health_indicators';
 
 describe('getHealthIndicators', () => {
-  let esClient: ScopedClusterClientMock;
+  let esClient: ElasticsearchClientMock;
   beforeEach(() => {
-    esClient = elasticsearchServiceMock.createScopedClusterClient();
+    esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
   });
 
   it('returns empty array on green indicators', async () => {
-    esClient.asCurrentUser.healthReport.mockResponse({
+    esClient.healthReport.mockResponse({
       cluster_name: 'mock',
       indicators: {
         disk: healthIndicatorsMock.diskIndicatorGreen,
@@ -30,7 +30,7 @@ describe('getHealthIndicators', () => {
   });
 
   it('returns unknown indicators', async () => {
-    esClient.asCurrentUser.healthReport.mockResponse({
+    esClient.healthReport.mockResponse({
       cluster_name: 'mock',
       indicators: {
         disk: healthIndicatorsMock.diskIndicatorUnknown,
@@ -48,7 +48,7 @@ describe('getHealthIndicators', () => {
   });
 
   it('returns unhealthy shards_capacity indicator', async () => {
-    esClient.asCurrentUser.healthReport.mockResponse({
+    esClient.healthReport.mockResponse({
       cluster_name: 'mock',
       indicators: {
         disk: healthIndicatorsMock.diskIndicatorGreen,
@@ -81,7 +81,7 @@ describe('getHealthIndicators', () => {
             "type": "healthIndicator",
           },
           "details": "Cluster is close to reaching the configured maximum number of shards for data nodes.",
-          "isCritical": true,
+          "level": "critical",
           "message": "Elasticsearch is about to reach the maximum number of shards it can host, based on your current settings.",
           "resolveDuringUpgrade": false,
           "type": "health_indicator",
@@ -92,7 +92,7 @@ describe('getHealthIndicators', () => {
   });
 
   it('returns unhealthy disk indicator', async () => {
-    esClient.asCurrentUser.healthReport.mockResponse({
+    esClient.healthReport.mockResponse({
       cluster_name: 'mock',
       indicators: {
         disk: healthIndicatorsMock.diskIndicatorRed,
@@ -119,7 +119,7 @@ describe('getHealthIndicators', () => {
             "type": "healthIndicator",
           },
           "details": "The cluster does not have enough available disk space.",
-          "isCritical": true,
+          "level": "critical",
           "message": "The cluster does not have enough available disk space.",
           "resolveDuringUpgrade": false,
           "type": "health_indicator",

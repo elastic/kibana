@@ -8,7 +8,6 @@ The package is structure as follow:
 ```
 src
  | autocomplete         // => the autocomplete/suggest service logic
- | code_actions         // => the quick fixes service logic
  | definitions          // => static assets to define all components behaviour of a ES|QL query: commands, functions, etc...
  | validation           // => the validation logic
 
@@ -26,7 +25,7 @@ For instance, not passing the `getSources` callback will report all index mentio
 ##### Usage
 
 ```js
-import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
+import { parse } from '@kbn/esql-ast';
 import { validateQuery } from '@kbn/esql-validation-autocomplete';
 
 // define all callbacks
@@ -36,13 +35,13 @@ const myCallbacks = {
 };
 
 // Full validation performed
-const { errors, warnings } = await validateQuery("from index | stats 1 + avg(myColumn)", getAstAndSyntaxErrors, undefined, myCallbacks);
+const { errors, warnings } = await validateQuery("from index | stats 1 + avg(myColumn)", parse, undefined, myCallbacks);
 ```
 
 If not all callbacks are available it is possible to gracefully degrade the validation experience with the `ignoreOnMissingCallbacks` option:
 
 ```js
-import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
+import { parse } from '@kbn/esql-ast';
 import { validateQuery } from '@kbn/esql-validation-autocomplete';
 
 // define only the getSources callback
@@ -53,7 +52,7 @@ const myCallbacks = {
 // ignore errors that might be triggered by the lack of some callbacks (i.e. "Unknown columns", etc...)
 const { errors, warnings } = await validateQuery(
   'from index | stats 1 + avg(myColumn)',
-  getAstAndSyntaxErrors,
+  parse,
   { ignoreOnMissingCallbacks: true },
   myCallbacks
 );
@@ -64,7 +63,7 @@ const { errors, warnings } = await validateQuery(
 This is the complete logic for the ES|QL autocomplete language, it is completely independent from the actual editor (i.e. Monaco) and the suggestions reported need to be wrapped against the specific editor shape.
 
 ```js
-import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
+import { parse } from '@kbn/esql-ast';
 import { suggest } from '@kbn/esql-validation-autocomplete';
 
 const queryString = "from index | stats 1 + avg(myColumn) ";
@@ -77,7 +76,7 @@ const suggestions = await suggest(
   queryString,
   queryString.length - 1, // the cursor position in a single line context
   { triggerCharacter: " "; triggerKind: 1 }, // kind = 0 is a programmatic trigger, while other values are ignored
-  getAstAndSyntaxErrors,
+  parse,
   myCallbacks
 );
 
@@ -103,7 +102,7 @@ This feature provides a list of suggestions to propose as fixes for a subset of 
 The feature works in combination with the validation service.
 
 ```js
-import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
+import { parse } from '@kbn/esql-ast';
 import { validateQuery, getActions } from '@kbn/esql-validation-autocomplete';
 
 const queryString = "from index2 | stats 1 + avg(myColumn)"
@@ -112,12 +111,12 @@ const myCallbacks = {
   getSources: async () => [{name: 'index', hidden: false}],
   ...
 };
-const { errors, warnings } = await validateQuery(queryString, getAstAndSyntaxErrors, undefined, myCallbacks);
+const { errors, warnings } = await validateQuery(queryString, parse, undefined, myCallbacks);
 
 const {title, edits} = await getActions(
   queryString,
   errors,
-  getAstAndSyntaxErrors,
+  parse,
   undefined,
   myCallbacks
 );
@@ -130,7 +129,7 @@ console.log({ title, edits });
 Like with validation also `getActions` can 'relax' its internal checks when no callbacks, either all or specific ones, are passed.
 
 ```js
-import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
+import { parse } from '@kbn/esql-ast';
 import { validateQuery, getActions } from '@kbn/esql-validation-autocomplete';
 
 const queryString = "from index2 | keep unquoted-field"
@@ -139,12 +138,12 @@ const myCallbacks = {
   getSources: async () => [{name: 'index', hidden: false}],
   ...
 };
-const { errors, warnings } = await validateQuery(queryString, getAstAndSyntaxErrors, undefined, myCallbacks);
+const { errors, warnings } = await validateQuery(queryString, parse, undefined, myCallbacks);
 
 const {title, edits} = await getActions(
   queryString,
   errors,
-  getAstAndSyntaxErrors,
+  parse,
   { relaxOnMissingCallbacks: true },
   myCallbacks
 );
@@ -160,13 +159,13 @@ This is an important function in order to build more features on top of the exis
 For instance to show contextual information on Hover the `getAstContext` function can be leveraged to get the correct context for the cursor position:
 
 ```js
-import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
+import { parse } from '@kbn/esql-ast';
 import { getAstContext } from '@kbn/esql-validation-autocomplete';
 
 const queryString = 'from index2 | stats 1 + avg(myColumn)';
 const offset = queryString.indexOf('avg');
 
-const astContext = getAstContext(queryString, getAstAndSyntaxErrors(queryString), offset);
+const astContext = getAstContext(queryString, parse(queryString), offset);
 
 if (astContext.type === 'function') {
   const fnNode = astContext.node;
@@ -248,14 +247,14 @@ Tests are found in files named with the following convention: `validation.some-d
 Here is an example of a block in the new test format.
 
 ```ts
-describe('METRICS <sources> [ <aggregates> [ BY <grouping> ]]', () => {
+describe('TS <sources> [ <aggregates> [ BY <grouping> ]]', () => {
   test('errors on invalid command start', async () => {
     const { expectErrors } = await setup();
 
     await expectErrors('m', [
-      "SyntaxError: mismatched input 'm' expecting {'explain', 'from', 'meta', 'metrics', 'row', 'show'}",
+      "SyntaxError: mismatched input 'm' expecting {'explain', 'from', 'meta', 'ts', 'row', 'show'}",
     ]);
-    await expectErrors('metrics ', [
+    await expectErrors('ts ', [
       "SyntaxError: mismatched input '<EOF>' expecting {UNQUOTED_SOURCE, QUOTED_STRING}",
     ]);
   });
@@ -284,7 +283,7 @@ It accepts
 2. a list of expected errors (can be empty)
 3. a list of expected warnings (can be empty or omitted)
 
-Running the tests in `validation.test.ts` populates `src/platform/packages/shared/kbn-esql-validation-autocomplete/src/validation/esql_validation_meta_tests.json` which is then used in `test/api_integration/apis/esql/errors.ts` to make sure our validator isn't giving users false positives. Therefore, the validation test suite should always be run after any changes have been made to it so that the JSON file stays in sync.
+Running the tests in `validation.test.ts` populates `src/platform/packages/shared/kbn-esql-validation-autocomplete/src/validation/esql_validation_meta_tests.json` which is then used in `src/platform/test/api_integration/apis/esql/errors.ts` to make sure our validator isn't giving users false positives. Therefore, the validation test suite should always be run after any changes have been made to it so that the JSON file stays in sync.
 
 #### Autocomplete
 
@@ -297,7 +296,7 @@ They look like this.
 ```ts
 test('lists possible aggregations on space after command', async () => {
   const { assertSuggestions } = await setup();
-  const expected = ['var0 = ', ...allAggFunctions, ...allEvaFunctions];
+  const expected = ['col0 = ', ...allAggFunctions, ...allEvaFunctions];
 
   await assertSuggestions('from a | stats /', expected);
   await assertSuggestions('FROM a | STATS /', expected);
@@ -335,7 +334,7 @@ They look like this
 testSuggestions('from a | eval a = 1 year /', [
   ',',
   '| ',
-  ...getFunctionSignaturesByReturnType('eval', 'any', { builtin: true, skipAssign: true }, [
+  ...getFunctionSignaturesByReturnType('eval', 'any', { operators: true, skipAssign: true }, [
     'time_interval',
   ]),
 ]);
@@ -346,6 +345,6 @@ Similarly to `testErrorsAndWarnings`, `testSuggestions` is an all-in-one utility
 Its parameters are as follows
 
 1. the query
-2. the expected suggestions (can be strings or `Partial<SuggestionRawDefinition>`)
+2. the expected suggestions (can be strings or `Partial<ISuggestionItem>`)
 3. the trigger character. This should only be included if the test is intended to validate a "Trigger Character" trigger kind from Monaco ([ref](https://microsoft.github.io/monaco-editor/typedoc/enums/languages.CompletionTriggerKind.html#TriggerCharacter))
 4. custom callback data such as a list of indicies or a field list

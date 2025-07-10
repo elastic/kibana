@@ -205,7 +205,7 @@ export const EntityConfig: FC<EntityConfigProps> = ({
                   />
                 }
               >
-                <EuiIcon tabIndex={0} type="iInCircle" color={'subdued'} />
+                <EuiIcon tabIndex={0} type="info" color={'subdued'} />
               </EuiToolTip>
             ) : null}
 
@@ -219,7 +219,7 @@ export const EntityConfig: FC<EntityConfigProps> = ({
                   />
                 }
               >
-                <EuiIcon tabIndex={0} type="iInCircle" color={'subdued'} />
+                <EuiIcon tabIndex={0} type="info" color={'subdued'} />
               </EuiToolTip>
             ) : null}
           </EuiFlexItem>

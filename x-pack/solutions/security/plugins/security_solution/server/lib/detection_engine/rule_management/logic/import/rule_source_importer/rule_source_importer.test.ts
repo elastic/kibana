@@ -10,33 +10,33 @@ import type {
   ValidatedRuleToImport,
 } from '../../../../../../../common/api/detection_engine';
 import { createPrebuiltRuleAssetsClient as createPrebuiltRuleAssetsClientMock } from '../../../../prebuilt_rules/logic/rule_assets/__mocks__/prebuilt_rule_assets_client';
-import { configMock, createMockConfig, requestContextMock } from '../../../../routes/__mocks__';
+import { createPrebuiltRuleObjectsClient as createPrebuiltRuleObjectsClientMock } from '../../../../prebuilt_rules/logic/rule_objects/__mocks__/prebuilt_rule_objects_client';
+import { requestContextMock } from '../../../../routes/__mocks__';
 import { getPrebuiltRuleMock } from '../../../../prebuilt_rules/mocks';
 import { createRuleSourceImporter } from './rule_source_importer';
-import * as calculateRuleSourceModule from '../calculate_rule_source_for_import';
 
 describe('ruleSourceImporter', () => {
   let ruleAssetsClientMock: ReturnType<typeof createPrebuiltRuleAssetsClientMock>;
-  let config: ReturnType<typeof createMockConfig>;
+  let ruleObjectsClientMock: ReturnType<typeof createPrebuiltRuleObjectsClientMock>;
   let context: ReturnType<typeof requestContextMock.create>['securitySolution'];
   let ruleToImport: RuleToImport;
   let subject: ReturnType<typeof createRuleSourceImporter>;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    config = createMockConfig();
-    config = configMock.withExperimentalFeature(config, 'prebuiltRulesCustomizationEnabled');
     context = requestContextMock.create().securitySolution;
     ruleAssetsClientMock = createPrebuiltRuleAssetsClientMock();
     ruleAssetsClientMock.fetchLatestAssets.mockResolvedValue([{}]);
     ruleAssetsClientMock.fetchLatestVersions.mockResolvedValue([]);
     ruleAssetsClientMock.fetchAssetsByVersion.mockResolvedValue([]);
+    ruleObjectsClientMock = createPrebuiltRuleObjectsClientMock();
+    ruleObjectsClientMock.fetchInstalledRulesByIds.mockResolvedValue([]);
     ruleToImport = { rule_id: 'rule-1', version: 1 } as RuleToImport;
 
     subject = createRuleSourceImporter({
       context,
-      config,
       prebuiltRuleAssetsClient: ruleAssetsClientMock,
+      prebuiltRuleObjectsClient: ruleObjectsClientMock,
     });
   });
 
@@ -112,7 +112,6 @@ describe('ruleSourceImporter', () => {
 
   describe('#calculateRuleSource()', () => {
     let rule: ValidatedRuleToImport;
-    let calculatorSpy: jest.SpyInstance;
 
     beforeEach(() => {
       rule = { rule_id: 'validated-rule', version: 1 } as ValidatedRuleToImport;
@@ -124,22 +123,6 @@ describe('ruleSourceImporter', () => {
         getPrebuiltRuleMock({ rule_id: 'rule-2' }),
         getPrebuiltRuleMock({ rule_id: 'validated-rule' }),
       ]);
-      calculatorSpy = jest
-        .spyOn(calculateRuleSourceModule, 'calculateRuleSourceForImport')
-        .mockReturnValue({ ruleSource: { type: 'internal' }, immutable: false });
-    });
-
-    it('invokes calculateRuleSourceForImport with the correct arguments', async () => {
-      await subject.setup([rule]);
-      await subject.calculateRuleSource(rule);
-
-      expect(calculatorSpy).toHaveBeenCalledTimes(1);
-      expect(calculatorSpy).toHaveBeenCalledWith({
-        rule,
-        prebuiltRuleAssetsByRuleId: { 'rule-1': expect.objectContaining({ rule_id: 'rule-1' }) },
-        isKnownPrebuiltRule: true,
-        isRuleCustomizationEnabled: true,
-      });
     });
 
     it('throws an error if the rule is not known to the calculator', async () => {
@@ -155,21 +138,6 @@ describe('ruleSourceImporter', () => {
       expect(() => subject.calculateRuleSource(rule)).toThrowErrorMatchingInlineSnapshot(
         `"Rule validated-rule was not registered during setup."`
       );
-    });
-
-    describe('for rules set up without a version', () => {
-      it('invokes the calculator with the correct arguments', async () => {
-        await subject.setup([{ ...rule, version: undefined }]);
-        await subject.calculateRuleSource(rule);
-
-        expect(calculatorSpy).toHaveBeenCalledTimes(1);
-        expect(calculatorSpy).toHaveBeenCalledWith({
-          rule,
-          prebuiltRuleAssetsByRuleId: { 'rule-1': expect.objectContaining({ rule_id: 'rule-1' }) },
-          isKnownPrebuiltRule: true,
-          isRuleCustomizationEnabled: true,
-        });
-      });
     });
   });
 });

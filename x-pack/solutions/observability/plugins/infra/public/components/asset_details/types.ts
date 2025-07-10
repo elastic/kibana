@@ -26,7 +26,6 @@ export enum ContentTabIds {
   ANOMALIES = 'anomalies',
   OSQUERY = 'osquery',
   LOGS = 'logs',
-  DASHBOARDS = 'dashboards',
 }
 
 export type TabIds = `${ContentTabIds}`;

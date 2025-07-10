@@ -24,13 +24,12 @@ describe('DeploymentParamsMapper', () => {
 
   let mapper: DeploymentParamsMapper;
 
-  mapper = new DeploymentParamsMapper(modelId, mlServerLimits, cloudInfo, true);
+  mapper = new DeploymentParamsMapper(mlServerLimits, cloudInfo, true);
 
   describe('DeploymentParamsMapper', () => {
     describe('running in serverless', () => {
       beforeEach(() => {
         mapper = new DeploymentParamsMapper(
-          modelId,
           {
             max_single_ml_node_processors: 16,
             total_ml_processors: 32,
@@ -49,12 +48,12 @@ describe('DeploymentParamsMapper', () => {
           static: 16,
         });
         expect(mapper.getVCURange('medium')).toEqual({
-          min: 8,
+          min: 0,
           max: 256,
           static: 256,
         });
         expect(mapper.getVCURange('high')).toEqual({
-          min: 8,
+          min: 0,
           max: 4096,
           static: 4096,
         });
@@ -62,38 +61,84 @@ describe('DeploymentParamsMapper', () => {
 
       it('maps UI params to API correctly', () => {
         expect(
-          mapper.mapUiToApiDeploymentParams({
+          mapper.mapUiToApiDeploymentParams(modelId, {
             deploymentId: 'test-deployment',
             optimized: 'optimizedForSearch',
             adaptiveResources: false,
             vCPUUsage: 'low',
           })
         ).toEqual({
-          number_of_allocations: 1,
-          deployment_id: 'test-deployment',
-          model_id: 'test-model',
-          priority: 'normal',
-          threads_per_allocation: 2,
+          modelId: 'test-model',
+          deploymentParams: {
+            number_of_allocations: 1,
+            deployment_id: 'test-deployment',
+            priority: 'normal',
+            threads_per_allocation: 2,
+          },
         });
 
         expect(
-          mapper.mapUiToApiDeploymentParams({
+          mapper.mapUiToApiDeploymentParams(modelId, {
             deploymentId: 'test-deployment',
             optimized: 'optimizedForIngest',
             adaptiveResources: false,
             vCPUUsage: 'low',
           })
         ).toEqual({
-          deployment_id: 'test-deployment',
-          model_id: 'test-model',
-          priority: 'normal',
-          threads_per_allocation: 1,
-          number_of_allocations: 2,
+          modelId: 'test-model',
+          deploymentParams: {
+            deployment_id: 'test-deployment',
+            threads_per_allocation: 1,
+            priority: 'normal',
+            number_of_allocations: 2,
+          },
+        });
+
+        expect(
+          mapper.mapUiToApiDeploymentParams(modelId, {
+            deploymentId: 'test-deployment',
+            optimized: 'optimizedForSearch',
+            adaptiveResources: true,
+            vCPUUsage: 'medium',
+          })
+        ).toEqual({
+          modelId: 'test-model',
+          deploymentParams: {
+            deployment_id: 'test-deployment',
+            priority: 'normal',
+            threads_per_allocation: 16,
+          },
+          adaptiveAllocationsParams: {
+            enabled: true,
+            max_number_of_allocations: 2,
+            min_number_of_allocations: 0,
+          },
+        });
+
+        expect(
+          mapper.mapUiToApiDeploymentParams(modelId, {
+            deploymentId: 'test-deployment',
+            optimized: 'optimizedForIngest',
+            adaptiveResources: true,
+            vCPUUsage: 'high',
+          })
+        ).toEqual({
+          modelId: 'test-model',
+          deploymentParams: {
+            deployment_id: 'test-deployment',
+            priority: 'normal',
+            threads_per_allocation: 1,
+          },
+          adaptiveAllocationsParams: {
+            enabled: true,
+            max_number_of_allocations: 512,
+            min_number_of_allocations: 0,
+          },
         });
       });
 
       it('overrides vCPUs levels and enforces adaptive allocations if static support is not configured', () => {
-        mapper = new DeploymentParamsMapper(modelId, mlServerLimits, cloudInfo, false, {
+        mapper = new DeploymentParamsMapper(mlServerLimits, cloudInfo, false, {
           modelDeployment: {
             allowStaticAllocations: false,
             vCPURange: {
@@ -121,37 +166,41 @@ describe('DeploymentParamsMapper', () => {
         });
 
         expect(
-          mapper.mapUiToApiDeploymentParams({
+          mapper.mapUiToApiDeploymentParams(modelId, {
             deploymentId: 'test-deployment',
             optimized: 'optimizedForSearch',
             adaptiveResources: false,
             vCPUUsage: 'low',
           })
         ).toEqual({
-          adaptive_allocations: {
+          modelId: 'test-model',
+          adaptiveAllocationsParams: {
             enabled: true,
             max_number_of_allocations: 1,
             min_number_of_allocations: 0,
           },
-          deployment_id: 'test-deployment',
-          model_id: 'test-model',
-          priority: 'normal',
-          threads_per_allocation: 2,
+          deploymentParams: {
+            deployment_id: 'test-deployment',
+            priority: 'normal',
+            threads_per_allocation: 2,
+          },
         });
 
         expect(
-          mapper.mapUiToApiDeploymentParams({
+          mapper.mapUiToApiDeploymentParams(modelId, {
             deploymentId: 'test-deployment',
             optimized: 'optimizedForIngest',
             adaptiveResources: false,
             vCPUUsage: 'low',
           })
         ).toEqual({
-          deployment_id: 'test-deployment',
-          model_id: 'test-model',
-          priority: 'normal',
-          threads_per_allocation: 1,
-          adaptive_allocations: {
+          modelId: 'test-model',
+          deploymentParams: {
+            deployment_id: 'test-deployment',
+            priority: 'normal',
+            threads_per_allocation: 1,
+          },
+          adaptiveAllocationsParams: {
             enabled: true,
             max_number_of_allocations: 2,
             min_number_of_allocations: 0,
@@ -163,7 +212,6 @@ describe('DeploymentParamsMapper', () => {
     describe('32 cores, 16 single', () => {
       beforeEach(() => {
         mapper = new DeploymentParamsMapper(
-          modelId,
           {
             max_single_ml_node_processors: 16,
             total_ml_processors: 32,
@@ -185,7 +233,6 @@ describe('DeploymentParamsMapper', () => {
     describe('when autoscaling is disabled', () => {
       beforeEach(() => {
         mapper = new DeploymentParamsMapper(
-          modelId,
           mlServerLimits,
           {
             isMlAutoscalingEnabled: false,
@@ -196,110 +243,124 @@ describe('DeploymentParamsMapper', () => {
 
       it('should map UI params to API request correctly', () => {
         expect(
-          mapper.mapUiToApiDeploymentParams({
+          mapper.mapUiToApiDeploymentParams(modelId, {
             deploymentId: 'test-deployment',
             optimized: 'optimizedForSearch',
             adaptiveResources: false,
             vCPUUsage: 'low',
           })
         ).toEqual({
-          model_id: modelId,
-          deployment_id: 'test-deployment',
-          priority: 'normal',
-          threads_per_allocation: 2,
-          number_of_allocations: 1,
+          modelId,
+          deploymentParams: {
+            deployment_id: 'test-deployment',
+            priority: 'normal',
+            threads_per_allocation: 2,
+            number_of_allocations: 1,
+          },
         });
 
         expect(
-          mapper.mapUiToApiDeploymentParams({
+          mapper.mapUiToApiDeploymentParams(modelId, {
             deploymentId: 'test-deployment',
             optimized: 'optimizedForSearch',
             adaptiveResources: false,
             vCPUUsage: 'medium',
           })
         ).toEqual({
-          model_id: modelId,
-          deployment_id: 'test-deployment',
-          priority: 'normal',
-          threads_per_allocation: 8,
-          number_of_allocations: 1,
+          modelId,
+          deploymentParams: {
+            deployment_id: 'test-deployment',
+            priority: 'normal',
+            threads_per_allocation: 8,
+            number_of_allocations: 1,
+          },
         });
 
         expect(
-          mapper.mapUiToApiDeploymentParams({
+          mapper.mapUiToApiDeploymentParams(modelId, {
             deploymentId: 'test-deployment',
             optimized: 'optimizedForSearch',
             adaptiveResources: false,
             vCPUUsage: 'high',
           })
         ).toEqual({
-          model_id: modelId,
-          deployment_id: 'test-deployment',
-          priority: 'normal',
-          threads_per_allocation: 8,
-          number_of_allocations: 1,
+          modelId,
+          deploymentParams: {
+            deployment_id: 'test-deployment',
+            priority: 'normal',
+            threads_per_allocation: 8,
+            number_of_allocations: 1,
+          },
         });
 
         expect(
-          mapper.mapUiToApiDeploymentParams({
+          mapper.mapUiToApiDeploymentParams(modelId, {
             deploymentId: 'test-deployment',
             optimized: 'optimizedForIngest',
             adaptiveResources: false,
             vCPUUsage: 'low',
           })
         ).toEqual({
-          model_id: modelId,
-          deployment_id: 'test-deployment',
-          priority: 'normal',
-          threads_per_allocation: 1,
-          number_of_allocations: 2,
+          modelId,
+          deploymentParams: {
+            deployment_id: 'test-deployment',
+            priority: 'normal',
+            threads_per_allocation: 1,
+            number_of_allocations: 2,
+          },
         });
 
         expect(
-          mapper.mapUiToApiDeploymentParams({
+          mapper.mapUiToApiDeploymentParams(modelId, {
             deploymentId: 'test-deployment',
             optimized: 'optimizedForIngest',
             adaptiveResources: false,
             vCPUUsage: 'medium',
           })
         ).toEqual({
-          model_id: modelId,
-          deployment_id: 'test-deployment',
-          priority: 'normal',
-          threads_per_allocation: 1,
-          number_of_allocations: 5,
+          modelId,
+          deploymentParams: {
+            deployment_id: 'test-deployment',
+            priority: 'normal',
+            threads_per_allocation: 1,
+            number_of_allocations: 5,
+          },
         });
 
         expect(
-          mapper.mapUiToApiDeploymentParams({
+          mapper.mapUiToApiDeploymentParams(modelId, {
             deploymentId: 'test-deployment',
             optimized: 'optimizedForIngest',
             adaptiveResources: false,
             vCPUUsage: 'high',
           })
         ).toEqual({
-          model_id: modelId,
-          deployment_id: 'test-deployment',
-          priority: 'normal',
-          threads_per_allocation: 1,
-          number_of_allocations: 10,
+          modelId,
+          deploymentParams: {
+            deployment_id: 'test-deployment',
+            priority: 'normal',
+            threads_per_allocation: 1,
+            number_of_allocations: 10,
+          },
         });
       });
 
       it('should map UI params to API request correctly with adaptive resources', () => {
         expect(
-          mapper.mapUiToApiDeploymentParams({
+          mapper.mapUiToApiDeploymentParams(modelId, {
             deploymentId: 'test-deployment',
             optimized: 'optimizedForSearch',
             adaptiveResources: true,
             vCPUUsage: 'low',
           })
         ).toEqual({
-          model_id: modelId,
-          deployment_id: 'test-deployment',
-          priority: 'normal',
-          threads_per_allocation: 2,
-          adaptive_allocations: {
+          modelId,
+          deploymentParams: {
+            deployment_id: 'test-deployment',
+            priority: 'normal',
+            threads_per_allocation: 2,
+          },
+          adaptiveAllocationsParams: {
             enabled: true,
             min_number_of_allocations: 1,
             max_number_of_allocations: 1,
@@ -307,18 +368,20 @@ describe('DeploymentParamsMapper', () => {
         });
 
         expect(
-          mapper.mapUiToApiDeploymentParams({
+          mapper.mapUiToApiDeploymentParams(modelId, {
             deploymentId: 'test-deployment',
             optimized: 'optimizedForSearch',
             adaptiveResources: true,
             vCPUUsage: 'medium',
           })
         ).toEqual({
-          model_id: modelId,
-          deployment_id: 'test-deployment',
-          priority: 'normal',
-          threads_per_allocation: 8,
-          adaptive_allocations: {
+          modelId,
+          deploymentParams: {
+            deployment_id: 'test-deployment',
+            priority: 'normal',
+            threads_per_allocation: 8,
+          },
+          adaptiveAllocationsParams: {
             enabled: true,
             min_number_of_allocations: 1,
             max_number_of_allocations: 1,
@@ -326,18 +389,20 @@ describe('DeploymentParamsMapper', () => {
         });
 
         expect(
-          mapper.mapUiToApiDeploymentParams({
+          mapper.mapUiToApiDeploymentParams(modelId, {
             deploymentId: 'test-deployment',
             optimized: 'optimizedForSearch',
             adaptiveResources: true,
             vCPUUsage: 'high',
           })
         ).toEqual({
-          model_id: modelId,
-          deployment_id: 'test-deployment',
-          priority: 'normal',
-          threads_per_allocation: 8,
-          adaptive_allocations: {
+          modelId,
+          deploymentParams: {
+            deployment_id: 'test-deployment',
+            priority: 'normal',
+            threads_per_allocation: 8,
+          },
+          adaptiveAllocationsParams: {
             enabled: true,
             min_number_of_allocations: 1,
             max_number_of_allocations: 1,
@@ -456,7 +521,6 @@ describe('DeploymentParamsMapper', () => {
     describe('when autoscaling is enabled', () => {
       beforeEach(() => {
         mapper = new DeploymentParamsMapper(
-          modelId,
           mlServerLimits,
           {
             isMlAutoscalingEnabled: true,
@@ -467,65 +531,73 @@ describe('DeploymentParamsMapper', () => {
 
       it('should map UI params to API request correctly', () => {
         expect(
-          mapper.mapUiToApiDeploymentParams({
+          mapper.mapUiToApiDeploymentParams(modelId, {
             deploymentId: 'test-deployment',
             optimized: 'optimizedForSearch',
             adaptiveResources: false,
             vCPUUsage: 'low',
           })
         ).toEqual({
-          model_id: modelId,
-          deployment_id: 'test-deployment',
-          priority: 'normal',
-          threads_per_allocation: 2,
-          number_of_allocations: 1,
+          modelId,
+          deploymentParams: {
+            deployment_id: 'test-deployment',
+            priority: 'normal',
+            threads_per_allocation: 2,
+            number_of_allocations: 1,
+          },
         });
 
         expect(
-          mapper.mapUiToApiDeploymentParams({
+          mapper.mapUiToApiDeploymentParams(modelId, {
             deploymentId: 'test-deployment',
             optimized: 'optimizedForSearch',
             adaptiveResources: false,
             vCPUUsage: 'medium',
           })
         ).toEqual({
-          model_id: modelId,
-          deployment_id: 'test-deployment',
-          priority: 'normal',
-          threads_per_allocation: 8,
-          number_of_allocations: 4,
+          modelId,
+          deploymentParams: {
+            deployment_id: 'test-deployment',
+            priority: 'normal',
+            threads_per_allocation: 8,
+            number_of_allocations: 4,
+          },
         });
 
         expect(
-          mapper.mapUiToApiDeploymentParams({
+          mapper.mapUiToApiDeploymentParams(modelId, {
             deploymentId: 'test-deployment',
             optimized: 'optimizedForSearch',
             adaptiveResources: false,
             vCPUUsage: 'high',
           })
         ).toEqual({
-          model_id: modelId,
-          deployment_id: 'test-deployment',
-          priority: 'normal',
-          threads_per_allocation: 8,
-          number_of_allocations: 12499,
+          modelId,
+          deploymentParams: {
+            deployment_id: 'test-deployment',
+            priority: 'normal',
+            threads_per_allocation: 8,
+            number_of_allocations: 12499,
+          },
         });
       });
 
       it('should map UI params to API request correctly with adaptive resources', () => {
         expect(
-          mapper.mapUiToApiDeploymentParams({
+          mapper.mapUiToApiDeploymentParams(modelId, {
             deploymentId: 'test-deployment',
             optimized: 'optimizedForSearch',
             adaptiveResources: true,
             vCPUUsage: 'low',
           })
         ).toEqual({
-          model_id: modelId,
-          deployment_id: 'test-deployment',
-          priority: 'normal',
-          threads_per_allocation: 2,
-          adaptive_allocations: {
+          modelId,
+          deploymentParams: {
+            deployment_id: 'test-deployment',
+            priority: 'normal',
+            threads_per_allocation: 2,
+          },
+          adaptiveAllocationsParams: {
             enabled: true,
             min_number_of_allocations: 0,
             max_number_of_allocations: 1,
@@ -533,18 +605,20 @@ describe('DeploymentParamsMapper', () => {
         });
 
         expect(
-          mapper.mapUiToApiDeploymentParams({
+          mapper.mapUiToApiDeploymentParams(modelId, {
             deploymentId: 'test-deployment',
             optimized: 'optimizedForSearch',
             adaptiveResources: true,
             vCPUUsage: 'medium',
           })
         ).toEqual({
-          model_id: modelId,
-          deployment_id: 'test-deployment',
-          priority: 'normal',
-          threads_per_allocation: 8,
-          adaptive_allocations: {
+          modelId,
+          deploymentParams: {
+            deployment_id: 'test-deployment',
+            priority: 'normal',
+            threads_per_allocation: 8,
+          },
+          adaptiveAllocationsParams: {
             enabled: true,
             min_number_of_allocations: 1,
             max_number_of_allocations: 4,
@@ -552,18 +626,20 @@ describe('DeploymentParamsMapper', () => {
         });
 
         expect(
-          mapper.mapUiToApiDeploymentParams({
+          mapper.mapUiToApiDeploymentParams(modelId, {
             deploymentId: 'test-deployment',
             optimized: 'optimizedForSearch',
             adaptiveResources: true,
             vCPUUsage: 'high',
           })
         ).toEqual({
-          model_id: modelId,
-          deployment_id: 'test-deployment',
-          priority: 'normal',
-          threads_per_allocation: 8,
-          adaptive_allocations: {
+          modelId,
+          deploymentParams: {
+            deployment_id: 'test-deployment',
+            priority: 'normal',
+            threads_per_allocation: 8,
+          },
+          adaptiveAllocationsParams: {
             enabled: true,
             max_number_of_allocations: 12499,
             min_number_of_allocations: 1,
@@ -571,18 +647,20 @@ describe('DeploymentParamsMapper', () => {
         });
 
         expect(
-          mapper.mapUiToApiDeploymentParams({
+          mapper.mapUiToApiDeploymentParams(modelId, {
             deploymentId: 'test-deployment',
             optimized: 'optimizedForIngest',
             adaptiveResources: true,
             vCPUUsage: 'low',
           })
         ).toEqual({
-          model_id: modelId,
-          deployment_id: 'test-deployment',
-          priority: 'normal',
-          threads_per_allocation: 1,
-          adaptive_allocations: {
+          modelId,
+          deploymentParams: {
+            deployment_id: 'test-deployment',
+            priority: 'normal',
+            threads_per_allocation: 1,
+          },
+          adaptiveAllocationsParams: {
             enabled: true,
             min_number_of_allocations: 0,
             max_number_of_allocations: 2,
@@ -590,18 +668,20 @@ describe('DeploymentParamsMapper', () => {
         });
 
         expect(
-          mapper.mapUiToApiDeploymentParams({
+          mapper.mapUiToApiDeploymentParams(modelId, {
             deploymentId: 'test-deployment',
             optimized: 'optimizedForIngest',
             adaptiveResources: true,
             vCPUUsage: 'medium',
           })
         ).toEqual({
-          model_id: modelId,
-          deployment_id: 'test-deployment',
-          priority: 'normal',
-          threads_per_allocation: 1,
-          adaptive_allocations: {
+          modelId,
+          deploymentParams: {
+            deployment_id: 'test-deployment',
+            priority: 'normal',
+            threads_per_allocation: 1,
+          },
+          adaptiveAllocationsParams: {
             enabled: true,
             min_number_of_allocations: 1,
             max_number_of_allocations: 32,
@@ -609,18 +689,20 @@ describe('DeploymentParamsMapper', () => {
         });
 
         expect(
-          mapper.mapUiToApiDeploymentParams({
+          mapper.mapUiToApiDeploymentParams(modelId, {
             deploymentId: 'test-deployment',
             optimized: 'optimizedForIngest',
             adaptiveResources: true,
             vCPUUsage: 'high',
           })
         ).toEqual({
-          model_id: modelId,
-          deployment_id: 'test-deployment',
-          priority: 'normal',
-          threads_per_allocation: 1,
-          adaptive_allocations: {
+          modelId,
+          deploymentParams: {
+            deployment_id: 'test-deployment',
+            priority: 'normal',
+            threads_per_allocation: 1,
+          },
+          adaptiveAllocationsParams: {
             enabled: true,
             min_number_of_allocations: 1,
             max_number_of_allocations: 99999,

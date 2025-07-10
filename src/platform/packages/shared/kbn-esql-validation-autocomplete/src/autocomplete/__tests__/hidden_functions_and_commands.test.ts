@@ -6,16 +6,17 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
-import { setTestFunctions } from '../../shared/test_functions';
+import { FunctionDefinitionTypes } from '@kbn/esql-ast';
+import { Location } from '@kbn/esql-ast/src/commands_registry/types';
+import { setTestFunctions } from '@kbn/esql-ast/src/definitions/utils/test_functions';
 import { setup } from './helpers';
 
 describe('hidden commands', () => {
   it('does not suggest hidden commands', async () => {
     const { suggest } = await setup();
     const suggestedCommands = (await suggest('FROM index | /')).map((s) => s.text);
-    expect(suggestedCommands).not.toContain('HIDDEN_COMMAND $0');
-    expect(suggestedCommands).toContain('EVAL $0');
+    expect(suggestedCommands).not.toContain('HIDDEN_COMMAND ');
+    expect(suggestedCommands).toContain('EVAL ');
     expect(suggestedCommands.every((s) => !s.toLowerCase().includes('HIDDEN_COMMAND'))).toBe(true);
   });
 });
@@ -28,19 +29,19 @@ describe('hidden functions', () => {
   it('does not suggest hidden scalar functions', async () => {
     setTestFunctions([
       {
-        type: 'eval',
+        type: FunctionDefinitionTypes.SCALAR,
         name: 'HIDDEN_FUNCTION',
         description: 'This is a hidden function',
         signatures: [{ params: [], returnType: 'text' }],
-        supportedCommands: ['eval'],
+        locationsAvailable: [Location.EVAL],
         ignoreAsSuggestion: true,
       },
       {
-        type: 'eval',
+        type: FunctionDefinitionTypes.SCALAR,
         name: 'VISIBLE_FUNCTION',
         description: 'This is a visible function',
         signatures: [{ params: [], returnType: 'text' }],
-        supportedCommands: ['eval'],
+        locationsAvailable: [Location.EVAL],
         ignoreAsSuggestion: false,
       },
     ]);
@@ -54,19 +55,19 @@ describe('hidden functions', () => {
   it('does not suggest hidden agg functions', async () => {
     setTestFunctions([
       {
-        type: 'agg',
+        type: FunctionDefinitionTypes.AGG,
         name: 'HIDDEN_FUNCTION',
         description: 'This is a hidden function',
         signatures: [{ params: [], returnType: 'text' }],
-        supportedCommands: ['stats'],
+        locationsAvailable: [Location.STATS],
         ignoreAsSuggestion: true,
       },
       {
-        type: 'agg',
+        type: FunctionDefinitionTypes.AGG,
         name: 'VISIBLE_FUNCTION',
         description: 'This is a visible function',
         signatures: [{ params: [], returnType: 'text' }],
-        supportedCommands: ['stats'],
+        locationsAvailable: [Location.STATS],
         ignoreAsSuggestion: false,
       },
     ]);
@@ -80,12 +81,17 @@ describe('hidden functions', () => {
   it('does not suggest hidden operators', async () => {
     setTestFunctions([
       {
-        type: 'builtin',
+        type: FunctionDefinitionTypes.OPERATOR,
         name: 'HIDDEN_OPERATOR',
         description: 'This is a hidden function',
-        supportedCommands: ['eval', 'where', 'row', 'sort'],
+        locationsAvailable: [
+          Location.EVAL,
+          Location.WHERE,
+          Location.ROW,
+          Location.SORT,
+          Location.STATS_BY,
+        ],
         ignoreAsSuggestion: true,
-        supportedOptions: ['by'],
         signatures: [
           {
             params: [
@@ -97,12 +103,17 @@ describe('hidden functions', () => {
         ],
       },
       {
-        type: 'builtin',
+        type: FunctionDefinitionTypes.OPERATOR,
         name: 'VISIBLE_OPERATOR',
         description: 'This is a visible function',
-        supportedCommands: ['eval', 'where', 'row', 'sort'],
+        locationsAvailable: [
+          Location.EVAL,
+          Location.WHERE,
+          Location.ROW,
+          Location.SORT,
+          Location.STATS_BY,
+        ],
         ignoreAsSuggestion: false,
-        supportedOptions: ['by'],
         signatures: [
           {
             params: [

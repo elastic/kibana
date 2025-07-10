@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable max-classes-per-file */
+
 import { omit, uniqBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { isValidNamespace } from '@kbn/fleet-plugin/common';
@@ -22,7 +24,10 @@ import {
   MonitorFields,
   type SyntheticsPrivateLocations,
 } from '../../../../common/runtime_types';
-import { DEFAULT_FIELDS } from '../../../../common/constants/monitor_defaults';
+import {
+  ALLOWED_SCHEDULES_IN_SECONDS,
+  DEFAULT_FIELDS,
+} from '../../../../common/constants/monitor_defaults';
 import { DEFAULT_COMMON_FIELDS } from '../../../../common/constants/monitor_defaults';
 import { formatKibanaNamespace } from '../../formatters/private_formatters';
 
@@ -96,6 +101,11 @@ export const getNormalizeCommonFields = ({
     // picking out keys specifically, so users can't add arbitrary fields
     [ConfigKey.ALERT_CONFIG]: getAlertConfig(monitor),
     [ConfigKey.LABELS]: monitor.fields || defaultFields[ConfigKey.LABELS],
+    [ConfigKey.MAINTENANCE_WINDOWS]:
+      monitor.maintenanceWindows || defaultFields[ConfigKey.MAINTENANCE_WINDOWS],
+    ...(monitor[ConfigKey.APM_SERVICE_NAME] && {
+      [ConfigKey.APM_SERVICE_NAME]: monitor[ConfigKey.APM_SERVICE_NAME],
+    }),
   };
   return { normalizedFields, errors };
 };
@@ -162,6 +172,14 @@ export const getMonitorSchedule = (
       };
     }
     if (schedule.includes('s')) {
+      if (!ALLOWED_SCHEDULES_IN_SECONDS.includes(schedule)) {
+        throw new InvalidScheduleError(
+          i18n.translate('xpack.synthetics.projectMonitorApi.validation.invalidSchedule', {
+            defaultMessage: 'Invalid schedule. Allowed schedules in seconds are {allowedSchedules}',
+            values: { allowedSchedules: ALLOWED_SCHEDULES_IN_SECONDS.join(', ') },
+          })
+        );
+      }
       return {
         number: schedule.replace('s', ''),
         unit: ScheduleUnit.SECONDS,
@@ -217,10 +235,9 @@ export const getMonitorLocations = ({
     }) || [];
   const privateLocs =
     monitorLocations.privateLocations?.map((locationName) => {
+      const loc = locationName.toLowerCase();
       const locationFound = allPrivateLocations.find(
-        (location) =>
-          location.label.toLowerCase() === locationName.toLowerCase() ||
-          location.id.toLowerCase() === locationName.toLowerCase()
+        (location) => location.label.toLowerCase() === loc || location.id.toLowerCase() === loc
       );
       if (locationFound) {
         return locationFound;
@@ -252,6 +269,13 @@ export class InvalidLocationError extends Error {
   constructor(message: string) {
     super(message);
     this.name = 'InvalidLocationError';
+  }
+}
+
+export class InvalidScheduleError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'InvalidScheduleError';
   }
 }
 

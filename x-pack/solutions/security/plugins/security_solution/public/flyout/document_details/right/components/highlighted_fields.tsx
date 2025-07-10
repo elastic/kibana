@@ -5,19 +5,17 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import React, { useMemo } from 'react';
+import React, { memo, useMemo, useState } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiInMemoryTable, EuiPanel, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { convertHighlightedFieldsToTableRow } from '../../shared/utils/highlighted_fields_helpers';
-import { useRuleWithFallback } from '../../../../detection_engine/rule_management/logic/use_rule_with_fallback';
-import { useBasicDataFromDetailsData } from '../../shared/hooks/use_basic_data_from_details_data';
 import { HighlightedFieldsCell } from './highlighted_fields_cell';
 import { CellActions } from '../../shared/components/cell_actions';
 import { HIGHLIGHTED_FIELDS_DETAILS_TEST_ID, HIGHLIGHTED_FIELDS_TITLE_TEST_ID } from './test_ids';
-import { useDocumentDetailsContext } from '../../shared/context';
 import { useHighlightedFields } from '../../shared/hooks/use_highlighted_fields';
+import { EditHighlightedFieldsButton } from './highlighted_fields_button';
 
 export interface HighlightedFieldsTableRow {
   /**
@@ -39,12 +37,18 @@ export interface HighlightedFieldsTableRow {
     values: string[] | null | undefined;
     /**
      * Maintain backwards compatibility // TODO remove when possible
+     * Only needed if alerts page flyout (which uses CellActions), NOT in the AI for SOC alert summary flyout.
      */
     scopeId: string;
     /**
-     * Boolean to indicate this field is shown in a preview
+     * If true, cell actions will be shown on hover
      */
-    isPreview: boolean;
+    showCellActions: boolean;
+    /**
+     * The indexName to be passed to the flyout preview panel
+     * when clicking on "Source event" id
+     */
+    ancestorsIndexName?: string;
   };
 }
 
@@ -76,63 +80,139 @@ const columns: Array<EuiBasicTableColumn<HighlightedFieldsTableRow>> = [
       values: string[] | null | undefined;
       scopeId: string;
       isPreview: boolean;
+      showCellActions: boolean;
+      ancestorsIndexName?: string;
     }) => (
-      <CellActions field={description.field} value={description.values}>
-        <HighlightedFieldsCell
-          values={description.values}
-          field={description.field}
-          originalField={description.originalField}
-        />
-      </CellActions>
+      <>
+        {description.showCellActions ? (
+          <CellActions field={description.field} value={description.values}>
+            <HighlightedFieldsCell
+              values={description.values}
+              field={description.field}
+              originalField={description.originalField}
+              scopeId={description.scopeId}
+              showPreview={true}
+              ancestorsIndexName={description.ancestorsIndexName}
+            />
+          </CellActions>
+        ) : (
+          <HighlightedFieldsCell
+            values={description.values}
+            field={description.field}
+            originalField={description.originalField}
+          />
+        )}
+      </>
     ),
   },
 ];
 
+export interface HighlightedFieldsProps {
+  /**
+   * An array of field objects with category and value
+   */
+  dataFormattedForFieldBrowser: TimelineEventsDetailsItem[];
+  /**
+   * User defined fields to highlight (defined on the rule)
+   */
+  investigationFields: string[];
+  /**
+   * Maintain backwards compatibility // TODO remove when possible
+   * Only needed if alerts page flyout (which uses CellActions), NOT in the AI for SOC alert summary flyout.
+   */
+  scopeId?: string;
+  /**
+   * If true, cell actions will be shown on hover.
+   * This is false for the AI for SOC alert summary page and true for the alerts page.
+   */
+  showCellActions: boolean;
+  /**
+   * If true, the edit button will be shown on hover (granted that the editHighlightedFieldsEnabled is also turned on).
+   * This is false by default (for the AI for SOC alert summary page) and will be true for the alerts page.
+   */
+  showEditButton?: boolean;
+  /**
+   * The indexName to be passed to the flyout preview panel
+   * when clicking on "Source event" id
+   */
+  ancestorsIndexName?: string;
+}
+
 /**
  * Component that displays the highlighted fields in the right panel under the Investigation section.
+ * It is used in both in the alerts page and the AI for SOC alert summary page. The latter has no CellActions enabled.
  */
-export const HighlightedFields: FC = () => {
-  const { dataFormattedForFieldBrowser, scopeId, isPreview } = useDocumentDetailsContext();
-  const { ruleId } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
-  const { loading, rule: maybeRule } = useRuleWithFallback(ruleId);
-
-  const highlightedFields = useHighlightedFields({
+export const HighlightedFields = memo(
+  ({
     dataFormattedForFieldBrowser,
-    investigationFields: maybeRule?.investigation_fields?.field_names ?? [],
-  });
-  const items = useMemo(
-    () => convertHighlightedFieldsToTableRow(highlightedFields, scopeId, isPreview),
-    [highlightedFields, scopeId, isPreview]
-  );
+    investigationFields,
+    scopeId = '',
+    showCellActions,
+    showEditButton = false,
+    ancestorsIndexName,
+  }: HighlightedFieldsProps) => {
+    const [isEditLoading, setIsEditLoading] = useState(false);
 
-  return (
-    <EuiFlexGroup direction="column" gutterSize="s">
-      <EuiFlexItem data-test-subj={HIGHLIGHTED_FIELDS_TITLE_TEST_ID}>
-        <EuiTitle size="xxs">
-          <h5>
-            <FormattedMessage
-              id="xpack.securitySolution.flyout.right.investigation.highlightedFields.highlightedFieldsTitle"
-              defaultMessage="Highlighted fields"
+    const highlightedFields = useHighlightedFields({
+      dataFormattedForFieldBrowser,
+      investigationFields,
+    });
+
+    const items = useMemo(
+      () =>
+        convertHighlightedFieldsToTableRow(
+          highlightedFields,
+          scopeId,
+          showCellActions,
+          ancestorsIndexName
+        ),
+      [highlightedFields, scopeId, showCellActions, ancestorsIndexName]
+    );
+
+    return (
+      <EuiFlexGroup direction="column" gutterSize="none">
+        <EuiFlexItem>
+          <EuiFlexGroup alignItems="center" css={{ minHeight: '40px' }}>
+            <EuiFlexItem data-test-subj={HIGHLIGHTED_FIELDS_TITLE_TEST_ID}>
+              <EuiTitle size="xxs">
+                <h5>
+                  <FormattedMessage
+                    id="xpack.securitySolution.flyout.right.investigation.highlightedFields.highlightedFieldsTitle"
+                    defaultMessage="Highlighted fields"
+                  />
+                </h5>
+              </EuiTitle>
+            </EuiFlexItem>
+            {showEditButton && (
+              <EuiFlexItem grow={false}>
+                <EditHighlightedFieldsButton
+                  customHighlightedFields={investigationFields}
+                  dataFormattedForFieldBrowser={dataFormattedForFieldBrowser}
+                  setIsEditLoading={setIsEditLoading}
+                />
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem data-test-subj={HIGHLIGHTED_FIELDS_DETAILS_TEST_ID}>
+          <EuiPanel hasBorder hasShadow={false}>
+            <EuiInMemoryTable
+              items={items}
+              columns={columns}
+              compressed
+              loading={isEditLoading}
+              message={
+                <FormattedMessage
+                  id="xpack.securitySolution.flyout.right.investigation.highlightedFields.noDataDescription"
+                  defaultMessage="There's no highlighted fields for this alert."
+                />
+              }
             />
-          </h5>
-        </EuiTitle>
-      </EuiFlexItem>
-      <EuiFlexItem data-test-subj={HIGHLIGHTED_FIELDS_DETAILS_TEST_ID}>
-        <EuiPanel hasBorder hasShadow={false}>
-          <EuiInMemoryTable
-            items={items}
-            columns={columns}
-            compressed
-            loading={loading}
-            message={
-              <FormattedMessage
-                id="xpack.securitySolution.flyout.right.investigation.highlightedFields.noDataDescription"
-                defaultMessage="There's no highlighted fields for this alert."
-              />
-            }
-          />
-        </EuiPanel>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-};
+          </EuiPanel>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+);
+
+HighlightedFields.displayName = 'HighlightedFields';

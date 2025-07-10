@@ -36,15 +36,16 @@ export interface RetrieveDocumentationParams {
   maxDocumentTokens?: number;
   /**
    * The token reduction strategy to apply for documents exceeding max token count.
-   * - truncate: Will keep the N first tokens
-   * - summarize: Will call the LLM asking to generate a contextualized summary of the document
+   * - "highlight": Use Elasticsearch semantic highlighter to build a summary (concatenating highlights)
+   * - "truncate": Will keep the N first tokens
+   * - "summarize": Will call the LLM asking to generate a contextualized summary of the document
    *
-   * Overall, `summarize` is way more efficient, but significantly slower, given that an additional
+   * Overall, `summarize` is more efficient, but significantly slower, given that an additional
    * LLM call will be performed.
    *
-   * Defaults to `summarize`
+   * Defaults to `highlight`
    */
-  tokenReductionStrategy?: 'truncate' | 'summarize';
+  tokenReductionStrategy?: 'highlight' | 'truncate' | 'summarize';
   /**
    * The request that initiated the task.
    */
@@ -53,20 +54,43 @@ export interface RetrieveDocumentationParams {
    * Id of the LLM connector to use for the task.
    */
   connectorId: string;
+  /**
+   * Optional functionCalling parameter to pass down to the inference APIs.
+   */
   functionCalling?: FunctionCallingMode;
+  /**
+   * Inferece ID to route the request to the right index to perform the search.
+   */
+  inferenceId: string;
 }
 
-export interface RetrievedDocument {
+/**
+ * Individual result item in a {@link RetrieveDocumentationResult}
+ */
+export interface RetrieveDocumentationResultDoc {
+  /** title of the document */
   title: string;
+  /** full url to the online documentation */
   url: string;
+  /** full content of the doc article */
   content: string;
+  /** true if content exceeded max token length and had to go through token reduction */
+  summarized: boolean;
 }
 
+/**
+ * Response type for {@link RetrieveDocumentationAPI}
+ */
 export interface RetrieveDocumentationResult {
+  /** whether the call was successful or not */
   success: boolean;
-  documents: RetrievedDocument[];
+  /** List of results for this search */
+  documents: RetrieveDocumentationResultDoc[];
 }
 
+/**
+ * Retrieve documentation API
+ */
 export type RetrieveDocumentationAPI = (
   options: RetrieveDocumentationParams
 ) => Promise<RetrieveDocumentationResult>;

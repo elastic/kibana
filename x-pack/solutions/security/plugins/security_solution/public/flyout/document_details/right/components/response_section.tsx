@@ -24,17 +24,17 @@ const KEY = 'response';
  * Most bottom section of the overview tab. It contains a summary of the response tab.
  */
 export const ResponseSection = memo(() => {
-  const { isPreview, getFieldsData, isPreviewMode } = useDocumentDetailsContext();
+  const { isRulePreview, getFieldsData, isPreviewMode } = useDocumentDetailsContext();
 
   const expanded = useExpandSection({ title: KEY, defaultValue: false });
   const eventKind = getField(getFieldsData('event.kind'));
 
-  const isNewNavigationEnabled = useIsExperimentalFeatureEnabled(
-    'newExpandableFlyoutNavigationEnabled'
+  const isNewNavigationEnabled = !useIsExperimentalFeatureEnabled(
+    'newExpandableFlyoutNavigationDisabled'
   );
 
   const content = useMemo(() => {
-    if (isPreview) {
+    if (isRulePreview) {
       return (
         <EuiCallOut
           iconType="documentation"
@@ -83,7 +83,7 @@ export const ResponseSection = memo(() => {
     }
 
     return <ResponseButton />;
-  }, [isPreview, isPreviewMode, isNewNavigationEnabled]);
+  }, [isRulePreview, isPreviewMode, isNewNavigationEnabled]);
 
   if (eventKind !== EventKind.signal) {
     return null;

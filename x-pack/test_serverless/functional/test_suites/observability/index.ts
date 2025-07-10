@@ -11,12 +11,16 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('serverless observability UI', function () {
     this.tags(['esGate']);
 
-    loadTestFile(require.resolve('./landing_page'));
     loadTestFile(require.resolve('./navigation'));
     loadTestFile(require.resolve('./dataset_quality'));
     loadTestFile(require.resolve('./discover/context_awareness'));
+    loadTestFile(require.resolve('./discover/logs'));
+    loadTestFile(require.resolve('./discover/embeddables'));
     loadTestFile(require.resolve('./onboarding'));
     loadTestFile(require.resolve('./rules/rules_list'));
+    // moved to feature flags config until custom roles in serverless are supported
+    // loadTestFile(require.resolve('./rules/custom_threshold_consumer'));
+    // loadTestFile(require.resolve('./rules/es_query_consumer'));
     loadTestFile(require.resolve('./cases'));
     loadTestFile(require.resolve('./advanced_settings'));
     loadTestFile(require.resolve('./ml'));

@@ -1,292 +1,5 @@
 {
   "properties": {
-    "cloud_defend": {
-      "properties": {
-        "indices": {
-          "properties": {
-            "alerts": {
-              "properties": {
-                "doc_count": {
-                  "type": "long"
-                },
-                "deleted": {
-                  "type": "long"
-                },
-                "size_in_bytes": {
-                  "type": "long"
-                },
-                "last_doc_timestamp": {
-                  "type": "date"
-                }
-              }
-            },
-            "file": {
-              "properties": {
-                "doc_count": {
-                  "type": "long"
-                },
-                "deleted": {
-                  "type": "long"
-                },
-                "size_in_bytes": {
-                  "type": "long"
-                },
-                "last_doc_timestamp": {
-                  "type": "date"
-                }
-              }
-            },
-            "process": {
-              "properties": {
-                "doc_count": {
-                  "type": "long"
-                },
-                "deleted": {
-                  "type": "long"
-                },
-                "size_in_bytes": {
-                  "type": "long"
-                },
-                "last_doc_timestamp": {
-                  "type": "date"
-                }
-              }
-            },
-            "latestPackageVersion": {
-              "type": "keyword"
-            },
-            "packageStatus": {
-              "properties": {
-                "status": {
-                  "type": "keyword"
-                },
-                "installedPackagePolicies": {
-                  "type": "long"
-                },
-                "healthyAgents": {
-                  "type": "long"
-                }
-              }
-            }
-          }
-        },
-        "pods_stats": {
-          "type": "array",
-          "items": {
-            "properties": {
-              "account_id": {
-                "type": "keyword"
-              },
-              "container_image_name": {
-                "type": "keyword"
-              },
-              "container_image_tag": {
-                "type": "keyword"
-              },
-              "pod_name": {
-                "type": "keyword"
-              },
-              "total_doc_count": {
-                "type": "long"
-              },
-              "process_doc_count": {
-                "type": "long"
-              },
-              "file_doc_count": {
-                "type": "long"
-              },
-              "alert_doc_count": {
-                "type": "long"
-              }
-            }
-          }
-        },
-        "accounts_stats": {
-          "type": "array",
-          "items": {
-            "properties": {
-              "account_id": {
-                "type": "keyword"
-              },
-              "cloud_provider": {
-                "type": "keyword"
-              },
-              "kubernetes_version": {
-                "type": "keyword"
-              },
-              "total_doc_count": {
-                "type": "long"
-              },
-              "file_doc_count": {
-                "type": "long"
-              },
-              "process_doc_count": {
-                "type": "long"
-              },
-              "alert_doc_count": {
-                "type": "long"
-              },
-              "agents_count": {
-                "type": "short"
-              },
-              "nodes_count": {
-                "type": "short"
-              },
-              "pods_count": {
-                "type": "short"
-              }
-            }
-          }
-        },
-        "installation_stats": {
-          "type": "array",
-          "items": {
-            "properties": {
-              "package_policy_id": {
-                "type": "keyword"
-              },
-              "package_version": {
-                "type": "keyword"
-              },
-              "agent_policy_id": {
-                "type": "keyword"
-              },
-              "created_at": {
-                "type": "date"
-              },
-              "agent_count": {
-                "type": "long"
-              },
-              "policy_yaml": {
-                "type": "keyword"
-              },
-              "selectors": {
-                "type": "array",
-                "items": {
-                  "properties": {
-                    "type": {
-                      "type": "keyword"
-                    },
-                    "name": {
-                      "type": "keyword"
-                    },
-                    "operation": {
-                      "type": "array",
-                      "items": {
-                        "type": "keyword"
-                      }
-                    },
-                    "containerImageFullName": {
-                      "type": "array",
-                      "items": {
-                        "type": "keyword"
-                      }
-                    },
-                    "containerImageName": {
-                      "type": "array",
-                      "items": {
-                        "type": "keyword"
-                      }
-                    },
-                    "containerImageTag": {
-                      "type": "array",
-                      "items": {
-                        "type": "keyword"
-                      }
-                    },
-                    "kubernetesClusterId": {
-                      "type": "array",
-                      "items": {
-                        "type": "keyword"
-                      }
-                    },
-                    "kubernetesClusterName": {
-                      "type": "array",
-                      "items": {
-                        "type": "keyword"
-                      }
-                    },
-                    "kubernetesNamespace": {
-                      "type": "array",
-                      "items": {
-                        "type": "keyword"
-                      }
-                    },
-                    "kubernetesPodLabel": {
-                      "type": "array",
-                      "items": {
-                        "type": "keyword"
-                      }
-                    },
-                    "kubernetesPodName": {
-                      "type": "array",
-                      "items": {
-                        "type": "keyword"
-                      }
-                    },
-                    "targetFilePath": {
-                      "type": "array",
-                      "items": {
-                        "type": "keyword"
-                      }
-                    },
-                    "ignoreVolumeFiles": {
-                      "type": "boolean"
-                    },
-                    "ignoreVolumeMounts": {
-                      "type": "boolean"
-                    },
-                    "processExecutable": {
-                      "type": "array",
-                      "items": {
-                        "type": "keyword"
-                      }
-                    },
-                    "processName": {
-                      "type": "array",
-                      "items": {
-                        "type": "keyword"
-                      }
-                    },
-                    "sessionLeaderInteractive": {
-                      "type": "boolean"
-                    }
-                  }
-                }
-              },
-              "responses": {
-                "type": "array",
-                "items": {
-                  "properties": {
-                    "type": {
-                      "type": "keyword"
-                    },
-                    "match": {
-                      "type": "array",
-                      "items": {
-                        "type": "keyword"
-                      }
-                    },
-                    "exclude": {
-                      "type": "array",
-                      "items": {
-                        "type": "keyword"
-                      }
-                    },
-                    "actions": {
-                      "type": "array",
-                      "items": {
-                        "type": "keyword"
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "cloud_security_posture": {
       "properties": {
         "indices": {
@@ -718,6 +431,25 @@
           "properties": {
             "detection_rules": {
               "properties": {
+                "spaces_usage": {
+                  "properties": {
+                    "total": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Total number of spaces where detection rules added"
+                      }
+                    },
+                    "rules_in_spaces": {
+                      "type": "array",
+                      "items": {
+                        "type": "long",
+                        "_meta": {
+                          "description": "Number of rules is each space"
+                        }
+                      }
+                    }
+                  }
+                },
                 "detection_rule_usage": {
                   "properties": {
                     "query": {
@@ -767,7 +499,7 @@
                         "notifications_disabled": {
                           "type": "long",
                           "_meta": {
-                            "description": "Number of notifications enabled"
+                            "description": "Number of notifications disabled"
                           }
                         },
                         "legacy_investigation_fields": {
@@ -801,13 +533,13 @@
                                 "two": {
                                   "type": "long",
                                   "_meta": {
-                                    "description": "Number of query rules configured with two suppression field"
+                                    "description": "Number of query rules configured with two suppression fields"
                                   }
                                 },
                                 "three": {
                                   "type": "long",
                                   "_meta": {
-                                    "description": "Number of query rules configured with three suppression field"
+                                    "description": "Number of query rules configured with three suppression fields"
                                   }
                                 }
                               }
@@ -836,6 +568,202 @@
                                 "description": "Number of query rules configured do not suppress alerts with missing fields"
                               }
                             }
+                          }
+                        },
+                        "response_actions": {
+                          "properties": {
+                            "enabled": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Number of enabled query rules configured with response actions"
+                              }
+                            },
+                            "disabled": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Number of disabled query rules configured with response actions"
+                              }
+                            },
+                            "response_actions": {
+                              "properties": {
+                                "endpoint": {
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Number of endpoint response actions within query rules"
+                                  }
+                                },
+                                "osquery": {
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Number of osquery response actions within query rules"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "has_exceptions": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of query rules with exceptions"
+                          }
+                        }
+                      }
+                    },
+                    "query_custom": {
+                      "properties": {
+                        "enabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of custom query rules enabled"
+                          }
+                        },
+                        "disabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of custom query rules disabled"
+                          }
+                        },
+                        "alerts": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of alerts generated by custom query rules"
+                          }
+                        },
+                        "cases": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of cases attached to custom query detection rule alerts"
+                          }
+                        },
+                        "legacy_notifications_enabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of custom query detection rules with legacy notifications enabled"
+                          }
+                        },
+                        "legacy_notifications_disabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of custom query detection rules with legacy notifications disabled"
+                          }
+                        },
+                        "notifications_enabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of custom query detection rules with custom notifications enabled"
+                          }
+                        },
+                        "notifications_disabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of custom query detection rules with custom notifications disabled"
+                          }
+                        },
+                        "legacy_investigation_fields": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of custom query detection rules using the legacy investigation fields type introduced only in 8.10 ESS"
+                          }
+                        },
+                        "alert_suppression": {
+                          "properties": {
+                            "enabled": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Number of enabled custom query rules configured with suppression"
+                              }
+                            },
+                            "disabled": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Number of disabled custom query rules configured with suppression"
+                              }
+                            },
+                            "suppressed_fields_count": {
+                              "properties": {
+                                "one": {
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Number of custom query rules configured with one suppression field"
+                                  }
+                                },
+                                "two": {
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Number of custom query rules configured with two suppression field"
+                                  }
+                                },
+                                "three": {
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Number of custom query rules configured with three suppression field"
+                                  }
+                                }
+                              }
+                            },
+                            "suppressed_per_time_period": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Number of custom query rules configured with suppression per time period"
+                              }
+                            },
+                            "suppressed_per_rule_execution": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Number of custom query rules configured with suppression per rule execution"
+                              }
+                            },
+                            "suppresses_missing_fields": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Number of custom query rules configured to suppress alerts with missing fields"
+                              }
+                            },
+                            "does_not_suppress_missing_fields": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Number of custom query rules configured do not suppress alerts with missing fields"
+                              }
+                            }
+                          }
+                        },
+                        "response_actions": {
+                          "properties": {
+                            "enabled": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Number of enabled custom query rules configured with response actions"
+                              }
+                            },
+                            "disabled": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Number of disabled custom query rules configured with response actions"
+                              }
+                            },
+                            "response_actions": {
+                              "properties": {
+                                "endpoint": {
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Number of endpoint response actions within custom query rules"
+                                  }
+                                },
+                                "osquery": {
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Number of osquery response actions within custom query rules"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "has_exceptions": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of custom query rules with exceptions"
                           }
                         }
                       }
@@ -957,6 +885,202 @@
                               }
                             }
                           }
+                        },
+                        "response_actions": {
+                          "properties": {
+                            "enabled": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Number of enabled threshold rules configured with response actions"
+                              }
+                            },
+                            "disabled": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Number of disabled threshold rules configured with response actions"
+                              }
+                            },
+                            "response_actions": {
+                              "properties": {
+                                "endpoint": {
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Number of endpoint response actions within threshold rules"
+                                  }
+                                },
+                                "osquery": {
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Number of osquery response actions within threshold rules"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "has_exceptions": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of threshold rules with exceptions"
+                          }
+                        }
+                      }
+                    },
+                    "threshold_custom": {
+                      "properties": {
+                        "enabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of custom threshold rules enabled"
+                          }
+                        },
+                        "disabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of custom threshold rules disabled"
+                          }
+                        },
+                        "alerts": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of alerts generated by custom threshold rules"
+                          }
+                        },
+                        "cases": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of cases attached to custom threshold detection rule alerts"
+                          }
+                        },
+                        "legacy_notifications_enabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of custom threshold rules with legacy notifications enabled"
+                          }
+                        },
+                        "legacy_notifications_disabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of custom threshold rules with legacy notifications disabled"
+                          }
+                        },
+                        "notifications_enabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of custom threshold rules with notifications enabled"
+                          }
+                        },
+                        "notifications_disabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of custom threshold rules with notifications disabled"
+                          }
+                        },
+                        "legacy_investigation_fields": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of custom threshold rules using the legacy investigation fields type introduced only in 8.10 ESS"
+                          }
+                        },
+                        "alert_suppression": {
+                          "properties": {
+                            "enabled": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Number of enabled custom threshold rules configured with suppression"
+                              }
+                            },
+                            "disabled": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Number of disabled custom threshold rules configured with suppression"
+                              }
+                            },
+                            "suppressed_fields_count": {
+                              "properties": {
+                                "one": {
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Number of custom threshold rules configured with one suppression field"
+                                  }
+                                },
+                                "two": {
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Number of custom threshold rules configured with two suppression field"
+                                  }
+                                },
+                                "three": {
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Number of custom threshold rules configured with three suppression field"
+                                  }
+                                }
+                              }
+                            },
+                            "suppressed_per_time_period": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Number of custom threshold rules configured with suppression per time period"
+                              }
+                            },
+                            "suppressed_per_rule_execution": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Number of custom threshold rules configured with suppression per rule execution"
+                              }
+                            },
+                            "suppresses_missing_fields": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Number of custom threshold rules configured to suppress alerts with missing fields"
+                              }
+                            },
+                            "does_not_suppress_missing_fields": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Number of custom threshold rules configured do not suppress alerts with missing fields"
+                              }
+                            }
+                          }
+                        },
+                        "response_actions": {
+                          "properties": {
+                            "enabled": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Number of enabled custom threshold rules configured with response actions"
+                              }
+                            },
+                            "disabled": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Number of disabled custom threshold rules configured with response actions"
+                              }
+                            },
+                            "response_actions": {
+                              "properties": {
+                                "endpoint": {
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Number of endpoint response actions within custom threshold rules"
+                                  }
+                                },
+                                "osquery": {
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Number of osquery response actions within custom threshold rules"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "has_exceptions": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of custom threshold rules with exceptions"
+                          }
                         }
                       }
                     },
@@ -1076,6 +1200,202 @@
                                 "description": "Number of eql rules configured do not suppress alerts with missing fields"
                               }
                             }
+                          }
+                        },
+                        "response_actions": {
+                          "properties": {
+                            "enabled": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Number of enabled eql rules configured with response actions"
+                              }
+                            },
+                            "disabled": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Number of disabled eql rules configured with response actions"
+                              }
+                            },
+                            "response_actions": {
+                              "properties": {
+                                "endpoint": {
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Number of endpoint response actions within eql rules"
+                                  }
+                                },
+                                "osquery": {
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Number of osquery response actions within eql rules"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "has_exceptions": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of EQL rules with exceptions"
+                          }
+                        }
+                      }
+                    },
+                    "eql_custom": {
+                      "properties": {
+                        "enabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of custom eql rules enabled"
+                          }
+                        },
+                        "disabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of custom eql rules disabled"
+                          }
+                        },
+                        "alerts": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of alerts generated by custom eql rules"
+                          }
+                        },
+                        "cases": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of cases attached to custom eql detection rule alerts"
+                          }
+                        },
+                        "legacy_notifications_enabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of custom EQL rules with legacy notifications enabled"
+                          }
+                        },
+                        "legacy_notifications_disabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of custom EQL rules with legacy notifications disabled"
+                          }
+                        },
+                        "notifications_enabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of custom EQL rules with notifications enabled"
+                          }
+                        },
+                        "notifications_disabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of custom EQL rules with notifications disabled"
+                          }
+                        },
+                        "legacy_investigation_fields": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of custom EQL rules using the legacy investigation fields type introduced only in 8.10 ESS"
+                          }
+                        },
+                        "alert_suppression": {
+                          "properties": {
+                            "enabled": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Number of enabled custom eql rules configured with suppression"
+                              }
+                            },
+                            "disabled": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Number of disabled custom eql rules configured with suppression"
+                              }
+                            },
+                            "suppressed_fields_count": {
+                              "properties": {
+                                "one": {
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Number of custom eql rules configured with one suppression field"
+                                  }
+                                },
+                                "two": {
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Number of custom eql rules configured with two suppression field"
+                                  }
+                                },
+                                "three": {
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Number of custom eql rules configured with three suppression field"
+                                  }
+                                }
+                              }
+                            },
+                            "suppressed_per_time_period": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Number of custom eql rules configured with suppression per time period"
+                              }
+                            },
+                            "suppressed_per_rule_execution": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Number of custom eql rules configured with suppression per rule execution"
+                              }
+                            },
+                            "suppresses_missing_fields": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Number of custom eql rules configured to suppress alerts with missing fields"
+                              }
+                            },
+                            "does_not_suppress_missing_fields": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Number of custom eql rules configured do not suppress alerts with missing fields"
+                              }
+                            }
+                          }
+                        },
+                        "response_actions": {
+                          "properties": {
+                            "enabled": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Number of enabled custom EQL rules configured with response actions"
+                              }
+                            },
+                            "disabled": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Number of disabled custom EQL rules configured with response actions"
+                              }
+                            },
+                            "response_actions": {
+                              "properties": {
+                                "endpoint": {
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Number of endpoint response actions within custom EQL rules"
+                                  }
+                                },
+                                "osquery": {
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Number of osquery response actions within custom EQL rules"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "has_exceptions": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of custom EQL rules with exceptions"
                           }
                         }
                       }
@@ -1197,6 +1517,202 @@
                               }
                             }
                           }
+                        },
+                        "response_actions": {
+                          "properties": {
+                            "enabled": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Number of enabled ML rules configured with response actions"
+                              }
+                            },
+                            "disabled": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Number of disabled ML rules configured with response actions"
+                              }
+                            },
+                            "response_actions": {
+                              "properties": {
+                                "endpoint": {
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Number of endpoint response actions within ML rules"
+                                  }
+                                },
+                                "osquery": {
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Number of osquery response actions within ML rules"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "has_exceptions": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of ML rules with exceptions"
+                          }
+                        }
+                      }
+                    },
+                    "machine_learning_custom": {
+                      "properties": {
+                        "enabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of custom machine_learning rules enabled"
+                          }
+                        },
+                        "disabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of custom machine_learning rules disabled"
+                          }
+                        },
+                        "alerts": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of alerts generated by custom machine_learning rules"
+                          }
+                        },
+                        "cases": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of cases attached to custom machine_learning detection rule alerts"
+                          }
+                        },
+                        "legacy_notifications_enabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of custom ML rules with legacy notifications enabled"
+                          }
+                        },
+                        "legacy_notifications_disabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of custom ML rules with legacy notifications disabled"
+                          }
+                        },
+                        "notifications_enabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of custom ML rules with notifications enabled"
+                          }
+                        },
+                        "notifications_disabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of custom ML rules with notifications disabled"
+                          }
+                        },
+                        "legacy_investigation_fields": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of custom ML rules using the legacy investigation fields type introduced only in 8.10 ESS"
+                          }
+                        },
+                        "alert_suppression": {
+                          "properties": {
+                            "enabled": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Number of enabled custom machine_learning rules configured with suppression"
+                              }
+                            },
+                            "disabled": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Number of disabled custom machine_learning rules configured with suppression"
+                              }
+                            },
+                            "suppressed_fields_count": {
+                              "properties": {
+                                "one": {
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Number of custom machine_learning rules configured with one suppression field"
+                                  }
+                                },
+                                "two": {
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Number of custom machine_learning rules configured with two suppression field"
+                                  }
+                                },
+                                "three": {
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Number of custom machine_learning rules configured with three suppression field"
+                                  }
+                                }
+                              }
+                            },
+                            "suppressed_per_time_period": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Number of custom machine_learning rules configured with suppression per time period"
+                              }
+                            },
+                            "suppressed_per_rule_execution": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Number of custom machine_learning rules configured with suppression per rule execution"
+                              }
+                            },
+                            "suppresses_missing_fields": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Number of custom machine_learning rules configured to suppress alerts with missing fields"
+                              }
+                            },
+                            "does_not_suppress_missing_fields": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Number of custom machine_learning rules configured do not suppress alerts with missing fields"
+                              }
+                            }
+                          }
+                        },
+                        "response_actions": {
+                          "properties": {
+                            "enabled": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Number of enabled custom ML rules configured with response actions"
+                              }
+                            },
+                            "disabled": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Number of disabled custom ML rules configured with response actions"
+                              }
+                            },
+                            "response_actions": {
+                              "properties": {
+                                "endpoint": {
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Number of endpoint response actions within custom ML rules"
+                                  }
+                                },
+                                "osquery": {
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Number of osquery response actions within custom ML rules"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "has_exceptions": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of custom ML rules with exceptions"
+                          }
                         }
                       }
                     },
@@ -1316,6 +1832,202 @@
                                 "description": "Number of threat_match rules configured do not suppress alerts with missing fields"
                               }
                             }
+                          }
+                        },
+                        "response_actions": {
+                          "properties": {
+                            "enabled": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Number of enabled threat match rules configured with response actions"
+                              }
+                            },
+                            "disabled": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Number of disabled threat match rules configured with response actions"
+                              }
+                            },
+                            "response_actions": {
+                              "properties": {
+                                "endpoint": {
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Number of endpoint response actions within threat match rules"
+                                  }
+                                },
+                                "osquery": {
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Number of osquery response actions within threat match rules"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "has_exceptions": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of threat match rules with exceptions"
+                          }
+                        }
+                      }
+                    },
+                    "threat_match_custom": {
+                      "properties": {
+                        "enabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of custom threat_match rules enabled"
+                          }
+                        },
+                        "disabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of custom threat_match rules disabled"
+                          }
+                        },
+                        "alerts": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of alerts generated by custom threat_match rules"
+                          }
+                        },
+                        "cases": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of cases attached to custom threat_match detection rule alerts"
+                          }
+                        },
+                        "legacy_notifications_enabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of custom IM rules with legacy notifications enabled"
+                          }
+                        },
+                        "legacy_notifications_disabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of custom IM rules with legacy notifications disabled"
+                          }
+                        },
+                        "notifications_enabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of custom IM rules with notifications enabled"
+                          }
+                        },
+                        "notifications_disabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of custom IM rules with notifications disabled"
+                          }
+                        },
+                        "legacy_investigation_fields": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of custom IM rules using the legacy investigation fields type introduced only in 8.10 ESS"
+                          }
+                        },
+                        "alert_suppression": {
+                          "properties": {
+                            "enabled": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Number of enabled custom threat_match rules configured with suppression"
+                              }
+                            },
+                            "disabled": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Number of disabled custom threat_match rules configured with suppression"
+                              }
+                            },
+                            "suppressed_fields_count": {
+                              "properties": {
+                                "one": {
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Number of custom threat_match rules configured with one suppression field"
+                                  }
+                                },
+                                "two": {
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Number of custom threat_match rules configured with two suppression field"
+                                  }
+                                },
+                                "three": {
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Number of custom threat_match rules configured with three suppression field"
+                                  }
+                                }
+                              }
+                            },
+                            "suppressed_per_time_period": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Number of custom threat_match rules configured with suppression per time period"
+                              }
+                            },
+                            "suppressed_per_rule_execution": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Number of custom threat_match rules configured with suppression per rule execution"
+                              }
+                            },
+                            "suppresses_missing_fields": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Number of custom threat_match rules configured to suppress alerts with missing fields"
+                              }
+                            },
+                            "does_not_suppress_missing_fields": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Number of custom threat_match rules configured do not suppress alerts with missing fields"
+                              }
+                            }
+                          }
+                        },
+                        "response_actions": {
+                          "properties": {
+                            "enabled": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Number of enabled custom threat match rules configured with response actions"
+                              }
+                            },
+                            "disabled": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Number of disabled custom threat match rules configured with response actions"
+                              }
+                            },
+                            "response_actions": {
+                              "properties": {
+                                "endpoint": {
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Number of endpoint response actions within custom threat match rules"
+                                  }
+                                },
+                                "osquery": {
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Number of osquery response actions within custom threat match rules"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "has_exceptions": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of custom threat match rules with exceptions"
                           }
                         }
                       }
@@ -1437,6 +2149,202 @@
                               }
                             }
                           }
+                        },
+                        "response_actions": {
+                          "properties": {
+                            "enabled": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Number of enabled new terms rules configured with response actions"
+                              }
+                            },
+                            "disabled": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Number of disabled new terms rules configured with response actions"
+                              }
+                            },
+                            "response_actions": {
+                              "properties": {
+                                "endpoint": {
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Number of endpoint response actions within new terms rules"
+                                  }
+                                },
+                                "osquery": {
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Number of osquery response actions within new terms rules"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "has_exceptions": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of New Terms rules with exceptions"
+                          }
+                        }
+                      }
+                    },
+                    "new_terms_custom": {
+                      "properties": {
+                        "enabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of custom new_terms rules enabled"
+                          }
+                        },
+                        "disabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of custom new_terms rules disabled"
+                          }
+                        },
+                        "alerts": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of alerts generated by custom new_terms rules"
+                          }
+                        },
+                        "cases": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of cases attached to custom new_terms detection rule alerts"
+                          }
+                        },
+                        "legacy_notifications_enabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of custom New Terms rules with legacy notifications enabled"
+                          }
+                        },
+                        "legacy_notifications_disabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of custom New Terms rules with legacy notifications disabled"
+                          }
+                        },
+                        "notifications_enabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of custom New Terms rules with notifications enabled"
+                          }
+                        },
+                        "notifications_disabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of custom New Terms rules with notifications disabled"
+                          }
+                        },
+                        "legacy_investigation_fields": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of custom New Terms rules using the legacy investigation fields type introduced only in 8.10 ESS"
+                          }
+                        },
+                        "alert_suppression": {
+                          "properties": {
+                            "enabled": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Number of enabled custom new_terms rules configured with suppression"
+                              }
+                            },
+                            "disabled": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Number of disabled custom new_terms rules configured with suppression"
+                              }
+                            },
+                            "suppressed_fields_count": {
+                              "properties": {
+                                "one": {
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Number of custom new_terms rules configured with one suppression field"
+                                  }
+                                },
+                                "two": {
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Number of custom new_terms rules configured with two suppression field"
+                                  }
+                                },
+                                "three": {
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Number of custom new_terms rules configured with three suppression field"
+                                  }
+                                }
+                              }
+                            },
+                            "suppressed_per_time_period": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Number of custom new_terms rules configured with suppression per time period"
+                              }
+                            },
+                            "suppressed_per_rule_execution": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Number of custom new_terms rules configured with suppression per rule execution"
+                              }
+                            },
+                            "suppresses_missing_fields": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Number of custom new_terms rules configured to suppress alerts with missing fields"
+                              }
+                            },
+                            "does_not_suppress_missing_fields": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Number of custom new_terms rules configured do not suppress alerts with missing fields"
+                              }
+                            }
+                          }
+                        },
+                        "response_actions": {
+                          "properties": {
+                            "enabled": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Number of enabled custom new terms rules configured with response actions"
+                              }
+                            },
+                            "disabled": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Number of disabled custom new terms rules configured with response actions"
+                              }
+                            },
+                            "response_actions": {
+                              "properties": {
+                                "endpoint": {
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Number of endpoint response actions within custom new terms rules"
+                                  }
+                                },
+                                "osquery": {
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Number of osquery response actions within custom new terms rules"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "has_exceptions": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of custom New Terms rules with exceptions"
+                          }
                         }
                       }
                     },
@@ -1556,6 +2464,202 @@
                                 "description": "Number of esql rules configured do not suppress alerts with missing fields"
                               }
                             }
+                          }
+                        },
+                        "response_actions": {
+                          "properties": {
+                            "enabled": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Number of enabled ES|QL rules configured with response actions"
+                              }
+                            },
+                            "disabled": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Number of disabled ES|QL rules configured with response actions"
+                              }
+                            },
+                            "response_actions": {
+                              "properties": {
+                                "endpoint": {
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Number of endpoint response actions within ES|QL rules"
+                                  }
+                                },
+                                "osquery": {
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Number of osquery response actions within ES|QL rules"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "has_exceptions": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of ES|QL rules with exceptions"
+                          }
+                        }
+                      }
+                    },
+                    "esql_custom": {
+                      "properties": {
+                        "enabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of custom esql rules enabled"
+                          }
+                        },
+                        "disabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of custom esql rules disabled"
+                          }
+                        },
+                        "alerts": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of alerts generated by custom esql rules"
+                          }
+                        },
+                        "cases": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of cases attached to custom esql detection rule alerts"
+                          }
+                        },
+                        "legacy_notifications_enabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of custom ES|QL rules with legacy notifications enabled"
+                          }
+                        },
+                        "legacy_notifications_disabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of custom ES|QL rules with legacy notifications disabled"
+                          }
+                        },
+                        "notifications_enabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of custom ES|QL rules with notifications enabled"
+                          }
+                        },
+                        "notifications_disabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of custom ES|QL rules with notifications disabled"
+                          }
+                        },
+                        "legacy_investigation_fields": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of custom ES|QL rules using the legacy investigation fields type introduced only in 8.10 ESS"
+                          }
+                        },
+                        "alert_suppression": {
+                          "properties": {
+                            "enabled": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Number of enabled custom esql rules configured with suppression"
+                              }
+                            },
+                            "disabled": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Number of disabled custom esql rules configured with suppression"
+                              }
+                            },
+                            "suppressed_fields_count": {
+                              "properties": {
+                                "one": {
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Number of custom esql rules configured with one suppression field"
+                                  }
+                                },
+                                "two": {
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Number of custom esql rules configured with two suppression field"
+                                  }
+                                },
+                                "three": {
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Number of custom esql rules configured with three suppression field"
+                                  }
+                                }
+                              }
+                            },
+                            "suppressed_per_time_period": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Number of custom esql rules configured with suppression per time period"
+                              }
+                            },
+                            "suppressed_per_rule_execution": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Number of custom esql rules configured with suppression per rule execution"
+                              }
+                            },
+                            "suppresses_missing_fields": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Number of custom esql rules configured to suppress alerts with missing fields"
+                              }
+                            },
+                            "does_not_suppress_missing_fields": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Number of custom esql rules configured do not suppress alerts with missing fields"
+                              }
+                            }
+                          }
+                        },
+                        "response_actions": {
+                          "properties": {
+                            "enabled": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Number of enabled custom ES|QL rules configured with response actions"
+                              }
+                            },
+                            "disabled": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Number of disabled custom ES|QL rules configured with response actions"
+                              }
+                            },
+                            "response_actions": {
+                              "properties": {
+                                "endpoint": {
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Number of endpoint response actions within custom ES|QL rules"
+                                  }
+                                },
+                                "osquery": {
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Number of osquery response actions within custom ES|QL rules"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "has_exceptions": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of custom ES|QL rules with exceptions"
                           }
                         }
                       }
@@ -1677,6 +2781,44 @@
                               }
                             }
                           }
+                        },
+                        "response_actions": {
+                          "properties": {
+                            "enabled": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Number of enabled prebuilt rules configured with response actions"
+                              }
+                            },
+                            "disabled": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Number of disabled prebuilt rules configured with response actions"
+                              }
+                            },
+                            "response_actions": {
+                              "properties": {
+                                "endpoint": {
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Number of endpoint response actions within prebuilt rules"
+                                  }
+                                },
+                                "osquery": {
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Number of osquery response actions within prebuilt rules"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "has_exceptions": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of prebuilt rules with exceptions"
+                          }
                         }
                       }
                     },
@@ -1797,6 +2939,44 @@
                               }
                             }
                           }
+                        },
+                        "response_actions": {
+                          "properties": {
+                            "enabled": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Number of enabled custom rules configured with response actions"
+                              }
+                            },
+                            "disabled": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Number of disabled custom rules configured with response actions"
+                              }
+                            },
+                            "response_actions": {
+                              "properties": {
+                                "endpoint": {
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Number of endpoint response actions within custom rules"
+                                  }
+                                },
+                                "osquery": {
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Number of osquery response actions within custom rules"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "has_exceptions": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of custom rules with exceptions"
+                          }
                         }
                       }
                     }
@@ -1877,6 +3057,60 @@
                         "_meta": {
                           "description": "True if this rule has a notification"
                         }
+                      },
+                      "has_legacy_investigation_field": {
+                        "type": "boolean",
+                        "_meta": {
+                          "description": "True if this rule has a legacy investigation field"
+                        }
+                      },
+                      "has_alert_suppression_missing_fields_strategy_do_not_suppress": {
+                        "type": "boolean",
+                        "_meta": {
+                          "description": "True if this rule has alert suppression missing fields strategy do not suppress"
+                        }
+                      },
+                      "has_alert_suppression_per_rule_execution": {
+                        "type": "boolean",
+                        "_meta": {
+                          "description": "True if this rule has alert suppression per rule execution"
+                        }
+                      },
+                      "has_alert_suppression_per_time_period": {
+                        "type": "boolean",
+                        "_meta": {
+                          "description": "True if this rule has alert suppression per time period"
+                        }
+                      },
+                      "alert_suppression_fields_count": {
+                        "type": "long",
+                        "_meta": {
+                          "description": "The number of alert suppression fields for this rule"
+                        }
+                      },
+                      "has_response_actions": {
+                        "type": "boolean",
+                        "_meta": {
+                          "description": "True if this rule has response actions"
+                        }
+                      },
+                      "has_response_actions_endpoint": {
+                        "type": "boolean",
+                        "_meta": {
+                          "description": "True if this rule has endpoint response actions"
+                        }
+                      },
+                      "has_response_actions_osquery": {
+                        "type": "boolean",
+                        "_meta": {
+                          "description": "True if this rule has osquery response actions"
+                        }
+                      },
+                      "has_exceptions": {
+                        "type": "boolean",
+                        "_meta": {
+                          "description": "True if this rule has exceptions"
+                        }
                       }
                     }
                   }
@@ -1886,6 +3120,314 @@
                     "all_rules": {
                       "properties": {
                         "eql": {
+                          "properties": {
+                            "failures": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "The number of failed rules"
+                              }
+                            },
+                            "top_failures": {
+                              "type": "array",
+                              "items": {
+                                "properties": {
+                                  "message": {
+                                    "type": "keyword",
+                                    "_meta": {
+                                      "description": "Failed rule message"
+                                    }
+                                  },
+                                  "count": {
+                                    "type": "long",
+                                    "_meta": {
+                                      "description": "Number of times the message occurred"
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "partial_failures": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "The number of partial failure rules"
+                              }
+                            },
+                            "top_partial_failures": {
+                              "type": "array",
+                              "items": {
+                                "properties": {
+                                  "message": {
+                                    "type": "keyword",
+                                    "_meta": {
+                                      "description": "Failed rule message"
+                                    }
+                                  },
+                                  "count": {
+                                    "type": "long",
+                                    "_meta": {
+                                      "description": "Number of times the message occurred"
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "succeeded": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "The number of successful rules"
+                              }
+                            },
+                            "index_duration": {
+                              "properties": {
+                                "max": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The max duration of time spent indexing alerts"
+                                  }
+                                },
+                                "avg": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The avg duration of time spent indexing alerts"
+                                  }
+                                },
+                                "min": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The min duration of time spent indexing alerts"
+                                  }
+                                }
+                              }
+                            },
+                            "search_duration": {
+                              "properties": {
+                                "max": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The max duration of time spent searching alerts"
+                                  }
+                                },
+                                "avg": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The avg duration of time spent searching alerts"
+                                  }
+                                },
+                                "min": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The min duration of time spent searching alerts"
+                                  }
+                                }
+                              }
+                            },
+                            "enrichment_duration": {
+                              "properties": {
+                                "max": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The max duration of time spent enriching alerts"
+                                  }
+                                },
+                                "avg": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The avg duration of time spent enriching alerts"
+                                  }
+                                },
+                                "min": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The min duration of time spent enriching alerts"
+                                  }
+                                }
+                              }
+                            },
+                            "gap_duration": {
+                              "properties": {
+                                "max": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The max duration"
+                                  }
+                                },
+                                "avg": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The avg duration"
+                                  }
+                                },
+                                "min": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The min duration"
+                                  }
+                                }
+                              }
+                            },
+                            "gap_count": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "The count of gaps"
+                              }
+                            }
+                          }
+                        },
+                        "new_terms": {
+                          "properties": {
+                            "failures": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "The number of failed rules"
+                              }
+                            },
+                            "top_failures": {
+                              "type": "array",
+                              "items": {
+                                "properties": {
+                                  "message": {
+                                    "type": "keyword",
+                                    "_meta": {
+                                      "description": "Failed rule message"
+                                    }
+                                  },
+                                  "count": {
+                                    "type": "long",
+                                    "_meta": {
+                                      "description": "Number of times the message occurred"
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "partial_failures": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "The number of partial failure rules"
+                              }
+                            },
+                            "top_partial_failures": {
+                              "type": "array",
+                              "items": {
+                                "properties": {
+                                  "message": {
+                                    "type": "keyword",
+                                    "_meta": {
+                                      "description": "Failed rule message"
+                                    }
+                                  },
+                                  "count": {
+                                    "type": "long",
+                                    "_meta": {
+                                      "description": "Number of times the message occurred"
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "succeeded": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "The number of successful rules"
+                              }
+                            },
+                            "index_duration": {
+                              "properties": {
+                                "max": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The max duration"
+                                  }
+                                },
+                                "avg": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The avg duration"
+                                  }
+                                },
+                                "min": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The min duration"
+                                  }
+                                }
+                              }
+                            },
+                            "search_duration": {
+                              "properties": {
+                                "max": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The max duration"
+                                  }
+                                },
+                                "avg": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The avg duration"
+                                  }
+                                },
+                                "min": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The min duration"
+                                  }
+                                }
+                              }
+                            },
+                            "enrichment_duration": {
+                              "properties": {
+                                "max": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The max duration"
+                                  }
+                                },
+                                "avg": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The avg duration"
+                                  }
+                                },
+                                "min": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The min duration"
+                                  }
+                                }
+                              }
+                            },
+                            "gap_duration": {
+                              "properties": {
+                                "max": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The max duration"
+                                  }
+                                },
+                                "avg": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The avg duration"
+                                  }
+                                },
+                                "min": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The min duration"
+                                  }
+                                }
+                              }
+                            },
+                            "gap_count": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "The count of gaps"
+                              }
+                            }
+                          }
+                        },
+                        "esql": {
                           "properties": {
                             "failures": {
                               "type": "long",
@@ -2989,6 +4531,314 @@
                             }
                           }
                         },
+                        "new_terms": {
+                          "properties": {
+                            "failures": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "The number of failed rules"
+                              }
+                            },
+                            "top_failures": {
+                              "type": "array",
+                              "items": {
+                                "properties": {
+                                  "message": {
+                                    "type": "keyword",
+                                    "_meta": {
+                                      "description": "Failed rule message"
+                                    }
+                                  },
+                                  "count": {
+                                    "type": "long",
+                                    "_meta": {
+                                      "description": "Number of times the message occurred"
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "partial_failures": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "The number of partial failure rules"
+                              }
+                            },
+                            "top_partial_failures": {
+                              "type": "array",
+                              "items": {
+                                "properties": {
+                                  "message": {
+                                    "type": "keyword",
+                                    "_meta": {
+                                      "description": "Failed rule message"
+                                    }
+                                  },
+                                  "count": {
+                                    "type": "long",
+                                    "_meta": {
+                                      "description": "Number of times the message occurred"
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "succeeded": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "The number of successful rules"
+                              }
+                            },
+                            "index_duration": {
+                              "properties": {
+                                "max": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The max duration"
+                                  }
+                                },
+                                "avg": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The avg duration"
+                                  }
+                                },
+                                "min": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The min duration"
+                                  }
+                                }
+                              }
+                            },
+                            "search_duration": {
+                              "properties": {
+                                "max": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The max duration"
+                                  }
+                                },
+                                "avg": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The avg duration"
+                                  }
+                                },
+                                "min": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The min duration"
+                                  }
+                                }
+                              }
+                            },
+                            "enrichment_duration": {
+                              "properties": {
+                                "max": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The max duration"
+                                  }
+                                },
+                                "avg": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The avg duration"
+                                  }
+                                },
+                                "min": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The min duration"
+                                  }
+                                }
+                              }
+                            },
+                            "gap_duration": {
+                              "properties": {
+                                "max": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The max duration"
+                                  }
+                                },
+                                "avg": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The avg duration"
+                                  }
+                                },
+                                "min": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The min duration"
+                                  }
+                                }
+                              }
+                            },
+                            "gap_count": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "The count of gaps"
+                              }
+                            }
+                          }
+                        },
+                        "esql": {
+                          "properties": {
+                            "failures": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "The number of failed rules"
+                              }
+                            },
+                            "top_failures": {
+                              "type": "array",
+                              "items": {
+                                "properties": {
+                                  "message": {
+                                    "type": "keyword",
+                                    "_meta": {
+                                      "description": "Failed rule message"
+                                    }
+                                  },
+                                  "count": {
+                                    "type": "long",
+                                    "_meta": {
+                                      "description": "Number of times the message occurred"
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "partial_failures": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "The number of partial failure rules"
+                              }
+                            },
+                            "top_partial_failures": {
+                              "type": "array",
+                              "items": {
+                                "properties": {
+                                  "message": {
+                                    "type": "keyword",
+                                    "_meta": {
+                                      "description": "Failed rule message"
+                                    }
+                                  },
+                                  "count": {
+                                    "type": "long",
+                                    "_meta": {
+                                      "description": "Number of times the message occurred"
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "succeeded": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "The number of successful rules"
+                              }
+                            },
+                            "index_duration": {
+                              "properties": {
+                                "max": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The max duration"
+                                  }
+                                },
+                                "avg": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The avg duration"
+                                  }
+                                },
+                                "min": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The min duration"
+                                  }
+                                }
+                              }
+                            },
+                            "search_duration": {
+                              "properties": {
+                                "max": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The max duration"
+                                  }
+                                },
+                                "avg": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The avg duration"
+                                  }
+                                },
+                                "min": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The min duration"
+                                  }
+                                }
+                              }
+                            },
+                            "enrichment_duration": {
+                              "properties": {
+                                "max": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The max duration"
+                                  }
+                                },
+                                "avg": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The avg duration"
+                                  }
+                                },
+                                "min": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The min duration"
+                                  }
+                                }
+                              }
+                            },
+                            "gap_duration": {
+                              "properties": {
+                                "max": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The max duration"
+                                  }
+                                },
+                                "avg": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The avg duration"
+                                  }
+                                },
+                                "min": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The min duration"
+                                  }
+                                }
+                              }
+                            },
+                            "gap_count": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "The count of gaps"
+                              }
+                            }
+                          }
+                        },
                         "threat_match": {
                           "properties": {
                             "failures": {
@@ -3786,6 +5636,314 @@
                     "custom_rules": {
                       "properties": {
                         "eql": {
+                          "properties": {
+                            "failures": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "The number of failed rules"
+                              }
+                            },
+                            "top_failures": {
+                              "type": "array",
+                              "items": {
+                                "properties": {
+                                  "message": {
+                                    "type": "keyword",
+                                    "_meta": {
+                                      "description": "Failed rule message"
+                                    }
+                                  },
+                                  "count": {
+                                    "type": "long",
+                                    "_meta": {
+                                      "description": "Number of times the message occurred"
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "partial_failures": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "The number of partial failure rules"
+                              }
+                            },
+                            "top_partial_failures": {
+                              "type": "array",
+                              "items": {
+                                "properties": {
+                                  "message": {
+                                    "type": "keyword",
+                                    "_meta": {
+                                      "description": "Failed rule message"
+                                    }
+                                  },
+                                  "count": {
+                                    "type": "long",
+                                    "_meta": {
+                                      "description": "Number of times the message occurred"
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "succeeded": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "The number of successful rules"
+                              }
+                            },
+                            "index_duration": {
+                              "properties": {
+                                "max": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The max duration"
+                                  }
+                                },
+                                "avg": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The avg duration"
+                                  }
+                                },
+                                "min": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The min duration"
+                                  }
+                                }
+                              }
+                            },
+                            "search_duration": {
+                              "properties": {
+                                "max": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The max duration"
+                                  }
+                                },
+                                "avg": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The avg duration"
+                                  }
+                                },
+                                "min": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The min duration"
+                                  }
+                                }
+                              }
+                            },
+                            "enrichment_duration": {
+                              "properties": {
+                                "max": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The max duration"
+                                  }
+                                },
+                                "avg": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The avg duration"
+                                  }
+                                },
+                                "min": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The min duration"
+                                  }
+                                }
+                              }
+                            },
+                            "gap_duration": {
+                              "properties": {
+                                "max": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The max duration"
+                                  }
+                                },
+                                "avg": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The avg duration"
+                                  }
+                                },
+                                "min": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The min duration"
+                                  }
+                                }
+                              }
+                            },
+                            "gap_count": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "The count of gaps"
+                              }
+                            }
+                          }
+                        },
+                        "new_terms": {
+                          "properties": {
+                            "failures": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "The number of failed rules"
+                              }
+                            },
+                            "top_failures": {
+                              "type": "array",
+                              "items": {
+                                "properties": {
+                                  "message": {
+                                    "type": "keyword",
+                                    "_meta": {
+                                      "description": "Failed rule message"
+                                    }
+                                  },
+                                  "count": {
+                                    "type": "long",
+                                    "_meta": {
+                                      "description": "Number of times the message occurred"
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "partial_failures": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "The number of partial failure rules"
+                              }
+                            },
+                            "top_partial_failures": {
+                              "type": "array",
+                              "items": {
+                                "properties": {
+                                  "message": {
+                                    "type": "keyword",
+                                    "_meta": {
+                                      "description": "Failed rule message"
+                                    }
+                                  },
+                                  "count": {
+                                    "type": "long",
+                                    "_meta": {
+                                      "description": "Number of times the message occurred"
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "succeeded": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "The number of successful rules"
+                              }
+                            },
+                            "index_duration": {
+                              "properties": {
+                                "max": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The max duration"
+                                  }
+                                },
+                                "avg": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The avg duration"
+                                  }
+                                },
+                                "min": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The min duration"
+                                  }
+                                }
+                              }
+                            },
+                            "search_duration": {
+                              "properties": {
+                                "max": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The max duration"
+                                  }
+                                },
+                                "avg": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The avg duration"
+                                  }
+                                },
+                                "min": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The min duration"
+                                  }
+                                }
+                              }
+                            },
+                            "enrichment_duration": {
+                              "properties": {
+                                "max": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The max duration"
+                                  }
+                                },
+                                "avg": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The avg duration"
+                                  }
+                                },
+                                "min": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The min duration"
+                                  }
+                                }
+                              }
+                            },
+                            "gap_duration": {
+                              "properties": {
+                                "max": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The max duration"
+                                  }
+                                },
+                                "avg": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The avg duration"
+                                  }
+                                },
+                                "min": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The min duration"
+                                  }
+                                }
+                              }
+                            },
+                            "gap_count": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "The count of gaps"
+                              }
+                            }
+                          }
+                        },
+                        "esql": {
                           "properties": {
                             "failures": {
                               "type": "long",
@@ -5117,6 +7275,364 @@
               "type": "long",
               "_meta": {
                 "description": "Total size of the unique Risk Score indices (MB)"
+              }
+            }
+          }
+        },
+        "exceptionsMetrics": {
+          "properties": {
+            "items_overview": {
+              "properties": {
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Total number of exception items"
+                  }
+                },
+                "has_expire_time": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Total number of exception items using expired time property"
+                  }
+                },
+                "are_expired": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Total number of expired exception items"
+                  }
+                },
+                "has_comments": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Total number of exception items that have comments"
+                  }
+                },
+                "entries": {
+                  "properties": {
+                    "match": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Total number of exception items that have match entries"
+                      }
+                    },
+                    "list": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Total number of exception items that have match entries"
+                      }
+                    },
+                    "nested": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Total number of exception items that have nested entries"
+                      }
+                    },
+                    "match_any": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Total number of exception items that have match_any entries"
+                      }
+                    },
+                    "exists": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Total number of exception items that have exists entries"
+                      }
+                    },
+                    "wildcard": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Total number of exception items that have wildcard entries"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "lists_overview": {
+              "properties": {
+                "detection": {
+                  "properties": {
+                    "lists": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Total number of exception lists of type \"detection\""
+                      }
+                    },
+                    "total_items": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Total number of exception list items of type \"detection\""
+                      }
+                    },
+                    "max_items_per_list": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Largest exception list of type \"detection\" - number of items"
+                      }
+                    },
+                    "min_items_per_list": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Smallest exception list of type \"detection\" - number of items"
+                      }
+                    },
+                    "median_items_per_list": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Average number of exception list items per list of type \"detection\""
+                      }
+                    }
+                  }
+                },
+                "rule_default": {
+                  "properties": {
+                    "lists": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Total number of exception lists of type \"rule_default\""
+                      }
+                    },
+                    "total_items": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Total number of exception list items of type \"rule_default\""
+                      }
+                    },
+                    "max_items_per_list": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Largest exception list of type \"rule_default\"- number of items"
+                      }
+                    },
+                    "min_items_per_list": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Smallest exception list of type \"rule_default\"- number of items"
+                      }
+                    },
+                    "median_items_per_list": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Average number of exception list items per list of type \"rule_default\""
+                      }
+                    }
+                  }
+                },
+                "endpoint": {
+                  "properties": {
+                    "lists": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Total number of exception lists of type \"endpoint\""
+                      }
+                    },
+                    "total_items": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Total number of exception list items of type \"endpoint\""
+                      }
+                    },
+                    "max_items_per_list": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Largest exception list of type \"endpoint\"- number of items"
+                      }
+                    },
+                    "min_items_per_list": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Smallest exception list of type \"endpoint\"- number of items"
+                      }
+                    },
+                    "median_items_per_list": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Average number of exception list items per list of type \"endpoint\""
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "valueListsMetrics": {
+          "properties": {
+            "lists_overview": {
+              "properties": {
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Total number of value lists"
+                  }
+                },
+                "binary": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Total number of value lists of type \"binary\""
+                  }
+                },
+                "boolean": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Total number of value lists of type \"boolean\""
+                  }
+                },
+                "byte": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Total number of value lists of type \"byte\""
+                  }
+                },
+                "date": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Total number of value lists of type \"date\""
+                  }
+                },
+                "date_nanos": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Total number of value lists of type \"date_nanos\""
+                  }
+                },
+                "date_range": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Total number of value lists of type \"date_range\""
+                  }
+                },
+                "double": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Total number of value lists of type \"double\""
+                  }
+                },
+                "double_range": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Total number of value lists of type \"double_range\""
+                  }
+                },
+                "float": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Total number of value lists of type \"float\""
+                  }
+                },
+                "float_range": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Total number of value lists of type \"float_range\""
+                  }
+                },
+                "geo_point": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Total number of value lists of type \"geo_point\""
+                  }
+                },
+                "geo_shape": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Total number of value lists of type \"geo_shape\""
+                  }
+                },
+                "half_float": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Total number of value lists of type \"half_float\""
+                  }
+                },
+                "integer": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Total number of value lists of type \"integer\""
+                  }
+                },
+                "integer_range": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Total number of value lists of type \"integer_range\""
+                  }
+                },
+                "ip": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Total number of value lists of type \"ip\""
+                  }
+                },
+                "ip_range": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Total number of value lists of type \"ip_range\""
+                  }
+                },
+                "keyword": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Total number of value lists of type \"keyword\""
+                  }
+                },
+                "long": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Total number of value lists of type \"long\""
+                  }
+                },
+                "long_range": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Total number of value lists of type \"long_range\""
+                  }
+                },
+                "shape": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Total number of value lists of type \"shape\""
+                  }
+                },
+                "short": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Total number of value lists of type \"short\""
+                  }
+                },
+                "text": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Total number of value lists of type \"text\""
+                  }
+                }
+              }
+            },
+            "items_overview": {
+              "properties": {
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Total number of value list items"
+                  }
+                },
+                "max_items_per_list": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Max number of value list items in a single list"
+                  }
+                },
+                "min_items_per_list": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Min number of value list items in a single list"
+                  }
+                },
+                "median_items_per_list": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Median number of value list items in a single list"
+                  }
+                }
               }
             }
           }

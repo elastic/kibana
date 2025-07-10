@@ -91,6 +91,7 @@ export const AGENT_FLYOUT = {
   MANAGED_TAB: 'managedTab',
   CONFIRM_AGENT_ENROLLMENT_BUTTON: 'ConfirmAgentEnrollmentButton',
   INCOMING_DATA_CONFIRMED_CALL_OUT: 'IncomingDataConfirmedCallOut',
+  PLATFORM_SELECTOR_EXTENDED: 'platformSelectorExtended',
   KUBERNETES_PLATFORM_TYPE: 'platformTypeKubernetes',
 };
 
@@ -129,6 +130,7 @@ export const SETTINGS_OUTPUTS = {
   ADD_HOST_ROW_BTN: 'fleetServerHosts.multiRowInput.addRowButton',
   WARNING_ELASTICSEARCH_CALLOUT: 'settingsOutputsFlyout.elasticsearchOutputTypeCallout',
   PRESET_INPUT: 'settingsOutputsFlyout.presetInput',
+  SSL_BUTTON: 'advancedSSLOptionsButton',
 };
 
 export const getSpecificSelectorId = (selector: string, id: number) => {

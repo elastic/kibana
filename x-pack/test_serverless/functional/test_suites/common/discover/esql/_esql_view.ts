@@ -41,12 +41,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       log.debug('load kibana index with default index pattern');
-      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
-      // and load a set of makelogs data
-      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
-      await esArchiver.load('test/functional/fixtures/es_archiver/kibana_sample_data_flights');
       await kibanaServer.importExport.load(
-        'test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern'
+        'src/platform/test/functional/fixtures/kbn_archiver/discover'
+      );
+      // and load a set of makelogs data
+      await esArchiver.loadIfNeeded(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
+      await esArchiver.load(
+        'src/platform/test/functional/fixtures/es_archiver/kibana_sample_data_flights'
+      );
+      await kibanaServer.importExport.load(
+        'src/platform/test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern'
       );
       await kibanaServer.uiSettings.replace(defaultSettings);
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
@@ -318,7 +324,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      it('should show available data views after switching to classic mode', async () => {
+      it('should show available data views and search results after switching to classic mode', async () => {
         await PageObjects.discover.selectTextBaseLang();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSearchingHasFinished();
@@ -329,10 +335,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.unifiedSearch.switchToDataViewMode();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSearchingHasFinished();
+        await PageObjects.discover.assertHitCount('14,004');
         const availableDataViews = await PageObjects.unifiedSearch.getDataViewList(
           'discover-dataView-switch-link'
         );
-        expect(availableDataViews).to.eql(['kibana_sample_data_flights', 'logstash-*']);
+        if (await testSubjects.exists('~nav-item-observability_project_nav')) {
+          expect(availableDataViews).to.eql([
+            'All logs',
+            'kibana_sample_data_flights',
+            'logstash-*',
+          ]);
+        } else {
+          expect(availableDataViews).to.eql(['kibana_sample_data_flights', 'logstash-*']);
+        }
         await dataViews.switchToAndValidate('kibana_sample_data_flights');
       });
     });
@@ -362,6 +377,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           const requestNames = await inspector.getRequestNames();
           expect(requestNames).to.contain('Table');
           expect(requestNames).to.contain('Visualization');
+          const request = await inspector.getRequest(1);
+          expect(request.command).to.be('POST /_query/async?drop_null_columns');
         });
       });
     });

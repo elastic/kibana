@@ -6,7 +6,8 @@
  */
 
 import React, { Component, Fragment, ReactNode } from 'react';
-import { EuiContextMenuItem, EuiLink } from '@elastic/eui';
+import { EuiContextMenuItem, EuiLink, UseEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 // @ts-ignore file exists, but ts def doesn't
 import { euiContextMenuPanelStyles } from '@elastic/eui/lib/components/context_menu/context_menu_panel.styles';
 import { i18n } from '@kbn/i18n';
@@ -28,7 +29,7 @@ interface Props {
   addFilters: ((filters: Filter[], actionId: string) => Promise<void>) | null;
   getFilterActions?: () => Promise<Action[]>;
   getActionContext?: () => ActionExecutionContext;
-  onSingleValueTrigger?: (actionId: string, key: string, value: RawValue) => void;
+  onSingleValueTrigger?: (actionId: string, key: string, value: RawValue) => Promise<void>;
   closeTooltip: () => void;
   features: TooltipFeature[];
   isLocked: boolean;
@@ -106,7 +107,7 @@ export class FeaturesTooltip extends Component<Props, State> {
     return this.state.currentFeature.actions.map((action) => {
       return (
         <EuiLink
-          className="mapFeatureTooltip_actionLinks"
+          css={componentStyles.actionLinksStyles}
           onClick={() => {
             if (action.onClick) {
               action.onClick();
@@ -125,8 +126,10 @@ export class FeaturesTooltip extends Component<Props, State> {
   _renderBackButton(label: string) {
     return (
       <EuiContextMenuItem
-        className="mapFeatureTooltip_backButton"
-        css={(euiTheme) => euiContextMenuPanelStyles(euiTheme).euiContextMenuPanel__title}
+        css={[
+          componentStyles.mapFeatureTooltipBackButtonStyles,
+          (euiTheme) => euiContextMenuPanelStyles(euiTheme).euiContextMenuPanel__title,
+        ]}
         onClick={this._showPropertiesView}
         icon="arrowLeft"
       >
@@ -199,3 +202,11 @@ export class FeaturesTooltip extends Component<Props, State> {
     );
   }
 }
+
+const componentStyles = {
+  actionLinksStyles: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      padding: euiTheme.size.xs,
+    }),
+  mapFeatureTooltipBackButtonStyles: css({ paddingLeft: '0' }),
+};

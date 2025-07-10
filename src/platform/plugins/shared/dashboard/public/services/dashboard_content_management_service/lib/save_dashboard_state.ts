@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { i18n } from '@kbn/i18n';
 import { getDashboardContentManagementCache } from '..';
 import type {
   DashboardCreateIn,
@@ -14,8 +15,7 @@ import type {
   DashboardUpdateIn,
   DashboardUpdateOut,
 } from '../../../../server/content_management';
-import { DASHBOARD_CONTENT_ID } from '../../../dashboard_constants';
-import { dashboardSaveToastStrings } from '../../../dashboard_container/_dashboard_container_strings';
+import { DASHBOARD_CONTENT_ID } from '../../../utils/telemetry_constants';
 import { getDashboardBackupService } from '../../dashboard_backup_service';
 import { contentManagementService, coreServices } from '../../kibana_services';
 import { SaveDashboardProps, SaveDashboardReturn } from '../types';
@@ -33,7 +33,7 @@ export const saveDashboardState = async ({
 
   const { attributes, references } = getSerializedState({
     controlGroupReferences,
-    generateNewIds: saveOptions.saveAsCopy,
+    generateNewIds: saveOptions.saveAsCopy, // When saving a dashboard as a copy, we should generate new IDs for all panels
     dashboardState,
     panelReferences,
     searchSourceReferences,
@@ -67,7 +67,10 @@ export const saveDashboardState = async ({
 
     if (newId) {
       coreServices.notifications.toasts.addSuccess({
-        title: dashboardSaveToastStrings.getSuccessString(dashboardState.title),
+        title: i18n.translate('dashboard.dashboardWasSavedSuccessMessage', {
+          defaultMessage: `Dashboard ''{title}'' was saved`,
+          values: { title: dashboardState.title },
+        }),
         className: 'eui-textBreakWord',
         'data-test-subj': 'saveDashboardSuccess',
       });
@@ -85,7 +88,13 @@ export const saveDashboardState = async ({
     return { id: newId, references };
   } catch (error) {
     coreServices.notifications.toasts.addDanger({
-      title: dashboardSaveToastStrings.getFailureString(dashboardState.title, error.message),
+      title: i18n.translate('dashboard.dashboardWasNotSavedDangerMessage', {
+        defaultMessage: `Dashboard ''{title}'' was not saved. Error: {errorMessage}`,
+        values: {
+          title: dashboardState.title,
+          errorMessage: error.message,
+        },
+      }),
       'data-test-subj': 'saveDashboardFailure',
     });
     return { error };

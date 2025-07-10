@@ -6,19 +6,18 @@
  */
 
 import { OPENAI_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/openai/constants';
-import { v4 as uuidv4 } from 'uuid';
 import { BEDROCK_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/bedrock/constants';
+import { GEMINI_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/gemini/constants';
+import { INFERENCE_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/inference/constants';
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { BaseLanguageModel } from '@langchain/core/language_models/base';
 import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
-import {
-  ActionsClientChatOpenAI,
-  ActionsClientSimpleChatModel,
-  getDefaultArguments,
-} from '@kbn/langchain/server';
-import { GEMINI_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/gemini/constants';
+import { getDefaultArguments } from '@kbn/langchain/server';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+
 import { Prompt, QuestionRewritePrompt } from '../../common/prompt';
+import { isEISConnector } from '../utils/eis';
 
 export const getChatParams = async (
   {
@@ -29,10 +28,11 @@ export const getChatParams = async (
   }: { connectorId: string; model?: string; prompt: string; citations: boolean },
   {
     actions,
+    inference,
     request,
-    logger,
   }: {
     actions: ActionsPluginStartContract;
+    inference: InferenceServerStart;
     logger: Logger;
     request: KibanaRequest;
   }
@@ -41,86 +41,72 @@ export const getChatParams = async (
   chatPrompt: string;
   questionRewritePrompt: string;
   connector: Connector;
+  summarizationModel?: string;
 }> => {
-  const abortController = new AbortController();
-  const abortSignal = abortController.signal;
+  let summarizationModel = model;
   const actionsClient = await actions.getActionsClientWithRequest(request);
   const connector = await actionsClient.get({ id: connectorId });
-  let chatModel;
-  let chatPrompt;
-  let questionRewritePrompt;
-  let llmType;
 
-  switch (connector.actionTypeId) {
-    case OPENAI_CONNECTOR_ID:
-      chatModel = new ActionsClientChatOpenAI({
-        actionsClient,
-        logger,
-        connectorId,
-        model: model || connector?.config?.defaultModel,
-        traceId: uuidv4(),
-        signal: abortSignal,
-        temperature: getDefaultArguments().temperature,
-        // prevents the agent from retrying on failure
-        // failure could be due to bad connector, we should deliver that result to the client asap
-        maxRetries: 0,
-      });
-      chatPrompt = Prompt(prompt, {
-        citations,
-        context: true,
-        type: 'openai',
-      });
-      questionRewritePrompt = QuestionRewritePrompt({
-        type: 'openai',
-      });
-      break;
-    case BEDROCK_CONNECTOR_ID:
-      llmType = 'bedrock';
-      chatModel = new ActionsClientSimpleChatModel({
-        actionsClient,
-        logger,
-        connectorId,
-        model,
-        llmType,
-        temperature: getDefaultArguments(llmType).temperature,
-        streaming: true,
-      });
-      chatPrompt = Prompt(prompt, {
-        citations,
-        context: true,
-        type: 'anthropic',
-      });
-      questionRewritePrompt = QuestionRewritePrompt({
-        type: 'anthropic',
-      });
-      break;
-    case GEMINI_CONNECTOR_ID:
-      llmType = 'gemini';
-      chatModel = new ActionsClientSimpleChatModel({
-        actionsClient,
-        logger,
-        connectorId,
-        model,
-        llmType,
-        temperature: getDefaultArguments(llmType).temperature,
-        streaming: true,
-      });
-      chatPrompt = Prompt(prompt, {
-        citations,
-        context: true,
-        type: 'gemini',
-      });
-      questionRewritePrompt = QuestionRewritePrompt({
-        type: 'gemini',
-      });
-      break;
-    default:
-      break;
+  let llmType: string;
+  let modelType: 'openai' | 'anthropic' | 'gemini';
+
+  if (isEISConnector(connector)) {
+    llmType = 'bedrock';
+    modelType = 'anthropic';
+    if (!summarizationModel && connector.config?.providerConfig?.model_id) {
+      summarizationModel = connector.config?.providerConfig?.model_id;
+    }
+  } else {
+    switch (connector.actionTypeId) {
+      case INFERENCE_CONNECTOR_ID:
+        llmType = 'inference';
+        modelType = 'openai';
+        break;
+      case OPENAI_CONNECTOR_ID:
+        llmType = 'openai';
+        modelType = 'openai';
+        break;
+      case BEDROCK_CONNECTOR_ID:
+        llmType = 'bedrock';
+        modelType = 'anthropic';
+        break;
+      case GEMINI_CONNECTOR_ID:
+        llmType = 'gemini';
+        modelType = 'gemini';
+        break;
+      default:
+        throw new Error(`Invalid connector type: ${connector.actionTypeId}`);
+    }
   }
 
-  if (!chatModel || !chatPrompt || !questionRewritePrompt) {
-    throw new Error('Invalid connector id');
-  }
+  const chatPrompt = Prompt(prompt, {
+    citations,
+    context: true,
+    type: modelType,
+  });
 
-  return { chatModel, chatPrompt, questionRewritePrompt, connector };
+  const questionRewritePrompt = QuestionRewritePrompt({
+    type: modelType,
+  });
+
+  const chatModel = await inference.getChatModel({
+    request,
+    connectorId,
+    chatModelOptions: {
+      model: summarizationModel || connector?.config?.defaultModel,
+      temperature: getDefaultArguments(llmType).temperature,
+      // prevents the agent from retrying on failure
+      // failure could be due to bad connector, we should deliver that result to the client asap
+      maxRetries: 0,
+      telemetryMetadata: { pluginId: 'search_playground' }, // hard-coded because the pluginId is not snake cased and the telemetry expects snake case
+    },
+  });
+
+  return {
+    chatModel,
+    chatPrompt,
+    questionRewritePrompt,
+    connector,
+    summarizationModel: summarizationModel || connector?.config?.defaultModel,
+  };
 };

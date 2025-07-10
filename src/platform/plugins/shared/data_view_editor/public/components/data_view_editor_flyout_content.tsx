@@ -8,18 +8,22 @@
  */
 
 import React, { useEffect, useCallback } from 'react';
+import { css } from '@emotion/react';
 import {
   EuiTitle,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
-  EuiLoadingSpinner,
   EuiLink,
+  EuiSkeletonRectangle,
+  EuiSkeletonTitle,
+  type UseEuiTheme,
 } from '@elastic/eui';
 import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
 import useObservable from 'react-use/lib/useObservable';
 import { INDEX_PATTERN_TYPE } from '@kbn/data-views-plugin/public';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 
 import {
   DataView,
@@ -92,6 +96,8 @@ const IndexPatternEditorFlyoutContentComponent = ({
   showManagementLink,
   dataViewEditorService,
 }: Props) => {
+  const styles = useMemoCss(componentStyles);
+
   const {
     services: { application, dataViews, uiSettings, overlays, docLinks },
   } = useKibana<DataViewEditorContext>();
@@ -142,7 +148,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
           params: {
             rollup_index: rollupIndex,
           },
-          aggs: rollupIndicesCapabilities[rollupIndex].aggs,
+          aggs: rollupCaps?.aggs,
         };
       }
 
@@ -176,6 +182,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
   const isLoadingSources = useObservable(dataViewEditorService.isLoadingSources$, true);
   const existingDataViewNames = useObservable(dataViewEditorService.dataViewNames$);
   const rollupIndex = useObservable(dataViewEditorService.rollupIndex$);
+  const rollupCaps = useObservable(dataViewEditorService.rollupCaps$);
   const rollupIndicesCapabilities = useObservable(dataViewEditorService.rollupIndicesCaps$, {});
 
   useDebounce(
@@ -194,7 +201,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
     dataViewEditorService.setType(type);
   }, [dataViewEditorService, type]);
 
-  const getRollupIndices = (rollupCaps: RollupIndicesCapsResponse) => Object.keys(rollupCaps);
+  const getRollupIndices = (rollupCapsRes: RollupIndicesCapsResponse) => Object.keys(rollupCapsRes);
 
   const onTypeChange = useCallback(
     (newType: INDEX_PATTERN_TYPE) => {
@@ -209,7 +216,22 @@ const IndexPatternEditorFlyoutContentComponent = ({
   );
 
   if (isLoadingSources || !existingDataViewNames) {
-    return <EuiLoadingSpinner size="xl" />;
+    return (
+      <EuiFlexGroup css={styles.loadingWrapper}>
+        <EuiFlexItem>
+          <EuiSkeletonTitle size="l" css={styles.skeletonTitle} />
+          {Array.from({ length: 3 }).map((_, index) => (
+            <React.Fragment key={index}>
+              <EuiSpacer size="xl" />
+              <EuiSkeletonRectangle width="100%" height="48px" />
+            </React.Fragment>
+          ))}
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiSkeletonRectangle width="100%" height="160px" />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
   }
 
   const showIndexPatternTypeSelect = () =>
@@ -242,7 +264,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
   return (
     <FlyoutPanels.Group flyoutClassName={'indexPatternEditorFlyout'} maxWidth={1180}>
       <FlyoutPanels.Item
-        className="fieldEditor__mainFlyoutPanel"
+        css={styles.flyoutPanel}
         data-test-subj="indexPatternEditorFlyout"
         border="right"
       >
@@ -262,7 +284,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
         )}
         <Form
           form={form}
-          className="indexPatternEditor__form"
+          css={styles.patternEditorForm}
           error={form.getErrors()}
           isInvalid={form.isSubmitted && !form.isValid && form.getErrors().length}
           data-validation-error={form.getErrors().length ? '1' : '0'}
@@ -349,6 +371,23 @@ const IndexPatternEditorFlyoutContentComponent = ({
       </FlyoutPanels.Item>
     </FlyoutPanels.Group>
   );
+};
+
+const componentStyles = {
+  patternEditorForm: css({
+    flexGrow: 1,
+  }),
+  flyoutPanel: css({
+    display: 'flex',
+    flexDirection: 'column',
+  }),
+  loadingWrapper: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      margin: euiTheme.size.l,
+    }),
+  skeletonTitle: css({
+    width: '25vw',
+  }),
 };
 
 export const IndexPatternEditorFlyoutContent = React.memo(IndexPatternEditorFlyoutContentComponent);

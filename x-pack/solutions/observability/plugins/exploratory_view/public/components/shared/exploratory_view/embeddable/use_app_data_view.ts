@@ -45,6 +45,7 @@ export const useAppDataView = ({
         setDataViews((prevState) => ({ ...(prevState ?? {}), [seriesDataType]: indPattern }));
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dataViewTitle, seriesDataType, JSON.stringify(series)]);
 
   return { dataViews, loading: loading && !dataViews[seriesDataType] };

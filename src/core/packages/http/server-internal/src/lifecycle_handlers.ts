@@ -13,7 +13,10 @@ import type {
   OnPreResponseInfo,
   KibanaRequest,
 } from '@kbn/core-http-server';
-import { isSafeMethod } from '@kbn/core-http-router-server-internal';
+import {
+  getWarningHeaderMessageFromRouteDeprecation,
+  isSafeMethod,
+} from '@kbn/core-http-router-server-internal';
 import { Logger } from '@kbn/logging';
 import { KIBANA_BUILD_NR_HEADER } from '@kbn/core-http-common';
 import { HttpConfig } from './http_config';
@@ -116,7 +119,25 @@ export const createCustomHeadersPreResponseHandler = (config: HttpConfig): OnPre
   };
 
   return (request, response, toolkit) => {
-    return toolkit.next({ headers: { ...additionalHeaders } });
+    return toolkit.next({ headers: additionalHeaders });
+  };
+};
+
+export const createDeprecationWarningHeaderPreResponseHandler = (
+  kibanaVersion: string
+): OnPreResponseHandler => {
+  return (request, response, toolkit) => {
+    // we don't want to overwrite the header value
+    if (!request.route.options.deprecated || response.headers?.warning) {
+      return toolkit.next();
+    }
+    const additionalHeaders = {
+      warning: getWarningHeaderMessageFromRouteDeprecation(
+        request.route.options.deprecated,
+        kibanaVersion
+      ),
+    };
+    return toolkit.next({ headers: additionalHeaders });
   };
 };
 

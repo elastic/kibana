@@ -10,15 +10,7 @@ import React, { useCallback, useMemo } from 'react';
 
 import { useEuiTheme, EuiButtonEmpty, EuiSpacer, EuiText, EuiCallOut } from '@elastic/eui';
 import type { RecursivePartial, AxisStyle, PartialTheme, BarSeriesProps } from '@elastic/charts';
-import {
-  Chart,
-  Settings,
-  Axis,
-  ScaleType,
-  Position,
-  BarSeries,
-  LEGACY_LIGHT_THEME,
-} from '@elastic/charts';
+import { Chart, Settings, Axis, ScaleType, Position, BarSeries } from '@elastic/charts';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -73,8 +65,15 @@ export const FeatureImportanceSummaryPanel: FC<FeatureImportanceSummaryPanelProp
 }) => {
   const { euiTheme } = useEuiTheme();
   const {
-    services: { docLinks },
+    services: {
+      docLinks,
+      charts: {
+        theme: { useChartsBaseTheme },
+      },
+    },
   } = useMlKibana();
+
+  const baseTheme = useChartsBaseTheme();
 
   const theme: PartialTheme = useMemo(() => {
     const euiColorMediumShade = euiTheme.colors.mediumShade;
@@ -265,7 +264,7 @@ export const FeatureImportanceSummaryPanel: FC<FeatureImportanceSummaryPanelProp
         docsLink={
           <EuiButtonEmpty
             target="_blank"
-            iconType="help"
+            iconType="question"
             iconSide="left"
             size="xs"
             color="primary"
@@ -299,8 +298,7 @@ export const FeatureImportanceSummaryPanel: FC<FeatureImportanceSummaryPanelProp
                 <Settings
                   rotation={90}
                   theme={theme}
-                  // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
-                  baseTheme={LEGACY_LIGHT_THEME}
+                  baseTheme={baseTheme}
                   showLegend={showLegend}
                   locale={i18n.getLocale()}
                 />

@@ -32,28 +32,26 @@ export const useBrowserEsResults = ({
   return useEsSearch(
     createEsParams({
       index: SYNTHETICS_INDEX_PATTERN,
-      body: {
-        sort: [
-          {
-            '@timestamp': 'desc',
-          },
-        ],
-        query: {
-          bool: {
-            filter: [
-              {
-                terms: {
-                  'synthetics.type': ['heartbeat/summary', 'journey/start'],
-                },
+      sort: [
+        {
+          '@timestamp': 'desc',
+        },
+      ],
+      query: {
+        bool: {
+          filter: [
+            {
+              terms: {
+                'synthetics.type': ['heartbeat/summary', 'journey/start'],
               },
+            },
 
-              {
-                term: {
-                  test_run_id: testRunId,
-                },
+            {
+              term: {
+                test_run_id: testRunId,
               },
-            ],
-          },
+            },
+          ],
         },
       },
       size: 1000,
@@ -189,6 +187,7 @@ export const useBrowserRunOnceMonitors = ({
     return Promise.resolve(null);
     // FIXME: Dario thinks there is a better way to do this but
     // he's getting tired and maybe the Synthetics folks can fix it
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [checkGroupCheckSum, setCheckGroupResults, lastRefresh]);
 
   // Whenever a new found document is fetched, update lastUpdated

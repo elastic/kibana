@@ -8,7 +8,6 @@
 import type { CoreStart } from '@kbn/core/public';
 import type { RefreshInterval } from '@kbn/data-plugin/common';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import type { EmbeddableInput } from '@kbn/embeddable-plugin/common';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import type { MlEntityField } from '@kbn/ml-anomaly-utils';
 import type {
@@ -19,11 +18,12 @@ import type {
   PublishesUnifiedSearch,
   PublishingSubject,
   PublishesTimeRange,
-  PublishesWritablePanelTitle,
+  PublishesWritableTitle,
   PublishesDataViews,
   SerializedTitles,
 } from '@kbn/presentation-publishing';
 import { type BehaviorSubject } from 'rxjs';
+import type { SeverityThreshold } from '../../common/types/anomalies';
 import type { JobId } from '../../common/types/anomaly_detection_jobs';
 import type { MlDependencies } from '../application/app';
 import type { MlCapabilitiesService } from '../application/capabilities/check_capabilities';
@@ -75,7 +75,7 @@ export interface AnomalySwimlaneEmbeddableCustomInput
   filters?: Filter[];
   query?: Query;
   refreshConfig?: RefreshInterval;
-  timeRange: TimeRange | undefined;
+  timeRange?: TimeRange;
 }
 
 export interface AnomalySwimlaneServices {
@@ -111,7 +111,7 @@ export interface AnomalyChartsEmbeddableRuntimeState {
   jobIds: JobId[];
   maxSeriesToPlot: number;
   // Embeddable inputs which are not included in the default interface
-  severityThreshold?: number;
+  severityThreshold?: SeverityThreshold[];
   selectedEntities?: MlEntityField[];
 }
 export interface AnomalyChartsEmbeddableOverridableState
@@ -121,10 +121,10 @@ export interface AnomalyChartsEmbeddableOverridableState
 export interface AnomalyChartsComponentApi {
   jobIds$: PublishingSubject<JobId[]>;
   maxSeriesToPlot$: PublishingSubject<number>;
-  severityThreshold$: PublishingSubject<number>;
+  severityThreshold$: PublishingSubject<SeverityThreshold[]>;
   selectedEntities$: PublishingSubject<MlEntityField[] | undefined>;
   updateUserInput: (input: AnomalyChartsEmbeddableOverridableState) => void;
-  updateSeverityThreshold: (v?: number) => void;
+  updateSeverityThreshold: (v?: SeverityThreshold[]) => void;
   updateSelectedEntities: (entities?: MlEntityField[] | undefined) => void;
 }
 export interface AnomalyChartsDataLoadingApi {
@@ -144,7 +144,7 @@ export type AnomalyChartsApi = AnomalyChartsComponentApi & AnomalyChartsDataLoad
 
 export type AnomalyChartsEmbeddableApi = MlEmbeddableBaseApi<AnomalyChartsEmbeddableState> &
   PublishesDataViews &
-  PublishesWritablePanelTitle &
+  PublishesWritableTitle &
   HasEditCapabilities &
   AnomalyChartsApi;
 
@@ -192,8 +192,9 @@ export interface SingleMetricViewerEmbeddableCustomInput
   timeRange: TimeRange | undefined;
 }
 
-export type SingleMetricViewerEmbeddableInput = EmbeddableInput &
-  SingleMetricViewerEmbeddableCustomInput;
+export type SingleMetricViewerEmbeddableInput = SingleMetricViewerEmbeddableCustomInput & {
+  title?: string;
+};
 
 /**
  * Persisted state for the Single Metric Embeddable.
@@ -204,7 +205,7 @@ export interface SingleMetricViewerEmbeddableState
 
 export type SingleMetricViewerEmbeddableApi =
   MlEmbeddableBaseApi<SingleMetricViewerEmbeddableState> &
-    PublishesWritablePanelTitle &
+    PublishesWritableTitle &
     HasEditCapabilities &
     SingleMetricViewerComponentApi;
 

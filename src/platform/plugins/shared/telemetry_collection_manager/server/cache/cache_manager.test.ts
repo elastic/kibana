@@ -12,22 +12,16 @@ import { CacheManager } from './cache_manager';
 describe('CacheManager', () => {
   const mockCacheKey = 'mock_key';
   const mockCacheItem = 'cache_item';
-  const cacheDurationMs = 10000;
-  let mockNow: number;
+  const cacheDurationMs = 1000;
 
-  beforeEach(() => {
-    jest.useFakeTimers();
-    mockNow = jest.getRealSystemTime();
-    jest.setSystemTime(mockNow);
-  });
   afterEach(() => jest.clearAllMocks());
-  afterAll(() => jest.useRealTimers());
 
-  it('caches object for the cache duration only', () => {
+  it('caches object for the cache duration only', async () => {
     const cacheManager = new CacheManager({ cacheDurationMs });
     cacheManager.setCache(mockCacheKey, mockCacheItem);
     expect(cacheManager.getFromCache(mockCacheKey)).toEqual(mockCacheItem);
-    jest.advanceTimersByTime(cacheDurationMs + 100);
+    // Cannot get `jest.FakeTimers` to work with LRUCache
+    await new Promise((resolve) => setTimeout(resolve, cacheDurationMs + 100));
     expect(cacheManager.getFromCache(mockCacheKey)).toEqual(undefined);
   });
 

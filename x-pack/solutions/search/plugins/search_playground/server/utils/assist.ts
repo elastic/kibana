@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { Client as ElasticsearchClient } from '@elastic/elasticsearch';
+import { Client } from '@elastic/elasticsearch';
+import { ElasticsearchClient } from '@kbn/core/server';
 
 export interface AssistClientOptionsWithCreds {
   cloud_id: string;
@@ -23,10 +24,10 @@ export class AssistClient {
 
   constructor(options: AssistOptions) {
     this.options = options as AssistClientOptionsWithCreds;
-    if ('es_client' in options) {
-      this.client = (options as AssistClientOptionsWithClient).es_client;
+    if (isClientOptions(options)) {
+      this.client = options.es_client;
     } else {
-      this.client = new ElasticsearchClient({
+      this.client = new Client({
         cloud: {
           id: this.options.cloud_id,
         },
@@ -44,4 +45,8 @@ export class AssistClient {
 
 export function createAssist(options: AssistOptions) {
   return new AssistClient(options);
+}
+
+function isClientOptions(options: AssistOptions): options is AssistClientOptionsWithClient {
+  return 'es_client' in options;
 }

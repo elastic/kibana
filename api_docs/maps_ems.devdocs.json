@@ -912,6 +912,36 @@
       },
       {
         "parentPluginId": "mapsEms",
+        "id": "def-common.EMS_DARKMAP_BOREALIS_ID",
+        "type": "string",
+        "tags": [],
+        "label": "EMS_DARKMAP_BOREALIS_ID",
+        "description": [],
+        "signature": [
+          "\"dark_map_v9\""
+        ],
+        "path": "src/platform/plugins/private/maps_ems/common/ems_defaults.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "mapsEms",
+        "id": "def-common.EMS_ROADMAP_BOREALIS_DESATURATED_ID",
+        "type": "string",
+        "tags": [],
+        "label": "EMS_ROADMAP_BOREALIS_DESATURATED_ID",
+        "description": [],
+        "signature": [
+          "\"road_map_desaturated_v9\""
+        ],
+        "path": "src/platform/plugins/private/maps_ems/common/ems_defaults.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "mapsEms",
         "id": "def-common.LICENSE_CHECK_ID",
         "type": "string",
         "tags": [],

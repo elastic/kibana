@@ -26,7 +26,8 @@ import { BULK_CREATE_MAX_ARTIFACTS_BYTES } from './services/artifacts/artifacts'
 const DEFAULT_BUNDLED_PACKAGE_LOCATION = path.join(__dirname, '../target/bundled_packages');
 const DEFAULT_GPG_KEY_PATH = path.join(__dirname, '../target/keys/GPG-KEY-elasticsearch');
 
-const REGISTRY_SPEC_MAX_VERSION = '3.3';
+const REGISTRY_SPEC_MIN_VERSION = '2.3';
+const REGISTRY_SPEC_MAX_VERSION = '3.4';
 
 export const config: PluginConfigDescriptor = {
   exposeToBrowser: {
@@ -36,6 +37,10 @@ export const config: PluginConfigDescriptor = {
     },
     agentless: {
       enabled: true,
+      isDefault: true,
+      customIntegrations: {
+        enabled: true,
+      },
     },
     enableExperimental: true,
     developer: {
@@ -46,6 +51,9 @@ export const config: PluginConfigDescriptor = {
       activeAgentsSoftLimit: true,
       onlyAllowAgentUpgradeToKnownVersions: true,
     },
+    integrationsHomeOverride: true,
+    prereleaseEnabledByDefault: true,
+    hideDashboards: true,
   },
   deprecations: ({ renameFromRoot, unused, unusedFromRoot }) => [
     // Unused settings before Fleet server exists
@@ -150,6 +158,7 @@ export const config: PluginConfigDescriptor = {
       agentless: schema.maybe(
         schema.object({
           enabled: schema.boolean({ defaultValue: false }),
+          isDefault: schema.maybe(schema.boolean({ defaultValue: false })),
           api: schema.maybe(
             schema.object({
               url: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
@@ -160,6 +169,17 @@ export const config: PluginConfigDescriptor = {
                   ca: schema.maybe(schema.string()),
                 })
               ),
+            })
+          ),
+          deploymentSecrets: schema.maybe(
+            schema.object({
+              fleetAppToken: schema.maybe(schema.string()),
+              elasticsearchAppToken: schema.maybe(schema.string()),
+            })
+          ),
+          customIntegrations: schema.maybe(
+            schema.object({
+              enabled: schema.maybe(schema.boolean({ defaultValue: false })),
             })
           ),
         })
@@ -224,25 +244,29 @@ export const config: PluginConfigDescriptor = {
         retrySetupOnBoot: schema.boolean({ defaultValue: false }),
         registry: schema.object(
           {
-            // Must be set back to `true`  before v9 release
-            // Requires all registry packages to add v9 as a compatible semver range
-            // https://github.com/elastic/kibana/issues/192624
-            kibanaVersionCheckEnabled: schema.boolean({ defaultValue: false }),
+            kibanaVersionCheckEnabled: schema.boolean({ defaultValue: true }),
             excludePackages: schema.arrayOf(schema.string(), { defaultValue: [] }),
             spec: schema.object(
               {
-                min: schema.maybe(schema.string()),
-                max: schema.string({ defaultValue: REGISTRY_SPEC_MAX_VERSION }),
+                min: schema.string({
+                  coerceFromNumber: true,
+                  defaultValue: REGISTRY_SPEC_MIN_VERSION,
+                }),
+                max: schema.string({
+                  coerceFromNumber: true,
+                  defaultValue: REGISTRY_SPEC_MAX_VERSION,
+                }),
               },
               {
                 defaultValue: {
+                  min: REGISTRY_SPEC_MIN_VERSION,
                   max: REGISTRY_SPEC_MAX_VERSION,
                 },
               }
             ),
             capabilities: schema.arrayOf(
               schema.oneOf([
-                // See package-spec for the list of available capiblities https://github.com/elastic/package-spec/blob/dcc37b652690f8a2bca9cf8a12fc28fd015730a0/spec/integration/manifest.spec.yml#L113
+                // See package-spec for the list of available capabilities https://github.com/elastic/package-spec/blob/dcc37b652690f8a2bca9cf8a12fc28fd015730a0/spec/integration/manifest.spec.yml#L113
                 schema.literal('apm'),
                 schema.literal('enterprise_search'),
                 schema.literal('observability'),
@@ -252,16 +276,17 @@ export const config: PluginConfigDescriptor = {
               ]),
               { defaultValue: [] }
             ),
+            searchAiLakePackageAllowlistEnabled: schema.maybe(
+              schema.boolean({ defaultValue: false })
+            ),
           },
           {
             defaultValue: {
-              // Must be set back to `true`  before v9 release
-              // Requires all registry packages to add v9 as a compatible semver range
-              // https://github.com/elastic/kibana/issues/192624
-              kibanaVersionCheckEnabled: false,
+              kibanaVersionCheckEnabled: true,
               capabilities: [],
               excludePackages: [],
               spec: {
+                min: REGISTRY_SPEC_MIN_VERSION,
                 max: REGISTRY_SPEC_MAX_VERSION,
               },
             },
@@ -288,6 +313,20 @@ export const config: PluginConfigDescriptor = {
           min: 400,
         })
       ),
+      autoUpgrades: schema.maybe(
+        schema.object({
+          taskInterval: schema.maybe(schema.string()),
+          retryDelays: schema.maybe(schema.arrayOf(schema.string())),
+        })
+      ),
+      syncIntegrations: schema.maybe(
+        schema.object({
+          taskInterval: schema.maybe(schema.string()),
+        })
+      ),
+      integrationsHomeOverride: schema.maybe(schema.string()),
+      prereleaseEnabledByDefault: schema.boolean({ defaultValue: false }),
+      hideDashboards: schema.boolean({ defaultValue: false }),
     },
     {
       validate: (configToValidate) => {

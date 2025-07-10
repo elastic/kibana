@@ -6,7 +6,7 @@
  */
 
 import React, { ComponentProps } from 'react';
-import { Story } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { RuleTagBadge } from './rule_tag_badge';
 
@@ -58,13 +58,18 @@ export default {
   },
 };
 
-const Template: Story<Args> = (args) => {
+const Template: StoryFn<Args> = (args) => {
   return <RuleTagBadge {...args} />;
 };
 
-export const Default = Template.bind({});
+export const Default = {
+  render: Template,
+};
 
-export const OutPopover = Template.bind({});
-OutPopover.args = {
-  tagsOutPopover: true,
+export const OutPopover = {
+  render: Template,
+
+  args: {
+    tagsOutPopover: true,
+  },
 };

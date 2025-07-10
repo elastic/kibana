@@ -52,14 +52,14 @@ export function agentStatusCheckInstruction({
   }
   return {
     title: i18n.translate('xpack.apm.onboarding.agentStatusCheck.title', {
-      defaultMessage: 'Agent status',
+      defaultMessage: 'Explore your data',
     }),
     children: (
       <>
         <EuiMarkdownFormat>
           {i18n.translate('xpack.apm.onboarding.agentStatusCheck.textPre', {
             defaultMessage:
-              'Make sure your application is running and the agents are sending data.',
+              'Make sure your application is running and data is flowing into Elastic Observability.',
           })}
         </EuiMarkdownFormat>
         <EuiSpacer />
@@ -69,7 +69,7 @@ export function agentStatusCheckInstruction({
           isLoading={agentStatusLoading}
         >
           {i18n.translate('xpack.apm.onboarding.agentStatus.check', {
-            defaultMessage: 'Check Agent Status',
+            defaultMessage: 'Check status',
           })}
         </EuiButton>
         <EuiSpacer />

@@ -7,7 +7,7 @@
 
 import type { Observable } from 'rxjs';
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 
 import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
 
@@ -70,6 +70,8 @@ export interface MlInfoResponse {
   isCloudTrial?: boolean;
   cloudUrl?: string;
   isMlAutoscalingEnabled: boolean;
+  showNodeInfo: boolean;
+  showLicenseInfo: boolean;
 }
 
 export interface BucketSpanEstimatorResponse {

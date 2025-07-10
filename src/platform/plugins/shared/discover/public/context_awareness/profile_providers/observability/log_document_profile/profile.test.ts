@@ -9,18 +9,18 @@
 
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { DocViewsRegistry } from '@kbn/unified-doc-viewer';
-import {
-  DataSourceCategory,
+import { BehaviorSubject } from 'rxjs';
+import type {
   DataSourceContext,
   DocumentProfileProviderParams,
-  DocumentType,
   RootContext,
-  SolutionType,
 } from '../../../profiles';
+import { DataSourceCategory, DocumentType, SolutionType } from '../../../profiles';
 import { createContextAwarenessMocks } from '../../../__mocks__';
 import { createObservabilityLogDocumentProfileProvider } from './profile';
-import { ContextWithProfileId } from '../../../profile_service';
+import type { ContextWithProfileId } from '../../../profile_service';
 import { OBSERVABILITY_ROOT_PROFILE_ID } from '../consts';
+import type { LogOverviewContext } from '../logs_data_source_profile/profile';
 
 const mockServices = createContextAwarenessMocks().profileProviderServices;
 
@@ -38,6 +38,7 @@ describe('logDocumentProfileProvider', () => {
     isMatch: true,
     context: {
       type: DocumentType.Log,
+      logOverviewContext$: new BehaviorSubject<LogOverviewContext | undefined>(undefined),
     },
   };
   const RESOLUTION_MISMATCH = {
@@ -151,7 +152,12 @@ describe('logDocumentProfileProvider', () => {
           title: 'test title',
           docViewsRegistry: (registry) => registry,
         }),
-        { context: { type: DocumentType.Log } }
+        {
+          context: {
+            type: DocumentType.Log,
+            logOverviewContext$: new BehaviorSubject<LogOverviewContext | undefined>(undefined),
+          },
+        }
       );
       const docViewer = getDocViewer({
         record: buildDataTableRecord({}),

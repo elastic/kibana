@@ -51,7 +51,7 @@ jest.mock('../../../../common/lib/kibana', () => {
           }),
         },
         sessionView: {
-          getSessionView: jest.fn().mockReturnValue(<div />),
+          getSessionView: jest.fn(() => <div />),
         },
       },
     }),
@@ -117,7 +117,7 @@ describe('<ResponseDetails />', () => {
   });
 
   it('should render preview message if flyout is in preview', () => {
-    const wrapper = renderResponseDetails({ ...defaultContextValue, isPreview: true });
+    const wrapper = renderResponseDetails({ ...defaultContextValue, isRulePreview: true });
     expect(wrapper.getByTestId(RESPONSE_DETAILS_TEST_ID)).toBeInTheDocument();
     expect(wrapper.getByTestId(RESPONSE_DETAILS_TEST_ID)).toHaveTextContent(PREVIEW_MESSAGE);
   });

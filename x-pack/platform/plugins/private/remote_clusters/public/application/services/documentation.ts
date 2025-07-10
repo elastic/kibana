@@ -12,9 +12,13 @@ export let remoteClustersUrl: string;
 export let transportPortUrl: string;
 export let proxyModeUrl: string;
 export let proxySettingsUrl: string;
-export let onPremSetupTrustWithCertUrl: string;
-export let onPremSetupTrustWithApiKeyUrl: string;
 export let cloudSetupTrustUrl: string;
+export let apiKeys: string;
+export let cloudCreateApiKey: string;
+export let onPremPrerequisitesApiKey: string;
+export let onPremSecurityApiKey: string;
+export let onPremPrerequisitesCert: string;
+export let onPremSecurityCert: string;
 
 export function init({ links }: DocLinksStart): void {
   skippingDisconnectedClustersUrl = links.ccs.skippingDisconnectedClusters;
@@ -22,7 +26,11 @@ export function init({ links }: DocLinksStart): void {
   transportPortUrl = links.elasticsearch.transportSettings;
   proxyModeUrl = links.elasticsearch.remoteClustersProxy;
   proxySettingsUrl = links.elasticsearch.remoteClusersProxySettings;
-  onPremSetupTrustWithCertUrl = links.elasticsearch.remoteClustersOnPremSetupTrustWithCert;
-  onPremSetupTrustWithApiKeyUrl = links.elasticsearch.remoteClustersOnPremSetupTrustWithApiKey;
   cloudSetupTrustUrl = links.elasticsearch.remoteClustersCloudSetupTrust;
+  apiKeys = links.management.apiKeys;
+  cloudCreateApiKey = links.elasticsearch.remoteClustersCreateCloudClusterApiKey;
+  onPremPrerequisitesApiKey = links.elasticsearch.remoteClustersOnPremPrerequisitesApiKey;
+  onPremSecurityApiKey = links.elasticsearch.remoteClustersOnPremSecurityApiKey;
+  onPremPrerequisitesCert = links.elasticsearch.remoteClustersOnPremPrerequisitesCert;
+  onPremSecurityCert = links.elasticsearch.remoteClustersOnPremSecurityCert;
 }

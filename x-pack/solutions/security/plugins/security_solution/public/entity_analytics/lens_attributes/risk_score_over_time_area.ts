@@ -8,14 +8,17 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { GetLensAttributes } from '../../common/components/visualization_actions/types';
 
-const internalReferenceIdMapping: Record<string, string> = { host: uuidv4(), user: uuidv4() };
+const internalReferenceIdMapping: Record<string, string> = {
+  host: `host-${uuidv4()}`,
+  user: `user-${uuidv4()}`,
+};
 
 export const getRiskScoreOverTimeAreaAttributes: GetLensAttributes = ({
   stackByField = 'host',
   extraOptions = { spaceId: 'default' },
 }) => {
-  const layerIds = [uuidv4(), uuidv4()];
-  const layer2ColumnId = uuidv4();
+  const layerIds = [`layer-id1-${uuidv4()}`, `layer-id2-${uuidv4()}`];
+  const layer2ColumnId = `layer2-column-id-${uuidv4()}`;
   const internalReferenceId = internalReferenceIdMapping[stackByField];
   return {
     title: `${stackByField} risk score over time`,
@@ -180,14 +183,14 @@ export const getRiskScoreOverTimeAreaAttributes: GetLensAttributes = ({
       adHocDataViews: {
         [internalReferenceId]: {
           id: internalReferenceId,
-          title: `ml_${stackByField}_risk_score_${extraOptions.spaceId}`,
+          title: `ea_${stackByField}_risk_score_${extraOptions.spaceId}`,
           timeFieldName: '@timestamp',
           sourceFilters: [],
           fieldFormats: {},
           runtimeFieldMap: {},
           fieldAttrs: {},
           allowNoIndex: false,
-          name: `ml_${stackByField}_risk_score_${extraOptions.spaceId}`,
+          name: `ea_${stackByField}_risk_score_${extraOptions.spaceId}`,
         },
       },
     },

@@ -6,39 +6,72 @@
  */
 
 import { DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS } from '@kbn/elastic-assistant';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 
 import { useAssistantAvailability } from '../../../assistant/use_assistant_availability';
+import { useKibana } from '../../../common/lib/kibana';
 import { TestProviders } from '../../../common/mock';
 import { Header } from '.';
+import { useSpaceId } from '../../../common/hooks/use_space_id';
 
+jest.mock('../../../common/lib/kibana');
 jest.mock('../../../assistant/use_assistant_availability');
+jest.mock('../../../common/hooks/use_space_id', () => ({
+  useSpaceId: jest.fn(),
+}));
+
+const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
+
+const defaultProps = {
+  stats: null,
+  connectorId: 'testConnectorId',
+  connectorsAreConfigured: true,
+  isDisabledActions: false,
+  isLoading: false,
+  localStorageAttackDiscoveryMaxAlerts: `${DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS}`,
+  onCancel: jest.fn(),
+  onGenerate: jest.fn(),
+  onConnectorIdSelected: jest.fn(),
+  openFlyout: jest.fn(),
+  setLocalStorageAttackDiscoveryMaxAlerts: jest.fn(),
+  showFlyout: false,
+};
 
 describe('Actions', () => {
   beforeEach(() => {
+    jest.clearAllMocks();
+
+    (useSpaceId as jest.Mock).mockReturnValue('default');
+
     (useAssistantAvailability as jest.Mock).mockReturnValue({
       hasAssistantPrivilege: true,
       isAssistantEnabled: true,
     });
+
+    mockUseKibana.mockReturnValue({
+      services: {
+        featureFlags: {
+          getBooleanValue: jest.fn().mockReturnValue(true),
+        },
+      },
+    } as unknown as jest.Mocked<ReturnType<typeof useKibana>>);
   });
 
-  it('renders the connector selector', () => {
+  it('renders the connector selector when the feature flag is false', () => {
+    const featureFlagValue = false;
+
+    mockUseKibana.mockReturnValue({
+      services: {
+        featureFlags: {
+          getBooleanValue: jest.fn().mockReturnValue(featureFlagValue),
+        },
+      },
+    } as unknown as jest.Mocked<ReturnType<typeof useKibana>>);
+
     render(
       <TestProviders>
-        <Header
-          stats={null}
-          connectorId="testConnectorId"
-          connectorsAreConfigured={true}
-          isDisabledActions={false}
-          isLoading={false}
-          localStorageAttackDiscoveryMaxAlerts={`${DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS}`}
-          onCancel={jest.fn()}
-          onGenerate={jest.fn()}
-          onConnectorIdSelected={jest.fn()}
-          openFlyout={jest.fn()}
-          setLocalStorageAttackDiscoveryMaxAlerts={jest.fn()}
-        />
+        <Header {...defaultProps} />
       </TestProviders>
     );
 
@@ -47,24 +80,24 @@ describe('Actions', () => {
     expect(connectorSelector).toBeInTheDocument();
   });
 
+  it('does NOT render the connector selector when the feature flag is true', () => {
+    render(
+      <TestProviders>
+        <Header {...defaultProps} />
+      </TestProviders>
+    );
+
+    const connectorSelector = screen.queryByTestId('addNewConnectorButton');
+
+    expect(connectorSelector).not.toBeInTheDocument();
+  });
+
   it('does NOT render the connector selector when connectors are NOT configured', () => {
     const connectorsAreConfigured = false;
 
     render(
       <TestProviders>
-        <Header
-          stats={null}
-          connectorId="testConnectorId"
-          connectorsAreConfigured={connectorsAreConfigured}
-          isDisabledActions={false}
-          isLoading={false}
-          localStorageAttackDiscoveryMaxAlerts={`${DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS}`}
-          onCancel={jest.fn()}
-          onGenerate={jest.fn()}
-          onConnectorIdSelected={jest.fn()}
-          openFlyout={jest.fn()}
-          setLocalStorageAttackDiscoveryMaxAlerts={jest.fn()}
-        />
+        <Header {...defaultProps} connectorsAreConfigured={connectorsAreConfigured} />
       </TestProviders>
     );
 
@@ -78,19 +111,7 @@ describe('Actions', () => {
 
     render(
       <TestProviders>
-        <Header
-          stats={null}
-          connectorId="testConnectorId"
-          connectorsAreConfigured={true}
-          isDisabledActions={false}
-          isLoading={false}
-          localStorageAttackDiscoveryMaxAlerts={`${DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS}`}
-          onCancel={jest.fn()}
-          onConnectorIdSelected={jest.fn()}
-          onGenerate={onGenerate}
-          openFlyout={jest.fn()}
-          setLocalStorageAttackDiscoveryMaxAlerts={jest.fn()}
-        />
+        <Header {...defaultProps} onGenerate={onGenerate} />
       </TestProviders>
     );
 
@@ -101,24 +122,21 @@ describe('Actions', () => {
     expect(onGenerate).toHaveBeenCalled();
   });
 
-  it('displays the cancel button when loading', () => {
+  it('displays the cancel button when loading and the feature flag is false', () => {
     const isLoading = true;
+    const featureFlagValue = false;
+
+    mockUseKibana.mockReturnValue({
+      services: {
+        featureFlags: {
+          getBooleanValue: jest.fn().mockReturnValue(featureFlagValue),
+        },
+      },
+    } as unknown as jest.Mocked<ReturnType<typeof useKibana>>);
 
     render(
       <TestProviders>
-        <Header
-          stats={null}
-          connectorId="testConnectorId"
-          connectorsAreConfigured={true}
-          isDisabledActions={false}
-          isLoading={isLoading}
-          localStorageAttackDiscoveryMaxAlerts={`${DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS}`}
-          onCancel={jest.fn()}
-          onConnectorIdSelected={jest.fn()}
-          onGenerate={jest.fn()}
-          openFlyout={jest.fn()}
-          setLocalStorageAttackDiscoveryMaxAlerts={jest.fn()}
-        />
+        <Header {...defaultProps} isLoading={isLoading} />
       </TestProviders>
     );
 
@@ -127,25 +145,46 @@ describe('Actions', () => {
     expect(cancel).toBeInTheDocument();
   });
 
+  it('does NOT display the cancel button when loading and the feature flag is true', () => {
+    const isLoading = true;
+    const featureFlagValue = true;
+
+    mockUseKibana.mockReturnValue({
+      services: {
+        featureFlags: {
+          getBooleanValue: jest.fn().mockReturnValue(featureFlagValue),
+        },
+      },
+    } as unknown as jest.Mocked<ReturnType<typeof useKibana>>);
+
+    render(
+      <TestProviders>
+        <Header {...defaultProps} isLoading={isLoading} />
+      </TestProviders>
+    );
+
+    const cancel = screen.queryByTestId('cancel');
+
+    expect(cancel).not.toBeInTheDocument();
+  });
+
   it('invokes onCancel when the cancel button is clicked', () => {
     const isLoading = true;
+    const featureFlagValue = false;
+
+    mockUseKibana.mockReturnValue({
+      services: {
+        featureFlags: {
+          getBooleanValue: jest.fn().mockReturnValue(featureFlagValue),
+        },
+      },
+    } as unknown as jest.Mocked<ReturnType<typeof useKibana>>);
+
     const onCancel = jest.fn();
 
     render(
       <TestProviders>
-        <Header
-          stats={null}
-          connectorId="testConnectorId"
-          connectorsAreConfigured={true}
-          isDisabledActions={false}
-          isLoading={isLoading}
-          localStorageAttackDiscoveryMaxAlerts={`${DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS}`}
-          onCancel={onCancel}
-          onConnectorIdSelected={jest.fn()}
-          onGenerate={jest.fn()}
-          openFlyout={jest.fn()}
-          setLocalStorageAttackDiscoveryMaxAlerts={jest.fn()}
-        />
+        <Header {...defaultProps} isLoading={isLoading} onCancel={onCancel} />
       </TestProviders>
     );
 
@@ -160,24 +199,27 @@ describe('Actions', () => {
 
     render(
       <TestProviders>
-        <Header
-          stats={null}
-          connectorId={connectorId}
-          connectorsAreConfigured={true}
-          isDisabledActions={false}
-          isLoading={false}
-          localStorageAttackDiscoveryMaxAlerts={`${DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS}`}
-          onCancel={jest.fn()}
-          onConnectorIdSelected={jest.fn()}
-          onGenerate={jest.fn()}
-          openFlyout={jest.fn()}
-          setLocalStorageAttackDiscoveryMaxAlerts={jest.fn()}
-        />
+        <Header {...defaultProps} connectorId={connectorId} />
       </TestProviders>
     );
 
     const generate = screen.getByTestId('generate');
 
     expect(generate).toBeDisabled();
+  });
+
+  it('invokes openFlyout when the settings button is clicked', async () => {
+    const openFlyout = jest.fn();
+
+    render(
+      <TestProviders>
+        <Header {...defaultProps} openFlyout={openFlyout} />
+      </TestProviders>
+    );
+
+    const settings = screen.getByTestId('openAlertSelection');
+    fireEvent.click(settings);
+
+    await waitFor(() => expect(openFlyout).toHaveBeenCalled());
   });
 });

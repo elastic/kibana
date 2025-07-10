@@ -1,18 +1,14 @@
 {
   "type": "plugin",
   "id": "@kbn/monitoring-plugin",
-  "owner": [
-    "@elastic/stack-monitoring"
-  ],
+  "owner": ["@elastic/stack-monitoring"],
   "group": "platform",
   "visibility": "private",
   "plugin": {
     "id": "monitoring",
     "browser": true,
     "server": true,
-    "configPath": [
-      "monitoring"
-    ],
+    "configPath": ["monitoring"],
     "requiredPlugins": [
       "licensing",
       "features",
@@ -20,23 +16,21 @@
       "navigation",
       "dataViews",
       "unifiedSearch",
-      "share"
+      "share",
+      "fieldsMetadata"
     ],
     "optionalPlugins": [
       "usageCollection",
       "home",
       "cloud",
       "triggersActionsUi",
+      "charts",
       "alerting",
       "actions",
       "encryptedSavedObjects",
       "dashboard",
       "fleet"
     ],
-    "requiredBundles": [
-      "kibanaUtils",
-      "alerting",
-      "kibanaReact",
-    ]
+    "requiredBundles": ["kibanaUtils", "alerting", "kibanaReact"]
   }
 }

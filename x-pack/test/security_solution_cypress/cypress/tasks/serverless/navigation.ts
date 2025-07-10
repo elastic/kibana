@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { ALERTS, DISCOVER, EXPLORE } from '../../screens/serverless_security_header';
-import {
-  EXPLORE_BREADCRUMB,
-  HOSTS_BREADCRUMB,
-} from '../../screens/serverless_security_breadcrumbs';
+import { ALERTS, DISCOVER, ONBOARDING } from '../../screens/serverless_security_header';
 
 const navigateTo = (page: string) => {
   cy.get(page).click();
+};
+
+export const navigateToOnboardingPageInServerless = () => {
+  navigateTo(ONBOARDING);
 };
 
 export const navigateToAlertsPageInServerless = () => {
@@ -21,16 +21,4 @@ export const navigateToAlertsPageInServerless = () => {
 
 export const navigateToDiscoverPageInServerless = () => {
   navigateTo(DISCOVER);
-};
-
-export const navigateToExplorePageInServerless = () => {
-  navigateTo(EXPLORE);
-};
-
-export const navigateToHostsUsingBreadcrumb = () => {
-  cy.get(HOSTS_BREADCRUMB).click();
-};
-
-export const navigateToExploreUsingBreadcrumb = () => {
-  cy.get(EXPLORE_BREADCRUMB).click();
 };

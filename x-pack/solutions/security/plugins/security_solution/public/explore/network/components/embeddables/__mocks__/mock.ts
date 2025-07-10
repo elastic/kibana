@@ -8,6 +8,7 @@
 import type { IndexPatternMapping } from '../types';
 import type { IndexPatternSavedObject } from '../../../../../common/hooks/types';
 import { LAYER_TYPE } from '@kbn/maps-plugin/common';
+import type { EuiThemeComputed } from '@elastic/eui';
 
 export const mockIndexPatternIds: IndexPatternMapping[] = [
   { title: 'filebeat-*', id: '8c7323ac-97ad-4b53-ac0a-40f8f691a918' },
@@ -50,11 +51,11 @@ export const mockSourceLayer = {
     properties: {
       fillColor: {
         type: 'STATIC',
-        options: { color: '#6092C0' },
+        options: { color: 'euiColorVis4' },
       },
       lineColor: {
         type: 'STATIC',
-        options: { color: '#FFFFFF' },
+        options: { color: 'euiColorVisBase0' },
       },
       lineWidth: { type: 'STATIC', options: { size: 2 } },
       iconSize: { type: 'STATIC', options: { size: 8 } },
@@ -108,11 +109,11 @@ export const mockDestinationLayer = {
     properties: {
       fillColor: {
         type: 'STATIC',
-        options: { color: '#D36086' },
+        options: { color: 'euiColorVis2' },
       },
       lineColor: {
         type: 'STATIC',
-        options: { color: '#FFFFFF' },
+        options: { color: 'euiColorVisBase0' },
       },
       lineWidth: { type: 'STATIC', options: { size: 2 } },
       iconSize: { type: 'STATIC', options: { size: 8 } },
@@ -164,11 +165,11 @@ export const mockClientLayer = {
     properties: {
       fillColor: {
         type: 'STATIC',
-        options: { color: '#6092C0' },
+        options: { color: 'euiColorVis4' },
       },
       lineColor: {
         type: 'STATIC',
-        options: { color: '#FFFFFF' },
+        options: { color: 'euiColorVisBase0' },
       },
       lineWidth: { type: 'STATIC', options: { size: 2 } },
       iconSize: { type: 'STATIC', options: { size: 8 } },
@@ -227,11 +228,11 @@ export const mockServerLayer = {
     properties: {
       fillColor: {
         type: 'STATIC',
-        options: { color: '#D36086' },
+        options: { color: 'euiColorVis2' },
       },
       lineColor: {
         type: 'STATIC',
-        options: { color: '#FFFFFF' },
+        options: { color: 'euiColorVisBase0' },
       },
       lineWidth: { type: 'STATIC', options: { size: 2 } },
       iconSize: { type: 'STATIC', options: { size: 8 } },
@@ -282,11 +283,11 @@ export const mockLineLayer = {
     properties: {
       fillColor: {
         type: 'STATIC',
-        options: { color: '#1EA593' },
+        options: { color: '#A6EDEA' },
       },
       lineColor: {
         type: 'STATIC',
-        options: { color: '#6092C0' },
+        options: { color: '#A6EDEA' },
       },
       lineWidth: {
         type: 'DYNAMIC',
@@ -347,11 +348,11 @@ export const mockClientServerLineLayer = {
     properties: {
       fillColor: {
         type: 'STATIC',
-        options: { color: '#1EA593' },
+        options: { color: '#A6EDEA' },
       },
       lineColor: {
         type: 'STATIC',
-        options: { color: '#6092C0' },
+        options: { color: '#A6EDEA' },
       },
       lineWidth: {
         type: 'DYNAMIC',
@@ -530,3 +531,14 @@ export const mockCommaFilebeatExclusionGlobIndexPattern: IndexPatternSavedObject
     title: 'filebeat-*,-filebeat-7.6.0*',
   },
 };
+
+export const mockEuiTheme: EuiThemeComputed<{}> = {
+  colors: {
+    vis: {
+      euiColorVisNeutral1: 'euiColorVisNeutral1',
+      euiColorVis4: 'euiColorVis4',
+      euiColorVis2: 'euiColorVis2',
+      euiColorVisBase0: 'euiColorVisBase0',
+    },
+  },
+} as unknown as EuiThemeComputed<{}>;

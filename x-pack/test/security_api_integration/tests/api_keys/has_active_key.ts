@@ -25,7 +25,7 @@ export default function ({ getService }: FtrProviderContext) {
   const cleanup = async () => {
     await getService('es').deleteByQuery({
       index: '.security-7',
-      body: { query: { match: { doc_type: 'api_key' } } },
+      query: { match: { doc_type: 'api_key' } },
       refresh: true,
     });
   };

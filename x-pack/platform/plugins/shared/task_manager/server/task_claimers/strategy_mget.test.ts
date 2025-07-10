@@ -13,30 +13,25 @@ import { filter, take } from 'rxjs';
 import { CLAIM_STRATEGY_MGET, DEFAULT_KIBANAS_PER_PARTITION } from '../config';
 import { NO_ASSIGNED_PARTITIONS_WARNING_INTERVAL } from './strategy_mget';
 
-import {
-  TaskStatus,
+import type {
   ConcreteTaskInstance,
   ConcreteTaskInstanceVersion,
-  TaskPriority,
-  TaskCost,
   PartialConcreteTaskInstance,
 } from '../task';
-import { SearchOpts, StoreOpts } from '../task_store';
-import { asTaskClaimEvent, TaskEvent } from '../task_events';
+import { TaskStatus, TaskPriority, TaskCost } from '../task';
+import type { SearchOpts, StoreOpts } from '../task_store';
+import type { TaskEvent } from '../task_events';
+import { asTaskClaimEvent } from '../task_events';
 import { asOk, asErr, isOk, unwrap } from '../lib/result_type';
 import { TaskTypeDictionary } from '../task_type_dictionary';
 import { mockLogger } from '../test_utils';
-import {
-  TaskClaiming,
-  OwnershipClaimingOpts,
-  TaskClaimingOpts,
-  TASK_MANAGER_MARK_AS_CLAIMED,
-} from '../queries/task_claiming';
+import type { OwnershipClaimingOpts, TaskClaimingOpts } from '../queries/task_claiming';
+import { TaskClaiming, TASK_MANAGER_MARK_AS_CLAIMED } from '../queries/task_claiming';
 import { taskStoreMock } from '../task_store.mock';
 import apm from 'elastic-apm-node';
 import { TASK_MANAGER_TRANSACTION_TYPE } from '../task_running';
-import { ClaimOwnershipResult } from '.';
-import { FillPoolResult } from '../lib/fill_pool';
+import type { ClaimOwnershipResult } from '.';
+import type { FillPoolResult } from '../lib/fill_pool';
 import { TaskPartitioner } from '../lib/task_partitioner';
 import type { MustNotCondition } from '../queries/query_clauses';
 import {
@@ -53,6 +48,8 @@ jest.mock('../constants', () => ({
     'limitedToTwo',
     'limitedToFive',
     'yawn',
+    'sampleTaskSharedConcurrencyType1',
+    'sampleTaskSharedConcurrencyType2',
   ],
 }));
 
@@ -63,6 +60,7 @@ beforeEach(() => jest.clearAllMocks());
 
 const mockedDate = new Date('2019-02-12T21:01:22.479Z');
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 (global as any).Date = class Date {
   constructor() {
     return mockedDate;
@@ -88,6 +86,16 @@ taskDefinitions.registerTaskDefinitions({
     title: 'yawn',
     cost: TaskCost.Tiny,
     maxConcurrency: 1,
+    createTaskRunner: jest.fn(),
+  },
+  sampleTaskSharedConcurrencyType1: {
+    title: 'Shared Concurrency Task Type 1',
+    maxConcurrency: 2,
+    createTaskRunner: jest.fn(),
+  },
+  sampleTaskSharedConcurrencyType2: {
+    title: 'Shared Concurrency Task Type 2',
+    maxConcurrency: 2,
     createTaskRunner: jest.fn(),
   },
 });
@@ -123,6 +131,7 @@ describe('TaskClaiming', () => {
     jest
       .spyOn(apm, 'startTransaction')
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .mockImplementation(() => mockApmTrans as any);
     jest.spyOn(taskPartitioner, 'getPartitions').mockResolvedValue([1, 3]);
   });
@@ -373,7 +382,7 @@ describe('TaskClaiming', () => {
       expect(mockApmTrans.end).toHaveBeenCalledWith('success');
 
       expect(taskManagerLogger.debug).toHaveBeenCalledWith(
-        'task claimer claimed: 3; stale: 0; conflicts: 0; missing: 0; capacity reached: 3; updateErrors: 0; getErrors: 0;',
+        'task claimer claimed: 3; stale: 0; conflicts: 0; missing: 0; capacity reached: 3; updateErrors: 0; getErrors: 0; malformed data errors: 0',
         { tags: ['taskClaiming', 'claimAvailableTasksMget'] }
       );
 
@@ -538,7 +547,7 @@ describe('TaskClaiming', () => {
       expect(mockApmTrans.end).toHaveBeenCalledWith('success');
 
       expect(taskManagerLogger.debug).toHaveBeenCalledWith(
-        'task claimer claimed: 2; stale: 0; conflicts: 0; missing: 1; capacity reached: 0; updateErrors: 0; getErrors: 0;',
+        'task claimer claimed: 2; stale: 0; conflicts: 0; missing: 1; capacity reached: 0; updateErrors: 0; getErrors: 0; malformed data errors: 0',
         { tags: ['taskClaiming', 'claimAvailableTasksMget'] }
       );
 
@@ -631,7 +640,7 @@ describe('TaskClaiming', () => {
       expect(mockApmTrans.end).toHaveBeenCalledWith('success');
 
       expect(taskManagerLogger.debug).toHaveBeenCalledWith(
-        'task claimer claimed: 2; stale: 0; conflicts: 0; missing: 1; capacity reached: 0; updateErrors: 0; getErrors: 0;',
+        'task claimer claimed: 2; stale: 0; conflicts: 0; missing: 1; capacity reached: 0; updateErrors: 0; getErrors: 0; malformed data errors: 0',
         { tags: ['taskClaiming', 'claimAvailableTasksMget'] }
       );
 
@@ -724,7 +733,7 @@ describe('TaskClaiming', () => {
       expect(mockApmTrans.end).toHaveBeenCalledWith('success');
 
       expect(taskManagerLogger.debug).toHaveBeenCalledWith(
-        'task claimer claimed: 2; stale: 1; conflicts: 0; missing: 0; capacity reached: 0; updateErrors: 0; getErrors: 0;',
+        'task claimer claimed: 2; stale: 1; conflicts: 0; missing: 0; capacity reached: 0; updateErrors: 0; getErrors: 0; malformed data errors: 0',
         { tags: ['taskClaiming', 'claimAvailableTasksMget'] }
       );
 
@@ -823,7 +832,7 @@ describe('TaskClaiming', () => {
       expect(mockApmTrans.end).toHaveBeenCalledWith('success');
 
       expect(taskManagerLogger.debug).toHaveBeenCalledWith(
-        'task claimer claimed: 4; stale: 0; conflicts: 0; missing: 0; capacity reached: 0; updateErrors: 0; getErrors: 0;',
+        'task claimer claimed: 4; stale: 0; conflicts: 0; missing: 0; capacity reached: 0; updateErrors: 0; getErrors: 0; malformed data errors: 0',
         { tags: ['taskClaiming', 'claimAvailableTasksMget'] }
       );
 
@@ -895,6 +904,164 @@ describe('TaskClaiming', () => {
       expect(result.docs.length).toEqual(4);
     });
 
+    test('should correctly handle shared concurrency tasks', async () => {
+      const store = taskStoreMock.create({ taskManagerId: 'test-test' });
+      store.convertToSavedObjectIds.mockImplementation((ids) => ids.map((id) => `task:${id}`));
+
+      const fetchedTasks = [
+        mockInstance({ id: `id-1`, taskType: 'report' }),
+        mockInstance({ id: `id-2`, taskType: 'report' }),
+        mockInstance({ id: `id-3`, taskType: 'yawn' }),
+        mockInstance({ id: `id-4`, taskType: 'yawn' }),
+        mockInstance({ id: `id-5`, taskType: 'report' }),
+        mockInstance({ id: `id-6`, taskType: 'yawn' }),
+      ];
+
+      const { versionMap, docLatestVersions } = getVersionMapsFromTasks(fetchedTasks);
+      store.msearch.mockResolvedValueOnce({ docs: fetchedTasks, versionMap });
+      store.getDocVersions.mockResolvedValueOnce(docLatestVersions);
+
+      store.bulkGet.mockResolvedValueOnce(
+        [fetchedTasks[0], fetchedTasks[1], fetchedTasks[2], fetchedTasks[4]].map(asOk)
+      );
+      store.bulkPartialUpdate.mockResolvedValueOnce(
+        [fetchedTasks[0], fetchedTasks[1], fetchedTasks[2], fetchedTasks[4]].map(
+          getPartialUpdateResult
+        )
+      );
+
+      const taskClaiming = new TaskClaiming({
+        logger: taskManagerLogger,
+        strategy: CLAIM_STRATEGY_MGET,
+        definitions: taskDefinitions,
+        taskStore: store,
+        excludedTaskTypes: [],
+        maxAttempts: 2,
+        getAvailableCapacity: (type?: string) => {
+          if (type === 'sampleTaskSharedConcurrencyType1') {
+            return 2;
+          } else {
+            return 10;
+          }
+        },
+        taskPartitioner,
+      });
+
+      const resultOrErr = await taskClaiming.claimAvailableTasksIfCapacityIsAvailable({
+        claimOwnershipUntil: new Date(),
+      });
+
+      if (!isOk<ClaimOwnershipResult, FillPoolResult>(resultOrErr)) {
+        expect(resultOrErr).toBe(undefined);
+      }
+
+      unwrap(resultOrErr) as ClaimOwnershipResult;
+
+      expect(taskManagerLogger.debug).toHaveBeenCalledWith(
+        'task claimer claimed: 4; stale: 0; conflicts: 0; missing: 0; capacity reached: 0; updateErrors: 0; getErrors: 0; malformed data errors: 0',
+        { tags: ['taskClaiming', 'claimAvailableTasksMget'] }
+      );
+
+      const mockSearch = store.msearch.mock.calls[0][0];
+
+      // should be 3 searches
+      expect(mockSearch?.length).toEqual(3);
+
+      // last search should be shared concurrency
+      expect(mockSearch?.[2].query).toMatchObject({
+        bool: {
+          must: [
+            {
+              bool: {
+                must: [{ term: { 'task.enabled': true } }],
+              },
+            },
+            {
+              bool: {
+                must: [
+                  {
+                    terms: {
+                      'task.taskType': [
+                        'sampleTaskSharedConcurrencyType1',
+                        'sampleTaskSharedConcurrencyType2',
+                      ],
+                    },
+                  },
+                ],
+              },
+            },
+            {
+              bool: {
+                should: [
+                  {
+                    bool: {
+                      must: [
+                        {
+                          term: {
+                            'task.status': 'idle',
+                          },
+                        },
+                        {
+                          range: {
+                            'task.runAt': {
+                              lte: 'now',
+                            },
+                          },
+                        },
+                      ],
+                    },
+                  },
+                  {
+                    bool: {
+                      must: [
+                        {
+                          bool: {
+                            should: [
+                              {
+                                term: {
+                                  'task.status': 'running',
+                                },
+                              },
+                              {
+                                term: {
+                                  'task.status': 'claiming',
+                                },
+                              },
+                            ],
+                          },
+                        },
+                        {
+                          range: {
+                            'task.retryAt': {
+                              lte: 'now',
+                            },
+                          },
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+            },
+            {
+              bool: {
+                must_not: [
+                  {
+                    term: {
+                      'task.status': 'unrecognized',
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      });
+      // size of search should match the shared concurrency task with the
+      // lower capacity (* cost multiplier)
+      expect(mockSearch?.[2].size).toEqual(4);
+    });
+
     test('should handle individual errors when bulk getting the full task doc', async () => {
       const store = taskStoreMock.create({ taskManagerId: 'test-test' });
       store.convertToSavedObjectIds.mockImplementation((ids) => ids.map((id) => `task:${id}`));
@@ -954,7 +1121,7 @@ describe('TaskClaiming', () => {
       expect(mockApmTrans.end).toHaveBeenCalledWith('success');
 
       expect(taskManagerLogger.debug).toHaveBeenCalledWith(
-        'task claimer claimed: 3; stale: 0; conflicts: 0; missing: 0; capacity reached: 0; updateErrors: 0; getErrors: 1;',
+        'task claimer claimed: 3; stale: 0; conflicts: 0; missing: 0; capacity reached: 0; updateErrors: 0; getErrors: 1; malformed data errors: 0',
         { tags: ['taskClaiming', 'claimAvailableTasksMget'] }
       );
       expect(taskManagerLogger.error).toHaveBeenCalledWith(
@@ -1082,7 +1249,7 @@ describe('TaskClaiming', () => {
       expect(mockApmTrans.end).toHaveBeenCalledWith('success');
 
       expect(taskManagerLogger.debug).toHaveBeenCalledWith(
-        'task claimer claimed: 3; stale: 0; conflicts: 1; missing: 0; capacity reached: 0; updateErrors: 0; getErrors: 0;',
+        'task claimer claimed: 3; stale: 0; conflicts: 1; missing: 0; capacity reached: 0; updateErrors: 0; getErrors: 0; malformed data errors: 0',
         { tags: ['taskClaiming', 'claimAvailableTasksMget'] }
       );
       expect(taskManagerLogger.warn).toHaveBeenCalledWith(
@@ -1322,7 +1489,7 @@ describe('TaskClaiming', () => {
       expect(mockApmTrans.end).toHaveBeenCalledWith('success');
 
       expect(taskManagerLogger.debug).toHaveBeenCalledWith(
-        'task claimer claimed: 3; stale: 0; conflicts: 0; missing: 0; capacity reached: 0; updateErrors: 1; getErrors: 0;',
+        'task claimer claimed: 3; stale: 0; conflicts: 0; missing: 0; capacity reached: 0; updateErrors: 1; getErrors: 0; malformed data errors: 0',
         { tags: ['taskClaiming', 'claimAvailableTasksMget'] }
       );
       expect(taskManagerLogger.error).toHaveBeenCalledWith(
@@ -1455,7 +1622,7 @@ describe('TaskClaiming', () => {
       expect(mockApmTrans.end).toHaveBeenCalledWith('success');
 
       expect(taskManagerLogger.debug).toHaveBeenCalledWith(
-        'task claimer claimed: 3; stale: 0; conflicts: 1; missing: 0; capacity reached: 0; updateErrors: 0; getErrors: 0;',
+        'task claimer claimed: 3; stale: 0; conflicts: 1; missing: 0; capacity reached: 0; updateErrors: 0; getErrors: 0; malformed data errors: 0',
         { tags: ['taskClaiming', 'claimAvailableTasksMget'] }
       );
       expect(taskManagerLogger.error).not.toHaveBeenCalled();
@@ -1618,6 +1785,125 @@ describe('TaskClaiming', () => {
         },
       ]);
       expect(store.bulkGet).not.toHaveBeenCalled();
+    });
+
+    test('should handle malformed errors when claiming tasks', async () => {
+      const store = taskStoreMock.create({ taskManagerId: 'test-test' });
+      store.convertToSavedObjectIds.mockImplementation((ids) => ids.map((id) => `task:${id}`));
+
+      const fetchedTasks = [
+        mockInstance({ id: `id-1`, taskType: 'report' }),
+        mockInstance({ id: `id-2`, taskType: 'report' }),
+        mockInstance({
+          id: `id-3`,
+          taskType: 'yawn',
+          schedule: {
+            interval: 'PT1M',
+          },
+        }),
+        mockInstance({ id: `id-4`, taskType: 'report' }),
+      ];
+
+      const { versionMap, docLatestVersions } = getVersionMapsFromTasks(fetchedTasks);
+      store.msearch.mockResolvedValueOnce({ docs: fetchedTasks, versionMap });
+      store.getDocVersions.mockResolvedValueOnce(docLatestVersions);
+      store.bulkPartialUpdate.mockResolvedValueOnce(
+        [fetchedTasks[0], fetchedTasks[1], fetchedTasks[3]].map(getPartialUpdateResult)
+      );
+      store.bulkGet.mockResolvedValueOnce([
+        asOk(fetchedTasks[0]),
+        asOk(fetchedTasks[1]),
+        asOk(fetchedTasks[3]),
+      ]);
+
+      const taskClaiming = new TaskClaiming({
+        logger: taskManagerLogger,
+        strategy: CLAIM_STRATEGY_MGET,
+        definitions: taskDefinitions,
+        taskStore: store,
+        excludedTaskTypes: [],
+        maxAttempts: 2,
+        getAvailableCapacity: () => 10,
+        taskPartitioner,
+      });
+
+      const resultOrErr = await taskClaiming.claimAvailableTasksIfCapacityIsAvailable({
+        claimOwnershipUntil: new Date(),
+      });
+
+      if (!isOk<ClaimOwnershipResult, FillPoolResult>(resultOrErr)) {
+        expect(resultOrErr).toBe(undefined);
+      }
+
+      const result = unwrap(resultOrErr) as ClaimOwnershipResult;
+
+      expect(apm.startTransaction).toHaveBeenCalledWith(
+        TASK_MANAGER_MARK_AS_CLAIMED,
+        TASK_MANAGER_TRANSACTION_TYPE
+      );
+      expect(mockApmTrans.end).toHaveBeenCalledWith('success');
+
+      expect(taskManagerLogger.debug).toHaveBeenCalledWith(
+        'task claimer claimed: 3; stale: 0; conflicts: 0; missing: 0; capacity reached: 0; updateErrors: 0; getErrors: 0; malformed data errors: 1',
+        { tags: ['taskClaiming', 'claimAvailableTasksMget'] }
+      );
+
+      expect(taskManagerLogger.error).toHaveBeenCalledWith(
+        'Error validating task schema id-3:yawn during claim: "Invalid interval \\"PT1M\\". Intervals must be of the form {number}m. Example: 5m."',
+        { tags: ['taskClaiming', 'claimAvailableTasksMget'] }
+      );
+
+      expect(store.msearch.mock.calls[0][0]?.[0]).toMatchObject({
+        size: 40,
+        seq_no_primary_term: true,
+      });
+
+      expect(store.getDocVersions).toHaveBeenCalledWith([
+        'task:id-1',
+        'task:id-2',
+        'task:id-3',
+        'task:id-4',
+      ]);
+
+      expect(store.bulkPartialUpdate).toHaveBeenCalledTimes(1);
+      expect(store.bulkPartialUpdate).toHaveBeenCalledWith([
+        {
+          id: fetchedTasks[0].id,
+          version: fetchedTasks[0].version,
+          scheduledAt: fetchedTasks[0].runAt,
+          attempts: 1,
+          ownerId: 'test-test',
+          retryAt: new Date('1970-01-01T00:05:30.000Z'),
+          status: 'running',
+          startedAt: new Date('1970-01-01T00:00:00.000Z'),
+        },
+        {
+          id: fetchedTasks[1].id,
+          version: fetchedTasks[1].version,
+          scheduledAt: fetchedTasks[1].runAt,
+          attempts: 1,
+          ownerId: 'test-test',
+          retryAt: new Date('1970-01-01T00:05:30.000Z'),
+          status: 'running',
+          startedAt: new Date('1970-01-01T00:00:00.000Z'),
+        },
+        {
+          id: fetchedTasks[3].id,
+          version: fetchedTasks[3].version,
+          scheduledAt: fetchedTasks[3].runAt,
+          attempts: 1,
+          ownerId: 'test-test',
+          retryAt: new Date('1970-01-01T00:05:30.000Z'),
+          status: 'running',
+          startedAt: new Date('1970-01-01T00:00:00.000Z'),
+        },
+      ]);
+
+      expect(store.bulkGet).toHaveBeenCalledWith(['id-1', 'id-2', 'id-4']);
+
+      expect(result.stats.tasksUpdated).toEqual(3);
+      expect(result.stats.tasksClaimed).toEqual(3);
+      expect(result.stats.tasksErrors).toEqual(1);
     });
 
     test('it should filter for specific partitions and tasks without partitions', async () => {

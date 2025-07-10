@@ -7,14 +7,15 @@
 
 import type { EuiButtonGroupOptionProps } from '@elastic/eui';
 import {
+  EuiButtonGroup,
+  EuiDescriptionList,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiPanel,
   EuiProgress,
-  EuiButtonGroup,
-  EuiSpacer,
-  EuiFlexItem,
-  EuiText,
-  EuiFlexGroup,
   EuiResizeObserver,
+  EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
 import { isEmpty } from 'lodash';
 import type { PropsWithChildren } from 'react';
@@ -24,13 +25,12 @@ import { css } from '@emotion/css';
 import { RuleAboutSection } from '../../../rule_management/components/rule_details/rule_about_section';
 import { HeaderSection } from '../../../../common/components/header_section';
 import { MarkdownRenderer } from '../../../../common/components/markdown_editor';
-import type {
-  AboutStepRule,
-  AboutStepRuleDetails,
-} from '../../../../detections/pages/detection_engine/rules/types';
+import type { AboutStepRule, AboutStepRuleDetails } from '../../../common/types';
 import * as i18n from './translations';
 import { fullHeight } from './styles';
 import type { RuleResponse } from '../../../../../common/api/detection_engine';
+import { ModifiedFieldBadge } from '../../../rule_management/components/rule_details/modified_field_badge';
+import { RuleFieldName } from '../../../rule_management/components/rule_details/rule_field_name';
 
 const detailsOption: EuiButtonGroupOptionProps = {
   id: 'details',
@@ -118,16 +118,11 @@ const StepAboutRuleToggleDetailsComponent: React.FC<StepPanelProps> = ({
                   <div ref={resizeRef} className={fullHeight}>
                     <VerticalOverflowContainer maxHeight={120}>
                       <VerticalOverflowContent maxHeight={120}>
-                        <EuiText
-                          size="s"
-                          data-test-subj="stepAboutRuleDetailsToggleDescriptionText"
-                        >
-                          {stepDataDetails.description}
-                        </EuiText>
+                        <RuleDescription description={stepDataDetails.description} />
                       </VerticalOverflowContent>
                     </VerticalOverflowContainer>
                     <EuiSpacer size="m" />
-                    <RuleAboutSection rule={rule} hideName hideDescription />
+                    <RuleAboutSection rule={rule} hideName hideDescription showModifiedFields />
                   </div>
                 )}
               </EuiResizeObserver>
@@ -138,7 +133,10 @@ const StepAboutRuleToggleDetailsComponent: React.FC<StepPanelProps> = ({
                 maxHeight={aboutPanelHeight}
               >
                 <VerticalOverflowContent maxHeight={aboutPanelHeight}>
-                  <MarkdownRenderer>{stepDataDetails.note}</MarkdownRenderer>
+                  <EuiFlexGroup gutterSize="xs" direction="column" alignItems="flexStart">
+                    <ModifiedFieldBadge fieldName={'note'} />
+                    <MarkdownRenderer>{stepDataDetails.note}</MarkdownRenderer>
+                  </EuiFlexGroup>
                 </VerticalOverflowContent>
               </VerticalOverflowContainer>
             )}
@@ -148,7 +146,10 @@ const StepAboutRuleToggleDetailsComponent: React.FC<StepPanelProps> = ({
                 maxHeight={aboutPanelHeight}
               >
                 <VerticalOverflowContent maxHeight={aboutPanelHeight}>
-                  <MarkdownRenderer>{stepDataDetails.setup}</MarkdownRenderer>
+                  <EuiFlexGroup gutterSize="xs" direction="column" alignItems="flexStart">
+                    <ModifiedFieldBadge fieldName={'setup'} />
+                    <MarkdownRenderer>{stepDataDetails.setup}</MarkdownRenderer>
+                  </EuiFlexGroup>
                 </VerticalOverflowContent>
               </VerticalOverflowContainer>
             )}
@@ -203,3 +204,24 @@ function VerticalOverflowContent({
     </div>
   );
 }
+
+const RuleDescription = ({ description }: { description: string }) => (
+  <EuiDescriptionList
+    listItems={[
+      {
+        title: (
+          <RuleFieldName
+            label={i18n.ABOUT_PANEL_DESCRIPTION_LABEL}
+            fieldName="description"
+            showModifiedFields
+          />
+        ),
+        description: (
+          <EuiText size="s" data-test-subj="stepAboutRuleDetailsToggleDescriptionText">
+            {description}
+          </EuiText>
+        ),
+      },
+    ]}
+  />
+);

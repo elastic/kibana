@@ -39,7 +39,7 @@ export const inspectSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =
       ...monitor,
     };
 
-    const validationResult = validateMonitor(monitorWithDefaults as MonitorFields);
+    const validationResult = validateMonitor(monitorWithDefaults as MonitorFields, spaceId);
 
     if (!validationResult.valid || !validationResult.decodedMonitor) {
       const { reason: message, details, payload } = validationResult;
@@ -63,7 +63,7 @@ export const inspectSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =
       ) ?? false;
 
     try {
-      const newMonitorId = id ?? uuidV4();
+      const newMonitorId = id || normalizedMonitor.config_id || uuidV4();
 
       const addMonitorAPI = new AddEditMonitorAPI(routeContext);
 
@@ -91,14 +91,14 @@ export const inspectSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =
       }
 
       return response.ok({ body: { result, decodedCode: formatCode(decodedCode) } });
-    } catch (getErr) {
+    } catch (error) {
       server.logger.error(
-        `Unable to inspect Synthetics monitor ${monitorWithDefaults[ConfigKey.NAME]}`
+        `Unable to inspect Synthetics monitor ${monitorWithDefaults[ConfigKey.NAME]}`,
+        { error }
       );
-      server.logger.error(getErr);
 
       return response.customError({
-        body: { message: getErr.message },
+        body: { message: error.message },
         statusCode: 500,
       });
     }

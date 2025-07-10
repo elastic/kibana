@@ -7,13 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type GuideId =
-  | 'kubernetes'
-  | 'siem'
-  | 'appSearch'
-  | 'websiteSearch'
-  | 'databaseSearch'
-  | 'testGuide';
+export type GuideId = 'kubernetes' | 'siem' | 'databaseSearch' | 'testGuide';
 
 type KubernetesStepIds = 'add_data' | 'view_dashboard' | 'tour_observability';
 type SiemStepIds = 'add_data' | 'rules' | 'alertsCases';

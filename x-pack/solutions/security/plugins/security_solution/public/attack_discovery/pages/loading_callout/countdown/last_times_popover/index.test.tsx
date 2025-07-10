@@ -11,6 +11,9 @@ import React from 'react';
 
 import { LastTimesPopover } from '.';
 import { TestProviders } from '../../../../../common/mock';
+import { useKibanaFeatureFlags } from '../../../use_kibana_feature_flags';
+
+jest.mock('../../../use_kibana_feature_flags');
 
 describe('LastTimesPopover', () => {
   const connectorIntervals: GenerationInterval[] = [
@@ -29,6 +32,10 @@ describe('LastTimesPopover', () => {
   ];
 
   beforeEach(() => {
+    (useKibanaFeatureFlags as jest.Mock).mockReturnValue({
+      attackDiscoveryAlertsEnabled: false,
+    });
+
     render(
       <TestProviders>
         <LastTimesPopover connectorIntervals={connectorIntervals} />

@@ -26,15 +26,13 @@ const getAuthzWrapper =
 
       try {
         const body = await elasticsearch.client.asCurrentUser.security.hasPrivileges({
-          body: {
-            index: [
-              {
-                privileges: ['manage'], // required to do anything with the reporting indices
-                names: [REPORTING_DATA_STREAM_WILDCARD_WITH_LEGACY],
-                allow_restricted_indices: true,
-              },
-            ],
-          },
+          index: [
+            {
+              privileges: ['manage'], // required to do anything with the reporting indices
+              names: [REPORTING_DATA_STREAM_WILDCARD_WITH_LEGACY],
+              allow_restricted_indices: true,
+            },
+          ],
         });
 
         if (!body.has_all_requested) {
@@ -63,6 +61,12 @@ export const registerDeprecationsRoutes = (reporting: ReportingCore, logger: Log
   router.get(
     {
       path: getStatusPath,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: false,
       options: { access: 'internal' },
     },
@@ -100,6 +104,12 @@ export const registerDeprecationsRoutes = (reporting: ReportingCore, logger: Log
   router.put(
     {
       path: migrateApiPath,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: false,
       options: { access: 'internal' },
     },

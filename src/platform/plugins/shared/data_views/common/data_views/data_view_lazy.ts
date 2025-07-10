@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
@@ -103,7 +103,7 @@ export class DataViewLazy extends AbstractDataView {
       runtimeResult = this.getRuntimeFields({ fieldName });
     }
 
-    const fieldMap = { ...mappedResult, ...scriptedResult, ...runtimeResult };
+    const fieldMap: DataViewFieldMap = { ...mappedResult, ...scriptedResult, ...runtimeResult };
     let fieldMapSorted = {};
     let hasBeenSorted = false;
 

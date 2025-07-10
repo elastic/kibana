@@ -21,9 +21,10 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
-import { Form, FormDataProvider, FormHook } from '../../../../../shared_imports';
+import { Form, FormDataProvider, FormHook, useFormIsModified } from '../../../../../shared_imports';
 import { ProcessorInternal } from '../../types';
 import { useTestPipelineContext } from '../../context';
 import { getProcessorDescriptor } from '../shared';
@@ -153,6 +154,9 @@ export const EditProcessorForm: FunctionComponent<Props> = ({
     flyoutContent = <ProcessorSettingsFields processor={processor} />;
   }
 
+  const isFormDirty = useFormIsModified({ form });
+  const flyoutTitleId = useGeneratedHtmlId();
+
   return (
     <Form data-test-subj="editProcessorForm" form={form} onSubmit={handleSubmit}>
       <EuiFlyout
@@ -162,13 +166,15 @@ export const EditProcessorForm: FunctionComponent<Props> = ({
           resetProcessors();
           closeFlyout();
         }}
+        outsideClickCloses={!isFormDirty}
+        aria-labelledby={flyoutTitleId}
       >
         <EuiFlyoutHeader>
           <EuiFlexGroup gutterSize="xs">
             <EuiFlexItem>
               <div>
                 <EuiTitle size="m">
-                  <h2>{getFlyoutTitle(isOnFailure)}</h2>
+                  <h2 id={flyoutTitleId}>{getFlyoutTitle(isOnFailure)}</h2>
                 </EuiTitle>
               </div>
             </EuiFlexItem>
@@ -181,7 +187,7 @@ export const EditProcessorForm: FunctionComponent<Props> = ({
                     return (
                       <DocumentationButton
                         processorLabel={formDescriptor.label}
-                        docLink={esDocsBasePath + formDescriptor.docLinkPath}
+                        docLink={formDescriptor.docLinkPath}
                       />
                     );
                   }

@@ -50,7 +50,6 @@ export interface AppLocation {
   pathname: string;
   search: string;
   hash: string;
-  key?: string;
   state?:
     | {
         isTabChange?: boolean;
@@ -973,6 +972,7 @@ export interface PolicyConfig {
     heartbeatinterval?: number;
   };
   global_manifest_version: 'latest' | string;
+  global_telemetry_enabled: boolean;
   windows: {
     advanced?: {
       [key: string]: unknown;
@@ -1033,9 +1033,11 @@ export interface PolicyConfig {
   mac: {
     advanced?: {};
     events: {
+      dns: boolean;
       file: boolean;
       process: boolean;
       network: boolean;
+      security: boolean;
     };
     malware: ProtectionFields & BlocklistFields & OnWriteScanFields;
     behavior_protection: BehaviorProtectionFields & SupportedFields;

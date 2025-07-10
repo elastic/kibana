@@ -12,6 +12,7 @@ import type { Page, PerPage, SortOrder } from '../../../../../../common/api/dete
 
 import type { RuleParams } from '../../../rule_schema';
 import { enrichFilterWithRuleTypeMapping } from './enrich_filter_with_rule_type_mappings';
+import { enrichFilterWithRuleIds } from './enrich_filter_with_rule_ids';
 import { transformSortField } from './transform_sort_field';
 
 interface HasReferences {
@@ -28,6 +29,7 @@ export interface FindRuleOptions {
   page: Page | undefined;
   perPage: PerPage | undefined;
   hasReference?: HasReferences | undefined;
+  ruleIds?: string[] | undefined;
 }
 
 export const findRules = ({
@@ -39,13 +41,14 @@ export const findRules = ({
   sortField,
   sortOrder,
   hasReference,
+  ruleIds,
 }: FindRuleOptions): Promise<FindResult<RuleParams>> => {
   return rulesClient.find({
     options: {
       fields,
       page,
       perPage,
-      filter: enrichFilterWithRuleTypeMapping(filter),
+      filter: enrichFilterWithRuleTypeMapping(enrichFilterWithRuleIds(filter, ruleIds)),
       sortOrder,
       sortField: transformSortField(sortField),
       hasReference,

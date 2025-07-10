@@ -12,6 +12,9 @@ get:
         application/json:
           schema:
             $ref: '../components/schemas/agent_configurations_response.yaml'
+          examples:
+            getAgentConfigurationsResponseExample1:
+              $ref: '../components/examples/agent_configuration_intake_object_get_200_response1.yaml'
     '400':
       description: Bad Request response
       content:
@@ -44,6 +47,9 @@ delete:
       application/json:
         schema:
           $ref: '../components/schemas/service_object.yaml'
+        examples:
+          deleteAgentConfigurationRequest1:
+            $ref: '../components/examples/agent_configuration_intake_object_delete_request1.yaml'
   responses:
     '200':
       description: Successful response
@@ -94,6 +100,9 @@ put:
       application/json:
         schema:
           $ref: '../components/schemas/agent_configuration_intake_object.yaml'
+        examples:
+          createUpdateAgentConfigurationRequestExample1:
+            $ref: '../components/examples/agent_configuration_intake_object_put_request1.yaml'
   responses:
     '200':
       description: Successful response

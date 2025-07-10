@@ -11,7 +11,11 @@ export const MICROSOFT_DEFENDER_ENDPOINT_CONNECTOR_ID = '.microsoft_defender_end
 export enum MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION {
   TEST_CONNECTOR = 'testConnector',
   GET_AGENT_DETAILS = 'getAgentDetails',
+  GET_AGENT_LIST = 'getAgentList',
   ISOLATE_HOST = 'isolateHost',
   RELEASE_HOST = 'releaseHost',
   GET_ACTIONS = 'getActions',
+  GET_LIBRARY_FILES = 'getLibraryFiles',
+  RUN_SCRIPT = 'runScript',
+  GET_ACTION_RESULTS = 'getActionResults',
 }

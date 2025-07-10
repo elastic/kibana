@@ -272,6 +272,7 @@ describe('policy details: ', () => {
               policy: {
                 value: {
                   global_manifest_version: 'latest',
+                  global_telemetry_enabled: false,
                   meta: {
                     license: '',
                     cloud: false,
@@ -330,7 +331,7 @@ describe('policy details: ', () => {
                     },
                   },
                   mac: {
-                    events: { process: true, file: true, network: true },
+                    events: { dns: true, process: true, file: true, network: true, security: true },
                     malware: { mode: 'prevent', blocklist: true, on_write_scan: true },
                     behavior_protection: {
                       mode: 'off',

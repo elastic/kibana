@@ -42,7 +42,7 @@ export function getDataViewFieldSubtypeMulti(field: HasSubtype) {
  * The index name is assumed to be individual index (no commas) but can contain `-`, wildcards,
  * datemath, remote cluster name and any other syntax permissible in index expression component.
  *
- * 2024/10/11 Implementation taken from https://github.com/smalyshev/elasticsearch/blob/main/server/src/main/java/org/elasticsearch/transport/RemoteClusterAware.java
+ * 2025/01/21 Implementation taken from https://github.com/smalyshev/elasticsearch/blob/main/server/src/main/java/org/elasticsearch/transport/RemoteClusterAware.java
  *
  * @param indexExpression
  */
@@ -52,6 +52,11 @@ export function isCCSRemoteIndexName(indexExpression: string): boolean {
     // Thus, whatever it is, this is definitely not a remote index.
     return false;
   }
+
+  const idx = indexExpression.indexOf(':');
+  // Check to make sure the remote cluster separator ':' isn't actually a selector separator '::'
+  const isSelector = indexExpression.startsWith('::', idx);
+
   // Note remote index name also can not start with ':'
-  return indexExpression.indexOf(':') > 0;
+  return idx > 0 && !isSelector;
 }

@@ -53,7 +53,7 @@ export default function ({ getService }: FtrProviderContext) {
           },
         ],
       });
-      roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('customRole');
+      roleAuthc = await samlAuth.createM2mApiKeyWithCustomRoleScope();
       const res = await supertestWithoutAuth
         .get(DATA_USAGE_DATA_STREAMS_API_ROUTE)
         .query({ includeZeroStorage: true })
@@ -83,7 +83,7 @@ export default function ({ getService }: FtrProviderContext) {
           },
         ],
       });
-      roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('customRole');
+      roleAuthc = await samlAuth.createM2mApiKeyWithCustomRoleScope();
       const res = await supertestWithoutAuth
         .get(DATA_USAGE_DATA_STREAMS_API_ROUTE)
         .query({ includeZeroStorage: true })
@@ -115,7 +115,7 @@ export default function ({ getService }: FtrProviderContext) {
           },
         ],
       });
-      roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('customRole');
+      roleAuthc = await samlAuth.createM2mApiKeyWithCustomRoleScope();
       const res = await supertestWithoutAuth
         .get(DATA_USAGE_DATA_STREAMS_API_ROUTE)
         .query({ includeZeroStorage: true })
@@ -140,7 +140,7 @@ export default function ({ getService }: FtrProviderContext) {
           },
         ],
       });
-      roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('customRole');
+      roleAuthc = await samlAuth.createM2mApiKeyWithCustomRoleScope();
       const res = await supertestWithoutAuth
         .get(DATA_USAGE_DATA_STREAMS_API_ROUTE)
         .query({ includeZeroStorage: true })

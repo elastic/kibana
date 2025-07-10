@@ -7,6 +7,8 @@
 
 .unifiedDataTable__cellValue {
   font-family: $euiCodeFontFamily;
+  display: inline-block;
+  text-align: left;
 }
 
 .unifiedDataTable__cell--expanded {
@@ -79,7 +81,7 @@
   }
 
   .euiDataGrid--rowHoverHighlight .euiDataGridRow:hover {
-    background-color: tintOrShade($euiColorLightShade, 50%, 0);
+    background-color: $euiColorLightestShade; // we keep using a deprecated shade until a proper token is available
   }
 
   .euiDataGrid__scrollOverlay .euiDataGrid__scrollBarOverlayRight {

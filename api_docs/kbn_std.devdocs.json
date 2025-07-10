@@ -411,6 +411,56 @@
       },
       {
         "parentPluginId": "@kbn/std",
+        "id": "def-common.bytePartition",
+        "type": "Function",
+        "tags": [],
+        "label": "bytePartition",
+        "description": [
+          "\nCreates chunks from a list of strings, where each chunk contains as many items\nas possible without exceeding the specified chunk size limit."
+        ],
+        "signature": [
+          "(list: string[], chunkSize?: number) => string[][]"
+        ],
+        "path": "src/platform/packages/shared/kbn-std/src/byte_partition/byte_partition.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/std",
+            "id": "def-common.bytePartition.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "list",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-std/src/byte_partition/byte_partition.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/std",
+            "id": "def-common.bytePartition.$2",
+            "type": "number",
+            "tags": [],
+            "label": "chunkSize",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "src/platform/packages/shared/kbn-std/src/byte_partition/byte_partition.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/std",
         "id": "def-common.deepFreeze",
         "type": "Function",
         "tags": [],
@@ -566,6 +616,47 @@
               "string[]"
             ],
             "path": "src/platform/packages/shared/kbn-std/src/ensure_deep_object.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/std",
+        "id": "def-common.fromExternalVariant",
+        "type": "Function",
+        "tags": [],
+        "label": "fromExternalVariant",
+        "description": [],
+        "signature": [
+          "(obj: T) => ",
+          {
+            "pluginId": "@kbn/std",
+            "scope": "common",
+            "docId": "kibKbnStdPluginApi",
+            "section": "def-common.FromExternalVariant",
+            "text": "FromExternalVariant"
+          },
+          "<T>"
+        ],
+        "path": "src/platform/packages/shared/kbn-std/src/from_external_variant.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/std",
+            "id": "def-common.fromExternalVariant.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "obj",
+            "description": [],
+            "signature": [
+              "T"
+            ],
+            "path": "src/platform/packages/shared/kbn-std/src/from_external_variant.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1653,6 +1744,118 @@
       },
       {
         "parentPluginId": "@kbn/std",
+        "id": "def-common.safeJsonParse",
+        "type": "Function",
+        "tags": [],
+        "label": "safeJsonParse",
+        "description": [
+          "\nSafely parses a JSON string. If the string cannot be parsed, for instance\nif it is not valid JSON, it will return `undefined`. If `handleError` is\ndefined, it will be called with the error, and the response from the callback\nwill be returned. This allows consumers to wrap the JSON.parse error.\n"
+        ],
+        "signature": [
+          "(value: string, handleError: (error: Error) => T) => T"
+        ],
+        "path": "src/platform/packages/shared/kbn-std/src/safe_json_parse.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/std",
+            "id": "def-common.safeJsonParse.$1",
+            "type": "string",
+            "tags": [],
+            "label": "value",
+            "description": [
+              "The JSON string to parse."
+            ],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-std/src/safe_json_parse.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/std",
+            "id": "def-common.safeJsonParse.$2",
+            "type": "Function",
+            "tags": [],
+            "label": "handleError",
+            "description": [
+              "Optional callback that is called when an error\nduring parsing. Its return value is returned from the\nfunction."
+            ],
+            "signature": [
+              "(error: Error) => T"
+            ],
+            "path": "src/platform/packages/shared/kbn-std/src/safe_json_parse.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "The parsed object, or `undefined` if an error occurs."
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/std",
+        "id": "def-common.safeJsonStringify",
+        "type": "Function",
+        "tags": [],
+        "label": "safeJsonStringify",
+        "description": [
+          "\nSafely stringifies a value to JSON. If the value cannot be stringified,\nfor instance if it contains circular references, it will return `undefined`.\nIf `handleError` is defined, it will be called with the error, and the\nresponse will be returned. This allows consumers to wrap the JSON.stringify\nerror.\n"
+        ],
+        "signature": [
+          "(value: unknown, handleError: (error: Error) => string | undefined) => string | undefined"
+        ],
+        "path": "src/platform/packages/shared/kbn-std/src/safe_json_stringify.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/std",
+            "id": "def-common.safeJsonStringify.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "value",
+            "description": [
+              "The value to stringify."
+            ],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/platform/packages/shared/kbn-std/src/safe_json_stringify.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/std",
+            "id": "def-common.safeJsonStringify.$2",
+            "type": "Function",
+            "tags": [],
+            "label": "handleError",
+            "description": [
+              "Optional callback that is called when an error occurs during\nstringifying."
+            ],
+            "signature": [
+              "(error: Error) => string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-std/src/safe_json_stringify.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "The JSON string representation of the value, or `undefined`\nif an error occurs."
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/std",
         "id": "def-common.stripVersionQualifier",
         "type": "Function",
         "tags": [],
@@ -1887,6 +2090,23 @@
           "any[] | { [k: string]: any; }"
         ],
         "path": "src/platform/packages/shared/kbn-std/src/deep_freeze.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/std",
+        "id": "def-common.FromExternalVariant",
+        "type": "Type",
+        "tags": [],
+        "label": "FromExternalVariant",
+        "description": [
+          "\nGiven a record type `{a: X; b: Y}`, produces a distributed union:\n`{ type: \"a\"; value: X } | { type: \"b\"; value: Y }`."
+        ],
+        "signature": [
+          "T extends any ? { [K in keyof T]: { type: K; value: T[K]; }; }[keyof T] : never"
+        ],
+        "path": "src/platform/packages/shared/kbn-std/src/from_external_variant.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -11,17 +11,18 @@ import { throwError, of } from 'rxjs';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { ReactWrapper } from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { Doc, DocProps } from './doc';
+import type { DocProps } from './doc';
+import { Doc } from './doc';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { setUnifiedDocViewerServices } from '@kbn/unified-doc-viewer-plugin/public/plugin';
 import { mockUnifiedDocViewerServices } from '@kbn/unified-doc-viewer-plugin/public/__mocks__';
 import type { UnifiedDocViewerServices } from '@kbn/unified-doc-viewer-plugin/public/types';
 import { createDiscoverServicesMock } from '../../../__mocks__/services';
+import { DiscoverTestProvider } from '../../../__mocks__/test_provider';
 
-const discoverServices = createDiscoverServicesMock();
+const services = createDiscoverServicesMock();
 const mockSearchApi = jest.fn();
 
 beforeEach(() => {
@@ -45,27 +46,6 @@ async function mountDoc(update = false) {
     referrer: 'mock-referrer',
   } as DocProps;
   let comp!: ReactWrapper;
-  const services = {
-    metadata: {
-      branch: 'test',
-    },
-    data: {
-      search: {
-        search: mockSearchApi,
-      },
-    },
-    docLinks: {
-      links: {
-        apis: {
-          indexExists: 'mockUrl',
-        },
-      },
-    },
-    locator: { getUrl: jest.fn(() => Promise.resolve('mock-url')) },
-    chrome: { setBreadcrumbs: jest.fn() },
-    profilesManager: discoverServices.profilesManager,
-    core: discoverServices.core,
-  };
   setUnifiedDocViewerServices({
     ...mockUnifiedDocViewerServices,
     data: {
@@ -76,9 +56,9 @@ async function mountDoc(update = false) {
   } as unknown as UnifiedDocViewerServices);
   await act(async () => {
     comp = mountWithIntl(
-      <KibanaContextProvider services={services}>
+      <DiscoverTestProvider services={services}>
         <Doc {...props} />
-      </KibanaContextProvider>
+      </DiscoverTestProvider>
     );
     if (update) comp.update();
   });

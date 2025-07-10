@@ -8,14 +8,24 @@
 import { createSelector } from 'reselect';
 import { AppState } from '..';
 
-const getState = (appState: AppState) => appState.agentPolicies;
+const getState = (appState: AppState) => appState.privateLocations;
 export const selectAgentPolicies = createSelector(getState, (state) => state);
 
-export const selectAddingNewPrivateLocation = (state: AppState) =>
-  state.agentPolicies.isAddingNewPrivateLocation ?? false;
+export const selectPrivateLocationFlyoutVisible = (state: AppState) =>
+  state.privateLocations.isPrivateLocationFlyoutVisible ?? false;
+
+export const selectPrivateLocationToEdit = (state: AppState) =>
+  state.privateLocations.privateLocationToEdit;
 
 export const selectPrivateLocationsLoading = (state: AppState) =>
-  state.agentPolicies.fetchLoading ?? false;
+  state.privateLocations.loading ?? false;
 
-export const selectPrivateLocations = (state: AppState) =>
-  state.agentPolicies.privateLocations ?? [];
+export const selectPrivateLocationCreating = (state: AppState) =>
+  state.privateLocations.createLoading ?? false;
+
+export const selectPrivateLocationDeleting = (state: AppState) =>
+  state.privateLocations.deleteLoading ?? false;
+
+export const selectPrivateLocationsState = (state: AppState) => state.privateLocations;
+
+export const selectPrivateLocations = (state: AppState) => state.privateLocations.data ?? [];

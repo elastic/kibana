@@ -13,6 +13,12 @@ import { AttachmentType, ExternalReferenceStorageType } from '@kbn/cases-plugin/
 import type { CaseAttachments } from '@kbn/cases-plugin/public/types';
 import { i18n } from '@kbn/i18n';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { PackagePolicy } from '@kbn/fleet-plugin/common';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import type { ResponseActionRequestTag } from '../../constants';
+import { ALLOWED_ACTION_REQUEST_TAGS } from '../../constants';
+import { getUnExpiredActionsEsQuery } from '../../utils/fetch_space_ids_with_maybe_pending_actions';
+import { catchAndWrapError } from '../../../../utils';
 import {
   ENDPOINT_RESPONSE_ACTION_SENT_EVENT,
   ENDPOINT_RESPONSE_ACTION_SENT_ERROR_EVENT,
@@ -27,6 +33,7 @@ import {
 } from '../../utils/fetch_action_responses';
 import { createEsSearchIterable } from '../../../../utils/create_es_search_iterable';
 import {
+  ensureActionRequestsIndexIsConfigured,
   getActionCompletionInfo,
   getActionRequestExpiration,
   mapResponsesByActionId,
@@ -39,6 +46,7 @@ import type {
   ResponseActionAgentType,
   ResponseActionsApiCommandNames,
 } from '../../../../../../common/endpoint/service/response_actions/constants';
+import { RESPONSE_ACTIONS_SUPPORTED_INTEGRATION_TYPES } from '../../../../../../common/endpoint/service/response_actions/constants';
 import { getActionDetailsById } from '../../action_details_by_id';
 import { ResponseActionsClientError, ResponseActionsNotSupportedError } from '../errors';
 import {
@@ -47,7 +55,9 @@ import {
 } from '../../../../../../common/endpoint/constants';
 import type {
   CommonResponseActionMethodOptions,
+  CustomScriptsResponse,
   GetFileDownloadMethodResponse,
+  OmitUnsupportedAttributes,
   ProcessPendingActionsMethodOptions,
   ResponseActionsClient,
 } from './types';
@@ -63,6 +73,8 @@ import type {
   ResponseActionGetFileOutputContent,
   ResponseActionGetFileParameters,
   ResponseActionParametersWithProcessData,
+  ResponseActionRunScriptOutputContent,
+  ResponseActionRunScriptParameters,
   ResponseActionScanOutputContent,
   ResponseActionsExecuteParameters,
   ResponseActionScanParameters,
@@ -71,8 +83,6 @@ import type {
   SuspendProcessActionOutputContent,
   UploadedFileInfo,
   WithAllKeys,
-  ResponseActionRunScriptOutputContent,
-  ResponseActionRunScriptParameters,
 } from '../../../../../../common/endpoint/types';
 import type {
   ExecuteActionRequestBody,
@@ -119,6 +129,7 @@ export const HOST_NOT_ENROLLED = i18n.translate(
 export interface ResponseActionsClientOptions {
   endpointService: EndpointAppContextService;
   esClient: ElasticsearchClient;
+  spaceId: string;
   casesClient?: CasesClient;
   /** Username that will be stored along with the action's ES documents */
   username: string;
@@ -156,6 +167,7 @@ export type ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
   Pick<LogsEndpointAction<TParameters, TOutputContent, TMeta>, 'meta'> & {
     command: ResponseActionsApiCommandNames;
     actionId?: string;
+    tags?: ResponseActionRequestTag[];
   };
 
 export type ResponseActionsClientWriteActionResponseToEndpointIndexOptions<
@@ -207,6 +219,121 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     this.log = options.endpointService.createLogger(
       this.constructor.name ?? 'ResponseActionsClient'
     );
+  }
+
+  /**
+   * Ensures that the Action Request Index is setup correctly (ex. has required mappings)
+   * @internal
+   */
+  private async ensureActionRequestsIndexIsConfigured(): Promise<void> {
+    this.log.debug(`checking index [${ENDPOINT_ACTIONS_INDEX}] is configured as expected`);
+
+    const CACHE_KEY = 'ensureActionRequestsIndexIsConfigured';
+    const cachedResult = this.cache.get<Promise<void>>(CACHE_KEY);
+
+    if (cachedResult) {
+      this.log.debug(`Checking has already been done - returned cached result`);
+      return cachedResult;
+    }
+
+    const resultPromise = ensureActionRequestsIndexIsConfigured(this.options.endpointService);
+
+    this.cache.set(CACHE_KEY, resultPromise);
+
+    return resultPromise;
+  }
+
+  /**
+   * Fetches information about the policies for each agent id that the response action is being sent to.
+   * Must be implemented by each subclass, since "agentId" for 3rd party EDRs agent IDs will need to
+   * to be mapped to elastic agent ids.
+   *
+   * @param agentIds
+   * @protected
+   */
+  protected abstract fetchAgentPolicyInfo(
+    /**
+     * The agent IDs that the response action is being sent to.  For 3rd party EDRs, these will be
+     * the IDs of the agent in the 3rd party system and NOT the Elastic Agent ID.
+     * The `fetchFleetInfoForAgents()` method can be used in conjunction with this method retrieve info.
+     * from Fleet once the Fleet Agent Ids have been calculated.
+     */
+    agentIds: string[]
+  ): Promise<LogsEndpointAction['agent']['policy']>;
+
+  /**
+   * Fetches Fleet agent information for each of the Fleet agent ids provided on input.
+   * @param agentIds
+   * @protected
+   */
+  protected async fetchFleetInfoForAgents(
+    /** Fleet Agent IDs */
+    agentIds: string[]
+  ): Promise<LogsEndpointAction['agent']['policy']> {
+    const integrations = [...RESPONSE_ACTIONS_SUPPORTED_INTEGRATION_TYPES[this.agentType]];
+
+    if (integrations.length === 0) {
+      throw new ResponseActionsClientError(
+        `No integration names defined for agent type [${this.agentType}]`
+      );
+    }
+
+    const spaceId = this.options.spaceId;
+    const fleetServices = this.options.endpointService.getInternalFleetServices(spaceId);
+    const soClient = fleetServices.savedObjects.createInternalScopedSoClient({ spaceId });
+    const agentPolicyIds = new Set<string>();
+    const policyInfo: LogsEndpointAction['agent']['policy'] = [];
+
+    // Get a list of Agent records so we can identify the Agent Policy ID
+    const agents = await fleetServices.agent.getByIds(agentIds).catch(catchAndWrapError);
+
+    this.log.debug(
+      () => `Fleet agent records for agent IDs [${agentIds.join(' | ')}]:\n${stringify(agents, 2)}`
+    );
+
+    for (const agent of agents) {
+      if (agent.policy_id) {
+        agentPolicyIds.add(agent.policy_id);
+      }
+    }
+
+    // Get a list of integration policies that are associated with the agent policies identified
+    const kuery = `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: (${integrations.join(
+      ' OR '
+    )}) AND ${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.policy_ids: (${Array.from(agentPolicyIds.values())
+      .map((id) => `"${id}"`)
+      .join(' OR ')})`;
+
+    this.log.debug(
+      () => `Looking for integration policies in fleet using filter (kuery):\n${kuery}`
+    );
+
+    const integrationPolicies = await fleetServices.packagePolicy
+      .list(soClient, { perPage: 10_000, kuery })
+      .catch(catchAndWrapError);
+
+    this.log.debug(() => `Integration policies found ${integrationPolicies.items.length}`);
+
+    const agentPolicyToIntegrationPolicyMap: Record<string, PackagePolicy> = {};
+
+    for (const integrationPolicy of integrationPolicies.items) {
+      for (const agentPolicyId of integrationPolicy.policy_ids) {
+        agentPolicyToIntegrationPolicyMap[agentPolicyId] = integrationPolicy;
+      }
+    }
+
+    for (const agent of agents) {
+      if (agent.policy_id) {
+        policyInfo.push({
+          agentId: agent.id,
+          elasticAgentId: agent.id,
+          agentPolicyId: agent.policy_id,
+          integrationPolicyId: agentPolicyToIntegrationPolicyMap[agent.policy_id].id,
+        });
+      }
+    }
+
+    return policyInfo;
   }
 
   /**
@@ -326,16 +453,20 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
   /**
    * Returns the action details for a given response action id
    * @param actionId
+   * @param bypassSpaceValidation
    * @protected
    */
   protected async fetchActionDetails<T extends ActionDetails = ActionDetails>(
-    actionId: string
+    actionId: string,
+    /**
+     * if `true`, then no space validations will be done on the action retrieved. Default is `false`.
+     * USE IT CAREFULLY!
+     */
+    bypassSpaceValidation: boolean = false
   ): Promise<T> {
-    return getActionDetailsById(
-      this.options.esClient,
-      this.options.endpointService.getEndpointMetadataService(),
-      actionId
-    );
+    return getActionDetailsById(this.options.endpointService, this.options.spaceId, actionId, {
+      bypassSpaceValidation,
+    });
   }
 
   /**
@@ -360,7 +491,8 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     }
 
     return fetchActionRequestById<TParameters, TOutputContent, TMeta>(
-      this.options.esClient,
+      this.options.endpointService,
+      this.options.spaceId,
       actionId
     ).then((actionRequestDoc) => {
       this.cache.set(cacheKey, actionRequestDoc);
@@ -441,6 +573,17 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
       };
     }
 
+    // if space awareness is enabled, then validate that agents are valid for active space.
+    // We do this validation by just calling `fetchAgentPolicyInfo()` which will throw if agents
+    // are not found in active space
+    if (this.options.endpointService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled) {
+      try {
+        await this.fetchAgentPolicyInfo(actionRequest.endpoint_ids);
+      } catch (err) {
+        return { isValid: false, error: err };
+      }
+    }
+
     return { isValid: true, error: undefined };
   }
 
@@ -459,6 +602,8 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
       TMeta
     >
   ): Promise<LogsEndpointAction<TParameters, TOutputContent, TMeta>> {
+    const isSpacesEnabled =
+      this.options.endpointService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled;
     let errorMsg = String(actionRequest.error ?? '').trim();
 
     if (!errorMsg) {
@@ -475,13 +620,41 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
 
     this.notifyUsage(actionRequest.command);
 
+    const actionId = actionRequest.actionId || uuidv4();
+    const tags = actionRequest.tags ?? [];
+
+    // With automated response action, it's possible to reach this point and not have any `endpoint_ids`
+    // defined in the action. That's because with automated response actions we always create an
+    // action request, even when there is a failure - like if the agent was un-enrolled in between
+    // the event sent and the detection engine processing that event.
+    const agentPolicyInfo =
+      isSpacesEnabled && actionRequest.endpoint_ids.length
+        ? await this.fetchAgentPolicyInfo(actionRequest.endpoint_ids)
+        : [];
+
+    if (isSpacesEnabled && agentPolicyInfo.length === 0) {
+      tags.push(ALLOWED_ACTION_REQUEST_TAGS.integrationPolicyDeleted);
+    }
+
     const doc: LogsEndpointAction<TParameters, TOutputContent, TMeta> = {
       '@timestamp': new Date().toISOString(),
+
+      // Add the `originSpaceId` property to the document if spaces is enabled
+      ...(isSpacesEnabled ? { originSpaceId: this.options.spaceId } : {}),
+
+      // Add `tags` property to the document if spaces is enabled
+      ...(isSpacesEnabled ? { tags } : {}),
+
+      // Need to suppress this TS error around `agent.policy` not supporting `undefined`.
+      // It will be removed once we enable the feature and delete the feature flag checks.
+      // @ts-expect-error
       agent: {
         id: actionRequest.endpoint_ids,
+        // add the `policy` info if space awareness is enabled
+        ...(isSpacesEnabled ? { policy: agentPolicyInfo } : {}),
       },
       EndpointActions: {
-        action_id: actionRequest.actionId || uuidv4(),
+        action_id: actionId,
         expiration: getActionRequestExpiration(),
         type: 'INPUT_ACTION',
         input_type: this.agentType,
@@ -502,6 +675,12 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
         ? { rule: { id: actionRequest.ruleId, name: actionRequest.ruleName } }
         : {}),
     };
+
+    if (isSpacesEnabled) {
+      await this.ensureActionRequestsIndexIsConfigured();
+    }
+
+    this.log.debug(() => `creating action request document:\n${stringify(doc)}`);
 
     try {
       const logsEndpointActionsResult = await this.options.esClient.index<LogsEndpointAction>(
@@ -526,6 +705,9 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
       return doc;
     } catch (err) {
       this.sendActionCreationErrorTelemetry(actionRequest.command, err);
+      this.log.debug(
+        () => `attempt to index document into ${ENDPOINT_ACTIONS_INDEX} failed:\n${stringify(err)}`
+      );
 
       if (!(err instanceof ResponseActionsClientError)) {
         throw new ResponseActionsClientError(
@@ -662,33 +844,25 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     Array<ResponseActionsClientPendingAction<TParameters, TOutputContent, TMeta>>
   > {
     const esClient = this.options.esClient;
-    const query: QueryDslQueryContainer = {
-      bool: {
-        must: {
-          // Only actions for this agent type
-          term: { 'EndpointActions.input_type': this.agentType },
-        },
-        must_not: {
-          // No action requests that have an `error` property defined
-          exists: { field: 'error' },
-        },
-        filter: [
-          // We only want actions requests whose expiration date is greater than now
-          { range: { 'EndpointActions.expiration': { gte: 'now' } } },
-        ],
-      },
-    };
+    const query: QueryDslQueryContainer = getUnExpiredActionsEsQuery(this.agentType);
 
-    return createEsSearchIterable<LogsEndpointAction>({
+    return createEsSearchIterable<
+      LogsEndpointAction,
+      Array<ResponseActionsClientPendingAction<TParameters, TOutputContent, TMeta>>
+    >({
       esClient,
       searchRequest: {
         index: ENDPOINT_ACTIONS_INDEX,
         sort: '@timestamp',
         query,
       },
-      resultsMapper: async (data): Promise<ResponseActionsClientPendingAction[]> => {
+      resultsMapper: async (
+        data
+      ): Promise<Array<ResponseActionsClientPendingAction<TParameters, TOutputContent, TMeta>>> => {
         const actionRequests = data.hits.hits.map((hit) => hit._source as LogsEndpointAction);
-        const pendingRequests: ResponseActionsClientPendingAction[] = [];
+        const pendingRequests: Array<
+          ResponseActionsClientPendingAction<TParameters, TOutputContent, TMeta>
+        > = [];
 
         if (actionRequests.length > 0) {
           const actionResults = await fetchActionResponses({
@@ -710,10 +884,14 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
             // If not completed, add action to the pending list and calculate the list of agent IDs
             // whose response we are still waiting on
             if (!actionCompleteInfo.isCompleted) {
-              const pendingActionData: ResponseActionsClientPendingAction = {
+              const pendingActionData = {
                 action: actionRequest,
                 pendingAgentIds: [],
-              };
+              } as unknown as ResponseActionsClientPendingAction<
+                TParameters,
+                TOutputContent,
+                TMeta
+              >;
 
               for (const [agentId, agentIdState] of Object.entries(actionCompleteInfo.agentState)) {
                 if (!agentIdState.isCompleted) {
@@ -851,12 +1029,16 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
   }
 
   public async runscript(
-    actionRequest: RunScriptActionRequestBody,
+    actionRequest: OmitUnsupportedAttributes<RunScriptActionRequestBody>,
     options?: CommonResponseActionMethodOptions
   ): Promise<
     ActionDetails<ResponseActionRunScriptOutputContent, ResponseActionRunScriptParameters>
   > {
     throw new ResponseActionsNotSupportedError('runscript');
+  }
+
+  public async getCustomScripts(): Promise<CustomScriptsResponse> {
+    throw new ResponseActionsNotSupportedError('getCustomScripts');
   }
 
   public async processPendingActions(_: ProcessPendingActionsMethodOptions): Promise<void> {

@@ -2,7 +2,8 @@
 
 exports[`TopNavMenu when setMenuMountPoint is provided should render badges and search bar 1`] = `
 <div
-  class="euiBadgeGroup kbnTopNavMenu__badgeGroup emotion-euiBadgeGroup-xs"
+  class="euiBadgeGroup emotion-euiBadgeGroup-xs-TopNavMenuBadges"
+  data-test-subj="kbn-top-nav-menu-badge-group"
 >
   <span
     class="euiBadge emotion-euiBadge-default"

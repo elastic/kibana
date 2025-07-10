@@ -12,11 +12,13 @@ import {
   euiPaletteForStatus,
   EuiSpacer,
   EuiStat,
+  useEuiTheme,
 } from '@elastic/eui';
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { PaletteLegends } from './palette_legends';
 import { ColorPaletteFlexItem } from './color_palette_flex_item';
+
 import {
   CV_AVERAGE_LABEL,
   CV_GOOD_LABEL,
@@ -86,11 +88,13 @@ export function CoreVitalItem({
   dataTestSubj,
 }: Props) {
   const palette = euiPaletteForStatus(3);
-
   const [inFocusInd, setInFocusInd] = useState<number | null>(null);
-
   const biggestValIndex = ranks.indexOf(Math.max(...ranks));
+  const {
+    euiTheme: { colors },
+  } = useEuiTheme();
 
+  const colorsStatus = [colors.textSuccess, colors.textWarning, colors.textDanger];
   if (!value && !loading) {
     return <EuiCard title={title} isDisabled={true} description={NO_DATA} />;
   }
@@ -105,11 +109,11 @@ export function CoreVitalItem({
         description={
           <>
             {title}
-            <EuiIconTip content={helpLabel} type="questionInCircle" />
+            <EuiIconTip content={helpLabel} type="question" />
           </>
         }
-        titleColor={palette[biggestValIndex]}
         isLoading={loading}
+        titleColor={colorsStatus[biggestValIndex]}
       />
       <EuiSpacer size="s" />
       <EuiFlexGroup

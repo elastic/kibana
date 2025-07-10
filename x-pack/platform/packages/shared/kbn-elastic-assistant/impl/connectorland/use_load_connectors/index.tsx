@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { useEffect } from 'react';
 import type { UseQueryResult } from '@tanstack/react-query';
 import { useQuery } from '@tanstack/react-query';
 import type { ServerError } from '@kbn/cases-plugin/public/types';
@@ -35,36 +35,30 @@ export const useLoadConnectors = ({
   toasts,
   inferenceEnabled = false,
 }: Props): UseQueryResult<AIConnector[], IHttpFetchError> => {
-  if (inferenceEnabled) {
-    actionTypes.push('.inference');
-  }
+  useEffect(() => {
+    if (inferenceEnabled && !actionTypes.includes('.inference')) {
+      actionTypes.push('.inference');
+    }
+  }, [inferenceEnabled]);
 
   return useQuery(
     QUERY_KEY,
     async () => {
-      const queryResult = await loadConnectors({ http });
-      return queryResult.reduce(
-        (acc: AIConnector[], connector) => [
-          ...acc,
-          ...(!connector.isMissingSecrets &&
-          actionTypes.includes(connector.actionTypeId) &&
-          // only include preconfigured .inference connectors
-          (connector.actionTypeId !== '.inference' || connector.isPreconfigured)
-            ? [
-                {
-                  ...connector,
-                  apiProvider:
-                    !connector.isPreconfigured &&
-                    !connector.isSystemAction &&
-                    connector?.config?.apiProvider
-                      ? (connector?.config?.apiProvider as OpenAiProviderType)
-                      : undefined,
-                },
-              ]
-            : []),
-        ],
-        []
-      );
+      const connectors = await loadConnectors({ http });
+      return connectors.reduce((acc: AIConnector[], connector) => {
+        if (!connector.isMissingSecrets && actionTypes.includes(connector.actionTypeId)) {
+          acc.push({
+            ...connector,
+            apiProvider:
+              !connector.isPreconfigured &&
+              !connector.isSystemAction &&
+              connector?.config?.apiProvider
+                ? (connector?.config?.apiProvider as OpenAiProviderType)
+                : undefined,
+          });
+        }
+        return acc;
+      }, []);
     },
     {
       retry: false,

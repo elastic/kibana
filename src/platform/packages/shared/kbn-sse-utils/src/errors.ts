@@ -23,6 +23,13 @@ export class ServerSentEventError<
     super(message);
   }
 
+  public get status() {
+    if (typeof this.meta === 'object' && this.meta.status) {
+      return this.meta.status as number;
+    }
+    return undefined;
+  }
+
   toJSON(): ServerSentErrorEvent {
     return {
       type: ServerSentEventType.error,

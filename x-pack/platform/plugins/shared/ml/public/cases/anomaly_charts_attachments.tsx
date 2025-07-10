@@ -54,10 +54,10 @@ const AnomalyChartsCaseAttachment = ({
     const query$ = new BehaviorSubject<Query | undefined>(initialState.query ?? undefined);
     const timeRange$ = new BehaviorSubject<TimeRange | undefined>(initialState.timeRange);
 
-    const anomalyChartsApi = initializeAnomalyChartsControls(initialState);
+    const chartsManager = initializeAnomalyChartsControls(initialState);
     const combined: AnomalyChartsAttachmentApi = {
-      ...anomalyChartsApi.anomalyChartsControlsApi,
-      ...anomalyChartsApi.dataLoadingApi,
+      ...chartsManager.api,
+      ...chartsManager.dataLoadingApi,
       parentApi: { filters$, query$, timeRange$ },
     };
     return combined;

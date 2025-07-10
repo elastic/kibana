@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { ComponentStory } from '@storybook/react';
+import type { StoryFn, StoryObj } from '@storybook/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
@@ -19,7 +19,7 @@ export default {
   alert,
 };
 
-const Template: ComponentStory<typeof Component> = (props: StatusBarProps) => (
+const Template: StoryFn<typeof Component> = (props: StatusBarProps) => (
   <I18nProvider>
     <KibanaContextProvider services={services}>
       <Component {...props} />
@@ -31,8 +31,10 @@ const defaultProps = {
   alert,
 };
 
-export const StatusBar = Template.bind({});
-StatusBar.args = defaultProps;
+export const StatusBar: StoryObj<StatusBarProps> = {
+  render: Template,
+  args: defaultProps,
+};
 
 const services = {
   http: {

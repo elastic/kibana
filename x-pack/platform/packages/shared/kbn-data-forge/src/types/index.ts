@@ -127,6 +127,7 @@ export const ConfigRT = rt.type({
     ephemeralProjectIds: rt.number,
     alignEventsToInterval: rt.boolean,
     artificialIndexDelay: rt.number,
+    slashLogs: rt.boolean,
   }),
   schedule: rt.array(ScheduleRT),
 });
@@ -187,4 +188,5 @@ export interface CliOptions {
   ephemeralProjectIds: number;
   alignEventsToInterval: boolean;
   scheduleEnd?: string;
+  slashLogs: boolean;
 }

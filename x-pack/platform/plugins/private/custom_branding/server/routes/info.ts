@@ -13,6 +13,13 @@ export const registerInfoRoute = (router: CustomBrandingRouter) => {
   router.get(
     {
       path: '/api/custom_branding/info',
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route is opted out from authorization, because this route is rather a status check route than a data fetching route',
+        },
+      },
       validate: false,
       options: {
         authRequired: 'optional',

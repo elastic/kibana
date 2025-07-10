@@ -8,8 +8,9 @@
  */
 
 import React, { FC } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer, type UseEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 
 export interface EndzoneTooltipHeaderProps {
   value?: string;
@@ -19,12 +20,15 @@ export const EndzoneTooltipHeader: FC<EndzoneTooltipHeaderProps> = ({ value }) =
   <>
     <EuiFlexGroup
       alignItems="center"
-      className="detailedTooltip__header--partial"
+      css={({ euiTheme }: UseEuiTheme) => css`
+        font-weight: ${euiTheme.font.weight.regular};
+        min-width: calc(${euiTheme.size.base} * 12);
+      `}
       responsive={false}
       gutterSize="xs"
     >
       <EuiFlexItem grow={false}>
-        <EuiIcon type="iInCircle" />
+        <EuiIcon type="info" />
       </EuiFlexItem>
       <EuiFlexItem>
         {i18n.translate('expressionXY.partialData.bucketTooltipText', {

@@ -10,8 +10,9 @@ import React, { useCallback } from 'react';
 import { EuiButton, EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import { useDispatch, useSelector } from 'react-redux';
-
+import { css } from '@emotion/react';
 import { useAssistantContext } from '@kbn/elastic-assistant';
+import { extractTimelineCapabilities } from '../../common/utils/timeline_capabilities';
 import { sourcererSelectors } from '../../common/store';
 import { sourcererActions } from '../../common/store/actions';
 import { inputsActions } from '../../common/store/inputs';
@@ -34,9 +35,11 @@ import {
 } from '../../timelines/store/actions';
 import { useDiscoverInTimelineContext } from '../../common/components/discover_in_timeline/use_discover_in_timeline_context';
 import { useShowTimeline } from '../../common/utils/timeline/use_show_timeline';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { useSourcererDataView } from '../../sourcerer/containers';
 import { useDiscoverState } from '../../timelines/components/timeline/tabs/esql/use_discover_state';
+import { useKibana } from '../../common/lib/kibana';
+import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
+import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 
 export interface SendToTimelineButtonProps {
   asEmptyButton: boolean;
@@ -60,11 +63,21 @@ export const SendToTimelineButton: FC<PropsWithChildren<SendToTimelineButtonProp
   const { showAssistantOverlay } = useAssistantContext();
   const [isTimelineBottomBarVisible] = useShowTimeline();
   const { discoverStateContainer, defaultDiscoverAppState } = useDiscoverInTimelineContext();
-  const { dataViewId: timelineDataViewId } = useSourcererDataView(SourcererScopeName.timeline);
+
+  const { dataViewId: oldTimelineDataViewId } = useSourcererDataView(SourcererScopeName.timeline);
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+
+  const { dataView } = useDataView(SourcererScopeName.timeline);
+
+  const timelineDataViewId = newDataViewPickerEnabled
+    ? dataView?.id ?? null
+    : oldTimelineDataViewId;
+
   const { setDiscoverAppState } = useDiscoverState();
-
-  const isEsqlTabInTimelineDisabled = useIsExperimentalFeatureEnabled('timelineEsqlTabDisabled');
-
+  const {
+    application: { capabilities },
+  } = useKibana().services;
+  const { read: hasAccessToTimeline } = extractTimelineCapabilities(capabilities);
   const signalIndexName = useSelector(sourcererSelectors.signalIndexName);
   const defaultDataView = useSelector(sourcererSelectors.defaultDataView);
 
@@ -245,10 +258,7 @@ export const SendToTimelineButton: FC<PropsWithChildren<SendToTimelineButtonProp
     : ACTION_CANNOT_INVESTIGATE_IN_TIMELINE;
   const isDisabled = !isTimelineBottomBarVisible;
 
-  if (
-    (dataProviders?.[0]?.queryType === 'esql' || dataProviders?.[0]?.queryType === 'sql') &&
-    isEsqlTabInTimelineDisabled
-  ) {
+  if (!hasAccessToTimeline) {
     return null;
   }
 
@@ -261,6 +271,9 @@ export const SendToTimelineButton: FC<PropsWithChildren<SendToTimelineButtonProp
       flush="both"
       data-test-subj="sendToTimelineEmptyButton"
       size="xs"
+      css={css`
+        width: 100%;
+      `}
     >
       <EuiToolTip position="right" content={toolTipText}>
         <>{children}</>

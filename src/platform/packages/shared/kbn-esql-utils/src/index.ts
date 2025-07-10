@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { TextBasedLanguages } from './types';
 export { getESQLAdHocDataview, getIndexForESQLQuery } from './utils/get_esql_adhoc_dataview';
 export { getInitialESQLQuery } from './utils/get_initial_esql_query';
 export { getESQLWithSafeLimit } from './utils/get_esql_with_safe_limit';
@@ -21,9 +20,20 @@ export {
   isQueryWrappedByPipes,
   retrieveMetadataColumns,
   getQueryColumnsFromESQLQuery,
+  mapVariableToColumn,
+  getValuesFromQueryField,
+  getESQLQueryVariables,
+  fixESQLQueryWithVariables,
+  getCategorizeColumns,
+  getArgsFromRenameFunction,
+  getCategorizeField,
 } from './utils/query_parsing_helpers';
 export { queryCannotBeSampled } from './utils/query_cannot_be_sampled';
-export { appendToESQLQuery, appendWhereClauseToESQLQuery } from './utils/append_to_query';
+export {
+  appendToESQLQuery,
+  appendWhereClauseToESQLQuery,
+  appendStatsByToQuery,
+} from './utils/append_to_query';
 export {
   getESQLQueryColumns,
   getESQLQueryColumnsRaw,
@@ -31,6 +41,7 @@ export {
   formatESQLColumns,
   getStartEndParams,
   hasStartEndParams,
+  getNamedParams,
 } from './utils/run_query';
 export {
   isESQLColumnSortable,
@@ -38,3 +49,5 @@ export {
   isESQLFieldGroupable,
 } from './utils/esql_fields_utils';
 export { sanitazeESQLInput } from './utils/sanitaze_input';
+export { replaceESQLQueryIndexPattern } from './utils/replace_index_pattern';
+export { extractCategorizeTokens } from './utils/extract_categorize_tokens';

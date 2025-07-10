@@ -25,8 +25,6 @@ export const API_HEADERS = Object.freeze({
   [ELASTIC_HTTP_VERSION_HEADER]: [INITIAL_REST_VERSION],
 });
 
-export const INTERNAL_CLOUD_CONNECTORS = ['Elastic-Cloud-SMTP'];
-
 export const rootRequest = <T = unknown>({
   headers: optionHeaders = {},
   role = 'admin',
@@ -98,24 +96,36 @@ export const getConnectors = () =>
   });
 
 export const deleteConnectors = () => {
+  cy.log('Deleting connectors...');
+
   cy.currentSpace().then((spaceId) => {
     getConnectors().then(($response) => {
-      if ($response.body.length > 0) {
-        const ids = $response.body.map((connector) => {
-          return connector.id;
-        });
-        ids.forEach((id) => {
-          if (!INTERNAL_CLOUD_CONNECTORS.includes(id)) {
-            rootRequest({
-              method: 'DELETE',
-              url: spaceId
-                ? getSpaceUrl(spaceId, `api/actions/connector/${id}`)
-                : `api/actions/connector/${id}`,
-            });
-          }
-        });
-      }
+      const connectors = $response.body;
+      const connectorNames = connectors.map((c) => c.name);
+
+      cy.log(`Found ${connectors.length} connectors`, connectorNames);
+
+      connectors.forEach((connector) => {
+        deleteConnector(spaceId, connector);
+      });
     });
+  });
+};
+
+const deleteConnector = (spaceId: string, connector: AllConnectorsResponse) => {
+  if (connector.is_preconfigured) {
+    // NOTE: Preconfigured connectors can't be deleted.
+    // https://www.elastic.co/guide/en/kibana/current/pre-configured-connectors.html
+    cy.log(`Skipping connector "${connector.name}" as it's preconfigured`);
+    return;
+  }
+
+  cy.log(`Deleting connector "${connector.name}"`);
+  rootRequest({
+    method: 'DELETE',
+    url: spaceId
+      ? getSpaceUrl(spaceId, `api/actions/connector/${connector.id}`)
+      : `api/actions/connector/${connector.id}`,
   });
 };
 
@@ -152,4 +162,27 @@ export const deleteDataView = (dataViewId: string) => {
     },
     failOnStatusCode: false,
   });
+};
+
+/**
+ * Refresh an index, making changes available to search.
+ * Reusable utility which refreshes all saved object indices, to make them available for search, especially
+ * useful when needing to perform a search on an index that has just been written to.
+ *
+ * An example of this when installing the prebuilt detection rules SO of type 'security-rule':
+ * the savedObjectsClient does this with a call with explicit `refresh: false`.
+ * So, despite of the fact that the endpoint waits until the prebuilt rule will be
+ * successfully indexed, it doesn't wait until they become "visible" for subsequent read
+ * operations.
+ *
+ * Additionally, this method clears the cache for all saved object indices. This helps in cases in which
+ * saved object is read, then written to, and then read again, and the second read returns stale data.
+ */
+export const refreshSavedObjectIndices = (): void => {
+  // Refresh indices to prevent a race condition between a write and subsequent read operation. To
+  // fix it deterministically we have to refresh saved object indices and wait until it's done.
+  cy.task('refreshIndex', { index: '*' });
+  // Additionally, we need to clear the cache to ensure that the next read operation will
+  // not return stale data.
+  cy.task('clearCache');
 };

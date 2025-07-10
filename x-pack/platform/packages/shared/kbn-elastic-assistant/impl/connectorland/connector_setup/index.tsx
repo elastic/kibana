@@ -20,7 +20,7 @@ import { getGenAiConfig } from '../helpers';
 
 export interface ConnectorSetupProps {
   conversation?: Conversation;
-  onConversationUpdate?: ({ cId, cTitle }: { cId: string; cTitle: string }) => Promise<void>;
+  onConversationUpdate?: ({ cId }: { cId: string }) => Promise<void>;
   updateConversationsOnSaveConnector?: boolean;
 }
 
@@ -45,7 +45,7 @@ export const ConnectorSetup = ({
 
   const onSaveConnector = useCallback(
     async (connector: ActionConnector) => {
-      if (updateConversationsOnSaveConnector) {
+      if (updateConversationsOnSaveConnector && conversation.id !== '') {
         // this side effect is not required for Attack discovery, because the connector is not used in a conversation
         const config = getGenAiConfig(connector);
         // persist only the active conversation
@@ -63,14 +63,10 @@ export const ConnectorSetup = ({
         if (updatedConversation) {
           onConversationUpdate?.({
             cId: updatedConversation.id,
-            cTitle: updatedConversation.title,
           });
-
-          refetchConnectors?.();
         }
-      } else {
-        refetchConnectors?.();
       }
+      refetchConnectors?.();
     },
     [
       conversation,

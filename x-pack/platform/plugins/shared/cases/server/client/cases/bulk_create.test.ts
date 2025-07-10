@@ -121,6 +121,7 @@ describe('bulkCreate', () => {
               "duration": null,
               "external_service": null,
               "id": "mock-id-1",
+              "incremental_id": undefined,
               "observables": Array [],
               "owner": "securitySolution",
               "settings": Object {
@@ -165,6 +166,7 @@ describe('bulkCreate', () => {
               "duration": null,
               "external_service": null,
               "id": "mock-id-1",
+              "incremental_id": undefined,
               "observables": Array [],
               "owner": "securitySolution",
               "settings": Object {
@@ -245,6 +247,7 @@ describe('bulkCreate', () => {
               "duration": null,
               "external_service": null,
               "id": "mock-saved-object-id",
+              "incremental_id": undefined,
               "observables": Array [],
               "owner": "securitySolution",
               "settings": Object {
@@ -284,6 +287,7 @@ describe('bulkCreate', () => {
               "duration": null,
               "external_service": null,
               "id": "mock-saved-object-id",
+              "incremental_id": undefined,
               "observables": Array [],
               "owner": "securitySolution",
               "settings": Object {
@@ -416,6 +420,65 @@ describe('bulkCreate', () => {
           { id: 'mock-saved-object-id', owner: 'securitySolution' },
           { id: 'mock-saved-object-id', owner: 'cases' },
         ],
+        operation: [
+          {
+            action: 'cases_assign',
+            docType: 'case',
+            ecsType: 'change',
+            name: 'assignCase',
+            savedObjectType: 'cases',
+            verbs: { past: 'updated', present: 'update', progressive: 'updating' },
+          },
+          {
+            action: 'case_create',
+            docType: 'case',
+            ecsType: 'creation',
+            name: 'createCase',
+            savedObjectType: 'cases',
+            verbs: { past: 'created', present: 'create', progressive: 'creating' },
+          },
+        ],
+      });
+    });
+
+    it('validates with assign+create operations when cases have assignees', async () => {
+      await bulkCreate(
+        { cases: [getCases()[0], getCases({ owner: 'cases' })[0]] },
+        clientArgs,
+        casesClientMock
+      );
+
+      expect(clientArgs.authorization.ensureAuthorized).toHaveBeenCalledWith({
+        entities: [
+          { id: 'mock-saved-object-id', owner: 'securitySolution' },
+          { id: 'mock-saved-object-id', owner: 'cases' },
+        ],
+        operation: [
+          {
+            action: 'cases_assign',
+            docType: 'case',
+            ecsType: 'change',
+            name: 'assignCase',
+            savedObjectType: 'cases',
+            verbs: { past: 'updated', present: 'update', progressive: 'updating' },
+          },
+          {
+            action: 'case_create',
+            docType: 'case',
+            ecsType: 'creation',
+            name: 'createCase',
+            savedObjectType: 'cases',
+            verbs: { past: 'created', present: 'create', progressive: 'creating' },
+          },
+        ],
+      });
+    });
+
+    it('validates with only create operation when cases have no assignees', async () => {
+      await bulkCreate({ cases: [getCases({ assignees: [] })[0]] }, clientArgs, casesClientMock);
+
+      expect(clientArgs.authorization.ensureAuthorized).toHaveBeenCalledWith({
+        entities: [{ id: 'mock-saved-object-id', owner: 'securitySolution' }],
         operation: {
           action: 'case_create',
           docType: 'case',

@@ -8,10 +8,11 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { replaceParams } from '@kbn/openapi-common/shared';
 import { useCallback } from 'react';
-import { SIEM_RULE_MIGRATION_PATH } from '../../../../common/siem_migrations/constants';
+import type { RuleMigrationFilters } from '../../../../common/siem_migrations/types';
+import { SIEM_RULE_MIGRATION_RULES_PATH } from '../../../../common/siem_migrations/constants';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import * as i18n from './translations';
-import { getRuleMigrations } from '../api';
+import { getMigrationRules } from '../api';
 import { DEFAULT_QUERY_OPTIONS } from './constants';
 
 export const useGetMigrationRules = (params: {
@@ -20,28 +21,28 @@ export const useGetMigrationRules = (params: {
   perPage?: number;
   sortField?: string;
   sortDirection?: 'asc' | 'desc';
-  searchTerm?: string;
-  ids?: string[];
+  filters?: RuleMigrationFilters;
 }) => {
   const { addError } = useAppToasts();
 
   const { migrationId } = params;
-  const SPECIFIC_MIGRATION_PATH = replaceParams(SIEM_RULE_MIGRATION_PATH, {
+  const SPECIFIC_MIGRATION_PATH = replaceParams(SIEM_RULE_MIGRATION_RULES_PATH, {
     migration_id: migrationId,
   });
 
   return useQuery(
     ['GET', SPECIFIC_MIGRATION_PATH, params],
     async ({ signal }) => {
-      const response = await getRuleMigrations({ signal, ...params });
+      const response = await getMigrationRules({ signal, ...params });
 
-      return { ruleMigrations: response.data, total: response.total };
+      return { migrationRules: response.data, total: response.total };
     },
     {
       ...DEFAULT_QUERY_OPTIONS,
       onError: (error) => {
         addError(error, { title: i18n.GET_MIGRATION_RULES_FAILURE });
       },
+      cacheTime: 2 * 1000,
     }
   );
 };
@@ -57,7 +58,7 @@ export const useInvalidateGetMigrationRules = () => {
 
   return useCallback(
     (migrationId: string) => {
-      const SPECIFIC_MIGRATION_PATH = replaceParams(SIEM_RULE_MIGRATION_PATH, {
+      const SPECIFIC_MIGRATION_PATH = replaceParams(SIEM_RULE_MIGRATION_RULES_PATH, {
         migration_id: migrationId,
       });
 

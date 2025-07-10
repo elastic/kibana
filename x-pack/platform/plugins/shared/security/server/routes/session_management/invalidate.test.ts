@@ -9,6 +9,7 @@ import type { ObjectType } from '@kbn/config-schema';
 import type { RequestHandler, RouteConfig } from '@kbn/core/server';
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
+import { ReservedPrivilegesSet } from '@kbn/core-http-server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import { defineInvalidateSessionsRoutes } from './invalidate';
@@ -48,7 +49,9 @@ describe('Invalidate sessions routes', () => {
         summary: 'Invalidate user sessions',
       });
 
-      expect(routeConfig.security?.authz).toEqual({ requiredPrivileges: ['sessionManagement'] });
+      expect(routeConfig.security?.authz).toEqual({
+        requiredPrivileges: [ReservedPrivilegesSet.superuser],
+      });
 
       const bodySchema = (routeConfig.validate as any).body as ObjectType;
       expect(() => bodySchema.validate({})).toThrowErrorMatchingInlineSnapshot(

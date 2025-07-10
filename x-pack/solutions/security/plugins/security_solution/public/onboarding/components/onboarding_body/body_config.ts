@@ -14,6 +14,9 @@ import { alertsCardConfig } from './cards/alerts';
 import { assistantCardConfig } from './cards/assistant';
 import { aiConnectorCardConfig } from './cards/siem_migrations/ai_connector';
 import { startMigrationCardConfig } from './cards/siem_migrations/start_migration';
+import { siemMigrationIntegrationsCardConfig } from './cards/siem_migrations/integrations';
+import { integrationsExternalDetectionsCardConfig } from './cards/integrations_external_detections';
+import { knowledgeSourceCardConfig } from './cards/knowledge_source';
 
 export const defaultBodyConfig: OnboardingGroupConfig[] = [
   {
@@ -37,6 +40,24 @@ export const defaultBodyConfig: OnboardingGroupConfig[] = [
   },
 ];
 
+export const defaultExternalDetectionsBodyConfig: OnboardingGroupConfig[] = [
+  {
+    title: i18n.translate('xpack.securitySolution.onboarding.externalDetections.dataGroup.title', {
+      defaultMessage: 'Ingest your data',
+    }),
+    cards: [integrationsExternalDetectionsCardConfig, knowledgeSourceCardConfig],
+  },
+  {
+    title: i18n.translate(
+      'xpack.securitySolution.onboarding.externalDetections.customizeLLMGroup.title',
+      {
+        defaultMessage: 'Customize your LLM',
+      }
+    ),
+    cards: [assistantCardConfig],
+  },
+];
+
 export const siemMigrationsBodyConfig: OnboardingGroupConfig[] = [
   {
     title: i18n.translate('xpack.securitySolution.onboarding.configure.title', {
@@ -48,6 +69,6 @@ export const siemMigrationsBodyConfig: OnboardingGroupConfig[] = [
     title: i18n.translate('xpack.securitySolution.onboarding.migrate.title', {
       defaultMessage: 'Migrate rules & add data',
     }),
-    cards: [startMigrationCardConfig],
+    cards: [startMigrationCardConfig, siemMigrationIntegrationsCardConfig],
   },
 ];

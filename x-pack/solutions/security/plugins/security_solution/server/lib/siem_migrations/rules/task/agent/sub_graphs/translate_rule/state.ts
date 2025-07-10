@@ -5,28 +5,25 @@
  * 2.0.
  */
 
-import type { BaseMessage } from '@langchain/core/messages';
-import { Annotation, messagesStateReducer } from '@langchain/langgraph';
+import { Annotation } from '@langchain/langgraph';
 import { RuleTranslationResult } from '../../../../../../../../common/siem_migrations/constants';
 import type {
   ElasticRulePartial,
   OriginalRule,
-  RuleMigration,
+  RuleMigrationRule,
 } from '../../../../../../../../common/siem_migrations/model/rule_migration.gen';
+import type { RuleMigrationResources } from '../../../retrievers/rule_resource_retriever';
 import type { RuleMigrationIntegration } from '../../../../types';
 import type { TranslateRuleValidationErrors } from './types';
 
 export const translateRuleState = Annotation.Root({
-  messages: Annotation<BaseMessage[]>({
-    reducer: messagesStateReducer,
-    default: () => [],
-  }),
   original_rule: Annotation<OriginalRule>(),
+  resources: Annotation<RuleMigrationResources>(),
   integration: Annotation<RuleMigrationIntegration>({
     reducer: (current, value) => value ?? current,
     default: () => ({} as RuleMigrationIntegration),
   }),
-  translation_finalized: Annotation<boolean>({
+  includes_ecs_mapping: Annotation<boolean>({
     reducer: (current, value) => value ?? current,
     default: () => false,
   }),
@@ -40,7 +37,7 @@ export const translateRuleState = Annotation.Root({
   }),
   elastic_rule: Annotation<ElasticRulePartial>({
     reducer: (state, action) => ({ ...state, ...action }),
-    default: () => ({}),
+    default: () => ({} as ElasticRulePartial),
   }),
   validation_errors: Annotation<TranslateRuleValidationErrors>({
     reducer: (current, value) => value ?? current,
@@ -50,12 +47,8 @@ export const translateRuleState = Annotation.Root({
     reducer: (current, value) => value ?? current,
     default: () => RuleTranslationResult.UNTRANSLATABLE,
   }),
-  comments: Annotation<RuleMigration['comments']>({
+  comments: Annotation<RuleMigrationRule['comments']>({
     reducer: (current, value) => (value ? (current ?? []).concat(value) : current),
     default: () => [],
-  }),
-  response: Annotation<string>({
-    reducer: (current, value) => value ?? current,
-    default: () => '',
   }),
 });

@@ -6,6 +6,7 @@
  */
 
 import { render } from '@testing-library/react';
+import { EuiThemeProvider } from '@elastic/eui';
 import { ReactElement, ElementType } from 'react';
 import { generateLinkedRulesMenuItems } from '.';
 import { rules } from '../mocks/rule_references.mock';
@@ -43,7 +44,9 @@ describe('generateLinedRulesMenuItems', () => {
     }) as ReactElement[];
 
     result.forEach((link) => {
-      const wrapper = render(link);
+      const wrapper = render(link, {
+        wrapper: EuiThemeProvider,
+      });
       expect(wrapper.container).toMatchSnapshot();
       expect(wrapper.getByTestId('generateLinedRulesMenuItemsTestActionItem1a2b3c'));
       expect(wrapper.getByTestId('generateLinedRulesMenuItemsTestLeftIcon'));
@@ -52,7 +55,7 @@ describe('generateLinedRulesMenuItems', () => {
   it('should render the second linked rule and apply the css when the length is > 1', () => {
     const result: ReactElement[] = getSecurityLinkAction(dataTestSubj);
 
-    const wrapper = render(result[1]);
+    const wrapper = render(result[1], { wrapper: EuiThemeProvider });
     expect(wrapper.container).toMatchSnapshot();
     expect(wrapper.getByTestId('generateLinedRulesMenuItemsTestActionItem2a2b3c'));
   });

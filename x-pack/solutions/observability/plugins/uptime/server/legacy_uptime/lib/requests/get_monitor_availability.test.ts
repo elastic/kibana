@@ -123,139 +123,137 @@ describe('monitor availability', () => {
       const [params] = esMock.search.mock.calls[0];
       expect(params).toMatchInlineSnapshot(`
         Object {
-          "body": Object {
-            "aggs": Object {
-              "monitors": Object {
-                "aggs": Object {
-                  "down_sum": Object {
-                    "sum": Object {
-                      "field": "summary.down",
-                      "missing": 0,
-                    },
+          "aggs": Object {
+            "monitors": Object {
+              "aggs": Object {
+                "down_sum": Object {
+                  "sum": Object {
+                    "field": "summary.down",
+                    "missing": 0,
                   },
-                  "fields": Object {
-                    "top_hits": Object {
-                      "size": 1,
-                      "sort": Array [
-                        Object {
-                          "@timestamp": Object {
-                            "order": "desc",
-                          },
+                },
+                "fields": Object {
+                  "top_hits": Object {
+                    "size": 1,
+                    "sort": Array [
+                      Object {
+                        "@timestamp": Object {
+                          "order": "desc",
                         },
-                      ],
-                    },
-                  },
-                  "filtered": Object {
-                    "bucket_selector": Object {
-                      "buckets_path": Object {
-                        "threshold": "ratio.value",
                       },
-                      "script": "params.threshold < 0.54",
-                    },
+                    ],
                   },
-                  "ratio": Object {
-                    "bucket_script": Object {
-                      "buckets_path": Object {
-                        "downTotal": "down_sum",
-                        "upTotal": "up_sum",
-                      },
-                      "script": "
+                },
+                "filtered": Object {
+                  "bucket_selector": Object {
+                    "buckets_path": Object {
+                      "threshold": "ratio.value",
+                    },
+                    "script": "params.threshold < 0.54",
+                  },
+                },
+                "ratio": Object {
+                  "bucket_script": Object {
+                    "buckets_path": Object {
+                      "downTotal": "down_sum",
+                      "upTotal": "up_sum",
+                    },
+                    "script": "
                         if (params.upTotal + params.downTotal > 0) {
                           return params.upTotal / (params.upTotal + params.downTotal);
                         } return null;",
-                    },
-                  },
-                  "up_sum": Object {
-                    "sum": Object {
-                      "field": "summary.up",
-                      "missing": 0,
-                    },
                   },
                 },
-                "composite": Object {
-                  "size": 2000,
-                  "sources": Array [
-                    Object {
-                      "monitorId": Object {
-                        "terms": Object {
-                          "field": "monitor.id",
-                        },
-                      },
-                    },
-                    Object {
-                      "location": Object {
-                        "terms": Object {
-                          "field": "observer.geo.name",
-                          "missing_bucket": true,
-                        },
-                      },
-                    },
-                  ],
+                "up_sum": Object {
+                  "sum": Object {
+                    "field": "summary.up",
+                    "missing": 0,
+                  },
                 },
               },
-            },
-            "query": Object {
-              "bool": Object {
-                "filter": Array [
+              "composite": Object {
+                "size": 2000,
+                "sources": Array [
                   Object {
-                    "exists": Object {
-                      "field": "summary",
-                    },
-                  },
-                  Object {
-                    "bool": Object {
-                      "must_not": Object {
-                        "exists": Object {
-                          "field": "run_once",
-                        },
+                    "monitorId": Object {
+                      "terms": Object {
+                        "field": "monitor.id",
                       },
                     },
                   },
                   Object {
-                    "range": Object {
-                      "@timestamp": Object {
-                        "gte": "now-2w",
-                        "lte": "now",
+                    "location": Object {
+                      "terms": Object {
+                        "field": "observer.geo.name",
+                        "missing_bucket": true,
                       },
-                    },
-                  },
-                  Object {
-                    "bool": Object {
-                      "minimum_should_match": 1,
-                      "should": Array [
-                        Object {
-                          "bool": Object {
-                            "minimum_should_match": 1,
-                            "should": Array [
-                              Object {
-                                "match_phrase": Object {
-                                  "monitor.id": "apm-dev",
-                                },
-                              },
-                            ],
-                          },
-                        },
-                        Object {
-                          "bool": Object {
-                            "minimum_should_match": 1,
-                            "should": Array [
-                              Object {
-                                "match_phrase": Object {
-                                  "monitor.id": "auto-http-0X8D6082B94BBE3B8A",
-                                },
-                              },
-                            ],
-                          },
-                        },
-                      ],
                     },
                   },
                 ],
               },
             },
-            "size": 0,
           },
           "index": "heartbeat-*",
+          "query": Object {
+            "bool": Object {
+              "filter": Array [
+                Object {
+                  "exists": Object {
+                    "field": "summary",
+                  },
+                },
+                Object {
+                  "bool": Object {
+                    "must_not": Object {
+                      "exists": Object {
+                        "field": "run_once",
+                      },
+                    },
+                  },
+                },
+                Object {
+                  "range": Object {
+                    "@timestamp": Object {
+                      "gte": "now-2w",
+                      "lte": "now",
+                    },
+                  },
+                },
+                Object {
+                  "bool": Object {
+                    "minimum_should_match": 1,
+                    "should": Array [
+                      Object {
+                        "bool": Object {
+                          "minimum_should_match": 1,
+                          "should": Array [
+                            Object {
+                              "match_phrase": Object {
+                                "monitor.id": "apm-dev",
+                              },
+                            },
+                          ],
+                        },
+                      },
+                      Object {
+                        "bool": Object {
+                          "minimum_should_match": 1,
+                          "should": Array [
+                            Object {
+                              "match_phrase": Object {
+                                "monitor.id": "auto-http-0X8D6082B94BBE3B8A",
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+          "size": 0,
         }
       `);
     });
@@ -314,108 +312,106 @@ describe('monitor availability', () => {
       const [params] = esMock.search.mock.calls[0];
       expect(params).toMatchInlineSnapshot(`
         Object {
-          "body": Object {
-            "aggs": Object {
-              "monitors": Object {
-                "aggs": Object {
-                  "down_sum": Object {
-                    "sum": Object {
-                      "field": "summary.down",
-                      "missing": 0,
-                    },
+          "aggs": Object {
+            "monitors": Object {
+              "aggs": Object {
+                "down_sum": Object {
+                  "sum": Object {
+                    "field": "summary.down",
+                    "missing": 0,
                   },
-                  "fields": Object {
-                    "top_hits": Object {
-                      "size": 1,
-                      "sort": Array [
-                        Object {
-                          "@timestamp": Object {
-                            "order": "desc",
-                          },
+                },
+                "fields": Object {
+                  "top_hits": Object {
+                    "size": 1,
+                    "sort": Array [
+                      Object {
+                        "@timestamp": Object {
+                          "order": "desc",
                         },
-                      ],
-                    },
-                  },
-                  "filtered": Object {
-                    "bucket_selector": Object {
-                      "buckets_path": Object {
-                        "threshold": "ratio.value",
                       },
-                      "script": "params.threshold < 0.69",
-                    },
+                    ],
                   },
-                  "ratio": Object {
-                    "bucket_script": Object {
-                      "buckets_path": Object {
-                        "downTotal": "down_sum",
-                        "upTotal": "up_sum",
-                      },
-                      "script": "
+                },
+                "filtered": Object {
+                  "bucket_selector": Object {
+                    "buckets_path": Object {
+                      "threshold": "ratio.value",
+                    },
+                    "script": "params.threshold < 0.69",
+                  },
+                },
+                "ratio": Object {
+                  "bucket_script": Object {
+                    "buckets_path": Object {
+                      "downTotal": "down_sum",
+                      "upTotal": "up_sum",
+                    },
+                    "script": "
                         if (params.upTotal + params.downTotal > 0) {
                           return params.upTotal / (params.upTotal + params.downTotal);
                         } return null;",
-                    },
-                  },
-                  "up_sum": Object {
-                    "sum": Object {
-                      "field": "summary.up",
-                      "missing": 0,
-                    },
                   },
                 },
-                "composite": Object {
-                  "size": 2000,
-                  "sources": Array [
-                    Object {
-                      "monitorId": Object {
-                        "terms": Object {
-                          "field": "monitor.id",
-                        },
-                      },
-                    },
-                    Object {
-                      "location": Object {
-                        "terms": Object {
-                          "field": "observer.geo.name",
-                          "missing_bucket": true,
-                        },
-                      },
-                    },
-                  ],
+                "up_sum": Object {
+                  "sum": Object {
+                    "field": "summary.up",
+                    "missing": 0,
+                  },
                 },
               },
-            },
-            "query": Object {
-              "bool": Object {
-                "filter": Array [
+              "composite": Object {
+                "size": 2000,
+                "sources": Array [
                   Object {
-                    "exists": Object {
-                      "field": "summary",
-                    },
-                  },
-                  Object {
-                    "bool": Object {
-                      "must_not": Object {
-                        "exists": Object {
-                          "field": "run_once",
-                        },
+                    "monitorId": Object {
+                      "terms": Object {
+                        "field": "monitor.id",
                       },
                     },
                   },
                   Object {
-                    "range": Object {
-                      "@timestamp": Object {
-                        "gte": "now-23d",
-                        "lte": "now",
+                    "location": Object {
+                      "terms": Object {
+                        "field": "observer.geo.name",
+                        "missing_bucket": true,
                       },
                     },
                   },
                 ],
               },
             },
-            "size": 0,
           },
           "index": "heartbeat-*",
+          "query": Object {
+            "bool": Object {
+              "filter": Array [
+                Object {
+                  "exists": Object {
+                    "field": "summary",
+                  },
+                },
+                Object {
+                  "bool": Object {
+                    "must_not": Object {
+                      "exists": Object {
+                        "field": "run_once",
+                      },
+                    },
+                  },
+                },
+                Object {
+                  "range": Object {
+                    "@timestamp": Object {
+                      "gte": "now-23d",
+                      "lte": "now",
+                    },
+                  },
+                },
+              ],
+            },
+          },
+          "size": 0,
         }
       `);
 
@@ -649,7 +645,112 @@ describe('monitor availability', () => {
       expect(esMock.search).toHaveBeenCalledTimes(2);
       expect(params).toMatchInlineSnapshot(`
         Object {
-          "body": Object {
+          "aggs": Object {
+            "monitors": Object {
+              "aggs": Object {
+                "down_sum": Object {
+                  "sum": Object {
+                    "field": "summary.down",
+                    "missing": 0,
+                  },
+                },
+                "fields": Object {
+                  "top_hits": Object {
+                    "size": 1,
+                    "sort": Array [
+                      Object {
+                        "@timestamp": Object {
+                          "order": "desc",
+                        },
+                      },
+                    ],
+                  },
+                },
+                "filtered": Object {
+                  "bucket_selector": Object {
+                    "buckets_path": Object {
+                      "threshold": "ratio.value",
+                    },
+                    "script": "params.threshold < 0.98",
+                  },
+                },
+                "ratio": Object {
+                  "bucket_script": Object {
+                    "buckets_path": Object {
+                      "downTotal": "down_sum",
+                      "upTotal": "up_sum",
+                    },
+                    "script": "
+                        if (params.upTotal + params.downTotal > 0) {
+                          return params.upTotal / (params.upTotal + params.downTotal);
+                        } return null;",
+                  },
+                },
+                "up_sum": Object {
+                  "sum": Object {
+                    "field": "summary.up",
+                    "missing": 0,
+                  },
+                },
+              },
+              "composite": Object {
+                "size": 2000,
+                "sources": Array [
+                  Object {
+                    "monitorId": Object {
+                      "terms": Object {
+                        "field": "monitor.id",
+                      },
+                    },
+                  },
+                  Object {
+                    "location": Object {
+                      "terms": Object {
+                        "field": "observer.geo.name",
+                        "missing_bucket": true,
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+          },
+          "index": "heartbeat-*",
+          "query": Object {
+            "bool": Object {
+              "filter": Array [
+                Object {
+                  "exists": Object {
+                    "field": "summary",
+                  },
+                },
+                Object {
+                  "bool": Object {
+                    "must_not": Object {
+                      "exists": Object {
+                        "field": "run_once",
+                      },
+                    },
+                  },
+                },
+                Object {
+                  "range": Object {
+                    "@timestamp": Object {
+                      "gte": "now-3M",
+                      "lte": "now",
+                    },
+                  },
+                },
+              ],
+            },
+          },
+          "size": 0,
+        }
+      `);
+
+      expect(esMock.search.mock.calls[1]).toMatchInlineSnapshot(`
+        Array [
+          Object {
             "aggs": Object {
               "monitors": Object {
                 "aggs": Object {
@@ -699,6 +800,10 @@ describe('monitor availability', () => {
                   },
                 },
                 "composite": Object {
+                  "after": Object {
+                    "location": "harrisburg",
+                    "monitorId": "baz",
+                  },
                   "size": 2000,
                   "sources": Array [
                     Object {
@@ -720,6 +825,7 @@ describe('monitor availability', () => {
                 },
               },
             },
+            "index": "heartbeat-*",
             "query": Object {
               "bool": Object {
                 "filter": Array [
@@ -750,121 +856,12 @@ describe('monitor availability', () => {
             },
             "size": 0,
           },
-          "index": "heartbeat-*",
-        }
-      `);
-
-      expect(esMock.search.mock.calls[1]).toMatchInlineSnapshot(`
-        Array [
           Object {
-            "body": Object {
-              "aggs": Object {
-                "monitors": Object {
-                  "aggs": Object {
-                    "down_sum": Object {
-                      "sum": Object {
-                        "field": "summary.down",
-                        "missing": 0,
-                      },
-                    },
-                    "fields": Object {
-                      "top_hits": Object {
-                        "size": 1,
-                        "sort": Array [
-                          Object {
-                            "@timestamp": Object {
-                              "order": "desc",
-                            },
-                          },
-                        ],
-                      },
-                    },
-                    "filtered": Object {
-                      "bucket_selector": Object {
-                        "buckets_path": Object {
-                          "threshold": "ratio.value",
-                        },
-                        "script": "params.threshold < 0.98",
-                      },
-                    },
-                    "ratio": Object {
-                      "bucket_script": Object {
-                        "buckets_path": Object {
-                          "downTotal": "down_sum",
-                          "upTotal": "up_sum",
-                        },
-                        "script": "
-                        if (params.upTotal + params.downTotal > 0) {
-                          return params.upTotal / (params.upTotal + params.downTotal);
-                        } return null;",
-                      },
-                    },
-                    "up_sum": Object {
-                      "sum": Object {
-                        "field": "summary.up",
-                        "missing": 0,
-                      },
-                    },
-                  },
-                  "composite": Object {
-                    "after": Object {
-                      "location": "harrisburg",
-                      "monitorId": "baz",
-                    },
-                    "size": 2000,
-                    "sources": Array [
-                      Object {
-                        "monitorId": Object {
-                          "terms": Object {
-                            "field": "monitor.id",
-                          },
-                        },
-                      },
-                      Object {
-                        "location": Object {
-                          "terms": Object {
-                            "field": "observer.geo.name",
-                            "missing_bucket": true,
-                          },
-                        },
-                      },
-                    ],
-                  },
-                },
+            "context": Object {
+              "loggingOptions": Object {
+                "loggerName": "uptime",
               },
-              "query": Object {
-                "bool": Object {
-                  "filter": Array [
-                    Object {
-                      "exists": Object {
-                        "field": "summary",
-                      },
-                    },
-                    Object {
-                      "bool": Object {
-                        "must_not": Object {
-                          "exists": Object {
-                            "field": "run_once",
-                          },
-                        },
-                      },
-                    },
-                    Object {
-                      "range": Object {
-                        "@timestamp": Object {
-                          "gte": "now-3M",
-                          "lte": "now",
-                        },
-                      },
-                    },
-                  ],
-                },
-              },
-              "size": 0,
             },
-            "index": "heartbeat-*",
-          },
-          Object {
             "meta": true,
           },
         ]
@@ -897,119 +894,117 @@ describe('monitor availability', () => {
       const [params] = esMock.search.mock.calls[0];
       expect(params).toMatchInlineSnapshot(`
         Object {
-          "body": Object {
-            "aggs": Object {
-              "monitors": Object {
-                "aggs": Object {
-                  "down_sum": Object {
-                    "sum": Object {
-                      "field": "summary.down",
-                      "missing": 0,
-                    },
+          "aggs": Object {
+            "monitors": Object {
+              "aggs": Object {
+                "down_sum": Object {
+                  "sum": Object {
+                    "field": "summary.down",
+                    "missing": 0,
                   },
-                  "fields": Object {
-                    "top_hits": Object {
-                      "size": 1,
-                      "sort": Array [
-                        Object {
-                          "@timestamp": Object {
-                            "order": "desc",
-                          },
+                },
+                "fields": Object {
+                  "top_hits": Object {
+                    "size": 1,
+                    "sort": Array [
+                      Object {
+                        "@timestamp": Object {
+                          "order": "desc",
                         },
-                      ],
-                    },
-                  },
-                  "filtered": Object {
-                    "bucket_selector": Object {
-                      "buckets_path": Object {
-                        "threshold": "ratio.value",
                       },
-                      "script": "params.threshold < 0.99",
-                    },
+                    ],
                   },
-                  "ratio": Object {
-                    "bucket_script": Object {
-                      "buckets_path": Object {
-                        "downTotal": "down_sum",
-                        "upTotal": "up_sum",
-                      },
-                      "script": "
+                },
+                "filtered": Object {
+                  "bucket_selector": Object {
+                    "buckets_path": Object {
+                      "threshold": "ratio.value",
+                    },
+                    "script": "params.threshold < 0.99",
+                  },
+                },
+                "ratio": Object {
+                  "bucket_script": Object {
+                    "buckets_path": Object {
+                      "downTotal": "down_sum",
+                      "upTotal": "up_sum",
+                    },
+                    "script": "
                         if (params.upTotal + params.downTotal > 0) {
                           return params.upTotal / (params.upTotal + params.downTotal);
                         } return null;",
-                    },
-                  },
-                  "up_sum": Object {
-                    "sum": Object {
-                      "field": "summary.up",
-                      "missing": 0,
-                    },
                   },
                 },
-                "composite": Object {
-                  "size": 2000,
-                  "sources": Array [
-                    Object {
-                      "monitorId": Object {
-                        "terms": Object {
-                          "field": "monitor.id",
-                        },
-                      },
-                    },
-                    Object {
-                      "location": Object {
-                        "terms": Object {
-                          "field": "observer.geo.name",
-                          "missing_bucket": true,
-                        },
-                      },
-                    },
-                  ],
+                "up_sum": Object {
+                  "sum": Object {
+                    "field": "summary.up",
+                    "missing": 0,
+                  },
                 },
               },
-            },
-            "query": Object {
-              "bool": Object {
-                "filter": Array [
+              "composite": Object {
+                "size": 2000,
+                "sources": Array [
                   Object {
-                    "exists": Object {
-                      "field": "summary",
-                    },
-                  },
-                  Object {
-                    "bool": Object {
-                      "must_not": Object {
-                        "exists": Object {
-                          "field": "run_once",
-                        },
+                    "monitorId": Object {
+                      "terms": Object {
+                        "field": "monitor.id",
                       },
                     },
                   },
                   Object {
-                    "range": Object {
-                      "@timestamp": Object {
-                        "gte": "now-3s",
-                        "lte": "now",
+                    "location": Object {
+                      "terms": Object {
+                        "field": "observer.geo.name",
+                        "missing_bucket": true,
                       },
-                    },
-                  },
-                  Object {
-                    "bool": Object {
-                      "filter": Array [
-                        Object {
-                          "term": Object {
-                            "monitor.id": "foo",
-                          },
-                        },
-                      ],
                     },
                   },
                 ],
               },
             },
-            "size": 0,
           },
           "index": "heartbeat-*",
+          "query": Object {
+            "bool": Object {
+              "filter": Array [
+                Object {
+                  "exists": Object {
+                    "field": "summary",
+                  },
+                },
+                Object {
+                  "bool": Object {
+                    "must_not": Object {
+                      "exists": Object {
+                        "field": "run_once",
+                      },
+                    },
+                  },
+                },
+                Object {
+                  "range": Object {
+                    "@timestamp": Object {
+                      "gte": "now-3s",
+                      "lte": "now",
+                    },
+                  },
+                },
+                Object {
+                  "bool": Object {
+                    "filter": Array [
+                      Object {
+                        "term": Object {
+                          "monitor.id": "foo",
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+          "size": 0,
         }
       `);
     });

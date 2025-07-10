@@ -9,9 +9,9 @@
 
 import type { SerializedSearchSourceFields } from '@kbn/data-plugin/public';
 import { extractSearchSourceReferences } from '@kbn/data-plugin/public';
-import { SerializedPanelState } from '@kbn/presentation-containers';
-import { SerializedTitles } from '@kbn/presentation-publishing';
+import { SerializedTitles, SerializedPanelState } from '@kbn/presentation-publishing';
 import { cloneDeep, isEmpty, omit } from 'lodash';
+import { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
 import { Reference } from '../../common/content_management';
 import {
   getAnalytics,
@@ -31,13 +31,11 @@ import {
 import { getSavedVisualization } from '../utils/saved_visualize_utils';
 import type { SerializedVis } from '../vis';
 import {
-  isVisualizeSavedObjectState,
   VisualizeSavedObjectInputState,
   VisualizeSerializedState,
   VisualizeRuntimeState,
   VisualizeSavedVisInputState,
   ExtraSavedObjectProperties,
-  isVisualizeRuntimeState,
 } from './types';
 
 export const deserializeState = async (
@@ -50,15 +48,24 @@ export const deserializeState = async (
       },
     } as VisualizeRuntimeState;
   let serializedState = cloneDeep(state.rawState);
-  if (isVisualizeSavedObjectState(serializedState)) {
-    serializedState = await deserializeSavedObjectState(serializedState);
-  } else if (isVisualizeRuntimeState(serializedState)) {
+  if ((serializedState as VisualizeSavedObjectInputState).savedObjectId) {
+    serializedState = await deserializeSavedObjectState(
+      serializedState as VisualizeSavedObjectInputState
+    );
+  } else if ((serializedState as VisualizeRuntimeState).serializedVis) {
+    // TODO remove once embeddable only exposes SerializedState
+    // Canvas passes incoming embeddable state in getSerializedStateForChild
+    // without this early return, serializedVis gets replaced in deserializeSavedVisState
+    // and breaks adding a new by-value embeddable in Canvas
     return serializedState as VisualizeRuntimeState;
   }
 
   const references: Reference[] = state.references ?? [];
 
-  const deserializedSavedVis = deserializeSavedVisState(serializedState, references);
+  const deserializedSavedVis = deserializeSavedVisState(
+    serializedState as VisualizeSavedVisInputState,
+    references
+  );
 
   return {
     ...serializedState,
@@ -169,11 +176,11 @@ export const deserializeSavedObjectState = async ({
 
 export const serializeState: (props: {
   serializedVis: SerializedVis;
-  titles: SerializedTitles;
+  titles?: SerializedTitles;
   id?: string;
   savedObjectProperties?: ExtraSavedObjectProperties;
   linkedToLibrary?: boolean;
-  enhancements?: VisualizeRuntimeState['enhancements'];
+  serializeDynamicActions?: (() => SerializedPanelState<DynamicActionsSerializedState>) | undefined;
   timeRange?: VisualizeRuntimeState['timeRange'];
 }) => Required<SerializedPanelState<VisualizeSerializedState>> = ({
   serializedVis, // Serialize the vis before passing it to this function for easier testing
@@ -181,28 +188,26 @@ export const serializeState: (props: {
   id,
   savedObjectProperties,
   linkedToLibrary,
-  enhancements,
+  serializeDynamicActions,
   timeRange,
 }) => {
-  const titlesWithDefaults = {
-    title: '',
-    description: '',
-    ...titles,
-  };
   const { references, serializedSearchSource } = serializeReferences(serializedVis);
+
+  const { rawState: dynamicActionsState, references: dynamicActionsReferences } =
+    serializeDynamicActions?.() ?? {};
 
   // Serialize ONLY the savedObjectId. This ensures that when this vis is loaded again, it will always fetch the
   // latest revision of the saved object
   if (linkedToLibrary) {
     return {
       rawState: {
-        ...titlesWithDefaults,
+        ...(titles ? titles : {}),
         savedObjectId: id,
-        ...(enhancements ? { enhancements } : {}),
+        ...dynamicActionsState,
         ...(!isEmpty(serializedVis.uiState) ? { uiState: serializedVis.uiState } : {}),
         ...(timeRange ? { timeRange } : {}),
       } as VisualizeSavedObjectInputState,
-      references,
+      references: [...references, ...(dynamicActionsReferences ?? [])],
     };
   }
 
@@ -212,9 +217,9 @@ export const serializeState: (props: {
 
   return {
     rawState: {
-      ...titlesWithDefaults,
+      ...(titles ? titles : {}),
       ...savedObjectProperties,
-      ...(enhancements ? { enhancements } : {}),
+      ...dynamicActionsState,
       ...(timeRange ? { timeRange } : {}),
       savedVis: {
         ...serializedVis,
@@ -230,6 +235,6 @@ export const serializeState: (props: {
         },
       },
     } as VisualizeSavedVisInputState,
-    references,
+    references: [...references, ...(dynamicActionsReferences ?? [])],
   };
 };

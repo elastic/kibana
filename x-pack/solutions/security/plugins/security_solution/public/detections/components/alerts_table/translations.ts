@@ -140,10 +140,24 @@ export const ALERTS_HEADERS_HOST_CRITICALITY = i18n.translate(
   }
 );
 
+export const ALERTS_HEADERS_SERVICE_RISK_LEVEL = i18n.translate(
+  'xpack.securitySolution.eventsViewer.alerts.defaultHeaders.serviceRiskLevel',
+  {
+    defaultMessage: 'Service Risk Level',
+  }
+);
+
 export const ALERTS_HEADERS_USER_CRITICALITY = i18n.translate(
   'xpack.securitySolution.eventsViewer.alerts.defaultHeaders.userCriticality',
   {
     defaultMessage: 'User Criticality',
+  }
+);
+
+export const ALERTS_HEADERS_SERVICE_CRITICALITY = i18n.translate(
+  'xpack.securitySolution.eventsViewer.alerts.defaultHeaders.serviceCriticality',
+  {
+    defaultMessage: 'Service Criticality',
   }
 );
 
@@ -379,6 +393,13 @@ export const STATS_GROUP_SEVERITY_MEDIUM = i18n.translate(
   }
 );
 
+export const STATS_GROUP_SEVERITY_UNKNOWN = i18n.translate(
+  'xpack.securitySolution.detectionEngine.groups.stats.severity.unknown',
+  {
+    defaultMessage: 'Unknown',
+  }
+);
+
 export const INSPECT_GROUPING_TITLE = i18n.translate(
   'xpack.securitySolution.detectionsEngine.grouping.inspectTitle',
   {
@@ -397,3 +418,10 @@ export const EVENT_RENDERED_VIEW_COLUMNS = {
     defaultMessage: 'Event Summary',
   }),
 };
+
+export const INSUFFICIENT_PRIVILEGES = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.insufficientPrivileges',
+  {
+    defaultMessage: 'Insufficient privileges',
+  }
+);

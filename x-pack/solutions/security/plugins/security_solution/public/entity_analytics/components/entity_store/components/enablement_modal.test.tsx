@@ -6,11 +6,15 @@
  */
 
 import React from 'react';
-import { act } from 'react-dom/test-utils';
 import { fireEvent, render, screen } from '@testing-library/react';
+import type { EntityStoreEnablementModalProps } from './enablement_modal';
 import { EntityStoreEnablementModal } from './enablement_modal';
 import { TestProviders } from '../../../../common/mock';
-import type { EntityAnalyticsPrivileges } from '../../../../../common/api/entity_analytics';
+import {
+  type EntityAnalyticsPrivileges,
+  RiskEngineStatusEnum,
+  StoreStatusEnum,
+} from '../../../../../common/api/entity_analytics';
 import type { RiskEngineMissingPrivilegesResponse } from '../../../hooks/use_missing_risk_engine_privileges';
 
 const mockToggle = jest.fn();
@@ -35,8 +39,8 @@ const defaultProps = {
   visible: true,
   toggle: mockToggle,
   enableStore: mockEnableStore,
-  riskScore: { disabled: false, checked: false },
-  entityStore: { disabled: false, checked: false },
+  riskEngineStatus: RiskEngineStatusEnum.NOT_INSTALLED,
+  entityStoreStatus: StoreStatusEnum.not_installed,
 };
 
 const allEntityEnginePrivileges: EntityAnalyticsPrivileges = {
@@ -78,14 +82,14 @@ const missingRiskEnginePrivileges: RiskEngineMissingPrivilegesResponse = {
   isLoading: false,
   hasAllRequiredPrivileges: false,
   missingPrivileges: {
-    clusterPrivileges: [],
+    clusterPrivileges: { enable: [], run: [] },
     indexPrivileges: [],
   },
 };
 
-const renderComponent = async (props = defaultProps) => {
-  await act(async () => {
-    return render(<EntityStoreEnablementModal {...props} />, { wrapper: TestProviders });
+const renderComponent = (props: EntityStoreEnablementModalProps = defaultProps) => {
+  return render(<EntityStoreEnablementModal {...props} />, {
+    wrapper: TestProviders,
   });
 };
 
@@ -121,29 +125,46 @@ describe('EntityStoreEnablementModal', () => {
     });
 
     it('should call enableStore function when enable button is clicked', () => {
-      renderComponent({
-        ...defaultProps,
-        riskScore: { ...defaultProps.riskScore, checked: true },
-        entityStore: { ...defaultProps.entityStore, checked: true },
-      });
+      renderComponent(defaultProps);
       fireEvent.click(screen.getByText('Enable'));
       expect(mockEnableStore).toHaveBeenCalledWith({ riskScore: true, entityStore: true });
     });
 
     it('should display proceed warning when no enablement options are selected', () => {
       renderComponent();
+      fireEvent.click(screen.getByTestId('enablementEntityStoreSwitch')); // unselect entity store
+      fireEvent.click(screen.getByTestId('enablementRiskScoreSwitch')); // unselect risk engine
       expect(screen.getByText('Please enable at least one option to proceed.')).toBeInTheDocument();
     });
 
     it('should disable the enable button when enablementOptions are false', () => {
-      renderComponent({
-        ...defaultProps,
-        riskScore: { ...defaultProps.riskScore, checked: false },
-        entityStore: { ...defaultProps.entityStore, checked: false },
-      });
+      renderComponent();
+      fireEvent.click(screen.getByTestId('enablementEntityStoreSwitch')); // unselect entity store
+      fireEvent.click(screen.getByTestId('enablementRiskScoreSwitch')); // unselect risk engine
 
       const enableButton = screen.getByRole('button', { name: /Enable/i });
       expect(enableButton).toBeDisabled();
+    });
+
+    it('should show proceed warning when riskScore is not installed and unchecked but entityStore is already running', () => {
+      renderComponent({
+        ...defaultProps,
+        riskEngineStatus: RiskEngineStatusEnum.NOT_INSTALLED,
+        entityStoreStatus: StoreStatusEnum.running,
+      });
+      fireEvent.click(screen.getByTestId('enablementRiskScoreSwitch')); // unselect risk engine
+      expect(screen.getByText('Please enable at least one option to proceed.')).toBeInTheDocument();
+    });
+
+    it('should show proceed warning when entityStore is not installed and unchecked but riskScore is already installed', () => {
+      renderComponent({
+        ...defaultProps,
+        riskEngineStatus: RiskEngineStatusEnum.ENABLED,
+        entityStoreStatus: StoreStatusEnum.not_installed,
+      });
+      fireEvent.click(screen.getByTestId('enablementEntityStoreSwitch')); // unselect risk engine
+
+      expect(screen.getByText('Please enable at least one option to proceed.')).toBeInTheDocument();
     });
 
     it('should not show entity engine missing privileges warning when no missing privileges', () => {
@@ -190,6 +211,14 @@ describe('EntityStoreEnablementModal', () => {
       await renderComponent();
 
       expect(screen.queryByTestId('enablement-modal-test')).toBeInTheDocument();
+    });
+
+    it('should disabled the "enable" button', async () => {
+      renderComponent();
+      expect(screen.getByTestId('callout-missing-entity-store-privileges')).toBeInTheDocument();
+
+      const enableButton = screen.getByRole('button', { name: /Enable/i });
+      expect(enableButton).toBeDisabled();
     });
   });
 });

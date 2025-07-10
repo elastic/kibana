@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import { PluginInitializerContext, Plugin, CoreSetup, Logger } from '@kbn/core/server';
-import { PluginSetupContract as ActionsPluginSetupContract } from '@kbn/actions-plugin/server';
+import type { PluginInitializerContext, Plugin, CoreSetup, Logger } from '@kbn/core/server';
+import type { PluginSetupContract as ActionsPluginSetupContract } from '@kbn/actions-plugin/server';
 import { registerConnectorTypes } from './connector_types';
 import { validSlackApiChannelsRoute, getWellKnownEmailServiceRoute } from './routes';
-import {
-  ExperimentalFeatures,
-  parseExperimentalConfigValue,
-} from '../common/experimental_features';
-import { StackConnectorsConfigType } from '../common/types';
+import type { ExperimentalFeatures } from '../common/experimental_features';
+import { parseExperimentalConfigValue } from '../common/experimental_features';
+import type { ConfigSchema as StackConnectorsConfigType } from './config';
 export interface ConnectorsPluginsSetup {
   actions: ActionsPluginSetupContract;
 }
@@ -39,7 +37,8 @@ export class StackConnectorsPlugin
     const router = core.http.createRouter();
     const { actions } = plugins;
 
-    getWellKnownEmailServiceRoute(router);
+    const awsSesConfig = actions.getActionsConfigurationUtilities().getAwsSesConfig();
+    getWellKnownEmailServiceRoute(router, awsSesConfig);
     validSlackApiChannelsRoute(router, actions.getActionsConfigurationUtilities(), this.logger);
 
     registerConnectorTypes({

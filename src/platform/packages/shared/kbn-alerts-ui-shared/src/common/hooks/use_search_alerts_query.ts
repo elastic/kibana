@@ -9,7 +9,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 
-import { SetOptional } from 'type-fest';
+import type { SetOptional } from 'type-fest';
 import { searchAlerts, type SearchAlertsParams } from '../apis/search_alerts/search_alerts';
 import { DEFAULT_ALERTS_PAGE_SIZE } from '../constants';
 import { AlertsQueryContext } from '../contexts/alerts_query_context';
@@ -27,7 +27,11 @@ export const queryKeyPrefix = ['alerts', searchAlerts.name];
  * When testing components that depend on this hook, prefer mocking the {@link searchAlerts} function instead of the hook itself.
  * @external https://tanstack.com/query/v4/docs/framework/react/guides/testing
  */
-export const useSearchAlertsQuery = ({ data, ...params }: UseSearchAlertsQueryParams) => {
+export const useSearchAlertsQuery = ({
+  data,
+  skipAlertsQueryContext,
+  ...params
+}: UseSearchAlertsQueryParams) => {
   const {
     ruleTypeIds,
     consumers,
@@ -43,6 +47,8 @@ export const useSearchAlertsQuery = ({ data, ...params }: UseSearchAlertsQueryPa
     runtimeMappings,
     pageIndex = 0,
     pageSize = DEFAULT_ALERTS_PAGE_SIZE,
+    minScore,
+    trackScores,
   } = params;
   return useQuery({
     queryKey: queryKeyPrefix.concat(JSON.stringify(params)),
@@ -58,9 +64,11 @@ export const useSearchAlertsQuery = ({ data, ...params }: UseSearchAlertsQueryPa
         runtimeMappings,
         pageIndex,
         pageSize,
+        minScore,
+        trackScores,
       }),
     refetchOnWindowFocus: false,
-    context: AlertsQueryContext,
+    context: skipAlertsQueryContext ? undefined : AlertsQueryContext,
     enabled: ruleTypeIds.length > 0,
     // To avoid flash of empty state with pagination, see https://tanstack.com/query/latest/docs/framework/react/guides/paginated-queries#better-paginated-queries-with-placeholderdata
     keepPreviousData: true,

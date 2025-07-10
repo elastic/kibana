@@ -83,7 +83,7 @@ const COMMANDS_WITH_ACCESS_TO_FILES: CommandsWithFileAccess = deepFreeze<Command
     endpoint: false,
     sentinel_one: false,
     crowdstrike: false,
-    microsoft_defender_endpoint: false,
+    microsoft_defender_endpoint: true,
   },
 });
 
@@ -101,16 +101,17 @@ export const ensureUserHasAuthzToFilesForAction = async (
   context: SecuritySolutionRequestHandlerContext,
   request: KibanaRequest
 ): Promise<void> => {
-  const userAuthz = await (await context.securitySolution).getEndpointAuthz();
-  const coreContext = await context.core;
-  const esClient = coreContext.elasticsearch.client.asInternalUser;
+  const securitySolution = await context.securitySolution;
+  const spaceId = securitySolution.getSpaceId();
+  const endpointService = securitySolution.getEndpointService();
+  const userAuthz = await securitySolution.getEndpointAuthz();
   const { action_id: actionId } = request.params as { action_id: string };
   const {
     EndpointActions: {
       data: { command },
       input_type: agentType,
     },
-  } = await fetchActionRequestById(esClient, actionId);
+  } = await fetchActionRequestById(endpointService, spaceId, actionId);
 
   // Check if command is supported by the agent type
   if (!isActionSupportedByAgentType(agentType, command, 'manual')) {
@@ -141,6 +142,10 @@ export const ensureUserHasAuthzToFilesForAction = async (
 
     case 'running-processes':
       hasAuthzToCommand = userAuthz.canGetRunningProcesses;
+      break;
+
+    case 'runscript':
+      hasAuthzToCommand = userAuthz.canWriteExecuteOperations;
       break;
   }
 

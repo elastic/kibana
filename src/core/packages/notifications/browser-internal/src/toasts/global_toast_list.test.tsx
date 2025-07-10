@@ -13,16 +13,20 @@ import { Observable, from, EMPTY, BehaviorSubject } from 'rxjs';
 import { screen, render, fireEvent, act } from '@testing-library/react';
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { EuiToast } from '@elastic/eui';
-import { EventReporter } from './telemetry';
+import { ToastsTelemetry } from './telemetry';
 
 import { GlobalToastList } from './global_toast_list';
 
 const mockAnalytics = analyticsServiceMock.createAnalyticsServiceStart();
 
+const toastsTelemetry = new ToastsTelemetry();
+
+toastsTelemetry.setup({ analytics: analyticsServiceMock.createAnalyticsServiceSetup() });
+
 const sharedProps = {
   toasts$: EMPTY,
   dismissToast: jest.fn(),
-  reportEvent: new EventReporter({ analytics: mockAnalytics }),
+  reportEvent: toastsTelemetry.start({ analytics: mockAnalytics }),
 };
 
 function RenderToastList(props: Partial<ComponentProps<typeof GlobalToastList>> = {}) {

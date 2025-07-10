@@ -5,17 +5,9 @@
  * 2.0.
  */
 
-import { SUB_FEATURE } from '@kbn/actions-types';
-import { LicenseType } from '@kbn/licensing-plugin/common/types';
-import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
-
-export {
-  AlertingConnectorFeatureId,
-  CasesConnectorFeatureId,
-  UptimeConnectorFeatureId,
-  SecurityConnectorFeatureId,
-  GenerativeAIForSecurityConnectorFeatureId,
-} from './connector_feature_config';
+import type { SUB_FEATURE } from '@kbn/actions-types';
+import type { LicenseType } from '@kbn/licensing-plugin/common/types';
+import type { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 
 export type SubFeature = keyof typeof SUB_FEATURE;
 

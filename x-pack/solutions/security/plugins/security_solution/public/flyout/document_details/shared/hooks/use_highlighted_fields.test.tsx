@@ -21,7 +21,12 @@ const dataFormattedForFieldBrowser = mockDataFormattedForFieldBrowser;
 
 describe('useHighlightedFields', () => {
   it('should return data', () => {
-    const hookResult = renderHook(() => useHighlightedFields({ dataFormattedForFieldBrowser }));
+    const hookResult = renderHook(() =>
+      useHighlightedFields({
+        dataFormattedForFieldBrowser,
+        investigationFields: [],
+      })
+    );
     expect(hookResult.result.current).toEqual({
       'host.name': {
         values: ['host-name'],
@@ -32,6 +37,13 @@ describe('useHighlightedFields', () => {
       'user.name': {
         values: ['user-name'],
       },
+      'kibana.alert.ancestors.id': {
+        overrideField: {
+          field: 'Source event',
+          values: [],
+        },
+        values: ['ancestors-id'],
+      },
     });
   });
 
@@ -39,6 +51,7 @@ describe('useHighlightedFields', () => {
     const hookResult = renderHook(() =>
       useHighlightedFields({
         dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowserWithOverridenField,
+        investigationFields: [],
       })
     );
 
@@ -77,6 +90,13 @@ describe('useHighlightedFields', () => {
       },
       'user.name': {
         values: ['user-name'],
+      },
+      'kibana.alert.ancestors.id': {
+        overrideField: {
+          field: 'Source event',
+          values: [],
+        },
+        values: ['ancestors-id'],
       },
     });
   });
@@ -117,6 +137,13 @@ describe('useHighlightedFields', () => {
       'user.name': {
         values: ['user-name'],
       },
+      'kibana.alert.ancestors.id': {
+        overrideField: {
+          field: 'Source event',
+          values: [],
+        },
+        values: ['ancestors-id'],
+      },
     });
   });
 
@@ -148,6 +175,13 @@ describe('useHighlightedFields', () => {
       'user.name': {
         values: ['user-name'],
       },
+      'kibana.alert.ancestors.id': {
+        overrideField: {
+          field: 'Source event',
+          values: [],
+        },
+        values: ['ancestors-id'],
+      },
     });
   });
 
@@ -175,6 +209,13 @@ describe('useHighlightedFields', () => {
       },
       'user.name': {
         values: ['user-name'],
+      },
+      'kibana.alert.ancestors.id': {
+        overrideField: {
+          field: 'Source event',
+          values: [],
+        },
+        values: ['ancestors-id'],
       },
     });
   });
@@ -217,6 +258,13 @@ describe('useHighlightedFields', () => {
         'user.name': {
           values: ['user-name'],
         },
+        'kibana.alert.ancestors.id': {
+          overrideField: {
+            field: 'Source event',
+            values: [],
+          },
+          values: ['ancestors-id'],
+        },
       });
     }
   );
@@ -256,6 +304,13 @@ describe('useHighlightedFields', () => {
       },
       'user.name': {
         values: ['user-name'],
+      },
+      'kibana.alert.ancestors.id': {
+        overrideField: {
+          field: 'Source event',
+          values: [],
+        },
+        values: ['ancestors-id'],
       },
     });
   });

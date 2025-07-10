@@ -11,6 +11,7 @@ import { TestProviders } from '../../../../../common/mock';
 
 import { ParentProcessDraggable } from './parent_process_draggable';
 import { useMountAppended } from '../../../../../common/utils/use_mount_appended';
+import { CellActionsWrapper } from '../../../../../common/components/drag_and_drop/cell_actions_wrapper';
 
 jest.mock('../../../../../common/lib/kibana');
 
@@ -22,13 +23,27 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
+jest.mock('../../../../../common/components/drag_and_drop/cell_actions_wrapper', () => {
+  return {
+    CellActionsWrapper: jest.fn(),
+  };
+});
+
+const MockedCellActionsWrapper = jest.fn(({ children }) => {
+  return <div data-test-subj="mock-cell-action-wrapper">{children}</div>;
+});
+
 describe('ParentProcessDraggable', () => {
+  beforeEach(() => {
+    (CellActionsWrapper as unknown as jest.Mock).mockImplementation(MockedCellActionsWrapper);
+  });
   const mount = useMountAppended();
 
   test('displays the text, endgameParentProcessName, processParentName, processParentPid, and processPpid when they are all provided', () => {
     const wrapper = mount(
       <TestProviders>
         <ParentProcessDraggable
+          scopeId="some_scope"
           contextId="test"
           endgameParentProcessName="[endgameParentProcessName]"
           eventId="1"
@@ -48,6 +63,7 @@ describe('ParentProcessDraggable', () => {
     const wrapper = mount(
       <TestProviders>
         <ParentProcessDraggable
+          scopeId="some_scope"
           contextId="test"
           endgameParentProcessName={undefined}
           eventId="1"
@@ -65,6 +81,7 @@ describe('ParentProcessDraggable', () => {
     const wrapper = mount(
       <TestProviders>
         <ParentProcessDraggable
+          scopeId="some_scope"
           contextId="test"
           endgameParentProcessName="[endgameParentProcessName]"
           eventId="1"
@@ -82,6 +99,7 @@ describe('ParentProcessDraggable', () => {
     const wrapper = mount(
       <TestProviders>
         <ParentProcessDraggable
+          scopeId="some_scope"
           contextId="test"
           endgameParentProcessName={undefined}
           eventId="1"
@@ -99,6 +117,7 @@ describe('ParentProcessDraggable', () => {
     const wrapper = mount(
       <TestProviders>
         <ParentProcessDraggable
+          scopeId="some_scope"
           contextId="test"
           endgameParentProcessName="[endgameParentProcessName]"
           eventId="1"
@@ -116,6 +135,7 @@ describe('ParentProcessDraggable', () => {
     const wrapper = mount(
       <TestProviders>
         <ParentProcessDraggable
+          scopeId="some_scope"
           contextId="test"
           endgameParentProcessName={undefined}
           eventId="1"
@@ -127,5 +147,29 @@ describe('ParentProcessDraggable', () => {
       </TestProviders>
     );
     expect(wrapper.text()).toEqual('[processParentName]');
+  });
+
+  test('should passing correct scopeId to cell actions', () => {
+    mount(
+      <TestProviders>
+        <ParentProcessDraggable
+          scopeId="some_scope"
+          contextId="test"
+          endgameParentProcessName={undefined}
+          eventId="1"
+          processParentName="[processParentName]"
+          processParentPid={undefined}
+          processPpid={undefined}
+          text={undefined}
+        />
+      </TestProviders>
+    );
+
+    expect(MockedCellActionsWrapper).toHaveBeenCalledWith(
+      expect.objectContaining({
+        scopeId: 'some_scope',
+      }),
+      {}
+    );
   });
 });

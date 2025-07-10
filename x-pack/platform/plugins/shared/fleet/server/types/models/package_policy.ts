@@ -182,6 +182,17 @@ export const PackagePolicyBaseSchema = {
       })
     )
   ),
+  additional_datastreams_permissions: schema.maybe(
+    schema.oneOf([
+      schema.literal(null),
+      schema.arrayOf(schema.string(), {
+        validate: validateAdditionalDatastreamsPermissions,
+        meta: {
+          description: 'Additional datastream permissions, that will be added to the agent policy.',
+        },
+      }),
+    ])
+  ),
 };
 
 export const NewPackagePolicySchema = schema.object({
@@ -200,6 +211,7 @@ const CreatePackagePolicyProps = {
       streams: schema.maybe(schema.arrayOf(schema.object(PackagePolicyStreamsSchema))),
     })
   ),
+  spaceIds: schema.maybe(schema.arrayOf(schema.string())),
 };
 
 export const CreatePackagePolicyRequestBodySchema = schema.object({
@@ -288,6 +300,17 @@ export const SimplifiedPackagePolicyInputsSchema = schema.maybe(
   )
 );
 
+const VALIDATE_DATASTREAMS_PERMISSION_REGEX =
+  /^(logs)|(metrics)|(traces)|(synthetics)|(profiling)-(.*)$/;
+
+function validateAdditionalDatastreamsPermissions(values: string[]) {
+  for (const val of values) {
+    if (!val.match(VALIDATE_DATASTREAMS_PERMISSION_REGEX)) {
+      return `${val} is not a valid datastream permissions, it should match logs|metrics|traces|synthetics|profiling)-*`;
+    }
+  }
+}
+
 export const SimplifiedPackagePolicyBaseSchema = schema.object({
   id: schema.maybe(schema.string()),
   name: schema.string(),
@@ -305,6 +328,17 @@ export const SimplifiedPackagePolicyBaseSchema = schema.object({
         },
       })
     )
+  ),
+  additional_datastreams_permissions: schema.maybe(
+    schema.oneOf([
+      schema.literal(null),
+      schema.arrayOf(schema.string(), {
+        validate: validateAdditionalDatastreamsPermissions,
+        meta: {
+          description: 'Additional datastream permissions, that will be added to the agent policy.',
+        },
+      }),
+    ])
   ),
 });
 
@@ -402,20 +436,29 @@ export const OrphanedPackagePoliciesResponseSchema = schema.object({
   total: schema.number(),
 });
 
-export const DryRunPackagePolicySchema = schema.object({
-  ...PackagePolicyBaseSchema,
-  id: schema.maybe(schema.string()),
-  force: schema.maybe(schema.boolean()),
-  errors: schema.maybe(
-    schema.arrayOf(
-      schema.object({
-        message: schema.string(),
-        key: schema.maybe(schema.string()),
-      })
-    )
-  ),
-  missingVars: schema.maybe(schema.arrayOf(schema.string())),
-});
+export const DryRunPackagePolicySchema = PackagePolicySchema.extends(
+  {
+    id: schema.maybe(schema.string()),
+    force: schema.maybe(schema.boolean()),
+    revision: schema.maybe(schema.number()),
+    updated_at: schema.maybe(schema.string()),
+    updated_by: schema.maybe(schema.string()),
+    created_at: schema.maybe(schema.string()),
+    created_by: schema.maybe(schema.string()),
+    errors: schema.maybe(
+      schema.arrayOf(
+        schema.object({
+          message: schema.string(),
+          key: schema.maybe(schema.string()),
+        })
+      )
+    ),
+    missingVars: schema.maybe(schema.arrayOf(schema.string())),
+  },
+  {
+    unknowns: 'allow',
+  }
+);
 
 export const PackagePolicyStatusResponseSchema = schema.object({
   id: schema.string(),

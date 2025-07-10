@@ -51,7 +51,6 @@ import {
   isAnnotationsLayer,
   isByReferenceAnnotationsLayer,
 } from './visualization_helpers';
-import { cloneDeep } from 'lodash';
 import { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 import {
   XYPersistedByReferenceAnnotationLayerConfig,
@@ -104,12 +103,11 @@ const paletteServiceMock = chartPluginMock.createPaletteRegistry();
 const fieldFormatsMock = fieldFormatsServiceMock.createStartContract();
 
 const core = coreMock.createStart();
-set(core, 'application.capabilities.visualize.save', true);
+set(core, 'application.capabilities.visualize_v2.save', true);
 
 const xyVisualization = getXyVisualization({
   paletteService: paletteServiceMock,
   fieldFormats: fieldFormatsMock,
-  useLegacyTimeAxis: false,
   kibanaTheme: themeServiceMock.createStartContract(),
   eventAnnotationService: eventAnnotationServiceMock,
   core,
@@ -230,9 +228,11 @@ describe('xy_visualization', () => {
                     "color": Object {
                       "type": "loop",
                     },
-                    "rule": Object {
-                      "type": "other",
-                    },
+                    "rules": Array [
+                      Object {
+                        "type": "other",
+                      },
+                    ],
                     "touched": false,
                   },
                 ],
@@ -278,6 +278,7 @@ describe('xy_visualization', () => {
             ],
           } as XYPersistedState,
           undefined,
+          undefined,
           {},
           [
             {
@@ -319,6 +320,7 @@ describe('xy_visualization', () => {
               },
             ],
           },
+          undefined,
           undefined,
           {},
           [
@@ -392,6 +394,7 @@ describe('xy_visualization', () => {
                 } as XYPersistedByReferenceAnnotationLayerConfig,
               ],
             } as XYPersistedState,
+            undefined,
             undefined,
             {
               [annotationGroupId1]: {
@@ -519,6 +522,7 @@ describe('xy_visualization', () => {
               layers: [...baseState.layers, ...persistedAnnotationLayers],
             } as XYPersistedState,
             undefined,
+            undefined,
             libraryAnnotationGroups,
             references
           ).layers
@@ -592,6 +596,7 @@ describe('xy_visualization', () => {
               ...baseState,
               layers: [...baseState.layers, ...persistedAnnotationLayers],
             } as XYPersistedState,
+            undefined,
             undefined,
             libraryAnnotationGroups,
             references
@@ -3766,7 +3771,7 @@ describe('xy_visualization', () => {
         annotationGroupId: `annotation-group-id-${index}`,
         __lastSaved: {
           ...byValueLayer,
-          annotations: cloneDeep(byValueLayer.annotations),
+          annotations: structuredClone(byValueLayer.annotations),
           title: 'My saved object title',
           description: 'some description',
           tags: [],

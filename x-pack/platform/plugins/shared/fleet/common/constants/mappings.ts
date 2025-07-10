@@ -42,6 +42,7 @@ export const AGENT_POLICY_MAPPINGS = {
     unenroll_timeout: { type: 'integer' },
     updated_at: { type: 'date' },
     updated_by: { type: 'keyword' },
+    supports_agentless: { type: 'boolean' },
   },
 } as const;
 
@@ -363,6 +364,9 @@ export const AGENT_MAPPINGS = {
         },
       },
     },
+    upgrade_attempts: {
+      type: 'date',
+    },
     // added to allow validation on status field
     status: {
       type: 'keyword',
@@ -395,6 +399,9 @@ export const ENROLLMENT_API_KEY_MAPPINGS = {
     },
     updated_at: {
       type: 'date',
+    },
+    hidden: {
+      type: 'boolean',
     },
   },
 } as const;

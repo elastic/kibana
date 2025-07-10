@@ -13,18 +13,20 @@ import {
 } from '@kbn/core/public';
 import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { CasesPublicStart } from '@kbn/cases-plugin/public';
 import { SettingsStart } from '@kbn/core-ui-settings-browser';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { ServerlessPluginStart } from '@kbn/serverless/public';
 import {
   SerializedTitles,
-  PublishesWritablePanelTitle,
-  PublishesPanelTitle,
+  PublishesWritableTitle,
+  PublishesTitle,
   HasEditCapabilities,
 } from '@kbn/presentation-publishing';
 import { ObservabilityPublicStart } from '@kbn/observability-plugin/public';
+import { CasesPublicStart } from '@kbn/cases-plugin/public';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 
 export interface SloItem {
   id: string;
@@ -41,8 +43,8 @@ export interface EmbeddableSloProps {
 export type SloAlertsEmbeddableState = SerializedTitles & EmbeddableSloProps;
 
 export type SloAlertsApi = DefaultEmbeddableApi<SloAlertsEmbeddableState> &
-  PublishesWritablePanelTitle &
-  PublishesPanelTitle &
+  PublishesWritableTitle &
+  PublishesTitle &
   HasSloAlertsConfig &
   HasEditCapabilities;
 
@@ -60,9 +62,11 @@ export interface SloEmbeddableDeps {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   data: DataPublicPluginStart;
   notifications: NotificationsStart;
-  cases: CasesPublicStart;
   settings: SettingsStart;
   charts: ChartsPluginStart;
   uiActions: UiActionsStart;
   serverless?: ServerlessPluginStart;
+  cases?: CasesPublicStart;
+  fieldFormats: FieldFormatsStart;
+  licensing: LicensingPluginStart;
 }

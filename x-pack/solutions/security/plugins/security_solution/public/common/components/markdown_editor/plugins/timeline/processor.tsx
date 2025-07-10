@@ -5,23 +5,24 @@
  * 2.0.
  */
 
-import React, { useCallback, memo } from 'react';
-import { EuiToolTip, EuiLink } from '@elastic/eui';
+import React, { memo, useCallback } from 'react';
+import { EuiLink, EuiToolTip } from '@elastic/eui';
 
 import { useUpsellingMessage } from '../../../../hooks/use_upselling';
 import { useTimelineClick } from '../../../../utils/timeline/use_timeline_click';
 import type { TimelineProps } from './types';
 import * as i18n from './translations';
 import { useAppToasts } from '../../../../hooks/use_app_toasts';
+import { useUserPrivileges } from '../../../user_privileges';
 
-export const TimelineMarkDownRendererComponent: React.FC<TimelineProps> = ({
-  id,
-  title,
-  graphEventId,
-}) => {
+export const TimelineMarkDownRendererComponent: React.FC<TimelineProps> = ({ id, title }) => {
   const { addError } = useAppToasts();
 
   const interactionsUpsellingMessage = useUpsellingMessage('investigation_guide_interactions');
+  const {
+    timelinePrivileges: { read: canReadTimelines },
+  } = useUserPrivileges();
+  const isDisabled = !!interactionsUpsellingMessage || !canReadTimelines;
 
   const handleTimelineClick = useTimelineClick();
 
@@ -36,14 +37,14 @@ export const TimelineMarkDownRendererComponent: React.FC<TimelineProps> = ({
   );
 
   const onClickTimeline = useCallback(
-    () => handleTimelineClick(id ?? '', onError, graphEventId),
-    [id, graphEventId, handleTimelineClick, onError]
+    () => handleTimelineClick(id ?? '', onError),
+    [id, handleTimelineClick, onError]
   );
   return (
     <EuiToolTip content={interactionsUpsellingMessage ?? i18n.TIMELINE_ID(id ?? '')}>
       <EuiLink
         onClick={onClickTimeline}
-        disabled={!!interactionsUpsellingMessage}
+        disabled={isDisabled}
         data-test-subj={`markdown-timeline-link-${id}`}
       >
         {title}

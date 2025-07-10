@@ -67,6 +67,11 @@ export interface NotesState extends EntityState<Note> {
 
 const notesAdapter = createEntityAdapter<Note>({
   selectId: (note: Note) => note.noteId,
+  sortComparer: (a: Note, b: Note) => {
+    const aCreated = a.created ?? 0;
+    const bCreated = b.created ?? 0;
+    return aCreated > bCreated ? 1 : -1;
+  },
 });
 
 export const initialNotesState: NotesState = notesAdapter.getInitialState({
@@ -298,6 +303,12 @@ const notesSlice = createSlice({
 
 export const notesReducer = notesSlice.reducer;
 
+const EMPTY_ARRAY: [] = [];
+
+export const fallbackToEmptyArray = <T>(array: T[]) => {
+  return array.length === 0 ? EMPTY_ARRAY : array;
+};
+
 export const {
   selectAll: selectAllNotes,
   selectById: selectNoteById,
@@ -315,6 +326,15 @@ export const selectFetchNotesBySavedObjectIdsStatus = (state: State) =>
 
 export const selectFetchNotesBySavedObjectIdsError = (state: State) =>
   state.notes.error.fetchNotesBySavedObjectIds;
+
+const selectIds = (state: State) => state.notes.ids;
+
+const selectEntities = (state: State) => state.notes.entities;
+
+export const selectAllReversed = createSelector(selectIds, selectEntities, (ids, entities) =>
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  [...ids].reverse().map((id) => entities[id]!)
+);
 
 export const selectCreateNoteStatus = (state: State) => state.notes.status.createNote;
 
@@ -344,14 +364,38 @@ export const selectFetchNotesStatus = (state: State) => state.notes.status.fetch
 
 export const selectNotesByDocumentId = createSelector(
   [selectAllNotes, (_: State, documentId: string) => documentId],
-  (notes, documentId) => notes.filter((note) => note.eventId === documentId)
+  (notes, documentId) => fallbackToEmptyArray(notes.filter((note) => note.eventId === documentId))
 );
+
+export const selectNotesByDocumentIdReversed = createSelector(
+  [selectAllReversed, (_: State, documentId: string) => documentId],
+  (notes, documentId) => fallbackToEmptyArray(notes.filter((note) => note.eventId === documentId))
+);
+
+export const makeSelectNotesByDocumentId = () =>
+  createSelector(
+    [selectAllNotes, (_: State, documentId: string) => documentId],
+    (notes, documentId) => fallbackToEmptyArray(notes.filter((note) => note.eventId === documentId))
+  );
 
 export const selectNotesBySavedObjectId = createSelector(
   [selectAllNotes, (_: State, savedObjectId: string) => savedObjectId],
   (notes, savedObjectId) =>
-    savedObjectId.length > 0 ? notes.filter((note) => note.timelineId === savedObjectId) : []
+    fallbackToEmptyArray(notes.filter((note) => note.timelineId === savedObjectId))
 );
+
+export const selectNotesBySavedObjectIdReversed = createSelector(
+  [selectAllReversed, (_: State, savedObjectId: string) => savedObjectId],
+  (notes, savedObjectId) =>
+    fallbackToEmptyArray(notes.filter((note) => note.timelineId === savedObjectId))
+);
+
+export const makeSelectNotesBySavedObjectId = () =>
+  createSelector(
+    [selectAllNotes, (_: State, savedObjectId: string) => savedObjectId],
+    (notes, savedObjectId) =>
+      fallbackToEmptyArray(notes.filter((note) => note.timelineId === savedObjectId))
+  );
 
 export const selectDocumentNotesBySavedObjectId = createSelector(
   [
@@ -362,61 +406,23 @@ export const selectDocumentNotesBySavedObjectId = createSelector(
     }),
   ],
   (notes, { documentId, savedObjectId }) =>
-    notes.filter((note) => note.eventId === documentId && note.timelineId === savedObjectId)
+    fallbackToEmptyArray(
+      notes.filter((note) => note.eventId === documentId && note.timelineId === savedObjectId)
+    )
 );
 
-export const selectSortedNotesByDocumentId = createSelector(
-  [
-    selectAllNotes,
-    (
-      _: State,
-      {
-        documentId,
-        sort,
-      }: { documentId: string; sort: { field: keyof Note; direction: 'asc' | 'desc' } }
-    ) => ({ documentId, sort }),
-  ],
-  (notes, { documentId, sort }) => {
-    const { field, direction } = sort;
-    return notes
-      .filter((note: Note) => note.eventId === documentId)
-      .sort((first: Note, second: Note) => {
-        const a = first[field];
-        const b = second[field];
-        if (a == null) return 1;
-        if (b == null) return -1;
-        return direction === 'asc' ? (a > b ? 1 : -1) : a > b ? -1 : 1;
-      });
-  }
-);
-
-export const selectSortedNotesBySavedObjectId = createSelector(
-  [
-    selectAllNotes,
-    (
-      _: State,
-      {
-        savedObjectId,
-        sort,
-      }: { savedObjectId: string; sort: { field: keyof Note; direction: 'asc' | 'desc' } }
-    ) => ({ savedObjectId, sort }),
-  ],
-  (notes, { savedObjectId, sort }) => {
-    const { field, direction } = sort;
-    if (savedObjectId.length === 0) {
-      return [];
-    }
-    return notes
-      .filter((note: Note) => note.timelineId === savedObjectId)
-      .sort((first: Note, second: Note) => {
-        const a = first[field];
-        const b = second[field];
-        if (a == null) return 1;
-        if (b == null) return -1;
-        return direction === 'asc' ? (a > b ? 1 : -1) : a > b ? -1 : 1;
-      });
-  }
-);
+export const makeSelectDocumentNotesBySavedObjectId = () =>
+  createSelector(
+    [
+      selectAllNotes,
+      (_: State, documentId: string) => documentId,
+      (_: State, documentId: string, savedObjectId: string) => savedObjectId,
+    ],
+    (notes, documentId, savedObjectId) =>
+      fallbackToEmptyArray(
+        notes.filter((note) => note.eventId === documentId && note.timelineId === savedObjectId)
+      )
+  );
 
 export const {
   userSelectedPage,

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { DatatableColumnMeta } from '@kbn/expressions-plugin/common';
 
 export type { IgnoredReason, ShouldShowFieldInTableHandler } from './utils';
@@ -111,4 +111,57 @@ export interface LogCloudFields {
   'cloud.availability_zone'?: string;
   'cloud.project.id'?: string;
   'cloud.instance.id'?: string;
+}
+
+export interface TransactionDocumentOverview
+  extends TraceFields,
+    ServiceFields,
+    TransactionFields,
+    UserAgentFields {}
+
+export interface SpanDocumentOverview
+  extends TraceFields,
+    ServiceFields,
+    SpanFields,
+    UserAgentFields {
+  'transaction.id'?: string;
+  'transaction.name'?: string;
+  duration?: number;
+  kind?: string;
+}
+
+export interface TraceFields {
+  '@timestamp': number;
+  'trace.id': string;
+  'processor.event'?: 'span' | 'transaction';
+  'parent.id'?: string;
+  'http.response.status_code'?: number;
+}
+
+export interface ServiceFields {
+  'service.name': string;
+  'service.environment': string;
+  'agent.name': string;
+}
+
+export interface TransactionFields {
+  'transaction.id': string;
+  'transaction.type': string;
+  'transaction.name': string;
+  'transaction.duration.us'?: number;
+}
+
+export interface SpanFields {
+  'span.id': string;
+  'span.name': string;
+  'span.action': string;
+  'span.duration.us': number;
+  'span.type': string;
+  'span.subtype': string;
+  'span.destination.service.resource': string;
+}
+
+export interface UserAgentFields {
+  'user_agent.name': string;
+  'user_agent.version': string;
 }

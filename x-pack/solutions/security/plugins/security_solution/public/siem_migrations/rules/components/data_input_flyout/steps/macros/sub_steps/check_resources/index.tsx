@@ -45,10 +45,6 @@ export const useCheckResourcesStep = ({
   return {
     title: i18n.RULES_DATA_INPUT_CHECK_RESOURCES_TITLE,
     status: uploadStepStatus,
-    children: (
-      <EuiText size="xs" color="subdued">
-        {i18n.RULES_DATA_INPUT_CHECK_RESOURCES_DESCRIPTION}
-      </EuiText>
-    ),
+    children: <EuiText size="s">{i18n.RULES_DATA_INPUT_CHECK_RESOURCES_DESCRIPTION}</EuiText>,
   };
 };

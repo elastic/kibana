@@ -23,10 +23,11 @@ import {
 import type { Action, Reducer, Store } from 'redux';
 import { QueryClient } from '@tanstack/react-query';
 import { coreMock } from '@kbn/core/public/mocks';
-import { PLUGIN_ID } from '@kbn/fleet-plugin/common';
+import { INTEGRATIONS_PLUGIN_ID, PLUGIN_ID } from '@kbn/fleet-plugin/common';
 import type { UseBaseQueryResult } from '@tanstack/react-query';
 import ReactDOM from 'react-dom';
 import type { DeepReadonly } from 'utility-types';
+import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 import type { UserPrivilegesState } from '../../components/user_privileges/user_privileges_context';
 import { getUserPrivilegesMockDefaultValue } from '../../components/user_privileges/__mocks__';
 import type { AppLinkItems } from '../../links/types';
@@ -44,7 +45,7 @@ import { SUB_PLUGINS_REDUCER, mockGlobalState, createMockStore } from '..';
 import type { ExperimentalFeatures } from '../../../../common/experimental_features';
 import { APP_UI_ID, APP_PATH } from '../../../../common/constants';
 import { KibanaServices } from '../../lib/kibana';
-import { appLinks } from '../../../app_links';
+import { appLinks } from '../../../app/links';
 import { fleetGetPackageHttpMock } from '../../../management/mocks';
 import { allowedExperimentalValues } from '../../../../common/experimental_features';
 import type { EndpointPrivileges } from '../../../../common/endpoint/types';
@@ -119,7 +120,8 @@ export type ReactQueryHookRenderer<
    * query response state value to be true
    */
   waitForHook?: WaitForReactHookState,
-  options?: RenderHookOptions<TProps>
+  options?: RenderHookOptions<TProps>,
+  timeout?: number
 ) => Promise<TResult>;
 
 export interface UserPrivilegesMockSetter {
@@ -134,7 +136,7 @@ export interface AppContextTestRender {
   store: Store<State>;
   history: ReturnType<typeof createMemoryHistory>;
   coreStart: ReturnType<typeof coreMock.createStart>;
-  depsStart: Pick<StartPlugins, 'data' | 'fleet' | 'unifiedSearch'>;
+  depsStart: Pick<StartPlugins, 'data' | 'fleet' | 'unifiedSearch' | 'spaces'>;
   startServices: StartServices;
   middlewareSpy: MiddlewareActionSpyHelper;
   /**
@@ -252,9 +254,20 @@ const experimentalFeaturesReducer: Reducer<State['app'], UpdateExperimentalFeatu
 export const createAppRootMockRenderer = (): AppContextTestRender => {
   const history = createMemoryHistory<never>();
   const coreStart = createCoreStartMock(history);
-  const depsStart = depsStartMock();
   const middlewareSpy = createSpyMiddleware();
   const startServices: StartServices = createStartServicesMock(coreStart);
+  const depsStart: AppContextTestRender['depsStart'] = {
+    ...depsStartMock(),
+    spaces: spacesPluginMock.createStartContract(),
+  };
+
+  (depsStart.spaces.getActiveSpace as jest.Mock).mockImplementation(async () => {
+    return {
+      id: 'default',
+      name: 'default',
+      disabledFeatures: [],
+    };
+  });
 
   const storeReducer = {
     ...SUB_PLUGINS_REDUCER,
@@ -334,12 +347,13 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
      * If defined (default is `isSuccess`), the renderer will wait for the given react query to be truthy
      */
     waitForHook: WaitForReactHookState = 'isSuccess',
-    options: RenderHookOptions<TProps> = {}
+    options: RenderHookOptions<TProps> = {},
+    timeout = 1000
   ) => {
     const { result: hookResult } = renderHook<TResult, TProps>(hookFn, options);
 
     if (waitForHook) {
-      await waitFor(() => expect(hookResult.current[waitForHook]).toBe(true));
+      await waitFor(() => expect(hookResult.current[waitForHook]).toBe(true), { timeout });
     }
 
     return hookResult.current;
@@ -422,18 +436,28 @@ const createCoreStartMock = (
 
   const linkPaths = getLinksPaths(appLinks);
 
-  // Mock the certain APP Ids returned by `application.getUrlForApp()`
-  coreStart.application.getUrlForApp.mockImplementation((appId, { deepLinkId, path } = {}) => {
+  // Mock certain APP Ids returned by `application.getUrlForApp()`
+  coreStart.application.getUrlForApp.mockImplementation((appId, { deepLinkId, path = '' } = {}) => {
+    let appUrl: string = '';
+
     switch (appId) {
       case PLUGIN_ID:
-        return '/app/fleet';
+        appUrl = '/app/fleet';
+        break;
+      case INTEGRATIONS_PLUGIN_ID:
+        appUrl = '/app/integrations';
+        break;
+
       case APP_UI_ID:
-        return `${APP_PATH}${deepLinkId && linkPaths[deepLinkId] ? linkPaths[deepLinkId] : ''}${
-          path ?? ''
-        }`;
+        appUrl = `${APP_PATH}${deepLinkId && linkPaths[deepLinkId] ? linkPaths[deepLinkId] : ''}`;
+        break;
+
       default:
-        return `${appId} not mocked!`;
+        appUrl = `app-id-${appId}-not-mocked!`;
+        break;
     }
+
+    return `${appUrl}${path}`;
   });
 
   coreStart.application.navigateToApp.mockImplementation((appId, { deepLinkId, path } = {}) => {

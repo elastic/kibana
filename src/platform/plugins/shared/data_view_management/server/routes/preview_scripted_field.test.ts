@@ -47,23 +47,21 @@ describe('preview_scripted_field route', () => {
 
     expect(mockClient.search.mock.calls[0][0]).toMatchInlineSnapshot(`
       Object {
-        "body": Object {
-          "_source": undefined,
-          "query": Object {
-            "match_all": Object {},
-          },
-          "script_fields": Object {
-            "my_scripted_field": Object {
-              "script": Object {
-                "lang": "painless",
-                "source": "doc['foo'].value",
-              },
+        "_source": undefined,
+        "index": "kibana_sample_data_logs",
+        "query": Object {
+          "match_all": Object {},
+        },
+        "script_fields": Object {
+          "my_scripted_field": Object {
+            "script": Object {
+              "lang": "painless",
+              "source": "doc['foo'].value",
             },
           },
-          "size": 10,
-          "timeout": "30s",
         },
-        "index": "kibana_sample_data_logs",
+        "size": 10,
+        "timeout": "30s",
       }
     `);
 
@@ -103,29 +101,27 @@ describe('preview_scripted_field route', () => {
 
     expect(mockClient.search.mock.calls[0][0]).toMatchInlineSnapshot(`
       Object {
-        "body": Object {
-          "_source": Array [
-            "a",
-            "b",
-            "c",
-          ],
-          "query": Object {
-            "bool": Object {
-              "some": "query",
-            },
-          },
-          "script_fields": Object {
-            "my_scripted_field": Object {
-              "script": Object {
-                "lang": "painless",
-                "source": "doc['foo'].value",
-              },
-            },
-          },
-          "size": 10,
-          "timeout": "30s",
-        },
+        "_source": Array [
+          "a",
+          "b",
+          "c",
+        ],
         "index": "kibana_sample_data_logs",
+        "query": Object {
+          "bool": Object {
+            "some": "query",
+          },
+        },
+        "script_fields": Object {
+          "my_scripted_field": Object {
+            "script": Object {
+              "lang": "painless",
+              "source": "doc['foo'].value",
+            },
+          },
+        },
+        "size": 10,
+        "timeout": "30s",
       }
     `);
   });

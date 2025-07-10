@@ -70,7 +70,9 @@ const TemplatesComponent: React.FC<Props> = ({
       fullWidth
       title={
         <EuiFlexGroup alignItems="center" gutterSize="none">
-          <EuiFlexItem grow={false}>{i18n.TEMPLATE_TITLE}</EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <h2>{i18n.TEMPLATE_TITLE}</h2>
+          </EuiFlexItem>
         </EuiFlexGroup>
       }
       description={<p>{i18n.TEMPLATE_DESCRIPTION}</p>}

@@ -16,6 +16,7 @@ import {
 } from './policy_template_form';
 import { TestProvider } from '../../test/test_provider';
 import {
+  getAwsPackageInfoMock,
   getMockPackageInfo,
   getMockPackageInfoCspmAWS,
   getMockPackageInfoCspmAzure,
@@ -41,7 +42,6 @@ import { useParams } from 'react-router-dom';
 import { createReactQueryResponse } from '../../test/fixtures/react_query';
 import { useCspSetupStatusApi } from '@kbn/cloud-security-posture/src/hooks/use_csp_setup_status_api';
 import { usePackagePolicyList } from '../../common/api/use_package_policy_list';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import {
   AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ,
   AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ,
@@ -51,14 +51,15 @@ import {
   CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS,
   CIS_GCP_OPTION_TEST_SUBJ,
   GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ,
-  SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ,
   SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ,
   SUBSCRIPTION_NOT_ALLOWED_TEST_SUBJECT,
 } from '../test_subjects';
-import { ExperimentalFeaturesService } from '@kbn/fleet-plugin/public/services';
 import { createFleetTestRendererMock } from '@kbn/fleet-plugin/public/mock';
 import { useIsSubscriptionStatusValid } from '../../common/hooks/use_is_subscription_status_valid';
 import { useLicenseManagementLocatorApi } from '../../common/api/use_license_management_locator_api';
+import * as KibanaHook from '../../common/hooks/use_kibana';
+import { SECURITY_SOLUTION_ENABLE_CLOUD_CONNECTOR_SETTING } from '@kbn/management-settings-ids';
+import { SetupTechnology } from '@kbn/fleet-plugin/public';
 
 // mock useParams
 jest.mock('react-router-dom', () => ({
@@ -74,7 +75,6 @@ jest.mock('../../common/api/use_license_management_locator_api');
 jest.mock('@kbn/fleet-plugin/public/services/experimental_features');
 
 const onChange = jest.fn();
-const mockedExperimentalFeaturesService = jest.mocked(ExperimentalFeaturesService);
 
 const createReactQueryResponseWithRefetch = (
   data: Parameters<typeof createReactQueryResponse>[0]
@@ -90,10 +90,6 @@ describe('<CspPolicyTemplateForm />', () => {
     (useParams as jest.Mock).mockReturnValue({
       integration: undefined,
     });
-
-    mockedExperimentalFeaturesService.get.mockReturnValue({
-      secretsStorage: true,
-    } as any);
 
     (usePackagePolicyList as jest.Mock).mockImplementation((packageName) =>
       createReactQueryResponseWithRefetch({
@@ -126,12 +122,16 @@ describe('<CspPolicyTemplateForm />', () => {
     edit = false,
     packageInfo = {} as PackageInfo,
     isAgentlessEnabled,
+    integrationToEnable,
+    defaultSetupTechnology = SetupTechnology.AGENT_BASED,
   }: {
     edit?: boolean;
     newPolicy: NewPackagePolicy;
     packageInfo?: PackageInfo;
     onChange?: jest.Mock<void, [NewPackagePolicy]>;
     isAgentlessEnabled?: boolean;
+    integrationToEnable?: string;
+    defaultSetupTechnology?: SetupTechnology;
   }) => {
     const { AppWrapper: FleetAppWrapper } = createFleetTestRendererMock();
     return (
@@ -145,6 +145,7 @@ describe('<CspPolicyTemplateForm />', () => {
               packageInfo={packageInfo}
               isEditPage={true}
               isAgentlessEnabled={isAgentlessEnabled}
+              integrationToEnable={integrationToEnable}
             />
           )}
           {!edit && (
@@ -154,6 +155,8 @@ describe('<CspPolicyTemplateForm />', () => {
               packageInfo={packageInfo}
               isEditPage={false}
               isAgentlessEnabled={isAgentlessEnabled}
+              integrationToEnable={integrationToEnable}
+              defaultSetupTechnology={defaultSetupTechnology}
             />
           )}
         </TestProvider>
@@ -422,11 +425,82 @@ describe('<CspPolicyTemplateForm />', () => {
           ...input,
           enabled: input.policy_template === 'kspm',
         })),
-        name: 'kspm-1',
+        name: 'kspm-2',
+      },
+    });
+  });
+
+  it('KSPM - calls onChange with isExtensionLoaded the second time after increment of package version', () => {
+    const policy = getMockPolicyK8s();
+
+    // enable all inputs of a policy template, same as fleet does
+    policy.inputs = policy.inputs.map((input) => ({
+      ...input,
+      enabled: input.policy_template === 'kspm',
+    }));
+    policy.name = 'cloud_security_posture-1';
+
+    (useParams as jest.Mock).mockReturnValue({
+      integration: 'kspm',
+    });
+
+    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
+      createReactQueryResponseWithRefetch({
+        status: 'success',
+        data: {
+          kspm: { status: 'not-deployed', healthyAgents: 0, installedPackagePolicies: 1 },
+        },
+      })
+    );
+
+    (usePackagePolicyList as jest.Mock).mockImplementation(() =>
+      createReactQueryResponseWithRefetch({
+        status: 'success',
+        data: {
+          items: [getPosturePolicy(getMockPolicyEKS(), CLOUDBEAT_EKS)],
+        },
+      })
+    );
+
+    render(
+      <WrappedComponent
+        newPolicy={policy}
+        packageInfo={{ name: 'kspm' } as PackageInfo}
+        onChange={onChange}
+        integrationToEnable="kspm"
+      />
+    );
+
+    // 1st call happens on mount and selects the default policy template enabled input
+    expect(onChange).nthCalledWith(1, {
+      isExtensionLoaded: undefined,
+      isValid: true,
+      updatedPolicy: {
+        ...getMockPolicyK8s(),
+        name: 'cloud_security_posture-1',
       },
     });
 
-    expect(onChange).toHaveBeenCalledWith({
+    // 2nd call happens on mount and increments kspm template enabled input
+    expect(onChange).nthCalledWith(2, {
+      isExtensionLoaded: undefined,
+      isValid: true,
+      updatedPolicy: {
+        ...getMockPolicyK8s(),
+        inputs: policy.inputs.map((input) => ({
+          ...input,
+          enabled: input.type === 'cloudbeat/cis_k8s',
+        })),
+        name: 'cloud_security_posture-1',
+      },
+    });
+
+    /*
+      3rd call happens when policies are fetched and the package version is incremented 
+      in that case isExtensionLoaded is set to 'true'
+    */
+    expect(onChange).nthCalledWith(3, {
+      isExtensionLoaded: true,
       isValid: true,
       updatedPolicy: {
         ...getMockPolicyK8s(),
@@ -434,7 +508,7 @@ describe('<CspPolicyTemplateForm />', () => {
           ...input,
           enabled: input.policy_template === 'kspm',
         })),
-        name: 'kspm-2',
+        name: 'kspm-1',
       },
     });
   });
@@ -510,19 +584,6 @@ describe('<CspPolicyTemplateForm />', () => {
           ...input,
           enabled: input.policy_template === 'vuln_mgmt',
         })),
-        name: 'vuln_mgmt-1',
-      },
-    });
-
-    // 3rd call happens on mount and increments vuln_mgmt template enabled input
-    expect(onChange).toHaveBeenCalledWith({
-      isValid: true,
-      updatedPolicy: {
-        ...getMockPolicyVulnMgmtAWS(),
-        inputs: policy.inputs.map((input) => ({
-          ...input,
-          enabled: input.policy_template === 'vuln_mgmt',
-        })),
         name: 'vuln_mgmt-2',
       },
     });
@@ -589,19 +650,6 @@ describe('<CspPolicyTemplateForm />', () => {
     });
 
     // 2nd call happens on mount and increments cspm template enabled input
-    expect(onChange).toHaveBeenCalledWith({
-      isValid: true,
-      updatedPolicy: {
-        ...getMockPolicyAWS(),
-        inputs: policy.inputs.map((input) => ({
-          ...input,
-          enabled: input.policy_template === 'cspm',
-        })),
-        name: 'cspm-1',
-      },
-    });
-
-    // // 3rd call happens on mount and increments cspm template enabled input
     expect(onChange).toHaveBeenCalledWith({
       isValid: true,
       updatedPolicy: {
@@ -1209,7 +1257,6 @@ describe('<CspPolicyTemplateForm />', () => {
       let policy = getMockPolicyGCP();
       policy = getPosturePolicy(policy, CLOUDBEAT_GCP, {
         credentials_type: { value: 'credentials-file' },
-        setup_access: { value: 'manual' },
       });
 
       const { getByText } = render(
@@ -1231,7 +1278,6 @@ describe('<CspPolicyTemplateForm />', () => {
       let policy = getMockPolicyGCP();
       policy = getPosturePolicy(policy, CLOUDBEAT_GCP, {
         credentials_type: { value: 'credentials-file' },
-        setup_access: { value: 'manual' },
       });
 
       const { getByText } = render(
@@ -1248,7 +1294,6 @@ describe('<CspPolicyTemplateForm />', () => {
       let policy = getMockPolicyGCP();
       policy = getPosturePolicy(policy, CLOUDBEAT_GCP, {
         'gcp.account_type': { value: GCP_ORGANIZATION_ACCOUNT },
-        setup_access: { value: 'google_cloud_shell' },
       });
 
       const { getByTestId } = render(
@@ -1268,7 +1313,6 @@ describe('<CspPolicyTemplateForm />', () => {
       let policy = getMockPolicyGCP();
       policy = getPosturePolicy(policy, CLOUDBEAT_GCP, {
         'gcp.credentials.type': { value: 'credentials-file' },
-        setup_access: { value: 'manual' },
       });
 
       const { getByLabelText, getByRole } = render(
@@ -1287,7 +1331,6 @@ describe('<CspPolicyTemplateForm />', () => {
       policy = getPosturePolicy(policy, CLOUDBEAT_GCP, {
         'gcp.project_id': { value: 'a' },
         'gcp.credentials.type': { value: 'credentials-file' },
-        setup_access: { value: 'manual' },
       });
 
       const { getByTestId } = render(
@@ -1329,7 +1372,6 @@ describe('<CspPolicyTemplateForm />', () => {
       let policy = getMockPolicyGCP();
       policy = getPosturePolicy(policy, CLOUDBEAT_GCP, {
         'gcp.account_type': { value: GCP_ORGANIZATION_ACCOUNT },
-        setup_access: { value: 'google_cloud_shell' },
       });
 
       const { getByLabelText, getByTestId } = render(
@@ -1345,7 +1387,6 @@ describe('<CspPolicyTemplateForm />', () => {
       let policy = getMockPolicyGCP();
       policy = getPosturePolicy(policy, CLOUDBEAT_GCP, {
         'gcp.account_type': { value: GCP_ORGANIZATION_ACCOUNT },
-        setup_access: { value: 'manual' },
       });
 
       const { getByLabelText, getByTestId } = render(
@@ -1361,7 +1402,6 @@ describe('<CspPolicyTemplateForm />', () => {
       let policy = getMockPolicyGCP();
       policy = getPosturePolicy(policy, CLOUDBEAT_GCP, {
         'gcp.account_type': { value: GCP_SINGLE_ACCOUNT },
-        setup_access: { value: 'google_cloud_shell' },
       });
 
       const { queryByLabelText, queryByTestId } = render(
@@ -1377,7 +1417,6 @@ describe('<CspPolicyTemplateForm />', () => {
       let policy = getMockPolicyGCP();
       policy = getPosturePolicy(policy, CLOUDBEAT_GCP, {
         'gcp.account_type': { value: GCP_ORGANIZATION_ACCOUNT },
-        setup_access: { value: 'manual' },
       });
 
       const { getByTestId } = render(
@@ -1529,7 +1568,10 @@ describe('<CspPolicyTemplateForm />', () => {
 
   describe('Agentless', () => {
     it('should not render setup technology selector if agentless is not available and CSPM integration supports agentless', async () => {
-      const newPackagePolicy = getMockPolicyAWS();
+      const policy = getMockPolicyAWS();
+      const newPackagePolicy = getPosturePolicy(policy, CLOUDBEAT_AWS, {
+        'aws.credentials.type': { value: 'direct_access_keys' },
+      });
 
       const { queryByTestId } = render(
         <WrappedComponent newPolicy={newPackagePolicy} isAgentlessEnabled={false} />
@@ -1541,19 +1583,21 @@ describe('<CspPolicyTemplateForm />', () => {
     });
 
     it('should render setup technology selector for AWS and allow to select agentless', async () => {
-      const newPackagePolicy = getMockPolicyAWS();
+      const policy = getMockPolicyAWS();
+      const newPackagePolicy = getPosturePolicy(policy, CLOUDBEAT_AWS, {
+        'aws.credentials.type': { value: 'direct_access_keys' },
+      });
 
-      const { getByTestId, getByRole } = render(
-        <WrappedComponent newPolicy={newPackagePolicy} isAgentlessEnabled={true} />
-      );
-
-      const setupTechnologySelectorAccordion = getByTestId(
-        SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ
+      const { getByTestId, queryByLabelText } = render(
+        <WrappedComponent
+          newPolicy={newPackagePolicy}
+          isAgentlessEnabled={true}
+          packageInfo={getPackageInfoMock() as PackageInfo}
+        />
       );
       const setupTechnologySelector = getByTestId(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ);
 
       // default state
-      expect(setupTechnologySelectorAccordion).toBeInTheDocument();
       expect(setupTechnologySelector).toBeInTheDocument();
       expect(setupTechnologySelector).toHaveTextContent(/agent-based/i);
 
@@ -1564,9 +1608,311 @@ describe('<CspPolicyTemplateForm />', () => {
 
       // select agent-based and check for cloudformation option
       await userEvent.click(setupTechnologySelector);
-      const agentlessOption = getByRole('option', { name: /agentless/i });
-      await waitForEuiPopoverOpen();
-      await userEvent.click(agentlessOption);
+      const agentlessOption = await queryByLabelText(/agentless/i);
+      if (agentlessOption) {
+        await userEvent.click(agentlessOption);
+
+        const awsCredentialsTypeSelector = getByTestId(AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ);
+        const options: HTMLOptionElement[] = within(awsCredentialsTypeSelector).getAllByRole(
+          'option'
+        );
+        const optionValues = options.map((option) => option.value);
+        await waitFor(() => {
+          expect(options).toHaveLength(2);
+          expect(optionValues).toEqual(
+            expect.arrayContaining(['direct_access_keys', 'temporary_keys'])
+          );
+        });
+      }
+    });
+
+    it('should render setup technology selector for AWS and allow to select cloud connectors in ess aws environment', async () => {
+      const newPackagePolicy = getMockPolicyAWS();
+
+      jest.spyOn(KibanaHook, 'useKibana').mockReturnValue({
+        services: {
+          cloud: {
+            cloudId:
+              'cloud_connector_cspm:dXMtZWFzdC0xLmF3cy5zdGFnaW5nLmZvdW5kaXQubm86NDQzJDYyMjExNzI5MDhjZTQ0YmE5YWNkOGFmN2NlYmUyYmVjJGZmYmUyNDc2NGFkNTQwODJhZTkyYjU1NDQ0ZDI3NzA5',
+            deploymentUrl: 'https://cloud.elastic.co/deployments/bfdad4ef99a24212a06d387593686d63',
+            isCloudEnabled: true,
+            isServerlessEnabled: false,
+            cloudHost: 'eu-west-1.aws.qa.elastic.cloud',
+            serverless: {},
+          },
+          uiSettings: {
+            get: (key: string) => key === SECURITY_SOLUTION_ENABLE_CLOUD_CONNECTOR_SETTING,
+          },
+        },
+      } as any);
+
+      const { getByTestId } = render(
+        <WrappedComponent
+          newPolicy={{ ...newPackagePolicy, supports_agentless: true }}
+          isAgentlessEnabled={true}
+          packageInfo={{ ...getAwsPackageInfoMock(), version: '2.0.0-preview01' } as PackageInfo}
+          defaultSetupTechnology={SetupTechnology.AGENTLESS}
+        />
+      );
+      const setupTechnologySelector = getByTestId(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ);
+
+      // default state
+      expect(setupTechnologySelector).toBeInTheDocument();
+      expect(setupTechnologySelector).toHaveTextContent(/agent-based/i);
+      expect(setupTechnologySelector).toHaveTextContent(/agentless/i);
+
+      const awsCredentialsTypeSelector = getByTestId(AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ);
+      const options: HTMLOptionElement[] = within(awsCredentialsTypeSelector).getAllByRole(
+        'option'
+      );
+      const optionValues = options.map((option) => option.value);
+
+      await waitFor(() => {
+        expect(options).toHaveLength(3);
+        expect(optionValues).toEqual(
+          expect.arrayContaining(['cloud_connectors', 'direct_access_keys', 'temporary_keys'])
+        );
+      });
+    });
+
+    it('should render setup technology selector for AWS and hide cloud connectors in ess gcp environment', async () => {
+      const newPackagePolicy = getMockPolicyAWS();
+
+      jest.spyOn(KibanaHook, 'useKibana').mockReturnValue({
+        services: {
+          cloud: {
+            cloudId:
+              'cloud_connector_cspm:dXMtZWFzdC0xLmF3cy5zdGFnaW5nLmZvdW5kaXQubm86NDQzJDYyMjExNzI5MDhjZTQ0YmE5YWNkOGFmN2NlYmUyYmVjJGZmYmUyNDc2NGFkNTQwODJhZTkyYjU1NDQ0ZDI3NzA5',
+            deploymentUrl: 'https://cloud.elastic.co/deployments/bfdad4ef99a24212a06d387593686d63',
+            isCloudEnabled: true,
+            isServerlessEnabled: false,
+            cloudHost: 'eu-west-1.gcp.qa.elastic.cloud',
+            serverless: {},
+          },
+          uiSettings: {
+            get: (key: string) => key === SECURITY_SOLUTION_ENABLE_CLOUD_CONNECTOR_SETTING,
+          },
+        },
+      } as any);
+
+      const { getByTestId } = render(
+        <WrappedComponent
+          newPolicy={{ ...newPackagePolicy, supports_agentless: true }}
+          isAgentlessEnabled={true}
+          packageInfo={{ ...getAwsPackageInfoMock(), version: '2.0.0-preview01' } as PackageInfo}
+          defaultSetupTechnology={SetupTechnology.AGENTLESS}
+        />
+      );
+      const setupTechnologySelector = getByTestId(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ);
+
+      // default state
+      expect(setupTechnologySelector).toBeInTheDocument();
+      expect(setupTechnologySelector).toHaveTextContent(/agent-based/i);
+      expect(setupTechnologySelector).toHaveTextContent(/agentless/i);
+
+      const awsCredentialsTypeSelector = getByTestId(AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ);
+      const options: HTMLOptionElement[] = within(awsCredentialsTypeSelector).getAllByRole(
+        'option'
+      );
+      const optionValues = options.map((option) => option.value);
+
+      await waitFor(() => {
+        expect(options).toHaveLength(2);
+        expect(optionValues).toEqual(
+          expect.arrayContaining(['direct_access_keys', 'temporary_keys'])
+        );
+      });
+    });
+    it('should render setup technology selector for AWS and hide cloud connectors in ess azure environment', async () => {
+      const newPackagePolicy = getMockPolicyAWS();
+
+      jest.spyOn(KibanaHook, 'useKibana').mockReturnValue({
+        services: {
+          cloud: {
+            cloudId:
+              'cloud_connector_cspm:dXMtZWFzdC0xLmF3cy5zdGFnaW5nLmZvdW5kaXQubm86NDQzJDYyMjExNzI5MDhjZTQ0YmE5YWNkOGFmN2NlYmUyYmVjJGZmYmUyNDc2NGFkNTQwODJhZTkyYjU1NDQ0ZDI3NzA5',
+            deploymentUrl: 'https://cloud.elastic.co/deployments/bfdad4ef99a24212a06d387593686d63',
+            isCloudEnabled: true,
+            isServerlessEnabled: false,
+            cloudHost: 'eu-west-1.azure.qa.elastic.cloud',
+            serverless: {},
+          },
+          uiSettings: {
+            get: (key: string) => key === SECURITY_SOLUTION_ENABLE_CLOUD_CONNECTOR_SETTING,
+          },
+        },
+      } as any);
+
+      const { getByTestId } = render(
+        <WrappedComponent
+          newPolicy={{ ...newPackagePolicy, supports_agentless: true }}
+          isAgentlessEnabled={true}
+          packageInfo={{ ...getAwsPackageInfoMock(), version: '2.0.0-preview01' } as PackageInfo}
+          defaultSetupTechnology={SetupTechnology.AGENTLESS}
+        />
+      );
+      const setupTechnologySelector = getByTestId(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ);
+
+      // default state
+      expect(setupTechnologySelector).toBeInTheDocument();
+      expect(setupTechnologySelector).toHaveTextContent(/agent-based/i);
+      expect(setupTechnologySelector).toHaveTextContent(/agentless/i);
+
+      const awsCredentialsTypeSelector = getByTestId(AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ);
+      const options: HTMLOptionElement[] = within(awsCredentialsTypeSelector).getAllByRole(
+        'option'
+      );
+      const optionValues = options.map((option) => option.value);
+
+      await waitFor(() => {
+        expect(options).toHaveLength(2);
+        expect(optionValues).toEqual(
+          expect.arrayContaining(['direct_access_keys', 'temporary_keys'])
+        );
+      });
+    });
+
+    it('should render setup technology selector for AWS and allow to select cloud connectors in serverless aws environment', async () => {
+      const newPackagePolicy = getMockPolicyAWS();
+
+      jest.spyOn(KibanaHook, 'useKibana').mockReturnValue({
+        services: {
+          cloud: {
+            cloudId: undefined,
+            deploymentUrl: undefined,
+            isCloudEnabled: true,
+            isServerlessEnabled: true,
+            cloudHost: 'us-east-1.aws.elastic.cloud',
+            serverless: {
+              projectId: 'project-xyz123',
+              projectName: 'cloudconnectoraws',
+              projectType: 'security',
+            },
+          },
+          uiSettings: {
+            get: (key: string) => key === SECURITY_SOLUTION_ENABLE_CLOUD_CONNECTOR_SETTING,
+          },
+        },
+      } as any);
+
+      const { getByTestId } = render(
+        <WrappedComponent
+          newPolicy={{ ...newPackagePolicy, supports_agentless: true }}
+          isAgentlessEnabled={true}
+          packageInfo={{ ...getAwsPackageInfoMock(), version: '2.0.0-preview01' } as PackageInfo}
+          defaultSetupTechnology={SetupTechnology.AGENTLESS}
+        />
+      );
+      const setupTechnologySelector = getByTestId(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ);
+
+      // default state
+      expect(setupTechnologySelector).toBeInTheDocument();
+      expect(setupTechnologySelector).toHaveTextContent(/agent-based/i);
+      expect(setupTechnologySelector).toHaveTextContent(/agentless/i);
+
+      const awsCredentialsTypeSelector = getByTestId(AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ);
+      const options: HTMLOptionElement[] = within(awsCredentialsTypeSelector).getAllByRole(
+        'option'
+      );
+      const optionValues = options.map((option) => option.value);
+
+      await waitFor(() => {
+        expect(options).toHaveLength(3);
+        expect(optionValues).toEqual(
+          expect.arrayContaining(['cloud_connectors', 'direct_access_keys', 'temporary_keys'])
+        );
+      });
+    });
+
+    it('should render setup technology selector for AWS and should hide cloud connectors in serverless gcp environment', async () => {
+      const newPackagePolicy = getMockPolicyAWS();
+
+      jest.spyOn(KibanaHook, 'useKibana').mockReturnValue({
+        services: {
+          cloud: {
+            cloudId: undefined,
+            deploymentUrl: undefined,
+            isCloudEnabled: true,
+            isServerlessEnabled: true,
+            cloudHost: 'us-east-1.gcp.elastic.cloud',
+            serverless: {
+              projectId: 'project-xyz123',
+              projectName: 'cloudconnectoraws',
+              projectType: 'security',
+            },
+          },
+          uiSettings: {
+            get: (key: string) => key === SECURITY_SOLUTION_ENABLE_CLOUD_CONNECTOR_SETTING,
+          },
+        },
+      } as any);
+
+      const { getByTestId } = render(
+        <WrappedComponent
+          newPolicy={{ ...newPackagePolicy, supports_agentless: true }}
+          isAgentlessEnabled={true}
+          packageInfo={{ ...getAwsPackageInfoMock(), version: '2.0.0-preview01' } as PackageInfo}
+          defaultSetupTechnology={SetupTechnology.AGENTLESS}
+        />
+      );
+      const setupTechnologySelector = getByTestId(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ);
+
+      // default state
+      expect(setupTechnologySelector).toBeInTheDocument();
+      expect(setupTechnologySelector).toHaveTextContent(/agent-based/i);
+      expect(setupTechnologySelector).toHaveTextContent(/agentless/i);
+
+      const awsCredentialsTypeSelector = getByTestId(AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ);
+      const options: HTMLOptionElement[] = within(awsCredentialsTypeSelector).getAllByRole(
+        'option'
+      );
+      const optionValues = options.map((option) => option.value);
+
+      await waitFor(() => {
+        expect(options).toHaveLength(2);
+        expect(optionValues).toEqual(
+          expect.arrayContaining(['direct_access_keys', 'temporary_keys'])
+        );
+      });
+    });
+
+    it('should render setup technology selector for AWS and should hide cloud connectors in serverless azure environment', async () => {
+      const newPackagePolicy = getMockPolicyAWS();
+
+      jest.spyOn(KibanaHook, 'useKibana').mockReturnValue({
+        services: {
+          cloud: {
+            cloudId: undefined,
+            deploymentUrl: undefined,
+            isCloudEnabled: true,
+            isServerlessEnabled: true,
+            cloudHost: 'us-east-1.azure.elastic.cloud',
+            serverless: {
+              projectId: 'project-xyz123',
+              projectName: 'cloudconnectoraws',
+              projectType: 'security',
+            },
+          },
+          uiSettings: {
+            get: (key: string) => key === SECURITY_SOLUTION_ENABLE_CLOUD_CONNECTOR_SETTING,
+          },
+        },
+      } as any);
+
+      const { getByTestId } = render(
+        <WrappedComponent
+          newPolicy={{ ...newPackagePolicy, supports_agentless: true }}
+          isAgentlessEnabled={true}
+          packageInfo={{ ...getAwsPackageInfoMock(), version: '2.0.0-preview01' } as PackageInfo}
+          defaultSetupTechnology={SetupTechnology.AGENTLESS}
+        />
+      );
+      const setupTechnologySelector = getByTestId(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ);
+
+      // default state
+      expect(setupTechnologySelector).toBeInTheDocument();
+      expect(setupTechnologySelector).toHaveTextContent(/agent-based/i);
+      expect(setupTechnologySelector).toHaveTextContent(/agentless/i);
 
       const awsCredentialsTypeSelector = getByTestId(AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ);
       const options: HTMLOptionElement[] = within(awsCredentialsTypeSelector).getAllByRole(
@@ -1585,7 +1931,7 @@ describe('<CspPolicyTemplateForm />', () => {
     it.skip('should render setup technology selector for GCP for organisation account type', async () => {
       const newPackagePolicy = getMockPolicyGCP();
 
-      const { getByTestId, queryByTestId, getByRole } = render(
+      const { getByTestId, queryByTestId, getByLabelText } = render(
         <WrappedComponent
           newPolicy={newPackagePolicy}
           isAgentlessEnabled={true}
@@ -1597,9 +1943,6 @@ describe('<CspPolicyTemplateForm />', () => {
       const gcpSelectorButton = getByTestId(CIS_GCP_OPTION_TEST_SUBJ);
       await userEvent.click(gcpSelectorButton);
 
-      const setupTechnologySelectorAccordion = queryByTestId(
-        SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ
-      );
       const setupTechnologySelector = getByTestId(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ);
       const orgIdField = queryByTestId(CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.ORGANIZATION_ID);
       const projectIdField = queryByTestId(CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.PROJECT_ID);
@@ -1614,7 +1957,6 @@ describe('<CspPolicyTemplateForm />', () => {
       );
 
       // default state for GCP with the Org selected
-      expect(setupTechnologySelectorAccordion).toBeInTheDocument();
       expect(setupTechnologySelector).toBeInTheDocument();
       expect(setupTechnologySelector).toHaveTextContent(/agentless/i);
       expect(orgIdField).toBeInTheDocument();
@@ -1625,8 +1967,7 @@ describe('<CspPolicyTemplateForm />', () => {
 
       // select agent-based and check for Cloud Shell option
       await userEvent.click(setupTechnologySelector);
-      const agentBasedOption = getByRole('option', { name: /agent-based/i });
-      await waitForEuiPopoverOpen();
+      const agentBasedOption = getByLabelText(/agent-based/i);
       await userEvent.click(agentBasedOption);
       await waitFor(() => {
         expect(getByTestId(GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ.CLOUD_SHELL)).toBeInTheDocument();
@@ -1651,9 +1992,6 @@ describe('<CspPolicyTemplateForm />', () => {
       const gcpSelectorButton = getByTestId(CIS_GCP_OPTION_TEST_SUBJ);
       await userEvent.click(gcpSelectorButton);
 
-      const setupTechnologySelectorAccordion = queryByTestId(
-        SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ
-      );
       const setupTechnologySelector = queryByTestId(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ);
       const orgIdField = queryByTestId(CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.ORGANIZATION_ID);
       const projectIdField = queryByTestId(CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.PROJECT_ID);
@@ -1668,7 +2006,6 @@ describe('<CspPolicyTemplateForm />', () => {
       );
 
       // default state for GCP with the Org selected
-      expect(setupTechnologySelectorAccordion).toBeInTheDocument();
       expect(setupTechnologySelector).toBeInTheDocument();
       expect(setupTechnologySelector).toHaveTextContent(/agentless/i);
       expect(orgIdField).not.toBeInTheDocument();
@@ -1681,7 +2018,7 @@ describe('<CspPolicyTemplateForm />', () => {
     it('should render setup technology selector for Azure for Organisation type', async () => {
       const newPackagePolicy = getMockPolicyAzure();
 
-      const { getByTestId, queryByTestId, getByRole } = render(
+      const { getByTestId, queryByTestId, getByLabelText } = render(
         <WrappedComponent
           newPolicy={newPackagePolicy}
           isAgentlessEnabled={true}
@@ -1693,13 +2030,9 @@ describe('<CspPolicyTemplateForm />', () => {
       const azureSelectorButton = getByTestId(CIS_AZURE_OPTION_TEST_SUBJ);
       await userEvent.click(azureSelectorButton);
 
-      const setupTechnologySelectorAccordion = queryByTestId(
-        SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ
-      );
       const setupTechnologySelector = getByTestId(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ);
 
       // default state for Azure with the Org selected
-      expect(setupTechnologySelectorAccordion).toBeInTheDocument();
       expect(setupTechnologySelector).toBeInTheDocument();
       expect(setupTechnologySelector).toHaveTextContent(/agent-based/i);
       await waitFor(() => {
@@ -1709,8 +2042,7 @@ describe('<CspPolicyTemplateForm />', () => {
 
       // select agent-based and check for ARM template option
       await userEvent.click(setupTechnologySelector);
-      const agentlessOption = getByRole('option', { name: /agentless/i });
-      await waitForEuiPopoverOpen();
+      const agentlessOption = getByLabelText(/agentless/i);
       await userEvent.click(agentlessOption);
 
       const tenantIdField = queryByTestId(CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID);
@@ -1719,7 +2051,6 @@ describe('<CspPolicyTemplateForm />', () => {
       const armTemplateSelector = queryByTestId(CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS.ARM_TEMPLATE);
       const manualSelector = queryByTestId(CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS.MANUAL);
 
-      expect(setupTechnologySelectorAccordion).toBeInTheDocument();
       expect(setupTechnologySelector).toBeInTheDocument();
       expect(setupTechnologySelector).toHaveTextContent(/agentless/i);
       expect(tenantIdField).toBeInTheDocument();
@@ -1734,7 +2065,7 @@ describe('<CspPolicyTemplateForm />', () => {
         'azure.account_type': { value: 'single-account', type: 'text' },
       });
 
-      const { getByTestId, queryByTestId, getByRole } = render(
+      const { getByTestId, queryByTestId, getByLabelText } = render(
         <WrappedComponent
           newPolicy={newPackagePolicy}
           isAgentlessEnabled={true}
@@ -1746,15 +2077,11 @@ describe('<CspPolicyTemplateForm />', () => {
       const azureSelectorButton = getByTestId(CIS_AZURE_OPTION_TEST_SUBJ);
       await userEvent.click(azureSelectorButton);
 
-      const setupTechnologySelectorAccordion = queryByTestId(
-        SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ
-      );
       const setupTechnologySelector = getByTestId(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ);
 
       // select agentless and check for ARM template option
       await userEvent.click(setupTechnologySelector);
-      const agentlessOption = getByRole('option', { name: /agentless/i });
-      await waitForEuiPopoverOpen();
+      const agentlessOption = getByLabelText(/agentless/i);
       await userEvent.click(agentlessOption);
 
       const tenantIdField = queryByTestId(CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID);
@@ -1764,7 +2091,6 @@ describe('<CspPolicyTemplateForm />', () => {
       const manualSelector = queryByTestId(CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS.MANUAL);
 
       // default state for Azure with the Org selected
-      expect(setupTechnologySelectorAccordion).toBeInTheDocument();
       expect(setupTechnologySelector).toBeInTheDocument();
       expect(setupTechnologySelector).toHaveTextContent(/agentless/i);
       expect(tenantIdField).toBeInTheDocument();
@@ -1781,11 +2107,9 @@ describe('<CspPolicyTemplateForm />', () => {
         <WrappedComponent newPolicy={newPackagePolicy} isAgentlessEnabled={true} />
       );
 
-      const setupTechnologySelectorAccordion = queryByTestId(
-        SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ
-      );
+      const setupTechnologySelector = queryByTestId(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ);
 
-      expect(setupTechnologySelectorAccordion).not.toBeInTheDocument();
+      expect(setupTechnologySelector).not.toBeInTheDocument();
     });
 
     it('should not render setup technology selector for CNVM', () => {
@@ -1795,11 +2119,9 @@ describe('<CspPolicyTemplateForm />', () => {
         <WrappedComponent newPolicy={newPackagePolicy} isAgentlessEnabled={true} />
       );
 
-      const setupTechnologySelectorAccordion = queryByTestId(
-        SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ
-      );
+      const setupTechnologySelector = queryByTestId(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ);
 
-      expect(setupTechnologySelectorAccordion).not.toBeInTheDocument();
+      expect(setupTechnologySelector).not.toBeInTheDocument();
     });
   });
 

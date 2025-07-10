@@ -111,7 +111,6 @@ class SavedObjectFinderUiClass extends React.Component<
     fixedPageSize: PropTypes.number,
     showFilter: PropTypes.bool,
   };
-
   private isComponentMounted: boolean = false;
 
   private debouncedFetch = debounce(async (query: Query) => {
@@ -365,6 +364,14 @@ class SavedObjectFinderUiClass extends React.Component<
       box: {
         incremental: true,
         'data-test-subj': 'savedObjectFinderSearchInput',
+        autoFocus: true,
+        inputRef: (node) => {
+          requestAnimationFrame(() => {
+            // preventing focus loss on the second rendering of the flyout
+            // which seems to steal focus from the input
+            node?.focus({ preventScroll: true });
+          });
+        },
         schema: {
           recognizedFields: ['type', 'tag'],
         },

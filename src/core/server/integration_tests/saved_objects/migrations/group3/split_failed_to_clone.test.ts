@@ -19,7 +19,7 @@ import {
   defaultKibanaTaskIndex,
   defaultKibanaIndex,
 } from '../kibana_migrator_test_kit';
-import { BASELINE_TEST_ARCHIVE_1K } from '../kibana_migrator_archive_utils';
+import { BASELINE_TEST_ARCHIVE_SMALL } from '../kibana_migrator_archive_utils';
 import {
   getRelocatingMigratorTestKit,
   kibanaSplitIndex,
@@ -27,7 +27,7 @@ import {
 import { delay } from '../test_utils';
 import '../jest_matchers';
 
-// mock clone_index from packages/core
+// mock clone_index from src/core/packages/saved-objects
 jest.mock('@kbn/core-saved-objects-migration-server-internal/src/actions/clone_index', () => {
   const realModule = jest.requireActual(
     '@kbn/core-saved-objects-migration-server-internal/src/actions/clone_index'
@@ -53,7 +53,7 @@ describe('when splitting .kibana into multiple indices and one clone fails', () 
 
   beforeAll(async () => {
     await clearLog(logFilePath);
-    esServer = await startElasticsearch({ dataArchive: BASELINE_TEST_ARCHIVE_1K });
+    esServer = await startElasticsearch({ dataArchive: BASELINE_TEST_ARCHIVE_SMALL });
   });
 
   afterAll(async () => {
@@ -65,7 +65,6 @@ describe('when splitting .kibana into multiple indices and one clone fails', () 
     migratorTestKitFactory = () =>
       getRelocatingMigratorTestKit({
         logFilePath,
-        filterDeprecated: true,
         relocateTypes: {
           // move 'basic' to a new index
           basic: kibanaSplitIndex,
@@ -80,6 +79,7 @@ describe('when splitting .kibana into multiple indices and one clone fails', () 
       basic: 200,
       complex: 200,
       deprecated: 200,
+      old: 200,
       server: 200,
     });
     expect(await getAggregatedTypesCount(client, defaultKibanaTaskIndex)).toEqual({
@@ -103,6 +103,7 @@ describe('when splitting .kibana into multiple indices and one clone fails', () 
     // ensure we have a valid 'after' state
     expect(await getAggregatedTypesCount(client, defaultKibanaIndex)).toEqual({
       complex: 99,
+      old: 200,
     });
     expect(await getAggregatedTypesCount(client, defaultKibanaTaskIndex)).toEqual({
       task: 200,

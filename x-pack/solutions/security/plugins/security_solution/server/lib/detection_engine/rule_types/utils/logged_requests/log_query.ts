@@ -10,7 +10,7 @@ import type {
   SearchSourceConfig,
   Indices,
   Fields,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 
 interface SearchRequest {
   query?: QueryDslQueryContainer;

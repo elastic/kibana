@@ -21,7 +21,7 @@ describe('useOnExpandableFlyoutClose', () => {
 
     window.removeEventListener = jest.fn().mockImplementationOnce((event, callback) => {});
 
-    renderHook(() => useOnExpandableFlyoutClose({ callback: callbackFct }));
+    const { unmount } = renderHook(() => useOnExpandableFlyoutClose({ callback: callbackFct }));
 
     window.dispatchEvent(
       new CustomEvent(TIMELINE_ON_CLOSE_EVENT, {
@@ -30,6 +30,9 @@ describe('useOnExpandableFlyoutClose', () => {
     );
 
     expect(callbackFct).toHaveBeenCalledWith(Flyouts.timeline);
+
+    unmount();
+
     expect(window.removeEventListener).toBeCalled();
   });
 

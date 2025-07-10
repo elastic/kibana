@@ -169,6 +169,5 @@ export const stacktraces: StackTraceResponse = {
   },
   executables: { '5JfXt00O17Yra2Rwh8HT8Q': 'vmlinux', fwIcP8qXDOl7k0VhWU8z9Q: 'metricbeat' },
   stack_trace_events: { ['c2TovSbgCECd_RtKHxMtyQ']: 7 },
-  total_frames: 34,
   sampling_rate: 1,
 };

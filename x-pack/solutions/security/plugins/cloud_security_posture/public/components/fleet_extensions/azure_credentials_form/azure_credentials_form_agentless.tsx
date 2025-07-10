@@ -30,6 +30,7 @@ export const AzureCredentialsFormAgentless = ({
   newPolicy,
   updatePolicy,
   packageInfo,
+  hasInvalidRequiredVars,
 }: AzureCredentialsFormProps) => {
   const documentationLink = cspIntegrationDocsNavigation.cspm.azureGetStartedPath;
   const options = getAzureCredentialsFormOptions();
@@ -46,6 +47,7 @@ export const AzureCredentialsFormAgentless = ({
         onChange={(key, value) => {
           updatePolicy(getPosturePolicy(newPolicy, input.type, { [key]: { value } }));
         }}
+        hasInvalidRequiredVars={hasInvalidRequiredVars}
       />
       <EuiSpacer size="m" />
       <EuiText color="subdued" size="s">

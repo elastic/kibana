@@ -25,14 +25,13 @@ import {
   sendGetActionStatus,
   sendBulkGetAgentPolicies,
 } from '../../../../hooks';
-import { AgentStatusKueryHelper, ExperimentalFeaturesService } from '../../../../services';
+import { AgentStatusKueryHelper } from '../../../../services';
 import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../../../constants';
 
 import { getKuery } from '../utils/get_kuery';
 
 const REFRESH_INTERVAL_MS = 30000;
 const MAX_AGENT_ACTIONS = 100;
-
 /** Allow to fetch full agent policy using a cache */
 function useFullAgentPolicyFetcher() {
   const authz = useAuthz();
@@ -97,12 +96,12 @@ export const getSortFieldForAPI = (field: string): string => {
 
 export function useFetchAgentsData() {
   const fullAgentPolicyFecher = useFullAgentPolicyFetcher();
-  const { displayAgentMetrics } = ExperimentalFeaturesService.get();
 
   const { notifications } = useStartServices();
 
   const history = useHistory();
   const { urlParams, toUrlParams } = useUrlParams();
+  const showAgentless = urlParams.showAgentless === 'true';
   const defaultKuery: string = (urlParams.kuery as string) || '';
   const urlHasInactive = (urlParams.showInactive as string) === 'true';
 
@@ -123,6 +122,7 @@ export function useFetchAgentsData() {
   const [selectedStatus, setSelectedStatus] = useState<string[]>([
     'healthy',
     'unhealthy',
+    'orphaned',
     'updating',
     'offline',
     ...(urlHasInactive ? ['inactive'] : []),
@@ -214,10 +214,11 @@ export function useFetchAgentsData() {
               kuery: kuery && kuery !== '' ? kuery : undefined,
               sortField: getSortFieldForAPI(sortField),
               sortOrder,
+              showAgentless,
               showInactive,
               showUpgradeable,
               getStatusSummary: true,
-              withMetrics: displayAgentMetrics,
+              withMetrics: true,
             }),
             sendGetAgentStatus({
               kuery: AgentStatusKueryHelper.buildKueryForInactiveAgents(),
@@ -235,7 +236,6 @@ export function useFetchAgentsData() {
               perPage: MAX_AGENT_ACTIONS,
             }),
           ]);
-
           // Return if a newer request has been triggered
           if (currentRequestRef.current !== currentRequest) {
             return;
@@ -263,6 +263,7 @@ export function useFetchAgentsData() {
           }
 
           const statusSummary = agentsResponse.data.statusSummary;
+
           if (!statusSummary) {
             throw new Error('Invalid GET /agents response - no status summary');
           }
@@ -287,7 +288,7 @@ export function useFetchAgentsData() {
 
           setAgentsStatus(agentStatusesToSummary(statusSummary));
 
-          const newAllTags = agentTagsResponse.data.items;
+          const newAllTags = [...agentTagsResponse.data.items];
           // We only want to update the list of available tags if
           // - We haven't set any tags yet
           // - We've received the "refreshTags" flag which will force a refresh of the tags list when an agent is unenrolled
@@ -359,9 +360,9 @@ export function useFetchAgentsData() {
       kuery,
       sortField,
       sortOrder,
+      showAgentless,
       showInactive,
       showUpgradeable,
-      displayAgentMetrics,
       fullAgentPolicyFecher,
       allTags,
       latestAgentActionErrors,

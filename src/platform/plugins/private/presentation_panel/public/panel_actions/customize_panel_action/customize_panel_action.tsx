@@ -13,35 +13,34 @@ import {
   apiCanAccessViewMode,
   apiPublishesDataViews,
   apiPublishesUnifiedSearch,
-  apiPublishesPanelTitle,
+  apiPublishesTitle,
   CanAccessViewMode,
   EmbeddableApiContext,
   getInheritedViewMode,
   HasParentApi,
   PublishesDataViews,
   PublishesWritableUnifiedSearch,
-  PublishesWritablePanelDescription,
-  PublishesWritablePanelTitle,
+  PublishesWritableDescription,
+  PublishesWritableTitle,
   PublishesUnifiedSearch,
 } from '@kbn/presentation-publishing';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { openCustomizePanelFlyout } from './open_customize_panel';
-
-export const ACTION_CUSTOMIZE_PANEL = 'ACTION_CUSTOMIZE_PANEL';
+import { ACTION_CUSTOMIZE_PANEL } from './constants';
 
 export type CustomizePanelActionApi = CanAccessViewMode &
   Partial<
     PublishesDataViews &
       PublishesWritableUnifiedSearch &
-      PublishesWritablePanelDescription &
-      PublishesWritablePanelTitle &
+      PublishesWritableDescription &
+      PublishesWritableTitle &
       HasParentApi<Partial<PublishesUnifiedSearch & TracksOverlays>>
   >;
 
 export const isApiCompatibleWithCustomizePanelAction = (
   api: unknown | null
 ): api is CustomizePanelActionApi =>
-  apiCanAccessViewMode(api) && (apiPublishesDataViews(api) || apiPublishesPanelTitle(api));
+  apiCanAccessViewMode(api) && (apiPublishesDataViews(api) || apiPublishesTitle(api));
 
 export class CustomizePanelAction implements Action<EmbeddableApiContext> {
   public type = ACTION_CUSTOMIZE_PANEL;

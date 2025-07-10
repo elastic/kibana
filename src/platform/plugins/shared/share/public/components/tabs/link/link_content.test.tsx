@@ -44,7 +44,7 @@ describe('LinkContent', () => {
 
   let urlService: BrowserUrlService;
 
-  // @ts-expect-error there is a type because we override the shortUrls implementation
+  // @ts-expect-error there is a type error because we override the shortUrls implementation
   // eslint-disable-next-line prefer-const
   ({ service: urlService } = urlServiceTestSetup({
     shortUrls: ({ locators }) =>
@@ -53,6 +53,8 @@ describe('LinkContent', () => {
         locators,
       }),
   }));
+
+  const shortUrlService = urlService.shortUrls.get(null)!;
 
   beforeAll(() => {
     Object.defineProperty(document, 'execCommand', {
@@ -71,11 +73,13 @@ describe('LinkContent', () => {
     renderComponent({
       objectType,
       objectId,
+      objectConfig: {
+        delegatedShareUrlHandler,
+      },
       isDirty,
       shareableUrl,
-      urlService,
+      shortUrlService,
       allowShortUrl: true,
-      delegatedShareUrlHandler,
     });
 
     await user.click(screen.getByTestId('copyShareUrlButton'));
@@ -92,9 +96,10 @@ describe('LinkContent', () => {
     renderComponent({
       objectType,
       objectId,
+      objectConfig: {},
       isDirty,
       shareableUrl,
-      urlService,
+      shortUrlService,
       allowShortUrl: false,
     });
 
@@ -102,7 +107,7 @@ describe('LinkContent', () => {
 
     await user.click(copyButton);
 
-    waitFor(() => {
+    await waitFor(() => {
       expect(copyButton.getAttribute('data-share-url')).toBe(shareableUrl);
     });
   });
@@ -131,9 +136,10 @@ describe('LinkContent', () => {
     renderComponent({
       objectType,
       objectId,
+      objectConfig: {},
       isDirty,
       shareableUrl,
-      urlService,
+      shortUrlService,
       allowShortUrl: true,
       // @ts-ignore this locator is passed mainly to test the code path that invokes createWithLocator
       shareableUrlLocatorParams,
@@ -170,9 +176,10 @@ describe('LinkContent', () => {
     renderComponent({
       objectType,
       objectId,
+      objectConfig: {},
       isDirty,
       shareableUrl,
-      urlService,
+      shortUrlService,
       allowShortUrl: true,
     });
 

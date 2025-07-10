@@ -121,13 +121,32 @@ describe('resetRetryState', () => {
       hello: 'dolly',
       foo: 42,
       retryCount: 5,
+      skipRetryReset: false,
       retryDelay: 1000,
     });
 
     expect(resetRetryState(state)).toEqual({
       ...state,
       retryCount: 0,
+      skipRetryReset: false,
       retryDelay: 0,
+    });
+  });
+
+  it('doesnt reset retry attributes if skipRetryReset is true and resets skipRetryReset', () => {
+    const state = createState({
+      hello: 'dolly',
+      foo: 42,
+      retryCount: 5,
+      skipRetryReset: true,
+      retryDelay: 1000,
+    });
+
+    expect(resetRetryState(state)).toEqual({
+      ...state,
+      retryCount: 5,
+      skipRetryReset: false,
+      retryDelay: 1000,
     });
   });
 
@@ -140,6 +159,7 @@ describe('resetRetryState', () => {
     expect(resetRetryState(state)).toEqual({
       ...state,
       retryCount: 0,
+      skipRetryReset: false,
       retryDelay: 0,
     });
   });

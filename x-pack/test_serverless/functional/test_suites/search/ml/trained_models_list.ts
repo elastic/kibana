@@ -4,12 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { SUPPORTED_TRAINED_MODELS } from '@kbn/test-suites-xpack/functional/services/ml/api';
+import { SUPPORTED_TRAINED_MODELS } from '@kbn/test-suites-xpack-platform/functional/services/ml/api';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-export default function ({ getService, getPageObjects }: FtrProviderContext) {
+export default function ({ getService, getPageObjects, getPageObject }: FtrProviderContext) {
   const ml = getService('ml');
   const PageObjects = getPageObjects(['svlCommonPage']);
+  const svlCommonNavigation = getPageObject('svlCommonNavigation');
 
   describe('Trained models list', function () {
     const tinyElser = SUPPORTED_TRAINED_MODELS.TINY_ELSER;
@@ -28,14 +29,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('page navigation', () => {
       it('renders trained models list', async () => {
-        await ml.navigation.navigateToMl();
-        await ml.testExecution.logTestStep('should load the trained models page');
-
-        await ml.testExecution.logTestStep(
-          'should display the stats bar and the analytics table with 1 installed trained model and built in elser models in the table'
+        await svlCommonNavigation.sidenav.openSection(
+          'search_project_nav_footer.project_settings_project_nav'
         );
-        await ml.trainedModels.assertStats(2);
-        await ml.trainedModelsTable.assertTableIsPopulated();
+        await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'management:trained_models' });
+        await svlCommonNavigation.sidenav.expectLinkActive({
+          deepLinkId: 'management:trained_models',
+        });
       });
     });
 
@@ -60,15 +60,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'Your model will scale up to a maximum of 4,096 VCUs per hour based on your search or ingest load. It will automatically scale down when demand decreases, and you only pay for the resources you use.'
         );
 
-        // Adaptive resources switch should be checked by default
-        await ml.trainedModelsTable.assertAdaptiveResourcesSwitchChecked(true);
-
-        // Static allocations should be allowed for search projects
-        await ml.trainedModelsTable.toggleAdaptiveResourcesSwitch(false);
-
-        await ml.trainedModelsTable.assertVCPUHelperText(
-          'Your model will consume 4,096 VCUs, even when not in use.'
-        );
+        // Adaptive resources switch should be hidden
+        // always use adaptive resources for serverless projects
+        await ml.trainedModelsTable.assertAdaptiveResourcesSwitchExists(false);
       });
     });
   });

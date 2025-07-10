@@ -20,8 +20,7 @@ import { CA_CERT_PATH, kibanaDevServiceAccount } from '@kbn/dev-utils';
 import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
 import { MOCK_IDP_REALM_NAME } from '@kbn/mock-idp-utils';
 import path from 'path';
-import { defineDockerServersConfig } from '@kbn/test';
-import { dockerImage } from '@kbn/test-suites-xpack/fleet_api_integration/config.base';
+import { fleetPackageRegistryDockerImage, defineDockerServersConfig } from '@kbn/test';
 import { services } from './services';
 
 export default async () => {
@@ -66,12 +65,12 @@ export default async () => {
     dockerServers: defineDockerServersConfig({
       registry: {
         enabled: !!dockerRegistryPort,
-        image: dockerImage,
+        image: fleetPackageRegistryDockerImage,
         portInContainer: 8080,
         port: dockerRegistryPort,
         args: dockerArgs,
         waitForLogLine: 'package manifests loaded',
-        waitForLogLineTimeoutMs: 60 * 2 * 1000, // 2 minutes
+        waitForLogLineTimeoutMs: 60 * 4 * 1000, // 4 minutes
       },
     }),
     browser: {
@@ -112,6 +111,7 @@ export default async () => {
       serverArgs: [
         `--server.restrictInternalApis=true`,
         `--server.port=${servers.kibana.port}`,
+        `--server.prototypeHardening=true`,
         '--status.allowAnonymous=true',
         `--migrations.zdt.runOnRoles=${JSON.stringify(['ui'])}`,
         // We shouldn't embed credentials into the URL since Kibana requests to Elasticsearch should
@@ -194,7 +194,7 @@ export default async () => {
       ...services,
     },
 
-    // overriding default timeouts from packages/kbn-test/src/functional_test_runner/lib/config/schema.ts
+    // overriding default timeouts from src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/config/schema.ts
     // so we can easily adjust them for serverless where needed
     timeouts: {
       find: 10 * 1000,

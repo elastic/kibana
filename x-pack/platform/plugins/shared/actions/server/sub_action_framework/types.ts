@@ -10,18 +10,19 @@ import type { Logger } from '@kbn/logging';
 import type { LicenseType } from '@kbn/licensing-plugin/common/types';
 
 import type { Method, AxiosRequestConfig } from 'axios';
-import { KibanaRequest } from '@kbn/core-http-server';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ActionsConfigurationUtilities } from '../actions_config';
 import type {
   ActionTypeParams,
   RenderParameterTemplates,
   Services,
+  SSLSettings,
   ValidatorType as ValidationSchema,
 } from '../types';
-import { SubFeature } from '../../common';
+import type { SubFeature } from '../../common';
 import type { SubActionConnector } from './sub_action_connector';
 import type { HookServices } from '../types';
-import { ActionExecutionSourceType } from '../lib';
+import type { ActionExecutionSourceType } from '../lib';
 
 export interface ServiceParams<Config, Secrets> {
   /**
@@ -41,6 +42,7 @@ export type SubActionRequestParams<R> = {
   url: string;
   responseSchema: Type<R>;
   method?: Method;
+  sslOverrides?: SSLSettings;
 } & AxiosRequestConfig;
 
 export type IService<Config, Secrets> = new (

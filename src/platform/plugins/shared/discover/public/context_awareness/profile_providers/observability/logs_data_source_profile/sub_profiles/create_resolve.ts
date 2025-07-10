@@ -8,17 +8,20 @@
  */
 
 import { createRegExpPatternFrom, testPatternAgainstAllowedList } from '@kbn/data-view-utils';
-import { DataSourceCategory, DataSourceProfileProvider } from '../../../../profiles';
+import { BehaviorSubject } from 'rxjs';
+import { DataSourceCategory, SolutionType } from '../../../../profiles';
 import { extractIndexPatternFrom } from '../../../extract_index_pattern_from';
-import { OBSERVABILITY_ROOT_PROFILE_ID } from '../../consts';
+import type { LogOverviewContext, LogsDataSourceProfileProvider } from '../profile';
 
-export const createResolve = (baseIndexPattern: string): DataSourceProfileProvider['resolve'] => {
+export const createResolve = (
+  baseIndexPattern: string
+): LogsDataSourceProfileProvider['resolve'] => {
   const testIndexPattern = testPatternAgainstAllowedList([
-    createRegExpPatternFrom(baseIndexPattern),
+    createRegExpPatternFrom(baseIndexPattern, 'data'),
   ]);
 
   return (params) => {
-    if (params.rootContext.profileId !== OBSERVABILITY_ROOT_PROFILE_ID) {
+    if (params.rootContext.solutionType !== SolutionType.Observability) {
       return { isMatch: false };
     }
 
@@ -30,7 +33,10 @@ export const createResolve = (baseIndexPattern: string): DataSourceProfileProvid
 
     return {
       isMatch: true,
-      context: { category: DataSourceCategory.Logs },
+      context: {
+        category: DataSourceCategory.Logs,
+        logOverviewContext$: new BehaviorSubject<LogOverviewContext | undefined>(undefined),
+      },
     };
   };
 };

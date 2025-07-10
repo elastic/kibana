@@ -26,6 +26,7 @@ const {
   getPkgDirMap,
   getPkgsById,
   updatePackageMap,
+  removePackagesFromPackageMap,
   readHashOfPackageMap,
   readPackageMap,
 } = require('./modern/get_packages');
@@ -45,6 +46,7 @@ module.exports = {
   getPkgDirMap,
   getPkgsById,
   updatePackageMap,
+  removePackagesFromPackageMap,
   findPackageForPath,
   readPackageManifest,
   Jsonc,

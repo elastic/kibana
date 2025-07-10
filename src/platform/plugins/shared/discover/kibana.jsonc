@@ -30,9 +30,7 @@
       "expressions",
       "unifiedDocViewer",
       "unifiedSearch",
-      "unifiedHistogram",
-      "contentManagement",
-      "discoverShared"
+      "contentManagement"
     ],
     "optionalPlugins": [
       "dataVisualizer",
@@ -49,6 +47,8 @@
       "aiops",
       "fieldsMetadata",
       "logsDataAccess",
+      "embeddableEnhanced",
+      "apmSourcesAccess"
     ],
     "requiredBundles": [
       "kibanaUtils",

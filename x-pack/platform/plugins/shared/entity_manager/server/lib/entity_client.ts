@@ -22,20 +22,15 @@ import { stopTransforms } from './entities/stop_transforms';
 import { deleteIndices } from './entities/delete_index';
 import { EntityDefinitionWithState } from './entities/types';
 import { EntityDefinitionUpdateConflict } from './entities/errors/entity_definition_update_conflict';
-import { EntityClient as EntityClient_v2 } from './v2/entity_client';
 
 export class EntityClient {
-  public v2: EntityClient_v2;
-
   constructor(
     private options: {
       clusterClient: IScopedClusterClient;
       soClient: SavedObjectsClientContract;
       logger: Logger;
     }
-  ) {
-    this.v2 = new EntityClient_v2(options);
-  }
+  ) {}
 
   async createEntityDefinition({
     definition,
@@ -44,7 +39,7 @@ export class EntityClient {
     definition: EntityDefinition;
     installOnly?: boolean;
   }) {
-    this.options.logger.info(
+    this.options.logger.debug(
       `Creating definition [${definition.id}] v${definition.version} (installOnly=${installOnly})`
     );
     const installedDefinition = await installEntityDefinition({
@@ -95,7 +90,7 @@ export class EntityClient {
       definition as EntityDefinitionWithState
     ).state.components.transforms.some((transform) => transform.running);
 
-    this.options.logger.info(
+    this.options.logger.debug(
       `Updating definition [${definition.id}] from v${definition.version} to v${definitionUpdate.version}`
     );
     const updatedDefinition = await reinstallEntityDefinition({
@@ -127,7 +122,7 @@ export class EntityClient {
       throw new EntityDefinitionNotFound(`Unable to find entity definition [${id}]`);
     }
 
-    this.options.logger.info(
+    this.options.logger.debug(
       `Uninstalling definition [${definition.id}] v${definition.version} (deleteData=${deleteData})`
     );
     await uninstallEntityDefinition({
@@ -176,7 +171,7 @@ export class EntityClient {
   }
 
   async startEntityDefinition(definition: EntityDefinition) {
-    this.options.logger.info(`Starting transforms for definition [${definition.id}]`);
+    this.options.logger.debug(`Starting transforms for definition [${definition.id}]`);
     return startTransforms(
       this.options.clusterClient.asCurrentUser,
       definition,
@@ -185,7 +180,7 @@ export class EntityClient {
   }
 
   async stopEntityDefinition(definition: EntityDefinition) {
-    this.options.logger.info(`Stopping transforms for definition [${definition.id}]`);
+    this.options.logger.debug(`Stopping transforms for definition [${definition.id}]`);
     return stopTransforms(
       this.options.clusterClient.asCurrentUser,
       definition,

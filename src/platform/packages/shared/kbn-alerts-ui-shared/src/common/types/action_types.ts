@@ -9,11 +9,11 @@
 
 import type { ComponentType, ReactNode } from 'react';
 import type { RuleActionParam, ActionVariable } from '@kbn/alerting-types';
-import { IconType, RecursivePartial } from '@elastic/eui';
-import { PublicMethodsOf } from '@kbn/utility-types';
-import { SubFeature } from '@kbn/actions-types';
-import { TypeRegistry } from '../type_registry';
-import { RuleFormParamsErrors } from './rule_types';
+import type { IconType, RecursivePartial } from '@elastic/eui';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { SubFeature } from '@kbn/actions-types';
+import type { TypeRegistry } from '../type_registry';
+import type { RuleFormParamsErrors } from './rule_types';
 
 export interface GenericValidationResult<T> {
   errors: Record<Extract<keyof T, string>, string[] | unknown>;
@@ -111,6 +111,7 @@ export interface ActionTypeModel<ActionConfig = any, ActionSecrets = any, Action
   id: string;
   iconClass: IconType;
   selectMessage: string;
+  selectMessagePreconfigured?: string;
   actionTypeTitle?: string;
   validateParams: (
     actionParams: ActionParams

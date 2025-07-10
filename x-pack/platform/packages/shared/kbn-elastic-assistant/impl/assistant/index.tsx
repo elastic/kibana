@@ -23,32 +23,39 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiFlyoutBody,
+  useEuiTheme,
 } from '@elastic/eui';
-import { euiThemeVars } from '@kbn/ui-theme';
-import { createPortal } from 'react-dom';
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 
-import { isEmpty } from 'lodash';
+import useEvent from 'react-use/lib/useEvent';
 import { AssistantBody } from './assistant_body';
 import { useCurrentConversation } from './use_current_conversation';
 import { useDataStreamApis } from './use_data_stream_apis';
 import { useChatSend } from './chat_send/use_chat_send';
 import { ChatSend } from './chat_send';
-import { WELCOME_CONVERSATION_TITLE } from './use_conversation/translations';
 import { getDefaultConnector } from './helpers';
 
 import { useAssistantContext } from '../assistant_context';
 import { ContextPills } from './context_pills';
 import { getNewSelectedPromptContext } from '../data_anonymization/get_new_selected_prompt_context';
 import type { PromptContext, SelectedPromptContext } from './prompt_context/types';
-import { CodeBlockDetails } from './use_conversation/helpers';
 import { QuickPrompts } from './quick_prompts/quick_prompts';
 import { useLoadConnectors } from '../connectorland/use_load_connectors';
-import { ConnectorMissingCallout } from '../connectorland/connector_missing_callout';
 import { ConversationSidePanel } from './conversations/conversation_sidepanel';
 import { SelectedPromptContexts } from './prompt_editor/selected_prompt_contexts';
 import { AssistantHeader } from './assistant_header';
+import { AnonymizedValuesAndCitationsTour } from '../tour/anonymized_values_and_citations_tour';
+import {
+  conversationContainsAnonymizedValues,
+  conversationContainsContentReferences,
+} from './conversations/utils';
+import {
+  LastConversation,
+  useAssistantLastConversation,
+  useAssistantSpaceId,
+} from './use_space_aware_context';
+import { AssistantConversationBanner } from './assistant_conversation_banner';
 
 export const CONVERSATION_SIDE_PANEL_WIDTH = 220;
 
@@ -60,7 +67,7 @@ const CommentContainer = styled('span')`
 
 export interface Props {
   chatHistoryVisible?: boolean;
-  conversationTitle?: string;
+  lastConversation?: LastConversation;
   onCloseFlyout?: () => void;
   promptContextId?: string;
   setChatHistoryVisible?: Dispatch<SetStateAction<boolean>>;
@@ -73,23 +80,26 @@ export interface Props {
  */
 const AssistantComponent: React.FC<Props> = ({
   chatHistoryVisible,
-  conversationTitle,
+  lastConversation,
   onCloseFlyout,
   promptContextId = '',
   setChatHistoryVisible,
   shouldRefocusPrompt = false,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const {
     assistantAvailability: { isAssistantEnabled },
     assistantTelemetry,
+    currentAppId,
     augmentMessageCodeBlocks,
-    baseConversations,
     getComments,
-    getLastConversationId,
     http,
     promptContexts,
     currentUserAvatar,
-    setLastConversationId,
+    contentReferencesVisible,
+    showAnonymizedValues,
+    setContentReferencesVisible,
+    setShowAnonymizedValues,
   } = useAssistantContext();
 
   const [selectedPromptContexts, setSelectedPromptContexts] = useState<
@@ -110,18 +120,27 @@ const AssistantComponent: React.FC<Props> = ({
     isFetchedAnonymizationFields,
     isFetchedCurrentUserConversations,
     isFetchedPrompts,
+    isFetchingCurrentUserConversations,
     isLoadingAnonymizationFields,
     isLoadingCurrentUserConversations,
+    setPaginationObserver,
     refetchPrompts,
     refetchCurrentUserConversations,
     setIsStreaming,
-  } = useDataStreamApis({ http, baseConversations, isAssistantEnabled });
+  } = useDataStreamApis({ http, isAssistantEnabled });
 
   // Connector details
   const { data: connectors, isFetchedAfterMount: isFetchedConnectors } = useLoadConnectors({
     http,
   });
   const defaultConnector = useMemo(() => getDefaultConnector(connectors), [connectors]);
+  const spaceId = useAssistantSpaceId();
+  const { getLastConversation, setLastConversation } = useAssistantLastConversation({ spaceId });
+  const lastConversationFromLocalStorage = useMemo(
+    () => getLastConversation(),
+    [getLastConversation]
+  );
+
   const {
     currentConversation,
     currentSystemPrompt,
@@ -133,15 +152,16 @@ const AssistantComponent: React.FC<Props> = ({
     setCurrentSystemPromptId,
   } = useCurrentConversation({
     allSystemPrompts,
+    currentAppId,
+    connectors,
     conversations,
     defaultConnector,
+    spaceId,
     refetchCurrentUserConversations,
-    conversationId: getLastConversationId(conversationTitle),
+    lastConversation: lastConversation ?? lastConversationFromLocalStorage,
     mayUpdateConversations:
-      isFetchedConnectors &&
-      isFetchedCurrentUserConversations &&
-      isFetchedPrompts &&
-      Object.keys(conversations).length > 0,
+      isFetchedConnectors && isFetchedCurrentUserConversations && isFetchedPrompts,
+    setLastConversation,
   });
 
   const isInitialLoad = useMemo(() => {
@@ -150,7 +170,7 @@ const AssistantComponent: React.FC<Props> = ({
     }
     return (
       (!isFetchedAnonymizationFields && !isFetchedCurrentUserConversations && !isFetchedPrompts) ||
-      !(currentConversation && currentConversation?.id !== '')
+      !currentConversation
     );
   }, [
     currentConversation,
@@ -181,40 +201,47 @@ const AssistantComponent: React.FC<Props> = ({
   // Settings modal state (so it isn't shared between assistant instances like Timeline)
   const [isSettingsModalVisible, setIsSettingsModalVisible] = useState(false);
 
-  // Remember last selection for reuse after keyboard shortcut is pressed.
-  // Clear it if there is no connectors
-  useEffect(() => {
-    if (isFetchedConnectors && !connectors?.length) {
-      return setLastConversationId(WELCOME_CONVERSATION_TITLE);
-    }
-
-    if (!currentConversation?.excludeFromLastConversationStorage) {
-      setLastConversationId(
-        !isEmpty(currentConversation?.id) ? currentConversation?.id : currentConversation?.title
-      );
-    }
-  }, [
-    isFetchedConnectors,
-    connectors?.length,
-    conversations,
-    currentConversation,
-    isLoadingCurrentUserConversations,
-    setLastConversationId,
-  ]);
-
   const [autoPopulatedOnce, setAutoPopulatedOnce] = useState<boolean>(false);
-  const [showAnonymizedValues, setShowAnonymizedValues] = useState<boolean>(false);
 
-  const [messageCodeBlocks, setMessageCodeBlocks] = useState<CodeBlockDetails[][]>();
   const [_, setCodeBlockControlsVisible] = useState(false);
   useLayoutEffect(() => {
+    let unmountFunc = () => {};
     if (currentConversation) {
       // need in order for code block controls to be added to the DOM
       setTimeout(() => {
-        setMessageCodeBlocks(augmentMessageCodeBlocks(currentConversation, showAnonymizedValues));
+        unmountFunc = augmentMessageCodeBlocks.mount({ currentConversation, showAnonymizedValues });
       }, 0);
     }
+
+    return () => {
+      unmountFunc();
+    };
   }, [augmentMessageCodeBlocks, currentConversation, showAnonymizedValues]);
+
+  // Keyboard shortcuts to toggle the visibility of content references and anonymized values
+  const onKeyDown = useCallback(
+    (event: KeyboardEvent) => {
+      if (event.altKey && event.code === 'KeyC') {
+        if (!conversationContainsContentReferences(currentConversation)) return;
+        event.preventDefault();
+        setContentReferencesVisible(!contentReferencesVisible);
+      }
+      if (event.altKey && event.code === 'KeyA') {
+        if (!conversationContainsAnonymizedValues(currentConversation)) return;
+        event.preventDefault();
+        setShowAnonymizedValues(!showAnonymizedValues);
+      }
+    },
+    [
+      setContentReferencesVisible,
+      contentReferencesVisible,
+      setShowAnonymizedValues,
+      showAnonymizedValues,
+      currentConversation,
+    ]
+  );
+
+  useEvent('keydown', onKeyDown);
 
   // Show missing connector callout if no connectors are configured
 
@@ -265,10 +292,6 @@ const AssistantComponent: React.FC<Props> = ({
   codeBlockContainers.forEach((e) => (e.style.minHeight = '85px'));
   ////
 
-  const onToggleShowAnonymizedValues = useCallback(() => {
-    setShowAnonymizedValues((prevValue) => !prevValue);
-  }, [setShowAnonymizedValues]);
-
   const {
     abortStream,
     handleOnChatCleared,
@@ -287,12 +310,24 @@ const AssistantComponent: React.FC<Props> = ({
   });
 
   useEffect(() => {
-    // Adding `conversationTitle !== selectedConversationTitle` to prevent auto-run still executing after changing selected conversation
-    if (currentConversation?.messages.length || conversationTitle !== currentConversation?.title) {
-      return;
+    if (
+      autoPopulatedOnce &&
+      currentConversation &&
+      lastConversation?.title !== currentConversation?.title
+    ) {
+      // reset PromptContexts state when conversation changes
+      setAutoPopulatedOnce(false);
+      setSelectedPromptContexts({});
+      setUserPrompt(null);
     }
+  }, [autoPopulatedOnce, currentConversation, lastConversation?.title, setUserPrompt]);
 
-    if (autoPopulatedOnce) {
+  useEffect(() => {
+    if (
+      (currentConversation && lastConversation?.title !== currentConversation?.title) ||
+      currentConversation?.messages.length ||
+      autoPopulatedOnce
+    ) {
       return;
     }
 
@@ -312,7 +347,6 @@ const AssistantComponent: React.FC<Props> = ({
             anonymizationFields,
             promptContext,
           });
-
           setSelectedPromptContexts((prev) => ({
             ...prev,
             [promptContext.id]: newSelectedPromptContext,
@@ -327,39 +361,18 @@ const AssistantComponent: React.FC<Props> = ({
       }
     }
   }, [
-    currentConversation?.messages,
-    promptContexts,
-    promptContextId,
-    conversationTitle,
-    currentConversation?.title,
-    selectedPromptContexts,
-    autoPopulatedOnce,
-    isLoadingAnonymizationFields,
-    isErrorAnonymizationFields,
     anonymizationFields,
+    autoPopulatedOnce,
+    currentConversation,
+    isErrorAnonymizationFields,
     isFetchedAnonymizationFields,
+    isLoadingAnonymizationFields,
+    lastConversation?.title,
+    promptContextId,
+    promptContexts,
+    selectedPromptContexts,
     setUserPrompt,
   ]);
-
-  const createCodeBlockPortals = useCallback(
-    () =>
-      messageCodeBlocks?.map((codeBlocks: CodeBlockDetails[], i: number) => {
-        return (
-          <span key={`${i}`}>
-            {codeBlocks.map((codeBlock: CodeBlockDetails, j: number) => {
-              const getElement = codeBlock.getControlContainer;
-              const element = getElement?.();
-              return (
-                <span key={`${i}+${j}`}>
-                  {element ? createPortal(codeBlock.button, element) : <></>}
-                </span>
-              );
-            })}
-          </span>
-        );
-      }),
-    [messageCodeBlocks]
-  );
 
   const comments = useMemo(
     () => (
@@ -375,10 +388,11 @@ const AssistantComponent: React.FC<Props> = ({
             setIsStreaming,
             currentUserAvatar,
             systemPromptContent: currentSystemPrompt?.content,
+            contentReferencesVisible,
           })}
           // Avoid comments going off the flyout
           css={css`
-            padding-bottom: ${euiThemeVars.euiSizeL};
+            padding-bottom: ${euiTheme.size.l};
 
             > li > div:nth-child(2) {
               overflow: hidden;
@@ -402,6 +416,8 @@ const AssistantComponent: React.FC<Props> = ({
       setIsStreaming,
       currentUserAvatar,
       currentSystemPrompt?.content,
+      contentReferencesVisible,
+      euiTheme.size.l,
       selectedPromptContextsCount,
     ]
   );
@@ -410,7 +426,6 @@ const AssistantComponent: React.FC<Props> = ({
     (promptTitle: string) => {
       if (currentConversation?.title) {
         assistantTelemetry?.reportAssistantQuickPrompt({
-          conversationId: currentConversation?.title,
           promptTitle,
         });
       }
@@ -419,198 +434,202 @@ const AssistantComponent: React.FC<Props> = ({
   );
 
   return (
-    <EuiFlexGroup direction={'row'} wrap={false} gutterSize="none">
-      {chatHistoryVisible && (
-        <EuiFlexItem
-          grow={false}
-          css={css`
-            inline-size: ${CONVERSATION_SIDE_PANEL_WIDTH}px;
-            border-right: 1px solid ${euiThemeVars.euiColorLightShade};
-          `}
-        >
-          <ConversationSidePanel
-            currentConversation={currentConversation}
-            onConversationSelected={handleOnConversationSelected}
-            conversations={conversations}
-            onConversationDeleted={handleOnConversationDeleted}
-            onConversationCreate={handleCreateConversation}
-            refetchCurrentUserConversations={refetchCurrentUserConversations}
-          />
-        </EuiFlexItem>
-      )}
-      <EuiFlexItem
-        css={css`
-          overflow: hidden;
-        `}
-      >
-        <CommentContainer data-test-subj="assistantChat">
-          <EuiFlexGroup
+    <>
+      <AnonymizedValuesAndCitationsTour conversation={currentConversation} />
+      <EuiFlexGroup direction={'row'} wrap={false} gutterSize="none">
+        {chatHistoryVisible && (
+          <EuiFlexItem
+            grow={false}
             css={css`
-              overflow: hidden;
+              inline-size: ${CONVERSATION_SIDE_PANEL_WIDTH}px;
+              border-right: ${euiTheme.border.thin};
             `}
           >
-            <EuiFlexItem
+            <ConversationSidePanel
+              currentConversation={currentConversation}
+              onConversationSelected={handleOnConversationSelected}
+              conversations={conversations}
+              onConversationDeleted={handleOnConversationDeleted}
+              onConversationCreate={handleCreateConversation}
+              isFetchingCurrentUserConversations={isFetchingCurrentUserConversations}
+              refetchCurrentUserConversations={refetchCurrentUserConversations}
+              setPaginationObserver={setPaginationObserver}
+            />
+          </EuiFlexItem>
+        )}
+        <EuiFlexItem
+          css={css`
+            overflow: hidden;
+          `}
+        >
+          <CommentContainer data-test-subj="assistantChat">
+            <EuiFlexGroup
               css={css`
-                max-width: 100%;
+                overflow: hidden;
               `}
             >
-              <EuiFlyoutHeader hasBorder>
-                <AssistantHeader
-                  isLoading={isInitialLoad}
-                  selectedConversation={currentConversation}
-                  defaultConnector={defaultConnector}
-                  isDisabled={isDisabled || isLoadingChatSend}
-                  isSettingsModalVisible={isSettingsModalVisible}
-                  onToggleShowAnonymizedValues={onToggleShowAnonymizedValues}
-                  setIsSettingsModalVisible={setIsSettingsModalVisible}
-                  showAnonymizedValues={showAnonymizedValues}
-                  onCloseFlyout={onCloseFlyout}
-                  onChatCleared={handleOnChatCleared}
-                  chatHistoryVisible={chatHistoryVisible}
-                  setChatHistoryVisible={setChatHistoryVisible}
-                  onConversationSelected={handleOnConversationSelected}
-                  conversations={conversations}
-                  conversationsLoaded={isFetchedCurrentUserConversations}
-                  refetchCurrentUserConversations={refetchCurrentUserConversations}
-                  onConversationCreate={handleCreateConversation}
-                  isAssistantEnabled={isAssistantEnabled}
-                  refetchPrompts={refetchPrompts}
-                />
-
-                {/* Create portals for each EuiCodeBlock to add the `Investigate in Timeline` action */}
-                {createCodeBlockPortals()}
-              </EuiFlyoutHeader>
-              <EuiFlyoutBody
+              <EuiFlexItem
                 css={css`
-                  min-height: 100px;
-                  flex: 1;
+                  max-width: 100%;
+                `}
+              >
+                <EuiFlyoutHeader hasBorder>
+                  <AssistantHeader
+                    chatHistoryVisible={chatHistoryVisible}
+                    conversations={conversations}
+                    conversationsLoaded={isFetchedCurrentUserConversations}
+                    defaultConnector={defaultConnector}
+                    isAssistantEnabled={isAssistantEnabled}
+                    isDisabled={isDisabled || isLoadingChatSend}
+                    isLoading={isInitialLoad}
+                    isSettingsModalVisible={isSettingsModalVisible}
+                    onChatCleared={handleOnChatCleared}
+                    onCloseFlyout={onCloseFlyout}
+                    onConversationCreate={handleCreateConversation}
+                    onConversationSelected={handleOnConversationSelected}
+                    refetchCurrentConversation={refetchCurrentConversation}
+                    refetchCurrentUserConversations={refetchCurrentUserConversations}
+                    refetchPrompts={refetchPrompts}
+                    selectedConversation={currentConversation}
+                    setChatHistoryVisible={setChatHistoryVisible}
+                    setIsSettingsModalVisible={setIsSettingsModalVisible}
+                    setPaginationObserver={setPaginationObserver}
+                  />
+                </EuiFlyoutHeader>
+                <EuiFlyoutBody
+                  css={css`
+                    min-height: 100px;
+                    flex: 1;
 
-                  > div {
+                    > div {
+                      display: flex;
+                      flex-direction: column;
+                      align-items: stretch;
+
+                      > .euiFlyoutBody__banner {
+                        overflow-x: unset;
+                      }
+
+                      > .euiFlyoutBody__overflowContent {
+                        display: flex;
+                        flex: 1;
+                        overflow: auto;
+                      }
+                    }
+                  `}
+                  banner={
+                    !isDisabled &&
+                    isFetchedConnectors && (
+                      <AssistantConversationBanner
+                        isSettingsModalVisible={isSettingsModalVisible}
+                        setIsSettingsModalVisible={setIsSettingsModalVisible}
+                        shouldShowMissingConnectorCallout={showMissingConnectorCallout}
+                        currentConversation={currentConversation}
+                        connectors={connectors}
+                      />
+                    )
+                  }
+                >
+                  <AssistantBody
+                    allSystemPrompts={allSystemPrompts}
+                    comments={comments}
+                    currentConversation={currentConversation}
+                    currentSystemPromptId={currentSystemPrompt?.id}
+                    handleOnConversationSelected={handleOnConversationSelected}
+                    http={http}
+                    isAssistantEnabled={isAssistantEnabled}
+                    isLoading={isInitialLoad}
+                    isSettingsModalVisible={isSettingsModalVisible}
+                    isWelcomeSetup={isWelcomeSetup}
+                    setUserPrompt={setUserPrompt}
+                    setCurrentSystemPromptId={setCurrentSystemPromptId}
+                    setIsSettingsModalVisible={setIsSettingsModalVisible}
+                  />
+                </EuiFlyoutBody>
+                <EuiFlyoutFooter
+                  css={css`
+                    background: none;
+                    border-top: ${euiTheme.border.thin};
+                    overflow: hidden;
+                    max-height: 60%;
                     display: flex;
                     flex-direction: column;
-                    align-items: stretch;
-
-                    > .euiFlyoutBody__banner {
-                      overflow-x: unset;
-                    }
-
-                    > .euiFlyoutBody__overflowContent {
-                      display: flex;
-                      flex: 1;
-                      overflow: auto;
-                    }
-                  }
-                `}
-                banner={
-                  !isDisabled &&
-                  showMissingConnectorCallout &&
-                  isFetchedConnectors && (
-                    <ConnectorMissingCallout
-                      isConnectorConfigured={(connectors?.length ?? 0) > 0}
-                      isSettingsModalVisible={isSettingsModalVisible}
-                      setIsSettingsModalVisible={setIsSettingsModalVisible}
-                    />
-                  )
-                }
-              >
-                <AssistantBody
-                  allSystemPrompts={allSystemPrompts}
-                  comments={comments}
-                  currentConversation={currentConversation}
-                  currentSystemPromptId={currentSystemPrompt?.id}
-                  handleOnConversationSelected={handleOnConversationSelected}
-                  http={http}
-                  isAssistantEnabled={isAssistantEnabled}
-                  isLoading={isInitialLoad}
-                  isSettingsModalVisible={isSettingsModalVisible}
-                  isWelcomeSetup={isWelcomeSetup}
-                  setCurrentSystemPromptId={setCurrentSystemPromptId}
-                  setIsSettingsModalVisible={setIsSettingsModalVisible}
-                />
-              </EuiFlyoutBody>
-              <EuiFlyoutFooter
-                css={css`
-                  background: none;
-                  border-top: 1px solid ${euiThemeVars.euiColorLightShade};
-                  overflow: hidden;
-                  max-height: 60%;
-                  display: flex;
-                  flex-direction: column;
-                `}
-              >
-                <EuiPanel
-                  paddingSize="m"
-                  hasShadow={false}
-                  css={css`
-                    overflow: auto;
                   `}
                 >
-                  {!isDisabled &&
-                    Object.keys(promptContexts).length !== selectedPromptContextsCount && (
-                      <EuiFlexGroup>
-                        <EuiFlexItem>
-                          <>
-                            <ContextPills
-                              anonymizationFields={anonymizationFields}
-                              promptContexts={promptContexts}
-                              selectedPromptContexts={selectedPromptContexts}
-                              setSelectedPromptContexts={setSelectedPromptContexts}
-                            />
-                            {Object.keys(promptContexts).length > 0 && <EuiSpacer size={'s'} />}
-                          </>
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-                    )}
+                  <EuiPanel
+                    paddingSize="m"
+                    hasShadow={false}
+                    css={css`
+                      overflow: auto;
+                    `}
+                  >
+                    {!isDisabled &&
+                      Object.keys(promptContexts).length !== selectedPromptContextsCount && (
+                        <EuiFlexGroup>
+                          <EuiFlexItem>
+                            <>
+                              <ContextPills
+                                anonymizationFields={anonymizationFields}
+                                promptContexts={promptContexts}
+                                selectedPromptContexts={selectedPromptContexts}
+                                setSelectedPromptContexts={setSelectedPromptContexts}
+                              />
+                              {Object.keys(promptContexts).length > 0 && <EuiSpacer size={'s'} />}
+                            </>
+                          </EuiFlexItem>
+                        </EuiFlexGroup>
+                      )}
 
-                  <EuiFlexGroup direction="column" gutterSize="s">
-                    {Object.keys(selectedPromptContexts).length ? (
+                    <EuiFlexGroup direction="column" gutterSize="s">
+                      {Object.keys(selectedPromptContexts).length ? (
+                        <EuiFlexItem grow={false}>
+                          <SelectedPromptContexts
+                            promptContexts={promptContexts}
+                            selectedPromptContexts={selectedPromptContexts}
+                            setSelectedPromptContexts={setSelectedPromptContexts}
+                            currentReplacements={currentConversation?.replacements}
+                          />
+                        </EuiFlexItem>
+                      ) : null}
+
                       <EuiFlexItem grow={false}>
-                        <SelectedPromptContexts
-                          promptContexts={promptContexts}
-                          selectedPromptContexts={selectedPromptContexts}
-                          setSelectedPromptContexts={setSelectedPromptContexts}
-                          currentReplacements={currentConversation?.replacements}
+                        <ChatSend
+                          handleChatSend={handleChatSend}
+                          setUserPrompt={setUserPrompt}
+                          handleRegenerateResponse={handleRegenerateResponse}
+                          isDisabled={isSendingDisabled}
+                          isLoading={isLoadingChatSend}
+                          shouldRefocusPrompt={shouldRefocusPrompt}
+                          userPrompt={userPrompt}
                         />
                       </EuiFlexItem>
-                    ) : null}
-
-                    <EuiFlexItem grow={false}>
-                      <ChatSend
-                        handleChatSend={handleChatSend}
-                        setUserPrompt={setUserPrompt}
-                        handleRegenerateResponse={handleRegenerateResponse}
-                        isDisabled={isSendingDisabled}
-                        isLoading={isLoadingChatSend}
-                        shouldRefocusPrompt={shouldRefocusPrompt}
-                        userPrompt={userPrompt}
-                      />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiPanel>
-
-                {!isDisabled && (
-                  <EuiPanel
-                    css={css`
-                      background: ${euiThemeVars.euiColorLightestShade};
-                    `}
-                    hasShadow={false}
-                    paddingSize="m"
-                    borderRadius="none"
-                  >
-                    <QuickPrompts
-                      setInput={setUserPrompt}
-                      setIsSettingsModalVisible={setIsSettingsModalVisible}
-                      trackPrompt={trackPrompt}
-                      allPrompts={allPrompts}
-                    />
+                    </EuiFlexGroup>
                   </EuiPanel>
-                )}
-              </EuiFlyoutFooter>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </CommentContainer>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+
+                  {!isDisabled && (
+                    <EuiPanel
+                      css={css`
+                        background: ${euiTheme.colors.backgroundBaseSubdued};
+                      `}
+                      hasShadow={false}
+                      paddingSize="m"
+                      borderRadius="none"
+                    >
+                      <QuickPrompts
+                        setInput={setUserPrompt}
+                        setIsSettingsModalVisible={setIsSettingsModalVisible}
+                        trackPrompt={trackPrompt}
+                        allPrompts={allPrompts}
+                      />
+                    </EuiPanel>
+                  )}
+                </EuiFlyoutFooter>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </CommentContainer>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </>
   );
 };
 

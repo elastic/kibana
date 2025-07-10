@@ -7,7 +7,7 @@
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import { EuiConfirmModal } from '@elastic/eui';
+import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import { ProcessorInternal, ProcessorSelector } from '../types';
 
 interface Props {
@@ -17,10 +17,14 @@ interface Props {
 }
 
 export const ProcessorRemoveModal = ({ processor, onResult, selector }: Props) => {
+  const modalTitleId = useGeneratedHtmlId();
+
   return (
     <EuiConfirmModal
+      aria-labelledby={modalTitleId}
       buttonColor="danger"
       data-test-subj="removeProcessorConfirmationModal"
+      titleProps={{ id: modalTitleId }}
       title={
         <FormattedMessage
           id="xpack.ingestPipelines.pipelineEditor.removeProcessorModal.titleText"

@@ -7,11 +7,12 @@
 
 import actionCreatorFactory from 'typescript-fsa';
 import type { TableId } from '@kbn/securitysolution-data-table';
+import type { GroupOption } from '@kbn/grouping';
 
 const actionCreator = actionCreatorFactory('x-pack/security_solution/groups');
 
 export const updateGroups = actionCreator<{
   activeGroups?: string[];
   tableId: TableId;
-  options?: Array<{ key: string; label: string }>;
+  options?: GroupOption[];
 }>('UPDATE_GROUPS');

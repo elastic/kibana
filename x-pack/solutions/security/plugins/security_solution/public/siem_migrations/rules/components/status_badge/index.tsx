@@ -14,10 +14,8 @@ import {
   convertTranslationResultIntoText,
   useResultVisColors,
 } from '../../utils/translation_results';
-import {
-  RuleMigrationStatusEnum,
-  type RuleMigration,
-} from '../../../../../common/siem_migrations/model/rule_migration.gen';
+import type { RuleMigrationRule } from '../../../../../common/siem_migrations/model/rule_migration.gen';
+import { RuleMigrationStatusEnum } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import * as i18n from './translations';
 
 const statusTextWrapperClassName = css`
@@ -26,7 +24,7 @@ const statusTextWrapperClassName = css`
 `;
 
 interface StatusBadgeProps {
-  migrationRule: RuleMigration;
+  migrationRule: RuleMigrationRule;
   'data-test-subj'?: string;
 }
 
@@ -41,7 +39,9 @@ export const StatusBadge: React.FC<StatusBadgeProps> = React.memo(
             <EuiFlexItem grow={false}>
               <EuiIcon type="check" color={colors[RuleTranslationResult.FULL]} />
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>{i18n.RULE_STATUS_INSTALLED}</EuiFlexItem>
+            <EuiFlexItem data-test-subj={dataTestSubj} grow={false}>
+              {i18n.RULE_STATUS_INSTALLED}
+            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiToolTip>
       );
@@ -49,13 +49,18 @@ export const StatusBadge: React.FC<StatusBadgeProps> = React.memo(
 
     // Failed
     if (migrationRule.status === RuleMigrationStatusEnum.failed) {
+      const tooltipMessage = migrationRule.comments?.length
+        ? migrationRule.comments[0].message
+        : i18n.RULE_STATUS_FAILED;
       return (
-        <EuiToolTip content={i18n.RULE_STATUS_FAILED}>
+        <EuiToolTip content={tooltipMessage}>
           <EuiFlexGroup gutterSize="xs" alignItems="center">
             <EuiFlexItem grow={false}>
               <EuiIcon type="warningFilled" color="danger" />
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>{i18n.RULE_STATUS_FAILED}</EuiFlexItem>
+            <EuiFlexItem data-test-subj={dataTestSubj} grow={false}>
+              {i18n.RULE_STATUS_FAILED}
+            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiToolTip>
       );

@@ -6,10 +6,14 @@
  */
 
 import { action } from '@storybook/addon-actions';
-import { storiesOf } from '@storybook/react';
 import React from 'react';
 import { FileUpload } from './file_upload';
 
-storiesOf('components/FileUpload', module).add('default', () => (
-  <FileUpload onUpload={action('onUpload')} />
-));
+export default {
+  title: 'components/FileUpload',
+};
+
+export const Default = {
+  render: () => <FileUpload onUpload={action('onUpload')} />,
+  name: 'default',
+};

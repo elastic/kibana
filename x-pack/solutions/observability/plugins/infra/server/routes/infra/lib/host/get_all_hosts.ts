@@ -49,58 +49,56 @@ export const getAllHosts = async ({
   const response = await infraMetricsClient.search({
     allow_no_indices: true,
     ignore_unavailable: true,
-    body: {
-      size: 0,
-      track_total_hits: false,
-      query: {
-        bool: {
-          filter: [...termsQuery(HOST_NAME_FIELD, ...hostNames), ...rangeQuery(from, to)],
-          should: [...documentsFilter],
-        },
+    size: 0,
+    track_total_hits: false,
+    query: {
+      bool: {
+        filter: [...termsQuery(HOST_NAME_FIELD, ...hostNames), ...rangeQuery(from, to)],
+        should: [...documentsFilter],
       },
-      aggs: {
-        // find hosts with metrics that are monitored by the system integration.
-        monitoredHosts: {
-          filter: getFilterByIntegration('system'),
-          aggs: {
-            names: {
-              terms: {
-                field: HOST_NAME_FIELD,
-                size: limit,
-                order: {
-                  _key: 'asc',
-                },
+    },
+    aggs: {
+      // find hosts with metrics that are monitored by the system integration.
+      monitoredHosts: {
+        filter: getFilterByIntegration('system'),
+        aggs: {
+          names: {
+            terms: {
+              field: HOST_NAME_FIELD,
+              size: limit,
+              order: {
+                _key: 'asc',
               },
             },
           },
         },
-        allHostMetrics: {
-          terms: {
-            field: HOST_NAME_FIELD,
-            size: limit,
-            order: {
-              _key: 'asc',
-            },
+      },
+      allHostMetrics: {
+        terms: {
+          field: HOST_NAME_FIELD,
+          size: limit,
+          order: {
+            _key: 'asc',
           },
-          aggs: {
-            ...metricAggregations,
-            [METADATA_AGGREGATION_NAME]: {
-              top_metrics: {
-                metrics: [
-                  {
-                    field: 'host.os.name',
-                  },
-                  {
-                    field: 'cloud.provider',
-                  },
-                  {
-                    field: 'host.ip',
-                  },
-                ],
-                size: 1,
-                sort: {
-                  '@timestamp': 'desc',
+        },
+        aggs: {
+          ...metricAggregations,
+          [METADATA_AGGREGATION_NAME]: {
+            top_metrics: {
+              metrics: [
+                {
+                  field: 'host.os.name',
                 },
+                {
+                  field: 'cloud.provider',
+                },
+                {
+                  field: 'host.ip',
+                },
+              ],
+              size: 1,
+              sort: {
+                '@timestamp': 'desc',
               },
             },
           },

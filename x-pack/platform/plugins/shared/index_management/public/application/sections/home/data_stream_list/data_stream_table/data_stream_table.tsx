@@ -219,7 +219,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
           {i18n.translate('xpack.idxMgmt.dataStreamList.table.dataRetentionColumnTitle', {
             defaultMessage: 'Data retention',
           })}{' '}
-          <EuiIcon size="s" color="subdued" type="questionInCircle" />
+          <EuiIcon size="s" color="subdued" type="question" />
         </span>
       </EuiToolTip>
     ),
@@ -247,12 +247,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
                   }
                 )}
               >
-                <EuiIcon
-                  size="s"
-                  color="subdued"
-                  type="iInCircle"
-                  data-test-subj="usingMaxRetention"
-                />
+                <EuiIcon size="s" color="subdued" type="info" data-test-subj="usingMaxRetention" />
               </EuiToolTip>
             </>
           )}
@@ -290,16 +285,20 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
     onSelectionChange: setSelection,
   };
 
-  const dataStreamActions: EuiContextMenuPanelItemDescriptor[] = [
-    {
+  const dataStreamActions: EuiContextMenuPanelItemDescriptor[] = [];
+
+  if (
+    selection.every((dataStream: DataStream) => dataStream.privileges.manage_data_stream_lifecycle)
+  ) {
+    dataStreamActions.push({
       name: i18n.translate('xpack.idxMgmt.dataStreamList.table.bulkEditDataRetentionButtonLabel', {
         defaultMessage: 'Edit data retention',
       }),
       icon: 'pencil',
       onClick: () => setDataStreamsToEditDataRetention(selection),
       'data-test-subj': 'bulkEditDataRetentionButton',
-    },
-  ];
+    });
+  }
 
   if (selection.every((dataStream: DataStream) => dataStream.privileges.delete_index)) {
     dataStreamActions.push({
@@ -319,7 +318,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
       incremental: true,
     },
     toolsLeft:
-      selection.length > 0 ? (
+      selection.length > 0 && dataStreamActions.length > 0 ? (
         <DataStreamActionsMenu
           dataStreamActions={dataStreamActions}
           selectedDataStreamsCount={selection.length}

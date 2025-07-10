@@ -10,7 +10,7 @@
 // this file was generated, and should not be edited by hand
 // ---------------------------------- WARNING ----------------------------------
 import * as rt from 'io-ts';
-import { Either } from 'fp-ts/lib/Either';
+import type { Either } from 'fp-ts/Either';
 import { AlertSchema } from './alert_schema';
 import { EcsSchema } from './ecs_schema';
 import { LegacyAlertSchema } from './legacy_alert_schema';
@@ -141,6 +141,9 @@ const SecurityAlertOptional = rt.partial({
   'kibana.alert.last_detected': schemaDate,
   'kibana.alert.maintenance_window_ids': schemaStringArray,
   'kibana.alert.new_terms': schemaStringArray,
+  'kibana.alert.original_data_stream.dataset': schemaString,
+  'kibana.alert.original_data_stream.namespace': schemaString,
+  'kibana.alert.original_data_stream.type': schemaString,
   'kibana.alert.original_event.agent_id_status': schemaString,
   'kibana.alert.original_event.code': schemaString,
   'kibana.alert.original_event.duration': schemaString,
@@ -154,6 +157,7 @@ const SecurityAlertOptional = rt.partial({
   'kibana.alert.original_event.start': schemaDate,
   'kibana.alert.original_event.timezone': schemaString,
   'kibana.alert.original_event.url': schemaString,
+  'kibana.alert.pending_recovered_count': schemaStringOrNumber,
   'kibana.alert.previous_action_group': schemaString,
   'kibana.alert.reason': schemaString,
   'kibana.alert.risk_score': schemaNumber,
@@ -203,6 +207,9 @@ const SecurityAlertOptional = rt.partial({
     })
   ),
   'kibana.alert.time_range': schemaDateRange,
+  'kibana.alert.updated_at': schemaDate,
+  'kibana.alert.updated_by.user.id': schemaString,
+  'kibana.alert.updated_by.user.name': schemaString,
   'kibana.alert.url': schemaString,
   'kibana.alert.user.criticality_level': schemaString,
   'kibana.alert.workflow_assignee_ids': schemaStringArray,
@@ -212,6 +219,9 @@ const SecurityAlertOptional = rt.partial({
   'kibana.alert.workflow_tags': schemaStringArray,
   'kibana.alert.workflow_user': schemaString,
   'kibana.version': schemaString,
+  'service.asset.criticality': schemaString,
+  'service.risk.calculated_level': schemaString,
+  'service.risk.calculated_score_norm': schemaNumber,
   tags: schemaStringArray,
   'user.asset.criticality': schemaString,
 });

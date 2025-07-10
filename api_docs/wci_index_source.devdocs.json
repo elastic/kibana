@@ -1,0 +1,114 @@
+{
+  "id": "wciIndexSource",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "wciIndexSource",
+      "id": "def-public.WCIIndexSourcePluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "WCIIndexSourcePluginSetup",
+      "description": [],
+      "path": "x-pack/solutions/chat/plugins/wci-index-source/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "wciIndexSource",
+      "id": "def-public.WCIIndexSourcePluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "WCIIndexSourcePluginStart",
+      "description": [],
+      "path": "x-pack/solutions/chat/plugins/wci-index-source/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "wciIndexSource",
+      "id": "def-server.WCIIndexSourcePluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "WCIIndexSourcePluginSetup",
+      "description": [],
+      "path": "x-pack/solutions/chat/plugins/wci-index-source/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "wciIndexSource",
+      "id": "def-server.WCIIndexSourcePluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "WCIIndexSourcePluginStart",
+      "description": [],
+      "path": "x-pack/solutions/chat/plugins/wci-index-source/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "wciIndexSource",
+        "id": "def-common.PLUGIN_ID",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_ID",
+        "description": [],
+        "signature": [
+          "\"wciIndexSource\""
+        ],
+        "path": "x-pack/solutions/chat/plugins/wci-index-source/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "wciIndexSource",
+        "id": "def-common.PLUGIN_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_NAME",
+        "description": [],
+        "signature": [
+          "\"wciIndexSource\""
+        ],
+        "path": "x-pack/solutions/chat/plugins/wci-index-source/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

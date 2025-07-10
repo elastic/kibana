@@ -22,6 +22,6 @@ export interface EntityAnomalies {
 export interface ObservedEntityData<T> extends BasicEntityData {
   firstSeen: FirstLastSeenData;
   lastSeen: FirstLastSeenData;
-  anomalies: EntityAnomalies;
+  anomalies?: EntityAnomalies;
   details: T;
 }

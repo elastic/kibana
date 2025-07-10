@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import { UsersContainer } from './users/pages';
 import { HostsContainer } from './hosts/pages';
 import { NetworkContainer } from './network/pages';
@@ -16,36 +15,29 @@ import { SecurityPageName } from '../app/types';
 import { EXPLORE_PATH, HOSTS_PATH, NETWORK_PATH, USERS_PATH } from '../../common/constants';
 import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
 import { ExploreLandingPage } from './landing';
+import { withSecurityRoutePageWrapper } from '../common/components/security_route_page_wrapper';
 
 const ExploreLanding = () => (
   <PluginTemplateWrapper>
-    <TrackApplicationView viewId={SecurityPageName.exploreLanding}>
-      <ExploreLandingPage />
-    </TrackApplicationView>
+    <ExploreLandingPage />
   </PluginTemplateWrapper>
 );
 
 const NetworkRoutes = () => (
   <PluginTemplateWrapper>
-    <TrackApplicationView viewId={SecurityPageName.network}>
-      <NetworkContainer />
-    </TrackApplicationView>
+    <NetworkContainer />
   </PluginTemplateWrapper>
 );
 
 const UsersRoutes = () => (
   <PluginTemplateWrapper>
-    <TrackApplicationView viewId={SecurityPageName.users}>
-      <UsersContainer />
-    </TrackApplicationView>
+    <UsersContainer />
   </PluginTemplateWrapper>
 );
 
 const HostsRoutes = () => (
   <PluginTemplateWrapper>
-    <TrackApplicationView viewId={SecurityPageName.hosts}>
-      <HostsContainer />
-    </TrackApplicationView>
+    <HostsContainer />
   </PluginTemplateWrapper>
 );
 
@@ -53,18 +45,26 @@ export const routes: SecuritySubPluginRoutes = [
   {
     path: EXPLORE_PATH,
     exact: true,
-    component: ExploreLanding,
+    component: withSecurityRoutePageWrapper(ExploreLanding, SecurityPageName.exploreLanding, {
+      omitSpyRoute: true,
+    }),
   },
   {
     path: NETWORK_PATH,
-    component: NetworkRoutes,
+    component: withSecurityRoutePageWrapper(NetworkRoutes, SecurityPageName.network, {
+      omitSpyRoute: true,
+    }),
   },
   {
     path: USERS_PATH,
-    component: UsersRoutes,
+    component: withSecurityRoutePageWrapper(UsersRoutes, SecurityPageName.users, {
+      omitSpyRoute: true,
+    }),
   },
   {
     path: HOSTS_PATH,
-    component: HostsRoutes,
+    component: withSecurityRoutePageWrapper(HostsRoutes, SecurityPageName.hosts, {
+      omitSpyRoute: true,
+    }),
   },
 ];

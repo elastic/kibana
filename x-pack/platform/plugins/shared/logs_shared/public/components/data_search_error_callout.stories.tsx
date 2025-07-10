@@ -6,7 +6,7 @@
  */
 
 import { PropsOf } from '@elastic/eui';
-import { Meta, Story } from '@storybook/react/types-6-0';
+import { Meta, StoryFn } from '@storybook/react';
 import React from 'react';
 import { decorateWithGlobalStorybookThemeProviders } from '../test_utils/use_global_storybook_theme';
 import { DataSearchErrorCallout } from './data_search_error_callout';
@@ -31,7 +31,7 @@ export default {
 
 type DataSearchErrorCalloutProps = PropsOf<typeof DataSearchErrorCallout>;
 
-const DataSearchErrorCalloutTemplate: Story<DataSearchErrorCalloutProps> = (args) => (
+const DataSearchErrorCalloutTemplate: StoryFn<DataSearchErrorCalloutProps> = (args) => (
   <DataSearchErrorCallout {...args} />
 );
 
@@ -54,31 +54,39 @@ const commonArgs = {
   ],
 };
 
-export const ErrorCallout = DataSearchErrorCalloutTemplate.bind({});
+export const ErrorCallout = {
+  render: DataSearchErrorCalloutTemplate,
 
-ErrorCallout.args = {
-  ...commonArgs,
+  args: {
+    ...commonArgs,
+  },
 };
 
-export const ErrorCalloutWithRetry = DataSearchErrorCalloutTemplate.bind({});
+export const ErrorCalloutWithRetry = {
+  render: DataSearchErrorCalloutTemplate,
 
-ErrorCalloutWithRetry.args = {
-  ...commonArgs,
-};
-ErrorCalloutWithRetry.argTypes = {
-  onRetry: { action: 'retrying' },
+  args: {
+    ...commonArgs,
+  },
+
+  argTypes: {
+    onRetry: { action: 'retrying' },
+  },
 };
 
-export const AbortedErrorCallout = DataSearchErrorCalloutTemplate.bind({});
+export const AbortedErrorCallout = {
+  render: DataSearchErrorCalloutTemplate,
 
-AbortedErrorCallout.args = {
-  ...commonArgs,
-  errors: [
-    {
-      type: 'aborted',
-    },
-  ],
-};
-AbortedErrorCallout.argTypes = {
-  onRetry: { action: 'retrying' },
+  args: {
+    ...commonArgs,
+    errors: [
+      {
+        type: 'aborted',
+      },
+    ],
+  },
+
+  argTypes: {
+    onRetry: { action: 'retrying' },
+  },
 };

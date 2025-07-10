@@ -126,12 +126,6 @@ export class Http1BasePathProxyServer implements BasePathProxyServer {
           xforward: true,
           mapUri: async (request: Request) => {
             return {
-              // Passing in this header to merge it is a workaround until this is fixed:
-              // https://github.com/hapijs/h2o2/issues/124
-              headers:
-                request.headers['content-length'] != null
-                  ? { 'content-length': request.headers['content-length'] }
-                  : undefined,
               uri: Url.format({
                 hostname: request.server.info.host,
                 port: this.devConfig.basePathProxyTargetPort,

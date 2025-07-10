@@ -1,16 +1,27 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Port renders correctly against snapshot 1`] = `
-<DefaultDraggable
-  data-test-subj="port"
-  field="destination.port"
-  id="port-default-draggable-test-abcd-destination.port-443"
-  isDraggable={true}
-  tooltipContent="destination.port"
-  value="443"
+<div
+  class="css-q5yr96-PortContainer etea1110"
 >
-  <PortOrServiceNameLink
-    portOrServiceName="443"
-  />
-</DefaultDraggable>
+  <a
+    class="euiLink emotion-euiLink-primary"
+    data-test-subj="port-or-service-name-link"
+    href="https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search=443"
+    rel="noopener noreferrer"
+    target="_blank"
+  >
+    443
+    <span
+      class="emotion-EuiExternalLinkIcon"
+      data-euiicon-type="popout"
+      role="presentation"
+    />
+    <span
+      class="emotion-euiScreenReaderOnly"
+    >
+      (external, opens in a new tab or window)
+    </span>
+  </a>
+</div>
 `;

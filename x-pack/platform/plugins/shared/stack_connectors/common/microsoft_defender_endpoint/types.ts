@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
 
-import {
+import type {
   MicrosoftDefenderEndpointSecretsSchema,
   MicrosoftDefenderEndpointConfigSchema,
   MicrosoftDefenderEndpointActionParamsSchema,
@@ -17,6 +17,9 @@ import {
   TestConnectorParamsSchema,
   AgentDetailsParamsSchema,
   GetActionsParamsSchema,
+  AgentListParamsSchema,
+  GetLibraryFilesResponse,
+  RunScriptParamsSchema,
 } from './schema';
 
 export type MicrosoftDefenderEndpointConfig = TypeOf<typeof MicrosoftDefenderEndpointConfigSchema>;
@@ -35,6 +38,18 @@ export interface MicrosoftDefenderEndpointTestConnector {
 
 export type MicrosoftDefenderEndpointAgentDetailsParams = TypeOf<typeof AgentDetailsParamsSchema>;
 
+export type MicrosoftDefenderEndpointAgentListParams = TypeOf<typeof AgentListParamsSchema>;
+
+export interface MicrosoftDefenderEndpointAgentListResponse {
+  '@odata.context': string;
+  '@odata.count'?: number;
+  /** If value is `-1`, then API did not provide a total count */
+  total: number;
+  page: number;
+  pageSize: number;
+  value: MicrosoftDefenderEndpointMachine[];
+}
+
 export type MicrosoftDefenderEndpointGetActionsParams = TypeOf<typeof GetActionsParamsSchema>;
 
 export interface MicrosoftDefenderEndpointGetActionsResponse {
@@ -45,6 +60,11 @@ export interface MicrosoftDefenderEndpointGetActionsResponse {
   page: number;
   pageSize: number;
   value: MicrosoftDefenderEndpointMachineAction[];
+}
+
+export interface MicrosoftDefenderEndpointGetActionResultsResponse {
+  '@odata.context': string;
+  value: string; // Downloadable link
 }
 
 /**
@@ -164,6 +184,7 @@ export type MicrosoftDefenderEndpointTestConnectorParams = TypeOf<typeof TestCon
 export type MicrosoftDefenderEndpointIsolateHostParams = TypeOf<typeof IsolateHostParamsSchema>;
 
 export type MicrosoftDefenderEndpointReleaseHostParams = TypeOf<typeof ReleaseHostParamsSchema>;
+export type MicrosoftDefenderEndpointRunScriptParams = TypeOf<typeof RunScriptParamsSchema>;
 
 export type MicrosoftDefenderEndpointActionParams = TypeOf<
   typeof MicrosoftDefenderEndpointActionParamsSchema
@@ -175,3 +196,5 @@ export interface MicrosoftDefenderEndpointApiTokenResponse {
   expires_in: number;
   access_token: string;
 }
+
+export type MicrosoftDefenderGetLibraryFilesResponse = TypeOf<typeof GetLibraryFilesResponse>;

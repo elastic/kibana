@@ -31,12 +31,14 @@ export default {
 
 const mock = new ExitFullScreenButtonStorybookMock();
 
-export const ExitFullScreenButton = (params: ExitFullScreenButtonStorybookParams) => {
-  return (
-    <ExitFullScreenButtonProvider {...mock.getServices()}>
-      <Component {...mock.getProps(params)} />
-    </ExitFullScreenButtonProvider>
-  );
-};
+export const ExitFullScreenButton = {
+  render: (params: ExitFullScreenButtonStorybookParams) => {
+    return (
+      <ExitFullScreenButtonProvider {...mock.getServices()}>
+        <Component {...mock.getProps(params)} />
+      </ExitFullScreenButtonProvider>
+    );
+  },
 
-ExitFullScreenButton.argTypes = mock.getArgumentTypes();
+  argTypes: mock.getArgumentTypes(),
+};

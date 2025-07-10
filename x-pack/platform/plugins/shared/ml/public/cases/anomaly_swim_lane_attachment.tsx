@@ -7,7 +7,7 @@
 
 import { EuiDescriptionList } from '@elastic/eui';
 import type { PersistableStateAttachmentViewProps } from '@kbn/cases-plugin/public/client/attachment_framework/types';
-import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
+import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -83,7 +83,7 @@ export const initComponent = memoize((fieldFormats: FieldFormatsStart) => {
       return (
         <>
           <EuiDescriptionList compressed type={'inline'} listItems={listItems} />
-          <ReactEmbeddableRenderer<AnomalySwimLaneEmbeddableState, AnomalySwimLaneEmbeddableApi>
+          <EmbeddableRenderer<AnomalySwimLaneEmbeddableState, AnomalySwimLaneEmbeddableApi>
             maybeId={inputProps.id}
             type={CASE_ATTACHMENT_TYPE_ID_ANOMALY_SWIMLANE}
             getParentApi={() => ({

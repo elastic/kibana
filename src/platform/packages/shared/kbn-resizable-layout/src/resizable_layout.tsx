@@ -7,13 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ReactElement, useState } from 'react';
+import { ReactNode } from 'react';
 import React from 'react';
-import { round } from 'lodash';
 import { PanelsResizable } from './panels_resizable';
 import { PanelsStatic } from './panels_static';
 import { ResizableLayoutDirection, ResizableLayoutMode } from '../types';
-import { getContainerSize, pixelsToPercent } from './utils';
 
 export interface ResizableLayoutProps {
   /**
@@ -29,10 +27,6 @@ export interface ResizableLayoutProps {
    */
   direction: ResizableLayoutDirection;
   /**
-   * The parent container element, used to calculate the layout size
-   */
-  container: HTMLElement | null;
-  /**
    * Current size of the fixed panel in pixels
    */
   fixedPanelSize: number;
@@ -47,11 +41,11 @@ export interface ResizableLayoutProps {
   /**
    * The fixed panel
    */
-  fixedPanel: ReactElement;
+  fixedPanel: ReactNode;
   /**
    * The flex panel
    */
-  flexPanel: ReactElement;
+  flexPanel: ReactNode;
   /**
    * Class name for the resize button
    */
@@ -68,11 +62,10 @@ export interface ResizableLayoutProps {
 
 const staticModes = [ResizableLayoutMode.Single, ResizableLayoutMode.Static];
 
-const ResizableLayout = ({
+export const ResizableLayout = ({
   className,
   mode,
   direction,
-  container,
   fixedPanelSize,
   minFixedPanelSize,
   minFlexPanelSize,
@@ -83,26 +76,6 @@ const ResizableLayout = ({
   onFixedPanelSizeChange,
 }: ResizableLayoutProps) => {
   const panelsProps = { className, fixedPanel, flexPanel };
-  const [panelSizes, setPanelSizes] = useState(() => {
-    if (!container) {
-      return { fixedPanelSizePct: 0, flexPanelSizePct: 0 };
-    }
-
-    const { width, height } = container.getBoundingClientRect();
-    const initialContainerSize = getContainerSize(direction, width, height);
-
-    if (!initialContainerSize) {
-      return { fixedPanelSizePct: 0, flexPanelSizePct: 0 };
-    }
-
-    const fixedPanelSizePct = pixelsToPercent(initialContainerSize, fixedPanelSize);
-    const flexPanelSizePct = 100 - fixedPanelSizePct;
-
-    return {
-      fixedPanelSizePct: round(fixedPanelSizePct, 4),
-      flexPanelSizePct: round(flexPanelSizePct, 4),
-    };
-  });
 
   return staticModes.includes(mode) ? (
     <PanelsStatic
@@ -113,19 +86,13 @@ const ResizableLayout = ({
   ) : (
     <PanelsResizable
       direction={direction}
-      container={container}
       fixedPanelSize={fixedPanelSize}
       minFixedPanelSize={minFixedPanelSize}
       minFlexPanelSize={minFlexPanelSize}
-      panelSizes={panelSizes}
       resizeButtonClassName={resizeButtonClassName}
       data-test-subj={dataTestSubj}
       onFixedPanelSizeChange={onFixedPanelSizeChange}
-      setPanelSizes={setPanelSizes}
       {...panelsProps}
     />
   );
 };
-
-// eslint-disable-next-line import/no-default-export
-export default ResizableLayout;

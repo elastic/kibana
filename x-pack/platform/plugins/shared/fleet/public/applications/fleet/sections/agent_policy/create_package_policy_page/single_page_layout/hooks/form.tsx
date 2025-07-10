@@ -5,20 +5,25 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import React from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { load } from 'js-yaml';
-
 import { isEqual } from 'lodash';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiLink } from '@elastic/eui';
 
+import { AgentlessAgentCreateOverProvisionedError } from '../../../../../../../../common/errors';
 import { useSpaceSettingsContext } from '../../../../../../../hooks/use_space_settings_context';
-import type {
-  AgentPolicy,
-  NewPackagePolicy,
-  NewAgentPolicy,
-  CreatePackagePolicyRequest,
-  PackagePolicy,
-  PackageInfo,
+import {
+  type AgentPolicy,
+  type NewPackagePolicy,
+  type NewAgentPolicy,
+  type CreatePackagePolicyRequest,
+  type PackagePolicy,
+  type PackageInfo,
+  SetupTechnology,
 } from '../../../../../types';
 import {
   useStartServices,
@@ -27,8 +32,10 @@ import {
   sendBulkInstallPackages,
   sendGetPackagePolicies,
   useMultipleAgentPolicies,
+  useFleetStatus,
 } from '../../../../../hooks';
 import { isVerificationError, packageToPackagePolicy } from '../../../../../services';
+import type { NewPackagePolicyInput } from '../../../../../../../../common';
 import {
   FLEET_ELASTIC_AGENT_PACKAGE,
   FLEET_SYSTEM_PACKAGE,
@@ -48,8 +55,12 @@ import {
   getCloudFormationPropsFromPackagePolicy,
   getCloudShellUrlFromPackagePolicy,
 } from '../../../../../../../components/cloud_security_posture/services';
+import { AGENTLESS_DISABLED_INPUTS } from '../../../../../../../../common/constants';
+import { ensurePackageKibanaAssetsInstalled } from '../../../../../services/ensure_kibana_assets_installed';
 
-import { useAgentless } from './setup_technology';
+import { useAgentless, useSetupTechnology } from './setup_technology';
+
+const DEFAULT_AGENTLESS_LIMIT = 5;
 
 export async function createAgentPolicy({
   packagePolicy,
@@ -122,6 +133,57 @@ async function savePackagePolicy(pkgPolicy: CreatePackagePolicyRequest['body']) 
 
   return result;
 }
+// Update the agentless policy with cloud connector info in the new agent policy when the package policy input `aws.support_cloud_connectors is updated
+export const updateAgentlessCloudConnectorConfig = (
+  packagePolicy: NewPackagePolicy,
+  newAgentPolicy: NewAgentPolicy,
+  setNewAgentPolicy: (policy: NewAgentPolicy) => void
+) => {
+  const input = packagePolicy.inputs?.filter(
+    (pinput: NewPackagePolicyInput) => pinput.enabled === true
+  )[0];
+
+  const enabled = input?.streams?.[0]?.vars?.['aws.supports_cloud_connectors']?.value;
+  if (
+    newAgentPolicy.agentless?.cloud_connectors?.enabled !== enabled &&
+    newAgentPolicy?.supports_agentless
+  ) {
+    let targetCsp;
+    if (input?.type.includes('aws')) {
+      targetCsp = 'aws';
+    }
+    if (input?.type.includes('gcp')) {
+      targetCsp = 'gcp';
+    }
+    if (input?.type.includes('azure')) {
+      targetCsp = 'azure';
+    }
+
+    if (targetCsp !== 'aws') {
+      setNewAgentPolicy({
+        ...newAgentPolicy,
+        agentless: {
+          ...newAgentPolicy.agentless,
+          cloud_connectors: undefined,
+        },
+      });
+      return;
+    }
+
+    if (newAgentPolicy.agentless?.cloud_connectors?.enabled !== enabled) {
+      setNewAgentPolicy({
+        ...newAgentPolicy,
+        agentless: {
+          ...newAgentPolicy.agentless,
+          cloud_connectors: {
+            enabled,
+            target_csp: targetCsp,
+          },
+        },
+      });
+    }
+  }
+};
 
 const DEFAULT_PACKAGE_POLICY = {
   name: '',
@@ -142,6 +204,9 @@ export function useOnSubmit({
   packageInfo,
   integrationToEnable,
   hasFleetAddAgentsPrivileges,
+  setNewAgentPolicy,
+  setSelectedPolicyTab,
+  hideAgentlessSelector,
 }: {
   packageInfo?: PackageInfo;
   newAgentPolicy: NewAgentPolicy;
@@ -151,8 +216,12 @@ export function useOnSubmit({
   queryParamsPolicyId: string | undefined;
   integrationToEnable?: string;
   hasFleetAddAgentsPrivileges: boolean;
+  setNewAgentPolicy: (policy: NewAgentPolicy) => void;
+  setSelectedPolicyTab: (tab: SelectedPolicyTab) => void;
+  hideAgentlessSelector?: boolean;
 }) {
-  const { notifications } = useStartServices();
+  const { notifications, docLinks } = useStartServices();
+  const { spaceId } = useFleetStatus();
   const confirmForceInstall = useConfirmForceInstall();
   const spaceSettings = useSpaceSettingsContext();
   const { canUseMultipleAgentPolicies } = useMultipleAgentPolicies();
@@ -164,21 +233,22 @@ export function useOnSubmit({
 
   // Used to render extension components only when package policy is initialized
   const [isInitialized, setIsInitialized] = useState<boolean>(false);
-  // Used to initialize the package policy once
-  const isInitializedRef = useRef(false);
+  const isFetchingBasePackage = useRef<boolean>(false);
 
   const [agentPolicies, setAgentPolicies] = useState<AgentPolicy[]>([]);
   // New package policy state
   const [packagePolicy, setPackagePolicy] = useState<NewPackagePolicy>({
     ...DEFAULT_PACKAGE_POLICY,
   });
+  const [integration, setIntegration] = useState<string | undefined>(integrationToEnable);
 
   // Validation state
   const [validationResults, setValidationResults] = useState<PackagePolicyValidationResults>();
   const [hasAgentPolicyError, setHasAgentPolicyError] = useState<boolean>(false);
-  const hasErrors = validationResults ? validationHasErrors(validationResults) : false;
 
   const { isAgentlessIntegration, isAgentlessAgentPolicy } = useAgentless();
+
+  const hasErrors = validationResults ? validationHasErrors(validationResults) : false;
 
   // Update agent policy method
   const updateAgentPolicies = useCallback(
@@ -191,9 +261,6 @@ export function useOnSubmit({
       if (packageInfo) {
         setHasAgentPolicyError(false);
       }
-
-      // eslint-disable-next-line no-console
-      console.debug('Agent policy updated', updatedAgentPolicies);
     },
     [packageInfo, agentPolicies]
   );
@@ -208,8 +275,6 @@ export function useOnSubmit({
           spaceSettings
         );
         setValidationResults(newValidationResult);
-        // eslint-disable-next-line no-console
-        console.debug('Package policy validation results', newValidationResult);
 
         return newValidationResult;
       }
@@ -225,8 +290,6 @@ export function useOnSubmit({
       };
       setPackagePolicy(newPackagePolicy);
 
-      // eslint-disable-next-line no-console
-      console.debug('Package policy updated', newPackagePolicy);
       const newValidationResults = updatePackagePolicyValidation(newPackagePolicy);
       const hasPackage = newPackagePolicy.package;
       const hasValidationErrors = newValidationResults
@@ -249,33 +312,57 @@ export function useOnSubmit({
   // Initial loading of package info
   useEffect(() => {
     async function init() {
-      if (isInitializedRef.current || !packageInfo) {
+      if (
+        !packageInfo ||
+        (packageInfo.name === packagePolicy.package?.name && integrationToEnable === integration)
+      ) {
         return;
+      }
+      if (integrationToEnable !== integration) {
+        setIntegration(integrationToEnable);
       }
 
       // Fetch all packagePolicies having the package name
-      const { data: packagePolicyData } = await sendGetPackagePolicies({
-        perPage: SO_SEARCH_LIMIT,
-        page: 1,
-        kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${packageInfo.name}`,
-      });
-      const incrementedName = getMaxPackageName(packageInfo.name, packagePolicyData?.items);
+      if (!isFetchingBasePackage.current) {
+        // Prevent multiple calls to fetch base package
+        isFetchingBasePackage.current = true;
+        const { data: packagePolicyData } = await sendGetPackagePolicies({
+          perPage: SO_SEARCH_LIMIT,
+          page: 1,
+          kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${packageInfo.name}`,
+        });
+        const incrementedName = getMaxPackageName(packageInfo.name, packagePolicyData?.items);
 
-      isInitializedRef.current = true;
-      updatePackagePolicy(
-        packageToPackagePolicy(
+        const basePackagePolicy = packageToPackagePolicy(
           packageInfo,
           agentPolicies.map((policy) => policy.id),
           '',
           DEFAULT_PACKAGE_POLICY.name || incrementedName,
           DEFAULT_PACKAGE_POLICY.description,
           integrationToEnable
-        )
-      );
-      setIsInitialized(true);
+        );
+
+        // Set the package policy with the fetched package
+        updatePackagePolicy(basePackagePolicy);
+        setIsInitialized(true);
+        isFetchingBasePackage.current = false;
+      }
     }
-    init();
-  }, [packageInfo, agentPolicies, updatePackagePolicy, integrationToEnable, isInitialized]);
+    if (!isInitialized) {
+      // Fetch agent policies
+      init();
+    }
+  }, [
+    isFetchingBasePackage,
+    packageInfo,
+    agentPolicies,
+    updatePackagePolicy,
+    integrationToEnable,
+    isInitialized,
+    packagePolicy.package?.name,
+    integration,
+    setIntegration,
+  ]);
 
   useEffect(() => {
     if (
@@ -291,8 +378,50 @@ export function useOnSubmit({
     }
   }, [packagePolicy, agentPolicies, updatePackagePolicy, canUseMultipleAgentPolicies]);
 
-  const onSaveNavigate = useOnSaveNavigate({
+  const {
+    handleSetupTechnologyChange,
+    allowedSetupTechnologies,
+    selectedSetupTechnology,
+    defaultSetupTechnology,
+  } = useSetupTechnology({
+    newAgentPolicy,
+    setNewAgentPolicy,
+    updatePackagePolicy,
+    setSelectedPolicyTab,
+    packageInfo,
     packagePolicy,
+    integrationToEnable,
+    hideAgentlessSelector,
+  });
+  const setupTechnologyRef = useRef<SetupTechnology | undefined>(selectedSetupTechnology);
+  // sync the inputs with the agentless selector change
+  useEffect(() => {
+    setupTechnologyRef.current = selectedSetupTechnology;
+  });
+  const prevSetupTechnology = setupTechnologyRef.current;
+  const isAgentlessSelected =
+    isAgentlessIntegration(packageInfo) && selectedSetupTechnology === SetupTechnology.AGENTLESS;
+
+  const newInputs = useMemo(() => {
+    return packagePolicy.inputs.map((input, i) => {
+      if (isAgentlessSelected && AGENTLESS_DISABLED_INPUTS.includes(input.type)) {
+        return { ...input, enabled: false };
+      }
+      return packagePolicy.inputs[i];
+    });
+  }, [packagePolicy.inputs, isAgentlessSelected]);
+
+  useEffect(() => {
+    if (prevSetupTechnology !== selectedSetupTechnology) {
+      updatePackagePolicy({
+        inputs: newInputs,
+      });
+    }
+  }, [newInputs, prevSetupTechnology, selectedSetupTechnology, updatePackagePolicy, packagePolicy]);
+
+  updateAgentlessCloudConnectorConfig(packagePolicy, newAgentPolicy, setNewAgentPolicy);
+
+  const onSaveNavigate = useOnSaveNavigate({
     queryParamsPolicyId,
   });
 
@@ -306,7 +435,12 @@ export function useOnSubmit({
     async ({
       force,
       overrideCreatedAgentPolicy,
-    }: { overrideCreatedAgentPolicy?: AgentPolicy; force?: boolean } = {}) => {
+      skipConfirmModal,
+    }: {
+      overrideCreatedAgentPolicy?: AgentPolicy;
+      force?: boolean;
+      skipConfirmModal?: boolean;
+    } = {}) => {
       if (formState === 'VALID' && hasErrors) {
         setFormState('INVALID');
         return;
@@ -344,15 +478,43 @@ export function useOnSubmit({
             (policy) => policy?.supports_agentless === true
           );
 
-          notifications.toasts.addError(e, {
-            title: agentlessPolicy?.supports_agentless
-              ? i18n.translate('xpack.fleet.createAgentlessPolicy.errorNotificationTitle', {
-                  defaultMessage: 'Unable to create integration',
-                })
-              : i18n.translate('xpack.fleet.createAgentPolicy.errorNotificationTitle', {
-                  defaultMessage: 'Unable to create agent policy',
-                }),
-          });
+          if (e?.attributes?.type === AgentlessAgentCreateOverProvisionedError.name) {
+            notifications.toasts.addError(e, {
+              title: i18n.translate('xpack.fleet.createAgentlessPolicy.errorNotificationTitle', {
+                defaultMessage: 'Unable to create integration',
+              }),
+              // @ts-expect-error
+              toastMessage: (
+                <>
+                  <FormattedMessage
+                    id="xpack.fleet.createAgentlessPolicy.overProvisionErrorMessage"
+                    defaultMessage="You've reached the maximum number of {limit} agentless deployments. To add more, either remove or change some to Elastic Agent-based integrations. {docLink}"
+                    values={{
+                      limit: <b>{e?.attributes?.limit ?? DEFAULT_AGENTLESS_LIMIT}</b>,
+                      docLink: (
+                        <EuiLink href={docLinks.links.fleet.agentlessIntegrations} target="_blank">
+                          <FormattedMessage
+                            id="xpack.fleet.createAgentlessPolicy.seeDocLink"
+                            defaultMessage="See agentless documentation."
+                          />
+                        </EuiLink>
+                      ),
+                    }}
+                  />
+                </>
+              ),
+            });
+          } else {
+            notifications.toasts.addError(e, {
+              title: agentlessPolicy?.supports_agentless
+                ? i18n.translate('xpack.fleet.createAgentlessPolicy.errorNotificationTitle', {
+                    defaultMessage: 'Unable to create integration',
+                  })
+                : i18n.translate('xpack.fleet.createAgentPolicy.errorNotificationTitle', {
+                    defaultMessage: 'Unable to create agent policy',
+                  }),
+            });
+          }
           return;
         }
       }
@@ -374,6 +536,15 @@ export function useOnSubmit({
         force: forceInstall,
       });
 
+      if (!error && data?.item.package) {
+        await ensurePackageKibanaAssetsInstalled({
+          currentSpaceId: spaceId ?? DEFAULT_SPACE_ID,
+          pkgName: data.item.package.name,
+          pkgVersion: data.item.package.version,
+          toasts: notifications.toasts,
+        });
+      }
+
       const hasAzureArmTemplate = data?.item
         ? getAzureArmPropsFromPackagePolicy(data.item).templateUrl
         : false;
@@ -388,7 +559,7 @@ export function useOnSubmit({
       const isAgentlessConfigured = isAgentlessAgentPolicy(createdPolicy);
 
       // Removing this code will disabled the Save and Continue button. We need code below update form state and trigger correct modal depending on agent count
-      if (hasFleetAddAgentsPrivileges && !isAgentlessConfigured) {
+      if (hasFleetAddAgentsPrivileges && !isAgentlessConfigured && !skipConfirmModal) {
         if (agentCount) {
           setFormState('SUBMITTED');
         } else if (hasAzureArmTemplate) {
@@ -410,23 +581,30 @@ export function useOnSubmit({
           !isAgentlessConfigured &&
           hasFleetAddAgentsPrivileges;
 
-        if (promptForAgentEnrollment && hasAzureArmTemplate) {
-          setFormState('SUBMITTED_AZURE_ARM_TEMPLATE');
-          return;
+        if (!skipConfirmModal) {
+          if (promptForAgentEnrollment && hasAzureArmTemplate) {
+            setFormState('SUBMITTED_AZURE_ARM_TEMPLATE');
+            return;
+          }
+          if (promptForAgentEnrollment && hasCloudFormation) {
+            setFormState('SUBMITTED_CLOUD_FORMATION');
+            return;
+          }
+          if (promptForAgentEnrollment && hasGoogleCloudShell) {
+            setFormState('SUBMITTED_GOOGLE_CLOUD_SHELL');
+            return;
+          }
+          if (promptForAgentEnrollment) {
+            setFormState('SUBMITTED_NO_AGENTS');
+            return;
+          }
+
+          if (isAgentlessConfigured) {
+            onSaveNavigate(data!.item, ['openEnrollmentFlyout']);
+          } else {
+            onSaveNavigate(data!.item);
+          }
         }
-        if (promptForAgentEnrollment && hasCloudFormation) {
-          setFormState('SUBMITTED_CLOUD_FORMATION');
-          return;
-        }
-        if (promptForAgentEnrollment && hasGoogleCloudShell) {
-          setFormState('SUBMITTED_GOOGLE_CLOUD_SHELL');
-          return;
-        }
-        if (promptForAgentEnrollment) {
-          setFormState('SUBMITTED_NO_AGENTS');
-          return;
-        }
-        onSaveNavigate(data!.item);
 
         notifications.toasts.addSuccess({
           title: i18n.translate('xpack.fleet.createPackagePolicy.addedNotificationTitle', {
@@ -466,6 +644,7 @@ export function useOnSubmit({
     },
     [
       formState,
+      spaceId,
       hasErrors,
       agentCount,
       isAgentlessIntegration,
@@ -481,6 +660,7 @@ export function useOnSubmit({
       agentPolicies,
       onSaveNavigate,
       confirmForceInstall,
+      docLinks.links.fleet.agentlessIntegrations,
     ]
   );
 
@@ -502,5 +682,10 @@ export function useOnSubmit({
     // TODO check
     navigateAddAgent,
     navigateAddAgentHelp,
+    handleSetupTechnologyChange,
+    allowedSetupTechnologies,
+    selectedSetupTechnology,
+    defaultSetupTechnology,
+    isAgentlessSelected,
   };
 }

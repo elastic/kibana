@@ -34,7 +34,7 @@ export const Page: FC = () => {
   const [isLoadingJobsExist, setIsLoadingJobsExist] = useState(false);
   const { refresh } = useRefreshAnalyticsList({ isLoading: setIsLoading });
 
-  const setAnalyticsId = useCallback(
+  const onAnalyticsIdChange = useCallback(
     (analyticsId: AnalyticsSelectorIds) => {
       setGlobalState({
         ml: {
@@ -80,7 +80,7 @@ export const Page: FC = () => {
     }
 
     if (jobsExist === false) {
-      return <AnalyticsEmptyPrompt />;
+      return <AnalyticsEmptyPrompt showDocsLink />;
     }
     return (
       <>
@@ -108,7 +108,7 @@ export const Page: FC = () => {
       />
       {isIdSelectorFlyoutVisible ? (
         <AnalyticsIdSelector
-          setAnalyticsId={setAnalyticsId}
+          setAnalyticsId={onAnalyticsIdChange}
           setIsIdSelectorFlyoutVisible={setIsIdSelectorFlyoutVisible}
         />
       ) : null}

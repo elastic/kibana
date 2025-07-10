@@ -1,0 +1,35 @@
+openapi: 3.0.3
+info:
+  title: Task manager health Serverless APIs
+  description: Kibana APIs for the task manager feature
+  version: 1.0.0
+  license:
+    name: Elastic License 2.0
+    url: https://www.elastic.co/licensing/elastic-license
+tags:
+  - name: task manager
+    x-displayName: Task manager
+    externalDocs:
+      url: https://www.elastic.co/docs/deploy-manage/distributed-architecture/kibana-tasks-management
+      description: Task manager
+servers:
+  - url: /
+paths:
+  /api/task_manager/_health:
+    get:
+      summary: Get the task manager health
+      description: |
+        Get the health status of the Kibana task manager.
+      operationId: task-manager-health
+      tags:
+        - task manager
+      responses:
+        '200':
+          description: Indicates a successful call
+          content:
+            application/json:
+              schema:
+                $ref: 'components/schemas/health_response_serverless.yaml'    
+              examples:
+                taskManagerHealthResponse1:
+                  $ref: 'components/examples/health_200response_serverless.yaml'

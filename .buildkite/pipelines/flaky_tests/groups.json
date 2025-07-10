@@ -93,16 +93,24 @@
       "name": "Profiling - Cypress"
     },
     {
-      "key": "cypress/inventory_cypress",
-      "name": "Inventory - Cypress"
-    },
-    {
       "key": "cypress/cloud_security_posture",
       "name": "Cloud Security Posture - Cypress"
     },
     {
       "key": "cypress/cloud_security_posture_serverless",
       "name": "[Serverless] Cloud Security Posture - Cypress"
+    },
+    {
+      "key": "elastic_synthetics/synthetics_plugin",
+      "name": "Synthetics plugin e2e tests - Elastic/Synthetics"
+    },
+    {
+      "key": "cypress/asset_inventory",
+      "name": "Asset Inventory - Cypress"
+    },
+    {
+      "key": "cypress/asset_inventory_serverless",
+      "name": "[Serverless] Asset Inventory - Cypress"
     }
   ]
 }

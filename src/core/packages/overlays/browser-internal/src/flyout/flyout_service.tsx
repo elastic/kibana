@@ -18,9 +18,9 @@ import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { MountPoint, OverlayRef } from '@kbn/core-mount-utils-browser';
-import { MountWrapper } from '@kbn/core-mount-utils-browser-internal';
 import type { OverlayFlyoutOpenOptions, OverlayFlyoutStart } from '@kbn/core-overlays-browser';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { OverlayMountWrapper } from '../overlay_mount_wrapper';
 
 /**
  * A FlyoutRef is a reference to an opened flyout panel. It offers methods to
@@ -86,6 +86,7 @@ export class FlyoutService {
 
     return {
       open: (mount: MountPoint, options: OverlayFlyoutOpenOptions = {}): OverlayRef => {
+        const { isResizable, ...restOptions } = options;
         // If there is an active flyout session close it before opening a new one.
         if (this.activeFlyout) {
           this.activeFlyout.close();
@@ -112,9 +113,9 @@ export class FlyoutService {
         };
 
         const getWrapper = (children: JSX.Element) => {
-          return options?.isResizable ? (
+          return isResizable ? (
             <EuiFlyoutResizable
-              {...options}
+              {...restOptions}
               onClose={onCloseFlyout}
               ref={React.createRef()}
               maxWidth={Number(options?.maxWidth)}
@@ -122,7 +123,7 @@ export class FlyoutService {
               {children}
             </EuiFlyoutResizable>
           ) : (
-            <EuiFlyout {...options} onClose={onCloseFlyout}>
+            <EuiFlyout {...restOptions} onClose={onCloseFlyout}>
               {children}
             </EuiFlyout>
           );
@@ -135,7 +136,7 @@ export class FlyoutService {
             theme={theme}
             userProfile={userProfile}
           >
-            {getWrapper(<MountWrapper mount={mount} className="kbnOverlayMountWrapper" />)}
+            {getWrapper(<OverlayMountWrapper mount={mount} />)}
           </KibanaRenderContextProvider>,
           this.targetDomElement
         );

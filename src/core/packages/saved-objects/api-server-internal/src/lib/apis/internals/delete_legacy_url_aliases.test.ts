@@ -86,14 +86,12 @@ describe('deleteLegacyUrlAliases', () => {
       expect(params.client.updateByQuery).toHaveBeenCalledTimes(1);
       expect(params.client.updateByQuery).toHaveBeenCalledWith(
         expect.objectContaining({
-          body: expect.objectContaining({
-            script: expect.objectContaining({
-              params: {
-                namespaces,
-                matchTargetNamespaceOp: 'delete',
-                notMatchTargetNamespaceOp: 'noop',
-              },
-            }),
+          script: expect.objectContaining({
+            params: {
+              namespaces,
+              matchTargetNamespaceOp: 'delete',
+              notMatchTargetNamespaceOp: 'noop',
+            },
           }),
         }),
         expect.anything()
@@ -111,14 +109,12 @@ describe('deleteLegacyUrlAliases', () => {
       expect(params.client.updateByQuery).toHaveBeenCalledTimes(1);
       expect(params.client.updateByQuery).toHaveBeenCalledWith(
         expect.objectContaining({
-          body: expect.objectContaining({
-            script: expect.objectContaining({
-              params: {
-                namespaces,
-                matchTargetNamespaceOp: 'noop',
-                notMatchTargetNamespaceOp: 'delete',
-              },
-            }),
+          script: expect.objectContaining({
+            params: {
+              namespaces,
+              matchTargetNamespaceOp: 'noop',
+              notMatchTargetNamespaceOp: 'delete',
+            },
           }),
         }),
         expect.anything()

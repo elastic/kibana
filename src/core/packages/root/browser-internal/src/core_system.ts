@@ -38,6 +38,7 @@ import { RenderingService } from '@kbn/core-rendering-browser-internal';
 import { CoreAppsService } from '@kbn/core-apps-browser-internal';
 import type { InternalCoreSetup, InternalCoreStart } from '@kbn/core-lifecycle-browser-internal';
 import { PluginsService } from '@kbn/core-plugins-browser-internal';
+import { PricingService } from '@kbn/core-pricing-browser-internal';
 import { CustomBrandingService } from '@kbn/core-custom-branding-browser-internal';
 import { SecurityService } from '@kbn/core-security-browser-internal';
 import { UserProfileService } from '@kbn/core-user-profile-browser-internal';
@@ -111,6 +112,7 @@ export class CoreSystem {
   private readonly customBranding: CustomBrandingService;
   private readonly security: SecurityService;
   private readonly userProfile: UserProfileService;
+  private readonly pricing: PricingService;
   private fatalErrorsSetup: FatalErrorsSetup | null = null;
 
   constructor(params: CoreSystemParams) {
@@ -166,6 +168,7 @@ export class CoreSystem {
     this.deprecations = new DeprecationsService();
     this.executionContext = new ExecutionContextService();
     this.plugins = new PluginsService(this.coreContext, injectedMetadata.uiPlugins);
+    this.pricing = new PricingService();
     this.coreApp = new CoreAppsService(this.coreContext);
     this.customBranding = new CustomBrandingService();
 
@@ -261,7 +264,6 @@ export class CoreSystem {
       const settings = this.settings.setup({ http, injectedMetadata });
       const notifications = this.notifications.setup({ uiSettings, analytics });
       const customBranding = this.customBranding.setup({ injectedMetadata });
-
       const application = this.application.setup({ http, analytics });
       this.coreApp.setup({ application, http, injectedMetadata, notifications });
       const featureFlags = this.featureFlags.setup({ injectedMetadata });
@@ -332,14 +334,7 @@ export class CoreSystem {
         userProfile,
         targetDomElement: overlayTargetDomElement,
       });
-      const notifications = this.notifications.start({
-        analytics,
-        i18n,
-        overlays,
-        theme,
-        userProfile,
-        targetDomElement: notificationsTargetDomElement,
-      });
+
       const customBranding = this.customBranding.start();
       const application = await this.application.start({
         http,
@@ -348,9 +343,22 @@ export class CoreSystem {
         customBranding,
         analytics,
       });
-
       const executionContext = this.executionContext.start({
         curApp$: application.currentAppId$,
+      });
+      const rendering = this.rendering.start({
+        analytics,
+        executionContext,
+        i18n,
+        theme,
+        userProfile,
+      });
+
+      const notifications = this.notifications.start({
+        analytics,
+        overlays,
+        targetDomElement: notificationsTargetDomElement,
+        rendering,
       });
 
       const chrome = await this.chrome.start({
@@ -380,6 +388,7 @@ export class CoreSystem {
       });
 
       const featureFlags = await this.featureFlags.start();
+      const pricing = await this.pricing.start({ http });
 
       const core: InternalCoreStart = {
         analytics,
@@ -402,6 +411,8 @@ export class CoreSystem {
         customBranding,
         security,
         userProfile,
+        rendering,
+        pricing,
       };
 
       await this.plugins.start(core);
@@ -419,16 +430,10 @@ export class CoreSystem {
       `;
       this.rootDomElement.classList.add(coreSystemRootDomElement);
 
-      this.rendering.start({
-        application,
-        chrome,
-        analytics,
-        i18n,
-        overlays,
-        theme,
-        targetDomElement: coreUiTargetDomElement,
-        userProfile,
-      });
+      this.rendering.renderCore(
+        { chrome, application, overlays, featureFlags },
+        coreUiTargetDomElement
+      );
 
       performance.mark(KBN_LOAD_MARKS, {
         detail: LOAD_START_DONE,

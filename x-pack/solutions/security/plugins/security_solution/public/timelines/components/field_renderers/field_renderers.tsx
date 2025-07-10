@@ -17,16 +17,17 @@ import type {
 } from '../../../../common/search_strategy';
 import { DefaultDraggable } from '../../../common/components/draggables';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
-import { HostDetailsLink, ReputationLink, WhoIsLink } from '../../../common/components/links';
+import { ReputationLink, WhoIsLink } from '../../../common/components/links';
 import * as i18n from '../../../explore/network/components/details/translations';
+import type { SourcererScopeName } from '../../../sourcerer/store/model';
+import { FlyoutLink } from '../../../flyout/shared/components/flyout_link';
 
 export const IpOverviewId = 'ip-overview';
 
 export const locationRenderer = (
   fieldNames: string[],
   data: NetworkDetailsStrategyResponse['networkDetails'],
-  contextID?: string,
-  isDraggable?: boolean
+  contextID?: string
 ): React.ReactElement =>
   fieldNames.length > 0 && fieldNames.every((fieldName) => getOr(null, fieldName, data)) ? (
     <EuiFlexGroup alignItems="center" gutterSize="none">
@@ -40,7 +41,6 @@ export const locationRenderer = (
                 id={`location-renderer-default-draggable-${IpOverviewId}-${
                   contextID ? `${contextID}-` : ''
                 }${fieldName}`}
-                isDraggable={isDraggable ?? false}
                 field={fieldName}
                 value={locationValue}
                 isAggregatable={true}
@@ -58,8 +58,7 @@ export const locationRenderer = (
 export const autonomousSystemRenderer = (
   as: AutonomousSystem,
   flowTarget: FlowTarget | FlowTargetSourceDest,
-  contextID?: string,
-  isDraggable?: boolean
+  contextID?: string
 ): React.ReactElement =>
   as && as.organization && as.organization.name && as.number ? (
     <EuiFlexGroup alignItems="center" gutterSize="none">
@@ -68,7 +67,6 @@ export const autonomousSystemRenderer = (
           id={`autonomous-system-renderer-default-draggable-${IpOverviewId}-${
             contextID ? `${contextID}-` : ''
           }${flowTarget}.as.organization.name`}
-          isDraggable={isDraggable ?? false}
           field={`${flowTarget}.as.organization.name`}
           value={as.organization.name}
         />
@@ -79,7 +77,6 @@ export const autonomousSystemRenderer = (
           id={`autonomous-system-renderer-default-draggable-${IpOverviewId}-${
             contextID ? `${contextID}-` : ''
           }${flowTarget}.as.number`}
-          isDraggable={false}
           field={`${flowTarget}.as.number`}
           value={`${as.number}`}
           isAggregatable={true}
@@ -95,16 +92,18 @@ interface HostIdRendererTypes {
   contextID?: string;
   host: HostEcs;
   ipFilter?: string;
-  isDraggable?: boolean;
   noLink?: boolean;
+  scopeId: string;
+  isFlyoutOpen: boolean;
 }
 
 export const hostIdRenderer = ({
   contextID,
   host,
-  isDraggable = false,
   ipFilter,
   noLink,
+  scopeId,
+  isFlyoutOpen,
 }: HostIdRendererTypes): React.ReactElement =>
   host.id && host.ip && (ipFilter == null || host.ip.includes(ipFilter)) ? (
     <>
@@ -113,16 +112,23 @@ export const hostIdRenderer = ({
           id={`host-id-renderer-default-draggable-${IpOverviewId}-${
             contextID ? `${contextID}-` : ''
           }host-id`}
-          isDraggable={isDraggable}
           field="host.id"
           value={host.id[0]}
           isAggregatable={true}
           fieldType={'keyword'}
+          scopeId={scopeId}
         >
           {noLink ? (
             <>{host.id}</>
           ) : (
-            <HostDetailsLink hostName={host.name[0]}>{host.id}</HostDetailsLink>
+            <FlyoutLink
+              field={'host.name'}
+              value={host.name[0]}
+              scopeId={scopeId}
+              isFlyoutOpen={isFlyoutOpen}
+            >
+              {host.id}
+            </FlyoutLink>
           )}
         </DefaultDraggable>
       ) : (
@@ -133,30 +139,37 @@ export const hostIdRenderer = ({
     getEmptyTagValue()
   );
 
-export const hostNameRenderer = (
-  host?: HostEcs,
-  ipFilter?: string,
-  contextID?: string,
-  isDraggable?: boolean
-): React.ReactElement =>
-  host &&
-  host.name &&
-  host.name[0] &&
-  host.ip &&
-  (!(ipFilter != null) || host.ip.includes(ipFilter)) ? (
+interface HostNameRendererTypes {
+  scopeId: SourcererScopeName;
+  host: HostEcs;
+  ipFilter?: string;
+  contextID?: string;
+  isFlyoutOpen: boolean;
+}
+export const hostNameRenderer = ({
+  scopeId,
+  host,
+  ipFilter,
+  contextID,
+  isFlyoutOpen,
+}: HostNameRendererTypes): React.ReactElement =>
+  host.name && host.name[0] && host.ip && (!(ipFilter != null) || host.ip.includes(ipFilter)) ? (
     <DefaultDraggable
       id={`host-name-renderer-default-draggable-${IpOverviewId}-${
         contextID ? `${contextID}-` : ''
       }host-name`}
-      isDraggable={isDraggable ?? false}
       field={'host.name'}
       value={host.name[0]}
       isAggregatable={true}
       fieldType={'keyword'}
+      scopeId={scopeId}
     >
-      <HostDetailsLink hostName={host.name[0]}>
-        {host.name ? host.name : getEmptyTagValue()}
-      </HostDetailsLink>
+      <FlyoutLink
+        field={'host.name'}
+        value={host.name[0]}
+        scopeId={scopeId}
+        isFlyoutOpen={isFlyoutOpen}
+      />
     </DefaultDraggable>
   ) : (
     getEmptyTagValue()

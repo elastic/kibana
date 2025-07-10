@@ -51,9 +51,13 @@ Build an archive that can be used to serve Kibana's static assets.
 
 Build cloud Docker images that can be used for testing deployments on Elastic Cloud.
 
+#### `ci:build-cloud-fips-image`
+
+Build FIPS cloud Docker images that can be used for testing deployments on Elastic Cloud.
+
 #### `ci:build-docker-fips`
 
-Build Docker UBI x64 image with FIPS enabled.
+Build Docker Wolfi image with FIPS enabled.
 
 #### `ci:build-os-packages`
 
@@ -99,6 +103,10 @@ Create or update a serverless Elasticsearch project on Elastic Cloud QA.
 
 Create or update a serverless Observability project on Elastic Cloud QA.
 
+#### `ci:project-deploy-log_essentials`
+
+Create or update a serverless Observability project (in the Log Essentials tier) on Elastic Cloud QA.
+
 #### `ci:project-deploy-security`
 
 Create or update a serverless Security project on Elastic Cloud QA.
@@ -106,3 +114,7 @@ Create or update a serverless Security project on Elastic Cloud QA.
 #### `ci:project-persist-deployment`
 
 Prevents an existing deployment from being shutdown due to inactivity.
+
+#### `ci:security-genai-run-evals`
+
+Run evaluations for the GenAI security evaluation suite.

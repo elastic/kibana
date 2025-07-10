@@ -24,17 +24,17 @@ export function initGetSpaceApi(deps: ExternalRouteDeps) {
       options: {
         tags: ['oas-tag:spaces'],
       },
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route delegates authorization to the spaces service via a scoped spaces client',
+        },
+      },
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        security: {
-          authz: {
-            enabled: false,
-            reason:
-              'This route delegates authorization to the spaces service via a scoped spaces client',
-          },
-        },
         validate: {
           request: {
             params: schema.object({

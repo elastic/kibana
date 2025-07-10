@@ -740,7 +740,26 @@
             "label": "mbFeature",
             "description": [],
             "signature": [
-              "maplibregl.GeoJSONFeature & { layer: (Omit<maplibregl.FillLayerSpecification, \"source\"> | Omit<maplibregl.LineLayerSpecification, \"source\"> | Omit<maplibregl.SymbolLayerSpecification, \"source\"> | Omit<maplibregl.CircleLayerSpecification, \"source\"> | Omit<maplibregl.HeatmapLayerSpecification, \"source\"> | Omit<maplibregl.FillExtrusionLayerSpecification, \"source\"> | Omit<maplibregl.RasterLayerSpecification, \"source\"> | Omit<maplibregl.HillshadeLayerSpecification, \"source\"> | Omit<maplibregl.BackgroundLayerSpecification, \"source\">) & { source: string; }; source: string; sourceLayer?: string | undefined; state: { [key: string]: any; }; }"
+              "GeoJSONFeature",
+              " & { layer: (Omit<",
+              "FillLayerSpecification",
+              ", \"source\"> | Omit<",
+              "LineLayerSpecification",
+              ", \"source\"> | Omit<",
+              "SymbolLayerSpecification",
+              ", \"source\"> | Omit<",
+              "CircleLayerSpecification",
+              ", \"source\"> | Omit<",
+              "HeatmapLayerSpecification",
+              ", \"source\"> | Omit<",
+              "FillExtrusionLayerSpecification",
+              ", \"source\"> | Omit<",
+              "RasterLayerSpecification",
+              ", \"source\"> | Omit<",
+              "HillshadeLayerSpecification",
+              ", \"source\"> | Omit<",
+              "BackgroundLayerSpecification",
+              ", \"source\">) & { source: string; }; source: string; sourceLayer?: string | undefined; state: { [key: string]: any; }; }"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
@@ -1290,7 +1309,9 @@
             "label": "isSourceStale",
             "description": [],
             "signature": [
-              "(mbSource: maplibregl.RasterTileSource, sourceData: ",
+              "(mbSource: ",
+              "RasterTileSource",
+              ", sourceData: ",
               "RasterTileSourceData",
               ") => boolean"
             ],
@@ -1306,7 +1327,7 @@
                 "label": "mbSource",
                 "description": [],
                 "signature": [
-                  "maplibregl.RasterTileSource"
+                  "RasterTileSource"
                 ],
                 "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/raster_source/index.ts",
                 "deprecated": false,
@@ -2632,7 +2653,7 @@
             "signature": [
               "((actionId: string, key: string, value: ",
               "RawValue",
-              ") => void) | undefined"
+              ") => Promise<void>) | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/tooltips/tooltip_property.ts",
             "deprecated": false,
@@ -2903,14 +2924,6 @@
             "section": "def-public.MapSerializedState",
             "text": "MapSerializedState"
           },
-          ", ",
-          {
-            "pluginId": "maps",
-            "scope": "public",
-            "docId": "kibMapsPluginApi",
-            "section": "def-public.MapSerializedState",
-            "text": "MapSerializedState"
-          },
           "> & Partial<{ enhancements: { dynamicActions: ",
           {
             "pluginId": "uiActionsEnhanced",
@@ -3039,6 +3052,14 @@
             "section": "def-public.MapSerializedState",
             "text": "MapSerializedState"
           },
+          ", ",
+          {
+            "pluginId": "maps",
+            "scope": "public",
+            "docId": "kibMapsPluginApi",
+            "section": "def-public.MapSerializedState",
+            "text": "MapSerializedState"
+          },
           "> & { getLayerList: () => ",
           "ILayer",
           "[]; reload: () => void; setEventHandlers: (eventHandlers: ",
@@ -3095,11 +3116,25 @@
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
             "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.SerializedTimeRange",
+            "text": "SerializedTimeRange"
+          },
+          " & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
             "section": "def-public.SerializedTitles",
             "text": "SerializedTitles"
           },
           " & Partial<",
-          "DynamicActionsSerializedState",
+          {
+            "pluginId": "embeddableEnhanced",
+            "scope": "public",
+            "docId": "kibEmbeddableEnhancedPluginApi",
+            "section": "def-public.DynamicActionsSerializedState",
+            "text": "DynamicActionsSerializedState"
+          },
           "> & { attributes?: ",
           "MapAttributes",
           " | undefined; savedObjectId?: string | undefined; isLayerTOCOpen?: boolean | undefined; openTOCDetails?: string[] | undefined; mapCenter?: ",
@@ -3108,15 +3143,7 @@
           "MapExtent",
           " | undefined; mapSettings?: Partial<",
           "MapSettings",
-          "> | undefined; hiddenLayers?: string[] | undefined; timeRange?: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.TimeRange",
-            "text": "TimeRange"
-          },
-          " | undefined; filterByMapExtent?: boolean | undefined; isMovementSynchronized?: boolean | undefined; }"
+          "> | undefined; hiddenLayers?: string[] | undefined; filterByMapExtent?: boolean | undefined; isMovementSynchronized?: boolean | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/maps/public/react_embeddable/types.ts",
         "deprecated": false,

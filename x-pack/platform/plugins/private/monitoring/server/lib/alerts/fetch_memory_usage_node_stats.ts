@@ -31,64 +31,62 @@ export async function fetchMemoryUsageNodeStats(
   const params = {
     index: indexPatterns,
     filter_path: ['aggregations'],
-    body: {
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            {
-              terms: {
-                cluster_uuid: clustersIds,
-              },
+    size: 0,
+    query: {
+      bool: {
+        filter: [
+          {
+            terms: {
+              cluster_uuid: clustersIds,
             },
-            createDatasetFilter('node_stats', 'node_stats', getElasticsearchDataset('node_stats')),
-            {
-              range: {
-                timestamp: {
-                  format: 'epoch_millis',
-                  gte: startMs,
-                  lte: endMs,
-                },
-              },
-            },
-          ],
-        },
-      },
-      aggs: {
-        clusters: {
-          terms: {
-            field: 'cluster_uuid',
-            size,
           },
-          aggs: {
-            nodes: {
-              terms: {
-                field: 'source_node.uuid',
-                size,
+          createDatasetFilter('node_stats', 'node_stats', getElasticsearchDataset('node_stats')),
+          {
+            range: {
+              timestamp: {
+                format: 'epoch_millis',
+                gte: startMs,
+                lte: endMs,
               },
-              aggs: {
-                index: {
-                  terms: {
-                    field: '_index',
-                    size: 1,
-                  },
+            },
+          },
+        ],
+      },
+    },
+    aggs: {
+      clusters: {
+        terms: {
+          field: 'cluster_uuid',
+          size,
+        },
+        aggs: {
+          nodes: {
+            terms: {
+              field: 'source_node.uuid',
+              size,
+            },
+            aggs: {
+              index: {
+                terms: {
+                  field: '_index',
+                  size: 1,
                 },
-                avg_heap: {
-                  avg: {
-                    field: 'node_stats.jvm.mem.heap_used_percent',
-                  },
+              },
+              avg_heap: {
+                avg: {
+                  field: 'node_stats.jvm.mem.heap_used_percent',
                 },
-                cluster_uuid: {
-                  terms: {
-                    field: 'cluster_uuid',
-                    size: 1,
-                  },
+              },
+              cluster_uuid: {
+                terms: {
+                  field: 'cluster_uuid',
+                  size: 1,
                 },
-                name: {
-                  terms: {
-                    field: 'source_node.name',
-                    size: 1,
-                  },
+              },
+              name: {
+                terms: {
+                  field: 'source_node.name',
+                  size: 1,
                 },
               },
             },
@@ -101,7 +99,7 @@ export async function fetchMemoryUsageNodeStats(
   try {
     if (filterQuery) {
       const filterQueryObject = JSON.parse(filterQuery);
-      params.body.query.bool.filter.push(filterQueryObject);
+      params.query.bool.filter.push(filterQueryObject);
     }
   } catch (e) {
     // meh

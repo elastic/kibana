@@ -59,7 +59,7 @@ function registerBeatsTutorialsWithCustomIntegrations(
       ? [
           {
             type: tutorial.euiIconType.endsWith('svg') ? 'svg' : 'eui',
-            src: core.http.basePath.prepend(tutorial.euiIconType),
+            src: tutorial.euiIconType,
           },
         ]
       : [],
@@ -73,15 +73,28 @@ export class TutorialsRegistry {
   private tutorialProviders: TutorialProvider[] = []; // pre-register all the tutorials we know we want in here
   private readonly scopedTutorialContextFactories: TutorialContextFactory[] = [];
   private staticAssets!: IStaticAssets;
+  private readonly isServerless: boolean;
 
-  constructor(private readonly initContext: PluginInitializerContext) {}
+  constructor(private readonly initContext: PluginInitializerContext) {
+    this.isServerless = this.initContext.env.packageInfo.buildFlavor === 'serverless';
+  }
 
   public setup(core: CoreSetup, customIntegrations?: CustomIntegrationsPluginSetup) {
     this.staticAssets = core.http.staticAssets;
 
     const router = core.http.createRouter();
     router.get(
-      { path: '/api/kibana/home/tutorials', validate: false },
+      {
+        path: '/api/kibana/home/tutorials',
+        security: {
+          authz: {
+            enabled: false,
+            reason:
+              'This route is opted out from authorization, because tutorials are public and ideally should be available to all users.',
+          },
+        },
+        validate: false,
+      },
       async (context, req, res) => {
         const initialContext = this.baseTutorialContext;
         const scopedContext = this.scopedTutorialContextFactories.reduce(
@@ -90,10 +103,13 @@ export class TutorialsRegistry {
           },
           initialContext
         );
+        const tutorials = this.tutorialProviders.map((tutorialProvider) => {
+          return tutorialProvider(scopedContext); // All the tutorialProviders need to be refactored so that they don't need the server.
+        });
         return res.ok({
-          body: this.tutorialProviders.map((tutorialProvider) => {
-            return tutorialProvider(scopedContext); // All the tutorialProviders need to be refactored so that they don't need the server.
-          }),
+          body: this.isServerless
+            ? tutorials.filter(({ omitServerless }) => !omitServerless)
+            : tutorials,
         });
       }
     );
@@ -140,6 +156,7 @@ export class TutorialsRegistry {
     if (customIntegrations) {
       builtInTutorials.forEach((provider) => {
         const tutorial = provider(this.baseTutorialContext);
+        if (tutorial.omitServerless && this.isServerless) return;
         registerBeatsTutorialsWithCustomIntegrations(core, customIntegrations, tutorial);
       });
     }

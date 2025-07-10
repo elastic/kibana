@@ -10,8 +10,8 @@ import { resolve as pathResolve, join as pathJoin } from 'path';
 import { ByteSizeValue } from '@kbn/config-schema';
 import moment from 'moment';
 
-import { ActionsConfig, DEFAULT_USAGE_API_URL } from '../config';
-import { Logger } from '@kbn/core/server';
+import type { ActionsConfig } from '../config';
+import type { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 import { resolveCustomHosts, getCanonicalCustomHostUrl } from './custom_host_settings';
@@ -21,7 +21,7 @@ import {
   DEFAULT_MICROSOFT_EXCHANGE_URL,
 } from '../../common';
 
-const CA_DIR = '../../../../../../../../packages/kbn-dev-utils/certs';
+const CA_DIR = '../../../../../../../../src/platform/packages/shared/kbn-dev-utils/certs';
 const CA_FILE1 = pathResolve(__filename, pathJoin(CA_DIR, 'ca.crt'));
 const CA_CONTENTS1 = fsReadFileSync(CA_FILE1, 'utf8');
 const CA_FILE2 = pathResolve(__filename, pathJoin(CA_DIR, 'kibana.crt'));
@@ -80,9 +80,6 @@ describe('custom_host_settings', () => {
       microsoftGraphApiUrl: DEFAULT_MICROSOFT_GRAPH_API_URL,
       microsoftGraphApiScope: DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
       microsoftExchangeUrl: DEFAULT_MICROSOFT_EXCHANGE_URL,
-      usage: {
-        url: DEFAULT_USAGE_API_URL,
-      },
     };
 
     test('ensure it copies over the config parts that it does not touch', () => {

@@ -31,7 +31,11 @@ import {
 } from '../lib/kibana/kibana_react.mock';
 import type { FieldHook } from '../../shared_imports';
 import { localStorageMock } from './mock_local_storage';
-import { ASSISTANT_FEATURE_ID, CASES_FEATURE_ID } from '../../../common/constants';
+import {
+  ASSISTANT_FEATURE_ID,
+  CASES_FEATURE_ID,
+  SECURITY_FEATURE_ID,
+} from '../../../common/constants';
 import { UserPrivilegesProvider } from '../components/user_privileges/user_privileges_context';
 import { MockDiscoverInTimelineContext } from '../components/discover_in_timeline/mocks/discover_in_timeline_provider';
 import { createMockStore } from './create_store';
@@ -88,7 +92,7 @@ export const TestProvidersComponent = ({
                         <CellActionsProvider
                           getTriggerCompatibleActions={() => Promise.resolve(cellActions)}
                         >
-                          <EuiProvider>
+                          <EuiProvider highContrastMode={false}>
                             <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
                           </EuiProvider>
                         </CellActionsProvider>
@@ -140,7 +144,7 @@ const TestProvidersWithPrivilegesComponent: React.FC<Props> = ({
                   <UserPrivilegesProvider
                     kibanaCapabilities={
                       {
-                        siem: { show: true, crud: true },
+                        [SECURITY_FEATURE_ID]: { show: true, crud: true },
                         [CASES_FEATURE_ID]: { read_cases: true, crud_cases: false },
                         [ASSISTANT_FEATURE_ID]: { 'ai-assistant': true },
                       } as unknown as Capabilities
@@ -149,7 +153,7 @@ const TestProvidersWithPrivilegesComponent: React.FC<Props> = ({
                     <CellActionsProvider
                       getTriggerCompatibleActions={() => Promise.resolve(cellActions)}
                     >
-                      <EuiProvider>
+                      <EuiProvider highContrastMode={false}>
                         <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
                       </EuiProvider>
                     </CellActionsProvider>

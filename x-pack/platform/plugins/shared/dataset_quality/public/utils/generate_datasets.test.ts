@@ -36,6 +36,7 @@ describe('generateDatasets', () => {
 
   const dataStreamStats: DataStreamStatType[] = [
     {
+      hasFailureStore: true,
       name: 'logs-system.application-default',
       lastActivity: 1712911241117,
       size: '82.1kb',
@@ -44,9 +45,11 @@ describe('generateDatasets', () => {
       integration: 'system',
       userPrivileges: {
         canMonitor: true,
+        canReadFailureStore: true,
       },
     },
     {
+      hasFailureStore: false,
       name: 'logs-synth-default',
       lastActivity: 1712911241117,
       size: '62.5kb',
@@ -54,6 +57,7 @@ describe('generateDatasets', () => {
       totalDocs: 100,
       userPrivileges: {
         canMonitor: true,
+        canReadFailureStore: true,
       },
     },
   ];
@@ -74,17 +78,26 @@ describe('generateDatasets', () => {
 
   const degradedDocs = [
     {
-      dataset: 'logs-system.application-default',
-      count: 0,
-    },
-    {
       dataset: 'logs-synth-default',
       count: 6,
     },
   ];
 
-  it('merges integrations information with dataStreamStats and degradedDocs', () => {
-    const datasets = generateDatasets(dataStreamStats, degradedDocs, integrations, totalDocs);
+  const failedDocs = [
+    {
+      dataset: 'logs-system.application-default',
+      count: 2,
+    },
+  ];
+
+  it('merges integrations information with dataStreamStats, degradedDocs and failedDocs', () => {
+    const datasets = generateDatasets(
+      dataStreamStats,
+      degradedDocs,
+      failedDocs,
+      integrations,
+      totalDocs
+    );
 
     expect(datasets).toEqual([
       {
@@ -100,13 +113,19 @@ describe('generateDatasets', () => {
         totalDocs: 100,
         userPrivileges: {
           canMonitor: true,
+          canReadFailureStore: true,
         },
-        docsInTimeRange: 100,
-        quality: 'good',
+        docsInTimeRange: 102,
+        quality: 'degraded',
         degradedDocs: {
           percentage: 0,
           count: 0,
         },
+        failedDocs: {
+          percentage: 1.9607843137254901,
+          count: 2,
+        },
+        hasFailureStore: true,
       },
       {
         name: 'synth',
@@ -121,6 +140,7 @@ describe('generateDatasets', () => {
         totalDocs: 100,
         userPrivileges: {
           canMonitor: true,
+          canReadFailureStore: true,
         },
         docsInTimeRange: 100,
         quality: 'poor',
@@ -128,6 +148,11 @@ describe('generateDatasets', () => {
           count: 6,
           percentage: 6,
         },
+        failedDocs: {
+          percentage: 0,
+          count: 0,
+        },
+        hasFailureStore: false,
       },
     ]);
   });
@@ -136,6 +161,7 @@ describe('generateDatasets', () => {
     const datasets = generateDatasets(
       dataStreamStats,
       degradedDocs,
+      failedDocs,
       integrations,
       DEFAULT_DICTIONARY_TYPE
     );
@@ -154,13 +180,19 @@ describe('generateDatasets', () => {
         totalDocs: 100,
         userPrivileges: {
           canMonitor: true,
+          canReadFailureStore: true,
         },
-        docsInTimeRange: 0,
-        quality: 'good',
+        docsInTimeRange: 2,
+        quality: 'poor',
         degradedDocs: {
           percentage: 0,
           count: 0,
         },
+        failedDocs: {
+          percentage: 100,
+          count: 2,
+        },
+        hasFailureStore: true,
       },
       {
         name: 'synth',
@@ -175,6 +207,7 @@ describe('generateDatasets', () => {
         totalDocs: 100,
         userPrivileges: {
           canMonitor: true,
+          canReadFailureStore: true,
         },
         docsInTimeRange: 0,
         quality: 'good',
@@ -182,12 +215,17 @@ describe('generateDatasets', () => {
           count: 6,
           percentage: 0,
         },
+        failedDocs: {
+          percentage: 0,
+          count: 0,
+        },
+        hasFailureStore: false,
       },
     ]);
   });
 
   it('merges integrations information with degradedDocs', () => {
-    const datasets = generateDatasets([], degradedDocs, integrations, totalDocs);
+    const datasets = generateDatasets([], degradedDocs, [], integrations, totalDocs);
 
     expect(datasets).toEqual([
       {
@@ -208,6 +246,11 @@ describe('generateDatasets', () => {
           percentage: 0,
           count: 0,
         },
+        failedDocs: {
+          percentage: 0,
+          count: 0,
+        },
+        hasFailureStore: false,
       },
       {
         name: 'synth',
@@ -227,12 +270,17 @@ describe('generateDatasets', () => {
           count: 6,
           percentage: 6,
         },
+        failedDocs: {
+          percentage: 0,
+          count: 0,
+        },
+        hasFailureStore: false,
       },
     ]);
   });
 
   it('merges integrations information with degradedDocs and totalDocs', () => {
-    const datasets = generateDatasets([], degradedDocs, integrations, {
+    const datasets = generateDatasets([], degradedDocs, [], integrations, {
       ...totalDocs,
       logs: [...totalDocs.logs, { dataset: 'logs-another-default', count: 100 }],
     });
@@ -256,6 +304,11 @@ describe('generateDatasets', () => {
           percentage: 0,
           count: 0,
         },
+        failedDocs: {
+          percentage: 0,
+          count: 0,
+        },
+        hasFailureStore: false,
       },
       {
         name: 'synth',
@@ -275,6 +328,11 @@ describe('generateDatasets', () => {
           count: 6,
           percentage: 6,
         },
+        failedDocs: {
+          percentage: 0,
+          count: 0,
+        },
+        hasFailureStore: false,
       },
       {
         name: 'another',
@@ -294,12 +352,17 @@ describe('generateDatasets', () => {
           percentage: 0,
           count: 0,
         },
+        failedDocs: {
+          percentage: 0,
+          count: 0,
+        },
+        hasFailureStore: false,
       },
     ]);
   });
 
   it('merges integrations information with dataStreamStats', () => {
-    const datasets = generateDatasets(dataStreamStats, [], integrations, totalDocs);
+    const datasets = generateDatasets(dataStreamStats, [], [], integrations, totalDocs);
 
     expect(datasets).toEqual([
       {
@@ -315,6 +378,7 @@ describe('generateDatasets', () => {
         totalDocs: 100,
         userPrivileges: {
           canMonitor: true,
+          canReadFailureStore: true,
         },
         quality: 'good',
         docsInTimeRange: 100,
@@ -322,6 +386,11 @@ describe('generateDatasets', () => {
           count: 0,
           percentage: 0,
         },
+        failedDocs: {
+          percentage: 0,
+          count: 0,
+        },
+        hasFailureStore: true,
       },
       {
         name: 'synth',
@@ -336,6 +405,7 @@ describe('generateDatasets', () => {
         totalDocs: 100,
         userPrivileges: {
           canMonitor: true,
+          canReadFailureStore: true,
         },
         quality: 'good',
         docsInTimeRange: 100,
@@ -343,12 +413,18 @@ describe('generateDatasets', () => {
           count: 0,
           percentage: 0,
         },
+        failedDocs: {
+          percentage: 0,
+          count: 0,
+        },
+        hasFailureStore: false,
       },
     ]);
   });
 
   it('merges integration information with dataStreamStats when dataset is not an integration default one', () => {
     const nonDefaultDataset = {
+      hasFailureStore: false,
       name: 'logs-system.custom-default',
       lastActivity: 1712911241117,
       size: '82.1kb',
@@ -357,10 +433,11 @@ describe('generateDatasets', () => {
       integration: 'system',
       userPrivileges: {
         canMonitor: true,
+        canReadFailureStore: true,
       },
     };
 
-    const datasets = generateDatasets([nonDefaultDataset], [], integrations, totalDocs);
+    const datasets = generateDatasets([nonDefaultDataset], [], [], integrations, totalDocs);
 
     expect(datasets).toEqual([
       {
@@ -375,6 +452,7 @@ describe('generateDatasets', () => {
         integration: integrations[0],
         userPrivileges: {
           canMonitor: true,
+          canReadFailureStore: true,
         },
         quality: 'good',
         totalDocs: 100,
@@ -383,6 +461,11 @@ describe('generateDatasets', () => {
           count: 0,
           percentage: 0,
         },
+        failedDocs: {
+          percentage: 0,
+          count: 0,
+        },
+        hasFailureStore: false,
       },
     ]);
   });

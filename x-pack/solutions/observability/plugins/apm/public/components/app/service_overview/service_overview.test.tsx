@@ -5,12 +5,19 @@
  * 2.0.
  */
 
-import { composeStories } from '@storybook/testing-react';
+import { composeStories } from '@storybook/react';
 import { screen } from '@testing-library/react';
 import React from 'react';
 import * as stories from './service_overview.stories';
 import * as useAdHocApmDataView from '../../../hooks/use_adhoc_apm_data_view';
 import { renderWithTheme } from '../../../utils/test_helpers';
+
+// Mock the usePerformanceContext hook
+jest.mock('@kbn/ebt-tools', () => ({
+  usePerformanceContext: () => ({
+    onPageReady: jest.fn(),
+  }),
+}));
 
 const { Example } = composeStories(stories);
 

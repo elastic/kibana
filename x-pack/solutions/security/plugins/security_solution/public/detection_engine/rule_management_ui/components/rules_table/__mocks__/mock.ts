@@ -11,13 +11,10 @@ import type {
   ActionsStepRule,
   DefineStepRule,
   ScheduleStepRule,
-} from '../../../../../detections/pages/detection_engine/rules/types';
-import {
-  DataSourceType,
-  AlertSuppressionDurationType,
-} from '../../../../../detections/pages/detection_engine/rules/types';
+} from '../../../../common/types';
+import { AlertSuppressionDurationType, DataSourceType } from '../../../../common/types';
 import type { FieldValueQueryBar } from '../../../../rule_creation_ui/components/query_bar_field';
-import { fillEmptySeverityMappings } from '../../../../../detections/pages/detection_engine/rules/helpers';
+import { fillEmptySeverityMappings } from '../../../../common/helpers';
 import { getThreatMock } from '../../../../../../common/detection_engine/schemas/types/threat.mock';
 import {
   AlertSuppressionMissingFieldsStrategyEnum,
@@ -205,7 +202,11 @@ export const mockAboutStepRule = (): AboutStepRule => ({
   name: 'Query with rule-id',
   description: '24/7',
   riskScore: { value: 21, mapping: [], isMappingChecked: false },
-  severity: { value: 'low', mapping: fillEmptySeverityMappings([]), isMappingChecked: false },
+  severity: {
+    value: 'low',
+    mapping: fillEmptySeverityMappings([]),
+    isMappingChecked: false,
+  },
   references: ['www.test.co'],
   falsePositives: ['test'],
   tags: ['tag1', 'tag2'],

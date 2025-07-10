@@ -10,23 +10,23 @@ import type {
   LogsOverviewProps as FullLogsOverviewProps,
   LogsOverviewDependencies,
   LogsOverviewErrorContentProps,
-} from '@kbn/observability-logs-overview';
+} from '@kbn/logs-overview';
 import { dynamic } from '@kbn/shared-ux-utility';
 import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
 
 const LazyLogsOverview = dynamic(() =>
-  import('@kbn/observability-logs-overview').then((mod) => ({ default: mod.LogsOverview }))
+  import('@kbn/logs-overview').then((mod) => ({ default: mod.LogsOverview }))
 );
 
 const LazyLogsOverviewErrorContent = dynamic(() =>
-  import('@kbn/observability-logs-overview').then((mod) => ({
+  import('@kbn/logs-overview').then((mod) => ({
     default: mod.LogsOverviewErrorContent,
   }))
 );
 
 const LazyLogsOverviewLoadingContent = dynamic(() =>
-  import('@kbn/observability-logs-overview').then((mod) => ({
+  import('@kbn/logs-overview').then((mod) => ({
     default: mod.LogsOverviewLoadingContent,
   }))
 );

@@ -55,11 +55,36 @@ paths:
           description: The kuery to filter by.
       responses:
         '200':
-          description: Bulk upload successful
+          description: Successfully retrieved asset criticality records
           content:
             application/json:
               schema:
                 type: object
+                example:
+                  records:
+                    - id_field: 'host.name'
+                      id_value: 'my_other_host'
+                      criticality_level: 'medium_impact'
+                      '@timestamp': '2024-08-02T14:40:35.705Z'
+                      asset:
+                        criticality: medium_impact
+                      host:
+                        name: my_other_host
+                        asset:
+                          criticality: medium_impact
+                    - id_field: 'host.name'
+                      id_value: 'my_host'
+                      criticality_level: 'high_impact'
+                      '@timestamp': '2024-08-02T11:15:34.290Z'
+                      asset:
+                        criticality: high_impact
+                      host:
+                        name: my_host
+                        asset:
+                          criticality: high_impact
+                  total: 2
+                  page: 1
+                  per_page: 10
                 properties:
                   records:
                     type: array

@@ -10,11 +10,11 @@ import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { updateRuleSo } from '../../../../data/rule/methods/update_rule_so';
 import { muteAlertParamsSchema } from './schemas';
 import type { MuteAlertParams } from './types';
-import { Rule } from '../../../../types';
+import type { Rule } from '../../../../types';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
 import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
-import { RulesClientContext } from '../../../../rules_client/types';
+import type { RulesClientContext } from '../../../../rules_client/types';
 import { updateMeta } from '../../../../rules_client/lib';
 
 export async function muteInstance(

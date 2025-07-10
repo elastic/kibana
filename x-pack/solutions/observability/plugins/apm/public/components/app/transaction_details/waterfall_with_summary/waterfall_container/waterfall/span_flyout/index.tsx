@@ -25,19 +25,17 @@ import styled from '@emotion/styled';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { isEmpty } from 'lodash';
 import React, { Fragment } from 'react';
-import { PlaintextStacktrace } from '../../../../../error_group_details/error_sampler/plaintext_stacktrace';
+import { Stacktrace, PlaintextStacktrace } from '@kbn/event-stacktrace';
+import { Duration, Timestamp } from '@kbn/apm-ui-shared';
 import type { Span } from '../../../../../../../../typings/es_schemas/ui/span';
 import type { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
 import { useFetcher, isPending } from '../../../../../../../hooks/use_fetcher';
 import { DiscoverSpanLink } from '../../../../../../shared/links/discover_links/discover_span_link';
 import { SpanMetadata } from '../../../../../../shared/metadata_table/span_metadata';
 import { getSpanLinksTabContent } from '../../../../../../shared/span_links/span_links_tab_content';
-import { Stacktrace } from '../../../../../../shared/stacktrace';
 import { Summary } from '../../../../../../shared/summary';
 import { CompositeSpanDurationSummaryItem } from '../../../../../../shared/summary/composite_span_duration_summary_item';
-import { DurationSummaryItem } from '../../../../../../shared/summary/duration_summary_item';
 import { HttpInfoSummaryItem } from '../../../../../../shared/summary/http_info_summary_item';
-import { TimestampTooltip } from '../../../../../../shared/timestamp_tooltip';
 import { SyncBadge } from '../badge/sync_badge';
 import { FailureBadge } from '../failure_badge';
 import { ResponsiveFlyout } from '../responsive_flyout';
@@ -215,8 +213,8 @@ function SpanFlyoutBody({
 
   const spanLinksTabContent = getSpanLinksTabContent({
     spanLinksCount,
-    traceId: span.trace.id,
-    spanId: span.span.id,
+    traceId: span.trace?.id,
+    spanId: span.span?.id,
     processorEvent: ProcessorEvent.span,
   });
 
@@ -267,12 +265,12 @@ function SpanFlyoutBody({
       <EuiSpacer size="m" />
       <Summary
         items={[
-          <TimestampTooltip time={span.timestamp.us / 1000} />,
+          <Timestamp timestamp={span.timestamp.us / 1000} renderMode="tooltip" />,
           <>
-            <DurationSummaryItem
+            <Duration
               duration={span.span.duration.us}
-              totalDuration={totalDuration}
-              parentType="transaction"
+              parent={{ duration: totalDuration, type: 'transaction', loading: false }}
+              showTooltip
             />
             {span.span.composite && (
               <CompositeSpanDurationSummaryItem

@@ -8,18 +8,9 @@
 import { isEmpty } from 'lodash';
 import { firstValueFrom } from 'rxjs';
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 
-import type {
-  AlertInstanceContext,
-  AlertInstanceState,
-  RuleExecutorServices,
-} from '@kbn/alerting-plugin/server';
-import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
-import type { Filter } from '@kbn/es-query';
-import type { CompleteRule, ThresholdRuleParams } from '../../rule_schema';
+import type { ThresholdRuleParams } from '../../rule_schema';
 import { getFilter } from '../utils/get_filter';
 import { bulkCreateThresholdSignals } from './bulk_create_threshold_signals';
 import { findThresholdSignals } from './find_threshold_signals';
@@ -28,12 +19,9 @@ import { getThresholdSignalHistory } from './get_threshold_signal_history';
 import { bulkCreateSuppressedThresholdAlerts } from './bulk_create_suppressed_threshold_alerts';
 
 import type {
-  BulkCreate,
-  RuleRangeTuple,
   SearchAfterAndBulkCreateReturnType,
-  WrapHits,
-  RunOpts,
-  CreateRuleOptions,
+  SecuritySharedParams,
+  SecurityRuleServices,
 } from '../types';
 import type { ThresholdAlertState, ThresholdSignalHistory } from './types';
 import {
@@ -43,59 +31,41 @@ import {
 } from '../utils/utils';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
 import { buildThresholdSignalHistory } from './build_signal_history';
-import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import { getSignalHistory, transformBulkCreatedItemsToHits } from './utils';
-import type { ExperimentalFeatures } from '../../../../../common';
+import type { ScheduleNotificationResponseActionsService } from '../../rule_response_actions/schedule_notification_response_actions';
 
 export const thresholdExecutor = async ({
-  inputIndex,
-  runtimeMappings,
-  completeRule,
-  tuple,
-  ruleExecutionLogger,
+  sharedParams,
   services,
-  version,
   startedAt,
   state,
-  bulkCreate,
-  wrapHits,
-  ruleDataClient,
-  primaryTimestamp,
-  secondaryTimestamp,
-  aggregatableTimestampField,
-  exceptionFilter,
-  unprocessedExceptions,
-  spaceId,
-  runOpts,
   licensing,
-  experimentalFeatures,
   scheduleNotificationResponseActionsService,
 }: {
-  inputIndex: string[];
-  runtimeMappings: estypes.MappingRuntimeFields | undefined;
-  completeRule: CompleteRule<ThresholdRuleParams>;
-  tuple: RuleRangeTuple;
-  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
-  ruleExecutionLogger: IRuleExecutionLogForExecutors;
-  version: string;
+  sharedParams: SecuritySharedParams<ThresholdRuleParams>;
+  services: SecurityRuleServices;
   startedAt: Date;
   state: ThresholdAlertState;
-  bulkCreate: BulkCreate;
-  wrapHits: WrapHits;
-  ruleDataClient: IRuleDataClient;
-  primaryTimestamp: string;
-  secondaryTimestamp?: string;
-  aggregatableTimestampField: string;
-  exceptionFilter: Filter | undefined;
-  unprocessedExceptions: ExceptionListItemSchema[];
-  spaceId: string;
-  runOpts: RunOpts<ThresholdRuleParams>;
   licensing: LicensingPluginSetup;
-  experimentalFeatures: ExperimentalFeatures;
-  scheduleNotificationResponseActionsService: CreateRuleOptions['scheduleNotificationResponseActionsService'];
+  scheduleNotificationResponseActionsService: ScheduleNotificationResponseActionsService;
 }): Promise<SearchAfterAndBulkCreateReturnType & { state: ThresholdAlertState }> => {
+  const {
+    completeRule,
+    unprocessedExceptions,
+    tuple,
+    spaceId,
+    aggregatableTimestampField,
+    ruleDataClient,
+    inputIndex,
+    exceptionFilter,
+    ruleExecutionLogger,
+    primaryTimestamp,
+    secondaryTimestamp,
+    runtimeMappings,
+  } = sharedParams;
   const result = createSearchAfterReturnType();
   const ruleParams = completeRule.ruleParams;
+  const isLoggedRequestsEnabled = Boolean(state?.isLoggedRequestsEnabled);
 
   return withSecuritySpan('thresholdExecutor', async () => {
     const exceptionsWarning = getUnprocessedExceptionsWarnings(unprocessedExceptions);
@@ -140,20 +110,22 @@ export const thresholdExecutor = async ({
     });
 
     // Look for new events over threshold
-    const { buckets, searchErrors, searchDurations, warnings } = await findThresholdSignals({
-      inputIndexPattern: inputIndex,
-      from: tuple.from.toISOString(),
-      to: tuple.to.toISOString(),
-      maxSignals: tuple.maxSignals,
-      services,
-      ruleExecutionLogger,
-      filter: esFilter,
-      threshold: ruleParams.threshold,
-      runtimeMappings,
-      primaryTimestamp,
-      secondaryTimestamp,
-      aggregatableTimestampField,
-    });
+    const { buckets, searchErrors, searchDurations, warnings, loggedRequests } =
+      await findThresholdSignals({
+        inputIndexPattern: inputIndex,
+        from: tuple.from.toISOString(),
+        to: tuple.to.toISOString(),
+        maxSignals: tuple.maxSignals,
+        services,
+        ruleExecutionLogger,
+        filter: esFilter,
+        threshold: ruleParams.threshold,
+        runtimeMappings,
+        primaryTimestamp,
+        secondaryTimestamp,
+        aggregatableTimestampField,
+        isLoggedRequestsEnabled,
+      });
 
     const alertSuppression = completeRule.ruleParams.alertSuppression;
 
@@ -161,17 +133,10 @@ export const thresholdExecutor = async ({
 
     if (alertSuppression?.duration && hasPlatinumLicense) {
       const suppressedResults = await bulkCreateSuppressedThresholdAlerts({
+        sharedParams,
         buckets,
-        completeRule,
         services,
-        inputIndexPattern: inputIndex,
         startedAt,
-        from: tuple.from.toDate(),
-        to: tuple.to.toDate(),
-        ruleExecutionLogger,
-        spaceId,
-        runOpts,
-        experimentalFeatures,
       });
       const createResult = suppressedResults.bulkCreateResult;
 
@@ -184,18 +149,10 @@ export const thresholdExecutor = async ({
       });
     } else {
       const createResult = await bulkCreateThresholdSignals({
+        sharedParams,
         buckets,
-        completeRule,
-        filter: esFilter,
         services,
-        inputIndexPattern: inputIndex,
-        signalsIndex: ruleParams.outputIndex,
         startedAt,
-        from: tuple.from.toDate(),
-        signalHistory: validSignalHistory,
-        bulkCreate,
-        wrapHits,
-        ruleExecutionLogger,
       });
 
       newSignalHistory = buildThresholdSignalHistory({
@@ -227,6 +184,7 @@ export const thresholdExecutor = async ({
           ...newSignalHistory,
         },
       },
+      ...(isLoggedRequestsEnabled ? { loggedRequests } : {}),
     };
   });
 };

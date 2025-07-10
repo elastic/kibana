@@ -11,6 +11,10 @@ import React from 'react';
 import { ActionableSummary } from '.';
 import { TestProviders } from '../../../../../common/mock';
 import { mockAttackDiscovery } from '../../../mock/mock_attack_discovery';
+import { useKibana } from '../../../../../common/lib/kibana';
+import { SECURITY_FEATURE_ID } from '../../../../../../common';
+
+jest.mock('../../../../../common/lib/kibana');
 
 describe('ActionableSummary', () => {
   const mockReplacements = {
@@ -104,6 +108,39 @@ describe('ActionableSummary', () => {
 
     it('renders the View in AI assistant button', () => {
       expect(screen.getByTestId('viewInAiAssistantCompact')).toBeInTheDocument();
+    });
+  });
+
+  describe('when configurations capabilities is defined (for AI4DSOC)', () => {
+    beforeEach(() => {
+      (useKibana as jest.Mock).mockReturnValue({
+        services: {
+          application: {
+            capabilities: {
+              [SECURITY_FEATURE_ID]: {
+                configurations: true,
+              },
+            },
+          },
+        },
+      });
+
+      render(
+        <TestProviders>
+          <ActionableSummary
+            attackDiscovery={mockAttackDiscovery}
+            replacements={mockReplacements}
+          />
+        </TestProviders>
+      );
+    });
+
+    it('renders a disabled badge with the hostname value', () => {
+      expect(screen.getAllByTestId('disabledActionsBadge')[0]).toHaveTextContent('foo.hostname');
+    });
+
+    it('renders a disabled badge with the username value', () => {
+      expect(screen.getAllByTestId('disabledActionsBadge')[1]).toHaveTextContent('bar.username');
     });
   });
 });

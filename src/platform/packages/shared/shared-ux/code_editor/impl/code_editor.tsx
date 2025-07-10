@@ -20,6 +20,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   useEuiTheme,
+  UseEuiTheme,
 } from '@elastic/eui';
 import {
   monaco,
@@ -28,13 +29,14 @@ import {
 } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { css } from '@emotion/react';
+import { css, Interpolation, Theme } from '@emotion/react';
 import {
   MonacoEditor as ReactMonacoEditor,
   type MonacoEditorProps as ReactMonacoEditorProps,
 } from './react_monaco_editor';
-import './register_languages';
 import { remeasureFonts } from './remeasure_fonts';
+import { useContextMenuUtils } from './use_context_menu_utils';
+import type { ContextMenuAction } from './use_context_menu_utils';
 
 import { PlaceholderWidget } from './placeholder_widget';
 import { styles } from './editor.styles';
@@ -157,6 +159,22 @@ export interface CodeEditorProps {
   enableFindAction?: boolean;
 
   dataTestSubj?: string;
+
+  /**
+   * Custom CSS class to apply to the container
+   */
+  classNameCss?: Interpolation<Theme>;
+
+  /**
+   * Enables a custom context menu with Cut, Copy, Paste actions. Disabled by default.
+   */
+  enableCustomContextMenu?: boolean;
+
+  /**
+   * If the custom context menu is enable through {@link enableCustomContextMenu},
+   * this prop allows adding more custom menu actions, on top of the default Cut, Copy, and Paste actions.
+   */
+  customContextMenuActions?: ContextMenuAction[];
 }
 
 export const CodeEditor: React.FC<CodeEditorProps> = ({
@@ -189,8 +207,12 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   accessibilityOverlayEnabled = true,
   enableFindAction,
   dataTestSubj,
+  classNameCss,
+  enableCustomContextMenu = false,
+  customContextMenuActions = [],
 }) => {
   const { euiTheme } = useEuiTheme();
+  const { registerContextMenuActions, unregisterContextMenuActions } = useContextMenuUtils();
 
   // We need to be able to mock the MonacoEditor in our test in order to not test implementation
   // detail and not have to call methods on the <CodeEditor /> component instance.
@@ -210,7 +232,6 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   const isReadOnly = options?.readOnly ?? false;
 
   const [_editor, setEditor] = useState<monaco.editor.IStandaloneCodeEditor | null>(null);
-  const _placeholderWidget = useRef<PlaceholderWidget | null>(null);
   const isSuggestionMenuOpen = useRef(false);
   const editorHint = useRef<HTMLDivElement>(null);
   const textboxMutationObserver = useRef<MutationObserver | null>(null);
@@ -446,20 +467,41 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
         });
       }
 
+      if (enableCustomContextMenu) {
+        registerContextMenuActions({
+          editor,
+          enableWriteActions: !isReadOnly,
+          customActions: customContextMenuActions,
+        });
+      }
+
       editorDidMount?.(editor);
       setEditor(editor);
     },
-    [editorDidMount, onBlurMonaco, onKeydownMonaco, readOnlyMessage]
+    [
+      editorDidMount,
+      onBlurMonaco,
+      onKeydownMonaco,
+      readOnlyMessage,
+      enableCustomContextMenu,
+      registerContextMenuActions,
+      isReadOnly,
+      customContextMenuActions,
+    ]
   );
 
   const _editorWillUnmount = useCallback<NonNullable<ReactMonacoEditorProps['editorWillUnmount']>>(
     (editor) => {
+      if (enableCustomContextMenu) {
+        unregisterContextMenuActions();
+      }
+
       editorWillUnmount?.();
 
       const model = editor.getModel();
       model?.dispose();
     },
-    [editorWillUnmount]
+    [editorWillUnmount, enableCustomContextMenu, unregisterContextMenuActions]
   );
 
   useEffect(() => {
@@ -468,19 +510,8 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
     };
   }, []);
 
-  useEffect(() => {
-    if (placeholder && !value && _editor) {
-      // Mounts editor inside constructor
-      _placeholderWidget.current = new PlaceholderWidget(placeholder, euiTheme, _editor);
-    }
-
-    return () => {
-      _placeholderWidget.current?.dispose();
-      _placeholderWidget.current = null;
-    };
-  }, [placeholder, value, euiTheme, _editor]);
-
   useFitToContent({ editor: _editor, fitToContent, isFullScreen });
+  usePlaceholder({ placeholder, euiTheme, editor: _editor, value });
 
   const { CopyButton } = useCopy({ isCopyable, value });
 
@@ -490,7 +521,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
 
   return (
     <div
-      css={styles.container}
+      css={[styles.container, classNameCss]}
       onKeyDown={onKeyDown}
       data-test-subj={dataTestSubj ?? 'kibanaCodeEditor'}
       className="kibanaCodeEditor"
@@ -549,6 +580,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
               fontFamily: 'Roboto Mono',
               fontSize: isFullScreen ? 16 : 12,
               lineHeight: isFullScreen ? 24 : 21,
+              contextmenu: enableCustomContextMenu,
               // @ts-expect-error, see https://github.com/microsoft/monaco-editor/issues/3829
               'bracketPairColorization.enabled': false,
               ...options,
@@ -653,6 +685,54 @@ const useCopy = ({ isCopyable, value }: { isCopyable: boolean; value: string }) 
   };
 
   return { showCopyButton, CopyButton };
+};
+
+const usePlaceholder = ({
+  placeholder,
+  euiTheme,
+  editor,
+  value,
+}: {
+  placeholder: string | undefined;
+  euiTheme: UseEuiTheme['euiTheme'];
+  editor: monaco.editor.IStandaloneCodeEditor | null;
+  value: string;
+}) => {
+  useEffect(() => {
+    if (!placeholder || !editor) return;
+
+    let placeholderWidget: PlaceholderWidget | null = null;
+
+    const addPlaceholder = () => {
+      if (!placeholderWidget) {
+        placeholderWidget = new PlaceholderWidget(placeholder, euiTheme, editor);
+      }
+    };
+
+    const removePlaceholder = () => {
+      if (placeholderWidget) {
+        placeholderWidget.dispose();
+        placeholderWidget = null;
+      }
+    };
+
+    if (!value) {
+      addPlaceholder();
+    }
+
+    const onDidChangeContent = editor.getModel()?.onDidChangeContent(() => {
+      if (!editor.getModel()?.getValue()) {
+        addPlaceholder();
+      } else {
+        removePlaceholder();
+      }
+    });
+
+    return () => {
+      onDidChangeContent?.dispose();
+      removePlaceholder();
+    };
+  }, [placeholder, value, euiTheme, editor]);
 };
 
 const useFitToContent = ({

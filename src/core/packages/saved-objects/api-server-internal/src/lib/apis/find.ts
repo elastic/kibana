@@ -8,7 +8,7 @@
  */
 
 import Boom from '@hapi/boom';
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { isSupportedEsServer } from '@kbn/core-elasticsearch-server-internal';
 import {
   SavedObjectsErrorHelpers,
@@ -191,31 +191,26 @@ export const performFind = async <T = unknown, A = unknown>(
     preference,
     rest_total_hits_as_int: true,
     size: perPage,
-    body: {
-      size: perPage,
-      seq_no_primary_term: true,
-      from: perPage * (page - 1),
-      _source: includedFields(allowedTypes, fields),
-      ...(aggsObject ? { aggs: aggsObject } : {}),
-      ...getSearchDsl(mappings, registry, {
-        search,
-        defaultSearchOperator,
-        searchFields,
-        pit,
-        rootSearchFields,
-        type: allowedTypes,
-        searchAfter,
-        sortField,
-        sortOrder,
-        namespaces,
-        typeToNamespacesMap, // If defined, this takes precedence over the `type` and `namespaces` fields
-        hasReference,
-        hasReferenceOperator,
-        hasNoReference,
-        hasNoReferenceOperator,
-        kueryNode,
-      }),
-    },
+    seq_no_primary_term: true,
+    ...(aggsObject ? { aggs: aggsObject } : {}),
+    ...getSearchDsl(mappings, registry, {
+      search,
+      defaultSearchOperator,
+      searchFields,
+      pit,
+      rootSearchFields,
+      type: allowedTypes,
+      searchAfter,
+      sortField,
+      sortOrder,
+      namespaces,
+      typeToNamespacesMap, // If defined, this takes precedence over the `type` and `namespaces` fields
+      hasReference,
+      hasReferenceOperator,
+      hasNoReference,
+      hasNoReferenceOperator,
+      kueryNode,
+    }),
   };
 
   const { body, statusCode, headers } = await client.search<SavedObjectsRawDocSource>(esOptions, {

@@ -3,5 +3,6 @@
   "id": "@kbn/shared-ux-storybook-config",
   "owner": "@elastic/appex-sharedux",
   "visibility": "private",
-  "group": "platform"
+  "group": "platform",
+  "devOnly": true
 }

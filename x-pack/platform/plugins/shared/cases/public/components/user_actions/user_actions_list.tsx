@@ -11,7 +11,7 @@ import { EuiCommentList, useEuiTheme } from '@elastic/eui';
 import React, { useMemo, useEffect, useState } from 'react';
 import { css } from '@emotion/react';
 
-import type { UserActionUI } from '../../containers/types';
+import type { AttachmentUI, UserActionUI } from '../../containers/types';
 import type { UserActionBuilderArgs, UserActionTreeProps } from './types';
 import { isUserActionTypeSupported } from './helpers';
 import { useCasesContext } from '../cases_context/use_cases_context';
@@ -66,6 +66,7 @@ export type UserActionListProps = Omit<
 > &
   Pick<UserActionBuilderArgs, 'commentRefs' | 'handleManageQuote'> & {
     caseUserActions: UserActionUI[];
+    attachments: AttachmentUI[];
     loadingAlertData: boolean;
     manualAlertsData: Record<string, unknown>;
     bottomActions?: EuiCommentProps[];
@@ -75,6 +76,7 @@ export type UserActionListProps = Omit<
 export const UserActionsList = React.memo(
   ({
     caseUserActions,
+    attachments,
     caseConnectors,
     userProfiles,
     currentUserProfile,
@@ -113,15 +115,15 @@ export const UserActionsList = React.memo(
         return [];
       }
 
-      return caseUserActions.reduce<EuiCommentProps[]>((comments, userAction, index) => {
+      return caseUserActions.reduce<EuiCommentProps[]>((userActions, userAction, index) => {
         if (!isUserActionTypeSupported(userAction.type)) {
-          return comments;
+          return userActions;
         }
 
         const builder = builderMap[userAction.type];
 
         if (builder == null) {
-          return comments;
+          return userActions;
         }
 
         const userActionBuilder = builder({
@@ -134,7 +136,7 @@ export const UserActionsList = React.memo(
           userAction,
           userProfiles,
           currentUserProfile,
-          comments: caseData?.comments,
+          attachments,
           index,
           commentRefs,
           manageMarkdownEditIds,
@@ -153,7 +155,7 @@ export const UserActionsList = React.memo(
           getRuleDetailsHref,
           onRuleDetailsClick,
         });
-        return [...comments, ...userActionBuilder.build()];
+        return [...userActions, ...userActionBuilder.build()];
       }, []);
     }, [
       caseUserActions,
@@ -165,6 +167,7 @@ export const UserActionsList = React.memo(
       persistableStateAttachmentTypeRegistry,
       userProfiles,
       currentUserProfile,
+      attachments,
       commentRefs,
       manageMarkdownEditIds,
       selectedOutlineCommentId,

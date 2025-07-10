@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import {
   EXCLUDE_RUN_ONCE_FILTER,
   SUMMARY_FILTER,
@@ -80,7 +80,7 @@ export const getPings: UMElasticsearchQueryFn<GetPingsParams, PingsResponse> = a
     body: {
       hits: { hits, total },
     },
-  } = await uptimeEsClient.search({ body: searchBody });
+  } = await uptimeEsClient.search(searchBody);
 
   const pings: Ping[] = hits.map((doc: any) => {
     const { _id, _source } = doc;

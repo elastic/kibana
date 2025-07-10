@@ -1,0 +1,3697 @@
+{
+  "id": "@kbn/unified-histogram",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/unified-histogram",
+        "id": "def-public.canImportVisContext",
+        "type": "Function",
+        "tags": [],
+        "label": "canImportVisContext",
+        "description": [],
+        "signature": [
+          "(visContext: unknown) => boolean"
+        ],
+        "path": "src/platform/packages/shared/kbn-unified-histogram/utils/external_vis_context.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.canImportVisContext.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "visContext",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/utils/external_vis_context.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/unified-histogram",
+        "id": "def-public.getBreakdownField",
+        "type": "Function",
+        "tags": [],
+        "label": "getBreakdownField",
+        "description": [
+          "\nGet the breakdown field from local storage"
+        ],
+        "signature": [
+          "(storage: ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "public",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-public.Storage",
+            "text": "Storage"
+          },
+          ", localStorageKeyPrefix: string) => string | undefined"
+        ],
+        "path": "src/platform/packages/shared/kbn-unified-histogram/utils/local_storage_utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.getBreakdownField.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "storage",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "kibanaUtils",
+                "scope": "public",
+                "docId": "kibKibanaUtilsPluginApi",
+                "section": "def-public.Storage",
+                "text": "Storage"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/utils/local_storage_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.getBreakdownField.$2",
+            "type": "string",
+            "tags": [],
+            "label": "localStorageKeyPrefix",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/utils/local_storage_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/unified-histogram",
+        "id": "def-public.getChartHidden",
+        "type": "Function",
+        "tags": [],
+        "label": "getChartHidden",
+        "description": [
+          "\nGet the chart hidden state from local storage"
+        ],
+        "signature": [
+          "(storage: ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "public",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-public.Storage",
+            "text": "Storage"
+          },
+          ", localStorageKeyPrefix: string) => boolean | undefined"
+        ],
+        "path": "src/platform/packages/shared/kbn-unified-histogram/utils/local_storage_utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.getChartHidden.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "storage",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "kibanaUtils",
+                "scope": "public",
+                "docId": "kibKibanaUtilsPluginApi",
+                "section": "def-public.Storage",
+                "text": "Storage"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/utils/local_storage_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.getChartHidden.$2",
+            "type": "string",
+            "tags": [],
+            "label": "localStorageKeyPrefix",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/utils/local_storage_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/unified-histogram",
+        "id": "def-public.getTopPanelHeight",
+        "type": "Function",
+        "tags": [],
+        "label": "getTopPanelHeight",
+        "description": [
+          "\nGet the top panel height from local storage"
+        ],
+        "signature": [
+          "(storage: ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "public",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-public.Storage",
+            "text": "Storage"
+          },
+          ", localStorageKeyPrefix: string) => number | undefined"
+        ],
+        "path": "src/platform/packages/shared/kbn-unified-histogram/utils/local_storage_utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.getTopPanelHeight.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "storage",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "kibanaUtils",
+                "scope": "public",
+                "docId": "kibKibanaUtilsPluginApi",
+                "section": "def-public.Storage",
+                "text": "Storage"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/utils/local_storage_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.getTopPanelHeight.$2",
+            "type": "string",
+            "tags": [],
+            "label": "localStorageKeyPrefix",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/utils/local_storage_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/unified-histogram",
+        "id": "def-public.setBreakdownField",
+        "type": "Function",
+        "tags": [],
+        "label": "setBreakdownField",
+        "description": [
+          "\nSet the breakdown field in local storage"
+        ],
+        "signature": [
+          "(storage: ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "public",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-public.Storage",
+            "text": "Storage"
+          },
+          ", localStorageKeyPrefix: string, breakdownField: string | undefined) => false | void"
+        ],
+        "path": "src/platform/packages/shared/kbn-unified-histogram/utils/local_storage_utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.setBreakdownField.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "storage",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "kibanaUtils",
+                "scope": "public",
+                "docId": "kibKibanaUtilsPluginApi",
+                "section": "def-public.Storage",
+                "text": "Storage"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/utils/local_storage_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.setBreakdownField.$2",
+            "type": "string",
+            "tags": [],
+            "label": "localStorageKeyPrefix",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/utils/local_storage_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.setBreakdownField.$3",
+            "type": "string",
+            "tags": [],
+            "label": "breakdownField",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/utils/local_storage_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/unified-histogram",
+        "id": "def-public.setChartHidden",
+        "type": "Function",
+        "tags": [],
+        "label": "setChartHidden",
+        "description": [
+          "\nSet the chart hidden state in local storage"
+        ],
+        "signature": [
+          "(storage: ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "public",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-public.Storage",
+            "text": "Storage"
+          },
+          ", localStorageKeyPrefix: string, chartHidden: boolean | undefined) => false | void"
+        ],
+        "path": "src/platform/packages/shared/kbn-unified-histogram/utils/local_storage_utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.setChartHidden.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "storage",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "kibanaUtils",
+                "scope": "public",
+                "docId": "kibKibanaUtilsPluginApi",
+                "section": "def-public.Storage",
+                "text": "Storage"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/utils/local_storage_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.setChartHidden.$2",
+            "type": "string",
+            "tags": [],
+            "label": "localStorageKeyPrefix",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/utils/local_storage_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.setChartHidden.$3",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "chartHidden",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/utils/local_storage_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/unified-histogram",
+        "id": "def-public.setTopPanelHeight",
+        "type": "Function",
+        "tags": [],
+        "label": "setTopPanelHeight",
+        "description": [
+          "\nSet the top panel height in local storage"
+        ],
+        "signature": [
+          "(storage: ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "public",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-public.Storage",
+            "text": "Storage"
+          },
+          ", localStorageKeyPrefix: string, topPanelHeight: number | undefined) => false | void"
+        ],
+        "path": "src/platform/packages/shared/kbn-unified-histogram/utils/local_storage_utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.setTopPanelHeight.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "storage",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "kibanaUtils",
+                "scope": "public",
+                "docId": "kibKibanaUtilsPluginApi",
+                "section": "def-public.Storage",
+                "text": "Storage"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/utils/local_storage_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.setTopPanelHeight.$2",
+            "type": "string",
+            "tags": [],
+            "label": "localStorageKeyPrefix",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/utils/local_storage_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.setTopPanelHeight.$3",
+            "type": "number",
+            "tags": [],
+            "label": "topPanelHeight",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/utils/local_storage_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/unified-histogram",
+        "id": "def-public.UnifiedBreakdownFieldSelector",
+        "type": "Function",
+        "tags": [],
+        "label": "UnifiedBreakdownFieldSelector",
+        "description": [
+          "\nA resizable layout component with two panels that renders a histogram with a hits\ncounter in the top panel, and a main display (data table, etc.) in the bottom panel."
+        ],
+        "signature": [
+          "React.ForwardRefExoticComponent<",
+          {
+            "pluginId": "@kbn/unified-histogram",
+            "scope": "public",
+            "docId": "kibKbnUnifiedHistogramPluginApi",
+            "section": "def-public.BreakdownFieldSelectorProps",
+            "text": "BreakdownFieldSelectorProps"
+          },
+          " & ",
+          {
+            "pluginId": "@kbn/shared-ux-utility",
+            "scope": "common",
+            "docId": "kibKbnSharedUxUtilityPluginApi",
+            "section": "def-common.WithSuspenseExtendedDeps",
+            "text": "WithSuspenseExtendedDeps"
+          },
+          " & React.RefAttributes<{}>>"
+        ],
+        "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/lazy.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.UnifiedBreakdownFieldSelector.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/unified-histogram",
+        "id": "def-public.UnifiedHistogramChart",
+        "type": "Function",
+        "tags": [],
+        "label": "UnifiedHistogramChart",
+        "description": [],
+        "signature": [
+          "({\n  isChartAvailable,\n  services,\n  dataView,\n  requestParams,\n  relativeTimeRange: originalRelativeTimeRange,\n  request,\n  hits,\n  chart,\n  breakdown,\n  lensVisService,\n  isPlainRecord,\n  renderCustomChartToggleActions,\n  input$: originalInput$,\n  lensAdapters,\n  dataLoading$,\n  isChartLoading,\n  onChartHiddenChange,\n  onTimeIntervalChange,\n  onBreakdownFieldChange,\n  onTotalHitsChange,\n  onChartLoad,\n  columns,\n  ...histogramProps\n}: ",
+          {
+            "pluginId": "@kbn/unified-histogram",
+            "scope": "public",
+            "docId": "kibKbnUnifiedHistogramPluginApi",
+            "section": "def-public.UnifiedHistogramChartProps",
+            "text": "UnifiedHistogramChartProps"
+          },
+          ") => React.JSX.Element"
+        ],
+        "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.UnifiedHistogramChart.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  isChartAvailable,\n  services,\n  dataView,\n  requestParams,\n  relativeTimeRange: originalRelativeTimeRange,\n  request,\n  hits,\n  chart,\n  breakdown,\n  lensVisService,\n  isPlainRecord,\n  renderCustomChartToggleActions,\n  input$: originalInput$,\n  lensAdapters,\n  dataLoading$,\n  isChartLoading,\n  onChartHiddenChange,\n  onTimeIntervalChange,\n  onBreakdownFieldChange,\n  onTotalHitsChange,\n  onChartLoad,\n  columns,\n  ...histogramProps\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/unified-histogram",
+                "scope": "public",
+                "docId": "kibKbnUnifiedHistogramPluginApi",
+                "section": "def-public.UnifiedHistogramChartProps",
+                "text": "UnifiedHistogramChartProps"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/unified-histogram",
+        "id": "def-public.UnifiedHistogramLayout",
+        "type": "Function",
+        "tags": [],
+        "label": "UnifiedHistogramLayout",
+        "description": [],
+        "signature": [
+          "({ container, unifiedHistogramChart, chart, isChartAvailable, hits, topPanelHeight, onTopPanelHeightChange, children, }: ",
+          {
+            "pluginId": "@kbn/unified-histogram",
+            "scope": "public",
+            "docId": "kibKbnUnifiedHistogramPluginApi",
+            "section": "def-public.UnifiedHistogramLayoutProps",
+            "text": "UnifiedHistogramLayoutProps"
+          },
+          ") => React.JSX.Element"
+        ],
+        "path": "src/platform/packages/shared/kbn-unified-histogram/components/layout/layout.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.UnifiedHistogramLayout.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  container,\n  unifiedHistogramChart,\n  chart,\n  isChartAvailable,\n  hits,\n  topPanelHeight,\n  onTopPanelHeightChange,\n  children,\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/unified-histogram",
+                "scope": "public",
+                "docId": "kibKbnUnifiedHistogramPluginApi",
+                "section": "def-public.UnifiedHistogramLayoutProps",
+                "text": "UnifiedHistogramLayoutProps"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/components/layout/layout.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/unified-histogram",
+        "id": "def-public.useUnifiedHistogram",
+        "type": "Function",
+        "tags": [],
+        "label": "useUnifiedHistogram",
+        "description": [],
+        "signature": [
+          "(props: ",
+          {
+            "pluginId": "@kbn/unified-histogram",
+            "scope": "public",
+            "docId": "kibKbnUnifiedHistogramPluginApi",
+            "section": "def-public.UseUnifiedHistogramProps",
+            "text": "UseUnifiedHistogramProps"
+          },
+          ") => ",
+          "UseUnifiedHistogramResult"
+        ],
+        "path": "src/platform/packages/shared/kbn-unified-histogram/hooks/use_unified_histogram.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.useUnifiedHistogram.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/unified-histogram",
+                "scope": "public",
+                "docId": "kibKbnUnifiedHistogramPluginApi",
+                "section": "def-public.UseUnifiedHistogramProps",
+                "text": "UseUnifiedHistogramProps"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/hooks/use_unified_histogram.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/unified-histogram",
+        "id": "def-public.BreakdownFieldSelectorProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "BreakdownFieldSelectorProps",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/breakdown_field_selector.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.BreakdownFieldSelectorProps.dataView",
+            "type": "Object",
+            "tags": [],
+            "label": "dataView",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/breakdown_field_selector.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.BreakdownFieldSelectorProps.breakdown",
+            "type": "Object",
+            "tags": [],
+            "label": "breakdown",
+            "description": [],
+            "signature": [
+              "UnifiedHistogramBreakdownContext"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/breakdown_field_selector.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.BreakdownFieldSelectorProps.esqlColumns",
+            "type": "Array",
+            "tags": [],
+            "label": "esqlColumns",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.DatatableColumn",
+                "text": "DatatableColumn"
+              },
+              "[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/breakdown_field_selector.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.BreakdownFieldSelectorProps.onBreakdownFieldChange",
+            "type": "Function",
+            "tags": [],
+            "label": "onBreakdownFieldChange",
+            "description": [],
+            "signature": [
+              "((breakdownField: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewField",
+                "text": "DataViewField"
+              },
+              " | undefined) => void) | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/breakdown_field_selector.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/unified-histogram",
+                "id": "def-public.BreakdownFieldSelectorProps.onBreakdownFieldChange.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "breakdownField",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "dataViews",
+                    "scope": "common",
+                    "docId": "kibDataViewsPluginApi",
+                    "section": "def-common.DataViewField",
+                    "text": "DataViewField"
+                  },
+                  " | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/breakdown_field_selector.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/unified-histogram",
+        "id": "def-public.UnifiedHistogramChartLoadEvent",
+        "type": "Interface",
+        "tags": [],
+        "label": "UnifiedHistogramChartLoadEvent",
+        "description": [
+          "\nEmitted when the histogram loading status changes"
+        ],
+        "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.UnifiedHistogramChartLoadEvent.adapters",
+            "type": "Object",
+            "tags": [],
+            "label": "adapters",
+            "description": [
+              "\nInspector adapters for the request"
+            ],
+            "signature": [
+              "{ requests?: ",
+              {
+                "pluginId": "inspector",
+                "scope": "common",
+                "docId": "kibInspectorPluginApi",
+                "section": "def-common.RequestAdapter",
+                "text": "RequestAdapter"
+              },
+              " | undefined; tables?: ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.TablesAdapter",
+                "text": "TablesAdapter"
+              },
+              " | undefined; expression?: ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionsInspectorAdapter",
+                "text": "ExpressionsInspectorAdapter"
+              },
+              " | undefined; }"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.UnifiedHistogramChartLoadEvent.dataLoading$",
+            "type": "Object",
+            "tags": [],
+            "label": "dataLoading$",
+            "description": [
+              "\nObservable for the data change subscription"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/presentation-publishing",
+                "scope": "public",
+                "docId": "kibKbnPresentationPublishingPluginApi",
+                "section": "def-public.PublishingSubject",
+                "text": "PublishingSubject"
+              },
+              "<boolean | undefined> | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/unified-histogram",
+        "id": "def-public.UnifiedHistogramChartProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "UnifiedHistogramChartProps",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.UnifiedHistogramChartProps.abortController",
+            "type": "Object",
+            "tags": [],
+            "label": "abortController",
+            "description": [],
+            "signature": [
+              "AbortController | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.UnifiedHistogramChartProps.isChartAvailable",
+            "type": "boolean",
+            "tags": [],
+            "label": "isChartAvailable",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.UnifiedHistogramChartProps.hiddenPanel",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hiddenPanel",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.UnifiedHistogramChartProps.services",
+            "type": "Object",
+            "tags": [],
+            "label": "services",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/unified-histogram",
+                "scope": "public",
+                "docId": "kibKbnUnifiedHistogramPluginApi",
+                "section": "def-public.UnifiedHistogramServices",
+                "text": "UnifiedHistogramServices"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.UnifiedHistogramChartProps.dataView",
+            "type": "Object",
+            "tags": [],
+            "label": "dataView",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.UnifiedHistogramChartProps.requestParams",
+            "type": "Object",
+            "tags": [],
+            "label": "requestParams",
+            "description": [],
+            "signature": [
+              "UseRequestParamsResult"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.UnifiedHistogramChartProps.isPlainRecord",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isPlainRecord",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.UnifiedHistogramChartProps.lensVisService",
+            "type": "Object",
+            "tags": [],
+            "label": "lensVisService",
+            "description": [],
+            "signature": [
+              "LensVisService"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.UnifiedHistogramChartProps.relativeTimeRange",
+            "type": "Object",
+            "tags": [],
+            "label": "relativeTimeRange",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.TimeRange",
+                "text": "TimeRange"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.UnifiedHistogramChartProps.request",
+            "type": "Object",
+            "tags": [],
+            "label": "request",
+            "description": [],
+            "signature": [
+              "UnifiedHistogramRequestContext",
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.UnifiedHistogramChartProps.hits",
+            "type": "Object",
+            "tags": [],
+            "label": "hits",
+            "description": [],
+            "signature": [
+              "UnifiedHistogramHitsContext",
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.UnifiedHistogramChartProps.chart",
+            "type": "Object",
+            "tags": [],
+            "label": "chart",
+            "description": [],
+            "signature": [
+              "UnifiedHistogramChartContext",
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.UnifiedHistogramChartProps.breakdown",
+            "type": "Object",
+            "tags": [],
+            "label": "breakdown",
+            "description": [],
+            "signature": [
+              "UnifiedHistogramBreakdownContext",
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.UnifiedHistogramChartProps.renderCustomChartToggleActions",
+            "type": "Function",
+            "tags": [],
+            "label": "renderCustomChartToggleActions",
+            "description": [],
+            "signature": [
+              "(() => React.ReactElement<any, string | React.JSXElementConstructor<any>> | undefined) | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.UnifiedHistogramChartProps.disableTriggers",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "disableTriggers",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.UnifiedHistogramChartProps.disabledActions",
+            "type": "Array",
+            "tags": [],
+            "label": "disabledActions",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.UnifiedHistogramChartProps.input$",
+            "type": "Object",
+            "tags": [],
+            "label": "input$",
+            "description": [],
+            "signature": [
+              "UnifiedHistogramInput",
+              "$ | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.UnifiedHistogramChartProps.lensAdapters",
+            "type": "Object",
+            "tags": [],
+            "label": "lensAdapters",
+            "description": [],
+            "signature": [
+              "Partial<",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.DefaultInspectorAdapters",
+                "text": "DefaultInspectorAdapters"
+              },
+              "> | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.UnifiedHistogramChartProps.dataLoading$",
+            "type": "Object",
+            "tags": [],
+            "label": "dataLoading$",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/presentation-publishing",
+                "scope": "public",
+                "docId": "kibKbnPresentationPublishingPluginApi",
+                "section": "def-public.PublishingSubject",
+                "text": "PublishingSubject"
+              },
+              "<boolean | undefined> | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.UnifiedHistogramChartProps.isChartLoading",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isChartLoading",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.UnifiedHistogramChartProps.onChartHiddenChange",
+            "type": "Function",
+            "tags": [],
+            "label": "onChartHiddenChange",
+            "description": [],
+            "signature": [
+              "((chartHidden: boolean) => void) | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/unified-histogram",
+                "id": "def-public.UnifiedHistogramChartProps.onChartHiddenChange.$1",
+                "type": "boolean",
+                "tags": [],
+                "label": "chartHidden",
+                "description": [],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.UnifiedHistogramChartProps.onTimeIntervalChange",
+            "type": "Function",
+            "tags": [],
+            "label": "onTimeIntervalChange",
+            "description": [],
+            "signature": [
+              "((timeInterval: string) => void) | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/unified-histogram",
+                "id": "def-public.UnifiedHistogramChartProps.onTimeIntervalChange.$1",
+                "type": "string",
+                "tags": [],
+                "label": "timeInterval",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.UnifiedHistogramChartProps.onBreakdownFieldChange",
+            "type": "Function",
+            "tags": [],
+            "label": "onBreakdownFieldChange",
+            "description": [],
+            "signature": [
+              "((breakdownField: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewField",
+                "text": "DataViewField"
+              },
+              " | undefined) => void) | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/unified-histogram",
+                "id": "def-public.UnifiedHistogramChartProps.onBreakdownFieldChange.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "breakdownField",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "dataViews",
+                    "scope": "common",
+                    "docId": "kibDataViewsPluginApi",
+                    "section": "def-common.DataViewField",
+                    "text": "DataViewField"
+                  },
+                  " | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.UnifiedHistogramChartProps.onTotalHitsChange",
+            "type": "Function",
+            "tags": [],
+            "label": "onTotalHitsChange",
+            "description": [],
+            "signature": [
+              "((status: ",
+              {
+                "pluginId": "@kbn/unified-histogram",
+                "scope": "public",
+                "docId": "kibKbnUnifiedHistogramPluginApi",
+                "section": "def-public.UnifiedHistogramFetchStatus",
+                "text": "UnifiedHistogramFetchStatus"
+              },
+              ", result?: number | Error | undefined) => void) | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/unified-histogram",
+                "id": "def-public.UnifiedHistogramChartProps.onTotalHitsChange.$1",
+                "type": "Enum",
+                "tags": [],
+                "label": "status",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/unified-histogram",
+                    "scope": "public",
+                    "docId": "kibKbnUnifiedHistogramPluginApi",
+                    "section": "def-public.UnifiedHistogramFetchStatus",
+                    "text": "UnifiedHistogramFetchStatus"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/unified-histogram",
+                "id": "def-public.UnifiedHistogramChartProps.onTotalHitsChange.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "result",
+                "description": [],
+                "signature": [
+                  "number | Error | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.UnifiedHistogramChartProps.onChartLoad",
+            "type": "Function",
+            "tags": [],
+            "label": "onChartLoad",
+            "description": [],
+            "signature": [
+              "((event: ",
+              {
+                "pluginId": "@kbn/unified-histogram",
+                "scope": "public",
+                "docId": "kibKbnUnifiedHistogramPluginApi",
+                "section": "def-public.UnifiedHistogramChartLoadEvent",
+                "text": "UnifiedHistogramChartLoadEvent"
+              },
+              ") => void) | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/unified-histogram",
+                "id": "def-public.UnifiedHistogramChartProps.onChartLoad.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "event",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/unified-histogram",
+                    "scope": "public",
+                    "docId": "kibKbnUnifiedHistogramPluginApi",
+                    "section": "def-public.UnifiedHistogramChartLoadEvent",
+                    "text": "UnifiedHistogramChartLoadEvent"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.UnifiedHistogramChartProps.onFilter",
+            "type": "Function",
+            "tags": [],
+            "label": "onFilter",
+            "description": [],
+            "signature": [
+              "((data: { data: { table: Pick<",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.Datatable",
+                "text": "Datatable"
+              },
+              ", \"columns\" | \"rows\">; column: number; row: number; value: any; }[]; timeFieldName?: string | undefined; negate?: boolean | undefined; preventDefault: () => void; } | { data: { table: Pick<",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.Datatable",
+                "text": "Datatable"
+              },
+              ", \"columns\" | \"rows\">; cells: { column: number; row: number; }[]; relation?: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.BooleanRelation",
+                "text": "BooleanRelation"
+              },
+              " | undefined; }[]; timeFieldName?: string | undefined; negate?: boolean | undefined; preventDefault: () => void; }) => void) | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.UnifiedHistogramChartProps.onBrushEnd",
+            "type": "Function",
+            "tags": [],
+            "label": "onBrushEnd",
+            "description": [],
+            "signature": [
+              "((data: { table: ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.Datatable",
+                "text": "Datatable"
+              },
+              "; column: number; range: number[]; timeFieldName?: string | undefined; preventDefault: () => void; }) => void) | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.UnifiedHistogramChartProps.withDefaultActions",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "withDefaultActions",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.UnifiedHistogramChartProps.columns",
+            "type": "Array",
+            "tags": [],
+            "label": "columns",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.DatatableColumn",
+                "text": "DatatableColumn"
+              },
+              "[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/unified-histogram",
+        "id": "def-public.UnifiedHistogramServices",
+        "type": "Interface",
+        "tags": [],
+        "label": "UnifiedHistogramServices",
+        "description": [
+          "\nThe services required by the Unified Histogram components"
+        ],
+        "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.UnifiedHistogramServices.data",
+            "type": "Object",
+            "tags": [],
+            "label": "data",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "public",
+                "docId": "kibDataPluginApi",
+                "section": "def-public.DataPublicPluginStart",
+                "text": "DataPublicPluginStart"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.UnifiedHistogramServices.uiActions",
+            "type": "Object",
+            "tags": [],
+            "label": "uiActions",
+            "description": [],
+            "signature": [
+              "{ readonly registerTrigger: (trigger: ",
+              {
+                "pluginId": "@kbn/ui-actions-browser",
+                "scope": "common",
+                "docId": "kibKbnUiActionsBrowserPluginApi",
+                "section": "def-common.Trigger",
+                "text": "Trigger"
+              },
+              ") => void; readonly hasTrigger: (triggerId: string) => boolean; readonly getTrigger: (triggerId: string) => ",
+              "TriggerContract",
+              "<object>; readonly registerAction: <Context extends object>(definition: ",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.ActionDefinition",
+                "text": "ActionDefinition"
+              },
+              "<Context>) => ",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.Action",
+                "text": "Action"
+              },
+              "<Context>; readonly registerActionAsync: <Context extends object>(id: string, getDefinition: () => Promise<",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.ActionDefinition",
+                "text": "ActionDefinition"
+              },
+              "<Context>>) => void; readonly unregisterAction: (actionId: string) => void; readonly hasAction: (actionId: string) => boolean; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerAction: (triggerId: string, action: ",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.ActionDefinition",
+                "text": "ActionDefinition"
+              },
+              "<any>) => void; readonly addTriggerActionAsync: (triggerId: string, actionId: string, getDefinition: () => Promise<",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.ActionDefinition",
+                "text": "ActionDefinition"
+              },
+              "<any>>) => void; readonly getAction: (id: string) => Promise<",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.Action",
+                "text": "Action"
+              },
+              "<object>>; readonly getTriggerActions: (triggerId: string) => Promise<",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.Action",
+                "text": "Action"
+              },
+              "<object>[]>; readonly getTriggerCompatibleActions: (triggerId: string, context: object) => Promise<",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.Action",
+                "text": "Action"
+              },
+              "<object>[]>; readonly getFrequentlyChangingActionsForTrigger: (triggerId: string, context: object) => Promise<",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.FrequentCompatibilityChangeAction",
+                "text": "FrequentCompatibilityChangeAction"
+              },
+              "<object>[]>; readonly executeTriggerActions: (triggerId: string, context: object) => Promise<void>; readonly clear: () => void; readonly fork: () => ",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.UiActionsService",
+                "text": "UiActionsService"
+              },
+              "; }"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.UnifiedHistogramServices.uiSettings",
+            "type": "Object",
+            "tags": [],
+            "label": "uiSettings",
+            "description": [],
+            "signature": [
+              "IUiSettingsClient"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.UnifiedHistogramServices.fieldFormats",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "fieldFormats",
+            "description": [],
+            "signature": [
+              "Omit<",
+              {
+                "pluginId": "fieldFormats",
+                "scope": "common",
+                "docId": "kibFieldFormatsPluginApi",
+                "section": "def-common.FieldFormatsRegistry",
+                "text": "FieldFormatsRegistry"
+              },
+              ", \"init\" | \"register\"> & { deserialize: ",
+              {
+                "pluginId": "fieldFormats",
+                "scope": "common",
+                "docId": "kibFieldFormatsPluginApi",
+                "section": "def-common.FormatFactory",
+                "text": "FormatFactory"
+              },
+              "; }"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.UnifiedHistogramServices.lens",
+            "type": "Object",
+            "tags": [],
+            "label": "lens",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.LensPublicStart",
+                "text": "LensPublicStart"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.UnifiedHistogramServices.storage",
+            "type": "Object",
+            "tags": [],
+            "label": "storage",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "kibanaUtils",
+                "scope": "public",
+                "docId": "kibKibanaUtilsPluginApi",
+                "section": "def-public.Storage",
+                "text": "Storage"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.UnifiedHistogramServices.expressions",
+            "type": "Object",
+            "tags": [],
+            "label": "expressions",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressions",
+                "scope": "public",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-public.ExpressionsStart",
+                "text": "ExpressionsStart"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.UnifiedHistogramServices.capabilities",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "capabilities",
+            "description": [],
+            "signature": [
+              "{ [key: string]: Record<string, boolean | Record<string, boolean>>; navLinks: Record<string, boolean>; management: { [sectionId: string]: Record<string, boolean>; }; catalogue: Record<string, boolean>; } & { discover?: {} | undefined; dashboard?: {} | undefined; maps?: {} | undefined; visualize?: {} | undefined; }"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/unified-histogram",
+        "id": "def-public.UnifiedHistogramState",
+        "type": "Interface",
+        "tags": [],
+        "label": "UnifiedHistogramState",
+        "description": [
+          "\nThe current state of the container"
+        ],
+        "path": "src/platform/packages/shared/kbn-unified-histogram/services/state_service.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.UnifiedHistogramState.currentSuggestionContext",
+            "type": "Object",
+            "tags": [],
+            "label": "currentSuggestionContext",
+            "description": [
+              "\nThe current Lens suggestion"
+            ],
+            "signature": [
+              "UnifiedHistogramSuggestionContext",
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/services/state_service.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.UnifiedHistogramState.chartHidden",
+            "type": "boolean",
+            "tags": [],
+            "label": "chartHidden",
+            "description": [
+              "\nWhether or not the chart is hidden"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/services/state_service.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.UnifiedHistogramState.lensRequestAdapter",
+            "type": "Object",
+            "tags": [],
+            "label": "lensRequestAdapter",
+            "description": [
+              "\nThe current Lens request adapter"
+            ],
+            "signature": [
+              {
+                "pluginId": "inspector",
+                "scope": "common",
+                "docId": "kibInspectorPluginApi",
+                "section": "def-common.RequestAdapter",
+                "text": "RequestAdapter"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/services/state_service.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.UnifiedHistogramState.lensAdapters",
+            "type": "Object",
+            "tags": [],
+            "label": "lensAdapters",
+            "description": [
+              "\nThe current Lens adapters"
+            ],
+            "signature": [
+              "Partial<",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.DefaultInspectorAdapters",
+                "text": "DefaultInspectorAdapters"
+              },
+              "> | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/services/state_service.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.UnifiedHistogramState.dataLoading$",
+            "type": "Object",
+            "tags": [],
+            "label": "dataLoading$",
+            "description": [
+              "\nLens embeddable output observable"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/presentation-publishing",
+                "scope": "public",
+                "docId": "kibKbnPresentationPublishingPluginApi",
+                "section": "def-public.PublishingSubject",
+                "text": "PublishingSubject"
+              },
+              "<boolean | undefined> | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/services/state_service.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.UnifiedHistogramState.timeInterval",
+            "type": "string",
+            "tags": [],
+            "label": "timeInterval",
+            "description": [
+              "\nThe current time interval of the chart"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/services/state_service.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.UnifiedHistogramState.topPanelHeight",
+            "type": "number",
+            "tags": [],
+            "label": "topPanelHeight",
+            "description": [
+              "\nThe current top panel height"
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/services/state_service.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.UnifiedHistogramState.totalHitsStatus",
+            "type": "Enum",
+            "tags": [],
+            "label": "totalHitsStatus",
+            "description": [
+              "\nThe current fetch status of the hits count request"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/unified-histogram",
+                "scope": "public",
+                "docId": "kibKbnUnifiedHistogramPluginApi",
+                "section": "def-public.UnifiedHistogramFetchStatus",
+                "text": "UnifiedHistogramFetchStatus"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/services/state_service.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.UnifiedHistogramState.totalHitsResult",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "totalHitsResult",
+            "description": [
+              "\nThe current result of the hits count request"
+            ],
+            "signature": [
+              "number | Error | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/services/state_service.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/unified-histogram",
+        "id": "def-public.UnifiedHistogramVisContext",
+        "type": "Interface",
+        "tags": [],
+        "label": "UnifiedHistogramVisContext",
+        "description": [
+          "\nUnified Histogram type for recreating a stored Lens vis"
+        ],
+        "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.UnifiedHistogramVisContext.attributes",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "attributes",
+            "description": [],
+            "signature": [
+              "{ title: string; description?: string | undefined; references: ",
+              "SavedObjectReference",
+              "[]; visualizationType: \"lnsXY\"; state: { query: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.AggregateQuery",
+                "text": "AggregateQuery"
+              },
+              "; filters: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewSpec",
+                "text": "DataViewSpec"
+              },
+              "> | undefined; internalReferences?: ",
+              "SavedObjectReference",
+              "[] | undefined; datasourceStates: { formBased?: ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.FormBasedPersistedState",
+                "text": "FormBasedPersistedState"
+              },
+              " | undefined; textBased?: ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.TextBasedPersistedState",
+                "text": "TextBasedPersistedState"
+              },
+              " | undefined; }; visualization: ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.XYState",
+                "text": "XYState"
+              },
+              "; }; } | { title: string; description?: string | undefined; references: ",
+              "SavedObjectReference",
+              "[]; visualizationType: \"lnsPie\"; state: { query: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.AggregateQuery",
+                "text": "AggregateQuery"
+              },
+              "; filters: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewSpec",
+                "text": "DataViewSpec"
+              },
+              "> | undefined; internalReferences?: ",
+              "SavedObjectReference",
+              "[] | undefined; datasourceStates: { formBased?: ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.FormBasedPersistedState",
+                "text": "FormBasedPersistedState"
+              },
+              " | undefined; textBased?: ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.TextBasedPersistedState",
+                "text": "TextBasedPersistedState"
+              },
+              " | undefined; }; visualization: ",
+              "PieVisualizationState",
+              "; }; } | { title: string; description?: string | undefined; references: ",
+              "SavedObjectReference",
+              "[]; visualizationType: \"lnsHeatmap\"; state: { query: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.AggregateQuery",
+                "text": "AggregateQuery"
+              },
+              "; filters: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewSpec",
+                "text": "DataViewSpec"
+              },
+              "> | undefined; internalReferences?: ",
+              "SavedObjectReference",
+              "[] | undefined; datasourceStates: { formBased?: ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.FormBasedPersistedState",
+                "text": "FormBasedPersistedState"
+              },
+              " | undefined; textBased?: ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.TextBasedPersistedState",
+                "text": "TextBasedPersistedState"
+              },
+              " | undefined; }; visualization: ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.HeatmapVisualizationState",
+                "text": "HeatmapVisualizationState"
+              },
+              "; }; } | { title: string; description?: string | undefined; references: ",
+              "SavedObjectReference",
+              "[]; visualizationType: \"lnsGauge\"; state: { query: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.AggregateQuery",
+                "text": "AggregateQuery"
+              },
+              "; filters: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewSpec",
+                "text": "DataViewSpec"
+              },
+              "> | undefined; internalReferences?: ",
+              "SavedObjectReference",
+              "[] | undefined; datasourceStates: { formBased?: ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.FormBasedPersistedState",
+                "text": "FormBasedPersistedState"
+              },
+              " | undefined; textBased?: ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.TextBasedPersistedState",
+                "text": "TextBasedPersistedState"
+              },
+              " | undefined; }; visualization: ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.GaugeVisualizationState",
+                "text": "GaugeVisualizationState"
+              },
+              "; }; } | { title: string; description?: string | undefined; references: ",
+              "SavedObjectReference",
+              "[]; visualizationType: \"lnsDatatable\"; state: { query: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.AggregateQuery",
+                "text": "AggregateQuery"
+              },
+              "; filters: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewSpec",
+                "text": "DataViewSpec"
+              },
+              "> | undefined; internalReferences?: ",
+              "SavedObjectReference",
+              "[] | undefined; datasourceStates: { formBased?: ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.FormBasedPersistedState",
+                "text": "FormBasedPersistedState"
+              },
+              " | undefined; textBased?: ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.TextBasedPersistedState",
+                "text": "TextBasedPersistedState"
+              },
+              " | undefined; }; visualization: ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.DatatableVisualizationState",
+                "text": "DatatableVisualizationState"
+              },
+              "; }; } | { title: string; description?: string | undefined; references: ",
+              "SavedObjectReference",
+              "[]; visualizationType: \"lnsLegacyMetric\"; state: { query: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.AggregateQuery",
+                "text": "AggregateQuery"
+              },
+              "; filters: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewSpec",
+                "text": "DataViewSpec"
+              },
+              "> | undefined; internalReferences?: ",
+              "SavedObjectReference",
+              "[] | undefined; datasourceStates: { formBased?: ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.FormBasedPersistedState",
+                "text": "FormBasedPersistedState"
+              },
+              " | undefined; textBased?: ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.TextBasedPersistedState",
+                "text": "TextBasedPersistedState"
+              },
+              " | undefined; }; visualization: ",
+              {
+                "pluginId": "lens",
+                "scope": "common",
+                "docId": "kibLensPluginApi",
+                "section": "def-common.LegacyMetricState",
+                "text": "LegacyMetricState"
+              },
+              "; }; } | { title: string; description?: string | undefined; references: ",
+              "SavedObjectReference",
+              "[]; visualizationType: \"lnsMetric\"; state: { query: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.AggregateQuery",
+                "text": "AggregateQuery"
+              },
+              "; filters: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewSpec",
+                "text": "DataViewSpec"
+              },
+              "> | undefined; internalReferences?: ",
+              "SavedObjectReference",
+              "[] | undefined; datasourceStates: { formBased?: ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.FormBasedPersistedState",
+                "text": "FormBasedPersistedState"
+              },
+              " | undefined; textBased?: ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.TextBasedPersistedState",
+                "text": "TextBasedPersistedState"
+              },
+              " | undefined; }; visualization: ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.MetricVisualizationState",
+                "text": "MetricVisualizationState"
+              },
+              "; }; } | { title: string; description?: string | undefined; references: ",
+              "SavedObjectReference",
+              "[]; visualizationType: string; state: { query: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.AggregateQuery",
+                "text": "AggregateQuery"
+              },
+              "; filters: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewSpec",
+                "text": "DataViewSpec"
+              },
+              "> | undefined; internalReferences?: ",
+              "SavedObjectReference",
+              "[] | undefined; datasourceStates: { formBased?: ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.FormBasedPersistedState",
+                "text": "FormBasedPersistedState"
+              },
+              " | undefined; textBased?: ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.TextBasedPersistedState",
+                "text": "TextBasedPersistedState"
+              },
+              " | undefined; }; visualization: unknown; }; }"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.UnifiedHistogramVisContext.requestData",
+            "type": "Object",
+            "tags": [],
+            "label": "requestData",
+            "description": [],
+            "signature": [
+              "LensRequestData"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.UnifiedHistogramVisContext.suggestionType",
+            "type": "Enum",
+            "tags": [],
+            "label": "suggestionType",
+            "description": [],
+            "signature": [
+              "UnifiedHistogramSuggestionType"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [
+      {
+        "parentPluginId": "@kbn/unified-histogram",
+        "id": "def-public.UnifiedHistogramExternalVisContextStatus",
+        "type": "Enum",
+        "tags": [],
+        "label": "UnifiedHistogramExternalVisContextStatus",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/unified-histogram",
+        "id": "def-public.UnifiedHistogramFetchStatus",
+        "type": "Enum",
+        "tags": [],
+        "label": "UnifiedHistogramFetchStatus",
+        "description": [
+          "\nThe fetch status of a Unified Histogram request"
+        ],
+        "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/unified-histogram",
+        "id": "def-public.UnifiedHistogramAdapters",
+        "type": "Type",
+        "tags": [],
+        "label": "UnifiedHistogramAdapters",
+        "description": [
+          "\nThe adapters passed up from Lens"
+        ],
+        "signature": [
+          "{ requests?: ",
+          {
+            "pluginId": "inspector",
+            "scope": "common",
+            "docId": "kibInspectorPluginApi",
+            "section": "def-common.RequestAdapter",
+            "text": "RequestAdapter"
+          },
+          " | undefined; tables?: ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.TablesAdapter",
+            "text": "TablesAdapter"
+          },
+          " | undefined; expression?: ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionsInspectorAdapter",
+            "text": "ExpressionsInspectorAdapter"
+          },
+          " | undefined; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/unified-histogram",
+        "id": "def-public.UnifiedHistogramApi",
+        "type": "Type",
+        "tags": [],
+        "label": "UnifiedHistogramApi",
+        "description": [],
+        "signature": [
+          "{ fetch: () => void; } & Pick<",
+          "UnifiedHistogramStateService",
+          ", \"state$\" | \"setChartHidden\" | \"setTopPanelHeight\" | \"setTimeInterval\" | \"setTotalHits\">"
+        ],
+        "path": "src/platform/packages/shared/kbn-unified-histogram/hooks/use_unified_histogram.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/unified-histogram",
+        "id": "def-public.UnifiedHistogramLayoutProps",
+        "type": "Type",
+        "tags": [],
+        "label": "UnifiedHistogramLayoutProps",
+        "description": [],
+        "signature": [
+          "{ container: HTMLElement | null; unifiedHistogramChart: React.ReactNode; chart?: ",
+          "UnifiedHistogramChartContext",
+          " | undefined; isChartAvailable?: boolean | undefined; hits?: ",
+          "UnifiedHistogramHitsContext",
+          " | undefined; topPanelHeight?: number | undefined; onTopPanelHeightChange?: ((topPanelHeight: number | undefined) => void) | undefined; } & { children?: React.ReactNode; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-unified-histogram/components/layout/layout.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/unified-histogram",
+        "id": "def-public.UnifiedHistogramPartialLayoutProps",
+        "type": "Type",
+        "tags": [],
+        "label": "UnifiedHistogramPartialLayoutProps",
+        "description": [],
+        "signature": [
+          "{ children?: React.ReactNode; hits?: ",
+          "UnifiedHistogramHitsContext",
+          " | undefined; chart?: ",
+          "UnifiedHistogramChartContext",
+          " | undefined; isChartAvailable?: boolean | undefined; topPanelHeight?: number | undefined; onTopPanelHeightChange?: ((topPanelHeight: number | undefined) => void) | undefined; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-unified-histogram/hooks/use_unified_histogram.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/unified-histogram",
+        "id": "def-public.UseUnifiedHistogramProps",
+        "type": "Type",
+        "tags": [],
+        "label": "UseUnifiedHistogramProps",
+        "description": [],
+        "signature": [
+          "Omit<",
+          "UnifiedHistogramStateOptions",
+          ", \"services\"> & { services: ",
+          {
+            "pluginId": "@kbn/unified-histogram",
+            "scope": "public",
+            "docId": "kibKbnUnifiedHistogramPluginApi",
+            "section": "def-public.UnifiedHistogramServices",
+            "text": "UnifiedHistogramServices"
+          },
+          "; searchSessionId?: string | undefined; requestAdapter?: ",
+          {
+            "pluginId": "inspector",
+            "scope": "common",
+            "docId": "kibInspectorPluginApi",
+            "section": "def-common.RequestAdapter",
+            "text": "RequestAdapter"
+          },
+          " | undefined; abortController?: AbortController | undefined; dataView: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataView",
+            "text": "DataView"
+          },
+          "; query?: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.AggregateQuery",
+            "text": "AggregateQuery"
+          },
+          " | undefined; filters?: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[] | undefined; breakdownField?: string | undefined; externalVisContext?: ",
+          {
+            "pluginId": "@kbn/unified-histogram",
+            "scope": "public",
+            "docId": "kibKbnUnifiedHistogramPluginApi",
+            "section": "def-public.UnifiedHistogramVisContext",
+            "text": "UnifiedHistogramVisContext"
+          },
+          " | undefined; timeRange?: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.TimeRange",
+            "text": "TimeRange"
+          },
+          " | undefined; relativeTimeRange?: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.TimeRange",
+            "text": "TimeRange"
+          },
+          " | undefined; columns?: ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.DatatableColumn",
+            "text": "DatatableColumn"
+          },
+          "[] | undefined; table?: ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.Datatable",
+            "text": "Datatable"
+          },
+          " | undefined; isChartLoading?: boolean | undefined; withDefaultActions?: boolean | undefined; disabledActions?: string[] | undefined; onFilter?: ((data: { data: { table: Pick<",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.Datatable",
+            "text": "Datatable"
+          },
+          ", \"columns\" | \"rows\">; column: number; row: number; value: any; }[]; timeFieldName?: string | undefined; negate?: boolean | undefined; preventDefault: () => void; } | { data: { table: Pick<",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.Datatable",
+            "text": "Datatable"
+          },
+          ", \"columns\" | \"rows\">; cells: { column: number; row: number; }[]; relation?: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.BooleanRelation",
+            "text": "BooleanRelation"
+          },
+          " | undefined; }[]; timeFieldName?: string | undefined; negate?: boolean | undefined; preventDefault: () => void; }) => void) | undefined; onBrushEnd?: ((data: { table: ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.Datatable",
+            "text": "Datatable"
+          },
+          "; column: number; range: number[]; timeFieldName?: string | undefined; preventDefault: () => void; }) => void) | undefined; onBreakdownFieldChange?: ((breakdownField: string | undefined) => void) | undefined; onVisContextChanged?: ((nextVisContext: ",
+          {
+            "pluginId": "@kbn/unified-histogram",
+            "scope": "public",
+            "docId": "kibKbnUnifiedHistogramPluginApi",
+            "section": "def-public.UnifiedHistogramVisContext",
+            "text": "UnifiedHistogramVisContext"
+          },
+          " | undefined, externalVisContextStatus: ",
+          {
+            "pluginId": "@kbn/unified-histogram",
+            "scope": "public",
+            "docId": "kibKbnUnifiedHistogramPluginApi",
+            "section": "def-public.UnifiedHistogramExternalVisContextStatus",
+            "text": "UnifiedHistogramExternalVisContextStatus"
+          },
+          ") => void) | undefined; getModifiedVisAttributes?: ((attributes: { title: string; description?: string | undefined; references: ",
+          "SavedObjectReference",
+          "[]; visualizationType: \"lnsXY\"; state: { query: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.AggregateQuery",
+            "text": "AggregateQuery"
+          },
+          "; filters: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewSpec",
+            "text": "DataViewSpec"
+          },
+          "> | undefined; internalReferences?: ",
+          "SavedObjectReference",
+          "[] | undefined; datasourceStates: { formBased?: ",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.FormBasedPersistedState",
+            "text": "FormBasedPersistedState"
+          },
+          " | undefined; textBased?: ",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.TextBasedPersistedState",
+            "text": "TextBasedPersistedState"
+          },
+          " | undefined; }; visualization: ",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.XYState",
+            "text": "XYState"
+          },
+          "; }; } | { title: string; description?: string | undefined; references: ",
+          "SavedObjectReference",
+          "[]; visualizationType: \"lnsPie\"; state: { query: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.AggregateQuery",
+            "text": "AggregateQuery"
+          },
+          "; filters: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewSpec",
+            "text": "DataViewSpec"
+          },
+          "> | undefined; internalReferences?: ",
+          "SavedObjectReference",
+          "[] | undefined; datasourceStates: { formBased?: ",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.FormBasedPersistedState",
+            "text": "FormBasedPersistedState"
+          },
+          " | undefined; textBased?: ",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.TextBasedPersistedState",
+            "text": "TextBasedPersistedState"
+          },
+          " | undefined; }; visualization: ",
+          "PieVisualizationState",
+          "; }; } | { title: string; description?: string | undefined; references: ",
+          "SavedObjectReference",
+          "[]; visualizationType: \"lnsHeatmap\"; state: { query: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.AggregateQuery",
+            "text": "AggregateQuery"
+          },
+          "; filters: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewSpec",
+            "text": "DataViewSpec"
+          },
+          "> | undefined; internalReferences?: ",
+          "SavedObjectReference",
+          "[] | undefined; datasourceStates: { formBased?: ",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.FormBasedPersistedState",
+            "text": "FormBasedPersistedState"
+          },
+          " | undefined; textBased?: ",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.TextBasedPersistedState",
+            "text": "TextBasedPersistedState"
+          },
+          " | undefined; }; visualization: ",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.HeatmapVisualizationState",
+            "text": "HeatmapVisualizationState"
+          },
+          "; }; } | { title: string; description?: string | undefined; references: ",
+          "SavedObjectReference",
+          "[]; visualizationType: \"lnsGauge\"; state: { query: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.AggregateQuery",
+            "text": "AggregateQuery"
+          },
+          "; filters: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewSpec",
+            "text": "DataViewSpec"
+          },
+          "> | undefined; internalReferences?: ",
+          "SavedObjectReference",
+          "[] | undefined; datasourceStates: { formBased?: ",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.FormBasedPersistedState",
+            "text": "FormBasedPersistedState"
+          },
+          " | undefined; textBased?: ",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.TextBasedPersistedState",
+            "text": "TextBasedPersistedState"
+          },
+          " | undefined; }; visualization: ",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.GaugeVisualizationState",
+            "text": "GaugeVisualizationState"
+          },
+          "; }; } | { title: string; description?: string | undefined; references: ",
+          "SavedObjectReference",
+          "[]; visualizationType: \"lnsDatatable\"; state: { query: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.AggregateQuery",
+            "text": "AggregateQuery"
+          },
+          "; filters: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewSpec",
+            "text": "DataViewSpec"
+          },
+          "> | undefined; internalReferences?: ",
+          "SavedObjectReference",
+          "[] | undefined; datasourceStates: { formBased?: ",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.FormBasedPersistedState",
+            "text": "FormBasedPersistedState"
+          },
+          " | undefined; textBased?: ",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.TextBasedPersistedState",
+            "text": "TextBasedPersistedState"
+          },
+          " | undefined; }; visualization: ",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.DatatableVisualizationState",
+            "text": "DatatableVisualizationState"
+          },
+          "; }; } | { title: string; description?: string | undefined; references: ",
+          "SavedObjectReference",
+          "[]; visualizationType: \"lnsLegacyMetric\"; state: { query: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.AggregateQuery",
+            "text": "AggregateQuery"
+          },
+          "; filters: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewSpec",
+            "text": "DataViewSpec"
+          },
+          "> | undefined; internalReferences?: ",
+          "SavedObjectReference",
+          "[] | undefined; datasourceStates: { formBased?: ",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.FormBasedPersistedState",
+            "text": "FormBasedPersistedState"
+          },
+          " | undefined; textBased?: ",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.TextBasedPersistedState",
+            "text": "TextBasedPersistedState"
+          },
+          " | undefined; }; visualization: ",
+          {
+            "pluginId": "lens",
+            "scope": "common",
+            "docId": "kibLensPluginApi",
+            "section": "def-common.LegacyMetricState",
+            "text": "LegacyMetricState"
+          },
+          "; }; } | { title: string; description?: string | undefined; references: ",
+          "SavedObjectReference",
+          "[]; visualizationType: \"lnsMetric\"; state: { query: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.AggregateQuery",
+            "text": "AggregateQuery"
+          },
+          "; filters: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewSpec",
+            "text": "DataViewSpec"
+          },
+          "> | undefined; internalReferences?: ",
+          "SavedObjectReference",
+          "[] | undefined; datasourceStates: { formBased?: ",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.FormBasedPersistedState",
+            "text": "FormBasedPersistedState"
+          },
+          " | undefined; textBased?: ",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.TextBasedPersistedState",
+            "text": "TextBasedPersistedState"
+          },
+          " | undefined; }; visualization: ",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.MetricVisualizationState",
+            "text": "MetricVisualizationState"
+          },
+          "; }; } | { title: string; description?: string | undefined; references: ",
+          "SavedObjectReference",
+          "[]; visualizationType: string; state: { query: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.AggregateQuery",
+            "text": "AggregateQuery"
+          },
+          "; filters: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewSpec",
+            "text": "DataViewSpec"
+          },
+          "> | undefined; internalReferences?: ",
+          "SavedObjectReference",
+          "[] | undefined; datasourceStates: { formBased?: ",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.FormBasedPersistedState",
+            "text": "FormBasedPersistedState"
+          },
+          " | undefined; textBased?: ",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.TextBasedPersistedState",
+            "text": "TextBasedPersistedState"
+          },
+          " | undefined; }; visualization: unknown; }; }) => { title: string; description?: string | undefined; references: ",
+          "SavedObjectReference",
+          "[]; visualizationType: \"lnsXY\"; state: { query: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.AggregateQuery",
+            "text": "AggregateQuery"
+          },
+          "; filters: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewSpec",
+            "text": "DataViewSpec"
+          },
+          "> | undefined; internalReferences?: ",
+          "SavedObjectReference",
+          "[] | undefined; datasourceStates: { formBased?: ",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.FormBasedPersistedState",
+            "text": "FormBasedPersistedState"
+          },
+          " | undefined; textBased?: ",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.TextBasedPersistedState",
+            "text": "TextBasedPersistedState"
+          },
+          " | undefined; }; visualization: ",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.XYState",
+            "text": "XYState"
+          },
+          "; }; } | { title: string; description?: string | undefined; references: ",
+          "SavedObjectReference",
+          "[]; visualizationType: \"lnsPie\"; state: { query: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.AggregateQuery",
+            "text": "AggregateQuery"
+          },
+          "; filters: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewSpec",
+            "text": "DataViewSpec"
+          },
+          "> | undefined; internalReferences?: ",
+          "SavedObjectReference",
+          "[] | undefined; datasourceStates: { formBased?: ",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.FormBasedPersistedState",
+            "text": "FormBasedPersistedState"
+          },
+          " | undefined; textBased?: ",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.TextBasedPersistedState",
+            "text": "TextBasedPersistedState"
+          },
+          " | undefined; }; visualization: ",
+          "PieVisualizationState",
+          "; }; } | { title: string; description?: string | undefined; references: ",
+          "SavedObjectReference",
+          "[]; visualizationType: \"lnsHeatmap\"; state: { query: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.AggregateQuery",
+            "text": "AggregateQuery"
+          },
+          "; filters: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewSpec",
+            "text": "DataViewSpec"
+          },
+          "> | undefined; internalReferences?: ",
+          "SavedObjectReference",
+          "[] | undefined; datasourceStates: { formBased?: ",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.FormBasedPersistedState",
+            "text": "FormBasedPersistedState"
+          },
+          " | undefined; textBased?: ",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.TextBasedPersistedState",
+            "text": "TextBasedPersistedState"
+          },
+          " | undefined; }; visualization: ",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.HeatmapVisualizationState",
+            "text": "HeatmapVisualizationState"
+          },
+          "; }; } | { title: string; description?: string | undefined; references: ",
+          "SavedObjectReference",
+          "[]; visualizationType: \"lnsGauge\"; state: { query: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.AggregateQuery",
+            "text": "AggregateQuery"
+          },
+          "; filters: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewSpec",
+            "text": "DataViewSpec"
+          },
+          "> | undefined; internalReferences?: ",
+          "SavedObjectReference",
+          "[] | undefined; datasourceStates: { formBased?: ",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.FormBasedPersistedState",
+            "text": "FormBasedPersistedState"
+          },
+          " | undefined; textBased?: ",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.TextBasedPersistedState",
+            "text": "TextBasedPersistedState"
+          },
+          " | undefined; }; visualization: ",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.GaugeVisualizationState",
+            "text": "GaugeVisualizationState"
+          },
+          "; }; } | { title: string; description?: string | undefined; references: ",
+          "SavedObjectReference",
+          "[]; visualizationType: \"lnsDatatable\"; state: { query: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.AggregateQuery",
+            "text": "AggregateQuery"
+          },
+          "; filters: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewSpec",
+            "text": "DataViewSpec"
+          },
+          "> | undefined; internalReferences?: ",
+          "SavedObjectReference",
+          "[] | undefined; datasourceStates: { formBased?: ",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.FormBasedPersistedState",
+            "text": "FormBasedPersistedState"
+          },
+          " | undefined; textBased?: ",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.TextBasedPersistedState",
+            "text": "TextBasedPersistedState"
+          },
+          " | undefined; }; visualization: ",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.DatatableVisualizationState",
+            "text": "DatatableVisualizationState"
+          },
+          "; }; } | { title: string; description?: string | undefined; references: ",
+          "SavedObjectReference",
+          "[]; visualizationType: \"lnsLegacyMetric\"; state: { query: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.AggregateQuery",
+            "text": "AggregateQuery"
+          },
+          "; filters: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewSpec",
+            "text": "DataViewSpec"
+          },
+          "> | undefined; internalReferences?: ",
+          "SavedObjectReference",
+          "[] | undefined; datasourceStates: { formBased?: ",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.FormBasedPersistedState",
+            "text": "FormBasedPersistedState"
+          },
+          " | undefined; textBased?: ",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.TextBasedPersistedState",
+            "text": "TextBasedPersistedState"
+          },
+          " | undefined; }; visualization: ",
+          {
+            "pluginId": "lens",
+            "scope": "common",
+            "docId": "kibLensPluginApi",
+            "section": "def-common.LegacyMetricState",
+            "text": "LegacyMetricState"
+          },
+          "; }; } | { title: string; description?: string | undefined; references: ",
+          "SavedObjectReference",
+          "[]; visualizationType: \"lnsMetric\"; state: { query: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.AggregateQuery",
+            "text": "AggregateQuery"
+          },
+          "; filters: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewSpec",
+            "text": "DataViewSpec"
+          },
+          "> | undefined; internalReferences?: ",
+          "SavedObjectReference",
+          "[] | undefined; datasourceStates: { formBased?: ",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.FormBasedPersistedState",
+            "text": "FormBasedPersistedState"
+          },
+          " | undefined; textBased?: ",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.TextBasedPersistedState",
+            "text": "TextBasedPersistedState"
+          },
+          " | undefined; }; visualization: ",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.MetricVisualizationState",
+            "text": "MetricVisualizationState"
+          },
+          "; }; } | { title: string; description?: string | undefined; references: ",
+          "SavedObjectReference",
+          "[]; visualizationType: string; state: { query: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.AggregateQuery",
+            "text": "AggregateQuery"
+          },
+          "; filters: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewSpec",
+            "text": "DataViewSpec"
+          },
+          "> | undefined; internalReferences?: ",
+          "SavedObjectReference",
+          "[] | undefined; datasourceStates: { formBased?: ",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.FormBasedPersistedState",
+            "text": "FormBasedPersistedState"
+          },
+          " | undefined; textBased?: ",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.TextBasedPersistedState",
+            "text": "TextBasedPersistedState"
+          },
+          " | undefined; }; visualization: unknown; }; }) | undefined; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-unified-histogram/hooks/use_unified_histogram.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

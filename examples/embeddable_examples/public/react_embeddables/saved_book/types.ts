@@ -10,11 +10,10 @@
 import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import {
   HasEditCapabilities,
-  HasInPlaceLibraryTransforms,
+  HasLibraryTransforms,
+  PublishesUnsavedChanges,
   SerializedTitles,
-  StateComparators,
 } from '@kbn/presentation-publishing';
-import { BehaviorSubject } from 'rxjs';
 
 export interface BookAttributes {
   bookTitle: string;
@@ -23,16 +22,16 @@ export interface BookAttributes {
   bookSynopsis?: string;
 }
 
-export type BookAttributesManager = {
-  [key in keyof Required<BookAttributes>]: BehaviorSubject<BookAttributes[key]>;
-} & { comparators: StateComparators<BookAttributes> };
-
 export interface BookByValueSerializedState {
   attributes: BookAttributes;
 }
 
 export interface BookByReferenceSerializedState {
   savedBookId: string;
+}
+
+export interface HasSavedBookId {
+  getSavedBookId: () => string | undefined;
 }
 
 export type BookSerializedState = SerializedTitles &
@@ -46,6 +45,8 @@ export interface BookRuntimeState
     Partial<BookByReferenceSerializedState>,
     SerializedTitles {}
 
-export type BookApi = DefaultEmbeddableApi<BookSerializedState, BookRuntimeState> &
+export type BookApi = DefaultEmbeddableApi<BookSerializedState> &
   HasEditCapabilities &
-  HasInPlaceLibraryTransforms<BookRuntimeState>;
+  HasLibraryTransforms<BookByReferenceSerializedState, BookByValueSerializedState> &
+  HasSavedBookId &
+  PublishesUnsavedChanges;

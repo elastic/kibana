@@ -21,11 +21,22 @@ import type {
   CompositeNewTermsAggResult,
   CreateAlertsHook,
 } from './build_new_terms_aggregation';
-import type { NewTermsFieldsLatest } from '../../../../../common/api/detection_engine/model/alerts';
-import { getMaxSignalsWarning, getSuppressionMaxSignalsWarning } from '../utils/utils';
+import type { NewTermsAlertLatest } from '../../../../../common/api/detection_engine/model/alerts';
+import {
+  getMaxSignalsWarning,
+  getSuppressionMaxSignalsWarning,
+  stringifyAfterKey,
+} from '../utils/utils';
 import type { GenericBulkCreateResponse } from '../utils/bulk_create_with_suppression';
+import { buildEventsSearchQuery } from '../utils/build_events_query';
 
-import type { RuleServices, SearchAfterAndBulkCreateReturnType, RunOpts } from '../types';
+import type {
+  SecurityRuleServices,
+  SearchAfterAndBulkCreateReturnType,
+  SecuritySharedParams,
+} from '../types';
+import type { RulePreviewLoggedRequest } from '../../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
+import * as i18n from '../translations';
 
 /**
  * composite aggregation page batch size set to 500 as it shows th best performance(refer https://github.com/elastic/kibana/pull/157413) and
@@ -34,6 +45,7 @@ import type { RuleServices, SearchAfterAndBulkCreateReturnType, RunOpts } from '
 const BATCH_SIZE = 500;
 
 interface MultiTermsCompositeArgsBase {
+  sharedParams: SecuritySharedParams<NewTermsRuleParams>;
   filterArgs: GetFilterArgs;
   buckets: Array<{
     doc_count: number;
@@ -42,18 +54,28 @@ interface MultiTermsCompositeArgsBase {
   params: NewTermsRuleParams;
   aggregatableTimestampField: string;
   parsedHistoryWindowSize: Moment;
-  services: RuleServices;
+  services: SecurityRuleServices;
   result: SearchAfterAndBulkCreateReturnType;
   logger: Logger;
-  runOpts: RunOpts<NewTermsRuleParams>;
   afterKey: Record<string, string | number | null> | undefined;
   createAlertsHook: CreateAlertsHook;
   isAlertSuppressionActive: boolean;
+  isLoggedRequestsEnabled: boolean;
 }
 
 interface MultiTermsCompositeArgs extends MultiTermsCompositeArgsBase {
   batchSize: number;
 }
+
+interface LoggedRequestsProps {
+  loggedRequests?: RulePreviewLoggedRequest[];
+}
+
+type MultiTermsCompositeResult =
+  | (Omit<GenericBulkCreateResponse<NewTermsAlertLatest>, 'suppressedItemsCount'> &
+      LoggedRequestsProps)
+  | LoggedRequestsProps
+  | undefined;
 
 /**
  * This helper does phase2/phase3(look README) got multiple new terms
@@ -62,6 +84,7 @@ interface MultiTermsCompositeArgs extends MultiTermsCompositeArgsBase {
  * It pages through though all 10,000 results from phase1 until maxSize alerts found
  */
 const multiTermsCompositeNonRetryable = async ({
+  sharedParams,
   filterArgs,
   buckets,
   params,
@@ -70,14 +93,12 @@ const multiTermsCompositeNonRetryable = async ({
   services,
   result,
   logger,
-  runOpts,
   afterKey,
   createAlertsHook,
   batchSize,
   isAlertSuppressionActive,
-}: MultiTermsCompositeArgs): Promise<
-  Omit<GenericBulkCreateResponse<NewTermsFieldsLatest>, 'suppressedItemsCount'> | undefined
-> => {
+  isLoggedRequestsEnabled,
+}: MultiTermsCompositeArgs): Promise<MultiTermsCompositeResult> => {
   const {
     ruleExecutionLogger,
     tuple,
@@ -85,13 +106,17 @@ const multiTermsCompositeNonRetryable = async ({
     runtimeMappings,
     primaryTimestamp,
     secondaryTimestamp,
-  } = runOpts;
+  } = sharedParams;
+
+  const loggedRequests: RulePreviewLoggedRequest[] = [];
 
   let internalAfterKey = afterKey ?? undefined;
 
   let i = 0;
+  let pageNumber = 0;
 
   while (i < buckets.length) {
+    pageNumber++;
     const batch = buckets.slice(i, i + batchSize);
     i += batchSize;
     const batchFilters = batch.map((b) => {
@@ -111,11 +136,7 @@ const multiTermsCompositeNonRetryable = async ({
     // PHASE 2: Take the page of results from Phase 1 and determine if each term exists in the history window.
     // The aggregation filters out buckets for terms that exist prior to `tuple.from`, so the buckets in the
     // response correspond to each new term.
-    const {
-      searchResult: pageSearchResult,
-      searchDuration: pageSearchDuration,
-      searchErrors: pageSearchErrors,
-    } = await singleSearchAfter({
+    const searchRequest = buildEventsSearchQuery({
       aggregations: buildCompositeNewTermsAgg({
         newValueWindowStart: tuple.from,
         timestampField: aggregatableTimestampField,
@@ -130,16 +151,34 @@ const multiTermsCompositeNonRetryable = async ({
       // in addition to the rule interval
       from: parsedHistoryWindowSize.toISOString(),
       to: tuple.to.toISOString(),
-      services,
-      ruleExecutionLogger,
       filter: esFilterForBatch,
-      pageSize: 0,
+      size: 0,
       primaryTimestamp,
       secondaryTimestamp,
+    });
+    const {
+      searchResult: pageSearchResult,
+      searchDuration: pageSearchDuration,
+      searchErrors: pageSearchErrors,
+      loggedRequests: pageSearchLoggedRequests = [],
+    } = await singleSearchAfter({
+      searchRequest,
+      services,
+      ruleExecutionLogger,
+      loggedRequestsConfig: isLoggedRequestsEnabled
+        ? {
+            type: 'findNewTerms',
+            description: i18n.FIND_NEW_TERMS_VALUES_DESCRIPTION(
+              stringifyAfterKey(internalAfterKey)
+            ),
+            skipRequestQuery: Boolean(afterKey) || pageNumber > 2,
+          }
+        : undefined,
     });
 
     result.searchAfterTimes.push(pageSearchDuration);
     result.errors.push(...pageSearchErrors);
+    loggedRequests.push(...pageSearchLoggedRequests);
     logger.debug(`Time spent on phase 2 terms agg: ${pageSearchDuration}`);
 
     const pageSearchResultWithAggs = pageSearchResult as CompositeNewTermsAggResult;
@@ -152,11 +191,7 @@ const multiTermsCompositeNonRetryable = async ({
     // become the basis of the resulting alert.
     // One document could become multiple alerts if the document contains an array with multiple new terms.
     if (pageSearchResultWithAggs.aggregations.new_terms.buckets.length > 0) {
-      const {
-        searchResult: docFetchSearchResult,
-        searchDuration: docFetchSearchDuration,
-        searchErrors: docFetchSearchErrors,
-      } = await singleSearchAfter({
+      const searchRequestPhase3 = buildEventsSearchQuery({
         aggregations: buildCompositeDocFetchAgg({
           newValueWindowStart: tuple.from,
           timestampField: aggregatableTimestampField,
@@ -169,15 +204,33 @@ const multiTermsCompositeNonRetryable = async ({
         index: inputIndex,
         from: parsedHistoryWindowSize.toISOString(),
         to: tuple.to.toISOString(),
-        services,
-        ruleExecutionLogger,
         filter: esFilterForBatch,
-        pageSize: 0,
+        size: 0,
         primaryTimestamp,
         secondaryTimestamp,
       });
+      const {
+        searchResult: docFetchSearchResult,
+        searchDuration: docFetchSearchDuration,
+        searchErrors: docFetchSearchErrors,
+        loggedRequests: docFetchLoggedRequests = [],
+      } = await singleSearchAfter({
+        searchRequest: searchRequestPhase3,
+        services,
+        ruleExecutionLogger,
+        loggedRequestsConfig: isLoggedRequestsEnabled
+          ? {
+              type: 'findDocuments',
+              description: i18n.FIND_NEW_TERMS_EVENTS_DESCRIPTION(
+                stringifyAfterKey(internalAfterKey)
+              ),
+              skipRequestQuery: Boolean(afterKey) || pageNumber > 2,
+            }
+          : undefined,
+      });
       result.searchAfterTimes.push(docFetchSearchDuration);
       result.errors.push(...docFetchSearchErrors);
+      loggedRequests.push(...docFetchLoggedRequests);
 
       const docFetchResultWithAggs = docFetchSearchResult as CompositeDocFetchAggResult;
 
@@ -191,12 +244,14 @@ const multiTermsCompositeNonRetryable = async ({
         result.warningMessages.push(
           isAlertSuppressionActive ? getSuppressionMaxSignalsWarning() : getMaxSignalsWarning()
         );
-        return bulkCreateResult;
+        return isLoggedRequestsEnabled ? { ...bulkCreateResult, loggedRequests } : bulkCreateResult;
       }
     }
 
     internalAfterKey = batch[batch.length - 1]?.key;
   }
+
+  return { loggedRequests };
 };
 
 /**
@@ -206,11 +261,9 @@ const multiTermsCompositeNonRetryable = async ({
  */
 export const multiTermsComposite = async (
   args: MultiTermsCompositeArgsBase
-): Promise<
-  Omit<GenericBulkCreateResponse<NewTermsFieldsLatest>, 'suppressedItemsCount'> | undefined
-> => {
+): Promise<MultiTermsCompositeResult> => {
   let retryBatchSize = BATCH_SIZE;
-  const ruleExecutionLogger = args.runOpts.ruleExecutionLogger;
+  const ruleExecutionLogger = args.sharedParams.ruleExecutionLogger;
   return pRetry(
     async (retryCount) => {
       try {

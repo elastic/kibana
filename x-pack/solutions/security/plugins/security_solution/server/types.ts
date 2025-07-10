@@ -20,8 +20,10 @@ import type { AlertsClient, IRuleDataService } from '@kbn/rule-registry-plugin/s
 
 import type { Readable } from 'stream';
 import type { AuditLogger } from '@kbn/security-plugin-types-server';
-import type { InferenceClient } from '@kbn/inference-plugin/server';
+import type { InferenceClient } from '@kbn/inference-common';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
+import type { PadPackageInstallationClient } from './lib/entity_analytics/privilege_monitoring/privileged_access_detection/pad_package_installation_client';
+import type { EndpointAppContextService } from './endpoint/endpoint_app_context_services';
 import type { Immutable } from '../common/endpoint/types';
 import { AppClient } from './client';
 import type { ConfigType } from './config';
@@ -38,12 +40,20 @@ import type { AssetCriticalityDataClient } from './lib/entity_analytics/asset_cr
 import type { IDetectionRulesClient } from './lib/detection_engine/rule_management/logic/detection_rules_client/detection_rules_client_interface';
 import type { EntityStoreDataClient } from './lib/entity_analytics/entity_store/entity_store_data_client';
 import type { SiemRuleMigrationsClient } from './lib/siem_migrations/rules/siem_rule_migrations_service';
+import type { AssetInventoryDataClient } from './lib/asset_inventory/asset_inventory_data_client';
+import type { PrivilegeMonitoringDataClient } from './lib/entity_analytics/privilege_monitoring/privilege_monitoring_data_client';
+import type { ApiKeyManager as EntityStoreApiKeyManager } from './lib/entity_analytics/entity_store/auth/api_key';
+import type { ApiKeyManager as PrivilegedUsersApiKeyManager } from './lib/entity_analytics/privilege_monitoring/auth/api_key';
+import type { ProductFeaturesService } from './lib/product_features_service';
+import type { MonitoringEntitySourceDataClient } from './lib/entity_analytics/privilege_monitoring/monitoring_entity_source_data_client';
+import type { MlAuthz } from './lib/machine_learning/authz';
 export { AppClient };
 
 export interface SecuritySolutionApiRequestHandlerContext {
   core: CoreRequestHandlerContext;
   getServerBasePath: () => string;
   getEndpointAuthz: () => Promise<Immutable<EndpointAuthz>>;
+  getEndpointService: () => EndpointAppContextService;
   getConfig: () => ConfigType;
   getFrameworkRequest: () => FrameworkRequest;
   getAppClient: () => AppClient;
@@ -55,14 +65,22 @@ export interface SecuritySolutionApiRequestHandlerContext {
   getRacClient: (req: KibanaRequest) => Promise<AlertsClient>;
   getAuditLogger: () => AuditLogger | undefined;
   getDataViewsService: () => DataViewsService;
+  getEntityStoreApiKeyManager: () => EntityStoreApiKeyManager;
   getExceptionListClient: () => ExceptionListClient | null;
   getInternalFleetServices: () => EndpointInternalFleetServicesInterface;
   getRiskEngineDataClient: () => RiskEngineDataClient;
   getRiskScoreDataClient: () => RiskScoreDataClient;
   getAssetCriticalityDataClient: () => AssetCriticalityDataClient;
   getEntityStoreDataClient: () => EntityStoreDataClient;
+  getPrivilegeMonitoringDataClient: () => PrivilegeMonitoringDataClient;
+  getMonitoringEntitySourceDataClient: () => MonitoringEntitySourceDataClient;
+  getPrivilegedUserMonitoringApiKeyManager: () => PrivilegedUsersApiKeyManager;
+  getPadPackageInstallationClient: () => PadPackageInstallationClient;
   getSiemRuleMigrationsClient: () => SiemRuleMigrationsClient;
   getInferenceClient: () => InferenceClient;
+  getAssetInventoryClient: () => AssetInventoryDataClient;
+  getProductFeatureService: () => ProductFeaturesService;
+  getMlAuthz: () => MlAuthz;
 }
 
 export type SecuritySolutionRequestHandlerContext = CustomRequestHandlerContext<{

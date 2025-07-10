@@ -1,0 +1,1020 @@
+{
+  "id": "@kbn/wci-server",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/wci-server",
+        "id": "def-server.createMcpServer",
+        "type": "Function",
+        "tags": [],
+        "label": "createMcpServer",
+        "description": [],
+        "signature": [
+          "({ name, version, tools, }: { name: string; version?: string | undefined; tools: ",
+          {
+            "pluginId": "@kbn/wci-server",
+            "scope": "server",
+            "docId": "kibKbnWciServerPluginApi",
+            "section": "def-server.McpServerTool",
+            "text": "McpServerTool"
+          },
+          "<Zod.ZodRawShape>[]; }) => ",
+          "McpServer"
+        ],
+        "path": "x-pack/solutions/chat/packages/wci-server/src/utils/create_mcp_server.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/wci-server",
+            "id": "def-server.createMcpServer.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  name,\n  version = '1.0.0',\n  tools,\n}",
+            "description": [],
+            "path": "x-pack/solutions/chat/packages/wci-server/src/utils/create_mcp_server.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/wci-server",
+                "id": "def-server.createMcpServer.$1.name",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "path": "x-pack/solutions/chat/packages/wci-server/src/utils/create_mcp_server.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/wci-server",
+                "id": "def-server.createMcpServer.$1.version",
+                "type": "string",
+                "tags": [],
+                "label": "version",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "x-pack/solutions/chat/packages/wci-server/src/utils/create_mcp_server.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/wci-server",
+                "id": "def-server.createMcpServer.$1.tools",
+                "type": "Array",
+                "tags": [],
+                "label": "tools",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/wci-server",
+                    "scope": "server",
+                    "docId": "kibKbnWciServerPluginApi",
+                    "section": "def-server.McpServerTool",
+                    "text": "McpServerTool"
+                  },
+                  "<Zod.ZodRawShape>[]"
+                ],
+                "path": "x-pack/solutions/chat/packages/wci-server/src/utils/create_mcp_server.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/wci-server",
+        "id": "def-server.getConnectToExternalServer",
+        "type": "Function",
+        "tags": [],
+        "label": "getConnectToExternalServer",
+        "description": [],
+        "signature": [
+          "({ serverUrl, clientName, }: { serverUrl: string; clientName?: string | undefined; }) => () => Promise<",
+          {
+            "pluginId": "@kbn/wci-server",
+            "scope": "server",
+            "docId": "kibKbnWciServerPluginApi",
+            "section": "def-server.McpClient",
+            "text": "McpClient"
+          },
+          ">"
+        ],
+        "path": "x-pack/solutions/chat/packages/wci-server/src/utils/create_external_client.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/wci-server",
+            "id": "def-server.getConnectToExternalServer.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  serverUrl,\n  clientName = 'unknown',\n}",
+            "description": [],
+            "path": "x-pack/solutions/chat/packages/wci-server/src/utils/create_external_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/wci-server",
+                "id": "def-server.getConnectToExternalServer.$1.serverUrl",
+                "type": "string",
+                "tags": [],
+                "label": "serverUrl",
+                "description": [],
+                "path": "x-pack/solutions/chat/packages/wci-server/src/utils/create_external_client.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/wci-server",
+                "id": "def-server.getConnectToExternalServer.$1.clientName",
+                "type": "string",
+                "tags": [],
+                "label": "clientName",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "x-pack/solutions/chat/packages/wci-server/src/utils/create_external_client.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/wci-server",
+        "id": "def-server.getConnectToInternalServer",
+        "type": "Function",
+        "tags": [],
+        "label": "getConnectToInternalServer",
+        "description": [
+          "\nReturns a {@link McpProviderFn} that will run the provided server in memory\nand connect to it."
+        ],
+        "signature": [
+          "({ server, clientName, }: { server: ",
+          "McpServer",
+          "; clientName?: string | undefined; }) => () => Promise<",
+          {
+            "pluginId": "@kbn/wci-server",
+            "scope": "server",
+            "docId": "kibKbnWciServerPluginApi",
+            "section": "def-server.McpClient",
+            "text": "McpClient"
+          },
+          ">"
+        ],
+        "path": "x-pack/solutions/chat/packages/wci-server/src/utils/create_internal_client.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/wci-server",
+            "id": "def-server.getConnectToInternalServer.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  server,\n  clientName = 'unknown',\n}",
+            "description": [],
+            "path": "x-pack/solutions/chat/packages/wci-server/src/utils/create_internal_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/wci-server",
+                "id": "def-server.getConnectToInternalServer.$1.server",
+                "type": "Object",
+                "tags": [],
+                "label": "server",
+                "description": [],
+                "signature": [
+                  "McpServer"
+                ],
+                "path": "x-pack/solutions/chat/packages/wci-server/src/utils/create_internal_client.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/wci-server",
+                "id": "def-server.getConnectToInternalServer.$1.clientName",
+                "type": "string",
+                "tags": [],
+                "label": "clientName",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "x-pack/solutions/chat/packages/wci-server/src/utils/create_internal_client.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/wci-server",
+        "id": "def-server.isContentResultTransportFormat",
+        "type": "Function",
+        "tags": [],
+        "label": "isContentResultTransportFormat",
+        "description": [],
+        "signature": [
+          "(content: any) => content is ",
+          {
+            "pluginId": "@kbn/wci-server",
+            "scope": "server",
+            "docId": "kibKbnWciServerPluginApi",
+            "section": "def-server.ContentResultTransportFormat",
+            "text": "ContentResultTransportFormat"
+          }
+        ],
+        "path": "x-pack/solutions/chat/packages/wci-server/src/tool_result.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/wci-server",
+            "id": "def-server.isContentResultTransportFormat.$1",
+            "type": "Any",
+            "tags": [],
+            "label": "content",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/solutions/chat/packages/wci-server/src/tool_result.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/wci-server",
+        "id": "def-server.ContentResultTransportFormat",
+        "type": "Interface",
+        "tags": [],
+        "label": "ContentResultTransportFormat",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/wci-server",
+            "scope": "server",
+            "docId": "kibKbnWciServerPluginApi",
+            "section": "def-server.ContentResultTransportFormat",
+            "text": "ContentResultTransportFormat"
+          },
+          " extends { [x: string]: unknown; type: \"text\"; text: string; _meta?: { [x: string]: unknown; } | undefined; }"
+        ],
+        "path": "x-pack/solutions/chat/packages/wci-server/src/tool_result.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/wci-server",
+            "id": "def-server.ContentResultTransportFormat.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"text\""
+            ],
+            "path": "x-pack/solutions/chat/packages/wci-server/src/tool_result.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wci-server",
+            "id": "def-server.ContentResultTransportFormat.reference",
+            "type": "Object",
+            "tags": [],
+            "label": "reference",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/wci-common",
+                "scope": "common",
+                "docId": "kibKbnWciCommonPluginApi",
+                "section": "def-common.ContentRef",
+                "text": "ContentRef"
+              }
+            ],
+            "path": "x-pack/solutions/chat/packages/wci-server/src/tool_result.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wci-server",
+            "id": "def-server.ContentResultTransportFormat.text",
+            "type": "string",
+            "tags": [],
+            "label": "text",
+            "description": [],
+            "path": "x-pack/solutions/chat/packages/wci-server/src/tool_result.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wci-server",
+            "id": "def-server.ContentResultTransportFormat.contentItemType",
+            "type": "string",
+            "tags": [],
+            "label": "contentItemType",
+            "description": [],
+            "signature": [
+              "\"content\""
+            ],
+            "path": "x-pack/solutions/chat/packages/wci-server/src/tool_result.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/wci-server",
+        "id": "def-server.IntegrationContext",
+        "type": "Interface",
+        "tags": [],
+        "label": "IntegrationContext",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/wci-server",
+            "scope": "server",
+            "docId": "kibKbnWciServerPluginApi",
+            "section": "def-server.IntegrationContext",
+            "text": "IntegrationContext"
+          },
+          "<T>"
+        ],
+        "path": "x-pack/solutions/chat/packages/wci-server/src/integration.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/wci-server",
+            "id": "def-server.IntegrationContext.request",
+            "type": "Object",
+            "tags": [],
+            "label": "request",
+            "description": [],
+            "signature": [
+              "KibanaRequest",
+              "<unknown, unknown, unknown, any>"
+            ],
+            "path": "x-pack/solutions/chat/packages/wci-server/src/integration.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wci-server",
+            "id": "def-server.IntegrationContext.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "path": "x-pack/solutions/chat/packages/wci-server/src/integration.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wci-server",
+            "id": "def-server.IntegrationContext.integrationId",
+            "type": "string",
+            "tags": [],
+            "label": "integrationId",
+            "description": [],
+            "path": "x-pack/solutions/chat/packages/wci-server/src/integration.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wci-server",
+            "id": "def-server.IntegrationContext.configuration",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "configuration",
+            "description": [],
+            "signature": [
+              "T"
+            ],
+            "path": "x-pack/solutions/chat/packages/wci-server/src/integration.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/wci-server",
+        "id": "def-server.McpClientProvider",
+        "type": "Interface",
+        "tags": [],
+        "label": "McpClientProvider",
+        "description": [],
+        "path": "x-pack/solutions/chat/packages/wci-server/src/mcp.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/wci-server",
+            "id": "def-server.McpClientProvider.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/solutions/chat/packages/wci-server/src/mcp.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wci-server",
+            "id": "def-server.McpClientProvider.connect",
+            "type": "Function",
+            "tags": [],
+            "label": "connect",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.MaybePromise",
+                "text": "MaybePromise"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/wci-server",
+                "scope": "server",
+                "docId": "kibKbnWciServerPluginApi",
+                "section": "def-server.McpClient",
+                "text": "McpClient"
+              },
+              ">"
+            ],
+            "path": "x-pack/solutions/chat/packages/wci-server/src/mcp.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/wci-server",
+            "id": "def-server.McpClientProvider.meta",
+            "type": "Object",
+            "tags": [],
+            "label": "meta",
+            "description": [],
+            "signature": [
+              "Record<string, unknown> | undefined"
+            ],
+            "path": "x-pack/solutions/chat/packages/wci-server/src/mcp.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/wci-server",
+        "id": "def-server.McpServerTool",
+        "type": "Interface",
+        "tags": [],
+        "label": "McpServerTool",
+        "description": [
+          "\nInternal representation of an MCP tool.\nMostly used to abstract the underlying MCP implementation we're using for \"internal\" servers"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/wci-server",
+            "scope": "server",
+            "docId": "kibKbnWciServerPluginApi",
+            "section": "def-server.McpServerTool",
+            "text": "McpServerTool"
+          },
+          "<RunInput>"
+        ],
+        "path": "x-pack/solutions/chat/packages/wci-server/src/mcp.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/wci-server",
+            "id": "def-server.McpServerTool.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/solutions/chat/packages/wci-server/src/mcp.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wci-server",
+            "id": "def-server.McpServerTool.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "path": "x-pack/solutions/chat/packages/wci-server/src/mcp.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wci-server",
+            "id": "def-server.McpServerTool.schema",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "schema",
+            "description": [],
+            "signature": [
+              "RunInput"
+            ],
+            "path": "x-pack/solutions/chat/packages/wci-server/src/mcp.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wci-server",
+            "id": "def-server.McpServerTool.execute",
+            "type": "Function",
+            "tags": [],
+            "label": "execute",
+            "description": [],
+            "signature": [
+              "(args: { [k in keyof Zod.objectUtil.addQuestionMarks<Zod.baseObjectOutputType<RunInput>, any>]: Zod.objectUtil.addQuestionMarks<Zod.baseObjectOutputType<RunInput>, any>[k]; }) => ",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.MaybePromise",
+                "text": "MaybePromise"
+              },
+              "<{ [x: string]: unknown; content: ({ [x: string]: unknown; type: \"text\"; text: string; _meta?: { [x: string]: unknown; } | undefined; } | { [x: string]: unknown; type: \"image\"; data: string; mimeType: string; _meta?: { [x: string]: unknown; } | undefined; } | { [x: string]: unknown; type: \"audio\"; data: string; mimeType: string; _meta?: { [x: string]: unknown; } | undefined; } | { [x: string]: unknown; type: \"resource_link\"; name: string; uri: string; title?: string | undefined; description?: string | undefined; _meta?: { [x: string]: unknown; } | undefined; mimeType?: string | undefined; } | { [x: string]: unknown; type: \"resource\"; resource: { [x: string]: unknown; text: string; uri: string; _meta?: { [x: string]: unknown; } | undefined; mimeType?: string | undefined; } | { [x: string]: unknown; blob: string; uri: string; _meta?: { [x: string]: unknown; } | undefined; mimeType?: string | undefined; }; _meta?: { [x: string]: unknown; } | undefined; })[]; isError?: boolean | undefined; _meta?: { [x: string]: unknown; } | undefined; structuredContent?: { [x: string]: unknown; } | undefined; }>"
+            ],
+            "path": "x-pack/solutions/chat/packages/wci-server/src/mcp.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/wci-server",
+                "id": "def-server.McpServerTool.execute.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "args",
+                "description": [],
+                "signature": [
+                  "{ [k in keyof Zod.objectUtil.addQuestionMarks<Zod.baseObjectOutputType<RunInput>, any>]: Zod.objectUtil.addQuestionMarks<Zod.baseObjectOutputType<RunInput>, any>[k]; }"
+                ],
+                "path": "x-pack/solutions/chat/packages/wci-server/src/mcp.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/wci-server",
+        "id": "def-server.ToolContentResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "ToolContentResult",
+        "description": [],
+        "path": "x-pack/solutions/chat/packages/wci-server/src/tool_result.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/wci-server",
+            "id": "def-server.ToolContentResult.reference",
+            "type": "Object",
+            "tags": [],
+            "label": "reference",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/wci-common",
+                "scope": "common",
+                "docId": "kibKbnWciCommonPluginApi",
+                "section": "def-common.ContentRef",
+                "text": "ContentRef"
+              }
+            ],
+            "path": "x-pack/solutions/chat/packages/wci-server/src/tool_result.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wci-server",
+            "id": "def-server.ToolContentResult.content",
+            "type": "Object",
+            "tags": [],
+            "label": "content",
+            "description": [],
+            "signature": [
+              "{ [x: string]: any; }"
+            ],
+            "path": "x-pack/solutions/chat/packages/wci-server/src/tool_result.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/wci-server",
+        "id": "def-server.WorkChatIntegration",
+        "type": "Interface",
+        "tags": [],
+        "label": "WorkChatIntegration",
+        "description": [
+          "\nRepresents an instance of an integration type, bound to a specific context"
+        ],
+        "path": "x-pack/solutions/chat/packages/wci-server/src/integration.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/wci-server",
+            "id": "def-server.WorkChatIntegration.connect",
+            "type": "Function",
+            "tags": [],
+            "label": "connect",
+            "description": [
+              "connect to the MCP client"
+            ],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.MaybePromise",
+                "text": "MaybePromise"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/wci-server",
+                "scope": "server",
+                "docId": "kibKbnWciServerPluginApi",
+                "section": "def-server.McpClient",
+                "text": "McpClient"
+              },
+              ">"
+            ],
+            "path": "x-pack/solutions/chat/packages/wci-server/src/integration.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/wci-server",
+        "id": "def-server.WorkchatIntegrationDefinition",
+        "type": "Interface",
+        "tags": [],
+        "label": "WorkchatIntegrationDefinition",
+        "description": [
+          "\nRepresents the definition of a type of integration for WorkChat.\n\nThis is the top level entity for integration, which is the source\nof all things related to this integration type, such as being\nable to create an actual integration instance."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/wci-server",
+            "scope": "server",
+            "docId": "kibKbnWciServerPluginApi",
+            "section": "def-server.WorkchatIntegrationDefinition",
+            "text": "WorkchatIntegrationDefinition"
+          },
+          "<T>"
+        ],
+        "path": "x-pack/solutions/chat/packages/wci-server/src/integration.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/wci-server",
+            "id": "def-server.WorkchatIntegrationDefinition.getType",
+            "type": "Function",
+            "tags": [],
+            "label": "getType",
+            "description": [
+              "\nReturns the type of integration."
+            ],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/wci-common",
+                "scope": "common",
+                "docId": "kibKbnWciCommonPluginApi",
+                "section": "def-common.IntegrationType",
+                "text": "IntegrationType"
+              }
+            ],
+            "path": "x-pack/solutions/chat/packages/wci-server/src/integration.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/wci-server",
+            "id": "def-server.WorkchatIntegrationDefinition.createIntegration",
+            "type": "Function",
+            "tags": [],
+            "label": "createIntegration",
+            "description": [
+              "\nCreates an integration instance based on the provided context"
+            ],
+            "signature": [
+              "(context: ",
+              {
+                "pluginId": "@kbn/wci-server",
+                "scope": "server",
+                "docId": "kibKbnWciServerPluginApi",
+                "section": "def-server.IntegrationContext",
+                "text": "IntegrationContext"
+              },
+              "<T>) => ",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.MaybePromise",
+                "text": "MaybePromise"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/wci-server",
+                "scope": "server",
+                "docId": "kibKbnWciServerPluginApi",
+                "section": "def-server.WorkChatIntegration",
+                "text": "WorkChatIntegration"
+              },
+              ">"
+            ],
+            "path": "x-pack/solutions/chat/packages/wci-server/src/integration.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/wci-server",
+                "id": "def-server.WorkchatIntegrationDefinition.createIntegration.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "context",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/wci-server",
+                    "scope": "server",
+                    "docId": "kibKbnWciServerPluginApi",
+                    "section": "def-server.IntegrationContext",
+                    "text": "IntegrationContext"
+                  },
+                  "<T>"
+                ],
+                "path": "x-pack/solutions/chat/packages/wci-server/src/integration.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/wci-server",
+        "id": "def-server.McpClient",
+        "type": "Type",
+        "tags": [],
+        "label": "McpClient",
+        "description": [
+          "\nWrapper on top of the MCP client implementation to avoid leaking internals\nand to control which APIs are supported."
+        ],
+        "signature": [
+          "Pick<",
+          "Client",
+          "<{ method: string; params?: { [x: string]: unknown; _meta?: { [x: string]: unknown; progressToken?: string | number | undefined; } | undefined; } | undefined; }, { method: string; params?: { [x: string]: unknown; _meta?: { [x: string]: unknown; } | undefined; } | undefined; }, { [x: string]: unknown; _meta?: { [x: string]: unknown; } | undefined; }>, \"listTools\" | \"callTool\"> & { disconnect: () => Promise<void>; }"
+        ],
+        "path": "x-pack/solutions/chat/packages/wci-server/src/mcp.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/wci-server",
+        "id": "def-server.McpClientConnectFn",
+        "type": "Type",
+        "tags": [],
+        "label": "McpClientConnectFn",
+        "description": [],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.MaybePromise",
+            "text": "MaybePromise"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/wci-server",
+            "scope": "server",
+            "docId": "kibKbnWciServerPluginApi",
+            "section": "def-server.McpClient",
+            "text": "McpClient"
+          },
+          ">"
+        ],
+        "path": "x-pack/solutions/chat/packages/wci-server/src/mcp.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [],
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/wci-server",
+        "id": "def-server.toolResultFactory",
+        "type": "Object",
+        "tags": [],
+        "label": "toolResultFactory",
+        "description": [
+          "\nUtility factory to generate MCP call tool results"
+        ],
+        "path": "x-pack/solutions/chat/packages/wci-server/src/tool_result.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/wci-server",
+            "id": "def-server.toolResultFactory.contentList",
+            "type": "Function",
+            "tags": [],
+            "label": "contentList",
+            "description": [],
+            "signature": [
+              "(contents: ",
+              {
+                "pluginId": "@kbn/wci-server",
+                "scope": "server",
+                "docId": "kibKbnWciServerPluginApi",
+                "section": "def-server.ToolContentResult",
+                "text": "ToolContentResult"
+              },
+              "[]) => { [x: string]: unknown; content: ({ [x: string]: unknown; type: \"text\"; text: string; _meta?: { [x: string]: unknown; } | undefined; } | { [x: string]: unknown; type: \"image\"; data: string; mimeType: string; _meta?: { [x: string]: unknown; } | undefined; } | { [x: string]: unknown; type: \"audio\"; data: string; mimeType: string; _meta?: { [x: string]: unknown; } | undefined; } | { [x: string]: unknown; type: \"resource_link\"; name: string; uri: string; title?: string | undefined; description?: string | undefined; _meta?: { [x: string]: unknown; } | undefined; mimeType?: string | undefined; } | { [x: string]: unknown; type: \"resource\"; resource: { [x: string]: unknown; text: string; uri: string; _meta?: { [x: string]: unknown; } | undefined; mimeType?: string | undefined; } | { [x: string]: unknown; blob: string; uri: string; _meta?: { [x: string]: unknown; } | undefined; mimeType?: string | undefined; }; _meta?: { [x: string]: unknown; } | undefined; })[]; isError?: boolean | undefined; _meta?: { [x: string]: unknown; } | undefined; structuredContent?: { [x: string]: unknown; } | undefined; }"
+            ],
+            "path": "x-pack/solutions/chat/packages/wci-server/src/tool_result.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/wci-server",
+                "id": "def-server.toolResultFactory.contentList.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "contents",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/wci-server",
+                    "scope": "server",
+                    "docId": "kibKbnWciServerPluginApi",
+                    "section": "def-server.ToolContentResult",
+                    "text": "ToolContentResult"
+                  },
+                  "[]"
+                ],
+                "path": "x-pack/solutions/chat/packages/wci-server/src/tool_result.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/wci-server",
+            "id": "def-server.toolResultFactory.text",
+            "type": "Function",
+            "tags": [],
+            "label": "text",
+            "description": [
+              "/**\n   * Generates a plain text tool response\n   */"
+            ],
+            "signature": [
+              "(text: string) => { [x: string]: unknown; content: ({ [x: string]: unknown; type: \"text\"; text: string; _meta?: { [x: string]: unknown; } | undefined; } | { [x: string]: unknown; type: \"image\"; data: string; mimeType: string; _meta?: { [x: string]: unknown; } | undefined; } | { [x: string]: unknown; type: \"audio\"; data: string; mimeType: string; _meta?: { [x: string]: unknown; } | undefined; } | { [x: string]: unknown; type: \"resource_link\"; name: string; uri: string; title?: string | undefined; description?: string | undefined; _meta?: { [x: string]: unknown; } | undefined; mimeType?: string | undefined; } | { [x: string]: unknown; type: \"resource\"; resource: { [x: string]: unknown; text: string; uri: string; _meta?: { [x: string]: unknown; } | undefined; mimeType?: string | undefined; } | { [x: string]: unknown; blob: string; uri: string; _meta?: { [x: string]: unknown; } | undefined; mimeType?: string | undefined; }; _meta?: { [x: string]: unknown; } | undefined; })[]; isError?: boolean | undefined; _meta?: { [x: string]: unknown; } | undefined; structuredContent?: { [x: string]: unknown; } | undefined; }"
+            ],
+            "path": "x-pack/solutions/chat/packages/wci-server/src/tool_result.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/wci-server",
+                "id": "def-server.toolResultFactory.text.$1",
+                "type": "string",
+                "tags": [],
+                "label": "text",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/solutions/chat/packages/wci-server/src/tool_result.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/wci-server",
+            "id": "def-server.toolResultFactory.error",
+            "type": "Function",
+            "tags": [],
+            "label": "error",
+            "description": [
+              "/**\n   * Generates an error tool response\n   */"
+            ],
+            "signature": [
+              "(message: string) => { [x: string]: unknown; content: ({ [x: string]: unknown; type: \"text\"; text: string; _meta?: { [x: string]: unknown; } | undefined; } | { [x: string]: unknown; type: \"image\"; data: string; mimeType: string; _meta?: { [x: string]: unknown; } | undefined; } | { [x: string]: unknown; type: \"audio\"; data: string; mimeType: string; _meta?: { [x: string]: unknown; } | undefined; } | { [x: string]: unknown; type: \"resource_link\"; name: string; uri: string; title?: string | undefined; description?: string | undefined; _meta?: { [x: string]: unknown; } | undefined; mimeType?: string | undefined; } | { [x: string]: unknown; type: \"resource\"; resource: { [x: string]: unknown; text: string; uri: string; _meta?: { [x: string]: unknown; } | undefined; mimeType?: string | undefined; } | { [x: string]: unknown; blob: string; uri: string; _meta?: { [x: string]: unknown; } | undefined; mimeType?: string | undefined; }; _meta?: { [x: string]: unknown; } | undefined; })[]; isError?: boolean | undefined; _meta?: { [x: string]: unknown; } | undefined; structuredContent?: { [x: string]: unknown; } | undefined; }"
+            ],
+            "path": "x-pack/solutions/chat/packages/wci-server/src/tool_result.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/wci-server",
+                "id": "def-server.toolResultFactory.error.$1",
+                "type": "string",
+                "tags": [],
+                "label": "message",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/solutions/chat/packages/wci-server/src/tool_result.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

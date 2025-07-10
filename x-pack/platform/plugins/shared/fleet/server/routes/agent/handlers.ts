@@ -185,18 +185,38 @@ export const getAgentsHandler: FleetRequestHandler<
   const { agentClient } = fleetContext;
   const esClientCurrentUser = coreContext.elasticsearch.client.asCurrentUser;
 
+  // Unwrap searchAfter from request query
+  let searchAfter: any[] | undefined;
+  if (request.query.searchAfter) {
+    try {
+      const searchAfterArray = JSON.parse(request.query.searchAfter);
+      if (!Array.isArray(searchAfterArray) || searchAfterArray.length === 0) {
+        response.badRequest({ body: { message: 'searchAfter must be a non-empty array' } });
+      } else {
+        searchAfter = searchAfterArray;
+      }
+    } catch (e) {
+      response.badRequest({ body: { message: 'searchAfter must be a non-empty array' } });
+    }
+  }
+
   const agentRes = await agentClient.asCurrentUser.listAgents({
     page: request.query.page,
     perPage: request.query.perPage,
+    showAgentless: request.query.showAgentless,
     showInactive: request.query.showInactive,
     showUpgradeable: request.query.showUpgradeable,
     kuery: request.query.kuery,
     sortField: request.query.sortField,
     sortOrder: request.query.sortOrder,
+    searchAfter,
+    openPit: request.query.openPit,
+    pitId: request.query.pitId,
+    pitKeepAlive: request.query.pitKeepAlive,
     getStatusSummary: request.query.getStatusSummary,
   });
 
-  const { total, page, perPage, statusSummary } = agentRes;
+  const { total, page, perPage, statusSummary, pit } = agentRes;
   let { agents } = agentRes;
 
   // Assign metrics
@@ -204,11 +224,16 @@ export const getAgentsHandler: FleetRequestHandler<
     agents = await fetchAndAssignAgentMetrics(esClientCurrentUser, agents);
   }
 
+  // Retrieve last agent to use for nextSearchAfter
+  const lastAgent = agents.length > 0 ? agents[agents.length - 1] : undefined;
+
   const body: GetAgentsResponse = {
     items: agents,
     total,
     page,
     perPage,
+    ...(lastAgent && lastAgent.sort ? { nextSearchAfter: JSON.stringify(lastAgent.sort) } : {}),
+    ...(pit ? { pit } : {}),
     ...(statusSummary ? { statusSummary } : {}),
   };
   return response.ok({ body });

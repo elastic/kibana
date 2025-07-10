@@ -68,7 +68,7 @@ export function SLOGroupings({ slo, direction = 'row', gutterSize = 's', truncat
                           <EuiButtonEmpty data-test-subj="accordion" flush="left">
                             {`(${i18n.translate('xpack.slo.andLabel', {
                               defaultMessage:
-                                'and {count, plural, one {# more instance} other {# more instances}}',
+                                'and {count, plural, one {# instance} other {# instances}}',
                               values: {
                                 count: rest.length,
                               },
@@ -101,7 +101,7 @@ function Entries({
   direction,
   gutterSize = 's',
 }: {
-  entries: Array<[string, unknown]>;
+  entries: Array<[string, string | number]>;
   direction: 'row' | 'column';
   gutterSize?: 'none' | 's';
 }) {
@@ -114,11 +114,11 @@ function Entries({
           <EuiText size="s">
             <span>
               {`${key}: `}
-              <EuiCopy textToCopy={`${value}`}>
+              <EuiCopy textToCopy={String(value)}>
                 {(copy) => (
                   <EuiLink
                     data-test-subj="sloInstanceCopy"
-                    style={{
+                    css={{
                       fontWeight: euiTheme.font.weight.semiBold,
                     }}
                     color="text"
@@ -127,7 +127,7 @@ function Entries({
                       copy();
                     }}
                   >
-                    {`${value}`}
+                    {value}
                   </EuiLink>
                 )}
               </EuiCopy>

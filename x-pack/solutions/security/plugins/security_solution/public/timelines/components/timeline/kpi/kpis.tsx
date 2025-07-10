@@ -5,31 +5,41 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import styled from 'styled-components';
-
-import { EuiFlexItem, EuiFlexGroup, EuiToolTip, EuiBadge } from '@elastic/eui';
+import React, { memo, useMemo } from 'react';
+import { css } from '@emotion/react';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import numeral from '@elastic/numeral';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { DEFAULT_NUMBER_FORMAT } from '../../../../../common/constants';
 import { useUiSetting$ } from '../../../../common/lib/kibana';
 import type { TimelineKpiStrategyResponse } from '../../../../../common/search_strategy';
 import { getEmptyValue } from '../../../../common/components/empty_value';
 import * as i18n from './translations';
 
-export const StatsContainer = styled.span`
-  font-size: ${euiThemeVars.euiFontSizeXS};
-  font-weight: ${euiThemeVars.euiFontWeightSemiBold};
-  padding-right: 16px;
-  .smallDot {
-    width: 3px !important;
-    display: inline-block;
-  }
-  .euiBadge__text {
-    text-align: center;
-    width: 100%;
-  }
-`;
+export const StatsContainer = memo(({ children }: { children: React.ReactNode }) => {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <span
+      css={css`
+        font-size: ${euiTheme.font.scale.xs};
+        font-weight: ${euiTheme.font.weight.semiBold};
+        padding-right: ${euiTheme.size.base};
+
+        .smallDot {
+          width: 3px !important;
+          display: inline-block;
+        }
+
+        .euiBadge__text {
+          text-align: center;
+          width: 100%;
+        }
+      `}
+    >
+      {children}
+    </span>
+  );
+});
+StatsContainer.displayName = 'StatsContainer';
 
 export const TimelineKPIs = React.memo(({ kpis }: { kpis: TimelineKpiStrategyResponse | null }) => {
   const kpiFormat = '0,0.[000]a';

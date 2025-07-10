@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IToasts } from '@kbn/core/public';
+import type { IToasts } from '@kbn/core/public';
 import { getDateISORange } from '@kbn/timerange';
 import { assign, createMachine, DoneInvokeEvent, InterpreterFrom } from 'xstate';
 import {
@@ -13,7 +13,7 @@ import {
   DataStreamStat,
   NonAggregatableDatasets,
 } from '../../../../common/api_types';
-import { KNOWN_TYPES } from '../../../../common/constants';
+import { DEFAULT_DATASET_TYPE, KNOWN_TYPES } from '../../../../common/constants';
 import { DataStreamStatServiceResponse } from '../../../../common/data_streams_stats';
 import { Integration } from '../../../../common/data_streams_stats/integration';
 import { DataStreamType } from '../../../../common/types';
@@ -24,6 +24,7 @@ import { DEFAULT_CONTEXT } from './defaults';
 import {
   fetchDatasetStatsFailedNotifier,
   fetchDegradedStatsFailedNotifier,
+  fetchFailedStatsFailedNotifier,
   fetchIntegrationsFailedNotifier,
   fetchTotalDocsFailedNotifier,
 } from './notifications';
@@ -122,6 +123,46 @@ export const createPureDatasetQualityControllerStateMachine = (
                 },
                 REFRESH_DATA: {
                   target: 'degradedDocs.fetching',
+                },
+              },
+            },
+            failedDocs: {
+              initial: 'fetching',
+              states: {
+                fetching: {
+                  invoke: {
+                    src: 'loadFailedDocs',
+                    onDone: {
+                      target: 'loaded',
+                      actions: ['storeFailedDocStats', 'storeDatasets'],
+                    },
+                    onError: [
+                      {
+                        target: 'notImplemented',
+                        cond: 'checkIfNotImplemented',
+                      },
+                      {
+                        target: 'unauthorized',
+                        cond: 'checkIfActionForbidden',
+                      },
+                      {
+                        target: 'loaded',
+                        actions: ['notifyFetchFailedStatsFailed'],
+                      },
+                    ],
+                  },
+                },
+                loaded: {},
+                notImplemented: {},
+                unauthorized: { type: 'final' },
+              },
+              on: {
+                UPDATE_TIME_RANGE: {
+                  target: 'failedDocs.fetching',
+                  actions: ['storeTimeRange'],
+                },
+                REFRESH_DATA: {
+                  target: 'failedDocs.fetching',
                 },
               },
             },
@@ -358,7 +399,12 @@ export const createPureDatasetQualityControllerStateMachine = (
         storeDataStreamStats: assign(
           (_context, event: DoneInvokeEvent<DataStreamStatServiceResponse>) => {
             const dataStreamStats = event.data.dataStreamsStats as DataStreamStat[];
-            const datasetUserPrivileges = event.data.datasetUserPrivileges;
+            const datasetUserPrivileges = {
+              ...event.data.datasetUserPrivileges,
+              canReadFailureStore:
+                event.data.datasetUserPrivileges.canReadFailureStore ||
+                dataStreamStats.some((ds) => ds.userPrivileges.canReadFailureStore),
+            };
 
             return {
               dataStreamStats,
@@ -380,6 +426,9 @@ export const createPureDatasetQualityControllerStateMachine = (
         ),
         storeDegradedDocStats: assign((_context, event: DoneInvokeEvent<DataStreamDocsStat[]>) => ({
           degradedDocStats: event.data,
+        })),
+        storeFailedDocStats: assign((_context, event: DoneInvokeEvent<DataStreamDocsStat[]>) => ({
+          failedDocStats: event.data,
         })),
         storeNonAggregatableDatasets: assign(
           (_context, event: DoneInvokeEvent<NonAggregatableDatasets>) => ({
@@ -404,6 +453,7 @@ export const createPureDatasetQualityControllerStateMachine = (
                 datasets: generateDatasets(
                   context.dataStreamStats,
                   context.degradedDocStats,
+                  context.failedDocStats,
                   context.integrations,
                   context.totalDocsStats
                 ),
@@ -412,12 +462,20 @@ export const createPureDatasetQualityControllerStateMachine = (
         }),
       },
       guards: {
-        checkIfActionForbidden: (context, event) => {
+        checkIfActionForbidden: (_context, event) => {
           return (
             'data' in event &&
             typeof event.data === 'object' &&
             'statusCode' in event.data! &&
             event.data.statusCode === 403
+          );
+        },
+        checkIfNotImplemented: (_context, event) => {
+          return (
+            'data' in event &&
+            typeof event.data === 'object' &&
+            'statusCode' in event.data! &&
+            event.data.statusCode === 501
           );
         },
       },
@@ -428,12 +486,14 @@ export interface DatasetQualityControllerStateMachineDependencies {
   initialContext?: DatasetQualityControllerContext;
   toasts: IToasts;
   dataStreamStatsClient: IDataStreamsStatsClient;
+  isDatasetQualityAllSignalsAvailable: boolean;
 }
 
 export const createDatasetQualityControllerStateMachine = ({
   initialContext = DEFAULT_CONTEXT,
   toasts,
   dataStreamStatsClient,
+  isDatasetQualityAllSignalsAvailable,
 }: DatasetQualityControllerStateMachineDependencies) =>
   createPureDatasetQualityControllerStateMachine(initialContext).withConfig({
     actions: {
@@ -447,13 +507,19 @@ export const createDatasetQualityControllerStateMachine = ({
         fetchIntegrationsFailedNotifier(toasts, event.data),
       notifyFetchTotalDocsFailed: (_context, event: DoneInvokeEvent<Error>, meta) =>
         fetchTotalDocsFailedNotifier(toasts, event.data, meta),
+      notifyFetchFailedStatsFailed: (_context, event: DoneInvokeEvent<Error>) =>
+        fetchFailedStatsFailedNotifier(toasts, event.data),
     },
     services: {
-      loadDataStreamStats: (context, _event) =>
-        dataStreamStatsClient.getDataStreamsStats({
-          types: context.filters.types as DataStreamType[],
+      loadDataStreamStats: (context, _event) => {
+        const validTypes = isDatasetQualityAllSignalsAvailable
+          ? context.filters.types
+          : [DEFAULT_DATASET_TYPE];
+        return dataStreamStatsClient.getDataStreamsStats({
+          types: validTypes as DataStreamType[],
           datasetQuery: context.filters.query,
-        }),
+        });
+      },
       loadDataStreamDocsStats:
         (context, _event, { data: { type } }) =>
         async (send) => {
@@ -483,6 +549,16 @@ export const createDatasetQualityControllerStateMachine = ({
         const { startDate: start, endDate: end } = getDateISORange(context.filters.timeRange);
 
         return dataStreamStatsClient.getDataStreamsDegradedStats({
+          types: context.filters.types as DataStreamType[],
+          datasetQuery: context.filters.query,
+          start,
+          end,
+        });
+      },
+      loadFailedDocs: (context) => {
+        const { startDate: start, endDate: end } = getDateISORange(context.filters.timeRange);
+
+        return dataStreamStatsClient.getDataStreamsFailedStats({
           types: context.filters.types as DataStreamType[],
           datasetQuery: context.filters.query,
           start,

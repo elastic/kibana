@@ -6,10 +6,31 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSkeletonTitle, EuiText } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiPanel,
+  EuiSkeletonTitle,
+  EuiText,
+  EuiToolTip,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { PrivilegesWarningIconWrapper } from '../../../common';
 import { notAvailableLabel } from '../../../../../common/translations';
-import { VerticalRule } from '../../../common/vertical_rule';
+
+const verticalRule = css`
+  width: 1px;
+  height: 65px;
+  background-color: ${euiThemeVars.euiColorLightShade};
+`;
+
+const verticalRuleHidden = css`
+  width: 1px;
+  height: 65px;
+  visibility: hidden;
+`;
 
 export function Panel({
   title,
@@ -25,14 +46,14 @@ export function Panel({
       return panelChildren.map((panelChild, index) => (
         <React.Fragment key={index}>
           {panelChild}
-          {index < panelChildren.length - 1 && <VerticalRule />}
+          {index < panelChildren.length - 1 && <span css={verticalRule} />}
         </React.Fragment>
       ));
     }
     return (
       <>
         {panelChildren}
-        <VerticalRule style={{ visibility: 'hidden' }} />
+        <span css={verticalRuleHidden} />
       </>
     );
   };
@@ -58,11 +79,13 @@ export function Panel({
 export function PanelIndicator({
   label,
   value,
+  tooltip,
   isLoading,
   userHasPrivilege = true,
 }: {
   label: string;
   value: string | number;
+  tooltip?: React.ReactElement;
   isLoading: boolean;
   userHasPrivilege?: boolean;
 }) {
@@ -72,9 +95,18 @@ export function PanelIndicator({
         <EuiSkeletonTitle size="m" />
       ) : (
         <>
-          <EuiText size="xs" color="subdued">
-            {label}
-          </EuiText>
+          {tooltip ? (
+            <EuiToolTip content={tooltip}>
+              <EuiText size="xs" color="subdued">
+                {`${label} `}
+                <EuiIcon size="s" color="subdued" type="question" className="eui-alignTop" />
+              </EuiText>
+            </EuiToolTip>
+          ) : (
+            <EuiText size="xs" color="subdued">
+              {label}
+            </EuiText>
+          )}
           <PrivilegesWarningIconWrapper
             hasPrivileges={userHasPrivilege}
             title={label}

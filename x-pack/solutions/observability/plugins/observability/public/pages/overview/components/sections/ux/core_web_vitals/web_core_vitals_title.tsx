@@ -30,6 +30,9 @@ const BROWSER_CORE_WEB_VITALS = i18n.translate(
   }
 );
 
+const CORE_VITALS_URL = 'https://ela.st/vtls';
+const CORE_VITALS_BROWSER_URL = 'https://ela.st/ch-vtls';
+
 export function WebCoreVitalsTitle({
   loading,
   coreVitalPages,
@@ -41,10 +44,8 @@ export function WebCoreVitalsTitle({
   totalPageViews?: number;
   displayTrafficMetric: boolean;
 }) {
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isBrowserPopoverOpen, setIsBrowserPopoverOpen] = useState(false);
 
-  const closePopover = () => setIsPopoverOpen(false);
   const closeBrowserPopover = () => setIsBrowserPopoverOpen(false);
 
   const helpAriaLabel = i18n.translate(
@@ -54,43 +55,27 @@ export function WebCoreVitalsTitle({
 
   return (
     <EuiFlexGroup gutterSize="none">
-      <EuiFlexItem>
-        <EuiTitle size="xs">
-          <h3>
-            {CORE_WEB_VITALS}
-            <EuiPopover
-              isOpen={isPopoverOpen}
-              button={
-                <EuiButtonIcon
-                  data-test-subj="o11yWebCoreVitalsTitleButton"
-                  aria-label={helpAriaLabel}
-                  onClick={() => setIsPopoverOpen(true)}
-                  color={'text'}
-                  iconType={'questionInCircle'}
-                />
-              }
-              closePopover={closePopover}
+      <EuiFlexGroup gutterSize="s" direction="row" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="xs">
+            <h3>{CORE_WEB_VITALS}</h3>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText size="s">
+            <EuiLink
+              data-test-subj="o11yWebCoreVitalsTitleLink"
+              href={CORE_VITALS_URL}
+              external
+              target="_blank"
             >
-              <div>
-                <EuiText>
-                  <FormattedMessage
-                    id="xpack.observability.ux.dashboard.webCoreVitals.help"
-                    defaultMessage="Learn more about"
-                  />{' '}
-                  <EuiLink
-                    data-test-subj="o11yWebCoreVitalsTitleLink"
-                    href="https://web.dev/vitals/"
-                    external
-                    target="_blank"
-                  >
-                    {CORE_WEB_VITALS}
-                  </EuiLink>
-                </EuiText>
-              </div>
-            </EuiPopover>
-          </h3>
-        </EuiTitle>
-      </EuiFlexItem>
+              {i18n.translate('xpack.observability.ux.dashboard.webCoreVitals.help', {
+                defaultMessage: 'Learn more',
+              })}
+            </EuiLink>
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
       {displayTrafficMetric && totalPageViews > 0 && (
         <EuiFlexItem grow={false}>
           {loading ? (
@@ -115,7 +100,7 @@ export function WebCoreVitalsTitle({
                     aria-label={helpAriaLabel}
                     onClick={() => setIsBrowserPopoverOpen(true)}
                     color={'text'}
-                    iconType={'questionInCircle'}
+                    iconType={'question'}
                   />
                 }
                 closePopover={closeBrowserPopover}
@@ -128,7 +113,7 @@ export function WebCoreVitalsTitle({
                     />{' '}
                     <EuiLink
                       data-test-subj="o11yWebCoreVitalsTitleLink"
-                      href="https://github.com/GoogleChrome/web-vitals#browser-support"
+                      href={CORE_VITALS_BROWSER_URL}
                       external
                       target="_blank"
                     >

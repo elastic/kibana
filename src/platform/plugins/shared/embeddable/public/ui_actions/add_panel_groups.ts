@@ -9,6 +9,18 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const ADD_PANEL_VISUALIZATION_GROUP = {
+  id: 'visualizations',
+  getDisplayName: () =>
+    i18n.translate('embeddableApi.common.constants.grouping.visualizations', {
+      defaultMessage: 'Visualizations',
+    }),
+  getIconType: () => {
+    return 'visGauge';
+  },
+  order: 1000,
+};
+
 export const ADD_PANEL_ANNOTATION_GROUP = {
   id: 'annotation-and-navigation',
   getDisplayName: () =>
@@ -26,13 +38,4 @@ export const ADD_PANEL_OTHER_GROUP = {
     }),
   getIconType: () => 'empty',
   order: -1, // Given an item that doesn't specify a group is assigned zero, this forces other to come after all intentionally grouped section
-};
-
-export const ADD_PANEL_LEGACY_GROUP = {
-  id: 'legacy',
-  getDisplayName: () =>
-    i18n.translate('embeddableApi.common.constants.grouping.legacy', {
-      defaultMessage: 'Legacy',
-    }),
-  order: -2, // Given an item that doesn't specify a group is assigned zero, this forces it to the bottom of the list
 };

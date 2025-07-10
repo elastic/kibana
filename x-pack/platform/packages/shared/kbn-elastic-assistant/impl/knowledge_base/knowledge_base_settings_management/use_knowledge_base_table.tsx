@@ -22,9 +22,8 @@ import {
   IndexEntryType,
   KnowledgeBaseEntryResponse,
 } from '@kbn/elastic-assistant-common';
-
-import useAsync from 'react-use/lib/useAsync';
 import { UserProfileAvatarData } from '@kbn/user-profile-components';
+import { useQuery } from '@tanstack/react-query';
 import { useAssistantContext } from '../../..';
 import * as i18n from './translations';
 import { BadgesColumn } from '../../assistant/common/components/assistant_settings_management/badges';
@@ -32,26 +31,37 @@ import { useInlineActions } from '../../assistant/common/components/assistant_se
 import { isSystemEntry } from './helpers';
 import { SetupKnowledgeBaseButton } from '../setup_knowledge_base_button';
 
-const AuthorColumn = ({ entry }: { entry: KnowledgeBaseEntryResponse }) => {
+const useUserProfile = ({ username, enabled = true }: { username: string; enabled: boolean }) => {
   const { userProfileService } = useAssistantContext();
 
-  const userProfile = useAsync(async () => {
-    if (isSystemEntry(entry) || entry.createdBy === 'unknown') {
-      return;
-    }
+  return useQuery({
+    queryKey: ['userProfile', username],
+    queryFn: async () => {
+      const data = await userProfileService?.bulkGet<{ avatar: UserProfileAvatarData }>({
+        uids: new Set([username]),
+        dataPath: 'avatar',
+      });
 
-    const profile = await userProfileService?.bulkGet<{ avatar: UserProfileAvatarData }>({
-      uids: new Set([entry.createdBy]),
-      dataPath: 'avatar',
-    });
-    return { username: profile?.[0].user.username, avatar: profile?.[0].data.avatar };
-  }, [entry.createdBy]);
+      return data;
+    },
+    select: (profile) => {
+      return {
+        username: profile?.[0]?.user.username ?? username ?? 'Unknown',
+        avatar: profile?.[0]?.data.avatar,
+      };
+    },
+    enabled: !!(enabled && username?.length),
+  });
+};
 
-  const userName = useMemo(
-    () => userProfile?.value?.username ?? 'Unknown',
-    [userProfile?.value?.username]
-  );
-  const userAvatar = userProfile?.value?.avatar;
+const AuthorColumn = ({ entry }: { entry: KnowledgeBaseEntryResponse }) => {
+  const { data: userProfile } = useUserProfile({
+    username: entry.createdBy,
+    enabled: !(isSystemEntry(entry) || entry.createdBy === 'unknown'),
+  });
+
+  const userName = useMemo(() => userProfile?.username ?? 'Unknown', [userProfile?.username]);
+  const userAvatar = userProfile?.avatar;
   const badgeItem = isSystemEntry(entry) ? 'Elastic' : userName;
   const userImage = isSystemEntry(entry) ? (
     <EuiIcon
@@ -124,7 +134,7 @@ const NameColumn = ({
 };
 
 export const useKnowledgeBaseTable = () => {
-  const getActions = useInlineActions<KnowledgeBaseEntryResponse & { isDefault?: undefined }>();
+  const getActions = useInlineActions<KnowledgeBaseEntryResponse>();
 
   const getIconForEntry = (entry: KnowledgeBaseEntryResponse): string => {
     if (entry.type === DocumentEntryType.value) {
@@ -138,7 +148,7 @@ export const useKnowledgeBaseTable = () => {
     } else if (entry.type === IndexEntryType.value) {
       return 'index';
     }
-    return 'questionInCircle';
+    return 'question';
   };
 
   const getColumns = useCallback(
@@ -168,7 +178,7 @@ export const useKnowledgeBaseTable = () => {
           render: (entry: KnowledgeBaseEntryResponse) => (
             <NameColumn entry={entry} existingIndices={existingIndices} />
           ),
-          sortable: ({ name }: KnowledgeBaseEntryResponse) => name,
+          sortable: ({ name }: KnowledgeBaseEntryResponse) => name.toLocaleLowerCase() + name, // Ensures that the sorting is case-insensitive and that the sorting is stable
           width: '30%',
         },
         {

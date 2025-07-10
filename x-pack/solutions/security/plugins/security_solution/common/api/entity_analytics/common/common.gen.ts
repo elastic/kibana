@@ -40,6 +40,7 @@ export const AfterKeys = z.object({
   host: EntityAfterKey.optional(),
   user: EntityAfterKey.optional(),
   service: EntityAfterKey.optional(),
+  generic: EntityAfterKey.optional(),
 });
 
 /**
@@ -73,7 +74,7 @@ export const DateRange = z.object({
 });
 
 export type IdentifierType = z.infer<typeof IdentifierType>;
-export const IdentifierType = z.enum(['host', 'user', 'service']);
+export const IdentifierType = z.enum(['host', 'user', 'service', 'generic']);
 export type IdentifierTypeEnum = typeof IdentifierType.enum;
 export const IdentifierTypeEnum = IdentifierType.enum;
 
@@ -176,6 +177,7 @@ export const RiskScoreWeightInternal = z.union([
       host: RiskScoreEntityIdentifierWeights,
       user: RiskScoreEntityIdentifierWeights.optional(),
       service: RiskScoreEntityIdentifierWeights.optional(),
+      generic: RiskScoreEntityIdentifierWeights.optional(),
     })
   ),
   RiskScoreWeightGlobalShared.merge(
@@ -183,6 +185,7 @@ export const RiskScoreWeightInternal = z.union([
       host: RiskScoreEntityIdentifierWeights.optional(),
       user: RiskScoreEntityIdentifierWeights,
       service: RiskScoreEntityIdentifierWeights.optional(),
+      generic: RiskScoreEntityIdentifierWeights.optional(),
     })
   ),
   RiskScoreWeightGlobalShared.merge(
@@ -190,6 +193,7 @@ export const RiskScoreWeightInternal = z.union([
       host: RiskScoreEntityIdentifierWeights.optional(),
       user: RiskScoreEntityIdentifierWeights.optional(),
       service: RiskScoreEntityIdentifierWeights,
+      generic: RiskScoreEntityIdentifierWeights.optional(),
     })
   ),
 ]);

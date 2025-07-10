@@ -37,7 +37,7 @@ import type {
   ApplicationStart,
   SavedObjectsClientContract,
 } from '@kbn/core/public';
-import { UiActionsStart, UiActionsSetup, ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
+import { UiActionsStart, UiActionsSetup } from '@kbn/ui-actions-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type {
   Setup as InspectorSetup,
@@ -47,11 +47,7 @@ import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { ExpressionsSetup, ExpressionsStart } from '@kbn/expressions-plugin/public';
-import {
-  CONTEXT_MENU_TRIGGER,
-  EmbeddableSetup,
-  EmbeddableStart,
-} from '@kbn/embeddable-plugin/public';
+import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { NavigationPublicPluginStart as NavigationStart } from '@kbn/navigation-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
@@ -71,6 +67,7 @@ import {
 import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
 import { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
 
+import { css, injectGlobal } from '@emotion/css';
 import type { TypesSetup, TypesStart } from './vis_types';
 import type { VisualizeServices } from './visualize_app/types';
 import {
@@ -119,16 +116,14 @@ import {
   setNotifications,
 } from './services';
 import { VisualizeConstants, VISUALIZE_EMBEDDABLE_TYPE } from '../common/constants';
-import { EditInLensAction } from './actions/edit_in_lens_action';
 import { ListingViewRegistry } from './types';
 import {
   LATEST_VERSION,
   CONTENT_ID,
   VisualizationSavedObjectAttributes,
 } from '../common/content_management';
-import { AddAggVisualizationPanelAction } from './actions/add_agg_vis_action';
-import type { VisualizeSerializedState } from './embeddable/types';
-import { getVisualizeEmbeddableFactoryLazy } from './embeddable';
+import type { VisualizeSavedObjectInputState } from './embeddable/types';
+import { registerActions } from './actions/register_actions';
 
 /**
  * Interface for this plugin's returned setup/start contracts.
@@ -183,6 +178,72 @@ export interface VisualizationsStartDeps {
   noDataPage?: NoDataPagePluginStart;
   embeddableEnhanced?: EmbeddableEnhancedPluginStart;
 }
+
+const styles = {
+  visAppWrapper: css({
+    display: 'flex',
+    flexDirection: 'column',
+    flexGrow: 1,
+  }),
+  globalScreenshotMode: css`
+    kbn-top-nav,
+    filter-bar,
+    .kbnTopNavMenu__wrapper,
+    ::-webkit-scrollbar,
+    .euiNavDrawer {
+      display: none !important;
+    }
+  `,
+  visEditorScreenshotMode: css`
+    /* hide unusable controls !important is required to override resizable panel inline display */
+    .visEditor__content .visEditor--default > :not(.visEditor__visualization__wrapper) {
+      display: none !important;
+    }
+
+    /** THIS IS FOR TSVB UNTIL REFACTOR **/
+    .tvbEditorVisualization {
+      position: static !important;
+    }
+    .visualize .tvbVisTimeSeries__legendToggle {
+      /* all non-content rows in interface */
+      display: none;
+    }
+
+    .tvbEditor--hideForReporting {
+      /* all non-content rows in interface */
+      display: none;
+    }
+    /**  END TSVB BAD BAD HACKS **/
+
+    /* remove left padding from visualizations so that map lines up with .leaflet-container and
+    *  setting the position to be fixed and to take up the entire screen, because some zoom levels/viewports
+    *  are triggering the media breakpoints that cause the .visEditor__canvas to take up more room than the viewport */
+
+    .visEditor .visEditor__canvas {
+      padding-left: 0;
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+    }
+
+    /** Visualization tweaks */
+
+    /* hide unusable controls */
+    .visualize .visLegend__toggle,
+    .visualize .kbnAggTable__controls,
+    .visualize .leaflet-container .leaflet-top.leaflet-left,
+    .visualize paginate-controls /* page numbers */ {
+      display: none;
+    }
+
+    /* Ensure the min-height of the small breakpoint isn't used */
+    .vis-editor visualization {
+      min-height: 0 !important;
+    }
+  `,
+};
 
 /**
  * Visualizations Plugin - public
@@ -332,8 +393,8 @@ export class VisualizationsPlugin
           navigation: pluginsStart.navigation,
           share: pluginsStart.share,
           toastNotifications: coreStart.notifications.toasts,
-          visualizeCapabilities: coreStart.application.capabilities.visualize,
-          dashboardCapabilities: coreStart.application.capabilities.dashboard,
+          visualizeCapabilities: coreStart.application.capabilities.visualize_v2,
+          dashboardCapabilities: coreStart.application.capabilities.dashboard_v2,
           embeddable: pluginsStart.embeddable,
           stateTransferService: pluginsStart.embeddable.getStateTransfer(),
           setActiveUrl,
@@ -355,16 +416,15 @@ export class VisualizationsPlugin
           contentManagement: pluginsStart.contentManagement,
         };
 
-        params.element.classList.add('visAppWrapper');
+        params.element.classList.add(styles.visAppWrapper);
         if (pluginsStart.screenshotMode.isScreenshotMode()) {
-          params.element.classList.add('visEditorScreenshotModeActive');
-          // @ts-expect-error TS error, cannot find type declaration for scss
-          await import('./visualize_screenshot_mode.scss');
+          params.element.classList.add(styles.visEditorScreenshotMode);
+          injectGlobal(styles.globalScreenshotMode);
         }
         const unmount = renderApp(params, services);
         return () => {
           data.search.session.clear();
-          params.element.classList.remove('visAppWrapper');
+          params.element.classList.remove(styles.visAppWrapper);
           unlistenParentHistory();
           unmount();
           appUnMounted();
@@ -403,22 +463,28 @@ export class VisualizationsPlugin
     uiActions.registerTrigger(aggBasedVisualizationTrigger);
     uiActions.registerTrigger(visualizeEditorTrigger);
     uiActions.registerTrigger(dashboardVisualizationPanelTrigger);
-    const editInLensAction = new EditInLensAction(data.query.timefilter.timefilter);
-    uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, editInLensAction);
     embeddable.registerReactEmbeddableFactory(VISUALIZE_EMBEDDABLE_TYPE, async () => {
       const {
         plugins: { embeddable: embeddableStart, embeddableEnhanced: embeddableEnhancedStart },
       } = start();
 
-      const getVisualizeEmbeddableFactory = await getVisualizeEmbeddableFactoryLazy();
+      const { getVisualizeEmbeddableFactory } = await import('./embeddable/visualize_embeddable');
       return getVisualizeEmbeddableFactory({ embeddableStart, embeddableEnhancedStart });
     });
     embeddable.registerAddFromLibraryType<VisualizationSavedObjectAttributes>({
-      onAdd: (container, savedObject) => {
-        container.addNewPanel<VisualizeSerializedState>({
-          panelType: VISUALIZE_EMBEDDABLE_TYPE,
-          initialState: { savedObjectId: savedObject.id },
-        });
+      onAdd: async (container, savedObject) => {
+        container.addNewPanel<VisualizeSavedObjectInputState>(
+          {
+            panelType: VISUALIZE_EMBEDDABLE_TYPE,
+            serializedState: {
+              rawState: {
+                savedObjectId: savedObject.id,
+              },
+              references: savedObject.references,
+            },
+          },
+          true
+        );
       },
       savedObjectType: VISUALIZE_EMBEDDABLE_TYPE,
       savedObjectName: i18n.translate('visualizations.visualizeSavedObjectName', {
@@ -498,8 +564,7 @@ export class VisualizationsPlugin
       setSavedObjectTagging(savedObjectsTaggingOss);
     }
 
-    const addAggVisAction = new AddAggVisualizationPanelAction(types);
-    uiActions.addTriggerAction(ADD_PANEL_TRIGGER, addAggVisAction);
+    registerActions(uiActions, data, types);
 
     return {
       ...types,

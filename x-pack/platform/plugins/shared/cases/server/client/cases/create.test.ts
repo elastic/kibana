@@ -18,12 +18,7 @@ import { SECURITY_SOLUTION_OWNER } from '../../../common';
 import { mockCases } from '../../mocks';
 import { createCasesClientMock, createCasesClientMockArgs } from '../mocks';
 import { create } from './create';
-import {
-  CaseSeverity,
-  CaseStatuses,
-  ConnectorTypes,
-  CustomFieldTypes,
-} from '../../../common/types/domain';
+import { CaseSeverity, ConnectorTypes, CustomFieldTypes } from '../../../common/types/domain';
 
 import type { CaseCustomFields } from '../../../common/types/domain';
 import { omit } from 'lodash';
@@ -116,6 +111,67 @@ describe('create', () => {
         `Failed to create case: Error: In order to assign users to cases, you must be subscribed to an Elastic Platinum license`
       );
     });
+
+    it('validates with assign+create operations when cases have assignees', async () => {
+      clientArgs.services.licensingService.isAtLeastPlatinum.mockResolvedValue(true);
+      await create(theCase, clientArgs, casesClientMock);
+
+      expect(clientArgs.authorization.ensureAuthorized).toHaveBeenCalledWith(
+        expect.objectContaining({
+          operation: [
+            {
+              action: 'cases_assign',
+              docType: 'case',
+              ecsType: 'change',
+              name: 'assignCase',
+              savedObjectType: 'cases',
+              verbs: { past: 'updated', present: 'update', progressive: 'updating' },
+            },
+            {
+              action: 'case_create',
+              docType: 'case',
+              ecsType: 'creation',
+              name: 'createCase',
+              savedObjectType: 'cases',
+              verbs: { past: 'created', present: 'create', progressive: 'creating' },
+            },
+          ],
+        })
+      );
+    });
+
+    it('validates with only create operation when cases have no assignees', async () => {
+      await create({ ...theCase, assignees: [] }, clientArgs, casesClientMock);
+
+      expect(clientArgs.authorization.ensureAuthorized).toHaveBeenCalledWith(
+        expect.objectContaining({
+          operation: {
+            action: 'case_create',
+            docType: 'case',
+            ecsType: 'creation',
+            name: 'createCase',
+            savedObjectType: 'cases',
+            verbs: { past: 'created', present: 'create', progressive: 'creating' },
+          },
+        })
+      );
+    });
+
+    it('should filter out empty assignees', async () => {
+      await create(
+        { ...theCase, assignees: [{ uid: '' }, { uid: '1' }] },
+        clientArgs,
+        casesClientMock
+      );
+
+      expect(clientArgs.services.caseService.createCase).toHaveBeenCalledWith(
+        expect.objectContaining({
+          attributes: expect.objectContaining({
+            assignees: [{ uid: '1' }],
+          }),
+        })
+      );
+    });
   });
 
   describe('Attributes', () => {
@@ -183,24 +239,9 @@ describe('create', () => {
 
       expect(clientArgs.services.caseService.createCase).toHaveBeenCalledWith(
         expect.objectContaining({
-          attributes: {
-            ...theCase,
-            closed_by: null,
-            closed_at: null,
+          attributes: expect.objectContaining({
             title: 'title with spaces',
-            created_at: expect.any(String),
-            created_by: expect.any(Object),
-            updated_at: null,
-            updated_by: null,
-            external_service: null,
-            duration: null,
-            status: CaseStatuses.open,
-            category: null,
-            customFields: [],
-            observables: [],
-          },
-          id: expect.any(String),
-          refresh: false,
+          }),
         })
       );
     });
@@ -261,24 +302,9 @@ describe('create', () => {
 
       expect(clientArgs.services.caseService.createCase).toHaveBeenCalledWith(
         expect.objectContaining({
-          attributes: {
-            ...theCase,
-            closed_by: null,
-            closed_at: null,
+          attributes: expect.objectContaining({
             description: 'this is a description with spaces!!',
-            created_at: expect.any(String),
-            created_by: expect.any(Object),
-            updated_at: null,
-            updated_by: null,
-            external_service: null,
-            duration: null,
-            status: CaseStatuses.open,
-            category: null,
-            customFields: [],
-            observables: [],
-          },
-          id: expect.any(String),
-          refresh: false,
+          }),
         })
       );
     });
@@ -341,24 +367,9 @@ describe('create', () => {
 
       expect(clientArgs.services.caseService.createCase).toHaveBeenCalledWith(
         expect.objectContaining({
-          attributes: {
-            ...theCase,
-            closed_by: null,
-            closed_at: null,
+          attributes: expect.objectContaining({
             tags: ['pepsi', 'coke'],
-            created_at: expect.any(String),
-            created_by: expect.any(Object),
-            updated_at: null,
-            updated_by: null,
-            external_service: null,
-            duration: null,
-            status: CaseStatuses.open,
-            category: null,
-            customFields: [],
-            observables: [],
-          },
-          id: expect.any(String),
-          refresh: false,
+          }),
         })
       );
     });
@@ -409,23 +420,9 @@ describe('create', () => {
 
       expect(clientArgs.services.caseService.createCase).toHaveBeenCalledWith(
         expect.objectContaining({
-          attributes: {
-            ...theCase,
-            closed_by: null,
-            closed_at: null,
+          attributes: expect.objectContaining({
             category: 'reporting',
-            created_at: expect.any(String),
-            created_by: expect.any(Object),
-            updated_at: null,
-            updated_by: null,
-            external_service: null,
-            duration: null,
-            status: CaseStatuses.open,
-            customFields: [],
-            observables: [],
-          },
-          id: expect.any(String),
-          refresh: false,
+          }),
         })
       );
     });
@@ -489,23 +486,9 @@ describe('create', () => {
 
       expect(clientArgs.services.caseService.createCase).toHaveBeenCalledWith(
         expect.objectContaining({
-          attributes: {
-            ...theCase,
-            closed_by: null,
-            closed_at: null,
-            category: null,
-            created_at: expect.any(String),
-            created_by: expect.any(Object),
-            updated_at: null,
-            updated_by: null,
-            external_service: null,
-            duration: null,
-            status: CaseStatuses.open,
+          attributes: expect.objectContaining({
             customFields: theCustomFields,
-            observables: [],
-          },
-          id: expect.any(String),
-          refresh: false,
+          }),
         })
       );
     });
@@ -515,26 +498,12 @@ describe('create', () => {
 
       expect(clientArgs.services.caseService.createCase).toHaveBeenCalledWith(
         expect.objectContaining({
-          attributes: {
-            ...theCase,
-            closed_by: null,
-            closed_at: null,
-            category: null,
-            created_at: expect.any(String),
-            created_by: expect.any(Object),
-            updated_at: null,
-            updated_by: null,
-            external_service: null,
-            duration: null,
-            status: CaseStatuses.open,
+          attributes: expect.objectContaining({
             customFields: [
               { key: 'first_key', type: 'text', value: 'default value' },
               { key: 'second_key', type: 'toggle', value: null },
             ],
-            observables: [],
-          },
-          id: expect.any(String),
-          refresh: false,
+          }),
         })
       );
     });

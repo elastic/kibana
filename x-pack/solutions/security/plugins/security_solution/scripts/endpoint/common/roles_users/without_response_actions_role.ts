@@ -6,6 +6,7 @@
  */
 
 import type { Role } from '@kbn/security-plugin/common';
+import { SECURITY_FEATURE_ID } from '../../../../common/constants';
 
 export const getNoResponseActionsRole: () => Omit<Role, 'name'> = () => ({
   elasticsearch: {
@@ -37,13 +38,13 @@ export const getNoResponseActionsRole: () => Omit<Role, 'name'> = () => ({
         advancedSettings: ['all'],
         dev_tools: ['all'],
         fleet: ['all'],
-        generalCasesV2: ['all'],
+        generalCasesV3: ['all'],
         indexPatterns: ['all'],
         osquery: ['all'],
         savedObjectsManagement: ['all'],
         savedObjectsTagging: ['all'],
-        siem: [
-          'minimal_all',
+        [SECURITY_FEATURE_ID]: [
+          'all',
           'endpoint_list_all',
           'endpoint_list_read',
           'trusted_applications_all',
@@ -57,6 +58,8 @@ export const getNoResponseActionsRole: () => Omit<Role, 'name'> = () => ({
           'policy_management_all',
           'policy_management_read',
         ],
+        securitySolutionTimeline: ['all'],
+        securitySolutionNotes: ['all'],
         stackAlerts: ['all'],
       },
       spaces: ['*'],

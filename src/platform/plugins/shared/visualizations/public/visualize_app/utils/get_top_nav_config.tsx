@@ -11,7 +11,7 @@ import React from 'react';
 import moment from 'moment';
 import EventEmitter from 'events';
 import { i18n } from '@kbn/i18n';
-import { EuiBetaBadgeProps } from '@elastic/eui';
+import { EuiBetaBadgeProps, EuiCallOut } from '@elastic/eui';
 import { parse } from 'query-string';
 
 import { Capabilities } from '@kbn/core/public';
@@ -28,6 +28,8 @@ import {
 } from '@kbn/presentation-util-plugin/public';
 import { unhashUrl } from '@kbn/kibana-utils-plugin/public';
 import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
+import { VISUALIZE_APP_LOCATOR } from '@kbn/deeplinks-analytics';
+
 import { saveVisualization } from '../../utils/saved_visualize_utils';
 import { VISUALIZE_EMBEDDABLE_TYPE, getFullPath } from '../..';
 
@@ -38,18 +40,18 @@ import {
 } from '../types';
 import { VisualizeConstants } from '../../../common/constants';
 import { getEditBreadcrumbs, getEditServerlessBreadcrumbs } from './breadcrumbs';
-import { VISUALIZE_APP_LOCATOR, VisualizeLocatorParams } from '../../../common/locator';
+import { VisualizeLocatorParams } from '../../../common/locator';
 import { getUiActions } from '../../services';
 import { VISUALIZE_EDITOR_TRIGGER, AGG_BASED_VISUALIZATION_TRIGGER } from '../../triggers';
 import { getVizEditorOriginatingAppUrl } from './utils';
 
-import './visualize_navigation.scss';
+import { serializeReferences } from '../../utils/saved_visualization_references';
+import { serializeState } from '../../embeddable/state';
 
 interface VisualizeCapabilities {
   createShortUrl: boolean;
   delete: boolean;
   save: boolean;
-  saveQuery: boolean;
   show: boolean;
 }
 
@@ -76,9 +78,9 @@ export interface TopNavConfigParams {
 const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
 
 export const showPublicUrlSwitch = (anonymousUserCapabilities: Capabilities) => {
-  if (!anonymousUserCapabilities.visualize) return false;
+  if (!anonymousUserCapabilities.visualize_v2) return false;
 
-  const visualize = anonymousUserCapabilities.visualize as unknown as VisualizeCapabilities;
+  const visualize = anonymousUserCapabilities.visualize_v2 as unknown as VisualizeCapabilities;
 
   return !!visualize.show;
 };
@@ -184,10 +186,17 @@ export const getTopNavConfig = (
           }
 
           if (stateTransfer) {
+            const serializedVis = vis.serialize();
+            const { references } = serializeReferences(serializedVis);
             stateTransfer.navigateToWithEmbeddablePackage(app, {
               state: {
                 type: VISUALIZE_EMBEDDABLE_TYPE,
-                input: { savedObjectId: id },
+                serializedState: {
+                  rawState: {
+                    savedObjectId: id,
+                  },
+                  references,
+                },
                 embeddableId: saveOptions.copyOnSave ? undefined : embeddableId,
                 searchSessionId: data.search.session.getSessionId(),
               },
@@ -244,16 +253,17 @@ export const getTopNavConfig = (
       return;
     }
 
-    const state = {
-      input: {
-        serializedVis: vis.serialize(),
+    stateTransfer.navigateToWithEmbeddablePackage(originatingApp, {
+      state: {
+        serializedState: serializeState({
+          serializedVis: vis.serialize(),
+        }),
+        embeddableId,
+        type: VISUALIZE_EMBEDDABLE_TYPE,
+        searchSessionId: data.search.session.getSessionId(),
       },
-      embeddableId,
-      type: VISUALIZE_EMBEDDABLE_TYPE,
-      searchSessionId: data.search.session.getSessionId(),
-    };
-
-    stateTransfer.navigateToWithEmbeddablePackage(originatingApp, { state, path: originatingPath });
+      path: originatingPath,
+    });
   };
 
   const navigateToOriginatingApp = () => {
@@ -277,6 +287,118 @@ export const getTopNavConfig = (
 
   const showSaveButton =
     visualizeCapabilities.save || (!originatingApp && dashboardCapabilities.showWriteControls);
+
+  const showShareOptions = (anchorElement: HTMLElement, asExport?: boolean) => {
+    if (share) {
+      const currentState = stateContainer.getState();
+      const searchParams = parse(history.location.search);
+      const params: VisualizeLocatorParams = {
+        visId: savedVis?.id,
+        filters: currentState.filters,
+        refreshInterval: undefined,
+        timeRange: data.query.timefilter.timefilter.getTime(),
+        uiState: currentState.uiState,
+        query: currentState.query,
+        vis: currentState.vis,
+        linked: currentState.linked,
+        indexPattern:
+          visInstance.savedSearch?.searchSource?.getField('index')?.id ??
+          (searchParams.indexPattern as string),
+        savedSearchId: visInstance.savedSearch?.id ?? (searchParams.savedSearchId as string),
+      };
+      // TODO: support sharing in by-value mode
+      share.toggleShareContextMenu({
+        asExport,
+        anchorElement,
+        allowShortUrl: Boolean(visualizeCapabilities.createShortUrl),
+        shareableUrl: unhashUrl(window.location.href),
+        objectId: savedVis?.id,
+        objectType: 'visualization',
+        objectTypeMeta: {
+          title: i18n.translate('visualizations.share.shareModal.title', {
+            defaultMessage: 'Share this visualization',
+          }),
+          config: {
+            embed: {
+              computeAnonymousCapabilities: showPublicUrlSwitch,
+            },
+            integration: {
+              export: {
+                pdfReports: {
+                  draftModeCallOut: (
+                    <EuiCallOut
+                      color="warning"
+                      iconType="warning"
+                      title={i18n.translate('visualizations.exports.pdfReports.warning.title', {
+                        defaultMessage: 'Unsaved changes',
+                      })}
+                    >
+                      {i18n.translate(
+                        'visualizations.exports.pdfReports.postURLWatcherMessage.unsavedChanges',
+                        {
+                          defaultMessage: 'URL may change if you upgrade Kibana.',
+                        }
+                      )}
+                    </EuiCallOut>
+                  ),
+                },
+                imageReports: {
+                  draftModeCallOut: (
+                    <EuiCallOut
+                      color="warning"
+                      iconType="warning"
+                      title={i18n.translate('visualizations.exports.imageReports.warning.title', {
+                        defaultMessage: 'Unsaved changes',
+                      })}
+                    >
+                      {i18n.translate(
+                        'visualizations.exports.imageReports.postURLWatcherMessage.unsavedChanges',
+                        {
+                          defaultMessage: 'URL may change if you upgrade Kibana.',
+                        }
+                      )}
+                    </EuiCallOut>
+                  ),
+                },
+                csvReports: {
+                  draftModeCallOut: (
+                    <EuiCallOut
+                      color="warning"
+                      iconType="warning"
+                      title={i18n.translate('visualizations.exports.csvReports.warning.title', {
+                        defaultMessage: 'Unsaved changes',
+                      })}
+                    >
+                      {i18n.translate(
+                        'visualizations.exports.csvReports.postURLWatcherMessage.unsavedChanges',
+                        {
+                          defaultMessage: 'URL may change if you upgrade Kibana.',
+                        }
+                      )}
+                    </EuiCallOut>
+                  ),
+                },
+              },
+            },
+          },
+        },
+        sharingData: {
+          title:
+            savedVis?.title ||
+            i18n.translate('visualizations.reporting.defaultReportTitle', {
+              defaultMessage: 'Visualization [{date}]',
+              values: { date: moment().toISOString(true) },
+            }),
+          locatorParams: {
+            id: VISUALIZE_APP_LOCATOR,
+            version: getKibanaVersion(),
+            params,
+          },
+        },
+        isDirty: hasUnappliedChanges || hasUnsavedChanges,
+      });
+    }
+  };
 
   const topNavMenu: TopNavMenuData[] = [
     ...(displayEditInLensItem
@@ -360,8 +482,33 @@ export const getTopNavConfig = (
         }
       },
     },
+    // Only show the export button if the current user meets the requirements for at least one registered export integration
+    ...(Boolean(share?.availableIntegrations('visualization', 'export')?.length)
+      ? ([
+          {
+            id: 'export',
+            iconType: 'download',
+            iconOnly: true,
+            label: i18n.translate('visualizations.topNavMenu.shareVisualizationButtonLabel', {
+              defaultMessage: 'export',
+            }),
+            description: i18n.translate(
+              'visualizations.topNavMenu.shareVisualizationButtonAriaLabel',
+              {
+                defaultMessage: 'Export Visualization',
+              }
+            ),
+            testId: 'exportTopNavButton',
+            run: (anchorElement) => showShareOptions(anchorElement, true),
+            // disable the Share button if no action specified and fot byValue visualizations
+            disableButton: !share || Boolean(!savedVis.id && originatingApp),
+          },
+        ] as TopNavMenuData[])
+      : []),
     {
       id: 'share',
+      iconType: 'share',
+      iconOnly: true,
       label: i18n.translate('visualizations.topNavMenu.shareVisualizationButtonLabel', {
         defaultMessage: 'share',
       }),
@@ -369,56 +516,7 @@ export const getTopNavConfig = (
         defaultMessage: 'Share Visualization',
       }),
       testId: 'shareTopNavButton',
-      run: (anchorElement) => {
-        if (share) {
-          const currentState = stateContainer.getState();
-          const searchParams = parse(history.location.search);
-          const params: VisualizeLocatorParams = {
-            visId: savedVis?.id,
-            filters: currentState.filters,
-            refreshInterval: undefined,
-            timeRange: data.query.timefilter.timefilter.getTime(),
-            uiState: currentState.uiState,
-            query: currentState.query,
-            vis: currentState.vis,
-            linked: currentState.linked,
-            indexPattern:
-              visInstance.savedSearch?.searchSource?.getField('index')?.id ??
-              (searchParams.indexPattern as string),
-            savedSearchId: visInstance.savedSearch?.id ?? (searchParams.savedSearchId as string),
-          };
-          // TODO: support sharing in by-value mode
-          share.toggleShareContextMenu({
-            anchorElement,
-            allowEmbed: true,
-            allowShortUrl: Boolean(visualizeCapabilities.createShortUrl),
-            shareableUrl: unhashUrl(window.location.href),
-            objectId: savedVis?.id,
-            objectType: 'visualization',
-            objectTypeMeta: {
-              title: i18n.translate('visualizations.share.shareModal.title', {
-                defaultMessage: 'Share this visualization',
-              }),
-            },
-            sharingData: {
-              title:
-                savedVis?.title ||
-                i18n.translate('visualizations.reporting.defaultReportTitle', {
-                  defaultMessage: 'Visualization [{date}]',
-                  values: { date: moment().toISOString(true) },
-                }),
-              locatorParams: {
-                id: VISUALIZE_APP_LOCATOR,
-                version: getKibanaVersion(),
-                params,
-              },
-            },
-            isDirty: hasUnappliedChanges || hasUnsavedChanges,
-            showPublicUrlSwitch,
-            toasts: toastNotifications,
-          });
-        }
-      },
+      run: showShareOptions,
       // disable the Share button if no action specified and fot byValue visualizations
       disableButton: !share || Boolean(!savedVis.id && originatingApp),
     },
@@ -513,24 +611,20 @@ export const getTopNavConfig = (
                   history.replace(appPath);
                   setActiveUrl(appPath);
 
-                  const state = {
-                    input: {
-                      serializedVis: {
-                        ...vis.serialize(),
-                        title: newTitle,
-                        description: newDescription,
-                      },
-                    },
-                    embeddableId,
-                    type: VISUALIZE_EMBEDDABLE_TYPE,
-                    searchSessionId: data.search.session.getSessionId(),
-                  };
-
-                  const path = dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`;
-
                   stateTransfer.navigateToWithEmbeddablePackage('dashboards', {
-                    state,
-                    path,
+                    state: {
+                      serializedState: serializeState({
+                        serializedVis: vis.serialize(),
+                        titles: {
+                          title: newTitle,
+                          description: newDescription,
+                        },
+                      }),
+                      embeddableId,
+                      type: VISUALIZE_EMBEDDABLE_TYPE,
+                      searchSessionId: data.search.session.getSessionId(),
+                    },
+                    path: dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`,
                   });
 
                   // TODO: Saved Object Modal requires `id` to be defined so this is a workaround

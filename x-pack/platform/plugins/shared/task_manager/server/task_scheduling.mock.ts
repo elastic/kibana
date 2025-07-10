@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TaskScheduling } from './task_scheduling';
+import type { TaskScheduling } from './task_scheduling';
 
 const createTaskSchedulingMock = () => {
   return {

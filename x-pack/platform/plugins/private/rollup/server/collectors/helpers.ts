@@ -6,7 +6,7 @@
  */
 import { get } from 'lodash';
 import { ElasticsearchClient } from '@kbn/core/server';
-import { estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import { DataViewType } from '@kbn/data-views-plugin/common';
 
 // elasticsearch index.max_result_window default value
@@ -36,13 +36,11 @@ export async function fetchRollupIndexPatterns(kibanaIndex: string, esClient: El
     index: kibanaIndex,
     ignore_unavailable: true,
     filter_path: ['hits.hits._id'],
-    body: {
-      query: {
-        bool: {
-          filter: {
-            term: {
-              'index-pattern.type': DataViewType.ROLLUP,
-            },
+    query: {
+      bool: {
+        filter: {
+          term: {
+            'index-pattern.type': DataViewType.ROLLUP,
           },
         },
       },
@@ -71,13 +69,11 @@ const getSavedObjectsList = async ({
   filter: ESFilterProps;
 }) => {
   const esResponse = await esClient.search({
-    body: {
-      search_after: searchAfter,
-      sort: [{ updated_at: 'asc' }],
-      query: {
-        bool: {
-          filter,
-        },
+    search_after: searchAfter,
+    sort: [{ updated_at: 'asc' }],
+    query: {
+      bool: {
+        filter,
       },
     },
     ignore_unavailable: true,

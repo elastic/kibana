@@ -143,7 +143,17 @@ export class CoreAppsService {
     const resources = coreSetup.httpResources.createRegistrar(router);
 
     router.get(
-      { path: '/', validate: false, options: { access: 'public' } },
+      {
+        path: '/',
+        validate: false,
+        options: { access: 'public' },
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is only used for serving the default route.',
+          },
+        },
+      },
       async (context, req, res) => {
         const { uiSettings } = await context.core;
         let defaultRoute = await uiSettings.client.get<string>('defaultRoute', { request: req });
@@ -174,8 +184,15 @@ export class CoreAppsService {
       {
         path: '/app/{id}/{any*}',
         validate: false,
-        options: {
-          authRequired: true,
+        security: {
+          authz: {
+            enabled: false,
+            reason:
+              'The route is opted out of the authorization since it is a wrapper around core app view',
+          },
+          authc: {
+            enabled: true,
+          },
         },
       },
       async (context, request, response) => {
@@ -188,8 +205,19 @@ export class CoreAppsService {
       {
         path: '/status',
         validate: false,
-        options: {
-          authRequired: !anonymousStatusPage,
+        security: {
+          authz: {
+            enabled: false,
+            reason:
+              'The route is opted out of the authorization since it is a wrapper around core app view',
+          },
+          authc: anonymousStatusPage
+            ? {
+                enabled: false,
+                reason:
+                  'The route is opted out of the authentication since it since it is a wrapper around core app anonymous view',
+              }
+            : { enabled: true },
         },
       },
       async (context, request, response) => {
@@ -269,7 +297,7 @@ export class CoreAppsService {
    * Registers the HTTP API that allows updating in-memory the settings that opted-in to be dynamically updatable.
    * @param router {@link IRouter}
    * @param savedObjectClient$ An observable of a {@link SavedObjectsClientContract | savedObjects client} that will be used to update the document
-   * @private
+   * @internal
    */
   private registerInternalCoreSettingsRoute(
     router: IRouter,
@@ -279,8 +307,10 @@ export class CoreAppsService {
       .put({
         path: '/internal/core/_settings',
         access: 'internal',
-        options: {
-          tags: ['access:updateDynamicConfig'],
+        security: {
+          authz: {
+            requiredPrivileges: ['updateDynamicConfig'],
+          },
         },
       })
       .addVersion(
@@ -336,6 +366,12 @@ export class CoreAppsService {
           }),
           query: schema.maybe(schema.recordOf(schema.string(), schema.any())),
         },
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'The route is opted out of the authorization since it is a catch-all route',
+          },
+        },
       },
       async (context, req, res) => {
         const { query, params } = req;
@@ -364,8 +400,18 @@ export class CoreAppsService {
       }
     );
 
-    router.get({ path: '/core', validate: false }, async (context, req, res) =>
-      res.ok({ body: { version: '0.0.1' } })
+    router.get(
+      {
+        path: '/core',
+        validate: false,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'The route is opted out of the authorization since it returns static response',
+          },
+        },
+      },
+      async (context, req, res) => res.ok({ body: { version: '0.0.1' } })
     );
 
     registerBundleRoutes({

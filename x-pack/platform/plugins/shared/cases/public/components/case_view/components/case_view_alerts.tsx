@@ -5,26 +5,36 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-
-import { EuiFlexItem, EuiFlexGroup, EuiProgress } from '@elastic/eui';
-import type { AlertsTableStateProps } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alerts_table/alerts_table_state';
+import { EuiFlexGroup, EuiFlexItem, EuiProgress } from '@elastic/eui';
+import type { Alert } from '@kbn/alerting-types';
+import { AlertsTable as DefaultAlertsTable } from '@kbn/response-ops-alerts-table';
 import { SECURITY_SOLUTION_RULE_TYPE_IDS } from '@kbn/securitysolution-rules';
-import { SECURITY_SOLUTION_OWNER } from '../../../../common/constants';
+import React, { useCallback, useMemo, type ComponentType } from 'react';
+import type { SetRequired } from 'type-fest';
 import type { CaseUI } from '../../../../common';
-import { useKibana } from '../../../common/lib/kibana';
-import { getManualAlertIds } from './helpers';
-import { useGetFeatureIds } from '../../../containers/use_get_feature_ids';
-import { CaseViewAlertsEmpty } from './case_view_alerts_empty';
-import { CaseViewTabs } from '../case_view_tabs';
+import { SECURITY_SOLUTION_OWNER } from '../../../../common/constants';
 import { CASE_VIEW_PAGE_TABS } from '../../../../common/types';
+import { useKibana } from '../../../common/lib/kibana';
+import { useGetFeatureIds } from '../../../containers/use_get_feature_ids';
+import { CaseViewTabs } from '../case_view_tabs';
+import type { CaseViewAlertsTableProps } from '../types';
+import { CaseViewAlertsEmpty } from './case_view_alerts_empty';
+import { getManualAlertIds } from './helpers';
+
 interface CaseViewAlertsProps {
   caseData: CaseUI;
   onAlertsTableLoaded?: (eventIds: Array<Partial<{ _id: string }>>) => void;
+  renderAlertsTable?: ComponentType<CaseViewAlertsTableProps>;
 }
-export const CaseViewAlerts = ({ caseData, onAlertsTableLoaded }: CaseViewAlertsProps) => {
-  const { triggersActionsUi } = useKibana().services;
 
+export const CaseViewAlerts = ({
+  caseData,
+  renderAlertsTable: CustomAlertsTable,
+  onAlertsTableLoaded,
+}: CaseViewAlertsProps) => {
+  const { services } = useKibana();
+  const { data, http, notifications, fieldFormats, application, licensing, settings } =
+    services as SetRequired<typeof services, 'licensing'>;
   const alertIds = getManualAlertIds(caseData.comments);
   const alertIdsQuery = useMemo(
     () => ({
@@ -40,38 +50,9 @@ export const CaseViewAlerts = ({ caseData, onAlertsTableLoaded }: CaseViewAlerts
     caseData.owner !== SECURITY_SOLUTION_OWNER
   );
 
-  const configId =
-    caseData.owner === SECURITY_SOLUTION_OWNER
-      ? `${caseData.owner}-case`
-      : !isLoadingAlertFeatureIds
-      ? triggersActionsUi.alertsTableConfigurationRegistry.getAlertConfigIdPerRuleTypes(
-          alertData?.ruleTypeIds ?? []
-        )
-      : '';
-
-  const alertStateProps: AlertsTableStateProps = useMemo(
-    () => ({
-      alertsTableConfigurationRegistry: triggersActionsUi.alertsTableConfigurationRegistry,
-      configurationId: configId,
-      id: `case-details-alerts-${caseData.owner}`,
-      ruleTypeIds:
-        caseData.owner === SECURITY_SOLUTION_OWNER
-          ? SECURITY_SOLUTION_RULE_TYPE_IDS
-          : alertData?.ruleTypeIds ?? [],
-      consumers: alertData?.featureIds,
-      query: alertIdsQuery,
-      showAlertStatusWithFlapping: caseData.owner !== SECURITY_SOLUTION_OWNER,
-      onLoaded: onAlertsTableLoaded,
-    }),
-    [
-      triggersActionsUi.alertsTableConfigurationRegistry,
-      configId,
-      caseData.owner,
-      alertData?.ruleTypeIds,
-      alertData?.featureIds,
-      alertIdsQuery,
-      onAlertsTableLoaded,
-    ]
+  const onLoaded = useCallback(
+    ({ alerts }: { alerts: Alert[] }) => onAlertsTableLoaded?.(alerts),
+    [onAlertsTableLoaded]
   );
 
   if (alertIdsQuery.ids.values.length === 0) {
@@ -85,6 +66,10 @@ export const CaseViewAlerts = ({ caseData, onAlertsTableLoaded }: CaseViewAlerts
     );
   }
 
+  const AlertsTable =
+    CustomAlertsTable ??
+    (DefaultAlertsTable as NonNullable<CaseViewAlertsProps['renderAlertsTable']>);
+
   return isLoadingAlertFeatureIds ? (
     <EuiFlexGroup>
       <EuiFlexItem>
@@ -94,7 +79,36 @@ export const CaseViewAlerts = ({ caseData, onAlertsTableLoaded }: CaseViewAlerts
   ) : (
     <EuiFlexItem data-test-subj="case-view-alerts">
       <CaseViewTabs caseData={caseData} activeTab={CASE_VIEW_PAGE_TABS.ALERTS} />
-      {triggersActionsUi.getAlertsStateTable(alertStateProps)}
+      <AlertsTable
+        id={`case-details-alerts-${caseData.owner}`}
+        ruleTypeIds={
+          caseData.owner === SECURITY_SOLUTION_OWNER
+            ? SECURITY_SOLUTION_RULE_TYPE_IDS
+            : alertData?.ruleTypeIds ?? []
+        }
+        consumers={alertData?.featureIds}
+        query={alertIdsQuery}
+        showAlertStatusWithFlapping={caseData.owner !== SECURITY_SOLUTION_OWNER}
+        onLoaded={onLoaded}
+        // Only provide the services to the default alerts table.
+        // Spreading from object to avoid incorrectly overriding
+        // services to `undefined` in custom solution tables
+        {...(CustomAlertsTable
+          ? {}
+          : {
+              services: {
+                data,
+                http,
+                notifications,
+                fieldFormats,
+                application,
+                settings,
+                // In the Cases UI the licensing service is defined
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                licensing: licensing!,
+              },
+            })}
+      />
     </EuiFlexItem>
   );
 };

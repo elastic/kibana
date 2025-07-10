@@ -10,7 +10,6 @@
 import { identity, range } from 'lodash';
 import * as Rx from 'rxjs';
 import type { Writable } from 'stream';
-import { add, type Duration } from 'date-fns';
 
 import { errors as esErrors, estypes } from '@elastic/elasticsearch';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
@@ -38,6 +37,7 @@ import {
   UI_SETTINGS_DATEFORMAT_TZ,
 } from '../constants';
 import { CsvGenerator } from './generate_csv';
+import moment from 'moment';
 
 type CsvConfigType = ReportingConfigType['csv'];
 
@@ -377,7 +377,7 @@ describe('CsvGenerator', () => {
 
       expect(mockDataClient.search).toHaveBeenCalledTimes(10);
       expect(mockDataClient.search).toBeCalledWith(
-        { params: { body: {}, ignore_throttled: undefined, max_concurrent_shard_requests: 5 } },
+        { params: { max_concurrent_shard_requests: 5 } },
         {
           abortSignal: expect.any(AbortSignal),
           strategy: 'es',
@@ -402,7 +402,7 @@ describe('CsvGenerator', () => {
 
       expect(mockEsClient.asCurrentUser.closePointInTime).toHaveBeenCalledTimes(1);
       expect(mockEsClient.asCurrentUser.closePointInTime).toHaveBeenCalledWith({
-        body: { id: mockCursorId },
+        id: mockCursorId,
       });
     });
 
@@ -576,9 +576,9 @@ describe('CsvGenerator', () => {
   });
 
   describe('export behavior when scroll duration config is auto', () => {
-    const getTaskInstanceFields = (intervalFromNow: Duration) => {
+    const getTaskInstanceFields = (intervalFromNow: { seconds: number }) => {
       const now = new Date(Date.now());
-      return { startedAt: now, retryAt: add(now, intervalFromNow) };
+      return { startedAt: now, retryAt: moment(now).add(intervalFromNow).toDate() };
     };
 
     let mockConfigWithAutoScrollDuration: ReportingConfigType['csv'];
@@ -676,7 +676,7 @@ describe('CsvGenerator', () => {
       );
 
       expect(mockDataClientSearchFn).toBeCalledWith(
-        { params: { body: {}, ignore_throttled: undefined, max_concurrent_shard_requests: 5 } },
+        { params: { max_concurrent_shard_requests: 5 } },
         {
           abortSignal: expect.any(AbortSignal),
           strategy: 'es',
@@ -762,7 +762,7 @@ describe('CsvGenerator', () => {
       );
 
       expect(mockDataClientSearchFn).toBeCalledWith(
-        { params: { body: {}, ignore_throttled: undefined, max_concurrent_shard_requests: 5 } },
+        { params: { max_concurrent_shard_requests: 5 } },
         {
           abortSignal: expect.any(AbortSignal),
           strategy: 'es',
@@ -1424,7 +1424,7 @@ describe('CsvGenerator', () => {
     expect(mockEsClient.asCurrentUser.openPointInTime).toHaveBeenCalledWith(
       {
         ignore_unavailable: true,
-        ignore_throttled: false,
+        querystring: { ignore_throttled: false },
         index: 'logstash-*',
         keep_alive: '30s',
       },
@@ -1439,7 +1439,6 @@ describe('CsvGenerator', () => {
     expect(mockDataClient.search).toBeCalledWith(
       {
         params: {
-          body: {},
           max_concurrent_shard_requests: 5,
         },
       },

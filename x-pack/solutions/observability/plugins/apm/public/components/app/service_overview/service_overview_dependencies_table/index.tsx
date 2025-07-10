@@ -9,23 +9,26 @@ import { EuiIconTip } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import type { ReactNode } from 'react';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useUiTracker } from '@kbn/observability-shared-plugin/public';
+import { usePerformanceContext } from '@kbn/ebt-tools';
 import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
 import { getNodeName, NodeType } from '../../../../../common/connections';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useApmParams } from '../../../../hooks/use_apm_params';
-import { useFetcher } from '../../../../hooks/use_fetcher';
+import { useFetcher, isSuccess } from '../../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { DependencyLink } from '../../../shared/links/dependency_link';
 import { DependenciesTable } from '../../../shared/dependencies_table';
 import { ServiceLink } from '../../../shared/links/apm/service_link';
+import type { TablesLoadedState } from '../apm_overview';
 
 interface ServiceOverviewDependenciesTableProps {
   fixedHeight?: boolean;
   link?: ReactNode;
   showPerPageOptions?: boolean;
   showSparkPlots?: boolean;
+  onLoadTable?: (key: keyof TablesLoadedState) => void;
 }
 
 export function ServiceOverviewDependenciesTable({
@@ -33,6 +36,7 @@ export function ServiceOverviewDependenciesTable({
   link,
   showPerPageOptions = true,
   showSparkPlots,
+  onLoadTable,
 }: ServiceOverviewDependenciesTableProps) {
   const {
     query: {
@@ -50,9 +54,8 @@ export function ServiceOverviewDependenciesTable({
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const { serviceName, transactionType } = useApmServiceContext();
-
+  const { onPageReady } = usePerformanceContext();
   const trackEvent = useUiTracker();
-
   const { data, status } = useFetcher(
     (callApmApi) => {
       if (!start || !end) {
@@ -74,6 +77,23 @@ export function ServiceOverviewDependenciesTable({
     },
     [start, end, serviceName, environment, offset, comparisonEnabled]
   );
+
+  useEffect(() => {
+    // this component is used both for the service overview tab and the dependency tab,
+    // onLoadTable will be defined if it's the service overview tab
+    if (isSuccess(status)) {
+      if (onLoadTable) {
+        onLoadTable('dependencies');
+      } else {
+        onPageReady({
+          meta: {
+            rangeFrom,
+            rangeTo,
+          },
+        });
+      }
+    }
+  }, [status, onPageReady, rangeFrom, rangeTo, onLoadTable]);
 
   const dependencies =
     data?.serviceDependencies.map((dependency) => {
@@ -140,7 +160,7 @@ export function ServiceOverviewDependenciesTable({
           <EuiIconTip
             size="s"
             color="subdued"
-            type="questionInCircle"
+            type="question"
             className="eui-alignCenter"
             content={i18n.translate('xpack.apm.serviceOverview.dependenciesTableTitleTip', {
               defaultMessage:

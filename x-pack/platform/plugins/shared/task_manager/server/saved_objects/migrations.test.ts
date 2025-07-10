@@ -7,10 +7,10 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { getMigrations } from './migrations';
-import { SavedObjectUnsanitizedDoc } from '@kbn/core/server';
+import type { SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 import { migrationMocks } from '@kbn/core/server/mocks';
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
-import { TaskInstanceWithDeprecatedFields } from '../task';
+import type { TaskInstanceWithDeprecatedFields } from '../task';
 
 const migrationContext = migrationMocks.createContext();
 
@@ -282,7 +282,7 @@ describe('handles errors during migrations', () => {
         migration800(taskInstance, migrationContext);
       }).toThrowError();
       expect(migrationContext.log.error).toHaveBeenCalledWith(
-        `savedObject 8.0.0 migration failed for task instance ${taskInstance.id} with error: Expected property name or '}' in JSON at position 2`,
+        `savedObject 8.0.0 migration failed for task instance ${taskInstance.id} with error: Expected property name or '}' in JSON at position 2 (line 1 column 3)`,
         {
           migrations: {
             taskInstanceDocument: {

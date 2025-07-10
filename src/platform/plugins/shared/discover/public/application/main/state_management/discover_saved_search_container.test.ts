@@ -10,27 +10,59 @@
 import { getSavedSearchContainer, isEqualSavedSearch } from './discover_saved_search_container';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { discoverServiceMock } from '../../../__mocks__/services';
-import { savedSearchMock, savedSearchMockWithTimeField } from '../../../__mocks__/saved_search';
+import {
+  createSavedSearchAdHocMock,
+  createSavedSearchMock,
+  savedSearchMock,
+  savedSearchMockWithTimeField,
+} from '../../../__mocks__/saved_search';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { dataViewComplexMock } from '../../../__mocks__/data_view_complex';
 import { getDiscoverGlobalStateContainer } from './discover_global_state_container';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { VIEW_MODE } from '../../../../common/constants';
 import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
+import { createInternalStateStore, createRuntimeStateManager, internalStateActions } from './redux';
+import { mockCustomizationContext } from '../../../customizations/__mocks__/customization_context';
+import { omit } from 'lodash';
+import { createTabsStorageManager } from './tabs_storage_manager';
 
 describe('DiscoverSavedSearchContainer', () => {
   const savedSearch = savedSearchMock;
   const services = discoverServiceMock;
-  const globalStateContainer = getDiscoverGlobalStateContainer(createKbnUrlStateStorage());
+  const urlStateStorage = createKbnUrlStateStorage();
+  const globalStateContainer = getDiscoverGlobalStateContainer(urlStateStorage);
+  const tabsStorageManager = createTabsStorageManager({
+    urlStateStorage,
+    storage: services.storage,
+  });
+  const internalState = createInternalStateStore({
+    services,
+    customizationContext: mockCustomizationContext,
+    runtimeStateManager: createRuntimeStateManager(),
+    urlStateStorage,
+    tabsStorageManager,
+  });
+  internalState.dispatch(
+    internalStateActions.initializeTabs({ userId: 'mockUserId', spaceId: 'mockSpaceId' })
+  );
 
   describe('getTitle', () => {
     it('returns undefined for new saved searches', () => {
-      const container = getSavedSearchContainer({ services, globalStateContainer });
+      const container = getSavedSearchContainer({
+        services,
+        globalStateContainer,
+        internalState,
+      });
       expect(container.getTitle()).toBe(undefined);
     });
 
     it('returns the title of a persisted saved searches', () => {
-      const container = getSavedSearchContainer({ services, globalStateContainer });
+      const container = getSavedSearchContainer({
+        services,
+        globalStateContainer,
+        internalState,
+      });
       container.set(savedSearch);
       expect(container.getTitle()).toBe(savedSearch.title);
     });
@@ -38,7 +70,11 @@ describe('DiscoverSavedSearchContainer', () => {
 
   describe('set', () => {
     it('should update the current and initial state of the saved search', () => {
-      const container = getSavedSearchContainer({ services, globalStateContainer });
+      const container = getSavedSearchContainer({
+        services,
+        globalStateContainer,
+        internalState,
+      });
       const newSavedSearch: SavedSearch = { ...savedSearch, title: 'New title' };
       const result = container.set(newSavedSearch);
 
@@ -51,53 +87,15 @@ describe('DiscoverSavedSearchContainer', () => {
     });
 
     it('should reset hasChanged$ to false', () => {
-      const container = getSavedSearchContainer({ services, globalStateContainer });
+      const container = getSavedSearchContainer({
+        services,
+        globalStateContainer,
+        internalState,
+      });
       const newSavedSearch: SavedSearch = { ...savedSearch, title: 'New title' };
 
       container.set(newSavedSearch);
       expect(container.getHasChanged$().getValue()).toBe(false);
-    });
-  });
-
-  describe('new', () => {
-    it('should create a new saved search', async () => {
-      const container = getSavedSearchContainer({ services, globalStateContainer });
-      const result = await container.new(dataViewMock);
-
-      expect(result.title).toBeUndefined();
-      expect(result.id).toBeUndefined();
-      const savedSearchState = container.getState();
-      expect(savedSearchState.id).not.toEqual(savedSearch.id);
-      expect(savedSearchState.searchSource.getField('index')).toEqual(
-        savedSearch.searchSource.getField('index')
-      );
-    });
-
-    it('should create a new saved search with provided DataView', async () => {
-      const container = getSavedSearchContainer({ services, globalStateContainer });
-      const result = await container.new(dataViewMock);
-      expect(result.title).toBeUndefined();
-      expect(result.id).toBeUndefined();
-      expect(result.searchSource.getField('index')).toBe(dataViewMock);
-      expect(container.getHasChanged$().getValue()).toBe(false);
-    });
-  });
-
-  describe('load', () => {
-    discoverServiceMock.data.search.searchSource.create = jest
-      .fn()
-      .mockReturnValue(savedSearchMock.searchSource);
-    discoverServiceMock.savedSearch.get = jest.fn().mockReturnValue(savedSearchMock);
-
-    it('loads a saved search', async () => {
-      const savedSearchContainer = getSavedSearchContainer({
-        services: discoverServiceMock,
-        globalStateContainer,
-      });
-      await savedSearchContainer.load('the-saved-search-id');
-      expect(savedSearchContainer.getInitial$().getValue().id).toEqual('the-saved-search-id');
-      expect(savedSearchContainer.getCurrent$().getValue().id).toEqual('the-saved-search-id');
-      expect(savedSearchContainer.getHasChanged$().getValue()).toEqual(false);
     });
   });
 
@@ -108,6 +106,7 @@ describe('DiscoverSavedSearchContainer', () => {
       const savedSearchContainer = getSavedSearchContainer({
         services: discoverServiceMock,
         globalStateContainer,
+        internalState,
       });
       const savedSearchToPersist = {
         ...savedSearchMockWithTimeField,
@@ -133,6 +132,7 @@ describe('DiscoverSavedSearchContainer', () => {
       const savedSearchContainer = getSavedSearchContainer({
         services: discoverServiceMock,
         globalStateContainer,
+        internalState,
       });
 
       const result = await savedSearchContainer.persist(persistedSavedSearch, saveOptions);
@@ -145,6 +145,7 @@ describe('DiscoverSavedSearchContainer', () => {
       const savedSearchContainer = getSavedSearchContainer({
         services: discoverServiceMock,
         globalStateContainer,
+        internalState,
       });
       const savedSearchToPersist = {
         ...savedSearchMockWithTimeField,
@@ -164,6 +165,7 @@ describe('DiscoverSavedSearchContainer', () => {
       const savedSearchContainer = getSavedSearchContainer({
         services: discoverServiceMock,
         globalStateContainer,
+        internalState,
       });
       const savedSearchToPersist = {
         ...savedSearchMockWithTimeField,
@@ -188,6 +190,7 @@ describe('DiscoverSavedSearchContainer', () => {
       const savedSearchContainer = getSavedSearchContainer({
         services: discoverServiceMock,
         globalStateContainer,
+        internalState,
       });
       savedSearchContainer.set(savedSearch);
       savedSearchContainer.update({ nextState: { hideChart: true } });
@@ -209,6 +212,7 @@ describe('DiscoverSavedSearchContainer', () => {
       const savedSearchContainer = getSavedSearchContainer({
         services: discoverServiceMock,
         globalStateContainer,
+        internalState,
       });
       savedSearchContainer.set(savedSearch);
       const updated = savedSearchContainer.update({ nextState: { hideChart: true } });
@@ -224,6 +228,7 @@ describe('DiscoverSavedSearchContainer', () => {
       const savedSearchContainer = getSavedSearchContainer({
         services: discoverServiceMock,
         globalStateContainer,
+        internalState,
       });
       const updated = savedSearchContainer.update({ nextDataView: dataViewMock });
       expect(savedSearchContainer.getHasChanged$().getValue()).toBe(true);
@@ -286,6 +291,89 @@ describe('DiscoverSavedSearchContainer', () => {
       expect(isEqualSavedSearch(savedSearch1, savedSearch2)).toBe(true);
       savedSearch2.searchSource.setField('query', { language: 'lucene', query: 'test' });
       expect(isEqualSavedSearch(savedSearch1, savedSearch2)).toBe(false);
+    });
+  });
+
+  describe('URL tracking', () => {
+    it('should enable URL tracking for a persisted data view', () => {
+      const savedSearchContainer = getSavedSearchContainer({
+        services: discoverServiceMock,
+        globalStateContainer,
+        internalState,
+      });
+      const unsubscribe = savedSearchContainer.initUrlTracking();
+      jest.spyOn(services.urlTracker, 'setTrackingEnabled').mockClear();
+      expect(services.urlTracker.setTrackingEnabled).not.toHaveBeenCalled();
+      const currentSavedSearch = omit(createSavedSearchMock(), 'id');
+      savedSearchContainer.set(currentSavedSearch);
+      expect(services.urlTracker.setTrackingEnabled).toHaveBeenCalledWith(true);
+      unsubscribe();
+    });
+
+    it('should disable URL tracking for an ad hoc data view', () => {
+      const savedSearchContainer = getSavedSearchContainer({
+        services: discoverServiceMock,
+        globalStateContainer,
+        internalState,
+      });
+      const unsubscribe = savedSearchContainer.initUrlTracking();
+      jest.spyOn(services.urlTracker, 'setTrackingEnabled').mockClear();
+      expect(services.urlTracker.setTrackingEnabled).not.toHaveBeenCalled();
+      const currentSavedSearch = omit(createSavedSearchAdHocMock(), 'id');
+      savedSearchContainer.set(currentSavedSearch);
+      expect(services.urlTracker.setTrackingEnabled).toHaveBeenCalledWith(false);
+      unsubscribe();
+    });
+
+    it('should enable URL tracking if the ad hoc data view is a default profile data view', () => {
+      const savedSearchContainer = getSavedSearchContainer({
+        services: discoverServiceMock,
+        globalStateContainer,
+        internalState,
+      });
+      const unsubscribe = savedSearchContainer.initUrlTracking();
+      jest.spyOn(services.urlTracker, 'setTrackingEnabled').mockClear();
+      expect(services.urlTracker.setTrackingEnabled).not.toHaveBeenCalled();
+      const currentSavedSearch = omit(createSavedSearchAdHocMock(), 'id');
+      internalState.dispatch(
+        internalStateActions.setDefaultProfileAdHocDataViews([
+          currentSavedSearch.searchSource.getField('index')!,
+        ])
+      );
+      savedSearchContainer.set(currentSavedSearch);
+      expect(services.urlTracker.setTrackingEnabled).toHaveBeenCalledWith(true);
+      unsubscribe();
+    });
+
+    it('should enable URL tracking with an ad hoc data view if in ES|QL mode', () => {
+      const savedSearchContainer = getSavedSearchContainer({
+        services: discoverServiceMock,
+        globalStateContainer,
+        internalState,
+      });
+      const unsubscribe = savedSearchContainer.initUrlTracking();
+      jest.spyOn(services.urlTracker, 'setTrackingEnabled').mockClear();
+      expect(services.urlTracker.setTrackingEnabled).not.toHaveBeenCalled();
+      const currentSavedSearch = omit(createSavedSearchAdHocMock(), 'id');
+      currentSavedSearch.searchSource.setField('query', { esql: 'FROM test' });
+      savedSearchContainer.set(currentSavedSearch);
+      expect(services.urlTracker.setTrackingEnabled).toHaveBeenCalledWith(true);
+      unsubscribe();
+    });
+
+    it('should enable URL tracking with an ad hoc data view if the saved search has an ID (persisted)', () => {
+      const savedSearchContainer = getSavedSearchContainer({
+        services: discoverServiceMock,
+        globalStateContainer,
+        internalState,
+      });
+      const unsubscribe = savedSearchContainer.initUrlTracking();
+      jest.spyOn(services.urlTracker, 'setTrackingEnabled').mockClear();
+      expect(services.urlTracker.setTrackingEnabled).not.toHaveBeenCalled();
+      const currentSavedSearch = createSavedSearchAdHocMock();
+      savedSearchContainer.set(currentSavedSearch);
+      expect(services.urlTracker.setTrackingEnabled).toHaveBeenCalledWith(true);
+      unsubscribe();
     });
   });
 });

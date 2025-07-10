@@ -67,6 +67,7 @@ export const AUTOCOMPLETE_VALUE_SUGGESTION_METHOD_ID = 'autocomplete:valueSugges
 export const BANNERS_PLACEMENT_ID = 'banners:placement';
 export const BANNERS_TEXT_CONTENT_ID = 'banners:textContent';
 export const BANNERS_TEXT_COLOR_ID = 'banners:textColor';
+export const BANNERS_LINK_COLOR_ID = 'banners:linkColor';
 export const BANNERS_BACKGROUND_COLOR_ID = 'banners:backgroundColor';
 
 // Discover settings
@@ -104,44 +105,29 @@ export const NOTIFICATIONS_LIFETIME_WARNING_ID = 'notifications:lifetime:warning
 export const OBSERVABILITY_APM_AWS_LAMBDA_PRICE_FACTOR_ID = 'observability:apmAWSLambdaPriceFactor';
 export const OBSERVABILITY_APM_AWS_LAMBDA_REQUEST_COST_PER_MILLION_ID =
   'observability:apmAWSLambdaRequestCostPerMillion';
-export const OBSERVABILITY_APM_AGENT_EXPLORER_VIEW_ID = 'observability:apmAgentExplorerView';
 export const OBSERVABILITY_APM_DEFAULT_SERVICE_ENVIRONMENT_ID =
   'observability:apmDefaultServiceEnvironment';
-export const OBSERVABILITY_APM_ENABLE_CRITICAL_PATH_ID = 'observability:apmEnableCriticalPath';
-export const OBSERVABILITY_APM_LABS_BUTTON_ID = 'observability:apmLabsButton';
 export const OBSERVABILITY_APM_PROGRESSIVE_LOADING_ID = 'observability:apmProgressiveLoading';
-export const OBSERVABILITY_APM_SERVICE_GROUP_MAX_NUMBER_OF_SERVCIE_ID =
+export const OBSERVABILITY_APM_SERVICE_GROUP_MAX_NUMBER_OF_SERVICE_ID =
   'observability:apmServiceGroupMaxNumberOfServices';
-export const OBSERVABILITY_APM_SERVICE_INVENTORY_OPTIMIZED_SORTING_ID =
-  'observability:apmServiceInventoryOptimizedSorting';
-export const OBSERVABILITY_APM_TRACE_EXPLORER_TAB_ID = 'observability:apmTraceExplorerTab';
-export const OBSERVABILITY_ENABLE_AWS_LAMBDA_METRICS_ID = 'observability:enableAwsLambdaMetrics';
 export const OBSERVABILITY_ENABLE_COMPARISON_BY_DEFAULT_ID =
   'observability:enableComparisonByDefault';
-export const OBSERVABILITY_ENABLE_INFRASTRUCTURE_ASSET_CUSTOM_DASHBOARDS_ID =
-  'observability:enableInfrastructureAssetCustomDashboards';
 export const OBSERVABILITY_ENABLE_INSPECT_ES_QUERIES_ID = 'observability:enableInspectEsQueries';
 export const OBSERVABILITY_MAX_SUGGESTIONS_ID = 'observability:maxSuggestions';
-export const OBSERVABILITY_PROFILING_ELASTICSEARCH_PLUGIN_ID =
-  'observability:profilingElasticsearchPlugin';
-export const OBSERVABILITY_APM_ENABLE_SERVICE_METRICS_ID = 'observability:apmEnableServiceMetrics';
-export const OBSERVABILITY_APM_ENABLE_CONTINUOUS_ROLLUPS_ID =
-  'observability:apmEnableContinuousRollups';
-export const OBSERVABILITY_APM_ENABLE_PROFILING_INTEGRATION_ID =
-  'observability:apmEnableProfilingIntegration';
 export const OBSERVABILITY_APM_ENABLE_TABLE_SEARCH_BAR = 'observability:apmEnableTableSearchBar';
 export const OBSERVABILITY_APM_ENABLE_SERVICE_INVENTORY_TABLE_SEARCH_BAR =
   'observability:apmEnableServiceInventoryTableSearchBar';
-export const OBSERVABILITY_LOGS_EXPLORER_ALLOWED_DATA_VIEWS_ID =
-  'observability:logsExplorer:allowedDataViews';
 export const OBSERVABILITY_LOGS_SHARED_NEW_LOGS_OVERVIEW_ID = 'observability:newLogsOverview';
-export const OBSERVABILITY_ENTITY_CENTRIC_EXPERIENCE = 'observability:entityCentricExperience';
 export const OBSERVABILITY_LOGS_DATA_ACCESS_LOG_SOURCES_ID = 'observability:logSources';
 export const OBSERVABILITY_AI_ASSISTANT_SIMULATED_FUNCTION_CALLING =
   'observability:aiAssistantSimulatedFunctionCalling';
 export const OBSERVABILITY_AI_ASSISTANT_SEARCH_CONNECTOR_INDEX_PATTERN =
   'observability:aiAssistantSearchConnectorIndexPattern';
+export const AI_ASSISTANT_PREFERRED_AI_ASSISTANT_TYPE = 'aiAssistant:preferredAIAssistantType';
 export const OBSERVABILITY_SEARCH_EXCLUDED_DATA_TIERS = 'observability:searchExcludedDataTiers';
+export const OBSERVABILITY_ENABLE_STREAMS_UI = 'observability:enableStreamsUI';
+export const OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS =
+  'observability:streamsEnableSignificantEvents';
 
 // Reporting settings
 export const XPACK_REPORTING_CUSTOM_PDF_LOGO_ID = 'xpackReporting:customPdfLogo';
@@ -178,6 +164,12 @@ export const SECURITY_SOLUTION_ENABLE_ASSET_CRITICALITY_SETTING =
   'securitySolution:enableAssetCriticality' as const;
 export const SECURITY_SOLUTION_ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING =
   'securitySolution:enableVisualizationsInFlyout' as const;
+export const SECURITY_SOLUTION_ENABLE_GRAPH_VISUALIZATION_SETTING =
+  'securitySolution:enableGraphVisualization' as const;
+export const SECURITY_SOLUTION_ENABLE_ASSET_INVENTORY_SETTING =
+  'securitySolution:enableAssetInventory' as const;
+export const SECURITY_SOLUTION_ENABLE_CLOUD_CONNECTOR_SETTING =
+  'securitySolution:enableCloudConnector' as const;
 
 // Timelion settings
 export const TIMELION_ES_DEFAULT_INDEX_ID = 'timelion:es.default_index';
@@ -187,9 +179,7 @@ export const TIMELION_MIN_INTERVAL_ID = 'timelion:min_interval';
 export const TIMELION_TARGET_BUCKETS_ID = 'timelion:target_buckets';
 
 // Visualization settings
-export const VISUALIZATION_COLOR_MAPPING_ID = 'visualization:colorMapping';
 export const VISUALIZATION_HEATMAP_MAX_BUCKETS_ID = 'visualization:heatmap:maxBuckets';
-export const VISUALIZATION_USE_LEGACY_TIME_AXIS_ID = 'visualization:useLegacyTimeAxis';
 export const VISUALIZATION_LEGACY_GAUGE_CHARTS_LIBRARY_ID =
   'visualization:visualize:legacyGaugeChartsLibrary';
 export const VISUALIZATION_LEGACY_HEATMAP_CHARTS_LIBRARY_ID =

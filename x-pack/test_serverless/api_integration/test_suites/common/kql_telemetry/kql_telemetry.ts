@@ -9,8 +9,8 @@ import expect from '@kbn/expect';
 import { get } from 'lodash';
 import { ANALYTICS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { KQL_TELEMETRY_ROUTE_LATEST_VERSION } from '@kbn/data-plugin/common';
-import { SupertestWithRoleScopeType } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/services';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import { SupertestWithRoleScopeType } from '../../../services';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -35,12 +35,12 @@ export default function ({ getService }: FtrProviderContext) {
       // TODO: Clean `kql-telemetry` before running the tests
       await kibanaServer.savedObjects.clean({ types: ['kql-telemetry'] });
       await kibanaServer.importExport.load(
-        'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
+        'src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
       );
     });
     after(async () => {
       await kibanaServer.importExport.unload(
-        'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
+        'src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
       );
     });
 

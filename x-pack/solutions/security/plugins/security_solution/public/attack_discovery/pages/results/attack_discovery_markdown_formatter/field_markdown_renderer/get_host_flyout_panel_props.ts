@@ -14,7 +14,6 @@ interface HostPanelProps extends Record<string, unknown> {
   contextID: string;
   scopeId: string;
   hostName: string;
-  isDraggable?: boolean;
 }
 
 interface HostPanelExpandableFlyoutProps extends FlyoutPanelProps {

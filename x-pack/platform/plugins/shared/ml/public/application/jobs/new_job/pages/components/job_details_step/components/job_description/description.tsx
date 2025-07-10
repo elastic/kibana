@@ -11,13 +11,17 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiDescribedFormGroup, EuiFormRow } from '@elastic/eui';
 
-export const Description: FC<PropsWithChildren<unknown>> = memo(({ children }) => {
+interface Props {
+  titleId: string;
+}
+
+export const Description: FC<PropsWithChildren<Props>> = memo(({ children, titleId }) => {
   const title = i18n.translate('xpack.ml.newJob.wizard.jobDetailsStep.jobDescription.title', {
     defaultMessage: 'Job description',
   });
   return (
     <EuiDescribedFormGroup
-      title={<h3>{title}</h3>}
+      title={<h3 id={titleId}>{title}</h3>}
       description={
         <FormattedMessage
           id="xpack.ml.newJob.wizard.jobDetailsStep.jobDescription.description"

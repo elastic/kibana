@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Meta, Story } from '@storybook/react/types-6-0';
+import type { Meta, StoryFn } from '@storybook/react';
 import React, { useCallback, useEffect, useState } from 'react';
 import type { TimeUnitChar } from '@kbn/observability-plugin/common';
 import type { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
@@ -33,7 +33,23 @@ export default {
   },
 } as Meta;
 
-const CustomEquationEditorTemplate: Story<CustomEquationEditorProps> = (args) => {
+const BASE_ARGS = {
+  expression: {
+    aggType: Aggregators.CUSTOM,
+    timeSize: 1,
+    timeUnit: 'm' as TimeUnitChar,
+    threshold: [1],
+    comparator: COMPARATORS.GREATER_THAN,
+  },
+  fields: [
+    { name: 'system.cpu.user.pct', normalizedType: 'number' },
+    { name: 'system.cpu.system.pct', normalizedType: 'number' },
+    { name: 'system.cpu.cores', normalizedType: 'number' },
+  ],
+  aggregationTypes: aggregationType,
+};
+
+const CustomEquationEditorTemplate: StoryFn<CustomEquationEditorProps> = (args) => {
   const [expression, setExpression] = useState<MetricExpression>(args.expression);
   const [errors, setErrors] = useState<IErrorObject>(args.errors);
 
@@ -63,43 +79,31 @@ const CustomEquationEditorTemplate: Story<CustomEquationEditorProps> = (args) =>
   );
 };
 
-export const CustomEquationEditorDefault = CustomEquationEditorTemplate.bind({});
-export const CustomEquationEditorWithEquationErrors = CustomEquationEditorTemplate.bind({});
-export const CustomEquationEditorWithFieldError = CustomEquationEditorTemplate.bind({});
+export const CustomEquationEditorDefault = {
+  render: CustomEquationEditorTemplate,
 
-const BASE_ARGS = {
-  expression: {
-    aggType: Aggregators.CUSTOM,
-    timeSize: 1,
-    timeUnit: 'm' as TimeUnitChar,
-    threshold: [1],
-    comparator: COMPARATORS.GREATER_THAN,
+  args: {
+    ...BASE_ARGS,
+    errors: {},
   },
-  fields: [
-    { name: 'system.cpu.user.pct', normalizedType: 'number' },
-    { name: 'system.cpu.system.pct', normalizedType: 'number' },
-    { name: 'system.cpu.cores', normalizedType: 'number' },
-  ],
-  aggregationTypes: aggregationType,
 };
 
-CustomEquationEditorDefault.args = {
-  ...BASE_ARGS,
-  errors: {},
-};
+export const CustomEquationEditorWithEquationErrors = {
+  render: CustomEquationEditorTemplate,
 
-CustomEquationEditorWithEquationErrors.args = {
-  ...BASE_ARGS,
-  expression: {
-    ...BASE_ARGS.expression,
-    equation: 'Math.round(A / B)',
-    customMetrics: [
-      { name: 'A', aggType: Aggregators.AVERAGE, field: 'system.cpu.user.pct' },
-      { name: 'B', aggType: Aggregators.MAX, field: 'system.cpu.cores' },
-    ],
-  },
-  errors: {
-    equation:
-      'The equation field only supports the following characters: A-Z, +, -, /, *, (, ), ?, !, &, :, |, >, <, =',
+  args: {
+    ...BASE_ARGS,
+    expression: {
+      ...BASE_ARGS.expression,
+      equation: 'Math.round(A / B)',
+      customMetrics: [
+        { name: 'A', aggType: Aggregators.AVERAGE, field: 'system.cpu.user.pct' },
+        { name: 'B', aggType: Aggregators.MAX, field: 'system.cpu.cores' },
+      ],
+    },
+    errors: {
+      equation:
+        'The equation field only supports the following characters: A-Z, +, -, /, *, (, ), ?, !, &, :, |, >, <, =',
+    },
   },
 };

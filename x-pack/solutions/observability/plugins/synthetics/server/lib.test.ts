@@ -93,18 +93,14 @@ describe('SyntheticsEsClient', () => {
   describe('search', () => {
     it('should call baseESClient.search with correct parameters', async () => {
       const mockSearchParams = {
-        body: {
-          query: {
-            match_all: {},
-          },
+        query: {
+          match_all: {},
         },
       };
 
       const result = await syntheticsEsClient.search({
-        body: {
-          query: {
-            match_all: {},
-          },
+        query: {
+          match_all: {},
         },
       });
 
@@ -113,7 +109,7 @@ describe('SyntheticsEsClient', () => {
           index: 'synthetics-*',
           ...mockSearchParams,
         },
-        { meta: true }
+        { meta: true, context: { loggingOptions: { loggerName: 'synthetics' } } }
       );
       expect(result).toEqual({
         body: {},
@@ -128,10 +124,8 @@ describe('SyntheticsEsClient', () => {
 
     it('should throw an error if baseESClient.search throws an error', async () => {
       const mockSearchParams = {
-        body: {
-          query: {
-            match_all: {},
-          },
+        query: {
+          match_all: {},
         },
       };
       const mockError = new Error('Search error');
@@ -143,7 +137,7 @@ describe('SyntheticsEsClient', () => {
           index: 'synthetics-*',
           ...mockSearchParams,
         },
-        { meta: true }
+        { meta: true, context: { loggingOptions: { loggerName: 'synthetics' } } }
       );
     });
   });
@@ -156,7 +150,10 @@ describe('SyntheticsEsClient', () => {
 
       const result = await syntheticsEsClient.count(mockCountParams);
 
-      expect(esClient.count).toHaveBeenCalledWith(mockCountParams, { meta: true });
+      expect(esClient.count).toHaveBeenCalledWith(mockCountParams, {
+        meta: true,
+        context: { loggingOptions: { loggerName: 'synthetics' } },
+      });
       expect(result).toEqual({
         indices: 'synthetics-*',
         result: {
@@ -179,7 +176,10 @@ describe('SyntheticsEsClient', () => {
       esClient.count.mockRejectedValueOnce(mockError);
 
       await expect(syntheticsEsClient.count(mockCountParams)).rejects.toThrow(mockError);
-      expect(esClient.count).toHaveBeenCalledWith(mockCountParams, { meta: true });
+      expect(esClient.count).toHaveBeenCalledWith(mockCountParams, {
+        meta: true,
+        context: { loggingOptions: { loggerName: 'synthetics' } },
+      });
     });
   });
 

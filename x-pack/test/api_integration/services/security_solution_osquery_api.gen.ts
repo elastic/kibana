@@ -31,10 +31,7 @@ import { OsqueryDeleteSavedQueryRequestParamsInput } from '@kbn/osquery-plugin/c
 import { OsqueryFindLiveQueriesRequestQueryInput } from '@kbn/osquery-plugin/common/api/live_query/live_queries.gen';
 import { OsqueryFindPacksRequestQueryInput } from '@kbn/osquery-plugin/common/api/packs/packs.gen';
 import { OsqueryFindSavedQueriesRequestQueryInput } from '@kbn/osquery-plugin/common/api/saved_query/saved_query.gen';
-import {
-  OsqueryGetLiveQueryDetailsRequestQueryInput,
-  OsqueryGetLiveQueryDetailsRequestParamsInput,
-} from '@kbn/osquery-plugin/common/api/live_query/live_queries.gen';
+import { OsqueryGetLiveQueryDetailsRequestParamsInput } from '@kbn/osquery-plugin/common/api/live_query/live_queries.gen';
 import {
   OsqueryGetLiveQueryResultsRequestQueryInput,
   OsqueryGetLiveQueryResultsRequestParamsInput,
@@ -213,8 +210,7 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
         )
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .query(props.query);
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
     /**
      * Get the results of a live query using the query action ID.
@@ -367,7 +363,6 @@ export interface OsqueryFindSavedQueriesProps {
   query: OsqueryFindSavedQueriesRequestQueryInput;
 }
 export interface OsqueryGetLiveQueryDetailsProps {
-  query: OsqueryGetLiveQueryDetailsRequestQueryInput;
   params: OsqueryGetLiveQueryDetailsRequestParamsInput;
 }
 export interface OsqueryGetLiveQueryResultsProps {

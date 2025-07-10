@@ -17,7 +17,6 @@ import {
   ERROR_EXC_TYPE,
   ERROR_GROUP_ID,
   ERROR_GROUP_NAME,
-  ERROR_ID,
   ERROR_LOG_MESSAGE,
   SERVICE_NAME,
   TRACE_ID,
@@ -97,7 +96,7 @@ export async function getErrorGroupMainStatistics({
       ]
     : [];
 
-  const requiredFields = asMutableArray([AT_TIMESTAMP, ERROR_GROUP_ID, ERROR_ID] as const);
+  const requiredFields = asMutableArray([AT_TIMESTAMP, ERROR_GROUP_ID] as const);
 
   const optionalFields = asMutableArray([
     TRACE_ID,
@@ -117,44 +116,42 @@ export async function getErrorGroupMainStatistics({
         },
       ],
     },
-    body: {
-      track_total_hits: false,
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            ...termQuery(SERVICE_NAME, serviceName),
-            ...termQuery(TRANSACTION_NAME, transactionName),
-            ...termQuery(TRANSACTION_TYPE, transactionType),
-            ...rangeQuery(start, end),
-            ...environmentQuery(environment),
-            ...kqlQuery(kuery),
-            ...shouldMatchSearchQuery,
-          ],
-        },
+    track_total_hits: false,
+    size: 0,
+    query: {
+      bool: {
+        filter: [
+          ...termQuery(SERVICE_NAME, serviceName),
+          ...termQuery(TRANSACTION_NAME, transactionName),
+          ...termQuery(TRANSACTION_TYPE, transactionType),
+          ...rangeQuery(start, end),
+          ...environmentQuery(environment),
+          ...kqlQuery(kuery),
+          ...shouldMatchSearchQuery,
+        ],
       },
-      aggs: {
-        error_groups: {
-          terms: {
-            field: ERROR_GROUP_ID,
-            size: maxNumberOfErrorGroups,
-            order,
-          },
-          aggs: {
-            sample: {
-              top_hits: {
-                size: 1,
-                fields: [...requiredFields, ...optionalFields],
-                _source: [ERROR_LOG_MESSAGE, ERROR_EXC_MESSAGE, ERROR_EXC_HANDLED, ERROR_EXC_TYPE],
-                sort: {
-                  '@timestamp': 'desc',
-                },
+    },
+    aggs: {
+      error_groups: {
+        terms: {
+          field: ERROR_GROUP_ID,
+          size: maxNumberOfErrorGroups,
+          order,
+        },
+        aggs: {
+          sample: {
+            top_hits: {
+              size: 1,
+              fields: [...requiredFields, ...optionalFields],
+              _source: [ERROR_LOG_MESSAGE, ERROR_EXC_MESSAGE, ERROR_EXC_HANDLED, ERROR_EXC_TYPE],
+              sort: {
+                '@timestamp': 'desc',
               },
             },
-            ...(sortByLatestOccurrence
-              ? { [maxTimestampAggKey]: { max: { field: '@timestamp' } } }
-              : {}),
           },
+          ...(sortByLatestOccurrence
+            ? { [maxTimestampAggKey]: { max: { field: '@timestamp' } } }
+            : {}),
         },
       },
     },
@@ -176,7 +173,7 @@ export async function getErrorGroupMainStatistics({
         error: {
           ...(event.error ?? {}),
           exception:
-            (errorSource?.error.exception?.length ?? 0) > 1
+            (errorSource?.error.exception?.length ?? 0) > 0
               ? errorSource?.error.exception
               : event?.error.exception && [event.error.exception],
         },

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState, useCallback, memo, useEffect, useRef } from 'react';
+import React, { useMemo, useState, useCallback, memo, useRef } from 'react';
 import type { EuiSuperSelectOption, EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiForm,
@@ -29,6 +29,8 @@ import { isOneOfOperator, isOperator } from '@kbn/securitysolution-list-utils';
 import { uniq } from 'lodash';
 
 import { ListOperatorEnum, ListOperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
+import { useCanAssignArtifactPerPolicy } from '../../../../hooks/artifacts/use_can_assign_artifact_per_policy';
+import { FormattedError } from '../../../../components/formatted_error';
 import { OS_TITLES } from '../../../../common/translations';
 import type {
   ArtifactFormComponentOnChangeCallbackProps,
@@ -52,15 +54,9 @@ import {
   VALUE_LABEL_HELPER,
   SINGLE_VALUE_LABEL_HELPER,
 } from '../../translations';
-import type { EffectedPolicySelection } from '../../../../components/effected_policy_select';
+import type { EffectedPolicySelectProps } from '../../../../components/effected_policy_select';
 import { EffectedPolicySelect } from '../../../../components/effected_policy_select';
-import { useLicense } from '../../../../../common/hooks/use_license';
 import { isValidHash } from '../../../../../../common/endpoint/service/artifacts/validations';
-import {
-  getArtifactTagsByPolicySelection,
-  isArtifactGlobal,
-} from '../../../../../../common/endpoint/service/artifacts';
-import type { PolicyData } from '../../../../../../common/endpoint/types';
 import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
 
 const testIdPrefix = 'blocklist-form';
@@ -113,41 +109,13 @@ function isValid(itemValidation: ItemValidation): boolean {
 
 // eslint-disable-next-line react/display-name
 export const BlockListForm = memo<ArtifactFormComponentProps>(
-  ({ item, policies, policiesIsLoading, onChange, mode }) => {
+  ({ item, onChange, mode, error: submitError }) => {
     const [nameVisited, setNameVisited] = useState(false);
     const [valueVisited, setValueVisited] = useState({ value: false }); // Use object to trigger re-render
     const warningsRef = useRef<ItemValidation>({ name: {}, value: {} });
     const errorsRef = useRef<ItemValidation>({ name: {}, value: {} });
-    const [selectedPolicies, setSelectedPolicies] = useState<PolicyData[]>([]);
-    const isPlatinumPlus = useLicense().isPlatinumPlus();
-    const isGlobal = useMemo(() => isArtifactGlobal(item), [item]);
-    const [wasByPolicy, setWasByPolicy] = useState(!isArtifactGlobal(item));
     const [hasFormChanged, setHasFormChanged] = useState(false);
-
-    const showAssignmentSection = useMemo(() => {
-      return (
-        isPlatinumPlus ||
-        (mode === 'edit' && (!isGlobal || (wasByPolicy && isGlobal && hasFormChanged)))
-      );
-    }, [mode, isGlobal, hasFormChanged, isPlatinumPlus, wasByPolicy]);
-
-    // set initial state of `wasByPolicy` that checks if the initial state of the exception was by policy or not
-    useEffect(() => {
-      if (!hasFormChanged && item.tags) {
-        setWasByPolicy(!isArtifactGlobal({ tags: item.tags }));
-      }
-    }, [item.tags, hasFormChanged]);
-
-    // select policies if editing
-    useEffect(() => {
-      if (hasFormChanged) return;
-      const policyIds = item.tags?.map((tag) => tag.split(':')[1]) ?? [];
-      if (!policyIds.length) return;
-      const policiesData = policies.filter((policy) => policyIds.includes(policy.id));
-
-      setSelectedPolicies(policiesData);
-    }, [hasFormChanged, item.tags, policies]);
-
+    const showAssignmentSection = useCanAssignArtifactPerPolicy(item, mode, hasFormChanged);
     const getTestId = useTestIdGenerator(testIdPrefix);
 
     const blocklistEntry = useMemo((): BlocklistEntry => {
@@ -260,7 +228,7 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
             content={displaySingleValueInput ? SINGLE_VALUE_LABEL_HELPER : VALUE_LABEL_HELPER}
           >
             <>
-              {VALUE_LABEL} <EuiIcon color="subdued" type="iInCircle" className="eui-alignTop" />
+              {VALUE_LABEL} <EuiIcon color="subdued" type="info" className="eui-alignTop" />
             </>
           </EuiToolTip>
         </div>
@@ -544,28 +512,28 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
       [validateValues, onChange, item, blocklistEntry]
     );
 
-    const handleOnPolicyChange = useCallback(
-      (change: EffectedPolicySelection) => {
-        const tags = getArtifactTagsByPolicySelection(change);
-
-        const nextItem = { ...item, tags };
-
-        // Preserve old selected policies when switching to global
-        if (!change.isGlobal) {
-          setSelectedPolicies(change.selected);
-        }
-        validateValues(nextItem);
+    const handleEffectedPolicyOnChange: EffectedPolicySelectProps['onChange'] = useCallback(
+      (updatedItem) => {
+        validateValues(updatedItem);
         onChange({
           isValid: isValid(errorsRef.current),
-          item: nextItem,
+          item: updatedItem,
         });
         setHasFormChanged(true);
       },
-      [validateValues, onChange, item]
+      [onChange, validateValues]
     );
 
     return (
-      <EuiForm component="div">
+      <EuiForm
+        component="div"
+        error={
+          submitError ? (
+            <FormattedError error={submitError} data-test-subj={getTestId('submitError')} />
+          ) : undefined
+        }
+        isInvalid={!!submitError}
+      >
         <EuiTitle size="xs">
           <h3>{DETAILS_HEADER}</h3>
         </EuiTitle>
@@ -700,12 +668,8 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
             <EuiHorizontalRule />
             <EuiFormRow fullWidth>
               <EffectedPolicySelect
-                isGlobal={isGlobal}
-                isPlatinumPlus={isPlatinumPlus}
-                selected={selectedPolicies}
-                options={policies}
-                onChange={handleOnPolicyChange}
-                isLoading={policiesIsLoading}
+                item={item}
+                onChange={handleEffectedPolicyOnChange}
                 description={POLICY_SELECT_DESCRIPTION}
                 data-test-subj={getTestId('effectedPolicies')}
               />

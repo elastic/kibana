@@ -43,6 +43,12 @@ export const registerBulkResolveRoute = (
         description: `Retrieve multiple Kibana saved objects by ID, using any legacy URL aliases if they exist.
         Under certain circumstances, when Kibana is upgraded, saved object migrations may necessitate regenerating some object IDs to enable new features. When an object's ID is regenerated, a legacy URL alias is created for that object, preserving its old ID. In such a scenario, that object can be retrieved with the bulk resolve API using either its new ID or its old ID.`,
       },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the Saved Objects Client',
+        },
+      },
       validate: {
         body: schema.arrayOf(
           schema.object({

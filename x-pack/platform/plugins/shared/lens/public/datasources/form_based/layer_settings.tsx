@@ -17,7 +17,41 @@ import { IgnoreGlobalFilterRowControl } from '../../shared_components/ignore_glo
 import { trackUiCounterEvents } from '../../lens_ui_telemetry';
 import { ExperimentalBadge } from '../../shared_components';
 
-const samplingValues = [0.00001, 0.0001, 0.001, 0.01, 0.1, 1];
+const samplingValues = [
+  {
+    label: '.001%',
+    value: 0.00001,
+    accessibleLabel: i18n.translate(
+      'xpack.lens.randomSampling.ui.sliderControl.tickLabels.0.00001',
+      {
+        defaultMessage: 'Point zero zero one percent, most performant',
+      }
+    ),
+  },
+  {
+    label: '.01%',
+    value: 0.0001,
+  },
+  {
+    label: '.1%',
+    value: 0.001,
+  },
+  {
+    label: '1%',
+    value: 0.01,
+  },
+  {
+    label: '10%',
+    value: 0.1,
+  },
+  {
+    label: '100%',
+    value: 1,
+    accessibleLabel: i18n.translate('xpack.lens.randomSampling.ui.sliderControl.tickLabels.1', {
+      defaultMessage: 'One hundred percent, most accurate',
+    }),
+  },
+];
 
 export function LayerSettingsPanel({
   state,
@@ -26,7 +60,7 @@ export function LayerSettingsPanel({
 }: DatasourceLayerSettingsProps<FormBasedPrivateState>) {
   const isSamplingValueDisabled = !isSamplingValueEnabled(state.layers[layerId]);
   const currentValue = isSamplingValueDisabled
-    ? samplingValues[samplingValues.length - 1]
+    ? samplingValues[samplingValues.length - 1].value
     : state.layers[layerId].sampling;
 
   return (
@@ -45,7 +79,7 @@ export function LayerSettingsPanel({
                 values={{
                   link: (
                     <EuiLink
-                      href="https://www.elastic.co/guide/en/elasticsearch/reference/master/search-aggregations-random-sampler-aggregation.html"
+                      href="https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-random-sampler-aggregation.html"
                       target="_blank"
                       external
                     >

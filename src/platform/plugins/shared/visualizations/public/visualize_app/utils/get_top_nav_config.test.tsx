@@ -21,7 +21,7 @@ import { createEmbeddableStateTransferMock } from '@kbn/embeddable-plugin/public
 import { visualizeAppStateStub } from './stubs';
 
 describe('showPublicUrlSwitch', () => {
-  test('returns false if "visualize" app is not available', () => {
+  test('returns false if "visualize_v2" app is not available', () => {
     const anonymousUserCapabilities: Capabilities = {
       catalogue: {},
       management: {},
@@ -32,12 +32,12 @@ describe('showPublicUrlSwitch', () => {
     expect(result).toBe(false);
   });
 
-  test('returns false if "visualize" app is not accessible', () => {
+  test('returns false if "visualize_v2" app is not accessible', () => {
     const anonymousUserCapabilities: Capabilities = {
       catalogue: {},
       management: {},
       navLinks: {},
-      visualize: {
+      visualize_v2: {
         show: false,
       },
     };
@@ -46,12 +46,12 @@ describe('showPublicUrlSwitch', () => {
     expect(result).toBe(false);
   });
 
-  test('returns true if "visualize" app is not available an accessible', () => {
+  test('returns true if "visualize_v2" app is not available an accessible', () => {
     const anonymousUserCapabilities: Capabilities = {
       catalogue: {},
       management: {},
       navLinks: {},
-      visualize: {
+      visualize_v2: {
         show: true,
       },
     };
@@ -134,6 +134,8 @@ describe('getTopNavConfig', () => {
         Object {
           "description": "Share Visualization",
           "disableButton": false,
+          "iconOnly": true,
+          "iconType": "share",
           "id": "share",
           "label": "share",
           "run": [Function],
@@ -161,6 +163,60 @@ describe('getTopNavConfig', () => {
         },
       ]
     `);
+  });
+  test('returns correct links that include when export integrations are available', () => {
+    const vis = {
+      savedVis: {
+        id: 'test',
+        sharingSavedObjectProps: {
+          outcome: 'conflict',
+          aliasTargetId: 'alias_id',
+        },
+      },
+      vis: {
+        type: {
+          title: 'TSVB',
+        },
+      },
+    } as VisualizeEditorVisInstance;
+
+    const availableExportIntegrationsSpy = jest.spyOn(share, 'availableIntegrations');
+
+    availableExportIntegrationsSpy.mockImplementationOnce((_objectType, groupId) => {
+      if (groupId === 'export') {
+        return [
+          {
+            id: 'export',
+            shareType: 'integration',
+            groupId: 'export',
+            config: () => ({}),
+          },
+        ];
+      }
+
+      return [];
+    });
+
+    const topNavLinks = getTopNavConfig(
+      {
+        hasUnsavedChanges: false,
+        setHasUnsavedChanges: jest.fn(),
+        hasUnappliedChanges: false,
+        onOpenInspector: jest.fn(),
+        originatingApp: 'dashboards',
+        setOriginatingApp: jest.fn(),
+        visInstance: vis,
+        stateContainer,
+        visualizationIdFromUrl: undefined,
+        stateTransfer: createEmbeddableStateTransferMock(),
+      } as unknown as TopNavConfigParams,
+      services
+    );
+
+    expect(topNavLinks.find(({ id }) => id === 'export')).toBeDefined();
+
+    // revert mock implementation
+    availableExportIntegrationsSpy.mockRestore();
   });
   test('returns correct links if the originating app is undefined', () => {
     const vis = {
@@ -207,6 +263,8 @@ describe('getTopNavConfig', () => {
         Object {
           "description": "Share Visualization",
           "disableButton": false,
+          "iconOnly": true,
+          "iconType": "share",
           "id": "share",
           "label": "share",
           "run": [Function],
@@ -314,6 +372,8 @@ describe('getTopNavConfig', () => {
         Object {
           "description": "Share Visualization",
           "disableButton": false,
+          "iconOnly": true,
+          "iconType": "share",
           "id": "share",
           "label": "share",
           "run": [Function],
@@ -399,6 +459,8 @@ describe('getTopNavConfig', () => {
         Object {
           "description": "Share Visualization",
           "disableButton": true,
+          "iconOnly": true,
+          "iconType": "share",
           "id": "share",
           "label": "share",
           "run": [Function],
@@ -495,6 +557,8 @@ describe('getTopNavConfig', () => {
         Object {
           "description": "Share Visualization",
           "disableButton": false,
+          "iconOnly": true,
+          "iconType": "share",
           "id": "share",
           "label": "share",
           "run": [Function],

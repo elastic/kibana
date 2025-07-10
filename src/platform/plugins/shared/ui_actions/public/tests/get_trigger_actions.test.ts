@@ -24,7 +24,7 @@ const action2: ActionDefinition = {
   execute: async () => {},
 };
 
-test('returns actions set on trigger', () => {
+test('returns actions set on trigger', async () => {
   const { setup, doStart } = uiActionsPluginMock.createPlugin();
   setup.registerAction(action1);
   setup.registerAction(action2);
@@ -35,19 +35,19 @@ test('returns actions set on trigger', () => {
   });
 
   const start = doStart();
-  const list0 = start.getTriggerActions('trigger');
+  const list0 = await start.getTriggerActions('trigger');
 
   expect(list0).toHaveLength(0);
 
   setup.addTriggerAction('trigger', action1);
-  const list1 = start.getTriggerActions('trigger');
+  const list1 = await start.getTriggerActions('trigger');
 
   expect(list1).toHaveLength(1);
   expect(list1[0]).toBeInstanceOf(ActionInternal);
   expect(list1[0].id).toBe(action1.id);
 
   setup.addTriggerAction('trigger', action2);
-  const list2 = start.getTriggerActions('trigger');
+  const list2 = await start.getTriggerActions('trigger');
 
   expect(list2).toHaveLength(2);
   expect(!!list2.find(({ id }: { id: string }) => id === 'action1')).toBe(true);

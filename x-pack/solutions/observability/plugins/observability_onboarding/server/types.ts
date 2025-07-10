@@ -12,6 +12,7 @@ import {
   PluginStart as DataPluginStart,
 } from '@kbn/data-plugin/server';
 import { FleetSetupContract, FleetStartContract } from '@kbn/fleet-plugin/server';
+import { APMPluginSetup } from '@kbn/apm-plugin/server';
 import { ObservabilityPluginSetup } from '@kbn/observability-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import {
@@ -26,6 +27,7 @@ export interface ObservabilityOnboardingPluginSetupDependencies {
   usageCollection: UsageCollectionSetup;
   fleet: FleetSetupContract;
   customIntegrations: CustomIntegrationsPluginSetup;
+  apm?: APMPluginSetup;
 }
 
 export interface ObservabilityOnboardingPluginStartDependencies {
@@ -35,6 +37,7 @@ export interface ObservabilityOnboardingPluginStartDependencies {
   usageCollection: undefined;
   fleet: FleetStartContract;
   customIntegrations: CustomIntegrationsPluginStart;
+  apm?: APMPluginSetup;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

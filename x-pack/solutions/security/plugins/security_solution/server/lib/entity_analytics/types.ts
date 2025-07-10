@@ -7,12 +7,13 @@
 
 import type { Logger, StartServicesAccessor } from '@kbn/core/server';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
+import type { EntityType } from '../../../common/search_strategy';
 import type {
   AfterKeys,
   EntityAfterKey,
   RiskScoreWeights,
 } from '../../../common/api/entity_analytics/common';
-import type { IdentifierType, Range } from '../../../common/entity_analytics/risk_engine';
+import type { Range } from '../../../common/entity_analytics/risk_engine';
 import type { ConfigType } from '../../config';
 import type { StartPlugins } from '../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../types';
@@ -71,7 +72,7 @@ export interface RiskEngineConfiguration {
   dataViewId: string;
   enabled: boolean;
   filter: unknown;
-  identifierType: IdentifierType | undefined;
+  identifierType: EntityType | undefined;
   interval: string;
   pageSize: number;
   range: Range;
@@ -80,6 +81,8 @@ export interface RiskEngineConfiguration {
   _meta: {
     mappingsVersion: number;
   };
+  excludeAlertStatuses?: string[];
+  excludeAlertTags?: string[];
 }
 
 export interface CalculateScoresParams {
@@ -87,7 +90,7 @@ export interface CalculateScoresParams {
   debug?: boolean;
   index: string;
   filter?: unknown;
-  identifierType?: IdentifierType;
+  identifierType?: EntityType;
   pageSize: number;
   range: { start: string; end: string };
   runtimeMappings: MappingRuntimeFields;
@@ -102,12 +105,14 @@ export interface CalculateAndPersistScoresParams {
   debug?: boolean;
   index: string;
   filter?: unknown;
-  identifierType: IdentifierType;
+  identifierType: EntityType;
   pageSize: number;
   range: Range;
   runtimeMappings: MappingRuntimeFields;
   weights?: RiskScoreWeights;
   alertSampleSizePerShard?: number;
+  excludeAlertStatuses?: string[];
+  excludeAlertTags?: string[];
   returnScores?: boolean;
   refresh?: 'wait_for';
 }

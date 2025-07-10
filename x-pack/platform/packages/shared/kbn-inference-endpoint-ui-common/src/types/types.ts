@@ -4,23 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { FieldType } from '@kbn/search-connectors';
 
-export { FieldType } from '@kbn/search-connectors';
-
-export interface ConfigProperties {
-  default_value: string | number | boolean | null;
-  description: string | null;
-  label: string;
-  required: boolean;
-  sensitive: boolean;
-  updatable: boolean;
-  type: FieldType;
-}
+import { ConfigProperties } from './dynamic_config/types';
 
 interface ConfigEntry extends ConfigProperties {
   key: string;
 }
+
+export * from './dynamic_config/types';
 
 export interface ConfigEntryView extends ConfigEntry {
   isValid: boolean;
@@ -29,14 +20,6 @@ export interface ConfigEntryView extends ConfigEntry {
 }
 
 export type FieldsConfiguration = Record<string, ConfigProperties>;
-
-export interface InferenceProvider {
-  service: string;
-  name: string;
-  task_types: string[];
-  logo?: string;
-  configurations: FieldsConfiguration;
-}
 
 export interface Config {
   taskType: string;
@@ -48,4 +31,23 @@ export interface Config {
 
 export interface Secrets {
   providerSecrets?: Record<string, unknown>;
+}
+
+export interface InferenceProvider {
+  service: string;
+  name: string;
+  task_types: string[];
+  logo?: string;
+  configurations: FieldsConfiguration;
+}
+
+export interface Secrets {
+  providerSecrets?: Record<string, unknown>;
+}
+
+export const INFERENCE_ENDPOINT_INTERNAL_API_VERSION = '1';
+
+export interface InferenceEndpoint {
+  config: Config;
+  secrets: Secrets;
 }

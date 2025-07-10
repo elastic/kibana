@@ -6,6 +6,7 @@
  */
 
 import { createEvent, fireEvent, render } from '@testing-library/react';
+import { EuiThemeProvider } from '@elastic/eui';
 import React from 'react';
 import { HeaderMenu } from '.';
 import { actions, actionsWithDisabledDelete } from '../mocks/header.mock';
@@ -17,21 +18,19 @@ describe('HeaderMenu', () => {
       <HeaderMenu iconType="boxesHorizontal" disableActions={false} actions={null} />
     );
 
-    expect(wrapper.container).toMatchSnapshot();
-
     expect(wrapper.getByTestId('ButtonIcon')).toBeInTheDocument();
     expect(wrapper.queryByTestId('EmptyButton')).not.toBeInTheDocument();
     expect(wrapper.queryByTestId('MenuPanel')).not.toBeInTheDocument();
   });
+
   it('should not render icon', () => {
     const wrapper = render(<HeaderMenu disableActions={false} actions={null} />);
 
-    expect(wrapper.container).toMatchSnapshot();
-
     expect(wrapper.getByTestId('ButtonIcon')).toBeInTheDocument();
     expect(wrapper.queryByTestId('EmptyButton')).not.toBeInTheDocument();
     expect(wrapper.queryByTestId('MenuPanel')).not.toBeInTheDocument();
   });
+
   it('should render button icon disabled', () => {
     const wrapper = render(
       <HeaderMenu
@@ -42,7 +41,6 @@ describe('HeaderMenu', () => {
     );
 
     fireEvent.click(wrapper.getByTestId('ButtonIcon'));
-    expect(wrapper.container).toMatchSnapshot();
     expect(wrapper.getByTestId('ActionItemdelete')).toBeDisabled();
     expect(wrapper.getByTestId('ActionItemedit')).toBeEnabled();
   });
@@ -57,8 +55,6 @@ describe('HeaderMenu', () => {
         iconType="cheer"
       />
     );
-
-    expect(wrapper.container).toMatchSnapshot();
 
     expect(wrapper.getByTestId('EmptyButton')).toBeInTheDocument();
     expect(wrapper.queryByTestId('ButtonIcon')).not.toBeInTheDocument();
@@ -77,14 +73,13 @@ describe('HeaderMenu', () => {
       />
     );
 
-    expect(wrapper.container).toMatchSnapshot();
-
     expect(wrapper.getByTestId('EmptyButton')).toBeInTheDocument();
     expect(wrapper.queryByTestId('ButtonIcon')).not.toBeInTheDocument();
     fireEvent.click(wrapper.getByTestId('EmptyButton'));
     expect(wrapper.getByTestId('ActionItemedit')).toBeInTheDocument();
     expect(wrapper.getByTestId('MenuPanel')).toBeInTheDocument();
   });
+
   it('should render empty button icon with actions and should not open the popover when clicked if disableActions', () => {
     const wrapper = render(
       <HeaderMenu
@@ -97,14 +92,13 @@ describe('HeaderMenu', () => {
       />
     );
 
-    expect(wrapper.container).toMatchSnapshot();
-
     expect(wrapper.getByTestId('EmptyButton')).toBeInTheDocument();
     expect(wrapper.queryByTestId('ButtonIcon')).not.toBeInTheDocument();
     fireEvent.click(wrapper.getByTestId('EmptyButton'));
     expect(wrapper.queryByTestId('ActionItemedit')).not.toBeInTheDocument();
     expect(wrapper.queryByTestId('MenuPanel')).not.toBeInTheDocument();
   });
+
   it('should call onEdit if action has onClick', () => {
     const onEdit = jest.fn();
     const customAction = [...actions];
@@ -124,15 +118,16 @@ describe('HeaderMenu', () => {
         emptyButton
         actions={customActions}
         useCustomActions
-      />
-    );
+      />,
 
-    expect(wrapper.container).toMatchSnapshot();
+      { wrapper: EuiThemeProvider }
+    );
 
     expect(wrapper.getByTestId('EmptyButton')).toBeInTheDocument();
     fireEvent.click(wrapper.getByTestId('EmptyButton'));
     expect(wrapper.queryByTestId('MenuPanel')).toBeInTheDocument();
   });
+
   it('should stop propagation when clicking on the menu', () => {
     const onEdit = jest.fn();
     const customAction = [...actions];

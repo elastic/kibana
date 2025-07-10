@@ -85,17 +85,15 @@ export async function getServiceInstanceMetadataDetails({
         apm: {
           events: [ProcessorEvent.metric],
         },
-        body: {
-          track_total_hits: false,
-          terminate_after: 1,
-          size: 1,
-          query: {
-            bool: {
-              filter: filter.concat({ term: { [METRICSET_NAME]: 'app' } }),
-            },
+        track_total_hits: false,
+        terminate_after: 1,
+        size: 1,
+        query: {
+          bool: {
+            filter: filter.concat({ term: { [METRICSET_NAME]: 'app' } }),
           },
-          fields,
         },
+        fields,
       }
     );
 
@@ -109,13 +107,11 @@ export async function getServiceInstanceMetadataDetails({
         apm: {
           events: [ProcessorEvent.transaction],
         },
-        body: {
-          track_total_hits: false,
-          terminate_after: 1,
-          size: 1,
-          query: { bool: { filter } },
-          fields,
-        },
+        track_total_hits: false,
+        terminate_after: 1,
+        size: 1,
+        query: { bool: { filter } },
+        fields,
       }
     );
 
@@ -131,17 +127,15 @@ export async function getServiceInstanceMetadataDetails({
         apm: {
           events: [getProcessorEventForTransactions(true)],
         },
-        body: {
-          track_total_hits: false,
-          terminate_after: 1,
-          size: 1,
-          query: {
-            bool: {
-              filter: filter.concat(getBackwardCompatibleDocumentTypeFilter(true)),
-            },
+        track_total_hits: false,
+        terminate_after: 1,
+        size: 1,
+        query: {
+          bool: {
+            filter: filter.concat(getBackwardCompatibleDocumentTypeFilter(true)),
           },
-          fields,
         },
+        fields,
       }
     );
 

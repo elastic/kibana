@@ -52,17 +52,19 @@ describe('<AccountManagementPage>', () => {
     coreStart.http.get.mockResolvedValue({ user, data });
 
     const { findByRole } = render(
-      <Providers
-        services={coreStart}
-        history={history}
-        authc={authc}
-        securityApiClients={{
-          userProfiles: new UserProfileAPIClient(coreStart.http),
-          users: new UserAPIClient(coreStart.http),
-        }}
-      >
-        <AccountManagementPage />
-      </Providers>
+      coreStart.rendering.addContext(
+        <Providers
+          services={coreStart}
+          history={history}
+          authc={authc}
+          securityApiClients={{
+            userProfiles: new UserProfileAPIClient(coreStart.http),
+            users: new UserAPIClient(coreStart.http),
+          }}
+        >
+          <AccountManagementPage />
+        </Providers>
+      )
     );
 
     await findByRole('form');
@@ -70,7 +72,7 @@ describe('<AccountManagementPage>', () => {
     expect(UserProfileMock).toHaveBeenCalledWith({ user, data }, expect.anything());
     expect(coreStart.chrome.setBreadcrumbs).toHaveBeenLastCalledWith([
       { href: '/security/account', text: 'User settings' },
-      { href: undefined, text: 'Profile' },
+      { href: undefined, text: 'user' },
     ]);
   });
 });

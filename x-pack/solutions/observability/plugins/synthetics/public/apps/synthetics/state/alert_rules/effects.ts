@@ -11,10 +11,18 @@ import {
   enableDefaultAlertingAction,
   enableDefaultAlertingSilentlyAction,
   getDefaultAlertingAction,
+  inspectStatusRuleAction,
+  inspectTLSRuleAction,
   updateDefaultAlertingAction,
 } from './actions';
 import { fetchEffectFactory } from '../utils/fetch_effect';
-import { enableDefaultAlertingAPI, getDefaultAlertingAPI, updateDefaultAlertingAPI } from './api';
+import {
+  enableDefaultAlertingAPI,
+  getDefaultAlertingAPI,
+  inspectStatusAlertAPI,
+  inspectTLSAlertAPI,
+  updateDefaultAlertingAPI,
+} from './api';
 
 export function* getDefaultAlertingEffect() {
   yield takeLeading(
@@ -64,6 +72,36 @@ export function* updateDefaultAlertingEffect() {
       updateDefaultAlertingAction.fail,
       successMessage,
       failureMessage
+    )
+  );
+}
+
+export function* inspectStatusRuleEffect() {
+  yield takeLeading(
+    inspectStatusRuleAction.get,
+    fetchEffectFactory(
+      inspectStatusAlertAPI,
+      inspectStatusRuleAction.success,
+      inspectStatusRuleAction.fail,
+      '',
+      i18n.translate('xpack.synthetics.settings.statusRule.inspect', {
+        defaultMessage: 'Failed to inspect monitor status rule type.',
+      })
+    )
+  );
+}
+
+export function* inspectTLSRuleEffect() {
+  yield takeLeading(
+    inspectTLSRuleAction.get,
+    fetchEffectFactory(
+      inspectTLSAlertAPI,
+      inspectTLSRuleAction.success,
+      inspectTLSRuleAction.fail,
+      '',
+      i18n.translate('xpack.synthetics.settings.TLSRule.inspect', {
+        defaultMessage: 'Failed to inspect monitor TLS rule type.',
+      })
     )
   );
 }

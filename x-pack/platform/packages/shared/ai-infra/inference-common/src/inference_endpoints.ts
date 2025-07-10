@@ -10,5 +10,26 @@
  */
 export const defaultInferenceEndpoints = {
   ELSER: '.elser-2-elasticsearch',
+  ELSER_IN_EIS_INFERENCE_ID: '.elser-v2-elastic',
   MULTILINGUAL_E5_SMALL: '.multilingual-e5-small-elasticsearch',
-};
+} as const;
+
+/**
+ * Constants for relevant inference providers
+ */
+export enum InferenceEndpointProvider {
+  /** Elastic (on EIS) */
+  Elastic = 'elastic',
+  /** Claude on bedrock */
+  AmazonBedrock = 'amazonbedrock',
+  /** Azure OpenAI */
+  AzureOpenAI = 'azureopenai',
+  /** Gemini */
+  GoogleVertexAI = 'googlevertexai',
+  /** Open AI */
+  OpenAI = 'openai',
+}
+
+export const elasticModelIds = {
+  RainbowSprinkles: 'rainbow-sprinkles',
+} as const;

@@ -83,7 +83,15 @@
             "section": "def-common.TimeRange",
             "text": "TimeRange"
           },
-          " | undefined, abortController: AbortController | undefined, timeFieldName: string | undefined) => Promise<",
+          " | undefined, abortController: AbortController | undefined, timeFieldName: string | undefined, esqlVariables: ",
+          {
+            "pluginId": "@kbn/esql-types",
+            "scope": "common",
+            "docId": "kibKbnEsqlTypesPluginApi",
+            "section": "def-common.ESQLControlVariable",
+            "text": "ESQLControlVariable"
+          },
+          "[] | undefined) => Promise<",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -198,6 +206,28 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-editor",
+            "id": "def-public.fetchFieldsFromESQL.$6",
+            "type": "Array",
+            "tags": [],
+            "label": "esqlVariables",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/esql-types",
+                "scope": "common",
+                "docId": "kibKbnEsqlTypesPluginApi",
+                "section": "def-common.ESQLControlVariable",
+                "text": "ESQLControlVariable"
+              },
+              "[] | undefined"
+            ],
+            "path": "src/platform/packages/private/kbn-esql-editor/src/fetch_fields_from_esql.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -205,6 +235,63 @@
       }
     ],
     "interfaces": [
+      {
+        "parentPluginId": "@kbn/esql-editor",
+        "id": "def-public.DataErrorsControl",
+        "type": "Interface",
+        "tags": [],
+        "label": "DataErrorsControl",
+        "description": [],
+        "path": "src/platform/packages/private/kbn-esql-editor/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-editor",
+            "id": "def-public.DataErrorsControl.enabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "enabled",
+            "description": [],
+            "path": "src/platform/packages/private/kbn-esql-editor/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-editor",
+            "id": "def-public.DataErrorsControl.onChange",
+            "type": "Function",
+            "tags": [],
+            "label": "onChange",
+            "description": [],
+            "signature": [
+              "(value: boolean) => void"
+            ],
+            "path": "src/platform/packages/private/kbn-esql-editor/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/esql-editor",
+                "id": "def-public.DataErrorsControl.onChange.$1",
+                "type": "boolean",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "src/platform/packages/private/kbn-esql-editor/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/esql-editor",
         "id": "def-public.ESQLEditorProps",
@@ -456,6 +543,22 @@
           },
           {
             "parentPluginId": "@kbn/esql-editor",
+            "id": "def-public.ESQLEditorProps.hideRunQueryButton",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hideRunQueryButton",
+            "description": [
+              "Hide the Run query button which appears when editor is inlined"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/private/kbn-esql-editor/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-editor",
             "id": "def-public.ESQLEditorProps.editorIsInline",
             "type": "CompoundType",
             "tags": [],
@@ -577,6 +680,85 @@
             ],
             "signature": [
               "boolean | undefined"
+            ],
+            "path": "src/platform/packages/private/kbn-esql-editor/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-editor",
+            "id": "def-public.ESQLEditorProps.controlsContext",
+            "type": "Object",
+            "tags": [],
+            "label": "controlsContext",
+            "description": [
+              "Enables the creation of controls from the editor"
+            ],
+            "signature": [
+              "ControlsContext",
+              " | undefined"
+            ],
+            "path": "src/platform/packages/private/kbn-esql-editor/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-editor",
+            "id": "def-public.ESQLEditorProps.esqlVariables",
+            "type": "Array",
+            "tags": [],
+            "label": "esqlVariables",
+            "description": [
+              "The available ESQL variables from the page context this editor was opened in"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/esql-types",
+                "scope": "common",
+                "docId": "kibKbnEsqlTypesPluginApi",
+                "section": "def-common.ESQLControlVariable",
+                "text": "ESQLControlVariable"
+              },
+              "[] | undefined"
+            ],
+            "path": "src/platform/packages/private/kbn-esql-editor/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-editor",
+            "id": "def-public.ESQLEditorProps.expandToFitQueryOnMount",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "expandToFitQueryOnMount",
+            "description": [
+              "Resize the editor to fit the initially passed query on mount"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/private/kbn-esql-editor/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-editor",
+            "id": "def-public.ESQLEditorProps.dataErrorsControl",
+            "type": "Object",
+            "tags": [],
+            "label": "dataErrorsControl",
+            "description": [
+              "Allows controlling the switch to toggle data errors in the UI. If not provided the switch will be hidden and data errors visible"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/esql-editor",
+                "scope": "public",
+                "docId": "kibKbnEsqlEditorPluginApi",
+                "section": "def-public.DataErrorsControl",
+                "text": "DataErrorsControl"
+              },
+              " | undefined"
             ],
             "path": "src/platform/packages/private/kbn-esql-editor/src/types.ts",
             "deprecated": false,

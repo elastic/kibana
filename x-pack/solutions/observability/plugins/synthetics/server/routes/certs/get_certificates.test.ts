@@ -5,28 +5,34 @@
  * 2.0.
  */
 
-import * as getAllMonitors from '../../saved_objects/synthetics_monitor/get_all_monitors';
+import * as getAllMonitors from '../../saved_objects/synthetics_monitor/process_monitors';
 import * as getCerts from '../../queries/get_certs';
 import { getSyntheticsCertsRoute } from './get_certificates';
+import { MonitorConfigRepository } from '../../services/monitor_config_repository';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 
 describe('getSyntheticsCertsRoute', () => {
-  let getMonitorsSpy: jest.SpyInstance;
-
-  beforeEach(() => {
-    getMonitorsSpy = jest.spyOn(getAllMonitors, 'getAllMonitors').mockReturnValue([] as any);
-  });
-
   afterEach(() => jest.clearAllMocks());
+  const soClient = savedObjectsClientMock.create();
+  const encryptedSavedObjectsClient = encryptedSavedObjectsMock.createStart().getClient();
+
+  const mockMonitorConfigRepository = new MonitorConfigRepository(
+    soClient,
+    encryptedSavedObjectsClient
+  );
 
   it('returns empty set when no monitors are found', async () => {
     const route = getSyntheticsCertsRoute();
+    mockMonitorConfigRepository.getAll = jest.fn().mockReturnValue([]);
     expect(
       await route.handler({
         // @ts-expect-error partial implementation for testing
         request: { query: {} },
         // @ts-expect-error partial implementation for testing
         syntheticsEsClient: jest.fn(),
-        savedObjectClient: jest.fn(),
+        savedObjectClient: soClient,
+        monitorConfigRepository: mockMonitorConfigRepository,
       })
     ).toEqual({
       data: {
@@ -34,7 +40,7 @@ describe('getSyntheticsCertsRoute', () => {
         total: 0,
       },
     });
-    expect(getMonitorsSpy).toHaveBeenCalledTimes(1);
+    expect(mockMonitorConfigRepository.getAll).toHaveBeenCalledTimes(1);
   });
 
   it('returns cert data when monitors are found', async () => {
@@ -78,15 +84,17 @@ describe('getSyntheticsCertsRoute', () => {
       // @ts-expect-error partial implementation for testing
       .mockReturnValue(getCertsResult);
     const route = getSyntheticsCertsRoute();
-    getMonitorsSpy.mockReturnValue(getMonitorsResult);
+    const getAll = jest.fn().mockReturnValue(getMonitorsResult);
     const result = await route.handler({
       // @ts-expect-error partial implementation for testing
       request: { query: {} },
       // @ts-expect-error partial implementation for testing
       syntheticsEsClient: jest.fn(),
       savedObjectClient: jest.fn(),
+      // @ts-expect-error partial implementation for testing
+      monitorConfigRepository: { getAll },
     });
-    expect(getMonitorsSpy).toHaveBeenCalledTimes(1);
+    expect(getAll).toHaveBeenCalledTimes(1);
     expect(processMonitorsSpy).toHaveBeenCalledTimes(1);
     expect(processMonitorsSpy).toHaveBeenCalledWith(getMonitorsResult);
     expect(getSyntheticsCertsSpy).toHaveBeenCalledTimes(1);

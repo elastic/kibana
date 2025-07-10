@@ -6,10 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import axios, { AxiosError, AxiosResponse } from 'axios';
-import { Logger } from '@kbn/core/server';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { map, getOrElse } from 'fp-ts/lib/Option';
+import type { AxiosError, AxiosResponse } from 'axios';
+import axios from 'axios';
+import type { Logger } from '@kbn/core/server';
+import { pipe } from 'fp-ts/pipeable';
+import { map, getOrElse } from 'fp-ts/Option';
 
 import type {
   ActionTypeExecutorResult as ConnectorTypeExecutorResult,
@@ -21,10 +22,11 @@ import {
   AlertingConnectorFeatureId,
   UptimeConnectorFeatureId,
   SecurityConnectorFeatureId,
-} from '@kbn/actions-plugin/common/types';
+} from '@kbn/actions-plugin/common';
 import { renderMustacheString } from '@kbn/actions-plugin/server/lib/mustache_renderer';
 import { combineHeadersWithBasicAuthHeader } from '@kbn/actions-plugin/server/lib';
 
+import { SSLCertType } from '../../../common/auth/constants';
 import type {
   WebhookConnectorType,
   ActionParamsType,
@@ -34,7 +36,8 @@ import type {
 } from './types';
 
 import { getRetryAfterIntervalFromHeaders } from '../lib/http_response_retry_header';
-import { isOk, promiseResult, Result } from '../lib/result_type';
+import type { Result } from '../lib/result_type';
+import { isOk, promiseResult } from '../lib/result_type';
 import { ConfigSchema, ParamsSchema } from './schema';
 import { buildConnectorAuth } from '../../../common/auth/utils';
 import { SecretConfigurationSchema } from '../../../common/auth/schema';
@@ -93,7 +96,7 @@ function validateConnectorTypeConfig(
   } catch (err) {
     throw new Error(
       i18n.translate('xpack.stackConnectors.webhook.configurationErrorNoHostname', {
-        defaultMessage: 'error configuring webhook action: unable to parse url: {err}',
+        defaultMessage: 'error validation webhook action config: unable to parse url: {err}',
         values: {
           err: err.toString(),
         },
@@ -106,7 +109,7 @@ function validateConnectorTypeConfig(
   } catch (allowListError) {
     throw new Error(
       i18n.translate('xpack.stackConnectors.webhook.configurationError', {
-        defaultMessage: 'error configuring webhook action: {message}',
+        defaultMessage: 'error validation webhook action config: {message}',
         values: {
           message: allowListError.message,
         },
@@ -118,9 +121,24 @@ function validateConnectorTypeConfig(
     throw new Error(
       i18n.translate('xpack.stackConnectors.webhook.authConfigurationError', {
         defaultMessage:
-          'error configuring webhook action: authType must be null or undefined if hasAuth is false',
+          'error validation webhook action config: authType must be null or undefined if hasAuth is false',
       })
     );
+  }
+
+  if (configObject.certType === SSLCertType.PFX) {
+    const webhookSettings = configurationUtilities.getWebhookSettings();
+    if (!webhookSettings.ssl.pfx.enabled) {
+      throw new Error(
+        i18n.translate('xpack.stackConnectors.webhook.pfxConfigurationError', {
+          defaultMessage:
+            'error validation webhook action config: certType "{certType}" is disabled',
+          values: {
+            certType: SSLCertType.PFX,
+          },
+        })
+      );
+    }
   }
 }
 

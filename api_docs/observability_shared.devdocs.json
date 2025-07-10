@@ -127,13 +127,15 @@
                 "section": "def-public.NavigationSection",
                 "text": "NavigationSection"
               },
-              "[]>) => void; }; updateGlobalNavigation: ({ capabilities, deepLinks, updater$, }: { capabilities: Readonly<{ [x: string]: Readonly<{ [x: string]: boolean | Readonly<{ [x: string]: boolean; }>; }>; navLinks: Readonly<{ [x: string]: boolean; }>; management: Readonly<{ [x: string]: Readonly<{ [x: string]: boolean; }>; }>; catalogue: Readonly<{ [x: string]: boolean; }>; }>; deepLinks: ",
+              "[]>) => void; }; updateGlobalNavigation: ({ capabilities, deepLinks, updater$, pricing, }: { capabilities: Readonly<{ [x: string]: Readonly<{ [x: string]: boolean | Readonly<{ [x: string]: boolean; }>; }>; navLinks: Readonly<{ [x: string]: boolean; }>; management: Readonly<{ [x: string]: Readonly<{ [x: string]: boolean; }>; }>; catalogue: Readonly<{ [x: string]: boolean; }>; discover?: Readonly<{}> | undefined; dashboard?: Readonly<{}> | undefined; maps?: Readonly<{}> | undefined; visualize?: Readonly<{}> | undefined; }>; deepLinks: ",
               "AppDeepLink",
               "<string>[]; updater$: ",
               "Subject",
               "<",
               "AppUpdater",
-              ">; }) => void; }"
+              ">; pricing: ",
+              "PricingServiceStart",
+              "; }) => void; }"
             ],
             "path": "x-pack/solutions/observability/plugins/observability_shared/public/plugin.ts",
             "deprecated": false,
@@ -298,7 +300,7 @@
         "label": "allCasesPermissions",
         "description": [],
         "signature": [
-          "() => { all: boolean; create: boolean; read: boolean; update: boolean; delete: boolean; push: boolean; connectors: boolean; settings: boolean; createComment: boolean; reopenCase: boolean; }"
+          "() => { all: boolean; create: boolean; read: boolean; update: boolean; delete: boolean; push: boolean; connectors: boolean; settings: boolean; createComment: boolean; reopenCase: boolean; assign: boolean; }"
         ],
         "path": "x-pack/solutions/observability/plugins/observability_shared/public/utils/cases_permissions.ts",
         "deprecated": false,
@@ -521,6 +523,23 @@
       },
       {
         "parentPluginId": "observabilityShared",
+        "id": "def-public.ExternalResourceLinks",
+        "type": "Function",
+        "tags": [],
+        "label": "ExternalResourceLinks",
+        "description": [],
+        "signature": [
+          "() => React.JSX.Element"
+        ],
+        "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/external_resource_links/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
         "id": "def-public.FeatureFeedbackButton",
         "type": "Function",
         "tags": [],
@@ -705,7 +724,7 @@
                     "section": "def-public.Action",
                     "text": "Action"
                   },
-                  "<Context>; readonly unregisterAction: (actionId: string) => void; readonly hasAction: (actionId: string) => boolean; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerAction: (triggerId: string, action: ",
+                  "<Context>; readonly registerActionAsync: <Context extends object>(id: string, getDefinition: () => Promise<",
                   {
                     "pluginId": "uiActions",
                     "scope": "public",
@@ -713,7 +732,23 @@
                     "section": "def-public.ActionDefinition",
                     "text": "ActionDefinition"
                   },
-                  "<any>) => void; readonly getAction: (id: string) => ",
+                  "<Context>>) => void; readonly unregisterAction: (actionId: string) => void; readonly hasAction: (actionId: string) => boolean; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerAction: (triggerId: string, action: ",
+                  {
+                    "pluginId": "uiActions",
+                    "scope": "public",
+                    "docId": "kibUiActionsPluginApi",
+                    "section": "def-public.ActionDefinition",
+                    "text": "ActionDefinition"
+                  },
+                  "<any>) => void; readonly addTriggerActionAsync: (triggerId: string, actionId: string, getDefinition: () => Promise<",
+                  {
+                    "pluginId": "uiActions",
+                    "scope": "public",
+                    "docId": "kibUiActionsPluginApi",
+                    "section": "def-public.ActionDefinition",
+                    "text": "ActionDefinition"
+                  },
+                  "<any>>) => void; readonly getAction: (id: string) => Promise<",
                   {
                     "pluginId": "uiActions",
                     "scope": "public",
@@ -721,7 +756,7 @@
                     "section": "def-public.Action",
                     "text": "Action"
                   },
-                  "<object>; readonly getTriggerActions: (triggerId: string) => ",
+                  "<object>>; readonly getTriggerActions: (triggerId: string) => Promise<",
                   {
                     "pluginId": "uiActions",
                     "scope": "public",
@@ -729,7 +764,7 @@
                     "section": "def-public.Action",
                     "text": "Action"
                   },
-                  "<object>[]; readonly getTriggerCompatibleActions: (triggerId: string, context: object) => Promise<",
+                  "<object>[]>; readonly getTriggerCompatibleActions: (triggerId: string, context: object) => Promise<",
                   {
                     "pluginId": "uiActions",
                     "scope": "public",
@@ -737,7 +772,7 @@
                     "section": "def-public.Action",
                     "text": "Action"
                   },
-                  "<object>[]>; readonly getFrequentlyChangingActionsForTrigger: (triggerId: string, context: object) => ",
+                  "<object>[]>; readonly getFrequentlyChangingActionsForTrigger: (triggerId: string, context: object) => Promise<",
                   {
                     "pluginId": "uiActions",
                     "scope": "public",
@@ -745,7 +780,7 @@
                     "section": "def-public.FrequentCompatibilityChangeAction",
                     "text": "FrequentCompatibilityChangeAction"
                   },
-                  "<object>[]; readonly executeTriggerActions: (triggerId: string, context: object) => Promise<void>; readonly clear: () => void; readonly fork: () => ",
+                  "<object>[]>; readonly executeTriggerActions: (triggerId: string, context: object) => Promise<void>; readonly clear: () => void; readonly fork: () => ",
                   {
                     "pluginId": "uiActions",
                     "scope": "public",
@@ -1115,7 +1150,7 @@
         "label": "noCasesPermissions",
         "description": [],
         "signature": [
-          "() => { all: boolean; create: boolean; read: boolean; update: boolean; delete: boolean; push: boolean; connectors: boolean; settings: boolean; createComment: boolean; reopenCase: boolean; }"
+          "() => { all: boolean; create: boolean; read: boolean; update: boolean; delete: boolean; push: boolean; connectors: boolean; settings: boolean; createComment: boolean; reopenCase: boolean; assign: boolean; }"
         ],
         "path": "x-pack/solutions/observability/plugins/observability_shared/public/utils/cases_permissions.ts",
         "deprecated": false,
@@ -1504,21 +1539,9 @@
         ],
         "signature": [
           "(extraCrumbs: ",
-          {
-            "pluginId": "@kbn/core-chrome-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreChromeBrowserPluginApi",
-            "section": "def-public.ChromeBreadcrumb",
-            "text": "ChromeBreadcrumb"
-          },
+          "ChromeBreadcrumb",
           "[], options?: { app?: { id: string; label: string; } | undefined; breadcrumbsAppendExtension?: ",
-          {
-            "pluginId": "@kbn/core-chrome-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreChromeBrowserPluginApi",
-            "section": "def-public.ChromeBreadcrumbsAppendExtension",
-            "text": "ChromeBreadcrumbsAppendExtension"
-          },
+          "ChromeBreadcrumbsAppendExtension",
           " | undefined; serverless?: ",
           {
             "pluginId": "serverless",
@@ -1541,13 +1564,7 @@
             "label": "extraCrumbs",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-chrome-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-public.ChromeBreadcrumb",
-                "text": "ChromeBreadcrumb"
-              },
+              "ChromeBreadcrumb",
               "[]"
             ],
             "path": "x-pack/solutions/observability/plugins/observability_shared/public/hooks/use_breadcrumbs.ts",
@@ -1588,13 +1605,7 @@
                 "label": "breadcrumbsAppendExtension",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-chrome-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreChromeBrowserPluginApi",
-                    "section": "def-public.ChromeBreadcrumbsAppendExtension",
-                    "text": "ChromeBreadcrumbsAppendExtension"
-                  },
+                  "ChromeBreadcrumbsAppendExtension",
                   " | undefined"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability_shared/public/hooks/use_breadcrumbs.ts",
@@ -3712,7 +3723,7 @@
         "label": "casesFeatureId",
         "description": [],
         "signature": [
-          "\"observabilityCasesV2\""
+          "\"observabilityCasesV3\""
         ],
         "path": "x-pack/solutions/observability/plugins/observability_shared/common/index.ts",
         "deprecated": false,
@@ -3937,13 +3948,15 @@
             "section": "def-public.NavigationSection",
             "text": "NavigationSection"
           },
-          "[]>) => void; }; updateGlobalNavigation: ({ capabilities, deepLinks, updater$, }: { capabilities: Readonly<{ [x: string]: Readonly<{ [x: string]: boolean | Readonly<{ [x: string]: boolean; }>; }>; navLinks: Readonly<{ [x: string]: boolean; }>; management: Readonly<{ [x: string]: Readonly<{ [x: string]: boolean; }>; }>; catalogue: Readonly<{ [x: string]: boolean; }>; }>; deepLinks: ",
+          "[]>) => void; }; updateGlobalNavigation: ({ capabilities, deepLinks, updater$, pricing, }: { capabilities: Readonly<{ [x: string]: Readonly<{ [x: string]: boolean | Readonly<{ [x: string]: boolean; }>; }>; navLinks: Readonly<{ [x: string]: boolean; }>; management: Readonly<{ [x: string]: Readonly<{ [x: string]: boolean; }>; }>; catalogue: Readonly<{ [x: string]: boolean; }>; discover?: Readonly<{}> | undefined; dashboard?: Readonly<{}> | undefined; maps?: Readonly<{}> | undefined; visualize?: Readonly<{}> | undefined; }>; deepLinks: ",
           "AppDeepLink",
           "<string>[]; updater$: ",
           "Subject",
           "<",
           "AppUpdater",
-          ">; }) => void; }"
+          ">; pricing: ",
+          "PricingServiceStart",
+          "; }) => void; }"
         ],
         "path": "x-pack/solutions/observability/plugins/observability_shared/public/plugin.ts",
         "deprecated": false,
@@ -4345,18 +4358,18 @@
       },
       {
         "parentPluginId": "observabilityShared",
-        "id": "def-common.EntitiesInventoryLocatorDefinition",
+        "id": "def-common.DependencyOverviewLocatorDefinition",
         "type": "Class",
         "tags": [],
-        "label": "EntitiesInventoryLocatorDefinition",
+        "label": "DependencyOverviewLocatorDefinition",
         "description": [],
         "signature": [
           {
             "pluginId": "observabilityShared",
             "scope": "common",
             "docId": "kibObservabilitySharedPluginApi",
-            "section": "def-common.EntitiesInventoryLocatorDefinition",
-            "text": "EntitiesInventoryLocatorDefinition"
+            "section": "def-common.DependencyOverviewLocatorDefinition",
+            "text": "DependencyOverviewLocatorDefinition"
           },
           " implements ",
           {
@@ -4368,46 +4381,76 @@
           },
           "<",
           {
-            "pluginId": "@kbn/utility-types",
+            "pluginId": "@kbn/deeplinks-observability",
             "scope": "common",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-common.SerializableRecord",
-            "text": "SerializableRecord"
+            "docId": "kibKbnDeeplinksObservabilityPluginApi",
+            "section": "def-common.DependencyOverviewParams",
+            "text": "DependencyOverviewParams"
           },
           ">"
         ],
-        "path": "x-pack/solutions/observability/plugins/observability_shared/common/locators/entity_inventory/entity_inventory_locator.ts",
+        "path": "x-pack/solutions/observability/plugins/observability_shared/common/locators/apm/dependency_overview_locator.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "observabilityShared",
-            "id": "def-common.EntitiesInventoryLocatorDefinition.id",
+            "id": "def-common.DependencyOverviewLocatorDefinition.id",
             "type": "string",
             "tags": [],
             "label": "id",
             "description": [],
             "signature": [
-              "\"ENTITY_INVENTORY_LOCATOR\""
+              "\"dependencyOverviewLocator\""
             ],
-            "path": "x-pack/solutions/observability/plugins/observability_shared/common/locators/entity_inventory/entity_inventory_locator.ts",
+            "path": "x-pack/solutions/observability/plugins/observability_shared/common/locators/apm/dependency_overview_locator.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "observabilityShared",
-            "id": "def-common.EntitiesInventoryLocatorDefinition.getLocation",
+            "id": "def-common.DependencyOverviewLocatorDefinition.getLocation",
             "type": "Function",
             "tags": [],
             "label": "getLocation",
             "description": [],
             "signature": [
-              "() => Promise<{ app: string; path: string; state: {}; }>"
+              "({ rangeFrom, rangeTo, dependencyName, environment, }: ",
+              {
+                "pluginId": "@kbn/deeplinks-observability",
+                "scope": "common",
+                "docId": "kibKbnDeeplinksObservabilityPluginApi",
+                "section": "def-common.DependencyOverviewParams",
+                "text": "DependencyOverviewParams"
+              },
+              ") => Promise<{ app: string; path: string; state: {}; }>"
             ],
-            "path": "x-pack/solutions/observability/plugins/observability_shared/common/locators/entity_inventory/entity_inventory_locator.ts",
+            "path": "x-pack/solutions/observability/plugins/observability_shared/common/locators/apm/dependency_overview_locator.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "children": [],
+            "children": [
+              {
+                "parentPluginId": "observabilityShared",
+                "id": "def-common.DependencyOverviewLocatorDefinition.getLocation.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{\n    rangeFrom,\n    rangeTo,\n    dependencyName,\n    environment,\n  }",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/deeplinks-observability",
+                    "scope": "common",
+                    "docId": "kibKbnDeeplinksObservabilityPluginApi",
+                    "section": "def-common.DependencyOverviewParams",
+                    "text": "DependencyOverviewParams"
+                  }
+                ],
+                "path": "x-pack/solutions/observability/plugins/observability_shared/common/locators/apm/dependency_overview_locator.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
             "returnComment": []
           }
         ],
@@ -4823,106 +4866,6 @@
       },
       {
         "parentPluginId": "observabilityShared",
-        "id": "def-common.ServiceEntityLocatorDefinition",
-        "type": "Class",
-        "tags": [],
-        "label": "ServiceEntityLocatorDefinition",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "observabilityShared",
-            "scope": "common",
-            "docId": "kibObservabilitySharedPluginApi",
-            "section": "def-common.ServiceEntityLocatorDefinition",
-            "text": "ServiceEntityLocatorDefinition"
-          },
-          " implements ",
-          {
-            "pluginId": "share",
-            "scope": "common",
-            "docId": "kibSharePluginApi",
-            "section": "def-common.LocatorDefinition",
-            "text": "LocatorDefinition"
-          },
-          "<",
-          {
-            "pluginId": "observabilityShared",
-            "scope": "common",
-            "docId": "kibObservabilitySharedPluginApi",
-            "section": "def-common.ServiceEntityLocatorParams",
-            "text": "ServiceEntityLocatorParams"
-          },
-          ">"
-        ],
-        "path": "x-pack/solutions/observability/plugins/observability_shared/common/locators/apm/service_entity_locator.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "observabilityShared",
-            "id": "def-common.ServiceEntityLocatorDefinition.id",
-            "type": "string",
-            "tags": [],
-            "label": "id",
-            "description": [],
-            "signature": [
-              "\"SERVICE_ENTITY_LOCATOR\""
-            ],
-            "path": "x-pack/solutions/observability/plugins/observability_shared/common/locators/apm/service_entity_locator.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observabilityShared",
-            "id": "def-common.ServiceEntityLocatorDefinition.getLocation",
-            "type": "Function",
-            "tags": [],
-            "label": "getLocation",
-            "description": [],
-            "signature": [
-              "({ serviceName }: ",
-              {
-                "pluginId": "observabilityShared",
-                "scope": "common",
-                "docId": "kibObservabilitySharedPluginApi",
-                "section": "def-common.ServiceEntityLocatorParams",
-                "text": "ServiceEntityLocatorParams"
-              },
-              ") => Promise<{ app: string; path: string; state: {}; }>"
-            ],
-            "path": "x-pack/solutions/observability/plugins/observability_shared/common/locators/apm/service_entity_locator.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "observabilityShared",
-                "id": "def-common.ServiceEntityLocatorDefinition.getLocation.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "{ serviceName }",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "observabilityShared",
-                    "scope": "common",
-                    "docId": "kibObservabilitySharedPluginApi",
-                    "section": "def-common.ServiceEntityLocatorParams",
-                    "text": "ServiceEntityLocatorParams"
-                  }
-                ],
-                "path": "x-pack/solutions/observability/plugins/observability_shared/common/locators/apm/service_entity_locator.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observabilityShared",
         "id": "def-common.ServiceOverviewLocatorDefinition",
         "type": "Class",
         "tags": [],
@@ -5246,9 +5189,9 @@
           },
           "<",
           {
-            "pluginId": "observabilityShared",
+            "pluginId": "@kbn/deeplinks-observability",
             "scope": "common",
-            "docId": "kibObservabilitySharedPluginApi",
+            "docId": "kibKbnDeeplinksObservabilityPluginApi",
             "section": "def-common.TransactionDetailsByNameParams",
             "text": "TransactionDetailsByNameParams"
           },
@@ -5282,9 +5225,9 @@
             "signature": [
               "({ rangeFrom, rangeTo, serviceName, transactionName, }: ",
               {
-                "pluginId": "observabilityShared",
+                "pluginId": "@kbn/deeplinks-observability",
                 "scope": "common",
-                "docId": "kibObservabilitySharedPluginApi",
+                "docId": "kibKbnDeeplinksObservabilityPluginApi",
                 "section": "def-common.TransactionDetailsByNameParams",
                 "text": "TransactionDetailsByNameParams"
               },
@@ -5303,9 +5246,9 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "observabilityShared",
+                    "pluginId": "@kbn/deeplinks-observability",
                     "scope": "common",
-                    "docId": "kibObservabilitySharedPluginApi",
+                    "docId": "kibKbnDeeplinksObservabilityPluginApi",
                     "section": "def-common.TransactionDetailsByNameParams",
                     "text": "TransactionDetailsByNameParams"
                   }
@@ -5380,7 +5323,7 @@
             "label": "getLocation",
             "description": [],
             "signature": [
-              "({ rangeFrom, rangeTo, traceId, }: ",
+              "({ rangeFrom, rangeTo, waterfallItemId, traceId, }: ",
               {
                 "pluginId": "@kbn/deeplinks-observability",
                 "scope": "common",
@@ -5399,7 +5342,7 @@
                 "id": "def-common.TransactionDetailsByTraceIdLocatorDefinition.getLocation.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n    rangeFrom,\n    rangeTo,\n    traceId,\n  }",
+                "label": "{\n    rangeFrom,\n    rangeTo,\n    waterfallItemId,\n    traceId,\n  }",
                 "description": [],
                 "signature": [
                   {
@@ -6241,48 +6184,6 @@
       },
       {
         "parentPluginId": "observabilityShared",
-        "id": "def-common.ServiceEntityLocatorParams",
-        "type": "Interface",
-        "tags": [],
-        "label": "ServiceEntityLocatorParams",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "observabilityShared",
-            "scope": "common",
-            "docId": "kibObservabilitySharedPluginApi",
-            "section": "def-common.ServiceEntityLocatorParams",
-            "text": "ServiceEntityLocatorParams"
-          },
-          " extends ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "common",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-common.SerializableRecord",
-            "text": "SerializableRecord"
-          }
-        ],
-        "path": "x-pack/solutions/observability/plugins/observability_shared/common/locators/apm/service_entity_locator.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "observabilityShared",
-            "id": "def-common.ServiceEntityLocatorParams.serviceName",
-            "type": "string",
-            "tags": [],
-            "label": "serviceName",
-            "description": [],
-            "path": "x-pack/solutions/observability/plugins/observability_shared/common/locators/apm/service_entity_locator.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observabilityShared",
         "id": "def-common.ServiceOverviewParams",
         "type": "Interface",
         "tags": [],
@@ -6534,87 +6435,6 @@
       },
       {
         "parentPluginId": "observabilityShared",
-        "id": "def-common.TransactionDetailsByNameParams",
-        "type": "Interface",
-        "tags": [],
-        "label": "TransactionDetailsByNameParams",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "observabilityShared",
-            "scope": "common",
-            "docId": "kibObservabilitySharedPluginApi",
-            "section": "def-common.TransactionDetailsByNameParams",
-            "text": "TransactionDetailsByNameParams"
-          },
-          " extends ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "common",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-common.SerializableRecord",
-            "text": "SerializableRecord"
-          }
-        ],
-        "path": "x-pack/solutions/observability/plugins/observability_shared/common/locators/apm/transaction_details_by_name_locator.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "observabilityShared",
-            "id": "def-common.TransactionDetailsByNameParams.serviceName",
-            "type": "string",
-            "tags": [],
-            "label": "serviceName",
-            "description": [],
-            "path": "x-pack/solutions/observability/plugins/observability_shared/common/locators/apm/transaction_details_by_name_locator.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observabilityShared",
-            "id": "def-common.TransactionDetailsByNameParams.transactionName",
-            "type": "string",
-            "tags": [],
-            "label": "transactionName",
-            "description": [],
-            "path": "x-pack/solutions/observability/plugins/observability_shared/common/locators/apm/transaction_details_by_name_locator.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observabilityShared",
-            "id": "def-common.TransactionDetailsByNameParams.rangeFrom",
-            "type": "string",
-            "tags": [],
-            "label": "rangeFrom",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/solutions/observability/plugins/observability_shared/common/locators/apm/transaction_details_by_name_locator.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observabilityShared",
-            "id": "def-common.TransactionDetailsByNameParams.rangeTo",
-            "type": "string",
-            "tags": [],
-            "label": "rangeTo",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/solutions/observability/plugins/observability_shared/common/locators/apm/transaction_details_by_name_locator.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observabilityShared",
         "id": "def-common.TransactionDetailsByTraceIdLocatorParams",
         "type": "Interface",
         "tags": [],
@@ -6661,6 +6481,20 @@
             "type": "string",
             "tags": [],
             "label": "rangeTo",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/deeplinks/observability/locators/apm.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-common.TransactionDetailsByTraceIdLocatorParams.waterfallItemId",
+            "type": "string",
+            "tags": [],
+            "label": "waterfallItemId",
             "description": [],
             "signature": [
               "string | undefined"
@@ -6878,7 +6712,7 @@
         "label": "casesFeatureId",
         "description": [],
         "signature": [
-          "\"observabilityCasesV2\""
+          "\"observabilityCasesV3\""
         ],
         "path": "x-pack/solutions/observability/plugins/observability_shared/common/index.ts",
         "deprecated": false,
@@ -7106,51 +6940,6 @@
           "\"destination.address\""
         ],
         "path": "x-pack/solutions/observability/plugins/observability_shared/common/field_names/elasticsearch.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observabilityShared",
-        "id": "def-common.ENTITIES_INVENTORY_LOCATOR_ID",
-        "type": "string",
-        "tags": [],
-        "label": "ENTITIES_INVENTORY_LOCATOR_ID",
-        "description": [],
-        "signature": [
-          "\"ENTITY_INVENTORY_LOCATOR\""
-        ],
-        "path": "x-pack/solutions/observability/plugins/observability_shared/common/locators/entity_inventory/entity_inventory_locator.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observabilityShared",
-        "id": "def-common.EntitiesInventoryLocator",
-        "type": "Type",
-        "tags": [],
-        "label": "EntitiesInventoryLocator",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "share",
-            "scope": "common",
-            "docId": "kibSharePluginApi",
-            "section": "def-common.LocatorPublic",
-            "text": "LocatorPublic"
-          },
-          "<",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "common",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-common.SerializableRecord",
-            "text": "SerializableRecord"
-          },
-          ">"
-        ],
-        "path": "x-pack/solutions/observability/plugins/observability_shared/common/locators/entity_inventory/entity_inventory_locator.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -8327,6 +8116,21 @@
       },
       {
         "parentPluginId": "observabilityShared",
+        "id": "def-common.RELATED_ALERTS_TABLE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "RELATED_ALERTS_TABLE_ID",
+        "description": [],
+        "signature": [
+          "\"xpack.observability.alerts.relatedAlerts\""
+        ],
+        "path": "x-pack/solutions/observability/plugins/observability_shared/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
         "id": "def-common.SERVICE",
         "type": "string",
         "tags": [],
@@ -8336,21 +8140,6 @@
           "\"service\""
         ],
         "path": "x-pack/solutions/observability/plugins/observability_shared/common/field_names/elasticsearch.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observabilityShared",
-        "id": "def-common.SERVICE_ENTITY_LOCATOR",
-        "type": "string",
-        "tags": [],
-        "label": "SERVICE_ENTITY_LOCATOR",
-        "description": [],
-        "signature": [
-          "\"SERVICE_ENTITY_LOCATOR\""
-        ],
-        "path": "x-pack/solutions/observability/plugins/observability_shared/common/locators/apm/service_entity_locator.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -8516,36 +8305,6 @@
           "\"service.version\""
         ],
         "path": "x-pack/solutions/observability/plugins/observability_shared/common/field_names/elasticsearch.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observabilityShared",
-        "id": "def-common.ServiceEntityLocator",
-        "type": "Type",
-        "tags": [],
-        "label": "ServiceEntityLocator",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "share",
-            "scope": "common",
-            "docId": "kibSharePluginApi",
-            "section": "def-common.LocatorPublic",
-            "text": "LocatorPublic"
-          },
-          "<",
-          {
-            "pluginId": "observabilityShared",
-            "scope": "common",
-            "docId": "kibObservabilitySharedPluginApi",
-            "section": "def-common.ServiceEntityLocatorParams",
-            "text": "ServiceEntityLocatorParams"
-          },
-          ">"
-        ],
-        "path": "x-pack/solutions/observability/plugins/observability_shared/common/locators/apm/service_entity_locator.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -9209,9 +8968,9 @@
           },
           "<",
           {
-            "pluginId": "observabilityShared",
+            "pluginId": "@kbn/deeplinks-observability",
             "scope": "common",
-            "docId": "kibObservabilitySharedPluginApi",
+            "docId": "kibKbnDeeplinksObservabilityPluginApi",
             "section": "def-common.TransactionDetailsByNameParams",
             "text": "TransactionDetailsByNameParams"
           },

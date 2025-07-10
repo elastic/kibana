@@ -9,7 +9,7 @@ import { Key } from 'selenium-webdriver';
 import expect from 'expect';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
-export default ({ getService }: FtrProviderContext) => {
+export default ({ getService, getPageObjects }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
@@ -17,9 +17,10 @@ export default ({ getService }: FtrProviderContext) => {
   const find = getService('find');
   const logger = getService('log');
   const retry = getService('retry');
+  const toasts = getService('toasts');
+  const pageObjects = getPageObjects(['header']);
 
-  // FLAKY: https://github.com/elastic/kibana/issues/196766
-  describe.skip('Custom threshold rule', function () {
+  describe('Custom threshold rule', function () {
     this.tags('includeFirefox');
 
     const observability = getService('observability');
@@ -48,6 +49,7 @@ export default ({ getService }: FtrProviderContext) => {
         logger,
       });
       await observability.alerts.common.navigateToRulesPage();
+      await pageObjects.header.waitUntilLoadingHasFinished();
     });
 
     after(async () => {
@@ -58,13 +60,16 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('shows the custom threshold rule in the observability section', async () => {
       await observability.alerts.rulesPage.clickCreateRuleButton();
+      await pageObjects.header.waitUntilLoadingHasFinished();
       await observability.alerts.rulesPage.clickOnObservabilityCategory();
       await observability.alerts.rulesPage.clickOnCustomThresholdRule();
     });
 
     it('can add name and tags', async () => {
-      await testSubjects.setValue('ruleNameInput', 'test custom threshold rule');
-      await testSubjects.setValue('comboBoxSearchInput', 'tag1');
+      await testSubjects.setValue('ruleDetailsNameInput', 'test custom threshold rule', {
+        clearWithKeyboard: true,
+      });
+      await testSubjects.setValue('ruleDetailsTagsInput', 'tag1');
     });
 
     it('can add data view', async () => {
@@ -204,9 +209,11 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('can save the rule', async () => {
-      await testSubjects.click('saveRuleButton');
+      await testSubjects.click('rulePageFooterSaveButton');
       await testSubjects.click('confirmModalConfirmButton');
-      await find.byCssSelector('button[title="test custom threshold rule"]');
+
+      const title = await toasts.getTitleAndDismiss();
+      expect(title).toEqual(`Created rule "test custom threshold rule"`);
     });
 
     it('saved the rule correctly', async () => {
@@ -220,6 +227,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect.objectContaining({
           name: 'test custom threshold rule',
           tags: ['tag1'],
+          consumer: 'logs',
           params: expect.objectContaining({
             alertOnGroupDisappear: false,
             alertOnNoData: false,

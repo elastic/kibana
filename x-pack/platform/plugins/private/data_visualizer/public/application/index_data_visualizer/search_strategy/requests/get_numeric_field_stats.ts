@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { find, get } from 'lodash';
 import { catchError, map } from 'rxjs';
 import type { Observable } from 'rxjs';
 import { of } from 'rxjs';
-import type { AggregationsTermsAggregation } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { AggregationsTermsAggregation } from '@elastic/elasticsearch/lib/api/types';
 import type {
   IKibanaSearchResponse,
   IKibanaSearchRequest,
@@ -122,7 +122,7 @@ export const getNumericFieldsStatsRequest = (
   return {
     index,
     size,
-    body: searchBody,
+    ...searchBody,
   };
 };
 

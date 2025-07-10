@@ -4,24 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import {
-  sampleDocSearchResultsNoSortId,
-  sampleDocSearchResultsWithSortId,
-} from '../__mocks__/es_results';
+import type { estypes } from '@elastic/elasticsearch';
+import { sampleDocSearchResultsNoSortId } from '../__mocks__/es_results';
 import { singleSearchAfter } from './single_search_after';
 import type { RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { ruleExecutionLogMock } from '../../rule_monitoring/mocks';
-import { buildEventsSearchQuery } from './build_events_query';
-
-jest.mock('./build_events_query');
-const mockBuildEventsSearchQuery = buildEventsSearchQuery as jest.Mock;
 
 describe('singleSearchAfter', () => {
   const mockService: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
   const ruleExecutionLogger = ruleExecutionLogMock.forExecutors.create();
+  const mockSearchRequest = { query: { match_all: {} } };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -29,39 +23,23 @@ describe('singleSearchAfter', () => {
 
   test('if singleSearchAfter works without a given sort id', async () => {
     mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
-      elasticsearchClientMock.createSuccessTransportRequestPromise(sampleDocSearchResultsNoSortId())
+      sampleDocSearchResultsNoSortId()
     );
     const { searchResult } = await singleSearchAfter({
-      searchAfterSortIds: undefined,
-      index: [],
-      from: 'now-360s',
-      to: 'now',
+      searchRequest: mockSearchRequest,
       services: mockService,
       ruleExecutionLogger,
-      pageSize: 1,
-      filter: {},
-      primaryTimestamp: '@timestamp',
-      secondaryTimestamp: undefined,
-      runtimeMappings: undefined,
     });
     expect(searchResult).toEqual(sampleDocSearchResultsNoSortId());
   });
   test('if singleSearchAfter returns an empty failure array', async () => {
     mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
-      elasticsearchClientMock.createSuccessTransportRequestPromise(sampleDocSearchResultsNoSortId())
+      sampleDocSearchResultsNoSortId()
     );
     const { searchErrors } = await singleSearchAfter({
-      searchAfterSortIds: undefined,
-      index: [],
-      from: 'now-360s',
-      to: 'now',
+      searchRequest: mockSearchRequest,
       services: mockService,
       ruleExecutionLogger,
-      pageSize: 1,
-      filter: {},
-      primaryTimestamp: '@timestamp',
-      secondaryTimestamp: undefined,
-      runtimeMappings: undefined,
     });
     expect(searchErrors).toEqual([]);
   });
@@ -83,125 +61,41 @@ describe('singleSearchAfter', () => {
         },
       },
     ];
-    mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
-        took: 10,
-        timed_out: false,
-        _shards: {
-          total: 10,
-          successful: 10,
-          failed: 1,
-          skipped: 0,
-          failures: errors,
-        },
-        hits: {
-          total: 100,
-          max_score: 100,
-          hits: [],
-        },
-      })
-    );
+    mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce({
+      took: 10,
+      timed_out: false,
+      _shards: {
+        total: 10,
+        successful: 10,
+        failed: 1,
+        skipped: 0,
+        failures: errors,
+      },
+      hits: {
+        total: 100,
+        max_score: 100,
+        hits: [],
+      },
+    });
     const { searchErrors } = await singleSearchAfter({
-      searchAfterSortIds: undefined,
-      index: [],
-      from: 'now-360s',
-      to: 'now',
+      searchRequest: mockSearchRequest,
       services: mockService,
       ruleExecutionLogger,
-      pageSize: 1,
-      filter: {},
-      primaryTimestamp: '@timestamp',
-      secondaryTimestamp: undefined,
-      runtimeMappings: undefined,
     });
     expect(searchErrors).toEqual([
       'index: "index-123" reason: "some reason" type: "some type" caused by reason: "some reason" caused by type: "some type"',
     ]);
   });
-  test('if singleSearchAfter works with a given sort id', async () => {
-    const searchAfterSortIds = ['1234567891111'];
-    mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
-      elasticsearchClientMock.createSuccessTransportRequestPromise(
-        sampleDocSearchResultsWithSortId()
-      )
-    );
-    const { searchResult } = await singleSearchAfter({
-      searchAfterSortIds,
-      index: [],
-      from: 'now-360s',
-      to: 'now',
-      services: mockService,
-      ruleExecutionLogger,
-      pageSize: 1,
-      filter: {},
-      primaryTimestamp: '@timestamp',
-      secondaryTimestamp: undefined,
-      runtimeMappings: undefined,
-    });
-    expect(searchResult).toEqual(sampleDocSearchResultsWithSortId());
-  });
   test('if singleSearchAfter throws error', async () => {
-    const searchAfterSortIds = ['1234567891111'];
     mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
       elasticsearchClientMock.createErrorTransportRequestPromise(new Error('Fake Error'))
     );
     await expect(
       singleSearchAfter({
-        searchAfterSortIds,
-        index: [],
-        from: 'now-360s',
-        to: 'now',
+        searchRequest: mockSearchRequest,
         services: mockService,
         ruleExecutionLogger,
-        pageSize: 1,
-        filter: {},
-        primaryTimestamp: '@timestamp',
-        secondaryTimestamp: undefined,
-        runtimeMappings: undefined,
       })
     ).rejects.toThrow('Fake Error');
-  });
-
-  test('singleSearchAfter passes overrideBody to buildEventsSearchQuery', async () => {
-    mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
-      elasticsearchClientMock.createSuccessTransportRequestPromise(sampleDocSearchResultsNoSortId())
-    );
-    await singleSearchAfter({
-      searchAfterSortIds: undefined,
-      index: [],
-      from: 'now-360s',
-      to: 'now',
-      services: mockService,
-      ruleExecutionLogger,
-      pageSize: 1,
-      filter: {},
-      primaryTimestamp: '@timestamp',
-      secondaryTimestamp: undefined,
-      runtimeMappings: undefined,
-      overrideBody: {
-        _source: false,
-        fields: ['@timestamp'],
-      },
-    });
-
-    expect(mockBuildEventsSearchQuery).toHaveBeenCalledWith({
-      additionalFilters: undefined,
-      aggregations: undefined,
-      filter: {},
-      from: 'now-360s',
-      index: [],
-      primaryTimestamp: '@timestamp',
-      runtimeMappings: undefined,
-      searchAfterSortIds: undefined,
-      secondaryTimestamp: undefined,
-      size: 1,
-      sortOrder: undefined,
-      to: 'now',
-      trackTotalHits: undefined,
-      overrideBody: {
-        _source: false,
-        fields: ['@timestamp'],
-      },
-    });
   });
 });

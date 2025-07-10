@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { ComponentMeta } from '@storybook/react';
+import { Meta } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 
 import type { SampleDataSet } from '@kbn/home-sample-data-types';
@@ -27,24 +27,26 @@ export default {
     },
   },
   decorators: [(Story) => <div style={{ width: '433px', padding: '25px' }}>{Story()}</div>],
-} as ComponentMeta<typeof Component>;
+} as Meta<typeof Component>;
 
 const { description, ...argTypes } = getStoryArgTypes();
 
-export const CardFooter = (params: Params) => {
-  const { includeAppLinks, status, ...rest } = params;
-  const sampleDataSet: SampleDataSet = {
-    ...mockDataSet,
-    ...rest,
-    status,
-    appLinks: includeAppLinks ? mockDataSet.appLinks : [],
-  };
+export const CardFooter = {
+  render: (params: Params) => {
+    const { includeAppLinks, status, ...rest } = params;
+    const sampleDataSet: SampleDataSet = {
+      ...mockDataSet,
+      ...rest,
+      status,
+      appLinks: includeAppLinks ? mockDataSet.appLinks : [],
+    };
 
-  return (
-    <SampleDataCardProvider {...getStoryServices(params)}>
-      <Component sampleDataSet={sampleDataSet} onAction={action('onAction')} />
-    </SampleDataCardProvider>
-  );
+    return (
+      <SampleDataCardProvider {...getStoryServices(params)}>
+        <Component sampleDataSet={sampleDataSet} onAction={action('onAction')} />
+      </SampleDataCardProvider>
+    );
+  },
+
+  argTypes,
 };
-
-CardFooter.argTypes = argTypes;

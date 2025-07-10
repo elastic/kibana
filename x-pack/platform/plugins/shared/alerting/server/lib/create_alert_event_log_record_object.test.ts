@@ -6,7 +6,7 @@
  */
 
 import { createAlertEventLogRecordObject } from './create_alert_event_log_record_object';
-import { UntypedNormalizedRuleType } from '../rule_type_registry';
+import type { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { RecoveredActionGroup } from '../types';
 import { schema } from '@kbn/config-schema';
 
@@ -24,6 +24,7 @@ describe('createAlertEventLogRecordObject', () => {
     executor: jest.fn(),
     category: 'test',
     producer: 'alerts',
+    solution: 'stack',
     validate: {
       params: schema.any(),
     },

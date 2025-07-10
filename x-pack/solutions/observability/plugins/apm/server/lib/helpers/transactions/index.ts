@@ -7,7 +7,7 @@
 
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { SearchAggregatedTransactionSetting } from '../../../../common/aggregated_transactions';
 import {
   TRANSACTION_DURATION,
@@ -37,18 +37,16 @@ export async function getHasTransactionsEvents({
     apm: {
       events: [ProcessorEvent.metric],
     },
-    body: {
-      track_total_hits: 1,
-      terminate_after: 1,
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            { exists: { field: TRANSACTION_DURATION_HISTOGRAM } },
-            ...(start && end ? rangeQuery(start, end) : []),
-            ...kqlQuery(kuery),
-          ],
-        },
+    track_total_hits: 1,
+    terminate_after: 1,
+    size: 0,
+    query: {
+      bool: {
+        filter: [
+          { exists: { field: TRANSACTION_DURATION_HISTOGRAM } },
+          ...(start && end ? rangeQuery(start, end) : []),
+          ...kqlQuery(kuery),
+        ],
       },
     },
   });

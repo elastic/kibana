@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-import { CapacityEstimationParams, estimateCapacity } from './capacity_estimation';
-import { HealthStatus, RawMonitoringStats } from './monitoring_stats_stream';
+import type { CapacityEstimationParams } from './capacity_estimation';
+import { estimateCapacity } from './capacity_estimation';
+import type { RawMonitoringStats } from './monitoring_stats_stream';
+import { HealthStatus } from './monitoring_stats_stream';
 import { mockLogger } from '../test_utils';
+import type { AveragedStat } from './task_run_calculators';
 
 describe('estimateCapacity', () => {
   const logger = mockLogger();
@@ -832,6 +835,24 @@ describe('estimateCapacity', () => {
       minutes_to_drain_overdue: 0,
       max_throughput_per_minute: 200,
     });
+  });
+  test('throws an error when the runtime load is undefined', async () => {
+    expect(
+      () =>
+        estimateCapacity(
+          logger,
+          mockStats(
+            {},
+            {},
+            {
+              load: {} as AveragedStat,
+            }
+          ),
+          2
+        ).value.observed
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"Task manager had an issue calculating capacity estimation. averageLoadPercentage: undefined"`
+    );
   });
 });
 

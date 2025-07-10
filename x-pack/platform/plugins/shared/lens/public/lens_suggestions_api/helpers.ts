@@ -50,7 +50,7 @@ export function mergeSuggestionWithVisContext({
       (layer) =>
         layer.columns?.some(
           (c: { fieldName: string }) =>
-            !context?.textBasedColumns?.find((col) => col.name === c.fieldName)
+            !context?.textBasedColumns?.find((col) => col.id === c.fieldName)
         ) || layer.columns?.length !== context?.textBasedColumns?.length
     )
   ) {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mount } from 'enzyme';
+import { screen, render } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { merge } from 'lodash';
@@ -98,11 +98,20 @@ useAllTiDataSourcesMock.mockReturnValue(mockTiDataSources);
 
 jest.mock('../../entity_analytics/api/hooks/use_risk_score');
 const useRiskScoreMock = useRiskScore as jest.Mock;
-useRiskScoreMock.mockReturnValue({ loading: false, data: [], isModuleEnabled: false });
+useRiskScoreMock.mockReturnValue({ loading: false, data: [], hasEngineBeenInstalled: false });
 
 jest.mock('../../common/hooks/use_experimental_features');
 const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
-useIsExperimentalFeatureEnabledMock.mockReturnValue(true);
+useIsExperimentalFeatureEnabledMock.mockReturnValue(false);
+
+jest.mock('../../sourcerer/containers', () => ({
+  useSourcererDataView: jest.fn().mockReturnValue({
+    selectedPatterns: ['auditbeat-mytest-*'],
+    dataViewId: 'security-solution-my-test',
+    indicesExist: true,
+    sourcererDataView: {},
+  }),
+}));
 
 const endpointNoticeMessage = (hasMessageValue: boolean) => {
   return {
@@ -158,7 +167,7 @@ describe('Overview', () => {
 
       mockUseMessagesStorage.mockImplementation(() => endpointNoticeMessage(false));
 
-      const wrapper = mount(
+      render(
         <TestProviders>
           <MemoryRouter>
             <Overview />
@@ -167,7 +176,6 @@ describe('Overview', () => {
       );
 
       expect(mockNavigateToApp).not.toHaveBeenCalled();
-      wrapper.unmount();
     });
 
     test('it DOES render the Endpoint banner when the endpoint index is NOT available AND storage is NOT set', () => {
@@ -185,7 +193,7 @@ describe('Overview', () => {
 
       mockUseMessagesStorage.mockImplementation(() => endpointNoticeMessage(false));
 
-      const wrapper = mount(
+      render(
         <TestProviders>
           <MemoryRouter>
             <Overview />
@@ -193,8 +201,7 @@ describe('Overview', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find('[data-test-subj="endpoint-prompt-banner"]').exists()).toBe(true);
-      wrapper.unmount();
+      expect(screen.getByTestId('endpoint-prompt-banner')).toBeInTheDocument();
     });
 
     test('it does NOT render the Endpoint banner when the endpoint index is NOT available but storage is set', () => {
@@ -212,7 +219,7 @@ describe('Overview', () => {
 
       mockUseMessagesStorage.mockImplementation(() => endpointNoticeMessage(true));
 
-      const wrapper = mount(
+      render(
         <TestProviders>
           <MemoryRouter>
             <Overview />
@@ -220,8 +227,7 @@ describe('Overview', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find('[data-test-subj="endpoint-prompt-banner"]').exists()).toBe(false);
-      wrapper.unmount();
+      expect(screen.queryByTestId('endpoint-prompt-banner')).not.toBeInTheDocument();
     });
 
     test('it does NOT render the Endpoint banner when the endpoint index is available AND storage is set', () => {
@@ -233,7 +239,7 @@ describe('Overview', () => {
 
       mockUseMessagesStorage.mockImplementation(() => endpointNoticeMessage(true));
 
-      const wrapper = mount(
+      render(
         <TestProviders>
           <MemoryRouter>
             <Overview />
@@ -241,8 +247,7 @@ describe('Overview', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find('[data-test-subj="endpoint-prompt-banner"]').exists()).toBe(false);
-      wrapper.unmount();
+      expect(screen.queryByTestId('endpoint-prompt-banner')).not.toBeInTheDocument();
     });
 
     test('it does NOT render the Endpoint banner when an index IS available but storage is NOT set', () => {
@@ -254,16 +259,14 @@ describe('Overview', () => {
 
       mockUseMessagesStorage.mockImplementation(() => endpointNoticeMessage(false));
 
-      const wrapper = mount(
+      render(
         <TestProviders>
           <MemoryRouter>
             <Overview />
           </MemoryRouter>
         </TestProviders>
       );
-      wrapper.update();
-      expect(wrapper.find('[data-test-subj="endpoint-prompt-banner"]').exists()).toBe(false);
-      wrapper.unmount();
+      expect(screen.queryByTestId('endpoint-prompt-banner')).not.toBeInTheDocument();
     });
 
     test('it does NOT render the Endpoint banner when Ingest is NOT available', () => {
@@ -276,7 +279,7 @@ describe('Overview', () => {
       mockUseMessagesStorage.mockImplementation(() => endpointNoticeMessage(true));
       mockUseUserPrivileges.mockReturnValue(loadedUserPrivilegesState({ canAccessFleet: false }));
 
-      const wrapper = mount(
+      render(
         <TestProviders>
           <MemoryRouter>
             <Overview />
@@ -284,8 +287,7 @@ describe('Overview', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find('[data-test-subj="endpoint-prompt-banner"]').exists()).toBe(false);
-      wrapper.unmount();
+      expect(screen.queryByTestId('endpoint-prompt-banner')).not.toBeInTheDocument();
     });
 
     describe('when no index is available', () => {
@@ -299,7 +301,7 @@ describe('Overview', () => {
       });
 
       it('renders getting started page', () => {
-        const wrapper = mount(
+        render(
           <TestProviders>
             <MemoryRouter>
               <Overview />
@@ -307,15 +309,16 @@ describe('Overview', () => {
           </TestProviders>
         );
 
-        expect(wrapper.find(`[data-test-subj="empty-prompt"]`).exists()).toBe(true);
+        expect(screen.getByTestId('empty-prompt')).toBeInTheDocument();
       });
     });
   });
 
   describe('Threat Intel Dashboard Links', () => {
     it('invokes useAllTiDataSourcesMock hook only once', () => {
+      mockUseMessagesStorage.mockImplementation(() => endpointNoticeMessage(false));
       useAllTiDataSourcesMock.mockClear();
-      mount(
+      render(
         <TestProviders>
           <MemoryRouter>
             <Overview />

@@ -6,9 +6,9 @@
  */
 
 import { getOr } from 'lodash/fp';
-import React, { useCallback, useState, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { ConnectedProps } from 'react-redux';
-import { useDispatch, connect } from 'react-redux';
+import { connect, useDispatch } from 'react-redux';
 import type { Dispatch } from 'redux';
 import deepEqual from 'fast-deep-equal';
 import type { Filter } from '@kbn/es-query';
@@ -17,12 +17,13 @@ import type { FilterManager } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { FilterItems } from '@kbn/unified-search-plugin/public';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { useKibana } from '../../../../common/lib/kibana';
 import { SourcererScopeName } from '../../../../sourcerer/store/model';
-import { useSourcererDataView } from '../../../../sourcerer/containers';
-import type { State, inputsModel } from '../../../../common/store';
+import type { inputsModel, State } from '../../../../common/store';
 import { inputsSelectors } from '../../../../common/store';
 import { timelineActions, timelineSelectors } from '../../../store';
 import type { KqlMode, TimelineModel } from '../../../store/model';
@@ -32,6 +33,7 @@ import { SearchOrFilter } from './search_or_filter';
 import { setDataProviderVisibility } from '../../../store/actions';
 import { getNonDropAreaFilters } from '../helpers';
 import * as i18n from './translations';
+import { useSourcererDataView } from '../../../../sourcerer/containers';
 
 interface OwnProps {
   filterManager: FilterManager;
@@ -73,7 +75,10 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
       services: { data },
     } = useKibana();
 
-    const { sourcererDataView } = useSourcererDataView(SourcererScopeName.timeline);
+    const { sourcererDataView: dataViewSpec } = useSourcererDataView(SourcererScopeName.timeline);
+
+    const { dataView: experimentalDataView } = useDataView(SourcererScopeName.timeline);
+    const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
     const getIsDataProviderVisible = useMemo(
       () => timelineSelectors.dataProviderVisibilitySelector(),
@@ -85,10 +90,16 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
     );
 
     useEffect(() => {
+      // TODO: (new data view picker) - this should not be necessary since the data view creation is managed in a centralized location
+      // with the new picker - eg. top level of the app, in data view picker state listener.
+      if (newDataViewPickerEnabled) {
+        return;
+      }
+
       let dv: DataView;
       const createDataView = async () => {
         try {
-          dv = await data.dataViews.create(sourcererDataView);
+          dv = await data.dataViews.create(dataViewSpec);
           setDataView(dv);
         } catch (error) {
           addError(error, { title: i18n.ERROR_PROCESSING_INDEX_PATTERNS });
@@ -101,9 +112,16 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
           data.dataViews.clearInstanceCache(dv?.id);
         }
       };
-    }, [data.dataViews, filterQuery, addError, sourcererDataView]);
+    }, [data.dataViews, filterQuery, addError, dataViewSpec, newDataViewPickerEnabled]);
 
-    const arrDataView = useMemo(() => (dataView != null ? [dataView] : []), [dataView]);
+    // NOTE: re-using data view that is already created and available through data view manager
+    const arrDataView = useMemo(() => {
+      if (newDataViewPickerEnabled) {
+        return experimentalDataView ? [experimentalDataView] : [];
+      }
+
+      return dataView != null ? [dataView] : [];
+    }, [dataView, experimentalDataView, newDataViewPickerEnabled]);
 
     // Keep filter manager in sync with redux filters
     useEffect(() => {

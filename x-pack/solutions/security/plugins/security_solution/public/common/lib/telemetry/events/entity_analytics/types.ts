@@ -6,7 +6,7 @@
  */
 
 import type { RootSchema } from '@kbn/core/public';
-import type { RiskSeverity } from '../../../../../../common/search_strategy';
+import type { EntityType, RiskSeverity } from '../../../../../../common/search_strategy';
 
 export enum EntityEventTypes {
   EntityDetailsClicked = 'Entity Details Clicked',
@@ -20,6 +20,9 @@ export enum EntityEventTypes {
   AssetCriticalityCsvPreviewGenerated = 'Asset Criticality Csv Preview Generated',
   AssetCriticalityFileSelected = 'Asset Criticality File Selected',
   AssetCriticalityCsvImported = 'Asset Criticality CSV Imported',
+  PrivilegedUserMonitoringCsvPreviewGenerated = 'Privileged User Monitoring Csv Preview Generated',
+  PrivilegedUserMonitoringFileSelected = 'Privileged User Monitoring File Selected',
+  PrivilegedUserMonitoringCsvImported = 'Privileged User Monitoring CSV Imported',
   AnomaliesCountClicked = 'Anomalies Count Clicked',
   MLJobUpdate = 'ML Job Update',
 }
@@ -33,7 +36,7 @@ export enum ML_JOB_TELEMETRY_STATUS {
   installationError = 'installationError',
 }
 interface EntityParam {
-  entity: 'host' | 'user';
+  entity: EntityType;
 }
 
 type ReportEntityDetailsClickedParams = EntityParam;
@@ -116,6 +119,9 @@ export interface EntityAnalyticsTelemetryEventsMap {
   [EntityEventTypes.AssetCriticalityCsvPreviewGenerated]: ReportAssetCriticalityCsvPreviewGeneratedParams;
   [EntityEventTypes.AssetCriticalityFileSelected]: ReportAssetCriticalityFileSelectedParams;
   [EntityEventTypes.AssetCriticalityCsvImported]: ReportAssetCriticalityCsvImportedParams;
+  [EntityEventTypes.PrivilegedUserMonitoringCsvPreviewGenerated]: ReportAssetCriticalityCsvPreviewGeneratedParams;
+  [EntityEventTypes.PrivilegedUserMonitoringFileSelected]: ReportAssetCriticalityFileSelectedParams;
+  [EntityEventTypes.PrivilegedUserMonitoringCsvImported]: ReportAssetCriticalityCsvImportedParams;
   [EntityEventTypes.AnomaliesCountClicked]: ReportAnomaliesCountClickedParams;
   [EntityEventTypes.MLJobUpdate]: ReportMLJobUpdateParams;
 }

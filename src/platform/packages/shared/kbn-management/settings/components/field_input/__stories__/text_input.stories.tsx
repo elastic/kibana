@@ -9,5 +9,9 @@
 
 import { getInputStory, getStory } from './common';
 
-export default getStory('String Input', 'An input with a string value.');
+const Story = getStory('String Input', 'An input with a string value.');
 export const StringInput = getInputStory('string' as const);
+
+export default {
+  ...Story,
+};

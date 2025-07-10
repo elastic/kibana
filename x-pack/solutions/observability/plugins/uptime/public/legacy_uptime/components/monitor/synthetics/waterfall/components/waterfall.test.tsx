@@ -10,6 +10,8 @@ import { WaterfallChart } from './waterfall_chart';
 import { renderLegendItem } from '../../step_detail/waterfall/waterfall_chart_wrapper';
 import { render } from '../../../../../lib/helper/rtl_helpers';
 
+// Necessary until components being tested are migrated of styled-components https://github.com/elastic/kibana/issues/219037
+import 'jest-styled-components';
 import 'jest-canvas-mock';
 import { waitFor } from '@testing-library/react';
 

@@ -13,29 +13,33 @@ import { isJSON, Forms } from '../../../../../shared_imports';
 interface Parameters {
   onChange: (content: Forms.Content) => void;
   defaultValue?: object;
+  customValidate?: (json: string) => string | null;
 }
 
 const stringifyJson = (json: any) =>
   Object.keys(json).length ? JSON.stringify(json, null, 2) : '{\n\n}';
 
-export const useJsonStep = ({ defaultValue, onChange }: Parameters) => {
+export const useJsonStep = ({ defaultValue, onChange, customValidate }: Parameters) => {
   const [jsonContent, setJsonContent] = useState<string>(stringifyJson(defaultValue ?? {}));
   const [error, setError] = useState<string | null>(null);
 
   const validateContent = useCallback(() => {
     // We allow empty string as it will be converted to "{}""
-    const isValid = jsonContent.trim() === '' ? true : isJSON(jsonContent);
-    if (!isValid) {
+    const isValidJson = jsonContent.trim() === '' ? true : isJSON(jsonContent);
+    const customValidationError = customValidate ? customValidate(jsonContent) : null;
+    if (!isValidJson) {
       setError(
         i18n.translate('xpack.idxMgmt.validators.string.invalidJSONError', {
           defaultMessage: 'Invalid JSON format.',
         })
       );
+    } else if (customValidationError) {
+      setError(customValidationError);
     } else {
       setError(null);
     }
-    return isValid;
-  }, [jsonContent]);
+    return isValidJson && !customValidationError;
+  }, [customValidate, jsonContent]);
 
   useEffect(() => {
     const isValid = validateContent();

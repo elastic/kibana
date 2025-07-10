@@ -249,6 +249,9 @@ describe('mappingFromFieldMap', () => {
                 last_detected: {
                   type: 'date',
                 },
+                pending_recovered_count: {
+                  type: 'long',
+                },
                 previous_action_group: {
                   type: 'keyword',
                 },
@@ -320,6 +323,23 @@ describe('mappingFromFieldMap', () => {
                 time_range: {
                   type: 'date_range',
                   format: 'epoch_millis||strict_date_optional_time',
+                },
+                updated_at: {
+                  type: 'date',
+                },
+                updated_by: {
+                  properties: {
+                    user: {
+                      properties: {
+                        id: {
+                          type: 'keyword',
+                        },
+                        name: {
+                          type: 'keyword',
+                        },
+                      },
+                    },
+                  },
                 },
                 url: {
                   ignore_above: 2048,

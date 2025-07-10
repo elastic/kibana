@@ -511,11 +511,11 @@
               },
               "<",
               {
-                "pluginId": "dashboard",
-                "scope": "public",
-                "docId": "kibDashboardPluginApi",
-                "section": "def-public.DashboardLocatorParams",
-                "text": "DashboardLocatorParams"
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
               },
               ">"
             ],
@@ -564,13 +564,13 @@
                 "section": "def-public.DataPublicPluginStart",
                 "text": "DataPublicPluginStart"
               },
-              "; dashboard: ",
+              "; share: ",
               {
-                "pluginId": "dashboard",
+                "pluginId": "share",
                 "scope": "public",
-                "docId": "kibDashboardPluginApi",
-                "section": "def-public.DashboardStart",
-                "text": "DashboardStart"
+                "docId": "kibSharePluginApi",
+                "section": "def-public.SharePublicStart",
+                "text": "SharePublicStart"
               },
               "; }, unknown, ",
               "CoreStart",
@@ -639,46 +639,18 @@
           {
             "parentPluginId": "dashboardEnhanced",
             "id": "def-public.SetupDependencies.share",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "share",
             "description": [],
             "signature": [
-              "{ register: (shareMenuProvider: ",
               {
                 "pluginId": "share",
                 "scope": "public",
                 "docId": "kibSharePluginApi",
-                "section": "def-public.ShareMenuProvider",
-                "text": "ShareMenuProvider"
-              },
-              ") => void; } & { url: ",
-              {
-                "pluginId": "share",
-                "scope": "public",
-                "docId": "kibSharePluginApi",
-                "section": "def-public.BrowserUrlService",
-                "text": "BrowserUrlService"
-              },
-              "; navigate(options: ",
-              "RedirectOptions",
-              "<",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
-              },
-              ">): void; setAnonymousAccessServiceProvider: (provider: () => ",
-              {
-                "pluginId": "share",
-                "scope": "common",
-                "docId": "kibSharePluginApi",
-                "section": "def-common.AnonymousAccessServiceContract",
-                "text": "AnonymousAccessServiceContract"
-              },
-              ") => void; }"
+                "section": "def-public.SharePublicSetup",
+                "text": "SharePublicSetup"
+              }
             ],
             "path": "x-pack/platform/plugins/shared/dashboard_enhanced/public/plugin.ts",
             "deprecated": false,
@@ -792,27 +764,9 @@
                 "section": "def-common.SerializableRecord",
                 "text": "SerializableRecord"
               },
-              ">): void; }"
-            ],
-            "path": "x-pack/platform/plugins/shared/dashboard_enhanced/public/plugin.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "dashboardEnhanced",
-            "id": "def-public.StartDependencies.dashboard",
-            "type": "Object",
-            "tags": [],
-            "label": "dashboard",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "dashboard",
-                "scope": "public",
-                "docId": "kibDashboardPluginApi",
-                "section": "def-public.DashboardStart",
-                "text": "DashboardStart"
-              }
+              ">): void; availableIntegrations: (objectType: string, groupId?: string | undefined) => ",
+              "ShareActionIntents",
+              "[]; }"
             ],
             "path": "x-pack/platform/plugins/shared/dashboard_enhanced/public/plugin.ts",
             "deprecated": false,

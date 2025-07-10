@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { mount } from 'enzyme';
+import { screen, render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { Router } from '@kbn/shared-ux-router';
-import { waitFor } from '@testing-library/react';
 import type { Filter } from '@kbn/es-query';
 import { useSourcererDataView } from '../../../sourcerer/containers';
 import { TestProviders, createMockStore } from '../../../common/mock';
@@ -19,6 +18,7 @@ import { NetworkRoutes } from './navigation';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 
 import { InputsModelId } from '../../../common/store/inputs/constants';
+import { SECURITY_FEATURE_ID } from '../../../../common/constants';
 
 jest.mock('../../../common/components/empty_prompt');
 jest.mock('../../../sourcerer/containers');
@@ -33,6 +33,13 @@ jest.mock('../../../common/components/query_bar', () => ({
 }));
 jest.mock('../../../common/components/visualization_actions/actions');
 jest.mock('../../../common/components/visualization_actions/lens_embeddable');
+
+jest.mock('./navigation', () => ({
+  ...jest.requireActual('./navigation'),
+  NetworkRoutes: jest.fn(() => <div data-test-subj="network-routes-mock" />),
+}));
+
+const NetworkRoutesMocked = NetworkRoutes as jest.MockedFunction<typeof NetworkRoutes>;
 
 type Action = 'PUSH' | 'POP' | 'REPLACE';
 const pop: Action = 'POP';
@@ -71,6 +78,9 @@ const mockProps = {
 
 const mockMapVisibility = jest.fn();
 const mockNavigateToApp = jest.fn();
+const mockSecurityCapabilities = {
+  [SECURITY_FEATURE_ID]: { crud_alerts: true, read_alerts: true },
+};
 jest.mock('../../../common/lib/kibana', () => {
   const original = jest.requireActual('../../../common/lib/kibana');
 
@@ -82,8 +92,8 @@ jest.mock('../../../common/lib/kibana', () => {
         application: {
           ...original.useKibana().services.application,
           capabilities: {
-            siem: { crud_alerts: true, read_alerts: true },
-            maps: mockMapVisibility(),
+            ...mockSecurityCapabilities,
+            maps_v2: mockMapVisibility(),
           },
           navigateToApp: mockNavigateToApp,
         },
@@ -102,6 +112,7 @@ jest.mock('../../../common/lib/kibana', () => {
       addError: jest.fn(),
       addSuccess: jest.fn(),
       addWarning: jest.fn(),
+      addInfo: jest.fn(),
       remove: jest.fn(),
     }),
   };
@@ -121,7 +132,7 @@ describe('Network page - rendering', () => {
       indicesExist: false,
     });
 
-    const wrapper = mount(
+    render(
       <TestProviders>
         <Router history={mockHistory}>
           <Network {...mockProps} />
@@ -129,7 +140,7 @@ describe('Network page - rendering', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find(`[data-test-subj="empty-prompt"]`).exists()).toBe(true);
+    expect(screen.getByTestId('empty-prompt')).toBeInTheDocument();
   });
 
   test('it DOES NOT render getting started page when an index is available', async () => {
@@ -138,7 +149,7 @@ describe('Network page - rendering', () => {
       indicesExist: true,
       indexPattern: {},
     });
-    mount(
+    render(
       <TestProviders>
         <Router history={mockHistory}>
           <Network {...mockProps} />
@@ -157,14 +168,14 @@ describe('Network page - rendering', () => {
       indexPattern: {},
     });
 
-    const wrapper = mount(
+    render(
       <TestProviders>
         <Router history={mockHistory}>
           <Network {...mockProps} />
         </Router>
       </TestProviders>
     );
-    expect(wrapper.find('[data-test-subj="conditional-embeddable-map"]').exists()).toBe(true);
+    expect(screen.getByTestId('conditional-embeddable-map')).toBeInTheDocument();
   });
 
   test('it does not render the network map if user does not have permissions', () => {
@@ -175,14 +186,14 @@ describe('Network page - rendering', () => {
       indexPattern: {},
     });
 
-    const wrapper = mount(
+    render(
       <TestProviders>
         <Router history={mockHistory}>
           <Network {...mockProps} />
         </Router>
       </TestProviders>
     );
-    expect(wrapper.find('[data-test-subj="conditional-embeddable-map"]').exists()).toBe(false);
+    expect(screen.queryByTestId('conditional-embeddable-map')).not.toBeInTheDocument();
   });
 
   test('it should add the new filters after init', async () => {
@@ -224,22 +235,24 @@ describe('Network page - rendering', () => {
       sourcererDataView: {},
     });
     const myStore = createMockStore();
-    const wrapper = mount(
+    render(
       <TestProviders store={myStore}>
         <Router history={mockHistory}>
           <Network {...mockProps} />
         </Router>
       </TestProviders>
     );
-    await waitFor(() => {
-      wrapper.update();
+    myStore.dispatch(
+      inputsActions.setSearchBarFilter({ id: InputsModelId.global, filters: newFilters })
+    );
 
-      myStore.dispatch(
-        inputsActions.setSearchBarFilter({ id: InputsModelId.global, filters: newFilters })
-      );
-      wrapper.update();
-      expect(wrapper.find(NetworkRoutes).props().filterQuery).toEqual(
-        '{"bool":{"must":[],"filter":[{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"host.name":"ItRocks"}}],"minimum_should_match":1}}]}}],"should":[],"must_not":[]}}'
+    await waitFor(() => {
+      expect(NetworkRoutesMocked).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          filterQuery:
+            '{"bool":{"must":[],"filter":[{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"host.name":"ItRocks"}}],"minimum_should_match":1}}]}}],"should":[],"must_not":[]}}',
+        }),
+        expect.anything()
       );
     });
   });

@@ -65,14 +65,32 @@ export function registerSetRoute(router: InternalUiSettingsRouter) {
     }
   };
   router.post(
-    { path: '/api/kibana/settings/{key}', validate },
+    {
+      path: '/api/kibana/settings/{key}',
+      validate,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the UI Settings Client',
+        },
+      },
+    },
     async (context, request, response) => {
       const uiSettingsClient = (await context.core).uiSettings.client;
       return await setFromRequest(uiSettingsClient, context, request, response);
     }
   );
   router.post(
-    { path: '/api/kibana/global_settings/{key}', validate },
+    {
+      path: '/api/kibana/global_settings/{key}',
+      validate,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the UI Settings Client',
+        },
+      },
+    },
     async (context, request, response) => {
       const uiSettingsClient = (await context.core).uiSettings.globalClient;
       return await setFromRequest(uiSettingsClient, context, request, response);

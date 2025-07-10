@@ -6,17 +6,21 @@
  */
 
 import { omit } from 'lodash';
-import { Observable } from 'rxjs';
-import { schema, TypeOf } from '@kbn/config-schema';
-import { IClusterClient, KibanaRequest } from '@kbn/core/server';
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { SpacesServiceStart } from '@kbn/spaces-plugin/server';
+import type { Observable } from 'rxjs';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
+import type { IClusterClient, KibanaRequest } from '@kbn/core/server';
+import type { estypes } from '@elastic/elasticsearch';
+import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 
-import { KueryNode } from '@kbn/es-query';
-import { EsContext } from './es';
-import { IEventLogClient } from './types';
-import { QueryEventsBySavedObjectResult } from './es/cluster_client_adapter';
-import { SavedObjectBulkGetterResult } from './saved_object_provider_registry';
+import type { KueryNode } from '@kbn/es-query';
+import type { EsContext } from './es';
+import type { IEventLogClient } from './types';
+import type {
+  QueryEventsBySavedObjectResult,
+  QueryEventsBySavedObjectSearchAfterResult,
+} from './es/cluster_client_adapter';
+import type { SavedObjectBulkGetterResult } from './saved_object_provider_registry';
 export type PluginClusterClient = Pick<IClusterClient, 'asInternalUser'>;
 export type AdminClusterClient$ = Observable<PluginClusterClient>;
 
@@ -40,6 +44,8 @@ const sortSchema = schema.object({
     schema.literal('event.duration'),
     schema.literal('event.action'),
     schema.literal('message'),
+    schema.literal('kibana.alert.rule.gap.status'),
+    schema.literal('kibana.alert.rule.gap.total_gap_duration_ms'),
   ]),
   sort_order: schema.oneOf([schema.literal('asc'), schema.literal('desc')]),
 });
@@ -47,6 +53,20 @@ const sortSchema = schema.object({
 export const queryOptionsSchema = schema.object({
   per_page: schema.number({ defaultValue: 10, min: 0 }),
   page: schema.number({ defaultValue: 1, min: 1 }),
+  start: optionalDateFieldSchema,
+  end: optionalDateFieldSchema,
+  sort: schema.arrayOf(sortSchema, {
+    defaultValue: [{ sort_field: '@timestamp', sort_order: 'asc' }],
+  }),
+  filter: schema.maybe(schema.string()),
+});
+
+export const queryOptionsSearchAfterSchema = schema.object({
+  per_page: schema.number({ defaultValue: 10, min: 0 }),
+  pit_id: schema.maybe(schema.string()),
+  search_after: schema.maybe(
+    schema.arrayOf(schema.oneOf([schema.string(), schema.number(), schema.boolean(), schema.any()]))
+  ),
   start: optionalDateFieldSchema,
   end: optionalDateFieldSchema,
   sort: schema.arrayOf(sortSchema, {
@@ -69,6 +89,11 @@ export type AggregateOptionsType = Pick<TypeOf<typeof queryOptionsSchema>, 'filt
   Partial<TypeOf<typeof queryOptionsSchema>> & {
     aggs: Record<string, estypes.AggregationsAggregationContainer>;
   };
+
+export type FindOptionsSearchAfterType = Omit<FindOptionsType, 'page'> & {
+  pit_id?: string;
+  search_after?: estypes.SortResults;
+};
 
 interface EventLogServiceCtorParams {
   esContext: EsContext;
@@ -137,6 +162,14 @@ export class EventLogClient implements IEventLogClient {
     });
   }
 
+  public async findEventsByDocumentIds(
+    docs: Array<{ _id: string; _index: string }>
+  ): Promise<Pick<QueryEventsBySavedObjectResult, 'data'>> {
+    const response = await this.esContext.esAdapter.queryEventsByDocumentIds(docs);
+
+    return response;
+  }
+
   public async aggregateEventsBySavedObjectIds(
     type: string,
     ids: string[],
@@ -191,6 +224,34 @@ export class EventLogClient implements IEventLogClient {
       aggregateOptions: { ...aggregateOptions, aggs } as AggregateOptionsType,
       includeSpaceAgnostic,
     });
+  }
+
+  public async refreshIndex(): Promise<void> {
+    await this.esContext.esAdapter.refreshIndex();
+  }
+
+  public async findEventsBySavedObjectIdsSearchAfter(
+    type: string,
+    ids: string[],
+    options?: Partial<FindOptionsSearchAfterType>,
+    legacyIds?: string[]
+  ): Promise<QueryEventsBySavedObjectSearchAfterResult> {
+    const findOptions = queryOptionsSearchAfterSchema.validate(options ?? {});
+
+    await this.savedObjectGetter(type, ids);
+
+    return await this.esContext.esAdapter.queryEventsBySavedObjectsSearchAfter({
+      index: this.esContext.esNames.indexPattern,
+      namespace: await this.getNamespace(),
+      type,
+      ids,
+      findOptions,
+      legacyIds,
+    });
+  }
+
+  public async closePointInTime(pitId: string): Promise<void> {
+    return await this.esContext.esAdapter.closePointInTime(pitId);
   }
 
   private async getNamespace() {

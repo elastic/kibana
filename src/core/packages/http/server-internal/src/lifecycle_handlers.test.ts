@@ -22,6 +22,7 @@ import {
   INTERNAL_API_RESTRICTED_LOGGER_NAME,
   createBuildNrMismatchLoggerPreResponseHandler,
   createCustomHeadersPreResponseHandler,
+  createDeprecationWarningHeaderPreResponseHandler,
   createRestrictInternalRoutesPostAuthHandler,
   createVersionCheckPostAuthHandler,
   createXsrfPostAuthHandler,
@@ -542,6 +543,50 @@ describe('customHeaders pre-response handler', () => {
         'Content-Security-Policy-Report-Only': 'bar',
         headerA: 'value-A',
         headerB: 'value-B',
+      },
+    });
+  });
+});
+
+describe('deprecation header pre-response handler', () => {
+  let toolkit: ToolkitMock;
+
+  beforeEach(() => {
+    toolkit = createToolkit();
+  });
+
+  it('adds the deprecation warning header to the request going to a deprecated route', () => {
+    const kibanaVersion = '19.73.41';
+    const deprecationMessage = 'This is a deprecated endpoint message in the tests';
+    const warningHeader = `299 Kibana-${kibanaVersion} "${deprecationMessage}"`;
+    const handler = createDeprecationWarningHeaderPreResponseHandler(kibanaVersion);
+
+    handler(
+      { route: { options: { deprecated: { message: deprecationMessage } } } } as any,
+      {} as any,
+      toolkit
+    );
+
+    expect(toolkit.next).toHaveBeenCalledTimes(1);
+    expect(toolkit.next).toHaveBeenCalledWith({
+      headers: {
+        warning: warningHeader,
+      },
+    });
+  });
+
+  it('does not add the deprecation warning header to the request going to a non-deprecated route', () => {
+    const kibanaVersion = '19.73.41';
+    const deprecationMessage = 'This is a deprecated endpoint message in the tests';
+    const warningHeader = `299 Kibana-${kibanaVersion} "${deprecationMessage}"`;
+    const handler = createDeprecationWarningHeaderPreResponseHandler(kibanaVersion);
+
+    handler({ route: { options: { deprecated: {} } } } as any, {} as any, toolkit);
+
+    expect(toolkit.next).toHaveBeenCalledTimes(1);
+    expect(toolkit.next).not.toHaveBeenCalledWith({
+      headers: {
+        warning: warningHeader,
       },
     });
   });

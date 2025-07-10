@@ -7,31 +7,34 @@
 
 import { EuiNotificationBadge, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React from 'react';
 import { paths } from '../../../../common/locators/paths';
 import { useFetchActiveAlerts } from '../../../hooks/use_fetch_active_alerts';
 import { useKibana } from '../../../hooks/use_kibana';
 import {
   ALERTS_TAB_ID,
+  DEFINITION_TAB_ID,
   HISTORY_TAB_ID,
   OVERVIEW_TAB_ID,
   SloTabId,
 } from '../components/slo_details';
+
+interface Props {
+  slo?: SLOWithSummaryResponse | null;
+  isAutoRefreshing: boolean;
+  selectedTabId: SloTabId;
+  setSelectedTabId?: (val: SloTabId) => void;
+}
 
 export const useSloDetailsTabs = ({
   slo,
   isAutoRefreshing,
   selectedTabId,
   setSelectedTabId,
-}: {
-  slo?: SLOWithSummaryResponse | null;
-  isAutoRefreshing: boolean;
-  selectedTabId: SloTabId;
-  setSelectedTabId?: (val: SloTabId) => void;
-}) => {
+}: Props) => {
   const { data: activeAlerts } = useFetchActiveAlerts({
-    sloIdsAndInstanceIds: slo ? [[slo.id, slo.instanceId ?? ALL_VALUE]] : [],
+    sloIdsAndInstanceIds: slo ? [[slo.id, slo.instanceId]] : [],
     shouldRefetch: isAutoRefreshing,
   });
 
@@ -62,32 +65,50 @@ export const useSloDetailsTabs = ({
               : undefined,
           }),
     },
-    ...(slo?.timeWindow.type === 'rolling'
-      ? [
-          {
-            id: HISTORY_TAB_ID,
-            label: i18n.translate('xpack.slo.sloDetails.tab.historyLabel', {
-              defaultMessage: 'History',
-            }),
-            'data-test-subj': 'historyTab',
-            isSelected: selectedTabId === HISTORY_TAB_ID,
-            ...(setSelectedTabId
-              ? {
-                  onClick: () => setSelectedTabId(HISTORY_TAB_ID),
-                }
-              : {
-                  href: slo
-                    ? `${basePath.get()}${paths.sloDetails(
-                        slo.id,
-                        slo.instanceId,
-                        slo.remote?.remoteName,
-                        HISTORY_TAB_ID
-                      )}`
-                    : undefined,
-                }),
-          },
-        ]
-      : []),
+    {
+      id: DEFINITION_TAB_ID,
+      label: i18n.translate('xpack.slo.sloDetails.tab.definitionLabel', {
+        defaultMessage: 'Definition',
+      }),
+      'data-test-subj': 'definitionTab',
+      isSelected: selectedTabId === DEFINITION_TAB_ID,
+      ...(setSelectedTabId
+        ? {
+            onClick: () => setSelectedTabId(DEFINITION_TAB_ID),
+          }
+        : {
+            href: slo
+              ? `${basePath.get()}${paths.sloDetails(
+                  slo.id,
+                  slo.instanceId,
+                  slo.remote?.remoteName,
+                  DEFINITION_TAB_ID
+                )}`
+              : undefined,
+          }),
+    },
+    {
+      id: HISTORY_TAB_ID,
+      label: i18n.translate('xpack.slo.sloDetails.tab.historyLabel', {
+        defaultMessage: 'History',
+      }),
+      'data-test-subj': 'historyTab',
+      isSelected: selectedTabId === HISTORY_TAB_ID,
+      ...(setSelectedTabId
+        ? {
+            onClick: () => setSelectedTabId(HISTORY_TAB_ID),
+          }
+        : {
+            href: slo
+              ? `${basePath.get()}${paths.sloDetails(
+                  slo.id,
+                  slo.instanceId,
+                  slo.remote?.remoteName,
+                  HISTORY_TAB_ID
+                )}`
+              : undefined,
+          }),
+    },
     {
       id: ALERTS_TAB_ID,
       label: isRemote ? (

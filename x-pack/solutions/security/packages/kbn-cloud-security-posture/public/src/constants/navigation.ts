@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { CLOUD_SECURITY_POSTURE_BASE_PATH } from '@kbn/cloud-security-posture-common';
+import {
+  CLOUD_SECURITY_POSTURE_BASE_PATH,
+  CspBenchmarksPage,
+  CspPageNavigationItem,
+} from '@kbn/cloud-security-posture-common';
 import { i18n } from '@kbn/i18n';
 
 export const NAV_ITEMS_NAMES = {
@@ -57,5 +61,13 @@ export const findingsNavigation = {
     name: NAV_ITEMS_NAMES.FINDINGS,
     path: `${CLOUD_SECURITY_POSTURE_BASE_PATH}/findings/vulnerabilities/resource/:resourceId`,
     id: 'cloud_security_posture-findings-vulnerabilities-resourceId',
+  },
+};
+
+export const benchmarksNavigation: Record<CspBenchmarksPage, CspPageNavigationItem> = {
+  rules: {
+    name: NAV_ITEMS_NAMES.RULES,
+    path: `${CLOUD_SECURITY_POSTURE_BASE_PATH}/benchmarks/:benchmarkId/:benchmarkVersion/rules/:ruleId?`,
+    id: 'cloud_security_posture-benchmarks-rules',
   },
 };

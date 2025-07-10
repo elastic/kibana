@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { EuiColorPaletteDisplay } from '@elastic/eui';
 import React, { useMemo } from 'react';
 
-import { RISK_SEVERITY_COLOUR } from '../../common/utils';
+import { RISK_SEVERITY_COLOUR, SEVERITY_UI_SORT_ORDER } from '../../common/utils';
 import type { RiskSeverity } from '../../../../common/search_strategy';
 import type { SeverityCount } from './types';
 
@@ -33,18 +33,15 @@ export const SeverityBar: React.FC<{
 }> = ({ severityCount }) => {
   const palette = useMemo(
     () =>
-      (Object.keys(RISK_SEVERITY_COLOUR) as RiskSeverity[]).reduce(
-        (acc: PalletteArray, status: RiskSeverity) => {
-          const previousStop = acc.length > 0 ? acc[acc.length - 1].stop : 0;
-          const newEntry: PalletteObject = {
-            stop: previousStop + (severityCount[status] || 0),
-            color: RISK_SEVERITY_COLOUR[status],
-          };
-          acc.push(newEntry);
-          return acc;
-        },
-        [] as PalletteArray
-      ),
+      SEVERITY_UI_SORT_ORDER.reduce((acc: PalletteArray, status: RiskSeverity) => {
+        const previousStop = acc.length > 0 ? acc[acc.length - 1].stop : 0;
+        const newEntry: PalletteObject = {
+          stop: previousStop + (severityCount[status] || 0),
+          color: RISK_SEVERITY_COLOUR[status],
+        };
+        acc.push(newEntry);
+        return acc;
+      }, [] as PalletteArray),
     [severityCount]
   );
   return (

@@ -5,53 +5,62 @@
  * 2.0.
  */
 
-import { combineLatest, Observable, Subject, BehaviorSubject } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { combineLatest, Subject, BehaviorSubject } from 'rxjs';
 import { map, distinctUntilChanged } from 'rxjs';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type {
   UsageCollectionSetup,
   UsageCollectionStart,
   UsageCounter,
 } from '@kbn/usage-collection-plugin/server';
-import {
+import type {
   PluginInitializerContext,
   Plugin,
   CoreSetup,
   Logger,
   CoreStart,
-  ServiceStatusLevels,
-  CoreStatus,
 } from '@kbn/core/server';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/server';
+import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-shared';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import {
   registerDeleteInactiveNodesTaskDefinition,
   scheduleDeleteInactiveNodesTaskDefinition,
 } from './kibana_discovery_service/delete_inactive_nodes_task';
 import { KibanaDiscoveryService } from './kibana_discovery_service';
 import { TaskPollingLifecycle } from './polling_lifecycle';
-import { TaskManagerConfig } from './config';
-import { createInitialMiddleware, addMiddlewareToChain, Middleware } from './lib/middleware';
+import type { TaskManagerConfig } from './config';
+import type { Middleware } from './lib/middleware';
+import { createInitialMiddleware, addMiddlewareToChain } from './lib/middleware';
 import { removeIfExists } from './lib/remove_if_exists';
 import { setupSavedObjects, BACKGROUND_TASK_NODE_SO_NAME, TASK_SO_NAME } from './saved_objects';
-import { TaskDefinitionRegistry, TaskTypeDictionary } from './task_type_dictionary';
-import { AggregationOpts, FetchResult, SearchOpts, TaskStore } from './task_store';
-import { createManagedConfiguration } from './lib/create_managed_configuration';
+import type { TaskDefinitionRegistry } from './task_type_dictionary';
+import { TaskTypeDictionary } from './task_type_dictionary';
+import type { AggregationOpts, FetchResult, SearchOpts } from './task_store';
+import { TaskStore } from './task_store';
 import { TaskScheduling } from './task_scheduling';
 import { backgroundTaskUtilizationRoute, healthRoute, metricsRoute } from './routes';
-import { createMonitoringStats, MonitoringStats } from './monitoring';
-import { ConcreteTaskInstance } from './task';
+import type { MonitoringStats } from './monitoring';
+import { createMonitoringStats } from './monitoring';
+import type { ConcreteTaskInstance } from './task';
 import { registerTaskManagerUsageCollector } from './usage';
 import { TASK_MANAGER_INDEX } from './constants';
 import { AdHocTaskCounter } from './lib/adhoc_task_counter';
 import { setupIntervalLogging } from './lib/log_health_metrics';
-import { metricsStream, Metrics } from './metrics';
+import type { Metrics } from './metrics';
+import { metricsStream } from './metrics';
 import { TaskManagerMetricsCollector } from './metrics/task_metrics_collector';
 import { TaskPartitioner } from './lib/task_partitioner';
 import { getDefaultCapacity } from './lib/get_default_capacity';
+import { calculateStartingCapacity } from './lib/create_managed_configuration';
 import {
   registerMarkRemovedTasksAsUnrecognizedDefinition,
   scheduleMarkRemovedTasksAsUnrecognizedDefinition,
 } from './removed_tasks/mark_removed_tasks_as_unrecognized';
+import { getElasticsearchAndSOAvailability } from './lib/get_es_and_so_availability';
+import { LicenseSubscriber } from './license_subscriber';
 
 export interface TaskManagerSetupContract {
   /**
@@ -64,6 +73,7 @@ export interface TaskManagerSetupContract {
    * @param taskDefinitions - The Kibana task definitions dictionary
    */
   registerTaskDefinitions: (taskDefinitions: TaskDefinitionRegistry) => void;
+  registerCanEncryptedSavedObjects: (canEncrypt: boolean) => void;
 }
 
 export type TaskManagerStartContract = Pick<
@@ -81,9 +91,11 @@ export type TaskManagerStartContract = Pick<
     removeIfExists: TaskStore['remove'];
   } & {
     getRegisteredTypes: () => string[];
+    registerEncryptedSavedObjectsClient: (client: EncryptedSavedObjectsClient) => void;
   };
 
 export interface TaskManagerPluginsStart {
+  licensing: LicensingPluginStart;
   cloud?: CloudStart;
   usageCollection?: UsageCollectionStart;
 }
@@ -123,6 +135,8 @@ export class TaskManagerPlugin
   private kibanaDiscoveryService?: KibanaDiscoveryService;
   private heapSizeLimit: number = 0;
   private numOfKibanaInstances$: Subject<number> = new BehaviorSubject(1);
+  private canEncryptSavedObjects: boolean;
+  private licenseSubscriber?: PublicMethodsOf<LicenseSubscriber>;
 
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
@@ -133,6 +147,7 @@ export class TaskManagerPlugin
     this.nodeRoles = initContext.node.roles;
     this.shouldRunBackgroundTasks = this.nodeRoles.backgroundTasks;
     this.adHocTaskCounter = new AdHocTaskCounter();
+    this.canEncryptSavedObjects = false;
   }
 
   isNodeBackgroundTasksOnly() {
@@ -144,7 +159,16 @@ export class TaskManagerPlugin
     core: CoreSetup<TaskManagerPluginsStart, TaskManagerStartContract>,
     plugins: TaskManagerPluginsSetup
   ): TaskManagerSetupContract {
-    this.elasticsearchAndSOAvailability$ = getElasticsearchAndSOAvailability(core.status.core$);
+    const isServerless = this.initContext.env.packageInfo.buildFlavor === 'serverless';
+    const clusterClientPromise = core
+      .getStartServices()
+      .then(([coreServices]) => coreServices.elasticsearch.client);
+    this.elasticsearchAndSOAvailability$ = getElasticsearchAndSOAvailability({
+      core$: core.status.core$,
+      isServerless,
+      logger: this.logger,
+      getClusterClient: () => clusterClientPromise,
+    });
 
     core.metrics
       .getOpsMetrics$()
@@ -154,6 +178,7 @@ export class TaskManagerPlugin
       });
 
     setupSavedObjects(core.savedObjects, this.config);
+
     this.taskManagerId = this.initContext.env.instanceUuid;
 
     if (!this.taskManagerId) {
@@ -164,10 +189,6 @@ export class TaskManagerPlugin
     } else {
       this.logger.info(`TaskManager is identified by the Kibana UUID: ${this.taskManagerId}`);
     }
-
-    const startServicesPromise = core.getStartServices().then(([coreServices]) => ({
-      elasticsearch: coreServices.elasticsearch,
-    }));
 
     this.usageCounter = plugins.usageCollection?.createUsageCounter(`taskManager`);
 
@@ -182,8 +203,7 @@ export class TaskManagerPlugin
       usageCounter: this.usageCounter!,
       kibanaVersion: this.kibanaVersion,
       kibanaIndexName: core.savedObjects.getDefaultIndex(),
-      getClusterClient: () =>
-        startServicesPromise.then(({ elasticsearch }) => elasticsearch.client),
+      getClusterClient: () => clusterClientPromise,
       shouldRunTasks: this.shouldRunBackgroundTasks,
       docLinks: core.docLinks,
       numOfKibanaInstances$: this.numOfKibanaInstances$,
@@ -197,8 +217,7 @@ export class TaskManagerPlugin
       usageCounter: this.usageCounter!,
       kibanaVersion: this.kibanaVersion,
       kibanaIndexName: core.savedObjects.getDefaultIndex(),
-      getClusterClient: () =>
-        startServicesPromise.then(({ elasticsearch }) => elasticsearch.client),
+      getClusterClient: () => clusterClientPromise,
     });
     metricsRoute({
       router,
@@ -264,13 +283,18 @@ export class TaskManagerPlugin
       registerTaskDefinitions: (taskDefinition: TaskDefinitionRegistry) => {
         this.definitions.registerTaskDefinitions(taskDefinition);
       },
+      registerCanEncryptedSavedObjects: (canEncrypt: boolean) => {
+        this.canEncryptSavedObjects = canEncrypt;
+      },
     };
   }
 
   public start(
-    { savedObjects, elasticsearch, executionContext, docLinks }: CoreStart,
-    { cloud }: TaskManagerPluginsStart
+    { http, savedObjects, elasticsearch, executionContext, security }: CoreStart,
+    { cloud, licensing }: TaskManagerPluginsStart
   ): TaskManagerStartContract {
+    this.licenseSubscriber = new LicenseSubscriber(licensing.license$);
+
     const savedObjectsRepository = savedObjects.createInternalRepository([
       TASK_SO_NAME,
       BACKGROUND_TASK_NODE_SO_NAME,
@@ -292,6 +316,7 @@ export class TaskManagerPlugin
     const taskStore = new TaskStore({
       serializer,
       savedObjectsRepository,
+      savedObjectsService: savedObjects,
       esClient: elasticsearch.client.asInternalUser,
       index: TASK_MANAGER_INDEX,
       definitions: this.definitions,
@@ -300,6 +325,9 @@ export class TaskManagerPlugin
       allowReadingInvalidState: this.config.allow_reading_invalid_state,
       logger: this.logger,
       requestTimeouts: this.config.request_timeouts,
+      security,
+      canEncryptSavedObjects: this.canEncryptSavedObjects,
+      getIsSecurityEnabled: this.licenseSubscriber?.getIsSecurityEnabled,
     });
 
     const isServerless = this.initContext.env.packageInfo.buildFlavor === 'serverless';
@@ -325,12 +353,7 @@ export class TaskManagerPlugin
       }`
     );
 
-    const managedConfiguration = createManagedConfiguration({
-      config: this.config!,
-      errors$: taskStore.errors$,
-      defaultCapacity,
-      logger: this.logger,
-    });
+    const startingCapacity = calculateStartingCapacity(this.config!, this.logger, defaultCapacity);
 
     // Only poll for tasks if configured to run tasks
     if (this.shouldRunBackgroundTasks) {
@@ -349,6 +372,7 @@ export class TaskManagerPlugin
       });
 
       this.taskPollingLifecycle = new TaskPollingLifecycle({
+        basePathService: http.basePath,
         config: this.config!,
         definitions: this.definitions,
         logger: this.logger,
@@ -357,8 +381,8 @@ export class TaskManagerPlugin
         usageCounter: this.usageCounter,
         middleware: this.middleware,
         elasticsearchAndSOAvailability$: this.elasticsearchAndSOAvailability$!,
-        ...managedConfiguration,
         taskPartitioner,
+        startingCapacity,
       });
     }
 
@@ -366,11 +390,11 @@ export class TaskManagerPlugin
       taskStore,
       elasticsearchAndSOAvailability$: this.elasticsearchAndSOAvailability$!,
       config: this.config!,
-      managedConfig: managedConfiguration,
       logger: this.logger,
       adHocTaskCounter: this.adHocTaskCounter,
       taskDefinitions: this.definitions,
       taskPollingLifecycle: this.taskPollingLifecycle,
+      startingCapacity,
     }).subscribe((stat) => this.monitoringStats$.next(stat));
 
     metricsStream({
@@ -408,10 +432,15 @@ export class TaskManagerPlugin
       bulkUpdateSchedules: (...args) => taskScheduling.bulkUpdateSchedules(...args),
       getRegisteredTypes: () => this.definitions.getAllTypes(),
       bulkUpdateState: (...args) => taskScheduling.bulkUpdateState(...args),
+      registerEncryptedSavedObjectsClient: (client: EncryptedSavedObjectsClient) => {
+        taskStore.registerEncryptedSavedObjectsClient(client);
+      },
     };
   }
 
   public async stop() {
+    this.licenseSubscriber?.cleanup();
+
     // Stop polling for tasks
     if (this.taskPollingLifecycle) {
       this.taskPollingLifecycle.stop();
@@ -426,17 +455,4 @@ export class TaskManagerPlugin
       }
     }
   }
-}
-
-export function getElasticsearchAndSOAvailability(
-  core$: Observable<CoreStatus>
-): Observable<boolean> {
-  return core$.pipe(
-    map(
-      ({ elasticsearch, savedObjects }) =>
-        elasticsearch.level === ServiceStatusLevels.available &&
-        savedObjects.level === ServiceStatusLevels.available
-    ),
-    distinctUntilChanged()
-  );
 }

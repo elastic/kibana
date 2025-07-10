@@ -10,13 +10,15 @@ import { FtrProviderContext } from '../../../api_integration/ftr_provider_contex
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { testUsers } from '../test_users';
 import { bundlePackage, removeBundledPackages } from './install_bundled';
+import { SpaceTestApiClient } from '../space_awareness/api_helper';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
-  const esArchiver = getService('esArchiver');
   const fleetAndAgents = getService('fleetAndAgents');
+  const kibanaServer = getService('kibanaServer');
+  const apiClient = new SpaceTestApiClient(supertest);
 
   // use function () {} and not () => {} here
   // because `this` has to point to the Mocha context
@@ -27,11 +29,11 @@ export default function (providerContext: FtrProviderContext) {
     const log = getService('log');
 
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+      await kibanaServer.savedObjects.cleanStandardList();
       await fleetAndAgents.setup();
     });
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+      await kibanaServer.savedObjects.cleanStandardList();
       await removeBundledPackages(log);
     });
 
@@ -60,6 +62,37 @@ export default function (providerContext: FtrProviderContext) {
         const listResponse = await fetchLimitedPackageList();
 
         expect(listResponse.items.sort()).to.eql(['endpoint'].sort());
+      });
+
+      it('Allow to retrieve package policies count', async function () {
+        await apiClient.installPackage({ pkgName: 'nginx', force: true, pkgVersion: '1.20.0' });
+        await apiClient.createPackagePolicy(undefined, {
+          policy_ids: [],
+          name: `test-nginx-${Date.now()}`,
+          description: 'test',
+          package: {
+            name: 'nginx',
+            version: '1.20.0',
+          },
+          inputs: {},
+        });
+
+        const fetchPackageList = async () => {
+          const response = await supertest
+            .get('/api/fleet/epm/packages?withPackagePoliciesCount=true')
+            .set('kbn-xsrf', 'xxx')
+            .expect(200);
+          return response.body;
+        };
+        const listResponse = await fetchPackageList();
+        expect(listResponse.items.length).not.to.be(0);
+        for (const item of listResponse.items) {
+          if (item.name === 'nginx') {
+            expect(item.packagePoliciesInfo.count).eql(1);
+          } else {
+            expect(item.packagePoliciesInfo.count).eql(0);
+          }
+        }
       });
 
       it('allows user with only fleet permission to access', async () => {

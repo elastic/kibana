@@ -25,28 +25,39 @@ export async function getHostsCount({
 }) {
   assertQueryStructure(query);
 
+  const apmDocumentSources = await apmDataAccessServices?.getDocumentSources({
+    start: from,
+    end: to,
+  });
+
   const documentsFilter = await getDocumentsFilter({
     apmDataAccessServices,
+    apmDocumentSources,
     from,
     to,
   });
 
   const response = await infraMetricsClient.search({
     allow_no_indices: true,
-    body: {
-      size: 0,
-      track_total_hits: false,
-      query: {
-        bool: {
-          filter: [query, ...rangeQuery(from, to)],
-          should: [...documentsFilter],
-        },
-      },
-      aggs: {
-        totalCount: {
-          cardinality: {
-            field: HOST_NAME_FIELD,
+    size: 0,
+    track_total_hits: false,
+    query: {
+      bool: {
+        filter: [
+          query,
+          ...rangeQuery(from, to),
+          {
+            bool: {
+              should: [...documentsFilter],
+            },
           },
+        ],
+      },
+    },
+    aggs: {
+      totalCount: {
+        cardinality: {
+          field: HOST_NAME_FIELD,
         },
       },
     },

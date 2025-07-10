@@ -46,10 +46,10 @@ describe('Default deprecation flyout', () => {
   });
 
   test('renders a flyout with deprecation details', async () => {
-    const multiFieldsDeprecation = esDeprecationsMockResponse.deprecations[2];
+    const multiFieldsDeprecation = esDeprecationsMockResponse.migrationsDeprecations[2];
     const { actions, find, exists } = testBed;
 
-    await actions.table.clickDeprecationRowAt('default', 0);
+    await actions.table.clickDeprecationRowAt({ deprecationType: 'default', index: 0 });
 
     expect(exists('defaultDeprecationDetails')).toBe(true);
     expect(find('defaultDeprecationDetails.flyoutTitle').text()).toContain(

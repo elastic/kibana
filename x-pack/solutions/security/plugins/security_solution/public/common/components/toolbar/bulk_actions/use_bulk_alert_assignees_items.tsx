@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { union } from 'lodash';
 import React, { useCallback, useMemo } from 'react';
+import { union } from 'lodash';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { ALERT_WORKFLOW_ASSIGNEE_IDS } from '@kbn/rule-data-utils';
 import type {
   BulkActionsConfig,
   RenderContentPanelProps,
-} from '@kbn/triggers-actions-ui-plugin/public/types';
+} from '@kbn/response-ops-alerts-table/types';
 
 import { isEmpty } from 'lodash/fp';
 import { useLicense } from '../../../hooks/use_license';

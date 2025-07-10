@@ -5,13 +5,22 @@
  * 2.0.
  */
 import type { EventTypeOpts } from '@kbn/core/server';
+import type { BulkUpsertAssetCriticalityRecordsResponse } from '../../../../common/api/entity_analytics';
 import type {
   ResponseActionAgentType,
   ResponseActionStatus,
   ResponseActionsApiCommandNames,
 } from '../../../../common/endpoint/service/response_actions/constants';
-import type { BulkUpsertAssetCriticalityRecordsResponse } from '../../../../common/api/entity_analytics';
-import type { DataStreams, IlmPolicies, IlmsStats, IndicesStats } from '../indices.metadata.types';
+import type {
+  DataStreams,
+  IlmPolicies,
+  IlmsStats,
+  IndexTemplatesStats,
+  IndicesSettings,
+  IndicesStats,
+} from '../indices.metadata.types';
+import type { NodeIngestPipelinesStats } from '../ingest_pipelines_stats.types';
+import { SiemMigrationsEventTypes } from './types';
 
 export const RISK_SCORE_EXECUTION_SUCCESS_EVENT: EventTypeOpts<{
   scoresWritten: number;
@@ -150,6 +159,27 @@ export const FIELD_RETENTION_ENRICH_POLICY_EXECUTION_EVENT: EventTypeOpts<{
   },
 };
 
+export const ENTITY_STORE_DATA_VIEW_REFRESH_EXECUTION_EVENT: EventTypeOpts<{
+  duration: number;
+  interval: string;
+}> = {
+  eventType: 'entity_store_data_view_refresh_execution_event',
+  schema: {
+    duration: {
+      type: 'long',
+      _meta: {
+        description: 'Duration (in seconds) of the entity store data view refresh execution time',
+      },
+    },
+    interval: {
+      type: 'keyword',
+      _meta: {
+        description: 'Configured interval for the entity store data view refresh task',
+      },
+    },
+  },
+};
+
 export const ENTITY_ENGINE_RESOURCE_INIT_FAILURE_EVENT: EventTypeOpts<{
   error: string;
 }> = {
@@ -187,6 +217,34 @@ export const ENTITY_STORE_USAGE_EVENT: EventTypeOpts<{
       type: 'long',
       _meta: {
         description: 'Number of entities stored in the entity store',
+      },
+    },
+  },
+};
+
+export const PRIVMON_ENGINE_INITIALIZATION_EVENT: EventTypeOpts<{
+  duration: number;
+}> = {
+  eventType: 'privmon_engine_initialization',
+  schema: {
+    duration: {
+      type: 'long',
+      _meta: {
+        description: 'Duration (in seconds) of the privilege monitoring engine initialization',
+      },
+    },
+  },
+};
+
+export const PRIVMON_ENGINE_RESOURCE_INIT_FAILURE_EVENT: EventTypeOpts<{
+  error: string;
+}> = {
+  eventType: 'privmon_engine_resource_init_failure',
+  schema: {
+    error: {
+      type: 'keyword',
+      _meta: {
+        description: 'Error message for a resource initialization failure',
       },
     },
   },
@@ -283,6 +341,14 @@ export const TELEMETRY_DATA_STREAM_EVENT: EventTypeOpts<DataStreams> = {
             type: 'keyword',
             _meta: { description: 'Name of the data stream' },
           },
+          ilm_policy: {
+            type: 'keyword',
+            _meta: { optional: true, description: 'ILM policy associated to the datastream' },
+          },
+          template: {
+            type: 'keyword',
+            _meta: { optional: true, description: 'Template associated to the datastream' },
+          },
           indices: {
             type: 'array',
             items: {
@@ -295,7 +361,7 @@ export const TELEMETRY_DATA_STREAM_EVENT: EventTypeOpts<DataStreams> = {
           },
         },
       },
-      _meta: { description: 'Datastreams' },
+      _meta: { description: 'Datastream settings' },
     },
   },
 };
@@ -311,6 +377,7 @@ export const TELEMETRY_INDEX_STATS_EVENT: EventTypeOpts<IndicesStats> = {
             type: 'keyword',
             _meta: { description: 'The name of the index being monitored.' },
           },
+
           query_total: {
             type: 'long',
             _meta: {
@@ -326,11 +393,38 @@ export const TELEMETRY_INDEX_STATS_EVENT: EventTypeOpts<IndicesStats> = {
                 'The total time spent on query execution across all search requests, measured in milliseconds.',
             },
           },
+
+          docs_count_primaries: {
+            type: 'long',
+            _meta: {
+              optional: true,
+              description:
+                'The total number of documents currently stored in the index (primary shards).',
+            },
+          },
+          docs_deleted_primaries: {
+            type: 'long',
+            _meta: {
+              optional: true,
+              description:
+                'The total number of documents that have been marked as deleted in the index (primary shards).',
+            },
+          },
+          docs_total_size_in_bytes_primaries: {
+            type: 'long',
+            _meta: {
+              optional: true,
+              description:
+                'The total size, in bytes, of all documents stored in the index, including storage overhead (primary shards).',
+            },
+          },
+
           docs_count: {
             type: 'long',
             _meta: {
               optional: true,
-              description: 'The total number of documents currently stored in the index.',
+              description:
+                'The total number of documents currently stored in the index (primary and replica shards).',
             },
           },
           docs_deleted: {
@@ -338,7 +432,7 @@ export const TELEMETRY_INDEX_STATS_EVENT: EventTypeOpts<IndicesStats> = {
             _meta: {
               optional: true,
               description:
-                'The total number of documents that have been marked as deleted in the index.',
+                'The total number of documents that have been marked as deleted in the index (primary and replica shards).',
             },
           },
           docs_total_size_in_bytes: {
@@ -346,12 +440,70 @@ export const TELEMETRY_INDEX_STATS_EVENT: EventTypeOpts<IndicesStats> = {
             _meta: {
               optional: true,
               description:
-                'The total size, in bytes, of all documents stored in the index, including storage overhead.',
+                'The total size, in bytes, of all documents stored in the index, including storage overhead (primary and replica shards).',
+            },
+          },
+
+          index_failed: {
+            type: 'long',
+            _meta: {
+              optional: true,
+              description:
+                'The total number of documents failed to index (primary and replica shards).',
+            },
+          },
+          index_failed_due_to_version_conflict: {
+            type: 'long',
+            _meta: {
+              optional: true,
+              description:
+                'The total number of documents failed to index due to version conflict (primary and replica shards).',
             },
           },
         },
       },
-      _meta: { description: 'Datastreams' },
+      _meta: { description: 'Index stats' },
+    },
+  },
+};
+
+export const TELEMETRY_INDEX_SETTINGS_EVENT: EventTypeOpts<IndicesSettings> = {
+  eventType: 'telemetry_index_settings_event',
+  schema: {
+    items: {
+      type: 'array',
+      items: {
+        properties: {
+          index_name: {
+            type: 'keyword',
+            _meta: { description: 'The name of the index.' },
+          },
+          index_mode: {
+            type: 'keyword',
+            _meta: { optional: true, description: 'Index mode.' },
+          },
+          source_mode: {
+            type: 'keyword',
+            _meta: { optional: true, description: 'Source mode.' },
+          },
+          default_pipeline: {
+            type: 'keyword',
+            _meta: {
+              optional: true,
+              description: 'Pipeline applied if no pipeline parameter specified when indexing.',
+            },
+          },
+          final_pipeline: {
+            type: 'keyword',
+            _meta: {
+              optional: true,
+              description:
+                'Pipeline applied to the document at the end of the indexing process, after the document has been indexed.',
+            },
+          },
+        },
+      },
+      _meta: { description: 'Index settings' },
     },
   },
 };
@@ -461,7 +613,7 @@ export const TELEMETRY_ILM_POLICY_EVENT: EventTypeOpts<IlmPolicies> = {
           },
         },
       },
-      _meta: { description: 'Datastreams' },
+      _meta: { description: 'ILM policies' },
     },
   },
 };
@@ -502,16 +654,232 @@ export const TELEMETRY_ILM_STATS_EVENT: EventTypeOpts<IlmsStats> = {
           },
         },
       },
-      _meta: { description: 'Datastreams' },
+      _meta: { description: 'ILM stats' },
     },
   },
 };
+
+export const TELEMETRY_INDEX_TEMPLATES_EVENT: EventTypeOpts<IndexTemplatesStats> = {
+  eventType: 'telemetry_index_templates_event',
+  schema: {
+    items: {
+      type: 'array',
+      items: {
+        properties: {
+          template_name: {
+            type: 'keyword',
+            _meta: { description: 'The name of the template.' },
+          },
+          index_mode: {
+            type: 'keyword',
+            _meta: {
+              optional: true,
+              description: 'The index mode.',
+            },
+          },
+          datastream: {
+            type: 'boolean',
+            _meta: {
+              description: 'Datastream dataset',
+            },
+          },
+          package_name: {
+            type: 'keyword',
+            _meta: {
+              optional: true,
+              description: 'The package name',
+            },
+          },
+          managed_by: {
+            type: 'keyword',
+            _meta: {
+              optional: true,
+              description: 'Managed by',
+            },
+          },
+          beat: {
+            type: 'keyword',
+            _meta: {
+              optional: true,
+              description: 'Shipper name',
+            },
+          },
+          is_managed: {
+            type: 'boolean',
+            _meta: {
+              optional: true,
+              description: 'Whether the template is managed',
+            },
+          },
+          composed_of: {
+            type: 'array',
+            items: {
+              type: 'keyword',
+              _meta: {
+                description: 'List of template components',
+              },
+            },
+            _meta: { description: '' },
+          },
+          source_enabled: {
+            type: 'boolean',
+            _meta: {
+              optional: true,
+              description:
+                'The _source field contains the original JSON document body that was provided at index time',
+            },
+          },
+          source_includes: {
+            type: 'array',
+            items: {
+              type: 'keyword',
+              _meta: {
+                description: 'Fields included in _source, if enabled',
+              },
+            },
+            _meta: { description: '' },
+          },
+          source_excludes: {
+            type: 'array',
+            items: {
+              type: 'keyword',
+              _meta: {
+                description: '',
+              },
+            },
+            _meta: { description: 'Fields excludes from _source, if enabled' },
+          },
+        },
+      },
+      _meta: { description: 'Index templates info' },
+    },
+  },
+};
+
+export const TELEMETRY_NODE_INGEST_PIPELINES_STATS_EVENT: EventTypeOpts<NodeIngestPipelinesStats> =
+  {
+    eventType: 'telemetry_node_ingest_pipelines_stats_event',
+    schema: {
+      name: {
+        type: 'keyword',
+        _meta: { description: 'The name of the node' },
+      },
+      pipelines: {
+        type: 'array',
+        items: {
+          properties: {
+            name: {
+              type: 'keyword',
+              _meta: { description: 'The name of the pipeline.' },
+            },
+            totals: {
+              properties: {
+                count: {
+                  type: 'long',
+                  _meta: {
+                    description:
+                      'Total number of documents ingested during the lifetime of this node.',
+                  },
+                },
+                time_in_millis: {
+                  type: 'long',
+                  _meta: {
+                    description: 'Ingestion elapsed time during the lifetime of this node.',
+                  },
+                },
+                current: {
+                  type: 'long',
+                  _meta: { description: 'Total number of documents currently being ingested.' },
+                },
+                failed: {
+                  type: 'long',
+                  _meta: {
+                    description:
+                      'Total number of failed ingest operations during the lifetime of this node.',
+                  },
+                },
+              },
+            },
+            processors: {
+              type: 'array',
+              items: {
+                properties: {
+                  name: {
+                    type: 'keyword',
+                    _meta: { description: 'The name of the pipeline.' },
+                  },
+                  totals: {
+                    properties: {
+                      count: {
+                        type: 'long',
+                        _meta: {
+                          description:
+                            'Total number of documents ingested during the lifetime of this node.',
+                        },
+                      },
+                      time_in_millis: {
+                        type: 'long',
+                        _meta: {
+                          description: 'Ingestion elapsed time during the lifetime of this node.',
+                        },
+                      },
+                      current: {
+                        type: 'long',
+                        _meta: {
+                          description: 'Total number of documents currently being ingested.',
+                        },
+                      },
+                      failed: {
+                        type: 'long',
+                        _meta: {
+                          description:
+                            'Total number of failed ingest operations during the lifetime of this node.',
+                        },
+                      },
+                    },
+                  },
+                },
+                _meta: { description: 'Datastreams' },
+              },
+            },
+          },
+          _meta: { description: 'Datastreams' },
+        },
+      },
+      totals: {
+        properties: {
+          count: {
+            type: 'long',
+            _meta: {
+              description: 'Total number of documents ingested during the lifetime of this node.',
+            },
+          },
+          time_in_millis: {
+            type: 'long',
+            _meta: { description: 'Ingestion elapsed time during the lifetime of this node.' },
+          },
+          current: {
+            type: 'long',
+            _meta: { description: 'Total number of documents currently being ingested.' },
+          },
+          failed: {
+            type: 'long',
+            _meta: {
+              description:
+                'Total number of failed ingest operations during the lifetime of this node.',
+            },
+          },
+        },
+      },
+    },
+  };
 
 interface CreateAssetCriticalityProcessedFileEvent {
   result?: BulkUpsertAssetCriticalityRecordsResponse['stats'];
   startTime: Date;
   endTime: Date;
 }
+
 export const createAssetCriticalityProcessedFileEvent = ({
   result,
   startTime,
@@ -680,6 +1048,412 @@ export const ENDPOINT_RESPONSE_ACTION_STATUS_CHANGE_EVENT: EventTypeOpts<{
   },
 };
 
+export const SIEM_MIGRATIONS_MIGRATION_SUCCESS: EventTypeOpts<{
+  model: string;
+  migrationId: string;
+  duration: number;
+  completed: number;
+  failed: number;
+  total: number;
+  eventName: string;
+}> = {
+  eventType: SiemMigrationsEventTypes.MigrationSuccess,
+  schema: {
+    eventName: {
+      type: 'keyword',
+      _meta: {
+        description: 'The event name/description',
+        optional: false,
+      },
+    },
+    model: {
+      type: 'keyword',
+      _meta: {
+        description: 'The LLM model that was used',
+      },
+    },
+    migrationId: {
+      type: 'keyword',
+      _meta: {
+        description: 'Unique identifier for the migration',
+      },
+    },
+    duration: {
+      type: 'long',
+      _meta: {
+        description: 'Duration of the migration in milliseconds',
+      },
+    },
+    completed: {
+      type: 'long',
+      _meta: {
+        description: 'Number of rules successfully migrated',
+      },
+    },
+    failed: {
+      type: 'long',
+      _meta: {
+        description: 'Number of rules that failed to migrate',
+      },
+    },
+    total: {
+      type: 'long',
+      _meta: {
+        description: 'Total number of rules to migrate',
+      },
+    },
+  },
+};
+
+export const SIEM_MIGRATIONS_RULE_TRANSLATION_SUCCESS: EventTypeOpts<{
+  model: string;
+  migrationId: string;
+  duration: number;
+  translationResult: string;
+  prebuiltMatch: boolean;
+  eventName: string;
+}> = {
+  eventType: SiemMigrationsEventTypes.TranslationSuccess,
+  schema: {
+    eventName: {
+      type: 'keyword',
+      _meta: {
+        description: 'The event name/description',
+        optional: false,
+      },
+    },
+    translationResult: {
+      type: 'keyword',
+      _meta: {
+        description: 'Describes if the translation was full or partial',
+      },
+    },
+    model: {
+      type: 'keyword',
+      _meta: {
+        description: 'The LLM model that was used',
+      },
+    },
+    migrationId: {
+      type: 'keyword',
+      _meta: {
+        description: 'Unique identifier for the migration',
+      },
+    },
+    duration: {
+      type: 'long',
+      _meta: {
+        description: 'Duration of the migration in milliseconds',
+      },
+    },
+    prebuiltMatch: {
+      type: 'boolean',
+      _meta: {
+        description: 'Whether a prebuilt rule was matched',
+      },
+    },
+  },
+};
+
+export const SIEM_MIGRATIONS_PREBUILT_RULES_MATCH: EventTypeOpts<{
+  model: string;
+  migrationId: string;
+  preFilterRuleNames: string[];
+  preFilterRuleCount: number;
+  postFilterRuleName: string;
+  postFilterRuleCount: number;
+  eventName: string;
+}> = {
+  eventType: SiemMigrationsEventTypes.PrebuiltRulesMatch,
+  schema: {
+    eventName: {
+      type: 'keyword',
+      _meta: {
+        description: 'The event name/description',
+        optional: false,
+      },
+    },
+    model: {
+      type: 'keyword',
+      _meta: {
+        description: 'The LLM model that was used',
+      },
+    },
+    migrationId: {
+      type: 'keyword',
+      _meta: {
+        description: 'Unique identifier for the migration',
+      },
+    },
+    preFilterRuleNames: {
+      type: 'array',
+      items: {
+        type: 'keyword',
+        _meta: {
+          description: 'List of matched rules from Semantic search before LLM filtering',
+        },
+      },
+    },
+    preFilterRuleCount: {
+      type: 'long',
+      _meta: {
+        description: 'Count of rules matched before LLM filtering',
+      },
+    },
+    postFilterRuleName: {
+      type: 'keyword',
+      _meta: {
+        description: 'List of matched rules from Semantic search after LLM filtering',
+      },
+    },
+    postFilterRuleCount: {
+      type: 'long',
+      _meta: {
+        description: 'Count of rules matched before LLM filtering',
+      },
+    },
+  },
+};
+
+export const SIEM_MIGRATIONS_INTEGRATIONS_MATCH: EventTypeOpts<{
+  model: string;
+  migrationId: string;
+  preFilterIntegrationNames: string[];
+  preFilterIntegrationCount: number;
+  postFilterIntegrationName: string;
+  postFilterIntegrationCount: number;
+  eventName: string;
+}> = {
+  eventType: SiemMigrationsEventTypes.IntegrationsMatch,
+  schema: {
+    eventName: {
+      type: 'keyword',
+      _meta: {
+        description: 'The event name/description',
+        optional: false,
+      },
+    },
+    model: {
+      type: 'keyword',
+      _meta: {
+        description: 'The LLM model that was used',
+      },
+    },
+    migrationId: {
+      type: 'keyword',
+      _meta: {
+        description: 'Unique identifier for the migration',
+      },
+    },
+    preFilterIntegrationNames: {
+      type: 'array',
+      items: {
+        type: 'keyword',
+        _meta: {
+          description: 'List of matched integrations from Semantic search before LLM filtering',
+        },
+      },
+    },
+    preFilterIntegrationCount: {
+      type: 'long',
+      _meta: {
+        description: 'Count of integrations matched before LLM filtering',
+      },
+    },
+    postFilterIntegrationName: {
+      type: 'keyword',
+      _meta: {
+        description: 'List of matched integrations from Semantic search after LLM filtering',
+      },
+    },
+    postFilterIntegrationCount: {
+      type: 'long',
+      _meta: {
+        description: 'Count of integrations matched before LLM filtering',
+      },
+    },
+  },
+};
+
+export const SIEM_MIGRATIONS_MIGRATION_FAILURE: EventTypeOpts<{
+  model: string;
+  error: string;
+  migrationId: string;
+  duration: number;
+  completed: number;
+  failed: number;
+  total: number;
+  eventName: string;
+}> = {
+  eventType: SiemMigrationsEventTypes.MigrationFailure,
+  schema: {
+    eventName: {
+      type: 'keyword',
+      _meta: {
+        description: 'The event name/description',
+        optional: false,
+      },
+    },
+    error: {
+      type: 'keyword',
+      _meta: {
+        description: 'Error message for the migration failure',
+      },
+    },
+    model: {
+      type: 'keyword',
+      _meta: {
+        description: 'The LLM model that was used',
+      },
+    },
+    migrationId: {
+      type: 'keyword',
+      _meta: {
+        description: 'Unique identifier for the migration',
+      },
+    },
+    duration: {
+      type: 'long',
+      _meta: {
+        description: 'Duration of the migration in milliseconds',
+      },
+    },
+    completed: {
+      type: 'long',
+      _meta: {
+        description: 'Number of rules successfully migrated',
+      },
+    },
+    failed: {
+      type: 'long',
+      _meta: {
+        description: 'Number of rules that failed to migrate',
+      },
+    },
+    total: {
+      type: 'long',
+      _meta: {
+        description: 'Total number of rules to migrate',
+      },
+    },
+  },
+};
+
+export const SIEM_MIGRATIONS_MIGRATION_ABORTED: EventTypeOpts<{
+  model: string;
+  reason: string;
+  migrationId: string;
+  duration: number;
+  completed: number;
+  failed: number;
+  total: number;
+  eventName: string;
+}> = {
+  eventType: SiemMigrationsEventTypes.MigrationAborted,
+  schema: {
+    eventName: {
+      type: 'keyword',
+      _meta: {
+        description: 'The event name/description',
+        optional: false,
+      },
+    },
+    model: {
+      type: 'keyword',
+      _meta: {
+        description: 'The LLM model that was used',
+      },
+    },
+    reason: {
+      type: 'keyword',
+      _meta: {
+        description: 'The reason of the migration abort',
+      },
+    },
+    migrationId: {
+      type: 'keyword',
+      _meta: {
+        description: 'Unique identifier for the migration',
+      },
+    },
+    duration: {
+      type: 'long',
+      _meta: {
+        description: 'Duration of the migration in milliseconds',
+      },
+    },
+    completed: {
+      type: 'long',
+      _meta: {
+        description: 'Number of rules successfully migrated',
+      },
+    },
+    failed: {
+      type: 'long',
+      _meta: {
+        description: 'Number of rules that failed to migrate',
+      },
+    },
+    total: {
+      type: 'long',
+      _meta: {
+        description: 'Total number of rules to migrate',
+      },
+    },
+  },
+};
+
+export const SIEM_MIGRATIONS_RULE_TRANSLATION_FAILURE: EventTypeOpts<{
+  model: string;
+  error: string;
+  migrationId: string;
+  eventName: string;
+}> = {
+  eventType: SiemMigrationsEventTypes.TranslationFailure,
+  schema: {
+    eventName: {
+      type: 'keyword',
+      _meta: {
+        description: 'The event name/description',
+        optional: false,
+      },
+    },
+    error: {
+      type: 'keyword',
+      _meta: {
+        description: 'Error message for the translation failure',
+      },
+    },
+    model: {
+      type: 'keyword',
+      _meta: {
+        description: 'The LLM model that was used',
+      },
+    },
+    migrationId: {
+      type: 'keyword',
+      _meta: {
+        description: 'Unique identifier for the migration',
+      },
+    },
+  },
+};
+
+export const ENDPOINT_WORKFLOW_INSIGHTS_REMEDIATED_EVENT: EventTypeOpts<{
+  insightId: string;
+}> = {
+  eventType: 'endpoint_workflow_insights_remediated_event',
+  schema: {
+    insightId: {
+      type: 'keyword',
+      _meta: {
+        description: 'The ID of the action that was sent to the endpoint',
+        optional: false,
+      },
+    },
+  },
+};
+
 export const events = [
   RISK_SCORE_EXECUTION_SUCCESS_EVENT,
   RISK_SCORE_EXECUTION_ERROR_EVENT,
@@ -689,12 +1463,26 @@ export const events = [
   ENDPOINT_RESPONSE_ACTION_SENT_EVENT,
   ENDPOINT_RESPONSE_ACTION_SENT_ERROR_EVENT,
   ENDPOINT_RESPONSE_ACTION_STATUS_CHANGE_EVENT,
+  ENDPOINT_WORKFLOW_INSIGHTS_REMEDIATED_EVENT,
   FIELD_RETENTION_ENRICH_POLICY_EXECUTION_EVENT,
+  ENTITY_STORE_DATA_VIEW_REFRESH_EXECUTION_EVENT,
   ENTITY_ENGINE_RESOURCE_INIT_FAILURE_EVENT,
   ENTITY_ENGINE_INITIALIZATION_EVENT,
   ENTITY_STORE_USAGE_EVENT,
+  PRIVMON_ENGINE_INITIALIZATION_EVENT,
+  PRIVMON_ENGINE_RESOURCE_INIT_FAILURE_EVENT,
   TELEMETRY_DATA_STREAM_EVENT,
   TELEMETRY_ILM_POLICY_EVENT,
   TELEMETRY_ILM_STATS_EVENT,
+  TELEMETRY_INDEX_SETTINGS_EVENT,
   TELEMETRY_INDEX_STATS_EVENT,
+  TELEMETRY_INDEX_TEMPLATES_EVENT,
+  TELEMETRY_NODE_INGEST_PIPELINES_STATS_EVENT,
+  SIEM_MIGRATIONS_MIGRATION_SUCCESS,
+  SIEM_MIGRATIONS_MIGRATION_ABORTED,
+  SIEM_MIGRATIONS_MIGRATION_FAILURE,
+  SIEM_MIGRATIONS_RULE_TRANSLATION_SUCCESS,
+  SIEM_MIGRATIONS_RULE_TRANSLATION_FAILURE,
+  SIEM_MIGRATIONS_PREBUILT_RULES_MATCH,
+  SIEM_MIGRATIONS_INTEGRATIONS_MATCH,
 ];

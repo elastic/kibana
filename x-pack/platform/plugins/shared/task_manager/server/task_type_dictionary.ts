@@ -5,15 +5,10 @@
  * 2.0.
  */
 
-import { ObjectType } from '@kbn/config-schema';
-import { Logger } from '@kbn/core/server';
-import {
-  TaskDefinition,
-  taskDefinitionSchema,
-  TaskRunCreatorFunction,
-  TaskPriority,
-  TaskCost,
-} from './task';
+import type { ObjectType } from '@kbn/config-schema';
+import type { Logger } from '@kbn/core/server';
+import type { TaskDefinition, TaskRunCreatorFunction, TaskPriority, TaskCost } from './task';
+import { taskDefinitionSchema } from './task';
 import { CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE } from './constants';
 
 /**
@@ -32,6 +27,17 @@ export const REMOVED_TYPES: string[] = [
 
   'cleanup_failed_action_executions',
   'reports:monitor',
+
+  // deprecated in https://github.com/elastic/kibana/pull/216916
+  'obs-ai-assistant:knowledge-base-migration',
+];
+
+export const SHARED_CONCURRENCY_TASKS: string[][] = [
+  // for testing
+  ['sampleTaskSharedConcurrencyType1', 'sampleTaskSharedConcurrencyType2'],
+
+  // reporting
+  ['report:execute', 'report:execute-scheduled'],
 ];
 
 /**
@@ -144,26 +150,39 @@ export class TaskTypeDictionary {
    * @param taskDefinitions - The Kibana task definitions dictionary
    */
   public registerTaskDefinitions(taskDefinitions: TaskDefinitionRegistry) {
-    const duplicate = Object.keys(taskDefinitions).find((type) => this.definitions.has(type));
+    const taskTypesToRegister = Object.keys(taskDefinitions);
+    const duplicate = taskTypesToRegister.find((type) => this.definitions.has(type));
     if (duplicate) {
       throw new Error(`Task ${duplicate} is already defined!`);
     }
 
-    const removed = Object.keys(taskDefinitions).find((type) => REMOVED_TYPES.indexOf(type) >= 0);
+    const invalidTaskType = taskTypesToRegister.find((type) => type.includes(','));
+    if (invalidTaskType) {
+      throw new Error(`Task type "${invalidTaskType}" cannot contain a comma.`);
+    }
+
+    const removed = taskTypesToRegister.find((type) => REMOVED_TYPES.indexOf(type) >= 0);
     if (removed) {
       throw new Error(`Task ${removed} has been removed from registration!`);
     }
 
-    for (const taskType of Object.keys(taskDefinitions)) {
-      if (
-        taskDefinitions[taskType].maxConcurrency !== undefined &&
-        !CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE.includes(taskType)
-      ) {
-        // maxConcurrency is designed to limit how many tasks of the same type a single Kibana
-        // instance should run at a time. Meaning if you have 8 Kibanas running, you will still
-        // see up to 8 tasks running at a time but one per Kibana instance. This is helpful for
-        // reporting purposes but not for many other cases and are better off not setting this value.
-        throw new Error(`maxConcurrency setting isn't allowed for task type: ${taskType}`);
+    for (const taskType of taskTypesToRegister) {
+      if (taskDefinitions[taskType].maxConcurrency !== undefined) {
+        if (!CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE.includes(taskType)) {
+          // maxConcurrency is designed to limit how many tasks of the same type a single Kibana
+          // instance should run at a time. Meaning if you have 8 Kibanas running, you will still
+          // see up to 8 tasks running at a time but one per Kibana instance. This is helpful for
+          // reporting purposes but not for many other cases and are better off not setting this value.
+          throw new Error(`maxConcurrency setting isn't allowed for task type: ${taskType}`);
+        }
+
+        // if this task type shares concurrency with another task type and both have been
+        // registered, throw an error if their maxConcurrency values are different
+        this.verifySharedConcurrencyAndCost(
+          taskType,
+          taskDefinitions[taskType].maxConcurrency!,
+          taskDefinitions[taskType].cost
+        );
       }
     }
 
@@ -173,6 +192,32 @@ export class TaskTypeDictionary {
       }
     } catch (e) {
       this.logger.error(`Could not sanitize task definitions: ${e.message}`);
+    }
+  }
+
+  private verifySharedConcurrencyAndCost(
+    taskType: string,
+    maxConcurrency: number,
+    cost?: TaskCost
+  ) {
+    const shared = sharedConcurrencyTaskTypes(taskType);
+
+    if (shared) {
+      const otherTaskTypes: string[] = shared.filter((type) => type !== taskType);
+
+      for (const otherTaskType of otherTaskTypes) {
+        const otherTaskDef = this.definitions.get(otherTaskType);
+        if (otherTaskDef && otherTaskDef.maxConcurrency !== maxConcurrency) {
+          throw new Error(
+            `Task type "${taskType}" shares concurrency limits with ${otherTaskType} but has a different maxConcurrency.`
+          );
+        }
+        if (otherTaskDef && otherTaskDef.cost !== cost) {
+          throw new Error(
+            `Task type "${taskType}" shares concurrency limits with ${otherTaskType} but has a different cost.`
+          );
+        }
+      }
     }
   }
 }
@@ -187,4 +232,8 @@ export function sanitizeTaskDefinitions(taskDefinitions: TaskDefinitionRegistry)
   return Object.entries(taskDefinitions).map(([type, rawDefinition]) => {
     return taskDefinitionSchema.validate({ type, ...rawDefinition }) as TaskDefinition;
   });
+}
+
+export function sharedConcurrencyTaskTypes(taskType: string) {
+  return SHARED_CONCURRENCY_TASKS.find((tasks: string[]) => tasks.includes(taskType));
 }

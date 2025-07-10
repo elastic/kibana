@@ -98,62 +98,60 @@ export async function getServiceTransactionStats({
         },
       ],
     },
-    body: {
-      track_total_hits: false,
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            ...rangeQuery(start, end),
-            ...environmentQuery(environment),
-            ...kqlQuery(kuery),
-            ...serviceGroupWithOverflowQuery(serviceGroup),
-            ...wildcardQuery(SERVICE_NAME, searchQuery),
-          ],
-        },
+    track_total_hits: false,
+    size: 0,
+    query: {
+      bool: {
+        filter: [
+          ...rangeQuery(start, end),
+          ...environmentQuery(environment),
+          ...kqlQuery(kuery),
+          ...serviceGroupWithOverflowQuery(serviceGroup),
+          ...wildcardQuery(SERVICE_NAME, searchQuery),
+        ],
       },
-      aggs: {
-        sample: {
-          random_sampler: randomSampler,
-          aggs: {
-            overflowCount: {
-              sum: {
-                field: SERVICE_OVERFLOW_COUNT,
-              },
+    },
+    aggs: {
+      sample: {
+        random_sampler: randomSampler,
+        aggs: {
+          overflowCount: {
+            sum: {
+              field: SERVICE_OVERFLOW_COUNT,
             },
-            services: {
-              terms: {
-                field: SERVICE_NAME,
-                size: maxNumServices,
+          },
+          services: {
+            terms: {
+              field: SERVICE_NAME,
+              size: maxNumServices,
+            },
+            aggs: {
+              telemetryAgentName: {
+                terms: {
+                  field: TELEMETRY_SDK_LANGUAGE,
+                },
               },
-              aggs: {
-                telemetryAgentName: {
-                  terms: {
-                    field: TELEMETRY_SDK_LANGUAGE,
-                  },
+              telemetrySdkName: {
+                terms: {
+                  field: TELEMETRY_SDK_NAME,
                 },
-                telemetrySdkName: {
-                  terms: {
-                    field: TELEMETRY_SDK_NAME,
-                  },
+              },
+              transactionType: {
+                terms: {
+                  field: TRANSACTION_TYPE,
                 },
-                transactionType: {
-                  terms: {
-                    field: TRANSACTION_TYPE,
-                  },
-                  aggs: {
-                    ...metrics,
-                    environments: {
-                      terms: {
-                        field: SERVICE_ENVIRONMENT,
-                      },
+                aggs: {
+                  ...metrics,
+                  environments: {
+                    terms: {
+                      field: SERVICE_ENVIRONMENT,
                     },
-                    sample: {
-                      top_metrics: {
-                        metrics: [{ field: AGENT_NAME } as const],
-                        sort: {
-                          '@timestamp': 'desc' as const,
-                        },
+                  },
+                  sample: {
+                    top_metrics: {
+                      metrics: [{ field: AGENT_NAME } as const],
+                      sort: {
+                        '@timestamp': 'desc' as const,
                       },
                     },
                   },

@@ -3,6 +3,12 @@ description: >
   A paginated response of SLOs matching the query.
 type: object
 properties:
+  size:
+    type: number
+    example: 25
+    description: Size provided for cursor based pagination
+  searchAfter:
+    type: string
   page:
     type: number
     example: 1

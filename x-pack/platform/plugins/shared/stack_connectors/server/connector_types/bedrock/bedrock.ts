@@ -5,15 +5,20 @@
  * 2.0.
  */
 
-import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
+import type { ServiceParams } from '@kbn/actions-plugin/server';
+import { SubActionConnector } from '@kbn/actions-plugin/server';
+import { trace } from '@opentelemetry/api';
 import aws from 'aws4';
 import { BedrockRuntimeClient } from '@aws-sdk/client-bedrock-runtime';
-import { SmithyMessageDecoderStream } from '@smithy/eventstream-codec';
-import { AxiosError, Method } from 'axios';
-import { IncomingMessage } from 'http';
+import type { SmithyMessageDecoderStream } from '@smithy/eventstream-codec';
+import { NodeHttpHandler } from '@smithy/node-http-handler';
+import type { AxiosError, Method } from 'axios';
+import type { IncomingMessage } from 'http';
 import { PassThrough } from 'stream';
-import { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
-import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
+import { getCustomAgents } from '@kbn/actions-plugin/server/lib/get_custom_agents';
+import type { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
+import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
+import type { ConverseRequest, ConverseStreamRequest } from '@aws-sdk/client-bedrock-runtime';
 import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
 import {
   RunActionParamsSchema,
@@ -24,8 +29,10 @@ import {
   RunActionResponseSchema,
   RunApiLatestResponseSchema,
   BedrockClientSendParamsSchema,
+  ConverseActionParamsSchema,
+  ConverseStreamActionParamsSchema,
 } from '../../../common/bedrock/schema';
-import {
+import type {
   Config,
   Secrets,
   RunActionParams,
@@ -35,23 +42,29 @@ import {
   InvokeAIRawActionParams,
   InvokeAIRawActionResponse,
   RunApiLatestResponse,
-  BedrockMessage,
-  BedrockToolChoice,
   ConverseActionParams,
   ConverseActionResponse,
+  ConverseParams,
+  ConverseStreamParams,
 } from '../../../common/bedrock/types';
 import {
   SUB_ACTION,
   DEFAULT_TOKEN_LIMIT,
   DEFAULT_TIMEOUT_MS,
 } from '../../../common/bedrock/constants';
-import {
+import type {
   DashboardActionParams,
   DashboardActionResponse,
   StreamingResponse,
 } from '../../../common/bedrock/types';
 import { DashboardActionParamsSchema } from '../../../common/bedrock/schema';
-
+import {
+  extractRegionId,
+  formatBedrockBody,
+  parseContent,
+  tee,
+  usesDeprecatedArguments,
+} from './utils';
 interface SignedRequest {
   host: string;
   headers: Record<string, string>;
@@ -69,12 +82,19 @@ export class BedrockConnector extends SubActionConnector<Config, Secrets> {
 
     this.url = this.config.apiUrl;
     this.model = this.config.defaultModel;
+    const { httpAgent, httpsAgent } = getCustomAgents(
+      this.configurationUtilities,
+      this.logger,
+      this.url
+    );
+    const isHttps = this.url.toLowerCase().startsWith('https');
     this.bedrockClient = new BedrockRuntimeClient({
       region: extractRegionId(this.config.apiUrl),
       credentials: {
         accessKeyId: this.secrets.accessKey,
         secretAccessKey: this.secrets.secret,
       },
+      requestHandler: new NodeHttpHandler(isHttps ? { httpsAgent } : { httpAgent }),
     });
     this.registerSubActions();
   }
@@ -120,6 +140,18 @@ export class BedrockConnector extends SubActionConnector<Config, Secrets> {
       name: SUB_ACTION.BEDROCK_CLIENT_SEND,
       method: 'bedrockClientSend',
       schema: BedrockClientSendParamsSchema,
+    });
+
+    this.registerSubAction({
+      name: SUB_ACTION.CONVERSE,
+      method: 'converse',
+      schema: ConverseActionParamsSchema,
+    });
+
+    this.registerSubAction({
+      name: SUB_ACTION.CONVERSE_STREAM,
+      method: 'converseStream',
+      schema: ConverseStreamActionParamsSchema,
     });
   }
 
@@ -249,7 +281,9 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<RunActionResponse | InvokeAIRawActionResponse> {
     // set model on per request basis
-    const currentModel = reqModel ?? this.model;
+    // Application Inference Profile IDs need to be encoded when using the API
+    // Decode first to ensure an existing encoded value is not double encoded
+    const currentModel = encodeURIComponent(decodeURIComponent(reqModel ?? this.model));
     const path = `/model/${currentModel}/invoke`;
     const signed = this.signRequest(body, path, false);
     const requestArgs = {
@@ -294,7 +328,10 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<StreamingResponse> {
     // set model on per request basis
-    const path = `/model/${reqModel ?? this.model}/invoke-with-response-stream`;
+    // Application Inference Profile IDs need to be encoded when using the API
+    // Decode first to ensure an existing encoded value is not double encoded
+    const currentModel = encodeURIComponent(decodeURIComponent(reqModel ?? this.model));
+    const path = `/model/${currentModel}/invoke-with-response-stream`;
     const signed = this.signRequest(body, path, true);
 
     const response = await this.request(
@@ -392,7 +429,7 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
       },
       connectorUsageCollector
     )) as RunActionResponse;
-    return { message: res.completion.trim() };
+    return { message: res.completion.trim(), usage: res?.usage };
   }
 
   public async invokeAIRaw(
@@ -445,6 +482,9 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     { signal, command }: ConverseActionParams,
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<ConverseActionResponse> {
+    if (command.input.modelId === 'preconfigured') {
+      command.input.modelId = this.model;
+    }
     connectorUsageCollector.addRequestBodyBytes(undefined, command);
     const res = await this.bedrockClient.send(command, {
       abortSignal: signal,
@@ -459,184 +499,153 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
 
     return res;
   }
-}
 
-const formatBedrockBody = ({
-  messages,
-  stopSequences,
-  temperature = 0,
-  system,
-  maxTokens = DEFAULT_TOKEN_LIMIT,
-  tools,
-  toolChoice,
-}: {
-  messages: BedrockMessage[];
-  stopSequences?: string[];
-  temperature?: number;
-  maxTokens?: number;
-  // optional system message to be sent to the API
-  system?: string;
-  tools?: Array<{ name: string; description: string }>;
-  toolChoice?: BedrockToolChoice;
-}) => ({
-  anthropic_version: 'bedrock-2023-05-31',
-  ...ensureMessageFormat(messages, system),
-  max_tokens: maxTokens,
-  stop_sequences: stopSequences,
-  temperature,
-  tools,
-  tool_choice: toolChoice,
-});
+  /**
+   * Implements support for Bedrock's converse API which provides a simpler interface for single-turn conversations
+   * Adapted from invokeAI and runApi to use the native Bedrock converse API endpoint
+   * @param params Conversation parameters including messages, model, etc.
+   * @param connectorUsageCollector Collector for usage metrics
+   * @returns A promise that resolves to the conversation response
+   */
+  public async converse(
+    {
+      messages,
+      model: reqModel,
+      stopSequences,
+      system,
+      temperature,
+      maxTokens,
+      tools,
+      toolChoice,
+      signal,
+      timeout = DEFAULT_TIMEOUT_MS,
+    }: ConverseParams,
+    connectorUsageCollector: ConnectorUsageCollector
+  ): Promise<RunActionResponse> {
+    const modelId = reqModel ?? this.model;
+    const currentModel = encodeURIComponent(decodeURIComponent(modelId));
+    const path = `/model/${currentModel}/converse`;
 
-interface FormattedBedrockMessage {
-  role: string;
-  content: string | BedrockMessage['rawContent'];
-}
-
-/**
- * Ensures that the messages are in the correct format for the Bedrock API
- * If 2 user or 2 assistant messages are sent in a row, Bedrock throws an error
- * We combine the messages into a single message to avoid this error
- * @param messages
- */
-const ensureMessageFormat = (
-  messages: BedrockMessage[],
-  systemPrompt?: string
-): {
-  messages: FormattedBedrockMessage[];
-  system?: string;
-} => {
-  let system = systemPrompt ? systemPrompt : '';
-
-  const newMessages = messages.reduce<FormattedBedrockMessage[]>((acc, m) => {
-    if (m.role === 'system') {
-      system = `${system.length ? `${system}\n` : ''}${m.content}`;
-      return acc;
-    }
-
-    const messageRole = () => (['assistant', 'ai'].includes(m.role) ? 'assistant' : 'user');
-
-    if (m.rawContent) {
-      acc.push({
-        role: messageRole(),
-        content: m.rawContent,
-      });
-      return acc;
-    }
-
-    const lastMessage = acc[acc.length - 1];
-    if (lastMessage && lastMessage.role === m.role && typeof lastMessage.content === 'string') {
-      // Bedrock only accepts assistant and user roles.
-      // If 2 user or 2 assistant messages are sent in a row, combine the messages into a single message
-      return [
-        ...acc.slice(0, -1),
-        { content: `${lastMessage.content}\n${m.content}`, role: m.role },
-      ];
-    }
-
-    // force role outside of system to ensure it is either assistant or user
-    return [...acc, { content: m.content, role: messageRole() }];
-  }, []);
-
-  return system.length ? { system, messages: newMessages } : { messages: newMessages };
-};
-
-function parseContent(content: Array<{ text?: string; type: string }>): string {
-  let parsedContent = '';
-  if (content.length === 1 && content[0].type === 'text' && content[0].text) {
-    parsedContent = content[0].text;
-  } else if (content.length > 1) {
-    parsedContent = content.reduce((acc, { text }) => (text ? `${acc}\n${text}` : acc), '');
-  }
-  return parsedContent;
-}
-
-const usesDeprecatedArguments = (body: string): boolean => JSON.parse(body)?.prompt != null;
-
-function extractRegionId(url: string) {
-  const match = (url ?? '').match(/bedrock\.(.*?)\.amazonaws\./);
-  if (match) {
-    return match[1];
-  } else {
-    // fallback to us-east-1
-    return 'us-east-1';
-  }
-}
-
-/**
- * Splits an async iterator into two independent async iterators which can be independently read from at different speeds.
- * @param asyncIterator The async iterator returned from Bedrock to split
- */
-function tee<T>(
-  asyncIterator: SmithyMessageDecoderStream<T>
-): [SmithyMessageDecoderStream<T>, SmithyMessageDecoderStream<T>] {
-  // @ts-ignore options is private, but we need it to create the new streams
-  const streamOptions = asyncIterator.options;
-
-  const streamLeft = new SmithyMessageDecoderStream<T>(streamOptions);
-  const streamRight = new SmithyMessageDecoderStream<T>(streamOptions);
-
-  // Queues to store chunks for each stream
-  const leftQueue: T[] = [];
-  const rightQueue: T[] = [];
-
-  // Promises for managing when a chunk is available
-  let leftPending: ((chunk: T | null) => void) | null = null;
-  let rightPending: ((chunk: T | null) => void) | null = null;
-
-  const distribute = async () => {
-    for await (const chunk of asyncIterator) {
-      // Push the chunk into both queues
-      if (leftPending) {
-        leftPending(chunk);
-        leftPending = null;
-      } else {
-        leftQueue.push(chunk);
-      }
-
-      if (rightPending) {
-        rightPending(chunk);
-        rightPending = null;
-      } else {
-        rightQueue.push(chunk);
-      }
-    }
-
-    // Signal the end of the iterator
-    if (leftPending) {
-      leftPending(null);
-    }
-    if (rightPending) {
-      rightPending(null);
-    }
-  };
-
-  // Start distributing chunks from the iterator
-  distribute().catch(() => {
-    // swallow errors
-  });
-
-  // Helper to create an async iterator for each stream
-  const createIterator = (
-    queue: T[],
-    setPending: (fn: ((chunk: T | null) => void) | null) => void
-  ) => {
-    return async function* () {
-      while (true) {
-        if (queue.length > 0) {
-          yield queue.shift()!;
-        } else {
-          const chunk = await new Promise<T | null>((resolve) => setPending(resolve));
-          if (chunk === null) break; // End of the stream
-          yield chunk;
-        }
-      }
+    const request: ConverseRequest = {
+      messages,
+      inferenceConfig: {
+        temperature,
+        stopSequences,
+        maxTokens,
+      },
+      toolConfig: {
+        tools,
+        toolChoice: { auto: toolChoice },
+      },
+      system,
+      modelId,
     };
-  };
+    const requestBody = JSON.stringify(request);
 
-  // Assign independent async iterators to each stream
-  streamLeft[Symbol.asyncIterator] = createIterator(leftQueue, (fn) => (leftPending = fn));
-  streamRight[Symbol.asyncIterator] = createIterator(rightQueue, (fn) => (rightPending = fn));
+    const signed = this.signRequest(requestBody, path, true);
+    const requestArgs = {
+      ...signed,
+      url: `${this.url}${path}`,
+      method: 'post' as const,
+      data: requestBody,
+      signal,
+      timeout,
+      responseSchema: RunApiLatestResponseSchema,
+    };
+    const response = await this.runApiLatest(requestArgs, connectorUsageCollector);
 
-  return [streamLeft, streamRight];
+    return response;
+  }
+  private async _converseStream({
+    messages,
+    model: reqModel,
+    stopSequences,
+    system,
+    temperature,
+    maxTokens,
+    tools,
+    toolChoice,
+    signal,
+    timeout = DEFAULT_TIMEOUT_MS,
+    connectorUsageCollector,
+  }: ConverseStreamParams) {
+    const modelId = reqModel ?? this.model;
+    const currentModel = encodeURIComponent(decodeURIComponent(modelId));
+    const path = `/model/${currentModel}/converse-stream`;
+
+    const request: ConverseStreamRequest = {
+      messages,
+      inferenceConfig: {
+        temperature,
+        stopSequences,
+        maxTokens,
+      },
+      toolConfig: {
+        tools,
+        toolChoice,
+      },
+      system,
+      modelId,
+    };
+    const requestBody = JSON.stringify(request);
+
+    const signed = this.signRequest(requestBody, path, true);
+
+    const parentSpan = trace.getActiveSpan();
+    parentSpan?.setAttribute('bedrock.raw_request', requestBody);
+
+    const response = await this.request(
+      {
+        ...signed,
+        url: `${this.url}${path}`,
+        method: 'post' as const,
+        responseSchema: StreamingResponseSchema,
+        data: requestBody,
+        responseType: 'stream',
+        signal,
+        timeout,
+      },
+      connectorUsageCollector
+    );
+
+    return response.data.pipe(new PassThrough()) as unknown as IncomingMessage;
+  }
+
+  /**
+   * Implements support for Bedrock's converse-stream API which provides a streaming interface for conversations
+   * Adapted from invokeStream and streamApi to use the native Bedrock converse-stream API endpoint
+   * @param params Conversation parameters including messages, model, etc.
+   * @param connectorUsageCollector Collector for usage metrics
+   * @returns A streaming response as an IncomingMessage
+   */
+  public async converseStream(
+    {
+      messages,
+      model: reqModel,
+      stopSequences,
+      system,
+      temperature,
+      maxTokens,
+      tools,
+      toolChoice,
+      signal,
+      timeout = DEFAULT_TIMEOUT_MS,
+    }: ConverseStreamParams,
+    connectorUsageCollector: ConnectorUsageCollector
+  ): Promise<IncomingMessage> {
+    const res = (await this._converseStream({
+      messages,
+      model: reqModel,
+      stopSequences,
+      system,
+      temperature,
+      maxTokens,
+      tools,
+      toolChoice,
+      signal,
+      timeout,
+      connectorUsageCollector,
+    })) as unknown as IncomingMessage;
+    return res;
+  }
 }

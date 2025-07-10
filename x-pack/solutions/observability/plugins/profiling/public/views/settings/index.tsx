@@ -27,7 +27,6 @@ import {
   profilingAzureCostDiscountRate,
   profilingCostPervCPUPerHour,
   profilingShowErrorFrames,
-  profilingFetchTopNFunctionsFromStacktraces,
 } from '@kbn/observability-plugin/common';
 import { useEditableSettings, useUiTracker } from '@kbn/observability-shared-plugin/public';
 import { isEmpty } from 'lodash';
@@ -54,7 +53,7 @@ const costSettings = [
   profilingAzureCostDiscountRate,
   profilingCostPervCPUPerHour,
 ];
-const miscSettings = [profilingShowErrorFrames, profilingFetchTopNFunctionsFromStacktraces];
+const miscSettings = [profilingShowErrorFrames];
 
 export function Settings() {
   const trackProfilingEvent = useUiTracker({ app: 'profiling' });
@@ -236,7 +235,7 @@ export function Settings() {
                   <>
                     <EuiFlexGroup gutterSize="xs">
                       <EuiFlexItem grow={false}>
-                        <EuiIcon type="iInCircle" />
+                        <EuiIcon type="info" />
                       </EuiFlexItem>
                       <EuiFlexItem>
                         <EuiFlexGroup direction="column" gutterSize="xs">

@@ -32,6 +32,7 @@ import {
   ALERT_PREVIOUS_ACTION_GROUP,
   ALERT_SEVERITY_IMPROVING,
   ALERT_RULE_EXECUTION_UUID,
+  ALERT_PENDING_RECOVERED_COUNT,
 } from '@kbn/rule-data-utils';
 import {
   alertRule,
@@ -78,6 +79,7 @@ for (const flattened of [true, false]) {
         [ALERT_SEVERITY_IMPROVING]: true,
         [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
         [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+        [ALERT_PENDING_RECOVERED_COUNT]: 0,
         [ALERT_STATUS]: 'recovered',
         [ALERT_WORKFLOW_STATUS]: 'open',
         [ALERT_DURATION]: 36000,
@@ -150,6 +152,7 @@ for (const flattened of [true, false]) {
         [ALERT_SEVERITY_IMPROVING]: true,
         [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
         [ALERT_MAINTENANCE_WINDOW_IDS]: ['maint-1', 'maint-321'],
+        [ALERT_PENDING_RECOVERED_COUNT]: 0,
         [ALERT_STATUS]: 'recovered',
         [ALERT_WORKFLOW_STATUS]: 'open',
         [ALERT_DURATION]: 36000,
@@ -166,6 +169,74 @@ for (const flattened of [true, false]) {
               [EVENT_KIND]: 'signal',
               [ALERT_INSTANCE_ID]: 'alert-A',
               [ALERT_UUID]: 'abcdefg',
+            }
+          : {
+              event: {
+                kind: 'signal',
+              },
+              kibana: {
+                alert: {
+                  instance: { id: 'alert-A' },
+                  rule: omit(rule, 'execution'),
+                  uuid: 'abcdefg',
+                },
+              },
+            }),
+      });
+    });
+
+    test(`should return alert document with kibana.space_ids set to '*' if dangerouslyCreateAlertsInAllSpaces=true`, () => {
+      const legacyAlert = new LegacyAlert<{}, {}, 'default'>('alert-A', {
+        meta: { uuid: 'abcdefg' },
+      });
+      legacyAlert.scheduleActions('default').replaceState({
+        start: '2023-03-28T12:27:28.159Z',
+        end: '2023-03-30T12:27:28.159Z',
+        duration: '36000000',
+      });
+
+      expect(
+        buildRecoveredAlert<{}, {}, {}, 'default', 'recovered'>({
+          // @ts-expect-error
+          alert: existingAlert,
+          legacyAlert,
+          rule: alertRule,
+          recoveryActionGroup: 'recovered',
+          timestamp: '2023-03-29T12:27:28.159Z',
+          kibanaVersion: '8.9.0',
+          dangerouslyCreateAlertsInAllSpaces: true,
+        })
+      ).toEqual({
+        [TIMESTAMP]: '2023-03-29T12:27:28.159Z',
+        [ALERT_RULE_EXECUTION_TIMESTAMP]: '2023-03-29T12:27:28.159Z',
+        // @ts-ignore
+        [ALERT_RULE_EXECUTION_UUID]: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+        [EVENT_ACTION]: 'close',
+        [ALERT_ACTION_GROUP]: 'recovered',
+        [ALERT_CONSECUTIVE_MATCHES]: 0,
+        [ALERT_FLAPPING]: false,
+        [ALERT_FLAPPING_HISTORY]: [],
+        [ALERT_SEVERITY_IMPROVING]: true,
+        [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
+        [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+        [ALERT_PENDING_RECOVERED_COUNT]: 0,
+        [ALERT_STATUS]: 'recovered',
+        [ALERT_WORKFLOW_STATUS]: 'open',
+        [ALERT_DURATION]: 36000,
+        [ALERT_START]: '2023-03-28T12:27:28.159Z',
+        [ALERT_END]: '2023-03-30T12:27:28.159Z',
+        [ALERT_TIME_RANGE]: { gte: '2023-03-28T12:27:28.159Z', lte: '2023-03-30T12:27:28.159Z' },
+        // @ts-expect-error
+        [SPACE_IDS]: ['*'],
+        [VERSION]: '8.9.0',
+        [TAGS]: ['rule-', '-tags'],
+        ...(flattened
+          ? {
+              ...alertRule,
+              [EVENT_KIND]: 'signal',
+              [ALERT_INSTANCE_ID]: 'alert-A',
+              [ALERT_UUID]: 'abcdefg',
+              [SPACE_IDS]: ['*'],
             }
           : {
               event: {
@@ -252,6 +323,7 @@ for (const flattened of [true, false]) {
         [ALERT_SEVERITY_IMPROVING]: true,
         [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
         [ALERT_MAINTENANCE_WINDOW_IDS]: ['maint-1', 'maint-321'],
+        [ALERT_PENDING_RECOVERED_COUNT]: 0,
         [ALERT_STATUS]: 'recovered',
         [ALERT_WORKFLOW_STATUS]: 'open',
         [ALERT_DURATION]: 36000,
@@ -318,6 +390,7 @@ for (const flattened of [true, false]) {
         [ALERT_SEVERITY_IMPROVING]: true,
         [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
         [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+        [ALERT_PENDING_RECOVERED_COUNT]: 0,
         [ALERT_STATUS]: 'recovered',
         [ALERT_WORKFLOW_STATUS]: 'open',
         [ALERT_DURATION]: 36000,
@@ -428,6 +501,7 @@ for (const flattened of [true, false]) {
         [ALERT_SEVERITY_IMPROVING]: true,
         [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
         [ALERT_MAINTENANCE_WINDOW_IDS]: ['maint-1', 'maint-321'],
+        [ALERT_PENDING_RECOVERED_COUNT]: 0,
         [ALERT_STATUS]: 'recovered',
         [ALERT_WORKFLOW_STATUS]: 'open',
         [ALERT_DURATION]: 36000,
@@ -536,6 +610,7 @@ for (const flattened of [true, false]) {
         [ALERT_SEVERITY_IMPROVING]: true,
         [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
         [ALERT_MAINTENANCE_WINDOW_IDS]: ['maint-1', 'maint-321'],
+        [ALERT_PENDING_RECOVERED_COUNT]: 0,
         [ALERT_STATUS]: 'recovered',
         [ALERT_WORKFLOW_STATUS]: 'open',
         [ALERT_DURATION]: 36000,
@@ -643,6 +718,7 @@ for (const flattened of [true, false]) {
         [ALERT_SEVERITY_IMPROVING]: true,
         [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
         [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+        [ALERT_PENDING_RECOVERED_COUNT]: 0,
         [ALERT_STATUS]: 'recovered',
         [ALERT_WORKFLOW_STATUS]: 'custom_status',
         [ALERT_DURATION]: 36000,

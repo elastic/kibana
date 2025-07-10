@@ -88,13 +88,16 @@ import {
   ALERT_HOST_RISK_SCORE_CALCULATED_SCORE_NORM,
   ALERT_USER_RISK_SCORE_CALCULATED_LEVEL,
   ALERT_USER_RISK_SCORE_CALCULATED_SCORE_NORM,
+  ALERT_SERVICE_CRITICALITY,
+  ALERT_SERVICE_RISK_SCORE_CALCULATED_LEVEL,
+  ALERT_SERVICE_RISK_SCORE_CALCULATED_SCORE_NORM,
 } from '../../../../../../common/field_maps/field_names';
 import type { CompleteRule, RuleParams } from '../../../rule_schema';
 import { commonParamsCamelToSnake, typeSpecificCamelToSnake } from '../../../rule_management';
 import { transformAlertToRuleAction } from '../../../../../../common/detection_engine/transform_actions';
 import type {
   AncestorLatest,
-  BaseFieldsLatest,
+  DetectionAlertLatest,
 } from '../../../../../../common/api/detection_engine/model/alerts';
 
 export interface BuildAlertFieldsProps {
@@ -114,7 +117,7 @@ export interface BuildAlertFieldsProps {
   intendedTimestamp: Date | undefined;
 }
 
-export const generateAlertId = (alert: BaseFieldsLatest) => {
+export const generateAlertId = (alert: DetectionAlertLatest) => {
   return createHash('sha256')
     .update(
       alert[ALERT_ANCESTORS].reduce(
@@ -149,8 +152,8 @@ export const buildParent = (doc: SimpleHit): AncestorLatest => {
  */
 export const buildAncestors = (doc: SimpleHit): AncestorLatest[] => {
   const newAncestor = buildParent(doc);
-  const existingAncestors: AncestorLatest[] =
-    (getField(doc, ALERT_ANCESTORS) as AncestorLatest[] | undefined) ?? [];
+  const ancestorsField = getField(doc, ALERT_ANCESTORS);
+  const existingAncestors: AncestorLatest[] = Array.isArray(ancestorsField) ? ancestorsField : [];
   return [...existingAncestors, newAncestor];
 };
 
@@ -178,7 +181,7 @@ export const buildAlertFields = ({
   alertTimestampOverride,
   overrides,
   intendedTimestamp,
-}: BuildAlertFieldsProps): BaseFieldsLatest => {
+}: BuildAlertFieldsProps): DetectionAlertLatest => {
   const parents = docs.map(buildParent);
   const depth = parents.reduce((acc, parent) => Math.max(parent.depth, acc), 0) + 1;
   const ancestors = docs.reduce(
@@ -288,10 +291,13 @@ export const buildAlertFields = ({
     [LEGACY_ALERT_USER_CRITICALITY]: undefined,
     [ALERT_HOST_CRITICALITY]: undefined,
     [ALERT_USER_CRITICALITY]: undefined,
+    [ALERT_SERVICE_CRITICALITY]: undefined,
     [ALERT_HOST_RISK_SCORE_CALCULATED_LEVEL]: undefined,
     [ALERT_HOST_RISK_SCORE_CALCULATED_SCORE_NORM]: undefined,
     [ALERT_USER_RISK_SCORE_CALCULATED_LEVEL]: undefined,
     [ALERT_USER_RISK_SCORE_CALCULATED_SCORE_NORM]: undefined,
+    [ALERT_SERVICE_RISK_SCORE_CALCULATED_LEVEL]: undefined,
+    [ALERT_SERVICE_RISK_SCORE_CALCULATED_SCORE_NORM]: undefined,
     [ALERT_INTENDED_TIMESTAMP]: intendedTimestamp ? intendedTimestamp.toISOString() : timestamp,
     [ALERT_RULE_EXECUTION_TYPE]: intendedTimestamp
       ? RULE_EXECUTION_TYPE.MANUAL

@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { euiLightVars } from '@kbn/ui-theme';
+import { euiThemeVars } from '@kbn/ui-theme'; // eslint-disable-line @elastic/eui/no-restricted-eui-imports
 import { RiskSeverity } from '../../../common/search_strategy';
-import { SEVERITY_COLOR } from '../../overview/components/detection_response/utils';
 export { RISK_LEVEL_RANGES as RISK_SCORE_RANGES } from '../../../common/entity_analytics/risk_engine';
 
 export const SEVERITY_UI_SORT_ORDER = [
@@ -18,12 +17,16 @@ export const SEVERITY_UI_SORT_ORDER = [
   RiskSeverity.Critical,
 ];
 
-export const RISK_SEVERITY_COLOUR: { [k in RiskSeverity]: string } = {
-  [RiskSeverity.Unknown]: euiLightVars.euiColorMediumShade,
-  [RiskSeverity.Low]: SEVERITY_COLOR.low,
-  [RiskSeverity.Moderate]: SEVERITY_COLOR.medium,
-  [RiskSeverity.High]: SEVERITY_COLOR.high,
-  [RiskSeverity.Critical]: SEVERITY_COLOR.critical,
+/*
+ * Map Risk severity to EUI severity color pattern as per spec:
+ * https://eui.elastic.co/docs/patterns/severity/index.html#use-cases
+ */
+export const RISK_SEVERITY_COLOUR = {
+  [RiskSeverity.Unknown]: euiThemeVars.euiColorSeverityUnknown,
+  [RiskSeverity.Low]: euiThemeVars.euiColorSeverityNeutral,
+  [RiskSeverity.Moderate]: euiThemeVars.euiColorSeverityWarning,
+  [RiskSeverity.High]: euiThemeVars.euiColorSeverityRisk,
+  [RiskSeverity.Critical]: euiThemeVars.euiColorSeverityDanger,
 };
 
 type SnakeToCamelCaseString<S extends string> = S extends `${infer T}_${infer U}`
@@ -63,6 +66,9 @@ export enum HostRiskScoreQueryId {
  */
 export const formatRiskScore = (riskScore: number) =>
   (Math.round(riskScore * 100) / 100).toFixed(2);
+
+export const formatRiskScoreWholeNumber = (riskScore: number) =>
+  (Math.round(riskScore * 100) / 100).toFixed(0);
 
 export const FIRST_RECORD_PAGINATION = {
   cursorStart: 0,

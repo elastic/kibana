@@ -1,12 +1,26 @@
 {
   "search_application.post_behavioral_analytics_event": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "debug": "__flag__"
+    },
+    "url_components": {
+      "event_type": [
+        "page_view",
+        "search",
+        "search_click"
+      ]
+    },
     "methods": [
       "POST"
     ],
     "patterns": [
       "_application/analytics/{collection_name}/event/{event_type}"
     ],
-    "documentation": "http://todo.com/tbd",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-search-application-post-behavioral-analytics-event",
     "availability": {
       "stack": true,
       "serverless": false

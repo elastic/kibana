@@ -47,6 +47,9 @@
           "id": "kibStyleGuide"
         },
         {
+          "id": "kibHttpApiGuidelines"
+        },
+        {
           "id": "ktRFCProcess"
         },
         {
@@ -198,6 +201,9 @@
           "id": "kibDevTutorialDebugging"
         },
         {
+          "id": "kibDevTutorialDebuggingFipsTestFailures"
+        },
+        {
           "id": "kibDevTutorialBuildingDistributable",
           "label": "Building a Kibana distributable"
         },
@@ -280,8 +286,8 @@
           "label": "Kibana Page Template"
         },
         {
-          "id": "kibDevReactKibanaContext",
-          "label": "Kibana React Contexts"
+          "id": "kibDevRenderingService",
+          "label": "Core Rendering Service"
         },
         {
           "id": "kibDevDocsChromeRecentlyAccessed",

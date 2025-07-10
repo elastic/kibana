@@ -38,7 +38,7 @@ export async function pollResult(
         await verifyActionResult();
         resolve({});
       }
-    }, 1000);
+    }, 3000);
   }).catch((e) => {
     throw e;
   });

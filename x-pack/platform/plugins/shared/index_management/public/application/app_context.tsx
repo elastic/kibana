@@ -19,15 +19,18 @@ import {
   HttpSetup,
   IUiSettingsClient,
   OverlayStart,
+  ChromeStart,
 } from '@kbn/core/public';
 import type { MlPluginStart } from '@kbn/ml-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { ConsolePluginStart } from '@kbn/console-plugin/public';
+import type { StreamsPluginStart } from '@kbn/streams-plugin/public';
 
 import { EuiBreadcrumb } from '@elastic/eui';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ExtensionsService } from '../services';
 import { HttpService, NotificationService, UiMetricService } from './services';
 import { IndexManagementBreadcrumb } from './services/breadcrumbs';
@@ -43,6 +46,7 @@ export interface AppDependencies {
     http: HttpSetup;
     i18n: I18nStart;
     theme: ThemeServiceStart;
+    chrome: ChromeStart;
   };
   plugins: {
     usageCollection: UsageCollectionSetup;
@@ -52,6 +56,7 @@ export interface AppDependencies {
     console?: ConsolePluginStart;
     licensing?: LicensingPluginStart;
     ml?: MlPluginStart;
+    streams?: StreamsPluginStart;
   };
   services: {
     uiMetricService: UiMetricService;
@@ -70,6 +75,7 @@ export interface AppDependencies {
     enableTogglingDataRetention: boolean;
     enableProjectLevelRetentionChecks: boolean;
     enableSemanticText: boolean;
+    enforceAdaptiveAllocations: boolean;
   };
   history: ScopedHistory;
   setBreadcrumbs: (type: IndexManagementBreadcrumb, additionalBreadcrumb?: EuiBreadcrumb) => void;
@@ -88,6 +94,8 @@ export interface AppDependencies {
   };
 }
 
+const queryClient = new QueryClient({});
+
 export const AppContextProvider = ({
   children,
   value,
@@ -95,7 +103,11 @@ export const AppContextProvider = ({
   value: AppDependencies;
   children: React.ReactNode;
 }) => {
-  return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
+  return (
+    <AppContext.Provider value={value}>
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    </AppContext.Provider>
+  );
 };
 
 export const AppContextConsumer = AppContext.Consumer;

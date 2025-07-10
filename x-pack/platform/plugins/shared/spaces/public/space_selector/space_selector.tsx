@@ -18,17 +18,19 @@ import {
   EuiTextColor,
   EuiTitle,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import React, { Component, Fragment } from 'react';
 import ReactDOM from 'react-dom';
 import type { Observable, Subscription } from 'rxjs';
 
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
+import { useKbnFullScreenBgCss } from '@kbn/css-utils/public/full_screen_bg_css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaSolutionAvatar } from '@kbn/shared-ux-avatar-solution';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { euiThemeVars } from '@kbn/ui-theme';
 
 import { SpaceCards } from './components';
 import type { Space } from '../../common';
@@ -107,6 +109,12 @@ export class SpaceSelector extends Component<Props, State> {
   public render() {
     const { spaces, searchTerm } = this.state;
 
+    const panelStyles = css`
+      text-align: center;
+      margin-inline: auto;
+      max-width: 700px;
+    `;
+
     let filteredSpaces = spaces;
     if (searchTerm) {
       filteredSpaces = spaces.filter(
@@ -117,15 +125,13 @@ export class SpaceSelector extends Component<Props, State> {
     }
 
     return (
-      <KibanaPageTemplate className="spcSpaceSelector" data-test-subj="kibanaSpaceSelector">
-        {/* Portal the fixed background graphic so it doesn't affect page positioning or overlap on top of global banners */}
-        <EuiPortal>
-          <div
-            className="spcSelectorBackground spcSelectorBackground__nonMixinAttributes"
-            role="presentation"
-          />
-        </EuiPortal>
-
+      <KibanaPageTemplate
+        css={css`
+          background-color: transparent;
+        `}
+        data-test-subj="kibanaSpaceSelector"
+      >
+        <BackgroundPortal />
         <KibanaPageTemplate.Section color="transparent" paddingSize="xl">
           <EuiText textAlign="center" size="s">
             <EuiSpacer size="xxl" />
@@ -143,9 +149,13 @@ export class SpaceSelector extends Component<Props, State> {
             <EuiSpacer size="xxl" />
             <EuiTextColor color="subdued">
               <h1
-                // plain `eui` class undos forced focus style on non-EUI components
-                className="eui spcSpaceSelector__pageHeader"
-                tabIndex={0}
+                css={css`
+                  &:focus {
+                    outline: none;
+                    text-decoration: underline;
+                  }
+                `}
+                tabIndex={-1}
                 ref={this.setHeaderRef}
               >
                 <FormattedMessage
@@ -174,7 +184,7 @@ export class SpaceSelector extends Component<Props, State> {
           {!this.state.loading && !this.state.error && filteredSpaces.length === 0 && (
             <Fragment>
               <EuiSpacer />
-              <EuiPanel className="spcSpaceSelector__errorPanel" color="subdued">
+              <EuiPanel css={panelStyles} color="subdued">
                 <EuiTitle size="xs">
                   <h2>
                     {i18n.translate(
@@ -193,7 +203,7 @@ export class SpaceSelector extends Component<Props, State> {
           {!this.state.loading && this.state.error && (
             <Fragment>
               <EuiSpacer />
-              <EuiPanel color="danger" className="spcSpaceSelector__errorPanel">
+              <EuiPanel css={panelStyles} color="danger">
                 <EuiText size="s" color="danger">
                   <h2>
                     <FormattedMessage
@@ -228,7 +238,13 @@ export class SpaceSelector extends Component<Props, State> {
 
     return (
       <>
-        <div className="spcSpaceSelector__searchHolder">
+        <div
+          css={css`
+            width: ${euiThemeVars.euiFormMaxWidth};
+            max-width: 100%;
+            margin-inline: auto;
+          `}
+        >
           <EuiFieldSearch
             placeholder={inputLabel}
             aria-label={inputLabel}
@@ -249,15 +265,24 @@ export class SpaceSelector extends Component<Props, State> {
 }
 
 export const renderSpaceSelectorApp = (
-  services: Pick<CoreStart, 'analytics' | 'i18n' | 'theme' | 'userProfile'>,
+  services: Pick<CoreStart, 'analytics' | 'i18n' | 'theme' | 'userProfile' | 'rendering'>,
   { element }: Pick<AppMountParameters, 'element'>,
   props: Props
 ) => {
-  ReactDOM.render(
-    <KibanaRenderContextProvider {...services}>
-      <SpaceSelector {...props} />
-    </KibanaRenderContextProvider>,
-    element
-  );
+  ReactDOM.render(services.rendering.addContext(<SpaceSelector {...props} />), element);
   return () => ReactDOM.unmountComponentAtNode(element);
 };
+
+// portal the fixed background graphic so it doesn't affect page positioning or overlap on top of global banners
+const BackgroundPortal = React.memo(function BackgroundPortal() {
+  const kbnFullScreenBgCss = useKbnFullScreenBgCss();
+  return (
+    <EuiPortal>
+      <div
+        className="spcSelectorBackground spcSelectorBackground__nonMixinAttributes"
+        css={kbnFullScreenBgCss}
+        role="presentation"
+      />
+    </EuiPortal>
+  );
+});

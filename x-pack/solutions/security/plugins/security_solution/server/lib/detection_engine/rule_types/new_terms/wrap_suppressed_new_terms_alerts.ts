@@ -5,23 +5,21 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 import objectHash from 'object-hash';
 import { TIMESTAMP } from '@kbn/rule-data-utils';
 import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
 import type {
-  BaseFieldsLatest,
-  NewTermsFieldsLatest,
-  WrappedFieldsLatest,
+  DetectionAlertLatest,
+  NewTermsAlertLatest,
+  WrappedAlert,
 } from '../../../../../common/api/detection_engine/model/alerts';
 import { ALERT_NEW_TERMS } from '../../../../../common/field_maps/field_names';
-import type { ConfigType } from '../../../../config';
-import type { CompleteRule, NewTermsRuleParams } from '../../rule_schema';
 import { buildReasonMessageForNewTermsAlert } from '../utils/reason_formatters';
 import { getSuppressionAlertFields, getSuppressionTerms } from '../utils';
-import type { SignalSource } from '../types';
-import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
+import type { SecuritySharedParams, SignalSource } from '../types';
 import { transformHitToAlert } from '../factories/utils/transform_hit_to_alert';
+import type { NewTermsRuleParams } from '../../rule_schema';
 
 export interface EventsAndTerms {
   event: estypes.SearchHit<SignalSource>;
@@ -29,32 +27,15 @@ export interface EventsAndTerms {
 }
 
 export const wrapSuppressedNewTermsAlerts = ({
+  sharedParams,
   eventsAndTerms,
-  spaceId,
-  completeRule,
-  mergeStrategy,
-  indicesToQuery,
-  alertTimestampOverride,
-  ruleExecutionLogger,
-  publicBaseUrl,
-  primaryTimestamp,
-  secondaryTimestamp,
-  intendedTimestamp,
 }: {
+  sharedParams: SecuritySharedParams<NewTermsRuleParams>;
   eventsAndTerms: EventsAndTerms[];
-  spaceId: string | null | undefined;
-  completeRule: CompleteRule<NewTermsRuleParams>;
-  mergeStrategy: ConfigType['alertMergeStrategy'];
-  indicesToQuery: string[];
-  alertTimestampOverride: Date | undefined;
-  ruleExecutionLogger: IRuleExecutionLogForExecutors;
-  publicBaseUrl: string | undefined;
-  primaryTimestamp: string;
-  secondaryTimestamp?: string;
-  intendedTimestamp: Date | undefined;
-}): Array<WrappedFieldsLatest<NewTermsFieldsLatest & SuppressionFieldsLatest>> => {
+}): Array<WrappedAlert<NewTermsAlertLatest & SuppressionFieldsLatest>> => {
   return eventsAndTerms.map((eventAndTerms) => {
     const event = eventAndTerms.event;
+    const { completeRule, spaceId } = sharedParams;
 
     const suppressionTerms = getSuppressionTerms({
       alertSuppression: completeRule?.ruleParams?.alertSuppression,
@@ -71,21 +52,12 @@ export const wrapSuppressedNewTermsAlerts = ({
       eventAndTerms.newTerms,
     ]);
 
-    const baseAlert: BaseFieldsLatest = transformHitToAlert({
-      spaceId,
-      completeRule,
+    const baseAlert: DetectionAlertLatest = transformHitToAlert({
+      sharedParams,
       doc: event,
-      mergeStrategy,
-      ignoreFields: {},
-      ignoreFieldsRegexes: [],
       applyOverrides: true,
       buildReasonMessage: buildReasonMessageForNewTermsAlert,
-      indicesToQuery,
-      alertTimestampOverride,
-      ruleExecutionLogger,
       alertUuid: id,
-      publicBaseUrl,
-      intendedTimestamp,
     });
 
     return {
@@ -95,8 +67,8 @@ export const wrapSuppressedNewTermsAlerts = ({
         ...baseAlert,
         [ALERT_NEW_TERMS]: eventAndTerms.newTerms,
         ...getSuppressionAlertFields({
-          primaryTimestamp,
-          secondaryTimestamp,
+          primaryTimestamp: sharedParams.primaryTimestamp,
+          secondaryTimestamp: sharedParams.secondaryTimestamp,
           fields: event.fields,
           suppressionTerms,
           fallbackTimestamp: baseAlert[TIMESTAMP],

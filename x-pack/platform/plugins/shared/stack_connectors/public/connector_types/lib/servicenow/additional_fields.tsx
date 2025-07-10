@@ -17,6 +17,7 @@ interface AdditionalFieldsProps {
   errors?: string[];
   messageVariables?: ActionVariable[];
   onChange: (value: string | null) => void;
+  isOptionalField?: boolean;
 }
 
 export const AdditionalFieldsComponent: React.FC<AdditionalFieldsProps> = ({
@@ -24,6 +25,7 @@ export const AdditionalFieldsComponent: React.FC<AdditionalFieldsProps> = ({
   errors,
   messageVariables,
   onChange,
+  isOptionalField = false,
 }) => {
   return (
     <JsonEditorWithMessageVariables
@@ -38,7 +40,7 @@ export const AdditionalFieldsComponent: React.FC<AdditionalFieldsProps> = ({
           <EuiIconTip
             size="s"
             color="subdued"
-            type="questionInCircle"
+            type="question"
             className="eui-alignTop"
             data-test-subj="otherFieldsHelpTooltip"
             aria-label={i18n.ADDITIONAL_FIELDS_HELP}
@@ -47,6 +49,7 @@ export const AdditionalFieldsComponent: React.FC<AdditionalFieldsProps> = ({
         </>
       }
       onDocumentsChange={(json: string) => onChange(isEmpty(json) ? null : json)}
+      isOptionalField={isOptionalField}
     />
   );
 };

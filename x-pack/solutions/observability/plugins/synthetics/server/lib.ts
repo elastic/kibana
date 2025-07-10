@@ -6,17 +6,17 @@
  */
 
 import {
-  MsearchMultisearchBody,
+  SearchSearchRequestBody,
   MsearchMultisearchHeader,
 } from '@elastic/elasticsearch/lib/api/types';
-import {
+import type {
   ElasticsearchClient,
+  ElasticsearchRequestLoggingOptions,
   SavedObjectsClientContract,
   KibanaRequest,
   CoreRequestHandlerContext,
 } from '@kbn/core/server';
-import chalk from 'chalk';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type { ESSearchResponse, InferSearchResponseOf } from '@kbn/es-types';
 import { RequestStatus } from '@kbn/inspector-plugin/common';
 import { InspectResponse } from '@kbn/observability-plugin/typings/common';
@@ -77,19 +77,25 @@ export class SyntheticsEsClient {
     let esError: any;
 
     const esParams = { index: SYNTHETICS_INDEX_PATTERN, ...params };
-    const startTime = process.hrtime();
     const startTimeNow = Date.now();
 
     let esRequestStatus: RequestStatus = RequestStatus.PENDING;
 
+    const isInspectorEnabled = await this.getInspectEnabled();
+
     try {
-      res = await this.baseESClient.search(esParams, { meta: true });
+      res = await this.baseESClient.search(esParams, {
+        meta: true,
+        context: {
+          loggingOptions: getElasticsearchRequestLoggingOptions(),
+        },
+      });
       esRequestStatus = RequestStatus.OK;
     } catch (e) {
       esError = e;
       esRequestStatus = RequestStatus.ERROR;
     }
-    const isInspectorEnabled = await this.getInspectEnabled();
+
     if ((isInspectorEnabled || this.isDev) && this.request) {
       this.inspectableEsQueries.push(
         getInspectResponse({
@@ -104,16 +110,6 @@ export class SyntheticsEsClient {
       );
     }
 
-    if (isInspectorEnabled && this.request) {
-      debugESCall({
-        startTime,
-        request: this.request,
-        esError,
-        operationName: 'search',
-        params: esParams,
-      });
-    }
-
     if (esError) {
       throw esError;
     }
@@ -125,10 +121,10 @@ export class SyntheticsEsClient {
     TSearchRequest extends estypes.SearchRequest = estypes.SearchRequest,
     TDocument = unknown
   >(
-    requests: MsearchMultisearchBody[],
+    requests: SearchSearchRequestBody[],
     operationName?: string
   ): Promise<{ responses: Array<InferSearchResponseOf<TDocument, TSearchRequest>> }> {
-    const searches: Array<MsearchMultisearchHeader | MsearchMultisearchBody> = [];
+    const searches: Array<MsearchMultisearchHeader | SearchSearchRequestBody> = [];
     for (const request of requests) {
       searches.push({ index: SYNTHETICS_INDEX_PATTERN, ignore_unavailable: true });
       searches.push(request);
@@ -180,24 +176,16 @@ export class SyntheticsEsClient {
     let esError: any;
 
     const esParams = { index: SYNTHETICS_INDEX_PATTERN, ...params };
-    const startTime = process.hrtime();
 
     try {
-      res = await this.baseESClient.count(esParams, { meta: true });
+      res = await this.baseESClient.count(esParams, {
+        meta: true,
+        context: {
+          loggingOptions: getElasticsearchRequestLoggingOptions(),
+        },
+      });
     } catch (e) {
       esError = e;
-    }
-
-    const isInspectorEnabled = await this.getInspectEnabled();
-
-    if (isInspectorEnabled && this.request) {
-      debugESCall({
-        startTime,
-        request: this.request,
-        esError,
-        operationName: 'count',
-        params: esParams,
-      });
     }
 
     if (esError) {
@@ -236,44 +224,12 @@ export function createEsParams<T extends estypes.SearchRequest>(params: T): T {
   return params;
 }
 
-/* eslint-disable no-console */
-
-function formatObj(obj: Record<string, any>) {
-  return JSON.stringify(obj);
-}
-
-export function debugESCall({
-  operationName,
-  params,
-  request,
-  esError,
-  startTime,
-}: {
-  operationName: string;
-  params: Record<string, any>;
-  request: KibanaRequest;
-  esError: any;
-  startTime: [number, number];
-}) {
-  const highlightColor = esError ? 'bgRed' : 'inverse';
-  const diff = process.hrtime(startTime);
-  const duration = `${Math.round(diff[0] * 1000 + diff[1] / 1e6)}ms`;
-  const routeInfo = `${request.route.method.toUpperCase()} ${request.route.path}`;
-
-  console.log(chalk.bold[highlightColor](`=== Debug: ${routeInfo} (${duration}) ===`));
-
-  if (operationName === 'search') {
-    console.log(`GET ${params.index}/_${operationName}`);
-    console.log(formatObj(params.body));
-  } else {
-    console.log(chalk.bold('ES operation:'), operationName);
-
-    console.log(chalk.bold('ES query:'));
-    console.log(formatObj(params));
-  }
-  console.log(`\n`);
-}
-
 export const isTestUser = (server: SyntheticsServerSetup) => {
   return server.config.service?.username === 'localKibanaIntegrationTestsUser';
 };
+
+function getElasticsearchRequestLoggingOptions(): ElasticsearchRequestLoggingOptions {
+  return {
+    loggerName: 'synthetics',
+  };
+}

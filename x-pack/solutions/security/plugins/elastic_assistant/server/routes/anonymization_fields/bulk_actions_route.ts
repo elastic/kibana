@@ -22,7 +22,7 @@ import {
   BulkCrudActionSummary,
   PerformAnonymizationFieldsBulkActionRequestBody,
   PerformAnonymizationFieldsBulkActionResponse,
-} from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
+} from '@kbn/elastic-assistant-common/impl/schemas';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { ANONYMIZATION_FIELDS_TABLE_MAX_PAGE_SIZE } from '../../../common/constants';
 import { ElasticAssistantPluginRouter } from '../../types';
@@ -165,7 +165,7 @@ export const bulkActionAnonymizationFieldsRoute = (
         try {
           const ctx = await context.resolve(['core', 'elasticAssistant', 'licensing']);
           // Perform license and authenticated user checks
-          const checkResponse = performChecks({
+          const checkResponse = await performChecks({
             context: ctx,
             request,
             response,

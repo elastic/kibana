@@ -2,21 +2,14 @@
   "extends": "../../../../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "target/types",
-    "types": [
-      "jest",
-      "node"
-    ]
+    "types": ["jest", "node"]
   },
-  "include": [
-    "**/*.ts"
-  ],
+  "include": ["**/*.ts"],
   "kbn_references": [
     "@kbn/i18n",
     "@kbn/esql-utils",
     "@kbn/esql-ast",
-    "@kbn/esql-validation-autocomplete"
+    "@kbn/datemath"
   ],
-  "exclude": [
-    "target/**/*",
-  ]
+  "exclude": ["target/**/*"]
 }

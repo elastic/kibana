@@ -10,37 +10,45 @@ import type { Logger } from '@kbn/core/server';
 import { PUBLIC_ROUTES } from '@kbn/reporting-common';
 import type { ReportingCore } from '../..';
 import { authorizedUserPreRouting } from '../common';
-import { RequestHandler } from '../common/generate';
+import { GenerateRequestHandler } from '../common/request_handler';
 
 export function registerGenerationRoutesPublic(reporting: ReportingCore, logger: Logger) {
   const setupDeps = reporting.getPluginSetupDeps();
   const { router } = setupDeps;
 
-  const kibanaAccessControlTags = ['access:generateReport'];
+  const kibanaAccessControlTags = ['generateReport'];
 
   const registerPublicPostGenerationEndpoint = () => {
     const path = `${PUBLIC_ROUTES.GENERATE_PREFIX}/{exportType}`;
     router.post(
       {
         path,
-        validate: RequestHandler.getValidation(),
-        options: { tags: kibanaAccessControlTags, access: 'public' },
+        security: {
+          authz: {
+            requiredPrivileges: kibanaAccessControlTags,
+          },
+        },
+        validate: GenerateRequestHandler.getValidation(),
+        options: {
+          tags: kibanaAccessControlTags.map((controlAccessTag) => `access:${controlAccessTag}`),
+          access: 'public',
+        },
       },
       authorizedUserPreRouting(reporting, async (user, context, req, res) => {
         try {
-          const requestHandler = new RequestHandler(
+          const requestHandler = new GenerateRequestHandler({
             reporting,
             user,
             context,
             path,
             req,
             res,
-            logger
-          );
-          return await requestHandler.handleGenerateRequest(
-            req.params.exportType,
-            requestHandler.getJobParams()
-          );
+            logger,
+          });
+          return await requestHandler.handleRequest({
+            exportTypeId: req.params.exportType,
+            jobParams: requestHandler.getJobParams(),
+          });
         } catch (err) {
           if (err instanceof KibanaResponse) {
             return err;
@@ -56,6 +64,12 @@ export function registerGenerationRoutesPublic(reporting: ReportingCore, logger:
     router.get(
       {
         path: `${PUBLIC_ROUTES.GENERATE_PREFIX}/{p*}`,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: false,
         options: { access: 'public' },
       },

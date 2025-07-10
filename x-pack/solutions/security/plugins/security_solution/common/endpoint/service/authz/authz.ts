@@ -63,10 +63,11 @@ export const calculateEndpointAuthz = (
   productFeaturesService?: ProductFeaturesService // only exists on the server side
 ): EndpointAuthz => {
   const hasAuth = hasAuthFactory(fleetAuthz, productFeaturesService);
+  const hasSuperuserRole = userRoles.includes('superuser');
 
   const isPlatinumPlusLicense = licenseService.isPlatinumPlus();
   const isEnterpriseLicense = licenseService.isEnterprise();
-  const hasEndpointManagementAccess = userRoles.includes('superuser');
+  const hasEndpointManagementAccess = hasSuperuserRole;
 
   const canWriteSecuritySolution = hasAuth('writeSecuritySolution', { action: 'ui:crud' });
   const canReadSecuritySolution = hasAuth('readSecuritySolution', { action: 'ui:show' });
@@ -97,8 +98,14 @@ export const calculateEndpointAuthz = (
   const canReadEndpointExceptions = hasAuth('showEndpointExceptions');
   const canWriteEndpointExceptions = hasAuth('crudEndpointExceptions');
 
+  const canManageGlobalArtifacts = hasAuth('writeGlobalArtifacts');
+
   const canReadWorkflowInsights = hasAuth('readWorkflowInsights');
   const canWriteWorkflowInsights = hasAuth('writeWorkflowInsights');
+
+  // These are currently tied to the superuser role
+  const canReadAdminData = hasSuperuserRole;
+  const canWriteAdminData = hasSuperuserRole;
 
   const authz: EndpointAuthz = {
     canWriteSecuritySolution,
@@ -156,6 +163,13 @@ export const calculateEndpointAuthz = (
     canReadEventFilters,
     canReadEndpointExceptions,
     canWriteEndpointExceptions,
+    canManageGlobalArtifacts,
+
+    // ---------------------------------------------------------
+    // Special Purpose
+    // ---------------------------------------------------------
+    canReadAdminData,
+    canWriteAdminData,
   };
 
   // Response console is only accessible when license is Enterprise and user has access to any
@@ -212,8 +226,11 @@ export const getEndpointAuthzInitialState = (): EndpointAuthz => {
     canReadEventFilters: false,
     canReadEndpointExceptions: false,
     canWriteEndpointExceptions: false,
+    canManageGlobalArtifacts: false,
     canReadWorkflowInsights: false,
     canWriteWorkflowInsights: false,
+    canReadAdminData: false,
+    canWriteAdminData: false,
   };
 };
 

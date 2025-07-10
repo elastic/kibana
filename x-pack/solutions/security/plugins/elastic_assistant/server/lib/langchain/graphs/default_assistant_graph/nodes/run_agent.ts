@@ -7,7 +7,17 @@
 
 import { RunnableConfig } from '@langchain/core/runnables';
 import { AgentRunnableSequence } from 'langchain/dist/agents/agent';
-import { formatLatestUserMessage } from '../prompts';
+import { BaseMessage } from '@langchain/core/messages';
+import {
+  ContentReferencesStore,
+  contentReferenceString,
+  DocumentEntry,
+  knowledgeBaseReference,
+  removeContentReferences,
+} from '@kbn/elastic-assistant-common';
+import { INCLUDE_CITATIONS } from '../../../../prompt/prompts';
+import { promptGroupId } from '../../../../prompt/local_prompt_object';
+import { getPrompt, promptDictionary } from '../../../../prompt';
 import { AgentState, NodeParamsBase } from '../types';
 import { NodeType } from '../constants';
 import { AIAssistantKnowledgeBaseDataClient } from '../../../../../ai_assistant_data_clients/knowledge_base';
@@ -34,28 +44,46 @@ const NO_KNOWLEDGE_HISTORY = '[No existing knowledge history]';
  * @param kbDataClient -  Data client for accessing the Knowledge Base on behalf of the current user
  */
 export async function runAgent({
+  actionsClient,
   logger,
+  savedObjectsClient,
   state,
   agentRunnable,
   config,
   kbDataClient,
+  contentReferencesStore,
 }: RunAgentParams): Promise<Partial<AgentState>> {
   logger.debug(() => `${NodeType.AGENT}: Node state:\n${JSON.stringify(state, null, 2)}`);
 
-  const knowledgeHistory = await kbDataClient?.getRequiredKnowledgeBaseDocumentEntries();
+  const knowledgeHistory: DocumentEntry[] =
+    (await kbDataClient?.getRequiredKnowledgeBaseDocumentEntries()) ?? [];
+  const citedKnowledgeHistory = knowledgeHistory.map(enrichDocument(contentReferencesStore));
+
+  const userPrompt =
+    state.llmType === 'gemini'
+      ? await getPrompt({
+          actionsClient,
+          connectorId: state.connectorId,
+          promptId: promptDictionary.userPrompt,
+          promptGroupId: promptGroupId.aiAssistant,
+          provider: 'gemini',
+          savedObjectsClient,
+        })
+      : '';
   const agentOutcome = await agentRunnable
     .withConfig({ tags: [AGENT_NODE_TAG], signal: config?.signal })
     .invoke(
       {
         ...state,
         knowledge_history: `${KNOWLEDGE_HISTORY_PREFIX}\n${
-          knowledgeHistory?.length
-            ? JSON.stringify(knowledgeHistory.map((e) => e.text))
+          citedKnowledgeHistory.length
+            ? JSON.stringify(citedKnowledgeHistory.map((e) => e.text))
             : NO_KNOWLEDGE_HISTORY
         }`,
+        citations_prompt: contentReferencesStore.options?.disabled ? '' : INCLUDE_CITATIONS,
         // prepend any user prompt (gemini)
-        input: formatLatestUserMessage(state.input, state.llmType),
-        chat_history: state.messages, // TODO: Message de-dupe with ...state spread
+        input: `${userPrompt}${state.input}`,
+        chat_history: sanitizeChatHistory(state.messages), // TODO: Message de-dupe with ...state spread
       },
       config
     );
@@ -65,3 +93,31 @@ export async function runAgent({
     lastNode: NodeType.AGENT,
   };
 }
+
+/**
+ * Removes content references from chat history
+ */
+const sanitizeChatHistory = (messages: BaseMessage[]): BaseMessage[] => {
+  return messages.map((message) => {
+    if (!Array.isArray(message.content)) {
+      message.content = removeContentReferences(message.content).trim();
+    }
+    return message;
+  });
+};
+
+const enrichDocument = (contentReferencesStore: ContentReferencesStore) => {
+  return (document: DocumentEntry): DocumentEntry => {
+    if (document.id == null) {
+      return document;
+    }
+    const documentId = document.id;
+    const reference = contentReferencesStore.add((p) =>
+      knowledgeBaseReference(p.id, document.name, documentId)
+    );
+    return {
+      ...document,
+      text: `${contentReferenceString(reference)}\n${document.text}`,
+    };
+  };
+};

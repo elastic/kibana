@@ -42,7 +42,8 @@ describe('Swimlane Cases Fields', () => {
         <Fields connector={invalidConnector} />
       </MockFormWrapperComponent>
     );
-    expect(screen.queryByText(i18n.EMPTY_MAPPING_WARNING_TITLE)).toBeTruthy();
+
+    expect(screen.getByText(i18n.EMPTY_MAPPING_WARNING_TITLE)).toBeInTheDocument();
   });
 
   it('shows the mapping error callout when the connector is of type alerts', () => {
@@ -59,6 +60,6 @@ describe('Swimlane Cases Fields', () => {
         <Fields connector={invalidConnector} />
       </MockFormWrapperComponent>
     );
-    expect(screen.queryByText(i18n.EMPTY_MAPPING_WARNING_TITLE)).toBeTruthy();
+    expect(screen.getByText(i18n.EMPTY_MAPPING_WARNING_TITLE)).toBeInTheDocument();
   });
 });

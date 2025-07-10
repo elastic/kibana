@@ -24,6 +24,7 @@ import {
   EPM_API_ROUTES,
   PACKAGE_POLICY_API_ROUTES,
 } from '@kbn/fleet-plugin/common';
+import type { HttpFetchOptionsWithPath } from '@kbn/core-http-browser';
 import type { ResponseProvidersInterface } from '../../common/mock/endpoint/http_handler_mock_factory';
 import {
   composeHttpHandlerMocks,
@@ -186,6 +187,8 @@ export const fleetGetEndpointPackagePolicyHttpMock =
 export type FleetGetEndpointPackagePolicyListHttpMockInterface = ResponseProvidersInterface<{
   endpointPackagePolicyList: () => GetPolicyListResponse;
 }>;
+// TODO:PT delete this mock (duplicate against the fleet list api)
+/** @deprecated use `fleetGetPackagePoliciesListHttpMock` instead */
 export const fleetGetEndpointPackagePolicyListHttpMock =
   httpHandlerMockFactory<FleetGetEndpointPackagePolicyListHttpMockInterface>([
     {
@@ -292,7 +295,7 @@ export const fleetBulkGetAgentPolicyListHttpMock =
   ]);
 
 export type FleetBulkGetPackagePoliciesListHttpMockInterface = ResponseProvidersInterface<{
-  bulkPackagePolicies: () => BulkGetPackagePoliciesResponse;
+  bulkPackagePolicies: (options?: HttpFetchOptionsWithPath) => BulkGetPackagePoliciesResponse;
 }>;
 export const fleetBulkGetPackagePoliciesListHttpMock =
   httpHandlerMockFactory<FleetBulkGetPackagePoliciesListHttpMockInterface>([
@@ -300,7 +303,7 @@ export const fleetBulkGetPackagePoliciesListHttpMock =
       id: 'bulkPackagePolicies',
       path: PACKAGE_POLICY_API_ROUTES.BULK_GET_PATTERN,
       method: 'post',
-      handler: ({ body }) => {
+      handler: (_) => {
         const generator = new EndpointDocGenerator('seed');
         const fleetPackagePolicyGenerator = new FleetPackagePolicyGenerator('seed');
         const endpointMetadata = generator.generateHostMetadata();
@@ -318,13 +321,6 @@ export const fleetBulkGetPackagePoliciesListHttpMock =
           // FIXME: remove hard-coded IDs below and get them from the new FleetPackagePolicyGenerator (#2262)
           'ddf6570b-9175-4a6d-b288-61a09771c647',
           'b8e616ae-44fc-4be7-846c-ce8fa5c082dd',
-
-          // And finally, include any kql filters for package policies ids
-          ...getPackagePoliciesFromKueryString(
-            `${AGENT_POLICY_SAVED_OBJECT_TYPE}.package_policies: (${(
-              JSON.parse(body?.toString() ?? '{}')?.ids as string[]
-            ).join(' or ')} )`
-          ),
         ];
 
         return {
@@ -347,7 +343,7 @@ export const fleetGetPackagePoliciesListHttpMock =
       id: 'packagePolicies',
       path: PACKAGE_POLICY_API_ROUTES.LIST_PATTERN,
       method: 'get',
-      handler: ({ query }) => {
+      handler: () => {
         const generator = new EndpointDocGenerator('seed');
         const fleetPackagePolicyGenerator = new FleetPackagePolicyGenerator('seed');
         const endpointMetadata = generator.generateHostMetadata();
@@ -365,13 +361,6 @@ export const fleetGetPackagePoliciesListHttpMock =
           // FIXME: remove hard-coded IDs below and get them from the new FleetPackagePolicyGenerator (#2262)
           'ddf6570b-9175-4a6d-b288-61a09771c647',
           'b8e616ae-44fc-4be7-846c-ce8fa5c082dd',
-
-          // And finally, include any kql filters for package policies ids
-          ...getPackagePoliciesFromKueryString(
-            `${AGENT_POLICY_SAVED_OBJECT_TYPE}.package_policies: (${(query?.ids as string[]).join(
-              ' or '
-            )} )`
-          ),
         ];
 
         return {
@@ -415,10 +404,10 @@ export const fleetGetAgentStatusHttpMock =
       id: 'agentStatus',
       path: AGENT_API_ROUTES.STATUS_PATTERN,
       method: 'get',
-      handler: () => {
+      handler: (): GetAgentStatusResponse => {
         return {
           results: {
-            total: 50,
+            active: 50,
             inactive: 5,
             online: 40,
             error: 0,
@@ -426,6 +415,8 @@ export const fleetGetAgentStatusHttpMock =
             updating: 0,
             other: 0,
             events: 0,
+            unenrolled: 0,
+            all: 0,
           },
         };
       },

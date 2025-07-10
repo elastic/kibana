@@ -1,0 +1,1501 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`getUnitedEntityDefinition generic entityManagerDefinition 1`] = `
+Object {
+  "displayNameTemplate": "{{entity.id}}",
+  "filter": "",
+  "id": "security_generic_test",
+  "identityFields": Array [
+    Object {
+      "field": "entity.id",
+      "optional": false,
+    },
+  ],
+  "indexPatterns": Array [
+    "test*",
+  ],
+  "latest": Object {
+    "lookbackPeriod": "3h",
+    "settings": Object {
+      "docsPerSecond": -1,
+      "frequency": "1m",
+      "maxPageSearchSize": 500,
+      "syncDelay": "1m",
+      "syncField": "@timestamp",
+      "timeout": "180s",
+    },
+    "timestampField": "@timestamp",
+  },
+  "managed": true,
+  "metadata": Array [
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "entity.name",
+      "source": "entity.name",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "entity.source",
+      "source": "entity.source",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "entity.type",
+      "source": "entity.type",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "entity.sub_type",
+      "source": "entity.sub_type",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "entity.url",
+      "source": "entity.url",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "cloud.account.id",
+      "source": "cloud.account.id",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "cloud.account.name",
+      "source": "cloud.account.name",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "cloud.availability_zone",
+      "source": "cloud.availability_zone",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "cloud.instance.id",
+      "source": "cloud.instance.id",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "cloud.instance.name",
+      "source": "cloud.instance.name",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "cloud.machine.type",
+      "source": "cloud.machine.type",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "cloud.project.id",
+      "source": "cloud.project.id",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "cloud.project.name",
+      "source": "cloud.project.name",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "cloud.provider",
+      "source": "cloud.provider",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "cloud.region",
+      "source": "cloud.region",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "cloud.service.name",
+      "source": "cloud.service.name",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "host.architecture",
+      "source": "host.architecture",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "host.boot.id",
+      "source": "host.boot.id",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "host.cpu.usage",
+      "source": "host.cpu.usage",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "host.disk.read.bytes",
+      "source": "host.disk.read.bytes",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "host.disk.write.bytes",
+      "source": "host.disk.write.bytes",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "host.domain",
+      "source": "host.domain",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "host.hostname",
+      "source": "host.hostname",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "host.id",
+      "source": "host.id",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "host.mac",
+      "source": "host.mac",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "host.name",
+      "source": "host.name",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "host.network.egress.bytes",
+      "source": "host.network.egress.bytes",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "host.network.egress.packets",
+      "source": "host.network.egress.packets",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "host.network.ingress.bytes",
+      "source": "host.network.ingress.bytes",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "host.network.ingress.packets",
+      "source": "host.network.ingress.packets",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "host.pid_ns_ino",
+      "source": "host.pid_ns_ino",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "host.type",
+      "source": "host.type",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "host.uptime",
+      "source": "host.uptime",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "host.ip",
+      "source": "host.ip",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "user.domain",
+      "source": "user.domain",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "user.email",
+      "source": "user.email",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "user.full_name",
+      "source": "user.full_name",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "user.roles",
+      "source": "user.roles",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "user.hash",
+      "source": "user.hash",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "user.id",
+      "source": "user.id",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "user.name",
+      "source": "user.name",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "user.full_name",
+      "source": "user.full_name",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "orchestrator.api_version",
+      "source": "orchestrator.api_version",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "orchestrator.cluster.id",
+      "source": "orchestrator.cluster.id",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "orchestrator.cluster.name",
+      "source": "orchestrator.cluster.name",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "orchestrator.cluster.url",
+      "source": "orchestrator.cluster.url",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "orchestrator.cluster.version",
+      "source": "orchestrator.cluster.version",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "orchestrator.namespace",
+      "source": "orchestrator.namespace",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "orchestrator.organization",
+      "source": "orchestrator.organization",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "orchestrator.resource.annotation",
+      "source": "orchestrator.resource.annotation",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "orchestrator.resource.id",
+      "source": "orchestrator.resource.id",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "orchestrator.resource.ip",
+      "source": "orchestrator.resource.ip",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "orchestrator.resource.label",
+      "source": "orchestrator.resource.label",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "orchestrator.resource.name",
+      "source": "orchestrator.resource.name",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "orchestrator.resource.parent.type",
+      "source": "orchestrator.resource.parent.type",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "orchestrator.resource.type",
+      "source": "orchestrator.resource.type",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "orchestrator.type",
+      "source": "orchestrator.type",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "asc",
+        },
+        "type": "top_value",
+      },
+      "destination": "entity.source",
+      "source": "_index",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "asset.criticality",
+      "source": "asset.criticality",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "entity.risk.calculated_level",
+      "source": "entity.risk.calculated_level",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "entity.risk.calculated_score",
+      "source": "entity.risk.calculated_score",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "entity.risk.calculated_score_norm",
+      "source": "entity.risk.calculated_score_norm",
+    },
+  ],
+  "name": "Security 'generic' Entity Store Definition",
+  "type": "generic",
+  "version": "1.0.0",
+}
+`;
+
+exports[`getUnitedEntityDefinition generic mapping 1`] = `
+Object {
+  "properties": Object {
+    "@timestamp": Object {
+      "type": "date",
+    },
+    "asset.criticality": Object {
+      "type": "keyword",
+    },
+    "cloud.account.id": Object {
+      "type": "keyword",
+    },
+    "cloud.account.name": Object {
+      "type": "keyword",
+    },
+    "cloud.availability_zone": Object {
+      "type": "keyword",
+    },
+    "cloud.instance.id": Object {
+      "type": "keyword",
+    },
+    "cloud.instance.name": Object {
+      "type": "keyword",
+    },
+    "cloud.machine.type": Object {
+      "type": "keyword",
+    },
+    "cloud.project.id": Object {
+      "type": "keyword",
+    },
+    "cloud.project.name": Object {
+      "type": "keyword",
+    },
+    "cloud.provider": Object {
+      "type": "keyword",
+    },
+    "cloud.region": Object {
+      "type": "keyword",
+    },
+    "cloud.service.name": Object {
+      "type": "keyword",
+    },
+    "entity.id": Object {
+      "type": "keyword",
+    },
+    "entity.name": Object {
+      "type": "keyword",
+    },
+    "entity.risk.calculated_level": Object {
+      "type": "keyword",
+    },
+    "entity.risk.calculated_score": Object {
+      "type": "float",
+    },
+    "entity.risk.calculated_score_norm": Object {
+      "type": "float",
+    },
+    "entity.source": Object {
+      "type": "keyword",
+    },
+    "entity.sub_type": Object {
+      "type": "keyword",
+    },
+    "entity.type": Object {
+      "type": "keyword",
+    },
+    "entity.url": Object {
+      "type": "keyword",
+    },
+    "host.architecture": Object {
+      "type": "keyword",
+    },
+    "host.boot.id": Object {
+      "type": "keyword",
+    },
+    "host.cpu.usage": Object {
+      "type": "keyword",
+    },
+    "host.disk.read.bytes": Object {
+      "type": "keyword",
+    },
+    "host.disk.write.bytes": Object {
+      "type": "keyword",
+    },
+    "host.domain": Object {
+      "type": "keyword",
+    },
+    "host.hostname": Object {
+      "type": "keyword",
+    },
+    "host.id": Object {
+      "type": "keyword",
+    },
+    "host.ip": Object {
+      "type": "ip",
+    },
+    "host.mac": Object {
+      "type": "keyword",
+    },
+    "host.name": Object {
+      "type": "keyword",
+    },
+    "host.network.egress.bytes": Object {
+      "type": "keyword",
+    },
+    "host.network.egress.packets": Object {
+      "type": "keyword",
+    },
+    "host.network.ingress.bytes": Object {
+      "type": "keyword",
+    },
+    "host.network.ingress.packets": Object {
+      "type": "keyword",
+    },
+    "host.pid_ns_ino": Object {
+      "type": "keyword",
+    },
+    "host.type": Object {
+      "type": "keyword",
+    },
+    "host.uptime": Object {
+      "type": "keyword",
+    },
+    "orchestrator.api_version": Object {
+      "type": "keyword",
+    },
+    "orchestrator.cluster.id": Object {
+      "type": "keyword",
+    },
+    "orchestrator.cluster.name": Object {
+      "type": "keyword",
+    },
+    "orchestrator.cluster.url": Object {
+      "type": "keyword",
+    },
+    "orchestrator.cluster.version": Object {
+      "type": "keyword",
+    },
+    "orchestrator.namespace": Object {
+      "type": "keyword",
+    },
+    "orchestrator.organization": Object {
+      "type": "keyword",
+    },
+    "orchestrator.resource.annotation": Object {
+      "type": "keyword",
+    },
+    "orchestrator.resource.id": Object {
+      "type": "keyword",
+    },
+    "orchestrator.resource.ip": Object {
+      "type": "keyword",
+    },
+    "orchestrator.resource.label": Object {
+      "type": "keyword",
+    },
+    "orchestrator.resource.name": Object {
+      "type": "keyword",
+    },
+    "orchestrator.resource.parent.type": Object {
+      "type": "keyword",
+    },
+    "orchestrator.resource.type": Object {
+      "type": "keyword",
+    },
+    "orchestrator.type": Object {
+      "type": "keyword",
+    },
+    "user.domain": Object {
+      "type": "keyword",
+    },
+    "user.email": Object {
+      "type": "keyword",
+    },
+    "user.full_name": Object {
+      "fields": Object {
+        "text": Object {
+          "type": "match_only_text",
+        },
+      },
+      "type": "keyword",
+    },
+    "user.hash": Object {
+      "type": "keyword",
+    },
+    "user.id": Object {
+      "type": "keyword",
+    },
+    "user.name": Object {
+      "fields": Object {
+        "text": Object {
+          "type": "match_only_text",
+        },
+      },
+      "type": "keyword",
+    },
+    "user.roles": Object {
+      "type": "keyword",
+    },
+  },
+}
+`;
+
+exports[`getUnitedEntityDefinition host entityManagerDefinition 1`] = `
+Object {
+  "displayNameTemplate": "{{host.name}}",
+  "filter": "",
+  "id": "security_host_test",
+  "identityFields": Array [
+    Object {
+      "field": "host.name",
+      "optional": false,
+    },
+  ],
+  "indexPatterns": Array [
+    "test*",
+  ],
+  "latest": Object {
+    "lookbackPeriod": "3h",
+    "settings": Object {
+      "docsPerSecond": -1,
+      "frequency": "1m",
+      "maxPageSearchSize": 500,
+      "syncDelay": "1m",
+      "syncField": "@timestamp",
+      "timeout": "180s",
+    },
+    "timestampField": "@timestamp",
+  },
+  "managed": true,
+  "metadata": Array [
+    Object {
+      "aggregation": Object {
+        "limit": 10,
+        "type": "terms",
+      },
+      "destination": "host.domain",
+      "source": "host.domain",
+    },
+    Object {
+      "aggregation": Object {
+        "limit": 10,
+        "type": "terms",
+      },
+      "destination": "host.hostname",
+      "source": "host.hostname",
+    },
+    Object {
+      "aggregation": Object {
+        "limit": 10,
+        "type": "terms",
+      },
+      "destination": "host.id",
+      "source": "host.id",
+    },
+    Object {
+      "aggregation": Object {
+        "limit": 10,
+        "type": "terms",
+      },
+      "destination": "host.os.name",
+      "source": "host.os.name",
+    },
+    Object {
+      "aggregation": Object {
+        "limit": 10,
+        "type": "terms",
+      },
+      "destination": "host.os.type",
+      "source": "host.os.type",
+    },
+    Object {
+      "aggregation": Object {
+        "limit": 10,
+        "type": "terms",
+      },
+      "destination": "host.ip",
+      "source": "host.ip",
+    },
+    Object {
+      "aggregation": Object {
+        "limit": 10,
+        "type": "terms",
+      },
+      "destination": "host.mac",
+      "source": "host.mac",
+    },
+    Object {
+      "aggregation": Object {
+        "limit": 10,
+        "type": "terms",
+      },
+      "destination": "host.type",
+      "source": "host.type",
+    },
+    Object {
+      "aggregation": Object {
+        "limit": 10,
+        "type": "terms",
+      },
+      "destination": "host.architecture",
+      "source": "host.architecture",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "asc",
+        },
+        "type": "top_value",
+      },
+      "destination": "entity.source",
+      "source": "_index",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "asset.criticality",
+      "source": "asset.criticality",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "host.risk.calculated_level",
+      "source": "host.risk.calculated_level",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "host.risk.calculated_score",
+      "source": "host.risk.calculated_score",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "host.risk.calculated_score_norm",
+      "source": "host.risk.calculated_score_norm",
+    },
+  ],
+  "name": "Security 'host' Entity Store Definition",
+  "type": "host",
+  "version": "1.0.0",
+}
+`;
+
+exports[`getUnitedEntityDefinition host mapping 1`] = `
+Object {
+  "properties": Object {
+    "@timestamp": Object {
+      "type": "date",
+    },
+    "asset.criticality": Object {
+      "type": "keyword",
+    },
+    "entity.name": Object {
+      "type": "keyword",
+    },
+    "entity.source": Object {
+      "type": "keyword",
+    },
+    "host.architecture": Object {
+      "type": "keyword",
+    },
+    "host.domain": Object {
+      "type": "keyword",
+    },
+    "host.hostname": Object {
+      "type": "keyword",
+    },
+    "host.id": Object {
+      "type": "keyword",
+    },
+    "host.ip": Object {
+      "type": "ip",
+    },
+    "host.mac": Object {
+      "type": "keyword",
+    },
+    "host.name": Object {
+      "type": "keyword",
+    },
+    "host.os.name": Object {
+      "fields": Object {
+        "text": Object {
+          "type": "match_only_text",
+        },
+      },
+      "type": "keyword",
+    },
+    "host.os.type": Object {
+      "type": "keyword",
+    },
+    "host.risk.calculated_level": Object {
+      "type": "keyword",
+    },
+    "host.risk.calculated_score": Object {
+      "type": "float",
+    },
+    "host.risk.calculated_score_norm": Object {
+      "type": "float",
+    },
+    "host.type": Object {
+      "type": "keyword",
+    },
+  },
+}
+`;
+
+exports[`getUnitedEntityDefinition service entityManagerDefinition 1`] = `
+Object {
+  "displayNameTemplate": "{{service.name}}",
+  "filter": "",
+  "id": "security_service_test",
+  "identityFields": Array [
+    Object {
+      "field": "service.name",
+      "optional": false,
+    },
+  ],
+  "indexPatterns": Array [
+    "test*",
+  ],
+  "latest": Object {
+    "lookbackPeriod": "3h",
+    "settings": Object {
+      "docsPerSecond": -1,
+      "frequency": "1m",
+      "maxPageSearchSize": 500,
+      "syncDelay": "1m",
+      "syncField": "@timestamp",
+      "timeout": "180s",
+    },
+    "timestampField": "@timestamp",
+  },
+  "managed": true,
+  "metadata": Array [
+    Object {
+      "aggregation": Object {
+        "limit": 10,
+        "type": "terms",
+      },
+      "destination": "service.address",
+      "source": "service.address",
+    },
+    Object {
+      "aggregation": Object {
+        "limit": 10,
+        "type": "terms",
+      },
+      "destination": "service.environment",
+      "source": "service.environment",
+    },
+    Object {
+      "aggregation": Object {
+        "limit": 10,
+        "type": "terms",
+      },
+      "destination": "service.ephemeral_id",
+      "source": "service.ephemeral_id",
+    },
+    Object {
+      "aggregation": Object {
+        "limit": 10,
+        "type": "terms",
+      },
+      "destination": "service.id",
+      "source": "service.id",
+    },
+    Object {
+      "aggregation": Object {
+        "limit": 10,
+        "type": "terms",
+      },
+      "destination": "service.node.name",
+      "source": "service.node.name",
+    },
+    Object {
+      "aggregation": Object {
+        "limit": 10,
+        "type": "terms",
+      },
+      "destination": "service.node.roles",
+      "source": "service.node.roles",
+    },
+    Object {
+      "aggregation": Object {
+        "limit": 10,
+        "type": "terms",
+      },
+      "destination": "service.node.role",
+      "source": "service.node.role",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "service.state",
+      "source": "service.state",
+    },
+    Object {
+      "aggregation": Object {
+        "limit": 10,
+        "type": "terms",
+      },
+      "destination": "service.type",
+      "source": "service.type",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "service.version",
+      "source": "service.version",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "asc",
+        },
+        "type": "top_value",
+      },
+      "destination": "entity.source",
+      "source": "_index",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "asset.criticality",
+      "source": "asset.criticality",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "service.risk.calculated_level",
+      "source": "service.risk.calculated_level",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "service.risk.calculated_score",
+      "source": "service.risk.calculated_score",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "service.risk.calculated_score_norm",
+      "source": "service.risk.calculated_score_norm",
+    },
+  ],
+  "name": "Security 'service' Entity Store Definition",
+  "type": "service",
+  "version": "1.0.0",
+}
+`;
+
+exports[`getUnitedEntityDefinition service mapping 1`] = `
+Object {
+  "properties": Object {
+    "@timestamp": Object {
+      "type": "date",
+    },
+    "asset.criticality": Object {
+      "type": "keyword",
+    },
+    "entity.name": Object {
+      "type": "keyword",
+    },
+    "entity.source": Object {
+      "type": "keyword",
+    },
+    "service.address": Object {
+      "type": "keyword",
+    },
+    "service.environment": Object {
+      "type": "keyword",
+    },
+    "service.ephemeral_id": Object {
+      "type": "keyword",
+    },
+    "service.id": Object {
+      "type": "keyword",
+    },
+    "service.name": Object {
+      "type": "keyword",
+    },
+    "service.node.name": Object {
+      "type": "keyword",
+    },
+    "service.node.role": Object {
+      "type": "keyword",
+    },
+    "service.node.roles": Object {
+      "type": "keyword",
+    },
+    "service.risk.calculated_level": Object {
+      "type": "keyword",
+    },
+    "service.risk.calculated_score": Object {
+      "type": "float",
+    },
+    "service.risk.calculated_score_norm": Object {
+      "type": "float",
+    },
+    "service.state": Object {
+      "type": "keyword",
+    },
+    "service.type": Object {
+      "type": "keyword",
+    },
+    "service.version": Object {
+      "type": "keyword",
+    },
+  },
+}
+`;
+
+exports[`getUnitedEntityDefinition user entityManagerDefinition 1`] = `
+Object {
+  "displayNameTemplate": "{{user.name}}",
+  "filter": "",
+  "id": "security_user_test",
+  "identityFields": Array [
+    Object {
+      "field": "user.name",
+      "optional": false,
+    },
+  ],
+  "indexPatterns": Array [
+    "test*",
+  ],
+  "latest": Object {
+    "lookbackPeriod": "3h",
+    "settings": Object {
+      "docsPerSecond": -1,
+      "frequency": "1m",
+      "maxPageSearchSize": 500,
+      "syncDelay": "1m",
+      "syncField": "@timestamp",
+      "timeout": "180s",
+    },
+    "timestampField": "@timestamp",
+  },
+  "managed": true,
+  "metadata": Array [
+    Object {
+      "aggregation": Object {
+        "limit": 10,
+        "type": "terms",
+      },
+      "destination": "user.domain",
+      "source": "user.domain",
+    },
+    Object {
+      "aggregation": Object {
+        "limit": 10,
+        "type": "terms",
+      },
+      "destination": "user.email",
+      "source": "user.email",
+    },
+    Object {
+      "aggregation": Object {
+        "limit": 10,
+        "type": "terms",
+      },
+      "destination": "user.full_name",
+      "source": "user.full_name",
+    },
+    Object {
+      "aggregation": Object {
+        "limit": 10,
+        "type": "terms",
+      },
+      "destination": "user.hash",
+      "source": "user.hash",
+    },
+    Object {
+      "aggregation": Object {
+        "limit": 10,
+        "type": "terms",
+      },
+      "destination": "user.id",
+      "source": "user.id",
+    },
+    Object {
+      "aggregation": Object {
+        "limit": 10,
+        "type": "terms",
+      },
+      "destination": "user.roles",
+      "source": "user.roles",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "asc",
+        },
+        "type": "top_value",
+      },
+      "destination": "entity.source",
+      "source": "_index",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "asset.criticality",
+      "source": "asset.criticality",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "user.risk.calculated_level",
+      "source": "user.risk.calculated_level",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "user.risk.calculated_score",
+      "source": "user.risk.calculated_score",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "user.risk.calculated_score_norm",
+      "source": "user.risk.calculated_score_norm",
+    },
+  ],
+  "name": "Security 'user' Entity Store Definition",
+  "type": "user",
+  "version": "1.0.0",
+}
+`;
+
+exports[`getUnitedEntityDefinition user mapping 1`] = `
+Object {
+  "properties": Object {
+    "@timestamp": Object {
+      "type": "date",
+    },
+    "asset.criticality": Object {
+      "type": "keyword",
+    },
+    "entity.name": Object {
+      "type": "keyword",
+    },
+    "entity.source": Object {
+      "type": "keyword",
+    },
+    "user.domain": Object {
+      "type": "keyword",
+    },
+    "user.email": Object {
+      "type": "keyword",
+    },
+    "user.full_name": Object {
+      "fields": Object {
+        "text": Object {
+          "type": "match_only_text",
+        },
+      },
+      "type": "keyword",
+    },
+    "user.hash": Object {
+      "type": "keyword",
+    },
+    "user.id": Object {
+      "type": "keyword",
+    },
+    "user.name": Object {
+      "fields": Object {
+        "text": Object {
+          "type": "match_only_text",
+        },
+      },
+      "type": "keyword",
+    },
+    "user.risk.calculated_level": Object {
+      "type": "keyword",
+    },
+    "user.risk.calculated_score": Object {
+      "type": "float",
+    },
+    "user.risk.calculated_score_norm": Object {
+      "type": "float",
+    },
+    "user.roles": Object {
+      "type": "keyword",
+    },
+  },
+}
+`;

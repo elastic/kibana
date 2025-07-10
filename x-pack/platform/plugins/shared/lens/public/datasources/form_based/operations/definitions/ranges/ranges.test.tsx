@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { EuiFieldNumber, EuiRange, EuiButtonEmpty, EuiLink, EuiText } from '@elastic/eui';
 import { IUiSettingsClient, HttpSetup } from '@kbn/core/public';
@@ -15,6 +14,7 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import { mountWithProviders } from '../../../../../test_utils/test_utils';
 import type { FormBasedLayer } from '../../../types';
 import { rangeOperation } from '..';
 import { RangeIndexPatternColumn } from './ranges';
@@ -137,14 +137,12 @@ describe('ranges', () => {
   function setToHistogramMode() {
     const column = layer.columns.col1 as RangeIndexPatternColumn;
     column.dataType = 'number';
-    column.scale = 'interval';
     column.params.type = MODES.Histogram;
   }
 
   function setToRangeMode() {
     const column = layer.columns.col1 as RangeIndexPatternColumn;
     column.dataType = 'string';
-    column.scale = 'ordinal';
     column.params.type = MODES.Range;
   }
 
@@ -158,7 +156,6 @@ describe('ranges', () => {
           label: sourceField,
           dataType: 'number',
           operationType: 'range',
-          scale: 'interval',
           isBucketed: true,
           sourceField,
           params: {
@@ -376,7 +373,7 @@ describe('ranges', () => {
 
       it('should start update the state with the default maxBars value', () => {
         const updateLayerSpy = jest.fn();
-        const instance = mount(
+        const instance = mountWithProviders(
           <InlineOptions
             {...defaultOptions}
             layer={layer}
@@ -392,7 +389,7 @@ describe('ranges', () => {
       it('should update state when changing Max bars number', () => {
         const updateLayerSpy = jest.fn();
 
-        const instance = mount(
+        const instance = mountWithProviders(
           <InlineOptions
             {...defaultOptions}
             layer={layer}
@@ -435,7 +432,7 @@ describe('ranges', () => {
       it('should update the state using the plus or minus buttons by the step amount', () => {
         const updateLayerSpy = jest.fn();
 
-        const instance = mount(
+        const instance = mountWithProviders(
           <InlineOptions
             {...defaultOptions}
             layer={layer}
@@ -505,7 +502,7 @@ describe('ranges', () => {
       it('should show one range interval to start with', () => {
         const updateLayerSpy = jest.fn();
 
-        const instance = mount(
+        const instance = mountWithProviders(
           <InlineOptions
             {...defaultOptions}
             layer={layer}
@@ -521,7 +518,7 @@ describe('ranges', () => {
       it('should use the parentFormat to create the trigger label', () => {
         const updateLayerSpy = jest.fn();
 
-        const instance = mount(
+        const instance = mountWithProviders(
           <InlineOptions
             {...defaultOptions}
             layer={layer}
@@ -532,7 +529,7 @@ describe('ranges', () => {
         );
 
         expect(
-          instance.find('[data-test-subj="indexPattern-ranges-popover-trigger"]').first().text()
+          instance.find('[data-test-subj="dataView-ranges-popover-trigger"]').first().text()
         ).toBe('0 - 1000');
       });
 
@@ -541,7 +538,7 @@ describe('ranges', () => {
         // we intercept the formatter without an id assigned an print "Error"
         const updateLayerSpy = jest.fn();
 
-        const instance = mount(
+        const instance = mountWithProviders(
           <InlineOptions
             {...defaultOptions}
             layer={layer}
@@ -560,14 +557,14 @@ describe('ranges', () => {
         );
 
         expect(
-          instance.find('[data-test-subj="indexPattern-ranges-popover-trigger"]').first().text()
+          instance.find('[data-test-subj="dataView-ranges-popover-trigger"]').first().text()
         ).not.toBe('Error');
       });
 
       it('should add a new range', () => {
         const updateLayerSpy = jest.fn();
 
-        const instance = mount(
+        const instance = mountWithProviders(
           <InlineOptions
             {...defaultOptions}
             layer={layer}
@@ -577,52 +574,51 @@ describe('ranges', () => {
           />
         );
 
-        // This series of act closures are made to make it work properly the update flush
+        instance.find(EuiButtonEmpty).simulate('click');
+
         act(() => {
-          instance.find(EuiButtonEmpty).simulate('click');
+          instance.update();
         });
 
-        act(() => {
-          // need another wrapping for this in order to work
-          instance.update();
+        expect(instance.find(RangePopover)).toHaveLength(2);
 
-          expect(instance.find(RangePopover)).toHaveLength(2);
-
-          // edit the range and check
-          instance
-            .find('RangePopover input[type="number"]')
-            .first()
-            .simulate('change', {
-              target: {
-                value: '50',
-              },
-            });
-
-          jest.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
-
-          expect(updateLayerSpy).toHaveBeenCalledWith({
-            ...layer,
-            columns: {
-              ...layer.columns,
-              col1: {
-                ...layer.columns.col1,
-                params: {
-                  ...(layer.columns.col1 as RangeIndexPatternColumn).params,
-                  ranges: [
-                    { from: 0, to: DEFAULT_INTERVAL, label: '' },
-                    { from: 50, to: Infinity, label: '' },
-                  ],
-                },
-              },
+        // edit the range and check
+        instance
+          .find('RangePopover input[type="number"]')
+          .first()
+          .simulate('change', {
+            target: {
+              value: '50',
             },
           });
+        jest.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
+
+        act(() => {
+          instance.update();
+        });
+
+        expect(updateLayerSpy).toHaveBeenCalledWith({
+          ...layer,
+          columns: {
+            ...layer.columns,
+            col1: {
+              ...layer.columns.col1,
+              params: {
+                ...(layer.columns.col1 as RangeIndexPatternColumn).params,
+                ranges: [
+                  { from: 0, to: DEFAULT_INTERVAL, label: '' },
+                  { from: 50, to: Infinity, label: '' },
+                ],
+              },
+            },
+          },
         });
       });
 
       it('should add a new range with custom label', () => {
         const updateLayerSpy = jest.fn();
 
-        const instance = mount(
+        const instance = mountWithProviders(
           <InlineOptions
             {...defaultOptions}
             layer={layer}
@@ -632,52 +628,50 @@ describe('ranges', () => {
           />
         );
 
-        // This series of act closures are made to make it work properly the update flush
+        instance.find(EuiButtonEmpty).simulate('click');
         act(() => {
-          instance.find(EuiButtonEmpty).simulate('click');
-        });
-
-        act(() => {
-          // need another wrapping for this in order to work
           instance.update();
+        });
+        expect(instance.find(RangePopover)).toHaveLength(2);
 
-          expect(instance.find(RangePopover)).toHaveLength(2);
-
-          // edit the label and check
-          instance
-            .find('RangePopover input[type="text"]')
-            .first()
-            .simulate('change', {
-              target: {
-                value: 'customlabel',
-              },
-            });
-
-          jest.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
-
-          expect(updateLayerSpy).toHaveBeenCalledWith({
-            ...layer,
-            columns: {
-              ...layer.columns,
-              col1: {
-                ...layer.columns.col1,
-                params: {
-                  ...(layer.columns.col1 as RangeIndexPatternColumn).params,
-                  ranges: [
-                    { from: 0, to: DEFAULT_INTERVAL, label: '' },
-                    { from: DEFAULT_INTERVAL, to: Infinity, label: 'customlabel' },
-                  ],
-                },
-              },
+        // edit the label and check
+        instance
+          .find('RangePopover input[type="text"]')
+          .first()
+          .simulate('change', {
+            target: {
+              value: 'customlabel',
             },
           });
+
+        jest.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
+
+        act(() => {
+          instance.update();
+        });
+
+        expect(updateLayerSpy).toHaveBeenCalledWith({
+          ...layer,
+          columns: {
+            ...layer.columns,
+            col1: {
+              ...layer.columns.col1,
+              params: {
+                ...(layer.columns.col1 as RangeIndexPatternColumn).params,
+                ranges: [
+                  { from: 0, to: DEFAULT_INTERVAL, label: '' },
+                  { from: DEFAULT_INTERVAL, to: Infinity, label: 'customlabel' },
+                ],
+              },
+            },
+          },
         });
       });
 
       it('should open a popover to edit an existing range', () => {
         const updateLayerSpy = jest.fn();
 
-        const instance = mount(
+        const instance = mountWithProviders(
           <InlineOptions
             {...defaultOptions}
             layer={layer}
@@ -687,44 +681,44 @@ describe('ranges', () => {
           />
         );
 
-        // This series of act closures are made to make it work properly the update flush
+        instance.find(RangePopover).find(EuiLink).find('button').simulate('click');
         act(() => {
-          instance.find(RangePopover).find(EuiLink).find('button').simulate('click');
+          instance.update();
         });
 
-        act(() => {
-          // need another wrapping for this in order to work
-          instance.update();
-          instance
-            .find('RangePopover input[type="number"]')
-            .last()
-            .simulate('change', {
-              target: {
-                value: '50',
-              },
-            });
-          jest.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
-
-          expect(updateLayerSpy).toHaveBeenCalledWith({
-            ...layer,
-            columns: {
-              ...layer.columns,
-              col1: {
-                ...layer.columns.col1,
-                params: {
-                  ...(layer.columns.col1 as RangeIndexPatternColumn).params,
-                  ranges: [{ from: 0, to: 50, label: '' }],
-                },
-              },
+        instance
+          .find('RangePopover input[type="number"]')
+          .last()
+          .simulate('change', {
+            target: {
+              value: '50',
             },
           });
+        jest.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
+
+        act(() => {
+          instance.update();
+        });
+
+        expect(updateLayerSpy).toHaveBeenCalledWith({
+          ...layer,
+          columns: {
+            ...layer.columns,
+            col1: {
+              ...layer.columns.col1,
+              params: {
+                ...(layer.columns.col1 as RangeIndexPatternColumn).params,
+                ranges: [{ from: 0, to: 50, label: '' }],
+              },
+            },
+          },
         });
       });
 
       it('should not accept invalid ranges', () => {
         const updateLayerSpy = jest.fn();
 
-        const instance = mount(
+        const instance = mountWithProviders(
           <InlineOptions
             {...defaultOptions}
             layer={layer}
@@ -774,7 +768,7 @@ describe('ranges', () => {
           label: '',
         });
 
-        const instance = mount(
+        const instance = mountWithProviders(
           <InlineOptions
             {...defaultOptions}
             layer={layer}
@@ -812,7 +806,7 @@ describe('ranges', () => {
           label: '',
         });
 
-        const instance = mount(
+        const instance = mountWithProviders(
           <InlineOptions
             {...defaultOptions}
             layer={layer}
@@ -844,7 +838,7 @@ describe('ranges', () => {
       it('should correctly handle the default formatter for the field', () => {
         const updateLayerSpy = jest.fn();
 
-        const instance = mount(
+        const instance = mountWithProviders(
           <InlineOptions
             {...defaultOptions}
             layer={layer}
@@ -874,7 +868,7 @@ describe('ranges', () => {
           params: { decimals: 0 },
         };
 
-        const instance = mount(
+        const instance = mountWithProviders(
           <InlineOptions
             {...defaultOptions}
             layer={layer}
@@ -898,7 +892,7 @@ describe('ranges', () => {
       it('should not update the state on mount', () => {
         const updateLayerSpy = jest.fn();
 
-        mount(
+        mountWithProviders(
           <InlineOptions
             {...defaultOptions}
             layer={layer}
@@ -918,7 +912,7 @@ describe('ranges', () => {
           params: { decimals: 3 },
         };
 
-        const instance = mount(
+        const instance = mountWithProviders(
           <InlineOptions
             {...defaultOptions}
             layer={layer}

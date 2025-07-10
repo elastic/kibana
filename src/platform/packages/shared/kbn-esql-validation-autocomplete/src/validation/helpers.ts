@@ -7,26 +7,60 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  ESQLAst,
-  ESQLAstItem,
-  ESQLAstMetricsCommand,
-  ESQLMessage,
-  ESQLSingleAstItem,
+import {
+  type ESQLAst,
+  type ESQLAstQueryExpression,
+  type ESQLColumn,
+  type ESQLSource,
+  type ESQLCommand,
+  type FunctionDefinition,
+  Walker,
 } from '@kbn/esql-ast';
-import { FunctionDefinition } from '../definitions/types';
-import { getAllArrayTypes, getAllArrayValues } from '../shared/helpers';
-import { getMessageFromId } from './errors';
-import type { ESQLPolicy, ReferenceMaps } from './types';
+import { mutate, synth } from '@kbn/esql-ast';
+import { ESQLPolicy } from '@kbn/esql-ast/src/commands_registry/types';
 
 export function buildQueryForFieldsFromSource(queryString: string, ast: ESQLAst) {
   const firstCommand = ast[0];
   if (!firstCommand) return '';
-  if (firstCommand.name === 'metrics') {
-    const metrics = firstCommand as ESQLAstMetricsCommand;
-    return `FROM ${metrics.sources.map((source) => source.name).join(', ')}`;
+
+  const sources: ESQLSource[] = [];
+  const metadataFields: ESQLColumn[] = [];
+
+  if (firstCommand.name === 'ts') {
+    const timeseries = firstCommand as ESQLCommand<'ts'>;
+    const tsSources = timeseries.args as ESQLSource[];
+
+    sources.push(...tsSources);
+  } else if (firstCommand.name === 'from') {
+    const fromSources = mutate.commands.from.sources.list(firstCommand as any);
+    const fromMetadataColumns = [...mutate.commands.from.metadata.list(firstCommand as any)].map(
+      ([column]) => column
+    );
+
+    sources.push(...fromSources);
+    if (fromMetadataColumns.length) metadataFields.push(...fromMetadataColumns);
   }
-  return queryString.substring(0, firstCommand.location.max + 1);
+
+  const joinSummary = mutate.commands.join.summarize({
+    type: 'query',
+    commands: ast,
+  } as ESQLAstQueryExpression);
+  const joinIndices = joinSummary.map(({ target: { index } }) => index);
+
+  if (joinIndices.length > 0) {
+    sources.push(...joinIndices);
+  }
+
+  if (sources.length === 0) {
+    return queryString.substring(0, firstCommand.location.max + 1);
+  }
+
+  const from =
+    metadataFields.length > 0
+      ? synth.cmd`FROM ${sources} METADATA ${metadataFields}`
+      : synth.cmd`FROM ${sources}`;
+
+  return from.toString();
 }
 
 export function buildQueryForFieldsInPolicies(policies: ESQLPolicy[]) {
@@ -68,38 +102,10 @@ export function getMaxMinNumberOfParams(definition: FunctionDefinition) {
 }
 
 /**
- * We only want to report one message when any number of the elements in an array argument is of the wrong type
+ * Collects all 'enrich' commands from a list of ESQL commands.
+ * @param commands - The list of ESQL commands to search through.
+ * This function traverses the provided ESQL commands and collects all commands with the name 'enrich'.
+ * @returns {ESQLCommand[]} - An array of ESQLCommand objects that represent the 'enrich' commands found in the input.
  */
-export function collapseWrongArgumentTypeMessages(
-  messages: ESQLMessage[],
-  arg: ESQLAstItem[],
-  funcName: string,
-  argType: string,
-  parentCommand: string,
-  references: ReferenceMaps
-) {
-  if (!messages.some(({ code }) => code === 'wrongArgumentType')) {
-    return messages;
-  }
-
-  // Replace the individual "wrong argument type" messages with a single one for the whole array
-  messages = messages.filter(({ code }) => code !== 'wrongArgumentType');
-
-  messages.push(
-    getMessageFromId({
-      messageId: 'wrongArgumentType',
-      values: {
-        name: funcName,
-        argType,
-        value: `(${getAllArrayValues(arg).join(', ')})`,
-        givenType: `(${getAllArrayTypes(arg, parentCommand, references).join(', ')})`,
-      },
-      locations: {
-        min: (arg[0] as ESQLSingleAstItem).location.min,
-        max: (arg[arg.length - 1] as ESQLSingleAstItem).location.max,
-      },
-    })
-  );
-
-  return messages;
-}
+export const getEnrichCommands = (commands: ESQLCommand[]): ESQLCommand[] =>
+  Walker.matchAll(commands, { type: 'command', name: 'enrich' }) as ESQLCommand[];

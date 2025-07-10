@@ -5,6 +5,13 @@
  * 2.0.
  */
 
+import { scalarFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/scalar_functions';
+import { groupingFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/grouping_functions';
+import { aggFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/aggregation_functions';
+import { timeSeriesAggFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/time_series_agg_functions';
+import type { FunctionDefinition } from '@kbn/esql-ast';
+import { memoize } from 'lodash';
+
 const STRING_DELIMITER_TOKENS = ['`', "'", '"'];
 const ESCAPE_TOKEN = '\\\\';
 
@@ -94,6 +101,67 @@ function removeColumnQuotesAndEscape(column: string) {
   return '`' + plainColumnIdentifier + '`';
 }
 
+const getFunctionDefinitionMap = memoize(() => {
+  const functionDefinitionMap = new Map<string, FunctionDefinition>();
+  const allFunctionDefinitions = [
+    ...scalarFunctionDefinitions,
+    ...aggFunctionDefinitions,
+    ...timeSeriesAggFunctionDefinitions,
+    ...groupingFunctionDefinitions,
+  ];
+  allFunctionDefinitions.forEach((definition) => {
+    const functionName = definition.name.toLowerCase();
+    if (!functionDefinitionMap.has(functionName)) {
+      functionDefinitionMap.set(functionName, definition);
+    }
+  });
+  return functionDefinitionMap;
+});
+
+/**
+ * Replaces quotes for fields in function argument if present.
+ * @example
+ * Example 1: Without quotes
+ * escapeColumnsInFunctions('MIN(total_bytes)'); // 'MIN(total_bytes)'
+ *
+ * @example
+ * Example 2: With quotes
+ * escapeColumnsInFunctions('MIN("Total Bytes")'); // 'MIN(`Total Bytes`)'
+ */
+function escapeColumnsInFunctions(string: string): string {
+  const regex = /([A-Za-z_]+)\s*\(([^()]*?)\)/g;
+
+  return string.replace(regex, (match: string, functionName: string, args: string) => {
+    const functionDefinition = getFunctionDefinitionMap().get(functionName.toLowerCase());
+    if (!functionDefinition) {
+      // function definition not found, return the original match
+      return match;
+    }
+
+    const escapedArgs = args.length
+      ? args
+          .split(',')
+          .map((arg, index) => {
+            const trimmedArg = arg.trim();
+            // Only escape field names
+            const paramName = functionDefinition.signatures[0].params[index]?.name;
+            if (paramName !== 'field' && paramName !== 'number') {
+              // It should be just a field, but some functions like SUM and AVG have a "number" name 🤷‍♂️
+              return trimmedArg;
+            }
+            // If the string is not wrapped in quotes, return it as is
+            if (!trimmedArg.match(/^["'].*["']$/)) {
+              return trimmedArg;
+            }
+            return removeColumnQuotesAndEscape(trimmedArg);
+          })
+          .join(', ')
+      : args;
+
+    return `${functionName}(${escapedArgs})`;
+  });
+}
+
 function replaceAsKeywordWithAssignments(command: string) {
   return command.replaceAll(/^STATS\s*(.*)/g, (__, statsOperations: string) => {
     return `STATS ${statsOperations.replaceAll(
@@ -113,10 +181,12 @@ function escapeColumns(line: string) {
   const escapedBody = split(body.trim(), ',')
     .map((statement) => {
       const [lhs, rhs] = split(statement, '=');
+
       if (!rhs) {
         return lhs;
       }
-      return `${removeColumnQuotesAndEscape(lhs)} = ${rhs}`;
+      const escapedRhs = escapeColumnsInFunctions(rhs);
+      return `${removeColumnQuotesAndEscape(lhs)} = ${escapedRhs}`;
     })
     .join(', ');
 

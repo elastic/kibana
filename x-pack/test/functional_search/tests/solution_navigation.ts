@@ -5,15 +5,21 @@
  * 2.0.
  */
 
+import type { AppDeepLinkId } from '@kbn/core-chrome-browser';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function searchSolutionNavigation({
   getPageObjects,
   getService,
 }: FtrProviderContext) {
-  const { common, solutionNavigation } = getPageObjects(['common', 'solutionNavigation']);
+  const { common, solutionNavigation, console } = getPageObjects([
+    'common',
+    'solutionNavigation',
+    'console',
+  ]);
   const spaces = getService('spaces');
   const browser = getService('browser');
+  const testSubjects = getService('testSubjects');
 
   describe('Search Solution Navigation', () => {
     let cleanUp: () => Promise<unknown>;
@@ -40,18 +46,17 @@ export default function searchSolutionNavigation({
 
     it('renders expected side nav items', async () => {
       // Verify all expected top-level links exist
-      await solutionNavigation.sidenav.expectLinkExists({ text: 'Overview' });
-      await solutionNavigation.sidenav.expectLinkExists({ text: 'Dev Tools' });
+      await solutionNavigation.sidenav.expectLinkExists({ text: 'Home' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Discover' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Dashboards' });
-      await solutionNavigation.sidenav.expectLinkExists({ text: 'Indices' });
-      await solutionNavigation.sidenav.expectLinkExists({ text: 'Connectors' });
-      await solutionNavigation.sidenav.expectLinkExists({ text: 'Web Crawlers' });
+      await solutionNavigation.sidenav.expectLinkExists({ text: 'Index Management' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Playground' });
+      await solutionNavigation.sidenav.expectLinkExists({ text: 'Connectors' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Search applications' });
-      await solutionNavigation.sidenav.expectLinkExists({ text: 'Behavioral Analytics' });
+      await solutionNavigation.sidenav.expectLinkExists({ text: 'Synonyms' });
+      await solutionNavigation.sidenav.expectLinkExists({ text: 'Query Rules' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Inference Endpoints' });
-      await solutionNavigation.sidenav.expectLinkExists({ text: 'Other tools' });
+      await solutionNavigation.sidenav.expectLinkExists({ text: 'Dev Tools' });
     });
 
     it('has expected navigation', async () => {
@@ -60,211 +65,122 @@ export default function searchSolutionNavigation({
       // check side nav links
       await solutionNavigation.sidenav.expectSectionExists('search_project_nav');
       await solutionNavigation.sidenav.expectLinkActive({
-        deepLinkId: 'enterpriseSearch',
+        deepLinkId: 'searchHomepage',
       });
       await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-        deepLinkId: 'enterpriseSearch',
+        text: 'Create your first index',
       });
 
-      // check Dev tools
-      await solutionNavigation.sidenav.clickLink({
-        deepLinkId: 'dev_tools',
-      });
-      await solutionNavigation.sidenav.expectLinkActive({
-        deepLinkId: 'dev_tools',
-      });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Dev Tools' });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-        deepLinkId: 'dev_tools',
-      });
+      const sideNavTestCases: Array<{
+        deepLinkId: AppDeepLinkId;
+        breadcrumbs: string[];
+        pageTestSubject: string;
+        extraChecks?: Array<() => Promise<void>>;
+      }> = [
+        {
+          deepLinkId: 'discover',
+          breadcrumbs: ['Discover'],
+          pageTestSubject: 'kbnNoDataPage',
+        },
+        {
+          deepLinkId: 'dashboards',
+          breadcrumbs: ['Dashboards'],
+          pageTestSubject: 'kbnNoDataPage',
+        },
+        {
+          deepLinkId: 'elasticsearchIndexManagement',
+          breadcrumbs: ['Build', 'Index Management', 'Indices'],
+          pageTestSubject: 'elasticsearchIndexManagement',
+        },
+        {
+          deepLinkId: 'searchPlayground',
+          breadcrumbs: ['Build', 'Playground'],
+          pageTestSubject: 'svlPlaygroundPage',
+        },
+        {
+          deepLinkId: 'enterpriseSearchContent:connectors',
+          breadcrumbs: ['Build', 'Connectors'],
+          pageTestSubject: 'searchCreateConnectorPage',
+        },
+        {
+          deepLinkId: 'enterpriseSearchApplications:searchApplications',
+          breadcrumbs: ['Build', 'Search applications'],
+          pageTestSubject: 'searchApplicationsListPage',
+        },
+        {
+          deepLinkId: 'searchSynonyms:synonyms',
+          breadcrumbs: ['Relevance', 'Synonyms'],
+          pageTestSubject: 'searchSynonymsOverviewPage',
+        },
+        {
+          deepLinkId: 'searchInferenceEndpoints:inferenceEndpoints',
+          breadcrumbs: ['Relevance', 'Inference Endpoints'],
+          pageTestSubject: 'inferenceEndpointsPage',
+        },
+        {
+          deepLinkId: 'dev_tools',
+          breadcrumbs: ['Dev Tools'],
+          pageTestSubject: 'console',
+          extraChecks: [
+            async () => {
+              if (await console.isTourPopoverOpen()) {
+                // Skip the tour if it's open. This will prevent the tour popover from staying on the page
+                // and blocking breadcrumbs for other tests.
+                await console.clickSkipTour();
+              }
+            },
+          ],
+        },
+      ];
 
-      // check Kibana
-      // > Discover
-      await solutionNavigation.sidenav.clickLink({
-        deepLinkId: 'discover',
-      });
-      await solutionNavigation.sidenav.expectLinkActive({
-        deepLinkId: 'discover',
-      });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Kibana' });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Discover' });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-        deepLinkId: 'discover',
-      });
-      // > Dashboards
-      await solutionNavigation.sidenav.clickLink({
-        deepLinkId: 'dashboards',
-      });
-      await solutionNavigation.sidenav.expectLinkActive({
-        deepLinkId: 'dashboards',
-      });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Kibana' });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Dashboards' });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-        deepLinkId: 'dashboards',
-      });
-
-      // check the Content
-      // > Indices section
-      await solutionNavigation.sidenav.clickLink({
-        deepLinkId: 'enterpriseSearchContent:searchIndices',
-      });
-      await solutionNavigation.sidenav.expectLinkActive({
-        deepLinkId: 'enterpriseSearchContent:searchIndices',
-      });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Content' });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Indices' });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-        deepLinkId: 'enterpriseSearchContent:searchIndices',
-      });
-      // > Connectors
-      await solutionNavigation.sidenav.clickLink({
-        deepLinkId: 'enterpriseSearchContent:connectors',
-      });
-      await solutionNavigation.sidenav.expectLinkActive({
-        deepLinkId: 'enterpriseSearchContent:connectors',
-      });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Content' });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Connectors' });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-        deepLinkId: 'enterpriseSearchContent:connectors',
-      });
-      // > Web Crawlers
-      await solutionNavigation.sidenav.clickLink({
-        deepLinkId: 'enterpriseSearchContent:webCrawlers',
-      });
-      await solutionNavigation.sidenav.expectLinkActive({
-        deepLinkId: 'enterpriseSearchContent:webCrawlers',
-      });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Content' });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Web Crawlers' });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-        deepLinkId: 'enterpriseSearchContent:webCrawlers',
-      });
-
-      // check Build
-      // > Playground
-      await solutionNavigation.sidenav.clickLink({
-        deepLinkId: 'searchPlayground',
-      });
-      await solutionNavigation.sidenav.expectLinkActive({
-        deepLinkId: 'searchPlayground',
-      });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Build' });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Playground' });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-        deepLinkId: 'searchPlayground',
-      });
-      // > Search applications
-      await solutionNavigation.sidenav.clickLink({
-        deepLinkId: 'enterpriseSearchApplications:searchApplications',
-      });
-      await solutionNavigation.sidenav.expectLinkActive({
-        deepLinkId: 'enterpriseSearchApplications:searchApplications',
-      });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Build' });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-        text: 'Search applications',
-      });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-        deepLinkId: 'enterpriseSearchApplications:searchApplications',
-      });
-      // > Behavioral Analytics
-      await solutionNavigation.sidenav.clickLink({
-        deepLinkId: 'enterpriseSearchAnalytics',
-      });
-      await solutionNavigation.sidenav.expectLinkActive({
-        deepLinkId: 'enterpriseSearchAnalytics',
-      });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Build' });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-        text: 'Behavioral Analytics',
-      });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-        deepLinkId: 'enterpriseSearchAnalytics',
-      });
-
-      // check Relevance
-      // > Inference Endpoints
-      await solutionNavigation.sidenav.clickLink({
-        deepLinkId: 'searchInferenceEndpoints:inferenceEndpoints',
-      });
-      await solutionNavigation.sidenav.expectLinkActive({
-        deepLinkId: 'searchInferenceEndpoints:inferenceEndpoints',
-      });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Relevance' });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-        text: 'Inference Endpoints',
-      });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-        deepLinkId: 'searchInferenceEndpoints:inferenceEndpoints',
-      });
-
-      // Other tools
-      await solutionNavigation.sidenav.openSection('search_project_nav.otherTools');
-      await solutionNavigation.sidenav.expectSectionOpen('search_project_nav.otherTools');
-      // > Maps
-      await solutionNavigation.sidenav.clickLink({
-        deepLinkId: 'maps',
-      });
-      await solutionNavigation.sidenav.expectLinkActive({
-        deepLinkId: 'maps',
-      });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Other tools' });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-        text: 'Maps',
-      });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-        deepLinkId: 'maps',
-      });
-      // > Graph
-      await solutionNavigation.sidenav.clickLink({
-        deepLinkId: 'graph',
-      });
-      await solutionNavigation.sidenav.expectLinkActive({
-        deepLinkId: 'graph',
-      });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Other tools' });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-        text: 'Graph',
-      });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-        deepLinkId: 'graph',
-      });
-      await solutionNavigation.sidenav.closeSection('search_project_nav.otherTools');
+      for (const testCase of sideNavTestCases) {
+        await solutionNavigation.sidenav.clickLink({
+          deepLinkId: testCase.deepLinkId,
+        });
+        await testSubjects.existOrFail(testCase.pageTestSubject);
+        await solutionNavigation.sidenav.expectLinkActive({
+          deepLinkId: testCase.deepLinkId,
+        });
+        for (const breadcrumb of testCase.breadcrumbs) {
+          await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: breadcrumb });
+        }
+        if (testCase.extraChecks !== undefined) {
+          for (const check of testCase.extraChecks) {
+            await check();
+          }
+        }
+      }
 
       await expectNoPageReload();
     });
 
     it('renders only expected items', async () => {
-      await solutionNavigation.sidenav.openSection('search_project_nav.otherTools');
-      await solutionNavigation.sidenav.openSection('project_settings_project_nav');
-      await solutionNavigation.sidenav.expectSectionOpen('search_project_nav.otherTools');
-      await solutionNavigation.sidenav.expectSectionOpen('project_settings_project_nav');
-
+      await solutionNavigation.sidenav.openSection(
+        'search_project_nav_footer.project_settings_project_nav'
+      );
+      await solutionNavigation.sidenav.expectSectionOpen(
+        'search_project_nav_footer.project_settings_project_nav'
+      );
       await solutionNavigation.sidenav.expectOnlyDefinedLinks([
         'search_project_nav',
-        'enterpriseSearch',
-        'dev_tools',
-        'kibana',
+        'searchHomepage',
         'discover',
         'dashboards',
-        'content',
-        'enterpriseSearchContent:searchIndices',
-        'enterpriseSearchContent:connectors',
-        'enterpriseSearchContent:webCrawlers',
         'build',
+        'elasticsearchIndexManagement',
         'searchPlayground',
+        'enterpriseSearchContent:connectors',
         'enterpriseSearchApplications:searchApplications',
-        'enterpriseSearchAnalytics',
         'relevance',
+        'searchSynonyms:synonyms',
+        'searchQueryRules',
         'searchInferenceEndpoints:inferenceEndpoints',
-        'otherTools',
-        'maps',
-        'graph',
+        'search_project_nav_footer',
+        'dev_tools',
         'project_settings_project_nav',
-        'ml:modelManagement',
+        'management:trained_models',
         'stack_management',
+        'monitoring',
       ]);
     });
   });

@@ -73,6 +73,12 @@ export const heatmapGridConfig: ExpressionFunctionDefinition<
         defaultMessage: 'Specifies whether or not the X-axis labels are visible.',
       }),
     },
+    xAxisLabelRotation: {
+      types: ['number'],
+      help: i18n.translate('expressionHeatmap.function.args.grid.xAxisLabelRotation.help', {
+        defaultMessage: 'Specifies the rotation of the X-axis labels.',
+      }),
+    },
     isXAxisTitleVisible: {
       types: ['boolean'],
       help: i18n.translate('expressionHeatmap.function.args.grid.isXAxisTitleVisible.help', {

@@ -48,6 +48,12 @@ describe('registerDataStreamsRoute', () => {
     expect(router.versioned.get).toHaveBeenCalledWith({
       access: 'internal',
       path: DATA_USAGE_DATA_STREAMS_API_ROUTE,
+      security: {
+        authz: {
+          enabled: false,
+          reason: expect.any(String),
+        },
+      },
     });
   });
 

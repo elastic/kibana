@@ -26,14 +26,14 @@ import {
 } from '@elastic/eui';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import {
+import type {
   AppMenuActionCustom,
   AppMenuActionPrimary,
   AppMenuActionSecondary,
   AppMenuActionSubmenuCustom,
   AppMenuActionSubmenuSecondary,
-  AppMenuActionType,
 } from '@kbn/discover-utils';
+import { AppMenuActionType } from '@kbn/discover-utils';
 import type { DiscoverServices } from '../../../../../build_services';
 
 const container = document.createElement('div');
@@ -58,9 +58,13 @@ export const AppMenuActionsMenuPopover: React.FC<AppMenuActionsMenuPopoverProps>
     anchorElement?.focus();
   }, [anchorElement, originalOnClose]);
 
-  const items = appMenuItem.actions.map((action) => {
+  const items = appMenuItem.actions.map((action, i) => {
     if (action.type === AppMenuActionType.submenuHorizontalRule) {
-      return <EuiHorizontalRule key={action.id} data-test-subj={action.testId} margin="none" />;
+      if (i === 0 || i === appMenuItem.actions.length - 1) {
+        return <></>;
+      } else {
+        return <EuiHorizontalRule key={action.id} data-test-subj={action.testId} margin="none" />;
+      }
     }
 
     const controlProps = action.controlProps;

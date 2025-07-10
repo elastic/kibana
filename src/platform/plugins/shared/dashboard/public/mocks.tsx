@@ -10,10 +10,9 @@
 import { ControlGroupApi } from '@kbn/controls-plugin/public';
 import { BehaviorSubject } from 'rxjs';
 import { DashboardStart } from './plugin';
-import { DashboardState } from './dashboard_api/types';
+import { DashboardState } from '../common/types';
 import { getDashboardApi } from './dashboard_api/get_dashboard_api';
-import { DashboardPanelState } from '../common';
-import { SavedDashboardInput } from './services/dashboard_content_management_service/types';
+import { deserializeLayout } from './dashboard_api/layout_manager/deserialize_layout';
 
 export type Start = jest.Mocked<DashboardStart>;
 
@@ -73,8 +72,10 @@ export const mockControlGroupApi = {
   filters$: new BehaviorSubject(undefined),
   query$: new BehaviorSubject(undefined),
   timeslice$: new BehaviorSubject(undefined),
-  dataViews: new BehaviorSubject(undefined),
-  unsavedChanges: new BehaviorSubject(undefined),
+  esqlVariables$: new BehaviorSubject(undefined),
+  dataViews$: new BehaviorSubject(undefined),
+  hasUnsavedChanges$: new BehaviorSubject(false),
+  children$: new BehaviorSubject([]),
 } as unknown as ControlGroupApi;
 
 export function buildMockDashboardApi({
@@ -95,9 +96,7 @@ export function buildMockDashboardApi({
       managed: false,
       dashboardInput: {
         ...initialState,
-        executionContext: { type: 'dashboard' },
-        id: savedObjectId ?? '123',
-      } as SavedDashboardInput,
+      },
       references: [],
     },
   });
@@ -126,26 +125,70 @@ export function getSampleDashboardState(overrides?: Partial<DashboardState>): Da
       from: 'now-15m',
     },
     timeRestore: false,
-    viewMode: 'view',
-    panels: {},
+    panels: [],
     ...overrides,
   };
 }
 
-export function getSampleDashboardPanel(
-  overrides: Partial<DashboardPanelState> & {
-    explicitInput: { id: string };
-    type: string;
-  }
-): DashboardPanelState {
-  return {
-    gridData: {
-      h: 15,
-      w: 15,
-      x: 0,
-      y: 0,
-      i: overrides.explicitInput.id,
+export function getMockPanels() {
+  return [
+    {
+      gridData: { x: 0, y: 0, w: 6, h: 6, i: '1' },
+      panelConfig: { title: 'panel One' },
+      panelIndex: '1',
+      type: 'testPanelType',
     },
-    ...overrides,
-  };
+    {
+      gridData: { x: 6, y: 0, w: 6, h: 6, i: '2' },
+      panelConfig: { title: 'panel Two' },
+      panelIndex: '2',
+      type: 'testPanelType',
+    },
+  ];
+}
+
+export function getMockPanelsWithSections() {
+  return [
+    ...getMockPanels(),
+    {
+      title: 'Section One',
+      collapsed: true,
+      gridData: {
+        y: 6,
+        i: 'section1',
+      },
+      panels: [
+        {
+          gridData: { x: 0, y: 0, w: 6, h: 6, i: '3' },
+          panelConfig: { title: 'panel Three' },
+          panelIndex: '3',
+          type: 'testPanelType',
+        },
+      ],
+    },
+    {
+      title: 'Section Two',
+      collapsed: false,
+      gridData: {
+        y: 7,
+        i: 'section2',
+      },
+      panels: [
+        {
+          gridData: { x: 0, y: 0, w: 6, h: 6, i: '4' },
+          panelConfig: { title: 'panel Four' },
+          panelIndex: '4',
+          type: 'testPanelType',
+        },
+      ],
+    },
+  ];
+}
+
+export function getMockLayout() {
+  return deserializeLayout(getMockPanels(), () => []).layout;
+}
+
+export function getMockLayoutWithSections() {
+  return deserializeLayout(getMockPanelsWithSections(), () => []).layout;
 }

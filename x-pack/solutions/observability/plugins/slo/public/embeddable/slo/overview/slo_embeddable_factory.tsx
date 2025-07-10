@@ -8,33 +8,51 @@
 import { EuiFlexGroup, EuiFlexItem, UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
-import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import {
+  WithAllKeys,
   fetch$,
-  getUnchangingComparator,
-  initializeTitles,
+  initializeStateManager,
+  initializeTitleManager,
+  titleComparators,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import { Router } from '@kbn/shared-ux-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createBrowserHistory } from 'history';
 import React, { useEffect } from 'react';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject, Subject, merge } from 'rxjs';
+import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { PluginContext } from '../../../context/plugin_context';
 import type { SLOPublicPluginsStart, SLORepositoryClient } from '../../../types';
 import { SLO_OVERVIEW_EMBEDDABLE_ID } from './constants';
 import { GroupSloView } from './group_view/group_view';
 import { SloOverview } from './slo_overview';
 import { SloCardChartList } from './slo_overview_grid';
-import { GroupSloCustomInput, SloOverviewApi, SloOverviewEmbeddableState } from './types';
+import {
+  GroupSloCustomInput,
+  SloOverviewApi,
+  SloOverviewEmbeddableState,
+  SloOverviewState,
+} from './types';
+import { openSloConfiguration } from './slo_overview_open_configuration';
 
 const getOverviewPanelTitle = () =>
   i18n.translate('xpack.slo.sloEmbeddable.displayName', {
     defaultMessage: 'SLO Overview',
   });
+
+const defaultSloEmbeddableState: WithAllKeys<SloOverviewState> = {
+  sloId: undefined,
+  sloInstanceId: undefined,
+  showAllGroupByInstances: undefined,
+  overviewMode: undefined,
+  groupFilters: undefined,
+  remoteName: undefined,
+};
 
 export const getOverviewEmbeddableFactory = ({
   coreStart,
@@ -44,102 +62,103 @@ export const getOverviewEmbeddableFactory = ({
   coreStart: CoreStart;
   pluginsStart: SLOPublicPluginsStart;
   sloClient: SLORepositoryClient;
-}): ReactEmbeddableFactory<
-  SloOverviewEmbeddableState,
-  SloOverviewEmbeddableState,
-  SloOverviewApi
-> => ({
+}): EmbeddableFactory<SloOverviewEmbeddableState, SloOverviewApi> => ({
   type: SLO_OVERVIEW_EMBEDDABLE_ID,
-  deserializeState: (state) => {
-    return state.rawState as SloOverviewEmbeddableState;
-  },
-  buildEmbeddable: async (state, buildApi, uuid, parentApi) => {
+  buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
     const deps = { ...coreStart, ...pluginsStart };
+    const state = initialState.rawState;
 
-    const dynamicActionsApi = deps.embeddableEnhanced?.initializeReactEmbeddableDynamicActions(
+    const dynamicActionsManager = deps.embeddableEnhanced?.initializeEmbeddableDynamicActions(
       uuid,
-      () => titlesApi.panelTitle.getValue(),
-      state
+      () => titleManager.api.title$.getValue(),
+      initialState
     );
 
-    const maybeStopDynamicActions = dynamicActionsApi?.startDynamicActions();
+    const maybeStopDynamicActions = dynamicActionsManager?.startDynamicActions();
 
-    const { titlesApi, titleComparators, serializeTitles } = initializeTitles(state);
+    const titleManager = initializeTitleManager(state);
+    const sloStateManager = initializeStateManager(state, defaultSloEmbeddableState);
     const defaultTitle$ = new BehaviorSubject<string | undefined>(getOverviewPanelTitle());
-    const sloId$ = new BehaviorSubject(state.sloId);
-    const sloInstanceId$ = new BehaviorSubject(state.sloInstanceId);
-    const showAllGroupByInstances$ = new BehaviorSubject(state.showAllGroupByInstances);
-    const overviewMode$ = new BehaviorSubject(state.overviewMode);
-    const groupFilters$ = new BehaviorSubject(state.groupFilters);
-    const remoteName$ = new BehaviorSubject(state.remoteName);
     const reload$ = new Subject<boolean>();
 
-    const api = buildApi(
-      {
-        ...titlesApi,
-        ...(dynamicActionsApi?.dynamicActionsApi ?? {}),
-        supportedTriggers: () => [],
-        defaultPanelTitle: defaultTitle$,
-        getTypeDisplayName: () =>
-          i18n.translate('xpack.slo.editSloOverviewEmbeddableTitle.typeDisplayName', {
-            defaultMessage: 'criteria',
-          }),
-        isEditingEnabled: () => api.getSloGroupOverviewConfig().overviewMode === 'groups',
-        onEdit: async function onEdit() {
-          try {
-            const { openSloConfiguration } = await import('./slo_overview_open_configuration');
+    function serializeState() {
+      const { rawState: dynamicActionsState, references: dynamicActionsReferences } =
+        dynamicActionsManager?.serializeState() ?? {};
+      return {
+        rawState: {
+          ...titleManager.getLatestState(),
+          ...sloStateManager.getLatestState(),
+          ...dynamicActionsState,
+        },
+        references: dynamicActionsReferences ?? [],
+      };
+    }
 
-            const result = await openSloConfiguration(
-              coreStart,
-              pluginsStart,
-              sloClient,
-              api.getSloGroupOverviewConfig()
-            );
-            api.updateSloGroupOverviewConfig(result as GroupSloCustomInput);
-          } catch (e) {
-            return Promise.reject();
-          }
-        },
-        serializeState: () => {
-          return {
-            rawState: {
-              ...serializeTitles(),
-              sloId: sloId$.getValue(),
-              sloInstanceId: sloInstanceId$.getValue(),
-              showAllGroupByInstances: showAllGroupByInstances$.getValue(),
-              overviewMode: overviewMode$.getValue(),
-              groupFilters: groupFilters$.getValue(),
-              remoteName: remoteName$.getValue(),
-              ...(dynamicActionsApi?.serializeDynamicActions?.() ?? {}),
-            },
-          };
-        },
-        getSloGroupOverviewConfig: () => {
-          return {
-            groupFilters: groupFilters$.getValue(),
-            overviewMode: overviewMode$.getValue(),
-          };
-        },
-        updateSloGroupOverviewConfig: (update: GroupSloCustomInput) => {
-          groupFilters$.next(update.groupFilters);
-        },
-      },
-      {
-        sloId: [sloId$, (value) => sloId$.next(value)],
-        sloInstanceId: [sloInstanceId$, (value) => sloInstanceId$.next(value)],
-        groupFilters: [groupFilters$, (value) => groupFilters$.next(value)],
-        showAllGroupByInstances: [
-          showAllGroupByInstances$,
-          (value) => showAllGroupByInstances$.next(value),
-        ],
-        remoteName: [remoteName$, (value) => remoteName$.next(value)],
-        overviewMode: [overviewMode$, (value) => overviewMode$.next(value)],
+    const unsavedChangesApi = initializeUnsavedChanges<SloOverviewEmbeddableState>({
+      uuid,
+      parentApi,
+      serializeState,
+      anyStateChange$: merge(
+        ...(dynamicActionsManager ? [dynamicActionsManager.anyStateChange$] : []),
+        titleManager.anyStateChange$,
+        sloStateManager.anyStateChange$
+      ),
+      getComparators: () => ({
+        sloId: 'referenceEquality',
+        sloInstanceId: 'referenceEquality',
+        groupFilters: 'referenceEquality',
+        showAllGroupByInstances: 'referenceEquality',
+        remoteName: 'referenceEquality',
+        overviewMode: 'referenceEquality',
         ...titleComparators,
-        ...(dynamicActionsApi?.dynamicActionsComparator ?? {
-          enhancements: getUnchangingComparator(),
+        ...(dynamicActionsManager?.comparators ?? { enhancements: 'skip' }),
+      }),
+      onReset: (lastSaved) => {
+        dynamicActionsManager?.reinitializeState(lastSaved?.rawState ?? {});
+        titleManager.reinitializeState(lastSaved?.rawState);
+        sloStateManager.reinitializeState(lastSaved?.rawState);
+      },
+    });
+
+    const api = finalizeApi({
+      ...unsavedChangesApi,
+      ...titleManager.api,
+      ...(dynamicActionsManager?.api ?? {}),
+      ...sloStateManager.api,
+      defaultTitle$,
+      hideTitle$: titleManager.api.hidePanelTitles$,
+      setHideTitle: titleManager.api.setHidePanelTitles,
+      supportedTriggers: () => [],
+      getTypeDisplayName: () =>
+        i18n.translate('xpack.slo.editSloOverviewEmbeddableTitle.typeDisplayName', {
+          defaultMessage: 'criteria',
         }),
-      }
-    );
+      isEditingEnabled: () => api.getSloGroupOverviewConfig().overviewMode === 'groups',
+      onEdit: async function onEdit() {
+        try {
+          const result = await openSloConfiguration(
+            coreStart,
+            pluginsStart,
+            sloClient,
+            api.getSloGroupOverviewConfig()
+          );
+          api.updateSloGroupOverviewConfig(result as GroupSloCustomInput);
+        } catch (e) {
+          return Promise.reject();
+        }
+      },
+      serializeState,
+      getSloGroupOverviewConfig: () => {
+        const { groupFilters, overviewMode } = sloStateManager.getLatestState();
+        return {
+          groupFilters,
+          overviewMode,
+        };
+      },
+      updateSloGroupOverviewConfig: (update: GroupSloCustomInput) => {
+        sloStateManager.api.setGroupFilters(update.groupFilters);
+      },
+    });
 
     const fetchSubscription = fetch$(api)
       .pipe()
@@ -158,12 +177,12 @@ export const getOverviewEmbeddableFactory = ({
           groupFilters,
           remoteName,
         ] = useBatchedPublishingSubjects(
-          sloId$,
-          sloInstanceId$,
-          showAllGroupByInstances$,
-          overviewMode$,
-          groupFilters$,
-          remoteName$
+          sloStateManager.api.sloId$,
+          sloStateManager.api.sloInstanceId$,
+          sloStateManager.api.showAllGroupByInstances$,
+          sloStateManager.api.overviewMode$,
+          sloStateManager.api.groupFilters$,
+          sloStateManager.api.remoteName$
         );
 
         useEffect(() => {

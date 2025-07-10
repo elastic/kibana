@@ -4,119 +4,122 @@
   - [INIT](#init)
     - [Next action](#next-action)
     - [New control state](#new-control-state)
-  - [CREATE\_NEW\_TARGET](#create_new_target)
+  - [CREATE\_INDEX\_CHECK\_CLUSTER\_ROUTING\_ALLOCATION](#create_index_check_cluster_routing_allocation)
     - [Next action](#next-action-1)
     - [New control state](#new-control-state-1)
-  - [LEGACY\_CHECK\_CLUSTER\_ROUTING\_ALLOCATION](#legacy_check_cluster_routing_allocation)
+  - [CREATE\_NEW\_TARGET](#create_new_target)
     - [Next action](#next-action-2)
     - [New control state](#new-control-state-2)
-  - [LEGACY\_SET\_WRITE\_BLOCK](#legacy_set_write_block)
+  - [LEGACY\_CHECK\_CLUSTER\_ROUTING\_ALLOCATION](#legacy_check_cluster_routing_allocation)
     - [Next action](#next-action-3)
     - [New control state](#new-control-state-3)
-  - [LEGACY\_CREATE\_REINDEX\_TARGET](#legacy_create_reindex_target)
+  - [LEGACY\_SET\_WRITE\_BLOCK](#legacy_set_write_block)
     - [Next action](#next-action-4)
     - [New control state](#new-control-state-4)
-  - [LEGACY\_REINDEX](#legacy_reindex)
+  - [LEGACY\_CREATE\_REINDEX\_TARGET](#legacy_create_reindex_target)
     - [Next action](#next-action-5)
     - [New control state](#new-control-state-5)
-  - [LEGACY\_REINDEX\_WAIT\_FOR\_TASK](#legacy_reindex_wait_for_task)
+  - [LEGACY\_REINDEX](#legacy_reindex)
     - [Next action](#next-action-6)
     - [New control state](#new-control-state-6)
-  - [LEGACY\_DELETE](#legacy_delete)
+  - [LEGACY\_REINDEX\_WAIT\_FOR\_TASK](#legacy_reindex_wait_for_task)
     - [Next action](#next-action-7)
     - [New control state](#new-control-state-7)
-  - [WAIT\_FOR\_MIGRATION\_COMPLETION](#wait_for_migration_completion)
+  - [LEGACY\_DELETE](#legacy_delete)
     - [Next action](#next-action-8)
     - [New control state](#new-control-state-8)
-  - [WAIT\_FOR\_YELLOW\_SOURCE](#wait_for_yellow_source)
+  - [WAIT\_FOR\_MIGRATION\_COMPLETION](#wait_for_migration_completion)
     - [Next action](#next-action-9)
     - [New control state](#new-control-state-9)
-  - [UPDATE\_SOURCE\_MAPPINGS\_PROPERTIES](#update_source_mappings_properties)
+  - [WAIT\_FOR\_YELLOW\_SOURCE](#wait_for_yellow_source)
     - [Next action](#next-action-10)
     - [New control state](#new-control-state-10)
-  - [CLEANUP\_UNKNOWN\_AND\_EXCLUDED](#cleanup_unknown_and_excluded)
+  - [UPDATE\_SOURCE\_MAPPINGS\_PROPERTIES](#update_source_mappings_properties)
     - [Next action](#next-action-11)
     - [New control state](#new-control-state-11)
-  - [CLEANUP\_UNKNOWN\_AND\_EXCLUDED\_WAIT\_FOR\_TASK](#cleanup_unknown_and_excluded_wait_for_task)
+  - [CLEANUP\_UNKNOWN\_AND\_EXCLUDED](#cleanup_unknown_and_excluded)
     - [Next action](#next-action-12)
     - [New control state](#new-control-state-12)
-  - [PREPARE\_COMPATIBLE\_MIGRATION](#prepare_compatible_migration)
+  - [CLEANUP\_UNKNOWN\_AND\_EXCLUDED\_WAIT\_FOR\_TASK](#cleanup_unknown_and_excluded_wait_for_task)
     - [Next action](#next-action-13)
     - [New control state](#new-control-state-13)
-  - [REFRESH\_SOURCE](#refresh_source)
+  - [PREPARE\_COMPATIBLE\_MIGRATION](#prepare_compatible_migration)
     - [Next action](#next-action-14)
     - [New control state](#new-control-state-14)
-  - [CHECK\_CLUSTER\_ROUTING\_ALLOCATION](#check_cluster_routing_allocation)
+  - [REFRESH\_SOURCE](#refresh_source)
     - [Next action](#next-action-15)
     - [New control state](#new-control-state-15)
-  - [CHECK\_UNKNOWN\_DOCUMENTS](#check_unknown_documents)
+  - [REINDEX\_CHECK\_CLUSTER\_ROUTING\_ALLOCATION](#reindex_check_cluster_routing_allocation)
     - [Next action](#next-action-16)
-  - [SET\_SOURCE\_WRITE\_BLOCK](#set_source_write_block)
-    - [Next action](#next-action-17)
     - [New control state](#new-control-state-16)
-  - [CREATE\_REINDEX\_TEMP](#create_reindex_temp)
+  - [CHECK\_UNKNOWN\_DOCUMENTS](#check_unknown_documents)
+    - [Next action](#next-action-17)
+  - [SET\_SOURCE\_WRITE\_BLOCK](#set_source_write_block)
     - [Next action](#next-action-18)
     - [New control state](#new-control-state-17)
-  - [REINDEX\_SOURCE\_TO\_TEMP\_OPEN\_PIT](#reindex_source_to_temp_open_pit)
-    - [Next action](#next-action-19)
-    - [New control state](#new-control-state-18)
-  - [REINDEX\_SOURCE\_TO\_TEMP\_READ](#reindex_source_to_temp_read)
+  - [RELOCATE\_CHECK\_CLUSTER\_ROUTING\_ALLOCATION](#relocate_check_cluster_routing_allocation)
     - [Next action](#next-action-20)
     - [New control state](#new-control-state-19)
-  - [REINDEX\_SOURCE\_TO\_TEMP\_TRANSFORM](#reindex_source_to_temp_transform)
+  - [REINDEX\_SOURCE\_TO\_TEMP\_OPEN\_PIT](#reindex_source_to_temp_open_pit)
     - [Next action](#next-action-21)
     - [New control state](#new-control-state-20)
-  - [REINDEX\_SOURCE\_TO\_TEMP\_INDEX\_BULK](#reindex_source_to_temp_index_bulk)
+  - [REINDEX\_SOURCE\_TO\_TEMP\_READ](#reindex_source_to_temp_read)
     - [Next action](#next-action-22)
     - [New control state](#new-control-state-21)
-  - [REINDEX\_SOURCE\_TO\_TEMP\_CLOSE\_PIT](#reindex_source_to_temp_close_pit)
+  - [REINDEX\_SOURCE\_TO\_TEMP\_TRANSFORM](#reindex_source_to_temp_transform)
     - [Next action](#next-action-23)
     - [New control state](#new-control-state-22)
-  - [SET\_TEMP\_WRITE\_BLOCK](#set_temp_write_block)
+  - [REINDEX\_SOURCE\_TO\_TEMP\_INDEX\_BULK](#reindex_source_to_temp_index_bulk)
     - [Next action](#next-action-24)
     - [New control state](#new-control-state-23)
-  - [CLONE\_TEMP\_TO\_TARGET](#clone_temp_to_target)
+  - [REINDEX\_SOURCE\_TO\_TEMP\_CLOSE\_PIT](#reindex_source_to_temp_close_pit)
     - [Next action](#next-action-25)
     - [New control state](#new-control-state-24)
-  - [REFRESH\_TARGET](#refresh_target)
+  - [SET\_TEMP\_WRITE\_BLOCK](#set_temp_write_block)
     - [Next action](#next-action-26)
     - [New control state](#new-control-state-25)
-  - [OUTDATED\_DOCUMENTS\_SEARCH\_OPEN\_PIT](#outdated_documents_search_open_pit)
+  - [CLONE\_TEMP\_TO\_TARGET](#clone_temp_to_target)
     - [Next action](#next-action-27)
     - [New control state](#new-control-state-26)
-  - [OUTDATED\_DOCUMENTS\_SEARCH\_READ](#outdated_documents_search_read)
+  - [REFRESH\_TARGET](#refresh_target)
     - [Next action](#next-action-28)
     - [New control state](#new-control-state-27)
-  - [OUTDATED\_DOCUMENTS\_TRANSFORM](#outdated_documents_transform)
+  - [OUTDATED\_DOCUMENTS\_SEARCH\_OPEN\_PIT](#outdated_documents_search_open_pit)
     - [Next action](#next-action-29)
     - [New control state](#new-control-state-28)
-  - [TRANSFORMED\_DOCUMENTS\_BULK\_INDEX](#transformed_documents_bulk_index)
+  - [OUTDATED\_DOCUMENTS\_SEARCH\_READ](#outdated_documents_search_read)
     - [Next action](#next-action-30)
     - [New control state](#new-control-state-29)
-  - [OUTDATED\_DOCUMENTS\_SEARCH\_CLOSE\_PIT](#outdated_documents_search_close_pit)
+  - [OUTDATED\_DOCUMENTS\_TRANSFORM](#outdated_documents_transform)
     - [Next action](#next-action-31)
     - [New control state](#new-control-state-30)
-  - [OUTDATED\_DOCUMENTS\_REFRESH](#outdated_documents_refresh)
+  - [TRANSFORMED\_DOCUMENTS\_BULK\_INDEX](#transformed_documents_bulk_index)
     - [Next action](#next-action-32)
     - [New control state](#new-control-state-31)
-  - [CHECK\_TARGET\_MAPPINGS](#check_target_mappings)
+  - [OUTDATED\_DOCUMENTS\_SEARCH\_CLOSE\_PIT](#outdated_documents_search_close_pit)
     - [Next action](#next-action-33)
     - [New control state](#new-control-state-32)
-  - [UPDATE\_TARGET\_MAPPINGS\_PROPERTIES](#update_target_mappings_properties)
+  - [OUTDATED\_DOCUMENTS\_REFRESH](#outdated_documents_refresh)
     - [Next action](#next-action-34)
     - [New control state](#new-control-state-33)
-  - [UPDATE\_TARGET\_MAPPINGS\_PROPERTIES\_WAIT\_FOR\_TASK](#update_target_mappings_properties_wait_for_task)
+  - [CHECK\_TARGET\_MAPPINGS](#check_target_mappings)
     - [Next action](#next-action-35)
     - [New control state](#new-control-state-34)
-  - [CHECK\_VERSION\_INDEX\_READY\_ACTIONS](#check_version_index_ready_actions)
+  - [UPDATE\_TARGET\_MAPPINGS\_PROPERTIES](#update_target_mappings_properties)
     - [Next action](#next-action-36)
     - [New control state](#new-control-state-35)
-  - [MARK\_VERSION\_INDEX\_READY](#mark_version_index_ready)
+  - [UPDATE\_TARGET\_MAPPINGS\_PROPERTIES\_WAIT\_FOR\_TASK](#update_target_mappings_properties_wait_for_task)
     - [Next action](#next-action-37)
     - [New control state](#new-control-state-36)
-  - [MARK\_VERSION\_INDEX\_READY\_CONFLICT](#mark_version_index_ready_conflict)
+  - [CHECK\_VERSION\_INDEX\_READY\_ACTIONS](#check_version_index_ready_actions)
     - [Next action](#next-action-38)
     - [New control state](#new-control-state-37)
+  - [MARK\_VERSION\_INDEX\_READY](#mark_version_index_ready)
+    - [Next action](#next-action-39)
+    - [New control state](#new-control-state-38)
+  - [MARK\_VERSION\_INDEX\_READY\_CONFLICT](#mark_version_index_ready_conflict)
+    - [Next action](#next-action-40)
+    - [New control state](#new-control-state-39)
   - [FATAL](#fatal)
   - [DONE](#done)
 - [Manual QA Test Plan](#manual-qa-test-plan)
@@ -144,7 +147,7 @@ able to successfully complete the migration once the cluster has enough heap.
 
 For more background information on the problem see the [saved object
 migrations
-RFC](https://github.com/elastic/kibana/blob/main/rfcs/text/0013_saved_object_migrations.md).
+RFC](https://github.com/elastic/kibana/blob/main/legacy_rfcs/text/0013_saved_object_migrations.md).
 
 # Algorithm steps
 
@@ -225,10 +228,35 @@ and the migration source index is the index the `.kibana` alias points to.
 
     → [LEGACY_SET_WRITE_BLOCK](#legacy_set_write_block)
 
-6. If there are no `.kibana` indices, this is a fresh deployment. Initialize a
-   new saved objects index
+6. If there are no `.kibana` indices, this is a fresh deployment. Check cluster routing allocation and 
+   initialize a new saved objects index
+
+    → [CREATE_INDEX_CHECK_CLUSTER_ROUTING_ALLOCATION](#create_index_check_cluster_routing_allocation)
+
+7. If there is a new indices migrators (e.g. .kibana_alerting_cases). Check cluster routing allocation
+   and reindex (this is dead code and should be removed)
+
+## CREATE_INDEX_CHECK_CLUSTER_ROUTING_ALLOCATION
+
+### Next action
+
+`checkClusterRoutingAllocationEnabled`
+
+Check that replica allocation is enabled from cluster settings (`cluster.routing.allocation.enabled`). Migrations will fail when replica allocation is disabled during the bulk index operation that waits for all active shards. Migrations wait for all active shards to ensure that saved objects are replicated to protect against data loss.
+
+The Elasticsearch documentation mentions switching off replica allocation when restoring a cluster and this is a setting that might be overlooked when a restore is done. Migrations will fail early if replica allocation is incorrectly set to avoid adding a write block to the old index before running into a failure later.
+
+If replica allocation is set to 'all', the migration continues to fetch the saved object indices.
+
+### New control state
+
+1. If `cluster.routing.allocation.enabled` has a compatible value.
 
     → [CREATE_NEW_TARGET](#create_new_target)
+
+2. If it has a value that will not allow creating new *saved object* indices.
+
+    → [CREATE_INDEX_CHECK_CLUSTER_ROUTING_ALLOCATION](#create_index_check_cluster_routing_allocation)
 
 ## CREATE_NEW_TARGET
 
@@ -428,7 +456,7 @@ The latter usually happens when a new plugin is enabled that brings some incompa
 
 3. If the mappings are not updated due to incompatible changes and the migration is still in progress.
 
-    → [CHECK_CLUSTER_ROUTING_ALLOCATION](#check_cluster_routing_allocation)
+    → [REINDEX_CHECK_CLUSTER_ROUTING_ALLOCATION](#reindex_check_cluster_routing_allocation)
 
 4. If the mappings are not updated due to incompatible changes and the migration is already completed.
 
@@ -523,7 +551,7 @@ We are performing a *compatible migration*, and we discarded some unknown and ex
 
     → [FATAL](#fatal)
 
-## CHECK_CLUSTER_ROUTING_ALLOCATION
+## REINDEX_CHECK_CLUSTER_ROUTING_ALLOCATION
 
 ### Next action
 
@@ -549,7 +577,7 @@ The check only considers persistent and transient settings and does not take sta
 
 2. If it has a value that will not allow creating new *saved object* indices.
 
-    → [CHECK_CLUSTER_ROUTING_ALLOCATION](#check_cluster_routing_allocation) (retry)
+    → [REINDEX_CHECK_CLUSTER_ROUTING_ALLOCATION](#reindex_check_cluster_routing_allocation) (retry)
 
 ## CHECK_UNKNOWN_DOCUMENTS
 
@@ -578,6 +606,28 @@ Set a write block on the source index to prevent any older Kibana instances from
 ### New control state
 
 → [CREATE_REINDEX_TEMP](#create_reindex_temp)
+
+## RELOCATE_CHECK_CLUSTER_ROUTING_ALLOCATION
+
+### Next action
+
+`checkClusterRoutingAllocationEnabled`
+
+Check that replica allocation is enabled from cluster settings (`cluster.routing.allocation.enabled`). Migrations will fail when replica allocation is disabled during the bulk index operation that waits for all active shards. Migrations wait for all active shards to ensure that saved objects are replicated to protect against data loss.
+
+The Elasticsearch documentation mentions switching off replica allocation when restoring a cluster and this is a setting that might be overlooked when a restore is done. Migrations will fail early if replica allocation is incorrectly set to avoid adding a write block to the old index before running into a failure later.
+
+If replica allocation is set to 'all', the migration continues to fetch the saved object indices.
+
+### New control state
+
+1. If `cluster.routing.allocation.enabled` has a compatible value.
+
+    → [CREATE_REINDEX_TEMP](#create_reindex_temp)
+
+2. If it has a value that will not allow creating new *saved object* indices.
+
+    → [RELOCATE_CHECK_CLUSTER_ROUTING_ALLOCATION](#relocate_check_cluster_routing_allocation)
 
 ## CREATE_REINDEX_TEMP
 

@@ -21,6 +21,269 @@
     "functions": [
       {
         "parentPluginId": "@kbn/ebt-tools",
+        "id": "def-common.clearPerformanceTrackersByType",
+        "type": "Function",
+        "tags": [],
+        "label": "clearPerformanceTrackersByType",
+        "description": [
+          "\nClear all performance trackers by type."
+        ],
+        "signature": [
+          "(type: \"Panel\") => void"
+        ],
+        "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_tracker.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ebt-tools",
+            "id": "def-common.clearPerformanceTrackersByType.$1",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [
+              "- High-level type of the performance tracker, for example \"Panel\"."
+            ],
+            "signature": [
+              "\"Panel\""
+            ],
+            "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_tracker.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ebt-tools",
+        "id": "def-common.createPerformanceTracker",
+        "type": "Function",
+        "tags": [],
+        "label": "createPerformanceTracker",
+        "description": [
+          "\nCreates a performance tracker to mark and measure performance events."
+        ],
+        "signature": [
+          "({ type, subType, logger }: PerformanceTrackerOptions) => { mark: (name: ",
+          {
+            "pluginId": "@kbn/ebt-tools",
+            "scope": "common",
+            "docId": "kibKbnEbtToolsPluginApi",
+            "section": "def-common.PerformanceTrackerMarks",
+            "text": "PerformanceTrackerMarks"
+          },
+          ") => void; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_tracker.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ebt-tools",
+            "id": "def-common.createPerformanceTracker.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ type, subType, logger }",
+            "description": [],
+            "signature": [
+              "PerformanceTrackerOptions"
+            ],
+            "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_tracker.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "A performance tracker object with a mark method."
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ebt-tools",
+        "id": "def-common.findMarkerByNamePostfix",
+        "type": "Function",
+        "tags": [],
+        "label": "findMarkerByNamePostfix",
+        "description": [
+          "\nFinds a performance marker by its name postfix."
+        ],
+        "signature": [
+          "(markers: PerformanceMark[], namePostfix: ",
+          {
+            "pluginId": "@kbn/ebt-tools",
+            "scope": "common",
+            "docId": "kibKbnEbtToolsPluginApi",
+            "section": "def-common.PerformanceTrackerMarks",
+            "text": "PerformanceTrackerMarks"
+          },
+          ") => PerformanceMark | undefined"
+        ],
+        "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_tracker.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ebt-tools",
+            "id": "def-common.findMarkerByNamePostfix.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "markers",
+            "description": [],
+            "signature": [
+              "PerformanceMark[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_tracker.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/ebt-tools",
+            "id": "def-common.findMarkerByNamePostfix.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "namePostfix",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/ebt-tools",
+                "scope": "common",
+                "docId": "kibKbnEbtToolsPluginApi",
+                "section": "def-common.PerformanceTrackerMarks",
+                "text": "PerformanceTrackerMarks"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_tracker.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "The found performance marker or undefined if not found."
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ebt-tools",
+        "id": "def-common.getMeanFromPerformanceMeasures",
+        "type": "Function",
+        "tags": [],
+        "label": "getMeanFromPerformanceMeasures",
+        "description": [
+          "\nGet the mean duration of performance measures between two marks."
+        ],
+        "signature": [
+          "({ type, startMark, endMark, createPerformanceMeasures, }: GetMeanFromMeasuresOptions) => number"
+        ],
+        "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_tracker.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ebt-tools",
+            "id": "def-common.getMeanFromPerformanceMeasures.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  type,\n  startMark,\n  endMark,\n  createPerformanceMeasures = true,\n}",
+            "description": [],
+            "signature": [
+              "GetMeanFromMeasuresOptions"
+            ],
+            "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_tracker.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "The mean duration of the performance measures between the two marks."
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ebt-tools",
+        "id": "def-common.getPerformanceTrackersByType",
+        "type": "Function",
+        "tags": [],
+        "label": "getPerformanceTrackersByType",
+        "description": [
+          "\nGet all performance trackers by type."
+        ],
+        "signature": [
+          "(type: \"Panel\") => PerformanceMark[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_tracker.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ebt-tools",
+            "id": "def-common.getPerformanceTrackersByType.$1",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [
+              "- High-level type of the performance tracker, for example \"Panel\"."
+            ],
+            "signature": [
+              "\"Panel\""
+            ],
+            "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_tracker.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "An array of performance trackers."
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ebt-tools",
+        "id": "def-common.getPerformanceTrackersGroupedById",
+        "type": "Function",
+        "tags": [],
+        "label": "getPerformanceTrackersGroupedById",
+        "description": [
+          "\nGet all performance trackers grouped by id."
+        ],
+        "signature": [
+          "(type: \"Panel\") => _.Dictionary<PerformanceMark[]>"
+        ],
+        "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_tracker.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ebt-tools",
+            "id": "def-common.getPerformanceTrackersGroupedById.$1",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [
+              "- High-level type of the performance tracker, for example \"Panel\"."
+            ],
+            "signature": [
+              "\"Panel\""
+            ],
+            "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_tracker.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "A map of performance trackers grouped by id."
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ebt-tools",
         "id": "def-common.PerformanceContextProvider",
         "type": "Function",
         "tags": [],
@@ -49,49 +312,6 @@
             "trackAdoption": false
           }
         ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/ebt-tools",
-        "id": "def-common.registerPerformanceMetricEventType",
-        "type": "Function",
-        "tags": [
-          "private"
-        ],
-        "label": "registerPerformanceMetricEventType",
-        "description": [
-          "\nRegister the `performance_metric` event type"
-        ],
-        "signature": [
-          "(analytics: Pick<",
-          "IAnalyticsClient",
-          ", \"registerEventType\">) => void"
-        ],
-        "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_metric_events/helpers.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/ebt-tools",
-            "id": "def-common.registerPerformanceMetricEventType.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "analytics",
-            "description": [
-              "The {@link AnalyticsClient } during the setup phase (it has the method `registerEventType`)"
-            ],
-            "signature": [
-              "Pick<",
-              "IAnalyticsClient",
-              ", \"registerEventType\">"
-            ],
-            "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_metric_events/helpers.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
         "initialIsOpen": false
       },
       {
@@ -174,11 +394,7 @@
         "label": "usePageReady",
         "description": [],
         "signature": [
-          "(state: { customMetrics?: ",
-          "CustomMetrics",
-          " | undefined; isReady: boolean; meta?: ",
-          "Meta",
-          " | undefined; }) => void"
+          "({ customInitialLoad, isReady, isRefreshing, customMetrics, meta, }: UsePageReadyProps) => void"
         ],
         "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_metrics/context/use_page_ready.ts",
         "deprecated": false,
@@ -189,54 +405,15 @@
             "id": "def-common.usePageReady.$1",
             "type": "Object",
             "tags": [],
-            "label": "state",
+            "label": "{\n  customInitialLoad,\n  isReady,\n  isRefreshing,\n  customMetrics,\n  meta,\n}",
             "description": [],
+            "signature": [
+              "UsePageReadyProps"
+            ],
             "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_metrics/context/use_page_ready.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/ebt-tools",
-                "id": "def-common.usePageReady.$1.customMetrics",
-                "type": "Object",
-                "tags": [],
-                "label": "customMetrics",
-                "description": [],
-                "signature": [
-                  "CustomMetrics",
-                  " | undefined"
-                ],
-                "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_metrics/context/use_page_ready.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/ebt-tools",
-                "id": "def-common.usePageReady.$1.isReady",
-                "type": "boolean",
-                "tags": [],
-                "label": "isReady",
-                "description": [],
-                "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_metrics/context/use_page_ready.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/ebt-tools",
-                "id": "def-common.usePageReady.$1.meta",
-                "type": "Object",
-                "tags": [],
-                "label": "meta",
-                "description": [],
-                "signature": [
-                  "Meta",
-                  " | undefined"
-                ],
-                "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_metrics/context/use_page_ready.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
+            "isRequired": true
           }
         ],
         "returnComment": [],
@@ -262,6 +439,62 @@
       }
     ],
     "interfaces": [
+      {
+        "parentPluginId": "@kbn/ebt-tools",
+        "id": "def-common.Meta",
+        "type": "Interface",
+        "tags": [],
+        "label": "Meta",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_metrics/context/performance_context.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ebt-tools",
+            "id": "def-common.Meta.rangeFrom",
+            "type": "string",
+            "tags": [],
+            "label": "rangeFrom",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_metrics/context/performance_context.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ebt-tools",
+            "id": "def-common.Meta.rangeTo",
+            "type": "string",
+            "tags": [],
+            "label": "rangeTo",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_metrics/context/performance_context.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ebt-tools",
+            "id": "def-common.Meta.description",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "signature": [
+              "`[ttfmp_alerts] ${string}` | `[ttfmp_onboarding] ${string}` | `[ttfmp_synthetics] ${string}` | `[ttfmp_hosts] ${string}` | `[ttfmp_services] ${string}` | `[ttfmp_traces] ${string}` | `[ttfmp_dependencies] ${string}` | `[ttfmp_alert_details] ${string}` | `[ttfmp_slos] ${string}` | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_metrics/context/performance_context.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/ebt-tools",
         "id": "def-common.PerformanceMetricEvent",
@@ -610,7 +843,53 @@
       }
     ],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/ebt-tools",
+        "id": "def-common.PerformanceTrackerMarks",
+        "type": "Type",
+        "tags": [],
+        "label": "PerformanceTrackerMarks",
+        "description": [],
+        "signature": [
+          "\"renderComplete\" | \"preRender\" | \"renderStart\""
+        ],
+        "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_tracker.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ebt-tools",
+        "id": "def-common.PerformanceTrackerMeasures",
+        "type": "Type",
+        "tags": [],
+        "label": "PerformanceTrackerMeasures",
+        "description": [],
+        "signature": [
+          "\"preRenderDuration\" | \"renderDuration\""
+        ],
+        "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_tracker.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ebt-tools",
+        "id": "def-common.PerformanceTrackerTypes",
+        "type": "Type",
+        "tags": [],
+        "label": "PerformanceTrackerTypes",
+        "description": [],
+        "signature": [
+          "\"Panel\""
+        ],
+        "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_tracker.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": [
       {
         "parentPluginId": "@kbn/ebt-tools",
@@ -644,8 +923,68 @@
             "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_metrics/performance_markers.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ebt-tools",
+            "id": "def-common.perfomanceMarkers.startPageRefresh",
+            "type": "string",
+            "tags": [],
+            "label": "startPageRefresh",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_metrics/performance_markers.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ebt-tools",
+        "id": "def-common.PERFORMANCE_TRACKER_MARKS",
+        "type": "Object",
+        "tags": [],
+        "label": "PERFORMANCE_TRACKER_MARKS",
+        "description": [
+          "\nPerformanceTrackerMarks are the marks that can be used to track performance\nof lens charts. They are used to mark specific points in time during\nthe chart's lifecycle."
+        ],
+        "signature": [
+          "{ readonly PRE_RENDER: \"preRender\"; readonly RENDER_START: \"renderStart\"; readonly RENDER_COMPLETE: \"renderComplete\"; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_tracker.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ebt-tools",
+        "id": "def-common.PERFORMANCE_TRACKER_MEASURES",
+        "type": "Object",
+        "tags": [],
+        "label": "PERFORMANCE_TRACKER_MEASURES",
+        "description": [],
+        "signature": [
+          "{ readonly PRE_RENDER_DURATION: \"preRenderDuration\"; readonly RENDER_DURATION: \"renderDuration\"; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_tracker.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ebt-tools",
+        "id": "def-common.PERFORMANCE_TRACKER_TYPES",
+        "type": "Object",
+        "tags": [],
+        "label": "PERFORMANCE_TRACKER_TYPES",
+        "description": [
+          "\nPERFORMANCE_TRACKER_TYPES defines top-level categories to be used as\nthe mark name. They are used to group marks and measures by type."
+        ],
+        "signature": [
+          "{ readonly PANEL: \"Panel\"; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_tracker.ts",
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ]

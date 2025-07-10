@@ -79,8 +79,6 @@ export interface StackTraceResponse {
   ['stack_frames']?: ProfilingStackFrames;
   /** executables */
   ['executables']?: ProfilingExecutables;
-  /** total frames */
-  ['total_frames']: number;
   /** sampling rate */
   ['sampling_rate']: number;
 }
@@ -95,8 +93,6 @@ export interface DecodedStackTraceResponse {
   stackFrames: Map<StackFrameID, StackFrame>;
   /** Map of file ID and Executables */
   executables: Map<FileID, Executable>;
-  /** Total number of frames */
-  totalFrames: number;
   /** sampling rate */
   samplingRate: number;
 }
@@ -207,7 +203,6 @@ export function decodeStackTraceResponse(
     stackTraces,
     stackFrames,
     executables,
-    totalFrames: response.total_frames,
     samplingRate: response.sampling_rate,
   };
 }
@@ -226,6 +221,7 @@ export enum StackTracesDisplayOption {
 export enum TopNType {
   Containers = 'containers',
   Deployments = 'deployments',
+  Executables = 'executables',
   Threads = 'threads',
   Hosts = 'hosts',
   Traces = 'traces',
@@ -240,6 +236,7 @@ export function getFieldNameForTopNType(type: TopNType): string {
   return {
     [TopNType.Containers]: ProfilingESField.ContainerName,
     [TopNType.Deployments]: ProfilingESField.OrchestratorResourceName,
+    [TopNType.Executables]: ProfilingESField.ProcessExecutableName,
     [TopNType.Threads]: ProfilingESField.ProcessThreadName,
     [TopNType.Hosts]: ProfilingESField.HostID,
     [TopNType.Traces]: ProfilingESField.StacktraceID,

@@ -23,7 +23,7 @@ An ES|QL (Elasticsearch query language) query consists of a series of commands, 
 
 A source command can be followed by one or more **processing commands**. Processing commands can change the output table of the previous command by adding, removing, and changing rows and columns.
 
-\`\`\`
+\`\`\` esql
 source-command
 | processing-command1
 | processing-command2
@@ -54,7 +54,7 @@ export const sourceCommands = {
             defaultMessage: `### FROM
 The \`FROM\` source command returns a table with up to 10,000 documents from a data stream, index, or alias. Each row in the resulting table represents a document. Each column corresponds to a field, and can be accessed by the name of that field.
 
-\`\`\`
+\`\`\` esql
 FROM employees
 \`\`\`
 
@@ -62,7 +62,7 @@ You can use [date math](https://www.elastic.co/guide/en/elasticsearch/reference/
 
 Use comma-separated lists or wildcards to query multiple data streams, indices, or aliases:
 
-\`\`\`
+\`\`\` esql
 FROM employees-00001,employees-*
 \`\`\`
 
@@ -76,7 +76,7 @@ ES|QL can access the following metadata fields:
 
 Use the \`METADATA\` directive to enable metadata fields:
 
-\`\`\`
+\`\`\` esql
 FROM index METADATA _index, _id
 \`\`\`
 
@@ -84,7 +84,7 @@ Metadata fields are only available if the source of the data is an index. Conseq
 
 Once enabled, the fields are then available to subsequent processing commands, just like the other index fields:
 
-\`\`\`
+\`\`\` esql
 FROM ul_logs, apps METADATA _index, _version
 | WHERE id IN (13, 14) AND _version == 1
 | EVAL key = CONCAT(_index, "_", TO_STR(id))
@@ -94,7 +94,7 @@ FROM ul_logs, apps METADATA _index, _version
 
 Also, similar to the index fields, once an aggregation is performed, a metadata field will no longer be accessible to subsequent commands, unless used as grouping field:
 
-\`\`\`
+\`\`\` esql
 FROM employees METADATA _index, _id
 | STATS max = MAX(emp_no) BY _index
 \`\`\`
@@ -115,19 +115,19 @@ FROM employees METADATA _index, _id
             defaultMessage: `### ROW
 The \`ROW\` source command produces a row with one or more columns with values that you specify. This can be useful for testing.
 
-\`\`\`
+\`\`\` esql
 ROW a = 1, b = "two", c = null
 \`\`\`
 
 Use square brackets to create multi-value columns:
 
-\`\`\`
+\`\`\` esql
 ROW a = [2, 1]
 \`\`\`
 
 ROW supports the use of functions:
 
-\`\`\`
+\`\`\` esql
 ROW a = ROUND(1.23, 0)
 \`\`\`
             `,
@@ -145,10 +145,7 @@ ROW a = ROUND(1.23, 0)
         <Markdown
           markdownContent={i18n.translate('languageDocumentation.documentationESQL.show.markdown', {
             defaultMessage: `### SHOW
-The \`SHOW <item>\` source command returns information about the deployment and its capabilities:
-
-* Use \`SHOW INFO\` to return the deployment's version, build date and hash.
-* Use \`SHOW FUNCTIONS\` to return a list of all supported functions and a synopsis of each function.
+The \`SHOW INFO\` source command returns the deployment's version, build date and hash.
             `,
             ignoreTag: true,
             description:
@@ -172,6 +169,70 @@ export const processingCommands = {
   ),
   items: [
     {
+      label: i18n.translate('languageDocumentation.documentationESQL.changePoint', {
+        defaultMessage: 'CHANGE_POINT',
+      }),
+      preview: true,
+      description: (
+        <Markdown
+          openLinksInNewTab={true}
+          markdownContent={i18n.translate(
+            'languageDocumentation.documentationESQL.changePoint.markdown',
+            {
+              defaultMessage: `### CHANGE POINT
+\`CHANGE POINT\`detects spikes, dips, and change points in a metric. 
+
+The command adds columns to the table with the change point type and p-value, that indicates how extreme the change point is (lower values indicate greater changes).
+
+The possible change point types are:
+
+* \`dip\`: a significant dip occurs at this change point
+* \`distribution_change\`: the overall distribution of the values has changed significantly
+* \`spike\`: a significant spike occurs at this point
+* \`step_change\`: the change indicates a statistically significant step up or down in value distribution
+* \`trend_change\`: there is an overall trend change occurring at this point
+
+Note that there must be at least 22 values for change point detection. Fewer than 1,000 is preferred.
+
+**Syntax**
+
+\`\`\` esql
+CHANGE_POINT value [ON key] [AS type_name, pvalue_name]
+\`\`\` 
+
+**Parameters**
+
+* \`value\`: The column with the metric in which you want to detect a change point.
+* \`key\`: The column with the key to order the values by. If not specified, @timestamp is used.
+* \`type_name\`: The name of the output column with the change point type. If not specified, type is used.
+* \`pvalue_name\`: The name of the output column with the p-value that indicates how extreme the change point is. If not specified, pvalue is used.
+
+**Example**
+
+The following example shows the detection of a step change:
+
+\`\`\` esql
+ROW key=[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25]
+| MV_EXPAND key
+| EVAL value = CASE(key<13, 0, 42)
+| CHANGE_POINT value ON key
+| WHERE type IS NOT NULL
+\`\`\` 
+
+| key:integer | value:integer | type:keyword | pvalue:double |
+|-------------|---------------|--------------|---------------|
+| 13          | 42            | step_change  | 0.0           |
+
+`,
+              ignoreTag: true,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
       label: i18n.translate('languageDocumentation.documentationESQL.dissect', {
         defaultMessage: 'DISSECT',
       }),
@@ -186,7 +247,7 @@ export const processingCommands = {
 
 Refer to the [dissect processor documentation](https://www.elastic.co/guide/en/elasticsearch/reference/current/dissect-processor.html) for the syntax of dissect patterns.
 
-\`\`\`
+\`\`\` esql
 ROW a = "1953-01-23T12:15:00Z - some text - 127.0.0.1"
 | DISSECT a "%'\{Y\}-%\{M\}-%\{D\}T%\{h\}:%\{m\}:%\{s\}Z - %\{msg\} - %\{ip\}'"
 \`\`\`            `,
@@ -208,14 +269,14 @@ ROW a = "1953-01-23T12:15:00Z - some text - 127.0.0.1"
             defaultMessage: `### DROP
 Use \`DROP\` to remove columns from a table:
 
-\`\`\`
+\`\`\` esql
 FROM employees
 | DROP height
 \`\`\`
 
 Rather than specify each column by name, you can use wildcards to drop all columns with a name that matches a pattern:
 
-\`\`\`
+\`\`\` esql
 FROM employees
 | DROP height*
 \`\`\`
@@ -239,7 +300,7 @@ FROM employees
               defaultMessage: `### ENRICH
 You can use \`ENRICH\` to add data from your existing indices to incoming records. It’s similar to [ingest enrich](https://www.elastic.co/guide/en/elasticsearch/reference/current/ingest-enriching-data.html), but it works at query time.
 
-\`\`\`
+\`\`\` esql
 ROW language_code = "1"
 | ENRICH languages_policy
 \`\`\`
@@ -248,21 +309,21 @@ ROW language_code = "1"
 
 \`ENRICH\` will look for records in the [enrich index](https://www.elastic.co/guide/en/elasticsearch/reference/current/ingest-enriching-data.html#enrich-index) based on the match field value. The matching key in the input dataset can be defined using \`ON <field-name>\`; if it’s not specified, the match will be performed on a field with the same name as the match field defined in the enrich policy.
 
-\`\`\`
+\`\`\` esql
 ROW a = "1"
 | ENRICH languages_policy ON a
 \`\`\`
 
 You can specify which attributes (between those defined as enrich fields in the policy) have to be added to the result, using \`WITH <field1>, <field2>...\` syntax.
 
-\`\`\`
+\`\`\` esql
 ROW a = "1"
 | ENRICH languages_policy ON a WITH language_name
 \`\`\`
 
 Attributes can also be renamed using \`WITH new_name=<field1>\`
 
-\`\`\`
+\`\`\` esql
 ROW a = "1"
 | ENRICH languages_policy ON a WITH name = language_name
 \`\`\`
@@ -289,7 +350,7 @@ In case of name collisions, the newly created fields will override the existing 
             defaultMessage: `### EVAL
 \`EVAL\` enables you to add new columns:
 
-\`\`\`
+\`\`\` esql
 FROM employees
 | KEEP first_name, last_name, height
 | EVAL height_feet = height * 3.281, height_cm = height * 100
@@ -297,7 +358,7 @@ FROM employees
 
 If the specified column already exists, the existing column will be dropped, and the new column will be appended to the table:
 
-\`\`\`
+\`\`\` esql
 FROM employees
 | KEEP first_name, last_name, height
 | EVAL height = height * 3.281
@@ -325,7 +386,7 @@ FROM employees
 
 Refer to the [grok processor documentation](https://www.elastic.co/guide/en/elasticsearch/reference/current/grok-processor.html) for the syntax of grok patterns.
 
-\`\`\`
+\`\`\` esql
 ROW a = "12 15.5 15.6 true"
 | GROK a "%'{NUMBER:b:int}' %'{NUMBER:c:float}' %'{NUMBER:d:double}' %'{WORD:e:boolean}'"
 \`\`\`
@@ -348,21 +409,21 @@ The \`KEEP\` command enables you to specify what columns are returned and the or
 
 To limit the columns that are returned, use a comma-separated list of column names. The columns are returned in the specified order:
 
-\`\`\`
+\`\`\` esql
 FROM employees
 | KEEP first_name, last_name, height
 \`\`\`
 
 Rather than specify each column by name, you can use wildcards to return all columns with a name that matches a pattern:
 
-\`\`\`
+\`\`\` esql
 FROM employees
 | KEEP h*
 \`\`\`
 
 The asterisk wildcard (\`*\`) by itself translates to all columns that do not match the other arguments. This query will first return all columns with a name that starts with an h, followed by all other columns:
 
-\`\`\`
+\`\`\` esql
 FROM employees
 | KEEP h*, *
 \`\`\`
@@ -385,7 +446,7 @@ FROM employees
               defaultMessage: `### LIMIT
 The \`LIMIT\` processing command enables you to limit the number of rows:
 
-\`\`\`
+\`\`\` esql
 FROM employees
 | LIMIT 5
 \`\`\`
@@ -398,9 +459,60 @@ FROM employees
       ),
     },
     {
+      label: i18n.translate('languageDocumentation.documentationESQL.lookupJoin', {
+        defaultMessage: 'LOOKUP JOIN',
+      }),
+      preview: false,
+      description: (
+        <Markdown
+          openLinksInNewTab={true}
+          markdownContent={i18n.translate(
+            'languageDocumentation.documentationESQL.lookupJoin.markdown',
+            {
+              defaultMessage: `### LOOKUP JOIN
+You can use \`LOOKUP JOIN\` to add data from an existing index to incoming rows. While this is similar to \`ENRICH\`, it does not require an enrich policy to be executed beforehand. Additionally, if multiple matching documents are found in the lookup index, they will generate multiple output rows.
+
+\`\`\` esql
+ROW language_code = 1
+| LOOKUP JOIN languages ON language_code
+\`\`\`
+
+An index that is used in \`LOOKUP JOIN\` needs to be in lookup mode. This [index mode](https://www.elastic.co/docs/reference/elasticsearch/index-settings/index-modules#_static_index_settings) needs to be set when the index is created.
+
+\`\`\` esql
+PUT languages
+'{
+  "settings": {
+    "index":{
+      "mode":"lookup"
+    }
+  }
+}'
+\`\`\`
+
+The join key field must have a compatible type and match the name of the field in the lookup index to find matching documents. You can use \`RENAME\` or \`EVAL\` to rename columns as needed.
+
+\`\`\` esql
+FROM employees
+| EVAL language_code = languages
+| LOOKUP JOIN languages ON language_code
+\`\`\`
+
+In case of name collisions, the fields from the lookup index will override the existing fields.
+            `,
+              ignoreTag: true,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
       label: i18n.translate('languageDocumentation.documentationESQL.mvExpand', {
         defaultMessage: 'MV_EXPAND',
       }),
+      preview: true,
       description: (
         <Markdown
           markdownContent={i18n.translate(
@@ -408,7 +520,7 @@ FROM employees
             {
               defaultMessage: `### MV_EXPAND
 The \`MV_EXPAND\` processing command expands multivalued fields into one row per value, duplicating other fields:
-\`\`\`
+\`\`\` esql
 ROW a=[1,2,3], b="b", j=["a","b"]
 | MV_EXPAND a
 \`\`\`
@@ -432,13 +544,13 @@ ROW a=[1,2,3], b="b", j=["a","b"]
               defaultMessage: `### RENAME
 Use \`RENAME\` to rename a column using the following syntax:
 
-\`\`\`
+\`\`\` esql
 RENAME <old-name> AS <new-name>
 \`\`\`
 
 For example:
 
-\`\`\`
+\`\`\` esql
 FROM employees
 | KEEP first_name, last_name, still_hired
 | RENAME still_hired AS employed
@@ -448,12 +560,62 @@ If a column with the new name already exists, it will be replaced by the new col
 
 Multiple columns can be renamed with a single \`RENAME\` command:
 
-\`\`\`
+\`\`\` esql
 FROM employees
 | KEEP first_name, last_name
 | RENAME first_name AS fn, last_name AS ln
 \`\`\`
             `,
+              ignoreTag: true,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate('languageDocumentation.documentationESQL.sampleCommand', {
+        defaultMessage: 'SAMPLE',
+      }),
+      preview: true,
+      description: (
+        <Markdown
+          openLinksInNewTab={true}
+          markdownContent={i18n.translate(
+            'languageDocumentation.documentationESQL.sampleCommand.markdown',
+            {
+              defaultMessage: `### SAMPLE
+The \`SAMPLE\` command samples a fraction of the table rows. 
+
+**Syntax**
+
+\`\`\` esql
+SAMPLE probability
+\`\`\` 
+
+**Parameters**
+
+* \`probability\`: The probability that a row is included in the sample. The value must be between 0 and 1, exclusive.
+
+**Example**
+
+The following example shows the detection of a step change:
+
+\`\`\` esql
+FROM employees
+| KEEP emp_no
+| SAMPLE 0.05
+\`\`\` 
+
+| emp_no:integer |
+|----------------|
+| 10018          |
+| 10024          |
+| 10062          |
+| 10081          |
+
+`,
               ignoreTag: true,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
@@ -472,7 +634,7 @@ FROM employees
             defaultMessage: `### SORT
 Use the \`SORT\` command to sort rows on one or more fields:
 
-\`\`\`
+\`\`\` esql
 FROM employees
 | KEEP first_name, last_name, height
 | SORT height
@@ -480,7 +642,7 @@ FROM employees
 
 The default sort order is ascending. Set an explicit sort order using \`ASC\` or \`DESC\`:
 
-\`\`\`
+\`\`\` esql
 FROM employees
 | KEEP first_name, last_name, height
 | SORT height DESC
@@ -488,7 +650,7 @@ FROM employees
 
 If two rows have the same sort key, the original order will be preserved. You can provide additional sort expressions to act as tie breakers:
 
-\`\`\`
+\`\`\` esql
 FROM employees
 | KEEP first_name, last_name, height
 | SORT height DESC, first_name ASC
@@ -497,7 +659,7 @@ FROM employees
 #### \`null\` values
 By default, \`null\` values are treated as being larger than any other value. With an ascending sort order, \`null\` values are sorted last, and with a descending sort order, \`null\` values are sorted first. You can change that by providing \`NULLS FIRST\` or \`NULLS LAST\`:
 
-\`\`\`
+\`\`\` esql
 FROM employees
 | KEEP first_name, last_name, height
 | SORT first_name ASC NULLS FIRST
@@ -523,7 +685,7 @@ Use \`STATS ... BY\` to group rows according to a common value and calculate one
 
 **Examples**:
 
-\`\`\`
+\`\`\` esql
 FROM employees
 | STATS count = COUNT(emp_no) BY languages
 | SORT languages
@@ -531,21 +693,21 @@ FROM employees
 
 If \`BY\` is omitted, the output table contains exactly one row with the aggregations applied over the entire dataset:
 
-\`\`\`
+\`\`\` esql
 FROM employees
 | STATS avg_lang = AVG(languages)
 \`\`\`
 
 It's possible to calculate multiple values:
 
-\`\`\`
+\`\`\` esql
 FROM employees
 | STATS avg_lang = AVG(languages), max_lang = MAX(languages)
 \`\`\`
 
 It's also possible to group by multiple values (only supported for long and keyword family fields):
 
-\`\`\`
+\`\`\` esql
 FROM employees
 | EVAL hired = DATE_FORMAT(hire_date, "YYYY")
 | STATS avg_salary = AVG(salary) BY hired, languages.long
@@ -557,14 +719,14 @@ Refer to **Aggregation functions** for a list of functions that can be used with
 
 Both the aggregating functions and the grouping expressions accept other functions. This is useful for using \`STATS...BY\` on multivalue columns. For example, to calculate the average salary change, you can use \`MV_AVG\` to first average the multiple values per employee, and use the result with the \`AVG\` function:
 
-\`\`\`
+\`\`\` esql
 FROM employees
 | STATS avg_salary_change = AVG(MV_AVG(salary_change))
 \`\`\`
 
 An example of grouping by an expression is grouping employees on the first letter of their last name:
 
-\`\`\`
+\`\`\` esql
 FROM employees
 | STATS my_count = COUNT() BY LEFT(last_name, 1)
 | SORT \`LEFT(last_name, 1)\`
@@ -572,14 +734,14 @@ FROM employees
 
 Specifying the output column name is optional. If not specified, the new column name is equal to the expression. The following query returns a column named \`AVG(salary)\`:
 
-\`\`\`
+\`\`\` esql
 FROM employees
 | STATS AVG(salary)
 \`\`\`
 
 Because this name contains special characters, it needs to be quoted with backticks (\`) when using it in subsequent commands:
 
-\`\`\`
+\`\`\` esql
 FROM employees
 | STATS AVG(salary)
 | EVAL avg_salary_rounded = ROUND(\`AVG(salary)\`)
@@ -608,7 +770,7 @@ FROM employees
               defaultMessage: `### WHERE
 Use \`WHERE\` to produce a table that contains all the rows from the input table for which the provided condition evaluates to \`true\`:
 
-\`\`\`
+\`\`\` esql
 FROM employees
 | KEEP first_name, last_name, still_hired
 | WHERE still_hired == true
@@ -631,326 +793,8 @@ Refer to **Operators** for an overview of the supported operators.
   ],
 };
 
-export const groupingFunctions = {
-  label: i18n.translate('languageDocumentation.documentationESQL.groupingFunctions', {
-    defaultMessage: 'Grouping functions',
-  }),
-  description: i18n.translate(
-    'languageDocumentation.documentationESQL.groupingFunctionsDocumentationESQLDescription',
-    {
-      defaultMessage: `These grouping functions can be used with \`STATS...BY\`:`,
-    }
-  ),
-  items: [
-    {
-      label: i18n.translate('languageDocumentation.documentationESQL.autoBucketFunction', {
-        defaultMessage: 'BUCKET',
-      }),
-      description: (
-        <Markdown
-          markdownContent={i18n.translate(
-            'languageDocumentation.documentationESQL.autoBucketFunction.markdown',
-            {
-              defaultMessage: `### BUCKET
-Creates groups of values - buckets - out of a datetime or numeric input. The size of the buckets can either be provided directly, or chosen based on a recommended count and values range.
-
-\`BUCKET\` works in two modes:
-
-1. Where the size of the bucket is computed based on a buckets count recommendation (four parameters) and a range.
-2. Where the bucket size is provided directly (two parameters).
-
-Using a target number of buckets, a start of a range, and an end of a range, \`BUCKET\` picks an appropriate bucket size to generate the target number of buckets or fewer.
-
-For example, requesting up to 20 buckets for a year will organize data into monthly intervals:
-
-\`\`\`
-FROM employees
-| WHERE hire_date >= "1985-01-01T00:00:00Z" AND hire_date < "1986-01-01T00:00:00Z"
-| STATS hire_date = MV_SORT(VALUES(hire_date)) BY month = BUCKET(hire_date, 20, "1985-01-01T00:00:00Z", "1986-01-01T00:00:00Z")
-| SORT hire_date
-\`\`\`
-
-**NOTE**: The goal isn’t to provide the exact target number of buckets, it’s to pick a range that provides _at most_ the target number of buckets.
-
-You can combine \`BUCKET\` with an aggregation to create a histogram:
-
-\`\`\`
-FROM employees
-| WHERE hire_date >= "1985-01-01T00:00:00Z" AND hire_date < "1986-01-01T00:00:00Z"
-| STATS hires_per_month = COUNT(*) BY month = BUCKET(hire_date, 20, "1985-01-01T00:00:00Z", "1986-01-01T00:00:00Z")
-| SORT month
-\`\`\`
-
-**NOTE**: \`BUCKET\` does not create buckets that match zero documents. That’s why the previous example is missing \`1985-03-01\` and other dates.
-
-Asking for more buckets can result in a smaller range. For example, requesting at most 100 buckets in a year results in weekly buckets:
-
-\`\`\`
-FROM employees
-| WHERE hire_date >= "1985-01-01T00:00:00Z" AND hire_date < "1986-01-01T00:00:00Z"
-| STATS hires_per_week = COUNT(*) BY week = BUCKET(hire_date, 100, "1985-01-01T00:00:00Z", "1986-01-01T00:00:00Z")
-| SORT week
-\`\`\`
-
-**NOTE**: \`BUCKET\` does not filter any rows. It only uses the provided range to pick a good bucket size. For rows with a value outside of the range, it returns a bucket value that corresponds to a bucket outside the range. Combine \`BUCKET\` with \`WHERE\` to filter rows.
-
-If the desired bucket size is known in advance, simply provide it as the second argument, leaving the range out:
-
-\`\`\`
-FROM employees
-| WHERE hire_date >= "1985-01-01T00:00:00Z" AND hire_date < "1986-01-01T00:00:00Z"
-| STATS hires_per_week = COUNT(*) BY week = BUCKET(hire_date, 1 week)
-| SORT week
-\`\`\`
-
-**NOTE**: When providing the bucket size as the second parameter, it must be a time duration or date period.
-
-\`BUCKET\` can also operate on numeric fields. For example, to create a salary histogram:
-
-\`\`\`
-FROM employees
-| STATS COUNT(*) by bs = BUCKET(salary, 20, 25324, 74999)
-| SORT bs
-\`\`\`
-
-Unlike the earlier example that intentionally filters on a date range, you rarely want to filter on a numeric range. You have to find the min and max separately. ES|QL doesn’t yet have an easy way to do that automatically.
-
-The range can be omitted if the desired bucket size is known in advance. Simply provide it as the second argument:
-
-\`\`\`
-FROM employees
-| WHERE hire_date >= "1985-01-01T00:00:00Z" AND hire_date < "1986-01-01T00:00:00Z"
-| STATS c = COUNT(1) BY b = BUCKET(salary, 5000.)
-| SORT b
-\`\`\`
-
-**NOTE**: When providing the bucket size as the second parameter, it must be of a **floating point type**.
-
-Here's an example to create hourly buckets for the last 24 hours, and calculate the number of events per hour:
-
-\`\`\`
-FROM sample_data
-| WHERE @timestamp >= NOW() - 1 day and @timestamp < NOW()
-| STATS COUNT(*) BY bucket = BUCKET(@timestamp, 25, NOW() - 1 day, NOW())
-\`\`\`
-
-Here's an example  to create monthly buckets for the year 1985, and calculate the average salary by hiring month:
-
-\`\`\`
-FROM employees
-| WHERE hire_date >= "1985-01-01T00:00:00Z" AND hire_date < "1986-01-01T00:00:00Z"
-| STATS AVG(salary) BY bucket = BUCKET(hire_date, 20, "1985-01-01T00:00:00Z", "1986-01-01T00:00:00Z")
-| SORT bucket
-\`\`\`
-
-\`BUCKET\` may be used in both the aggregating and grouping part of the \`STATS …​ BY …\`​ command, provided that in the aggregating part the function is **referenced by an alias defined in the grouping part**, or that it is invoked with the exact same expression.
-
-For example:
-
-\`\`\`
-FROM employees
-| STATS s1 = b1 + 1, s2 = BUCKET(salary / 1000 + 999, 50.) + 2 BY b1 = BUCKET(salary / 100 + 99, 50.), b2 = BUCKET(salary / 1000 + 999, 50.)
-| SORT b1, b2
-| KEEP s1, b1, s2, b2
-\`\`\`
-              `,
-              description:
-                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-            }
-          )}
-        />
-      ),
-    },
-  ],
-};
-
-export const operators = {
-  label: i18n.translate('languageDocumentation.documentationESQL.operators', {
-    defaultMessage: 'Operators',
-  }),
-  description: i18n.translate(
-    'languageDocumentation.documentationESQL.operatorsDocumentationESQLDescription',
-    {
-      defaultMessage: `ES|QL supports the following operators:`,
-    }
-  ),
-  items: [
-    {
-      label: i18n.translate('languageDocumentation.documentationESQL.binaryOperators', {
-        defaultMessage: 'Binary operators',
-      }),
-      description: (
-        <Markdown
-          markdownContent={i18n.translate(
-            'languageDocumentation.documentationESQL.binaryOperators.markdown',
-            {
-              defaultMessage: `### Binary operators
-These binary comparison operators are supported:
-
-* equality: \`==\`
-* inequality: \`!=\`
-* less than: \`<\`
-* less than or equal: \`<=\`
-* greater than: \`>\`
-* greater than or equal: \`>=\`
-* add: \`+\`
-* subtract: \`-\`
-* multiply: \`*\`
-* divide: \`/\`
-* modulus: \`%\`
-              `,
-              description:
-                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-            }
-          )}
-        />
-      ),
-    },
-    {
-      label: i18n.translate('languageDocumentation.documentationESQL.booleanOperators', {
-        defaultMessage: 'Boolean operators',
-      }),
-      description: (
-        <Markdown
-          markdownContent={i18n.translate(
-            'languageDocumentation.documentationESQL.booleanOperators.markdown',
-            {
-              defaultMessage: `### Boolean operators
-The following boolean operators are supported:
-
-* \`AND\`
-* \`OR\`
-* \`NOT\`
-              `,
-              description:
-                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-            }
-          )}
-        />
-      ),
-    },
-    {
-      label: i18n.translate('languageDocumentation.documentationESQL.castOperator', {
-        defaultMessage: 'Cast (::)',
-      }),
-      description: (
-        <Markdown
-          markdownContent={i18n.translate(
-            'languageDocumentation.documentationESQL.castOperator.markdown',
-            {
-              defaultMessage: `### CAST (\`::\`)
-The \`::\` operator provides a convenient alternative syntax to the \`TO_<type>\` type conversion functions.
-
-Example:
-\`\`\`
-ROW ver = CONCAT(("0"::INT + 1)::STRING, ".2.3")::VERSION
-\`\`\`
-              `,
-              description:
-                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-              ignoreTag: true,
-            }
-          )}
-        />
-      ),
-    },
-    {
-      label: i18n.translate('languageDocumentation.documentationESQL.inOperator', {
-        defaultMessage: 'IN',
-      }),
-      description: (
-        <Markdown
-          markdownContent={i18n.translate(
-            'languageDocumentation.documentationESQL.inOperator.markdown',
-            {
-              defaultMessage: `### IN
-The \`IN\` operator allows testing whether a field or expression equals an element in a list of literals, fields or expressions:
-
-\`\`\`
-ROW a = 1, b = 4, c = 3
-| WHERE c-a IN (3, b / 2, a)
-\`\`\`
-              `,
-              description:
-                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-            }
-          )}
-        />
-      ),
-    },
-    {
-      label: i18n.translate('languageDocumentation.documentationESQL.stringOperators', {
-        defaultMessage: 'LIKE and RLIKE',
-      }),
-      description: (
-        <Markdown
-          markdownContent={i18n.translate(
-            'languageDocumentation.documentationESQL.stringOperators.markdown',
-            {
-              defaultMessage: `### LIKE and RLIKE
-For string comparison using wildcards or regular expressions, use \`LIKE\` or \`RLIKE\`:
-
-Use \`LIKE\` to match strings using wildcards. The following wildcard characters are supported:
-
-* \`*\` matches zero or more characters.
-* \`?\` matches one character.
-
-\`\`\`
-FROM employees
-| WHERE first_name LIKE "?b*"
-| KEEP first_name, last_name
-\`\`\`
-
-Use \`RLIKE\` to match strings using regular expressions:
-
-\`\`\`
-FROM employees
-| WHERE first_name RLIKE ".leja.*"
-| KEEP first_name, last_name
-\`\`\`
-              `,
-              description:
-                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-            }
-          )}
-        />
-      ),
-    },
-    {
-      label: i18n.translate('languageDocumentation.documentationESQL.predicates', {
-        defaultMessage: 'NULL values',
-      }),
-      description: (
-        <Markdown
-          markdownContent={i18n.translate(
-            'languageDocumentation.documentationESQL.predicates.markdown',
-            {
-              defaultMessage: `### NULL values
-For NULL comparison use the \`IS NULL\` and \`IS NOT NULL\` predicates:
-
-\`\`\`
-FROM employees
-| WHERE birth_date IS NULL
-| KEEP first_name, last_name
-| SORT first_name
-| LIMIT 3
-\`\`\`
-
-\`\`\`
-FROM employees
-| WHERE is_rehired IS NOT NULL
-| STATS count(emp_no)
-\`\`\`
-              `,
-              description:
-                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-            }
-          )}
-        />
-      ),
-    },
-  ],
-};
-
 export { functions as scalarFunctions } from './generated/scalar_functions';
 export { functions as aggregationFunctions } from './generated/aggregation_functions';
+export { functions as timeseriesAggregationFunctions } from './generated/timeseries_aggregation_functions';
+export { functions as groupingFunctions } from './generated/grouping_functions';
+export { functions as operators } from './generated/operators';

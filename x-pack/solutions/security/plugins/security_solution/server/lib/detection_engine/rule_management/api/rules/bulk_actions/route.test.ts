@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  DETECTION_ENGINE_RULES_BULK_ACTION,
-  BulkActionsDryRunErrCode,
-} from '../../../../../../../common/constants';
+import { DETECTION_ENGINE_RULES_BULK_ACTION } from '../../../../../../../common/constants';
 import { mlServicesMock } from '../../../../../machine_learning/mocks';
 import { buildMlAuthz } from '../../../../../machine_learning/authz';
 import {
@@ -17,39 +14,35 @@ import {
   getBulkActionEditRequest,
   getFindResultWithSingleHit,
   getFindResultWithMultiHits,
+  getBulkActionEditAlertSuppressionRequest,
 } from '../../../../routes/__mocks__/request_responses';
-import {
-  createMockConfig,
-  requestContextMock,
-  serverMock,
-  requestMock,
-} from '../../../../routes/__mocks__';
+import { requestContextMock, serverMock, requestMock } from '../../../../routes/__mocks__';
 import { performBulkActionRoute } from './route';
 import {
   getPerformBulkActionEditSchemaMock,
   getBulkDisableRuleActionSchemaMock,
 } from '../../../../../../../common/api/detection_engine/rule_management/mocks';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { readRules } from '../../../logic/detection_rules_client/read_rules';
+import { BulkActionsDryRunErrCodeEnum } from '../../../../../../../common/api/detection_engine';
+import type { ConfigType } from '../../../../../../config';
 
 jest.mock('../../../../../machine_learning/authz');
-jest.mock('../../../logic/detection_rules_client/read_rules', () => ({ readRules: jest.fn() }));
+
+let bulkGetRulesMock: jest.Mock;
 
 describe('Perform bulk action route', () => {
-  const readRulesMock = readRules as jest.Mock;
-  let config: ReturnType<typeof createMockConfig>;
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
   let ml: ReturnType<typeof mlServicesMock.createSetupContract>;
-  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   const mockRule = getFindResultWithSingleHit().data[0];
+  const experimentalFeatures = {
+    bulkEditAlertSuppressionEnabled: true,
+  } as ConfigType['experimentalFeatures'];
 
-  beforeEach(() => {
+  beforeEach(async () => {
     server = serverMock.create();
-    logger = loggingSystemMock.createLogger();
     ({ clients, context } = requestContextMock.createTools());
-    config = createMockConfig();
     ml = mlServicesMock.createSetupContract();
+    bulkGetRulesMock = (await context.alerting.getRulesClient()).bulkGetRules as jest.Mock;
 
     clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
     clients.rulesClient.bulkDisableRules.mockResolvedValue({
@@ -57,7 +50,9 @@ describe('Perform bulk action route', () => {
       errors: [],
       total: 1,
     });
-    performBulkActionRoute(server.router, config, ml, logger);
+    performBulkActionRoute(server.router, ml, {
+      experimentalFeatures,
+    } as ConfigType);
   });
 
   describe('status codes', () => {
@@ -116,6 +111,32 @@ describe('Perform bulk action route', () => {
       expect(response.body).toEqual({
         message: 'More than 10000 rules matched the filter query. Try to narrow it down.',
         status_code: 400,
+      });
+    });
+
+    it('returns 403 if alert suppression license is not sufficient', async () => {
+      (context.licensing.license.hasAtLeast as jest.Mock).mockReturnValue(false);
+      const response = await server.inject(
+        getBulkActionEditAlertSuppressionRequest(),
+        requestContextMock.convertContext(context)
+      );
+
+      expect(response.body).toEqual({
+        message: 'Alert suppression is enabled with platinum license or above.',
+        status_code: 403,
+      });
+    });
+
+    it('returns 403 for dry run mode if alert suppression license is not sufficient', async () => {
+      (context.licensing.license.hasAtLeast as jest.Mock).mockReturnValue(false);
+      const response = await server.inject(
+        { ...getBulkActionEditAlertSuppressionRequest(), query: { dry_run: 'true' } },
+        requestContextMock.convertContext(context)
+      );
+
+      expect(response.body).toEqual({
+        message: 'Alert suppression is enabled with platinum license or above.',
+        status_code: 403,
       });
     });
   });
@@ -184,7 +205,7 @@ describe('Perform bulk action route', () => {
           errors: [
             {
               message: 'mocked validation message',
-              err_code: BulkActionsDryRunErrCode.MACHINE_LEARNING_AUTH,
+              err_code: BulkActionsDryRunErrCodeEnum.MACHINE_LEARNING_AUTH,
               status_code: 403,
               rules: [
                 {
@@ -224,7 +245,7 @@ describe('Perform bulk action route', () => {
           errors: [
             {
               message: 'mocked validation message',
-              err_code: BulkActionsDryRunErrCode.MACHINE_LEARNING_AUTH,
+              err_code: BulkActionsDryRunErrCodeEnum.MACHINE_LEARNING_AUTH,
               status_code: 403,
               rules: [
                 {
@@ -338,9 +359,10 @@ describe('Perform bulk action route', () => {
     });
 
     it('returns partial failure error if one if rules from ids params can`t be fetched', async () => {
-      readRulesMock
-        .mockImplementationOnce(() => Promise.resolve(mockRule))
-        .mockImplementationOnce(() => Promise.resolve(null));
+      bulkGetRulesMock.mockImplementation(() => ({
+        rules: [mockRule],
+        errors: [{ id: 'failed-mock-id', error: { statusCode: 404 } }],
+      }));
 
       const request = requestMock.create({
         method: 'patch',
@@ -518,7 +540,7 @@ describe('Perform bulk action route', () => {
       });
       const result = server.validate(request);
       expect(result.badRequest).toHaveBeenCalledWith(
-        'action: Invalid literal value, expected "delete", action: Invalid literal value, expected "disable", action: Invalid literal value, expected "enable", action: Invalid literal value, expected "export", action: Invalid literal value, expected "duplicate", and 4 more'
+        'action: Invalid literal value, expected "delete", action: Invalid literal value, expected "disable", action: Invalid literal value, expected "enable", action: Invalid literal value, expected "export", action: Invalid literal value, expected "duplicate", and 6 more'
       );
     });
 
@@ -530,7 +552,7 @@ describe('Perform bulk action route', () => {
       });
       const result = server.validate(request);
       expect(result.badRequest).toHaveBeenCalledWith(
-        'action: Invalid literal value, expected "delete", action: Invalid literal value, expected "disable", action: Invalid literal value, expected "enable", action: Invalid literal value, expected "export", action: Invalid literal value, expected "duplicate", and 4 more'
+        'action: Invalid literal value, expected "delete", action: Invalid literal value, expected "disable", action: Invalid literal value, expected "enable", action: Invalid literal value, expected "export", action: Invalid literal value, expected "duplicate", and 6 more'
       );
     });
 
@@ -564,7 +586,7 @@ describe('Perform bulk action route', () => {
       });
       const result = server.validate(request);
       expect(result.badRequest).toHaveBeenCalledWith(
-        'ids: Expected array, received string, action: Invalid literal value, expected "delete", ids: Expected array, received string, ids: Expected array, received string, action: Invalid literal value, expected "enable", and 10 more'
+        'ids: Expected array, received string, action: Invalid literal value, expected "delete", ids: Expected array, received string, ids: Expected array, received string, action: Invalid literal value, expected "enable", and 13 more'
       );
     });
 
@@ -642,6 +664,93 @@ describe('Perform bulk action route', () => {
         )
       );
     });
+
+    it('rejects payload if both ids and gap range are defined', async () => {
+      const request = requestMock.create({
+        method: 'patch',
+        path: DETECTION_ENGINE_RULES_BULK_ACTION,
+        body: {
+          ...getBulkDisableRuleActionSchemaMock(),
+          query: undefined,
+          ids: ['id'],
+          gaps_range_start: '2025-01-01T00:00:00.000Z',
+          gaps_range_end: '2025-01-02T00:00:00.000Z',
+        },
+      });
+
+      const response = await server.inject(request, requestContextMock.convertContext(context));
+
+      expect(response.status).toEqual(400);
+      expect(response.body.message).toEqual(
+        'Cannot use both ids and gaps_range_start/gaps_range_end in request payload.'
+      );
+    });
+
+    it('rejects payload if only gaps_range_start is defined without gaps_range_end', async () => {
+      const request = requestMock.create({
+        method: 'patch',
+        path: DETECTION_ENGINE_RULES_BULK_ACTION,
+        body: {
+          ...getBulkDisableRuleActionSchemaMock(),
+          query: '',
+          gaps_range_start: '2025-01-01T00:00:00.000Z',
+        },
+      });
+
+      const response = await server.inject(request, requestContextMock.convertContext(context));
+
+      expect(response.status).toEqual(400);
+      expect(response.body.message).toEqual(
+        'Both gaps_range_start and gaps_range_end must be provided together.'
+      );
+    });
+
+    it('rejects payload if only gaps_range_end is defined without gaps_range_start', async () => {
+      const request = requestMock.create({
+        method: 'patch',
+        path: DETECTION_ENGINE_RULES_BULK_ACTION,
+        body: {
+          ...getBulkDisableRuleActionSchemaMock(),
+          query: '',
+          gaps_range_end: '2025-01-02T00:00:00.000Z',
+        },
+      });
+
+      const response = await server.inject(request, requestContextMock.convertContext(context));
+
+      expect(response.status).toEqual(400);
+      expect(response.body.message).toEqual(
+        'Both gaps_range_start and gaps_range_end must be provided together.'
+      );
+    });
+  });
+
+  describe('gap range functionality', () => {
+    it('passes gap range to rules find when provided with query', async () => {
+      const gapStartDate = '2025-01-01T00:00:00.000Z';
+      const gapEndDate = '2025-01-02T00:00:00.000Z';
+
+      const request = requestMock.create({
+        method: 'patch',
+        path: DETECTION_ENGINE_RULES_BULK_ACTION,
+        body: {
+          ...getBulkDisableRuleActionSchemaMock(),
+          query: '',
+          gaps_range_start: gapStartDate,
+          gaps_range_end: gapEndDate,
+        },
+      });
+
+      await server.inject(request, requestContextMock.convertContext(context));
+
+      expect(clients.rulesClient.getRuleIdsWithGaps).toHaveBeenCalledWith(
+        expect.objectContaining({
+          start: gapStartDate,
+          end: gapEndDate,
+          statuses: ['unfilled', 'partially_filled'],
+        })
+      );
+    });
   });
 
   it('should process large number of rules, larger than configured concurrency', async () => {
@@ -674,6 +783,52 @@ describe('Perform bulk action route', () => {
         },
       })
     );
+  });
+});
+
+describe('Perform bulk action route, experimental feature bulkEditAlertSuppressionEnabled is disabled', () => {
+  let server: ReturnType<typeof serverMock.create>;
+  let { clients, context } = requestContextMock.createTools();
+  let ml: ReturnType<typeof mlServicesMock.createSetupContract>;
+  const experimentalFeatures = {} as ConfigType['experimentalFeatures'];
+
+  beforeEach(() => {
+    server = serverMock.create();
+    ({ clients, context } = requestContextMock.createTools());
+    ml = mlServicesMock.createSetupContract();
+    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
+
+    performBulkActionRoute(server.router, ml, {
+      experimentalFeatures,
+    } as ConfigType);
+  });
+
+  it('returns error if experimental feature bulkEditAlertSuppressionEnabled is not enabled for alert suppression bulk action', async () => {
+    const response = await server.inject(
+      getBulkActionEditAlertSuppressionRequest(),
+      requestContextMock.convertContext(context)
+    );
+
+    expect(response.status).toEqual(400);
+    expect(response.body).toEqual({
+      message:
+        'Bulk alert suppression actions are not supported. Use "experimentalFeatures.bulkEditAlertSuppressionEnabled" config field to enable it.',
+      status_code: 400,
+    });
+  });
+
+  it('returns error for dry run mode if experimental feature bulkEditAlertSuppressionEnabled is not enabled for alert suppression bulk action', async () => {
+    const response = await server.inject(
+      { ...getBulkActionEditAlertSuppressionRequest(), query: { dry_run: 'true' } },
+      requestContextMock.convertContext(context)
+    );
+
+    expect(response.status).toEqual(400);
+    expect(response.body).toEqual({
+      message:
+        'Bulk alert suppression actions are not supported. Use "experimentalFeatures.bulkEditAlertSuppressionEnabled" config field to enable it.',
+      status_code: 400,
+    });
   });
 });
 

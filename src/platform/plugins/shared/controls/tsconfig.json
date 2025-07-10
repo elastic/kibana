@@ -39,6 +39,10 @@
     "@kbn/shared-ux-utility",
     "@kbn/std",
     "@kbn/react-hooks",
+    "@kbn/esql-types",
+    "@kbn/css-utils",
+    "@kbn/esql-utils",
+    "@kbn/search-types"
   ],
   "exclude": ["target/**/*"]
 }

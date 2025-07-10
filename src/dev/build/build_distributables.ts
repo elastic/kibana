@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import chalk from 'chalk';
 import { ToolingLog } from '@kbn/tooling-log';
 
-import { Config, createRunner, Task, GlobalTask } from './lib';
+import { Config, createRunner } from './lib';
 import * as Tasks from './tasks';
 
 export interface BuildOptions {
@@ -31,9 +32,9 @@ export interface BuildOptions {
   createRpmPackage: boolean;
   createDebPackage: boolean;
   createDockerUBI: boolean;
-  createDockerUbuntu: boolean;
   createDockerWolfi: boolean;
   createDockerCloud: boolean;
+  createDockerCloudFIPS: boolean;
   createDockerServerless: boolean;
   createDockerContexts: boolean;
   createDockerFIPS: boolean;
@@ -48,23 +49,22 @@ export interface BuildOptions {
 export async function buildDistributables(log: ToolingLog, options: BuildOptions): Promise<void> {
   log.verbose('building distributables with options:', options);
 
-  const config = await Config.create(options);
+  log.write(`--- ${chalk`{dim [ global ]}`} Kibana build tasks`);
 
-  const run: (task: Task | GlobalTask) => Promise<void> = createRunner({
-    config,
-    log,
-  });
+  const config = await Config.create(options);
+  const globalRun = createRunner({ config, log });
+  const artifactTasks = [];
 
   /**
    * verify, reset, and initialize the build environment
    */
   if (options.initialize) {
-    await run(Tasks.VerifyEnv);
-    await run(Tasks.Clean);
-    await run(
+    await globalRun(Tasks.VerifyEnv);
+    await globalRun(Tasks.Clean);
+    await globalRun(
       options.downloadFreshNode ? Tasks.DownloadNodeBuilds : Tasks.VerifyExistingNodeBuilds
     );
-    await run(Tasks.ExtractNodeBuilds);
+    await globalRun(Tasks.ExtractNodeBuilds);
   }
 
   /**
@@ -73,33 +73,33 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
   if (options.createGenericFolders) {
     // Build before copying source files
     if (options.buildCanvasShareableRuntime) {
-      await run(Tasks.BuildCanvasShareableRuntime);
+      await globalRun(Tasks.BuildCanvasShareableRuntime);
     }
 
-    await run(Tasks.CopyLegacySource);
+    await globalRun(Tasks.CopyLegacySource);
 
-    await run(Tasks.CreateEmptyDirsAndFiles);
-    await run(Tasks.CreateReadme);
-    await run(Tasks.BuildPackages);
-    await run(Tasks.ReplaceFavicon);
-    await run(Tasks.BuildKibanaPlatformPlugins);
-    await run(Tasks.CreatePackageJson);
-    await run(Tasks.InstallDependencies);
-    await run(Tasks.GeneratePackagesOptimizedAssets);
+    await globalRun(Tasks.CreateEmptyDirsAndFiles);
+    await globalRun(Tasks.CreateReadme);
+    await globalRun(Tasks.BuildPackages);
+    await globalRun(Tasks.ReplaceFavicon);
+    await globalRun(Tasks.BuildKibanaPlatformPlugins);
+    await globalRun(Tasks.CreatePackageJson);
+    await globalRun(Tasks.InstallDependencies);
+    await globalRun(Tasks.GeneratePackagesOptimizedAssets);
 
     // Run on all source files
     // **/packages need to be read
     // before DeletePackagesFromBuildRoot
-    await run(Tasks.CreateNoticeFile);
-    await run(Tasks.CreateXPackNoticeFile);
+    await globalRun(Tasks.CreateNoticeFile);
+    await globalRun(Tasks.CreateXPackNoticeFile);
 
-    await run(Tasks.DeletePackagesFromBuildRoot);
-    await run(Tasks.UpdateLicenseFile);
-    await run(Tasks.RemovePackageJsonDeps);
-    await run(Tasks.CleanPackageManagerRelatedFiles);
-    await run(Tasks.CleanExtraFilesFromModules);
-    await run(Tasks.CleanEmptyFolders);
-    await run(Tasks.FetchAgentVersionsList);
+    await globalRun(Tasks.DeletePackagesFromBuildRoot);
+    await globalRun(Tasks.UpdateLicenseFile);
+    await globalRun(Tasks.RemovePackageJsonDeps);
+    await globalRun(Tasks.CleanPackageManagerRelatedFiles);
+    await globalRun(Tasks.CleanExtraFilesFromModules);
+    await globalRun(Tasks.CleanEmptyFolders);
+    await globalRun(Tasks.FetchAgentVersionsList);
   }
 
   /**
@@ -107,18 +107,18 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
    * directories and perform platform/architecture-specific steps
    */
   if (options.createPlatformFolders) {
-    await run(Tasks.CreateArchivesSources);
-    await run(Tasks.InstallChromium);
-    await run(Tasks.CopyBinScripts);
-    await run(Tasks.CleanNodeBuilds);
+    await globalRun(Tasks.CreateArchivesSources);
+    await globalRun(Tasks.InstallChromium);
+    await globalRun(Tasks.CopyBinScripts);
+    await globalRun(Tasks.CleanNodeBuilds);
 
-    await run(Tasks.AssertFileTime);
-    await run(Tasks.AssertPathLength);
-    await run(Tasks.AssertNoUUID);
+    await globalRun(Tasks.AssertFileTime);
+    await globalRun(Tasks.AssertPathLength);
+    await globalRun(Tasks.AssertNoUUID);
   }
   // control w/ --skip-cdn-assets
   if (options.createCdnAssets) {
-    await run(Tasks.CreateCdnAssets);
+    await globalRun(Tasks.CreateCdnAssets);
   }
 
   /**
@@ -127,60 +127,85 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
    */
   if (options.createArchives) {
     // control w/ --skip-archives
-    await run(Tasks.CreateArchives);
+    await globalRun(Tasks.CreateArchives);
+  }
+
+  if (
+    options.downloadCloudDependencies &&
+    (options.createDockerCloud || options.createDockerCloudFIPS)
+  ) {
+    // control w/ --skip-cloud-dependencies-download
+    await globalRun(Tasks.DownloadCloudDependencies);
   }
 
   if (options.createDebPackage || options.createRpmPackage) {
-    await run(Tasks.CreatePackageConfig);
-  }
-  if (options.createDebPackage) {
-    // control w/ --deb or --skip-os-packages
-    await run(Tasks.CreateDebPackage);
-  }
-  if (options.createRpmPackage) {
-    // control w/ --rpm or --skip-os-packages
-    await run(Tasks.CreateRpmPackage);
-  }
-  if (options.createDockerUBI) {
-    // control w/ --docker-images or --skip-docker-ubi or --skip-os-packages
-    await run(Tasks.CreateDockerUBI);
+    await globalRun(Tasks.CreatePackageConfig);
+
+    if (options.createDebPackage) {
+      // control w/ --deb or --skip-os-packages
+      artifactTasks.push(Tasks.CreateDebPackageX64);
+      artifactTasks.push(Tasks.CreateDebPackageARM64);
+    }
+    if (options.createRpmPackage) {
+      // control w/ --rpm or --skip-os-packages
+      artifactTasks.push(Tasks.CreateRpmPackageX64);
+      artifactTasks.push(Tasks.CreateRpmPackageARM64);
+    }
   }
 
-  if (options.createDockerUbuntu) {
-    // control w/ --docker-images or --skip-docker-ubuntu or --skip-os-packages
-    await run(Tasks.CreateDockerUbuntu);
+  if (options.createDockerUBI) {
+    // control w/ --docker-images or --skip-docker-ubi or --skip-os-packages
+    artifactTasks.push(Tasks.CreateDockerUBIX64);
+    artifactTasks.push(Tasks.CreateDockerUBIARM64);
   }
 
   if (options.createDockerWolfi) {
     // control w/ --docker-images or --skip-docker-wolfi or --skip-os-packages
-    await run(Tasks.CreateDockerWolfi);
+    artifactTasks.push(Tasks.CreateDockerWolfiX64);
+    artifactTasks.push(Tasks.CreateDockerWolfiARM64);
   }
+
   if (options.createDockerCloud) {
     // control w/ --docker-images and --skip-docker-cloud
-    if (options.downloadCloudDependencies) {
-      // control w/ --skip-cloud-dependencies-download
-      await run(Tasks.DownloadCloudDependencies);
-    }
-    await run(Tasks.CreateDockerCloud);
+    artifactTasks.push(Tasks.CreateDockerCloudX64);
+    artifactTasks.push(Tasks.CreateDockerCloudARM64);
   }
 
   if (options.createDockerServerless) {
     // control w/ --docker-images and --skip-docker-serverless
-    await run(Tasks.CreateDockerServerless);
+    artifactTasks.push(Tasks.CreateDockerServerlessX64);
+    artifactTasks.push(Tasks.CreateDockerServerlessARM64);
   }
 
   if (options.createDockerFIPS) {
     // control w/ --docker-images or --skip-docker-fips or --skip-os-packages
-    await run(Tasks.CreateDockerFIPS);
+    artifactTasks.push(Tasks.CreateDockerFIPSX64);
+  }
+
+  if (options.createDockerCloudFIPS) {
+    // control w/ --docker-images and --skip-docker-cloud-fips
+    artifactTasks.push(Tasks.CreateDockerCloudFIPSX64);
+    artifactTasks.push(Tasks.CreateDockerCloudFIPSARM64);
   }
 
   if (options.createDockerContexts) {
     // control w/ --skip-docker-contexts
-    await run(Tasks.CreateDockerContexts);
+    artifactTasks.push(Tasks.CreateDockerContexts);
+  }
+
+  const results = await Promise.allSettled(
+    // createRunner for each task to ensure each task gets its own Build instance
+    artifactTasks.map(async (task) => await createRunner({ config, log, bufferLogs: true })(task))
+  );
+
+  log.write('--- Finalizing Kibana artifacts');
+
+  if (results.some((result) => result.status === 'rejected')) {
+    throw new Error('One or more artifact tasks failed. Check the logs for details.');
   }
 
   /**
    * finalize artifacts by writing sha1sums of each into the target directory
    */
-  await run(Tasks.WriteShaSums);
+  await globalRun(Tasks.WriteShaSums);
 }

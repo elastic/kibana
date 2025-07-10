@@ -8,7 +8,6 @@
 import datemath from '@elastic/datemath';
 import { KibanaRequest } from '@kbn/core/server';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
-import { FunctionVisibility } from '@kbn/observability-ai-assistant-plugin/common';
 import { getRelevantFieldNames } from '@kbn/observability-ai-assistant-plugin/server/functions/get_dataset_info/get_relevant_field_names';
 import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import {
@@ -19,6 +18,8 @@ import {
 import { omit } from 'lodash';
 import { OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES } from '@kbn/observability-plugin/common/constants';
 import { FunctionRegistrationParameters } from '.';
+
+export const GET_ALERTS_DATASET_INFO_NAME = 'get_alerts_dataset_info';
 
 const defaultFields = [
   '@timestamp',
@@ -72,8 +73,7 @@ export function registerAlertsFunction({
   if (scopes.includes('observability')) {
     functions.registerFunction(
       {
-        name: 'get_alerts_dataset_info',
-        visibility: FunctionVisibility.AssistantOnly,
+        name: GET_ALERTS_DATASET_INFO_NAME,
         description: `Use this function to get information about alerts data.`,
         parameters: {
           type: 'object',
@@ -110,13 +110,15 @@ export function registerAlertsFunction({
           signal,
           chat: (
             operationName,
-            { messages: nextMessages, functionCall, functions: nextFunctions }
+            { messages: nextMessages, functionCall, functions: nextFunctions, systemMessage }
           ) => {
             return chat(operationName, {
+              systemMessage,
               messages: nextMessages,
               functionCall,
               functions: nextFunctions,
               signal,
+              stream: true,
             });
           },
         });
@@ -132,7 +134,7 @@ export function registerAlertsFunction({
     functions.registerFunction(
       {
         name: 'alerts',
-        description: `Get alerts for Observability.  Make sure get_alerts_dataset_info was called before.
+        description: `Get alerts for Observability. Make sure ${GET_ALERTS_DATASET_INFO_NAME} was called before.
         Use this to get open (and optionally recovered) alerts for Observability assets, like services,
         hosts or containers.
         Display the response in tabular format if appropriate.
@@ -191,7 +193,9 @@ export function registerAlertsFunction({
               filter: [
                 {
                   range: {
-                    '@timestamp': {
+                    // Note: The @timestamp field is the value for when the alert was last updated
+                    // and not when the alert was created
+                    'kibana.alert.start': {
                       gte: start,
                       lte: end,
                     },

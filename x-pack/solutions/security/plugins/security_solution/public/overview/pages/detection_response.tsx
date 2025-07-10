@@ -32,11 +32,30 @@ import { NoPrivileges } from '../../common/components/no_privileges';
 import { FiltersGlobal } from '../../common/components/filters_global';
 import { useGlobalFilterQuery } from '../../common/hooks/use_global_filter_query';
 import { useKibana } from '../../common/lib/kibana';
+import { useDataView } from '../../data_view_manager/hooks/use_data_view';
+import { useDataViewSpec } from '../../data_view_manager/hooks/use_data_view_spec';
+import { PageLoader } from '../../common/components/page_loader';
 
 const DetectionResponseComponent = () => {
   const { cases } = useKibana().services;
   const { filterQuery } = useGlobalFilterQuery();
-  const { indicesExist, loading: isSourcererLoading, sourcererDataView } = useSourcererDataView();
+
+  const {
+    indicesExist: oldIndicesExist,
+    loading: oldIsSourcererLoading,
+    sourcererDataView: oldSourcererDataView,
+  } = useSourcererDataView();
+
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+  const { dataView, status } = useDataView();
+  const { dataViewSpec } = useDataViewSpec();
+
+  const sourcererDataView = newDataViewPickerEnabled ? dataViewSpec : oldSourcererDataView;
+  const indicesExist = newDataViewPickerEnabled
+    ? !!dataView?.matchedIndices?.length
+    : oldIndicesExist;
+  const isSourcererLoading = newDataViewPickerEnabled ? status !== 'ready' : oldIsSourcererLoading;
+
   const { signalIndexName } = useSignalIndex();
   const { hasKibanaREAD, hasIndexRead } = useAlertsPrivileges();
   const userCasesPermissions = cases.helpers.canUseCases([APP_ID]);
@@ -47,6 +66,10 @@ const DetectionResponseComponent = () => {
 
   if (!canReadAlerts && !canReadCases) {
     return <NoPrivileges docLinkSelector={(docLinks: DocLinks) => docLinks.siem.privileges} />;
+  }
+
+  if (newDataViewPickerEnabled && status === 'pristine') {
+    return <PageLoader />;
   }
 
   return (

@@ -281,6 +281,22 @@ export interface EndpointMetrics {
     active_global_count: number;
     active_user_count: number;
   };
+  top_process_trees: {
+    values: Event[];
+  };
+}
+
+interface Event {
+  event_count: number;
+  last_seen: string;
+  sample: Sample;
+}
+
+interface Sample {
+  command_line: string;
+  entity_id: string;
+  executable: string;
+  parent_command_line: string;
 }
 
 interface EndpointMetricOS {
@@ -370,6 +386,27 @@ interface ExceptionListEntry {
   namespace_type: string;
 }
 
+export interface ResponseActionsRuleResponseAggregations {
+  actionTypes: {
+    buckets: Array<{
+      key: '.endpoint' | '.osquery';
+      doc_count: number;
+    }>;
+  };
+}
+
+export interface ResponseActionsRuleTelemetryTemplate {
+  '@timestamp': string;
+  cluster_uuid: string;
+  cluster_name: string;
+  license_id: string | undefined;
+  response_actions_rules: ResponseActionRules;
+}
+
+export interface ResponseActionRules {
+  endpoint: number;
+  osquery: number;
+}
 interface DetectionRuleParms {
   ruleId: string;
   version: number;
@@ -466,14 +503,25 @@ export interface TelemetryConfiguration {
   };
   pagination_config?: PaginationConfiguration;
   indices_metadata_config?: IndicesMetadataConfiguration;
+  ingest_pipelines_stats_config?: IngestPipelinesStatsConfiguration;
 }
 
 export interface IndicesMetadataConfiguration {
   indices_threshold: number;
   datastreams_threshold: number;
+  indices_settings_threshold: number;
+
+  index_query_size: number;
+  ilm_stats_query_size: number;
+  ilm_policy_query_size: number;
+
   max_prefixes: number;
   max_group_size: number;
   min_group_size: number;
+}
+
+export interface IngestPipelinesStatsConfiguration {
+  enabled: boolean;
 }
 
 export interface PaginationConfiguration {

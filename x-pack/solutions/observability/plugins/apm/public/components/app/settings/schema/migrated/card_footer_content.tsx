@@ -9,7 +9,7 @@ import { EuiButton, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import { LegacyAPMLink } from '../../../../shared/links/apm/apm_link';
+import { HomeLink } from '../../../../shared/links/apm/home_link';
 import { useFleetCloudAgentPolicyHref } from '../../../../shared/links/kibana';
 
 export function CardFooterContent() {
@@ -33,12 +33,12 @@ export function CardFooterContent() {
             defaultMessage="or simply return to the {serviceInventoryLink}."
             values={{
               serviceInventoryLink: (
-                <LegacyAPMLink path="/services">
+                <HomeLink>
                   {i18n.translate(
                     'xpack.apm.settings.schema.success.returnText.serviceInventoryLink',
-                    { defaultMessage: 'Service inventory' }
+                    { defaultMessage: 'Service Inventory' }
                   )}
-                </LegacyAPMLink>
+                </HomeLink>
               ),
             }}
           />

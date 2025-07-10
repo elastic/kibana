@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import { DefendInsightStatus, DefendInsightType } from '@kbn/elastic-assistant-common';
 
-import type { EsDefendInsightSchema } from '../ai_assistant_data_clients/defend_insights/types';
+import type { EsDefendInsightSchema } from '../lib/defend_insights/persistence/types';
 
 export const getDefendInsightsSearchEsMock = () => {
   const searchResponse: estypes.SearchResponse<EsDefendInsightSchema> = {

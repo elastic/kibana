@@ -23,11 +23,11 @@ export const useDatasetQualityDetailsState = () => {
 
   const {
     dataStream,
-    degradedFields,
+    qualityIssues,
     timeRange,
     breakdownField,
     isIndexNotFoundError,
-    expandedDegradedField,
+    expandedQualityIssue,
   } = useSelector(service, (state) => state.context) ?? {};
 
   const isNonAggregatable = useSelector(service, (state) =>
@@ -51,9 +51,19 @@ export const useDatasetQualityDetailsState = () => {
   );
 
   const dataStreamSettings = useSelector(service, (state) =>
-    state.matches('initializing.dataStreamSettings.fetchingDataStreamDegradedFields') ||
-    state.matches('initializing.dataStreamSettings.doneFetchingDegradedFields') ||
-    state.matches('initializing.dataStreamSettings.errorFetchingDegradedFields')
+    state.matches(
+      'initializing.dataStreamSettings.qualityIssues.dataStreamDegradedFields.fetchingDataStreamDegradedFields'
+    ) ||
+    state.matches('initializing.dataStreamSettings.doneFetchingQualityIssues') ||
+    state.matches(
+      'initializing.dataStreamSettings.qualityIssues.dataStreamDegradedFields.errorFetchingDegradedFields'
+    ) ||
+    state.matches(
+      'initializing.dataStreamSettings.qualityIssues.dataStreamFailedDocs.fetchingFailedDocs'
+    ) ||
+    state.matches(
+      'initializing.dataStreamSettings.qualityIssues.dataStreamFailedDocs.errorFetchingFailedDocs'
+    )
       ? state.context.dataStreamSettings
       : undefined
   );
@@ -89,6 +99,10 @@ export const useDatasetQualityDetailsState = () => {
     dataStreamSettings?.datasetUserPrivileges?.canViewIntegrations
   );
 
+  const canUserReadFailureStore = Boolean(
+    dataStreamSettings?.datasetUserPrivileges?.canReadFailureStore
+  );
+
   const dataStreamDetails = useSelector(service, (state) =>
     state.matches('initializing.dataStreamDetails.done')
       ? state.context.dataStreamDetails
@@ -103,6 +117,8 @@ export const useDatasetQualityDetailsState = () => {
     namespace,
     rawName: dataStream,
   };
+
+  const docsTrendChart = useSelector(service, (state) => state.context.qualityIssuesChart);
 
   const loadingState = useSelector(service, (state) => ({
     nonAggregatableDatasetLoading: state.matches('initializing.nonAggregatableDataset.fetching'),
@@ -126,8 +142,8 @@ export const useDatasetQualityDetailsState = () => {
     ),
   }));
 
-  const isDegradedFieldFlyoutOpen = useSelector(service, (state) =>
-    state.matches('initializing.degradedFieldFlyout.open')
+  const isQualityIssueFlyoutOpen = useSelector(service, (state) =>
+    state.matches('initializing.qualityIssueFlyout.open')
   );
 
   const updateTimeRange = useCallback(
@@ -144,6 +160,9 @@ export const useDatasetQualityDetailsState = () => {
     [service]
   );
 
+  const hasFailureStore = Boolean(dataStreamDetails?.hasFailureStore);
+  const canShowFailureStoreInfo = canUserReadFailureStore && hasFailureStore;
+
   return {
     service,
     telemetryClient,
@@ -151,8 +170,9 @@ export const useDatasetQualityDetailsState = () => {
     isIndexNotFoundError,
     dataStream,
     datasetDetails,
-    degradedFields,
+    qualityIssues,
     dataStreamDetails,
+    docsTrendChart,
     breakdownField,
     isBreakdownFieldEcs,
     isBreakdownFieldAsserted,
@@ -164,7 +184,10 @@ export const useDatasetQualityDetailsState = () => {
     integrationDetails,
     canUserAccessDashboards,
     canUserViewIntegrations,
-    expandedDegradedField,
-    isDegradedFieldFlyoutOpen,
+    canUserReadFailureStore,
+    hasFailureStore,
+    canShowFailureStoreInfo,
+    expandedQualityIssue,
+    isQualityIssueFlyoutOpen,
   };
 };

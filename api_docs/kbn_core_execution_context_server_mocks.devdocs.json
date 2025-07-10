@@ -22,7 +22,7 @@
         "tags": [],
         "label": "executionContextServiceMock",
         "description": [],
-        "path": "packages/core/execution-context/core-execution-context-server-mocks/src/execution_context_service.mock.ts",
+        "path": "src/core/packages/execution-context/server-mocks/src/execution_context_service.mock.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -38,7 +38,7 @@
               "IExecutionContext",
               ">"
             ],
-            "path": "packages/core/execution-context/core-execution-context-server-mocks/src/execution_context_service.mock.ts",
+            "path": "src/core/packages/execution-context/server-mocks/src/execution_context_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -56,7 +56,7 @@
               "IExecutionContext",
               ">"
             ],
-            "path": "packages/core/execution-context/core-execution-context-server-mocks/src/execution_context_service.mock.ts",
+            "path": "src/core/packages/execution-context/server-mocks/src/execution_context_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -74,7 +74,7 @@
               "ExecutionContextSetup",
               ">"
             ],
-            "path": "packages/core/execution-context/core-execution-context-server-mocks/src/execution_context_service.mock.ts",
+            "path": "src/core/packages/execution-context/server-mocks/src/execution_context_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -92,7 +92,7 @@
               "ExecutionContextSetup",
               ">"
             ],
-            "path": "packages/core/execution-context/core-execution-context-server-mocks/src/execution_context_service.mock.ts",
+            "path": "src/core/packages/execution-context/server-mocks/src/execution_context_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],

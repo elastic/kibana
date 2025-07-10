@@ -6,8 +6,6 @@
  */
 
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
-import { APMTracer } from '@kbn/langchain/server/tracers/apm';
-import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { SIEM_RULE_MIGRATION_START_PATH } from '../../../../../common/siem_migrations/constants';
 import {
@@ -16,17 +14,22 @@ import {
   type StartRuleMigrationResponse,
 } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
+import { SiemMigrationAuditLogger } from './util/audit';
+import { authz } from './util/authz';
+import { getRetryFilter } from './util/retry';
 import { withLicense } from './util/with_license';
+import { createTracersCallbacks } from './util/tracing';
+import { withExistingMigration } from './util/with_existing_migration_id';
 
 export const registerSiemRuleMigrationsStartRoute = (
   router: SecuritySolutionPluginRouter,
   logger: Logger
 ) => {
   router.versioned
-    .put({
+    .post({
       path: SIEM_RULE_MIGRATION_START_PATH,
       access: 'internal',
-      security: { authz: { requiredPrivileges: ['securitySolution'] } },
+      security: { authz },
     })
     .addVersion(
       {
@@ -39,45 +42,66 @@ export const registerSiemRuleMigrationsStartRoute = (
         },
       },
       withLicense(
-        async (context, req, res): Promise<IKibanaResponse<StartRuleMigrationResponse>> => {
-          const migrationId = req.params.migration_id;
-          const { langsmith_options: langsmithOptions, connector_id: connectorId } = req.body;
+        withExistingMigration(
+          async (context, req, res): Promise<IKibanaResponse<StartRuleMigrationResponse>> => {
+            const migrationId = req.params.migration_id;
+            const {
+              langsmith_options: langsmithOptions,
+              settings: {
+                connector_id: connectorId,
+                skip_prebuilt_rules_matching: skipPrebuiltRulesMatching = false,
+              },
+              retry,
+            } = req.body;
 
-          try {
-            const ctx = await context.resolve(['core', 'actions', 'alerting', 'securitySolution']);
+            const siemMigrationAuditLogger = new SiemMigrationAuditLogger(context.securitySolution);
+            try {
+              const ctx = await context.resolve([
+                'core',
+                'actions',
+                'alerting',
+                'securitySolution',
+              ]);
 
-            const ruleMigrationsClient = ctx.securitySolution.getSiemRuleMigrationsClient();
-            const inferenceClient = ctx.securitySolution.getInferenceClient();
-            const actionsClient = ctx.actions.getActionsClient();
-            const soClient = ctx.core.savedObjects.client;
-            const rulesClient = await ctx.alerting.getRulesClient();
+              // Check if the connector exists and user has permissions to read it
+              const connector = await ctx.actions.getActionsClient().get({ id: connectorId });
+              if (!connector) {
+                return res.badRequest({ body: `Connector with id ${connectorId} not found` });
+              }
 
-            const invocationConfig = {
-              callbacks: [
-                new APMTracer({ projectName: langsmithOptions?.project_name ?? 'default' }, logger),
-                ...getLangSmithTracer({ ...langsmithOptions, logger }),
-              ],
-            };
+              const ruleMigrationsClient = ctx.securitySolution.getSiemRuleMigrationsClient();
+              if (retry) {
+                const { updated } = await ruleMigrationsClient.task.updateToRetry(
+                  migrationId,
+                  getRetryFilter(retry)
+                );
+                if (!updated) {
+                  return res.ok({ body: { started: false } });
+                }
+              }
 
-            const { exists, started } = await ruleMigrationsClient.task.start({
-              migrationId,
-              connectorId,
-              invocationConfig,
-              inferenceClient,
-              actionsClient,
-              soClient,
-              rulesClient,
-            });
+              const callbacks = createTracersCallbacks(langsmithOptions, logger);
 
-            if (!exists) {
-              return res.noContent();
+              const { exists, started } = await ruleMigrationsClient.task.start({
+                migrationId,
+                connectorId,
+                invocationConfig: { callbacks, configurable: { skipPrebuiltRulesMatching } },
+              });
+
+              if (!exists) {
+                return res.notFound();
+              }
+
+              await siemMigrationAuditLogger.logStart({ migrationId });
+
+              return res.ok({ body: { started } });
+            } catch (error) {
+              logger.error(error);
+              await siemMigrationAuditLogger.logStart({ migrationId, error });
+              return res.customError({ statusCode: 500, body: error.message });
             }
-            return res.ok({ body: { started } });
-          } catch (err) {
-            logger.error(err);
-            return res.badRequest({ body: err.message });
           }
-        }
+        )
       )
     );
 };

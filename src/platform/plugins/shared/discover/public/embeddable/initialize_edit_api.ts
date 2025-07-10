@@ -8,8 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  apiHasAppContext,
+import type {
   FetchContext,
   HasAppContext,
   HasEditCapabilities,
@@ -17,8 +16,9 @@ import {
   PublishesSavedObjectId,
   PublishingSubject,
 } from '@kbn/presentation-publishing';
-import { DiscoverServices } from '../build_services';
-import { PublishesSavedSearch } from './types';
+import { apiHasAppContext } from '@kbn/presentation-publishing';
+import type { DiscoverServices } from '../build_services';
+import type { PublishesSavedSearch } from './types';
 import { getDiscoverLocatorParams } from './utils/get_discover_locator_params';
 
 type SavedSearchPartialApi = PublishesSavedSearch &
@@ -29,20 +29,24 @@ export async function getAppTarget(
   partialApi: SavedSearchPartialApi,
   discoverServices: DiscoverServices
 ) {
-  const savedObjectId = partialApi.savedObjectId.getValue();
-  const dataViews = partialApi.dataViews.getValue();
+  const savedObjectId = partialApi.savedObjectId$.getValue();
+  const dataViews = partialApi.dataViews$.getValue();
   const locatorParams = getDiscoverLocatorParams(partialApi);
 
   // We need to use a redirect URL if this is a by value saved search using
   // an ad hoc data view to ensure the data view spec gets encoded in the URL
   const useRedirect = !savedObjectId && !dataViews?.[0]?.isPersisted();
+
+  const urlWithoutLocationState = await discoverServices.locator.getUrl({});
+
   const editUrl = useRedirect
     ? discoverServices.locator.getRedirectUrl(locatorParams)
     : await discoverServices.locator.getUrl(locatorParams);
+
   const editPath = discoverServices.core.http.basePath.remove(editUrl);
   const editApp = useRedirect ? 'r' : 'discover';
 
-  return { path: editPath, app: editApp, editUrl };
+  return { path: editPath, app: editApp, editUrl, urlWithoutLocationState };
 }
 
 export function initializeEditApi<

@@ -7,45 +7,42 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { combineLatest, debounceTime, distinctUntilChanged, map, of, switchMap } from 'rxjs';
-import deepEqual from 'fast-deep-equal';
-import { apiPublishesUnsavedChanges, PublishesUnsavedChanges } from '@kbn/presentation-publishing';
-import { PresentationContainer } from '../presentation_container';
+import {
+  HasUniqueId,
+  PublishesUnsavedChanges,
+  PublishingSubject,
+  apiHasUniqueId,
+  apiPublishesUnsavedChanges,
+} from '@kbn/presentation-publishing';
+import { combineLatest, debounceTime, map, of, switchMap } from 'rxjs';
 
 export const DEBOUNCE_TIME = 100;
 
 /**
  *  Create an observable stream of unsaved changes from all react embeddable children
  */
-export function childrenUnsavedChanges$(children$: PresentationContainer['children$']) {
+export function childrenUnsavedChanges$<Api extends unknown = unknown>(
+  children$: PublishingSubject<{ [key: string]: Api }>
+) {
   return children$.pipe(
     map((children) => Object.keys(children)),
-    distinctUntilChanged(deepEqual),
-
     // children may change, so make sure we subscribe/unsubscribe with switchMap
     switchMap((newChildIds: string[]) => {
       if (newChildIds.length === 0) return of([]);
-      const childrenThatPublishUnsavedChanges = Object.entries(children$.value).filter(
-        ([childId, child]) => apiPublishesUnsavedChanges(child)
-      ) as Array<[string, PublishesUnsavedChanges]>;
+      const childrenThatPublishUnsavedChanges = Object.values(children$.value).filter(
+        (child) => apiPublishesUnsavedChanges(child) && apiHasUniqueId(child)
+      ) as Array<PublishesUnsavedChanges & HasUniqueId>;
 
       return childrenThatPublishUnsavedChanges.length === 0
         ? of([])
         : combineLatest(
-            childrenThatPublishUnsavedChanges.map(([childId, child]) =>
-              child.unsavedChanges.pipe(map((unsavedChanges) => ({ childId, unsavedChanges })))
+            childrenThatPublishUnsavedChanges.map((child) =>
+              child.hasUnsavedChanges$.pipe(
+                map((hasUnsavedChanges) => ({ uuid: child.uuid, hasUnsavedChanges }))
+              )
             )
           );
     }),
-    debounceTime(DEBOUNCE_TIME),
-    map((unsavedChildStates) => {
-      const unsavedChildrenState: { [key: string]: object } = {};
-      unsavedChildStates.forEach(({ childId, unsavedChanges }) => {
-        if (unsavedChanges) {
-          unsavedChildrenState[childId] = unsavedChanges;
-        }
-      });
-      return Object.keys(unsavedChildrenState).length ? unsavedChildrenState : undefined;
-    })
+    debounceTime(DEBOUNCE_TIME)
   );
 }

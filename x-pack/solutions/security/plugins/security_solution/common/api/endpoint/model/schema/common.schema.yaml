@@ -15,21 +15,62 @@ components:
       default: 1
       minimum: 1
       description: Page number
+      example: 1
     PageSize:
       type: integer
       default: 10
       minimum: 1
       maximum: 100
       description: Number of items per page
+      example: 10
     StartDate:
       type: string
-      description: Start date
+      description: A start date in ISO 8601 format or Date Math format.
+      example: "2023-10-31T00:00:00.000Z"
     EndDate:
       type: string
-      description: End date
+      description: An end date in ISO format or Date Math format.
+      example: "2023-10-31T23:59:59.999Z"
     AgentId:
       type: string
       description: Agent ID
+    Kuery:
+      type: string
+      description: A KQL string.
+      example: "united.endpoint.host.os.name : 'Windows'"
+    HostStatuses:
+      type: array
+      description: A set of agent health statuses to filter by.
+      example: [ "healthy", "updating" ]
+      items:
+        type: string
+        enum:
+          - healthy
+          - offline
+          - updating
+          - inactive
+          - unenrolled
+    SortDirection:
+      type: string
+      description: Determines the sort order.
+      example: desc
+      enum:
+        - asc
+        - desc
+    SortField:
+      type: string
+      description: Determines which field is used to sort the results.
+      example: enrolled_at
+      enum:
+        - enrolled_at
+        - metadata.host.hostname
+        - host_status
+        - metadata.Endpoint.policy.applied.name
+        - metadata.Endpoint.policy.applied.status
+        - metadata.host.os.name
+        - metadata.host.ip
+        - metadata.agent.version
+        - last_checkin
 
     AgentIds:
       oneOf:
@@ -41,6 +82,8 @@ components:
           maxItems: 50
         - type: string
           minLength: 1
+      description: A list of agent IDs. Max of 50.
+      example: [ "agent-id-1", "agent-id-2" ]
       minLength: 1
 
     Command:
@@ -60,6 +103,8 @@ components:
 
     Commands:
       type: array
+      description: A list of response action command names.
+      example: [ "isolate", "unisolate" ]
       items:
         $ref: '#/components/schemas/Command'
 
@@ -91,7 +136,8 @@ components:
           minItems: 1
         - type: string
           minLength: 1
-      description: User IDs
+      description: A list of user IDs.
+      example: [ "user-id-1", "user-id-2" ]
 
     WithOutputs:
       oneOf:
@@ -102,7 +148,8 @@ components:
           minItems: 1
         - type: string
           minLength: 1
-      description: Shows detailed outputs for an action response
+      description: A list of action IDs that should include the complete output of the action.
+      example: [ "action-id-1", "action-id-2" ]
 
     Type:
       type: string
@@ -114,6 +161,7 @@ components:
     Types:
       type: array
       description: List of types of response actions
+      example: [ "automated", "manual" ]
       items:
         $ref: '#/components/schemas/Type'
       minLength: 1
@@ -121,27 +169,35 @@ components:
 
     EndpointIds:
       type: array
+      description: List of endpoint IDs (cannot contain empty strings)
+      example: [ "endpoint-id-1", "endpoint-id-2" ]
       items:
         type: string
         minLength: 1
       minItems: 1
-      description: List of endpoint IDs (cannot contain empty strings)
+
     CaseIds:
       type: array
+      description: Case IDs to be updated (cannot contain empty strings)
+      example: [ "case-id-1", "case-id-2" ]
       items:
         type: string
         minLength: 1
       minItems: 1
-      description: Case IDs to be updated (cannot contain empty strings)
+
     Comment:
       type: string
       description: Optional comment
+      example: "This is a comment"
+
     Parameters:
       type: object
       description: Optional parameters object
+
     AgentTypes:
       type: string
-      description: The host agent type (optional). Defaults to endpoint.
+      description: List of agent types to retrieve. Defaults to `endpoint`.
+      example: endpoint
       enum:
         - endpoint
         - sentinel_one
@@ -174,20 +230,6 @@ components:
       properties:
         body:
           $ref: '#/components/schemas/BaseActionSchema'
-
-    Pid:
-      type: object
-      properties:
-        pid:
-          type: integer
-          minimum: 1
-
-    EntityId:
-      type: object
-      properties:
-        entity_id:
-          type: string
-          minLength: 1
 
     ProtectionUpdatesNoteResponse:
       type: object

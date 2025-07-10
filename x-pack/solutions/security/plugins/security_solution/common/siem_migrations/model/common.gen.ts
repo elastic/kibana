@@ -15,13 +15,6 @@
  */
 
 import { z } from '@kbn/zod';
-import { isNonEmptyString } from '@kbn/zod-helpers';
-
-/**
- * A string that does not contain only whitespace characters
- */
-export type NonEmptyString = z.infer<typeof NonEmptyString>;
-export const NonEmptyString = z.string().min(1).superRefine(isNonEmptyString);
 
 /**
  * The GenAI connector id to use.
@@ -43,3 +36,16 @@ export const LangSmithOptions = z.object({
    */
   api_key: z.string(),
 });
+
+/**
+ * The LangSmith settings object for evaluations.
+ */
+export type LangSmithEvaluationOptions = z.infer<typeof LangSmithEvaluationOptions>;
+export const LangSmithEvaluationOptions = LangSmithOptions.merge(
+  z.object({
+    /**
+     * The dataset name to use for evaluations.
+     */
+    dataset: z.string(),
+  })
+);

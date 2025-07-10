@@ -49,56 +49,6 @@ export const guideCards: GuideCardConstants[] = [
     order: 1,
   },
   {
-    solution: 'search',
-    icon: 'vector',
-    title: i18n.translate('guidedOnboardingPackage.gettingStarted.cards.vectorSearch.title', {
-      defaultMessage: 'Set up vector search',
-    }),
-    navigateTo: {
-      appId: 'enterpriseSearchVectorSearch',
-    },
-    telemetryId: 'onboarding--search--vector',
-    order: 4,
-  },
-  {
-    solution: 'search',
-    icon: 'magnifyWithPlus',
-    title: i18n.translate('guidedOnboardingPackage.gettingStarted.cards.aiSearch.title', {
-      defaultMessage: 'Build an AI-powered search experience',
-    }),
-    navigateTo: {
-      appId: 'enterpriseSearchAISearch',
-    },
-    telemetryId: 'onboarding--search--ai',
-    order: 7,
-  },
-  {
-    solution: 'search',
-    icon: 'wrench',
-    title: (
-      <FormattedMessage
-        id="guidedOnboardingPackage.gettingStarted.cards.appSearch.title"
-        defaultMessage="Build an application on {lineBreak} top of Elasticsearch"
-        values={{
-          lineBreak: <br />,
-        }}
-      />
-    ),
-    guideId: 'appSearch',
-    telemetryId: 'onboarding--search--application',
-    order: 10,
-  },
-  {
-    solution: 'search',
-    icon: 'search',
-    title: i18n.translate('guidedOnboardingPackage.gettingStarted.cards.websiteSearch.title', {
-      defaultMessage: 'Add search to my website',
-    }),
-    guideId: 'websiteSearch',
-    telemetryId: 'onboarding--search--website',
-    order: 13,
-  },
-  {
     solution: 'observability',
     icon: 'logstashInput',
     title: i18n.translate('guidedOnboardingPackage.gettingStarted.cards.logsObservability.title', {

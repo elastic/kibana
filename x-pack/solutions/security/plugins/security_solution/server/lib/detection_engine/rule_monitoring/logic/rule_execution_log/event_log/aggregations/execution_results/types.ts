@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 import type { RuleRunType } from '../../../../../../../../../common/api/detection_engine/rule_monitoring';
 
 type AlertCounts = estypes.AggregationsMultiBucketAggregateBase & {
@@ -47,6 +47,7 @@ export type ExecutionUuidAggBucket = estypes.AggregationsStringTermsBucketKeys &
     searchDuration: estypes.AggregationsMinAggregate;
     indexDuration: estypes.AggregationsMinAggregate;
     gapDuration: estypes.AggregationsMinAggregate;
+    frozenIndicesQueriedCount: estypes.AggregationsMinAggregate;
   };
 };
 

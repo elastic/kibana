@@ -14,7 +14,8 @@ import type { IScopedClusterClient, IUiSettingsClient, Logger } from '@kbn/core/
 import type { IKibanaSearchResponse, IKibanaSearchRequest } from '@kbn/search-types';
 import { ESQL_SEARCH_STRATEGY, cellHasFormulas, getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { IScopedSearchClient } from '@kbn/data-plugin/server';
-import { type Filter, buildEsQuery } from '@kbn/es-query';
+import { type Filter, buildEsQuery, extractTimeRange } from '@kbn/es-query';
+import { getTimeFieldFromESQLQuery, getStartEndParams } from '@kbn/esql-utils';
 import type { ESQLSearchParams, ESQLSearchResponse } from '@kbn/es-types';
 import { i18n } from '@kbn/i18n';
 import {
@@ -76,6 +77,17 @@ export class CsvESQLGenerator {
     const { maxSizeBytes, bom, escapeFormulaValues } = settings;
     const builder = new MaxSizeStringBuilder(this.stream, byteSizeValueToNumber(maxSizeBytes), bom);
 
+    // it will return undefined if there are no _tstart, _tend named params in the query
+    const timeFieldName = getTimeFieldFromESQLQuery(this.job.query.esql);
+    const params = [];
+    if (timeFieldName && this.job.filters) {
+      const { timeRange } = extractTimeRange(this.job.filters, timeFieldName);
+      if (timeRange) {
+        const namedParams = getStartEndParams(this.job.query.esql, timeRange);
+        params.push(...namedParams);
+      }
+    }
+
     const filter =
       this.job.filters &&
       buildEsQuery(
@@ -91,6 +103,7 @@ export class CsvESQLGenerator {
         filter,
         // locale can be used for number/date formatting
         locale: i18n.getLocale(),
+        ...(params.length ? { params } : {}),
         // TODO: time_zone support was temporarily removed from ES|QL,
         // we will need to add it back in once it is supported again.
         // https://github.com/elastic/elasticsearch/pull/102767

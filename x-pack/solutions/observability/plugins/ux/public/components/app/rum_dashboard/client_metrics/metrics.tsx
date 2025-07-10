@@ -7,7 +7,7 @@
 
 import * as React from 'react';
 import numeral from '@elastic/numeral';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { useContext, useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiStat, EuiToolTip, EuiIconTip } from '@elastic/eui';
 import { useClientMetricsQuery } from '../../../../hooks/use_client_metrics_query';
@@ -62,7 +62,7 @@ export function Metrics() {
           description={
             <>
               {I18LABELS.totalPageLoad}
-              <EuiIconTip content={I18LABELS.totalPageLoadTooltip} type="questionInCircle" />
+              <EuiIconTip content={I18LABELS.totalPageLoadTooltip} type="question" />
             </>
           }
           isLoading={!!loading}
@@ -76,7 +76,7 @@ export function Metrics() {
           description={
             <>
               {I18LABELS.backEnd}
-              <EuiIconTip content={I18LABELS.backEndTooltip} type="questionInCircle" />
+              <EuiIconTip content={I18LABELS.backEndTooltip} type="question" />
             </>
           }
           isLoading={!!loading}
@@ -90,7 +90,7 @@ export function Metrics() {
           description={
             <>
               {I18LABELS.frontEnd}
-              <EuiIconTip content={I18LABELS.frontEndTooltip} type="questionInCircle" />
+              <EuiIconTip content={I18LABELS.frontEndTooltip} type="question" />
             </>
           }
           isLoading={!!loading}

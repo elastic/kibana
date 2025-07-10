@@ -4,18 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { euiLightVars } from '@kbn/ui-theme';
-
-export const RISK_COLOR_LOW = euiLightVars.euiColorVis0;
-export const RISK_COLOR_MEDIUM = euiLightVars.euiColorVis5;
-export const RISK_COLOR_HIGH = euiLightVars.euiColorVis7;
-export const RISK_COLOR_CRITICAL = euiLightVars.euiColorVis9;
-
-export const RISK_SCORE_LOW = 21;
-export const RISK_SCORE_MEDIUM = 47;
-export const RISK_SCORE_HIGH = 73;
-export const RISK_SCORE_CRITICAL = 99;
+import { euiThemeVars } from '@kbn/ui-theme';
+/**
+ * @deprecated Use getRiskSeverityColors instead
+ */
+export const RISK_COLOR_LOW = euiThemeVars.euiColorVis0;
+/**
+ * @deprecated Use getRiskSeverityColors instead
+ */
+export const RISK_COLOR_MEDIUM = euiThemeVars.euiColorVis5_behindText;
+/**
+ * @deprecated Use getRiskSeverityColors instead
+ */
+export const RISK_COLOR_HIGH = euiThemeVars.euiColorVis9_behindText;
+/**
+ * @deprecated Use getRiskSeverityColors instead
+ */
+export const RISK_COLOR_CRITICAL = euiThemeVars.euiColorDanger;
 
 export const ONBOARDING_VIDEO_SOURCE = '//play.vidyard.com/K6kKDBbP9SpXife9s2tHNP.html?';
 

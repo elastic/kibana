@@ -12,7 +12,7 @@
     "patterns": [
       "_sql/close"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/clear-sql-cursor-api.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-sql-clear-cursor",
     "availability": {
       "stack": true,
       "serverless": true

@@ -21,6 +21,7 @@ import {
   EuiSelect,
   EuiSpacer,
   EuiText,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -47,8 +48,8 @@ import {
   useIntegrationsStateContext,
   useGetSettingsQuery,
 } from '../../../../hooks';
+import { useAgentless } from '../../../../../fleet/sections/agent_policy/create_package_policy_page/single_page_layout/hooks/setup_technology';
 import { INTEGRATIONS_ROUTING_PATHS } from '../../../../constants';
-import { ExperimentalFeaturesService } from '../../../../services';
 import {
   useGetPackageInfoByKeyQuery,
   useLink,
@@ -67,10 +68,11 @@ import {
 import type { WithHeaderLayoutProps } from '../../../../layouts';
 import { WithHeaderLayout } from '../../../../layouts';
 
-import { PermissionsError } from '../../../../../fleet/layouts';
+import { PermissionsError } from '../../../../layouts';
 
 import { DeferredAssetsWarning } from './assets/deferred_assets_warning';
 import { useIsFirstTimeAgentUserQuery } from './hooks';
+
 import { getInstallPkgRouteOptions } from './utils';
 import {
   BackLink,
@@ -78,7 +80,9 @@ import {
   UpdateIcon,
   IconPanel,
   LoadingIconPanel,
+  MiniIcon,
   AddIntegrationButton,
+  EditIntegrationButton,
 } from './components';
 import { AssetsPage } from './assets';
 import { OverviewPage } from './overview';
@@ -88,9 +92,9 @@ import { CustomViewPage } from './custom';
 import { DocumentationPage, hasDocumentation } from './documentation';
 import { Configs } from './configs';
 
-import './index.scss';
 import type { InstallPkgRouteOptions } from './utils/get_install_route_options';
 import { InstallButton } from './settings/install_button';
+import { EditIntegrationFlyout } from './components/edit_integration_flyout';
 
 export type DetailViewPanelName =
   | 'overview'
@@ -105,7 +109,7 @@ export interface DetailParams {
   pkgkey: string;
   panel?: DetailViewPanelName;
 }
-
+const CUSTOM_INTEGRATION_SOURCES = ['custom', 'upload'];
 const Divider = styled.div`
   width: 0;
   height: 100%;
@@ -130,20 +134,22 @@ function Breadcrumbs({ packageTitle }: { packageTitle: string }) {
 }
 
 export function Detail() {
+  const theme = useEuiTheme();
   const { getId: getAgentPolicyId } = useAgentPolicyContext();
   const { getFromIntegrations } = useIntegrationsStateContext();
   const { pkgkey, panel } = useParams<DetailParams>();
   const { getHref, getPath } = useLink();
   const history = useHistory();
   const { pathname, search, hash } = useLocation();
+  const { isAgentlessIntegration, isAgentlessDefault } = useAgentless();
   const queryParams = useMemo(() => new URLSearchParams(search), [search]);
   const integration = useMemo(() => queryParams.get('integration'), [queryParams]);
   const prerelease = useMemo(() => Boolean(queryParams.get('prerelease')), [queryParams]);
-  /** Users from Security Solution onboarding page will have onboardingLink and onboardingAppId in the query params
-   ** to redirect back to the onboarding page after adding an integration
+  /** Users from Security and Observability Solution onboarding pages will have returnAppId and returnPath
+   ** in the query params to redirect back to the onboarding page after adding an integration
    */
-  const onboardingLink = useMemo(() => queryParams.get('onboardingLink'), [queryParams]);
-  const onboardingAppId = useMemo(() => queryParams.get('onboardingAppId'), [queryParams]);
+  const returnAppId = useMemo(() => queryParams.get('returnAppId'), [queryParams]);
+  const returnPath = useMemo(() => queryParams.get('returnPath'), [queryParams]);
 
   const authz = useAuthz();
   const canAddAgent = authz.fleet.addAgents;
@@ -162,10 +168,12 @@ export function Detail() {
 
   const services = useStartServices();
   const isCloud = !!services?.cloud?.cloudId;
-  const { createPackagePolicyMultiPageLayout: isExperimentalAddIntegrationPageEnabled } =
-    ExperimentalFeaturesService.get();
   const agentPolicyIdFromContext = getAgentPolicyId();
   const isOverviewPage = panel === 'overview';
+  // edit readme state
+
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [isCustomPackage, setIsCustomPackage] = useState(false);
 
   // Package info state
   const [packageInfo, setPackageInfo] = useState<PackageInfo | null>(null);
@@ -293,7 +301,13 @@ export function Detail() {
     if (packageInfoIsFetchedAfterMount && packageInfoData?.item) {
       const packageInfoResponse = packageInfoData.item;
       setPackageInfo(packageInfoResponse);
-
+      setIsCustomPackage(
+        (packageInfoResponse?.installationInfo?.install_source &&
+          CUSTOM_INTEGRATION_SOURCES.includes(
+            packageInfoResponse.installationInfo?.install_source
+          )) ??
+          false
+      );
       let installedVersion;
       const { name } = packageInfoData.item;
       if ('installationInfo' in packageInfoResponse) {
@@ -318,12 +332,12 @@ export function Detail() {
 
   const fromIntegrations = getFromIntegrations();
 
-  const href =
+  const fromIntegrationsPath =
     fromIntegrations === 'updates_available'
-      ? getHref('integrations_installed_updates_available')
+      ? getPath('integrations_installed_updates_available')
       : fromIntegrations === 'installed'
-      ? getHref('integrations_installed')
-      : getHref('integrations_all');
+      ? getPath('integrations_installed')
+      : getPath('integrations_all');
 
   const numOfDeferredInstallations = useMemo(
     () => getDeferredInstallationsCnt(packageInfo),
@@ -336,7 +350,7 @@ export function Detail() {
         <EuiFlexItem>
           {/* Allows button to break out of full width */}
           <div>
-            <BackLink queryParams={queryParams} href={href} />
+            <BackLink queryParams={queryParams} integrationsPath={fromIntegrationsPath} />
           </div>
         </EuiFlexItem>
         <EuiFlexItem>
@@ -393,9 +407,12 @@ export function Detail() {
         </EuiFlexItem>
       </EuiFlexGroup>
     ),
-    [integrationInfo, isLoading, packageInfo, href, queryParams]
+    [integrationInfo, isLoading, packageInfo, fromIntegrationsPath, queryParams]
   );
 
+  const handleEditIntegrationClick = useCallback<ReactEventHandler>((ev) => {
+    setIsEditOpen(true);
+  }, []);
   const handleAddIntegrationPolicyClick = useCallback<ReactEventHandler>(
     (ev) => {
       ev.preventDefault();
@@ -412,26 +429,27 @@ export function Detail() {
         currentPath,
         integration,
         isCloud,
-        isExperimentalAddIntegrationPageEnabled,
         isFirstTimeAgentUser,
         isGuidedOnboardingActive,
         pkgkey,
+        isAgentlessIntegration: isAgentlessIntegration(packageInfo || undefined),
+        isAgentlessDefault,
       });
 
-      /** Users from Security Solution onboarding page will have onboardingLink and onboardingAppId in the query params
-       ** to redirect back to the onboarding page after adding an integration
+      /** Users from Security and Observability Solution onboarding pages will have returnAppId and returnPath
+       ** in the query params to redirect back to the onboarding page after adding an integration
        */
       const navigateOptions: InstallPkgRouteOptions =
-        onboardingAppId && onboardingLink
+        returnAppId && returnPath
           ? [
               defaultNavigateOptions[0],
               {
                 ...defaultNavigateOptions[1],
                 state: {
                   ...(defaultNavigateOptions[1]?.state ?? {}),
-                  onCancelNavigateTo: [onboardingAppId, { path: onboardingLink }],
-                  onCancelUrl: onboardingLink,
-                  onSaveNavigateTo: [onboardingAppId, { path: onboardingLink }],
+                  onCancelNavigateTo: [returnAppId, { path: returnPath }],
+                  onCancelUrl: services.application.getUrlForApp(returnAppId, { path: returnPath }),
+                  onSaveNavigateTo: [returnAppId, { path: returnPath }],
                 },
               },
             ]
@@ -444,12 +462,14 @@ export function Detail() {
       hash,
       history,
       integration,
+      isAgentlessIntegration,
+      isAgentlessDefault,
       isCloud,
-      isExperimentalAddIntegrationPageEnabled,
       isFirstTimeAgentUser,
       isGuidedOnboardingActive,
-      onboardingAppId,
-      onboardingLink,
+      returnAppId,
+      returnPath,
+      packageInfo,
       pathname,
       pkgkey,
       search,
@@ -557,19 +577,30 @@ export function Detail() {
                           isTourVisible={isOverviewPage && isGuidedOnboardingActive}
                           tourOffset={10}
                         >
-                          <AddIntegrationButton
-                            userCanInstallPackages={userCanInstallPackages}
-                            href={getHref('add_integration_to_policy', {
-                              pkgkey,
-                              ...(integration ? { integration } : {}),
-                              ...(agentPolicyIdFromContext
-                                ? { agentPolicyId: agentPolicyIdFromContext }
-                                : {}),
-                            })}
-                            missingSecurityConfiguration={missingSecurityConfiguration}
-                            packageName={integrationInfo?.title || packageInfo.title}
-                            onClick={handleAddIntegrationPolicyClick}
-                          />
+                          <EuiFlexGroup justifyContent="center" alignItems="center" gutterSize="s">
+                            {isCustomPackage && (
+                              <EuiFlexItem grow={false}>
+                                <EditIntegrationButton
+                                  handleEditIntegrationClick={handleEditIntegrationClick}
+                                />
+                              </EuiFlexItem>
+                            )}
+                            <EuiFlexItem grow={false}>
+                              <AddIntegrationButton
+                                userCanInstallPackages={userCanInstallPackages}
+                                href={getHref('add_integration_to_policy', {
+                                  pkgkey,
+                                  ...(integration ? { integration } : {}),
+                                  ...(agentPolicyIdFromContext
+                                    ? { agentPolicyId: agentPolicyIdFromContext }
+                                    : {}),
+                                })}
+                                missingSecurityConfiguration={missingSecurityConfiguration}
+                                packageName={integrationInfo?.title || packageInfo.title}
+                                onClick={handleAddIntegrationPolicyClick}
+                              />
+                            </EuiFlexItem>
+                          </EuiFlexGroup>
                         </WithGuidedOnboardingTour>
                       ),
                     },
@@ -609,6 +640,8 @@ export function Detail() {
       showVersionSelect,
       versionLabel,
       versionOptions,
+      handleEditIntegrationClick,
+      isCustomPackage,
     ]
   );
 
@@ -617,6 +650,12 @@ export function Detail() {
       return [];
     }
     const packageInfoKey = pkgKeyFromPackageInfo(packageInfo);
+    const pathValues = {
+      pkgkey: packageInfoKey,
+      ...(integration ? { integration } : {}),
+      ...(returnAppId ? { returnAppId } : {}),
+      ...(returnPath ? { returnPath } : {}),
+    };
 
     const tabs: WithHeaderLayoutProps['tabs'] = [
       {
@@ -629,10 +668,7 @@ export function Detail() {
         ),
         isSelected: panel === 'overview',
         'data-test-subj': `tab-overview`,
-        href: getHref('integration_details_overview', {
-          pkgkey: packageInfoKey,
-          ...(integration ? { integration } : {}),
-        }),
+        href: getHref('integration_details_overview', pathValues),
       },
     ];
 
@@ -647,10 +683,7 @@ export function Detail() {
         ),
         isSelected: panel === 'policies',
         'data-test-subj': `tab-policies`,
-        href: getHref('integration_details_policies', {
-          pkgkey: packageInfoKey,
-          ...(integration ? { integration } : {}),
-        }),
+        href: getHref('integration_details_policies', pathValues),
       });
     }
 
@@ -671,10 +704,7 @@ export function Detail() {
         ),
         isSelected: panel === 'assets',
         'data-test-subj': `tab-assets`,
-        href: getHref('integration_details_assets', {
-          pkgkey: packageInfoKey,
-          ...(integration ? { integration } : {}),
-        }),
+        href: getHref('integration_details_assets', pathValues),
       });
     }
 
@@ -689,10 +719,7 @@ export function Detail() {
         ),
         isSelected: panel === 'settings',
         'data-test-subj': `tab-settings`,
-        href: getHref('integration_details_settings', {
-          pkgkey: packageInfoKey,
-          ...(integration ? { integration } : {}),
-        }),
+        href: getHref('integration_details_settings', pathValues),
       });
     }
 
@@ -707,10 +734,7 @@ export function Detail() {
         ),
         isSelected: panel === 'configs',
         'data-test-subj': `tab-configs`,
-        href: getHref('integration_details_configs', {
-          pkgkey: packageInfoKey,
-          ...(integration ? { integration } : {}),
-        }),
+        href: getHref('integration_details_configs', pathValues),
       });
     }
 
@@ -725,10 +749,7 @@ export function Detail() {
         ),
         isSelected: panel === 'custom',
         'data-test-subj': `tab-custom`,
-        href: getHref('integration_details_custom', {
-          pkgkey: packageInfoKey,
-          ...(integration ? { integration } : {}),
-        }),
+        href: getHref('integration_details_custom', pathValues),
       });
     }
 
@@ -743,16 +764,15 @@ export function Detail() {
         ),
         isSelected: panel === 'api-reference',
         'data-test-subj': `tab-api-reference`,
-        href: getHref('integration_details_api_reference', {
-          pkgkey: packageInfoKey,
-          ...(integration ? { integration } : {}),
-        }),
+        href: getHref('integration_details_api_reference', pathValues),
       });
     }
 
     return tabs;
   }, [
     packageInfo,
+    returnAppId,
+    returnPath,
     panel,
     getHref,
     integration,
@@ -805,7 +825,10 @@ export function Detail() {
       rightColumnGrow={false}
       topContent={securityCallout}
       tabs={headerTabs}
-      tabsClassName="fleet__epm__shiftNavTabs"
+      tabsCss={`
+        margin-left: calc(${theme.euiTheme.size.base} * 6 + ${theme.euiTheme.size.xl} * 2 +
+          ${theme.euiTheme.size.l});
+      `}
     >
       {integrationInfo || packageInfo ? (
         <Breadcrumbs packageTitle={integrationInfo?.title || packageInfo?.title || ''} />
@@ -836,6 +859,7 @@ export function Detail() {
               packageInfo={packageInfo}
               packageMetadata={packageInfoData?.metadata}
               startServices={services}
+              isCustomPackage={isCustomPackage}
             />
           </Route>
           <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_assets}>
@@ -851,6 +875,7 @@ export function Detail() {
               <PermissionsError
                 error="MISSING_PRIVILEGES"
                 requiredFleetRole="Agent Policies Read and Integrations Read"
+                callingApplication="Integrations"
               />
             )}
           </Route>
@@ -862,6 +887,33 @@ export function Detail() {
           </Route>
           <Redirect to={INTEGRATIONS_ROUTING_PATHS.integration_details_overview} />
         </Routes>
+      )}
+      {isEditOpen && (
+        <EditIntegrationFlyout
+          integrationName={packageInfo?.title || 'Integration'}
+          onClose={() => setIsEditOpen(false)}
+          packageInfo={packageInfo}
+          setIsEditOpen={setIsEditOpen}
+          integration={integration}
+          services={services}
+          existingCategories={packageInfo?.categories ?? []}
+          onComplete={(urlParts) => {
+            const path = getPath('integration_details_overview', urlParts);
+            history.push(path);
+          }}
+          miniIcon={
+            isLoading || !packageInfo ? (
+              <Loading />
+            ) : (
+              <MiniIcon
+                packageName={packageInfo?.name}
+                integrationName={integrationInfo?.name}
+                version={packageInfo?.version}
+                icons={integrationInfo?.icons || packageInfo?.icons}
+              />
+            )
+          }
+        />
       )}
     </WithHeaderLayout>
   );

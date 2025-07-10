@@ -31,7 +31,7 @@
         "signature": [
           "(kibanaUrl: string) => Promise<string>"
         ],
-        "path": "packages/kbn-mock-idp-utils/src/utils.ts",
+        "path": "src/platform/packages/private/kbn-mock-idp-utils/src/utils.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -47,7 +47,7 @@
             "signature": [
               "string"
             ],
-            "path": "packages/kbn-mock-idp-utils/src/utils.ts",
+            "path": "src/platform/packages/private/kbn-mock-idp-utils/src/utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -68,7 +68,7 @@
         "signature": [
           "(options: { kibanaUrl: string; authnRequestId?: string | undefined; username: string; full_name?: string | undefined; email?: string | undefined; roles: string[]; }) => Promise<string>"
         ],
-        "path": "packages/kbn-mock-idp-utils/src/utils.ts",
+        "path": "src/platform/packages/private/kbn-mock-idp-utils/src/utils.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -79,7 +79,7 @@
             "tags": [],
             "label": "options",
             "description": [],
-            "path": "packages/kbn-mock-idp-utils/src/utils.ts",
+            "path": "src/platform/packages/private/kbn-mock-idp-utils/src/utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -92,7 +92,7 @@
                 "description": [
                   "Fully qualified URL where Kibana is hosted (including base path)"
                 ],
-                "path": "packages/kbn-mock-idp-utils/src/utils.ts",
+                "path": "src/platform/packages/private/kbn-mock-idp-utils/src/utils.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -108,7 +108,7 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "path": "packages/kbn-mock-idp-utils/src/utils.ts",
+                "path": "src/platform/packages/private/kbn-mock-idp-utils/src/utils.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -119,7 +119,7 @@
                 "tags": [],
                 "label": "username",
                 "description": [],
-                "path": "packages/kbn-mock-idp-utils/src/utils.ts",
+                "path": "src/platform/packages/private/kbn-mock-idp-utils/src/utils.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -133,7 +133,7 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "path": "packages/kbn-mock-idp-utils/src/utils.ts",
+                "path": "src/platform/packages/private/kbn-mock-idp-utils/src/utils.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -147,7 +147,7 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "path": "packages/kbn-mock-idp-utils/src/utils.ts",
+                "path": "src/platform/packages/private/kbn-mock-idp-utils/src/utils.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -161,7 +161,7 @@
                 "signature": [
                   "string[]"
                 ],
-                "path": "packages/kbn-mock-idp-utils/src/utils.ts",
+                "path": "src/platform/packages/private/kbn-mock-idp-utils/src/utils.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -185,7 +185,7 @@
           "default",
           ") => Promise<unknown>"
         ],
-        "path": "packages/kbn-mock-idp-utils/src/utils.ts",
+        "path": "src/platform/packages/private/kbn-mock-idp-utils/src/utils.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -199,7 +199,7 @@
             "signature": [
               "default"
             ],
-            "path": "packages/kbn-mock-idp-utils/src/utils.ts",
+            "path": "src/platform/packages/private/kbn-mock-idp-utils/src/utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -222,7 +222,7 @@
         "signature": [
           "\"http://saml.elastic-cloud.com/attributes/email\""
         ],
-        "path": "packages/kbn-mock-idp-utils/src/constants.ts",
+        "path": "src/platform/packages/private/kbn-mock-idp-utils/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -237,7 +237,7 @@
         "signature": [
           "\"http://saml.elastic-cloud.com/attributes/name\""
         ],
-        "path": "packages/kbn-mock-idp-utils/src/constants.ts",
+        "path": "src/platform/packages/private/kbn-mock-idp-utils/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -252,7 +252,7 @@
         "signature": [
           "\"http://saml.elastic-cloud.com/attributes/principal\""
         ],
-        "path": "packages/kbn-mock-idp-utils/src/constants.ts",
+        "path": "src/platform/packages/private/kbn-mock-idp-utils/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -267,7 +267,7 @@
         "signature": [
           "\"http://saml.elastic-cloud.com/attributes/roles\""
         ],
-        "path": "packages/kbn-mock-idp-utils/src/constants.ts",
+        "path": "src/platform/packages/private/kbn-mock-idp-utils/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -282,7 +282,7 @@
         "signature": [
           "\"urn:mock-idp\""
         ],
-        "path": "packages/kbn-mock-idp-utils/src/constants.ts",
+        "path": "src/platform/packages/private/kbn-mock-idp-utils/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -297,7 +297,7 @@
         "signature": [
           "\"/mock_idp/login\""
         ],
-        "path": "packages/kbn-mock-idp-utils/src/constants.ts",
+        "path": "src/platform/packages/private/kbn-mock-idp-utils/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -312,7 +312,7 @@
         "signature": [
           "\"/mock_idp/logout\""
         ],
-        "path": "packages/kbn-mock-idp-utils/src/constants.ts",
+        "path": "src/platform/packages/private/kbn-mock-idp-utils/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -327,7 +327,7 @@
         "signature": [
           "\"cloud-saml-kibana\""
         ],
-        "path": "packages/kbn-mock-idp-utils/src/constants.ts",
+        "path": "src/platform/packages/private/kbn-mock-idp-utils/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -342,7 +342,7 @@
         "signature": [
           "\"saml\""
         ],
-        "path": "packages/kbn-mock-idp-utils/src/constants.ts",
+        "path": "src/platform/packages/private/kbn-mock-idp-utils/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -357,7 +357,7 @@
         "signature": [
           "\"mock-idp-mapping\""
         ],
-        "path": "packages/kbn-mock-idp-utils/src/constants.ts",
+        "path": "src/platform/packages/private/kbn-mock-idp-utils/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

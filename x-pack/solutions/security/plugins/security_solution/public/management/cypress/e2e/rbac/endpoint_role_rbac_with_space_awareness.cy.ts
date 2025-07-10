@@ -22,6 +22,7 @@ import {
   setRoleName,
   setSecuritySolutionEndpointGroupPrivilege,
 } from '../../screens/stack_management/role_page';
+import { SECURITY_FEATURE_ID } from '../../../../../common/constants';
 
 describe(
   'When defining a kibana role for Endpoint security access with space awareness enabled',
@@ -88,7 +89,7 @@ describe(
         .findByTestSubj(`space-avatar-${spaceId}`)
         .should('exist');
 
-      cy.get('#row_siem_expansion')
+      cy.get(`#row_${SECURITY_FEATURE_ID}_expansion`)
         .findByTestSubj('subFeatureEntry')
         .then(($element) => {
           const features: string[] = [];
@@ -103,6 +104,8 @@ describe(
         // up in this list - `Endpoint exceptions`.
         .should('include.members', [
           'Endpoint ListAll',
+          'Automatic TroubleshootingNone',
+          'Global Artifact ManagementNone',
           'Trusted ApplicationsNone',
           'Host Isolation ExceptionsNone',
           'BlocklistNone',
@@ -119,10 +122,16 @@ describe(
 
     it('should not display the privilege tooltip', () => {
       ENDPOINT_SUB_FEATURE_PRIVILEGE_IDS.forEach((subFeaturePrivilegeId) => {
-        cy.getByTestSubj(`securitySolution_siem_${subFeaturePrivilegeId}_nameTooltip`).should(
-          'not.exist'
-        );
+        cy.getByTestSubj(
+          `securitySolution_${SECURITY_FEATURE_ID}_${subFeaturePrivilegeId}_nameTooltip`
+        ).should('not.exist');
       });
+    });
+
+    it('should include new Global Artifact Management privilege', () => {
+      cy.getByTestSubj(`securitySolution_${SECURITY_FEATURE_ID}_global_artifact_management`).should(
+        'exist'
+      );
     });
   }
 );

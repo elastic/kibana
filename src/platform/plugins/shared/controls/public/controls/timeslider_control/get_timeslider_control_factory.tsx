@@ -8,7 +8,7 @@
  */
 
 import React, { useEffect, useMemo } from 'react';
-import { BehaviorSubject, debounceTime, first, map } from 'rxjs';
+import { BehaviorSubject, debounceTime, first, map, merge } from 'rxjs';
 
 import { EuiInputPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -17,19 +17,24 @@ import {
   ViewMode,
   apiHasParentApi,
   apiPublishesDataLoading,
-  getUnchangingComparator,
   getViewModeSubject,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 
+import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { TIME_SLIDER_CONTROL } from '../../../common';
-import { initializeDefaultControlApi } from '../initialize_default_control_api';
+import {
+  defaultControlComparators,
+  initializeDefaultControlManager,
+} from '../default_control_manager';
 import { ControlFactory } from '../types';
-import './components/index.scss';
 import { TimeSliderPopoverButton } from './components/time_slider_popover_button';
 import { TimeSliderPopoverContent } from './components/time_slider_popover_content';
 import { TimeSliderPrepend } from './components/time_slider_prepend';
-import { initTimeRangePercentage } from './init_time_range_percentage';
+import {
+  initTimeRangePercentage,
+  timeRangePercentageComparators,
+} from './init_time_range_percentage';
 import { initTimeRangeSubscription } from './init_time_range_subscription';
 import {
   FROM_INDEX,
@@ -52,7 +57,7 @@ export const getTimesliderControlFactory = (): ControlFactory<
     type: TIME_SLIDER_CONTROL,
     getIconType: () => 'search',
     getDisplayName: () => displayName,
-    buildControl: async (initialState, buildApi, uuid, controlGroupApi) => {
+    buildControl: async ({ initialState, finalizeApi, uuid, controlGroupApi }) => {
       const { timeRangeMeta$, formatDate, cleanupTimeRangeSubscription } =
         initTimeRangeSubscription(controlGroupApi);
       const timeslice$ = new BehaviorSubject<[number, number] | undefined>(undefined);
@@ -190,11 +195,14 @@ export const getTimesliderControlFactory = (): ControlFactory<
       const viewModeSubject =
         getViewModeSubject(controlGroupApi) ?? new BehaviorSubject('view' as ViewMode);
 
-      const defaultControl = initializeDefaultControlApi({ ...initialState, width: 'large' });
+      const defaultControlManager = initializeDefaultControlManager({
+        ...initialState,
+        width: 'large',
+      });
 
       const dashboardDataLoading$ =
         apiHasParentApi(controlGroupApi) && apiPublishesDataLoading(controlGroupApi.parentApi)
-          ? controlGroupApi.parentApi.dataLoading
+          ? controlGroupApi.parentApi.dataLoading$
           : new BehaviorSubject<boolean | undefined>(false);
       const waitForDashboardPanelsToLoad$ = dashboardDataLoading$.pipe(
         // debounce to give time for panels to start loading if they are going to load from time changes
@@ -209,56 +217,74 @@ export const getTimesliderControlFactory = (): ControlFactory<
         })
       );
 
-      const api = buildApi(
-        {
-          ...defaultControl.api,
-          defaultPanelTitle: new BehaviorSubject<string | undefined>(displayName),
-          timeslice$,
-          serializeState: () => {
-            const { rawState: defaultControlState } = defaultControl.serialize();
-            return {
-              rawState: {
-                ...defaultControlState,
-                ...timeRangePercentage.serializeState(),
-                isAnchored: isAnchored$.value,
-              },
-              references: [],
-            };
+      function serializeState() {
+        return {
+          rawState: {
+            ...defaultControlManager.getLatestState(),
+            ...timeRangePercentage.getLatestState(),
+            isAnchored: isAnchored$.value,
           },
-          clearSelections: () => {
-            setTimeslice(undefined);
-            hasTimeSliceSelection$.next(false);
-          },
-          hasSelections$: hasTimeSliceSelection$ as PublishingSubject<boolean | undefined>,
-          CustomPrependComponent: () => {
-            const [autoApplySelections, viewMode] = useBatchedPublishingSubjects(
-              controlGroupApi.autoApplySelections$,
-              viewModeSubject
-            );
+          references: [],
+        };
+      }
 
-            return (
-              <TimeSliderPrepend
-                onNext={onNext}
-                onPrevious={onPrevious}
-                viewMode={viewMode}
-                disablePlayButton={!autoApplySelections}
-                setIsPopoverOpen={(value) => isPopoverOpen$.next(value)}
-                waitForControlOutputConsumersToLoad$={waitForDashboardPanelsToLoad$}
-              />
-            );
-          },
+      const unsavedChangesApi = initializeUnsavedChanges<TimesliderControlState>({
+        uuid,
+        parentApi: controlGroupApi,
+        serializeState,
+        anyStateChange$: merge(
+          defaultControlManager.anyStateChange$,
+          timeRangePercentage.anyStateChange$,
+          isAnchored$.pipe(map(() => undefined))
+        ),
+        getComparators: () => {
+          return {
+            ...defaultControlComparators,
+            ...timeRangePercentageComparators,
+            width: 'skip',
+            isAnchored: 'skip',
+          };
         },
-        {
-          ...defaultControl.comparators,
-          width: getUnchangingComparator(),
-          ...timeRangePercentage.comparators,
-          isAnchored: [isAnchored$, setIsAnchored],
-        }
-      );
+        onReset: (lastSaved) => {
+          defaultControlManager.reinitializeState(lastSaved?.rawState);
+          timeRangePercentage.reinitializeState(lastSaved?.rawState);
+          setIsAnchored(lastSaved?.rawState?.isAnchored);
+        },
+      });
+
+      const api = finalizeApi({
+        ...unsavedChangesApi,
+        ...defaultControlManager.api,
+        defaultTitle$: new BehaviorSubject<string | undefined>(displayName),
+        timeslice$,
+        serializeState,
+        clearSelections: () => {
+          setTimeslice(undefined);
+          hasTimeSliceSelection$.next(false);
+        },
+        hasSelections$: hasTimeSliceSelection$ as PublishingSubject<boolean | undefined>,
+        CustomPrependComponent: () => {
+          const [autoApplySelections, viewMode] = useBatchedPublishingSubjects(
+            controlGroupApi.autoApplySelections$,
+            viewModeSubject
+          );
+
+          return (
+            <TimeSliderPrepend
+              onNext={onNext}
+              onPrevious={onPrevious}
+              viewMode={viewMode}
+              disablePlayButton={!autoApplySelections}
+              setIsPopoverOpen={(value) => isPopoverOpen$.next(value)}
+              waitForControlOutputConsumersToLoad$={waitForDashboardPanelsToLoad$}
+            />
+          );
+        },
+      });
 
       const timeRangeMetaSubscription = timeRangeMeta$.subscribe((timeRangeMeta) => {
         const { timesliceStartAsPercentageOfTimeRange, timesliceEndAsPercentageOfTimeRange } =
-          timeRangePercentage.serializeState();
+          timeRangePercentage.getLatestState();
         syncTimesliceWithTimeRangePercentage(
           timesliceStartAsPercentageOfTimeRange,
           timesliceEndAsPercentageOfTimeRange

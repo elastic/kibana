@@ -9,16 +9,20 @@
 
 export * from './build_data_record';
 export * from './calc_field_counts';
+export * from './contains_index_pattern';
 export * from './format_hit';
 export * from './format_value';
 export * from './get_doc_id';
 export * from './get_ignored_reason';
 export * from './get_log_document_overview';
+export * from './get_transaction_document_overview';
+export * from './get_span_document_overview';
 export * from './get_message_field_with_fallbacks';
 export * from './get_should_show_field_handler';
 export * from './get_stack_trace_fields';
 export * from './nested_fields';
 export * from './get_field_value';
-export * from './calc_field_counts';
 export * from './get_visible_columns';
+export * from './convert_value_to_string';
+export * from './sorting';
 export { DiscoverFlyouts, dismissAllFlyoutsExceptFor, dismissFlyouts } from './dismiss_flyouts';

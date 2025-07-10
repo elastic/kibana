@@ -29,16 +29,21 @@ import {
   InvestigationFields,
   TimelineTemplateId,
   TimelineTemplateTitle,
+  AlertSuppression,
 } from '../../model/rule_schema/common_attributes.gen';
+import { ThresholdAlertSuppression } from '../../model/rule_schema/specific_attributes/threshold_attributes.gen';
 
 export type BulkEditSkipReason = z.infer<typeof BulkEditSkipReason>;
 export const BulkEditSkipReason = z.literal('RULE_NOT_MODIFIED');
+
+export type BulkGapsFillingSkipReason = z.infer<typeof BulkGapsFillingSkipReason>;
+export const BulkGapsFillingSkipReason = z.literal('NO_GAPS_TO_FILL');
 
 export type BulkActionSkipResult = z.infer<typeof BulkActionSkipResult>;
 export const BulkActionSkipResult = z.object({
   id: z.string(),
   name: z.string().optional(),
-  skip_reason: BulkEditSkipReason,
+  skip_reason: z.union([BulkEditSkipReason, BulkGapsFillingSkipReason]),
 });
 
 export type RuleDetailsInError = z.infer<typeof RuleDetailsInError>;
@@ -50,11 +55,15 @@ export const RuleDetailsInError = z.object({
 export type BulkActionsDryRunErrCode = z.infer<typeof BulkActionsDryRunErrCode>;
 export const BulkActionsDryRunErrCode = z.enum([
   'IMMUTABLE',
+  'PREBUILT_CUSTOMIZATION_LICENSE',
   'MACHINE_LEARNING_AUTH',
   'MACHINE_LEARNING_INDEX_PATTERN',
   'ESQL_INDEX_PATTERN',
   'MANUAL_RULE_RUN_FEATURE',
   'MANUAL_RULE_RUN_DISABLED_RULE',
+  'THRESHOLD_RULE_TYPE_IN_SUPPRESSION',
+  'UNSUPPORTED_RULE_IN_SUPPRESSION_FOR_THRESHOLD',
+  'RULE_FILL_GAPS_DISABLED_RULE',
 ]);
 export type BulkActionsDryRunErrCodeEnum = typeof BulkActionsDryRunErrCode.enum;
 export const BulkActionsDryRunErrCodeEnum = BulkActionsDryRunErrCode.enum;
@@ -75,6 +84,9 @@ export const BulkEditActionResults = z.object({
   skipped: z.array(BulkActionSkipResult),
 });
 
+/**
+ * A rule can only be skipped when the bulk action to be performed on it results in nothing being done. For example, if the `edit` action is used to add a tag to a rule that already has that tag, or to delete an index pattern that is not specified in a rule. Objects returned in `attributes.results.skipped` will only include rules' `id`, `name`, and `skip_reason`.
+ */
 export type BulkEditActionSummary = z.infer<typeof BulkEditActionSummary>;
 export const BulkEditActionSummary = z.object({
   failed: z.number().int(),
@@ -102,13 +114,21 @@ export const BulkExportActionResponse = z.string();
 export type BulkActionBase = z.infer<typeof BulkActionBase>;
 export const BulkActionBase = z.object({
   /**
-   * Query to filter rules
+   * Query to filter rules.
    */
   query: z.string().optional(),
   /**
-   * Array of rule IDs
+   * Array of rule IDs. Array of rule IDs to which a bulk action will be applied. Only valid when query property is undefined.
    */
   ids: z.array(z.string()).min(1).optional(),
+  /**
+   * Gaps range start, valid only when query is provided
+   */
+  gaps_range_start: z.string().optional(),
+  /**
+   * Gaps range end, valid only when query is provided
+   */
+  gaps_range_end: z.string().optional(),
 });
 
 export type BulkDeleteRules = z.infer<typeof BulkDeleteRules>;
@@ -143,6 +163,9 @@ export type BulkDuplicateRules = z.infer<typeof BulkDuplicateRules>;
 export const BulkDuplicateRules = BulkActionBase.merge(
   z.object({
     action: z.literal('duplicate'),
+    /**
+     * Duplicate object that describes applying an update action.
+     */
     duplicate: z
       .object({
         /**
@@ -162,6 +185,9 @@ export type BulkManualRuleRun = z.infer<typeof BulkManualRuleRun>;
 export const BulkManualRuleRun = BulkActionBase.merge(
   z.object({
     action: z.literal('run'),
+    /**
+     * Object that describes applying a manual rule run action.
+     */
     run: z.object({
       /**
        * Start date of the manual rule run
@@ -170,14 +196,38 @@ export const BulkManualRuleRun = BulkActionBase.merge(
       /**
        * End date of the manual rule run
        */
-      end_date: z.string().optional(),
+      end_date: z.string(),
+    }),
+  })
+);
+
+export type BulkManualRuleFillGaps = z.infer<typeof BulkManualRuleFillGaps>;
+export const BulkManualRuleFillGaps = BulkActionBase.merge(
+  z.object({
+    action: z.literal('fill_gaps'),
+    /**
+     * Object that describes applying a manual gap fill action for the specified time range.
+     */
+    fill_gaps: z.object({
+      /**
+       * Start date of the manual gap fill
+       */
+      start_date: z.string(),
+      /**
+       * End date of the manual gap fill
+       */
+      end_date: z.string(),
     }),
   })
 );
 
 /**
- * The condition for throttling the notification: 'rule', 'no_actions', or time duration
- */
+  * Defines the maximum interval in which a rule’s actions are executed.
+> info
+> The rule level `throttle` field is deprecated in Elastic Security 8.8 and will remain active for at least the next 12 months.
+> In Elastic Security 8.8 and later, you can use the `frequency` field to define frequencies for individual actions. Actions without frequencies will acquire a converted version of the rule’s `throttle` field. In the response, the converted `throttle` setting appears in the individual actions' `frequency` field.
+
+  */
 export type ThrottleForBulkActions = z.infer<typeof ThrottleForBulkActions>;
 export const ThrottleForBulkActions = z.enum(['rule', '1h', '1d', '7d']);
 export type ThrottleForBulkActionsEnum = typeof ThrottleForBulkActions.enum;
@@ -192,6 +242,7 @@ export const BulkActionType = z.enum([
   'duplicate',
   'edit',
   'run',
+  'fill_gaps',
 ]);
 export type BulkActionTypeEnum = typeof BulkActionType.enum;
 export const BulkActionTypeEnum = BulkActionType.enum;
@@ -211,6 +262,9 @@ export const BulkActionEditType = z.enum([
   'add_investigation_fields',
   'delete_investigation_fields',
   'set_investigation_fields',
+  'delete_alert_suppression',
+  'set_alert_suppression',
+  'set_alert_suppression_for_threshold',
 ]);
 export type BulkActionEditTypeEnum = typeof BulkActionEditType.enum;
 export const BulkActionEditTypeEnum = BulkActionEditType.enum;
@@ -226,6 +280,13 @@ export const NormalizedRuleAction = z
   })
   .strict();
 
+/**
+  * Edits rule actions of rules.
+
+- `add_rule_actions` adds rule actions to rules. This action is non-idempotent, meaning that even if the same rule action already exists for a rule, it will be added again with a new unique ID.
+- `set_rule_actions` sets rule actions for rules. This action is non-idempotent, meaning that even if the same set of rule actions already exists for a rule, it will be set again and the actions will receive new unique IDs.
+
+  */
 export type BulkActionEditPayloadRuleActions = z.infer<typeof BulkActionEditPayloadRuleActions>;
 export const BulkActionEditPayloadRuleActions = z.object({
   type: z.enum(['add_rule_actions', 'set_rule_actions']),
@@ -235,6 +296,14 @@ export const BulkActionEditPayloadRuleActions = z.object({
   }),
 });
 
+/**
+  * Overwrites schedule of rules. 
+
+- `set_schedule` sets a schedule for rules. If the same schedule already exists for a rule, no changes are made.
+
+Both `interval` and `lookback` have a format of "{integer}{time_unit}", where accepted time units are `s` for seconds, `m` for minutes, and `h` for hours. The integer must be positive and larger than 0. Examples: "45s", "30m", "6h"
+
+  */
 export type BulkActionEditPayloadSchedule = z.infer<typeof BulkActionEditPayloadSchedule>;
 export const BulkActionEditPayloadSchedule = z.object({
   type: z.literal('set_schedule'),
@@ -243,26 +312,56 @@ export const BulkActionEditPayloadSchedule = z.object({
      * Interval in which the rule runs. For example, `"1h"` means the rule runs every hour.
      */
     interval: z.string().regex(/^[1-9]\d*[smh]$/),
-    /**
-     * Lookback time for the rule
-     */
+    /** 
+      * Lookback time for the rules.
+
+Additional look-back time that the rule analyzes. For example, "10m" means the rule analyzes the last 10 minutes of data in addition to the frequency interval.
+ 
+      */
     lookback: z.string().regex(/^[1-9]\d*[smh]$/),
   }),
 });
 
+/**
+  * Edits index patterns of rulesClient.
+
+- `add_index_patterns` adds index patterns to rules. If an index pattern already exists for a rule, no changes are made.
+- `delete_index_patterns` removes index patterns from rules. If an index pattern does not exist for a rule, no changes are made.
+- `set_index_patterns` sets index patterns for rules, overwriting any existing index patterns. If the set of index patterns is the same as the existing index patterns, no changes are made.
+
+  */
 export type BulkActionEditPayloadIndexPatterns = z.infer<typeof BulkActionEditPayloadIndexPatterns>;
 export const BulkActionEditPayloadIndexPatterns = z.object({
   type: z.enum(['add_index_patterns', 'delete_index_patterns', 'set_index_patterns']),
   value: IndexPatternArray,
+  /**
+   * Resets the data view for the rule.
+   */
   overwrite_data_views: z.boolean().optional(),
 });
 
+/**
+  * Edits tags of rules.
+
+- `add_tags` adds tags to rules. If a tag already exists for a rule, no changes are made.
+- `delete_tags` removes tags from rules. If a tag does not exist for a rule, no changes are made.
+- `set_tags` sets tags for rules, overwriting any existing tags. If the set of tags is the same as the existing tags, no changes are made.
+
+  */
 export type BulkActionEditPayloadTags = z.infer<typeof BulkActionEditPayloadTags>;
 export const BulkActionEditPayloadTags = z.object({
   type: z.enum(['add_tags', 'delete_tags', 'set_tags']),
   value: RuleTagArray,
 });
 
+/**
+  * Edits investigation fields of rules.
+
+- `add_investigation_fields` adds investigation fields to rules. If an investigation field already exists for a rule, no changes are made.
+- `delete_investigation_fields` removes investigation fields from rules. If an investigation field does not exist for a rule, no changes are made.
+- `set_investigation_fields` sets investigation fields for rules. If the set of investigation fields is the same as the existing investigation fields, no changes are made.
+
+  */
 export type BulkActionEditPayloadInvestigationFields = z.infer<
   typeof BulkActionEditPayloadInvestigationFields
 >;
@@ -275,6 +374,12 @@ export const BulkActionEditPayloadInvestigationFields = z.object({
   value: InvestigationFields,
 });
 
+/**
+  * Edits timeline of rules.
+
+- `set_timeline` sets a timeline for rules. If the same timeline already exists for a rule, no changes are made.
+
+  */
 export type BulkActionEditPayloadTimeline = z.infer<typeof BulkActionEditPayloadTimeline>;
 export const BulkActionEditPayloadTimeline = z.object({
   type: z.literal('set_timeline'),
@@ -284,6 +389,41 @@ export const BulkActionEditPayloadTimeline = z.object({
   }),
 });
 
+export type BulkActionEditPayloadSetAlertSuppression = z.infer<
+  typeof BulkActionEditPayloadSetAlertSuppression
+>;
+export const BulkActionEditPayloadSetAlertSuppression = z.object({
+  type: z.literal('set_alert_suppression'),
+  value: AlertSuppression,
+});
+
+export type BulkActionEditPayloadSetAlertSuppressionForThreshold = z.infer<
+  typeof BulkActionEditPayloadSetAlertSuppressionForThreshold
+>;
+export const BulkActionEditPayloadSetAlertSuppressionForThreshold = z.object({
+  type: z.literal('set_alert_suppression_for_threshold'),
+  value: ThresholdAlertSuppression,
+});
+
+export type BulkActionEditPayloadDeleteAlertSuppression = z.infer<
+  typeof BulkActionEditPayloadDeleteAlertSuppression
+>;
+export const BulkActionEditPayloadDeleteAlertSuppression = z.object({
+  type: z.literal('delete_alert_suppression'),
+});
+
+export const BulkActionEditPayloadAlertSuppressionInternal = z.union([
+  BulkActionEditPayloadSetAlertSuppression,
+  BulkActionEditPayloadSetAlertSuppressionForThreshold,
+  BulkActionEditPayloadDeleteAlertSuppression,
+]);
+
+export type BulkActionEditPayloadAlertSuppression = z.infer<
+  typeof BulkActionEditPayloadAlertSuppressionInternal
+>;
+export const BulkActionEditPayloadAlertSuppression =
+  BulkActionEditPayloadAlertSuppressionInternal as z.ZodType<BulkActionEditPayloadAlertSuppression>;
+
 export const BulkActionEditPayloadInternal = z.union([
   BulkActionEditPayloadTags,
   BulkActionEditPayloadIndexPatterns,
@@ -291,6 +431,7 @@ export const BulkActionEditPayloadInternal = z.union([
   BulkActionEditPayloadTimeline,
   BulkActionEditPayloadRuleActions,
   BulkActionEditPayloadSchedule,
+  BulkActionEditPayloadAlertSuppression,
 ]);
 
 export type BulkActionEditPayload = z.infer<typeof BulkActionEditPayloadInternal>;
@@ -310,9 +451,16 @@ export const BulkEditRules = BulkActionBase.merge(
 
 export type PerformRulesBulkActionRequestQuery = z.infer<typeof PerformRulesBulkActionRequestQuery>;
 export const PerformRulesBulkActionRequestQuery = z.object({
-  /**
-   * Enables dry run mode for the request call.
-   */
+  /** 
+      * Enables dry run mode for the request call.
+
+Enable dry run mode to verify that bulk actions can be applied to specified rules. Certain rules, such as prebuilt Elastic rules on a Basic subscription, can’t be edited and will return errors in the request response. Error details will contain an explanation, the rule name and/or ID, and additional troubleshooting information.
+
+To enable dry run mode on a request, add the query parameter `dry_run=true` to the end of the request URL. Rules specified in the request will be temporarily updated. These updates won’t be written to Elasticsearch.
+> info
+> Dry run mode is not supported for the `export` bulk action. A 400 error will be returned in the request response.
+ 
+      */
   dry_run: BooleanFromString.optional(),
 });
 export type PerformRulesBulkActionRequestQueryInput = z.input<
@@ -327,6 +475,7 @@ export const PerformRulesBulkActionRequestBody = z.union([
   BulkExportRules,
   BulkDuplicateRules,
   BulkManualRuleRun,
+  BulkManualRuleFillGaps,
   BulkEditRules,
 ]);
 export type PerformRulesBulkActionRequestBodyInput = z.input<

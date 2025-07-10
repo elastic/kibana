@@ -6,17 +6,22 @@
  */
 
 import type { FC, PropsWithChildren } from 'react';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
+import { merge } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut, EuiLink, useEuiTheme } from '@elastic/eui';
-import type { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import {
-  initializeTimeRange,
-  initializeTitles,
+  initializeTimeRangeManager,
+  initializeTitleManager,
+  timeRangeComparators,
+  titleComparators,
   useFetchContext,
 } from '@kbn/presentation-publishing';
+import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { LogStream } from '@kbn/logs-shared-plugin/public';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import type { Query } from '@kbn/es-query';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
@@ -29,39 +34,47 @@ import { useKibanaContextForPluginProvider } from '../../hooks/use_kibana';
 import type { InfraClientStartDeps, InfraClientStartExports } from '../../types';
 
 export function getLogStreamEmbeddableFactory(services: Services) {
-  const factory: ReactEmbeddableFactory<
-    LogStreamSerializedState,
-    LogStreamSerializedState,
-    LogStreamApi
-  > = {
+  const factory: EmbeddableFactory<LogStreamSerializedState, LogStreamApi> = {
     type: LOG_STREAM_EMBEDDABLE,
-    deserializeState: (state) => state.rawState,
-    buildEmbeddable: async (state, buildApi) => {
-      const timeRangeContext = initializeTimeRange(state);
-      const { titlesApi, titleComparators, serializeTitles } = initializeTitles(state);
+    buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
+      const timeRangeContext = initializeTimeRangeManager(initialState.rawState);
+      const titleManager = initializeTitleManager(initialState.rawState);
 
-      const api = buildApi(
-        {
-          ...timeRangeContext.api,
-          ...titlesApi,
-          serializeState: () => {
-            return {
-              rawState: {
-                ...timeRangeContext.serialize(),
-                ...serializeTitles(),
-              },
-            };
+      function serializeState() {
+        return {
+          rawState: {
+            ...timeRangeContext.getLatestState(),
+            ...titleManager.getLatestState(),
           },
-        },
-        {
-          ...timeRangeContext.comparators,
+        };
+      }
+
+      const unsavedChangesApi = initializeUnsavedChanges({
+        uuid,
+        parentApi,
+        serializeState,
+        anyStateChange$: merge(timeRangeContext.anyStateChange$, titleManager.anyStateChange$),
+        getComparators: () => ({
+          ...timeRangeComparators,
           ...titleComparators,
-        }
-      );
+        }),
+        onReset: (lastSaved) => {
+          timeRangeContext.reinitializeState(lastSaved?.rawState);
+          titleManager.reinitializeState(lastSaved?.rawState);
+        },
+      });
+
+      const api = finalizeApi({
+        ...timeRangeContext.api,
+        ...titleManager.api,
+        ...unsavedChangesApi,
+        serializeState,
+      });
 
       return {
         api,
         Component: () => {
+          const darkMode = useKibanaIsDarkMode();
           const { filters, query, timeRange } = useFetchContext(api);
           const { startTimestamp, endTimestamp } = useMemo(() => {
             return {
@@ -69,14 +82,6 @@ export function getLogStreamEmbeddableFactory(services: Services) {
               endTimestamp: timeRange ? datemathToEpochMillis(timeRange.to, 'up') : undefined,
             };
           }, [timeRange]);
-
-          const [darkMode, setDarkMode] = useState(false);
-          useEffect(() => {
-            const subscription = services.coreStart.theme.theme$.subscribe((theme) => {
-              setDarkMode(theme.darkMode);
-            });
-            return () => subscription.unsubscribe();
-          }, []);
 
           return !startTimestamp || !endTimestamp ? null : (
             <LogStreamEmbeddableProviders
@@ -122,7 +127,7 @@ const DeprecationCallout = () => {
   return (
     <EuiCallOut
       color="warning"
-      iconType="help"
+      iconType="question"
       onDismiss={() => setDismissed(true)}
       css={{
         position: 'absolute',

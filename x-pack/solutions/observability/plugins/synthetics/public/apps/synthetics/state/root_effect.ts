@@ -6,6 +6,7 @@
  */
 
 import { all, fork } from 'redux-saga/effects';
+import { getMaintenanceWindowsEffect } from './maintenance_windows';
 import { getCertsListEffect } from './certs';
 import {
   addGlobalParamEffect,
@@ -18,6 +19,8 @@ import {
   enableDefaultAlertingEffect,
   enableDefaultAlertingSilentlyEffect,
   getDefaultAlertingEffect,
+  inspectStatusRuleEffect,
+  inspectTLSRuleEffect,
   updateDefaultAlertingEffect,
 } from './alert_rules/effects';
 import { executeEsQueryEffect } from './elasticsearch';
@@ -27,8 +30,7 @@ import {
   fetchLocationMonitorsEffect,
   setDynamicSettingsEffect,
 } from './settings/effects';
-import { syncGlobalParamsEffect } from './settings';
-import { fetchAgentPoliciesEffect, fetchPrivateLocationsEffect } from './private_locations';
+import { privateLocationsEffects } from './private_locations/effects';
 import { fetchNetworkEventsEffect } from './network_events/effects';
 import { fetchSyntheticsMonitorEffect } from './monitor_details';
 import { fetchSyntheticsEnablementEffect } from './synthetics_enablement';
@@ -44,6 +46,7 @@ import { browserJourneyEffects, fetchJourneyStepsEffect } from './browser_journe
 import { fetchOverviewStatusEffect } from './overview_status';
 import { fetchMonitorStatusHeatmap, quietFetchMonitorStatusHeatmap } from './status_heatmap';
 import { fetchOverviewTrendStats, refreshOverviewTrendStats } from './overview/effects';
+import { fetchAgentPoliciesEffect } from './agent_policies';
 
 export const rootEffect = function* root(): Generator {
   yield all([
@@ -57,12 +60,10 @@ export const rootEffect = function* root(): Generator {
     fork(fetchOverviewStatusEffect),
     fork(fetchNetworkEventsEffect),
     fork(fetchAgentPoliciesEffect),
-    fork(fetchPrivateLocationsEffect),
     fork(fetchDynamicSettingsEffect),
     fork(fetchLocationMonitorsEffect),
     fork(setDynamicSettingsEffect),
     fork(fetchAlertConnectorsEffect),
-    fork(syncGlobalParamsEffect),
     fork(enableDefaultAlertingEffect),
     fork(enableMonitorAlertEffect),
     fork(updateDefaultAlertingEffect),
@@ -80,5 +81,9 @@ export const rootEffect = function* root(): Generator {
     fork(quietFetchMonitorStatusHeatmap),
     fork(fetchOverviewTrendStats),
     fork(refreshOverviewTrendStats),
+    fork(inspectStatusRuleEffect),
+    fork(inspectTLSRuleEffect),
+    fork(getMaintenanceWindowsEffect),
+    ...privateLocationsEffects.map((effect) => fork(effect)),
   ]);
 };

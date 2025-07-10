@@ -10,26 +10,34 @@
 import React, { useState } from 'react';
 
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import { css } from '@emotion/react';
 import { OptionsListPopoverActionBar } from './options_list_popover_action_bar';
 import { useOptionsListContext } from '../options_list_context_provider';
 import { OptionsListPopoverFooter } from './options_list_popover_footer';
 import { OptionsListPopoverInvalidSelections } from './options_list_popover_invalid_selections';
 import { OptionsListPopoverSuggestions } from './options_list_popover_suggestions';
 
+const optionsListPopoverStyles = {
+  wrapper: css({
+    width: '100%',
+    height: '100%',
+  }),
+};
+
 export const OptionsListPopover = () => {
-  const { api, displaySettings } = useOptionsListContext();
+  const { componentApi, displaySettings } = useOptionsListContext();
 
   const [field, availableOptions, invalidSelections, loading] = useBatchedPublishingSubjects(
-    api.field$,
-    api.availableOptions$,
-    api.invalidSelections$,
-    api.dataLoading
+    componentApi.field$,
+    componentApi.availableOptions$,
+    componentApi.invalidSelections$,
+    componentApi.dataLoading$
   );
   const [showOnlySelected, setShowOnlySelected] = useState(false);
 
   return (
     <div
-      id={`control-popover-${api.uuid}`}
+      id={`control-popover-${componentApi.uuid}`}
       className={'optionsList__popover'}
       data-test-subj={`optionsList-control-popover`}
     >
@@ -42,7 +50,7 @@ export const OptionsListPopover = () => {
       <div
         data-test-subj={`optionsList-control-available-options`}
         data-option-count={loading ? 0 : Object.keys(availableOptions ?? {}).length}
-        css={{ width: '100%', height: '100%' }}
+        css={optionsListPopoverStyles.wrapper}
       >
         <OptionsListPopoverSuggestions showOnlySelected={showOnlySelected} />
         {!showOnlySelected && invalidSelections && invalidSelections.size !== 0 && (

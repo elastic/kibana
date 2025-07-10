@@ -14,6 +14,7 @@ import { RulesTables } from './rules_tables';
 import { AllRulesTabs, RulesTableToolbar } from './rules_table_toolbar';
 import { UpgradePrebuiltRulesTable } from './upgrade_prebuilt_rules_table/upgrade_prebuilt_rules_table';
 import { UpgradePrebuiltRulesTableContextProvider } from './upgrade_prebuilt_rules_table/upgrade_prebuilt_rules_table_context';
+import { RuleGapsCallout } from '../../../rule_gaps/components/rule_gaps_callout';
 
 /**
  * Table Component for displaying all Rules for a given cluster. Provides the ability to filter
@@ -31,6 +32,7 @@ export const AllRules = React.memo(() => {
     return (
       <>
         <RulesManagementTour />
+        {tabName !== AllRulesTabs.monitoring && <RuleGapsCallout />}
         <RulesTableToolbar />
         <EuiSpacer />
         <RulesTables selectedTab={tabName as AllRulesTabs} />
@@ -38,13 +40,11 @@ export const AllRules = React.memo(() => {
     );
   } else {
     return (
-      <>
-        <UpgradePrebuiltRulesTableContextProvider>
-          <RulesTableToolbar />
-          <EuiSpacer />
-          <UpgradePrebuiltRulesTable />
-        </UpgradePrebuiltRulesTableContextProvider>
-      </>
+      <UpgradePrebuiltRulesTableContextProvider>
+        <RulesTableToolbar />
+        <EuiSpacer />
+        <UpgradePrebuiltRulesTable />
+      </UpgradePrebuiltRulesTableContextProvider>
     );
   }
 });

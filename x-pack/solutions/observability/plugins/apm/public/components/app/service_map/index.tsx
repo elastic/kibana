@@ -6,13 +6,24 @@
  */
 
 import { usePerformanceContext } from '@kbn/ebt-tools';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiPanel, useEuiTheme } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiPanel,
+  EuiSpacer,
+  useEuiTheme,
+} from '@elastic/eui';
 import type { ReactNode } from 'react';
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { apmEnableServiceMapApiV2 } from '@kbn/observability-plugin/common';
+import { useEditableSettings } from '@kbn/observability-shared-plugin/public';
+import { Subscription } from 'rxjs';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { isActivePlatinumLicense } from '../../../../common/license_check';
 import { invalidLicenseMessage, SERVICE_MAP_TIMEOUT_ERROR } from '../../../../common/service_map';
-import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
+import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useLicenseContext } from '../../../context/license/use_license_context';
 import { LicensePrompt } from '../../shared/license_prompt';
 import { Controls } from './controls';
@@ -29,9 +40,8 @@ import { useApmParams, useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import type { Environment } from '../../../../common/environment_rt';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { DisabledPrompt } from './disabled_prompt';
-import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
-import { isLogsOnlySignal } from '../../../utils/get_signal_type';
-import { ServiceTabEmptyState } from '../service_tab_empty_state';
+import { useServiceMap } from './use_service_map';
+import { TryItButton } from '../../shared/try_it_button';
 
 function PromptContainer({ children }: { children: ReactNode }) {
   return (
@@ -79,14 +89,7 @@ export function ServiceMapServiceDetail() {
     '/mobile-services/{serviceName}/service-map'
   );
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
-  const { serviceEntitySummary } = useApmServiceContext();
 
-  const hasLogsOnlySignal =
-    serviceEntitySummary?.dataStreamTypes && isLogsOnlySignal(serviceEntitySummary.dataStreamTypes);
-
-  if (hasLogsOnlySignal) {
-    return <ServiceTabEmptyState id="serviceMap" />;
-  }
   return <ServiceMap environment={environment} kuery={kuery} start={start} end={end} />;
 }
 
@@ -106,36 +109,44 @@ export function ServiceMap({
   const { euiTheme } = useEuiTheme();
   const license = useLicenseContext();
   const serviceName = useServiceName();
-  const { config } = useApmPluginContext();
+
+  const { config, core } = useApmPluginContext();
   const { onPageReady } = usePerformanceContext();
 
-  const {
-    data = { elements: [], nodesCount: 0, tracesCount: 0 },
-    status,
-    error,
-  } = useFetcher(
-    (callApmApi) => {
-      // When we don't have a license or a valid license, don't make the request.
-      if (!license || !isActivePlatinumLicense(license) || !config.serviceMapEnabled) {
-        return;
-      }
-
-      return callApmApi('GET /internal/apm/service-map', {
-        isCachable: false,
-        params: {
-          query: {
-            start,
-            end,
-            environment,
-            serviceName,
-            serviceGroup: serviceGroupId,
-            kuery,
-          },
-        },
-      });
-    },
-    [license, serviceName, environment, start, end, serviceGroupId, kuery, config.serviceMapEnabled]
+  const subscriptions = useRef<Subscription>(new Subscription());
+  const [isServiceMapApiV2Enabled, setIsServiceMapApiV2Enabled] = useState<boolean>(
+    core.settings.client.get(apmEnableServiceMapApiV2)
   );
+
+  useEffect(() => {
+    subscriptions.current.add(
+      core.settings.client.get$<boolean>(apmEnableServiceMapApiV2).subscribe((value) => {
+        setIsServiceMapApiV2Enabled(value);
+      })
+    );
+  }, [core.settings]);
+
+  useEffect(() => {
+    const currentSubscriptions = subscriptions.current;
+    return () => {
+      currentSubscriptions.unsubscribe();
+    };
+  }, []);
+
+  const { fields, isSaving, saveSingleSetting } = useEditableSettings([apmEnableServiceMapApiV2]);
+
+  const settingsField = fields[apmEnableServiceMapApiV2];
+  const isServiceMapV2Enabled = Boolean(settingsField?.savedValue ?? settingsField?.defaultValue);
+
+  const { data, status, error } = useServiceMap({
+    environment,
+    kuery,
+    start,
+    end,
+    serviceGroupId,
+    serviceName,
+    isServiceMapApiV2Enabled,
+  });
 
   const { ref, height } = useRefDimensions();
 
@@ -200,6 +211,39 @@ export function ServiceMap({
   return (
     <>
       <SearchBar showTimeComparison />
+      <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="s">
+        <TryItButton
+          isFeatureEnabled={isServiceMapV2Enabled}
+          linkLabel={
+            isServiceMapV2Enabled
+              ? i18n.translate('xpack.apm.serviceMap.disableServiceMapApiV2', {
+                  defaultMessage: 'Disable the new service map API',
+                })
+              : i18n.translate('xpack.apm.serviceMap.enableServiceMapApiV2', {
+                  defaultMessage: 'Enable the new service map API',
+                })
+          }
+          onClick={() => {
+            saveSingleSetting(apmEnableServiceMapApiV2, !isServiceMapV2Enabled);
+          }}
+          isLoading={isSaving}
+          popoverContent={
+            <EuiFlexGroup direction="column" gutterSize="s">
+              <EuiFlexItem grow={false}>
+                {i18n.translate('xpack.apm.serviceMap.serviceMapApiV2PopoverContent', {
+                  defaultMessage: 'The new service map API is faster, try it out!',
+                })}
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          }
+          hideThisContent={i18n.translate('xpack.apm.serviceMap.hideThisContent', {
+            defaultMessage:
+              'Hide this. The setting can be enabled or disabled in Advanced Settings.',
+          })}
+          calloutId="showServiceMapV2Callout"
+        />
+      </EuiFlexGroup>
+      <EuiSpacer size="s" />
       <EuiPanel hasBorder={true} paddingSize="none">
         <div data-test-subj="serviceMap" style={{ height: heightWithPadding }} ref={ref}>
           <Cytoscape

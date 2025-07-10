@@ -33,6 +33,7 @@ import {
 } from './saved_objects';
 import { registerUsageCountersRollups } from './rollups';
 import { searchUsageCounters } from './search';
+import { USAGE_COUNTERS_BACKOFF_DELAY_IN_MS } from '../../common/constants';
 
 interface UsageCountersLogMeta extends LogMeta {
   kibana: { usageCounters: { results: unknown[] } };
@@ -159,6 +160,9 @@ export class UsageCountersService {
     };
   };
 
+  private backoffDelay = (attempt: number) =>
+    Math.pow(2, attempt) * USAGE_COUNTERS_BACKOFF_DELAY_IN_MS; // exponential backoff: 500ms, 1000ms, 2000ms
+
   private storeDate$(
     counters: UsageCounters.v1.CounterMetric[],
     soRepository: Pick<SavedObjectsRepository, 'incrementCounter'>
@@ -166,7 +170,13 @@ export class UsageCountersService {
     return Rx.forkJoin(
       counters.map((metric) =>
         Rx.defer(() => storeCounter({ metric, soRepository })).pipe(
-          Rx.retry(this.retryCount),
+          Rx.retry({
+            count: this.retryCount,
+            delay: (error, retryIndex) => {
+              this.logger.debug(`Error: ${error.message}, retrying attempt ${retryIndex}`); // extra warning logger
+              return Rx.timer(this.backoffDelay(retryIndex));
+            },
+          }),
           Rx.catchError((error) => {
             this.logger.warn(error);
             return Rx.of(error);

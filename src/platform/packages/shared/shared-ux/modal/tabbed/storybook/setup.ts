@@ -31,19 +31,19 @@ export class StorybookMock extends AbstractStorybookMock<
   propArguments = {
     tabs: {
       control: {
-        type: 'array',
+        control: 'array',
       },
       defaultValue: [],
     },
     defaultSelectedTabId: {
       control: {
-        type: 'array',
+        control: 'array',
       },
       defaultValue: [],
     },
     onClose: {
       control: {
-        type: 'array',
+        control: 'array',
       },
       defaultValue: [],
     },

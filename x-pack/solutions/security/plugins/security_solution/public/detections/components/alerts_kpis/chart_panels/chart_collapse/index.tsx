@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiFlexItem, EuiHealth, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHealth, EuiText, useEuiTheme } from '@elastic/eui';
 import { ALERT_SEVERITY, ALERT_RULE_NAME } from '@kbn/rule-data-utils';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import type { Filter, Query } from '@kbn/es-query';
@@ -20,8 +20,7 @@ import { getSeverityColor } from '../../severity_level_panel/helpers';
 import { FormattedCount } from '../../../../../common/components/formatted_number';
 import { getIsChartCollapseData } from './helpers';
 import * as i18n from './translations';
-
-import { SEVERITY_COLOR } from '../../../../../overview/components/detection_response/utils';
+import { useRiskSeverityColors } from '../../../../../common/utils/risk_color_palette';
 
 const DETECTIONS_ALERTS_COLLAPSED_CHART_ID = 'detectioin-alerts-collapsed-chart';
 
@@ -79,6 +78,7 @@ export const ChartCollapse: React.FC<Props> = ({
   signalIndexName,
   runtimeMappings,
 }: Props) => {
+  const { euiTheme } = useEuiTheme();
   const uniqueQueryId = useMemo(() => `${DETECTIONS_ALERTS_COLLAPSED_CHART_ID}-${uuid()}`, []);
   const aggregations = useMemo(() => combinedAggregations(groupBySelection), [groupBySelection]);
 
@@ -94,9 +94,10 @@ export const ChartCollapse: React.FC<Props> = ({
 
   const topRule = useMemo(() => data.at(0)?.rule ?? i18n.NO_RESULT_MESSAGE, [data]);
   const topGroup = useMemo(() => data.at(0)?.group ?? i18n.NO_RESULT_MESSAGE, [data]);
+  const severityColors = useRiskSeverityColors();
   const severities = useMemo(() => {
     const severityData = data.at(0)?.severities ?? [];
-    return Object.keys(SEVERITY_COLOR).map((severity) => {
+    return Object.keys(severityColors).map((severity) => {
       const obj = severityData.find((s) => s.key === severity);
       if (obj) {
         return { key: obj.key, label: obj.label, value: obj.value };
@@ -104,7 +105,7 @@ export const ChartCollapse: React.FC<Props> = ({
         return { key: severity, label: capitalize(severity), value: 0 };
       }
     });
-  }, [data]);
+  }, [data, severityColors]);
   const groupBy = useMemo(() => getGroupByLabel(groupBySelection), [groupBySelection]);
 
   return (
@@ -115,7 +116,7 @@ export const ChartCollapse: React.FC<Props> = ({
             <EuiFlexGroup data-test-subj="chart-collapse-severities">
               {severities.map((severity) => (
                 <EuiFlexItem key={severity.key} grow={false}>
-                  <EuiHealth color={getSeverityColor(severity.key)}>
+                  <EuiHealth color={getSeverityColor(severity.key, euiTheme)}>
                     <EuiText size="xs">
                       {`${severity.label}: `}
                       <FormattedCount count={severity.value || 0} />

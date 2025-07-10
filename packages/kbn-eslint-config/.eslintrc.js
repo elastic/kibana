@@ -20,7 +20,13 @@
 const { USES_STYLED_COMPONENTS } = require('@kbn/babel-preset/styled_components_files');
 
 module.exports = {
-  extends: ['./javascript.js', './typescript.js', './jest.js', './react.js'],
+  extends: [
+    './javascript.js',
+    './typescript.js',
+    './jest.js',
+    './react.js',
+    'plugin:@elastic/eui/recommended',
+  ],
 
   plugins: [
     '@kbn/eslint-plugin-disable',
@@ -28,7 +34,8 @@ module.exports = {
     '@kbn/eslint-plugin-imports',
     '@kbn/eslint-plugin-telemetry',
     '@kbn/eslint-plugin-i18n',
-    '@kbn/eslint-plugin-css',
+    '@kbn/eslint-plugin-eui-a11y',
+    '@elastic/eui',
     'eslint-plugin-depend',
     'prettier',
   ],
@@ -120,7 +127,7 @@ module.exports = {
           from: 'zod',
           to: '@kbn/zod',
           disallowedMessage: `import from @kbn/zod instead`,
-          exclude: [/packages[\/\\]kbn-zod[\/\\]/],
+          exclude: [/src[\/\\]platform[\/\\]packages[\/\\]shared[\/\\]kbn-zod[\/\\]/],
         },
         {
           from: 'styled-components',
@@ -128,16 +135,6 @@ module.exports = {
           exclude: USES_STYLED_COMPONENTS,
           disallowedMessage: `Prefer using @emotion/react instead. To use styled-components, ensure you plugin is enabled in packages/kbn-babel-preset/styled_components_files.js.`,
         },
-        ...[
-          '@elastic/eui/dist/eui_theme_amsterdam_light.json',
-          '@elastic/eui/dist/eui_theme_amsterdam_dark.json',
-          '@elastic/eui/dist/eui_theme_borealis_light.json',
-          '@elastic/eui/dist/eui_theme_borealis_dark.json',
-        ].map((from) => ({
-          from,
-          to: false,
-          disallowedMessage: `Use "@kbn/ui-theme" to access theme vars.`,
-        })),
         {
           from: '@kbn/test/jest',
           to: '@kbn/test-jest-helpers',
@@ -321,7 +318,7 @@ module.exports = {
     '@kbn/disable/no_naked_eslint_disable': 'error',
     '@kbn/eslint/no_async_promise_body': 'error',
     '@kbn/eslint/no_async_foreach': 'error',
-    '@kbn/eslint/no_deprecated_authz_config': 'error',
+    '@kbn/eslint/require_kibana_feature_privileges_naming': 'warn',
     '@kbn/eslint/no_trailing_import_slash': 'error',
     '@kbn/eslint/no_constructor_args_in_property_initializers': 'error',
     '@kbn/eslint/no_this_in_property_initializers': 'error',
@@ -333,9 +330,20 @@ module.exports = {
     '@kbn/imports/no_boundary_crossing': 'error',
     '@kbn/imports/no_group_crossing_manifests': 'error',
     '@kbn/imports/no_group_crossing_imports': 'error',
-    '@kbn/css/no_css_color': 'warn',
     'no-new-func': 'error',
     'no-implied-eval': 'error',
     'no-prototype-builtins': 'error',
+
+    /**
+     * EUI Team rules
+     */
+
+    '@elastic/eui/no-restricted-eui-imports': [
+      'warn',
+      {
+        patterns: ['@kbn/ui-theme'],
+        message: 'For client-side, please use `useEuiTheme` instead.',
+      },
+    ],
   },
 };

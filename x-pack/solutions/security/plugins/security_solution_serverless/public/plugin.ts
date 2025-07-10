@@ -5,15 +5,23 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import type {
+  AppUpdater,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  PluginInitializerContext,
+} from '@kbn/core/public';
+import { BehaviorSubject } from 'rxjs';
+import { AppStatus } from '@kbn/core-application-browser';
 
 import { getDashboardsLandingCallout } from './components/dashboards_landing_callout';
+import type { ServerlessSecurityPublicConfig } from '../common/config';
 import type {
   SecuritySolutionServerlessPluginSetup,
   SecuritySolutionServerlessPluginStart,
   SecuritySolutionServerlessPluginSetupDeps,
   SecuritySolutionServerlessPluginStartDeps,
-  ServerlessSecurityPublicConfig,
 } from './types';
 import { registerUpsellings } from './upselling';
 import { createServices } from './common/services/create_services';
@@ -24,6 +32,7 @@ import {
 } from '../common/experimental_features';
 import { setOnboardingSettings } from './onboarding';
 import { getAdditionalChargesMessage } from './components/additional_charges_message';
+import { getEnabledProductFeatures } from '../common/pli/pli_features';
 
 export class SecuritySolutionServerlessPlugin
   implements
@@ -47,13 +56,16 @@ export class SecuritySolutionServerlessPlugin
     setupDeps: SecuritySolutionServerlessPluginSetupDeps
   ): SecuritySolutionServerlessPluginSetup {
     const { securitySolution } = setupDeps;
+    const { productTypes, enableExperimental, inaccessibleApps } = this.config;
 
     this.experimentalFeatures = parseExperimentalConfigValue(
-      this.config.enableExperimental,
+      enableExperimental,
       securitySolution.experimentalFeatures
     ).features;
 
-    setupDeps.discover.showInlineTopNav();
+    securitySolution.setProductFeatureKeys(getEnabledProductFeatures(productTypes));
+
+    updateInaccessibleApps(inaccessibleApps, core);
 
     return {};
   }
@@ -74,10 +86,30 @@ export class SecuritySolutionServerlessPlugin
     });
 
     setOnboardingSettings(services);
-    startNavigation(services);
+    startNavigation(services, productTypes);
 
     return {};
   }
 
   public stop() {}
 }
+
+/**
+ * Disables apps that are inaccessible based on the provided configuration.
+ * It updates the app status to 'inaccessible' for those apps.
+ * The apps will still execute their lifecycle methods, but it will remain inaccessible in the UI.
+ */
+const updateInaccessibleApps = (inaccessibleApps: string[], core: CoreSetup) => {
+  if (!inaccessibleApps?.length) {
+    return;
+  }
+
+  const inaccessibleAppsSet = new Set(inaccessibleApps);
+  const appUpdater$ = new BehaviorSubject<AppUpdater>((app) => {
+    if (inaccessibleAppsSet.has(app.id)) {
+      return { status: AppStatus.inaccessible };
+    }
+  });
+
+  core.application.registerAppUpdater(appUpdater$);
+};

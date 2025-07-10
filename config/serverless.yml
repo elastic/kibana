@@ -1,3 +1,5 @@
+# Common serverless config
+
 interactiveSetup.enabled: false
 newsfeed.enabled: false
 xpack.serverless.plugin.enabled: true
@@ -8,7 +10,9 @@ xpack.fleet.internal.activeAgentsSoftLimit: 25000
 xpack.fleet.internal.onlyAllowAgentUpgradeToKnownVersions: true
 xpack.fleet.internal.retrySetupOnBoot: true
 xpack.fleet.internal.useMeteringApi: true
-xpack.searchSynonyms.enabled: false
+xpack.fleet.internal.registry.kibanaVersionCheckEnabled: false
+xpack.fleet.internal.registry.spec.min: '3.0'
+xpack.fleet.internal.registry.spec.max: '3.4'
 
 ## Fine-tune the feature privileges.
 xpack.features.overrides:
@@ -36,7 +40,40 @@ xpack.features.overrides:
       url_create:
         disabled: true
         includeIn: "read"
+  dashboard_v2:
+    privileges:
+      ### Dashboard's `All` feature privilege should implicitly grant `All` access to Maps and Visualize features.
+      all.composedOf:
+        - feature: "maps_v2"
+          privileges: [ "all" ]
+        - feature: "visualize_v2"
+          privileges: [ "all" ]
+      ### Dashboard's `Read` feature privilege should implicitly grant `Read` access to Maps and Visualize features.
+      ### Additionally, it should implicitly grant privilege to create short URLs in Visualize app.
+      read.composedOf:
+        - feature: "maps_v2"
+          privileges: [ "read" ]
+        - feature: "visualize_v2"
+          privileges: [ "read" ]
+    ### All Dashboard sub-feature privileges should be hidden: reporting capabilities will be granted via dedicated
+    ### Reporting feature and short URL sub-feature privilege should be granted for both `All` and `Read`.
+    subFeatures.privileges:
+      download_csv_report.disabled: true
+      generate_report.disabled: true
+      store_search_session.disabled: true
+      url_create:
+        disabled: true
+        includeIn: "read"
   discover:
+    ### All Discover sub-feature privileges should be hidden: reporting capabilities will be granted via dedicated
+    ### Reporting feature and short URL sub-feature privilege should be granted for both `All` and `Read`.
+    subFeatures.privileges:
+      generate_report.disabled: true
+      store_search_session.disabled: true
+      url_create:
+        disabled: true
+        includeIn: "read"
+  discover_v2:
     ### All Discover sub-feature privileges should be hidden: reporting capabilities will be granted via dedicated
     ### Reporting feature and short URL sub-feature privilege should be granted for both `All` and `Read`.
     subFeatures.privileges:
@@ -48,17 +85,20 @@ xpack.features.overrides:
   ### Shared images feature is hidden in Role management since it's not needed.
   filesSharedImage.hidden: true
   ### Maps feature is hidden in Role management since it's automatically granted by Dashboard feature.
-  maps.hidden: true
+  maps_v2.hidden: true
   ### Reporting feature is supposed to give access to reporting capabilities across different features.
   reporting:
     privileges:
       all.composedOf:
-        - feature: "dashboard"
+        - feature: "dashboard_v2"
           privileges: [ "download_csv_report" ]
-        - feature: "discover"
+        - feature: "discover_v2"
           privileges: [ "generate_report" ]
   ### Visualize feature is hidden in Role management since it's automatically granted by Dashboard feature.
   visualize:
+    ### The short URL sub-feature privilege should be always granted.
+    subFeatures.privileges.url_create.includeIn: "read"
+  visualize_v2:
     hidden: true
     ### The short URL sub-feature privilege should be always granted.
     subFeatures.privileges.url_create.includeIn: "read"
@@ -81,9 +121,6 @@ migrations.batchSize: 250
 
 migrations.zdt:
   metaPickupSyncDelaySec: 5
-
-# Ess plugins
-xpack.securitySolutionEss.enabled: false
 
 # Management team plugins
 xpack.upgrade_assistant.enabled: false
@@ -190,11 +227,6 @@ xpack.cases.stack.enabled: false
 # Alerting and action circuit breakers
 xpack.alerting.rules.run.actions.max: 3000
 xpack.alerting.rules.run.timeout: 1m
-xpack.alerting.rules.run.ruleTypeOverrides:
-  - id: siem.indicatorRule
-    timeout: 10m
-  - id: siem.eqlRule
-    timeout: 5m
 xpack.alerting.rules.minimumScheduleInterval.enforce: true
 xpack.alerting.rules.maxScheduledPerMinute: 400
 xpack.actions.run.maxAttempts: 10
@@ -219,14 +251,11 @@ xpack.reporting.queue.pollInterval: 3m
 xpack.reporting.statefulSettings.enabled: false
 xpack.reporting.csv.maxConcurrentShardRequests: 0
 
-# Disabled Observability plugins
-xpack.ux.enabled: false
-xpack.legacy_uptime.enabled: false
+# Disabled Platform plugins
 monitoring.enabled: false
 monitoring.ui.enabled: false
 
 ## Enable uiSettings validations
-xpack.securitySolution.enableUiSettingsValidations: true
 data.enableUiSettingsValidations: true
 discover.enableUiSettingsValidations: true
 
@@ -234,3 +263,10 @@ discover.enableUiSettingsValidations: true
 xpack.dataUsage.enabled: true
 # This feature is disabled in Serverless until fully tested within a Serverless environment
 xpack.dataUsage.enableExperimental: ['dataUsageDisabled']
+
+## Content Connectors in stack management
+xpack.contentConnectors.enabled: true
+
+## Enable Kibana Product Intercept
+xpack.product_intercept.enabled: true
+xpack.product_intercept.interval: '90d'

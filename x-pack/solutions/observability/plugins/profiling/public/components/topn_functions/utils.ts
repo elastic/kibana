@@ -5,7 +5,11 @@
  * 2.0.
  */
 import { keyBy } from 'lodash';
-import type { StackFrameMetadata, TopNFunctions } from '@kbn/profiling-utils';
+import {
+  getCalleeFunction,
+  type StackFrameMetadata,
+  type TopNFunctions,
+} from '@kbn/profiling-utils';
 import type {
   CalculateImpactEstimates,
   ImpactEstimates,
@@ -28,8 +32,18 @@ export function getColorLabel(percent: number) {
   return { color: 'text', label: undefined, icon: undefined };
 }
 
-export function scaleValue({ value, scaleFactor = 1 }: { value: number; scaleFactor?: number }) {
+function scaleValue({ value, scaleFactor = 1 }: { value: number; scaleFactor?: number }) {
   return value * scaleFactor;
+}
+
+export function scaleAndRoundValue({
+  value,
+  scaleFactor = 1,
+}: {
+  value: number;
+  scaleFactor?: number;
+}) {
+  return Math.round(scaleValue({ value, scaleFactor }));
 }
 
 export const getTotalCount = (topNFunctions?: TopNFunctions) => topNFunctions?.selfCPU ?? 0;
@@ -71,6 +85,7 @@ export function getFunctionsRows({
   topNFunctions,
   totalSeconds,
   calculateImpactEstimates,
+  functionNameSearchQuery,
 }: {
   baselineScaleFactor?: number;
   comparisonScaleFactor?: number;
@@ -78,6 +93,7 @@ export function getFunctionsRows({
   topNFunctions?: TopNFunctions;
   totalSeconds: number;
   calculateImpactEstimates: CalculateImpactEstimates;
+  functionNameSearchQuery: string;
 }): IFunctionRow[] {
   if (!topNFunctions || !topNFunctions.TotalCount || topNFunctions.TotalCount === 0) {
     return [];
@@ -87,72 +103,80 @@ export function getFunctionsRows({
     ? keyBy(comparisonTopNFunctions.TopN, 'Id')
     : {};
 
-  return topNFunctions.TopN.filter((topN) => topN.CountExclusive >= 0).map((topN, i) => {
-    const comparisonRow = comparisonDataById?.[topN.Id];
-
-    const scaledSelfCPU = scaleValue({
-      value: topN.CountExclusive,
-      scaleFactor: baselineScaleFactor,
-    });
-
-    const totalCPUPerc = (topN.CountInclusive / topNFunctions.selfCPU) * 100;
-    const selfCPUPerc = (topN.CountExclusive / topNFunctions.selfCPU) * 100;
-
-    const impactEstimates =
-      totalSeconds > 0
-        ? calculateImpactEstimates({
-            countExclusive: topN.CountExclusive,
-            countInclusive: topN.CountInclusive,
-            totalSamples: topNFunctions.selfCPU,
-            totalSeconds,
-          })
-        : undefined;
-
-    function calculateDiff() {
-      if (comparisonTopNFunctions && comparisonRow) {
-        const comparisonScaledSelfCPU = scaleValue({
-          value: comparisonRow.CountExclusive,
-          scaleFactor: comparisonScaleFactor,
-        });
-
-        const scaledDiffSamples = scaledSelfCPU - comparisonScaledSelfCPU;
-
-        return {
-          id: comparisonRow.Id,
-          rank: topN.Rank - comparisonRow.Rank,
-          samples: scaledDiffSamples,
-          selfCPU: comparisonRow.CountExclusive,
-          totalCPU: comparisonRow.CountInclusive,
-          selfCPUPerc:
-            selfCPUPerc - (comparisonRow.CountExclusive / comparisonTopNFunctions.selfCPU) * 100,
-          totalCPUPerc:
-            totalCPUPerc - (comparisonRow.CountInclusive / comparisonTopNFunctions.selfCPU) * 100,
-          selfAnnualCO2kgs: comparisonRow.selfAnnualCO2kgs,
-          selfAnnualCostUSD: comparisonRow.selfAnnualCostUSD,
-          totalAnnualCO2kgs: comparisonRow.totalAnnualCO2kgs,
-          totalAnnualCostUSD: comparisonRow.totalAnnualCostUSD,
-        };
+  return topNFunctions.TopN.filter((topN) => topN.CountExclusive >= 0)
+    .filter((topN) => {
+      if (functionNameSearchQuery) {
+        const functionName = getCalleeFunction(topN.Frame);
+        return functionName.toLowerCase().includes(functionNameSearchQuery.toLowerCase());
       }
-    }
+      return true;
+    })
+    .map((topN, i) => {
+      const comparisonRow = comparisonDataById?.[topN.Id];
 
-    return {
-      id: topN.Id,
-      rank: topN.Rank,
-      frame: topN.Frame,
-      samples: scaledSelfCPU,
-      selfCPUPerc,
-      totalCPUPerc,
-      selfCPU: topN.CountExclusive,
-      totalCPU: topN.CountInclusive,
-      impactEstimates,
-      selfAnnualCO2kgs: topN.selfAnnualCO2kgs,
-      selfAnnualCostUSD: topN.selfAnnualCostUSD,
-      totalAnnualCO2kgs: topN.totalAnnualCO2kgs,
-      totalAnnualCostUSD: topN.totalAnnualCostUSD,
-      subGroups: topN.subGroups,
-      diff: calculateDiff(),
-    };
-  });
+      const scaledSelfCPU = scaleValue({
+        value: topN.CountExclusive,
+        scaleFactor: baselineScaleFactor,
+      });
+
+      const totalCPUPerc = (topN.CountInclusive / topNFunctions.selfCPU) * 100;
+      const selfCPUPerc = (topN.CountExclusive / topNFunctions.selfCPU) * 100;
+
+      const impactEstimates =
+        totalSeconds > 0
+          ? calculateImpactEstimates({
+              countExclusive: topN.CountExclusive,
+              countInclusive: topN.CountInclusive,
+              totalSamples: topNFunctions.selfCPU,
+              totalSeconds,
+            })
+          : undefined;
+
+      function calculateDiff() {
+        if (comparisonTopNFunctions && comparisonRow) {
+          const comparisonScaledSelfCPU = scaleValue({
+            value: comparisonRow.CountExclusive,
+            scaleFactor: comparisonScaleFactor,
+          });
+
+          const scaledDiffSamples = scaledSelfCPU - comparisonScaledSelfCPU;
+
+          return {
+            id: comparisonRow.Id,
+            rank: topN.Rank - comparisonRow.Rank,
+            samples: scaledDiffSamples,
+            selfCPU: comparisonRow.CountExclusive,
+            totalCPU: comparisonRow.CountInclusive,
+            selfCPUPerc:
+              selfCPUPerc - (comparisonRow.CountExclusive / comparisonTopNFunctions.selfCPU) * 100,
+            totalCPUPerc:
+              totalCPUPerc - (comparisonRow.CountInclusive / comparisonTopNFunctions.selfCPU) * 100,
+            selfAnnualCO2kgs: comparisonRow.selfAnnualCO2kgs,
+            selfAnnualCostUSD: comparisonRow.selfAnnualCostUSD,
+            totalAnnualCO2kgs: comparisonRow.totalAnnualCO2kgs,
+            totalAnnualCostUSD: comparisonRow.totalAnnualCostUSD,
+          };
+        }
+      }
+
+      return {
+        id: topN.Id,
+        rank: topN.Rank,
+        frame: topN.Frame,
+        samples: scaledSelfCPU,
+        selfCPUPerc,
+        totalCPUPerc,
+        selfCPU: topN.CountExclusive,
+        totalCPU: topN.CountInclusive,
+        impactEstimates,
+        selfAnnualCO2kgs: topN.selfAnnualCO2kgs,
+        selfAnnualCostUSD: topN.selfAnnualCostUSD,
+        totalAnnualCO2kgs: topN.totalAnnualCO2kgs,
+        totalAnnualCostUSD: topN.totalAnnualCostUSD,
+        subGroups: topN.subGroups,
+        diff: calculateDiff(),
+      };
+    });
 }
 
 export function calculateBaseComparisonDiff({

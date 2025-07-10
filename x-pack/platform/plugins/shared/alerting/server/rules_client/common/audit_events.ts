@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { EcsEvent } from '@kbn/core/server';
-import { AuditEvent } from '@kbn/security-plugin/server';
-import { ArrayElement } from '@kbn/utility-types';
+import type { EcsEvent } from '@kbn/core/server';
+import type { AuditEvent } from '@kbn/security-plugin/server';
+import type { ArrayElement } from '@kbn/utility-types';
 import { AD_HOC_RUN_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
 export enum RuleAuditAction {
   CREATE = 'rule_create',
   GET = 'rule_get',
+  BULK_GET = 'rule_bulk_get',
   RESOLVE = 'rule_resolve',
   UPDATE = 'rule_update',
   UPDATE_API_KEY = 'rule_update_api_key',
@@ -29,6 +30,7 @@ export enum RuleAuditAction {
   GET_EXECUTION_LOG = 'rule_get_execution_log',
   GET_GLOBAL_EXECUTION_LOG = 'rule_get_global_execution_log',
   GET_GLOBAL_EXECUTION_KPI = 'rule_get_global_execution_kpi',
+  GET_GLOBAL_EXECUTION_SUMMARY = 'rule_get_global_execution_summary',
   GET_ACTION_ERROR_LOG = 'rule_get_action_error_log',
   GET_RULE_EXECUTION_KPI = 'rule_get_execution_kpi',
   SNOOZE = 'rule_snooze',
@@ -36,6 +38,10 @@ export enum RuleAuditAction {
   RUN_SOON = 'rule_run_soon',
   UNTRACK_ALERT = 'rule_alert_untrack',
   SCHEDULE_BACKFILL = 'rule_schedule_backfill',
+  FIND_GAPS = 'rule_find_gaps',
+  FILL_GAPS = 'rule_fill_gaps',
+  GET_RULES_WITH_GAPS = 'rule_get_rules_with_gaps',
+  GET_GAPS_SUMMARY_BY_RULE_IDS = 'rule_get_gaps_summary_by_rule_ids',
 }
 
 export enum AdHocRunAuditAction {
@@ -50,6 +56,7 @@ type VerbsTuple = [string, string, string];
 const ruleEventVerbs: Record<RuleAuditAction, VerbsTuple> = {
   rule_create: ['create', 'creating', 'created'],
   rule_get: ['access', 'accessing', 'accessed'],
+  rule_bulk_get: ['bulk access', 'bulk accessing', 'bulk accessed'],
   rule_resolve: ['access', 'accessing', 'accessed'],
   rule_update: ['update', 'updating', 'updated'],
   rule_bulk_edit: ['update', 'updating', 'updated'],
@@ -91,11 +98,28 @@ const ruleEventVerbs: Record<RuleAuditAction, VerbsTuple> = {
     'accessing global execution KPI for',
     'accessed global execution KPI for',
   ],
+  rule_get_global_execution_summary: [
+    'access global execution summary for',
+    'accessing global execution summary for',
+    'accessed global execution summary for',
+  ],
   rule_alert_untrack: ['untrack', 'untracking', 'untracked'],
   rule_schedule_backfill: [
     'schedule backfill for',
     'scheduling backfill for',
     'scheduled backfill for',
+  ],
+  rule_find_gaps: ['find gaps for', 'finding gaps for', 'found gaps for'],
+  rule_fill_gaps: ['fill gaps for', 'filling gaps for', 'filled gaps for'],
+  rule_get_rules_with_gaps: [
+    'get rules with gaps',
+    'getting rules with gaps',
+    'got rules with gaps',
+  ],
+  rule_get_gaps_summary_by_rule_ids: [
+    'get gaps summary by rule ids',
+    'getting gaps summary by rule ids',
+    'got gaps summary by rule ids',
   ],
 };
 
@@ -109,6 +133,7 @@ const adHocRunEventVerbs: Record<AdHocRunAuditAction, VerbsTuple> = {
 const ruleEventTypes: Record<RuleAuditAction, ArrayElement<EcsEvent['type']>> = {
   rule_create: 'creation',
   rule_get: 'access',
+  rule_bulk_get: 'access',
   rule_resolve: 'access',
   rule_update: 'change',
   rule_bulk_edit: 'change',
@@ -130,8 +155,13 @@ const ruleEventTypes: Record<RuleAuditAction, ArrayElement<EcsEvent['type']>> = 
   rule_run_soon: 'access',
   rule_get_execution_kpi: 'access',
   rule_get_global_execution_kpi: 'access',
+  rule_get_global_execution_summary: 'access',
   rule_alert_untrack: 'change',
   rule_schedule_backfill: 'access',
+  rule_find_gaps: 'access',
+  rule_fill_gaps: 'change',
+  rule_get_rules_with_gaps: 'access',
+  rule_get_gaps_summary_by_rule_ids: 'access',
 };
 
 const adHocRunEventTypes: Record<AdHocRunAuditAction, ArrayElement<EcsEvent['type']>> = {

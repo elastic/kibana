@@ -22,6 +22,7 @@ export {
   getIndexPatternFromFilter,
 } from './query';
 
+export { convertIntervalToEsInterval } from '../common/search/aggs/buckets/lib/time_buckets/calc_es_interval';
 /**
  * Exporters (CSV)
  */
@@ -258,6 +259,7 @@ export type {
   QuerySetup,
   TimefilterSetup,
   GlobalQueryStateFromUrl,
+  TimefilterHook,
 } from './query';
 
 export type { AggsStart } from './search/aggs';

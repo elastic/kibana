@@ -27,9 +27,9 @@
             "section": "def-public.TimefilterContract",
             "text": "TimefilterContract"
           },
-          ", core: ",
-          "CoreSetup",
-          "<{}, unknown>, id: string, type: string) => ",
+          ", coreStart: ",
+          "CoreStart",
+          ", id: string, type: string) => Promise<",
           {
             "pluginId": "uiActions",
             "scope": "public",
@@ -45,9 +45,9 @@
             "section": "def-public.ApplyGlobalFilterActionContext",
             "text": "ApplyGlobalFilterActionContext"
           },
-          ">"
+          ">>"
         ],
-        "path": "src/platform/plugins/shared/unified_search/public/actions/apply_filter_action.ts",
+        "path": "src/platform/plugins/shared/unified_search/public/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -67,7 +67,7 @@
                 "text": "FilterManager"
               }
             ],
-            "path": "src/platform/plugins/shared/unified_search/public/actions/apply_filter_action.ts",
+            "path": "src/platform/plugins/shared/unified_search/public/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -88,7 +88,7 @@
                 "text": "TimefilterContract"
               }
             ],
-            "path": "src/platform/plugins/shared/unified_search/public/actions/apply_filter_action.ts",
+            "path": "src/platform/plugins/shared/unified_search/public/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -98,13 +98,12 @@
             "id": "def-public.createFilterAction.$3",
             "type": "Object",
             "tags": [],
-            "label": "core",
+            "label": "coreStart",
             "description": [],
             "signature": [
-              "CoreSetup",
-              "<{}, unknown>"
+              "CoreStart"
             ],
-            "path": "src/platform/plugins/shared/unified_search/public/actions/apply_filter_action.ts",
+            "path": "src/platform/plugins/shared/unified_search/public/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -119,7 +118,7 @@
             "signature": [
               "string"
             ],
-            "path": "src/platform/plugins/shared/unified_search/public/actions/apply_filter_action.ts",
+            "path": "src/platform/plugins/shared/unified_search/public/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -134,7 +133,7 @@
             "signature": [
               "string"
             ],
-            "path": "src/platform/plugins/shared/unified_search/public/actions/apply_filter_action.ts",
+            "path": "src/platform/plugins/shared/unified_search/public/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -614,7 +613,15 @@
               },
               "[] | undefined; iconType?: ",
               "IconType",
-              " | undefined; showQueryInput?: boolean | undefined; isLoading?: boolean | undefined; dataTestSubj?: string | undefined; minRefreshInterval?: number | undefined; isDisabled?: boolean | undefined; showSaveQuery?: boolean | undefined; customSubmitButton?: React.ReactNode; dataViewPickerOverride?: React.ReactNode; screenTitle?: string | undefined; showQueryMenu?: boolean | undefined; showFilterBar?: boolean | undefined; showDatePicker?: boolean | undefined; showAutoRefreshOnly?: boolean | undefined; additionalQueryBarMenuItems?: ",
+              " | undefined; showQueryInput?: boolean | undefined; isLoading?: boolean | undefined; dataTestSubj?: string | undefined; minRefreshInterval?: number | undefined; isDisabled?: boolean | undefined; savedQuery?: ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-common.SavedQuery",
+                "text": "SavedQuery"
+              },
+              " | undefined; showSaveQuery?: boolean | undefined; customSubmitButton?: React.ReactNode; dataViewPickerOverride?: React.ReactNode; screenTitle?: string | undefined; showQueryMenu?: boolean | undefined; showFilterBar?: boolean | undefined; showDatePicker?: boolean | undefined; showAutoRefreshOnly?: boolean | undefined; additionalQueryBarMenuItems?: ",
               "AdditionalQueryBarMenuItems",
               " | undefined; filtersForSuggestions?: ",
               {
@@ -626,15 +633,7 @@
               },
               "[] | undefined; hiddenFilterPanelOptions?: ",
               "FilterPanelOption",
-              "[] | undefined; prependFilterBar?: React.ReactNode; isRefreshPaused?: boolean | undefined; dateRangeFrom?: string | undefined; dateRangeTo?: string | undefined; savedQuery?: ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-common.SavedQuery",
-                "text": "SavedQuery"
-              },
-              " | undefined; onQueryChange?: ((payload: { dateRange: ",
+              "[] | undefined; prependFilterBar?: React.ReactNode; isRefreshPaused?: boolean | undefined; dateRangeFrom?: string | undefined; dateRangeTo?: string | undefined; showSavedQueryControls?: boolean | undefined; onQueryChange?: ((payload: { dateRange: ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -706,7 +705,7 @@
                 "section": "def-public.DataViewPickerProps",
                 "text": "DataViewPickerProps"
               },
-              " | undefined; textBasedLanguageModeErrors?: Error[] | undefined; textBasedLanguageModeWarning?: string | undefined; showSubmitButton?: boolean | undefined; submitButtonStyle?: \"auto\" | \"full\" | \"iconOnly\" | undefined; suggestionsSize?: ",
+              " | undefined; textBasedLanguageModeErrors?: Error[] | undefined; textBasedLanguageModeWarning?: string | undefined; showSubmitButton?: boolean | undefined; submitButtonStyle?: \"full\" | \"auto\" | \"iconOnly\" | undefined; suggestionsSize?: ",
               "SuggestionsListSize",
               " | undefined; suggestionsAbstraction?: ",
               "SuggestionsAbstraction",
@@ -726,7 +725,7 @@
                 "section": "def-common.Filter",
                 "text": "Filter"
               },
-              "[]) => void) | undefined; }"
+              "[]) => void) | undefined; bubbleSubmitEvent?: boolean | undefined; }"
             ],
             "path": "src/platform/plugins/shared/unified_search/public/search_bar/index.tsx",
             "deprecated": false,
@@ -744,7 +743,7 @@
         "tags": [],
         "label": "ApplyGlobalFilterActionContext",
         "description": [],
-        "path": "src/platform/plugins/shared/unified_search/public/actions/apply_filter_action.ts",
+        "path": "src/platform/plugins/shared/unified_search/public/actions/apply_filter_action/apply_filter_action.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -765,7 +764,7 @@
               },
               "[]"
             ],
-            "path": "src/platform/plugins/shared/unified_search/public/actions/apply_filter_action.ts",
+            "path": "src/platform/plugins/shared/unified_search/public/actions/apply_filter_action/apply_filter_action.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -779,7 +778,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/platform/plugins/shared/unified_search/public/actions/apply_filter_action.ts",
+            "path": "src/platform/plugins/shared/unified_search/public/actions/apply_filter_action/apply_filter_action.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -793,7 +792,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "src/platform/plugins/shared/unified_search/public/actions/apply_filter_action.ts",
+            "path": "src/platform/plugins/shared/unified_search/public/actions/apply_filter_action/apply_filter_action.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -807,7 +806,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/platform/plugins/shared/unified_search/public/actions/apply_filter_action.ts",
+            "path": "src/platform/plugins/shared/unified_search/public/actions/apply_filter_action/apply_filter_action.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -981,6 +980,29 @@
           },
           {
             "parentPluginId": "unifiedSearch",
+            "id": "def-public.DataViewPickerProps.managedDataViews",
+            "type": "Array",
+            "tags": [],
+            "label": "managedDataViews",
+            "description": [
+              "\nData views managed by the application"
+            ],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              "[] | undefined"
+            ],
+            "path": "src/platform/plugins/shared/unified_search/public/dataview_picker/data_view_picker.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedSearch",
             "id": "def-public.DataViewPickerProps.savedDataViews",
             "type": "Array",
             "tags": [],
@@ -1103,29 +1125,6 @@
           },
           {
             "parentPluginId": "unifiedSearch",
-            "id": "def-public.DataViewPickerProps.textBasedLanguages",
-            "type": "Array",
-            "tags": [],
-            "label": "textBasedLanguages",
-            "description": [
-              "\nList of the supported text based languages (SQL, ESQL) etc.\nDefined per application, if not provided, no text based languages\nwill be available."
-            ],
-            "signature": [
-              {
-                "pluginId": "@kbn/esql-utils",
-                "scope": "common",
-                "docId": "kibKbnEsqlUtilsPluginApi",
-                "section": "def-common.TextBasedLanguages",
-                "text": "TextBasedLanguages"
-              },
-              "[] | undefined"
-            ],
-            "path": "src/platform/plugins/shared/unified_search/public/dataview_picker/data_view_picker.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "unifiedSearch",
             "id": "def-public.DataViewPickerProps.isDisabled",
             "type": "CompoundType",
             "tags": [],
@@ -1139,6 +1138,24 @@
             "path": "src/platform/plugins/shared/unified_search/public/dataview_picker/data_view_picker.tsx",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedSearch",
+            "id": "def-public.DataViewPickerProps.onClosePopover",
+            "type": "Function",
+            "tags": [],
+            "label": "onClosePopover",
+            "description": [
+              "\nOptional callback when data view picker is closed"
+            ],
+            "signature": [
+              "(() => void) | undefined"
+            ],
+            "path": "src/platform/plugins/shared/unified_search/public/dataview_picker/data_view_picker.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -1413,6 +1430,20 @@
             "tags": [],
             "label": "appName",
             "description": [],
+            "path": "src/platform/plugins/shared/unified_search/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedSearch",
+            "id": "def-public.IUnifiedSearchPluginServices.chrome",
+            "type": "Object",
+            "tags": [],
+            "label": "chrome",
+            "description": [],
+            "signature": [
+              "ChromeStart"
+            ],
             "path": "src/platform/plugins/shared/unified_search/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2247,7 +2278,7 @@
         "signature": [
           "\"ACTION_GLOBAL_APPLY_FILTER\""
         ],
-        "path": "src/platform/plugins/shared/unified_search/public/actions/apply_filter_action.ts",
+        "path": "src/platform/plugins/shared/unified_search/public/actions/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2299,9 +2330,7 @@
         "signature": [
           "Omit<",
           "SearchBarOwnProps",
-          "<QT>, \"showSaveQuery\"> & { appName: string; useDefaultBehaviors?: boolean | undefined; savedQueryId?: string | undefined; saveQueryMenuVisibility?: ",
-          "SavedQueryMenuVisibility",
-          " | undefined; onSavedQueryIdChange?: ((savedQueryId?: string | undefined) => void) | undefined; onFiltersUpdated?: ((filters: ",
+          "<QT>, \"showSaveQuery\"> & { appName: string; useDefaultBehaviors?: boolean | undefined; savedQueryId?: string | undefined; allowSavingQueries?: boolean | undefined; onSavedQueryIdChange?: ((savedQueryId?: string | undefined) => void) | undefined; onFiltersUpdated?: ((filters: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -2326,7 +2355,7 @@
         "signature": [
           "\"UPDATE_FILTER_REFERENCES_ACTION\""
         ],
-        "path": "src/platform/plugins/shared/unified_search/public/actions/update_filter_references_action.ts",
+        "path": "src/platform/plugins/shared/unified_search/public/actions/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

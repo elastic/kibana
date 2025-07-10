@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import { storiesOf } from '@storybook/react';
 import React from 'react';
 import { MapToolTip } from '../map_tooltip';
 import { COUNTRY_NAME, TRANSACTION_DURATION_COUNTRY } from '../use_layer_list';
 
-storiesOf('app/rum_dashboard/VisitorsRegionMap', module).add(
-  'Tooltip',
-  () => {
+export default {
+  title: 'app/rum_dashboard/VisitorsRegionMap',
+};
+
+export const Tooltip = {
+  render: () => {
     const loadFeatureProps = async () => {
       return [
         {
@@ -47,10 +49,11 @@ storiesOf('app/rum_dashboard/VisitorsRegionMap', module).add(
       />
     );
   },
-  {
+
+  parameters: {
     info: {
       propTables: false,
       source: false,
     },
-  }
-);
+  },
+};

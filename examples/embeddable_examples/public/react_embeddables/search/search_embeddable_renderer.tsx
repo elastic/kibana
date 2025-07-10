@@ -9,10 +9,10 @@
 
 import React, { useMemo } from 'react';
 import { TimeRange } from '@kbn/es-query';
-import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
+import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { useSearchApi } from '@kbn/presentation-publishing';
 import type { SearchApi, SearchSerializedState } from './types';
-import { SEARCH_EMBEDDABLE_ID } from './constants';
+import { SEARCH_EMBEDDABLE_TYPE } from './constants';
 
 interface Props {
   timeRange?: TimeRange;
@@ -32,8 +32,8 @@ export function SearchEmbeddableRenderer(props: Props) {
   const searchApi = useSearchApi({ timeRange: props.timeRange });
 
   return (
-    <ReactEmbeddableRenderer<SearchSerializedState, SearchApi>
-      type={SEARCH_EMBEDDABLE_ID}
+    <EmbeddableRenderer<SearchSerializedState, SearchApi>
+      type={SEARCH_EMBEDDABLE_TYPE}
       getParentApi={() => ({
         ...searchApi,
         getSerializedStateForChild: () => initialState,

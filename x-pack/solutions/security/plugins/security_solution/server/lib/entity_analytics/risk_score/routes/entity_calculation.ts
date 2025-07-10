@@ -15,6 +15,7 @@ import type {
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import type { EntityType } from '../../../../../common/search_strategy';
 import type { SecuritySolutionRequestHandlerContext } from '../../../../types';
 import type { RiskScoresCalculationResponse } from '../../../../../common/api/entity_analytics';
 import type { AfterKeys } from '../../../../../common/api/entity_analytics/common';
@@ -76,6 +77,8 @@ const handler: (logger: Logger) => Handler = (logger) => async (context, request
       pageSize,
       alertSampleSizePerShard,
       filter: userFilter,
+      excludeAlertStatuses,
+      excludeAlertTags,
     } = entityAnalyticsConfig;
 
     if (!enabled) {
@@ -96,14 +99,14 @@ const handler: (logger: Logger) => Handler = (logger) => async (context, request
     const afterKeys: AfterKeys = {};
 
     const identifierFilter = {
-      term: { [getFieldForIdentifier(identifierType)]: identifier },
+      term: { [getFieldForIdentifier(identifierType as EntityType)]: identifier },
     };
 
     const filter = isEmpty(userFilter) ? [identifierFilter] : [userFilter, identifierFilter];
 
     const result = await riskScoreService.calculateAndPersistScores({
       pageSize,
-      identifierType,
+      identifierType: identifierType as EntityType,
       index,
       filter: {
         bool: {
@@ -114,6 +117,8 @@ const handler: (logger: Logger) => Handler = (logger) => async (context, request
       runtimeMappings,
       weights: [],
       alertSampleSizePerShard,
+      excludeAlertStatuses,
+      excludeAlertTags,
       afterKeys,
       returnScores: true,
       refresh,

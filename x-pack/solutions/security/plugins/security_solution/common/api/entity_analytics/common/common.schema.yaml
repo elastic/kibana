@@ -54,6 +54,8 @@ components:
           $ref: '#/components/schemas/EntityAfterKey'
         service:
           $ref: '#/components/schemas/EntityAfterKey'
+        generic:
+          $ref: '#/components/schemas/EntityAfterKey'
       example:
         host:
           'host.name': 'example.host'
@@ -100,6 +102,7 @@ components:
         - host
         - user
         - service
+        - generic
 
     RiskScoreInput:
       description: A generic representation of a document contributing to a Risk Score.
@@ -255,6 +258,8 @@ components:
                   $ref: '#/components/schemas/RiskScoreEntityIdentifierWeights'
                 service:
                   $ref: '#/components/schemas/RiskScoreEntityIdentifierWeights'
+                generic:
+                  $ref: '#/components/schemas/RiskScoreEntityIdentifierWeights'
 
         - allOf:
             - $ref: '#/components/schemas/RiskScoreWeightGlobalShared'
@@ -268,6 +273,8 @@ components:
                   $ref: '#/components/schemas/RiskScoreEntityIdentifierWeights'
                 service:
                   $ref: '#/components/schemas/RiskScoreEntityIdentifierWeights'
+                generic:
+                  $ref: '#/components/schemas/RiskScoreEntityIdentifierWeights'
         - allOf:
             - $ref: '#/components/schemas/RiskScoreWeightGlobalShared'
             - type: object
@@ -279,6 +286,8 @@ components:
                 user:
                   $ref: '#/components/schemas/RiskScoreEntityIdentifierWeights'
                 service:
+                  $ref: '#/components/schemas/RiskScoreEntityIdentifierWeights'
+                generic:
                   $ref: '#/components/schemas/RiskScoreEntityIdentifierWeights'
     RiskScoreWeights:
       description: 'A list of weights to be applied to the scoring calculation.'

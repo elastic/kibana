@@ -5,17 +5,19 @@
  * 2.0.
  */
 
+import type { MappingDynamicTemplate } from '@elastic/elasticsearch/lib/api/types';
 import type {
   IRouter,
   CustomRequestHandlerContext,
   SavedObjectReference,
   IUiSettingsClient,
+  KibanaRequest,
 } from '@kbn/core/server';
-import { z } from '@kbn/zod';
-import { DataViewsContract } from '@kbn/data-views-plugin/common';
-import { ISearchStartSearchSource } from '@kbn/data-plugin/common';
-import { LicenseType } from '@kbn/licensing-plugin/server';
-import {
+import type { z } from '@kbn/zod';
+import type { DataViewsContract } from '@kbn/data-views-plugin/common';
+import type { ISearchStartSearchSource } from '@kbn/data-plugin/common';
+import type { LicenseType } from '@kbn/licensing-plugin/server';
+import type {
   IScopedClusterClient,
   SavedObjectAttributes,
   SavedObjectsClientContract,
@@ -23,22 +25,23 @@ import {
 } from '@kbn/core/server';
 import type { ObjectType } from '@kbn/config-schema';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { SharePluginStart } from '@kbn/share-plugin/server';
+import type { SharePluginStart } from '@kbn/share-plugin/server';
 import type { DefaultAlert, FieldMap } from '@kbn/alerts-as-data-utils';
-import { Alert } from '@kbn/alerts-as-data-utils';
-import { ActionsApiRequestHandlerContext } from '@kbn/actions-plugin/server';
-import { AlertsHealth } from '@kbn/alerting-types';
-import { RuleTypeRegistry as OrigruleTypeRegistry } from './rule_type_registry';
-import { AlertingServerSetup, AlertingServerStart } from './plugin';
-import { RulesClient } from './rules_client';
-import {
+import type { Alert } from '@kbn/alerts-as-data-utils';
+import type { ActionsApiRequestHandlerContext, ActionsClient } from '@kbn/actions-plugin/server';
+import type { AlertsHealth, RuleTypeSolution } from '@kbn/alerting-types';
+import type { TaskPriority } from '@kbn/task-manager-plugin/server';
+import type { RuleTypeRegistry as OrigruleTypeRegistry } from './rule_type_registry';
+import type { AlertingServerSetup, AlertingServerStart } from './plugin';
+import type { RulesClient } from './rules_client';
+import type {
   RulesSettingsClient,
   RulesSettingsFlappingClient,
   RulesSettingsQueryDelayClient,
 } from './rules_settings';
-import { MaintenanceWindowClient } from './maintenance_window_client';
+import type { MaintenanceWindowClient } from './maintenance_window_client';
 export * from '../common';
-import {
+import type {
   Rule,
   RuleTypeParams,
   RuleTypeState,
@@ -50,18 +53,29 @@ import {
   SanitizedRuleConfig,
   SanitizedRule,
   RuleAlertData,
+  Artifacts,
 } from '../common';
-import { PublicAlertFactory } from './alert/create_alert_factory';
-import { RulesSettingsFlappingProperties } from '../common/rules_settings';
-import { PublicAlertsClient } from './alerts_client/types';
-import { GetTimeRangeResult } from './lib/get_time_range';
+import type { PublicAlertFactory } from './alert/create_alert_factory';
+import type { RulesSettingsFlappingProperties } from '../common/rules_settings';
+import type { PublicAlertsClient } from './alerts_client/types';
+import type { GetTimeRangeResult } from './lib/get_time_range';
+import type { AlertDeletionClient } from './alert_deletion';
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;
 export type { RuleTypeParams };
+export type { Artifacts };
+
+export interface HasRequiredPrivilegeGrantedInAllSpaces {
+  spaceIds: string[];
+  requiredPrivilege: string;
+  request: KibanaRequest;
+}
+
 /**
  * @public
  */
 export interface AlertingApiRequestHandlerContext {
+  getAlertDeletionClient: () => AlertDeletionClient;
   getRulesClient: () => Promise<RulesClient>;
   getRulesSettingsClient: (withoutAuth?: boolean) => RulesSettingsClient;
   getMaintenanceWindowClient: () => MaintenanceWindowClient;
@@ -99,6 +113,10 @@ export interface RuleExecutorServices<
    * @deprecated
    */
   alertFactory: PublicAlertFactory<State, Context, ActionGroupIds>;
+  /**
+   * Only available for Attack Discovery
+   */
+  actionsClient?: PublicMethodsOf<ActionsClient>;
   getDataViews: () => Promise<DataViewsContract>;
   getMaintenanceWindowIds: () => Promise<string[]>;
   getSearchSourceClient: () => Promise<ISearchStartSearchSource>;
@@ -134,6 +152,7 @@ export interface RuleExecutorOptions<
   flappingSettings: RulesSettingsFlappingProperties;
   getTimeRange: (timeWindow?: string) => GetTimeRangeResult;
   isServerless: boolean;
+  ruleExecutionTimeout?: string;
 }
 
 export interface RuleParamsAndRefs<Params extends RuleTypeParams> {
@@ -197,6 +216,7 @@ export type GetViewInAppRelativeUrlFn<Params extends RuleTypeParams> = (
 interface ComponentTemplateSpec {
   dynamic?: 'strict' | false; // defaults to 'strict'
   fieldMap: FieldMap;
+  dynamicTemplates?: Array<Record<string, MappingDynamicTemplate>>;
 }
 
 export type FormatAlert<AlertData extends RuleAlertData> = (
@@ -255,6 +275,12 @@ export interface IRuleTypeAlerts<AlertData extends RuleAlertData = never> {
   isSpaceAware?: boolean;
 
   /**
+   * Optional flag to indicate that these alerts should not be space aware. When set
+   * to true, alerts for this rule type will be created with the `*` space id.
+   */
+  dangerouslyCreateAlertsInAllSpaces?: boolean;
+
+  /**
    * Optional secondary alias to use. This alias should not include the namespace.
    */
   secondaryAlias?: string;
@@ -308,6 +334,7 @@ export interface RuleType<
   >;
   category: string;
   producer: string;
+  solution: RuleTypeSolution;
   actionVariables?: {
     context?: ActionVariable[];
     state?: ActionVariable[];
@@ -330,7 +357,16 @@ export interface RuleType<
    */
   autoRecoverAlerts?: boolean;
   getViewInAppRelativeUrl?: GetViewInAppRelativeUrlFn<Params>;
-  fieldsForAAD?: string[];
+  /**
+   * Task priority allowing for tasks to be ran at lower priority (NormalLongRunning vs Normal), defaults to
+   * normal priority.
+   */
+  priority?: TaskPriority.Normal | TaskPriority.NormalLongRunning;
+  /**
+   * Indicates that the rule type is managed internally by a Kibana plugin.
+   * Alerts of internally managed rule types are not returned by the APIs and thus not shown in the alerts table.
+   */
+  internallyManaged?: boolean;
 }
 export type UntypedRuleType = RuleType<
   RuleTypeParams,
@@ -338,6 +374,8 @@ export type UntypedRuleType = RuleType<
   AlertInstanceState,
   AlertInstanceContext
 >;
+
+export type UntypedRuleTypeAlerts = IRuleTypeAlerts<RuleAlertData>;
 
 export interface RuleMeta extends SavedObjectAttributes {
   versionApiKeyLastmodified?: string;
@@ -400,6 +438,7 @@ export interface PublicMetricsSetters {
   setLastRunMetricsTotalAlertsDetected: (totalAlertDetected: number) => void;
   setLastRunMetricsTotalAlertsCreated: (totalAlertCreated: number) => void;
   setLastRunMetricsGapDurationS: (gapDurationS: number) => void;
+  setLastRunMetricsGapRange: (gapRange: { lte: string; gte: string } | null) => void;
 }
 
 export interface PublicLastRunSetters {

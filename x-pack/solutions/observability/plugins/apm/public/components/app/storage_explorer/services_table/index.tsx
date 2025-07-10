@@ -22,8 +22,6 @@ import {
   EuiButton,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { apmServiceInventoryOptimizedSorting } from '@kbn/observability-plugin/common';
 import moment from 'moment';
 import { isEmpty } from 'lodash';
 import { downloadJson } from '../../../../utils/download_json';
@@ -63,6 +61,9 @@ interface Props {
   summaryStatsData?: APIReturnType<'GET /internal/apm/storage_explorer_summary_stats'>;
   loadingSummaryStats: boolean;
 }
+
+const initialSortField = StorageExplorerFieldName.ServiceName;
+const initialSortDirection = 'asc';
 
 export function ServicesTable({ summaryStatsData, loadingSummaryStats }: Props) {
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, ReactNode>>(
@@ -104,26 +105,21 @@ export function ServicesTable({ summaryStatsData, loadingSummaryStats }: Props) 
     setItemIdToExpandedRowMap(expandedRowMapValues);
   };
 
-  const useOptimizedSorting =
-    useKibana().services.uiSettings?.get<boolean>(apmServiceInventoryOptimizedSorting) || false;
-
   const sortedAndFilteredServicesFetch = useFetcher(
     (callApmApi) => {
-      if (useOptimizedSorting) {
-        return callApmApi('GET /internal/apm/storage_explorer/get_services', {
-          params: {
-            query: {
-              environment,
-              kuery,
-              indexLifecyclePhase,
-              start,
-              end,
-            },
+      return callApmApi('GET /internal/apm/storage_explorer/get_services', {
+        params: {
+          query: {
+            environment,
+            kuery,
+            indexLifecyclePhase,
+            start,
+            end,
           },
-        });
-      }
+        },
+      });
     },
-    [useOptimizedSorting, environment, kuery, indexLifecyclePhase, start, end]
+    [environment, kuery, indexLifecyclePhase, start, end]
   );
 
   const serviceStatisticsFetch = useProgressiveFetcher(
@@ -146,21 +142,11 @@ export function ServicesTable({ summaryStatsData, loadingSummaryStats }: Props) 
   const serviceStatisticsItems = serviceStatisticsFetch.data?.serviceStatistics ?? [];
   const preloadedServices = sortedAndFilteredServicesFetch.data?.services || [];
 
-  const initialSortField = useOptimizedSorting
-    ? StorageExplorerFieldName.ServiceName
-    : StorageExplorerFieldName.Size;
-
-  const initialSortDirection =
-    initialSortField === StorageExplorerFieldName.ServiceName ? 'asc' : 'desc';
-
   const loading = serviceStatisticsFetch.status === FETCH_STATUS.LOADING;
 
   const items = joinByKey(
-    [
-      ...(initialSortField === StorageExplorerFieldName.ServiceName ? preloadedServices : []),
-      ...serviceStatisticsItems,
-    ],
-    'serviceName'
+    [...preloadedServices, ...serviceStatisticsItems],
+    StorageExplorerFieldName.ServiceName
   );
 
   const columns: Array<EuiBasicTableColumn<StorageExplorerItem>> = [
@@ -216,7 +202,7 @@ export function ServicesTable({ summaryStatsData, loadingSummaryStats }: Props) 
             {i18n.translate('xpack.apm.storageExplorer.table.samplingColumnName', {
               defaultMessage: 'Sampling rate',
             })}{' '}
-            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+            <EuiIcon size="s" color="subdued" type="question" className="eui-alignTop" />
           </>
         </EuiToolTip>
       ),
@@ -266,7 +252,7 @@ export function ServicesTable({ summaryStatsData, loadingSummaryStats }: Props) 
   const isDownloadButtonDisable = isEmpty(serviceStatisticsItems) || loadingSummaryStats;
 
   return (
-    <EuiPanel hasShadow={false} paddingSize="none" style={{ position: 'relative' }}>
+    <EuiPanel hasShadow={false} paddingSize="none" css={{ position: 'relative' }}>
       {loading && <EuiProgress size="xs" color="accent" position="absolute" />}
       <EuiFlexGroup justifyContent="flexEnd">
         <EuiFlexItem grow={false}>

@@ -10,4 +10,3 @@ Cypress.on('uncaught:exception', (err, runnable) => {
 });
 
 import './commands';
-// import './output_command_timings';

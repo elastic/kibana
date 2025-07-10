@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { Location } from '@kbn/esql-ast/src/commands_registry/types';
 import {
   setup,
   getFieldNamesByType,
@@ -14,21 +15,23 @@ import {
   getFunctionSignaturesByReturnType,
 } from './helpers';
 
+const expectedFieldSuggestions = getFieldNamesByType('any').map(attachTriggerCommand);
+const expectedFunctionSuggestions = getFunctionSignaturesByReturnType(Location.SORT, 'any', {
+  scalar: true,
+}).map(attachTriggerCommand);
+
+export const EXPECTED_FIELD_AND_FUNCTION_SUGGESTIONS = [
+  ...expectedFieldSuggestions,
+  ...expectedFunctionSuggestions,
+];
+
 describe('autocomplete.suggest', () => {
   describe('SORT ( <column> [ ASC / DESC ] [ NULLS FIST / NULLS LAST ] )+', () => {
     describe('SORT <column> ...', () => {
-      const expectedFieldSuggestions = getFieldNamesByType('any').map(attachTriggerCommand);
-      const expectedFunctionSuggestions = getFunctionSignaturesByReturnType('sort', 'any', {
-        scalar: true,
-      }).map(attachTriggerCommand);
-
       test('suggests column', async () => {
         const { assertSuggestions } = await setup();
 
-        await assertSuggestions('from a | sort /', [
-          ...expectedFieldSuggestions,
-          ...expectedFunctionSuggestions,
-        ]);
+        await assertSuggestions('from a | sort /', EXPECTED_FIELD_AND_FUNCTION_SUGGESTIONS);
         await assertSuggestions('from a | sort keyw/', [
           ...expectedFieldSuggestions,
           ...expectedFunctionSuggestions,

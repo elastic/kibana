@@ -6,44 +6,27 @@
  */
 
 import type { Type as RuleType } from '@kbn/securitysolution-io-ts-alerting-types';
-import type { ExperimentalFeatures } from '../../../../../../common';
-import { invariant } from '../../../../../../common/utils/invariant';
-import { isMlRule } from '../../../../../../common/machine_learning/helpers';
-import { isEsqlRule } from '../../../../../../common/detection_engine/utils';
-import { BulkActionsDryRunErrCode } from '../../../../../../common/constants';
 import type {
   BulkActionEditPayload,
   BulkActionEditType,
 } from '../../../../../../common/api/detection_engine/rule_management';
-import { BulkActionEditTypeEnum } from '../../../../../../common/api/detection_engine/rule_management';
-import type { RuleAlertType } from '../../../rule_schema';
-import { isIndexPatternsBulkEditAction } from './utils';
-import { throwDryRunError } from './dry_run';
+import {
+  BulkActionEditTypeEnum,
+  BulkActionsDryRunErrCodeEnum,
+} from '../../../../../../common/api/detection_engine/rule_management';
+import type { PrebuiltRulesCustomizationStatus } from '../../../../../../common/detection_engine/prebuilt_rules/prebuilt_rule_customization_status';
+import { isEsqlRule, isThresholdRule } from '../../../../../../common/detection_engine/utils';
+import { isMlRule } from '../../../../../../common/machine_learning/helpers';
+import { invariant } from '../../../../../../common/utils/invariant';
 import type { MlAuthz } from '../../../../machine_learning/authz';
 import { throwAuthzError } from '../../../../machine_learning/validation';
+import type { RuleAlertType } from '../../../rule_schema';
+import { throwDryRunError } from './dry_run';
+import { isIndexPatternsBulkEditAction } from './utils';
 
 interface BulkActionsValidationArgs {
   rule: RuleAlertType;
   mlAuthz: MlAuthz;
-}
-
-interface BulkEditBulkActionsValidationArgs {
-  ruleType: RuleType;
-  mlAuthz: MlAuthz;
-  edit: BulkActionEditPayload[];
-  immutable: boolean;
-  experimentalFeatures: ExperimentalFeatures;
-}
-
-interface DryRunBulkEditBulkActionsValidationArgs {
-  rule: RuleAlertType;
-  mlAuthz: MlAuthz;
-  edit: BulkActionEditPayload[];
-  experimentalFeatures: ExperimentalFeatures;
-}
-
-interface DryRunManualRuleRunBulkActionsValidationArgs extends BulkActionsValidationArgs {
-  experimentalFeatures: ExperimentalFeatures;
 }
 
 /**
@@ -54,7 +37,7 @@ interface DryRunManualRuleRunBulkActionsValidationArgs extends BulkActionsValida
 const throwMlAuthError = (mlAuthz: MlAuthz, ruleType: RuleType) =>
   throwDryRunError(
     async () => throwAuthzError(await mlAuthz.validateRuleType(ruleType)),
-    BulkActionsDryRunErrCode.MACHINE_LEARNING_AUTH
+    BulkActionsDryRunErrCodeEnum.MACHINE_LEARNING_AUTH
   );
 
 /**
@@ -85,45 +68,66 @@ export const validateBulkDuplicateRule = async ({ rule, mlAuthz }: BulkActionsVa
  * runs validation for bulk schedule backfill for a single rule
  * @param params - {@link DryRunManualRuleRunBulkActionsValidationArgs}
  */
-export const validateBulkScheduleBackfill = async ({
-  rule,
-  experimentalFeatures,
-}: DryRunManualRuleRunBulkActionsValidationArgs) => {
-  // check whether "manual rule run" feature is enabled
-
+export const validateBulkScheduleBackfill = async ({ rule }: BulkActionsValidationArgs) => {
   await throwDryRunError(
     () => invariant(rule.enabled, 'Cannot schedule manual rule run for a disabled rule'),
-    BulkActionsDryRunErrCode.MANUAL_RULE_RUN_DISABLED_RULE
+    BulkActionsDryRunErrCodeEnum.MANUAL_RULE_RUN_DISABLED_RULE
   );
 };
 
 /**
+ * runs validation for bulk gap filling for a single rule
+ * @param params - {@link DryRunRuleFillGapsBulkActionsValidationArgs}
+ */
+export const validateBulkRuleGapFilling = async ({ rule }: BulkActionsValidationArgs) => {
+  await throwDryRunError(
+    () => invariant(rule.enabled, 'Cannot bulk fill gaps for a disabled rule'),
+    BulkActionsDryRunErrCodeEnum.RULE_FILL_GAPS_DISABLED_RULE
+  );
+};
+
+interface BulkEditBulkActionsValidationArgs {
+  ruleType: RuleType;
+  mlAuthz: MlAuthz;
+  edit: BulkActionEditPayload[];
+  immutable: boolean;
+  ruleCustomizationStatus: PrebuiltRulesCustomizationStatus;
+}
+
+/**
  * runs validation for bulk edit for a single rule
- * @param params - {@link BulkActionsValidationArgs}
  */
 export const validateBulkEditRule = async ({
   ruleType,
   mlAuthz,
   edit,
   immutable,
-  experimentalFeatures,
+  ruleCustomizationStatus,
 }: BulkEditBulkActionsValidationArgs) => {
   await throwMlAuthError(mlAuthz, ruleType);
 
-  if (!experimentalFeatures.prebuiltRulesCustomizationEnabled) {
-    // if rule can't be edited error will be thrown
-    const canRuleBeEdited = !immutable || istEditApplicableToImmutableRule(edit);
-    await throwDryRunError(
-      () => invariant(canRuleBeEdited, "Elastic rule can't be edited"),
-      BulkActionsDryRunErrCode.IMMUTABLE
-    );
+  // Prebuilt rule customization checks
+  if (immutable) {
+    if (ruleCustomizationStatus.isRulesCustomizationEnabled) {
+      // Rule customization is enabled; prebuilt rules can be edited
+      return undefined;
+    }
+
+    // Rule customization is disabled; only certain actions can be applied to immutable rules
+    const canRuleBeEdited = isEditApplicableToImmutableRule(edit);
+    if (!canRuleBeEdited) {
+      await throwDryRunError(
+        () => invariant(canRuleBeEdited, "Elastic rule can't be edited"),
+        BulkActionsDryRunErrCodeEnum.PREBUILT_CUSTOMIZATION_LICENSE
+      );
+    }
   }
 };
 
 /**
  * add_rule_actions, set_rule_actions can be applied to prebuilt/immutable rules
  */
-const istEditApplicableToImmutableRule = (edit: BulkActionEditPayload[]): boolean => {
+const isEditApplicableToImmutableRule = (edit: BulkActionEditPayload[]): boolean => {
   const applicableActions: BulkActionEditType[] = [
     BulkActionEditTypeEnum.set_rule_actions,
     BulkActionEditTypeEnum.add_rule_actions,
@@ -131,22 +135,28 @@ const istEditApplicableToImmutableRule = (edit: BulkActionEditPayload[]): boolea
   return edit.every(({ type }) => applicableActions.includes(type));
 };
 
+interface DryRunBulkEditBulkActionsValidationArgs {
+  rule: RuleAlertType;
+  mlAuthz: MlAuthz;
+  edit: BulkActionEditPayload[];
+  ruleCustomizationStatus: PrebuiltRulesCustomizationStatus;
+}
+
 /**
  * executes dry run validations for bulk edit of a single rule
- * @param params - {@link DryRunBulkEditBulkActionsValidationArgs}
  */
 export const dryRunValidateBulkEditRule = async ({
   rule,
   edit,
   mlAuthz,
-  experimentalFeatures,
+  ruleCustomizationStatus,
 }: DryRunBulkEditBulkActionsValidationArgs) => {
   await validateBulkEditRule({
     ruleType: rule.params.type,
     mlAuthz,
     edit,
     immutable: rule.params.immutable,
-    experimentalFeatures,
+    ruleCustomizationStatus,
   });
 
   // if rule is machine_learning, index pattern action can't be applied to it
@@ -157,7 +167,7 @@ export const dryRunValidateBulkEditRule = async ({
           !edit.some((action) => isIndexPatternsBulkEditAction(action.type)),
         "Machine learning rule doesn't have index patterns"
       ),
-    BulkActionsDryRunErrCode.MACHINE_LEARNING_INDEX_PATTERN
+    BulkActionsDryRunErrCodeEnum.MACHINE_LEARNING_INDEX_PATTERN
   );
 
   // if rule is es|ql, index pattern action can't be applied to it
@@ -168,6 +178,30 @@ export const dryRunValidateBulkEditRule = async ({
           !edit.some((action) => isIndexPatternsBulkEditAction(action.type)),
         "ES|QL rule doesn't have index patterns"
       ),
-    BulkActionsDryRunErrCode.ESQL_INDEX_PATTERN
+    BulkActionsDryRunErrCodeEnum.ESQL_INDEX_PATTERN
+  );
+
+  // if rule is threshold, set_alert_suppression action can't be applied to it
+  await throwDryRunError(
+    () =>
+      invariant(
+        !isThresholdRule(rule.params.type) ||
+          !edit.some((action) => action.type === BulkActionEditTypeEnum.set_alert_suppression),
+        "Threshold rule doesn't support this action. Use 'set_alert_suppression_for_threshold' action instead"
+      ),
+    BulkActionsDryRunErrCodeEnum.THRESHOLD_RULE_TYPE_IN_SUPPRESSION
+  );
+
+  // if rule noy threshold, set_alert_suppression_for_threshold action can't be applied to it
+  await throwDryRunError(
+    () =>
+      invariant(
+        isThresholdRule(rule.params.type) ||
+          !edit.some(
+            (action) => action.type === BulkActionEditTypeEnum.set_alert_suppression_for_threshold
+          ),
+        "Rule type doesn't support this action. Use 'set_alert_suppression' action instead."
+      ),
+    BulkActionsDryRunErrCodeEnum.UNSUPPORTED_RULE_IN_SUPPRESSION_FOR_THRESHOLD
   );
 };

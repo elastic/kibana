@@ -8,7 +8,8 @@
       "react",
       "@kbn/ambient-ui-types",
       "@kbn/ambient-storybook-types",
-      "@emotion/react/types/css-prop"
+      "@emotion/react/types/css-prop",
+      "../../../../../typings/emotion.d.ts"
     ]
   },
   "include": [
@@ -61,7 +62,6 @@
     "@kbn/core-user-profile-browser",
     "@kbn/core-ui-settings-browser",
     "@kbn/core-user-profile-common",
-    "@kbn/react-kibana-mount",
     "@kbn/core-theme-browser-internal"
   ],
   "exclude": [

@@ -489,6 +489,10 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
                 if (cloudHandler instanceof CloudHandler) {
                   command = `curl -X DELETE ${BASE_ENV_URL}/api/v1/serverless/projects/security/${project.id} -H "Authorization: ApiKey ${API_KEY}"`;
                   exec(command);
+                } else if (cloudHandler instanceof ProxyHandler) {
+                  const proxyAuth = btoa(`${PROXY_CLIENT_ID}:${PROXY_SECRET}`);
+                  command = `curl -X DELETE ${PROXY_URL}/projects/${project.id} -H "Authorization: Basic ${proxyAuth}"`;
+                  exec(command);
                 }
               });
 

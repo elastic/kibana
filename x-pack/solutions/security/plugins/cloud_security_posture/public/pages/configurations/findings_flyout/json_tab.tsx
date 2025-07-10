@@ -9,20 +9,23 @@ import React from 'react';
 import { CodeEditor } from '@kbn/code-editor';
 import { XJsonLang } from '@kbn/monaco';
 import type { CspFinding } from '@kbn/cloud-security-posture-common';
+import { EuiPanel } from '@elastic/eui';
 
 export const JsonTab = ({ data }: { data: CspFinding }) => (
-  <div style={{ position: 'absolute', inset: 0 }}>
-    <CodeEditor
-      isCopyable
-      allowFullScreen
-      enableFindAction
-      languageId={XJsonLang.ID}
-      value={JSON.stringify(data, null, 2)}
-      options={{
-        readOnly: true,
-        lineNumbers: 'on',
-        folding: true,
-      }}
-    />
-  </div>
+  <EuiPanel>
+    <div css={{ height: '100vh' }}>
+      <CodeEditor
+        isCopyable
+        allowFullScreen
+        enableFindAction
+        languageId={XJsonLang.ID}
+        value={JSON.stringify(data, null, 2)}
+        options={{
+          readOnly: true,
+          lineNumbers: 'on',
+          folding: true,
+        }}
+      />
+    </div>
+  </EuiPanel>
 );

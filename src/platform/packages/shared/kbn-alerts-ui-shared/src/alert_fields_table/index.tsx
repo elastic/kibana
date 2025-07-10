@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import React, { memo, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiInMemoryTable,
@@ -14,11 +15,11 @@ import {
   EuiTabbedContentProps,
   useEuiOverflowScroll,
   EuiBasicTableColumn,
+  useEuiTheme,
+  useEuiFontSize,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { memo, useMemo } from 'react';
-import { Alert } from '@kbn/alerting-types';
-import { euiThemeVars } from '@kbn/ui-theme';
+import type { Alert } from '@kbn/alerting-types';
 import { useEuiTablePersist } from '@kbn/shared-ux-table-persist';
 
 export const search = {
@@ -90,6 +91,8 @@ export interface AlertFieldsTableProps {
  * A paginated, filterable table to show alert object fields
  */
 export const AlertFieldsTable = memo(({ alert, fields }: AlertFieldsTableProps) => {
+  const { euiTheme } = useEuiTheme();
+  const xsFontSize = useEuiFontSize('xs').fontSize;
   const { pageSize, sorting, onTableChange } = useEuiTablePersist<AlertField>({
     tableId: 'obltAlertFields',
     initialPageSize: 25,
@@ -122,8 +125,8 @@ export const AlertFieldsTable = memo(({ alert, fields }: AlertFieldsTableProps) 
       search={search}
       css={css`
         & .euiTableRow {
-          font-size: ${euiThemeVars.euiFontSizeXS};
-          font-family: ${euiThemeVars.euiCodeFontFamily};
+          font-size: ${xsFontSize};
+          font-family: ${euiTheme.font.familyCode};
         }
       `}
     />

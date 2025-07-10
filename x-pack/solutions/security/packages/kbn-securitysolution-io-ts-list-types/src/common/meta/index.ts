@@ -7,7 +7,7 @@
 
 import * as t from 'io-ts';
 
-export const meta = t.object;
+export const meta = t.UnknownRecord;
 export type Meta = t.TypeOf<typeof meta>;
 export const metaOrUndefined = t.union([meta, t.undefined]);
 export type MetaOrUndefined = t.TypeOf<typeof metaOrUndefined>;

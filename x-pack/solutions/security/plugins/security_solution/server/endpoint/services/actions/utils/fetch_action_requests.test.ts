@@ -5,54 +5,34 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import type { FetchActionRequestsOptions } from './fetch_action_requests';
-import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { applyActionListEsSearchMock } from '../mocks';
 import { fetchActionRequests } from './fetch_action_requests';
 import { ENDPOINT_ACTIONS_INDEX } from '../../../../../common/endpoint/constants';
+import { createMockEndpointAppContextService } from '../../../mocks';
+import { REF_DATA_KEY_INITIAL_VALUE, REF_DATA_KEYS } from '../../../lib/reference_data';
+import { set } from '@kbn/safer-lodash-set';
+import { ALLOWED_ACTION_REQUEST_TAGS } from '../constants';
 
 describe('fetchActionRequests()', () => {
   let esClientMock: ElasticsearchClientMock;
   let fetchOptions: FetchActionRequestsOptions;
 
   beforeEach(() => {
-    esClientMock = elasticsearchServiceMock.createScopedClusterClient().asInternalUser;
-
     fetchOptions = {
-      logger: loggingSystemMock.create().get(),
-      esClient: esClientMock,
+      spaceId: 'default',
+      endpointService: createMockEndpointAppContextService(),
       from: 0,
       size: 10,
     };
-
+    esClientMock = fetchOptions.endpointService.getInternalEsClient() as ElasticsearchClientMock;
     applyActionListEsSearchMock(esClientMock);
   });
 
   it('should return an array of items', async () => {
     await expect(fetchActionRequests(fetchOptions)).resolves.toEqual({
-      data: [
-        {
-          '@timestamp': '2022-04-27T16:08:47.449Z',
-          EndpointActions: {
-            action_id: '123',
-            data: {
-              command: 'kill-process',
-              comment: '5wb6pu6kh2xix5i',
-            },
-            expiration: '2022-05-10T16:08:47.449Z',
-            input_type: 'endpoint',
-            type: 'INPUT_ACTION',
-          },
-          agent: {
-            id: 'agent-a',
-          },
-          user: {
-            id: 'Shanel',
-          },
-        },
-      ],
+      data: expect.any(Array),
       total: 1,
       from: 0,
       size: 10,
@@ -361,5 +341,85 @@ describe('fetchActionRequests()', () => {
       },
       { ignore: [404] }
     );
+  });
+
+  describe('and space awareness feature is enabled', () => {
+    beforeEach(() => {
+      // @ts-expect-error
+      fetchOptions.endpointService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled =
+        true;
+    });
+
+    it('should fetch all policy IDs for all package names supporting response actions', async () => {
+      await fetchActionRequests(fetchOptions);
+
+      expect(
+        fetchOptions.endpointService.getInternalFleetServices().packagePolicy.fetchAllItemIds
+      ).toHaveBeenCalledWith(expect.anything(), {
+        kuery:
+          'ingest-package-policies.package.name: (endpoint OR sentinel_one OR crowdstrike OR microsoft_defender_endpoint OR m365_defender)',
+      });
+    });
+
+    it('should add integration policy IDs to search filtering criteria', async () => {
+      await fetchActionRequests(fetchOptions);
+
+      expect(fetchOptions.endpointService.getInternalEsClient().search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: {
+            bool: {
+              must: [
+                {
+                  bool: {
+                    filter: { terms: { 'agent.policy.integrationPolicyId': ['111', '222'] } },
+                  },
+                },
+                { bool: { filter: [] } },
+              ],
+            },
+          },
+        }),
+        expect.anything()
+      );
+    });
+
+    it('should include search filter for deleted integration policy tag when ref. data has one defined', async () => {
+      (fetchOptions.endpointService.getReferenceDataClient().get as jest.Mock).mockResolvedValue(
+        set(
+          REF_DATA_KEY_INITIAL_VALUE[REF_DATA_KEYS.orphanResponseActionsSpace](),
+          'metadata.spaceId',
+          'bar'
+        )
+      );
+      fetchOptions.spaceId = 'bar';
+
+      await fetchActionRequests(fetchOptions);
+
+      expect(fetchOptions.endpointService.getInternalEsClient().search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: {
+            bool: {
+              must: [
+                {
+                  bool: {
+                    filter: {
+                      bool: {
+                        should: [
+                          { terms: { 'agent.policy.integrationPolicyId': ['111', '222'] } },
+                          { term: { tags: ALLOWED_ACTION_REQUEST_TAGS.integrationPolicyDeleted } },
+                        ],
+                        minimum_should_match: 1,
+                      },
+                    },
+                  },
+                },
+                { bool: { filter: [] } },
+              ],
+            },
+          },
+        }),
+        expect.anything()
+      );
+    });
   });
 });

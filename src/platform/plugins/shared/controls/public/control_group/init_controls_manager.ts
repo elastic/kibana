@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import fastIsEqual from 'fast-deep-equal';
 import { omit } from 'lodash';
 import { v4 as generateId } from 'uuid';
 
@@ -17,10 +16,10 @@ import type {
   PanelPackage,
   PresentationContainer,
 } from '@kbn/presentation-containers';
-import { apiHasSnapshottableState } from '@kbn/presentation-containers/interfaces/serialized_state';
-import type { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
+import type { PublishingSubject } from '@kbn/presentation-publishing';
 import { BehaviorSubject, first, merge } from 'rxjs';
 import type {
+  ControlGroupSerializedState,
   ControlPanelState,
   ControlPanelsState,
   ControlWidth,
@@ -29,7 +28,6 @@ import type {
 } from '../../common';
 import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '../../common';
 import type { DefaultControlApi } from '../controls/types';
-import type { ControlGroupComparatorState } from './control_group_unsaved_changes_api';
 import type { ControlGroupApi } from './types';
 
 export type ControlsInOrder = Array<{ id: string; type: string }>;
@@ -49,11 +47,7 @@ export function initControlsManager(
   /**
    * Composed from last saved controls state and previous sessions's unsaved changes to controls state
    */
-  initialControlsState: ControlPanelsState,
-  /**
-   * Observable that publishes last saved controls state only
-   */
-  lastSavedControlsState$: PublishingSubject<ControlPanelsState>
+  initialControlsState: ControlPanelsState
 ) {
   const initialControlIds = Object.keys(initialControlsState);
   const children$ = new BehaviorSubject<{ [key: string]: DefaultControlApi }>({});
@@ -99,17 +93,17 @@ export function initControlsManager(
   }
 
   async function addNewPanel(
-    { panelType, initialState }: PanelPackage<DefaultControlState>,
+    { panelType, serializedState }: PanelPackage<DefaultControlState>,
     index: number
   ) {
-    if ((initialState as DefaultDataControlState)?.dataViewId) {
-      lastUsedDataViewId$.next((initialState as DefaultDataControlState).dataViewId);
+    if ((serializedState?.rawState as DefaultDataControlState)?.dataViewId) {
+      lastUsedDataViewId$.next((serializedState!.rawState as DefaultDataControlState).dataViewId);
     }
-    if (initialState?.width) {
-      lastUsedWidth$.next(initialState.width);
+    if (serializedState?.rawState?.width) {
+      lastUsedWidth$.next(serializedState.rawState.width);
     }
-    if (typeof initialState?.grow === 'boolean') {
-      lastUsedGrow$.next(initialState.grow);
+    if (typeof serializedState?.rawState?.grow === 'boolean') {
+      lastUsedGrow$.next(serializedState.rawState.grow);
     }
 
     const id = generateId();
@@ -119,7 +113,7 @@ export function initControlsManager(
       type: panelType,
     });
     controlsInOrder$.next(nextControlsInOrder);
-    currentControlsState[id] = initialState ?? {};
+    currentControlsState[id] = serializedState?.rawState ?? {};
     return await untilControlLoaded(id);
   }
 
@@ -148,7 +142,7 @@ export function initControlsManager(
     serializeControls: () => {
       const references: Reference[] = [];
 
-      const controls: Array<ControlPanelState & { controlConfig: object }> = [];
+      const controls: ControlGroupSerializedState['controls'] = [];
 
       controlsInOrder$.getValue().forEach(({ id }, index) => {
         const controlApi = getControlApi(id);
@@ -157,7 +151,7 @@ export function initControlsManager(
         }
 
         const {
-          rawState: { grow, width, ...rest },
+          rawState: { grow, width, ...controlConfig },
           references: controlReferences,
         } = controlApi.serializeState();
 
@@ -166,12 +160,13 @@ export function initControlsManager(
         }
 
         controls.push({
+          id,
           grow,
           order: index,
           type: controlApi.type,
           width,
           /** Re-add the `controlConfig` layer on serialize so control group saved object retains shape */
-          controlConfig: { id, ...rest },
+          controlConfig,
         });
       });
 
@@ -180,23 +175,9 @@ export function initControlsManager(
         references,
       };
     },
-    snapshotControlsRuntimeState: () => {
-      const controlsRuntimeState: ControlPanelsState = {};
-      controlsInOrder$.getValue().forEach(({ id, type }, index) => {
-        const controlApi = getControlApi(id);
-        if (controlApi && apiHasSnapshottableState(controlApi)) {
-          controlsRuntimeState[id] = {
-            order: index,
-            type,
-            ...controlApi.snapshotRuntimeState(),
-          };
-        }
-      });
-      return controlsRuntimeState;
-    },
-    resetControlsUnsavedChanges: () => {
+    resetControlsUnsavedChanges: (lastSavedControlsState: ControlPanelsState) => {
       currentControlsState = {
-        ...lastSavedControlsState$.value,
+        ...lastSavedControlsState,
       };
       const nextControlsInOrder = getControlsInOrder(currentControlsState as ControlPanelsState);
       controlsInOrder$.next(nextControlsInOrder);
@@ -258,13 +239,6 @@ export function initControlsManager(
     } as PresentationContainer &
       HasSerializedChildState<ControlPanelState> &
       Pick<ControlGroupApi, 'untilInitialized'>,
-    comparators: {
-      controlsInOrder: [
-        controlsInOrder$,
-        (next: ControlsInOrder) => {}, // setter does nothing, controlsInOrder$ reset by resetControlsRuntimeState
-        fastIsEqual,
-      ],
-    } as StateComparators<Pick<ControlGroupComparatorState, 'controlsInOrder'>>,
   };
 }
 

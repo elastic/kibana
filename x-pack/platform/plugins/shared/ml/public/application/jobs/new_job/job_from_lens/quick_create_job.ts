@@ -15,7 +15,7 @@ import type { IUiSettingsClient } from '@kbn/core/public';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { isOfAggregateQueryType, type Filter, type Query } from '@kbn/es-query';
-import type { DashboardStart } from '@kbn/dashboard-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { LensApi } from '@kbn/lens-plugin/public';
 import type { JobCreatorType } from '../common/job_creator';
 import { createEmptyJob, createEmptyDatafeed } from '../common/job_creator/util/default_configs';
@@ -41,10 +41,10 @@ export class QuickLensJobCreator extends QuickJobCreatorBase {
     dataViews: DataViewsContract,
     kibanaConfig: IUiSettingsClient,
     timeFilter: TimefilterContract,
-    dashboardService: DashboardStart,
+    share: SharePluginStart,
     mlApi: MlApi
   ) {
-    super(dataViews, kibanaConfig, timeFilter, dashboardService, mlApi);
+    super(dataViews, kibanaConfig, timeFilter, share, mlApi);
   }
 
   public async createAndSaveJob(
@@ -198,7 +198,8 @@ export class QuickLensJobCreator extends QuickJobCreatorBase {
     bucketSpan: string,
     layerIndex?: number
   ) {
-    // @TODO: ask ML team to check if ES|QL query here is ok
+    // we should not have got this far if the query is ES|QL
+    // but just in case, throw an error if it is
     if (isOfAggregateQueryType(chartInfo.query)) {
       throw new Error('Cannot create job, query is of aggregate type');
     }

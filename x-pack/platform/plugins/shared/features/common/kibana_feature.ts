@@ -46,7 +46,7 @@ export interface KibanaFeatureConfig {
   /**
    * An optional description that will appear as subtext underneath the feature name
    */
-  description?: string;
+  description?: string | null;
 
   /**
    * The category for this feature.
@@ -148,7 +148,7 @@ export interface KibanaFeatureConfig {
   privilegesTooltip?: string;
 
   /**
-   * @private
+   * @internal
    */
   reserved?: {
     description: string;
@@ -177,6 +177,14 @@ export interface KibanaFeatureConfig {
      * documentation.
      */
     notice: string;
+    /**
+     * An optional list of feature IDs representing the features that should _conceptually_ replace this deprecated
+     * feature. This is used, for example, in the Spaces feature visibility toggles UI to display the replacement
+     * feature(s) instead of the deprecated one. By default, the list of replacement features is derived from the
+     * `replacedBy` fields of the feature privileges. However, if the feature privileges are replaced by the privileges
+     * of multiple features, this behavior is not always desired and can be overridden here.
+     */
+    replacedBy?: readonly string[];
   }>;
 }
 

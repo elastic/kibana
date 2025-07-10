@@ -85,6 +85,7 @@ const parsedAlerts = {
     {
       _index: '.internal.alerts-security.alerts-default-000001',
       _id: '38dd308706a127696cc63b8f142e8e4d66f8f79bc7d491dd79a42ea4ead62dd1',
+      _score: 1,
       '@timestamp': ['2022-03-22T16:48:07.518Z'],
       'host.name': ['Host-4dbzugdlqd'],
       'kibana.alert.reason': [
@@ -99,6 +100,7 @@ const parsedAlerts = {
     {
       _index: '.internal.alerts-security.alerts-default-000001',
       _id: '8361363c0db6f30ca2dfb4aeb4835e7d6ec57bc195b96d9ee5a4ead1bb9f8b86',
+      _score: 1,
       '@timestamp': ['2022-03-22T16:17:50.769Z'],
       'host.name': ['Host-4dbzugdlqd'],
       'kibana.alert.reason': [
@@ -130,6 +132,7 @@ const parsedAlerts = {
       host: { name: ['Host-4dbzugdlqd'] },
       _id: '38dd308706a127696cc63b8f142e8e4d66f8f79bc7d491dd79a42ea4ead62dd1',
       _index: '.internal.alerts-security.alerts-default-000001',
+      _score: 1,
     },
     {
       kibana: {
@@ -148,6 +151,7 @@ const parsedAlerts = {
       host: { name: ['Host-4dbzugdlqd'] },
       _id: '8361363c0db6f30ca2dfb4aeb4835e7d6ec57bc195b96d9ee5a4ead1bb9f8b86',
       _index: '.internal.alerts-security.alerts-default-000001',
+      _score: 1,
     },
   ],
   oldAlertsData: [
@@ -169,6 +173,10 @@ const parsedAlerts = {
         field: '_id',
         value: '38dd308706a127696cc63b8f142e8e4d66f8f79bc7d491dd79a42ea4ead62dd1',
       },
+      {
+        field: '_score',
+        value: 1,
+      },
       { field: '_index', value: '.internal.alerts-security.alerts-default-000001' },
     ],
     [
@@ -188,6 +196,10 @@ const parsedAlerts = {
       {
         field: '_id',
         value: '8361363c0db6f30ca2dfb4aeb4835e7d6ec57bc195b96d9ee5a4ead1bb9f8b86',
+      },
+      {
+        field: '_score',
+        value: 1,
       },
       { field: '_index', value: '.internal.alerts-security.alerts-default-000001' },
     ],

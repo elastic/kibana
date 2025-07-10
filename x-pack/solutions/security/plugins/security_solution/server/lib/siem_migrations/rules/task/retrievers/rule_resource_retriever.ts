@@ -7,17 +7,21 @@
 
 import { ResourceIdentifier } from '../../../../../../common/siem_migrations/rules/resources';
 import type {
-  OriginalRule,
   RuleMigrationResource,
   RuleMigrationResourceType,
+  RuleMigrationRule,
 } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { RuleMigrationsDataClient } from '../../data/rule_migrations_data_client';
 
 export interface RuleMigrationDefinedResource extends RuleMigrationResource {
   content: string; // ensures content exists
 }
+export type RuleMigrationResourcesData = Pick<
+  RuleMigrationDefinedResource,
+  'name' | 'content' | 'type'
+>;
 export type RuleMigrationResources = Partial<
-  Record<RuleMigrationResourceType, RuleMigrationDefinedResource[]>
+  Record<RuleMigrationResourceType, RuleMigrationResourcesData[]>
 >;
 interface ExistingResources {
   macro: Record<string, RuleMigrationDefinedResource>;
@@ -50,7 +54,8 @@ export class RuleResourceRetriever {
     this.existingResources = existingRuleResources;
   }
 
-  public async getResources(originalRule: OriginalRule): Promise<RuleMigrationResources> {
+  public async getResources(migrationRule: RuleMigrationRule): Promise<RuleMigrationResources> {
+    const originalRule = migrationRule.original_rule;
     const existingResources = this.existingResources;
     if (!existingResources) {
       throw new Error('initialize must be called before calling getResources');
@@ -96,8 +101,18 @@ export class RuleResourceRetriever {
     } while (nestedResourcesFound.length > 0);
 
     return {
-      ...(macrosFound.size > 0 ? { macro: Array.from(macrosFound.values()) } : {}),
-      ...(lookupsFound.size > 0 ? { lookup: Array.from(lookupsFound.values()) } : {}),
+      ...(macrosFound.size > 0 ? { macro: this.formatOutput(macrosFound) } : {}),
+      ...(lookupsFound.size > 0 ? { lookup: this.formatOutput(lookupsFound) } : {}),
     };
+  }
+
+  private formatOutput(
+    resources: Map<string, RuleMigrationDefinedResource>
+  ): RuleMigrationResourcesData[] {
+    return Array.from(resources.values()).map(({ name, content, type }) => ({
+      name,
+      content,
+      type,
+    }));
   }
 }

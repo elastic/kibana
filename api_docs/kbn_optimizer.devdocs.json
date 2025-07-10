@@ -274,21 +274,6 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
-              },
-              {
-                "parentPluginId": "@kbn/optimizer",
-                "id": "def-server.OptimizerConfig.Unnamed.$12",
-                "type": "string",
-                "tags": [],
-                "label": "reactVersion",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "packages/kbn-optimizer/src/optimizer/optimizer_config.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
               }
             ],
             "returnComment": []

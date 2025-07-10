@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RuleDomain } from '../types';
+import type { RuleDomain } from '../types';
 import { transformRuleDomainToRuleAttributes } from './transform_rule_domain_to_rule_attributes';
 
 describe('transformRuleDomainToRuleAttributes', () => {
@@ -19,6 +19,17 @@ describe('transformRuleDomainToRuleAttributes', () => {
     params: {},
   };
 
+  const artifacts = {
+    dashboards: [
+      {
+        id: 'dashboard-1',
+      },
+      {
+        id: 'dashboard-2',
+      },
+    ],
+  };
+
   const rule: RuleDomain<{}> = {
     id: 'test',
     enabled: false,
@@ -28,6 +39,7 @@ describe('transformRuleDomainToRuleAttributes', () => {
     consumer: 'myApp',
     schedule: { interval: '1m' },
     actions: [defaultAction],
+    artifacts,
     params: {},
     mapped_params: {},
     createdBy: 'user',
@@ -66,6 +78,13 @@ describe('transformRuleDomainToRuleAttributes', () => {
           params: {},
         },
       ],
+      artifactsWithRefs: {
+        dashboards: [
+          {
+            refId: 'dashboard_0',
+          },
+        ],
+      },
       params: {
         legacyId: 'test',
         paramsWithRefs: {},
@@ -86,6 +105,13 @@ describe('transformRuleDomainToRuleAttributes', () => {
         "alertTypeId": "myType",
         "apiKey": "MTIzOmFiYw==",
         "apiKeyOwner": "user",
+        "artifacts": Object {
+          "dashboards": Array [
+            Object {
+              "refId": "dashboard_0",
+            },
+          ],
+        },
         "consumer": "myApp",
         "createdAt": "2019-02-12T21:01:22.479Z",
         "createdBy": "user",

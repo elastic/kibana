@@ -27,12 +27,12 @@ export const VULNERABILITIES_GROUPS_UNIT = (
   const groupCount = hasNullGroup ? totalCount - 1 : totalCount;
 
   switch (selectedGroup) {
-    case VULNERABILITY_GROUPING_OPTIONS.RESOURCE_NAME:
+    case VULNERABILITY_GROUPING_OPTIONS.RESOURCE_ID:
       return i18n.translate('xpack.csp.vulnerabilities.groupUnit.resource', {
         values: { groupCount },
         defaultMessage: `{groupCount} {groupCount, plural, =1 {resource} other {resources}}`,
       });
-    case VULNERABILITY_GROUPING_OPTIONS.CLOUD_ACCOUNT_NAME:
+    case VULNERABILITY_GROUPING_OPTIONS.CLOUD_ACCOUNT_ID:
       return i18n.translate('xpack.csp.vulnerabilities.groupUnit.cloudAccount', {
         values: { groupCount },
         defaultMessage: `{groupCount} {groupCount, plural, =1 {cloud account} other {cloud accounts}}`,
@@ -44,7 +44,7 @@ export const VULNERABILITIES_GROUPS_UNIT = (
       });
     default:
       return i18n.translate('xpack.csp.vulnerabilities.groupUnit', {
-        values: { groupCount: totalCount },
+        values: { groupCount },
         defaultMessage: `{groupCount} {groupCount, plural, =1 {group} other {groups}}`,
       });
   }
@@ -58,10 +58,10 @@ export const NULL_GROUPING_UNIT = i18n.translate(
 );
 
 export const NULL_GROUPING_MESSAGES = {
-  RESOURCE_NAME: i18n.translate('xpack.csp.vulnerabilities.grouping.resource.nullGroupTitle', {
+  RESOURCE_ID: i18n.translate('xpack.csp.vulnerabilities.grouping.resource.nullGroupTitle', {
     defaultMessage: 'No resource',
   }),
-  CLOUD_ACCOUNT_NAME: i18n.translate(
+  CLOUD_ACCOUNT_ID: i18n.translate(
     'xpack.csp.vulnerabilities.grouping.cloudAccount.nullGroupTitle',
     {
       defaultMessage: 'No cloud account',
@@ -73,11 +73,11 @@ export const NULL_GROUPING_MESSAGES = {
 };
 
 export const GROUPING_LABELS = {
-  RESOURCE_NAME: i18n.translate('xpack.csp.vulnerabilities.groupBy.resource', {
-    defaultMessage: 'Resource',
+  RESOURCE: i18n.translate('xpack.csp.vulnerabilities.groupBy.resource', {
+    defaultMessage: 'Resource ID',
   }),
-  CLOUD_ACCOUNT_NAME: i18n.translate('xpack.csp.vulnerabilities.groupBy.cloudAccount', {
-    defaultMessage: 'Cloud account',
+  CLOUD_ACCOUNT: i18n.translate('xpack.csp.vulnerabilities.groupBy.cloudAccount', {
+    defaultMessage: 'Cloud account ID',
   }),
 };
 

@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
-import { Logger } from '@kbn/core/server';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
+import type { Logger } from '@kbn/core/server';
 import {
   DEFAULT_MICROSOFT_EXCHANGE_URL,
   DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
   DEFAULT_MICROSOFT_GRAPH_API_URL,
 } from '../common';
+import { validateDuration } from './lib/parse_date';
 
 export enum AllowedHosts {
   Any = '*',
@@ -27,11 +29,14 @@ const MIN_MAX_ATTEMPTS = 1;
 const MIN_QUEUED_MAX = 1;
 export const DEFAULT_QUEUED_MAX = 1000000;
 
+const validRateLimiterConnectorTypeIds = new Set(['email']);
+
 const preconfiguredActionSchema = schema.object({
   name: schema.string({ minLength: 1 }),
   actionTypeId: schema.string({ minLength: 1 }),
   config: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
   secrets: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
+  exposeConfig: schema.maybe(schema.boolean({ defaultValue: false })),
 });
 
 const customHostSettingsSchema = schema.object({
@@ -68,8 +73,6 @@ const connectorTypeSchema = schema.object({
   maxAttempts: schema.maybe(schema.number({ min: MIN_MAX_ATTEMPTS, max: MAX_MAX_ATTEMPTS })),
 });
 
-export const DEFAULT_USAGE_API_URL = 'https://usage-api.usage-api/api/v1/usage';
-
 // We leverage enabledActionTypes list by allowing the other plugins to overwrite it by using "setEnabledConnectorTypes" in the plugin setup.
 // The list can be overwritten only if it's not already been set in the config.
 const enabledConnectorTypesSchema = schema.arrayOf(
@@ -77,6 +80,22 @@ const enabledConnectorTypesSchema = schema.arrayOf(
   {
     defaultValue: [AllowedHosts.Any],
   }
+);
+
+const rateLimiterSchema = schema.recordOf(
+  schema.string({
+    validate: (value) => {
+      if (!validRateLimiterConnectorTypeIds.has(value)) {
+        return `Rate limiter configuration for connector type "${value}" is not supported. Supported types: ${Array.from(
+          validRateLimiterConnectorTypeIds
+        ).join(', ')}`;
+      }
+    },
+  }),
+  schema.object({
+    lookbackWindow: schema.string({ defaultValue: '15m', validate: validateDuration }),
+    limit: schema.number({ defaultValue: 500, min: 1, max: 5000 }),
+  })
 );
 
 export const configSchema = schema.object({
@@ -119,9 +138,56 @@ export const configSchema = schema.object({
   microsoftGraphApiScope: schema.string({ defaultValue: DEFAULT_MICROSOFT_GRAPH_API_SCOPE }),
   microsoftExchangeUrl: schema.string({ defaultValue: DEFAULT_MICROSOFT_EXCHANGE_URL }),
   email: schema.maybe(
-    schema.object({
-      domain_allowlist: schema.arrayOf(schema.string()),
-    })
+    schema.object(
+      {
+        domain_allowlist: schema.maybe(schema.arrayOf(schema.string())),
+        recipient_allowlist: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
+        services: schema.maybe(
+          schema.object(
+            {
+              enabled: schema.maybe(
+                schema.arrayOf(
+                  schema.oneOf([
+                    schema.literal('google-mail'),
+                    schema.literal('microsoft-exchange'),
+                    schema.literal('microsoft-outlook'),
+                    schema.literal('amazon-ses'),
+                    schema.literal('elastic-cloud'),
+                    schema.literal('other'),
+                    schema.literal('*'),
+                  ]),
+                  { minSize: 1 }
+                )
+              ),
+              ses: schema.maybe(
+                schema.object({
+                  host: schema.string({ minLength: 1 }),
+                  port: schema.number({ min: 1, max: 65535 }),
+                })
+              ),
+            },
+            {
+              validate: (obj) => {
+                if (obj && Object.keys(obj).length === 0) {
+                  return 'email.services.enabled or email.services.ses must be defined';
+                }
+              },
+            }
+          )
+        ),
+      },
+      {
+        validate: (obj) => {
+          if (obj && Object.keys(obj).length === 0) {
+            return 'email.domain_allowlist, email.recipient_allowlist, or email.services must be defined';
+          }
+
+          if (obj?.domain_allowlist && obj?.recipient_allowlist) {
+            return 'email.domain_allowlist and email.recipient_allowlist can not be used at the same time';
+          }
+        },
+      }
+    )
   ),
   run: schema.maybe(
     schema.object({
@@ -135,18 +201,32 @@ export const configSchema = schema.object({
       max: schema.maybe(schema.number({ min: MIN_QUEUED_MAX, defaultValue: DEFAULT_QUEUED_MAX })),
     })
   ),
-  usage: schema.object({
-    url: schema.string({ defaultValue: DEFAULT_USAGE_API_URL }),
-    ca: schema.maybe(
-      schema.object({
-        path: schema.string(),
-      })
-    ),
-  }),
+  usage: schema.maybe(
+    schema.object({
+      url: schema.maybe(schema.string()),
+      enabled: schema.maybe(schema.boolean()),
+      ca: schema.maybe(
+        schema.object({
+          path: schema.string(),
+        })
+      ),
+    })
+  ),
+  webhook: schema.maybe(
+    schema.object({
+      ssl: schema.object({
+        pfx: schema.object({
+          enabled: schema.boolean({ defaultValue: true }),
+        }),
+      }),
+    })
+  ),
+  rateLimiter: schema.maybe(rateLimiterSchema),
 });
 
 export type ActionsConfig = TypeOf<typeof configSchema>;
 export type EnabledConnectorTypes = TypeOf<typeof enabledConnectorTypesSchema>;
+export type ConnectorRateLimiterConfig = TypeOf<typeof rateLimiterSchema>;
 
 // It would be nicer to add the proxyBypassHosts / proxyOnlyHosts restriction on
 // simultaneous usage in the config validator directly, but there's no good way to express

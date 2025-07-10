@@ -6,8 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { RuleType } from '../../common';
-import { AlertNavigationHandler } from './types';
+import type { RuleType } from '../../common';
+import type { AlertNavigationHandler } from './types';
 
 const DEFAULT_HANDLER = Symbol('*');
 export class AlertNavigationRegistry {

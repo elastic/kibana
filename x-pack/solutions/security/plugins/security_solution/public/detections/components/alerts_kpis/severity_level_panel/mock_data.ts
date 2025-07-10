@@ -105,8 +105,8 @@ export const query = {
 };
 
 export const parsedAlerts: Array<{ key: Severity; value: number; label: string }> = [
-  { key: 'high', value: 78, label: 'High' },
-  { key: 'low', value: 46, label: 'Low' },
-  { key: 'medium', value: 32, label: 'Medium' },
   { key: 'critical', value: 21, label: 'Critical' },
+  { key: 'high', value: 78, label: 'High' },
+  { key: 'medium', value: 32, label: 'Medium' },
+  { key: 'low', value: 46, label: 'Low' },
 ];

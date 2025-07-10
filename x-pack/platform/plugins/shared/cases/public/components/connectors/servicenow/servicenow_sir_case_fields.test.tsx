@@ -12,8 +12,8 @@ import userEvent, { type UserEvent } from '@testing-library/user-event';
 import { useGetChoices } from './use_get_choices';
 import { connector, choices } from '../mock';
 import Fields from './servicenow_sir_case_fields';
-import type { AppMockRenderer } from '../../../common/mock';
-import { createAppMockRenderer } from '../../../common/mock';
+
+import { renderWithTestingProviders } from '../../../common/mock';
 import { MockFormWrapperComponent } from '../test_utils';
 
 jest.mock('../../../common/lib/kibana');
@@ -22,7 +22,6 @@ const useGetChoicesMock = useGetChoices as jest.Mock;
 
 describe('ServiceNowSIR Fields', () => {
   let user: UserEvent;
-  let appMockRenderer: AppMockRenderer;
 
   const fields = {
     destIp: true,
@@ -46,7 +45,7 @@ describe('ServiceNowSIR Fields', () => {
   beforeEach(() => {
     // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
     user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
-    appMockRenderer = createAppMockRenderer();
+
     useGetChoicesMock.mockReturnValue({
       isLoading: false,
       isFetching: false,
@@ -56,7 +55,7 @@ describe('ServiceNowSIR Fields', () => {
   });
 
   it('all params fields are rendered', () => {
-    appMockRenderer.render(
+    renderWithTestingProviders(
       <MockFormWrapperComponent fields={fields}>
         <Fields connector={connector} />
       </MockFormWrapperComponent>
@@ -73,7 +72,7 @@ describe('ServiceNowSIR Fields', () => {
   });
 
   it('transforms the categories to options correctly', async () => {
-    appMockRenderer.render(
+    renderWithTestingProviders(
       <MockFormWrapperComponent fields={fields}>
         <Fields connector={connector} />
       </MockFormWrapperComponent>
@@ -87,7 +86,7 @@ describe('ServiceNowSIR Fields', () => {
   });
 
   it('transforms the subcategories to options correctly', async () => {
-    appMockRenderer.render(
+    renderWithTestingProviders(
       <MockFormWrapperComponent fields={fields}>
         <Fields connector={connector} />
       </MockFormWrapperComponent>
@@ -99,7 +98,7 @@ describe('ServiceNowSIR Fields', () => {
   });
 
   it('transforms the priorities to options correctly', async () => {
-    appMockRenderer.render(
+    renderWithTestingProviders(
       <MockFormWrapperComponent fields={fields}>
         <Fields connector={connector} />
       </MockFormWrapperComponent>
@@ -114,7 +113,7 @@ describe('ServiceNowSIR Fields', () => {
   it('shows the deprecated callout if the connector is deprecated', async () => {
     const tableApiConnector = { ...connector, isDeprecated: true };
 
-    appMockRenderer.render(
+    renderWithTestingProviders(
       <MockFormWrapperComponent fields={fields}>
         <Fields connector={tableApiConnector} />
       </MockFormWrapperComponent>
@@ -134,7 +133,7 @@ describe('ServiceNowSIR Fields', () => {
   });
 
   it('does not show the deprecated callout when the connector is preconfigured and not deprecated', async () => {
-    appMockRenderer.render(
+    renderWithTestingProviders(
       <MockFormWrapperComponent fields={fields}>
         <Fields connector={{ ...connector, isPreconfigured: true }} />
       </MockFormWrapperComponent>
@@ -144,13 +143,13 @@ describe('ServiceNowSIR Fields', () => {
   });
 
   it('shows the deprecated callout when the connector is preconfigured and deprecated', async () => {
-    appMockRenderer.render(
+    renderWithTestingProviders(
       <MockFormWrapperComponent fields={fields}>
         <Fields connector={{ ...connector, isPreconfigured: true, isDeprecated: true }} />
       </MockFormWrapperComponent>
     );
 
-    expect(screen.queryByTestId('deprecated-connector-warning-callout')).toBeInTheDocument();
+    expect(screen.getByTestId('deprecated-connector-warning-callout')).toBeInTheDocument();
   });
 
   it('shows the subcategory if the selected category does not have subcategories', async () => {
@@ -161,7 +160,7 @@ describe('ServiceNowSIR Fields', () => {
       subcategory: '',
     };
 
-    appMockRenderer.render(
+    renderWithTestingProviders(
       <MockFormWrapperComponent fields={customFields}>
         <Fields connector={connector} />
       </MockFormWrapperComponent>
@@ -176,7 +175,7 @@ describe('ServiceNowSIR Fields', () => {
 
     checkboxes.forEach((subj) =>
       it(`${subj.toUpperCase()}`, async () => {
-        appMockRenderer.render(
+        renderWithTestingProviders(
           <MockFormWrapperComponent fields={fields}>
             <Fields connector={connector} />
           </MockFormWrapperComponent>
@@ -193,7 +192,7 @@ describe('ServiceNowSIR Fields', () => {
 
     testers.forEach((subj) =>
       it(`${subj.toUpperCase()}`, async () => {
-        appMockRenderer.render(
+        renderWithTestingProviders(
           <MockFormWrapperComponent fields={fields}>
             <Fields connector={connector} />
           </MockFormWrapperComponent>
@@ -208,7 +207,7 @@ describe('ServiceNowSIR Fields', () => {
   });
 
   it('should submit servicenow sir connector', async () => {
-    appMockRenderer.render(
+    renderWithTestingProviders(
       <MockFormWrapperComponent fields={fields}>
         <Fields connector={connector} />
       </MockFormWrapperComponent>
@@ -234,7 +233,7 @@ describe('ServiceNowSIR Fields', () => {
   });
 
   it('resets subcategory when changing category', async () => {
-    appMockRenderer.render(
+    renderWithTestingProviders(
       <MockFormWrapperComponent fields={fields}>
         <Fields connector={connector} />
       </MockFormWrapperComponent>

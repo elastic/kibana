@@ -33,16 +33,15 @@ export function getSearchParamsFromRequest(
 ): ISearchRequestParams {
   const { getConfig } = dependencies;
   const searchParams = { preference: getEsPreference(getConfig) };
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { track_total_hits, ...body } = searchRequest.body;
   const dataView = typeof searchRequest.index !== 'string' ? searchRequest.index : undefined;
   const index = dataView?.title ?? `${searchRequest.index}`;
+  const trackTotalHits = searchRequest.track_total_hits ?? searchRequest.body.track_total_hits;
 
+  // @ts-expect-error elasticsearch@9.0.0 `query` types don't match (it seems like it's been wrong here for a while)
   return {
+    ...searchRequest,
+    track_total_hits: trackTotalHits,
     index,
-    body,
-    // @ts-ignore
-    track_total_hits,
     ...(dataView?.getAllowHidden() && { expand_wildcards: 'all' }),
     ...searchParams,
   };

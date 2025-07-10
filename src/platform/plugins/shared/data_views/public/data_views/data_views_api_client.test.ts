@@ -8,9 +8,10 @@
  */
 
 import type { HttpSetup } from '@kbn/core/public';
-import { http } from './data_views_api_client.test.mock';
-import { DataViewsApiClient } from './data_views_api_client';
+import { http, indexFilterMock, runtimeMappingsMock } from './data_views_api_client.test.mock';
+import { getFieldsForWildcardRequestBody, DataViewsApiClient } from './data_views_api_client';
 import { FIELDS_PATH as expectedPath } from '../../common/constants';
+import type { GetFieldsOptions } from '../../common';
 
 describe('IndexPatternsApiClient', () => {
   let fetchSpy: jest.SpyInstance;
@@ -54,5 +55,38 @@ describe('IndexPatternsApiClient', () => {
     });
 
     expect(fetchSpy.mock.calls[0][1].query.field_types).toEqual(fieldTypes);
+  });
+});
+
+describe('getFieldsForWildcardRequestBody', () => {
+  test('returns undefined if no indexFilter or runtimeMappings', () => {
+    expect(getFieldsForWildcardRequestBody({} as unknown as GetFieldsOptions)).toBeUndefined();
+  });
+
+  test('returns just indexFilter if no runtimeMappings', () => {
+    expect(
+      getFieldsForWildcardRequestBody({
+        indexFilter: indexFilterMock,
+      } as unknown as GetFieldsOptions)
+    ).toEqual(JSON.stringify({ index_filter: indexFilterMock }));
+  });
+
+  test('returns just runtimeMappings if no indexFilter', () => {
+    expect(
+      getFieldsForWildcardRequestBody({
+        runtimeMappings: runtimeMappingsMock,
+      } as unknown as GetFieldsOptions)
+    ).toEqual(JSON.stringify({ runtime_mappings: runtimeMappingsMock }));
+  });
+
+  test('returns both indexFilter and runtimeMappings', () => {
+    expect(
+      getFieldsForWildcardRequestBody({
+        indexFilter: indexFilterMock,
+        runtimeMappings: runtimeMappingsMock,
+      } as unknown as GetFieldsOptions)
+    ).toEqual(
+      JSON.stringify({ index_filter: indexFilterMock, runtime_mappings: runtimeMappingsMock })
+    );
   });
 });

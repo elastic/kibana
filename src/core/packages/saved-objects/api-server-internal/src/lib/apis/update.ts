@@ -22,6 +22,7 @@ import type {
   SavedObjectsUpdateResponse,
 } from '@kbn/core-saved-objects-api-server';
 import { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-server-internal';
+import type { CreateRequest, IndexRequest } from '@elastic/elasticsearch/lib/api/types';
 import { DEFAULT_REFRESH_SETTING, DEFAULT_RETRY_COUNT } from '../constants';
 import { isValidRequest } from '../utils';
 import { getCurrentTime, getSavedObjectFromSource, mergeForUpdate } from './utils';
@@ -187,11 +188,11 @@ export const executeUpdate = async <T>(
     validationHelper.validateObjectForCreate(type, migratedUpsert);
     const rawUpsert = serializer.savedObjectToRaw(migratedUpsert);
 
-    const createRequestParams = {
+    const createRequestParams: CreateRequest = {
       id: rawUpsert._id,
       index: commonHelper.getIndexForType(type),
       refresh,
-      body: rawUpsert._source,
+      document: rawUpsert._source,
       ...(version ? decodeRequestVersion(version) : {}),
       require_alias: true,
     };
@@ -289,11 +290,11 @@ export const executeUpdate = async <T>(
     );
 
     // implement creating the call params
-    const indexRequestParams = {
+    const indexRequestParams: IndexRequest = {
       id: docToSend._id,
       index: commonHelper.getIndexForType(type),
       refresh,
-      body: docToSend._source,
+      document: docToSend._source,
       // using version from the source doc if not provided as option to avoid erasing changes in case of concurrent calls
       ...decodeRequestVersion(version || migrated!.version),
       require_alias: true,

@@ -129,7 +129,7 @@ export class Handler {
    * used to render the Vis. Throws a no results error if data is not
    * present.
    *
-   * @private
+   * @internal
    */
   _validateData() {
     const dataType = this.data.type;

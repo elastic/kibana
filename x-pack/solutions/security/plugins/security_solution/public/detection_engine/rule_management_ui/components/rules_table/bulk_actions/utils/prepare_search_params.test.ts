@@ -9,9 +9,9 @@ import type { DryRunResult } from '../types';
 import type { FilterOptions } from '../../../../../rule_management/logic/types';
 
 import { convertRulesFilterToKQL } from '../../../../../../../common/detection_engine/rule_management/rule_filtering';
-import { BulkActionsDryRunErrCode } from '../../../../../../../common/constants';
 
 import { prepareSearchParams } from './prepare_search_params';
+import { BulkActionsDryRunErrCodeEnum } from '../../../../../../../common/api/detection_engine';
 
 jest.mock('../../../../../../../common/detection_engine/rule_management/rule_filtering', () => ({
   convertRulesFilterToKQL: jest.fn().mockReturnValue('str'),
@@ -44,7 +44,7 @@ describe('prepareSearchParams', () => {
 
   test.each([
     [
-      BulkActionsDryRunErrCode.MACHINE_LEARNING_INDEX_PATTERN,
+      BulkActionsDryRunErrCodeEnum.MACHINE_LEARNING_INDEX_PATTERN,
       {
         filter: '',
         tags: [],
@@ -54,7 +54,7 @@ describe('prepareSearchParams', () => {
       },
     ],
     [
-      BulkActionsDryRunErrCode.MACHINE_LEARNING_AUTH,
+      BulkActionsDryRunErrCodeEnum.MACHINE_LEARNING_AUTH,
       {
         filter: '',
         tags: [],
@@ -64,7 +64,7 @@ describe('prepareSearchParams', () => {
       },
     ],
     [
-      BulkActionsDryRunErrCode.ESQL_INDEX_PATTERN,
+      BulkActionsDryRunErrCodeEnum.ESQL_INDEX_PATTERN,
       {
         filter: '',
         tags: [],
@@ -74,12 +74,32 @@ describe('prepareSearchParams', () => {
       },
     ],
     [
-      BulkActionsDryRunErrCode.IMMUTABLE,
+      BulkActionsDryRunErrCodeEnum.IMMUTABLE,
       {
         filter: '',
         tags: [],
         showCustomRules: true,
         showElasticRules: false,
+      },
+    ],
+    [
+      BulkActionsDryRunErrCodeEnum.THRESHOLD_RULE_TYPE_IN_SUPPRESSION,
+      {
+        filter: '',
+        tags: [],
+        showCustomRules: false,
+        showElasticRules: false,
+        excludeRuleTypes: ['threshold'],
+      },
+    ],
+    [
+      BulkActionsDryRunErrCodeEnum.UNSUPPORTED_RULE_IN_SUPPRESSION_FOR_THRESHOLD,
+      {
+        filter: '',
+        tags: [],
+        showCustomRules: false,
+        showElasticRules: false,
+        includeRuleTypes: ['threshold'],
       },
     ],
     [
@@ -118,4 +138,54 @@ describe('prepareSearchParams', () => {
       expect(result).toEqual({ query: expect.any(String) });
     }
   );
+
+  test('should not include gapRange in the output when provided with ids', () => {
+    const selectedRuleIds = ['rule:1', 'rule:2'];
+    const dryRunResult: DryRunResult = {
+      ruleErrors: [],
+    };
+    const gapRange = { start: '2025-01-01T00:00:00.000Z', end: '2025-01-02T00:00:00.000Z' };
+    const result = prepareSearchParams({
+      selectedRuleIds,
+      dryRunResult,
+      gapRange,
+    });
+
+    expect(result).toEqual({ ids: ['rule:1', 'rule:2'] });
+  });
+
+  test('should include gapRange in the query when provided with query', () => {
+    const filterOptions: FilterOptions = {
+      filter: '',
+      tags: [],
+      showCustomRules: false,
+      showElasticRules: false,
+    };
+    const dryRunResult: DryRunResult = {
+      ruleErrors: [],
+    };
+    const gapRange = { start: '2025-01-01T00:00:00.000Z', end: '2025-01-02T00:00:00.000Z' };
+    const result = prepareSearchParams({
+      filterOptions,
+      dryRunResult,
+      gapRange,
+    });
+
+    expect(result).toEqual({ query: expect.any(String), gapRange });
+  });
+
+  test('should return only query when neither selectedRuleIds nor gapRange are provided', () => {
+    const dryRunResult: DryRunResult = { ruleErrors: [] };
+
+    const filterOptions: FilterOptions = {
+      filter: '',
+      tags: [],
+      showCustomRules: false,
+      showElasticRules: false,
+    };
+
+    const result = prepareSearchParams({ dryRunResult, filterOptions });
+
+    expect(result).toEqual({ query: expect.any(String) });
+  });
 });

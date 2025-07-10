@@ -21,13 +21,20 @@ import type { ListResult, ListWithKuery } from './common';
 
 export interface GetAgentsRequest {
   query: ListWithKuery & {
+    showAgentless?: boolean;
     showInactive?: boolean;
     showUpgradeable?: boolean;
     withMetrics?: boolean;
+    searchAfter?: string;
+    openPit?: boolean;
+    pitId?: string;
+    pitKeepAlive?: string;
   };
 }
 
 export interface GetAgentsResponse extends ListResult<Agent> {
+  pit?: string;
+  nextSearchAfter?: string;
   statusSummary?: Record<AgentStatus, number>;
 }
 
@@ -175,7 +182,55 @@ export interface DeleteAgentRequest {
     agentId: string;
   };
 }
-
+export interface MigrateSingleAgentRequest {
+  body: {
+    id: string;
+    enrollment_token: string;
+    uri: string;
+    settings?: {
+      ca_sha256?: string;
+      certificate_authorities?: string;
+      elastic_agent_cert?: string;
+      elastic_agent_cert_key?: string;
+      elastic_agent_cert_key_passphrase?: string;
+      headers?: Record<string, string>;
+      insecure?: boolean;
+      proxy_disabled?: boolean;
+      proxy_headers?: Record<string, string>;
+      proxy_url?: string;
+      staging?: boolean;
+      tags?: string;
+      replace_token?: boolean;
+    };
+  };
+}
+export interface MigrateSingleAgentResponse {
+  actionId: string;
+}
+export interface BulkMigrateAgentsRequest {
+  body: {
+    agents: string[];
+    enrollment_token: string;
+    uri: string;
+    settings?: {
+      ca_sha256?: string;
+      certificate_authorities?: string;
+      elastic_agent_cert?: string;
+      elastic_agent_cert_key?: string;
+      elastic_agent_cert_key_passphrase?: string;
+      headers?: Record<string, string>;
+      insecure?: boolean;
+      proxy_disabled?: boolean;
+      proxy_headers?: Record<string, string>;
+      proxy_url?: string;
+      staging?: boolean;
+      tags?: string;
+    };
+  };
+}
+export interface BulkMigrateAgentsResponse {
+  actionId: string;
+}
 export interface UpdateAgentRequest {
   params: {
     agentId: string;

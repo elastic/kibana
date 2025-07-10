@@ -10,8 +10,14 @@ import type { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/serv
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { SolutionId } from '@kbn/core-chrome-browser';
 
-import { registerCloudDeploymentMetadataAnalyticsContext } from '../common/register_cloud_deployment_id_analytics_context';
+import { schema } from '@kbn/config-schema';
+import { parseNextURL } from '@kbn/std';
+
+import camelcaseKeys from 'camelcase-keys';
+import type { KibanaProductTier, KibanaSolution } from '@kbn/projects-solutions-groups';
 import type { CloudConfigType } from './config';
+
+import { registerCloudDeploymentMetadataAnalyticsContext } from '../common/register_cloud_deployment_id_analytics_context';
 import { registerCloudUsageCollector } from './collectors';
 import { getIsCloudEnabled } from '../common/is_cloud_enabled';
 import { parseDeploymentIdFromDeploymentUrl } from '../common/parse_deployment_id_from_deployment_url';
@@ -21,7 +27,8 @@ import { getFullCloudUrl } from '../common/utils';
 import { readInstanceSizeMb } from './env';
 import { defineRoutes } from './routes';
 import { CloudRequestHandlerContext } from './routes/types';
-import { setupSavedObjects } from './saved_objects';
+import { CLOUD_DATA_SAVED_OBJECT_TYPE, setupSavedObjects } from './saved_objects';
+import { persistTokenCloudData } from './cloud_data';
 
 interface PluginsSetup {
   usageCollection?: UsageCollectionSetup;
@@ -140,7 +147,14 @@ export interface CloudSetup {
      * The serverless project type.
      * Will always be present if `isServerlessEnabled` is `true`
      */
-    projectType?: string;
+    projectType?: KibanaSolution;
+    /**
+     * The serverless product tier.
+     * Only present if the current project type has product tiers defined.
+     * @remarks This field is only exposed for informational purposes. Use the `core.pricing` when checking if a feature is available for the current product tier.
+     * @internal
+     */
+    productTier?: KibanaProductTier;
     /**
      * The serverless orchestrator target. The potential values are `canary` or `non-canary`
      * Will always be present if `isServerlessEnabled` is `true`
@@ -185,6 +199,7 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
     const organizationId = this.config.organization_id;
     const projectId = this.config.serverless?.project_id;
     const projectType = this.config.serverless?.project_type;
+    const productTier = this.config.serverless?.product_tier;
     const orchestratorTarget = this.config.serverless?.orchestrator_target;
     const isServerlessEnabled = !!projectId;
     const deploymentId = parseDeploymentIdFromDeploymentUrl(this.config.deployment_url);
@@ -198,8 +213,121 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
       deploymentId,
       projectId,
       projectType,
+      productTier,
       orchestratorTarget,
     });
+    const basePath = core.http.basePath.serverBasePath;
+    core.http.resources.register(
+      {
+        path: '/app/cloud/onboarding',
+        validate: {
+          query: schema.maybe(
+            schema.object(
+              {
+                next: schema.maybe(schema.string()),
+                onboarding_token: schema.maybe(schema.string()),
+                security: schema.maybe(
+                  schema.object({
+                    use_case: schema.oneOf([
+                      schema.literal('siem'),
+                      schema.literal('cloud'),
+                      schema.literal('edr'),
+                      schema.literal('other'),
+                    ]),
+                    migration: schema.maybe(
+                      schema.object({
+                        value: schema.boolean(),
+                        type: schema.maybe(
+                          schema.oneOf([schema.literal('splunk'), schema.literal('other')])
+                        ),
+                      })
+                    ),
+                  })
+                ),
+                resource_data: schema.maybe(
+                  schema.object({
+                    project: schema.maybe(
+                      schema.object({
+                        search: schema.maybe(
+                          schema.object({
+                            type: schema.oneOf([
+                              schema.literal('general'),
+                              schema.literal('vector'),
+                              schema.literal('timeseries'),
+                            ]),
+                          })
+                        ),
+                      })
+                    ),
+                    // Can be added in the future if needed:
+                    // deployment: schema.maybe(schema.object({})),
+                  })
+                ),
+              },
+              { unknowns: 'ignore' }
+            )
+          ),
+        },
+        security: {
+          authz: {
+            enabled: false,
+            reason:
+              'Authorization at the API level isn’t required, as it’s implicitly enforced by the scoped `uiSettings` and `SavedObjects` clients used to handle the request.',
+          },
+        },
+      },
+      async (context, request, response) => {
+        const { uiSettings } = await context.core;
+        const defaultRoute = await uiSettings.client.get<string>('defaultRoute', { request });
+        const nextCandidateRoute = parseNextURL(request.url.href);
+
+        const route = nextCandidateRoute === '/' ? defaultRoute : nextCandidateRoute;
+        // need to get rid of ../../ to make sure we will not be out of space basePath
+        const normalizedRoute = new URL(route, 'https://localhost');
+
+        const queryOnboardingToken = request.query?.onboarding_token ?? undefined;
+        const queryOnboardingSecurityRaw = request.query?.security ?? undefined;
+        const queryOnboardingSecurity = queryOnboardingSecurityRaw
+          ? camelcaseKeys(queryOnboardingSecurityRaw, {
+              deep: true,
+            })
+          : undefined;
+
+        const queryResourceDataRaw = request.query?.resource_data ?? undefined;
+        const queryResourceData = queryResourceDataRaw
+          ? camelcaseKeys(queryResourceDataRaw, {
+              deep: true,
+            })
+          : undefined;
+
+        const solutionType = this.config.onboarding?.default_solution;
+
+        if (queryOnboardingToken || queryOnboardingSecurity || queryResourceData) {
+          core
+            .getStartServices()
+            .then(async ([coreStart]) => {
+              const soClient = coreStart.savedObjects.getScopedClient(request, {
+                includedHiddenTypes: [CLOUD_DATA_SAVED_OBJECT_TYPE],
+              });
+
+              await persistTokenCloudData(soClient, {
+                logger: this.logger,
+                onboardingToken: queryOnboardingToken,
+                solutionType,
+                security: queryOnboardingSecurity,
+                resourceData: queryResourceData,
+              });
+            })
+            .catch((errorMsg) => this.logger.error(errorMsg));
+        }
+        // preserving of the hash is important for the navigation to work correctly with default route
+        return response.redirected({
+          headers: {
+            location: `${basePath}${normalizedRoute.pathname}${normalizedRoute.search}${normalizedRoute.hash}`,
+          },
+        });
+      }
+    );
 
     let decodedId: DecodedCloudId | undefined;
     if (this.config.id) {
@@ -241,6 +369,10 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
         projectName: this.config.serverless?.project_name,
         projectType,
         orchestratorTarget,
+        // Hi fellow developer! Please, refrain from using `productTier` from this contract.
+        // It is exposed for informational purposes (telemetry and feature flags). Do not use it for feature-gating.
+        // Use `core.pricing` when checking if a feature is available for the current product tier.
+        productTier,
       },
     };
   }

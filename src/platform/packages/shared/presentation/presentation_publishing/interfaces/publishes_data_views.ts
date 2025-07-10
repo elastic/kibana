@@ -10,8 +10,12 @@
 import { DataView } from '@kbn/data-views-plugin/common';
 import { PublishingSubject } from '../publishing_subject';
 
+/**
+ * This API publishes a list of data views that it uses. Note that this should not contain any
+ * ad-hoc data views.
+ */
 export interface PublishesDataViews {
-  dataViews: PublishingSubject<DataView[] | undefined>;
+  dataViews$: PublishingSubject<DataView[] | undefined>;
 }
 
 export type PublishesWritableDataViews = PublishesDataViews & {
@@ -21,5 +25,5 @@ export type PublishesWritableDataViews = PublishesDataViews & {
 export const apiPublishesDataViews = (
   unknownApi: null | unknown
 ): unknownApi is PublishesDataViews => {
-  return Boolean(unknownApi && (unknownApi as PublishesDataViews)?.dataViews !== undefined);
+  return Boolean(unknownApi && (unknownApi as PublishesDataViews)?.dataViews$ !== undefined);
 };

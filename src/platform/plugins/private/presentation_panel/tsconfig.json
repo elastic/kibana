@@ -28,7 +28,8 @@
     "@kbn/panel-loader",
     "@kbn/search-errors",
     "@kbn/shared-ux-markdown",
-    "@kbn/react-hooks"
+    "@kbn/react-hooks",
+    "@kbn/shared-ux-utility",
   ],
   "exclude": ["target/**/*"]
 }

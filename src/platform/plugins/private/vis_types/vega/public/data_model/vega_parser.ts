@@ -12,15 +12,14 @@ import schemaParser from 'vega-schema-url-parser';
 import semVerCompare from 'semver/functions/compare';
 import semVerCoerce from 'semver/functions/coerce';
 import hjson from 'hjson';
-import { euiPaletteColorBlind } from '@elastic/eui';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
 
-import { logger, Warn, None, version as vegaVersion } from 'vega';
+import { logger, Warn, None, version as vegaVersion, scheme } from 'vega';
 import { compile, TopLevelSpec, version as vegaLiteVersion } from 'vega-lite';
 
+import type { CoreTheme } from '@kbn/core/public';
 import { EsQueryParser } from './es_query_parser';
-import { Utils } from './utils';
+import { Utils, getVegaThemeColors } from './utils';
 import { EmsFileParser } from './ems_file_parser';
 import { UrlParser } from './url_parser';
 import { SearchAPI } from './search_api';
@@ -39,9 +38,6 @@ import {
   ControlsDirection,
   KibanaConfig,
 } from './types';
-
-// Set default single color to match other Kibana visualizations
-const defaultColor: string = euiPaletteColorBlind()[0];
 
 const locToDirMap: Record<string, ControlsLocation> = {
   left: 'row-reverse',
@@ -75,13 +71,15 @@ export class VegaParser {
   getServiceSettings: () => Promise<IServiceSettings>;
   filters: Bool;
   timeCache: TimeCache;
+  theme: CoreTheme;
 
   constructor(
     spec: VegaSpec | string,
     searchAPI: SearchAPI,
     timeCache: TimeCache,
     filters: Bool,
-    getServiceSettings: () => Promise<IServiceSettings>
+    getServiceSettings: () => Promise<IServiceSettings>,
+    theme: CoreTheme
   ) {
     this.spec = spec as VegaSpec;
     this.hideWarnings = false;
@@ -92,6 +90,7 @@ export class VegaParser {
     this.getServiceSettings = getServiceSettings;
     this.filters = filters;
     this.timeCache = timeCache;
+    this.theme = theme;
   }
 
   async parseAsync() {
@@ -321,7 +320,7 @@ The URL is an identifier only. Kibana and your browser will never access this UR
 
   /**
    * Calculate container-direction CSS property for binding placement
-   * @private
+   * @internal
    */
   _parseControlPlacement() {
     this.containerDir = this._config?.controlsLocation
@@ -358,7 +357,7 @@ The URL is an identifier only. Kibana and your browser will never access this UR
   /**
    * Parse {config: kibana: {...}} portion of the Vega spec (or root-level _hostConfig for backward compat)
    * @returns {object} kibana config
-   * @private
+   * @internal
    */
   _parseConfig(): KibanaConfig | {} {
     let result: KibanaConfig | null = null;
@@ -468,7 +467,7 @@ The URL is an identifier only. Kibana and your browser will never access this UR
   /**
    * Parse map-specific configuration
    * @returns {{mapStyle: *|string, delayRepaint: boolean, latitude: number, longitude: number, zoom, minZoom, maxZoom, zoomControl: *|boolean, maxBounds: *}}
-   * @private
+   * @internal
    */
   _parseMapConfig() {
     const res: VegaConfig = {
@@ -553,7 +552,7 @@ The URL is an identifier only. Kibana and your browser will never access this UR
   /**
    * Parse Vega schema element
    * @returns {object} isVegaLite, libVersion
-   * @private
+   * @internal
    */
   private parseSchema(spec: VegaSpec) {
     try {
@@ -594,7 +593,7 @@ The URL is an identifier only. Kibana and your browser will never access this UR
   /**
    * Replace all instances of ES requests with raw values.
    * Also handle any other type of url: {type: xxx, ...}
-   * @private
+   * @internal
    */
   async _resolveDataUrls() {
     if (!this._urlParsers) {
@@ -653,7 +652,7 @@ The URL is an identifier only. Kibana and your browser will never access this UR
    * @param {*} obj current location in the object tree
    * @param {function({object})} onFind Call this function for all url objects
    * @param {string} [key] field name of the current object
-   * @private
+   * @internal
    */
 
   _findObjectDataUrls(obj: VegaSpec | Data, onFind: (data: Data) => void, key?: unknown) {
@@ -696,14 +695,19 @@ The URL is an identifier only. Kibana and your browser will never access this UR
 
   /**
    * Inject default colors into the spec.config
-   * @private
+   * @internal
    */
   _setDefaultColors() {
+    // Add the default palette
+    const paletteColors = getVegaThemeColors(this.theme, 'visColors');
+    scheme('elastic', paletteColors);
+
     // Default category coloring to the Elastic color scheme
     this._setDefaultValue({ scheme: 'elastic' }, 'config', 'range', 'category');
 
+    const defaultColor = getVegaThemeColors(this.theme, 'default');
     if (this.isVegaLite) {
-      // Vega-Lite: set default color, works for fill and strike --  config: { mark:  { color: '#54B399' }}
+      // Vega-Lite: set default color, works for fill and strike --  config: { mark:  { color: 'euiColorVis0' }}
       this._setDefaultValue(defaultColor, 'config', 'mark', 'color');
     } else {
       // Vega - global mark has very strange behavior, must customize each mark type individually
@@ -725,33 +729,18 @@ The URL is an identifier only. Kibana and your browser will never access this UR
       }
     }
 
-    // provide right colors for light and dark themes
-    this._setDefaultValue(euiThemeVars.euiColorDarkestShade, 'config', 'title', 'color');
-    this._setDefaultValue(euiThemeVars.euiColorDarkShade, 'config', 'style', 'guide-label', 'fill');
-    this._setDefaultValue(
-      euiThemeVars.euiColorDarkestShade,
-      'config',
-      'style',
-      'guide-title',
-      'fill'
-    );
-    this._setDefaultValue(
-      euiThemeVars.euiColorDarkestShade,
-      'config',
-      'style',
-      'group-title',
-      'fill'
-    );
-    this._setDefaultValue(
-      euiThemeVars.euiColorDarkestShade,
-      'config',
-      'style',
-      'group-subtitle',
-      'fill'
-    );
-    this._setDefaultValue(euiThemeVars.euiColorChartLines, 'config', 'axis', 'tickColor');
-    this._setDefaultValue(euiThemeVars.euiColorChartLines, 'config', 'axis', 'domainColor');
-    this._setDefaultValue(euiThemeVars.euiColorChartLines, 'config', 'axis', 'gridColor');
+    const titleColor = getVegaThemeColors(this.theme, 'title');
+    const labelColor = getVegaThemeColors(this.theme, 'label');
+    const axisColor = getVegaThemeColors(this.theme, 'grid');
+
+    this._setDefaultValue(labelColor, 'config', 'style', 'guide-label', 'fill'); // style for axis, legend, and header labels
+    this._setDefaultValue(titleColor, 'config', 'style', 'guide-title', 'fill'); // style for axis, legend, and header titles
+    this._setDefaultValue(titleColor, 'config', 'style', 'group-title', 'fill'); // styles for chart titles
+    this._setDefaultValue(titleColor, 'config', 'style', 'group-subtitle', 'fill'); // styles for chart sub-titles
+    this._setDefaultValue(axisColor, 'config', 'axis', 'tickColor');
+    this._setDefaultValue(axisColor, 'config', 'axis', 'domainColor');
+    this._setDefaultValue(axisColor, 'config', 'axis', 'gridColor');
+
     this._setDefaultValue('transparent', 'config', 'background');
   }
 
@@ -760,7 +749,7 @@ The URL is an identifier only. Kibana and your browser will never access this UR
    * Given an object, and an array of fields, ensure that obj.fld1.fld2. ... .fldN is set to value if it doesn't exist.
    * @param {*} value
    * @param {string} fields
-   * @private
+   * @internal
    */
   _setDefaultValue(value: unknown, ...fields: string[]) {
     let o = this.spec;
@@ -782,7 +771,7 @@ The URL is an identifier only. Kibana and your browser will never access this UR
 
   /**
    * Add a warning to the warnings array
-   * @private
+   * @internal
    */
   _onWarning(...args: any[]) {
     if (!this.hideWarnings) {

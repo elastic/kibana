@@ -179,7 +179,7 @@ function getProps({
   } as any);
 
   const { fatalErrors } = coreMock.createSetup();
-  const { http, docLinks, notifications } = coreMock.createStart();
+  const { http, docLinks, notifications, rendering } = coreMock.createStart();
   http.get.mockImplementation(async (path: any) => {
     if (path === '/api/spaces/space') {
       if (!spacesEnabled) {
@@ -221,6 +221,7 @@ function getProps({
     theme: themeMock,
     i18n: i18nMock,
     analytics: analyticsMock,
+    rendering,
   };
 }
 

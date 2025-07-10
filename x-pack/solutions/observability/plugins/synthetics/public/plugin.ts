@@ -57,17 +57,27 @@ import {
   ObservabilityAIAssistantPublicStart,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
-import type { UiActionsSetup } from '@kbn/ui-actions-plugin/public';
+import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
-import { DashboardStart, DashboardSetup } from '@kbn/dashboard-plugin/public';
+import { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { SLOPublicStart } from '@kbn/slo-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
+import { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import { registerSyntheticsEmbeddables } from './apps/embeddables/register_embeddables';
 import { kibanaService } from './utils/kibana_service';
 import { PLUGIN } from '../common/constants/plugin';
 import { OVERVIEW_ROUTE } from '../common/constants/ui';
 import { locators } from './apps/locators';
 import { syntheticsAlertTypeInitializers } from './apps/synthetics/lib/alert_types';
+import {
+  SYNTHETICS_MONITORS_EMBEDDABLE,
+  SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE,
+} from './apps/embeddables/constants';
+import { registerSyntheticsUiActions } from './apps/embeddables/ui_actions/register_ui_actions';
 
 export interface ClientPluginsSetup {
   home?: HomePublicPluginSetup;
@@ -82,7 +92,6 @@ export interface ClientPluginsSetup {
   embeddable: EmbeddableSetup;
   serverless?: ServerlessPluginSetup;
   uiActions: UiActionsSetup;
-  dashboard: DashboardSetup;
 }
 
 export interface ClientPluginsStart {
@@ -92,14 +101,16 @@ export interface ClientPluginsStart {
   discover: DiscoverStart;
   inspector: InspectorPluginStart;
   embeddable: EmbeddableStart;
+  embeddableEnhanced?: EmbeddableEnhancedPluginStart;
   exploratoryView: ExploratoryViewPublicStart;
   observability: ObservabilityPublicStart;
   observabilityShared: ObservabilitySharedPluginStart;
   observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
   share: SharePluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
-  cases: CasesPublicStart;
+  cases?: CasesPublicStart;
   dataViews: DataViewsPublicPluginStart;
+  fieldFormats: FieldFormatsStart;
   spaces?: SpacesPluginStart;
   cloud?: CloudStart;
   appName: string;
@@ -112,10 +123,14 @@ export interface ClientPluginsStart {
   usageCollection: UsageCollectionStart;
   serverless: ServerlessPluginStart;
   licenseManagement?: LicenseManagementUIPluginSetup;
+  licensing: LicensingPluginStart;
   slo?: SLOPublicStart;
   presentationUtil: PresentationUtilPluginStart;
   dashboard: DashboardStart;
   charts: ChartsPluginStart;
+  uiActions: UiActionsStart;
+  fieldsMetadata: FieldsMetadataPublicStart;
+  settings: SettingsStart;
 }
 
 export interface SyntheticsPluginServices extends Partial<CoreStart> {
@@ -217,6 +232,21 @@ export class SyntheticsPlugin
 
   public start(coreStart: CoreStart, pluginsStart: ClientPluginsStart): void {
     const { triggersActionsUi } = pluginsStart;
+
+    pluginsStart.dashboard.registerDashboardPanelPlacementSetting(
+      SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE,
+      () => {
+        return { width: 10, height: 8 };
+      }
+    );
+    pluginsStart.dashboard.registerDashboardPanelPlacementSetting(
+      SYNTHETICS_MONITORS_EMBEDDABLE,
+      () => {
+        return { width: 30, height: 12 };
+      }
+    );
+
+    registerSyntheticsUiActions(coreStart, pluginsStart);
 
     syntheticsAlertTypeInitializers.forEach((init) => {
       const { observabilityRuleTypeRegistry } = pluginsStart.observability;

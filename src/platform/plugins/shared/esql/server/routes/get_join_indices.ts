@@ -19,12 +19,18 @@ export const registerGetJoinIndicesRoute = (
     {
       path: '/internal/esql/autocomplete/join/indices',
       validate: {},
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
     },
     async (requestHandlerContext, request, response) => {
       try {
         const core = await requestHandlerContext.core;
         const service = new EsqlService({ client: core.elasticsearch.client.asCurrentUser });
-        const result = await service.getJoinIndices();
+        const result = await service.getIndicesByIndexMode('lookup');
 
         return response.ok({
           body: result,

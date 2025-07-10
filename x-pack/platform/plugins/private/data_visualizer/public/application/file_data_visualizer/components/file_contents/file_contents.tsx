@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import React, { useEffect, useState, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -16,21 +16,24 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSwitch,
+  EuiCallOut,
 } from '@elastic/eui';
 
-import { TIKA_PREVIEW_CHARS, type FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
+import { type FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
 import useMountedState from 'react-use/lib/useMountedState';
 import { i18n } from '@kbn/i18n';
-import { FILE_FORMATS } from '../../../../../common/constants';
+
+import { FILE_FORMATS } from '@kbn/file-upload-common';
+import { TIKA_PREVIEW_CHARS } from '@kbn/file-upload-common';
 import { EDITOR_MODE, JsonEditor } from '../json_editor';
 import { useGrokHighlighter } from './use_text_parser';
 import { LINE_LIMIT } from './grok_highlighter';
 
 interface Props {
   fileContents: string;
-  format: string;
-  numberOfLines: number;
-  semiStructureTextData: SemiStructureTextData | null;
+  results: FindFileStructureResponse;
+  showTitle?: boolean;
+  disableHighlighting?: boolean;
 }
 
 interface SemiStructureTextData {
@@ -38,7 +41,6 @@ interface SemiStructureTextData {
   multilineStartPattern?: string;
   excludeLinesPattern?: string;
   sampleStart: string;
-  mappings: FindFileStructureResponse['mappings'];
   ecsCompatibility?: string;
 }
 
@@ -54,19 +56,37 @@ function semiStructureTextDataGuard(
 
 export const FileContents: FC<Props> = ({
   fileContents,
-  format,
-  numberOfLines,
-  semiStructureTextData,
+  results,
+  showTitle = true,
+  disableHighlighting = false,
 }) => {
   let mode = EDITOR_MODE.TEXT;
+  const format = results.format;
+  const numberOfLines = results.num_lines_analyzed;
+
   if (format === EDITOR_MODE.JSON) {
     mode = EDITOR_MODE.JSON;
   }
   const isMounted = useMountedState();
   const grokHighlighter = useGrokHighlighter();
 
+  const semiStructureTextData = useMemo(
+    () =>
+      results.format === FILE_FORMATS.SEMI_STRUCTURED_TEXT
+        ? {
+            grokPattern: results.grok_pattern,
+            multilineStartPattern: results.multiline_start_pattern,
+            sampleStart: results.sample_start,
+            excludeLinesPattern: results.exclude_lines_pattern,
+            mappings: results.mappings,
+            ecsCompatibility: results.ecs_compatibility,
+          }
+        : null,
+    [results]
+  );
+
   const [isSemiStructureTextData, setIsSemiStructureTextData] = useState(
-    semiStructureTextDataGuard(semiStructureTextData)
+    disableHighlighting === false && semiStructureTextDataGuard(semiStructureTextData)
   );
   const formattedData = useMemo(
     () => limitByNumberOfLines(fileContents, numberOfLines),
@@ -108,14 +128,16 @@ export const FileContents: FC<Props> = ({
     <>
       <EuiFlexGroup>
         <EuiFlexItem>
-          <EuiTitle size="s">
-            <h2>
-              <FormattedMessage
-                id="xpack.dataVisualizer.file.fileContents.fileContentsTitle"
-                defaultMessage="File contents"
-              />
-            </h2>
-          </EuiTitle>
+          {showTitle ? (
+            <EuiTitle size="s">
+              <h2>
+                <FormattedMessage
+                  id="xpack.dataVisualizer.file.fileContents.fileContentsTitle"
+                  defaultMessage="File contents"
+                />
+              </h2>
+            </EuiTitle>
+          ) : null}
         </EuiFlexItem>
         {isSemiStructureTextData ? (
           <EuiFlexItem grow={false} data-test-subj="dataVisualizerFileContentsHighlightingSwitch">
@@ -131,25 +153,25 @@ export const FileContents: FC<Props> = ({
         ) : null}
       </EuiFlexGroup>
 
-      <EuiSpacer size="s" />
-
-      {format === FILE_FORMATS.TIKA ? (
-        <FormattedMessage
-          id="xpack.dataVisualizer.file.fileContents.characterCount"
-          defaultMessage="Preview limited to the first {numberOfChars} characters"
-          values={{
-            numberOfChars: TIKA_PREVIEW_CHARS,
-          }}
-        />
-      ) : (
-        <FormattedMessage
-          id="xpack.dataVisualizer.file.fileContents.firstLinesDescription"
-          defaultMessage="First {numberOfLines, plural, zero {# line} one {# line} other {# lines}}"
-          values={{
-            numberOfLines: showHighlights ? LINE_LIMIT : numberOfLines,
-          }}
-        />
-      )}
+      <PreviewLimitMessage wrapInCallout={showTitle === false}>
+        {format === FILE_FORMATS.TIKA ? (
+          <FormattedMessage
+            id="xpack.dataVisualizer.file.fileContents.characterCount"
+            defaultMessage="Preview limited to the first {numberOfChars} characters"
+            values={{
+              numberOfChars: TIKA_PREVIEW_CHARS,
+            }}
+          />
+        ) : (
+          <FormattedMessage
+            id="xpack.dataVisualizer.file.fileContents.firstLinesDescription"
+            defaultMessage="First {numberOfLines, plural, zero {# line} one {# line} other {# lines}}"
+            values={{
+              numberOfLines: showHighlights ? LINE_LIMIT : numberOfLines,
+            }}
+          />
+        )}
+      </PreviewLimitMessage>
 
       <EuiSpacer size="s" />
 
@@ -165,6 +187,20 @@ export const FileContents: FC<Props> = ({
           ))}
         </>
       )}
+    </>
+  );
+};
+
+const PreviewLimitMessage: FC<PropsWithChildren<{ wrapInCallout?: boolean }>> = ({
+  wrapInCallout = false,
+  children,
+}) => {
+  return wrapInCallout ? (
+    <EuiCallOut size="s" color="primary" title={children} />
+  ) : (
+    <>
+      <EuiSpacer size="s" />
+      {children}
     </>
   );
 };

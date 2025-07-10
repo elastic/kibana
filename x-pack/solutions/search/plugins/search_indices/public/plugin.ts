@@ -5,10 +5,16 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import {
+  type CoreSetup,
+  type CoreStart,
+  type Plugin,
+  DEFAULT_APP_CATEGORIES,
+} from '@kbn/core/public';
 import { SEARCH_INDICES_CREATE_INDEX } from '@kbn/deeplinks-search/constants';
 import { i18n } from '@kbn/i18n';
 
+import { Subscription } from 'rxjs';
 import { docLinks } from '../common/doc_links';
 import type {
   AppPluginSetupDependencies,
@@ -18,12 +24,13 @@ import type {
   SearchIndicesServicesContextDeps,
 } from './types';
 import { initQueryClient } from './services/query_client';
-import { INDICES_APP_ID, START_APP_ID } from '../common';
+import { SEARCH_INDEX_MANAGEMENT_APP_ID, INDICES_APP_ID, START_APP_ID } from '../common';
 import {
   CREATE_INDEX_PATH,
   INDICES_APP_BASE,
   START_APP_BASE,
   SearchIndexDetailsTabValues,
+  SEARCH_INDEX_MANAGEMENT_APP_BASE,
 } from './routes';
 import { registerLocators } from './locators';
 
@@ -31,6 +38,7 @@ export class SearchIndicesPlugin
   implements Plugin<SearchIndicesPluginSetup, SearchIndicesPluginStart>
 {
   private pluginEnabled: boolean = false;
+  private activeSolutionIdSubscription: Subscription | undefined;
 
   public setup(
     core: CoreSetup<SearchIndicesAppPluginStartDependencies, SearchIndicesPluginStart>,
@@ -56,6 +64,7 @@ export class SearchIndicesPlugin
         };
         return renderApp(ElasticsearchStartPage, coreStart, startDeps, element, queryClient);
       },
+      visibleIn: [],
     });
     core.application.register({
       id: INDICES_APP_ID,
@@ -67,6 +76,7 @@ export class SearchIndicesPlugin
           title: i18n.translate('xpack.searchIndices.elasticsearchIndices.createIndexTitle', {
             defaultMessage: 'Create index',
           }),
+          visibleIn: ['globalSearch'],
         },
       ],
       title: i18n.translate('xpack.searchIndices.elasticsearchIndices.startAppTitle', {
@@ -82,6 +92,25 @@ export class SearchIndicesPlugin
         };
         return renderApp(SearchIndicesRouter, coreStart, startDeps, element, queryClient);
       },
+      visibleIn: [],
+    });
+    core.application.register({
+      id: SEARCH_INDEX_MANAGEMENT_APP_ID,
+      appRoute: SEARCH_INDEX_MANAGEMENT_APP_BASE,
+      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
+      title: i18n.translate('xpack.searchIndices.elasticsearchIndices.indexManagementTitle', {
+        defaultMessage: 'Index Management',
+      }),
+      async mount({ element, history }) {
+        const { renderIndexManagementApp } = await import('./index_management_application');
+        return renderIndexManagementApp(element, {
+          core,
+          history,
+          indexManagement: plugins.indexManagement,
+        });
+      },
+      order: 1,
+      visibleIn: ['sideNav'],
     });
 
     registerLocators(plugins.share);
@@ -99,16 +128,23 @@ export class SearchIndicesPlugin
   ): SearchIndicesPluginStart {
     const { indexManagement } = deps;
     docLinks.setDocLinks(core.docLinks.links);
+
     if (this.pluginEnabled) {
-      indexManagement?.extensionsService.setIndexDetailsPageRoute({
-        renderRoute: (indexName, detailsTabId) => {
-          const route = `/app/elasticsearch/indices/index_details/${indexName}`;
-          if (detailsTabId && SearchIndexDetailsTabValues.includes(detailsTabId)) {
-            return `${route}/${detailsTabId}`;
+      this.activeSolutionIdSubscription = core.chrome
+        .getActiveSolutionNavId$()
+        .subscribe((activeSolutionId) => {
+          if (activeSolutionId === 'es') {
+            indexManagement?.extensionsService.setIndexDetailsPageRoute({
+              renderRoute: (indexName, detailsTabId) => {
+                const route = `/app/elasticsearch/indices/index_details/${indexName}`;
+                if (detailsTabId && SearchIndexDetailsTabValues.includes(detailsTabId)) {
+                  return `${route}/${detailsTabId}`;
+                }
+                return route;
+              },
+            });
           }
-          return route;
-        },
-      });
+        });
     }
     return {
       enabled: this.pluginEnabled,
@@ -117,5 +153,10 @@ export class SearchIndicesPlugin
     };
   }
 
-  public stop() {}
+  public stop() {
+    if (this.activeSolutionIdSubscription) {
+      this.activeSolutionIdSubscription.unsubscribe();
+      this.activeSolutionIdSubscription = undefined;
+    }
+  }
 }

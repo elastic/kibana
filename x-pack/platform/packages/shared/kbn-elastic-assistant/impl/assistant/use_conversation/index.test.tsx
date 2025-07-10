@@ -11,12 +11,13 @@ import { TestProviders } from '../../mock/test_providers/test_providers';
 import React from 'react';
 import { MessageRole } from '@kbn/elastic-assistant-common';
 import { httpServiceMock } from '@kbn/core/public/mocks';
-import { WELCOME_CONVERSATION } from './sample_conversations';
 import {
   deleteConversation,
   getConversationById as _getConversationById,
   createConversation as _createConversationApi,
+  updateConversation,
 } from '../api/conversations';
+import { emptyWelcomeConvo, welcomeConvo } from '../../mock/conversation';
 
 jest.mock('../api/conversations');
 const message = {
@@ -107,15 +108,38 @@ describe('useConversation', () => {
 
     await act(async () => {
       await result.current.setApiConfig({
-        conversation: WELCOME_CONVERSATION,
+        conversation: welcomeConvo,
         apiConfig: mockConvo.apiConfig,
       });
     });
 
-    expect(createConversation).toHaveBeenCalledWith({
+    expect(updateConversation).toHaveBeenCalledWith({
       http: httpMock,
-      conversation: { ...WELCOME_CONVERSATION, apiConfig: mockConvo.apiConfig, id: '' },
+      apiConfig: mockConvo.apiConfig,
+      conversationId: welcomeConvo.id,
     });
+  });
+
+  it('should not update the apiConfig for conversation that does not yet exist', async () => {
+    const { result } = renderHook(() => useConversation(), {
+      wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+        <TestProviders providerContext={{ http: httpMock }}>{children}</TestProviders>
+      ),
+    });
+    await waitFor(() => new Promise((resolve) => resolve(null)));
+
+    await act(async () => {
+      const res = await result.current.setApiConfig({
+        conversation: emptyWelcomeConvo,
+        apiConfig: mockConvo.apiConfig,
+      });
+      expect(res).toEqual({
+        ...emptyWelcomeConvo,
+        apiConfig: mockConvo.apiConfig,
+      });
+    });
+
+    expect(updateConversation).not.toHaveBeenCalled();
   });
 
   it('should remove the last message from a conversation when called with valid conversationId', async () => {

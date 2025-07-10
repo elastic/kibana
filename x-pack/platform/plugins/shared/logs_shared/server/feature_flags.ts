@@ -10,10 +10,6 @@ import { UiSettingsParams } from '@kbn/core-ui-settings-common';
 import { i18n } from '@kbn/i18n';
 import { OBSERVABILITY_LOGS_SHARED_NEW_LOGS_OVERVIEW_ID } from '@kbn/management-settings-ids';
 
-const technicalPreviewLabel = i18n.translate('xpack.logsShared.technicalPreviewSettingLabel', {
-  defaultMessage: 'Technical Preview',
-});
-
 export const featureFlagUiSettings: Record<string, UiSettingsParams> = {
   [OBSERVABILITY_LOGS_SHARED_NEW_LOGS_OVERVIEW_ID]: {
     category: ['observability'],
@@ -22,12 +18,12 @@ export const featureFlagUiSettings: Record<string, UiSettingsParams> = {
     }),
     value: false,
     description: i18n.translate('xpack.logsShared.newLogsOverviewSettingDescription', {
-      defaultMessage: '{technicalPreviewLabel} Enable the new logs overview experience.',
-
-      values: { technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>` },
+      defaultMessage: 'Enable the new logs overview experience.',
     }),
     type: 'boolean',
     schema: schema.boolean(),
     requiresPageReload: true,
+    solution: 'oblt',
+    technicalPreview: true,
   },
 };

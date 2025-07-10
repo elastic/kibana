@@ -6,6 +6,7 @@
  */
 
 import React, { memo, useEffect, useState } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 import type { AppMountParameters } from '@kbn/core/public';
 import { EuiPortal, useEuiTheme } from '@elastic/eui';
 import type { History } from 'history';
@@ -14,7 +15,6 @@ import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import useObservable from 'react-use/lib/useObservable';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { css } from '@emotion/css';
@@ -27,6 +27,8 @@ import type { FleetConfigType, FleetStartServices } from '../../plugin';
 
 import { PackageInstallProvider } from '../integrations/hooks';
 import { SpaceSettingsContextProvider } from '../../hooks/use_space_settings_context';
+
+import { ErrorLayout, PermissionsError } from '../../layouts/error';
 
 import { type FleetStatusProviderProps, useAuthz, useFleetStatus, useFlyoutContext } from './hooks';
 
@@ -60,12 +62,19 @@ import { EnrollmentTokenListPage } from './sections/agents/enrollment_token_list
 import { UninstallTokenListPage } from './sections/agents/uninstall_token_list_page';
 import { SettingsApp } from './sections/settings';
 import { DebugPage } from './sections/debug';
-import { ExperimentalFeaturesService } from './services';
-import { ErrorLayout, PermissionsError } from './layouts';
 
 const FEEDBACK_URL = 'https://ela.st/fleet-feedback';
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      networkMode: 'always',
+    },
+    mutations: {
+      networkMode: 'always',
+    },
+  },
+});
 
 export const WithPermissionsAndSetup = memo<{ children?: React.ReactNode }>(({ children }) => {
   useBreadcrumbs('base');
@@ -77,6 +86,8 @@ export const WithPermissionsAndSetup = memo<{ children?: React.ReactNode }>(({ c
     authz.fleet.readAgents ||
     authz.fleet.readAgentPolicies ||
     authz.fleet.readSettings;
+
+  const hasIntegrationsCreateOrUpdatePrivileges = authz.integrations.all;
 
   const [isPermissionsLoading, setIsPermissionsLoading] = useState<boolean>(false);
   const [permissionsError, setPermissionsError] = useState<string>();
@@ -112,6 +123,9 @@ export const WithPermissionsAndSetup = memo<{ children?: React.ReactNode }>(({ c
             if (!hasAnyFleetReadPrivileges) {
               setPermissionsError('MISSING_PRIVILEGES');
             }
+            if (!hasIntegrationsCreateOrUpdatePrivileges && isAddIntegrationsPath) {
+              setPermissionsError('MISSING_PRIVILEGES');
+            }
           } catch (err) {
             setInitializationError(err);
           }
@@ -123,12 +137,21 @@ export const WithPermissionsAndSetup = memo<{ children?: React.ReactNode }>(({ c
         setPermissionsError('REQUEST_ERROR');
       }
     })();
-  }, [notifications.toasts, hasAnyFleetReadPrivileges]);
+  }, [
+    notifications.toasts,
+    hasAnyFleetReadPrivileges,
+    hasIntegrationsCreateOrUpdatePrivileges,
+    isAddIntegrationsPath,
+  ]);
 
   if (isPermissionsLoading || permissionsError) {
     return (
       <ErrorLayout isAddIntegrationsPath={isAddIntegrationsPath}>
-        {isPermissionsLoading ? <Loading /> : <PermissionsError error={permissionsError!} />}
+        {isPermissionsLoading ? (
+          <Loading />
+        ) : (
+          <PermissionsError callingApplication="Fleet" error={permissionsError!} />
+        )}
       </ErrorLayout>
     );
   }
@@ -186,8 +209,10 @@ export const FleetAppContext: React.FC<{
     fleetStatus,
   }) => {
     const XXL_BREAKPOINT = 1600;
-    const darkModeObservable = useObservable(startServices.theme.theme$);
-    const isDarkMode = darkModeObservable && darkModeObservable.darkMode;
+    const isDarkMode = useObservable(
+      startServices.theme.theme$,
+      startServices.theme.getTheme()
+    ).darkMode;
 
     return (
       <KibanaRenderContextProvider
@@ -307,8 +332,6 @@ export const AppRoutes = memo(
     const flyoutContext = useFlyoutContext();
     const fleetStatus = useFleetStatus();
 
-    const { agentTamperProtectionEnabled } = ExperimentalFeaturesService.get();
-
     const authz = useAuthz();
 
     return (
@@ -325,7 +348,11 @@ export const AppRoutes = memo(
             ) : (
               <AppLayout setHeaderActionMenu={setHeaderActionMenu}>
                 <ErrorLayout isAddIntegrationsPath={false}>
-                  <PermissionsError error="MISSING_PRIVILEGES" requiredFleetRole="Agents Read" />
+                  <PermissionsError
+                    callingApplication="Fleet"
+                    error="MISSING_PRIVILEGES"
+                    requiredFleetRole="Agents Read"
+                  />
                 </ErrorLayout>
               </AppLayout>
             )}
@@ -343,6 +370,7 @@ export const AppRoutes = memo(
               <AppLayout setHeaderActionMenu={setHeaderActionMenu}>
                 <ErrorLayout isAddIntegrationsPath={false}>
                   <PermissionsError
+                    callingApplication="Fleet"
                     error="MISSING_PRIVILEGES"
                     requiredFleetRole="Agent policies Read"
                   />
@@ -359,26 +387,32 @@ export const AppRoutes = memo(
             ) : (
               <AppLayout setHeaderActionMenu={setHeaderActionMenu}>
                 <ErrorLayout isAddIntegrationsPath={false}>
-                  <PermissionsError error="MISSING_PRIVILEGES" requiredFleetRole="Agents All" />
+                  <PermissionsError
+                    callingApplication="Fleet"
+                    error="MISSING_PRIVILEGES"
+                    requiredFleetRole="Agents All"
+                  />
                 </ErrorLayout>
               </AppLayout>
             )}
           </Route>
-          {agentTamperProtectionEnabled && (
-            <Route path={FLEET_ROUTING_PATHS.uninstall_tokens}>
-              {authz.fleet.allAgents ? (
-                <AppLayout setHeaderActionMenu={setHeaderActionMenu}>
-                  <UninstallTokenListPage />
-                </AppLayout>
-              ) : (
-                <AppLayout setHeaderActionMenu={setHeaderActionMenu}>
-                  <ErrorLayout isAddIntegrationsPath={false}>
-                    <PermissionsError error="MISSING_PRIVILEGES" requiredFleetRole="Agents All" />
-                  </ErrorLayout>
-                </AppLayout>
-              )}
-            </Route>
-          )}
+          <Route path={FLEET_ROUTING_PATHS.uninstall_tokens}>
+            {authz.fleet.allAgents ? (
+              <AppLayout setHeaderActionMenu={setHeaderActionMenu}>
+                <UninstallTokenListPage />
+              </AppLayout>
+            ) : (
+              <AppLayout setHeaderActionMenu={setHeaderActionMenu}>
+                <ErrorLayout isAddIntegrationsPath={false}>
+                  <PermissionsError
+                    callingApplication="Fleet"
+                    error="MISSING_PRIVILEGES"
+                    requiredFleetRole="Agents All"
+                  />
+                </ErrorLayout>
+              </AppLayout>
+            )}
+          </Route>
           <Route path={FLEET_ROUTING_PATHS.data_streams}>
             <AppLayout setHeaderActionMenu={setHeaderActionMenu}>
               <DataStreamApp />
@@ -396,7 +430,11 @@ export const AppRoutes = memo(
             ) : (
               <ErrorLayout isAddIntegrationsPath={false}>
                 <AppLayout setHeaderActionMenu={setHeaderActionMenu}>
-                  <PermissionsError error="MISSING_PRIVILEGES" requiredFleetRole="Settings Read" />
+                  <PermissionsError
+                    callingApplication="Fleet"
+                    error="MISSING_PRIVILEGES"
+                    requiredFleetRole="Settings Read"
+                  />
                 </AppLayout>
               </ErrorLayout>
             )}

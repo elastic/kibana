@@ -19,7 +19,7 @@ export const DEFAULT_TABLE_LIMIT = 25;
 export const DEFAULT_QUERY_PARAMS: QueryParams = {
   page: DEFAULT_TABLE_ACTIVE_PAGE,
   perPage: DEFAULT_TABLE_LIMIT,
-  sortField: SortFieldInferenceEndpoint.endpoint,
+  sortField: SortFieldInferenceEndpoint.inference_id,
   sortOrder: SortOrder.asc,
 };
 

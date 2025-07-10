@@ -33,7 +33,6 @@
     "@kbn/event-annotation-common",
     "@kbn/lens-plugin",
     "@kbn/ui-theme",
-    "@kbn/test-jest-helpers",
     "@kbn/expressions-plugin",
     "@kbn/es-query",
     "@kbn/core-ui-settings-browser",

@@ -120,7 +120,9 @@ describe('internalBulkResolve', () => {
   }
 
   /** Mocks the elasticsearch client so it returns the expected results for an mget operation*/
-  function mockMgetResults(...results: Array<{ found: boolean }>) {
+  function mockMgetResults(
+    ...results: Array<{ found: boolean; _source?: Record<string, unknown> }>
+  ) {
     client.mget.mockResponseOnce({
       docs: results.map((x) => {
         return x.found
@@ -129,6 +131,7 @@ describe('internalBulkResolve', () => {
               _index: 'doesnt-matter',
               _source: {
                 foo: 'bar',
+                ...(x._source ?? {}),
               },
               ...VERSION_PROPS,
               found: true,
@@ -147,7 +150,7 @@ describe('internalBulkResolve', () => {
     expect(client.bulk).toHaveBeenCalledTimes(1);
     expect(client.bulk).toHaveBeenCalledWith(
       expect.objectContaining({
-        body: aliasIds
+        operations: aliasIds
           .map((id) => [
             {
               update: {
@@ -169,12 +172,10 @@ describe('internalBulkResolve', () => {
     expect(client.mget).toHaveBeenCalledTimes(1);
     expect(client.mget).toHaveBeenCalledWith(
       {
-        body: {
-          docs: objectIds.map((id) => ({
-            _id: serializer.generateRawId(normalizedNamespace, OBJ_TYPE, id),
-            _index: `index-for-${OBJ_TYPE}`,
-          })),
-        },
+        docs: objectIds.map((id) => ({
+          _id: serializer.generateRawId(normalizedNamespace, OBJ_TYPE, id),
+          _index: `index-for-${OBJ_TYPE}`,
+        })),
       },
       expect.anything()
     );
@@ -424,12 +425,12 @@ describe('internalBulkResolve', () => {
 
     beforeEach(() => {
       mockGetSavedObjectFromSource.mockReset();
-      mockGetSavedObjectFromSource.mockImplementation((_registry, type, id) => {
+      mockGetSavedObjectFromSource.mockImplementation((_registry, type, id, doc) => {
         return {
           id,
           type,
           namespaces: [namespace],
-          attributes: {},
+          attributes: doc?._source?.[type] ?? {},
           references: [],
         } as SavedObject;
       });
@@ -443,20 +444,17 @@ describe('internalBulkResolve', () => {
         { found: false },
         { found: false }
       );
-      mockMgetResults(
-        // exact matches
-        { found: true },
-        { found: true }
-      );
     });
 
     test(`propagates decorated error when unauthorized`, async () => {
+      mockMgetResults({ found: true }, { found: true });
       setupAuthorizeAndRedactInternalBulkResolveFailure(mockSecurityExt);
       await expect(internalBulkResolve(params, apiContext)).rejects.toThrow(enforceError);
       expect(mockSecurityExt.authorizeAndRedactInternalBulkResolve).toHaveBeenCalledTimes(1);
     });
 
     test(`returns result when successful`, async () => {
+      mockMgetResults({ found: true }, { found: true });
       setupAuthorizeAndRedactInternalBulkResolveSuccess(mockSecurityExt);
 
       const result = await internalBulkResolve(params, apiContext);
@@ -471,6 +469,7 @@ describe('internalBulkResolve', () => {
     });
 
     test(`returns empty array when no objects are provided`, async () => {
+      mockMgetResults({ found: true }, { found: true });
       setupAuthorizeAndRedactInternalBulkResolveSuccess(mockSecurityExt);
 
       const result = await internalBulkResolve({ ...params, objects: [] }, apiContext);
@@ -480,6 +479,7 @@ describe('internalBulkResolve', () => {
 
     describe('calls authorizeAndRedactInternalBulkResolve of the security extension', () => {
       beforeEach(() => {
+        mockMgetResults({ found: true }, { found: true });
         setupAuthorizeAndRedactInternalBulkResolveFailure(mockSecurityExt);
       });
 
@@ -496,6 +496,7 @@ describe('internalBulkResolve', () => {
       });
 
       test(`in a non-default space`, async () => {
+        mockMgetResults({ found: true }, { found: true });
         await expect(internalBulkResolve(params, apiContext)).rejects.toThrow(enforceError);
         expect(mockSecurityExt.authorizeAndRedactInternalBulkResolve).toHaveBeenCalledTimes(1);
 
@@ -504,6 +505,41 @@ describe('internalBulkResolve', () => {
         expect(actualNamespace).toEqual(namespace);
         expect(actualObjects).toEqual(expectedObjects);
       });
+    });
+
+    it('correctly passes params to securityExtension.authorizeAndRedactInternalBulkResolve', async () => {
+      mockMgetResults(
+        // exact matches
+        { found: true, _source: { [OBJ_TYPE]: { title: 'foo_title' } } },
+        { found: true, _source: { [OBJ_TYPE]: { name: 'bar_name' } } }
+      );
+
+      setupAuthorizeAndRedactInternalBulkResolveSuccess(mockSecurityExt);
+
+      await internalBulkResolve(params, apiContext);
+
+      expect(mockSecurityExt.authorizeAndRedactInternalBulkResolve).toHaveBeenCalledWith(
+        expect.objectContaining({
+          objects: expect.arrayContaining([
+            expect.objectContaining({
+              outcome: 'exactMatch',
+              saved_object: expect.objectContaining({
+                attributes: { name: 'bar_name' },
+                id: '14',
+                name: 'bar_name',
+              }),
+            }),
+            expect.objectContaining({
+              outcome: 'exactMatch',
+              saved_object: expect.objectContaining({
+                attributes: { title: 'foo_title' },
+                id: '13',
+                name: 'foo_title',
+              }),
+            }),
+          ]),
+        })
+      );
     });
   });
 });

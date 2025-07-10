@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsModelVersionMap } from '@kbn/core-saved-objects-server';
+import type { SavedObjectsModelVersionMap } from '@kbn/core-saved-objects-server';
 import { backgroundTaskNodeSchemaV1 } from '../schemas/background_task_node';
 
 export const backgroundTaskNodeModelVersions: SavedObjectsModelVersionMap = {

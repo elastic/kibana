@@ -7,7 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
-import type { ServerApiError } from '../../common/types';
 
 export const ENDPOINTS_TAB = i18n.translate('xpack.securitySolution.endpointsTab', {
   defaultMessage: 'Endpoints',
@@ -37,7 +36,7 @@ export const OS_TITLES: Readonly<{ [K in OperatingSystem]: string }> = {
   }),
 };
 
-export const getLoadPoliciesError = (error: ServerApiError) => {
+export const getLoadPoliciesError = (error: Error) => {
   return i18n.translate('xpack.securitySolution.exceptions.failedLoadPolicies', {
     defaultMessage: 'There was an error loading policies: "{error}"',
     values: { error: error.message },
@@ -213,6 +212,11 @@ export const CONSOLE_COMMANDS = {
       },
     },
   },
+  runscript: {
+    about: i18n.translate('xpack.securitySolution.endpointConsoleCommands.runscript.about', {
+      defaultMessage: 'Run a script on the host',
+    }),
+  },
 };
 
 export const CROWDSTRIKE_CONSOLE_COMMANDS = {
@@ -260,14 +264,10 @@ export const CROWDSTRIKE_CONSOLE_COMMANDS = {
       },
     },
     title: i18n.translate('xpack.securitySolution.crowdStrikeConsoleCommands.runscript.title', {
-      defaultMessage: 'Isolate',
-    }),
-    about: i18n.translate('xpack.securitySolution.crowdStrikeConsoleCommands.runscript.about', {
-      defaultMessage: 'Run a script on the host',
+      defaultMessage: 'Run Script',
     }),
     helpUsage: i18n.translate('xpack.securitySolution.crowdStrikeConsoleCommands.runscript.about', {
-      defaultMessage: `
-Command Examples for Running Scripts:
+      defaultMessage: `Command Examples for Running Scripts:
 
 1. Executes a script saved in the CrowdStrike cloud with the specified command-line arguments.
 
@@ -289,6 +289,45 @@ Command Examples for Running Scripts:
     }),
     privileges: i18n.translate(
       'xpack.securitySolution.crowdStrikeConsoleCommands.runscript.privileges',
+      {
+        defaultMessage:
+          'Insufficient privileges to run script. Contact your Kibana administrator if you think you should have this permission.',
+      }
+    ),
+  },
+};
+
+export const MS_DEFENDER_ENDPOINT_CONSOLE_COMMANDS = {
+  runscript: {
+    args: {
+      scriptName: {
+        about: i18n.translate(
+          'xpack.securitySolution.msDefenderEndpointConsoleCommands.runscript.args.scriptName.about',
+          {
+            defaultMessage: 'Script name in Files Library',
+          }
+        ),
+      },
+      args: {
+        about: i18n.translate(
+          'xpack.securitySolution.msDefenderEndpointConsoleCommands.runscript.args.args.about',
+          {
+            defaultMessage: 'Command line arguments',
+          }
+        ),
+      },
+    },
+
+    helpUsage: i18n.translate(
+      'xpack.securitySolution.msDefenderEndpointConsoleCommands.runscript.about',
+      {
+        defaultMessage: `Command Examples for Running Scripts:
+   runscript --ScriptName="CloudScript1.ps1" --Args="--Verbose true"
+`,
+      }
+    ),
+    privileges: i18n.translate(
+      'xpack.securitySolution.msDefenderEndpointConsoleCommands.runscript.privileges',
       {
         defaultMessage:
           'Insufficient privileges to run script. Contact your Kibana administrator if you think you should have this permission.',
@@ -321,3 +360,15 @@ export const CONFIRM_WARNING_MODAL_LABELS = (entryType: string) => {
     ),
   };
 };
+
+export const NO_PRIVILEGE_FOR_MANAGEMENT_OF_GLOBAL_ARTIFACT_MESSAGE = i18n.translate(
+  'xpack.securitySolution.translations.noGlobalArtifactManagementAllowedMessage',
+  { defaultMessage: 'Management of global artifacts requires additional privilege' }
+);
+
+export const ARTIFACT_POLICIES_NOT_ACCESSIBLE_IN_ACTIVE_SPACE_MESSAGE = (count: number): string =>
+  i18n.translate('xpack.securitySolution.translations.artifactPoliciesNotAccessibleInActiveSpace', {
+    defaultMessage:
+      'This artifact is associated with {count} {count, plural, =1 {policy that is} other {policies that are}} not accessible in active space',
+    values: { count },
+  });

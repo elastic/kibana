@@ -6,7 +6,7 @@
  */
 
 import { coreMock } from '@kbn/core/public/mocks';
-import { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public/plugin';
+import { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
 import type { ViewMode } from '@kbn/presentation-publishing';
 import { SerializedEvent } from '@kbn/ui-actions-enhanced-plugin/common';
 import {
@@ -58,7 +58,7 @@ const compatibleEmbeddableApi = {
   supportedTriggers: () => {
     return ['VALUE_CLICK_TRIGGER'];
   },
-  viewMode: new BehaviorSubject<ViewMode>('edit'),
+  viewMode$: new BehaviorSubject<ViewMode>('edit'),
 };
 
 beforeAll(async () => {
@@ -120,7 +120,7 @@ describe('isCompatible', () => {
   test('not compatible in view mode', async () => {
     const embeddableApi = {
       ...compatibleEmbeddableApi,
-      viewMode: new BehaviorSubject<ViewMode>('view'),
+      viewMode$: new BehaviorSubject<ViewMode>('view'),
     };
     const action = createAction();
     expect(await action.isCompatible({ embeddable: embeddableApi })).toBe(false);

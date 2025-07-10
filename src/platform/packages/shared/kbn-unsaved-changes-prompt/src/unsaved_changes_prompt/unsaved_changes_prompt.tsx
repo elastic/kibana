@@ -28,8 +28,11 @@ const DEFAULT_CONFIRM_BUTTON = i18n.translate('unsavedChangesPrompt.defaultModal
   defaultMessage: 'Leave page',
 });
 
-interface Props {
+interface BaseProps {
   hasUnsavedChanges: boolean;
+}
+
+interface SpaBlockingProps extends BaseProps {
   http: HttpStart;
   openConfirm: OverlayStart['openConfirm'];
   history: ScopedHistory;
@@ -38,20 +41,23 @@ interface Props {
   messageText?: string;
   cancelButtonText?: string;
   confirmButtonText?: string;
+  blockSpaNavigation?: true;
+  shouldPromptOnReplace?: boolean;
 }
 
-export const useUnsavedChangesPrompt = ({
-  hasUnsavedChanges,
-  openConfirm,
-  history,
-  http,
-  navigateToUrl,
-  // Provide overrides for confirm dialog
-  messageText = DEFAULT_BODY_TEXT,
-  titleText = DEFAULT_TITLE_TEXT,
-  confirmButtonText = DEFAULT_CONFIRM_BUTTON,
-  cancelButtonText = DEFAULT_CANCEL_BUTTON,
-}: Props) => {
+interface BrowserBlockingProps extends BaseProps {
+  blockSpaNavigation: false;
+  shouldPromptOnReplace?: boolean;
+}
+
+type Props = SpaBlockingProps | BrowserBlockingProps;
+
+const isSpaBlocking = (props: Props): props is SpaBlockingProps =>
+  props.blockSpaNavigation !== false;
+
+export const useUnsavedChangesPrompt = (props: Props) => {
+  const { hasUnsavedChanges, blockSpaNavigation = true, shouldPromptOnReplace = true } = props;
+
   useEffect(() => {
     if (hasUnsavedChanges) {
       const handler = (event: BeforeUnloadEvent) => {
@@ -67,11 +73,27 @@ export const useUnsavedChangesPrompt = ({
   }, [hasUnsavedChanges]);
 
   useEffect(() => {
-    if (!hasUnsavedChanges) {
+    if (!hasUnsavedChanges || !isSpaBlocking(props)) {
       return;
     }
 
-    const unblock = history.block((state) => {
+    const {
+      openConfirm,
+      http,
+      history,
+      navigateToUrl,
+      // Provide overrides for confirm dialog
+      messageText = DEFAULT_BODY_TEXT,
+      titleText = DEFAULT_TITLE_TEXT,
+      confirmButtonText = DEFAULT_CONFIRM_BUTTON,
+      cancelButtonText = DEFAULT_CANCEL_BUTTON,
+    } = props;
+
+    const unblock = history.block((state, action) => {
+      if (!shouldPromptOnReplace && action === 'REPLACE') {
+        return;
+      }
+
       async function confirmAsync() {
         const confirmResponse = await openConfirm(messageText, {
           title: titleText,
@@ -97,15 +119,5 @@ export const useUnsavedChangesPrompt = ({
     });
 
     return unblock;
-  }, [
-    history,
-    hasUnsavedChanges,
-    openConfirm,
-    navigateToUrl,
-    http.basePath,
-    titleText,
-    cancelButtonText,
-    confirmButtonText,
-    messageText,
-  ]);
+  }, [hasUnsavedChanges, blockSpaNavigation, shouldPromptOnReplace, props]);
 };

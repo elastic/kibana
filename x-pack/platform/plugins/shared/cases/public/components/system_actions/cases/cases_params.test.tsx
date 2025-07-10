@@ -19,6 +19,7 @@ import { useGetAllCaseConfigurations } from '../../../containers/configure/use_g
 import { useGetAllCaseConfigurationsResponse } from '../../configure_cases/__mock__';
 import { templatesConfigurationMock } from '../../../containers/mock';
 import * as utils from '../../../containers/configure/utils';
+import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common';
 
 jest.mock('@kbn/alerts-ui-shared/src/common/hooks/use_alerts_data_view');
 jest.mock('../../../common/lib/kibana/use_application');
@@ -72,6 +73,7 @@ describe('CasesParamsFields renders', () => {
     // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
     user = userEvent.setup({
       advanceTimers: jest.advanceTimersByTime,
+      pointerEventsCheck: 0,
     });
     useApplicationMock.mockReturnValueOnce({ appId: 'management' });
     useAlertsDataViewMock.mockReturnValue({
@@ -316,6 +318,54 @@ describe('CasesParamsFields renders', () => {
       getConfigurationByOwnerSpy.mockRestore();
     });
 
+    it('renders observability templates if the project is serverless observability', async () => {
+      useKibanaMock.mockReturnValue({
+        services: {
+          ...createStartServicesMock(),
+          // simulate a observability security project
+          cloud: { isServerlessEnabled: true, serverless: { projectType: 'observability' } },
+          data: { dataViews: {} },
+        },
+      } as unknown as ReturnType<typeof useKibana>);
+
+      const configuration = {
+        ...useGetAllCaseConfigurationsResponse.data[0],
+        templates: templatesConfigurationMock,
+      };
+      useGetAllCaseConfigurationsMock.mockImplementation(() => ({
+        ...useGetAllCaseConfigurationsResponse,
+        data: [configuration],
+      }));
+      const getConfigurationByOwnerSpy = jest
+        .spyOn(utils, 'getConfigurationByOwner')
+        .mockImplementation(() => configuration);
+
+      const securityOwnedRule = {
+        ...defaultProps,
+        // these two would normally produce a security owner
+        producerId: 'securitySolution',
+        featureId: 'securitySolution',
+        actionParams: {
+          subAction: 'run',
+          subActionParams: {
+            ...actionParams.subActionParams,
+            templateId: templatesConfigurationMock[1].key,
+          },
+        },
+      };
+
+      render(<CasesParamsFields {...securityOwnedRule} />);
+
+      expect(getConfigurationByOwnerSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          // the observability owner was forced
+          owner: 'observability',
+        })
+      );
+
+      getConfigurationByOwnerSpy.mockRestore();
+    });
+
     it('updates template correctly', async () => {
       useGetAllCaseConfigurationsMock.mockReturnValueOnce({
         ...useGetAllCaseConfigurationsResponse,
@@ -369,6 +419,24 @@ describe('CasesParamsFields renders', () => {
       expect(editAction.mock.calls[0][1].timeWindow).toEqual('6d');
     });
 
+    it('renders time window warning', async () => {
+      const { rerender } = render(<CasesParamsFields {...defaultProps} />);
+
+      expect(screen.queryByTestId('show-time-window-warning')).not.toBeInTheDocument();
+
+      const updatedProps = {
+        ...defaultProps,
+        actionParams: {
+          ...defaultProps.actionParams,
+          subActionParams: { ...defaultProps.actionParams.subActionParams, timeWindow: '10m' },
+        },
+      };
+
+      rerender(<CasesParamsFields {...updatedProps} />);
+
+      expect(await screen.findByTestId('show-time-window-warning')).toBeInTheDocument();
+    });
+
     it('updates reopenClosedCases', async () => {
       render(<CasesParamsFields {...defaultProps} />);
 
@@ -377,6 +445,69 @@ describe('CasesParamsFields renders', () => {
       await user.click(await screen.findByTestId('reopen-case'));
 
       expect(editAction.mock.calls[0][1].reopenClosedCases).toEqual(true);
+    });
+  });
+
+  describe('Attack Discovery', () => {
+    it('does not render `group by` component', async () => {
+      const newProps = {
+        ...defaultProps,
+        ruleTypeId: ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID,
+      };
+      render(<CasesParamsFields {...newProps} />);
+
+      expect(screen.queryByTestId('group-by-alert-field-combobox')).not.toBeInTheDocument();
+    });
+
+    it('does not render `time window` component', async () => {
+      const newProps = {
+        ...defaultProps,
+        ruleTypeId: ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID,
+      };
+      render(<CasesParamsFields {...newProps} />);
+
+      expect(screen.queryByTestId('time-window-size-input')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('time-window-unit-select')).not.toBeInTheDocument();
+    });
+
+    it('does not render `reopen case` component', async () => {
+      const newProps = {
+        ...defaultProps,
+        ruleTypeId: ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID,
+      };
+      render(<CasesParamsFields {...newProps} />);
+
+      expect(screen.queryByTestId('reopen-case')).not.toBeInTheDocument();
+    });
+
+    it('renders disabled `template selector` component', async () => {
+      const newProps = {
+        ...defaultProps,
+        ruleTypeId: ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID,
+      };
+      render(<CasesParamsFields {...newProps} />);
+
+      const templateSelectorComponent = await screen.findByTestId('create-case-template-select');
+
+      expect(templateSelectorComponent).toBeInTheDocument();
+      expect(templateSelectorComponent).toBeDisabled();
+    });
+
+    it('shows attack discovery explanation tooltip', async () => {
+      const newProps = {
+        ...defaultProps,
+        ruleTypeId: ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID,
+      };
+      render(<CasesParamsFields {...newProps} />);
+
+      await user.hover(await screen.findByTestId('create-case-template-select'));
+
+      expect(await screen.findByTestId('case-action-attack-discovery-tooltip')).toBeTruthy();
+      expect(
+        await screen.findByText(
+          'Attack Discovery Schedules fully manage Case actions, automatically filling in all fields for new Cases.'
+        )
+      ).toBeInTheDocument();
     });
   });
 });

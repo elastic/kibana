@@ -38,6 +38,8 @@ export const transformEventLogTypeStatus = ({
 
   // metrics
   const eqlMetrics = aggs.eventActionExecutionMetrics['siem.eqlRule'];
+  const newTermsMetrics = aggs.eventActionExecutionMetrics['siem.newTermsRule'];
+  const esqlMetrics = aggs.eventActionExecutionMetrics['siem.esqlRule'];
   const indicatorMetrics = aggs.eventActionExecutionMetrics['siem.indicatorRule'];
   const mlMetrics = aggs.eventActionExecutionMetrics['siem.mlRule'];
   const queryMetrics = aggs.eventActionExecutionMetrics['siem.queryRule'];
@@ -46,6 +48,8 @@ export const transformEventLogTypeStatus = ({
 
   // failure status
   const eqlFailure = aggs.eventActionStatusChange.failed['siem.eqlRule'];
+  const newTermsFailure = aggs.eventActionStatusChange.failed['siem.newTermsRule'];
+  const esqlFailure = aggs.eventActionStatusChange.failed['siem.esqlRule'];
   const indicatorFailure = aggs.eventActionStatusChange.failed['siem.indicatorRule'];
   const mlFailure = aggs.eventActionStatusChange.failed['siem.mlRule'];
   const queryFailure = aggs.eventActionStatusChange.failed['siem.queryRule'];
@@ -54,6 +58,9 @@ export const transformEventLogTypeStatus = ({
 
   // partial failure
   const eqlPartialFailure = aggs.eventActionStatusChange['partial failure']['siem.eqlRule'];
+  const newTermsPartialFailure =
+    aggs.eventActionStatusChange['partial failure']['siem.newTermsRule'];
+  const esqlPartialFailure = aggs.eventActionStatusChange['partial failure']['siem.esqlRule'];
   const indicatorPartialFailure =
     aggs.eventActionStatusChange['partial failure']['siem.indicatorRule'];
   const mlPartialFailure = aggs.eventActionStatusChange['partial failure']['siem.mlRule'];
@@ -65,6 +72,8 @@ export const transformEventLogTypeStatus = ({
 
   // success
   const eqlSuccess = aggs.eventActionStatusChange.succeeded['siem.eqlRule'];
+  const newTermsSuccess = aggs.eventActionStatusChange.succeeded['siem.newTermsRule'];
+  const esqlSuccess = aggs.eventActionStatusChange.succeeded['siem.esqlRule'];
   const indicatorSuccess = aggs.eventActionStatusChange.succeeded['siem.indicatorRule'];
   const mlSuccess = aggs.eventActionStatusChange.succeeded['siem.mlRule'];
   const querySuccess = aggs.eventActionStatusChange.succeeded['siem.queryRule'];
@@ -77,6 +86,18 @@ export const transformEventLogTypeStatus = ({
       partialFailed: eqlPartialFailure,
       succeeded: eqlSuccess,
       singleMetric: eqlMetrics,
+    }),
+    new_terms: transformSingleRuleMetric({
+      failed: newTermsFailure,
+      partialFailed: newTermsPartialFailure,
+      succeeded: newTermsSuccess,
+      singleMetric: newTermsMetrics,
+    }),
+    esql: transformSingleRuleMetric({
+      failed: esqlFailure,
+      partialFailed: esqlPartialFailure,
+      succeeded: esqlSuccess,
+      singleMetric: esqlMetrics,
     }),
     threat_match: transformSingleRuleMetric({
       failed: indicatorFailure,
@@ -111,6 +132,8 @@ export const transformEventLogTypeStatus = ({
     total: {
       failures: countTotals([
         eqlFailure,
+        newTermsFailure,
+        esqlFailure,
         indicatorFailure,
         mlFailure,
         queryFailure,
@@ -119,6 +142,8 @@ export const transformEventLogTypeStatus = ({
       ]),
       partial_failures: countTotals([
         eqlPartialFailure,
+        newTermsPartialFailure,
+        esqlPartialFailure,
         indicatorPartialFailure,
         mlPartialFailure,
         queryPartialFailure,
@@ -127,6 +152,8 @@ export const transformEventLogTypeStatus = ({
       ]),
       succeeded: countTotals([
         eqlSuccess,
+        newTermsSuccess,
+        esqlSuccess,
         indicatorSuccess,
         mlSuccess,
         querySuccess,

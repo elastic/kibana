@@ -5,22 +5,18 @@
  * 2.0.
  */
 import qs from 'query-string';
-import type { SerializableRecord } from '@kbn/utility-types';
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
-
-export interface TransactionDetailsByNameParams extends SerializableRecord {
-  serviceName: string;
-  transactionName: string;
-  rangeFrom?: string;
-  rangeTo?: string;
-}
+import {
+  TRANSACTION_DETAILS_BY_NAME_LOCATOR,
+  TransactionDetailsByNameParams,
+} from '@kbn/deeplinks-observability';
 
 export type TransactionDetailsByNameLocator = LocatorPublic<TransactionDetailsByNameParams>;
 
 export class TransactionDetailsByNameLocatorDefinition
   implements LocatorDefinition<TransactionDetailsByNameParams>
 {
-  public readonly id = 'TransactionDetailsByNameLocator';
+  public readonly id = TRANSACTION_DETAILS_BY_NAME_LOCATOR;
 
   public readonly getLocation = async ({
     rangeFrom,

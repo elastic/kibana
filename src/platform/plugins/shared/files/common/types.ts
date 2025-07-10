@@ -111,10 +111,10 @@ interface HttpEndpointDefinition {
    *
    * @example
    * // This will enable access control to this endpoint for users that can access "myApp" only.
-   * { tags: ['access:myApp'] }
+   * { requiredPrivileges: ['myApp'] }
    *
    */
-  tags: string[];
+  requiredPrivileges: string[];
 }
 
 /**

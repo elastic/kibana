@@ -11,7 +11,6 @@ import { useDispatch } from 'react-redux';
 import type { ChromeBreadcrumb } from '@kbn/core/public';
 import type { Dispatch } from 'redux';
 import { SecurityPageName } from '../../../../app/types';
-import type { RouteSpyState } from '../../../utils/route/types';
 import { timelineActions } from '../../../../timelines/store';
 import { TimelineId } from '../../../../../common/types/timeline';
 import type { GetSecuritySolutionUrl } from '../../link_to';
@@ -20,9 +19,10 @@ import { AppEventTypes, type TelemetryServiceStart } from '../../../lib/telemetr
 import { useKibana, useNavigateTo, type NavigateTo } from '../../../lib/kibana';
 import { useRouteSpy } from '../../../utils/route/use_route_spy';
 import { updateBreadcrumbsNav } from '../../../breadcrumbs';
-import { getAncestorLinksInfo } from '../../../links';
+import type { LinkInfo } from '../../../links';
 import { APP_NAME } from '../../../../../common/constants';
 import { getTrailingBreadcrumbs } from './trailing_breadcrumbs';
+import { useParentLinks } from '../../../links/links_hooks';
 
 export const useBreadcrumbsNav = () => {
   const dispatch = useDispatch();
@@ -30,6 +30,7 @@ export const useBreadcrumbsNav = () => {
   const [routeProps] = useRouteSpy();
   const { navigateTo } = useNavigateTo();
   const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
+  const parentLinks = useParentLinks(routeProps.pageName);
 
   useEffect(() => {
     // cases manages its own breadcrumbs
@@ -37,18 +38,18 @@ export const useBreadcrumbsNav = () => {
       return;
     }
 
-    const leadingBreadcrumbs = getLeadingBreadcrumbs(routeProps, getSecuritySolutionUrl);
+    const leadingBreadcrumbs = getLeadingBreadcrumbs(parentLinks, getSecuritySolutionUrl);
     const trailingBreadcrumbs = getTrailingBreadcrumbs(routeProps, getSecuritySolutionUrl);
 
     updateBreadcrumbsNav({
       leading: addOnClicksHandlers(leadingBreadcrumbs, dispatch, navigateTo, telemetry),
       trailing: addOnClicksHandlers(trailingBreadcrumbs, dispatch, navigateTo, telemetry),
     });
-  }, [routeProps, getSecuritySolutionUrl, dispatch, navigateTo, telemetry]);
+  }, [routeProps, parentLinks, getSecuritySolutionUrl, dispatch, navigateTo, telemetry]);
 };
 
 const getLeadingBreadcrumbs = (
-  { pageName }: RouteSpyState,
+  parentLinks: LinkInfo[],
   getSecuritySolutionUrl: GetSecuritySolutionUrl
 ): ChromeBreadcrumb[] => {
   const landingBreadcrumb: ChromeBreadcrumb = {
@@ -56,7 +57,7 @@ const getLeadingBreadcrumbs = (
     href: getSecuritySolutionUrl({ deepLinkId: SecurityPageName.landing }),
   };
 
-  const breadcrumbs: ChromeBreadcrumb[] = getAncestorLinksInfo(pageName).map(({ title, id }) => ({
+  const breadcrumbs: ChromeBreadcrumb[] = parentLinks.map(({ title, id }) => ({
     text: title,
     href: getSecuritySolutionUrl({ deepLinkId: id }),
   }));

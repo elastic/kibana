@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { Story } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 import { EuiIcon } from '@elastic/eui';
 import { ExpandablePanel } from './expandable_panel';
 
@@ -25,16 +25,16 @@ const headerContent = <EuiIcon type="expand" />;
 
 const children = <p>{'test content'}</p>;
 
-export const Default: Story<void> = () => {
+export const Default: StoryFn = () => {
   return <ExpandablePanel {...defaultProps}>{children}</ExpandablePanel>;
 };
 
-export const DefaultWithoutIcon: Story<void> = () => {
+export const DefaultWithoutIcon: StoryFn = () => {
   const props = { header: { title: 'title' } };
   return <ExpandablePanel {...props}>{children}</ExpandablePanel>;
 };
 
-export const DefaultWithHeaderContent: Story<void> = () => {
+export const DefaultWithHeaderContent: StoryFn = () => {
   const props = {
     ...defaultProps,
     header: { ...defaultProps.header, headerContent },
@@ -42,7 +42,7 @@ export const DefaultWithHeaderContent: Story<void> = () => {
   return <ExpandablePanel {...props}>{children}</ExpandablePanel>;
 };
 
-export const Expandable: Story<void> = () => {
+export const Expandable: StoryFn = () => {
   const props = {
     ...defaultProps,
     expand: { expandable: true },
@@ -50,7 +50,7 @@ export const Expandable: Story<void> = () => {
   return <ExpandablePanel {...props}>{children}</ExpandablePanel>;
 };
 
-export const ExpandableDefaultOpen: Story<void> = () => {
+export const ExpandableDefaultOpen: StoryFn = () => {
   const props = {
     ...defaultProps,
     expand: { expandable: true, expandedOnFirstRender: true },
@@ -58,11 +58,11 @@ export const ExpandableDefaultOpen: Story<void> = () => {
   return <ExpandablePanel {...props}>{children}</ExpandablePanel>;
 };
 
-export const EmptyDefault: Story<void> = () => {
+export const EmptyDefault: StoryFn = () => {
   return <ExpandablePanel {...defaultProps} />;
 };
 
-export const EmptyDefaultExpanded: Story<void> = () => {
+export const EmptyDefaultExpanded: StoryFn = () => {
   const props = {
     ...defaultProps,
     expand: { expandable: true },

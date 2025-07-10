@@ -1,0 +1,4 @@
+# Security Complete tier config
+
+## Cloud settings
+xpack.cloud.serverless.product_tier: complete

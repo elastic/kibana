@@ -27,10 +27,12 @@
       {
         "feature": {
           "ml": ["read"],
-          "siem": ["read", "read_alerts"],
+          "siemV3": ["read", "read_alerts"],
           "securitySolutionAssistant": ["none"],
           "securitySolutionAttackDiscovery": ["none"],
           "securitySolutionCasesV2": ["read"],
+          "securitySolutionTimeline": ["read"],
+          "securitySolutionNotes": ["read"],
           "actions": ["read"],
           "builtInAlerts": ["read"]
         },
@@ -76,10 +78,12 @@
       {
         "feature": {
           "ml": ["read"],
-          "siem": ["all", "read_alerts", "crud_alerts"],
+          "siemV3": ["all", "read_alerts", "crud_alerts"],
           "securitySolutionAssistant": ["all"],
           "securitySolutionAttackDiscovery": ["all"],
           "securitySolutionCasesV2": ["all"],
+          "securitySolutionTimeline": ["read"],
+          "securitySolutionNotes": ["read"],
           "actions": ["read"],
           "builtInAlerts": ["all"]
         },
@@ -125,10 +129,12 @@
       {
         "feature": {
           "ml": ["read"],
-          "siem": ["all", "read_alerts", "crud_alerts"],
+          "siemV3": ["all", "read_alerts", "crud_alerts"],
           "securitySolutionAssistant": ["all"],
           "securitySolutionAttackDiscovery": ["all"],
           "securitySolutionCasesV2": ["all"],
+          "securitySolutionTimeline": ["all"],
+          "securitySolutionNotes": ["all"],
           "builtInAlerts": ["all"]
         },
         "spaces": ["*"],
@@ -146,7 +152,119 @@
     "kibana": [
       {
         "feature": {
-          "siem": ["read"]
+          "siemV3": ["read"]
+        },
+        "spaces": ["*"],
+        "base": []
+      }
+    ]
+  },
+  "timeline_none": {
+    "name": "timeline_none",
+    "elasticsearch": {
+      "cluster": [],
+      "indices": [
+        {
+          "names": [
+            "apm-*-transaction*",
+            "traces-apm*",
+            "auditbeat-*",
+            "endgame-*",
+            "filebeat-*",
+            "logs-*",
+            "packetbeat-*",
+            "winlogbeat-*",
+            ".lists*",
+            ".items*",
+            ".asset-criticality.asset-criticality-*"
+          ],
+          "privileges": ["read", "write"]
+        },
+        {
+          "names": [
+            ".alerts-security*",
+            ".preview.alerts-security*",
+            ".internal.preview.alerts-security*",
+            ".adhoc.alerts-security*",
+            ".internal.adhoc.alerts-security*",
+            ".siem-signals-*"
+          ],
+          "privileges": ["read", "write", "manage"]
+        },
+        {
+          "names": ["metrics-endpoint.metadata_current_*", ".fleet-agents*", ".fleet-actions*"],
+          "privileges": ["read"]
+        }
+      ],
+      "run_as": []
+    },
+    "kibana": [
+      {
+        "feature": {
+          "ml": ["read"],
+          "siemV3": ["all", "read_alerts", "crud_alerts"],
+          "securitySolutionAssistant": ["all"],
+          "securitySolutionAttackDiscovery": ["all"],
+          "securitySolutionCasesV2": ["all"],
+          "securitySolutionNotes": ["all"],
+          "actions": ["all"],
+          "builtInAlerts": ["all"]
+        },
+        "spaces": ["*"],
+        "base": []
+      }
+    ]
+  },
+  "notes_none": {
+    "name": "notes_none",
+    "elasticsearch": {
+      "cluster": [],
+      "indices": [
+        {
+          "names": [
+            "apm-*-transaction*",
+            "traces-apm*",
+            "auditbeat-*",
+            "endgame-*",
+            "filebeat-*",
+            "logs-*",
+            "packetbeat-*",
+            "winlogbeat-*",
+            ".lists*",
+            ".items*",
+            ".asset-criticality.asset-criticality-*"
+          ],
+          "privileges": ["read", "write"]
+        },
+        {
+          "names": [
+            ".alerts-security*",
+            ".preview.alerts-security*",
+            ".internal.preview.alerts-security*",
+            ".adhoc.alerts-security*",
+            ".internal.adhoc.alerts-security*",
+            ".siem-signals-*"
+          ],
+          "privileges": ["read", "write", "manage"]
+        },
+        {
+          "names": ["metrics-endpoint.metadata_current_*", ".fleet-agents*", ".fleet-actions*"],
+          "privileges": ["read"]
+        }
+      ],
+      "run_as": []
+    },
+    "kibana": [
+      {
+        "feature": {
+          "ml": ["read"],
+          "siemV3": ["all", "read_alerts", "crud_alerts"],
+          "securitySolutionAssistant": ["all"],
+          "securitySolutionAttackDiscovery": ["all"],
+          "securitySolutionCasesV2": ["all"],
+          "securitySolutionTimeline": ["all"],
+          "actions": ["all"],
+          "builtInAlerts": ["all"]
         },
         "spaces": ["*"],
         "base": []

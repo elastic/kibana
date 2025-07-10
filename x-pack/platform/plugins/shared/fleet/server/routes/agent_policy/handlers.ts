@@ -17,7 +17,12 @@ import { inputsFormat } from '../../../common/constants';
 import { HTTPAuthorizationHeader } from '../../../common/http_authorization_header';
 
 import { fullAgentPolicyToYaml } from '../../../common/services';
-import { appContextService, agentPolicyService } from '../../services';
+import {
+  appContextService,
+  agentPolicyService,
+  packagePolicyService,
+  licenseService,
+} from '../../services';
 import { type AgentClient, getLatestAvailableAgentVersion } from '../../services/agents';
 import {
   AGENTS_PREFIX,
@@ -39,12 +44,15 @@ import type {
   FleetRequestHandlerContext,
   GetAgentPolicyOutputsRequestSchema,
   GetListAgentPolicyOutputsRequestSchema,
+  GetAutoUpgradeAgentsStatusRequestSchema,
+  CreateAgentAndPackagePolicyRequestSchema,
 } from '../../types';
 
 import type {
   GetAgentPoliciesResponse,
   GetAgentPoliciesResponseItem,
   GetOneAgentPolicyResponse,
+  CreateAgentPolicyRequest,
   CreateAgentPolicyResponse,
   UpdateAgentPolicyResponse,
   CopyAgentPolicyResponse,
@@ -55,11 +63,16 @@ import type {
   BulkGetAgentPoliciesResponse,
   GetAgentPolicyOutputsResponse,
   GetListAgentPolicyOutputsResponse,
+  CreatePackagePolicyRequest,
 } from '../../../common/types';
 import { AgentPolicyNotFoundError, FleetUnauthorizedError, FleetError } from '../../errors';
 import { createAgentPolicyWithPackages } from '../../services/agent_policy_create';
 import { updateAgentPolicySpaces } from '../../services/spaces/agent_policy';
 import { packagePolicyToSimplifiedPackagePolicy } from '../../../common/services/simplified_package_policy_helper';
+import { FLEET_API_PRIVILEGES } from '../../constants/api_privileges';
+import { getAutoUpgradeAgentsStatus } from '../../services/agents';
+
+import { createPackagePolicyHandler } from '../package_policy/handlers';
 
 export async function populateAssignedAgentsCount(
   agentClient: AgentClient,
@@ -131,8 +144,17 @@ export const getAgentPoliciesHandler: FleetRequestHandler<
   TypeOf<typeof GetAgentPoliciesRequestSchema.query>
 > = async (context, request, response) => {
   const [coreContext, fleetContext] = await Promise.all([context.core, context.fleet]);
-  const soClient = fleetContext.internalSoClient;
+
+  const authzFleetReadAgentPolicies =
+    request.authzResult?.[FLEET_API_PRIVILEGES.AGENT_POLICIES.READ] === true;
+  const authzFleetAgentRead = request.authzResult?.[FLEET_API_PRIVILEGES.AGENTS.READ] === true;
+
+  const soClient =
+    authzFleetReadAgentPolicies || authzFleetAgentRead
+      ? coreContext.savedObjects.client
+      : fleetContext.internalSoClient;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
+
   const {
     full: withPackagePolicies = false,
     noAgentCount,
@@ -140,7 +162,7 @@ export const getAgentPoliciesHandler: FleetRequestHandler<
     format,
     ...restOfQuery
   } = request.query;
-  if (!fleetContext.authz.fleet.readAgentPolicies && withPackagePolicies) {
+  if (!authzFleetReadAgentPolicies && withPackagePolicies) {
     throw new FleetUnauthorizedError(
       'full query parameter require agent policies read permissions'
     );
@@ -153,11 +175,11 @@ export const getAgentPoliciesHandler: FleetRequestHandler<
   let { items } = agentPoliciesResponse;
   const { total, page, perPage } = agentPoliciesResponse;
 
-  if (fleetContext.authz.fleet.readAgents && (noAgentCount === false || withAgentCount)) {
+  if (authzFleetAgentRead && (noAgentCount === false || withAgentCount)) {
     await populateAssignedAgentsCount(fleetContext.agentClient.asCurrentUser, items);
   }
 
-  if (!fleetContext.authz.fleet.readAgentPolicies) {
+  if (!authzFleetReadAgentPolicies) {
     items = items.map(sanitizeItemForReadAgentOnly);
   } else if (withPackagePolicies && format === inputsFormat.Simplified) {
     items.map((item) => {
@@ -188,10 +210,18 @@ export const bulkGetAgentPoliciesHandler: FleetRequestHandler<
   TypeOf<typeof BulkGetAgentPoliciesRequestSchema.body>
 > = async (context, request, response) => {
   try {
-    const fleetContext = await context.fleet;
-    const soClient = fleetContext.internalSoClient;
+    const [coreContext, fleetContext] = await Promise.all([context.core, context.fleet]);
+    const authzFleetReadAgentPolicies =
+      request.authzResult?.[FLEET_API_PRIVILEGES.AGENT_POLICIES.READ] === true;
+    const authzFleetAgentRead = request.authzResult?.[FLEET_API_PRIVILEGES.AGENTS.READ] === true;
+
+    const soClient =
+      authzFleetReadAgentPolicies || authzFleetAgentRead
+        ? coreContext.savedObjects.client
+        : fleetContext.internalSoClient;
+
     const { full: withPackagePolicies = false, ignoreMissing = false, ids } = request.body;
-    if (!fleetContext.authz.fleet.readAgentPolicies && withPackagePolicies) {
+    if (!authzFleetReadAgentPolicies && withPackagePolicies) {
       throw new FleetUnauthorizedError(
         'full query parameter require agent policies read permissions'
       );
@@ -200,7 +230,7 @@ export const bulkGetAgentPoliciesHandler: FleetRequestHandler<
       withPackagePolicies,
       ignoreMissing,
     });
-    if (!fleetContext.authz.fleet.readAgentPolicies) {
+    if (!authzFleetReadAgentPolicies) {
       items = items.map(sanitizeItemForReadAgentOnly);
     } else if (withPackagePolicies && request.query.format === inputsFormat.Simplified) {
       items.map((item) => {
@@ -219,7 +249,7 @@ export const bulkGetAgentPoliciesHandler: FleetRequestHandler<
     const body: BulkGetAgentPoliciesResponse = {
       items,
     };
-    if (fleetContext.authz.fleet.readAgents) {
+    if (authzFleetAgentRead) {
       await populateAssignedAgentsCount(fleetContext.agentClient.asCurrentUser, items);
     }
 
@@ -277,6 +307,26 @@ export const getOneAgentPolicyHandler: FleetRequestHandler<
   }
 };
 
+export const getAutoUpgradeAgentsStatusHandler: FleetRequestHandler<
+  TypeOf<typeof GetAutoUpgradeAgentsStatusRequestSchema.params>,
+  undefined
+> = async (context, request, response) => {
+  const [_, fleetContext] = await Promise.all([context.core, context.fleet]);
+
+  const agentClient = fleetContext.agentClient.asCurrentUser;
+
+  if (!licenseService.isEnterprise()) {
+    throw new FleetUnauthorizedError(
+      'Auto-upgrade agents feature requires at least Enterprise license'
+    );
+  }
+
+  const body = await getAutoUpgradeAgentsStatus(agentClient, request.params.agentPolicyId);
+  return response.ok({
+    body,
+  });
+};
+
 export const createAgentPolicyHandler: FleetRequestHandler<
   undefined,
   TypeOf<typeof CreateAgentPolicyRequestSchema.query>,
@@ -289,6 +339,8 @@ export const createAgentPolicyHandler: FleetRequestHandler<
   const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
   const withSysMonitoring = request.query.sys_monitoring ?? false;
   const monitoringEnabled = request.body.monitoring_enabled;
+  const logger = appContextService.getLogger().get('httpCreateAgentPolicyHandler');
+
   const {
     has_fleet_server: hasFleetServer,
     force,
@@ -298,9 +350,13 @@ export const createAgentPolicyHandler: FleetRequestHandler<
   const spaceId = fleetContext.spaceId;
   const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request, user?.username);
 
+  logger.debug(`Creating agent policy [${newPolicy.name}]`);
+
   try {
     let authorizedSpaces: string[] | undefined;
     if (spaceIds?.length) {
+      logger.debug(`Checking privileges for spaces [${spaceIds.join(', ')}] `);
+
       authorizedSpaces = await checkAgentPoliciesAllPrivilegesForSpaces(request, context, spaceIds);
       for (const requestedSpaceId of spaceIds) {
         if (!authorizedSpaces.includes(requestedSpaceId)) {
@@ -327,8 +383,12 @@ export const createAgentPolicyHandler: FleetRequestHandler<
     const body: CreateAgentPolicyResponse = {
       item: agentPolicy,
     };
-
-    if (spaceIds && spaceIds.length > 1 && authorizedSpaces) {
+    // Update spaces if there is more than one space ID assigned to that policy or if there the space that policy is created is different than the current space
+    if (
+      spaceIds &&
+      authorizedSpaces &&
+      (spaceIds.length > 1 || (spaceIds.length === 0 && spaceIds[0]) !== spaceId)
+    ) {
       await updateAgentPolicySpaces({
         agentPolicyId: agentPolicy.id,
         currentSpaceId: spaceId,
@@ -352,20 +412,135 @@ export const createAgentPolicyHandler: FleetRequestHandler<
   }
 };
 
+export const createAgentAndPackagePoliciesHandler: FleetRequestHandler<
+  undefined,
+  TypeOf<typeof CreateAgentAndPackagePolicyRequestSchema.query>,
+  TypeOf<typeof CreateAgentAndPackagePolicyRequestSchema.body>
+> = async (context, request, response) => {
+  const coreContext = await context.core;
+  const logger = appContextService.getLogger().get('httpCreateAgentAndPackagePoliciesHandler');
+  logger.debug('Creating agent and package policies');
+
+  // Try to create the agent policy
+  const { package_policies: packagePolicies, ...agentPolicyWithoutPackagePolicies } = request.body;
+  const agentPolicyRequest = {
+    ...request,
+    body: agentPolicyWithoutPackagePolicies,
+    query: request.query satisfies CreateAgentPolicyRequest['query'],
+  };
+  const agentPolicyResult = await createAgentPolicyHandler(context, agentPolicyRequest, response);
+  const createdAgentPolicy: CreateAgentPolicyResponse['item'] = agentPolicyResult.options.body.item;
+  const createdPackagePolicyIds = [];
+
+  if (agentPolicyRequest.body.id && agentPolicyRequest.body.id !== createdAgentPolicy.id) {
+    logger.warn(
+      `Agent policy created with id ${createdAgentPolicy.id} instead of requested id ${agentPolicyRequest.body.id}`
+    );
+  }
+
+  // Try to create the package policies
+  try {
+    for (const packagePolicy of packagePolicies) {
+      // Extract the original agent policy ID from the request in order to replace it with the created agent policy ID
+      const {
+        policy_id: agentPolicyId,
+        policy_ids: agentPolicyIds,
+        ...restOfPackagePolicy
+      } = packagePolicy;
+
+      // Warn if the requested agent policy ID does not match the created agent policy ID
+      if (agentPolicyId && agentPolicyId !== createdAgentPolicy.id) {
+        logger.warn(
+          `Creating package policy with agent policy ID ${createdAgentPolicy.id} instead of requested id ${agentPolicyId}`
+        );
+      }
+      if (
+        agentPolicyIds &&
+        agentPolicyIds.length > 0 &&
+        (!agentPolicyIds.includes(createdAgentPolicy.id) || agentPolicyIds.length > 1)
+      ) {
+        logger.warn(
+          `Creating package policy with agent policy ID ${
+            createdAgentPolicy.id
+          } instead of requested id(s) ${agentPolicyIds.join(',')}`
+        );
+      }
+
+      const packagePolicyRequest = {
+        ...request,
+        body: {
+          ...restOfPackagePolicy,
+          policy_ids: [createdAgentPolicy.id],
+        },
+        query: request.query satisfies CreatePackagePolicyRequest['query'],
+      };
+      const packagePolicyResult = await createPackagePolicyHandler(
+        context,
+        packagePolicyRequest,
+        response
+      );
+      createdPackagePolicyIds.push(packagePolicyResult.options.body.item.id);
+    }
+
+    // Return the created agent policy with full package policy details
+    return getOneAgentPolicyHandler(
+      context,
+      {
+        ...request,
+        body: {},
+        params: { agentPolicyId: createdAgentPolicy.id },
+      },
+      response
+    );
+  } catch (e) {
+    // If there is an error creating package policies, delete any created package policy
+    // and the parent agent policy
+    if (createdPackagePolicyIds.length > 0) {
+      await packagePolicyService.delete(
+        coreContext.savedObjects.client,
+        coreContext.elasticsearch.client.asInternalUser,
+        createdPackagePolicyIds,
+        {
+          force: true,
+          skipUnassignFromAgentPolicies: true,
+        }
+      );
+    }
+    if (createdAgentPolicy) {
+      await agentPolicyService.delete(
+        coreContext.savedObjects.client,
+        coreContext.elasticsearch.client.asInternalUser,
+        createdAgentPolicy.id,
+        {
+          force: true,
+        }
+      );
+    }
+
+    // Rethrow
+    throw e;
+  }
+};
+
 export const updateAgentPolicyHandler: FleetRequestHandler<
   TypeOf<typeof UpdateAgentPolicyRequestSchema.params>,
   TypeOf<typeof UpdateAgentPolicyRequestSchema.query>,
   TypeOf<typeof UpdateAgentPolicyRequestSchema.body>
 > = async (context, request, response) => {
+  const logger = appContextService.getLogger().get('httpUpdateAgentPolicyHandler');
   const coreContext = await context.core;
   const fleetContext = await context.fleet;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
-  const { force, space_ids: spaceIds, ...data } = request.body;
+  const { force, bumpRevision, space_ids: spaceIds, ...data } = request.body;
 
   let spaceId = fleetContext.spaceId;
 
+  logger.debug(`updating policy [${request.params.agentPolicyId}] in space [${spaceId}]`);
+
   try {
+    const requestSpaceId = spaceId;
+
     if (spaceIds?.length) {
       const authorizedSpaces = await checkAgentPoliciesAllPrivilegesForSpaces(
         request,
@@ -377,17 +552,21 @@ export const updateAgentPolicyHandler: FleetRequestHandler<
         currentSpaceId: spaceId,
         newSpaceIds: spaceIds,
         authorizedSpaces,
-        options: { force },
+        options: { force, validateUniqueName: true },
       });
 
       spaceId = spaceIds[0];
+
+      logger.debug(
+        `spaceId now set to [${spaceId}] for updating agent policy [${request.params.agentPolicyId}]`
+      );
     }
     const agentPolicy = await agentPolicyService.update(
       appContextService.getInternalUserSOClientForSpaceId(spaceId),
       esClient,
       request.params.agentPolicyId,
       data,
-      { force, user, spaceId }
+      { force, bumpRevision, user, spaceId, requestSpaceId }
     );
 
     let item: any = agentPolicy;

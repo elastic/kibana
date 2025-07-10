@@ -15,12 +15,12 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useTheme } from '@kbn/observability-shared-plugin/public';
+import { useEuiTheme } from '@elastic/eui';
 import { useSeriesStorage } from '../hooks/use_series_storage';
 import { SeriesUrl } from '../types';
 
 export function SeriesColorPicker({ seriesId, series }: { seriesId: number; series: SeriesUrl }) {
-  const theme = useTheme();
+  const { euiTheme } = useEuiTheme();
 
   const { setSeries } = useSeriesStorage();
 
@@ -31,7 +31,8 @@ export function SeriesColorPicker({ seriesId, series }: { seriesId: number; seri
   };
 
   const color =
-    series.color ?? (theme.eui as unknown as Record<string, string>)[`euiColorVis${seriesId}`];
+    series.color ??
+    (euiTheme.colors.vis as unknown as Record<string, string>)[`euiColorVis${seriesId}`];
 
   const button = (
     <EuiToolTip content={EDIT_SERIES_COLOR_LABEL}>

@@ -10,7 +10,7 @@ import type { Logger } from '@kbn/core/server';
 import { INTERNAL_ROUTES } from '@kbn/reporting-common';
 import type { ReportingCore } from '../../..';
 import { authorizedUserPreRouting } from '../../common';
-import { RequestHandler } from '../../common/generate';
+import { GenerateRequestHandler } from '../../common/request_handler';
 
 const { GENERATE_PREFIX } = INTERNAL_ROUTES;
 
@@ -18,29 +18,40 @@ export function registerGenerationRoutesInternal(reporting: ReportingCore, logge
   const setupDeps = reporting.getPluginSetupDeps();
   const { router } = setupDeps;
 
-  const kibanaAccessControlTags = ['access:generateReport'];
+  const kibanaAccessControlTags = ['generateReport'];
 
   const registerInternalPostGenerationEndpoint = () => {
     const path = `${GENERATE_PREFIX}/{exportType}`;
     router.post(
       {
         path,
-        validate: RequestHandler.getValidation(),
-        options: { tags: kibanaAccessControlTags, access: 'internal' },
+        security: {
+          authz: {
+            requiredPrivileges: kibanaAccessControlTags,
+          },
+        },
+        validate: GenerateRequestHandler.getValidation(),
+        options: {
+          tags: kibanaAccessControlTags.map((accessControlTag) => `access:${accessControlTag}`),
+          access: 'internal',
+        },
       },
       authorizedUserPreRouting(reporting, async (user, context, req, res) => {
         try {
-          const requestHandler = new RequestHandler(
+          const requestHandler = new GenerateRequestHandler({
             reporting,
             user,
             context,
             path,
             req,
             res,
-            logger
-          );
+            logger,
+          });
           const jobParams = requestHandler.getJobParams();
-          return await requestHandler.handleGenerateRequest(req.params.exportType, jobParams);
+          return await requestHandler.handleRequest({
+            exportTypeId: req.params.exportType,
+            jobParams,
+          });
         } catch (err) {
           if (err instanceof KibanaResponse) {
             return err;

@@ -14,24 +14,17 @@ import {
 } from '../../screens/stack_management/role_page';
 import { closeAllToasts } from '../../tasks/toasts';
 import { login, ROLE } from '../../tasks/login';
+import { SECURITY_FEATURE_ID } from '../../../../../common/constants';
 
-// Unskip when defendInsights assistant feature is enabled by default
-describe.skip(
+describe(
   'When defining a kibana role for Endpoint security access',
   {
-    env: {
-      ftrConfig: {
-        kbnServerArgs: [
-          `--xpack.securitySolution.enableExperimental=${JSON.stringify(['defendInsights'])}`,
-        ],
-      },
-    },
     tags: '@ess',
   },
   () => {
     const getAllSubFeatureRows = (): Cypress.Chainable<JQuery<HTMLElement>> => {
       return cy
-        .get('#featurePrivilegeControls_siem')
+        .get(`#featurePrivilegeControls_${SECURITY_FEATURE_ID}`)
         .findByTestSubj('mutexSubFeaturePrivilegeControl')
         .closest('.euiFlexGroup');
     };
@@ -59,7 +52,8 @@ describe.skip(
         })
         .should('deep.equal', [
           'Endpoint List Displays all hosts running Elastic Defend and their relevant integration details.Endpoint List sub-feature privilegeAllReadNone',
-          'Endpoint Insights Access the endpoint insights.Endpoint Insights sub-feature privilegeAllReadNone',
+          'Automatic Troubleshooting Access to the automatic troubleshooting.Automatic Troubleshooting sub-feature privilegeAllReadNone',
+          'Global Artifact Management (coming soon) Manage global assignment of endpoint artifacts (e.g., Trusted Applications, Event Filters) across all policies. This privilege controls global assignment rights only; privileges for each artifact type are required for full artifact management.Global Artifact Management (coming soon) sub-feature privilegeAllNone',
           'Trusted Applications Helps mitigate conflicts with other software, usually other antivirus or endpoint security applications.Trusted Applications sub-feature privilegeAllReadNone',
           'Host Isolation Exceptions Add specific IP addresses that isolated hosts are still allowed to communicate with, even when isolated from the rest of the network.Host Isolation Exceptions sub-feature privilegeAllReadNone',
           'Blocklist Extend Elastic Defend’s protection against malicious processes and protect against potentially harmful applications.Blocklist sub-feature privilegeAllReadNone',

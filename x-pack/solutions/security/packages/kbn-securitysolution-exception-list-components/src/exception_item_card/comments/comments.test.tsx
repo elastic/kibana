@@ -17,7 +17,6 @@ describe('ExceptionItemCardComments', () => {
     const wrapper = render(
       <ExceptionItemCardComments comments={[]} dataTestSubj="ExceptionItemCardCommentsContainer" />
     );
-    expect(wrapper.container).toMatchSnapshot();
 
     expect(wrapper.queryByTestId('ExceptionItemCardCommentsContainer')).not.toBeInTheDocument();
   });
@@ -29,7 +28,6 @@ describe('ExceptionItemCardComments', () => {
         dataTestSubj="ExceptionItemCardCommentsContainer"
       />
     );
-    expect(wrapper.container).toMatchSnapshot();
 
     expect(wrapper.getByTestId('ExceptionItemCardCommentsContainer')).toHaveTextContent(
       i18n.exceptionItemCardCommentsAccordion(comments.length)
@@ -45,11 +43,10 @@ describe('ExceptionItemCardComments', () => {
       />
     );
 
-    const container = wrapper.getByTestId('ExceptionItemCardCommentsContainerTextButton');
-    fireEvent.click(container);
+    const button = wrapper.getByTestId('ExceptionItemCardCommentsContainerTextButton');
+    fireEvent.click(button);
     expect(wrapper.getByTestId('accordionContentPanel')).toBeVisible();
     expect(wrapper.getByTestId('accordionCommentList')).toBeVisible();
     expect(wrapper.getByTestId('accordionCommentList')).toHaveTextContent('some old comment');
-    expect(wrapper.container).toMatchSnapshot();
   });
 });

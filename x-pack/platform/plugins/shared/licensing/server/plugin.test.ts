@@ -7,7 +7,7 @@
 
 import moment from 'moment';
 import { BehaviorSubject, firstValueFrom, take, toArray } from 'rxjs';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import {
   ClusterClientMock,
   coreMock,
@@ -379,7 +379,7 @@ describe('licensing plugin', () => {
         let customClient: ClusterClientMock;
         let coreStatus$: BehaviorSubject<CoreStatus>;
         let coreStatus: CoreStatus;
-        const customPollingFrequency = 100;
+        const customPollingFrequency = 1000;
 
         async function setElasticsearchStatus(esStatus: ServiceStatusLevel) {
           coreStatus$.next({

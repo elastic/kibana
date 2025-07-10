@@ -6,7 +6,8 @@
  */
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { LogLevel, LogRecord } from '@kbn/logging';
+import type { LogRecord } from '@kbn/logging';
+import { LogLevel } from '@kbn/logging';
 import { createTaskRunnerLogger } from './task_runner_logger';
 
 describe('createTaskRunnerLogger', () => {

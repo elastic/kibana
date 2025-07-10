@@ -41,7 +41,7 @@ export function SLOCardItemInstanceBadge({ slo }: Props) {
             data-test-subj="o11ySlosSeeAllInstanceIdsBadge"
           >
             {`${i18n.translate('xpack.slo.extraInstanceIds.badge', {
-              defaultMessage: '+{count, plural, one {# more instance} other {# more instances}}',
+              defaultMessage: '+{count, plural, one {# instance} other {# instances}}',
               values: {
                 count: entries.length - 1,
               },

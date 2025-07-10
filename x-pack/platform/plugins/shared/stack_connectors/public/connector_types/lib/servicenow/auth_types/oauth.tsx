@@ -38,6 +38,7 @@ const OAuthComponent: React.FC<Props> = ({ isLoading, readOnly, pathPrefix = '' 
           ],
         }}
         componentProps={{
+          id: 'clientId',
           euiFieldProps: {
             'data-test-subj': 'connector-servicenow-client-id-form-input',
             readOnly,
@@ -58,6 +59,7 @@ const OAuthComponent: React.FC<Props> = ({ isLoading, readOnly, pathPrefix = '' 
           ],
         }}
         componentProps={{
+          id: 'userIdentifierValue',
           euiFieldProps: {
             'data-test-subj': 'connector-servicenow-user-identifier-form-input',
             readOnly,
@@ -78,6 +80,7 @@ const OAuthComponent: React.FC<Props> = ({ isLoading, readOnly, pathPrefix = '' 
           ],
         }}
         componentProps={{
+          id: 'jwtKeyId',
           euiFieldProps: {
             'data-test-subj': 'connector-servicenow-jwt-key-id-form-input',
             readOnly,
@@ -98,6 +101,7 @@ const OAuthComponent: React.FC<Props> = ({ isLoading, readOnly, pathPrefix = '' 
         }}
         component={PasswordField}
         componentProps={{
+          id: 'clientSecret',
           euiFieldProps: {
             'data-test-subj': 'connector-servicenow-client-secret-form-input',
             isLoading,
@@ -118,6 +122,7 @@ const OAuthComponent: React.FC<Props> = ({ isLoading, readOnly, pathPrefix = '' 
           ],
         }}
         componentProps={{
+          id: 'privateKey',
           euiFieldProps: {
             readOnly,
             'data-test-subj': 'connector-servicenow-private-key-form-input',
@@ -134,6 +139,7 @@ const OAuthComponent: React.FC<Props> = ({ isLoading, readOnly, pathPrefix = '' 
         }}
         component={PasswordField}
         componentProps={{
+          id: 'privateKeyPassword',
           euiFieldProps: {
             'data-test-subj': 'connector-servicenow-private-key-password-form-input',
             isLoading,

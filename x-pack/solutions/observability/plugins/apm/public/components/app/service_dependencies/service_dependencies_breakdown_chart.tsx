@@ -5,6 +5,7 @@
  * 2.0.
  */
 import React from 'react';
+import { useEuiTheme } from '@elastic/eui';
 import { getVizColorForIndex } from '../../../../common/viz_colors';
 import type { Coordinate, TimeSeries } from '../../../../typings/timeseries';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
@@ -15,6 +16,7 @@ import { BreakdownChart } from '../../shared/charts/breakdown_chart';
 
 export function ServiceDependenciesBreakdownChart({ height }: { height: number }) {
   const { serviceName } = useApmServiceContext();
+  const { euiTheme } = useEuiTheme();
 
   const {
     query: { kuery, environment, rangeFrom, rangeTo },
@@ -50,7 +52,7 @@ export function ServiceDependenciesBreakdownChart({ height }: { height: number }
         title: item.title,
         data: item.data,
         type: 'area',
-        color: getVizColorForIndex(index),
+        color: getVizColorForIndex(index, euiTheme),
       };
     }) ?? [];
 

@@ -13,6 +13,7 @@ import type { NotificationsPlugin } from './plugin';
 const emailServiceMock: jest.Mocked<EmailService> = {
   sendPlainTextEmail: jest.fn(),
   sendHTMLEmail: jest.fn(),
+  sendAttachmentEmail: jest.fn(),
 };
 
 const createEmailServiceMock = () => {

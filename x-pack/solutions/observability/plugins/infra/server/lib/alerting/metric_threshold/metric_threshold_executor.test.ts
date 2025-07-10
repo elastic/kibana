@@ -31,7 +31,7 @@ import {
   ALERT_REASON,
   ALERT_GROUP,
 } from '@kbn/rule-data-utils';
-import { type Group } from '@kbn/observability-alerting-rule-utils';
+import { type Group } from '@kbn/alerting-rule-utils';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import type {
   AssetDetailsLocatorParams,
@@ -2464,13 +2464,13 @@ const createMockStaticConfiguration = (sources: any): InfraConfig => ({
   },
   featureFlags: {
     customThresholdAlertsEnabled: false,
-    logsUIEnabled: true,
     metricsExplorerEnabled: true,
     osqueryEnabled: true,
     inventoryThresholdAlertRuleEnabled: true,
     metricThresholdAlertRuleEnabled: true,
     logThresholdAlertRuleEnabled: true,
     alertsAndRulesDropdownEnabled: true,
+    // to be removed in https://github.com/elastic/kibana/issues/221904
     profilingEnabled: false,
     ruleFormV2Enabled: false,
   },

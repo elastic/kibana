@@ -5,23 +5,22 @@
  * 2.0.
  */
 
-import type { AppMockRenderer } from '../../../common/mock';
-import { createAppMockRenderer } from '../../../common/mock';
 import { act, waitFor, renderHook } from '@testing-library/react';
 import { useAssigneesAction } from './use_assignees_action';
 
 import * as api from '../../../containers/api';
 import { basicCase } from '../../../containers/mock';
+import { TestProviders } from '../../../common/mock';
+import { coreMock } from '@kbn/core/public/mocks';
+import React from 'react';
 
 jest.mock('../../../containers/api');
 
 describe('useAssigneesAction', () => {
-  let appMockRender: AppMockRenderer;
   const onAction = jest.fn();
   const onActionSuccess = jest.fn();
 
   beforeEach(() => {
-    appMockRender = createAppMockRenderer();
     jest.clearAllMocks();
   });
 
@@ -34,7 +33,7 @@ describe('useAssigneesAction', () => {
           isDisabled: false,
         }),
       {
-        wrapper: appMockRender.AppWrapper,
+        wrapper: TestProviders,
       }
     );
 
@@ -59,7 +58,7 @@ describe('useAssigneesAction', () => {
     const { result } = renderHook(
       () => useAssigneesAction({ onAction, onActionSuccess, isDisabled: false }),
       {
-        wrapper: appMockRender.AppWrapper,
+        wrapper: TestProviders,
       }
     );
 
@@ -78,24 +77,27 @@ describe('useAssigneesAction', () => {
 
     await waitFor(() => {
       expect(result.current.isFlyoutOpen).toBe(false);
-      expect(onActionSuccess).toHaveBeenCalled();
-      expect(updateSpy).toHaveBeenCalledWith({
-        cases: [
-          {
-            assignees: [{ uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0' }, { uid: '1' }],
-            id: basicCase.id,
-            version: basicCase.version,
-          },
-        ],
-      });
+    });
+
+    expect(onActionSuccess).toHaveBeenCalled();
+    expect(updateSpy).toHaveBeenCalledWith({
+      cases: [
+        {
+          assignees: [{ uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0' }, { uid: '1' }],
+          id: basicCase.id,
+          version: basicCase.version,
+        },
+      ],
     });
   });
 
   it('shows the success toaster correctly when updating one case', async () => {
+    const coreStart = coreMock.createStart();
+
     const { result } = renderHook(
       () => useAssigneesAction({ onAction, onActionSuccess, isDisabled: false }),
       {
-        wrapper: appMockRender.AppWrapper,
+        wrapper: (props) => <TestProviders {...props} coreStart={coreStart} />,
       }
     );
 
@@ -110,7 +112,7 @@ describe('useAssigneesAction', () => {
     });
 
     await waitFor(() => {
-      expect(appMockRender.coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith({
+      expect(coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith({
         title: 'Edited case',
         className: 'eui-textBreakWord',
       });
@@ -118,10 +120,12 @@ describe('useAssigneesAction', () => {
   });
 
   it('shows the success toaster correctly when updating multiple cases', async () => {
+    const coreStart = coreMock.createStart();
+
     const { result } = renderHook(
       () => useAssigneesAction({ onAction, onActionSuccess, isDisabled: false }),
       {
-        wrapper: appMockRender.AppWrapper,
+        wrapper: (props) => <TestProviders {...props} coreStart={coreStart} />,
       }
     );
 
@@ -136,7 +140,7 @@ describe('useAssigneesAction', () => {
     });
 
     await waitFor(() => {
-      expect(appMockRender.coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith({
+      expect(coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith({
         title: 'Edited 2 cases',
         className: 'eui-textBreakWord',
       });

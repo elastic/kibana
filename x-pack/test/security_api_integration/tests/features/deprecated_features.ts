@@ -14,7 +14,6 @@ import type {
   FeatureKibanaPrivilegesReference,
   KibanaFeatureConfig,
 } from '@kbn/features-plugin/common';
-import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import type { Role } from '@kbn/security-plugin-types-common';
 
 import type { FtrProviderContext } from '../../ftr_provider_context';
@@ -181,35 +180,51 @@ export default function ({ getService }: FtrProviderContext) {
           "case_3_feature_a",
           "case_4_feature_a",
           "case_4_feature_b",
+          "dashboard",
+          "discover",
           "generalCases",
+          "generalCasesV2",
+          "maps",
           "observabilityCases",
+          "observabilityCasesV2",
           "securitySolutionCases",
+          "securitySolutionCasesV2",
+          "siem",
+          "siemV2",
+          "visualize",
         ]
       `);
     });
 
-    it('all deprecated features are replaced by a single feature only', async () => {
+    it('all deprecated features are replaced by a single feature only or explicitly specify replacement features', async () => {
       const featuresResponse = await supertest
         .get('/internal/features_provider/features')
         .expect(200);
       const features = featuresResponse.body as KibanaFeatureConfig[];
 
       // **NOTE**: This test ensures that deprecated features displayed in the Space’s feature visibility toggles screen
-      // are only replaced by a single feature. This way, if a feature is toggled off for a particular Space, there
-      // won’t be any ambiguity about which replacement feature should also be toggled off. Currently, we don’t
-      // anticipate having a deprecated feature replaced by more than one feature, so this test is intended to catch
-      // such scenarios early. If there’s a need for a deprecated feature to be replaced by multiple features, please
-      // reach out to the AppEx Security team to discuss how this should affect Space’s feature visibility toggles.
-      const featureIdsThatSupportMultipleReplacements = new Set([
+      // are only replaced by a single feature unless explicitly configured otherwise by the developer. This approach
+      // validates that if a deprecated feature was toggled off for a particular Space, there is no ambiguity about
+      // which replacement feature or features should also be toggled off. Currently, we don’t anticipate having many
+      // deprecated features replaced by more than one feature, so this test is designed to catch such scenarios early.
+      // If there’s a need for a deprecated feature to be replaced by multiple features, please reach out to the AppEx
+      // Security team to discuss how this should affect Space’s feature visibility toggles. You may need to explicitly
+      // specify feature replacements in the feature configuration (`feature.deprecated.replacedBy`).
+      const featureIdsImplicitlyReplacedWithMultipleFeatures = new Set([
         'case_2_feature_a',
         'case_4_feature_a',
-        'case_4_feature_b',
+        'discover',
+        'dashboard',
+        'visualize',
+        'maps',
+        'siem',
+        'siemV2',
       ]);
       for (const feature of features) {
         if (
           !feature.deprecated ||
-          !feature.scope?.includes(KibanaFeatureScope.Spaces) ||
-          featureIdsThatSupportMultipleReplacements.has(feature.id)
+          (feature.deprecated?.replacedBy?.length ?? 0) > 0 ||
+          featureIdsImplicitlyReplacedWithMultipleFeatures.has(feature.id)
         ) {
           continue;
         }
@@ -236,7 +251,9 @@ export default function ({ getService }: FtrProviderContext) {
 
         if (referencedFeaturesIds.size > 1) {
           throw new Error(
-            `Feature "${feature.id}" is deprecated and replaced by more than one feature: ${
+            `Feature "${
+              feature.id
+            }" is deprecated and implicitly replaced by more than one feature: ${
               referencedFeaturesIds.size
             } features: ${Array.from(referencedFeaturesIds).join(
               ', '
@@ -299,12 +316,24 @@ export default function ({ getService }: FtrProviderContext) {
           for (const deprecatedAction of deprecatedActions) {
             if (
               isReplaceableAction(deprecatedAction) &&
-              !replacementActions.has(deprecatedAction)
+              !replacementActions.delete(deprecatedAction)
             ) {
               throw new Error(
                 `Action "${deprecatedAction}" granted by the privilege "${privilegeId}" of the deprecated feature "${feature.id}" is not properly replaced.`
               );
             }
+          }
+
+          const extraReplacementActions =
+            Array.from(replacementActions).filter(isReplaceableAction);
+          if (extraReplacementActions.length > 0) {
+            log.warning(
+              `Replacement actions for the privilege "${privilegeId}" of the deprecated feature "${
+                feature.id
+              }" grant more privileges than they were granting before: ${JSON.stringify(
+                extraReplacementActions
+              )} via ${JSON.stringify(replacedBy)}.`
+            );
           }
         }
       }

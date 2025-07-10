@@ -16,7 +16,7 @@ exports[`FieldIcon renders an icon for an unknown type 1`] = `
   aria-label="test"
   className="kbnFieldIcon"
   color="gray"
-  iconType="questionInCircle"
+  iconType="question"
   size="s"
   title="test"
 />
@@ -50,6 +50,16 @@ exports[`FieldIcon renders known field types boolean is rendered 1`] = `
   iconType="tokenBoolean"
   size="s"
   title="boolean"
+/>
+`;
+
+exports[`FieldIcon renders known field types byte is rendered 1`] = `
+<EuiToken
+  aria-label="byte"
+  className="kbnFieldIcon"
+  iconType="tokenNumber"
+  size="s"
+  title="byte"
 />
 `;
 
@@ -105,6 +115,16 @@ exports[`FieldIcon renders known field types dense_vector is rendered 1`] = `
 />
 `;
 
+exports[`FieldIcon renders known field types double is rendered 1`] = `
+<EuiToken
+  aria-label="double"
+  className="kbnFieldIcon"
+  iconType="tokenNumber"
+  size="s"
+  title="double"
+/>
+`;
+
 exports[`FieldIcon renders known field types flattened is rendered 1`] = `
 <EuiToken
   aria-label="flattened"
@@ -112,6 +132,16 @@ exports[`FieldIcon renders known field types flattened is rendered 1`] = `
   iconType="tokenFlattened"
   size="s"
   title="flattened"
+/>
+`;
+
+exports[`FieldIcon renders known field types float is rendered 1`] = `
+<EuiToken
+  aria-label="float"
+  className="kbnFieldIcon"
+  iconType="tokenNumber"
+  size="s"
+  title="float"
 />
 `;
 
@@ -145,6 +175,16 @@ exports[`FieldIcon renders known field types geo_shape is rendered 1`] = `
 />
 `;
 
+exports[`FieldIcon renders known field types half_float is rendered 1`] = `
+<EuiToken
+  aria-label="half_float"
+  className="kbnFieldIcon"
+  iconType="tokenNumber"
+  size="s"
+  title="half_float"
+/>
+`;
+
 exports[`FieldIcon renders known field types histogram is rendered 1`] = `
 <EuiToken
   aria-label="histogram"
@@ -152,6 +192,16 @@ exports[`FieldIcon renders known field types histogram is rendered 1`] = `
   iconType="tokenHistogram"
   size="s"
   title="histogram"
+/>
+`;
+
+exports[`FieldIcon renders known field types integer is rendered 1`] = `
+<EuiToken
+  aria-label="integer"
+  className="kbnFieldIcon"
+  iconType="tokenNumber"
+  size="s"
+  title="integer"
 />
 `;
 
@@ -182,6 +232,16 @@ exports[`FieldIcon renders known field types keyword is rendered 1`] = `
   iconType="tokenKeyword"
   size="s"
   title="keyword"
+/>
+`;
+
+exports[`FieldIcon renders known field types long is rendered 1`] = `
+<EuiToken
+  aria-label="long"
+  className="kbnFieldIcon"
+  iconType="tokenNumber"
+  size="s"
+  title="long"
 />
 `;
 
@@ -265,6 +325,16 @@ exports[`FieldIcon renders known field types rank_features is rendered 1`] = `
 />
 `;
 
+exports[`FieldIcon renders known field types scaled_float is rendered 1`] = `
+<EuiToken
+  aria-label="scaled_float"
+  className="kbnFieldIcon"
+  iconType="tokenNumber"
+  size="s"
+  title="scaled_float"
+/>
+`;
+
 exports[`FieldIcon renders known field types semantic_text is rendered 1`] = `
 <EuiToken
   aria-label="semantic_text"
@@ -282,6 +352,16 @@ exports[`FieldIcon renders known field types shape is rendered 1`] = `
   iconType="tokenShape"
   size="s"
   title="shape"
+/>
+`;
+
+exports[`FieldIcon renders known field types short is rendered 1`] = `
+<EuiToken
+  aria-label="short"
+  className="kbnFieldIcon"
+  iconType="tokenNumber"
+  size="s"
+  title="short"
 />
 `;
 
@@ -315,6 +395,16 @@ exports[`FieldIcon renders known field types text is rendered 1`] = `
 />
 `;
 
+exports[`FieldIcon renders known field types unsigned_long is rendered 1`] = `
+<EuiToken
+  aria-label="unsigned_long"
+  className="kbnFieldIcon"
+  iconType="tokenNumber"
+  size="s"
+  title="unsigned_long"
+/>
+`;
+
 exports[`FieldIcon renders known field types version is rendered 1`] = `
 <EuiToken
   aria-label="version"
@@ -330,7 +420,7 @@ exports[`FieldIcon renders with className if provided 1`] = `
   aria-label="test"
   className="kbnFieldIcon myClass"
   color="gray"
-  iconType="questionInCircle"
+  iconType="question"
   size="s"
   title="test"
 />

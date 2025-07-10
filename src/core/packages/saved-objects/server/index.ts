@@ -64,6 +64,7 @@ export {
   ANALYTICS_SAVED_OBJECT_INDEX,
   USAGE_COUNTERS_SAVED_OBJECT_INDEX,
   ALL_SAVED_OBJECT_INDICES,
+  SEARCH_SOLUTION_SAVED_OBJECT_INDEX,
 } from './src/saved_objects_index_pattern';
 export type {
   SavedObjectsType,
@@ -109,6 +110,7 @@ export type {
   AuthorizeOpenPointInTimeParams,
   AuthorizeUpdateSpacesParams,
   AuthorizeFindParams,
+  WithAuditName,
 } from './src/extensions/security';
 export type { ISavedObjectsSpacesExtension } from './src/extensions/spaces';
 export type { SavedObjectsExtensions } from './src/extensions/extensions';

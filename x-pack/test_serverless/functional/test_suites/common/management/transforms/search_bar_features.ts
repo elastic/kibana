@@ -46,12 +46,8 @@ export default function ({ getPageObjects }: FtrProviderContext) {
 
           for (const notExpectedLabel of notExpectedLabels) {
             await PageObjects.svlCommonNavigation.search.searchFor(notExpectedLabel.search);
-            const [result] = await PageObjects.svlCommonNavigation.search.getDisplayedResults();
-            const label = result?.label;
-            expect(label).to.not.eql(
-              notExpectedLabel.label,
-              `First result should not be ${notExpectedLabel.label} (got matching items '${label}')`
-            );
+            const results = await PageObjects.svlCommonNavigation.search.getDisplayedResults();
+            expect(results.map((r) => r.label)).to.not.contain(notExpectedLabel);
           }
 
           await PageObjects.svlCommonNavigation.search.hideSearch();

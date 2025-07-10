@@ -8,25 +8,38 @@
  */
 
 import { camelCase } from 'lodash';
-import { parse } from '@kbn/esql-ast';
-import { scalarFunctionDefinitions } from '../../definitions/generated/scalar_functions';
-import { builtinFunctions } from '../../definitions/builtin';
-import { NOT_SUGGESTED_TYPES } from '../../shared/resources_helpers';
-import { aggregationFunctionDefinitions } from '../../definitions/generated/aggregation_functions';
-import { timeUnitsToSuggest } from '../../definitions/literals';
-import { groupingFunctionDefinitions } from '../../definitions/grouping';
-import * as autocomplete from '../autocomplete';
-import type { ESQLCallbacks } from '../../shared/types';
-import type { EditorContext, SuggestionRawDefinition } from '../types';
-import { TIME_SYSTEM_PARAMS, TRIGGER_SUGGESTION_COMMAND, getSafeInsertText } from '../factories';
-import { ESQLRealField } from '../../validation/types';
 import {
-  FieldType,
+  TRIGGER_SUGGESTION_COMMAND,
+  timeUnitsToSuggest,
   fieldTypes,
+  FieldType,
+  SupportedDataType,
   FunctionParameterType,
   FunctionReturnType,
-  SupportedDataType,
-} from '../../definitions/types';
+  FunctionDefinitionTypes,
+} from '@kbn/esql-ast';
+import { getSafeInsertText } from '@kbn/esql-ast/src/definitions/utils';
+import {
+  Location,
+  ESQLFieldWithMetadata,
+  ISuggestionItem,
+} from '@kbn/esql-ast/src/commands_registry/types';
+import { aggFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/aggregation_functions';
+import { timeSeriesAggFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/time_series_agg_functions';
+import { groupingFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/grouping_functions';
+import { scalarFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/scalar_functions';
+import { operatorsDefinitions } from '@kbn/esql-ast/src/definitions/all_operators';
+import { NOT_SUGGESTED_TYPES } from '../../shared/resources_helpers';
+import { getLocationFromCommandOrOptionName } from '../../shared/types';
+import * as autocomplete from '../autocomplete';
+import type { ESQLCallbacks } from '../../shared/types';
+import type { EditorContext } from '../types';
+import {
+  joinIndices,
+  timeseriesIndices,
+  editorExtensions,
+  inferenceEndpoints,
+} from '../../__tests__/helpers';
 
 export interface Integration {
   name: string;
@@ -38,7 +51,7 @@ export interface Integration {
   }>;
 }
 
-export type PartialSuggestionWithText = Partial<SuggestionRawDefinition> & { text: string };
+export type PartialSuggestionWithText = Partial<ISuggestionItem> & { text: string };
 
 export const TIME_PICKER_SUGGESTION: PartialSuggestionWithText = {
   text: '',
@@ -47,13 +60,21 @@ export const TIME_PICKER_SUGGESTION: PartialSuggestionWithText = {
 
 export const triggerCharacters = [',', '(', '=', ' '];
 
-export const fields: Array<ESQLRealField & { suggestedAs?: string }> = [
+export type TestField = ESQLFieldWithMetadata & { suggestedAs?: string };
+
+export const fields: TestField[] = [
   ...fieldTypes.map((type) => ({
     name: `${camelCase(type)}Field`,
     type,
   })),
   { name: 'any#Char$Field', type: 'double', suggestedAs: '`any#Char$Field`' },
   { name: 'kubernetes.something.something', type: 'double' },
+];
+
+export const lookupIndexFields: TestField[] = [
+  { name: 'booleanField', type: 'boolean' },
+  { name: 'dateField', type: 'date' },
+  { name: 'joinIndexOnlyField', type: 'text' },
 ];
 
 export const indexes = (
@@ -114,7 +135,7 @@ export const policies = [
 /**
  * Utility to filter down the function list for the given type
  * It is mainly driven by the return type, but it can be filtered upon with the last optional argument "paramsTypes"
- * jsut make sure to pass the arguments in the right order
+ * just make sure to pass the arguments in the right order
  * @param command current command context
  * @param expectedReturnType the expected type returned by the function
  * @param functionCategories
@@ -122,13 +143,14 @@ export const policies = [
  * @returns
  */
 export function getFunctionSignaturesByReturnType(
-  command: string | string[],
+  location: Location | Location[],
   _expectedReturnType: Readonly<FunctionReturnType | 'any' | Array<FunctionReturnType | 'any'>>,
   {
     agg,
     grouping,
     scalar,
-    builtin,
+    operators,
+    timeseriesAgg,
     // skipAssign here is used to communicate to not propose an assignment if it's not possible
     // within the current context (the actual logic has it, but here we want a shortcut)
     skipAssign,
@@ -136,7 +158,8 @@ export function getFunctionSignaturesByReturnType(
     agg?: boolean;
     grouping?: boolean;
     scalar?: boolean;
-    builtin?: boolean;
+    operators?: boolean;
+    timeseriesAgg?: boolean;
     skipAssign?: boolean;
   } = {},
   paramsTypes?: Readonly<FunctionParameterType[]>,
@@ -149,9 +172,7 @@ export function getFunctionSignaturesByReturnType(
 
   const list = [];
   if (agg) {
-    list.push(...aggregationFunctionDefinitions);
-    // right now all grouping functions are agg functions too
-    list.push(...groupingFunctionDefinitions);
+    list.push(...aggFunctionDefinitions);
   }
   if (grouping) {
     list.push(...groupingFunctionDefinitions);
@@ -160,21 +181,26 @@ export function getFunctionSignaturesByReturnType(
   if (scalar) {
     list.push(...scalarFunctionDefinitions);
   }
-  if (builtin) {
-    list.push(...builtinFunctions.filter(({ name }) => (skipAssign ? name !== '=' : true)));
+  if (timeseriesAgg) {
+    list.push(...timeSeriesAggFunctionDefinitions);
+  }
+  if (operators) {
+    list.push(...operatorsDefinitions.filter(({ name }) => (skipAssign ? name !== '=' : true)));
   }
 
   const deduped = Array.from(new Set(list));
 
-  const commands = Array.isArray(command) ? command : [command];
+  const locations = Array.isArray(location) ? location : [location];
+
   return deduped
-    .filter(({ signatures, ignoreAsSuggestion, supportedCommands, supportedOptions, name }) => {
+    .filter(({ signatures, ignoreAsSuggestion, locationsAvailable }) => {
       if (ignoreAsSuggestion) {
         return false;
       }
       if (
-        !commands.some((c) => supportedCommands.includes(c)) &&
-        !supportedOptions?.includes(option || '')
+        !(option ? [...locations, getLocationFromCommandOrOptionName(option)] : locations).some(
+          (loc) => locationsAvailable.includes(loc)
+        )
       ) {
         return false;
       }
@@ -208,9 +234,9 @@ export function getFunctionSignaturesByReturnType(
     })
     .sort(({ name: a }, { name: b }) => a.localeCompare(b))
     .map<PartialSuggestionWithText>((definition) => {
-      const { type, name, signatures } = definition;
+      const { type, name, signatures, customParametersSnippet } = definition;
 
-      if (type === 'builtin') {
+      if (type === FunctionDefinitionTypes.OPERATOR) {
         return {
           text: signatures.some(({ params }) => params.length > 1)
             ? `${name.toUpperCase()} $0`
@@ -219,7 +245,9 @@ export function getFunctionSignaturesByReturnType(
         };
       }
       return {
-        text: `${name.toUpperCase()}($0)`,
+        text: customParametersSnippet
+          ? `${name.toUpperCase()}(${customParametersSnippet})`
+          : `${name.toUpperCase()}($0)`,
         label: name.toUpperCase(),
       };
     });
@@ -240,16 +268,11 @@ export function getFieldNamesByType(
 
 export function getLiteralsByType(_type: SupportedDataType | SupportedDataType[]) {
   const type = Array.isArray(_type) ? _type : [_type];
-  if (type.includes('time_literal')) {
+  if (type.includes('time_duration')) {
     // return only singular
     return timeUnitsToSuggest.map(({ name }) => `1 ${name}`).filter((s) => !/s$/.test(s));
   }
   return [];
-}
-
-export function getDateLiteralsByFieldType(_requestedType: FieldType | FieldType[]) {
-  const requestedType = Array.isArray(_requestedType) ? _requestedType : [_requestedType];
-  return requestedType.includes('date') ? [TIME_PICKER_SUGGESTION, ...TIME_SYSTEM_PARAMS] : [];
 }
 
 export function createCustomCallbackMocks(
@@ -263,7 +286,7 @@ export function createCustomCallbackMocks(
    * `FROM index | EVAL foo = 1 | LIMIT 0` will be used to fetch columns. The response
    * will include "foo" as a column.
    */
-  customColumnsSinceLastCommand?: ESQLRealField[],
+  customColumnsSinceLastCommand?: ESQLFieldWithMetadata[],
   customSources?: Array<{ name: string; hidden: boolean }>,
   customPolicies?: Array<{
     name: string;
@@ -278,9 +301,27 @@ export function createCustomCallbackMocks(
   const finalSources = customSources || indexes;
   const finalPolicies = customPolicies || policies;
   return {
-    getColumnsFor: jest.fn(async () => finalColumnsSinceLastCommand),
+    getColumnsFor: jest.fn(async ({ query }) => {
+      if (query === 'FROM join_index') {
+        return lookupIndexFields;
+      }
+
+      return finalColumnsSinceLastCommand;
+    }),
     getSources: jest.fn(async () => finalSources),
     getPolicies: jest.fn(async () => finalPolicies),
+    getJoinIndices: jest.fn(async () => ({ indices: joinIndices })),
+    getTimeseriesIndices: jest.fn(async () => ({ indices: timeseriesIndices })),
+    getEditorExtensions: jest.fn(async (queryString: string) => {
+      if (queryString.includes('logs*')) {
+        return {
+          recommendedQueries: editorExtensions.recommendedQueries,
+          recommendedFields: editorExtensions.recommendedFields,
+        };
+      }
+      return { recommendedQueries: [], recommendedFields: [] };
+    }),
+    getInferenceEndpoints: jest.fn(async () => ({ inferenceEndpoints })),
   };
 }
 
@@ -304,6 +345,23 @@ export interface SuggestOptions {
   callbacks?: ESQLCallbacks;
 }
 
+export type AssertSuggestionsFn = (
+  query: string,
+  expected: Array<string | PartialSuggestionWithText>,
+  opts?: SuggestOptions
+) => Promise<void>;
+
+export type AssertSuggestionOrderFn = (
+  // query to test
+  query: string,
+  // field name to check the order of
+  fieldName: string,
+  // expected order of the field
+  order: string
+) => Promise<void>;
+
+export type SuggestFn = (query: string, opts?: SuggestOptions) => Promise<ISuggestionItem[]>;
+
 export const setup = async (caret = '/') => {
   if (caret.length !== 1) {
     throw new Error('Caret must be a single character');
@@ -311,7 +369,7 @@ export const setup = async (caret = '/') => {
 
   const callbacks = createCustomCallbackMocks();
 
-  const suggest = async (query: string, opts: SuggestOptions = {}) => {
+  const suggest: SuggestFn = async (query, opts = {}) => {
     const pos = query.indexOf(caret);
     if (pos < 0) throw new Error(`User cursor/caret "${caret}" not found in query: ${query}`);
     const querySansCaret = query.slice(0, pos) + query.slice(pos + 1);
@@ -319,20 +377,10 @@ export const setup = async (caret = '/') => {
       ? { triggerKind: 1, triggerCharacter: opts.triggerCharacter }
       : { triggerKind: 0 };
 
-    return await autocomplete.suggest(
-      querySansCaret,
-      pos,
-      ctx,
-      (_query: string | undefined) => parse(_query, { withFormatting: true }),
-      opts.callbacks ?? callbacks
-    );
+    return await autocomplete.suggest(querySansCaret, pos, ctx, opts.callbacks ?? callbacks);
   };
 
-  const assertSuggestions = async (
-    query: string,
-    expected: Array<string | PartialSuggestionWithText>,
-    opts?: SuggestOptions
-  ) => {
+  const assertSuggestions: AssertSuggestionsFn = async (query, expected, opts) => {
     try {
       const result = await suggest(query, opts);
       const resultTexts = [...result.map((suggestion) => suggestion.text)].sort();
@@ -358,10 +406,25 @@ export const setup = async (caret = '/') => {
     }
   };
 
+  const assertSuggestionsOrder: AssertSuggestionOrderFn = async (query, fieldName, order) => {
+    try {
+      const result = await suggest(query);
+      const resultField = result.find((s) => s.text === fieldName);
+      expect(resultField).toBeDefined();
+      expect(resultField?.sortText).toBeDefined();
+      expect(resultField?.sortText).toEqual(order);
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error(`Failed query\n-------------\n${query}`);
+      throw error;
+    }
+  };
+
   return {
     callbacks,
     suggest,
     assertSuggestions,
+    assertSuggestionsOrder,
   };
 };
 

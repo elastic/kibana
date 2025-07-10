@@ -12,6 +12,7 @@ import {
   KibanaRequest,
   KibanaResponseFactory,
   Logger,
+  SavedObjectsClientContract,
 } from '@kbn/core/server';
 import { StreamResponseWithHeaders } from '@kbn/ml-response-stream/server';
 
@@ -20,7 +21,11 @@ import {
   Message,
   Replacements,
   replaceAnonymizedValuesWithOriginalValues,
-  DEFEND_INSIGHTS_TOOL_ID,
+  DEFEND_INSIGHTS_ID,
+  ContentReferencesStore,
+  ContentReferences,
+  MessageMetadata,
+  ScreenContext,
 } from '@kbn/elastic-assistant-common';
 import { ILicense } from '@kbn/licensing-plugin/server';
 import { i18n } from '@kbn/i18n';
@@ -30,6 +35,7 @@ import { AssistantFeatureKey } from '@kbn/elastic-assistant-common/impl/capabili
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { LlmTasksPluginStart } from '@kbn/llm-tasks-plugin/server';
+import { isEmpty } from 'lodash';
 import { INVOKE_ASSISTANT_SUCCESS_EVENT } from '../lib/telemetry/event_based_telemetry';
 import { AIAssistantKnowledgeBaseDataClient } from '../ai_assistant_data_clients/knowledge_base';
 import { FindResponse } from '../ai_assistant_data_clients/find';
@@ -46,7 +52,7 @@ import {
 import { getLangChainMessages } from '../lib/langchain/helpers';
 
 import { AIAssistantConversationsDataClient } from '../ai_assistant_data_clients/conversations';
-import { ElasticAssistantRequestHandlerContext, GetElser } from '../types';
+import { ElasticAssistantRequestHandlerContext } from '../types';
 import { callAssistantGraph } from '../lib/langchain/graphs/default_assistant_graph';
 
 interface GetPluginNameFromRequestParams {
@@ -98,10 +104,12 @@ export const getPluginNameFromRequest = ({
 
 export const getMessageFromRawResponse = ({
   rawContent,
+  metadata,
   isError,
   traceData,
 }: {
   rawContent?: string;
+  metadata?: MessageMetadata;
   traceData?: TraceData;
   isError?: boolean;
 }): Message => {
@@ -111,6 +119,7 @@ export const getMessageFromRawResponse = ({
       role: 'assistant',
       content: rawContent,
       timestamp: dateTimeString,
+      metadata,
       isError,
       traceData,
     };
@@ -168,6 +177,7 @@ export interface AppendAssistantMessageToConversationParams {
   messageContent: string;
   replacements: Replacements;
   conversationId: string;
+  contentReferences: ContentReferences;
   isError?: boolean;
   traceData?: Message['traceData'];
 }
@@ -176,6 +186,7 @@ export const appendAssistantMessageToConversation = async ({
   messageContent,
   replacements,
   conversationId,
+  contentReferences,
   isError = false,
   traceData = {},
 }: AppendAssistantMessageToConversationParams) => {
@@ -183,6 +194,10 @@ export const appendAssistantMessageToConversation = async ({
   if (!conversation) {
     return;
   }
+
+  const metadata: MessageMetadata = {
+    ...(!isEmpty(contentReferences) ? { contentReferences } : {}),
+  };
 
   await conversationsDataClient.appendConversationMessages({
     existingConversation: conversation,
@@ -192,6 +207,7 @@ export const appendAssistantMessageToConversation = async ({
           messageContent,
           replacements,
         }),
+        metadata: !isEmpty(metadata) ? metadata : undefined,
         traceData,
         isError,
       }),
@@ -216,8 +232,10 @@ export interface LangChainExecuteParams {
   telemetry: AnalyticsServiceSetup;
   actionTypeId: string;
   connectorId: string;
+  contentReferencesStore: ContentReferencesStore;
   llmTasks?: LlmTasksPluginStart;
   inference: InferenceServerStart;
+  inferenceChatModelEnabled?: boolean;
   isOssModel?: boolean;
   conversationId?: string;
   context: AwaitedProperties<
@@ -232,10 +250,12 @@ export interface LangChainExecuteParams {
     traceData?: Message['traceData'],
     isError?: boolean
   ) => Promise<void>;
-  getElser: GetElser;
   response: KibanaResponseFactory;
   responseLanguage?: string;
+  savedObjectsClient: SavedObjectsClientContract;
+  screenContext?: ScreenContext;
   systemPrompt?: string;
+  timeout?: number;
 }
 export const langChainExecute = async ({
   messages,
@@ -245,6 +265,8 @@ export const langChainExecute = async ({
   telemetry,
   actionTypeId,
   connectorId,
+  contentReferencesStore,
+  inferenceChatModelEnabled,
   isOssModel,
   context,
   actionsClient,
@@ -254,11 +276,13 @@ export const langChainExecute = async ({
   logger,
   conversationId,
   onLlmResponse,
-  getElser,
   response,
   responseLanguage,
   isStream = true,
+  savedObjectsClient,
+  screenContext,
   systemPrompt,
+  timeout,
 }: LangChainExecuteParams) => {
   // Fetch any tools registered by the request's originating plugin
   const pluginName = getPluginNameFromRequest({
@@ -268,9 +292,11 @@ export const langChainExecute = async ({
   });
   const assistantContext = context.elasticAssistant;
   // We don't (yet) support invoking these tools interactively
-  const unsupportedTools = new Set(['attack-discovery', DEFEND_INSIGHTS_TOOL_ID]);
+  const unsupportedTools = new Set(['attack-discovery', DEFEND_INSIGHTS_ID]);
+  const pluginNames = Array.from(new Set([pluginName, DEFAULT_PLUGIN_NAME]));
+
   const assistantTools = assistantContext
-    .getRegisteredTools(pluginName)
+    .getRegisteredTools(pluginNames)
     .filter((tool) => !unsupportedTools.has(tool.id));
 
   // get a scoped esClient for assistant memory
@@ -297,15 +323,19 @@ export const langChainExecute = async ({
   // Shared executor params
   const executorParams: AgentExecutorParams<boolean> = {
     abortSignal,
+    assistantContext,
     dataClients,
     alertsIndexPattern: request.body.alertsIndexPattern,
+    core: context.core,
     actionsClient,
     assistantTools,
     conversationId,
     connectorId,
+    contentReferencesStore,
     esClient,
     llmTasks,
     inference,
+    inferenceChatModelEnabled,
     isStream,
     llmType: getLlmType(actionTypeId),
     isOssModel,
@@ -316,8 +346,11 @@ export const langChainExecute = async ({
     request,
     replacements,
     responseLanguage,
+    savedObjectsClient,
+    screenContext,
     size: request.body.size,
     systemPrompt,
+    timeout,
     telemetry,
     telemetryParams: {
       actionTypeId,
@@ -418,12 +451,12 @@ type PerformChecks =
       isSuccess: false;
       response: IKibanaResponse;
     };
-export const performChecks = ({
+export const performChecks = async ({
   capability,
   context,
   request,
   response,
-}: PerformChecksParams): PerformChecks => {
+}: PerformChecksParams): Promise<PerformChecks> => {
   const assistantResponse = buildResponse(response);
 
   if (!hasAIAssistantLicense(context.licensing.license)) {
@@ -437,7 +470,7 @@ export const performChecks = ({
     };
   }
 
-  const currentUser = context.elasticAssistant.getCurrentUser();
+  const currentUser = await context.elasticAssistant.getCurrentUser();
 
   if (currentUser == null) {
     return {

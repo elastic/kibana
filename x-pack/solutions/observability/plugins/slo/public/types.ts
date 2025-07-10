@@ -49,6 +49,8 @@ import type {
   UsageCollectionStart,
 } from '@kbn/usage-collection-plugin/public';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin-types-public';
+import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
+import { ApmSourceAccessPluginStart } from '@kbn/apm-sources-access-plugin/public';
 import type { SLORouteRepository } from '../server/routes/get_slo_server_route_repository';
 import { SLOPlugin } from './plugin';
 
@@ -72,7 +74,7 @@ export interface SLOPublicPluginsSetup {
 
 export interface SLOPublicPluginsStart {
   aiops: AiopsPluginStart;
-  cases: CasesPublicStart;
+  cases?: CasesPublicStart;
   charts: ChartsPluginStart;
   cloud?: CloudStart;
   dashboard: DashboardStart;
@@ -99,6 +101,8 @@ export interface SLOPublicPluginsStart {
   unifiedSearch: UnifiedSearchPublicPluginStart;
   usageCollection: UsageCollectionStart;
   security?: SecurityPluginStart;
+  fieldsMetadata: FieldsMetadataPublicStart;
+  apmSourcesAccess: ApmSourceAccessPluginStart;
 }
 
 export type SLOPublicSetup = ReturnType<SLOPlugin['setup']>;

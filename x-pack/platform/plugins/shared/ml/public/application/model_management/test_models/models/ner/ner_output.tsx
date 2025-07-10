@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
@@ -63,7 +63,7 @@ const ENTITY_TYPES: Record<EntityTypeName, EntityType> = {
   },
   MISC: {
     label: 'Miscellaneous',
-    icon: 'questionInCircle',
+    icon: 'question',
     // Amsterdam color
     colorIndex: 7,
   },
@@ -71,7 +71,7 @@ const ENTITY_TYPES: Record<EntityTypeName, EntityType> = {
 
 const UNKNOWN_ENTITY_TYPE: EntityType = {
   label: '',
-  icon: 'questionInCircle',
+  icon: 'question',
   // Amsterdam color
   colorIndex: 5,
 };

@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
-import * as Either from 'fp-ts/lib/Either';
-import * as TaskEither from 'fp-ts/lib/TaskEither';
-import * as Option from 'fp-ts/lib/Option';
+import type { estypes } from '@elastic/elasticsearch';
+import * as Either from 'fp-ts/Either';
+import * as TaskEither from 'fp-ts/TaskEither';
+import * as Option from 'fp-ts/Option';
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import {
@@ -20,7 +20,7 @@ import {
 
 /** @internal */
 export interface WaitForTaskResponse {
-  error: Option.Option<{ type: string; reason?: string; index?: string }>;
+  error: Option.Option<{ type: string; reason?: string | null; index?: string }>;
   completed: boolean;
   failures: Option.Option<any[]>;
   description?: string;
@@ -38,6 +38,19 @@ export interface WaitForTaskResponse {
 export interface WaitForTaskCompletionTimeout {
   /** After waiting for the specified timeout, the task has not yet completed. */
   readonly type: 'wait_for_task_completion_timeout';
+  readonly message: string;
+  readonly error?: Error;
+}
+
+/**
+ * When we use `wait_for_completion=false`, we won't get the errors right away, we'll get a
+ * task id. Then we have to query the tasks API with that id and Elasticsearch will tell us
+ * if there was any error in the original task inside a 200 response. In some cases we might
+ * want to retry the original task.
+ */
+export interface TaskCompletedWithRetriableError {
+  /** While waiting, the original task encountered an error. It might need to be retried. */
+  readonly type: 'task_completed_with_retriable_error';
   readonly message: string;
   readonly error?: Error;
 }

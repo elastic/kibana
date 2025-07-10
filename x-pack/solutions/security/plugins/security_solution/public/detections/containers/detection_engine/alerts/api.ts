@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { getCasesFromAlertsUrl } from '@kbn/cases-plugin/common';
 import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
 import type { ResponseActionApiResponse, HostInfo } from '../../../../../common/endpoint/types';

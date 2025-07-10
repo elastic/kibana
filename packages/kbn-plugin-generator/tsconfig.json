@@ -20,5 +20,6 @@
     "@kbn/dev-cli-runner",
     "@kbn/dev-cli-errors",
     "@kbn/jest-serializers",
+    "@kbn/projects-solutions-groups",
   ],
 }

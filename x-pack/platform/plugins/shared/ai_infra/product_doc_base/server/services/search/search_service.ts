@@ -21,12 +21,14 @@ export class SearchService {
   }
 
   async search(options: DocSearchOptions): Promise<DocSearchResponse> {
-    const { query, max = 3, products } = options;
-    this.log.debug(`performing search - query=[${query}]`);
+    const { query, max = 3, highlights = 3, products, inferenceId } = options;
+    const index = getIndicesForProductNames(products, inferenceId);
+    this.log.debug(`performing search - query=[${query}] at index=[${index}] `);
     const results = await performSearch({
       searchQuery: query,
       size: max,
-      index: getIndicesForProductNames(products),
+      highlights,
+      index,
       client: this.esClient,
     });
 

@@ -7,15 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataSourceProfileProvider } from '../../../../profiles';
+import type { LogsDataSourceProfileProvider } from '../profile';
 import { extendProfileProvider } from '../../../extend_profile_provider';
 import { createGetDefaultAppState } from '../accessors';
 import { LOG_LEVEL_COLUMN, MESSAGE_COLUMN } from '../consts';
 import { createResolve } from './create_resolve';
 
 export const createKubernetesContainerLogsDataSourceProfileProvider = (
-  logsDataSourceProfileProvider: DataSourceProfileProvider
-): DataSourceProfileProvider =>
+  logsDataSourceProfileProvider: LogsDataSourceProfileProvider
+): LogsDataSourceProfileProvider =>
   extendProfileProvider(logsDataSourceProfileProvider, {
     profileId: 'observability-kubernetes-container-logs-data-source-profile',
     profile: {

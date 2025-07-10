@@ -42,9 +42,11 @@ type Props = EuiBadgeProps & {
 
 function getStatusComponent({
   status,
+  upgradeDetails,
   ...restOfProps
 }: {
   status: Agent['status'];
+  upgradeDetails?: Agent['upgrade_details'];
 } & EuiBadgeProps): React.ReactElement {
   switch (status) {
     case 'error':
@@ -75,10 +77,36 @@ function getStatusComponent({
           />
         </EuiBadge>
       );
+    case 'uninstalled':
+      return (
+        <EuiBadge color="default" {...restOfProps}>
+          <FormattedMessage
+            id="xpack.fleet.agentHealth.uninstalledStatusText"
+            defaultMessage="Uninstalled"
+          />
+        </EuiBadge>
+      );
+    case 'orphaned':
+      return (
+        <EuiBadge color="warning" {...restOfProps}>
+          <FormattedMessage
+            id="xpack.fleet.agentHealth.orphanedStatusText"
+            defaultMessage="Orphaned"
+          />
+        </EuiBadge>
+      );
+
     case 'unenrolling':
     case 'enrolling':
     case 'updating':
-      return (
+      return isAgentInFailedUpgradeState(upgradeDetails) ? (
+        <EuiBadge color="danger" {...restOfProps}>
+          <FormattedMessage
+            id="xpack.fleet.agentHealth.upgradingFailedStatusText"
+            defaultMessage="Upgrade failed"
+          />
+        </EuiBadge>
+      ) : (
         <EuiBadge color="primary" {...restOfProps}>
           <FormattedMessage
             id="xpack.fleet.agentHealth.updatingStatusText"
@@ -166,7 +194,7 @@ export const AgentHealth: React.FunctionComponent<Props> = ({
             <p>{lastCheckinText}</p>
             <p>{lastCheckInMessageText}</p>
             {isStuckInUpdating(agent) ? (
-              isAgentInFailedUpgradeState(agent) ? (
+              isAgentInFailedUpgradeState(agent.upgrade_details) ? (
                 <FormattedMessage
                   id="xpack.fleet.agentHealth.failedUpgradeTooltipText"
                   defaultMessage="Agent upgrade failed. Consider restarting the upgrade."
@@ -185,15 +213,26 @@ export const AgentHealth: React.FunctionComponent<Props> = ({
       >
         {isStuckInUpdating(agent) && !fromDetails ? (
           <div className="eui-textNoWrap">
-            {getStatusComponent({ status: agent.status, ...restOfProps })}
+            {getStatusComponent({
+              status: agent.status,
+              upgradeDetails: agent.upgrade_details,
+              ...restOfProps,
+            })}
             &nbsp;
             <EuiIcon type="warning" color="warning" />
           </div>
         ) : (
           <>
-            {getStatusComponent({ status: agent.status, ...restOfProps })}
+            {getStatusComponent({
+              status: agent.status,
+              upgradeDetails: agent.upgrade_details,
+              ...restOfProps,
+            })}
             {previousToOfflineStatus
-              ? getStatusComponent({ status: previousToOfflineStatus, ...restOfProps })
+              ? getStatusComponent({
+                  status: previousToOfflineStatus,
+                  ...restOfProps,
+                })
               : null}
           </>
         )}
@@ -206,7 +245,7 @@ export const AgentHealth: React.FunctionComponent<Props> = ({
             size="m"
             color="warning"
             title={
-              isAgentInFailedUpgradeState(agent) ? (
+              isAgentInFailedUpgradeState(agent.upgrade_details) ? (
                 <FormattedMessage
                   id="xpack.fleet.agentHealth.failedUpgradeTitle"
                   defaultMessage="Agent upgrade is stuck in failed state."
@@ -224,7 +263,7 @@ export const AgentHealth: React.FunctionComponent<Props> = ({
                 id="xpack.fleet.agentHealth.stuckUpdatingText"
                 defaultMessage="{stuckMessage} Consider restarting the upgrade. {learnMore}"
                 values={{
-                  stuckMessage: isAgentInFailedUpgradeState(agent)
+                  stuckMessage: isAgentInFailedUpgradeState(agent.upgrade_details)
                     ? 'Agent upgrade failed.'
                     : 'Agent has been updating for a while, and may be stuck.',
                   learnMore: (

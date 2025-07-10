@@ -7,7 +7,7 @@
 
 import { EuiFieldNumber, EuiRange, EuiRangeProps } from '@elastic/eui';
 import React, { useCallback } from 'react';
-import { i18n } from '@kbn/i18n';
+import { i18n, TranslateArguments } from '@kbn/i18n';
 import { AggFunctionsMapping } from '@kbn/data-plugin/public';
 import {
   buildExpression,
@@ -17,6 +17,8 @@ import {
 } from '@kbn/expressions-plugin/public';
 import { useDebouncedValue } from '@kbn/visualization-utils';
 import { PERCENTILE_ID, PERCENTILE_NAME } from '@kbn/lens-formula-docs';
+import { sanitazeESQLInput } from '@kbn/esql-utils';
+import { memoize } from 'lodash';
 import { OperationDefinition } from '.';
 import {
   getFormatFromPreviousColumn,
@@ -45,17 +47,40 @@ export interface PercentileIndexPatternColumn extends FieldBasedIndexPatternColu
   };
 }
 
+const DEFAULT_PERCENTILE_VALUE = 95;
+const ALLOWED_DECIMAL_DIGITS = 4;
+
 function ofName(
   name: string,
   percentile: number,
   timeShift: string | undefined,
   reducedTimeRange: string | undefined
 ) {
+  const formatters: TranslateArguments['formatters'] = {
+    getNumberFormat: memoize(
+      (locale, opts) =>
+        new Intl.NumberFormat(locale, {
+          ...(opts as Intl.NumberFormatOptions), // To resolve a type mismatch in the 'useGrouping' property
+          maximumFractionDigits: ALLOWED_DECIMAL_DIGITS,
+        })
+    ),
+    // @ts-expect-error - There’s a small mismatch between @formatjs type and Intl API that only applies to the date function, we’re ignoring that
+    getDateTimeFormat: memoize((locale, opts) => new Intl.DateTimeFormat(locale, opts)),
+    getPluralRules: memoize(
+      (locale, opts) =>
+        new Intl.PluralRules(locale, {
+          ...opts,
+          maximumFractionDigits: ALLOWED_DECIMAL_DIGITS, // ensures the correct ordinal suffix is selected based on the matching number of decimal digits used in the number formatter
+        })
+    ),
+  };
+
   return adjustTimeScaleLabelSuffix(
     i18n.translate('xpack.lens.indexPattern.percentileOf', {
       defaultMessage:
         '{percentile, selectordinal, one {#st} two {#nd} few {#rd} other {#th}} percentile of {name}',
       values: { name, percentile },
+      formatters,
     }),
     undefined,
     undefined,
@@ -65,9 +90,6 @@ function ofName(
     reducedTimeRange
   );
 }
-
-const DEFAULT_PERCENTILE_VALUE = 95;
-const ALLOWED_DECIMAL_DIGITS = 4;
 
 function getInvalidErrorMessage(
   value: string | undefined,
@@ -174,7 +196,6 @@ export const percentileOperation: OperationDefinition<
       operationType: PERCENTILE_ID,
       sourceField: field.name,
       isBucketed: false,
-      scale: 'ratio',
       filter: getFilter(previousColumn, columnParams),
       timeShift: columnParams?.shift || previousColumn?.timeShift,
       reducedTimeRange: columnParams?.reducedTimeRange || previousColumn?.reducedTimeRange,
@@ -195,6 +216,10 @@ export const percentileOperation: OperationDefinition<
       ),
       sourceField: field.name,
     };
+  },
+  toESQL: (column, columnId) => {
+    if (column.timeShift) return;
+    return `PERCENTILE(${sanitazeESQLInput(column.sourceField)}, ${column.params.percentile})`;
   },
   toEsAggsFn: (column, columnId, _indexPattern) => {
     return buildExpressionFunction<AggFunctionsMapping['aggSinglePercentile']>(

@@ -11,9 +11,7 @@
     // Emotion theme typing
     "./emotion.d.ts"
   ],
-  "exclude": [
-    "target/**/*"
-  ],
+  "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/i18n",
     "@kbn/i18n-react",
@@ -32,7 +30,6 @@
     "@kbn/embeddable-plugin",
     "@kbn/embeddable-enhanced-plugin",
     "@kbn/lens-plugin",
-    "@kbn/ui-theme",
     "@kbn/es-query",
     "@kbn/react-kibana-mount",
     "@kbn/cases-plugin",
@@ -97,9 +94,18 @@
     "@kbn/core-application-browser",
     "@kbn/core-theme-browser",
     "@kbn/ebt-tools",
-    "@kbn/observability-alerting-rule-utils",
+    "@kbn/alerting-rule-utils",
     "@kbn/discover-shared-plugin",
     "@kbn/server-route-repository-client",
+    "@kbn/response-ops-alerts-table",
     "@kbn/security-plugin-types-public",
+    "@kbn/response-ops-rule-params",
+    "@kbn/core-test-helpers-kbn-server",
+    "@kbn/security-plugin",
+    "@kbn/response-ops-rule-form",
+    "@kbn/server-route-repository-utils",
+    "@kbn/fields-metadata-plugin",
+    "@kbn/apm-sources-access-plugin",
+    "@kbn/lock-manager",
   ]
 }

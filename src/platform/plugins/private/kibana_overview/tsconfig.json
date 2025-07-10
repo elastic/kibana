@@ -6,6 +6,7 @@
   "include": [
     "public/**/*",
     "common/**/*",
+    "../../../../../typings/emotion.d.ts"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -27,9 +28,11 @@
     "@kbn/shared-ux-router",
     "@kbn/shared-ux-avatar-solution",
     "@kbn/shared-ux-utility",
-    "@kbn/react-kibana-context-render",
+    "@kbn/core-application-browser-mocks",
+    "@kbn/core-http-browser-mocks",
+    "@kbn/react-kibana-context-theme",
   ],
   "exclude": [
-    "target/**/*",
+    "target/**/*"
   ]
 }
