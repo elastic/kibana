@@ -809,7 +809,7 @@ export class CasesConnectorExecutor {
       ...(caseFieldsFromTemplate?.category ? { category: caseFieldsFromTemplate?.category } : null),
       owner: params.owner,
       customFields: builtCustomFields,
-      isAssistant: params.isGeneratedByAssistant ?? false,
+      isGeneratedByAssistant: params.isGeneratedByAssistant ?? false,
     };
   }
 
@@ -1152,7 +1152,7 @@ export class CasesConnectorExecutor {
           })) ?? [];
         return {
           caseId: theCase.id,
-          isAssistant: isGeneratedByAssistant ?? false,
+          isGeneratedByAssistant: isGeneratedByAssistant ?? false,
           attachments: [
             ...extraComments,
             {

@@ -62,7 +62,7 @@ const getSingleAlertUserAction = ({
 
   return [
     {
-      username: userAction.isAssistant ? (
+      username: userAction.isGeneratedByAssistant ? (
         <HoverableAssistantTitleWithAvatar />
       ) : (
         <HoverableUserWithAvatarResolver user={userAction.createdBy} userProfiles={userProfiles} />
@@ -122,7 +122,7 @@ const getMultipleAlertsUserAction = ({
 
   return [
     {
-      username: userAction.isAssistant ? (
+      username: userAction.isGeneratedByAssistant ? (
         <HoverableAssistantTitleWithAvatar />
       ) : (
         <HoverableUserWithAvatarResolver user={userAction.createdBy} userProfiles={userProfiles} />

@@ -279,14 +279,14 @@ export class UserActionPersister {
     caseId,
     attachments,
     user,
-    isAssistant,
+    isGeneratedByAssistant,
     refresh,
   }: BulkCreateAttachmentUserAction): Promise<void> {
     await this.bulkCreateAttachment({
       caseId,
       attachments,
       user,
-      isAssistant,
+      isGeneratedByAssistant,
       action: UserActionActions.create,
       refresh,
     });
@@ -296,7 +296,7 @@ export class UserActionPersister {
     caseId,
     attachments,
     user,
-    isAssistant,
+    isGeneratedByAssistant,
     action = UserActionActions.create,
     refresh,
   }: BulkCreateAttachmentUserAction): Promise<void> {
@@ -314,7 +314,7 @@ export class UserActionPersister {
         user,
         owner: attachment.owner,
         attachmentId: attachment.id,
-        isAssistant,
+        isGeneratedByAssistant,
         payload: { attachment: attachment.attachment },
       });
 
@@ -383,8 +383,17 @@ export class UserActionPersister {
     userAction,
     refresh,
   }: CreateUserActionArgs<T>): Promise<void> {
-    const { action, type, caseId, user, owner, payload, connectorId, attachmentId, isAssistant } =
-      userAction;
+    const {
+      action,
+      type,
+      caseId,
+      user,
+      owner,
+      payload,
+      connectorId,
+      attachmentId,
+      isGeneratedByAssistant,
+    } = userAction;
 
     try {
       this.context.log.debug(`Attempting to create a user action of type: ${type}`);
@@ -397,7 +406,7 @@ export class UserActionPersister {
         owner,
         connectorId,
         attachmentId,
-        isAssistant,
+        isGeneratedByAssistant,
         payload,
       });
 
@@ -432,7 +441,7 @@ export class UserActionPersister {
             payload,
             connectorId,
             attachmentId,
-            isAssistant,
+            isGeneratedByAssistant,
           }) => {
             const userActionBuilder = this.builderFactory.getBuilder<T>(type);
             const userAction = userActionBuilder?.build({
@@ -442,7 +451,7 @@ export class UserActionPersister {
               owner,
               connectorId,
               attachmentId,
-              isAssistant,
+              isGeneratedByAssistant,
               payload,
             });
 

@@ -171,7 +171,7 @@ describe('CasePostRequestRt', () => {
         value: 3,
       },
     ],
-    isAssistant: false,
+    isGeneratedByAssistant: false,
   };
 
   it('has expected attributes in request', () => {
@@ -400,13 +400,13 @@ describe('CasePostRequestRt', () => {
   });
 
   test.each([undefined, false, true])(
-    'has expected attributes in request if the `isAssistant` is %s',
-    (isAssistant) => {
-      const query = CasePostRequestRt.decode({ ...defaultRequest, isAssistant });
+    'has expected attributes in request if the `isGeneratedByAssistant` is %s',
+    (isGeneratedByAssistant) => {
+      const query = CasePostRequestRt.decode({ ...defaultRequest, isGeneratedByAssistant });
 
       expect(query).toStrictEqual({
         _tag: 'Right',
-        right: { ...defaultRequest, isAssistant },
+        right: { ...defaultRequest, isGeneratedByAssistant },
       });
     }
   );

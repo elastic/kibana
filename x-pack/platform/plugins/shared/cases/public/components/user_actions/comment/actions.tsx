@@ -35,7 +35,7 @@ export const createActionAttachmentUserActionBuilder = ({
     const actionIconName = attachment.actions.type === 'isolate' ? 'lock' : 'lockOpen';
     return [
       {
-        username: userAction.isAssistant ? (
+        username: userAction.isGeneratedByAssistant ? (
           <HoverableAssistantTitleWithAvatar />
         ) : (
           <HoverableUserWithAvatarResolver

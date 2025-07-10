@@ -151,7 +151,7 @@ describe('common utils', () => {
           "duration": null,
           "external_service": null,
           "incremental_id": undefined,
-          "is_assistant": undefined,
+          "is_generated_by_assistant": undefined,
           "observables": Array [],
           "owner": "securitySolution",
           "settings": Object {
@@ -209,7 +209,7 @@ describe('common utils', () => {
           "duration": null,
           "external_service": null,
           "incremental_id": undefined,
-          "is_assistant": undefined,
+          "is_generated_by_assistant": undefined,
           "observables": Array [],
           "owner": "securitySolution",
           "settings": Object {
@@ -271,7 +271,7 @@ describe('common utils', () => {
           "duration": null,
           "external_service": null,
           "incremental_id": undefined,
-          "is_assistant": undefined,
+          "is_generated_by_assistant": undefined,
           "observables": Array [],
           "owner": "securitySolution",
           "settings": Object {
@@ -339,7 +339,7 @@ describe('common utils', () => {
           "duration": null,
           "external_service": null,
           "incremental_id": undefined,
-          "is_assistant": undefined,
+          "is_generated_by_assistant": undefined,
           "observables": Array [],
           "owner": "securitySolution",
           "settings": Object {
@@ -358,9 +358,9 @@ describe('common utils', () => {
       `);
     });
 
-    it('transform correctly with isAssistant provided', () => {
+    it('transform correctly with isGeneratedByAssistant provided', () => {
       const myCase = {
-        newCase: { ...newCase, connector, isAssistant: true },
+        newCase: { ...newCase, connector, isGeneratedByAssistant: true },
         user: {
           email: 'elastic@elastic.co',
           full_name: 'Elastic',
@@ -397,7 +397,7 @@ describe('common utils', () => {
           "duration": null,
           "external_service": null,
           "incremental_id": undefined,
-          "is_assistant": true,
+          "is_generated_by_assistant": true,
           "observables": Array [],
           "owner": "securitySolution",
           "settings": Object {

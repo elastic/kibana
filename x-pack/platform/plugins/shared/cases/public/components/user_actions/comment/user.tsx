@@ -41,7 +41,7 @@ type BuilderArgs = Pick<
   outlined: boolean;
   isEdit: boolean;
   isLoading: boolean;
-  isAssistant: boolean;
+  isGeneratedByAssistant: boolean;
 };
 
 const getCommentFooterCss = (euiTheme?: EuiThemeComputed<{}>) => {
@@ -86,7 +86,7 @@ export const createUserAttachmentUserActionBuilder = ({
   outlined,
   isEdit,
   isLoading,
-  isAssistant,
+  isGeneratedByAssistant,
   commentRefs,
   caseId,
   euiTheme,
@@ -97,7 +97,7 @@ export const createUserAttachmentUserActionBuilder = ({
 }: BuilderArgs): ReturnType<UserActionBuilder> => ({
   build: () => [
     {
-      username: isAssistant ? (
+      username: isGeneratedByAssistant ? (
         <HoverableAssistantTitle />
       ) : (
         <HoverableUsernameResolver user={attachment.createdBy} userProfiles={userProfiles} />
@@ -143,7 +143,7 @@ export const createUserAttachmentUserActionBuilder = ({
           )}
         </>
       ),
-      timelineAvatar: isAssistant ? (
+      timelineAvatar: isGeneratedByAssistant ? (
         <AssistantAvatar
           name={'machine'}
           size={'m'}

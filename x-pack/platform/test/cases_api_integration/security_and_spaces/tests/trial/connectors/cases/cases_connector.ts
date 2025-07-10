@@ -353,7 +353,7 @@ export default ({ getService }: FtrProviderContext): void => {
               username: 'elastic',
             },
             observables: [],
-            is_assistant: false,
+            is_generated_by_assistant: false,
           });
         });
 
@@ -467,7 +467,7 @@ export default ({ getService }: FtrProviderContext): void => {
               username: 'elastic',
             },
             observables: [],
-            is_assistant: false,
+            is_generated_by_assistant: false,
           });
         });
 
@@ -846,7 +846,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 username: 'elastic',
               },
               observables: [],
-              is_assistant: false,
+              is_generated_by_assistant: false,
             });
 
             expect(secondCase).to.eql({
@@ -895,7 +895,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 username: 'elastic',
               },
               observables: [],
-              is_assistant: false,
+              is_generated_by_assistant: false,
             });
           });
 
@@ -1367,7 +1367,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 username: 'elastic',
               },
               observables: [],
-              is_assistant: true,
+              is_generated_by_assistant: true,
             });
 
             expect(secondCase).to.eql({
@@ -1416,7 +1416,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 username: 'elastic',
               },
               observables: [],
-              is_assistant: true,
+              is_generated_by_assistant: true,
             });
 
             expect(thirdCase).to.eql({
@@ -1465,7 +1465,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 username: 'elastic',
               },
               observables: [],
-              is_assistant: true,
+              is_generated_by_assistant: true,
             });
           });
 

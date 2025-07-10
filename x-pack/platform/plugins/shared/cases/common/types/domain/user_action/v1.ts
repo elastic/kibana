@@ -36,8 +36,8 @@ const UserActionCommonAttributesRt = rt.strict({
   action: UserActionActionsRt,
 });
 
-const UserActionWithIsAssistantRt = rt.exact(
-  rt.partial({ is_assistant: rt.union([rt.boolean, rt.null]) })
+const UserActionWithIsGeneratedByAssistantRt = rt.exact(
+  rt.partial({ is_generated_by_assistant: rt.union([rt.boolean, rt.null]) })
 );
 
 /**
@@ -87,13 +87,13 @@ const UserActionsWithoutIdsRt = rt.union([
 export const CaseUserActionBasicRt = rt.intersection([
   UserActionPayloadRt,
   UserActionCommonAttributesRt,
-  UserActionWithIsAssistantRt,
+  UserActionWithIsGeneratedByAssistantRt,
 ]);
 
 export const CaseUserActionWithoutReferenceIdsRt = rt.intersection([
   UserActionsWithoutIdsRt,
   UserActionCommonAttributesRt,
-  UserActionWithIsAssistantRt,
+  UserActionWithIsGeneratedByAssistantRt,
 ]);
 
 /**

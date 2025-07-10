@@ -14,5 +14,5 @@ export const casesSchema = casesSchemaV3.extends({
   time_to_acknowledge: schema.maybe(schema.nullable(schema.number())),
   time_to_investigate: schema.maybe(schema.nullable(schema.number())),
   time_to_resolve: schema.maybe(schema.nullable(schema.number())),
-  is_assistant: schema.maybe(schema.nullable(schema.boolean())),
+  is_generated_by_assistant: schema.maybe(schema.nullable(schema.boolean())),
 });

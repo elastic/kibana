@@ -9,13 +9,13 @@ import type { CasesClientMock } from '../../client/mocks';
 
 export const expectCasesToHaveTheCorrectAlertsAttachedWithGrouping = (
   casesClientMock: CasesClientMock,
-  isAssistant = false
+  isGeneratedByAssistant = false
 ) => {
   expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(3);
 
   expect(casesClientMock.attachments.bulkCreate).nthCalledWith(1, {
     caseId: 'mock-id-1',
-    isAssistant,
+    isGeneratedByAssistant,
     attachments: [
       {
         alertId: ['alert-id-0', 'alert-id-2'],
@@ -32,7 +32,7 @@ export const expectCasesToHaveTheCorrectAlertsAttachedWithGrouping = (
 
   expect(casesClientMock.attachments.bulkCreate).nthCalledWith(2, {
     caseId: 'mock-id-2',
-    isAssistant,
+    isGeneratedByAssistant,
     attachments: [
       {
         alertId: ['alert-id-1'],
@@ -49,7 +49,7 @@ export const expectCasesToHaveTheCorrectAlertsAttachedWithGrouping = (
 
   expect(casesClientMock.attachments.bulkCreate).nthCalledWith(3, {
     caseId: 'mock-id-3',
-    isAssistant,
+    isGeneratedByAssistant,
     attachments: [
       {
         alertId: ['alert-id-3'],
@@ -67,13 +67,13 @@ export const expectCasesToHaveTheCorrectAlertsAttachedWithGrouping = (
 
 export const expectCasesToHaveTheCorrectAlertsAttachedWithGroupingAndIncreasedCounter = (
   casesClientMock: CasesClientMock,
-  isAssistant = false
+  isGeneratedByAssistant = false
 ) => {
   expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(3);
 
   expect(casesClientMock.attachments.bulkCreate).nthCalledWith(1, {
     caseId: 'mock-id-1',
-    isAssistant,
+    isGeneratedByAssistant,
     attachments: [
       {
         alertId: ['alert-id-1'],
@@ -90,7 +90,7 @@ export const expectCasesToHaveTheCorrectAlertsAttachedWithGroupingAndIncreasedCo
 
   expect(casesClientMock.attachments.bulkCreate).nthCalledWith(2, {
     caseId: 'mock-id-2',
-    isAssistant,
+    isGeneratedByAssistant,
     attachments: [
       {
         alertId: ['alert-id-3'],
@@ -107,7 +107,7 @@ export const expectCasesToHaveTheCorrectAlertsAttachedWithGroupingAndIncreasedCo
 
   expect(casesClientMock.attachments.bulkCreate).nthCalledWith(3, {
     caseId: 'mock-id-4',
-    isAssistant,
+    isGeneratedByAssistant,
     attachments: [
       {
         alertId: ['alert-id-0', 'alert-id-2'],
@@ -125,13 +125,13 @@ export const expectCasesToHaveTheCorrectAlertsAttachedWithGroupingAndIncreasedCo
 
 export const expectCasesToHaveTheCorrectAlertsAttachedWithPredefinedGrouping = (
   casesClientMock: CasesClientMock,
-  isAssistant = false
+  isGeneratedByAssistant = false
 ) => {
   expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(3);
 
   expect(casesClientMock.attachments.bulkCreate).nthCalledWith(1, {
     caseId: 'mock-id-1',
-    isAssistant,
+    isGeneratedByAssistant,
     attachments: [
       { comment: 'comment-1', owner: 'securitySolution', type: 'user' },
       {
@@ -146,7 +146,7 @@ export const expectCasesToHaveTheCorrectAlertsAttachedWithPredefinedGrouping = (
 
   expect(casesClientMock.attachments.bulkCreate).nthCalledWith(2, {
     caseId: 'mock-id-2',
-    isAssistant,
+    isGeneratedByAssistant,
     attachments: [
       { comment: 'comment-2', owner: 'securitySolution', type: 'user' },
       { comment: 'comment-3', owner: 'securitySolution', type: 'user' },
@@ -162,7 +162,7 @@ export const expectCasesToHaveTheCorrectAlertsAttachedWithPredefinedGrouping = (
 
   expect(casesClientMock.attachments.bulkCreate).nthCalledWith(3, {
     caseId: 'mock-id-3',
-    isAssistant,
+    isGeneratedByAssistant,
     attachments: [
       {
         alertId: ['alert-id-5'],

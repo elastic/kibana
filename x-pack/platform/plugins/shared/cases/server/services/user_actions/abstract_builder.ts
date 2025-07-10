@@ -101,7 +101,7 @@ export abstract class UserActionBuilder {
     valueKey,
     caseId,
     attachmentId,
-    isAssistant,
+    isGeneratedByAssistant,
     connectorId,
     type,
   }: CommonBuilderArguments): SavedObjectParameters => {
@@ -109,7 +109,7 @@ export abstract class UserActionBuilder {
       attributes: {
         ...this.getCommonUserActionAttributes({ user, owner }),
         action,
-        is_assistant: isAssistant,
+        is_generated_by_assistant: isGeneratedByAssistant,
         payload: { [valueKey]: value },
         type,
       },

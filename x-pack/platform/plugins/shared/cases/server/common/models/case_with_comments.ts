@@ -449,10 +449,10 @@ export class CaseCommentModel {
   }
 
   private async bulkCreateCommentUserAction({
-    isAssistant,
+    isGeneratedByAssistant,
     attachments,
   }: {
-    isAssistant?: boolean;
+    isGeneratedByAssistant?: boolean;
     attachments: Array<{ id: string } & AttachmentRequest>;
   }) {
     await this.params.services.userActionService.creator.bulkCreateAttachmentCreation({
@@ -463,7 +463,7 @@ export class CaseCommentModel {
         attachment,
       })),
       user: this.params.user,
-      isAssistant,
+      isGeneratedByAssistant,
     });
   }
 
@@ -506,10 +506,10 @@ export class CaseCommentModel {
   }
 
   public async bulkCreate({
-    isAssistant,
+    isGeneratedByAssistant,
     attachments,
   }: {
-    isAssistant?: boolean;
+    isGeneratedByAssistant?: boolean;
     attachments: CommentRequestWithId;
   }): Promise<CaseCommentModel> {
     try {
@@ -552,7 +552,10 @@ export class CaseCommentModel {
 
       await Promise.all([
         commentableCase.handleAlertComments(attachmentsWithoutErrors),
-        this.bulkCreateCommentUserAction({ isAssistant, attachments: attachmentsWithoutErrors }),
+        this.bulkCreateCommentUserAction({
+          isGeneratedByAssistant,
+          attachments: attachmentsWithoutErrors,
+        }),
       ]);
 
       return commentableCase;

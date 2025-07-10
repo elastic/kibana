@@ -66,7 +66,7 @@ export const createCommonUpdateUserActionBuilder = ({
   return {
     build: () => [
       {
-        username: userAction.isAssistant ? (
+        username: userAction.isGeneratedByAssistant ? (
           <HoverableAssistantTitleWithAvatar />
         ) : (
           <HoverableUserWithAvatarResolver

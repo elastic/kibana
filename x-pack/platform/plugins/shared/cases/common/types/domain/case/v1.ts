@@ -134,7 +134,7 @@ export const CaseAttributesRt = rt.intersection([
       time_to_acknowledge: rt.union([rt.number, rt.null]),
       time_to_investigate: rt.union([rt.number, rt.null]),
       time_to_resolve: rt.union([rt.number, rt.null]),
-      is_assistant: rt.union([rt.boolean, rt.null]),
+      is_generated_by_assistant: rt.union([rt.boolean, rt.null]),
     })
   ),
 ]);
