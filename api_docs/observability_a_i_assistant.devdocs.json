@@ -330,23 +330,14 @@
         "label": "createFunctionRequestMessage",
         "description": [],
         "signature": [
-          "({\n  name,\n  args,\n}: { name: string; args?: Record<string, any> | undefined; }) => { message: ",
+          "({\n  name,\n  args,\n}: { name: string; args?: Record<string, any> | undefined; }) => ",
           {
             "pluginId": "observabilityAIAssistant",
             "scope": "common",
             "docId": "kibObservabilityAIAssistantPluginApi",
-            "section": "def-common.Message",
-            "text": "Message"
-          },
-          "; id: string; } & { type: ",
-          {
-            "pluginId": "observabilityAIAssistant",
-            "scope": "common",
-            "docId": "kibObservabilityAIAssistantPluginApi",
-            "section": "def-common.StreamingChatResponseEventType",
-            "text": "StreamingChatResponseEventType"
-          },
-          ".MessageAdd; }"
+            "section": "def-common.MessageAddEvent",
+            "text": "MessageAddEvent"
+          }
         ],
         "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/utils/create_function_request_message.ts",
         "deprecated": false,
@@ -402,23 +393,14 @@
         "label": "createFunctionResponseMessage",
         "description": [],
         "signature": [
-          "({\n  name,\n  content,\n  data,\n}: { name: string; content: unknown; data?: unknown; }) => { message: ",
+          "({\n  name,\n  content,\n  data,\n}: { name: string; content: unknown; data?: unknown; }) => ",
           {
             "pluginId": "observabilityAIAssistant",
             "scope": "common",
             "docId": "kibObservabilityAIAssistantPluginApi",
-            "section": "def-common.Message",
-            "text": "Message"
-          },
-          "; id: string; } & { type: ",
-          {
-            "pluginId": "observabilityAIAssistant",
-            "scope": "common",
-            "docId": "kibObservabilityAIAssistantPluginApi",
-            "section": "def-common.StreamingChatResponseEventType",
-            "text": "StreamingChatResponseEventType"
-          },
-          ".MessageAdd; }"
+            "section": "def-common.MessageAddEvent",
+            "text": "MessageAddEvent"
+          }
         ],
         "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/utils/create_function_response_message.ts",
         "deprecated": false,
@@ -913,99 +895,29 @@
       },
       {
         "parentPluginId": "observabilityAIAssistant",
-        "id": "def-public.redactEntities",
+        "id": "def-public.ObservabilityAIAssistantFlyoutStateProvider",
         "type": "Function",
         "tags": [],
-        "label": "redactEntities",
-        "description": [
-          "\nReplace each entity span in the original with its hash."
-        ],
+        "label": "ObservabilityAIAssistantFlyoutStateProvider",
+        "description": [],
         "signature": [
-          "(original: string, entities: ",
-          "DetectedEntity",
-          "[]) => string"
+          "({\n  children,\n  isFlyoutOpen,\n}: FlyoutStateProviderProps) => React.JSX.Element"
         ],
-        "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/utils/anonymization/redaction.ts",
+        "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/context/observability_ai_assistant_flyout_state_context.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "observabilityAIAssistant",
-            "id": "def-public.redactEntities.$1",
-            "type": "string",
-            "tags": [],
-            "label": "original",
-            "description": [],
-            "signature": [
-              "string"
-            ],
-            "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/utils/anonymization/redaction.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "observabilityAIAssistant",
-            "id": "def-public.redactEntities.$2",
-            "type": "Array",
-            "tags": [],
-            "label": "entities",
-            "description": [],
-            "signature": [
-              "DetectedEntity",
-              "[]"
-            ],
-            "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/utils/anonymization/redaction.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observabilityAIAssistant",
-        "id": "def-public.unhashString",
-        "type": "Function",
-        "tags": [],
-        "label": "unhashString",
-        "description": [
-          "\nReplace every placeholder in a string with its real value\n(taken from `hashMap`)."
-        ],
-        "signature": [
-          "(contentWithHashes: string, hashMap: Map<string, { value: string; }>) => string"
-        ],
-        "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/utils/anonymization/redaction.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "observabilityAIAssistant",
-            "id": "def-public.unhashString.$1",
-            "type": "string",
-            "tags": [],
-            "label": "contentWithHashes",
-            "description": [],
-            "signature": [
-              "string"
-            ],
-            "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/utils/anonymization/redaction.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "observabilityAIAssistant",
-            "id": "def-public.unhashString.$2",
+            "id": "def-public.ObservabilityAIAssistantFlyoutStateProvider.$1",
             "type": "Object",
             "tags": [],
-            "label": "hashMap",
+            "label": "{\n  children,\n  isFlyoutOpen,\n}",
             "description": [],
             "signature": [
-              "Map<string, { value: string; }>"
+              "FlyoutStateProviderProps"
             ],
-            "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/utils/anonymization/redaction.ts",
+            "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/context/observability_ai_assistant_flyout_state_context.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1220,6 +1132,23 @@
             "isRequired": true
           }
         ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-public.useObservabilityAIAssistantFlyoutStateContext",
+        "type": "Function",
+        "tags": [],
+        "label": "useObservabilityAIAssistantFlyoutStateContext",
+        "description": [],
+        "signature": [
+          "() => FlyoutStateContextValue"
+        ],
+        "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/context/observability_ai_assistant_flyout_state_context.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -1752,8 +1681,8 @@
             "label": "message",
             "description": [],
             "signature": [
-              "{ content?: string | undefined; unredactions?: ",
-              "Unredaction",
+              "{ content?: string | undefined; deanonymizations?: ",
+              "Deanonymization",
               "[] | undefined; name?: string | undefined; role: ",
               {
                 "pluginId": "observabilityAIAssistant",
@@ -4985,23 +4914,15 @@
             "signature": [
               "(callback: () => void) => Promise<",
               "Observable",
-              "<{ message: ",
+              "<",
               {
                 "pluginId": "observabilityAIAssistant",
                 "scope": "common",
                 "docId": "kibObservabilityAIAssistantPluginApi",
-                "section": "def-common.Message",
-                "text": "Message"
+                "section": "def-common.MessageAddEvent",
+                "text": "MessageAddEvent"
               },
-              "; id: string; } & { type: ",
-              {
-                "pluginId": "observabilityAIAssistant",
-                "scope": "common",
-                "docId": "kibObservabilityAIAssistantPluginApi",
-                "section": "def-common.StreamingChatResponseEventType",
-                "text": "StreamingChatResponseEventType"
-              },
-              ".MessageAdd; }>>"
+              ">>"
             ],
             "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/types.ts",
             "deprecated": false,
@@ -5449,21 +5370,6 @@
           "(T extends Promise<infer TReturn> ? State<TReturn> : State<T>) & { refresh: () => void; }"
         ],
         "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/hooks/use_abortable_async.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observabilityAIAssistant",
-        "id": "def-public.aiAssistantAnonymizationRules",
-        "type": "string",
-        "tags": [],
-        "label": "aiAssistantAnonymizationRules",
-        "description": [],
-        "signature": [
-          "\"observability:aiAssistantAnonymizationRules\""
-        ],
-        "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/ui_settings/settings_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6664,7 +6570,11 @@
         "label": "ChatCompletionChunkEvent",
         "description": [],
         "signature": [
-          "{ id: string; message: { content?: string | undefined; function_call?: { name?: string | undefined; arguments?: string | undefined; } | undefined; }; } & { type: ",
+          "{ id: string; message: { content?: string | undefined; function_call?: { name?: string | undefined; arguments?: string | undefined; } | undefined; }; deanonymized_input?: ",
+          "DeanonymizationInput",
+          " | undefined; deanonymized_output?: ",
+          "DeanonymizationOutput",
+          " | undefined; } & { type: ",
           {
             "pluginId": "observabilityAIAssistant",
             "scope": "common",
@@ -6881,23 +6791,6 @@
           "\".inference\""
         ],
         "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/utils/get_elastic_managed_llm_connector.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observabilityAIAssistant",
-        "id": "def-public.NER_MODEL_ID",
-        "type": "string",
-        "tags": [],
-        "label": "NER_MODEL_ID",
-        "description": [
-          "Default model ID for named entity recognition"
-        ],
-        "signature": [
-          "\"elastic__distilbert-base-uncased-finetuned-conll03-english\""
-        ],
-        "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/utils/anonymization/redaction.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -8907,20 +8800,6 @@
                     "path": "x-pack/platform/plugins/shared/observability_ai_assistant/server/service/client/index.ts",
                     "deprecated": false,
                     "trackAdoption": false
-                  },
-                  {
-                    "parentPluginId": "observabilityAIAssistant",
-                    "id": "def-server.ObservabilityAIAssistantClient.Unnamed.$1.anonymizationService",
-                    "type": "Object",
-                    "tags": [],
-                    "label": "anonymizationService",
-                    "description": [],
-                    "signature": [
-                      "AnonymizationService"
-                    ],
-                    "path": "x-pack/platform/plugins/shared/observability_ai_assistant/server/service/client/index.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
                   }
                 ]
               }
@@ -9053,23 +8932,15 @@
                 "section": "def-common.ChatCompletionMessageEvent",
                 "text": "ChatCompletionMessageEvent"
               },
-              " | ({ message: ",
+              " | ",
               {
                 "pluginId": "observabilityAIAssistant",
                 "scope": "common",
                 "docId": "kibObservabilityAIAssistantPluginApi",
-                "section": "def-common.Message",
-                "text": "Message"
+                "section": "def-common.MessageAddEvent",
+                "text": "MessageAddEvent"
               },
-              "; id: string; } & { type: ",
-              {
-                "pluginId": "observabilityAIAssistant",
-                "scope": "common",
-                "docId": "kibObservabilityAIAssistantPluginApi",
-                "section": "def-common.StreamingChatResponseEventType",
-                "text": "StreamingChatResponseEventType"
-              },
-              ".MessageAdd; }) | ({ data?: string | undefined; } & { type: ",
+              " | ({ data?: string | undefined; } & { type: ",
               {
                 "pluginId": "observabilityAIAssistant",
                 "scope": "common",
@@ -10264,23 +10135,6 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": []
-          },
-          {
-            "parentPluginId": "observabilityAIAssistant",
-            "id": "def-server.ObservabilityAIAssistantClient.getAnonymizationService",
-            "type": "Function",
-            "tags": [],
-            "label": "getAnonymizationService",
-            "description": [],
-            "signature": [
-              "() => ",
-              "AnonymizationService"
-            ],
-            "path": "x-pack/platform/plugins/shared/observability_ai_assistant/server/service/client/index.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -10295,23 +10149,14 @@
         "label": "createFunctionRequestMessage",
         "description": [],
         "signature": [
-          "({\n  name,\n  args,\n}: { name: string; args?: Record<string, any> | undefined; }) => { message: ",
+          "({\n  name,\n  args,\n}: { name: string; args?: Record<string, any> | undefined; }) => ",
           {
             "pluginId": "observabilityAIAssistant",
             "scope": "common",
             "docId": "kibObservabilityAIAssistantPluginApi",
-            "section": "def-common.Message",
-            "text": "Message"
-          },
-          "; id: string; } & { type: ",
-          {
-            "pluginId": "observabilityAIAssistant",
-            "scope": "common",
-            "docId": "kibObservabilityAIAssistantPluginApi",
-            "section": "def-common.StreamingChatResponseEventType",
-            "text": "StreamingChatResponseEventType"
-          },
-          ".MessageAdd; }"
+            "section": "def-common.MessageAddEvent",
+            "text": "MessageAddEvent"
+          }
         ],
         "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/utils/create_function_request_message.ts",
         "deprecated": false,
@@ -10367,23 +10212,14 @@
         "label": "createFunctionResponseMessage",
         "description": [],
         "signature": [
-          "({\n  name,\n  content,\n  data,\n}: { name: string; content: unknown; data?: unknown; }) => { message: ",
+          "({\n  name,\n  content,\n  data,\n}: { name: string; content: unknown; data?: unknown; }) => ",
           {
             "pluginId": "observabilityAIAssistant",
             "scope": "common",
             "docId": "kibObservabilityAIAssistantPluginApi",
-            "section": "def-common.Message",
-            "text": "Message"
-          },
-          "; id: string; } & { type: ",
-          {
-            "pluginId": "observabilityAIAssistant",
-            "scope": "common",
-            "docId": "kibObservabilityAIAssistantPluginApi",
-            "section": "def-common.StreamingChatResponseEventType",
-            "text": "StreamingChatResponseEventType"
-          },
-          ".MessageAdd; }"
+            "section": "def-common.MessageAddEvent",
+            "text": "MessageAddEvent"
+          }
         ],
         "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/utils/create_function_response_message.ts",
         "deprecated": false,
@@ -13683,8 +13519,8 @@
             "label": "message",
             "description": [],
             "signature": [
-              "{ content?: string | undefined; unredactions?: ",
-              "Unredaction",
+              "{ content?: string | undefined; deanonymizations?: ",
+              "Deanonymization",
               "[] | undefined; name?: string | undefined; role: ",
               {
                 "pluginId": "observabilityAIAssistant",
@@ -13828,21 +13664,6 @@
     "misc": [
       {
         "parentPluginId": "observabilityAIAssistant",
-        "id": "def-common.aiAssistantAnonymizationRules",
-        "type": "string",
-        "tags": [],
-        "label": "aiAssistantAnonymizationRules",
-        "description": [],
-        "signature": [
-          "\"observability:aiAssistantAnonymizationRules\""
-        ],
-        "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/ui_settings/settings_keys.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observabilityAIAssistant",
         "id": "def-common.aiAssistantLogsIndexPattern",
         "type": "string",
         "tags": [],
@@ -13888,23 +13709,6 @@
       },
       {
         "parentPluginId": "observabilityAIAssistant",
-        "id": "def-common.AnonymizationRule",
-        "type": "Type",
-        "tags": [],
-        "label": "AnonymizationRule",
-        "description": [],
-        "signature": [
-          "NerAnonymizationRule",
-          " | ",
-          "RegexAnonymizationRule"
-        ],
-        "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observabilityAIAssistant",
         "id": "def-common.BufferFlushEvent",
         "type": "Type",
         "tags": [],
@@ -13934,7 +13738,11 @@
         "label": "ChatCompletionChunkEvent",
         "description": [],
         "signature": [
-          "{ id: string; message: { content?: string | undefined; function_call?: { name?: string | undefined; arguments?: string | undefined; } | undefined; }; } & { type: ",
+          "{ id: string; message: { content?: string | undefined; function_call?: { name?: string | undefined; arguments?: string | undefined; } | undefined; }; deanonymized_input?: ",
+          "DeanonymizationInput",
+          " | undefined; deanonymized_output?: ",
+          "DeanonymizationOutput",
+          " | undefined; } & { type: ",
           {
             "pluginId": "observabilityAIAssistant",
             "scope": "common",
@@ -13988,7 +13796,11 @@
         "label": "ChatCompletionMessageEvent",
         "description": [],
         "signature": [
-          "{ id: string; message: { content?: string | undefined; function_call?: { name?: string | undefined; arguments?: string | undefined; } | undefined; }; } & { type: ",
+          "{ id: string; message: { content?: string | undefined; function_call?: { name?: string | undefined; arguments?: string | undefined; } | undefined; }; deanonymized_input?: ",
+          "DeanonymizationInput",
+          " | undefined; deanonymized_output?: ",
+          "DeanonymizationOutput",
+          " | undefined; } & { type: ",
           {
             "pluginId": "observabilityAIAssistant",
             "scope": "common",
@@ -14260,26 +14072,13 @@
             "section": "def-common.StreamingChatResponseEventType",
             "text": "StreamingChatResponseEventType"
           },
-          ".MessageAdd; }"
+          ".MessageAdd; } & { deanonymized_input?: ",
+          "DeanonymizationInput",
+          " | undefined; deanonymized_output?: ",
+          "DeanonymizationOutput",
+          " | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/conversation_complete.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observabilityAIAssistant",
-        "id": "def-common.NER_MODEL_ID",
-        "type": "string",
-        "tags": [],
-        "label": "NER_MODEL_ID",
-        "description": [
-          "Default model ID for named entity recognition"
-        ],
-        "signature": [
-          "\"elastic__distilbert-base-uncased-finetuned-conll03-english\""
-        ],
-        "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/utils/anonymization/redaction.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -14324,23 +14123,15 @@
             "section": "def-common.ChatCompletionMessageEvent",
             "text": "ChatCompletionMessageEvent"
           },
-          " | ({ message: ",
+          " | ",
           {
             "pluginId": "observabilityAIAssistant",
             "scope": "common",
             "docId": "kibObservabilityAIAssistantPluginApi",
-            "section": "def-common.Message",
-            "text": "Message"
+            "section": "def-common.MessageAddEvent",
+            "text": "MessageAddEvent"
           },
-          "; id: string; } & { type: ",
-          {
-            "pluginId": "observabilityAIAssistant",
-            "scope": "common",
-            "docId": "kibObservabilityAIAssistantPluginApi",
-            "section": "def-common.StreamingChatResponseEventType",
-            "text": "StreamingChatResponseEventType"
-          },
-          ".MessageAdd; }) | ({ error: { message: string; stack?: string | undefined; code?: ",
+          " | ({ error: { message: string; stack?: string | undefined; code?: ",
           {
             "pluginId": "observabilityAIAssistant",
             "scope": "common",
@@ -14411,23 +14202,15 @@
             "section": "def-common.ChatCompletionMessageEvent",
             "text": "ChatCompletionMessageEvent"
           },
-          " | ({ message: ",
+          " | ",
           {
             "pluginId": "observabilityAIAssistant",
             "scope": "common",
             "docId": "kibObservabilityAIAssistantPluginApi",
-            "section": "def-common.Message",
-            "text": "Message"
+            "section": "def-common.MessageAddEvent",
+            "text": "MessageAddEvent"
           },
-          "; id: string; } & { type: ",
-          {
-            "pluginId": "observabilityAIAssistant",
-            "scope": "common",
-            "docId": "kibObservabilityAIAssistantPluginApi",
-            "section": "def-common.StreamingChatResponseEventType",
-            "text": "StreamingChatResponseEventType"
-          },
-          ".MessageAdd; }) | ({ data?: string | undefined; } & { type: ",
+          " | ({ data?: string | undefined; } & { type: ",
           {
             "pluginId": "observabilityAIAssistant",
             "scope": "common",
