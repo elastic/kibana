@@ -263,7 +263,7 @@ export const mobileServiceDetailRoute = {
         element: <ServiceLogs />,
         searchBarOptions: {
           showMobileFilters: false,
-          showQueryInput: false,
+          showQueryInput: true,
         },
       }),
       '/mobile-services/{serviceName}/alerts': {
