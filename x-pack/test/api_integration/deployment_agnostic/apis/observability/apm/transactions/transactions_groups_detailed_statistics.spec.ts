@@ -13,7 +13,7 @@ import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_
 import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
 import { ApmDocumentType, ApmTransactionDocumentType } from '@kbn/apm-plugin/common/document_type';
 import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
-import { roundNumber } from '@kbn/test-suites-xpack-observability/apm_api_integration/utils';
+import { roundNumber } from '../../../../../../apm_api_integration/utils';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 
 type TransactionsGroupsDetailedStatistics =

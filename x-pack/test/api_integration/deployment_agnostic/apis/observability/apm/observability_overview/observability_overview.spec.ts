@@ -10,7 +10,7 @@ import { meanBy, sumBy } from 'lodash';
 import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
 import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
 import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
-import { roundNumber } from '@kbn/test-suites-xpack-observability/apm_api_integration/utils';
+import { roundNumber } from '../../../../../../apm_api_integration/utils';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {

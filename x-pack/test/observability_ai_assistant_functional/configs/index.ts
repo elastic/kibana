@@ -9,7 +9,7 @@ import { mapValues } from 'lodash';
 import {
   ObservabilityAIAssistantFtrConfigName,
   observabilityAIAssistantFtrConfigs,
-} from '../../observability_ai_assistant_api_integration/configs';
+} from '../common/config';
 import { createTestConfig, CreateTestConfig } from '../common/config';
 
 export const configs: Record<ObservabilityAIAssistantFtrConfigName, CreateTestConfig> = mapValues(

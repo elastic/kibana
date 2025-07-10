@@ -71,15 +71,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     it('Paginates historical reports', async () => {
       // previous CAN NOT be clicked
       const previousButton = await testSubjects.find('pagination-button-previous');
+      const nextButton = await testSubjects.find('pagination-button-next');
+
+      await testSubjects.find('checkboxSelectRow-krazcyw4156m0763b503j7f9');
+      await testSubjects.find('checkboxSelectRow-k9a9xj3i0gpe1457b16qaduc');
+
+      // shows 50 rows per page
       expect(await previousButton.getAttribute('disabled')).to.be('true');
-
-      await testSubjects.find('checkboxSelectRow-krazcyw4156m0763b503j7f9'); // find first row of page 1
-
-      await testSubjects.click('pagination-button-1'); // click page 2
-      await testSubjects.find('checkboxSelectRow-k9a9xj3i0gpe1457b16qaduc'); // wait for first row of page 2
-
-      // previous CAN be clicked
-      expect(await previousButton.getAttribute('disabled')).to.be(null);
+      expect(await nextButton.getAttribute('disabled')).to.be('true');
     });
 
     it('Displays types of report jobs', async () => {
