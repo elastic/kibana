@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import {
   EuiPopover,
   EuiFlexGroup,
@@ -24,6 +24,7 @@ import type { CustomScript } from '../../../../server/endpoint/services';
 import { useConsoleStateDispatch } from '../console/hooks/state_selectors/use_console_state_dispatch';
 import type { ResponseActionAgentType } from '../../../../common/endpoint/service/response_actions/constants';
 import { useGetCustomScripts } from '../../hooks/custom_scripts/use_get_custom_scripts';
+import { useKibana } from '../../../common/lib/kibana';
 import type { CommandArgumentValueSelectorProps } from '../console/types';
 
 // Css to have a tooltip in place with a one line truncated description
@@ -61,6 +62,8 @@ export const CustomScriptSelector = (agentType: ResponseActionAgentType) => {
     CommandArgumentValueSelectorProps<string, CustomScriptSelectorState>
   >(({ value, valueText, onChange, store: _store }) => {
     const dispatch = useConsoleStateDispatch();
+    const { notifications } = useKibana();
+
     const state = useMemo<CustomScriptSelectorState>(() => {
       return _store ?? { isPopoverOpen: true };
     }, [_store]);
@@ -166,6 +169,47 @@ export const CustomScriptSelector = (agentType: ResponseActionAgentType) => {
       [onChange, state]
     );
 
+    const toastShownRef = useRef(false);
+
+    useEffect(() => {
+      if (scriptsError && !toastShownRef.current) {
+        let code = 'Error';
+        let message: string | undefined;
+
+        const err = scriptsError;
+        if (err?.body?.message) {
+          const { error } = getMessageFieldFromStringifiedObject(err.body.message) || {};
+          if (error) {
+            code = error.code || code;
+            message = error.message;
+          } else {
+            code = err.body.error || code;
+            message = err.body.message;
+          }
+        } else {
+          message = err?.message || String(err);
+        }
+
+        if (message) {
+          notifications.toasts.danger({
+            title: code,
+            body: (
+              <EuiText size="s">
+                <p>
+                  <FormattedMessage
+                    id="xpack.securitySolution.endpoint.customScripts.fetchError"
+                    defaultMessage="Failed to fetch Microsoft Defender for Endpoint scripts"
+                  />
+                </p>
+                <p>{message}</p>
+              </EuiText>
+            ),
+          });
+          toastShownRef.current = true;
+        }
+      }
+    }, [scriptsError, notifications]);
+
     if (isAwaitingRenderDelay || (isLoadingScripts && !scriptsError)) {
       return <EuiLoadingSpinner />;
     }
@@ -236,3 +280,18 @@ export const CustomScriptSelector = (agentType: ResponseActionAgentType) => {
   CustomScriptSelectorComponent.displayName = 'CustomScriptSelector';
   return CustomScriptSelectorComponent;
 };
+
+export function getMessageFieldFromStringifiedObject(
+  str: string
+): { error: { code: string; message: string } } | undefined {
+  const marker = 'Response body: ';
+  const idx = str.indexOf(marker);
+  if (idx === -1) return undefined;
+
+  const jsonPart = str.slice(idx + marker.length).trim();
+  try {
+    return JSON.parse(jsonPart);
+  } catch {
+    return undefined;
+  }
+}
