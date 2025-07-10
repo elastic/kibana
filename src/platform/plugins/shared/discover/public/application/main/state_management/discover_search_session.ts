@@ -54,7 +54,6 @@ export class DiscoverSearchSessionManager {
    */
   getNextSearchSessionId() {
     let searchSessionIdFromURL = this.getSearchSessionIdFromURL();
-    console.log(`getNextSearchSessionId: searchSessionIdFromURL=${searchSessionIdFromURL}`);
     if (searchSessionIdFromURL) {
       if (
         this.deps.session.isRestore() &&
@@ -76,7 +75,6 @@ export class DiscoverSearchSessionManager {
    */
   removeSearchSessionIdFromURL({ replace = true }: { replace?: boolean } = { replace: true }) {
     if (this.hasSearchSessionIdInURL()) {
-      console.log('removeSearchSessionIdFromURL');
       removeQueryParam(this.deps.history, SEARCH_SESSION_ID_QUERY_PARAM, replace);
     }
   }

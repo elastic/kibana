@@ -644,7 +644,6 @@ export function createSearchSessionRestorationDataProvider(deps: {
   data: DataPublicPluginStart;
   getSavedSearch: () => SavedSearch;
 }): SearchSessionInfoProvider {
-  // this is where the search session restoration data is created
   const getSavedSearch = () => deps.getSavedSearch();
   return {
     getName: async () => {

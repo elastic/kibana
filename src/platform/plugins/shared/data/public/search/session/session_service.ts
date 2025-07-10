@@ -557,14 +557,6 @@ export class SessionService {
       sessionStartTime: this.state.get().startTime,
       appendStartTime: currentSessionInfoProvider.appendSessionStartTimeToName,
     });
-    console.log({
-      formattedName,
-      sessionId,
-      currentSessionApp,
-      locatorId,
-      restoreState,
-      initialState,
-    });
     // this is where the saved object is created
     const searchSessionSavedObject = await this.sessionsClient.create({
       name: formattedName,
@@ -577,7 +569,6 @@ export class SessionService {
 
     // if we are still interested in this result
     if (this.isCurrentSession(sessionId)) {
-      console.log('SessionService: saving session');
       this.state.transitions.store(searchSessionSavedObject);
 
       // trigger a poll for all the searches that are not yet stored to propagate them into newly created search session saved object and extend their keepAlive
@@ -598,7 +589,6 @@ export class SessionService {
 
       // notify all the searches with onSavingSession that session has been saved and saved object has been created
       // don't wait for the result
-      debugger;
       const searchesWithSavingHandler = this.state
         .get()
         .trackedSearches.filter((s) => s.searchDescriptor.onSavingSession);

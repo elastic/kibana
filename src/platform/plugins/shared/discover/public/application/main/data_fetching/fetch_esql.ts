@@ -65,7 +65,6 @@ export function fetchEsql({
   return textBasedQueryStateToAstWithValidation(props)
     .then((ast) => {
       if (ast) {
-        console.log('searchSessionId', searchSessionId);
         const contract = expressions.execute(ast, null, {
           inspectorAdapters,
           searchSessionId,

@@ -196,8 +196,6 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
             locale,
             include_ccs_metadata: true,
           };
-          console.log({params});
-          console.log('test', getSearchSessionId());
           if (input) {
             const esQueryConfigs = getEsQueryConfig(
               uiSettings as Parameters<typeof getEsQueryConfig>[0]

@@ -204,13 +204,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
         query: '',
         language: nextProps.query.language,
       };
-    } else if (
-      nextProps.query &&
-      isOfAggregateQueryType(nextProps.query) &&
-      nextProps.query.esql !== get(prevState, 'currentProps.query.esql')
-    ) {
-      // this code is just overriding the query with a new one in case the query has changed in props
-      // without the props check it would override any edits to the query, if e.g. results were returned and isLoading switches from true to false
+    } else if (nextProps.query && !isOfQueryType(nextProps.query)) {
       nextQuery = nextProps.query;
     }
 

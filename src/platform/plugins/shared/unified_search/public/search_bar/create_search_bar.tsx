@@ -253,7 +253,6 @@ export function createSearchBar({
             }
             savedQuery={savedQuery}
             onQuerySubmit={defaultOnQuerySubmit(props, data.query, query)}
-            onQueryChange={props.onQueryChange}
             onRefresh={props.onRefresh}
             onClearSavedQuery={defaultOnClearSavedQuery(props, clearSavedQuery)}
             onSavedQueryUpdated={defaultOnSavedQueryUpdated(props, setSavedQuery)}
