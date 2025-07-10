@@ -5,14 +5,10 @@
  * 2.0.
  */
 
-import React, { useCallback, useRef, useEffect, useState, useMemo } from 'react';
+import React, { useCallback, useRef, useEffect, useState } from 'react';
 import { css } from '@emotion/css';
 import { EuiFlexItem, EuiPanel, useEuiTheme, euiScrollBarStyles } from '@elastic/eui';
-import {
-  isSerializedAgentIdentifier,
-  oneChatDefaultAgentId,
-  toStructuredAgentIdentifier,
-} from '@kbn/onechat-common';
+import { oneChatDefaultAgentId } from '@kbn/onechat-common';
 import { useChat } from '../../hooks/use_chat';
 import { useConversation } from '../../hooks/use_conversation';
 import { useStickToBottom } from '../../hooks/use_stick_to_bottom';
@@ -54,13 +50,6 @@ export const Conversation: React.FC<ConversationProps> = ({ conversationId }) =>
     conversationId,
     agentId,
   });
-
-  const agentProfileId = useMemo(() => {
-    if (isSerializedAgentIdentifier(agentId)) {
-      return toStructuredAgentIdentifier(agentId).agentId;
-    }
-    return agentId;
-  }, [agentId]);
 
   const theme = useEuiTheme();
   const scrollBarStyles = euiScrollBarStyles(theme);
@@ -108,7 +97,7 @@ export const Conversation: React.FC<ConversationProps> = ({ conversationId }) =>
           disabled={!agentId}
           loading={false}
           onSubmit={onSubmit}
-          selectedAgentId={agentProfileId}
+          selectedAgentId={agentId}
         />
       </EuiFlexItem>
     </>

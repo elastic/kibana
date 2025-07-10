@@ -20,5 +20,5 @@ export const AgentDisplay: React.FC<AgentDisplayProps> = ({ selectedAgentId }) =
     return <EuiLoadingSpinner size="m" />;
   }
 
-  return <EuiBadge iconType="user"> {agent?.name}</EuiBadge>;
+  return <EuiBadge> {agent?.name}</EuiBadge>;
 };

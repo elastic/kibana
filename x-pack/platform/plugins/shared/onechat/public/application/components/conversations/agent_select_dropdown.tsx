@@ -9,9 +9,9 @@ import React, { useMemo } from 'react';
 import { css } from '@emotion/css';
 import { EuiSuperSelect, EuiSuperSelectOption, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { AgentProfile } from '@kbn/onechat-common';
+import type { AgentDefinition } from '@kbn/onechat-common';
 import { oneChatDefaultAgentId } from '@kbn/onechat-common';
-import { useOnechatAgents } from '../../hooks/use_agents';
+import { useOnechatAgents } from '../../hooks/agents/use_agents';
 
 interface AgentSelectDropdownProps {
   selectedAgentId?: string;
@@ -24,14 +24,14 @@ export const AgentSelectDropdown: React.FC<AgentSelectDropdownProps> = ({
   onAgentChange,
   disabled = false,
 }) => {
-  const { agentProfiles, isLoading } = useOnechatAgents();
+  const { agents, isLoading } = useOnechatAgents();
 
   const agentDropdownClass = css`
     min-width: 200px;
   `;
 
   const agentOptions: Array<EuiSuperSelectOption<string>> = useMemo(() => {
-    const customAgents = agentProfiles.map((agent: AgentProfile) => ({
+    const options = agents.map((agent: AgentDefinition) => ({
       value: agent.id,
       inputDisplay: agent.name,
       dropdownDisplay: (
@@ -44,30 +44,8 @@ export const AgentSelectDropdown: React.FC<AgentSelectDropdownProps> = ({
       ),
     }));
 
-    // Append default agent option
-    const defaultAgentOption = {
-      value: oneChatDefaultAgentId,
-      inputDisplay: i18n.translate('xpack.onechat.agentDropdown.defaultAgent.name', {
-        defaultMessage: 'Default Agent',
-      }),
-      dropdownDisplay: (
-        <div>
-          <EuiText size="s">
-            {i18n.translate('xpack.onechat.agentDropdown.defaultAgent.name', {
-              defaultMessage: 'Default Agent',
-            })}
-          </EuiText>
-          <EuiText size="xs" color="subdued">
-            {i18n.translate('xpack.onechat.agentDropdown.defaultAgent.description', {
-              defaultMessage: 'Agent capable of dealing with general queries',
-            })}
-          </EuiText>
-        </div>
-      ),
-    };
-
-    return [defaultAgentOption, ...customAgents];
-  }, [agentProfiles]);
+    return options;
+  }, [agents]);
 
   return (
     <div className={agentDropdownClass}>
