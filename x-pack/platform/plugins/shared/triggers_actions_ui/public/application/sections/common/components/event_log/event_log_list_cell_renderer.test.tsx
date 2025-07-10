@@ -42,14 +42,12 @@ jest.mock('../../../../../common/lib/kibana', () => ({
 
 jest.mock('../../../rules_list/components/rule_duration_format', () => ({
   RuleDurationFormat: jest.fn(({ duration }) => (
-    // Use data-test-subj for getByTestId in Kibana
     <span data-test-subj="rule-duration">{duration}</span>
   )),
 }));
 
 jest.mock('./event_log_list_status', () => ({
   EventLogListStatus: jest.fn((props) => (
-    // Use data-test-subj for getByTestId in Kibana
     <span data-test-subj="event-log-status">{props.status}</span>
   )),
 }));
@@ -96,7 +94,6 @@ describe('EventLogListCellRenderer', () => {
   it('renders date duration correctly', () => {
     render(<EventLogListCellRenderer columnId="execution_duration" value="100000" />);
     expect(RuleDurationFormat).toHaveBeenCalledWith({ duration: 100000 }, {});
-    // Use getByTestId which looks for data-test-subj
     expect(screen.getByTestId('rule-duration')).toHaveTextContent('100000');
   });
 
@@ -117,7 +114,6 @@ describe('EventLogListCellRenderer', () => {
       { status: 'success', useExecutionStatus: true },
       {}
     );
-    // Use getByTestId which looks for data-test-subj
     expect(screen.getByTestId('event-log-status')).toHaveTextContent('success');
   });
 
@@ -127,7 +123,6 @@ describe('EventLogListCellRenderer', () => {
       { status: 'newOutcome', useExecutionStatus: true },
       {}
     );
-    // Use getByTestId which looks for data-test-subj
     expect(screen.getByTestId('event-log-status')).toHaveTextContent('newOutcome');
   });
 
