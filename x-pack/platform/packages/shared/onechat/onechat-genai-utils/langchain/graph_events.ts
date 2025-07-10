@@ -7,14 +7,13 @@
 
 import { StreamEvent as LangchainStreamEvent } from '@langchain/core/tracers/log_stream';
 import {
-  ChatAgentEventType,
+  ChatEventType,
   MessageChunkEvent,
   MessageCompleteEvent,
   ReasoningEvent,
   ToolCallEvent,
   ToolResultEvent,
-} from '@kbn/onechat-common/agents';
-import type { PlainIdToolIdentifier } from '@kbn/onechat-common';
+} from '@kbn/onechat-common';
 
 export const isStreamEvent = (input: any): input is LangchainStreamEvent => {
   return 'event' in input && 'name' in input;
@@ -42,12 +41,12 @@ export const hasTag = (event: LangchainStreamEvent, tag: string): boolean => {
 
 export const createToolCallEvent = (data: {
   toolCallId: string;
-  toolId: PlainIdToolIdentifier;
+  toolId: string;
   toolType: string;
   params: Record<string, unknown>;
 }): ToolCallEvent => {
   return {
-    type: ChatAgentEventType.toolCall,
+    type: ChatEventType.toolCall,
     data: {
       tool_call_id: data.toolCallId,
       tool_id: data.toolId,
@@ -59,12 +58,12 @@ export const createToolCallEvent = (data: {
 
 export const createToolResultEvent = (data: {
   toolCallId: string;
-  toolId: PlainIdToolIdentifier;
+  toolId: string;
   toolType: string;
   result: string;
 }): ToolResultEvent => {
   return {
-    type: ChatAgentEventType.toolResult,
+    type: ChatEventType.toolResult,
     data: {
       tool_call_id: data.toolCallId,
       tool_id: data.toolId,
@@ -79,7 +78,7 @@ export const createTextChunkEvent = (
   { messageId = 'unknown' }: { messageId?: string } = {}
 ): MessageChunkEvent => {
   return {
-    type: ChatAgentEventType.messageChunk,
+    type: ChatEventType.messageChunk,
     data: {
       message_id: messageId,
       text_chunk: chunk,
@@ -92,7 +91,7 @@ export const createMessageEvent = (
   { messageId = 'unknown' }: { messageId?: string } = {}
 ): MessageCompleteEvent => {
   return {
-    type: ChatAgentEventType.messageComplete,
+    type: ChatEventType.messageComplete,
     data: {
       message_id: messageId,
       message_content: content,
@@ -102,7 +101,7 @@ export const createMessageEvent = (
 
 export const createReasoningEvent = (reasoning: string): ReasoningEvent => {
   return {
-    type: ChatAgentEventType.reasoning,
+    type: ChatEventType.reasoning,
     data: {
       reasoning,
     },
