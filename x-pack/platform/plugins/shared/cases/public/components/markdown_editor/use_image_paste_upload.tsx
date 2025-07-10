@@ -13,7 +13,7 @@ import type { DoneNotification, FileState } from '@kbn/shared-ux-file-upload/src
 import { createUploadState, type UploadState } from '@kbn/shared-ux-file-upload/src/upload_state';
 import { type FileKindBase } from '@kbn/files-plugin/common/types';
 import { useUploadDone } from '../files/use_upload_done';
-import type { MarkdownEditorRef } from './editor';
+import type { MarkdownEditorRef } from './types';
 import {
   MAX_IMAGE_SIZE_MESSAGE,
   NO_SIMULTANEOUS_UPLOADS_MESSAGE,
