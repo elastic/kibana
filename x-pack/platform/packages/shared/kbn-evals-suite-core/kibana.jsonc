@@ -1,0 +1,7 @@
+{
+  "type": "functional-tests",
+  "id": "@kbn/evals-suite-core",
+  "owner": "@elastic/obs-ai-assistant",
+  "group": "platform",
+  "visibility": "shared"
+}
