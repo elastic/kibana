@@ -53,6 +53,8 @@ function generateMarkdownLink(
 // 5MB
 const MAX_IMAGE_SIZE = 1024 * 1024 * 5;
 
+const ALLOWED_IMAGE_MIME_TYPES = ['image/png', 'image/jpeg'] as const;
+
 export function useImagePasteUpload({
   editorRef,
   field,
@@ -170,7 +172,11 @@ export function useImagePasteUpload({
         if (file) {
           // don't modify textarea value when receiving files
           e.preventDefault();
-          if (!['image/png', 'image/jpeg', 'image/jpg'].includes(file.type)) {
+          if (
+            !ALLOWED_IMAGE_MIME_TYPES.includes(
+              file.type as (typeof ALLOWED_IMAGE_MIME_TYPES)[number]
+            )
+          ) {
             setErrors([UNSUPPORTED_MIME_TYPE_MESSAGE]);
             return;
           }
