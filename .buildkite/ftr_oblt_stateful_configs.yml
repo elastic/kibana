@@ -10,6 +10,7 @@ disabled:
   #FTR configs
   - x-pack/solutions/observability/plugins/uptime/e2e/config.ts
   - x-pack/solutions/observability/test/api_integration/config.ts
+  - x-pack/solutions/observability/test/functional/config.base.ts
 
   # Elastic Synthetics configs
   - x-pack/solutions/observability/plugins/uptime/e2e/uptime/synthetics_run.ts
@@ -47,6 +48,9 @@ enabled:
   - x-pack/solutions/observability/test/api_integration/profiling/cloud/config.ts
   - x-pack/test/functional/apps/apm/config.ts
   - x-pack/test/functional_with_es_ssl/apps/config.ts
+  - x-pack/solutions/observability/test/api_integration/apis/cases/config.ts
+  - x-pack/solutions/observability/test/functional/apps/slo/embeddables/config.ts
+  - x-pack/solutions/observability/test/api_integration/apis/security/config.ts
   # stateful configs that run deployment-agnostic tests
   - x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.stateful.config.ts
   - x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.apm.stateful.config.ts

@@ -6,15 +6,13 @@
  */
 
 import { cleanup } from '@kbn/infra-forge';
-import { loadTestData } from '../../../../api_integration/apis/slos/helper/load_test_data';
-import { SloEsClient } from '../../../../api_integration/apis/slos/helper/es';
-import { sloData } from '../../../../api_integration/apis/slos/fixtures/create_slo';
+import { loadTestData } from '../../../services/slo/helper/load_test_data';
+import { sloData } from '../../../services/slo/fixtures/create_slo';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'dashboard']);
   const esClient = getService('es');
-  const sloEsClient = new SloEsClient(esClient);
   const logger = getService('log');
   const slo = getService('slo');
   const sloUi = getService('sloUi');
@@ -34,7 +32,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     after(async () => {
       await slo.deleteAllSLOs();
       await cleanup({ esClient, logger });
-      await sloEsClient.deleteTestSourceData();
+      try {
+        await esClient.deleteByQuery({
+          index: 'kbn-data-forge-fake_hosts*',
+          query: { term: { 'system.network.name': 'eth1' } },
+        });
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.warn('SLO api integration test data not found');
+      }
     });
 
     describe('Single SLO', function () {

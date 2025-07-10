@@ -157,8 +157,6 @@ enabled:
   - x-pack/platform/test/alerting_api_integration/spaces_only/tests/alerting/group4/config_with_schedule_circuit_breaker.ts
   - x-pack/platform/test/alerting_api_integration/spaces_only/tests/actions/config.ts
   - x-pack/platform/test/alerting_api_integration/spaces_only/tests/action_task_params/config.ts
-  - x-pack/test/api_integration/apis/cases/config.ts
-  - x-pack/test/api_integration/apis/security/config.ts
   - x-pack/test/banners_functional/config.ts
   - x-pack/platform/test/cases_api_integration/security_and_spaces/config_basic.ts
   - x-pack/platform/test/cases_api_integration/security_and_spaces/config_trial.ts
@@ -364,6 +362,7 @@ enabled:
   - x-pack/test/custom_branding/config.ts
   # configs migrated to the new Kibana architecture
   - x-pack/platform/test/api_integration/apis/aiops/config.ts
+  - x-pack/platform/test/api_integration/apis/cases/config.ts
   - x-pack/platform/test/api_integration/apis/cloud/config.ts
   - x-pack/platform/test/api_integration/apis/cloud/saml.config.ts
   - x-pack/platform/test/api_integration/apis/console/config.ts
