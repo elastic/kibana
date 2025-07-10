@@ -18,7 +18,12 @@ jest.mock('@kbn/react-kibana-mount', () => ({
 
 const overlayRef = { close: jest.fn() } as unknown as OverlayRef;
 const openFlyout = jest.fn(() => overlayRef);
-const core = { overlays: { openFlyout } } as unknown as CoreStart;
+const core = {
+  overlays: { openFlyout },
+  application: {
+    currentAppId$: { pipe: () => ({ subscribe: () => {} }) },
+  },
+} as unknown as CoreStart;
 const loadContent = jest.fn(async () => <div>Test Content</div>);
 const props = {
   core,
