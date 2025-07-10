@@ -15,45 +15,58 @@ import { useCasesContext } from '../cases_context/use_cases_context';
 import { MarkdownEditor } from './editor';
 import { type MarkdownEditorRef } from './types';
 
-const PastableMarkdownEditorComponent = forwardRef<
-  MarkdownEditorRef,
-  {
-    'data-test-subj': string;
-    field: FieldHook<string>;
-    caseId?: string;
-    id: string;
-    idAria: string;
-    disabledUiPlugins?: string[];
+// Use the same prop names that <MarkdownEditor> expects so callers can switch components interchangeably
+interface PastableMarkdownEditorProps {
+  ariaLabel: string;
+  'data-test-subj': string;
+  field: FieldHook<string>;
+  caseId?: string;
+  editorId: string;
+  disabledUiPlugins?: string[];
+}
+
+const PastableMarkdownEditorComponent = forwardRef<MarkdownEditorRef, PastableMarkdownEditorProps>(
+  (props, ref) => {
+    const {
+      ariaLabel,
+      field,
+      caseId,
+      editorId,
+      disabledUiPlugins,
+      'data-test-subj': dataTestSubj,
+    } = props;
+
+    const { owner: ownerList } = useCasesContext();
+    const owner = ownerList[0];
+    const fileKindId = constructFileKindIdByOwner(owner as Owner);
+    const [editorErrors, setEditorErrors] = useState<Array<string | Error>>([]);
+
+    const { isUploading } = useImagePasteUpload({
+      editorRef: ref,
+      field,
+      caseId,
+      owner,
+      fileKindId,
+      setErrors: setEditorErrors,
+    });
+
+    return (
+      <>
+        {isUploading && <EuiProgress size="m" />}
+        <MarkdownEditor
+          ref={ref}
+          ariaLabel={ariaLabel}
+          editorId={editorId}
+          onChange={field.setValue}
+          value={field.value}
+          disabledUiPlugins={disabledUiPlugins}
+          data-test-subj={`${dataTestSubj}-markdown-editor`}
+          errors={editorErrors}
+        />
+      </>
+    );
   }
->(({ field, caseId, id, idAria, disabledUiPlugins, 'data-test-subj': dataTestSubj }, ref) => {
-  const { owner: ownerList } = useCasesContext();
-  const owner = ownerList[0];
-  const fileKindId = constructFileKindIdByOwner(owner as Owner);
-  const [editorErrors, setEditorErrors] = useState<Array<string | Error>>([]);
-  const { isUploading } = useImagePasteUpload({
-    editorRef: ref,
-    field,
-    caseId,
-    owner,
-    fileKindId,
-    setErrors: setEditorErrors,
-  });
-  return (
-    <>
-      {isUploading && <EuiProgress size="m" />}
-      <MarkdownEditor
-        ref={ref}
-        ariaLabel={idAria}
-        editorId={id}
-        onChange={field.setValue}
-        value={field.value}
-        disabledUiPlugins={disabledUiPlugins}
-        data-test-subj={`${dataTestSubj}-markdown-editor`}
-        errors={editorErrors}
-      />
-    </>
-  );
-});
+);
 
 PastableMarkdownEditorComponent.displayName = 'PastableMarkdownEditor';
 

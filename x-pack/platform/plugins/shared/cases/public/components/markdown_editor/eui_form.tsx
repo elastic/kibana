@@ -68,6 +68,8 @@ export const MarkdownEditorForm = React.memo(
       },
       ref
     ) => {
+      const hasFilesContext = useHasFilesContext();
+
       const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
       const { hasConflicts } = useMarkdownSessionStorage({
         field,
@@ -89,7 +91,6 @@ export const MarkdownEditorForm = React.memo(
         }),
         [id, field.value, caseTitle, caseTags]
       );
-      const hasFilesContext = useHasFilesContext();
 
       return (
         <CommentEditorContext.Provider value={commentEditorContextValue}>
@@ -106,8 +107,8 @@ export const MarkdownEditorForm = React.memo(
             {hasFilesContext ? (
               <PastableMarkdownEditor
                 ref={ref}
-                idAria={idAria}
-                id={id}
+                ariaLabel={idAria}
+                editorId={id}
                 field={field}
                 caseId={caseId}
                 disabledUiPlugins={disabledUiPlugins}
