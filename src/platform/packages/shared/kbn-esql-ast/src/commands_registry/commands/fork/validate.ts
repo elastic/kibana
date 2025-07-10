@@ -32,16 +32,7 @@ export const validate = (
     });
   }
 
-  messages.push(
-    ...validateCommandArguments(
-      command,
-      ast,
-      context ?? {
-        userDefinedColumns: new Map(),
-        fields: new Map(),
-      }
-    )
-  );
+  messages.push(...validateCommandArguments(command, ast, context));
 
   for (const arg of command.args.flat()) {
     if (!Array.isArray(arg) && arg.type === 'query') {

@@ -80,15 +80,6 @@ export const validate = (
     );
   }
 
-  messages.push(
-    ...validateCommandArguments(
-      command,
-      ast,
-      context ?? {
-        userDefinedColumns: new Map(), // Ensure context is always defined
-        fields: new Map(),
-      }
-    )
-  );
+  messages.push(...validateCommandArguments(command, ast, context));
   return messages;
 };

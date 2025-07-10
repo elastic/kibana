@@ -25,7 +25,10 @@ import { ICommandContext } from '../../../commands_registry/types';
 export const validateCommandArguments = (
   command: ESQLCommand,
   ast: ESQLAst,
-  context: ICommandContext
+  context: ICommandContext = {
+    userDefinedColumns: new Map(), // Ensure context is always defined
+    fields: new Map(),
+  }
 ) => {
   const currentCommandIndex = ast.findIndex((astCommand) => isEqual(astCommand, command));
   const messages: ESQLMessage[] = [];
