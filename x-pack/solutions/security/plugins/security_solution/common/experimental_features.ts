@@ -267,7 +267,7 @@ export const allowedExperimentalValues = Object.freeze({
   eventCollectionDataReductionBannerEnabled: true,
 
   /** Enables new Data View Picker */
-  newDataViewPickerEnabled: false,
+  newDataViewPickerEnabled: true,
 
   /**
    * Enables Microsoft Defender for  Endpoint's RunScript RTR command
