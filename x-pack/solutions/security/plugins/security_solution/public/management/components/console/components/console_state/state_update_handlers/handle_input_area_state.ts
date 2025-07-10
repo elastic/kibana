@@ -132,6 +132,7 @@ export const handleInputAreaState: ConsoleStoreReducer<InputAreaStateAction> = (
 
         // Merge extracted argState from pre-processing with adjusted argState
         let finalArgState = adjustedArgState;
+        
         if (preProcessResult.hasSelectorArguments && Object.keys(preProcessResult.extractedArgState).length > 0) {
           finalArgState = {
             ...adjustedArgState,
@@ -181,12 +182,20 @@ export const handleInputAreaState: ConsoleStoreReducer<InputAreaStateAction> = (
         // Update parsed input with any values that were selected via argument selectors
         setArgSelectorValueToParsedArgs(parsedInput, enteredCommand);
 
+        // Use cleaned command text for display if pre-processing occurred
+        const displayLeftText = preProcessResult.hasSelectorArguments 
+          ? preProcessResult.cleanedCommand 
+          : newTextEntered;
+        const displayRightText = preProcessResult.hasSelectorArguments 
+          ? '' 
+          : newRightOfCursor;
+
         return {
           ...state,
           input: {
             ...state.input,
-            leftOfCursorText: newTextEntered,
-            rightOfCursorText: newRightOfCursor,
+            leftOfCursorText: displayLeftText,
+            rightOfCursorText: displayRightText,
             parsedInput,
             enteredCommand,
           },

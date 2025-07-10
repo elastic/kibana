@@ -66,8 +66,11 @@ const parseInputString = (rawInput: string): ParsedCommandInput => {
 
           response.args[argName].push(newArgValue);
         } else {
-          // Argument has not value (bare), set it to empty string
-          response.args[argName].push(true);
+          // Argument has no value (bare flag)
+          // Use empty string for selector arguments (ScriptName, CloudFile), boolean true for others
+          const selectorArguments = ['ScriptName', 'CloudFile'];
+          const useStringValue = selectorArguments.includes(argName);
+          response.args[argName].push(useStringValue ? '' : true);
         }
       }
     }
@@ -175,7 +178,7 @@ export const detectAndPreProcessPastedCommand = (
   commandDefinitions: any[] = []
 ): {
   cleanedCommand: string;
-  extractedArgState: Record<string, Array<{ value: string; valueText: string }>>;
+  extractedArgState: Record<string, Array<{ value: string; valueText: string }>>
   hasSelectorArguments: boolean;
 } => {
   const result = {

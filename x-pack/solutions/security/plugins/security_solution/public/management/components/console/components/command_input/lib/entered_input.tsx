@@ -67,7 +67,6 @@ const toInputCharacterDisplayString = (
     else if (item.argState?.valueText && item.argState.valueText.trim() !== '') {
       response += `="${item.argState.valueText}"`;
     }
-    // For empty values, don't add anything (no ="" suffix)
   }
 
   return response;
