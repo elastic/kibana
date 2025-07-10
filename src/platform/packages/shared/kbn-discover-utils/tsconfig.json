@@ -25,6 +25,5 @@
     "@kbn/logs-data-access-plugin",
     "@kbn/i18n-react",
     "@kbn/navigation-plugin"
-    "@kbn/core-ui-settings-browser"
   ]
 }
