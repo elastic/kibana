@@ -76,66 +76,13 @@ describe('MonitoringEntitySourceDataClient', () => {
       });
 
       const result = await dataClient.init(testDescriptor);
-      const id = `entity-analytics-monitoring-entity-source-${namespace}-${testDescriptor.type}-${testDescriptor.indexPattern}`;
 
       expect(defaultOpts.soClient.create).toHaveBeenCalledWith(
         monitoringEntitySourceTypeName,
-        testDescriptor,
-        {
-          id,
-        }
+        testDescriptor
       );
 
-      expect(result).toEqual({ ...testDescriptor, managed: false, id });
-    });
-
-    it('should update Monitoring Entity Source Sync Config Successfully when calling init when the SO already exists', async () => {
-      const existingDescriptor = {
-        total: 1,
-        saved_objects: [
-          {
-            attributes: testDescriptor,
-            id: 'entity-analytics-monitoring-entity-source-test-namespace-test-type-test-index-pattern',
-          },
-        ],
-      } as unknown as SavedObjectsFindResponse<unknown, unknown>;
-
-      const testSourceObject = {
-        filter: {},
-        indexPattern: 'test-index-pattern',
-        matchers: [
-          {
-            fields: ['user.role'],
-            values: ['admin'],
-          },
-        ],
-        name: 'Test Source',
-        type: 'test-type',
-        managed: false,
-      };
-
-      defaultOpts.soClient.asScopedToNamespace.mockReturnValue({
-        find: jest.fn().mockResolvedValue(existingDescriptor),
-      } as unknown as SavedObjectsClientContract);
-
-      defaultOpts.soClient.update.mockResolvedValue({
-        id: 'entity-analytics-monitoring-entity-source-test-namespace-test-type-test-index-pattern',
-        type: monitoringEntitySourceTypeName,
-        attributes: { ...testDescriptor, name: 'Updated Source' },
-        references: [],
-      });
-
-      const updatedDescriptor = { ...testDescriptor, name: 'Updated Source' };
-      const result = await dataClient.init(testDescriptor);
-
-      expect(defaultOpts.soClient.update).toHaveBeenCalledWith(
-        monitoringEntitySourceTypeName,
-        `entity-analytics-monitoring-entity-source-${namespace}-${testDescriptor.type}-${testDescriptor.indexPattern}`,
-        testSourceObject,
-        { refresh: 'wait_for' }
-      );
-
-      expect(result).toEqual(updatedDescriptor);
+      expect(result).toEqual({ ...testDescriptor, managed: false, id: 'abcdefg' });
     });
 
     it('should not create Monitoring Entity Source Sync Config when a SO already exist with the same name', async () => {
