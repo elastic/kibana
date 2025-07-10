@@ -220,32 +220,6 @@ export function useOnSubmit({
   setSelectedPolicyTab: (tab: SelectedPolicyTab) => void;
   hideAgentlessSelector?: boolean;
 }) {
-  // console log all the parameters to help debugging
-  console.log(
-    'Fleet useOnSubmit called with',
-    'agentCount',
-    agentCount,
-    'selectedPolicyTab',
-    selectedPolicyTab,
-    'newAgentPolicy',
-    newAgentPolicy,
-    'withSysMonitoring',
-    withSysMonitoring,
-    'queryParamsPolicyId',
-    queryParamsPolicyId,
-    'packageInfo',
-    packageInfo,
-    'integrationToEnable',
-    integrationToEnable,
-    'hasFleetAddAgentsPrivileges',
-    hasFleetAddAgentsPrivileges,
-    // 'setNewAgentPolicy',
-    // setNewAgentPolicy,
-    // 'setSelectedPolicyTab',
-    // setSelectedPolicyTab,
-    'hideAgentlessSelector',
-    hideAgentlessSelector
-  );
   const { notifications, docLinks } = useStartServices();
   const { spaceId } = useFleetStatus();
   const confirmForceInstall = useConfirmForceInstall();
@@ -335,6 +309,7 @@ export function useOnSubmit({
   );
 
   // Initial loading of package info
+  const [isFetching, setIsFetching] = useState<boolean>(false);
   useEffect(() => {
     async function init(randomNumber: number) {
       if (
@@ -348,42 +323,46 @@ export function useOnSubmit({
       }
 
       // Fetch all packagePolicies having the package name
-      const { data: packagePolicyData } = await sendGetPackagePolicies({
-        perPage: SO_SEARCH_LIMIT,
-        page: 1,
-        kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${packageInfo.name}`,
-      });
-      const incrementedName = getMaxPackageName(packageInfo.name, packagePolicyData?.items);
+      if (!isFetching) {
+        setIsFetching(true);
+        const { data: packagePolicyData } = await sendGetPackagePolicies({
+          perPage: SO_SEARCH_LIMIT,
+          page: 1,
+          kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${packageInfo.name}`,
+        });
+        const incrementedName = getMaxPackageName(packageInfo.name, packagePolicyData?.items);
 
-      const basePackagePolicy = packageToPackagePolicy(
-        packageInfo,
-        agentPolicies.map((policy) => policy.id),
-        '',
-        DEFAULT_PACKAGE_POLICY.name || incrementedName,
-        DEFAULT_PACKAGE_POLICY.description,
-        integrationToEnable
-      );
-      console.log(
-        'Fleet useOnSubmit init loaded basePackagePolicy ',
-        'number',
-        randomNumber,
-        'basePackagePolicy',
-        basePackagePolicy,
-        'packageInfo',
-        packageInfo,
-        'integrationToEnable',
-        integrationToEnable
-      );
-      updatePackagePolicy(basePackagePolicy);
-      setIsInitialized(true);
+        const basePackagePolicy = packageToPackagePolicy(
+          packageInfo,
+          agentPolicies.map((policy) => policy.id),
+          '',
+          DEFAULT_PACKAGE_POLICY.name || incrementedName,
+          DEFAULT_PACKAGE_POLICY.description,
+          integrationToEnable
+        );
+        console.log(
+          'Fleet useOnSubmit init loaded basePackagePolicy ',
+          'number',
+          randomNumber,
+          'basePackagePolicy',
+          basePackagePolicy,
+          'packageInfo',
+          packageInfo,
+          'integrationToEnable',
+          integrationToEnable
+        );
+        updatePackagePolicy(basePackagePolicy);
+        setIsInitialized(true);
+        setIsFetching(false);
+      }
     }
     if (!isInitialized) {
       const randomNumber = Math.floor(Math.random() * 1000);
-      console.log('Fleet useOnSubmit init', randomNumber);
       // Fetch agent policies
       init(randomNumber);
     }
   }, [
+    isFetching,
     packageInfo,
     agentPolicies,
     updatePackagePolicy,
