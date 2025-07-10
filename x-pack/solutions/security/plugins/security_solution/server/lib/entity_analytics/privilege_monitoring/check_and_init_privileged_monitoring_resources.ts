@@ -18,11 +18,13 @@ export const checkAndInitPrivilegedMonitoringResources = async (
   logger: Logger
 ) => {
   const secSol = await context.securitySolution;
-  const privMonDataClient = await secSol.getPrivilegeMonitoringDataClient();
+  const privMonDataClient = secSol.getPrivilegeMonitoringDataClient();
+
+  await privMonDataClient.createIngestPipelineIfDoesNotExist();
 
   const doesIndexExist = await privMonDataClient.doesIndexExist();
   if (!doesIndexExist) {
-    logger.info('Privilege monitoring resources are not installed, initialising...');
+    logger.info('Privilege monitoring index does not exist, initialising.');
     await privMonDataClient.createOrUpdateIndex().catch((e) => {
       if (e.meta.body.error.type === 'resource_already_exists_exception') {
         logger.info('Privilege monitoring index already exists');
