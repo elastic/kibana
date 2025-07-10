@@ -7,7 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { GetBrowserFieldsResponse } from '@kbn/alerting-types';
+import type { FieldDescriptor } from '@kbn/data-views-plugin/server';
+import type { BrowserFields } from './alert_fields_type';
 
-export const DEFAULT_ALERTS_PAGE_SIZE = 10;
-export const EMPTY_AAD_FIELDS: GetBrowserFieldsResponse['fields'] = [];
+export interface GetBrowserFieldsResponse {
+  browserFields: BrowserFields;
+  fields: FieldDescriptor[];
+}
