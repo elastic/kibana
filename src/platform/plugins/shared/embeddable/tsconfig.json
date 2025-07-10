@@ -24,6 +24,7 @@
     "@kbn/react-kibana-mount",
     "@kbn/analytics",
     "@kbn/ui-theme",
+    "@kbn/content-management-utils",
   ],
   "exclude": ["target/**/*"]
 }
