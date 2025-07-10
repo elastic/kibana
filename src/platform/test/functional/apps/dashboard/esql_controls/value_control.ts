@@ -26,7 +26,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esql = getService('esql');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const browser = getService('browser');
-  const comboBox = getService('comboBox');
   const dashboardPanelActions = getService('dashboardPanelActions');
 
   describe('dashboard - add a value type ES|QL control', function () {
