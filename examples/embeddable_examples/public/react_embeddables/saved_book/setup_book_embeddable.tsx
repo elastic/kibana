@@ -12,11 +12,13 @@ import { ContentManagementPublicSetup } from '@kbn/content-management-plugin/pub
 import { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
 import { BOOK_CONTENT_ID, BOOK_EMBEDDABLE_TYPE, BOOK_LATEST_VERSION } from '../../../common';
 
-export function setupBookEmbeddable(core: CoreSetup, embeddable: EmbeddableSetup, contentManagement: ContentManagementPublicSetup) {
+export function setupBookEmbeddable(
+  core: CoreSetup,
+  embeddable: EmbeddableSetup,
+  contentManagement: ContentManagementPublicSetup
+) {
   embeddable.registerReactEmbeddableFactory(BOOK_EMBEDDABLE_TYPE, async () => {
-    const { getSavedBookEmbeddableFactory } = await import(
-      './saved_book_react_embeddable'
-    );
+    const { getSavedBookEmbeddableFactory } = await import('./saved_book_react_embeddable');
     const [coreStart] = await core.getStartServices();
     return getSavedBookEmbeddableFactory(coreStart);
   });
@@ -32,6 +34,4 @@ export function setupBookEmbeddable(core: CoreSetup, embeddable: EmbeddableSetup
       latest: BOOK_LATEST_VERSION,
     },
   });
-
-
 }
