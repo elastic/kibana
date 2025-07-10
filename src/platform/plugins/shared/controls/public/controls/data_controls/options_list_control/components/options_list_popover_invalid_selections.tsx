@@ -55,7 +55,7 @@ export const OptionsListPopoverInvalidSelections = () => {
     const options: EuiSelectableOption[] = Array.from(invalidSelections).map((key) => {
       return {
         key: String(key),
-        label: fieldFormatter?.(key) ?? String(key),
+        label: fieldFormatter(key) ?? String(key),
         checked: 'on',
         css: css`
           .euiSelectableListItem__prepend {

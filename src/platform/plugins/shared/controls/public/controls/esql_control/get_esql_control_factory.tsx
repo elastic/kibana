@@ -153,6 +153,7 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
         selectAll: () => {},
         deselectAll: () => {},
         loadMoreSubject: new BehaviorSubject<void>(undefined),
+        fieldFormatter: new BehaviorSubject((v: string) => v),
       };
 
       return {

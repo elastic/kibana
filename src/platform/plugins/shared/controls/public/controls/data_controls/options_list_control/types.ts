@@ -50,13 +50,11 @@ type PublishesOptionsListState = SubjectsOf<OptionsListState>;
 type OptionsListStateSetters = Partial<SettersOf<OptionsListState>> &
   SettersOf<Pick<OptionsListState, 'sort' | 'searchString' | 'requestSize'>>;
 
-export type OptionsListComponentApi = Pick<PublishesField, 'field$'> &
+export type OptionsListComponentApi = PublishesField &
   PublishesOptions &
   PublishesOptionsListState &
   Pick<PublishesTitle, 'title$'> &
   OptionsListStateSetters & {
-    // Make fieldFormatter explicitly optional
-    fieldFormatter?: PublishesField['fieldFormatter'];
     deselectOption: (key: string | undefined) => void;
     makeSelection: (key: string | undefined, showOnlySelected: boolean) => void;
     loadMoreSubject: Subject<void>;

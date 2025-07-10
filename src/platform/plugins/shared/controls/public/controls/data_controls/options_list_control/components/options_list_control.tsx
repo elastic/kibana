@@ -150,7 +150,7 @@ export const OptionsListControl = ({
                 <>
                   {selectedOptions?.length
                     ? selectedOptions.map((value: OptionsListSelection, i, { length }) => {
-                        const text = `${fieldFormatter?.(value) ?? value}${
+                        const text = `${fieldFormatter(value) ?? value}${
                           i + 1 === length ? '' : delimiter
                         } `;
                         const isInvalid = invalidSelections?.has(value);
