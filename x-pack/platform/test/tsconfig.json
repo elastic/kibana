@@ -138,7 +138,6 @@
     "@kbn/streams-plugin",
     "@kbn/es-errors",
     "@kbn/content-packs-schema",
-    "@kbn/test-suites-xpack-platform",
     "@kbn/utility-types",
     "@kbn/server-route-repository-utils",
     "@kbn/management-settings-ids",
