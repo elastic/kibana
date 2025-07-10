@@ -23,26 +23,10 @@ export function plugin() {
 
 // Containers & Hook
 export { LogViewProvider, useLogViewContext, useLogView } from './hooks/use_log_view';
-export {
-  LogPositionStateProvider,
-  useLogPositionStateContext,
-} from './containers/logs/log_position';
 
 // Shared components
 export type { LogAIAssistantDocument } from './components/log_ai_assistant/log_ai_assistant';
-export type {
-  LogEntryStreamItem,
-  LogEntryColumnWidths,
-} from './components/logging/log_text_stream';
-export {
-  iconColumnId,
-  useColumnWidths,
-} from './components/logging/log_text_stream/log_entry_column';
 export type { LogAIAssistantProps } from './components/log_ai_assistant/log_ai_assistant';
-export type {
-  UpdatedDateRange,
-  VisibleInterval,
-} from './components/logging/log_text_stream/scrollable_log_text_stream_view';
 export type { LogsOverviewProps } from './components/logs_overview';
 
 export const LogEntryFlyout = dynamic(
@@ -51,33 +35,7 @@ export const LogEntryFlyout = dynamic(
 export const LogAIAssistant = dynamic(
   () => import('./components/log_ai_assistant/log_ai_assistant')
 );
-export const LogColumnHeader = dynamic(
-  () => import('./components/logging/log_text_stream/column_headers')
-);
-export const LogColumnHeadersWrapper = dynamic(
-  () => import('./components/logging/log_text_stream/column_headers_wrapper')
-);
-export const LogEntryColumn = dynamic(
-  () => import('./components/logging/log_text_stream/log_entry_column')
-);
-export const LogEntryContextMenu = dynamic(
-  () => import('./components/logging/log_text_stream/log_entry_context_menu')
-);
-export const LogEntryFieldColumn = dynamic(
-  () => import('./components/logging/log_text_stream/log_entry_field_column')
-);
-export const LogEntryMessageColumn = dynamic(
-  () => import('./components/logging/log_text_stream/log_entry_message_column')
-);
-export const LogEntryRowWrapper = dynamic(
-  () => import('./components/logging/log_text_stream/log_entry_row_wrapper')
-);
-export const LogEntryTimestampColumn = dynamic(
-  () => import('./components/logging/log_text_stream/log_entry_timestamp_column')
-);
-export const ScrollableLogTextStreamView = dynamic(
-  () => import('./components/logging/log_text_stream/scrollable_log_text_stream_view')
-);
+
 export const OpenInLogsExplorerButton = dynamic(
   () => import('./components/open_in_logs_explorer_button')
 );
