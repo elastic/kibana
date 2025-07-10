@@ -114,6 +114,7 @@ export const UseRunQueryRuleset = ({
 
   return (
     <TryInConsoleButton
+      disabled={disabled}
       application={application}
       sharePlugin={share ?? undefined}
       consolePlugin={consolePlugin ?? undefined}

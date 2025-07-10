@@ -110,7 +110,6 @@ enabled:
   - x-pack/solutions/security/test/cloud_security_posture_functional/config.ts
   - x-pack/solutions/security/test/cloud_security_posture_functional/config.agentless.ts
   - x-pack/solutions/security/test/cloud_security_posture_functional/data_views/config.ts
-  - x-pack/solutions/security/test/alerting_api_integration/security_and_spaces/group1/config.ts
   - x-pack/solutions/security/test/alerting_api_integration/security_and_spaces/group2/config.ts
   - x-pack/solutions/security/test/alerting_api_integration/security_and_spaces/group2/config_non_dedicated_task_runner.ts
   - x-pack/solutions/security/test/cases_api_integration/security_and_spaces/config_trial.ts

@@ -8,19 +8,14 @@
 import expect from '@kbn/expect';
 import moment from 'moment';
 import { ESTestIndexTool } from '@kbn/alerting-api-integration-helpers';
-import { asyncForEach } from '@kbn/test-suites-xpack-platform/api_integration/services/transform/api';
-import {
-  getUrlPrefix,
-  ObjectRemover,
-} from '@kbn/test-suites-xpack-platform/alerting_api_integration/common/lib';
-import {
-  indexTestDocs,
-  waitForEventLogDocs,
-} from '@kbn/test-suites-xpack-platform/alerting_api_integration/security_and_spaces/group1/tests/alerting/backfill/test_utils';
+import { asyncForEach } from '../../../../../../api_integration/services/transform/api';
+import { getUrlPrefix, ObjectRemover } from '../../../../../common/lib';
+import { indexTestDocs, waitForEventLogDocs } from './test_utils';
 import { SuperuserAtSpace1 } from '../../../../scenarios';
-import type { FtrProviderContext } from '../../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { TEST_ACTIONS_INDEX, getSecurityRule, testDocTimestamps } from './test_utils';
 
+// eslint-disable-next-line import/no-default-export
 export default function scheduleBackfillTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const es = getService('es');
@@ -122,7 +117,8 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
         getService,
         backfillId,
         spaceId,
-        new Map([['execute-backfill', { equal: 4 }]])
+        new Map([['execute-backfill', { equal: 4 }]]),
+        true // collapse by execution uuid
       );
 
       await retry.try(async () => {
@@ -184,7 +180,8 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
         getService,
         backfillId,
         spaceId,
-        new Map([['execute-backfill', { equal: 4 }]])
+        new Map([['execute-backfill', { equal: 4 }]]),
+        true // collapse by execution uuid
       );
 
       await retry.try(async () => {
@@ -247,7 +244,8 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
         getService,
         backfillId,
         spaceId,
-        new Map([['execute-backfill', { equal: 4 }]])
+        new Map([['execute-backfill', { equal: 4 }]]),
+        true // collapse by execution uuid
       );
 
       // since we want to check that no actions were executed and they might take a bit to run
