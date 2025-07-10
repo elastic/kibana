@@ -198,7 +198,9 @@ describe('getRuleIdsWithGaps', () => {
         RULE_SAVED_OBJECT_TYPE,
         filter,
         expect.objectContaining({
-          filter: expect.stringContaining('event.action: gap AND event.provider: alerting AND not kibana.alert.rule.gap.disabled:*'),
+          filter: expect.stringContaining(
+            'event.action: gap AND event.provider: alerting AND not kibana.alert.rule.gap.disabled:*'
+          ),
           aggs: {
             latest_gap_timestamp: { max: { field: '@timestamp' } },
             unique_rule_ids: { terms: { field: 'rule.id', size: 10000 } },

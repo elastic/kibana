@@ -267,7 +267,7 @@ export default function getRuleIdsWithGapsTests({ getService }: FtrProviderConte
                     'Failed to find rules with gaps: Unauthorized to find rules for any rule types',
                   statusCode: 403,
                 });
-                return
+                return;
 
               case 'global_read at space1':
               case 'space_1_all_alerts_none_actions at space1':
@@ -289,13 +289,13 @@ export default function getRuleIdsWithGapsTests({ getService }: FtrProviderConte
             const deleteResponse = await supertestWithoutAuth
               .delete(`${getUrlPrefix(apiOptions.spaceId)}/api/alerting/rule/${ruleId2}`)
               .set('kbn-xsrf', 'foo')
-              .auth(SuperuserAtSpace1.user.username, SuperuserAtSpace1.user.password)
+              .auth(SuperuserAtSpace1.user.username, SuperuserAtSpace1.user.password);
 
-            if(deleteResponse.statusCode !== 204) {
+            if (deleteResponse.statusCode !== 204) {
               objectRemover.add(apiOptions.spaceId, ruleId2, 'rule', 'alerting');
             }
 
-            expect(deleteResponse.statusCode).to.eql(204)
+            expect(deleteResponse.statusCode).to.eql(204);
 
             response = await supertestWithoutAuth
               .post(`${getUrlPrefix(apiOptions.spaceId)}/internal/alerting/rules/gaps/_get_rules`)
