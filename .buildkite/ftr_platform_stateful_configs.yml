@@ -157,6 +157,7 @@ enabled:
   - x-pack/platform/test/alerting_api_integration/spaces_only/tests/alerting/group4/config_with_schedule_circuit_breaker.ts
   - x-pack/platform/test/alerting_api_integration/spaces_only/tests/actions/config.ts
   - x-pack/platform/test/alerting_api_integration/spaces_only/tests/action_task_params/config.ts
+  - x-pack/platform/test/alerting_api_integration/spaces_only/tests/actions/connector_types/stack/email_recipient_allowlist/config.ts
   - x-pack/test/api_integration/apis/cases/config.ts
   - x-pack/test/api_integration/apis/security/config.ts
   - x-pack/platform/test/banners_functional/config.ts
