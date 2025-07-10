@@ -29,6 +29,7 @@ describe('UserActionBuilder', () => {
     caseId: '123',
     user: { full_name: 'Elastic User', username: 'elastic', email: 'elastic@elastic.co' },
     owner: SECURITY_SOLUTION_OWNER,
+    isAssistant: false,
   };
   let builderFactory: BuilderFactory;
 
@@ -66,6 +67,7 @@ describe('UserActionBuilder', () => {
               "full_name": "Elastic User",
               "username": "elastic",
             },
+            "is_assistant": false,
             "owner": "securitySolution",
             "payload": Object {
               "title": "test",
@@ -115,6 +117,7 @@ describe('UserActionBuilder', () => {
               "full_name": "Elastic User",
               "username": "elastic",
             },
+            "is_assistant": false,
             "owner": "securitySolution",
             "payload": Object {
               "connector": Object {
@@ -174,6 +177,7 @@ describe('UserActionBuilder', () => {
               "full_name": "Elastic User",
               "username": "elastic",
             },
+            "is_assistant": false,
             "owner": "securitySolution",
             "payload": Object {
               "comment": Object {
@@ -221,6 +225,7 @@ describe('UserActionBuilder', () => {
               "full_name": "Elastic User",
               "username": "elastic",
             },
+            "is_assistant": false,
             "owner": "securitySolution",
             "payload": Object {
               "comment": Object {
@@ -278,6 +283,7 @@ describe('UserActionBuilder', () => {
               "full_name": "Elastic User",
               "username": "elastic",
             },
+            "is_assistant": false,
             "owner": "securitySolution",
             "payload": Object {
               "comment": Object {
@@ -330,6 +336,7 @@ describe('UserActionBuilder', () => {
               "full_name": "Elastic User",
               "username": "elastic",
             },
+            "is_assistant": false,
             "owner": "securitySolution",
             "payload": Object {
               "comment": Object {
@@ -381,6 +388,7 @@ describe('UserActionBuilder', () => {
               "full_name": "Elastic User",
               "username": "elastic",
             },
+            "is_assistant": false,
             "owner": "securitySolution",
             "payload": Object {
               "description": "test",
@@ -415,6 +423,7 @@ describe('UserActionBuilder', () => {
               "full_name": "Elastic User",
               "username": "elastic",
             },
+            "is_assistant": false,
             "owner": "securitySolution",
             "payload": Object {
               "externalService": Object {
@@ -466,6 +475,7 @@ describe('UserActionBuilder', () => {
               "full_name": "Elastic User",
               "username": "elastic",
             },
+            "is_assistant": false,
             "owner": "securitySolution",
             "payload": Object {
               "tags": Array [
@@ -503,6 +513,7 @@ describe('UserActionBuilder', () => {
               "full_name": "Elastic User",
               "username": "elastic",
             },
+            "is_assistant": false,
             "owner": "securitySolution",
             "payload": Object {
               "status": "open",
@@ -537,6 +548,7 @@ describe('UserActionBuilder', () => {
               "full_name": "Elastic User",
               "username": "elastic",
             },
+            "is_assistant": false,
             "owner": "securitySolution",
             "payload": Object {
               "severity": "low",
@@ -571,6 +583,7 @@ describe('UserActionBuilder', () => {
               "full_name": "Elastic User",
               "username": "elastic",
             },
+            "is_assistant": false,
             "owner": "securitySolution",
             "payload": Object {
               "assignees": Array [
@@ -612,6 +625,7 @@ describe('UserActionBuilder', () => {
               "full_name": "Elastic User",
               "username": "elastic",
             },
+            "is_assistant": false,
             "owner": "securitySolution",
             "payload": Object {
               "settings": Object {
@@ -648,6 +662,7 @@ describe('UserActionBuilder', () => {
               "full_name": "Elastic User",
               "username": "elastic",
             },
+            "is_assistant": false,
             "owner": "securitySolution",
             "payload": Object {
               "assignees": Array [
@@ -726,6 +741,7 @@ describe('UserActionBuilder', () => {
               "full_name": "Elastic User",
               "username": "elastic",
             },
+            "is_assistant": false,
             "owner": "securitySolution",
             "payload": Object {
               "category": "new",
@@ -760,6 +776,7 @@ describe('UserActionBuilder', () => {
               "full_name": "Elastic User",
               "username": "elastic",
             },
+            "is_assistant": false,
             "owner": "securitySolution",
             "payload": Object {
               "category": null,

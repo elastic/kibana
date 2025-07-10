@@ -353,6 +353,7 @@ export default ({ getService }: FtrProviderContext): void => {
               username: 'elastic',
             },
             observables: [],
+            is_assistant: false,
           });
         });
 
@@ -466,6 +467,7 @@ export default ({ getService }: FtrProviderContext): void => {
               username: 'elastic',
             },
             observables: [],
+            is_assistant: false,
           });
         });
 
@@ -844,6 +846,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 username: 'elastic',
               },
               observables: [],
+              is_assistant: false,
             });
 
             expect(secondCase).to.eql({
@@ -892,6 +895,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 username: 'elastic',
               },
               observables: [],
+              is_assistant: false,
             });
           });
 
@@ -1234,7 +1238,11 @@ export default ({ getService }: FtrProviderContext): void => {
             grouping: { field_name_1: 'field_value_3' },
           },
         ];
-        const req = getRequest({ groupedAlerts, internallyManagedAlerts: true });
+        const req = getRequest({
+          groupedAlerts,
+          internallyManagedAlerts: true,
+          isGeneratedByAssistant: true,
+        });
 
         describe('Oracle', () => {
           it('should create the oracle records correctly with grouping', async () => {
@@ -1359,6 +1367,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 username: 'elastic',
               },
               observables: [],
+              is_assistant: true,
             });
 
             expect(secondCase).to.eql({
@@ -1407,6 +1416,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 username: 'elastic',
               },
               observables: [],
+              is_assistant: true,
             });
 
             expect(thirdCase).to.eql({
@@ -1455,6 +1465,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 username: 'elastic',
               },
               observables: [],
+              is_assistant: true,
             });
           });
 
