@@ -19,7 +19,7 @@ describe('ArtifactService', () => {
   const url = 'http://localhost:3000';
   const requestTimeout = 10_000;
   const mockedAxios = axios as jest.Mocked<typeof axios>;
-  const artifactService = new ArtifactService(loggingSystemMock.createLogger());
+  const logger = loggingSystemMock.createLogger();
   const defaultClusterInfo: InfoResponse = {
     name: 'elasticsearch',
     cluster_name: 'elasticsearch',
@@ -55,7 +55,11 @@ describe('ArtifactService', () => {
   });
 
   it('should fail when manifest is not found', async () => {
-    artifactService.start(createClusterInfoWithVersion(), { url, pubKey, requestTimeout });
+    const artifactService = new ArtifactService(logger, createClusterInfoWithVersion(), {
+      url,
+      pubKey,
+      requestTimeout,
+    });
 
     mockedAxios.get.mockImplementationOnce(() => Promise.resolve({ status: 404 }));
 
@@ -64,7 +68,34 @@ describe('ArtifactService', () => {
 
   it('should construct manifest URL by removing -SNAPSHOT suffix from version number', async () => {
     const version = '9.2.0';
-    artifactService.start(createClusterInfoWithVersion(`${version}-SNAPSHOT`), {
+    const artifactService = new ArtifactService(
+      logger,
+      createClusterInfoWithVersion(`${version}-SNAPSHOT`),
+      { url, pubKey, requestTimeout }
+    );
+
+    const zip = createManifestZipPackage(
+      JSON.stringify({
+        artifacts: {
+          [artifactName]: {
+            relative_url: '/downloads/artifacts/telemetry-buffer-and-batch-sizes-v1.json',
+          },
+        },
+      })
+    );
+
+    setupMockResponses(zip.toBuffer());
+
+    const result = await artifactService.getArtifact(artifactName);
+    expect(result).toBeDefined();
+    expect(mockedAxios.get.mock.calls[0][0]).toBe(
+      `${url}/downloads/kibana/manifest/artifacts-${version}.zip`
+    );
+  });
+
+  it('should use exact version number in manifest URL for non-snapshot versions', async () => {
+    const version = '9.1.1';
+    const artifactService = new ArtifactService(logger, createClusterInfoWithVersion(version), {
       url,
       pubKey,
       requestTimeout,
@@ -89,32 +120,13 @@ describe('ArtifactService', () => {
     );
   });
 
-  it('should use exact version number in manifest URL for non-snapshot versions', async () => {
-    const version = '9.1.1';
-    artifactService.start(createClusterInfoWithVersion(version), { url, pubKey, requestTimeout });
-
-    const zip = createManifestZipPackage(
-      JSON.stringify({
-        artifacts: {
-          [artifactName]: {
-            relative_url: '/downloads/artifacts/telemetry-buffer-and-batch-sizes-v1.json',
-          },
-        },
-      })
-    );
-
-    setupMockResponses(zip.toBuffer());
-
-    const result = await artifactService.getArtifact(artifactName);
-    expect(result).toBeDefined();
-    expect(mockedAxios.get.mock.calls[0][0]).toBe(
-      `${url}/downloads/kibana/manifest/artifacts-${version}.zip`
-    );
-  });
-
   it('should throw an error when requesting an artifact that does not exist in the manifest', async () => {
     const invalidArtifactName = 'invalid-artifact-name';
-    artifactService.start(createClusterInfoWithVersion(), { url, pubKey, requestTimeout });
+    const artifactService = new ArtifactService(logger, createClusterInfoWithVersion(), {
+      url,
+      pubKey,
+      requestTimeout,
+    });
 
     const zip = createManifestZipPackage(
       JSON.stringify({
@@ -135,7 +147,11 @@ describe('ArtifactService', () => {
 
   it('should retrieve and return artifact content when the artifact exists in the manifest', async () => {
     const content = 'artifact content';
-    artifactService.start(createClusterInfoWithVersion(), { url, pubKey, requestTimeout });
+    const artifactService = new ArtifactService(logger, createClusterInfoWithVersion(), {
+      url,
+      pubKey,
+      requestTimeout,
+    });
 
     const zip = createManifestZipPackage(
       JSON.stringify({
@@ -155,7 +171,11 @@ describe('ArtifactService', () => {
   });
 
   it('should cache manifest and use If-None-Match header for subsequent requests to avoid redundant downloads', async () => {
-    artifactService.start(createClusterInfoWithVersion(), { url, pubKey, requestTimeout });
+    const artifactService = new ArtifactService(logger, createClusterInfoWithVersion(), {
+      url,
+      pubKey,
+      requestTimeout,
+    });
 
     const zip = createManifestZipPackage(
       JSON.stringify({
@@ -205,7 +225,7 @@ describe('ArtifactService', () => {
     });
 
     const version = '9.2.0';
-    artifactService.start(createClusterInfoWithVersion(version), {
+    const artifactService = new ArtifactService(logger, createClusterInfoWithVersion(version), {
       url,
       pubKey: altPubKey,
       requestTimeout,
