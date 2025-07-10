@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { useCallback, useRef, useEffect } from 'react';
+import React, { useCallback, useRef, useEffect, useState } from 'react';
 import { css } from '@emotion/css';
 import { EuiFlexItem, EuiPanel, useEuiTheme, euiScrollBarStyles } from '@elastic/eui';
+import { oneChatDefaultAgentId } from '@kbn/onechat-common';
 import { useChat } from '../../hooks/use_chat';
 import { useConversation } from '../../hooks/use_conversation';
 import { useStickToBottom } from '../../hooks/use_stick_to_bottom';
@@ -32,12 +33,19 @@ const scrollContainerClassName = (scrollBarStyles: string) => css`
 `;
 
 interface ConversationProps {
-  agentId: string;
   conversationId: string | undefined;
 }
 
-export const Conversation: React.FC<ConversationProps> = ({ agentId, conversationId }) => {
+export const Conversation: React.FC<ConversationProps> = ({ conversationId }) => {
+  const [selectedAgentId, setSelectedAgentId] = useState<string>(oneChatDefaultAgentId);
+
   const { conversation } = useConversation({ conversationId });
+
+  const { agentId: conversationAgentId } = conversation ?? {};
+
+  // We allow to change agent only at the start of the conversation
+  const agentId = conversationId ? conversationAgentId ?? oneChatDefaultAgentId : selectedAgentId;
+
   const { sendMessage } = useChat({
     conversationId,
     agentId,
@@ -66,7 +74,13 @@ export const Conversation: React.FC<ConversationProps> = ({ agentId, conversatio
   );
 
   if (!conversationId && (!conversation || conversation.rounds.length === 0)) {
-    return <NewConversationPrompt onSubmit={onSubmit} />;
+    return (
+      <NewConversationPrompt
+        onSubmit={onSubmit}
+        selectAgentId={setSelectedAgentId}
+        agentId={selectedAgentId}
+      />
+    );
   }
 
   return (
@@ -79,7 +93,12 @@ export const Conversation: React.FC<ConversationProps> = ({ agentId, conversatio
         </div>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <ConversationInputForm disabled={!agentId} loading={false} onSubmit={onSubmit} />
+        <ConversationInputForm
+          disabled={!agentId}
+          loading={false}
+          onSubmit={onSubmit}
+          selectedAgentId={agentId}
+        />
       </EuiFlexItem>
     </>
   );
