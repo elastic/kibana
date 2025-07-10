@@ -300,6 +300,11 @@ export class Server {
       elasticsearchService: elasticsearchServiceSetup,
     });
 
+    const httpRateLimiterSetup = this.httpRateLimiter.setup({
+      http: httpSetup,
+      metrics: metricsSetup,
+    });
+
     const coreUsageDataSetup = this.coreUsageData.setup({
       http: httpSetup,
       metrics: metricsSetup,
@@ -336,6 +341,7 @@ export class Server {
       savedObjects: savedObjectsSetup,
       environment: environmentSetup,
       http: httpSetup,
+      httpRateLimiter: httpRateLimiterSetup,
       metrics: metricsSetup,
       coreUsageData: coreUsageDataSetup,
     });
@@ -355,10 +361,6 @@ export class Server {
       i18n: i18nServiceSetup,
     });
 
-    this.httpRateLimiter.setup({
-      http: httpSetup,
-      metrics: metricsSetup,
-    });
     const httpResourcesSetup = this.httpResources.setup({
       http: httpSetup,
       rendering: renderingSetup,

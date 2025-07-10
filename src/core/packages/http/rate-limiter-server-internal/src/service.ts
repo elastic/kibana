@@ -12,19 +12,20 @@ import {
   BehaviorSubject,
   distinctUntilChanged,
   endWith,
+  filter,
   map,
   skipUntil,
   type Observable,
+  scan,
   Subject,
   takeUntil,
-  scan,
-  filter,
 } from 'rxjs';
 import type { CoreService } from '@kbn/core-base-server-internal';
 import type { OnPreAuthHandler } from '@kbn/core-http-server';
 import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
 import type { EluMetrics } from '@kbn/core-metrics-server';
 import { EluTerm, type InternalMetricsServiceSetup } from '@kbn/core-metrics-server-internal';
+import { type ServiceStatus, ServiceStatusLevels } from '@kbn/core-status-common';
 
 const RATE_LIMITER_POLICY = 'elu';
 
@@ -40,11 +41,10 @@ interface State {
   timestamp: number;
 }
 
-// type State = { overloaded: false } | { overloaded: true; retryAfter: number };
-// type StateWithTimestamp = State & { timestamp: number };
-
 /** @internal */
-export type InternalRateLimiterSetup = void;
+export interface InternalRateLimiterSetup {
+  status$: Observable<ServiceStatus | undefined>;
+}
 
 /** @internal */
 export type InternalRateLimiterStart = void;
@@ -53,6 +53,7 @@ export type InternalRateLimiterStart = void;
 export class HttpRateLimiterService
   implements CoreService<InternalRateLimiterSetup, InternalRateLimiterStart>
 {
+  private status$ = new BehaviorSubject<ServiceStatus | undefined>(undefined);
   private state$ = new BehaviorSubject<State | undefined>(undefined);
   private ready$ = new Subject<boolean>();
   private stopped$ = new Subject<boolean>();
@@ -118,15 +119,35 @@ export class HttpRateLimiterService
         )
       )
       .subscribe(this.state$);
+
+    this.state$
+      .pipe(
+        map((state) => !!state?.overloaded),
+        distinctUntilChanged(),
+        map((overloaded) =>
+          overloaded
+            ? {
+                level: ServiceStatusLevels.degraded,
+                summary: 'http server is rate-limited due to high load',
+              }
+            : {
+                level: ServiceStatusLevels.available,
+                summary: 'http server is available',
+              }
+        )
+      )
+      .subscribe(this.status$);
   }
 
   public setup({ http, metrics }: SetupDeps): InternalRateLimiterSetup {
-    if (!http.rateLimiter.enabled) {
-      return;
+    if (http.rateLimiter.enabled) {
+      this.watch(metrics.getEluMetrics$(), http.rateLimiter);
+      http.registerOnPreAuth(this.handler);
     }
 
-    this.watch(metrics.getEluMetrics$(), http.rateLimiter);
-    http.registerOnPreAuth(this.handler);
+    return {
+      status$: this.status$,
+    };
   }
 
   public start(): InternalRateLimiterStart {
