@@ -168,7 +168,8 @@ Here is an example configuration for a dependency in the `renovate.json` file:
     "labels": [
       "Team:My-Team-Label",
       "release_note:skip",
-      "backport:all-open"
+      "backport:all-open",
+      "effort:low"
     ],
     // [5]
     "minimumReleaseAge": "7 days",
@@ -183,7 +184,7 @@ Here is an example configuration for a dependency in the `renovate.json` file:
 
 [3] `matchBaseBranches`: The branches that the rule will apply to. This should be set to `main` for most dependencies.
 
-[4] `labels`: Labels to apply to the PRs created by Renovate. The `Team:My-Team-Label` label should be replaced with your team's GitHub label from the Kibana repository. The `release_note:skip` and `backport:all-open` labels are used to control the release process and should not be changed without first consulting the AppEx Platform Security team.
+[4] `labels`: Labels to apply to the PRs created by Renovate. The `Team:My-Team-Label` label should be replaced with your team's GitHub label from the Kibana repository. Include an `effort:low|medium|high` label to indicate the relative complexity in supporting updates to the dependency. The `release_note:skip` and `backport:all-open` labels are used to control the release process and should not be changed without first consulting the AppEx Platform Security team.
 
 [5] `minimumReleaseAge`: The minimum age of a release before it can be upgraded. This is set to `7 days` to allow time for any issues to be identified and resolved before upgrading. You may adjust this value as needed.
 
