@@ -8,20 +8,17 @@
 import { renderHook } from '@testing-library/react';
 import { useQuery } from '@tanstack/react-query';
 import type { UseQueryOptions } from '@tanstack/react-query';
-import {
-  useGetCustomScripts,
-  getMessageFieldFromStringifiedObject,
-} from './use_get_custom_scripts';
+import { useGetCustomScripts } from './use_get_custom_scripts';
+import { useHttp } from '../../../common/lib/kibana';
+import type { HttpSetup } from '@kbn/core/public';
 
 jest.mock('@tanstack/react-query');
 jest.mock('../../../common/lib/kibana');
 
 describe('useGetCustomScripts', () => {
   const mockUseQuery = useQuery as jest.MockedFunction<typeof useQuery>;
+  const mockUseHttp = useHttp as jest.MockedFunction<typeof useHttp>;
   const mockHttpGet = jest.fn();
-  const mockNotifications = { toasts: { danger: jest.fn() } };
-  const mockUseKibana = jest.requireMock('../../../common/lib/kibana').useKibana;
-  const mockUseHttp = jest.requireMock('../../../common/lib/kibana').useHttp;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -29,18 +26,14 @@ describe('useGetCustomScripts', () => {
     // Mock the useHttp hook
     mockUseHttp.mockReturnValue({
       get: mockHttpGet,
-    });
+    } as unknown as HttpSetup);
 
-    // Mock the useKibana hook
-    mockUseKibana.mockReturnValue({ notifications: mockNotifications });
-
-    // Mock the useQuery hook
+    // Mock the useQuery hook to return successful response
     mockUseQuery.mockReturnValue({
       data: [{ id: 'script1', name: 'Script 1', description: 'Test script 1' }],
       isLoading: false,
       isError: false,
       error: null,
-      // Add other required properties for UseQueryResult
       isSuccess: true,
       isFetching: false,
       isPending: false,
@@ -49,6 +42,11 @@ describe('useGetCustomScripts', () => {
       fetchStatus: 'idle',
       refetch: jest.fn(),
     } as unknown as ReturnType<typeof useQuery>);
+
+    // Mock HTTP get to return successful response
+    mockHttpGet.mockResolvedValue({
+      data: [{ id: 'script1', name: 'Script 1', description: 'Test script 1' }],
+    });
   });
 
   test('calls useQuery with correct parameters for endpoint agent type', () => {
@@ -78,54 +76,19 @@ describe('useGetCustomScripts', () => {
     });
   });
 
-  test('displays a toast notification on error and only once per error', async () => {
-    // Override the default mock for this test
-    mockHttpGet.mockRejectedValue({
-      body: {
-        message: 'Response body: {"error":{"code":"Forbidden","message":"Test error message"}}',
-      },
-    });
-
+  test('makes HTTP request with correct parameters', async () => {
     renderHook(() => useGetCustomScripts('endpoint'));
 
     const queryOptions = mockUseQuery.mock.calls[0][0] as UseQueryOptions<unknown, unknown>;
     const queryFn = queryOptions.queryFn as () => Promise<unknown>;
 
-    // Simulate error thrown in queryFn
-    try {
-      await queryFn();
-    } catch (e) {
-      /* empty */
-    }
-    expect(mockNotifications.toasts.danger).toHaveBeenCalledWith(
-      expect.objectContaining({
-        title: 'Forbidden',
-        body: expect.any(Object),
-      })
-    );
-    // Call again, should not show another toast
-    try {
-      await queryFn();
-    } catch (e) {
-      /* empty */
-    }
-    expect(mockNotifications.toasts.danger).toHaveBeenCalledTimes(1);
-  });
+    await queryFn();
 
-  describe('getMessageFieldFromStringifiedObject', () => {
-    it('parses error JSON from stringified response', () => {
-      const str =
-        'Some error. Response body: {"error":{"code":"Forbidden","message":"Test error"}}';
-      const result = getMessageFieldFromStringifiedObject(str);
-      expect(result).toEqual({ error: { code: 'Forbidden', message: 'Test error' } });
-    });
-    it('returns undefined if marker is missing', () => {
-      const str = 'No marker here';
-      expect(getMessageFieldFromStringifiedObject(str)).toBeUndefined();
-    });
-    it('returns undefined if JSON is invalid', () => {
-      const str = 'Response body: not-json';
-      expect(getMessageFieldFromStringifiedObject(str)).toBeUndefined();
+    expect(mockHttpGet).toHaveBeenCalledWith('/api/endpoint/action/custom_scripts', {
+      version: '1',
+      query: {
+        agentType: 'endpoint',
+      },
     });
   });
 });

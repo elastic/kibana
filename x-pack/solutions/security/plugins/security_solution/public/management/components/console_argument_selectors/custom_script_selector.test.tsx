@@ -7,14 +7,22 @@
 
 import React from 'react';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import type {
+  KibanaReactContextValue,
+  KibanaReactNotifications,
+} from '@kbn/kibana-react-plugin/public';
 import { CustomScriptSelector } from './custom_script_selector';
 import { useGetCustomScripts } from '../../hooks/custom_scripts/use_get_custom_scripts';
 import { useConsoleStateDispatch } from '../console/hooks/state_selectors/use_console_state_dispatch';
+import { useCustomScriptsErrorToast } from './use_custom_scripts_error_toast';
+import { useKibana } from '../../../common/lib/kibana';
 import type { CommandArgumentValueSelectorProps } from '../console/types';
 import type { CustomScript } from '../../../../server/endpoint/services';
 
 jest.mock('../../hooks/custom_scripts/use_get_custom_scripts');
 jest.mock('../console/hooks/state_selectors/use_console_state_dispatch');
+jest.mock('./use_custom_scripts_error_toast');
+jest.mock('../../../common/lib/kibana');
 
 // Mock setTimeout to execute immediately in tests
 jest.useFakeTimers();
@@ -26,6 +34,10 @@ describe('CustomScriptSelector', () => {
   const mockUseConsoleStateDispatch = useConsoleStateDispatch as jest.MockedFunction<
     typeof useConsoleStateDispatch
   >;
+  const mockUseCustomScriptsErrorToast = useCustomScriptsErrorToast as jest.MockedFunction<
+    typeof useCustomScriptsErrorToast
+  >;
+  const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
   const mockOnChange = jest.fn();
   const mockDispatch = jest.fn();
   const mockScripts: CustomScript[] = [
@@ -53,6 +65,22 @@ describe('CustomScriptSelector', () => {
 
     // Mock the dispatch function
     mockUseConsoleStateDispatch.mockReturnValue(mockDispatch);
+
+    // Mock the error toast hook
+    mockUseCustomScriptsErrorToast.mockImplementation(() => {});
+
+    // Mock useKibana
+    mockUseKibana.mockReturnValue({
+      services: {},
+      notifications: {
+        toasts: {
+          show: jest.fn(),
+          success: jest.fn(),
+          warning: jest.fn(),
+          danger: jest.fn(),
+        },
+      } as KibanaReactNotifications,
+    } as KibanaReactContextValue<never>);
   });
 
   afterEach(() => {
