@@ -18,7 +18,10 @@ import { APP_UI_ID, DEFAULT_NUMBER_FORMAT } from '../../../../common/constants';
 import { SHOWING, UNIT } from '../../../common/components/events_viewer/translations';
 import { getTabsOnHostsUrl } from '../../../common/components/link_to/redirect_to_hosts';
 import { MatrixHistogram } from '../../../common/components/matrix_histogram';
-import type { MatrixHistogramConfigs, MatrixHistogramOption } from '../../../common/components/matrix_histogram/types';
+import type {
+  MatrixHistogramConfigs,
+  MatrixHistogramOption,
+} from '../../../common/components/matrix_histogram/types';
 import { convertToBuildEsQuery } from '../../../common/lib/kuery';
 import { useKibana, useUiSetting$ } from '../../../common/lib/kibana';
 import {
