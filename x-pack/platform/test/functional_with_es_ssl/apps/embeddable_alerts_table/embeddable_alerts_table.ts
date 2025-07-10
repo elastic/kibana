@@ -145,11 +145,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   };
 
   // Failing: See https://github.com/elastic/kibana/issues/220807
-  describe.skip('Embeddable alerts panel', () => {
+  describe('Embeddable alerts panel', () => {
     before(async () => {
       await pageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
         useActualUrl: true,
       });
+
       await pageObjects.home.addSampleDataSet('logs');
       const dataView = await getSampleWebLogsDataView();
       const [stackRule, observabilityRule, securityRule] = await Promise.all([
@@ -168,16 +169,19 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         [observabilityRule.id]: false,
         [securityRule.id]: false,
       };
+
       await retry.try(async () => {
         const rulesWithoutAlerts = Object.entries(rulesAlerted)
           .filter(([_, alerted]) => !alerted)
           .map(([ruleId]) => ruleId);
+
         await Promise.all(
           rulesWithoutAlerts.map(async (ruleId) => {
             const summary = await getRuleSummary(ruleId);
             rulesAlerted[ruleId] = Object.keys(summary.alerts).length > 0;
           })
         );
+
         expect(Object.values(rulesAlerted).every((hasAlerts) => hasAlerts)).to.be(true);
       });
 
@@ -188,6 +192,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await pageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
         useActualUrl: true,
       });
+
       await pageObjects.home.addSampleDataSet('logs');
       await objectRemover.removeAll();
     });
@@ -257,7 +262,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     }
 
-    it(`should only show alerts from the observability area (o11y+stack) when selecting it`, async () => {
+    it.only(`should only show alerts from the observability area (o11y+stack) when selecting it`, async () => {
       await toasts.dismissIfExists();
       await dashboardAddPanel.clickEditorMenuButton();
       await dashboardAddPanel.clickAddNewPanelFromUIActionLink('Alerts');
