@@ -14,11 +14,7 @@ import { createUploadState, type UploadState } from '@kbn/shared-ux-file-upload/
 import { type FileKindBase } from '@kbn/files-plugin/common/types';
 import { useUploadDone } from '../files/use_upload_done';
 import type { MarkdownEditorRef } from './types';
-import {
-  MAX_IMAGE_SIZE_MESSAGE,
-  NO_SIMULTANEOUS_UPLOADS_MESSAGE,
-  UNSUPPORTED_MIME_TYPE_MESSAGE,
-} from './translations';
+import { NO_SIMULTANEOUS_UPLOADS_MESSAGE, UNSUPPORTED_MIME_TYPE_MESSAGE } from './translations';
 
 interface UseImagePasteUploadArgs {
   editorRef: React.ForwardedRef<MarkdownEditorRef | null>;
@@ -49,9 +45,6 @@ function generateMarkdownLink(
     kind.id
   }/${id}/blob)`;
 }
-
-// 5MB
-const MAX_IMAGE_SIZE = 1024 * 1024 * 5;
 
 const ALLOWED_IMAGE_MIME_TYPES = ['image/png', 'image/jpeg'] as const;
 
@@ -180,11 +173,14 @@ export function useImagePasteUpload({
             setErrors([UNSUPPORTED_MIME_TYPE_MESSAGE]);
             return;
           }
-          if (file.size > MAX_IMAGE_SIZE) {
-            setErrors([MAX_IMAGE_SIZE_MESSAGE]);
-            return;
+          try {
+            // this will throw if image size is too large
+            // it also throws if mime type is not supported, but we already limit mime type
+            // because of constraints on images we can display
+            uploadState.setFiles([file]);
+          } catch (err) {
+            setErrors([err.message]);
           }
-          uploadState.setFiles([file]);
           if (uploadState.hasFiles()) {
             setErrors([]);
             uploadState.upload({

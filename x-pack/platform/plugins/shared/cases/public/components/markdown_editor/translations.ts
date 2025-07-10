@@ -24,10 +24,3 @@ export const UNSUPPORTED_MIME_TYPE_MESSAGE = i18n.translate(
     defaultMessage: 'Only PNG and JPG images are allowed.',
   }
 );
-
-export const MAX_IMAGE_SIZE_MESSAGE = i18n.translate(
-  'xpack.cases.markdownEditor.maxImageSize.message',
-  {
-    defaultMessage: 'Image size must be less than 5MB.',
-  }
-);
