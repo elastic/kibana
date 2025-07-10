@@ -19,6 +19,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   let adminApiClient: StreamsSupertestRepositoryClient;
   let editorApiClient: StreamsSupertestRepositoryClient;
 
+  const config = getService('config');
+  const isServerless = !!config.get('serverless');
+
   describe('Fails on missing permissions', () => {
     before(async () => {
       adminApiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
@@ -63,7 +66,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   create_index: false,
                   manage: false,
                   manage_data_stream_lifecycle: false,
-                  manage_ilm: false,
+                  ...(isServerless ? {} : { manage_ilm: false }),
                 },
               },
               application: {},
