@@ -43,13 +43,12 @@ import {
 } from '@kbn/alerting-plugin/server';
 import type { Logger, ElasticsearchClient, EcsEvent } from '@kbn/core/server';
 import type { AuditLogger } from '@kbn/security-plugin/server';
-import type { FieldDescriptor } from '@kbn/data-plugin/server';
 import { IndexPatternsFetcher } from '@kbn/data-plugin/server';
 import { isEmpty } from 'lodash';
 import type { RuleTypeRegistry } from '@kbn/alerting-plugin/server/types';
 import type { TypeOf } from 'io-ts';
 import { alertAuditEvent, operationAlertAuditActionMap } from '@kbn/alerting-plugin/server/lib';
-import type { BrowserFields } from '../../common';
+import type { GetBrowserFieldsResponse } from '@kbn/alerting-types';
 import {
   ALERT_WORKFLOW_STATUS,
   ALERT_RULE_CONSUMER,
@@ -1213,7 +1212,7 @@ export class AlertsClient {
     allowNoIndex: boolean;
     includeEmptyFields: boolean;
     indexFilter?: estypes.QueryDslQueryContainer;
-  }): Promise<{ browserFields: BrowserFields; fields: FieldDescriptor[] }> {
+  }): Promise<GetBrowserFieldsResponse> {
     const indexPatternsFetcherAsInternalUser = new IndexPatternsFetcher(this.esClient);
 
     const { fields } = await indexPatternsFetcherAsInternalUser.getFieldsForWildcard({
