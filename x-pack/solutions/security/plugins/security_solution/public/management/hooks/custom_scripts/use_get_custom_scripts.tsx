@@ -16,7 +16,7 @@ import { useHttp } from '../../../common/lib/kibana';
 /**
  * Error type for custom scripts API errors
  */
-interface CustomScriptsErrorType {
+export interface CustomScriptsErrorType {
   statusCode: number;
   message: string;
   meta: ActionTypeExecutorResult<unknown>;
