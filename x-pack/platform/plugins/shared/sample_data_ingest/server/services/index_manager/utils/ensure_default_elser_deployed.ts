@@ -13,6 +13,7 @@ export const ensureDefaultElserDeployed = async ({ client }: { client: Elasticse
     {
       inference_id: defaultInferenceEndpoints.ELSER,
       input: 'I just want to call the API to force the model to download and allocate',
+      timeout: '2m',
     },
     { requestTimeout: 10 * 60 * 1000 }
   );
