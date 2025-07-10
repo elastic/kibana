@@ -14,6 +14,5 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./rules/custom_threshold_consumer'));
     loadTestFile(require.resolve('./rules/es_query_consumer'));
     loadTestFile(require.resolve('./infra'));
-    loadTestFile(require.resolve('./streams'));
   });
 }
