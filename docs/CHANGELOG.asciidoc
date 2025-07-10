@@ -97,6 +97,7 @@ Review important information about the {kib} 8.x releases.
 
 --
 
+
 include::upgrade-notes.asciidoc[]
 
 [[release-notes-8.18.4]]
@@ -113,9 +114,20 @@ Data ingestion and Fleet::
 * Fixes an issue with agentless integration policies appearing under the Agent-based section ({kibana-pull}225767[#225767]).
 * Fixes an issue where the background task was not deleting some unenrolled agents ({kibana-pull}224808[#224808]).
 Elastic Observability solution::
-For the Elastic Observability 8.18.4 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
+* Fixes sparklines in the **Dependencies** table ({kibana-pull}227211[#227211]).
+* Shows **Uptime Monitors** in the Observability solution view when enabled in Advanced Settings ({kibana-pull}226999[#226999]).
+* Fixes response handling of the `get_apm_dependencies` tool call in the AI Assistant ({kibana-pull}226601[#226601]).
+* Fixes the **Span details** flyout on the APM **Operations** page ({kibana-pull}226423[#226423]).
+* Collapses *query tool calls when using Claude ({kibana-pull}226078[#226078]).
+* Fixes `Unable to load page` error on the APM **Operations** page ({kibana-pull}226036[#226036]).
+* Fixes `Unable to load page` error on the APM Settings **Schema** page ({kibana-pull}225481[#225481]).
+* Fixes `Unable to load page` error on the APM Settings **Agent Explorer** page ({kibana-pull}225071[#225071]).
+* Fixes unexpected error on some panels of the EDOT JVM metrics dashboard ({kibana-pull}224052[#224052]).
 Elastic Security solution::
-For the Elastic Security 8.18.4 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+For the Elastic Security 8.18.4 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Kibana platform::
+* Prevents navigation feedback popup from reappearing in each session ({kibana-pull}227199[#227199]).
+* Hides the header and side navigation when printing or exporting the dashboard with Print layout selected ({kibana-pull}227095[#227095]).
 Search::
 * Fixes handling of context limit errors in Playground when using the Elastic Managed LLM ({kibana-pull}225360[#225360]).
 
