@@ -60,9 +60,19 @@ export {
   dismissAllFlyoutsExceptFor,
   dismissFlyouts,
   LogLevelBadge,
+  getDefaultSort,
+  getSort,
+  getSortArray,
+  getSortForSearchSource,
 } from './src';
 
-export type { LogsContextService, TracesContextService, ApmErrorsContextService } from './src';
+export type {
+  LogsContextService,
+  TracesContextService,
+  ApmErrorsContextService,
+  SortInput,
+  SortPair,
+} from './src';
 
 export * from './src/types';
 

@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { getDefaultSort } from '../../../common/utils/sorting/get_default_sort';
-export { getSort, getSortArray } from '../../../common/utils/sorting/get_sort';
-export type { SortPair } from '../../../common/utils/sorting/get_sort';
-export { getSortForSearchSource } from '../../../common/utils/sorting/get_sort_for_search_source';
-export { getSortForEmbeddable } from './get_sort';
+export { getDefaultSort } from './get_default_sort';
+export { getSort, getSortArray } from './get_sort';
+export type { SortInput, SortPair } from './get_sort';
+export { getSortForSearchSource } from './get_sort_for_search_source';
