@@ -13,7 +13,7 @@ import { memoize, isFinite } from 'lodash';
 import type { Maybe } from '@kbn/apm-types-shared';
 import { asDecimalOrInteger, asInteger, NOT_AVAILABLE_LABEL } from './numeric';
 
-type TimeUnit = 'hours' | 'minutes' | 'seconds' | 'milliseconds';
+export type TimeUnit = 'hours' | 'minutes' | 'seconds' | 'milliseconds';
 type DurationTimeUnit = TimeUnit | 'microseconds';
 
 interface FormatterOptions {

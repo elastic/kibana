@@ -196,7 +196,6 @@ export const percentileOperation: OperationDefinition<
       operationType: PERCENTILE_ID,
       sourceField: field.name,
       isBucketed: false,
-      scale: 'ratio',
       filter: getFilter(previousColumn, columnParams),
       timeShift: columnParams?.shift || previousColumn?.timeShift,
       reducedTimeRange: columnParams?.reducedTimeRange || previousColumn?.reducedTimeRange,
