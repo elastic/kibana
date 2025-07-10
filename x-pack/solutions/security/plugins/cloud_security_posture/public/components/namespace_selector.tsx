@@ -49,25 +49,19 @@ export const NamespaceSelector = ({
   });
 
   return (
-    <EuiSuperSelect
-      data-test-subj="namespace-selector-superselect"
-      options={namespaceOptions}
-      valueOfSelected={activeNamespace}
-      onChange={onSelectedNamespaceChange}
-      disabled={namespaces.length < 2}
-      hasDividers
-      fullWidth
-      compressed
-      aria-label={label}
-      prepend={
-        <span
-          style={{
-            inlineSize: '80px',
-          }}
-        >
-          {label}
-        </span>
-      }
-    />
+    <div style={{ width: '250px' }}>
+      <EuiSuperSelect
+        data-test-subj="namespace-selector-superselect"
+        options={namespaceOptions}
+        valueOfSelected={activeNamespace}
+        onChange={onSelectedNamespaceChange}
+        disabled={namespaces.length < 2}
+        hasDividers
+        fullWidth
+        compressed
+        aria-label={label}
+        prepend={<span>{label}</span>}
+      />
+    </div>
   );
 };
