@@ -996,6 +996,7 @@ x-pack/platform/test/api_integration/apis/entity_manager/fixture_plugin @elastic
 x-pack/platform/test/cases_api_integration/common/plugins/cases @elastic/response-ops
 x-pack/platform/test/cases_api_integration/common/plugins/observability @elastic/response-ops
 x-pack/platform/test/cases_api_integration/common/plugins/security_solution @elastic/response-ops
+x-pack/platform/test/cloud_integration/plugins/saml_provider @elastic/kibana-core
 x-pack/platform/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin @elastic/kibana-security
 x-pack/platform/test/functional_cors/plugins/kibana_cors_test @elastic/kibana-security
 x-pack/platform/test/functional_embedded/plugins/iframe_embedded @elastic/kibana-core
@@ -1124,7 +1125,6 @@ x-pack/solutions/security/plugins/session_view @elastic/kibana-cloud-security-po
 x-pack/solutions/security/test
 x-pack/test
 x-pack/test_serverless
-x-pack/test/cloud_integration/plugins/saml_provider @elastic/kibana-core
 x-pack/test/plugin_functional/plugins/global_search_test @elastic/kibana-core
 x-pack/test/plugin_functional/plugins/resolver_test @elastic/security-solution
 x-pack/test/security_api_integration/packages/helpers @elastic/kibana-security
@@ -1679,10 +1679,10 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/test/accessibility/apps/group2/ml_* @elastic/ml-ui
 /x-pack/test/accessibility/apps/group3/ml_embeddables_in_dashboard.ts @elastic/ml-ui
 /x-pack/platform/test/api_integration/apis/ml/ @elastic/ml-ui
-/x-pack/test/functional/apps/ml/  @elastic/ml-ui
+/x-pack/platform/test/functional/apps/ml/  @elastic/ml-ui
 /x-pack/test/functional/es_archives/ml/  @elastic/ml-ui
 /x-pack/platform/test/functional/services/ml @elastic/ml-ui
-/x-pack/test/functional_basic/apps/ml/ @elastic/ml-ui
+/x-pack/platform/test/functional_basic/apps/ml/ @elastic/ml-ui
 /x-pack/platform/test/functional_with_es_ssl/apps/discover_ml/config.ts @elastic/ml-ui
 /x-pack/platform/test/functional_with_es_ssl/apps/discover_ml/ml/ @elastic/ml-ui
 /x-pack/platform/test/alerting_api_integration/spaces_only/tests/alerting/ml_rule_types/ @elastic/ml-ui
@@ -1706,11 +1706,11 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /x-pack/test/api_integration/services/aiops.ts @elastic/ml-ui
 /x-pack/test/api_integration/services/transform.ts @elastic/ml-ui @elastic/kibana-management
 /x-pack/platform/test/functional/apps/aiops @elastic/ml-ui
-/x-pack/test/functional/apps/transform/ @elastic/ml-ui @elastic/kibana-management
+/x-pack/platform/test/functional/apps/transform/ @elastic/ml-ui @elastic/kibana-management
 /x-pack/test/functional/es_archives/large_arrays @elastic/ml-ui # Assigned per usages
 /x-pack/platform/test/functional/services/transform @elastic/ml-ui @elastic/kibana-management
 /x-pack/platform/test/functional/services/aiops @elastic/ml-ui
-/x-pack/test/functional_basic/apps/transform/ @elastic/ml-ui @elastic/kibana-management
+/x-pack/platform/test/functional_basic/apps/transform/ @elastic/ml-ui @elastic/kibana-management
 
 # Operations
 /src/platform/test/package @elastic/kibana-operations
@@ -1793,7 +1793,7 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /x-pack/platform/test/upgrade/services/index.ts @elastic/appex-qa
 /x-pack/platform/test/upgrade/ftr_provider_context.d.ts @elastic/appex-qa
 /x-pack/platform/test/upgrade/config.ts @elastic/appex-qa
-/x-pack/test/functional_basic/ftr_provider_context.d.ts @elastic/appex-qa
+/x-pack/platform/test/functional_basic/ftr_provider_context.d.ts @elastic/appex-qa
 /x-pack/test/functional/services/remote_es/remote_es.ts @elastic/appex-qa
 /x-pack/test/functional/services/random.js @elastic/appex-qa
 /x-pack/test/functional/services/index.ts @elastic/appex-qa
@@ -1953,7 +1953,7 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /x-pack/test/stack_functional_integration/apps/savedobjects_upgrade_testing @elastic/kibana-core
 /x-pack/test/functional/page_objects/status_page.ts @elastic/kibana-core
 /x-pack/test/functional/page_objects/share_saved_objects_to_space_page.ts @elastic/kibana-core
-/x-pack/test/functional/page_objects/banners_page.ts @elastic/kibana-core
+/x-pack/platform/test/functional/page_objects/banners_page.ts @elastic/kibana-core
 /x-pack/test/common/lib/test_data_loader.ts @elastic/kibana-core
 /x-pack/test/api_integration/services/usage_api.ts @elastic/kibana-core
 /x-pack/platform/test/api_integration/apis/kibana @elastic/kibana-core
@@ -1968,8 +1968,8 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /src/platform/test/api_integration/fixtures/import_managed.ndjson @elastic/kibana-core
 /src/platform/test/functional/services/apps_menu.ts @elastic/kibana-core
 /x-pack/test/functional/apps/status_page @elastic/kibana-core
-/x-pack/test/cloud_integration @elastic/kibana-core
-/x-pack/test/cloud_integration/plugins/saml_provider @elastic/kibana-core
+/x-pack/platform/test/cloud_integration @elastic/kibana-core
+/x-pack/platform/test/cloud_integration/plugins/saml_provider @elastic/kibana-core
 /src/platform/test/server_integration @elastic/kibana-core
 /x-pack/platform/test/functional_cors @elastic/kibana-core
 /x-pack/test/stack_functional_integration/apps/telemetry @elastic/kibana-core
@@ -2037,7 +2037,7 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /typings/ @elastic/kibana-core
 /src/platform/test/analytics @elastic/kibana-core
 /src/platform/packages/shared/kbn-test/src/jest/setup/mocks.kbn_i18n_react.js @elastic/kibana-core
-/x-pack/test/saved_objects_field_count/ @elastic/kibana-core
+/x-pack/platform/test/saved_objects_field_count/ @elastic/kibana-core
 /x-pack/test_serverless/**/test_suites/common/saved_objects_management/ @elastic/kibana-core
 /x-pack/test_serverless/api_integration/test_suites/common/core/ @elastic/kibana-core
 /x-pack/test_serverless/api_integration/test_suites/**/telemetry/ @elastic/kibana-core
@@ -2898,8 +2898,8 @@ x-pack/solutions/observability/plugins/observability_shared/public/components/pr
 /src/platform/test/examples/content_management/*.ts @elastic/appex-sharedux
 /src/platform/test/api_integration/apis/guided_onboarding @elastic/appex-sharedux
 /x-pack/solutions/search/test/api_integration/apis/guided_onboarding @elastic/appex-sharedux
-/x-pack/test/banners_functional @elastic/appex-sharedux
-/x-pack/test/custom_branding @elastic/appex-sharedux
+/x-pack/platform/test/banners_functional @elastic/appex-sharedux
+/x-pack/platform/test/custom_branding @elastic/appex-sharedux
 /x-pack/platform/test/api_integration/apis/content_management @elastic/appex-sharedux
 /x-pack/test/accessibility/apps/group3/tags.ts @elastic/appex-sharedux
 /x-pack/test/accessibility/apps/group3/snapshot_and_restore.ts @elastic/appex-sharedux
