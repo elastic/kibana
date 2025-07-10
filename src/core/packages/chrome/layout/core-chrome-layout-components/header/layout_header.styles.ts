@@ -12,7 +12,6 @@ import { EmotionFn } from '../types';
 
 const root: EmotionFn = ({ euiTheme }) => css`
   position: sticky;
-  overflow: hidden;
   grid-area: header;
   height: var(--kbn-layout--header-height);
   z-index: var(--kbn-layout--aboveFlyoutLevel);

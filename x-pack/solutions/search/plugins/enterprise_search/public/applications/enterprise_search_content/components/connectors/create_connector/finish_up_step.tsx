@@ -30,10 +30,9 @@ import { i18n } from '@kbn/i18n';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
-import { ELASTICSEARCH_PLUGIN } from '../../../../../../common/constants';
-
 import { KibanaDeps } from '../../../../../../common/types';
 
+import { docLinks } from '../../../../shared/doc_links';
 import { generateEncodedPath } from '../../../../shared/encode_path_params';
 import { HttpLogic } from '../../../../shared/http';
 import { KibanaLogic } from '../../../../shared/kibana';
@@ -311,9 +310,7 @@ export const FinishUpStep: React.FC<FinishUpStepProps> = ({ title }) => {
                         'Use your favorite language client to query your data in your app',
                     }
                   )}
-                  onClick={() => {
-                    application.navigateToUrl(http.basePath.prepend(ELASTICSEARCH_PLUGIN.URL));
-                  }}
+                  href={docLinks.languageClients}
                   display="subdued"
                 />
               </EuiFlexItem>
