@@ -9,7 +9,7 @@
 import type { ESQLCommand } from '../../../types';
 import { type ISuggestionItem, type ICommandContext, ICommandCallbacks } from '../../types';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
-import { pipeCompleteItem, commaCompleteItem } from '../../utils/complete_items';
+import { pipeCompleteItem, commaCompleteItem } from '../../complete_items';
 import {
   columnExists,
   getLastNonWhitespaceChar,

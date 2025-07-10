@@ -9,38 +9,21 @@
 
 import {
   ESQLAst,
-  ESQLColumn,
   ESQLCommand,
-  ESQLCommandOption,
   ESQLMessage,
   EsqlQuery,
-  ESQLSource,
-  isIdentifier,
-  isOptionNode,
-  isSource,
-  isColumn,
-  isTimeInterval,
-  isFunctionExpression,
   walk,
-  Walker,
   esqlCommandRegistry,
   ErrorTypes,
 } from '@kbn/esql-ast';
-import { getMessageFromId, errors, sourceExists } from '@kbn/esql-ast/src/definitions/utils';
-import type { ESQLIdentifier } from '@kbn/esql-ast/src/types';
+import { getMessageFromId } from '@kbn/esql-ast/src/definitions/utils';
 import type {
   ESQLFieldWithMetadata,
   ESQLUserDefinedColumn,
 } from '@kbn/esql-ast/src/commands_registry/types';
-import {
-  areFieldAndUserDefinedColumnTypesCompatible,
-  getColumnExists,
-  hasWildcard,
-  isParametrized,
-} from '../shared/helpers';
+import { areFieldAndUserDefinedColumnTypesCompatible } from '../shared/helpers';
 import type { ESQLCallbacks } from '../shared/types';
 import { collectUserDefinedColumns } from '../shared/user_defined_columns';
-import { validateFunction } from './function_validation';
 import {
   retrieveFields,
   retrieveFieldsFromStringSources,
@@ -180,15 +163,8 @@ async function validateAst(
     joinIndices: joinIndices?.indices || [],
   };
 
-  const allCommands = Walker.commands(rootCommands);
-  const forks = allCommands.filter(({ name }) => name === 'fork');
-
-  if (forks.length > 1) {
-    messages.push(errors.tooManyForks(forks[1] as any));
-  }
-
-  for (const [index, command] of rootCommands.entries()) {
-    const commandMessages = validateCommand(command, references, rootCommands, index);
+  for (const [_, command] of rootCommands.entries()) {
+    const commandMessages = validateCommand(command, references, rootCommands);
     messages.push(...commandMessages);
   }
 
@@ -208,8 +184,7 @@ async function validateAst(
 function validateCommand(
   command: ESQLCommand,
   references: ReferenceMaps,
-  ast: ESQLAst,
-  currentCommandIndex: number
+  ast: ESQLAst
 ): ESQLMessage[] {
   const messages: ESQLMessage[] = [];
   if (command.incomplete) {
@@ -226,7 +201,9 @@ function validateCommand(
     fields: references.fields,
     policies: references.policies,
     userDefinedColumns: references.userDefinedColumns,
-    sources: references.sources,
+    sources: [...references.sources].map((source) => ({
+      name: source,
+    })),
     joinSources: references.joinIndices,
   };
 
@@ -234,102 +211,8 @@ function validateCommand(
     messages.push(...commandDefinition.methods.validate(command, ast, context));
   }
 
-  switch (commandDefinition.name) {
-    case 'join':
-      break;
-    case 'fork': {
-      for (const arg of command.args.flat()) {
-        if (!Array.isArray(arg) && arg.type === 'query') {
-          // all the args should be commands
-          arg.commands.forEach((subCommand) => {
-            messages.push(...validateCommand(subCommand, references, ast, currentCommandIndex));
-          });
-        }
-      }
-    }
-    default: {
-      // Now validate arguments
-      for (const arg of command.args) {
-        if (!Array.isArray(arg)) {
-          if (isFunctionExpression(arg)) {
-            messages.push(
-              ...validateFunction({
-                fn: arg,
-                parentCommand: command.name,
-                parentOption: undefined,
-                references,
-                parentAst: ast,
-                currentCommandIndex,
-              })
-            );
-          } else if (isOptionNode(arg)) {
-            messages.push(...validateOption(arg, command, references));
-          } else if (isColumn(arg) || isIdentifier(arg)) {
-            if (command.name === 'stats' || command.name === 'inlinestats') {
-              messages.push(errors.unknownAggFunction(arg));
-            } else {
-              messages.push(...validateColumnForCommand(arg, command.name, references));
-            }
-          } else if (isTimeInterval(arg)) {
-            messages.push(
-              getMessageFromId({
-                messageId: 'unsupportedTypeForCommand',
-                values: {
-                  command: command.name.toUpperCase(),
-                  type: 'date_period',
-                  value: arg.name,
-                },
-                locations: arg.location,
-              })
-            );
-          }
-        }
-      }
-
-      const sources = command.args.filter((arg) => isSource(arg)) as ESQLSource[];
-      messages.push(...validateSources(sources, references));
-    }
-  }
-
   // no need to check for mandatory options passed
   // as they are already validated at syntax level
-  return messages;
-}
-
-function validateOption(
-  option: ESQLCommandOption,
-  command: ESQLCommand,
-  referenceMaps: ReferenceMaps
-): ESQLMessage[] {
-  // check if the arguments of the option are of the correct type
-  const messages: ESQLMessage[] = [];
-  if (option.incomplete || command.incomplete || option.name === 'metadata') {
-    return messages;
-  }
-
-  if (option.name === 'metadata') {
-    // Validation for the metadata statement is handled in the FROM command's validate method
-    return messages;
-  }
-
-  for (const arg of option.args) {
-    if (Array.isArray(arg)) {
-      continue;
-    }
-    if (isColumn(arg)) {
-      messages.push(...validateColumnForCommand(arg, command.name, referenceMaps));
-    } else if (isFunctionExpression(arg)) {
-      messages.push(
-        ...validateFunction({
-          fn: arg,
-          parentCommand: command.name,
-          parentOption: option.name,
-          references: referenceMaps,
-        })
-      );
-    }
-  }
-
   return messages;
 }
 
@@ -389,85 +272,5 @@ function validateUnsupportedTypeFields(fields: Map<string, ESQLFieldWithMetadata
       );
     }
   }
-  return messages;
-}
-
-export function validateSources(
-  sources: ESQLSource[],
-  { sources: availableSources }: ReferenceMaps
-) {
-  const messages: ESQLMessage[] = [];
-
-  const knownIndexNames = [];
-  const knownIndexPatterns = [];
-  const unknownIndexNames = [];
-  const unknownIndexPatterns = [];
-
-  for (const source of sources) {
-    if (source.incomplete) {
-      return messages;
-    }
-
-    if (source.sourceType === 'index') {
-      const index = source.index;
-      const sourceName = source.prefix ? source.name : index?.valueUnquoted;
-      if (!sourceName) continue;
-
-      if (sourceExists(sourceName, availableSources) && !hasWildcard(sourceName)) {
-        knownIndexNames.push(source);
-      }
-      if (sourceExists(sourceName, availableSources) && hasWildcard(sourceName)) {
-        knownIndexPatterns.push(source);
-      }
-      if (!sourceExists(sourceName, availableSources) && !hasWildcard(sourceName)) {
-        unknownIndexNames.push(source);
-      }
-      if (!sourceExists(sourceName, availableSources) && hasWildcard(sourceName)) {
-        unknownIndexPatterns.push(source);
-      }
-    }
-  }
-
-  unknownIndexNames.forEach((source) => {
-    messages.push(
-      getMessageFromId({
-        messageId: 'unknownIndex',
-        values: { name: source.name },
-        locations: source.location,
-      })
-    );
-  });
-
-  if (knownIndexNames.length + unknownIndexNames.length + knownIndexPatterns.length === 0) {
-    // only if there are no known index names, no known index patterns, and no unknown
-    // index names do we worry about creating errors for unknown index patterns
-    unknownIndexPatterns.forEach((source) => {
-      messages.push(
-        getMessageFromId({
-          messageId: 'unknownIndex',
-          values: { name: source.name },
-          locations: source.location,
-        })
-      );
-    });
-  }
-
-  return messages;
-}
-
-export function validateColumnForCommand(
-  column: ESQLColumn | ESQLIdentifier,
-  commandName: string,
-  references: ReferenceMaps
-): ESQLMessage[] {
-  const messages: ESQLMessage[] = [];
-  if (commandName === 'row') {
-    if (!references.userDefinedColumns.has(column.name) && !isParametrized(column)) {
-      messages.push(errors.unknownColumn(column));
-    }
-  } else if (!getColumnExists(column, references) && !isParametrized(column)) {
-    messages.push(errors.unknownColumn(column));
-  }
-
   return messages;
 }

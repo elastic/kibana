@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import type { ESQLCommand } from '../../../types';
 import { type ISuggestionItem, type ICommandContext, ICommandCallbacks } from '../../types';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
-import { pipeCompleteItem, commaCompleteItem } from '../../utils/complete_items';
+import { pipeCompleteItem, commaCompleteItem } from '../../complete_items';
 import { getFullCommandMnemonics, getPosition, suggestFields } from './utils';
 import { specialIndicesToSuggestions } from '../../../definitions/utils/sources';
 import { esqlCommandRegistry } from '../..';

@@ -6,48 +6,278 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
+import { uniqBy } from 'lodash';
 import {
   ESQLAstItem,
   ESQLCommand,
   ESQLFunction,
   ESQLMessage,
-  isIdentifier,
-  isAssignment,
+  ESQLSingleAstItem,
+  ESQLLiteral,
+  ESQLParamLiteral,
+} from '../../../types';
+import { isAssignment, isInlineCast } from '../../../ast/is';
+import {
   UNSUPPORTED_COMMANDS_BEFORE_MATCH,
   UNSUPPORTED_COMMANDS_BEFORE_QSTR,
-  isList,
-  isColumn,
+} from '../../constants';
+import { getMessageFromId, errors, getFunctionDefinition, getColumnForASTNode } from '..';
+import {
+  FunctionParameter,
+  FunctionDefinitionTypes,
+  FunctionDefinition,
+  FunctionParameterType,
+  ReasonTypes,
+} from '../../types';
+import { getLocationFromCommandOrOptionName } from '../../../commands_registry/types';
+import { buildFunctionLookup, printFunctionSignature } from '../functions';
+import {
+  getSignaturesWithMatchingArity,
+  getExpressionType,
+  getParamAtPosition,
+} from '../expressions';
+import { isArrayType } from '../operators';
+import {
+  compareTypesWithLiterals,
+  doesLiteralMatchParameterType,
+  inKnownTimeInterval,
+} from '../literals';
+import { getQuotedColumnName, getColumnExists } from '../columns';
+import {
   isLiteral,
-  isInlineCast,
   isTimeInterval,
   isFunctionExpression,
-} from '@kbn/esql-ast';
-import {
-  getMessageFromId,
-  errors,
-  getFunctionDefinition,
-} from '@kbn/esql-ast/src/definitions/utils';
-import { FunctionParameter, FunctionDefinitionTypes } from '@kbn/esql-ast';
-import { uniqBy } from 'lodash';
-import { getColumnForASTNode } from '@kbn/esql-ast/src/definitions/utils';
-import { isSupportedFunction } from '../..';
-import {
-  isValidLiteralOption,
-  checkFunctionArgMatchesDefinition,
-  inKnownTimeInterval,
-  getQuotedColumnName,
-  getColumnExists,
-  isFunctionOperatorParam,
-  getSignaturesWithMatchingArity,
-  getParamAtPosition,
-  unwrapArrayOneLevel,
-  isArrayType,
+  isColumn,
+  isList,
+  isIdentifier,
+  isParamLiteral,
   isParametrized,
-} from '../shared/helpers';
-import { getMaxMinNumberOfParams, collapseWrongArgumentTypeMessages } from './helpers';
-import { ReferenceMaps } from './types';
-import { compareTypesWithLiterals } from '../shared/esql_types';
+} from '../../../ast/is';
+import { ICommandContext } from '../../../commands_registry/types';
+
+export function getAllArrayValues(arg: ESQLAstItem) {
+  const values: string[] = [];
+  if (Array.isArray(arg)) {
+    for (const subArg of arg) {
+      if (Array.isArray(subArg)) {
+        break;
+      }
+      if (subArg.type === 'literal') {
+        values.push(String(subArg.value));
+      }
+      if (isColumn(subArg) || isTimeInterval(subArg)) {
+        values.push(subArg.name);
+      }
+      if (subArg.type === 'function') {
+        const signature = printFunctionSignature(subArg);
+        if (signature) {
+          values.push(signature);
+        }
+      }
+    }
+  }
+  return values;
+}
+
+export function getAllArrayTypes(
+  arg: ESQLAstItem,
+  parentCommand: string,
+  context: ICommandContext
+) {
+  const types = [];
+  if (Array.isArray(arg)) {
+    for (const subArg of arg) {
+      if (Array.isArray(subArg)) {
+        break;
+      }
+      if (subArg.type === 'literal') {
+        types.push(subArg.literalType);
+      }
+      if (subArg.type === 'column') {
+        const hit = getColumnForASTNode(subArg, {
+          fields: context.fields,
+          userDefinedColumns: context.userDefinedColumns,
+        });
+        types.push(hit?.type || 'unsupported');
+      }
+      if (subArg.type === 'timeInterval') {
+        types.push('time_duration');
+      }
+      if (subArg.type === 'function') {
+        if (isSupportedFunction(subArg.name, parentCommand).supported) {
+          const fnDef = buildFunctionLookup().get(subArg.name)!;
+          types.push(fnDef.signatures[0].returnType);
+        }
+      }
+    }
+  }
+  return types;
+}
+
+const isParam = (x: unknown): x is ESQLParamLiteral =>
+  !!x &&
+  typeof x === 'object' &&
+  (x as ESQLParamLiteral).type === 'literal' &&
+  (x as ESQLParamLiteral).literalType === 'param';
+
+/**
+ * Checks if both types are string types.
+ *
+ * Functions in ES|QL accept `text` and `keyword` types interchangeably.
+ * @param type1
+ * @param type2
+ * @returns
+ */
+function bothStringTypes(type1: string, type2: string): boolean {
+  return (type1 === 'text' || type1 === 'keyword') && (type2 === 'text' || type2 === 'keyword');
+}
+
+/**
+ * Checks if an AST function argument is of the correct type
+ * given the definition.
+ */
+export function checkFunctionArgMatchesDefinition(
+  arg: ESQLSingleAstItem,
+  parameterDefinition: FunctionParameter,
+  context: ICommandContext,
+  parentCommand?: string
+): boolean {
+  const parameterType = parameterDefinition.type;
+  if (parameterType === 'any') {
+    return true;
+  }
+  if (isParam(arg)) {
+    return true;
+  }
+  if (arg.type === 'literal') {
+    const matched = doesLiteralMatchParameterType(parameterType, arg);
+    return matched;
+  }
+  if (arg.type === 'function') {
+    if (isSupportedFunction(arg.name, parentCommand).supported) {
+      const fnDef = buildFunctionLookup().get(arg.name)!;
+      return fnDef.signatures.some(
+        (signature) =>
+          signature.returnType === 'unknown' ||
+          parameterType === signature.returnType ||
+          bothStringTypes(parameterType, signature.returnType)
+      );
+    }
+  }
+  if (arg.type === 'timeInterval') {
+    return parameterType === 'time_duration' && inKnownTimeInterval(arg.unit);
+  }
+  if (arg.type === 'column') {
+    const hit = getColumnForASTNode(arg, {
+      fields: context.fields,
+      userDefinedColumns: context.userDefinedColumns,
+    });
+    const validHit = hit;
+    if (!validHit) {
+      return false;
+    }
+    const wrappedTypes: Array<(typeof validHit)['type']> = Array.isArray(validHit.type)
+      ? validHit.type
+      : [validHit.type];
+
+    return wrappedTypes.some(
+      (ct) =>
+        ct === parameterType ||
+        bothStringTypes(ct, parameterType) ||
+        ct === 'null' ||
+        ct === 'unknown'
+    );
+  }
+  if (arg.type === 'inlineCast') {
+    const lowerArgType = parameterType?.toLowerCase();
+    const castedType = getExpressionType(arg);
+    return castedType === lowerArgType;
+  }
+  return false;
+}
+
+/**
+ * Checks if this argument is one of the possible options
+ * if they are defined on the arg definition.
+ *
+ * TODO - Consider merging with isEqualType to create a unified arg validation function
+ */
+export function isValidLiteralOption(arg: ESQLLiteral, argDef: FunctionParameter) {
+  const unwrapStringLiteralQuotes = (value: string) => value.slice(1, -1);
+  return (
+    arg.literalType === 'keyword' &&
+    argDef.acceptedValues &&
+    !argDef.acceptedValues
+      .map((option) => option.toLowerCase())
+      .includes(unwrapStringLiteralQuotes(arg.value).toLowerCase())
+  );
+}
+
+/**
+ * Returns the maximum and minimum number of parameters allowed by a function
+ *
+ * Used for too-many, too-few arguments validation
+ */
+export function getMaxMinNumberOfParams(definition: FunctionDefinition) {
+  if (definition.signatures.length === 0) {
+    return { min: 0, max: 0 };
+  }
+
+  let min = Infinity;
+  let max = 0;
+  definition.signatures.forEach(({ params, minParams }) => {
+    min = Math.min(min, params.filter(({ optional }) => !optional).length);
+    max = Math.max(max, minParams ? Infinity : params.length);
+  });
+  return { min, max };
+}
+
+/**
+ * We only want to report one message when any number of the elements in an array argument is of the wrong type
+ */
+export function collapseWrongArgumentTypeMessages(
+  messages: ESQLMessage[],
+  arg: ESQLAstItem[],
+  funcName: string,
+  argType: string,
+  parentCommand: string,
+  context: ICommandContext
+) {
+  if (!messages.some(({ code }) => code === 'wrongArgumentType')) {
+    return messages;
+  }
+
+  // Replace the individual "wrong argument type" messages with a single one for the whole array
+  messages = messages.filter(({ code }) => code !== 'wrongArgumentType');
+
+  messages.push(
+    getMessageFromId({
+      messageId: 'wrongArgumentType',
+      values: {
+        name: funcName,
+        argType,
+        value: `(${getAllArrayValues(arg).join(', ')})`,
+        givenType: `(${getAllArrayTypes(arg, parentCommand, context).join(', ')})`,
+      },
+      locations: {
+        min: (arg[0] as ESQLSingleAstItem).location.min,
+        max: (arg[arg.length - 1] as ESQLSingleAstItem).location.max,
+      },
+    })
+  );
+
+  return messages;
+}
+
+const isFunctionOperatorParam = (fn: ESQLFunction): boolean =>
+  !!fn.operator && isParamLiteral(fn.operator);
+
+/**
+ * Given an array type for example `string[]` it will return `string`
+ */
+function unwrapArrayOneLevel(type: FunctionParameterType): FunctionParameterType {
+  return isArrayType(type) ? (type.slice(0, -2) as FunctionParameterType) : type;
+}
 
 const NO_MESSAGE: ESQLMessage[] = [];
 
@@ -58,7 +288,7 @@ export function validateFunction({
   fn,
   parentCommand,
   parentOption,
-  references,
+  context,
   forceConstantOnly = false,
   isNested,
   parentAst,
@@ -67,7 +297,7 @@ export function validateFunction({
   fn: ESQLFunction;
   parentCommand: string;
   parentOption?: string;
-  references: ReferenceMaps;
+  context: ICommandContext;
   forceConstantOnly?: boolean;
   isNested?: boolean;
   parentAst?: ESQLCommand[];
@@ -92,7 +322,7 @@ export function validateFunction({
         fn,
         parentCommand,
         parentOption,
-        references,
+        context,
         isNested,
         parentAst,
         currentCommandIndex,
@@ -192,8 +422,8 @@ export function validateFunction({
           fn: subArg,
           parentCommand,
           parentOption,
-          references,
-          /**
+          context,
+          /*
            * The constantOnly constraint needs to be enforced for arguments that
            * are functions as well, regardless of whether the definition for the
            * sub function's arguments includes the constantOnly flag.
@@ -304,7 +534,7 @@ export function validateFunction({
               type: singularType,
               constantOnly: forceConstantOnly || parameter.constantOnly,
             },
-            references,
+            context,
             parentCommand
           );
         });
@@ -320,7 +550,7 @@ export function validateFunction({
               fn.name,
               parameter.type as string,
               parentCommand,
-              references
+              context
             )
           : messagesFromAllArgElements)
       );
@@ -348,7 +578,7 @@ function validateFunctionLiteralArg(
   astFunction: ESQLFunction,
   argument: ESQLAstItem,
   parameter: FunctionParameter,
-  references: ReferenceMaps,
+  context: ICommandContext,
   parentCommand: string
 ) {
   const messages: ESQLMessage[] = [];
@@ -371,7 +601,7 @@ function validateFunctionLiteralArg(
       );
     }
 
-    if (!checkFunctionArgMatchesDefinition(argument, parameter, references, parentCommand)) {
+    if (!checkFunctionArgMatchesDefinition(argument, parameter, context, parentCommand)) {
       messages.push(
         getMessageFromId({
           messageId: 'wrongArgumentType',
@@ -399,7 +629,7 @@ function validateFunctionLiteralArg(
         })
       );
     } else {
-      if (!checkFunctionArgMatchesDefinition(argument, parameter, references, parentCommand)) {
+      if (!checkFunctionArgMatchesDefinition(argument, parameter, context, parentCommand)) {
         messages.push(
           getMessageFromId({
             messageId: 'wrongArgumentType',
@@ -422,14 +652,14 @@ function validateInlineCastArg(
   astFunction: ESQLFunction,
   arg: ESQLAstItem,
   parameterDefinition: FunctionParameter,
-  references: ReferenceMaps,
+  context: ICommandContext,
   parentCommand: string
 ) {
   if (!isInlineCast(arg)) {
     return [];
   }
 
-  if (!checkFunctionArgMatchesDefinition(arg, parameterDefinition, references, parentCommand)) {
+  if (!checkFunctionArgMatchesDefinition(arg, parameterDefinition, context, parentCommand)) {
     return [
       getMessageFromId({
         messageId: 'wrongArgumentType',
@@ -451,7 +681,7 @@ function validateNestedFunctionArg(
   astFunction: ESQLFunction,
   argument: ESQLAstItem,
   parameter: FunctionParameter,
-  references: ReferenceMaps,
+  context: ICommandContext,
   parentCommand: string
 ) {
   const messages: ESQLMessage[] = [];
@@ -473,7 +703,7 @@ function validateNestedFunctionArg(
         })
       );
     }
-    if (!checkFunctionArgMatchesDefinition(argument, parameter, references, parentCommand)) {
+    if (!checkFunctionArgMatchesDefinition(argument, parameter, context, parentCommand)) {
       messages.push(
         getMessageFromId({
           messageId: 'wrongArgumentType',
@@ -495,7 +725,7 @@ function validateFunctionColumnArg(
   astFunction: ESQLFunction,
   actualArg: ESQLAstItem,
   parameterDefinition: FunctionParameter,
-  references: ReferenceMaps,
+  context: ICommandContext,
   parentCommand: string
 ) {
   const messages: ESQLMessage[] = [];
@@ -504,7 +734,7 @@ function validateFunctionColumnArg(
   }
 
   const columnName = getQuotedColumnName(actualArg);
-  const columnExists = getColumnExists(actualArg, references);
+  const columnExists = getColumnExists(actualArg, context);
 
   if (parameterDefinition.constantOnly) {
     messages.push(
@@ -552,12 +782,10 @@ function validateFunctionColumnArg(
     return messages;
   }
 
-  if (
-    !checkFunctionArgMatchesDefinition(actualArg, parameterDefinition, references, parentCommand)
-  ) {
+  if (!checkFunctionArgMatchesDefinition(actualArg, parameterDefinition, context, parentCommand)) {
     const columnHit = getColumnForASTNode(actualArg, {
-      fields: references.fields,
-      userDefinedColumns: references.userDefinedColumns,
+      fields: context.fields,
+      userDefinedColumns: context.userDefinedColumns,
     });
     const isConflictType = columnHit && 'hasConflict' in columnHit && columnHit.hasConflict;
     if (!isConflictType) {
@@ -621,10 +849,6 @@ function validateIfHasUnsupportedCommandPrior(
 const validateMatchFunction: FunctionValidator = ({
   fn,
   parentCommand,
-  parentOption,
-  references,
-  forceConstantOnly = false,
-  isNested,
   parentAst,
   currentCommandIndex,
 }) => {
@@ -652,23 +876,14 @@ type FunctionValidator = (args: {
   fn: ESQLFunction;
   parentCommand: string;
   parentOption?: string;
-  references: ReferenceMaps;
+  context: ICommandContext;
   forceConstantOnly?: boolean;
   isNested?: boolean;
   parentAst?: ESQLCommand[];
   currentCommandIndex?: number;
 }) => ESQLMessage[];
 
-const validateQSTRFunction: FunctionValidator = ({
-  fn,
-  parentCommand,
-  parentOption,
-  references,
-  forceConstantOnly = false,
-  isNested,
-  parentAst,
-  currentCommandIndex,
-}) => {
+const validateQSTRFunction: FunctionValidator = ({ fn, parentAst, currentCommandIndex }) => {
   if (fn.name === 'qstr') {
     return validateIfHasUnsupportedCommandPrior(
       fn,
@@ -684,5 +899,26 @@ const textSearchFunctionsValidators: Record<string, FunctionValidator> = {
   match: validateMatchFunction,
   qstr: validateQSTRFunction,
 };
+
+export function isSupportedFunction(
+  name: string,
+  parentCommand?: string,
+  option?: string
+): { supported: boolean; reason: ReasonTypes | undefined } {
+  if (!parentCommand) {
+    return {
+      supported: false,
+      reason: 'missingCommand',
+    };
+  }
+  const fn = buildFunctionLookup().get(name);
+  const isSupported = Boolean(
+    fn?.locationsAvailable.includes(getLocationFromCommandOrOptionName(option ?? parentCommand))
+  );
+  return {
+    supported: isSupported,
+    reason: isSupported ? undefined : fn ? 'unsupportedFunction' : 'unknownFunction',
+  };
+}
 
 // #endregion

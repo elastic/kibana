@@ -8,7 +8,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import type { ESQLCommand } from '../../../types';
-import { pipeCompleteItem, getCommandAutocompleteDefinitions } from '../../utils/complete_items';
+import { pipeCompleteItem, getCommandAutocompleteDefinitions } from '../../complete_items';
 import { pipePrecedesCurrentWord } from '../../../definitions/utils/shared';
 import { type ISuggestionItem, type ICommandContext, ICommandCallbacks } from '../../types';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';

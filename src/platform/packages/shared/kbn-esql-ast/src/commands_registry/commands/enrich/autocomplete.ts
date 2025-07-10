@@ -11,7 +11,7 @@ import {
   pipeCompleteItem,
   commaCompleteItem,
   getNewUserDefinedColumnSuggestion,
-} from '../../utils/complete_items';
+} from '../../complete_items';
 import { findFinalWord, findPreviousWord } from '../../../definitions/utils/autocomplete';
 import { unescapeColumnName } from '../../../definitions/utils/shared';
 import {

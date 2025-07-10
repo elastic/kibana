@@ -6,8 +6,5 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
-import * as helpers from './helpers';
-import { validationCompletionCommandTestSuite } from './test_suites/validation.command.completion';
-
-validationCompletionCommandTestSuite(helpers.setup);
+export { validateSources } from './sources_validation';
+export { validateCommandArguments } from './validate_command_arguments';

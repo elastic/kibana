@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { ESQLCommand } from '../../../types';
-import { pipeCompleteItem } from '../../utils/complete_items';
+import { pipeCompleteItem } from '../../complete_items';
 import { type ISuggestionItem, type ICommandContext, ICommandCallbacks } from '../../types';
 
 export async function autocomplete(

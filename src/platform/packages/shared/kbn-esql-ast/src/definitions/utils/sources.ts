@@ -11,69 +11,11 @@ import { i18n } from '@kbn/i18n';
 import type { ESQLCommand, ESQLSource } from '../../types';
 import type { ISuggestionItem, ESQLSourceResult } from '../../commands_registry/types';
 import { handleFragment } from './autocomplete';
-import { pipeCompleteItem, commaCompleteItem } from '../../commands_registry/utils/complete_items';
+import { pipeCompleteItem, commaCompleteItem } from '../../commands_registry/complete_items';
 import { EDITOR_MARKER } from '../../parser/constants';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../commands_registry/constants';
 import { metadataSuggestion } from '../../commands_registry/options/metadata';
-
-function hasWildcard(name: string) {
-  return /\*/.test(name);
-}
-
-function getMatcher(name: string, position: 'start' | 'end' | 'middle' | 'multiple-within') {
-  if (position === 'start') {
-    const prefix = name.substring(1);
-    return (resource: string) => resource.endsWith(prefix);
-  }
-  if (position === 'end') {
-    const prefix = name.substring(0, name.length - 1);
-    return (resource: string) => resource.startsWith(prefix);
-  }
-  if (position === 'multiple-within') {
-    // make sure to remove the * at the beginning of the name if present
-    const safeName = name.startsWith('*') ? name.slice(1) : name;
-    // replace 2 ore more consecutive wildcards with a single one
-    const setOfChars = safeName.replace(/\*{2+}/g, '*').split('*');
-    return (resource: string) => {
-      let index = -1;
-      return setOfChars.every((char) => {
-        index = resource.indexOf(char, index + 1);
-        return index !== -1;
-      });
-    };
-  }
-  const [prefix, postFix] = name.split('*');
-  return (resource: string) => resource.startsWith(prefix) && resource.endsWith(postFix);
-}
-
-function getWildcardPosition(name: string) {
-  if (!hasWildcard(name)) {
-    return 'none';
-  }
-  const wildCardCount = name.match(/\*/g)!.length;
-  if (wildCardCount > 1) {
-    return 'multiple-within';
-  }
-  if (name.startsWith('*')) {
-    return 'start';
-  }
-  if (name.endsWith('*')) {
-    return 'end';
-  }
-  return 'middle';
-}
-
-function fuzzySearch(fuzzyName: string, resources: IterableIterator<string>) {
-  const wildCardPosition = getWildcardPosition(fuzzyName);
-  if (wildCardPosition !== 'none') {
-    const matcher = getMatcher(fuzzyName, wildCardPosition);
-    for (const resourceName of resources) {
-      if (matcher(resourceName)) {
-        return true;
-      }
-    }
-  }
-}
+import { fuzzySearch } from './shared';
 
 const removeSourceNameQuotes = (sourceName: string) =>
   sourceName.startsWith('"') && sourceName.endsWith('"') ? sourceName.slice(1, -1) : sourceName;

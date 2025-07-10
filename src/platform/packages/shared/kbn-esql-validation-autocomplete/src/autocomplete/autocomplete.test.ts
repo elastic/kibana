@@ -16,7 +16,7 @@ import {
 } from '@kbn/esql-ast';
 import { getSafeInsertText } from '@kbn/esql-ast/src/definitions/utils';
 import { scalarFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/scalar_functions';
-import { getDateHistogramCompletionItem } from '@kbn/esql-ast/src/commands_registry/utils/complete_items';
+import { getDateHistogramCompletionItem } from '@kbn/esql-ast/src/commands_registry/complete_items';
 import { getRecommendedQueriesTemplates } from '@kbn/esql-ast/src/commands_registry/options/recommended_queries';
 import { Location } from '@kbn/esql-ast/src/commands_registry/types';
 import {
