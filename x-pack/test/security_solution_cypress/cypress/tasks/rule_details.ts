@@ -132,7 +132,9 @@ export const goToAlertsTab = () => {
 };
 
 export const goToExceptionsTab = () => {
-  cy.get(EXCEPTIONS_TAB).click();
+  // TODO if cannot fix this now, create an issue to track (see https://github.com/elastic/kibana/commit/ba084f290be949238058f261f553bb4ad6280b0b)
+  // eslint-disable-next-line cypress/no-force
+  cy.get(EXCEPTIONS_TAB).click({ force: true });
 };
 
 export const goToExecutionLogTab = () => {
