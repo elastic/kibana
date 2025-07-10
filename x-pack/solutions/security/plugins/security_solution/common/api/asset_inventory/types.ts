@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { DataView } from '@kbn/data-views-plugin/common';
 import type { ServerApiError } from '../../../public/common/types';
 import type { EntityAnalyticsPrivileges } from '../entity_analytics';
 import type { InitEntityStoreResponse } from '../entity_analytics/entity_store/enable.gen';
@@ -23,6 +24,10 @@ export interface AssetInventoryStatusResponse {
 }
 
 export type AssetInventoryEnableResponse = InitEntityStoreResponse;
+
+export interface AssetInventoryInstallDataViewResponse {
+  body: Promise<DataView | undefined>;
+}
 
 export interface AssetInventoryServerApiError {
   body: ServerApiError;

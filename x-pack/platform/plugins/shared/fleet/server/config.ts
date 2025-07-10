@@ -27,7 +27,7 @@ const DEFAULT_BUNDLED_PACKAGE_LOCATION = path.join(__dirname, '../target/bundled
 const DEFAULT_GPG_KEY_PATH = path.join(__dirname, '../target/keys/GPG-KEY-elasticsearch');
 
 const REGISTRY_SPEC_MIN_VERSION = '2.3';
-const REGISTRY_SPEC_MAX_VERSION = '3.3';
+const REGISTRY_SPEC_MAX_VERSION = '3.4';
 
 export const config: PluginConfigDescriptor = {
   exposeToBrowser: {
@@ -38,6 +38,9 @@ export const config: PluginConfigDescriptor = {
     agentless: {
       enabled: true,
       isDefault: true,
+      customIntegrations: {
+        enabled: true,
+      },
     },
     enableExperimental: true,
     developer: {
@@ -50,6 +53,7 @@ export const config: PluginConfigDescriptor = {
     },
     integrationsHomeOverride: true,
     prereleaseEnabledByDefault: true,
+    hideDashboards: true,
   },
   deprecations: ({ renameFromRoot, unused, unusedFromRoot }) => [
     // Unused settings before Fleet server exists
@@ -167,6 +171,17 @@ export const config: PluginConfigDescriptor = {
               ),
             })
           ),
+          deploymentSecrets: schema.maybe(
+            schema.object({
+              fleetAppToken: schema.maybe(schema.string()),
+              elasticsearchAppToken: schema.maybe(schema.string()),
+            })
+          ),
+          customIntegrations: schema.maybe(
+            schema.object({
+              enabled: schema.maybe(schema.boolean({ defaultValue: false })),
+            })
+          ),
         })
       ),
       packages: PreconfiguredPackagesSchema,
@@ -261,6 +276,9 @@ export const config: PluginConfigDescriptor = {
               ]),
               { defaultValue: [] }
             ),
+            searchAiLakePackageAllowlistEnabled: schema.maybe(
+              schema.boolean({ defaultValue: false })
+            ),
           },
           {
             defaultValue: {
@@ -301,8 +319,14 @@ export const config: PluginConfigDescriptor = {
           retryDelays: schema.maybe(schema.arrayOf(schema.string())),
         })
       ),
+      syncIntegrations: schema.maybe(
+        schema.object({
+          taskInterval: schema.maybe(schema.string()),
+        })
+      ),
       integrationsHomeOverride: schema.maybe(schema.string()),
       prereleaseEnabledByDefault: schema.boolean({ defaultValue: false }),
+      hideDashboards: schema.boolean({ defaultValue: false }),
     },
     {
       validate: (configToValidate) => {

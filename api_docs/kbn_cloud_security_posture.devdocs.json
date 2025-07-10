@@ -103,7 +103,7 @@
             "id": "def-public.CspEvaluationBadge.$1",
             "type": "Object",
             "tags": [],
-            "label": "{ type }",
+            "label": "{ type = MISCONFIGURATION_STATUS.UNKNOWN }",
             "description": [],
             "signature": [
               "Props"
@@ -156,7 +156,9 @@
         "type": "Function",
         "tags": [],
         "label": "decodeQuery",
-        "description": [],
+        "description": [
+          "\nDecodes query parameters from a search string"
+        ],
         "signature": [
           "<T extends unknown>(search?: string | undefined) => Partial<T> | undefined"
         ],
@@ -170,7 +172,9 @@
             "type": "string",
             "tags": [],
             "label": "search",
-            "description": [],
+            "description": [
+              "- The search string to decode"
+            ],
             "signature": [
               "string | undefined"
             ],
@@ -180,7 +184,9 @@
             "isRequired": false
           }
         ],
-        "returnComment": [],
+        "returnComment": [
+          "The decoded query object or undefined if decoding fails"
+        ],
         "initialIsOpen": false
       },
       {
@@ -189,9 +195,11 @@
         "type": "Function",
         "tags": [],
         "label": "encodeQuery",
-        "description": [],
+        "description": [
+          "\nEncodes query parameters using rison and returns a search string with 'cspq=' prefix"
+        ],
         "signature": [
-          "(query: any) => string | undefined"
+          "(query: unknown) => string | undefined"
         ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/utils/query_utils.ts",
         "deprecated": false,
@@ -200,12 +208,14 @@
           {
             "parentPluginId": "@kbn/cloud-security-posture",
             "id": "def-public.encodeQuery.$1",
-            "type": "Any",
+            "type": "Unknown",
             "tags": [],
             "label": "query",
-            "description": [],
+            "description": [
+              "- The query object to encode"
+            ],
             "signature": [
-              "any"
+              "unknown"
             ],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/utils/query_utils.ts",
             "deprecated": false,
@@ -213,7 +223,9 @@
             "isRequired": true
           }
         ],
-        "returnComment": [],
+        "returnComment": [
+          "The encoded search string or undefined if encoding fails"
+        ],
         "initialIsOpen": false
       },
       {
@@ -312,54 +324,6 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/cloud-security-posture",
-        "id": "def-public.getMisconfigurationStatusColor",
-        "type": "Function",
-        "tags": [],
-        "label": "getMisconfigurationStatusColor",
-        "description": [],
-        "signature": [
-          "(status?: ",
-          {
-            "pluginId": "@kbn/cloud-security-posture-common",
-            "scope": "common",
-            "docId": "kibKbnCloudSecurityPostureCommonPluginApi",
-            "section": "def-common.MisconfigurationEvaluationStatus",
-            "text": "MisconfigurationEvaluationStatus"
-          },
-          " | undefined) => string"
-        ],
-        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/utils/get_finding_colors.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/cloud-security-posture",
-            "id": "def-public.getMisconfigurationStatusColor.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "status",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/cloud-security-posture-common",
-                "scope": "common",
-                "docId": "kibKbnCloudSecurityPostureCommonPluginApi",
-                "section": "def-common.MisconfigurationEvaluationStatus",
-                "text": "MisconfigurationEvaluationStatus"
-              },
-              " | undefined"
-            ],
-            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/utils/get_finding_colors.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -799,6 +763,31 @@
             "isRequired": true
           }
         ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture",
+        "id": "def-public.useGetMisconfigurationStatusColor",
+        "type": "Function",
+        "tags": [],
+        "label": "useGetMisconfigurationStatusColor",
+        "description": [],
+        "signature": [
+          "() => { getMisconfigurationStatusColor: (status: ",
+          {
+            "pluginId": "@kbn/cloud-security-posture-common",
+            "scope": "common",
+            "docId": "kibKbnCloudSecurityPostureCommonPluginApi",
+            "section": "def-common.MisconfigurationEvaluationStatus",
+            "text": "MisconfigurationEvaluationStatus"
+          },
+          ") => string; }"
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/hooks/use_get_misconfiguration_status_color.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
         "returnComment": [],
         "initialIsOpen": false
       }
@@ -2259,7 +2248,9 @@
         "type": "Type",
         "tags": [],
         "label": "NavFilter",
-        "description": [],
+        "description": [
+          "\nType alias for navigation filters"
+        ],
         "signature": [
           "{ [x: string]: FilterValue; }"
         ],

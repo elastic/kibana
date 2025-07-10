@@ -8,7 +8,6 @@ import { SavedObjectsFindResult } from '@kbn/core-saved-objects-api-server';
 import { EncryptedSyntheticsMonitorAttributes } from '../../../common/runtime_types';
 import { getUptimeESMockClient } from '../../queries/test_helpers';
 
-import * as commonLibs from '../common';
 import * as allLocationsFn from '../../synthetics_service/get_all_locations';
 import { OverviewStatusService, SUMMARIES_PAGE_SIZE } from './overview_status_service';
 import times from 'lodash/times';
@@ -30,38 +29,15 @@ jest.spyOn(allLocationsFn, 'getAllLocations').mockResolvedValue({
   allLocations,
 });
 
-jest.mock('../../saved_objects/synthetics_monitor/get_all_monitors', () => ({
-  ...jest.requireActual('../../saved_objects/synthetics_monitor/get_all_monitors'),
+jest.mock('../../saved_objects/synthetics_monitor/process_monitors', () => ({
+  ...jest.requireActual('../../saved_objects/synthetics_monitor/process_monitors'),
   getAllMonitors: jest.fn(),
 }));
-
-jest.spyOn(commonLibs, 'getMonitors').mockResolvedValue({
-  per_page: 10,
-  saved_objects: [
-    {
-      id: 'mon-1',
-      attributes: {
-        enabled: false,
-        locations: [{ id: 'us-east1' }, { id: 'us-west1' }, { id: 'japan' }],
-      },
-    },
-    {
-      id: 'mon-2',
-      attributes: {
-        enabled: true,
-        locations: [{ id: 'us-east1' }, { id: 'us-west1' }, { id: 'japan' }],
-        schedule: {
-          number: '10',
-          unit: 'm',
-        },
-      },
-    },
-  ],
-} as any);
 
 describe('current status route', () => {
   const testMonitors = [
     {
+      namespaces: ['default'],
       attributes: {
         config_id: 'id1',
         id: 'id1',
@@ -78,6 +54,7 @@ describe('current status route', () => {
       },
     },
     {
+      namespaces: ['default'],
       attributes: {
         id: 'id2',
         config_id: 'id2',
@@ -182,11 +159,14 @@ describe('current status route', () => {
               "isStatusAlertEnabled": false,
               "locationId": "europe_germany",
               "locationLabel": "Europe - Germany",
+              "maintenanceWindows": undefined,
               "monitorQueryId": "id2",
               "name": "test monitor 2",
               "projectId": "project-id",
               "schedule": "1",
-              "spaceId": undefined,
+              "spaces": Array [
+                "default",
+              ],
               "status": "down",
               "tags": Array [
                 "tag-1",
@@ -213,11 +193,14 @@ describe('current status route', () => {
               "isStatusAlertEnabled": false,
               "locationId": "asia_japan",
               "locationLabel": "Asia/Pacific - Japan",
+              "maintenanceWindows": undefined,
               "monitorQueryId": "id1",
               "name": "test monitor 1",
               "projectId": "project-id",
               "schedule": "1",
-              "spaceId": undefined,
+              "spaces": Array [
+                "default",
+              ],
               "status": "up",
               "tags": Array [
                 "tag-1",
@@ -234,11 +217,14 @@ describe('current status route', () => {
               "isStatusAlertEnabled": false,
               "locationId": "asia_japan",
               "locationLabel": "Asia/Pacific - Japan",
+              "maintenanceWindows": undefined,
               "monitorQueryId": "id2",
               "name": "test monitor 2",
               "projectId": "project-id",
               "schedule": "1",
-              "spaceId": undefined,
+              "spaces": Array [
+                "default",
+              ],
               "status": "up",
               "tags": Array [
                 "tag-1",
@@ -344,11 +330,14 @@ describe('current status route', () => {
               "isStatusAlertEnabled": false,
               "locationId": "europe_germany",
               "locationLabel": "Europe - Germany",
+              "maintenanceWindows": undefined,
               "monitorQueryId": "id2",
               "name": "test monitor 2",
               "projectId": "project-id",
               "schedule": "1",
-              "spaceId": undefined,
+              "spaces": Array [
+                "default",
+              ],
               "status": "down",
               "tags": Array [
                 "tag-1",
@@ -375,11 +364,14 @@ describe('current status route', () => {
               "isStatusAlertEnabled": false,
               "locationId": "asia_japan",
               "locationLabel": "Asia/Pacific - Japan",
+              "maintenanceWindows": undefined,
               "monitorQueryId": "id1",
               "name": "test monitor 1",
               "projectId": "project-id",
               "schedule": "1",
-              "spaceId": undefined,
+              "spaces": Array [
+                "default",
+              ],
               "status": "up",
               "tags": Array [
                 "tag-1",
@@ -396,11 +388,14 @@ describe('current status route', () => {
               "isStatusAlertEnabled": false,
               "locationId": "asia_japan",
               "locationLabel": "Asia/Pacific - Japan",
+              "maintenanceWindows": undefined,
               "monitorQueryId": "id2",
               "name": "test monitor 2",
               "projectId": "project-id",
               "schedule": "1",
-              "spaceId": undefined,
+              "spaces": Array [
+                "default",
+              ],
               "status": "up",
               "tags": Array [
                 "tag-1",
@@ -456,11 +451,14 @@ describe('current status route', () => {
               "isStatusAlertEnabled": false,
               "locationId": "asia_japan",
               "locationLabel": "Asia/Pacific - Japan",
+              "maintenanceWindows": undefined,
               "monitorQueryId": "id1",
               "name": "test monitor 1",
               "projectId": "project-id",
               "schedule": "1",
-              "spaceId": undefined,
+              "spaces": Array [
+                "default",
+              ],
               "status": "unknown",
               "tags": Array [
                 "tag-1",
@@ -477,11 +475,14 @@ describe('current status route', () => {
               "isStatusAlertEnabled": false,
               "locationId": "asia_japan",
               "locationLabel": "Asia/Pacific - Japan",
+              "maintenanceWindows": undefined,
               "monitorQueryId": "id2",
               "name": "test monitor 2",
               "projectId": "project-id",
               "schedule": "1",
-              "spaceId": undefined,
+              "spaces": Array [
+                "default",
+              ],
               "status": "unknown",
               "tags": Array [
                 "tag-1",
@@ -498,11 +499,14 @@ describe('current status route', () => {
               "isStatusAlertEnabled": false,
               "locationId": "europe_germany",
               "locationLabel": "Europe - Germany",
+              "maintenanceWindows": undefined,
               "monitorQueryId": "id2",
               "name": "test monitor 2",
               "projectId": "project-id",
               "schedule": "1",
-              "spaceId": undefined,
+              "spaces": Array [
+                "default",
+              ],
               "status": "unknown",
               "tags": Array [
                 "tag-1",

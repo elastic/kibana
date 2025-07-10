@@ -21,7 +21,8 @@ export default ({ getService }: FtrProviderContext): void => {
   const securitySolutionApi = getService('securitySolutionApi');
   const log = getService('log');
 
-  describe('@ess @serverless @skipInServerless Customize via bulk editing', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/222257
+  describe.skip('@ess @serverless @skipInServerless Customize via bulk editing', () => {
     before(async () => {
       await deleteAllRules(supertest, log);
       await deleteAllPrebuiltRuleAssets(es, log);

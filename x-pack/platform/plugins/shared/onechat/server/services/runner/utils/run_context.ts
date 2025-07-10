@@ -30,3 +30,16 @@ export const forkContextForToolRun = ({
     stack: [...parentContext.stack, { type: 'tool', toolId: toSerializedToolIdentifier(toolId) }],
   };
 };
+
+export const forkContextForAgentRun = ({
+  agentId,
+  parentContext,
+}: {
+  agentId: string;
+  parentContext: RunContext;
+}): RunContext => {
+  return {
+    ...parentContext,
+    stack: [...parentContext.stack, { type: 'agent', agentId }],
+  };
+};

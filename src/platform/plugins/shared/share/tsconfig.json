@@ -22,8 +22,14 @@
     "@kbn/shared-ux-tabbed-modal",
     "@kbn/core-user-profile-browser",
     "@kbn/datemath",
+    "@kbn/task-manager-plugin",
+    "@kbn/logging",
     "@kbn/licensing-plugin",
     "@kbn/core-rendering-browser",
+    "@kbn/std",
+    "@kbn/core-test-helpers-test-utils",
+    "@kbn/core-logging-server-mocks",
+    "@kbn/core-http-router-server-mocks"
   ],
   "exclude": ["target/**/*"]
 }

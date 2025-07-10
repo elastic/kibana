@@ -24,7 +24,7 @@ components:
           type: string
           description: The API key to use for tracing.
 
-    LangSmithEvaluationSettings:
+    LangSmithEvaluationOptions:
       description: The LangSmith settings object for evaluations.
       allOf:
         - $ref: '#/components/schemas/LangSmithOptions'

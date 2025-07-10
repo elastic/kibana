@@ -86,6 +86,17 @@ export const SLI_MAPPINGS_TEMPLATE: ClusterPutComponentTemplateRequest = {
               type: 'keyword',
               ignore_above: 256,
             },
+            name: {
+              type: 'text',
+              fields: {
+                keyword: {
+                  type: 'keyword',
+                },
+              },
+            },
+            tags: {
+              type: 'keyword',
+            },
             revision: {
               type: 'long',
             },

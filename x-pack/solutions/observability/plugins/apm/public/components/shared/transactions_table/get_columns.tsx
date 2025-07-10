@@ -216,7 +216,7 @@ export function getColumns({
           <EuiIconTip
             size="s"
             color="subdued"
-            type="questionInCircle"
+            type="question"
             className="eui-alignCenter"
             content={i18n.translate(
               'xpack.apm.serviceOverview.transactionsTableColumnErrorRateTip',
@@ -263,7 +263,7 @@ export function getColumns({
           <EuiIconTip
             size="s"
             color="subdued"
-            type="questionInCircle"
+            type="question"
             className="eui-alignCenter"
             content={i18n.translate('xpack.apm.serviceOverview.transactionsTableColumnImpactTip', {
               defaultMessage:

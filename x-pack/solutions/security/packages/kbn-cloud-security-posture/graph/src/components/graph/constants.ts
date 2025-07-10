@@ -9,3 +9,5 @@
  * Whether or not to instruct the graph component to only render nodes and edges that would be visible in the viewport.
  */
 export const ONLY_RENDER_VISIBLE_ELEMENTS = true as const;
+
+export const GRID_SIZE = 10; // in px

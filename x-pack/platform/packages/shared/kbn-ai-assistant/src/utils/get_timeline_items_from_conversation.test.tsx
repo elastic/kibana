@@ -12,7 +12,7 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { ChatState, Message, MessageRole } from '@kbn/observability-ai-assistant-plugin/public';
 import { createMockChatService } from './create_mock_chat_service';
 import { KibanaContextProvider } from '@kbn/triggers-actions-ui-plugin/public/common/lib/kibana';
-import { CONTEXT_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server/functions/context';
+import { CONTEXT_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server/functions/context/context';
 
 const mockChatService = createMockChatService();
 

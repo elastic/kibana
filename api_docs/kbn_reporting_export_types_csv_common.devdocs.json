@@ -313,7 +313,7 @@
             "section": "def-common.SerializedSearchSourceFields",
             "text": "SerializedSearchSourceFields"
           },
-          "; layout?: { id?: ",
+          "; forceNow?: string | undefined; layout?: { id?: ",
           {
             "pluginId": "screenshotting",
             "scope": "common",
@@ -340,7 +340,7 @@
         "label": "JobAppParamsCsvV2",
         "description": [],
         "signature": [
-          "{ title: string; layout?: { id?: ",
+          "{ title: string; forceNow?: string | undefined; layout?: { id?: ",
           {
             "pluginId": "screenshotting",
             "scope": "common",

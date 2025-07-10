@@ -174,9 +174,13 @@ export class DataGridService extends FtrService {
     );
   }
 
+  private getCellElementByColumnNameSelector(rowIndex: number, columnName: string) {
+    return `[data-test-subj="euiDataGridBody"] [data-test-subj="dataGridRowCell"][data-gridcell-column-id="${columnName}"][data-gridcell-visible-row-index="${rowIndex}"]`;
+  }
+
   public async getCellElementByColumnName(rowIndex: number, columnName: string) {
     return await this.find.byCssSelector(
-      `[data-test-subj="euiDataGridBody"] [data-test-subj="dataGridRowCell"][data-gridcell-column-id="${columnName}"][data-gridcell-visible-row-index="${rowIndex}"]`
+      this.getCellElementByColumnNameSelector(rowIndex, columnName)
     );
   }
 
@@ -315,6 +319,12 @@ export class DataGridService extends FtrService {
    */
   public async getAllCellElements(rowIndex: number = 0, columnIndex: number = 0) {
     return await this.find.allByCssSelector(this.getCellElementSelector(rowIndex, columnIndex));
+  }
+
+  public async getAllCellElementsByColumnName(rowIndex: number, columnName: string) {
+    return await this.find.allByCssSelector(
+      this.getCellElementByColumnNameSelector(rowIndex, columnName)
+    );
   }
 
   public async getDocCount(): Promise<number> {

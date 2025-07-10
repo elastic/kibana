@@ -14,6 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
 import { ErrorAnnotation } from '@kbn/monaco/src/languages/console/types';
+import { checkForTripleQuotesAndQueries } from '@kbn/monaco/src/languages/console/utils';
 import { isQuotaExceededError } from '../../../services/history';
 import { DEFAULT_VARIABLES, KIBANA_API_PREFIX } from '../../../../common/constants';
 import { getStorage, StorageKeys } from '../../../services';
@@ -38,7 +39,6 @@ import {
   shouldTriggerSuggestions,
   trackSentRequests,
   getRequestFromEditor,
-  isInsideTripleQuotes,
 } from './utils';
 
 import type { AdjustedParsedRequest } from './types';
@@ -588,8 +588,7 @@ export class MonacoEditorActionsProvider {
   public async provideCompletionItems(
     model: monaco.editor.ITextModel,
     position: monaco.Position,
-    context: monaco.languages.CompletionContext,
-    token: monaco.CancellationToken
+    context: monaco.languages.CompletionContext
   ): Promise<monaco.languages.CompletionList> {
     return this.getSuggestions(model, position, context);
   }
@@ -783,10 +782,10 @@ export class MonacoEditorActionsProvider {
     return this.editor.getPosition() ?? { lineNumber: 1, column: 1 };
   }
 
-  private async isPositionInsideScript(
+  private async isPositionInsideTripleQuotesAndQuery(
     model: monaco.editor.ITextModel,
     position: monaco.Position
-  ): Promise<boolean> {
+  ): Promise<{ insideTripleQuotes: boolean; insideQuery: boolean }> {
     const selectedRequests = await this.getSelectedParsedRequests();
 
     for (const request of selectedRequests) {
@@ -801,18 +800,21 @@ export class MonacoEditorActionsProvider {
           endColumn: position.column,
         });
 
-        if (isInsideTripleQuotes(requestContentBefore)) {
-          return true;
-        }
+        const { insideTripleQuotes, insideSingleQuotesQuery, insideTripleQuotesQuery } =
+          checkForTripleQuotesAndQueries(requestContentBefore);
+        return {
+          insideTripleQuotes,
+          insideQuery: insideSingleQuotesQuery || insideTripleQuotesQuery,
+        };
       }
       if (request.startLineNumber > position.lineNumber) {
         // Stop iteration once we pass the cursor position
-        return false;
+        return { insideTripleQuotes: false, insideQuery: false };
       }
     }
 
-    // Return false if no match
-    return false;
+    // Return false if the position is not inside a request
+    return { insideTripleQuotes: false, insideQuery: false };
   }
 
   private triggerSuggestions() {
@@ -821,23 +823,32 @@ export class MonacoEditorActionsProvider {
     if (!model || !position) {
       return;
     }
-    this.isPositionInsideScript(model, position).then((isCursorInsideScript) => {
-      if (isCursorInsideScript) {
-        // Don't trigger autocomplete suggestions inside scripts
-        return;
-      }
+    this.isPositionInsideTripleQuotesAndQuery(model, position).then(
+      ({ insideTripleQuotes, insideQuery }) => {
+        if (insideTripleQuotes && !insideQuery) {
+          // Don't trigger autocomplete suggestions inside scripts and strings
+          return;
+        }
 
-      const lineContentBefore = model.getValueInRange({
-        startLineNumber: position.lineNumber,
-        startColumn: 1,
-        endLineNumber: position.lineNumber,
-        endColumn: position.column,
-      });
-      // if the line is empty or it matches specified regex, trigger suggestions
-      if (!lineContentBefore.trim() || shouldTriggerSuggestions(lineContentBefore)) {
-        this.editor.trigger(TRIGGER_SUGGESTIONS_ACTION_LABEL, TRIGGER_SUGGESTIONS_HANDLER_ID, {});
+        const lineContentBefore = model.getValueInRange({
+          startLineNumber: position.lineNumber,
+          startColumn: 1,
+          endLineNumber: position.lineNumber,
+          endColumn: position.column,
+        });
+        // Trigger suggestions if the line:
+        // - is empty
+        // - matches specified regex
+        // - is inside a query
+        if (
+          !lineContentBefore.trim() ||
+          shouldTriggerSuggestions(lineContentBefore) ||
+          insideQuery
+        ) {
+          this.editor.trigger(TRIGGER_SUGGESTIONS_ACTION_LABEL, TRIGGER_SUGGESTIONS_HANDLER_ID, {});
+        }
       }
-    });
+    );
   }
 
   /*

@@ -281,6 +281,8 @@ export type {
   ErrorToastOptions,
 } from '@kbn/core-notifications-browser';
 
+export type { PricingServiceStart } from '@kbn/core-pricing-browser';
+
 export type { ToastsApi } from '@kbn/core-notifications-browser-internal';
 
 export type { CustomBrandingStart, CustomBrandingSetup } from '@kbn/core-custom-branding-browser';
@@ -308,10 +310,3 @@ export type { CoreSetup, CoreStart, StartServicesAccessor } from '@kbn/core-life
 export type { CoreSystem } from '@kbn/core-root-browser-internal';
 
 export { __kbnBootstrap__ } from '@kbn/core-root-browser-internal';
-
-export {
-  kibanaFullBodyHeightCss,
-  fullScreenGraphicsMixinStyles,
-  useMemoizedStyles,
-  type EmotionStyles,
-} from './css_utils';

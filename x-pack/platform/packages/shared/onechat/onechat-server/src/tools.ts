@@ -7,17 +7,24 @@
 
 import type { z, ZodObject } from '@kbn/zod';
 import type { MaybePromise } from '@kbn/utility-types';
+import type { Logger } from '@kbn/logging';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { ToolDescriptor, ToolDescriptorMeta, ToolIdentifier } from '@kbn/onechat-common';
+import type {
+  ToolDescriptor,
+  ToolDescriptorMeta,
+  ToolIdentifier,
+  PlainIdToolIdentifier,
+  FieldTypes,
+} from '@kbn/onechat-common';
 import type { ModelProvider } from './model_provider';
 import type { ScopedRunner, RunToolReturn, ScopedRunnerRunToolsParams } from './runner';
-import type { RunEventEmitter } from './events';
+import type { ToolEventEmitter } from './events';
 
 /**
  * Subset of {@link ToolDescriptorMeta} that can be defined during tool registration.
  */
-export type RegisteredToolMeta = Partial<Omit<ToolDescriptorMeta, 'sourceType' | 'sourceId'>>;
+export type RegisteredToolMeta = Partial<Omit<ToolDescriptorMeta, 'providerId'>>;
 
 /**
  * Onechat tool, as registered by built-in tool providers.
@@ -38,6 +45,101 @@ export interface RegisteredTool<
    * Optional set of metadata for this tool.
    */
   meta?: RegisteredToolMeta;
+}
+
+/**
+ * Onechat tool, as registered by built-in tool providers.
+ */
+export interface EsqlToolDefinition extends ToolDescriptor {
+  /**
+   * The ESQL Tool name.
+   */
+  name: string;
+
+  /**
+   * The ESQL query to be executed.
+   */
+  query: string;
+
+  /**
+   * Parameters that can be used in the query.
+   * Each parameter has a key identifier and metadata about its type and usage.
+   */
+  params: Record<
+    string,
+    {
+      /**
+       * The data types of the parameter. Must be one of these
+       */
+      type: FieldTypes;
+
+      /**
+       * Description of the parameter's purpose or expected values.
+       */
+      description: string;
+    }
+  >;
+}
+
+export interface EsqlTool<RunInput extends ZodObject<any> = ZodObject<any>, RunOutput = unknown>
+  extends RegisteredTool<RunInput, RunOutput> {
+  /**
+   * The ESQL id to be executed.
+   */
+  id: string;
+
+  /**
+   * The ESQL Tool name.
+   */
+  name: string;
+
+  /**
+   * The ESQL tool description to be executed.
+   */
+  description: string;
+
+  /**
+   * The ESQL query to be executed.
+   */
+  query: string;
+
+  /**
+   * Parameters that can be used in the query.
+   * Each parameter has a key identifier and metadata about its type and usage.
+   */
+  params: Record<
+    string,
+    {
+      /**
+       * The data types of the parameter.
+       */
+      type: FieldTypes;
+
+      /**
+       * Description of the parameter's purpose or expected values.
+       */
+      description: string;
+    }
+  >;
+}
+
+/**
+ * Tool provider interface, as registered by API consumers.
+ */
+export interface RegisteredToolProvider {
+  /**
+   * Check if a tool is available in the provider.
+   */
+  has(options: { toolId: PlainIdToolIdentifier; request: KibanaRequest }): Promise<boolean>;
+  /**
+   * Retrieve a tool based on its identifier.
+   * If not found,the provider should throw a {@link OnechatToolNotFoundError}
+   */
+  get(options: { toolId: PlainIdToolIdentifier; request: KibanaRequest }): Promise<RegisteredTool>;
+  /**
+   * List all tools present in the provider.
+   */
+  list(options: { request: KibanaRequest }): Promise<RegisteredTool[]>;
 }
 
 /**
@@ -73,12 +175,19 @@ export type ExecutableToolHandlerFn<TParams = Record<string, unknown>, TResult =
 ) => Promise<RunToolReturn<TResult>>;
 
 /**
+ * Return value for {@link ToolHandlerFn} / {@link RegisteredTool}
+ */
+export interface ToolHandlerReturn<T = unknown> {
+  result: T;
+}
+
+/**
  * Tool handler function for {@link RegisteredTool} handlers.
  */
 export type ToolHandlerFn<
   TParams extends Record<string, unknown> = Record<string, unknown>,
   RunOutput = unknown
-> = (args: TParams, context: ToolHandlerContext) => MaybePromise<RunOutput>;
+> = (args: TParams, context: ToolHandlerContext) => MaybePromise<ToolHandlerReturn<RunOutput>>;
 
 /**
  * Scoped context which can be used during tool execution to access
@@ -101,6 +210,10 @@ export interface ToolHandlerContext {
    */
   modelProvider: ModelProvider;
   /**
+   * Tool provider that can be used to list or execute tools.
+   */
+  toolProvider: ToolProvider;
+  /**
    * Onechat runner scoped to the current execution.
    * Can be used to run other workchat primitive as part of the tool execution.
    */
@@ -108,7 +221,11 @@ export interface ToolHandlerContext {
   /**
    * Event emitter that can be used to emits custom events
    */
-  events: RunEventEmitter;
+  events: ToolEventEmitter;
+  /**
+   * Logger scoped to this execution
+   */
+  logger: Logger;
 }
 
 /**

@@ -14,15 +14,17 @@ import {
   coreUsageStatsClientMock,
   coreUsageDataServiceMock,
 } from '@kbn/core-usage-data-server-mocks';
-import { createHiddenTypeVariants, setupServer } from '@kbn/core-test-helpers-test-utils';
+import {
+  createHiddenTypeVariants,
+  setupServer,
+  SetupServerReturn,
+} from '@kbn/core-test-helpers-test-utils';
 import {
   registerUpdateRoute,
   type InternalSavedObjectsRequestHandlerContext,
 } from '@kbn/core-saved-objects-server-internal';
 import { loggerMock } from '@kbn/logging-mocks';
 import { deprecationMock, setupConfig } from './routes_test_utils';
-
-type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
 const testTypes = [
   { name: 'index-pattern', hide: false }, // multi-namespace type
@@ -32,7 +34,7 @@ const testTypes = [
 
 describe('PUT /api/saved_objects/{type}/{id?}', () => {
   let server: SetupServerReturn['server'];
-  let httpSetup: SetupServerReturn['httpSetup'];
+  let createRouter: SetupServerReturn['createRouter'];
   let handlerContext: SetupServerReturn['handlerContext'];
   let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
   let coreUsageStatsClient: jest.Mocked<ICoreUsageStatsClient>;
@@ -50,7 +52,7 @@ describe('PUT /api/saved_objects/{type}/{id?}', () => {
       references: [],
     };
 
-    ({ server, httpSetup, handlerContext } = await setupServer());
+    ({ server, createRouter, handlerContext } = await setupServer());
     savedObjectsClient = handlerContext.savedObjects.client;
     savedObjectsClient.update.mockResolvedValue(clientResponse);
 
@@ -60,8 +62,7 @@ describe('PUT /api/saved_objects/{type}/{id?}', () => {
         .find((fullTest) => fullTest.name === typename);
     });
 
-    const router =
-      httpSetup.createRouter<InternalSavedObjectsRequestHandlerContext>('/api/saved_objects/');
+    const router = createRouter<InternalSavedObjectsRequestHandlerContext>('/api/saved_objects/');
     coreUsageStatsClient = coreUsageStatsClientMock.create();
     coreUsageStatsClient.incrementSavedObjectsUpdate.mockRejectedValue(new Error('Oh no!')); // intentionally throw this error, which is swallowed, so we can assert that the operation does not fail
     const coreUsageData = coreUsageDataServiceMock.createSetupContract(coreUsageStatsClient);
@@ -98,7 +99,7 @@ describe('PUT /api/saved_objects/{type}/{id?}', () => {
     };
     savedObjectsClient.update.mockResolvedValue(clientResponse);
 
-    const result = await supertest(httpSetup.server.listener)
+    const result = await supertest(server.listener)
       .put('/api/saved_objects/index-pattern/logstash-*')
       .set('x-elastic-internal-origin', 'kibana')
       .send({
@@ -117,7 +118,7 @@ describe('PUT /api/saved_objects/{type}/{id?}', () => {
   });
 
   it('calls upon savedObjectClient.update', async () => {
-    await supertest(httpSetup.server.listener)
+    await supertest(server.listener)
       .put('/api/saved_objects/index-pattern/logstash-*')
       .set('x-elastic-internal-origin', 'kibana')
       .send({
@@ -135,7 +136,7 @@ describe('PUT /api/saved_objects/{type}/{id?}', () => {
   });
 
   it('returns with status 400 for types hidden from the HTTP APIs', async () => {
-    const result = await supertest(httpSetup.server.listener)
+    const result = await supertest(server.listener)
       .put('/api/saved_objects/hidden-from-http/hiddenId')
       .set('x-elastic-internal-origin', 'kibana')
       .send({
@@ -146,7 +147,7 @@ describe('PUT /api/saved_objects/{type}/{id?}', () => {
   });
 
   it('logs a warning message when called', async () => {
-    await supertest(httpSetup.server.listener)
+    await supertest(server.listener)
       .put('/api/saved_objects/index-pattern/logstash-*')
       .set('x-elastic-internal-origin', 'kibana')
       .send({ attributes: { title: 'Logging test' }, version: 'log' })
@@ -155,7 +156,7 @@ describe('PUT /api/saved_objects/{type}/{id?}', () => {
   });
 
   it('passes deprecation configuration to the router arguments', async () => {
-    await supertest(httpSetup.server.listener)
+    await supertest(server.listener)
       .put('/api/saved_objects/index-pattern/logstash-*')
       .set('x-elastic-internal-origin', 'kibana')
       .send({ attributes: { title: 'Logging test' }, version: 'log' })

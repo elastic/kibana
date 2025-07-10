@@ -20,17 +20,17 @@ import {
   createExampleRootProfileProvider,
 } from './example/example_root_profile';
 import { createObservabilityLogsDataSourceProfileProviders } from './observability/logs_data_source_profile';
-import { createObservabilityLogDocumentProfileProvider } from './observability/log_document_profile';
 import { createSecurityRootProfileProvider } from './security/security_root_profile';
 import type { ProfileProviderServices } from './profile_provider_services';
 import { createProfileProviderServices } from './profile_provider_services';
 import type { DiscoverServices } from '../../build_services';
-import { createObservabilityRootProfileProvider } from './observability/observability_root_profile';
 import { createTracesDataSourceProfileProvider } from './observability/traces_data_source_profile';
 import { createDeprecationLogsDataSourceProfileProvider } from './common/deprecation_logs';
 import { createClassicNavRootProfileProvider } from './common/classic_nav_root_profile';
-import { createObservabilityTracesSpanDocumentProfileProvider } from './observability/traces_document_profile/span_document_profile';
-import { createObservabilityTracesTransactionDocumentProfileProvider } from './observability/traces_document_profile/transaction_document_profile';
+import { createObservabilityDocumentProfileProviders } from './observability/observability_profile_providers';
+import { createPatternDataSourceProfileProvider } from './common/patterns';
+import { createSecurityDocumentProfileProvider } from './security/security_document_profile';
+import { createObservabilityRootProfileProvider } from './observability/observability_root_profile/profile';
 
 /**
  * Register profile providers for root, data source, and document contexts to the profile profile services
@@ -70,18 +70,21 @@ export const registerProfileProviders = async ({
     profileService: rootProfileService,
     providers: rootProfileProviders,
     enabledExperimentalProfileIds,
+    services,
   });
 
   registerEnabledProfileProviders({
     profileService: dataSourceProfileService,
     providers: dataSourceProfileProviders,
     enabledExperimentalProfileIds,
+    services,
   });
 
   registerEnabledProfileProviders({
     profileService: documentProfileService,
     providers: documentProfileProviders,
     enabledExperimentalProfileIds,
+    services,
   });
 };
 
@@ -96,6 +99,7 @@ export const registerEnabledProfileProviders = <
   profileService,
   providers: availableProviders,
   enabledExperimentalProfileIds = [],
+  services,
 }: {
   /**
    * Profile service to register providers
@@ -109,9 +113,16 @@ export const registerEnabledProfileProviders = <
    * Array of experimental profile IDs which are enabled in `kibana.yml`
    */
   enabledExperimentalProfileIds?: string[];
+  services: DiscoverServices;
 }) => {
   for (const provider of availableProviders) {
-    if (!provider.isExperimental || enabledExperimentalProfileIds.includes(provider.profileId)) {
+    const checkForExperimentalProfile =
+      !provider.isExperimental || enabledExperimentalProfileIds.includes(provider.profileId);
+    const checkForProductFeature =
+      !provider.restrictedToProductFeature ||
+      services.core.pricing.isFeatureAvailable(provider.restrictedToProductFeature);
+
+    if (checkForExperimentalProfile && checkForProductFeature) {
       profileService.registerProvider(provider);
     }
   }
@@ -137,6 +148,7 @@ const createRootProfileProviders = (providerServices: ProfileProviderServices) =
  */
 const createDataSourceProfileProviders = (providerServices: ProfileProviderServices) => [
   createExampleDataSourceProfileProvider(),
+  createPatternDataSourceProfileProvider(providerServices),
   createDeprecationLogsDataSourceProfileProvider(),
   createTracesDataSourceProfileProvider(providerServices),
   ...createObservabilityLogsDataSourceProfileProviders(providerServices),
@@ -149,7 +161,6 @@ const createDataSourceProfileProviders = (providerServices: ProfileProviderServi
  */
 const createDocumentProfileProviders = (providerServices: ProfileProviderServices) => [
   createExampleDocumentProfileProvider(),
-  createObservabilityLogDocumentProfileProvider(providerServices),
-  createObservabilityTracesSpanDocumentProfileProvider(providerServices),
-  createObservabilityTracesTransactionDocumentProfileProvider(providerServices),
+  createSecurityDocumentProfileProvider(providerServices),
+  ...createObservabilityDocumentProfileProviders(providerServices),
 ];

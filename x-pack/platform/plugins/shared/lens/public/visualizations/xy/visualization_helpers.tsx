@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { cloneDeep, uniq } from 'lodash';
+import { uniq } from 'lodash';
 import { IconChartBarHorizontal, IconChartBarStacked, IconChartMixedXy } from '@kbn/chart-icons';
 import type { LayerType as XYLayerType } from '@kbn/expression-xy-plugin/common';
 import {
@@ -355,7 +355,7 @@ const newLayerFn = {
         layerType: layerTypes.ANNOTATIONS,
         annotationGroupId,
 
-        annotations: cloneDeep(libraryGroupConfig.annotations),
+        annotations: structuredClone(libraryGroupConfig.annotations),
         indexPatternId: libraryGroupConfig.indexPatternId,
         ignoreGlobalFilters: libraryGroupConfig.ignoreGlobalFilters,
         __lastSaved: libraryGroupConfig,

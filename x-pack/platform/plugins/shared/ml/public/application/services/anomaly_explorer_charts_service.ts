@@ -18,6 +18,7 @@ import type {
   MlRecordForInfluencer,
 } from '@kbn/ml-anomaly-utils';
 import type { TimeRangeBounds } from '@kbn/ml-time-buckets';
+import type { SeverityThreshold } from '../../../common/types/anomalies';
 import type { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
 import type { SeriesConfigWithMetadata } from '../../../common/types/results';
 
@@ -110,9 +111,9 @@ export class AnomalyExplorerChartsService {
     chartsContainerWidth: number,
     selectedEarliestMs: number,
     selectedLatestMs: number,
+    severity: SeverityThreshold[],
     influencerFilterQuery?: InfluencersFilterQuery,
     influencers?: MlEntityField[],
-    severity = 0,
     maxSeries?: number
   ): Observable<ExplorerChartsData> {
     const bounds = this.getTimeBounds();

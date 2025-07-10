@@ -167,6 +167,8 @@ describe('When on the package policy create page', () => {
           from="package"
           queryParamsPolicyId={queryParamsPolicyId}
           prerelease={false}
+          pkgName={'nginx'}
+          pkgVersion={'1.3.0'}
         />
       </Route>
     ));

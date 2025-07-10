@@ -25,7 +25,7 @@ export const getLocationObservable = (
     subject.next(locationToUrl(location));
   });
   return subject.pipe(
-    startWith(locationToUrl(initialLocation)),
+    startWith(locationToUrl(history.location ?? initialLocation)),
     distinctUntilChanged(),
     shareReplay(1)
   );

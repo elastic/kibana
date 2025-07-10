@@ -7,11 +7,14 @@
 
 import * as Rx from 'rxjs';
 import type { CoreStart, CoreSetup } from '@kbn/core/public';
+import { apm } from '@elastic/apm-rum';
 import { InterceptDialogService, InterceptServiceStartDeps } from './service';
 import { UserInterceptRunPersistenceService } from './service/user_intercept_run_persistence_service';
 import { Intercept } from './service';
 import { TRIGGER_INFO_API_ROUTE } from '../../common/constants';
 import { TriggerInfo } from '../../common/types';
+
+export type { Intercept } from './service';
 
 type ProductInterceptPrompterSetupDeps = Pick<CoreSetup, 'analytics' | 'notifications'>;
 type ProductInterceptPrompterStartDeps = Omit<
@@ -24,6 +27,12 @@ export class InterceptPrompter {
   private userInterceptRunPersistenceService = new UserInterceptRunPersistenceService();
   private interceptDialogService = new InterceptDialogService();
   private queueIntercept?: ReturnType<InterceptDialogService['start']>['add'];
+  // observer for page visibility changes, shared across all intercepts
+  private pageHidden$?: Rx.Observable<boolean>;
+  // Defines safe timer bound at 24 days, javascript browser timers are not reliable for longer intervals
+  // see https://developer.mozilla.org/en-US/docs/Web/API/Window/setTimeout#maximum_delay_value,
+  // rxjs can do longer intervals, but we want to avoid the risk of running into issues with browser timers.
+  private readonly MAX_TIMER_INTERVAL = 0x7b98a000; // 24 days in milliseconds
 
   setup({ analytics, notifications }: ProductInterceptPrompterSetupDeps) {
     this.interceptDialogService.setup({ analytics, notifications });
@@ -41,6 +50,11 @@ export class InterceptPrompter {
       staticAssetsHelper: http.staticAssets,
     }));
 
+    this.pageHidden$ = Rx.fromEvent(document, 'visibilitychange').pipe(
+      Rx.map(() => document.hidden),
+      Rx.startWith(document.hidden)
+    );
+
     return {
       /**
        * Configures the intercept journey that will be shown to the user, and returns an observable
@@ -56,7 +70,10 @@ export class InterceptPrompter {
     getUserTriggerData$: ReturnType<
       UserInterceptRunPersistenceService['start']
     >['getUserTriggerData$'],
-    intercept: Intercept
+    intercept: {
+      id: Intercept['id'];
+      config: () => Promise<Omit<Intercept, 'id'>>;
+    }
   ) {
     let nextRunId: number;
 
@@ -70,36 +87,76 @@ export class InterceptPrompter {
       .pipe(Rx.filter((response) => !!response))
       .pipe(
         Rx.mergeMap((response) => {
-          const now = Date.now();
+          // anchor for all calculations, this is the time when the trigger was registered
+          const timePoint = Date.now();
+
           let diff = 0;
 
           // Calculate the number of runs since the trigger was registered
           const runs = Math.floor(
-            (diff = now - Date.parse(response.registeredAt)) / response.triggerIntervalInMs
+            (diff = timePoint - Date.parse(response.registeredAt)) / response.triggerIntervalInMs
           );
 
           nextRunId = runs + 1;
 
-          // Calculate the time until the next run
-          const nextRun = nextRunId * response.triggerIntervalInMs - diff;
+          return this.pageHidden$!.pipe(
+            Rx.switchMap((isHidden) => {
+              if (isHidden) return Rx.EMPTY;
 
-          return Rx.timer(nextRun, response.triggerIntervalInMs).pipe(
-            Rx.switchMap(() => getUserTriggerData$(intercept.id)),
-            Rx.takeWhile((triggerData) => {
-              // Stop the timer if lastInteractedInterceptId is defined and matches nextRunId
-              if (!response.recurrent && triggerData.lastInteractedInterceptId) {
-                return false;
-              }
-              return true;
+              return Rx.timer(
+                Math.min(nextRunId * response.triggerIntervalInMs - diff, this.MAX_TIMER_INTERVAL),
+                Math.min(response.triggerIntervalInMs, this.MAX_TIMER_INTERVAL)
+              ).pipe(
+                Rx.switchMap((timerIterationCount) => {
+                  if (response.triggerIntervalInMs < this.MAX_TIMER_INTERVAL) {
+                    return getUserTriggerData$(intercept.id);
+                  } else {
+                    const timeElapsedSinceRegistration =
+                      diff + this.MAX_TIMER_INTERVAL * timerIterationCount;
+
+                    const timeTillTriggerEvent =
+                      nextRunId * response.triggerIntervalInMs - timeElapsedSinceRegistration;
+
+                    if (timeTillTriggerEvent <= this.MAX_TIMER_INTERVAL) {
+                      // trigger event would happen sometime within this current slice
+                      // set up a single use timer that will emit the trigger event
+                      return Rx.timer(timeTillTriggerEvent).pipe(
+                        Rx.switchMap(() => {
+                          return getUserTriggerData$(intercept.id);
+                        })
+                      );
+                    } else {
+                      // current timer slice requires no action
+                      return Rx.EMPTY;
+                    }
+                  }
+                }),
+                Rx.takeWhile((triggerData) => {
+                  // Stop the timer if lastInteractedInterceptId is defined and matches nextRunId
+                  if (!response.recurrent && triggerData.lastInteractedInterceptId) {
+                    return false;
+                  }
+                  return true;
+                })
+              );
             })
           );
         })
       )
       .pipe(
-        Rx.tap((triggerData) => {
+        Rx.tap(async (triggerData) => {
           if (nextRunId !== triggerData.lastInteractedInterceptId) {
-            this.queueIntercept?.({ ...intercept, runId: nextRunId });
-            nextRunId++;
+            try {
+              const interceptConfig = await intercept.config();
+              this.queueIntercept?.({ id: intercept.id, runId: nextRunId, ...interceptConfig });
+              nextRunId++;
+            } catch (err) {
+              apm.captureError(err, {
+                labels: {
+                  interceptId: intercept.id,
+                },
+              });
+            }
           }
         })
       );

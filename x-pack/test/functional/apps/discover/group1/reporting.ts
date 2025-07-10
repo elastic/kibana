@@ -103,7 +103,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await toasts.dismissAll();
 
     await exports.clickExportTopNavButton();
+    await reporting.selectExportItem('CSV');
     await reporting.clickGenerateReportButton();
+    await exports.closeExportFlyout();
+    await exports.clickExportTopNavButton();
 
     const url = await reporting.getReportURL(timeout);
     const res = await reporting.getResponse(url ?? '');
@@ -116,6 +119,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const getReportPostUrl = async () => {
     // click 'Copy POST URL'
     await exports.clickExportTopNavButton();
+    await reporting.selectExportItem('CSV');
+    await reporting.clickGenerateReportButton();
     await reporting.copyReportingPOSTURLValueToClipboard();
 
     const clipboardValue = decodeURIComponent(await browser.getClipboardValue());
@@ -125,8 +130,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     return clipboardValue;
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/222247
-  describe.skip('Discover CSV Export', () => {
+  describe('Discover CSV Export', () => {
     describe('Check Available', () => {
       before(async () => {
         await esArchiver.emptyKibanaIndex();
@@ -142,15 +146,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('is available if new', async () => {
         await reporting.openExportPopover();
-        expect(await reporting.isGenerateReportButtonDisabled()).to.be(null);
-        await exports.closeExportFlyout();
+        expect(await exports.isPopoverItemEnabled('CSV')).to.be(true);
+        await reporting.openExportPopover();
       });
 
       it('becomes available when saved', async () => {
         await discover.saveSearch('my search - expectEnabledGenerateReportButton');
         await reporting.openExportPopover();
-        expect(await reporting.isGenerateReportButtonDisabled()).to.be(null);
-        await exports.closeExportFlyout();
+        expect(await exports.isPopoverItemEnabled('CSV')).to.be(true);
+        await reporting.openExportPopover();
       });
     });
 
@@ -264,7 +268,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expectSnapshot(csvFile).toMatch();
       });
 
-      it('generate a report using ES|QL for relative time range as absolute dates and time params', async () => {
+      // TODO: Adjust and unskip when we have full support for toggling relative/absolute time ranges through the export UI
+      // https://github.com/elastic/kibana/issues/223171
+      it.skip('generate a report using ES|QL for relative time range as absolute dates and time params', async () => {
         const RECENT_DATA_INDEX_NAME = 'test_recent_data';
         const RECENT_DOC_COUNT = 500;
         const RECENT_DOC_END_DATE = moment().toISOString();

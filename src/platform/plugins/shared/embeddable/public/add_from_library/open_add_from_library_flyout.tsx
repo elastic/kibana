@@ -41,6 +41,7 @@ export const openAddFromLibraryFlyout = ({
       core
     ),
     {
+      type: 'push',
       ownFocus: true,
       onClose: (overlayRef) => {
         if (onClose) onClose();

@@ -8,21 +8,34 @@
  */
 
 import { partition, throttle } from 'lodash';
-import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { css } from '@emotion/react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { i18n } from '@kbn/i18n';
-import { EuiScreenReaderOnly, EuiSpacer } from '@elastic/eui';
+import {
+  EuiScreenReaderOnly,
+  EuiSpacer,
+  EuiSkipLink,
+  useGeneratedHtmlId,
+  euiOverflowScroll,
+  type UseEuiTheme,
+} from '@elastic/eui';
 import { type DataViewField } from '@kbn/data-views-plugin/common';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { NoFieldsCallout } from './no_fields_callout';
 import { FieldsAccordion, type FieldsAccordionProps, getFieldKey } from './fields_accordion';
 import type { FieldListGroups, FieldListItem } from '../../types';
 import { ExistenceFetchStatus, FieldsGroup, FieldsGroupNames } from '../../types';
-import './field_list_grouped.scss';
+import {
+  useRestorableState,
+  useRestorableRef,
+  type UnifiedFieldListRestorableState,
+} from '../../restorable_state';
 
 const PAGINATION_SIZE = 50;
 export const LOCAL_STORAGE_KEY_SECTIONS = 'unifiedFieldList.initiallyOpenSections';
 
-type InitiallyOpenSections = Record<string, boolean>;
+type InitiallyOpenSections = UnifiedFieldListRestorableState['accordionState'];
 
 function getDisplayedFieldsLength<T extends FieldListItem>(
   fieldGroups: FieldListGroups<T>,
@@ -41,6 +54,7 @@ export interface FieldListGroupedProps<T extends FieldListItem> {
   scrollToTopResetCounter: number;
   screenReaderDescriptionId?: string;
   localStorageKeyPrefix?: string; // Your app name: "discover", "lens", etc. If not provided, sections state would not be persisted.
+  muteScreenReader?: boolean; // Changes aria-live from "polite" to "off" - it's useful when the numbers change due to something not directly related to the field list and we want to avoid announcing it.
   'data-test-subj'?: string;
 }
 
@@ -51,50 +65,82 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
   renderFieldItem,
   scrollToTopResetCounter,
   screenReaderDescriptionId,
+  muteScreenReader,
   localStorageKeyPrefix,
   'data-test-subj': dataTestSubject = 'fieldListGrouped',
 }: FieldListGroupedProps<T>) {
+  const styles = useMemoCss(componentStyles);
+
   const hasSyncedExistingFields =
     fieldsExistenceStatus && fieldsExistenceStatus !== ExistenceFetchStatus.unknown;
+
+  const buttonIdPrefix = useGeneratedHtmlId({ prefix: 'fieldListGroupedButton' });
 
   const [fieldGroupsToShow, fieldGroupsToCollapse] = partition(
     Object.entries(fieldGroups),
     ([, { showInAccordion }]) => showInAccordion
   );
-  const [pageSize, setPageSize] = useState(PAGINATION_SIZE);
+  const isInitializedRef = useRef<boolean>(false);
+  const [pageSize, setPageSize] = useRestorableState('pageSize', PAGINATION_SIZE);
+  const scrollPositionRef = useRestorableRef('scrollPosition', 0);
   const [scrollContainer, setScrollContainer] = useState<Element | undefined>(undefined);
   const [storedInitiallyOpenSections, storeInitiallyOpenSections] =
     useLocalStorage<InitiallyOpenSections>(
       `${localStorageKeyPrefix ? localStorageKeyPrefix + '.' : ''}${LOCAL_STORAGE_KEY_SECTIONS}`,
       {}
     );
-  const [accordionState, setAccordionState] = useState<InitiallyOpenSections>(() =>
-    Object.fromEntries(
-      fieldGroupsToShow.map(([key, { isInitiallyOpen }]) => {
-        const storedInitiallyOpen = localStorageKeyPrefix
-          ? storedInitiallyOpenSections?.[key]
-          : null; // from localStorage
-        return [
-          key,
-          typeof storedInitiallyOpen === 'boolean' ? storedInitiallyOpen : isInitiallyOpen,
-        ];
-      })
-    )
+  const [accordionState, setAccordionState] = useRestorableState(
+    'accordionState',
+    () =>
+      Object.fromEntries(
+        fieldGroupsToShow.map(([key, { isInitiallyOpen }]) => {
+          const storedInitiallyOpen = localStorageKeyPrefix
+            ? storedInitiallyOpenSections?.[key]
+            : null; // from localStorage
+          return [
+            key,
+            typeof storedInitiallyOpen === 'boolean' ? storedInitiallyOpen : isInitiallyOpen,
+          ];
+        })
+      ),
+    {
+      shouldStoreDefaultValueRightAway: true, // otherwise, it would re-initialize with the localStorage value which might get updated in the meantime
+      shouldIgnoredRestoredValue: (restoredAccordionState) => {
+        return (
+          fieldGroupsToShow.length !== Object.keys(restoredAccordionState).length ||
+          fieldGroupsToShow.some(([key]) => !(key in restoredAccordionState))
+        );
+      },
+    }
   );
 
   useEffect(() => {
     // Reset the scroll if we have made material changes to the field list
     if (scrollContainer && scrollToTopResetCounter) {
+      if (!isInitializedRef.current) {
+        isInitializedRef.current = true;
+        // If this is the first time after the mount, no need to reset the scroll position
+        return;
+      }
       scrollContainer.scrollTop = 0;
+      scrollPositionRef.current = 0;
       setPageSize(PAGINATION_SIZE);
     }
-  }, [scrollToTopResetCounter, scrollContainer]);
+  }, [scrollToTopResetCounter, scrollContainer, setPageSize, scrollPositionRef]);
 
   const lazyScroll = useCallback(() => {
     if (scrollContainer) {
+      if (scrollContainer.scrollTop === scrollPositionRef.current) {
+        // scroll top was restored to the last position
+        return;
+      }
+
       const nearBottom =
         scrollContainer.scrollTop + scrollContainer.clientHeight >
         scrollContainer.scrollHeight * 0.9;
+
+      scrollPositionRef.current = scrollContainer.scrollTop;
+
       if (nearBottom) {
         setPageSize(
           Math.max(
@@ -107,7 +153,7 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
         );
       }
     }
-  }, [scrollContainer, pageSize, setPageSize, fieldGroups, accordionState]);
+  }, [scrollContainer, scrollPositionRef, setPageSize, pageSize, fieldGroups, accordionState]);
 
   const paginatedFields = useMemo(() => {
     let remainingItems = pageSize;
@@ -127,9 +173,19 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
 
   return (
     <div
-      className="unifiedFieldList__fieldListGrouped"
+      css={styles.outerContainer}
       data-test-subj={`${dataTestSubject}FieldGroups`}
       ref={(el) => {
+        if (el && !el.scrollTop && scrollPositionRef.current) {
+          // restore scroll position after restoring the initial ref value
+          setTimeout(() => {
+            el.scrollTo?.({
+              top: scrollPositionRef.current,
+              behavior: 'instant',
+            });
+          }, 0);
+        }
+
         if (el && !el.dataset.dynamicScroll) {
           el.dataset.dynamicScroll = 'true';
           setScrollContainer(el);
@@ -137,11 +193,11 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
       }}
       onScroll={throttle(lazyScroll, 100)}
     >
-      <div className="unifiedFieldList__fieldListGrouped__container">
+      <div css={styles.innerContainer}>
         {Boolean(screenReaderDescriptionId) && (
           <EuiScreenReaderOnly>
             <div
-              aria-live="polite"
+              aria-live={muteScreenReader ? 'off' : 'polite'}
               id={screenReaderDescriptionId}
               data-test-subj={`${dataTestSubject}__ariaDescription`}
             >
@@ -241,66 +297,83 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
             <EuiSpacer size="s" />
           </>
         )}
-        {fieldGroupsToShow.map(([key, fieldGroup], index) => {
-          const hidden = Boolean(fieldGroup.hideIfEmpty) && !fieldGroup.fields.length;
-          if (hidden) {
-            return null;
-          }
-          return (
-            <Fragment key={key}>
-              <FieldsAccordion<T>
-                id={`${dataTestSubject}${key}`}
-                initialIsOpen={Boolean(accordionState[key])}
-                label={fieldGroup.title}
-                helpTooltip={fieldGroup.helpText}
-                hideDetails={fieldGroup.hideDetails}
-                hasLoaded={hasSyncedExistingFields}
-                fieldsCount={fieldGroup.fields.length}
-                isFiltered={fieldGroup.fieldCount !== fieldGroup.fields.length}
-                fieldSearchHighlight={fieldGroup.fieldSearchHighlight}
-                paginatedFields={paginatedFields[key]}
-                groupIndex={index + 1}
-                groupName={key as FieldsGroupNames}
-                onToggle={(open) => {
-                  setAccordionState((s) => ({
-                    ...s,
-                    [key]: open,
-                  }));
-                  const displayedFieldLength = getDisplayedFieldsLength(fieldGroups, {
-                    ...accordionState,
-                    [key]: open,
-                  });
-                  setPageSize(
-                    Math.max(
-                      PAGINATION_SIZE,
-                      Math.min(Math.ceil(pageSize * 1.5), displayedFieldLength)
-                    )
-                  );
-                  if (localStorageKeyPrefix) {
-                    storeInitiallyOpenSections({
-                      ...storedInitiallyOpenSections,
+        {fieldGroupsToShow
+          .filter(([_, fieldGroup]) => {
+            if (fieldGroup.fields.length) return true;
+            return !Boolean(fieldGroup.hideIfEmpty);
+          })
+          .map(([key, fieldGroup], index, _fieldGroupsToShow) => {
+            const nextFieldGroup = _fieldGroupsToShow.at(index + 1);
+
+            return (
+              <Fragment key={key}>
+                <FieldsAccordion<T>
+                  id={`${dataTestSubject}${key}`}
+                  buttonId={`${buttonIdPrefix}${key}`}
+                  initialIsOpen={Boolean(accordionState[key])}
+                  label={fieldGroup.title}
+                  helpTooltip={fieldGroup.helpText}
+                  hideDetails={fieldGroup.hideDetails}
+                  hasLoaded={hasSyncedExistingFields}
+                  fieldsCount={fieldGroup.fields.length}
+                  isFiltered={fieldGroup.fieldCount !== fieldGroup.fields.length}
+                  fieldSearchHighlight={fieldGroup.fieldSearchHighlight}
+                  paginatedFields={paginatedFields[key]}
+                  groupIndex={index + 1}
+                  groupName={key as FieldsGroupNames}
+                  onToggle={(open) => {
+                    setAccordionState((s) => ({
+                      ...s,
+                      [key]: open,
+                    }));
+                    const displayedFieldLength = getDisplayedFieldsLength(fieldGroups, {
+                      ...accordionState,
                       [key]: open,
                     });
+                    setPageSize(
+                      Math.max(
+                        PAGINATION_SIZE,
+                        Math.min(Math.ceil(pageSize * 1.5), displayedFieldLength)
+                      )
+                    );
+                    if (localStorageKeyPrefix) {
+                      storeInitiallyOpenSections({
+                        ...storedInitiallyOpenSections,
+                        [key]: open,
+                      });
+                    }
+                  }}
+                  showExistenceFetchError={fieldsExistenceStatus === ExistenceFetchStatus.failed}
+                  showExistenceFetchTimeout={fieldsExistenceStatus === ExistenceFetchStatus.failed} // TODO: deprecate timeout logic?
+                  renderCallout={() => (
+                    <NoFieldsCallout
+                      isAffectedByGlobalFilter={fieldGroup.isAffectedByGlobalFilter}
+                      isAffectedByTimerange={fieldGroup.isAffectedByTimeFilter}
+                      isAffectedByFieldFilter={fieldGroup.fieldCount !== fieldGroup.fields.length}
+                      fieldsExistInIndex={!!fieldsExistInIndex}
+                      defaultNoFieldsMessage={fieldGroup.defaultNoFieldsMessage}
+                      data-test-subj={`${dataTestSubject}${key}NoFieldsCallout`}
+                    />
+                  )}
+                  renderFieldItem={renderFieldItem}
+                  extraAction={
+                    nextFieldGroup ? (
+                      <EuiSkipLink
+                        overrideLinkBehavior
+                        destinationId={`${buttonIdPrefix}${nextFieldGroup[0]}`}
+                      >
+                        {i18n.translate('unifiedFieldList.fieldListGrouped.goToNextGroupLink', {
+                          defaultMessage: 'Go to {nextFieldGroup}',
+                          values: { nextFieldGroup: nextFieldGroup[1].title },
+                        })}
+                      </EuiSkipLink>
+                    ) : null
                   }
-                }}
-                showExistenceFetchError={fieldsExistenceStatus === ExistenceFetchStatus.failed}
-                showExistenceFetchTimeout={fieldsExistenceStatus === ExistenceFetchStatus.failed} // TODO: deprecate timeout logic?
-                renderCallout={() => (
-                  <NoFieldsCallout
-                    isAffectedByGlobalFilter={fieldGroup.isAffectedByGlobalFilter}
-                    isAffectedByTimerange={fieldGroup.isAffectedByTimeFilter}
-                    isAffectedByFieldFilter={fieldGroup.fieldCount !== fieldGroup.fields.length}
-                    fieldsExistInIndex={!!fieldsExistInIndex}
-                    defaultNoFieldsMessage={fieldGroup.defaultNoFieldsMessage}
-                    data-test-subj={`${dataTestSubject}${key}NoFieldsCallout`}
-                  />
-                )}
-                renderFieldItem={renderFieldItem}
-              />
-              <EuiSpacer size="m" />
-            </Fragment>
-          );
-        })}
+                />
+                <EuiSpacer size="m" />
+              </Fragment>
+            );
+          })}
       </div>
     </div>
   );
@@ -322,3 +395,31 @@ function shouldIncludeGroupDescriptionInAria<T extends FieldListItem>(
   // has some fields or an empty list should be still shown
   return group.fields?.length > 0 || !group.hideIfEmpty;
 }
+
+/**
+ * 1. Don't cut off the shadow of the field items
+ */
+
+const componentStyles = {
+  outerContainer: (themeContext: UseEuiTheme) => {
+    const { euiTheme } = themeContext;
+
+    return css([
+      {
+        marginLeft: `-${euiTheme.size.base}` /* 1 */,
+        position: 'relative',
+        flexGrow: 1,
+        overflow: 'auto',
+      },
+      euiOverflowScroll(themeContext, { direction: 'y', mask: true }),
+    ]);
+  },
+  innerContainer: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      paddingTop: euiTheme.size.s,
+      position: 'absolute',
+      top: 0,
+      left: euiTheme.size.base /* 1 */,
+      right: euiTheme.size.xs /* 1 */,
+    }),
+};

@@ -159,7 +159,7 @@ export const FieldStatisticsInitializer: FC<FieldStatsInitializerProps> = ({
                       }
                     )}{' '}
                 <EuiIconTip
-                  type="iInCircle"
+                  type="info"
                   content={i18n.translate(
                     'xpack.dataVisualizer.fieldStatisticsDashboardPanel.config.samplingTooltip',
                     {
@@ -210,7 +210,7 @@ export const FieldStatisticsInitializer: FC<FieldStatsInitializerProps> = ({
           {isNewPanel ? (
             <EuiCallOut
               size="s"
-              iconType="iInCircle"
+              iconType="info"
               title={
                 <FormattedMessage
                   id="xpack.dataVisualizer.fieldStatisticsDashboardPanel.config.description"

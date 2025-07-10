@@ -19,6 +19,7 @@ export { getInspectResponse } from './utils/get_inspect_response';
 export { getAlertDetailsUrl, getAlertUrl } from './utils/alerting/alert_url';
 export { convertToBuiltInComparators } from './utils/convert_legacy_outside_comparator';
 export { ProcessorEvent } from './processor_event';
+export { ElapsedTimestampTooltip } from './components/elapsed_timestamp_tooltip';
 
 export {
   enableInspectEsQueries,
@@ -27,9 +28,7 @@ export {
   defaultApmServiceEnvironment,
   apmProgressiveLoading,
   apmServiceGroupMaxNumberOfServices,
-  apmLabsButton,
   apmEnableTableSearchBar,
-  entityCentricExperience,
   apmAWSLambdaPriceFactor,
   apmAWSLambdaRequestCostPerMillion,
   syntheticsThrottlingEnabled,
@@ -67,6 +66,8 @@ export const observabilityFeatureId = 'observability';
 // Name of a locator created by the uptime plugin. Intended for use
 // by other plugins as well, so defined here to prevent cross-references.
 export { uptimeOverviewLocatorID } from '@kbn/deeplinks-observability';
+export const casesOverviewLocatorID = 'OBSERVABILITY_CASES_OVERVIEW_LOCATOR';
+export const casesDetailLocatorID = 'OBSERVABILITY_CASES_DETAIL_LOCATOR';
 export const syntheticsMonitorDetailLocatorID = 'SYNTHETICS_MONITOR_DETAIL_LOCATOR';
 export const syntheticsMonitorLocationQueryLocatorID =
   'SYNTHETICS_MONITOR_GROUP_BY_LOCATION_LOCATOR';
@@ -85,3 +86,8 @@ export const observabilityPaths = paths.observability;
 export type { AlertsLocator, AlertsLocatorParams } from './locators/alerts';
 export { AlertsLocatorDefinition } from './locators/alerts';
 export { observabilityAlertFeatureIds } from './constants';
+
+export {
+  OBSERVABILITY_TIERED_FEATURES,
+  OBSERVABILITY_COMPLETE_LANDING_PAGE_FEATURE,
+} from './product_features';

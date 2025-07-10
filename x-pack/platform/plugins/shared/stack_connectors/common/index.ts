@@ -10,6 +10,7 @@ export enum AdditionalEmailServices {
   ELASTIC_CLOUD = 'elastic_cloud',
   EXCHANGE = 'exchange_server',
   OTHER = 'other',
+  AWS_SES = 'ses',
 }
 
 export const INTERNAL_BASE_STACK_CONNECTORS_API_PATH = '/internal/stack_connectors';

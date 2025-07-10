@@ -52,7 +52,7 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ agentId, selectedT
     >
       New conversation
     </EuiButton>,
-    <EuiButtonEmpty iconType={'questionInCircle'} color="primary" iconSide="left" href="/">
+    <EuiButtonEmpty iconType={'question'} color="primary" iconSide="left" href="/">
       Learn more
     </EuiButtonEmpty>,
   ];

@@ -27,6 +27,7 @@ import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { GlobalSearchFindParams, GlobalSearchResult } from '@kbn/global-search-plugin/public';
 import React, { FC, useCallback, useEffect, useRef, useState } from 'react';
+import { apm } from '@elastic/apm-rum';
 import useDebounce from 'react-use/lib/useDebounce';
 import useEvent from 'react-use/lib/useEvent';
 import useMountedState from 'react-use/lib/useMountedState';
@@ -67,7 +68,13 @@ const SearchCharLimitExceededMessage = (props: { basePathUrl: string }) => {
 };
 
 const EmptyMessage = () => (
-  <EuiFlexGroup direction="column" justifyContent="center" style={{ minHeight: '300px' }}>
+  <EuiFlexGroup
+    direction="column"
+    justifyContent="center"
+    css={css`
+      min-height: 300px;
+    `}
+  >
     <EuiFlexItem grow={false}>
       <EuiLoadingSpinner size="xl" />
     </EuiFlexItem>
@@ -212,9 +219,14 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
           },
           error: (err) => {
             setIsLoading(false);
+
             // Not doing anything on error right now because it'll either just show the previous
             // results or empty results which is basically what we want anyways
-            reportEvent.error({ message: err, searchValue });
+            apm.captureError(err, {
+              labels: {
+                SearchValue: searchValue,
+              },
+            });
           },
           complete: () => {
             setIsLoading(false);
@@ -290,7 +302,11 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
           });
         }
       } catch (err) {
-        reportEvent.error({ message: err, searchValue });
+        apm.captureError(err, {
+          labels: {
+            SearchValue: searchValue,
+          },
+        });
         // eslint-disable-next-line no-console
         console.log('Error trying to track searchbar metrics', err);
       }

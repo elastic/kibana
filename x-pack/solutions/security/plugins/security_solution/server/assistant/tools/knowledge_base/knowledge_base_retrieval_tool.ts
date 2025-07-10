@@ -8,15 +8,13 @@
 import { tool } from '@langchain/core/tools';
 import { z } from '@kbn/zod';
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
-import type { AIAssistantKnowledgeBaseDataClient } from '@kbn/elastic-assistant-plugin/server/ai_assistant_data_clients/knowledge_base';
 import { Document } from 'langchain/document';
 import type { ContentReferencesStore } from '@kbn/elastic-assistant-common';
 import { knowledgeBaseReference, contentReferenceBlock } from '@kbn/elastic-assistant-common';
+import type { Require } from '@kbn/elastic-assistant-plugin/server/types';
 import { APP_UI_ID } from '../../../../common';
 
-export interface KnowledgeBaseRetrievalToolParams extends AssistantToolParams {
-  kbDataClient: AIAssistantKnowledgeBaseDataClient;
-}
+export type KnowledgeBaseRetrievalToolParams = Require<AssistantToolParams, 'kbDataClient'>;
 
 const toolDetails = {
   // note: this description is overwritten when `getTool` is called
@@ -34,7 +32,7 @@ export const KNOWLEDGE_BASE_RETRIEVAL_TOOL: AssistantTool = {
     const { kbDataClient, isEnabledKnowledgeBase } = params;
     return isEnabledKnowledgeBase && kbDataClient != null;
   },
-  getTool(params: AssistantToolParams) {
+  async getTool(params: AssistantToolParams) {
     if (!this.isSupported(params)) return null;
 
     const { kbDataClient, logger, contentReferencesStore } =

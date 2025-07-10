@@ -8,26 +8,27 @@
  */
 
 import {
-  ESQLCommandMode,
   ESQLCommandOption,
   Walker,
   isIdentifier,
+  isOptionNode,
+  isSource,
+  isColumn,
+  isList,
   type ESQLAst,
   type ESQLAstItem,
   type ESQLCommand,
   type ESQLFunction,
   type ESQLSingleAstItem,
+  FunctionDefinitionTypes,
 } from '@kbn/esql-ast';
-import { FunctionDefinitionTypes } from '../definitions/types';
-import { EDITOR_MARKER } from './constants';
+import { EDITOR_MARKER } from '@kbn/esql-ast/src/parser/constants';
 import {
-  isColumnItem,
-  isSourceItem,
   pipePrecedesCurrentWord,
   getFunctionDefinition,
-  isOptionItem,
-  within,
-} from './helpers';
+} from '@kbn/esql-ast/src/definitions/utils';
+import { ESQLAstExpression } from '@kbn/esql-ast/src/types';
+import { within } from './helpers';
 
 function findCommand(ast: ESQLAst, offset: number) {
   const commandIndex = ast.findIndex(
@@ -40,10 +41,10 @@ function findCommand(ast: ESQLAst, offset: number) {
 }
 
 function findOption(nodes: ESQLAstItem[], offset: number): ESQLCommandOption | undefined {
-  return findCommandSubType(nodes, offset, isOptionItem);
+  return findCommandSubType(nodes, offset, isOptionNode);
 }
 
-function findCommandSubType<T extends ESQLCommandMode | ESQLCommandOption>(
+function findCommandSubType<T extends ESQLCommandOption>(
   nodes: ESQLAstItem[],
   offset: number,
   isOfTypeFn: (node: ESQLAstItem) => node is T
@@ -67,7 +68,7 @@ export function isMarkerNode(node: ESQLAstItem | undefined): boolean {
 
   return Boolean(
     node &&
-      (isColumnItem(node) || isIdentifier(node) || isSourceItem(node)) &&
+      (isColumn(node) || isIdentifier(node) || isSource(node)) &&
       node.name.endsWith(EDITOR_MARKER)
   );
 }
@@ -99,6 +100,18 @@ export function removeMarkerArgFromArgsList<T extends ESQLSingleAstItem | ESQLCo
   return node;
 }
 
+const removeMarkerNode = (node: ESQLAstExpression) => {
+  Walker.walk(node, {
+    visitAny: (current) => {
+      if ('args' in current) {
+        current.args = current.args.filter((n) => !isMarkerNode(n));
+      } else if ('values' in current) {
+        current.values = current.values.filter((n) => !isMarkerNode(n));
+      }
+    },
+  });
+};
+
 function findAstPosition(ast: ESQLAst, offset: number) {
   const command = findCommand(ast, offset);
   if (!command) {
@@ -109,6 +122,12 @@ function findAstPosition(ast: ESQLAst, offset: number) {
   let node: ESQLSingleAstItem | undefined;
 
   Walker.walk(command, {
+    visitSource: (_node, parent, walker) => {
+      if (_node.location.max >= offset && _node.text !== EDITOR_MARKER) {
+        node = _node as ESQLSingleAstItem;
+        walker.abort();
+      }
+    },
     visitAny: (_node) => {
       if (
         _node.type === 'function' &&
@@ -118,11 +137,17 @@ function findAstPosition(ast: ESQLAst, offset: number) {
         containingFunction = _node;
       }
 
-      if (_node.location.max >= offset && _node.text !== EDITOR_MARKER) {
+      if (
+        _node.location.max >= offset &&
+        _node.text !== EDITOR_MARKER &&
+        (!isList(_node) || _node.subtype !== 'tuple')
+      ) {
         node = _node as ESQLSingleAstItem;
       }
     },
   });
+
+  if (node) removeMarkerNode(node);
 
   return {
     command: removeMarkerArgFromArgsList(command)!,
@@ -155,7 +180,15 @@ export function getAstContext(queryString: string, ast: ESQLAst, offset: number)
   let inComment = false;
 
   Walker.visitComments(ast, (node) => {
+    // if the cursor (offset) is within the range of a comment node
     if (within(offset, node.location)) {
+      inComment = true;
+      // or if the cursor (offset) is right after a single-line comment (which means there was no newline)
+    } else if (
+      node.subtype === 'single-line' &&
+      node.location &&
+      offset === node.location.max + 1
+    ) {
       inComment = true;
     }
   });
@@ -183,7 +216,7 @@ export function getAstContext(queryString: string, ast: ESQLAst, offset: number)
     }
 
     if (node.type === 'function') {
-      if (['in', 'not_in'].includes(node.name) && Array.isArray(node.args[1])) {
+      if (['in', 'not in'].includes(node.name)) {
         // command ... a in ( <here> )
         return { type: 'list' as const, command, node, option, containingFunction };
       }

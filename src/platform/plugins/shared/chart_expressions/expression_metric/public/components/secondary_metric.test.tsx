@@ -43,7 +43,6 @@ function renderSecondaryMetric(props: Partial<SecondaryMetricProps> = {}) {
         metric: { secondaryPrefix: '' },
       }}
       getMetricFormatter={jest.fn(() => () => formattedValue)}
-      fontSize={16}
       {...props}
     />
   );
@@ -257,9 +256,10 @@ describe('Secondary metric', () => {
         it.each(trendCombinationCompareToPrimary)(
           '[Compare to primary] should render a badge with the trend icon "$icon" and the formatted value (rawValue: $valueFinite, baseline: $baselineFinite)',
           ({ value, baseline, color, icon }) => {
+            const getMetricFormatterMock = jest.fn(() => (v: unknown) => String(v));
             renderSecondaryMetric({
               row: { [id]: value },
-              getMetricFormatter: jest.fn(() => (v: unknown) => String(v)),
+              getMetricFormatter: getMetricFormatterMock,
               trendConfig: {
                 icon: showIcon,
                 value: showValue,
@@ -280,6 +280,13 @@ describe('Secondary metric', () => {
               const el = screen.getByTitle(badgeText);
               expect(el).toBeInTheDocument();
               expect(el).toHaveStyle(`--euiBadgeBackgroundColor: ${color}`);
+              expect(getMetricFormatterMock).toHaveBeenCalledWith(
+                expect.any(String),
+                expect.any(Object),
+                expect.objectContaining({
+                  number: expect.objectContaining({ alwaysShowSign: true }),
+                })
+              );
             }
             if (showValue) {
               expect(

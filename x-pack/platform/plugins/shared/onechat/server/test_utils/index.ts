@@ -25,3 +25,11 @@ export {
   type MockedTool,
   type MockedExecutableTool,
 } from './tools';
+export {
+  createAgentsServiceStartMock,
+  createMockedAgentClient,
+  createMockedAgent,
+  type AgentsServiceStartMock,
+  type AgentClientMock,
+  type MockedAgent,
+} from './agents';

@@ -10,13 +10,14 @@
 import classNames from 'classnames';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { EuiPortal } from '@elastic/eui';
+import { EuiPortal, UseEuiTheme } from '@elastic/eui';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { ExitFullScreenButton } from '@kbn/shared-ux-button-exit-full-screen';
 
 import { CONTROL_GROUP_TYPE } from '@kbn/controls-plugin/common';
 import { ControlGroupApi } from '@kbn/controls-plugin/public';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { CONTROL_GROUP_EMBEDDABLE_ID } from '../../dashboard_api/control_group_manager';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { useDashboardInternalApi } from '../../dashboard_api/use_dashboard_internal_api';
@@ -66,8 +67,7 @@ export const DashboardViewport = ({
     };
   }, [layout, dashboardInternalApi]);
 
-  const classes = classNames({
-    dshDashboardViewport: true,
+  const classes = classNames('dshDashboardViewport', {
     'dshDashboardViewport--empty': panelCount === 0 && sectionCount === 0,
     'dshDashboardViewport--print': viewMode === 'print',
     'dshDashboardViewport--panelExpanded': Boolean(expandedPanelId),
@@ -103,12 +103,15 @@ export const DashboardViewport = ({
   }, [dashboard]);
   */
 
+  const styles = useMemoCss(dashboardViewportStyles);
+
   return (
     <div
       className={classNames('dshDashboardViewportWrapper', {
         'dshDashboardViewportWrapper--defaultBg': !useMargins,
         'dshDashboardViewportWrapper--isFullscreen': fullScreenMode,
       })}
+      css={styles.wrapper}
     >
       {viewMode !== 'print' ? (
         <div className={hasControls ? 'dshDashboardViewport-controls' : ''}>
@@ -135,10 +138,12 @@ export const DashboardViewport = ({
       )}
       <div
         className={classes}
+        css={styles.viewport}
         data-shared-items-container
         data-title={dashboardTitle}
         data-description={description}
         data-shared-items-count={visiblePanelCount}
+        data-test-subj={'dshDashboardViewport'}
       >
         {panelCount === 0 && sectionCount === 0 ? (
           <DashboardEmptyScreen />
@@ -148,4 +153,40 @@ export const DashboardViewport = ({
       </div>
     </div>
   );
+};
+
+const dashboardViewportStyles = {
+  wrapper: ({ euiTheme }: UseEuiTheme) => ({
+    flex: 'auto',
+    display: 'flex',
+    flexDirection: 'column' as 'column',
+    width: '100%',
+    '&.dshDashboardViewportWrapper--defaultBg': {
+      backgroundColor: euiTheme.colors.emptyShade,
+    },
+    '.dshDashboardViewport-controls': {
+      margin: `0 ${euiTheme.size.s}`,
+      paddingTop: euiTheme.size.s,
+    },
+  }),
+  viewport: {
+    width: '100%',
+    '&.dshDashboardViewport--empty': {
+      height: '100%',
+    },
+    '&.dshDashboardViewport--panelExpanded': {
+      flex: 1,
+    },
+    '&.dshDashboardViewport--print': {
+      '.kbnGrid': {
+        display: 'block !important',
+      },
+      '.kbnGridSectionHeader, .kbnGridSectionFooter': {
+        display: 'none',
+      },
+      '.kbnGridPanel': {
+        height: '100% !important',
+      },
+    },
+  },
 };

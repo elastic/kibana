@@ -421,7 +421,6 @@ export const mockGlobalState: State = {
             sortDirection: 'desc',
           },
         ],
-        graphEventId: '',
         selectAll: false,
         id: TableId.test,
         title: '',
@@ -490,6 +489,16 @@ export const mockGlobalState: State = {
         ),
       },
       [SourcererScopeName.analyzer]: {
+        ...mockSourcererState.sourcererScopes[SourcererScopeName.default],
+        selectedDataViewId: mockSourcererState.defaultDataView.id,
+        selectedPatterns: getScopePatternListSelection(
+          mockSourcererState.defaultDataView,
+          SourcererScopeName.default,
+          mockSourcererState.signalIndexName,
+          true
+        ),
+      },
+      [SourcererScopeName.explore]: {
         ...mockSourcererState.sourcererScopes[SourcererScopeName.default],
         selectedDataViewId: mockSourcererState.defaultDataView.id,
         selectedPatterns: getScopePatternListSelection(

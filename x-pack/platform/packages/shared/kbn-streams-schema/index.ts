@@ -36,6 +36,8 @@ export {
   type DissectProcessorDefinition,
   type GrokProcessorConfig,
   type GrokProcessorDefinition,
+  type ManualIngestPipelineProcessorConfig as ManualIngestPipelineProcessorConfig,
+  type ManualIngestPipelineProcessorDefinition as ManualIngestPipelineProcessorDefinition,
   getProcessorConfig,
   getProcessorType,
   processorWithIdDefinitionSchema,
@@ -47,6 +49,8 @@ export { type RoutingDefinition, routingDefinitionListSchema } from './src/model
 export { type ContentPack, contentPackSchema } from './src/content';
 
 export { isRootStreamDefinition } from './src/helpers/is_root';
+export { getIndexPatternsForStream } from './src/helpers/hierarchy_helpers';
+
 export {
   keepFields,
   namespacePrefixes,
@@ -56,13 +60,15 @@ export {
 export { getAdvancedParameters } from './src/helpers/get_advanced_parameters';
 export { getInheritedFieldsFromAncestors } from './src/helpers/get_inherited_fields_from_ancestors';
 
+export * from './src/ingest_pipeline_processors';
+
 export {
   type SampleDocument,
   type FlattenRecord,
   flattenRecord,
   recursiveRecord,
 } from './src/shared/record_types';
-export { isSchema } from './src/shared/type_guards';
+export { isSchema, createIsNarrowSchema } from './src/shared/type_guards';
 
 export {
   isChildOf,
@@ -87,7 +93,13 @@ export {
 
 export { getConditionFields } from './src/helpers/get_condition_fields';
 
-export { type StreamQuery, upsertStreamQueryRequestSchema, streamQuerySchema } from './src/queries';
+export {
+  type StreamQuery,
+  type StreamQueryKql,
+  upsertStreamQueryRequestSchema,
+  streamQueryKqlSchema,
+  streamQuerySchema,
+} from './src/queries';
 
 export { findInheritedLifecycle, findInheritingStreams } from './src/helpers/lifecycle';
 
@@ -99,6 +111,9 @@ export {
   type IlmPolicyHotPhase,
   type IlmPolicyDeletePhase,
   type IngestStreamLifecycleILM,
+  type IngestStreamLifecycleDSL,
+  type IngestStreamLifecycleDisabled,
+  type IngestStreamLifecycleInherit,
   type IngestStreamEffectiveLifecycle,
   type PhaseName,
   isDslLifecycle,
@@ -126,5 +141,11 @@ export {
   conditionSchema,
   isCondition,
 } from './src/conditions';
+
+export type {
+  SignificantEventsResponse,
+  SignificantEventsGetResponse,
+  SignificantEventsPreviewResponse,
+} from './src/api/significant_events';
 
 export { conditionToQueryDsl } from './src/helpers/condition_to_query_dsl';

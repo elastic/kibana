@@ -9,7 +9,7 @@ import type { FC, PropsWithChildren } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiSelectProps } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect, useEuiTheme } from '@elastic/eui';
 import { debounce } from 'lodash';
 import { lastValueFrom } from 'rxjs';
 import { useStorage } from '@kbn/ml-local-storage';
@@ -107,6 +107,7 @@ export const SeriesControls: FC<PropsWithChildren<SeriesControlsProps>> = ({
     },
   } = useMlKibana();
   const mlJobService = useMlJobService();
+  const { euiTheme } = useEuiTheme();
 
   const selectedJob: CombinedJob | MlJob = useMemo(
     () => job ?? mlJobService.getJob(selectedJobId),
@@ -355,6 +356,7 @@ export const SeriesControls: FC<PropsWithChildren<SeriesControlsProps>> = ({
               key={entityKey}
               options={getEntityControlOptions(entityValues[entity.fieldName])}
               isModelPlotEnabled={isModelPlotEnabled}
+              euiTheme={euiTheme}
             />
           );
         })}

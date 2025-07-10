@@ -108,6 +108,7 @@ export function createTestConfig(options: CreateTestConfigOptions, testFiles?: s
             'previewTelemetryUrlEnabled',
             'riskScoringPersistence',
             'riskScoringRoutesEnabled',
+            'bulkEditAlertSuppressionEnabled',
           ])}`,
           `--plugin-path=${path.resolve(
             __dirname,

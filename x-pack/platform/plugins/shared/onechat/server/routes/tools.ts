@@ -5,21 +5,21 @@
  * 2.0.
  */
 
+import { schema } from '@kbn/config-schema';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import { toolToDescriptor } from '../services/tools/utils/tool_conversion';
+import type { ListToolsResponse } from '../../common/http_api/tools';
+import { apiPrivileges } from '../../common/features';
 
 export function registerToolsRoutes({ router, getInternalServices, logger }: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
 
-  router.get(
+  router.post(
     {
-      path: '/api/onechat/tools/list',
+      path: '/internal/onechat/tools',
       security: {
-        authz: {
-          enabled: false,
-          reason: 'Platform feature - RBAC in lower layers',
-        },
+        authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
       },
       validate: false,
     },
@@ -27,11 +27,63 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
       const { tools: toolService } = getInternalServices();
       const registry = toolService.registry.asScopedPublicRegistry({ request });
       const tools = await registry.list({});
-      return response.ok({
+      return response.ok<ListToolsResponse>({
         body: {
           tools: tools.map(toolToDescriptor),
         },
       });
     })
   );
+
+  router.versioned
+    .post({
+      path: '/api/chat/tools/_execute',
+      security: {
+        authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
+      },
+      access: 'public',
+      summary: 'Execute a Tool',
+      options: {
+        tags: ['tools'],
+        availability: {
+          stability: 'experimental',
+        },
+      },
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: {
+            body: schema.object({
+              id: schema.string({}),
+              params: schema.recordOf(schema.string(), schema.any()),
+            }),
+          },
+        },
+      },
+      wrapHandler(async (ctx, request, response) => {
+        const { id, params } = request.body;
+        const { tools: toolService } = getInternalServices();
+        const registry = toolService.registry.asScopedPublicRegistry({ request });
+        const tool = await registry.get(id);
+
+        const validation = tool.schema.safeParse(params);
+        if (validation.error) {
+          return response.badRequest({
+            body: {
+              message: `Invalid parameters: ${validation.error.message}`,
+            },
+          });
+        }
+
+        const toolResult = await tool.execute({ toolParams: params });
+
+        return response.ok({
+          body: {
+            result: toolResult.result,
+          },
+        });
+      })
+    );
 }

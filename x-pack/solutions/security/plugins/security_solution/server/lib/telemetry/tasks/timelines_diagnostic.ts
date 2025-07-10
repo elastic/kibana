@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
+import type { LogMeta, Logger } from '@kbn/core/server';
 import { DEFAULT_DIAGNOSTIC_INDEX_PATTERN } from '../../../../common/endpoint/constants';
 import type { ITelemetryEventsSender } from '../sender';
 import type { ITelemetryReceiver } from '../receiver';
@@ -36,7 +36,7 @@ export function createTelemetryDiagnosticTimelineTaskConfig() {
       const trace = taskMetricsService.start(taskType);
       const fetcher = new TelemetryTimelineFetcher(receiver);
 
-      log.l('Running telemetry task');
+      log.debug('Running telemetry task');
 
       try {
         let counter = 0;
@@ -49,7 +49,7 @@ export function createTelemetryDiagnosticTimelineTaskConfig() {
           rangeTo
         );
 
-        log.l('found alerts to process', { length: alerts.length });
+        log.debug('found alerts to process', { length: alerts.length } as LogMeta);
 
         for (const alert of alerts) {
           const result = await fetcher.fetchTimeline(alert);
@@ -74,14 +74,14 @@ export function createTelemetryDiagnosticTimelineTaskConfig() {
           }
         }
 
-        log.l('Concluding timeline task.', { counter });
+        log.debug('Concluding timeline task.', { counter } as LogMeta);
 
         await taskMetricsService.end(trace);
 
         return counter;
-      } catch (err) {
-        logger.error('could not complete task', { error: err });
-        await taskMetricsService.end(trace, err);
+      } catch (error) {
+        logger.error('could not complete task', { error });
+        await taskMetricsService.end(trace, error);
         return 0;
       }
     },

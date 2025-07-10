@@ -11,6 +11,7 @@ import type { MethodKeysOf } from '@kbn/utility-types';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import type { ActionsClientMock } from '@kbn/actions-plugin/server/mocks';
+import type { HasPrivilegesResponseApplication } from '@kbn/security-plugin-types-server';
 import type { RulesClientMock } from '../rules_client.mock';
 import { rulesClientMock } from '../rules_client.mock';
 import type { RulesSettingsClientMock } from '../rules_settings/rules_settings_client.mock';
@@ -19,6 +20,10 @@ import type { MaintenanceWindowClientMock } from '../maintenance_window_client.m
 import { maintenanceWindowClientMock } from '../maintenance_window_client.mock';
 import type { AlertsHealth, RuleType } from '../../common';
 import type { AlertingRequestHandlerContext } from '../types';
+import {
+  alertDeletionClientMock,
+  type AlertDeletionClientMock,
+} from '../alert_deletion/alert_deletion_client.mock';
 
 export function mockHandlerArguments(
   {
@@ -29,6 +34,8 @@ export function mockHandlerArguments(
     listTypes: listTypesRes = [],
     getFrameworkHealth,
     areApiKeysEnabled,
+    alertDeletionClient,
+    hasRequiredPrivilegeGrantedInAllSpaces,
   }: {
     rulesClient?: RulesClientMock;
     actionsClient?: ActionsClientMock;
@@ -38,6 +45,10 @@ export function mockHandlerArguments(
     getFrameworkHealth?: jest.MockInstance<Promise<AlertsHealth>, []> &
       (() => Promise<AlertsHealth>);
     areApiKeysEnabled?: () => Promise<boolean>;
+    alertDeletionClient?: AlertDeletionClientMock;
+    hasRequiredPrivilegeGrantedInAllSpaces?: (
+      args: HasPrivilegesResponseApplication
+    ) => Promise<boolean>;
   },
   request: unknown,
   response?: Array<MethodKeysOf<KibanaResponseFactory>>
@@ -66,6 +77,14 @@ export function mockHandlerArguments(
         },
         getFrameworkHealth,
         areApiKeysEnabled: areApiKeysEnabled ? areApiKeysEnabled : () => Promise.resolve(true),
+        getAlertDeletionClient() {
+          return alertDeletionClient || alertDeletionClientMock.create();
+        },
+        hasRequiredPrivilegeGrantedInAllSpaces: hasRequiredPrivilegeGrantedInAllSpaces
+          ? hasRequiredPrivilegeGrantedInAllSpaces
+          : () => {
+              return Promise.resolve(true);
+            },
       },
       actions: {
         getActionsClient() {
