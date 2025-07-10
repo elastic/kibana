@@ -56,51 +56,61 @@ const generateBackfillTransformPutRequest = ({
   docsPerSecond?: number;
   maxPageSearchSize?: number;
 }): TransformPutTransformRequest => {
-  return {
-    transform_id: transformId,
-    _meta: {
-      definition_version: definition.version,
-      managed: definition.managed,
-    },
-    defer_validation: true,
-    timeout: definition.latest.settings?.timeout,
-    source: {
-      index: definition.indexPatterns,
-      query: filter,
-    },
-    dest: {
-      index: `${generateLatestBackfillIndexName({ id: 'noop' } as EntityDefinition)}`,
-      pipeline: generateLatestBackfillIngestPipelineId(definition),
-    },
-    settings: {
-      deduce_mappings: false,
-      unattended: true,
-      docs_per_second: docsPerSecond,
-      max_page_search_size: maxPageSearchSize,
-    },
-    pivot: {
-      group_by: {
-        ...definition.identityFields.reduce(
-          (acc, id) => ({
-            ...acc,
-            [`entity.identity.${id.field}`]: {
-              terms: { field: id.field },
-            },
-          }),
-          {}
-        ),
+  const lookback = definition.latest.lookbackPeriod;
+  try {
+    definition.latest.lookbackPeriod = definition.latest.initialBackfillPeriod;
+    const request = {
+      transform_id: transformId,
+      _meta: {
+        definition_version: definition.version,
+        managed: definition.managed,
       },
-      aggs: {
-        ...generateLatestMetricAggregations(definition),
-        ...generateLatestMetadataAggregations(definition),
-        'entity.last_seen_timestamp': {
-          max: {
-            field: definition.latest.timestampField,
+      defer_validation: true,
+      timeout: definition.latest.settings?.timeout,
+      source: {
+        index: definition.indexPatterns,
+        query: filter,
+      },
+      dest: {
+        index: `${generateLatestBackfillIndexName({ id: 'noop' } as EntityDefinition)}`,
+        pipeline: generateLatestBackfillIngestPipelineId(definition),
+      },
+      settings: {
+        deduce_mappings: false,
+        unattended: true,
+        docs_per_second: docsPerSecond,
+        max_page_search_size: maxPageSearchSize,
+      },
+      pivot: {
+        group_by: {
+          ...definition.identityFields.reduce(
+            (acc, id) => ({
+              ...acc,
+              [`entity.identity.${id.field}`]: {
+                terms: { field: id.field },
+              },
+            }),
+            {}
+          ),
+        },
+        aggs: {
+          ...generateLatestMetricAggregations(definition),
+          ...generateLatestMetadataAggregations(definition),
+          'entity.last_seen_timestamp': {
+            max: {
+              field: definition.latest.timestampField,
+            },
           },
         },
       },
-    },
-  };
+    };
+
+    definition.latest.lookbackPeriod = lookback;
+    return request;
+  } catch (e) {
+    definition.latest.lookbackPeriod = lookback;
+    throw e;
+  }
 };
 
 function generateBackfillFilters(definition: EntityDefinition, timestampFilter: string | undefined) {
