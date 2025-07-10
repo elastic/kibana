@@ -140,6 +140,9 @@ export function registerQueryFunction({
             { description: fn.description, schema: fn.parameters } as ToolDefinition,
           ])
         ),
+        system: `If the query is visualized once, don't attempt to visualize the same query again immediately.
+          After calling visualize_query you are done - **do NOT repeat the ES|QL query or add any further
+          explanation unless the user explicitly asks for it again.**`,
         functionCalling: simulateFunctionCalling ? 'simulated' : 'auto',
         maxRetries: 0,
         metadata: {
