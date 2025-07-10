@@ -180,29 +180,7 @@ export class AutoInstallContentPackagesTask {
         {} as { [name: string]: string }
       );
 
-      const discoveryMapWithNotInstalledPackages: DiscoveryMap = Object.entries(
-        this.discoveryMap
-      ).reduce((acc, [dataset, mapValue]) => {
-        const packages = mapValue.packages.filter(
-          (pkg) => !installedPackagesMap[pkg.name] || installedPackagesMap[pkg.name] !== pkg.version
-        );
-        if (packages.length > 0) {
-          acc[dataset] = { packages };
-        }
-        return acc;
-      }, {} as DiscoveryMap);
-
-      const datasetsInContentPacks = Object.keys(discoveryMapWithNotInstalledPackages);
-      if (datasetsInContentPacks.length === 0) {
-        return;
-      }
-
-      const packagesToInstall = await this.getPackagesToInstall(
-        esClient,
-        discoveryMapWithNotInstalledPackages,
-        datasetsInContentPacks,
-        installedPackagesMap
-      );
+      const packagesToInstall = await this.getPackagesToInstall(esClient, installedPackagesMap);
       this.logger.debug(
         `[AutoInstallContentPackagesTask] Content packages to install: ${packagesToInstall
           .map((pkg) => `${pkg.name}@${pkg.version}`)
@@ -249,15 +227,43 @@ export class AutoInstallContentPackagesTask {
 
   private async getPackagesToInstall(
     esClient: ElasticsearchClient,
-    discoveryMap: DiscoveryMap,
-    datasetsInContentPacks: string[],
     installedPackagesMap: { [name: string]: string }
   ) {
-    const datasetsWithData = await this.getDatasetsWithData(esClient, datasetsInContentPacks);
+    const datasetsOfInstalledContentPackages: string[] = Object.entries(this.discoveryMap!).reduce(
+      (acc: string[], [dataset, mapValue]) => {
+        if (
+          mapValue.packages.every(
+            (pkg) =>
+              installedPackagesMap[pkg.name] && installedPackagesMap[pkg.name] === pkg.version
+          )
+        ) {
+          acc.push(dataset);
+        }
+        return acc;
+      },
+      []
+    );
+
+    const datasetsWithData = await this.getDatasetsWithData(
+      esClient,
+      datasetsOfInstalledContentPackages
+    );
+
+    const discoveryMapWithNotInstalledPackages: DiscoveryMap = Object.entries(
+      this.discoveryMap!
+    ).reduce((acc, [dataset, mapValue]) => {
+      const packages = mapValue.packages.filter(
+        (pkg) => !installedPackagesMap[pkg.name] || installedPackagesMap[pkg.name] !== pkg.version
+      );
+      if (packages.length > 0) {
+        acc[dataset] = { packages };
+      }
+      return acc;
+    }, {} as DiscoveryMap);
 
     const packagesToInstall: { [name: string]: string } = {};
 
-    for (const [dataset, mapValue] of Object.entries(discoveryMap)) {
+    for (const [dataset, mapValue] of Object.entries(discoveryMapWithNotInstalledPackages)) {
       const packages = mapValue.packages;
 
       const hasData = datasetsWithData.includes(dataset);
@@ -275,12 +281,16 @@ export class AutoInstallContentPackagesTask {
 
   private async getDatasetsWithData(
     esClient: ElasticsearchClient,
-    datasetsInContentPacks: string[]
+    datasetsOfInstalledContentPackages: string[]
   ): Promise<string[]> {
+    const whereClause =
+      datasetsOfInstalledContentPackages.length > 0
+        ? `| WHERE data_stream.dataset NOT IN (${datasetsOfInstalledContentPackages
+            .map((dataset) => `"${dataset}"`)
+            .join(',')})`
+        : '';
     const response = await esClient.esql.query({
-      query: `FROM logs-*,metrics-*,traces-* | STATS COUNT(*) BY data_stream.dataset | LIMIT 1000 | WHERE data_stream.dataset IN (${datasetsInContentPacks
-        .map((dataset) => `"${dataset}"`)
-        .join(',')})`,
+      query: `FROM logs-*,metrics-*,traces-* | STATS COUNT(*) BY data_stream.dataset | LIMIT 100 ${whereClause}`,
       filter: {
         range: {
           '@timestamp': {
