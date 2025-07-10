@@ -123,13 +123,8 @@ export const useAnonymizationUpdater = ({
 
   const onListUpdated: OnListUpdated = useCallback(
     (updates) => {
-      // when isSelectAll is true, we use anonymizationAllFields to find the field
-      // otherwise, we use `updates` to find the field
-      const batchUpdatedFields = updates;
-      const updatedFieldsKeys = batchUpdatedFields.map((u) => u.field);
-      const updatedFields = batchUpdatedFields.map((u) => ({
-        // when isSelectAll is true, we use anonymizationAllFields to find the field
-        // otherwise, we use updatedAnonymizationData (anonymizationPageFields) to find the field
+      const updatedFieldsKeys = updates.map((u) => u.field);
+      const updatedFields = updates.map((u) => ({
         ...((anonymizationAllFields?.data ?? []).find((f) => f.field === u.field) ?? {
           id: '',
           field: '',
