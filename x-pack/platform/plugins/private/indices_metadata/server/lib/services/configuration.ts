@@ -16,6 +16,7 @@ import {
 } from 'rxjs';
 import type { Logger, LogMeta } from '@kbn/core/server';
 import { ArtifactService } from './artifact';
+import { ArtifactNotFoundError, ManifestNotFoundError } from './artifact.errors';
 import {
   IndicesMetadataConfiguration,
   IndicesMetadataConfigurationSchema,
@@ -26,16 +27,16 @@ const CONFIGURATION_ARTIFACT_NAME = 'indices-metadata-configuration';
 export class ConfigurationService {
   private readonly logger: Logger;
   private readonly artifactService: ArtifactService;
-  private readonly indicesMetadataConfiguration$: Observable<
-    IndicesMetadataConfiguration | undefined
-  >;
+  private indicesMetadataConfiguration$!: Observable<IndicesMetadataConfiguration | undefined>;
 
   private readonly stop$ = new ReplaySubject<void>(1);
 
   constructor(logger: Logger, artifactService: ArtifactService) {
     this.logger = logger.get(ConfigurationService.name);
     this.artifactService = artifactService;
+  }
 
+  public start() {
     this.indicesMetadataConfiguration$ = timer(0, REFRESH_CONFIG_INTERVAL_MS).pipe(
       exhaustMap(() => this.getConfiguration()),
       takeUntil(this.stop$),
@@ -69,7 +70,13 @@ export class ConfigurationService {
       } as LogMeta);
       return IndicesMetadataConfigurationSchema.validate(artifact.data);
     } catch (error) {
-      this.logger.error('Failed to get indices metadata configuration', { error });
+      if (error instanceof ManifestNotFoundError) {
+        this.logger.warn('Indices metadata configuration manifest not found');
+      } else if (error instanceof ArtifactNotFoundError) {
+        this.logger.warn('Indices metadata configuration artifact not found');
+      } else {
+        this.logger.error('Failed to get indices metadata configuration', { error } as LogMeta);
+      }
       return undefined;
     }
   }

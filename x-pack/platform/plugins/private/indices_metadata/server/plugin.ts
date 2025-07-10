@@ -76,14 +76,16 @@ export class IndicesMetadataPlugin
   public start(core: CoreStart, plugin: IndicesMetadataPluginStartDeps) {
     this.logger.debug('Starting indices metadata plugin');
 
-    this.sender.start(core.analytics);
-    this.receiver.start(core.elasticsearch.client.asInternalUser);
-    this.indicesMetadataService.start(plugin.taskManager);
-
     this.config$.subscribe(async (pluginConfig) => {
       this.logger.debug('PluginConfig changed', { pluginConfig } as LogMeta);
+
       const info = await core.elasticsearch.client.asInternalUser.info();
+
+      this.sender.start(core.analytics);
+      this.receiver.start(core.elasticsearch.client.asInternalUser);
+      this.configurationService.start();
       this.artifactService.start(info, this.effectiveCdnConfig(pluginConfig));
+      this.indicesMetadataService.start(plugin.taskManager);
     });
   }
 

@@ -88,6 +88,10 @@ export class IndicesMetadataService {
   }
 
   private async publishIndicesMetadata() {
+    if (this.configuration.index_query_size === 0) {
+      this.logger.debug('Index query size is 0, skipping indices metadata publish');
+      return;
+    }
     this.logger.debug('About to publish indices metadata');
 
     // 1. Get cluster stats and list of indices and datastreams
