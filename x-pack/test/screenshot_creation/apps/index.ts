@@ -9,8 +9,6 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('apps', function () {
-    loadTestFile(require.resolve('./ml_docs'));
     loadTestFile(require.resolve('./response_ops_docs'));
-    loadTestFile(require.resolve('./transform_docs'));
   });
 }
