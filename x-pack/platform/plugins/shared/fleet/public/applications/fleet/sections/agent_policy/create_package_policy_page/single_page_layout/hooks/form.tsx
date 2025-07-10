@@ -310,7 +310,6 @@ export function useOnSubmit({
   );
 
   // Initial loading of package info
-
   useEffect(() => {
     async function init() {
       if (
