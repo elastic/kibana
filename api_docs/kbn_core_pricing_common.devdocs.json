@@ -62,7 +62,7 @@
                   "- The current pricing tiers configuration"
                 ],
                 "signature": [
-                  "Readonly<{ products?: (Readonly<{} & { name: \"observability\"; tier: \"complete\" | \"logs_essentials\"; }> | Readonly<{} & { name: \"ai_soc\"; tier: \"search_ai_lake\"; }> | Readonly<{} & { name: \"security\"; tier: \"complete\" | \"search_ai_lake\" | \"essentials\"; }> | Readonly<{} & { name: \"endpoint\"; tier: \"complete\" | \"search_ai_lake\" | \"essentials\"; }> | Readonly<{} & { name: \"cloud\"; tier: \"complete\" | \"search_ai_lake\" | \"essentials\"; }>)[] | undefined; } & { enabled: boolean; }>"
+                  "Readonly<{ products?: (Readonly<{} & { name: \"observability\"; tier: \"complete\" | \"logs_essentials\"; }> | Readonly<{} & { name: \"ai_soc\"; tier: \"search_ai_lake\"; }> | Readonly<{} & { name: \"security\"; tier: \"complete\" | \"essentials\" | \"search_ai_lake\"; }> | Readonly<{} & { name: \"endpoint\"; tier: \"complete\" | \"essentials\" | \"search_ai_lake\"; }> | Readonly<{} & { name: \"cloud\"; tier: \"complete\" | \"essentials\" | \"search_ai_lake\"; }>)[] | undefined; } & { enabled: boolean; }>"
                 ],
                 "path": "src/core/packages/pricing/common/src/pricing_tiers_client.ts",
                 "deprecated": false,
@@ -99,7 +99,7 @@
               "\nSets the pricing tiers configuration.\n"
             ],
             "signature": [
-              "(tiers: Readonly<{ products?: (Readonly<{} & { name: \"observability\"; tier: \"complete\" | \"logs_essentials\"; }> | Readonly<{} & { name: \"ai_soc\"; tier: \"search_ai_lake\"; }> | Readonly<{} & { name: \"security\"; tier: \"complete\" | \"search_ai_lake\" | \"essentials\"; }> | Readonly<{} & { name: \"endpoint\"; tier: \"complete\" | \"search_ai_lake\" | \"essentials\"; }> | Readonly<{} & { name: \"cloud\"; tier: \"complete\" | \"search_ai_lake\" | \"essentials\"; }>)[] | undefined; } & { enabled: boolean; }>) => void"
+              "(tiers: Readonly<{ products?: (Readonly<{} & { name: \"observability\"; tier: \"complete\" | \"logs_essentials\"; }> | Readonly<{} & { name: \"ai_soc\"; tier: \"search_ai_lake\"; }> | Readonly<{} & { name: \"security\"; tier: \"complete\" | \"essentials\" | \"search_ai_lake\"; }> | Readonly<{} & { name: \"endpoint\"; tier: \"complete\" | \"essentials\" | \"search_ai_lake\"; }> | Readonly<{} & { name: \"cloud\"; tier: \"complete\" | \"essentials\" | \"search_ai_lake\"; }>)[] | undefined; } & { enabled: boolean; }>) => void"
             ],
             "path": "src/core/packages/pricing/common/src/pricing_tiers_client.ts",
             "deprecated": false,
@@ -115,7 +115,7 @@
                   "- The new pricing tiers configuration"
                 ],
                 "signature": [
-                  "Readonly<{ products?: (Readonly<{} & { name: \"observability\"; tier: \"complete\" | \"logs_essentials\"; }> | Readonly<{} & { name: \"ai_soc\"; tier: \"search_ai_lake\"; }> | Readonly<{} & { name: \"security\"; tier: \"complete\" | \"search_ai_lake\" | \"essentials\"; }> | Readonly<{} & { name: \"endpoint\"; tier: \"complete\" | \"search_ai_lake\" | \"essentials\"; }> | Readonly<{} & { name: \"cloud\"; tier: \"complete\" | \"search_ai_lake\" | \"essentials\"; }>)[] | undefined; } & { enabled: boolean; }>"
+                  "Readonly<{ products?: (Readonly<{} & { name: \"observability\"; tier: \"complete\" | \"logs_essentials\"; }> | Readonly<{} & { name: \"ai_soc\"; tier: \"search_ai_lake\"; }> | Readonly<{} & { name: \"security\"; tier: \"complete\" | \"essentials\" | \"search_ai_lake\"; }> | Readonly<{} & { name: \"endpoint\"; tier: \"complete\" | \"essentials\" | \"search_ai_lake\"; }> | Readonly<{} & { name: \"cloud\"; tier: \"complete\" | \"essentials\" | \"search_ai_lake\"; }>)[] | undefined; } & { enabled: boolean; }>"
                 ],
                 "path": "src/core/packages/pricing/common/src/pricing_tiers_client.ts",
                 "deprecated": false,
@@ -422,7 +422,7 @@
             "label": "products",
             "description": [],
             "signature": [
-              "(Readonly<{} & { name: \"observability\"; tier: \"complete\" | \"logs_essentials\"; }> | Readonly<{} & { name: \"ai_soc\"; tier: \"search_ai_lake\"; }> | Readonly<{} & { name: \"security\"; tier: \"complete\" | \"search_ai_lake\" | \"essentials\"; }> | Readonly<{} & { name: \"endpoint\"; tier: \"complete\" | \"search_ai_lake\" | \"essentials\"; }> | Readonly<{} & { name: \"cloud\"; tier: \"complete\" | \"search_ai_lake\" | \"essentials\"; }>)[]"
+              "(Readonly<{} & { name: \"observability\"; tier: \"complete\" | \"logs_essentials\"; }> | Readonly<{} & { name: \"ai_soc\"; tier: \"search_ai_lake\"; }> | Readonly<{} & { name: \"security\"; tier: \"complete\" | \"essentials\" | \"search_ai_lake\"; }> | Readonly<{} & { name: \"endpoint\"; tier: \"complete\" | \"essentials\" | \"search_ai_lake\"; }> | Readonly<{} & { name: \"cloud\"; tier: \"complete\" | \"essentials\" | \"search_ai_lake\"; }>)[]"
             ],
             "path": "src/core/packages/pricing/common/src/types.ts",
             "deprecated": false,
@@ -444,7 +444,7 @@
           "\nRepresents a product with an associated pricing tier.\nUsed to determine feature availability based on the current pricing configuration.\n"
         ],
         "signature": [
-          "Readonly<{} & { name: \"observability\"; tier: \"complete\" | \"logs_essentials\"; }> | Readonly<{} & { name: \"ai_soc\"; tier: \"search_ai_lake\"; }> | Readonly<{} & { name: \"security\"; tier: \"complete\" | \"search_ai_lake\" | \"essentials\"; }> | Readonly<{} & { name: \"endpoint\"; tier: \"complete\" | \"search_ai_lake\" | \"essentials\"; }> | Readonly<{} & { name: \"cloud\"; tier: \"complete\" | \"search_ai_lake\" | \"essentials\"; }>"
+          "Readonly<{} & { name: \"observability\"; tier: \"complete\" | \"logs_essentials\"; }> | Readonly<{} & { name: \"ai_soc\"; tier: \"search_ai_lake\"; }> | Readonly<{} & { name: \"security\"; tier: \"complete\" | \"essentials\" | \"search_ai_lake\"; }> | Readonly<{} & { name: \"endpoint\"; tier: \"complete\" | \"essentials\" | \"search_ai_lake\"; }> | Readonly<{} & { name: \"cloud\"; tier: \"complete\" | \"essentials\" | \"search_ai_lake\"; }>"
         ],
         "path": "src/core/packages/pricing/common/src/pricing_tiers_config.ts",
         "deprecated": false,
@@ -461,7 +461,7 @@
           "\nConfiguration for pricing tiers that determines feature availability.\nWhen enabled, features are only available if they're associated with an active product.\nWhen disabled, all features are considered available.\n"
         ],
         "signature": [
-          "{ readonly products?: (Readonly<{} & { name: \"observability\"; tier: \"complete\" | \"logs_essentials\"; }> | Readonly<{} & { name: \"ai_soc\"; tier: \"search_ai_lake\"; }> | Readonly<{} & { name: \"security\"; tier: \"complete\" | \"search_ai_lake\" | \"essentials\"; }> | Readonly<{} & { name: \"endpoint\"; tier: \"complete\" | \"search_ai_lake\" | \"essentials\"; }> | Readonly<{} & { name: \"cloud\"; tier: \"complete\" | \"search_ai_lake\" | \"essentials\"; }>)[] | undefined; readonly enabled: boolean; }"
+          "{ readonly products?: (Readonly<{} & { name: \"observability\"; tier: \"complete\" | \"logs_essentials\"; }> | Readonly<{} & { name: \"ai_soc\"; tier: \"search_ai_lake\"; }> | Readonly<{} & { name: \"security\"; tier: \"complete\" | \"essentials\" | \"search_ai_lake\"; }> | Readonly<{} & { name: \"endpoint\"; tier: \"complete\" | \"essentials\" | \"search_ai_lake\"; }> | Readonly<{} & { name: \"cloud\"; tier: \"complete\" | \"essentials\" | \"search_ai_lake\"; }>)[] | undefined; readonly enabled: boolean; }"
         ],
         "path": "src/core/packages/pricing/common/src/pricing_tiers_config.ts",
         "deprecated": false,
