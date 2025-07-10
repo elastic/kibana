@@ -43,7 +43,7 @@ export interface ToolClient {
   get(toolId: string): Promise<ToolDefinition>;
   list(opts?: ToolListParams): Promise<ToolDefinition[]>;
   create(tool: ToolCreateParams): Promise<ToolDefinition>;
-  update(tool: ToolUpdateParams): Promise<ToolDefinition>;
+  update(toolId: string, update: ToolUpdateParams): Promise<ToolDefinition>;
   delete(toolId: string): Promise<boolean>;
 }
 
@@ -97,6 +97,11 @@ class ToolClientImpl implements ToolClient {
 
   async create(tool: ToolCreateParams) {
     const { type, ...toolCreateParams } = tool;
+
+    if (await this.has(tool.id)) {
+      throw createBadRequestError(`Tool with id ${tool.id} already exists`);
+    }
+
     const typeDef = this.typesDefinitions.find((t) => t.toolType === type);
     if (!typeDef) {
       throw createBadRequestError(`Unknown tool type ${type}`);
@@ -109,15 +114,15 @@ class ToolClientImpl implements ToolClient {
     }
   }
 
-  async update(tool: ToolUpdateParams) {
+  async update(toolId: string, update: ToolUpdateParams) {
     for (const type of this.typesDefinitions) {
       const client = await type.getClient({ request: this.request });
-      if (await client.has(tool.id)) {
+      if (await client.has(toolId)) {
         if (type.readonly) {
-          throw createBadRequestError(`Tool ${tool.id} is read-only and can't be updated`);
+          throw createBadRequestError(`Tool ${toolId} is read-only and can't be updated`);
         }
         if (isToolTypeClient(client)) {
-          return client.update(tool);
+          return client.update(toolId, update);
         } else {
           throw createInternalError(
             `Non-readonly type ${type.toolType} exposes a read-only client`
@@ -125,7 +130,7 @@ class ToolClientImpl implements ToolClient {
         }
       }
     }
-    throw createToolNotFoundError({ toolId: tool.id });
+    throw createToolNotFoundError({ toolId });
   }
 
   async delete(toolId: string): Promise<boolean> {

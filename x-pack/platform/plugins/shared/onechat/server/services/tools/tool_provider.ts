@@ -21,25 +21,21 @@ export interface ToolDefinition<
 }
 
 export interface ToolCreateParams<TConfig extends object = {}> {
-  id?: string;
+  id: string;
   type: ToolType;
   description?: string;
   tags?: string[];
-  config: TConfig;
+  configuration: TConfig;
 }
 
 export interface ToolUpdateParams<TConfig extends object = {}> {
-  id: string;
   description?: string;
   tags?: string[];
-  config?: Partial<TConfig>;
+  configuration?: Partial<TConfig>;
 }
 
-export type ToolTypeCreateParams<TConfig extends object = {}> = Omit<
-  ToolCreateParams<TConfig>,
-  'type'
->;
-
+// TODO: duplicate ? delete?
+export type ToolTypeCreateParams<TConfig extends object = {}> = ToolCreateParams<TConfig>;
 export type ToolTypeUpdateParams<TConfig extends object = {}> = ToolUpdateParams<TConfig>;
 
 /**
@@ -70,7 +66,10 @@ export interface ToolTypeClient<TConfig extends object = {}>
   /**
    * Update an existing tool
    */
-  update(params: ToolTypeUpdateParams<TConfig>): MaybePromise<ToolDefinition<TConfig>>;
+  update(
+    toolId: string,
+    update: ToolTypeUpdateParams<TConfig>
+  ): MaybePromise<ToolDefinition<TConfig>>;
 
   /**
    * Delete a tool

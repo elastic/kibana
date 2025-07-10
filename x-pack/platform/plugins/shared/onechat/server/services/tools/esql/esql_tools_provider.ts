@@ -50,7 +50,7 @@ export const createEsqlToolTypeDefinition = ({
     toolType: ToolType.esql,
     readonly: false,
     getClient: ({ request }) => {
-      const esClient = elasticsearch.client.asScoped(request).asCurrentUser;
+      const esClient = elasticsearch.client.asScoped(request).asInternalUser;
       return createEsqlToolClient({ logger, esClient });
     },
   };
@@ -86,10 +86,14 @@ export const createEsqlToolClient = ({
       return tools as Array<ToolDescriptor<EsqlToolConfig>>;
     },
     async create(createRequest) {
-      // TODO
+      // TODO: params validation
+      // TODO: convert tool (add schema)
+      return toolClient.create(createRequest);
     },
-    async update(updateRequest) {
-      // TODO
+    async update(toolId, updateRequest) {
+      // TODO: params validation
+      // TODO: convert tool (add schema)
+      return toolClient.update(toolId, updateRequest);
     },
     async delete(toolId: string) {
       return toolClient.delete(toolId);

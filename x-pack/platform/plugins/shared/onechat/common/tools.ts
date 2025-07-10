@@ -5,14 +5,4 @@
  * 2.0.
  */
 
-import { EsqlToolDefinition } from '@kbn/onechat-server';
-
-export type EsqlToolApiObj = EsqlToolDefinition & {
-  id: string;
-  created_at: string;
-  updated_at: string;
-};
-
-export type EsqlToolCreateRequest = EsqlToolApiObj;
-export type EsqlToolCreateResponse = EsqlToolApiObj;
-export type EsqlToolUpdateRequest = Partial<EsqlToolApiObj>;
+// TODO: add stuff or delete
