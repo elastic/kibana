@@ -11,6 +11,7 @@ import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const es = getService('es');
+  const logger = getService('log');
 
   describe('@ess @serverless @serverlessQA ES_ARCHIVER TESTS', () => {
     describe('reloading archives before each test', () => {
@@ -35,8 +36,8 @@ export default ({ getService }: FtrProviderContext) => {
                 index: 'myfakeindex-3',
               });
 
-              console.log('shards', searchResponse._shards);
-              console.log('hits.total', searchResponse.hits.total);
+              logger.info('shards', searchResponse._shards);
+              logger.info('hits.total', searchResponse.hits.total);
 
               expect(searchResponse.hits.hits).toEqual([
                 expect.objectContaining({
