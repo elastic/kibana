@@ -85,7 +85,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           'dataViews',
           'filesManagement',
           'objects',
-          'aiAssistantManagementSelection',
           'tags',
           'spaces',
           'settings',
