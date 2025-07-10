@@ -7,7 +7,6 @@
 
 import { ByteSizeValue } from '@kbn/config-schema';
 import type { ActionsConfig } from './config';
-import { DEFAULT_USAGE_API_URL } from './config';
 import {
   DEFAULT_MICROSOFT_EXCHANGE_URL,
   DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
@@ -41,9 +40,6 @@ const defaultActionsConfig: ActionsConfig = {
   microsoftGraphApiUrl: DEFAULT_MICROSOFT_GRAPH_API_URL,
   microsoftGraphApiScope: DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
   microsoftExchangeUrl: DEFAULT_MICROSOFT_EXCHANGE_URL,
-  usage: {
-    url: DEFAULT_USAGE_API_URL,
-  },
 };
 
 describe('ensureUriAllowed', () => {

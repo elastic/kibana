@@ -468,16 +468,12 @@
                 "path": "src/platform/plugins/shared/unified_search/public/types.ts"
               },
               {
-                "plugin": "fileUpload",
-                "path": "x-pack/platform/plugins/private/file_upload/public/kibana_services.ts"
-              },
-              {
                 "plugin": "visualizations",
                 "path": "src/platform/plugins/shared/visualizations/public/plugin.ts"
               },
               {
-                "plugin": "transform",
-                "path": "x-pack/platform/plugins/private/transform/public/app/mount_management_section.ts"
+                "plugin": "fileUpload",
+                "path": "x-pack/platform/plugins/private/file_upload/public/kibana_services.ts"
               },
               {
                 "plugin": "dashboardEnhanced",

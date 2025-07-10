@@ -14,6 +14,7 @@ import type { Filter } from '@kbn/es-query';
 import { isTab } from '@kbn/timelines-plugin/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { LastEventIndexKey } from '@kbn/timelines-plugin/common';
+import { DataViewManagerScopeName } from '../../../data_view_manager/constants';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { InputsModelId } from '../../../common/store/inputs/constants';
 import { SecurityPageName } from '../../../app/types';
@@ -55,6 +56,7 @@ import { useLicense } from '../../../common/hooks/use_license';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { useDataViewSpec } from '../../../data_view_manager/hooks/use_data_view_spec';
 import { useSelectedPatterns } from '../../../data_view_manager/hooks/use_selected_patterns';
+import { PageLoader } from '../../../common/components/page_loader';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -110,14 +112,12 @@ const HostsComponent = () => {
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
-  const { dataView } = useDataView();
-  const { dataViewSpec } = useDataViewSpec();
-  const experimentalSelectedPatterns = useSelectedPatterns();
+  const { dataView, status } = useDataView(DataViewManagerScopeName.explore);
+  const { dataViewSpec } = useDataViewSpec(DataViewManagerScopeName.explore);
+  const experimentalSelectedPatterns = useSelectedPatterns(DataViewManagerScopeName.explore);
 
   const sourcererDataView = newDataViewPickerEnabled ? dataViewSpec : oldSourcererDataView;
-  const indicesExist = newDataViewPickerEnabled
-    ? !!dataView?.matchedIndices?.length
-    : oldIndicesExist;
+  const indicesExist = newDataViewPickerEnabled ? dataView.hasMatchedIndices() : oldIndicesExist;
   const selectedPatterns = newDataViewPickerEnabled
     ? experimentalSelectedPatterns
     : oldSelectedPatterns;
@@ -177,6 +177,10 @@ const HostsComponent = () => {
     },
     [containerElement, onSkipFocusBeforeEventsTable, onSkipFocusAfterEventsTable]
   );
+
+  if (newDataViewPickerEnabled && status === 'pristine') {
+    return <PageLoader />;
+  }
 
   return (
     <>

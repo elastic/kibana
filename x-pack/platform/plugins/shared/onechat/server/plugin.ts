@@ -8,16 +8,15 @@
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { OnechatConfig } from './config';
-import { registerFeatures } from './features';
-import { registerRoutes } from './routes';
 import { ServiceManager } from './services';
-import { registerTools } from './tools';
 import type {
   OnechatPluginSetup,
   OnechatPluginStart,
   OnechatSetupDependencies,
   OnechatStartDependencies,
 } from './types';
+import { registerFeatures } from './features';
+import { registerRoutes } from './routes';
 import { registerUISettings } from './ui_settings';
 
 export class OnechatPlugin
@@ -48,8 +47,6 @@ export class OnechatPlugin
     });
 
     registerFeatures({ features: pluginsSetup.features });
-
-    registerTools({ tools: serviceSetups.tools });
 
     registerUISettings({ uiSettings: coreSetup.uiSettings });
 
@@ -104,7 +101,7 @@ export class OnechatPlugin
         },
       },
       agents: {
-        registry: agents.registry.asPublicRegistry(),
+        getScopedClient: (args) => agents.getScopedClient(args),
         execute: async (args) => {
           return agents.execute(args);
         },

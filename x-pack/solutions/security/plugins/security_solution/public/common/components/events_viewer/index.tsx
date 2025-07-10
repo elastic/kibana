@@ -35,6 +35,7 @@ import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
 import { useDataViewSpec } from '../../../data_view_manager/hooks/use_data_view_spec';
+import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { InspectButton } from '../inspect';
 import type {
   ControlColumnProps,
@@ -148,9 +149,12 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
     sourcererDataView: oldSourcererDataView,
     loading: oldIsLoadingIndexPattern,
   } = useSourcererDataView(sourcererScope);
+  const oldGetFieldSpec = useGetFieldSpec(sourcererScope);
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const { dataViewSpec, status } = useDataViewSpec(sourcererScope);
+  const { dataView: experimentalDataView } = useDataView(sourcererScope);
+
   const experimentalSelectedPatterns = useSelectedPatterns(sourcererScope);
   const experimentalBrowserFields = useBrowserFields(sourcererScope);
   const selectedPatterns = newDataViewPickerEnabled
@@ -164,7 +168,13 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
   const selectedDataViewId = newDataViewPickerEnabled ? dataViewSpec.id : oldDataViewId;
   const browserFields = newDataViewPickerEnabled ? experimentalBrowserFields : oldBrowserFields;
 
-  const getFieldSpec = useGetFieldSpec(sourcererScope);
+  const experimentalGetFieldSpec = useCallback(
+    (fieldName: string) => {
+      return experimentalDataView?.fields?.getByName(fieldName)?.toSpec();
+    },
+    [experimentalDataView?.fields]
+  );
+  const getFieldSpec = newDataViewPickerEnabled ? experimentalGetFieldSpec : oldGetFieldSpec;
 
   const editorActionsRef = useRef<FieldEditorActions>(null);
   useEffect(() => {

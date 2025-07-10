@@ -12,7 +12,6 @@
     "requiredPlugins": [
       "aiops",
       "alerting",
-      "cases",
       "charts",
       "dashboard",
       "data",
@@ -39,6 +38,7 @@
       "apmSourcesAccess"
     ],
     "optionalPlugins": [
+      "cases",
       "cloud",
       "discover",
       "embeddableEnhanced",

@@ -9,6 +9,8 @@ import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { BoundOptions, BoundInferenceClient, InferenceClient } from '@kbn/inference-common';
+import { AnonymizationRule } from '@kbn/inference-common';
+import { ElasticsearchClient } from '@kbn/core/server';
 import { createInferenceClient } from './inference_client';
 import { bindClient } from '../../common/inference_client/bind_client';
 
@@ -16,6 +18,8 @@ interface CreateClientOptions {
   request: KibanaRequest;
   actions: ActionsPluginStart;
   logger: Logger;
+  anonymizationRulesPromise: Promise<AnonymizationRule[]>;
+  esClient: ElasticsearchClient;
 }
 
 interface BoundCreateClientOptions extends CreateClientOptions {
@@ -27,8 +31,14 @@ export function createClient(options: BoundCreateClientOptions): BoundInferenceC
 export function createClient(
   options: CreateClientOptions | BoundCreateClientOptions
 ): BoundInferenceClient | InferenceClient {
-  const { actions, request, logger } = options;
-  const client = createInferenceClient({ request, actions, logger: logger.get('client') });
+  const { actions, request, logger, anonymizationRulesPromise, esClient } = options;
+  const client = createInferenceClient({
+    request,
+    actions,
+    logger: logger.get('client'),
+    anonymizationRulesPromise,
+    esClient,
+  });
   if ('bindTo' in options) {
     return bindClient(client, options.bindTo);
   } else {

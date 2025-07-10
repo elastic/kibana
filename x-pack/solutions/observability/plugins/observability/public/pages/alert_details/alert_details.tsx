@@ -36,12 +36,12 @@ import { AlertFieldsTable } from '@kbn/alerts-ui-shared/src/alert_fields_table';
 import { css } from '@emotion/react';
 import { omit } from 'lodash';
 import { usePageReady } from '@kbn/ebt-tools';
+import { ObsCasesContext } from './components/obs_cases_context';
 import { RelatedAlerts } from './components/related_alerts/related_alerts';
 import { AlertDetailsSource, TAB_IDS, TabId } from './types';
 import { SourceBar } from './components';
 import { InvestigationGuide } from './components/investigation_guide';
 import { StatusBar } from './components/status_bar';
-import { observabilityFeatureId } from '../../../common';
 import { useKibana } from '../../utils/kibana_react';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
 import { usePluginContext } from '../../hooks/use_plugin_context';
@@ -63,6 +63,7 @@ import { AlertSubtitle } from './components/alert_subtitle';
 import { ProximalAlertsCallout } from './proximal_alerts_callout';
 import { useTabId } from './hooks/use_tab_id';
 import { useRelatedDashboards } from './hooks/use_related_dashboards';
+import { useAlertDetailsPageViewEbt } from '../../hooks/use_alert_details_page_view_ebt';
 
 interface AlertDetailsPathParams {
   alertId: string;
@@ -84,16 +85,14 @@ const isTabId = (value: string): value is TabId => {
 export function AlertDetails() {
   const { services } = useKibana();
   const {
-    cases: {
-      helpers: { canUseCases },
-      ui: { getCasesContext },
-    },
+    cases,
     http,
     triggersActionsUi: { ruleTypeRegistry },
     observabilityAIAssistant,
     uiSettings,
     serverless,
   } = services;
+
   const { ObservabilityPageTemplate, config } = usePluginContext();
   const { alertId } = useParams<AlertDetailsPathParams>();
   const { getUrlTabId, setUrlTabId } = useTabId();
@@ -107,12 +106,13 @@ export function AlertDetails() {
 
   const [isLoading, alertDetail] = useFetchAlertDetail(alertId);
   const [ruleTypeModel, setRuleTypeModel] = useState<RuleTypeModel | null>(null);
-  const CasesContext = getCasesContext();
-  const userCasesPermissions = canUseCases([observabilityFeatureId]);
+
   const ruleId = alertDetail?.formatted.fields[ALERT_RULE_UUID];
   const { rule, refetch } = useFetchRule({
     ruleId: ruleId || '',
   });
+
+  useAlertDetailsPageViewEbt({ ruleType: rule?.ruleTypeId });
 
   const onSuccessAddSuggestedDashboard = useCallback(async () => {
     await Promise.all([refetchRelatedDashboards(), refetch()]);
@@ -121,7 +121,8 @@ export function AlertDetails() {
   // used to trigger refetch when rule edit flyout closes
   const onUpdate = useCallback(() => {
     refetch();
-  }, [refetch]);
+    refetchRelatedDashboards();
+  }, [refetch, refetchRelatedDashboards]);
   const [alertStatus, setAlertStatus] = useState<AlertStatus>();
   const { euiTheme } = useEuiTheme();
   const [sources, setSources] = useState<AlertDetailsSource[]>();
@@ -398,23 +399,21 @@ export function AlertDetails() {
         ) : (
           <EuiLoadingSpinner />
         ),
-        rightSideItems: [
-          <CasesContext
-            owner={[observabilityFeatureId]}
-            permissions={userCasesPermissions}
-            features={{ alerts: { sync: false } }}
-          >
-            <HeaderActions
-              alert={alertDetail?.formatted ?? null}
-              alertIndex={alertDetail?.raw._index}
-              alertStatus={alertStatus}
-              onUntrackAlert={onUntrackAlert}
-              onUpdate={onUpdate}
-              rule={rule}
-              refetch={refetch}
-            />
-          </CasesContext>,
-        ],
+        rightSideItems: cases
+          ? [
+              <ObsCasesContext>
+                <HeaderActions
+                  alert={alertDetail?.formatted ?? null}
+                  alertIndex={alertDetail?.raw._index}
+                  alertStatus={alertStatus}
+                  onUntrackAlert={onUntrackAlert}
+                  onUpdate={onUpdate}
+                  rule={rule}
+                  refetch={refetch}
+                />
+              </ObsCasesContext>,
+            ]
+          : [],
         bottomBorder: false,
         'data-test-subj': rule?.ruleTypeId || 'alertDetailsPageTitle',
       }}
@@ -426,11 +425,7 @@ export function AlertDetails() {
       }}
       data-test-subj="alertDetails"
     >
-      <CasesContext
-        owner={[observabilityFeatureId]}
-        permissions={userCasesPermissions}
-        features={{ alerts: { sync: false } }}
-      >
+      <ObsCasesContext>
         <StatusBar alert={alertDetail?.formatted ?? null} alertStatus={alertStatus} />
         <EuiSpacer size="l" />
         <HeaderMenu />
@@ -440,7 +435,7 @@ export function AlertDetails() {
           selectedTab={tabs.find((tab) => tab.id === activeTabId)}
           onTabClick={(tab) => handleSetTabId(tab.id as TabId)}
         />
-      </CasesContext>
+      </ObsCasesContext>
     </ObservabilityPageTemplate>
   );
 }

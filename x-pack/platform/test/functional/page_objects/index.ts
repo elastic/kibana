@@ -12,8 +12,18 @@ import { SpaceSelectorPageObject } from './space_selector_page';
 import { CopySavedObjectsToSpacePageProvider } from './copy_saved_objects_to_space_page';
 import { MonitoringPageObject } from './monitoring_page';
 import { AccountSettingsPageObject } from './account_settings_page';
-import { ReportingPageObject } from './reporting_page';
 import { CanvasPageProvider } from './canvas_page';
+import { LensPageProvider } from './lens_page';
+import { GisPageObject } from './gis_page';
+import { ReportingPageObject } from './reporting_page';
+import { WatcherPageObject } from './watcher_page';
+import { SearchProfilerPageProvider } from './search_profiler_page';
+import { UpgradeAssistantFlyoutObject } from './upgrade_assistant_page';
+import { UserProfilePageProvider } from './user_profile_page';
+import { SnapshotRestorePageProvider } from './snapshot_restore_page';
+import { SearchSessionsPageProvider } from './search_sessions_management_page';
+import { GraphPageObject } from './graph_page';
+import { MaintenanceWindowsPageProvider } from './maintenance_windows_page';
 
 // just like services, PageObjects are defined as a map of
 // names to Providers. Merge in Kibana's or pick specific ones
@@ -25,6 +35,16 @@ export const pageObjects = {
   copySavedObjectsToSpace: CopySavedObjectsToSpacePageProvider,
   monitoring: MonitoringPageObject,
   accountSetting: AccountSettingsPageObject,
-  reporting: ReportingPageObject,
   canvas: CanvasPageProvider,
+  graph: GraphPageObject,
+  lens: LensPageProvider,
+  maps: GisPageObject,
+  reporting: ReportingPageObject,
+  watcher: WatcherPageObject,
+  searchProfiler: SearchProfilerPageProvider,
+  searchSessionsManagement: SearchSessionsPageProvider,
+  snapshotRestore: SnapshotRestorePageProvider,
+  upgradeAssistant: UpgradeAssistantFlyoutObject,
+  userProfiles: UserProfilePageProvider,
+  maintenanceWindows: MaintenanceWindowsPageProvider,
 };
