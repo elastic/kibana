@@ -14,7 +14,7 @@ import { apiHasUniqueId } from '@kbn/presentation-publishing';
 import { core } from '../../kibana_services';
 import { CustomizePanelActionApi } from './customize_panel_action';
 
-export async function openCustomizePanelFlyout({
+export function openCustomizePanelFlyout({
   focusOnTitle,
   api,
 }: {

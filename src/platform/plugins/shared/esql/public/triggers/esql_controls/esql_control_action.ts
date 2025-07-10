@@ -99,8 +99,8 @@ export class CreateESQLControlAction implements Action<Context> {
         'data-test-subj': 'create_esql_control_flyout',
         isResizable: true,
         maxWidth: 800,
-        triggerId: 'dashboard-controls-menu-button',
       },
+      triggerId: 'dashboard-controls-menu-button',
     });
   }
 }

@@ -15,6 +15,7 @@ import { i18n } from '@kbn/i18n';
 import { focusFirstFocusable } from './focus_helpers';
 import { LoadingFlyout } from './loading_flyout';
 import { tracksOverlays } from './tracks_overlays';
+import { skip, take } from 'rxjs';
 
 const htmlId = htmlIdGenerator('modalTitleId');
 
@@ -28,6 +29,7 @@ export interface OpenLazyFlyoutParams {
   loadContent: (args: LoadContentArgs) => Promise<JSX.Element | null | void>;
   flyoutProps?: Partial<OverlayFlyoutOpenOptions> & { triggerId?: string };
   parentApi?: unknown;
+  triggerId?: string;
   uuid?: string;
 }
 
@@ -37,10 +39,10 @@ export const openLazyFlyout = ({
   loadContent,
   flyoutProps,
   uuid,
+  triggerId
 }: OpenLazyFlyoutParams) => {
   const ariaLabelledBy = htmlId();
   const overlayTracker = tracksOverlays(parentApi) ? parentApi : undefined;
-  const { triggerId, ...restFlyoutProps } = flyoutProps || {};
 
   const onClose = () => {
     overlayTracker?.clearOverlays();
@@ -50,9 +52,17 @@ export const openLazyFlyout = ({
     }
   };
 
+  /**
+   * Close the flyout whenever the app changes - this handles cases for when the flyout is open outside of the
+   * Dashboard app (`overlayTracker` is not available)
+   */
+  core.application.currentAppId$.pipe(skip(1), take(1)).subscribe(() => {
+    onClose();
+  });
+
   const flyoutRef = core.overlays.openFlyout(
     toMountPoint(
-      <EditPanelWrapper
+      <LazyFlyout
         closeFlyout={onClose}
         loadContent={loadContent}
         core={core}
@@ -71,24 +81,24 @@ export const openLazyFlyout = ({
       className: 'kbnPresentationLazyFlyout',
       'aria-labelledby': ariaLabelledBy,
       onClose,
-      ...restFlyoutProps,
+      ...flyoutProps,
     }
   );
   overlayTracker?.openOverlay(flyoutRef, { focusedPanelId: uuid });
   return flyoutRef;
 };
 
-function EditPanelWrapper({
+function LazyFlyout({
   core,
   loadContent,
   closeFlyout,
   ariaLabelledBy,
 }: LoadContentArgs & Pick<OpenLazyFlyoutParams, 'core' | 'loadContent'>) {
-  const [EditFlyoutPanel, setEditFlyoutPanel] = React.useState<React.JSX.Element | null>(null);
+  const [LoadedFlyout, setLoadedFlyout] = React.useState<React.JSX.Element | null>(null);
   useAsync(async () => {
     const editFlyoutContent = await loadContent?.({ closeFlyout, ariaLabelledBy });
     if (editFlyoutContent) {
-      setEditFlyoutPanel(editFlyoutContent);
+      setLoadedFlyout(editFlyoutContent);
     } else {
       // If no content is returned, we close the flyout
       closeFlyout();
@@ -102,12 +112,11 @@ function EditPanelWrapper({
   }, []);
 
   React.useEffect(() => {
-    if (!EditFlyoutPanel) {
+    if (!LoadedFlyout) {
       return;
-    } else {
-      focusFirstFocusable(document.querySelector('.kbnPresentationLazyFlyout'));
-    }
-  }, [EditFlyoutPanel]);
+    } 
+    focusFirstFocusable(document.querySelector('.kbnPresentationLazyFlyout'));
+  }, [LoadedFlyout]);
 
-  return EditFlyoutPanel ?? LoadingFlyout;
+  return LoadedFlyout ?? LoadingFlyout;
 }

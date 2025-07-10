@@ -10,10 +10,10 @@ import {
   type HasDynamicActions,
 } from '@kbn/embeddable-enhanced-plugin/public';
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
-import { openLazyFlyout } from '@kbn/presentation-util';
 import { i18n } from '@kbn/i18n';
 import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
-import { type PresentationContainer, type TracksOverlays } from '@kbn/presentation-containers';
+import { type PresentationContainer } from '@kbn/presentation-containers';
+import { openLazyFlyout, type TracksOverlays } from '@kbn/presentation-util';
 import {
   apiCanAccessViewMode,
   apiHasParentApi,
@@ -34,7 +34,6 @@ import { StartDependencies } from '../../../../plugin';
 import {
   createDrilldownTemplatesFromSiblings,
   DRILLDOWN_ACTION_GROUP,
-  DRILLDOWN_MAX_WIDTH,
   ensureNestedTriggers,
 } from '../drilldown_shared';
 
@@ -125,8 +124,6 @@ export class FlyoutCreateDrilldownAction implements Action<EmbeddableApiContext>
         );
       },
       flyoutProps: {
-        maxWidth: DRILLDOWN_MAX_WIDTH,
-        ownFocus: true,
         'data-test-subj': 'createDrilldownFlyout',
       },
       uuid: apiHasUniqueId(embeddable) ? embeddable.uuid : undefined,

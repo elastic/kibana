@@ -16,26 +16,28 @@ jest.mock('@kbn/react-kibana-mount', () => ({
   toMountPoint: jest.fn((x) => x), // identity for simplicity
 }));
 
-describe('openLazyFlyout', () => {
-  const openFlyout = jest.fn(() => overlayRef);
-  const core = { overlays: { openFlyout } } as unknown as CoreStart;
-  const overlayRef = { close: jest.fn() } as unknown as OverlayRef;
+const overlayRef = { close: jest.fn() } as unknown as OverlayRef;
+const openFlyout = jest.fn(() => overlayRef);
+const core = { overlays: { openFlyout } } as unknown as CoreStart;
+const loadContent = jest.fn(async () => <div>Test Content</div>);
+const props = {
+  core,
+  loadContent,
+  flyoutProps: {
+    'data-test-subj': 'lazyFlyoutTest',
+  },
+  triggerId: 'testTrigger',
+};
 
+describe('openLazyFlyout', () => {
+  
   beforeEach(() => {
     jest.clearAllMocks();
   });
-  const loadContent = jest.fn(async () => <div>Test Content</div>);
+  
 
-  const props = {
-    core,
-    loadContent,
-    flyoutProps: {
-      'data-test-subj': 'lazyFlyoutTest',
-      triggerId: 'testTrigger',
-    },
-  };
 
-  it('opens flyout with default props and mounts EditPanelWrapper and return flyout ref', async () => {
+  it('opens flyout with default props and mounts LazyFlyout and return flyout ref', async () => {
     const ref = openLazyFlyout(props);
 
     expect(ref).toBe(overlayRef);

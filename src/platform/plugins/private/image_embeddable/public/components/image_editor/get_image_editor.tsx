@@ -30,6 +30,7 @@ export const getImageEditor = async ({
   ariaLabelledBy: string;
 }) => {
   const filesClient = filesService.filesClientFactory.asUnscoped<FileImageMetadata>();
+  const user = await coreServices.security.authc.getCurrentUser();
 
   return (
     <FilesContext client={filesClient}>
@@ -45,7 +46,7 @@ export const getImageEditor = async ({
         }}
       >
         <ImageEditorFlyout
-          getCurrentUser={coreServices.security.authc.getCurrentUser}
+          user={user}
           onSave={(imageConfig: ImageConfig) => {
             onSave?.(imageConfig);
             closeFlyout();

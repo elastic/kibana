@@ -19,9 +19,11 @@ import {
 } from '@kbn/presentation-publishing';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import type { LinksParentApi } from '../types';
-import { APP_ICON, APP_NAME } from '../../common';
+import { APP_ICON, APP_NAME, CONTENT_ID } from '../../common';
 import { ADD_LINKS_PANEL_ACTION_ID } from './constants';
 import { coreServices } from '../services/kibana_services';
+import { getEditorFlyout } from '../editor/get_editor_flyout';
+import { serializeLinksAttributes } from '../lib/serialize_attributes';
 
 export const isParentApiCompatible = (parentApi: unknown): parentApi is LinksParentApi =>
   apiIsPresentationContainer(parentApi) &&
@@ -43,10 +45,37 @@ export const addLinksPanelAction: ActionDefinition<EmbeddableApiContext> = {
       core: coreServices,
       parentApi: embeddable,
       loadContent: async ({ closeFlyout }) => {
-        const { loadLinksPanel } = await import('./load_links_panel');
-        return loadLinksPanel({
+        return await getEditorFlyout({
+          parentDashboard: embeddable,
           closeFlyout,
-          embeddable,
+          onCompleteEdit: async (runtimeState) => {
+            if (!runtimeState) return;
+      
+            function serializeState() {
+              if (!runtimeState) return;
+      
+              if (runtimeState.savedObjectId !== undefined) {
+                return {
+                  rawState: {
+                    savedObjectId: runtimeState.savedObjectId,
+                  },
+                };
+              }
+      
+              const { attributes, references } = serializeLinksAttributes(runtimeState);
+              return {
+                rawState: {
+                  attributes,
+                },
+                references,
+              };
+            }
+      
+            await embeddable.addNewPanel<LinksSerializedState>({
+              panelType: CONTENT_ID,
+              serializedState: serializeState(),
+            });
+          },
         });
       },
       flyoutProps: {

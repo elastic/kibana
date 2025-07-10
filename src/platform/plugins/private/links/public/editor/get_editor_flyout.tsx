@@ -8,13 +8,11 @@
  */
 
 import React from 'react';
-import { skip, take } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 
 import { apiPublishesSavedObjectId } from '@kbn/presentation-publishing';
 import { LinksLayoutType } from '../../common/content_management';
 import { linksClient, runSaveToLibrary } from '../content_management';
-import { coreServices } from '../services/kibana_services';
 import { LinksRuntimeState, ResolvedLink } from '../types';
 import { serializeLinksAttributes } from '../lib/serialize_attributes';
 import LinksEditor from '../components/editor/links_editor';
@@ -31,14 +29,6 @@ export async function getEditorFlyout({
   closeFlyout: () => void;
 }) {
   const flyoutId = `linksEditorFlyout-${uuidv4()}`;
-
-  /**
-   * Close the flyout whenever the app changes - this handles cases for when the flyout is open outside of the
-   * Dashboard app (`overlayTracker` is not available)
-   */
-  coreServices.application.currentAppId$.pipe(skip(1), take(1)).subscribe(() => {
-    closeFlyout();
-  });
   return (
     <LinksEditor
       flyoutId={flyoutId}

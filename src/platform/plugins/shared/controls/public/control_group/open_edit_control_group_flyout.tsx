@@ -72,7 +72,7 @@ export const openEditControlGroupFlyout = (
         defaultMessage: 'Edit control settings',
       }),
       outsideClickCloses: false,
-      triggerId: 'dashboard-controls-menu-button',
     },
+    triggerId: 'dashboard-controls-menu-button',
   });
 };

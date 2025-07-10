@@ -25,7 +25,7 @@ import {
 import { CoreStart } from '@kbn/core-lifecycle-browser';
 import { OverlayRef } from '@kbn/core-mount-utils-browser';
 import { i18n } from '@kbn/i18n';
-import { tracksOverlays } from '@kbn/presentation-containers';
+import { tracksOverlays } from '@kbn/presentation-util';
 import { apiHasUniqueId, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import React, { useState } from 'react';

@@ -9,8 +9,7 @@
 
 import { OverlayRef } from '@kbn/core-mount-utils-browser';
 
-// todo: this will be removed after rewriting all the flyouts to openLazyFlyout and it doesn't have to be exposed
-export interface TracksOverlaysOptions {
+interface TracksOverlaysOptions {
   /**
    * If present, the panel with this ID will be focused when the overlay is opened. This can be used in tandem with a push
    * flyout to edit a panel's settings in context

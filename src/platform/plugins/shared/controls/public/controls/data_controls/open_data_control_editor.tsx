@@ -16,7 +16,7 @@ import type { DefaultDataControlState } from '../../../common';
 import { coreServices } from '../../services/kibana_services';
 import type { ControlGroupApi } from '../../control_group/types';
 
-export const openDataControlEditor = async <
+export const openDataControlEditor = <
   State extends DefaultDataControlState = DefaultDataControlState
 >({
   initialState,
@@ -86,8 +86,6 @@ export const openDataControlEditor = async <
         />
       );
     },
-    flyoutProps: {
-      triggerId: 'dashboard-controls-menu-button',
-    },
+    triggerId: 'dashboard-controls-menu-button',
   });
 };

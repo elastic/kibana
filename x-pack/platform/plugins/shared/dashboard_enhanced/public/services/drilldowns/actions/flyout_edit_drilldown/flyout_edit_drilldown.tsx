@@ -7,8 +7,8 @@
 
 import React from 'react';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import { type PresentationContainer, type TracksOverlays } from '@kbn/presentation-containers';
-import { openLazyFlyout } from '@kbn/presentation-util';
+import { type PresentationContainer } from '@kbn/presentation-containers';
+import { openLazyFlyout, type TracksOverlays } from '@kbn/presentation-util';
 import {
   apiCanAccessViewMode,
   apiHasSupportedTriggers,
@@ -32,7 +32,6 @@ import { StartDependencies } from '../../../../plugin';
 import {
   createDrilldownTemplatesFromSiblings,
   DRILLDOWN_ACTION_GROUP,
-  DRILLDOWN_MAX_WIDTH,
   ensureNestedTriggers,
 } from '../drilldown_shared';
 
@@ -98,8 +97,6 @@ export class FlyoutEditDrilldownAction implements Action<EmbeddableApiContext> {
         );
       },
       flyoutProps: {
-        maxWidth: DRILLDOWN_MAX_WIDTH,
-        ownFocus: true,
         'data-test-subj': 'editDrilldownFlyout',
       },
       uuid: apiHasUniqueId(embeddable) ? embeddable.uuid : undefined,
