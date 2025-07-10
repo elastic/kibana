@@ -75,6 +75,7 @@ export function TransactionDurationSummary({
                 duration: rootTransaction?.duration,
                 loading: rootTransactionLoading,
               }}
+              size="xs"
             />
           </EuiText>
         </FieldWithoutActions>
