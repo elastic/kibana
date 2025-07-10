@@ -22,7 +22,7 @@ import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import useObservable from 'react-use/lib/useObservable';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
-import { getSortForEmbeddable } from '../../utils/sorting';
+import { getSortArray } from '../../../common/utils/sorting';
 import { getAllowedSampleSize, getMaxAllowedSampleSize } from '../../utils/get_allowed_sample_size';
 import { SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID } from '../constants';
 import { isEsqlMode } from '../initialize_fetch';
@@ -96,9 +96,10 @@ export function SearchEmbeddableGridComponent({
 
   const isEsql = useMemo(() => isEsqlMode(savedSearch), [savedSearch]);
 
-  const sort = useMemo(() => {
-    return getSortForEmbeddable(savedSearch.sort, dataView, discoverServices.uiSettings, isEsql);
-  }, [savedSearch.sort, dataView, isEsql, discoverServices.uiSettings]);
+  const sort = useMemo(
+    () => getSortArray(savedSearch.sort ?? [], dataView, isEsql),
+    [dataView, isEsql, savedSearch.sort]
+  );
 
   const originalColumns = useMemo(() => savedSearch.columns ?? [], [savedSearch.columns]);
 
@@ -199,23 +200,19 @@ export function SearchEmbeddableGridComponent({
 
   const defaults = getSearchEmbeddableDefaults(discoverServices.uiSettings);
 
-  const sharedProps = {
-    columns,
-    dataView,
-    interceptedWarnings,
-    onFilter: onAddFilter,
-    rows,
-    rowsPerPageState: savedSearch.rowsPerPage ?? defaults.rowsPerPage,
-    sampleSizeState: fetchedSampleSize,
-    searchDescription: panelDescription || savedSearchDescription,
-    sort,
-    totalHitCount,
-  };
-
   return (
     <DiscoverGridEmbeddableMemoized
-      {...sharedProps}
       {...onStateEditedProps}
+      columns={columns}
+      dataView={dataView}
+      interceptedWarnings={interceptedWarnings}
+      onFilter={onAddFilter}
+      rows={rows}
+      rowsPerPageState={savedSearch.rowsPerPage ?? defaults.rowsPerPage}
+      sampleSizeState={fetchedSampleSize}
+      searchDescription={panelDescription || savedSearchDescription}
+      sort={sort}
+      totalHitCount={totalHitCount}
       settings={savedSearch.grid}
       ariaLabelledBy={'documentsAriaLabel'}
       cellActionsTriggerId={
