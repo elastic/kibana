@@ -89,7 +89,7 @@ export function BarDetails({
                 aria-label={i18n.translate('xpack.apm.barDetails.errorButton.ariaLabel', {
                   defaultMessage: 'View error details',
                 })}
-                data-test-subj="apmBarDetailsButton"
+                data-test-subj="apmBarDetailsErrorButton"
                 color="danger"
                 iconType="errorFilled"
                 iconSize="s"
@@ -115,11 +115,17 @@ export function BarDetails({
                 role="button"
                 aria-label={viewRelatedErrorsLabel}
                 onClickAriaLabel={viewRelatedErrorsLabel}
+                data-test-subj="apmBarDetailsErrorBadge"
               >
                 {viewRelatedErrorsLabel}
               </EuiBadge>
             ) : (
-              <EuiIcon type="errorFilled" color={theme.euiTheme.colors.danger} size="s" />
+              <EuiIcon
+                type="errorFilled"
+                color={theme.euiTheme.colors.danger}
+                size="s"
+                data-test-subj="apmBarDetailsErrorIcon"
+              />
             )}
           </EuiFlexItem>
         ) : null}

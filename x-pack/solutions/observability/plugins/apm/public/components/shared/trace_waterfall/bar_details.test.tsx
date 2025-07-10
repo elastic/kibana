@@ -13,11 +13,23 @@ import type { TraceItem } from '../../../../common/waterfall/unified_trace_item'
 jest.mock('../../../../common/utils/formatters', () => ({
   asDuration: (value: number) => `${value} ms`,
 }));
+jest.mock('./trace_waterfall_context', () => ({
+  useTraceWaterfallContext: jest.fn(),
+}));
+
+import { useTraceWaterfallContext } from './trace_waterfall_context';
 
 describe('BarDetails', () => {
   afterAll(() => {
     jest.clearAllMocks();
   });
+
+  beforeAll(() => {
+    (useTraceWaterfallContext as jest.Mock).mockReturnValue({
+      getRelatedErrorsHref: undefined,
+    });
+  });
+
   const mockItem = {
     name: 'Test Span',
     duration: 1234,
@@ -46,5 +58,68 @@ describe('BarDetails', () => {
     const flexItems = container.querySelectorAll('.euiFlexGroup > .euiFlexItem');
     const lastFlexItem = flexItems[flexItems.length - 1];
     expect(window.getComputedStyle(lastFlexItem).marginRight).toBe('8px');
+  });
+
+  it('renders errors icon in case of errors', () => {
+    const mockItemWithError = {
+      name: 'Test Span',
+      duration: 1234,
+      errorCount: 1,
+    } as unknown as TraceItem;
+    const { getByTestId } = render(<BarDetails item={mockItemWithError} left={10} />);
+    expect(getByTestId('apmBarDetailsErrorIcon')).toBeInTheDocument();
+  });
+
+  it('renders errors button icon in case of errors and click event', () => {
+    const mockItemWithError = {
+      name: 'Test Span',
+      duration: 1234,
+      errorCount: 1,
+    } as unknown as TraceItem;
+    const { getByTestId } = render(
+      <BarDetails item={mockItemWithError} left={10} onErrorClick={() => {}} />
+    );
+    expect(getByTestId('apmBarDetailsErrorButton')).toBeInTheDocument();
+  });
+
+  describe('in case of errors and related errors href', () => {
+    beforeAll(() => {
+      (useTraceWaterfallContext as jest.Mock).mockReturnValue({
+        getRelatedErrorsHref: () => {},
+      });
+    });
+
+    describe('and only has 1 error', () => {
+      const mockItemWithError = {
+        name: 'Test Span',
+        duration: 1234,
+        errorCount: 1,
+      } as unknown as TraceItem;
+
+      it('renders errors badge in with the correct string', () => {
+        const { getByTestId, getByText } = render(
+          <BarDetails item={mockItemWithError} left={10} />
+        );
+        expect(getByTestId('apmBarDetailsErrorBadge')).toBeInTheDocument();
+        expect(getByText('View related error')).toBeInTheDocument();
+      });
+    });
+
+    describe('and has more than 1 error', () => {
+      const errorCount = 2;
+      const mockItemWithError = {
+        name: 'Test Span',
+        duration: 1234,
+        errorCount,
+      } as unknown as TraceItem;
+
+      it('renders errors badge in with the correct string', () => {
+        const { getByTestId, getByText } = render(
+          <BarDetails item={mockItemWithError} left={10} />
+        );
+        expect(getByTestId('apmBarDetailsErrorBadge')).toBeInTheDocument();
+        expect(getByText(`View ${errorCount} related errors`)).toBeInTheDocument();
+      });
+    });
   });
 });
