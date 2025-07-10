@@ -14,7 +14,6 @@ import { customFieldsConfigurationMock } from '../../containers/mock';
 import { CustomFields } from './custom_fields';
 import { renderWithTestingProviders } from '../../common/mock';
 
-// Failing: See https://github.com/elastic/kibana/issues/188133
 describe('CustomFields', () => {
   const onSubmit = jest.fn();
 
