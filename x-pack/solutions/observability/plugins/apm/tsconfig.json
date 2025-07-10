@@ -140,6 +140,7 @@
     "@kbn/object-utils",
     "@kbn/cases-plugin",
     "@kbn/apm-ui-shared",
+    "@kbn/shared-ux-error-boundary",
   ],
   "exclude": ["target/**/*"]
 }

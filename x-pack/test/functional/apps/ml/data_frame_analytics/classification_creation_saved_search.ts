@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AnalyticsTableRowDetails } from '../../../services/ml/data_frame_analytics_table';
+import type { AnalyticsTableRowDetails } from '@kbn/test-suites-xpack-platform/functional/services/ml/data_frame_analytics_table';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 import type { FieldStatsType } from '../common/types';
 
