@@ -7,68 +7,50 @@
 
 import type { Logger } from '@kbn/core/server';
 import { cloneDeep } from 'lodash';
-import type { AlertInstanceContext, AlertInstanceState } from '../types';
+import type { AlertInstanceContext as Context, AlertInstanceState as State } from '../types';
 import type { PublicAlert } from './alert';
 import { Alert } from './alert';
-import { processAlerts } from '../lib';
+import { categorizeAlerts } from '../lib';
+import { AlertCategory, filterFor } from '../alerts_client/alert_mapper';
 
-export interface AlertFactory<
-  State extends AlertInstanceState,
-  Context extends AlertInstanceContext,
-  ActionGroupIds extends string
-> {
-  create: (id: string) => PublicAlert<State, Context, ActionGroupIds>;
-  get: (id: string) => PublicAlert<State, Context, ActionGroupIds> | null;
+export interface AlertFactory<S extends State, C extends Context, G extends string> {
+  create: (id: string) => PublicAlert<S, C, G>;
+  get: (id: string) => PublicAlert<S, C, G> | null;
   alertLimit: {
     getValue: () => number;
     setLimitReached: (reached: boolean) => void;
     checkLimitUsage: () => void;
   };
   hasReachedAlertLimit: () => boolean;
-  done: () => AlertFactoryDoneUtils<State, Context, ActionGroupIds>;
+  done: () => AlertFactoryDoneUtils<S, C, G>;
 }
 
-export type PublicAlertFactory<
-  State extends AlertInstanceState,
-  Context extends AlertInstanceContext,
-  ActionGroupIds extends string
-> = Pick<AlertFactory<State, Context, ActionGroupIds>, 'create' | 'done'> & {
-  alertLimit: Pick<
-    AlertFactory<State, Context, ActionGroupIds>['alertLimit'],
-    'getValue' | 'setLimitReached'
-  >;
+export type PublicAlertFactory<S extends State, C extends Context, G extends string> = Pick<
+  AlertFactory<S, C, G>,
+  'create' | 'done'
+> & {
+  alertLimit: Pick<AlertFactory<S, C, G>['alertLimit'], 'getValue' | 'setLimitReached'>;
 };
 
-export interface AlertFactoryDoneUtils<
-  State extends AlertInstanceState,
-  Context extends AlertInstanceContext,
-  ActionGroupIds extends string
-> {
-  getRecoveredAlerts: () => Array<Alert<State, Context, ActionGroupIds>>;
+export interface AlertFactoryDoneUtils<S extends State, C extends Context, G extends string> {
+  getRecoveredAlerts: () => Array<Alert<S, C, G>>;
 }
 
-export interface CreateAlertFactoryOpts<
-  State extends AlertInstanceState,
-  Context extends AlertInstanceContext
-> {
-  alerts: Record<string, Alert<State, Context>>;
+export interface CreateAlertFactoryOpts<S extends State, C extends Context> {
+  alerts: Map<string, Alert<S, C>>;
   logger: Logger;
   maxAlerts: number;
   autoRecoverAlerts: boolean;
   canSetRecoveryContext?: boolean;
 }
 
-export function createAlertFactory<
-  State extends AlertInstanceState,
-  Context extends AlertInstanceContext,
-  ActionGroupIds extends string
->({
+export function createAlertFactory<S extends State, C extends Context, G extends string>({
   alerts,
   logger,
   maxAlerts,
   autoRecoverAlerts,
   canSetRecoveryContext = false,
-}: CreateAlertFactoryOpts<State, Context>): AlertFactory<State, Context, ActionGroupIds> {
+}: CreateAlertFactoryOpts<S, C>): AlertFactory<S, C, G> {
   // Keep track of which alerts we started with so we can determine which have recovered
   const originalAlerts = cloneDeep(alerts);
 
@@ -86,7 +68,7 @@ export function createAlertFactory<
 
   let isDone = false;
   return {
-    create: (id: string): PublicAlert<State, Context, ActionGroupIds> => {
+    create: (id: string): PublicAlert<S, C, G> => {
       if (isDone) {
         throw new Error(`Can't create new alerts after calling done() in AlertsFactory.`);
       }
@@ -96,14 +78,14 @@ export function createAlertFactory<
         throw new Error(`Rule reported more than ${maxAlerts} alerts.`);
       }
 
-      if (!alerts[id]) {
-        alerts[id] = new Alert<State, Context>(id);
+      if (!alerts.has(id)) {
+        alerts.set(id, new Alert<S, C>(id));
       }
 
-      return alerts[id];
+      return alerts.get(id)!;
     },
-    get: (id: string): PublicAlert<State, Context, ActionGroupIds> | null => {
-      return alerts[id] ? alerts[id] : null;
+    get: (id: string): PublicAlert<S, C, G> | null => {
+      return alerts.get(id) ?? null;
     },
     // namespace alert limit services for rule type executors to use
     alertLimit: {
@@ -125,7 +107,7 @@ export function createAlertFactory<
       },
     },
     hasReachedAlertLimit: (): boolean => hasReachedAlertLimit,
-    done: (): AlertFactoryDoneUtils<State, Context, ActionGroupIds> => {
+    done: (): AlertFactoryDoneUtils<S, C, G> => {
       isDone = true;
       return {
         getRecoveredAlerts: () => {
@@ -142,18 +124,13 @@ export function createAlertFactory<
             return [];
           }
 
-          const { recoveredAlerts } = processAlerts<State, Context, ActionGroupIds, ActionGroupIds>(
-            {
-              alerts,
-              existingAlerts: originalAlerts,
-              hasReachedAlertLimit,
-              alertLimit: maxAlerts,
-              autoRecoverAlerts,
-            }
-          );
-          return Object.keys(recoveredAlerts ?? {}).map(
-            (alertId: string) => recoveredAlerts[alertId]
-          );
+          const categorizedAlerts = categorizeAlerts<S, C, G>({
+            alerts,
+            existingAlerts: originalAlerts,
+            autoRecoverAlerts,
+            startedAt: new Date().toISOString(),
+          });
+          return filterFor(categorizedAlerts, AlertCategory.Recovered).map(({ alert }) => alert);
         },
       };
     },
@@ -161,18 +138,16 @@ export function createAlertFactory<
 }
 
 export function getPublicAlertFactory<
-  State extends AlertInstanceState = AlertInstanceState,
-  Context extends AlertInstanceContext = AlertInstanceContext,
-  ActionGroupIds extends string = string
->(
-  alertFactory: AlertFactory<State, Context, ActionGroupIds>
-): PublicAlertFactory<State, Context, ActionGroupIds> {
+  S extends State = State,
+  C extends Context = Context,
+  G extends string = string
+>(alertFactory: AlertFactory<S, C, G>): PublicAlertFactory<S, C, G> {
   return {
-    create: (...args): PublicAlert<State, Context, ActionGroupIds> => alertFactory.create(...args),
+    create: (...args): PublicAlert<S, C, G> => alertFactory.create(...args),
     alertLimit: {
       getValue: (): number => alertFactory.alertLimit.getValue(),
       setLimitReached: (...args): void => alertFactory.alertLimit.setLimitReached(...args),
     },
-    done: (): AlertFactoryDoneUtils<State, Context, ActionGroupIds> => alertFactory.done(),
+    done: (): AlertFactoryDoneUtils<S, C, G> => alertFactory.done(),
   };
 }
