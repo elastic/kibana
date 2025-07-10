@@ -442,6 +442,21 @@ export class Walker {
     });
   };
 
+  /**
+   * Visits all nodes in the AST.
+   *
+   * @param tree AST node to walk.
+   * @param visitAny Callback function to call for each node.
+   * @param options Additional options for the walker.
+   */
+  public static visitAny = (
+    tree: WalkerAstNode,
+    visitAny: WalkerOptions['visitAny'],
+    options?: WalkerOptions
+  ): void => {
+    Walker.walk(tree, { ...options, visitAny });
+  };
+
   protected aborted: boolean = false;
 
   constructor(protected readonly options: WalkerOptions) {}
