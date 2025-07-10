@@ -371,7 +371,7 @@ This may occur if you had not previously selected a specific connector for any o
 
 For more information, check https://github.com/elastic/docs-content/issues/2088[#2088]
 ====
-// end::know-issue-2088[]
+// end::known-issue-2088[]
 
 // tag::known-issue-211850[]
 .Upgrade Assistant - Rollup jobs need to be stopped before rollup indices are reindexed.
