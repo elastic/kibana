@@ -54,6 +54,12 @@ interface AccountEntity {
   resources: {
     pods_count: Value;
   };
+  kspm_namespaces_count: {
+    namespaces_count: Value;
+  };
+  cspm_namespaces_count: {
+    namespaces_count: Value;
+  };
 }
 
 const getAccountsStatsQuery = (): SearchRequest => ({
@@ -193,6 +199,34 @@ const getAccountsStatsQuery = (): SearchRequest => ({
             },
           },
         },
+        kspm_namespaces_count: {
+          filter: {
+            term: {
+              'rule.benchmark.posture_type': 'kspm',
+            },
+          },
+          aggs: {
+            namespaces_count: {
+              cardinality: {
+                field: 'data_stream.namespace',
+              },
+            },
+          },
+        },
+        cspm_namespaces_count: {
+          filter: {
+            term: {
+              'rule.benchmark.posture_type': 'cspm',
+            },
+          },
+          aggs: {
+            namespaces_count: {
+              cardinality: {
+                field: 'data_stream.namespace',
+              },
+            },
+          },
+        },
       },
     },
   },
@@ -223,6 +257,8 @@ const getCspmAccountsStats = (
     agents_count: account.agents_count.value,
     nodes_count: account.nodes_count.value,
     pods_count: account.resources.pods_count.value,
+    kspm_namespaces_count: account.kspm_namespaces_count.namespaces_count.value,
+    cspm_namespaces_count: account.cspm_namespaces_count.namespaces_count.value,
   }));
 
   return cspmAccountsStats;
