@@ -28,7 +28,7 @@ import {
   EmbeddableStart,
   EmbeddableStartDependencies,
 } from './types';
-import { getTransforms, registerTransforms } from './transforms_registry';
+import { getTransforms, hasTransforms, registerTransforms } from './transforms_registry';
 
 export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, EmbeddableStart> {
   private stateTransferService: EmbeddableStateTransfer = {} as EmbeddableStateTransfer;
@@ -71,6 +71,7 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
             )
           : this.stateTransferService,
       getTransforms,
+      hasTransforms,
       getEnhancement: this.enhancementsRegistry.getEnhancement,
     };
 

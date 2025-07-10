@@ -16,7 +16,7 @@ import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import {
   ContentManagementPublicSetup,
   ContentManagementPublicStart,
@@ -32,14 +32,14 @@ import { registerFieldListPanelPlacementSetting } from './react_embeddables/fiel
 import { registerCreateSavedBookAction } from './react_embeddables/saved_book/create_saved_book_action';
 import { registerAddSearchPanelAction } from './react_embeddables/search/register_add_search_panel_action';
 import { registerSearchEmbeddable } from './react_embeddables/search/register_search_embeddable';
-import { BOOK_CONTENT_ID, BOOK_EMBEDDABLE_TYPE, BOOK_LATEST_VERSION } from '../common';
 import { setKibanaServices } from './kibana_services';
+import { setupBookEmbeddable } from './react_embeddables/saved_book/setup_book_embeddable';
 
 export interface SetupDeps {
   contentManagement: ContentManagementPublicSetup;
   developerExamples: DeveloperExamplesSetup;
   embeddable: EmbeddableSetup;
-  uiActions: UiActionsStart;
+  uiActions: UiActionsSetup;
 }
 
 export interface StartDeps {
@@ -86,25 +86,12 @@ export class EmbeddableExamplesPlugin implements Plugin<void, void, SetupDeps, S
       return getDataTableFactory(coreStart, deps);
     });
 
-    embeddable.registerReactEmbeddableFactory(BOOK_EMBEDDABLE_TYPE, async () => {
-      const { getSavedBookEmbeddableFactory } = await import(
-        './react_embeddables/saved_book/saved_book_react_embeddable'
-      );
-      const [coreStart] = await startServicesPromise;
-      return getSavedBookEmbeddableFactory(coreStart);
-    });
+    setupBookEmbeddable(core, embeddable, contentManagement);
 
     registerSearchEmbeddable(
       embeddable,
       new Promise((resolve) => startServicesPromise.then(([_, startDeps]) => resolve(startDeps)))
     );
-
-    contentManagement.registry.register({
-      id: BOOK_CONTENT_ID,
-      version: {
-        latest: BOOK_LATEST_VERSION,
-      },
-    });
   }
 
   public start(core: CoreStart, deps: StartDeps) {

@@ -82,5 +82,6 @@ export interface EmbeddableSetup {
 export interface EmbeddableStart {
   getStateTransfer: (storage?: Storage) => EmbeddableStateTransfer;
   getTransforms: (type: string) => Promise<EmbeddableTransforms | undefined>;
+  hasTransforms: (type: string) => boolean;
   getEnhancement: (enhancementId: string) => PersistableState;
 }

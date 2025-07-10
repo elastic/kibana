@@ -25,3 +25,7 @@ export function registerTransforms(
 export async function getTransforms(type: string) {
   return await registry[type]?.();
 }
+
+export function hasTransforms(type: string) {
+  return Boolean(registry[type]);
+}
