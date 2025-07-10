@@ -10,7 +10,8 @@
 import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { SetupDeps, StartDeps } from './types';
 import { registerBookSavedObject, BookStorage } from './book';
-import { BOOK_CONTENT_ID, BOOK_LATEST_VERSION } from '../common';
+import { BOOK_CONTENT_ID, BOOK_EMBEDDABLE_TYPE, BOOK_LATEST_VERSION } from '../common';
+import { bookTransforms } from '../common/book/transforms';
 
 export class EmbeddableExamplesPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
   private readonly logger: Logger;
@@ -32,10 +33,7 @@ export class EmbeddableExamplesPlugin implements Plugin<void, void, SetupDeps, S
       },
     });
 
-    /* embeddable.registerTransforms(
-      'book',
-      () => bookCmDefinitionsWithSchemas
-    );*/
+    embeddable.registerTransforms(BOOK_EMBEDDABLE_TYPE, bookTransforms);
 
     return {};
   }

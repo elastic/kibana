@@ -16,14 +16,16 @@ export function transformIn(state: BookEmbeddableState) {
     const { savedObjectId, ...rest } = state as BookByReferenceState;
     return {
       state: rest,
-      references: {
-        name: 'savedObjectRef',
-        type: BOOK_SAVED_OBJECT_TYPE,
-        id: savedObjectId,
-      },
+      references: [
+        {
+          name: 'savedObjectRef',
+          type: BOOK_SAVED_OBJECT_TYPE,
+          id: savedObjectId,
+        },
+      ],
     };
   }
 
   // no reference extraction needed for by-value state
-  return state;
+  return { state };
 }
