@@ -49,8 +49,8 @@ const createActions = ({
       setConversation(
         produce((draft) => {
           const nextRound: ConversationRound = {
-            userInput: { message: userMessage },
-            assistantResponse: { message: '' },
+            input: { message: userMessage },
+            response: { message: '' },
             steps: [],
           };
           if (!draft) {
@@ -70,7 +70,7 @@ const createActions = ({
     setToolCallResult: ({ result, toolCallId }: { result: string; toolCallId: string }) => {
       setCurrentRound((round) => {
         const step = round.steps.find(
-          (s) => isToolCallStep(s) && s.toolCallId === toolCallId
+          (s) => isToolCallStep(s) && s.tool_call_id === toolCallId
         ) as ToolCallStep;
         if (step) {
           step.result = result;
@@ -79,12 +79,12 @@ const createActions = ({
     },
     setAssistantMessage: ({ assistantMessage }: { assistantMessage: string }) => {
       setCurrentRound((round) => {
-        round.assistantResponse.message = assistantMessage;
+        round.response.message = assistantMessage;
       });
     },
     addAssistantMessageChunk: ({ messageChunk }: { messageChunk: string }) => {
       setCurrentRound((round) => {
-        round.assistantResponse.message += messageChunk;
+        round.response.message += messageChunk;
       });
     },
     onConversationUpdate: ({
