@@ -6,36 +6,24 @@
  */
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { cloneDeep, keys } from 'lodash';
-import { pipe } from 'lodash/fp';
 import { Alert } from '../alert/alert';
 import type { AlertFactory } from '../alert/create_alert_factory';
 import { createAlertFactory, getPublicAlertFactory } from '../alert/create_alert_factory';
 import { toRawAlertInstances, categorizeAlerts } from '../lib';
 import { logAlerts } from '../task_runner/log_alerts';
 import type {
-  AlertInstanceContext,
-  AlertInstanceState,
+  AlertInstanceContext as Context,
+  AlertInstanceState as State,
   WithoutReservedActionGroups,
 } from '../types';
 import type { RulesSettingsFlappingProperties } from '../../common/rules_settings';
 import { DEFAULT_FLAPPING_SETTINGS } from '../../common/rules_settings';
-import type {
-  IAlertsClient,
-  InitializeExecutionOpts,
-  LogAlertsOpts,
-  TrackedAlerts,
-  DetermineDelayedAlertsOpts,
-  AlertMapper,
-  AlertsResult,
-} from './types';
+import type { IAlertsClient, InitializeExecutionOpts, LogAlertsOpts, TrackedAlerts } from './types';
 import { DEFAULT_MAX_ALERTS } from '../config';
 import type { UntypedNormalizedRuleType } from '../rule_type_registry';
 import type { MaintenanceWindowsService } from '../task_runner/maintenance_windows';
-import type { MaintenanceWindow } from '../application/maintenance_window/types';
 import type { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
-import { determineFlappingAlerts } from '../lib/flapping/determine_flapping_alerts';
-import { determineDelayedAlerts } from '../lib/determine_delayed_alerts';
-import * as mappers from './mappers';
+import { mapAlerts } from './alert_mapper';
 
 export interface LegacyAlertsClientParams {
   alertingEventLogger: AlertingEventLogger;
@@ -47,48 +35,37 @@ export interface LegacyAlertsClientParams {
 }
 
 export class LegacyAlertsClient<
-  State extends AlertInstanceState,
-  Context extends AlertInstanceContext,
-  ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
-> implements IAlertsClient<{}, State, Context, ActionGroupIds, RecoveryActionGroupId>
+  S extends State,
+  C extends Context,
+  G extends string,
+  R extends string
+> implements IAlertsClient<{}, S, C, G, R>
 {
-  private readonly mappers: Array<
-    AlertMapper<State, Context, ActionGroupIds, RecoveryActionGroupId>
-  > = [];
   private maxAlerts: number = DEFAULT_MAX_ALERTS;
   private flappingSettings: RulesSettingsFlappingProperties = DEFAULT_FLAPPING_SETTINGS;
   private ruleLogPrefix = '';
   private startedAtString: string | null = null;
 
   // Alerts from the previous execution that are deserialized from the task state
-  private trackedAlerts: TrackedAlerts<State, Context> = {
+  private trackedAlerts: TrackedAlerts<S, C> = {
     active: new Map(),
     recovered: new Map(),
   };
 
   // Alerts reported from the rule executor using the alert factory
-  private reportedAlerts: Map<string, Alert<State, Context>> = new Map();
+  private reportedAlerts: Map<string, Alert<S, C>> = new Map();
 
   private processedAlerts: {
-    new: Map<string, Alert<State, Context, ActionGroupIds>>;
-    active: Map<string, Alert<State, Context, ActionGroupIds>>;
-    trackedActiveAlerts: Map<string, Alert<State, Context, ActionGroupIds>>;
-    recovered: Map<string, Alert<State, Context, RecoveryActionGroupId>>;
-    trackedRecoveredAlerts: Map<string, Alert<State, Context, RecoveryActionGroupId>>;
+    new: Map<string, Alert<S, C, G>>;
+    active: Map<string, Alert<S, C, G>>;
+    trackedActiveAlerts: Map<string, Alert<S, C, G>>;
+    recovered: Map<string, Alert<S, C, R>>;
+    trackedRecoveredAlerts: Map<string, Alert<S, C, R>>;
   };
 
-  private alertFactory?: AlertFactory<
-    State,
-    Context,
-    WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
-  >;
+  private alertFactory?: AlertFactory<S, C, WithoutReservedActionGroups<G, R>>;
 
   constructor(private readonly options: LegacyAlertsClientParams) {
-    for (const [_, mapper] of Object.entries(mappers)) {
-      this.mappers.push(mapper);
-    }
-
     this.processedAlerts = {
       new: new Map(),
       active: new Map(),
@@ -112,14 +89,11 @@ export class LegacyAlertsClient<
     this.startedAtString = startedAt ? startedAt.toISOString() : null;
 
     for (const id of keys(activeAlertsFromState)) {
-      this.trackedAlerts.active.set(id, new Alert<State, Context>(id, activeAlertsFromState[id]));
+      this.trackedAlerts.active.set(id, new Alert<S, C>(id, activeAlertsFromState[id]));
     }
 
     for (const id of keys(recoveredAlertsFromState)) {
-      this.trackedAlerts.recovered.set(
-        id,
-        new Alert<State, Context>(id, recoveredAlertsFromState[id])
-      );
+      this.trackedAlerts.recovered.set(id, new Alert<S, C>(id, recoveredAlertsFromState[id]));
     }
 
     // Legacy alerts client creates a copy of the active tracked alerts
@@ -127,11 +101,7 @@ export class LegacyAlertsClient<
     // while the original alert is preserved
     this.reportedAlerts = cloneDeep(this.trackedAlerts.active);
 
-    this.alertFactory = createAlertFactory<
-      State,
-      Context,
-      WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
-    >({
+    this.alertFactory = createAlertFactory<S, C, WithoutReservedActionGroups<G, R>>({
       alerts: this.reportedAlerts,
       logger: this.options.logger,
       maxAlerts: this.maxAlerts,
@@ -150,20 +120,12 @@ export class LegacyAlertsClient<
 
   public async processAlerts() {
     const currentTime = this.startedAtString ?? new Date().toISOString();
-    const categorizedAlerts = categorizeAlerts<
-      State,
-      Context,
-      ActionGroupIds,
-      RecoveryActionGroupId
-    >({
+    const categorizedAlerts = categorizeAlerts<S, C, G, G>({
       alerts: this.reportedAlerts,
       existingAlerts: this.trackedAlerts.active,
-      previouslyRecoveredAlerts: this.trackedAlerts.recovered,
       autoRecoverAlerts: this.options.ruleType.autoRecoverAlerts ?? true,
       startedAt: currentTime,
     });
-
-    console.log(`categorizedAlerts: ${JSON.stringify(categorizedAlerts)}`);
 
     const mapperContext = {
       alertDelay: 0,
@@ -171,27 +133,13 @@ export class LegacyAlertsClient<
       flappingSettings: this.flappingSettings,
       hasReachedAlertLimit: this.alertFactory!.hasReachedAlertLimit(),
       maxAlerts: this.maxAlerts,
+      previousActiveAlerts: this.trackedAlerts.active,
+      previousRecoveredAlerts: this.trackedAlerts.recovered,
       startedAt: currentTime,
     };
 
-    function asyncPipe(
-      ...fns: Array<AlertMapper<State, Context, ActionGroupIds, RecoveryActionGroupId>>
-    ) {
-      return async (input: AlertsResult<State, Context, ActionGroupIds, RecoveryActionGroupId>) => {
-        let acc = input;
-        for (const mapper of fns) {
-          acc = await mapper({ alerts: acc, context: mapperContext });
-        }
-        return acc;
-      };
-    }
+    const processedAlerts = await mapAlerts(categorizedAlerts, mapperContext);
 
-    const processedAlerts = await asyncPipe(...this.mappers)(categorizedAlerts);
-
-    console.log(`processedAlerts: ${JSON.stringify(processedAlerts)}`);
-
-    // alert limit
-    // maintenance window
     // flapping
     // flapping recovery
     // query delay
@@ -228,7 +176,7 @@ export class LegacyAlertsClient<
   }
 
   public getRawAlertInstancesForState(shouldOptimizeTaskState?: boolean) {
-    return toRawAlertInstances<State, Context, ActionGroupIds, RecoveryActionGroupId>(
+    return toRawAlertInstances<S, C, G, R>(
       this.options.logger,
       this.maxAlerts,
       this.processedAlerts.trackedActiveAlerts,
@@ -236,25 +184,6 @@ export class LegacyAlertsClient<
       shouldOptimizeTaskState
     );
   }
-
-  // public determineFlappingAlerts() {
-  //   if (this.flappingSettings.enabled) {
-  //     const alerts = determineFlappingAlerts({
-  //       newAlerts: this.processedAlerts.new,
-  //       activeAlerts: this.processedAlerts.active,
-  //       recoveredAlerts: this.processedAlerts.recovered,
-  //       flappingSettings: this.flappingSettings,
-  //       previouslyRecoveredAlerts: this.trackedAlerts.recovered,
-  //       actionGroupId: this.options.ruleType.defaultActionGroupId,
-  //     });
-
-  //     this.processedAlerts.new = alerts.newAlerts;
-  //     this.processedAlerts.active = alerts.activeAlerts;
-  //     this.processedAlerts.trackedActiveAlerts = alerts.trackedActiveAlerts;
-  //     this.processedAlerts.recovered = alerts.recoveredAlerts;
-  //     this.processedAlerts.trackedRecoveredAlerts = alerts.trackedRecoveredAlerts;
-  //   }
-  // }
 
   // public determineDelayedAlerts(opts: DetermineDelayedAlertsOpts) {
   //   const alerts = determineDelayedAlerts({

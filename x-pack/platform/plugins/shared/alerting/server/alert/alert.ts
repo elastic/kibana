@@ -311,6 +311,7 @@ export class Alert<
 
   setFlapping(f: boolean) {
     this.meta.flapping = f;
+    return this;
   }
 
   getFlapping() {
@@ -360,6 +361,7 @@ export class Alert<
 
   setMaintenanceWindowIds(maintenanceWindowIds: string[] = []) {
     this.meta.maintenanceWindowIds = maintenanceWindowIds;
+    return this;
   }
 
   getMaintenanceWindowIds() {

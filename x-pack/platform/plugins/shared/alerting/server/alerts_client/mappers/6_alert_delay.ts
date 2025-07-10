@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { compact } from 'lodash';
-import type { AlertInstanceContext, AlertInstanceState } from '../../types';
-import { AlertCategory, type AlertsResult, type MapperOpts } from '../types';
+import type { AlertInstanceState as State, AlertInstanceContext as Context } from '../../types';
+import type { MapperOpts } from '../alert_mapper';
+import { type AlertMapperFn } from '../alert_mapper';
 
-export async function mapAlertDelay<
-  State extends AlertInstanceState,
-  Context extends AlertInstanceContext,
-  ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
+export const applyAlertDelay: AlertMapperFn = async <
+  S extends State,
+  C extends Context,
+  G extends string,
+  R extends string
 >(
-  opts: MapperOpts<State, Context, ActionGroupIds, RecoveryActionGroupId>
-): Promise<AlertsResult<State, Context, ActionGroupIds, RecoveryActionGroupId>> {
-  console.log(`mapAlertDelay called`);
+  opts: MapperOpts<S, C, G, R>
+) => {
+  opts.context.alertsClientContext.logger.info(`Applying alert delay mapping function`);
   return opts.alerts;
   // const currentTime = opts.context.startedAt ?? new Date().toISOString();
   // let delayedAlertsCount = 0;
@@ -55,4 +55,4 @@ export async function mapAlertDelay<
   // );
 
   // return mappedAlerts;
-}
+};

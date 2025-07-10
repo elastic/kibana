@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-// mapAlertLimit should be first in the applied mapping functions
-export { mapAlertLimit } from './1_alert_limit';
+// applyAlertLimit should be first in the applied mapping functions
+export { applyAlertLimit } from './1_alert_limit';
 
 // remaining mappers can be imported in any order but we order them
 // for repeatability and consistency
-export { mapMaintenanceWindows } from './2_maintenance_window';
-export { mapFlapping } from './3_flapping';
-export { mapFlappingRecovery } from './4_flapping_recovery';
-export { mapAlertDelay } from './5_alert_delay';
+export { applyMaintenanceWindows } from './2_maintenance_window';
+export { applyFlapping } from './3_flapping';
+export { applyFlappingHistory } from './4_flapping_history';
+export { applyFlappingRecovery } from './5_flapping_recovery';
+export { applyAlertDelay } from './6_alert_delay';

@@ -24,12 +24,12 @@ import type {
 } from '@kbn/rule-data-utils';
 import type { Alert as LegacyAlert } from '../alert/alert';
 import type {
-  AlertInstanceContext,
-  AlertInstanceState,
+  AlertInstanceContext as Context,
+  AlertInstanceState as State,
   AlertsFilter,
   SummarizedAlerts,
   RawAlertInstance,
-  RuleAlertData,
+  RuleAlertData as AlertData,
   WithoutReservedActionGroups,
 } from '../types';
 import type { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
@@ -37,8 +37,6 @@ import type { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import type { RulesSettingsFlappingProperties } from '../../common/rules_settings';
 import type { PublicAlertFactory } from '../alert/create_alert_factory';
 import type { MaintenanceWindow } from '../application/maintenance_window/types';
-import type { MaintenanceWindowsService } from '../task_runner/maintenance_windows';
-import type { LegacyAlertsClientParams } from './legacy_alerts_client';
 
 export interface AlertRuleData {
   consumer: string;
@@ -67,11 +65,11 @@ export interface AlertRule {
 }
 
 export interface IAlertsClient<
-  AlertData extends RuleAlertData,
-  State extends AlertInstanceState,
-  Context extends AlertInstanceContext,
-  ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
+  A extends AlertData,
+  S extends State,
+  C extends Context,
+  G extends string,
+  R extends string
 > {
   initializeExecution(opts: InitializeExecutionOpts): Promise<void>;
   hasReachedAlertLimit(): boolean;
@@ -80,10 +78,10 @@ export interface IAlertsClient<
   logAlerts(opts: LogAlertsOpts): void;
   getProcessedAlerts(
     type: 'new' | 'active' | 'trackedActiveAlerts'
-  ): Record<string, LegacyAlert<State, Context, ActionGroupIds>> | {};
+  ): Record<string, LegacyAlert<S, C, G>> | {};
   getProcessedAlerts(
     type: 'recovered' | 'trackedRecoveredAlerts'
-  ): Record<string, LegacyAlert<State, Context, RecoveryActionGroupId>> | {};
+  ): Record<string, LegacyAlert<S, C, R>> | {};
   persistAlerts(): Promise<{ alertIds: string[]; maintenanceWindowIds: string[] } | null>;
   isTrackedAlert(id: string): boolean;
   getSummarizedAlerts?(params: GetSummarizedAlertsParams): Promise<SummarizedAlerts>;
@@ -91,19 +89,8 @@ export interface IAlertsClient<
     rawActiveAlerts: Record<string, RawAlertInstance>;
     rawRecoveredAlerts: Record<string, RawAlertInstance>;
   };
-  factory(): PublicAlertFactory<
-    State,
-    Context,
-    WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
-  >;
-  client(): PublicAlertsClient<
-    AlertData,
-    State,
-    Context,
-    WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
-  > | null;
-  determineFlappingAlerts(): void;
-  determineDelayedAlerts(opts: DetermineDelayedAlertsOpts): void;
+  factory(): PublicAlertFactory<State, Context, WithoutReservedActionGroups<G, R>>;
+  client(): PublicAlertsClient<A, S, C, WithoutReservedActionGroups<G, R>> | null;
   getTrackedExecutions(): Set<string>;
 }
 
@@ -136,70 +123,65 @@ export interface InitializeExecutionOpts {
   trackedExecutions?: string[];
 }
 
-export interface TrackedAlerts<
-  State extends AlertInstanceState,
-  Context extends AlertInstanceContext
-> {
-  active: Map<string, LegacyAlert<State, Context>>;
-  recovered: Map<string, LegacyAlert<State, Context>>;
+export interface TrackedAlerts<S extends State, C extends Context> {
+  active: Map<string, LegacyAlert<S, C>>;
+  recovered: Map<string, LegacyAlert<S, C>>;
 }
 
 export interface PublicAlertsClient<
-  AlertData extends RuleAlertData,
-  State extends AlertInstanceState,
-  Context extends AlertInstanceContext,
-  ActionGroupIds extends string
+  A extends AlertData,
+  S extends State,
+  C extends Context,
+  G extends string
 > {
-  report(
-    alert: ReportedAlert<AlertData, State, Context, ActionGroupIds>
-  ): ReportedAlertData<AlertData>;
+  report(alert: ReportedAlert<A, S, C, G>): ReportedAlertData<A>;
   isTrackedAlert(id: string): boolean;
-  setAlertData(alert: UpdateableAlert<AlertData, State, Context, ActionGroupIds>): void;
+  setAlertData(alert: UpdateableAlert<A, S, C, G>): void;
   getAlertLimitValue: () => number;
   setAlertLimitReached: (reached: boolean) => void;
-  getRecoveredAlerts: () => Array<RecoveredAlertData<AlertData, State, Context, ActionGroupIds>>;
+  getRecoveredAlerts: () => Array<RecoveredAlertData<A, S, C, G>>;
 }
 
 export interface ReportedAlert<
-  AlertData extends RuleAlertData,
-  State extends AlertInstanceState,
-  Context extends AlertInstanceContext,
-  ActionGroupIds extends string
+  A extends AlertData,
+  S extends State,
+  C extends Context,
+  G extends string
 > {
   id: string; // alert instance id
-  actionGroup: ActionGroupIds;
-  state?: State;
-  context?: Context;
-  payload?: DeepPartial<AlertData>;
+  actionGroup: G;
+  state?: S;
+  context?: C;
+  payload?: DeepPartial<A>;
 }
 
 export interface RecoveredAlertData<
-  AlertData extends RuleAlertData,
-  State extends AlertInstanceState,
-  Context extends AlertInstanceContext,
-  ActionGroupIds extends string
+  A extends AlertData,
+  S extends State,
+  C extends Context,
+  G extends string
 > {
-  alert: LegacyAlert<State, Context, ActionGroupIds>;
-  hit?: AlertData;
+  alert: LegacyAlert<S, C, G>;
+  hit?: A;
 }
 
-export interface ReportedAlertData<AlertData> {
+export interface ReportedAlertData<A> {
   uuid: string;
   start: string | null;
-  alertDoc?: AlertData;
+  alertDoc?: A;
 }
 
 export type UpdateableAlert<
-  AlertData extends RuleAlertData,
-  State extends AlertInstanceState,
-  Context extends AlertInstanceContext,
-  ActionGroupIds extends string
-> = Pick<ReportedAlert<AlertData, State, Context, ActionGroupIds>, 'id' | 'context' | 'payload'>;
+  A extends AlertData,
+  S extends State,
+  C extends Context,
+  G extends string
+> = Pick<ReportedAlert<A, S, C, G>, 'id' | 'context' | 'payload'>;
 
-export interface SearchResult<AlertData, Aggregation = unknown> {
-  hits: SearchResponseBody<Alert & AlertData>['hits']['hits'];
-  total: SearchResponseBody<Alert & AlertData>['hits']['total'];
-  aggregations: SearchResponseBody<Alert & AlertData, Aggregation>['aggregations'];
+export interface SearchResult<A, Aggregation = unknown> {
+  hits: SearchResponseBody<Alert & A>['hits']['hits'];
+  total: SearchResponseBody<Alert & A>['hits']['total'];
+  aggregations: SearchResponseBody<Alert & A, Aggregation>['aggregations'];
 }
 
 export type GetSummarizedAlertsParams = {
@@ -286,49 +268,3 @@ export type ScopedQueryAggregationResult = Record<
     };
   }
 >;
-
-export type AlertMapper<
-  State extends AlertInstanceState,
-  Context extends AlertInstanceContext,
-  ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
-> = (
-  opts: MapperOpts<State, Context, ActionGroupIds, RecoveryActionGroupId>
-) => Promise<AlertsResult<State, Context, ActionGroupIds, RecoveryActionGroupId>>;
-
-export enum AlertCategory {
-  Existing, // alerts that were active in the previous run
-  New, // alerts that are newly created in the current run
-  Ongoing, // alerts that were active in the previous run and are still active in the current run
-  Recovered, // alerts that were active in the previous run and are now recovered in the current run
-  PreviouslyRecovered, // alerts that were recovered in the previous run
-}
-
-export type AlertsResult<
-  State extends AlertInstanceState,
-  Context extends AlertInstanceContext,
-  ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
-> = Array<{
-  alert: LegacyAlert<State, Context, ActionGroupIds | RecoveryActionGroupId>;
-  category: AlertCategory;
-}>;
-
-export interface MapperContext {
-  alertDelay: number;
-  alertsClientContext: LegacyAlertsClientParams;
-  flappingSettings: RulesSettingsFlappingProperties;
-  hasReachedAlertLimit: boolean;
-  maxAlerts: number;
-  startedAt: string;
-}
-
-export interface MapperOpts<
-  State extends AlertInstanceState,
-  Context extends AlertInstanceContext,
-  ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
-> {
-  alerts: AlertsResult<State, Context, ActionGroupIds, RecoveryActionGroupId>;
-  context: MapperContext;
-}

@@ -10,7 +10,7 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { Alert } from './alert';
 import { createAlertFactory, getPublicAlertFactory } from './create_alert_factory';
 import { categorizeAlerts } from '../lib';
-import { AlertCategory } from '../alerts_client/types';
+import { AlertCategory } from '../alerts_client/alert_category';
 
 jest.mock('../lib', () => ({
   categorizeAlerts: jest.fn(),
@@ -88,18 +88,17 @@ describe('createAlertFactory()', () => {
       autoRecoverAlerts: true,
     });
     alertFactory.create('1');
-    expect(alerts).toMatchInlineSnapshot(`
-      Map {
-        "1" => Object {
-          "meta": Object {
-            "flappingHistory": Array [],
-            "maintenanceWindowIds": Array [],
-            "uuid": "454dc139-05e0-43da-af95-845f99cb275b",
-          },
-          "state": Object {},
+    expect(alerts.size).toBe(1);
+    expect(alerts.get('1')).toEqual(
+      new Alert('1', {
+        meta: {
+          flappingHistory: [],
+          maintenanceWindowIds: [],
+          uuid: expect.any(String),
         },
-      }
-    `);
+        state: {},
+      })
+    );
   });
 
   test('gets alert if it exists, returns null if it does not', () => {

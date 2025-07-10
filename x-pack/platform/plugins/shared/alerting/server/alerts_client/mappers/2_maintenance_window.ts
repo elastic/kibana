@@ -5,49 +5,50 @@
  * 2.0.
  */
 
-import type { AlertInstanceContext, AlertInstanceState } from '../../types';
-import { AlertCategory, type AlertsResult, type MapperOpts } from '../types';
+import { AlertCategory, type AlertMapperFn } from '../alert_mapper';
+import type { AlertInstanceState as State, AlertInstanceContext as Context } from '../../types';
+import type { MapperOpts } from '../alert_mapper';
 
-export async function mapMaintenanceWindows<
-  State extends AlertInstanceState,
-  Context extends AlertInstanceContext,
-  ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
+export const applyMaintenanceWindows: AlertMapperFn = async <
+  S extends State,
+  C extends Context,
+  G extends string,
+  R extends string
 >(
-  opts: MapperOpts<State, Context, ActionGroupIds, RecoveryActionGroupId>
-): Promise<AlertsResult<State, Context, ActionGroupIds, RecoveryActionGroupId>> {
-  console.log(`mapMaintenanceWindows called`);
-  return opts.alerts;
-  // if (!opts.context.alertsClientContext.maintenanceWindowsService || !opts.alerts.length) {
-  //   return opts.alerts;
-  // }
+  opts: MapperOpts<S, C, G, R>
+) => {
+  opts.context.alertsClientContext.logger.info(`Applying maintenance window mapping function`);
 
-  // // load maintenance windows if there are any any alerts (new, active, recovered)
-  // // this is because we need the MW IDs for any active or recovered alerts that may
-  // // have started during the MW period.
+  if (!opts.context.alertsClientContext.maintenanceWindowsService || !opts.alerts.length) {
+    return opts.alerts;
+  }
 
-  // const { maintenanceWindowsWithoutScopedQueryIds, maintenanceWindows } =
-  //   await opts.context.alertsClientContext.maintenanceWindowsService.getMaintenanceWindows({
-  //     eventLogger: opts.context.alertsClientContext.alertingEventLogger,
-  //     request: opts.context.alertsClientContext.request,
-  //     ruleTypeCategory: opts.context.alertsClientContext.ruleType.category,
-  //     spaceId: opts.context.alertsClientContext.spaceId,
-  //   });
+  // load maintenance windows if there are any any alerts (new, active, recovered)
+  // this is because we need the MW IDs for any active or recovered alerts that may
+  // have started during the MW period.
+  const { maintenanceWindowsWithoutScopedQueryIds, maintenanceWindows } =
+    await opts.context.alertsClientContext.maintenanceWindowsService.getMaintenanceWindows({
+      eventLogger: opts.context.alertsClientContext.alertingEventLogger,
+      request: opts.context.alertsClientContext.request,
+      ruleTypeCategory: opts.context.alertsClientContext.ruleType.category,
+      spaceId: opts.context.alertsClientContext.spaceId,
+    });
 
-  // const maintenanceWindowIds = maintenanceWindows.map((mw) => mw.id);
+  const maintenanceWindowIds = maintenanceWindows.map((mw) => mw.id);
 
-  // // clear maintenance windows from ongoing and recovered alerts
-  // return opts.alerts.map(({ alert, category }) => {
-  //   if (category === AlertCategory.Ongoing || category === AlertCategory.Recovered) {
-  //     const existingMaintenanceWindowIds = alert.getMaintenanceWindowIds();
-  //     const activeMaintenanceWindowIds = existingMaintenanceWindowIds.filter((mw) => {
-  //       return maintenanceWindowIds.includes(mw);
-  //     });
-  //     alert.setMaintenanceWindowIds(activeMaintenanceWindowIds);
-  //   } else if (category === AlertCategory.New) {
-  //     alert.setMaintenanceWindowIds(maintenanceWindowsWithoutScopedQueryIds);
-  //   }
+  return opts.alerts.map(({ alert, category }) => {
+    if (category === AlertCategory.Ongoing || category === AlertCategory.Recovered) {
+      // clear outdated maintenance windows from ongoing and recovered alerts
+      const existingMaintenanceWindowIds = alert.getMaintenanceWindowIds();
+      const activeMaintenanceWindowIds = existingMaintenanceWindowIds.filter((mw) => {
+        return maintenanceWindowIds.includes(mw);
+      });
+      alert.setMaintenanceWindowIds(activeMaintenanceWindowIds);
+    } else if (category === AlertCategory.New) {
+      // add active maintenance windows to new alerts
+      alert.setMaintenanceWindowIds(maintenanceWindowsWithoutScopedQueryIds);
+    }
 
-  //   return { alert, category };
-  // });
-}
+    return { alert, category };
+  });
+};

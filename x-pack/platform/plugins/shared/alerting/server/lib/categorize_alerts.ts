@@ -7,50 +7,30 @@
 
 import { cloneDeep } from 'lodash';
 import type { Alert } from '../alert';
-import type { AlertInstanceState, AlertInstanceContext } from '../types';
-import { AlertCategory, type AlertsResult } from '../alerts_client/types';
+import type { AlertInstanceState as State, AlertInstanceContext as Context } from '../types';
+import { AlertCategory, type AlertsResult } from '../alerts_client/alert_mapper';
 
-interface CategorizeAlertsOpts<
-  State extends AlertInstanceState,
-  Context extends AlertInstanceContext
-> {
-  alerts: Map<string, Alert<State, Context>>;
-  existingAlerts: Map<string, Alert<State, Context>>;
-  previouslyRecoveredAlerts?: Map<string, Alert<State, Context>>;
+interface CategorizeAlertsOpts<S extends State, C extends Context, G extends string> {
+  alerts: Map<string, Alert<S, C, G>>;
+  existingAlerts: Map<string, Alert<S, C, G>>;
   autoRecoverAlerts: boolean;
   startedAt: string;
 }
 
 export function categorizeAlerts<
-  State extends AlertInstanceState,
-  Context extends AlertInstanceContext,
-  ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
+  S extends State,
+  C extends Context,
+  G extends string,
+  R extends string
 >({
   alerts,
   existingAlerts,
-  previouslyRecoveredAlerts,
   autoRecoverAlerts,
   startedAt,
-}: CategorizeAlertsOpts<State, Context>): AlertsResult<
-  State,
-  Context,
-  ActionGroupIds,
-  RecoveryActionGroupId
-> {
+}: CategorizeAlertsOpts<S, C, G>): AlertsResult<S, C, G, R> {
   const reportedAlerts = cloneDeep(alerts);
-  const categorizedAlerts: AlertsResult<State, Context, ActionGroupIds, RecoveryActionGroupId> = [];
+  const categorizedAlerts: AlertsResult<S, C, G, R> = [];
   const existingAlertIds = new Set([...existingAlerts.keys()]);
-
-  // Add all existing alerts
-  existingAlerts.forEach((alert) => {
-    categorizedAlerts.push({ alert, category: AlertCategory.Existing });
-  });
-
-  // Add all previously recovered alerts
-  (previouslyRecoveredAlerts ?? []).forEach((alert) => {
-    categorizedAlerts.push({ alert, category: AlertCategory.PreviouslyRecovered });
-  });
 
   // Categorize reported alerts into new, ongoing and recovered
   reportedAlerts.forEach((alert, id) => {

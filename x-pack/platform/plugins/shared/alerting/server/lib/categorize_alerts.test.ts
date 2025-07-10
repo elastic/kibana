@@ -10,7 +10,7 @@ import { cloneDeep } from 'lodash';
 import { categorizeAlerts } from './categorize_alerts';
 import { Alert } from '../alert';
 import type { AlertInstanceState, AlertInstanceContext } from '../types';
-import { AlertCategory } from '../alerts_client/types';
+import { AlertCategory } from '../alerts_client/alert_mapper';
 
 describe('categorizeAlerts', () => {
   let clock: sinon.SinonFakeTimers;
@@ -62,10 +62,8 @@ describe('categorizeAlerts', () => {
       });
 
       // 2 existing, 2 ongoing, 1 new
-      expect(categorizedAlerts).toHaveLength(5);
+      expect(categorizedAlerts).toHaveLength(3);
       expect(categorizedAlerts).toEqual([
-        { alert: existingAlert1, category: AlertCategory.Existing },
-        { alert: existingAlert2, category: AlertCategory.Existing },
         {
           alert: newAlert.replaceState({
             duration: '0',
