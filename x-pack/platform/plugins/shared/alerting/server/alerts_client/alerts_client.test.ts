@@ -621,7 +621,7 @@ describe('Alerts Client', () => {
               '3': trackedAlert3Raw,
             },
           });
-
+          expect(logger.info).toHaveBeenCalledWith('ss');
           expect(alertsClient.getTrackedExecutions()).toEqual(
             new Set([
               '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
