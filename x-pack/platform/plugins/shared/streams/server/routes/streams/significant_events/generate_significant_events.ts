@@ -19,6 +19,7 @@ import pLimit from 'p-limit';
 import { v4 } from 'uuid';
 import { kqlQuery, rangeQuery } from '../../internal/esql/query_helpers';
 import { KQL_GUIDE } from './kql_guide';
+import { mapValues, sampleSize } from 'lodash';
 
 const LOOKBACK_DAYS = 7;
 
@@ -319,5 +320,102 @@ root cause analysis. Some example of patterns:
     `;
   });
 
-  return selected;
+  const messageFields = analysis.fields.find((f) => f.name === 'message' || f.name === 'body.text');
+
+  const { content: systemIdentification } = await inferenceClient.output({
+    id: 'identify_system',
+    connectorId,
+    input: `
+You are an expert log analysis system. Your task is to identify the system that generated these logs.
+
+## Context
+- Index Name: ${name}
+- Time Range: Last 24 hours
+- Total Document Count: ${analysis.total}
+
+## Sample Log Documents
+
+${JSON.stringify(messageFields?.values ?? [])}
+
+## Dataset analysis
+    
+${JSON.stringify(short)}
+
+## Task: System Identification
+
+Based on the log samples above, identify:
+1. **Primary System/Application**: What system generated these logs? (e.g., Nginx, Apache, Kubernetes, AWS CloudTrail, Spring Boot application, etc.)
+2. **System Version** (if detectable): Can you identify the specific version or variant?
+3. **Confidence Level**: Rate your confidence in this identification (High/Medium/Low) and explain why.
+
+Please structure your response as plain text for usage in another LLM prompt
+`,
+  });
+
+  logger.debug(() => `identified system: ${JSON.stringify(systemIdentification)}`);
+
+  const { output: zeroShotQueries } = await inferenceClient.output({
+    id: 'generate_queries_from_system',
+    connectorId,
+    input: `
+You are an expert log analysis system. You previously identified the system that generated the logs as {identified_system}.
+
+## Identified System
+
+${JSON.stringify(systemIdentification)}
+
+## Context
+- Index Name: ${name}
+- Time Range: Last 24 hours
+- Total Document Count: ${analysis.total}
+- Field name: ${messageFields?.name ?? 'message'}
+
+## Dataset analysis
+    
+${JSON.stringify(short)}
+
+${KQL_GUIDE}
+
+Based on your identification of this as a {identified_system} system, generate Elasticsearch KQL queries to detect the most significant events for this type of system. 
+
+For each query, provide:
+- **Query Title**: A title for the log pattern
+- **KQL**: The KQL of the specific log pattern
+
+Focus on queries that would detect:
+1. **Critical Errors**: System failures, crashes, or critical errors specific to {identified_system}
+2. **Security Events**: Authentication failures, unauthorized access, suspicious patterns
+3. **Performance Issues**: Slow responses, timeouts, resource exhaustion
+4. **Availability Issues**: Service disruptions, connectivity problems
+5. **Data Integrity**: Corruption, failed transactions, data loss indicators
+6. **Anomalous Behavior**: Unusual patterns specific to {identified_system}
+`,
+    schema: {
+      type: 'object',
+      properties: {
+        queries: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              title: {
+                type: 'string',
+                description: 'A title for the log pattern',
+              },
+              kql: {
+                type: 'string',
+                description: 'The KQL of the specific log pattern',
+              },
+            },
+            required: ['kql', 'title'],
+          },
+        },
+      },
+      required: ['queries'],
+    } as const,
+  });
+
+  logger.debug(() => `identified system: ${JSON.stringify(zeroShotQueries)}`);
+
+  return [...selected, ...zeroShotQueries.queries];
 }
