@@ -32,10 +32,10 @@ export const UPDATED_BY_AND_WHEN = (updatedBy: ReactNode, updatedAt: ReactNode) 
   />
 );
 
-export const FIELD_UPDATES = i18n.translate(
-  'xpack.securitySolution.detectionEngine.baseVersionFlyout.header.fieldUpdates',
+export const FIELD_MODIFICATIONS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.baseVersionFlyout.header.fieldModifications',
   {
-    defaultMessage: 'Field updates',
+    defaultMessage: 'Field modifications',
   }
 );
 
@@ -88,6 +88,27 @@ export const BASE_VERSION_LABEL = i18n.translate(
   }
 );
 
+export const CURRENT_VERSION_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.baseVersionFlyout.currentVersionLabel',
+  {
+    defaultMessage: 'Current rule',
+  }
+);
+
+export const BASE_VERSION_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.baseVersionFlyout.baseVersionDescriptionLabel',
+  {
+    defaultMessage: 'Shows original Elastic rule asset',
+  }
+);
+
+export const CURRENT_VERSION_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.baseVersionFlyout.currentVersionDescriptionLabel',
+  {
+    defaultMessage: 'Shows currently installed rule',
+  }
+);
+
 export const NEW_REVISION_DETECTED_WARNING = i18n.translate(
   'xpack.securitySolution.detectionEngine.baseVersionFlyout.ruleNewRevisionDetectedWarning',
   {
@@ -100,5 +121,13 @@ export const NEW_REVISION_DETECTED_WARNING_MESSAGE = i18n.translate(
   {
     defaultMessage:
       'The installed rule was changed, the rule modifications diff flyout has been updated.',
+  }
+);
+
+export const OUTDATED_DIFF_CALLOUT_MESSAGE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.baseVersionFlyout.outdatedDiffCalloutMessage',
+  {
+    defaultMessage:
+      'Changes have been made to the installed rule, please reload the page to view updated diff.',
   }
 );
