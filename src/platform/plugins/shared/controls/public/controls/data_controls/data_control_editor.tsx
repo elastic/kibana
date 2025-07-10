@@ -79,6 +79,7 @@ import {
 import { ControlFactory } from '../types';
 import { OptionsField } from './options_field';
 // import { ESQLLangEditor } from '@kbn/esql/public';
+import { confirmDeleteControl } from '../../common';
 
 export interface ControlEditorProps<
   State extends DefaultDataControlState = DefaultDataControlState
@@ -634,23 +635,6 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
       <EuiFlyoutBody data-test-subj="control-editor-flyout">
         <EuiForm fullWidth>
           <EuiSteps steps={steps} titleSize="xxs" />
-          {controlId && (
-            <>
-              <EuiSpacer size="l" />
-              <EuiButtonEmpty
-                aria-label={`delete-${editorState.title ?? editorState.fieldName}`}
-                iconType="trash"
-                flush="left"
-                color="danger"
-                onClick={() => {
-                  onCancel(initialState); // don't want to show "lost changes" warning
-                  controlGroupApi.removePanel(controlId!);
-                }}
-              >
-                {DataControlEditorStrings.manageControl.getDeleteButtonTitle()}
-              </EuiButtonEmpty>
-            </>
-          )}
         </EuiForm>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
@@ -667,25 +651,44 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton
-              aria-label={`save-${editorState.title ?? editorState.fieldName}`}
-              data-test-subj="control-editor-save"
-              fill
-              color="primary"
-              disabled={
-                !(
-                  controlOptionsValid &&
-                  Boolean(editorState.fieldName) &&
-                  (Boolean(selectedDataView) || !isDSLInputMode) &&
-                  Boolean(selectedControlType)
-                )
-              }
-              onClick={() => {
-                onSave(editorState, selectedControlType!);
-              }}
-            >
-              {DataControlEditorStrings.manageControl.getSaveChangesTitle()}
-            </EuiButton>
+            <EuiFlexGroup responsive={false} justifyContent="flexEnd" gutterSize="s">
+              {controlId && (
+                <EuiButton
+                  aria-label={`delete-${editorState.title ?? editorState.fieldName}`}
+                  iconType="trash"
+                  color="danger"
+                  onClick={() => {
+                    confirmDeleteControl().then((confirmed) => {
+                      if (confirmed) {
+                        onCancel(initialState); // don't want to show "lost changes" warning
+                        controlGroupApi.removePanel(controlId!);
+                      }
+                    });
+                  }}
+                >
+                  {DataControlEditorStrings.manageControl.getDeleteButtonTitle()}
+                </EuiButton>
+              )}
+              <EuiButton
+                aria-label={`save-${editorState.title ?? editorState.fieldName}`}
+                data-test-subj="control-editor-save"
+                fill
+                color="primary"
+                disabled={
+                  !(
+                    controlOptionsValid &&
+                    Boolean(editorState.fieldName) &&
+                    (Boolean(selectedDataView) || !isDSLInputMode) &&
+                    Boolean(selectedControlType)
+                  )
+                }
+                onClick={() => {
+                  onSave(editorState, selectedControlType!);
+                }}
+              >
+                {DataControlEditorStrings.manageControl.getSaveChangesTitle()}
+              </EuiButton>
+            </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>

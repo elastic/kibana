@@ -8,7 +8,8 @@
  */
 
 import type * as types from '../types';
-import { ESQLInlineCast, ESQLTimeInterval } from '../types';
+import { ESQLInlineCast, ESQLProperNode, ESQLTimeInterval } from '../types';
+import { Walker } from '../walker';
 
 export const isProperNode = (node: unknown): node is types.ESQLProperNode =>
   !!node &&
@@ -96,3 +97,5 @@ export const isInlineCast = (node: unknown): node is ESQLInlineCast =>
 export function isAssignment(node: unknown): node is types.ESQLFunction {
   return isFunctionExpression(node) && node.name === '=';
 }
+
+export const isParametrized = (node: ESQLProperNode): boolean => Walker.params(node).length > 0;
