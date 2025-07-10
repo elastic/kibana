@@ -27,6 +27,7 @@ import {
 import { useInferenceEndpoints, UseKnowledgeBaseResult } from '@kbn/ai-assistant/src/hooks';
 import { KnowledgeBaseState, useKibana } from '@kbn/observability-ai-assistant-plugin/public';
 import { useInstallProductDoc } from '../../../hooks/use_install_product_doc';
+import { useGetProductDocStatus } from '../../../hooks/use_get_product_doc_status';
 
 export function ChangeKbModel({ knowledgeBase }: { knowledgeBase: UseKnowledgeBaseResult }) {
   const { overlays } = useKibana().services;
@@ -40,6 +41,7 @@ export function ChangeKbModel({ knowledgeBase }: { knowledgeBase: UseKnowledgeBa
   const [hasLoadedCurrentModel, setHasLoadedCurrentModel] = useState(false);
   const [isUpdatingModel, setIsUpdatingModel] = useState(false);
   const { mutateAsync: installProductDoc } = useInstallProductDoc();
+  const { refetch: refetchProductDocStatus } = useGetProductDocStatus(selectedInferenceId);
 
   const { inferenceEndpoints, isLoading: isLoadingEndpoints, error } = useInferenceEndpoints();
 
@@ -144,6 +146,9 @@ export function ChangeKbModel({ knowledgeBase }: { knowledgeBase: UseKnowledgeBa
           knowledgeBase.warmupModel(selectedInferenceId);
         } else {
           knowledgeBase.install(selectedInferenceId);
+          installProductDoc(selectedInferenceId).then(() => {
+            refetchProductDocStatus();
+          });
         }
       } else {
         overlays
@@ -156,7 +161,9 @@ export function ChangeKbModel({ knowledgeBase }: { knowledgeBase: UseKnowledgeBa
             if (isConfirmed) {
               setIsUpdatingModel(true);
               knowledgeBase.install(selectedInferenceId);
-              installProductDoc(selectedInferenceId);
+              installProductDoc(selectedInferenceId).then(() => {
+                refetchProductDocStatus();
+              });
             }
           });
       }
@@ -169,6 +176,7 @@ export function ChangeKbModel({ knowledgeBase }: { knowledgeBase: UseKnowledgeBa
     overlays,
     confirmationMessages,
     installProductDoc,
+    refetchProductDocStatus,
   ]);
 
   const superSelectOptions = modelOptions.map((option: ModelOptionsData) => ({

@@ -41,10 +41,19 @@ export function ProductDocEntry({ knowledgeBase }: { knowledgeBase: UseKnowledge
 
   useEffect(() => {
     if (isStatusLoading) return;
-    if (status) {
-      setInstalled(status.overall === 'installed' && status.inferenceId === selectedInferenceId);
+    if (status && status.inferenceId === selectedInferenceId) {
+      if (status.overall === 'installing') {
+        setInstalling(true);
+        setInstalled(false);
+      } else if (status.overall === 'installed') {
+        setInstalling(false);
+        setInstalled(true);
+      } else if (status.overall === 'uninstalled') {
+        setInstalling(false);
+        setInstalled(false);
+      }
     }
-  }, [selectedInferenceId, status, isStatusLoading]);
+  }, [selectedInferenceId, status, isStatusLoading, setInstalling, setInstalled]);
 
   const onClickInstall = useCallback(() => {
     if (!selectedInferenceId) {
