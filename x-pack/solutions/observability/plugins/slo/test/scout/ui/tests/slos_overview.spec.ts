@@ -34,10 +34,9 @@ test.describe('SLOs Overview', { tag: ['@ess', '@svlOblt'] }, () => {
     await expect(async () => {
       await page.getByTestId('querySubmitButton').click();
 
-      // eslint-disable-next-line playwright/no-wait-for-selector
-      await page.waitForSelector('text="Test Stack SLO"');
-      const cards = await page.locator('text="Test Stack SLO"').all();
-      expect(cards.length > 5).toBeTruthy();
+      await expect
+        .poll(() => page.locator('text=Test Stack SLO').count(), { timeout: 1000 })
+        .toBeGreaterThan(5);
     }).toPass({
       intervals: [20000],
       timeout: TEST_TIMEOUT,
