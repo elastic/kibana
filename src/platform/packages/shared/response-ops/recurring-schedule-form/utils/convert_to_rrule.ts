@@ -11,8 +11,9 @@ import type { Moment } from 'moment';
 import { Frequency } from '@kbn/rrule';
 import { ISO_WEEKDAYS_TO_RRULE } from '../constants';
 import { getPresets } from './get_presets';
-import type { RRuleParams, RecurringSchedule } from '../types';
+import { parseSchedule } from './parse_schedule';
 import { getNthByWeekday } from './get_nth_by_weekday';
+import type { RRuleParams, RecurringSchedule } from '../types';
 
 export const convertToRRule = ({
   startDate,
@@ -27,6 +28,8 @@ export const convertToRRule = ({
 }): RRuleParams => {
   const presets = getPresets(startDate);
 
+  const parsedSchedule = parseSchedule(recurringSchedule);
+
   const rRule: RRuleParams = {
     dtstart: startDate.toISOString(),
     tzid: timezone,
@@ -35,7 +38,7 @@ export const convertToRRule = ({
       : {}),
   };
 
-  if (!recurringSchedule)
+  if (!parsedSchedule)
     return {
       ...rRule,
       // default to yearly and a count of 1
@@ -44,9 +47,9 @@ export const convertToRRule = ({
       count: 1,
     };
 
-  let form = recurringSchedule;
-  if (recurringSchedule.frequency !== 'CUSTOM') {
-    form = { ...recurringSchedule, ...presets[recurringSchedule.frequency] };
+  let form = parsedSchedule;
+  if (parsedSchedule.frequency !== 'CUSTOM') {
+    form = { ...parsedSchedule, ...presets[parsedSchedule.frequency] };
   }
 
   const frequency = form.customFrequency ?? (form.frequency as Frequency);

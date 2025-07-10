@@ -1265,9 +1265,7 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/test_serverless/api_integration/test_suites/common/data_usage @elastic/obs-ai-assistant @elastic/security-solution
 /x-pack/test_serverless/functional/test_suites/common/data_usage @elastic/obs-ai-assistant @elastic/security-solution
 /x-pack/test_serverless/functional/page_objects/svl_data_usage.ts @elastic/obs-ai-assistant @elastic/security-solution
-/x-pack/test/observability_ai_assistant_api_integration @elastic/obs-ai-assistant
 /x-pack/test/observability_ai_assistant_functional @elastic/obs-ai-assistant
-/x-pack/test_serverless/**/test_suites/observability/ai_assistant @elastic/obs-ai-assistant
 /x-pack/test/functional/es_archives/observability/ai_assistant @elastic/obs-ai-assistant
 /x-pack/test/api_integration/deployment_agnostic/apis/observability/ai_assistant @elastic/obs-ai-assistant
 # Infra Obs
@@ -1675,9 +1673,6 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /x-pack/test/common/services/index.ts @elastic/appex-qa
 /x-pack/test/common/services/bsearch_secure.ts @elastic/appex-qa
 /x-pack/test/common/ftr_provider_context.ts @elastic/appex-qa
-/x-pack/test/api_integration_basic/ftr_provider_context.d.ts @elastic/appex-qa
-/x-pack/test/api_integration_basic/config.ts @elastic/appex-qa
-/x-pack/test/api_integration_basic/apis/index.ts @elastic/appex-qa
 /x-pack/test/api_integration/services/index.ts @elastic/appex-qa
 /x-pack/test/api_integration/services/es_supertest_without_auth.js @elastic/appex-qa
 /x-pack/test/api_integration/config.ts @elastic/appex-qa
@@ -2028,8 +2023,8 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /x-pack/test/functional_with_es_ssl/lib/object_remover.ts @elastic/response-ops
 /x-pack/test/stack_functional_integration/apps/alerts @elastic/response-ops
 /x-pack/test/functional/services/actions @elastic/response-ops
-/x-pack/test/api_integration_basic/apis/security_solution/index.ts @elastic/response-ops
-/x-pack/test/api_integration_basic/apis/security_solution/cases_privileges.ts @elastic/response-ops
+/x-pack/solutions/security/test/api_integration_basic/apis/security_solution/index.ts @elastic/response-ops @elastic/kibana-cases
+/x-pack/solutions/security/test/api_integration_basic/apis/security_solution/cases_privileges.ts @elastic/response-ops @elastic/kibana-cases
 /x-pack/test/upgrade/services/rules_upgrade_services.ts @elastic/response-ops
 /x-pack/test/upgrade/apps/rules @elastic/response-ops
 /x-pack/test/examples/triggers_actions_ui_examples @elastic/response-ops # Assigned per https://github.com/elastic/kibana/blob/main/x-pack/examples/triggers_actions_ui_example/kibana.jsonc#L4
@@ -2455,6 +2450,8 @@ x-pack/platform/plugins/shared/actions/server/lib/token_tracking @elastic/securi
 /x-pack/platform/plugins/shared/stack_connectors/public/connector_types/sentinelone @elastic/security-defend-workflows
 /x-pack/platform/plugins/shared/stack_connectors/server/connector_types/sentinelone @elastic/security-defend-workflows
 /x-pack/platform/plugins/shared/stack_connectors/common/sentinelone @elastic/security-defend-workflows
+/x-pack/solutions/security/test/api_integration_basic @elastic/security-defend-workflows
+/x-pack/solutions/security/test/alerting_api_integration/security_and_spaces @elastic/security-defend-workflows
 /x-pack/solutions/security/test/alerting_api_integration/security_and_spaces/group2/tests/actions/connector_types/sentinelone.ts @elastic/security-defend-workflows
 /x-pack/platform/plugins/shared/stack_connectors/server/connector_types/crowdstrike @elastic/security-defend-workflows
 /x-pack/platform/plugins/shared/stack_connectors/common/crowdstrike @elastic/security-defend-workflows
@@ -2553,7 +2550,7 @@ x-pack/platform/plugins/shared/actions/server/lib/token_tracking @elastic/securi
 /x-pack/solutions/security/plugins/security_solution/public/common/components/threat_match @elastic/security-detection-engine
 
 ## Security Solution sub teams - security-defend-workflows
-/x-pack/test/defend_workflows_cypress @elastic/security-defend-workflows
+/x-pack/solutions/security/test/defend_workflows_cypress @elastic/security-defend-workflows
 /x-pack/platform/test/api_integration/apis/osquery @elastic/security-defend-workflows
 /x-pack/solutions/security/plugins/security_solution/public/management/ @elastic/security-defend-workflows
 /x-pack/solutions/security/plugins/security_solution/public/common/lib/endpoint/ @elastic/security-defend-workflows
@@ -2571,7 +2568,6 @@ x-pack/solutions/security/plugins/security_solution/server/assistant/tools/defen
 /x-pack/solutions/security/plugins/security_solution/scripts/endpoint/ @elastic/security-defend-workflows
 /x-pack/test/security_solution_endpoint/ @elastic/security-defend-workflows
 /x-pack/test/security_solution_api_integration/test_suites/edr_workflows/ @elastic/security-defend-workflows
-/x-pack/test_serverless/shared/lib/security/kibana_roles/ @elastic/security-defend-workflows
 /x-pack/solutions/security/plugins/security_solution_serverless/public/upselling/sections/endpoint_management @elastic/security-defend-workflows
 /x-pack/solutions/security/plugins/security_solution_serverless/public/upselling/pages/endpoint_management @elastic/security-defend-workflows
 /x-pack/solutions/security/plugins/security_solution_serverless/server/endpoint @elastic/security-defend-workflows

@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { OBSERVABILITY_ENABLE_LOGS_STREAM } from '@kbn/management-settings-ids';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-const logsPages = ['logs/anomalies', 'logs/log-categories', 'logs/settings'];
+const logsPages = ['logs/stream', 'logs/anomalies', 'logs/log-categories', 'logs/settings'];
 
 const metricsPages = [
   'metrics/inventory',

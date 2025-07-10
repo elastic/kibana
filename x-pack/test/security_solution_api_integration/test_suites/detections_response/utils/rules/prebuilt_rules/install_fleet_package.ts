@@ -100,9 +100,9 @@ export const installPrebuiltRulesPackageByVersion = async (
   return fleetResponse as InstallPackageResponse;
 };
 
-export const MOCK_SECURITY_DETECTION_ENGINE_PACKAGE_PATH = path.join(
+const MOCK_SECURITY_DETECTION_ENGINE_PACKAGE_PATH = path.join(
   path.dirname(__filename),
-  './fixtures/packages/mock-security_detection_engine-99.0.0.zip'
+  '../../../rules_management/prebuilt_rules/common/fixtures/packages/security_detection_engine-99.0.0.zip'
 );
 
 /**

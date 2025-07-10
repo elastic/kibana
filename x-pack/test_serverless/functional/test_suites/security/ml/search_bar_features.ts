@@ -5,7 +5,6 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import { ServerlessRoleName } from '../../../../shared/lib';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects }: FtrProviderContext) {
@@ -42,7 +41,7 @@ export default function ({ getPageObjects }: FtrProviderContext) {
 
   describe('Search bar features', () => {
     before(async () => {
-      await PageObjects.svlCommonPage.loginWithRole(ServerlessRoleName.PLATFORM_ENGINEER);
+      await PageObjects.svlCommonPage.loginWithRole('platform_engineer');
     });
 
     describe('list features', () => {
