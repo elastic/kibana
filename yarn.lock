@@ -3885,7 +3885,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/alerting-fixture-plugin@link:x-pack/test/functional_with_es_ssl/plugins/alerts":
+"@kbn/alerting-fixture-plugin@link:x-pack/platform/test/functional_with_es_ssl/plugins/alerts":
   version "0.0.0"
   uid ""
 
@@ -5297,6 +5297,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/data-service-server@link:src/platform/packages/shared/kbn-data-service-server":
+  version "0.0.0"
+  uid ""
+
 "@kbn/data-service@link:src/platform/packages/shared/kbn-data-service":
   version "0.0.0"
   uid ""
@@ -5861,7 +5865,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/functional-with-es-ssl-cases-test-plugin@link:x-pack/test/functional_with_es_ssl/plugins/cases":
+"@kbn/functional-with-es-ssl-cases-test-plugin@link:x-pack/platform/test/functional_with_es_ssl/plugins/cases":
   version "0.0.0"
   uid ""
 
