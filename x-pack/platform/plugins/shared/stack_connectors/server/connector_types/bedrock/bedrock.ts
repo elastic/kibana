@@ -14,7 +14,7 @@ import type { SmithyMessageDecoderStream } from '@smithy/eventstream-codec';
 import { NodeHttpHandler } from '@smithy/node-http-handler';
 import type { AxiosError, Method } from 'axios';
 import type { IncomingMessage } from 'http';
-import { PassThrough } from 'stream';
+import { PassThrough, Readable } from 'stream';
 import { getCustomAgents } from '@kbn/actions-plugin/server/lib/get_custom_agents';
 import type { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
@@ -608,7 +608,18 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
       connectorUsageCollector
     );
 
-    return response.data.pipe(new PassThrough()) as unknown as IncomingMessage;
+    if (response.data) {
+      const resultStream = response.data as SmithyMessageDecoderStream<unknown>;
+      // splits the stream in two, [stream = consumer, tokenStream = token tracking]
+      const [stream, tokenStream] = tee(resultStream);
+      return {
+        ...response.data,
+        stream: Readable.from(stream).pipe(new PassThrough()),
+        tokenStream: Readable.from(tokenStream).pipe(new PassThrough()),
+      };
+    }
+
+    return { ...response.data };
   }
 
   /**
@@ -632,7 +643,7 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
       timeout = DEFAULT_TIMEOUT_MS,
     }: ConverseStreamParams,
     connectorUsageCollector: ConnectorUsageCollector
-  ): Promise<IncomingMessage> {
+  ): Promise<ConverseActionResponse> {
     const res = (await this._converseStream({
       messages,
       model: reqModel,
@@ -646,6 +657,7 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
       timeout,
       connectorUsageCollector,
     })) as unknown as IncomingMessage;
+
     return res;
   }
 }

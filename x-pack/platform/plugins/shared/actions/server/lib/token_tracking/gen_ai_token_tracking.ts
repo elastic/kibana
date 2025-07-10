@@ -9,8 +9,9 @@ import { PassThrough, Readable } from 'stream';
 import type { Logger } from '@kbn/logging';
 import type { Stream } from 'openai/streaming';
 import type { ChatCompletionChunk } from 'openai/resources/chat/completions';
+import { getTokensFromBedrockConverseStream } from './get_token_count_from_bedrock_converse_stream';
 import type { SmithyStream } from './get_token_count_from_bedrock_converse';
-import { getTokensFromBedrockConverseStream } from './get_token_count_from_bedrock_converse';
+import { getTokensFromBedrockClientSend } from './get_token_count_from_bedrock_client_send';
 import type { InvokeAsyncIteratorBody } from './get_token_count_from_invoke_async_iterator';
 import { getTokenCountFromInvokeAsyncIterator } from './get_token_count_from_invoke_async_iterator';
 import { getTokenCountFromBedrockInvoke } from './get_token_count_from_bedrock_invoke';
@@ -302,7 +303,7 @@ export const getGenAiTokenTracking = async ({
       usage?: { inputTokens: number; outputTokens: number; totalTokens: number };
     };
     if (tokenStream) {
-      const res = await getTokensFromBedrockConverseStream(tokenStream, logger);
+      const res = await getTokensFromBedrockClientSend(tokenStream, logger);
       return res;
     }
     if (usage) {
@@ -316,6 +317,25 @@ export const getGenAiTokenTracking = async ({
       logger.error('Response from Bedrock converse API did not contain usage object');
       return null;
     }
+  }
+
+  // converseStream response used by InferenceChatModel
+  if (actionTypeId === '.bedrock' && validatedParams.subAction === 'converseStream') {
+    const { tokenStream } = result.data as unknown as {
+      tokenStream?: Readable;
+    };
+
+    if (tokenStream) {
+      const res = await getTokensFromBedrockConverseStream(tokenStream, logger);
+      if (res) {
+        return {
+          ...res,
+          telemetry_metadata: telemetryMetadata,
+        };
+      }
+    }
+    logger.error('Response from Bedrock converse API did not contain usage object');
+    return null;
   }
 
   if (actionTypeId === '.bedrock' && validatedParams.subAction === 'invokeAIRaw') {
