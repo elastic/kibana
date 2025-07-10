@@ -18,7 +18,7 @@ import {
   apiPublishesSavedObjectId,
 } from '@kbn/presentation-publishing';
 import { openLazyFlyout } from '@kbn/presentation-util';
-import type { LinksParentApi } from '../types';
+import type { LinksParentApi, LinksSerializedState } from '../types';
 import { APP_ICON, APP_NAME, CONTENT_ID } from '../../common';
 import { ADD_LINKS_PANEL_ACTION_ID } from './constants';
 import { coreServices } from '../services/kibana_services';
@@ -35,9 +35,7 @@ export const addLinksPanelAction: ActionDefinition<EmbeddableApiContext> = {
   id: ADD_LINKS_PANEL_ACTION_ID,
   getIconType: () => APP_ICON,
   order: 10,
-  isCompatible: async ({ embeddable }) => {
-    return isParentApiCompatible(embeddable);
-  },
+  isCompatible: async ({ embeddable }) => isParentApiCompatible(embeddable),
   execute: async ({ embeddable }) => {
     if (!isParentApiCompatible(embeddable)) throw new IncompatibleActionError();
 
@@ -50,10 +48,10 @@ export const addLinksPanelAction: ActionDefinition<EmbeddableApiContext> = {
           closeFlyout,
           onCompleteEdit: async (runtimeState) => {
             if (!runtimeState) return;
-      
+
             function serializeState() {
               if (!runtimeState) return;
-      
+
               if (runtimeState.savedObjectId !== undefined) {
                 return {
                   rawState: {
@@ -61,7 +59,7 @@ export const addLinksPanelAction: ActionDefinition<EmbeddableApiContext> = {
                   },
                 };
               }
-      
+
               const { attributes, references } = serializeLinksAttributes(runtimeState);
               return {
                 rawState: {
@@ -70,7 +68,7 @@ export const addLinksPanelAction: ActionDefinition<EmbeddableApiContext> = {
                 references,
               };
             }
-      
+
             await embeddable.addNewPanel<LinksSerializedState>({
               panelType: CONTENT_ID,
               serializedState: serializeState(),

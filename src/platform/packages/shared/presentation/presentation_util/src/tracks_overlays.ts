@@ -9,7 +9,7 @@
 
 import { OverlayRef } from '@kbn/core-mount-utils-browser';
 
-interface TracksOverlaysOptions {
+export interface TracksOverlaysOptions {
   /**
    * If present, the panel with this ID will be focused when the overlay is opened. This can be used in tandem with a push
    * flyout to edit a panel's settings in context

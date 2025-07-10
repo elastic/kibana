@@ -30,12 +30,9 @@ const props = {
 };
 
 describe('openLazyFlyout', () => {
-  
   beforeEach(() => {
     jest.clearAllMocks();
   });
-  
-
 
   it('opens flyout with default props and mounts LazyFlyout and return flyout ref', async () => {
     const ref = openLazyFlyout(props);

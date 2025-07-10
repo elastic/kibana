@@ -12,10 +12,10 @@ import { htmlIdGenerator } from '@elastic/eui';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import useAsync from 'react-use/lib/useAsync';
 import { i18n } from '@kbn/i18n';
+import { skip, take } from 'rxjs';
 import { focusFirstFocusable } from './focus_helpers';
 import { LoadingFlyout } from './loading_flyout';
 import { tracksOverlays } from './tracks_overlays';
-import { skip, take } from 'rxjs';
 
 const htmlId = htmlIdGenerator('modalTitleId');
 
@@ -39,7 +39,7 @@ export const openLazyFlyout = ({
   loadContent,
   flyoutProps,
   uuid,
-  triggerId
+  triggerId,
 }: OpenLazyFlyoutParams) => {
   const ariaLabelledBy = htmlId();
   const overlayTracker = tracksOverlays(parentApi) ? parentApi : undefined;
@@ -114,7 +114,7 @@ function LazyFlyout({
   React.useEffect(() => {
     if (!LoadedFlyout) {
       return;
-    } 
+    }
     focusFirstFocusable(document.querySelector('.kbnPresentationLazyFlyout'));
   }, [LoadedFlyout]);
 

@@ -8,64 +8,48 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CanAddNewPanel } from '@kbn/presentation-containers';
+import { apiCanAddNewPanel } from '@kbn/presentation-containers';
 import { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { ADD_PANEL_ANNOTATION_GROUP } from '@kbn/embeddable-plugin/public';
-import { IncompatibleActionError, ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
+import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { openLazyFlyout } from '@kbn/presentation-util';
+import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
 import {
   ADD_IMAGE_EMBEDDABLE_ACTION_ID,
   IMAGE_EMBEDDABLE_TYPE,
 } from '../image_embeddable/constants';
 import { ImageConfig, ImageEmbeddableSerializedState } from '../image_embeddable/types';
-import { coreServices, uiActionsService } from '../services/kibana_services';
+import { coreServices } from '../services/kibana_services';
 
-const parentApiIsCompatible = async (parentApi: unknown): Promise<CanAddNewPanel | undefined> => {
-  const { apiCanAddNewPanel } = await import('@kbn/presentation-containers');
-  // we cannot have an async type check, so return the casted parentApi rather than a boolean
-  return apiCanAddNewPanel(parentApi) ? (parentApi as CanAddNewPanel) : undefined;
-};
+export const createImageAction: ActionDefinition<EmbeddableApiContext> = {
+  id: ADD_IMAGE_EMBEDDABLE_ACTION_ID,
+  getIconType: () => 'image',
+  order: 20,
+  isCompatible: async ({ embeddable: parentApi }) => apiCanAddNewPanel(parentApi),
+  execute: async ({ embeddable: parentApi }) => {
+    if (!apiCanAddNewPanel(parentApi)) throw new IncompatibleActionError();
 
-export const registerCreateImageAction = () => {
-  uiActionsService.registerAction<EmbeddableApiContext>({
-    id: ADD_IMAGE_EMBEDDABLE_ACTION_ID,
-    getIconType: () => 'image',
-    order: 20,
-    isCompatible: async ({ embeddable: parentApi }) => {
-      return Boolean(await parentApiIsCompatible(parentApi));
-    },
-    execute: async ({ embeddable: parentApi }) => {
-      const canAddNewPanelParent = await parentApiIsCompatible(parentApi);
-      if (!canAddNewPanelParent) throw new IncompatibleActionError();
-      openLazyFlyout({
-        core: coreServices,
-        parentApi,
-        loadContent: async ({ closeFlyout, ariaLabelledBy }) => {
-          const { getImageEditor } = await import('../components/image_editor/get_image_editor');
-          return await getImageEditor({
-            closeFlyout,
-            ariaLabelledBy,
-            onSave: (imageConfig: ImageConfig) => {
-              canAddNewPanelParent.addNewPanel<ImageEmbeddableSerializedState>({
-                panelType: IMAGE_EMBEDDABLE_TYPE,
-                serializedState: { rawState: { imageConfig } },
-              });
-            },
-          });
-        },
-      });
-    },
-    grouping: [ADD_PANEL_ANNOTATION_GROUP],
-    getDisplayName: () =>
-      i18n.translate('imageEmbeddable.imageEmbeddableFactory.displayName', {
-        defaultMessage: 'Image',
-      }),
-  });
-
-  uiActionsService.attachAction(ADD_PANEL_TRIGGER, ADD_IMAGE_EMBEDDABLE_ACTION_ID);
-  if (uiActionsService.hasTrigger('ADD_CANVAS_ELEMENT_TRIGGER')) {
-    // Because Canvas is not enabled in Serverless, this trigger might not be registered - only attach
-    // the create action if the Canvas-specific trigger does indeed exist.
-    uiActionsService.attachAction('ADD_CANVAS_ELEMENT_TRIGGER', ADD_IMAGE_EMBEDDABLE_ACTION_ID);
-  }
+    openLazyFlyout({
+      core: coreServices,
+      parentApi,
+      loadContent: async ({ closeFlyout, ariaLabelledBy }) => {
+        const { getImageEditor } = await import('../components/image_editor/get_image_editor');
+        return await getImageEditor({
+          closeFlyout,
+          ariaLabelledBy,
+          onSave: (imageConfig: ImageConfig) => {
+            parentApi.addNewPanel<ImageEmbeddableSerializedState>({
+              panelType: IMAGE_EMBEDDABLE_TYPE,
+              serializedState: { rawState: { imageConfig } },
+            });
+          },
+        });
+      },
+    });
+  },
+  grouping: [ADD_PANEL_ANNOTATION_GROUP],
+  getDisplayName: () =>
+    i18n.translate('imageEmbeddable.imageEmbeddableFactory.displayName', {
+      defaultMessage: 'Image',
+    }),
 };
