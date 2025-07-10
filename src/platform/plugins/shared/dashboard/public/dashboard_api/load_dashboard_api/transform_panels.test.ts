@@ -36,7 +36,7 @@ describe('transformPanels', () => {
       [
         {
           gridData: { x: 0, y: 0, w: 6, h: 6, i: '1' },
-          panelConfig: { title: 'panel One' },
+          panelConfig: {},
           panelIndex: '1',
           type: 'testPanelType',
         },
@@ -50,7 +50,7 @@ describe('transformPanels', () => {
           panels: [
             {
               gridData: { x: 0, y: 0, w: 6, h: 6, i: '3' },
-              panelConfig: { title: 'panel Three' },
+              panelConfig: {},
               panelIndex: '3',
               type: 'testPanelType',
             },
