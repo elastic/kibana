@@ -121,6 +121,8 @@
     "@kbn/apm-sources-access-plugin",
     "@kbn/test-suites-xpack-platform",
     "@kbn/core-chrome-browser",
+    "@kbn/upgrade-assistant-pkg-server",
+    "@kbn/upgrade-assistant-pkg-common",
     "@kbn/test-suites-xpack-platform",
     "@kbn/core-chrome-browser",
     "@kbn/core-provider-plugin",

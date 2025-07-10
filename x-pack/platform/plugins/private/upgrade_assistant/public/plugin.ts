@@ -21,7 +21,7 @@ export class UpgradeAssistantUIPlugin
 
   setup(
     coreSetup: CoreSetup<StartDependencies>,
-    { management, cloud, share, usageCollection }: SetupDependencies
+    { management, cloud, share, usageCollection, reindexService }: SetupDependencies
   ) {
     const {
       featureSet,
@@ -67,6 +67,7 @@ export class UpgradeAssistantUIPlugin
             plugins: {
               cloud,
               share,
+              reindexService,
             },
             services: {
               core: coreStart,
