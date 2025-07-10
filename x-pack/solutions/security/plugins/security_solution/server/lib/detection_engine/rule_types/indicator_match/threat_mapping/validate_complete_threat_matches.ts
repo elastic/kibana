@@ -66,7 +66,7 @@ export const validateCompleteThreatMatches = (
 
   signalsQueryMap.forEach((threatQueries, signalId) => {
     const allMatchedThreatQueriesSet = new Set<ThreatMatchNamedQuery>();
-    const hasMatch = threatMapping.some((andGroup) => {
+    threatMapping.forEach((andGroup) => {
       const matchedThreatQueriesForAndGroup: ThreatMatchNamedQuery[] = [];
       const hasMatchForAndGroup = andGroup.entries.every((entry) => {
         const filteredThreatQueries = threatQueries.filter(
@@ -90,7 +90,7 @@ export const validateCompleteThreatMatches = (
       return hasMatchForAndGroup;
     });
 
-    if (hasMatch) {
+    if (allMatchedThreatQueriesSet.size > 0) {
       matchedEvents.set(signalId, Array.from(allMatchedThreatQueriesSet));
     } else {
       skippedIds.push(signalId);
