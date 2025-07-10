@@ -38,6 +38,9 @@ actions:
                   $ref: "../examples/create_webhook_connector_response.yaml"
                 createXmattersConnectorResponse:
                   $ref: "../examples/get_connector_response.yaml"
+      x-codeSamples:
+        - $ref: "../examples/create_index_connector_curl.yaml"
+        - $ref: "../examples/create_index_connector_console.yaml"
   - target: "$.paths['/api/actions/connector/{id}/_execute']['post']"
     description: "Add examples to run connector API"
     update:
