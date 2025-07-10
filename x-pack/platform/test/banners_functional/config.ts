@@ -11,7 +11,7 @@ import { services, pageObjects } from './ftr_provider_context';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const kibanaFunctionalConfig = await readConfigFile(
-    require.resolve('../functional/config.base.js')
+    require.resolve('../functional/config.base.ts')
   );
 
   return {
@@ -24,21 +24,21 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     pageObjects,
 
     junit: {
-      reportName: 'X-Pack Custom Branding Functional Tests',
+      reportName: 'X-Pack Banners Functional Tests',
     },
 
-    esTestCluster: {
-      ...kibanaFunctionalConfig.get('esTestCluster'),
-      license: 'trial',
-      serverArgs: [`xpack.license.self_generated.type='trial'`],
-    },
+    esTestCluster: kibanaFunctionalConfig.get('esTestCluster'),
     apps: {
       ...kibanaFunctionalConfig.get('apps'),
     },
 
     kbnTestServer: {
       ...kibanaFunctionalConfig.get('kbnTestServer'),
-      serverArgs: [...kibanaFunctionalConfig.get('kbnTestServer.serverArgs')],
+      serverArgs: [
+        ...kibanaFunctionalConfig.get('kbnTestServer.serverArgs'),
+        '--xpack.banners.placement=top',
+        '--xpack.banners.textContent="global banner text"',
+      ],
     },
   };
 }
