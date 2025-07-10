@@ -147,7 +147,9 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
-    it('should backfill the cases attachments index', async () => {
+    // This test passes locally but fails in the flaky test runner.
+    // Increasing the timeout did not work.
+    it.skip('should backfill the cases attachments index', async () => {
       const postedCase = await createCase(
         supertest,
         { ...postCaseReq, owner: SECURITY_SOLUTION_OWNER },
