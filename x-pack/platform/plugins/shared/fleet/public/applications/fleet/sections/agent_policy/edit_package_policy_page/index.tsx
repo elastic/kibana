@@ -220,7 +220,7 @@ export const EditPackagePolicyForm = memo<{
         setImpactedAgentCount(0);
       }
     };
-
+    
     if (
       isFleetEnabled &&
       (packagePolicy.policy_ids.length > 0 || agentPoliciesToRemoveIds.length > 0)
@@ -379,9 +379,14 @@ export const EditPackagePolicyForm = memo<{
     );
   }
 
+  const enabledInput = useMemo(() => {
+    return packagePolicy.inputs?.find(
+      (input) => input.enabled
+    )?.policy_template;
+  }, [packagePolicy.inputs]);
+
   const tabsViews = extensionTabsView?.tabs;
   const [selectedTab, setSelectedTab] = useState(0);
-
   const layoutProps = {
     from: extensionView?.useLatestPackageVersion && isUpgrade ? 'upgrade-from-extension' : from,
     cancelUrl,
@@ -408,7 +413,6 @@ export const EditPackagePolicyForm = memo<{
         ]
       : [],
   };
-
   const configurePackage = useMemo(
     () =>
       agentPolicies && packageInfo ? (
@@ -431,6 +435,7 @@ export const EditPackagePolicyForm = memo<{
               packageInfo={packageInfo}
               packagePolicy={packagePolicy}
               updatePackagePolicy={updatePackagePolicy}
+              showOnlyIntegration={enabledInput}
               validationResults={validationResults}
               submitAttempted={formState === 'INVALID'}
               isEditPage={true}
