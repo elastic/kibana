@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { css } from '@emotion/react';
 import type { ElementRef } from 'react';
 import React, { memo, forwardRef, useCallback, useRef, useState, useImperativeHandle } from 'react';
 import type { EuiMarkdownEditorProps, EuiMarkdownAstNode } from '@elastic/eui';
@@ -13,6 +12,7 @@ import { EuiMarkdownEditor } from '@elastic/eui';
 import { usePlugins } from './use_plugins';
 import { useLensButtonToggle } from './plugins/lens/use_lens_button_toggle';
 import { type MarkdownEditorRef } from './types';
+import { scaledMarkdownImages } from '../utils';
 
 interface MarkdownEditorProps {
   ariaLabel: string;
@@ -69,12 +69,7 @@ const MarkdownEditorComponent = forwardRef<MarkdownEditorRef, MarkdownEditorProp
     return (
       <EuiMarkdownEditor
         // prevent images from displaying at full scale
-        css={css`
-          .euiMarkdownEditorPreview img {
-            max-width: 100%;
-            height: auto;
-          }
-        `}
+        css={scaledMarkdownImages}
         ref={editorRef}
         aria-label={ariaLabel}
         editorId={editorId}
