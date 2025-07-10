@@ -8,7 +8,7 @@
 import { AnonymizationRule } from '@kbn/inference-common';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import { RegexWorkerService } from './regex_worker_service';
-import { InferenceConfig } from '../../config';
+import { AnonymizationWorkerConfig } from '../../config';
 
 const regexEmailRule: AnonymizationRule = {
   type: 'RegExp',
@@ -27,19 +27,16 @@ const taskPayload = {
   rule: regexEmailRule,
 };
 function createTestConfig(
-  overrides: Partial<InferenceConfig['anonymizationRegexWorker']> = {}
-): InferenceConfig {
+  overrides: Partial<AnonymizationWorkerConfig> = {}
+): AnonymizationWorkerConfig {
   return {
     enabled: true,
-    anonymizationRegexWorker: {
-      enabled: true,
-      minThreads: 1,
-      maxThreads: 3,
-      idleTimeout: { asMilliseconds: () => 30000 },
-      taskTimeout: { asMilliseconds: () => 15000 },
-      ...overrides,
-    },
-  } as unknown as InferenceConfig;
+    minThreads: 1,
+    maxThreads: 3,
+    idleTimeout: { asMilliseconds: () => 30000 },
+    taskTimeout: { asMilliseconds: () => 15000 },
+    ...overrides,
+  } as AnonymizationWorkerConfig;
 }
 
 describe('RegexWorkerService', () => {

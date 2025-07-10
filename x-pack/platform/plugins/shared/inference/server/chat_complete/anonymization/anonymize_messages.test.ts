@@ -18,18 +18,15 @@ import {
 import { messageToAnonymizationRecords } from './message_to_anonymization_records';
 import { getEntityMask } from './get_entity_mask';
 import { RegexWorkerService } from './regex_worker_service';
-import { InferenceConfig } from '../../config';
+import { AnonymizationWorkerConfig } from '../../config';
 const mockEsClient = {
   ml: {
     inferTrainedModel: jest.fn(),
   },
 } as any;
 const testConfig = {
-  enabled: true,
-  anonymizationRegexWorker: {
-    enabled: false,
-  },
-} as InferenceConfig;
+  enabled: false,
+} as AnonymizationWorkerConfig;
 describe('anonymizeMessages', () => {
   let logger: MockedLogger;
   let regexWorker: RegexWorkerService;

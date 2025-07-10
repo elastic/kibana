@@ -10,7 +10,7 @@ import { AnonymizationRule } from '@kbn/inference-common';
 import { MlInferenceResponseResult } from '@elastic/elasticsearch/lib/api/types';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import { RegexWorkerService } from './regex_worker_service';
-import { InferenceConfig } from '../../config';
+import { AnonymizationWorkerConfig } from '../../config';
 const mockEsClient = {
   ml: {
     inferTrainedModel: jest.fn(),
@@ -40,11 +40,8 @@ const regexRule: AnonymizationRule = {
 };
 
 const testConfig = {
-  enabled: true,
-  anonymizationRegexWorker: {
-    enabled: false,
-  },
-} as InferenceConfig;
+  enabled: false,
+} as AnonymizationWorkerConfig;
 
 describe('anonymizeRecords', () => {
   let logger: MockedLogger;

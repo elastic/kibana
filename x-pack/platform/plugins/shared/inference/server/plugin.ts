@@ -63,7 +63,10 @@ export class InferencePlugin
   }
 
   start(core: CoreStart, pluginsStart: InferenceStartDependencies): InferenceServerStart {
-    this.regexWorker = new RegexWorkerService(this.config, this.logger.get('regex_worker'));
+    this.regexWorker = new RegexWorkerService(
+      this.config.workers.anonymization,
+      this.logger.get('regex_worker')
+    );
 
     const createAnonymizationRulesPromise = async (request: KibanaRequest) => {
       const soClient = core.savedObjects.getScopedClient(request);

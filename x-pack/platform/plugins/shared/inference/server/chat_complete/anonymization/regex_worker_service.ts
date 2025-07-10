@@ -8,7 +8,7 @@
 import Piscina from 'piscina';
 import type { Logger } from '@kbn/logging';
 import type { AnonymizationRegexWorkerTaskPayload } from '@kbn/inference-common';
-import type { InferenceConfig } from '../../config';
+import type { AnonymizationWorkerConfig } from '../../config';
 import { regexWorkerFilename } from './regex_worker_task';
 import { AnonymizationState } from './types';
 import { executeRegexRuleTask } from './execute_regex_rule_task';
@@ -20,25 +20,25 @@ function runTaskSync(payload: AnonymizationRegexWorkerTaskPayload): Anonymizatio
 export class RegexWorkerService {
   private readonly enabled: boolean;
   private worker?: Piscina;
-  private readonly config: InferenceConfig;
+  private readonly config: AnonymizationWorkerConfig;
 
-  constructor(config: InferenceConfig, private readonly logger: Logger) {
-    this.enabled = config.anonymizationRegexWorker.enabled;
+  constructor(config: AnonymizationWorkerConfig, private readonly logger: Logger) {
     this.config = config;
+    this.enabled = config.enabled;
 
     if (this.enabled) {
       this.logger.debug(
-        `Initializing regex worker pool (min=${config.anonymizationRegexWorker.minThreads} | max=${
-          config.anonymizationRegexWorker.maxThreads
-        } | idle=${config.anonymizationRegexWorker.idleTimeout.asMilliseconds()}ms)`
+        `Initializing regex worker pool (min=${this.config.minThreads} | max=${
+          this.config.maxThreads
+        } | idle=${this.config.idleTimeout.asMilliseconds()}ms)`
       );
 
       this.worker = new Piscina({
         filename: require.resolve('./regex_worker_wrapper.js'),
         workerData: { fullpath: regexWorkerFilename },
-        minThreads: config.anonymizationRegexWorker.minThreads,
-        maxThreads: config.anonymizationRegexWorker.maxThreads,
-        idleTimeout: config.anonymizationRegexWorker.idleTimeout.asMilliseconds(),
+        minThreads: this.config.minThreads,
+        maxThreads: this.config.maxThreads,
+        idleTimeout: this.config.idleTimeout.asMilliseconds(),
       });
     }
   }
@@ -56,10 +56,7 @@ export class RegexWorkerService {
     }
 
     const controller = new AbortController();
-    const timer = setTimeout(
-      () => controller.abort(),
-      this.config.anonymizationRegexWorker.taskTimeout.asMilliseconds()
-    );
+    const timer = setTimeout(() => controller.abort(), this.config.taskTimeout.asMilliseconds());
 
     try {
       return await this.worker.run(payload, { signal: controller.signal });
