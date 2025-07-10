@@ -521,6 +521,8 @@ export class KibanaClient {
         };
       },
       evaluate: async ({ messages, conversationId, errors }, criteria) => {
+        const criteriaCount = criteria.length;
+
         const message = await chat('evaluate', {
           connectorIdOverride: evaluationConnectorId,
           systemMessage: `You are a critical assistant for evaluating conversations with the Elastic Observability AI Assistant,
@@ -529,7 +531,15 @@ export class KibanaClient {
                 Your goal is to verify whether a conversation between the user and the assistant matches the given criteria.
 
                 For each criterion, calculate a score. Explain your score, by describing what the assistant did right, and describing and quoting what the
-                assistant did wrong, where it could improve, and what the root cause was in case of a failure.`,
+                assistant did wrong, where it could improve, and what the root cause was in case of a failure.
+                
+                ### Scoring Contract
+
+                * You MUST call the function "scores" exactly once.  
+                * The "criteria" array in the arguments MUST contain **one object for EVERY criterion**.  
+                  * If a criterion cannot be satisfied, still include it with \`"score": 0\` and a short \`"reasoning"\`.  
+                * Do NOT omit, merge, or reorder indices.  
+                * Do NOT place the scores in normal text; only in the "scores" function call.`,
           messages: [
             {
               '@timestamp': new Date().toString(),
@@ -559,6 +569,8 @@ export class KibanaClient {
                 properties: {
                   criteria: {
                     type: 'array',
+                    minLength: criteriaCount,
+                    maxLength: criteriaCount,
                     items: {
                       type: 'object',
                       properties: {

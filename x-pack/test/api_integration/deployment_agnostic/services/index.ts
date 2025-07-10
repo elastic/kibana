@@ -7,11 +7,9 @@
 
 import { services as platformDeploymentAgnosticServices } from '@kbn/test-suites-xpack-platform/api_integration_deployment_agnostic/services';
 import { SupertestWithRoleScope } from '@kbn/test-suites-xpack-platform/api_integration_deployment_agnostic/services/role_scoped_supertest';
-import { AlertingApiProvider } from './alerting_api';
-import { SloApiProvider } from './slo_api';
 import { SynthtraceProvider } from './synthtrace';
-import { ApmApiProvider } from './apm_api';
 import { ObservabilityAIAssistantApiProvider } from './observability_ai_assistant_api';
+import { AlertingApiProvider } from './alerting_api';
 
 export type {
   InternalRequestHeader,
@@ -21,11 +19,9 @@ export type {
 
 export const services = {
   ...platformDeploymentAgnosticServices,
-  // create a new deployment-agnostic service and load here
+  // these services are left for compatibility with existing tests in x-pack/test and should not be used in new tests
   alertingApi: AlertingApiProvider,
-  sloApi: SloApiProvider,
   synthtrace: SynthtraceProvider,
-  apmApi: ApmApiProvider,
   observabilityAIAssistantApi: ObservabilityAIAssistantApiProvider,
 };
 
