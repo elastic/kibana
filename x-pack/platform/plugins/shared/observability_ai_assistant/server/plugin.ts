@@ -7,6 +7,7 @@
 
 import {
   CoreSetup,
+  CoreStart,
   DEFAULT_APP_CATEGORIES,
   Logger,
   Plugin,
@@ -152,7 +153,36 @@ export class ObservabilityAIAssistantPlugin
     };
   }
 
-  public start(): ObservabilityAIAssistantServerStart {
+  public start(
+    coreStart: CoreStart,
+    plugins: ObservabilityAIAssistantPluginStartDependencies
+  ): ObservabilityAIAssistantServerStart {
+    // How can I make sure this only gets submitted once?
+    plugins.changeRequests.submitChangeRequest({
+      title: 'Install AI Assistant Knowledge base',
+      description:
+        'This allows the AI Assistant to learn from your conversations as well as gain access to external data.',
+      urgency: 'low',
+      space: 'default', // Not sure how plugins should go about deciding this, maybe it should support all spaces?
+      actions: [
+        {
+          originApp: 'Observability AI Assistant',
+          label: 'Install AI Assistant Knowledge base',
+          summary: 'Installs ELSER and prepares an index to store the Knowledge base entries',
+          requiredPrivileges: {
+            kibana: ['api:ai_assistant'],
+          },
+          request: {
+            method: 'post',
+            endpoint: '/internal/observability_ai_assistant/kb/setup',
+            query: {
+              inference_id: '.elser-2-elasticsearch',
+            },
+          },
+        },
+      ],
+    });
+
     return {
       service: this.service!,
     };
