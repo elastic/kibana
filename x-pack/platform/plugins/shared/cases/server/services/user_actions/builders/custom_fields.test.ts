@@ -71,6 +71,7 @@ describe('CustomFieldsUserActionBuilder', () => {
               "full_name": "Elastic User",
               "username": "elastic",
             },
+            "is_assistant": undefined,
             "owner": "cases",
             "payload": Object {
               "customFields": Array [
