@@ -12,12 +12,11 @@ export const EndpointSuggestionsSchema = {
   body: schema.object({
     field: schema.string(),
     query: schema.string(),
-    filters: schema.maybe(schema.any()),
+    filters: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
     fieldMeta: schema.maybe(schema.any()),
   }),
   params: schema.object({
-    // Ready to be used with other suggestion types like endpoints
-    suggestion_type: schema.oneOf([schema.literal('eventFilters')]),
+    suggestion_type: schema.oneOf([schema.literal('eventFilters'), schema.literal('endpoints')]),
   }),
 };
 

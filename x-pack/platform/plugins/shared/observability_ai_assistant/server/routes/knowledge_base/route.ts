@@ -12,7 +12,6 @@ import {
   MlTrainedModelStats,
 } from '@elastic/elasticsearch/lib/api/types';
 import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
-import pRetry from 'p-retry';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
 import {
   Instruction,
@@ -215,8 +214,6 @@ const knowledgeBaseEntryRt = t.intersection([
     text: nonEmptyStringRt,
   }),
   t.partial({
-    confidence: t.union([t.literal('low'), t.literal('medium'), t.literal('high')]),
-    is_correction: toBooleanRt,
     public: toBooleanRt,
     labels: t.record(t.string, t.string),
     role: t.union([
@@ -243,8 +240,6 @@ const saveKnowledgeBaseEntry = createObservabilityAIAssistantServerRoute({
     const entry = resources.params.body;
     return client.addKnowledgeBaseEntry({
       entry: {
-        confidence: 'high',
-        is_correction: false,
         public: true,
         labels: {},
         role: KnowledgeBaseEntryRole.UserEntry,
@@ -294,15 +289,13 @@ const importKnowledgeBaseEntries = createObservabilityAIAssistantServerRoute({
     }
 
     const entries = resources.params.body.entries.map((entry) => ({
-      confidence: 'high' as const,
-      is_correction: false,
       public: true,
       labels: {},
       role: KnowledgeBaseEntryRole.UserEntry,
       ...entry,
     }));
 
-    await pRetry(() => client.addKnowledgeBaseBulkEntries({ entries }), { retries: 10 });
+    await client.addKnowledgeBaseBulkEntries({ entries });
 
     resources.logger.info(`Imported ${entries.length} knowledge base entries`);
   },

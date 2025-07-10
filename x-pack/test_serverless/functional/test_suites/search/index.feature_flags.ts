@@ -13,5 +13,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./search_synonyms/search_synonyms_overview'));
     loadTestFile(require.resolve('./search_synonyms/search_synonym_detail'));
     loadTestFile(require.resolve('./search_playground/search_relevance'));
+    loadTestFile(require.resolve('./search_playground/saved_playgrounds'));
   });
 }

@@ -5,25 +5,21 @@
  * 2.0.
  */
 
+import { getSyntheticsDynamicSettings } from '../../saved_objects/synthetics_settings';
 import { DefaultAlertService } from './default_alert_service';
 import { SyntheticsRestApiRouteFactory } from '../types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
-import { savedObjectsAdapter } from '../../saved_objects';
 import { DEFAULT_ALERT_RESPONSE } from '../../../common/types/default_alerts';
 
 export const updateDefaultAlertingRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'PUT',
   path: SYNTHETICS_API_URLS.ENABLE_DEFAULT_ALERTING,
   validate: {},
-  handler: async ({
-    request,
-    context,
-    server,
-    savedObjectsClient,
-  }): Promise<DEFAULT_ALERT_RESPONSE> => {
+  handler: async ({ context, server, savedObjectsClient }): Promise<DEFAULT_ALERT_RESPONSE> => {
     const defaultAlertService = new DefaultAlertService(context, server, savedObjectsClient);
-    const { defaultTLSRuleEnabled, defaultStatusRuleEnabled } =
-      await savedObjectsAdapter.getSyntheticsDynamicSettings(savedObjectsClient);
+    const { defaultTLSRuleEnabled, defaultStatusRuleEnabled } = await getSyntheticsDynamicSettings(
+      savedObjectsClient
+    );
 
     const updateStatusRulePromise = defaultAlertService.updateStatusRule(defaultStatusRuleEnabled);
     const updateTLSRulePromise = defaultAlertService.updateTlsRule(defaultTLSRuleEnabled);
@@ -37,8 +33,10 @@ export const updateDefaultAlertingRoute: SyntheticsRestApiRouteFactory = () => (
         statusRule: statusRule || null,
         tlsRule: tlsRule || null,
       };
-    } catch (e) {
-      server.logger.error(`Error updating default alerting rules: ${e}`);
+    } catch (error) {
+      server.logger.error(`Error updating default alerting rules, Error: ${error.message}`, {
+        error,
+      });
       return {
         statusRule: null,
         tlsRule: null,

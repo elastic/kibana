@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { KIBANA_SOLUTIONS } from '@kbn/projects-solutions-groups';
+// TODO: This cannot be imported until Kibana supports ESM
+// import { KIBANA_SOLUTIONS } from '@kbn/projects-solutions-groups';
+const KIBANA_SOLUTIONS = ['observability', 'security', 'search', 'chat'] as const;
 
 export const aggregationGroups: string[] = [
   ...KIBANA_SOLUTIONS.flatMap((solution) => [

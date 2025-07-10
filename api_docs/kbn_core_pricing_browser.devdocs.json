@@ -1,0 +1,119 @@
+{
+  "id": "@kbn/core-pricing-browser",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/core-pricing-browser",
+        "id": "def-public.GetPricingResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "GetPricingResponse",
+        "description": [],
+        "path": "src/core/packages/pricing/browser/src/api.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-pricing-browser",
+            "id": "def-public.GetPricingResponse.tiers",
+            "type": "Object",
+            "tags": [],
+            "label": "tiers",
+            "description": [],
+            "signature": [
+              "{ enabled: boolean; products: (Readonly<{} & { name: \"observability\"; tier: \"complete\" | \"logs_essentials\"; }> | Readonly<{} & { name: \"ai_soc\"; tier: \"search_ai_lake\"; }> | Readonly<{} & { name: \"security\"; tier: \"complete\" | \"essentials\" | \"search_ai_lake\"; }> | Readonly<{} & { name: \"endpoint\"; tier: \"complete\" | \"essentials\" | \"search_ai_lake\"; }> | Readonly<{} & { name: \"cloud\"; tier: \"complete\" | \"essentials\" | \"search_ai_lake\"; }>)[]; }"
+            ],
+            "path": "src/core/packages/pricing/browser/src/api.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-pricing-browser",
+            "id": "def-public.GetPricingResponse.product_features",
+            "type": "Object",
+            "tags": [],
+            "label": "product_features",
+            "description": [],
+            "signature": [
+              "{ [x: string]: ",
+              "PricingProductFeature",
+              "; }"
+            ],
+            "path": "src/core/packages/pricing/browser/src/api.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-pricing-browser",
+        "id": "def-public.PricingServiceStart",
+        "type": "Interface",
+        "tags": [],
+        "label": "PricingServiceStart",
+        "description": [
+          "\nStart contract for Core's pricing service.\n"
+        ],
+        "path": "src/core/packages/pricing/browser/src/contracts.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-pricing-browser",
+            "id": "def-public.PricingServiceStart.isFeatureAvailable",
+            "type": "Function",
+            "tags": [],
+            "label": "isFeatureAvailable",
+            "description": [],
+            "signature": [
+              "<TFeatureId extends string>(featureId: TFeatureId) => boolean"
+            ],
+            "path": "src/core/packages/pricing/browser/src/contracts.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-pricing-browser",
+                "id": "def-public.PricingServiceStart.isFeatureAvailable.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "featureId",
+                "description": [],
+                "signature": [
+                  "TFeatureId"
+                ],
+                "path": "src/core/packages/pricing/common/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

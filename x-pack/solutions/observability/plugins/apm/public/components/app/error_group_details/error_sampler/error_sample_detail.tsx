@@ -29,6 +29,7 @@ import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import useAsync from 'react-use/lib/useAsync';
 import { ExceptionStacktrace, PlaintextStacktrace, Stacktrace } from '@kbn/event-stacktrace';
+import { Timestamp } from '@kbn/apm-ui-shared';
 import type { AT_TIMESTAMP } from '../../../../../common/es_fields/apm';
 import type { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
@@ -45,7 +46,6 @@ import { ErrorMetadata } from '../../../shared/metadata_table/error_metadata';
 import { Summary } from '../../../shared/summary';
 import { HttpInfoSummaryItem } from '../../../shared/summary/http_info_summary_item';
 import { UserAgentSummaryItem } from '../../../shared/summary/user_agent_summary_item';
-import { TimestampTooltip } from '../../../shared/timestamp_tooltip';
 import type { ErrorTab } from './error_tabs';
 import { ErrorTabKey, getTabs } from './error_tabs';
 import { ErrorUiActionsContextMenu } from './error_ui_actions_context_menu';
@@ -225,7 +225,10 @@ export function ErrorSampleDetails({
       ) : (
         <Summary
           items={[
-            <TimestampTooltip time={errorData ? error.timestamp.us / 1000 : 0} />,
+            <Timestamp
+              timestamp={errorData ? error.timestamp.us / 1000 : 0}
+              renderMode="tooltip"
+            />,
             errorUrl ? (
               <HttpInfoSummaryItem url={errorUrl} method={method} status={status} />
             ) : null,

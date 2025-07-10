@@ -35,18 +35,20 @@ jest.mock('@kbn/embeddable-plugin/public', () => {
 const TEST_EMBEDDABLE = 'TEST_EMBEDDABLE';
 
 const createAndMountDashboardGridItem = (props: DashboardGridItemProps) => {
-  const panels = {
-    '1': {
+  const panels = [
+    {
       gridData: { x: 0, y: 0, w: 6, h: 6, i: '1' },
       type: TEST_EMBEDDABLE,
-      explicitInput: { id: '1' },
+      panelConfig: {},
+      panelIndex: '1',
     },
-    '2': {
+    {
       gridData: { x: 6, y: 6, w: 6, h: 6, i: '2' },
       type: TEST_EMBEDDABLE,
-      explicitInput: { id: '2' },
+      panelConfig: {},
+      panelIndex: '2',
     },
-  };
+  ];
   const { api, internalApi } = buildMockDashboardApi({ overrides: { panels } });
 
   const component = render(

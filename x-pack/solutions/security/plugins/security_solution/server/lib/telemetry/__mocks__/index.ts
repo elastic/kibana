@@ -131,6 +131,9 @@ export const createMockTelemetryReceiver = (
     fetchTrustedApplications: jest.fn(),
     fetchEndpointList: jest.fn(),
     fetchDetectionRules: jest.fn().mockReturnValue({ body: null }),
+    fetchResponseActionsRules: jest
+      .fn()
+      .mockReturnValue({ body: { aggregations: { actionTypes: {} } } }),
     fetchEndpointMetadata: jest.fn().mockReturnValue(Promise.resolve(new Map())),
     fetchTimelineAlerts: jest.fn().mockReturnValue(Promise.resolve(stubEndpointAlertResponse())),
     buildProcessTree: jest.fn().mockReturnValue(processTreeResponse),

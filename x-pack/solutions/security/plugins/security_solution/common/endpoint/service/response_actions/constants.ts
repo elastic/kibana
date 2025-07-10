@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { deepFreeze } from '@kbn/std';
 import type { EndpointAuthzKeyList } from '../../types/authz';
 
 export const RESPONSE_ACTION_STATUS = ['failed', 'pending', 'successful'] as const;
@@ -223,3 +224,17 @@ export const RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELDS: Readonly<
 export const SUPPORTED_AGENT_ID_ALERT_FIELDS: Readonly<string[]> = Object.values(
   RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELDS
 ).flat();
+
+/**
+ * A map of agent types to associated list of Fleet packages (integration type) that it supports.
+ * The value (Array of strings) is the name of the package, normally found in integration policies
+ * under `policy.package.name`
+ */
+export const RESPONSE_ACTIONS_SUPPORTED_INTEGRATION_TYPES: Readonly<
+  Record<ResponseActionAgentType, Readonly<string[]>>
+> = deepFreeze({
+  endpoint: ['endpoint'],
+  sentinel_one: ['sentinel_one'],
+  crowdstrike: ['crowdstrike'],
+  microsoft_defender_endpoint: ['microsoft_defender_endpoint', 'm365_defender'],
+});

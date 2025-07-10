@@ -149,6 +149,7 @@ Object {
   "settings": Object {
     "deduce_mappings": false,
     "docs_per_second": undefined,
+    "max_page_search_size": 500,
     "unattended": true,
   },
   "source": Object {
@@ -157,7 +158,7 @@ Object {
     ],
     "query": Object {
       "bool": Object {
-        "filter": Array [
+        "must": Array [
           Object {
             "exists": Object {
               "field": "log.logger",
@@ -168,6 +169,16 @@ Object {
               "@timestamp": Object {
                 "gte": "now-10m",
               },
+            },
+          },
+        ],
+        "must_not": Array [
+          Object {
+            "terms": Object {
+              "_tier": Array [
+                "data_frozen",
+                "data_cold",
+              ],
             },
           },
         ],

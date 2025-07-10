@@ -24,3 +24,6 @@ xpack.spaces.maxSpaces: 1
 
 ## Content Connectors in stack management
 xpack.contentConnectors.enabled: false
+
+## Disable Kibana Product Intercept
+xpack.product_intercept.enabled: false

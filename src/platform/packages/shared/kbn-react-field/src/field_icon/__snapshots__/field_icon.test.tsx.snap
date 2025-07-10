@@ -16,7 +16,7 @@ exports[`FieldIcon renders an icon for an unknown type 1`] = `
   aria-label="test"
   className="kbnFieldIcon"
   color="gray"
-  iconType="questionInCircle"
+  iconType="question"
   size="s"
   title="test"
 />
@@ -420,7 +420,7 @@ exports[`FieldIcon renders with className if provided 1`] = `
   aria-label="test"
   className="kbnFieldIcon myClass"
   color="gray"
-  iconType="questionInCircle"
+  iconType="question"
   size="s"
   title="test"
 />

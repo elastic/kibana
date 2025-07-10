@@ -19,6 +19,7 @@ import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { performChecks } from '../../helpers';
 import { buildResponse } from '../../../lib/build_response';
 import { ElasticAssistantRequestHandlerContext } from '../../../types';
+import { hasReadWriteAttackDiscoveryAlertsPrivileges } from '../helpers/index_privileges';
 
 export const postAttackDiscoveryBulkRoute = (
   router: IRouter<ElasticAssistantRequestHandlerContext>
@@ -83,6 +84,15 @@ export const postAttackDiscoveryBulkRoute = (
           });
         }
 
+        // Perform alerts access check
+        const privilegesCheckResponse = await hasReadWriteAttackDiscoveryAlertsPrivileges({
+          context: ctx,
+          response,
+        });
+        if (!privilegesCheckResponse.isSuccess) {
+          return privilegesCheckResponse.response;
+        }
+
         try {
           const currentUser = await checkResponse.currentUser;
           const dataClient = await assistantContext.getAttackDiscoveryDataClient();
@@ -104,8 +114,12 @@ export const postAttackDiscoveryBulkRoute = (
             });
           }
 
+          // get an Elasticsearch client for the authenticated user:
+          const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+
           const data = await dataClient.bulkUpdateAttackDiscoveryAlerts({
             authenticatedUser: currentUser,
+            esClient,
             ids,
             kibanaAlertWorkflowStatus,
             logger,

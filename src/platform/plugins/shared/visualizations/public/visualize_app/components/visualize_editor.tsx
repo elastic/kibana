@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import './visualize_editor.scss';
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { EventEmitter } from 'events';

@@ -7,11 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import './index.scss';
-
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { EventEmitter } from 'events';
-import { EuiResizableContainer } from '@elastic/eui';
+import { EuiResizableContainer, type UseEuiTheme, euiBreakpoint } from '@elastic/eui';
 
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import {
@@ -22,10 +20,84 @@ import {
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 
+import { css } from '@emotion/react';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { DefaultEditorSideBar } from './components/sidebar';
 import { getInitialWidth } from './editor_size';
 
 const localStorage = new Storage(window.localStorage);
+
+const defaultEditorStyles = {
+  base: (euiThemeContext: UseEuiTheme) =>
+    css({
+      flex: '1 1 auto',
+      display: 'flex',
+      [euiBreakpoint(euiThemeContext, ['xs', 's', 'm'])]: {
+        flexDirection: 'column', // change the editor direction to column
+      },
+    }),
+  // Collapsible sidebar container
+  collapsibleSidebar: (euiThemeContext: UseEuiTheme) =>
+    css({
+      flexGrow: 1,
+      [euiBreakpoint(euiThemeContext, ['xs', 's', 'm'])]: {
+        width: '100% !important', // force the editor to take 100% width
+        flexGrow: 0,
+      },
+    }),
+  // !importants on width and height are required to override resizable panel inline widths
+  collapsibleSidebarIsClosed: (euiThemeContext: UseEuiTheme) =>
+    css({
+      minWidth: 0,
+      width: `${euiThemeContext.euiTheme.size.xl} !important`, // Just enough room for the collapse button
+      '.visEditorSidebar': {
+        display: 'none',
+        paddingLeft: 0,
+      },
+      [euiBreakpoint(euiThemeContext, ['xs', 's', 'm'])]: {
+        height: `${euiThemeContext.euiTheme.size.xxl} !important`, // Just enough room for the collapse button
+      },
+    }),
+  // Resizer
+  resizer: (euiThemeContext: UseEuiTheme) =>
+    css({
+      height: 'auto',
+      [euiBreakpoint(euiThemeContext, ['xs', 's', 'm'])]: {
+        display: 'none', // hide the resizer button
+      },
+    }),
+  resizerIsHidden: css({
+    display: 'none',
+  }),
+  // Canvas area
+  visWrapper: (euiThemeContext: UseEuiTheme) =>
+    css({
+      [euiBreakpoint(euiThemeContext, ['xs', 's', 'm'])]: {
+        width: '100% !important',
+        flex: 1,
+        display: 'flex',
+        flexDirection: 'column',
+      },
+    }),
+  visWrapperExpanded: css({ width: '100% !important' }),
+  visualization: css({
+    display: 'flex',
+    flex: '1 1 auto', // Fixes IE bug: the editor overflows a visualization on small screens
+    overflow: 'hidden',
+  }),
+  canvas: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      backgroundColor: euiTheme.colors.emptyShade,
+      display: 'flex',
+      flexDirection: 'row',
+      overflow: 'auto',
+      flexShrink: 1,
+      flexBasis: '100%',
+      '.visChart': {
+        position: 'relative',
+      },
+    }),
+};
 
 function DefaultEditor({
   core,
@@ -82,6 +154,8 @@ function DefaultEditor({
 
   const editorInitialWidth = getInitialWidth(vis.type.editorConfig.defaultSize);
 
+  const styles = useMemoCss(defaultEditorStyles);
+
   return (
     <KibanaRenderContextProvider {...core}>
       <KibanaContextProvider
@@ -92,7 +166,11 @@ function DefaultEditor({
           ...core,
         }}
       >
-        <EuiResizableContainer className="visEditor--default" onMouseLeave={onEditorMouseLeave}>
+        <EuiResizableContainer
+          className="visEditor--default"
+          onMouseLeave={onEditorMouseLeave}
+          css={styles.base}
+        >
           {(EuiResizablePanel, EuiResizableButton) => (
             <>
               <EuiResizablePanel
@@ -104,14 +182,22 @@ function DefaultEditor({
                   className: `visEditor__visualization__wrapper ${
                     isCollapsed ? 'visEditor__visualization__wrapper-expanded' : ''
                   }`,
+                  css: [styles.visWrapper, isCollapsed && styles.visWrapperExpanded],
                 }}
+                css={styles.visualization}
               >
-                <div className="visEditor__canvas" ref={visRef} data-shared-items-container />
+                <div
+                  className="visEditor__canvas"
+                  ref={visRef}
+                  data-shared-items-container
+                  css={styles.canvas}
+                />
               </EuiResizablePanel>
 
               <EuiResizableButton
                 alignIndicator="start"
                 className={`visEditor__resizer ${isCollapsed ? 'visEditor__resizer-isHidden' : ''}`}
+                css={[styles.resizer, isCollapsed && styles.resizerIsHidden]}
               />
 
               <EuiResizablePanel
@@ -122,6 +208,10 @@ function DefaultEditor({
                   className: `visEditor__collapsibleSidebar ${
                     isCollapsed ? 'visEditor__collapsibleSidebar-isClosed' : ''
                   }`,
+                  css: [
+                    styles.collapsibleSidebar,
+                    isCollapsed && styles.collapsibleSidebarIsClosed,
+                  ],
                 }}
               >
                 <DefaultEditorSideBar

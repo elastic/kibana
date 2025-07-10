@@ -58,14 +58,6 @@
             "path": "src/platform/plugins/shared/visualizations/public/services.ts"
           },
           {
-            "plugin": "transform",
-            "path": "x-pack/platform/plugins/private/transform/public/app/app_dependencies.tsx"
-          },
-          {
-            "plugin": "transform",
-            "path": "x-pack/platform/plugins/private/transform/public/app/app_dependencies.tsx"
-          },
-          {
             "plugin": "exploratoryView",
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/application/types.ts"
           },

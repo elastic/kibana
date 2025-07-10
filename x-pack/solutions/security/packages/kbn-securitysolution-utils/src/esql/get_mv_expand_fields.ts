@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { parse } from '@kbn/esql-ast';
-import { isColumnItem } from '@kbn/esql-validation-autocomplete';
+import { parse, isColumn } from '@kbn/esql-ast';
 
 export const getMvExpandFields = (query: string): string[] => {
   const { root } = parse(query);
@@ -16,7 +15,7 @@ export const getMvExpandFields = (query: string): string[] => {
   return mvExpandCommands.reduce<string[]>((acc, command) => {
     const argument = command.args[0];
 
-    if (isColumnItem(argument) && argument.name) {
+    if (isColumn(argument) && argument.name) {
       acc.push(argument.name);
     }
 

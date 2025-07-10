@@ -24,10 +24,40 @@
     "misc": [
       {
         "parentPluginId": "@kbn/serverless-observability-settings",
+        "id": "def-common.OBSERVABILITY_AI_ASSISTANT_PROJECT_SETTINGS",
+        "type": "Array",
+        "tags": [],
+        "label": "OBSERVABILITY_AI_ASSISTANT_PROJECT_SETTINGS",
+        "description": [],
+        "signature": [
+          "string[]"
+        ],
+        "path": "src/platform/packages/shared/serverless/settings/observability_project/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/serverless-observability-settings",
         "id": "def-common.OBSERVABILITY_PROJECT_SETTINGS",
         "type": "Array",
         "tags": [],
         "label": "OBSERVABILITY_PROJECT_SETTINGS",
+        "description": [],
+        "signature": [
+          "string[]"
+        ],
+        "path": "src/platform/packages/shared/serverless/settings/observability_project/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/serverless-observability-settings",
+        "id": "def-common.OBSERVABILITY_STREAMS_TIERED_PROJECT_SETTINGS",
+        "type": "Array",
+        "tags": [],
+        "label": "OBSERVABILITY_STREAMS_TIERED_PROJECT_SETTINGS",
         "description": [],
         "signature": [
           "string[]"

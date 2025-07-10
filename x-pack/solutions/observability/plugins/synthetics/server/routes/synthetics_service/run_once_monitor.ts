@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { schema } from '@kbn/config-schema';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { isEmpty } from 'lodash';
 import { PrivateLocationAttributes } from '../../runtime_types/private_locations';
 import { getPrivateLocationsForMonitor } from '../monitor_cruds/add_monitor/utils';
@@ -26,9 +25,9 @@ export const runOnceSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =
   handler: async ({
     request,
     response,
-    server,
     syntheticsMonitorClient,
     savedObjectsClient,
+    spaceId,
   }): Promise<any> => {
     const monitor = request.body as MonitorFields;
     const { monitorId } = request.params;
@@ -36,9 +35,7 @@ export const runOnceSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =
       return response.badRequest({ body: { message: 'Monitor data is empty.' } });
     }
 
-    const validationResult = validateMonitor(monitor);
-
-    const spaceId = server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+    const validationResult = validateMonitor(monitor, spaceId);
 
     const decodedMonitor = validationResult.decodedMonitor;
     if (!validationResult.valid || !decodedMonitor) {

@@ -8,4 +8,4 @@
  */
 
 export { telemetryTracingSchema } from './src/config_schema';
-export type { TelemetryConfig, TracingConfig } from './src/types';
+export type { TelemetryConfig } from './src/types';

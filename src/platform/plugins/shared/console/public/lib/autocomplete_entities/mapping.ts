@@ -123,7 +123,7 @@ export class Mapping implements BaseMapping {
 
   /**
    * Map of the currently loading mappings for index patterns specified by a user.
-   * @private
+   * @internal
    */
   private loadingState: Record<string, boolean> = {};
 

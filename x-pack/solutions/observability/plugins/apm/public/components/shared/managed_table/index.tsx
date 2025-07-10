@@ -12,6 +12,8 @@ import { isEmpty, merge, orderBy } from 'lodash';
 import type { ReactNode } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { ProgressiveLoadingQuality, apmProgressiveLoading } from '@kbn/observability-plugin/common';
 import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { fromQuery, toQuery } from '../links/url_helpers';
 import {
@@ -104,6 +106,12 @@ function UnoptimizedManagedTable<T extends object>(props: {
 }) {
   const [searchQuery, setSearchQuery] = useState('');
   const history = useHistory();
+  const {
+    services: { uiSettings },
+  } = useKibana();
+  const progressiveLoadingQuality =
+    uiSettings?.get<ProgressiveLoadingQuality>(apmProgressiveLoading) ??
+    ProgressiveLoadingQuality.off;
 
   const {
     items,
@@ -167,10 +175,10 @@ function UnoptimizedManagedTable<T extends object>(props: {
   // update table options state when url params change
   useEffect(() => {
     // Prevent updates while data is loading, as this cause pagination issues when observability:apmProgressiveLoading is enabled
-    if (!isLoading) {
+    if (progressiveLoadingQuality === ProgressiveLoadingQuality.off || !isLoading) {
       setTableOptions(getStateFromUrl());
     }
-  }, [getStateFromUrl, isLoading]);
+  }, [getStateFromUrl, progressiveLoadingQuality, isLoading]);
 
   // Clean up searchQuery when fast filter is toggled off
   useEffect(() => {
@@ -184,7 +192,10 @@ function UnoptimizedManagedTable<T extends object>(props: {
     (newTableOptions: Partial<TableOptions<T>>) => {
       setTableOptions((oldTableOptions) => merge({}, oldTableOptions, newTableOptions));
 
-      if (saveTableOptionsToUrl && !isLoading) {
+      if (
+        saveTableOptionsToUrl &&
+        (progressiveLoadingQuality === ProgressiveLoadingQuality.off || !isLoading)
+      ) {
         history.push({
           ...history.location,
           search: fromQuery({
@@ -197,7 +208,7 @@ function UnoptimizedManagedTable<T extends object>(props: {
         });
       }
     },
-    [history, saveTableOptionsToUrl, setTableOptions, isLoading]
+    [history, saveTableOptionsToUrl, setTableOptions, progressiveLoadingQuality, isLoading]
   );
 
   const filteredItems = useMemo(() => {

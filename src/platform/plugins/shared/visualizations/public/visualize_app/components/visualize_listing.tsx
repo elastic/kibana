@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import './visualize_listing.scss';
-
 import React, {
   useCallback,
   useRef,
@@ -17,7 +15,7 @@ import React, {
   MouseEvent,
   MutableRefObject,
 } from 'react';
-import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiLink, EuiSpacer, type UseEuiTheme, logicalSizeCSS } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useUnmount from 'react-use/lib/useUnmount';
@@ -36,6 +34,8 @@ import { TableListViewProps } from '@kbn/content-management-table-list-view';
 import { TableListViewTable } from '@kbn/content-management-table-list-view-table';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 
+import { css } from '@emotion/react';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { findListItems } from '../../utils/saved_visualize_utils';
 import { updateBasicSoAttributes } from '../../utils/saved_objects_utils/update_basic_attributes';
 import { checkForDuplicateTitle } from '../../utils/saved_objects_utils/check_for_duplicate_title';
@@ -48,6 +48,32 @@ import { VisualizeConstants } from '../../../common/constants';
 import { getNoItemsMessage, getCustomColumn, getCustomSortingOptions } from '../utils';
 import { getVisualizeListItemLink } from '../utils/get_visualize_list_item_link';
 import type { VisualizationStage } from '../../vis_types/vis_type_alias_registry';
+
+const visualizeListingStyles = {
+  table: ({ euiTheme }: UseEuiTheme) => css`
+    .visListingTable__typeImage,
+    .visListingTable__typeIcon {
+      margin-right: ${euiTheme.size.s};
+      position: relative;
+      top: -1px;
+    }
+
+    .visListingTable__typeImage {
+      ${logicalSizeCSS(euiTheme.size.base, euiTheme.size.base)};
+    }
+
+    .visListingTable__experimentalIcon {
+      width: ${euiTheme.size.l};
+      vertical-align: middle;
+      padding: 0 ${euiTheme.size.s};
+      margin-left: ${euiTheme.size.s};
+    }
+  `,
+
+  calloutLink: css`
+    text-decoration: underline;
+  `,
+};
 
 type VisualizeUserContent = VisualizationListItem &
   UserContentCommonSchema & {
@@ -285,6 +311,7 @@ const useTableListViewProps = (
 };
 
 export const VisualizeListing = () => {
+  const styles = useMemoCss(visualizeListingStyles);
   const {
     services: {
       application,
@@ -364,6 +391,7 @@ export const VisualizeListing = () => {
           dashboardApp: (
             <EuiLink
               className="visListingCallout__link"
+              css={styles.calloutLink}
               onClick={(event: MouseEvent) => {
                 event.preventDefault();
                 application.navigateToUrl(application.getUrlForApp('dashboards'));
@@ -386,42 +414,44 @@ export const VisualizeListing = () => {
         <>
           {dashboardCapabilities.createNew && (
             <>
-              <EuiCallOut size="s" title={calloutMessage} iconType="iInCircle" />
+              <EuiCallOut size="s" title={calloutMessage} iconType="info" />
               <EuiSpacer size="m" />
             </>
           )}
-          <TableListViewTable<VisualizeUserContent>
-            id="vis"
-            // we allow users to create visualizations even if they can't save them
-            // for data exploration purposes
-            customTableColumn={getCustomColumn()}
-            customSortingOptions={getCustomSortingOptions()}
-            initialPageSize={initialPageSize}
-            initialFilter={''}
-            entityName={i18n.translate('visualizations.listing.table.entityName', {
-              defaultMessage: 'visualization',
-            })}
-            entityNamePlural={i18n.translate('visualizations.listing.table.entityNamePlural', {
-              defaultMessage: 'visualizations',
-            })}
-            getOnClickTitle={(item) =>
-              item.attributes.readOnly ? undefined : () => tableViewProps.editItem?.(item)
-            }
-            getDetailViewLink={({ editor, attributes: { error, readOnly } }) =>
-              readOnly || (editor && 'onEdit' in editor)
-                ? undefined
-                : getVisualizeListItemLink(
-                    application,
-                    kbnUrlStateStorage,
-                    editor.editApp,
-                    editor.editUrl,
-                    error
-                  )
-            }
-            tableCaption={visualizeLibraryTitle}
-            {...tableViewProps}
-            {...propsFromParent}
-          />
+          <div css={styles.table}>
+            <TableListViewTable<VisualizeUserContent>
+              id="vis"
+              // we allow users to create visualizations even if they can't save them
+              // for data exploration purposes
+              customTableColumn={getCustomColumn()}
+              customSortingOptions={getCustomSortingOptions()}
+              initialPageSize={initialPageSize}
+              initialFilter={''}
+              entityName={i18n.translate('visualizations.listing.table.entityName', {
+                defaultMessage: 'visualization',
+              })}
+              entityNamePlural={i18n.translate('visualizations.listing.table.entityNamePlural', {
+                defaultMessage: 'visualizations',
+              })}
+              getOnClickTitle={(item) =>
+                item.attributes.readOnly ? undefined : () => tableViewProps.editItem?.(item)
+              }
+              getDetailViewLink={({ editor, attributes: { error, readOnly } }) =>
+                readOnly || (editor && 'onEdit' in editor)
+                  ? undefined
+                  : getVisualizeListItemLink(
+                      application,
+                      kbnUrlStateStorage,
+                      editor.editApp,
+                      editor.editUrl,
+                      error
+                    )
+              }
+              tableCaption={visualizeLibraryTitle}
+              {...tableViewProps}
+              {...propsFromParent}
+            />
+          </div>
         </>
       ),
     };
@@ -432,6 +462,7 @@ export const VisualizeListing = () => {
     kbnUrlStateStorage,
     tableViewProps,
     visualizeLibraryTitle,
+    styles,
   ]);
 
   const tabs = useMemo(

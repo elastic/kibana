@@ -19,6 +19,24 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-feature-flags-browser",
+            "id": "def-public.FeatureFlagsSetup.getInitialFeatureFlags",
+            "type": "Function",
+            "tags": [],
+            "label": "getInitialFeatureFlags",
+            "description": [
+              "\nUsed for bootstrapping the browser-side client with a seed of the feature flags for faster load-times."
+            ],
+            "signature": [
+              "() => Record<string, unknown>"
+            ],
+            "path": "src/core/packages/feature-flags/browser/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-feature-flags-browser",
             "id": "def-public.FeatureFlagsSetup.setProvider",
             "type": "Function",
             "tags": [],

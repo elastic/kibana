@@ -25,7 +25,7 @@ export const CASES_FEATURE_ID = 'securitySolutionCasesV3' as const;
 export const TIMELINE_FEATURE_ID = 'securitySolutionTimeline' as const;
 export const NOTES_FEATURE_ID = 'securitySolutionNotes' as const;
 export const SERVER_APP_ID = 'siem' as const;
-export const SECURITY_FEATURE_ID = 'siemV2' as const;
+export const SECURITY_FEATURE_ID = 'siemV3' as const;
 export const APP_NAME = 'Security' as const;
 export const APP_ICON_SOLUTION = 'logoSecurity' as const;
 export const APP_PATH = `/app/security` as const;
@@ -38,6 +38,7 @@ export const DEFAULT_DATE_FORMAT_TZ = 'dateFormat:tz' as const;
 export const DEFAULT_INDEX_KEY = 'securitySolution:defaultIndex' as const;
 export const DEFAULT_NUMBER_FORMAT = 'format:number:defaultPattern' as const;
 export const DEFAULT_DATA_VIEW_ID = 'security-solution' as const;
+export const DEFAULT_ALERT_DATA_VIEW_ID = 'security-solution-alert' as const;
 export const DEFAULT_TIME_FIELD = '@timestamp' as const;
 export const DEFAULT_TIME_RANGE = 'timepicker:timeDefaults' as const;
 export const DEFAULT_REFRESH_RATE_INTERVAL = 'timepicker:refreshIntervalDefaults' as const;
@@ -80,6 +81,8 @@ export const ENRICHMENT_DESTINATION_PATH = 'threat.enrichments' as const;
 export const DEFAULT_THREAT_INDEX_KEY = 'securitySolution:defaultThreatIndex' as const;
 export const DEFAULT_THREAT_INDEX_VALUE = ['logs-ti_*'] as const;
 export const DEFAULT_THREAT_MATCH_QUERY = '@timestamp >= "now-30d/d"' as const;
+
+export const EXPLORE_DATA_VIEW_PREFIX = 'explore-data-view' as const;
 
 export const EXPLORE_PATH = '/explore' as const;
 export const DASHBOARDS_PATH = '/dashboards' as const;
@@ -127,6 +130,7 @@ export const ENTITY_ANALYTICS_ENTITY_STORE_MANAGEMENT_PATH =
 export const ENTITY_ANALYTICS_LANDING_PATH = '/entity_analytics_landing' as const;
 export const ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH =
   '/entity_analytics_privileged_user_monitoring' as const;
+export const ENTITY_ANALYTICS_OVERVIEW_PATH = `/entity_analytics_overview` as const;
 export const APP_ALERTS_PATH = `${APP_PATH}${ALERTS_PATH}` as const;
 export const APP_CASES_PATH = `${APP_PATH}${CASES_PATH}` as const;
 export const APP_ENDPOINTS_PATH = `${APP_PATH}${ENDPOINTS_PATH}` as const;
@@ -501,19 +505,13 @@ export const CASE_ATTACHMENT_ENDPOINT_TYPE_ID = 'endpoint' as const;
  */
 export const MAX_MANUAL_RULE_RUN_LOOKBACK_WINDOW_DAYS = 90;
 export const MAX_MANUAL_RULE_RUN_BULK_SIZE = 100;
+export const MAX_BULK_FILL_RULE_GAPS_LOOKBACK_WINDOW_DAYS = 90;
+export const MAX_BULK_FILL_RULE_GAPS_BULK_SIZE = 100;
 
 /*
  * Whether it is a Jest environment
  */
 export const JEST_ENVIRONMENT = typeof jest !== 'undefined';
-
-export const AI_FOR_SOC_INTEGRATIONS = [
-  'splunk',
-  'google_secops',
-  'microsoft_sentinel',
-  'sentinel_one',
-  'crowdstrike',
-];
 
 /*
  * The tag to mark promotion rules that are related to the AI for SOC integrations

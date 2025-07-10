@@ -15,7 +15,11 @@ import { createDataViewDataSource, createEsqlDataSource } from '../../../../../c
 import type { DataSourceProfileProviderParams, RootContext } from '../../../profiles';
 import { DataSourceCategory, SolutionType } from '../../../profiles';
 import { createContextAwarenessMocks } from '../../../__mocks__';
-import { type LogOverviewContext, createLogsDataSourceProfileProvider } from './profile';
+import {
+  type LogOverviewContext,
+  createLogsDataSourceProfileProvider,
+  isLogsDataSourceContext,
+} from './profile';
 import { DataGridDensity } from '@kbn/unified-data-table';
 import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
 import type { ContextWithProfileId } from '../../../profile_service';
@@ -249,6 +253,9 @@ describe('logsDataSourceProfileProvider', () => {
           },
         });
       const rowAdditionalLeadingControls = getRowAdditionalLeadingControls?.({
+        actions: {
+          setExpandedDoc: jest.fn(),
+        },
         dataView: dataViewWithLogLevel,
       });
 
@@ -256,5 +263,68 @@ describe('logsDataSourceProfileProvider', () => {
       expect(rowAdditionalLeadingControls?.[0].id).toBe('connectedDegradedDocs');
       expect(rowAdditionalLeadingControls?.[1].id).toBe('connectedStacktraceDocs');
     });
+
+    it('should not return the passed additional controls if the flag is turned off', () => {
+      const getRowAdditionalLeadingControls =
+        logsDataSourceProfileProvider.profile.getRowAdditionalLeadingControls?.(() => undefined, {
+          context: {
+            category: DataSourceCategory.Logs,
+            logOverviewContext$: new BehaviorSubject<LogOverviewContext | undefined>(undefined),
+          },
+        });
+      const rowAdditionalLeadingControls = getRowAdditionalLeadingControls?.({
+        actions: {},
+        dataView: dataViewWithLogLevel,
+      });
+
+      expect(rowAdditionalLeadingControls).toHaveLength(0);
+    });
+  });
+
+  describe('getColumnsConfiguration', () => {
+    it('should return custom configuration for the "_source" column', () => {
+      const getColumnsConfiguration =
+        logsDataSourceProfileProvider.profile.getColumnsConfiguration?.(() => ({}), {
+          context: {
+            category: DataSourceCategory.Logs,
+            logOverviewContext$: new BehaviorSubject<LogOverviewContext | undefined>(undefined),
+          },
+        });
+
+      const columnConfiguration = getColumnsConfiguration?.();
+
+      expect(columnConfiguration).toBeDefined();
+      expect(columnConfiguration).toHaveProperty('_source');
+
+      const config = columnConfiguration!._source({
+        column: { id: '_source', displayAsText: 'Summary' },
+        headerRowHeight: 1,
+      });
+
+      expect(config).toBeDefined();
+      expect(config).toHaveProperty('display');
+    });
+  });
+});
+
+describe('isLogsDataSourceContext', () => {
+  const logsDataSourceContext = {
+    category: DataSourceCategory.Logs,
+    logOverviewContext$: new BehaviorSubject<LogOverviewContext | undefined>(undefined),
+  };
+
+  it('should return true for context with DataSourceCategory.Logs and logOverviewContext$', () => {
+    expect(isLogsDataSourceContext(logsDataSourceContext)).toBe(true);
+  });
+
+  it('should return false for context with other DataSourceCategory', () => {
+    expect(
+      isLogsDataSourceContext({ ...logsDataSourceContext, category: DataSourceCategory.Default })
+    ).toBe(false);
+  });
+
+  it('should return false for context without logOverviewContext$', () => {
+    const { logOverviewContext$, ...restContext } = logsDataSourceContext;
+    expect(isLogsDataSourceContext(restContext)).toBe(false);
   });
 });

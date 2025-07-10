@@ -44,8 +44,10 @@ export const testSubjectIds = {
     ARM_TEMPLATE: 'cisAzureArmTemplate',
     MANUAL: 'cisAzureManual',
   },
+  EVENT_PREVIEW_SECTION_TEST_ID: 'previewSection',
   EVENTS_TABLE_ROW_CSS_SELECTOR: '[data-test-subj="events-viewer-panel"] .euiDataGridRow',
   VISUALIZATIONS_SECTION_HEADER_TEST_ID: 'securitySolutionFlyoutVisualizationsHeader',
+  VISUALIZATIONS_SECTION_CONTENT_TEST_ID: 'securitySolutionFlyoutVisualizationsContent',
   GRAPH_PREVIEW_CONTENT_TEST_ID: 'securitySolutionFlyoutGraphPreviewContent',
   GRAPH_PREVIEW_LOADING_TEST_ID: 'securitySolutionFlyoutGraphPreviewLoading',
   GRAPH_PREVIEW_TITLE_LINK_TEST_ID: 'securitySolutionFlyoutGraphPreviewTitleLink',
@@ -58,9 +60,13 @@ export const testSubjectIds = {
     'cloudSecurityGraphGraphInvestigationShowActionsByEntity',
   GRAPH_NODE_POPOVER_SHOW_ACTIONS_ON_TEST_ID:
     'cloudSecurityGraphGraphInvestigationShowActionsOnEntity',
+  GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID:
+    'cloudSecurityGraphGraphInvestigationShowEntityDetails',
   GRAPH_LABEL_EXPAND_POPOVER_TEST_ID: 'cloudSecurityGraphGraphInvestigationGraphLabelExpandPopover',
   GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENTS_WITH_THIS_ACTION_ITEM_ID:
     'cloudSecurityGraphGraphInvestigationShowEventsWithThisAction',
+  GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENT_DETAILS_ITEM_ID:
+    'cloudSecurityGraphGraphInvestigationShowEventDetails',
   GRAPH_ACTIONS_TOGGLE_SEARCH_ID: 'cloudSecurityGraphGraphInvestigationToggleSearch',
   GRAPH_ACTIONS_INVESTIGATE_IN_TIMELINE_ID:
     'cloudSecurityGraphGraphInvestigationInvestigateInTimeline',
@@ -69,4 +75,6 @@ export const testSubjectIds = {
   DIRECT_ACCESS_KEYS: 'direct_access_keys',
   SETUP_TECHNOLOGY_SELECTOR_AGENTLESS_RADIO: 'setup-technology-agentless-radio',
   SETUP_TECHNOLOGY_SELECTOR_AGENT_BASED_RADIO: 'setup-technology-agent-based-radio',
+  NAMESPACE_INPUT: 'namespaceInput',
+  ADVANCED_OPTION_ACCORDION: 'advancedOptionsAccordion',
 };

@@ -303,6 +303,7 @@ export const generalSettings: RawSettingDefinition[] = [
       'opentelemetry/nodejs/elastic',
       'opentelemetry/php/elastic',
       'opentelemetry/python/elastic',
+      'opentelemetry/java/elastic',
     ],
   },
 

@@ -93,6 +93,7 @@ export class ObservabilityAIAssistantService {
     const user = plugins.security.authc.getCurrentUser(request);
 
     const soClient = coreStart.savedObjects.getScopedClient(request);
+    const uiSettingsClient = coreStart.uiSettings.asScopedToClient(soClient);
 
     const basePath = coreStart.http.basePath.get(request);
 
@@ -100,6 +101,7 @@ export class ObservabilityAIAssistantService {
     const inferenceClient = plugins.inference.getClient({ request });
 
     const { asInternalUser } = coreStart.elasticsearch.client;
+    const { asCurrentUser } = coreStart.elasticsearch.client.asScoped(request);
 
     const kbService = new KnowledgeBaseService({
       core: this.core,
@@ -114,11 +116,11 @@ export class ObservabilityAIAssistantService {
       core: this.core,
       config: this.config,
       actionsClient: await plugins.actions.getActionsClientWithRequest(request),
-      uiSettingsClient: coreStart.uiSettings.asScopedToClient(soClient),
+      uiSettingsClient,
       namespace: spaceId,
       esClient: {
         asInternalUser,
-        asCurrentUser: coreStart.elasticsearch.client.asScoped(request).asCurrentUser,
+        asCurrentUser,
       },
       inferenceClient,
       logger: this.logger,

@@ -277,6 +277,20 @@
           },
           {
             "parentPluginId": "@kbn/doc-links",
+            "id": "def-common.DocLinks.searchHomepage",
+            "type": "Object",
+            "tags": [],
+            "label": "searchHomepage",
+            "description": [],
+            "signature": [
+              "{ readonly visitSearchLabs: string; readonly notebooksExamples: string; readonly customerEngineerRequestForm: string; readonly elasticCommunity: string; }"
+            ],
+            "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/doc-links",
             "id": "def-common.DocLinks.metricbeat",
             "type": "Object",
             "tags": [],
@@ -501,7 +515,7 @@
             "label": "siem",
             "description": [],
             "signature": [
-              "{ readonly privileges: string; readonly guide: string; readonly gettingStarted: string; readonly ml: string; readonly ruleChangeLog: string; readonly detectionsReq: string; readonly networkMap: string; readonly troubleshootGaps: string; readonly ruleApiOverview: string; readonly configureAlertSuppression: string; }"
+              "{ readonly privileges: string; readonly guide: string; readonly gettingStarted: string; readonly ml: string; readonly ruleChangeLog: string; readonly detectionsReq: string; readonly networkMap: string; readonly troubleshootGaps: string; readonly gapsTable: string; readonly ruleApiOverview: string; readonly configureAlertSuppression: string; readonly ingestDataToSecurity: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
             "deprecated": false,
@@ -543,7 +557,7 @@
             "label": "securitySolution",
             "description": [],
             "signature": [
-              "{ readonly aiAssistant: string; readonly artifactControl: string; readonly avcResults: string; readonly bidirectionalIntegrations: string; readonly trustedApps: string; readonly eventFilters: string; readonly eventMerging: string; readonly blocklist: string; readonly endpointArtifacts: string; readonly policyResponseTroubleshooting: { full_disk_access: string; macos_system_ext: string; linux_deadlock: string; }; readonly packageActionTroubleshooting: { es_connection: string; }; readonly threatIntelInt: string; readonly responseActions: string; readonly configureEndpointIntegrationPolicy: string; readonly exceptions: { value_lists: string; }; readonly privileges: string; readonly manageDetectionRules: string; readonly createDetectionRules: string; readonly updatePrebuiltDetectionRules: string; readonly prebuiltRuleCustomizationPromoBlog: string; readonly createEsqlRuleType: string; readonly ruleUiAdvancedParams: string; readonly entityAnalytics: { readonly riskScorePrerequisites: string; readonly entityRiskScoring: string; readonly assetCriticality: string; }; readonly detectionEngineOverview: string; readonly signalsMigrationApi: string; readonly siemMigrations: string; readonly llmPerformanceMatrix: string; }"
+              "{ readonly aiAssistant: string; readonly cloudSecurityPosture: string; readonly installElasticDefend: string; readonly artifactControl: string; readonly avcResults: string; readonly bidirectionalIntegrations: string; readonly thirdPartyLlmProviders: string; readonly trustedApps: string; readonly elasticAiFeatures: string; readonly eventFilters: string; readonly eventMerging: string; readonly blocklist: string; readonly endpointArtifacts: string; readonly policyResponseTroubleshooting: { full_disk_access: string; macos_system_ext: string; linux_deadlock: string; }; readonly packageActionTroubleshooting: { es_connection: string; }; readonly threatIntelInt: string; readonly responseActions: string; readonly configureEndpointIntegrationPolicy: string; readonly exceptions: { value_lists: string; }; readonly privileges: string; readonly manageDetectionRules: string; readonly createDetectionRules: string; readonly updatePrebuiltDetectionRules: string; readonly prebuiltRuleCustomizationPromoBlog: string; readonly createEsqlRuleType: string; readonly ruleUiAdvancedParams: string; readonly entityAnalytics: { readonly riskScorePrerequisites: string; readonly entityRiskScoring: string; readonly assetCriticality: string; readonly privilegedUserMonitoring: string; }; readonly detectionEngineOverview: string; readonly signalsMigrationApi: string; readonly siemMigrations: string; readonly llmPerformanceMatrix: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
             "deprecated": false,
@@ -655,7 +669,7 @@
             "label": "observability",
             "description": [],
             "signature": [
-              "{ readonly guide: string; readonly infrastructureThreshold: string; readonly logsThreshold: string; readonly metricsThreshold: string; readonly customThreshold: string; readonly monitorStatus: string; readonly monitorUptime: string; readonly tlsCertificate: string; readonly uptimeDurationAnomaly: string; readonly monitorLogs: string; readonly analyzeMetrics: string; readonly monitorUptimeSynthetics: string; readonly userExperience: string; readonly createAlerts: string; readonly syntheticsAlerting: string; readonly syntheticsCommandReference: string; readonly syntheticsProjectMonitors: string; readonly syntheticsMigrateFromIntegration: string; readonly slo: string; readonly sloBurnRateRule: string; readonly aiAssistant: string; }"
+              "{ readonly guide: string; readonly infrastructureThreshold: string; readonly logsThreshold: string; readonly metricsThreshold: string; readonly customThreshold: string; readonly monitorStatus: string; readonly monitorUptime: string; readonly tlsCertificate: string; readonly uptimeDurationAnomaly: string; readonly monitorLogs: string; readonly logsStreams: string; readonly analyzeMetrics: string; readonly monitorUptimeSynthetics: string; readonly userExperience: string; readonly createAlerts: string; readonly syntheticsAlerting: string; readonly syntheticsCommandReference: string; readonly syntheticsProjectMonitors: string; readonly syntheticsMigrateFromIntegration: string; readonly slo: string; readonly sloBurnRateRule: string; readonly aiAssistant: string; readonly elasticManagedLlm: string; readonly elasticManagedLlmUsageCost: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
             "deprecated": false,
@@ -1062,6 +1076,20 @@
             "description": [],
             "signature": [
               "{ readonly queryRulesAPIDocumentation: string; }"
+            ],
+            "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/doc-links",
+            "id": "def-common.DocLinks.datasetQuality",
+            "type": "Object",
+            "tags": [],
+            "label": "datasetQuality",
+            "description": [],
+            "signature": [
+              "{ readonly failureStore: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
             "deprecated": false,

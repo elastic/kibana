@@ -8,8 +8,9 @@
 import { z } from '@kbn/zod';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
+import type { ToolProviderId } from '@kbn/onechat-common';
 import type { RegisteredTool } from '@kbn/onechat-server';
-import type { InternalToolProvider } from '../types';
+import { RegisteredToolProviderWithId, RegisteredToolWithMeta } from '../types';
 import { combineToolProviders } from './combine_tool_providers';
 
 describe('combineToolProviders', () => {
@@ -21,13 +22,16 @@ describe('combineToolProviders', () => {
 
   const createMockTool = (id: string): RegisteredTool => ({
     id,
-    name: `Tool ${id}`,
     description: `Description for tool ${id}`,
     schema: z.object({}),
     handler: jest.fn(),
   });
 
-  const createMockProvider = (tools: RegisteredTool[]): InternalToolProvider => ({
+  const createMockProvider = (
+    tools: RegisteredTool[],
+    providerId: string
+  ): RegisteredToolProviderWithId => ({
+    id: providerId,
     has: jest.fn().mockImplementation(async ({ toolId }) => {
       return tools.some((t) => t.id === toolId);
     }),
@@ -41,23 +45,34 @@ describe('combineToolProviders', () => {
     list: jest.fn().mockResolvedValue(tools),
   });
 
+  const addMeta = (tool: RegisteredTool, providerId: ToolProviderId): RegisteredToolWithMeta => {
+    return {
+      ...tool,
+      meta: {
+        ...tool.meta,
+        tags: tool.meta?.tags ?? [],
+        providerId,
+      },
+    };
+  };
+
   it('should return a tool from the first provider that has it', async () => {
     const tool1 = createMockTool('tool1');
     const tool2 = createMockTool('tool2');
-    const provider1 = createMockProvider([tool1]);
-    const provider2 = createMockProvider([tool2]);
+    const provider1 = createMockProvider([tool1], 'provider1');
+    const provider2 = createMockProvider([tool2], 'provider2');
 
     const combined = combineToolProviders(provider1, provider2);
     const result = await combined.get({ toolId: 'tool1', request: mockRequest });
 
-    expect(result).toBe(tool1);
+    expect(result).toEqual(addMeta(tool1, 'provider1'));
     expect(provider1.get).toHaveBeenCalledWith({ toolId: 'tool1', request: mockRequest });
     expect(provider2.get).not.toHaveBeenCalled();
   });
 
   it('should throw an error if no provider has the requested tool', async () => {
-    const provider1 = createMockProvider([]);
-    const provider2 = createMockProvider([]);
+    const provider1 = createMockProvider([], 'provider1');
+    const provider2 = createMockProvider([], 'provider2');
 
     const combined = combineToolProviders(provider1, provider2);
 
@@ -66,22 +81,21 @@ describe('combineToolProviders', () => {
     );
   });
 
-  it('should combine tools from all providers without duplicates', async () => {
+  it('should combine tools from all providers', async () => {
     const tool1 = createMockTool('tool1');
     const tool2 = createMockTool('tool2');
     const tool3 = createMockTool('tool3');
-    const provider1 = createMockProvider([tool1, tool2]);
-    const provider2 = createMockProvider([tool2, tool3]); // tool2 is duplicated
+    const provider1 = createMockProvider([tool1, tool2], 'provider1');
+    const provider2 = createMockProvider([tool2, tool3], 'provider2'); // tool2 is duplicated
 
     const combined = combineToolProviders(provider1, provider2);
     const result = await combined.list({ request: mockRequest });
 
-    expect(result).toHaveLength(3);
-    expect(result).toContainEqual(tool1);
-    expect(result).toContainEqual(tool2);
-    expect(result).toContainEqual(tool3);
-    // Verify tool2 only appears once
-    expect(result.filter((t) => t.id === 'tool2')).toHaveLength(1);
+    expect(result).toHaveLength(4);
+    expect(result).toContainEqual(addMeta(tool1, 'provider1'));
+    expect(result).toContainEqual(addMeta(tool2, 'provider1'));
+    expect(result).toContainEqual(addMeta(tool2, 'provider2'));
+    expect(result).toContainEqual(addMeta(tool3, 'provider2'));
   });
 
   it('should handle empty providers', async () => {
@@ -91,8 +105,8 @@ describe('combineToolProviders', () => {
   });
 
   it('should handle providers with no tools', async () => {
-    const provider1 = createMockProvider([]);
-    const provider2 = createMockProvider([]);
+    const provider1 = createMockProvider([], 'provider1');
+    const provider2 = createMockProvider([], 'provider2');
     const combined = combineToolProviders(provider1, provider2);
     const result = await combined.list({ request: mockRequest });
     expect(result).toHaveLength(0);
@@ -102,12 +116,16 @@ describe('combineToolProviders', () => {
     const tool1 = createMockTool('tool1');
     const tool2 = createMockTool('tool2');
     const tool3 = createMockTool('tool3');
-    const provider1 = createMockProvider([tool1, tool2]);
-    const provider2 = createMockProvider([tool3]);
+    const provider1 = createMockProvider([tool1, tool2], 'provider1');
+    const provider2 = createMockProvider([tool3], 'provider2');
 
     const combined = combineToolProviders(provider1, provider2);
     const result = await combined.list({ request: mockRequest });
 
-    expect(result).toEqual([tool1, tool2, tool3]);
+    expect(result).toEqual([
+      addMeta(tool1, 'provider1'),
+      addMeta(tool2, 'provider1'),
+      addMeta(tool3, 'provider2'),
+    ]);
   });
 });

@@ -1,0 +1,15 @@
+{
+  "streams.status": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_streams/status"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/streams-status.html",
+    "availability": {
+      "stack": false,
+      "serverless": false
+    }
+  }
+}

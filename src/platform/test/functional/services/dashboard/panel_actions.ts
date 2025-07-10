@@ -39,11 +39,23 @@ export class DashboardPanelActionsService extends FtrService {
   private readonly dashboard = this.ctx.getPageObject('dashboard');
 
   async getContainerTopOffset() {
-    const containerSelector = (await this.find.existsByCssSelector('.dashboardContainer'))
-      ? '.dashboardContainer'
-      : '.canvasContainer';
+    const existsDashboardContainer = await this.testSubjects.exists('dashboardContainer');
+    if (existsDashboardContainer) {
+      return this.getDashboardContainerTopOffset();
+    }
+    return this.getCanvasContainerTopOffset();
+  }
+
+  async getDashboardContainerTopOffset() {
     return (
-      (await (await this.find.byCssSelector(containerSelector)).getPosition()).y +
+      (await (await this.testSubjects.find('dashboardContainer')).getPosition()).y +
+      DASHBOARD_MARGIN_SIZE
+    );
+  }
+
+  async getCanvasContainerTopOffset() {
+    return (
+      (await (await this.find.byCssSelector('.canvasContainer')).getPosition()).y +
       DASHBOARD_MARGIN_SIZE
     );
   }

@@ -66,7 +66,7 @@ export async function waitForKnowledgeBaseReady(
     const { body, status } = await getKnowledgeBaseStatus(observabilityAIAssistantAPIClient);
 
     const { kbState, isReIndexing, concreteWriteIndex, currentInferenceId } = body;
-    if (status !== 200) {
+    if (status !== 200 || kbState !== KnowledgeBaseState.READY) {
       log.warning(`Knowledge base is not ready yet:
         Status code: ${status}
         State: ${kbState}
@@ -78,7 +78,7 @@ export async function waitForKnowledgeBaseReady(
     expect(status).to.be(200);
     expect(kbState).to.be(KnowledgeBaseState.READY);
     expect(isReIndexing).to.be(false);
-    log.debug(`Knowledge base is in ready state.`);
+    log.info(`Knowledge base is in ready state.`);
   });
 }
 
@@ -255,9 +255,9 @@ interface SemanticTextField {
   };
 }
 
-export async function getKnowledgeBaseEntriesFromEs(es: Client) {
+export async function getKnowledgeBaseEntriesFromEs(es: Client, size = 1000) {
   const res = await es.search<KnowledgeBaseEntry & SemanticTextField>({
-    size: 1000,
+    size,
     index: resourceNames.writeIndexAlias.kb,
     // Add fields parameter to include inference metadata
     fields: ['_inference_fields'],
@@ -267,6 +267,16 @@ export async function getKnowledgeBaseEntriesFromEs(es: Client) {
   });
 
   return res.hits.hits;
+}
+
+export async function addKnowledgeBaseEntryToEs(es: Client, entry: KnowledgeBaseEntry) {
+  const result = await es.index({
+    index: resourceNames.writeIndexAlias.kb,
+    document: entry,
+    refresh: true,
+  });
+
+  return result;
 }
 
 export function getKnowledgeBaseEntriesFromApi({

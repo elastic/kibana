@@ -321,7 +321,7 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
         return (
           <EuiCallOut
             color={'primary'}
-            iconType={'iInCircle'}
+            iconType={'info'}
             size="m"
             data-test-subj="protection-updates-automatic-updates-enabled"
             title={i18n.translate(

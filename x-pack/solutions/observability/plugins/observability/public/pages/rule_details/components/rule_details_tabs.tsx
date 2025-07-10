@@ -64,6 +64,14 @@ export function RuleDetailsTabs({
   controlApi,
 }: Props) {
   const {
+    data,
+    http,
+    notifications,
+    fieldFormats,
+    application,
+    licensing,
+    cases,
+    settings,
     triggersActionsUi: { getRuleEventLogList: RuleEventLogList },
   } = useKibana().services;
   const [filterControls, setFilterControls] = useState<Filter[] | undefined>();
@@ -115,6 +123,16 @@ export function RuleDetailsTabs({
                   consumers={observabilityAlertFeatureIds}
                   query={esQuery}
                   columns={tableColumns}
+                  services={{
+                    data,
+                    http,
+                    notifications,
+                    fieldFormats,
+                    application,
+                    licensing,
+                    cases,
+                    settings,
+                  }}
                 />
               )}
             </EuiFlexItem>

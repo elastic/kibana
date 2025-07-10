@@ -31,6 +31,7 @@ import { buildResponse } from '../../../lib/build_response';
 import { ElasticAssistantRequestHandlerContext } from '../../../types';
 import { requestIsValid } from './helpers/request_is_valid';
 import { generateAndUpdateAttackDiscoveries } from '../helpers/generate_and_update_discoveries';
+import { hasReadWriteAttackDiscoveryAlertsPrivileges } from '../helpers/index_privileges';
 
 const ROUTE_HANDLER_TIMEOUT = 10 * 60 * 1000; // 10 * 60 seconds = 10 minutes
 
@@ -138,6 +139,17 @@ export const postAttackDiscoveryRoute = (
             ATTACK_DISCOVERY_ALERTS_ENABLED_FEATURE_FLAG,
             false
           );
+
+          if (attackDiscoveryAlertsEnabled) {
+            // Perform alerts access check
+            const privilegesCheckResponse = await hasReadWriteAttackDiscoveryAlertsPrivileges({
+              context: performChecksContext,
+              response,
+            });
+            if (!privilegesCheckResponse.isSuccess) {
+              return privilegesCheckResponse.response;
+            }
+          }
 
           const { currentAd, attackDiscoveryId } = await updateAttackDiscoveryStatusToRunning(
             dataClient,

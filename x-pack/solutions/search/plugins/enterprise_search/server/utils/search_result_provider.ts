@@ -8,11 +8,10 @@
 import { takeUntil, of, map } from 'rxjs';
 
 import { GlobalSearchResultProvider } from '@kbn/global-search-plugin/server';
-import { i18n } from '@kbn/i18n';
 import { ConnectorServerSideDefinition } from '@kbn/search-connectors';
 
 import { ConfigType } from '..';
-import { ENTERPRISE_SEARCH_DATA_PLUGIN, AI_SEARCH_PLUGIN } from '../../common/constants';
+import { ENTERPRISE_SEARCH_DATA_PLUGIN } from '../../common/constants';
 
 type ServiceDefinition =
   | ConnectorServerSideDefinition
@@ -72,18 +71,7 @@ export function getSearchResultProvider(
           if (!caps.catalogue.enterpriseSearch) {
             return [];
           }
-          const services: ServiceDefinition[] = [
-            ...(config.hasConnectors ? connectorTypes : []),
-
-            {
-              keywords: ['esre', 'search'],
-              name: i18n.translate('xpack.enterpriseSearch.searchProvider.aiSearch.name', {
-                defaultMessage: 'Search AI',
-              }),
-              serviceType: 'ai_search',
-              url: AI_SEARCH_PLUGIN.URL,
-            },
-          ];
+          const services: ServiceDefinition[] = [...(config.hasConnectors ? connectorTypes : [])];
           const result = services
             .map((service) => {
               const { iconPath, name, keywords, serviceType } = service;

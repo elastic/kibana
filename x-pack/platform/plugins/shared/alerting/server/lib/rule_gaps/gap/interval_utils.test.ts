@@ -15,6 +15,8 @@ import {
   normalizeInterval,
   denormalizeInterval,
   clipInterval,
+  clampIntervals,
+  clipDateInterval,
 } from './interval_utils';
 import type { Interval, StringInterval } from '../types';
 
@@ -258,6 +260,127 @@ describe('interval_utils', () => {
         lte: new Date('2025-01-01T12:30:00Z'),
       };
       expect(clipInterval(interval, boundary)).toBeNull();
+    });
+  });
+
+  describe('clampIntervals', () => {
+    const toInterval = (start: string, end: string) => ({
+      gte: new Date(start),
+      lte: new Date(end),
+    });
+
+    const buildTestCase = (
+      testDescription: string,
+      intervals: Interval[],
+      boundary: Interval,
+      expectedResult: Interval[]
+    ) => ({
+      testDescription,
+      intervals,
+      boundary,
+      expectedResult,
+    });
+
+    const testCases = [
+      buildTestCase(
+        'when the list of intervals is outside the range on the left, it should return an empty list',
+        [
+          toInterval('2025-05-09T09:12:09.457Z', '2025-05-09T09:13:09.457Z'),
+          toInterval('2025-05-09T09:14:09.457Z', '2025-05-09T09:15:09.457Z'),
+        ],
+        toInterval('2025-05-09T09:15:09.457Z', '2025-05-09T09:17:09.457Z'),
+        []
+      ),
+      buildTestCase(
+        'when the list of intervals overlaps on the left, it should clamp the overlapping interval on the start',
+        [
+          toInterval('2025-05-09T09:12:09.457Z', '2025-05-09T09:13:09.457Z'),
+          toInterval('2025-05-09T09:14:09.457Z', '2025-05-09T09:15:09.457Z'),
+        ],
+        toInterval('2025-05-09T09:14:50.457Z', '2025-05-09T09:17:09.457Z'),
+        [toInterval('2025-05-09T09:14:50.457Z', '2025-05-09T09:15:09.457Z')]
+      ),
+      buildTestCase(
+        'when the list of intervals overlaps with the range on both left and right, it should clamp the overlapping intervals',
+        [
+          toInterval('2025-05-09T09:12:09.457Z', '2025-05-09T09:13:09.457Z'),
+          toInterval('2025-05-09T09:15:09.457Z', '2025-05-09T09:16:09.457Z'),
+          toInterval('2025-05-09T09:17:09.458Z', '2025-05-09T09:20:09.457Z'),
+          toInterval('2025-05-09T09:21:09.458Z', '2025-05-09T09:22:09.457Z'),
+        ],
+        toInterval('2025-05-09T09:15:50.457Z', '2025-05-09T09:18:09.457Z'),
+        [
+          toInterval('2025-05-09T09:15:50.457Z', '2025-05-09T09:16:09.457Z'),
+          toInterval('2025-05-09T09:17:09.458Z', '2025-05-09T09:18:09.457Z'),
+        ]
+      ),
+      buildTestCase(
+        'when the list of intervals is included inside the range, it should not clamp anything',
+        [
+          toInterval('2025-05-09T09:12:09.457Z', '2025-05-09T09:13:09.457Z'),
+          toInterval('2025-05-09T09:14:09.457Z', '2025-05-09T09:15:09.457Z'),
+        ],
+        toInterval('2025-05-09T08:11:50.457Z', '2025-05-09T09:17:09.457Z'),
+        [
+          toInterval('2025-05-09T09:12:09.457Z', '2025-05-09T09:13:09.457Z'),
+          toInterval('2025-05-09T09:14:09.457Z', '2025-05-09T09:15:09.457Z'),
+        ]
+      ),
+      buildTestCase(
+        'when the list of intervals overlaps on the right, it should clamp the overlapping interval on the end',
+        [
+          toInterval('2025-05-09T09:12:09.457Z', '2025-05-09T09:13:09.457Z'),
+          toInterval('2025-05-09T09:14:09.457Z', '2025-05-09T09:15:09.457Z'),
+        ],
+        toInterval('2025-05-09T09:11:50.457Z', '2025-05-09T09:14:55.457Z'),
+        [
+          toInterval('2025-05-09T09:12:09.457Z', '2025-05-09T09:13:09.457Z'),
+          toInterval('2025-05-09T09:14:09.457Z', '2025-05-09T09:14:55.457Z'),
+        ]
+      ),
+      buildTestCase(
+        'when the list of intervals is outside the range on the right, it should return an empty list',
+        [
+          toInterval('2025-05-09T09:18:09.457Z', '2025-05-09T09:20:09.457Z'),
+          toInterval('2025-05-09T09:21:09.457Z', '2025-05-09T09:22:09.457Z'),
+        ],
+        toInterval('2025-05-09T09:15:09.457Z', '2025-05-09T09:17:09.457Z'),
+        []
+      ),
+    ];
+
+    testCases.forEach(({ testDescription, intervals, boundary, expectedResult }) => {
+      it(testDescription, () => {
+        expect(clampIntervals(intervals, boundary)).toEqual(expectedResult);
+      });
+    });
+  });
+
+  describe('clipDateInterval', () => {
+    it('clips date interval to boundary', () => {
+      const expected = {
+        start: new Date('2025-01-01T12:00:00Z'),
+        end: new Date('2025-01-01T12:30:00Z'),
+      };
+      expect(
+        clipDateInterval(
+          new Date('2025-01-01T11:00:00Z'),
+          new Date('2025-01-01T13:00:00Z'),
+          new Date('2025-01-01T12:00:00Z'),
+          new Date('2025-01-01T12:30:00Z')
+        )
+      ).toEqual(expected);
+    });
+
+    it('returns null when no overlap with boundary', () => {
+      expect(
+        clipDateInterval(
+          new Date('2025-01-01T11:00:00Z'),
+          new Date('2025-01-01T11:30:00Z'),
+          new Date('2025-01-01T12:00:00Z'),
+          new Date('2025-01-01T12:30:00Z')
+        )
+      ).toBeNull();
     });
   });
 });

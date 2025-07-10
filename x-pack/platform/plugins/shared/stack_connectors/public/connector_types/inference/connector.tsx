@@ -9,6 +9,7 @@ import React from 'react';
 import { InferenceServiceFormFields } from '@kbn/inference-endpoint-ui-common';
 import { type ActionConnectorFieldsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
+import { useConnectorContext } from '@kbn/triggers-actions-ui-plugin/public';
 
 const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps> = ({
   isEdit,
@@ -16,9 +17,19 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
   const {
     http,
     notifications: { toasts },
+    isServerless: isServerlessKibanaContext,
   } = useKibana().services;
+  const { isServerless: isServerlessConnectorContext } = useConnectorContext();
+  const isServerless = isServerlessKibanaContext ?? isServerlessConnectorContext;
 
-  return <InferenceServiceFormFields http={http} isEdit={isEdit} toasts={toasts} />;
+  return (
+    <InferenceServiceFormFields
+      http={http}
+      isEdit={isEdit}
+      enforceAdaptiveAllocations={isServerless}
+      toasts={toasts}
+    />
+  );
 };
 
 // eslint-disable-next-line import/no-default-export

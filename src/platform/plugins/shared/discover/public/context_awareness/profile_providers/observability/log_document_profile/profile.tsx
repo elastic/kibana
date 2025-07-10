@@ -10,10 +10,9 @@
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { BehaviorSubject } from 'rxjs';
 import type { DocumentProfileProvider } from '../../../profiles';
-import { DocumentType } from '../../../profiles';
+import { DocumentType, SolutionType } from '../../../profiles';
 import type { ProfileProviderServices } from '../../profile_provider_services';
 import { createGetDocViewer } from './accessors';
-import { OBSERVABILITY_ROOT_PROFILE_ID } from '../consts';
 import type { LogOverviewContext } from '../logs_data_source_profile/profile';
 import { isLogsDataSourceContext } from '../logs_data_source_profile/profile';
 
@@ -29,7 +28,7 @@ export const createObservabilityLogDocumentProfileProvider = (
     getDocViewer: createGetDocViewer(services),
   },
   resolve: ({ record, rootContext, dataSourceContext }) => {
-    if (rootContext.profileId !== OBSERVABILITY_ROOT_PROFILE_ID) {
+    if (rootContext.solutionType !== SolutionType.Observability) {
       return { isMatch: false };
     }
 

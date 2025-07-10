@@ -20,6 +20,12 @@ export function getStackTracesTabs({
 }) {
   return [
     {
+      label: i18n.translate('xpack.profiling.stackTracesView.executablesTabLabel', {
+        defaultMessage: 'Executables',
+      }),
+      topNType: TopNType.Executables,
+    },
+    {
       label: i18n.translate('xpack.profiling.stackTracesView.threadsTabLabel', {
         defaultMessage: 'Threads',
       }),

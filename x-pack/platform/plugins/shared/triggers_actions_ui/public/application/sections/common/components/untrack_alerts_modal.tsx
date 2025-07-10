@@ -59,6 +59,7 @@ export const UntrackAlertsModal = (props: UntrackAlertsModalProps) => {
       onConfirm={() => onConfirm(isUntrack)}
       confirmButtonText={UNTRACK_ORPHANED_ALERTS_CONFIRM_BUTTON_TEXT}
       cancelButtonText={UNTRACK_ORPHANED_ALERTS_CANCEL_BUTTON_TEXT}
+      aria-label={UNTRACK_ORPHANED_ALERTS_TITLE}
     >
       <EuiSwitch
         data-test-subj="untrackAlertsModalSwitch"

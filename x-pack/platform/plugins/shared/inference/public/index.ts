@@ -15,8 +15,6 @@ import type {
 } from './types';
 import { InferencePlugin } from './plugin';
 
-export { httpResponseIntoObservable } from './util/http_response_into_observable';
-
 export type { InferencePublicSetup, InferencePublicStart };
 
 export const plugin: PluginInitializer<

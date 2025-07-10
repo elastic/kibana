@@ -28,7 +28,6 @@ import {
   CLOUDBEAT_GCP,
   CLOUDBEAT_VANILLA,
   CLOUDBEAT_VULN_MGMT_AWS,
-  SINGLE_ACCOUNT,
   SUPPORTED_CLOUDBEAT_INPUTS,
   SUPPORTED_POLICY_TEMPLATES,
   TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR,
@@ -56,6 +55,7 @@ import {
   getTemplateUrlFromPackageInfo,
   SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS,
 } from '../../common/utils/get_template_url_package_info';
+import { AWS_SINGLE_ACCOUNT } from './policy_template_form';
 
 // Posture policies only support the default namespace
 export const POSTURE_NAMESPACE = 'default';
@@ -72,7 +72,15 @@ export type CloudSetupAccessInputType = 'cloudbeat/cis_aws' | 'cloudbeat/cloud_c
 
 export interface GetCloudConnectorRemoteRoleTemplateParams {
   input: NewPackagePolicyPostureInput;
-  cloud: Pick<CloudSetup, 'isCloudEnabled' | 'deploymentId' | 'serverless'>;
+  cloud: Pick<
+    CloudSetup,
+    | 'isCloudEnabled'
+    | 'cloudId'
+    | 'cloudHost'
+    | 'deploymentUrl'
+    | 'serverless'
+    | 'isServerlessEnabled'
+  >;
   packageInfo: PackageInfo;
 }
 
@@ -160,7 +168,7 @@ export const getPosturePolicy = (
   inputVars?: Record<string, PackagePolicyConfigRecordEntry>
 ): NewPackagePolicy => ({
   ...newPolicy,
-  namespace: POSTURE_NAMESPACE,
+  namespace: newPolicy.namespace,
   // Enable new policy input and disable all others
   inputs: newPolicy.inputs.map((item) => getPostureInput(item, inputType, inputVars)),
   // Set hidden policy vars
@@ -485,16 +493,53 @@ export const isCloudConnectorsEnabled = (
   return isAgentless && credentialsType === AWS_CREDENTIALS_TYPE.CLOUD_CONNECTORS;
 };
 
+export const getCloudProviderFromCloudHost = (
+  cloudHost: string | undefined
+): string | undefined => {
+  if (!cloudHost) return undefined;
+  const match = cloudHost.match(/\b(aws|gcp|azure)\b/)?.[1];
+  return match;
+};
+
+export const getDeploymentIdFromUrl = (url: string | undefined): string | undefined => {
+  if (!url) return undefined;
+  const match = url.match(/\/deployments\/([^/?#]+)/);
+  return match?.[1];
+};
+
+export const getKibanaComponentId = (cloudId: string | undefined): string | undefined => {
+  if (!cloudId) return undefined;
+
+  const base64Part = cloudId.split(':')[1];
+  const decoded = atob(base64Part);
+  const [, , kibanaComponentId] = decoded.split('$');
+
+  return kibanaComponentId || undefined;
+};
+
 export const getCloudConnectorRemoteRoleTemplate = ({
   input,
   cloud,
   packageInfo,
 }: GetCloudConnectorRemoteRoleTemplateParams): string | undefined => {
-  const accountType = input?.streams?.[0]?.vars?.['aws.account_type']?.value ?? SINGLE_ACCOUNT;
+  let elasticResourceId: string | undefined;
+  const accountType = input?.streams?.[0]?.vars?.['aws.account_type']?.value ?? AWS_SINGLE_ACCOUNT;
 
-  const elasticResourceId = cloud?.isCloudEnabled
-    ? cloud?.deploymentId
-    : cloud?.serverless?.projectId;
+  const provider = getCloudProviderFromCloudHost(cloud?.cloudHost);
+
+  if (!provider || provider !== 'aws') return undefined;
+
+  const deploymentId = getDeploymentIdFromUrl(cloud?.deploymentUrl);
+
+  const kibanaComponentId = getKibanaComponentId(cloud?.cloudId);
+
+  if (cloud?.isServerlessEnabled && cloud?.serverless?.projectId) {
+    elasticResourceId = cloud.serverless.projectId;
+  }
+
+  if (cloud?.isCloudEnabled && deploymentId && kibanaComponentId) {
+    elasticResourceId = kibanaComponentId;
+  }
 
   if (!elasticResourceId) return undefined;
 
@@ -504,7 +549,7 @@ export const getCloudConnectorRemoteRoleTemplate = ({
     SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS.CLOUD_FORMATION_CLOUD_CONNECTORS
   )
     ?.replace(TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR, accountType)
-    ?.replace(TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR, 'elasticResourceId');
+    ?.replace(TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR, elasticResourceId);
 };
 
 export const getCloudProvider = (type: string): string | undefined => {

@@ -7,11 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataSourceCategory, type DataSourceProfileProvider } from '../../../profiles';
+import { TRACES_PRODUCT_FEATURE_ID } from '../../../../../common/constants';
+import {
+  SolutionType,
+  DataSourceCategory,
+  type DataSourceProfileProvider,
+} from '../../../profiles';
 import { extractIndexPatternFrom } from '../../extract_index_pattern_from';
 import type { ProfileProviderServices } from '../../profile_provider_services';
-import { getCellRenderers } from './accessors';
-import { OBSERVABILITY_ROOT_PROFILE_ID } from '../consts';
+import { getCellRenderers, getColumnsConfiguration } from './accessors';
 
 const OBSERVABILITY_TRACES_DATA_SOURCE_PROFILE_ID = 'observability-traces-data-source-profile';
 
@@ -19,7 +23,7 @@ export const createTracesDataSourceProfileProvider = ({
   tracesContextService,
 }: ProfileProviderServices): DataSourceProfileProvider => ({
   profileId: OBSERVABILITY_TRACES_DATA_SOURCE_PROFILE_ID,
-  isExperimental: true,
+  restrictedToProductFeature: TRACES_PRODUCT_FEATURE_ID,
   profile: {
     getDefaultAppState: (prev) => (params) => ({
       ...prev(params),
@@ -35,10 +39,11 @@ export const createTracesDataSourceProfileProvider = ({
       rowHeight: 5,
     }),
     getCellRenderers,
+    getColumnsConfiguration,
   },
   resolve: (params) => {
     if (
-      params.rootContext.profileId === OBSERVABILITY_ROOT_PROFILE_ID &&
+      params.rootContext.solutionType === SolutionType.Observability &&
       tracesContextService.containsTracesIndexPattern(extractIndexPatternFrom(params))
     ) {
       return {

@@ -77,7 +77,7 @@ export interface TrackedSearch<SearchDescriptor = unknown, SearchMeta extends {}
  * Internal state of SessionService
  * {@link SearchSessionState} is inferred from this state
  *
- * @private
+ * @internal
  */
 export interface SessionStateInternal<SearchDescriptor = unknown, SearchMeta extends {} = {}> {
   /**

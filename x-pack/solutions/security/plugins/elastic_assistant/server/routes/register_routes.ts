@@ -7,6 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 
+import { findSecurityAIPromptsRoute } from './security_ai_prompts/find_prompts';
 import { findAlertSummaryRoute } from './alert_summary/find_route';
 import { cancelAttackDiscoveryRoute } from './attack_discovery/post/cancel/cancel_attack_discovery';
 import { findAttackDiscoveriesRoute } from './attack_discovery/get/find_attack_discoveries';
@@ -55,6 +56,7 @@ import { findAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/
 import { disableAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/disable';
 import { enableAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/enable';
 import type { ConfigSchema } from '../config_schema';
+import { deleteAllConversationsRoute } from './user_conversations/delete_all_route';
 
 export const registerRoutes = (
   router: ElasticAssistantPluginRouter,
@@ -74,6 +76,7 @@ export const registerRoutes = (
   readConversationRoute(router);
   updateConversationRoute(router);
   deleteConversationRoute(router);
+  deleteAllConversationsRoute(router);
   appendConversationMessageRoute(router);
 
   // User Conversations bulk CRUD
@@ -105,6 +108,9 @@ export const registerRoutes = (
   // Prompts
   bulkPromptsRoute(router, logger);
   findPromptsRoute(router, logger);
+
+  // Security AI Prompts
+  findSecurityAIPromptsRoute(router, logger);
 
   // Anonymization Fields
   bulkActionAnonymizationFieldsRoute(router, logger);

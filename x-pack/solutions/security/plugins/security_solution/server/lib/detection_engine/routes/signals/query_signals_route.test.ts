@@ -25,7 +25,7 @@ describe('query for signal', () => {
   context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
     elasticsearchClientMock.createSuccessTransportRequestPromise(getEmptySignalsResponse())
   );
-  const ruleDataClient = ruleRegistryMocks.createRuleDataClient('.alerts-security.alerts-');
+  const ruleDataClient = ruleRegistryMocks.createRuleDataClient('.alerts-security.alerts');
 
   beforeEach(() => {
     server = serverMock.create();

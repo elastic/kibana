@@ -82,7 +82,8 @@ export default ({ getService }: FtrProviderContext) => {
   const auditPath = dataPathBuilder.getPath('auditbeat/hosts');
   const packetBeatPath = dataPathBuilder.getPath('packetbeat/default');
 
-  describe('@ess @serverless @serverlessQA EQL type rules', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/220943
+  describe.skip('@ess @serverless @serverlessQA EQL type rules', () => {
     const { indexListOfDocuments } = dataGeneratorFactory({
       es,
       index: 'ecs_compliant',
@@ -1227,9 +1228,10 @@ export default ({ getService }: FtrProviderContext) => {
         kbnExpect(logs[0].requests).equal(undefined);
       });
       it('should return requests property when enable_logged_requests set to true', async () => {
+        const eqlRule = getEqlRuleForAlertTesting(['auditbeat-*']);
         const { logs } = await previewRule({
           supertest,
-          rule: getEqlRuleForAlertTesting(['auditbeat-*']),
+          rule: eqlRule,
           enableLoggedRequests: true,
         });
 
@@ -1240,6 +1242,7 @@ export default ({ getService }: FtrProviderContext) => {
         kbnExpect(requests![0].request).to.contain(
           'POST /auditbeat-*/_eql/search?allow_no_indices=true'
         );
+        kbnExpect(requests![0].request).to.contain(eqlRule.query);
       });
     });
   });

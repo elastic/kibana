@@ -154,7 +154,7 @@ const Prompt: AnnotationTooltipFormatter = () => {
   return (
     <EuiFlexGroup alignItems="center" responsive={false} gutterSize="xs" css={headerPartialCss}>
       <EuiFlexItem grow={false}>
-        <EuiIcon type="iInCircle" />
+        <EuiIcon type="info" />
       </EuiFlexItem>
       <EuiFlexItem>{partialDataText}</EuiFlexItem>
     </EuiFlexGroup>

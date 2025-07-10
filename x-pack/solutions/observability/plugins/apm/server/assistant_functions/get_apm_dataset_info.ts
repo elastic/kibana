@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { FunctionVisibility } from '@kbn/observability-ai-assistant-plugin/common';
 import { compact, mapValues, omit, uniq } from 'lodash';
 import datemath from '@elastic/datemath';
 import { rangeQuery } from '@kbn/observability-plugin/server';
@@ -20,7 +19,6 @@ export function registerGetApmDatasetInfoFunction({
   registerFunction(
     {
       name: 'get_apm_dataset_info',
-      visibility: FunctionVisibility.AssistantOnly,
       description: `Use this function to get information about APM data.`,
       parameters: {
         type: 'object',

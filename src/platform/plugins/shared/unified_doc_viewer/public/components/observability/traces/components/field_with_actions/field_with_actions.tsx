@@ -10,26 +10,31 @@
 import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiLoadingSpinner, EuiTitle } from '@elastic/eui';
 import React from 'react';
 import { PartialFieldMetadataPlain } from '@kbn/fields-metadata-plugin/common';
+import { DataViewField } from '@kbn/data-views-plugin/common';
 import { FieldHoverActionPopover } from './field_hover_popover_action';
 
 export interface FieldWithActionsProps {
   field: string;
   fieldMetadata?: PartialFieldMetadataPlain;
+  fieldMapping?: DataViewField;
   formattedValue: string;
   label: string;
   value: string;
   children: React.ReactNode;
   loading?: boolean;
+  showActions?: boolean;
 }
 
 export function FieldWithActions({
   field,
   fieldMetadata,
+  fieldMapping,
   formattedValue,
   label,
   value,
   loading,
   children,
+  showActions = true,
   ...props
 }: FieldWithActionsProps) {
   const hasFieldDescription = !!fieldMetadata?.flat_name;
@@ -37,6 +42,13 @@ export function FieldWithActions({
   if (!label) {
     return null;
   }
+
+  const fieldContent = (
+    <div className="eui-textBreakWord">
+      {loading && <EuiLoadingSpinner size="m" />}
+      {children}
+    </div>
+  );
 
   return (
     <div {...props}>
@@ -50,19 +62,30 @@ export function FieldWithActions({
             </EuiFlexItem>
             {hasFieldDescription && (
               <EuiFlexItem grow={false}>
-                <EuiIconTip content={fieldMetadata.flat_name} color="subdued" />
+                <EuiIconTip
+                  title={fieldMetadata.flat_name}
+                  content={fieldMetadata.short}
+                  color="subdued"
+                  aria-label={`${fieldMetadata.flat_name}: ${fieldMetadata.short}`}
+                />
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
         </EuiFlexItem>
 
         <EuiFlexItem grow={2}>
-          <FieldHoverActionPopover title={value} value={value} field={field}>
-            <div className="eui-textBreakWord">
-              {loading && <EuiLoadingSpinner size="m" />}
-              {children}
-            </div>
-          </FieldHoverActionPopover>
+          {showActions ? (
+            <FieldHoverActionPopover
+              title={value}
+              value={value}
+              field={field}
+              fieldMapping={fieldMapping}
+            >
+              {fieldContent}
+            </FieldHoverActionPopover>
+          ) : (
+            fieldContent
+          )}
         </EuiFlexItem>
       </EuiFlexGroup>
     </div>

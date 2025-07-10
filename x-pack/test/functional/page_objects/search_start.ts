@@ -17,6 +17,10 @@ export function SearchStartProvider({ getService }: FtrProviderContext) {
     async expectToBeOnStartPage() {
       await testSubjects.existOrFail('elasticsearchStartPage', { timeout: 2000 });
     },
+    async expectToBeOnCreateIndexPage() {
+      expect(await browser.getCurrentUrl()).contain('/app/elasticsearch/indices/create');
+      await testSubjects.existOrFail('elasticsearchCreateIndexPage', { timeout: 2000 });
+    },
     async expectToBeOnIndexDetailsPage() {
       await retry.tryForTime(60 * 1000, async () => {
         expect(await browser.getCurrentUrl()).contain('/app/elasticsearch/indices/index_details');
@@ -27,6 +31,11 @@ export function SearchStartProvider({ getService }: FtrProviderContext) {
         expect(await browser.getCurrentUrl()).contain(
           '/app/elasticsearch/index_management/indices'
         );
+      });
+    },
+    async expectToBeOnSearchHomepagePage() {
+      await retry.tryForTime(60 * 1000, async () => {
+        expect(await browser.getCurrentUrl()).contain('/app/elasticsearch/home');
       });
     },
     async expectToBeOnMLFileUploadPage() {
@@ -127,6 +136,9 @@ export function SearchStartProvider({ getService }: FtrProviderContext) {
         /^https?\:\/\/.*\/app\/management\/kibana\/spaces\/create/
       );
       expect(await testSubjects.getAttribute('createO11ySpaceBtn', 'target')).equal('_blank');
+    },
+    async clearSkipEmptyStateStorageFlag() {
+      await browser.removeLocalStorageItem('search_onboarding_global_empty_state_skip');
     },
   };
 }

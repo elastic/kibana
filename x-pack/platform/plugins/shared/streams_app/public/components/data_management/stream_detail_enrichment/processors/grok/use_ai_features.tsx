@@ -7,10 +7,13 @@
 
 import useObservable from 'react-use/lib/useObservable';
 import { isEmpty } from 'lodash';
-import useLocalStorage from 'react-use/lib/useLocalStorage';
+import {
+  ElasticLlmCalloutKey,
+  useElasticLlmCalloutDismissed,
+  getElasticManagedLlmConnector,
+} from '@kbn/observability-ai-assistant-plugin/public';
+import { STREAMS_TIERED_AI_FEATURE } from '@kbn/streams-plugin/common';
 import { useKibana } from '../../../../../hooks/use_kibana';
-
-const INTERNAL_INFERENCE_CONNECTORS = ['Elastic-Managed-LLM'];
 
 export function useAIFeatures() {
   const {
@@ -19,24 +22,34 @@ export function useAIFeatures() {
     },
     core,
   } = useKibana();
-  const genAiConnectors = observabilityAIAssistant.useGenAIConnectors();
+
+  const isAIAvailableForTier = core.pricing.isFeatureAvailable(STREAMS_TIERED_AI_FEATURE.id);
+
+  const genAiConnectors = observabilityAIAssistant?.useGenAIConnectors();
   const license = useObservable(licensing.license$);
-  const [hasAcknowledgedAdditionalCharges, acknowledgeAdditionalCharges] = useLocalStorage(
-    'streams:additionalChargesAcknowledged',
-    false
+  const [tourCalloutDismissed, setTourCalloutDismissed] = useElasticLlmCalloutDismissed(
+    ElasticLlmCalloutKey.TOUR_CALLOUT
   );
 
-  if (genAiConnectors.loading) {
-    return undefined;
+  if (
+    !isAIAvailableForTier ||
+    !observabilityAIAssistant ||
+    !genAiConnectors ||
+    genAiConnectors.loading
+  ) {
+    return null;
   }
+
+  const elasticManagedLlmConnector = getElasticManagedLlmConnector(genAiConnectors.connectors);
 
   const enabled =
     observabilityAIAssistant.service.isEnabled() && !isEmpty(genAiConnectors.connectors);
+
   const couldBeEnabled = Boolean(
     license?.hasAtLeast('enterprise') && core.application.capabilities.actions?.save
   );
-  const isManagedAIConnector = genAiConnectors.selectedConnector
-    ? INTERNAL_INFERENCE_CONNECTORS.includes(genAiConnectors.selectedConnector)
+  const isManagedAIConnector = elasticManagedLlmConnector
+    ? elasticManagedLlmConnector.id === genAiConnectors.selectedConnector
     : false;
 
   return {
@@ -44,8 +57,8 @@ export function useAIFeatures() {
     couldBeEnabled,
     genAiConnectors,
     isManagedAIConnector,
-    hasAcknowledgedAdditionalCharges,
-    acknowledgeAdditionalCharges,
+    hasAcknowledgedAdditionalCharges: tourCalloutDismissed,
+    acknowledgeAdditionalCharges: setTourCalloutDismissed,
   };
 }
 

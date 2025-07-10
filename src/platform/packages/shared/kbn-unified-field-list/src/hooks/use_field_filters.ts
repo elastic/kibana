@@ -7,13 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { htmlIdGenerator } from '@elastic/eui';
 import { type DataViewField } from '@kbn/data-views-plugin/common';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
-import { type FieldTypeKnown, getFieldIconType, fieldNameWildcardMatcher } from '@kbn/field-utils';
+import { getFieldIconType, fieldNameWildcardMatcher } from '@kbn/field-utils';
 import { type FieldListFiltersProps } from '../components/field_list_filters';
 import { type FieldListItem, GetCustomFieldType } from '../types';
+import { useRestorableState } from '../restorable_state';
 
 const htmlId = htmlIdGenerator('fieldList');
 
@@ -52,8 +53,8 @@ export function useFieldFilters<T extends FieldListItem = DataViewField>({
   onSupportedFieldFilter,
   services,
 }: FieldFiltersParams<T>): FieldFiltersResult<T> {
-  const [selectedFieldTypes, setSelectedFieldTypes] = useState<FieldTypeKnown[]>([]);
-  const [nameFilter, setNameFilter] = useState<string>('');
+  const [selectedFieldTypes, setSelectedFieldTypes] = useRestorableState('selectedFieldTypes', []);
+  const [nameFilter, setNameFilter] = useRestorableState('nameFilter', '');
   const screenReaderDescriptionId = useMemo(() => htmlId(), []);
   const docLinks = services.core.docLinks;
 

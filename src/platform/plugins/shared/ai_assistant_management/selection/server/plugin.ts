@@ -58,10 +58,7 @@ export class AIAssistantManagementSelectionPlugin
           'aiAssistantManagementSelection.preferredAIAssistantTypeSettingDescription',
           {
             defaultMessage:
-              '<em>[technical preview]</em> Whether to show the AI Assistant menu item in Observability and Search, everywhere, or nowhere.',
-            values: {
-              em: (chunks) => `<em>${chunks}</em>`,
-            },
+              'Whether to show the AI Assistant menu item in Observability and Search, everywhere, or nowhere.',
           }
         ),
         schema: schema.oneOf(
@@ -90,6 +87,7 @@ export class AIAssistantManagementSelectionPlugin
         },
         requiresPageReload: true,
         solution: 'oblt',
+        technicalPreview: true,
       },
     });
 

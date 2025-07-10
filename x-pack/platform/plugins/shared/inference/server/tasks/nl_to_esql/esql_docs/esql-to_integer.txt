@@ -1,6 +1,6 @@
 # TO_INTEGER
 
-The TO_INTEGER function converts an input value into an integer.
+Converts an input value to an integer. If the input is a date type, it is interpreted as milliseconds since the Unix epoch and converted to an integer. Boolean values are converted to integers: `true` becomes `1` and `false` becomes `0`.
 
 ## Syntax
 
@@ -8,21 +8,42 @@ The TO_INTEGER function converts an input value into an integer.
 
 ### Parameters
 
-#### field
+#### `field`
 
-The input value. This can be a single or multi-valued column or an expression.
-
-## Description
-
-The TO_INTEGER function converts an input value into an integer.
+The input value to be converted. This can be a single- or multi-valued column or an expression.
 
 ## Examples
+
+Converting long values to integers
 
 ```esql
 ROW long = [5013792, 2147483647, 501379200000]
 | EVAL int = TO_INTEGER(long)
 ```
 
-## Notes
+| long           | int          |
+|----------------|--------------|
+| 5013792        | 5013792      |
+| 2147483647     | 2147483647   |
+| 501379200000   | null         |
 
--  If the input parameter is of a date type, its value is interpreted as milliseconds since the Unix epoch and converted to an integer. A boolean value of true is converted to integer 1, and false is converted to 0.
+In this example, the first two values are successfully converted to integers. However, the last value exceeds the range of an integer, resulting in a `null` value. When such a failure occurs, a warning is added to the response.
+
+### Warning Example
+
+If a value cannot be converted, the response includes a warning header with details about the failure:
+
+```
+"Line 1:61: evaluation of [TO_INTEGER(long)] failed, treating result as null. Only first 20 failures recorded."
+```
+
+Additionally, another header provides the failure reason and the problematic value:
+
+```
+"org.elasticsearch.xpack.esql.core.InvalidArgumentException: [501379200000] out of [integer] range"
+```
+
+## Limitations
+
+- Values that exceed the range of an integer will result in a `null` value.
+- A warning is generated when conversion fails, and only the first 20 failures are recorded in the response headers.

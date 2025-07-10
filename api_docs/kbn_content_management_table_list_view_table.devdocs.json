@@ -228,7 +228,7 @@
               "UserProfileBulkGetParams",
               ") => Promise<",
               "UserProfile",
-              "<D>[]>; }; }"
+              "<D>[]>; }; rendering: { addContext: (element: React.ReactNode) => React.ReactElement<any, string | React.JSXElementConstructor<any>>; }; }"
             ],
             "path": "src/platform/packages/shared/content-management/table_list_view_table/src/services.tsx",
             "deprecated": false,

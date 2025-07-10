@@ -47,7 +47,7 @@ const ConfirmDeployAgentPolicyModalComponent: React.FC<ConfirmDeployAgentPolicyM
     buttonColor="primary"
   >
     <EuiCallOut
-      iconType="iInCircle"
+      iconType="info"
       title={i18n.translate('xpack.osquery.agentPolicy.confirmModalCalloutTitle', {
         defaultMessage:
           'This action will update {agentCount, plural, one {# agent} other {# agents}}',

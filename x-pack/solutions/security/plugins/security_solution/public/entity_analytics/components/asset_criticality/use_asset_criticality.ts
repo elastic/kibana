@@ -10,7 +10,10 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { SecurityAppError } from '@kbn/securitysolution-t-grid';
 import type { EntityType } from '../../../../common/entity_analytics/types';
 import { EntityTypeToIdentifierField } from '../../../../common/entity_analytics/types';
-import type { EntityAnalyticsPrivileges } from '../../../../common/api/entity_analytics';
+import type {
+  EntityAnalyticsPrivileges,
+  FindAssetCriticalityRecordsResponse,
+} from '../../../../common/api/entity_analytics';
 import type { CriticalityLevelWithUnassigned } from '../../../../common/entity_analytics/asset_criticality/types';
 import { useHasSecurityCapability } from '../../../helper_hooks';
 import type { AssetCriticalityRecord } from '../../../../common/api/entity_analytics/asset_criticality';
@@ -18,6 +21,7 @@ import type { AssetCriticality, DeleteAssetCriticalityResponse } from '../../api
 import { useEntityAnalyticsRoutes } from '../../api/api';
 
 const ASSET_CRITICALITY_KEY = 'ASSET_CRITICALITY';
+const ASSET_CRITICALITY_LIST_KEY = 'ASSET_CRITICALITY_LIST';
 const PRIVILEGES_KEY = 'PRIVILEGES';
 
 const nonAuthorizedResponse: Promise<EntityAnalyticsPrivileges> = Promise.resolve({
@@ -40,6 +44,21 @@ export const useAssetCriticalityPrivileges = (
     queryFn: hasEntityAnalyticsCapability
       ? fetchAssetCriticalityPrivileges
       : () => nonAuthorizedResponse,
+  });
+};
+
+export const useAssetCriticalityFetchList = ({
+  idField,
+  idValues,
+}: {
+  idField: string;
+  idValues: string[];
+}) => {
+  const { fetchAssetCriticalityList } = useEntityAnalyticsRoutes();
+  return useQuery<FindAssetCriticalityRecordsResponse>({
+    queryKey: [ASSET_CRITICALITY_LIST_KEY],
+    queryFn: () => fetchAssetCriticalityList({ idField, idValues }),
+    enabled: idValues.length > 0,
   });
 };
 

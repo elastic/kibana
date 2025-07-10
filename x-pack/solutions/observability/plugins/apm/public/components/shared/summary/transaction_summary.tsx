@@ -6,10 +6,9 @@
  */
 
 import React from 'react';
+import { Duration, Timestamp } from '@kbn/apm-ui-shared';
 import type { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { Summary } from '.';
-import { TimestampTooltip } from '../timestamp_tooltip';
-import { DurationSummaryItem } from './duration_summary_item';
 import { ErrorCountSummaryItemBadge } from './error_count_summary_item_badge';
 import { HttpInfoSummaryItem } from './http_info_summary_item';
 import { TransactionResultSummaryItem } from './transaction_result_summary_item';
@@ -45,11 +44,14 @@ function getTransactionResultSummaryItem(transaction: Transaction) {
 
 function TransactionSummary({ transaction, totalDuration, errorCount, coldStartBadge }: Props) {
   const items = [
-    <TimestampTooltip time={transaction.timestamp.us / 1000} />,
-    <DurationSummaryItem
+    <Timestamp timestamp={transaction.timestamp.us / 1000} renderMode="tooltip" />,
+    <Duration
       duration={transaction.transaction.duration.us}
-      totalDuration={totalDuration}
-      parentType="trace"
+      parent={{
+        duration: totalDuration,
+        type: 'trace',
+      }}
+      showTooltip={true}
     />,
     getTransactionResultSummaryItem(transaction),
     errorCount ? <ErrorCountSummaryItemBadge count={errorCount} /> : null,

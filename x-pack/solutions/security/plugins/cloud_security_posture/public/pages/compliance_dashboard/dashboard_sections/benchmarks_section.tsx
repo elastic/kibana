@@ -35,19 +35,30 @@ import { ComplianceScoreChart } from '../compliance_charts/compliance_score_char
 import { BenchmarkDetailsBox } from './benchmark_details_box';
 const BENCHMARK_DEFAULT_SORT_ORDER = 'asc';
 
-export const getBenchmarkIdQuery = (benchmark: BenchmarkData): NavFilter => {
-  return {
-    'rule.benchmark.id': benchmark.meta.benchmarkId,
-    'rule.benchmark.version': benchmark.meta.benchmarkVersion,
-  };
+export const getBenchmarkIdQuery = (
+  benchmark: BenchmarkData,
+  activeNamespace?: string
+): NavFilter => {
+  return activeNamespace
+    ? {
+        'rule.benchmark.id': benchmark.meta.benchmarkId,
+        'rule.benchmark.version': benchmark.meta.benchmarkVersion,
+        [`${FINDINGS_GROUPING_OPTIONS.NAMESPACE}`]: activeNamespace,
+      }
+    : {
+        'rule.benchmark.id': benchmark.meta.benchmarkId,
+        'rule.benchmark.version': benchmark.meta.benchmarkVersion,
+      };
 };
 
 export const BenchmarksSection = ({
   complianceData,
   dashboardType,
+  activeNamespace,
 }: {
   complianceData: ComplianceDashboardDataV2;
   dashboardType: PosturePolicyTemplate;
+  activeNamespace?: string;
 }) => {
   const { euiTheme } = useEuiTheme();
   const navToFindings = useNavigateFindings();
@@ -65,32 +76,30 @@ export const BenchmarksSection = ({
     benchmark: BenchmarkData,
     evaluation: Evaluation,
     groupBy: string[] = [FINDINGS_GROUPING_OPTIONS.NONE]
-  ) => {
+  ) =>
     navToFindings(
       {
-        ...getPolicyTemplateQuery(dashboardType),
-        ...getBenchmarkIdQuery(benchmark),
+        ...getPolicyTemplateQuery(dashboardType, activeNamespace),
+        ...getBenchmarkIdQuery(benchmark, activeNamespace),
         'result.evaluation': evaluation,
       },
       groupBy
     );
-  };
 
   const navToFailedFindingsByBenchmarkAndSection = (
     benchmark: BenchmarkData,
     ruleSection: string,
     resultEvaluation: 'passed' | 'failed' = RULE_FAILED
-  ) => {
+  ) =>
     navToFindings(
       {
-        ...getPolicyTemplateQuery(dashboardType),
-        ...getBenchmarkIdQuery(benchmark),
+        ...getPolicyTemplateQuery(dashboardType, activeNamespace),
+        ...getBenchmarkIdQuery(benchmark, activeNamespace),
         'rule.section': ruleSection,
         'result.evaluation': resultEvaluation,
       },
       [FINDINGS_GROUPING_OPTIONS.NONE]
     );
-  };
 
   const navToFailedFindingsByBenchmark = (benchmark: BenchmarkData) => {
     navToFindingsByBenchmarkAndEvaluation(benchmark, RULE_FAILED, [
@@ -175,7 +184,7 @@ export const BenchmarksSection = ({
           `}
         >
           <EuiFlexItem grow={dashboardColumnsGrow.first}>
-            <BenchmarkDetailsBox benchmark={benchmark} />
+            <BenchmarkDetailsBox benchmark={benchmark} activeNamespace={activeNamespace} />
           </EuiFlexItem>
           <EuiFlexItem
             grow={dashboardColumnsGrow.second}
@@ -196,7 +205,7 @@ export const BenchmarksSection = ({
           </EuiFlexItem>
           <EuiFlexItem grow={dashboardColumnsGrow.third}>
             <div
-              style={{
+              css={{
                 paddingRight: euiTheme.size.base,
               }}
             >

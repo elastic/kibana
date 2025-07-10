@@ -9,7 +9,7 @@
 
 /* eslint-disable @typescript-eslint/no-namespace */
 
-import { isStringLiteral } from '../ast/helpers';
+import { isStringLiteral } from '../ast/is';
 import { LeafPrinter } from '../pretty_print';
 import {
   ESQLAstComment,
@@ -113,10 +113,10 @@ export namespace Builder {
 
     export namespace source {
       export type SourceTemplate = {
-        cluster?: string | ESQLSource['cluster'];
+        prefix?: string | ESQLSource['prefix'];
         index?: string | ESQLSource['index'];
         selector?: string | ESQLSource['selector'];
-      } & Omit<AstNodeTemplate<ESQLSource>, 'name' | 'cluster' | 'index' | 'selector'> &
+      } & Omit<AstNodeTemplate<ESQLSource>, 'name' | 'prefix' | 'index' | 'selector'> &
         Partial<Pick<ESQLSource, 'name'>>;
 
       export const node = (
@@ -127,11 +127,11 @@ export namespace Builder {
           typeof indexOrTemplate === 'string' || isStringLiteral(indexOrTemplate)
             ? { sourceType: 'index', index: indexOrTemplate }
             : indexOrTemplate;
-        const cluster: ESQLSource['cluster'] = !template.cluster
+        const prefix: ESQLSource['prefix'] = !template.prefix
           ? undefined
-          : typeof template.cluster === 'string'
-          ? Builder.expression.literal.string(template.cluster, { unquoted: true })
-          : template.cluster;
+          : typeof template.prefix === 'string'
+          ? Builder.expression.literal.string(template.prefix, { unquoted: true })
+          : template.prefix;
         const index: ESQLSource['index'] = !template.index
           ? undefined
           : typeof template.index === 'string'
@@ -146,7 +146,7 @@ export namespace Builder {
           ...template,
           ...Builder.parserFields(fromParser),
           type: 'source',
-          cluster,
+          prefix,
           index,
           selector,
           name: template.name ?? '',
@@ -161,16 +161,16 @@ export namespace Builder {
 
       export const index = (
         indexName: string,
-        cluster?: string | ESQLSource['cluster'],
+        prefix?: string | ESQLSource['prefix'],
         selector?: string | ESQLSource['selector'],
-        template?: Omit<AstNodeTemplate<ESQLSource>, 'name' | 'index' | 'cluster'>,
+        template?: Omit<AstNodeTemplate<ESQLSource>, 'name' | 'index' | 'prefix'>,
         fromParser?: Partial<AstNodeParserFields>
       ): ESQLSource => {
         return Builder.expression.source.node(
           {
             ...template,
             index: indexName,
-            cluster,
+            prefix,
             selector,
             sourceType: 'index',
           },
@@ -317,6 +317,37 @@ export namespace Builder {
       fromParser?: Partial<AstNodeParserFields>
     ) => Builder.expression.func.binary('where', args, template, fromParser);
 
+    export namespace list {
+      export const literal = (
+        template: Omit<AstNodeTemplate<ESQLList>, 'name' | 'values'> &
+          Partial<Pick<ESQLList, 'values'>> = {},
+        fromParser?: Partial<AstNodeParserFields>
+      ): ESQLList => {
+        return {
+          values: [],
+          ...template,
+          ...Builder.parserFields(fromParser),
+          type: 'list',
+          name: '',
+        };
+      };
+
+      export const tuple = (
+        template: Omit<AstNodeTemplate<ESQLList>, 'name' | 'values'> &
+          Partial<Pick<ESQLList, 'values'>> = {},
+        fromParser?: Partial<AstNodeParserFields>
+      ): ESQLList => {
+        return {
+          values: [],
+          ...template,
+          ...Builder.parserFields(fromParser),
+          type: 'list',
+          subtype: 'tuple',
+          name: '',
+        };
+      };
+    }
+
     export namespace literal {
       /**
        * Constructs a NULL literal node.
@@ -461,18 +492,6 @@ export namespace Builder {
         };
 
         return node;
-      };
-
-      export const list = (
-        template: Omit<AstNodeTemplate<ESQLList>, 'name'>,
-        fromParser?: Partial<AstNodeParserFields>
-      ): ESQLList => {
-        return {
-          ...template,
-          ...Builder.parserFields(fromParser),
-          type: 'list',
-          name: '',
-        };
       };
     }
 

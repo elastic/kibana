@@ -1,7 +1,7 @@
 #!/bin/bash
 
 fail() {
-  printf "%s\n" "$@" >&2
+  printf "\n\033[33m%s\e[0m\n\e[2m%s\e[0m\n" "$1" "$2" >&2
   exit 1
 }
 
@@ -45,11 +45,6 @@ ensure_argument() {
     help
   fi
 }
-
-if [ "$EUID" -ne 0 ]; then
-  echo "Error: This script must be run as root."
-  help
-fi
 
 # Parse command line arguments
 for i in "$@"; do
@@ -97,13 +92,14 @@ update_step_progress() {
   local PAYLOAD=${4:-}
   local data=""
 
-  MESSAGE=$(echo "$MESSAGE" | sed 's/"/\\"/g')
+  MESSAGE=$(printf "%s" "$MESSAGE" | base64 --wrap=0)
 
   if [ -z "$PAYLOAD" ]; then
     data="{\"status\":\"${STATUS}\", \"message\":\"${MESSAGE}\"}"
   else
     data="{\"status\":\"${STATUS}\", \"message\":\"${MESSAGE}\", \"payload\":${PAYLOAD}}"
   fi
+
   curl --request POST \
     --url "${kibana_api_endpoint}/internal/observability_onboarding/flow/${onboarding_flow_id}/step/${STEPNAME}" \
     --header "Authorization: ApiKey ${install_api_key_encoded}" \
@@ -116,6 +112,12 @@ update_step_progress() {
     --show-error \
     --fail
 }
+
+if [ "$EUID" -ne 0 ]; then
+  echo "Error: This script must be run as root."
+  update_step_progress "logs-detect" "danger" "The user running the script doesn't have root privileges."
+  help
+fi
 
 update_step_progress "logs-detect" "initialize"
 
@@ -159,38 +161,39 @@ elastic_agent_artifact_name="elastic-agent-${elastic_agent_version}-${os}-${arch
 download_elastic_agent() {
   local download_url="https://artifacts.elastic.co/downloads/beats/elastic-agent/${elastic_agent_artifact_name}.tar.gz"
   rm -rf "./${elastic_agent_artifact_name}" "./${elastic_agent_artifact_name}.tar.gz"
-  curl -L -O "$download_url" --silent --fail
+  agent_download_result=$(curl -L -O "$download_url" --silent --show-error --fail 2>&1)
+  local download_exit_code=$?
 
-  if [ "$?" -eq 0 ]; then
+  if [ $download_exit_code -eq 0 ]; then
     printf "\e[32;1m✓\e[0m %s\n" "Elastic Agent downloaded to $(pwd)/$elastic_agent_artifact_name.tar.gz"
     update_step_progress "ea-download" "complete"
   else
-    update_step_progress "ea-download" "danger" "Failed to download Elastic Agent, see script output for error."
-    fail "Failed to download Elastic Agent"
+    update_step_progress "ea-download" "danger" "Failed to download Elastic Agent. Curl error: $agent_download_result.\nURL: $download_url"
+    fail "Failed to download Elastic Agent" "$agent_download_result"
   fi
 }
 
 extract_elastic_agent() {
-  tar -xzf "${elastic_agent_artifact_name}.tar.gz"
+  agent_extract_result=$(tar -xzf "${elastic_agent_artifact_name}.tar.gz" 2>&1)
 
   if [ "$?" -eq 0 ]; then
     printf "\e[32;1m✓\e[0m %s\n" "Archive extracted"
     update_step_progress "ea-extract" "complete"
   else
-    update_step_progress "ea-extract" "danger" "Failed to extract Elastic Agent, see script output for error."
-    fail "Failed to extract Elastic Agent"
+    update_step_progress "ea-extract" "danger" "Failed to extract Elastic Agent. Tar Error: $agent_extract_result"
+    fail "Failed to extract Elastic Agent" "$agent_extract_result"
   fi
 }
 
 install_elastic_agent() {
-  "./${elastic_agent_artifact_name}/elastic-agent" install -f -n >/dev/null
+  agent_install_result=$("./${elastic_agent_artifact_name}/elastic-agent" install -f -n 2>&1)
 
   if [ "$?" -eq 0 ]; then
     printf "\e[32;1m✓\e[0m %s\n" "Elastic Agent installed to $(dirname "$elastic_agent_config_path")"
     update_step_progress "ea-install" "complete"
   else
-    update_step_progress "ea-install" "danger" "Failed to install Elastic Agent, see script output for error."
-    fail "Failed to install Elastic Agent"
+    update_step_progress "ea-install" "danger" "Failed to install Elastic Agent. Elastic Agent install error: $agent_install_result"
+    fail "Failed to install Elastic Agent" "$agent_install_result"
   fi
 }
 
@@ -292,7 +295,7 @@ install_integrations() {
     install_integrations_api_body_string+="$integration_name\tcustom\t$item\n"
   done
 
-  curl --request POST \
+  install_integrations_result=$(curl --request POST \
     --url "$kibana_api_endpoint/internal/observability_onboarding/flow/$onboarding_flow_id/integrations/install" \
     --header "Authorization: ApiKey $install_api_key_encoded" \
     --header "Content-Type: text/tab-separated-values" \
@@ -303,13 +306,13 @@ install_integrations() {
     --silent \
     --show-error \
     --fail \
-    --output "$elastic_agent_tmp_config_path"
+    --output "$elastic_agent_tmp_config_path" 2>&1)
 
   if [ "$?" -eq 0 ]; then
     printf "\n\e[32;1m✓\e[0m %s\n" "Integrations installed"
   else
-    update_step_progress "install-integrations" "danger" "Failed to install integrations"
-    fail "Failed to install integrations"
+    update_step_progress "install-integrations" "danger" "Failed to install integrations.\nCurl error: $install_integrations_result.\nIntegrations: $install_integrations_api_body_string"
+    fail "Failed to install integrations" "$install_integrations_result"
   fi
 }
 

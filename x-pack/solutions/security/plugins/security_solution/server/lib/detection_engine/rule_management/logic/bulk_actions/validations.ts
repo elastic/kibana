@@ -15,7 +15,7 @@ import {
   BulkActionsDryRunErrCodeEnum,
 } from '../../../../../../common/api/detection_engine/rule_management';
 import type { PrebuiltRulesCustomizationStatus } from '../../../../../../common/detection_engine/prebuilt_rules/prebuilt_rule_customization_status';
-import { isEsqlRule } from '../../../../../../common/detection_engine/utils';
+import { isEsqlRule, isThresholdRule } from '../../../../../../common/detection_engine/utils';
 import { isMlRule } from '../../../../../../common/machine_learning/helpers';
 import { invariant } from '../../../../../../common/utils/invariant';
 import type { MlAuthz } from '../../../../machine_learning/authz';
@@ -72,6 +72,17 @@ export const validateBulkScheduleBackfill = async ({ rule }: BulkActionsValidati
   await throwDryRunError(
     () => invariant(rule.enabled, 'Cannot schedule manual rule run for a disabled rule'),
     BulkActionsDryRunErrCodeEnum.MANUAL_RULE_RUN_DISABLED_RULE
+  );
+};
+
+/**
+ * runs validation for bulk gap filling for a single rule
+ * @param params - {@link DryRunRuleFillGapsBulkActionsValidationArgs}
+ */
+export const validateBulkRuleGapFilling = async ({ rule }: BulkActionsValidationArgs) => {
+  await throwDryRunError(
+    () => invariant(rule.enabled, 'Cannot bulk fill gaps for a disabled rule'),
+    BulkActionsDryRunErrCodeEnum.RULE_FILL_GAPS_DISABLED_RULE
   );
 };
 
@@ -168,5 +179,29 @@ export const dryRunValidateBulkEditRule = async ({
         "ES|QL rule doesn't have index patterns"
       ),
     BulkActionsDryRunErrCodeEnum.ESQL_INDEX_PATTERN
+  );
+
+  // if rule is threshold, set_alert_suppression action can't be applied to it
+  await throwDryRunError(
+    () =>
+      invariant(
+        !isThresholdRule(rule.params.type) ||
+          !edit.some((action) => action.type === BulkActionEditTypeEnum.set_alert_suppression),
+        "Threshold rule doesn't support this action. Use 'set_alert_suppression_for_threshold' action instead"
+      ),
+    BulkActionsDryRunErrCodeEnum.THRESHOLD_RULE_TYPE_IN_SUPPRESSION
+  );
+
+  // if rule noy threshold, set_alert_suppression_for_threshold action can't be applied to it
+  await throwDryRunError(
+    () =>
+      invariant(
+        isThresholdRule(rule.params.type) ||
+          !edit.some(
+            (action) => action.type === BulkActionEditTypeEnum.set_alert_suppression_for_threshold
+          ),
+        "Rule type doesn't support this action. Use 'set_alert_suppression' action instead."
+      ),
+    BulkActionsDryRunErrCodeEnum.UNSUPPORTED_RULE_IN_SUPPRESSION_FOR_THRESHOLD
   );
 };

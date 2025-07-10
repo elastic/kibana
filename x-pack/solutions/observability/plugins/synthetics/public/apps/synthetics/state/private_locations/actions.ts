@@ -6,9 +6,10 @@
  */
 
 import { createAction } from '@reduxjs/toolkit';
-import { NewLocation } from '../../components/settings/private_locations/add_location_flyout';
+import { NewLocation } from '../../components/settings/private_locations/add_or_edit_location_flyout';
 import { PrivateLocation, SyntheticsPrivateLocations } from '../../../../../common/runtime_types';
 import { createAsyncAction } from '../utils/actions';
+import type { EditPrivateLocationAttributes } from '../../../../../server/routes/settings/private_locations/edit_private_location';
 
 export const getPrivateLocationsAction = createAsyncAction<void, SyntheticsPrivateLocations>(
   '[PRIVATE LOCATIONS] GET'
@@ -18,12 +19,24 @@ export const createPrivateLocationAction = createAsyncAction<NewLocation, Privat
   'CREATE PRIVATE LOCATION'
 );
 
+export const editPrivateLocationAction = createAsyncAction<
+  {
+    locationId: string;
+    newAttributes: EditPrivateLocationAttributes;
+  },
+  PrivateLocation
+>('EDIT PRIVATE LOCATION');
+
 export const deletePrivateLocationAction = createAsyncAction<string, SyntheticsPrivateLocations>(
   'DELETE PRIVATE LOCATION'
 );
 
 export const setManageFlyoutOpen = createAction<boolean>('SET MANAGE FLYOUT OPEN');
 
-export const setIsCreatePrivateLocationFlyoutVisible = createAction<boolean>(
-  'SET IS CREATE PRIVATE LOCATION FLYOUT VISIBLE'
+export const setIsPrivateLocationFlyoutVisible = createAction<boolean>(
+  'SET IS CREATE OR EDIT PRIVATE LOCATION FLYOUT VISIBLE'
+);
+
+export const setPrivateLocationToEdit = createAction<PrivateLocation | undefined>(
+  'SET PRIVATE LOCATION TO EDIT'
 );

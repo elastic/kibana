@@ -185,7 +185,6 @@ module.exports = {
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]common[\/\\]components[\/\\]endpoint[\/\\]agents[\/\\]agent_status[\/\\]agent_status.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]common[\/\\]components[\/\\]events_viewer[\/\\]index.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]common[\/\\]components[\/\\]events_viewer[\/\\]summary_view_select[\/\\]index.tsx/,
-    /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]common[\/\\]components[\/\\]field_selection[\/\\]index.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]common[\/\\]components[\/\\]header_actions[\/\\]actions.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]common[\/\\]components[\/\\]health_truncate_text[\/\\]index.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]common[\/\\]components[\/\\]hover_visibility_container[\/\\]index.tsx/,

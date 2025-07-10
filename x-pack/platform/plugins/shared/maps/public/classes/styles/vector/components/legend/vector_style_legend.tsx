@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiText, UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { useMemoizedStyles } from '@kbn/core/public';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { StyleError } from './style_error';
 import {
   DynamicStyleProperty,
@@ -51,7 +51,7 @@ export function VectorStyleLegend({
 }: Props) {
   const legendRows = [];
 
-  const cssStyles = useMemoizedStyles(vectorStyleLegendStyles);
+  const cssStyles = useMemoCss(vectorStyleLegendStyles);
 
   for (let i = 0; i < styles.length; i++) {
     const styleMetaDataRequest = styles[i].isDynamic()

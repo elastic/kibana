@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-describe('Differential Functions page', () => {
+// Failing: See https://github.com/elastic/kibana/issues/225941
+describe.skip('Differential Functions page', () => {
   const rangeFrom = '2023-04-18T00:00:00.000Z';
   const rangeTo = '2023-04-18T00:00:30.000Z';
 

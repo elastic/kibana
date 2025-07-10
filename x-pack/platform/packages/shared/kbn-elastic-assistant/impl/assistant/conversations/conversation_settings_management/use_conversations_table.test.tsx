@@ -6,15 +6,12 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import {
-  useConversationsTable,
-  GetConversationsListParams,
-  ConversationTableItem,
-} from './use_conversations_table';
+import { useConversationsTable, GetConversationsListParams } from './use_conversations_table';
 import { alertConvo, welcomeConvo, customConvo } from '../../../mock/conversation';
 import { mockActionTypes, mockConnectors } from '../../../mock/connectors';
 import { mockSystemPrompts } from '../../../mock/system_prompt';
 import { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
+import { ConversationTableItem } from './types';
 
 const mockActionTypeRegistry: ActionTypeRegistryContract = {
   has: jest
@@ -35,19 +32,29 @@ describe('useConversationsTable', () => {
   it('should return columns', () => {
     const { result } = renderHook(() => useConversationsTable());
     const columns = result.current.getColumns({
+      conversationOptions: [],
+      deletedConversationsIds: [],
+      excludedIds: [],
+      handlePageChecked: jest.fn(),
+      handlePageUnchecked: jest.fn(),
+      handleRowChecked: jest.fn(),
+      handleRowUnChecked: jest.fn(),
       isDeleteEnabled: jest.fn(),
       isEditEnabled: jest.fn(),
+      isExcludedMode: false,
       onDeleteActionClicked: jest.fn(),
       onEditActionClicked: jest.fn(),
+      totalItemCount: 0,
     });
 
-    expect(columns).toHaveLength(5);
+    expect(columns).toHaveLength(6);
 
-    expect(columns[0].name).toBe('Title');
-    expect(columns[1].name).toBe('System prompt');
-    expect(columns[2].name).toBe('Connector');
-    expect(columns[3].name).toBe('Date updated');
-    expect(columns[4].name).toBe('Actions');
+    // column 0 is the checkbox column
+    expect(columns[1].name).toBe('Title');
+    expect(columns[2].name).toBe('System prompt');
+    expect(columns[3].name).toBe('Connector');
+    expect(columns[4].name).toBe('Date updated');
+    expect(columns[5].name).toBe('Actions');
   });
 
   it('should return a list of conversations', () => {

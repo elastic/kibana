@@ -1733,6 +1733,17 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
+    key: 'windows.advanced.events.image_load.origin_info_collection',
+    first_supported_version: '8.19.0',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.image_load.origin_info_collection',
+      {
+        defaultMessage:
+          "If set to true, image load events include dll.origin_url, dll.origin_referrer_url, and dll.Ext.windows.zone_identifier. These fields normally show where the loaded DLL was downloaded from, using information taken from the file's Mark of the Web. Default: false",
+      }
+    ),
+  },
+  {
     key: 'mac.advanced.events.image_load',
     first_supported_version: '8.11',
     documentation: i18n.translate(
@@ -1894,6 +1905,17 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       {
         defaultMessage:
           'Enables an additional enrichment for process events. Use this setting only for troubleshooting if process events are not functioning as expected. Default: true',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.events.process.origin_info_collection',
+    first_supported_version: '8.19.0',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.process.origin_info_collection',
+      {
+        defaultMessage:
+          "If set to true, process events include process.origin_url, process.origin_referrer_url, and process.Ext.windows.zone_identifier. These fields normally show where the process's executable file was downloaded from, using information taken from the file's Mark of the Web. Default: false",
       }
     ),
   },
@@ -2082,6 +2104,17 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
+    key: 'windows.advanced.events.file.origin_info_collection',
+    first_supported_version: '8.19.0',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.file.origin_info_collection',
+      {
+        defaultMessage:
+          "If set to true, file events include file origin details: file.origin_url, file.origin_referrer_url, and file.Ext.windows.zone_identifier. These fields show the details of file's Mark of the Web. Default: true",
+      }
+    ),
+  },
+  {
     key: 'windows.advanced.events.file.max_hash_size_mb',
     first_supported_version: '8.16',
     documentation: i18n.translate(
@@ -2232,6 +2265,17 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       {
         defaultMessage:
           'Compute and include SHA-256 hashes for processes and libraries in events? This will increase CPU usage and event sizes. If any user event filter or trustlists reference this hash type, Endpoint will ignore this setting and automatically enable this hash type. Default: true',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.events.security.provider_etw',
+    first_supported_version: '8.19.0',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.security.provider_etw',
+      {
+        defaultMessage:
+          'Controls whether Microsoft-Windows-Security-Auditing ETW provider is enabled for security events collection. Set to false to disable the provider. Default: true.',
       }
     ),
   },

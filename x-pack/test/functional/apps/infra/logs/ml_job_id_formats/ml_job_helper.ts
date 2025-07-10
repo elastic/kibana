@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MlApi } from '../../../../services/ml/api';
+import { MlApi } from '@kbn/test-suites-xpack-platform/functional/services/ml/api';
 import { MlJob } from './ml_job_configs';
 
 export function createMlJobHelper(ml: MlApi) {

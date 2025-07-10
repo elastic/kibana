@@ -20,3 +20,4 @@ export const OPTIONS_LIST_DEFAULT_SORT: OptionsListSortingType = {
 
 export const MIN_OPTIONS_LIST_REQUEST_SIZE = 10;
 export const MAX_OPTIONS_LIST_REQUEST_SIZE = 1000;
+export const MAX_OPTIONS_LIST_BULK_SELECT_SIZE = 100;

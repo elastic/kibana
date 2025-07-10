@@ -114,7 +114,7 @@ export const useChartsFilter = ({
             {UX_LABELS.filters.dataStreams.append}
             <EuiIconTip
               content={UX_LABELS.filters.dataStreams.appendTooltip}
-              type="iInCircle"
+              type="info"
               color="subdued"
               css={{ alignContent: 'flex-start', justifyContent: 'flex-start' }}
             />

@@ -1,0 +1,141 @@
+{
+  "id": "@kbn/ai-security-labs-content",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/ai-security-labs-content",
+        "id": "def-server.decryptSecurityLabsContent",
+        "type": "Function",
+        "tags": [],
+        "label": "decryptSecurityLabsContent",
+        "description": [
+          "\nDecryption function for security labs content."
+        ],
+        "signature": [
+          "(encrypted: string) => string"
+        ],
+        "path": "x-pack/solutions/security/packages/ai-security-labs-content/src/utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ai-security-labs-content",
+            "id": "def-server.decryptSecurityLabsContent.$1",
+            "type": "string",
+            "tags": [],
+            "label": "encrypted",
+            "description": [
+              "Encrypted security labs content as a hex string."
+            ],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/solutions/security/packages/ai-security-labs-content/src/utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "Decrypted content as a string."
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ai-security-labs-content",
+        "id": "def-server.encryptSecurityLabsContent",
+        "type": "Function",
+        "tags": [],
+        "label": "encryptSecurityLabsContent",
+        "description": [
+          "\nUnsafe encryption function for security labs content."
+        ],
+        "signature": [
+          "(text: string) => string"
+        ],
+        "path": "x-pack/solutions/security/packages/ai-security-labs-content/src/utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ai-security-labs-content",
+            "id": "def-server.encryptSecurityLabsContent.$1",
+            "type": "string",
+            "tags": [],
+            "label": "text",
+            "description": [
+              "security labs content to encrypt"
+            ],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/solutions/security/packages/ai-security-labs-content/src/utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "Encrypted content as a hex string."
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/ai-security-labs-content",
+        "id": "def-server.ENCODED_FILE_MICROMATCH_PATTERN",
+        "type": "Array",
+        "tags": [],
+        "label": "ENCODED_FILE_MICROMATCH_PATTERN",
+        "description": [
+          "\nMicromatch pattern for encoded markdown files in the security labs content."
+        ],
+        "signature": [
+          "string[]"
+        ],
+        "path": "x-pack/solutions/security/packages/ai-security-labs-content/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ai-security-labs-content",
+        "id": "def-server.PLAIN_TEXT_FILE_MICROMATCH_PATTERN",
+        "type": "Array",
+        "tags": [],
+        "label": "PLAIN_TEXT_FILE_MICROMATCH_PATTERN",
+        "description": [
+          "\nMicromatch pattern for plain text markdown files in the security labs content."
+        ],
+        "signature": [
+          "string[]"
+        ],
+        "path": "x-pack/solutions/security/packages/ai-security-labs-content/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

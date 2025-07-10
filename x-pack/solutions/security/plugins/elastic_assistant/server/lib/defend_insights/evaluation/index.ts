@@ -22,6 +22,7 @@ import { DEFAULT_EVAL_ANONYMIZATION_FIELDS } from '../../attack_discovery/evalua
 import { DefaultDefendInsightsGraph } from '../graphs/default_defend_insights_graph';
 import { DefendInsightsGraphMetadata } from '../../langchain/graphs';
 import { getLlmType } from '../../../routes/utils';
+import { createOrUpdateEvaluationResults, EvaluationStatus } from '../../../routes/evaluate/utils';
 
 interface ConnectorWithPrompts extends Connector {
   prompts: DefendInsightsCombinedPrompts;
@@ -35,6 +36,7 @@ export const evaluateDefendInsights = async ({
   connectorTimeout,
   datasetName,
   esClient,
+  esClientInternalUser,
   evaluationId,
   evaluatorConnectorId,
   langSmithApiKey,
@@ -50,6 +52,7 @@ export const evaluateDefendInsights = async ({
   connectorTimeout: number;
   datasetName: string;
   esClient: ElasticsearchClient;
+  esClientInternalUser: ElasticsearchClient;
   evaluationId: string;
   evaluatorConnectorId: string | undefined;
   langSmithApiKey: string | undefined;
@@ -91,6 +94,7 @@ export const evaluateDefendInsights = async ({
         temperature: 0, // zero temperature for defend insights, because we want structured JSON output
         timeout: connectorTimeout,
         traceOptions,
+        model: connector.config?.defaultModel,
       });
 
       const graph = getDefaultDefendInsightsGraph({
@@ -122,5 +126,11 @@ export const evaluateDefendInsights = async ({
       langSmithApiKey,
       logger,
     });
+  });
+
+  await createOrUpdateEvaluationResults({
+    evaluationResults: [{ id: evaluationId, status: EvaluationStatus.COMPLETE }],
+    esClientInternalUser,
+    logger,
   });
 };

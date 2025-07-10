@@ -49,9 +49,9 @@ export interface FlyoutNavigationProps {
    */
   isPreviewMode?: boolean;
   /**
-   * Boolean indicating the panel is shown in rule preview
+   * Boolean indicating whether to show the history button
    */
-  isPreview?: boolean;
+  isRulePreview?: boolean;
 }
 
 /**
@@ -59,7 +59,7 @@ export interface FlyoutNavigationProps {
  * pass in a list of actions to be displayed on top.
  */
 export const FlyoutNavigation: FC<FlyoutNavigationProps> = memo(
-  ({ flyoutIsExpandable = false, expandDetails, actions, isPreviewMode, isPreview }) => {
+  ({ flyoutIsExpandable = false, expandDetails, actions, isPreviewMode, isRulePreview }) => {
     const { euiTheme } = useEuiTheme();
 
     const history = useExpandableFlyoutHistory();
@@ -68,7 +68,7 @@ export const FlyoutNavigation: FC<FlyoutNavigationProps> = memo(
     );
     const historyArray = useMemo(() => getProcessedHistory({ history, maxCount: 10 }), [history]);
     // Don't show history in rule preview
-    const hasHistory = !isPreview && isNewNavigationEnabled;
+    const hasHistory = !isRulePreview && isNewNavigationEnabled;
 
     const panels = useExpandableFlyoutState();
     const isExpanded: boolean = !!panels.left;

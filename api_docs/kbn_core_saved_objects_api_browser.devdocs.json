@@ -80,22 +80,6 @@
             "path": "x-pack/platform/plugins/shared/spaces/public/legacy_urls/types.ts"
           },
           {
-            "plugin": "savedSearch",
-            "path": "src/platform/plugins/shared/saved_search/public/services/saved_searches/types.ts"
-          },
-          {
-            "plugin": "savedSearch",
-            "path": "src/platform/plugins/shared/saved_search/public/services/saved_searches/types.ts"
-          },
-          {
-            "plugin": "savedSearch",
-            "path": "src/platform/plugins/shared/saved_search/public/services/saved_searches/types.ts"
-          },
-          {
-            "plugin": "savedSearch",
-            "path": "src/platform/plugins/shared/saved_search/public/services/saved_searches/types.ts"
-          },
-          {
             "plugin": "visualizations",
             "path": "src/platform/plugins/shared/visualizations/public/types.ts"
           },
@@ -128,22 +112,6 @@
             "path": "x-pack/platform/plugins/shared/lens/public/types.ts"
           },
           {
-            "plugin": "maps",
-            "path": "x-pack/platform/plugins/shared/maps/public/routes/map_page/saved_map/load_from_library.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/platform/plugins/shared/maps/public/routes/map_page/saved_map/load_from_library.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/platform/plugins/shared/maps/public/routes/map_page/saved_map/load_from_library.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/platform/plugins/shared/maps/public/routes/map_page/saved_map/load_from_library.ts"
-          },
-          {
             "plugin": "cases",
             "path": "x-pack/platform/plugins/shared/cases/common/ui/types.ts"
           },
@@ -158,6 +126,22 @@
           {
             "plugin": "cases",
             "path": "x-pack/platform/plugins/shared/cases/common/ui/types.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/platform/plugins/shared/maps/public/routes/map_page/saved_map/load_from_library.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/platform/plugins/shared/maps/public/routes/map_page/saved_map/load_from_library.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/platform/plugins/shared/maps/public/routes/map_page/saved_map/load_from_library.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/platform/plugins/shared/maps/public/routes/map_page/saved_map/load_from_library.ts"
           },
           {
             "plugin": "canvas",
@@ -1743,10 +1727,6 @@
               {
                 "plugin": "@kbn/core",
                 "path": "src/core/packages/saved-objects/browser-mocks/src/saved_objects_service.mock.ts"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/platform/plugins/shared/discover/public/application/main/state_management/discover_state.test.ts"
               },
               {
                 "plugin": "@kbn/core",

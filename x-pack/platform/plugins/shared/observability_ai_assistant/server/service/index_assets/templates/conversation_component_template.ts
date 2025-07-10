@@ -83,6 +83,10 @@ export const conversationComponentTemplate: ClusterComponentTemplate['component_
                     trigger: keyword,
                   },
                 },
+                deanonymizations: {
+                  type: 'object',
+                  enabled: false,
+                },
               },
             },
           },

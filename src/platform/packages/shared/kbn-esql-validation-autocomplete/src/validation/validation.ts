@@ -9,34 +9,21 @@
 
 import {
   ESQLAst,
-  ESQLColumn,
   ESQLCommand,
-  ESQLCommandOption,
   ESQLMessage,
-  ESQLSource,
-  isIdentifier,
-  parse,
+  EsqlQuery,
   walk,
+  esqlCommandRegistry,
+  ErrorTypes,
 } from '@kbn/esql-ast';
-import type { ESQLAstJoinCommand, ESQLIdentifier } from '@kbn/esql-ast/src/types';
-import {
-  areFieldAndUserDefinedColumnTypesCompatible,
-  getColumnExists,
-  getCommandDefinition,
-  hasWildcard,
-  isColumnItem,
-  isFunctionItem,
-  isOptionItem,
-  isParametrized,
-  isSingleItem,
-  isSourceItem,
-  isTimeIntervalItem,
-  sourceExists,
-} from '../shared/helpers';
+import { getMessageFromId } from '@kbn/esql-ast/src/definitions/utils';
+import type {
+  ESQLFieldWithMetadata,
+  ESQLUserDefinedColumn,
+} from '@kbn/esql-ast/src/commands_registry/types';
+import { areFieldAndUserDefinedColumnTypesCompatible } from '../shared/helpers';
 import type { ESQLCallbacks } from '../shared/types';
 import { collectUserDefinedColumns } from '../shared/user_defined_columns';
-import { errors, getMessageFromId } from './errors';
-import { validateFunction } from './function_validation';
 import {
   retrieveFields,
   retrieveFieldsFromStringSources,
@@ -44,16 +31,7 @@ import {
   retrievePoliciesFields,
   retrieveSources,
 } from './resources';
-import type {
-  ESQLFieldWithMetadata,
-  ESQLUserDefinedColumn,
-  ErrorTypes,
-  ReferenceMaps,
-  ValidationOptions,
-  ValidationResult,
-} from './types';
-
-import { validate as validateJoinCommand } from './commands/join';
+import type { ReferenceMaps, ValidationOptions, ValidationResult } from './types';
 
 /**
  * ES|QL validation public API
@@ -105,7 +83,7 @@ export async function validateQuery(
 }
 
 /**
- * @private
+ * @internal
  */
 export const ignoreErrorsMap: Record<keyof ESQLCallbacks, ErrorTypes[]> = {
   getColumnsFor: ['unknownColumn', 'wrongArgumentType', 'unsupportedFieldType'],
@@ -118,6 +96,7 @@ export const ignoreErrorsMap: Record<keyof ESQLCallbacks, ErrorTypes[]> = {
   getJoinIndices: [],
   getTimeseriesIndices: [],
   getEditorExtensions: [],
+  getInferenceEndpoints: [],
 };
 
 /**
@@ -132,30 +111,33 @@ async function validateAst(
 ): Promise<ValidationResult> {
   const messages: ESQLMessage[] = [];
 
-  const parsingResult = parse(queryString);
-
-  const { ast } = parsingResult;
+  const parsingResult = EsqlQuery.fromSrc(queryString);
+  const rootCommands = parsingResult.ast.commands;
 
   const [sources, availableFields, availablePolicies, joinIndices] = await Promise.all([
     // retrieve the list of available sources
-    retrieveSources(ast, callbacks),
+    retrieveSources(rootCommands, callbacks),
     // retrieve available fields (if a source command has been defined)
-    retrieveFields(queryString, ast, callbacks),
+    retrieveFields(queryString, rootCommands, callbacks),
     // retrieve available policies (if an enrich command has been defined)
-    retrievePolicies(ast, callbacks),
+    retrievePolicies(rootCommands, callbacks),
     // retrieve indices for join command
     callbacks?.getJoinIndices?.(),
   ]);
 
   if (availablePolicies.size) {
-    const fieldsFromPoliciesMap = await retrievePoliciesFields(ast, availablePolicies, callbacks);
+    const fieldsFromPoliciesMap = await retrievePoliciesFields(
+      rootCommands,
+      availablePolicies,
+      callbacks
+    );
     fieldsFromPoliciesMap.forEach((value, key) => availableFields.set(key, value));
   }
 
-  if (ast.some(({ name }) => ['grok', 'dissect'].includes(name))) {
+  if (rootCommands.some(({ name }) => ['grok', 'dissect'].includes(name))) {
     const fieldsFromGrokOrDissect = await retrieveFieldsFromStringSources(
       queryString,
-      ast,
+      rootCommands,
       callbacks
     );
     fieldsFromGrokOrDissect.forEach((value, key) => {
@@ -167,10 +149,10 @@ async function validateAst(
     });
   }
 
-  const userDefinedColumns = collectUserDefinedColumns(ast, availableFields, queryString);
+  const userDefinedColumns = collectUserDefinedColumns(rootCommands, availableFields, queryString);
   // notify if the user is rewriting a column as userDefinedColumn with another type
   messages.push(...validateFieldsShadowing(availableFields, userDefinedColumns));
-  messages.push(...validateUnsupportedTypeFields(availableFields, ast));
+  messages.push(...validateUnsupportedTypeFields(availableFields, rootCommands));
 
   const references: ReferenceMaps = {
     sources,
@@ -180,21 +162,21 @@ async function validateAst(
     query: queryString,
     joinIndices: joinIndices?.indices || [],
   };
-  let seenFork = false;
-  for (const [index, command] of ast.entries()) {
-    if (command.name === 'fork') {
-      if (seenFork) {
-        messages.push(errors.tooManyForks(command));
-      } else {
-        seenFork = true;
-      }
-    }
-    const commandMessages = validateCommand(command, references, ast, index);
+
+  for (const [_, command] of rootCommands.entries()) {
+    const commandMessages = validateCommand(command, references, rootCommands);
     messages.push(...commandMessages);
   }
 
+  const parserErrors = parsingResult.errors;
+
+  for (const error of parserErrors) {
+    error.message = error.message.replace(/\bLP\b/, "'('");
+    error.message = error.message.replace(/\bOPENING_BRACKET\b/, "'['");
+  }
+
   return {
-    errors: [...parsingResult.errors, ...messages.filter(({ type }) => type === 'error')],
+    errors: [...parserErrors, ...messages.filter(({ type }) => type === 'error')],
     warnings: messages.filter(({ type }) => type === 'warning'),
   };
 }
@@ -202,129 +184,35 @@ async function validateAst(
 function validateCommand(
   command: ESQLCommand,
   references: ReferenceMaps,
-  ast: ESQLAst,
-  currentCommandIndex: number
+  ast: ESQLAst
 ): ESQLMessage[] {
   const messages: ESQLMessage[] = [];
   if (command.incomplete) {
     return messages;
   }
   // do not check the command exists, the grammar is already picking that up
-  const commandDef = getCommandDefinition(command.name);
+  const commandDefinition = esqlCommandRegistry.getCommandByName(command.name);
 
-  if (!commandDef) {
+  if (!commandDefinition) {
     return messages;
   }
 
-  if (commandDef.validate) {
-    messages.push(...commandDef.validate(command, references, ast));
-  }
+  const context = {
+    fields: references.fields,
+    policies: references.policies,
+    userDefinedColumns: references.userDefinedColumns,
+    sources: [...references.sources].map((source) => ({
+      name: source,
+    })),
+    joinSources: references.joinIndices,
+  };
 
-  switch (commandDef.name) {
-    case 'join': {
-      const join = command as ESQLAstJoinCommand;
-      const joinCommandErrors = validateJoinCommand(join, references);
-      messages.push(...joinCommandErrors);
-      break;
-    }
-    case 'fork': {
-      references.fields.set('_fork', {
-        name: '_fork',
-        type: 'keyword',
-      });
-
-      for (const arg of command.args.flat()) {
-        if (isSingleItem(arg) && arg.type === 'query') {
-          // all the args should be commands
-          arg.commands.forEach((subCommand) => {
-            messages.push(...validateCommand(subCommand, references, ast, currentCommandIndex));
-          });
-        }
-      }
-    }
-    default: {
-      // Now validate arguments
-      for (const arg of command.args) {
-        if (!Array.isArray(arg)) {
-          if (isFunctionItem(arg)) {
-            messages.push(
-              ...validateFunction({
-                fn: arg,
-                parentCommand: command.name,
-                parentOption: undefined,
-                references,
-                parentAst: ast,
-                currentCommandIndex,
-              })
-            );
-          } else if (isOptionItem(arg)) {
-            messages.push(...validateOption(arg, command, references));
-          } else if (isColumnItem(arg) || isIdentifier(arg)) {
-            if (command.name === 'stats' || command.name === 'inlinestats') {
-              messages.push(errors.unknownAggFunction(arg));
-            } else {
-              messages.push(...validateColumnForCommand(arg, command.name, references));
-            }
-          } else if (isTimeIntervalItem(arg)) {
-            messages.push(
-              getMessageFromId({
-                messageId: 'unsupportedTypeForCommand',
-                values: {
-                  command: command.name.toUpperCase(),
-                  type: 'date_period',
-                  value: arg.name,
-                },
-                locations: arg.location,
-              })
-            );
-          }
-        }
-      }
-
-      const sources = command.args.filter((arg) => isSourceItem(arg)) as ESQLSource[];
-      messages.push(...validateSources(sources, references));
-    }
+  if (commandDefinition.methods.validate) {
+    messages.push(...commandDefinition.methods.validate(command, ast, context));
   }
 
   // no need to check for mandatory options passed
   // as they are already validated at syntax level
-  return messages;
-}
-
-function validateOption(
-  option: ESQLCommandOption,
-  command: ESQLCommand,
-  referenceMaps: ReferenceMaps
-): ESQLMessage[] {
-  // check if the arguments of the option are of the correct type
-  const messages: ESQLMessage[] = [];
-  if (option.incomplete || command.incomplete || option.name === 'metadata') {
-    return messages;
-  }
-
-  if (option.name === 'metadata') {
-    // Validation for the metadata statement is handled in the FROM command's validate method
-    return messages;
-  }
-
-  for (const arg of option.args) {
-    if (Array.isArray(arg)) {
-      continue;
-    }
-    if (isColumnItem(arg)) {
-      messages.push(...validateColumnForCommand(arg, command.name, referenceMaps));
-    } else if (isFunctionItem(arg)) {
-      messages.push(
-        ...validateFunction({
-          fn: arg,
-          parentCommand: command.name,
-          parentOption: option.name,
-          references: referenceMaps,
-        })
-      );
-    }
-  }
-
   return messages;
 }
 
@@ -384,85 +272,5 @@ function validateUnsupportedTypeFields(fields: Map<string, ESQLFieldWithMetadata
       );
     }
   }
-  return messages;
-}
-
-export function validateSources(
-  sources: ESQLSource[],
-  { sources: availableSources }: ReferenceMaps
-) {
-  const messages: ESQLMessage[] = [];
-
-  const knownIndexNames = [];
-  const knownIndexPatterns = [];
-  const unknownIndexNames = [];
-  const unknownIndexPatterns = [];
-
-  for (const source of sources) {
-    if (source.incomplete) {
-      return messages;
-    }
-
-    if (source.sourceType === 'index') {
-      const index = source.index;
-      const sourceName = source.cluster ? source.name : index?.valueUnquoted;
-      if (!sourceName) continue;
-
-      if (sourceExists(sourceName, availableSources) && !hasWildcard(sourceName)) {
-        knownIndexNames.push(source);
-      }
-      if (sourceExists(sourceName, availableSources) && hasWildcard(sourceName)) {
-        knownIndexPatterns.push(source);
-      }
-      if (!sourceExists(sourceName, availableSources) && !hasWildcard(sourceName)) {
-        unknownIndexNames.push(source);
-      }
-      if (!sourceExists(sourceName, availableSources) && hasWildcard(sourceName)) {
-        unknownIndexPatterns.push(source);
-      }
-    }
-  }
-
-  unknownIndexNames.forEach((source) => {
-    messages.push(
-      getMessageFromId({
-        messageId: 'unknownIndex',
-        values: { name: source.name },
-        locations: source.location,
-      })
-    );
-  });
-
-  if (knownIndexNames.length + unknownIndexNames.length + knownIndexPatterns.length === 0) {
-    // only if there are no known index names, no known index patterns, and no unknown
-    // index names do we worry about creating errors for unknown index patterns
-    unknownIndexPatterns.forEach((source) => {
-      messages.push(
-        getMessageFromId({
-          messageId: 'unknownIndex',
-          values: { name: source.name },
-          locations: source.location,
-        })
-      );
-    });
-  }
-
-  return messages;
-}
-
-export function validateColumnForCommand(
-  column: ESQLColumn | ESQLIdentifier,
-  commandName: string,
-  references: ReferenceMaps
-): ESQLMessage[] {
-  const messages: ESQLMessage[] = [];
-  if (commandName === 'row') {
-    if (!references.userDefinedColumns.has(column.name) && !isParametrized(column)) {
-      messages.push(errors.unknownColumn(column));
-    }
-  } else if (!getColumnExists(column, references) && !isParametrized(column)) {
-    messages.push(errors.unknownColumn(column));
-  }
-
   return messages;
 }

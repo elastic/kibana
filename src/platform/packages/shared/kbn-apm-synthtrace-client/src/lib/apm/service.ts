@@ -30,7 +30,7 @@ export function service(
 ): Service;
 
 export function service(
-  options: { name: string; environment: string } & (
+  options: { name: string; environment: string; agentVersion?: string } & (
     | { agentName: string }
     | { agentName: OpenTelemetryAgentName }
   )
@@ -38,16 +38,28 @@ export function service(
 
 export function service(
   ...args:
-    | [{ name: string; environment: string; agentName: string | OpenTelemetryAgentName }]
+    | [
+        {
+          name: string;
+          environment: string;
+          agentName: string | OpenTelemetryAgentName;
+          agentVersion?: string;
+        }
+      ]
     | [string, string, string]
 ) {
-  const [serviceName, environment, agentName] =
-    args.length === 1 ? [args[0].name, args[0].environment, args[0].agentName] : args;
+  const [serviceName, environment, agentName, agentVersion] =
+    args.length === 1
+      ? [args[0].name, args[0].environment, args[0].agentName, args[0].agentVersion]
+      : args;
 
   return new Service({
     'service.name': serviceName,
     'service.environment': environment,
     'agent.name': agentName,
+    ...(agentVersion && {
+      'agent.version': agentVersion,
+    }),
   });
 }
 

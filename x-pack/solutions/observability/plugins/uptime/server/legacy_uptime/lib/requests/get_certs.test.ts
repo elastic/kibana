@@ -254,6 +254,11 @@ describe('getCerts', () => {
             ],
           },
           Object {
+            "context": Object {
+              "loggingOptions": Object {
+                "loggerName": "uptime",
+              },
+            },
             "meta": true,
           },
         ],

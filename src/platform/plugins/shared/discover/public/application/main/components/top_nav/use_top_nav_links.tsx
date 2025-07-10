@@ -22,7 +22,6 @@ import { ESQL_TYPE } from '@kbn/data-view-utils';
 import { DISCOVER_APP_ID } from '@kbn/deeplinks-analytics';
 import type { RuleTypeWithDescription } from '@kbn/alerts-ui-shared';
 import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared';
-import { ES_QUERY_ID } from '@kbn/rule-data-utils';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
 import { ESQL_TRANSITION_MODAL_KEY } from '../../../../../common/constants';
 import type { DiscoverServices } from '../../../../build_services';
@@ -90,9 +89,11 @@ export const useTopNavLinks = ({
       dataView,
       adHocDataViews,
       authorizedRuleTypeIds: getAuthorizedWriteConsumerIds(authorizedRuleTypes),
-      onUpdateAdHocDataViews: async (adHocDataViewList) => {
-        await dispatch(internalStateActions.loadDataViewList());
-        dispatch(internalStateActions.setAdHocDataViews(adHocDataViewList));
+      actions: {
+        updateAdHocDataViews: async (adHocDataViewList) => {
+          await dispatch(internalStateActions.loadDataViewList());
+          dispatch(internalStateActions.setAdHocDataViews(adHocDataViewList));
+        },
       },
     }),
     [isEsqlMode, dataView, adHocDataViews, dispatch, authorizedRuleTypes]
@@ -110,9 +111,8 @@ export const useTopNavLinks = ({
 
       if (
         services.triggersActionsUi &&
-        services.capabilities.management?.insightsAndAlerting?.triggersActions &&
         !defaultMenu?.alertsItem?.disabled &&
-        discoverParams.authorizedRuleTypeIds.includes(ES_QUERY_ID)
+        discoverParams.authorizedRuleTypeIds.length
       ) {
         const alertsAppMenuItem = getAlertsAppMenuItem({
           discoverParams,

@@ -48,7 +48,7 @@ export function mergeFlagOptions(global: FlagOptions = {}, local: FlagOptions = 
       ...local.default,
     },
 
-    help: local.help,
+    help: [global.help, local.help].filter(Boolean).join('\n'),
     examples: local.examples,
 
     allowUnexpected: !!(global.allowUnexpected || local.allowUnexpected),

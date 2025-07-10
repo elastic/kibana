@@ -27,7 +27,7 @@
       {
         "feature": {
           "ml": ["read"],
-          "siemV2": ["read", "read_alerts"],
+          "siemV3": ["read", "read_alerts"],
           "securitySolutionAssistant": ["none"],
           "securitySolutionAttackDiscovery": ["none"],
           "securitySolutionCasesV2": ["read"],
@@ -78,7 +78,7 @@
       {
         "feature": {
           "ml": ["read"],
-          "siemV2": ["all", "read_alerts", "crud_alerts"],
+          "siemV3": ["all", "read_alerts", "crud_alerts"],
           "securitySolutionAssistant": ["all"],
           "securitySolutionAttackDiscovery": ["all"],
           "securitySolutionCasesV2": ["all"],
@@ -129,7 +129,7 @@
       {
         "feature": {
           "ml": ["read"],
-          "siemV2": ["all", "read_alerts", "crud_alerts"],
+          "siemV3": ["all", "read_alerts", "crud_alerts"],
           "securitySolutionAssistant": ["all"],
           "securitySolutionAttackDiscovery": ["all"],
           "securitySolutionCasesV2": ["all"],
@@ -152,7 +152,7 @@
     "kibana": [
       {
         "feature": {
-          "siemV2": ["read"]
+          "siemV3": ["read"]
         },
         "spaces": ["*"],
         "base": []
@@ -202,7 +202,7 @@
       {
         "feature": {
           "ml": ["read"],
-          "siemV2": ["all", "read_alerts", "crud_alerts"],
+          "siemV3": ["all", "read_alerts", "crud_alerts"],
           "securitySolutionAssistant": ["all"],
           "securitySolutionAttackDiscovery": ["all"],
           "securitySolutionCasesV2": ["all"],
@@ -258,7 +258,7 @@
       {
         "feature": {
           "ml": ["read"],
-          "siemV2": ["all", "read_alerts", "crud_alerts"],
+          "siemV3": ["all", "read_alerts", "crud_alerts"],
           "securitySolutionAssistant": ["all"],
           "securitySolutionAttackDiscovery": ["all"],
           "securitySolutionCasesV2": ["all"],

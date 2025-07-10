@@ -64,7 +64,7 @@ export class CloudFullStoryPlugin implements Plugin {
    * If the right config is provided, register the FullStory shipper to the analytics client.
    * @param analytics Core's Analytics service's setup contract.
    * @param staticAssets Core's http.staticAssets helper.
-   * @private
+   * @internal
    */
   private async setupFullStory({ analytics, staticAssets }: SetupFullStoryDeps) {
     const { org_id: fullStoryOrgId, eventTypesAllowlist, pageVarsDebounceTime } = this.config;

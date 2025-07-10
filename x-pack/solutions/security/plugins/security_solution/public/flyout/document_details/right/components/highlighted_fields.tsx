@@ -41,14 +41,14 @@ export interface HighlightedFieldsTableRow {
      */
     scopeId: string;
     /**
-     * Boolean to indicate this field is shown in a preview
-     * Only needed if alerts page flyout (which uses CellActions), NOT in the AI for SOC alert summary flyout.
-     */
-    isPreview: boolean;
-    /**
      * If true, cell actions will be shown on hover
      */
     showCellActions: boolean;
+    /**
+     * The indexName to be passed to the flyout preview panel
+     * when clicking on "Source event" id
+     */
+    ancestorsIndexName?: string;
   };
 }
 
@@ -81,6 +81,7 @@ const columns: Array<EuiBasicTableColumn<HighlightedFieldsTableRow>> = [
       scopeId: string;
       isPreview: boolean;
       showCellActions: boolean;
+      ancestorsIndexName?: string;
     }) => (
       <>
         {description.showCellActions ? (
@@ -91,6 +92,7 @@ const columns: Array<EuiBasicTableColumn<HighlightedFieldsTableRow>> = [
               originalField={description.originalField}
               scopeId={description.scopeId}
               showPreview={true}
+              ancestorsIndexName={description.ancestorsIndexName}
             />
           </CellActions>
         ) : (
@@ -115,24 +117,25 @@ export interface HighlightedFieldsProps {
    */
   investigationFields: string[];
   /**
-   * Boolean to indicate whether flyout is opened in rule preview
-   */
-  isPreview: boolean;
-  /**
    * Maintain backwards compatibility // TODO remove when possible
    * Only needed if alerts page flyout (which uses CellActions), NOT in the AI for SOC alert summary flyout.
    */
   scopeId?: string;
   /**
    * If true, cell actions will be shown on hover.
-   * This is false by default (for the AI for SOC alert summary page) and will be true for the alerts page.
+   * This is false for the AI for SOC alert summary page and true for the alerts page.
    */
-  showCellActions?: boolean;
+  showCellActions: boolean;
   /**
    * If true, the edit button will be shown on hover (granted that the editHighlightedFieldsEnabled is also turned on).
    * This is false by default (for the AI for SOC alert summary page) and will be true for the alerts page.
    */
   showEditButton?: boolean;
+  /**
+   * The indexName to be passed to the flyout preview panel
+   * when clicking on "Source event" id
+   */
+  ancestorsIndexName?: string;
 }
 
 /**
@@ -143,10 +146,10 @@ export const HighlightedFields = memo(
   ({
     dataFormattedForFieldBrowser,
     investigationFields,
-    isPreview,
     scopeId = '',
-    showCellActions = false,
+    showCellActions,
     showEditButton = false,
+    ancestorsIndexName,
   }: HighlightedFieldsProps) => {
     const [isEditLoading, setIsEditLoading] = useState(false);
 
@@ -154,10 +157,16 @@ export const HighlightedFields = memo(
       dataFormattedForFieldBrowser,
       investigationFields,
     });
+
     const items = useMemo(
       () =>
-        convertHighlightedFieldsToTableRow(highlightedFields, scopeId, isPreview, showCellActions),
-      [highlightedFields, scopeId, isPreview, showCellActions]
+        convertHighlightedFieldsToTableRow(
+          highlightedFields,
+          scopeId,
+          showCellActions,
+          ancestorsIndexName
+        ),
+      [highlightedFields, scopeId, showCellActions, ancestorsIndexName]
     );
 
     return (

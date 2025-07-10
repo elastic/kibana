@@ -2587,6 +2587,54 @@ describe('BackfillClient', () => {
         `Error deleting tasks with IDs: def with errors: delete failed`
       );
     });
+
+    test('should process bulk create in chunks of 10', async () => {
+      // Create 25 mock rules and backfill params to test chunking
+      const mockRules = Array.from({ length: 25 }, (_, i) => getMockRule({ id: `${i + 1}` }));
+      const mockData = Array.from({ length: 25 }, (_, i) => getMockData({ ruleId: `${i + 1}` }));
+
+      // Create mock responses for each chunk
+      const mockResponses = Array.from({ length: 3 }, (_, chunkIndex) => {
+        const startIdx = chunkIndex * 10;
+        const endIdx = Math.min(startIdx + 10, 25);
+        return {
+          saved_objects: Array.from({ length: endIdx - startIdx }, (item, i) => {
+            const idx = startIdx + i;
+            return getBulkCreateParam(`id-${idx}`, `${idx + 1}`, getMockAdHocRunAttributes());
+          }),
+        };
+      });
+
+      // Mock bulkCreate to return different responses for each chunk
+      unsecuredSavedObjectsClient.bulkCreate
+        .mockResolvedValueOnce(mockResponses[0])
+        .mockResolvedValueOnce(mockResponses[1])
+        .mockResolvedValueOnce(mockResponses[2]);
+
+      const result = await backfillClient.bulkQueue({
+        actionsClient,
+        auditLogger,
+        params: mockData,
+        rules: mockRules,
+        ruleTypeRegistry,
+        spaceId: 'default',
+        unsecuredSavedObjectsClient,
+        eventLogClient,
+        internalSavedObjectsRepository,
+        eventLogger,
+      });
+
+      // Verify bulkCreate was called 3 times (for chunks of 10, 10, and 5)
+      expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(3);
+
+      // Verify each chunk was processed with correct size
+      expect(unsecuredSavedObjectsClient.bulkCreate.mock.calls[0][0]).toHaveLength(10);
+      expect(unsecuredSavedObjectsClient.bulkCreate.mock.calls[1][0]).toHaveLength(10);
+      expect(unsecuredSavedObjectsClient.bulkCreate.mock.calls[2][0]).toHaveLength(5);
+
+      // Verify all results were combined correctly
+      expect(result).toHaveLength(25);
+    });
   });
 
   describe('findOverlappingBackfills()', () => {

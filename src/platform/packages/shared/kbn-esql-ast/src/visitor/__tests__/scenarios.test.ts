@@ -189,6 +189,6 @@ test('can print a query to text', () => {
   const text = prettyPrint(ast);
 
   expect(text).toBe(
-    'FROM index METADATA _id, asdf, 123 | STATS FN(<LIST>, <TIME_INTERVAL>, <CAST>, IN(x, 1, 2)), =(a, b) | LIMIT 1000'
+    'FROM index METADATA _id, asdf, 123 | STATS FN(<LIST>, <TIME_INTERVAL>, <CAST>, IN(x, <LIST>)), =(a, b) | LIMIT 1000'
   );
 });

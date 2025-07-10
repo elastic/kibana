@@ -33,14 +33,16 @@ const fieldsMetadataMock = {
 
 describe('useLoadRuleTypeAlertFields', () => {
   beforeEach(() => {
-    http.get.mockResolvedValue([
-      {
-        name: '@timestamp',
-        deprecated: false,
-        useWithTripleBracesInTemplates: false,
-        usesPublicBaseUrl: false,
-      },
-    ]);
+    http.get.mockResolvedValue({
+      fields: [
+        {
+          name: '@timestamp',
+          deprecated: false,
+          useWithTripleBracesInTemplates: false,
+          usesPublicBaseUrl: false,
+        },
+      ],
+    });
   });
 
   afterEach(() => {

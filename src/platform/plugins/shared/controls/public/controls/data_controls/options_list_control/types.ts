@@ -52,4 +52,6 @@ export type OptionsListComponentApi = OptionsListControlApi &
     loadMoreSubject: Subject<void>;
     sort$: PublishingSubject<OptionsListSortingType | undefined>;
     setSort: (sort: OptionsListSortingType | undefined) => void;
+    selectAll: (keys: string[]) => void;
+    deselectAll: (keys: string[]) => void;
   };

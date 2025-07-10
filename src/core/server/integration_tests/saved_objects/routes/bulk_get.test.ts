@@ -14,15 +14,17 @@ import {
   coreUsageStatsClientMock,
   coreUsageDataServiceMock,
 } from '@kbn/core-usage-data-server-mocks';
-import { createHiddenTypeVariants, setupServer } from '@kbn/core-test-helpers-test-utils';
+import {
+  createHiddenTypeVariants,
+  setupServer,
+  SetupServerReturn,
+} from '@kbn/core-test-helpers-test-utils';
 import {
   registerBulkGetRoute,
   type InternalSavedObjectsRequestHandlerContext,
 } from '@kbn/core-saved-objects-server-internal';
 import { loggerMock } from '@kbn/logging-mocks';
 import { deprecationMock, setupConfig } from './routes_test_utils';
-
-type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
 const testTypes = [
   { name: 'index-pattern', hide: false },
@@ -31,7 +33,7 @@ const testTypes = [
 
 describe('POST /api/saved_objects/_bulk_get', () => {
   let server: SetupServerReturn['server'];
-  let httpSetup: SetupServerReturn['httpSetup'];
+  let createRouter: SetupServerReturn['createRouter'];
   let handlerContext: SetupServerReturn['handlerContext'];
   let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
   let coreUsageStatsClient: jest.Mocked<ICoreUsageStatsClient>;
@@ -39,7 +41,7 @@ describe('POST /api/saved_objects/_bulk_get', () => {
   let registrationSpy: jest.SpyInstance;
 
   beforeEach(async () => {
-    ({ server, httpSetup, handlerContext } = await setupServer());
+    ({ server, createRouter, handlerContext } = await setupServer());
     savedObjectsClient = handlerContext.savedObjects.client;
 
     savedObjectsClient.bulkGet.mockResolvedValue({
@@ -51,8 +53,7 @@ describe('POST /api/saved_objects/_bulk_get', () => {
         .map((typeDesc) => createHiddenTypeVariants(typeDesc))
         .find((fullTest) => fullTest.name === typename);
     });
-    const router =
-      httpSetup.createRouter<InternalSavedObjectsRequestHandlerContext>('/api/saved_objects/');
+    const router = createRouter<InternalSavedObjectsRequestHandlerContext>('/api/saved_objects/');
     coreUsageStatsClient = coreUsageStatsClientMock.create();
     coreUsageStatsClient.incrementSavedObjectsBulkGet.mockRejectedValue(new Error('Oh no!')); // intentionally throw this error, which is swallowed, so we can assert that the operation does not fail
     const coreUsageData = coreUsageDataServiceMock.createSetupContract(coreUsageStatsClient);
@@ -93,7 +94,7 @@ describe('POST /api/saved_objects/_bulk_get', () => {
     };
     savedObjectsClient.bulkGet.mockImplementation(() => Promise.resolve(clientResponse));
 
-    const result = await supertest(httpSetup.server.listener)
+    const result = await supertest(server.listener)
       .post('/api/saved_objects/_bulk_get')
       .set('x-elastic-internal-origin', 'kibana')
       .send([
@@ -119,7 +120,7 @@ describe('POST /api/saved_objects/_bulk_get', () => {
       },
     ];
 
-    await supertest(httpSetup.server.listener)
+    await supertest(server.listener)
       .post('/api/saved_objects/_bulk_get')
       .set('x-elastic-internal-origin', 'kibana')
       .send(docs)
@@ -132,7 +133,7 @@ describe('POST /api/saved_objects/_bulk_get', () => {
   });
 
   it('returns with status 400 when a type is hidden from the HTTP APIs', async () => {
-    const result = await supertest(httpSetup.server.listener)
+    const result = await supertest(server.listener)
       .post('/api/saved_objects/_bulk_get')
       .set('x-elastic-internal-origin', 'kibana')
       .send([
@@ -146,7 +147,7 @@ describe('POST /api/saved_objects/_bulk_get', () => {
   });
 
   it('logs a warning message when called', async () => {
-    await supertest(httpSetup.server.listener)
+    await supertest(server.listener)
       .post('/api/saved_objects/_bulk_get')
       .set('x-elastic-internal-origin', 'kibana')
       .send([
@@ -160,7 +161,7 @@ describe('POST /api/saved_objects/_bulk_get', () => {
   });
 
   it('passes deprecation config to the router arguments', async () => {
-    await supertest(httpSetup.server.listener)
+    await supertest(server.listener)
       .post('/api/saved_objects/_bulk_get')
       .set('x-elastic-internal-origin', 'kibana')
       .send([

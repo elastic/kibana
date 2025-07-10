@@ -90,7 +90,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await pageObjects.searchIndexDetailsPage.expectIndexNametoBeInBreadcrumbs(
             indexWithoutDataName
           );
-          await pageObjects.searchIndexDetailsPage.expectBreadcrumbsToBeAvailable('Data');
+          await pageObjects.searchIndexDetailsPage.expectBreadcrumbsToBeAvailable('Build');
           await pageObjects.searchIndexDetailsPage.expectBreadcrumbsToBeAvailable(
             'Index Management'
           );

@@ -55,7 +55,7 @@ const strings = {
         {i18n.translate('xpack.maps.customIconModal.cutoffRangeLabel', {
           defaultMessage: 'Alpha threshold',
         })}{' '}
-        <EuiIcon color="subdued" type="questionInCircle" />
+        <EuiIcon color="subdued" type="question" />
       </>
     </EuiToolTip>
   ),
@@ -91,7 +91,7 @@ const strings = {
         {i18n.translate('xpack.maps.customIconModal.radiusRangeLabel', {
           defaultMessage: 'Radius',
         })}{' '}
-        <EuiIcon color="subdued" type="questionInCircle" />
+        <EuiIcon color="subdued" type="question" />
       </>
     </EuiToolTip>
   ),

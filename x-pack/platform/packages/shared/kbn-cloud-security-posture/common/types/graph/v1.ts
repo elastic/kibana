@@ -8,15 +8,19 @@
 import type { TypeOf } from '@kbn/config-schema';
 import type { BoolQuery } from '@kbn/es-query';
 import {
-  colorSchema,
+  edgeColorSchema,
   edgeDataSchema,
   entityNodeDataSchema,
   graphRequestSchema,
   graphResponseSchema,
   groupNodeDataSchema,
   labelNodeDataSchema,
+  nodeColorSchema,
   nodeShapeSchema,
+  nodeDocumentDataSchema,
 } from '../../schema/graph/v1';
+
+export { DOCUMENT_TYPE_ALERT, DOCUMENT_TYPE_EVENT } from '../../schema/graph/v1';
 
 export type GraphRequest = Omit<TypeOf<typeof graphRequestSchema>, 'query.esQuery'> & {
   query: { esQuery?: { bool: Partial<BoolQuery> } };
@@ -25,7 +29,8 @@ export type GraphResponse = Omit<TypeOf<typeof graphResponseSchema>, 'messages'>
   messages?: ApiMessageCode[];
 };
 
-export type Color = typeof colorSchema.type;
+export type EdgeColor = typeof edgeColorSchema.type;
+export type NodeColor = typeof nodeColorSchema.type;
 
 export type NodeShape = TypeOf<typeof nodeShapeSchema>;
 
@@ -42,3 +47,5 @@ export type LabelNodeDataModel = TypeOf<typeof labelNodeDataSchema>;
 export type EdgeDataModel = TypeOf<typeof edgeDataSchema>;
 
 export type NodeDataModel = EntityNodeDataModel | GroupNodeDataModel | LabelNodeDataModel;
+
+export type NodeDocumentDataModel = TypeOf<typeof nodeDocumentDataSchema>;

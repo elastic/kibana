@@ -24,20 +24,17 @@ import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import {
+  AgentMode,
   type RoundInput,
   type Conversation,
   type ChatEvent,
   type ChatAgentEvent,
   type RoundCompleteEvent,
-  OneChatDefaultAgentId,
-  toSerializedAgentIdentifier,
-  AgentIdentifier,
-  SerializedAgentIdentifier,
+  oneChatDefaultAgentId,
   isRoundCompleteEvent,
   isOnechatError,
   createInternalError,
 } from '@kbn/onechat-common';
-import type { ExecutableConversationalAgent } from '@kbn/onechat-server';
 import { getConnectorList, getDefaultConnector } from '../runner/utils';
 import type { ConversationService, ConversationClient } from '../conversation';
 import type { AgentsServiceStart } from '../agents';
@@ -67,7 +64,11 @@ export interface ChatConverseParams {
    * Id of the conversational agent to converse with.
    * If empty, will use the default agent id.
    */
-  agentId?: AgentIdentifier;
+  agentId?: string;
+  /**
+   * Agent mode to use for this round of conversation.
+   */
+  mode?: AgentMode;
   /**
    * Id of the genAI connector to use.
    * If empty, will use the default connector.
@@ -114,25 +115,21 @@ class ChatServiceImpl implements ChatService {
   }
 
   converse({
-    agentId = OneChatDefaultAgentId,
+    agentId = oneChatDefaultAgentId,
+    mode = AgentMode.normal,
     conversationId,
     connectorId,
     request,
     nextInput,
-  }: {
-    agentId?: string;
-    connectorId?: string;
-    conversationId?: string;
-    nextInput: RoundInput;
-    request: KibanaRequest;
-  }): Observable<ChatEvent> {
+  }: ChatConverseParams): Observable<ChatEvent> {
     const isNewConversation = !conversationId;
 
     return forkJoin({
       conversationClient: defer(async () => this.conversationService.getScopedClient({ request })),
-      agent: defer(async () =>
-        this.agentService.registry.asPublicRegistry().get({ agentId, request })
-      ),
+      agent: defer(async () => {
+        const agentClient = await this.agentService.getScopedClient({ request });
+        return agentClient.get(agentId);
+      }),
       chatModel: defer(async () => {
         if (connectorId) {
           return connectorId;
@@ -151,17 +148,19 @@ class ChatServiceImpl implements ChatService {
       ),
     }).pipe(
       switchMap(({ conversationClient, chatModel, agent }) => {
-        const agentIdentifier = toSerializedAgentIdentifier({
-          agentId: agent.agentId,
-          providerId: agent.providerId,
-        });
-
         const conversation$ = getConversation$({
-          agentId: agentIdentifier,
+          agentId,
           conversationId,
           conversationClient,
         });
-        const agentEvents$ = getExecutionEvents$({ agent, conversation$, nextInput });
+        const agentEvents$ = getExecutionEvents$({
+          agentId,
+          request,
+          mode,
+          conversation$,
+          nextInput,
+          agentService: this.agentService,
+        });
 
         const title$ = isNewConversation
           ? generatedTitle$({ chatModel, conversation$, nextInput })
@@ -175,7 +174,7 @@ class ChatServiceImpl implements ChatService {
 
         const saveOrUpdateAndEmit$ = isNewConversation
           ? createConversation$({
-              agentId: agentIdentifier,
+              agentId,
               conversationClient,
               title$,
               roundCompletedEvents$,
@@ -197,7 +196,8 @@ class ChatServiceImpl implements ChatService {
                     statusCode: 500,
                   })
             );
-          })
+          }),
+          shareReplay()
         );
       })
     );
@@ -235,7 +235,7 @@ const createConversation$ = ({
   title$,
   roundCompletedEvents$,
 }: {
-  agentId: SerializedAgentIdentifier;
+  agentId: string;
   conversationClient: ConversationClient;
   title$: Observable<string>;
   roundCompletedEvents$: Observable<RoundCompleteEvent>;
@@ -290,20 +290,29 @@ const updateConversation$ = ({
 };
 
 const getExecutionEvents$ = ({
+  agentId,
+  request,
+  agentService,
   conversation$,
+  mode,
   nextInput,
-  agent,
 }: {
+  agentId: string;
+  request: KibanaRequest;
+  agentService: AgentsServiceStart;
   conversation$: Observable<Conversation>;
+  mode: AgentMode;
   nextInput: RoundInput;
-  agent: ExecutableConversationalAgent;
 }): Observable<ChatAgentEvent> => {
   return conversation$.pipe(
     switchMap((conversation) => {
       return new Observable<ChatAgentEvent>((observer) => {
-        agent
+        agentService
           .execute({
+            request,
+            agentId,
             agentParams: {
+              agentMode: mode,
               nextInput,
               conversation: conversation.rounds,
             },
@@ -321,8 +330,9 @@ const getExecutionEvents$ = ({
           );
 
         return () => {};
-      }).pipe(shareReplay());
-    })
+      });
+    }),
+    shareReplay()
   );
 };
 
@@ -331,7 +341,7 @@ const getConversation$ = ({
   conversationId,
   conversationClient,
 }: {
-  agentId: SerializedAgentIdentifier;
+  agentId: string;
   conversationId: string | undefined;
   conversationClient: ConversationClient;
 }): Observable<Conversation> => {
@@ -344,11 +354,7 @@ const getConversation$ = ({
   }).pipe(shareReplay());
 };
 
-const placeholderConversation = ({
-  agentId,
-}: {
-  agentId: SerializedAgentIdentifier;
-}): Conversation => {
+const placeholderConversation = ({ agentId }: { agentId: string }): Conversation => {
   return {
     id: uuidv4(),
     title: 'New conversation',

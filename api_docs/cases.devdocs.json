@@ -178,7 +178,9 @@
         "signature": [
           "{ features?: Partial<",
           "CasesContextFeatures",
-          "> | undefined; owner: string[]; permissions: ",
+          "> | undefined; settings?: ",
+          "CasesSettings",
+          " | undefined; owner: string[]; permissions: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -229,7 +231,9 @@
         "signature": [
           "{ features?: Partial<",
           "CasesContextFeatures",
-          "> | undefined; owner: string[]; permissions: ",
+          "> | undefined; settings?: ",
+          "CasesSettings",
+          " | undefined; owner: string[]; permissions: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -372,7 +376,9 @@
         "signature": [
           "{ features?: Partial<",
           "CasesContextFeatures",
-          "> | undefined; owner: string[]; permissions: ",
+          "> | undefined; settings?: ",
+          "CasesSettings",
+          " | undefined; owner: string[]; permissions: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -481,7 +487,7 @@
               "section": "def-common.CaseSeverity",
               "text": "CaseSeverity"
             },
-            "[] | undefined; assignees?: string | string[] | undefined; reporters?: string | string[] | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; from?: string | undefined; search?: string | undefined; searchFields?: \"title\" | \"description\" | (\"title\" | \"description\")[] | undefined; sortField?: \"title\" | \"createdAt\" | \"updatedAt\" | \"status\" | \"severity\" | \"category\" | \"closedAt\" | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; to?: string | undefined; owner?: string | string[] | undefined; category?: string | string[] | undefined; } & Partial<",
+            "[] | undefined; assignees?: string | string[] | undefined; reporters?: string | string[] | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; from?: string | undefined; search?: string | undefined; searchFields?: \"title\" | \"description\" | \"incremental_id\" | (\"title\" | \"description\" | \"incremental_id\")[] | undefined; sortField?: \"title\" | \"createdAt\" | \"updatedAt\" | \"status\" | \"severity\" | \"category\" | \"closedAt\" | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; to?: string | undefined; owner?: string | string[] | undefined; category?: string | string[] | undefined; } & Partial<",
             "Pagination",
             ">, signal?: AbortSignal | undefined) => Promise<",
             {
@@ -585,7 +591,7 @@
               "section": "def-common.CaseStatuses",
               "text": "CaseStatuses"
             },
-            "; owner: string; } & { duration: number | null; closed_at: string | null; closed_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }; external_service: ({ connector_id: string; } & { connector_name: string; external_id: string; external_title: string; external_url: string; pushed_at: string; pushed_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }; }) | null; updated_at: string | null; updated_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; } & { id: string; totalComment: number; totalAlerts: number; version: string; } & { comments?: ((({ comment: string; type: ",
+            "; owner: string; } & { duration: number | null; closed_at: string | null; closed_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }; external_service: ({ connector_id: string; } & { connector_name: string; external_id: string; external_title: string; external_url: string; pushed_at: string; pushed_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }; }) | null; updated_at: string | null; updated_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; } & { incremental_id?: number | null | undefined; in_progress_at?: string | null | undefined; time_to_acknowledge?: number | null | undefined; time_to_investigate?: number | null | undefined; time_to_resolve?: number | null | undefined; } & { id: string; totalComment: number; totalAlerts: number; version: string; } & { comments?: ((({ comment: string; type: ",
             {
               "pluginId": "cases",
               "scope": "common",
@@ -2089,7 +2095,7 @@
             "section": "def-common.CaseStatuses",
             "text": "CaseStatuses"
           },
-          "; owner: string; } & { duration: number | null; closed_at: string | null; closed_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }; external_service: ({ connector_id: string; } & { connector_name: string; external_id: string; external_title: string; external_url: string; pushed_at: string; pushed_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }; }) | null; updated_at: string | null; updated_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; } & { id: string; totalComment: number; totalAlerts: number; version: string; } & { comments?: ((({ comment: string; type: ",
+          "; owner: string; } & { duration: number | null; closed_at: string | null; closed_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }; external_service: ({ connector_id: string; } & { connector_name: string; external_id: string; external_title: string; external_url: string; pushed_at: string; pushed_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }; }) | null; updated_at: string | null; updated_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; } & { incremental_id?: number | null | undefined; in_progress_at?: string | null | undefined; time_to_acknowledge?: number | null | undefined; time_to_investigate?: number | null | undefined; time_to_resolve?: number | null | undefined; } & { id: string; totalComment: number; totalAlerts: number; version: string; } & { comments?: ((({ comment: string; type: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -2487,7 +2493,7 @@
             "section": "def-common.CaseStatuses",
             "text": "CaseStatuses"
           },
-          "; owner: string; } & { duration: number | null; closed_at: string | null; closed_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }; external_service: ({ connector_id: string; } & { connector_name: string; external_id: string; external_title: string; external_url: string; pushed_at: string; pushed_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }; }) | null; updated_at: string | null; updated_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; } & { id: string; totalComment: number; totalAlerts: number; version: string; } & { comments?: ((({ comment: string; type: ",
+          "; owner: string; } & { duration: number | null; closed_at: string | null; closed_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }; external_service: ({ connector_id: string; } & { connector_name: string; external_id: string; external_title: string; external_url: string; pushed_at: string; pushed_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }; }) | null; updated_at: string | null; updated_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; } & { incremental_id?: number | null | undefined; in_progress_at?: string | null | undefined; time_to_acknowledge?: number | null | undefined; time_to_investigate?: number | null | undefined; time_to_resolve?: number | null | undefined; } & { id: string; totalComment: number; totalAlerts: number; version: string; } & { comments?: ((({ comment: string; type: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -2738,7 +2744,7 @@
             "section": "def-common.CaseStatuses",
             "text": "CaseStatuses"
           },
-          "; owner: string; } & { duration: number | null; closed_at: string | null; closed_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }; external_service: ({ connector_id: string; } & { connector_name: string; external_id: string; external_title: string; external_url: string; pushed_at: string; pushed_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }; }) | null; updated_at: string | null; updated_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; } & { id: string; totalComment: number; totalAlerts: number; version: string; } & { comments?: ((({ comment: string; type: ",
+          "; owner: string; } & { duration: number | null; closed_at: string | null; closed_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }; external_service: ({ connector_id: string; } & { connector_name: string; external_id: string; external_title: string; external_url: string; pushed_at: string; pushed_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }; }) | null; updated_at: string | null; updated_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; } & { incremental_id?: number | null | undefined; in_progress_at?: string | null | undefined; time_to_acknowledge?: number | null | undefined; time_to_investigate?: number | null | undefined; time_to_resolve?: number | null | undefined; } & { id: string; totalComment: number; totalAlerts: number; version: string; } & { comments?: ((({ comment: string; type: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -2927,7 +2933,7 @@
             "section": "def-common.CaseStatuses",
             "text": "CaseStatuses"
           },
-          "; owner: string; duration: number | null; closedAt: string | null; closedBy: { email: string | null | undefined; fullName: string | null | undefined; username: string | null | undefined; profileUid?: string | undefined; } | null; createdAt: string; createdBy: { email: string | null | undefined; fullName: string | null | undefined; username: string | null | undefined; profileUid?: string | undefined; }; externalService: { connectorId: string; connectorName: string; externalId: string; externalTitle: string; externalUrl: string; pushedAt: string; pushedBy: { email: string | null | undefined; fullName: string | null | undefined; username: string | null | undefined; profileUid?: string | undefined; }; } | null; updatedAt: string | null; updatedBy: { email: string | null | undefined; fullName: string | null | undefined; username: string | null | undefined; profileUid?: string | undefined; } | null; id: string; totalComment: number; totalAlerts: number; version: string; comments?: ({ comment: string; type: ",
+          "; owner: string; duration: number | null; closedAt: string | null; closedBy: { email: string | null | undefined; fullName: string | null | undefined; username: string | null | undefined; profileUid?: string | undefined; } | null; createdAt: string; createdBy: { email: string | null | undefined; fullName: string | null | undefined; username: string | null | undefined; profileUid?: string | undefined; }; externalService: { connectorId: string; connectorName: string; externalId: string; externalTitle: string; externalUrl: string; pushedAt: string; pushedBy: { email: string | null | undefined; fullName: string | null | undefined; username: string | null | undefined; profileUid?: string | undefined; }; } | null; updatedAt: string | null; updatedBy: { email: string | null | undefined; fullName: string | null | undefined; username: string | null | undefined; profileUid?: string | undefined; } | null; incrementalId?: number | null | undefined; inProgressAt?: string | null | undefined; timeToAcknowledge?: number | null | undefined; timeToInvestigate?: number | null | undefined; timeToResolve?: number | null | undefined; id: string; totalComment: number; totalAlerts: number; version: string; comments?: ({ comment: string; type: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -3137,7 +3143,7 @@
             "section": "def-common.CaseStatuses",
             "text": "CaseStatuses"
           },
-          "; owner: string; duration: number | null; closedAt: string | null; closedBy: { email: string | null | undefined; fullName: string | null | undefined; username: string | null | undefined; profileUid?: string | undefined; } | null; createdAt: string; createdBy: { email: string | null | undefined; fullName: string | null | undefined; username: string | null | undefined; profileUid?: string | undefined; }; externalService: { connectorId: string; connectorName: string; externalId: string; externalTitle: string; externalUrl: string; pushedAt: string; pushedBy: { email: string | null | undefined; fullName: string | null | undefined; username: string | null | undefined; profileUid?: string | undefined; }; } | null; updatedAt: string | null; updatedBy: { email: string | null | undefined; fullName: string | null | undefined; username: string | null | undefined; profileUid?: string | undefined; } | null; id: string; totalComment: number; totalAlerts: number; version: string; comments?: ({ comment: string; type: ",
+          "; owner: string; duration: number | null; closedAt: string | null; closedBy: { email: string | null | undefined; fullName: string | null | undefined; username: string | null | undefined; profileUid?: string | undefined; } | null; createdAt: string; createdBy: { email: string | null | undefined; fullName: string | null | undefined; username: string | null | undefined; profileUid?: string | undefined; }; externalService: { connectorId: string; connectorName: string; externalId: string; externalTitle: string; externalUrl: string; pushedAt: string; pushedBy: { email: string | null | undefined; fullName: string | null | undefined; username: string | null | undefined; profileUid?: string | undefined; }; } | null; updatedAt: string | null; updatedBy: { email: string | null | undefined; fullName: string | null | undefined; username: string | null | undefined; profileUid?: string | undefined; } | null; incrementalId?: number | null | undefined; inProgressAt?: string | null | undefined; timeToAcknowledge?: number | null | undefined; timeToInvestigate?: number | null | undefined; timeToResolve?: number | null | undefined; id: string; totalComment: number; totalAlerts: number; version: string; comments?: ({ comment: string; type: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -3498,7 +3504,7 @@
         "tags": [],
         "label": "SAVED_OBJECT_TYPES",
         "description": [
-          "\nIf more values are added here please also add them here: x-pack/test/cases_api_integration/common/plugins"
+          "\nIf more values are added here please also add them here: x-pack/platform/test/cases_api_integration/common/plugins"
         ],
         "signature": [
           "(\"cases\" | \"cases-connector-mappings\" | \"cases-user-actions\" | \"cases-comments\" | \"cases-configure\")[]"

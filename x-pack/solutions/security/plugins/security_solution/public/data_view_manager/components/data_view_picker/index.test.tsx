@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { DataViewPicker } from '.';
-import { useDataViewSpec } from '../../hooks/use_data_view_spec';
+import { useDataView } from '../../hooks/use_data_view';
 import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, DataViewManagerScopeName } from '../../constants';
 import { sharedDataViewManagerSlice } from '../../redux/slices';
 import { useDispatch } from 'react-redux';
@@ -19,13 +19,14 @@ import { TestProviders } from '../../../common/mock/test_providers';
 import { useSelectDataView } from '../../hooks/use_select_data_view';
 import { useUpdateUrlParam } from '../../../common/utils/global_query_string';
 import { URL_PARAM_KEY } from '../../../common/hooks/constants';
+import { useKibana as mockUseKibana } from '../../../common/lib/kibana/__mocks__';
 
 jest.mock('../../../common/utils/global_query_string', () => ({
   useUpdateUrlParam: jest.fn(),
 }));
 
-jest.mock('../../hooks/use_data_view_spec', () => ({
-  useDataViewSpec: jest.fn(),
+jest.mock('../../hooks/use_data_view', () => ({
+  useDataView: jest.fn(),
 }));
 
 jest.mock('../../hooks/use_select_data_view', () => ({
@@ -39,9 +40,7 @@ jest.mock('react-redux', () => {
   };
 });
 
-jest.mock('../../../common/lib/kibana', () => ({
-  useKibana: jest.fn(),
-}));
+jest.mock('../../../common/lib/kibana');
 
 jest.mock('@kbn/unified-search-plugin/public', () => ({
   ...jest.requireActual('@kbn/unified-search-plugin/public'),
@@ -79,11 +78,11 @@ describe('DataViewPicker', () => {
   beforeEach(() => {
     jest.mocked(useUpdateUrlParam).mockReturnValue(jest.fn());
 
-    jest.mocked(useDataViewSpec).mockReturnValue({
-      dataViewSpec: {
+    jest.mocked(useDataView).mockReturnValue({
+      dataView: {
         id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
         name: 'Default Security Data View',
-      },
+      } as unknown as DataView,
       status: 'ready',
     });
 
@@ -93,12 +92,12 @@ describe('DataViewPicker', () => {
 
     jest.mocked(useKibana).mockReturnValue({
       services: {
+        ...mockUseKibana().services,
         dataViewFieldEditor: { openEditor: jest.fn() },
         dataViewEditor: {
           openEditor: jest.fn(),
           userPermissions: { editDataView: jest.fn().mockReturnValue(true) },
         },
-        data: { dataViews: { get: jest.fn() } },
       },
     } as unknown as ReturnType<typeof useKibana>);
   });

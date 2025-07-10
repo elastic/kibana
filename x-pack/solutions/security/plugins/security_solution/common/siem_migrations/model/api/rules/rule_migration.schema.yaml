@@ -64,15 +64,27 @@ paths:
   /internal/siem_migrations/rules:
     put:
       summary: Creates a new rule migration
-      operationId: "CreateRuleMigration"
+      operationId: 'CreateRuleMigration'
       x-codegen-enabled: true
       x-internal: true
       description: Creates a new rule migration and returns the corresponding migration_id
       tags:
         - SIEM Rule Migrations
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+              properties:
+                name:
+                  description: The rule migration name
+                  $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
       responses:
         200:
-          description: The migration was created successfully and migrationId is returned
+          description: The migration was created successfully and migrationId, name is returned
           content:
             application/json:
               schema:
@@ -80,9 +92,9 @@ paths:
                 required:
                   - migration_id
                 properties:
-                    migration_id:
-                      description: The migration id created.
-                      $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+                  migration_id:
+                    description: The migration id created.
+                    $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
 
   ## Specific rule migration APIs
   /internal/siem_migrations/rules/{migration_id}:
@@ -101,13 +113,21 @@ paths:
           schema:
             description: The migration id to start
             $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+              properties:
+                name:
+                  description: The rule migration name
+                  $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
       responses:
         200:
           description: Indicates rules migrations have been updated correctly.
-          content:
-            application/json:
-              schema:
-                $ref: '../../rule_migration.schema.yaml#/components/schemas/RuleMigration'
         404:
           description: Indicates the migration id was not found.
     get:
@@ -387,15 +407,16 @@ paths:
             schema:
               type: object
               required:
-                - connector_id
+                - settings
               properties:
-                connector_id:
-                  $ref: '../../common.schema.yaml#/components/schemas/ConnectorId'
+                settings:
+                  $ref: '../../rule_migration.schema.yaml#/components/schemas/RuleMigrationTaskExecutionSettings'
+                  description: Settings applicable to current rule migration task execution.
                 langsmith_options:
                   $ref: '../../common.schema.yaml#/components/schemas/LangSmithOptions'
                 retry:
                   $ref: '../../rule_migration.schema.yaml#/components/schemas/RuleMigrationRetryFilter'
-                  description: The optional indicator to retry the rule translation based on this filter criteria
+                  description: The optional indicator to retry the rule translation based on this filter criteria.
       responses:
         200:
           description: Indicates the migration start request has been processed successfully.

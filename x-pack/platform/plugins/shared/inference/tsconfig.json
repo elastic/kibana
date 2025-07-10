@@ -38,8 +38,11 @@
     "@kbn/expressions-plugin",
     "@kbn/inference-langchain",
     "@kbn/sse-utils-server",
-    "@kbn/tracing",
-    "@kbn/safer-lodash-set",
-    "@kbn/std"
+    "@kbn/ml-is-populated-object",
+    "@kbn/ml-is-defined",
+    "@kbn/sse-utils-client",
+    "@kbn/zod",
+    "@kbn/inference-tracing",
+    "@kbn/core-ui-settings-common"
   ]
 }

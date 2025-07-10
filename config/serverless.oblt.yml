@@ -4,7 +4,7 @@
 pricing.tiers.enabled: true
 pricing.tiers.products:
   - name: observability
-    tier: complete
+    tier: complete  # Accepted values for this tier are: complete, logs_essentials
 
 # Make sure the plugins belonging to this project type are loaded
 plugins.allowlistPluginGroups: ['platform', 'observability']
@@ -13,64 +13,11 @@ plugins.allowlistPluginGroups: ['platform', 'observability']
 xpack.ux.enabled: false
 xpack.legacy_uptime.enabled: false
 
-xpack.features.overrides:
-  ### Dashboards feature should be moved from Analytics category to the Observability one.
-  dashboard_v2.category: "observability"
-  ### Discover feature should be moved from Analytics category to the Observability one and its privileges are
-  ### fine-tuned to grant access to Observability app.
-  discover:
-    privileges:
-      # Discover `All` feature privilege should implicitly grant `All` access to Observability app.
-      all.composedOf:
-        - feature: "observability"
-          privileges: [ "all" ]
-      # Discover `Read` feature privilege should implicitly grant `Read` access to Observability app.
-      read.composedOf:
-        - feature: "observability"
-          privileges: [ "read" ]
-  discover_v2:
-    category: "observability"
-    privileges:
-      # Discover `All` feature privilege should implicitly grant `All` access to Observability app.
-      all.composedOf:
-        - feature: "observability"
-          privileges: [ "all" ]
-      # Discover `Read` feature privilege should implicitly grant `Read` access to Observability app.
-      read.composedOf:
-        - feature: "observability"
-          privileges: [ "read" ]
-  ### Machine Learning feature should be moved from Analytics category to the Observability one and renamed to `AI Ops`.
-  ml:
-    category: "observability"
-    order: 1200
-  ### Observability feature is hidden in Role management since it's automatically granted by either Discover,
-  ### Infrastructure, Applications, Synthetics, or SLOs features.
-  observability.hidden: true
-  ### Stack alerts is hidden in Role management since it's not needed.
-  stackAlerts.hidden: true
-  ### Synthetics feature privileges are fine-tuned to grant access to Observability app.
-  uptime:
-    ### By default, this feature named as `Synthetics and Uptime`, but should be renamed to `Synthetics` since `Uptime` is not available.
-    name: "Synthetics"
-    privileges:
-      # Synthetics `All` feature privilege should implicitly grant `All` access to Observability app.
-      all.composedOf:
-        - feature: "observability"
-          privileges: [ "all" ]
-      # Synthetics `Read` feature privilege should implicitly grant `Read` access to Observability app.
-      read.composedOf:
-        - feature: "observability"
-          privileges: [ "read" ]
-
-
 ## Cloud settings
 xpack.cloud.serverless.project_type: observability
 
 ## Enable the Serverless Observability plugin
 xpack.serverless.observability.enabled: true
-
-## Set the home route
-uiSettings.overrides.defaultRoute: /app/observability/landing
 
 # Customize empty page state for analytics apps
 no_data_page.analyticsNoDataPageFlavor: 'serverless_observability'
@@ -81,11 +28,6 @@ xpack.fleet.agentIdVerificationEnabled: false
 ## Enable event.ingested separately because agentIdVerification is disabled
 xpack.fleet.eventIngestedEnabled: true
 
-## Enable the capability for the observability feature ID in the serverless environment to take ownership of the rules.
-## The value need to be a featureId observability Or stackAlerts Or siem
-xpack.alerting.rules.overwriteProducer: 'observability'
-xpack.observability.createO11yGenericFeatureId: true
-
 ## APM Serverless Onboarding flow
 xpack.apm.serverlessOnboarding: true
 
@@ -95,9 +37,6 @@ xpack.uptime.service.tls.key: /mnt/elastic-internal/http-certs/tls.key
 
 # Fleet specific configuration
 xpack.fleet.internal.registry.capabilities: ['apm', 'observability', 'uptime']
-xpack.fleet.internal.registry.spec.min: '3.0'
-xpack.fleet.internal.registry.spec.max: '3.3'
-xpack.fleet.internal.registry.kibanaVersionCheckEnabled: false
 xpack.fleet.internal.registry.excludePackages: [
     # Security integrations
     'endpoint',
@@ -143,8 +82,8 @@ xpack.apm.featureFlags.sourcemapApiAvailable: false
 xpack.apm.featureFlags.storageExplorerAvailable: false
 
 ## Set the AI Assistant type
-aiAssistantManagementSelection.preferredAIAssistantType: "observability"
-xpack.observabilityAIAssistant.scope: "observability"
+aiAssistantManagementSelection.preferredAIAssistantType: 'observability'
+xpack.observabilityAIAssistant.scope: 'observability'
 
 # Specify in telemetry the project type
 telemetry.labels.serverless: observability
@@ -160,10 +99,10 @@ xpack.ml.nlp:
         min: 0
         max: 2
       medium:
-        min: 1
+        min: 0
         max: 32
       high:
-        min: 1
+        min: 0
         max: 128
 xpack.ml.compatibleModuleType: 'observability'
 

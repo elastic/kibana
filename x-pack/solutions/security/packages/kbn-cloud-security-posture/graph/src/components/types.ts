@@ -12,7 +12,8 @@ import type {
   LabelNodeDataModel,
   EdgeDataModel,
   NodeShape,
-  Color as NodeColor,
+  NodeColor,
+  NodeDocumentDataModel,
 } from '@kbn/cloud-security-posture-common/types/graph/latest';
 import type { Node, NodeProps as xyNodeProps, Edge, EdgeProps as xyEdgeProps } from '@xyflow/react';
 
@@ -45,6 +46,8 @@ export interface GroupNodeViewModel
   extends Record<string, unknown>,
     GroupNodeDataModel,
     BaseNodeDataViewModel {}
+
+export type NodeDocumentDataViewModel = NodeDocumentDataModel;
 
 export interface LabelNodeViewModel
   extends Record<string, unknown>,

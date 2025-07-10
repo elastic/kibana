@@ -165,7 +165,7 @@ describe('<FlyoutNavigation />', () => {
     it('should not render history button if in rule preview', () => {
       const { container } = render(
         <ExpandableFlyoutTestProviders>
-          <FlyoutNavigation flyoutIsExpandable={false} isPreview={true} />
+          <FlyoutNavigation flyoutIsExpandable={false} isRulePreview={true} />
         </ExpandableFlyoutTestProviders>
       );
       expect(container).toBeEmptyDOMElement();

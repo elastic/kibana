@@ -16,8 +16,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const toasts = getService('toasts');
-  const { common, discover } = getPageObjects(['common', 'discover']);
+  const { common, discover, header, timePicker } = getPageObjects([
+    'common',
+    'discover',
+    'header',
+    'timePicker',
+  ]);
   const dataViews = getService('dataViews');
+  const monacoEditor = getService('monacoEditor');
 
   const esArchiver = getService('esArchiver');
   const remoteEsArchiver = getService('remoteEsArchiver' as 'esArchiver');
@@ -159,6 +165,39 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.try(async function tryingForTime() {
           const hitCount = await discover.getHitCount();
           expect(hitCount).to.be('14,004');
+        });
+      });
+    });
+
+    describe('with esql', () => {
+      it('should show warning and results', async () => {
+        await common.navigateToApp('discover');
+        await discover.selectTextBaseLang();
+        await monacoEditor.setCodeEditorValue(`FROM logstash-*, ftr-remote:logstash-* METADATA _index
+  | EVAL buckets = DATE_TRUNC(5 minute, @timestamp), delay = TO_STRING(CASE(STARTS_WITH(_index, "ftr-remote"), DELAY(10ms), false))
+  | STATS count = COUNT(*) BY buckets, delay`);
+        await timePicker.setDefaultAbsoluteRange();
+        await header.waitUntilLoadingHasFinished();
+        // Warning callout is shown
+        await testSubjects.exists('searchResponseWarningsCallout');
+
+        // Timed out error notification is shown
+        const { title } = await toasts.getErrorByIndex(1, true);
+        expect(title).to.contain('Timed out');
+
+        // View cluster details shows timed out
+        await testSubjects.click('searchResponseWarningsViewDetails');
+
+        await testSubjects.click('inspectorRequestToggleClusterDetailsftr-remote');
+        const txt = await testSubjects.getVisibleText(
+          'inspectorRequestClustersTableCell-Status-ftr-remote'
+        );
+        expect(txt).to.be('partial');
+
+        // Ensure documents are still returned for the successful shards
+        await retry.try(async () => {
+          const hitCount = await discover.getHitCount({ isPartial: true });
+          expect(hitCount).to.be('746');
         });
       });
     });

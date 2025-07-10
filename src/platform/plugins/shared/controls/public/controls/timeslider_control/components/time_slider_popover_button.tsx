@@ -10,7 +10,7 @@
 import React from 'react';
 import { EuiText, UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { useMemoizedStyles } from '@kbn/core/public';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 
 interface Props {
   onClick: () => void;
@@ -52,7 +52,7 @@ const timeSliderStyles = {
 };
 
 export function TimeSliderPopoverButton(props: Props) {
-  const styles = useMemoizedStyles(timeSliderStyles);
+  const styles = useMemoCss(timeSliderStyles);
   return (
     <button
       className="eui-textTruncate"

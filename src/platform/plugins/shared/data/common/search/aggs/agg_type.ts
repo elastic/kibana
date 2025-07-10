@@ -253,7 +253,7 @@ export class AggType<
    * Used to create the values exposed by the agg_types module.
    *
    * @class AggType
-   * @private
+   * @internal
    * @param {object} config - used to set the properties of the AggType
    */
   constructor(config: AggTypeConfig<TAggConfig>) {

@@ -148,7 +148,7 @@ export const useKnowledgeBaseTable = () => {
     } else if (entry.type === IndexEntryType.value) {
       return 'index';
     }
-    return 'questionInCircle';
+    return 'question';
   };
 
   const getColumns = useCallback(

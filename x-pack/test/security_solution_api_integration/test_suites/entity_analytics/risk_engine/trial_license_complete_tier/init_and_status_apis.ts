@@ -638,6 +638,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(response?.saved_objects?.[0]?.attributes).to.eql({
           dataViewId: '.alerts-security.alerts-default',
           enabled: true,
+          excludeAlertStatuses: ['closed'],
           filter: {},
           interval: '1h',
           pageSize: 3500,
@@ -646,7 +647,7 @@ export default ({ getService }: FtrProviderContext) => {
             start: 'now-30d',
           },
           _meta: {
-            mappingsVersion: 3,
+            mappingsVersion: 4,
           },
         });
       });

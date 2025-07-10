@@ -185,7 +185,6 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
     ]
   );
 
-  const [sidebarContainer, setSidebarContainer] = useState<HTMLDivElement | null>(null);
   const [, setMainContainer] = useState<HTMLDivElement | null>(null);
 
   const columnIds = useMemo(() => {
@@ -345,9 +344,8 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
   }, [onFieldEdited]);
 
   return (
-    <TimelineBodyContainer className="timelineBodyContainer" ref={setSidebarContainer}>
+    <TimelineBodyContainer className="timelineBodyContainer">
       <TimelineResizableLayout
-        container={sidebarContainer}
         unifiedFieldListSidebarContainerApi={unifiedFieldListContainerRef.current}
         sidebarPanel={
           <SidebarPanelFlexGroup gutterSize="none">

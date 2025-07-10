@@ -20,6 +20,7 @@ import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-tim
 import { get, identity } from 'lodash';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { useLogView } from '@kbn/logs-shared-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import {
   Comparator,
@@ -32,11 +33,13 @@ import type { AlertDetailsAppSectionProps } from './types';
 import { Threshold } from '../../../common/components/threshold';
 import { LogRateAnalysis } from './components/log_rate_analysis';
 import { LogThresholdCountChart, LogThresholdRatioChart } from './components/threhsold_chart';
-import { useLicense } from '../../../../hooks/use_license';
 
 const formatThreshold = (threshold: number) => String(threshold);
 
 const AlertDetailsAppSection = ({ rule, alert }: AlertDetailsAppSectionProps) => {
+  const {
+    services: { application },
+  } = useKibana();
   const { logsShared } = useKibanaContextForPlugin().services;
   const baseTheme = useElasticChartsTheme();
   const timeRange = getPaddedAlertTimeRange(alert.fields[ALERT_START]!, alert.fields[ALERT_END]);
@@ -62,8 +65,7 @@ const AlertDetailsAppSection = ({ rule, alert }: AlertDetailsAppSectionProps) =>
     logViews: logsShared.logViews.client,
   });
 
-  const { hasAtLeast } = useLicense();
-  const hasLicenseForLogRateAnalysis = hasAtLeast('platinum');
+  const aiopsEnabled = application?.capabilities.aiops?.enabled ?? false;
 
   const getLogRatioChart = () => {
     if (isRatioRule(rule.params.criteria)) {
@@ -191,7 +193,7 @@ const AlertDetailsAppSection = ({ rule, alert }: AlertDetailsAppSectionProps) =>
   };
 
   const getLogRateAnalysisSection = () => {
-    return hasLicenseForLogRateAnalysis ? <LogRateAnalysis rule={rule} alert={alert} /> : null;
+    return aiopsEnabled ? <LogRateAnalysis rule={rule} alert={alert} /> : null;
   };
 
   return (

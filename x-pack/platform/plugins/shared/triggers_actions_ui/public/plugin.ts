@@ -90,6 +90,7 @@ import type {
   RulesListNotifyBadgePropsWithApi,
   RulesListProps,
 } from './types';
+import type { RuleSettingsLinkProps } from './application/components/rules_setting/rules_settings_link';
 import type { UntrackAlertsModalProps } from './application/sections/common/components/untrack_alerts_modal';
 import { isRuleSnoozed } from './application/lib';
 import { getNextRuleSnoozeSchedule } from './application/sections/rules_list/components/notify_badge/helpers';
@@ -133,7 +134,7 @@ export interface TriggersAndActionsUIPublicPluginStart {
   getAlertSummaryWidget: (props: AlertSummaryWidgetProps) => ReactElement<AlertSummaryWidgetProps>;
   getRuleSnoozeModal: (props: RuleSnoozeModalProps) => ReactElement<RuleSnoozeModalProps>;
   getUntrackModal: (props: UntrackAlertsModalProps) => ReactElement<UntrackAlertsModalProps>;
-  getRulesSettingsLink: () => ReactElement;
+  getRulesSettingsLink: (props: RuleSettingsLinkProps) => ReactElement<RuleSettingsLinkProps>;
   getRuleHelpers: (rule: Rule<RuleTypeParams>) => {
     isRuleSnoozed: boolean;
     getNextRuleSnoozeSchedule: {
@@ -191,19 +192,23 @@ export class Plugin
   private config: TriggersActionsUiConfigType;
   private connectorServices?: ConnectorServices;
   readonly experimentalFeatures: ExperimentalFeatures;
+  private readonly isServerless: boolean;
 
   constructor(ctx: PluginInitializerContext) {
     this.actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
     this.ruleTypeRegistry = new TypeRegistry<RuleTypeModel>();
     this.config = ctx.config.get();
     this.experimentalFeatures = parseExperimentalConfigValue(this.config.enableExperimental || []);
+    this.isServerless = ctx.env.packageInfo.buildFlavor === 'serverless';
   }
 
   public setup(core: CoreSetup, plugins: PluginsSetup): TriggersAndActionsUIPublicPluginSetup {
     const actionTypeRegistry = this.actionTypeRegistry;
     const ruleTypeRegistry = this.ruleTypeRegistry;
+    const isServerless = this.isServerless;
     this.connectorServices = {
       validateEmailAddresses: plugins.actions.validateEmailAddresses,
+      enabledEmailServices: plugins.actions.enabledEmailServices,
     };
 
     ExperimentalFeaturesService.init({ experimentalFeatures: this.experimentalFeatures });
@@ -365,6 +370,7 @@ export class Plugin
           ruleTypeRegistry,
           share: pluginsStart.share,
           kibanaFeatures,
+          isServerless,
         });
       },
     });
@@ -411,7 +417,7 @@ export class Plugin
             kibanaFeatures,
             licensing: pluginsStart.licensing,
             expressions: pluginsStart.expressions,
-            isServerless: !!pluginsStart.serverless,
+            isServerless,
             fieldFormats: pluginsStart.fieldFormats,
             lens: pluginsStart.lens,
             fieldsMetadata: pluginsStart.fieldsMetadata,
@@ -480,6 +486,7 @@ export class Plugin
           ...props,
           actionTypeRegistry: this.actionTypeRegistry,
           connectorServices: this.connectorServices!,
+          isServerless: !!plugins.serverless,
         });
       },
       getEditConnectorFlyout: (props: Omit<EditConnectorFlyoutProps, 'actionTypeRegistry'>) => {
@@ -487,6 +494,7 @@ export class Plugin
           ...props,
           actionTypeRegistry: this.actionTypeRegistry,
           connectorServices: this.connectorServices!,
+          isServerless: !!plugins.serverless,
         });
       },
       getAlertsSearchBar: (props: AlertsSearchBarProps) => {
@@ -544,8 +552,8 @@ export class Plugin
       getUntrackModal: (props: UntrackAlertsModalProps) => {
         return getUntrackModalLazy(props);
       },
-      getRulesSettingsLink: () => {
-        return getRulesSettingsLinkLazy();
+      getRulesSettingsLink: (props: RuleSettingsLinkProps) => {
+        return getRulesSettingsLinkLazy(props);
       },
       getRuleHelpers: (rule: Rule<RuleTypeParams>) => {
         return {

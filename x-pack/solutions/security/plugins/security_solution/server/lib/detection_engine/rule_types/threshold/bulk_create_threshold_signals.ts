@@ -14,7 +14,7 @@ import { buildReasonMessageForThresholdAlert } from '../utils/reason_formatters'
 import type { ThresholdCompositeBucket } from './types';
 import type { SecurityRuleServices, SecuritySharedParams } from '../types';
 import type { ThresholdRuleParams } from '../../rule_schema';
-import type { BaseFieldsLatest } from '../../../../../common/api/detection_engine/model/alerts';
+import type { DetectionAlertLatest } from '../../../../../common/api/detection_engine/model/alerts';
 import { bulkCreate, wrapHits } from '../factories';
 
 interface BulkCreateThresholdSignalsParams {
@@ -81,7 +81,7 @@ export const bulkCreateThresholdSignals = async ({
   buckets,
   services,
   startedAt,
-}: BulkCreateThresholdSignalsParams): Promise<GenericBulkCreateResponse<BaseFieldsLatest>> => {
+}: BulkCreateThresholdSignalsParams): Promise<GenericBulkCreateResponse<DetectionAlertLatest>> => {
   const ruleParams = sharedParams.completeRule.ruleParams;
   const ecsResults = getTransformedHits(
     buckets,

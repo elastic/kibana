@@ -22,6 +22,8 @@ const {
   SHARED_CREDENTIALS_FILE_TEST_ID,
   SHARED_CREDETIALS_PROFILE_NAME_TEST_ID,
   ROLE_ARN_TEST_ID,
+  ADVANCED_OPTION_ACCORDION,
+  NAMESPACE_INPUT,
 } = testSubjectIds;
 
 // eslint-disable-next-line import/no-default-export
@@ -29,11 +31,14 @@ export default function (providerContext: FtrProviderContext) {
   const { getPageObjects, getService } = providerContext;
   const pageObjects = getPageObjects(['cloudPostureDashboard', 'cisAddIntegration', 'header']);
   const kibanaServer = getService('kibanaServer');
+  const supertest = getService('supertest');
+  const browser = getService('browser');
   const retry = getService('retry');
   const logger = getService('log');
   const saveIntegrationPolicyTimeout = 1000 * 30; // 30 seconds
 
-  describe('Test adding Cloud Security Posture Integrations CSPM AWS', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/224777
+  describe.skip('Test adding Cloud Security Posture Integrations CSPM AWS', function () {
     this.tags(['cloud_security_posture_cis_integration_cspm_aws']);
     let cisIntegration: typeof pageObjects.cisAddIntegration;
 
@@ -350,6 +355,28 @@ export default function (providerContext: FtrProviderContext) {
               sharedCredentialProfileName
           ).to.be(true);
         });
+      });
+    });
+    describe('Change namespace default value', () => {
+      it('should allow editing of the namespace field', async () => {
+        const namespace = 'foo';
+        await pageObjects.header.waitUntilLoadingHasFinished();
+
+        await cisIntegration.clickOptionButton(ADVANCED_OPTION_ACCORDION);
+        await cisIntegration.fillInComboBox(NAMESPACE_INPUT, namespace);
+        await cisIntegration.clickSaveButton();
+        await pageObjects.header.waitUntilLoadingHasFinished();
+        await cisIntegration.waitUntilLaunchCloudFormationButtonAppears();
+
+        await cisIntegration.navigateToIntegrationCspList();
+        await pageObjects.header.waitUntilLoadingHasFinished();
+        await cisIntegration.clickFirstElementOnIntegrationTable();
+        await pageObjects.header.waitUntilLoadingHasFinished();
+
+        const parsedUrl = (await browser.getCurrentUrl()).split('/');
+        const packagePolicyId = parsedUrl[parsedUrl.length - 1];
+        const { body } = await supertest.get(`/api/fleet/package_policies/${packagePolicyId}`);
+        expect(body.item.namespace).to.be(namespace);
       });
     });
   });

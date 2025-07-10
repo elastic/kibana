@@ -105,7 +105,7 @@ export function AgentConfigurationCreateEdit({
     <>
       <EuiText color="subdued">
         {i18n.translate('xpack.apm.agentConfig.newConfig.description', {
-          defaultMessage: `Fine-tune your agent configuration from within the APM app. Changes are automatically propagated to your APM agents, so there’s no need to redeploy.`,
+          defaultMessage: `Fine-tune your agent configuration. Changes are automatically propagated to your APM agents and EDOT SDKs, so there’s no need to redeploy.`,
         })}
       </EuiText>
 

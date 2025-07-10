@@ -67,6 +67,7 @@ describe('SyntheticsMonitorClient', () => {
   syntheticsService.addConfigs = jest.fn();
   syntheticsService.editConfig = jest.fn();
   syntheticsService.deleteConfigs = jest.fn();
+  syntheticsService.getMaintenanceWindows = jest.fn();
 
   const locations = times(3).map((n) => {
     return {
@@ -179,16 +180,20 @@ describe('SyntheticsMonitorClient', () => {
     );
 
     expect(syntheticsService.editConfig).toHaveBeenCalledTimes(1);
-    expect(syntheticsService.editConfig).toHaveBeenCalledWith([
-      {
-        monitor,
-        configId: id,
-        params: {
-          username: 'elastic',
+    expect(syntheticsService.editConfig).toHaveBeenCalledWith(
+      [
+        {
+          monitor,
+          configId: id,
+          params: {
+            username: 'elastic',
+          },
+          spaceId: 'test-space',
         },
-        spaceId: 'test-space',
-      },
-    ]);
+      ],
+      true,
+      undefined
+    );
     expect(syntheticsService.deleteConfigs).toHaveBeenCalledTimes(1);
     expect(client.privateLocationAPI.editMonitors).toHaveBeenCalledTimes(1);
   });

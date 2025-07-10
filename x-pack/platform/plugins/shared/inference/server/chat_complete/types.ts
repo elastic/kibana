@@ -14,7 +14,11 @@ import type {
   Message,
   ToolOptions,
   ChatCompleteMetadata,
+  AnonymizationRule,
 } from '@kbn/inference-common';
+import { KibanaRequest } from '@kbn/core/server';
+import { PluginStartContract as ActionsPluginsStart } from '@kbn/actions-plugin/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import type { InferenceExecutor } from './utils';
 
 /**
@@ -54,3 +58,15 @@ export type InferenceAdapterChatCompleteOptions = {
 export type InferenceConnectorAdapterChatCompleteEvent =
   | ChatCompletionChunkEvent
   | ChatCompletionTokenCountEvent;
+
+/**
+ * Options for createChatCompleteApi
+ */
+
+export interface CreateChatCompleteApiOptions {
+  request: KibanaRequest;
+  actions: ActionsPluginsStart;
+  logger: Logger;
+  anonymizationRulesPromise: Promise<AnonymizationRule[]>;
+  esClient: ElasticsearchClient;
+}

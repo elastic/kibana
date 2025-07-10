@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { InferenceClient } from '@kbn/inference-plugin/server';
+import { InferenceClient } from '@kbn/inference-common';
 import { RCA_PROMPT_SIGNIFICANT_EVENTS, RCA_SYSTEM_PROMPT_BASE } from '../../prompts';
 import { formatEntity } from '../../util/format_entity';
 import { toBlockquote } from '../../util/to_blockquote';

@@ -32,7 +32,7 @@
       {
         "feature": {
           "ml": ["read"],
-          "siemV2": ["read", "read_alerts"],
+          "siemV3": ["read", "read_alerts"],
           "securitySolutionAssistant": ["all"],
           "securitySolutionAttackDiscovery": ["all"],
           "securitySolutionCasesV2": ["read"],
@@ -81,7 +81,7 @@
       {
         "feature": {
           "ml": ["read"],
-          "siemV2": ["read", "read_alerts"],
+          "siemV3": ["read", "read_alerts"],
           "securitySolutionAssistant": ["all"],
           "securitySolutionAttackDiscovery": ["all"],
           "securitySolutionCasesV2": ["read"],
@@ -140,7 +140,7 @@
       {
         "feature": {
           "ml": ["read"],
-          "siemV2": [
+          "siemV3": [
             "all",
             "read_alerts",
             "crud_alerts",
@@ -217,7 +217,7 @@
       {
         "feature": {
           "ml": ["read"],
-          "siemV2": ["all", "read_alerts", "crud_alerts"],
+          "siemV3": ["all", "read_alerts", "crud_alerts"],
           "securitySolutionAssistant": ["all"],
           "securitySolutionAttackDiscovery": ["all"],
           "securitySolutionCasesV2": ["all"],
@@ -274,7 +274,7 @@
       {
         "feature": {
           "ml": ["read"],
-          "siemV2": ["all", "read_alerts", "crud_alerts"],
+          "siemV3": ["all", "read_alerts", "crud_alerts"],
           "securitySolutionAssistant": ["all"],
           "securitySolutionAttackDiscovery": ["all"],
           "securitySolutionCasesV2": ["all"],
@@ -326,7 +326,7 @@
       {
         "feature": {
           "ml": ["all"],
-          "siemV2": ["all", "read_alerts", "crud_alerts"],
+          "siemV3": ["all", "read_alerts", "crud_alerts"],
           "securitySolutionAssistant": ["all"],
           "securitySolutionAttackDiscovery": ["all"],
           "securitySolutionCasesV2": ["all"],
@@ -385,7 +385,7 @@
       {
         "feature": {
           "ml": ["all"],
-          "siemV2": ["all", "read_alerts", "crud_alerts"],
+          "siemV3": ["all", "read_alerts", "crud_alerts"],
           "securitySolutionAssistant": ["all"],
           "securitySolutionAttackDiscovery": ["all"],
           "securitySolutionCasesV2": ["all"],

@@ -1,6 +1,6 @@
 # ST_Y
 
-The ST_Y function extracts the `y` coordinate from a given point.
+Extracts the `y` coordinate from the supplied point. For points of type `geo_point`, this corresponds to the `latitude` value.
 
 ## Syntax
 
@@ -8,19 +8,15 @@ The ST_Y function extracts the `y` coordinate from a given point.
 
 ### Parameters
 
-#### point
+#### `point`
 
-This is an expression of type `geo_point` or `cartesian_point`.
+Expression of type `geo_point` or `cartesian_point`. If `null`, the function returns `null`.
 
 ## Examples
-
 
 ```esql
 ROW point = TO_GEOPOINT("POINT(42.97109629958868 14.7552534006536)")
 | EVAL x = ST_X(point), y = ST_Y(point)
 ```
 
-```esql
-ROW point = TO_GEOPOINT("POINT(34.052235 -118.243683)")
-| EVAL latitude = ST_Y(point)
-```
+This example extracts the `x` (longitude) and `y` (latitude) coordinates from a `geo_point`.

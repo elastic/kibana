@@ -29,7 +29,7 @@ export const getSLOStatsOverview = createSloServerRoute({
 
     const slosOverview = new GetSLOStatsOverview(
       soClient,
-      scopedClusterClient.asCurrentUser,
+      scopedClusterClient,
       spaceId,
       logger,
       rulesClient,

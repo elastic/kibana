@@ -10,8 +10,12 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { SpanSummaryTitle } from './span_summary_title';
 
+const fieldHoverActionPopoverDataTestSubj = 'FieldHoverActionPopover';
+
 jest.mock('../../components/field_with_actions/field_hover_popover_action', () => ({
-  FieldHoverActionPopover: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  FieldHoverActionPopover: ({ children }: { children: React.ReactNode }) => (
+    <div data-test-subj={fieldHoverActionPopoverDataTestSubj}>{children}</div>
+  ),
 }));
 
 jest.mock('../../components/highlight_field.tsx', () => ({
@@ -71,5 +75,35 @@ describe('SpanSummaryTitle', () => {
 
     expect(getByText('Test Span')).toBeInTheDocument();
     expect(getByText('123')).toBeInTheDocument();
+  });
+
+  it('renders FieldHoverActionPopover if showActions is undefined', () => {
+    const { container } = render(
+      <SpanSummaryTitle spanId="123" formattedSpanId="<mark>123</mark>" />
+    );
+
+    expect(
+      container.querySelector(`[data-test-subj="${fieldHoverActionPopoverDataTestSubj}"]`)
+    ).not.toBeNull();
+  });
+
+  it('renders FieldHoverActionPopover if showActions is true', () => {
+    const { container } = render(
+      <SpanSummaryTitle spanId="123" formattedSpanId="<mark>123</mark>" showActions={true} />
+    );
+
+    expect(
+      container.querySelector(`[data-test-subj="${fieldHoverActionPopoverDataTestSubj}"]`)
+    ).not.toBeNull();
+  });
+
+  it('does not render FieldHoverActionPopover if showActions is false', () => {
+    const { container } = render(
+      <SpanSummaryTitle spanId="123" formattedSpanId="<mark>123</mark>" showActions={false} />
+    );
+
+    expect(
+      container.querySelector(`[data-test-subj="${fieldHoverActionPopoverDataTestSubj}"]`)
+    ).toBeNull();
   });
 });

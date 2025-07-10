@@ -12,11 +12,12 @@ import { TelemetryTracer } from '@kbn/langchain/server/tracers/telemetry';
 import { pruneContentReferences, MessageMetadata } from '@kbn/elastic-assistant-common';
 import { getPrompt, resolveProviderAndModel } from '@kbn/security-ai-prompts';
 import { isEmpty } from 'lodash';
+import { generateChatTitle } from './nodes/generate_chat_title';
 import { localToolPrompts, promptGroupId as toolsGroupId } from '../../../prompt/tool_prompts';
 import { promptGroupId } from '../../../prompt/local_prompt_object';
 import { getFormattedTime, getModelOrOss } from '../../../prompt/helpers';
-import { getPrompt as localGetPrompt, promptDictionary } from '../../../prompt';
 import { getLlmClass } from '../../../../routes/utils';
+import { getPrompt as localGetPrompt, promptDictionary } from '../../../prompt';
 import { EsAnonymizationFieldsSchema } from '../../../../ai_assistant_data_clients/anonymization_fields/types';
 import { AssistantToolParams } from '../../../../types';
 import { AgentExecutor } from '../../executors/types';
@@ -41,6 +42,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   dataClients,
   esClient,
   inference,
+  inferenceChatModelEnabled = false,
   langChainMessages,
   llmTasks,
   llmType,
@@ -71,31 +73,51 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
    * This function ensures that a new llmClass instance is created every time it is called.
    * This is necessary to avoid any potential side effects from shared state. By always
    * creating a new instance, we prevent other uses of llm from binding and changing
-   * the state unintentionally. For this reason, never assign this value to a variable (ex const llm = createLlmInstance())
+   * the state unintentionally. For this reason, only call createLlmInstance at runtime
    */
-  const createLlmInstance = () =>
-    new llmClass({
-      actionsClient,
-      connectorId,
-      llmType,
-      logger,
-      // possible client model override,
-      // let this be undefined otherwise so the connector handles the model
-      model: request.body.model,
-      // ensure this is defined because we default to it in the language_models
-      // This is where the LangSmith logs (Metadata > Invocation Params) are set
-      temperature: getDefaultArguments(llmType).temperature,
-      signal: abortSignal,
-      streaming: isStream,
-      // prevents the agent from retrying on failure
-      // failure could be due to bad connector, we should deliver that result to the client asap
-      maxRetries: 0,
-      convertSystemMessageToHumanContent: false,
-      timeout,
-      telemetryMetadata: {
-        pluginId: 'security_ai_assistant',
-      },
-    });
+  const createLlmInstance = async () =>
+    inferenceChatModelEnabled
+      ? inference.getChatModel({
+          request,
+          connectorId,
+          chatModelOptions: {
+            model: request.body.model,
+            signal: abortSignal,
+            temperature: getDefaultArguments(llmType).temperature,
+            // prevents the agent from retrying on failure
+            // failure could be due to bad connector, we should deliver that result to the client asap
+            maxRetries: 0,
+            metadata: {
+              connectorTelemetry: {
+                pluginId: 'security_ai_assistant',
+              },
+            },
+            // TODO add timeout to inference once resolved https://github.com/elastic/kibana/issues/221318
+            // timeout,
+          },
+        })
+      : new llmClass({
+          actionsClient,
+          connectorId,
+          llmType,
+          logger,
+          // possible client model override,
+          // let this be undefined otherwise so the connector handles the model
+          model: request.body.model,
+          // ensure this is defined because we default to it in the language_models
+          // This is where the LangSmith logs (Metadata > Invocation Params) are set
+          temperature: getDefaultArguments(llmType).temperature,
+          signal: abortSignal,
+          streaming: isStream,
+          // prevents the agent from retrying on failure
+          // failure could be due to bad connector, we should deliver that result to the client asap
+          maxRetries: 0,
+          convertSystemMessageToHumanContent: false,
+          timeout,
+          telemetryMetadata: {
+            pluginId: 'security_ai_assistant',
+          },
+        });
 
   const anonymizationFieldsRes =
     await dataClients?.anonymizationFieldsDataClient?.findDocuments<EsAnonymizationFieldsSchema>({
@@ -153,15 +175,29 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
         } catch (e) {
           logger.error(`Failed to get prompt for tool: ${tool.name}`);
         }
+        const llm = await createLlmInstance();
         return tool.getTool({
           ...assistantToolParams,
-          llm: createLlmInstance(),
+          llm,
           isOssModel,
           description,
         });
       })
     )
   ).filter((e) => e != null) as StructuredTool[];
+
+  const apmTracer = new APMTracer({ projectName: traceOptions?.projectName ?? 'default' }, logger);
+  const telemetryTracer = telemetryParams
+    ? new TelemetryTracer(
+        {
+          // this line MUST come before kbTools are added
+          elasticTools: tools.map(({ name }) => name),
+          telemetry,
+          telemetryParams,
+        },
+        logger
+      )
+    : undefined;
 
   // If KB enabled, fetch for any KB IndexEntries and generate a tool for each
   if (isEnabledKnowledgeBase) {
@@ -187,29 +223,19 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   const chatPromptTemplate = formatPrompt({
     prompt: defaultSystemPrompt,
     additionalPrompt: systemPrompt,
+    llmType,
   });
 
+  const llm = await createLlmInstance();
   const agentRunnable = await agentRunnableFactory({
-    llm: createLlmInstance(),
-    isOpenAI,
+    llm,
     llmType,
     tools,
+    inferenceChatModelEnabled,
+    isOpenAI,
     isStream,
     prompt: chatPromptTemplate,
   });
-
-  const apmTracer = new APMTracer({ projectName: traceOptions?.projectName ?? 'default' }, logger);
-  const telemetryTracer = telemetryParams
-    ? new TelemetryTracer(
-        {
-          elasticTools: tools.map(({ name }) => name),
-          totalTools: tools.length,
-          telemetry,
-          telemetryParams,
-        },
-        logger
-      )
-    : undefined;
 
   const { provider } =
     !llmType || llmType === 'inference'
@@ -255,12 +281,34 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     provider: provider ?? '',
   };
 
+  // make a fire and forget async call to generateChatTitle
+  void (async () => {
+    const model = await createLlmInstance();
+    await generateChatTitle({
+      actionsClient,
+      contentReferencesStore,
+      conversationsDataClient: dataClients?.conversationsDataClient,
+      logger,
+      savedObjectsClient,
+      state: {
+        ...inputs,
+      },
+      model,
+      telemetryParams,
+      telemetry,
+    }).catch((error) => {
+      logger.error(`Failed to generate chat title: ${error.message}`);
+    });
+  })();
+
   if (isStream) {
     return streamGraph({
       apmTracer,
       assistantGraph,
       inputs,
+      inferenceChatModelEnabled,
       isEnabledKnowledgeBase: telemetryParams?.isEnabledKnowledgeBase ?? false,
+
       logger,
       onLlmResponse,
       request,

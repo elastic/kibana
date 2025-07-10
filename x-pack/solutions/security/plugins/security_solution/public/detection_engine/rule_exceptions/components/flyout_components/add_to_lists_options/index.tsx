@@ -60,7 +60,7 @@ const ExceptionsAddToListsOptionsComponent: React.FC<ExceptionsAddToListsOptions
               <EuiPopover
                 button={
                   <EuiButtonIcon
-                    iconType="iInCircle"
+                    iconType="info"
                     onClick={onPopOverButtonClick}
                     aria-label={i18n.ADD_TO_LISTS_OPTION_TOOLTIP_ARIA_LABEL}
                   />
