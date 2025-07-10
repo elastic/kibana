@@ -66,7 +66,7 @@ export {
   flattenRecord,
   recursiveRecord,
 } from './src/shared/record_types';
-export { isSchema } from './src/shared/type_guards';
+export { isSchema, createIsNarrowSchema } from './src/shared/type_guards';
 
 export {
   isChildOf,
