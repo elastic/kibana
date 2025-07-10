@@ -338,6 +338,7 @@ export const ScheduledReportFlyoutContent = ({
                 componentProps={{
                   compressed: true,
                   fullWidth: true,
+                  'data-test-subj': 'startDatePicker',
                   euiFieldProps: {
                     compressed: true,
                     fullWidth: true,
@@ -362,6 +363,7 @@ export const ScheduledReportFlyoutContent = ({
                   id: 'timezone',
                   compressed: true,
                   fullWidth: true,
+                  'data-test-subj': 'timezoneCombobox',
                   euiFieldProps: {
                     compressed: true,
                     fullWidth: true,

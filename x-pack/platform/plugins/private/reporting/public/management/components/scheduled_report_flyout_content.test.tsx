@@ -6,17 +6,19 @@
  */
 
 import React, { PropsWithChildren } from 'react';
+import moment from 'moment';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { type ReportingAPIClient, useKibana } from '@kbn/reporting-public';
+import { coreMock } from '@kbn/core/public/mocks';
 import { ReportTypeData, ScheduledReport } from '../../types';
 import { getReportingHealth } from '../apis/get_reporting_health';
-import { coreMock } from '@kbn/core/public/mocks';
 import { testQueryClient } from '../test_utils/test_query_client';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { ScheduledReportFlyoutContent } from './scheduled_report_flyout_content';
 import { scheduleReport } from '../apis/schedule_report';
 import { ScheduledReportApiJSON } from '../../../server/types';
-import userEvent from '@testing-library/user-event';
+import * as useDefaultTimezoneModule from '../hooks/use_default_timezone';
 
 // Mock Kibana hooks and context
 jest.mock('@kbn/reporting-public', () => ({
@@ -378,5 +380,72 @@ describe('ScheduledReportFlyoutContent', () => {
 
     expect(mockValidateEmailAddresses).toHaveBeenCalled();
     expect(emailInput).not.toBeValid();
+  });
+
+  it('should use default values for startDate and timezone if not provided', async () => {
+    const defaultTimezone = moment.tz.guess();
+    const systemTime = moment('2025-07-01');
+    jest.useFakeTimers().setSystemTime(systemTime.toDate());
+    const timezoneSpy = jest
+      .spyOn(useDefaultTimezoneModule, 'useDefaultTimezone')
+      .mockReturnValue({ defaultTimezone, isBrowser: true });
+
+    render(
+      <TestProviders>
+        <ScheduledReportFlyoutContent
+          apiClient={mockApiClient}
+          objectType={objectType}
+          sharingData={sharingData}
+          scheduledReport={{ reportTypeId: 'printablePdfV2' }}
+          availableReportTypes={availableFormats}
+          onClose={mockOnClose}
+        />
+      </TestProviders>
+    );
+
+    const timezoneField = await screen.findByTestId('timezoneCombobox');
+    expect(within(timezoneField).getByText(defaultTimezone)).toBeInTheDocument();
+
+    const startDatePicker = await screen.findByTestId('startDatePicker');
+    const startDateInput = within(startDatePicker).getByRole('textbox');
+    const startDateValue = startDateInput.getAttribute('value')!;
+    expect(startDateValue).toEqual(systemTime.format('MM/DD/YYYY hh:mm A'));
+
+    timezoneSpy.mockRestore();
+    jest.useRealTimers();
+  });
+
+  it('should show a validation error if startDate is in the past', async () => {
+    const defaultTimezone = moment.tz.guess();
+    const systemTime = moment('2025-07-02');
+    jest.useFakeTimers().setSystemTime(systemTime.toDate());
+    const timezoneSpy = jest
+      .spyOn(useDefaultTimezoneModule, 'useDefaultTimezone')
+      .mockReturnValue({ defaultTimezone, isBrowser: true });
+
+    render(
+      <TestProviders>
+        <ScheduledReportFlyoutContent
+          apiClient={mockApiClient}
+          objectType={objectType}
+          sharingData={sharingData}
+          scheduledReport={{
+            reportTypeId: 'printablePdfV2',
+          }}
+          availableReportTypes={availableFormats}
+          onClose={mockOnClose}
+        />
+      </TestProviders>
+    );
+
+    const startDatePicker = await screen.findByTestId('startDatePicker');
+    const startDateInput = within(startDatePicker).getByRole('textbox');
+    fireEvent.change(startDateInput, { target: { value: '07/01/2025 10:00 AM' } });
+    fireEvent.blur(startDateInput);
+
+    expect(await screen.findByText('Start date must be in the future')).toBeInTheDocument();
+
+    timezoneSpy.mockRestore();
+    jest.useRealTimers();
   });
 });
