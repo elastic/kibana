@@ -83,8 +83,7 @@ export function initializeEditApi(
     PublishesDisabledActionIds &
     HasEditCapabilities &
     HasReadOnlyCapabilities &
-    PublishesViewMode & { uuid: string } &
-    LensHasEditPanel
+    PublishesViewMode & { uuid: string } & LensHasEditPanel;
 } {
   const supportedTriggers = getSupportedTriggers(getState, startDependencies.visualizationMap);
   const isManaged = (currentState: LensRuntimeState) => {
