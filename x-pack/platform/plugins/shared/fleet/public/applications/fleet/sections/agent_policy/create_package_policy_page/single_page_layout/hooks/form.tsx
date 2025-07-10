@@ -233,7 +233,7 @@ export function useOnSubmit({
 
   // Used to render extension components only when package policy is initialized
   const [isInitialized, setIsInitialized] = useState<boolean>(false);
-  const [isFetchingBasePackage, setIsFetchingBasePackage] = useState<boolean>(false);
+  const isFetchingBasePackage = useRef<boolean>(false);
 
   const [agentPolicies, setAgentPolicies] = useState<AgentPolicy[]>([]);
   // New package policy state
@@ -323,9 +323,9 @@ export function useOnSubmit({
       }
 
       // Fetch all packagePolicies having the package name
-      if (!isFetchingBasePackage) {
+      if (!isFetchingBasePackage.current) {
         // Prevent multiple calls to fetch base package
-        setIsFetchingBasePackage(true);
+        isFetchingBasePackage.current = true;
         const { data: packagePolicyData } = await sendGetPackagePolicies({
           perPage: SO_SEARCH_LIMIT,
           page: 1,
@@ -341,9 +341,11 @@ export function useOnSubmit({
           DEFAULT_PACKAGE_POLICY.description,
           integrationToEnable
         );
+
+        // Set the package policy with the fetched package
         updatePackagePolicy(basePackagePolicy);
         setIsInitialized(true);
-        setIsFetchingBasePackage(false);
+        isFetchingBasePackage.current = false;
       }
     }
     if (!isInitialized) {
