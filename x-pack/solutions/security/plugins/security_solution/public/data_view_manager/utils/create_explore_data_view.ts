@@ -23,7 +23,7 @@ export const createExploreDataView = async (
 
   return dependencies.dataViews.create({
     id: `${EXPLORE_DATA_VIEW_PREFIX}-${(await dependencies.spaces.getActiveSpace()).id}`,
-    name: 'Explore Data View',
+    name: 'Explore data view',
     title: exploreDataViewPattern,
   });
 };
