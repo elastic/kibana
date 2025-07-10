@@ -28,6 +28,7 @@ export function RulesAPIServiceProvider({ getService }: FtrProviderContext) {
       ruleTypeId: string;
       schedule: Record<string, unknown>;
       actions?: any[];
+      tags?: string[];
     }) {
       log.debug(`Create basic rule...`);
       const { body: createdRule } = await kbnSupertest

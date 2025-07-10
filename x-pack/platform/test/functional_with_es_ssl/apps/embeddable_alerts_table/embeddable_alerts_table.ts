@@ -33,7 +33,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     'dashboard',
     'timePicker',
   ]);
-  const browser = getService('browser');
+
   const security = getService('security');
   const retry = getService('retry');
   const find = getService('find');
@@ -42,158 +42,36 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const comboBox = getService('comboBox');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const toasts = getService('toasts');
+  const sampleData = getService('sampleData');
+  const rules = getService('rules');
+  const config = getService('config');
+  const retryTimeout = config.get('timeouts.try');
+  const es = getService('es');
 
-  const createEsQueryRule = async (index: string, solution: 'stack' | 'observability') => {
-    const name = `${solution}-rule`;
-    const { body: createdRule } = await supertest
-      .post(`/api/alerting/rule`)
-      .set('kbn-xsrf', 'foo')
-      .send({
-        name,
-        rule_type_id: `.es-query`,
-        enabled: true,
-        schedule: { interval: '5s' },
-        consumer: solution === 'stack' ? 'stackAlerts' : 'logs',
-        tags: [name],
-        params: {
-          searchConfiguration: {
-            query: {
-              query: '',
-              language: 'kuery',
-            },
-            index,
-          },
-          timeField: 'timestamp',
-          searchType: 'searchSource',
-          timeWindowSize: 5,
-          timeWindowUnit: 'h',
-          threshold: [-1],
-          thresholdComparator: '>',
-          size: 1,
-          aggType: 'count',
-          groupBy: 'all',
-          termSize: 5,
-          excludeHitsFromPreviousRun: false,
-          sourceFields: [],
-        },
-      })
-      .expect(200);
-    objectRemover.add(createdRule.id, 'rule', 'alerting');
-    return createdRule;
-  };
-
-  const createSecurityRule = async (index: string) => {
-    const { body: createdRule } = await supertest
-      .post(`/api/detection_engine/rules`)
-      .set('kbn-xsrf', 'foo')
-      .send({
-        type: 'query',
-        filters: [],
-        language: 'kuery',
-        query: '_id: *',
-        required_fields: [],
-        data_view_id: index,
-        author: [],
-        false_positives: [],
-        references: [],
-        risk_score: 21,
-        risk_score_mapping: [],
-        severity: 'low',
-        severity_mapping: [],
-        threat: [],
-        max_signals: 100,
-        name: 'security-rule',
-        description: 'security-rule',
-        tags: ['security-rule'],
-        setup: '',
-        license: '',
-        interval: '5s',
-        from: 'now-10m',
-        to: 'now',
-        actions: [],
-        enabled: true,
-        meta: {
-          kibana_siem_app_url: 'http://localhost:5601/app/security',
-        },
-      })
-      .expect(200);
-    objectRemover.add(createdRule.id, 'rule', 'alerting');
-    return createdRule;
-  };
-
-  const getSampleWebLogsDataView = async () => {
-    const { body } = await supertest
-      .post(`/api/content_management/rpc/search`)
-      .set('kbn-xsrf', 'foo')
-      .send({
-        contentTypeId: 'index-pattern',
-        query: { limit: 10 },
-        version: 1,
-      })
-      .expect(200);
-    return body.result.result.hits.find(
-      (dataView: { attributes: { title: string } }) =>
-        dataView.attributes.title === 'kibana_sample_data_logs'
-    );
-  };
-
-  const getRuleSummary = async (ruleId: string) => {
-    const { body: summary } = await supertest
-      .get(`/internal/alerting/rule/${encodeURIComponent(ruleId)}/_alert_summary`)
-      .expect(200);
-    return summary;
-  };
-
-  // Failing: See https://github.com/elastic/kibana/issues/220807
   describe('Embeddable alerts panel', () => {
     before(async () => {
-      await pageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
-        useActualUrl: true,
-      });
+      await sampleData.testResources.installAllKibanaSampleData();
 
-      await pageObjects.home.addSampleDataSet('logs');
-      const dataView = await getSampleWebLogsDataView();
+      const dataViews = await getDataViews();
+      const sampleDataLogsDataView = dataViews.find(
+        (dataView) => dataView.title === 'kibana_sample_data_logs'
+      );
+
       const [stackRule, observabilityRule, securityRule] = await Promise.all([
-        createEsQueryRule(dataView.id, 'stack'),
-        createEsQueryRule(dataView.id, 'observability'),
-        createSecurityRule(dataView.id),
+        createEsQueryRule(sampleDataLogsDataView.id, 'stack'),
+        createEsQueryRule(sampleDataLogsDataView.id, 'observability'),
+        createSecurityRule(sampleDataLogsDataView.id),
       ]);
 
-      // Refresh to see the created rules
-      await browser.refresh();
-      await pageObjects.header.waitUntilLoadingHasFinished();
-
-      // Wait for all rules to have created alerts
-      const rulesAlerted: Record<string, boolean> = {
-        [stackRule.id]: false,
-        [observabilityRule.id]: false,
-        [securityRule.id]: false,
-      };
-
-      await retry.try(async () => {
-        const rulesWithoutAlerts = Object.entries(rulesAlerted)
-          .filter(([_, alerted]) => !alerted)
-          .map(([ruleId]) => ruleId);
-
-        await Promise.all(
-          rulesWithoutAlerts.map(async (ruleId) => {
-            const summary = await getRuleSummary(ruleId);
-            rulesAlerted[ruleId] = Object.keys(summary.alerts).length > 0;
-          })
-        );
-
-        expect(Object.values(rulesAlerted).every((hasAlerts) => hasAlerts)).to.be(true);
-      });
+      await waitForAlertsToBeCreated('.alerts-*', stackRule.id);
+      await waitForAlertsToBeCreated('.alerts-*', observabilityRule.id);
+      await waitForAlertsToBeCreated('.alerts-*', securityRule.id);
 
       await pageObjects.dashboard.gotoDashboardURL();
     });
 
     after(async () => {
-      await pageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
-        useActualUrl: true,
-      });
-
-      await pageObjects.home.addSampleDataSet('logs');
+      await sampleData.testResources.removeAllKibanaSampleData();
       await objectRemover.removeAll();
     });
 
@@ -262,7 +140,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     }
 
-    it.only(`should only show alerts from the observability area (o11y+stack) when selecting it`, async () => {
+    it(`should only show alerts from the observability area (o11y+stack) when selecting it`, async () => {
       await toasts.dismissIfExists();
       await dashboardAddPanel.clickEditorMenuButton();
       await dashboardAddPanel.clickAddNewPanelFromUIActionLink('Alerts');
@@ -348,4 +226,112 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       );
     });
   });
+
+  const createEsQueryRule = async (index: string, solution: 'stack' | 'observability') => {
+    const name = `${solution}-rule`;
+    const createdRule = await rules.api.createRule({
+      name,
+      ruleTypeId: `.es-query`,
+      schedule: { interval: '5s' },
+      consumer: solution === 'stack' ? 'stackAlerts' : 'logs',
+      tags: [name],
+      params: {
+        searchConfiguration: {
+          query: {
+            query: '',
+            language: 'kuery',
+          },
+          index,
+        },
+        timeField: 'timestamp',
+        searchType: 'searchSource',
+        timeWindowSize: 5,
+        timeWindowUnit: 'h',
+        threshold: [-1],
+        thresholdComparator: '>',
+        size: 1,
+        aggType: 'count',
+        groupBy: 'all',
+        termSize: 5,
+        excludeHitsFromPreviousRun: false,
+        sourceFields: [],
+      },
+    });
+
+    objectRemover.add(createdRule.id, 'rule', 'alerting');
+
+    return createdRule;
+  };
+
+  const createSecurityRule = async (index: string) => {
+    const { body: createdRule } = await supertest
+      .post(`/api/detection_engine/rules`)
+      .set('kbn-xsrf', 'foo')
+      .send({
+        type: 'query',
+        filters: [],
+        language: 'kuery',
+        query: '_id: *',
+        required_fields: [],
+        data_view_id: index,
+        author: [],
+        false_positives: [],
+        references: [],
+        risk_score: 21,
+        risk_score_mapping: [],
+        severity: 'low',
+        severity_mapping: [],
+        threat: [],
+        max_signals: 100,
+        name: 'security-rule',
+        description: 'security-rule',
+        tags: ['security-rule'],
+        setup: '',
+        license: '',
+        interval: '5s',
+        from: 'now-10m',
+        to: 'now',
+        actions: [],
+        enabled: true,
+        meta: {
+          kibana_siem_app_url: 'http://localhost:5601/app/security',
+        },
+      })
+      .expect(200);
+
+    objectRemover.add(createdRule.id, 'rule', 'alerting');
+
+    return createdRule;
+  };
+
+  const waitForAlertsToBeCreated = async (index: string, ruleId: string) => {
+    return await retry.tryForTime(retryTimeout, async () => {
+      const response = await es.search({
+        index,
+        query: {
+          bool: {
+            filter: [
+              {
+                term: {
+                  'kibana.alert.rule.uuid': ruleId,
+                },
+              },
+            ],
+          },
+        },
+      });
+
+      if (response.hits.hits.length === 0) {
+        throw new Error('No hits found');
+      }
+
+      return response;
+    });
+  };
+
+  const getDataViews = async () => {
+    const response = await supertest.get('/api/data_views');
+
+    return response.body.data_view;
+  };
 };
