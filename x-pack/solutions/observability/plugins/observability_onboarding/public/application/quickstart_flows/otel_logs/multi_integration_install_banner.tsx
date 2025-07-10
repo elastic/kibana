@@ -22,7 +22,7 @@ export function MultiIntegrationInstallBanner() {
 
   const { performRequest, requestState } = useInstallIntegrations({
     onIntegrationCreationFailure,
-    packages: ['system_otel', 'kubernetes'],
+    packages: ['system_otel', 'kubernetes_otel'],
   });
 
   useEffect(() => {
