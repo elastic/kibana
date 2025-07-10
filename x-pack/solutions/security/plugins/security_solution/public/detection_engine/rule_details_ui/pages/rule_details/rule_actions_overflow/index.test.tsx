@@ -14,7 +14,7 @@ import { useBulkExport } from '../../../../rule_management/logic/bulk_actions/us
 import { useExecuteBulkAction } from '../../../../rule_management/logic/bulk_actions/use_execute_bulk_action';
 import { mockRule } from '../../../../rule_management_ui/components/rules_table/__mocks__/mock';
 import type { ExternalRuleSource } from '../../../../../../common/api/detection_engine';
-import { usePrebuiltRuleBaseVersionContext } from '../../../../rule_management/components/rule_details/base_version_diff/base_version_context';
+import { useRuleCustomizationsContext } from '../../../../rule_management/components/rule_details/rule_customizations_diff/rule_customizations_context';
 
 const showBulkDuplicateExceptionsConfirmation = () => Promise.resolve(null);
 const showManualRuleRunConfirmation = () => Promise.resolve(null);
@@ -51,7 +51,7 @@ jest.mock('../../../../../common/lib/kibana', () => {
 
 const useExecuteBulkActionMock = useExecuteBulkAction as jest.Mock;
 const useBulkExportMock = useBulkExport as jest.Mock;
-const usePrebuiltRuleBaseVersionContextMock = usePrebuiltRuleBaseVersionContext as jest.Mock;
+const usePrebuiltRuleBaseVersionContextMock = useRuleCustomizationsContext as jest.Mock;
 
 describe('RuleActionsOverflow', () => {
   beforeEach(() => {

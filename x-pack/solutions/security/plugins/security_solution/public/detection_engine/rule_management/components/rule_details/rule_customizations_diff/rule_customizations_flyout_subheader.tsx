@@ -13,17 +13,17 @@ import type { PartialRuleDiff, RuleResponse } from '../../../../../../common/api
 import * as i18n from './translations';
 import { fieldToDisplayNameMap } from '../diff_components/translations';
 
-interface BaseVersionDiffFlyoutSubheaderProps {
+interface RuleCustomizationsFlyoutSubheaderProps {
   currentRule: RuleResponse;
   diff: PartialRuleDiff;
   isOutdated: boolean;
 }
 
-export const BaseVersionDiffFlyoutSubheader = ({
+export const RuleCustomizationsFlyoutSubheader = ({
   currentRule,
   diff,
   isOutdated,
-}: BaseVersionDiffFlyoutSubheaderProps) => {
+}: RuleCustomizationsFlyoutSubheaderProps) => {
   const lastUpdate = (
     <EuiText size="s">
       <strong>

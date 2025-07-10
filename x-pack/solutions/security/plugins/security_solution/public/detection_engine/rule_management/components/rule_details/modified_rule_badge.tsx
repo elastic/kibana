@@ -10,7 +10,7 @@ import React from 'react';
 import type { RuleResponse } from '../../../../../common/api/detection_engine';
 import { isCustomizedPrebuiltRule } from '../../../../../common/api/detection_engine';
 import * as i18n from './translations';
-import { usePrebuiltRuleBaseVersionContext } from './base_version_diff/base_version_context';
+import { useRuleCustomizationsContext } from './rule_customizations_diff/rule_customizations_context';
 import { PrebuiltRuleDiffBadge } from './prebuilt_rule_diff_badge';
 
 interface ModifiedRuleBadgeProps {
@@ -20,7 +20,7 @@ interface ModifiedRuleBadgeProps {
 export const ModifiedRuleBadge: React.FC<ModifiedRuleBadgeProps> = ({ rule }) => {
   const {
     state: { doesBaseVersionExist },
-  } = usePrebuiltRuleBaseVersionContext();
+  } = useRuleCustomizationsContext();
 
   if (rule === null || !isCustomizedPrebuiltRule(rule)) {
     return null;

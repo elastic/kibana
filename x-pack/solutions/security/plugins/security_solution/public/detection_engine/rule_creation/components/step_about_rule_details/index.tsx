@@ -29,24 +29,8 @@ import type { AboutStepRule, AboutStepRuleDetails } from '../../../common/types'
 import * as i18n from './translations';
 import { fullHeight } from './styles';
 import type { RuleResponse } from '../../../../../common/api/detection_engine';
-import { ModifiedFieldBadge } from '../../../rule_management/components/rule_details/modified_field_badge';
 import { RuleFieldName } from '../../../rule_management/components/rule_details/rule_field_name';
-
-const detailsOption: EuiButtonGroupOptionProps = {
-  id: 'details',
-  label: i18n.ABOUT_PANEL_DETAILS_TAB,
-  'data-test-subj': 'stepAboutDetailsToggle-details',
-};
-const notesOption: EuiButtonGroupOptionProps = {
-  id: 'notes',
-  label: i18n.ABOUT_PANEL_NOTES_TAB,
-  'data-test-subj': 'stepAboutDetailsToggle-notes',
-};
-const setupOption: EuiButtonGroupOptionProps = {
-  id: 'setup',
-  label: i18n.ABOUT_PANEL_SETUP_TAB,
-  'data-test-subj': 'stepAboutDetailsToggle-setup',
-};
+import { useRuleCustomizationsContext } from '../../../rule_management/components/rule_details/rule_customizations_diff/rule_customizations_context';
 
 interface StepPanelProps {
   stepData: AboutStepRule | null;
@@ -63,12 +47,49 @@ const StepAboutRuleToggleDetailsComponent: React.FC<StepPanelProps> = ({
 }) => {
   const [selectedToggleOption, setToggleOption] = useState('details');
   const [aboutPanelHeight, setAboutPanelHeight] = useState(0);
+  const {
+    state: { modifiedFields },
+  } = useRuleCustomizationsContext();
+
+  const isNoteFieldModified = useMemo(() => modifiedFields.has('note'), [modifiedFields]);
+  const isSetupFieldModified = useMemo(() => modifiedFields.has('setup'), [modifiedFields]);
 
   const onResize = useCallback(
     (e: { height: number; width: number }) => {
       setAboutPanelHeight(e.height);
     },
     [setAboutPanelHeight]
+  );
+
+  const detailsOption: EuiButtonGroupOptionProps = useMemo(
+    () => ({
+      id: 'details',
+      label: i18n.ABOUT_PANEL_DETAILS_TAB,
+      'data-test-subj': 'stepAboutDetailsToggle-details',
+    }),
+    []
+  );
+
+  const notesOption: EuiButtonGroupOptionProps = useMemo(
+    () => ({
+      id: 'notes',
+      label: i18n.ABOUT_PANEL_NOTES_TAB,
+      'data-test-subj': 'stepAboutDetailsToggle-notes',
+      iconType: isNoteFieldModified ? 'indexEdit' : undefined,
+      toolTipContent: isNoteFieldModified ? i18n.CUSTOMIZED_FIELD_TAB_TOOLTIP : undefined,
+    }),
+    [isNoteFieldModified]
+  );
+
+  const setupOption: EuiButtonGroupOptionProps = useMemo(
+    () => ({
+      id: 'setup',
+      label: i18n.ABOUT_PANEL_SETUP_TAB,
+      'data-test-subj': 'stepAboutDetailsToggle-setup',
+      iconType: isSetupFieldModified ? 'indexEdit' : undefined,
+      toolTipContent: isSetupFieldModified ? i18n.CUSTOMIZED_FIELD_TAB_TOOLTIP : undefined,
+    }),
+    [isSetupFieldModified]
   );
 
   const toggleOptions: EuiButtonGroupOptionProps[] = useMemo(() => {
@@ -79,7 +100,7 @@ const StepAboutRuleToggleDetailsComponent: React.FC<StepPanelProps> = ({
       ...(notesExist ? [notesOption] : []),
       ...(setupExists ? [setupOption] : []),
     ];
-  }, [stepDataDetails]);
+  }, [detailsOption, notesOption, setupOption, stepDataDetails?.note, stepDataDetails?.setup]);
 
   return (
     <EuiPanel
@@ -122,7 +143,7 @@ const StepAboutRuleToggleDetailsComponent: React.FC<StepPanelProps> = ({
                       </VerticalOverflowContent>
                     </VerticalOverflowContainer>
                     <EuiSpacer size="m" />
-                    <RuleAboutSection rule={rule} hideName hideDescription showModifiedFields />
+                    <RuleAboutSection rule={rule} hideName hideDescription />
                   </div>
                 )}
               </EuiResizeObserver>
@@ -133,10 +154,7 @@ const StepAboutRuleToggleDetailsComponent: React.FC<StepPanelProps> = ({
                 maxHeight={aboutPanelHeight}
               >
                 <VerticalOverflowContent maxHeight={aboutPanelHeight}>
-                  <EuiFlexGroup gutterSize="xs" direction="column" alignItems="flexStart">
-                    <ModifiedFieldBadge fieldName={'note'} />
-                    <MarkdownRenderer>{stepDataDetails.note}</MarkdownRenderer>
-                  </EuiFlexGroup>
+                  <RuleInvestigationGuide note={stepDataDetails.note} />
                 </VerticalOverflowContent>
               </VerticalOverflowContainer>
             )}
@@ -146,10 +164,7 @@ const StepAboutRuleToggleDetailsComponent: React.FC<StepPanelProps> = ({
                 maxHeight={aboutPanelHeight}
               >
                 <VerticalOverflowContent maxHeight={aboutPanelHeight}>
-                  <EuiFlexGroup gutterSize="xs" direction="column" alignItems="flexStart">
-                    <ModifiedFieldBadge fieldName={'setup'} />
-                    <MarkdownRenderer>{stepDataDetails.setup}</MarkdownRenderer>
-                  </EuiFlexGroup>
+                  <RuleSetupGuide setup={stepDataDetails.setup} />
                 </VerticalOverflowContent>
               </VerticalOverflowContainer>
             )}
@@ -209,18 +224,34 @@ const RuleDescription = ({ description }: { description: string }) => (
   <EuiDescriptionList
     listItems={[
       {
-        title: (
-          <RuleFieldName
-            label={i18n.ABOUT_PANEL_DESCRIPTION_LABEL}
-            fieldName="description"
-            showModifiedFields
-          />
-        ),
+        title: <RuleFieldName label={i18n.ABOUT_PANEL_DESCRIPTION_LABEL} fieldName="description" />,
         description: (
           <EuiText size="s" data-test-subj="stepAboutRuleDetailsToggleDescriptionText">
             {description}
           </EuiText>
         ),
+      },
+    ]}
+  />
+);
+
+const RuleInvestigationGuide = ({ note }: { note: string }) => (
+  <EuiDescriptionList
+    listItems={[
+      {
+        title: <RuleFieldName fieldName="note" />,
+        description: <MarkdownRenderer>{note}</MarkdownRenderer>,
+      },
+    ]}
+  />
+);
+
+const RuleSetupGuide = ({ setup }: { setup: string }) => (
+  <EuiDescriptionList
+    listItems={[
+      {
+        title: <RuleFieldName fieldName="setup" />,
+        description: <MarkdownRenderer>{setup}</MarkdownRenderer>,
       },
     ]}
   />

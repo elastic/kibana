@@ -9,57 +9,55 @@ import type { Dispatch, SetStateAction } from 'react';
 import React, { createContext, useContext, useMemo, useState } from 'react';
 import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import { invariant } from '../../../../../../common/utils/invariant';
-import { usePrebuiltRulesViewBaseDiff } from './use_prebuilt_rules_view_base_diff';
+import { useRuleCustomizationsDiff } from './use_rule_customizations_diff';
 
-export interface PrebuiltRuleBaseVersionState {
+export interface RuleCustomizationsState {
   doesBaseVersionExist: boolean;
   isLoading: boolean;
   modifiedFields: Set<string>;
 }
 
-export interface PrebuiltRuleBaseVersionActions {
+export interface RuleCustomizationsActions {
   openCustomizationsPreviewFlyout: () => void;
   openCustomizationsRevertFlyout: () => void;
-  setBaseVersionRule: Dispatch<SetStateAction<RuleResponse | null>>;
+  setCustomizationsRule: Dispatch<SetStateAction<RuleResponse | null>>;
 }
 
-export interface PrebuiltRuleBaseVersionContextType {
-  state: PrebuiltRuleBaseVersionState;
-  actions: PrebuiltRuleBaseVersionActions;
+export interface RuleCustomizationsContextType {
+  state: RuleCustomizationsState;
+  actions: RuleCustomizationsActions;
 }
 
-const PrebuiltRuleBaseVersionContext = createContext<PrebuiltRuleBaseVersionContextType | null>(
-  null
-);
+export const RuleCustomizationsContext = createContext<RuleCustomizationsContextType | null>(null);
 
-interface PrebuiltRuleBaseVersionFlyoutContextProviderProps {
+interface RuleCustomizationsContextProviderProps {
   children: React.ReactNode;
 }
 
-export const PrebuiltRuleBaseVersionFlyoutContextProvider = ({
+export const RuleCustomizationsContextProvider = ({
   children,
-}: PrebuiltRuleBaseVersionFlyoutContextProviderProps) => {
+}: RuleCustomizationsContextProviderProps) => {
   const [rule, setRule] = useState<RuleResponse | null>(null);
 
   const {
-    baseVersionFlyout,
+    ruleCustomizationsFlyout,
     openCustomizationsPreviewFlyout,
     openCustomizationsRevertFlyout,
     doesBaseVersionExist,
     isLoading,
     modifiedFields,
-  } = usePrebuiltRulesViewBaseDiff({ rule });
+  } = useRuleCustomizationsDiff({ rule });
 
-  const actions = useMemo<PrebuiltRuleBaseVersionActions>(
+  const actions = useMemo<RuleCustomizationsActions>(
     () => ({
       openCustomizationsPreviewFlyout,
       openCustomizationsRevertFlyout,
-      setBaseVersionRule: setRule,
+      setCustomizationsRule: setRule,
     }),
     [openCustomizationsPreviewFlyout, openCustomizationsRevertFlyout]
   );
 
-  const providerValue = useMemo<PrebuiltRuleBaseVersionContextType>(
+  const providerValue = useMemo<RuleCustomizationsContextType>(
     () => ({
       state: {
         isLoading,
@@ -72,21 +70,21 @@ export const PrebuiltRuleBaseVersionFlyoutContextProvider = ({
   );
 
   return (
-    <PrebuiltRuleBaseVersionContext.Provider value={providerValue}>
+    <RuleCustomizationsContext.Provider value={providerValue}>
       <>
         {children}
-        {baseVersionFlyout}
+        {ruleCustomizationsFlyout}
       </>
-    </PrebuiltRuleBaseVersionContext.Provider>
+    </RuleCustomizationsContext.Provider>
   );
 };
 
-export const usePrebuiltRuleBaseVersionContext = (): PrebuiltRuleBaseVersionContextType => {
-  const prebuiltRuleBaseVersionContext = useContext(PrebuiltRuleBaseVersionContext);
+export const useRuleCustomizationsContext = (): RuleCustomizationsContextType => {
+  const ruleCustomizationsContext = useContext(RuleCustomizationsContext);
   invariant(
-    prebuiltRuleBaseVersionContext,
-    'usePrebuiltRuleBaseVersionContext should be used inside PrebuiltRuleBaseVersionFlyoutContextProvider'
+    ruleCustomizationsContext,
+    'useRuleCustomizationsContext should be used inside RuleCustomizationsContextProvider'
   );
 
-  return prebuiltRuleBaseVersionContext;
+  return ruleCustomizationsContext;
 };

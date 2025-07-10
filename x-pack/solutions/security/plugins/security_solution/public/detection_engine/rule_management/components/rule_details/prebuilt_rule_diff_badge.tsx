@@ -7,7 +7,7 @@
 
 import { EuiBadge } from '@elastic/eui';
 import React from 'react';
-import { usePrebuiltRuleBaseVersionContext } from './base_version_diff/base_version_context';
+import { useRuleCustomizationsContext } from './rule_customizations_diff/rule_customizations_context';
 
 interface PrebuiltRuleDiffBadgeProps {
   label: string;
@@ -17,7 +17,7 @@ interface PrebuiltRuleDiffBadgeProps {
 export const PrebuiltRuleDiffBadge = ({ label, dataTestSubj }: PrebuiltRuleDiffBadgeProps) => {
   const {
     actions: { openCustomizationsPreviewFlyout },
-  } = usePrebuiltRuleBaseVersionContext();
+  } = useRuleCustomizationsContext();
 
   return (
     <EuiBadge
