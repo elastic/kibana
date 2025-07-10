@@ -30,6 +30,7 @@ const root: TraceItem = {
   traceId: 't1',
   duration: 1000,
   serviceName: 'svcA',
+  errorCount: 0,
 };
 const child1: TraceItem = {
   id: '2',
@@ -39,6 +40,7 @@ const child1: TraceItem = {
   traceId: 't1',
   duration: 400,
   serviceName: 'svcB',
+  errorCount: 0,
 };
 const child2: TraceItem = {
   id: '3',
@@ -48,6 +50,7 @@ const child2: TraceItem = {
   traceId: 't1',
   duration: 100,
   serviceName: 'svcC',
+  errorCount: 0,
 };
 const grandchild: TraceItem = {
   id: '4',
@@ -57,6 +60,7 @@ const grandchild: TraceItem = {
   traceId: 't1',
   duration: 50,
   serviceName: 'svcD',
+  errorCount: 0,
 };
 
 describe('getFlattenedTraceWaterfall', () => {
@@ -137,9 +141,33 @@ describe('getServiceColors', () => {
   });
   it('assigns a unique color to each serviceName', () => {
     const traceItems: TraceItem[] = [
-      { id: '1', timestampUs: 0, name: '', traceId: '', duration: 1, serviceName: 'svcA' },
-      { id: '2', timestampUs: 0, name: '', traceId: '', duration: 1, serviceName: 'svcB' },
-      { id: '3', timestampUs: 0, name: '', traceId: '', duration: 1, serviceName: 'svcC' },
+      {
+        id: '1',
+        timestampUs: 0,
+        name: '',
+        traceId: '',
+        duration: 1,
+        serviceName: 'svcA',
+        errorCount: 0,
+      },
+      {
+        id: '2',
+        timestampUs: 0,
+        name: '',
+        traceId: '',
+        duration: 1,
+        serviceName: 'svcB',
+        errorCount: 0,
+      },
+      {
+        id: '3',
+        timestampUs: 0,
+        name: '',
+        traceId: '',
+        duration: 1,
+        serviceName: 'svcC',
+        errorCount: 0,
+      },
     ];
 
     const result = getServiceColors(traceItems);
@@ -152,9 +180,33 @@ describe('getServiceColors', () => {
 
   it('handles duplicate service names gracefully', () => {
     const traceItems: TraceItem[] = [
-      { id: '1', timestampUs: 0, name: '', traceId: '', duration: 1, serviceName: 'svcA' },
-      { id: '2', timestampUs: 0, name: '', traceId: '', duration: 1, serviceName: 'svcA' },
-      { id: '3', timestampUs: 0, name: '', traceId: '', duration: 1, serviceName: 'svcB' },
+      {
+        id: '1',
+        timestampUs: 0,
+        name: '',
+        traceId: '',
+        duration: 1,
+        serviceName: 'svcA',
+        errorCount: 0,
+      },
+      {
+        id: '2',
+        timestampUs: 0,
+        name: '',
+        traceId: '',
+        duration: 1,
+        serviceName: 'svcA',
+        errorCount: 0,
+      },
+      {
+        id: '3',
+        timestampUs: 0,
+        name: '',
+        traceId: '',
+        duration: 1,
+        serviceName: 'svcB',
+        errorCount: 0,
+      },
     ];
 
     const result = getServiceColors(traceItems);
@@ -177,6 +229,7 @@ describe('getServiceColors', () => {
       traceId: '',
       duration: 1,
       serviceName: `svc${i}`,
+      errorCount: 0,
     }));
 
     const result = getServiceColors(traceItems);
@@ -194,7 +247,15 @@ describe('getTraceMap', () => {
   });
   it('maps root and children correctly', () => {
     const items: TraceItem[] = [
-      { id: '1', timestampUs: 0, name: 'root', traceId: 't1', duration: 100, serviceName: 'svcA' },
+      {
+        id: '1',
+        timestampUs: 0,
+        name: 'root',
+        traceId: 't1',
+        duration: 100,
+        serviceName: 'svcA',
+        errorCount: 0,
+      },
       {
         id: '2',
         timestampUs: 0,
@@ -203,6 +264,7 @@ describe('getTraceMap', () => {
         duration: 50,
         serviceName: 'svcB',
         parentId: '1',
+        errorCount: 0,
       },
       {
         id: '3',
@@ -212,6 +274,7 @@ describe('getTraceMap', () => {
         duration: 30,
         serviceName: 'svcC',
         parentId: '1',
+        errorCount: 0,
       },
       {
         id: '4',
@@ -221,6 +284,7 @@ describe('getTraceMap', () => {
         duration: 10,
         serviceName: 'svcD',
         parentId: '2',
+        errorCount: 0,
       },
     ];
 
@@ -236,7 +300,15 @@ describe('getTraceMap', () => {
 
   it('returns only root if there are no children', () => {
     const items: TraceItem[] = [
-      { id: '1', timestampUs: 0, name: 'root', traceId: 't1', duration: 100, serviceName: 'svcA' },
+      {
+        id: '1',
+        timestampUs: 0,
+        name: 'root',
+        traceId: 't1',
+        duration: 100,
+        serviceName: 'svcA',
+        errorCount: 0,
+      },
     ];
 
     const result = getTraceParentChildrenMap(items);
@@ -247,8 +319,24 @@ describe('getTraceMap', () => {
 
   it('handles multiple roots (should only keep the last as root)', () => {
     const items: TraceItem[] = [
-      { id: '1', timestampUs: 0, name: 'root1', traceId: 't1', duration: 100, serviceName: 'svcA' },
-      { id: '2', timestampUs: 0, name: 'root2', traceId: 't1', duration: 100, serviceName: 'svcB' },
+      {
+        id: '1',
+        timestampUs: 0,
+        name: 'root1',
+        traceId: 't1',
+        duration: 100,
+        serviceName: 'svcA',
+        errorCount: 0,
+      },
+      {
+        id: '2',
+        timestampUs: 0,
+        name: 'root2',
+        traceId: 't1',
+        duration: 100,
+        serviceName: 'svcB',
+        errorCount: 0,
+      },
     ];
 
     const result = getTraceParentChildrenMap(items);
@@ -279,6 +367,7 @@ describe('getTraceWaterfallDuration', () => {
         offset: 0,
         skew: 0,
         color: 'red',
+        errorCount: 0,
       },
       {
         id: '2',
@@ -291,6 +380,7 @@ describe('getTraceWaterfallDuration', () => {
         offset: 80,
         skew: 10,
         color: 'blue',
+        errorCount: 0,
       },
       {
         id: '3',
@@ -303,6 +393,7 @@ describe('getTraceWaterfallDuration', () => {
         offset: 120,
         skew: 5,
         color: 'green',
+        errorCount: 0,
       },
     ];
     expect(getTraceWaterfallDuration(items)).toBe(155);
