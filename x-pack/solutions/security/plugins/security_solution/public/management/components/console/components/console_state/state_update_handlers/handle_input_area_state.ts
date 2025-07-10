@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { v4 as uuidV4 } from 'uuid';
 import type { ParsedCommandInterface } from '../../../service/types';
-import { parseCommandInput } from '../../../service/parsed_command_input';
+import { parseCommandInput, detectAndPreProcessPastedCommand } from '../../../service/parsed_command_input';
 import type {
   ConsoleDataAction,
   ConsoleDataState,
@@ -115,15 +115,34 @@ export const handleInputAreaState: ConsoleStoreReducer<InputAreaStateAction> = (
         state.input.leftOfCursorText !== newTextEntered ||
         state.input.rightOfCursorText !== newRightOfCursor
       ) {
-        const parsedInput = parseCommandInput(newTextEntered + newRightOfCursor);
+        const fullCommand = newTextEntered + newRightOfCursor;
+        
+        // Pre-process pasted commands to handle selector arguments like --ScriptName
+        const preProcessResult = detectAndPreProcessPastedCommand(fullCommand, state.commands);
+        
+        // Use cleaned command for parsing if selector arguments were found
+        const commandToParse = preProcessResult.hasSelectorArguments 
+          ? preProcessResult.cleanedCommand 
+          : fullCommand;
+          
+        const parsedInput = parseCommandInput(commandToParse);
 
         let enteredCommand: ConsoleDataState['input']['enteredCommand'] =
           state.input.enteredCommand;
 
-        if (enteredCommand && adjustedArgState && enteredCommand?.argState !== adjustedArgState) {
+        // Merge extracted argState from pre-processing with adjusted argState
+        let finalArgState = adjustedArgState;
+        if (preProcessResult.hasSelectorArguments && Object.keys(preProcessResult.extractedArgState).length > 0) {
+          finalArgState = {
+            ...adjustedArgState,
+            ...preProcessResult.extractedArgState,
+          };
+        }
+
+        if (enteredCommand && finalArgState && enteredCommand?.argState !== finalArgState) {
           enteredCommand = {
             ...enteredCommand,
-            argState: adjustedArgState,
+            argState: finalArgState,
           };
         }
 
@@ -139,7 +158,7 @@ export const handleInputAreaState: ConsoleStoreReducer<InputAreaStateAction> = (
 
           if (commandDefinition) {
             let argsWithValueSelectors: EnteredCommand['argsWithValueSelectors'];
-            const argState: EnteredCommand['argState'] = adjustedArgState ?? {};
+            const argState: EnteredCommand['argState'] = finalArgState ?? {};
 
             for (const [argName, argDef] of Object.entries(commandDefinition.args ?? {})) {
               if (argDef.SelectorComponent) {

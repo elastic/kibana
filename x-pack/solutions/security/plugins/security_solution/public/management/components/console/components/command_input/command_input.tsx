@@ -123,7 +123,7 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
 
   const handleSubmitButton = useCallback<MouseEventHandler>(() => {
     setCommandToExecute({
-      input: userInput.getFullText(true),
+      input: userInput.getFullText(),
       enteredCommand,
       parsedInput,
     });
@@ -193,7 +193,7 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
             // ENTER  = Execute command and blank out the input area
             case 13:
               setCommandToExecute({
-                input: inputText.getFullText(true),
+                input: inputText.getFullText(),
                 enteredCommand: prevEnteredCommand as ConsoleDataState['input']['enteredCommand'],
                 parsedInput: prevParsedInput as ConsoleDataState['input']['parsedInput'],
               });

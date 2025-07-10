@@ -145,20 +145,102 @@ export const getArgumentsForCommand = (command: CommandDefinition): string[] => 
     exclusive?: string;
     optional?: string;
   }) => {
-    return `${required ? required : ''}${exclusive ? ` ${exclusive}` : ''} ${
-      optional && optional.length > 0 ? `[${optional}]` : ''
-    }`.trim();
+    return `${required ? required : ''}${exclusive ? ` ${exclusive}` : ''} ${optional && optional.length > 0 ? `[${optional}]` : ''
+      }`.trim();
   };
 
   return exclusiveOrArgs.length > 0
     ? exclusiveOrArgs.map((exclusiveArg) => {
-        return buildArgumentText({
-          required: requiredArgs,
-          exclusive: exclusiveArg,
-          optional: optionalArgs,
-        });
-      })
+      return buildArgumentText({
+        required: requiredArgs,
+        exclusive: exclusiveArg,
+        optional: optionalArgs,
+      });
+    })
     : requiredArgs || optionalArgs
-    ? [buildArgumentText({ required: requiredArgs, optional: optionalArgs })]
-    : [];
+      ? [buildArgumentText({ required: requiredArgs, optional: optionalArgs })]
+      : [];
+};
+
+/**
+ * Detects and pre-processes pasted commands that contain argument values
+ * for arguments that should be handled by selector components.
+ * 
+ * For example: "runscript --ScriptName="test.ps1"" becomes:
+ * - cleanedCommand: "runscript --ScriptName"  
+ * - extractedArgState: { ScriptName: [{ value: "test.ps1", valueText: "test.ps1" }] }
+ */
+export const detectAndPreProcessPastedCommand = (
+  rawInput: string,
+  commandDefinitions: any[] = []
+): {
+  cleanedCommand: string;
+  extractedArgState: Record<string, Array<{ value: string; valueText: string }>>;
+  hasSelectorArguments: boolean;
+} => {
+  const result = {
+    cleanedCommand: rawInput,
+    extractedArgState: {} as Record<string, Array<{ value: string; valueText: string }>>,
+    hasSelectorArguments: false,
+  };
+
+  // Early return if no input
+  if (!rawInput.trim()) {
+    return result;
+  }
+
+  const commandName = getCommandNameFromTextInput(rawInput);
+  const commandDef = commandDefinitions.find((def) => def.name === commandName);
+
+  // Early return if command not found or has no selector arguments
+  if (!commandDef?.args) {
+    return result;
+  }
+
+  // Find arguments that have SelectorComponents (like ScriptName)
+  const selectorArguments = Object.entries(commandDef.args).filter(
+    ([_, argDef]: [string, any]) => argDef.SelectorComponent
+  );
+
+  if (selectorArguments.length === 0) {
+    return result;
+  }
+
+  let cleanedCommand = rawInput;
+  let hasExtractedValues = false;
+
+  // Process each selector argument to extract embedded values
+  for (const [argName] of selectorArguments) {
+    const argPattern = new RegExp(`--${argName}\\s*[=]\\s*(["'][^"']*["']|\\S+)`, 'g');
+    let match;
+
+    while ((match = argPattern.exec(rawInput)) !== null) {
+      let value = match[1];
+
+      // Remove quotes if present
+      if ((value.startsWith('"') && value.endsWith('"')) ||
+        (value.startsWith("'") && value.endsWith("'"))) {
+        value = value.slice(1, -1);
+      }
+
+      // Store the extracted value in argState format
+      if (!result.extractedArgState[argName]) {
+        result.extractedArgState[argName] = [];
+      }
+
+      result.extractedArgState[argName].push({
+        value,
+        valueText: value,
+      });
+
+      // Replace the full argument with value with just the argument name
+      cleanedCommand = cleanedCommand.replace(match[0], `--${argName}`);
+      hasExtractedValues = true;
+    }
+  }
+
+  result.cleanedCommand = cleanedCommand;
+  result.hasSelectorArguments = hasExtractedValues;
+
+  return result;
 };

@@ -700,7 +700,7 @@ const adjustCommandsForCrowdstrike = ({
               about: CROWDSTRIKE_CONSOLE_COMMANDS.runscript.args.cloudFile.about,
               mustHaveValue: 'truthy',
               exclusiveOr: true,
-              SelectorComponent: CustomScriptSelector('crowdstrike'),
+              SelectorComponent: CustomScriptSelector,
             },
             CommandLine: {
               required: false,
@@ -767,7 +767,7 @@ const adjustCommandsForMicrosoftDefenderEndpoint = ({
               allowMultiples: false,
               about: MS_DEFENDER_ENDPOINT_CONSOLE_COMMANDS.runscript.args.scriptName.about,
               mustHaveValue: 'truthy',
-              SelectorComponent: CustomScriptSelector('microsoft_defender_endpoint'),
+              SelectorComponent: CustomScriptSelector,
             },
             Args: {
               required: false,
