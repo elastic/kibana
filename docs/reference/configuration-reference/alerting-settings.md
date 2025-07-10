@@ -134,7 +134,7 @@ $$$action-config-email-domain-allowlist$$$
 
     Data type: `string`
 
-`xpack.actions.email.recipient_allowlist` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
+`xpack.actions.email.recipient_allowlist` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}") {applies_to}`stack: ga 9.2`
 :    A list of allowed email recipient (`to`, `cc`, or `bcc`) patterns that can be used with email connectors. If you attempt to send an email to a recipient that does not match the allowed patterns, the action will fail. The failure message indicates that the email is not allowed.
 
     ::::{warning}

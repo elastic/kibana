@@ -294,6 +294,11 @@ groups:
         # important: ""
         datatype: string
         # default:
+        applies_to:
+          stack: ga 9.2
+          deployment:
+            self: ga
+            ess: ga
 
       - setting: xpack.actions.email.services.ses.host 
         id: action-config-email-services-ses-host
