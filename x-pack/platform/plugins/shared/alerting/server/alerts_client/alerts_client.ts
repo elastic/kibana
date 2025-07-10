@@ -253,6 +253,10 @@ export class AlertsClient<
           this.trackedAlerts.seqNo[alertUuid] = hit._seq_no;
           this.trackedAlerts.primaryTerm[alertUuid] = hit._primary_term;
 
+          this.options.logger.info(
+            `[TrackedAlerts] Found alert ${alertUuid} in index ${hit._index} with seq_no ${hit._seq_no} and primary_term ${hit._primary_term}`
+          );
+
           // only when the alerts are fetched by alert uuids
           if (!trackedExecutions) {
             const executionUuid = get(alertHit, ALERT_RULE_EXECUTION_UUID);

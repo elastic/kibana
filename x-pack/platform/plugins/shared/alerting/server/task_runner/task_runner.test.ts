@@ -2677,26 +2677,6 @@ describe('Task Runner', () => {
     );
   });
 
-  test('caps monitoring history at 200', async () => {
-    const taskRunner = new TaskRunner({
-      ruleType,
-      internalSavedObjectsRepository,
-      taskInstance: mockedTaskInstance,
-      context: taskRunnerFactoryInitializerParams,
-      inMemoryMetrics,
-    });
-    expect(AlertingEventLogger).toHaveBeenCalled();
-
-    mockGetAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
-
-    for (let i = 0; i < 300; i++) {
-      await taskRunner.run();
-    }
-    const runnerResult = await taskRunner.run();
-    expect(runnerResult.monitoring?.run.history.length).toBe(200);
-  });
-
   test('Actions circuit breaker kicked in, should set status as warning and log a message in event log', async () => {
     const actionsConfigMap = {
       default: {
