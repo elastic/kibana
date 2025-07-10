@@ -46,7 +46,7 @@ describe('execute_connector function', () => {
         `Does not use ${EXECUTE_CONNECTOR_FUNCTION_NAME} function.`,
         'Explains that no connectors are available to send the email.',
         'Does not attempt to send an email.',
-        'unsuccessfully sends an email.',
+        'Mentions that sending the email was unsuccessful.',
       ]);
       expect(result.passed).to.be(true);
     });
