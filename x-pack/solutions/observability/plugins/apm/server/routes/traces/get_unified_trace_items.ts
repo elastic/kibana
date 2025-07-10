@@ -136,7 +136,6 @@ export async function getUnifiedTraceItems({
   );
 
   const errorCountByDocId = getErrorCountByDocId(unifiedTraceErrors);
-
   return response.hits.hits
     .map((hit) => {
       const event = unflattenKnownApmEventFields(hit.fields, fields);
@@ -153,11 +152,7 @@ export async function getUnifiedTraceItems({
         name: event.span?.name ?? event.transaction?.name,
         traceId: event.trace.id,
         duration: resolveDuration(apmDuration, event.duration),
-        hasError:
-          docErrorCount > 0 ||
-          (event.status?.code && Array.isArray(event.status.code)
-            ? event.status.code[0] === 'Error'
-            : false),
+        errorCount: docErrorCount,
         parentId: event.parent?.id,
         serviceName: event.service.name,
       } as TraceItem;

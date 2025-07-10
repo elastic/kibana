@@ -77,7 +77,7 @@ export function BarDetails({
             {asDuration(item.duration)}
           </EuiText>
         </EuiFlexItem>
-        {item.hasError ? (
+        {item.errorCount > 0 ? (
           <EuiFlexItem grow={false}>
             {onErrorClick ? (
               <EuiButtonIcon
