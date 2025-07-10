@@ -78,11 +78,37 @@ export const INDEX_STATS_EVENT: EventTypeOpts<IndicesStats> = {
                 'The total time spent on query execution across all search requests, measured in milliseconds.',
             },
           },
+
+          docs_count_primaries: {
+            type: 'long',
+            _meta: {
+              optional: true,
+              description:
+                'The total number of documents currently stored in the index (primary shards).',
+            },
+          },
+          docs_deleted_primaries: {
+            type: 'long',
+            _meta: {
+              optional: true,
+              description:
+                'The total number of documents that have been marked as deleted in the index (primary shards).',
+            },
+          },
+          docs_total_size_in_bytes_primaries: {
+            type: 'long',
+            _meta: {
+              optional: true,
+              description:
+                'The total size, in bytes, of all documents stored in the index, including storage overhead (primary shards).',
+            },
+          },
           docs_count: {
             type: 'long',
             _meta: {
               optional: true,
-              description: 'The total number of documents currently stored in the index.',
+              description:
+                'The total number of documents currently stored in the index (primary and replica shards).',
             },
           },
           docs_deleted: {
@@ -90,7 +116,7 @@ export const INDEX_STATS_EVENT: EventTypeOpts<IndicesStats> = {
             _meta: {
               optional: true,
               description:
-                'The total number of documents that have been marked as deleted in the index.',
+                'The total number of documents that have been marked as deleted in the index (primary and replica shards).',
             },
           },
           docs_total_size_in_bytes: {
@@ -98,7 +124,24 @@ export const INDEX_STATS_EVENT: EventTypeOpts<IndicesStats> = {
             _meta: {
               optional: true,
               description:
-                'The total size, in bytes, of all documents stored in the index, including storage overhead.',
+                'The total size, in bytes, of all documents stored in the index, including storage overhead (primary and replica shards).',
+            },
+          },
+
+          index_failed: {
+            type: 'long',
+            _meta: {
+              optional: true,
+              description:
+                'The total number of documents failed to index (primary and replica shards).',
+            },
+          },
+          index_failed_due_to_version_conflict: {
+            type: 'long',
+            _meta: {
+              optional: true,
+              description:
+                'The total number of documents failed to index due to version conflict (primary and replica shards).',
             },
           },
         },
