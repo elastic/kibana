@@ -91,6 +91,11 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
           pageTestSubject: 'searchSynonymsOverviewPage',
         },
         {
+          deepLinkId: 'searchQueryRules',
+          breadcrumbs: ['Relevance', 'Query Rules'],
+          pageTestSubject: 'queryRulesBasePage',
+        },
+        {
           deepLinkId: 'searchInferenceEndpoints',
           breadcrumbs: ['Relevance', 'Inference Endpoints'],
           pageTestSubject: 'inferenceEndpointsPage',
@@ -222,6 +227,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Connectors' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Relevance' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Synonyms' });
+      await solutionNavigation.sidenav.expectLinkExists({ text: 'Query Rules' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Inference Endpoints' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Developer Tools' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Trained Models' });
@@ -243,6 +249,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         'serverlessConnectors',
         'relevance',
         'searchSynonyms',
+        'searchQueryRules',
         'searchInferenceEndpoints',
         'search_project_nav_footer',
         'dev_tools',

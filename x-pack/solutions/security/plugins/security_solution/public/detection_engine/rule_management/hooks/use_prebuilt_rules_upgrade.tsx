@@ -301,7 +301,14 @@ export function usePrebuiltRulesUpgrade({
       }
 
       let updateTabContent = (
-        <PerFieldRuleDiffTab header={headerCallout} ruleDiff={ruleUpgradeState.diff} />
+        <PerFieldRuleDiffTab
+          header={headerCallout}
+          ruleDiff={ruleUpgradeState.diff}
+          leftDiffSideLabel={i18n.CURRENT_RULE_VERSION}
+          rightDiffSideLabel={i18n.ELASTIC_UPDATE_VERSION}
+          leftDiffSideDescription={i18n.CURRENT_VERSION_DESCRIPTION}
+          rightDiffSideDescription={i18n.UPDATED_VERSION_DESCRIPTION}
+        />
       );
 
       // Show the resolver tab only if rule customization is enabled and there
@@ -338,6 +345,10 @@ export function usePrebuiltRulesUpgrade({
             <RuleDiffTab
               oldRule={ruleUpgradeState.current_rule}
               newRule={ruleUpgradeState.target_rule}
+              leftDiffSideLabel={i18n.CURRENT_RULE_VERSION}
+              rightDiffSideLabel={i18n.ELASTIC_UPDATE_VERSION}
+              leftDiffSideDescription={i18n.CURRENT_VERSION_DESCRIPTION}
+              rightDiffSideDescription={i18n.UPDATED_VERSION_DESCRIPTION}
             />
           </div>
         ),

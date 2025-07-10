@@ -16,6 +16,7 @@ import {
   EuiLoadingSpinner,
   EuiDescriptionList,
 } from '@elastic/eui';
+import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common';
 import { AlertConsumers, getEditRuleRoute, getRuleDetailsRoute } from '@kbn/rule-data-utils';
 import { i18n } from '@kbn/i18n';
 import { formatDuration } from '@kbn/alerting-plugin/common';
@@ -102,6 +103,11 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = memo
     const ruleDescription = useMemo(() => {
       if (ruleTypeRegistry.has(rule.ruleTypeId)) {
         return ruleTypeRegistry.get(rule.ruleTypeId).description;
+      }
+      if (rule.ruleTypeId === ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID) {
+        return i18n.translate('xpack.triggersActionsUI.ruleDetails.attackDiscoveryRule', {
+          defaultMessage: 'Attack Discovery rule',
+        });
       }
       // TODO: Replace this generic description with proper SIEM rule descriptions
       if (rule.consumer === AlertConsumers.SIEM) {

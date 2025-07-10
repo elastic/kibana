@@ -115,6 +115,11 @@ describe('attackDiscoveryScheduleExecutor', () => {
     spaceId,
     state: {},
   };
+  const mockReplacements = {
+    ...mockAnonymizedAlertsReplacements,
+    'e1cb3cf0-30f3-4f99-a9c8-518b955c6f90': 'Test-Host-1',
+    '039c15c5-3964-43e7-a891-42fe2ceeb9ff': 'Test-User-1',
+  };
 
   beforeAll(() => {
     jest.useFakeTimers();
@@ -133,11 +138,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
     (generateAttackDiscoveries as jest.Mock).mockResolvedValue({
       anonymizedAlerts: mockAnonymizedAlerts,
       attackDiscoveries: mockAttackDiscoveries,
-      replacements: {
-        ...mockAnonymizedAlertsReplacements,
-        'e1cb3cf0-30f3-4f99-a9c8-518b955c6f90': 'Test-Host-1',
-        '039c15c5-3964-43e7-a891-42fe2ceeb9ff': 'Test-User-1',
-      },
+      replacements: mockReplacements,
     });
     (deduplicateAttackDiscoveries as jest.Mock).mockResolvedValue(mockAttackDiscoveries);
 
@@ -419,6 +420,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
       indexPattern: '.alerts-security.attack.discovery.alerts-test-space',
       logger: mockLogger,
       ownerId: executorOptions.rule.id,
+      replacements: mockReplacements,
       spaceId,
     });
   });

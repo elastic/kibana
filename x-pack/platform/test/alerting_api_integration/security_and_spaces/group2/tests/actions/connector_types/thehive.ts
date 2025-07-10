@@ -17,7 +17,6 @@ const secrets = {
   apiKey: 'token12345',
 };
 
-// eslint-disable-next-line import/no-default-export
 export default function theHiveTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const configService = getService('config');

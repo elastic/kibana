@@ -17,14 +17,25 @@ All features in the Onechat plugin are developed behind UI settings (feature fla
 
 ```yml
 uiSettings.overrides:
-  onechat:agentApi:enabled: true
-  onechat:mcpServer:enabled: true
-  onechat:esqlToolApi:enabled: true
-  onechat:tools:enabled: true
+  onechat:mcp:enabled: true
+  onechat:api:enabled: true
   onechat:ui:enabled: true
 ```
 
 This will ensure all Onechat features are available in your Kibana instance.
+
+If running in Serverless or Cloud dev environments, it may be more practical to adjust these via API:
+
+```
+POST kbn://api/kibana/settings
+{
+   "changes": {
+      "onechat:mcp:enabled": true,
+      "onechat:api:enabled": true,
+      "onechat:ui:enabled": true,
+   }
+}
+```
 
 ## Overview
 
@@ -248,7 +259,7 @@ To enable the MCP server, add the following to your Kibana config:
 
 ```yaml
 uiSettings.overrides:
-  onechat:mcpServer:enabled: true
+  onechat:mcp:enabled: true
 ```
 Configure Claude Desktop by adding this to its configuration:
 ```json
@@ -296,7 +307,7 @@ To enable the API, add the following to your Kibana config
 
 ```yaml
 uiSettings.overrides:
-  onechat:esqlToolApi:enabled: true
+  onechat:api:enabled: true
 ```
 ## Chat UI
 To enable the Chat UI located at `/app/chat/`, add the following to your Kibana config:
@@ -306,10 +317,4 @@ uiSettings.overrides:
   onechat:ui:enabled: true
 ```
 
-### Tools UI
-To enable the Tools UI located at `/app/chat/tools`, add the following to your Kibana config:
 
-```yaml
-uiSettings.overrides:
-  onechat:tools:enabled: true
-```

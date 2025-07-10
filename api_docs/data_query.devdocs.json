@@ -2244,14 +2244,7 @@
             "label": "refreshInterval",
             "description": [],
             "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-common.RefreshInterval",
-                "text": "RefreshInterval"
-              },
-              " | undefined"
+              "Readonly<{} & { value: number; pause: boolean; }> | undefined"
             ],
             "path": "src/platform/plugins/shared/data/public/query/state_sync/types.ts",
             "deprecated": false,
@@ -3461,23 +3454,7 @@
               },
               "; setTime: (time: ",
               "InputTimeRange",
-              ") => void; getRefreshInterval: () => ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-common.RefreshInterval",
-                "text": "RefreshInterval"
-              },
-              "; getMinRefreshInterval: () => number; setRefreshInterval: (refreshInterval: Partial<",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-common.RefreshInterval",
-                "text": "RefreshInterval"
-              },
-              ">) => void; createFilter: (indexPattern: ",
+              ") => void; getRefreshInterval: () => Readonly<{} & { value: number; pause: boolean; }>; getMinRefreshInterval: () => number; setRefreshInterval: (refreshInterval: Partial<Readonly<{} & { value: number; pause: boolean; }>>) => void; createFilter: (indexPattern: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -3585,15 +3562,7 @@
                 "section": "def-common.TimeRange",
                 "text": "TimeRange"
               },
-              "; getRefreshIntervalDefaults: () => ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-common.RefreshInterval",
-                "text": "RefreshInterval"
-              },
-              "; }"
+              "; getRefreshIntervalDefaults: () => Readonly<{} & { value: number; pause: boolean; }>; }"
             ],
             "path": "src/platform/plugins/shared/data/public/query/timefilter/timefilter_service.ts",
             "deprecated": false,
@@ -3806,15 +3775,7 @@
             "section": "def-common.TimeRange",
             "text": "TimeRange"
           },
-          " & { refreshInterval: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataQueryPluginApi",
-            "section": "def-common.RefreshInterval",
-            "text": "RefreshInterval"
-          },
-          "; }"
+          " & { refreshInterval: Readonly<{} & { value: number; pause: boolean; }>; }"
         ],
         "path": "src/platform/plugins/shared/data/public/query/saved_query/types.ts",
         "deprecated": false,
@@ -3873,23 +3834,7 @@
           },
           "; setTime: (time: ",
           "InputTimeRange",
-          ") => void; getRefreshInterval: () => ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataQueryPluginApi",
-            "section": "def-common.RefreshInterval",
-            "text": "RefreshInterval"
-          },
-          "; getMinRefreshInterval: () => number; setRefreshInterval: (refreshInterval: Partial<",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataQueryPluginApi",
-            "section": "def-common.RefreshInterval",
-            "text": "RefreshInterval"
-          },
-          ">) => void; createFilter: (indexPattern: ",
+          ") => void; getRefreshInterval: () => Readonly<{} & { value: number; pause: boolean; }>; getMinRefreshInterval: () => number; setRefreshInterval: (refreshInterval: Partial<Readonly<{} & { value: number; pause: boolean; }>>) => void; createFilter: (indexPattern: ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -3997,15 +3942,7 @@
             "section": "def-common.TimeRange",
             "text": "TimeRange"
           },
-          "; getRefreshIntervalDefaults: () => ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataQueryPluginApi",
-            "section": "def-common.RefreshInterval",
-            "text": "RefreshInterval"
-          },
-          "; }"
+          "; getRefreshIntervalDefaults: () => Readonly<{} & { value: number; pause: boolean; }>; }"
         ],
         "path": "src/platform/plugins/shared/data/public/query/timefilter/timefilter.ts",
         "deprecated": false,
@@ -4872,15 +4809,7 @@
             "section": "def-common.TimeRange",
             "text": "TimeRange"
           },
-          " | undefined; refreshInterval?: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataQueryPluginApi",
-            "section": "def-common.RefreshInterval",
-            "text": "RefreshInterval"
-          },
-          " | undefined; filters?: ",
+          " | undefined; refreshInterval?: Readonly<{} & { value: number; pause: boolean; }> | undefined; filters?: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -4913,21 +4842,6 @@
       },
       {
         "parentPluginId": "data",
-        "id": "def-common.RefreshInterval",
-        "type": "Type",
-        "tags": [],
-        "label": "RefreshInterval",
-        "description": [],
-        "signature": [
-          "{ pause: boolean; value: number; }"
-        ],
-        "path": "src/platform/plugins/shared/data/common/query/timefilter/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
         "id": "def-common.SavedQueryTimeFilter",
         "type": "Type",
         "tags": [],
@@ -4941,15 +4855,7 @@
             "section": "def-common.TimeRange",
             "text": "TimeRange"
           },
-          " & { refreshInterval: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataQueryPluginApi",
-            "section": "def-common.RefreshInterval",
-            "text": "RefreshInterval"
-          },
-          "; }"
+          " & { refreshInterval: Readonly<{} & { value: number; pause: boolean; }>; }"
         ],
         "path": "src/platform/plugins/shared/data/common/query/types.ts",
         "deprecated": false,

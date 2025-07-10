@@ -64,7 +64,6 @@ export function getDatafeedConfig(): Datafeed {
   } as Datafeed;
 }
 
-// eslint-disable-next-line import/no-default-export
 export default function alertTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const retry = getService('retry');

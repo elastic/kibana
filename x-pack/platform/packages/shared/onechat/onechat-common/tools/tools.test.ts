@@ -24,7 +24,7 @@ describe('Tool Identifier utilities', () => {
     });
 
     it('should return false for an unstructured identifier', () => {
-      expect(isPlainToolIdentifier('builtIn::my-tool')).toBe(false);
+      expect(isPlainToolIdentifier('built_in::my-tool')).toBe(false);
     });
 
     it('should return false for a structured identifier', () => {
@@ -51,13 +51,13 @@ describe('Tool Identifier utilities', () => {
     });
 
     it('should return false for an unstructured identifier', () => {
-      expect(isStructuredToolIdentifier('builtIn::my-tool')).toBe(false);
+      expect(isStructuredToolIdentifier('built_in::my-tool')).toBe(false);
     });
   });
 
   describe('isSerializedToolIdentifier', () => {
     it('should return true for a valid serialized identifier', () => {
-      expect(isSerializedToolIdentifier('builtIn::my-tool')).toBe(true);
+      expect(isSerializedToolIdentifier('built_in::my-tool')).toBe(true);
     });
 
     it('should return false for a plain string identifier', () => {
@@ -86,7 +86,7 @@ describe('Tool Identifier utilities', () => {
 
   describe('toSerializedToolIdentifier', () => {
     it('should return the same string for a serialized identifier', () => {
-      const serializedId = 'builtIn::my-tool';
+      const serializedId = 'built_in::my-tool';
       expect(toSerializedToolIdentifier(serializedId)).toBe(serializedId);
     });
 

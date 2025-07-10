@@ -14,7 +14,7 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import { FetchStatus } from '../../../types';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { useDiscoverHistogram } from './use_discover_histogram';
+import { useDiscoverHistogram, type UseUnifiedHistogramOptions } from './use_discover_histogram';
 import { setTimeout } from 'timers/promises';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 import { RequestAdapter } from '@kbn/inspector-plugin/public';
@@ -110,9 +110,11 @@ describe('useDiscoverHistogram', () => {
   const renderUseDiscoverHistogram = async ({
     stateContainer = getStateContainer(),
     scopedProfilesManager,
+    options,
   }: {
     stateContainer?: DiscoverStateContainer;
     scopedProfilesManager?: ScopedProfilesManager;
+    options?: UseUnifiedHistogramOptions;
   } = {}) => {
     const Wrapper = ({ children }: React.PropsWithChildren<unknown>) => (
       <DiscoverTestProvider
@@ -124,7 +126,7 @@ describe('useDiscoverHistogram', () => {
       </DiscoverTestProvider>
     );
 
-    const hook = renderHook(() => useDiscoverHistogram(stateContainer), {
+    const hook = renderHook(() => useDiscoverHistogram(stateContainer, options), {
       wrapper: Wrapper,
     });
 
@@ -155,12 +157,36 @@ describe('useDiscoverHistogram', () => {
       const { hook } = await renderUseDiscoverHistogram();
       const params = hook.result.current;
       expect(params?.localStorageKeyPrefix).toBe('discover');
-      expect(Object.keys(params?.initialState ?? {})).toEqual([
-        'chartHidden',
-        'timeInterval',
-        'totalHitsStatus',
-        'totalHitsResult',
-      ]);
+      expect(params?.initialState).toMatchInlineSnapshot(`
+        Object {
+          "chartHidden": false,
+          "timeInterval": "auto",
+          "topPanelHeight": undefined,
+          "totalHitsResult": undefined,
+          "totalHitsStatus": "loading",
+        }
+      `);
+    });
+
+    it('should return the restored initial state', async () => {
+      const { hook } = await renderUseDiscoverHistogram({
+        options: {
+          initialLayoutProps: {
+            topPanelHeight: 100,
+          },
+        },
+      });
+      const params = hook.result.current;
+      expect(params?.localStorageKeyPrefix).toBe('discover');
+      expect(params?.initialState).toMatchInlineSnapshot(`
+        Object {
+          "chartHidden": false,
+          "timeInterval": "auto",
+          "topPanelHeight": 100,
+          "totalHitsResult": undefined,
+          "totalHitsStatus": "loading",
+        }
+      `);
     });
 
     it('should return the isChartLoading params for ES|QL mode', async () => {

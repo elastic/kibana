@@ -26,5 +26,6 @@
     "@kbn/navigation-plugin",
     "@kbn/apm-sources-access-plugin",
     "@kbn/data-plugin",
+    "@kbn/core-ui-settings-browser"
   ]
 }

@@ -22,7 +22,6 @@ import { discoverServiceMock } from '../../../../__mocks__/services';
 import type { SidebarToggleState } from '../../../types';
 import { FetchStatus } from '../../../types';
 import { buildDataTableRecord } from '@kbn/discover-utils';
-import type { DiscoverHistogramLayoutProps } from './discover_histogram_layout';
 import { DiscoverHistogramLayout } from './discover_histogram_layout';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/public';
@@ -35,6 +34,7 @@ import { createDataViewDataSource } from '../../../../../common/data_sources';
 import { internalStateActions } from '../../state_management/redux';
 import { UnifiedHistogramChart } from '@kbn/unified-histogram';
 import { DiscoverTestProvider } from '../../../../__mocks__/test_provider';
+import type { DiscoverMainContentProps } from './discover_main_content';
 
 const mockSearchSessionId = '123';
 
@@ -132,14 +132,13 @@ const mountComponent = async ({
   stateContainer.dataState.data$ = savedSearchData$;
   stateContainer.actions.undoSavedSearchChanges = jest.fn();
 
-  const props: DiscoverHistogramLayoutProps = {
+  const props: DiscoverMainContentProps = {
     dataView,
     stateContainer,
     onFieldEdited: jest.fn(),
     columns: [],
     viewMode: VIEW_MODE.DOCUMENT_LEVEL,
     onAddFilter: jest.fn(),
-    container: null,
     panelsToggle: (
       <PanelsToggle
         stateContainer={stateContainer}

@@ -33,6 +33,11 @@ export function SvlSearchElasticsearchStartPageProvider({ getService }: FtrProvi
         );
       });
     },
+    async expectToBeOnSearchHomepagePage() {
+      await retry.tryForTime(60 * 1000, async () => {
+        expect(await browser.getCurrentUrl()).contain('/app/elasticsearch/home');
+      });
+    },
     async expectToBeOnMLFileUploadPage() {
       await retry.tryForTime(60 * 1000, async () => {
         expect(await browser.getCurrentUrl()).contain('/app/ml/filedatavisualizer');
@@ -126,6 +131,10 @@ export function SvlSearchElasticsearchStartPageProvider({ getService }: FtrProvi
     async expectAPIKeyFormNotAvailable() {
       await testSubjects.missingOrFail('apiKeyHasNotBeenGenerated');
       await testSubjects.missingOrFail('apiKeyHasBeenGenerated');
+    },
+
+    async clearSkipEmptyStateStorageFlag() {
+      await browser.removeLocalStorageItem('search_onboarding_global_empty_state_skip');
     },
   };
 }

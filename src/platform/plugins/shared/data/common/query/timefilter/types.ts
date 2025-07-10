@@ -10,12 +10,6 @@
 import type { Moment } from 'moment';
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-export type RefreshInterval = {
-  pause: boolean;
-  value: number;
-};
-
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type TimeRange = {
   from: string;
   to: string;

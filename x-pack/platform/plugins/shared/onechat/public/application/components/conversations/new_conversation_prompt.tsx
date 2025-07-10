@@ -17,14 +17,22 @@ import {
   keys,
 } from '@elastic/eui';
 import { chatCommonLabels } from './i18n';
+import { AgentSelectDropdown } from './agent_select_dropdown';
 
 interface NewConversationPromptProps {
   onSubmit: (message: string) => void;
+  agentId: string;
+  selectAgentId: (agentId: string) => void;
 }
 
-export const NewConversationPrompt: React.FC<NewConversationPromptProps> = ({ onSubmit }) => {
+export const NewConversationPrompt: React.FC<NewConversationPromptProps> = ({
+  onSubmit,
+  selectAgentId,
+  agentId,
+}) => {
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const [message, setMessage] = useState<string>('');
+
   const { euiTheme } = useEuiTheme();
 
   useEffect(() => {
@@ -41,10 +49,6 @@ export const NewConversationPrompt: React.FC<NewConversationPromptProps> = ({ on
   const inputContainerClass = css`
     padding-top: ${euiTheme.size.l};
     width: 100%;
-  `;
-
-  const inputFlexItemClass = css`
-    max-width: 900px;
   `;
 
   const handleSubmit = useCallback(() => {
@@ -70,6 +74,17 @@ export const NewConversationPrompt: React.FC<NewConversationPromptProps> = ({ on
     [handleSubmit]
   );
 
+  const handleAgentChange = useCallback(
+    (newAgentId: string) => {
+      selectAgentId(newAgentId);
+    },
+    [selectAgentId]
+  );
+
+  const textAreaClass = css`
+    border: none;
+  `;
+
   return (
     <EuiFlexGroup alignItems="center" justifyContent="center">
       <EuiFlexItem grow={false} className={containerClass}>
@@ -77,38 +92,56 @@ export const NewConversationPrompt: React.FC<NewConversationPromptProps> = ({ on
           <EuiFlexGroup
             direction="column"
             gutterSize="s"
-            alignItems="center"
+            alignItems="stretch"
             justifyContent="center"
           >
             <EuiFlexItem className={inputContainerClass}>
               <EuiFlexGroup
+                direction="column"
                 gutterSize="s"
                 responsive={false}
-                alignItems="center"
+                alignItems="stretch"
                 justifyContent="center"
               >
-                <EuiFlexItem className={inputFlexItemClass}>
+                <EuiFlexItem>
                   <EuiTextArea
                     inputRef={inputRef}
                     data-test-subj="onechatAppChatNewConvTextArea"
                     fullWidth
                     rows={1}
                     resize="vertical"
-                    value={message}
+                    className={textAreaClass}
                     onChange={handleChange}
                     onKeyDown={handleTextAreaKeyDown}
                     placeholder={chatCommonLabels.userInputBox.placeholder}
                   />
                 </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButtonIcon
-                    aria-label="Submit"
-                    data-test-subj="onechatAppChatNewConvSubmitButton"
-                    iconType="kqlFunction"
-                    display="fill"
-                    size="m"
-                    onClick={handleSubmit}
-                  />
+
+                <EuiFlexItem>
+                  <EuiFlexGroup
+                    gutterSize="s"
+                    responsive={false}
+                    alignItems="center"
+                    justifyContent="flexEnd"
+                  >
+                    <EuiFlexItem grow={false}>
+                      <AgentSelectDropdown
+                        selectedAgentId={agentId}
+                        onAgentChange={handleAgentChange}
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiButtonIcon
+                        aria-label="Submit"
+                        data-test-subj="onechatAppChatNewConvSubmitButton"
+                        iconType="kqlFunction"
+                        display="fill"
+                        size="m"
+                        disabled={!message.trim()}
+                        onClick={handleSubmit}
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>

@@ -134,9 +134,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         // give time for the ruleset to be created
         await pageObjects.common.sleep(400);
-        await pageObjects.svlCommonNavigation.sidenav.clickLink({
-          deepLinkId: 'searchQueryRules',
-        });
+        await browser.navigateTo('about:blank');
+        await pageObjects.common.navigateToApp('searchQueryRules');
         await pageObjects.searchQueryRules.QueryRulesManagementPage.expectQueryRulesTableToExist();
       });
     });
@@ -185,7 +184,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await retry.try(async () => {
           const results =
             await pageObjects.searchQueryRules.QueryRulesManagementPage.getQueryRulesRulesetsList();
-          await expect(results.length).to.equal(2);
+          expect(results.length).to.equal(2);
         });
       });
       after(async () => {
@@ -199,7 +198,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     describe('Deleting a query ruleset from the ruleset details page', () => {
       before(async () => {
         await createTestRuleset('my-test-ruleset');
-        await browser.refresh();
+        await browser.navigateTo('about:blank');
+        await pageObjects.common.navigateToApp('searchQueryRules');
+      });
+      after(async () => {
+        try {
+          await deleteTestRuleset('my-test-ruleset');
+        } catch (error) {
+          // Ignore errors if ruleset doesn't exist or cannot be deleted
+        }
       });
       it('should be able to delete an existing ruleset and render the empty state', async () => {
         await pageObjects.searchQueryRules.QueryRulesManagementPage.expectQueryRulesTableToExist();
@@ -218,6 +225,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await browser.navigateTo('about:blank');
         await pageObjects.common.navigateToApp('searchQueryRules');
       });
+      after(async () => {
+        try {
+          await deleteTestRuleset('my-test-ruleset');
+        } catch (error) {
+          // Ignore errors if ruleset doesn't exist or cannot be deleted
+        }
+      });
       it('should be able to delete an existing ruleset and render the empty state', async () => {
         await pageObjects.searchQueryRules.QueryRulesManagementPage.expectQueryRulesTableToExist();
         await pageObjects.searchQueryRules.QueryRulesManagementPage.clickDeleteRulesetRow(0);
@@ -232,6 +246,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.common.sleep(500);
         await browser.navigateTo('about:blank');
         await pageObjects.common.navigateToApp('searchQueryRules');
+      });
+      after(async () => {
+        // give time for the ruleset to be deleted
+        await pageObjects.common.sleep(500);
+        await deleteTestRuleset('my-test-ruleset');
+        await deleteTestIndex('my-index-000001');
       });
       it('should edit the document id and the criteria field', async () => {
         await pageObjects.searchQueryRules.QueryRulesManagementPage.expectQueryRulesTableToExist();
@@ -251,16 +271,35 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.searchQueryRules.QueryRulesRuleFlyout.clickUpdateButton();
         await pageObjects.searchQueryRules.QueryRulesDetailPage.clickQueryRulesDetailPageSaveButton();
       });
-      after(async () => {
-        try {
-          await deleteTestRuleset('my-test-ruleset');
-        } catch (error) {
-          // Ignore errors if ruleset doesn't exist or cannot be deleted
+    });
+    describe('Pagination', () => {
+      before(async () => {
+        for (let i = 1; i <= 26; i++) {
+          await createTestRuleset(`ruleset-${i}`);
         }
-        try {
-          await deleteTestIndex('my-index-000001');
-        } catch (error) {
-          // Ignore errors if index doesn't exist or cannot be deleted
+        await browser.navigateTo('about:blank');
+        await pageObjects.common.navigateToApp('searchQueryRules');
+      });
+      it('should paginate through the rulesets', async () => {
+        await pageObjects.searchQueryRules.QueryRulesManagementPage.expectQueryRulesTableToExist();
+
+        const results =
+          await pageObjects.searchQueryRules.QueryRulesManagementPage.getQueryRulesRulesetsList();
+        expect(results.length).to.equal(25);
+
+        await pageObjects.searchQueryRules.QueryRulesManagementPage.clickPaginationNext();
+        const nextResults =
+          await pageObjects.searchQueryRules.QueryRulesManagementPage.getQueryRulesRulesetsList();
+        expect(nextResults.length).to.equal(1);
+        await pageObjects.searchQueryRules.QueryRulesManagementPage.clickPaginationPrevious();
+        const previousResults =
+          await pageObjects.searchQueryRules.QueryRulesManagementPage.getQueryRulesRulesetsList();
+        expect(previousResults.length).to.equal(25);
+      });
+      after(async () => {
+        // delete all created rulesets
+        for (let i = 1; i <= 26; i++) {
+          await deleteTestRuleset(`ruleset-${i}`);
         }
       });
     });

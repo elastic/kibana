@@ -7,6 +7,7 @@
 
 import expect from 'expect';
 import { KNOWLEDGE_BASE_ENTRIES_TABLE_MAX_PAGE_SIZE } from '@kbn/elastic-assistant-plugin/common/constants';
+import { MachineLearningProvider } from '@kbn/test-suites-xpack-platform/functional/services/ml';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { createEntry, createEntryForUser } from '../utils/create_entry';
 import { findEntries } from '../utils/find_entry';
@@ -17,7 +18,6 @@ import {
   setupKnowledgeBase,
 } from '../utils/helpers';
 import { removeServerGeneratedProperties } from '../utils/remove_server_generated_properties';
-import { MachineLearningProvider } from '../../../../../../functional/services/ml';
 import { documentEntry, indexEntry, globalDocumentEntry } from './mocks/entries';
 import { secOnlySpacesAll, secOnlySpacesAllAssistantMinimalAll } from '../utils/auth/users';
 import {

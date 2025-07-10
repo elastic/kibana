@@ -18,6 +18,14 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await svlObltNavigation.navigateToDiscoverPage();
     });
 
+    it('shows the alerts entry', async () => {
+      await svlCommonNavigation.expectExists();
+
+      await svlCommonNavigation.sidenav.expectLinkExists({
+        deepLinkId: 'observability-overview:alerts',
+      });
+    });
+
     it('does not show the SLO entry', async () => {
       await svlCommonNavigation.expectExists();
 

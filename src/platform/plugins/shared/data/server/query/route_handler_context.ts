@@ -179,7 +179,7 @@ export async function registerSavedQueryRouteHandlerContext(context: RequestHand
     // TODO: Handle properly
     if (savedObject.error) throw internal(savedObject.error.message);
 
-    return injectReferences({ id, attributes, references });
+    return injectReferences({ id, attributes, references, namespaces: savedObject.namespaces });
   };
 
   const getSavedQuery = async (id: string): Promise<SavedQueryRestResponse> => {

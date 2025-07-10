@@ -8,3 +8,5 @@
 export { addRoundCompleteEvent } from './add_round_complete_event';
 export { extractRound } from './extract_round';
 export { conversationToLangchainMessages } from './to_langchain_messages';
+export { selectProviderTools } from './select_provider_tools';
+export { customInstructionsBlock } from './prompt_helpers';

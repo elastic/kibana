@@ -263,7 +263,10 @@ export const mobileServiceDetailRoute = {
         element: <ServiceLogs />,
         searchBarOptions: {
           showMobileFilters: false,
-          showQueryInput: false,
+          showQueryInput: true,
+          searchBarPlaceholder: i18n.translate('xpack.apm.views.logs.searchBarPlaceholder', {
+            defaultMessage: 'Search for log entries',
+          }),
         },
       }),
       '/mobile-services/{serviceName}/alerts': {

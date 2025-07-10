@@ -58,6 +58,7 @@ describe('useManagedDataViews', () => {
     // Mock the Redux selector
     (useSelector as jest.Mock).mockReturnValue({
       dataViews: mockDataViews,
+      adhocDataViews: [],
       defaultDataViewId: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
       alertDataViewId: DEFAULT_ALERT_DATA_VIEW_ID,
     });
@@ -101,6 +102,7 @@ describe('useManagedDataViews', () => {
     ];
     (useSelector as jest.Mock).mockReturnValue({
       dataViews: mockDataViews,
+      adhocDataViews: [],
       defaultDataViewId: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
     });
 

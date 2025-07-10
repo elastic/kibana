@@ -9,10 +9,9 @@ import { schema } from '@kbn/config-schema';
 import { UiSettingsServiceSetup } from '@kbn/core-ui-settings-server';
 import { i18n } from '@kbn/i18n';
 import {
-  ONECHAT_AGENT_API_UI_SETTING_ID,
   ONECHAT_UI_SETTING_ID,
   ONECHAT_MCP_SERVER_UI_SETTING_ID,
-  ONECHAT_TOOLS_UI_SETTING_ID,
+  ONECHAT_API_SETTING_ID,
 } from '../common/constants';
 
 export const registerUISettings = ({ uiSettings }: { uiSettings: UiSettingsServiceSetup }) => {
@@ -41,24 +40,12 @@ export const registerUISettings = ({ uiSettings }: { uiSettings: UiSettingsServi
       readonly: true,
       readonlyMode: 'ui',
     },
-    [ONECHAT_TOOLS_UI_SETTING_ID]: {
-      description: i18n.translate('xpack.onechat.uiSettings.toolsPage.description', {
-        defaultMessage: 'Enables the OneChat tools page.',
+    [ONECHAT_API_SETTING_ID]: {
+      description: i18n.translate('xpack.onechat.uiSettings.api.description', {
+        defaultMessage: 'Enables the OneChat APIs.',
       }),
-      name: i18n.translate('xpack.onechat.uiSettings.toolsPage.name', {
-        defaultMessage: 'OneChat Tools Page',
-      }),
-      schema: schema.boolean(),
-      value: false,
-      readonly: true,
-      readonlyMode: 'ui',
-    },
-    [ONECHAT_AGENT_API_UI_SETTING_ID]: {
-      description: i18n.translate('xpack.onechat.uiSettings.agentApi.description', {
-        defaultMessage: 'Enables the OneChat agent API.',
-      }),
-      name: i18n.translate('xpack.onechat.uiSettings.agentApi.name', {
-        defaultMessage: 'OneChat Agent API',
+      name: i18n.translate('xpack.onechat.uiSettings.api.name', {
+        defaultMessage: 'OneChat APIs',
       }),
       schema: schema.boolean(),
       value: false,

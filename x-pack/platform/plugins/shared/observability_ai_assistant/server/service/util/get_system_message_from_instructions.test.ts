@@ -17,7 +17,6 @@ describe('getSystemMessageFromInstructions', () => {
         kbUserInstructions: [],
         apiUserInstructions: [],
         availableFunctionNames: [],
-        anonymizationInstruction: '',
       })
     ).toEqual(`first\n\nsecond`);
   });
@@ -34,7 +33,6 @@ describe('getSystemMessageFromInstructions', () => {
         kbUserInstructions: [],
         apiUserInstructions: [],
         availableFunctionNames: ['myFunction'],
-        anonymizationInstruction: '',
       })
     ).toEqual(`first\n\nmyFunction`);
   });
@@ -51,7 +49,6 @@ describe('getSystemMessageFromInstructions', () => {
           },
         ],
         availableFunctionNames: [],
-        anonymizationInstruction: '',
       })
     ).toEqual(`first\n\n${USER_INSTRUCTIONS_HEADER}\n\nsecond from adhoc instruction`);
   });
@@ -63,7 +60,6 @@ describe('getSystemMessageFromInstructions', () => {
         kbUserInstructions: [{ id: 'second', text: 'second_kb' }],
         apiUserInstructions: [],
         availableFunctionNames: [],
-        anonymizationInstruction: '',
       })
     ).toEqual(`first\n\n${USER_INSTRUCTIONS_HEADER}\n\nsecond_kb`);
   });
@@ -80,7 +76,6 @@ describe('getSystemMessageFromInstructions', () => {
         kbUserInstructions: [],
         apiUserInstructions: [],
         availableFunctionNames: [],
-        anonymizationInstruction: '',
       })
     ).toEqual(`first`);
   });

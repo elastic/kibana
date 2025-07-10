@@ -17,12 +17,13 @@ import {
   ToolResultEvent,
   isToolCallEvent,
   isToolResultEvent,
-} from '@kbn/onechat-common/agents';
+} from '@kbn/onechat-common';
 import {
   matchGraphName,
   matchEvent,
   matchName,
   hasTag,
+  extractTextContent,
   createTextChunkEvent,
   createMessageEvent,
   createReasoningEvent,
@@ -58,7 +59,6 @@ export const convertGraphEvents = ({
 }): OperatorFunction<LangchainStreamEvent, ResearcherAgentEvents> => {
   return (streamEvents$) => {
     const messageId = uuidv4();
-
     const replay$ = streamEvents$.pipe(shareReplay());
 
     return merge(
@@ -100,16 +100,17 @@ export const convertGraphEvents = ({
           // answer step text chunks
           if (matchEvent(event, 'on_chat_model_stream') && hasTag(event, 'planner:answer')) {
             const chunk: AIMessageChunk = event.data.chunk;
-
-            const messageChunkEvent = createTextChunkEvent(chunk, { defaultMessageId: messageId });
-            return of(messageChunkEvent);
+            const textContent = extractTextContent(chunk);
+            if (textContent) {
+              return of(createTextChunkEvent(textContent, { messageId }));
+            }
           }
 
           // answer step response message
           if (matchEvent(event, 'on_chain_end') && matchName(event, 'answer')) {
             const { generatedAnswer } = event.data.output as StateType;
 
-            const messageEvent = createMessageEvent(generatedAnswer);
+            const messageEvent = createMessageEvent(generatedAnswer, { messageId });
             return of(messageEvent);
           }
 

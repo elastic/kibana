@@ -42,13 +42,12 @@ export const researcherTool = (): RegisteredTool<typeof researcherSchema, Resear
       const searchAgentResult = await runResearcherAgent(
         {
           nextInput: { message: instructions },
-          tools: context.toolProvider,
         },
         context
       );
 
       return {
-        answer: searchAgentResult.round.assistantResponse.message,
+        result: { answer: searchAgentResult.round.response.message },
       };
     },
     meta: {

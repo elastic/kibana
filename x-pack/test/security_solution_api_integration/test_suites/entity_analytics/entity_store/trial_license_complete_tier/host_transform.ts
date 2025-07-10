@@ -8,6 +8,7 @@ import expect from '@kbn/expect';
 import { Ecs, EcsHost } from '@elastic/ecs';
 import type {
   IndexRequest,
+  MappingTypeMapping,
   SearchHit,
   SearchTotalHits,
 } from '@elastic/elasticsearch/lib/api/types';
@@ -15,11 +16,30 @@ import { FtrProviderContext } from '@kbn/ftr-common-functional-services';
 import type { GetEntityStoreStatusResponse } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/status.gen';
 import { dataViewRouteHelpersFactory } from '../../utils/data_view';
 import { EntityStoreUtils } from '../../utils';
+import { moveIndexToSlowDataTier } from '../../utils/move_index_to_slow_data_tier';
 
 const DATASTREAM_NAME: string = 'logs-elastic_agent.cloudbeat-test';
+const FROZEN_INDEX_NAME: string = 'test-frozen-index';
+const COLD_INDEX_NAME: string = 'test-cold-index';
 const HOST_TRANSFORM_ID: string = 'entities-v1-latest-security_host_default';
 const INDEX_NAME: string = '.entities.v1.latest.security_host_default';
 const TIMEOUT_MS: number = 600000; // 10 minutes
+
+const SMALL_HOST_MAPPING: MappingTypeMapping = {
+  properties: {
+    '@timestamp': {
+      type: 'date',
+    },
+    host: {
+      type: 'object',
+      properties: {
+        name: {
+          type: 'keyword',
+        },
+      },
+    },
+  },
+};
 
 export default function (providerContext: FtrProviderContext) {
   const supertest = providerContext.getService('supertest');
@@ -45,10 +65,16 @@ export default function (providerContext: FtrProviderContext) {
         await dataView.create('security-solution');
         // Create a test index matching transform's pattern to store test documents
         await es.indices.createDataStream({ name: DATASTREAM_NAME });
+        // Create a test index that will be moved to frozen matching transform's pattern to store test documents
+        await es.indices.create({ index: FROZEN_INDEX_NAME, mappings: SMALL_HOST_MAPPING });
+        // Create a test index that will be moved to cold matching transform's pattern to store test documents
+        await es.indices.create({ index: COLD_INDEX_NAME, mappings: SMALL_HOST_MAPPING });
       });
 
       after(async () => {
         await es.indices.deleteDataStream({ name: DATASTREAM_NAME });
+        await es.indices.deleteAlias({ name: FROZEN_INDEX_NAME, index: `*${FROZEN_INDEX_NAME}*` });
+        await es.indices.deleteAlias({ name: COLD_INDEX_NAME, index: `*${COLD_INDEX_NAME}*` });
         await dataView.delete('security-solution');
       });
 
@@ -81,10 +107,13 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it('Should successfully trigger a host transform', async () => {
-        const HOST_NAME: string = 'host-transform-test-ip';
-        const testDocs: EcsHost[] = [{ ip: '1.1.1.1' }, { ip: '2.2.2.2' }];
+        const hostName: string = 'host-transform-test-ip';
+        const testDocs: EcsHost[] = [
+          { name: hostName, ip: '1.1.1.1' },
+          { name: hostName, ip: '2.2.2.2' },
+        ];
 
-        await createDocumentsAndTriggerTransform(providerContext, HOST_NAME, testDocs);
+        await createDocumentsAndTriggerTransform(providerContext, testDocs, DATASTREAM_NAME);
 
         await retry.waitForWithTimeout(
           'Document to be processed and transformed',
@@ -94,7 +123,7 @@ export default function (providerContext: FtrProviderContext) {
               index: INDEX_NAME,
               query: {
                 term: {
-                  'host.name': HOST_NAME,
+                  'host.name': hostName,
                 },
               },
             });
@@ -102,7 +131,7 @@ export default function (providerContext: FtrProviderContext) {
             expect(total.value).to.eql(1);
             const hit = result.hits.hits[0] as SearchHit<Ecs>;
             expect(hit._source).ok();
-            expect(hit._source?.host?.name).to.eql(HOST_NAME);
+            expect(hit._source?.host?.name).to.eql(hostName);
             expect(hit._source?.host?.ip).to.eql(['1.1.1.1', '2.2.2.2']);
 
             return true;
@@ -111,9 +140,10 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it('Should successfully collect all expected fields', async () => {
-        const HOST_NAME: string = 'host-transform-test-all-fields';
+        const hostName: string = 'host-transform-test-all-fields';
         const testDocs: EcsHost[] = [
           {
+            name: hostName,
             domain: 'example.com',
             hostname: 'example.com',
             id: 'alpha',
@@ -127,6 +157,7 @@ export default function (providerContext: FtrProviderContext) {
             ip: '1.1.1.1',
           },
           {
+            name: hostName,
             domain: 'example.com',
             hostname: 'sub.example.com',
             id: 'beta',
@@ -141,7 +172,7 @@ export default function (providerContext: FtrProviderContext) {
           },
         ];
 
-        await createDocumentsAndTriggerTransform(providerContext, HOST_NAME, testDocs);
+        await createDocumentsAndTriggerTransform(providerContext, testDocs, DATASTREAM_NAME);
 
         await retry.waitForWithTimeout(
           'Document to be processed and transformed',
@@ -151,7 +182,7 @@ export default function (providerContext: FtrProviderContext) {
               index: INDEX_NAME,
               query: {
                 term: {
-                  'host.name': HOST_NAME,
+                  'host.name': hostName,
                 },
               },
             });
@@ -162,7 +193,7 @@ export default function (providerContext: FtrProviderContext) {
             expect(source.host).ok();
             const hit = source.host as HostTransformResultHost;
 
-            expect(hit.name).to.eql(HOST_NAME);
+            expect(hit.name).to.eql(hostName);
             expectFieldToEqualValues(hit.domain, ['example.com']);
             expectFieldToEqualValues(hit.hostname, ['example.com', 'sub.example.com']);
             expectFieldToEqualValues(hit.id, ['alpha', 'beta']);
@@ -176,6 +207,93 @@ export default function (providerContext: FtrProviderContext) {
             return true;
           }
         );
+      });
+
+      it('Should not collect fields present in frozen or cold tier', async () => {
+        // We are prefixing data to avoid conflict with old data not yet cleaned up
+        const TEST_DATA_PREFIX = 'test-cold-frozen-';
+        const log = providerContext.getService('log');
+
+        // Two docs per tier
+        const docsPerIndex: Record<string, EcsHost[]> = {
+          [FROZEN_INDEX_NAME]: [
+            { name: `${TEST_DATA_PREFIX}frozen-host-0` },
+            { name: `${TEST_DATA_PREFIX}frozen-host-1` },
+          ],
+          [COLD_INDEX_NAME]: [
+            { name: `${TEST_DATA_PREFIX}cold-host-0` },
+            { name: `${TEST_DATA_PREFIX}cold-host-1` },
+          ],
+          [DATASTREAM_NAME]: [
+            { name: `${TEST_DATA_PREFIX}hot-host-0` },
+            { name: `${TEST_DATA_PREFIX}hot-host-1` },
+          ],
+        };
+
+        // Ingest docs
+        const esPromise: Array<Promise<void>> = [];
+        for (const index in docsPerIndex) {
+          if (!Object.prototype.hasOwnProperty.call(docsPerIndex, index)) {
+            continue;
+          }
+
+          for (let i = 0; i < docsPerIndex[index].length; i++) {
+            esPromise.push(
+              (async () => {
+                const { result } = await es.index(
+                  buildHostTransformDocument(docsPerIndex[index][i], index)
+                );
+                expect(result).to.eql('created');
+              })()
+            );
+          }
+        }
+
+        await Promise.all(esPromise); // await docs flush
+
+        // Configure frozen
+        await Promise.all([
+          moveIndexToSlowDataTier({
+            es,
+            retry,
+            log,
+            index: FROZEN_INDEX_NAME,
+            tier: 'frozen',
+          }),
+          moveIndexToSlowDataTier({ es, retry, log, index: COLD_INDEX_NAME, tier: 'cold' }),
+        ]);
+
+        // Start transform
+        await createDocumentsAndTriggerTransform(providerContext, [], DATASTREAM_NAME);
+
+        await retry.waitForWithTimeout('Fetch only hot node documents', TIMEOUT_MS, async () => {
+          const result = await es.search({
+            index: INDEX_NAME,
+            query: {
+              wildcard: {
+                'host.name': {
+                  value: `${TEST_DATA_PREFIX}*`,
+                },
+              },
+            },
+          });
+
+          log.debug(`Found documents ${JSON.stringify(result)}`);
+
+          const total = result.hits.total as SearchTotalHits;
+          expect(total.value).to.eql(2);
+          expect(result.hits.hits[0]._source).ok();
+          expect(result.hits.hits[1]._source).ok();
+
+          for (let i = 0; i < total.value; i++) {
+            const source = result.hits.hits[i]._source as HostTransformResult;
+            expect(source.host).ok();
+            const hit = source.host as HostTransformResultHost;
+            expect(hit.name).to.contain(`hot-host`);
+          }
+
+          return true;
+        });
       });
     });
   });
@@ -195,12 +313,11 @@ function expectFieldToEqualValues(field: string[] | undefined, values: string[] 
   }
 }
 
-function buildHostTransformDocument(name: string, host: EcsHost): IndexRequest {
-  host.name = name;
+function buildHostTransformDocument(host: EcsHost, dataStream: string): IndexRequest {
   // Get timestamp without the millisecond part
   const isoTimestamp: string = new Date().toISOString().split('.')[0];
   const document: IndexRequest = {
-    index: DATASTREAM_NAME,
+    index: dataStream,
     document: {
       '@timestamp': isoTimestamp,
       host,
@@ -211,8 +328,8 @@ function buildHostTransformDocument(name: string, host: EcsHost): IndexRequest {
 
 async function createDocumentsAndTriggerTransform(
   providerContext: FtrProviderContext,
-  documentName: string,
-  docs: EcsHost[]
+  docs: EcsHost[],
+  dataStream: string
 ): Promise<void> {
   const retry = providerContext.getService('retry');
   const es = providerContext.getService('es');
@@ -227,7 +344,7 @@ async function createDocumentsAndTriggerTransform(
   const docsProcessed: number = transform.stats.documents_processed;
 
   for (let i = 0; i < docs.length; i++) {
-    const { result } = await es.index(buildHostTransformDocument(documentName, docs[i]));
+    const { result } = await es.index(buildHostTransformDocument(docs[i], dataStream));
     expect(result).to.eql('created');
   }
 
@@ -259,7 +376,9 @@ async function enableEntityStore(providerContext: FtrProviderContext): Promise<v
     const response = await supertest
       .post('/api/entity_store/enable')
       .set('kbn-xsrf', 'xxxx')
-      .send({});
+      .send({
+        indexPattern: `${FROZEN_INDEX_NAME},${COLD_INDEX_NAME}`,
+      });
     expect(response.statusCode).to.eql(200);
     expect(response.body.succeeded).to.eql(true);
 

@@ -170,10 +170,10 @@ export function getAllTestSuiteFactory(context: DeploymentAgnosticFtrProviderCon
     (describeFn: DescribeFn) =>
     (description: string, { user, spaceId, tests }: GetAllTestDefinition) => {
       describeFn(description, () => {
-        const roleScopedSupertest = context.getService('roleScopedSupertest');
+        const spacesSupertest = context.getService('spacesSupertest');
         let supertest: SupertestWithRoleScopeType;
         before(async () => {
-          supertest = await roleScopedSupertest.getSupertestWithRoleScope(user!);
+          supertest = await spacesSupertest.getSupertestWithRoleScope(user!);
           await esArchiver.load(
             'x-pack/platform/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
           );

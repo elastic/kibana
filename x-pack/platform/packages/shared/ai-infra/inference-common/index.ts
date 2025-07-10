@@ -60,6 +60,16 @@ export {
   isToolNotFoundError,
   type ChatCompleteMetadata,
   type ConnectorTelemetryMetadata,
+  type AnonymizationRule,
+  type RegexAnonymizationRule,
+  type NamedEntityRecognitionRule,
+  type AnonymizationEntity,
+  type Anonymization,
+  type Deanonymization,
+  type AnonymizationOutput,
+  type DeanonymizationOutput,
+  type DeanonymizedMessage,
+  type AnonymizationSettings,
 } from './src/chat_complete';
 
 export type { BoundInferenceClient, InferenceClient } from './src/inference_client';
@@ -146,3 +156,5 @@ export {
 } from './src/prompt';
 
 export { type BoundOptions, type UnboundOptions, bindApi } from './src/bind';
+
+export { aiAssistantAnonymizationSettings } from './src/ui_settings/settings_keys';

@@ -43,7 +43,6 @@ import {
   getActiveAlert,
 } from './alert_deletion_test_utils';
 
-// eslint-disable-next-line import/no-default-export
 export default function alertDeletionTests({ getService }: FtrProviderContext) {
   const retry = getService('retry');
   const es = getService('es');

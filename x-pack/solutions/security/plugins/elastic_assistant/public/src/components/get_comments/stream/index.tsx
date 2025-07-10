@@ -89,8 +89,13 @@ export const StreamComment = ({
     [content, transformMessage, pendingMessage]
   );
   const isAnythingLoading = useMemo(
-    () => isFetching || isLoading || isStreaming,
-    [isFetching, isLoading, isStreaming]
+    () =>
+      isFetching ||
+      isLoading ||
+      isStreaming ||
+      // this indicates that the message has not yet started streaming
+      message.length === 0,
+    [message, isFetching, isLoading, isStreaming]
   );
   const controls = useMemo(() => {
     if (!isControlsEnabled) {

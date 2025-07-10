@@ -104,11 +104,6 @@ export const allowedExperimentalValues = Object.freeze({
   assistantModelEvaluation: false,
 
   /**
-   * Enables advanced ESQL generation for the Assistant.
-   */
-  advancedEsqlGeneration: false,
-
-  /**
    * Enables the Managed User section inside the new user details flyout.
    */
   newUserDetailsFlyoutManagedUser: false,
@@ -206,7 +201,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the rule's bulk action to manage alert suppression
    */
-  bulkEditAlertSuppressionEnabled: false,
+  bulkEditAlertSuppressionEnabled: true,
 
   /**
    * Enables the new data ingestion hub

@@ -355,6 +355,32 @@ describe('Data table columns', function () {
     });
   });
 
+  describe('Summary column', () => {
+    it('returns eui grid columns with summary column', async () => {
+      const actual = getEuiGridColumns({
+        columns: ['_source'],
+        settings: {},
+        dataView: dataViewWithTimefieldMock,
+        defaultColumns: false,
+        isSortEnabled: false,
+        isPlainRecord: false,
+        valueToStringConverter: dataTableContextMock.valueToStringConverter,
+        rowsCount: 100,
+        headerRowHeightLines: 5,
+        services: {
+          uiSettings: servicesMock.uiSettings,
+          toastNotifications: servicesMock.toastNotifications,
+        },
+        hasEditDataViewPermission: () =>
+          servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
+        onFilter: () => {},
+        onResize: () => {},
+        cellActionsHandling: 'replace',
+      });
+      expect(actual).toMatchSnapshot();
+    });
+  });
+
   describe('deserializeHeaderRowHeight', () => {
     it('returns undefined for auto', () => {
       expect(deserializeHeaderRowHeight(ROWS_HEIGHT_OPTIONS.auto)).toBe(undefined);

@@ -6,7 +6,6 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
 import { EditorError, ESQLMessage } from '@kbn/esql-ast';
 import { ESQLCallbacks } from '../../shared/types';
 import { getCallbackMocks } from '../../__tests__/helpers';

@@ -12,6 +12,7 @@ import {
 } from '@kbn/elastic-assistant-common';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import os from 'os';
+import { MachineLearningProvider } from '@kbn/test-suites-xpack-platform/functional/services/ml';
 import { getSecurityGenAIConfigFromEnvVar } from '../../../../scripts/genai/vault/manage_secrets';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
@@ -22,7 +23,6 @@ import {
   setupKnowledgeBase,
 } from '../../knowledge_base/entries/utils/helpers';
 
-import { MachineLearningProvider } from '../../../../../functional/services/ml';
 import { routeWithNamespace } from '../../../../../common/utils/security_solution';
 import { loadEvalKnowledgeBaseEntries } from '../data/kb_entries';
 import { waitForEvaluationComplete } from './utils';
