@@ -71,11 +71,8 @@ export const transformDashboardIn = async ({
     };
     return {
       attributes,
-      references: [
-        ...tagReferences,
-        ...panelReferences,
-      ],
-      error: null
+      references: [...tagReferences, ...panelReferences],
+      error: null,
     };
   } catch (e) {
     return { attributes: null, references: null, error: e };

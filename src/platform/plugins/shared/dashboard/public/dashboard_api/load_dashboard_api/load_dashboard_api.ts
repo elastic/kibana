@@ -8,15 +8,16 @@
  */
 
 import { ContentInsightsClient } from '@kbn/content-management-content-insights-public';
-import { DashboardState } from '../../common';
-import { getDashboardBackupService } from '../services/dashboard_backup_service';
-import { getDashboardContentManagementService } from '../services/dashboard_content_management_service';
-import { coreServices } from '../services/kibana_services';
-import { logger } from '../services/logger';
-import { DEFAULT_DASHBOARD_STATE } from './default_dashboard_state';
-import { getDashboardApi } from './get_dashboard_api';
-import { startQueryPerformanceTracking } from './performance/query_performance_tracking';
-import { DashboardCreationOptions } from './types';
+import { DashboardState } from '../../../common';
+import { getDashboardBackupService } from '../../services/dashboard_backup_service';
+import { getDashboardContentManagementService } from '../../services/dashboard_content_management_service';
+import { coreServices } from '../../services/kibana_services';
+import { logger } from '../../services/logger';
+import { DEFAULT_DASHBOARD_STATE } from '../default_dashboard_state';
+import { getDashboardApi } from '../get_dashboard_api';
+import { startQueryPerformanceTracking } from '../performance/query_performance_tracking';
+import { DashboardCreationOptions } from '../types';
+import { transformPanels } from './transform_panels';
 
 export async function loadDashboardApi({
   getCreationOptions,
@@ -65,6 +66,9 @@ export async function loadDashboardApi({
   // Combine state with overrides.
   // --------------------------------------------------------------------------------------
   const { viewMode, ...overrideState } = creationOptions?.getInitialInput?.() ?? {};
+  if (overrideState.panels) {
+    overrideState.panels = await transformPanels(overrideState.panels);
+  }
 
   // Back up any view mode passed in explicitly.
   if (viewMode) {

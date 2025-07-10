@@ -7,11 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EmbeddableStart } from '@kbn/embeddable-plugin/server';
-import type { StartDeps } from './plugin';
-
-export let embeddableService: EmbeddableStart;
-
-export const setKibanaServices = (deps: StartDeps) => {
-  embeddableService = deps.embeddable;
-};
+export { loadDashboardApi } from './load_dashboard_api';

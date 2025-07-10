@@ -26,7 +26,7 @@ export function serializeLayout(
   Object.entries(layout.panels).forEach(([panelId, { gridData, type }]) => {
     const panelConfig = childState[panelId]?.rawState ?? {};
     references.push(...prefixReferencesFromPanel(panelId, childState[panelId]?.references ?? []));
-    
+
     // TODO move savedObjectRef extraction into embeddable implemenations
     const savedObjectId = (panelConfig as { savedObjectId?: string }).savedObjectId;
     let panelRefName: string | undefined;

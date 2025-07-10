@@ -72,7 +72,7 @@ function transformPanelProperties(
     // <8.19 savedObjectId and title stored as siblings to embeddableConfig
     ...(savedObjectId !== undefined && { savedObjectId }),
     ...(title !== undefined && { title }),
-  }
+  };
 
   return {
     gridData: rest,
