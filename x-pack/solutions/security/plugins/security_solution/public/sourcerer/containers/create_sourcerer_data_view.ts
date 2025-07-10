@@ -44,7 +44,11 @@ export const createSourcererDataView = async ({
   if (dataViewId === null) {
     return;
   }
+  // await dataViewService.delete(dataViewId ?? 'security-solution-default');
+  // await dataViewService.delete(alertDataViewId ?? 'security-solution-alert-default');
+
   let allDataViews: DataViewListItem[] = await dataViewService.getIdsWithTitle();
+  // allDataViews.map((dv) => dataViewService.delete(dv.id ?? ''));
   const siemDataViewExist = allDataViews.find((dv) => dv.id === dataViewId);
   const alertDataViewExist =
     alertDataViewId && allDataViews.find((dv) => dv.id === alertDataViewId);
@@ -63,6 +67,7 @@ export const createSourcererDataView = async ({
           title: patternListAsTitle,
           timeFieldName: DEFAULT_TIME_FIELD,
           name: DEFAULT_SECURITY_DATA_VIEW,
+          managed: true,
         },
         // Override property - if a data view exists with the security solution pattern
         // delete it and replace it with our data view
@@ -108,6 +113,7 @@ export const createSourcererDataView = async ({
           title: signalIndexName,
           timeFieldName: DEFAULT_TIME_FIELD,
           name: DEFAULT_SECURITY_ALERT_DATA_VIEW,
+          managed: true,
         },
         // Override property - if a data view exists with the security solution pattern
         // delete it and replace it with our data view

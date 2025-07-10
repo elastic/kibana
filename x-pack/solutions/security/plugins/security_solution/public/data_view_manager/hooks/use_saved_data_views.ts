@@ -24,12 +24,13 @@ export const useSavedDataViews = (): DataViewListItem[] => {
   return useMemo(
     () =>
       dataViewSpecs
-        .filter((dv) => dv.id !== defaultDataViewId && dv.id !== alertDataViewId)
+        // .filter((dv) => dv.id !== defaultDataViewId && dv.id !== alertDataViewId)
         .map((spec) => ({
           id: spec.id ?? '',
           title: spec.title ?? '',
           name: spec.name,
+          managed: spec.managed,
         })),
-    [dataViewSpecs, defaultDataViewId, alertDataViewId]
+    [dataViewSpecs]
   );
 };

@@ -24,5 +24,6 @@ export const createExploreDataView = async (
     id: `explore-data-view-${(await dependencies.spaces.getActiveSpace()).id}`,
     name: 'Explore Data View',
     title: exploreDataViewPattern,
+    // managed: true,
   });
 };

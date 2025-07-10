@@ -26,7 +26,7 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/public';
+import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/public';
 import type { IUnifiedSearchPluginServices } from '../types';
 import { type DataViewPickerProps } from './data_view_picker';
 import type { DataViewListItemEnhanced } from './dataview_list';
@@ -35,7 +35,7 @@ import { changeDataViewStyles } from './change_dataview.styles';
 import { DataViewSelector } from './data_view_selector';
 
 const mapDataViewListItem = (
-  dataView: DataView,
+  dataView: DataView | DataViewListItem,
   partial: Partial<DataViewListItemEnhanced>
 ): DataViewListItemEnhanced => ({
   title: dataView.title,
@@ -48,7 +48,7 @@ const mapDataViewListItem = (
 const mapAdHocDataView = (adHocDataView: DataView) =>
   mapDataViewListItem(adHocDataView, { isAdhoc: true });
 
-const mapManagedDataView = (managedDataView: DataView) =>
+const mapManagedDataView = (managedDataView: DataViewListItem) =>
   mapDataViewListItem(managedDataView, { isManaged: true });
 
 const shrinkableContainerCss = css`
@@ -59,7 +59,7 @@ export function ChangeDataView({
   isMissingCurrent,
   currentDataViewId,
   adHocDataViews,
-  managedDataViews,
+  // managedDataViews,
   savedDataViews,
   onChangeDataView,
   onAddField,
@@ -71,6 +71,7 @@ export function ChangeDataView({
   onCreateDefaultAdHocDataView,
   onClosePopover,
 }: DataViewPickerProps) {
+  // console.log('savedDataViews', savedDataViews);
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
   const [dataViewsList, setDataViewsList] = useState<DataViewListItemEnhanced[]>([]);
@@ -99,16 +100,19 @@ export function ChangeDataView({
 
   useEffect(() => {
     const fetchDataViews = async () => {
-      const savedDataViewRefs = savedDataViews
+      const availableDataViewRefs = savedDataViews
         ? savedDataViews
         : (await data.dataViews.getIdsWithTitle()) ?? [];
+      const savedDataViewRefs = availableDataViewRefs.filter((dataView) => !dataView.managed);
       const adHocDataViewRefs = adHocDataViews?.map(mapAdHocDataView) ?? [];
-      const managedDataViewRefs = managedDataViews?.map(mapManagedDataView) ?? [];
-
+      const managedDataViewRefs =
+        savedDataViews?.filter((dataView) => dataView.managed === true).map(mapManagedDataView) ??
+        [];
+      // console.log('savedDataViewRefs', savedDataViewRefs);
       setDataViewsList([...savedDataViewRefs, ...adHocDataViewRefs, ...managedDataViewRefs]);
     };
     fetchDataViews();
-  }, [data, currentDataViewId, adHocDataViews, savedDataViews, managedDataViews]);
+  }, [data, currentDataViewId, adHocDataViews, savedDataViews]);
 
   const isAdHocSelected = useMemo(() => {
     return adHocDataViews?.some((dataView) => dataView.id === currentDataViewId);
