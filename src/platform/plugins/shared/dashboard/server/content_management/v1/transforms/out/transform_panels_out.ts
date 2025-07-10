@@ -74,11 +74,18 @@ function transformPanelProperties(
     ...(title !== undefined && { title }),
   };
 
+  let transformedPanelConfig;
+  try {
+    if (transforms?.transformOut) {
+      transformedPanelConfig = transforms.transformOut(panelConfig, references);
+    }
+  } catch (transformOutError) {
+    // do not prevent read on transformOutError
+  }
+
   return {
     gridData: rest,
-    panelConfig: transforms?.transformOut
-      ? transforms.transformOut(panelConfig, references)
-      : panelConfig,
+    panelConfig: transformedPanelConfig ? transformedPanelConfig : panelConfig,
     panelIndex,
     panelRefName,
     type: panelType,
