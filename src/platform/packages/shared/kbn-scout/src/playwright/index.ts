@@ -7,41 +7,39 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { scoutFixtures, scoutParallelFixtures, lighthouseFixtures, globalSetup } from './fixtures';
-
-// Scout core fixtures: worker & test scope
-export const test = scoutFixtures;
-
-export const lighthouseTest = lighthouseFixtures;
-
-// Scout core 'space aware' fixtures: worker & test scope
-export const spaceTest = scoutParallelFixtures;
-
-export const globalSetupHook = globalSetup;
-
+// Config and utilities
 export { createPlaywrightConfig } from './config';
 export { createLazyPageObject } from './page_objects/utils';
 export { expect } from './expect';
 
+// Types for Playwright options
 export type { ScoutPlaywrightOptions, ScoutTestOptions } from './types';
+
+// Fixtures and Page Objects (can be extended with solution-specific logic)
 export type {
   BrowserAuthFixture,
   ScoutPage,
-  // can be extended with solution specific fixtures
+  PageObjects, // can be extended with solution specific Page Objects
+} from './fixtures/scope/test';
+export { browserAuthFixture } from './fixtures/scope/test';
+
+// Test and worker fixtures (can be extended with solution specific fixtures)
+export type {
   ScoutTestFixtures,
   ScoutWorkerFixtures,
   ScoutParallelTestFixtures,
   ScoutParallelWorkerFixtures,
-  // can be extended with solution specific API services
-  ApiServicesFixture,
-  // can be extended with solution specific Page Objects
-  PageObjects,
-} from './fixtures';
+} from './test/ui';
 
-// can be extended with solution specific logic
-export { browserAuthFixture } from './fixtures/test';
+// API services (can be extended with solution specific API services)
+export type { ApiServicesFixture } from './fixtures/scope/worker/apis';
 
-export type { SamlAuth, SynthtraceFixture } from './fixtures/worker';
+// Other worker types
+export type { SamlAuth, SynthtraceFixture } from './fixtures/scope/worker';
 
-// use to tag tests
+// Tagging utility
 export { tags } from './tags';
+
+// Test entrypoints
+export { test, spaceTest, lighthouseTest, globalSetupHook } from './test/ui';
+export { apiTest } from './test/api';
