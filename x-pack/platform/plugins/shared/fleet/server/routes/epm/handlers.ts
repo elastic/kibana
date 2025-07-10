@@ -115,12 +115,11 @@ export const getListHandler: FleetRequestHandler<
     savedObjectsClient,
     ...request.query,
   });
-  const flattenedRes = res.reduce(
+  const flattenedRes = res
     // exclude the security_ai_prompts package from being shown in Kibana UI
     // https://github.com/elastic/kibana/pull/227308
-    (acc, pkg) => (pkg.id === 'security_ai_prompts' ? acc : [...acc, soToInstallationInfo(pkg)]),
-    []
-  ) as unknown as PackageList;
+    .filter((pkg) => pkg.id !== 'security_ai_prompts')
+    .map((pkg) => soToInstallationInfo(pkg)) as PackageList;
 
   if (request.query.withPackagePoliciesCount) {
     const countByPackage = await getPackagePoliciesCountByPackageName(
