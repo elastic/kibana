@@ -43,6 +43,7 @@ export function packageFilter(pkg: string) {
     pkg !== '@elastic/eui' &&
     pkg !== '@elastic/eui-amsterdam' &&
     pkg !== '@elastic/eui-theme-borealis' &&
+    pkg !== '@elastic/eui-theme-common' &&
     // Operations owns node, and is not covered by renovate
     pkg !== '@types/node'
   );

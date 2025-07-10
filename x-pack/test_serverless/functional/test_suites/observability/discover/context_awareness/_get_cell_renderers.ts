@@ -62,7 +62,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           const logLevelBadge = await firstCell.findByTestSubject('*logLevelBadgeCell-');
           expect(await logLevelBadge.getVisibleText()).to.be('debug');
           expect(await logLevelBadge.getComputedStyle('background-color')).to.be(
-            'rgba(189, 215, 255, 1)'
+            'rgba(232, 241, 255, 1)'
           );
         });
 
@@ -203,7 +203,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             logLevelBadge = await firstCell.findByTestSubject('*logLevelBadgeCell-');
             expect(await logLevelBadge.getVisibleText()).to.be('debug');
             expect(await logLevelBadge.getComputedStyle('background-color')).to.be(
-              'rgba(189, 215, 255, 1)'
+              'rgba(232, 241, 255, 1)'
             );
           });
 
@@ -220,7 +220,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             logLevelBadge = await firstCell.findByTestSubject('*logLevelBadgeCell-');
             expect(await logLevelBadge.getVisibleText()).to.be('debug');
             expect(await logLevelBadge.getComputedStyle('background-color')).to.be(
-              'rgba(189, 215, 255, 1)'
+              'rgba(232, 241, 255, 1)'
             );
           });
         });
