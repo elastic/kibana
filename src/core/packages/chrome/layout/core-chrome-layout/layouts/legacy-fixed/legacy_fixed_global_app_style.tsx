@@ -76,6 +76,12 @@ const globalLayoutStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
     --kbn-application--sticky-headers-offset: calc(
       var(--euiFixedHeadersOffset, 0px) + var(--kbn-application--top-bar-height, 0px)
     );
+
+    // for forward compatibility with grid layout,
+    --kbn-application--content-top: var(--kbnAppHeadersOffset, var(--euiFixedHeadersOffset, 0));
+    --kbn-application--content-left: 0px;
+    --kbn-application--content-bottom: 0px;
+    --kbn-application--content-right: 0px;
   }
 
   // Conditionally override :root CSS fixed header variable. Updating \`--euiFixedHeadersOffset\`
