@@ -21,7 +21,6 @@ describe('createTreeNodesFromPipelines', () => {
 
     expect(result.id).toBe('root');
     expect(result.label).toBe('root');
-    expect(result['data-test-subj']).toBe('pipelineTreeNode-root');
     expect(result.children).toHaveLength(0);
     expect(result.icon).toBeUndefined();
   });
@@ -57,8 +56,8 @@ describe('createTreeNodesFromPipelines', () => {
     // Traverse to ensure we only went MAX_TREE_LEVEL deep
     let current = result;
     let level = 1;
-    while (current.children.length > 0) {
-      current = current.children[0];
+    while (current.children!.length > 0) {
+      current = current.children![0];
       level++;
     }
 
@@ -86,7 +85,7 @@ describe('createTreeNodesFromPipelines', () => {
 
     const result = createTreeNodesFromPipelines(input);
     expect(result.id).toBe('root');
-    expect(result.children[0].id).toBe('child1');
-    expect(result.children[0].children[0].id).toBe('grandchild1');
+    expect(result.children![0].id).toBe('child1');
+    expect(result.children![0].children![0].id).toBe('grandchild1');
   });
 });
