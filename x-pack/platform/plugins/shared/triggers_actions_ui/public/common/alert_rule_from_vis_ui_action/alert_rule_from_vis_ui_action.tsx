@@ -58,7 +58,7 @@ export class AlertRuleFromVisAction implements Action<Context> {
   public shouldAutoExecute = async () => true;
 
   public async execute({ embeddable, data }: Context) {
-    await openLazyFlyout({
+    openLazyFlyout({
       core: this.startDependencies.coreStart,
       parentApi: embeddable.parentApi,
       flyoutProps: {

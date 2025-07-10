@@ -228,7 +228,7 @@ export const getLinksEmbeddableFactory = () => {
           });
         },
         onEdit: async () => {
-          await openLazyFlyout({
+          openLazyFlyout({
             core: coreServices,
             parentApi,
             loadContent: async ({ closeFlyout }) => {
