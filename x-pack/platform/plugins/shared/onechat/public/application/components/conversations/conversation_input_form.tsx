@@ -29,13 +29,13 @@ interface ConversationInputFormProps {
 
 export const ConversationInputForm: React.FC<ConversationInputFormProps> = ({ onSubmit }) => {
   const [message, setMessage] = useState<string>('');
-  const disabled = !message.trim();
   const { euiTheme } = useEuiTheme();
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
   const { actions, conversation, hasActiveConversation } = useConversation();
   const agentId = conversation?.agentId ?? oneChatDefaultAgentId;
 
-  const { sendMessage } = useChat();
+  const { status, sendMessage } = useChat();
+  const disabled = !message.trim() || status === 'loading';
 
   useEffect(() => {
     setTimeout(() => {
