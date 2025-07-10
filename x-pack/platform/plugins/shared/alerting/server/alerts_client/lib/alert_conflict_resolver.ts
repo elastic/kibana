@@ -53,7 +53,7 @@ export async function resolveAlertConflicts(params: ResolveAlertConflictsParams)
   const ruleInfoMessage = `for ${ruleType}:${ruleId} '${ruleName}'`;
   const logTags = { tags: [ruleType, ruleId, 'resolve-alert-conflicts'] };
 
-  logger.info(
+  logger.warn(
     `Resolving alert conflicts ${ruleInfoMessage} for the operations: ${JSON.stringify(
       params.bulkRequest.operations
     )}`
