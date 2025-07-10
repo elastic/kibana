@@ -25,6 +25,9 @@ describe('isNavControlVisible', () => {
       aiAssistantManagementSelection: {
         aiAssistantType$: of(AIAssistantType.Observability),
       },
+      spaces: {
+        getActiveSpace$: () => of({ solution: 'oblt' }),
+      },
     } as unknown as ObservabilityAIAssistantAppPluginStartDependencies;
 
     const { result } = renderHook(() => useIsNavControlVisible({ coreStart, pluginsStart }));
@@ -43,6 +46,9 @@ describe('isNavControlVisible', () => {
     const pluginsStart = {
       aiAssistantManagementSelection: {
         aiAssistantType$: of(AIAssistantType.Default),
+      },
+      spaces: {
+        getActiveSpace$: () => of({ solution: 'oblt' }),
       },
     } as unknown as ObservabilityAIAssistantAppPluginStartDependencies;
 
@@ -65,6 +71,9 @@ describe('isNavControlVisible', () => {
       aiAssistantManagementSelection: {
         aiAssistantType$: of(AIAssistantType.Default),
       },
+      spaces: {
+        getActiveSpace$: () => of({ solution: 'oblt' }),
+      },
     } as unknown as ObservabilityAIAssistantAppPluginStartDependencies;
 
     const { result } = renderHook(() => useIsNavControlVisible({ coreStart, pluginsStart }));
@@ -85,6 +94,9 @@ describe('isNavControlVisible', () => {
     const pluginsStart = {
       aiAssistantManagementSelection: {
         aiAssistantType$: of(AIAssistantType.Default),
+      },
+      spaces: {
+        getActiveSpace$: () => of({ solution: 'oblt' }),
       },
     } as unknown as ObservabilityAIAssistantAppPluginStartDependencies;
 
@@ -107,10 +119,35 @@ describe('isNavControlVisible', () => {
       aiAssistantManagementSelection: {
         aiAssistantType$: of(AIAssistantType.Observability),
       },
+      spaces: {
+        getActiveSpace$: () => of({ solution: 'oblt' }),
+      },
     } as unknown as ObservabilityAIAssistantAppPluginStartDependencies;
 
     const { result } = renderHook(() => useIsNavControlVisible({ coreStart, pluginsStart }));
 
     expect(result.current.isVisible).toBe(false);
+  });
+
+  it('returns true when the current space is es and the ai assistant type is observability', () => {
+    const coreStart = {
+      application: {
+        currentAppId$: of('discover'),
+        applications$: of(new Map([['discover', { id: 'discover', category: { id: 'kibana' } }]])),
+      },
+    } as unknown as CoreStart;
+
+    const pluginsStart = {
+      aiAssistantManagementSelection: {
+        aiAssistantType$: of(AIAssistantType.Observability),
+      },
+      spaces: {
+        getActiveSpace$: () => of({ solution: 'es' }),
+      },
+    } as unknown as ObservabilityAIAssistantAppPluginStartDependencies;
+
+    const { result } = renderHook(() => useIsNavControlVisible({ coreStart, pluginsStart }));
+
+    expect(result.current.isVisible).toBe(true);
   });
 });
