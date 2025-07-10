@@ -6,8 +6,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink } from '@elastic/eui';
-import { css } from '@emotion/css';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import {
   useAssistantContext,
   type Conversation,
@@ -23,7 +22,6 @@ import {
 import { useConversation } from '@kbn/elastic-assistant/impl/assistant/use_conversation';
 
 import { CenteredLoadingSpinner } from '../../../../../common/components/centered_loading_spinner';
-import { OnboardingCardId } from '../../../../constants';
 import type { OnboardingCardComponent } from '../../../../types';
 import * as i18n from './translations';
 import { ConnectorsMissingPrivilegesCallOut } from '../common/connectors/missing_privileges';
@@ -31,7 +29,6 @@ import { useStoredAssistantConnectorId } from '../../../hooks/use_stored_state';
 import { useOnboardingContext } from '../../../onboarding_context';
 import { OnboardingCardContentPanel } from '../common/card_content_panel';
 import { ConnectorCards } from '../common/connectors/connector_cards';
-import { CardCallOut } from '../common/card_callout';
 import { CardSubduedText } from '../common/card_subdued_text';
 import type { AIConnector } from '../common/connectors/types';
 import type { AssistantCardMetadata } from './types';
@@ -46,20 +43,6 @@ export const AssistantCard: OnboardingCardComponent<AssistantCardMetadata> = ({
 }) => {
   const { spaceId } = useOnboardingContext();
   const { connectors, canExecuteConnectors, canCreateConnectors } = checkCompleteMetadata ?? {};
-
-  const isIntegrationsCardComplete = useMemo(
-    () => isCardComplete(OnboardingCardId.integrations),
-    [isCardComplete]
-  );
-
-  const isIntegrationsCardAvailable = useMemo(
-    () => isCardAvailable(OnboardingCardId.integrations),
-    [isCardAvailable]
-  );
-
-  const expandIntegrationsCard = useCallback(() => {
-    setExpandedCardId(OnboardingCardId.integrations, { scroll: true });
-  }, [setExpandedCardId]);
 
   const [selectedConnectorId, setSelectedConnectorId] = useStoredAssistantConnectorId(spaceId);
 
@@ -172,37 +155,13 @@ export const AssistantCard: OnboardingCardComponent<AssistantCardMetadata> = ({
             </CardSubduedText>
           </EuiFlexItem>
           <EuiFlexItem>
-            {isIntegrationsCardAvailable && !isIntegrationsCardComplete ? (
-              <EuiFlexItem
-                className={css`
-                  width: 45%;
-                `}
-              >
-                <CardCallOut
-                  color="primary"
-                  icon="info"
-                  text={i18n.ASSISTANT_CARD_CALLOUT_INTEGRATIONS_TEXT}
-                  action={
-                    <EuiLink onClick={expandIntegrationsCard}>
-                      <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center">
-                        <EuiFlexItem>{i18n.ASSISTANT_CARD_CALLOUT_INTEGRATIONS_BUTTON}</EuiFlexItem>
-                        <EuiFlexItem grow={false}>
-                          <EuiIcon type="arrowRight" color="primary" size="s" />
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-                    </EuiLink>
-                  }
-                />
-              </EuiFlexItem>
-            ) : (
-              <ConnectorCards
-                canCreateConnectors={canCreateConnectors}
-                connectors={connectors}
-                onNewConnectorSaved={onNewConnectorSaved}
-                selectedConnectorId={selectedConnectorId}
-                onConnectorSelected={onConnectorSelected}
-              />
-            )}
+            <ConnectorCards
+              canCreateConnectors={canCreateConnectors}
+              connectors={connectors}
+              onNewConnectorSaved={onNewConnectorSaved}
+              selectedConnectorId={selectedConnectorId}
+              onConnectorSelected={onConnectorSelected}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       ) : (
