@@ -43,6 +43,7 @@ examples/unified_field_list_examples @elastic/kibana-data-discovery
 examples/unified_tabs_examples @elastic/kibana-data-discovery
 examples/user_profile_examples @elastic/kibana-security
 examples/v8_profiler_examples @elastic/response-ops
+examples/workflows @elastic/workflows-eng
 packages/kbn-babel-preset @elastic/kibana-operations
 packages/kbn-bazel-runner @elastic/kibana-operations
 packages/kbn-capture-oas-snapshot-cli @elastic/kibana-core
@@ -736,7 +737,9 @@ src/platform/plugins/shared/unified_search @elastic/kibana-presentation
 src/platform/plugins/shared/usage_collection @elastic/kibana-core
 src/platform/plugins/shared/vis_types/timeseries @elastic/kibana-visualizations
 src/platform/plugins/shared/visualizations @elastic/kibana-visualizations
-src/platform/plugins/shared/workflows @elastic/workflows-eng
+src/platform/plugins/shared/workflows_execution_engine @elastic/workflows-eng
+src/platform/plugins/shared/workflows_management @elastic/workflows-eng
+src/platform/packages/shared/kbn-workflows @elastic/workflows-eng
 src/platform/test
 src/platform/test/analytics/plugins/analytics_ftr_helpers @elastic/kibana-core
 src/platform/test/analytics/plugins/analytics_plugin_a @elastic/kibana-core
