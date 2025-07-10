@@ -8,7 +8,7 @@
 import * as React from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { render, waitFor } from '@testing-library/react';
-import { IntlProvider } from '@kbn/i18n-react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { createMemoryHistory, createLocation } from 'history';
 import { ToastsApi } from '@kbn/core/public';
 import { RuleDetailsRoute, getRuleData } from './rule_details_route';

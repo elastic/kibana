@@ -85,7 +85,7 @@ describe('with_bulk_rule_api_operations', () => {
       expect(typeof props.loadRuleTypes).toEqual('function');
       expect(typeof props.resolveRule).toEqual('function');
       expect(typeof props.loadExecutionLogAggregations).toEqual('function');
-      return <div data-testid="extended-component" />;
+      return <div data-test-subj="extended-component" />;
     };
 
     const ExtendedComponent = withBulkRuleOperations(ComponentToExtend);
