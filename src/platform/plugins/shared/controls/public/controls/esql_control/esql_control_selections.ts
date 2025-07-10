@@ -105,7 +105,7 @@ export function initializeESQLControlSelections(
     .pipe(debounceTime(50))
     .subscribe(([searchString, availableOptions]) => {
       const displayOptions =
-        availableOptions?.filter((option) => option.startsWith(searchString)) ?? [];
+        availableOptions?.filter((option) => option.includes(searchString)) ?? [];
       displayedAvailableOptions$.next(displayOptions.map((value) => ({ value })));
       totalCardinality$.next(displayOptions.length);
     });
@@ -173,7 +173,7 @@ export function initializeESQLControlSelections(
       setSelectedOptions,
       setSearchString,
       field$: new BehaviorSubject<DataViewField | undefined>({ type: 'string' } as DataViewField),
-      searchTechnique$: new BehaviorSubject<OptionsListSearchTechnique | undefined>('prefix'),
+      searchTechnique$: new BehaviorSubject<OptionsListSearchTechnique | undefined>('wildcard'),
       searchString$,
       searchStringValid$: new BehaviorSubject(true),
     },
