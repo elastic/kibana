@@ -12,6 +12,9 @@ import type { SPAN_DESTINATION_SERVICE_RESOURCE, SPAN_SUBTYPE, SPAN_TYPE } from 
 import type { ServiceAnomaliesResponse } from '../../server/routes/service_map/get_service_anomalies';
 import type { Coordinate } from '../../typings/timeseries';
 import type { ServiceAnomalyStats } from '../anomaly_detection';
+import type { getWarnings } from './get_service_map_nodes';
+
+export type ServiceMapWarnings = ReturnType<typeof getWarnings>;
 
 export interface ServiceMapTelemetry {
   tracesCount: number;
