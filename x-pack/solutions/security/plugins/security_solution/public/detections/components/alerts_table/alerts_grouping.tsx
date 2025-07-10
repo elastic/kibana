@@ -60,6 +60,9 @@ export interface AlertsTableComponentProps {
    * DataViewSpec object to use internally to fetch the data
    */
   dataViewSpec: DataViewSpec;
+  /**
+   * DataView object to use internally to fetch the data.
+   */
   dataView?: DataView;
   defaultFilters?: Filter[];
   /**
