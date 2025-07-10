@@ -312,7 +312,7 @@ export function useOnSubmit({
   // Initial loading of package info
 
   useEffect(() => {
-    async function init(randomNumber: number) {
+    async function init() {
       if (
         !packageInfo ||
         (packageInfo.name === packagePolicy.package?.name && integrationToEnable === integration)
@@ -348,9 +348,8 @@ export function useOnSubmit({
       }
     }
     if (!isInitialized) {
-      const randomNumber = Math.floor(Math.random() * 1000);
       // Fetch agent policies
-      init(randomNumber);
+      init();
     }
   }, [
     isFetchingBasePackage,
