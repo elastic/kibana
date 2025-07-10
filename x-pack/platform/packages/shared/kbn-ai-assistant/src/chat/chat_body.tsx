@@ -298,24 +298,35 @@ export function ChatBody({
     ({ message, payload }: { message: Message; payload: ChatActionClickPayload }) => {
       setStickToBottom(true);
       switch (payload.type) {
-        case ChatActionClickType.executeEsqlQuery:
+        case ChatActionClickType.executeEsqlQuery: {
+          const now = new Date().toISOString();
           next(
-            messages.concat({
-              '@timestamp': new Date().toISOString(),
-              message: {
-                role: MessageRole.Assistant,
-                content: '',
-                function_call: {
-                  name: 'execute_query',
-                  arguments: JSON.stringify({
-                    query: payload.query,
-                  }),
-                  trigger: MessageRole.User,
+            messages.concat([
+              {
+                '@timestamp': now,
+                message: {
+                  role: MessageRole.User,
+                  content: `Display results for the following ES|QL query:\n\n\u0060\u0060\u0060esql\n${payload.query}\n\u0060\u0060\u0060`,
                 },
               },
-            })
+              {
+                '@timestamp': now,
+                message: {
+                  role: MessageRole.Assistant,
+                  content: '',
+                  function_call: {
+                    name: 'execute_query',
+                    arguments: JSON.stringify({
+                      query: payload.query,
+                    }),
+                    trigger: MessageRole.User,
+                  },
+                },
+              },
+            ])
           );
           break;
+        }
 
         case ChatActionClickType.updateVisualization:
           const visualizeQueryResponse = message;
