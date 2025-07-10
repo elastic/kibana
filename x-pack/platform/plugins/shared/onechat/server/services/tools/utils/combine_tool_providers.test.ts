@@ -9,7 +9,7 @@ import { z } from '@kbn/zod';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { ToolProviderId } from '@kbn/onechat-common';
-import type { RegisteredTool } from '@kbn/onechat-server';
+import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import { RegisteredToolProviderWithId, RegisteredToolWithMeta } from '../types';
 import { combineToolProviders } from './combine_tool_providers';
 
@@ -20,7 +20,7 @@ describe('combineToolProviders', () => {
     mockRequest = httpServerMock.createKibanaRequest();
   });
 
-  const createMockTool = (id: string): RegisteredTool => ({
+  const createMockTool = (id: string): BuiltinToolDefinition => ({
     id,
     description: `Description for tool ${id}`,
     schema: z.object({}),
@@ -28,7 +28,7 @@ describe('combineToolProviders', () => {
   });
 
   const createMockProvider = (
-    tools: RegisteredTool[],
+    tools: BuiltinToolDefinition[],
     providerId: string
   ): RegisteredToolProviderWithId => ({
     id: providerId,
@@ -45,7 +45,7 @@ describe('combineToolProviders', () => {
     list: jest.fn().mockResolvedValue(tools),
   });
 
-  const addMeta = (tool: RegisteredTool, providerId: ToolProviderId): RegisteredToolWithMeta => {
+  const addMeta = (tool: BuiltinToolDefinition, providerId: ToolProviderId): RegisteredToolWithMeta => {
     return {
       ...tool,
       meta: {

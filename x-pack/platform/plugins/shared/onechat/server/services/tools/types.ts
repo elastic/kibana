@@ -10,17 +10,18 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ToolDescriptorMeta, ToolIdentifier } from '@kbn/onechat-common';
 import type {
   ToolProvider,
-  RegisteredTool,
+  BuiltinToolDefinition,
   RegisteredToolProvider,
   ToolProviderHasOptions,
   ToolProviderGetOptions,
   ToolProviderListOptions,
   ExecutableTool,
 } from '@kbn/onechat-server';
+import { ToolClient } from './tool_client';
 
 export interface ToolsServiceSetup {
   register<RunInput extends ZodObject<any>, RunOutput = unknown>(
-    tool: RegisteredTool<RunInput, RunOutput>
+    tool: BuiltinToolDefinition<RunInput, RunOutput>
   ): void;
   registerProvider(id: string, provider: RegisteredToolProvider): void;
 }
@@ -30,6 +31,8 @@ export interface ToolsServiceStart {
    * Internal tool registry, exposing internal APIs to interact with tool providers.
    */
   registry: InternalToolRegistry;
+
+  createClient(opts: { request: KibanaRequest }): Promise<ToolClient>;
 }
 
 /**
@@ -38,7 +41,7 @@ export interface ToolsServiceStart {
 export type RegisteredToolWithMeta<
   RunInput extends ZodObject<any> = ZodObject<any>,
   RunOutput = unknown
-> = Omit<RegisteredTool<RunInput, RunOutput>, 'meta'> & {
+> = Omit<BuiltinToolDefinition<RunInput, RunOutput>, 'meta'> & {
   meta: ToolDescriptorMeta;
 };
 

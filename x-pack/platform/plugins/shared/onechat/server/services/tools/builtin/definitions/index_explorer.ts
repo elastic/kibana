@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod';
 import { BuiltinToolIds, BuiltinTags } from '@kbn/onechat-common';
-import type { RegisteredTool } from '@kbn/onechat-server';
+import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import { indexExplorer, IndexExplorerResponse } from '@kbn/onechat-genai-utils';
 
 const indexExplorerSchema = z.object({
@@ -22,7 +22,7 @@ const indexExplorerSchema = z.object({
     .describe('(optional) Index pattern to filter indices by. Defaults to *.'),
 });
 
-export const indexExplorerTool = (): RegisteredTool<
+export const indexExplorerTool = (): BuiltinToolDefinition<
   typeof indexExplorerSchema,
   IndexExplorerResponse
 > => {
@@ -53,8 +53,6 @@ export const indexExplorerTool = (): RegisteredTool<
         result,
       };
     },
-    meta: {
-      tags: [BuiltinTags.retrieval],
-    },
+    tags: [BuiltinTags.retrieval],
   };
 };

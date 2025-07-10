@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
-import type { RegisteredTool } from '@kbn/onechat-server';
+import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import { BuiltinToolIds, BuiltinTags } from '@kbn/onechat-common';
 import { runResearcherAgent } from './run_researcher_agent';
 
@@ -18,7 +18,7 @@ export interface ResearcherResponse {
   answer: string;
 }
 
-export const researcherTool = (): RegisteredTool<typeof researcherSchema, ResearcherResponse> => {
+export const researcherTool = (): BuiltinToolDefinition<typeof researcherSchema, ResearcherResponse> => {
   return {
     id: BuiltinToolIds.researcherAgent,
     description: `An agentic researcher tool to perform search and analysis tasks.

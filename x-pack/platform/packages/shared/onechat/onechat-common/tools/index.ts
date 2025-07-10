@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+export { ToolType, type ToolDescriptor, type ToolDescriptorWithSchema } from './definition';
 export {
-  type ToolDescriptor,
   type ToolDescriptorMeta,
   type PlainIdToolIdentifier,
   type SerializedToolIdentifier,

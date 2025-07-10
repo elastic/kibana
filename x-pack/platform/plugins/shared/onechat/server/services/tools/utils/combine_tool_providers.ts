@@ -11,7 +11,7 @@ import {
   unknownToolProviderId,
 } from '@kbn/onechat-common';
 import type {
-  RegisteredTool,
+  BuiltinToolDefinition,
   ToolProviderGetOptions,
   ToolProviderHasOptions,
   ToolProviderListOptions,
@@ -30,7 +30,7 @@ import {
 export const combineToolProviders = (
   ...providers: RegisteredToolProviderWithId[]
 ): InternalToolProvider => {
-  const addMeta = (tool: RegisteredTool, providerId: ToolProviderId): RegisteredToolWithMeta => {
+  const addMeta = (tool: BuiltinToolDefinition, providerId: ToolProviderId): RegisteredToolWithMeta => {
     return {
       ...tool,
       meta: {

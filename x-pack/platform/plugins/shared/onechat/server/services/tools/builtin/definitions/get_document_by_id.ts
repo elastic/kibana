@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod';
 import { BuiltinToolIds, BuiltinTags } from '@kbn/onechat-common';
-import type { RegisteredTool } from '@kbn/onechat-server';
+import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import { getDocumentById, GetDocumentByIdResult } from '@kbn/onechat-genai-utils';
 
 const getDocumentByIdSchema = z.object({
@@ -15,7 +15,7 @@ const getDocumentByIdSchema = z.object({
   index: z.string().describe('Name of the index to retrieve the document from'),
 });
 
-export const getDocumentByIdTool = (): RegisteredTool<
+export const getDocumentByIdTool = (): BuiltinToolDefinition<
   typeof getDocumentByIdSchema,
   GetDocumentByIdResult
 > => {
@@ -29,8 +29,6 @@ export const getDocumentByIdTool = (): RegisteredTool<
         result,
       };
     },
-    meta: {
-      tags: [BuiltinTags.retrieval],
-    },
+    tags: [BuiltinTags.retrieval],
   };
 };

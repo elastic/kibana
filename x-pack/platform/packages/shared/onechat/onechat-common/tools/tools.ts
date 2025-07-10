@@ -134,43 +134,6 @@ export const toStructuredToolIdentifier = (
   throw createInternalError(`Malformed tool identifier: "${identifier}"`);
 };
 
-/**
- * Serializable representation of a tool, without its handler or schema.
- *
- * Use as a common base for browser-side and server-side tool types.
- */
-export interface ToolDescriptor {
-  /**
-   * A unique id for this tool.
-   */
-  id: PlainIdToolIdentifier;
-  /**
-   * The description for this tool, which will be exposed to the LLM.
-   */
-  description: string;
-  /**
-   * Meta associated with this tool
-   */
-  meta: ToolDescriptorMeta;
-}
-
-/**
- * Metadata associated with a tool.
- *
- * Some of them are specified by the tool owner during registration,
- * others are automatically added by the framework.
- */
-export interface ToolDescriptorMeta {
-  /**
-   * ID of the provider this tool is exposed from.
-   */
-  providerId: ToolProviderId;
-  /**
-   * Optional list of tags attached to this tool.
-   * For built-in tools, this is specified during registration.
-   */
-  tags: string[];
-}
 
 export const toolDescriptorToIdentifier = (tool: ToolDescriptor): StructuredToolIdentifier => {
   return {

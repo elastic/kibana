@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
-import type { RegisteredTool } from '@kbn/onechat-server';
+import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { BuiltinToolRegistry, createBuiltinToolRegistry } from './builtin_registry';
@@ -22,7 +22,7 @@ describe('BuiltinToolRegistry', () => {
 
   describe('register', () => {
     it('should register a tool', async () => {
-      const mockTool: RegisteredTool = {
+      const mockTool: BuiltinToolDefinition = {
         id: 'test-tool',
         description: 'A test tool',
         schema: z.object({}),
@@ -38,7 +38,7 @@ describe('BuiltinToolRegistry', () => {
 
   describe('has', () => {
     it('should return true when tool exists', async () => {
-      const mockTool: RegisteredTool = {
+      const mockTool: BuiltinToolDefinition = {
         id: 'test-tool',
         description: 'A test tool',
         schema: z.object({}),
@@ -53,7 +53,7 @@ describe('BuiltinToolRegistry', () => {
     });
 
     it('should return false when tool does not exist', async () => {
-      const mockTool: RegisteredTool = {
+      const mockTool: BuiltinToolDefinition = {
         id: 'test-tool',
         description: 'A test tool',
         schema: z.object({}),
@@ -70,7 +70,7 @@ describe('BuiltinToolRegistry', () => {
 
   describe('get', () => {
     it('should return the tool when it exists', async () => {
-      const mockTool: RegisteredTool = {
+      const mockTool: BuiltinToolDefinition = {
         id: 'test-tool',
         description: 'A test tool',
         schema: z.object({}),
@@ -85,7 +85,7 @@ describe('BuiltinToolRegistry', () => {
     });
 
     it('should throw an error when tool does not exist', async () => {
-      const mockTool: RegisteredTool = {
+      const mockTool: BuiltinToolDefinition = {
         id: 'test-tool',
         description: 'A test tool',
         schema: z.object({}),
@@ -103,7 +103,7 @@ describe('BuiltinToolRegistry', () => {
 
   describe('list', () => {
     it('should return all registered tools', async () => {
-      const mockTool1: RegisteredTool = {
+      const mockTool1: BuiltinToolDefinition = {
         id: 'test-tool-1',
         description: 'A test tool',
         schema: z.object({}),
@@ -112,7 +112,7 @@ describe('BuiltinToolRegistry', () => {
         }),
       };
 
-      const mockTool2: RegisteredTool = {
+      const mockTool2: BuiltinToolDefinition = {
         id: 'test-tool-2',
         description: 'Another test tool',
         schema: z.object({}),

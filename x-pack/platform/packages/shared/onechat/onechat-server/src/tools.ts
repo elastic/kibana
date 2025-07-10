@@ -12,7 +12,6 @@ import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type {
   ToolDescriptor,
-  ToolDescriptorMeta,
   ToolIdentifier,
   PlainIdToolIdentifier,
   FieldTypes,
@@ -22,17 +21,12 @@ import type { ScopedRunner, RunToolReturn, ScopedRunnerRunToolsParams } from './
 import type { ToolEventEmitter } from './events';
 
 /**
- * Subset of {@link ToolDescriptorMeta} that can be defined during tool registration.
- */
-export type RegisteredToolMeta = Partial<Omit<ToolDescriptorMeta, 'providerId'>>;
-
-/**
  * Onechat tool, as registered by built-in tool providers.
  */
-export interface RegisteredTool<
+export interface BuiltinToolDefinition<
   RunInput extends ZodObject<any> = ZodObject<any>,
   RunOutput = unknown
-> extends Omit<ToolDescriptor, 'meta'> {
+> extends Omit<ToolDescriptor, 'type' | 'configuration'> {
   /**
    * Tool's input schema, defined as a zod schema.
    */
@@ -41,10 +35,6 @@ export interface RegisteredTool<
    * Handler to call to execute the tool.
    */
   handler: ToolHandlerFn<z.infer<RunInput>, RunOutput>;
-  /**
-   * Optional set of metadata for this tool.
-   */
-  meta?: RegisteredToolMeta;
 }
 
 /**
@@ -82,7 +72,7 @@ export interface EsqlToolDefinition extends ToolDescriptor {
 }
 
 export interface EsqlTool<RunInput extends ZodObject<any> = ZodObject<any>, RunOutput = unknown>
-  extends RegisteredTool<RunInput, RunOutput> {
+  extends BuiltinToolDefinition<RunInput, RunOutput> {
   /**
    * The ESQL id to be executed.
    */
@@ -135,11 +125,14 @@ export interface RegisteredToolProvider {
    * Retrieve a tool based on its identifier.
    * If not found,the provider should throw a {@link OnechatToolNotFoundError}
    */
-  get(options: { toolId: PlainIdToolIdentifier; request: KibanaRequest }): Promise<RegisteredTool>;
+  get(options: {
+    toolId: PlainIdToolIdentifier;
+    request: KibanaRequest;
+  }): Promise<BuiltinToolDefinition>;
   /**
    * List all tools present in the provider.
    */
-  list(options: { request: KibanaRequest }): Promise<RegisteredTool[]>;
+  list(options: { request: KibanaRequest }): Promise<BuiltinToolDefinition[]>;
 }
 
 /**
@@ -175,14 +168,14 @@ export type ExecutableToolHandlerFn<TParams = Record<string, unknown>, TResult =
 ) => Promise<RunToolReturn<TResult>>;
 
 /**
- * Return value for {@link ToolHandlerFn} / {@link RegisteredTool}
+ * Return value for {@link ToolHandlerFn} / {@link BuiltinToolDefinition}
  */
 export interface ToolHandlerReturn<T = unknown> {
   result: T;
 }
 
 /**
- * Tool handler function for {@link RegisteredTool} handlers.
+ * Tool handler function for {@link BuiltinToolDefinition} handlers.
  */
 export type ToolHandlerFn<
   TParams extends Record<string, unknown> = Record<string, unknown>,

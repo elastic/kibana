@@ -4,13 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EsqlTool, EsqlToolDefinition, RegisteredTool } from '@kbn/onechat-server';
+import { EsqlTool, EsqlToolDefinition, BuiltinToolDefinition } from '@kbn/onechat-server';
 import { z } from '@kbn/zod';
 
 function toRegisteredTool<
   RunInput extends z.ZodObject<any> = z.ZodObject<any>,
   RunOutput = unknown
->(esqlTool: EsqlTool<RunInput, RunOutput>): RegisteredTool<RunInput, RunOutput> {
+>(esqlTool: EsqlTool<RunInput, RunOutput>): BuiltinToolDefinition<RunInput, RunOutput> {
   const { id, description, meta, schema, handler } = esqlTool;
   return { id, description, meta, schema, handler };
 }
@@ -56,7 +56,7 @@ function createSchemaFromParams(params: EsqlToolDefinition['params']): z.ZodObje
   return schema;
 }
 
-export const registeredToolCreator = (tool: EsqlToolDefinition): RegisteredTool => {
+export const registeredToolCreator = (tool: EsqlToolDefinition): BuiltinToolDefinition => {
   const esqlSchema = createSchemaFromParams(tool.params);
 
   const executableTool: EsqlTool = {

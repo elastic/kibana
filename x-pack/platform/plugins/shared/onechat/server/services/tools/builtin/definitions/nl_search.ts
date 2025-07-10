@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod';
 import { BuiltinToolIds, BuiltinTags } from '@kbn/onechat-common';
-import type { RegisteredTool } from '@kbn/onechat-server';
+import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import { naturalLanguageSearch, NaturalLanguageSearchResponse } from '@kbn/onechat-genai-utils';
 
 const searchDslSchema = z.object({
@@ -24,7 +24,7 @@ const searchDslSchema = z.object({
     .describe('(optional) Additional context that could be useful to perform the search'),
 });
 
-export const naturalLanguageSearchTool = (): RegisteredTool<
+export const naturalLanguageSearchTool = (): BuiltinToolDefinition<
   typeof searchDslSchema,
   NaturalLanguageSearchResponse
 > => {
@@ -45,8 +45,6 @@ export const naturalLanguageSearchTool = (): RegisteredTool<
         result,
       };
     },
-    meta: {
-      tags: [BuiltinTags.retrieval],
-    },
+    tags: [BuiltinTags.retrieval],
   };
 };

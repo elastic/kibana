@@ -7,7 +7,7 @@
 
 export type {
   RegisteredToolMeta,
-  RegisteredTool,
+  BuiltinToolDefinition,
   RegisteredToolProvider,
   EsqlToolDefinition,
   EsqlTool,

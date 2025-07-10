@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod';
 import { BuiltinToolIds, BuiltinTags } from '@kbn/onechat-common';
-import type { RegisteredTool } from '@kbn/onechat-server';
+import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import { relevanceSearch } from '@kbn/onechat-genai-utils';
 
 const relevanceSearchSchema = z.object({
@@ -41,7 +41,7 @@ export interface SearchFulltextResponse {
   results: SearchFulltextResult[];
 }
 
-export const relevanceSearchTool = (): RegisteredTool<
+export const relevanceSearchTool = (): BuiltinToolDefinition<
   typeof relevanceSearchSchema,
   SearchFulltextResponse
 > => {
@@ -69,8 +69,6 @@ export const relevanceSearchTool = (): RegisteredTool<
         result,
       };
     },
-    meta: {
-      tags: [BuiltinTags.retrieval],
-    },
+    tags: [BuiltinTags.retrieval],
   };
 };

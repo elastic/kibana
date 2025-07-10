@@ -6,7 +6,7 @@
  */
 
 import type { KibanaRequest, Logger, ElasticsearchServiceStart } from '@kbn/core/server';
-import { EsqlTool, RegisteredTool } from '@kbn/onechat-server';
+import { EsqlTool, BuiltinToolDefinition } from '@kbn/onechat-server';
 import { esqlToolProviderId } from '@kbn/onechat-common';
 import { EsqlToolClient, createClient } from './client';
 import { createStorage } from './storage';
@@ -40,7 +40,7 @@ export class EsqlToolRegistryImpl implements EsqlToolRegistry {
     return true;
   }
 
-  async get(options: { toolId: string; request: KibanaRequest }): Promise<RegisteredTool> {
+  async get(options: { toolId: string; request: KibanaRequest }): Promise<BuiltinToolDefinition> {
     const { toolId, request } = options;
     const client = await this.getScopedClient({ request });
     const document = await client.get(toolId);
@@ -50,10 +50,10 @@ export class EsqlToolRegistryImpl implements EsqlToolRegistry {
     return executableTool as EsqlTool;
   }
 
-  async list(options: { request: KibanaRequest }): Promise<RegisteredTool[]> {
+  async list(options: { request: KibanaRequest }): Promise<BuiltinToolDefinition[]> {
     const client = await this.getScopedClient({ request: options.request });
     const esqlTools = await client.list();
-    const registeredTools: RegisteredTool[] = [];
+    const registeredTools: BuiltinToolDefinition[] = [];
 
     for (const tool of esqlTools) {
       const executableTool = registeredToolCreator(tool);

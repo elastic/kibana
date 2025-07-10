@@ -93,10 +93,12 @@ export const isToolNotFoundError = (err: unknown): err is OnechatToolNotFoundErr
 
 export const createToolNotFoundError = ({
   toolId,
+  toolType,
   customMessage,
   meta = {},
 }: {
-  toolId: SerializedToolIdentifier;
+  toolId: string;
+  toolType?: string;
   customMessage?: string;
   meta?: Record<string, any>;
 }): OnechatToolNotFoundError => {
