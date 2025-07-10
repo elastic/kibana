@@ -136,12 +136,19 @@ export function KnowledgeBaseBulkImportFlyout({ onClose }: { onClose: () => void
         <EuiSpacer size="m" />
 
         <EuiCodeBlock isCopyable paddingSize="s">
-          {`{
-  "id": "a_unique_human_readable_id",
-  "title": "Title of item",
-  "text": "Contents of item",
-}
-`}
+          {JSON.stringify({ id: 'some_uuid', title: 'Title of item', text: 'Contents of item' })}
+          {`\n`}
+          {JSON.stringify({
+            id: 'a_different_uuid',
+            title: 'Title of second item',
+            text: 'Contents of second item',
+          })}
+          {`\n`}
+          {JSON.stringify({
+            id: 'another_uuid',
+            title: 'Title of third item',
+            text: 'Contents of third item',
+          })}
         </EuiCodeBlock>
 
         <EuiHorizontalRule />

@@ -8,7 +8,7 @@
 import { Readable } from 'stream';
 import { Observable, toArray, firstValueFrom, map, filter } from 'rxjs';
 import {
-  BedrockChunkMember,
+  BedrockStreamChunkMember,
   BedrockStreamMember,
   serdeEventstreamIntoObservable,
 } from './serde_eventstream_into_observable';
@@ -16,6 +16,7 @@ import { EventStreamMarshaller } from '@smithy/eventstream-serde-node';
 import { fromUtf8, toUtf8 } from '@smithy/util-utf8';
 import type { CompletionChunk } from './types';
 import { parseSerdeChunkMessage, serializeSerdeChunkMessage } from './serde_utils';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 describe('serdeEventstreamIntoObservable', () => {
   const marshaller = new EventStreamMarshaller({
@@ -31,10 +32,11 @@ describe('serdeEventstreamIntoObservable', () => {
   const getChunks = async (serde$: Observable<BedrockStreamMember>) => {
     return await firstValueFrom(
       serde$.pipe(
-        filter((value): value is BedrockChunkMember => {
-          return 'chunk' in value && value.chunk?.headers?.[':event-type']?.value === 'chunk';
+        filter((value): value is BedrockStreamChunkMember => {
+          return isPopulatedObject(value, ['chunk']);
         }),
         map((message) => {
+          // @ts-expect-error Chunk is a valid Message
           return parseSerdeChunkMessage(message.chunk);
         }),
         toArray()

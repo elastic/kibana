@@ -32,7 +32,7 @@ import type {
   SerializedTitles,
   ViewMode,
 } from '@kbn/presentation-publishing';
-import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public/plugin';
+import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
 import type {
   BrushTriggerEvent,
   ClickTriggerEvent,
@@ -64,10 +64,7 @@ import type { AllowedPartitionOverrides } from '@kbn/expression-partition-vis-pl
 import type { AllowedXYOverrides } from '@kbn/expression-xy-plugin/common';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { PublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
-import type { RuleFormData, RuleTypeRegistryContract } from '@kbn/response-ops-rule-form';
-import type { ActionTypeRegistryContract } from '@kbn/alerts-ui-shared';
-import { EsQueryRuleParams } from '@kbn/response-ops-rule-params/es_query';
-import { CanAddNewPanel } from '@kbn/presentation-containers';
+import { CanAddNewPanel, TracksOverlays } from '@kbn/presentation-containers';
 import type { LegacyMetricState } from '../../common';
 import type { LensDocument } from '../persistence';
 import type { LensInspector } from '../lens_inspector_service';
@@ -208,6 +205,15 @@ export interface IntegrationCallbacks extends LensApiProps {
   updateSavedObjectId: (newSavedObjectId: LensRuntimeState['savedObjectId']) => void;
   updateOverrides: (newOverrides: LensOverrides['overrides']) => void;
   getTriggerCompatibleActions: (triggerId: string, context: object) => Promise<Action[]>;
+  mountInlineFlyout: (
+    Component: React.ComponentType,
+    overlayTracker?: TracksOverlays,
+    options?: {
+      dataTestSubj?: string;
+      uuid?: string;
+      container?: HTMLElement | null;
+    }
+  ) => void;
 }
 
 /**
@@ -378,15 +384,6 @@ export interface LensInspectorAdapters {
   adapters$: PublishingSubject<Adapters>;
 }
 
-export type LensCreateAlertRuleInitialValues = Partial<RuleFormData<Partial<EsQueryRuleParams>>>;
-export interface LensAlertRulesApi {
-  createAlertRule: (
-    initialValues: LensCreateAlertRuleInitialValues,
-    ruleTypeRegistry: RuleTypeRegistryContract,
-    actionTypeRegistry: ActionTypeRegistryContract
-  ) => void;
-}
-
 export type LensApi = Simplify<
   DefaultEmbeddableApi<LensSerializedState> &
     // This is used by actions to operate the edit action
@@ -419,8 +416,7 @@ export type LensApi = Simplify<
     // Let the container know when the data has been loaded/updated
     LensInspectorAdapters &
     LensRequestHandlersProps &
-    LensApiCallbacks &
-    LensAlertRulesApi
+    LensApiCallbacks
 >;
 
 // This is an API only used internally to the embeddable but not exported elsewhere

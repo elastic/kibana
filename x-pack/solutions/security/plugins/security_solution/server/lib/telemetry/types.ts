@@ -386,6 +386,27 @@ interface ExceptionListEntry {
   namespace_type: string;
 }
 
+export interface ResponseActionsRuleResponseAggregations {
+  actionTypes: {
+    buckets: Array<{
+      key: '.endpoint' | '.osquery';
+      doc_count: number;
+    }>;
+  };
+}
+
+export interface ResponseActionsRuleTelemetryTemplate {
+  '@timestamp': string;
+  cluster_uuid: string;
+  cluster_name: string;
+  license_id: string | undefined;
+  response_actions_rules: ResponseActionRules;
+}
+
+export interface ResponseActionRules {
+  endpoint: number;
+  osquery: number;
+}
 interface DetectionRuleParms {
   ruleId: string;
   version: number;

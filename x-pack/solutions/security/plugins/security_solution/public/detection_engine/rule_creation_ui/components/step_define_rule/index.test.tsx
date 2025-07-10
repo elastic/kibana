@@ -26,7 +26,7 @@ import {
   addRequiredFieldRow,
   createIndexPatternField,
   getSelectToggleButtonForName,
-} from '../../../rule_creation/components/required_fields/required_fields.test';
+} from '../../../rule_creation/components/required_fields/required_fields.test_helpers';
 import { ALERT_SUPPRESSION_FIELDS_FIELD_NAME } from '../../../rule_creation/components/alert_suppression_edit';
 import {
   expectDuration,
@@ -115,6 +115,7 @@ jest.mock('../../../../common/lib/kibana', () => {
       addError: jest.fn(),
       addSuccess: jest.fn(),
       addWarning: jest.fn(),
+      addInfo: jest.fn(),
       remove: jest.fn(),
     }),
     useKibana: () => {

@@ -69,6 +69,25 @@
       },
       {
         "parentPluginId": "@kbn/react-kibana-context-theme",
+        "id": "def-common.useKibanaIsDarkMode",
+        "type": "Function",
+        "tags": [],
+        "label": "useKibanaIsDarkMode",
+        "description": [
+          "\nA **temporary** hook to simplify getting `isDarkMode` from eui context\n\nTODO: Replace with hook directly from eui\nSee https://github.com/elastic/eui/issues/8693"
+        ],
+        "signature": [
+          "() => boolean"
+        ],
+        "path": "src/platform/packages/shared/react/kibana_context/theme/hooks/use_kibana_is_dark_mode.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/react-kibana-context-theme",
         "id": "def-common.wrapWithTheme",
         "type": "Function",
         "tags": [],

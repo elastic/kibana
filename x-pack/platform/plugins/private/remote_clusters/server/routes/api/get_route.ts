@@ -25,13 +25,12 @@ export const register = (deps: RouteDependencies): void => {
     try {
       const { client: clusterClient } = (await ctx.core).elasticsearch;
       const clusterSettings = await clusterClient.asCurrentUser.cluster.getSettings();
+      const transientClusters = get(clusterSettings, 'transient.cluster.remote', {});
+      const persistentClusters = get(clusterSettings, 'persistent.cluster.remote', {});
 
-      const transientClusterNames = Object.keys(
-        get(clusterSettings, 'transient.cluster.remote') || {}
-      );
-      const persistentClusterNames = Object.keys(
-        get(clusterSettings, 'persistent.cluster.remote') || {}
-      );
+      const clustersSettingsByName = { ...transientClusters, ...persistentClusters };
+      const transientClusterNames = Object.keys(transientClusters);
+      const persistentClusterNames = Object.keys(persistentClusters);
 
       const clustersByName = await clusterClient.asCurrentUser.cluster.remoteInfo();
       const clusterNames = (clustersByName && Object.keys(clustersByName)) || [];
@@ -64,7 +63,14 @@ export const register = (deps: RouteDependencies): void => {
       const clusterStatus = assign({}, ...flattenedClusterStatus);
 
       const body = clusterNames.map((clusterName: string): any => {
-        const cluster = clustersByName[clusterName];
+        const cluster = { ...clustersByName[clusterName], ...clustersSettingsByName[clusterName] };
+
+        // Node connections and proxy socket connections by the user are not available in the remote info API, so we need to assign
+        // them from the cluster settings.
+        const nodeConnections = clustersSettingsByName[clusterName]?.node_connections;
+        const proxySocketConnections =
+          clustersSettingsByName[clusterName]?.proxy_socket_connections;
+
         const isTransient = transientClusterNames.includes(clusterName);
         const isPersistent = persistentClusterNames.includes(clusterName);
         const { config } = deps;
@@ -85,7 +91,9 @@ export const register = (deps: RouteDependencies): void => {
             clusterName,
             cluster,
             deprecatedProxyAddress,
-            config.isCloudEnabled
+            config.isCloudEnabled,
+            nodeConnections,
+            proxySocketConnections
           ),
           isConfiguredByNode,
           // We prioritize the cluster status from the resolve cluster API, and fallback to

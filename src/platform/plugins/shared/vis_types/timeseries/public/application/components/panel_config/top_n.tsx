@@ -37,6 +37,7 @@ import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
 import { QueryBarWrapper } from '../query_bar_wrapper';
 import { PanelConfigProps, PANEL_CONFIG_TABS } from './types';
 import { TimeseriesVisParams } from '../../../types';
+import { panelConfigContainerStyles } from './_panel_config';
 
 export class TopNPanelConfig extends Component<
   PanelConfigProps,
@@ -79,7 +80,7 @@ export class TopNPanelConfig extends Component<
           onChange={this.props.onChange}
         />
       ) : (
-        <div className="tvbPanelConfig__container">
+        <div className="tvbPanelConfig__container" css={panelConfigContainerStyles}>
           <EuiPanel>
             <EuiTitle size="s">
               <span>

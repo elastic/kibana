@@ -12,11 +12,6 @@ jest.doMock('./render_template', () => ({
   renderTemplate: renderTemplateMock,
 }));
 
-export const getThemeTagMock = jest.fn();
-jest.doMock('../theme', () => ({
-  getThemeTag: getThemeTagMock,
-}));
-
 export const getPluginsBundlePathsMock = jest.fn();
 jest.doMock('./get_plugin_bundle_paths', () => ({
   getPluginsBundlePaths: getPluginsBundlePathsMock,

@@ -116,9 +116,6 @@ export const mlExecutor = async ({
       anomalyResults = searchResults.anomalyResults;
       loggedRequests.push(...(searchResults.loggedRequests ?? []));
     } catch (error) {
-      if (typeof error.message === 'string' && (error.message as string).endsWith('missing')) {
-        result.userError = true;
-      }
       result.errors.push(error.message);
       result.success = false;
       return { result };

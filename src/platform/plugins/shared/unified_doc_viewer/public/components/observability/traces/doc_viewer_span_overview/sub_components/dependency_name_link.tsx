@@ -7,18 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
-import { getRouterLinkProps } from '@kbn/router-utils';
+import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import { DEPENDENCY_OVERVIEW_LOCATOR_ID } from '@kbn/deeplinks-observability';
+import { getRouterLinkProps } from '@kbn/router-utils';
+import React from 'react';
+import { SpanIcon } from '@kbn/apm-ui-shared';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
 
 interface DependencyNameLinkProps {
   dependencyName: string;
+  spanType?: string;
+  spanSubtype?: string;
   environment: string;
+  formattedDependencyName?: React.ReactNode;
 }
 
-export function DependencyNameLink({ dependencyName, environment }: DependencyNameLinkProps) {
+export function DependencyNameLink({
+  dependencyName,
+  spanType,
+  spanSubtype,
+  environment,
+  formattedDependencyName,
+}: DependencyNameLinkProps) {
   const {
     share: { url: urlService },
     core,
@@ -60,8 +70,9 @@ export function DependencyNameLink({ dependencyName, environment }: DependencyNa
   const content = (
     <EuiFlexGroup gutterSize="xs" alignItems="center">
       <EuiFlexItem>
-        <EuiText size="xs">{dependencyName}</EuiText>
+        <SpanIcon type={spanType} subtype={spanSubtype} size="m" />
       </EuiFlexItem>
+      <EuiFlexItem>{formattedDependencyName}</EuiFlexItem>
     </EuiFlexGroup>
   );
 
@@ -70,6 +81,6 @@ export function DependencyNameLink({ dependencyName, environment }: DependencyNa
       {content}
     </EuiLink>
   ) : (
-    content
+    dependencyName
   );
 }

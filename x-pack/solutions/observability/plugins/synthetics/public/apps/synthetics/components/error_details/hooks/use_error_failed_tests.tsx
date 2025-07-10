@@ -45,8 +45,8 @@ export function useErrorFailedTests() {
             },
           ],
         },
-        sort: [{ '@timestamp': 'desc' }],
       },
+      sort: [{ '@timestamp': 'desc' }],
     },
     [lastRefresh, monitorId, dateRangeStart, dateRangeEnd],
     { name: 'getMonitorErrorFailedTests' }

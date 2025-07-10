@@ -39,7 +39,6 @@ describe('V2 algorithm - using model versions - upgrade without stack version in
       name: 'test_mv',
       namespaceType: 'single',
       migrations: {},
-      switchToModelVersionAt: '8.8.0',
       modelVersions: {
         1: {
           changes: [],
@@ -91,7 +90,7 @@ describe('V2 algorithm - using model versions - upgrade without stack version in
     const { runMigrations, savedObjectsRepository } = await getKibanaMigratorTestKit({
       ...getBaseMigratorParams({
         migrationAlgorithm: 'v2',
-        kibanaVersion: '8.8.0',
+        kibanaVersion: '8.18.0',
       }),
       types: [getTestModelVersionType({ beforeUpgrade: true })],
     });
@@ -115,16 +114,16 @@ describe('V2 algorithm - using model versions - upgrade without stack version in
     const modelVersionType = getTestModelVersionType({ beforeUpgrade: false });
 
     const { runMigrations, client, savedObjectsRepository } = await getKibanaMigratorTestKit({
-      ...getBaseMigratorParams({ migrationAlgorithm: 'v2', kibanaVersion: '8.8.0' }),
+      ...getBaseMigratorParams({ migrationAlgorithm: 'v2', kibanaVersion: '8.18.0' }),
       logFilePath,
       types: [modelVersionType],
     });
     await runMigrations();
 
     const indices = await client.indices.get({ index: '.kibana*' });
-    expect(Object.keys(indices)).toEqual(['.kibana_8.8.0_001']);
+    expect(Object.keys(indices)).toEqual(['.kibana_8.18.0_001']);
 
-    const index = indices['.kibana_8.8.0_001'];
+    const index = indices['.kibana_8.18.0_001'];
     const mappings = index.mappings ?? {};
     const mappingMeta = mappings._meta ?? {};
 

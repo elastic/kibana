@@ -74,8 +74,6 @@ const RiskScoreBadge: React.FC<{
   ['data-test-subj']?: string;
 }> = React.memo(({ severity, hideBackgroundColor = false, 'data-test-subj': dataTestSubj }) => {
   const { euiTheme } = useEuiTheme();
-  // TODO: use riskSeverity hook when palette agreed.
-  // https://github.com/elastic/security-team/issues/11516 hook - https://github.com/elastic/kibana/pull/206276
   return (
     <RiskBadge
       color={euiTheme.colors.backgroundBaseDanger}

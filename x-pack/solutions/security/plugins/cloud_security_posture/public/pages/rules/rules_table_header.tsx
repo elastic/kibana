@@ -157,6 +157,8 @@ export const RulesTableHeader = ({
               <EuiFilterGroup>
                 <EuiFilterButton
                   withNext
+                  isToggle
+                  isSelected={enabledDisabledItemsFilterState === 'enabled'}
                   hasActiveFilters={enabledDisabledItemsFilterState === 'enabled'}
                   onClick={toggleEnabledRulesFilter}
                   data-test-subj={RULES_TABLE_HEADER_TEST_SUBJ.RULES_ENABLED_FILTER}
@@ -167,6 +169,8 @@ export const RulesTableHeader = ({
                   />
                 </EuiFilterButton>
                 <EuiFilterButton
+                  isToggle
+                  isSelected={enabledDisabledItemsFilterState === 'enabled'}
                   hasActiveFilters={enabledDisabledItemsFilterState === 'disabled'}
                   onClick={toggleDisabledRulesFilter}
                   data-test-subj={RULES_TABLE_HEADER_TEST_SUBJ.RULES_DISABLED_FILTER}
@@ -207,7 +211,7 @@ const SearchField = ({
 
   return (
     <div>
-      <EuiFlexItem grow={true} style={{ alignItems: 'flex-end' }}>
+      <EuiFlexItem grow={true} css={{ alignItems: 'flex-end' }}>
         <EuiFieldSearch
           data-test-subj={RULES_TABLE_HEADER_TEST_SUBJ.RULES_TABLE_HEADER_SEARCH_INPUT}
           isLoading={isSearching}
@@ -216,7 +220,7 @@ const SearchField = ({
           })}
           value={localValue}
           onChange={(e) => setLocalValue(e.target.value)}
-          style={{ minWidth: 150 }}
+          css={{ minWidth: 150 }}
           fullWidth
         />
       </EuiFlexItem>
@@ -308,7 +312,7 @@ const CurrentPageOfTotal = ({
           grow={false}
           data-test-subj={RULES_TABLE_HEADER_TEST_SUBJ.RULES_TABLE_HEADER_RULE_SHOWING_LABEL}
         >
-          <EuiText size="xs" textAlign="left" color="subdued" style={{ marginLeft: '8px' }}>
+          <EuiText size="xs" textAlign="left" color="subdued" css={{ marginLeft: '8px' }}>
             <FormattedMessage
               id="xpack.csp.rules.rulesTable.showingPageOfTotalLabel"
               defaultMessage="Showing {pageSize} of {total, plural, one {# rule} other {# rules}} {pipe} Selected {selectedRulesAmount, plural, one {# rule} other {# rules}}"
@@ -357,8 +361,8 @@ const CurrentPageOfTotal = ({
             anchorPosition="downLeft"
             panelPaddingSize="s"
           >
-            <EuiPopoverTitle style={{ minWidth: 240 }}>
-              <EuiText size="s" textAlign="left" color="subdued" style={{ marginLeft: '8px' }}>
+            <EuiPopoverTitle css={{ minWidth: 240 }}>
+              <EuiText size="s" textAlign="left" color="subdued" css={{ marginLeft: '8px' }}>
                 <b>
                   <FormattedMessage
                     id="xpack.csp.rules.rulesTable.bulkActionsOptionTitle"

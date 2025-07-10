@@ -10,14 +10,14 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
 import { useFetchGraphData } from '@kbn/cloud-security-posture-graph/src/hooks';
 import {
-  uiMetricService,
   GRAPH_PREVIEW,
+  uiMetricService,
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { METRIC_TYPE } from '@kbn/analytics';
 import {
   ANALYZER_PREVIEW_TEST_ID,
-  SESSION_PREVIEW_TEST_ID,
   GRAPH_PREVIEW_TEST_ID,
+  SESSION_PREVIEW_TEST_ID,
   VISUALIZATIONS_SECTION_CONTENT_TEST_ID,
   VISUALIZATIONS_SECTION_HEADER_TEST_ID,
 } from './test_ids';
@@ -26,29 +26,24 @@ import { mockContextValue } from '../../shared/mocks/mock_context';
 import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
 import { DocumentDetailsContext } from '../../shared/context';
 import { useAlertPrevalenceFromProcessTree } from '../../shared/hooks/use_alert_prevalence_from_process_tree';
-import { useTimelineDataFilters } from '../../../../timelines/containers/use_timeline_data_filters';
-import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
+import { TestProviders } from '../../../../common/mock';
 import { useExpandSection } from '../hooks/use_expand_section';
 import { useInvestigateInTimeline } from '../../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline';
 import { useIsInvestigateInResolverActionEnabled } from '../../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
 import { useGraphPreview } from '../../shared/hooks/use_graph_preview';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useEnableExperimental } from '../../../../common/hooks/use_experimental_features';
 import { createUseUiSetting$Mock } from '../../../../common/lib/kibana/kibana_react.mock';
-import {
-  ENABLE_GRAPH_VISUALIZATION_SETTING,
-  ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING,
-} from '../../../../../common/constants';
-
+import { ENABLE_GRAPH_VISUALIZATION_SETTING } from '../../../../../common/constants';
+import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 jest.mock('../hooks/use_expand_section');
 jest.mock('../../shared/hooks/use_alert_prevalence_from_process_tree', () => ({
   useAlertPrevalenceFromProcessTree: jest.fn(),
 }));
 const mockUseAlertPrevalenceFromProcessTree = useAlertPrevalenceFromProcessTree as jest.Mock;
 
-jest.mock('../../../../timelines/containers/use_timeline_data_filters', () => ({
-  useTimelineDataFilters: jest.fn(),
-}));
-const mockUseTimelineDataFilters = useTimelineDataFilters as jest.Mock;
+jest.mock('../../../../common/hooks/use_experimental_features');
+jest.mock('../../../../data_view_manager/hooks/use_selected_patterns');
+
 jest.mock('react-redux', () => {
   const original = jest.requireActual('react-redux');
 
@@ -64,14 +59,7 @@ jest.mock(
   '../../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver'
 );
 
-jest.mock('../../../../common/hooks/use_experimental_features', () => ({
-  useIsExperimentalFeatureEnabled: jest.fn(),
-}));
-
-const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
-useIsExperimentalFeatureEnabledMock.mockReturnValue(true);
 const mockUseUiSetting = jest.fn().mockImplementation((key) => [false]);
-
 jest.mock('@kbn/kibana-react-plugin/public', () => {
   const original = jest.requireActual('@kbn/kibana-react-plugin/public');
   return {
@@ -105,18 +93,21 @@ const panelContextValue = {
 const renderVisualizationsSection = (contextValue = panelContextValue) =>
   render(
     <IntlProvider locale="en">
-      <TestProvider>
+      <TestProviders>
         <DocumentDetailsContext.Provider value={contextValue}>
           <VisualizationsSection />
         </DocumentDetailsContext.Provider>
-      </TestProvider>
+      </TestProviders>
     </IntlProvider>
   );
 
 describe('<VisualizationsSection />', () => {
   beforeEach(() => {
     mockUseUiSetting.mockImplementation(() => [false]);
-    mockUseTimelineDataFilters.mockReturnValue({ selectedPatterns: ['index'] });
+    (useSelectedPatterns as jest.Mock).mockReturnValue(['index']);
+    (useEnableExperimental as jest.Mock).mockReturnValue({
+      newDataViewPickerEnabled: true,
+    });
     mockUseAlertPrevalenceFromProcessTree.mockReturnValue({
       loading: false,
       error: false,
@@ -163,8 +154,6 @@ describe('<VisualizationsSection />', () => {
 
       if (key === ENABLE_GRAPH_VISUALIZATION_SETTING) {
         return [false, jest.fn()];
-      } else if (key === ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING) {
-        return [false, jest.fn()];
       }
 
       return useUiSetting$Mock(key, defaultValue);
@@ -184,8 +173,6 @@ describe('<VisualizationsSection />', () => {
       const useUiSetting$Mock = createUseUiSetting$Mock();
 
       if (key === ENABLE_GRAPH_VISUALIZATION_SETTING) {
-        return [true, jest.fn()];
-      } else if (key === ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING) {
         return [true, jest.fn()];
       }
 
@@ -207,27 +194,6 @@ describe('<VisualizationsSection />', () => {
       const useUiSetting$Mock = createUseUiSetting$Mock();
 
       if (key === ENABLE_GRAPH_VISUALIZATION_SETTING) {
-        return [false, jest.fn()];
-      } else if (key === ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING) {
-        return [true, jest.fn()];
-      }
-
-      return useUiSetting$Mock(key, defaultValue);
-    });
-
-    const { queryByTestId } = renderVisualizationsSection();
-
-    expect(queryByTestId(`${GRAPH_PREVIEW_TEST_ID}LeftSection`)).not.toBeInTheDocument();
-  });
-
-  it('should not render the graph preview component if the flyout feature is disabled', () => {
-    (useExpandSection as jest.Mock).mockReturnValue(true);
-    mockUseUiSetting.mockImplementation((key, defaultValue) => {
-      const useUiSetting$Mock = createUseUiSetting$Mock();
-
-      if (key === ENABLE_GRAPH_VISUALIZATION_SETTING) {
-        return [true, jest.fn()];
-      } else if (key === ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING) {
         return [false, jest.fn()];
       }
 

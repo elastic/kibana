@@ -1,0 +1,17 @@
+{
+  "type": "plugin",
+  "id": "@kbn/onechat-plugin",
+  "owner": "@elastic/workchat-eng",
+  "group": "platform",
+  "visibility": "shared",
+  "plugin": {
+    "id": "onechat",
+    "server": true,
+    "browser": true,
+    "configPath": ["xpack", "onechat"],
+    "requiredPlugins": ["actions", "inference", "features"],
+    "requiredBundles": ["kibanaReact"],
+    "optionalPlugins": [],
+    "extraPublicDirs": []
+  }
+}

@@ -131,6 +131,18 @@ const stateSchemaV4 = stateSchemaV3.extends({
   count_rules_muted_by_type: schema.recordOf(schema.string(), schema.number()),
 });
 
+const stateSchemaV5 = stateSchemaV4.extends({
+  count_ignored_fields_by_rule_type: schema.recordOf(schema.string(), schema.number()),
+});
+
+const stateSchemaV6 = stateSchemaV5.extends({
+  count_backfill_executions: schema.number(),
+  count_backfills_by_execution_status_per_day: schema.recordOf(schema.string(), schema.number()),
+  count_gaps: schema.number(),
+  total_unfilled_gap_duration_ms: schema.number(),
+  total_filled_gap_duration_ms: schema.number(),
+});
+
 export const stateSchemaByVersion = {
   1: {
     // A task that was created < 8.10 will go through this "up" migration
@@ -245,9 +257,28 @@ export const stateSchemaByVersion = {
     }),
     schema: stateSchemaV4,
   },
+  5: {
+    up: (state: Record<string, unknown>) => ({
+      ...stateSchemaByVersion[4].up(state),
+      count_ignored_fields_by_rule_type: state.count_ignored_fields_by_rule_type || {},
+    }),
+    schema: stateSchemaV5,
+  },
+  6: {
+    up: (state: Record<string, unknown>) => ({
+      ...stateSchemaByVersion[5].up(state),
+      count_backfill_executions: state.count_backfill_executions || 0,
+      count_backfills_by_execution_status_per_day:
+        state.count_backfills_by_execution_status_per_day || {},
+      count_gaps: state.count_gaps || 0,
+      total_unfilled_gap_duration_ms: state.total_unfilled_gap_duration_ms || 0,
+      total_filled_gap_duration_ms: state.total_filled_gap_duration_ms || 0,
+    }),
+    schema: stateSchemaV6,
+  },
 };
 
-const latestTaskStateSchema = stateSchemaByVersion[4].schema;
+const latestTaskStateSchema = stateSchemaByVersion[6].schema;
 export type LatestTaskStateSchema = TypeOf<typeof latestTaskStateSchema>;
 
 export const emptyState: LatestTaskStateSchema = {
@@ -328,6 +359,12 @@ export const emptyState: LatestTaskStateSchema = {
   percentile_num_alerts_by_type_per_day: {},
   count_alerts_total: 0,
   count_alerts_by_rule_type: {},
+  count_backfill_executions: 0,
+  count_backfills_by_execution_status_per_day: {},
+  count_gaps: 0,
+  total_unfilled_gap_duration_ms: 0,
+  total_filled_gap_duration_ms: 0,
+  count_ignored_fields_by_rule_type: {},
   count_rules_with_linked_dashboards: 0,
   count_rules_with_investigation_guide: 0,
 };

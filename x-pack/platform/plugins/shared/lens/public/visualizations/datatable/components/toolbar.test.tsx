@@ -13,6 +13,7 @@ import { FramePublicAPI, VisualizationToolbarProps } from '../../../types';
 import { PagingState } from '../../../../common/expressions';
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { DataGridDensity } from '@kbn/unified-data-table';
 
 // mocking random id generator function
 jest.mock('@elastic/eui', () => {
@@ -45,6 +46,7 @@ describe('datatable toolbar', () => {
   const renderAndOpenToolbar = async (overrides = {}) => {
     const ROW_HEIGHT_SETTINGS_TEST_ID = 'lnsRowHeightSettings';
     const HEADER_HEIGHT_SETTINGS_TEST_ID = 'lnsHeaderHeightSettings';
+    const DENSITY_SETTINGS_TEST_ID = 'lnsDensitySettings';
 
     const rtlRender = render(<DataTableToolbar {...defaultProps} {...overrides} />);
 
@@ -78,6 +80,9 @@ describe('datatable toolbar', () => {
       selectHeaderHeightOption: selectOptionFromButtonGroup(HEADER_HEIGHT_SETTINGS_TEST_ID),
       getPaginationSwitch,
       clickPaginationSwitch,
+      // Density
+      getDensityValue: getSelectedButtonInGroup(DENSITY_SETTINGS_TEST_ID),
+      selectDensityOption: selectOptionFromButtonGroup(DENSITY_SETTINGS_TEST_ID),
     };
   };
 
@@ -87,12 +92,14 @@ describe('datatable toolbar', () => {
       getRowHeightValue,
       getHeaderHeightValue,
       getPaginationSwitch,
+      getDensityValue,
     } = await renderAndOpenToolbar();
 
     expect(getRowHeightValue()).toHaveTextContent(/custom/i);
     expect(getHeaderHeightValue()).toHaveTextContent(/custom/i);
     expect(getHeaderHeightCustomValue()).toHaveValue(3);
     expect(getPaginationSwitch()).not.toBeChecked();
+    expect(getDensityValue()).toHaveTextContent(/normal/i);
   });
 
   it('should reflect passed state in the UI', async () => {
@@ -102,6 +109,7 @@ describe('datatable toolbar', () => {
       getPaginationSwitch,
       getHeaderHeightCustomValue,
       getRowHeightCustomValue,
+      getDensityValue,
     } = await renderAndOpenToolbar({
       state: {
         ...defaultProps.state,
@@ -110,6 +118,7 @@ describe('datatable toolbar', () => {
         headerRowHeight: 'custom',
         headerRowHeightLines: 4,
         paging: { size: 10, enabled: true },
+        density: DataGridDensity.COMPACT,
       },
     });
 
@@ -118,6 +127,7 @@ describe('datatable toolbar', () => {
     expect(getHeaderHeightValue()).toHaveTextContent(/custom/i);
     expect(getHeaderHeightCustomValue()).toHaveValue(4);
     expect(getPaginationSwitch()).toBeChecked();
+    expect(getDensityValue()).toHaveTextContent(/compact/i);
   });
 
   it('should change row height to "Auto" mode when selected', async () => {
@@ -188,6 +198,24 @@ describe('datatable toolbar', () => {
     expect(defaultProps.setState).toHaveBeenCalledTimes(1);
     expect(defaultProps.setState).toHaveBeenCalledWith({
       paging: { ...defaultPagingState, enabled: false },
+    });
+  });
+
+  it('should change density to "Compact" when selected', async () => {
+    const { selectDensityOption } = await renderAndOpenToolbar();
+    selectDensityOption(/compact/i);
+    expect(defaultProps.setState).toHaveBeenCalledTimes(1);
+    expect(defaultProps.setState).toHaveBeenCalledWith({
+      density: DataGridDensity.COMPACT,
+    });
+  });
+
+  it('should change density to "Expanded" when selected', async () => {
+    const { selectDensityOption } = await renderAndOpenToolbar();
+    selectDensityOption(/expanded/i);
+    expect(defaultProps.setState).toHaveBeenCalledTimes(1);
+    expect(defaultProps.setState).toHaveBeenCalledWith({
+      density: DataGridDensity.EXPANDED,
     });
   });
 });

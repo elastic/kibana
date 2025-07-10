@@ -10,10 +10,9 @@ import { noop } from 'lodash/fp';
 import React, { useCallback, useMemo, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import styled from '@emotion/styled';
-
 import { isTab } from '@kbn/timelines-plugin/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
-import { dataTableSelectors, tableDefaults, TableId } from '@kbn/securitysolution-data-table';
+import { DataViewManagerScopeName } from '../../../data_view_manager/constants';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { InputsModelId } from '../../../common/store/inputs/constants';
 import { SecurityPageName } from '../../../app/types';
@@ -22,7 +21,6 @@ import { FiltersGlobal } from '../../../common/components/filters_global';
 import { HeaderPage } from '../../../common/components/header_page';
 import { LastEventTime } from '../../../common/components/last_event_time';
 import { TabNavigation } from '../../../common/components/navigation/tab_navigation';
-
 import { NetworkKpiComponent } from '../components/kpi_network';
 import { SiemSearchBar } from '../../../common/components/search_bar';
 import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
@@ -42,16 +40,17 @@ import { NetworkRouteType } from './navigation/types';
 import {
   onTimelineTabKeyPressed,
   resetKeyboardFocus,
-  showGlobalFilters,
 } from '../../../timelines/components/timeline/helpers';
 import { useSourcererDataView } from '../../../sourcerer/containers';
-import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
+import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 import { sourceOrDestinationIpExistsFilter } from '../../../common/components/visualization_actions/utils';
 import { EmptyPrompt } from '../../../common/components/empty_prompt';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { useDataViewSpec } from '../../../data_view_manager/hooks/use_data_view_spec';
 import { useSelectedPatterns } from '../../../data_view_manager/hooks/use_selected_patterns';
+import { PageLoader } from '../../../common/components/page_loader';
+
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
  */
@@ -66,10 +65,6 @@ const ID = 'NetworkQueryId';
 const NetworkComponent = React.memo<NetworkComponentProps>(
   ({ hasMlUserPermissions, capabilitiesFetched }) => {
     const containerElement = useRef<HTMLDivElement | null>(null);
-    const getTable = useMemo(() => dataTableSelectors.getTableByIdSelector(), []);
-    const graphEventId = useShallowEqualSelector(
-      (state) => (getTable(state, TableId.networkPageEvents) ?? tableDefaults).graphEventId
-    );
     const getGlobalFiltersQuerySelector = useMemo(
       () => inputsSelectors.globalFiltersQuerySelector(),
       []
@@ -100,14 +95,12 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
 
     const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
-    const { dataView } = useDataView();
-    const { dataViewSpec } = useDataViewSpec();
-    const experimentalSelectedPatterns = useSelectedPatterns();
+    const { dataView, status } = useDataView(DataViewManagerScopeName.explore);
+    const { dataViewSpec } = useDataViewSpec(DataViewManagerScopeName.explore);
+    const experimentalSelectedPatterns = useSelectedPatterns(DataViewManagerScopeName.explore);
 
     const sourcererDataView = newDataViewPickerEnabled ? dataViewSpec : oldSourcererDataView;
-    const indicesExist = newDataViewPickerEnabled
-      ? !!dataView?.matchedIndices?.length
-      : oldIndicesExist;
+    const indicesExist = newDataViewPickerEnabled ? dataView.hasMatchedIndices() : oldIndicesExist;
     const selectedPatterns = newDataViewPickerEnabled
       ? experimentalSelectedPatterns
       : oldSelectedPatterns;
@@ -152,12 +145,16 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
 
     useInvalidFilterQuery({ id: ID, filterQuery, kqlError, query, startDate: from, endDate: to });
 
+    if (newDataViewPickerEnabled && status === 'pristine') {
+      return <PageLoader />;
+    }
+
     return (
       <>
         {indicesExist ? (
           <StyledFullHeightContainer onKeyDown={onKeyDown} ref={containerElement}>
             <EuiWindowEvent event="resize" handler={noop} />
-            <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
+            <FiltersGlobal>
               <SiemSearchBar sourcererDataView={sourcererDataView} id={InputsModelId.global} />
             </FiltersGlobal>
 

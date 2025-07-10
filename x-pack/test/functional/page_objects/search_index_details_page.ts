@@ -43,16 +43,28 @@ export function SearchIndexDetailPageProvider({ getService }: FtrProviderContext
         /^https?\:\/\/.*(\:\d+)?/
       );
     },
-    async expectQuickStats() {
+    async expectQuickStats(counts: { total: number; deleted: number } = { total: 0, deleted: 0 }) {
       await testSubjects.existOrFail('quickStats', { timeout: 2000 });
       const quickStatsElem = await testSubjects.find('quickStats');
       const quickStatsDocumentElem = await quickStatsElem.findByTestSubject(
         'QuickStatsDocumentCount'
       );
-      expect(await quickStatsDocumentElem.getVisibleText()).to.contain('Document count\n0');
-      expect(await quickStatsDocumentElem.getVisibleText()).not.to.contain('Total\n0');
-      await quickStatsDocumentElem.click();
-      expect(await quickStatsDocumentElem.getVisibleText()).to.contain('Total\n0\nDeleted\n0');
+      const documentCountVisibileText = await quickStatsDocumentElem.getVisibleText();
+      expect(documentCountVisibileText).to.contain(`Document count\n${counts.total}`);
+      expect(documentCountVisibileText).not.to.contain(`Total\n${counts.total}`);
+      await testSubjects.click('QuickStatsDocumentCount');
+      await retry.tryWithRetries(
+        'Wait for redirect to start page',
+        async () => {
+          expect(await testSubjects.getVisibleText('QuickStatsDocumentCount')).to.contain(
+            `Total\n${counts.total}\nDeleted\n${counts.deleted}`
+          );
+        },
+        {
+          retryCount: 2,
+          retryDelay: 1000,
+        }
+      );
     },
 
     async expectQuickStatsToHaveIndexStatus() {
@@ -86,6 +98,13 @@ export function SearchIndexDetailPageProvider({ getService }: FtrProviderContext
       );
       await quickStatsAIMappingsElem.click();
       await testSubjects.existOrFail('setupAISearchButton', { timeout: 2000 });
+    },
+
+    async expectQuickStatsAIMappingsToHaveSemanticFields() {
+      const quickStatsDocumentElem = await testSubjects.find('QuickStatsAIMappings');
+      await quickStatsDocumentElem.click();
+      expect(await quickStatsDocumentElem.getVisibleText()).to.contain('AI Search\n2 Fields');
+      await testSubjects.missingOrFail('setupAISearchButton', { timeout: 2000 });
     },
 
     async expectQuickStatsAIMappingsToHaveVectorFields() {
@@ -166,10 +185,21 @@ export function SearchIndexDetailPageProvider({ getService }: FtrProviderContext
       ).findByClassName('euiTitle');
       expect(await pageLoadErrorElement.getVisibleText()).to.contain('Not Found');
     },
+    async hasPageReloadButton() {
+      await testSubjects.existOrFail('reloadButton');
+    },
+    async pageReloadButtonIsVisible() {
+      return testSubjects.isDisplayed('reloadButton');
+    },
     async clickPageReload() {
-      await retry.tryForTime(60 * 1000, async () => {
-        await testSubjects.click('reloadButton', 2000);
-      });
+      await retry.tryForTime(
+        60 * 1000,
+        async () => {
+          await testSubjects.click('reloadButton', 2000);
+        },
+        undefined,
+        100
+      );
     },
     async expectTabsExists() {
       await testSubjects.existOrFail('mappingsTab', { timeout: 2000 });
@@ -289,18 +319,18 @@ export function SearchIndexDetailPageProvider({ getService }: FtrProviderContext
       expect(await testSubjects.getVisibleText('breadcrumb last')).to.contain(indexName);
     },
     async expectBreadcrumbsToBeAvailable(breadcrumbsName: string) {
-      const breadcrumbs = await testSubjects.findAll('breadcrumb');
+      const breadcrumbs = await testSubjects.findAll('euiBreadcrumb');
       let isBreadcrumbShown: boolean = false;
       for (const breadcrumb of breadcrumbs) {
         if ((await breadcrumb.getVisibleText()) === breadcrumbsName) {
           isBreadcrumbShown = true;
         }
       }
-      expect(isBreadcrumbShown).to.be(true);
+      expect(isBreadcrumbShown).to.eql(true, `Breadcrumb ${breadcrumbsName} was not found`);
     },
 
     async clickOnBreadcrumb(breadcrumbsName: string) {
-      const breadcrumbs = await testSubjects.findAll('breadcrumb');
+      const breadcrumbs = await testSubjects.findAll('euiBreadcrumb');
       for (const breadcrumb of breadcrumbs) {
         if ((await breadcrumb.getVisibleText()) === breadcrumbsName) {
           await breadcrumb.click();
@@ -321,6 +351,13 @@ export function SearchIndexDetailPageProvider({ getService }: FtrProviderContext
       await testSubjects.existOrFail('indexDetailsMappingsAddField');
       const isMappingsFieldEnabled = await testSubjects.isEnabled('indexDetailsMappingsAddField');
       expect(isMappingsFieldEnabled).to.be(true);
+    },
+
+    async dismissIngestTourIfShown() {
+      if (await testSubjects.isDisplayed('searchIngestTourCloseButton')) {
+        await testSubjects.click('searchIngestTourCloseButton');
+        await testSubjects.missingOrFail('searchIngestTourCloseButton', { timeout: 2000 });
+      }
     },
   };
 }

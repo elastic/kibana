@@ -7,9 +7,21 @@
 
 import { services as kibanaFunctionalServices } from '@kbn/test-suites-src/functional/services';
 import { services as kibanaApiIntegrationServices } from '@kbn/test-suites-src/api_integration/services';
+import { AceEditorProvider } from '@kbn/test-suites-xpack-platform/functional/services/ace_editor';
+import { UserMenuProvider } from '@kbn/test-suites-xpack-platform/functional/services/user_menu';
+import { SampleDataServiceProvider } from '@kbn/test-suites-xpack-platform/functional/services/sample_data';
+import { GrokDebuggerProvider } from '@kbn/test-suites-xpack-platform/functional/services/grok_debugger';
+import { SearchSessionsService } from '@kbn/test-suites-xpack-platform/functional/services/search_sessions';
+import { CasesServiceProvider } from '@kbn/test-suites-xpack-platform/functional/services/cases';
+import { ActionsServiceProvider } from '@kbn/test-suites-xpack-platform/functional/services/actions';
+import { AiopsProvider } from '@kbn/test-suites-xpack-platform/functional/services/aiops';
+import { RulesServiceProvider } from '@kbn/test-suites-xpack-platform/functional/services/rules';
+import { MachineLearningProvider } from '@kbn/test-suites-xpack-platform/functional/services/ml';
+import { CanvasElementProvider } from '@kbn/test-suites-xpack-platform/functional/services/canvas_element';
+import { TransformProvider } from '@kbn/test-suites-xpack-platform/functional/services/transform';
+import { ReportingFunctionalProvider } from '@kbn/test-suites-xpack-platform/reporting_functional/services';
 import { services as kibanaXPackApiIntegrationServices } from '../../api_integration/services';
 import { services as commonServices } from '../../common/services';
-import { ReportingFunctionalProvider } from '../../reporting_functional/services';
 
 import {
   MonitoringNoDataProvider,
@@ -50,24 +62,10 @@ import { PipelineEditorProvider } from './pipeline_editor';
 // @ts-ignore not ts yet
 import { RandomProvider } from './random';
 // @ts-ignore not ts yet
-import { AceEditorProvider } from './ace_editor';
-import { CanvasElementProvider } from './canvas_element';
-// @ts-ignore not ts yet
-import { GrokDebuggerProvider } from './grok_debugger';
-// @ts-ignore not ts yet
-import { UserMenuProvider } from './user_menu';
 import { UptimeProvider } from './uptime';
 import { InfraSourceConfigurationFormProvider } from './infra_source_configuration_form';
 import { LogsUiProvider } from './logs_ui';
-import { MachineLearningProvider } from './ml';
-import { TransformProvider } from './transform';
-import { SearchSessionsService } from './search_sessions';
 import { ObservabilityProvider } from './observability';
-import { CasesServiceProvider } from './cases';
-import { ActionsServiceProvider } from './actions';
-import { RulesServiceProvider } from './rules';
-import { AiopsProvider } from './aiops';
-import { SampleDataServiceProvider } from './sample_data';
 import { DataStreamProvider } from './data_stream';
 import { SloUiServiceProvider } from './slo';
 // define the name and providers for services that should be
@@ -122,14 +120,13 @@ export const services = {
   ml: MachineLearningProvider,
   transform: TransformProvider,
   reporting: ReportingFunctionalProvider,
+  sampleData: SampleDataServiceProvider,
   searchSessions: SearchSessionsService,
   observability: ObservabilityProvider,
-  // compareImages: CompareImagesProvider,
   actions: ActionsServiceProvider,
   rules: RulesServiceProvider,
   cases: CasesServiceProvider,
   aiops: AiopsProvider,
-  sampleData: SampleDataServiceProvider,
   dataStreams: DataStreamProvider,
   slo: kibanaXPackApiIntegrationServices.slo,
   dataViewApi: kibanaXPackApiIntegrationServices.dataViewApi,

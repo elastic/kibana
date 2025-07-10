@@ -18,6 +18,7 @@ import { useKibana } from '../../../common/lib/kibana';
 import { TestProviders } from '../../../common/mock';
 import { mockAttackDiscovery } from '../mock/mock_attack_discovery';
 import { Results } from '.';
+import { SECURITY_FEATURE_ID } from '../../../../common/constants';
 
 jest.mock('../../../common/lib/kibana');
 
@@ -101,7 +102,7 @@ describe('Results', () => {
       services: {
         application: {
           capabilities: {
-            siemV2: { crud_alerts: true, read_alerts: true },
+            [SECURITY_FEATURE_ID]: { crud_alerts: true, read_alerts: true },
           },
           navigateToUrl: jest.fn(),
         },

@@ -32,7 +32,7 @@ export default function searchSolutionNavigation({
         solution: 'classic',
       }));
       await browser.navigateTo(spaces.getRootUrl(spaceCreated.id));
-      await common.navigateToApp('enterpriseSearch');
+      await common.navigateToApp('searchHomepage');
     });
 
     after(async () => {
@@ -43,21 +43,15 @@ export default function searchSolutionNavigation({
     it('renders expected navigation items', async () => {
       await searchClassicNavigation.expectAllNavItems([
         { id: 'Home', label: 'Home' },
-        { id: 'Data', label: 'Data' },
-        { id: 'Indices', label: 'Index Management' },
-        { id: 'Connectors', label: 'Connectors' },
-        { id: 'Crawlers', label: 'Web Crawlers' },
         { id: 'Build', label: 'Build' },
+        { id: 'Indices', label: 'Index Management' },
         { id: 'Playground', label: 'Playground' },
+        { id: 'Connectors', label: 'Connectors' },
         { id: 'SearchApplications', label: 'Search Applications' },
         { id: 'Relevance', label: 'Relevance' },
-        { id: 'InferenceEndpoints', label: 'Inference Endpoints' },
         { id: 'Synonyms', label: 'Synonyms' },
-        { id: 'GettingStarted', label: 'Getting started' },
-        { id: 'Elasticsearch', label: 'Elasticsearch' },
-        { id: 'VectorSearch', label: 'Vector Search' },
-        { id: 'SemanticSearch', label: 'Semantic Search' },
-        { id: 'AISearch', label: 'AI Search' },
+        { id: 'QueryRules', label: 'Query Rules' },
+        { id: 'InferenceEndpoints', label: 'Inference Endpoints' },
       ]);
     });
     it('has expected navigation', async () => {
@@ -72,18 +66,13 @@ export default function searchSolutionNavigation({
       }> = [
         {
           navItem: 'Indices',
-          breadcrumbs: ['Data', 'Index Management'],
+          breadcrumbs: ['Build', 'Index Management'],
           pageTestSubject: 'indexManagementHeaderContent',
         },
         {
           navItem: 'Connectors',
-          breadcrumbs: ['Data', 'Connectors'],
+          breadcrumbs: ['Build', 'Connectors'],
           pageTestSubject: 'searchCreateConnectorPage',
-        },
-        {
-          navItem: 'Crawlers',
-          breadcrumbs: ['Data', 'Web Crawlers'],
-          pageTestSubject: 'searchConnectorsPage',
         },
         {
           navItem: 'Playground',
@@ -96,34 +85,19 @@ export default function searchSolutionNavigation({
           pageTestSubject: 'searchApplicationsListPage',
         },
         {
-          navItem: 'InferenceEndpoints',
-          breadcrumbs: ['Relevance', 'Inference Endpoints'],
-          pageTestSubject: 'inferenceEndpointsPage',
-        },
-        {
           navItem: 'Synonyms',
           breadcrumbs: ['Relevance', 'Synonyms'],
           pageTestSubject: 'searchSynonymsOverviewPage',
         },
         {
-          navItem: 'Elasticsearch',
-          breadcrumbs: ['Getting started with Elasticsearch'],
-          pageTestSubject: 'elasticsearchGuide',
+          navItem: 'QueryRules',
+          breadcrumbs: ['Relevance', 'Query Rules'],
+          pageTestSubject: 'queryRulesBasePage',
         },
         {
-          navItem: 'VectorSearch',
-          breadcrumbs: ['Getting started', 'Vector Search'],
-          pageTestSubject: 'vectorSearchGuidePage',
-        },
-        {
-          navItem: 'SemanticSearch',
-          breadcrumbs: ['Getting started', 'Semantic Search'],
-          pageTestSubject: 'semanticSearchGuidePage',
-        },
-        {
-          navItem: 'AISearch',
-          breadcrumbs: ['Getting started', 'AI Search'],
-          pageTestSubject: 'aiSearchGuidePage',
+          navItem: 'InferenceEndpoints',
+          breadcrumbs: ['Relevance', 'Inference Endpoints'],
+          pageTestSubject: 'inferenceEndpointsPage',
         },
       ];
 

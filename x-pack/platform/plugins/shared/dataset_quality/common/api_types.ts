@@ -9,6 +9,7 @@ import * as rt from 'io-ts';
 
 const userPrivilegesRt = rt.type({
   canMonitor: rt.boolean,
+  canReadFailureStore: rt.boolean,
 });
 
 const datasetUserPrivilegesRt = rt.intersection([
@@ -33,6 +34,7 @@ export const dataStreamStatRt = rt.intersection([
     integration: rt.string,
     totalDocs: rt.number,
     creationDate: rt.number,
+    hasFailureStore: rt.boolean,
   }),
 ]);
 
@@ -235,6 +237,7 @@ export const dataStreamSettingsRt = rt.partial({
 export type DataStreamSettings = rt.TypeOf<typeof dataStreamSettingsRt>;
 
 export const dataStreamDetailsRt = rt.partial({
+  hasFailureStore: rt.boolean,
   lastActivity: rt.number,
   degradedDocsCount: rt.number,
   failedDocsCount: rt.number,
@@ -274,3 +277,20 @@ export const getNonAggregatableDatasetsRt = rt.exact(
 );
 
 export type NonAggregatableDatasets = rt.TypeOf<typeof getNonAggregatableDatasetsRt>;
+
+export const getPreviewChartResponseRt = rt.type({
+  series: rt.array(
+    rt.type({
+      name: rt.string,
+      data: rt.array(
+        rt.type({
+          x: rt.number,
+          y: rt.union([rt.number, rt.null]),
+        })
+      ),
+    })
+  ),
+  totalGroups: rt.number,
+});
+
+export type PreviewChartResponse = rt.TypeOf<typeof getPreviewChartResponseRt>;

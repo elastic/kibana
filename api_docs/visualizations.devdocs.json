@@ -686,7 +686,8 @@
             "text": "PersistedState"
           },
           " extends ",
-          "events"
+          "events",
+          "<DefaultEventMap>"
         ],
         "path": "src/platform/plugins/shared/visualizations/public/persisted_state/persisted_state.ts",
         "deprecated": false,
@@ -2187,6 +2188,8 @@
             "text": "Datatable"
           },
           ", dimensions: ",
+          "LayerDimension",
+          "[] | ",
           {
             "pluginId": "visualizations",
             "scope": "common",
@@ -2194,7 +2197,7 @@
             "section": "def-common.Dimension",
             "text": "Dimension"
           },
-          "[], removeUnmappedColumns?: boolean) => { columns: { meta: { dimensionName: string | undefined; type: ",
+          "[], removeUnmappedColumns?: boolean) => { columns: { meta: { dimensionType?: string | undefined; dimensionName: string | undefined; type: ",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -2266,11 +2269,13 @@
           {
             "parentPluginId": "visualizations",
             "id": "def-public.prepareLogTable.$2",
-            "type": "Array",
+            "type": "CompoundType",
             "tags": [],
             "label": "dimensions",
             "description": [],
             "signature": [
+              "LayerDimension",
+              "[] | ",
               {
                 "pluginId": "visualizations",
                 "scope": "common",
@@ -4105,7 +4110,7 @@
                 "section": "def-public.AutoRefreshDoneFn",
                 "text": "AutoRefreshDoneFn"
               },
-              ">; getFetch$: () => ",
+              ">; triggerFetch: () => void; getFetch$: () => ",
               "Observable",
               "<void>; getTime: () => ",
               {
@@ -4125,23 +4130,7 @@
               },
               "; setTime: (time: ",
               "InputTimeRange",
-              ") => void; getRefreshInterval: () => ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-common.RefreshInterval",
-                "text": "RefreshInterval"
-              },
-              "; getMinRefreshInterval: () => number; setRefreshInterval: (refreshInterval: Partial<",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-common.RefreshInterval",
-                "text": "RefreshInterval"
-              },
-              ">) => void; createFilter: (indexPattern: ",
+              ") => void; getRefreshInterval: () => Readonly<{} & { value: number; pause: boolean; }>; getMinRefreshInterval: () => number; setRefreshInterval: (refreshInterval: Partial<Readonly<{} & { value: number; pause: boolean; }>>) => void; createFilter: (indexPattern: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -4249,15 +4238,7 @@
                 "section": "def-common.TimeRange",
                 "text": "TimeRange"
               },
-              "; getRefreshIntervalDefaults: () => ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-common.RefreshInterval",
-                "text": "RefreshInterval"
-              },
-              "; }"
+              "; getRefreshIntervalDefaults: () => Readonly<{} & { value: number; pause: boolean; }>; }"
             ],
             "path": "src/platform/plugins/shared/visualizations/public/types.ts",
             "deprecated": false,
@@ -6919,6 +6900,20 @@
             "path": "src/platform/plugins/shared/visualizations/public/embeddable/events.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-public.VIS_EVENT_TO_TRIGGER.alertRule",
+            "type": "string",
+            "tags": [],
+            "label": "alertRule",
+            "description": [],
+            "signature": [
+              "\"alertRule\""
+            ],
+            "path": "src/platform/plugins/shared/visualizations/public/embeddable/events.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -8613,6 +8608,8 @@
             "text": "Datatable"
           },
           ", dimensions: ",
+          "LayerDimension",
+          "[] | ",
           {
             "pluginId": "visualizations",
             "scope": "common",
@@ -8620,7 +8617,7 @@
             "section": "def-common.Dimension",
             "text": "Dimension"
           },
-          "[], removeUnmappedColumns?: boolean) => { columns: { meta: { dimensionName: string | undefined; type: ",
+          "[], removeUnmappedColumns?: boolean) => { columns: { meta: { dimensionType?: string | undefined; dimensionName: string | undefined; type: ",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -8692,11 +8689,13 @@
           {
             "parentPluginId": "visualizations",
             "id": "def-common.prepareLogTable.$2",
-            "type": "Array",
+            "type": "CompoundType",
             "tags": [],
             "label": "dimensions",
             "description": [],
             "signature": [
+              "LayerDimension",
+              "[] | ",
               {
                 "pluginId": "visualizations",
                 "scope": "common",
@@ -9014,7 +9013,7 @@
             "label": "mode",
             "description": [],
             "signature": [
-              "\"custom\" | \"full\" | \"dataBounds\""
+              "\"full\" | \"custom\" | \"dataBounds\""
             ],
             "path": "src/platform/plugins/shared/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
@@ -11747,7 +11746,7 @@
                 "section": "def-common.PaletteOutput",
                 "text": "PaletteOutput"
               },
-              "<{ [key: string]: unknown; }> | undefined"
+              "<Record<string, unknown>> | undefined"
             ],
             "path": "src/platform/plugins/shared/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
@@ -12568,7 +12567,7 @@
                 "section": "def-common.PaletteOutput",
                 "text": "PaletteOutput"
               },
-              "<{ [key: string]: unknown; }>"
+              "<Record<string, unknown>>"
             ],
             "path": "src/platform/plugins/shared/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
@@ -13661,7 +13660,7 @@
                 "section": "def-common.PaletteOutput",
                 "text": "PaletteOutput"
               },
-              "<{ [key: string]: unknown; }> | undefined"
+              "<Record<string, unknown>> | undefined"
             ],
             "path": "src/platform/plugins/shared/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
@@ -15373,7 +15372,7 @@
         "label": "Operation",
         "description": [],
         "signature": [
-          "\"min\" | \"max\" | \"sum\" | \"median\" | \"count\" | \"filters\" | \"terms\" | \"cumulative_sum\" | \"date_histogram\" | \"range\" | \"average\" | \"percentile\" | \"counter_rate\" | \"differences\" | \"moving_average\" | \"formula\" | \"static_value\" | \"standard_deviation\" | \"unique_count\" | \"percentile_rank\" | \"last_value\" | \"normalize_by_unit\""
+          "\"min\" | \"max\" | \"sum\" | \"median\" | \"count\" | \"filters\" | \"range\" | \"terms\" | \"cumulative_sum\" | \"date_histogram\" | \"average\" | \"percentile\" | \"counter_rate\" | \"differences\" | \"moving_average\" | \"formula\" | \"static_value\" | \"standard_deviation\" | \"unique_count\" | \"percentile_rank\" | \"last_value\" | \"normalize_by_unit\""
         ],
         "path": "src/platform/plugins/shared/visualizations/common/convert_to_lens/types/operations.ts",
         "deprecated": false,
@@ -15403,7 +15402,7 @@
         "label": "OperationWithSourceField",
         "description": [],
         "signature": [
-          "\"min\" | \"max\" | \"sum\" | \"median\" | \"count\" | \"filters\" | \"terms\" | \"date_histogram\" | \"range\" | \"average\" | \"percentile\" | \"standard_deviation\" | \"unique_count\" | \"percentile_rank\" | \"last_value\""
+          "\"min\" | \"max\" | \"sum\" | \"median\" | \"count\" | \"filters\" | \"range\" | \"terms\" | \"date_histogram\" | \"average\" | \"percentile\" | \"standard_deviation\" | \"unique_count\" | \"percentile_rank\" | \"last_value\""
         ],
         "path": "src/platform/plugins/shared/visualizations/common/convert_to_lens/types/operations.ts",
         "deprecated": false,

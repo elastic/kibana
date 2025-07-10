@@ -37,7 +37,7 @@ export const registerCleanUpTask = (
         return {
           // Perform the work of the task. The return value should fit the TaskResult interface.
           async run() {
-            logger.info(
+            logger.debug(
               `Executing synthetics clean up task: ${SYNTHETICS_SERVICE_CLEAN_UP_TASK_ID}`
             );
             const { state } = taskInstance;

@@ -100,7 +100,7 @@ export default function ({ getPageObjects, getService }) {
             '#61a2ff',
           ],
           'circle-opacity': 0.75,
-          'circle-stroke-color': '#119793',
+          'circle-stroke-color': '#009490',
           'circle-stroke-opacity': 0.75,
           'circle-stroke-width': 1,
           'circle-radius': 10,
@@ -205,7 +205,7 @@ export default function ({ getPageObjects, getService }) {
           ['==', ['get', '__kbn_isvisibleduetojoin__'], true],
         ],
         layout: { visibility: 'visible' },
-        paint: { 'line-color': '#119793', 'line-opacity': 0.75, 'line-width': 1 },
+        paint: { 'line-color': '#009490', 'line-opacity': 0.75, 'line-width': 1 },
       });
     });
   });

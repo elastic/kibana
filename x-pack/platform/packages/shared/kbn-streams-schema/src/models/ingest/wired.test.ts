@@ -96,9 +96,10 @@ describe('WiredStream', () => {
           manage: true,
           monitor: true,
           simulate: true,
+          text_structure: true,
         },
         effective_lifecycle: {
-          inherit: {},
+          dsl: {},
           from: 'logs',
         },
         inherited_fields: {},
@@ -126,7 +127,7 @@ describe('WiredStream', () => {
           },
         },
         effective_lifecycle: {
-          inherit: {},
+          dsl: {},
           from: 'logs',
         },
         inherited_fields: {},
@@ -135,6 +136,7 @@ describe('WiredStream', () => {
           manage: true,
           monitor: true,
           simulate: true,
+          text_structure: true,
         },
         dashboards: [],
         queries: [],

@@ -23,8 +23,6 @@ const TimelinesRoutes = () => (
 export const routes: SecuritySubPluginRoutes = [
   {
     path: TIMELINES_PATH,
-    component: withSecurityRoutePageWrapper(TimelinesRoutes, SecurityPageName.timelines, {
-      redirectOnMissing: true,
-    }),
+    component: withSecurityRoutePageWrapper(TimelinesRoutes, SecurityPageName.timelines),
   },
 ];

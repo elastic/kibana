@@ -18,7 +18,6 @@ import {
 } from '@kbn/elastic-assistant-common';
 import { buildResponse } from '../../../lib/build_response';
 import { ElasticAssistantRequestHandlerContext } from '../../../types';
-import { convertAlertingRuleToSchedule } from './utils/convert_alerting_rule_to_schedule';
 import { performChecks } from '../../helpers';
 import { isFeatureAvailable } from './utils/is_feature_available';
 
@@ -79,7 +78,6 @@ export const updateAttackDiscoverySchedulesRoute = (
         }
 
         const { id } = request.params;
-        const scheduleAttributes = request.body;
 
         try {
           const dataClient = await assistantContext.getAttackDiscoverySchedulingDataClient();
@@ -90,12 +88,10 @@ export const updateAttackDiscoverySchedulesRoute = (
             });
           }
 
-          const alertingRule = await dataClient.updateSchedule({
+          const schedule = await dataClient.updateSchedule({
             id,
-            tags: [],
-            ...scheduleAttributes,
+            ...request.body,
           });
-          const schedule = convertAlertingRuleToSchedule(alertingRule);
 
           return response.ok({ body: schedule });
         } catch (err) {

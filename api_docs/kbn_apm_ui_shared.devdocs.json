@@ -5,6 +5,306 @@
     "functions": [
       {
         "parentPluginId": "@kbn/apm-ui-shared",
+        "id": "def-public.asDecimal",
+        "type": "Function",
+        "tags": [],
+        "label": "asDecimal",
+        "description": [],
+        "signature": [
+          "(value: ",
+          {
+            "pluginId": "@kbn/apm-types-shared",
+            "scope": "common",
+            "docId": "kibKbnApmTypesSharedPluginApi",
+            "section": "def-common.Maybe",
+            "text": "Maybe"
+          },
+          "<number>) => string"
+        ],
+        "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/utils/formatters/numeric.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/apm-ui-shared",
+            "id": "def-public.asDecimal.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/apm-types-shared",
+                "scope": "common",
+                "docId": "kibKbnApmTypesSharedPluginApi",
+                "section": "def-common.Maybe",
+                "text": "Maybe"
+              },
+              "<number>"
+            ],
+            "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/utils/formatters/numeric.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-ui-shared",
+        "id": "def-public.asDecimalOrInteger",
+        "type": "Function",
+        "tags": [],
+        "label": "asDecimalOrInteger",
+        "description": [],
+        "signature": [
+          "(value: ",
+          {
+            "pluginId": "@kbn/apm-types-shared",
+            "scope": "common",
+            "docId": "kibKbnApmTypesSharedPluginApi",
+            "section": "def-common.Maybe",
+            "text": "Maybe"
+          },
+          "<number>, threshold: number) => string"
+        ],
+        "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/utils/formatters/numeric.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/apm-ui-shared",
+            "id": "def-public.asDecimalOrInteger.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/apm-types-shared",
+                "scope": "common",
+                "docId": "kibKbnApmTypesSharedPluginApi",
+                "section": "def-common.Maybe",
+                "text": "Maybe"
+              },
+              "<number>"
+            ],
+            "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/utils/formatters/numeric.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/apm-ui-shared",
+            "id": "def-public.asDecimalOrInteger.$2",
+            "type": "number",
+            "tags": [],
+            "label": "threshold",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/utils/formatters/numeric.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-ui-shared",
+        "id": "def-public.asDuration",
+        "type": "Function",
+        "tags": [],
+        "label": "asDuration",
+        "description": [],
+        "signature": [
+          "(value: ",
+          {
+            "pluginId": "@kbn/apm-types-shared",
+            "scope": "common",
+            "docId": "kibKbnApmTypesSharedPluginApi",
+            "section": "def-common.Maybe",
+            "text": "Maybe"
+          },
+          "<number>, { defaultValue = NOT_AVAILABLE_LABEL }: FormatterOptions) => string"
+        ],
+        "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/utils/formatters/duration.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/apm-ui-shared",
+            "id": "def-public.asDuration.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/apm-types-shared",
+                "scope": "common",
+                "docId": "kibKbnApmTypesSharedPluginApi",
+                "section": "def-common.Maybe",
+                "text": "Maybe"
+              },
+              "<number>"
+            ],
+            "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/utils/formatters/duration.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/apm-ui-shared",
+            "id": "def-public.asDuration.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "{ defaultValue = NOT_AVAILABLE_LABEL }",
+            "description": [],
+            "signature": [
+              "FormatterOptions"
+            ],
+            "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/utils/formatters/duration.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-ui-shared",
+        "id": "def-public.asInteger",
+        "type": "Function",
+        "tags": [],
+        "label": "asInteger",
+        "description": [],
+        "signature": [
+          "(value: ",
+          {
+            "pluginId": "@kbn/apm-types-shared",
+            "scope": "common",
+            "docId": "kibKbnApmTypesSharedPluginApi",
+            "section": "def-common.Maybe",
+            "text": "Maybe"
+          },
+          "<number>) => string"
+        ],
+        "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/utils/formatters/numeric.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/apm-ui-shared",
+            "id": "def-public.asInteger.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/apm-types-shared",
+                "scope": "common",
+                "docId": "kibKbnApmTypesSharedPluginApi",
+                "section": "def-common.Maybe",
+                "text": "Maybe"
+              },
+              "<number>"
+            ],
+            "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/utils/formatters/numeric.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-ui-shared",
+        "id": "def-public.asPercent",
+        "type": "Function",
+        "tags": [],
+        "label": "asPercent",
+        "description": [],
+        "signature": [
+          "(numerator: ",
+          {
+            "pluginId": "@kbn/apm-types-shared",
+            "scope": "common",
+            "docId": "kibKbnApmTypesSharedPluginApi",
+            "section": "def-common.Maybe",
+            "text": "Maybe"
+          },
+          "<number>, denominator: number | undefined, fallbackResult: string) => string"
+        ],
+        "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/utils/formatters/numeric.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/apm-ui-shared",
+            "id": "def-public.asPercent.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "numerator",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/apm-types-shared",
+                "scope": "common",
+                "docId": "kibKbnApmTypesSharedPluginApi",
+                "section": "def-common.Maybe",
+                "text": "Maybe"
+              },
+              "<number>"
+            ],
+            "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/utils/formatters/numeric.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/apm-ui-shared",
+            "id": "def-public.asPercent.$2",
+            "type": "number",
+            "tags": [],
+            "label": "denominator",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/utils/formatters/numeric.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/apm-ui-shared",
+            "id": "def-public.asPercent.$3",
+            "type": "string",
+            "tags": [],
+            "label": "fallbackResult",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/utils/formatters/numeric.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-ui-shared",
         "id": "def-public.Duration",
         "type": "Function",
         "tags": [],
@@ -49,9 +349,338 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-ui-shared",
+        "id": "def-public.DurationDistributionChart",
+        "type": "Function",
+        "tags": [],
+        "label": "DurationDistributionChart",
+        "description": [],
+        "signature": [
+          "({\n  data,\n  hasData,\n  markerCurrentEvent,\n  markerValue,\n  onChartSelection,\n  selection,\n  loading,\n  hasError,\n  eventType,\n  dataTestSubPrefix,\n  showAxisTitle = true,\n  showLegend = true,\n  isOtelData = false,\n}: DurationDistributionChartProps) => React.JSX.Element"
+        ],
+        "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/components/duration_distribution_chart/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/apm-ui-shared",
+            "id": "def-public.DurationDistributionChart.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  data,\n  hasData,\n  markerCurrentEvent,\n  markerValue,\n  onChartSelection,\n  selection,\n  loading,\n  hasError,\n  eventType,\n  dataTestSubPrefix,\n  showAxisTitle = true,\n  showLegend = true,\n  isOtelData = false,\n}",
+            "description": [],
+            "signature": [
+              "DurationDistributionChartProps"
+            ],
+            "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/components/duration_distribution_chart/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-ui-shared",
+        "id": "def-public.getDurationFormatter",
+        "type": "Function",
+        "tags": [],
+        "label": "getDurationFormatter",
+        "description": [],
+        "signature": [
+          "(max: number, threshold?: number | undefined, scalingFactor?: number | undefined) => ",
+          {
+            "pluginId": "@kbn/apm-ui-shared",
+            "scope": "public",
+            "docId": "kibKbnApmUiSharedPluginApi",
+            "section": "def-public.TimeFormatter",
+            "text": "TimeFormatter"
+          }
+        ],
+        "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/utils/formatters/duration.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/apm-ui-shared",
+            "id": "def-public.getDurationFormatter.$1",
+            "type": "number",
+            "tags": [],
+            "label": "max",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/utils/formatters/duration.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/apm-ui-shared",
+            "id": "def-public.getDurationFormatter.$2",
+            "type": "number",
+            "tags": [],
+            "label": "threshold",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/utils/formatters/duration.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/apm-ui-shared",
+            "id": "def-public.getDurationFormatter.$3",
+            "type": "number",
+            "tags": [],
+            "label": "scalingFactor",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/utils/formatters/duration.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-ui-shared",
+        "id": "def-public.getDurationUnitKey",
+        "type": "Function",
+        "tags": [],
+        "label": "getDurationUnitKey",
+        "description": [],
+        "signature": [
+          "(max: number, threshold: number) => DurationTimeUnit"
+        ],
+        "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/utils/formatters/duration.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/apm-ui-shared",
+            "id": "def-public.getDurationUnitKey.$1",
+            "type": "number",
+            "tags": [],
+            "label": "max",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/utils/formatters/duration.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/apm-ui-shared",
+            "id": "def-public.getDurationUnitKey.$2",
+            "type": "number",
+            "tags": [],
+            "label": "threshold",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/utils/formatters/duration.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-ui-shared",
+        "id": "def-public.replaceHistogramZerosWithMinimumDomainValue",
+        "type": "Function",
+        "tags": [],
+        "label": "replaceHistogramZerosWithMinimumDomainValue",
+        "description": [],
+        "signature": [
+          "(histogramItems: ",
+          {
+            "pluginId": "@kbn/apm-types-shared",
+            "scope": "common",
+            "docId": "kibKbnApmTypesSharedPluginApi",
+            "section": "def-common.HistogramItem",
+            "text": "HistogramItem"
+          },
+          "[]) => ",
+          {
+            "pluginId": "@kbn/apm-types-shared",
+            "scope": "common",
+            "docId": "kibKbnApmTypesSharedPluginApi",
+            "section": "def-common.HistogramItem",
+            "text": "HistogramItem"
+          },
+          "[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/components/duration_distribution_chart/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/apm-ui-shared",
+            "id": "def-public.replaceHistogramZerosWithMinimumDomainValue.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "histogramItems",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/apm-types-shared",
+                "scope": "common",
+                "docId": "kibKbnApmTypesSharedPluginApi",
+                "section": "def-common.HistogramItem",
+                "text": "HistogramItem"
+              },
+              "[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/components/duration_distribution_chart/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-ui-shared",
+        "id": "def-public.toMicroseconds",
+        "type": "Function",
+        "tags": [],
+        "label": "toMicroseconds",
+        "description": [],
+        "signature": [
+          "(value: number, timeUnit: TimeUnit) => number"
+        ],
+        "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/utils/formatters/duration.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/apm-ui-shared",
+            "id": "def-public.toMicroseconds.$1",
+            "type": "number",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/utils/formatters/duration.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/apm-ui-shared",
+            "id": "def-public.toMicroseconds.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "timeUnit",
+            "description": [],
+            "signature": [
+              "TimeUnit"
+            ],
+            "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/utils/formatters/duration.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-ui-shared",
+        "id": "def-public.useChartThemes",
+        "type": "Function",
+        "tags": [],
+        "label": "useChartThemes",
+        "description": [],
+        "signature": [
+          "() => { baseTheme: ",
+          "Theme",
+          "; theme: ",
+          "RecursivePartial",
+          "<",
+          "Theme",
+          ">[]; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/hooks/use_chart_theme.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [
+      {
+        "parentPluginId": "@kbn/apm-ui-shared",
+        "id": "def-public.DurationDistributionChartData",
+        "type": "Interface",
+        "tags": [],
+        "label": "DurationDistributionChartData",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/components/duration_distribution_chart/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/apm-ui-shared",
+            "id": "def-public.DurationDistributionChartData.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/components/duration_distribution_chart/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/apm-ui-shared",
+            "id": "def-public.DurationDistributionChartData.histogram",
+            "type": "Array",
+            "tags": [],
+            "label": "histogram",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/apm-types-shared",
+                "scope": "common",
+                "docId": "kibKbnApmTypesSharedPluginApi",
+                "section": "def-common.HistogramItem",
+                "text": "HistogramItem"
+              },
+              "[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/components/duration_distribution_chart/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/apm-ui-shared",
+            "id": "def-public.DurationDistributionChartData.areaSeriesColor",
+            "type": "string",
+            "tags": [],
+            "label": "areaSeriesColor",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/components/duration_distribution_chart/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/apm-ui-shared",
         "id": "def-public.DurationProps",
@@ -93,7 +722,63 @@
       }
     ],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/apm-ui-shared",
+        "id": "def-public.NOT_AVAILABLE_LABEL",
+        "type": "string",
+        "tags": [],
+        "label": "NOT_AVAILABLE_LABEL",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/utils/formatters/numeric.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-ui-shared",
+        "id": "def-public.TimeFormatter",
+        "type": "Type",
+        "tags": [],
+        "label": "TimeFormatter",
+        "description": [],
+        "signature": [
+          "(value: number, options?: FormatterOptions | undefined) => ConvertedDuration"
+        ],
+        "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/utils/formatters/duration.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/apm-ui-shared",
+            "id": "def-public.TimeFormatter.$1",
+            "type": "number",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/utils/formatters/duration.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/apm-ui-shared",
+            "id": "def-public.TimeFormatter.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              "FormatterOptions | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/utils/formatters/duration.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   },
   "server": {

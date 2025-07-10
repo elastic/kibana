@@ -75,7 +75,7 @@ exports[`should render 1`] = `
     }
     defaultStaticStyleOptions={
       Object {
-        "color": "#119793",
+        "color": "#009490",
       }
     }
     disabled={false}
@@ -97,23 +97,23 @@ exports[`should render 1`] = `
     styleProperty={
       StaticColorProperty {
         "_options": Object {
-          "color": "#119793",
+          "color": "#009490",
         },
         "_styleName": "lineColor",
       }
     }
     swatches={
       Array [
-        "#119793",
-        "#7ce4e0",
-        "#2e84ff",
-        "#8cbeff",
-        "#e94489",
-        "#ff94ba",
-        "#f3443a",
-        "#ff9c8f",
-        "#b78801",
-        "#fbc851",
+        "#009490",
+        "#75bab8",
+        "#1674cb",
+        "#8ea9cc",
+        "#b94177",
+        "#cb96a9",
+        "#be413f",
+        "#cb9892",
+        "#b37f00",
+        "#c7a754",
         "#000",
         "#FFF",
       ]
@@ -256,16 +256,16 @@ exports[`should render 1`] = `
     }
     swatches={
       Array [
-        "#119793",
-        "#7ce4e0",
-        "#2e84ff",
-        "#8cbeff",
-        "#e94489",
-        "#ff94ba",
-        "#f3443a",
-        "#ff9c8f",
-        "#b78801",
-        "#fbc851",
+        "#009490",
+        "#75bab8",
+        "#1674cb",
+        "#8ea9cc",
+        "#b94177",
+        "#cb96a9",
+        "#be413f",
+        "#cb9892",
+        "#b37f00",
+        "#c7a754",
         "#000",
         "#FFF",
       ]
@@ -351,16 +351,16 @@ exports[`should render 1`] = `
     }
     swatches={
       Array [
-        "#119793",
-        "#7ce4e0",
-        "#2e84ff",
-        "#8cbeff",
-        "#e94489",
-        "#ff94ba",
-        "#f3443a",
-        "#ff9c8f",
-        "#b78801",
-        "#fbc851",
+        "#009490",
+        "#75bab8",
+        "#1674cb",
+        "#8ea9cc",
+        "#b94177",
+        "#cb96a9",
+        "#be413f",
+        "#cb9892",
+        "#b37f00",
+        "#c7a754",
         "#000",
         "#FFF",
       ]
@@ -468,7 +468,7 @@ exports[`should render with no style fields 1`] = `
     }
     defaultStaticStyleOptions={
       Object {
-        "color": "#119793",
+        "color": "#009490",
       }
     }
     disabled={false}
@@ -479,23 +479,23 @@ exports[`should render with no style fields 1`] = `
     styleProperty={
       StaticColorProperty {
         "_options": Object {
-          "color": "#119793",
+          "color": "#009490",
         },
         "_styleName": "lineColor",
       }
     }
     swatches={
       Array [
-        "#119793",
-        "#7ce4e0",
-        "#2e84ff",
-        "#8cbeff",
-        "#e94489",
-        "#ff94ba",
-        "#f3443a",
-        "#ff9c8f",
-        "#b78801",
-        "#fbc851",
+        "#009490",
+        "#75bab8",
+        "#1674cb",
+        "#8ea9cc",
+        "#b94177",
+        "#cb96a9",
+        "#be413f",
+        "#cb9892",
+        "#b37f00",
+        "#c7a754",
         "#000",
         "#FFF",
       ]
@@ -616,16 +616,16 @@ exports[`should render with no style fields 1`] = `
     }
     swatches={
       Array [
-        "#119793",
-        "#7ce4e0",
-        "#2e84ff",
-        "#8cbeff",
-        "#e94489",
-        "#ff94ba",
-        "#f3443a",
-        "#ff9c8f",
-        "#b78801",
-        "#fbc851",
+        "#009490",
+        "#75bab8",
+        "#1674cb",
+        "#8ea9cc",
+        "#b94177",
+        "#cb96a9",
+        "#be413f",
+        "#cb9892",
+        "#b37f00",
+        "#c7a754",
         "#000",
         "#FFF",
       ]
@@ -700,16 +700,16 @@ exports[`should render with no style fields 1`] = `
     }
     swatches={
       Array [
-        "#119793",
-        "#7ce4e0",
-        "#2e84ff",
-        "#8cbeff",
-        "#e94489",
-        "#ff94ba",
-        "#f3443a",
-        "#ff9c8f",
-        "#b78801",
-        "#fbc851",
+        "#009490",
+        "#75bab8",
+        "#1674cb",
+        "#8ea9cc",
+        "#b94177",
+        "#cb96a9",
+        "#be413f",
+        "#cb9892",
+        "#b37f00",
+        "#c7a754",
         "#000",
         "#FFF",
       ]

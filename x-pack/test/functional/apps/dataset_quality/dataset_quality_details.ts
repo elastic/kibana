@@ -7,13 +7,16 @@
 
 import expect from '@kbn/expect';
 import originalExpect from 'expect';
+import { IndexTemplateName } from '@kbn/apm-synthtrace/src/lib/logs/custom_logsdb_index_templates';
 import { DatasetQualityFtrProviderContext } from './config';
 import {
   createDegradedFieldsRecord,
+  createFailedLogRecord,
   datasetNames,
   defaultNamespace,
   getInitialTestLogs,
   getLogsForDataset,
+  processors,
   productionNamespace,
 } from './data';
 
@@ -56,6 +59,8 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
   const regularDataStreamName = `logs-${datasetNames[0]}-${defaultNamespace}`;
   const degradedDatasetName = datasetNames[2];
   const degradedDataStreamName = `logs-${degradedDatasetName}-${defaultNamespace}`;
+  const failedDatasetName = datasetNames[1];
+  const failedDataStreamName = `logs-${failedDatasetName}-${defaultNamespace}`;
 
   describe('Dataset Quality Details', () => {
     before(async () => {
@@ -64,6 +69,17 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
       // Install Bitbucket Integration (package which does not has Dashboards) and ingest logs for it
       await PageObjects.observabilityLogsExplorer.installPackage(bitbucketPkg);
+
+      await synthtrace.createCustomPipeline(processors, 'synth.2@pipeline');
+      await synthtrace.createComponentTemplate({
+        name: 'synth.2@custom',
+        dataStreamOptions: {
+          failure_store: {
+            enabled: true,
+          },
+        },
+      });
+      await synthtrace.createIndexTemplate(IndexTemplateName.Synht2);
 
       await synthtrace.index([
         // Ingest basic logs
@@ -91,6 +107,16 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
         }),
         // Index logs for Bitbucket integration
         getLogsForDataset({ to, count: 10, dataset: bitbucketDatasetName }),
+        createFailedLogRecord({
+          to: new Date().toISOString(),
+          count: 2,
+          dataset: failedDatasetName,
+        }),
+        getLogsForDataset({
+          to: new Date().toISOString(),
+          count: 4,
+          dataset: failedDatasetName,
+        }),
       ]);
     });
 
@@ -98,9 +124,17 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
       await PageObjects.observabilityLogsExplorer.uninstallPackage(apachePkg);
       await PageObjects.observabilityLogsExplorer.uninstallPackage(bitbucketPkg);
       await synthtrace.clean();
+      await synthtrace.deleteIndexTemplate(IndexTemplateName.Synht2);
+      await synthtrace.deleteComponentTemplate('synth.2@custom');
+      await synthtrace.deleteCustomPipeline('synth.2@pipeline');
     });
 
-    describe('navigate to dataset details', () => {
+    describe('navigate to dataset details', function () {
+      // This disables the forward-compatibility test for Elasticsearch 8.19 with Kibana and ES 9.0.
+      // These versions are not expected to work together. Note: Failure store is not available in ES 9.0,
+      // and running these tests will result in an "unknown index privilege [read_failure_store]" error.
+      this.onlyEsVersion('8.19 || >=9.1');
+
       it('should navigate to right dataset', async () => {
         await PageObjects.datasetQuality.navigateToDetails({ dataStream: regularDataStreamName });
 
@@ -164,7 +198,12 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
       });
     });
 
-    describe('overview summary panel', () => {
+    describe('overview summary panel', function () {
+      // This disables the forward-compatibility test for Elasticsearch 8.19 with Kibana and ES 9.0.
+      // These versions are not expected to work together. Note: Failure store is not available in ES 9.0,
+      // and running these tests will result in an "unknown index privilege [read_failure_store]" error.
+      this.onlyEsVersion('8.19 || >=9.1');
+
       it('should show summary KPIs', async () => {
         await PageObjects.datasetQuality.navigateToDetails({
           dataStream: apacheAccessDataStreamName,
@@ -180,7 +219,83 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
       });
     });
 
-    describe('overview integrations', () => {
+    describe('failed docs', function () {
+      // This disables the forward-compatibility test for Elasticsearch 8.19 with Kibana and ES 9.0.
+      // These versions are not expected to work together. Note: Failure store is not available in ES 9.0,
+      // and running these tests will result in an "unknown index privilege [read_failure_store]" error.
+      this.onlyEsVersion('8.19 || >=9.1');
+
+      it('should show it in summary KPIs', async () => {
+        await PageObjects.datasetQuality.navigateToDetails({
+          dataStream: failedDataStreamName,
+        });
+
+        const { failedDocs } = await PageObjects.datasetQuality.parseOverviewSummaryPanelKpis();
+
+        expect(parseInt(failedDocs, 10)).to.be(4);
+      });
+
+      it('reflects the qualityIssuesChart field state in url', async () => {
+        await PageObjects.datasetQuality.navigateToDetails({ dataStream: failedDataStreamName });
+
+        const chartType = 'failed';
+        await PageObjects.datasetQuality.selectQualityIssueChart(chartType);
+
+        // Wait for URL to contain "qualityIssuesChart:failed"
+        await retry.tryForTime(5000, async () => {
+          const currentUrl = await browser.getCurrentUrl();
+          expect(decodeURIComponent(currentUrl)).to.contain(`qualityIssuesChart:${chartType}`);
+        });
+      });
+
+      it('should go to discover for failed docs when the button next to breakdown selector is clicked', async () => {
+        await PageObjects.datasetQuality.navigateToDetails({
+          dataStream: failedDataStreamName,
+        });
+
+        await PageObjects.datasetQuality.selectQualityIssueChart('failed');
+
+        await testSubjects.click(
+          PageObjects.datasetQuality.testSubjectSelectors.datasetQualityDetailsLinkToDiscover
+        );
+
+        // Confirm dataset selector text in discover
+        await retry.tryForTime(5000, async () => {
+          const datasetSelectorText = await PageObjects.discover.getCurrentDataViewId();
+          originalExpect(datasetSelectorText).toMatch(`${failedDataStreamName}::failures`);
+        });
+      });
+
+      it('should show the degraded fields table with data and spark plots when present', async () => {
+        await PageObjects.datasetQuality.navigateToDetails({
+          dataStream: failedDataStreamName,
+        });
+
+        await testSubjects.existOrFail(
+          PageObjects.datasetQuality.testSubjectSelectors.datasetQualityDetailsDegradedFieldTable
+        );
+
+        await retry.tryForTime(5000, async () => {
+          const rows =
+            await PageObjects.datasetQuality.getDatasetQualityDetailsDegradedFieldTableRows();
+
+          expect(rows.length).to.eql(1);
+
+          const sparkPlots = await testSubjects.findAll(
+            PageObjects.datasetQuality.testSubjectSelectors.datasetQualitySparkPlot
+          );
+
+          expect(rows.length).to.be(sparkPlots.length);
+        });
+      });
+    });
+
+    describe('overview integrations', function () {
+      // This disables the forward-compatibility test for Elasticsearch 8.19 with Kibana and ES 9.0.
+      // These versions are not expected to work together. Note: Failure store is not available in ES 9.0,
+      // and running these tests will result in an "unknown index privilege [read_failure_store]" error.
+      this.onlyEsVersion('8.19 || >=9.1');
+
       it('should hide the integration section for non integrations', async () => {
         await PageObjects.datasetQuality.navigateToDetails({
           dataStream: regularDataStreamName,
@@ -323,8 +438,9 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
           dataStream: regularDataStreamName,
         });
 
-        const discoverButton =
-          await PageObjects.datasetQuality.getDatasetQualityDetailsHeaderButton();
+        await PageObjects.datasetQuality.openDatasetQualityDetailsActionsButton();
+
+        const discoverButton = await PageObjects.datasetQuality.getOpenInDiscoverButton();
 
         await discoverButton.click();
 
@@ -352,7 +468,12 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
       });
     });
 
-    describe('degraded fields table', () => {
+    describe('degraded fields table', function () {
+      // This disables the forward-compatibility test for Elasticsearch 8.19 with Kibana and ES 9.0.
+      // These versions are not expected to work together. Note: Failure store is not available in ES 9.0,
+      // and running these tests will result in an "unknown index privilege [read_failure_store]" error.
+      this.onlyEsVersion('8.19 || >=9.1');
+
       it(' should show empty degraded fields table when no degraded fields are present', async () => {
         await PageObjects.datasetQuality.navigateToDetails({
           dataStream: regularDataStreamName,

@@ -71,7 +71,7 @@ export const AnomalyDetectionTable: FC<Props> = ({ items, chartsService }) => {
             {i18n.translate('xpack.ml.overview.anomalyDetection.overallScore', {
               defaultMessage: 'Overall score',
             })}
-            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+            <EuiIcon size="s" color="subdued" type="question" className="eui-alignTop" />
           </span>
         </EuiToolTip>
       ),

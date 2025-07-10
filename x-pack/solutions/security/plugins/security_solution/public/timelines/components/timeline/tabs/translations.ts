@@ -18,13 +18,6 @@ export const EQL_TAB = i18n.translate('xpack.securitySolution.timeline.tabs.eqlT
   defaultMessage: 'Correlation',
 });
 
-export const ANALYZER_TAB = i18n.translate(
-  'xpack.securitySolution.timeline.tabs.analyserTabTimelineTitle',
-  {
-    defaultMessage: 'Analyzer',
-  }
-);
-
 export const NOTES_TAB = i18n.translate(
   'xpack.securitySolution.timeline.tabs.notesTabTimelineTitle',
   {
@@ -39,23 +32,9 @@ export const PINNED_TAB = i18n.translate(
   }
 );
 
-export const SECURITY_ASSISTANT = i18n.translate(
-  'xpack.securitySolution.timeline.tabs.securityAssistantTimelineTitle',
-  {
-    defaultMessage: 'Elastic AI Assistant',
-  }
-);
-
 export const DISCOVER_ESQL_IN_TIMELINE_TAB = i18n.translate(
   'xpack.securitySolution.timeline.tabs.discoverEsqlInTimeline',
   {
     defaultMessage: 'ES|QL',
-  }
-);
-
-export const SESSION_TAB = i18n.translate(
-  'xpack.securitySolution.timeline.tabs.sessionTabTimelineTitle',
-  {
-    defaultMessage: 'Session View',
   }
 );

@@ -20,7 +20,7 @@ import { getConnectorTypesRoute } from './default_alerts/get_connector_types';
 import { getActionConnectorsRoute } from './default_alerts/get_action_connectors';
 import { SyntheticsRestApiRouteFactory } from './types';
 import { getSyntheticsCertsRoute } from './certs/get_certificates';
-import { getSyntheticsSuggestionsRoute } from './suggestions/route';
+import { getSyntheticsSuggestionsRoute } from './suggestions/suggestions_route';
 import { getAgentPoliciesRoute } from './settings/private_locations/get_agent_policies';
 import { inspectSyntheticsMonitorRoute } from './monitor_cruds/inspect_monitor';
 import { deletePackagePolicyRoute } from './monitor_cruds/delete_integration';
@@ -29,7 +29,6 @@ import { createJourneyScreenshotBlocksRoute } from './pings/journey_screenshot_b
 import { createLastSuccessfulCheckRoute } from './pings/last_successful_check';
 import { createJourneyFailedStepsRoute, createJourneyRoute } from './pings/journeys';
 import { updateDefaultAlertingRoute } from './default_alerts/update_default_alert';
-import { syncParamsSyntheticsParamsRoute } from './settings/sync_global_params';
 import { getIndexSizesRoute } from './settings/settings';
 import { getAPIKeySyntheticsRoute } from './monitor_cruds/get_api_key';
 import { getServiceLocationsRoute } from './synthetics_service/get_service_locations';
@@ -56,6 +55,7 @@ import { getDefaultAlertingRoute } from './default_alerts/get_default_alert';
 import { createNetworkEventsRoute } from './network_events';
 import { addPrivateLocationRoute } from './settings/private_locations/add_private_location';
 import { deletePrivateLocationRoute } from './settings/private_locations/delete_private_location';
+import { editPrivateLocationRoute } from './settings/private_locations/edit_private_location';
 import { getPrivateLocationsRoute } from './settings/private_locations/get_private_locations';
 import { getSyntheticsFilters } from './filters/filters';
 import { getAllSyntheticsMonitorRoute } from './monitor_cruds/get_monitors_list';
@@ -80,7 +80,6 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   getHasIntegrationMonitorsRoute,
   createGetCurrentStatusRoute,
   getIndexSizesRoute,
-  syncParamsSyntheticsParamsRoute,
   enableDefaultAlertingRoute,
   getDefaultAlertingRoute,
   updateDefaultAlertingRoute,
@@ -114,6 +113,7 @@ export const syntheticsAppPublicRestApiRoutes: SyntheticsRestApiRouteFactory[] =
   deleteSyntheticsParamsRoute,
   addPrivateLocationRoute,
   deletePrivateLocationRoute,
+  editPrivateLocationRoute,
   getPrivateLocationsRoute,
   getAllSyntheticsMonitorRoute,
   getSyntheticsMonitorRoute,

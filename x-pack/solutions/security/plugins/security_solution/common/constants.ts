@@ -19,16 +19,14 @@ export { SecurityPageName } from '@kbn/security-solution-navigation';
  */
 export const APP_ID = 'securitySolution' as const;
 export const APP_UI_ID = 'securitySolutionUI' as const;
-export const ASSET_INVENTORY_FEATURE_ID = 'securitySolutionAssetInventory' as const;
 export const ASSISTANT_FEATURE_ID = 'securitySolutionAssistant' as const;
 export const ATTACK_DISCOVERY_FEATURE_ID = 'securitySolutionAttackDiscovery' as const;
 export const CASES_FEATURE_ID = 'securitySolutionCasesV3' as const;
 export const TIMELINE_FEATURE_ID = 'securitySolutionTimeline' as const;
 export const NOTES_FEATURE_ID = 'securitySolutionNotes' as const;
 export const SERVER_APP_ID = 'siem' as const;
-export const SECURITY_FEATURE_ID = 'siemV2' as const;
+export const SECURITY_FEATURE_ID = 'siemV3' as const;
 export const APP_NAME = 'Security' as const;
-export const APP_ICON = 'securityAnalyticsApp' as const;
 export const APP_ICON_SOLUTION = 'logoSecurity' as const;
 export const APP_PATH = `/app/security` as const;
 export const APP_INTEGRATIONS_PATH = `/app/integrations` as const;
@@ -40,6 +38,7 @@ export const DEFAULT_DATE_FORMAT_TZ = 'dateFormat:tz' as const;
 export const DEFAULT_INDEX_KEY = 'securitySolution:defaultIndex' as const;
 export const DEFAULT_NUMBER_FORMAT = 'format:number:defaultPattern' as const;
 export const DEFAULT_DATA_VIEW_ID = 'security-solution' as const;
+export const DEFAULT_ALERT_DATA_VIEW_ID = 'security-solution-alert' as const;
 export const DEFAULT_TIME_FIELD = '@timestamp' as const;
 export const DEFAULT_TIME_RANGE = 'timepicker:timeDefaults' as const;
 export const DEFAULT_REFRESH_RATE_INTERVAL = 'timepicker:refreshIntervalDefaults' as const;
@@ -83,6 +82,8 @@ export const DEFAULT_THREAT_INDEX_KEY = 'securitySolution:defaultThreatIndex' as
 export const DEFAULT_THREAT_INDEX_VALUE = ['logs-ti_*'] as const;
 export const DEFAULT_THREAT_MATCH_QUERY = '@timestamp >= "now-30d/d"' as const;
 
+export const EXPLORE_DATA_VIEW_PREFIX = 'explore-data-view' as const;
+
 export const EXPLORE_PATH = '/explore' as const;
 export const DASHBOARDS_PATH = '/dashboards' as const;
 export const MANAGE_PATH = '/manage' as const;
@@ -112,9 +113,6 @@ export const NETWORK_PATH = '/network' as const;
 export const MANAGEMENT_PATH = '/administration' as const;
 export const COVERAGE_OVERVIEW_PATH = '/rules_coverage_overview' as const;
 export const THREAT_INTELLIGENCE_PATH = '/threat_intelligence' as const;
-export const INVESTIGATIONS_PATH = '/investigations' as const;
-export const MACHINE_LEARNING_PATH = '/ml' as const;
-export const ASSETS_PATH = '/assets' as const;
 export const ENDPOINTS_PATH = `${MANAGEMENT_PATH}/endpoints` as const;
 export const POLICIES_PATH = `${MANAGEMENT_PATH}/policy` as const;
 export const TRUSTED_APPS_PATH = `${MANAGEMENT_PATH}/trusted_apps` as const;
@@ -132,6 +130,7 @@ export const ENTITY_ANALYTICS_ENTITY_STORE_MANAGEMENT_PATH =
 export const ENTITY_ANALYTICS_LANDING_PATH = '/entity_analytics_landing' as const;
 export const ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH =
   '/entity_analytics_privileged_user_monitoring' as const;
+export const ENTITY_ANALYTICS_OVERVIEW_PATH = `/entity_analytics_overview` as const;
 export const APP_ALERTS_PATH = `${APP_PATH}${ALERTS_PATH}` as const;
 export const APP_CASES_PATH = `${APP_PATH}${CASES_PATH}` as const;
 export const APP_ENDPOINTS_PATH = `${APP_PATH}${ENDPOINTS_PATH}` as const;
@@ -149,6 +148,8 @@ export const SIEM_MIGRATIONS_RULES_PATH = `${SIEM_MIGRATIONS_PATH}/rules` as con
 
 // AI SOC exclusive paths
 export const CONFIGURATIONS_PATH = '/configurations' as const;
+export const CONFIGURATIONS_INTEGRATIONS_PATH =
+  `${APP_PATH}/${CONFIGURATIONS_PATH}/integrations/browse` as const;
 
 // cloud logs to exclude from default index pattern
 export const EXCLUDE_ELASTIC_CLOUD_INDICES = ['-*elastic-cloud-logs-*'];
@@ -214,10 +215,6 @@ export const EXTENDED_RULE_EXECUTION_LOGGING_MIN_LEVEL_SETTING =
 export const EXCLUDED_DATA_TIERS_FOR_RULE_EXECUTION =
   'securitySolution:excludedDataTiersForRuleExecution' as const;
 
-/** This Kibana Advanced Setting allows users to enable/disable the Visualizations in Flyout feature */
-export const ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING =
-  'securitySolution:enableVisualizationsInFlyout' as const;
-
 /** This Kibana Advanced Setting allows users to enable/disable the Graph Visualizations for alerts and events */
 export const ENABLE_GRAPH_VISUALIZATION_SETTING =
   'securitySolution:enableGraphVisualization' as const;
@@ -225,6 +222,8 @@ export const ENABLE_GRAPH_VISUALIZATION_SETTING =
 /** This Kibana Advanced Setting allows users to enable/disable the Asset Inventory feature */
 export const ENABLE_ASSET_INVENTORY_SETTING = 'securitySolution:enableAssetInventory' as const;
 
+/** This Kibana Advanced Setting allows users to enable/disable the Cloud Connector Feature */
+export const ENABLE_CLOUD_CONNECTOR_SETTING = 'securitySolution:enableCloudConnector' as const;
 /**
  * Id for the notifications alerting type
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
@@ -290,7 +289,6 @@ export const TIMELINE_COPY_URL = `${TIMELINE_URL}/_copy` as const;
 
 export const NOTE_URL = '/api/note' as const;
 export const PINNED_EVENT_URL = '/api/pinned_event' as const;
-export const SOURCERER_API_URL = '/internal/security_solution/sourcerer' as const;
 
 /**
  * This limit exists to maintain some kind of a safety net for how many events we are fetching in total,
@@ -357,18 +355,6 @@ export const NOTIFICATION_DEFAULT_FREQUENCY = {
   throttle: null,
   summary: true,
 };
-
-export const showAllOthersBucket: string[] = [
-  'destination.ip',
-  'event.action',
-  'event.category',
-  'event.dataset',
-  'event.module',
-  'signal.rule.threat.tactic.name',
-  'source.ip',
-  'destination.ip',
-  'user.name',
-];
 
 export const TRANSFORM_STATES = {
   ABORTING: 'aborting',
@@ -519,19 +505,13 @@ export const CASE_ATTACHMENT_ENDPOINT_TYPE_ID = 'endpoint' as const;
  */
 export const MAX_MANUAL_RULE_RUN_LOOKBACK_WINDOW_DAYS = 90;
 export const MAX_MANUAL_RULE_RUN_BULK_SIZE = 100;
+export const MAX_BULK_FILL_RULE_GAPS_LOOKBACK_WINDOW_DAYS = 90;
+export const MAX_BULK_FILL_RULE_GAPS_BULK_SIZE = 100;
 
 /*
  * Whether it is a Jest environment
  */
 export const JEST_ENVIRONMENT = typeof jest !== 'undefined';
-
-export const AI_FOR_SOC_INTEGRATIONS = [
-  'splunk',
-  'google_secops',
-  'microsoft_sentinel',
-  'sentinel_one',
-  'crowdstrike',
-];
 
 /*
  * The tag to mark promotion rules that are related to the AI for SOC integrations

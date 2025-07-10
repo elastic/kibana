@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { DetailPanelAlertTab, useFetchSessionViewAlerts } from '@kbn/session-view-plugin/public';
 import type { ProcessEvent } from '@kbn/session-view-plugin/common';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { LeftPanelVisualizeTab } from '../../left';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { SESSION_VIEW_ID } from '../../left/components/session_view';
 import {
@@ -22,6 +23,7 @@ import { useSessionViewPanelContext } from '../context';
 import { SourcererScopeName } from '../../../../sourcerer/store/model';
 import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
+
 /**
  * Tab displayed in the SessionView preview panel, shows alerts related to the session.
  */
@@ -106,7 +108,7 @@ export const AlertsTab = memo(() => {
           jumpToCursor,
         },
         path: {
-          tab: 'visualize',
+          tab: LeftPanelVisualizeTab,
           subTab: SESSION_VIEW_ID,
         },
       });

@@ -177,7 +177,7 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<ActionConnector
       <UpdateStep readOnly={readOnly} display={currentStep === 4} />
       <EuiFlexGroup alignItems="flexStart" justifyContent="flexStart" direction="rowReverse">
         {currentStep < 4 && (
-          <EuiFlexItem grow={false} style={{ minWidth: 160 }}>
+          <EuiFlexItem grow={false} css={{ minWidth: 160 }}>
             <EuiButton
               data-test-subj="casesWebhookNext"
               fill
@@ -190,7 +190,7 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<ActionConnector
           </EuiFlexItem>
         )}
         {currentStep > 1 && (
-          <EuiFlexItem grow={false} style={{ minWidth: 160 }}>
+          <EuiFlexItem grow={false} css={{ minWidth: 160 }}>
             <EuiButton
               data-test-subj="casesWebhookBack"
               iconSide="left"

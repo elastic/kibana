@@ -64,6 +64,7 @@ const ConnectorAddModal = ({
   const [allActionTypes, setAllActionTypes] = useState<ActionTypeIndex | undefined>(undefined);
   const { isLoading: isSavingConnector, createConnector } = useCreateConnector();
   const isMounted = useRef(false);
+  const containerRef = useRef<HTMLDivElement>(null);
   const [initialConnector, setInitialConnector] = useState({
     actionTypeId: actionType?.id ?? '',
     isDeprecated: false,
@@ -163,6 +164,19 @@ const ConnectorAddModal = ({
 
       const createdConnector = await createConnector(validConnector);
       return createdConnector;
+    } else {
+      // point the user to the first invalid field
+      const container = containerRef.current;
+      if (!container) return;
+
+      const selector = 'input[aria-invalid="true"]';
+      const firstInputInvalid = container.querySelector<HTMLInputElement>(selector);
+
+      if (firstInputInvalid) {
+        window.requestAnimationFrame(() => {
+          firstInputInvalid.focus({ preventScroll: false });
+        });
+      }
     }
   }, [submit, preSubmitValidator, createConnector]);
 
@@ -222,108 +236,111 @@ const ConnectorAddModal = ({
       className="actConnectorModal"
       css={css`
         z-index: 9000;
+        width: ${actionTypeRegistry.get(actionType.id).modalWidth};
+        overflow-y: auto;
       `}
       data-test-subj="connectorAddModal"
       onClose={closeModal}
-      style={{ width: actionTypeRegistry.get(actionType.id).modalWidth }}
       aria-labelledby={modalTitleId}
     >
-      <EuiModalHeader>
-        <EuiFlexGroup gutterSize="m" alignItems="center">
-          {actionTypeModel && actionTypeModel.iconClass ? (
-            <EuiFlexItem grow={false}>
-              <EuiIcon type={actionTypeModel.iconClass} size="xl" />
-            </EuiFlexItem>
-          ) : null}
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="s" justifyContent="center" alignItems="center">
-              <EuiFlexItem>
-                <EuiModalHeaderTitle id={modalTitleId} size="s" component="h3">
-                  <FormattedMessage
-                    defaultMessage="{actionTypeName} connector"
-                    id="xpack.triggersActionsUI.sections.addModalConnectorForm.flyoutTitle"
-                    values={{
-                      actionTypeName: actionType.name,
-                    }}
-                  />
-                </EuiModalHeaderTitle>
+      <div ref={containerRef}>
+        <EuiModalHeader>
+          <EuiFlexGroup gutterSize="m" alignItems="center">
+            {actionTypeModel && actionTypeModel.iconClass ? (
+              <EuiFlexItem grow={false}>
+                <EuiIcon type={actionTypeModel.iconClass} size="xl" />
               </EuiFlexItem>
-              {actionTypeModel && actionTypeModel.isExperimental && (
-                <EuiFlexItem className="betaBadgeFlexItem" grow={false}>
-                  <EuiBetaBadge
-                    label={TECH_PREVIEW_LABEL}
-                    tooltipContent={TECH_PREVIEW_DESCRIPTION}
-                  />
+            ) : null}
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup gutterSize="s" justifyContent="center" alignItems="center">
+                <EuiFlexItem>
+                  <EuiModalHeaderTitle id={modalTitleId} size="s" component="h3">
+                    <FormattedMessage
+                      defaultMessage="{actionTypeName} connector"
+                      id="xpack.triggersActionsUI.sections.addModalConnectorForm.flyoutTitle"
+                      values={{
+                        actionTypeName: actionType.name,
+                      }}
+                    />
+                  </EuiModalHeaderTitle>
                 </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiModalHeader>
+                {actionTypeModel && actionTypeModel.isExperimental && (
+                  <EuiFlexItem className="betaBadgeFlexItem" grow={false}>
+                    <EuiBetaBadge
+                      label={TECH_PREVIEW_LABEL}
+                      tooltipContent={TECH_PREVIEW_DESCRIPTION}
+                    />
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiModalHeader>
 
-      <EuiModalBody>
-        {loadingActionTypes ? (
-          <SectionLoading>
-            <FormattedMessage
-              id="xpack.triggersActionsUI.sections.connectorAddModal.loadingConnectorTypesDescription"
-              defaultMessage="Loading connector types…"
-            />
-          </SectionLoading>
-        ) : (
-          <>
-            {groupActionTypeModel && (
-              <>
-                <EuiButtonGroup
-                  isFullWidth
-                  buttonSize="m"
-                  color="primary"
-                  legend=""
-                  options={groupActionButtons}
-                  idSelected={actionType.id}
-                  onChange={onChangeGroupAction}
-                  data-test-subj="slackTypeChangeButton"
-                />
-                <EuiSpacer size="xs" />
-              </>
-            )}
-            <ConnectorForm
-              actionTypeModel={actionTypeModel}
-              connector={initialConnector}
-              isEdit={false}
-              onChange={setFormState}
-              setResetForm={setResetForm}
-            />
-            {preSubmitValidationErrorMessage}
-          </>
-        )}
-      </EuiModalBody>
-      <EuiModalFooter>
-        <EuiButtonEmpty onClick={closeModal} isLoading={isSaving}>
-          {i18n.translate(
-            'xpack.triggersActionsUI.sections.addModalConnectorForm.cancelButtonLabel',
-            {
-              defaultMessage: 'Cancel',
-            }
+        <EuiModalBody>
+          {loadingActionTypes ? (
+            <SectionLoading>
+              <FormattedMessage
+                id="xpack.triggersActionsUI.sections.connectorAddModal.loadingConnectorTypesDescription"
+                defaultMessage="Loading connector types…"
+              />
+            </SectionLoading>
+          ) : (
+            <>
+              {groupActionTypeModel && (
+                <>
+                  <EuiButtonGroup
+                    isFullWidth
+                    buttonSize="m"
+                    color="primary"
+                    legend=""
+                    options={groupActionButtons}
+                    idSelected={actionType.id}
+                    onChange={onChangeGroupAction}
+                    data-test-subj="slackTypeChangeButton"
+                  />
+                  <EuiSpacer size="xs" />
+                </>
+              )}
+              <ConnectorForm
+                actionTypeModel={actionTypeModel}
+                connector={initialConnector}
+                isEdit={false}
+                onChange={setFormState}
+                setResetForm={setResetForm}
+              />
+              {preSubmitValidationErrorMessage}
+            </>
           )}
-        </EuiButtonEmpty>
-        {canSave ? (
-          <EuiButton
-            fill
-            color="primary"
-            data-test-subj="saveActionButtonModal"
-            type="submit"
-            iconType="check"
-            isLoading={isSaving}
-            disabled={hasErrors}
-            onClick={onSubmit}
-          >
-            <FormattedMessage
-              id="xpack.triggersActionsUI.sections.addModalConnectorForm.saveButtonLabel"
-              defaultMessage="Save"
-            />
-          </EuiButton>
-        ) : null}
-      </EuiModalFooter>
+        </EuiModalBody>
+        <EuiModalFooter>
+          <EuiButtonEmpty onClick={closeModal} isLoading={isSaving}>
+            {i18n.translate(
+              'xpack.triggersActionsUI.sections.addModalConnectorForm.cancelButtonLabel',
+              {
+                defaultMessage: 'Cancel',
+              }
+            )}
+          </EuiButtonEmpty>
+          {canSave ? (
+            <EuiButton
+              fill
+              color="primary"
+              data-test-subj="saveActionButtonModal"
+              type="submit"
+              iconType="check"
+              isLoading={isSaving}
+              disabled={hasErrors}
+              onClick={onSubmit}
+            >
+              <FormattedMessage
+                id="xpack.triggersActionsUI.sections.addModalConnectorForm.saveButtonLabel"
+                defaultMessage="Save"
+              />
+            </EuiButton>
+          ) : null}
+        </EuiModalFooter>
+      </div>
     </EuiModal>
   );
 };

@@ -6,11 +6,13 @@
  */
 
 import { useContext, useCallback, useState } from 'react';
-import { CspFinding } from '@kbn/cloud-security-posture-common';
+import { CspFinding, CspVulnerabilityFinding } from '@kbn/cloud-security-posture-common';
 import { DataTableRecord } from '@kbn/discover-utils';
 import { SecuritySolutionContext } from '../../application/security_solution_context';
 
-export const useExpandableFlyoutCsp = () => {
+export const useExpandableFlyoutCsp = (
+  flyoutType: 'misconfiguration' | 'vulnerability' = 'misconfiguration'
+) => {
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>(undefined);
   const securitySolutionContext = useContext(SecuritySolutionContext);
 
@@ -34,18 +36,36 @@ export const useExpandableFlyoutCsp = () => {
   setFlyoutCloseCallback(setExpandedDoc);
 
   const onExpandDocClick = (record?: DataTableRecord | undefined) => {
+    let finding;
     if (record) {
-      const finding = record?.raw?._source as unknown as CspFinding;
-      setExpandedDoc(record);
-      openFlyout({
-        right: {
-          id: 'findings-misconfiguration-panel',
-          params: {
-            resourceId: finding.resource.id,
-            ruleId: finding.rule.id,
+      if (flyoutType === 'vulnerability') {
+        finding = record?.raw?._source as unknown as CspVulnerabilityFinding;
+        setExpandedDoc(record);
+        openFlyout({
+          right: {
+            id: 'findings-vulnerability-panel',
+            params: {
+              vulnerabilityId: finding?.vulnerability?.id,
+              resourceId: finding?.resource?.id,
+              packageName: finding?.package?.name,
+              packageVersion: finding?.package?.version,
+              eventId: finding?.event?.id,
+            },
           },
-        },
-      });
+        });
+      } else {
+        finding = record?.raw?._source as unknown as CspFinding;
+        setExpandedDoc(record);
+        openFlyout({
+          right: {
+            id: 'findings-misconfiguration-panel',
+            params: {
+              resourceId: finding.resource.id,
+              ruleId: finding.rule.id,
+            },
+          },
+        });
+      }
     } else {
       closeFlyout();
       setExpandedDoc(undefined);

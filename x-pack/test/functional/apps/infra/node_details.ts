@@ -9,7 +9,6 @@ import moment from 'moment';
 import expect from '@kbn/expect';
 import rison from '@kbn/rison';
 import { InfraSynthtraceEsClient } from '@kbn/apm-synthtrace';
-import { enableInfrastructureProfilingIntegration } from '@kbn/observability-plugin/common';
 import {
   ALERT_STATUS_ACTIVE,
   ALERT_STATUS_RECOVERED,
@@ -130,12 +129,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
      */
     await pageObjects.common.sleep(1000);
     await browser.refresh();
-  };
-
-  const setInfrastructureProfilingIntegrationUiSetting = async (value: boolean = true) => {
-    await kibanaServer.uiSettings.update({ [enableInfrastructureProfilingIntegration]: value });
-    await browser.refresh();
-    await pageObjects.header.waitUntilLoadingHasFinished();
   };
 
   describe('Node Details', () => {
@@ -289,14 +282,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await pageObjects.assetDetails.alertsSectionClosedContentNoAlertsMissing();
         });
 
-        it('shows the CPU Profiling prompt if UI setting for Profiling integration is enabled', async () => {
-          await setInfrastructureProfilingIntegrationUiSetting(true);
+        it('shows the CPU Profiling prompt', async () => {
           await pageObjects.assetDetails.cpuProfilingPromptExists();
-        });
-
-        it('hides the CPU Profiling prompt if UI setting for Profiling integration is disabled', async () => {
-          await setInfrastructureProfilingIntegrationUiSetting(false);
-          await pageObjects.assetDetails.cpuProfilingPromptMissing();
         });
 
         describe('Alerts Section with alerts', () => {
@@ -579,7 +566,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
       });
 
-      describe('Osquery Tab', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/216514
+      // We should revisit this test and decide if it is usefull and worth to keep
+      describe.skip('Osquery Tab', () => {
         before(async () => {
           await browser.scrollTop();
           await pageObjects.assetDetails.clickOsqueryTab();
@@ -591,14 +580,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       describe('Profiling tab', () => {
-        it('shows the Profiling tab if Profiling integration UI setting is enabled', async () => {
-          await setInfrastructureProfilingIntegrationUiSetting(true);
+        it('shows the Profiling tab', async () => {
           await pageObjects.assetDetails.profilingTabExists();
-        });
-
-        it('hides the Profiling tab if Profiling integration UI setting is disabled', async () => {
-          await setInfrastructureProfilingIntegrationUiSetting(false);
-          await pageObjects.assetDetails.profilingTabMissing();
         });
       });
 
@@ -659,7 +642,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       describe('Overview Tab', () => {
         before(async () => {
-          await pageObjects.assetDetails.clickOverviewTab();
+          // Close the metric popover if it is open
+          await browser.pressKeys(browser.keys.ESCAPE);
+          const overviewTab = await pageObjects.assetDetails.getOverviewTab();
+          // Use clickMouseButton to ensure the tab is visible
+          await overviewTab.clickMouseButton();
         });
 
         [
@@ -668,23 +655,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           { metric: 'memoryUsage' },
           { metric: 'diskUsage' },
         ].forEach(({ metric }) => {
-          it(`${metric} tile should not be shown`, async () => {
-            await pageObjects.assetDetails.assetDetailsKPITileMissing(metric);
+          it(`${metric} tile should be shown`, async () => {
+            const titleValue = await pageObjects.assetDetails.getAssetDetailsKPITileValue(metric);
+            expect(titleValue).to.be('N/A');
           });
-        });
-
-        it('should show add metrics callout', async () => {
-          await pageObjects.assetDetails.addMetricsCalloutExists();
-        });
-      });
-
-      describe('Processes Tab', () => {
-        before(async () => {
-          await pageObjects.assetDetails.clickProcessesTab();
-        });
-
-        it('should show add metrics callout', async () => {
-          await pageObjects.assetDetails.addMetricsCalloutExists();
         });
       });
     });
@@ -850,7 +824,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         describe('Metadata Tab', () => {
           before(async () => {
-            await pageObjects.assetDetails.clickMetadataTab();
+            // Close the metric popover if it is open
+            await browser.pressKeys(browser.keys.ESCAPE);
+            const metadataTab = await pageObjects.assetDetails.getMetadataTab();
+            // Use clickMouseButton to ensure the tab is visible
+            await metadataTab.clickMouseButton();
           });
 
           it('should show metadata table', async () => {

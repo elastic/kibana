@@ -15,12 +15,12 @@ import {
 import { noop } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
-
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { Filter } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
-import { dataTableSelectors, TableId } from '@kbn/securitysolution-data-table';
 import { LastEventIndexKey } from '@kbn/timelines-plugin/common';
+import { DataViewManagerScopeName } from '../../../../data_view_manager/constants';
+import { SourcererScopeName } from '../../../../sourcerer/store/model';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { dataViewSpecToViewBase } from '../../../../common/lib/kuery';
 import { useCalculateEntityRiskScore } from '../../../../entity_analytics/api/hooks/use_calculate_entity_risk_score';
@@ -49,28 +49,21 @@ import { useAlertsPrivileges } from '../../../../detections/containers/detection
 import { setUsersDetailsTablesActivePageToZero } from '../../store/actions';
 import { setAbsoluteRangeDatePicker } from '../../../../common/store/inputs/actions';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
-
 import { UsersDetailsTabs } from './details_tabs';
 import { navTabsUsersDetails } from './nav_tabs';
 import type { UsersDetailsProps } from './types';
 import { getUsersDetailsPageFilters } from './helpers';
-import { showGlobalFilters } from '../../../../timelines/components/timeline/helpers';
 import { useGlobalFullScreen } from '../../../../common/containers/use_full_screen';
-import { timelineDefaults } from '../../../../timelines/store/defaults';
 import { useSourcererDataView } from '../../../../sourcerer/containers';
-import {
-  useDeepEqualSelector,
-  useShallowEqualSelector,
-} from '../../../../common/hooks/use_selector';
+import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { useInvalidFilterQuery } from '../../../../common/hooks/use_invalid_filter_query';
 import { LastEventTime } from '../../../../common/components/last_event_time';
 import { EntityType } from '../../../../../common/entity_analytics/types';
-
 import { AnomalyTableProvider } from '../../../../common/components/ml/anomaly/anomaly_table_provider';
 import type { UserSummaryProps } from '../../../../overview/components/user_overview';
 import {
-  UserOverview,
   USER_OVERVIEW_RISK_SCORE_QUERY_ID,
+  UserOverview,
 } from '../../../../overview/components/user_overview';
 import { useObservedUserDetails } from '../../containers/users/observed_details';
 import { useQueryInspector } from '../../../../common/components/page/manage_query';
@@ -84,6 +77,7 @@ import { useRefetchOverviewPageRiskScore } from '../../../../entity_analytics/ap
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import { useDataViewSpec } from '../../../../data_view_manager/hooks/use_data_view_spec';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
+import { PageLoader } from '../../../../common/components/page_loader';
 
 const QUERY_ID = 'UsersDetailsQueryId';
 const ES_USER_FIELD = 'user.name';
@@ -93,10 +87,6 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
   usersDetailsPagePath,
 }) => {
   const dispatch = useDispatch();
-  const getTable = useMemo(() => dataTableSelectors.getTableByIdSelector(), []);
-  const graphEventId = useShallowEqualSelector(
-    (state) => (getTable(state, TableId.hostsPageEvents) ?? timelineDefaults).graphEventId
-  );
   const getGlobalFiltersQuerySelector = useMemo(
     () => inputsSelectors.globalFiltersQuerySelector(),
     []
@@ -129,14 +119,12 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
-  const { dataView } = useDataView();
-  const { dataViewSpec } = useDataViewSpec();
-  const experimentalSelectedPatterns = useSelectedPatterns();
+  const { dataView, status } = useDataView(DataViewManagerScopeName.explore);
+  const { dataViewSpec } = useDataViewSpec(DataViewManagerScopeName.explore);
+  const experimentalSelectedPatterns = useSelectedPatterns(DataViewManagerScopeName.explore);
 
   const sourcererDataView = newDataViewPickerEnabled ? dataViewSpec : oldSourcererDataView;
-  const indicesExist = newDataViewPickerEnabled
-    ? !!dataView?.matchedIndices?.length
-    : oldIndicesExist;
+  const indicesExist = newDataViewPickerEnabled ? dataView.hasMatchedIndices() : oldIndicesExist;
   const selectedPatterns = newDataViewPickerEnabled
     ? experimentalSelectedPatterns
     : oldSelectedPatterns;
@@ -225,12 +213,16 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
     onChange: calculateEntityRiskScore,
   });
 
+  if (newDataViewPickerEnabled && status === 'pristine') {
+    return <PageLoader />;
+  }
+
   return (
     <>
       {indicesExist ? (
         <>
           <EuiWindowEvent event="resize" handler={noop} />
-          <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
+          <FiltersGlobal>
             <SiemSearchBar sourcererDataView={sourcererDataView} id={InputsModelId.global} />
           </FiltersGlobal>
 
@@ -276,6 +268,11 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
                   narrowDateRange={narrowDateRange}
                   indexPatterns={selectedPatterns}
                   jobNameById={jobNameById}
+                  scopeId={
+                    newDataViewPickerEnabled
+                      ? SourcererScopeName.explore
+                      : SourcererScopeName.default
+                  }
                 />
               )}
             </AnomalyTableProvider>

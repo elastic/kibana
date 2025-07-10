@@ -181,6 +181,7 @@ describe('Agents CRUD test', () => {
           Promise.resolve(getEsResponse(['1', '2', '3', '4', '5', 'up', '7'], 7, 'inactive'))
         );
       const result = await getAgentsByKuery(esClientMock, soClientMock, {
+        showAgentless: true,
         showUpgradeable: true,
         showInactive: false,
         page: 1,
@@ -212,6 +213,7 @@ describe('Agents CRUD test', () => {
           Promise.resolve(getEsResponse(['1', '2', '3', 'up', '5', 'up2', '7'], 7, 'inactive'))
         );
       const result = await getAgentsByKuery(esClientMock, soClientMock, {
+        showAgentless: true,
         showUpgradeable: true,
         showInactive: false,
         page: 1,
@@ -250,6 +252,7 @@ describe('Agents CRUD test', () => {
           )
         );
       const result = await getAgentsByKuery(esClientMock, soClientMock, {
+        showAgentless: true,
         showUpgradeable: true,
         showInactive: false,
         page: 2,
@@ -277,6 +280,7 @@ describe('Agents CRUD test', () => {
         Promise.resolve(getEsResponse(['1', '2', '3', 'up', '5'], 10001, 'inactive'))
       );
       const result = await getAgentsByKuery(esClientMock, soClientMock, {
+        showAgentless: true,
         showUpgradeable: true,
         showInactive: false,
         page: 1,
@@ -307,6 +311,7 @@ describe('Agents CRUD test', () => {
         Promise.resolve(getEsResponse(['1', '2', '3', 'up', '5'], 100, 'updating'))
       );
       const result = await getAgentsByKuery(esClientMock, soClientMock, {
+        showAgentless: true,
         showUpgradeable: true,
         showInactive: false,
         getStatusSummary: true,
@@ -344,6 +349,7 @@ describe('Agents CRUD test', () => {
         Promise.resolve(getEsResponse(['1', '2', '3', 'up', '5'], 10001, 'updating'))
       );
       const result = await getAgentsByKuery(esClientMock, soClientMock, {
+        showAgentless: true,
         showUpgradeable: true,
         showInactive: false,
         getStatusSummary: true,
@@ -377,6 +383,7 @@ describe('Agents CRUD test', () => {
         Promise.resolve(getEsResponse(['6', '7'], 7, 'inactive'))
       );
       const result = await getAgentsByKuery(esClientMock, soClientMock, {
+        showAgentless: true,
         showUpgradeable: false,
         showInactive: false,
         page: 2,
@@ -411,6 +418,7 @@ describe('Agents CRUD test', () => {
         Promise.resolve(getEsResponse(['1', '2'], 2, 'inactive'))
       );
       await getAgentsByKuery(esClientMock, soClientMock, {
+        showAgentless: true,
         showInactive: false,
       });
 
@@ -425,6 +433,7 @@ describe('Agents CRUD test', () => {
         Promise.resolve(getEsResponse(['1', '2'], 2, 'inactive'))
       );
       await getAgentsByKuery(esClientMock, soClientMock, {
+        showAgentless: true,
         showInactive: false,
         sortField: 'policy_id',
       });
@@ -437,6 +446,7 @@ describe('Agents CRUD test', () => {
       });
       it('should add inactive and unenrolled filter', async () => {
         await getAgentsByKuery(esClientMock, soClientMock, {
+          showAgentless: true,
           showInactive: false,
           kuery: '',
         });
@@ -448,6 +458,7 @@ describe('Agents CRUD test', () => {
 
       it('should add unenrolled filter', async () => {
         await getAgentsByKuery(esClientMock, soClientMock, {
+          showAgentless: true,
           showInactive: true,
           kuery: '',
         });
@@ -459,6 +470,7 @@ describe('Agents CRUD test', () => {
 
       it('should not add unenrolled filter', async () => {
         await getAgentsByKuery(esClientMock, soClientMock, {
+          showAgentless: true,
           showInactive: true,
           kuery: 'status:unenrolled',
         });
@@ -470,6 +482,7 @@ describe('Agents CRUD test', () => {
 
       it('should add inactive filter', async () => {
         await getAgentsByKuery(esClientMock, soClientMock, {
+          showAgentless: true,
           showInactive: false,
           kuery: 'status:*',
         });
@@ -481,6 +494,7 @@ describe('Agents CRUD test', () => {
 
       it('should not add inactive filter', async () => {
         await getAgentsByKuery(esClientMock, soClientMock, {
+          showAgentless: true,
           showInactive: true,
           kuery: 'status:*',
         });

@@ -312,6 +312,165 @@
       },
       {
         "parentPluginId": "@kbn/esql-types",
+        "id": "def-common.IndexAutocompleteItem",
+        "type": "Interface",
+        "tags": [],
+        "label": "IndexAutocompleteItem",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-esql-types/src/sources_autocomplete_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-types",
+            "id": "def-common.IndexAutocompleteItem.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-esql-types/src/sources_autocomplete_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-types",
+            "id": "def-common.IndexAutocompleteItem.mode",
+            "type": "string",
+            "tags": [],
+            "label": "mode",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-esql-types/src/sources_autocomplete_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-types",
+            "id": "def-common.IndexAutocompleteItem.aliases",
+            "type": "Array",
+            "tags": [],
+            "label": "aliases",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-types/src/sources_autocomplete_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-types",
+        "id": "def-common.IndicesAutocompleteResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "IndicesAutocompleteResult",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-esql-types/src/sources_autocomplete_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-types",
+            "id": "def-common.IndicesAutocompleteResult.indices",
+            "type": "Array",
+            "tags": [],
+            "label": "indices",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/esql-types",
+                "scope": "common",
+                "docId": "kibKbnEsqlTypesPluginApi",
+                "section": "def-common.IndexAutocompleteItem",
+                "text": "IndexAutocompleteItem"
+              },
+              "[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-types/src/sources_autocomplete_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-types",
+        "id": "def-common.InferenceEndpointAutocompleteItem",
+        "type": "Interface",
+        "tags": [],
+        "label": "InferenceEndpointAutocompleteItem",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-esql-types/src/inference_endpoint_autocomplete_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-types",
+            "id": "def-common.InferenceEndpointAutocompleteItem.inference_id",
+            "type": "string",
+            "tags": [],
+            "label": "inference_id",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-esql-types/src/inference_endpoint_autocomplete_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-types",
+            "id": "def-common.InferenceEndpointAutocompleteItem.task_type",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "task_type",
+            "description": [],
+            "signature": [
+              "\"completion\" | \"sparse_embedding\" | \"text_embedding\" | \"rerank\" | \"chat_completion\""
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-types/src/inference_endpoint_autocomplete_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-types",
+        "id": "def-common.InferenceEndpointsAutocompleteResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "InferenceEndpointsAutocompleteResult",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-esql-types/src/inference_endpoint_autocomplete_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-types",
+            "id": "def-common.InferenceEndpointsAutocompleteResult.inferenceEndpoints",
+            "type": "Array",
+            "tags": [],
+            "label": "inferenceEndpoints",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/esql-types",
+                "scope": "common",
+                "docId": "kibKbnEsqlTypesPluginApi",
+                "section": "def-common.InferenceEndpointAutocompleteItem",
+                "text": "InferenceEndpointAutocompleteItem"
+              },
+              "[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-types/src/inference_endpoint_autocomplete_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-types",
         "id": "def-common.PublishesESQLVariable",
         "type": "Interface",
         "tags": [],
@@ -583,9 +742,9 @@
               "OperatorFunction",
               "<any, any>[]): ",
               "Observable",
-              "<unknown>; }; operator: ",
-              "Operator",
-              "<any, ",
+              "<unknown>; }; observers: ",
+              "Observer",
+              "<",
               {
                 "pluginId": "@kbn/esql-types",
                 "scope": "common",
@@ -593,7 +752,7 @@
                 "section": "def-common.ESQLControlVariable",
                 "text": "ESQLControlVariable"
               },
-              "> | undefined; lift: <R>(operator: ",
+              ">[]; isStopped: boolean; hasError: boolean; thrownError: any; lift: <R>(operator: ",
               "Operator",
               "<",
               {
@@ -605,7 +764,27 @@
               },
               ", R>) => ",
               "Observable",
-              "<R>; subscribe: { (observerOrNext?: Partial<",
+              "<R>; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
+              "Observable",
+              "<",
+              {
+                "pluginId": "@kbn/esql-types",
+                "scope": "common",
+                "docId": "kibKbnEsqlTypesPluginApi",
+                "section": "def-common.ESQLControlVariable",
+                "text": "ESQLControlVariable"
+              },
+              ">; operator: ",
+              "Operator",
+              "<any, ",
+              {
+                "pluginId": "@kbn/esql-types",
+                "scope": "common",
+                "docId": "kibKbnEsqlTypesPluginApi",
+                "section": "def-common.ESQLControlVariable",
+                "text": "ESQLControlVariable"
+              },
+              "> | undefined; subscribe: { (observerOrNext?: Partial<",
               "Observer",
               "<",
               {
@@ -659,27 +838,7 @@
                 "section": "def-common.ESQLControlVariable",
                 "text": "ESQLControlVariable"
               },
-              " | undefined>; }; observers: ",
-              "Observer",
-              "<",
-              {
-                "pluginId": "@kbn/esql-types",
-                "scope": "common",
-                "docId": "kibKbnEsqlTypesPluginApi",
-                "section": "def-common.ESQLControlVariable",
-                "text": "ESQLControlVariable"
-              },
-              ">[]; isStopped: boolean; hasError: boolean; thrownError: any; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
-              "Observable",
-              "<",
-              {
-                "pluginId": "@kbn/esql-types",
-                "scope": "common",
-                "docId": "kibKbnEsqlTypesPluginApi",
-                "section": "def-common.ESQLControlVariable",
-                "text": "ESQLControlVariable"
-              },
-              ">; }"
+              " | undefined>; }; }"
             ],
             "path": "src/platform/packages/shared/kbn-esql-types/src/variables_types.ts",
             "deprecated": false,
@@ -961,9 +1120,9 @@
               "OperatorFunction",
               "<any, any>[]): ",
               "Observable",
-              "<unknown>; }; operator: ",
-              "Operator",
-              "<any, ",
+              "<unknown>; }; observers: ",
+              "Observer",
+              "<",
               {
                 "pluginId": "@kbn/esql-types",
                 "scope": "common",
@@ -971,7 +1130,7 @@
                 "section": "def-common.ESQLControlVariable",
                 "text": "ESQLControlVariable"
               },
-              "[]> | undefined; lift: <R>(operator: ",
+              "[]>[]; isStopped: boolean; hasError: boolean; thrownError: any; lift: <R>(operator: ",
               "Operator",
               "<",
               {
@@ -983,7 +1142,27 @@
               },
               "[], R>) => ",
               "Observable",
-              "<R>; subscribe: { (observerOrNext?: Partial<",
+              "<R>; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
+              "Observable",
+              "<",
+              {
+                "pluginId": "@kbn/esql-types",
+                "scope": "common",
+                "docId": "kibKbnEsqlTypesPluginApi",
+                "section": "def-common.ESQLControlVariable",
+                "text": "ESQLControlVariable"
+              },
+              "[]>; operator: ",
+              "Operator",
+              "<any, ",
+              {
+                "pluginId": "@kbn/esql-types",
+                "scope": "common",
+                "docId": "kibKbnEsqlTypesPluginApi",
+                "section": "def-common.ESQLControlVariable",
+                "text": "ESQLControlVariable"
+              },
+              "[]> | undefined; subscribe: { (observerOrNext?: Partial<",
               "Observer",
               "<",
               {
@@ -1037,29 +1216,151 @@
                 "section": "def-common.ESQLControlVariable",
                 "text": "ESQLControlVariable"
               },
-              "[] | undefined>; }; observers: ",
-              "Observer",
-              "<",
-              {
-                "pluginId": "@kbn/esql-types",
-                "scope": "common",
-                "docId": "kibKbnEsqlTypesPluginApi",
-                "section": "def-common.ESQLControlVariable",
-                "text": "ESQLControlVariable"
-              },
-              "[]>[]; isStopped: boolean; hasError: boolean; thrownError: any; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
-              "Observable",
-              "<",
-              {
-                "pluginId": "@kbn/esql-types",
-                "scope": "common",
-                "docId": "kibKbnEsqlTypesPluginApi",
-                "section": "def-common.ESQLControlVariable",
-                "text": "ESQLControlVariable"
-              },
-              "[]>; }"
+              "[] | undefined>; }; }"
             ],
             "path": "src/platform/packages/shared/kbn-esql-types/src/variables_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-types",
+        "id": "def-common.RecommendedField",
+        "type": "Interface",
+        "tags": [],
+        "label": "RecommendedField",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-esql-types/src/extensions_autocomplete_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-types",
+            "id": "def-common.RecommendedField.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-esql-types/src/extensions_autocomplete_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-types",
+            "id": "def-common.RecommendedField.pattern",
+            "type": "string",
+            "tags": [],
+            "label": "pattern",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-esql-types/src/extensions_autocomplete_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-types",
+        "id": "def-common.RecommendedQuery",
+        "type": "Interface",
+        "tags": [],
+        "label": "RecommendedQuery",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-esql-types/src/extensions_autocomplete_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-types",
+            "id": "def-common.RecommendedQuery.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-esql-types/src/extensions_autocomplete_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-types",
+            "id": "def-common.RecommendedQuery.query",
+            "type": "string",
+            "tags": [],
+            "label": "query",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-esql-types/src/extensions_autocomplete_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-types",
+            "id": "def-common.RecommendedQuery.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-types/src/extensions_autocomplete_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-types",
+        "id": "def-common.ResolveIndexResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "ResolveIndexResponse",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-esql-types/src/extensions_autocomplete_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-types",
+            "id": "def-common.ResolveIndexResponse.indices",
+            "type": "Array",
+            "tags": [],
+            "label": "indices",
+            "description": [],
+            "signature": [
+              "ResolveIndexResponseItem[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-types/src/extensions_autocomplete_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-types",
+            "id": "def-common.ResolveIndexResponse.aliases",
+            "type": "Array",
+            "tags": [],
+            "label": "aliases",
+            "description": [],
+            "signature": [
+              "ResolveIndexResponseItem[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-types/src/extensions_autocomplete_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-types",
+            "id": "def-common.ResolveIndexResponse.data_streams",
+            "type": "Array",
+            "tags": [],
+            "label": "data_streams",
+            "description": [],
+            "signature": [
+              "ResolveIndexResponseItem[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-types/src/extensions_autocomplete_types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1119,6 +1420,21 @@
           "\"small\" | \"medium\" | \"large\""
         ],
         "path": "src/platform/packages/shared/kbn-esql-types/src/variables_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-types",
+        "id": "def-common.REGISTRY_EXTENSIONS_ROUTE",
+        "type": "string",
+        "tags": [],
+        "label": "REGISTRY_EXTENSIONS_ROUTE",
+        "description": [],
+        "signature": [
+          "\"/internal/esql_registry/extensions/\""
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-types/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

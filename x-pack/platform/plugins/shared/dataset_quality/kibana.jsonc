@@ -16,25 +16,30 @@
       "datasetQuality"
     ],
     "requiredPlugins": [
+      "controls",
       "data",
+      "dataViews",
+      "dataViewEditor",
+      "embeddable",
+      "fieldFormats",
+      "fieldsMetadata",
+      "fleet",
       "kibanaReact",
       "kibanaUtils",
-      "controls",
-      "embeddable",
+      "lens",
       "share",
-      "fleet",
-      "fieldFormats",
-      "dataViews",
-      "fieldsMetadata",
       "taskManager",
-      "usageCollection"
+      "triggersActionsUi",
     ],
     "optionalPlugins": [
+      "alerting",
       "telemetry",
-      "lens"
+      "usageCollection",
     ],
     "requiredBundles": [
-      "discover"
+      "charts",
+      "discover",
+      "stackAlerts",
     ],
     "extraPublicDirs": [
       "common"

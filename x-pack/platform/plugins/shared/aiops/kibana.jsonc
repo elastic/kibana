@@ -11,9 +11,11 @@
     "id": "aiops",
     "browser": true,
     "server": true,
+    "configPath": ["xpack", "aiops"],
     "requiredPlugins": [
       "charts",
       "data",
+      "lens",
       "licensing",
       "uiActions",
       "embeddable",
@@ -26,8 +28,7 @@
     "optionalPlugins": [
       "cases",
       "observabilityAIAssistant",
-      "usageCollection",
-      "lens"
+      "usageCollection"
     ],
     "requiredBundles": [
       "dataViews",

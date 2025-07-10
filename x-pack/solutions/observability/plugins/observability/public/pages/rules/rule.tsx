@@ -16,6 +16,7 @@ import { useKibana } from '../../utils/kibana_react';
 import { paths } from '../../../common/locators/paths';
 import { observabilityRuleCreationValidConsumers } from '../../../common/constants';
 import { usePluginContext } from '../../hooks/use_plugin_context';
+import { NewRulesCallout } from './new_rules_callout';
 
 export function RulePage() {
   const {
@@ -25,14 +26,15 @@ export function RulePage() {
     application,
     notifications,
     charts,
+    serverless,
     settings,
     data,
     dataViews,
     unifiedSearch,
-    serverless,
     actionTypeRegistry,
     ruleTypeRegistry,
     chrome,
+    contentManagement,
     ...startServices
   } = useKibana().services;
   const { ObservabilityPageTemplate } = usePluginContext();
@@ -59,11 +61,24 @@ export function RulePage() {
           defaultMessage: 'Rules',
         }),
       },
-      {
-        text: i18n.translate('xpack.observability.breadcrumbs.createLinkText', {
-          defaultMessage: 'Create',
-        }),
-      },
+      ...(ruleTypeId
+        ? [
+            {
+              text: i18n.translate('xpack.observability.breadcrumbs.createLinkText', {
+                defaultMessage: 'Create',
+              }),
+            },
+          ]
+        : []),
+      ...(id
+        ? [
+            {
+              text: i18n.translate('xpack.observability.breadcrumbs.editLinkText', {
+                defaultMessage: 'Edit',
+              }),
+            },
+          ]
+        : []),
     ],
     { serverless }
   );
@@ -71,7 +86,9 @@ export function RulePage() {
   return (
     <ObservabilityPageTemplate data-test-subj="rulePage">
       <HeaderMenu />
+      <NewRulesCallout ruleTypeId={ruleTypeId} />
       <RuleForm
+        key={ruleTypeId}
         plugins={{
           http,
           application,
@@ -84,13 +101,13 @@ export function RulePage() {
           docLinks,
           ruleTypeRegistry,
           actionTypeRegistry,
+          contentManagement,
           ...startServices,
         }}
         id={id}
         ruleTypeId={ruleTypeId}
         validConsumers={observabilityRuleCreationValidConsumers}
         multiConsumerSelection={AlertConsumers.LOGS}
-        isServerless={!!serverless}
         onCancel={() => {
           if (returnApp && returnPath) {
             application.navigateToApp(returnApp, { path: returnPath });

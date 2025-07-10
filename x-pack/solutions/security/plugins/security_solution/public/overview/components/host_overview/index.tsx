@@ -10,6 +10,8 @@ import { euiDarkVars as darkTheme, euiLightVars as lightTheme } from '@kbn/ui-th
 import { getOr } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import styled from '@emotion/styled';
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
+import { FlyoutLink } from '../../../flyout/shared/components/flyout_link';
 import { RiskScoreHeaderTitle } from '../../../entity_analytics/components/risk_score_header_title';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useQueryInspector } from '../../../common/components/page/manage_query';
@@ -18,7 +20,6 @@ import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score
 import { buildHostNamesFilter, type HostItem } from '../../../../common/search_strategy';
 import { EntityType } from '../../../../common/entity_analytics/types';
 import type { DescriptionList } from '../../../../common/utility_types';
-import { useDarkMode } from '../../../common/lib/kibana';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
 import { hostIdRenderer } from '../../../timelines/components/field_renderers/field_renderers';
 import { DefaultFieldRenderer } from '../../../timelines/components/field_renderers/default_renderer';
@@ -28,7 +29,6 @@ import {
 } from '../../../common/components/first_last_seen/first_last_seen';
 import { InspectButton, InspectButtonContainer } from '../../../common/components/inspect';
 import { Loader } from '../../../common/components/loader';
-import { NetworkDetailsLink } from '../../../common/components/links';
 import { hasMlUserPermissions } from '../../../../common/machine_learning/has_ml_user_permissions';
 import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_capabilities';
 import { AnomalyScores } from '../../../common/components/ml/score/anomaly_scores';
@@ -42,7 +42,7 @@ import { RiskScoreDocTooltip } from '../common';
 
 interface HostSummaryProps {
   contextID?: string; // used to provide unique draggable context when viewing in the side panel
-  scopeId?: string;
+  scopeId: string;
   data: HostItem;
   id: string;
   isInDetailsSidePanel: boolean;
@@ -55,6 +55,7 @@ interface HostSummaryProps {
   narrowDateRange: NarrowDateRange;
   hostName: string;
   jobNameById: Record<string, string | undefined>;
+  isFlyoutOpen?: boolean;
 }
 
 const HostRiskOverviewWrapper = styled(EuiFlexGroup, {
@@ -82,10 +83,11 @@ export const HostOverview = React.memo<HostSummaryProps>(
     startDate,
     hostName,
     jobNameById,
+    isFlyoutOpen = false,
   }) => {
     const capabilities = useMlCapabilities();
     const userPermissions = hasMlUserPermissions(capabilities);
-    const darkMode = useDarkMode();
+    const darkMode = useKibanaIsDarkMode();
     const filterQuery = useMemo(
       () => (hostName ? buildHostNamesFilter([hostName]) : undefined),
       [hostName]
@@ -178,7 +180,12 @@ export const HostOverview = React.memo<HostSummaryProps>(
           title: i18n.HOST_ID,
           description:
             data && data.host
-              ? hostIdRenderer({ host: data.host, noLink: true, scopeId })
+              ? hostIdRenderer({
+                  host: data.host,
+                  noLink: true,
+                  scopeId,
+                  isFlyoutOpen,
+                })
               : getEmptyTagValue(),
         },
         {
@@ -204,7 +211,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
           ),
         },
       ],
-      [data, scopeId, indexNames, hostName]
+      [data, scopeId, indexNames, hostName, isFlyoutOpen]
     );
     const firstColumn = useMemo(
       () =>
@@ -250,7 +257,18 @@ export const HostOverview = React.memo<HostSummaryProps>(
                 attrName={'host.ip'}
                 idPrefix={contextID ? `host-overview-${contextID}` : 'host-overview'}
                 scopeId={scopeId}
-                render={(ip) => (ip != null ? <NetworkDetailsLink ip={ip} /> : getEmptyTagValue())}
+                render={(ip) =>
+                  ip != null ? (
+                    <FlyoutLink
+                      field={'host.ip'}
+                      value={ip}
+                      scopeId={scopeId}
+                      isFlyoutOpen={isFlyoutOpen}
+                    />
+                  ) : (
+                    getEmptyTagValue()
+                  )
+                }
               />
             ),
           },
@@ -285,7 +303,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
           },
         ],
       ],
-      [contextID, scopeId, data, firstColumn, getDefaultRenderer]
+      [contextID, scopeId, data, firstColumn, getDefaultRenderer, isFlyoutOpen]
     );
     return (
       <>

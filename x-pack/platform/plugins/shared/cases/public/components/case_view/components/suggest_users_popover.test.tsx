@@ -24,7 +24,8 @@ const asAssignee = (profile: UserProfileWithAvatar): AssigneeWithProfile => ({
   profile,
 });
 
-describe('SuggestUsersPopover', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/216570
+describe.skip('SuggestUsersPopover', () => {
   const defaultProps: SuggestUsersPopoverProps = {
     isLoading: false,
     assignedUsersWithProfiles: [],

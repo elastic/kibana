@@ -53,6 +53,12 @@ describe('checkErrorDetails', () => {
   });
 
   describe('data source verification errors', () => {
+    it('should mark as user error when index_not_found exceptoin', () => {
+      const errorMessage = `index_not_found_exception
+	Root causes:
+		index_not_found_exception: no such index [logs-ti_rapid7_threat_command_latest.vulnerability]`;
+      expect(checkErrorDetails(new Error(errorMessage))).toHaveProperty('isUserError', true);
+    });
     it('should mark as user error from search response body', () => {
       const errorResponse = {
         errBody: {
@@ -81,6 +87,13 @@ describe('checkErrorDetails', () => {
 line 1:45: invalid [test_not_lookup] resolution in lookup mode to an index in [standard] mode
 `;
 
+      expect(checkErrorDetails(new Error(errorMessage))).toHaveProperty('isUserError', true);
+    });
+  });
+
+  describe('missing ml job errors', () => {
+    it('should mark as user error error string', () => {
+      const errorMessage = `problem_child_rare_process_by_user missing`;
       expect(checkErrorDetails(new Error(errorMessage))).toHaveProperty('isUserError', true);
     });
   });
@@ -118,6 +131,21 @@ line 1:45: invalid [test_not_lookup] resolution in lookup mode to an index in [s
   });
 
   describe('non user errors', () => {
+    it('should not mark as user error shard exception', () => {
+      const errorResponse = {
+        errBody: {
+          error: {
+            root_cause: [
+              {
+                type: 'no_shard_available_action_exception',
+              },
+            ],
+            type: 'no_shard_available_action_exception',
+          },
+        },
+      };
+      expect(checkErrorDetails(errorResponse)).toHaveProperty('isUserError', false);
+    });
     it('should not mark as user error from search response body', () => {
       const errorResponse = {
         errBody: {

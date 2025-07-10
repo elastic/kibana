@@ -160,11 +160,12 @@ export const functions = {
   ### MEDIAN
   The value that is greater than half of all values and less than half of all values, also known as the 50% [\`PERCENTILE\`](https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/aggregation-functions#esql-percentile).
 
+  Note: Like [\`PERCENTILE\`](https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/aggregation-functions#esql-percentile), \`MEDIAN\` is [usually approximate](https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/aggregation-functions#esql-percentile-approximate).
+
   \`\`\`esql
   FROM employees
   | STATS MEDIAN(salary), PERCENTILE(salary, 50)
   \`\`\`
-  Note: Like [\`PERCENTILE\`](https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/aggregation-functions#esql-percentile), \`MEDIAN\` is [usually approximate](https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/aggregation-functions#esql-percentile-approximate).
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
@@ -194,11 +195,12 @@ export const functions = {
 
   It is calculated as the median of each data point’s deviation from the median of the entire sample. That is, for a random variable \`X\`, the median absolute deviation is \`median(|median(X) - X|)\`.
 
+  Note: Like [\`PERCENTILE\`](https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/aggregation-functions#esql-percentile), \`MEDIAN_ABSOLUTE_DEVIATION\` is [usually approximate](https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/aggregation-functions#esql-percentile-approximate).
+
   \`\`\`esql
   FROM employees
   | STATS MEDIAN(salary), MEDIAN_ABSOLUTE_DEVIATION(salary)
   \`\`\`
-  Note: Like [\`PERCENTILE\`](https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/aggregation-functions#esql-percentile), \`MEDIAN_ABSOLUTE_DEVIATION\` is [usually approximate](https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/aggregation-functions#esql-percentile-approximate).
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
@@ -305,7 +307,7 @@ export const functions = {
       label: i18n.translate('languageDocumentation.documentationESQL.st_centroid_agg', {
         defaultMessage: 'ST_CENTROID_AGG',
       }),
-      preview: false,
+      preview: true,
       description: (
         <Markdown
           openLinksInNewTab
@@ -336,7 +338,7 @@ export const functions = {
       label: i18n.translate('languageDocumentation.documentationESQL.st_extent_agg', {
         defaultMessage: 'ST_EXTENT_AGG',
       }),
-      preview: false,
+      preview: true,
       description: (
         <Markdown
           openLinksInNewTab
@@ -379,7 +381,7 @@ export const functions = {
             {
               defaultMessage: `
   ### STD DEV
-  The standard deviation of a numeric field.
+  The population standard deviation of a numeric field.
 
   \`\`\`esql
   FROM employees
@@ -466,7 +468,9 @@ export const functions = {
             {
               defaultMessage: `
   ### VALUES
-  Returns all values in a group as a multivalued field. The order of the returned values isn’t guaranteed. If you need the values returned in order use [\`MV_SORT\`](https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/mv-functions#esql-mv_sort).
+  Returns unique values as a multivalued field. The order of the returned values isn’t guaranteed.
+  If you need the values returned in order use
+  [\`MV_SORT\`](https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/mv-functions#esql-mv_sort).
 
   \`\`\`esql
   FROM employees

@@ -45,8 +45,6 @@ export const AssetInventoryRoutes = () => {
 export const routes: SecuritySubPluginRoutes = [
   {
     path: ASSET_INVENTORY_PATH,
-    component: withSecurityRoutePageWrapper(AssetInventoryRoutes, SecurityPageName.assetInventory, {
-      redirectOnMissing: true,
-    }),
+    component: withSecurityRoutePageWrapper(AssetInventoryRoutes, SecurityPageName.assetInventory),
   },
 ];

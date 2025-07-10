@@ -73,30 +73,29 @@ These settings are not supported to pre-configure the Endpoint and Cloud Securit
 `xpack.fleet.packages`
 :   List of integrations that are installed when the {{fleet}} app starts up for the first time.
 
-    ::::{dropdown} Required properties of `xpack.fleet.packages`
+    **Required properties of `xpack.fleet.packages`**:
+
     `name`
     :   Name of the integration from the package registry.
 
     `version`
     :   Either an exact semantic version, or the keyword `latest` to fetch the latest integration version.
 
-    ::::
-
 
 `xpack.fleet.agentPolicies`
 :   List of agent policies that are configured when the {{fleet}} app starts.
 
-    ::::{dropdown} Required properties of `xpack.fleet.agentPolicies`
+    **Required properties of `xpack.fleet.agentPolicies`**:
+
     `id`
     :   Unique ID for this policy. The ID may be a number or string.
 
     `name`
     :   Policy name.
 
-    ::::
 
+    **Optional properties of `xpack.fleet.agentPolicies`**:
 
-    ::::{dropdown} Optional properties of `xpack.fleet.agentPolicies`
     `description`
     :   Text description of this policy.
 
@@ -130,7 +129,8 @@ These settings are not supported to pre-configure the Endpoint and Cloud Securit
     `package_policies`
     :   List of integration policies to add to this policy.
 
-        ::::{dropdown} Properties of `package_policies`
+        **Properties of `package_policies`**:
+
         `id`
         :   Unique ID of the integration policy. The ID may be a number or string.
 
@@ -140,12 +140,10 @@ These settings are not supported to pre-configure the Endpoint and Cloud Securit
         `package`
         :   (required) Integration that this policy configures.
 
-            ::::{dropdown} Properties of `package`
+            **Properties of `package`**:
+
             `name`
             :   Name of the integration associated with this policy.
-
-            ::::
-
 
         `description`
         :   Text string describing this integration policy.
@@ -155,12 +153,6 @@ These settings are not supported to pre-configure the Endpoint and Cloud Securit
 
         `inputs`
         :   Map of input for the integration. Follows the same schema as the package policy API inputs, with the exception that any object in `vars` can be passed `frozen: true` in order to prevent that specific `var` from being edited by the user.
-
-        ::::
-
-
-    ::::
-
 
     Example configuration:
 
@@ -206,7 +198,8 @@ These settings are not supported to pre-configure the Endpoint and Cloud Securit
     ::::
 
 
-    ::::{dropdown} Required properties of `xpack.fleet.outputs`
+    **Required properties of `xpack.fleet.outputs`**:
+
     `id`
     :   Unique ID for this output. The ID should be a string.
 
@@ -219,10 +212,9 @@ These settings are not supported to pre-configure the Endpoint and Cloud Securit
     `hosts`
     :   Array that contains the list of host for that output.
 
-    ::::
 
+    **Optional properties of `xpack.fleet.outputs`**:
 
-    ::::{dropdown} Optional properties of `xpack.fleet.outputs`
     `is_default`
     :   If `true`, the output specified in `xpack.fleet.outputs` will be the one used to send agent data unless there is another one configured specifically for the agent policy.
 
@@ -241,25 +233,18 @@ These settings are not supported to pre-configure the Endpoint and Cloud Securit
     `ssl`
     :   Set to enable authentication using the Secure Sockets Layer (SSL) protocol.
 
-        ::::{dropdown} Properties of `ssl`
+        **Properties of `ssl`**:
+
         `certificate`
         :   The SSL certificate that {{agents}} use to authenticate with the output. Include the full contents of the certificate here.
-
-        ::::
-
 
     `secrets`
     :   Include here any values for preconfigured outputs that should be stored as secrets. A secret value is replaced in the `kibana.yml` settings file with a reference, with the original value stored externally as a secure hash. Note that this type of secret storage requires all configured {{fleet-server}}s to be on version 8.12.0 or later.
 
-        ::::{dropdown} Properties of `secrets`
+        **Properties of `secrets`**
+
         `key`:
         :   The private certificate key that {{agents}} use to authenticate with the output.
-
-        ::::
-
-
-    ::::
-
 
     Example `xpack.fleet.outputs` configuration:
 
@@ -280,7 +265,8 @@ These settings are not supported to pre-configure the Endpoint and Cloud Securit
 `xpack.fleet.fleetServerHosts`
 :   List of {{fleet-server}} hosts that are configured when the {{fleet}} app starts.
 
-    ::::{dropdown} Required properties of `xpack.fleet.fleetServerHosts`
+    **Required properties of `xpack.fleet.fleetServerHosts`**
+
     `id`
     :   Unique ID for the host server.
 
@@ -290,10 +276,8 @@ These settings are not supported to pre-configure the Endpoint and Cloud Securit
     `host_urls`
     :   Array of one or more host URLs that {{agents}} will use to connect to {{fleet-server}}.
 
-    ::::
+    **Optional properties of `xpack.fleet.fleetServerHosts`**:
 
-
-    ::::{dropdown} Optional properties of `xpack.fleet.fleetServerHosts`
     `is_default`
     :   Whether or not this host should be the default to use for {{fleet-server}}.
 
@@ -303,13 +287,11 @@ These settings are not supported to pre-configure the Endpoint and Cloud Securit
     `proxy_id`
     :   Unique ID of the proxy to access the {{fleet-server}} host.
 
-    ::::
-
-
 `xpack.fleet.proxy`
 :   List of proxies to access {{fleet-server}} that are configured when the {{fleet}} app starts.
 
-    ::::{dropdown} Required properties of `xpack.fleet.proxy`
+    **Required properties of `xpack.fleet.proxy`**:
+
     `id`
     :   Unique ID of the proxy to access the {{fleet-server}} host.
 
@@ -319,21 +301,17 @@ These settings are not supported to pre-configure the Endpoint and Cloud Securit
     `url`
     :   URL that {{agents}} use to connect to the proxy to access {{fleet-server}}.
 
-    ::::
+    **Optional properties of `xpack.fleet.proxy`**:
 
-
-    :::::{dropdown} Optional properties of `xpack.fleet.proxy`
     `proxy_headers`
     :   Map of headers to use with the proxy. .Properties of `proxy_headers`
 
-    ::::{dropdown}
-    `key`
-    :   Key to use for the proxy header.
 
-    `value`
-    :   Value to use for the proxy header.
+        `key`
+        :   Key to use for the proxy header.
 
-    ::::
+        `value`
+        :   Value to use for the proxy header.
 
 
     `certificate_authorities`
@@ -344,8 +322,6 @@ These settings are not supported to pre-configure the Endpoint and Cloud Securit
 
     `certificate_key`
     :   The certificate key used to authenticate the proxy.
-
-    :::::
 
 
 `xpack.fleet.enableExperimental` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")

@@ -22,6 +22,7 @@ export interface SecurityFeatureParams {
 
 export type DefaultSecurityProductFeaturesConfig = Omit<
   Record<ProductFeatureSecurityKey, ProductFeatureKibanaConfig<SecuritySubFeatureId>>,
-  ProductFeatureSecurityKey.endpointExceptions
+  | ProductFeatureSecurityKey.endpointExceptions
+  | ProductFeatureSecurityKey.endpointArtifactManagement
   // | add not generic security app features here
 >;

@@ -1158,6 +1158,8 @@
           "ThemeServiceSetup",
           "; userProfile: ",
           "UserProfileService",
+          "; rendering: ",
+          "RenderingService",
           "; }"
         ],
         "path": "x-pack/platform/plugins/shared/security/public/index.ts",
@@ -1880,6 +1882,14 @@
               {
                 "plugin": "fleet",
                 "path": "x-pack/platform/plugins/shared/fleet/server/routes/app/index.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/lib/has_required_privilege_granted_in_all_spaces.ts"
+              },
+              {
+                "plugin": "reporting",
+                "path": "x-pack/platform/plugins/private/reporting/server/core.ts"
               },
               {
                 "plugin": "profiling",
@@ -4642,7 +4652,7 @@
             "label": "indices",
             "description": [],
             "signature": [
-              "{ names: string[]; field_security?: Record<\"except\" | \"grant\", string[]> | undefined; privileges: string[]; query?: string | undefined; allow_restricted_indices?: boolean | undefined; }[] | undefined"
+              "{ names: string[]; field_security?: Record<\"grant\" | \"except\", string[]> | undefined; privileges: string[]; query?: string | undefined; allow_restricted_indices?: boolean | undefined; }[] | undefined"
             ],
             "path": "src/core/packages/security/server/src/roles/schema.ts",
             "deprecated": false,
@@ -4656,7 +4666,7 @@
             "label": "remote_indices",
             "description": [],
             "signature": [
-              "{ clusters: string[]; names: string[]; field_security?: Record<\"except\" | \"grant\", string[]> | undefined; privileges: string[]; query?: string | undefined; allow_restricted_indices?: boolean | undefined; }[] | undefined"
+              "{ clusters: string[]; names: string[]; field_security?: Record<\"grant\" | \"except\", string[]> | undefined; privileges: string[]; query?: string | undefined; allow_restricted_indices?: boolean | undefined; }[] | undefined"
             ],
             "path": "src/core/packages/security/server/src/roles/schema.ts",
             "deprecated": false,
@@ -4800,7 +4810,7 @@
               "\nDetails about these errors. This field is not present in the response when error_count is 0."
             ],
             "signature": [
-              "{ type?: string | undefined; reason?: string | undefined; caused_by?: { type?: string | undefined; reason?: string | undefined; } | undefined; }[] | undefined"
+              "{ type?: string | undefined; reason?: string | null | undefined; caused_by?: { type?: string | undefined; reason?: string | null | undefined; } | undefined; }[] | undefined"
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
             "deprecated": false,
@@ -6039,20 +6049,32 @@
               "path": "x-pack/platform/plugins/shared/entity_manager/server/routes/enablement/disable.ts"
             },
             {
+              "plugin": "fleet",
+              "path": "x-pack/platform/plugins/shared/fleet/server/routes/setup/handlers.test.ts"
+            },
+            {
+              "plugin": "fleet",
+              "path": "x-pack/platform/plugins/shared/fleet/server/routes/setup/handlers.test.ts"
+            },
+            {
+              "plugin": "fleet",
+              "path": "x-pack/platform/plugins/shared/fleet/server/routes/setup/handlers.test.ts"
+            },
+            {
+              "plugin": "@kbn/test-suites-xpack-platform",
+              "path": "x-pack/platform/test/alerting_api_integration/common/plugins/alerts/server/routes.ts"
+            },
+            {
+              "plugin": "@kbn/test-suites-xpack-platform",
+              "path": "x-pack/platform/test/alerting_api_integration/common/plugins/alerts/server/routes.ts"
+            },
+            {
+              "plugin": "@kbn/test-suites-xpack-platform",
+              "path": "x-pack/platform/test/alerting_api_integration/common/plugins/alerts/server/routes.ts"
+            },
+            {
               "plugin": "securitySolution",
               "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/privilege_monitoring/auth/api_key.ts"
-            },
-            {
-              "plugin": "fleet",
-              "path": "x-pack/platform/plugins/shared/fleet/server/routes/setup/handlers.test.ts"
-            },
-            {
-              "plugin": "fleet",
-              "path": "x-pack/platform/plugins/shared/fleet/server/routes/setup/handlers.test.ts"
-            },
-            {
-              "plugin": "fleet",
-              "path": "x-pack/platform/plugins/shared/fleet/server/routes/setup/handlers.test.ts"
             },
             {
               "plugin": "synthetics",

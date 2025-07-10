@@ -64,7 +64,7 @@ class ScopedCookieSessionStorage<T extends object> implements SessionStorage<T> 
       // and won't be authing the user because we don't know which session identifies
       // the actual user. There's potential to change this behavior to ensure all valid sessions
       // identify the same user, or choose one valid one, but this is the safest option.
-      this.log.warn(
+      this.log.error(
         `Found multiple auth sessions. Found:[${session.credentials.length}] unequal sessions`
       );
       return null;

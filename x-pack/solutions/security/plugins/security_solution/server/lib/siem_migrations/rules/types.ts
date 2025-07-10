@@ -10,27 +10,21 @@ import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { AnalyticsServiceSetup } from '@kbn/core/public';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { PackageService } from '@kbn/fleet-plugin/server';
-import type { InferenceClient } from '@kbn/inference-plugin/server';
+import type { InferenceClient } from '@kbn/inference-common';
 import type { IndexAdapter, IndexPatternAdapter } from '@kbn/index-adapter';
 import type {
   RuleMigration,
+  RuleMigrationRule,
   RuleMigrationTranslationResult,
-  UpdateRuleMigrationData,
+  UpdateRuleMigrationRule,
 } from '../../../../common/siem_migrations/model/rule_migration.gen';
 import { type RuleMigrationResource } from '../../../../common/siem_migrations/model/rule_migration.gen';
 import type { RuleVersions } from './data/rule_migrations_data_prebuilt_rules_client';
+import type { Stored } from '../types';
 
-export type Stored<T extends object> = T & { id: string };
+export type StoredSiemMigration = Stored<RuleMigration>;
 
-export interface SiemMigration {
-  /** The moment the migration was created */
-  created_at: string;
-  /** The profile id of the user who created the migration */
-  created_by: string;
-}
-export type StoredSiemMigration = Stored<SiemMigration>;
-
-export type StoredRuleMigration = Stored<RuleMigration>;
+export type StoredRuleMigration = Stored<RuleMigrationRule>;
 export type StoredRuleMigrationResource = Stored<RuleMigrationResource>;
 
 export interface SiemRuleMigrationsClientDependencies {
@@ -60,7 +54,7 @@ export interface RuleMigrationPrebuiltRule {
 
 export type RuleSemanticSearchResult = RuleMigrationPrebuiltRule & RuleVersions;
 
-export type InternalUpdateRuleMigrationData = UpdateRuleMigrationData & {
+export type InternalUpdateRuleMigrationRule = UpdateRuleMigrationRule & {
   translation_result?: RuleMigrationTranslationResult;
 };
 

@@ -15,9 +15,8 @@ import {
   MetaConversion,
   MessageConversion,
   DateConversion,
+  ErrorConversion,
 } from '@kbn/core-logging-common-internal';
-
-const DEFAULT_PATTERN = `[%date][%level][%logger] %message`;
 
 const conversions: Conversion[] = [
   LoggerConversion,
@@ -25,6 +24,7 @@ const conversions: Conversion[] = [
   LevelConversion,
   MetaConversion,
   DateConversion,
+  ErrorConversion,
 ];
 
 /**
@@ -33,7 +33,7 @@ const conversions: Conversion[] = [
  * @internal
  */
 export class PatternLayout extends BasePatternLayout {
-  constructor(pattern: string = DEFAULT_PATTERN) {
+  constructor(pattern?: string) {
     super({
       pattern,
       highlight: false,

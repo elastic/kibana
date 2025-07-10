@@ -98,7 +98,7 @@ export const getLensMigrations = <T>({
   lensEmbeddableFactory,
   migratorFactory,
 }: GetLensMigrationsArgs<T>) => {
-  const lensMigrations = lensEmbeddableFactory?.().migrations;
+  const lensMigrations = lensEmbeddableFactory().migrations;
   const lensMigrationObject = isFunction(lensMigrations) ? lensMigrations() : lensMigrations || {};
 
   const embeddableMigrations = mapValues<MigrateFunctionsObject, SavedObjectMigrationParams<T, T>>(

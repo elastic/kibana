@@ -1,0 +1,116 @@
+{
+  "id": "intercepts",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "intercepts",
+        "id": "def-public.InterceptsSetup",
+        "type": "Type",
+        "tags": [],
+        "label": "InterceptsSetup",
+        "description": [],
+        "signature": [
+          "{}"
+        ],
+        "path": "x-pack/platform/plugins/private/intercepts/public/plugin.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "intercepts",
+        "id": "def-public.InterceptsStart",
+        "type": "Type",
+        "tags": [],
+        "label": "InterceptsStart",
+        "description": [],
+        "signature": [
+          "{ registerIntercept: ((intercept: { id: string; config: () => Promise<Omit<",
+          {
+            "pluginId": "intercepts",
+            "scope": "public",
+            "docId": "kibInterceptsPluginApi",
+            "section": "def-public.InterceptWithoutRunId",
+            "text": "InterceptWithoutRunId"
+          },
+          ", \"id\">>; }) => ",
+          "Observable",
+          "<{ lastInteractedInterceptId: number; }>) | undefined; }"
+        ],
+        "path": "x-pack/platform/plugins/private/intercepts/public/plugin.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "intercepts",
+        "id": "def-public.InterceptWithoutRunId",
+        "type": "Type",
+        "tags": [],
+        "label": "InterceptWithoutRunId",
+        "description": [],
+        "signature": [
+          "{ id: string; onProgress?: ((evt: InterceptProgressEvent) => void) | undefined; steps: [StartingInterceptStep, ...InterceptSteps[], CompletionInterceptStep]; onFinish: (evt: InterceptCompletionEvent) => void; onDismiss?: ((evt: InterceptDismissalEvent) => void) | undefined; }"
+        ],
+        "path": "x-pack/platform/plugins/private/intercepts/public/prompter/service/intercept_dialog_api.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "intercepts",
+        "id": "def-server.InterceptSetup",
+        "type": "Type",
+        "tags": [],
+        "label": "InterceptSetup",
+        "description": [],
+        "signature": [
+          "{}"
+        ],
+        "path": "x-pack/platform/plugins/private/intercepts/server/plugin.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "intercepts",
+        "id": "def-server.InterceptStart",
+        "type": "Type",
+        "tags": [],
+        "label": "InterceptStart",
+        "description": [],
+        "signature": [
+          "{ registerTriggerDefinition: ((triggerId: string, cb: (args: ",
+          "InterceptRegistrationCallbackArgs",
+          ") => { triggerAfter: string | null; isRecurrent?: boolean | undefined; }) => Promise<void>) | undefined; }"
+        ],
+        "path": "x-pack/platform/plugins/private/intercepts/server/plugin.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

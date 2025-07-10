@@ -601,6 +601,7 @@ describe('schema validation', () => {
       ],
       _meta: {
         install_source: 'registry',
+        name: 'test',
       },
     };
     (installPackageFromRegistryHandler as jest.Mock).mockImplementation((ctx, request, res) => {

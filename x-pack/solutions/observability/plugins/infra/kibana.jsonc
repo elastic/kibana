@@ -13,7 +13,6 @@
     "requiredPlugins": [
       "aiops",
       "alerting",
-      "cases",
       "charts",
       "data",
       "dataViews",
@@ -23,6 +22,7 @@
       "embeddable",
       "features",
       "fieldFormats",
+      "lens",
       "logsShared",
       "metricsDataAccess",
       "observability",
@@ -37,11 +37,9 @@
       "visTypeTimeseries",
       "apmDataAccess",
       "logsDataAccess",
-      "entityManager",
       "fieldsMetadata"
     ],
     "optionalPlugins": [
-      "lens",
       "spaces",
       "ml",
       "home",

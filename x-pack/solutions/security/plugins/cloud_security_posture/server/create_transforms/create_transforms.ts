@@ -11,6 +11,7 @@ import { errors } from '@elastic/elasticsearch';
 import {
   latestFindingsTransform,
   DEPRECATED_FINDINGS_TRANSFORMS_VERSION,
+  CURRENT_FINDINGS_TRANSFORM_VERSION,
 } from './latest_findings_transform';
 import {
   latestVulnerabilitiesTransform,
@@ -20,11 +21,14 @@ import {
 // TODO: Move transforms to integration package
 export const initializeCspTransforms = async (
   esClient: ElasticsearchClient,
+  latestFindingsIndexAutoCreated: boolean,
   logger: Logger
 ): Promise<void> => {
   // Deletes old assets from previous versions as part of upgrade process
-  await deletePreviousTransformsVersions(esClient, logger);
-  await initializeTransform(esClient, latestFindingsTransform, logger);
+  await deletePreviousTransformsVersions(esClient, latestFindingsIndexAutoCreated, logger);
+  if (!latestFindingsIndexAutoCreated) {
+    await initializeTransform(esClient, latestFindingsTransform, logger);
+  }
   await initializeTransform(esClient, latestVulnerabilitiesTransform, logger);
 };
 
@@ -118,10 +122,19 @@ export const startTransformIfNotStarted = async (
   }
 };
 
-const deletePreviousTransformsVersions = async (esClient: ElasticsearchClient, logger: Logger) => {
-  const deprecatedTransforms = DEPRECATED_FINDINGS_TRANSFORMS_VERSION.concat(
-    DEPRECATED_VULN_TRANSFORM_VERSIONS
-  );
+export const deletePreviousTransformsVersions = async (
+  esClient: ElasticsearchClient,
+  isIntegrationVersionIncludesTransformAsset: boolean,
+  logger: Logger
+) => {
+  let deprecatedTransforms = [
+    ...DEPRECATED_FINDINGS_TRANSFORMS_VERSION,
+    ...DEPRECATED_VULN_TRANSFORM_VERSIONS,
+  ];
+
+  if (isIntegrationVersionIncludesTransformAsset) {
+    deprecatedTransforms = [...deprecatedTransforms, CURRENT_FINDINGS_TRANSFORM_VERSION];
+  }
   for (const transform of deprecatedTransforms) {
     const response = await deleteTransformSafe(esClient, logger, transform);
     if (response) return;

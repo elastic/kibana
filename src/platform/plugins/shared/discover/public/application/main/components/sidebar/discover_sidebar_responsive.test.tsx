@@ -7,10 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { render, screen, act as rtlAct } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { BehaviorSubject } from 'rxjs';
 import type { ReactWrapper } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { EuiProgress, EuiProvider } from '@elastic/eui';
+import { EuiProgress } from '@elastic/eui';
 import { getDataTableRecords, realHits } from '../../../../__fixtures__/real_hits';
 import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
@@ -22,7 +24,6 @@ import type { SidebarToggleState } from '../../../types';
 import { FetchStatus } from '../../../types';
 import type { DataDocuments$ } from '../../state_management/discover_data_state_container';
 import { stubLogstashDataView } from '@kbn/data-plugin/common/stubs';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 import * as ExistingFieldsServiceApi from '@kbn/unified-field-list/src/services/field_existing/load_field_existing';
 import { resetExistingFieldsCache } from '@kbn/unified-field-list/src/hooks/use_existing_fields';
@@ -32,8 +33,12 @@ import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DiscoverCustomizationId } from '../../../../customizations/customization_service';
 import type { FieldListCustomization, SearchBarCustomization } from '../../../../customizations';
-import { RuntimeStateProvider } from '../../state_management/redux';
-import { DiscoverMainProvider } from '../../state_management/discover_state_provider';
+import { DiscoverTestProvider } from '../../../../__mocks__/test_provider';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { UnifiedFieldListRestorableState } from '@kbn/unified-field-list';
+import { internalStateActions } from '../../state_management/redux';
+
+type TestWrapperProps = DiscoverSidebarResponsiveProps & { selectedDataView: DataView };
 
 const mockSearchBarCustomization: SearchBarCustomization = {
   id: 'search_bar',
@@ -143,7 +148,7 @@ jest.mock('@kbn/discover-utils/src/utils/calc_field_counts', () => ({
 
 jest.spyOn(ExistingFieldsServiceApi, 'loadFieldExisting');
 
-function getCompProps(options?: { hits?: DataTableRecord[] }): DiscoverSidebarResponsiveProps {
+function getCompProps(options?: { hits?: DataTableRecord[] }): TestWrapperProps {
   const dataView = stubLogstashDataView;
   dataView.toSpec = jest.fn(() => ({}));
 
@@ -177,21 +182,41 @@ function getCompProps(options?: { hits?: DataTableRecord[] }): DiscoverSidebarRe
   };
 }
 
-function getStateContainer({ query }: { query?: Query | AggregateQuery }) {
+function getStateContainer({
+  query,
+  fieldListUiState,
+}: {
+  query?: Query | AggregateQuery;
+  fieldListUiState?: Partial<UnifiedFieldListRestorableState>;
+}) {
   const stateContainer = getDiscoverStateMock({ isTimeBased: true });
   stateContainer.appState.set({
     query: query ?? { query: '', language: 'lucene' },
     filters: [],
   });
+  if (fieldListUiState) {
+    stateContainer.internalState.dispatch(
+      stateContainer.injectCurrentTab(internalStateActions.setFieldListUiState)({
+        fieldListUiState,
+      })
+    );
+  }
   return stateContainer;
 }
 
-async function mountComponent(
-  props: DiscoverSidebarResponsiveProps,
-  appStateParams: { query?: Query | AggregateQuery } = {},
-  services?: DiscoverServices
-): Promise<ReactWrapper<DiscoverSidebarResponsiveProps>> {
-  let comp: ReactWrapper<DiscoverSidebarResponsiveProps>;
+type EnzymeReturnType = ReactWrapper<TestWrapperProps>;
+type MountReturn<WithRTL extends boolean> = WithRTL extends true ? undefined : EnzymeReturnType;
+
+async function mountComponent<WithReactTestingLibrary extends boolean = false>(
+  props: TestWrapperProps,
+  appStateParams: {
+    query?: Query | AggregateQuery;
+    fieldListUiState?: Partial<UnifiedFieldListRestorableState>;
+  } = {},
+  services?: DiscoverServices,
+  withReactTestingLibrary?: WithReactTestingLibrary
+): Promise<MountReturn<WithReactTestingLibrary>> {
+  let comp: ReactWrapper<TestWrapperProps>;
   const stateContainer = getStateContainer(appStateParams);
   const mockedServices = services ?? createMockServices();
   mockedServices.data.dataViews.getIdsWithTitle = jest.fn(async () =>
@@ -206,18 +231,26 @@ async function mountComponent(
     .fn()
     .mockImplementation(() => stateContainer.appState.getState());
 
+  const component = (
+    <DiscoverTestProvider
+      services={mockedServices}
+      stateContainer={stateContainer}
+      runtimeState={{
+        currentDataView: props.selectedDataView!,
+        adHocDataViews: [],
+      }}
+    >
+      <DiscoverSidebarResponsive {...props} />
+    </DiscoverTestProvider>
+  );
+
+  if (withReactTestingLibrary) {
+    await rtlAct(() => render(component));
+    return undefined as MountReturn<WithReactTestingLibrary>;
+  }
+
   await act(async () => {
-    comp = mountWithIntl(
-      <EuiProvider>
-        <KibanaContextProvider services={mockedServices}>
-          <DiscoverMainProvider value={stateContainer}>
-            <RuntimeStateProvider currentDataView={props.selectedDataView!} adHocDataViews={[]}>
-              <DiscoverSidebarResponsive {...props} />{' '}
-            </RuntimeStateProvider>
-          </DiscoverMainProvider>
-        </KibanaContextProvider>
-      </EuiProvider>
-    );
+    comp = mountWithIntl(component);
     // wait for lazy modules
     await new Promise((resolve) => setTimeout(resolve, 0));
     comp.update();
@@ -225,11 +258,11 @@ async function mountComponent(
 
   comp!.update();
 
-  return comp!;
+  return comp! as unknown as MountReturn<WithReactTestingLibrary>;
 }
 
 describe('discover responsive sidebar', function () {
-  let props: DiscoverSidebarResponsiveProps;
+  let props: TestWrapperProps;
 
   beforeEach(async () => {
     (ExistingFieldsServiceApi.loadFieldExisting as jest.Mock).mockImplementation(async () => ({
@@ -328,17 +361,42 @@ describe('discover responsive sidebar', function () {
     expect(ExistingFieldsServiceApi.loadFieldExisting).toHaveBeenCalledTimes(1);
   });
 
-  it('should set a11y attributes for the search input in the field list', async function () {
-    const comp = await mountComponent(props);
+  describe('when the input is not focused', () => {
+    it('should set a11y attributes for the search input in the field list', async function () {
+      // When
+      await mountComponent(props, undefined, undefined, true);
 
-    const a11yDescription = findTestSubject(comp, 'fieldListGrouped__ariaDescription');
-    expect(a11yDescription.prop('aria-live')).toBe('polite');
-    expect(a11yDescription.text()).toBe(
-      '1 selected field. 4 popular fields. 3 available fields. 20 empty fields. 2 meta fields.'
-    );
+      // Then
+      const a11yDescription = screen.getByTestId('fieldListGrouped__ariaDescription');
+      expect(a11yDescription).toHaveAttribute('aria-live', 'off');
+      expect(a11yDescription).toHaveTextContent(
+        '1 selected field. 4 popular fields. 3 available fields. 20 empty fields. 2 meta fields.'
+      );
 
-    const searchInput = findTestSubject(comp, 'fieldListFiltersFieldSearch');
-    expect(searchInput.first().prop('aria-describedby')).toBe(a11yDescription.prop('id'));
+      const searchInput = screen.getByTestId('fieldListFiltersFieldSearch');
+      expect(searchInput).toHaveAttribute('aria-describedby', a11yDescription.id);
+    });
+  });
+
+  describe('when the input is focused', () => {
+    it('should set a11y attributes for the search input in the field list', async function () {
+      // Given
+      const user = userEvent.setup();
+
+      // When
+      await mountComponent(props, undefined, undefined, true);
+
+      // Then
+      const searchInput = screen.getByTestId('fieldListFiltersFieldSearch');
+      const a11yDescription = screen.getByTestId('fieldListGrouped__ariaDescription');
+      await user.click(searchInput);
+      expect(searchInput).toHaveAttribute('aria-describedby', a11yDescription.id);
+
+      expect(a11yDescription).toHaveAttribute('aria-live', 'polite');
+      expect(a11yDescription).toHaveTextContent(
+        '1 selected field. 4 popular fields. 3 available fields. 20 empty fields. 2 meta fields.'
+      );
+    });
   });
 
   it('should not have selected fields if no columns selected', async function () {
@@ -385,7 +443,7 @@ describe('discover responsive sidebar', function () {
   });
 
   it('should not calculate counts if documents are not fetched yet', async function () {
-    const propsWithoutDocuments: DiscoverSidebarResponsiveProps = {
+    const propsWithoutDocuments: TestWrapperProps = {
       ...props,
       documents$: new BehaviorSubject({
         fetchStatus: FetchStatus.UNINITIALIZED,
@@ -465,9 +523,9 @@ describe('discover responsive sidebar', function () {
     );
 
     await act(async () => {
-      findTestSubject(comp, 'fieldListFiltersFieldSearch').simulate('change', {
-        target: { value: 'bytes' },
-      });
+      const input = findTestSubject(comp, 'fieldListFiltersFieldSearch').find('input');
+      input.getDOMNode().setAttribute('value', 'byte');
+      input.simulate('change');
     });
 
     expect(findTestSubject(comp, 'fieldListGroupedAvailableFields-count').text()).toBe('1');
@@ -504,6 +562,42 @@ describe('discover responsive sidebar', function () {
 
     expect(mockCalcFieldCounts.mock.calls.length).toBe(1);
   }, 10000);
+
+  it('should restore sidebar state after switching tabs', async function () {
+    const comp = await mountComponent(props, {
+      fieldListUiState: {
+        nameFilter: 'byte',
+        selectedFieldTypes: ['number'],
+        pageSize: 10,
+        scrollTop: 0,
+        accordionState: {},
+      },
+    });
+
+    expect(findTestSubject(comp, 'fieldListGroupedAvailableFields-count').text()).toBe('1');
+    expect(findTestSubject(comp, 'fieldListGrouped__ariaDescription').text()).toBe(
+      '1 popular field. 1 available field. 0 meta fields.'
+    );
+    expect(findTestSubject(comp, 'fieldListFiltersFieldSearch').prop('value')).toBe('byte');
+  });
+
+  it('should restore collapsed state state after switching tabs', async function () {
+    const compCollapsed = await mountComponent(props, {
+      fieldListUiState: {
+        isCollapsed: true,
+      },
+    });
+
+    expect(findTestSubject(compCollapsed, 'fieldList').exists()).toBe(false);
+
+    const compExpanded = await mountComponent(props, {
+      fieldListUiState: {
+        isCollapsed: false,
+      },
+    });
+
+    expect(findTestSubject(compExpanded, 'fieldList').exists()).toBe(true);
+  });
 
   it('should show "Add a field" button to create a runtime field', async () => {
     const services = createMockServices();
@@ -662,7 +756,7 @@ describe('discover responsive sidebar', function () {
 
   it('should render buttons in data view picker correctly', async () => {
     const services = createMockServices();
-    const propsWithPicker: DiscoverSidebarResponsiveProps = {
+    const propsWithPicker: TestWrapperProps = {
       ...props,
       fieldListVariant: 'button-and-flyout-always',
     };
@@ -694,7 +788,7 @@ describe('discover responsive sidebar', function () {
     const services = createMockServices();
     services.dataViewEditor.userPermissions.editDataView = jest.fn(() => false);
     services.dataViewFieldEditor.userPermissions.editIndexPattern = jest.fn(() => false);
-    const propsWithPicker: DiscoverSidebarResponsiveProps = {
+    const propsWithPicker: TestWrapperProps = {
       ...props,
       fieldListVariant: 'button-and-flyout-always',
     };

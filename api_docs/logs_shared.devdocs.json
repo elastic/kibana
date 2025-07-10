@@ -2759,6 +2759,8 @@
             "signature": [
               "{ services: { logSourcesService: ",
               "LogSourcesService",
+              "; logDataService: ",
+              "LogDataService",
               "; }; }"
             ],
             "path": "x-pack/platform/plugins/shared/logs_shared/public/types.ts",
@@ -2820,7 +2822,9 @@
                 "section": "def-common.SerializableRecord",
                 "text": "SerializableRecord"
               },
-              ">): void; }"
+              ">): void; availableIntegrations: (objectType: string, groupId?: string | undefined) => ",
+              "ShareActionIntents",
+              "[]; }"
             ],
             "path": "x-pack/platform/plugins/shared/logs_shared/public/types.ts",
             "deprecated": false,

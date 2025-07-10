@@ -1,14 +1,19 @@
 # Security Search AI Lake tier config
 
-## Disable xpack plugins
+## Cloud settings
+xpack.cloud.serverless.product_tier: search_ai_lake
+
+## Disable plugins
 xpack.osquery.enabled: false
-xpack.maps.enabled: false
 xpack.ml.ad.enabled: false
 xpack.ml.dfa.enabled: false
-xpack.lens.enabled: false
 
-### Disable shared plugins
-visualizations.enabled: false
+## Plugins that are inaccessible in the UI
+xpack.securitySolutionServerless.inaccessibleApps:
+  - dashboards
+  - visualize
+  - maps
+  - lens
 
 ## Disable plugin features
 xpack.alerting.maintenanceWindow.enabled: false
@@ -21,21 +26,25 @@ xpack.features.overrides:
   securitySolutionNotes.hidden: true
   siem.description: null
   siemV2.description: null
+  siemV3.description: null
   securitySolutionSiemMigrations.hidden: true
 
   ## Fine-tune the security solution essentials feature privileges. These feature privilege overrides are set individually for each project type. Also, refer to `serverless.yml` for the project-agnostic overrides.
-  dashboard:
+  siemV3:
     privileges:
-      ## We do not need to compose dashboard from maps and visualizations because these functionalities are disabled in this tier
-      ## Setting to empty array so the values from serverless.yml or serverless.security.yml are overwritten
-      all.composedOf: []
-      read.composedOf: []
-  dashboard_v2:
-    privileges:
-      ## Setting to empty array so the values from serverless.yml or serverless.security.yml are overwritten
-      ## We do not need to compose dashboard from maps and visualizations because these functionalities are disabled in this tier
-      all.composedOf: []
-      read.composedOf: []
+      all.composedOf:
+        ## Limited values so the fields from serverless.yml or serverless.security.yml are overwritten
+        ## We do not need to compose siemV3 from maps and visualizations because these functionalities are disabled in this tier
+        - feature: "discover_v2"
+          privileges: [ "all" ]
+          ## We need limited access to fleet (v1) in order to use integrations
+        - feature: "fleet"
+          privileges: [ "all" ]
+      read.composedOf:
+        - feature: "discover_v2"
+          privileges: [ "read" ]
+        - feature: "fleet"
+          privileges: [ "read" ]
   siemV2:
     privileges:
       all.composedOf:
@@ -43,12 +52,13 @@ xpack.features.overrides:
         ## We do not need to compose siemV2 from maps and visualizations because these functionalities are disabled in this tier
         - feature: "discover_v2"
           privileges: [ "all" ]
-        - feature: "dashboard_v2"
+          ## We need limited access to fleet (v1) in order to use integrations
+        - feature: "fleet"
           privileges: [ "all" ]
       read.composedOf:
         - feature: "discover_v2"
           privileges: [ "read" ]
-        - feature: "dashboard_v2"
+        - feature: "fleet"
           privileges: [ "read" ]
   siem:
     privileges:
@@ -57,21 +67,20 @@ xpack.features.overrides:
         ## We do not need to compose siemV2 from maps and visualizations because these functionalities are disabled in this tier
         - feature: "discover_v2"
           privileges: [ "all" ]
-        - feature: "dashboard_v2"
-          privileges: [ "all" ]
         - feature: "savedQueryManagement"
           privileges: [ "all" ]
       read.composedOf:
         - feature: "discover_v2"
           privileges: [ "read" ]
-        - feature: "dashboard_v2"
-          privileges: [ "read" ]
         - feature: "savedQueryManagement"
           privileges: [ "read" ]
+
 # Custom integrations/fleet settings
 xpack.fleet.agentless.isDefault: true
+xpack.fleet.hideDashboards: true
 xpack.fleet.integrationsHomeOverride: '/app/security/configurations/integrations'
 xpack.fleet.prereleaseEnabledByDefault: true
+xpack.fleet.internal.registry.searchAiLakePackageAllowlistEnabled: true
 
 # Pin the prebuilt rules package version to the version that contains promotion rules
 xpack.securitySolution.prebuiltRulesPackageVersion: '9.0.5-beta.1'

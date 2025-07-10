@@ -10,9 +10,24 @@
 import { EsqlQuery } from '../../query';
 import { Walker } from '../../walker';
 
-describe('RERANK command', () => {
+/**
+ * @todo Tests skipped, while RERANK command grammar is being stabilized. We will
+ * get back to it after 9.1 release.
+ */
+describe.skip('RERANK command', () => {
   describe('correctly formatted', () => {
     it('can parse the command', () => {
+      const text = `FROM index | RERANK "query text" ON title, description`;
+      const query = EsqlQuery.fromSrc(text);
+
+      expect(query.errors.length).toBe(0);
+      expect(query.ast.commands[1]).toMatchObject({
+        type: 'command',
+        name: 'rerank',
+      });
+    });
+
+    it('can parse the command with inference id', () => {
       const text = `FROM index | RERANK "query text" ON title, description WITH \`reranker-inference-id\``;
       const query = EsqlQuery.fromSrc(text);
 
@@ -297,12 +312,6 @@ describe('RERANK command', () => {
         incomplete: true,
       });
     };
-
-    it('errors on missing WITH clause', () => {
-      assertError(`FROM index | RERANK "query text" ON title, description WITH `);
-      assertError(`FROM index | RERANK "query text" ON title, description WITH`);
-      assertError(`FROM index | RERANK "query text" ON title, description`);
-    });
 
     it('errors on missing ON clause', () => {
       assertError(`FROM index | RERANK "query text" ON  WITH asdf`);

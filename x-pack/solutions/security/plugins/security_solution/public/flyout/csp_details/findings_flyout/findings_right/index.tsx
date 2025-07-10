@@ -10,20 +10,12 @@ import { EuiFlexGroup, EuiFlexItem, EuiText, EuiSpacer, EuiFlyoutFooter } from '
 import type { FindingsMisconfigurationPanelExpandableFlyoutProps } from '@kbn/cloud-security-posture';
 import { CspEvaluationBadge } from '@kbn/cloud-security-posture';
 import { i18n } from '@kbn/i18n';
-import { useGetNavigationUrlParams } from '@kbn/cloud-security-posture/src/hooks/use_get_navigation_url_params';
-import { METRIC_TYPE } from '@kbn/analytics';
-import {
-  uiMetricService,
-  NAV_TO_FINDINGS_BY_RULE_NAME_FROM_ENTITY_FLYOUT,
-} from '@kbn/cloud-security-posture-common/utils/ui_metrics';
-import { SecurityPageName } from '@kbn/deeplinks-security';
 import { FlyoutNavigation } from '../../../shared/components/flyout_navigation';
 import { FlyoutHeader } from '../../../shared/components/flyout_header';
 import { useKibana } from '../../../../common/lib/kibana';
 import { PreferenceFormattedDate } from '../../../../common/components/formatted_date';
 import { FlyoutTitle } from '../../../shared/components/flyout_title';
 import { FlyoutBody } from '../../../shared/components/flyout_body';
-import { SecuritySolutionLinkAnchor } from '../../../../common/components/links';
 
 export const FindingsMisconfigurationPanel = ({
   resourceId,
@@ -33,20 +25,9 @@ export const FindingsMisconfigurationPanel = ({
   const { cloudSecurityPosture } = useKibana().services;
   const CspFlyout = cloudSecurityPosture.getCloudSecurityPostureMisconfigurationFlyout();
 
-  const getNavUrlParams = useGetNavigationUrlParams();
-  const getFindingsPageUrlFilteredByRuleAndResourceId = (
-    findingRuleId: string,
-    findingResourceId: string
-  ) => {
-    return getNavUrlParams(
-      { 'rule.id': findingRuleId, 'resource.id': findingResourceId },
-      'configurations'
-    );
-  };
-
   return (
     <>
-      <FlyoutNavigation flyoutIsExpandable={false} />
+      <FlyoutNavigation flyoutIsExpandable={false} isPreviewMode={isPreviewMode} />
       <CspFlyout.Component ruleId={ruleId} resourceId={resourceId}>
         {({ finding, createRuleFn }) => {
           return (
@@ -70,27 +51,7 @@ export const FindingsMisconfigurationPanel = ({
                     </EuiFlexItem>
                   )}
                   <EuiFlexItem>
-                    {isPreviewMode ? (
-                      <SecuritySolutionLinkAnchor
-                        deepLinkId={SecurityPageName.cloudSecurityPostureFindings}
-                        path={`${getFindingsPageUrlFilteredByRuleAndResourceId(
-                          finding.rule.id,
-                          finding.resource.id
-                        )}`}
-                        target={'_blank'}
-                        external={false}
-                        onClick={() => {
-                          uiMetricService.trackUiMetric(
-                            METRIC_TYPE.CLICK,
-                            NAV_TO_FINDINGS_BY_RULE_NAME_FROM_ENTITY_FLYOUT
-                          );
-                        }}
-                      >
-                        <FlyoutTitle title={finding.rule.name} isLink />
-                      </SecuritySolutionLinkAnchor>
-                    ) : (
-                      <FlyoutTitle title={finding.rule.name} />
-                    )}
+                    <FlyoutTitle title={finding.rule.name} />
                   </EuiFlexItem>
                 </EuiFlexGroup>
                 <CspFlyout.Header finding={finding} />

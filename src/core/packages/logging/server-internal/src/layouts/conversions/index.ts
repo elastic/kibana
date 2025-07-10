@@ -14,4 +14,5 @@ export {
   DateConversion,
   MessageConversion,
   MetaConversion,
+  ErrorConversion,
 } from '@kbn/core-logging-common-internal';

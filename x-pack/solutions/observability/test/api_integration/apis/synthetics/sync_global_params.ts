@@ -136,6 +136,7 @@ export default function ({ getService }: FtrProviderContext) {
           [ConfigKey.MONITOR_QUERY_ID]: apiResponse.body.id,
           [ConfigKey.CONFIG_ID]: apiResponse.body.id,
           locations: [LOCAL_LOCATION, pvtLoc],
+          spaces: ['default'],
         })
       );
       newMonitorId = apiResponse.rawBody.id;
@@ -172,6 +173,13 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'true')
         .send({ key: 'test', value: 'http://proxy.com' });
 
+      /*
+       * Creating a global parameter kicks off an asynchronous background task.
+       * We pause for 5 seconds to let that task finish before creating monitors that reference the param;
+       * if it’s still running when the monitor is added, Kibana would not schedule a second sync task.
+       */
+      await new Promise((resolve) => setTimeout(resolve, 5000));
+
       expect(apiResponse.status).eql(200);
     });
 
@@ -186,15 +194,6 @@ export default function ({ getService }: FtrProviderContext) {
       apiResponse.body.forEach(({ key, value }: SyntheticsParams) => {
         params[key] = value;
       });
-    });
-
-    it('sync global params', async () => {
-      const apiResponse = await supertestAPI
-        .get(SYNTHETICS_API_URLS.SYNC_GLOBAL_PARAMS)
-        .set('kbn-xsrf', 'true')
-        .send({ key: 'test', value: 'test' });
-
-      expect(apiResponse.status).eql(200);
     });
 
     it('added params to for previously added integration', async () => {
@@ -244,6 +243,7 @@ export default function ({ getService }: FtrProviderContext) {
           [ConfigKey.MONITOR_QUERY_ID]: apiResponse.body.id,
           [ConfigKey.CONFIG_ID]: apiResponse.body.id,
           locations: [LOCAL_LOCATION, pvtLoc],
+          spaces: ['default'],
         })
       );
       newHttpMonitorId = apiResponse.rawBody.id;
@@ -301,11 +301,6 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
 
       expect(getResponseAfterDelete.body.length).eql(0);
-
-      await supertestAPI
-        .get(SYNTHETICS_API_URLS.SYNC_GLOBAL_PARAMS)
-        .set('kbn-xsrf', 'true')
-        .expect(200);
 
       const apiResponse = await supertestAPI.get(
         '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'

@@ -101,6 +101,8 @@ export interface CloudSecurityDataTableProps {
    * Specify if distribution bar is shown on data table, used to calculate height of data table in virtualized mode
    */
   hasDistributionBar?: boolean;
+  /* Specify Flyout type so the expandable API hook knows what parameter it uses to call the flout */
+  flyoutType?: 'misconfiguration' | 'vulnerability';
 }
 
 export const CloudSecurityDataTable = ({
@@ -118,6 +120,7 @@ export const CloudSecurityDataTable = ({
   createRuleFn,
   columnHeaders,
   hasDistributionBar = true,
+  flyoutType = 'misconfiguration',
   ...rest
 }: CloudSecurityDataTableProps) => {
   const {
@@ -247,7 +250,7 @@ export const CloudSecurityDataTable = ({
     return customCellRenderer(rows);
   }, [customCellRenderer, rows]);
 
-  const { expandedDoc, onExpandDocClick } = useExpandableFlyoutCsp();
+  const { expandedDoc, onExpandDocClick } = useExpandableFlyoutCsp(flyoutType);
 
   if (!onExpandDocClick) {
     return <></>;
@@ -325,7 +328,7 @@ export const CloudSecurityDataTable = ({
           height: computeDataTableRendering.wrapperHeight,
         }}
       >
-        <EuiProgress size="xs" color="accent" style={loadingStyle} />
+        <EuiProgress size="xs" color="accent" css={loadingStyle} />
         <UnifiedDataTable
           key={computeDataTableRendering.mode}
           className={styles.gridStyle}

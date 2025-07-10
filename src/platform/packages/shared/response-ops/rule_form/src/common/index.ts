@@ -8,3 +8,4 @@
  */
 
 export * from './types';
+export * from './services/dashboard_service';

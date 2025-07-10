@@ -7,8 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataTableRecord, TransactionDocumentOverview } from '../types';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { fieldConstants } from '..';
+import type { DataTableRecord, TransactionDocumentOverview } from '../types';
+import { getFormattedFields } from './get_formatted_fields';
 import { getFlattenedFields } from './get_flattened_fields';
 
 const fields: Array<keyof TransactionDocumentOverview> = [
@@ -28,6 +31,15 @@ const fields: Array<keyof TransactionDocumentOverview> = [
   fieldConstants.PROCESSOR_EVENT_FIELD,
 ];
 
-export function getTransactionDocumentOverview(doc: DataTableRecord): TransactionDocumentOverview {
+export function getTransactionDocumentOverview(
+  doc: DataTableRecord,
+  { dataView, fieldFormats }: { dataView: DataView; fieldFormats: FieldFormatsStart }
+): TransactionDocumentOverview {
+  return getFormattedFields<TransactionDocumentOverview>(doc, fields, { dataView, fieldFormats });
+}
+
+export function getFlattenedTransactionDocumentOverview(
+  doc: DataTableRecord
+): TransactionDocumentOverview {
   return getFlattenedFields<TransactionDocumentOverview>(doc, fields);
 }

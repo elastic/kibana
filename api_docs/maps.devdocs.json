@@ -2924,14 +2924,6 @@
             "section": "def-public.MapSerializedState",
             "text": "MapSerializedState"
           },
-          ", ",
-          {
-            "pluginId": "maps",
-            "scope": "public",
-            "docId": "kibMapsPluginApi",
-            "section": "def-public.MapSerializedState",
-            "text": "MapSerializedState"
-          },
           "> & Partial<{ enhancements: { dynamicActions: ",
           {
             "pluginId": "uiActionsEnhanced",
@@ -3124,11 +3116,25 @@
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
             "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.SerializedTimeRange",
+            "text": "SerializedTimeRange"
+          },
+          " & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
             "section": "def-public.SerializedTitles",
             "text": "SerializedTitles"
           },
           " & Partial<",
-          "DynamicActionsSerializedState",
+          {
+            "pluginId": "embeddableEnhanced",
+            "scope": "public",
+            "docId": "kibEmbeddableEnhancedPluginApi",
+            "section": "def-public.DynamicActionsSerializedState",
+            "text": "DynamicActionsSerializedState"
+          },
           "> & { attributes?: ",
           "MapAttributes",
           " | undefined; savedObjectId?: string | undefined; isLayerTOCOpen?: boolean | undefined; openTOCDetails?: string[] | undefined; mapCenter?: ",
@@ -3137,15 +3143,7 @@
           "MapExtent",
           " | undefined; mapSettings?: Partial<",
           "MapSettings",
-          "> | undefined; hiddenLayers?: string[] | undefined; timeRange?: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.TimeRange",
-            "text": "TimeRange"
-          },
-          " | undefined; filterByMapExtent?: boolean | undefined; isMovementSynchronized?: boolean | undefined; }"
+          "> | undefined; hiddenLayers?: string[] | undefined; filterByMapExtent?: boolean | undefined; isMovementSynchronized?: boolean | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/maps/public/react_embeddable/types.ts",
         "deprecated": false,

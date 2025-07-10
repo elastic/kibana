@@ -966,13 +966,30 @@
     "misc": [
       {
         "parentPluginId": "@kbn/core-saved-objects-server-internal",
+        "id": "def-server.REMOVED_TYPES",
+        "type": "Array",
+        "tags": [],
+        "label": "REMOVED_TYPES",
+        "description": [
+          "\nTypes that are no longer registered and need to be removed\nAs of 8.8, no new types are allowed to be removed.\nRemoving saved object types is not backward compatible"
+        ],
+        "signature": [
+          "string[]"
+        ],
+        "path": "src/core/packages/saved-objects/server-internal/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server-internal",
         "id": "def-server.SAVED_OBJECT_TYPES_COUNT",
         "type": "number",
         "tags": [],
         "label": "SAVED_OBJECT_TYPES_COUNT",
         "description": [],
         "signature": [
-          "130"
+          "137"
         ],
         "path": "src/core/packages/saved-objects/server-internal/src/object_types/index.ts",
         "deprecated": false,

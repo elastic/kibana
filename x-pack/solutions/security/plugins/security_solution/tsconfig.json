@@ -8,16 +8,19 @@
     "public/**/*",
     "server/**/*",
     "scripts/**/*",
-    "ui_tests/**/*",
+    "test/scout/**/*",
     // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
     "common/**/*.json",
     "server/**/*.json",
     "scripts/**/*.json",
     "public/**/*.json",
     "../../../../../typings/**/*",
-    "emotion.d.ts"
+    "emotion.d.ts" ],
+  "exclude": [
+    "target/**/*",
+    "**/cypress/**",
+    "public/management/cypress.config.ts"
   ],
-  "exclude": ["target/**/*", "**/cypress/**", "public/management/cypress.config.ts"],
   "kbn_references": [
     "@kbn/core",
     {
@@ -49,7 +52,6 @@
     "@kbn/session-view-plugin",
     "@kbn/security-plugin",
     "@kbn/spaces-plugin",
-    "@kbn/threat-intelligence-plugin",
     "@kbn/timelines-plugin",
     "@kbn/es-query",
     "@kbn/utility-types",
@@ -245,9 +247,14 @@
     "@kbn/security-plugin-types-common",
     "@kbn/management-settings-ids",
     "@kbn/inference-endpoint-ui-common",
+    "@kbn/core-ui-settings-browser",
     "@kbn/core-chrome-browser",
     "@kbn/actions-types",
     "@kbn/triggers-actions-ui-types",
     "@kbn/unified-histogram",
+    "@kbn/react-kibana-context-theme",
+    "@kbn/elastic-assistant-shared-state",
+    "@kbn/elastic-assistant-shared-state-plugin",
+    "@kbn/spaces-utils",
   ]
 }

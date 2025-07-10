@@ -21,8 +21,8 @@ import { ControlFactory } from '../types';
 import { uiActionsService } from '../../services/kibana_services';
 import {
   defaultControlComparators,
-  initializeDefaultControlApi,
-} from '../initialize_default_control_api';
+  initializeDefaultControlManager,
+} from '../default_control_manager';
 import { initializeESQLControlSelections, selectionComparators } from './esql_control_selections';
 
 const displayName = i18n.translate('controls.esqlValuesControl.displayName', {
@@ -36,8 +36,11 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
     getIconType: () => 'editorChecklist',
     getDisplayName: () => displayName,
     buildControl: async ({ initialState, finalizeApi, uuid, controlGroupApi }) => {
-      const defaultControl = initializeDefaultControlApi(initialState);
-      const selections = initializeESQLControlSelections(initialState);
+      const defaultControlManager = initializeDefaultControlManager(initialState);
+      const selections = initializeESQLControlSelections(
+        initialState,
+        controlGroupApi.controlFetch$(uuid)
+      );
 
       const closeOverlay = () => {
         if (apiHasParentApi(controlGroupApi) && tracksOverlays(controlGroupApi.parentApi)) {
@@ -55,10 +58,9 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
       };
 
       function serializeState() {
-        const { rawState: defaultControlState } = defaultControl.getLatestState();
         return {
           rawState: {
-            ...defaultControlState,
+            ...defaultControlManager.getLatestState(),
             ...selections.getLatestState(),
           },
           references: [],
@@ -69,7 +71,7 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
         uuid,
         parentApi: controlGroupApi,
         serializeState,
-        anyStateChange$: merge(defaultControl.anyStateChange$, selections.anyStateChange$),
+        anyStateChange$: merge(defaultControlManager.anyStateChange$, selections.anyStateChange$),
         getComparators: () => {
           return {
             ...defaultControlComparators,
@@ -77,14 +79,14 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
           };
         },
         onReset: (lastSaved) => {
-          defaultControl.reinitializeState(lastSaved?.rawState);
+          defaultControlManager.reinitializeState(lastSaved?.rawState);
           selections.reinitializeState(lastSaved?.rawState);
         },
       });
 
       const api = finalizeApi({
         ...unsavedChangesApi,
-        ...defaultControl.api,
+        ...defaultControlManager.api,
         ...selections.api,
         defaultTitle$: new BehaviorSubject<string | undefined>(initialState.title),
         isEditingEnabled: () => true,
@@ -92,7 +94,7 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
         onEdit: async () => {
           const state = {
             ...initialState,
-            ...defaultControl.getLatestState().rawState,
+            ...defaultControlManager.getLatestState(),
           };
           const variablesInParent = apiPublishesESQLVariables(api.parentApi)
             ? api.parentApi.esqlVariables$.value

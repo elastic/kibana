@@ -8,6 +8,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { CoreStart } from '@kbn/core/public';
 import { PerformanceContextProvider } from '@kbn/ebt-tools';
 import React, { useMemo } from 'react';
+import { DATASET_QUALITY_ALL_SIGNALS_ID } from '../../../common/constants';
 import { DatasetQualityController } from '../../controller/dataset_quality';
 import SummaryPanelProvider from '../../hooks/use_summary_panel';
 import { ITelemetryClient } from '../../services/telemetry';
@@ -29,7 +30,6 @@ export interface CreateDatasetQualityArgs {
   core: CoreStart;
   plugins: DatasetQualityStartDeps;
   telemetryClient: ITelemetryClient;
-  isFailureStoreEnabled: boolean;
 }
 
 export const DatasetQuality = ({
@@ -37,7 +37,6 @@ export const DatasetQuality = ({
   core,
   plugins,
   telemetryClient,
-  isFailureStoreEnabled,
 }: DatasetQualityProps & CreateDatasetQualityArgs) => {
   const KibanaContextProviderForPlugin = useKibanaContextForPluginProvider(core, plugins);
 
@@ -45,9 +44,11 @@ export const DatasetQuality = ({
     () => ({
       service: controller.service,
       telemetryClient,
-      isFailureStoreEnabled,
+      isDatasetQualityAllSignalsAvailable: core.pricing.isFeatureAvailable(
+        DATASET_QUALITY_ALL_SIGNALS_ID
+      ),
     }),
-    [controller.service, isFailureStoreEnabled, telemetryClient]
+    [controller.service, telemetryClient, core.pricing]
   );
 
   return (

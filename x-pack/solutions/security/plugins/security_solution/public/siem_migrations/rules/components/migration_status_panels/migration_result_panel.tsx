@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import moment from 'moment';
 import {
   EuiFlexGroup,
@@ -22,9 +22,9 @@ import {
   EuiBadge,
   type EuiBasicTableColumn,
   useEuiTheme,
-  COLOR_MODES_STANDARD,
 } from '@elastic/eui';
 import { Chart, BarSeries, Settings, ScaleType } from '@elastic/charts';
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
@@ -43,6 +43,7 @@ import { RuleTranslationResult } from '../../../../../common/siem_migrations/con
 import * as i18n from './translations';
 import { RuleMigrationsUploadMissingPanel } from './upload_missing_panel';
 import { RuleMigrationsLastError } from './last_error';
+import { MigrationPanelTitle } from './migration_panel_title';
 
 const headerStyle = css`
   &:hover {
@@ -52,8 +53,8 @@ const headerStyle = css`
 `;
 
 const useCompleteBadgeStyles = () => {
-  const { euiTheme, colorMode } = useEuiTheme();
-  const isDarkMode = colorMode === COLOR_MODES_STANDARD.dark;
+  const { euiTheme } = useEuiTheme();
+  const isDarkMode = useKibanaIsDarkMode();
   return css`
     background-color: ${isDarkMode
       ? euiTheme.colors.success
@@ -76,16 +77,18 @@ export const MigrationResultPanel = React.memo<MigrationResultPanelProps>(
 
     const completeBadgeStyles = useCompleteBadgeStyles();
 
+    const toggleCollapsed = useCallback(() => {
+      onToggleCollapsed(!isCollapsed);
+    }, [isCollapsed, onToggleCollapsed]);
+
     return (
       <EuiPanel hasShadow={false} hasBorder paddingSize="none">
         <EuiPanel hasShadow={false} hasBorder={false} paddingSize="m">
           <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
-            <EuiFlexItem onClick={() => onToggleCollapsed(!isCollapsed)} css={headerStyle}>
+            <EuiFlexItem onClick={toggleCollapsed} css={headerStyle}>
               <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="xs">
                 <EuiFlexItem grow={false}>
-                  <PanelText size="s" semiBold>
-                    <p>{i18n.RULE_MIGRATION_TITLE(migrationStats.number)}</p>
-                  </PanelText>
+                  <MigrationPanelTitle migrationStats={migrationStats} />
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <PanelText size="s" subdued>
@@ -105,7 +108,7 @@ export const MigrationResultPanel = React.memo<MigrationResultPanelProps>(
             <EuiFlexItem grow={false}>
               <EuiButtonIcon
                 iconType={isCollapsed ? 'arrowDown' : 'arrowUp'}
-                onClick={() => onToggleCollapsed(!isCollapsed)}
+                onClick={toggleCollapsed}
                 aria-label={isCollapsed ? i18n.RULE_MIGRATION_EXPAND : i18n.RULE_MIGRATION_COLLAPSE}
               />
             </EuiFlexItem>
@@ -119,9 +122,9 @@ export const MigrationResultPanel = React.memo<MigrationResultPanelProps>(
         >
           <EuiHorizontalRule margin="none" />
           <EuiPanel hasShadow={false} hasBorder={false} paddingSize="m">
-            {migrationStats.last_error && (
+            {migrationStats.last_execution?.error && (
               <>
-                <RuleMigrationsLastError message={migrationStats.last_error} />
+                <RuleMigrationsLastError message={migrationStats.last_execution.error} />
                 <EuiSpacer size="m" />
               </>
             )}
@@ -147,7 +150,7 @@ export const MigrationResultPanel = React.memo<MigrationResultPanelProps>(
                       ) : (
                         translationStats && (
                           <>
-                            <EuiText size="m" style={{ textAlign: 'center' }}>
+                            <EuiText size="m" css={{ textAlign: 'center' }}>
                               <b>{i18n.RULE_MIGRATION_SUMMARY_CHART_TITLE}</b>
                             </EuiText>
                             <TranslationResultsChart translationStats={translationStats} />
@@ -248,7 +251,7 @@ const columns: Array<EuiBasicTableColumn<TranslationResultsTableItem>> = [
     name: i18n.RULE_MIGRATION_TABLE_COLUMN_STATUS,
     render: (title: string, { color }) => (
       <EuiHealth color={color} textSize="xs">
-        {title}
+        <span data-test-subj={`translationStatus-${title}`}>{title} </span>
       </EuiHealth>
     ),
   },
@@ -256,7 +259,11 @@ const columns: Array<EuiBasicTableColumn<TranslationResultsTableItem>> = [
     field: 'value',
     name: i18n.RULE_MIGRATION_TABLE_COLUMN_RULES,
     align: 'right',
-    render: (value: string) => <EuiText size="xs">{value}</EuiText>,
+    render: (value: string, { title }) => (
+      <EuiText size="xs" data-test-subj={`translationStatusCount-${title}`}>
+        {value}
+      </EuiText>
+    ),
   },
 ];
 
@@ -290,6 +297,13 @@ const TranslationResultsTable = React.memo<{
     [translationStats, translationResultColors]
   );
 
-  return <EuiBasicTable items={items} columns={columns} compressed />;
+  return (
+    <EuiBasicTable
+      data-test-subj="translatedResultsTable"
+      items={items}
+      columns={columns}
+      compressed
+    />
+  );
 });
 TranslationResultsTable.displayName = 'TranslationResultsTable';

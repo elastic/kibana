@@ -42,7 +42,7 @@ const styles = {
       ${euiFontSize({ euiTheme } as UseEuiTheme<{}>, 'xs')}
     }
   `,
-  listGroup: ({ euiTheme }: Theme) => css`
+  listGroup: () => css`
     padding-left: 0;
     padding-right: 0;
     gap: 0;
@@ -76,10 +76,11 @@ const someChildIsVisible = (children: ChromeProjectNavigationNode[]) => {
 
 interface Props {
   navNode: ChromeProjectNavigationNode;
+  parentId: string;
   nodeIndex: number;
 }
 
-export const PanelGroup: FC<Props> = ({ navNode, nodeIndex }) => {
+export const PanelGroup: FC<Props> = ({ navNode, parentId, nodeIndex }) => {
   const { id, title, spaceBefore: _spaceBefore, withBadge } = navNode;
   const filteredChildren = navNode.children?.filter((child) => child.sideNavStatus !== 'hidden');
   const hasTitle = !!title && title !== '';
@@ -97,18 +98,21 @@ export const PanelGroup: FC<Props> = ({ navNode, nodeIndex }) => {
     }
   }
 
-  const renderChildren = useCallback(() => {
-    if (!filteredChildren) return null;
+  const renderChildren = useCallback(
+    (parentNode: ChromeProjectNavigationNode) => {
+      if (!filteredChildren) return null;
 
-    return filteredChildren.map((item, i) => {
-      const isItem = item.renderAs === 'item' || !item.children;
-      return isItem ? (
-        <PanelNavItem key={item.id} item={item} />
-      ) : (
-        <PanelGroup navNode={item} key={item.id} nodeIndex={i} />
-      );
-    });
-  }, [filteredChildren]);
+      return filteredChildren.map((item, i) => {
+        const isItem = item.renderAs === 'item' || !item.children;
+        return isItem ? (
+          <PanelNavItem key={item.id} item={item} />
+        ) : (
+          <PanelGroup navNode={item} parentId={parentNode.id} key={item.id} nodeIndex={i} />
+        );
+      });
+    },
+    [filteredChildren]
+  );
 
   if (!filteredChildren?.length || !someChildIsVisible(filteredChildren)) {
     return null;
@@ -130,7 +134,7 @@ export const PanelGroup: FC<Props> = ({ navNode, nodeIndex }) => {
             'data-test-subj': `panelAccordionBtnId-${navNode.id}`,
           }}
         >
-          {renderChildren()}
+          {renderChildren(navNode)}
         </EuiAccordion>
       </>
     );
@@ -140,13 +144,23 @@ export const PanelGroup: FC<Props> = ({ navNode, nodeIndex }) => {
     <div data-test-subj={groupTestSubj} css={styles.panelGroup}>
       {spaceBefore != null && <EuiSpacer size={spaceBefore} />}
       {hasTitle && (
-        <EuiTitle size="xs" css={styles.title} data-test-subj={`panelGroupTitleId-${navNode.id}`}>
+        <EuiTitle
+          size="xs"
+          css={styles.title}
+          id={`panelGroupTitleId-${navNode.id}`}
+          data-test-subj={`panelGroupTitleId-${navNode.id}`}
+        >
           <h2>{title}</h2>
         </EuiTitle>
       )}
       <div style={{ paddingTop: removePaddingTop ? 0 : undefined }}>
-        <EuiListGroup css={[styles.listGroup, styles.listGroupItemButton]}>
-          {renderChildren()}
+        <EuiListGroup
+          css={[styles.listGroup, styles.listGroupItemButton]}
+          aria-labelledby={
+            hasTitle ? `panelGroupTitleId-${navNode.id}` : `panelTitleId-${parentId}`
+          }
+        >
+          {renderChildren(navNode)}
         </EuiListGroup>
       </div>
     </div>

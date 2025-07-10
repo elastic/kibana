@@ -7,11 +7,14 @@
 import { FtrProviderContext } from '../ftr_provider_context';
 import { testHasEmbeddedConsole } from './embedded_console';
 
+const archivedBooksIndex = 'x-pack/test/functional_search/fixtures/search-books';
+const archiveEmptyIndex = 'x-pack/test/functional_search/fixtures/search-empty-index';
+const archiveDenseVectorIndex = 'x-pack/test/functional_search/fixtures/search-national-parks';
+
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects([
     'embeddedConsole',
     'searchIndexDetailsPage',
-    'searchApiKeys',
     'header',
     'common',
     'indexManagement',
@@ -19,15 +22,29 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'solutionNavigation',
   ]);
   const es = getService('es');
+  const esArchiver = getService('esArchiver');
   const browser = getService('browser');
-  const retry = getService('retry');
   const spaces = getService('spaces');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
+  const retry = getService('retry');
 
-  const indexName = 'test-my-index';
+  const createIndices = async () => {
+    await esArchiver.load(archivedBooksIndex);
+    await esArchiver.load(archiveDenseVectorIndex);
+    await esArchiver.load(archiveEmptyIndex);
+  };
+  const deleteIndices = async () => {
+    await esArchiver.unload(archivedBooksIndex);
+    await esArchiver.unload(archiveDenseVectorIndex);
+    await esArchiver.unload(archiveEmptyIndex);
+    await esDeleteAllIndices([indexDoesNotExistName]);
+  };
+  const indexWithDataName = 'search-books';
+  const indexWithoutDataName = 'search-empty-index';
+  const indexWithDenseVectorName = 'search-national-parks';
+  const indexDoesNotExistName = 'search-not-found';
 
-  // Failing: See https://github.com/elastic/kibana/issues/206396
-  describe.skip('Search index details page', function () {
+  describe('Search index details page', function () {
     describe('Solution Nav - Search', function () {
       let cleanUpSpace: () => Promise<unknown>;
       let spaceCreated: { id: string } = { id: '' };
@@ -44,20 +61,21 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           solution: 'es',
         }));
 
-        await pageObjects.searchApiKeys.deleteAPIKeys();
-        await es.indices.create({ index: indexName });
+        await createIndices();
       });
 
       after(async () => {
         // Clean up space created
         await cleanUpSpace();
-        await esDeleteAllIndices(indexName);
+        await deleteIndices();
       });
       describe('search index details page', () => {
         before(async () => {
           // Navigate to the spaces management page which will log us in Kibana
           await browser.navigateTo(spaces.getRootUrl(spaceCreated.id));
-          await pageObjects.searchNavigation.navigateToIndexDetailPage(indexName);
+          await pageObjects.searchNavigation.navigateToIndexDetailPage(indexWithoutDataName);
+          await pageObjects.searchIndexDetailsPage.expectIndexDetailsPageIsLoaded();
+          await pageObjects.searchIndexDetailsPage.dismissIngestTourIfShown();
         });
         it('can load index detail page', async () => {
           await pageObjects.searchIndexDetailsPage.expectIndexDetailPageHeader();
@@ -69,8 +87,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await testHasEmbeddedConsole(pageObjects);
         });
         it('should have breadcrumbs', async () => {
-          await pageObjects.searchIndexDetailsPage.expectIndexNametoBeInBreadcrumbs(indexName);
-          await pageObjects.searchIndexDetailsPage.expectBreadcrumbsToBeAvailable('Content');
+          await pageObjects.searchIndexDetailsPage.expectIndexNametoBeInBreadcrumbs(
+            indexWithoutDataName
+          );
+          await pageObjects.searchIndexDetailsPage.expectBreadcrumbsToBeAvailable('Build');
           await pageObjects.searchIndexDetailsPage.expectBreadcrumbsToBeAvailable(
             'Index Management'
           );
@@ -82,48 +102,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await pageObjects.searchIndexDetailsPage.clickOnBreadcrumb('Index Management');
           await pageObjects.indexManagement.expectToBeOnIndexManagement();
 
-          await pageObjects.searchNavigation.navigateToIndexDetailPage(indexName);
+          await pageObjects.searchNavigation.navigateToIndexDetailPage(indexWithoutDataName);
         });
 
         it('should have connection details', async () => {
           await pageObjects.searchIndexDetailsPage.expectConnectionDetails();
         });
 
-        describe('check code example texts', () => {
-          const indexNameCodeExample = 'test-my-index2';
-          before(async () => {
-            await es.indices.create({ index: indexNameCodeExample });
-            await pageObjects.searchNavigation.navigateToIndexDetailPage(indexNameCodeExample);
-          });
-
-          after(async () => {
-            await esDeleteAllIndices(indexNameCodeExample);
-          });
-
-          it('should have basic example texts', async () => {
-            await pageObjects.searchIndexDetailsPage.expectHasSampleDocuments();
-          });
-        });
-
-        describe('API key details', () => {
-          it('should show api key', async () => {
-            await pageObjects.searchApiKeys.deleteAPIKeys();
-            await pageObjects.searchNavigation.navigateToIndexDetailPage(indexName);
-            // sometimes the API key exists in the cluster and its lost in sessionStorage
-            // if fails we retry to delete the API key and refresh the browser
-            await retry.try(
-              async () => {
-                await pageObjects.searchApiKeys.expectAPIKeyExists();
-              },
-              async () => {
-                await pageObjects.searchApiKeys.deleteAPIKeys();
-                await browser.refresh();
-              }
-            );
-            await pageObjects.searchApiKeys.expectAPIKeyAvailable();
-            const apiKey = await pageObjects.searchApiKeys.getAPIKeyFromUI();
-            await pageObjects.searchIndexDetailsPage.expectAPIKeyToBeVisibleInCodeBlock(apiKey);
-          });
+        it('should have basic example texts', async () => {
+          await pageObjects.searchIndexDetailsPage.expectHasSampleDocuments();
         });
 
         it('should have quick stats', async () => {
@@ -131,17 +118,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await pageObjects.searchIndexDetailsPage.expectQuickStatsToHaveIndexStatus();
           await pageObjects.searchIndexDetailsPage.expectQuickStatsToHaveIndexStorage('227b');
           await pageObjects.searchIndexDetailsPage.expectQuickStatsAIMappings();
-          await es.indices.putMapping({
-            index: indexName,
-            properties: {
-              my_field: {
-                type: 'dense_vector',
-                dims: 3,
-              },
-            },
-          });
-          await pageObjects.searchNavigation.navigateToIndexDetailPage(indexName);
-          await pageObjects.searchIndexDetailsPage.expectQuickStatsAIMappingsToHaveVectorFields();
         });
 
         it('should show code examples for adding documents', async () => {
@@ -164,14 +140,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         describe('With data', () => {
           before(async () => {
-            await es.index({
-              index: indexName,
-              refresh: true,
-              body: {
-                my_field: [1, 0, 1],
-              },
-            });
-            await pageObjects.searchNavigation.navigateToIndexDetailPage(indexName);
+            await pageObjects.searchNavigation.navigateToIndexDetailPage(indexWithDataName);
           });
           it('should have index documents', async () => {
             await pageObjects.searchIndexDetailsPage.expectHasIndexDocuments();
@@ -183,8 +152,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             await pageObjects.searchIndexDetailsPage.clickMoreOptionsActionsButton();
             await pageObjects.searchIndexDetailsPage.expectAPIReferenceDocLinkExistsInMoreOptions();
           });
-          it('should have one document in quick stats', async () => {
-            await pageObjects.searchIndexDetailsPage.expectQuickStatsToHaveDocumentCount(1);
+          it('should have documents in quick stats', async () => {
+            await pageObjects.searchIndexDetailsPage.expectQuickStatsToHaveDocumentCount(46);
           });
           it('should have with data tabs', async () => {
             await pageObjects.searchIndexDetailsPage.expectTabsExists();
@@ -206,24 +175,35 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
             // re-open page to refresh queries for test (these will auto-refresh,
             // but waiting for that will make this test flakey)
-            await pageObjects.searchNavigation.navigateToIndexDetailPage(indexName);
-            await pageObjects.searchIndexDetailsPage.expectAddDocumentCodeExamples();
-            await pageObjects.searchIndexDetailsPage.expectQuickStatsToHaveDocumentCount(0);
+            await browser.refresh();
+            await retry.tryWithRetries(
+              'Wait for document count to update',
+              async () => {
+                await pageObjects.searchIndexDetailsPage.expectQuickStatsToHaveDocumentCount(45);
+              },
+              {
+                retryCount: 5,
+                retryDelay: 1000,
+              },
+              async () => {
+                await browser.refresh();
+              }
+            );
+          });
+        });
+        describe('With dense vecotrs', () => {
+          it('should have ai quick stats for index with semantic mappings', async () => {
+            await pageObjects.searchNavigation.navigateToIndexDetailPage(indexWithDenseVectorName);
+            await pageObjects.searchIndexDetailsPage.expectQuickStatsAIMappingsToHaveVectorFields();
           });
         });
         describe('has index actions enabled', () => {
           before(async () => {
-            await es.index({
-              index: indexName,
-              body: {
-                my_field: [1, 0, 1],
-              },
-            });
-            await pageObjects.searchNavigation.navigateToIndexDetailPage(indexName);
+            await pageObjects.searchNavigation.navigateToIndexDetailPage(indexWithDenseVectorName);
           });
 
           beforeEach(async () => {
-            await pageObjects.searchNavigation.navigateToIndexDetailPage(indexName);
+            await pageObjects.searchNavigation.navigateToIndexDetailPage(indexWithDenseVectorName);
           });
 
           it('delete document button is enabled', async () => {
@@ -248,22 +228,35 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         describe('page loading error', () => {
           before(async () => {
-            await pageObjects.searchNavigation.navigateToIndexDetailPage(indexName);
-            await esDeleteAllIndices(indexName);
+            // manually navigate to index detail page for an index that doesn't exist
+            await browser.navigateTo(
+              `${spaces.getRootUrl(
+                spaceCreated.id
+              )}/app/elasticsearch/indices/index_details/${indexDoesNotExistName}/data`
+            );
           });
           it('has page load error section', async () => {
             await pageObjects.searchIndexDetailsPage.expectPageLoadErrorExists();
             await pageObjects.searchIndexDetailsPage.expectIndexNotFoundErrorExists();
           });
           it('reload button shows details page again', async () => {
-            await es.indices.create({ index: indexName });
-            await pageObjects.searchIndexDetailsPage.clickPageReload();
-            await pageObjects.searchIndexDetailsPage.expectIndexDetailPageHeader();
+            await es.indices.create({ index: indexDoesNotExistName });
+            await retry.tryForTime(
+              30 * 1000,
+              async () => {
+                if (await pageObjects.searchIndexDetailsPage.pageReloadButtonIsVisible()) {
+                  await pageObjects.searchIndexDetailsPage.clickPageReload();
+                }
+                await pageObjects.searchIndexDetailsPage.expectIndexDetailPageHeader();
+              },
+              undefined,
+              1000
+            );
           });
         });
         describe('Index more options menu', () => {
           before(async () => {
-            await pageObjects.searchNavigation.navigateToIndexDetailPage(indexName);
+            await pageObjects.searchNavigation.navigateToIndexDetailPage(indexWithDataName);
           });
           it('shows action menu in actions popover', async () => {
             await pageObjects.searchIndexDetailsPage.expectMoreOptionsActionButtonExists();

@@ -31,6 +31,9 @@ describe('actionTypeRegistry.get() works', () => {
   test('connector type static data is as expected', () => {
     expect(actionTypeModel.id).toEqual(ACTION_TYPE_ID);
     expect(actionTypeModel.selectMessage).toBe(
+      'Send requests to AI providers such as Amazon Bedrock, OpenAI and more.'
+    );
+    expect(actionTypeModel.selectMessagePreconfigured).toBe(
       'Use the Elastic Managed LLM for your chat and RAG use cases.'
     );
     expect(actionTypeModel.actionTypeTitle).toBe('AI Connector');

@@ -7,12 +7,15 @@
 
 import expect from '@kbn/expect';
 import originalExpect from 'expect';
+import { IndexTemplateName } from '@kbn/apm-synthtrace/src/lib/logs/custom_logsdb_index_templates';
 import { DatasetQualityFtrProviderContext } from './config';
 import {
+  createFailedLogRecord,
   datasetNames,
   defaultNamespace,
   getInitialTestLogs,
   getLogsForDataset,
+  processors,
   productionNamespace,
 } from './data';
 
@@ -24,6 +27,8 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
     'observabilityLogsExplorer',
     'datasetQuality',
   ]);
+  const retry = getService('retry');
+  const testSubjects = getService('testSubjects');
   const synthtrace = getService('logSynthtraceEsClient');
   const to = '2024-01-01T12:00:00.000Z';
   const apacheAccessDatasetName = 'apache.access';
@@ -33,11 +38,29 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
     version: '1.14.0',
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/213289
-  describe.skip('Dataset quality table', () => {
+  const failedDatasetName = datasetNames[1];
+
+  describe('Dataset quality table', function () {
+    // This disables the forward-compatibility test for Elasticsearch 8.19 with Kibana and ES 9.0.
+    // These versions are not expected to work together. Note: Failure store is not available in ES 9.0,
+    // and running these tests will result in an "unknown index privilege [read_failure_store]" error.
+    this.onlyEsVersion('8.19 || >=9.1');
+
     before(async () => {
       // Install Integration and ingest logs for it
       await PageObjects.observabilityLogsExplorer.installPackage(pkg);
+
+      await synthtrace.createCustomPipeline(processors, 'synth.2@pipeline');
+      await synthtrace.createComponentTemplate({
+        name: 'synth.2@custom',
+        dataStreamOptions: {
+          failure_store: {
+            enabled: true,
+          },
+        },
+      });
+      await synthtrace.createIndexTemplate(IndexTemplateName.Synht2);
+
       // Ingest basic logs
       await synthtrace.index([
         // Ingest basic logs
@@ -56,6 +79,16 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
           dataset: apacheAccessDatasetName,
           namespace: productionNamespace,
         }),
+        createFailedLogRecord({
+          to: new Date().toISOString(),
+          count: 2,
+          dataset: failedDatasetName,
+        }),
+        getLogsForDataset({
+          to: new Date().toISOString(),
+          count: 4,
+          dataset: failedDatasetName,
+        }),
       ]);
       await PageObjects.datasetQuality.navigateTo();
     });
@@ -63,6 +96,9 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
     after(async () => {
       await synthtrace.clean();
       await PageObjects.observabilityLogsExplorer.uninstallPackage(pkg);
+      await synthtrace.deleteIndexTemplate(IndexTemplateName.Synht2);
+      await synthtrace.deleteComponentTemplate('synth.2@custom');
+      await synthtrace.deleteCustomPipeline('synth.2@pipeline');
     });
 
     it('shows sort by dataset name and show namespace', async () => {
@@ -91,14 +127,15 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
       const lastActivityCol = cols[PageObjects.datasetQuality.texts.datasetLastActivityColumn];
       const activityCells = await lastActivityCol.getCellTexts();
-      const lastActivityCell = activityCells[activityCells.length - 1];
-      const restActivityCells = activityCells.slice(0, -1);
+      const degradedActivityCell = activityCells[activityCells.length - 1];
+      const failedActivityCell = activityCells[activityCells.length - 2];
+      const restActivityCells = activityCells.slice(0, -2);
 
-      // The first cell of lastActivity should have data
-      expect(lastActivityCell).to.not.eql(PageObjects.datasetQuality.texts.noActivityText);
+      // The following lastActivity cells should have data
+      expect(degradedActivityCell).to.not.eql(PageObjects.datasetQuality.texts.noActivityText);
+      expect(failedActivityCell).to.not.eql(PageObjects.datasetQuality.texts.noActivityText);
       // The rest of the rows must show no activity
       expect(restActivityCells).to.eql([
-        PageObjects.datasetQuality.texts.noActivityText,
         PageObjects.datasetQuality.texts.noActivityText,
         PageObjects.datasetQuality.texts.noActivityText,
       ]);
@@ -117,7 +154,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
       const sizeColCellTexts = await cols.Size.getCellTexts();
       const sizeGreaterThanZero = sizeColCellTexts[3];
-      const sizeEqualToZero = sizeColCellTexts[2];
+      const sizeEqualToZero = sizeColCellTexts[1];
 
       expect(sizeGreaterThanZero).to.not.eql('0.0 KB');
       expect(sizeEqualToZero).to.eql('0.0 B');
@@ -142,9 +179,10 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
       await (await actionsCol.getCellChildren('a'))[rowIndexToOpen].click(); // Click "Open"
 
       // Confirm dataset selector text in observability logs explorer
-      const datasetSelectorText = await PageObjects.discover.getCurrentDataViewId();
-
-      originalExpect(datasetSelectorText).toMatch(datasetName);
+      await retry.try(async () => {
+        const datasetSelectorText = await PageObjects.discover.getCurrentDataViewId();
+        originalExpect(datasetSelectorText).toMatch(datasetName);
+      });
 
       // Return to Dataset Quality Page
       await PageObjects.datasetQuality.navigateTo();
@@ -161,7 +199,36 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
       await PageObjects.datasetQuality.toggleShowInactiveDatasets();
       const rows = await PageObjects.datasetQuality.getDatasetTableRows();
-      expect(rows.length).to.eql(activeDatasets.length);
+      expect(rows.length).to.eql(activeDatasets.length); // Return to Previous state
+      await PageObjects.datasetQuality.toggleShowInactiveDatasets();
+    });
+
+    describe('Failed docs', () => {
+      it('shows failed docs percentage', async () => {
+        const cols = await PageObjects.datasetQuality.parseDatasetTable();
+
+        const failedDocsCol = cols[PageObjects.datasetQuality.texts.datasetFailedDocsColumn];
+        const failedDocsColCellTexts = await failedDocsCol.getCellTexts();
+        expect(failedDocsColCellTexts).to.eql(['N/A', 'N/A', '20%', 'N/A']);
+      });
+
+      it('changes link text on hover when failure store is not enabled', async () => {
+        const linkSelector = 'datasetQualitySetFailureStoreLink';
+        const links = await testSubjects.findAll(linkSelector);
+        expect(links.length).to.be.greaterThan(0);
+        const link = links[links.length - 1];
+
+        expect(await link.getVisibleText()).to.eql('N/A');
+
+        await link.moveMouseTo();
+
+        await retry.try(async () => {
+          expect(await link.getVisibleText()).to.eql('Set failure store');
+        });
+
+        const table = await PageObjects.datasetQuality.getDatasetsTable();
+        await table.moveMouseTo();
+      });
     });
   });
 }

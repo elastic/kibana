@@ -9,7 +9,10 @@ import React from 'react';
 import IntegrationsCard from './integrations_card';
 import { render } from '@testing-library/react';
 jest.mock('../../../onboarding_context');
-jest.mock('../../../../../common/lib/integrations/components/with_filtered_integrations');
+
+jest.mock('../../../../../common/lib/integrations/components/security_integrations_grid_tabs');
+jest.mock('../../../../../common/lib/integrations/components/with_available_packages');
+
 const props = {
   setComplete: jest.fn(),
   checkComplete: jest.fn(),
@@ -34,10 +37,19 @@ describe('IntegrationsCard', () => {
     const { queryByTestId } = render(
       <IntegrationsCard
         {...props}
-        checkCompleteMetadata={{ installedIntegrationsCount: 1, isAgentRequired: false }}
+        checkCompleteMetadata={{
+          activeIntegrations: [
+            {
+              name: 'test',
+              version: '1.0.0',
+              status: 'installed',
+              dataStreams: [{ name: 'test-data-stream', title: 'test' }],
+            },
+          ],
+        }}
       />
     );
     expect(queryByTestId('loadingInstalledIntegrations')).not.toBeInTheDocument();
-    expect(queryByTestId('withFilteredIntegrations')).toBeInTheDocument();
+    expect(queryByTestId('withAvailablePackages')).toBeInTheDocument();
   });
 });

@@ -7,7 +7,7 @@
 
 import React, { FC } from 'react';
 import PropTypes from 'prop-types';
-import tinycolor from 'tinycolor2';
+import chroma from 'chroma-js';
 
 import { ColorManager, Props as ColorManagerProps } from '../color_manager';
 import { ColorPalette } from '../color_palette';
@@ -28,18 +28,17 @@ export const ColorPicker: FC<Props> = ({
   onRemoveColor,
   value = '',
 }) => {
-  const tc = tinycolor(value);
-  const isValidColor = tc.isValid();
+  const isValidColor = chroma.valid(value);
 
   colors = colors.filter((color) => {
-    return tinycolor(color).isValid();
+    return chroma.valid(color);
   });
 
   let canRemove = false;
   let canAdd = false;
 
   if (isValidColor) {
-    const match = colors.filter((color) => tinycolor.equals(value, color));
+    const match = colors.filter((color) => chroma(value).hex() === chroma(color).hex());
     canRemove = match.length > 0;
     canAdd = match.length === 0;
   }

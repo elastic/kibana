@@ -20,6 +20,7 @@ import {
   getCasesV2Feature,
   getCasesV3Feature,
   getSecurityV2Feature,
+  getSecurityV3Feature,
   getTimelineFeature,
   getNotesFeature,
   getSiemMigrationsFeature,
@@ -27,7 +28,6 @@ import {
 import { API_ACTION_PREFIX } from '@kbn/security-solution-features/actions';
 import type { RecursiveReadonly } from '@kbn/utility-types';
 import type { ExperimentalFeatures } from '../../../common';
-import { APP_ID } from '../../../common';
 import { ProductFeatures } from './product_features';
 import {
   securityDefaultSavedObjects,
@@ -40,6 +40,7 @@ import { casesApiTags, casesUiCapabilities } from './cases_privileges';
 export class ProductFeaturesService {
   private securityProductFeatures: ProductFeatures;
   private securityV2ProductFeatures: ProductFeatures;
+  private securityV3ProductFeatures: ProductFeatures;
   private casesProductFeatures: ProductFeatures;
   private casesProductV2Features: ProductFeatures;
   private casesProductFeaturesV3: ProductFeatures;
@@ -74,6 +75,17 @@ export class ProductFeaturesService {
       securityV2Feature.subFeaturesMap,
       securityV2Feature.baseKibanaFeature,
       securityV2Feature.baseKibanaSubFeatureIds
+    );
+
+    const securityV3Feature = getSecurityV3Feature({
+      savedObjects: securityDefaultSavedObjects,
+      experimentalFeatures: this.experimentalFeatures,
+    });
+    this.securityV3ProductFeatures = new ProductFeatures(
+      this.logger,
+      securityV3Feature.subFeaturesMap,
+      securityV3Feature.baseKibanaFeature,
+      securityV3Feature.baseKibanaSubFeatureIds
     );
 
     const casesFeature = getCasesFeature({
@@ -165,6 +177,7 @@ export class ProductFeaturesService {
   public init(featuresSetup: FeaturesPluginSetup) {
     this.securityProductFeatures.init(featuresSetup);
     this.securityV2ProductFeatures.init(featuresSetup);
+    this.securityV3ProductFeatures.init(featuresSetup);
     this.casesProductFeatures.init(featuresSetup);
     this.casesProductV2Features.init(featuresSetup);
     this.casesProductFeaturesV3.init(featuresSetup);
@@ -179,6 +192,7 @@ export class ProductFeaturesService {
     const securityProductFeaturesConfig = configurator.security();
     this.securityProductFeatures.setConfig(securityProductFeaturesConfig);
     this.securityV2ProductFeatures.setConfig(securityProductFeaturesConfig);
+    this.securityV3ProductFeatures.setConfig(securityProductFeaturesConfig);
 
     const casesProductFeaturesConfig = configurator.cases();
     this.casesProductFeatures.setConfig(casesProductFeaturesConfig);
@@ -227,6 +241,7 @@ export class ProductFeaturesService {
     return (
       this.securityProductFeatures.isActionRegistered(action) ||
       this.securityV2ProductFeatures.isActionRegistered(action) ||
+      this.securityV3ProductFeatures.isActionRegistered(action) ||
       this.casesProductFeatures.isActionRegistered(action) ||
       this.casesProductV2Features.isActionRegistered(action) ||
       this.securityAssistantProductFeatures.isActionRegistered(action) ||
@@ -249,9 +264,6 @@ export class ProductFeaturesService {
     // Should be used only by routes that do not need RBAC, only direct productFeature control.
     const APP_FEATURE_TAG_PREFIX = 'securitySolutionProductFeature:';
 
-    /** @deprecated Use security.authz.requiredPrivileges instead */
-    const API_ACTION_TAG_PREFIX = `access:${APP_ID}-`;
-
     const isAuthzEnabled = (authz?: RecursiveReadonly<RouteAuthz>): authz is AuthzEnabled => {
       return Boolean((authz as AuthzEnabled)?.requiredPrivileges);
     };
@@ -271,8 +283,6 @@ export class ProductFeaturesService {
           isEnabled = this.isEnabled(
             tag.substring(APP_FEATURE_TAG_PREFIX.length) as ProductFeatureKeyType
           );
-        } else if (tag.startsWith(API_ACTION_TAG_PREFIX)) {
-          isEnabled = this.isApiPrivilegeEnabled(tag.substring(API_ACTION_TAG_PREFIX.length));
         }
 
         if (!isEnabled) {

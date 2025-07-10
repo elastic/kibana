@@ -17,7 +17,7 @@ export class Collector<TFetchReturn, ExtraOptions extends object = {}>
   public readonly fetch: CollectorFetchMethod<TFetchReturn, ExtraOptions>;
   public readonly isReady: CollectorOptions<TFetchReturn>['isReady'];
   /**
-   * @private Constructor of a Collector. It should be called via the CollectorSet factory methods: `makeStatsCollector` and `makeUsageCollector`
+   * @internal Constructor of a Collector. It should be called via the CollectorSet factory methods: `makeStatsCollector` and `makeUsageCollector`
    * @param log {@link Logger}
    * @param collectorDefinition {@link CollectorOptions}
    */

@@ -24,21 +24,38 @@ import { useUpdateExecutionContext } from '../../common/hooks/use_update_executi
 import { useUpgradeSecurityPackages } from '../../detection_engine/rule_management/logic/use_upgrade_security_packages';
 import { useSetupDetectionEngineHealthApi } from '../../detection_engine/rule_monitoring';
 import { TopValuesPopover } from '../components/top_values_popover/top_values_popover';
-import { AssistantOverlay } from '../../assistant/overlay';
 import { useInitSourcerer } from '../../sourcerer/containers/use_init_sourcerer';
 import { useInitDataViewManager } from '../../data_view_manager/hooks/use_init_data_view_manager';
+import { useRestoreDataViewManagerStateFromURL } from '../../data_view_manager/hooks/use_sync_url_state';
+import { useBrowserFields } from '../../data_view_manager/hooks/use_browser_fields';
+import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
+import { type BrowserFields } from '../../common/containers/source';
 
 interface HomePageProps {
   children: React.ReactNode;
 }
 
 const HomePageComponent: React.FC<HomePageProps> = ({ children }) => {
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+
   const { pathname } = useLocation();
-  const { browserFields } = useInitSourcerer(getScopeFromPath(pathname));
+  const { browserFields: oldBrowserFields } = useInitSourcerer(getScopeFromPath(pathname, false));
+  const { browserFields: experimentalBrowserFields } = useBrowserFields(
+    getScopeFromPath(pathname, newDataViewPickerEnabled)
+  );
+
+  useRestoreDataViewManagerStateFromURL(
+    useInitDataViewManager(),
+    getScopeFromPath(pathname, newDataViewPickerEnabled)
+  );
+
   useUrlState();
   useUpdateBrowserTitle();
   useUpdateExecutionContext();
-  useInitDataViewManager();
+
+  const browserFields = (
+    newDataViewPickerEnabled ? experimentalBrowserFields : oldBrowserFields
+  ) as BrowserFields;
 
   // side effect: this will attempt to upgrade the endpoint package if it is not up to date
   // this will run when a user navigates to the Security Solution app and when they navigate between
@@ -59,7 +76,6 @@ const HomePageComponent: React.FC<HomePageProps> = ({ children }) => {
             </DragDropContextWrapper>
             <HelpMenu />
             <TopValuesPopover />
-            <AssistantOverlay />
           </>
         </TourContextProvider>
       </ConsoleManager>

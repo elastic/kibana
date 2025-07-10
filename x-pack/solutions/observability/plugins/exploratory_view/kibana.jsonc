@@ -9,20 +9,20 @@
   "plugin": {
     "id": "exploratoryView",
     "browser": true,
-    "server": false,
+    "server": true,
     "configPath": [
       "xpack",
-      "exploratory_view"
+      "exploratoryView"
     ],
     "requiredPlugins": [
       "alerting",
-      "cases",
       "charts",
       "data",
       "dataViews",
       "features",
       "files",
       "inspector",
+      "lens",
       "observabilityShared",
       "security",
       "share",
@@ -30,16 +30,17 @@
       "unifiedSearch"
     ],
     "optionalPlugins": [
+      "cases",
       "discover",
       "embeddable",
       "home",
-      "lens",
       "licensing",
       "spaces",
       "usageCollection",
       "observabilityAIAssistant"
     ],
     "requiredBundles": [
+      "cases",
       "dataViews",
       "data",
       "kibanaReact",
