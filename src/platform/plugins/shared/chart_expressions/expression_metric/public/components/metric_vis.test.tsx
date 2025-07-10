@@ -562,13 +562,10 @@ describe('MetricVisComponent', function () {
 
       let secondaryElements = screen.getAllByTestId('metric-secondary-element');
       for (const row of table.rows) {
-        expect(
-          secondaryElements.some((element) => {
-            return new RegExp(`howdynumber-${row[minPriceColumnId]}`, 'i').test(
-              element.textContent ?? ''
-            );
-          })
-        ).toBe(true);
+        const regExp = new RegExp(`howdynumber-${row[minPriceColumnId]}`, 'i');
+        expect(secondaryElements.some((element) => regExp.test(element.textContent ?? ''))).toBe(
+          true
+        );
       }
 
       // Now remove the prefix and check the secondary label is there
@@ -584,13 +581,10 @@ describe('MetricVisComponent', function () {
 
       const secondaryLabel = table.columns.find((col) => col.id === minPriceColumnId)!.name;
       for (const row of table.rows) {
-        expect(
-          secondaryElements.some((element) => {
-            return new RegExp(`${secondaryLabel}*number-${row[minPriceColumnId]}`, 'i').test(
-              element.textContent ?? ''
-            );
-          })
-        ).toBe(true);
+        const regExp = new RegExp(`${secondaryLabel}*number-${row[minPriceColumnId]}`, 'i');
+        expect(secondaryElements.some((element) => regExp.test(element.textContent ?? ''))).toBe(
+          true
+        );
       }
     });
 
