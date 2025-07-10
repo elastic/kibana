@@ -8,7 +8,7 @@
 import { EuiButtonIcon, EuiPageHeaderSection } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
-import { conversationsCommonLabels } from './i18n';
+import { i18n } from '@kbn/i18n';
 
 const sidebarToggleBtnStyles = css`
   margin-inline-end: 8px;
@@ -24,13 +24,20 @@ export const ConversationSidebarToggle: React.FC<ConversationSidebarToggleProps>
   isSidebarOpen,
   onToggle: _onToggle,
 }) => {
-  const labels = conversationsCommonLabels.header.sidebarToggle;
+  const labels = {
+    open: i18n.translate('xpack.onechat.conversationSidebarToggle.open', {
+      defaultMessage: 'Open sidebar',
+    }),
+    close: i18n.translate('xpack.onechat.conversationSidebarToggle.close', {
+      defaultMessage: 'Close sidebar',
+    }),
+  };
   return (
     <EuiPageHeaderSection>
       <EuiButtonIcon
         iconType={isSidebarOpen ? 'transitionLeftOut' : 'transitionLeftIn'}
         color="text"
-        aria-label={isSidebarOpen ? labels.closeAriaLabel : labels.openAriaLabel}
+        aria-label={isSidebarOpen ? labels.close : labels.open}
         onClick={() => {}}
         css={[
           sidebarToggleBtnStyles,

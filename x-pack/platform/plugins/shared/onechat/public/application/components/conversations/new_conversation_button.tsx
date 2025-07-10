@@ -7,9 +7,9 @@
 
 import { EuiButton } from '@elastic/eui';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { useNavigation } from '../../hooks/use_navigation';
 import { appPaths } from '../../utils/app_paths';
-import { conversationsCommonLabels } from './i18n';
 import { useConversationId } from '../../hooks/use_conversation_id';
 
 export const NewConversationButton: React.FC<{}> = () => {
@@ -25,7 +25,14 @@ export const NewConversationButton: React.FC<{}> = () => {
         href: createOnechatUrl(appPaths.chat.new),
       };
 
-  const labels = conversationsCommonLabels.header.actions.createNewConversationButton;
+  const labels = {
+    ariaLabel: i18n.translate('xpack.onechat.newConversationButton.ariaLabel', {
+      defaultMessage: 'Create new conversation',
+    }),
+    display: i18n.translate('xpack.onechat.newConversationButton.display', {
+      defaultMessage: 'New',
+    }),
+  };
 
   return (
     <EuiButton iconType="plus" iconSide="left" aria-label={labels.ariaLabel} {...buttonProps}>

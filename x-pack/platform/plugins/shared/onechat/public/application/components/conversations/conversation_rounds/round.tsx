@@ -9,8 +9,8 @@ import { EuiFlexGroup, EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { ConversationRound } from '@kbn/onechat-common';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { RoundAnswer } from './round_answer';
-import { conversationsCommonLabels } from '../i18n';
 
 interface RoundProps {
   round: ConversationRound;
@@ -25,9 +25,19 @@ export const Round: React.FC<RoundProps> = ({ round }) => {
     max-inline-size: 80%;
     background-color: ${euiTheme.colors.backgroundBasePrimary};
   `;
-  const labels = conversationsCommonLabels.content.messages.round;
+  const labels = {
+    container: i18n.translate('xpack.onechat.round.container', {
+      defaultMessage: 'Conversation round',
+    }),
+    userMessage: i18n.translate('xpack.onechat.round.userMessage', {
+      defaultMessage: 'User message',
+    }),
+    assistantResponse: i18n.translate('xpack.onechat.round.assistantResponse', {
+      defaultMessage: 'Assistant response',
+    }),
+  };
   return (
-    <EuiFlexGroup direction="column" gutterSize="l" aria-label={labels.ariaLabel}>
+    <EuiFlexGroup direction="column" gutterSize="l" aria-label={labels.container}>
       <EuiPanel
         css={userMessageContainerStyles}
         paddingSize="l"

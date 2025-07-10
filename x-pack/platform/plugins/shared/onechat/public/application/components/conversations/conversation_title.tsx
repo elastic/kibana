@@ -8,8 +8,8 @@
 import React from 'react';
 import { EuiTitle, EuiPageHeaderSection, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 import { useConversation } from '../../hooks/use_conversation';
-import { conversationsCommonLabels } from './i18n';
 
 export const ConversationTitle: React.FC<{}> = () => {
   const { conversation } = useConversation();
@@ -18,6 +18,18 @@ export const ConversationTitle: React.FC<{}> = () => {
   if (!conversation) {
     return null;
   }
+
+  const labels = {
+    ariaLabel: i18n.translate('xpack.onechat.conversationTitle.ariaLabel', {
+      defaultMessage: 'Conversation title',
+    }),
+    newConversationDisplay: i18n.translate(
+      'xpack.onechat.conversationTitle.newConversationDisplay',
+      {
+        defaultMessage: 'New conversation',
+      }
+    ),
+  };
 
   const sectionStyles = css`
     display: flex;
@@ -28,13 +40,8 @@ export const ConversationTitle: React.FC<{}> = () => {
 
   return (
     <EuiPageHeaderSection css={sectionStyles}>
-      <EuiTitle
-        aria-label={conversationsCommonLabels.header.conversationTitle.ariaLabel}
-        size="xxs"
-      >
-        <h1>
-          {title || conversationsCommonLabels.header.conversationTitle.newConversationDisplay}
-        </h1>
+      <EuiTitle aria-label={labels.ariaLabel} size="xxs">
+        <h1>{title || labels.newConversationDisplay}</h1>
       </EuiTitle>
     </EuiPageHeaderSection>
   );

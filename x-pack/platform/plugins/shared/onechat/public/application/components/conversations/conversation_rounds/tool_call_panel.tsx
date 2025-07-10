@@ -17,7 +17,7 @@ import {
 import { ToolCallStep } from '@kbn/onechat-common';
 import React from 'react';
 import { css } from '@emotion/css';
-import { conversationsCommonLabels } from '../i18n';
+import { i18n } from '@kbn/i18n';
 
 interface ToolCallPanelProps {
   step: ToolCallStep;
@@ -42,14 +42,27 @@ export const ToolCallPanel: React.FC<ToolCallPanelProps> = ({
     border: 1px solid ${euiTheme.colors.lightShade};
     border-radius: ${euiTheme.border.radius.medium};
   `;
-  const labels = conversationsCommonLabels.content.messages.round.steps;
+  const labels = {
+    header: i18n.translate('xpack.onechat.toolCallPanel.header', {
+      defaultMessage: 'Tool:',
+    }),
+    args: i18n.translate('xpack.onechat.toolCallPanel.args', {
+      defaultMessage: 'Tool call args',
+    }),
+    result: i18n.translate('xpack.onechat.toolCallPanel.result', {
+      defaultMessage: 'Tool call result',
+    }),
+    noResult: i18n.translate('xpack.onechat.toolCallPanel.noResult', {
+      defaultMessage: 'No result available',
+    }),
+  };
   return (
     <div key={callId}>
       <EuiPanel className={toolCallPanelClass} hasShadow={false} hasBorder={true}>
         <div className={stepHeaderClass}>
           <EuiIcon type="wrench" color="primary" />
           <EuiText size="s" color="subdued">
-            {labels.toolCall.header} {toolId}
+            {labels.header} {toolId}
           </EuiText>
         </div>
         <EuiSpacer size="xs" />
@@ -57,7 +70,7 @@ export const ToolCallPanel: React.FC<ToolCallPanelProps> = ({
           id={`args-${callId}`}
           buttonContent={
             <EuiText size="xs" color="subdued">
-              {labels.toolCall.args}
+              {labels.args}
             </EuiText>
           }
           paddingSize="s"
@@ -80,7 +93,7 @@ export const ToolCallPanel: React.FC<ToolCallPanelProps> = ({
             id={`result-${callId}`}
             buttonContent={
               <EuiText size="xs" color="subdued">
-                {labels.toolCall.result}
+                {labels.result}
               </EuiText>
             }
           >
@@ -98,7 +111,7 @@ export const ToolCallPanel: React.FC<ToolCallPanelProps> = ({
           </EuiAccordion>
         ) : (
           <EuiText size="s" color="subdued">
-            {labels.toolCall.noResult}
+            {labels.noResult}
           </EuiText>
         )}
       </EuiPanel>

@@ -16,7 +16,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { oneChatDefaultAgentId } from '@kbn/onechat-common';
-import { conversationsCommonLabels } from './i18n';
+import { i18n } from '@kbn/i18n';
 import { AgentDisplay } from './agent_display';
 import { ConversationContent } from './conversation_grid';
 import { useConversation } from '../../hooks/use_conversation';
@@ -74,7 +74,17 @@ export const ConversationInputForm: React.FC<ConversationInputFormProps> = ({ on
     border: none;
   `;
 
-  const labels = conversationsCommonLabels.content.input;
+  const labels = {
+    container: i18n.translate('xpack.onechat.conversationInputForm.container', {
+      defaultMessage: 'Message input form',
+    }),
+    submit: i18n.translate('xpack.onechat.conversationInputForm.submit', {
+      defaultMessage: 'Submit',
+    }),
+    placeholder: i18n.translate('xpack.onechat.conversationInputForm.placeholder', {
+      defaultMessage: 'Ask anything',
+    }),
+  };
 
   return (
     <ConversationContent>
@@ -84,7 +94,7 @@ export const ConversationInputForm: React.FC<ConversationInputFormProps> = ({ on
         alignItems="stretch"
         justifyContent="center"
         className={topContainerClass}
-        aria-label={labels.ariaLabel}
+        aria-label={labels.container}
       >
         <EuiFlexItem>
           <EuiFlexGroup
@@ -130,7 +140,7 @@ export const ConversationInputForm: React.FC<ConversationInputFormProps> = ({ on
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiButtonIcon
-                    aria-label={labels.submitAriaLabel}
+                    aria-label={labels.submit}
                     data-test-subj="onechatAppConversationInputFormSubmitButton"
                     iconType="kqlFunction"
                     display="fill"

@@ -7,10 +7,10 @@
 
 import React from 'react';
 import { EuiPageHeaderSection, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { css } from '@emotion/css';
+import { i18n } from '@kbn/i18n';
 import { NewConversationButton } from './new_conversation_button';
 import { useConversation } from '../../hooks/use_conversation';
-import { conversationsCommonLabels } from './i18n';
 
 export const ConversationActions: React.FC<{}> = () => {
   const { conversation } = useConversation();
@@ -28,10 +28,14 @@ export const ConversationActions: React.FC<{}> = () => {
     justify-self: end;
   `;
 
-  const labels = conversationsCommonLabels.header.actions;
+  const labels = {
+    container: i18n.translate('xpack.onechat.conversationActions.container', {
+      defaultMessage: 'Conversation actions',
+    }),
+  };
 
   return (
-    <EuiPageHeaderSection css={actionsContainerStyles} aria-label={labels.ariaLabel}>
+    <EuiPageHeaderSection css={actionsContainerStyles} aria-label={labels.container}>
       <NewConversationButton />
     </EuiPageHeaderSection>
   );
