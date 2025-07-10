@@ -63,95 +63,24 @@ export const getGuideCards = (
       order: 1,
     },
     {
-      solution: 'observability',
-      icon: 'logstashInput',
-      title: i18n.translate(
-        'guidedOnboardingPackage.gettingStarted.cards.logsObservability.title',
-        {
-          defaultMessage: 'Collect and analyze my logs',
-        }
-      ),
-      url:
-        locator?.getRedirectUrl({
-          source: 'auto-detect',
-          category: 'host',
-        }) ?? '',
-      telemetryId: 'onboarding--observability--logs',
-      order: 2,
+      solution: 'search',
+      icon: 'vector',
+      title: i18n.translate('guidedOnboardingPackage.gettingStarted.cards.vectorSearch.title', {
+        defaultMessage: 'Set up vector search',
+      }),
+      url: application.getUrlForApp('enterpriseSearchVectorSearch'),
+      telemetryId: 'onboarding--search--vector',
+      order: 4,
     },
     {
-      solution: 'observability',
-      icon: 'apmTrace',
-      title: (
-        <FormattedMessage
-          id="guidedOnboardingPackage.gettingStarted.cards.apmObservability.title"
-          defaultMessage="Monitor my application {lineBreak} performance (APM / tracing)"
-          values={{
-            lineBreak: <br />,
-          }}
-        />
-      ),
-      url: application.getUrlForApp('apm', { path: '/tutorial' }),
-      telemetryId: 'onboarding--observability--apm',
-      order: 5,
-    },
-    {
-      solution: 'observability',
-      icon: 'visBarVertical',
-      title: i18n.translate(
-        'guidedOnboardingPackage.gettingStarted.cards.hostsObservability.title',
-        {
-          defaultMessage: 'Monitor my host metrics',
-        }
-      ),
-      url:
-        locator?.getRedirectUrl({
-          source: 'auto-detect',
-          category: 'host',
-        }) ?? '',
-      telemetryId: 'onboarding--observability--hosts',
-      order: 8,
-    },
-    {
-      solution: 'observability',
-      icon: 'cluster',
-      title: i18n.translate(
-        'guidedOnboardingPackage.gettingStarted.cards.kubernetesObservability.title',
-        {
-          defaultMessage: 'Monitor Kubernetes clusters',
-        }
-      ),
-      url:
-        locator?.getRedirectUrl({
-          source: 'kubernetes',
-          category: 'host',
-        }) ?? '',
-      telemetryId: 'onboarding--observability--kubernetes',
-      order: 11,
-    },
-    {
-      solution: 'observability',
-      icon: 'videoPlayer',
-      title: i18n.translate(
-        'guidedOnboardingPackage.gettingStarted.cards.syntheticsObservability.title',
-        {
-          defaultMessage: 'Create a Synthetic Monitor',
-        }
-      ),
-      url: application.getUrlForApp('synthetics', { path: '/monitors/getting-started' }),
-      telemetryId: 'onboarding--observability--synthetics',
-      order: 14,
-    },
-    {
-      solution: 'observability',
-      icon: 'visBarHorizontal',
-      title: i18n.translate(
-        'guidedOnboardingPackage.gettingStarted.cards.universalProfilingObservability.title',
-        { defaultMessage: 'Optimize my workloads with Universal Profiling' }
-      ),
-      url: application.getUrlForApp('profiling', { path: '/add-data-instructions' }),
-      telemetryId: 'onboarding--observability--profiling',
-      order: 15,
+      solution: 'search',
+      icon: 'magnifyWithPlus',
+      title: i18n.translate('guidedOnboardingPackage.gettingStarted.cards.aiSearch.title', {
+        defaultMessage: 'Build an AI-powered search experience',
+      }),
+      url: application.getUrlForApp('enterpriseSearchAISearch'),
+      telemetryId: 'onboarding--search--ai',
+      order: 7,
     },
     {
       solution: 'security',

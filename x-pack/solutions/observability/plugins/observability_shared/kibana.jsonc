@@ -19,9 +19,6 @@
       "embeddable",
       "share"
     ],
-    "optionalPlugins": [
-      "guidedOnboarding"
-    ],
     "requiredBundles": [
       "cases",
       "data",
