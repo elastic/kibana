@@ -39,6 +39,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         ])}`,
         '--csp.strict=false',
         '--csp.warnLegacyBrowsers=false',
+        '--xpack.fleet.agentless.enabled=true',
       ],
     },
     testRunner: SecuritySolutionConfigurableCypressTestRunner,

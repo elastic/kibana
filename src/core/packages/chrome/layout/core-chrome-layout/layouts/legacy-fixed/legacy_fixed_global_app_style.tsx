@@ -10,6 +10,7 @@
 import React from 'react';
 import { css, Global } from '@emotion/react';
 import { useEuiTheme, type UseEuiTheme } from '@elastic/eui';
+import { APP_FIXED_VIEWPORT_ID } from '@kbn/core-chrome-layout-constants';
 import { CommonGlobalAppStyles } from '../common/global_app_styles';
 
 const globalLayoutStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
@@ -33,7 +34,7 @@ const globalLayoutStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
   }
 
   // Affixes a div to restrict the position of charts tooltip to the visible viewport minus the header
-  #app-fixed-viewport {
+  #${APP_FIXED_VIEWPORT_ID} {
     pointer-events: none;
     visibility: hidden;
     position: fixed;
@@ -69,6 +70,12 @@ const globalLayoutStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
     --kbn-application--sticky-headers-offset: calc(
       var(--euiFixedHeadersOffset, 0px) + var(--kbn-application--top-bar-height, 0px)
     );
+
+    // for forward compatibility with grid layout,
+    --kbn-application--content-top: var(--kbnAppHeadersOffset, var(--euiFixedHeadersOffset, 0));
+    --kbn-application--content-left: 0px;
+    --kbn-application--content-bottom: 0px;
+    --kbn-application--content-right: 0px;
   }
 
   // Conditionally override :root CSS fixed header variable. Updating \`--euiFixedHeadersOffset\`
