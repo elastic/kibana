@@ -94,7 +94,7 @@ export class AIAssistantManagementSelectionPlugin
     core.capabilities.registerProvider(() => {
       return {
         management: {
-          kibana: {
+          ai: {
             aiAssistantManagementSelection: true,
             observabilityAiAssistantManagement: true,
             securityAiAssistantManagement: true,
@@ -113,7 +113,7 @@ export class AIAssistantManagementSelectionPlugin
       category: DEFAULT_APP_CATEGORIES.management,
       scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       management: {
-        kibana: [
+        ai: [
           'aiAssistantManagementSelection',
           'securityAiAssistantManagement',
           'observabilityAiAssistantManagement',
@@ -123,7 +123,7 @@ export class AIAssistantManagementSelectionPlugin
       privileges: {
         all: {
           management: {
-            kibana: [
+            ai: [
               'aiAssistantManagementSelection',
               'securityAiAssistantManagement',
               'observabilityAiAssistantManagement',
@@ -137,7 +137,7 @@ export class AIAssistantManagementSelectionPlugin
         },
         read: {
           management: {
-            kibana: [
+            ai: [
               'aiAssistantManagementSelection',
               'securityAiAssistantManagement',
               'observabilityAiAssistantManagement',
