@@ -72,7 +72,6 @@ async function fetchDependenciesTimeseriesStatistics({
           terms: {
             field: SPAN_DESTINATION_SERVICE_RESOURCE,
             size: dependencyNames.length,
-
           },
           aggs: {
             timeseries: {
