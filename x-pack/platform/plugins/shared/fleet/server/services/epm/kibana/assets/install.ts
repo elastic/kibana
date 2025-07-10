@@ -16,8 +16,6 @@ import type {
   SavedObjectsImportFailure,
   Logger,
 } from '@kbn/core/server';
-import type { TypeOf } from '@kbn/config-schema';
-import type { createBodySchemaV1 as alertRuleBodySchema } from '@kbn/alerting-plugin/common/routes/rule/apis/create';
 import type { RulesClient } from '@kbn/alerting-plugin/server/rules_client';
 import { createListStream } from '@kbn/utils';
 import { partition, chunk, once } from 'lodash';
@@ -40,6 +38,7 @@ import { appContextService } from '../../..';
 
 import { tagKibanaAssets } from './tag_assets';
 import { getSpaceAwareSaveobjectsClients } from './saved_objects';
+import { installAlertRules, type AlertRuleAsset } from './alert_rules';
 
 const MAX_ASSETS_TO_INSTALL_IN_PARALLEL = 200;
 
@@ -57,11 +56,6 @@ type SavedObjectToBe = Required<
   type: KibanaSavedObjectType;
 };
 
-interface AlertRuleAsset {
-  id: string;
-  type: KibanaSavedObjectType.alert;
-  template: Omit<TypeOf<typeof alertRuleBodySchema>, 'actions'>;
-}
 type SavedObjectAsset = Pick<
   SavedObject,
   | 'id'
@@ -186,7 +180,12 @@ export async function installKibanaAssets(options: {
     // split assets into SO installs and alert rule installs
     const { asSavedObjects, asAlertRules } = createInstallGroups(assetsToInstall);
 
-    await installAlertRules({ logger, alertingRulesClient, alertRuleAssets: asAlertRules });
+    await installAlertRules({
+      logger,
+      alertingRulesClient,
+      alertRuleAssets: asAlertRules,
+      assetsChunkSize: MAX_ASSETS_TO_INSTALL_IN_PARALLEL,
+    });
 
     const installedAssets = await installKibanaSavedObjects({
       logger,
@@ -650,49 +649,4 @@ export function toAssetReference({ id, type }: SavedObject) {
 
 function hasReferences(assetsToInstall: SavedObjectAsset[]) {
   return assetsToInstall.some((asset) => asset.references.length);
-}
-
-async function installAlertRules({
-  logger,
-  alertingRulesClient,
-  alertRuleAssets,
-}: {
-  logger: Logger;
-  alertingRulesClient: RulesClient;
-  alertRuleAssets: AlertRuleAsset[];
-}): Promise<void> {
-  logger.debug(`create alert rule assets: ${JSON.stringify(alertRuleAssets, null, 2)}`);
-  const { template: alertRule, id } = alertRuleAssets[0];
-
-  const {
-    rule_type_id: _ruleTypeId,
-    alert_delay: _alertDelay,
-    notify_when: _notifyWhen,
-    ...baseCreateData
-  } = alertRule;
-
-  const createData = {
-    ...baseCreateData,
-    alertTypeId: alertRule.rule_type_id,
-    flapping: alertRule.flapping
-      ? {
-          lookBackWindow: alertRule.flapping.look_back_window,
-          statusChangeThreshold: alertRule.flapping.status_change_threshold,
-        }
-      : undefined,
-    ...(alertRule.alert_delay ? { alertDelay: alertRule.alert_delay } : {}),
-    ...(alertRule.notify_when ? { notifyWhen: alertRule.notify_when } : {}),
-    actions: [],
-  };
-
-  try {
-    await alertingRulesClient.create({ data: createData, options: { id } });
-  } catch (e) {
-    if (e?.output?.statusCode === 409) {
-      await alertingRulesClient.update({
-        data: createData,
-        id,
-      });
-    }
-  }
 }
