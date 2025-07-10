@@ -15,8 +15,6 @@ import {
 import type { Logger, LogMeta } from '@kbn/core/server';
 import { IndicesMetadataService } from './lib/services/indices_metadata';
 import { registerEbtEvents } from './lib/ebt/events';
-import { MetadataReceiver } from './lib/services/receiver';
-import { MetadataSender } from './lib/services/sender';
 import type {
   IndicesMetadataPluginSetup,
   IndicesMetadataPluginStart,
@@ -42,26 +40,16 @@ export class IndicesMetadataPlugin
   private readonly config$: Observable<PluginConfig>;
 
   private readonly indicesMetadataService: IndicesMetadataService;
-  private readonly receiver: MetadataReceiver;
-  private readonly sender: MetadataSender;
-  private readonly artifactService: ArtifactService;
   private readonly configurationService: ConfigurationService;
 
   constructor(context: PluginInitializerContext) {
     this.logger = context.logger.get();
     this.config$ = context.config.create<PluginConfig>();
 
-    this.receiver = new MetadataReceiver(this.logger);
-    this.sender = new MetadataSender(this.logger);
-    this.artifactService = new ArtifactService(this.logger);
-    this.configurationService = new ConfigurationService(this.logger, this.artifactService);
-
+    this.configurationService = new ConfigurationService(this.logger);
     this.indicesMetadataService = new IndicesMetadataService(
       this.logger,
-      this.sender,
-      this.receiver,
-      this.configurationService,
-      DEFAULT_INDICES_METADATA_CONFIGURATION
+      this.configurationService
     );
   }
 
@@ -79,13 +67,16 @@ export class IndicesMetadataPlugin
     this.config$.subscribe(async (pluginConfig) => {
       this.logger.debug('PluginConfig changed', { pluginConfig } as LogMeta);
 
+      const cdnConfig = this.effectiveCdnConfig(pluginConfig);
       const info = await core.elasticsearch.client.asInternalUser.info();
+      const artifactService = new ArtifactService(this.logger, info, cdnConfig);
 
-      this.sender.start(core.analytics);
-      this.receiver.start(core.elasticsearch.client.asInternalUser);
-      this.configurationService.start();
-      this.artifactService.start(info, this.effectiveCdnConfig(pluginConfig));
-      this.indicesMetadataService.start(plugin.taskManager);
+      this.configurationService.start(artifactService, DEFAULT_INDICES_METADATA_CONFIGURATION);
+      this.indicesMetadataService.start(
+        plugin.taskManager,
+        core.analytics,
+        core.elasticsearch.client.asInternalUser
+      );
     });
   }
 
@@ -95,11 +86,11 @@ export class IndicesMetadataPlugin
     this.configurationService.stop();
   }
 
-  private effectiveCdnConfig({ cdnUrl, publicKey }: PluginConfig): CdnConfig {
+  private effectiveCdnConfig({ cdn }: PluginConfig): CdnConfig {
     return {
-      url: cdnUrl ?? DEFAULT_CDN_CONFIG.url,
-      pubKey: publicKey ?? DEFAULT_CDN_CONFIG.pubKey,
-      requestTimeout: DEFAULT_CDN_CONFIG.requestTimeout,
+      url: cdn?.url ?? DEFAULT_CDN_CONFIG.url,
+      pubKey: cdn?.publicKey ?? DEFAULT_CDN_CONFIG.pubKey,
+      requestTimeout: cdn?.requestTimeout ?? DEFAULT_CDN_CONFIG.requestTimeout,
     };
   }
 }

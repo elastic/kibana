@@ -12,7 +12,7 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import type { LogMeta, Logger } from '@kbn/core/server';
+import type { AnalyticsServiceStart, ElasticsearchClient, LogMeta, Logger } from '@kbn/core/server';
 import type {
   DataStream,
   DataStreams,
@@ -44,26 +44,16 @@ const INTERVAL = '1m';
 
 export class IndicesMetadataService {
   private readonly logger: Logger;
-  private readonly receiver: MetadataReceiver;
-  private readonly sender: MetadataSender;
   private readonly configurationService: ConfigurationService;
 
-  private subscription$?: Subscription;
-  private configuration: IndicesMetadataConfiguration;
+  private receiver!: MetadataReceiver;
+  private sender!: MetadataSender;
+  private subscription$!: Subscription;
+  private configuration?: IndicesMetadataConfiguration;
 
-  constructor(
-    logger: Logger,
-    sender: MetadataSender,
-    receiver: MetadataReceiver,
-    configurationService: ConfigurationService,
-    defaultConfiguration: IndicesMetadataConfiguration
-  ) {
+  constructor(logger: Logger, configurationService: ConfigurationService) {
     this.logger = logger.get(IndicesMetadataService.name);
-
-    this.receiver = receiver;
-    this.sender = sender;
     this.configurationService = configurationService;
-    this.configuration = defaultConfiguration;
   }
 
   public setup(taskManager: TaskManagerSetupContract) {
@@ -71,8 +61,15 @@ export class IndicesMetadataService {
     this.registerIndicesMetadataTask(taskManager);
   }
 
-  public start(taskManager: TaskManagerStartContract) {
+  public start(
+    taskManager: TaskManagerStartContract,
+    analytics: AnalyticsServiceStart,
+    esClient: ElasticsearchClient
+  ) {
     this.logger.debug('Starting indices metadata service');
+
+    this.receiver = new MetadataReceiver(this.logger, esClient);
+    this.sender = new MetadataSender(this.logger, analytics);
 
     this.subscription$ = this.configurationService
       .getIndicesMetadataConfiguration$()
@@ -89,16 +86,17 @@ export class IndicesMetadataService {
   }
 
   public stop() {
+    this.logger.debug('Stopping indices metadata service');
     this.subscription$?.unsubscribe();
-    this.configurationService.stop();
   }
 
   private async publishIndicesMetadata() {
-    if (this.configuration.index_query_size === 0) {
+    this.ensureInitialized();
+
+    if (!this.configuration || this.configuration.index_query_size === 0) {
       this.logger.debug('Index query size is 0, skipping indices metadata publish');
       return;
     }
-    this.logger.debug('About to publish indices metadata');
 
     // 1. Get cluster stats and list of indices and datastreams
     const [indicesSettings, dataStreams, indexTemplates] = await Promise.all([
@@ -148,6 +146,12 @@ export class IndicesMetadataService {
       policies: policyCount,
       templates: indexTemplatesCount,
     } as LogMeta);
+  }
+
+  private ensureInitialized() {
+    if (!this.receiver || !this.sender) {
+      throw new Error('Indices metadata service not initialized');
+    }
   }
 
   private publishDatastreamsStats(stats: DataStream[]): number {
@@ -216,6 +220,9 @@ export class IndicesMetadataService {
   }
 
   private async publishIndicesStats(indices: string[]): Promise<number> {
+    if (!this.configuration) {
+      return 0;
+    }
     const indicesStats: IndicesStats = {
       items: [],
     };
@@ -260,6 +267,10 @@ export class IndicesMetadataService {
   }
 
   async publishIlmPolicies(ilmNames: Set<string>): Promise<number> {
+    if (!this.configuration) {
+      return 0;
+    }
+
     const ilmPolicies: IlmPolicies = {
       items: [],
     };

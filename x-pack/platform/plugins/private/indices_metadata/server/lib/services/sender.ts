@@ -9,22 +9,12 @@ import type { AnalyticsServiceStart, EventTypeOpts, LogMeta, Logger } from '@kbn
 
 export class MetadataSender {
   private readonly logger: Logger;
-  private analytics?: AnalyticsServiceStart;
 
-  constructor(logger: Logger) {
+  constructor(logger: Logger, private readonly analytics: AnalyticsServiceStart) {
     this.logger = logger.get(MetadataSender.name);
   }
 
-  public start(analytics: AnalyticsServiceStart) {
-    this.logger.debug('Starting sender');
-    this.analytics = analytics;
-  }
-
   public reportEBT<T>(eventTypeOpts: EventTypeOpts<T>, eventData: T): void {
-    if (!this.analytics) {
-      throw Error('analytics is unavailable');
-    }
-
     this.logger.debug('Reporting event', { eventType: eventTypeOpts.eventType } as LogMeta);
     this.analytics.reportEvent(eventTypeOpts.eventType, eventData as object);
   }

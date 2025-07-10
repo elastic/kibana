@@ -29,20 +29,12 @@ import { chunkedBy } from '../utils';
 
 export class MetadataReceiver {
   private readonly logger: Logger;
-  private _esClient?: ElasticsearchClient;
 
-  constructor(logger: Logger) {
+  constructor(logger: Logger, private readonly esClient: ElasticsearchClient) {
     this.logger = logger.get(MetadataReceiver.name);
   }
 
-  public start(esClient: ElasticsearchClient) {
-    this.logger.debug('Starting receiver');
-    this._esClient = esClient;
-  }
-
   public async getIndices(): Promise<IndexSettings[]> {
-    const es = this.esClient();
-
     this.logger.debug('Fetching indices');
 
     const request: IndicesGetRequest = {
@@ -57,7 +49,7 @@ export class MetadataReceiver {
       ],
     };
 
-    return es.indices
+    return this.esClient.indices
       .get(request)
       .then((indices) =>
         Object.entries(indices).map(([index, value]) => {
@@ -77,8 +69,6 @@ export class MetadataReceiver {
   }
 
   public async getDataStreams(): Promise<DataStream[]> {
-    const es = this.esClient();
-
     this.logger.debug('Fetching datstreams');
 
     const request: IndicesGetDataStreamRequest = {
@@ -87,7 +77,7 @@ export class MetadataReceiver {
       filter_path: ['data_streams.name', 'data_streams.indices'],
     };
 
-    return es.indices
+    return this.esClient.indices
       .getDataStream(request)
       .then((response) =>
         response.data_streams.map((ds) => {
@@ -110,7 +100,6 @@ export class MetadataReceiver {
   }
 
   public async *getIndicesStats(indices: string[], chunkSize: number) {
-    const es = this.esClient();
     const safeChunkSize = Math.min(chunkSize, 3000);
 
     this.logger.debug('Fetching indices stats');
@@ -138,7 +127,7 @@ export class MetadataReceiver {
       };
 
       try {
-        const response = await es.indices.stats(request);
+        const response = await this.esClient.indices.stats(request);
         for (const [indexName, stats] of Object.entries(response.indices ?? {})) {
           yield {
             index_name: indexName,
@@ -157,14 +146,13 @@ export class MetadataReceiver {
   }
 
   public async isIlmStatsAvailable() {
-    const es = this.esClient();
     const request: IlmExplainLifecycleRequest = {
       index: '-invalid-index',
       only_managed: false,
       filter_path: ['indices.*.phase', 'indices.*.age', 'indices.*.policy'],
     };
 
-    const result = await es.ilm
+    const result = await this.esClient.ilm
       .explainLifecycle(request)
       .then(() => {
         return true;
@@ -177,8 +165,6 @@ export class MetadataReceiver {
   }
 
   public async *getIlmsStats(indices: string[]) {
-    const es = this.esClient();
-
     const groupedIndices = this.chunkStringsByMaxLength(indices);
 
     this.logger.debug('Splitted ilms into groups', {
@@ -193,7 +179,7 @@ export class MetadataReceiver {
         filter_path: ['indices.*.phase', 'indices.*.age', 'indices.*.policy'],
       };
 
-      const data = await es.ilm.explainLifecycle(request);
+      const data = await this.esClient.ilm.explainLifecycle(request);
 
       try {
         for (const [indexName, stats] of Object.entries(data.indices ?? {})) {
@@ -214,8 +200,6 @@ export class MetadataReceiver {
   }
 
   public async getIndexTemplatesStats(): Promise<IndexTemplateInfo[]> {
-    const es = this.esClient();
-
     this.logger.debug('Fetching index templates');
 
     const request: IndicesGetIndexTemplateRequest = {
@@ -235,7 +219,7 @@ export class MetadataReceiver {
       ],
     };
 
-    return es.indices
+    return this.esClient.indices
       .getIndexTemplate(request)
       .then((response) =>
         response.index_templates.map((props) => {
@@ -262,7 +246,6 @@ export class MetadataReceiver {
   }
 
   public async *getIlmsPolicies(ilms: string[], chunkSize: number) {
-    const es = this.esClient();
     const safeChunkSize = Math.min(chunkSize, 3000);
 
     const phase = (obj: unknown): IlmPhase | null | undefined => {
@@ -296,7 +279,7 @@ export class MetadataReceiver {
         ],
       };
 
-      const response = await es.ilm.getLifecycle(request);
+      const response = await this.esClient.ilm.getLifecycle(request);
       try {
         for (const [policyName, stats] of Object.entries(response ?? {})) {
           yield {
@@ -318,13 +301,6 @@ export class MetadataReceiver {
         throw error;
       }
     }
-  }
-
-  private esClient(): ElasticsearchClient {
-    if (this._esClient === undefined || this._esClient === null) {
-      throw Error('elasticsearch client is unavailable');
-    }
-    return this._esClient;
   }
 
   private chunkStringsByMaxLength(strings: string[], maxLength: number = 3072): string[][] {

@@ -23,13 +23,14 @@ export class ArtifactService {
   private clusterInfo?: InfoResponse;
   private manifestUrl?: string;
 
-  constructor(logger: Logger) {
+  constructor(logger: Logger, clusterInfo: InfoResponse, cdnConfig: CdnConfig) {
     this.logger = logger.get(ArtifactService.name);
     this.cache = new Map();
+    this.configure(clusterInfo, cdnConfig);
   }
 
-  public start(clusterInfo: InfoResponse, cdnConfig: CdnConfig) {
-    this.logger.debug('Starting artifact service with cluster info', { clusterInfo } as LogMeta);
+  public configure(clusterInfo: InfoResponse, cdnConfig: CdnConfig) {
+    this.logger.debug('Configuring artifact service with cluster info', { clusterInfo } as LogMeta);
 
     if (!clusterInfo.version?.number) {
       throw new Error(
@@ -104,30 +105,25 @@ export class ArtifactService {
   private async getManifest(name: string, data: Buffer): Promise<unknown> {
     const zip = new AdmZip(data);
 
-    const manifestFile = zip.getEntries().find((entry) => {
-      return entry.entryName === 'manifest.json';
-    });
-
-    const manifestSigFile = zip.getEntries().find((entry) => {
-      return entry.entryName === 'manifest.sig';
-    });
+    const manifestFile = zip.getEntry('manifest.json');
+    const signatureFile = zip.getEntry('manifest.sig');
 
     if (!manifestFile) {
       throw Error('No manifest.json in artifact zip');
     }
 
-    if (!manifestSigFile) {
+    if (!signatureFile) {
       throw Error('No manifest.sig in artifact zip');
     }
 
-    if (!this.isSignatureValid(manifestFile.getData(), manifestSigFile.getData())) {
+    if (!this.isSignatureValid(manifestFile.getData(), signatureFile.getData())) {
       throw Error('Invalid manifest signature');
     }
 
     const manifest = JSON.parse(manifestFile.getData().toString());
-    const relativeUrl = manifest.artifacts[name]?.relative_url;
-    if (relativeUrl) {
-      const url = `${this.cdnConfig?.url}${relativeUrl}`;
+    const artifact = manifest.artifacts[name];
+    if (artifact) {
+      const url = `${this.cdnConfig?.url}${artifact.relative_url}`;
       const artifactResponse = await axios.get(url, { timeout: this.cdnConfig?.requestTimeout });
       return artifactResponse.data;
     } else {
