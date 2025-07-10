@@ -13,12 +13,39 @@ import {
   FindSLODefinitionsResponse,
 } from '@kbn/slo-schema';
 import * as t from 'io-ts';
-import { waitForIndexToBeEmpty } from '../apis/slos/helper/wait_for_index_state';
+import type { Client } from '@elastic/elasticsearch';
+import type { AggregationsAggregate, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import { retryForSuccess } from '@kbn/ftr-common-functional-services';
+import { ToolingLog } from '@kbn/tooling-log';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 type FetchHistoricalSummaryParams = t.OutputOf<
   typeof fetchHistoricalSummaryParamsSchema.props.body
 >;
+
+const debugLog = ToolingLog.bind(ToolingLog, { level: 'debug', writeTo: process.stdout });
+
+async function waitForIndexToBeEmpty<T>({
+  esClient,
+  indexName,
+}: {
+  esClient: Client;
+  indexName: string;
+}): Promise<SearchResponse<T, Record<string, AggregationsAggregate>>> {
+  return await retryForSuccess(new debugLog({ context: 'waitForIndexToBeEmpty' }), {
+    timeout: 20_000,
+    methodName: 'waitForIndexToBeEmpty',
+    block: async () => {
+      const response = await esClient.search<T>({ index: indexName, rest_total_hits_as_int: true });
+      // @ts-expect-error upgrade typescript v5.1.6
+      if (response.hits.total != null && response.hits.total > 0) {
+        throw new Error(`Found ${response.hits.total} docs.`);
+      }
+      return response;
+    },
+    retryCount: 10,
+  });
+}
 
 export function SloApiProvider({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
