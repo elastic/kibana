@@ -11,7 +11,6 @@ import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_
 import { useFilesContext } from '@kbn/shared-ux-file-context';
 import type { DoneNotification, FileState } from '@kbn/shared-ux-file-upload/src/upload_state';
 import { createUploadState, type UploadState } from '@kbn/shared-ux-file-upload/src/upload_state';
-import { type FileKindBase } from '@kbn/files-plugin/common/types';
 import { useUploadDone } from '../files/use_upload_done';
 import type { MarkdownEditorRef } from './types';
 import { NO_SIMULTANEOUS_UPLOADS_MESSAGE, UNSUPPORTED_MIME_TYPE_MESSAGE } from './translations';
@@ -32,19 +31,13 @@ function generatePlaceholderCopy(filename: string, extension?: string) {
   return `<!-- uploading "${filename}${extension ? `.${extension}` : ''}" -->`;
 }
 
+const IMAGE_PATH = (kindId: string, id: string) => `/api/files/files/${kindId}/${id}/blob`;
+
 /**
  * Returns a markdown link for the file with a link to the asset
  */
-function generateMarkdownLink(
-  filename: string,
-  id: string,
-  kind: FileKindBase,
-  extension?: string
-) {
-  return `![${filename}${extension ? `.${extension}` : ''}](/api/files/files/${
-    kind.id
-  }/${id}/blob)`;
-}
+export const markdownImage = (fileName: string, kindId: string, id: string, ext?: string) =>
+  `![${fileName}${ext ? `.${ext}` : ''}](${IMAGE_PATH(kindId, id)})`;
 
 const ALLOWED_IMAGE_MIME_TYPES = ['image/png', 'image/jpeg'] as const;
 
@@ -84,7 +77,7 @@ export function useImagePasteUpload({
 
       const newText = textarea.value.replace(
         uploadPlaceholder ?? '',
-        generateMarkdownLink(file.fileJSON.name, file.id, kind, file.fileJSON.extension)
+        markdownImage(file.fileJSON.name, kind.id, file.id, file.fileJSON.extension)
       );
       field.setValue(newText);
     },
@@ -179,7 +172,7 @@ export function useImagePasteUpload({
             // because of constraints on images we can display
             uploadState.setFiles([file]);
           } catch (err) {
-            setErrors([err.message]);
+            setErrors((prev) => (prev.includes(err) ? prev : [...prev, err]));
           }
           if (uploadState.hasFiles()) {
             setErrors([]);
