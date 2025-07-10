@@ -37,22 +37,15 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     it('cannot fork a stream with editor permissions', async () => {
-      const response = await editorApiClient
-        .fetch('POST /api/streams/{name}/_fork 2023-10-31', {
-          params: {
-            path: { name: 'logs' },
-            body: {
-              stream: {
-                name: 'logs.forked2',
-              },
-              if: { always: {} },
-            },
-          },
-        })
-        .expect(403);
+      const response = await forkStream(
+        editorApiClient,
+        'logs',
+        { stream: { name: 'logs.forked2' }, if: { always: {} } },
+        403
+      );
 
       // make sure that the right permissions are validated
-      expect(response.body).to.eql({
+      expect(response).to.eql({
         statusCode: 403,
         error: 'Forbidden',
         message: 'User does not have sufficient permissions to execute these actions',

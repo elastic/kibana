@@ -90,6 +90,8 @@ export class ExecutionPlan {
         `Failed to plan Elasticsearch action execution: ${error.message}`
       );
     }
+
+    await this.validatePermissions();
   }
 
   plannedActions() {
@@ -99,7 +101,10 @@ export class ExecutionPlan {
   async validatePermissions() {
     const { actionsByType } = this;
 
-    const requiredPermissions = getRequiredPermissionsForActions(actionsByType);
+    const requiredPermissions = getRequiredPermissionsForActions({
+      actionsByType,
+      isServerless: this.dependencies.isServerless,
+    });
 
     // Check if we have any permissions to validate
     if (
@@ -137,9 +142,6 @@ export class ExecutionPlan {
   }
 
   async execute() {
-    // Validate permissions before executing
-    await this.validatePermissions();
-
     try {
       const {
         upsert_component_template,

@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+/* eslint-disable @typescript-eslint/naming-convention */
 
 import type { ActionsByType } from './types';
 
@@ -42,68 +43,95 @@ export function mergeRequiredPermissions(permissions: RequiredPermissions[]): Re
   return result;
 }
 
-export function getRequiredPermissionsForActions(actions: ActionsByType): RequiredPermissions {
+export function getRequiredPermissionsForActions({
+  actionsByType,
+  isServerless,
+}: {
+  actionsByType: ActionsByType;
+  isServerless: boolean;
+}): RequiredPermissions {
   const permissions: RequiredPermissions[] = [];
 
-  if (actions.upsert_component_template.length > 0) {
+  const {
+    upsert_component_template,
+    delete_component_template,
+    upsert_index_template,
+    delete_index_template,
+    upsert_ingest_pipeline,
+    delete_ingest_pipeline,
+    append_processor_to_ingest_pipeline,
+    delete_processor_from_ingest_pipeline,
+    upsert_datastream,
+    update_lifecycle,
+    upsert_write_index_or_rollover,
+    delete_datastream,
+    // we don't need to validate permissions for these actions
+    // since they are done by the kibana system user
+    upsert_dot_streams_document,
+    delete_dot_streams_document,
+    ...rest
+  } = actionsByType;
+  assertEmptyObject(rest);
+
+  if (upsert_component_template.length > 0) {
     permissions.push({
       cluster: ['manage_index_templates'],
       index: {},
     });
   }
 
-  if (actions.delete_component_template.length > 0) {
+  if (delete_component_template.length > 0) {
     permissions.push({
       cluster: ['manage_index_templates'],
       index: {},
     });
   }
 
-  if (actions.upsert_index_template.length > 0) {
+  if (upsert_index_template.length > 0) {
     permissions.push({
       cluster: ['manage_index_templates'],
       index: {},
     });
   }
 
-  if (actions.delete_index_template.length > 0) {
+  if (delete_index_template.length > 0) {
     permissions.push({
       cluster: ['manage_index_templates'],
       index: {},
     });
   }
 
-  if (actions.upsert_ingest_pipeline.length > 0) {
+  if (upsert_ingest_pipeline.length > 0) {
     permissions.push({
       cluster: ['manage_pipeline'],
       index: {},
     });
   }
 
-  if (actions.delete_ingest_pipeline.length > 0) {
+  if (delete_ingest_pipeline.length > 0) {
     permissions.push({
       cluster: ['manage_pipeline'],
       index: {},
     });
   }
 
-  if (actions.append_processor_to_ingest_pipeline.length > 0) {
+  if (append_processor_to_ingest_pipeline.length > 0) {
     permissions.push({
       cluster: ['manage_pipeline'],
       index: {},
     });
   }
 
-  if (actions.delete_processor_from_ingest_pipeline.length > 0) {
+  if (delete_processor_from_ingest_pipeline.length > 0) {
     permissions.push({
       cluster: ['manage_pipeline'],
       index: {},
     });
   }
 
-  if (actions.upsert_datastream.length > 0) {
+  if (upsert_datastream.length > 0) {
     const indexPermissions: Record<string, string[]> = {};
-    actions.upsert_datastream.forEach((action) => {
+    upsert_datastream.forEach((action) => {
       indexPermissions[action.request.name] = ['create_index'];
     });
     permissions.push({
@@ -112,14 +140,12 @@ export function getRequiredPermissionsForActions(actions: ActionsByType): Requir
     });
   }
 
-  if (actions.update_lifecycle.length > 0) {
+  if (update_lifecycle.length > 0) {
     const indexPermissions: Record<string, string[]> = {};
-    actions.update_lifecycle.forEach((action) => {
-      indexPermissions[action.request.name] = [
-        'manage_ilm',
-        'manage_data_stream_lifecycle',
-        'manage',
-      ];
+    update_lifecycle.forEach((action) => {
+      indexPermissions[action.request.name] = isServerless
+        ? ['manage_data_stream_lifecycle', 'manage']
+        : ['manage_ilm', 'manage_data_stream_lifecycle', 'manage'];
     });
     permissions.push({
       cluster: [],
@@ -127,9 +153,9 @@ export function getRequiredPermissionsForActions(actions: ActionsByType): Requir
     });
   }
 
-  if (actions.upsert_write_index_or_rollover.length > 0) {
+  if (upsert_write_index_or_rollover.length > 0) {
     const indexPermissions: Record<string, string[]> = {};
-    actions.upsert_write_index_or_rollover.forEach((action) => {
+    upsert_write_index_or_rollover.forEach((action) => {
       indexPermissions[action.request.name] = ['manage'];
     });
     permissions.push({
@@ -138,9 +164,9 @@ export function getRequiredPermissionsForActions(actions: ActionsByType): Requir
     });
   }
 
-  if (actions.delete_datastream.length > 0) {
+  if (delete_datastream.length > 0) {
     const indexPermissions: Record<string, string[]> = {};
-    actions.delete_datastream.forEach((action) => {
+    delete_datastream.forEach((action) => {
       indexPermissions[action.request.name] = ['delete_index'];
     });
     permissions.push({
@@ -150,4 +176,8 @@ export function getRequiredPermissionsForActions(actions: ActionsByType): Requir
   }
 
   return mergeRequiredPermissions(permissions);
+}
+
+function assertEmptyObject(object: Record<string, never>) {
+  // This is for type checking only
 }

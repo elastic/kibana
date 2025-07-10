@@ -6,6 +6,10 @@
  */
 
 export class StatusError extends Error {
+  /**
+   * Optional data that can be included with the error. It will be attached
+   * to the response as `attributes.data`.
+   */
   public data?: unknown;
   constructor(message: string, public readonly statusCode: number) {
     super(message);
