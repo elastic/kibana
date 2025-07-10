@@ -8,7 +8,10 @@
 import expect from '@kbn/expect';
 import { APP_ID as CASES_APP_ID } from '@kbn/cases-plugin/common/constants';
 import { deleteAllCaseItems } from '../../../cases_api_integration/common/lib/api';
-import { bulkGetUserProfiles, suggestUserProfiles } from '../../../cases_api_integration/common/lib/api/user_profiles';
+import {
+  bulkGetUserProfiles,
+  suggestUserProfiles,
+} from '../../../cases_api_integration/common/lib/api/user_profiles';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import {
   casesAllUser,
