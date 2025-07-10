@@ -78,6 +78,12 @@ export default ({ getService }: FtrProviderContext) => {
     return Promise.all(userPromises);
   }
 
+  async function deletePrivilegeTestUsers() {
+    const userPromises = ROLES.map((role) => userHelper.deleteUser(role.name));
+    const rolePromises = ROLES.map((role) => userHelper.deleteRole(role.name));
+    await Promise.all([...userPromises, ...rolePromises]);
+  }
+
   const getPrivilegesForUsername = async (username: string) =>
     privMonRoutesNoAuth.privilegesForUser({
       username,
@@ -88,6 +94,10 @@ export default ({ getService }: FtrProviderContext) => {
     describe('privileges checks', () => {
       before(async () => {
         await createPrivilegeTestUsers();
+      });
+
+      after(async () => {
+        await deletePrivilegeTestUsers();
       });
 
       it('should return has_all_required true for user with all priv_mon privileges', async () => {
@@ -113,53 +123,53 @@ export default ({ getService }: FtrProviderContext) => {
           kibana: {},
         });
       });
-    });
 
-    it('should return has_all_required false for user with no privileges', async () => {
-      const { body } = await getPrivilegesForUsername(READ_NO_INDEX_ROLE.name);
-      expect(body.has_all_required).to.eql(false);
-      expect(body.privileges).to.eql({
-        elasticsearch: {
-          index: {
-            '.alerts-security.alerts-default': {
-              read: false,
-            },
-            '.entity_analytics.monitoring.users-default': {
-              read: false,
-            },
-            '.ml-anomalies-shared': {
-              read: false,
-            },
-            'risk-score.risk-score-*': {
-              read: false,
+      it('should return has_all_required false for user with no privileges', async () => {
+        const { body } = await getPrivilegesForUsername(READ_NO_INDEX_ROLE.name);
+        expect(body.has_all_required).to.eql(false);
+        expect(body.privileges).to.eql({
+          elasticsearch: {
+            index: {
+              '.alerts-security.alerts-default': {
+                read: false,
+              },
+              '.entity_analytics.monitoring.users-default': {
+                read: false,
+              },
+              '.ml-anomalies-shared': {
+                read: false,
+              },
+              'risk-score.risk-score-*': {
+                read: false,
+              },
             },
           },
-        },
-        kibana: {},
+          kibana: {},
+        });
       });
-    });
 
-    it('should return has_all_required false for user with partial index privileges', async () => {
-      const { body } = await getPrivilegesForUsername(READ_PRIV_MON_INDICES_ROLE.name);
-      expect(body.has_all_required).to.eql(false);
-      expect(body.privileges).to.eql({
-        elasticsearch: {
-          index: {
-            '.alerts-security.alerts-default': {
-              read: false,
-            },
-            '.entity_analytics.monitoring.users-default': {
-              read: true,
-            },
-            '.ml-anomalies-shared': {
-              read: false,
-            },
-            'risk-score.risk-score-*': {
-              read: false,
+      it('should return has_all_required false for user with partial index privileges', async () => {
+        const { body } = await getPrivilegesForUsername(READ_PRIV_MON_INDICES_ROLE.name);
+        expect(body.has_all_required).to.eql(false);
+        expect(body.privileges).to.eql({
+          elasticsearch: {
+            index: {
+              '.alerts-security.alerts-default': {
+                read: false,
+              },
+              '.entity_analytics.monitoring.users-default': {
+                read: true,
+              },
+              '.ml-anomalies-shared': {
+                read: false,
+              },
+              'risk-score.risk-score-*': {
+                read: false,
+              },
             },
           },
-        },
-        kibana: {},
+          kibana: {},
+        });
       });
     });
   });
