@@ -61,7 +61,7 @@ function transformPanelIn(panel: DashboardPanel): {
   const { panelIndex, gridData, panelConfig, ...restPanel } = panel as DashboardPanel;
   const idx = panelIndex ?? uuidv4();
 
-  const transforms = embeddableService.getTransforms(panel.type);
+  const transforms = embeddableService?.getTransforms(panel.type);
   let transformedPanelConfig = panelConfig;
   let references: undefined | SavedObjectReference[];
   try {
