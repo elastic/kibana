@@ -524,6 +524,8 @@ export const GcpCredentialsForm = ({
         }
       />
       <EuiSpacer size="l" />
+      <ReadDocumentation url={cspIntegrationDocsNavigation.cspm.gcpGetStartedPath} />
+      <EuiSpacer />
       {setupFormat === GCP_SETUP_ACCESS.CLOUD_SHELL ? (
         <GoogleCloudShellSetup
           disabled={disabled}
@@ -547,9 +549,6 @@ export const GcpCredentialsForm = ({
           hasInvalidRequiredVars={hasInvalidRequiredVars}
         />
       )}
-
-      <EuiSpacer size="s" />
-      <ReadDocumentation url={cspIntegrationDocsNavigation.cspm.gcpGetStartedPath} />
       <EuiSpacer />
     </>
   );
