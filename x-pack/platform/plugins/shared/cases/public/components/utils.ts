@@ -6,6 +6,7 @@
  */
 
 import type { IconType } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { isEmpty } from 'lodash';
 import type {
   FieldConfig,
@@ -324,3 +325,11 @@ export const customFieldsFormSerializer = (
 
   return transformedCustomFields;
 };
+
+export const scaledMarkdownImages = css`
+  // prevent images from displaying at full scale
+  & .euiMarkdownFormat img {
+    max-width: 100%;
+    height: auto;
+  }
+`;
