@@ -108,7 +108,7 @@ export const registerEntityStoreFieldRetentionEnrichTask = ({
 
     if (!apiKey) {
       logger.info(
-        `[Entity Store] No API key found, return all entity types as enabled in ${namespace} namespace`
+        `[Entity Store] No API key found, returning all entity types as enabled in ${namespace} namespace`
       );
       return Object.values(EntityType);
     }
