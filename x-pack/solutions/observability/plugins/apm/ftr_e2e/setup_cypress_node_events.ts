@@ -6,7 +6,7 @@
  */
 import { ApmSynthtraceEsClient, createLogger, LogLevel } from '@kbn/apm-synthtrace';
 import { createEsClientForTesting } from '@kbn/test';
-// eslint-disable-next-line @kbn/imports/no_unresolvable_imports
+
 import { initPlugin } from '@frsource/cypress-plugin-visual-regression-diff/plugins';
 import { Readable } from 'stream';
 import type { ApmSynthtracePipelines } from '@kbn/apm-synthtrace-client';

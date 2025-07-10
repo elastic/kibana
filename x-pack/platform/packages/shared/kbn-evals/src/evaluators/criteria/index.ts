@@ -1,0 +1,104 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { BoundInferenceClient, ShortIdTable } from '@kbn/inference-common';
+import { ToolingLog } from '@kbn/tooling-log';
+import { sumBy, uniqBy } from 'lodash';
+import pRetry from 'p-retry';
+import { Evaluator } from '../../types';
+import { LlmCriteriaEvaluationPrompt } from './prompt';
+
+type EvaluationCriterionText = string;
+
+export interface EvaluationCriterionStructured {
+  id: string;
+  text: string;
+  score?: number;
+}
+
+export type EvaluationCriterion = EvaluationCriterionStructured | EvaluationCriterionText;
+
+export function createCriteriaEvaluator({
+  inferenceClient,
+  criteria,
+  log,
+}: {
+  inferenceClient: BoundInferenceClient;
+  criteria?: EvaluationCriterion[];
+  log: ToolingLog;
+}): Evaluator {
+  const table = new ShortIdTable();
+
+  const structuredCriteria =
+    criteria?.map((criterion) => {
+      if (typeof criterion === 'string') {
+        return {
+          id: table.take(criterion),
+          text: criterion,
+          score: 1,
+        };
+      }
+
+      return {
+        id: criterion.id,
+        text: criterion.text,
+        score: criterion.score ?? 1,
+      };
+    }) ?? [];
+
+  const criteriaById = new Map(structuredCriteria.map((criterion) => [criterion.id, criterion]));
+
+  return {
+    evaluate: async ({ input, output }) => {
+      async function scoreTask() {
+        const response = await inferenceClient.prompt({
+          prompt: LlmCriteriaEvaluationPrompt,
+          input: {
+            input: JSON.stringify(input),
+            output: JSON.stringify(output),
+            criteria: structuredCriteria.map((criterion) => {
+              return `${criterion.id}: ${criterion.text}`;
+            }),
+          },
+        });
+
+        const results = uniqBy(
+          response.toolCalls.flatMap((toolCall) => toolCall.function.arguments.criteria),
+          (criterion) => criterion.id
+        );
+
+        return results.map((result) => {
+          const criterion = criteriaById.get(result.id);
+          if (!criterion) {
+            throw new Error(`Could not find criterion for id "${result.id}"`);
+          }
+
+          return {
+            ...criterion,
+            result: result.result,
+          };
+        });
+      }
+
+      const results = await pRetry(scoreTask, {
+        retries: 0,
+        onFailedAttempt: (error) => {
+          log.error(new Error(`Failed to score task`, { cause: error }));
+        },
+      });
+
+      return {
+        explanation: null,
+        label: null,
+        metadata: {},
+        score: sumBy(results, (result) => (result.result !== 'FAIL' ? result.score || 1 : 0)),
+      };
+    },
+    kind: 'LLM',
+    name: 'criteria',
+  };
+}

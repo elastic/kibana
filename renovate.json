@@ -196,7 +196,8 @@
         "cache-manager",
         "cache-manager-fs-hash",
         "keyv",
-        "@types/cache-manager-fs-hash"
+        "@types/cache-manager-fs-hash",
+        "@arizeai/phoenix-client"
       ],
       "reviewers": [
         "team:appex-ai-infra"
@@ -3370,7 +3371,7 @@
       ],
       "minimumReleaseAge": "7 days",
       "enabled": true
-    },    
+    },
     {
       "groupName": "redux-actions",
       "matchDepNames": [

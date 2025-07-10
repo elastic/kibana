@@ -1397,6 +1397,7 @@
   },
   "devDependencies": {
     "@apidevtools/swagger-parser": "^12.0.0",
+    "@arizeai/phoenix-client": "^2.2.0",
     "@babel/cli": "^7.24.7",
     "@babel/core": "^7.24.7",
     "@babel/eslint-parser": "^7.24.7",
@@ -1542,6 +1543,8 @@
     "@kbn/eslint-plugin-i18n": "link:packages/kbn-eslint-plugin-i18n",
     "@kbn/eslint-plugin-imports": "link:packages/kbn-eslint-plugin-imports",
     "@kbn/eslint-plugin-telemetry": "link:packages/kbn-eslint-plugin-telemetry",
+    "@kbn/evals": "link:x-pack/platform/packages/shared/kbn-evals",
+    "@kbn/evals-suite-obs-ai-assistant": "link:x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant",
     "@kbn/expect": "link:src/platform/packages/shared/kbn-expect",
     "@kbn/failed-test-reporter-cli": "link:packages/kbn-failed-test-reporter-cli",
     "@kbn/find-used-node-modules": "link:packages/kbn-find-used-node-modules",

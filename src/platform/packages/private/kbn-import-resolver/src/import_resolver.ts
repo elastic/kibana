@@ -11,7 +11,12 @@ import Path from 'path';
 
 import Resolve from 'resolve';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { getPackages, type Package } from '@kbn/repo-packages';
+import {
+  getPackages,
+  type Package,
+  type ParsedPackageJson,
+  type PackageExports,
+} from '@kbn/repo-packages';
 
 import { safeStat, readFileSync } from './helpers/fs';
 import { ResolveResult } from './resolve_result';
@@ -202,6 +207,12 @@ export class ImportResolver {
       };
     } catch (error) {
       if (error && error.code === 'MODULE_NOT_FOUND') {
+        // fallback: attempt to resolve using the "exports" map in package.json
+        const expRes = this.tryExportsResolve(req, dirname);
+        if (expRes) {
+          return expRes;
+        }
+
         if (req === 'fsevents') {
           return {
             type: 'optional-and-missing',
@@ -228,6 +239,128 @@ export class ImportResolver {
     }
 
     return null;
+  }
+
+  private tryExportsResolve(req: string, dirname: string): ResolveResult | null {
+    // Only handle bare specifiers – ignore relative/absolute paths
+    if (req.startsWith('.') || Path.isAbsolute(req)) {
+      return null;
+    }
+
+    const parts = req.split('/');
+    const pkgName = parts[0].startsWith('@') ? `${parts[0]}/${parts[1]}` : parts[0];
+    const subPathParts = parts.slice(pkgName.startsWith('@') ? 2 : 1);
+    // If there is no sub-path then exports map does not apply
+    if (subPathParts.length === 0) {
+      return null;
+    }
+
+    let manifestPath: string | undefined;
+    try {
+      manifestPath = Resolve.sync(`${pkgName}/package.json`, {
+        basedir: dirname,
+        ...this.baseResolveOpts,
+      });
+    } catch {
+      return null;
+    }
+
+    const pkgDir = Path.dirname(manifestPath);
+    const pkgJsonRaw = this.baseResolveOpts.readFileSync(manifestPath);
+    if (!pkgJsonRaw) {
+      return null;
+    }
+
+    let pkgJson: ParsedPackageJson;
+    try {
+      pkgJson = JSON.parse(pkgJsonRaw);
+    } catch {
+      return null;
+    }
+
+    const exportsField = pkgJson.exports;
+
+    if (!exportsField) {
+      return null;
+    }
+
+    // The requested sub-path key in the exports map always starts with './'
+    const subPathKey = `./${subPathParts.join('/')}`;
+
+    // Find the export target path
+    const pickTarget = (source: PackageExports): string | undefined => {
+      if (!source) {
+        return undefined;
+      }
+
+      if (typeof source === 'string') {
+        return source;
+      }
+
+      if (Array.isArray(source)) {
+        for (const item of source) {
+          const target = pickTarget(item);
+          if (target) return target;
+        }
+        return undefined;
+      }
+
+      const target =
+        pickTarget(source.import) ??
+        pickTarget(source.require) ??
+        pickTarget(source.types) ??
+        pickTarget(source.default) ??
+        pickTarget(source[subPathKey]);
+
+      if (target) {
+        return target;
+      }
+
+      // try to match by wildcard
+      for (const [key, val] of Object.entries(source)) {
+        if (!key.includes('*')) continue;
+        // Split the key on the first '*', everything before is the prefix, after is the suffix
+        const starIndex = key.indexOf('*');
+        const prefix = key.slice(0, starIndex);
+        const suffix = key.slice(starIndex + 1);
+
+        if (subPathKey.startsWith(prefix) && subPathKey.endsWith(suffix)) {
+          // Extract the part matched by the wildcard
+          const wildcardSegment = subPathKey.slice(
+            prefix.length,
+            subPathKey.length - suffix.length
+          );
+
+          // Resolve the value similar to exact match logic
+          const resolved = pickTarget(val);
+
+          if (typeof resolved === 'string') {
+            return resolved.replace('*', wildcardSegment);
+          }
+        }
+      }
+
+      return undefined;
+    };
+
+    const target = pickTarget(exportsField);
+
+    if (!target) {
+      return null;
+    }
+
+    const absolute = Path.resolve(pkgDir, target);
+    const stat = this.safeStat(absolute);
+    if (!stat || !stat.isFile()) {
+      // We only support files for now
+      return null;
+    }
+
+    return {
+      type: 'file',
+      absolute,
+      nodeModule: pkgName,
+    };
   }
 
   /**

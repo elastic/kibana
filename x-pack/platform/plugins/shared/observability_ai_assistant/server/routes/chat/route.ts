@@ -250,7 +250,7 @@ async function chatComplete(
     },
   } = params;
 
-  resources.logger.debug(`Initializing chat request with ${messages.length} messages`);
+  resources.logger.info(`Initializing chat request with ${messages.length} messages`);
 
   const { client, isCloudEnabled, signal, simulateFunctionCalling } = await initializeChatRequest(
     resources
