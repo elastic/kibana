@@ -10,7 +10,7 @@ import type { Logger } from '@kbn/logging';
 import type { Stream } from 'openai/streaming';
 import type { ChatCompletionChunk } from 'openai/resources/chat/completions';
 import { getTokensFromBedrockConverseStream } from './get_token_count_from_bedrock_converse_stream';
-import type { SmithyStream } from './get_token_count_from_bedrock_converse';
+import type { SmithyStream } from './get_token_count_from_bedrock_client_send';
 import { getTokensFromBedrockClientSend } from './get_token_count_from_bedrock_client_send';
 import type { InvokeAsyncIteratorBody } from './get_token_count_from_invoke_async_iterator';
 import { getTokenCountFromInvokeAsyncIterator } from './get_token_count_from_invoke_async_iterator';
