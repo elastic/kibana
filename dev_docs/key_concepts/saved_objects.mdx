@@ -15,7 +15,26 @@ exposed to the user in the [Saved Object management UI](https://www.elastic.co/g
 Developers create and manage their Saved Objects using the SavedObjectClient, while other data in Elasticsearch should be accessed via the data plugin's search
 services.
 
-![image](../assets/saved_object_vs_data_indices.png)
+```mermaid
+graph LR
+    subgraph Elasticsearch
+        KSI[(Kibana System Index)]
+        
+        DI1[(Data Index 1)]
+        DI2[(Data Index 2)]
+        DI3[(Data Index 3)]
+    end
+    
+    subgraph Kibana
+        SOC[core.savedObjectsClient]
+        DS[data.search]
+    end
+    
+    SOC-->KSI
+    DS-->DI1
+    DS-->DI2
+    DS-->DI3
+```
 
 <DocLink id="kibDevTutorialSavedObject" text="Tutorial: Register a new Saved Object type" />
 
