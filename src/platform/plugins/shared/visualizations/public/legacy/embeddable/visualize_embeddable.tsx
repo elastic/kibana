@@ -12,7 +12,7 @@ import { Subscription, ReplaySubject, mergeMap } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { render } from 'react-dom';
-import { EuiLoadingChart } from '@elastic/eui';
+import { EuiLoadingChart, type UseEuiTheme } from '@elastic/eui';
 import { Filter, onlyDisabledFiltersChanged, Query, TimeRange } from '@kbn/es-query';
 import type { KibanaExecutionContext, SavedObjectAttributes } from '@kbn/core/public';
 import type { ErrorLike } from '@kbn/expressions-plugin/common';
@@ -34,6 +34,7 @@ import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/public';
 import { mapAndFlattenFilters } from '@kbn/data-plugin/public';
 import { isChartSizeEvent } from '@kbn/chart-expressions-common';
 import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
+import { css } from '@emotion/react';
 import { isFallbackDataView } from '../../visualize_app/utils';
 import { VisualizationMissedSavedObjectError } from '../../components/visualization_missed_saved_object_error';
 import VisualizationError from '../../components/visualization_error';
@@ -96,6 +97,14 @@ export type VisualizeSavedObjectAttributes = SavedObjectAttributes & {
 };
 export type VisualizeByValueInput = { attributes: VisualizeSavedObjectAttributes } & VisualizeInput;
 export type VisualizeByReferenceInput = { savedObjectId: string } & VisualizeInput;
+
+const warningStyles = ({ euiTheme }: UseEuiTheme) =>
+  css({
+    position: 'absolute',
+    zIndex: 2,
+    right: euiTheme.size.m,
+    bottom: euiTheme.size.m,
+  });
 
 /** @deprecated
  * VisualizeEmbeddable is no longer registered with the legacy embeddable system and is only
@@ -345,7 +354,9 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
       const { core } = this.deps.start();
       render(
         <KibanaRenderContextProvider {...core}>
-          <Warnings warnings={warnings || []} />
+          <div css={warningStyles}>
+            <Warnings warnings={warnings || []} />
+          </div>
         </KibanaRenderContextProvider>,
         this.warningDomNode
       );
@@ -427,7 +438,6 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     domNode.appendChild(div);
 
     const warningDiv = document.createElement('div');
-    warningDiv.className = 'visPanel__warnings';
     domNode.appendChild(warningDiv);
     this.warningDomNode = warningDiv;
 

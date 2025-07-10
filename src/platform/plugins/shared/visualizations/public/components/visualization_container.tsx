@@ -8,9 +8,8 @@
  */
 
 import React, { ReactNode, Suspense, lazy } from 'react';
-import { EuiLoadingChart, type UseEuiTheme } from '@elastic/eui';
+import { EuiLoadingChart, euiScrollBarStyles, type UseEuiTheme } from '@elastic/eui';
 import classNames from 'classnames';
-
 import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
@@ -41,6 +40,12 @@ const visualizationContainerStyles = {
       flex: '1 1 100%',
       flexDirection: 'column',
     }),
+  inEmbPanel: (euiThemeContext: UseEuiTheme) =>
+    css`
+      .embPanel & {
+        ${euiScrollBarStyles(euiThemeContext)}; /* Force a better looking scrollbar */
+      }
+    `,
 };
 
 export const VisualizationContainer = ({
@@ -62,7 +67,7 @@ export const VisualizationContainer = ({
   );
 
   return (
-    <div data-test-subj={dataTestSubj} className={classes} css={styles.base}>
+    <div data-test-subj={dataTestSubj} className={classes} css={[styles.base, styles.inEmbPanel]}>
       <Suspense fallback={fallBack}>
         {error ? (
           <VisualizationError onInit={() => handlers.done()} error={error} />
