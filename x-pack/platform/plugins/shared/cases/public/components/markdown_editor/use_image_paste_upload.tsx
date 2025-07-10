@@ -79,7 +79,7 @@ export function useImagePasteUpload({
 
   const [isUploading, setIsUploading] = useState(false);
   const [uploadPlaceholder, setUploadPlaceholder] = useState<string | null>(null);
-  const [uploadingFile, setUploadingFile] = useState<FileState | null>(null);
+  const [uploadingFileName, setUploadingFileName] = useState<string | null>(null);
   const textarea =
     !editorRef || typeof editorRef === 'function' ? null : editorRef.current?.textarea ?? null;
 
@@ -98,12 +98,12 @@ export function useImagePasteUpload({
   const onDone = useUploadDone({
     caseId,
     onSuccess: () => {
-      setUploadingFile(null);
+      setUploadingFileName(null);
       setUploadPlaceholder(null);
     },
     onFailure: (err) => {
       setErrors((cur) => [...cur, err]);
-      setUploadingFile(null);
+      setUploadingFileName(null);
       setIsUploading(false);
     },
   });
@@ -113,13 +113,15 @@ export function useImagePasteUpload({
     if (!uploadState.done$.observed) {
       subscriptions.push(
         uploadState.files$.subscribe((files: FileState[]) => {
-          if (files.length && files[0].status !== 'uploaded') setUploadingFile(files[0]);
+          if (files.length && files[0].status !== 'uploaded') {
+            setUploadingFileName(files[0].file.name);
+          }
         }),
         uploadState.done$.subscribe((files: DoneNotification[] | undefined) => {
           if (files?.length) {
             replacePlaceholder(files[0]);
           }
-          setUploadingFile(null);
+          setUploadingFileName(null);
           onDone(files);
         }),
         uploadState.error$.subscribe((err) => {
@@ -139,23 +141,17 @@ export function useImagePasteUpload({
 
   // Insert the temporary placeholder whilst the file is uploading
   useEffect(() => {
-    if (
-      !textarea ||
-      uploadingFile === null ||
-      uploadPlaceholder ||
-      !caseId ||
-      !uploadingFile.file
-    ) {
+    if (!textarea || !uploadingFileName || uploadPlaceholder || !caseId) {
       return;
     }
 
     const { selectionStart, selectionEnd } = textarea;
-    const placeholder = generatePlaceholderCopy(uploadingFile.file.name);
+    const placeholder = generatePlaceholderCopy(uploadingFileName);
     const before = field.value.slice(0, selectionStart);
     const after = field.value.slice(selectionEnd);
     field.setValue(before + placeholder + after);
     setUploadPlaceholder(placeholder);
-  }, [uploadingFile, uploadPlaceholder, textarea, field, caseId]);
+  }, [uploadingFileName, uploadPlaceholder, textarea, field, caseId]);
 
   const pasteListenerRef = useRef<(e: ClipboardEvent) => void>();
 
