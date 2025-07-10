@@ -29,7 +29,7 @@ export const DEFAULT_CDN_CONFIG: CdnConfig = {
   requestTimeout: 10_000,
 };
 
-export const INDICES_METADATA_CONFIGURATION_DEFAULTS: IndicesMetadataConfiguration = {
+export const DEFAULT_INDICES_METADATA_CONFIGURATION: IndicesMetadataConfiguration = {
   datastreams_threshold: 0,
   ilm_policy_query_size: 0,
   ilm_stats_query_size: 0,

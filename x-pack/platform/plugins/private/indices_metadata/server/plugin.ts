@@ -23,7 +23,7 @@ import type {
   IndicesMetadataPluginSetupDeps,
   IndicesMetadataPluginStartDeps,
 } from './plugin.types';
-import { DEFAULT_CDN_CONFIG, INDICES_METADATA_CONFIGURATION_DEFAULTS } from './lib/constants';
+import { DEFAULT_CDN_CONFIG, DEFAULT_INDICES_METADATA_CONFIGURATION } from './lib/constants';
 import { PluginConfig } from './config';
 import { CdnConfig } from './lib/services/artifact.types';
 import { ArtifactService } from './lib/services/artifact';
@@ -61,7 +61,7 @@ export class IndicesMetadataPlugin
       this.sender,
       this.receiver,
       this.configurationService,
-      INDICES_METADATA_CONFIGURATION_DEFAULTS
+      DEFAULT_INDICES_METADATA_CONFIGURATION
     );
   }
 

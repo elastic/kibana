@@ -216,7 +216,7 @@ export class MetadataReceiver {
   public async getIndexTemplatesStats(): Promise<IndexTemplateInfo[]> {
     const es = this.esClient();
 
-    this.logger.debug('Fetching datstreams');
+    this.logger.debug('Fetching index templates');
 
     const request: IndicesGetIndexTemplateRequest = {
       name: '*',
