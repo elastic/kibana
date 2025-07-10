@@ -309,7 +309,7 @@ exports[`Filter Lists Table renders with filter lists and selection supplied 1`]
                 class="euiTableCellContent emotion-euiTableCellContent-wrapText"
               >
                 <a
-                  href="/filter_lists/edit_filter_list/safe_domains"
+                  href="/settings/filter_lists/edit_filter_list/safe_domains"
                 >
                   safe_domains
                 </a>
@@ -400,7 +400,7 @@ exports[`Filter Lists Table renders with filter lists and selection supplied 1`]
                 class="euiTableCellContent emotion-euiTableCellContent-wrapText"
               >
                 <a
-                  href="/filter_lists/edit_filter_list/us_east_instances"
+                  href="/settings/filter_lists/edit_filter_list/us_east_instances"
                 >
                   us_east_instances
                 </a>
@@ -877,7 +877,7 @@ exports[`Filter Lists Table renders with filter lists supplied 1`] = `
                 class="euiTableCellContent emotion-euiTableCellContent-wrapText"
               >
                 <a
-                  href="/filter_lists/edit_filter_list/safe_domains"
+                  href="/settings/filter_lists/edit_filter_list/safe_domains"
                 >
                   safe_domains
                 </a>
@@ -968,7 +968,7 @@ exports[`Filter Lists Table renders with filter lists supplied 1`] = `
                 class="euiTableCellContent emotion-euiTableCellContent-wrapText"
               >
                 <a
-                  href="/filter_lists/edit_filter_list/us_east_instances"
+                  href="/settings/filter_lists/edit_filter_list/us_east_instances"
                 >
                   us_east_instances
                 </a>

@@ -252,6 +252,7 @@ exports[`ScopeExpression renders when no filter ID or type supplied 1`] = `
           is 
         </span>
          
+        
       </button>
     </div>
   </div>

@@ -10,6 +10,7 @@ import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { screen } from '@testing-library/react';
 
 import { Settings } from './settings';
+import { AnomalyDetectionSettingsContext } from './anomaly_detection_settings_context';
 
 jest.mock('../components/help_menu', () => ({
   HelpMenu: () => <div id="mockHelpMenu" />,
@@ -19,7 +20,10 @@ jest.mock('../contexts/kibana', () => ({
   useNotifications: () => ({
     toasts: { addDanger: jest.fn(), addError: jest.fn() },
   }),
-  useMlApi: jest.fn(),
+  useMlApi: () => ({
+    calendars: jest.fn().mockResolvedValue([]),
+    filters: { filtersStats: jest.fn().mockResolvedValue([]) },
+  }),
   useMlKibana: () => ({
     services: {
       docLinks: {
@@ -46,7 +50,18 @@ describe('Settings', () => {
     isCalendarsMngDisabled: boolean,
     isCalendarCreateDisabled: boolean
   ) {
-    renderWithI18n(<Settings />);
+    renderWithI18n(
+      <AnomalyDetectionSettingsContext.Provider
+        value={{
+          canGetFilters,
+          canCreateFilter,
+          canGetCalendars,
+          canCreateCalendar,
+        }}
+      >
+        <Settings />
+      </AnomalyDetectionSettingsContext.Provider>
+    );
 
     // Check filter lists manage button
     const filterMngButton = screen.getByTestId('mlFilterListsMngButton');

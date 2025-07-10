@@ -278,7 +278,7 @@ exports[`CalendarsListTable renders the table with all calendars 1`] = `
                 >
                   <a
                     data-test-subj="mlEditCalendarLink"
-                    href="/calendars_list/edit_calendar/farequote-calendar"
+                    href="/settings/calendars_list/edit_calendar/farequote-calendar"
                   >
                     farequote-calendar
                   </a>
@@ -353,7 +353,7 @@ exports[`CalendarsListTable renders the table with all calendars 1`] = `
                 >
                   <a
                     data-test-subj="mlEditCalendarLink"
-                    href="/calendars_list/edit_calendar/this-is-a-new-calendar"
+                    href="/settings/calendars_list/edit_calendar/this-is-a-new-calendar"
                   >
                     this-is-a-new-calendar
                   </a>

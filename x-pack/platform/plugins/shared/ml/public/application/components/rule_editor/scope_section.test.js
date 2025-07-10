@@ -17,7 +17,8 @@ jest.mock('../../capabilities/check_capabilities', () => ({
 }));
 
 jest.mock('../../contexts/kibana', () => ({
-  useCreateAndNavigateToManagementMlLink: jest.fn().mockReturnValue(jest.fn()),
+  useMlLocator: jest.fn(),
+  useNavigateToPath: jest.fn(),
 }));
 
 import React from 'react';

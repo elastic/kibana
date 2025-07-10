@@ -20,9 +20,9 @@ jest.mock('react-router-dom', () => ({
   Link: ({ to, children }) => <a href={to}>{children}</a>,
 }));
 
-// Mock the useCreateAndNavigateToManagementMlLink hook
+// Mock the useCreateAndNavigateToMlLink hook
 jest.mock('../../../contexts/kibana/use_create_url', () => ({
-  useCreateAndNavigateToManagementMlLink: () => jest.fn(),
+  useCreateAndNavigateToMlLink: () => jest.fn(),
 }));
 
 import { FilterListsTable } from './table';
