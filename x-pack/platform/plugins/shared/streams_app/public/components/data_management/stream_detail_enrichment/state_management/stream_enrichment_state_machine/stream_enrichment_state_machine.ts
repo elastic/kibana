@@ -44,6 +44,7 @@ import {
   getConfiguredProcessors,
   getDataSourcesSamples,
   getDataSourcesUrlState,
+  getProcessorsForSimulation,
   getStagedProcessors,
   getUpsertWiredFields,
   spawnDataSource,
@@ -81,7 +82,7 @@ export const streamEnrichmentMachine = setup({
         spawn('simulationMachine', {
           id: 'simulator',
           input: {
-            processors: getStagedProcessors(context),
+            processors: getProcessorsForSimulation(context),
             streamName: context.definition.stream.name,
           },
         }),
@@ -158,7 +159,7 @@ export const streamEnrichmentMachine = setup({
       'simulator',
       ({ context }, params: { type: StreamEnrichmentEvent['type'] }) => ({
         type: params.type,
-        processors: getStagedProcessors(context),
+        processors: getProcessorsForSimulation(context),
       })
     ),
     sendDataSourcesSamplesToSimulator: sendTo(
@@ -211,12 +212,6 @@ export const streamEnrichmentMachine = setup({
 
       if (!processorRef) return false;
       return processorRef.getSnapshot().context.isNew;
-    },
-    isDraftProcessor: ({ context }, params: { id: string }) => {
-      const processorRef = context.processorsRefs.find((p) => p.id === params.id);
-
-      if (!processorRef) return false;
-      return processorRef.getSnapshot().matches('draft');
     },
     isRootStream: ({ context }) => isRootStreamDefinition(context.definition.stream),
   },
@@ -408,17 +403,14 @@ export const streamEnrichmentMachine = setup({
               states: {
                 idle: {
                   on: {
-                    'processors.add': {
-                      guard: 'hasSimulatePrivileges',
-                      target: 'creating',
-                      actions: [
-                        { type: 'addProcessor', params: ({ event }) => event },
-                        { type: 'sendProcessorsEventToSimulator', params: ({ event }) => event },
-                      ],
-                    },
                     'processor.edit': {
                       guard: 'hasSimulatePrivileges',
                       target: 'editing',
+                    },
+                    'processors.add': {
+                      guard: 'hasSimulatePrivileges',
+                      target: 'creating',
+                      actions: [{ type: 'addProcessor', params: ({ event }) => event }],
                     },
                     'processors.reorder': {
                       guard: 'canReorderProcessors',
@@ -431,6 +423,7 @@ export const streamEnrichmentMachine = setup({
                 },
                 creating: {
                   id: 'creatingProcessor',
+                  entry: [{ type: 'sendProcessorsEventToSimulator', params: ({ event }) => event }],
                   on: {
                     'processor.change': {
                       actions: [
@@ -460,18 +453,33 @@ export const streamEnrichmentMachine = setup({
                 },
                 editing: {
                   id: 'editingProcessor',
+                  entry: [{ type: 'sendProcessorsEventToSimulator', params: ({ event }) => event }],
                   on: {
-                    'processor.cancel': 'idle',
+                    'processor.change': {
+                      actions: [
+                        { type: 'sendProcessorsEventToSimulator', params: ({ event }) => event },
+                      ],
+                    },
+                    'processor.cancel': {
+                      target: 'idle',
+                      actions: [
+                        { type: 'sendProcessorsEventToSimulator', params: ({ event }) => event },
+                      ],
+                    },
                     'processor.delete': {
                       target: 'idle',
                       actions: [
                         stopChild(({ event }) => event.id),
                         { type: 'deleteProcessor', params: ({ event }) => event },
+                        { type: 'sendProcessorsEventToSimulator', params: ({ event }) => event },
                       ],
                     },
                     'processor.save': {
                       target: 'idle',
-                      actions: [{ type: 'reassignProcessors' }],
+                      actions: [
+                        { type: 'reassignProcessors' },
+                        { type: 'sendProcessorsEventToSimulator', params: ({ event }) => event },
+                      ],
                     },
                   },
                 },

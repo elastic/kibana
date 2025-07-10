@@ -83,6 +83,30 @@ export function getStagedProcessors(context: StreamEnrichmentContextType) {
     .map((proc) => proc.context.processor);
 }
 
+/**
+ * Gets processors for simulation based on current editing state.
+ * - If no processor is being edited: returns all new processors
+ * - If a processor is being edited: returns new processors up to and including the one being edited
+ */
+export function getProcessorsForSimulation(context: StreamEnrichmentContextType) {
+  let newProcessorsSnapshots = context.processorsRefs
+    .map((procRef) => procRef.getSnapshot())
+    .filter((snapshot) => snapshot.context.isNew);
+
+  // Find if any processor is currently being edited
+  const editingProcessorIndex = newProcessorsSnapshots.findIndex(
+    (snapshot) => snapshot.matches({ configured: 'editing' }) || snapshot.matches('draft')
+  );
+
+  // If a processor is being edited, set new processors up to and including the one being edited
+  if (editingProcessorIndex !== -1) {
+    newProcessorsSnapshots = newProcessorsSnapshots.slice(0, editingProcessorIndex + 1);
+  }
+
+  // Return processors
+  return newProcessorsSnapshots.map((snapshot) => snapshot.context.processor);
+}
+
 export function getConfiguredProcessors(context: StreamEnrichmentContextType) {
   return context.processorsRefs
     .map((proc) => proc.getSnapshot())
