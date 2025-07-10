@@ -156,7 +156,8 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
           await observability.alerts.common.submitQuery('');
         });
 
-        it('Autocompletion works', async () => {
+        // FLAKY: https://github.com/elastic/kibana/issues/217739
+        it.skip('Autocompletion works', async () => {
           await browser.refresh();
           await observability.alerts.common.typeInQueryBar('kibana.alert.s');
           await observability.alerts.common.clickOnQueryBar();

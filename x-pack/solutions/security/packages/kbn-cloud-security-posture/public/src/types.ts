@@ -165,10 +165,10 @@ export interface FindingVulnerabilityFullFlyoutContentProps {
 
 interface BaseVulnerabilityFlyoutProps {
   vulnerabilityId: string | string[];
-  resourceId: string;
+  resourceId?: string;
   packageName: string | string[];
   packageVersion: string | string[];
-  eventId: string;
+  eventId?: string;
 }
 
 export type FindingsVulnerabilityPanelExpandableFlyoutPropsNonPreview = FlyoutPanelProps & {

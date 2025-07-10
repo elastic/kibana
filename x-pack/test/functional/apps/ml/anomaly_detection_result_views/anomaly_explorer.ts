@@ -8,8 +8,8 @@
 import type { Job, Datafeed } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
 import type { AnomalySwimLaneEmbeddableState } from '@kbn/ml-plugin/public';
 import { stringHash } from '@kbn/ml-string-hash';
+import { USER } from '@kbn/test-suites-xpack-platform/functional/services/ml/security_common';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
-import { USER } from '../../../services/ml/security_common';
 
 // @ts-expect-error not full interface
 const JOB_CONFIG: Job = {
