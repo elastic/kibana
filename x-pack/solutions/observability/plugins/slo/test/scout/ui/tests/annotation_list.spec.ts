@@ -34,12 +34,16 @@ test.describe('Annotations List', { tag: ['@ess'] }, () => {
   });
 
   test('validate annotation list', async ({ page }) => {
-    // eslint-disable-next-line playwright/no-wait-for-selector
-    await page.waitForSelector('text="Test annotation"');
+    await expect(
+      page.locator('[data-test-subj="annotation-marker-body"]:has-text("Test annotation")')
+    ).toBeVisible();
     await expect(page.locator('.euiTableRow')).toHaveCount(1);
     await page.locator('.echAnnotation__marker').hover();
-    // eslint-disable-next-line playwright/no-wait-for-selector
-    await page.waitForSelector('text="Test annotation description"');
+    await expect(
+      page.locator(
+        '[data-test-subj="annotation-tooltip-description"]:has-text("Test annotation description")'
+      )
+    ).toBeVisible();
   });
 
   test('Go to slos', async ({ page }) => {
@@ -52,8 +56,11 @@ test.describe('Annotations List', { tag: ['@ess'] }, () => {
 
   test('check that annotation is displayed', async ({ page }) => {
     await page.getByRole('button', { name: 'Test annotation description' }).hover();
-    // eslint-disable-next-line playwright/no-wait-for-selector
-    await page.waitForSelector('text="Test annotation description"');
+    await expect(
+      page.locator(
+        '[data-test-subj="annotation-tooltip-description"]:has-text("Test annotation description")'
+      )
+    ).toBeVisible();
   });
 
   test('update annotation', async ({ page }) => {
@@ -64,11 +71,15 @@ test.describe('Annotations List', { tag: ['@ess'] }, () => {
     await page.getByTestId('annotationMessage').blur();
     await page.getByTestId('annotationSaveButton').click();
     await page.getByTestId('toastCloseButton').click();
-    // eslint-disable-next-line playwright/no-wait-for-selector
-    await page.waitForSelector('text="Updated annotation"');
+    await expect(
+      page.locator('[data-test-subj="annotation-marker-body"]:has-text("Updated annotation")')
+    ).toBeVisible();
     await page.getByRole('button', { name: 'Updated annotation description' }).hover();
-    // eslint-disable-next-line playwright/no-wait-for-selector
-    await page.waitForSelector('text="Updated annotation description"');
+    await expect(
+      page.locator(
+        '[data-test-subj="annotation-tooltip-description"]:has-text("Updated annotation description")'
+      )
+    ).toBeVisible();
   });
 
   test('delete annotation', async ({ page }) => {
