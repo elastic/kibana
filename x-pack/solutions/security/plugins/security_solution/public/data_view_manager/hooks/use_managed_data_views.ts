@@ -8,9 +8,9 @@
 import { DataView } from '@kbn/data-views-plugin/public';
 import { useSelector } from 'react-redux';
 import { useMemo } from 'react';
+import { EXPLORE_DATA_VIEW_PREFIX } from '../../../common/constants';
 import { useKibana } from '../../common/lib/kibana';
 import { sharedStateSelector } from '../redux/selectors';
-import { EXPLORE_DATA_VIEW_PREFIX } from '../constants';
 
 /**
  * Returns the default security solution data view and alert data view

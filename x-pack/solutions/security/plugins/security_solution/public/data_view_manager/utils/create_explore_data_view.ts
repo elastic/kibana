@@ -7,7 +7,7 @@
 
 import type { DataViewsServicePublic, DataView } from '@kbn/data-views-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import { EXPLORE_DATA_VIEW_PREFIX } from '../constants';
+import { EXPLORE_DATA_VIEW_PREFIX } from '../../../common/constants';
 
 export const createExploreDataView = async (
   dependencies: {
