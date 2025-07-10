@@ -16,8 +16,9 @@ import type {
   SavedObjectsImportFailure,
   Logger,
 } from '@kbn/core/server';
-// import { RulesClient } from '@kbn/alerting-plugin/server/rules_client';
+import type { TypeOf } from '@kbn/config-schema';
 import type { createBodySchemaV1 as alertRuleBodySchema } from '@kbn/alerting-plugin/common/routes/rule/apis/create';
+import type { RulesClient } from '@kbn/alerting-plugin/server/rules_client';
 import { createListStream } from '@kbn/utils';
 import { partition, chunk, once } from 'lodash';
 
@@ -56,10 +57,11 @@ type SavedObjectToBe = Required<
   type: KibanaSavedObjectType;
 };
 
-type AlertRuleAsset = typeof alertRuleBodySchema & {
+interface AlertRuleAsset {
   id: string;
   type: KibanaSavedObjectType.alert;
-};
+  template: Omit<TypeOf<typeof alertRuleBodySchema>, 'actions'>;
+}
 type SavedObjectAsset = Pick<
   SavedObject,
   | 'id'
@@ -136,11 +138,18 @@ export function createSavedObjectKibanaAsset(asset: SavedObjectAsset): SavedObje
 export async function installKibanaAssets(options: {
   savedObjectsClient: SavedObjectsClientContract;
   savedObjectsImporter: SavedObjectsImporterContract;
+  alertingRulesClient: RulesClient;
   logger: Logger;
   pkgName: string;
   kibanaAssetsArchiveIterator: ReturnType<typeof getKibanaAssetsArchiveIterator>;
 }): Promise<SavedObjectsImportSuccess[]> {
-  const { kibanaAssetsArchiveIterator, savedObjectsClient, savedObjectsImporter, logger } = options;
+  const {
+    kibanaAssetsArchiveIterator,
+    savedObjectsClient,
+    savedObjectsImporter,
+    alertingRulesClient,
+    logger,
+  } = options;
 
   let assetsToInstall: ArchiveAssetEntry[] = [];
   let res: SavedObjectsImportSuccess[] = [];
@@ -177,7 +186,7 @@ export async function installKibanaAssets(options: {
     // split assets into SO installs and alert rule installs
     const { asSavedObjects, asAlertRules } = createInstallGroups(assetsToInstall);
 
-    await installAlertRules({ logger, alertRuleAssets: asAlertRules });
+    await installAlertRules({ logger, alertingRulesClient, alertRuleAssets: asAlertRules });
 
     const installedAssets = await installKibanaSavedObjects({
       logger,
@@ -239,6 +248,7 @@ export async function createDefaultIndexPatterns(
 
 export async function installKibanaAssetsAndReferencesMultispace({
   savedObjectsClient,
+  alertingRulesClient,
   logger,
   pkgName,
   pkgTitle,
@@ -249,6 +259,7 @@ export async function installKibanaAssetsAndReferencesMultispace({
   installAsAdditionalSpace,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
+  alertingRulesClient: RulesClient;
   logger: Logger;
   pkgName: string;
   pkgTitle: string;
@@ -262,6 +273,7 @@ export async function installKibanaAssetsAndReferencesMultispace({
     // Install in every space => upgrades
     const refs = await installKibanaAssetsAndReferences({
       savedObjectsClient,
+      alertingRulesClient,
       logger,
       pkgName,
       pkgTitle,
@@ -277,6 +289,7 @@ export async function installKibanaAssetsAndReferencesMultispace({
     )) {
       await installKibanaAssetsAndReferences({
         savedObjectsClient,
+        alertingRulesClient,
         logger,
         pkgName,
         pkgTitle,
@@ -292,6 +305,7 @@ export async function installKibanaAssetsAndReferencesMultispace({
 
   return installKibanaAssetsAndReferences({
     savedObjectsClient,
+    alertingRulesClient,
     logger,
     pkgName,
     pkgTitle,
@@ -305,6 +319,7 @@ export async function installKibanaAssetsAndReferencesMultispace({
 
 export async function installKibanaAssetsAndReferences({
   savedObjectsClient,
+  alertingRulesClient,
   logger,
   pkgName,
   pkgTitle,
@@ -315,6 +330,7 @@ export async function installKibanaAssetsAndReferences({
   installAsAdditionalSpace,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
+  alertingRulesClient: RulesClient;
   logger: Logger;
   pkgName: string;
   pkgTitle: string;
@@ -338,6 +354,7 @@ export async function installKibanaAssetsAndReferences({
     savedObjectsClient,
     logger,
     savedObjectsImporter,
+    alertingRulesClient,
     pkgName,
     kibanaAssetsArchiveIterator,
   });
@@ -637,11 +654,45 @@ function hasReferences(assetsToInstall: SavedObjectAsset[]) {
 
 async function installAlertRules({
   logger,
+  alertingRulesClient,
   alertRuleAssets,
 }: {
   logger: Logger;
+  alertingRulesClient: RulesClient;
   alertRuleAssets: AlertRuleAsset[];
 }): Promise<void> {
-  logger.debug(`no-op alert rule assets: ${JSON.stringify(alertRuleAssets, null, 2)}`);
-  return Promise.resolve();
+  logger.debug(`create alert rule assets: ${JSON.stringify(alertRuleAssets, null, 2)}`);
+  const { template: alertRule, id } = alertRuleAssets[0];
+
+  const {
+    rule_type_id: _ruleTypeId,
+    alert_delay: _alertDelay,
+    notify_when: _notifyWhen,
+    ...baseCreateData
+  } = alertRule;
+
+  const createData = {
+    ...baseCreateData,
+    alertTypeId: alertRule.rule_type_id,
+    flapping: alertRule.flapping
+      ? {
+          lookBackWindow: alertRule.flapping.look_back_window,
+          statusChangeThreshold: alertRule.flapping.status_change_threshold,
+        }
+      : undefined,
+    ...(alertRule.alert_delay ? { alertDelay: alertRule.alert_delay } : {}),
+    ...(alertRule.notify_when ? { notifyWhen: alertRule.notify_when } : {}),
+    actions: [],
+  };
+
+  try {
+    await alertingRulesClient.create({ data: createData, options: { id } });
+  } catch (e) {
+    if (e?.output?.statusCode === 409) {
+      await alertingRulesClient.update({
+        data: createData,
+        id,
+      });
+    }
+  }
 }
