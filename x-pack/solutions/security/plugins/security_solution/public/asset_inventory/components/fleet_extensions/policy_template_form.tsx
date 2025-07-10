@@ -293,7 +293,7 @@ export const CloudAssetInventoryPolicyTemplateForm =
                 }}
               >
                 <FormattedMessage
-                  id="xpack.csp.fleetIntegration.advancedOptionsLabel"
+                  id="xpack.securitySolution.fleetIntegration.advancedOptionsLabel"
                   defaultMessage="Advanced options"
                 />
               </EuiText>
