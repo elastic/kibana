@@ -233,6 +233,7 @@ export function useOnSubmit({
 
   // Used to render extension components only when package policy is initialized
   const [isInitialized, setIsInitialized] = useState<boolean>(false);
+  const [isFetchingBasePackage, setIsFetchingBasePackage] = useState<boolean>(false);
 
   const [agentPolicies, setAgentPolicies] = useState<AgentPolicy[]>([]);
   // New package policy state
@@ -309,7 +310,7 @@ export function useOnSubmit({
   );
 
   // Initial loading of package info
-  const [isFetching, setIsFetching] = useState<boolean>(false);
+
   useEffect(() => {
     async function init(randomNumber: number) {
       if (
@@ -323,8 +324,9 @@ export function useOnSubmit({
       }
 
       // Fetch all packagePolicies having the package name
-      if (!isFetching) {
-        setIsFetching(true);
+      if (!isFetchingBasePackage) {
+        // Prevent multiple calls to fetch base package
+        setIsFetchingBasePackage(true);
         const { data: packagePolicyData } = await sendGetPackagePolicies({
           perPage: SO_SEARCH_LIMIT,
           page: 1,
@@ -340,20 +342,9 @@ export function useOnSubmit({
           DEFAULT_PACKAGE_POLICY.description,
           integrationToEnable
         );
-        console.log(
-          'Fleet useOnSubmit init loaded basePackagePolicy ',
-          'number',
-          randomNumber,
-          'basePackagePolicy',
-          basePackagePolicy,
-          'packageInfo',
-          packageInfo,
-          'integrationToEnable',
-          integrationToEnable
-        );
         updatePackagePolicy(basePackagePolicy);
         setIsInitialized(true);
-        setIsFetching(false);
+        setIsFetchingBasePackage(false);
       }
     }
     if (!isInitialized) {
@@ -362,7 +353,7 @@ export function useOnSubmit({
       init(randomNumber);
     }
   }, [
-    isFetching,
+    isFetchingBasePackage,
     packageInfo,
     agentPolicies,
     updatePackagePolicy,
