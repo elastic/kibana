@@ -19,14 +19,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const resourceName1 = 'name-ng-1-Node';
   const resourceName2 = 'othername-june12-8-8-0-1';
 
-  const cloudAccountName1 = 'elastic-security-cloud-security-dev';
-  const cloudAccountName2 = 'elastic-security-cloud-security-gcp';
+  const cloudAccountId1 = '704479110758';
+  const cloudAccountId2 = '704479110759';
 
   const cloudProviderName1 = 'Amazon Web Services';
   const cloudProviderName2 = 'Google Cloud Platform';
 
-  // Failing: See https://github.com/elastic/kibana/issues/221220
-  describe.skip('Vulnerabilities Page - Grouping', function () {
+  describe('Vulnerabilities Page - Grouping', function () {
     this.tags(['cloud_security_posture_findings_grouping']);
     let findings: typeof pageObjects.findings;
 
@@ -48,23 +47,22 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await findings.vulnerabilitiesIndex.remove();
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/220578
-    describe.skip('Default Grouping', async () => {
+    describe('Default Grouping', async () => {
       it('groups vulnerabilities by cloud account and sort by number of vulnerabilities desc', async () => {
         const groupSelector = findings.groupSelector();
         await groupSelector.openDropDown();
-        await groupSelector.setValue('Cloud account');
+        await groupSelector.setValue('Cloud account ID');
 
         const grouping = await findings.findingsGrouping();
 
         const order = [
           {
-            cloudAccountName: cloudAccountName1,
+            cloudAccountId: cloudAccountId1,
             cloudProviderName: cloudProviderName1,
             findingsCount: '1',
           },
           {
-            cloudAccountName: cloudAccountName2,
+            cloudAccountId: cloudAccountId2,
             cloudProviderName: cloudProviderName2,
             findingsCount: '1',
           },
@@ -72,9 +70,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         await asyncForEach(
           order,
-          async ({ cloudAccountName, cloudProviderName, findingsCount }, index) => {
+          async ({ cloudAccountId, cloudProviderName, findingsCount }, index) => {
             const groupRow = await grouping.getRowAtIndex(index);
-            expect(await groupRow.getVisibleText()).to.contain(cloudAccountName);
+            expect(await groupRow.getVisibleText()).to.contain(cloudAccountId);
             expect(await groupRow.getVisibleText()).to.contain(cloudProviderName);
 
             expect(
@@ -136,7 +134,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await groupSelector.openDropDown();
         await groupSelector.setValue('None');
         await groupSelector.openDropDown();
-        await groupSelector.setValue('Resource');
+        await groupSelector.setValue('Resource ID');
         const grouping = await findings.findingsGrouping();
 
         const resourceOrder = [
@@ -179,7 +177,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await groupSelector.openDropDown();
         await groupSelector.setValue('None');
         await groupSelector.openDropDown();
-        await groupSelector.setValue('Resource');
+        await groupSelector.setValue('Resource ID');
 
         // Filter bar uses the field's customLabel in the DataView
 

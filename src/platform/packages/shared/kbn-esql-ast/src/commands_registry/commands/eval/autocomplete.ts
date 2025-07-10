@@ -6,12 +6,12 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { ESQLCommand, ESQLSingleAstItem, ESQLAstItem, ESQLFunction } from '../../../types';
+import type { ESQLCommand, ESQLSingleAstItem, ESQLAstItem } from '../../../types';
 import {
   pipeCompleteItem,
   commaCompleteItem,
   getNewUserDefinedColumnSuggestion,
-} from '../../utils/complete_items';
+} from '../../complete_items';
 import {
   suggestForExpression,
   getExpressionPosition,
@@ -24,11 +24,7 @@ import {
   ICommandCallbacks,
 } from '../../types';
 import { EDITOR_MARKER } from '../../../parser/constants';
-import { isColumn, isFunctionExpression, isIdentifier, isSource } from '../../../ast/is';
-
-function isAssignment(arg: ESQLAstItem): arg is ESQLFunction {
-  return isFunctionExpression(arg) && arg.name === '=';
-}
+import { isColumn, isAssignment, isIdentifier, isSource } from '../../../ast/is';
 
 function isMarkerNode(node: ESQLAstItem | undefined): boolean {
   if (Array.isArray(node)) {
