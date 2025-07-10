@@ -361,13 +361,13 @@ For more information, check:
 [%collapsible]
 ====
 *Details* +
-The Elastic Managed LLM may be automatically be selected as your default connector because of existing connector selection logic. 
+The Elastic Managed LLM may be automatically selected as your default connector because of existing connector selection logic. 
 This may occur if you had not previously selected a specific connector for any of the following reasons:
 
 - You only had one connector available and it was always automatically picked for your conversations.
-- You had multiple connectors available but didn’t make a specific selection and used the automatically picked connector for their conversations.
-- You previously selected a connector but cleared browser local storage or switched browsers/devices.
-- All of your existing connector names sort alphabetically after “Elastic Managed LLM connector."
+- You had multiple connectors available but didn’t make a specific selection and used the automatically picked connector for your conversations.
+- You previously selected a connector but cleared your browser's local storage or switched browsers or devices.
+- All of your existing connector names come after “Elastic Managed LLM connector" when sorted alphabetically.
 
 For more information, check https://github.com/elastic/docs-content/issues/2088[#2088]
 ====
