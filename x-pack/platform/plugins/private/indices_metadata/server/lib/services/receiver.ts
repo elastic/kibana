@@ -10,6 +10,7 @@ import type {
   IlmExplainLifecycleRequest,
   IlmGetLifecycleRequest,
   IndicesGetDataStreamRequest,
+  IndicesGetIndexTemplateRequest,
   IndicesGetRequest,
   IndicesStatsRequest,
 } from '@elastic/elasticsearch/lib/api/types';
@@ -20,7 +21,9 @@ import type {
   IlmPolicy,
   IlmStats,
   Index,
+  IndexSettings,
   IndexStats,
+  IndexTemplateInfo,
 } from './indices_metadata.types';
 import { chunkedBy } from '../utils';
 
@@ -37,7 +40,7 @@ export class MetadataReceiver {
     this._esClient = esClient;
   }
 
-  public async getIndices(): Promise<string[]> {
+  public async getIndices(): Promise<IndexSettings[]> {
     const es = this.esClient();
 
     this.logger.debug('Fetching indices');
@@ -45,14 +48,30 @@ export class MetadataReceiver {
     const request: IndicesGetRequest = {
       index: '*',
       expand_wildcards: ['open', 'hidden'],
-      filter_path: ['*.settings.index.provided_name'],
+      filter_path: [
+        '*.mappings._source.mode',
+        '*.settings.index.default_pipeline',
+        '*.settings.index.final_pipeline',
+        '*.settings.index.mode',
+        '*.settings.index.provided_name',
+      ],
     };
 
     return es.indices
       .get(request)
-      .then((indices) => Array.from(Object.keys(indices)))
+      .then((indices) =>
+        Object.entries(indices).map(([index, value]) => {
+          return {
+            index_name: index,
+            default_pipeline: value.settings?.index?.default_pipeline,
+            final_pipeline: value.settings?.index?.final_pipeline,
+            index_mode: value.settings?.index?.mode,
+            source_mode: value.mappings?._source?.mode,
+          } as IndexSettings;
+        })
+      )
       .catch((error) => {
-        this.logger.error('Error fetching indices', { error_message: error } as LogMeta);
+        this.logger.warn('Error fetching indices', { error_message: error } as LogMeta);
         throw error;
       });
   }
@@ -192,6 +211,54 @@ export class MetadataReceiver {
         throw error;
       }
     }
+  }
+
+  public async getIndexTemplatesStats(): Promise<IndexTemplateInfo[]> {
+    const es = this.esClient();
+
+    this.logger.debug('Fetching datstreams');
+
+    const request: IndicesGetIndexTemplateRequest = {
+      name: '*',
+      filter_path: [
+        'index_templates.name',
+        'index_templates.index_template.template.settings.index.mode',
+        'index_templates.index_template.data_stream',
+        'index_templates.index_template._meta.package.name',
+        'index_templates.index_template._meta.managed_by',
+        'index_templates.index_template._meta.beat',
+        'index_templates.index_template._meta.managed',
+        'index_templates.index_template.composed_of',
+        'index_templates.index_template.template.mappings._source.enabled',
+        'index_templates.index_template.template.mappings._source.includes',
+        'index_templates.index_template.template.mappings._source.excludes',
+      ],
+    };
+
+    return es.indices
+      .getIndexTemplate(request)
+      .then((response) =>
+        response.index_templates.map((props) => {
+          const datastream = props.index_template?.data_stream !== undefined;
+          return {
+            template_name: props.name,
+            index_mode: props.index_template.template?.settings?.index?.mode,
+            package_name: props.index_template._meta?.package?.name,
+            datastream,
+            managed_by: props.index_template._meta?.managed_by,
+            beat: props.index_template._meta?.beat,
+            is_managed: props.index_template._meta?.managed,
+            composed_of: props.index_template.composed_of,
+            source_enabled: props.index_template.template?.mappings?._source?.enabled,
+            source_includes: props.index_template.template?.mappings?._source?.includes ?? [],
+            source_excludes: props.index_template.template?.mappings?._source?.excludes ?? [],
+          } as IndexTemplateInfo;
+        })
+      )
+      .catch((error) => {
+        this.logger.warn('Error fetching index templates', { error_message: error } as LogMeta);
+        throw error;
+      });
   }
 
   public async *getIlmsPolicies(ilms: string[], chunkSize: number) {

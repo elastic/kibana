@@ -11,6 +11,8 @@ import type {
   DataStreams,
   IlmPolicies,
   IlmsStats,
+  IndexTemplatesStats,
+  IndicesSettings,
   IndicesStats,
 } from '../services/indices_metadata.types';
 
@@ -24,6 +26,14 @@ export const DATA_STREAM_EVENT: EventTypeOpts<DataStreams> = {
           datastream_name: {
             type: 'keyword',
             _meta: { description: 'Name of the data stream' },
+          },
+          ilm_policy: {
+            type: 'keyword',
+            _meta: { optional: true, description: 'ILM policy associated to the datastream' },
+          },
+          template: {
+            type: 'keyword',
+            _meta: { optional: true, description: 'Template associated to the datastream' },
           },
           indices: {
             type: 'array',
@@ -139,6 +149,47 @@ export const ILM_STATS_EVENT: EventTypeOpts<IlmsStats> = {
   },
 };
 
+export const INDEX_SETTINGS_EVENT: EventTypeOpts<IndicesSettings> = {
+  eventType: 'telemetry_index_settings_event',
+  schema: {
+    items: {
+      type: 'array',
+      items: {
+        properties: {
+          index_name: {
+            type: 'keyword',
+            _meta: { description: 'The name of the index.' },
+          },
+          index_mode: {
+            type: 'keyword',
+            _meta: { optional: true, description: 'Index mode.' },
+          },
+          source_mode: {
+            type: 'keyword',
+            _meta: { optional: true, description: 'Source mode.' },
+          },
+          default_pipeline: {
+            type: 'keyword',
+            _meta: {
+              optional: true,
+              description: 'Pipeline applied if no pipeline parameter specified when indexing.',
+            },
+          },
+          final_pipeline: {
+            type: 'keyword',
+            _meta: {
+              optional: true,
+              description:
+                'Pipeline applied to the document at the end of the indexing process, after the document has been indexed.',
+            },
+          },
+        },
+      },
+      _meta: { description: 'Index settings' },
+    },
+  },
+};
+
 export const ILM_POLICY_EVENT: EventTypeOpts<IlmPolicies> = {
   eventType: 'indices-metadata-ilm-policy-event',
   schema: {
@@ -249,12 +300,111 @@ export const ILM_POLICY_EVENT: EventTypeOpts<IlmPolicies> = {
   },
 };
 
+export const INDEX_TEMPLATES_EVENT: EventTypeOpts<IndexTemplatesStats> = {
+  eventType: 'telemetry_index_templates_event',
+  schema: {
+    items: {
+      type: 'array',
+      items: {
+        properties: {
+          template_name: {
+            type: 'keyword',
+            _meta: { description: 'The name of the template.' },
+          },
+          index_mode: {
+            type: 'keyword',
+            _meta: {
+              optional: true,
+              description: 'The index mode.',
+            },
+          },
+          datastream: {
+            type: 'boolean',
+            _meta: {
+              description: 'Datastream dataset',
+            },
+          },
+          package_name: {
+            type: 'keyword',
+            _meta: {
+              optional: true,
+              description: 'The package name',
+            },
+          },
+          managed_by: {
+            type: 'keyword',
+            _meta: {
+              optional: true,
+              description: 'Managed by',
+            },
+          },
+          beat: {
+            type: 'keyword',
+            _meta: {
+              optional: true,
+              description: 'Shipper name',
+            },
+          },
+          is_managed: {
+            type: 'boolean',
+            _meta: {
+              optional: true,
+              description: 'Whether the template is managed',
+            },
+          },
+          composed_of: {
+            type: 'array',
+            items: {
+              type: 'keyword',
+              _meta: {
+                description: 'List of template components',
+              },
+            },
+            _meta: { description: '' },
+          },
+          source_enabled: {
+            type: 'boolean',
+            _meta: {
+              optional: true,
+              description:
+                'The _source field contains the original JSON document body that was provided at index time',
+            },
+          },
+          source_includes: {
+            type: 'array',
+            items: {
+              type: 'keyword',
+              _meta: {
+                description: 'Fields included in _source, if enabled',
+              },
+            },
+            _meta: { description: '' },
+          },
+          source_excludes: {
+            type: 'array',
+            items: {
+              type: 'keyword',
+              _meta: {
+                description: '',
+              },
+            },
+            _meta: { description: 'Fields excludes from _source, if enabled' },
+          },
+        },
+      },
+      _meta: { description: 'Index templates info' },
+    },
+  },
+};
+
 export const registerEbtEvents = (analytics: AnalyticsServiceSetup) => {
   const events: Array<EventTypeOpts<{}>> = [
     DATA_STREAM_EVENT,
     INDEX_STATS_EVENT,
     ILM_STATS_EVENT,
     ILM_POLICY_EVENT,
+    INDEX_TEMPLATES_EVENT,
+    INDEX_SETTINGS_EVENT,
   ];
 
   events.forEach((eventConfig) => analytics.registerEventType(eventConfig));

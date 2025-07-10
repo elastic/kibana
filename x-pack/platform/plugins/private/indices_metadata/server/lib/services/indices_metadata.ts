@@ -18,7 +18,11 @@ import type {
   DataStreams,
   IlmPolicies,
   IlmsStats,
+  IndexSettings,
+  IndexTemplateInfo,
+  IndexTemplatesStats,
   IndicesMetadataConfiguration,
+  IndicesSettings,
   IndicesStats,
 } from './indices_metadata.types';
 
@@ -27,6 +31,8 @@ import {
   ILM_POLICY_EVENT,
   ILM_STATS_EVENT,
   INDEX_STATS_EVENT,
+  INDEX_SETTINGS_EVENT,
+  INDEX_TEMPLATES_EVENT,
 } from '../ebt/events';
 import { MetadataReceiver } from './receiver';
 import { MetadataSender } from './sender';
@@ -95,61 +101,52 @@ export class IndicesMetadataService {
     this.logger.debug('About to publish indices metadata');
 
     // 1. Get cluster stats and list of indices and datastreams
-    const [indices, dataStreams] = await Promise.all([
+    const [indicesSettings, dataStreams, indexTemplates] = await Promise.all([
       this.receiver.getIndices(),
       this.receiver.getDataStreams(),
+      this.receiver.getIndexTemplatesStats(),
     ]);
+
+    const indices = indicesSettings.map((index) => index.index_name);
 
     // 2. Publish datastreams stats
     const dsCount = this.publishDatastreamsStats(
       dataStreams.slice(0, this.configuration.datastreams_threshold)
     );
 
-    // 3. Get and publish indices stats
+    // 3. Publish indices settings
+    const indicesSettingsCount = this.publishIndicesSettings(
+      indicesSettings.slice(0, this.configuration.indices_settings_threshold)
+    );
+
+    // 4. Get and publish indices stats
     const indicesCount: number = await this.publishIndicesStats(
       indices.slice(0, this.configuration.indices_threshold)
-    )
-      .then((count) => {
-        return count;
-      })
-      .catch((error) => {
-        this.logger.error('Error getting indices stats', { error });
-        return 0;
-      });
+    );
 
-    // 4. Get ILM stats and publish them
+    // 5. Get ILM stats and publish them
     let ilmNames = new Set<string>();
-
     if (await this.receiver.isIlmStatsAvailable()) {
-      ilmNames = await this.publishIlmStats(
-        indices.slice(0, this.configuration.ilm_stats_query_size)
-      )
-        .then((names) => {
-          return names;
-        })
-        .catch((error) => {
-          this.logger.error('Error getting ILM stats', { error });
-          return new Set<string>();
-        });
+      ilmNames = await this.publishIlmStats(indices.slice(0, this.configuration.indices_threshold));
     } else {
       this.logger.debug('ILM explain API is not available');
     }
 
-    // 5. Publish ILM policies
-    const policyCount = await this.publishIlmPolicies(ilmNames)
-      .then((count) => {
-        return count;
-      })
-      .catch((error) => {
-        this.logger.warn('Error getting ILM policies', { error });
-        return 0;
-      });
+    // 6. Publish ILM policies
+    const policyCount = await this.publishIlmPolicies(ilmNames);
+
+    // 7. Publish index templates
+    const indexTemplatesCount: number = await this.publishIndexTemplatesStats(
+      indexTemplates.slice(0, this.configuration.indices_threshold)
+    );
 
     this.logger.debug('EBT events sent', {
       datastreams: dsCount,
       ilms: ilmNames.size,
       indices: indicesCount,
+      indicesSettings: indicesSettingsCount,
       policies: policyCount,
+      templates: indexTemplatesCount,
     } as LogMeta);
   }
 
@@ -234,6 +231,15 @@ export class IndicesMetadataService {
     return indicesStats.items.length;
   }
 
+  private publishIndicesSettings(settings: IndexSettings[]): number {
+    const indicesSettings: IndicesSettings = {
+      items: settings,
+    };
+
+    this.sender.reportEBT(INDEX_SETTINGS_EVENT, indicesSettings);
+    this.logger.debug('Indices settings sent', { count: indicesSettings.items.length } as LogMeta);
+    return indicesSettings.items.length;
+  }
   private async publishIlmStats(indices: string[]): Promise<Set<string>> {
     const ilmNames = new Set<string>();
     const ilmsStats: IlmsStats = {
@@ -267,5 +273,18 @@ export class IndicesMetadataService {
     this.sender.reportEBT(ILM_POLICY_EVENT, ilmPolicies);
     this.logger.debug('ILM policies sent', { count: ilmPolicies.items.length } as LogMeta);
     return ilmPolicies.items.length;
+  }
+
+  async publishIndexTemplatesStats(indexTemplates: IndexTemplateInfo[]): Promise<number> {
+    const templateStats: IndexTemplatesStats = {
+      items: indexTemplates,
+    };
+
+    this.sender.reportEBT(INDEX_TEMPLATES_EVENT, templateStats);
+    this.logger.debug('Index templates stats sent', {
+      count: templateStats.items.length,
+    } as LogMeta);
+
+    return templateStats.items.length;
   }
 }
