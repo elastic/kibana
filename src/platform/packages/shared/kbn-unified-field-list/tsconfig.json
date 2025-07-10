@@ -36,6 +36,7 @@
     "@kbn/fields-metadata-plugin",
     "@kbn/esql-utils",
     "@kbn/restorable-state",
+    "@kbn/css-utils"
   ],
   "exclude": ["target/**/*"]
 }

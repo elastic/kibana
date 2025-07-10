@@ -13,10 +13,16 @@ import {
   ESQLCommand,
   ESQLCommandOption,
   ESQLMessage,
+  EsqlQuery,
   ESQLSource,
   isIdentifier,
-  parse,
+  isOptionNode,
+  isSource,
+  isColumn,
+  isTimeInterval,
+  isFunctionExpression,
   walk,
+  Walker,
   esqlCommandRegistry,
   ErrorTypes,
 } from '@kbn/esql-ast';
@@ -30,12 +36,7 @@ import {
   areFieldAndUserDefinedColumnTypesCompatible,
   getColumnExists,
   hasWildcard,
-  isColumnItem,
-  isFunctionItem,
-  isOptionItem,
   isParametrized,
-  isSourceItem,
-  isTimeIntervalItem,
 } from '../shared/helpers';
 import type { ESQLCallbacks } from '../shared/types';
 import { collectUserDefinedColumns } from '../shared/user_defined_columns';
@@ -127,30 +128,33 @@ async function validateAst(
 ): Promise<ValidationResult> {
   const messages: ESQLMessage[] = [];
 
-  const parsingResult = parse(queryString);
-
-  const { ast } = parsingResult;
+  const parsingResult = EsqlQuery.fromSrc(queryString);
+  const rootCommands = parsingResult.ast.commands;
 
   const [sources, availableFields, availablePolicies, joinIndices] = await Promise.all([
     // retrieve the list of available sources
-    retrieveSources(ast, callbacks),
+    retrieveSources(rootCommands, callbacks),
     // retrieve available fields (if a source command has been defined)
-    retrieveFields(queryString, ast, callbacks),
+    retrieveFields(queryString, rootCommands, callbacks),
     // retrieve available policies (if an enrich command has been defined)
-    retrievePolicies(ast, callbacks),
+    retrievePolicies(rootCommands, callbacks),
     // retrieve indices for join command
     callbacks?.getJoinIndices?.(),
   ]);
 
   if (availablePolicies.size) {
-    const fieldsFromPoliciesMap = await retrievePoliciesFields(ast, availablePolicies, callbacks);
+    const fieldsFromPoliciesMap = await retrievePoliciesFields(
+      rootCommands,
+      availablePolicies,
+      callbacks
+    );
     fieldsFromPoliciesMap.forEach((value, key) => availableFields.set(key, value));
   }
 
-  if (ast.some(({ name }) => ['grok', 'dissect'].includes(name))) {
+  if (rootCommands.some(({ name }) => ['grok', 'dissect'].includes(name))) {
     const fieldsFromGrokOrDissect = await retrieveFieldsFromStringSources(
       queryString,
-      ast,
+      rootCommands,
       callbacks
     );
     fieldsFromGrokOrDissect.forEach((value, key) => {
@@ -162,10 +166,10 @@ async function validateAst(
     });
   }
 
-  const userDefinedColumns = collectUserDefinedColumns(ast, availableFields, queryString);
+  const userDefinedColumns = collectUserDefinedColumns(rootCommands, availableFields, queryString);
   // notify if the user is rewriting a column as userDefinedColumn with another type
   messages.push(...validateFieldsShadowing(availableFields, userDefinedColumns));
-  messages.push(...validateUnsupportedTypeFields(availableFields, ast));
+  messages.push(...validateUnsupportedTypeFields(availableFields, rootCommands));
 
   const references: ReferenceMaps = {
     sources,
@@ -175,16 +179,16 @@ async function validateAst(
     query: queryString,
     joinIndices: joinIndices?.indices || [],
   };
-  let seenFork = false;
-  for (const [index, command] of ast.entries()) {
-    if (command.name === 'fork') {
-      if (seenFork) {
-        messages.push(errors.tooManyForks(command));
-      } else {
-        seenFork = true;
-      }
-    }
-    const commandMessages = validateCommand(command, references, ast, index);
+
+  const allCommands = Walker.commands(rootCommands);
+  const forks = allCommands.filter(({ name }) => name === 'fork');
+
+  if (forks.length > 1) {
+    messages.push(errors.tooManyForks(forks[1] as any));
+  }
+
+  for (const [index, command] of rootCommands.entries()) {
+    const commandMessages = validateCommand(command, references, rootCommands, index);
     messages.push(...commandMessages);
   }
 
@@ -247,7 +251,7 @@ function validateCommand(
       // Now validate arguments
       for (const arg of command.args) {
         if (!Array.isArray(arg)) {
-          if (isFunctionItem(arg)) {
+          if (isFunctionExpression(arg)) {
             messages.push(
               ...validateFunction({
                 fn: arg,
@@ -258,15 +262,15 @@ function validateCommand(
                 currentCommandIndex,
               })
             );
-          } else if (isOptionItem(arg)) {
+          } else if (isOptionNode(arg)) {
             messages.push(...validateOption(arg, command, references));
-          } else if (isColumnItem(arg) || isIdentifier(arg)) {
+          } else if (isColumn(arg) || isIdentifier(arg)) {
             if (command.name === 'stats' || command.name === 'inlinestats') {
               messages.push(errors.unknownAggFunction(arg));
             } else {
               messages.push(...validateColumnForCommand(arg, command.name, references));
             }
-          } else if (isTimeIntervalItem(arg)) {
+          } else if (isTimeInterval(arg)) {
             messages.push(
               getMessageFromId({
                 messageId: 'unsupportedTypeForCommand',
@@ -282,7 +286,7 @@ function validateCommand(
         }
       }
 
-      const sources = command.args.filter((arg) => isSourceItem(arg)) as ESQLSource[];
+      const sources = command.args.filter((arg) => isSource(arg)) as ESQLSource[];
       messages.push(...validateSources(sources, references));
     }
   }
@@ -312,9 +316,9 @@ function validateOption(
     if (Array.isArray(arg)) {
       continue;
     }
-    if (isColumnItem(arg)) {
+    if (isColumn(arg)) {
       messages.push(...validateColumnForCommand(arg, command.name, referenceMaps));
-    } else if (isFunctionItem(arg)) {
+    } else if (isFunctionExpression(arg)) {
       messages.push(
         ...validateFunction({
           fn: arg,

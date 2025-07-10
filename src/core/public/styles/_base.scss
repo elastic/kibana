@@ -29,9 +29,3 @@
 .euiBody--hasFlyout .euiBottomBar--fixed {
   margin-left: var(--euiCollapsibleNavOffset, 0);
 }
-
-// Temporary fix for EuiPageHeader with a bottom border but no tabs or padding
-// Will fix in EUI -- @cchaos
-.euiPageHeader--bottomBorder:not(.euiPageHeader--tabsAtBottom):not([class*='euiPageHeader--padding']) {
-  padding-bottom: $euiSizeL;
-}
