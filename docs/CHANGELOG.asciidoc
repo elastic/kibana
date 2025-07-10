@@ -110,6 +110,7 @@ IMPORTANT: The 8.18.3 release contains fixes for potential security vulnerabilit
 [[known-issues-8.18.3]]
 === Known issues
 include::CHANGELOG.asciidoc[tag=known-issue-1508]
+include::CHANGELOG.asciidoc[tag=known-issue-2088]
 
 [float]
 [[enhancement-v8.18.3]]
@@ -180,6 +181,7 @@ The 8.18.2 release includes the following known issues and fixes.
 === Known issues
 
 include::CHANGELOG.asciidoc[tag=known-issue-1508]
+include::CHANGELOG.asciidoc[tag=known-issue-2088]
 
 // tag::known-issue-222127[]
 .Upgrading Kibana from 8.x to 8.18.2 fails due to a configuration conflict in the kibana.yml file.
@@ -234,6 +236,7 @@ The 8.18.1 release includes the following known issues, enhancements and fixes.
 include::CHANGELOG.asciidoc[tag=known-issue-320]
 include::CHANGELOG.asciidoc[tag=known-issue-220339]
 include::CHANGELOG.asciidoc[tag=known-issue-1508]
+include::CHANGELOG.asciidoc[tag=known-issue-2088]
 
 [float]
 [[enhancement-v8.18.1]]
@@ -352,6 +355,23 @@ For more information, check:
 
 ====
 // end::known-issue-220339[]
+
+// tag::known-issue-2088[]
+.Observability AI Assistant - Elastic Managed LLM may be automatically selected as default connector
+[%collapsible]
+====
+*Details* +
+The Elastic Managed LLM may be automatically be selected as your default connector because of existing connector selection logic. 
+This may occur if you had not previously selected a specific connector for any of the following reasons:
+
+- You only had one connector available and it was always automatically picked for your conversations.
+- You had multiple connectors available but didn’t make a specific selection and used the automatically picked connector for their conversations.
+- You previously selected a connector but cleared browser local storage or switched browsers/devices.
+- All of your existing connector names sort alphabetically after “Elastic Managed LLM connector."
+
+For more information, check https://github.com/elastic/docs-content/issues/2088[#2088]
+====
+// end::know-issue-2088[]
 
 // tag::known-issue-211850[]
 .Upgrade Assistant - Rollup jobs need to be stopped before rollup indices are reindexed.
