@@ -141,14 +141,6 @@ export class CasePlugin
     }
 
     if (plugins.taskManager) {
-      if (this.caseConfig.incrementalId.enabled) {
-        this.incrementalIdTaskManager = new IncrementalIdTaskManager(
-          plugins.taskManager,
-          this.caseConfig.incrementalId,
-          this.logger
-        );
-      }
-
       if (plugins.usageCollection) {
         createCasesTelemetry({
           core,
@@ -157,6 +149,15 @@ export class CasePlugin
           logger: this.logger,
           kibanaVersion: this.kibanaVersion,
         });
+      }
+
+      if (this.caseConfig.incrementalId.enabled) {
+        this.incrementalIdTaskManager = new IncrementalIdTaskManager(
+          plugins.taskManager,
+          this.caseConfig.incrementalId,
+          this.logger,
+          plugins.usageCollection
+        );
       }
     }
 
