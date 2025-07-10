@@ -134,6 +134,23 @@ $$$action-config-email-domain-allowlist$$$
 
     Data type: `string`
 
+`xpack.actions.email.recipient_allowlist` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}") {applies_to}`stack: ga 9.2`
+:    A list of allowed email recipient (`to`, `cc`, or `bcc`) patterns that can be used with email connectors. If you attempt to send an email to a recipient that does not match the allowed patterns, the action will fail. The failure message indicates that the email is not allowed.
+
+    ::::{warning}
+    This setting cannot be used with `xpack.actions.email.domain_allowlist`.
+    ::::
+
+    Data type: `string`
+
+    For example:
+
+    ```yaml
+    xpack.actions.email.recipient_allowlist: ["admin-*@company.org", "sales-*@example.com"]
+    ```
+
+    Only "to", "cc", or "bcc" email addresses that match the listed patterns will be accepted. For example, "admin-network@company.org" or "sales-north@example.com".
+
 `xpack.actions.email.services.ses.host` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :    The SMTP endpoint for an Amazon Simple Email Service (SES) service provider that can be used by email connectors.
 

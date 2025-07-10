@@ -282,6 +282,32 @@ groups:
             ess: all
          # example: |
 
+      - setting: xpack.actions.email.recipient_allowlist
+        id: action-config-email-recipient-allowlist
+        description: |
+          A list of allowed email recipient (`to`, `cc`, or `bcc`) patterns that can be used with email connectors. If you attempt to send an email to a recipient that does not match the allowed patterns, the action will fail. The failure message indicates that the email is not allowed.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        warning: "This setting cannot be used with `xpack.actions.email.domain_allowlist`."
+        # important: ""
+        datatype: string
+        # default:
+        applies_to:
+          stack: ga 9.2
+          deployment:
+            self: ga
+            ess: ga
+        example: |
+          For example:
+
+          ```yaml
+          xpack.actions.email.recipient_allowlist:["admin-*@company.org", "sales-*@example.com"]
+          ```
+
+          Only "to", "cc", or "bcc" email addresses that match the listed patterns will be accepted. For example, "admin-network@company.org" or "sales-north@example.com".
+
       - setting: xpack.actions.email.services.ses.host
         id: action-config-email-services-ses-host
         description: |
