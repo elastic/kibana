@@ -14,6 +14,7 @@ import {
   AdvancedUiActionsStart,
 } from '@kbn/ui-actions-enhanced-plugin/public';
 import { DashboardDrilldownsService } from './services';
+import { setKibanaServices, untilPluginStartServicesReady } from './services/kibana_services';
 
 export interface SetupDependencies {
   uiActionsEnhanced: AdvancedUiActionsSetup;
@@ -50,6 +51,10 @@ export class DashboardEnhancedPlugin
   }
 
   public start(core: CoreStart, plugins: StartDependencies): StartContract {
+    setKibanaServices(core, plugins);
+
+    untilPluginStartServicesReady().then(() => {});
+
     return {};
   }
 

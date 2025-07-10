@@ -13,7 +13,7 @@ import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import { type PresentationContainer } from '@kbn/presentation-containers';
-import { openLazyFlyout, type TracksOverlays } from '@kbn/presentation-util';
+import { openLazyFlyout } from '@kbn/presentation-util';
 import {
   apiCanAccessViewMode,
   apiHasParentApi,
@@ -28,14 +28,16 @@ import {
   type HasType,
   apiHasUniqueId,
 } from '@kbn/presentation-publishing';
-import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import React from 'react';
+import { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
 import { StartDependencies } from '../../../../plugin';
 import {
   createDrilldownTemplatesFromSiblings,
   DRILLDOWN_ACTION_GROUP,
   ensureNestedTriggers,
 } from '../drilldown_shared';
+import { coreServices, uiActionsEnhancedServices } from '../../../kibana_services';
 
 export const OPEN_FLYOUT_ADD_DRILLDOWN = 'OPEN_FLYOUT_ADD_DRILLDOWN';
 
@@ -45,7 +47,7 @@ export interface OpenFlyoutAddDrilldownParams {
 
 export type FlyoutCreateDrilldownActionApi = CanAccessViewMode &
   Required<HasDynamicActions> &
-  HasParentApi<HasType & Partial<PresentationContainer & TracksOverlays>> &
+  HasParentApi<HasType & Partial<PresentationContainer>> &
   HasSupportedTriggers &
   Partial<HasUniqueId>;
 
@@ -55,25 +57,17 @@ const isApiCompatible = (api: unknown | null): api is FlyoutCreateDrilldownActio
   apiCanAccessViewMode(api) &&
   apiHasSupportedTriggers(api);
 
-export class FlyoutCreateDrilldownAction implements Action<EmbeddableApiContext> {
-  public readonly type = OPEN_FLYOUT_ADD_DRILLDOWN;
-  public readonly id = OPEN_FLYOUT_ADD_DRILLDOWN;
-  public order = 12;
-  public grouping = [DRILLDOWN_ACTION_GROUP];
-
-  constructor(protected readonly params: OpenFlyoutAddDrilldownParams) {}
-
-  public getDisplayName() {
-    return i18n.translate('xpack.dashboard.FlyoutCreateDrilldownAction.displayName', {
+export const flyoutCreateDrilldownAction: ActionDefinition<EmbeddableApiContext> = {
+  id: OPEN_FLYOUT_ADD_DRILLDOWN,
+  type: OPEN_FLYOUT_ADD_DRILLDOWN,
+  order: 12,
+  getIconType: () => 'plusInCircle',
+  grouping: [DRILLDOWN_ACTION_GROUP],
+  getDisplayName: () =>
+    i18n.translate('xpack.dashboard.FlyoutCreateDrilldownAction.displayName', {
       defaultMessage: 'Create drilldown',
-    });
-  }
-
-  public getIconType() {
-    return 'plusInCircle';
-  }
-
-  public async isCompatible({ embeddable }: EmbeddableApiContext) {
+    }),
+  isCompatible: async ({ embeddable }) => {
     if (!isApiCompatible(embeddable)) return false;
     if (
       getInheritedViewMode(embeddable) !== 'edit' ||
@@ -87,23 +81,20 @@ export class FlyoutCreateDrilldownAction implements Action<EmbeddableApiContext>
      * Check if there is an intersection between all registered drilldowns possible triggers that they could be attached to
      * and triggers that current embeddable supports
      */
-    const allPossibleTriggers = this.params
-      .start()
-      .plugins.uiActionsEnhanced.getActionFactories()
+    const allPossibleTriggers = uiActionsEnhancedServices
+      .getActionFactories()
       .map((factory) => (factory.isCompatibleLicense() ? factory.supportedTriggers() : []))
       .reduce((res, next) => res.concat(next), []);
 
     return ensureNestedTriggers(supportedTriggers).some((trigger) =>
       allPossibleTriggers.includes(trigger)
     );
-  }
-
-  public async execute({ embeddable }: EmbeddableApiContext) {
+  },
+  execute: async ({ embeddable }) => {
     if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
-    const { core, plugins } = this.params.start();
 
     openLazyFlyout({
-      core,
+      core: coreServices,
       parentApi: embeddable.parentApi,
       loadContent: async ({ closeFlyout }) => {
         const templates = createDrilldownTemplatesFromSiblings(embeddable);
@@ -112,7 +103,7 @@ export class FlyoutCreateDrilldownAction implements Action<EmbeddableApiContext>
           CONTEXT_MENU_TRIGGER,
         ];
         return (
-          <plugins.uiActionsEnhanced.DrilldownManager
+          <uiActionsEnhancedServices.DrilldownManager
             closeAfterCreate
             initialRoute={'/new'}
             dynamicActionManager={embeddable.enhancements.dynamicActions}
@@ -128,5 +119,5 @@ export class FlyoutCreateDrilldownAction implements Action<EmbeddableApiContext>
       },
       uuid: apiHasUniqueId(embeddable) ? embeddable.uuid : undefined,
     });
-  }
-}
+  },
+};

@@ -9,7 +9,7 @@ import { CoreSetup } from '@kbn/core/public';
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
 import { createStartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import { SetupDependencies, StartDependencies } from '../../plugin';
-import { FlyoutCreateDrilldownAction, FlyoutEditDrilldownAction } from './actions';
+import { flyoutCreateDrilldownAction, flyoutEditDrilldownAction } from './actions';
 import { EmbeddableToDashboardDrilldown } from './embeddable_to_dashboard_drilldown';
 
 interface BootstrapParams {
@@ -33,11 +33,9 @@ export class DashboardDrilldownsService {
   ) {
     const start = createStartServicesGetter(core.getStartServices);
 
-    const actionFlyoutCreateDrilldown = new FlyoutCreateDrilldownAction({ start });
-    uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, actionFlyoutCreateDrilldown);
+    uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, flyoutCreateDrilldownAction);
 
-    const actionFlyoutEditDrilldown = new FlyoutEditDrilldownAction({ start });
-    uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, actionFlyoutEditDrilldown);
+    uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, flyoutEditDrilldownAction);
 
     const dashboardToDashboardDrilldown = new EmbeddableToDashboardDrilldown({ start });
     uiActions.registerDrilldown(dashboardToDashboardDrilldown);

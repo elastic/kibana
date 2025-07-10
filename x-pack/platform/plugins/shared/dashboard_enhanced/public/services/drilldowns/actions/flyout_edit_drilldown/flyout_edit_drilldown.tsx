@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
-import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { type PresentationContainer } from '@kbn/presentation-containers';
-import { openLazyFlyout, type TracksOverlays } from '@kbn/presentation-util';
+import { openLazyFlyout } from '@kbn/presentation-util';
 import {
   apiCanAccessViewMode,
   apiHasSupportedTriggers,
@@ -26,6 +26,7 @@ import {
   type HasDynamicActions,
 } from '@kbn/embeddable-enhanced-plugin/public';
 import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
+import { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
 import { txtDisplayName } from './i18n';
 import { MenuItem } from './menu_item';
 import { StartDependencies } from '../../../../plugin';
@@ -34,6 +35,7 @@ import {
   DRILLDOWN_ACTION_GROUP,
   ensureNestedTriggers,
 } from '../drilldown_shared';
+import { coreServices, uiActionsEnhancedServices } from '../../../kibana_services';
 
 export const OPEN_FLYOUT_EDIT_DRILLDOWN = 'OPEN_FLYOUT_EDIT_DRILLDOWN';
 
@@ -43,47 +45,34 @@ export interface FlyoutEditDrilldownParams {
 
 export type FlyoutEditDrilldownActionApi = CanAccessViewMode &
   Required<HasDynamicActions> &
-  HasParentApi<Partial<PresentationContainer & TracksOverlays>> &
+  HasParentApi<Partial<PresentationContainer>> &
   HasSupportedTriggers &
   Partial<HasUniqueId>;
 
 const isApiCompatible = (api: unknown | null): api is FlyoutEditDrilldownActionApi =>
   apiHasDynamicActions(api) && apiCanAccessViewMode(api) && apiHasSupportedTriggers(api);
 
-export class FlyoutEditDrilldownAction implements Action<EmbeddableApiContext> {
-  public readonly type = OPEN_FLYOUT_EDIT_DRILLDOWN;
-  public readonly id = OPEN_FLYOUT_EDIT_DRILLDOWN;
-  public order = 10;
-  public grouping = [DRILLDOWN_ACTION_GROUP];
-
-  constructor(protected readonly params: FlyoutEditDrilldownParams) {}
-
-  public getDisplayName() {
-    return txtDisplayName;
-  }
-
-  public getIconType() {
-    return 'list';
-  }
-
-  public readonly MenuItem = MenuItem as any;
-
-  public async isCompatible({ embeddable }: EmbeddableApiContext) {
+export const flyoutEditDrilldownAction: ActionDefinition<EmbeddableApiContext> = {
+  id: OPEN_FLYOUT_EDIT_DRILLDOWN,
+  type: OPEN_FLYOUT_EDIT_DRILLDOWN,
+  order: 10,
+  getIconType: () => 'list',
+  grouping: [DRILLDOWN_ACTION_GROUP],
+  getDisplayName: () => txtDisplayName,
+  MenuItem: MenuItem as any,
+  isCompatible: async ({ embeddable }) => {
     if (!isApiCompatible(embeddable) || getInheritedViewMode(embeddable) !== 'edit') return false;
     return (embeddable.dynamicActionsState$.getValue()?.dynamicActions.events ?? []).length > 0;
-  }
-
-  public async execute({ embeddable }: EmbeddableApiContext) {
+  },
+  execute: async ({ embeddable }) => {
     if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
-    const { core, plugins } = this.params.start();
-
     openLazyFlyout({
-      core,
+      core: coreServices,
       parentApi: embeddable.parentApi,
       loadContent: async ({ closeFlyout }) => {
         const templates = createDrilldownTemplatesFromSiblings(embeddable);
         return (
-          <plugins.uiActionsEnhanced.DrilldownManager
+          <uiActionsEnhancedServices.DrilldownManager
             initialRoute={'/manage'}
             dynamicActionManager={embeddable.enhancements.dynamicActions}
             triggers={[
@@ -101,5 +90,5 @@ export class FlyoutEditDrilldownAction implements Action<EmbeddableApiContext> {
       },
       uuid: apiHasUniqueId(embeddable) ? embeddable.uuid : undefined,
     });
-  }
-}
+  },
+};
