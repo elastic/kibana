@@ -41,7 +41,10 @@ export const isClusterShardLimitExceeded = (errorCause?: ErrorCause): boolean =>
   );
 };
 
-export const hasAllKeywordsInOrder = (message: string | undefined, keywords: string[]): boolean => {
+export const hasAllKeywordsInOrder = (
+  message: string | null | undefined,
+  keywords: string[]
+): boolean => {
   if (!message || !keywords.length) {
     return false;
   }

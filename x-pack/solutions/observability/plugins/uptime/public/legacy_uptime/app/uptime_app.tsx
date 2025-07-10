@@ -112,7 +112,6 @@ const Application = (props: UptimeAppProps) => {
               observability: startPlugins.observability,
               observabilityShared: startPlugins.observabilityShared,
               exploratoryView: startPlugins.exploratoryView,
-              cases: startPlugins.cases,
             }}
           >
             <Router history={appMountParameters.history}>

@@ -18,6 +18,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import React, { useState } from 'react';
+import { Timestamp } from '@kbn/apm-ui-shared';
 import { useApmRouter } from '../../../../../hooks/use_apm_router';
 import type { APIReturnType } from '../../../../../services/rest/create_call_apm_api';
 import { getOptionLabel } from '../../../../../../common/agent_configuration/all_option';
@@ -26,7 +27,6 @@ import { FETCH_STATUS } from '../../../../../hooks/use_fetcher';
 import { LoadingStatePrompt } from '../../../../shared/loading_state_prompt';
 import type { ITableColumn } from '../../../../shared/managed_table';
 import { ManagedTable } from '../../../../shared/managed_table';
-import { TimestampTooltip } from '../../../../shared/timestamp_tooltip';
 import { ConfirmDeleteModal } from './confirm_delete_modal';
 
 type Config =
@@ -138,6 +138,7 @@ export function AgentConfigurationList({ status, configurations, refetch }: Prop
       sortable: true,
       render: (_, config: Config) => (
         <EuiButtonEmpty
+          aria-label={i18n.translate('xpack.apm.columns.button.ariaLabel', { defaultMessage: '' })}
           data-test-subj="apmColumnsButton"
           flush="left"
           size="s"
@@ -168,7 +169,9 @@ export function AgentConfigurationList({ status, configurations, refetch }: Prop
         defaultMessage: 'Last updated',
       }),
       sortable: true,
-      render: (_, item) => <TimestampTooltip time={item['@timestamp']} timeUnit="minutes" />,
+      render: (_, item) => (
+        <Timestamp timestamp={item['@timestamp']} timeUnit="minutes" renderMode="tooltip" />
+      ),
     },
     ...(canSave
       ? [

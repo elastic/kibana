@@ -37,7 +37,7 @@ Region
 :   The GCP region where the Vertex AI endpoint enabled.
 
 Default model
-:   The GAI model for {{gemini}} to use. Current support is for the Google Gemini models, defaulting to gemini-1.5-pro-002. The model can be set on a per request basis by including a "model" parameter alongside the request body.
+:   The GAI model for {{gemini}} to use. Current support is for the Google Gemini models, defaulting to gemini-2.5-pro. The model can be set on a per request basis by including a "model" parameter alongside the request body.
 
 Credentials JSON
 :   The GCP service account JSON file for authentication.

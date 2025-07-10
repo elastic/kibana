@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types",
   },
-  "include": ["*.ts", "common/**/*", "public/**/*", "server/**/*", "ui_tests/**/*", "api_tests/**/*"],
+  "include": ["*.ts", "common/**/*", "public/**/*", "server/**/*", "test/**/*"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/data-plugin",

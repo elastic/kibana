@@ -293,7 +293,8 @@ describe('ResponseActionsClientImpl base class', () => {
       expect(getActionDetailsByIdMock).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
-        'one'
+        'one',
+        { bypassSpaceValidation: false }
       );
     });
   });

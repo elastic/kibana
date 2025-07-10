@@ -44,6 +44,14 @@ export const AlertsOverview = ({
   const {
     charts,
     triggersActionsUi: { getAlertSummaryWidget: AlertSummaryWidget },
+    data,
+    http,
+    notifications,
+    fieldFormats,
+    application,
+    licensing,
+    cases,
+    settings,
   } = services;
 
   const baseTheme = charts.theme.useChartsBaseTheme();
@@ -126,6 +134,16 @@ export const AlertsOverview = ({
           consumers={INFRA_ALERT_CONSUMERS}
           query={alertsEsQueryByStatus}
           initialPageSize={5}
+          services={{
+            data,
+            http,
+            notifications,
+            fieldFormats,
+            application,
+            licensing,
+            cases,
+            settings,
+          }}
         />
       </EuiFlexItem>
     </EuiFlexGroup>
