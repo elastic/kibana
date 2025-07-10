@@ -31,14 +31,10 @@ import {
   type ChatAgentEvent,
   type RoundCompleteEvent,
   oneChatDefaultAgentId,
-  toSerializedAgentIdentifier,
-  AgentIdentifier,
-  SerializedAgentIdentifier,
   isRoundCompleteEvent,
   isOnechatError,
   createInternalError,
 } from '@kbn/onechat-common';
-import type { ExecutableConversationalAgent } from '@kbn/onechat-server';
 import { getConnectorList, getDefaultConnector } from '../runner/utils';
 import type { ConversationService, ConversationClient } from '../conversation';
 import type { AgentsServiceStart } from '../agents';
@@ -68,7 +64,7 @@ export interface ChatConverseParams {
    * Id of the conversational agent to converse with.
    * If empty, will use the default agent id.
    */
-  agentId?: AgentIdentifier;
+  agentId?: string;
   /**
    * Agent mode to use for this round of conversation.
    */
@@ -130,9 +126,10 @@ class ChatServiceImpl implements ChatService {
 
     return forkJoin({
       conversationClient: defer(async () => this.conversationService.getScopedClient({ request })),
-      agent: defer(async () =>
-        this.agentService.registry.asPublicRegistry().get({ agentId, request })
-      ),
+      agent: defer(async () => {
+        const agentClient = await this.agentService.getScopedClient({ request });
+        return agentClient.get(agentId);
+      }),
       chatModel: defer(async () => {
         if (connectorId) {
           return connectorId;
@@ -151,17 +148,19 @@ class ChatServiceImpl implements ChatService {
       ),
     }).pipe(
       switchMap(({ conversationClient, chatModel, agent }) => {
-        const agentIdentifier = toSerializedAgentIdentifier({
-          agentId: agent.agentId,
-          providerId: agent.providerId,
-        });
-
         const conversation$ = getConversation$({
-          agentId: agentIdentifier,
+          agentId,
           conversationId,
           conversationClient,
         });
-        const agentEvents$ = getExecutionEvents$({ agent, mode, conversation$, nextInput });
+        const agentEvents$ = getExecutionEvents$({
+          agentId,
+          request,
+          mode,
+          conversation$,
+          nextInput,
+          agentService: this.agentService,
+        });
 
         const title$ = isNewConversation
           ? generatedTitle$({ chatModel, conversation$, nextInput })
@@ -175,7 +174,7 @@ class ChatServiceImpl implements ChatService {
 
         const saveOrUpdateAndEmit$ = isNewConversation
           ? createConversation$({
-              agentId: agentIdentifier,
+              agentId,
               conversationClient,
               title$,
               roundCompletedEvents$,
@@ -236,7 +235,7 @@ const createConversation$ = ({
   title$,
   roundCompletedEvents$,
 }: {
-  agentId: SerializedAgentIdentifier;
+  agentId: string;
   conversationClient: ConversationClient;
   title$: Observable<string>;
   roundCompletedEvents$: Observable<RoundCompleteEvent>;
@@ -291,21 +290,27 @@ const updateConversation$ = ({
 };
 
 const getExecutionEvents$ = ({
+  agentId,
+  request,
+  agentService,
   conversation$,
   mode,
   nextInput,
-  agent,
 }: {
+  agentId: string;
+  request: KibanaRequest;
+  agentService: AgentsServiceStart;
   conversation$: Observable<Conversation>;
   mode: AgentMode;
   nextInput: RoundInput;
-  agent: ExecutableConversationalAgent;
 }): Observable<ChatAgentEvent> => {
   return conversation$.pipe(
     switchMap((conversation) => {
       return new Observable<ChatAgentEvent>((observer) => {
-        agent
+        agentService
           .execute({
+            request,
+            agentId,
             agentParams: {
               agentMode: mode,
               nextInput,
@@ -336,7 +341,7 @@ const getConversation$ = ({
   conversationId,
   conversationClient,
 }: {
-  agentId: SerializedAgentIdentifier;
+  agentId: string;
   conversationId: string | undefined;
   conversationClient: ConversationClient;
 }): Observable<Conversation> => {
@@ -349,11 +354,7 @@ const getConversation$ = ({
   }).pipe(shareReplay());
 };
 
-const placeholderConversation = ({
-  agentId,
-}: {
-  agentId: SerializedAgentIdentifier;
-}): Conversation => {
+const placeholderConversation = ({ agentId }: { agentId: string }): Conversation => {
   return {
     id: uuidv4(),
     title: 'New conversation',

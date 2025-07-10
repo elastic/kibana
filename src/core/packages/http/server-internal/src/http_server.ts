@@ -558,15 +558,14 @@ export class HttpServer {
 
       executionContext?.setRequestId(requestId);
 
-      request.app = {
-        ...(request.app ?? {}),
-        requestId,
-        requestUuid: uuidv4(),
-        measureElu: stop,
-        // Kibana stores trace.id until https://github.com/elastic/apm-agent-nodejs/issues/2353 is resolved
-        // The current implementation of the APM agent ends a request transaction before "response" log is emitted.
-        traceId: apm.currentTraceIds['trace.id'],
-      } as KibanaRequestState;
+      const app: KibanaRequestState = request.app as KibanaRequestState;
+      app.requestId = requestId;
+      app.requestUuid = uuidv4();
+      app.measureElu = stop;
+      // Kibana stores trace.id until https://github.com/elastic/apm-agent-nodejs/issues/2353 is resolved
+      // The current implementation of the APM agent ends a request transaction before "response" log is emitted.
+      app.traceId = apm.currentTraceIds['trace.id'];
+
       return responseToolkit.continue;
     });
   }
