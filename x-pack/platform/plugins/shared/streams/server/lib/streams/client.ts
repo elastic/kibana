@@ -660,19 +660,6 @@ export class StreamsClient {
       throw new StatusError('Cannot delete root stream', 400);
     }
 
-    const access =
-      definition && Streams.GroupStream.Definition.is(definition)
-        ? { write: true, read: true }
-        : await checkAccess({
-            name,
-            scopedClusterClient: this.dependencies.scopedClusterClient,
-          });
-
-    // Can/should State manage access control as well?
-    if (!access.write) {
-      throw new SecurityError(`Cannot delete stream, insufficient privileges`);
-    }
-
     await State.attemptChanges(
       [
         {
