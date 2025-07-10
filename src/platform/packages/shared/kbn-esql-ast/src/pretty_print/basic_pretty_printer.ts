@@ -193,7 +193,7 @@ export class BasicPrettyPrinter {
       formatted = this.replaceLiteralWithParameter(node, formatted);
     }
 
-    return this.decorateWithComments(node, formatted);
+    return formatted;
   }
 
   protected replaceLiteralWithParameter(node: ESQLAstExpressionNode, formatted: string): string {
@@ -228,6 +228,7 @@ export class BasicPrettyPrinter {
     };
 
     const value = resolveParamValue();
+
     return value === undefined
       ? formatted
       : node.paramKind === '?'
