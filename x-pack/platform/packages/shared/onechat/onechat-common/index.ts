@@ -79,8 +79,6 @@ export {
   ConversationRoundStepType,
   isToolCallStep,
   isReasoningStep,
-  createEmptyConversation,
-  newConversationId,
   ChatEventType,
   type ChatEventBase,
   type ChatEvent,

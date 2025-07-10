@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { newConversationId } from '@kbn/onechat-common';
 import { useMemo } from 'react';
 import { useParams } from 'react-router-dom';
+import { newConversationId } from '../utils/new_conversation';
 
 export const useConversationId = () => {
   const { conversationId: conversationIdParam } = useParams<{ conversationId?: string }>();

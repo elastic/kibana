@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { newConversationId } from '@kbn/onechat-common';
+import { newConversationId } from './new_conversation';
 
 export const appPaths = {
   root: '/',

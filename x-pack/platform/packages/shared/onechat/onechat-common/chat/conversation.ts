@@ -6,7 +6,6 @@
  */
 
 import type { PlainIdToolIdentifier } from '../tools/tools';
-import { oneChatDefaultAgentId } from '../agents';
 import type { UserIdAndName } from '../base/users';
 
 /**
@@ -125,18 +124,3 @@ export interface Conversation {
   updatedAt: string;
   rounds: ConversationRound[];
 }
-
-export const newConversationId = 'new';
-
-export const createEmptyConversation = (): Conversation => {
-  const now = new Date().toISOString();
-  return {
-    id: newConversationId,
-    agentId: oneChatDefaultAgentId,
-    user: { id: '', username: '' },
-    title: '',
-    createdAt: now,
-    updatedAt: now,
-    rounds: [],
-  };
-};

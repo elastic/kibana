@@ -5,14 +5,7 @@
  * 2.0.
  */
 
-import {
-  Conversation,
-  ConversationRound,
-  ToolCallStep,
-  createEmptyConversation,
-  isToolCallStep,
-  newConversationId,
-} from '@kbn/onechat-common';
+import { Conversation, ConversationRound, ToolCallStep, isToolCallStep } from '@kbn/onechat-common';
 import { QueryClient, QueryKey, useQuery, useQueryClient } from '@tanstack/react-query';
 import produce from 'immer';
 import { queryKeys } from '../query_keys';
@@ -20,6 +13,7 @@ import { appPaths } from '../utils/app_paths';
 import { useNavigation } from './use_navigation';
 import { useOnechatServices } from './use_onechat_service';
 import { useConversationId } from './use_conversation_id';
+import { createNewConversation, newConversationId } from '../utils/new_conversation';
 
 const createActions = ({
   queryClient,
@@ -62,7 +56,7 @@ const createActions = ({
             steps: [],
           };
           if (!draft) {
-            const nextConversation = createEmptyConversation();
+            const nextConversation = createNewConversation();
             nextConversation.rounds.push(nextRound);
             return nextConversation;
           }
