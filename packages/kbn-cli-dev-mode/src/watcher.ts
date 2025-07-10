@@ -67,16 +67,16 @@ export class Watcher {
     Pw.subscribe(
       this.repoRoot,
       (error, events) => {
-        // if (error) {
-        //   subscriber.error(error);
-        //   return;
-        // }
-
         if (error) {
-          // skip runtime errors like FS Events dropped
+          // NOTE: This error happens as a result of handling kFSEventStreamEventFlagMustScanSubDirs
+          // which is delivered by macOS if there are too many events and some of them have been dropped, either
+          // by the kernel or the user-space client. The application must assume that all files could have been
+          // modified, and ignore the cache in this case.
+          //
+          // This happens mainly when switching branches, running a package manager, or otherwise changing a lot of
+          // files at once. This results of a new handling introduced in parcel v2.5.1
           if (error.message && error.message.includes('Events were dropped by the FSEvents client')) {
-            console.log(`FS Events were dropped on watcher for ${this.repoRoot}`);
-            return;
+            return fire(`${this.repoRoot}`);
           }
 
           // Other runtime errors should still fail
