@@ -3,11 +3,12 @@ disabled:
   - x-pack/test/security_solution_api_integration/config/serverless/config.base.ts
   - x-pack/test/security_solution_api_integration/config/serverless/config.base.essentials.ts
   - x-pack/test/security_solution_api_integration/config/serverless/config.base.edr_workflows.ts
-  - x-pack/test/defend_workflows_cypress/serverless_config.base.ts
+  - x-pack/test/security_solution_api_integration/config/serverless/config.base.ai4dsoc.ts
+  - x-pack/solutions/security/test/defend_workflows_cypress/serverless_config.base.ts
   - x-pack/solutions/security/test/osquery_cypress/serverless_config.base.ts
 
   # Cypress configs, for now these are still run manually
-  - x-pack/test/defend_workflows_cypress/serverless_config.ts
+  - x-pack/solutions/security/test/defend_workflows_cypress/serverless_config.ts
   - x-pack/solutions/security/test/osquery_cypress/serverless_cli_config.ts
   - x-pack/test/security_solution_cypress/serverless_config.ts
   - x-pack/test/security_solution_cypress/ai4dsoc_serverless_config.ts

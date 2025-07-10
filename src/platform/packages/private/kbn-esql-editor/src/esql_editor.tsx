@@ -58,6 +58,7 @@ import {
   EDITOR_INITIAL_HEIGHT,
   EDITOR_INITIAL_HEIGHT_INLINE_EDITING,
   RESIZABLE_CONTAINER_INITIAL_HEIGHT,
+  EDITOR_MAX_HEIGHT,
   esqlEditorStyles,
 } from './esql_editor.styles';
 import type { ESQLEditorProps, ESQLEditorDeps, ControlsContext } from './types';
@@ -883,7 +884,11 @@ export const ESQLEditor = memo(function ESQLEditor({
                       const lineCount = editor.getModel()?.getLineCount() || 1;
                       const padding = lineHeight * 1.25; // Extra line at the bottom, plus a bit more to compensate for hidden vertical scrollbars
                       const height = editor.getTopForLineNumber(lineCount + 1) + padding;
-                      if (height > editorHeight) setEditorHeight(height);
+                      if (height > editorHeight && height < EDITOR_MAX_HEIGHT) {
+                        setEditorHeight(height);
+                      } else if (height >= EDITOR_MAX_HEIGHT) {
+                        setEditorHeight(EDITOR_MAX_HEIGHT);
+                      }
                     }
                     editor.onDidLayoutChange((layoutInfoEvent) => {
                       onLayoutChangeRef.current(layoutInfoEvent);
