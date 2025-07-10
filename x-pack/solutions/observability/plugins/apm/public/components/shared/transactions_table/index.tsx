@@ -23,7 +23,7 @@ import { FETCH_STATUS, isPending, isSuccess, useFetcher } from '../../../hooks/u
 import { usePreferredDataSourceAndBucketSize } from '../../../hooks/use_preferred_data_source_and_bucket_size';
 import type { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { TransactionOverviewLink } from '../links/apm/transaction_overview_link';
-import type { TableSearchBar, VisibleItemsStartEnd } from '../managed_table';
+import type { TableSearchBar } from '../managed_table';
 import { ManagedTable } from '../managed_table';
 import { OverviewTableContainer } from '../overview_table_container';
 import { isTimeComparison } from '../time_comparison/get_comparison_options';
