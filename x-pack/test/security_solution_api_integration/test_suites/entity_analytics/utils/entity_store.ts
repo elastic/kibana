@@ -54,27 +54,30 @@ export const EntityStoreUtils = (
     } catch (e) {
       log.warning(`Error deleting engines: ${e.message}`);
     }
-    
+
     log.info(`Ensuring eventually consistent resources are deleted for engines: ${engineTypes.join(', ')}`);
     try {
+      // Delete all transforms
       await Promise.all(
-        getStatusResponse.body.engines.map((engine) =>
-          Promise.all(
-            engine.components
-              .filter(
-                (component) => component.resource === 'transform' || component.resource === 'enrich_policy'
-              )
-              .map(async (component) => {
-                if (component.resource === 'transform') {
-                  await es.transform.deleteTransform(
-                    { transform_id: component.id, force: true },
-                    { ignore: [404] }
-                  );
-                } else if (component.resource === 'enrich_policy') {
-                  await es.enrich.deletePolicy({ name: component.id }, { ignore: [404] });
-                }
-              })
-          )
+        getStatusResponse.body.engines.flatMap(engine =>
+          engine.components
+            .filter(component => component.resource === "transform")
+            .map(async component => {
+              await es.transform.deleteTransform(
+                { transform_id: component.id, force: true },
+                { ignore: [404] }
+              );
+            })
+        )
+      );
+      // Delete all enrich policies
+      await Promise.all(
+        getStatusResponse.body.engines.flatMap(engine =>
+          engine.components
+            .filter(component => component.resource === "enrich_policy")
+            .map(async component => {
+              await es.enrich.deletePolicy({ name: component.id }, { ignore: [404] });
+            })
         )
       );
     } catch (e) {
