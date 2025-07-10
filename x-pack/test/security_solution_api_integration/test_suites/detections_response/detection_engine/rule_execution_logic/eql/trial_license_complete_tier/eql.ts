@@ -82,7 +82,8 @@ export default ({ getService }: FtrProviderContext) => {
   const auditPath = dataPathBuilder.getPath('auditbeat/hosts');
   const packetBeatPath = dataPathBuilder.getPath('packetbeat/default');
 
-  describe('@ess @serverless @serverlessQA EQL type rules', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/220943
+  describe.skip('@ess @serverless @serverlessQA EQL type rules', () => {
     const { indexListOfDocuments } = dataGeneratorFactory({
       es,
       index: 'ecs_compliant',

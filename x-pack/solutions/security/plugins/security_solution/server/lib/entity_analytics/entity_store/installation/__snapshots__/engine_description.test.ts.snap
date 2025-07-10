@@ -698,11 +698,6 @@ Object {
       "type": "keyword",
     },
     "entity.id": Object {
-      "fields": Object {
-        "text": Object {
-          "type": "match_only_text",
-        },
-      },
       "type": "keyword",
     },
     "entity.name": Object {
@@ -1030,11 +1025,6 @@ Object {
       "type": "keyword",
     },
     "entity.name": Object {
-      "fields": Object {
-        "text": Object {
-          "type": "match_only_text",
-        },
-      },
       "type": "keyword",
     },
     "entity.source": Object {
@@ -1059,11 +1049,6 @@ Object {
       "type": "keyword",
     },
     "host.name": Object {
-      "fields": Object {
-        "text": Object {
-          "type": "match_only_text",
-        },
-      },
       "type": "keyword",
     },
     "host.os.name": Object {
@@ -1272,11 +1257,6 @@ Object {
       "type": "keyword",
     },
     "entity.name": Object {
-      "fields": Object {
-        "text": Object {
-          "type": "match_only_text",
-        },
-      },
       "type": "keyword",
     },
     "entity.source": Object {
@@ -1295,11 +1275,6 @@ Object {
       "type": "keyword",
     },
     "service.name": Object {
-      "fields": Object {
-        "text": Object {
-          "type": "match_only_text",
-        },
-      },
       "type": "keyword",
     },
     "service.node.name": Object {
@@ -1476,11 +1451,6 @@ Object {
       "type": "keyword",
     },
     "entity.name": Object {
-      "fields": Object {
-        "text": Object {
-          "type": "match_only_text",
-        },
-      },
       "type": "keyword",
     },
     "entity.source": Object {
