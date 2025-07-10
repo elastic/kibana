@@ -19,13 +19,14 @@ describe('stats', () => {
     );
 
     expect(pipeline.asString()).toEqual(
-      'FROM `logs-*`\n  | STATS avg_duration = AVG(transaction.duration.us) BY service.name'
+      'FROM logs-*\n  | STATS avg_duration = AVG(transaction.duration.us) BY service.name'
     );
   });
 
   it('handles STATS with params', () => {
     const pipeline = source.pipe(
-      stats('AVG(??duration), COUNT(??svcName) WHERE agent.name == "java" BY ??env', {
+      stats('AVG(??duration), COUNT(??svcName) WHERE agent.name == ?agentName BY ??env', {
+        agentName: 'java',
         duration: 'transaction.duration.us',
         svcName: 'service.name',
         env: 'service.environment',
@@ -34,9 +35,12 @@ describe('stats', () => {
     const queryRequest = pipeline.asRequest();
 
     expect(queryRequest.query).toEqual(
-      'FROM `logs-*`\n  | STATS AVG(??duration), COUNT(??svcName) WHERE agent.name == "java" BY ??env'
+      'FROM logs-*\n  | STATS AVG(??duration), COUNT(??svcName) WHERE agent.name == ?agentName BY ??env'
     );
     expect(queryRequest.params).toEqual([
+      {
+        agentName: 'java',
+      },
       {
         duration: 'transaction.duration.us',
       },
@@ -48,7 +52,7 @@ describe('stats', () => {
       },
     ]);
     expect(pipeline.asString()).toEqual(
-      'FROM `logs-*`\n  | STATS AVG(`transaction.duration.us`), COUNT(`service.name`) WHERE agent.name == "java" BY `service.environment`'
+      'FROM logs-*\n  | STATS AVG(`transaction.duration.us`), COUNT(`service.name`) WHERE agent.name == "java" BY `service.environment`'
     );
   });
 });

@@ -16,13 +16,13 @@ describe('drop', () => {
     const pipeline = source.pipe(drop('log.level', 'service.name'));
     const queryRequest = pipeline.asRequest();
 
-    expect(queryRequest.query).toEqual('FROM `logs-*`\n  | DROP `log.level`, `service.name`');
+    expect(queryRequest.query).toEqual('FROM logs-*\n  | DROP log.level, service.name');
   });
 
   it('handles arrays of strings', () => {
     const pipeline = source.pipe(drop(['log.level', 'service.name']));
     const queryRequest = pipeline.asRequest();
 
-    expect(queryRequest.query).toEqual('FROM `logs-*`\n  | DROP `log.level`, `service.name`');
+    expect(queryRequest.query).toEqual('FROM logs-*\n  | DROP log.level, service.name');
   });
 });

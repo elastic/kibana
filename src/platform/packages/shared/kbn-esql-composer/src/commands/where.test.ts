@@ -16,7 +16,7 @@ describe('where', () => {
     const pipeline = source.pipe(where(`@timestamp <= NOW() AND @timestamp > NOW() - 24 hours`));
 
     expect(pipeline.asString()).toEqual(
-      'FROM `logs-*`\n  | WHERE @timestamp <= NOW() AND @timestamp > (NOW() - 24 hours)'
+      'FROM logs-*\n  | WHERE @timestamp <= NOW() AND @timestamp > NOW() - 24 hours'
     );
   });
 
@@ -24,11 +24,9 @@ describe('where', () => {
     const pipeline = source.pipe(where('timestamp.us >= ?', 1704892605838000));
     const queryRequest = pipeline.asRequest();
 
-    expect(queryRequest.query).toEqual('FROM `logs-*`\n  | WHERE timestamp.us >= ?');
+    expect(queryRequest.query).toEqual('FROM logs-*\n  | WHERE timestamp.us >= ?');
     expect(queryRequest.params).toEqual([1704892605838000]);
-    expect(pipeline.asString()).toEqual(
-      'FROM `logs-*`\n  | WHERE timestamp.us >= 1704892605838000'
-    );
+    expect(pipeline.asString()).toEqual('FROM logs-*\n  | WHERE timestamp.us >= 1704892605838000');
   });
 
   it('appends a WHERE clause with named parameters', () => {
@@ -39,24 +37,24 @@ describe('where', () => {
     const queryRequest = pipeline.asRequest();
 
     expect(queryRequest.query).toEqual(
-      'FROM `logs-*`\n  | WHERE host.name == ?hostName AND service.name == ?serviceName'
+      'FROM logs-*\n  | WHERE host.name == ?hostName AND service.name == ?serviceName'
     );
     expect(queryRequest.params).toEqual([{ hostName: 'host' }, { serviceName: 'service' }]);
     expect(pipeline.asString()).toEqual(
-      'FROM `logs-*`\n  | WHERE host.name == "host" AND service.name == "service"'
+      'FROM logs-*\n  | WHERE host.name == "host" AND service.name == "service"'
     );
   });
 
   // ast has a problem with positional parameters in IN operator
   it.skip('handles WHERE clause with IN operator and positional parameters', () => {
-    const hosts = ['host1', 'host2', 'host3'] as const;
+    const hosts = ['host1', 'host2', 'host3'];
     const pipeline = source.pipe(where(`host.name IN (${hosts.map(() => '?').join(',')})`, hosts));
     const queryRequest = pipeline.asRequest();
 
     expect(queryRequest.query).toEqual('FROM `logs-*`\n  | WHERE host.name IN (?,?,?)');
     expect(queryRequest.params).toEqual(['host1', 'host2', 'host3']);
     expect(pipeline.asString()).toEqual(
-      'FROM `logs-*`\n  | WHERE host.name IN ("host1","host2","host3")'
+      'FROM logs-*\n  | WHERE host.name IN ("host1","host2","host3")'
     );
   });
 });

@@ -20,10 +20,10 @@ const query = from('logs-*')
 The above example will output
 
 ```sql
-FROM `logs-*`
+FROM logs-*
   | WHERE @timestamp >= NOW() - 1 hour
-  | SORT `@timestamp` DESC
-  | KEEP `service.name`, `log.level`
+  | SORT @timestamp DESC
+  | KEEP service.name, log.level
   | LIMIT 10
 ```
 
@@ -51,7 +51,7 @@ from('logs-*')
 output: 
 
 ```sql
-FROM `logs-*`
+FROM logs-*
   | WHERE @timestamp <= NOW() AND @timestamp > NOW() - 24 hours
 ```
 
@@ -73,7 +73,7 @@ from('logs-*')
 The example above will create the following object
 ```ts
 { 
-  query: `FROM \`logs-*\`
+  query: `FROM logs-*
   | WHERE host.name == ?hostName AND service.name == ?serviceName AND service.name == ?hostName
   `,
   params: [{ hostName: 'host' }, { serviceName: 'service' }]
@@ -94,7 +94,7 @@ from('logs-*')
 The example above will create the following request
 ```ts
 { 
-  query: `FROM \`logs-*\`
+  query: `FROM logs-*
   | WHERE host.name IN (?,?,?)
   `,
   params: ['host1', 'host2', 'host3']
@@ -136,7 +136,7 @@ Returns
 
 ```ts
 { 
-  query: `FROM \`logs-*\`
+  query: `FROM logs-*
   | AVG(??duration), COUNT(??svcName) WHERE agent.name == "java" BY ??env`,
   params: [
     {
@@ -174,8 +174,8 @@ import { from, evaluate } from '@kbn/esql-composer';
 
 from('logs-*')
   .pipe(
-    evaluate('latestTs = MAX(?ts)', {
-      ts: { identifier: '@timestamp' },
+    evaluate('latestTs = MAX(??ts)', {
+      ts: '@timestamp',
     })
   )
   .asRequest();
@@ -183,8 +183,8 @@ from('logs-*')
 
 ```ts
 { 
-  query: `FROM \`logs-*\`
-  | EVAL latestTs = MAX(?ts)`,
+  query: `FROM logs-*
+  | EVAL latestTs = MAX(??ts)`,
   params: [
     {
       ts: '@timestamp',
@@ -238,8 +238,8 @@ Returns
  
 ```ts
 {
-  query: `FROM \`logs-*\`
-  | SORT ?timestamp DESC, ?logLevel ASC`,
+  query: `FROM logs-*
+  | SORT ??timestamp DESC, ??logLevel ASC`,
   params: [
     { timestamp: '@timestamp' },
     { logLevel: 'log.level' }

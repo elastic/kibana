@@ -7,66 +7,42 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isObject } from 'lodash';
+import { isObject, once } from 'lodash';
 import { mutate, BasicPrettyPrinter, Builder } from '@kbn/esql-ast';
 import { Query, QueryPipeline, QueryRequest, Params } from './types';
-import { formatValue, escapeColumn } from './utils/formatters';
 
 export function createPipeline(source: Query): QueryPipeline {
-  const asRequest = (): QueryRequest => {
-    const params = source.params.flatMap<Params>((param) => {
-      if (isObject(param)) {
-        return Object.entries(param).map(([key, value]) => ({ [key]: value }));
-      }
+  const flattenParams = (): Params[] => {
+    return source.params.flatMap<Params>((param) =>
+      isObject(param) ? Object.entries(param).map(([key, value]) => ({ [key]: value })) : param
+    );
+  };
 
-      return param;
-    });
-
+  const buildQueryNode = once(() => {
     const { root, commands } = source;
     const rootCopy = Builder.expression.query([...root.commands]);
     for (const command of commands) {
       mutate.generic.commands.append(rootCopy, command);
     }
+    return rootCopy;
+  });
 
-    return {
-      query: BasicPrettyPrinter.print(rootCopy, { multiline: true }),
-      params,
-    };
+  const asRequest = (): QueryRequest => ({
+    query: BasicPrettyPrinter.print(buildQueryNode(), { multiline: true }),
+    params: flattenParams(),
+  });
+
+  const asString = (): string => {
+    return BasicPrettyPrinter.print(buildQueryNode(), { multiline: true }, flattenParams());
   };
 
-  const asString = () => {
-    const { query, params } = asRequest();
-
-    let index = 0;
-    return query.replace(
-      /(\?{1,2})([a-zA-Z0-9_]+)?/g,
-      (match, questionMarks: string, namedParam: string) => {
-        if (index < params.length) {
-          const value = params[index++];
-
-          if (namedParam) {
-            if (isObject(value)) {
-              const paramValue = (value as any)[namedParam];
-              return questionMarks.length > 1 ? escapeColumn(paramValue) : formatValue(paramValue);
-            }
-          }
-
-          return formatValue(value);
-        }
-
-        return match;
-      }
-    );
+  const pipe = (...operators: Array<(query: Query) => Query>): QueryPipeline => {
+    const nextSource = operators.reduce((q, op) => op(q), source);
+    return createPipeline(nextSource);
   };
 
   return {
-    pipe: (...operators) => {
-      const nextSource = operators.reduce((previousQuery, operator) => {
-        return operator(previousQuery);
-      }, source);
-
-      return createPipeline(nextSource);
-    },
+    pipe,
     asRequest,
     asString,
   };

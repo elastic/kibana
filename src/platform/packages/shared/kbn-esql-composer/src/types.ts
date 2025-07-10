@@ -31,16 +31,13 @@ type ExtractSingleParam<
 export type ExtractNamedParamNames<
   S extends string,
   Acc extends string = never
-> = S extends `${infer _Before}??${infer After}`
+> = S extends `${infer _Before}?${infer After}`
   ? ExtractSingleParam<After> extends [infer Param extends string, infer Rest extends string]
-    ? ExtractNamedParamNames<Rest, Acc | Param>
-    : Acc
-  : S extends `${infer _Before}?${infer After}`
-  ? ExtractSingleParam<After> extends [infer Param extends string, infer Rest extends string]
-    ? ExtractNamedParamNames<Rest, Acc | Param>
+    ? Param extends ''
+      ? ExtractNamedParamNames<Rest, Acc>
+      : ExtractNamedParamNames<Rest, Acc | Param>
     : Acc
   : Acc;
-
 export type FieldValue = number | string | boolean | null;
 
 export type NamedParameter<TQuery extends string = string> = Record<

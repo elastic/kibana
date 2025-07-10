@@ -8,7 +8,6 @@
  */
 
 import { Params, QueryOperator } from '../types';
-import { formatColumn } from '../utils/formatters';
 import { append } from '../append';
 
 export enum SortOrder {
@@ -44,7 +43,7 @@ export function sort(...sorts: SortArgs[]): QueryOperator {
     });
 
   const command = `SORT ${allSorts
-    .map((sortInstruction) => `${formatColumn(sortInstruction.column)} ${sortInstruction.order}`)
+    .map((sortInstruction) => `${sortInstruction.column} ${sortInstruction.order}`)
     .join(', ')}`;
 
   return append({ command });

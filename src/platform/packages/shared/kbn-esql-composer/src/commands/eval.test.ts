@@ -19,7 +19,7 @@ describe('evaluate', () => {
     );
 
     expect(pipeline.asString()).toEqual(
-      'FROM `logs-*`\n  | EVAL type = CASE(languages <= 1, "monolingual", languages <= 2, "bilingual", "polyglot")'
+      'FROM logs-*\n  | EVAL type = CASE(languages <= 1, "monolingual", languages <= 2, "bilingual", "polyglot")'
     );
   });
 
@@ -31,12 +31,12 @@ describe('evaluate', () => {
     );
     const queryRequest = pipeline.asRequest();
 
-    expect(queryRequest.query).toEqual('FROM `logs-*`\n  | EVAL latestTs = MAX(??ts)');
+    expect(queryRequest.query).toEqual('FROM logs-*\n  | EVAL latestTs = MAX(??ts)');
     expect(queryRequest.params).toEqual([
       {
         ts: '@timestamp',
       },
     ]);
-    expect(pipeline.asString()).toEqual('FROM `logs-*`\n  | EVAL latestTs = MAX(`@timestamp`)');
+    expect(pipeline.asString()).toEqual('FROM logs-*\n  | EVAL latestTs = MAX(@timestamp)');
   });
 });

@@ -16,25 +16,25 @@ describe('sort', () => {
   it('handles single strings', () => {
     const pipeline = source.pipe(sort('@timestamp', 'log.level'));
 
-    expect(pipeline.asString()).toEqual('FROM `logs-*`\n  | SORT @timestamp ASC, `log.level` ASC');
+    expect(pipeline.asString()).toEqual('FROM logs-*\n  | SORT @timestamp ASC, log.level ASC');
   });
 
   it('handles SORT with SortOrder', () => {
     const pipeline = source.pipe(sort({ '@timestamp': SortOrder.Desc }));
 
-    expect(pipeline.asString()).toEqual('FROM `logs-*`\n  | SORT @timestamp DESC');
+    expect(pipeline.asString()).toEqual('FROM logs-*\n  | SORT @timestamp DESC');
   });
 
   it('handles a mix of strings and SortOrder instructions', () => {
     const pipeline = source.pipe(sort('@timestamp', { 'log.level': SortOrder.Desc }));
 
-    expect(pipeline.asString()).toEqual('FROM `logs-*`\n  | SORT @timestamp ASC, `log.level` DESC');
+    expect(pipeline.asString()).toEqual('FROM logs-*\n  | SORT @timestamp ASC, log.level DESC');
   });
 
   it('handles sort arrays', () => {
     const pipeline = source.pipe(sort(['@timestamp', { 'log.level': SortOrder.Asc }]));
 
-    expect(pipeline.asString()).toEqual('FROM `logs-*`\n  | SORT @timestamp ASC, `log.level` ASC');
+    expect(pipeline.asString()).toEqual('FROM logs-*\n  | SORT @timestamp ASC, log.level ASC');
   });
 
   it('handles SORT with params', () => {
@@ -45,7 +45,7 @@ describe('sort', () => {
       })
     );
     const queryRequest = pipeline.asRequest();
-    expect(queryRequest.query).toEqual('FROM `logs-*`\n  | SORT ??timestamp DESC, ??logLevel ASC');
+    expect(queryRequest.query).toEqual('FROM logs-*\n  | SORT ??timestamp DESC, ??logLevel ASC');
     expect(queryRequest.params).toEqual([
       {
         timestamp: '@timestamp',
@@ -55,8 +55,6 @@ describe('sort', () => {
       },
     ]);
 
-    expect(pipeline.asString()).toEqual(
-      'FROM `logs-*`\n  | SORT `@timestamp` DESC, `log.level` ASC'
-    );
+    expect(pipeline.asString()).toEqual('FROM logs-*\n  | SORT @timestamp DESC, `log.level` ASC');
   });
 });
