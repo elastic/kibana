@@ -22,7 +22,7 @@ function isESQLVariableType(value: string): value is ESQLVariableType {
   return Object.values(ESQLVariableType).includes(value as ESQLVariableType);
 }
 
-export async function isActionCompatible(core: CoreStart, variableType: ESQLVariableType) {
+export function isActionCompatible(core: CoreStart, variableType: ESQLVariableType) {
   return core.uiSettings.get(ENABLE_ESQL) && isESQLVariableType(variableType);
 }
 
@@ -70,8 +70,7 @@ export class CreateESQLControlAction implements Action<Context> {
     cursorPosition,
     initialState,
   }: Context) {
-    const isCompatibleAction = await isActionCompatible(this.core, variableType);
-    if (!isCompatibleAction) {
+    if (!isActionCompatible(this.core, variableType)) {
       throw new IncompatibleActionError();
     }
 

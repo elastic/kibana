@@ -364,6 +364,13 @@ export type LensRuntimeState = Simplify<
     ContentManagementProps
 >;
 
+export interface LensHasEditPanel {
+  getEditPanel?: (options?: {
+    closeFlyout?: () => void;
+    showOnly?: boolean;
+  }) => Promise<JSX.Element | undefined>;
+}
+
 export interface LensInspectorAdapters {
   getInspectorAdapters: () => Adapters;
   inspect: (options?: InspectorOptions) => OverlayRef;
@@ -407,7 +414,8 @@ export type LensApi = Simplify<
     // Let the container know when the data has been loaded/updated
     LensInspectorAdapters &
     LensRequestHandlersProps &
-    LensApiCallbacks
+    LensApiCallbacks &
+    LensHasEditPanel
 >;
 
 // This is an API only used internally to the embeddable but not exported elsewhere

@@ -88,7 +88,6 @@ export class ImageEmbeddablePlugin
         }
       );
 
-      plugins.uiActions.attachAction(ADD_PANEL_TRIGGER, ADD_IMAGE_EMBEDDABLE_ACTION_ID);
       if (plugins.uiActions.hasTrigger('ADD_CANVAS_ELEMENT_TRIGGER')) {
         // Because Canvas is not enabled in Serverless, this trigger might not be registered - only attach
         // the create action if the Canvas-specific trigger does indeed exist.

@@ -26,6 +26,7 @@ import { APP_ID, getEditPath } from '../../../common/constants';
 import {
   GetStateType,
   LensEmbeddableStartServices,
+  LensHasEditPanel,
   LensInspectorAdapters,
   LensInternalApi,
   LensRuntimeState,
@@ -82,7 +83,8 @@ export function initializeEditApi(
     PublishesDisabledActionIds &
     HasEditCapabilities &
     HasReadOnlyCapabilities &
-    PublishesViewMode & { uuid: string };
+    PublishesViewMode & { uuid: string } &
+    LensHasEditPanel
 } {
   const supportedTriggers = getSupportedTriggers(getState, startDependencies.visualizationMap);
   const isManaged = (currentState: LensRuntimeState) => {

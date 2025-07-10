@@ -25,7 +25,7 @@ pageLoadAssetSize:
   crossClusterReplication: 65408
   customIntegrations: 22034
   dashboard: 19000
-  dashboardEnhanced: 14000
+  dashboardEnhanced: 12000
   data: 454087
   dataQuality: 19384
   datasetQuality: 55000
@@ -73,7 +73,7 @@ pageLoadAssetSize:
   grokdebugger: 26779
   guidedOnboarding: 42965
   home: 30182
-  imageEmbeddable: 8500
+  imageEmbeddable: 6000
   indexLifecycleManagement: 107090
   indexManagement: 140608
   inference: 20403
