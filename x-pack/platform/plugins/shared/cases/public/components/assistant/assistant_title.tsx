@@ -12,8 +12,8 @@ import * as i18n from './translations';
 
 const AssistantTitleComponent: React.FC = () => {
   return (
-    <EuiText size={'s'} className={'eui-textBreakWord'} data-test-subj={'assistant-title'}>
-      <strong data-test-subj={'assistant-bolded'}>{i18n.ASSISTANT}</strong>
+    <EuiText size="s" className="eui-textBreakWord" data-test-subj="assistant-title">
+      <strong data-test-subj="assistant-bolded">{i18n.ASSISTANT}</strong>
     </EuiText>
   );
 };

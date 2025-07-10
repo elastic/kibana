@@ -145,10 +145,10 @@ export const createUserAttachmentUserActionBuilder = ({
       ),
       timelineAvatar: isGeneratedByAssistant ? (
         <AssistantAvatar
-          name={'machine'}
-          size={'m'}
-          color={'subdued'}
-          data-test-subj={'assistant-avatar'}
+          name="machine"
+          size="m"
+          color="subdued"
+          data-test-subj="assistant-avatar"
         />
       ) : (
         <HoverableAvatarResolver user={attachment.createdBy} userProfiles={userProfiles} />
