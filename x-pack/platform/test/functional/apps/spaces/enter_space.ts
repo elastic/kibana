@@ -17,6 +17,7 @@ export default function enterSpaceFunctionalTests({
   const spacesService = getService('spaces');
   const browser = getService('browser');
 
+
   describe('Enter Space', function () {
     this.tags('includeFirefox');
     before(async () => {
