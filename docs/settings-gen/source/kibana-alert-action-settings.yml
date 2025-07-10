@@ -299,6 +299,14 @@ groups:
           deployment:
             self: ga
             ess: ga
+        example: |
+          For example:
+
+          ```yaml
+          xpack.actions.email.recipient_allowlist:["admin-*@company.org", "sales-*@example.com"]
+          ```
+
+          Only "to", "cc", or "bcc" email addresses that match the listed patterns will be accepted. For example, "admin-network@company.org" or "sales-north@example.com".
 
       - setting: xpack.actions.email.services.ses.host
         id: action-config-email-services-ses-host
@@ -320,14 +328,7 @@ groups:
           deployment:
             self: all
             ess: all
-        example: |
-          For example:
-
-          ```yaml
-          xpack.actions.email.recipient_allowlist:["admin-*@company.org", "sales-*@example.com"]
-          ```
-
-          Only "to", "cc", or "bcc" email addresses that match the listed patterns will be accepted. For example, "admin-network@company.org" or "sales-north@example.com".
+         # example: |
 
       - setting: xpack.actions.email.services.ses.port
         id: action-config-email-services-ses-port
