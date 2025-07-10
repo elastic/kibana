@@ -96,6 +96,9 @@ export const storeReducer = <G extends GroupNode = GroupNode, L extends LeafNode
     case 'RESET_ACTIVE_CASCADE_GROUPS': {
       return produce(state, (draft) => {
         draft.currentGroupByColumns = state.groupByColumns.length ? [state.groupByColumns[0]] : [];
+        draft.groupNodes.forEach((node) => {
+          delete node.children;
+        });
       });
     }
     case 'UPDATE_ROW_GROUP_NODE_DATA': {
