@@ -193,7 +193,7 @@ export const ILM_STATS_EVENT: EventTypeOpts<IlmsStats> = {
 };
 
 export const INDEX_SETTINGS_EVENT: EventTypeOpts<IndicesSettings> = {
-  eventType: 'telemetry_index_settings_event',
+  eventType: 'indices-metadata-index-settings-event',
   schema: {
     items: {
       type: 'array',
@@ -344,7 +344,7 @@ export const ILM_POLICY_EVENT: EventTypeOpts<IlmPolicies> = {
 };
 
 export const INDEX_TEMPLATES_EVENT: EventTypeOpts<IndexTemplatesStats> = {
-  eventType: 'telemetry_index_templates_event',
+  eventType: 'indices-metadata-index-templates-event',
   schema: {
     items: {
       type: 'array',
