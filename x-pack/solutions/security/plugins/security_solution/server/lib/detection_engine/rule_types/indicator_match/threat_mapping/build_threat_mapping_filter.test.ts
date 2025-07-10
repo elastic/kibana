@@ -206,7 +206,7 @@ describe('build_threat_mapping_filter', () => {
             },
           ],
         },
-      } = getThreatMappingFilterShouldMock(); // get the first element
+      } = getThreatMappingFilterShouldMock();
       expect(innerClause).toEqual(filter);
     });
 
