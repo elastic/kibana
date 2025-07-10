@@ -137,6 +137,7 @@ components:
         - kafka
         - tcp
         - udp
+        - winlog
 
     DataStream:
       type: object
