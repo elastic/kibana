@@ -102,7 +102,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           const textarea = await find.byCssSelector('#newComment');
           if (!textarea) return false;
           const content = await textarea?.getVisibleText();
-          return !content?.includes('<!-- uploading "screenshot.png" -->');
+          return content?.includes('<!-- uploading "screenshot.png" -->');
         });
 
         // wait for the image placeholder to be replaced with markdown url
