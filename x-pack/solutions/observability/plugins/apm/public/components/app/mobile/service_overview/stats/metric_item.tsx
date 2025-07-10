@@ -39,10 +39,10 @@ export function MetricItem({
           <EuiSkeletonText lines={3} />
         </EuiPanel>
       ) : (
-          <Chart>
-            <Settings baseTheme={chartBaseTheme} />
-            <Metric id={`metric_${id}`} data={[data]} />
-          </Chart>
+        <Chart>
+          <Settings baseTheme={chartBaseTheme} />
+          <Metric id={`metric_${id}`} data={[data]} />
+        </Chart>
       )}
     </div>
   );
