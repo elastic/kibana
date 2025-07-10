@@ -7,22 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// eslint-disable-next-line import/no-extraneous-dependencies
-const { createNoRestrictedImportsOverride } = require('@kbn/eslint-rule-overrides');
-
-const RESTRICTED_IMPORTS = [
-  {
-    name: 'enzyme',
-    message: 'Please use @testing-library/react instead',
-  },
-];
-
-const overrides = createNoRestrictedImportsOverride({
-  childConfigDir: __dirname,
-  restrictedImports: RESTRICTED_IMPORTS,
-});
-
-/** @type {import('eslint').Linter.Config} */
 module.exports = {
-  overrides,
+  createNoRestrictedImportsOverride: require('./src/create_no_restricted_imports_override')
+    .createNoRestrictedImportsOverride,
 };
