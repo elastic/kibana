@@ -101,7 +101,7 @@ export async function getFunctionArgsSuggestions(
 ): Promise<ISuggestionItem[]> {
   const { command, option, node } = findAstPosition(commands, offset);
   // If the node is not
-  if (!node || !command) {
+  if (!node) {
     return [];
   }
   const functionNode = node as ESQLFunction;
