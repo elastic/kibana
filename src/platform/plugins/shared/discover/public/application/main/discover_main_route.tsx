@@ -23,12 +23,8 @@ import {
 import type { RootProfileState } from '../../context_awareness';
 import { useRootProfile, useDefaultAdHocDataViews } from '../../context_awareness';
 import { DiscoverError } from '../../components/common/error_alert';
-import type { DiscoverSessionViewProps } from './components/session_view';
-import {
-  BrandedLoadingIndicator,
-  DiscoverSessionView,
-  NoDataPage,
-} from './components/session_view';
+import type { SingleTabViewProps } from './components/single_tab_view';
+import { BrandedLoadingIndicator, SingleTabView, NoDataPage } from './components/single_tab_view';
 import { useAsyncFunction } from './hooks/use_async_function';
 import { TabsView } from './components/tabs_view';
 import { TABS_ENABLED } from '../../constants';
@@ -133,7 +129,7 @@ export const DiscoverMainRoute = ({
     );
   }
 
-  const sessionViewProps: DiscoverSessionViewProps = {
+  const singleTabProps: SingleTabViewProps = {
     customizationContext,
     customizationCallbacks,
     urlStateStorage,
@@ -144,12 +140,8 @@ export const DiscoverMainRoute = ({
   return (
     <InternalStateProvider store={internalState}>
       <rootProfileState.AppWrapper>
-        <ChartPortalsRenderer runtimeStateManager={sessionViewProps.runtimeStateManager}>
-          {TABS_ENABLED ? (
-            <TabsView {...sessionViewProps} />
-          ) : (
-            <DiscoverSessionView {...sessionViewProps} />
-          )}
+        <ChartPortalsRenderer runtimeStateManager={singleTabProps.runtimeStateManager}>
+          {TABS_ENABLED ? <TabsView {...singleTabProps} /> : <SingleTabView {...singleTabProps} />}
         </ChartPortalsRenderer>
       </rootProfileState.AppWrapper>
     </InternalStateProvider>
