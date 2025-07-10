@@ -7,7 +7,7 @@
 import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext) {
-  describe('Serverless Observability - Deployment-agnostic Streams API integration tests', function () {
+  describe('Serverless Platform - Deployment-agnostic Streams API integration tests', function () {
     this.tags(['esGate']);
 
     loadTestFile(require.resolve('../../apis/streams'));

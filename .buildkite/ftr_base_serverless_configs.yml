@@ -15,3 +15,4 @@ enabled:
   - x-pack/platform/test/api_integration_deployment_agnostic/configs/serverless/search.serverless.config.ts
   - x-pack/platform/test/api_integration_deployment_agnostic/configs/serverless/security.serverless.config.ts
   - x-pack/platform/test/api_integration_deployment_agnostic/configs/serverless/oblt.logs_essentials.serverless.config.ts
+  - x-pack/platform/test/api_integration_deployment_agnostic/configs/serverless/platform.streams.serverless.config.ts
