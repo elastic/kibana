@@ -13,26 +13,33 @@ export interface RequiredPermissions {
 }
 
 export function mergeRequiredPermissions(permissions: RequiredPermissions[]): RequiredPermissions {
-  return permissions.reduce(
-    (acc, current) => {
-      const clusterPermissions = [...new Set([...acc.cluster, ...current.cluster])];
+  const clusterSet = new Set<string>();
+  const indexPermissions: Record<string, Set<string>> = {};
 
-      const indexPermissions: Record<string, string[]> = { ...acc.index };
-      Object.entries(current.index).forEach(([index, perms]) => {
-        if (indexPermissions[index]) {
-          indexPermissions[index] = [...new Set([...indexPermissions[index], ...perms])];
-        } else {
-          indexPermissions[index] = perms;
-        }
-      });
+  permissions.forEach((permission) => {
+    // Add cluster permissions to the set
+    permission.cluster.forEach((perm) => clusterSet.add(perm));
 
-      return {
-        cluster: clusterPermissions,
-        index: indexPermissions,
-      };
-    },
-    { cluster: [], index: {} }
-  );
+    // Process index permissions
+    Object.entries(permission.index).forEach(([index, perms]) => {
+      if (!indexPermissions[index]) {
+        indexPermissions[index] = new Set<string>();
+      }
+      perms.forEach((perm) => indexPermissions[index].add(perm));
+    });
+  });
+
+  // Convert sets back to arrays for the return value
+  const result: RequiredPermissions = {
+    cluster: Array.from(clusterSet),
+    index: {},
+  };
+
+  Object.entries(indexPermissions).forEach(([index, permSet]) => {
+    result.index[index] = Array.from(permSet);
+  });
+
+  return result;
 }
 
 export function getRequiredPermissionsForActions(actions: ActionsByType): RequiredPermissions {
