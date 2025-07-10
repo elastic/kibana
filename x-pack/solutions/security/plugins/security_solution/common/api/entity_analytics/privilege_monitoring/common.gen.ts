@@ -17,7 +17,14 @@
 import { z } from '@kbn/zod';
 
 export type EngineStatus = z.infer<typeof EngineStatus>;
-export const EngineStatus = z.enum(['installing', 'started', 'stopped', 'updating', 'error']);
+export const EngineStatus = z.enum([
+  'installing',
+  'started',
+  'stopped',
+  'updating',
+  'error',
+  'disabled',
+]);
 export type EngineStatusEnum = typeof EngineStatus.enum;
 export const EngineStatusEnum = EngineStatus.enum;
 

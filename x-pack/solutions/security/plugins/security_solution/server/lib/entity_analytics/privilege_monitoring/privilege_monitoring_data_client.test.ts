@@ -25,6 +25,7 @@ import {
 jest.mock('./tasks/privilege_monitoring_task', () => {
   return {
     startPrivilegeMonitoringTask: jest.fn().mockResolvedValue(undefined),
+    removePrivilegeMonitoringTask: jest.fn().mockResolvedValue(undefined),
   };
 });
 
@@ -319,6 +320,95 @@ describe('Privilege Monitoring Data Client', () => {
       expect(esClientMock.bulk).toHaveBeenCalled();
       expect(dataClient.getMonitoredUsers).toHaveBeenCalledWith(['frodo', 'samwise']);
       expect(dataClient.buildBulkOperationsForUsers).toHaveBeenCalled();
+    });
+  });
+
+  describe('disable', () => {
+    it('should not disable the privilege monitoring engine if it is not started', async () => {
+      const mockGetEngineStatus = jest.fn().mockResolvedValue({
+        status: 'error',
+        error: null,
+      });
+      Object.defineProperty(dataClient, 'getEngineStatus', {
+        value: mockGetEngineStatus,
+      });
+      const result = await dataClient.disable();
+      expect(result.status).toBe('error');
+      expect(result.error).toBeNull();
+    });
+
+    it('should disable the privilege monitoring engine', async () => {
+      dataClient.disable = jest.fn().mockResolvedValue({
+        status: 'disabled',
+        error: null,
+      });
+      const result = await dataClient.disable();
+      expect(result.status).toBe('disabled');
+    });
+
+    it('should not restart the task on Task Manager unavailability', async () => {
+      const mockError = new Error('Task Manager is not available');
+      dataClient.disable = jest.fn().mockRejectedValue(mockError);
+      await expect(dataClient.disable()).rejects.toThrow(mockError);
+      // Task is not removed as the task manager is not available
+      expect(mockStartPrivilegeMonitoringTask).not.toHaveBeenCalled();
+    });
+
+    it('should restart the task on disable failure', async () => {
+      const mockMonitoringIndexSourceClient = {
+        findByIndex: jest.fn().mockResolvedValue([{ id: 'source1' }]),
+        update: jest.fn(),
+      };
+      Object.defineProperty(dataClient, 'monitoringIndexSourceClient', {
+        value: mockMonitoringIndexSourceClient,
+      });
+      Object.defineProperty(dataClient, 'engineClient', {
+        value: {
+          get: jest.fn().mockResolvedValue({ status: 'started', error: null }),
+          updateStatus: jest.fn().mockImplementation(() => {
+            throw new Error('Simulated failure for updateStatus');
+          }),
+        },
+      });
+      const result = await dataClient.disable();
+      expect(result.status).toBe('started');
+      expect(result.error && result.error[0]).toBe(
+        'Failed to disable Privileged Monitoring Engine: Simulated failure for updateStatus'
+      );
+      expect(mockStartPrivilegeMonitoringTask).toHaveBeenCalled();
+    });
+
+    it('should disable and revert multiple index sources if a later step fails', async () => {
+      const mockMonitoringIndexSourceClient = {
+        findByIndex: jest.fn().mockResolvedValue([{ id: 'source1' }, { id: 'source2' }]),
+        update: jest.fn(),
+      };
+      Object.defineProperty(dataClient, 'monitoringIndexSourceClient', {
+        value: mockMonitoringIndexSourceClient,
+      });
+      Object.defineProperty(dataClient, 'engineClient', {
+        value: {
+          get: jest.fn().mockResolvedValue({ status: 'started', error: null }),
+          updateStatus: jest.fn().mockImplementation(() => {
+            throw new Error('Simulated failure for updateStatus');
+          }),
+        },
+      });
+
+      const result = await dataClient.disable();
+      expect(result.status).toBe('started');
+      expect(result.error && result.error[0]).toBe(
+        'Failed to disable Privileged Monitoring Engine: Simulated failure for updateStatus'
+      );
+      // Should revert both index sources
+      expect(mockMonitoringIndexSourceClient.update).toHaveBeenCalledWith({
+        id: 'source1',
+        enabled: true,
+      });
+      expect(mockMonitoringIndexSourceClient.update).toHaveBeenCalledWith({
+        id: 'source2',
+        enabled: true,
+      });
     });
   });
 });

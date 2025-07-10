@@ -42,7 +42,10 @@ import {
   type EngineComponentResource,
 } from '../../../../common/api/entity_analytics/privilege_monitoring/common.gen';
 import type { ApiKeyManager } from './auth/api_key';
-import { startPrivilegeMonitoringTask } from './tasks/privilege_monitoring_task';
+import {
+  startPrivilegeMonitoringTask,
+  removePrivilegeMonitoringTask,
+} from './tasks/privilege_monitoring_task';
 import { createOrUpdateIndex } from '../utils/create_or_update_index';
 import {
   PRIVILEGED_MONITOR_IMPORT_USERS_INDEX_MAPPING,
@@ -735,5 +738,117 @@ export class PrivilegeMonitoringDataClient {
       search_after: searchAfter,
       query,
     });
+  }
+
+  public async disable() {
+    this.log('info', 'Disabling Privileged Monitoring Engine');
+    const errors: string[] = [];
+    let indexSources: string[] = [];
+    const disabledSources: string[] = [];
+    let taskRemoved = false;
+    let soStatusUpdated = false;
+
+    // Check the currenrt status of the engine
+    const currentEngineStatus = await this.getEngineStatus();
+    if (currentEngineStatus.status !== PRIVILEGE_MONITORING_ENGINE_STATUS.STARTED) {
+      this.log(
+        'info',
+        'Privilege Monitoring Engine is not in STARTED state, skipping disable operation'
+      );
+      return {
+        status: currentEngineStatus.status,
+        error: null,
+      };
+    }
+    try {
+      // 1. Disable index sources
+      this.log('debug', 'Disabling Privileged Monitoring Engine: removing index sources');
+      indexSources = await this.monitoringIndexSourceClient.findByIndex();
+      for (const source of indexSources) {
+        await this.monitoringIndexSourceClient.update({ id: source.id, enabled: false });
+        disabledSources.push(source.id);
+      }
+
+      // 2. Remove the privileged user monitoring task
+      if (!this.opts.taskManager) {
+        throw new Error('Task Manager is not available');
+      }
+      this.log('debug', 'Disabling Privileged Monitoring Engine: removing task');
+      await removePrivilegeMonitoringTask({
+        logger: this.opts.logger,
+        namespace: this.opts.namespace,
+        taskManager: this.opts.taskManager,
+      });
+      taskRemoved = true;
+
+      // 3. Update status in Saved Objects
+      this.log(
+        'debug',
+        'Disabling Privileged Monitoring Engine: Updating status to DISABLED in Saved Objects'
+      );
+      await this.engineClient.updateStatus(PRIVILEGE_MONITORING_ENGINE_STATUS.DISABLED);
+      soStatusUpdated = true;
+
+      // 4. Audit
+      this.audit(
+        PrivilegeMonitoringEngineActions.DISABLE,
+        EngineComponentResourceEnum.privmon_engine,
+        'Privilege Monitoring Engine disabled'
+      );
+      this.log('info', 'Privileged Monitoring Engine disabled successfully');
+      return {
+        status: PRIVILEGE_MONITORING_ENGINE_STATUS.DISABLED,
+        error: null,
+      };
+    } catch (e) {
+      const msg = `Failed to disable Privileged Monitoring Engine: ${e.message}`;
+      this.log('error', msg);
+      errors.push(msg);
+
+      // --- Attempt to revert changes ---
+      // 1. Re-enable index sources if they were disabled
+      if (disabledSources.length > 0) {
+        for (const id of disabledSources) {
+          try {
+            await this.monitoringIndexSourceClient.update({ id, enabled: true });
+            this.log('warn', `Re-enabled index source ${id} after failure`);
+          } catch (revertErr) {
+            this.log('error', `Failed to revert index source ${id}: ${revertErr.message}`);
+          }
+        }
+      }
+      // 2. Re-create the task if it was removed
+      if (taskRemoved) {
+        try {
+          await startPrivilegeMonitoringTask({
+            logger: this.opts.logger,
+            namespace: this.opts.namespace,
+            taskManager: this.opts.taskManager,
+          });
+          this.log('warn', 'Re-created privilege monitoring task after failure');
+        } catch (revertErr) {
+          this.log('error', `Failed to re-create privilege monitoring task: ${revertErr.message}`);
+        }
+      }
+      // 3. Revert status in Saved Objects if it was updated
+      if (soStatusUpdated) {
+        try {
+          await this.engineClient.updateStatus(PRIVILEGE_MONITORING_ENGINE_STATUS.STARTED);
+          this.log('warn', 'Reverted engine status to STARTED after failure');
+        } catch (revertErr) {
+          this.log('error', `Failed to revert engine status: ${revertErr.message}`);
+        }
+      }
+      this.audit(
+        PrivilegeMonitoringEngineActions.DISABLE,
+        EngineComponentResourceEnum.privmon_engine,
+        'Failed to disable Privileged Monitoring Engine',
+        e
+      );
+      return {
+        status: PRIVILEGE_MONITORING_ENGINE_STATUS.STARTED,
+        error: errors,
+      };
+    }
   }
 }

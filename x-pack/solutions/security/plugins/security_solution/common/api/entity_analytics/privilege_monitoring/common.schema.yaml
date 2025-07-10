@@ -23,6 +23,7 @@ components:
         - stopped
         - updating
         - error
+        - disabled
 
     EngineComponentStatus:
       type: object
