@@ -448,6 +448,11 @@ class AgentPolicyService {
 
     this.checkAgentless(agentPolicy);
 
+    if (agentPolicy.supports_agentless && !agentPolicy.fleet_server_host_id) {
+      const { fleetServerId } = agentlessAgentService.getDefaultSettings();
+      agentPolicy.fleet_server_host_id = fleetServerId;
+    }
+
     await this.requireUniqueName(soClient, agentPolicy);
     await validatePolicyNamespaceForSpace({
       spaceId: soClient.getCurrentNamespace(),
