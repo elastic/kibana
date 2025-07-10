@@ -15,8 +15,8 @@ import {
   ToolCallEvent,
   ToolResultEvent,
   ReasoningEvent,
-} from '@kbn/onechat-common/agents';
-import { StructuredToolIdentifier, toStructuredToolIdentifier } from '@kbn/onechat-common/tools';
+} from '@kbn/onechat-common';
+import { StructuredToolIdentifier } from '@kbn/onechat-common/tools';
 import {
   matchGraphName,
   matchEvent,
@@ -31,6 +31,7 @@ import {
   createToolCallEvent,
   createMessageEvent,
   createToolResultEvent,
+  extractToolReturn,
 } from '@kbn/onechat-genai-utils/langchain';
 import { isMessage, isReasoningStep } from './actions';
 import type { StateType } from './graph';
@@ -93,7 +94,14 @@ export const convertGraphEvents = ({
               const toolId = toolIdentifierFromToolCall(toolCall, toolIdMapping);
               const { toolCallId, args } = toolCall;
               toolCallIdToIdMap.set(toolCall.toolCallId, toolId);
-              toolCallEvents.push(createToolCallEvent({ toolId, toolCallId, args }));
+              toolCallEvents.push(
+                createToolCallEvent({
+                  toolId: toolId.toolId,
+                  toolType: toolId.providerId,
+                  toolCallId,
+                  params: args,
+                })
+              );
             }
 
             return of(...toolCallEvents);
@@ -113,11 +121,13 @@ export const convertGraphEvents = ({
           const toolResultEvents: ToolResultEvent[] = [];
           for (const toolMessage of toolMessages) {
             const toolId = toolCallIdToIdMap.get(toolMessage.tool_call_id);
+            const toolReturn = extractToolReturn(toolMessage);
             toolResultEvents.push(
               createToolResultEvent({
                 toolCallId: toolMessage.tool_call_id,
-                toolId: toolId ?? toStructuredToolIdentifier('unknown'),
-                result: extractTextContent(toolMessage),
+                toolId: toolId?.toolId ?? 'unknown',
+                toolType: toolId?.providerId ?? 'unknown',
+                result: JSON.stringify(toolReturn.result),
               })
             );
           }

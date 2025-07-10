@@ -4,16 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { schema } from '@kbn/config-schema';
 import { esqlToolProviderId } from '@kbn/onechat-common';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import { EsqlToolCreateRequest, EsqlToolUpdateRequest } from '../../common/tools';
 import { apiPrivileges } from '../../common/features';
-import { ESQL_TOOL_API_UI_SETTING_ID } from '../../common/constants';
+import { getTechnicalPreviewWarning } from './utils';
 
-const TECHNICAL_PREVIEW_WARNING =
-  'Elastic ESQL Tool API is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.';
+const TECHNICAL_PREVIEW_WARNING = getTechnicalPreviewWarning('Elastic ESQL Tool API');
 
 const paramValueTypeSchema = schema.oneOf([
   schema.literal('text'),
@@ -59,12 +59,6 @@ export function registerESQLToolsRoutes({
         },
       },
       wrapHandler(async (ctx, request, response) => {
-        const { uiSettings } = await ctx.core;
-        const enabled = await uiSettings.client.get(ESQL_TOOL_API_UI_SETTING_ID);
-
-        if (!enabled) {
-          return response.notFound();
-        }
         const { esql: esqlToolClientService } = getInternalServices();
         const client = await esqlToolClientService.getScopedClient({ request });
         const tool = await client.get(request.params.id);
@@ -107,13 +101,6 @@ export function registerESQLToolsRoutes({
         validate: false,
       },
       wrapHandler(async (ctx, request, response) => {
-        const { uiSettings } = await ctx.core;
-        const enabled = await uiSettings.client.get(ESQL_TOOL_API_UI_SETTING_ID);
-
-        if (!enabled) {
-          return response.notFound();
-        }
-
         const { esql: esqlToolClientService } = getInternalServices();
         const client = await esqlToolClientService.getScopedClient({ request });
 
@@ -168,12 +155,6 @@ export function registerESQLToolsRoutes({
         },
       },
       wrapHandler(async (ctx, request, response) => {
-        const { uiSettings } = await ctx.core;
-        const enabled = await uiSettings.client.get(ESQL_TOOL_API_UI_SETTING_ID);
-
-        if (!enabled) {
-          return response.notFound();
-        }
         if (!/^[a-zA-Z0-9_-]+$/.test(request.body.id)) {
           return response.badRequest({
             body: {
@@ -254,12 +235,6 @@ export function registerESQLToolsRoutes({
         },
       },
       wrapHandler(async (ctx, request, response) => {
-        const { uiSettings } = await ctx.core;
-        const enabled = await uiSettings.client.get(ESQL_TOOL_API_UI_SETTING_ID);
-
-        if (!enabled) {
-          return response.notFound();
-        }
         const { esql: esqlToolService } = getInternalServices();
         const client = await esqlToolService.getScopedClient({ request });
 
@@ -314,13 +289,6 @@ export function registerESQLToolsRoutes({
         },
       },
       wrapHandler(async (ctx, request, response) => {
-        const { uiSettings } = await ctx.core;
-        const enabled = await uiSettings.client.get(ESQL_TOOL_API_UI_SETTING_ID);
-
-        if (!enabled) {
-          return response.notFound();
-        }
-
         const { esql: esqlToolService } = getInternalServices();
         const client = await esqlToolService.getScopedClient({ request });
         const result = await client.delete(request.params.id);
