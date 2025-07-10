@@ -135,7 +135,10 @@ export class IndexUpdateService {
     map((updates) => {
       return updates.reduce((acc, update) => {
         if (update.id) {
-          acc.set(update.id, update.value);
+          acc.set(update.id, {
+            ...acc.get(update.id),
+            ...update.value,
+          });
         }
         return acc;
       }, new Map() as PendingSave);
