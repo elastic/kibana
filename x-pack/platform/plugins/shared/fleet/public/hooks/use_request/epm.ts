@@ -110,10 +110,6 @@ export const useGetPackagesQuery = (
     enabled: options?.enabled,
     retry: (_, error) => !isRegistryConnectionError(error),
     refetchOnWindowFocus: false,
-    select: (data) => {
-      // do not display the security_ai_prompts package in the UI
-      return { items: data.items?.filter((item) => item.id !== 'security_ai_prompts') };
-    },
   });
 };
 

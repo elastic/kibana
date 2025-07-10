@@ -115,7 +115,11 @@ export const getListHandler: FleetRequestHandler<
     savedObjectsClient,
     ...request.query,
   });
-  const flattenedRes = res.map((pkg) => soToInstallationInfo(pkg)) as PackageList;
+  const flattenedRes = res.reduce(
+    (acc: PackageList, pkg) =>
+      pkg.id === 'security_ai_prompts' ? acc : [...acc, soToInstallationInfo(pkg)],
+    []
+  );
 
   if (request.query.withPackagePoliciesCount) {
     const countByPackage = await getPackagePoliciesCountByPackageName(
