@@ -238,7 +238,7 @@ export const defaultConfig: StorybookConfig = {
   staticDirs: [
     UiSharedDepsNpm.distDir,
     UiSharedDepsSrc.distDir,
-    `${REPO_ROOT}/bazel-bin/src/platform/packages/shared/kbn-monaco/target_workers`,
+    `${REPO_ROOT}/target/build/src/platform/packages/shared/kbn-monaco/target_workers`,
     {
       from: `${REPO_ROOT}/src/platform/plugins/shared/kibana_react/public/assets`,
       to: 'plugins/kibanaReact/assets',
