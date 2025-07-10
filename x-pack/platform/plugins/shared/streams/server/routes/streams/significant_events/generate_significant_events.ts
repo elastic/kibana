@@ -127,7 +127,7 @@ root cause analysis. Some example of patterns:
     logPatterns
       ? `## Log patterns
     
-    The following log patterns where found over the last
+    The following log patterns were found over the last
     ${LOOKBACK_DAYS} days. The field used is \`${categorizationField}\`:
     
     ${JSON.stringify(
