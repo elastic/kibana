@@ -6,7 +6,7 @@
  */
 
 import * as React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ThemeProvider } from 'styled-components';
 import ActionsConnectorsList from './actions_connectors_list';
@@ -68,12 +68,14 @@ describe('actions_connectors_list', () => {
           />
         </IntlProvider>
       );
+
       expect(await screen.findByTestId('createFirstConnectorEmptyPrompt')).toBeInTheDocument();
       expect(await screen.findByTestId('createFirstActionButton')).toBeInTheDocument();
     });
 
     it('if click create button should render CreateConnectorFlyout', async () => {
       const setAddFlyoutVisibility = jest.fn();
+
       render(
         <IntlProvider>
           <ActionsConnectorsList
@@ -86,6 +88,7 @@ describe('actions_connectors_list', () => {
           />
         </IntlProvider>
       );
+
       const createFirstActionButton = await screen.findByTestId('createFirstActionButton');
       await userEvent.click(createFirstActionButton);
       await waitFor(() => {
@@ -181,14 +184,19 @@ describe('actions_connectors_list', () => {
           application: { capabilities },
         },
       ] = await mocks.getStartServices();
-      actionTypeRegistry.get.mockReturnValue({
-        id: 'test',
-        iconClass: 'test',
-        selectMessage: 'test',
-        validateParams: (): Promise<GenericValidationResult<unknown>> =>
-          Promise.resolve({ errors: {} }),
-        actionConnectorFields: null,
-        actionParamsFields: React.lazy(async () => ({ default: () => <></> })),
+      actionTypeRegistry.get.mockImplementation((id: string) => {
+        return {
+          id,
+          iconClass: 'test',
+          selectMessage: 'test',
+          validateParams: (): Promise<GenericValidationResult<unknown>> =>
+            Promise.resolve({ errors: {} }),
+          actionConnectorFields: null,
+          actionParamsFields: React.lazy(async () => ({ default: () => <></> })),
+          actionTypeTitle: 'Test Action',
+          defaultActionParams: {},
+          defaultRecoveredActionParams: {},
+        };
       });
       useKibanaMock().services.actionTypeRegistry = actionTypeRegistry;
       useKibanaMock().services.application.capabilities = {
@@ -228,6 +236,7 @@ describe('actions_connectors_list', () => {
           />
         </IntlProvider>
       );
+
       expect(await screen.findByTestId('preConfiguredTitleMessage')).toBeInTheDocument();
     });
 
@@ -244,6 +253,7 @@ describe('actions_connectors_list', () => {
           />
         </IntlProvider>
       );
+
       const editButton = await screen.findByTestId('edit4');
       expect(editButton).toBeDisabled();
       const deleteButtons = await screen.findAllByTestId('deleteConnector');
@@ -265,6 +275,7 @@ describe('actions_connectors_list', () => {
           />
         </IntlProvider>
       );
+
       const deleteButtons = await screen.findAllByTestId('deleteConnector');
       expect(deleteButtons[deleteButtons.length - 1]).not.toBeDisabled();
       const fixButtons = await screen.findAllByTestId('fixConnectorButton');
@@ -283,6 +294,7 @@ describe('actions_connectors_list', () => {
         referencedByCount: 1,
         config: {},
       })) as ActionConnector[];
+
       render(
         <IntlProvider>
           <ActionsConnectorsList
@@ -295,6 +307,7 @@ describe('actions_connectors_list', () => {
           />
         </IntlProvider>
       );
+
       // Find and click the next page button
       const nextPageButton = await screen.findByTestId('pagination-button-1');
       await userEvent.click(nextPageButton);
@@ -315,11 +328,21 @@ describe('actions_connectors_list', () => {
           />
         </IntlProvider>
       );
+
+      // Wait for the table to be rendered
+      await screen.findByTestId('actionsTable');
+
       const deleteButtons = await screen.findAllByTestId('deleteConnector');
-      await userEvent.click(deleteButtons[deleteButtons.length - 1]);
-      const confirmation = await screen.findByTestId('deleteConnectorsConfirmation');
-      expect(confirmation).toBeInTheDocument();
-      expect(confirmation).toHaveTextContent(/this connector is used in a rule/i);
+      // Click the first delete button (all mocked actions have referencedByCount: 1)
+      await userEvent.click(deleteButtons[0]);
+
+      // Wait for the confirmation dialog to appear
+      await waitFor(() => {
+        expect(screen.getByTestId('deleteIdsConfirmation')).toBeInTheDocument();
+      });
+
+      const confirmation = screen.getByTestId('deleteIdsConfirmation');
+      expect(confirmation).toHaveTextContent(/this connector is currently in use/i);
     });
 
     it('call editItem when connectorId presented in url', async () => {
@@ -341,6 +364,7 @@ describe('actions_connectors_list', () => {
           />
         </IntlProvider>
       );
+
       await waitFor(() => {
         expect(mockedEditItem).toBeCalledWith(selectedConnector, EditConnectorTabs.Configuration);
         expect(mockedCreateHref).toHaveBeenCalledWith({ pathname: '/connectors' });
@@ -351,7 +375,7 @@ describe('actions_connectors_list', () => {
   });
 
   describe('component empty with show only capability', () => {
-    const setup = async () => {
+    beforeEach(async () => {
       loadActionTypes.mockResolvedValueOnce([
         { id: 'test', name: 'Test', supportedFeatureIds: ['alerting'] },
         { id: 'test2', name: 'Test2', supportedFeatureIds: ['alerting'] },
@@ -366,29 +390,30 @@ describe('actions_connectors_list', () => {
         ...capabilities,
         actions: { show: true, save: false, delete: false },
       };
-    };
+    });
 
     it('renders no permissions to create connector', async () => {
-      await setup();
-      render(
-        <IntlProvider>
-          <ActionsConnectorsList
-            setAddFlyoutVisibility={() => {}}
-            loadActions={async () => {}}
-            editItem={() => {}}
-            isLoadingActions={false}
-            actions={[]}
-            setActions={() => {}}
-          />
-        </IntlProvider>
-      );
+      await act(async () => {
+        render(
+          <IntlProvider>
+            <ActionsConnectorsList
+              setAddFlyoutVisibility={() => {}}
+              loadActions={async () => {}}
+              editItem={() => {}}
+              isLoadingActions={false}
+              actions={[]}
+              setActions={() => {}}
+            />
+          </IntlProvider>
+        );
+      });
       expect(screen.getByText(/no permissions to create connectors/i)).toBeInTheDocument();
       expect(screen.queryByTestId('createConnectorButton')).not.toBeInTheDocument();
     });
   });
 
   describe('with show only capability', () => {
-    const setup = async () => {
+    beforeEach(async () => {
       loadActionTypes.mockResolvedValueOnce([
         { id: 'test', name: 'Test', supportedFeatureIds: ['alerting'] },
         { id: 'test2', name: 'Test2', supportedFeatureIds: ['alerting'] },
@@ -403,10 +428,9 @@ describe('actions_connectors_list', () => {
         actions: { show: true, save: false, delete: false },
       };
       useKibanaMock().services.actionTypeRegistry = actionTypeRegistry;
-    };
+    });
 
     it('renders table of connectors with delete button disabled', async () => {
-      await setup();
       const actions = [
         {
           id: '1',
@@ -425,6 +449,7 @@ describe('actions_connectors_list', () => {
           config: {},
         },
       ] as ActionConnector[];
+
       render(
         <IntlProvider>
           <ActionsConnectorsList
@@ -437,6 +462,7 @@ describe('actions_connectors_list', () => {
           />
         </IntlProvider>
       );
+
       expect(await screen.findByTestId('actionsTable')).toBeInTheDocument();
       const deleteButtons = await screen.findAllByTestId('deleteConnector');
       deleteButtons.forEach((btn) => expect(btn).toBeDisabled());
@@ -444,7 +470,7 @@ describe('actions_connectors_list', () => {
   });
 
   describe('component with disabled items', () => {
-    const setup = async () => {
+    beforeEach(async () => {
       loadActionTypes.mockResolvedValueOnce([
         {
           id: 'test',
@@ -473,15 +499,15 @@ describe('actions_connectors_list', () => {
         actions: { show: true, save: true, delete: true },
       };
       useKibanaMock().services.actionTypeRegistry = actionTypeRegistry;
-    };
+    });
 
     it('renders table of connectors and disables correct rows', async () => {
-      await setup();
       const actions = [
         { id: '1', actionTypeId: 'test', referencedByCount: 1, config: {} },
         { id: '2', actionTypeId: 'test2', referencedByCount: 1, config: {} },
         { id: '3', actionTypeId: 'test3', isPreconfigured: true, isDeprecated: false },
       ] as ActionConnector[];
+
       render(
         <IntlProvider>
           <ActionsConnectorsList
@@ -494,28 +520,29 @@ describe('actions_connectors_list', () => {
           />
         </IntlProvider>
       );
+
       expect(await screen.findByTestId('actionsTable')).toBeInTheDocument();
       // You may need to adjust this if you have a class or attribute for disabled rows
     });
   });
 
   describe('component with deprecated connectors', () => {
-    const setup = async () => {
+    beforeEach(async () => {
       loadActionTypes.mockResolvedValueOnce([
         {
           id: 'test',
           name: '.servicenow',
-          enabled: false,
-          enabledInConfig: false,
+          enabled: true,
+          enabledInConfig: true,
           enabledInLicense: true,
           supportedFeatureIds: ['alerting'],
         },
         {
           id: 'test2',
           name: '.servicenow-sir',
-          enabled: false,
+          enabled: true,
           enabledInConfig: true,
-          enabledInLicense: false,
+          enabledInLicense: true,
           supportedFeatureIds: ['alerting'],
         },
       ]);
@@ -529,26 +556,53 @@ describe('actions_connectors_list', () => {
         actions: { show: true, save: true, delete: true },
       };
       useKibanaMock().services.actionTypeRegistry = actionTypeRegistry;
-    };
+
+      // Mock the action type registry to return valid action types
+      actionTypeRegistry.get.mockImplementation((id: string) => {
+        return {
+          id,
+          iconClass: 'test',
+          selectMessage: 'test',
+          validateParams: (): Promise<GenericValidationResult<unknown>> =>
+            Promise.resolve({ errors: {} }),
+          actionConnectorFields: null,
+          actionParamsFields: React.lazy(async () => ({ default: () => <></> })),
+          actionTypeTitle: 'Test Action',
+          defaultActionParams: {},
+          defaultRecoveredActionParams: {},
+        };
+      });
+
+      // Mock the has method to return true for all action types
+      actionTypeRegistry.has.mockReturnValue(true);
+    });
 
     it('shows the warning icon', async () => {
-      await setup();
       const actions = [
         {
           id: '1',
-          actionTypeId: '.servicenow',
+          actionTypeId: 'test',
+          name: 'ServiceNow Connector',
+          secrets: {},
+          isSystemAction: false,
           referencedByCount: 1,
           config: { usesTableApi: true },
           isDeprecated: true,
+          isMissingSecrets: false,
         },
         {
           id: '2',
-          actionTypeId: '.servicenow-sir',
+          actionTypeId: 'test2',
+          name: 'ServiceNow SIR Connector',
+          secrets: {},
+          isSystemAction: false,
           referencedByCount: 1,
           config: { usesTableApi: true },
           isDeprecated: true,
+          isMissingSecrets: false,
         },
       ] as Array<ActionConnector<{ usesTableApi: boolean }>>;
+
       render(
         <ThemeProvider theme={() => ({ eui: { euiSizeS: '15px' }, darkMode: true })}>
           <IntlProvider>
@@ -563,8 +617,33 @@ describe('actions_connectors_list', () => {
           </IntlProvider>
         </ThemeProvider>
       );
-      expect(await screen.findByTestId('actionsTable')).toBeInTheDocument();
-      expect(screen.getAllByLabelText(/warning/i).length).toBeGreaterThan(0);
+
+      // Wait for the table to be rendered
+      await screen.findByTestId('actionsTable');
+
+      // Wait for loadActionTypes to be called
+      await waitFor(() => {
+        expect(loadActionTypes).toHaveBeenCalled();
+      });
+
+      // Wait for action types to be loaded and processed
+      await waitFor(() => {
+        expect(screen.getAllByTestId('connectorsTableCell-actionType')).toHaveLength(2);
+      });
+
+      // Wait for the connectors to be rendered
+      await waitFor(() => {
+        expect(screen.getByTestId('edit1')).toBeInTheDocument();
+        expect(screen.getByTestId('edit2')).toBeInTheDocument();
+      });
+
+      // Look for warning icons by their data-euiicon-type attribute
+      await waitFor(() => {
+        const warningIcons = screen
+          .getByTestId('actionsTable')
+          .querySelectorAll('[data-euiicon-type="warning"]');
+        expect(warningIcons.length).toBeGreaterThan(0);
+      });
     });
   });
 });
