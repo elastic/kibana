@@ -916,6 +916,7 @@ export function defineRoutes(
     ) => {
       try {
         const es = (await context.core).elasticsearch.client.asInternalUser;
+        const eventLogClient = eventLog.getClient(req);
 
         await es.deleteByQuery({
           index: '.kibana-event-log*',
@@ -927,6 +928,8 @@ export function defineRoutes(
           conflicts: 'proceed',
           wait_for_completion: true,
         });
+
+        await eventLogClient.refreshIndex();
 
         return res.ok({ body: { ok: true } });
       } catch (err) {

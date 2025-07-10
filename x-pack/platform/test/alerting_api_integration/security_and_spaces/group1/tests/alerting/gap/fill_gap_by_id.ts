@@ -65,6 +65,18 @@ export default function fillGapByIdTests({ getService }: FtrProviderContext) {
             const ruleId = ruleResponse.body.id;
             objectRemover.add(apiOptions.spaceId, ruleId, 'rule', 'alerting');
 
+            const findResponseWithoutGaps = await supertest
+              .post(`${getUrlPrefix(apiOptions.spaceId)}/internal/alerting/rules/gaps/_find`)
+              .set('kbn-xsrf', 'foo')
+              .send({
+                rule_id: ruleId,
+                start: gapStart,
+                end: gapEnd,
+              });
+
+            expect(findResponseWithoutGaps.statusCode).to.eql(200);
+            expect(findResponseWithoutGaps.body.total).to.eql(0);
+
             // Create an unfilled gap
             await supertest
               .post(`${getUrlPrefix(apiOptions.spaceId)}/_test/report_gap`)
