@@ -179,6 +179,7 @@ const RequiredFieldsList = ({
         }
         hasChildLabel={false}
         labelType="legend"
+        data-test-subj="requiredFieldsFormRow"
       >
         <>
           {items.map((item) => (

@@ -2108,10 +2108,10 @@
     enabled "2.0.x"
     kuler "^2.0.0"
 
-"@dagrejs/dagre@^1.1.4":
-  version "1.1.4"
-  resolved "https://registry.yarnpkg.com/@dagrejs/dagre/-/dagre-1.1.4.tgz#66f9c0e2b558308f2c268f60e2c28f22ee17e339"
-  integrity sha512-QUTc54Cg/wvmlEUxB+uvoPVKFazM1H18kVHBQNmK2NbrDR5ihOCR6CXLnDSZzMcSQKJtabPUWridBOlJM3WkDg==
+"@dagrejs/dagre@^1.1.5":
+  version "1.1.5"
+  resolved "https://registry.yarnpkg.com/@dagrejs/dagre/-/dagre-1.1.5.tgz#af392e24723c479f00661af3f4e8ede5c6acce51"
+  integrity sha512-Ghgrh08s12DCL5SeiR6AoyE80mQELTWhJBRmXfFoqDiFkR458vPEdgTbbjA0T+9ETNxUblnD0QW55tfdvi5pjQ==
   dependencies:
     "@dagrejs/graphlib" "2.2.4"
 
@@ -8856,10 +8856,10 @@
   resolved "https://registry.yarnpkg.com/@open-draft/until/-/until-2.1.0.tgz#0acf32f470af2ceaf47f095cdecd40d68666efda"
   integrity sha512-U69T3ItWHvLwGg5eJ0n3I62nWuE6ilHlmz7zM0npLBRvPRd7e6NYmg54vvRtP5mZG7kZqZCFVdsTWo7BPtBujg==
 
-"@openfeature/core@^1.5.0":
-  version "1.5.0"
-  resolved "https://registry.yarnpkg.com/@openfeature/core/-/core-1.5.0.tgz#5fda73aa125dfb5729f5dd7362df00b6dca23a24"
-  integrity sha512-dRBJjnYhEa6XoF9BNf9sW4sHuXmigfBbbatA5djbRXRBDExrXsMydMpEWQqKYhd7XwdwFatuh2q+UkVbXriUKA==
+"@openfeature/core@^1.8.1":
+  version "1.8.1"
+  resolved "https://registry.yarnpkg.com/@openfeature/core/-/core-1.8.1.tgz#9e10166d2ada996a941ab430d5c26c7df03cc710"
+  integrity sha512-5mDq0RTlCZKc3BKAArnz4CiPK5uPY5rf1NpYRy4snPf4OppcZXnjjrvozo5I1p4UtyHGu/maoUVtaQCY54/n0A==
 
 "@openfeature/launchdarkly-client-provider@^0.3.2":
   version "0.3.2"
@@ -20930,10 +20930,10 @@ hdr-histogram-js@^2.0.1:
     base64-js "^1.2.0"
     pako "^1.0.3"
 
-hdr-histogram-js@^3.0.0:
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/hdr-histogram-js/-/hdr-histogram-js-3.0.0.tgz#8e2d9a68e3313147804c47d85a9c22a93f85e24b"
-  integrity sha512-/EpvQI2/Z98mNFYEnlqJ8Ogful8OpArLG/6Tf2bPnkutBVLIeMVNHjk1ZDfshF2BUweipzbk+dB1hgSB7SIakw==
+hdr-histogram-js@^3.0.1:
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/hdr-histogram-js/-/hdr-histogram-js-3.0.1.tgz#b281e90d6ca80ee656bc378dafa39d7239b90855"
+  integrity sha512-l3GSdZL1Jr1C0kyb461tUjEdrRPZr8Qry7jByltf5JGrA0xvqOSrxRBfcrJqqV/AMEtqqhHhC6w8HW0gn76tRQ==
   dependencies:
     "@assemblyscript/loader" "^0.19.21"
     base64-js "^1.2.0"
@@ -25097,10 +25097,10 @@ moment-duration-format@^2.3.2:
   resolved "https://registry.yarnpkg.com/moment-duration-format/-/moment-duration-format-2.3.2.tgz#5fa2b19b941b8d277122ff3f87a12895ec0d6212"
   integrity sha512-cBMXjSW+fjOb4tyaVHuaVE/A5TqkukDWiOfxxAjY+PEqmmBQlLwn+8OzwPiG3brouXKY5Un4pBjAeB6UToXHaQ==
 
-moment-timezone@^0.5.47:
-  version "0.5.47"
-  resolved "https://registry.yarnpkg.com/moment-timezone/-/moment-timezone-0.5.47.tgz#d4d1a21b78372d914d6d69ae285454732a429749"
-  integrity sha512-UbNt/JAWS0m/NJOebR0QMRHBk0hu03r5dx9GK8Cs0AS3I81yDcOc9k+DytPItgVvBP7J6Mf6U2n3BPAacAV9oA==
+moment-timezone@^0.6.0:
+  version "0.6.0"
+  resolved "https://registry.yarnpkg.com/moment-timezone/-/moment-timezone-0.6.0.tgz#c5a6519171f31a64739ea75d33f5c136c08ff608"
+  integrity sha512-ldA5lRNm3iJCWZcBCab4pnNL3HSZYXVb/3TYr75/1WCTWYuTqYUb5f/S384pncYjJ88lbO8Z4uPDvmoluHJc8Q==
   dependencies:
     moment "^2.29.4"
 

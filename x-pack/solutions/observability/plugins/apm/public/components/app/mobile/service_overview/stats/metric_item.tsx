@@ -9,7 +9,7 @@ import type { MetricDatum } from '@elastic/charts';
 import { Chart, Metric } from '@elastic/charts';
 import { EuiSkeletonText, EuiPanel } from '@elastic/eui';
 import { isEmpty } from 'lodash';
-import { EuiErrorBoundary } from '@elastic/eui';
+import { KibanaErrorBoundary } from '@kbn/shared-ux-error-boundary';
 
 export function MetricItem({
   data,
@@ -38,11 +38,11 @@ export function MetricItem({
           <EuiSkeletonText lines={3} />
         </EuiPanel>
       ) : (
-        <EuiErrorBoundary>
+        <KibanaErrorBoundary>
           <Chart>
             <Metric id={`metric_${id}`} data={[data]} />
           </Chart>
-        </EuiErrorBoundary>
+        </KibanaErrorBoundary>
       )}
     </div>
   );

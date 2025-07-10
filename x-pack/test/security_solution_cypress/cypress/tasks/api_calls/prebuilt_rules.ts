@@ -14,7 +14,8 @@ import { ELASTIC_SECURITY_RULE_ID } from '@kbn/security-solution-plugin/common/d
 import type { PrePackagedRulesStatusResponse } from '@kbn/security-solution-plugin/public/detection_engine/rule_management/logic/types';
 import { getPrebuiltRuleWithExceptionsMock } from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules/mocks';
 import { createRuleAssetSavedObject } from '../../helpers/rules';
-import { rootRequest } from './common';
+import { IS_SERVERLESS } from '../../env_var_names_constants';
+import { refreshSavedObjectIndices, rootRequest } from './common';
 
 export const getPrebuiltRulesStatus = () => {
   return rootRequest<PrePackagedRulesStatusResponse>({
@@ -184,6 +185,35 @@ export const getRuleAssets = (index: string | undefined = '.kibana_security_solu
 export const preventPrebuiltRulesPackageInstallation = () => {
   cy.log('Prevent prebuilt rules package installation');
   cy.intercept('POST', BOOTSTRAP_PREBUILT_RULES_URL, {});
+};
+
+/**
+ * Installs a prepared mock prebuilt rules package `security_detection_engine`.
+ * Installing it up front prevents installing the real package when making API requests.
+ */
+export const installMockPrebuiltRulesPackage = (): void => {
+  cy.fixture(
+    'security_detection_engine_packages/mock-security_detection_engine-99.0.0.zip',
+    'binary'
+  )
+    .then(Cypress.Blob.binaryStringToBlob)
+    .then((blob) => {
+      rootRequest({
+        method: 'POST',
+        url: '/api/fleet/epm/packages',
+        headers: {
+          'Content-Type': 'application/zip',
+          'elastic-api-version': '2023-10-31',
+          'kbn-xsrf': 'xxxx',
+        },
+        body: blob,
+        encoding: 'binary',
+      });
+    });
+
+  if (!Cypress.env(IS_SERVERLESS)) {
+    refreshSavedObjectIndices();
+  }
 };
 
 /**

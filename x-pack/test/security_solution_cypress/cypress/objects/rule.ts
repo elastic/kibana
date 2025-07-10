@@ -13,7 +13,6 @@ import type {
   MachineLearningRuleCreateProps,
   NewTermsRuleCreateProps,
   QueryRuleCreateProps,
-  RuleResponse,
   SavedQueryRuleCreateProps,
   ThreatMatchRuleCreateProps,
   ThresholdRuleCreateProps,
@@ -137,6 +136,9 @@ export const getDataViewRule = (
   ...rewrites,
 });
 
+/**
+ * @deprecated Use `getCustomQueryRuleParams()` instead
+ */
 export const getNewRule = (
   rewrites?: CreateRulePropsRewrites<QueryRuleCreateProps>
 ): QueryRuleCreateProps => ({
@@ -154,6 +156,27 @@ export const getNewRule = (
   note: '# test markdown',
   interval: '100m',
   from: 'now-50000h',
+  max_signals: 100,
+  ...rewrites,
+});
+
+export const getCustomQueryRuleParams = (
+  rewrites?: CreateRulePropsRewrites<QueryRuleCreateProps>
+): QueryRuleCreateProps => ({
+  type: 'query',
+  query: 'host.name: *',
+  index: getIndexPatterns(),
+  name: 'New Rule Test',
+  description: 'The new rule description.',
+  severity: 'high',
+  risk_score: 17,
+  tags: ['test', 'newRule'],
+  references: ['http://example.com/', 'https://example.com/'],
+  false_positives: ['False1', 'False2'],
+  threat: [getMitre1(), getMitre2()],
+  note: '# test markdown',
+  interval: '100m',
+  from: '1900-01-01T00:00:00.000Z',
   max_signals: 100,
   ...rewrites,
 });
@@ -522,147 +545,6 @@ export const getEditedRule = (): QueryRuleCreateProps =>
     description: 'Edited Rule description',
     tags: [...(getExistingRule().tags || []), 'edited'],
   });
-
-export const expectedExportedRules = (responses: Array<Cypress.Response<RuleResponse>>): string => {
-  const rules = responses
-    .map((response) => JSON.stringify(getFormattedRuleResponse(response)))
-    .join('\n');
-
-  // NOTE: Order of the properties in this object matters for the tests to work.
-  const details = {
-    exported_count: responses.length,
-    exported_rules_count: responses.length,
-    missing_rules: [],
-    missing_rules_count: 0,
-    exported_exception_list_count: 0,
-    exported_exception_list_item_count: 0,
-    missing_exception_list_item_count: 0,
-    missing_exception_list_items: [],
-    missing_exception_lists: [],
-    missing_exception_lists_count: 0,
-    exported_action_connector_count: 0,
-    missing_action_connection_count: 0,
-    missing_action_connections: [],
-    excluded_action_connection_count: 0,
-    excluded_action_connections: [],
-  };
-
-  return `${rules}\n${JSON.stringify(details)}\n`;
-};
-
-export const expectedExportedRule = (ruleResponse: Cypress.Response<RuleResponse>): string => {
-  const rule = getFormattedRuleResponse(ruleResponse);
-
-  // NOTE: Order of the properties in this object matters for the tests to work.
-  const details = {
-    exported_count: 1,
-    exported_rules_count: 1,
-    missing_rules: [],
-    missing_rules_count: 0,
-    exported_exception_list_count: 0,
-    exported_exception_list_item_count: 0,
-    missing_exception_list_item_count: 0,
-    missing_exception_list_items: [],
-    missing_exception_lists: [],
-    missing_exception_lists_count: 0,
-    exported_action_connector_count: 0,
-    missing_action_connection_count: 0,
-    missing_action_connections: [],
-    excluded_action_connection_count: 0,
-    excluded_action_connections: [],
-  };
-
-  return `${JSON.stringify(rule)}\n${JSON.stringify(details)}\n`;
-};
-
-// TODO: Follow up https://github.com/elastic/kibana/pull/137628 and add an explicit type to this object
-// without using Partial
-const getFormattedRuleResponse = (
-  ruleResponse: Cypress.Response<RuleResponse>
-): Partial<RuleResponse> => {
-  const {
-    id,
-    updated_at: updatedAt,
-    updated_by: updatedBy,
-    created_at: createdAt,
-    created_by: createdBy,
-    description,
-    name,
-    risk_score: riskScore,
-    severity,
-    note,
-    tags,
-    interval,
-    enabled,
-    author,
-    false_positives: falsePositives,
-    from,
-    rule_id: ruleId,
-    max_signals: maxSignals,
-    risk_score_mapping: riskScoreMapping,
-    severity_mapping: severityMapping,
-    threat,
-    to,
-    references,
-    version,
-    exceptions_list: exceptionsList,
-    immutable,
-    rule_source: ruleSource,
-    related_integrations: relatedIntegrations,
-    setup,
-    investigation_fields: investigationFields,
-    license,
-    revision,
-  } = ruleResponse.body;
-
-  let query: string | undefined;
-  if (ruleResponse.body.type === 'query') {
-    query = ruleResponse.body.query;
-  }
-
-  // NOTE: Order of the properties in this object matters for the tests to work.
-  return {
-    id,
-    updated_at: updatedAt,
-    updated_by: updatedBy,
-    created_at: createdAt,
-    created_by: createdBy,
-    name,
-    tags,
-    interval,
-    enabled,
-    revision,
-    description,
-    risk_score: riskScore,
-    severity,
-    note,
-    license,
-    output_index: '',
-    investigation_fields: investigationFields,
-    author,
-    false_positives: falsePositives,
-    from,
-    rule_id: ruleId,
-    max_signals: maxSignals,
-    risk_score_mapping: riskScoreMapping,
-    severity_mapping: severityMapping,
-    threat,
-    to,
-    references,
-    version,
-    exceptions_list: exceptionsList,
-    immutable,
-    rule_source: ruleSource,
-    related_integrations: relatedIntegrations,
-    required_fields: [],
-    setup,
-    type: 'query',
-    language: 'kuery',
-    index: getIndexPatterns(),
-    query,
-    actions: [],
-  };
-};
 
 export const getEndpointRule = (): QueryRuleCreateProps => ({
   type: 'query',
