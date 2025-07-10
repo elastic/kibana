@@ -2,8 +2,6 @@ disabled:
   # Stateful base config for deployment-agnostic tests
   - x-pack/platform/test/api_integration_deployment_agnostic/default_configs/stateful.config.base.ts
   - x-pack/platform/test/api_integration_deployment_agnostic/default_configs/feature_flag.stateful.config.base.ts
-  - x-pack/test/api_integration/deployment_agnostic/default_configs/stateful.config.base.ts
-  - x-pack/test/api_integration/deployment_agnostic/default_configs/feature_flag.stateful.config.base.ts
 
   # Base config files, only necessary to inform config finding script
   - src/platform/test/functional/config.base.js
@@ -12,7 +10,7 @@ disabled:
   - x-pack/platform/test/functional/config.base.ts
   - x-pack/platform/test/localization/config.base.ts
   - src/platform/test/server_integration/config.base.js
-  - x-pack/test/functional_with_es_ssl/config.base.ts
+  - x-pack/platform/test/functional_with_es_ssl/config.base.ts
   - x-pack/test/api_integration/config.ts
   - x-pack/platform/test/api_integration/config.ts
   - x-pack/test/fleet_api_integration/config.base.ts
@@ -32,10 +30,11 @@ disabled:
   - x-pack/platform/test/alerting_api_integration/security_and_spaces/group2/tests/actions/config.ts
   - x-pack/platform/test/alerting_api_integration/security_and_spaces/group2/tests/telemetry/config.ts
   - x-pack/platform/test/alerting_api_integration/spaces_only_legacy/config.ts
-  - x-pack/test/cloud_integration/config.ts
+  - x-pack/platform/test/cloud_integration/config.ts
   - x-pack/platform/test/load/config.ts
   - x-pack/platform/test/plugin_api_perf/config.ts
   - x-pack/test/screenshot_creation/config.ts
+  - x-pack/platform/test/screenshot_creation/config.ts
   - x-pack/platform/test/fleet_packages/config.ts
 
   # Scalability testing config that we run in its own pipeline
@@ -160,7 +159,7 @@ enabled:
   - x-pack/platform/test/alerting_api_integration/spaces_only/tests/action_task_params/config.ts
   - x-pack/test/api_integration/apis/cases/config.ts
   - x-pack/test/api_integration/apis/security/config.ts
-  - x-pack/test/banners_functional/config.ts
+  - x-pack/platform/test/banners_functional/config.ts
   - x-pack/platform/test/cases_api_integration/security_and_spaces/config_basic.ts
   - x-pack/platform/test/cases_api_integration/security_and_spaces/config_trial.ts
   - x-pack/platform/test/cases_api_integration/security_and_spaces/config_trial_common.ts
@@ -191,18 +190,18 @@ enabled:
   - x-pack/platform/test/functional_cors/config.ts
   - x-pack/platform/test/functional_embedded/config.ts
   - x-pack/platform/test/functional_execution_context/config.ts
-  - x-pack/test/functional_with_es_ssl/apps/cases/group1/config.ts
-  - x-pack/test/functional_with_es_ssl/apps/cases/group2/config.ts
-  - x-pack/test/functional_with_es_ssl/apps/cases/basic/config.ts
-  - x-pack/test/functional_with_es_ssl/apps/discover_ml_uptime/config.ts
-  - x-pack/test/functional_with_es_ssl/apps/embeddable_alerts_table/config.ts
-  - x-pack/test/functional_with_es_ssl/apps/triggers_actions_ui/config.ts
-  - x-pack/test/functional_with_es_ssl/apps/triggers_actions_ui/connectors/with_email_aws_ses_kbn_config/config.ts
-  - x-pack/test/functional_with_es_ssl/apps/triggers_actions_ui/connectors/with_email_services_enabled_kbn_config/config.ts
-  - x-pack/test/functional_with_es_ssl/apps/triggers_actions_ui/shared/config.ts
-  - x-pack/test/functional_with_es_ssl/apps/triggers_actions_ui/connectors/webhook_disabled_ssl_pfx/config.ts
+  - x-pack/platform/test/functional_with_es_ssl/apps/cases/group1/config.ts
+  - x-pack/platform/test/functional_with_es_ssl/apps/cases/group2/config.ts
+  - x-pack/platform/test/functional_with_es_ssl/apps/cases/basic/config.ts
+  - x-pack/platform/test/functional_with_es_ssl/apps/discover_ml/config.ts
+  - x-pack/platform/test/functional_with_es_ssl/apps/embeddable_alerts_table/config.ts
+  - x-pack/platform/test/functional_with_es_ssl/apps/triggers_actions_ui/config.ts
+  - x-pack/platform/test/functional_with_es_ssl/apps/triggers_actions_ui/connectors/with_email_aws_ses_kbn_config/config.ts
+  - x-pack/platform/test/functional_with_es_ssl/apps/triggers_actions_ui/connectors/with_email_services_enabled_kbn_config/config.ts
+  - x-pack/platform/test/functional_with_es_ssl/apps/triggers_actions_ui/shared/config.ts
+  - x-pack/platform/test/functional_with_es_ssl/apps/triggers_actions_ui/connectors/webhook_disabled_ssl_pfx/config.ts
   - x-pack/test/functional/apps/advanced_settings/config.ts
-  - x-pack/test/functional/apps/aiops/config.ts
+  - x-pack/platform/test/functional/apps/aiops/config.ts
   - x-pack/test/functional/apps/api_keys/config.ts
   - x-pack/platform/test/functional/apps/canvas/config.ts
   - x-pack/test/functional/apps/cross_cluster_replication/config.ts
@@ -293,7 +292,7 @@ enabled:
   - x-pack/test/saved_object_tagging/api_integration/tagging_api/config.ts
   - x-pack/test/saved_object_tagging/api_integration/tagging_usage_collection/config.ts
   - x-pack/test/saved_object_tagging/functional/config.ts
-  - x-pack/test/saved_objects_field_count/config.ts
+  - x-pack/platform/test/saved_objects_field_count/config.ts
   - x-pack/platform/test/search_sessions_integration/config.ts
   - x-pack/test/security_api_integration/anonymous_es_anonymous.config.ts
   - x-pack/test/security_api_integration/anonymous.config.ts
@@ -362,7 +361,7 @@ enabled:
   - x-pack/performance/journeys_e2e/cloud_security_dashboard.ts
   - x-pack/performance/journeys_e2e/apm_service_inventory.ts
   - x-pack/performance/journeys_e2e/infra_hosts_view.ts
-  - x-pack/test/custom_branding/config.ts
+  - x-pack/platform/test/custom_branding/config.ts
   # configs migrated to the new Kibana architecture
   - x-pack/platform/test/api_integration/apis/aiops/config.ts
   - x-pack/platform/test/api_integration/apis/cloud/config.ts
