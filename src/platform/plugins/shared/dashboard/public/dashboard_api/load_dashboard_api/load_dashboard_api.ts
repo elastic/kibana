@@ -67,7 +67,7 @@ export async function loadDashboardApi({
   // --------------------------------------------------------------------------------------
   const { viewMode, ...overrideState } = creationOptions?.getInitialInput?.() ?? {};
   if (overrideState.panels) {
-    overrideState.panels = await transformPanels(overrideState.panels);
+    overrideState.panels = await transformPanels(overrideState.panels, overrideState.references);
   }
 
   // Back up any view mode passed in explicitly.
