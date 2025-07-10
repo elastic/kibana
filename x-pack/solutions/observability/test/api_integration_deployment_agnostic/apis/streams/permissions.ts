@@ -114,7 +114,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 'logs.forked': {
                   manage: false,
                   manage_data_stream_lifecycle: false,
-                  manage_ilm: false,
+                  ...(isServerless ? {} : { manage_ilm: false }),
                 },
               },
               application: {},
