@@ -282,6 +282,21 @@ export interface PackagePolicyClient {
   rollback(
     soClient: SavedObjectsClientContract,
     packagePolicies: Array<SavedObjectsFindResult<PackagePolicySOAttributes>>
+  ): Promise<RollbackResult>;
+
+  restoreRollback(
+    soClient: SavedObjectsClientContract,
+    rollbackResult: RollbackResult
+  ): Promise<void>;
+
+  cleanupRollbackSavedObjects(
+    soClient: SavedObjectsClientContract,
+    rollbackResult: RollbackResult
+  ): Promise<void>;
+
+  bumpAgentPolicyRevisionAfterRollback(
+    soClient: SavedObjectsClientContract,
+    rollbackResult: RollbackResult
   ): Promise<void>;
 }
 
@@ -293,6 +308,12 @@ interface WithSpaceIdsOption {
    * all space, use a value of `*` (ex. `spaceIds: ['*']`)
    */
   spaceIds?: string[];
+}
+
+export interface RollbackResult {
+  updatedPolicies: Record<string, Array<SavedObjectsFindResult<PackagePolicySOAttributes>>>;
+  copiedPolicies: Record<string, Array<SavedObjectsFindResult<PackagePolicySOAttributes>>>;
+  previousVersionPolicies: Record<string, Array<SavedObjectsFindResult<PackagePolicySOAttributes>>>;
 }
 
 export type PackagePolicyClientFetchAllItemIdsOptions = Pick<ListWithKuery, 'perPage' | 'kuery'> &

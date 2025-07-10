@@ -1192,7 +1192,6 @@ class AgentPolicyService {
 
   private async _bumpPolicies(
     internalSoClientWithoutSpaceExtension: SavedObjectsClientContract,
-    esClient: ElasticsearchClient,
     savedObjectsResults: Array<SavedObject<AgentPolicySOAttributes>>,
     options?: { user?: AuthenticatedUser }
   ): Promise<SavedObjectsBulkUpdateResponse<AgentPolicy>> {
@@ -1305,7 +1304,6 @@ class AgentPolicyService {
 
     return this._bumpPolicies(
       internalSoClientWithoutSpaceExtension,
-      esClient,
       [
         ...agentPoliciesUsingOutput.saved_objects,
         ...agentPoliciesOfPackagePoliciesUsingOutput.saved_objects,
@@ -1331,7 +1329,6 @@ class AgentPolicyService {
 
     return this._bumpPolicies(
       internalSoClientWithoutSpaceExtension,
-      esClient,
       currentPolicies.saved_objects,
       options
     );
@@ -1814,7 +1811,6 @@ class AgentPolicyService {
 
     return this._bumpPolicies(
       internalSoClientWithoutSpaceExtension,
-      esClient,
       currentPolicies.saved_objects,
       options
     );
@@ -1839,25 +1835,23 @@ class AgentPolicyService {
 
     return this._bumpPolicies(
       internalSoClientWithoutSpaceExtension,
-      esClient,
       currentPolicies.saved_objects,
       options
     );
   }
 
   public async bumpAgentPoliciesByIds(
-    soClient: SavedObjectsClientContract,
-    esClient: ElasticsearchClient,
     agentPolicyIds: string[],
-    options?: { user?: AuthenticatedUser }
+    options?: { user?: AuthenticatedUser },
+    spaceId?: string
   ): Promise<SavedObjectsBulkUpdateResponse<AgentPolicy>> {
     const internalSoClientWithoutSpaceExtension =
       appContextService.getInternalUserSOClientWithoutSpaceExtension();
     const savedObjectType = await getAgentPolicySavedObjectType();
 
     const objects = agentPolicyIds.map((id: string) => ({ id, type: savedObjectType }));
-    const bulkGetResponse = await soClient
-      .bulkGet<AgentPolicySOAttributes>(objects)
+    const bulkGetResponse = await internalSoClientWithoutSpaceExtension
+      .bulkGet<AgentPolicySOAttributes>(objects, { namespace: spaceId })
       .catch(
         catchAndSetErrorStackTrace.withMessage(
           `Failed to bulk get agent policies [${agentPolicyIds.join(', ')}]`
@@ -1866,7 +1860,6 @@ class AgentPolicyService {
 
     return this._bumpPolicies(
       internalSoClientWithoutSpaceExtension,
-      esClient,
       bulkGetResponse.saved_objects,
       options
     );

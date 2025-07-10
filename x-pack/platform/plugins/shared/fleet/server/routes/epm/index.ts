@@ -879,30 +879,32 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
       deletePackageDatastreamAssetsHandler
     );
 
-  router.versioned
-    .post({
-      path: EPM_API_ROUTES.ROLLBACK_PATTERN,
-      security: INSTALL_PACKAGES_SECURITY,
-      summary: `Rollback a package to previous version`,
-      options: {
-        tags: ['oas-tag:Elastic Package Manager (EPM)'],
-      },
-    })
-    .addVersion(
-      {
-        version: API_VERSIONS.public.v1,
-        validate: {
-          request: RollbackPackageRequestSchema,
-          response: {
-            200: {
-              body: () => RollbackPackageResponseSchema,
-            },
-            400: {
-              body: genericErrorResponse,
+  if (experimentalFeatures.enablePackageRollback) {
+    router.versioned
+      .post({
+        path: EPM_API_ROUTES.ROLLBACK_PATTERN,
+        security: INSTALL_PACKAGES_SECURITY,
+        summary: `Rollback a package to previous version`,
+        options: {
+          tags: ['oas-tag:Elastic Package Manager (EPM)'],
+        },
+      })
+      .addVersion(
+        {
+          version: API_VERSIONS.public.v1,
+          validate: {
+            request: RollbackPackageRequestSchema,
+            response: {
+              200: {
+                body: () => RollbackPackageResponseSchema,
+              },
+              400: {
+                body: genericErrorResponse,
+              },
             },
           },
         },
-      },
-      rollbackPackageHandler
-    );
+        rollbackPackageHandler
+      );
+  }
 };

@@ -37,8 +37,6 @@ export async function stepCreateRestartInstallation(context: InstallContext) {
       previousVersion = installedPkg.attributes.install_version;
     } else if (semverLt(pkgVersion, installedPkg.attributes.install_version)) {
       previousVersion = null;
-    } else {
-      previousVersion = undefined;
     }
     const isStatusInstalling = installedPkg.attributes.install_status === 'installing';
     const hasExceededTimeout =

@@ -7,7 +7,7 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import semverValid from 'semver/functions/valid';
-import { SavedObjectsClient, type HttpResponseOptions } from '@kbn/core/server';
+import { type HttpResponseOptions } from '@kbn/core/server';
 
 import { omit, pick } from 'lodash';
 
@@ -75,7 +75,7 @@ import type { BulkInstallResponse } from '../../services/epm/packages';
 import { fleetErrorToResponseOptions, FleetError, FleetTooManyRequestsError } from '../../errors';
 import { appContextService, checkAllowedPackages, packagePolicyService } from '../../services';
 import { getPackageUsageStats } from '../../services/epm/packages/get';
-import { PackageRollbackError, rollbackInstallation } from '../../services/epm/packages/rollback';
+import { rollbackInstallation } from '../../services/epm/packages/rollback';
 import { updatePackage } from '../../services/epm/packages/update';
 import { getGpgKeyIdOrUndefined } from '../../services/epm/packages/package_verification';
 import type {
@@ -676,35 +676,22 @@ export const rollbackPackageHandler: FleetRequestHandler<
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const fleetContext = await context.fleet;
   // Need a less restrictive client than fleetContext.internalSoClient for SO operations in multiple spaces.
-  const savedObjectsClient = new SavedObjectsClient(
-    appContextService.getSavedObjects().createInternalRepository()
-  );
+  const internalSoClientWithoutSpaceExtension =
+    appContextService.getInternalUserSOClientWithoutSpaceExtension();
   const spaceId = fleetContext.spaceId;
   const allSpaces = await fleetContext.getAllSpaces();
   const logger = appContextService.getLogger();
   try {
     const body: RollbackPackageResponse = await rollbackInstallation({
       esClient,
-      savedObjectsClient,
+      savedObjectsClient: internalSoClientWithoutSpaceExtension,
       pkgName,
       spaceId,
       spaceIds: allSpaces.map((space) => space.id),
     });
     return response.ok({ body });
   } catch (error) {
-    const message = `Failed to rollback package ${pkgName}: ${error.message}`;
-    if (error instanceof PackageRollbackError) {
-      logger.warn(message);
-      return response.customError({
-        statusCode: 400,
-        body: { message },
-      });
-    } else {
-      logger.error(message);
-      return response.customError({
-        statusCode: 500,
-        body: { message },
-      });
-    }
+    logger.error(`Failed to roll back package ${pkgName}: ${error.message}`);
+    throw error;
   }
 };

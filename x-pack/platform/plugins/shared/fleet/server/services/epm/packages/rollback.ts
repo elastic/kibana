@@ -7,18 +7,11 @@
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
+import { PackageRollbackError } from '../../../errors';
 import { appContextService, packagePolicyService } from '../..';
 
 import { getPackageSavedObjects } from './get';
 import { installPackage } from './install';
-
-export class PackageRollbackError extends Error {
-  constructor(message?: string) {
-    super(message);
-    Object.setPrototypeOf(this, new.target.prototype);
-    this.name = 'PackagePolicyRollbackError';
-  }
-}
 
 export async function rollbackInstallation(options: {
   esClient: ElasticsearchClient;
@@ -32,21 +25,31 @@ export async function rollbackInstallation(options: {
 }> {
   const { esClient, savedObjectsClient, pkgName, spaceId, spaceIds } = options;
   const logger = appContextService.getLogger();
-  logger.info(`Rolling back installation for package: ${pkgName}`);
+  logger.info(`Starting installation rollback for package: ${pkgName}`);
 
-  // Retrieve the package saved object, throw if it doesn't have a previous version.
+  // Retrieve the package saved object, throw if it doesn't exist or doesn't have a previous version.
   const packageSORes = await getPackageSavedObjects(savedObjectsClient, {
     searchFields: ['name'],
     search: pkgName,
   });
-  if (packageSORes.saved_objects.length !== 1) {
-    throw new Error('Expected exactly one package saved object');
+  if (packageSORes.saved_objects.length === 0) {
+    throw new PackageRollbackError(`Package ${pkgName} not found`);
+  } else if (packageSORes.saved_objects.length > 1) {
+    // This should not happen.
+    throw new PackageRollbackError('Expected exactly one package saved object');
   }
   const packageSO = packageSORes.saved_objects[0];
   if (!packageSO.attributes.previous_version) {
-    throw new PackageRollbackError('No previous version found for package');
+    throw new PackageRollbackError(`No previous version found for package ${pkgName}`);
   }
   const previousVersion = packageSO.attributes.previous_version;
+  if (packageSO.attributes.install_source !== 'registry') {
+    throw new PackageRollbackError(
+      `${pkgName} was not installed from the registry (install source: ${packageSO.attributes.install_source})`
+    );
+  }
+
+  logger.info(`Rolling back ${pkgName} from ${packageSO.attributes.version} to ${previousVersion}`);
 
   // Retrieve package policy saved objects, throw if any of them doesn't have a previous version or has a different one.
   const packagePolicySORes = await packagePolicyService.getPackagePolicySavedObjects(
@@ -60,30 +63,41 @@ export async function rollbackInstallation(options: {
   const packagePolicySO = packagePolicySORes.saved_objects;
 
   if (packagePolicySO.length > 0) {
-    const allPoliciesHavePreviousVersion = (policies: string[]) => {
-      for (const policy of policies) {
-        if (policy.endsWith(':prev')) {
-          continue;
-        }
-        if (!policies.includes(`${policy}:prev`)) {
-          return false;
-        }
+    const policyIds = packagePolicySO.map((so) => so.id);
+    const policyIdsWithNoPreviousVersion = policyIds.filter((soId) => {
+      if (!soId.endsWith(':prev')) {
+        return !policyIds.includes(`${soId}:prev`);
       }
-      return true;
-    };
-    if (!allPoliciesHavePreviousVersion(packagePolicySO.map((so) => so.id))) {
-      throw new PackageRollbackError('No previous version found for least one package policy');
+      return false;
+    });
+    if (policyIdsWithNoPreviousVersion.length > 0) {
+      throw new PackageRollbackError(
+        `No previous version found for package policies: ${policyIdsWithNoPreviousVersion.join(
+          ', '
+        )}`
+      );
     }
 
-    const allPolicyPreviousRevisionsOnPreviousVersion = packagePolicySO
-      .filter((so) => so.id.endsWith(':prev'))
-      .every((so) => so.attributes.package?.version === previousVersion);
-    if (!allPolicyPreviousRevisionsOnPreviousVersion) {
-      throw new PackageRollbackError('Wrong previous version for least one package policy');
+    const policiesOnWrongPreviousVersion = packagePolicySO.filter((so) => {
+      if (so.id.endsWith(':prev')) {
+        return so.attributes.package?.version !== previousVersion;
+      }
+      return false;
+    });
+    if (policiesOnWrongPreviousVersion.length > 0) {
+      const report = policiesOnWrongPreviousVersion.map((so) => {
+        return `${so.id} (version: ${so.attributes.package?.version}, expected: ${previousVersion})`;
+      });
+      throw new PackageRollbackError(
+        `Wrong previous version for package policies: ${report.join(', ')}`
+      );
     }
   }
 
-  // Rollback package.
+  // Roll back package policies.
+  const rollbackResult = await packagePolicyService.rollback(savedObjectsClient, packagePolicySO);
+
+  // Roll back package.
   const res = await installPackage({
     esClient,
     savedObjectsClient,
@@ -93,15 +107,19 @@ export async function rollbackInstallation(options: {
     force: true,
   });
   if (res.error) {
+    await packagePolicyService.restoreRollback(savedObjectsClient, rollbackResult);
     throw new PackageRollbackError(
       `Failed to rollback package ${pkgName} to version ${previousVersion}: ${res.error.message}`
     );
   }
 
-  // Rollback package policies.
-  if (packagePolicySO.length > 0) {
-    await packagePolicyService.rollback(savedObjectsClient, packagePolicySO);
-  }
+  // Clean up package policies previous revisions and package policies that were copied during rollback.
+  await packagePolicyService.cleanupRollbackSavedObjects(savedObjectsClient, rollbackResult);
+  // Bump agent policy revision for all package policies that were rolled back.
+  await packagePolicyService.bumpAgentPolicyRevisionAfterRollback(
+    savedObjectsClient,
+    rollbackResult
+  );
 
   logger.info(`Package: ${pkgName} successfully rolled back to version: ${previousVersion}`);
   return { version: previousVersion, success: true };
