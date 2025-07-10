@@ -45,7 +45,6 @@ import {
   getDataSourcesSamples,
   getDataSourcesUrlState,
   getProcessorsForSimulation,
-  getStagedProcessors,
   getUpsertWiredFields,
   spawnDataSource,
   spawnProcessor,

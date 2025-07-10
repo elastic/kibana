@@ -12,8 +12,9 @@ import { StreamEnrichmentContextType } from './types';
  */
 export const selectDraftProcessor = (context: StreamEnrichmentContextType) => {
   const draft = context.processorsRefs.find((p) => p.getSnapshot().matches('draft'));
+  const snapshot = draft?.getSnapshot();
   return {
-    processor: draft?.getSnapshot().context.processor,
-    resources: draft?.getSnapshot().context.resources,
+    processor: snapshot?.context.processor,
+    resources: snapshot?.context.resources,
   };
 };

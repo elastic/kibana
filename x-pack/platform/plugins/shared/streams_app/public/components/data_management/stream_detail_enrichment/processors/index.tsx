@@ -28,7 +28,7 @@ import {
 import { useSelector } from '@xstate5/react';
 import { i18n } from '@kbn/i18n';
 import { isEmpty, isEqual } from 'lodash';
-import React, { PropsWithChildren, useEffect, useMemo, useState } from 'react';
+import React, { PropsWithChildren, useEffect, useState } from 'react';
 import { useForm, SubmitHandler, FormProvider, useWatch, DeepPartial } from 'react-hook-form';
 import { css } from '@emotion/react';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
@@ -209,7 +209,10 @@ const ProcessorConfigurationEditor = ({
   );
   const canSave = useSelector(processorRef, (snapshot) => snapshot.can({ type: 'processor.save' }));
 
-  const hasUnsavedChanges = useSelector(
+  const hasStreamChanges = useStreamEnrichmentSelector((state) =>
+    state.can({ type: 'stream.reset' })
+  );
+  const hasProcessorChanges = useSelector(
     processorRef,
     (snapshot) => !isEqual(snapshot.context.previousProcessor, snapshot.context.processor)
   );
@@ -217,7 +220,7 @@ const ProcessorConfigurationEditor = ({
   const type = useWatch({ control: methods.control, name: 'type' });
 
   useUnsavedChangesPrompt({
-    hasUnsavedChanges,
+    hasUnsavedChanges: hasStreamChanges || hasProcessorChanges,
     history: appParams.history,
     http: core.http,
     navigateToUrl: core.application.navigateToUrl,
@@ -226,7 +229,7 @@ const ProcessorConfigurationEditor = ({
   });
 
   const handleCancel = useDiscardConfirm(() => processorRef.send({ type: 'processor.cancel' }), {
-    enabled: hasUnsavedChanges,
+    enabled: hasProcessorChanges,
     ...discardChangesPromptOptions,
   });
 

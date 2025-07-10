@@ -76,13 +76,6 @@ export function getDataSourcesSamples(context: StreamEnrichmentContextType) {
   return dataSourcesSnapshots.flatMap((snapshot) => snapshot.context.data);
 }
 
-export function getStagedProcessors(context: StreamEnrichmentContextType) {
-  return context.processorsRefs
-    .map((proc) => proc.getSnapshot())
-    .filter((proc) => proc.context.isNew)
-    .map((proc) => proc.context.processor);
-}
-
 /**
  * Gets processors for simulation based on current editing state.
  * - If no processor is being edited: returns all new processors
