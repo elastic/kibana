@@ -8,9 +8,10 @@
 import type { SignalsEnrichment } from '../../types';
 import type { BuildThreatEnrichmentOptions, GetThreatListOptions } from './types';
 import { buildThreatMappingFilter } from './build_threat_mapping_filter';
-import { getSignalsQueryMapFromThreatIndex } from './get_signals_map_from_threat_index';
+import { getSignalIdToMatchedQueriesMap } from './get_signals_map_from_threat_index';
 
 import { threatEnrichmentFactory } from './threat_enrichment_factory';
+import { getFieldAndValueToDocIdsMap } from './utils';
 
 // we do want to make extra requests to the threat index to get enrichments from all threats
 // previously we were enriched alerts only from `currentThreatList` but not all threats
@@ -20,18 +21,16 @@ export const buildThreatEnrichment = ({
   threatFilters,
   threatIndicatorPath,
   pitId,
-  reassignPitId,
   threatIndexFields,
+  threatMatchedFields,
+  allowedFieldsForTermsQuery,
 }: BuildThreatEnrichmentOptions): SignalsEnrichment => {
   return async (signals) => {
     const threatFiltersFromEvents = buildThreatMappingFilter({
       threatMapping: sharedParams.completeRule.ruleParams.threatMapping,
       threatList: signals,
       entryKey: 'field',
-      allowedFieldsForTermsQuery: {
-        source: {},
-        threat: {},
-      },
+      allowedFieldsForTermsQuery,
     });
 
     const threatSearchParams: Omit<GetThreatListOptions, 'searchAfter'> = {
@@ -43,21 +42,22 @@ export const buildThreatEnrichment = ({
         fields: undefined,
       },
       pitId,
-      reassignPitId,
       indexFields: threatIndexFields,
     };
 
-    const signalsQueryMap = await getSignalsQueryMapFromThreatIndex({
+    const { signalIdToMatchedQueriesMap, threatList } = await getSignalIdToMatchedQueriesMap({
       threatSearchParams,
       eventsCount: signals.length,
-      termsQueryAllowed: false,
+      fieldAndValueToDocIdsMap: getFieldAndValueToDocIdsMap({
+        eventList: signals,
+        threatMatchedFields,
+      }),
     });
 
     const enrichment = threatEnrichmentFactory({
-      signalsQueryMap,
+      signalIdToMatchedQueriesMap,
       threatIndicatorPath,
-      threatFilters,
-      threatSearchParams,
+      matchedThreats: threatList,
     });
 
     return enrichment(signals);

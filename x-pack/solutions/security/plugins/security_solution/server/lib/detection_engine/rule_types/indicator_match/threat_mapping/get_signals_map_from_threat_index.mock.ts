@@ -21,7 +21,6 @@ export const threatSearchParamsMock: GetThreatListOptions = {
     fields: undefined,
   },
   pitId: 'mock',
-  reassignPitId: jest.fn(),
   searchAfter: undefined,
   indexFields: [],
 };

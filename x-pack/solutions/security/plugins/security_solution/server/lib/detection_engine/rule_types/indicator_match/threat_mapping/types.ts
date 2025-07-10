@@ -54,10 +54,10 @@ export interface CreateThreatSignalOptions {
   threatFilters: unknown[];
   perPage?: number;
   threatPitId: OpenPointInTimeResponse['id'];
-  reassignThreatPitId: (newPitId: OpenPointInTimeResponse['id'] | undefined) => void;
   allowedFieldsForTermsQuery: AllowedFieldsForTermsQuery;
   inputIndexFields: DataViewFieldBase[];
   threatIndexFields: DataViewFieldBase[];
+  threatMatchedFields: ThreatMatchedFields;
   sortOrder?: SortOrderOrUndefined;
   isAlertSuppressionActive: boolean;
 }
@@ -73,7 +73,6 @@ export interface CreateEventSignalOptions {
   threatFilters: unknown[];
   perPage?: number;
   threatPitId: OpenPointInTimeResponse['id'];
-  reassignThreatPitId: (newPitId: OpenPointInTimeResponse['id'] | undefined) => void;
   allowedFieldsForTermsQuery: AllowedFieldsForTermsQuery;
   threatMatchedFields: ThreatMatchedFields;
   inputIndexFields: DataViewFieldBase[];
@@ -85,7 +84,6 @@ export interface CreateEventSignalOptions {
 type EntryKey = 'field' | 'value';
 
 export interface BuildThreatMappingFilterOptions {
-  chunkSize?: number;
   threatList: ThreatListItem[];
   threatMapping: ThreatMapping;
   entryKey: EntryKey;
@@ -111,16 +109,10 @@ export interface CreateAndOrClausesOptions {
 }
 
 export interface BuildEntriesMappingFilterOptions {
-  chunkSize: number;
   threatList: ThreatListItem[];
   threatMapping: ThreatMapping;
   entryKey: EntryKey;
   allowedFieldsForTermsQuery?: AllowedFieldsForTermsQuery;
-}
-
-export interface SplitShouldClausesOptions {
-  chunkSize: number;
-  should: BooleanFilter[];
 }
 
 export interface BooleanFilter {
@@ -144,7 +136,6 @@ export interface GetThreatListOptions {
   threatFilters: unknown[];
   threatListConfig: ThreatListConfig;
   pitId: OpenPointInTimeResponse['id'];
-  reassignPitId: (newPitId: OpenPointInTimeResponse['id'] | undefined) => void;
   indexFields: DataViewFieldBase[];
 }
 
@@ -197,8 +188,9 @@ export interface BuildThreatEnrichmentOptions {
   threatFilters: unknown[];
   threatIndicatorPath: ThreatIndicatorPath;
   pitId: string;
-  reassignPitId: (newPitId: OpenPointInTimeResponse['id'] | undefined) => void;
   threatIndexFields: DataViewFieldBase[];
+  threatMatchedFields: ThreatMatchedFields;
+  allowedFieldsForTermsQuery: AllowedFieldsForTermsQuery;
 }
 
 export interface EventsOptions {
@@ -264,7 +256,7 @@ export interface AllowedFieldsForTermsQuery {
   threat: Record<string, boolean>;
 }
 
-export interface SignalValuesMap {
+export interface FieldAndValueToDocIdsMap {
   [field: string]: {
     [fieldValue: string]: string[];
   };
@@ -278,7 +270,7 @@ export interface GetAllowedFieldsForTermQuery {
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
 }
 
-export interface GetSignalValuesMap {
+export interface GetFieldAndValueToDocIdsMap {
   eventList: EventItem[];
   threatMatchedFields: ThreatMatchedFields;
 }

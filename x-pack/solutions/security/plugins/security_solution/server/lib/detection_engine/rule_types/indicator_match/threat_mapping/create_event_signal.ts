@@ -10,18 +10,19 @@ import { buildThreatMappingFilter } from './build_threat_mapping_filter';
 import { getFilter } from '../../utils/get_filter';
 import { searchAfterAndBulkCreate } from '../../utils/search_after_bulk_create';
 import { buildReasonMessageForThreatMatchAlert } from '../../utils/reason_formatters';
-import type { CreateEventSignalOptions, GetThreatListOptions } from './types';
+import type { CreateEventSignalOptions, GetThreatListOptions, ThreatListItem } from './types';
 import type {
   SearchAfterAndBulkCreateParams,
   SearchAfterAndBulkCreateReturnType,
 } from '../../types';
-import { getSignalsQueryMapFromThreatIndex } from './get_signals_map_from_threat_index';
+import { getSignalIdToMatchedQueriesMap } from './get_signals_map_from_threat_index';
+import type { SignalIdToMatchedQueriesMap } from './get_signals_map_from_threat_index';
 import { searchAfterAndBulkCreateSuppressedAlerts } from '../../utils/search_after_bulk_create_suppressed_alerts';
 
 import { threatEnrichmentFactory } from './threat_enrichment_factory';
 import {
   FAILED_CREATE_QUERY_MAX_CLAUSE,
-  getSignalValueMap,
+  getFieldAndValueToDocIdsMap,
   MANY_NESTED_CLAUSES_ERR,
 } from './utils';
 import { alertSuppressionTypeGuard } from '../../utils/get_is_alert_suppression_active';
@@ -36,7 +37,6 @@ export const createEventSignal = async ({
   wrapSuppressedHits,
   threatFilters,
   threatPitId,
-  reassignThreatPitId,
   allowedFieldsForTermsQuery,
   threatMatchedFields,
   inputIndexFields,
@@ -74,25 +74,26 @@ export const createEventSignal = async ({
       esClient: services.scopedClusterClient.asCurrentUser,
       threatFilters: [...threatFilters, threatFiltersFromEvents],
       threatListConfig: {
-        _source: threatMatchedFields.threat,
+        _source: [...threatMatchedFields.threat, `${threatIndicatorPath}.*`, 'threat.feed.*'],
         fields: undefined,
       },
       pitId: threatPitId,
-      reassignPitId: reassignThreatPitId,
       indexFields: threatIndexFields,
     };
 
-    let signalsQueryMap;
+    let signalIdToMatchedQueriesMap: SignalIdToMatchedQueriesMap | undefined;
+    let threatList: ThreatListItem[] | undefined;
     try {
-      signalsQueryMap = await getSignalsQueryMapFromThreatIndex({
+      const result = await getSignalIdToMatchedQueriesMap({
         threatSearchParams,
         eventsCount: currentEventList.length,
-        signalValueMap: getSignalValueMap({
+        fieldAndValueToDocIdsMap: getFieldAndValueToDocIdsMap({
           eventList: currentEventList,
           threatMatchedFields,
         }),
-        termsQueryAllowed: true,
       });
+      signalIdToMatchedQueriesMap = result.signalIdToMatchedQueriesMap;
+      threatList = result.threatList;
     } catch (exc) {
       // we receive an error if the event list count < threat list count
       // which puts us into the create_event_signal which differs from create threat signal
@@ -109,7 +110,7 @@ export const createEventSignal = async ({
       }
     }
 
-    const ids = Array.from(signalsQueryMap.keys());
+    const ids = Array.from(signalIdToMatchedQueriesMap.keys());
     const indexFilter = {
       query: {
         bool: {
@@ -136,10 +137,9 @@ export const createEventSignal = async ({
     ruleExecutionLogger.debug(`${ids?.length} matched signals found`);
 
     const enrichment = threatEnrichmentFactory({
-      signalsQueryMap,
+      signalIdToMatchedQueriesMap,
       threatIndicatorPath,
-      threatFilters,
-      threatSearchParams,
+      matchedThreats: threatList,
     });
 
     let createResult: SearchAfterAndBulkCreateReturnType;

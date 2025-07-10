@@ -27,7 +27,6 @@ export const getThreatList = async ({
   threatFilters,
   threatListConfig,
   pitId,
-  reassignPitId,
   indexFields,
 }: GetThreatListOptions): Promise<estypes.SearchResponse<ThreatListDoc>> => {
   const {
@@ -75,8 +74,6 @@ export const getThreatList = async ({
   });
 
   ruleExecutionLogger.debug(`Retrieved indicator items of size: ${response.hits.hits.length}`);
-
-  reassignPitId(response.pit_id);
 
   return response;
 };
