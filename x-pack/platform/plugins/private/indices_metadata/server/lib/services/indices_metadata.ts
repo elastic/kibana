@@ -94,11 +94,6 @@ export class IndicesMetadataService {
     }
     this.logger.debug('About to publish indices metadata');
 
-    if (this.configuration.indices_threshold === 0) {
-      this.logger.info('Indices threshold is 0, skipping indices metadata publish');
-      return;
-    }
-
     // 1. Get cluster stats and list of indices and datastreams
     const [indices, dataStreams] = await Promise.all([
       this.receiver.getIndices(),
