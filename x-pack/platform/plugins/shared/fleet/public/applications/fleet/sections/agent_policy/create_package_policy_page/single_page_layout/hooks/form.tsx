@@ -220,6 +220,32 @@ export function useOnSubmit({
   setSelectedPolicyTab: (tab: SelectedPolicyTab) => void;
   hideAgentlessSelector?: boolean;
 }) {
+  // console log all the parameters to help debugging
+  console.log(
+    'Fleet useOnSubmit called with',
+    'agentCount',
+    agentCount,
+    'selectedPolicyTab',
+    selectedPolicyTab,
+    'newAgentPolicy',
+    newAgentPolicy,
+    'withSysMonitoring',
+    withSysMonitoring,
+    'queryParamsPolicyId',
+    queryParamsPolicyId,
+    'packageInfo',
+    packageInfo,
+    'integrationToEnable',
+    integrationToEnable,
+    'hasFleetAddAgentsPrivileges',
+    hasFleetAddAgentsPrivileges,
+    // 'setNewAgentPolicy',
+    // setNewAgentPolicy,
+    // 'setSelectedPolicyTab',
+    // setSelectedPolicyTab,
+    'hideAgentlessSelector',
+    hideAgentlessSelector
+  );
   const { notifications, docLinks } = useStartServices();
   const { spaceId } = useFleetStatus();
   const confirmForceInstall = useConfirmForceInstall();
