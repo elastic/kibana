@@ -110,7 +110,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.waitForRenderComplete();
       await header.waitUntilLoadingHasFinished();
       // change the control value
-      await comboBox.set('esqlControlValuesDropdown', 'AO');
+      const controlId = (await dashboardControls.getAllControlIds())[0];
+      await dashboardControls.optionsListOpenPopover(controlId);
+      await dashboardControls.optionsListPopoverSelectOption('AO');
       await dashboard.waitForRenderComplete();
 
       const tableContent = await testSubjects.getVisibleText('lnsTableCellContent');
