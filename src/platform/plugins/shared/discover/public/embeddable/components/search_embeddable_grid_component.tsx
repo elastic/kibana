@@ -243,6 +243,7 @@ export function SearchEmbeddableGridComponent({
       />
     );
   }
+
   return (
     <DiscoverGridEmbeddableMemoized
       {...sharedProps}
