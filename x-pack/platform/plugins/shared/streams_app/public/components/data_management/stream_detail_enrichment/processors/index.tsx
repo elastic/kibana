@@ -28,9 +28,11 @@ import {
 import { useSelector } from '@xstate5/react';
 import { i18n } from '@kbn/i18n';
 import { isEmpty, isEqual } from 'lodash';
-import React, { PropsWithChildren, useEffect, useMemo } from 'react';
+import React, { PropsWithChildren, useEffect, useMemo, useState } from 'react';
 import { useForm, SubmitHandler, FormProvider, useWatch, DeepPartial } from 'react-hook-form';
 import { css } from '@emotion/react';
+import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
+import { useKibana } from '../../../../hooks/use_kibana';
 import { DiscardPromptOptions, useDiscardConfirm } from '../../../../hooks/use_discard_confirm';
 import { DissectProcessorForm } from './dissect';
 import { GrokProcessorForm } from './grok';
@@ -165,24 +167,20 @@ const ProcessorConfigurationEditor = ({
   processorMetrics,
   processorRef,
 }: Omit<ProcessorConfigurationProps, 'dragHandleProps'>) => {
+  const { appParams, core } = useKibana();
+
   const getEnrichmentState = useGetStreamEnrichmentState();
 
   const grokCollection = useStreamEnrichmentSelector((snapshot) => snapshot.context.grokCollection);
 
   const processor = useSelector(processorRef, (snapshot) => snapshot.context.processor);
-  const previousProcessor = useSelector(
-    processorRef,
-    (snapshot) => snapshot.context.previousProcessor
-  );
 
-  const defaultValues = useMemo(
-    () =>
-      getFormStateFrom(
-        selectPreviewRecords(getEnrichmentState().context.simulatorRef?.getSnapshot().context),
-        { grokCollection },
-        processor
-      ),
-    [getEnrichmentState, grokCollection, processor]
+  const [defaultValues] = useState(() =>
+    getFormStateFrom(
+      selectPreviewRecords(getEnrichmentState().context.simulatorRef?.getSnapshot().context),
+      { grokCollection },
+      processor
+    )
   );
 
   const methods = useForm<ProcessorFormState>({
@@ -211,8 +209,24 @@ const ProcessorConfigurationEditor = ({
   );
   const canSave = useSelector(processorRef, (snapshot) => snapshot.can({ type: 'processor.save' }));
 
+  const hasUnsavedChanges = useSelector(
+    processorRef,
+    (snapshot) => !isEqual(snapshot.context.previousProcessor, snapshot.context.processor)
+  );
+
+  const type = useWatch({ control: methods.control, name: 'type' });
+
+  useUnsavedChangesPrompt({
+    hasUnsavedChanges,
+    history: appParams.history,
+    http: core.http,
+    navigateToUrl: core.application.navigateToUrl,
+    openConfirm: core.overlays.openConfirm,
+    shouldPromptOnReplace: false,
+  });
+
   const handleCancel = useDiscardConfirm(() => processorRef.send({ type: 'processor.cancel' }), {
-    enabled: !isEqual(previousProcessor, processor),
+    enabled: hasUnsavedChanges,
     ...discardChangesPromptOptions,
   });
 
@@ -220,8 +234,6 @@ const ProcessorConfigurationEditor = ({
     enabled: canDelete,
     ...deleteProcessorPromptOptions,
   });
-
-  const type = useWatch({ control: methods.control, name: 'type' });
 
   const handleSubmit: SubmitHandler<ProcessorFormState> = () => {
     processorRef.send({ type: 'processor.save' });
