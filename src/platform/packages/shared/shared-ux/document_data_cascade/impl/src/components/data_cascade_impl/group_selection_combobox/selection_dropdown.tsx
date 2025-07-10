@@ -19,12 +19,15 @@ import {
   EuiFlexGroup,
   EuiListGroup,
   EuiPopover,
+  EuiPanel,
   EuiPopoverFooter,
   EuiText,
   euiDragDropReorder,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useDataCascadeState, useDataCascadeDispatch } from '../../data_cascade_provider';
+
+const MAX_SELECTABLE_COLUMNS = 3;
 
 interface SelectionDropdownProps {
   onSelectionChange?: (groupByColumn: string[]) => void;
@@ -73,9 +76,10 @@ export function SelectionDropdown({ onSelectionChange }: SelectionDropdownProps)
   );
 
   const button = (
-    <EuiButtonEmpty iconType={'inspect'} onClick={onButtonClick} flush="right">
+    <EuiButtonEmpty iconType="inspect" onClick={onButtonClick} flush="right">
       {i18n.translate('sharedUXPackages.data_cascade.selection_dropdown.selection_message', {
-        defaultMessage: 'Group By: {groupedColumnsCount} groups selected',
+        defaultMessage:
+          'Group By: {groupedColumnsCount, plural, one {# group selected} other {# groups selected}}',
         values: { groupedColumnsCount: currentGroupByColumns.length },
       })}
     </EuiButtonEmpty>
@@ -108,19 +112,21 @@ export function SelectionDropdown({ onSelectionChange }: SelectionDropdownProps)
                             index={idx}
                             key={groupColumn}
                             spacing="m"
+                            usePortal
                           >
-                            {(provided) => (
-                              <EuiFlexItem
-                                ref={provided.innerRef}
-                                {...provided.draggableProps}
-                                {...provided.dragHandleProps}
+                            {(provided, state) => (
+                              <EuiPanel
+                                hasBorder={false}
+                                hasShadow={state.isDragging}
+                                paddingSize="xs"
+                                panelRef={provided.innerRef}
                                 data-test-subj={`DataCascadeColumnSelection-${groupColumn}`}
                               >
                                 <EuiFlexGroup alignItems="center" gutterSize="s">
                                   <EuiToken iconType="tokenString" />
                                   <EuiText size="s">{groupColumn}</EuiText>
                                 </EuiFlexGroup>
-                              </EuiFlexItem>
+                              </EuiPanel>
                             )}
                           </EuiDraggable>
                         ))}
@@ -161,7 +167,10 @@ export function SelectionDropdown({ onSelectionChange }: SelectionDropdownProps)
                                 flush="left"
                                 iconType="arrowDown"
                                 iconSide="right"
-                                disabled={!availableColumnsForSelection?.length}
+                                disabled={
+                                  !availableColumnsForSelection?.length ||
+                                  currentGroupByColumns.length - 1 >= MAX_SELECTABLE_COLUMNS
+                                }
                               >
                                 {i18n.translate(
                                   'sharedUXPackages.data_cascade.selection_dropdown.available_selection_btn_text',
