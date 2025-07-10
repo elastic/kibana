@@ -38,6 +38,7 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
     });
 
     after(async () => {
+      await browser.setLocalStorageItem('discoverExperimental:tabs', 'false');
       await kibanaServer.importExport.unload(
         'src/platform/test/functional/fixtures/kbn_archiver/discover'
       );
@@ -48,6 +49,7 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
+    loadTestFile(require.resolve('./_duplication'));
     loadTestFile(require.resolve('./_restorable_state'));
   });
 }
