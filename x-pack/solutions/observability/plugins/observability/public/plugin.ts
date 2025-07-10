@@ -122,7 +122,7 @@ export interface ConfigSchema {
 }
 export type ObservabilityPublicSetup = ReturnType<Plugin['setup']>;
 export interface ObservabilityPublicPluginsSetup {
-  cases: CasesPublicSetup;
+  cases?: CasesPublicSetup;
   data: DataPublicPluginSetup;
   fieldFormats: FieldFormatsSetup;
   observabilityShared: ObservabilitySharedPluginSetup;
@@ -264,7 +264,9 @@ export class Plugin
     const logsLocator =
       pluginsSetup.share.url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR);
 
-    pluginsSetup.cases.attachmentFramework.registerPersistableState(getPageAttachmentType());
+    if (pluginsSetup.cases) {
+      pluginsSetup.cases.attachmentFramework.registerPersistableState(getPageAttachmentType());
+    }
 
     const mount = async (params: AppMountParameters<unknown>) => {
       // Load application bundle

@@ -55,7 +55,7 @@ export type ObservabilityPluginSetup = ReturnType<ObservabilityPlugin['setup']>;
 
 interface PluginSetup {
   alerting: AlertingServerSetup;
-  cases: CasesServerSetup;
+  cases?: CasesServerSetup;
   features: FeaturesPluginSetup;
   guidedOnboarding?: GuidedOnboardingPluginSetup;
   ruleRegistry: RuleRegistryPluginSetupContract;
@@ -101,9 +101,11 @@ export class ObservabilityPlugin
     plugins.features.registerKibanaFeature(getCasesFeatureV2(casesCapabilities, casesApiTags));
     plugins.features.registerKibanaFeature(getCasesFeatureV3(casesCapabilities, casesApiTags));
 
-    plugins.cases.attachmentFramework.registerPersistableState({
-      id: PAGE_ATTACHMENT_TYPE,
-    });
+    if (plugins.cases) {
+      plugins.cases.attachmentFramework.registerPersistableState({
+        id: PAGE_ATTACHMENT_TYPE,
+      });
+    }
 
     let annotationsApiPromise: Promise<AnnotationsAPI> | undefined;
 
