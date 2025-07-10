@@ -69,6 +69,9 @@ export const getNormalizeTCPFields = ({
     [ConfigKey.TLS_VERSION]: get(monitor, ConfigKey.TLS_VERSION)
       ? (getOptionalListField(get(monitor, ConfigKey.TLS_VERSION)) as TLSVersion[])
       : defaultFields[ConfigKey.TLS_VERSION],
+    [ConfigKey.TLS_CIPHER_SUITES]: get(monitor, ConfigKey.TLS_CIPHER_SUITES)
+      ? (getOptionalListField(get(monitor, ConfigKey.TLS_CIPHER_SUITES)) as string[])
+      : defaultFields[ConfigKey.TLS_CIPHER_SUITES],
     [ConfigKey.METADATA]: {
       ...DEFAULT_FIELDS[MonitorTypeEnum.TCP][ConfigKey.METADATA],
       is_tls_enabled: getHasTLSFields(monitor),
