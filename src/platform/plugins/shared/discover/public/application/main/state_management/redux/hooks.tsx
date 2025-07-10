@@ -43,8 +43,9 @@ export const InternalStateProvider = ({
   </ReduxProvider>
 );
 
-export const useInternalStateDispatch: () => InternalStateDispatch =
-  createDispatchHook(internalStateContext);
+export const useInternalStateDispatch = createDispatchHook(
+  internalStateContext
+) as () => InternalStateDispatch;
 
 export const useInternalStateSelector: TypedUseSelectorHook<DiscoverInternalState> =
   createSelectorHook(internalStateContext);
