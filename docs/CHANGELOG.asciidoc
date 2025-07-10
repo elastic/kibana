@@ -633,7 +633,8 @@ Data ingestion and Fleet::
 Discover::
 * Prevents selected document from changing when resizing the **Document** flyout with a keyboard ({kibana-pull}225594[#225594]).
 Elastic Observability solution::
-For the Elastic Observability 8.17.9 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
+* Sets environment name length when creating an ML job ({kibana-pull}225973[#225973]).
+* Fixes SLO federated view issue when remote clusters and index name listed exceed 4096 bytes ({kibana-pull}224478[#224478]).
 Machine Learning::
 * Fixes the handling of time range in embedded anomaly swim lane ({kibana-pull}225803[#225803]).
 * Resets to the default value when the `lookbackInterval` field is empty ({kibana-pull}225249[#225249]).
