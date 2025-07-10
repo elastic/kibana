@@ -21,7 +21,7 @@ interface DisableGapsParams {
 
 /**
  * Disable gaps for a given rule.
- * It orchestrates the process of searching and disabling all the rule gaps created in the last 90 days
+ * It orchestrates the process of searching and disabling all the rule gaps
  */
 export const disableGaps = async (params: DisableGapsParams) => {
   const { ruleId, logger, eventLogClient, eventLogger } = params;
