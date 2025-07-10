@@ -12,8 +12,6 @@ import * as rt from 'io-ts';
 import { pipe } from 'fp-ts/pipeable';
 import { fold } from 'fp-ts/Either';
 import { constant, identity } from 'fp-ts/function';
-import { enumeration } from '@kbn/securitysolution-io-ts-types';
-import { FilterStateStore } from '@kbn/es-query';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { useUrlState } from '@kbn/observability-shared-plugin/public';
 import {
@@ -115,7 +113,7 @@ const HostsFilterRT = rt.intersection([
   rt.partial({
     query: rt.record(rt.string, rt.any),
     $state: rt.type({
-      store: enumeration('FilterStateStore', FilterStateStore),
+      store: rt.union([rt.literal('appState'), rt.literal('globalState')]),
     }),
   }),
 ]);
