@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
-import { TRIGGER_SUGGESTION_COMMAND } from '../constants';
-import { ISuggestionItem } from '../types';
-import { esqlCommandRegistry } from '..';
-import { buildDocumentation } from '../../definitions/utils/documentation';
-import { TIME_SYSTEM_PARAMS } from '../../definitions/utils/literals';
+import { TRIGGER_SUGGESTION_COMMAND } from './constants';
+import { ISuggestionItem } from './types';
+import { esqlCommandRegistry } from '.';
+import { buildDocumentation } from '../definitions/utils/documentation';
+import { TIME_SYSTEM_PARAMS } from '../definitions/utils/literals';
 
 const techPreviewLabel = i18n.translate('kbn-esql-ast.esql.autocomplete.techPreviewLabel', {
   defaultMessage: `Technical Preview`,
