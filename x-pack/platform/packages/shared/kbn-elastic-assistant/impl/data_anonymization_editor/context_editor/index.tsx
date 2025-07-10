@@ -18,6 +18,7 @@ import { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common/i
 import styled from '@emotion/styled';
 import { css } from '@emotion/react';
 import { getColumns } from './get_columns';
+import { getSelectionColumns } from './get_columns/get_selection_columns';
 import { getRows } from './get_rows';
 import { Toolbar } from './toolbar';
 import { ContextEditorRow, FIELDS } from './types';
@@ -49,6 +50,7 @@ export interface Props {
   handleSearch: (query: EuiSearchBarOnChangeArgs) => void;
   handleRowReset: HandleRowReset;
   handlePageReset: HandlePageReset;
+  handleTableReset: () => void;
   selectionState: UseSelectionReturn['selectionState'];
   selectionActions: UseSelectionReturn['selectionActions'];
 }
@@ -66,6 +68,7 @@ const ContextEditorComponent: React.FC<Props> = ({
   handleSearch,
   handleRowReset,
   handlePageReset,
+  handleTableReset,
   selectionState,
   selectionActions,
 }) => {
@@ -102,7 +105,6 @@ const ContextEditorComponent: React.FC<Props> = ({
   const { selectedFields } = selectionState;
   const {
     handleSelectAll,
-    handleUnselectAll,
     handlePageUnchecked,
     handlePageChecked,
     handleRowUnChecked,
@@ -110,57 +112,62 @@ const ContextEditorComponent: React.FC<Props> = ({
   } = selectionActions;
 
   const columns = useMemo(
-    () =>
-      getColumns({
-        compressed,
+    () => [
+      ...getSelectionColumns({
+        anonymizationPageFields: anonymizationPageFields.data || [],
         handlePageChecked,
+        handlePageReset,
         handlePageUnchecked,
         handleRowChecked,
+        handleRowReset,
         handleRowUnChecked,
+        hasUpdateAIAssistantAnonymization,
+        selectedFields,
+        totalItemCount: anonymizationPageFields.total,
+      }),
+      ...getColumns({
+        compressed,
+        handleRowChecked,
         hasUpdateAIAssistantAnonymization,
         onListUpdated,
         rawData,
-        anonymizationPageFields: anonymizationPageFields.data || [],
-        anonymizationAllFields: anonymizationAllFields.data || [],
         selectedFields,
-        handleRowReset,
-        handlePageReset,
-        totalItemCount: anonymizationPageFields.total,
       }),
+    ],
     [
+      anonymizationPageFields.data,
+      anonymizationPageFields.total,
       compressed,
       handlePageChecked,
+      handlePageReset,
       handlePageUnchecked,
       handleRowChecked,
+      handleRowReset,
       handleRowUnChecked,
       hasUpdateAIAssistantAnonymization,
       onListUpdated,
       rawData,
-      anonymizationPageFields.data,
-      anonymizationPageFields.total,
-      anonymizationAllFields,
       selectedFields,
-      handleRowReset,
-      handlePageReset,
     ]
   );
   const toolbar = useMemo(
     () => (
       <Toolbar
-        anonymizationAllFieldsData={anonymizationAllFields.data || []}
+        anonymizationAllFieldsData={anonymizationAllFields.data}
+        handleRowChecked={handleRowChecked}
+        handleUnselectAll={handleTableReset}
         onListUpdated={onListUpdated}
         onSelectAll={handleSelectAll}
-        handleUnselectAll={handleUnselectAll}
-        selected={selectedFields}
+        selectedFields={selectedFields}
         totalFields={anonymizationAllFields.total}
-        handleRowChecked={handleRowChecked}
       />
     ),
     [
-      anonymizationAllFields,
+      anonymizationAllFields.data,
+      anonymizationAllFields.total,
       handleRowChecked,
       handleSelectAll,
-      handleUnselectAll,
+      handleTableReset,
       onListUpdated,
       selectedFields,
     ]

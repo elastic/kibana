@@ -26,20 +26,21 @@ import {
 } from '@elastic/eui';
 import { i18n as I18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { ContextEditor } from '../context_editor';
+import {
+  AnonymizationFieldResponse,
+  PerformAnonymizationFieldsBulkActionRequestBody,
+} from '@kbn/elastic-assistant-common/impl/schemas';
+import { find, uniqBy } from 'lodash';
 import { Stats } from '../stats';
 import * as i18n from '../../data_anonymization/settings/anonymization_settings/translations';
 import { SelectedPromptContext } from '../../assistant/prompt_context/types';
 import { BatchUpdateListItem } from '../context_editor/types';
-import { getIsDataAnonymizable } from '../helpers';
+import { updateSelectedPromptContext, getIsDataAnonymizable } from '../helpers';
 import { useAssistantContext } from '../../assistant_context';
-import {
-  SEARCH,
-  useTable as useAnonymizationTable,
-} from '../../data_anonymization/settings/anonymization_settings_management/use_table';
-import { useAnonymizationUpdater } from '../../assistant/settings/use_settings_updater/use_anonymization_updater';
-import type { OnListUpdated } from '../../assistant/settings/use_settings_updater/use_anonymization_updater';
-import { useSelection } from '../context_editor/selection/use_selection';
+
+import { bulkUpdateAnonymizationFields } from '../../assistant/api/anonymization_fields/bulk_update_anonymization_fields';
+import { ContextEditor } from './context_editor';
+import { useFetchAnonymizationFields } from '../../assistant/api/anonymization_fields/use_fetch_anonymization_fields';
 
 export interface Props {
   onClose: () => void;
@@ -49,39 +50,21 @@ export interface Props {
 
 const SelectedPromptContextEditorModalComponent = ({ onClose, onSave, promptContext }: Props) => {
   const { euiTheme } = useEuiTheme();
-  const { http, toasts, nameSpace } = useAssistantContext();
-
-  const {
-    anonymizationPageFields,
-    anonymizationAllFields,
-    onTableChange,
-    pagination,
-    sorting,
-    handleSearch,
-  } = useAnonymizationTable(nameSpace);
-
-  const {
-    handlePageReset,
-    handleRowReset,
-    onListUpdated: onAnonymizationListUpdated,
-    saveAnonymizationSettings,
-    updatedAnonymizationData: updatedAnonymizationPageData,
-  } = useAnonymizationUpdater({
-    anonymizationFields: anonymizationPageFields,
-    http,
-    toasts,
-  });
-
-  const { selectionActions, selectionState } = useSelection({
-    anonymizationAllFields,
-    anonymizationPageFields,
-  });
+  const { http, toasts } = useAssistantContext();
 
   const [checked, setChecked] = useState(false);
   const checkboxId = useGeneratedHtmlId({ prefix: 'updateSettingPresetsCheckbox' });
 
+  const { data: anonymizationAllFields, refetch: anonymizationFieldsRefetch } =
+    useFetchAnonymizationFields();
   const [contextUpdates, setContextUpdates] = React.useState<BatchUpdateListItem[]>([]);
   const [selectedPromptContext, setSelectedPromptContext] = React.useState(promptContext);
+  const [anonymizationFieldsBulkActions, setAnonymizationFieldsBulkActions] =
+    useState<PerformAnonymizationFieldsBulkActionRequestBody>({
+      create: [],
+      update: [],
+      delete: {},
+    });
 
   const isDataAnonymizable = useMemo<boolean>(
     () => getIsDataAnonymizable(selectedPromptContext.rawData),
@@ -93,21 +76,76 @@ const SelectedPromptContextEditorModalComponent = ({ onClose, onSave, promptCont
       onSave(contextUpdates);
     }
     try {
-      await saveAnonymizationSettings();
+      await bulkUpdateAnonymizationFields(http, anonymizationFieldsBulkActions, toasts);
+      anonymizationFieldsRefetch();
     } catch (e) {
       /* empty */
     }
     onClose();
-  }, [contextUpdates, onClose, onSave, saveAnonymizationSettings]);
+  }, [
+    anonymizationFieldsBulkActions,
+    anonymizationFieldsRefetch,
+    contextUpdates,
+    http,
+    onClose,
+    onSave,
+    toasts,
+  ]);
 
-  const onListUpdated: OnListUpdated = useCallback(
-    (updates, isSelectAll) => {
+  const onListUpdated = useCallback(
+    (updates: BatchUpdateListItem[]) => {
       setContextUpdates((prev) => [...prev, ...updates]);
 
-      onAnonymizationListUpdated(updates, isSelectAll, anonymizationAllFields);
-      setSelectedPromptContext((prev) => ({ ...prev, data: anonymizationAllFields.data }));
+      setAnonymizationFieldsBulkActions((prev) => {
+        return updates.reduce<PerformAnonymizationFieldsBulkActionRequestBody>(
+          (acc, item) => {
+            const persistedField = find(anonymizationAllFields.data, ['field', item.field]) as
+              | AnonymizationFieldResponse
+              | undefined;
+
+            if (persistedField) {
+              acc.update?.push({
+                id: persistedField.id,
+                ...(item.update === 'allow' || item.update === 'defaultAllow'
+                  ? { allowed: item.operation === 'add' }
+                  : {}),
+                ...(item.update === 'allowReplacement' || item.update === 'defaultAllowReplacement'
+                  ? { anonymized: item.operation === 'add' }
+                  : {}),
+              });
+            } else {
+              acc.create?.push({
+                field: item.field,
+                allowed:
+                  item.operation === 'add' &&
+                  (item.update === 'allow' || item.update === 'defaultAllow'),
+                anonymized:
+                  item.operation === 'add' &&
+                  (item.update === 'allowReplacement' || item.update === 'defaultAllowReplacement'),
+              });
+              acc.create = uniqBy(acc.create, 'field');
+            }
+
+            return acc;
+          },
+          { create: prev.create ?? [], update: prev.update ?? [] }
+        );
+      });
+
+      setSelectedPromptContext((prev) => {
+        return updates.reduce<SelectedPromptContext>(
+          (acc, { field, operation, update }) =>
+            updateSelectedPromptContext({
+              field,
+              operation,
+              selectedPromptContext: acc,
+              update,
+            }),
+          prev
+        );
+      });
     },
-    [anonymizationAllFields, onAnonymizationListUpdated]
+    [anonymizationAllFields.data]
   );
 
   const onChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -137,26 +175,22 @@ const SelectedPromptContextEditorModalComponent = ({ onClose, onSave, promptCont
         />
         <EuiSpacer size="s" />
         <ContextEditor
-          anonymizationAllFields={anonymizationAllFields}
-          anonymizationPageFields={updatedAnonymizationPageData}
-          compressed={false}
-          onTableChange={onTableChange}
-          pagination={pagination}
-          sorting={sorting}
-          search={SEARCH}
-          handleSearch={handleSearch}
-          handleRowReset={handleRowReset}
-          handlePageReset={handlePageReset}
+          anonymizationFields={
+            selectedPromptContext.contextAnonymizationFields ?? {
+              total: 0,
+              page: 1,
+              perPage: 1000,
+              data: [],
+            }
+          }
           onListUpdated={onListUpdated}
           rawData={selectedPromptContext.rawData as Record<string, string[]>}
-          selectionState={selectionState}
-          selectionActions={selectionActions}
         />
       </EuiModalBody>
 
       <EuiModalFooter
         css={css`
-          background: ${euiTheme.colors.backgroundBaseSubdued};
+          background: ${euiTheme.colors.mediumShade};
           padding-block: 16px;
         `}
       >

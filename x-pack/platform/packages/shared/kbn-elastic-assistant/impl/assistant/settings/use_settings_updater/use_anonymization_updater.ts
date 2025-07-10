@@ -24,6 +24,7 @@ const DEFAULT_ANONYMIZATION_FIELDS = {
 
 interface Params {
   anonymizationFields: FindAnonymizationFieldsResponse;
+  anonymizationAllFields?: FindAnonymizationFieldsResponse;
   http: HttpSetup;
   toasts?: IToasts;
 }
@@ -48,6 +49,7 @@ interface AnonymizationUpdater {
 }
 
 export const useAnonymizationUpdater = ({
+  anonymizationAllFields,
   anonymizationFields = DEFAULT_ANONYMIZATION_FIELDS,
   http,
   toasts,
@@ -120,23 +122,15 @@ export const useAnonymizationUpdater = ({
   }, [anonymizationFields, anonymizationFieldsBulkActions, http, toasts]);
 
   const onListUpdated: OnListUpdated = useCallback(
-    (updates, isSelectAll, anonymizationAllFields) => {
+    (updates) => {
       // when isSelectAll is true, we use anonymizationAllFields to find the field
       // otherwise, we use `updates` to find the field
-      const batchUpdatedFields = isSelectAll
-        ? (anonymizationAllFields?.data ?? []).map((f) => ({
-            field: f.field,
-            operation: updates[0].operation,
-            update: updates[0].update,
-          }))
-        : updates;
+      const batchUpdatedFields = updates;
       const updatedFieldsKeys = batchUpdatedFields.map((u) => u.field);
       const updatedFields = batchUpdatedFields.map((u) => ({
         // when isSelectAll is true, we use anonymizationAllFields to find the field
         // otherwise, we use updatedAnonymizationData (anonymizationPageFields) to find the field
-        ...((isSelectAll ? anonymizationAllFields?.data ?? [] : updatedAnonymizationData.data).find(
-          (f) => f.field === u.field
-        ) ?? {
+        ...((anonymizationAllFields?.data ?? []).find((f) => f.field === u.field) ?? {
           id: '',
           field: '',
         }),
@@ -187,7 +181,7 @@ export const useAnonymizationUpdater = ({
         return newAnonymizationData;
       });
     },
-    [updatedAnonymizationData, anonymizationFieldsBulkActions]
+    [anonymizationAllFields?.data, anonymizationFieldsBulkActions, updatedAnonymizationData]
   );
 
   const handleRowReset = useCallback(

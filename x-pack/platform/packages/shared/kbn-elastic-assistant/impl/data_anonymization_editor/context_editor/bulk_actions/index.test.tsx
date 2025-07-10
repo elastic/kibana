@@ -35,7 +35,7 @@ const defaultProps = {
   disabled: false,
   onListUpdated: jest.fn(),
   onlyDefaults: false,
-  selected,
+  selectedFields: selected.map((item) => item.field),
   handleRowChecked: jest.fn(),
 };
 

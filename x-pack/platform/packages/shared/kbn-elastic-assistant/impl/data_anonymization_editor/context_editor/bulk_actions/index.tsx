@@ -15,7 +15,6 @@ import {
 } from '@elastic/eui';
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common';
 import { getContextMenuPanels, PRIMARY_PANEL_ID } from '../get_context_menu_panels';
 import * as i18n from '../translations';
 import type { OnListUpdated } from '../../../assistant/settings/use_settings_updater/use_anonymization_updater';
@@ -29,7 +28,8 @@ export interface Props {
   disableDeny?: boolean;
   disableUnanonymize?: boolean;
   onListUpdated: OnListUpdated;
-  selected: FindAnonymizationFieldsResponse['data'];
+  selectedField?: string; // Selected field for a single row, undefined if applies to multiple rows
+  selectedFields: string[]; // Selected fields for the entire table
   handleRowChecked: HandleRowChecked;
 }
 
@@ -41,7 +41,8 @@ const BulkActionsComponent: React.FC<Props> = ({
   disableDeny = false,
   disableUnanonymize = false,
   onListUpdated,
-  selected,
+  selectedField,
+  selectedFields,
   handleRowChecked,
 }) => {
   const [isPopoverOpen, setPopover] = useState(false);
@@ -83,7 +84,8 @@ const BulkActionsComponent: React.FC<Props> = ({
         disableUnanonymize,
         closePopover,
         onListUpdated,
-        selected,
+        selectedField,
+        selectedFields,
         handleRowChecked,
       }),
     [
@@ -94,7 +96,8 @@ const BulkActionsComponent: React.FC<Props> = ({
       disableUnanonymize,
       handleRowChecked,
       onListUpdated,
-      selected,
+      selectedField,
+      selectedFields,
     ]
   );
 

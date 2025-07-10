@@ -68,6 +68,7 @@ const AnonymizationSettingsManagementComponent: React.FC<Props> = ({
     saveAnonymizationSettings,
     updatedAnonymizationData: updatedAnonymizationPageData,
   } = useAnonymizationUpdater({
+    anonymizationAllFields,
     anonymizationFields: anonymizationPageFields,
     http,
     toasts,
@@ -78,11 +79,15 @@ const AnonymizationSettingsManagementComponent: React.FC<Props> = ({
     anonymizationPageFields,
   });
 
-  const onCancelClick = useCallback(() => {
-    onClose?.();
+  const handleTableReset = useCallback(() => {
     resetAnonymizationSettings();
     selectionActions?.handleUnselectAll();
-  }, [onClose, resetAnonymizationSettings, selectionActions]);
+  }, [resetAnonymizationSettings, selectionActions]);
+
+  const onCancelClick = useCallback(() => {
+    onClose?.();
+    handleTableReset();
+  }, [onClose, handleTableReset]);
 
   const handleSave = useCallback(async () => {
     const updateSuccess = await saveAnonymizationSettings();
@@ -134,6 +139,7 @@ const AnonymizationSettingsManagementComponent: React.FC<Props> = ({
             sorting={sorting}
             search={SEARCH}
             handleSearch={handleSearch}
+            handleTableReset={handleTableReset}
             handleRowReset={handleRowReset}
             handlePageReset={handlePageReset}
             selectionState={selectionState}
@@ -181,6 +187,7 @@ const AnonymizationSettingsManagementComponent: React.FC<Props> = ({
           handleSearch={handleSearch}
           handleRowReset={handleRowReset}
           handlePageReset={handlePageReset}
+          handleTableReset={handleTableReset}
           selectionState={selectionState}
           selectionActions={selectionActions}
         />

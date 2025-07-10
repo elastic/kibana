@@ -7,7 +7,6 @@
 
 import { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 
-import { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common';
 import * as i18n from '../translations';
 import type { BatchUpdateListItem } from '../types';
 import type { OnListUpdated } from '../../../assistant/settings/use_settings_updater/use_anonymization_updater';
@@ -22,7 +21,8 @@ export const getContextMenuPanels = ({
   disableUnanonymize,
   closePopover,
   onListUpdated,
-  selected,
+  selectedField,
+  selectedFields,
   handleRowChecked,
 }: {
   disableAllow: boolean;
@@ -31,10 +31,12 @@ export const getContextMenuPanels = ({
   disableUnanonymize: boolean;
   closePopover: () => void;
   onListUpdated: OnListUpdated;
-  selected: FindAnonymizationFieldsResponse['data'];
+  selectedField: string | undefined; // Selected field for a single row, undefined if applies to multiple rows
+  selectedFields: string[]; // Selected fields for the entire table
   handleRowChecked: HandleRowChecked;
 }): EuiContextMenuPanelDescriptor[] => {
   const nonDefaultsPanelId = PRIMARY_PANEL_ID;
+  const updatedFields = selectedField ? [selectedField] : selectedFields;
 
   const nonDefaultsPanelItems: EuiContextMenuPanelDescriptor[] = [
     {
@@ -47,14 +49,14 @@ export const getContextMenuPanels = ({
           onClick: () => {
             closePopover();
 
-            const updates: BatchUpdateListItem[] = selected.map<BatchUpdateListItem>(
-              ({ field }) => ({
+            const updates: BatchUpdateListItem[] = updatedFields.map<BatchUpdateListItem>(
+              (field) => ({
                 field,
                 operation: 'add',
                 update: 'allow',
               })
             );
-            if (updates.length === 1) {
+            if (selectedField) {
               handleRowChecked(updates[0].field);
             }
             onListUpdated(updates);
@@ -67,14 +69,14 @@ export const getContextMenuPanels = ({
           onClick: () => {
             closePopover();
 
-            const updates: BatchUpdateListItem[] = selected.map<BatchUpdateListItem>(
-              ({ field }) => ({
+            const updates: BatchUpdateListItem[] = updatedFields.map<BatchUpdateListItem>(
+              (field) => ({
                 field,
                 operation: 'remove',
                 update: 'allow',
               })
             );
-            if (updates.length === 1) {
+            if (selectedField) {
               handleRowChecked(updates[0].field);
             }
             onListUpdated(updates);
@@ -87,14 +89,14 @@ export const getContextMenuPanels = ({
           onClick: () => {
             closePopover();
 
-            const updates: BatchUpdateListItem[] = selected.map<BatchUpdateListItem>(
-              ({ field }) => ({
+            const updates: BatchUpdateListItem[] = updatedFields.map<BatchUpdateListItem>(
+              (field) => ({
                 field,
                 operation: 'add',
                 update: 'allowReplacement',
               })
             );
-            if (updates.length === 1) {
+            if (selectedField) {
               handleRowChecked(updates[0].field);
             }
             onListUpdated(updates);
@@ -107,14 +109,14 @@ export const getContextMenuPanels = ({
           onClick: () => {
             closePopover();
 
-            const updates: BatchUpdateListItem[] = selected.map<BatchUpdateListItem>(
-              ({ field }) => ({
+            const updates: BatchUpdateListItem[] = updatedFields.map<BatchUpdateListItem>(
+              (field) => ({
                 field,
                 operation: 'remove',
                 update: 'allowReplacement',
               })
             );
-            if (updates.length === 1) {
+            if (selectedField) {
               handleRowChecked(updates[0].field);
             }
             onListUpdated(updates);

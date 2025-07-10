@@ -20,7 +20,7 @@ export interface Props {
   handleUnselectAll: () => void;
   onListUpdated: OnListUpdated;
   onSelectAll: (totalCount: number) => void;
-  selected: string[];
+  selectedFields: string[];
   totalFields: number;
 }
 
@@ -29,7 +29,7 @@ const ToolbarComponent: React.FC<Props> = ({
   onListUpdated,
   onSelectAll,
   handleUnselectAll,
-  selected,
+  selectedFields,
   totalFields,
   handleRowChecked,
 }) => {
@@ -40,19 +40,19 @@ const ToolbarComponent: React.FC<Props> = ({
     <EuiFlexGroup alignItems="center" data-test-subj="toolbar" gutterSize="none">
       <EuiFlexItem grow={false}>
         <EuiText color="subdued" data-test-subj="selectedFields" size="xs">
-          {i18n.SELECTED_FIELDS(selected.length)}
+          {i18n.SELECTED_FIELDS(selectedFields.length)}
         </EuiText>
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
-        {selected.length === totalFields ? (
+        {selectedFields.length === totalFields ? (
           <EuiButtonEmpty
             data-test-subj="unselectAllFields"
             iconType="pagesSelect"
             onClick={handleUnselectAll}
             size="xs"
           >
-            {i18n.UNSELECT_ALL_FIELDS(selected.length)}
+            {i18n.UNSELECT_ALL_FIELDS(selectedFields.length)}
           </EuiButtonEmpty>
         ) : (
           <EuiButtonEmpty
@@ -69,9 +69,9 @@ const ToolbarComponent: React.FC<Props> = ({
       <EuiFlexItem grow={false}>
         <BulkActions
           appliesTo="multipleRows"
-          disabled={selected.length === 0}
+          disabled={selectedFields.length === 0}
           onListUpdated={onListUpdated}
-          selected={anonymizationAllFieldsData.filter((r) => selected.includes(r.field))}
+          selectedFields={selectedFields}
           handleRowChecked={handleRowChecked}
         />
       </EuiFlexItem>
