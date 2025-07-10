@@ -31,15 +31,15 @@ import {
 } from './state_management/stream_routing_state_machine';
 
 function getReasonDisabledCreateButton(canManageRoutingRules: boolean, maxNestingLevel: boolean) {
-  if (!canManageRoutingRules) {
-    return i18n.translate('xpack.streams.streamDetailRouting.rules.onlySimulate', {
-      defaultMessage: "You don't have sufficient privileges to create new streams, only simulate.",
-    });
-  }
   if (maxNestingLevel) {
     return i18n.translate('xpack.streams.streamDetailRouting.rules.maxNestingLevel', {
       defaultMessage:
         'You have reached the maximum nesting level for streams. Try to flatten your hierarchy.',
+    });
+  }
+  if (!canManageRoutingRules) {
+    return i18n.translate('xpack.streams.streamDetailRouting.rules.onlySimulate', {
+      defaultMessage: "You don't have sufficient privileges to create new streams, only simulate.",
     });
   }
 }
