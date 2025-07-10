@@ -8,10 +8,7 @@
  */
 import type { ESQLAstItem, ESQLCommand, ESQLFunction, ESQLSingleAstItem } from '../../../types';
 import {
-  isColumn,
   isFunctionExpression,
-  isIdentifier,
-  isSource,
   isFieldExpression,
   isWhereExpression,
   isParamLiteral,
@@ -26,29 +23,9 @@ import {
 } from '../../../definitions/utils/autocomplete';
 import { ISuggestionItem } from '../../types';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
-import { EDITOR_MARKER } from '../../../parser/constants';
 import { getFunctionDefinition } from '../../../definitions/utils/functions';
 import { FunctionDefinitionTypes } from '../../../definitions/types';
-
-export function isMarkerNode(node: ESQLAstItem | undefined): boolean {
-  if (Array.isArray(node)) {
-    return false;
-  }
-
-  return Boolean(
-    node &&
-      (isColumn(node) || isIdentifier(node) || isSource(node)) &&
-      node.name.endsWith(EDITOR_MARKER)
-  );
-}
-
-function isNotMarkerNodeOrArray(arg: ESQLAstItem) {
-  return Array.isArray(arg) || !isMarkerNode(arg);
-}
-
-function mapToNonMarkerNode(arg: ESQLAstItem): ESQLAstItem {
-  return Array.isArray(arg) ? arg.filter(isNotMarkerNodeOrArray).map(mapToNonMarkerNode) : arg;
-}
+import { mapToNonMarkerNode, isNotMarkerNodeOrArray } from '../../../definitions/utils/astl';
 
 function isAssignmentComplete(node: ESQLFunction | undefined) {
   const assignExpression = removeMarkerArgFromArgsList(node)?.args?.[1];

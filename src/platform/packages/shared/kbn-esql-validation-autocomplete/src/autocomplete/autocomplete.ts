@@ -180,52 +180,53 @@ export async function suggest(
       astContext,
       getFieldsByType,
       getFieldsMap,
-      resourceRetriever
+      resourceRetriever,
+      offset
     );
     return commandsSpecificSuggestions;
   }
-  if (astContext.type === 'function') {
-    const getCommandAndOptionWithinFORK = (
-      command: ESQLCommand<'fork'>
-    ): {
-      command: ESQLCommand;
-      option: ESQLCommandOption | undefined;
-    } => {
-      let option;
-      let subCommand;
-      Walker.walk(command, {
-        visitCommandOption: (_node) => {
-          option = _node;
-        },
-        visitCommand: (_node) => {
-          subCommand = _node;
-        },
-      });
+  // if (astContext.type === 'function') {
+  //   const getCommandAndOptionWithinFORK = (
+  //     command: ESQLCommand<'fork'>
+  //   ): {
+  //     command: ESQLCommand;
+  //     option: ESQLCommandOption | undefined;
+  //   } => {
+  //     let option;
+  //     let subCommand;
+  //     Walker.walk(command, {
+  //       visitCommandOption: (_node) => {
+  //         option = _node;
+  //       },
+  //       visitCommand: (_node) => {
+  //         subCommand = _node;
+  //       },
+  //     });
 
-      return {
-        option,
-        command: subCommand ?? command,
-      };
-    };
+  //     return {
+  //       option,
+  //       command: subCommand ?? command,
+  //     };
+  //   };
 
-    const functionsSpecificSuggestions = await getFunctionArgsSuggestions(
-      innerText,
-      ast,
-      {
-        ...astContext,
-        ...(astContext.command.name === 'fork'
-          ? getCommandAndOptionWithinFORK(astContext.command as ESQLCommand<'fork'>)
-          : {}),
-      },
-      getFieldsByType,
-      getFieldsMap,
-      fullText,
-      offset,
-      getVariables,
-      supportsControls
-    );
-    return functionsSpecificSuggestions;
-  }
+  //   const functionsSpecificSuggestions = await getFunctionArgsSuggestions(
+  //     innerText,
+  //     ast,
+  //     {
+  //       ...astContext,
+  //       ...(astContext.command.name === 'fork'
+  //         ? getCommandAndOptionWithinFORK(astContext.command as ESQLCommand<'fork'>)
+  //         : {}),
+  //     },
+  //     getFieldsByType,
+  //     getFieldsMap,
+  //     fullText,
+  //     offset,
+  //     getVariables,
+  //     supportsControls
+  //   );
+  //   return functionsSpecificSuggestions;
+  // }
   if (astContext.type === 'list') {
     return getListArgsSuggestions(innerText, ast, astContext, getFieldsByType, getFieldsMap);
   }
@@ -291,7 +292,8 @@ async function getSuggestionsWithinCommandExpression(
   },
   getColumnsByType: GetColumnsByTypeFn,
   getFieldsMap: GetFieldsMapFn,
-  callbacks?: ESQLCallbacks
+  callbacks?: ESQLCallbacks,
+  offset?: number
 ) {
   const commandDefinition = esqlCommandRegistry.getCommandByName(astContext.command.name);
 
@@ -362,7 +364,8 @@ async function getSuggestionsWithinCommandExpression(
           }
         : undefined,
     },
-    context
+    context,
+    offset
   );
 }
 
@@ -527,7 +530,7 @@ async function getFunctionArgsSuggestions(
           advanceCursorAndOpenSuggestions: hasMoreMandatoryArgs,
           supportsControls,
         },
-        getVariables
+        getVariables?.() ?? undefined
       )
     );
 

@@ -8,7 +8,8 @@
  */
 import { i18n } from '@kbn/i18n';
 import { ESQLVariableType, ESQLControlVariable } from '@kbn/esql-types';
-import type { ESQLSingleAstItem, ESQLFunction } from '../../types';
+import { uniqBy } from 'lodash';
+import type { ESQLSingleAstItem, ESQLFunction, ESQLAstItem, ESQLLiteral } from '../../types';
 import type {
   ISuggestionItem,
   GetColumnsByTypeFn,
@@ -16,13 +17,25 @@ import type {
   ICommandContext,
 } from '../../commands_registry/types';
 import { Location } from '../../commands_registry/types';
-import { getDateLiterals, getCompatibleLiterals, buildConstantsDefinitions } from './literals';
-import { SINGLE_TICK_REGEX, DOUBLE_BACKTICK } from '../../parser/constants';
-import { type SupportedDataType, isParameterType } from '../types';
-import { getOverlapRange } from './shared';
+import {
+  getDateLiterals,
+  getCompatibleLiterals,
+  buildConstantsDefinitions,
+  isLiteralDateItem,
+  compareTypesWithLiterals,
+} from './literals';
+import { SINGLE_TICK_REGEX, DOUBLE_BACKTICK, EDITOR_MARKER } from '../../parser/constants';
+import {
+  type SupportedDataType,
+  isParameterType,
+  FunctionDefinition,
+  FunctionReturnType,
+  FunctionDefinitionTypes,
+} from '../types';
+import { getColumnForASTNode, getOverlapRange } from './shared';
 import { getExpressionType } from './expressions';
 import { getColumnByName, isParamExpressionType } from './shared';
-import { getFunctionSuggestions } from './functions';
+import { getFunctionDefinition, getFunctionSuggestions } from './functions';
 import { logicalOperators } from '../all_operators';
 import {
   getOperatorSuggestion,
@@ -30,7 +43,13 @@ import {
   getOperatorsSuggestionsAfterNot,
   getSuggestionsToRightOfOperatorExpression,
 } from './operators';
-import { isColumn, isFunctionExpression, isLiteral, isTimeInterval } from '../../ast/is';
+import {
+  isColumn,
+  isFunctionExpression,
+  isIdentifier,
+  isLiteral,
+  isTimeInterval,
+} from '../../ast/is';
 import { Walker } from '../../walker';
 
 export const shouldBeQuotedText = (
@@ -528,4 +547,170 @@ export function getControlSuggestionIfSupported(
     filteredVariables?.map((v) => `${prefix}${v.key}`)
   );
   return controlSuggestion;
+}
+
+/** @deprecated — use getExpressionType instead (src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/helpers.ts) */
+export function extractTypeFromASTArg(
+  arg: ESQLAstItem,
+  context: ICommandContext
+):
+  | ESQLLiteral['literalType']
+  | SupportedDataType
+  | FunctionReturnType
+  | 'timeInterval'
+  | string // @TODO remove this
+  | undefined {
+  if (Array.isArray(arg)) {
+    return extractTypeFromASTArg(arg[0], context);
+  }
+  if (isLiteral(arg)) {
+    return arg.literalType;
+  }
+  if (isColumn(arg) || isIdentifier(arg)) {
+    const hit = getColumnForASTNode(arg, context);
+    if (hit) {
+      return hit.type;
+    }
+  }
+  if (isTimeInterval(arg)) {
+    return arg.type;
+  }
+  if (isFunctionExpression(arg)) {
+    const fnDef = getFunctionDefinition(arg.name);
+    if (fnDef) {
+      // @TODO: improve this to better filter down the correct return type based on existing arguments
+      // just mind that this can be highly recursive...
+      return fnDef.signatures[0].returnType;
+    }
+  }
+}
+
+function getValidFunctionSignaturesForPreviousArgs(
+  fnDefinition: FunctionDefinition,
+  enrichedArgs: Array<
+    ESQLAstItem & {
+      dataType: string;
+    }
+  >,
+  argIndex: number
+) {
+  // Filter down to signatures that match every params up to the current argIndex
+  // e.g. BUCKET(longField, /) => all signatures with first param as long column type
+  // or BUCKET(longField, 2, /) => all signatures with (longField, integer, ...)
+  const relevantFuncSignatures = fnDefinition.signatures.filter(
+    (s) =>
+      s.params?.length >= argIndex &&
+      s.params.slice(0, argIndex).every(({ type: dataType }, idx) => {
+        return (
+          dataType === enrichedArgs[idx].dataType ||
+          compareTypesWithLiterals(dataType, enrichedArgs[idx].dataType)
+        );
+      })
+  );
+  return relevantFuncSignatures;
+}
+
+/**
+ * Given a function signature, returns the compatible types to suggest for the next argument
+ *
+ * @param fnDefinition: the function definition
+ * @param enrichedArgs: AST args with enriched esType info to match with function signatures
+ * @param argIndex: the index of the argument to suggest for
+ * @returns
+ */
+function getCompatibleTypesToSuggestNext(
+  fnDefinition: FunctionDefinition,
+  enrichedArgs: Array<
+    ESQLAstItem & {
+      dataType: string;
+    }
+  >,
+  argIndex: number
+) {
+  // First, narrow down to valid function signatures based on previous arguments
+  const relevantFuncSignatures = getValidFunctionSignaturesForPreviousArgs(
+    fnDefinition,
+    enrichedArgs,
+    argIndex
+  );
+
+  // Then, get the compatible types to suggest for the next argument
+  const compatibleTypesToSuggestForArg = uniqBy(
+    relevantFuncSignatures.map((f) => f.params[argIndex]).filter((d) => d),
+    (o) => `${o.type}-${o.constantOnly}`
+  );
+  return compatibleTypesToSuggestForArg;
+}
+
+/**
+ * Given a function signature, returns the parameter at the given position, even if it's undefined or null
+ *
+ * @param {params}
+ * @param position
+ * @returns
+ */
+function strictlyGetParamAtPosition(
+  { params }: FunctionDefinition['signatures'][number],
+  position: number
+) {
+  return params[position] ? params[position] : null;
+}
+
+export function getValidSignaturesAndTypesToSuggestNext(
+  node: ESQLFunction,
+  context: ICommandContext,
+  fnDefinition: FunctionDefinition,
+  fullText: string,
+  offset: number
+) {
+  const enrichedArgs = node.args.map((nodeArg) => {
+    let dataType = extractTypeFromASTArg(nodeArg, context);
+
+    // For named system time parameters ?start and ?end, make sure it's compatiable
+    if (isLiteralDateItem(nodeArg)) {
+      dataType = 'date';
+    }
+
+    return { ...nodeArg, dataType } as ESQLAstItem & { dataType: string };
+  });
+
+  // pick the type of the next arg
+  const shouldGetNextArgument = node.text.includes(EDITOR_MARKER);
+  let argIndex = Math.max(node.args.length, 0);
+  if (!shouldGetNextArgument && argIndex) {
+    argIndex -= 1;
+  }
+
+  const validSignatures = getValidFunctionSignaturesForPreviousArgs(
+    fnDefinition,
+    enrichedArgs,
+    argIndex
+  );
+  // Retrieve unique of types that are compatiable for the current arg
+  const typesToSuggestNext = getCompatibleTypesToSuggestNext(fnDefinition, enrichedArgs, argIndex);
+  const hasMoreMandatoryArgs = !validSignatures
+    // Types available to suggest next after this argument is completed
+    .map((signature) => strictlyGetParamAtPosition(signature, argIndex + 1))
+    // when a param is null, it means param is optional
+    // If there's at least one param that is optional, then
+    // no need to suggest comma
+    .some((p) => p === null || p?.optional === true);
+
+  // Whether to prepend comma to suggestion string
+  // E.g. if true, "fieldName" -> "fieldName, "
+  const alreadyHasComma = fullText ? fullText[offset] === ',' : false;
+  const shouldAddComma =
+    hasMoreMandatoryArgs &&
+    fnDefinition.type !== FunctionDefinitionTypes.OPERATOR &&
+    !alreadyHasComma;
+  const currentArg = enrichedArgs[argIndex];
+  return {
+    shouldAddComma,
+    typesToSuggestNext,
+    validSignatures,
+    hasMoreMandatoryArgs,
+    enrichedArgs,
+    argIndex,
+    currentArg,
+  };
 }

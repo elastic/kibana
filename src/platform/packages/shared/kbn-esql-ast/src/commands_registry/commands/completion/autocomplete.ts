@@ -31,10 +31,14 @@ import { TRIGGER_SUGGESTION_COMMAND, ESQL_VARIABLES_PREFIX } from '../../constan
 import { EDITOR_MARKER } from '../../../parser/constants';
 import { getExpressionType, isExpressionComplete } from '../../../definitions/utils/expressions';
 import { getFunctionDefinition } from '../../../definitions/utils/functions';
+import { getFunctionArgsSuggestions } from '../../../definitions/utils/autocomplete/functions';
+import { parse } from '../../../parser';
+import { correctQuerySyntax } from '../../../definitions/utils/astl';
 
 export enum CompletionPosition {
   AFTER_COMPLETION = 'after_completion',
   AFTER_PROMPT_OR_TARGET = 'after_prompt_or_target',
+  BEFORE_PROMPT = 'before_prompt',
   AFTER_PROMPT = 'after_prompt',
   AFTER_WITH = 'after_with',
   AFTER_INFERENCE_ID = 'after_inference_id',
@@ -62,6 +66,9 @@ function getPosition(
     context?.fields,
     context?.userDefinedColumns
   );
+  if (!isExpressionComplete(expressionType, query)) {
+    return CompletionPosition.BEFORE_PROMPT;
+  }
 
   if (isExpressionComplete(expressionType, query)) {
     return CompletionPosition.AFTER_PROMPT;
@@ -123,7 +130,8 @@ export async function autocomplete(
   query: string,
   command: ESQLCommand,
   callbacks?: ICommandCallbacks,
-  context?: ICommandContext
+  context?: ICommandContext,
+  cursorPosition?: number
 ): Promise<ISuggestionItem[]> {
   if (!callbacks?.getByType) {
     return [];
@@ -178,6 +186,21 @@ export async function autocomplete(
       }
 
       return suggestions;
+    }
+
+    case CompletionPosition.BEFORE_PROMPT: {
+      const correctedQuery = correctQuerySyntax(query);
+      const { ast } = parse(correctedQuery, { withFormatting: true });
+      const functionsSpecificSuggestions = await getFunctionArgsSuggestions(
+        query,
+        ast,
+        callbacks?.getByType,
+        query,
+        cursorPosition ?? 0,
+        context
+      );
+
+      return functionsSpecificSuggestions;
     }
 
     case CompletionPosition.AFTER_PROMPT:
