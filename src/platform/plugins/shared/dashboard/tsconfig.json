@@ -87,6 +87,7 @@
     "@kbn/react-kibana-context-theme",
     "@kbn/std",
     "@kbn/css-utils",
+    "@kbn/data-service-server",
     "@kbn/controls-schemas",
     "@kbn/controls-constants",
     "@kbn/presentation-util"

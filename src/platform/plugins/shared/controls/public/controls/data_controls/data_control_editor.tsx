@@ -58,6 +58,7 @@ import {
   type DataControlFieldRegistry,
 } from './types';
 import { ControlFactory } from '../types';
+import { confirmDeleteControl } from '../../common';
 
 export interface ControlEditorProps<
   State extends DefaultDataControlState = DefaultDataControlState
@@ -157,7 +158,7 @@ const CompatibleControlTypesComponent = ({
               content={DataControlEditorStrings.manageControl.dataSource.getControlTypeErrorMessage(
                 {
                   fieldSelected: Boolean(selectedFieldName),
-                  controlType: factory.getDisplayName(),
+                  controlType: factory.type,
                 }
               )}
             >
@@ -416,23 +417,6 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
             </EuiFormRow>
           )}
           {!editorConfig?.hideAdditionalSettings && CustomSettingsComponent}
-          {controlId && (
-            <>
-              <EuiSpacer size="l" />
-              <EuiButtonEmpty
-                aria-label={`delete-${editorState.title ?? editorState.fieldName}`}
-                iconType="trash"
-                flush="left"
-                color="danger"
-                onClick={() => {
-                  onCancel(initialState); // don't want to show "lost changes" warning
-                  controlGroupApi.removePanel(controlId!);
-                }}
-              >
-                {DataControlEditorStrings.manageControl.getDeleteButtonTitle()}
-              </EuiButtonEmpty>
-            </>
-          )}
         </EuiForm>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
@@ -449,25 +433,44 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton
-              aria-label={`save-${editorState.title ?? editorState.fieldName}`}
-              data-test-subj="control-editor-save"
-              fill
-              color="primary"
-              disabled={
-                !(
-                  controlOptionsValid &&
-                  Boolean(editorState.fieldName) &&
-                  Boolean(selectedDataView) &&
-                  Boolean(selectedControlType)
-                )
-              }
-              onClick={() => {
-                onSave(editorState, selectedControlType!);
-              }}
-            >
-              {DataControlEditorStrings.manageControl.getSaveChangesTitle()}
-            </EuiButton>
+            <EuiFlexGroup responsive={false} justifyContent="flexEnd" gutterSize="s">
+              {controlId && (
+                <EuiButton
+                  aria-label={`delete-${editorState.title ?? editorState.fieldName}`}
+                  iconType="trash"
+                  color="danger"
+                  onClick={() => {
+                    confirmDeleteControl().then((confirmed) => {
+                      if (confirmed) {
+                        onCancel(initialState); // don't want to show "lost changes" warning
+                        controlGroupApi.removePanel(controlId!);
+                      }
+                    });
+                  }}
+                >
+                  {DataControlEditorStrings.manageControl.getDeleteButtonTitle()}
+                </EuiButton>
+              )}
+              <EuiButton
+                aria-label={`save-${editorState.title ?? editorState.fieldName}`}
+                data-test-subj="control-editor-save"
+                fill
+                color="primary"
+                disabled={
+                  !(
+                    controlOptionsValid &&
+                    Boolean(editorState.fieldName) &&
+                    Boolean(selectedDataView) &&
+                    Boolean(selectedControlType)
+                  )
+                }
+                onClick={() => {
+                  onSave(editorState, selectedControlType!);
+                }}
+              >
+                {DataControlEditorStrings.manageControl.getSaveChangesTitle()}
+              </EuiButton>
+            </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>

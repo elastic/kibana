@@ -14,40 +14,13 @@ import { StateManager } from '@kbn/presentation-publishing/state_manager/types';
 
 import { ControlGroupApi, ControlGroupEditorState } from './types';
 import { coreServices } from '../services/kibana_services';
+import { confirmDeleteAllControls } from '../common/confirm_delete_control';
 
 export const openEditControlGroupFlyout = (
   controlGroupApi: ControlGroupApi,
   stateManager: StateManager<ControlGroupEditorState>
 ) => {
   const lastSavedState = stateManager.getLatestState();
-
-  const onDeleteAll = (closeFlyout: () => void) => {
-    coreServices.overlays
-      .openConfirm(
-        i18n.translate('controls.controlGroup.management.delete.sub', {
-          defaultMessage: 'Controls are not recoverable once removed.',
-        }),
-        {
-          confirmButtonText: i18n.translate('controls.controlGroup.management.delete.confirm', {
-            defaultMessage: 'Delete',
-          }),
-          cancelButtonText: i18n.translate('controls.controlGroup.management.delete.cancel', {
-            defaultMessage: 'Cancel',
-          }),
-          title: i18n.translate('controls.controlGroup.management.delete.deleteAllTitle', {
-            defaultMessage: 'Delete all controls?',
-          }),
-          buttonColor: 'danger',
-        }
-      )
-      .then((confirmed) => {
-        if (confirmed)
-          Object.keys(controlGroupApi.children$.getValue()).forEach((childId) => {
-            controlGroupApi.removePanel(childId);
-          });
-        closeFlyout();
-      });
-  };
 
   openLazyFlyout({
     core: coreServices,
@@ -59,7 +32,15 @@ export const openEditControlGroupFlyout = (
           api={controlGroupApi}
           stateManager={stateManager}
           onSave={closeFlyout}
-          onDeleteAll={() => onDeleteAll(closeFlyout)}
+          onDeleteAll={() => {
+            confirmDeleteAllControls().then((confirmed) => {
+              if (confirmed)
+                Object.keys(controlGroupApi.children$.getValue()).forEach((childId) => {
+                  controlGroupApi.removePanel(childId);
+                });
+              closeFlyout();
+            });
+          }}
           onCancel={() => {
             stateManager.reinitializeState(lastSavedState);
             closeFlyout();
