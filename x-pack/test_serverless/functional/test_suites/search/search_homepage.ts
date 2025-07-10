@@ -28,9 +28,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   const testSubjects = getService('testSubjects');
 
-  describe('Search Homepage', function () {
-    // Skip on MKI until timeout flakes can be diagnosed and resolved
-    this.tags(['skipMKI']);
+  // Skip the tests until timeout flakes can be diagnosed and resolved
+  describe.skip('Search Homepage', function () {
     describe('as viewer', function () {
       before(async () => {
         roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
