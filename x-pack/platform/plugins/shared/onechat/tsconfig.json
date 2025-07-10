@@ -47,6 +47,5 @@
     "@kbn/core-application-common",
     "@kbn/core-application-browser",
     "@kbn/core-ui-settings-server",
-    "@kbn/router-utils",
   ]
 }
