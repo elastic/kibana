@@ -161,24 +161,24 @@ export const retriever = (specService: SpecDefinitionsService) => {
     },
     simplified_linear: {
       __template: {
-        query: "search terms",
-        fields: ["field1", "field2^2"],
-        normalizer: "minmax"
+        query: 'search terms',
+        fields: ['field1', 'field2^2'],
+        normalizer: 'minmax',
       },
-      query: "",
+      query: '',
       fields: [],
       normalizer: { __one_of: ['minmax', 'l2_norm', 'none'] },
       rank_window_size: 100,
       filter: {
-        __scope_link: 'GLOBAL.query'
-      }
+        __scope_link: 'GLOBAL.query',
+      },
     },
     simplified_rrf: {
       __template: {
-        query: "search terms",
-        fields: ["field1", "field2"]
+        query: 'search terms',
+        fields: ['field1', 'field2'],
       },
-      query: "",
+      query: '',
       fields: [],
       rank_constant: 60,
       rank_window_size: 100,
