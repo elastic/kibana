@@ -86,6 +86,12 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
   dateRangeTo?: string;
   // Query bar - should be in SearchBarInjectedDeps
   query?: QT | Query;
+  // To initialize with a predefined query which has not been submitted yet (in dirty state)
+  draft?: {
+    query?: QT | Query;
+    dateRangeFrom?: string;
+    dateRangeTo?: string;
+  };
   // Show when user has privileges to save. See `canShowSavedQuery(...)` lib.
   showSaveQuery?: boolean;
   // Show the controls to save and load saved queries
@@ -263,9 +269,13 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
     openQueryBarMenu: false,
     showSavedQueryPopover: false,
     currentProps: this.props,
-    query: this.props.query ? { ...this.props.query } : undefined,
-    dateRangeFrom: get(this.props, 'dateRangeFrom', 'now-15m'),
-    dateRangeTo: get(this.props, 'dateRangeTo', 'now'),
+    query: this.props.draft?.query
+      ? { ...this.props.draft.query }
+      : this.props.query
+      ? { ...this.props.query }
+      : undefined,
+    dateRangeFrom: this.props.draft?.dateRangeFrom || get(this.props, 'dateRangeFrom', 'now-15m'),
+    dateRangeTo: this.props.draft?.dateRangeTo || get(this.props, 'dateRangeTo', 'now'),
   } as SearchBarState<QT>;
 
   public isDirty = () => {
@@ -493,6 +503,9 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
   }
 
   public render() {
+    // console.log('this.state.query', this.state.query);
+    // console.log('this.props.query', this.props.query);
+    // console.log('this.state.currentProps.query', this.state.currentProps?.query);
     const { theme, query } = this.props;
     const isESQLQuery = isOfAggregateQueryType(query);
     const isScreenshotMode = this.props.isScreenshotMode === true;

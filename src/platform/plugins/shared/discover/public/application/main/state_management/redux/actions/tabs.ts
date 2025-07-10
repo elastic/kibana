@@ -8,7 +8,7 @@
  */
 
 import type { TabbedContentState } from '@kbn/unified-tabs/src/components/tabbed_content/tabbed_content';
-import { cloneDeep, differenceBy, omit, pick, isEqual } from 'lodash';
+import { cloneDeep, differenceBy, omit, pick } from 'lodash';
 import type { QueryState } from '@kbn/data-plugin/common';
 import type { TabState } from '../types';
 import { selectAllTabs, selectRecentlyClosedTabs, selectTab } from '../selectors';
@@ -138,13 +138,6 @@ export const updateTabs: InternalStateThunkActionCreator<[TabbedContentState], P
         } = nextTab.lastPersistedGlobalState;
         const appState = nextTabStateContainer.appState.getState();
         const { filters: appFilters, query } = appState;
-        const lastEnteredQuery = nextTab.uiState.search?.query;
-        const nextQuery =
-          lastEnteredQuery && !isEqual(lastEnteredQuery, query) ? lastEnteredQuery : query;
-
-        if (!isEqual(nextQuery, query)) {
-          nextTabStateContainer.appState.update({ query: nextQuery });
-        }
 
         await urlStateStorage.set<QueryState>(GLOBAL_STATE_URL_KEY, {
           time: timeRange,
@@ -160,7 +153,7 @@ export const updateTabs: InternalStateThunkActionCreator<[TabbedContentState], P
         services.filterManager.setGlobalFilters(cloneDeep(globalFilters ?? []));
         services.filterManager.setAppFilters(cloneDeep(appFilters ?? []));
         services.data.query.queryString.setQuery(
-          nextQuery ?? services.data.query.queryString.getDefaultQuery()
+          query ?? services.data.query.queryString.getDefaultQuery()
         );
 
         nextTabStateContainer.actions.initializeAndSync();

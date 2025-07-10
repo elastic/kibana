@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { DataViewType } from '@kbn/data-views-plugin/public';
 import type {
   DataViewPickerProps,
   UnifiedSearchRestorableState,
 } from '@kbn/unified-search-plugin/public';
+import { isEqual } from 'lodash';
 import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
 import type { EuiHeaderLinksProps } from '@elastic/eui';
 import { useSavedSearchInitial } from '../../state_management/discover_state_provider';
@@ -244,7 +245,26 @@ export const DiscoverTopNav = ({
     [dispatch, setSearchUiState]
   );
 
+  const [draft] = useState(() => {
+    const draftState: Partial<UnifiedSearchRestorableState> = {};
+
+    if (searchUiState?.query && !isEqual(searchUiState.query, query)) {
+      draftState.query = searchUiState.query;
+    }
+
+    if (searchUiState?.dateRangeFrom) {
+      draftState.dateRangeFrom = searchUiState.dateRangeFrom;
+    }
+
+    if (searchUiState?.dateRangeTo) {
+      draftState.dateRangeTo = searchUiState.dateRangeTo;
+    }
+
+    return Object.keys(draftState).length > 0 ? draftState : undefined;
+  });
+
   // console.log('searchUiState', searchUiState);
+  // console.log('draft', draft);
 
   const shouldHideDefaultDataviewPicker =
     !!searchBarCustomization?.CustomDataViewPicker || !!searchBarCustomization?.hideDataViewPicker;
@@ -259,6 +279,7 @@ export const DiscoverTopNav = ({
         onCancel={onCancelClick}
         isLoading={isLoading}
         onSavedQueryIdChange={updateSavedQueryId}
+        draft={draft}
         query={query}
         savedQueryId={savedQuery}
         screenTitle={savedSearch.title}

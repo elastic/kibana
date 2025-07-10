@@ -12,6 +12,8 @@ import type { Query, AggregateQuery } from '@kbn/es-query';
 
 export interface UnifiedSearchRestorableState {
   query: AggregateQuery | Query | undefined;
+  dateRangeFrom: string | undefined;
+  dateRangeTo: string | undefined;
 }
 
 export const { withRestorableState, useRestorableRef } =

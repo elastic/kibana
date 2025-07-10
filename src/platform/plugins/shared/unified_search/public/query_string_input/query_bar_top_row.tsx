@@ -231,8 +231,13 @@ export const QueryBarTopRow = React.memo(
   function QueryBarTopRow<QT extends Query | AggregateQuery = Query>(
     props: QueryBarTopRowProps<QT>
   ) {
+    const isDirty = props.isDirty;
     const restorableQueryRef = useRestorableRef('query', props.query);
-    restorableQueryRef.current = props.query;
+    restorableQueryRef.current = isDirty ? props.query : undefined;
+    const restorableDateRangeFromRef = useRestorableRef('dateRangeFrom', props.dateRangeFrom);
+    restorableDateRangeFromRef.current = isDirty ? props.dateRangeFrom : undefined;
+    const restorableDateRangeToRef = useRestorableRef('dateRangeTo', props.dateRangeTo);
+    restorableDateRangeToRef.current = isDirty ? props.dateRangeTo : undefined;
 
     const isMobile = useIsWithinBreakpoints(['xs', 's']);
     const [isXXLarge, setIsXXLarge] = useState<boolean>(false);
