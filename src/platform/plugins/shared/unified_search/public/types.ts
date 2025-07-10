@@ -22,8 +22,8 @@ import { AutocompleteSetup, AutocompleteStart } from './autocomplete';
 import type { IndexPatternSelectProps, QueryStringInputProps, StatefulSearchBarProps } from '.';
 import type { FiltersBuilderProps } from './filters_builder/filters_builder';
 import { StatefulSearchBarDeps } from './search_bar/create_search_bar';
-import { withRestorableState } from '../restorable_state';
-export type { UnifiedSearchRestorableState } from '../restorable_state';
+import { withRestorableState } from './restorable_state';
+export type { UnifiedSearchRestorableState } from './restorable_state';
 
 export interface UnifiedSearchSetupDependencies {
   uiActions: UiActionsSetup;

@@ -59,7 +59,7 @@ import type {
   SuggestionsAbstraction,
   SuggestionsListSize,
 } from '../typeahead/suggestions_component';
-import { useRestorableRef } from '../../restorable_state';
+import { useRestorableRef } from '../restorable_state';
 
 export const strings = {
   getNeedsUpdatingLabel: () =>
