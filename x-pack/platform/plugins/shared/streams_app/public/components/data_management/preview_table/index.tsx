@@ -150,7 +150,7 @@ export function PreviewTable({
 
   const leadingControlColumns: EuiDataGridControlColumn[] = useMemo(
     () =>
-      selectableRow || rowSourceAvatars
+      (selectableRow || rowSourceAvatars) && visibleColumns.length > 0
         ? [
             {
               id: 'selection',
@@ -192,7 +192,7 @@ export function PreviewTable({
             },
           ]
         : [],
-    [onRowSelected, rowSourceAvatars, selectableRow, selectedRowIndex]
+    [onRowSelected, rowSourceAvatars, selectableRow, selectedRowIndex, visibleColumns.length]
   );
 
   return (
