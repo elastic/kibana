@@ -314,7 +314,11 @@ export class DynamicStyleProperty<T extends object>
       return false;
     }
 
-    return this._field.getSource().isMvt() ? false : this.supportsFeatureState();
+    // todo - this seems wrong! (join soruces shouldnt care if feature state or not)
+    const source = this._field.getSource();
+    console.log(source, this._field);
+
+    return source.isMvt() ? false : this.supportsFeatureState();
   }
 
   getMbLookupFunction(): MB_LOOKUP_FUNCTION {
