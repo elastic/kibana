@@ -41,5 +41,6 @@
     "@kbn/ml-plugin",
     "@kbn/deeplinks-management",
     "@kbn/core",
+    "@kbn/test-jest-helpers",
   ]
 }

@@ -39,7 +39,12 @@ export const LogEvents = React.memo<LogEventsProps>(
     onChangeGrouping,
   }) => {
     return (
-      <EuiFlexGroup direction="column" gutterSize="m" style={{ height }}>
+      <EuiFlexGroup
+        direction="column"
+        gutterSize="m"
+        style={{ height }}
+        data-test-subj="logsOverviewLogEvents"
+      >
         <EuiFlexItem grow={false}>
           <LogEventsControlBar
             dependencies={dependencies}
