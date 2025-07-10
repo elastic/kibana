@@ -6,10 +6,10 @@
  */
 import React from 'react';
 import type { MetricDatum } from '@elastic/charts';
-import { Chart, Metric } from '@elastic/charts';
+import { Chart, Metric, Settings } from '@elastic/charts';
+import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { EuiSkeletonText, EuiPanel } from '@elastic/eui';
 import { isEmpty } from 'lodash';
-import { KibanaErrorBoundary } from '@kbn/shared-ux-error-boundary';
 
 export function MetricItem({
   data,
@@ -22,6 +22,7 @@ export function MetricItem({
   isLoading: boolean;
   height?: string;
 }) {
+  const chartBaseTheme = useElasticChartsTheme();
   const hasData = !isEmpty(data);
   return (
     <div
@@ -38,11 +39,10 @@ export function MetricItem({
           <EuiSkeletonText lines={3} />
         </EuiPanel>
       ) : (
-        <KibanaErrorBoundary>
-          <Chart>
-            <Metric id={`metric_${id}`} data={[data]} />
-          </Chart>
-        </KibanaErrorBoundary>
+        <Chart>
+          <Settings baseTheme={chartBaseTheme} />
+          <Metric id={`metric_${id}`} data={[data]} />
+        </Chart>
       )}
     </div>
   );
