@@ -56,7 +56,7 @@ export const IndicatorsBarChart: FC<IndicatorsBarChartProps> = ({
   return (
     <>
       <EuiScreenReaderLive aria-live="assertive" aria-atomic="true" focusRegionOnTextChange>
-        <p>{screenReaderMessage}</p>
+        {screenReaderMessage}
       </EuiScreenReaderLive>
       <Chart size={{ width: DEFAULT_CHART_WIDTH, height }}>
         <Settings

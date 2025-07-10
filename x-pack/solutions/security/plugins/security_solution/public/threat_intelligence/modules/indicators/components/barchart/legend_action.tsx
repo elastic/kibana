@@ -81,30 +81,28 @@ export const IndicatorBarchartLegendAction: FC<IndicatorBarchartLegendActionProp
   }
 
   return (
-    <>
-      <EuiPopover
-        data-test-subj={POPOVER_BUTTON_TEST_ID}
-        button={
-          <EuiToolTip content={BUTTON_LABEL}>
-            <EuiButtonIcon
-              aria-label={BUTTON_LABEL}
-              iconType="boxesHorizontal"
-              iconSize="s"
-              size="xs"
-              onClick={() => setPopover((prevIsPopoverOpen) => !prevIsPopoverOpen)}
-              css={{ height: '100%' }}
-            />
-          </EuiToolTip>
-        }
-        isOpen={isPopoverOpen}
-        closePopover={() => setPopover(false)}
-        panelPaddingSize="none"
-        anchorPosition="downLeft"
-      >
-        <ReduxProvider store={store}>
-          <EuiContextMenuPanel size="s" items={popoverItems} />
-        </ReduxProvider>
-      </EuiPopover>
-    </>
+    <EuiPopover
+      data-test-subj={POPOVER_BUTTON_TEST_ID}
+      button={
+        <EuiToolTip content={BUTTON_LABEL}>
+          <EuiButtonIcon
+            aria-label={BUTTON_LABEL}
+            iconType="boxesHorizontal"
+            iconSize="s"
+            size="xs"
+            onClick={() => setPopover((prevIsPopoverOpen) => !prevIsPopoverOpen)}
+            css={{ height: '100%' }}
+          />
+        </EuiToolTip>
+      }
+      isOpen={isPopoverOpen}
+      closePopover={() => setPopover(false)}
+      panelPaddingSize="none"
+      anchorPosition="downLeft"
+    >
+      <ReduxProvider store={store}>
+        <EuiContextMenuPanel size="s" items={popoverItems} />
+      </ReduxProvider>
+    </EuiPopover>
   );
 };
