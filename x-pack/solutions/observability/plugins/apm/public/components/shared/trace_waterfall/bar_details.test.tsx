@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { BarDetails } from './bar_details';
 import type { TraceItem } from '../../../../common/waterfall/unified_trace_item';
 
@@ -60,65 +61,93 @@ describe('BarDetails', () => {
     expect(window.getComputedStyle(lastFlexItem).marginRight).toBe('8px');
   });
 
-  it('renders errors icon in case of errors', () => {
-    const mockItemWithError = {
-      name: 'Test Span',
-      duration: 1234,
-      errorCount: 1,
-    } as unknown as TraceItem;
-    const { getByTestId } = render(<BarDetails item={mockItemWithError} left={10} />);
-    expect(getByTestId('apmBarDetailsErrorIcon')).toBeInTheDocument();
-  });
-
-  it('renders errors button icon in case of errors and click event', () => {
-    const mockItemWithError = {
-      name: 'Test Span',
-      duration: 1234,
-      errorCount: 1,
-    } as unknown as TraceItem;
-    const { getByTestId } = render(
-      <BarDetails item={mockItemWithError} left={10} onErrorClick={() => {}} />
-    );
-    expect(getByTestId('apmBarDetailsErrorButton')).toBeInTheDocument();
-  });
-
-  describe('in case of errors and related errors href', () => {
-    beforeAll(() => {
-      (useTraceWaterfallContext as jest.Mock).mockReturnValue({
-        getRelatedErrorsHref: () => {},
-      });
-    });
-
-    describe('and only has 1 error', () => {
+  describe('in case of errors', () => {
+    it('renders errors icon in case of errors', () => {
       const mockItemWithError = {
         name: 'Test Span',
         duration: 1234,
         errorCount: 1,
       } as unknown as TraceItem;
+      const { getByTestId } = render(<BarDetails item={mockItemWithError} left={10} />);
+      expect(getByTestId('apmBarDetailsErrorIcon')).toBeInTheDocument();
+    });
 
-      it('renders errors badge in with the correct string', () => {
-        const { getByTestId, getByText } = render(
-          <BarDetails item={mockItemWithError} left={10} />
+    describe('and error click event', () => {
+      it('renders errors button icont', () => {
+        const mockItemWithError = {
+          name: 'Test Span',
+          duration: 1234,
+          errorCount: 1,
+        } as unknown as TraceItem;
+        const { getByTestId } = render(
+          <BarDetails item={mockItemWithError} left={10} onErrorClick={() => {}} />
         );
-        expect(getByTestId('apmBarDetailsErrorBadge')).toBeInTheDocument();
-        expect(getByText('View related error')).toBeInTheDocument();
+        expect(getByTestId('apmBarDetailsErrorButton')).toBeInTheDocument();
       });
     });
 
-    describe('and has more than 1 error', () => {
-      const errorCount = 2;
-      const mockItemWithError = {
-        name: 'Test Span',
-        duration: 1234,
-        errorCount,
-      } as unknown as TraceItem;
+    describe('and related errors href', () => {
+      beforeAll(() => {
+        (useTraceWaterfallContext as jest.Mock).mockReturnValue({
+          getRelatedErrorsHref: () => {},
+        });
+      });
 
-      it('renders errors badge in with the correct string', () => {
-        const { getByTestId, getByText } = render(
-          <BarDetails item={mockItemWithError} left={10} />
-        );
-        expect(getByTestId('apmBarDetailsErrorBadge')).toBeInTheDocument();
-        expect(getByText(`View ${errorCount} related errors`)).toBeInTheDocument();
+      describe('and only has 1 error', () => {
+        const mockItemWithError = {
+          name: 'Test Span',
+          duration: 1234,
+          errorCount: 1,
+        } as unknown as TraceItem;
+
+        it('renders errors badge in with the correct string', () => {
+          const { getByTestId, getByText } = render(
+            <BarDetails item={mockItemWithError} left={10} />
+          );
+          expect(getByTestId('apmBarDetailsErrorBadge')).toBeInTheDocument();
+          expect(getByText('View related error')).toBeInTheDocument();
+        });
+      });
+
+      describe('and has more than 1 error', () => {
+        const errorCount = 2;
+        const mockItemWithError = {
+          name: 'Test Span',
+          duration: 1234,
+          errorCount,
+        } as unknown as TraceItem;
+
+        it('renders errors badge in with the correct string', () => {
+          const { getByTestId, getByText } = render(
+            <BarDetails item={mockItemWithError} left={10} />
+          );
+          expect(getByTestId('apmBarDetailsErrorBadge')).toBeInTheDocument();
+          expect(getByText(`View ${errorCount} related errors`)).toBeInTheDocument();
+        });
+      });
+    });
+  });
+
+  describe('in case of failure', () => {
+    const mockItemWithFailure = {
+      name: 'Test Span',
+      duration: 1234,
+      isFailure: true,
+    } as unknown as TraceItem;
+
+    it('renders failure badge', () => {
+      const { getByTestId } = render(<BarDetails item={mockItemWithFailure} left={10} />);
+      expect(getByTestId('apmBarDetailsFailureBadge')).toBeInTheDocument();
+    });
+
+    it('shows failure badge tooltip on hover', async () => {
+      const user = userEvent.setup();
+      const { getByTestId } = render(<BarDetails item={mockItemWithFailure} left={10} />);
+
+      await user.hover(getByTestId('apmBarDetailsFailureBadge'));
+
+      await waitFor(() => {
+        expect(getByTestId('apmBarDetailsFailureTooltip')).toBeInTheDocument();
       });
     });
   });

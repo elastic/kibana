@@ -12,6 +12,7 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiText,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -84,11 +85,18 @@ export function BarDetails({
         </EuiFlexItem>
         {item.isFailure && (
           <EuiFlexItem grow={false}>
-            <EuiBadge data-test-subj="apmBarDetailsFailureBadge" color="danger">
-              {i18n.translate('xpack.apm.barDetails.failure', {
-                defaultMessage: 'failure',
+            <EuiToolTip
+              data-test-subj="apmBarDetailsFailureTooltip"
+              content={i18n.translate('xpack.apm.barDetails.failureTooltip', {
+                defaultMessage: 'event.outcome = failure',
               })}
-            </EuiBadge>
+            >
+              <EuiBadge data-test-subj="apmBarDetailsFailureBadge" color="danger">
+                {i18n.translate('xpack.apm.barDetails.failureBadge', {
+                  defaultMessage: 'failure',
+                })}
+              </EuiBadge>
+            </EuiToolTip>
           </EuiFlexItem>
         )}
         {item.errorCount > 0 ? (
