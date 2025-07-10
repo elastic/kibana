@@ -8,7 +8,9 @@
  */
 
 import { parse } from '..';
+import { EsqlQuery } from '../../query';
 import { ESQLAstQueryExpression } from '../../types';
+import { Walker } from '../../walker';
 
 describe('FORK', () => {
   describe('correctly formatted', () => {
@@ -28,7 +30,23 @@ describe('FORK', () => {
       ]);
     });
 
-    it('can parse composite-command FORK query', () => {
+    it('correctly computes `location` fields', () => {
+      const text = `
+        FROM kibana_ecommerce_data
+          | FORK (WHERE bytes > 1 | LIMIT 10) (SORT bytes ASC) (LIMIT 100)`;
+      const { ast } = EsqlQuery.fromSrc(text);
+      const fork = Walker.match(ast, { type: 'command', name: 'fork' })!;
+      const firstQuery = Walker.match(fork, { type: 'query' })!;
+
+      expect(text.slice(fork.location.min, fork.location.max + 1)).toBe(
+        'FORK (WHERE bytes > 1 | LIMIT 10) (SORT bytes ASC) (LIMIT 100)'
+      );
+      expect(text.slice(firstQuery.location.min, firstQuery.location.max + 1)).toBe(
+        '(WHERE bytes > 1 | LIMIT 10)'
+      );
+    });
+
+    it('can parse composite-command FORK query (multiple commmands piped)', () => {
       const text = `FROM kibana_ecommerce_data
 | FORK
     (WHERE bytes > 1 | SORT bytes ASC | LIMIT 1)
