@@ -256,7 +256,7 @@ export interface AllowedFieldsForTermsQuery {
   threat: Record<string, boolean>;
 }
 
-export interface SignalValuesMap {
+export interface FieldAndValueToDocIdsMap {
   [field: string]: {
     [fieldValue: string]: string[];
   };
@@ -270,7 +270,7 @@ export interface GetAllowedFieldsForTermQuery {
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
 }
 
-export interface GetSignalValuesMap {
+export interface GetFieldAndValueToDocIdsMap {
   eventList: EventItem[];
   threatMatchedFields: ThreatMatchedFields;
 }

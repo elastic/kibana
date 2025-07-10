@@ -15,14 +15,14 @@ import type {
   SearchAfterAndBulkCreateParams,
   SearchAfterAndBulkCreateReturnType,
 } from '../../types';
-import { getSignalsQueryMapFromThreatIndex } from './get_signals_map_from_threat_index';
-import type { SignalsQueryMap } from './get_signals_map_from_threat_index';
+import { getSignalIdToMatchedQueriesMap } from './get_signals_map_from_threat_index';
+import type { SignalIdToMatchedQueriesMap } from './get_signals_map_from_threat_index';
 import { searchAfterAndBulkCreateSuppressedAlerts } from '../../utils/search_after_bulk_create_suppressed_alerts';
 
 import { threatEnrichmentFactory } from './threat_enrichment_factory';
 import {
   FAILED_CREATE_QUERY_MAX_CLAUSE,
-  getSignalValueMap,
+  getFieldAndValueToDocIdsMap,
   MANY_NESTED_CLAUSES_ERR,
 } from './utils';
 import { alertSuppressionTypeGuard } from '../../utils/get_is_alert_suppression_active';
@@ -81,18 +81,18 @@ export const createEventSignal = async ({
       indexFields: threatIndexFields,
     };
 
-    let signalsQueryMap: SignalsQueryMap | undefined;
+    let signalsQueryMap: SignalIdToMatchedQueriesMap | undefined;
     let threatList: ThreatListItem[] | undefined;
     try {
-      const result = await getSignalsQueryMapFromThreatIndex({
+      const result = await getSignalIdToMatchedQueriesMap({
         threatSearchParams,
         eventsCount: currentEventList.length,
-        signalValueMap: getSignalValueMap({
+        fieldAndValueToDocIdsMap: getFieldAndValueToDocIdsMap({
           eventList: currentEventList,
           threatMatchedFields,
         }),
       });
-      signalsQueryMap = result.signalsQueryMap;
+      signalsQueryMap = result.signalIdToMatchedQueriesMap;
       threatList = result.threatList;
     } catch (exc) {
       // we receive an error if the event list count < threat list count

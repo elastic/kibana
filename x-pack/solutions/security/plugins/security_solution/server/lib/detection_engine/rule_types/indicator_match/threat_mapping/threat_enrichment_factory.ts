@@ -9,11 +9,11 @@ import type { ThreatIndicatorPath } from '../../../../../../common/api/detection
 import type { ThreatListItem } from './types';
 import type { SignalSourceHit } from '../../types';
 import { enrichSignalThreatMatchesFromSignalsMap } from './enrich_signal_threat_matches';
-import { type SignalsQueryMap } from './get_signals_map_from_threat_index';
+import { type SignalIdToMatchedQueriesMap } from './get_signals_map_from_threat_index';
 
 interface ThreatEnrichmentFactoryOptions {
   threatIndicatorPath: ThreatIndicatorPath;
-  signalsQueryMap: SignalsQueryMap;
+  signalsQueryMap: SignalIdToMatchedQueriesMap;
   matchedThreats: ThreatListItem[];
 }
 

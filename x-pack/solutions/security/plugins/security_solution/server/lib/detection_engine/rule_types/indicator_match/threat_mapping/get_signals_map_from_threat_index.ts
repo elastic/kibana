@@ -12,39 +12,39 @@ import type {
   ThreatMatchNamedQuery,
   ThreatTermNamedQuery,
   ThreatListItem,
-  SignalValuesMap,
+  FieldAndValueToDocIdsMap,
 } from './types';
 import { getThreatList } from './get_threat_list';
 import { decodeThreatMatchNamedQuery } from './utils';
 
 import { MAX_NUMBER_OF_SIGNAL_MATCHES } from './enrich_signal_threat_matches';
 
-export type SignalsQueryMap = Map<string, ThreatMatchNamedQuery[]>;
+export type SignalIdToMatchedQueriesMap = Map<string, ThreatMatchNamedQuery[]>;
 
-interface GetSignalsQueryMapFromThreatIndexOptionsTerms {
+interface GetSignalIdToMatchedQueriesMapOptions {
   threatSearchParams: Omit<GetThreatListOptions, 'searchAfter'>;
   eventsCount: number;
-  signalValueMap: SignalValuesMap;
+  fieldAndValueToDocIdsMap: FieldAndValueToDocIdsMap;
 }
 
 /**
- * fetches threats and creates signals map from results, that matches signal is with list of threat queries
+ * fetches threats and creates a map that matches each signal with a list of threat queries
+ * @param options.fieldAndValueToDocIdsMap - map of signal values from terms query results
  */
-/**
- * fetches threats and creates signals map from results, that matches signal is with list of threat queries
- * @param options.signalValueMap - map of signal values from terms query results
- */
-export async function getSignalsQueryMapFromThreatIndex(
-  options: GetSignalsQueryMapFromThreatIndexOptionsTerms
-): Promise<{ signalsQueryMap: SignalsQueryMap; threatList: ThreatListItem[] }> {
+export async function getSignalIdToMatchedQueriesMap(
+  options: GetSignalIdToMatchedQueriesMapOptions
+): Promise<{
+  signalIdToMatchedQueriesMap: SignalIdToMatchedQueriesMap;
+  threatList: ThreatListItem[];
+}> {
   const { threatSearchParams, eventsCount } = options;
 
   let threatList: Awaited<ReturnType<typeof getThreatList>> | undefined;
-  const signalsQueryMap = new Map<string, ThreatMatchNamedQuery[]>();
+  const signalIdToMatchedQueriesMap = new Map<string, ThreatMatchNamedQuery[]>();
   // number of threat matches per signal is limited by MAX_NUMBER_OF_SIGNAL_MATCHES. Once it hits this number, threats stop to be processed for a signal
   const maxThreatsReachedMap = new Map<string, boolean>();
 
-  const addSignalValueToMap = ({
+  const addMatchedQueryToMap = ({
     signalId,
     threatHit,
     decodedQuery,
@@ -53,7 +53,7 @@ export async function getSignalsQueryMapFromThreatIndex(
     threatHit: ThreatListItem;
     decodedQuery: ThreatMatchNamedQuery | ThreatTermNamedQuery;
   }) => {
-    const signalMatch = signalsQueryMap.get(signalId);
+    const signalMatch = signalIdToMatchedQueriesMap.get(signalId);
 
     const threatQuery = {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -65,7 +65,7 @@ export async function getSignalsQueryMapFromThreatIndex(
     };
 
     if (!signalMatch) {
-      signalsQueryMap.set(signalId, [threatQuery]);
+      signalIdToMatchedQueriesMap.set(signalId, [threatQuery]);
       return;
     }
 
@@ -94,11 +94,11 @@ export async function getSignalsQueryMapFromThreatIndex(
           const values = Array.isArray(threatValue) ? threatValue : [threatValue];
 
           values.forEach((value) => {
-            if (value && options.signalValueMap) {
-              const ids = options.signalValueMap[decodedQuery.field][value?.toString()];
+            if (value && options.fieldAndValueToDocIdsMap) {
+              const ids = options.fieldAndValueToDocIdsMap[decodedQuery.field][value?.toString()];
 
               ids?.forEach((id: string) => {
-                addSignalValueToMap({
+                addMatchedQueryToMap({
                   signalId: id,
                   threatHit,
                   decodedQuery,
@@ -111,7 +111,7 @@ export async function getSignalsQueryMapFromThreatIndex(
             return;
           }
 
-          addSignalValueToMap({
+          addMatchedQueryToMap({
             signalId,
             threatHit,
             decodedQuery,
@@ -126,5 +126,5 @@ export async function getSignalsQueryMapFromThreatIndex(
     });
   }
 
-  return { signalsQueryMap, threatList: threatListPage1 };
+  return { signalIdToMatchedQueriesMap, threatList: threatListPage1 };
 }
