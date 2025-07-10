@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { getAgentIcon } from '@kbn/custom-icons';
-import { maybe } from '../../../../common/utils/maybe';
 import awsIcon from './icons/aws.svg';
 import cassandraIcon from './icons/cassandra.svg';
 import databaseIcon from './icons/database.svg';
@@ -91,7 +92,7 @@ export function getSpanIcon(type?: string, subtype?: string) {
     return defaultIcon;
   }
 
-  const types = maybe(spanTypeIcons[type]);
+  const types = spanTypeIcons[type];
 
   if (subtype && types && subtype in types) {
     return types[subtype];

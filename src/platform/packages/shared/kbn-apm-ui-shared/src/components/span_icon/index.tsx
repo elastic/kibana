@@ -8,21 +8,16 @@
  */
 
 import React from 'react';
-import { EuiText } from '@elastic/eui';
-import moment from 'moment';
+import { EuiIcon, IconSize, type EuiIconProps } from '@elastic/eui';
+import { getSpanIcon } from './get_span_icon';
 
-interface TimestampProps {
-  timestamp: number;
+interface Props extends Omit<EuiIconProps, 'type'> {
+  type?: string;
+  subtype?: string;
+  size?: IconSize;
 }
 
-export function Timestamp({ timestamp }: TimestampProps) {
-  const momentTime = moment(timestamp);
-  const relativeTime = momentTime.fromNow();
-  const absoluteTime = momentTime.format('MMM D, YYYY @ HH:mm:ss');
-
-  return (
-    <EuiText size="xs" data-test-subj="unifiedDocViewerObservabilityTracesTimestamp">
-      {absoluteTime} ({relativeTime})
-    </EuiText>
-  );
+export function SpanIcon({ type, subtype, size = 'l', ...props }: Props) {
+  const icon = getSpanIcon(type, subtype);
+  return <EuiIcon type={icon} size={size} title={type || subtype} {...props} />;
 }

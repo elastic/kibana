@@ -7,4 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { createSearchSessionsDeprecationsConfig } from './search_sessions';
+export function mockNow(date: string | number | Date) {
+  const fakeNow = new Date(date).getTime();
+  return jest.spyOn(Date, 'now').mockReturnValue(fakeNow);
+}
