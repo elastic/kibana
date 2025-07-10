@@ -15,3 +15,7 @@ export interface BookByReferenceState {
 }
 
 export type BookEmbeddableState = SerializedTitles & (BookState | BookByReferenceState);
+
+// Shape of stored state <=9.1
+export type BookEmbeddableState910 = SerializedTitles &
+  ({ attributes: BookState } | { savedBookId: string });

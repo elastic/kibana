@@ -8,13 +8,36 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
-import type { BookAttributes, BookState } from '../../../server';
-import { BookEmbeddableState } from '../types';
+import type { BookState } from '../../../server';
+import { BookEmbeddableState, BookEmbeddableState910 } from '../types';
 import { BOOK_SAVED_OBJECT_TYPE } from '../constants';
 
-export function transformOut(storedState: unknown, references: Reference[]): BookEmbeddableState {
+export function transformOut(
+  storedState: BookEmbeddableState | BookEmbeddableState910,
+  references?: Reference[]
+): BookEmbeddableState {
+  // storedState may contain legacy state stored from dashboards or URL
+
+  // 9.1.0 by-value state stored book state under attributes
+  if ('attributes' in storedState) {
+    const { attributes, ...rest } = storedState as { attributes: BookState };
+    return {
+      ...attributes,
+      ...rest,
+    };
+  }
+
+  // 9.1.0 by-reference state stored by-reference id as savedBookId
+  if ('savedBookId' in storedState) {
+    const { savedBookId, ...rest } = storedState as { savedBookId: string };
+    return {
+      ...rest,
+      savedObjectId: savedBookId,
+    };
+  }
+
   // inject saved object reference when by-reference
-  const savedObjectRef = references.find(
+  const savedObjectRef = (references ?? []).find(
     ({ name, type }) => name === 'savedObjectRef' && type === BOOK_SAVED_OBJECT_TYPE
   );
   if (savedObjectRef) {
@@ -24,18 +47,6 @@ export function transformOut(storedState: unknown, references: Reference[]): Boo
     };
   }
 
-  // storedState may contain legacy state stored from dashboards or URL
-  // In this example, legacy state was stored as Book saved object attributes
-  if (storedState && typeof storedState === 'object' && 'bookJSON' in storedState) {
-    return attributesToBook(storedState as BookAttributes);
-  }
-
+  // storedState is current by-value state
   return storedState as BookEmbeddableState;
-}
-
-export function attributesToBook(attributes: BookAttributes): BookState {
-  return {
-    bookTitle: attributes.title,
-    ...JSON.parse(attributes.bookJSON),
-  };
 }

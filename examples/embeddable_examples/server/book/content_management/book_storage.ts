@@ -17,9 +17,8 @@ import { omit } from 'lodash';
 import { BookAttributes } from '../saved_object';
 import { BOOK_CONTENT_ID, BOOK_SAVED_OBJECT_TYPE } from '../../../common';
 import { cmServicesDefinition } from './schema/cm_services';
-import { attributesToBook } from '../../../common/book/transforms/transform_out';
+import { attributesToBook, bookToAttributes } from '../saved_object/utils';
 import { BookSearchOptions, BookState } from './schema/latest';
-import { bookToAttributes } from '../saved_object/book_to_attributes';
 
 const getFindOptions = (
   query: SearchQuery,

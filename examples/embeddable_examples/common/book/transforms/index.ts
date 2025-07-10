@@ -14,5 +14,3 @@ export const bookTransforms = {
   transformOut,
   transformIn,
 };
-
-export { attributesToBook } from './transform_out';

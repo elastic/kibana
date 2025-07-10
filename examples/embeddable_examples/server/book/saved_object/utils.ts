@@ -10,6 +10,13 @@
 import { BookState } from '../content_management';
 import { BookAttributes } from './types';
 
+export function attributesToBook(attributes: BookAttributes): BookState {
+  return {
+    bookTitle: attributes.title,
+    ...JSON.parse(attributes.bookJSON),
+  };
+}
+
 export function bookToAttributes(book: BookState): BookAttributes {
   const { bookTitle, ...rest } = book;
   return {
