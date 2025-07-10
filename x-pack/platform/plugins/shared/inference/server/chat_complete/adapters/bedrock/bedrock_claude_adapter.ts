@@ -76,7 +76,7 @@ export const bedrockClaudeAdapter: InferenceConnectorAdapter = {
         subActionParams,
       });
       const result = res.data as { stream: Readable };
-      return { ...res, data: result.stream };
+      return { ...res, data: result?.stream };
     }).pipe(
       handleConnectorResponse({ processStream: serdeEventstreamIntoObservable }),
       tap((eventData) => {

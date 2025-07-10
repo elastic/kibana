@@ -656,7 +656,10 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
       signal,
       timeout,
       connectorUsageCollector,
-    })) as unknown as IncomingMessage;
+    })) as unknown as {
+      stream: IncomingMessage;
+      tokenStream: IncomingMessage;
+    };
 
     return res;
   }
