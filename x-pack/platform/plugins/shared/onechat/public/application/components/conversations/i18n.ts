@@ -84,6 +84,25 @@ export const conversationsCommonLabels = {
             defaultMessage: 'Assistant response',
           }
         ),
+        steps: {
+          toolCall: {
+            header: i18n.translate('xpack.onechat.content.messages.round.steps.toolCall.header', {
+              defaultMessage: 'Tool:',
+            }),
+            args: i18n.translate('xpack.onechat.content.messages.round.steps.toolCall.args', {
+              defaultMessage: 'Tool call args',
+            }),
+            result: i18n.translate('xpack.onechat.content.messages.round.steps.toolCall.result', {
+              defaultMessage: 'Tool call result',
+            }),
+            noResult: i18n.translate(
+              'xpack.onechat.content.messages.round.steps.toolCall.noResult',
+              {
+                defaultMessage: 'No result available',
+              }
+            ),
+          },
+        },
       },
     },
     input: {
