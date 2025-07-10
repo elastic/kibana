@@ -181,13 +181,15 @@ export class AutoInstallContentPackagesTask {
       );
 
       const packagesToInstall = await this.getPackagesToInstall(esClient, installedPackagesMap);
-      this.logger.debug(
-        `[AutoInstallContentPackagesTask] Content packages to install: ${packagesToInstall
-          .map((pkg) => `${pkg.name}@${pkg.version}`)
-          .join(', ')}`
-      );
+      if (packagesToInstall.length > 0) {
+        this.logger.debug(
+          `[AutoInstallContentPackagesTask] Content packages to install: ${packagesToInstall
+            .map((pkg) => `${pkg.name}@${pkg.version}`)
+            .join(', ')}`
+        );
 
-      await this.installPackages(packageClient, packagesToInstall);
+        await this.installPackages(packageClient, packagesToInstall);
+      }
 
       this.endRun('success');
     } catch (err) {
@@ -229,6 +231,22 @@ export class AutoInstallContentPackagesTask {
     esClient: ElasticsearchClient,
     installedPackagesMap: { [name: string]: string }
   ) {
+    const discoveryMapWithNotInstalledPackages: DiscoveryMap = Object.entries(
+      this.discoveryMap!
+    ).reduce((acc, [dataset, mapValue]) => {
+      const packages = mapValue.packages.filter(
+        (pkg) => !installedPackagesMap[pkg.name] || installedPackagesMap[pkg.name] !== pkg.version
+      );
+      if (packages.length > 0) {
+        acc[dataset] = { packages };
+      }
+      return acc;
+    }, {} as DiscoveryMap);
+
+    if (Object.keys(discoveryMapWithNotInstalledPackages).length === 0) {
+      return [];
+    }
+
     const datasetsOfInstalledContentPackages: string[] = Object.entries(this.discoveryMap!).reduce(
       (acc: string[], [dataset, mapValue]) => {
         if (
@@ -248,18 +266,6 @@ export class AutoInstallContentPackagesTask {
       esClient,
       datasetsOfInstalledContentPackages
     );
-
-    const discoveryMapWithNotInstalledPackages: DiscoveryMap = Object.entries(
-      this.discoveryMap!
-    ).reduce((acc, [dataset, mapValue]) => {
-      const packages = mapValue.packages.filter(
-        (pkg) => !installedPackagesMap[pkg.name] || installedPackagesMap[pkg.name] !== pkg.version
-      );
-      if (packages.length > 0) {
-        acc[dataset] = { packages };
-      }
-      return acc;
-    }, {} as DiscoveryMap);
 
     const packagesToInstall: { [name: string]: string } = {};
 
