@@ -7,20 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type {
+  ControlsChainingSystem,
+  ControlsIgnoreParentSettings,
+  ControlsLabelPosition,
+} from '@kbn/controls-schemas';
 import { StateComparators, initializeStateManager } from '@kbn/presentation-publishing';
-import { ControlGroupEditorState } from './types';
 import {
   DEFAULT_AUTO_APPLY_SELECTIONS,
-  DEFAULT_CONTROL_CHAINING,
-  DEFAULT_CONTROL_LABEL_POSITION,
+  DEFAULT_CONTROLS_CHAINING,
+  DEFAULT_CONTROLS_LABEL_POSITION,
   DEFAULT_IGNORE_PARENT_SETTINGS,
-} from '../../common';
+} from '@kbn/controls-constants';
+import { ControlGroupEditorState } from './types';
 
 export const defaultEditorState = {
   autoApplySelections: DEFAULT_AUTO_APPLY_SELECTIONS,
-  chainingSystem: DEFAULT_CONTROL_CHAINING,
-  ignoreParentSettings: DEFAULT_IGNORE_PARENT_SETTINGS,
-  labelPosition: DEFAULT_CONTROL_LABEL_POSITION,
+  chainingSystem: DEFAULT_CONTROLS_CHAINING as ControlsChainingSystem,
+  ignoreParentSettings: DEFAULT_IGNORE_PARENT_SETTINGS as ControlsIgnoreParentSettings,
+  labelPosition: DEFAULT_CONTROLS_LABEL_POSITION as ControlsLabelPosition,
 };
 
 export const editorStateComparators: StateComparators<ControlGroupEditorState> = {

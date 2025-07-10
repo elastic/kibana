@@ -14,7 +14,7 @@ import { setMockedPresentationUtilServices } from '@kbn/presentation-util-plugin
 import { render as rtlRender, waitFor, screen, act } from '@testing-library/react';
 import { Action } from '@kbn/ui-actions-plugin/public';
 
-import type { ControlLabelPosition, ControlWidth } from '../../../common';
+import type { ControlsLabelPosition, ControlWidth } from '@kbn/controls-schemas';
 import { uiActionsService } from '../../services/kibana_services';
 import { ControlPanel } from './control_panel';
 import { EuiThemeProvider } from '@elastic/eui';
@@ -77,7 +77,7 @@ describe('render', () => {
       mockApi = {
         uuid: 'control1',
         parentApi: {
-          labelPosition: new BehaviorSubject<ControlLabelPosition>('oneLine'),
+          labelPosition: new BehaviorSubject<ControlsLabelPosition>('oneLine'),
         },
       };
       await act(async () => render(<ControlPanel uuid="control1" Component={Component} />));
@@ -89,7 +89,7 @@ describe('render', () => {
       mockApi = {
         uuid: 'control1',
         parentApi: {
-          labelPosition: new BehaviorSubject<ControlLabelPosition>('twoLine'),
+          labelPosition: new BehaviorSubject<ControlsLabelPosition>('twoLine'),
         },
       };
       await act(async () => render(<ControlPanel uuid="control1" Component={Component} />));

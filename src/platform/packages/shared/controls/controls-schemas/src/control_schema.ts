@@ -42,11 +42,13 @@ export const controlSchema = schema.object(
         description: 'The order of the control panel in the control group.',
       },
     }),
-    width: controlWidthSchema,
-    grow: schema.boolean({
-      defaultValue: DEFAULT_CONTROL_GROW,
-      meta: { description: 'Expand width of the control panel to fit available space.' },
-    }),
+    width: schema.maybe(controlWidthSchema),
+    grow: schema.maybe(
+      schema.boolean({
+        defaultValue: DEFAULT_CONTROL_GROW,
+        meta: { description: 'Expand width of the control panel to fit available space.' },
+      })
+    ),
   },
   { unknowns: 'allow' }
 );

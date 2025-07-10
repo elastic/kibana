@@ -15,7 +15,7 @@ import { EuiComboBox } from '@elastic/eui';
 import { apiPublishesESQLVariables, type ESQLControlState } from '@kbn/esql-types';
 import { useBatchedPublishingSubjects, apiHasParentApi } from '@kbn/presentation-publishing';
 import { initializeUnsavedChanges, tracksOverlays } from '@kbn/presentation-containers';
-import { ESQL_CONTROL } from '../../../common';
+import { ESQL_CONTROL } from '@kbn/controls-constants';
 import type { ESQLControlApi } from './types';
 import { ControlFactory } from '../types';
 import { uiActionsService } from '../../services/kibana_services';

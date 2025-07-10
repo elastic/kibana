@@ -20,8 +20,9 @@ import {
   PublishesUnsavedChanges,
   PublishingSubject,
 } from '@kbn/presentation-publishing';
+import type { ControlWidth } from '@kbn/controls-schemas';
 
-import { ControlWidth, DefaultControlState } from '../../common/types';
+import { DefaultControlState } from '../../common/types';
 import { ControlGroupApi } from '../control_group/types';
 import { CanClearSelections } from '../types';
 

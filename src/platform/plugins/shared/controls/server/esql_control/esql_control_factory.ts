@@ -8,7 +8,7 @@
  */
 
 import { EmbeddableRegistryDefinition } from '@kbn/embeddable-plugin/server';
-import { ESQL_CONTROL } from '../../common';
+import { ESQL_CONTROL } from '@kbn/controls-constants';
 import {
   createEsqlControlInject,
   createEsqlControlExtract,

@@ -21,8 +21,8 @@ import {
 import { apiPublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
 import React, { useEffect } from 'react';
 import { BehaviorSubject } from 'rxjs';
-import type { ControlGroupSerializedState } from '../../common';
-import { CONTROL_GROUP_TYPE } from '../../common';
+import type { ControlsGroupState } from '@kbn/controls-schemas';
+import { CONTROLS_GROUP_TYPE } from '@kbn/controls-constants';
 import { openDataControlEditor } from '../controls/data_controls/open_data_control_editor';
 import { coreServices, dataViewsService } from '../services/kibana_services';
 import { ControlGroup } from './components/control_group';
@@ -36,11 +36,8 @@ import { deserializeControlGroup } from './utils/serialization_utils';
 import { initializeEditorStateManager } from './initialize_editor_state_manager';
 
 export const getControlGroupEmbeddableFactory = () => {
-  const controlGroupEmbeddableFactory: EmbeddableFactory<
-    ControlGroupSerializedState,
-    ControlGroupApi
-  > = {
-    type: CONTROL_GROUP_TYPE,
+  const controlGroupEmbeddableFactory: EmbeddableFactory<ControlsGroupState, ControlGroupApi> = {
+    type: CONTROLS_GROUP_TYPE,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const initialRuntimeState = deserializeControlGroup(initialState);
 

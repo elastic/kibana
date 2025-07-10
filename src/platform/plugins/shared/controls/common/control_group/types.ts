@@ -7,14 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ControlsGroupState } from '@kbn/controls-schemas';
 import { DataViewField } from '@kbn/data-views-plugin/common';
-import { ControlLabelPosition, DefaultControlState, ParentIgnoreSettings } from '../types';
-import { CONTROL_CHAINING_OPTIONS } from '../constants';
-
-export const CONTROL_GROUP_TYPE = 'control_group';
-
-export type ControlGroupChainingSystem =
-  (typeof CONTROL_CHAINING_OPTIONS)[keyof typeof CONTROL_CHAINING_OPTIONS];
+import { DefaultControlState } from '../types';
 
 export type FieldFilterPredicate = (f: DataViewField) => boolean;
 
@@ -31,12 +26,8 @@ export interface ControlGroupEditorConfig {
   fieldFilterPredicate?: FieldFilterPredicate;
 }
 
-export interface ControlGroupRuntimeState<State extends DefaultControlState = DefaultControlState> {
-  chainingSystem: ControlGroupChainingSystem;
-  labelPosition: ControlLabelPosition;
-  autoApplySelections: boolean;
-  ignoreParentSettings?: ParentIgnoreSettings;
-
+export interface ControlGroupRuntimeState<State extends DefaultControlState = DefaultControlState>
+  extends Omit<ControlsGroupState, 'controls'> {
   initialChildControlState: ControlPanelsState<State>;
 
   /*
@@ -46,18 +37,18 @@ export interface ControlGroupRuntimeState<State extends DefaultControlState = De
   editorConfig?: ControlGroupEditorConfig;
 }
 
-export interface ControlGroupSerializedState
-  extends Omit<ControlGroupRuntimeState, 'initialChildControlState'> {
-  // In runtime state, we refer to this property as `initialChildControlState`, but in
-  // the serialized state we transform the state object into an array of state objects
-  // to make it easier for API consumers to add new controls without specifying a uuid key.
-  controls: Array<
-    ControlPanelState & {
-      id?: string;
-      controlConfig?: object;
-    }
-  >;
-}
+// export interface ControlGroupSerializedState
+//   extends Omit<ControlGroupRuntimeState, 'initialChildControlState'> {
+//   // In runtime state, we refer to this property as `initialChildControlState`, but in
+//   // the serialized state we transform the state object into an array of state objects
+//   // to make it easier for API consumers to add new controls without specifying a uuid key.
+//   controls: Array<
+//     ControlPanelState & {
+//       id?: string;
+//       controlConfig?: object;
+//     }
+//   >;
+// }
 
 /**
  * ----------------------------------------------------------------
