@@ -7,16 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  DISCOVER_APP_LOCATOR,
-  CANVAS_APP_LOCATOR,
-  DASHBOARD_APP_ID,
-  DISCOVER_APP_ID,
-  VISUALIZE_APP_ID,
-  VISUALIZE_APP_LOCATOR,
-  LENS_APP_LOCATOR,
-  DISCOVER_ESQL_LOCATOR,
-  DASHBOARD_APP_LOCATOR,
-} from './constants';
+import { distinctUntilChanged, fromEvent, map, merge, shareReplay, startWith } from 'rxjs';
 
-export type { AppId, DeepLinkId } from './deep_links';
+/**
+ * Emits true during printing (window.beforeprint), false otherwise.
+ */
+export const isPrinting$ = merge(
+  fromEvent(window, 'beforeprint').pipe(map(() => true)),
+  fromEvent(window, 'afterprint').pipe(map(() => false))
+).pipe(startWith(false), distinctUntilChanged(), shareReplay(1));
