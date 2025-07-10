@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { UserAtSpaceScenarios } from '../../../../scenarios';
+import { UserAtSpaceScenarios, SuperuserAtSpace1 } from '../../../../scenarios';
 import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { getUrlPrefix, ObjectRemover, getTestRuleData } from '../../../../../common/lib';
 
@@ -217,13 +217,14 @@ export default function getRuleIdsWithGapsTests({ getService }: FtrProviderConte
             const ruleId1 = rresponse1.body.id;
             objectRemover.add(apiOptions.spaceId, ruleId1, 'rule', 'alerting');
 
-            const rresponse2 = await supertest
+            const response2 = await supertest
               .post(`${getUrlPrefix(apiOptions.spaceId)}/api/alerting/rule`)
               .set('kbn-xsrf', 'foo')
               .send(getRule())
               .expect(200);
-            const ruleId2 = rresponse2.body.id;
-            objectRemover.add(apiOptions.spaceId, ruleId2, 'rule', 'alerting');
+            // This rule is intended to be removed during the test.
+            // However it is added to the object remover when not applicable
+            const ruleId2 = response2.body.id;
 
             // Create gaps for both rules
             await supertest
@@ -258,6 +259,7 @@ export default function getRuleIdsWithGapsTests({ getService }: FtrProviderConte
             switch (scenario.id) {
               case 'no_kibana_privileges at space1':
               case 'space_1_all at space2':
+                objectRemover.add(apiOptions.spaceId, ruleId2, 'rule', 'alerting');
                 expect(response.statusCode).to.eql(403);
                 expect(response.body).to.eql({
                   error: 'Forbidden',
@@ -265,7 +267,7 @@ export default function getRuleIdsWithGapsTests({ getService }: FtrProviderConte
                     'Failed to find rules with gaps: Unauthorized to find rules for any rule types',
                   statusCode: 403,
                 });
-                break;
+                return
 
               case 'global_read at space1':
               case 'space_1_all_alerts_none_actions at space1':
@@ -283,12 +285,17 @@ export default function getRuleIdsWithGapsTests({ getService }: FtrProviderConte
                 throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
             }
 
-            // Delete 1 rule.
-            await supertestWithoutAuth
-              .delete(`${getUrlPrefix(apiOptions.spaceId)}/api/alerting/rule/${ruleId1}`)
+            // Delete rule 2.
+            const deleteResponse = await supertestWithoutAuth
+              .delete(`${getUrlPrefix(apiOptions.spaceId)}/api/alerting/rule/${ruleId2}`)
               .set('kbn-xsrf', 'foo')
-              .auth(apiOptions.username, apiOptions.password)
-              .expect(204);
+              .auth(SuperuserAtSpace1.user.username, SuperuserAtSpace1.user.password)
+
+            if(deleteResponse.statusCode !== 204) {
+              objectRemover.add(apiOptions.spaceId, ruleId2, 'rule', 'alerting');
+            }
+
+            expect(deleteResponse.statusCode).to.eql(204)
 
             response = await supertestWithoutAuth
               .post(`${getUrlPrefix(apiOptions.spaceId)}/internal/alerting/rules/gaps/_get_rules`)
@@ -300,17 +307,6 @@ export default function getRuleIdsWithGapsTests({ getService }: FtrProviderConte
               });
 
             switch (scenario.id) {
-              case 'no_kibana_privileges at space1':
-              case 'space_1_all at space2':
-                expect(response.statusCode).to.eql(403);
-                expect(response.body).to.eql({
-                  error: 'Forbidden',
-                  message:
-                    'Failed to find rules with gaps: Unauthorized to find rules for any rule types',
-                  statusCode: 403,
-                });
-                break;
-
               case 'global_read at space1':
               case 'space_1_all_alerts_none_actions at space1':
               case 'superuser at space1':
@@ -319,7 +315,7 @@ export default function getRuleIdsWithGapsTests({ getService }: FtrProviderConte
                 expect(response.statusCode).to.eql(200);
                 expect(response.body.total).to.eql(1);
                 expect(response.body.rule_ids).to.have.length(1);
-                expect(response.body.rule_ids).to.contain(ruleId2);
+                expect(response.body.rule_ids).to.contain(ruleId1);
                 break;
 
               default:
