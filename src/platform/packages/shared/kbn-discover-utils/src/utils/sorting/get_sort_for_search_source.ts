@@ -7,15 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type DataView, DataViewType } from '@kbn/data-views-plugin/common';
+import type { DataView, DataViewType } from '@kbn/data-views-plugin/common';
 import type { EsQuerySortValue, SortDirection } from '@kbn/data-plugin/common';
-import type { SortOrder } from '@kbn/saved-search-plugin/public';
-import { getSort } from './get_sort';
+import { type SortOrder, getSort } from './get_sort';
 import {
   getESQuerySortForTimeField,
   getESQuerySortForTieBreaker,
   DEFAULT_TIE_BREAKER_NAME,
 } from './get_es_query_sort';
+
+const DATA_VIEW_TYPE_ROLLUP: `${DataViewType.ROLLUP}` = 'rollup';
 
 /**
  * Prepares sort for search source, that's sending the request to ES
@@ -50,7 +51,7 @@ export function getSortForSearchSource({
   const sortPairs = getSort(sort, dataView, false); // ES|QL request is not using search source
 
   const sortForSearchSource = sortPairs.map((sortPair: Record<string, string>) => {
-    if (dataView.type !== DataViewType.ROLLUP && timeFieldName && sortPair[timeFieldName]) {
+    if (dataView.type !== DATA_VIEW_TYPE_ROLLUP && timeFieldName && sortPair[timeFieldName]) {
       return getESQuerySortForTimeField({
         sortDir: sortPair[timeFieldName] as SortDirection,
         timeFieldName,
