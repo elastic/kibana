@@ -31,7 +31,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     await esDeleteAllIndices(['search-*', 'test-*']);
   };
 
-  describe('Search onboarding API keys', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/227104
+  describe.skip('Search onboarding API keys', () => {
     let cleanUpSpace: () => Promise<unknown>;
     let spaceCreated: { id: string } = { id: '' };
     before(async () => {
