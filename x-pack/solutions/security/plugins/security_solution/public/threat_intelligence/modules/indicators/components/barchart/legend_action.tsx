@@ -34,26 +34,31 @@ export interface IndicatorBarchartLegendActionProps {
    * Indicator field selected in the IndicatorFieldSelector component, passed to the {@link AddToTimelineContextMenu} to populate the timeline.
    */
   field: EuiComboBoxOptionOption<string>;
+  announceFilterChange: (filterMessage: string) => void;
 }
 
 export const IndicatorBarchartLegendAction: FC<IndicatorBarchartLegendActionProps> = ({
   data,
   field,
+  announceFilterChange,
 }) => {
   const [isPopoverOpen, setPopover] = useState(false);
 
   const group = field.value === 'date' ? timestampToIsoString(data) : data;
+
   const popoverItems = [
     <FilterInContextMenu
       key={FILTER_IN_BUTTON_TEST_ID}
       data={group}
       field={field.label}
+      announceFilterInChange={announceFilterChange}
       data-test-subj={FILTER_IN_BUTTON_TEST_ID}
     />,
     <FilterOutContextMenu
       key={FILTER_OUT_BUTTON_TEST_ID}
       data={group}
       field={field.label}
+      announceFilterOutChange={announceFilterChange}
       data-test-subj={FILTER_OUT_BUTTON_TEST_ID}
     />,
     <AddToTimelineContextMenu
@@ -76,28 +81,30 @@ export const IndicatorBarchartLegendAction: FC<IndicatorBarchartLegendActionProp
   }
 
   return (
-    <EuiPopover
-      data-test-subj={POPOVER_BUTTON_TEST_ID}
-      button={
-        <EuiToolTip content={BUTTON_LABEL}>
-          <EuiButtonIcon
-            aria-label={BUTTON_LABEL}
-            iconType="boxesHorizontal"
-            iconSize="s"
-            size="xs"
-            onClick={() => setPopover((prevIsPopoverOpen) => !prevIsPopoverOpen)}
-            css={{ height: '100%' }}
-          />
-        </EuiToolTip>
-      }
-      isOpen={isPopoverOpen}
-      closePopover={() => setPopover(false)}
-      panelPaddingSize="none"
-      anchorPosition="downLeft"
-    >
-      <ReduxProvider store={store}>
-        <EuiContextMenuPanel size="s" items={popoverItems} />
-      </ReduxProvider>
-    </EuiPopover>
+    <>
+      <EuiPopover
+        data-test-subj={POPOVER_BUTTON_TEST_ID}
+        button={
+          <EuiToolTip content={BUTTON_LABEL}>
+            <EuiButtonIcon
+              aria-label={BUTTON_LABEL}
+              iconType="boxesHorizontal"
+              iconSize="s"
+              size="xs"
+              onClick={() => setPopover((prevIsPopoverOpen) => !prevIsPopoverOpen)}
+              css={{ height: '100%' }}
+            />
+          </EuiToolTip>
+        }
+        isOpen={isPopoverOpen}
+        closePopover={() => setPopover(false)}
+        panelPaddingSize="none"
+        anchorPosition="downLeft"
+      >
+        <ReduxProvider store={store}>
+          <EuiContextMenuPanel size="s" items={popoverItems} />
+        </ReduxProvider>
+      </EuiPopover>
+    </>
   );
 };
