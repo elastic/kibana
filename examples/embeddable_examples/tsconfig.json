@@ -37,8 +37,6 @@
     "@kbn/react-kibana-context-render",
     "@kbn/unified-data-table",
     "@kbn/kibana-utils-plugin",
-    "@kbn/core-mount-utils-browser",
-    "@kbn/react-kibana-mount",
     "@kbn/shared-ux-router",
     "@kbn/presentation-util"
   ]
