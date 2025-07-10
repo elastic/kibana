@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Subject } from 'rxjs';
+import { firstValueFrom, Subject } from 'rxjs';
 import type { OnPreAuthHandler } from '@kbn/core-http-server';
 import {
   httpServerMock,
@@ -15,8 +15,9 @@ import {
   type InternalHttpServiceSetupMock,
 } from '@kbn/core-http-server-mocks';
 import { metricsServiceMock } from '@kbn/core-metrics-server-mocks';
+import { ServiceStatusLevels } from '@kbn/core-status-common';
 import type { UnwrapObservable } from '@kbn/utility-types';
-import { HttpRateLimiterService } from './service';
+import { HttpRateLimiterService, type InternalRateLimiterSetup } from './service';
 
 describe('HttpRateLimiterService', () => {
   let service: HttpRateLimiterService;
@@ -48,6 +49,7 @@ describe('HttpRateLimiterService', () => {
 
     describe('when enabled', () => {
       let handler: OnPreAuthHandler;
+      let setup: InternalRateLimiterSetup;
       let request: ReturnType<typeof httpServerMock.createKibanaRequest>;
       let response: ReturnType<typeof httpServerMock.createResponseFactory>;
       let toolkit: ReturnType<typeof httpServerMock.createToolkit>;
@@ -65,8 +67,34 @@ describe('HttpRateLimiterService', () => {
         toolkit.next.mockReturnValue(ignored);
         response.customError.mockReturnValue(throttled);
 
-        service.setup({ http, metrics });
+        setup = service.setup({ http, metrics });
         [handler] = http.registerOnPreAuth.mock.lastCall!;
+      });
+
+      it('should return `available` status initially', async () => {
+        await expect(firstValueFrom(setup.status$)).resolves.toHaveProperty(
+          'level',
+          ServiceStatusLevels.available
+        );
+      });
+
+      it('should return `degraded` status when overloaded', async () => {
+        service.start();
+        elu$.next({ short: 0.9, medium: 0.9, long: 0.9 });
+        await expect(firstValueFrom(setup.status$)).resolves.toHaveProperty(
+          'level',
+          ServiceStatusLevels.degraded
+        );
+      });
+
+      it('should return `available` status when recovered', async () => {
+        service.start();
+        elu$.next({ short: 0.9, medium: 0.9, long: 0.9 });
+        elu$.next({ short: 0.1, medium: 0.1, long: 0.1 });
+        await expect(firstValueFrom(setup.status$)).resolves.toHaveProperty(
+          'level',
+          ServiceStatusLevels.available
+        );
       });
 
       it('should register a handler if the rate limiter is enabled', () => {

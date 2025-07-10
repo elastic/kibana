@@ -12,19 +12,21 @@ import {
   BehaviorSubject,
   distinctUntilChanged,
   endWith,
+  filter,
   map,
   skipUntil,
   type Observable,
+  scan,
+  shareReplay,
   Subject,
   takeUntil,
-  scan,
-  filter,
 } from 'rxjs';
 import type { CoreService } from '@kbn/core-base-server-internal';
 import type { OnPreAuthHandler } from '@kbn/core-http-server';
 import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
 import type { EluMetrics } from '@kbn/core-metrics-server';
 import { EluTerm, type InternalMetricsServiceSetup } from '@kbn/core-metrics-server-internal';
+import { type ServiceStatus, ServiceStatusLevels } from '@kbn/core-status-common';
 
 const RATE_LIMITER_POLICY = 'elu';
 
@@ -40,11 +42,10 @@ interface State {
   timestamp: number;
 }
 
-// type State = { overloaded: false } | { overloaded: true; retryAfter: number };
-// type StateWithTimestamp = State & { timestamp: number };
-
 /** @internal */
-export type InternalRateLimiterSetup = void;
+export interface InternalRateLimiterSetup {
+  status$: Observable<ServiceStatus>;
+}
 
 /** @internal */
 export type InternalRateLimiterStart = void;
@@ -120,13 +121,34 @@ export class HttpRateLimiterService
       .subscribe(this.state$);
   }
 
+  private get status$() {
+    return this.state$.pipe(
+      map((state) => !!state?.overloaded),
+      distinctUntilChanged(),
+      map((overloaded) =>
+        overloaded
+          ? {
+              level: ServiceStatusLevels.degraded,
+              summary: 'http server is rate-limited due to high load',
+            }
+          : {
+              level: ServiceStatusLevels.available,
+              summary: 'http server is not rate-limited',
+            }
+      ),
+      shareReplay(1)
+    );
+  }
+
   public setup({ http, metrics }: SetupDeps): InternalRateLimiterSetup {
-    if (!http.rateLimiter.enabled) {
-      return;
+    if (http.rateLimiter.enabled) {
+      this.watch(metrics.getEluMetrics$(), http.rateLimiter);
+      http.registerOnPreAuth(this.handler);
     }
 
-    this.watch(metrics.getEluMetrics$(), http.rateLimiter);
-    http.registerOnPreAuth(this.handler);
+    return {
+      status$: this.status$,
+    };
   }
 
   public start(): InternalRateLimiterStart {

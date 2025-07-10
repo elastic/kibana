@@ -20,5 +20,6 @@ import type { ServiceStatus } from './service_status';
  */
 export interface CoreStatus {
   elasticsearch: ServiceStatus;
+  http: ServiceStatus;
   savedObjects: ServiceStatus;
 }
