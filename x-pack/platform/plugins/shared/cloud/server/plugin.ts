@@ -14,7 +14,7 @@ import { schema } from '@kbn/config-schema';
 import { parseNextURL } from '@kbn/std';
 
 import camelcaseKeys from 'camelcase-keys';
-import { KibanaSolution } from '@kbn/projects-solutions-groups';
+import type { KibanaProductTier, KibanaSolution } from '@kbn/projects-solutions-groups';
 import type { CloudConfigType } from './config';
 
 import { registerCloudDeploymentMetadataAnalyticsContext } from '../common/register_cloud_deployment_id_analytics_context';
@@ -149,6 +149,13 @@ export interface CloudSetup {
      */
     projectType?: KibanaSolution;
     /**
+     * The serverless product tier.
+     * Only present if the current project type has product tiers defined.
+     * @remarks This field is only exposed for informational purposes. Use the `core.pricing` when checking if a feature is available for the current product tier.
+     * @internal
+     */
+    productTier?: KibanaProductTier;
+    /**
      * The serverless orchestrator target. The potential values are `canary` or `non-canary`
      * Will always be present if `isServerlessEnabled` is `true`
      */
@@ -192,6 +199,7 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
     const organizationId = this.config.organization_id;
     const projectId = this.config.serverless?.project_id;
     const projectType = this.config.serverless?.project_type;
+    const productTier = this.config.serverless?.product_tier;
     const orchestratorTarget = this.config.serverless?.orchestrator_target;
     const isServerlessEnabled = !!projectId;
     const deploymentId = parseDeploymentIdFromDeploymentUrl(this.config.deployment_url);
@@ -205,6 +213,7 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
       deploymentId,
       projectId,
       projectType,
+      productTier,
       orchestratorTarget,
     });
     const basePath = core.http.basePath.serverBasePath;
@@ -360,6 +369,10 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
         projectName: this.config.serverless?.project_name,
         projectType,
         orchestratorTarget,
+        // Hi fellow developer! Please, refrain from using `productTier` from this contract.
+        // It is exposed for informational purposes (telemetry and feature flags). Do not use it for feature-gating.
+        // Use `core.pricing` when checking if a feature is available for the current product tier.
+        productTier,
       },
     };
   }

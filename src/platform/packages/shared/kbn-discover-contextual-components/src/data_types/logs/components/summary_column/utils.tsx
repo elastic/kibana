@@ -29,7 +29,7 @@ import {
 } from '@kbn/discover-utils';
 import { TraceDocument, formatFieldValue } from '@kbn/discover-utils/src';
 import { EuiIcon, useEuiTheme } from '@elastic/eui';
-import { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { testPatternAgainstAllowedList } from '@kbn/data-view-utils';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { FieldBadgeWithActions, FieldBadgeWithActionsProps } from '../cell_actions_popover';
@@ -82,6 +82,7 @@ export interface ResourceFieldDescriptor {
   Icon?: () => JSX.Element;
   name: string;
   value: string;
+  property?: DataViewField;
   rawValue: unknown;
 }
 
@@ -153,12 +154,13 @@ export const createResourceFields = ({
   const availableResourceFields = getAvailableFields(resourceDoc);
 
   return availableResourceFields.map((name) => {
+    const property = dataView.getFieldByName(name);
     const value = formatFieldValue(
       resourceDoc[name],
       row.raw,
       fieldFormats,
       dataView,
-      dataView.getFieldByName(name),
+      property,
       'html'
     );
 
@@ -166,6 +168,7 @@ export const createResourceFields = ({
       name,
       rawValue: resourceDoc[name],
       value,
+      property,
       ResourceBadge: getResourceBadgeComponent(name, core, share),
       Icon: getResourceBadgeIcon(name, resourceDoc),
     };
