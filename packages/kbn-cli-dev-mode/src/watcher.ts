@@ -78,6 +78,8 @@ export class Watcher {
           //
           // For now we are ignoring it and following the previous behaviour in place, if it does cause problems we can
           // force restart the server
+          //
+          // Parcel PR: https://github.com/parcel-bundler/watcher/pull/196
           if (error.message && error.message.includes('Events were dropped by the FSEvents client')) {
             return false;
           }
