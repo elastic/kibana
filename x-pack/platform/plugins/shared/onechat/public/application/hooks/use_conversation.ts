@@ -5,9 +5,16 @@
  * 2.0.
  */
 
-import { Conversation, ConversationRound, ToolCallStep, isToolCallStep } from '@kbn/onechat-common';
+import {
+  Conversation,
+  ConversationRound,
+  ToolCallStep,
+  isToolCallStep,
+  oneChatDefaultAgentId,
+} from '@kbn/onechat-common';
 import { QueryClient, QueryKey, useQuery, useQueryClient } from '@tanstack/react-query';
 import produce from 'immer';
+import { useEffect, useMemo } from 'react';
 import { queryKeys } from '../query_keys';
 import { appPaths } from '../utils/app_paths';
 import { useNavigation } from './use_navigation';
@@ -37,15 +44,19 @@ const createActions = ({
       })
     );
   };
+  const [_, conversationId] = queryKey;
+  const isNewConversation = conversationId === newConversationId;
   return {
     invalidateConversation: () => {
-      const [_, conversationId] = queryKey;
-      if (conversationId === newConversationId) {
+      if (isNewConversation) {
         // Purge the query cache since we never fetch for conversation id "new"
         queryClient.removeQueries({ queryKey });
       } else {
         queryClient.invalidateQueries({ queryKey });
       }
+    },
+    addConversation: () => {
+      setConversation(() => createNewConversation());
     },
     addConversationRound: ({ userMessage }: { userMessage: string }) => {
       setConversation(
@@ -55,12 +66,20 @@ const createActions = ({
             response: { message: '' },
             steps: [],
           };
-          if (!draft) {
-            const nextConversation = createNewConversation();
-            nextConversation.rounds.push(nextRound);
-            return nextConversation;
+          draft?.rounds?.push(nextRound);
+        })
+      );
+    },
+    setAgentId: (agentId: string) => {
+      // We allow to change agent only at the start of the conversation
+      if (!isNewConversation) {
+        return;
+      }
+      setConversation(
+        produce((draft) => {
+          if (draft) {
+            draft.agentId = agentId;
           }
-          draft.rounds.push(nextRound);
         })
       );
     },
@@ -126,15 +145,30 @@ export const useConversation = () => {
   });
   const { navigateToOnechatUrl } = useNavigation();
 
+  const actions = useMemo(
+    () =>
+      createActions({
+        queryClient,
+        queryKey,
+        navigateToConversation: ({ nextConversationId }: { nextConversationId: string }) => {
+          navigateToOnechatUrl(appPaths.chat.conversation({ conversationId: nextConversationId }));
+        },
+      }),
+    [queryClient, queryKey, navigateToOnechatUrl]
+  );
+
+  useEffect(() => {
+    if (!conversationId && !conversation) {
+      actions.addConversation();
+    }
+  }, [conversationId, actions, conversation]);
+
   return {
     conversation,
+    conversationId,
+    agentId: conversation?.agentId ?? oneChatDefaultAgentId,
+    hasActiveConversation: conversationId || (conversation && conversation.rounds.length > 0),
     isLoading,
-    actions: createActions({
-      queryClient,
-      queryKey,
-      navigateToConversation: ({ nextConversationId }: { nextConversationId: string }) => {
-        navigateToOnechatUrl(appPaths.chat.conversation({ conversationId: nextConversationId }));
-      },
-    }),
+    actions,
   };
 };

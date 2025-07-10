@@ -7,7 +7,6 @@
 
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { oneChatDefaultAgentId } from '@kbn/onechat-common';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React, { useState } from 'react';
 import { Conversation } from './conversation';
@@ -80,7 +79,7 @@ export const OnechatConversationsView: React.FC<{}> = () => {
         }}
         aria-label={conversationsCommonLabels.content.ariaLabel}
       >
-        <Conversation agentId={oneChatDefaultAgentId} />
+        <Conversation />
       </KibanaPageTemplate.Section>
     </KibanaPageTemplate>
   );

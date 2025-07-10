@@ -20,7 +20,7 @@ disabled:
   - x-pack/solutions/observability/plugins/slo/e2e/synthetics_run.ts
 
   # Observability AI Assistant local-only tests
-  - x-pack/test/api_integration/deployment_agnostic/configs/stateful/oblt.ai_assistant_local.stateful.config.ts
+  - x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.ai_assistant_local.stateful.config.ts
 
 defaultQueue: 'n2-4-spot'
 enabled:
@@ -48,7 +48,7 @@ enabled:
   - x-pack/test/functional/apps/apm/config.ts
   - x-pack/test/functional_with_es_ssl/apps/config.ts
   # stateful configs that run deployment-agnostic tests
-  - x-pack/test/api_integration/deployment_agnostic/configs/stateful/oblt.stateful.config.ts
-  - x-pack/test/api_integration/deployment_agnostic/configs/stateful/oblt.apm.stateful.config.ts
-  - x-pack/test/api_integration/deployment_agnostic/configs/stateful/oblt.ai_assistant.stateful.config.ts
-  - x-pack/test/api_integration/deployment_agnostic/feature_flag_configs/stateful/oblt.stateful.config.ts
+  - x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.stateful.config.ts
+  - x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.apm.stateful.config.ts
+  - x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.ai_assistant.stateful.config.ts
+  - x-pack/solutions/observability/test/api_integration_deployment_agnostic/feature_flag_configs/stateful/oblt.stateful.config.ts

@@ -15,23 +15,27 @@ import {
   keys,
   useEuiTheme,
 } from '@elastic/eui';
+import { oneChatDefaultAgentId } from '@kbn/onechat-common';
 import { conversationsCommonLabels } from './i18n';
+import { AgentDisplay } from './agent_display';
 import { ConversationContent } from './conversation_grid';
+import { useConversation } from '../../hooks/use_conversation';
+import { AgentSelectDropdown } from './agent_select_dropdown';
+import { useChat } from '../../hooks/use_chat';
 
 interface ConversationInputFormProps {
-  disabled: boolean;
-  loading: boolean;
-  onSubmit: (message: string) => void;
+  onSubmit: () => void;
 }
 
-export const ConversationInputForm: React.FC<ConversationInputFormProps> = ({
-  disabled,
-  loading,
-  onSubmit,
-}) => {
+export const ConversationInputForm: React.FC<ConversationInputFormProps> = ({ onSubmit }) => {
   const [message, setMessage] = useState<string>('');
+  const disabled = !message.trim();
   const { euiTheme } = useEuiTheme();
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
+  const { actions, conversation, hasActiveConversation } = useConversation();
+  const agentId = conversation?.agentId ?? oneChatDefaultAgentId;
+
+  const { sendMessage } = useChat();
 
   useEffect(() => {
     setTimeout(() => {
@@ -40,13 +44,14 @@ export const ConversationInputForm: React.FC<ConversationInputFormProps> = ({
   }, []);
 
   const handleSubmit = useCallback(() => {
-    if (loading || !message.trim()) {
+    if (disabled) {
       return;
     }
 
-    onSubmit(message);
+    sendMessage(message);
+    onSubmit();
     setMessage('');
-  }, [message, loading, onSubmit]);
+  }, [message, onSubmit, sendMessage, disabled]);
 
   const handleChange = useCallback((event: React.ChangeEvent<HTMLTextAreaElement>) => {
     setMessage(event.currentTarget.value);
@@ -65,8 +70,8 @@ export const ConversationInputForm: React.FC<ConversationInputFormProps> = ({
   const topContainerClass = css`
     padding-bottom: ${euiTheme.size.m};
   `;
-  const inputFlexItemClass = css`
-    max-width: 900px;
+  const textAreaClass = css`
+    border: none;
   `;
 
   const labels = conversationsCommonLabels.content.input;
@@ -76,34 +81,67 @@ export const ConversationInputForm: React.FC<ConversationInputFormProps> = ({
       <EuiFlexGroup
         gutterSize="s"
         responsive={false}
-        alignItems="center"
+        alignItems="stretch"
         justifyContent="center"
         className={topContainerClass}
         aria-label={labels.ariaLabel}
       >
-        <EuiFlexItem className={inputFlexItemClass}>
-          <EuiTextArea
-            data-test-subj="onechatAppConversationInputFormTextArea"
-            fullWidth
-            rows={1}
-            value={message}
-            onChange={handleChange}
-            onKeyDown={handleTextAreaKeyDown}
-            placeholder={labels.placeholder}
-            inputRef={textAreaRef}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            aria-label={labels.submitAriaLabel}
-            data-test-subj="onechatAppConversationInputFormSubmitButton"
-            iconType="kqlFunction"
-            display="fill"
-            size="m"
-            onClick={handleSubmit}
-            disabled={loading || disabled}
-            isLoading={loading}
-          />
+        <EuiFlexItem>
+          <EuiFlexGroup
+            direction="column"
+            gutterSize="s"
+            responsive={false}
+            alignItems="stretch"
+            justifyContent="center"
+          >
+            <EuiFlexItem>
+              <EuiTextArea
+                data-test-subj="onechatAppConversationInputFormTextArea"
+                fullWidth
+                rows={1}
+                resize="vertical"
+                value={message}
+                onChange={handleChange}
+                onKeyDown={handleTextAreaKeyDown}
+                placeholder={labels.placeholder}
+                inputRef={textAreaRef}
+                className={textAreaClass}
+              />
+            </EuiFlexItem>
+
+            <EuiFlexItem>
+              <EuiFlexGroup
+                gutterSize="s"
+                responsive={false}
+                alignItems="center"
+                justifyContent="flexEnd"
+              >
+                <EuiFlexItem grow={false}>
+                  {hasActiveConversation ? (
+                    <AgentDisplay selectedAgentId={agentId} />
+                  ) : (
+                    <AgentSelectDropdown
+                      selectedAgentId={agentId}
+                      onAgentChange={(newAgentId: string) => {
+                        actions.setAgentId(newAgentId);
+                      }}
+                    />
+                  )}
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonIcon
+                    aria-label={labels.submitAriaLabel}
+                    data-test-subj="onechatAppConversationInputFormSubmitButton"
+                    iconType="kqlFunction"
+                    display="fill"
+                    size="m"
+                    disabled={disabled}
+                    onClick={handleSubmit}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
     </ConversationContent>

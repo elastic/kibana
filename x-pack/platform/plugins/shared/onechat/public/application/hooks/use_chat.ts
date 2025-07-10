@@ -21,24 +21,22 @@ import { useCallback, useState } from 'react';
 import { useConversation } from './use_conversation';
 import { useKibana } from './use_kibana';
 import { useOnechatServices } from './use_onechat_service';
-import { useConversationId } from './use_conversation_id';
 
 export type ChatStatus = 'ready' | 'loading' | 'error';
 
 interface UseChatProps {
-  agentId: string;
   connectorId?: string;
   onError?: (error: OnechatError<OnechatErrorCode>) => void;
 }
 
-export const useChat = ({ agentId, connectorId, onError }: UseChatProps) => {
+export const useChat = ({ connectorId, onError }: UseChatProps = {}) => {
   const { chatService } = useOnechatServices();
   const {
     services: { notifications },
   } = useKibana();
   const [status, setStatus] = useState<ChatStatus>('ready');
-  const { actions } = useConversation();
-  const conversationId = useConversationId();
+  const { actions, conversationId, conversation } = useConversation();
+  const { agentId } = conversation ?? {};
 
   const sendMessage = useCallback(
     (nextMessage: string) => {

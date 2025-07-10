@@ -8,9 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem, useEuiScrollBar } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useEffect, useRef } from 'react';
-import { useChat } from '../../hooks/use_chat';
 import { useConversation } from '../../hooks/use_conversation';
-import { useConversationId } from '../../hooks/use_conversation_id';
 import { useStickToBottom } from '../../hooks/use_stick_to_bottom';
 import { ConversationInputForm } from './conversation_input_form';
 import { ConversationRounds } from './conversation_rounds/conversation_rounds';
@@ -21,14 +19,8 @@ const conversationContainerStyles = css`
   height: 100%;
 `;
 
-interface ConversationProps {
-  agentId: string;
-}
-
-export const Conversation: React.FC<ConversationProps> = ({ agentId }) => {
-  const { conversation } = useConversation();
-  const { sendMessage } = useChat({ agentId });
-  const conversationId = useConversationId();
+export const Conversation: React.FC<{}> = () => {
+  const { conversation, conversationId, hasActiveConversation } = useConversation();
 
   const scrollContainerStyles = css`
     overflow-y: auto;
@@ -46,15 +38,9 @@ export const Conversation: React.FC<ConversationProps> = ({ agentId }) => {
     setStickToBottom(true);
   }, [conversationId, setStickToBottom]);
 
-  const onSubmit = useCallback(
-    (message: string) => {
-      setStickToBottom(true);
-      sendMessage(message);
-    },
-    [sendMessage, setStickToBottom]
-  );
-
-  const hasActiveConversation = conversationId || (conversation && conversation.rounds.length > 0);
+  const onSubmit = useCallback(() => {
+    setStickToBottom(true);
+  }, [setStickToBottom]);
 
   return (
     <EuiFlexGroup
@@ -74,7 +60,7 @@ export const Conversation: React.FC<ConversationProps> = ({ agentId }) => {
         </EuiFlexItem>
       )}
       <EuiFlexItem grow={false}>
-        <ConversationInputForm disabled={!agentId} loading={false} onSubmit={onSubmit} />
+        <ConversationInputForm onSubmit={onSubmit} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

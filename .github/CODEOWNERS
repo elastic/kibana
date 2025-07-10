@@ -452,6 +452,7 @@ src/platform/packages/shared/kbn-cypress-config @elastic/kibana-operations
 src/platform/packages/shared/kbn-cypress-test-helper @elastic/security-solution
 src/platform/packages/shared/kbn-data-grid-in-table-search @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-data-service @elastic/kibana-visualizations @elastic/kibana-data-discovery
+src/platform/packages/shared/kbn-data-service-server @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-data-view-utils @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-datemath @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-dev-cli-errors @elastic/kibana-operations
@@ -1352,7 +1353,7 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/test_serverless/api_integration/test_suites/observability/config.logs_essentials.ts @elastic/observability-ui @elastic/appex-qa
 /x-pack/test_serverless/api_integration/test_suites/observability/index.logs_essentials.ts @elastic/observability-ui
 /x-pack/test_serverless/api_integration/test_suites/observability/logs_essentials_only @elastic/observability-ui
-/x-pack/test/api_integration/deployment_agnostic/configs/serverless/oblt.logs_essentials.index.ts @elastic/observability-ui
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.logs_essentials.index.ts @elastic/observability-ui
 /x-pack/platform/test/api_integration_deployment_agnostic/configs/serverless/oblt.logs_essentials.serverless.config.ts @elastic/observability-ui
 
 ### Observability Plugins
@@ -1363,15 +1364,15 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/test_serverless/functional/page_objects/svl_data_usage.ts @elastic/kibana-management
 /x-pack/test/observability_ai_assistant_functional @elastic/obs-ai-assistant
 /x-pack/test/functional/es_archives/observability/ai_assistant @elastic/obs-ai-assistant
-/x-pack/test/api_integration/deployment_agnostic/apis/observability/ai_assistant @elastic/obs-ai-assistant
-/x-pack/test/api_integration/deployment_agnostic/configs/serverless/oblt.ai_assistant.index.ts @elastic/obs-ai-assistant
-/x-pack/test/api_integration/deployment_agnostic/configs/serverless/oblt.ai_assistant.serverless.config.ts @elastic/obs-ai-assistant
-/x-pack/test/api_integration/deployment_agnostic/configs/stateful/oblt.ai_assistant.index.ts @elastic/obs-ai-assistant
-/x-pack/test/api_integration/deployment_agnostic/configs/stateful/oblt.ai_assistant.stateful.config.ts @elastic/obs-ai-assistant
-/x-pack/test/api_integration/deployment_agnostic/configs/serverless/oblt.ai_assistant_local.index.ts  @elastic/obs-ai-assistant
-/x-pack/test/api_integration/deployment_agnostic/configs/serverless/oblt.ai_assistant_local.serverless.config.ts  @elastic/obs-ai-assistant
-/x-pack/test/api_integration/deployment_agnostic/configs/stateful/oblt.ai_assistant_local.index.ts  @elastic/obs-ai-assistant
-/x-pack/test/api_integration/deployment_agnostic/configs/stateful/oblt.ai_assistant_local.stateful.config.ts  @elastic/obs-ai-assistant
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/ai_assistant @elastic/obs-ai-assistant
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.ai_assistant.index.ts @elastic/obs-ai-assistant
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.ai_assistant.serverless.config.ts @elastic/obs-ai-assistant
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.ai_assistant.index.ts @elastic/obs-ai-assistant
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.ai_assistant.stateful.config.ts @elastic/obs-ai-assistant
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.ai_assistant_local.index.ts  @elastic/obs-ai-assistant
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.ai_assistant_local.serverless.config.ts  @elastic/obs-ai-assistant
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.ai_assistant_local.index.ts  @elastic/obs-ai-assistant
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.ai_assistant_local.stateful.config.ts  @elastic/obs-ai-assistant
 
 # Infra Obs
 ## This plugin mostly contains the codebase for the infra services, but also includes some code for the Logs UI app.
@@ -1384,16 +1385,16 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 
 ## infra/{common,docs,public,server}/{sub-folders}/ -> @elastic/obs-ux-infra_services-team
 # obs-ux-infra_services-team
-/x-pack/test/api_integration/deployment_agnostic/apis/observability/apm/ @elastic/obs-ux-infra_services-team
-/x-pack/test/api_integration/deployment_agnostic/configs/serverless/oblt.apm.index.ts @elastic/obs-ux-infra_services-team
-/x-pack/test/api_integration/deployment_agnostic/configs/serverless/oblt.apm.serverless.config.ts @elastic/obs-ux-infra_services-team
-/x-pack/test/api_integration/deployment_agnostic/configs/stateful/oblt.apm.index.ts @elastic/obs-ux-infra_services-team
-/x-pack/test/api_integration/deployment_agnostic/configs/stateful/oblt.apm.stateful.config.ts @elastic/obs-ux-infra_services-team
-/x-pack/test/api_integration/deployment_agnostic/apis/observability/infra/ @elastic/obs-ux-infra_services-team
-/x-pack/test/api_integration/deployment_agnostic/configs/serverless/oblt.index.ts @elastic/obs-ux-infra_services-team
-/x-pack/test/api_integration/deployment_agnostic/configs/serverless/oblt.serverless.config.ts @elastic/obs-ux-infra_services-team
-/x-pack/test/api_integration/deployment_agnostic/configs/stateful/oblt.index.ts @elastic/obs-ux-infra_services-team
-/x-pack/test/api_integration/deployment_agnostic/configs/stateful/oblt.stateful.config.ts @elastic/obs-ux-infra_services-team
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/apm/ @elastic/obs-ux-infra_services-team
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.apm.index.ts @elastic/obs-ux-infra_services-team
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.apm.serverless.config.ts @elastic/obs-ux-infra_services-team
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.apm.index.ts @elastic/obs-ux-infra_services-team
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.apm.stateful.config.ts @elastic/obs-ux-infra_services-team
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/infra/ @elastic/obs-ux-infra_services-team
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.index.ts @elastic/obs-ux-infra_services-team
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.serverless.config.ts @elastic/obs-ux-infra_services-team
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.index.ts @elastic/obs-ux-infra_services-team
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.stateful.config.ts @elastic/obs-ux-infra_services-team
 /x-pack/test/functional/page_objects/asset_details.ts @elastic/obs-ux-infra_services-team # Assigned per https://github.com/elastic/kibana/pull/200157/files/c83fae62151fe634342c498aca69b686b739fe45#r1842202022
 /x-pack/test/functional/page_objects/infra_* @elastic/obs-ux-infra_services-team
 /x-pack/test/functional/es_archives/infra @elastic/obs-ux-infra_services-team
@@ -1426,8 +1427,8 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /src/platform/plugins/shared/unified_doc_viewer/public/components/observability/attributes @elastic/obs-ux-infra_services-team
 
 ## Logs UI code exceptions -> @elastic/obs-ux-logs-team
-/x-pack/test/api_integration/deployment_agnostic/apis/observability/data_quality/ @elastic/obs-ux-logs-team
-/x-pack/test/api_integration/deployment_agnostic/apis/observability/onboarding/ @elastic/obs-ux-logs-team
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/data_quality/ @elastic/obs-ux-logs-team
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/onboarding/ @elastic/obs-ux-logs-team
 /x-pack/test_serverless/functional/page_objects/svl_oblt_onboarding_stream_log_file.ts @elastic/obs-ux-logs-team
 /x-pack/test_serverless/functional/page_objects/svl_oblt_onboarding_page.ts @elastic/obs-ux-logs-team
 /x-pack/solutions/observability/plugins/infra/common/http_api/log_alerts @elastic/obs-ux-logs-team
@@ -1450,6 +1451,8 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/solutions/observability/plugins/infra/server/routes/log_analysis @elastic/obs-ux-logs-team
 /x-pack/solutions/observability/plugins/infra/server/services/rules @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
 /x-pack/test/common/utils/synthtrace @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team # Assigned per https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/kbn-apm-synthtrace/kibana.jsonc#L5
+/x-pack/solutions/observability/test/common/utils/synthtrace @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
+/x-pack/solutions/observability/test/common/utils/server_route_repository @elastic/obs-knowledge-team
 /x-pack/test/common/utils/server_route_repository @elastic/obs-knowledge-team
 /src/platform/test/functional/services/synthtrace/logs_synthtrace_es_client.ts @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
 
@@ -1484,20 +1487,20 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/test_serverless/**/test_suites/observability/custom_threshold_rule/ @elastic/obs-ux-management-team
 /x-pack/test_serverless/**/test_suites/observability/slos/ @elastic/obs-ux-management-team
 /x-pack/test_serverless/api_integration/test_suites/observability/es_query_rule @elastic/obs-ux-management-team
-/x-pack/test/api_integration/deployment_agnostic/apis/observability/alerting/ @elastic/obs-ux-management-team
-/x-pack/test/api_integration/deployment_agnostic/apis/observability/slo/ @elastic/obs-ux-management-team
-/x-pack/test/api_integration/deployment_agnostic/services/alerting_api @elastic/obs-ux-management-team
-/x-pack/test/api_integration/deployment_agnostic/services/slo_api @elastic/obs-ux-management-team
-/x-pack/test/api_integration/deployment_agnostic/apis/observability/synthetics/ @elastic/obs-ux-management-team
-/x-pack/test/api_integration/deployment_agnostic/configs/serverless/oblt.synthetics.index.ts @elastic/obs-ux-management-team
-/x-pack/test/api_integration/deployment_agnostic/configs/serverless/oblt.synthetics.serverless.config.ts @elastic/obs-ux-management-team
-/x-pack/test/api_integration/deployment_agnostic/feature_flag_configs/serverless/oblt.synthetics.index.ts @elastic/obs-ux-management-team
-/x-pack/test/api_integration/deployment_agnostic/feature_flag_configs/serverless/oblt.synthetics.serverless.config.ts @elastic/obs-ux-management-team
-/x-pack/test/api_integration/deployment_agnostic/feature_flag_configs/stateful/oblt.synthetics.index.ts @elastic/obs-ux-management-team
-/x-pack/test/api_integration/deployment_agnostic/feature_flag_configs/stateful/oblt.synthetics.stateful.config.ts @elastic/obs-ux-management-team
-/x-pack/test/api_integration/deployment_agnostic/services/synthetics_monitors @elastic/obs-ux-management-team
-/x-pack/test/api_integration/deployment_agnostic/services/synthetics_private_location @elastic/obs-ux-management-team
-/x-pack/test/api_integration/deployment_agnostic/apis/observability/incident_management/ @elastic/obs-ux-management-team
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/alerting/ @elastic/obs-ux-management-team
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/slo/ @elastic/obs-ux-management-team
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/services/alerting_api @elastic/obs-ux-management-team
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/services/slo_api @elastic/obs-ux-management-team
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/synthetics/ @elastic/obs-ux-management-team
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.synthetics.index.ts @elastic/obs-ux-management-team
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.synthetics.serverless.config.ts @elastic/obs-ux-management-team
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/feature_flag_configs/serverless/oblt.synthetics.index.ts @elastic/obs-ux-management-team
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/feature_flag_configs/serverless/oblt.synthetics.serverless.config.ts @elastic/obs-ux-management-team
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/feature_flag_configs/stateful/oblt.synthetics.index.ts @elastic/obs-ux-management-team
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/feature_flag_configs/stateful/oblt.synthetics.stateful.config.ts @elastic/obs-ux-management-team
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/services/synthetics_monitors @elastic/obs-ux-management-team
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/services/synthetics_private_location @elastic/obs-ux-management-team
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/incident_management/ @elastic/obs-ux-management-team
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/services @elastic/obs-ux-management-team
 /x-pack/test/functional/page_objects/alert_controls.ts @elastic/obs-ux-management-team
 
@@ -1563,7 +1566,7 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 
 # obs-ux-logs-team
 /x-pack/test/functional/es_archives/observability_logs_explorer @elastic/obs-ux-logs-team
-/x-pack/test/api_integration/deployment_agnostic/apis/observability/dataset_quality @elastic/obs-ux-logs-team
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/dataset_quality @elastic/obs-ux-logs-team
 /x-pack/test_serverless/functional/test_suites/observability/config.* @elastic/obs-ux-logs-team
 /x-pack/test_serverless/functional/test_suites/observability/landing_page.ts @elastic/obs-ux-logs-team
 /x-pack/test_serverless/functional/test_suites/observability/navigation.ts @elastic/obs-ux-logs-team
@@ -1605,9 +1608,9 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/plugins/observability_solution/observability/server/ui_settings.ts @elastic/obs-docs
 
 # Streams
-/x-pack/test/api_integration/deployment_agnostic/apis/observability/streams @elastic/streams-program-team
-/x-pack/test/api_integration/deployment_agnostic/configs/serverless/oblt.streams.index.ts @elastic/streams-program-team
-/x-pack/test/api_integration/deployment_agnostic/configs/serverless/oblt.streams.serverless.config.ts @elastic/streams-program-team
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/streams @elastic/streams-program-team
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.streams.index.ts @elastic/streams-program-team
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.streams.serverless.config.ts @elastic/streams-program-team
 /x-pack/test/api_integration/fixtures/kbn_archiver/streams @elastic/streams-program-team
 
 ### END Observability Plugins
@@ -1899,10 +1902,10 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /x-pack/test_serverless/functional/test_suites/common/home_page/  @elastic/appex-qa
 /x-pack/test_serverless/**/services/ @elastic/appex-qa
 /src/platform/packages/shared/kbn-es/src/stateful_resources/roles.yml @elastic/appex-qa
-/x-pack/test/api_integration/deployment_agnostic/ftr_provider_context.d.ts @elastic/appex-qa
-/x-pack/test/api_integration/deployment_agnostic/README.md @elastic/appex-qa
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/ftr_provider_context.d.ts @elastic/appex-qa
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/README.md @elastic/appex-qa
 /x-pack/platform/test/api_integration_deployment_agnostic/*configs/ @elastic/appex-qa
-/x-pack/test/api_integration/deployment_agnostic/services/ @elastic/appex-qa
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/services/ @elastic/appex-qa
 /x-pack/platform/test/api_integration_deployment_agnostic/ @elastic/appex-qa
 /x-pack/platform/test/kibana.jsonc @elastic/appex-qa
 /x-pack/platform/test/tsconfig.json @elastic/appex-qa
@@ -1923,11 +1926,14 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /x-pack/test/apm_api_integration  @elastic/appex-qa # temporarily due to SKA tests relocation
 /x-pack/test/common/utils/observability  @elastic/appex-qa # temporarily due to SKA tests relocation
 /x-pack/test/common/utils/uptime  @elastic/appex-qa # temporarily due to SKA tests relocation
-/x-pack/test/api_integration/deployment_agnostic/feature_flag_configs/serverless/oblt.index.ts @elastic/appex-qa # temporarily due to SKA tests relocation
-/x-pack/test/api_integration/deployment_agnostic/feature_flag_configs/serverless/oblt.serverless.config.ts @elastic/appex-qa # temporarily due to SKA tests relocation
-/x-pack/test/api_integration/deployment_agnostic/feature_flag_configs/stateful/oblt.index.ts @elastic/appex-qa # temporarily due to SKA tests relocation
-/x-pack/test/api_integration/deployment_agnostic/feature_flag_configs/stateful/oblt.stateful.config.ts @elastic/appex-qa # temporarily due to SKA tests relocation
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/feature_flag_configs/serverless/oblt.index.ts @elastic/appex-qa # temporarily due to SKA tests relocation
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/feature_flag_configs/serverless/oblt.serverless.config.ts @elastic/appex-qa # temporarily due to SKA tests relocation
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/feature_flag_configs/stateful/oblt.index.ts @elastic/appex-qa # temporarily due to SKA tests relocation
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/feature_flag_configs/stateful/oblt.stateful.config.ts @elastic/appex-qa # temporarily due to SKA tests relocation
 /x-pack/platform/test/serverless @elastic/appex-qa
+/x-pack/test/api_integration/deployment_agnostic @elastic/appex-qa
+/x-pack/platform/test/functional/services/ml/api.ts @elastic/appex-qa # temporarily due to SKA tests relocation
+/x-pack/test/api_integration/deployment_agnostic/apis/ @elastic/appex-qa # temporarily due to SKA tests relocation
 
 # Core
 /src/platform/test/api_integration/fixtures/kbn_archiver/management/saved_objects/relationships.json @elastic/kibana-core @elastic/kibana-data-discovery
@@ -2903,7 +2909,7 @@ src/platform/testfunctional/page_objects/solution_navigation.ts @elastic/appex-s
 /x-pack/test_serverless/functional/page_objects/svl_common_navigation.ts @elastic/appex-sharedux
 /x-pack/test_serverless/functional/page_objects/svl_sec_landing_page.ts @elastic/appex-sharedux
 /x-pack/test_serverless/functional/test_suites/security/ftr/navigation.ts @elastic/appex-sharedux
-/x-pack/test/api_integration/deployment_agnostic/apis/intercepts/*.ts @elastic/appex-sharedux
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/intercepts/*.ts @elastic/appex-sharedux
 
 # OpenAPI spec files
 oas_docs/linters                              @elastic/core-docs @elastic/experience-docs
