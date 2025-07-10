@@ -16,6 +16,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import {
   ExternalResourceLinks,
+  FETCH_STATUS,
   useBreadcrumbs,
   useFetcher,
 } from '@kbn/observability-shared-plugin/public';
@@ -25,7 +26,7 @@ import { useDatePickerContext } from '../../hooks/use_date_picker_context';
 import { useHasData } from '../../hooks/use_has_data';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useTimeBuckets } from '../../hooks/use_time_buckets';
-import { DataSections } from './components/data_sections';
+import { DATA_SECTIONS, DataSections, type DataSectionsApps } from './components/data_sections';
 import { HeaderActions } from './components/header_actions/header_actions';
 import { HeaderMenu } from './components/header_menu/header_menu';
 import { getNewsFeed } from './components/news_feed/helpers/get_news_feed';
@@ -67,15 +68,35 @@ export function OverviewPage() {
       return getNewsFeed({ http, kibanaVersion });
     }
   }, [http, kibanaVersion, isServerless]);
-  const { hasAnyData, isAllRequestsComplete, hasDataMap } = useHasData();
+
+  const { hasDataMap } = useHasData();
+  // we need to filter out unwanted apps
+  const hasData = useMemo<Partial<Pick<HasDataMap, DataSectionsApps>>>(
+    () =>
+      Object.fromEntries(
+        Object.entries(hasDataMap).filter(([app]) =>
+          DATA_SECTIONS.includes(app as DataSectionsApps)
+        )
+      ) as Partial<Pick<HasDataMap, DataSectionsApps>>,
+    [hasDataMap]
+  );
+
+  const hasAnyData = useMemo(() => Object.values(hasData).some((d) => d?.hasData), [hasData]);
+
+  const isAllRequestsComplete = useMemo(() => {
+    return DATA_SECTIONS.every((app) => {
+      const section = hasData[app as DataSectionsApps];
+      return section?.status === FETCH_STATUS.SUCCESS;
+    });
+  }, [hasData]);
 
   const { setScreenContext } = observabilityAIAssistant?.service || {};
 
-  const appsWithoutData = Object.keys(hasDataMap)
+  const appsWithoutData = (Object.keys(hasData) as DataSectionsApps[])
     .sort()
     .reduce((acc, app) => {
-      const hasData = hasDataMap[app as keyof HasDataMap];
-      if (hasData?.status === 'success' && !hasData?.hasData) {
+      const section = hasData[app];
+      if (section?.status === 'success' && !section?.hasData) {
         const appName = appLabels[app as DataContextApps];
 
         return `${acc}${appName}, `;
@@ -87,7 +108,7 @@ export function OverviewPage() {
   useEffect(() => {
     return setScreenContext?.({
       screenDescription: `The user is viewing the Overview page which shows a summary of the following apps: ${JSON.stringify(
-        hasDataMap
+        hasData
       )}`,
       starterPrompts: [
         ...(appsWithoutData.length > 0
@@ -112,7 +133,7 @@ export function OverviewPage() {
           : []),
       ],
     });
-  }, [appsWithoutData, hasDataMap, setScreenContext]);
+  }, [appsWithoutData, hasData, setScreenContext]);
 
   const { absoluteStart, absoluteEnd } = useDatePickerContext();
 
@@ -127,7 +148,7 @@ export function OverviewPage() {
     [absoluteStart, absoluteEnd, timeBuckets]
   );
 
-  if (!isAllRequestsComplete) {
+  if (!hasAnyData && !isAllRequestsComplete) {
     return <LoadingObservability />;
   }
 

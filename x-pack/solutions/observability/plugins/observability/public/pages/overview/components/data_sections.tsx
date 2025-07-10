@@ -17,6 +17,14 @@ import type { BucketSize } from '../helpers/calculate_bucket_size';
 interface Props {
   bucketSize: BucketSize;
 }
+export type DataSectionsApps = 'alert' | 'infra_logs' | 'infra_metrics' | 'apm' | 'ux';
+export const DATA_SECTIONS: Readonly<DataSectionsApps[]> = [
+  'alert',
+  'infra_logs',
+  'infra_metrics',
+  'apm',
+  'ux',
+];
 
 export function DataSections({ bucketSize }: Props) {
   return (
