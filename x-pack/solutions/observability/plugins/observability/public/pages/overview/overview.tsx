@@ -13,8 +13,8 @@ import {
   EuiHorizontalRule,
   EuiSpacer,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { useEuiTheme } from '@elastic/eui';
 import {
   ExternalResourceLinks,
   FETCH_STATUS,
@@ -50,7 +50,7 @@ export function OverviewPage() {
   } = useKibana().services;
 
   const { ObservabilityPageTemplate } = usePluginContext();
-
+  const { euiTheme } = useEuiTheme();
   useBreadcrumbs(
     [
       {
@@ -193,10 +193,11 @@ export function OverviewPage() {
         <EuiEmptyPrompt
           iconType="logoObservability"
           data-test-subj="obltOverviewNoDataPrompt"
-          css={css({
+          css={{
             flexGrow: 1,
             display: 'flex',
-          })}
+            alignItems: 'center',
+          }}
           title={
             <h2>
               {i18n.translate('xpack.observability.overview.emptyState.title', {
@@ -221,19 +222,22 @@ export function OverviewPage() {
           }
         />
       )}
-      <EuiHorizontalRule />
+      <EuiHorizontalRule
+        css={{
+          width: 'auto',
+          marginLeft: `-${euiTheme.size.l}`,
+          marginRight: `-${euiTheme.size.l}`,
+        }}
+      />
 
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          {/* Resources / What's New sections */}
-          <EuiFlexGroup direction="column">
-            <EuiFlexItem>
-              {!!newsFeed?.items?.length && <NewsFeed items={newsFeed.items.slice(0, 3)} />}
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <ExternalResourceLinks />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+      <EuiFlexGroup direction="column" gutterSize="xl" css={{ flexGrow: 0 }}>
+        {!!newsFeed?.items?.length && (
+          <EuiFlexItem grow={false}>
+            <NewsFeed items={newsFeed.items.slice(0, 3)} />
+          </EuiFlexItem>
+        )}
+        <EuiFlexItem grow={false}>
+          <ExternalResourceLinks />
         </EuiFlexItem>
       </EuiFlexGroup>
     </ObservabilityPageTemplate>
