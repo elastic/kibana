@@ -11,24 +11,24 @@ import {
   ESQLCommandOption,
   Walker,
   isIdentifier,
+  isOptionNode,
+  isSource,
+  isColumn,
+  isList,
   type ESQLAst,
   type ESQLAstItem,
   type ESQLCommand,
   type ESQLFunction,
   type ESQLSingleAstItem,
+  FunctionDefinitionTypes,
 } from '@kbn/esql-ast';
-import { isList } from '@kbn/esql-ast/src/ast/helpers';
-import { ESQLAstExpression } from '@kbn/esql-ast/src/types';
-import { FunctionDefinitionTypes } from '../definitions/types';
-import { EDITOR_MARKER } from './constants';
+import { EDITOR_MARKER } from '@kbn/esql-ast/src/parser/constants';
 import {
-  isColumnItem,
-  isSourceItem,
   pipePrecedesCurrentWord,
   getFunctionDefinition,
-  isOptionItem,
-  within,
-} from './helpers';
+} from '@kbn/esql-ast/src/definitions/utils';
+import { ESQLAstExpression } from '@kbn/esql-ast/src/types';
+import { within } from './helpers';
 
 function findCommand(ast: ESQLAst, offset: number) {
   const commandIndex = ast.findIndex(
@@ -41,7 +41,7 @@ function findCommand(ast: ESQLAst, offset: number) {
 }
 
 function findOption(nodes: ESQLAstItem[], offset: number): ESQLCommandOption | undefined {
-  return findCommandSubType(nodes, offset, isOptionItem);
+  return findCommandSubType(nodes, offset, isOptionNode);
 }
 
 function findCommandSubType<T extends ESQLCommandOption>(
@@ -68,7 +68,7 @@ export function isMarkerNode(node: ESQLAstItem | undefined): boolean {
 
   return Boolean(
     node &&
-      (isColumnItem(node) || isIdentifier(node) || isSourceItem(node)) &&
+      (isColumn(node) || isIdentifier(node) || isSource(node)) &&
       node.name.endsWith(EDITOR_MARKER)
   );
 }

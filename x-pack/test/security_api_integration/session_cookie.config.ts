@@ -7,6 +7,7 @@
 
 import { resolve } from 'path';
 
+import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import type { FtrConfigProviderContext } from '@kbn/test';
 
 import { services } from './services';
@@ -17,6 +18,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xPackAPITestsConfig = await readConfigFile(require.resolve('../api_integration/config.ts'));
 
   return {
+    testConfigCategory: ScoutTestRunConfigCategory.API_TEST,
     testFiles: [resolve(__dirname, './tests/session_cookie')],
     services,
     servers: xPackAPITestsConfig.get('servers'),
