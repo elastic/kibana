@@ -14,29 +14,6 @@ import {
 } from './helpers/repository_client';
 import { disableStreams, enableStreams, forkStream } from './helpers/requests';
 
-export const ROLES = {
-  missing_ingest_pipeline: {
-    elasticsearch: {
-      cluster: ['monitor'],
-      indices: [
-        {
-          names: ['*'],
-          privileges: ['read'],
-        },
-      ],
-    },
-    kibana: [
-      {
-        base: [],
-        spaces: ['*'],
-        feature: {
-          streams: ['all'],
-        },
-      },
-    ],
-  },
-};
-
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
   let adminApiClient: StreamsSupertestRepositoryClient;
