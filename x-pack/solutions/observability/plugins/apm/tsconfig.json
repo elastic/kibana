@@ -135,7 +135,6 @@
     "@kbn/core-http-server-utils",
     "@kbn/key-value-metadata-table",
     "@kbn/event-stacktrace",
-    "@kbn/shared-ux-error-boundary",
   ],
   "exclude": ["target/**/*"]
 }
