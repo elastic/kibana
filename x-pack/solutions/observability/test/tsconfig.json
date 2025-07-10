@@ -74,10 +74,5 @@
     "@kbn/observability-onboarding-plugin",
     "@kbn/slo-plugin",
     "@kbn/slo-schema",
-    "@kbn/streams-schema",
-    "@kbn/streams-plugin",
-    "@kbn/es-errors",
-    "@kbn/content-packs-schema",
-    "@kbn/server-route-repository-utils",
   ]
 }
