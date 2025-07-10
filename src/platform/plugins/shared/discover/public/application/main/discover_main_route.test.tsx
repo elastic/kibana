@@ -15,7 +15,7 @@ import { discoverServiceMock } from '../../__mocks__/services';
 import type { MainRouteProps } from './discover_main_route';
 import { DiscoverMainRoute } from './discover_main_route';
 import { MemoryRouter } from 'react-router-dom';
-import { DiscoverMainApp } from './components/session_view/main_app';
+import { DiscoverMainApp } from './components/single_tab_view/main_app';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import type { DiscoverCustomizationService } from '../../customizations/customization_service';
 import { createCustomizationService } from '../../customizations/customization_service';
