@@ -156,7 +156,7 @@ describe('getGeneratedTitle', () => {
     expect(logger.error).toHaveBeenCalledWith('Error generating title');
   });
 
-  it('should generate title with Elastic Observability scope when scopes include search', () => {
+  it('should generate title with Elastic Observability scope when scopes include observability', () => {
     const response = createChatCompletionResponse({
       function_call: {
         name: TITLE_CONVERSATION_FUNCTION_NAME,
