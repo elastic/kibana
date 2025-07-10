@@ -35,8 +35,6 @@ export function getGeneratedTitle({
   logger: Pick<Logger, 'debug' | 'error'>;
   scopes: AssistantScope[];
 }): Observable<string> {
-  console.log(scopes);
-  console.log(scopes.includes('observability'));
   return from(
     chat('generate_title', {
       systemMessage: scopes.includes('observability')
