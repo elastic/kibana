@@ -14,7 +14,7 @@ import {
   MessageCompleteEvent,
   ToolCallEvent,
   ToolResultEvent,
-} from '@kbn/onechat-common/agents';
+} from '@kbn/onechat-common';
 import { StructuredToolIdentifier } from '@kbn/onechat-common/tools';
 import {
   matchGraphName,

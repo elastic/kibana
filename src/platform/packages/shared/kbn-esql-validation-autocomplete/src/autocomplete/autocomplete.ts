@@ -28,6 +28,10 @@ import {
   FunctionDefinitionTypes,
   FunctionParameter,
   isList,
+  isColumn,
+  isOptionNode,
+  isLiteral,
+  isFunctionExpression,
 } from '@kbn/esql-ast';
 import { Location } from '@kbn/esql-ast/src/commands_registry/types';
 import { comparisonFunctions } from '@kbn/esql-ast/src/definitions/all_operators';
@@ -42,6 +46,8 @@ import {
   buildFieldsDefinitionsWithMetadata,
   getFunctionSuggestions,
   getExpressionType,
+  getColumnExists,
+  getFunctionDefinition,
 } from '@kbn/esql-ast/src/definitions/utils';
 import { getRecommendedQueriesSuggestionsFromStaticTemplates } from '@kbn/esql-ast/src/commands_registry/options/recommended_queries';
 import {
@@ -53,17 +59,7 @@ import {
 } from '@kbn/esql-ast/src/commands_registry/types';
 import { type ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';
 import type { EditorContext } from './types';
-import {
-  getFunctionDefinition,
-  isColumnItem,
-  isFunctionItem,
-  isLiteralItem,
-  isOptionItem,
-  isSourceCommand,
-  getAllFunctions,
-  isSingleItem,
-  getColumnExists,
-} from '../shared/helpers';
+import { isSourceCommand, getAllFunctions } from '../shared/helpers';
 import {
   collectUserDefinedColumns,
   excludeUserDefinedColumnsFromCurrentCommand,
@@ -453,7 +449,7 @@ async function getFunctionArgsSuggestions(
   const noArgDefined = !arg;
   const isUnknownColumn =
     arg &&
-    isColumnItem(arg) &&
+    isColumn(arg) &&
     !getColumnExists(arg, {
       fields: fieldsMap,
       userDefinedColumns: userDefinedColumnsExcludingCurrentCommandOnes,
@@ -463,7 +459,7 @@ async function getFunctionArgsSuggestions(
     // ... | EVAL fn( field, <suggest>)
 
     const commandArgIndex = command.args.findIndex(
-      (cmdArg) => isSingleItem(cmdArg) && cmdArg.location.max >= node.location.max
+      (cmdArg) => !Array.isArray(cmdArg) && cmdArg.location.max >= node.location.max
     );
     const finalCommandArgIndex =
       command.name !== 'stats'
@@ -487,7 +483,7 @@ async function getFunctionArgsSuggestions(
 
     if (
       command.name !== 'stats' ||
-      (isOptionItem(finalCommandArg) && finalCommandArg.name === 'by')
+      (isOptionNode(finalCommandArg) && finalCommandArg.name === 'by')
     ) {
       // ignore the current function
       fnToIgnore.push(node.name);
@@ -615,7 +611,7 @@ async function getFunctionArgsSuggestions(
   // for eval and row commands try also to complete numeric literals with time intervals where possible
   if (arg) {
     if (command.name !== 'stats') {
-      if (isLiteralItem(arg) && isNumericType(arg.literalType)) {
+      if (isLiteral(arg) && isNumericType(arg.literalType)) {
         // ... | EVAL fn(2 <suggest>)
         suggestions.push(
           ...getCompatibleLiterals(['time_literal_unit'], {
@@ -667,7 +663,7 @@ async function getListArgsSuggestions(
 
   // node is supposed to be the function who support a list argument (like the "in" operator)
   // so extract the type of the first argument and suggest fields of that type
-  if (node && isFunctionItem(node)) {
+  if (node && isFunctionExpression(node)) {
     const list = node?.args[1];
 
     if (isList(list)) {
@@ -689,7 +685,7 @@ async function getListArgsSuggestions(
       }
     });
     const [firstArg] = node.args;
-    if (isColumnItem(firstArg)) {
+    if (isColumn(firstArg)) {
       const argType = extractTypeFromASTArg(firstArg, {
         fields: fieldsMap,
         userDefinedColumns: anyUserDefinedColumns,
@@ -698,7 +694,7 @@ async function getListArgsSuggestions(
         // do not propose existing columns again
         const otherArgs = isList(list)
           ? list.values
-          : node.args.filter(Array.isArray).flat().filter(isColumnItem);
+          : node.args.filter(Array.isArray).flat().filter(isColumn);
         suggestions.push(
           ...(await getFieldsOrFunctionsSuggestions(
             [argType as string],

@@ -2129,30 +2129,6 @@
           },
           {
             "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/types/types.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/types/types.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/types/types.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/types.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/types.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/types.ts"
-          },
-          {
-            "plugin": "actions",
             "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/update/types/types.ts"
           },
           {
@@ -2177,7 +2153,15 @@
           },
           {
             "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/create.ts"
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/types/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/types/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/types/types.ts"
           },
           {
             "plugin": "actions",
@@ -2186,6 +2170,22 @@
           {
             "plugin": "actions",
             "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/create.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/create.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/types.ts"
           },
           {
             "plugin": "alerting",
