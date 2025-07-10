@@ -119,11 +119,13 @@ describe('AutoInstallContentPackagesTask', () => {
     beforeEach(async () => {
       const [{ elasticsearch }] = await mockCore.getStartServices();
       esClient = elasticsearch.client.asInternalUser as ElasticsearchClientMock;
-      esClient.search.mockResolvedValue({
-        hits: {
-          hits: [],
-          total: { value: 1, relation: 'eq' },
-        },
+      esClient.esql.query.mockResolvedValue({
+        took: 100,
+        values: [
+          [1, 'system.cpu'],
+          [2, 'system.memory'],
+          [3, 'system.test'],
+        ],
       } as any);
       jest
         .spyOn(appContextService, 'getExperimentalFeatures')
