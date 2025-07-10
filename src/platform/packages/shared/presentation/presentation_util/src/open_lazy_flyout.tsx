@@ -19,12 +19,12 @@ import { tracksOverlays } from './tracks_overlays';
 
 const htmlId = htmlIdGenerator('modalTitleId');
 
-export interface LoadContentArgs {
+interface LoadContentArgs {
   closeFlyout: () => void;
   ariaLabelledBy: string;
 }
 
-export interface OpenLazyFlyoutParams {
+interface OpenLazyFlyoutParams {
   core: CoreStart;
   loadContent: (args: LoadContentArgs) => Promise<JSX.Element | null | void>;
   flyoutProps?: Partial<OverlayFlyoutOpenOptions> & { triggerId?: string };
@@ -33,14 +33,30 @@ export interface OpenLazyFlyoutParams {
   uuid?: string;
 }
 
-export const openLazyFlyout = ({
-  core,
-  parentApi,
-  loadContent,
-  flyoutProps,
-  uuid,
-  triggerId,
-}: OpenLazyFlyoutParams) => {
+/**
+ * Opens a flyout panel with lazily loaded content.
+ *
+ * This helper handles:
+ * - Mounting a flyout panel with async content.
+ * - Automatically focusing the flyout when content is ready.
+ * - Closing the flyout when the user navigates to a different app.
+ * - Tracking the flyout if `parentApi` supports overlay tracking.
+ * - Returning focus to a trigger element when the flyout closes.
+ *
+ * @param params - Configuration object.
+ * @param params.core - The `CoreStart` contract, used for overlays, app lifecycle, and notifications.
+ * @param params.loadContent - Async function that loads the flyout content. Must return a valid React element.
+ *                             If it resolves to `null` or `undefined`, the flyout will close automatically.
+ * @param params.flyoutProps - Optional props passed to `openFlyout` (e.g. size, className, etc).
+ *                             Supports `OverlayFlyoutOpenOptions`.
+ * @param params.parentApi - Optional parent API to track opened overlays (e.g. dashboardsApi).
+ * @param params.triggerId - Optional DOM element ID to focus when the flyout closes.
+ * @param params.uuid - Optional ID for the related panel on the dashboard (used by overlay tracking).
+ *
+ * @returns A handle to the opened flyout (`OverlayRef`).
+ */
+export const openLazyFlyout = (params: OpenLazyFlyoutParams) => {
+  const { core, parentApi, loadContent, flyoutProps, uuid, triggerId } = params;
   const ariaLabelledBy = htmlId();
   const overlayTracker = tracksOverlays(parentApi) ? parentApi : undefined;
 
