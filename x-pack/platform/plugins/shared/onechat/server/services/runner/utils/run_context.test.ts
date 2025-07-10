@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  createBuiltinToolId,
-  toSerializedToolIdentifier,
-  toSerializedAgentIdentifier,
-  type AgentIdentifier,
-} from '@kbn/onechat-common';
+import { createBuiltinToolId, toSerializedToolIdentifier } from '@kbn/onechat-common';
 import type { RunContext } from '@kbn/onechat-server';
 import {
   createEmptyRunContext,
@@ -99,11 +94,7 @@ describe('RunContext utilities', () => {
         stack: [],
       };
 
-      const agentId: AgentIdentifier = {
-        agentId: 'test-agent',
-        providerId: 'test-provider',
-      };
-      const expectedSerializedAgentId = toSerializedAgentIdentifier(agentId);
+      const agentId = 'test-agent';
       const forkedContext = forkContextForAgentRun({ agentId, parentContext });
 
       expect(forkedContext).toEqual({
@@ -111,28 +102,22 @@ describe('RunContext utilities', () => {
         stack: [
           {
             type: 'agent',
-            agentId: expectedSerializedAgentId,
+            agentId,
           },
         ],
       });
     });
 
     it('should preserve existing stack entries when forking', () => {
-      const existingAgentId: AgentIdentifier = {
-        agentId: 'existing-agent',
-        providerId: 'test-provider',
-      };
-      const newAgentId: AgentIdentifier = {
-        agentId: 'new-agent',
-        providerId: 'test-provider',
-      };
+      const existingAgentId = 'existing-agent';
+      const newAgentId = 'new-agent';
 
       const parentContext: RunContext = {
         runId: 'parent-run-id',
         stack: [
           {
             type: 'agent',
-            agentId: toSerializedAgentIdentifier(existingAgentId),
+            agentId: existingAgentId,
           },
         ],
       };
@@ -144,11 +129,11 @@ describe('RunContext utilities', () => {
         stack: [
           {
             type: 'agent',
-            agentId: toSerializedAgentIdentifier(existingAgentId),
+            agentId: existingAgentId,
           },
           {
             type: 'agent',
-            agentId: toSerializedAgentIdentifier(newAgentId),
+            agentId: newAgentId,
           },
         ],
       });
