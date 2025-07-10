@@ -17,6 +17,7 @@ import { VisParams } from '../../common';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import userEvent from '@testing-library/user-event';
+import { EuiThemeProvider } from '@elastic/eui';
 
 describe('NewVisModal', () => {
   const defaultVisTypeParams = {
@@ -100,19 +101,21 @@ describe('NewVisModal', () => {
 
   const renderNewVisModal = (propsOverrides?: Partial<TypeSelectionProps>) => {
     return render(
-      <I18nProvider>
-        <NewVisModal
-          isOpen={true}
-          onClose={() => null}
-          visTypesRegistry={visTypes}
-          addBasePath={addBasePath}
-          uiSettings={uiSettings}
-          application={{} as ApplicationStart}
-          docLinks={docLinks}
-          contentClient={contentManagement.client}
-          {...propsOverrides}
-        />
-      </I18nProvider>
+      <EuiThemeProvider>
+        <I18nProvider>
+          <NewVisModal
+            isOpen={true}
+            onClose={() => null}
+            visTypesRegistry={visTypes}
+            addBasePath={addBasePath}
+            uiSettings={uiSettings}
+            application={{} as ApplicationStart}
+            docLinks={docLinks}
+            contentClient={contentManagement.client}
+            {...propsOverrides}
+          />
+        </I18nProvider>
+      </EuiThemeProvider>
     );
   };
 

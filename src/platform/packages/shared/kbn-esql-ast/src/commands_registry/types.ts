@@ -231,3 +231,27 @@ export interface ESQLSourceResult {
   dataStreams?: Array<{ name: string; title?: string }>;
   type?: string;
 }
+
+const commandOptionNameToLocation: Record<string, Location> = {
+  eval: Location.EVAL,
+  where: Location.WHERE,
+  row: Location.ROW,
+  sort: Location.SORT,
+  stats: Location.STATS,
+  by: Location.STATS_BY,
+  enrich: Location.ENRICH,
+  with: Location.ENRICH_WITH,
+  dissect: Location.DISSECT,
+  rename: Location.RENAME,
+  join: Location.JOIN,
+  show: Location.SHOW,
+  completion: Location.COMPLETION,
+};
+
+/**
+ * Pause before using this in new places. Where possible, use the Location enum directly.
+ *
+ * This is primarily around for backwards compatibility with the old system of command and option names.
+ */
+export const getLocationFromCommandOrOptionName = (name: string) =>
+  commandOptionNameToLocation[name];
