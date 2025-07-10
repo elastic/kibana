@@ -142,10 +142,10 @@ export const createStateService = (
     currentSuggestionContext: undefined,
     lensRequestAdapter: undefined,
     timeInterval: 'auto',
-    topPanelHeight: initialTopPanelHeight,
     totalHitsResult: undefined,
     totalHitsStatus: UnifiedHistogramFetchStatus.uninitialized,
     ...initialState,
+    topPanelHeight: initialState?.topPanelHeight ?? initialTopPanelHeight,
   });
 
   const updateState = (stateUpdate: Partial<UnifiedHistogramState>) => {

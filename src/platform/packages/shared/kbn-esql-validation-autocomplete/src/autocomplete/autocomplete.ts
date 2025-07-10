@@ -28,7 +28,12 @@ import {
   FunctionDefinitionTypes,
   FunctionParameter,
   isList,
+  isColumn,
+  isOptionNode,
+  isLiteral,
+  isFunctionExpression,
 } from '@kbn/esql-ast';
+import { Location } from '@kbn/esql-ast/src/commands_registry/types';
 import { comparisonFunctions } from '@kbn/esql-ast/src/definitions/all_operators';
 import { EDITOR_MARKER } from '@kbn/esql-ast/src/parser/constants';
 import {
@@ -41,6 +46,8 @@ import {
   buildFieldsDefinitionsWithMetadata,
   getFunctionSuggestions,
   getExpressionType,
+  getColumnExists,
+  getFunctionDefinition,
 } from '@kbn/esql-ast/src/definitions/utils';
 import { getRecommendedQueriesSuggestionsFromStaticTemplates } from '@kbn/esql-ast/src/commands_registry/options/recommended_queries';
 import {
@@ -52,17 +59,7 @@ import {
 } from '@kbn/esql-ast/src/commands_registry/types';
 import { type ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';
 import type { EditorContext } from './types';
-import {
-  getFunctionDefinition,
-  isColumnItem,
-  isFunctionItem,
-  isLiteralItem,
-  isOptionItem,
-  isSourceCommand,
-  getAllFunctions,
-  isSingleItem,
-  getColumnExists,
-} from '../shared/helpers';
+import { isSourceCommand, getAllFunctions } from '../shared/helpers';
 import {
   collectUserDefinedColumns,
   excludeUserDefinedColumnsFromCurrentCommand,
@@ -78,6 +75,7 @@ import {
   getValidSignaturesAndTypesToSuggestNext,
   extractTypeFromASTArg,
   correctQuerySyntax,
+  isTimeseriesAggUsedAlready,
 } from './helper';
 import { getLocationFromCommandOrOptionName } from '../shared/types';
 import { mapRecommendedQueriesFromExtensions } from './utils/recommended_queries_helpers';
@@ -118,7 +116,7 @@ export async function suggest(
     // resolve particular commands suggestions after
     // filter source commands if already defined
     const commands = esqlCommandRegistry.getAllCommandNames();
-    let suggestions = getCommandAutocompleteDefinitions(commands);
+    const suggestions = getCommandAutocompleteDefinitions(commands);
     if (!ast.length) {
       // Display the recommended queries if there are no commands (empty state)
       const recommendedQueriesSuggestions: ISuggestionItem[] = [];
@@ -156,12 +154,6 @@ export async function suggest(
       }
       const sourceCommandsSuggestions = suggestions.filter(isSourceCommand);
       return [...sourceCommandsSuggestions, ...recommendedQueriesSuggestions];
-    }
-
-    // If the last command is not a FORK, RRF should not be suggested.
-    const lastCommand = root.commands[root.commands.length - 1];
-    if (lastCommand.name !== 'fork') {
-      suggestions = suggestions.filter((def) => def.label !== 'RRF');
     }
 
     return suggestions.filter((def) => !isSourceCommand(def));
@@ -457,7 +449,7 @@ async function getFunctionArgsSuggestions(
   const noArgDefined = !arg;
   const isUnknownColumn =
     arg &&
-    isColumnItem(arg) &&
+    isColumn(arg) &&
     !getColumnExists(arg, {
       fields: fieldsMap,
       userDefinedColumns: userDefinedColumnsExcludingCurrentCommandOnes,
@@ -467,7 +459,7 @@ async function getFunctionArgsSuggestions(
     // ... | EVAL fn( field, <suggest>)
 
     const commandArgIndex = command.args.findIndex(
-      (cmdArg) => isSingleItem(cmdArg) && cmdArg.location.max >= node.location.max
+      (cmdArg) => !Array.isArray(cmdArg) && cmdArg.location.max >= node.location.max
     );
     const finalCommandArgIndex =
       command.name !== 'stats'
@@ -491,7 +483,7 @@ async function getFunctionArgsSuggestions(
 
     if (
       command.name !== 'stats' ||
-      (isOptionItem(finalCommandArg) && finalCommandArg.name === 'by')
+      (isOptionNode(finalCommandArg) && finalCommandArg.name === 'by')
     ) {
       // ignore the current function
       fnToIgnore.push(node.name);
@@ -500,6 +492,11 @@ async function getFunctionArgsSuggestions(
         ...getFunctionsToIgnoreForStats(command, finalCommandArgIndex),
         ...(isAggFunctionUsedAlready(command, finalCommandArgIndex)
           ? getAllFunctions({ type: FunctionDefinitionTypes.AGG }).map(({ name }) => name)
+          : []),
+        ...(isTimeseriesAggUsedAlready(command, finalCommandArgIndex)
+          ? getAllFunctions({ type: FunctionDefinitionTypes.TIME_SERIES_AGG }).map(
+              ({ name }) => name
+            )
           : [])
       );
     }
@@ -572,9 +569,16 @@ async function getFunctionArgsSuggestions(
 
     // Functions
     if (typesToSuggestNext.every((d) => !d.fieldsOnly)) {
+      let location = getLocationFromCommandOrOptionName(option?.name ?? command.name);
+      // If the user is working with timeseries data, we want to suggest
+      // functions that are relevant to the timeseries context.
+      const isTSSourceCommand = commands[0].name === 'ts';
+      if (isTSSourceCommand && isAggFunctionUsedAlready(command, finalCommandArgIndex)) {
+        location = Location.STATS_TIMESERIES;
+      }
       suggestions.push(
         ...getFunctionSuggestions({
-          location: getLocationFromCommandOrOptionName(option?.name ?? command.name),
+          location,
           returnTypes: canBeBooleanCondition
             ? ['any']
             : (ensureKeywordAndText(
@@ -607,7 +611,7 @@ async function getFunctionArgsSuggestions(
   // for eval and row commands try also to complete numeric literals with time intervals where possible
   if (arg) {
     if (command.name !== 'stats') {
-      if (isLiteralItem(arg) && isNumericType(arg.literalType)) {
+      if (isLiteral(arg) && isNumericType(arg.literalType)) {
         // ... | EVAL fn(2 <suggest>)
         suggestions.push(
           ...getCompatibleLiterals(['time_literal_unit'], {
@@ -659,7 +663,7 @@ async function getListArgsSuggestions(
 
   // node is supposed to be the function who support a list argument (like the "in" operator)
   // so extract the type of the first argument and suggest fields of that type
-  if (node && isFunctionItem(node)) {
+  if (node && isFunctionExpression(node)) {
     const list = node?.args[1];
 
     if (isList(list)) {
@@ -681,7 +685,7 @@ async function getListArgsSuggestions(
       }
     });
     const [firstArg] = node.args;
-    if (isColumnItem(firstArg)) {
+    if (isColumn(firstArg)) {
       const argType = extractTypeFromASTArg(firstArg, {
         fields: fieldsMap,
         userDefinedColumns: anyUserDefinedColumns,
@@ -690,7 +694,7 @@ async function getListArgsSuggestions(
         // do not propose existing columns again
         const otherArgs = isList(list)
           ? list.values
-          : node.args.filter(Array.isArray).flat().filter(isColumnItem);
+          : node.args.filter(Array.isArray).flat().filter(isColumn);
         suggestions.push(
           ...(await getFieldsOrFunctionsSuggestions(
             [argType as string],
