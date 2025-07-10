@@ -347,7 +347,7 @@ export function ChatBody({
                 '@timestamp': now,
                 message: {
                   role: MessageRole.User,
-                  content: `Visualize the above query.`,
+                  content: `Visualize the following ES|QL query:\n\n\`\`\`esql\n${payload.query}\n\`\`\``,
                 },
               },
               {
