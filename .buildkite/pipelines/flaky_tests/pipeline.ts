@@ -119,7 +119,7 @@ const pipeline = {
     IGNORE_SHIP_CI_STATS_ERROR: 'true',
     ...envFromLabels,
     ELASTIC_APM_TRANSACTION_SAMPLE_RATE: 1,
-    ELASTIC_APM_ENABLED: 'true',
+    ELASTIC_APM_ACTIVE: 'true',
   },
   steps,
 };
