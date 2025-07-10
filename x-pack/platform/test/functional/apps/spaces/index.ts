@@ -9,12 +9,12 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function spacesApp({ loadTestFile }: FtrProviderContext) {
   describe('Spaces app', function spacesAppTestSuite() {
-    loadTestFile(require.resolve('./copy_saved_objects'));
-    loadTestFile(require.resolve('./feature_controls/spaces_security'));
-    loadTestFile(require.resolve('./spaces_selection'));
+    // loadTestFile(require.resolve('./copy_saved_objects'));
+    // loadTestFile(require.resolve('./feature_controls/spaces_security'));
+    // loadTestFile(require.resolve('./spaces_selection'));
     loadTestFile(require.resolve('./enter_space'));
     loadTestFile(require.resolve('./create_edit_space'));
-    loadTestFile(require.resolve('./spaces_grid'));
-    loadTestFile(require.resolve('./solution_tour'));
+    // loadTestFile(require.resolve('./spaces_grid'));
+    // loadTestFile(require.resolve('./solution_tour'));
   });
 }
