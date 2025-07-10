@@ -77,9 +77,9 @@ import {
   type DataControlFieldRegistry,
 } from './types';
 import { ControlFactory } from '../types';
-import { OptionsField } from './options_field';
 // import { ESQLLangEditor } from '@kbn/esql/public';
 import { confirmDeleteControl } from '../../common';
+import { ListOptionsInput } from '../../common/list_options_input/list_options_input';
 
 export interface ControlEditorProps<
   State extends DefaultDataControlState = DefaultDataControlState
@@ -442,7 +442,11 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
             />
           )} */}
           {isStaticInputMode && (
-            <OptionsField label="List options" value={staticOptions} onChange={setStaticOptions} />
+            <ListOptionsInput
+              label="List options"
+              value={staticOptions}
+              onChange={setStaticOptions}
+            />
           )}
         </>
       ),

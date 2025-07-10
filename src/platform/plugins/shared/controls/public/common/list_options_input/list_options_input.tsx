@@ -41,7 +41,7 @@ interface Props {
   error?: ReactNode;
 }
 
-type OptionsFieldOption = EuiSelectOption & { isFresh?: boolean };
+type ListOptionsInputOption = EuiSelectOption & { isFresh?: boolean };
 
 export const INITIAL_OPTIONS: EuiSelectOption[] = [
   {
@@ -53,7 +53,7 @@ export const INITIAL_OPTIONS: EuiSelectOption[] = [
   },
 ];
 
-const OptionsFieldComponent = ({
+const ListOptionsInputComponent = ({
   value,
   helpText,
   label,
@@ -66,9 +66,9 @@ const OptionsFieldComponent = ({
 }: Props) => {
   // Add a state to track if an option has just been created. This is used to auto-focus the input, and to prevent
   // any validation errors from appearing until after the user has entered a value or blurred the input
-  const [freshOption, setFreshOption] = useState<OptionsFieldOption | null>(null);
+  const [freshOption, setFreshOption] = useState<ListOptionsInputOption | null>(null);
 
-  const currentOptions: OptionsFieldOption[] = useMemo(() => {
+  const currentOptions: ListOptionsInputOption[] = useMemo(() => {
     const parsedValue = value.length ? value : INITIAL_OPTIONS;
     if (freshOption) parsedValue.push(freshOption);
     return Array.isArray(parsedValue) ? parsedValue : INITIAL_OPTIONS;
@@ -81,7 +81,7 @@ const OptionsFieldComponent = ({
   });
 
   const onChangeOptionLabel = useCallback(
-    ({ value: key, text }: OptionsFieldOption) => {
+    ({ value: key, text }: ListOptionsInputOption) => {
       setFreshOption(null);
       const newOptions = currentOptions.map((option) =>
         key === option.value ? { value: key, text } : option
@@ -106,7 +106,7 @@ const OptionsFieldComponent = ({
   );
 
   const onBlurOption = useCallback(
-    (option: OptionsFieldOption) => {
+    (option: ListOptionsInputOption) => {
       if (option.isFresh) {
         onChangeOptionLabel(option);
       }
@@ -179,7 +179,7 @@ const OptionsFieldComponent = ({
                               onAddOption();
                             }
                           }}
-                          data-test-subj={`options-field-option-label-${index}`}
+                          data-test-subj={`list-options-input-option-label-${index}`}
                         />
                       </EuiFlexItem>
                       {currentOptions.length > 1 && (
@@ -188,7 +188,7 @@ const OptionsFieldComponent = ({
                             iconType={'minusInCircle'}
                             color={'danger'}
                             onClick={() => onRemoveOption(option.value)}
-                            data-test-subj={`options-field-remove-option-${index}`}
+                            data-test-subj={`list-options-input-remove-option-${index}`}
                           />
                         </EuiFlexItem>
                       )}
@@ -206,7 +206,7 @@ const OptionsFieldComponent = ({
                 <EuiButtonEmpty
                   iconType={'plusInCircle'}
                   onClick={onAddOption}
-                  data-test-subj="options-field-add-option"
+                  data-test-subj="list-options-input-add-option"
                 >
                   {i18n.translate('optionsfield.addOption', {
                     defaultMessage: 'Add option',
@@ -221,6 +221,6 @@ const OptionsFieldComponent = ({
   );
 };
 
-OptionsFieldComponent.displayName = 'OptionsField';
+ListOptionsInputComponent.displayName = 'ListOptionsInput';
 
-export const OptionsField = React.memo(OptionsFieldComponent);
+export const ListOptionsInput = React.memo(ListOptionsInputComponent);
