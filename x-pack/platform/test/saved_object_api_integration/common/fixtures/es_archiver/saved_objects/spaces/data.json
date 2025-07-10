@@ -952,7 +952,8 @@
       "sortTestingType": {
         "title": "Alpha",
         "titleKeyword": "alpha",
-        "textWithKeyword": "zulu"
+        "textWithKeyword": "zulu",
+        "numericValue": 100
       },
       "type": "sortTestingType",
       "namespaces": ["default"],
@@ -970,7 +971,8 @@
       "sortTestingType": {
         "title": "Bravo",
         "titleKeyword": "bravo",
-        "textWithKeyword": "yankee"
+        "textWithKeyword": "yankee",
+        "numericValue": 100
       },
       "type": "sortTestingType",
       "namespaces": ["default"],
@@ -988,7 +990,8 @@
       "sortTestingType": {
         "title": "Charlie",
         "titleKeyword": "charlie",
-        "textWithKeyword": "xray"
+        "textWithKeyword": "xray",
+        "numericValue": 100
       },
       "type": "sortTestingType",
       "namespaces": ["space_1"],
@@ -1060,7 +1063,8 @@
       "sortTestingType2": {
         "title": "Alpha2",
         "titleKeyword": "alpha2",
-        "textWithKeyword": "zulu2"
+        "textWithKeyword": "zulu2",
+        "numericValue": 100000
       },
       "type": "sortTestingType2",
       "namespaces": ["default"],
@@ -1078,7 +1082,8 @@
       "sortTestingType2": {
         "title": "Bravo2",
         "titleKeyword": "bravo2",
-        "textWithKeyword": "yankee2"
+        "textWithKeyword": "yankee2",
+        "numericValue": 100000
       },
       "type": "sortTestingType2",
       "namespaces": ["default"],
@@ -1096,7 +1101,8 @@
       "sortTestingType2": {
         "title": "Charlie2",
         "titleKeyword": "charlie2",
-        "textWithKeyword": "xray2"
+        "textWithKeyword": "xray2",
+        "numericValue": 900000
       },
       "type": "sortTestingType2",
       "namespaces": ["space_1"],
@@ -1114,7 +1120,8 @@
       "sortTestingType2": {
         "title": "Delta2",
         "titleKeyword": "delta2",
-        "textWithKeyword": "whiskey2"
+        "textWithKeyword": "whiskey2",
+        "numericValue": 100122
       },
       "type": "sortTestingType2",
       "namespaces": ["space_2"],

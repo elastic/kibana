@@ -20,13 +20,11 @@ const NUMERIC_TYPES = [
   'half_float',
   'scaled_float',
 ] as const;
+
 const NUMERIC_TYPES_SET = new Set(NUMERIC_TYPES);
 
-// Priority: numeric > date > keyword > text > others
-const TYPE_PRIORITY = [...NUMERIC_TYPES, 'date', 'keyword'] as const;
-
-// List of sortable types in Elasticsearch (TYPE_PRIORITY plus 'boolean')
-const SORTABLE_TYPES = new Set([...TYPE_PRIORITY, 'boolean']);
+// List of sortable types in Elasticsearch (numeric, date, keyword, boolean)
+const SORTABLE_TYPES = new Set([...NUMERIC_TYPES, 'date', 'keyword', 'boolean']);
 
 /**
  * Returns true if the field mapping is sortable in Elasticsearch.
@@ -102,12 +100,6 @@ export const getMergedFieldType = (
   if (types.some((t) => NUMERIC_TYPES_SET.has(t as (typeof NUMERIC_TYPES)[number]))) {
     return 'double';
   }
-
-  for (const t of TYPE_PRIORITY) {
-    if (types.includes(t)) {
-      return t as MappingRuntimeFieldType;
-    }
-  }
   // fallback to keyword if unknown
-  return 'keyword';
+  return (types?.[0] as MappingRuntimeFieldType) ?? 'keyword';
 };

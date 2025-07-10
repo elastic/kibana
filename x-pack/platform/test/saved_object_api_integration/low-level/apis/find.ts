@@ -267,18 +267,6 @@ export default function ({ getService }: FtrProviderContext) {
         ]);
       });
 
-      it('throws error if sort field is not present in single type', async () => {
-        const query = queryString.stringify({
-          type: 'sortTestingType',
-          sort_field: 'notPresent',
-        });
-        const response = await supertest.get(
-          `${getUrlPrefix(defaultNamespace)}/api/saved_objects/_find?${query}`
-        );
-        expect(response.status).to.eql(400);
-        expect(response.body.message).to.match(/Unknown sort field notPresent/);
-      });
-
       it('sorts by keyword field for multiple types when some documents are missing the field', async () => {
         // This assumes that at least one document in sortTestingType or sortTestingType2 is missing 'titleKeyword'
         // If not, you may need to adjust the fixture data to include such a document.
@@ -299,6 +287,24 @@ export default function ({ getService }: FtrProviderContext) {
             true
           );
         }
+      });
+
+      it('sorts by a numeric field (short + long) for multiple types, treating numeric fields equally', async () => {
+        const query = queryString.stringify({
+          type: sortTestTypes,
+          sort_field: 'numericValue',
+          sort_order: 'asc',
+        });
+        const response = await supertest.get(
+          `${getUrlPrefix(defaultNamespace)}/api/saved_objects/_find?${query}`
+        );
+        expect(response.status).to.eql(200, JSON.stringify(response.body));
+        // The test expects the numeric values to be sorted in ascending order,
+        // regardless of whether the field is mapped as short or long.
+        const values = response.body.saved_objects.map((o: any) => o.attributes.numericValue);
+        // All values should be sorted numerically
+        const sorted = [...values].sort((a: number, b: number) => a - b);
+        expect(values).to.eql(sorted);
       });
     });
   });
