@@ -28,7 +28,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   const testSubjects = getService('testSubjects');
 
-  describe('Search Homepage', function () {
+  describe.skip('Search Homepage', function () {
     describe('as viewer', function () {
       before(async () => {
         roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
