@@ -18,7 +18,7 @@ import {
   commaCompleteItem,
   getNewUserDefinedColumnSuggestion,
   getDateHistogramCompletionItem,
-} from '../../utils/complete_items';
+} from '../../complete_items';
 import {
   pushItUpInTheList,
   columnExists,
