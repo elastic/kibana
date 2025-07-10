@@ -57,6 +57,9 @@ const globalLayoutStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
   .kbnBody {
     padding-top: var(--euiFixedHeadersOffset, 0);
 
+    // total height of all fixed headers + the sticky action menu toolbar, dynamically updated depending on the presence of the elements
+    --kbnAppHeadersOffset: var(--euiFixedHeadersOffset, 0px);
+
     // forward compatibility with new grid layout variables,
     --kbn-application--content-height: calc(
       100vh - var(--kbnAppHeadersOffset, var(--euiFixedHeadersOffset, 0))
