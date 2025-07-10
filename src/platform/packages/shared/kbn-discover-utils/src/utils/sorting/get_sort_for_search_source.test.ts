@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SortOrder } from '@kbn/saved-search-plugin/public';
+import type { SortOrder } from './get_sort';
 import { getSortForSearchSource } from './get_sort_for_search_source';
 import {
   stubDataView,

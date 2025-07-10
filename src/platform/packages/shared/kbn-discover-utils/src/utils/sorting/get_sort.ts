@@ -8,9 +8,9 @@
  */
 
 import { DataView } from '@kbn/data-views-plugin/common';
-import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { isPlainObject } from 'lodash';
 
+export type SortOrder = [string, string];
 export type SortPairObj = Record<string, string>;
 export type SortPair = SortOrder | SortPairObj;
 export type SortInput = SortPair | SortPair[];
