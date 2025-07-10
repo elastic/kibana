@@ -34,10 +34,15 @@ export function BarDetails({
   const theme = useEuiTheme();
   const { getRelatedErrorsHref } = useTraceWaterfallContext();
 
-  const viewRelatedErrorsLabel = i18n.translate(
-    'xpack.apm.waterfall.embeddableRelatedErrors.unifedErrorCount',
-    { defaultMessage: 'View related errors' }
-  );
+  const viewRelatedErrorsLabel =
+    item.errorCount > 1
+      ? i18n.translate('xpack.apm.waterfall.embeddableRelatedErrors.unifedErrorCount', {
+          defaultMessage: 'View {count} related errors',
+          values: { count: item.errorCount },
+        })
+      : i18n.translate('xpack.apm.waterfall.embeddableRelatedErrors.unifedErrorCount.default', {
+          defaultMessage: 'View related error',
+        });
 
   return (
     <div
