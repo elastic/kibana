@@ -13,13 +13,13 @@ export const styles = css`
     padding: 20px 10px;
     border: 1px solid;
     width: 400px;
-    margin: 15px 0px;
+    margin: 20px 0px;
   }
 
   .cssTreeNode-level-2,
   .cssTreeNode-level-3,
   .cssTreeNode-level-4,
   .cssTreeNode-level-5 {
-    margin-left: 16px;
+    margin-left: 15px;
   }
 `;
