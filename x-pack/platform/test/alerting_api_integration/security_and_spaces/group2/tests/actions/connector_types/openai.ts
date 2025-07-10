@@ -25,7 +25,6 @@ const secrets = {
 
 const defaultConfig = { apiProvider: 'OpenAI' };
 
-// eslint-disable-next-line import/no-default-export
 export default function genAiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const objectRemover = new ObjectRemover(supertest);
