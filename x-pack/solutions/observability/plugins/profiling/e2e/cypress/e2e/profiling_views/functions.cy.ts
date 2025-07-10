@@ -10,10 +10,7 @@ import {
   profilingPervCPUWattX86,
 } from '@kbn/observability-plugin/common';
 
-// Failing: See https://github.com/elastic/kibana/issues/224515
-// Failing: See https://github.com/elastic/kibana/issues/224516
-// Failing: See https://github.com/elastic/kibana/issues/224514
-describe.skip('Functions page', () => {
+describe('Functions page', () => {
   const rangeFrom = '2023-04-18T00:00:00.000Z';
   const rangeTo = '2023-04-18T00:00:30.000Z';
 
@@ -39,11 +36,11 @@ describe.skip('Functions page', () => {
     const firstRowSelector = '[data-grid-row-index="0"] [data-test-subj="dataGridRowCell"]';
     cy.get(firstRowSelector).eq(1).contains('1');
     cy.get(firstRowSelector).eq(2).contains('vmlinux');
-    cy.get(firstRowSelector).eq(3).contains('5.46%');
-    cy.get(firstRowSelector).eq(4).contains('5.46%');
-    cy.get(firstRowSelector).eq(5).contains('4.19 lbs / 1.9 kg');
-    cy.get(firstRowSelector).eq(6).contains('$18.29');
-    cy.get(firstRowSelector).eq(7).contains('28');
+    cy.get(firstRowSelector).eq(3).contains('13.45%');
+    cy.get(firstRowSelector).eq(4).contains('13.86%');
+    cy.get(firstRowSelector).eq(5).contains('10.58 lbs / 4.8 kg');
+    cy.get(firstRowSelector).eq(6).contains('$45.07');
+    cy.get(firstRowSelector).eq(7).contains('67');
   });
 
   it('shows function details when action button is clicked on the table ', () => {
@@ -59,26 +56,26 @@ describe.skip('Functions page', () => {
       { parentKey: 'informationRows', key: 'executable', value: 'vmlinux' },
       { parentKey: 'informationRows', key: 'function', value: 'N/A' },
       { parentKey: 'informationRows', key: 'sourceFile', value: 'N/A' },
-      { parentKey: 'impactEstimates', key: 'totalCPU', value: '5.46%' },
-      { parentKey: 'impactEstimates', key: 'selfCPU', value: '5.46%' },
-      { parentKey: 'impactEstimates', key: 'samples', value: '28' },
-      { parentKey: 'impactEstimates', key: 'selfSamples', value: '28' },
-      { parentKey: 'impactEstimates', key: 'coreSeconds', value: '1.47 seconds' },
-      { parentKey: 'impactEstimates', key: 'selfCoreSeconds', value: '1.47 seconds' },
-      { parentKey: 'impactEstimates', key: 'annualizedCoreSeconds', value: '17.93 days' },
-      { parentKey: 'impactEstimates', key: 'annualizedSelfCoreSeconds', value: '17.93 days' },
+      { parentKey: 'impactEstimates', key: 'totalCPU', value: '13.86%' },
+      { parentKey: 'impactEstimates', key: 'selfCPU', value: '13.45%' },
+      { parentKey: 'impactEstimates', key: 'samples', value: '69' },
+      { parentKey: 'impactEstimates', key: 'selfSamples', value: '67' },
+      { parentKey: 'impactEstimates', key: 'coreSeconds', value: '3.63 seconds' },
+      { parentKey: 'impactEstimates', key: 'selfCoreSeconds', value: '3.53 seconds' },
+      { parentKey: 'impactEstimates', key: 'annualizedCoreSeconds', value: '1.45 months' },
+      { parentKey: 'impactEstimates', key: 'annualizedSelfCoreSeconds', value: '1.41 months' },
       { parentKey: 'impactEstimates', key: 'co2Emission', value: '~0.00 lbs / ~0.00 kg' },
       { parentKey: 'impactEstimates', key: 'selfCo2Emission', value: '~0.00 lbs / ~0.00 kg' },
-      { parentKey: 'impactEstimates', key: 'annualizedCo2Emission', value: '4.19 lbs / 1.9 kg' },
+      { parentKey: 'impactEstimates', key: 'annualizedCo2Emission', value: '10.58 lbs / 4.8 kg' },
       {
         parentKey: 'impactEstimates',
         key: 'annualizedSelfCo2Emission',
-        value: '4.19 lbs / 1.9 kg',
+        value: '10.14 lbs / 4.6 kg',
       },
       { parentKey: 'impactEstimates', key: 'dollarCost', value: '$~0.00' },
       { parentKey: 'impactEstimates', key: 'selfDollarCost', value: '$~0.00' },
-      { parentKey: 'impactEstimates', key: 'annualizedDollarCost', value: '$18.29' },
-      { parentKey: 'impactEstimates', key: 'annualizedSelfDollarCost', value: '$18.29' },
+      { parentKey: 'impactEstimates', key: 'annualizedDollarCost', value: '$45.07' },
+      { parentKey: 'impactEstimates', key: 'annualizedSelfDollarCost', value: '$43.76' },
     ].forEach(({ parentKey, key, value }) => {
       cy.get(`[data-test-subj="${parentKey}_${key}"]`).contains(value);
     });
@@ -113,7 +110,7 @@ describe.skip('Functions page', () => {
       const firstRowSelector = '[data-grid-row-index="0"] [data-test-subj="dataGridRowCell"]';
       cy.get(firstRowSelector).eq(1).contains('1');
       cy.get(firstRowSelector).eq(2).contains('vmlinux');
-      cy.get(firstRowSelector).eq(5).contains('4.19 lbs / 1.9 kg');
+      cy.get(firstRowSelector).eq(5).contains('10.58 lbs / 4.8 kg');
       cy.contains('Settings').click();
       cy.contains('Advanced Settings');
       cy.get(`[data-test-subj="management-settings-editField-${profilingCo2PerKWH}"]`)
@@ -132,7 +129,7 @@ describe.skip('Functions page', () => {
       });
       cy.go('back');
       cy.wait('@getTopNFunctions');
-      cy.get(firstRowSelector).eq(5).contains('1.97k lbs / 892.5 kg');
+      cy.get(firstRowSelector).eq(5).contains('4.85k lbs / 2.2k kg');
       const firstRowSelectorActionButton =
         '[data-grid-row-index="0"] [data-test-subj="dataGridRowCell"] .euiButtonIcon';
       cy.get(firstRowSelectorActionButton).click();
@@ -142,12 +139,12 @@ describe.skip('Functions page', () => {
         {
           parentKey: 'impactEstimates',
           key: 'annualizedCo2Emission',
-          value: '1.97k lbs / 892.5 kg',
+          value: '4.85k lbs / 2.2k kg',
         },
         {
           parentKey: 'impactEstimates',
           key: 'annualizedSelfCo2Emission',
-          value: '1.97k lbs / 892.5 kg',
+          value: '4.71k lbs / 2.14k kg',
         },
       ].forEach(({ parentKey, key, value }) => {
         cy.get(`[data-test-subj="${parentKey}_${key}"]`).contains(value);
