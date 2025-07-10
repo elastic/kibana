@@ -39,7 +39,7 @@ const ruleTypes = [...UPTIME_RULE_TYPE_IDS, ...SYNTHETICS_RULE_TYPE_IDS];
 
 const alertingFeatures = ruleTypes.map((ruleTypeId) => ({
   ruleTypeId,
-  consumers: [PLUGIN.ID, ALERTING_FEATURE_ID, ...DEPRECATED_ALERTING_CONSUMERS],
+  consumers: [PLUGIN.SYNTHETICS_PLUGIN_ID, ALERTING_FEATURE_ID, ...DEPRECATED_ALERTING_CONSUMERS],
 }));
 
 const canManageSyntheticsAlerts: SubFeaturePrivilegeGroupConfig = {

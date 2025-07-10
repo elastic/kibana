@@ -38,7 +38,7 @@ const ruleTypes = [...UPTIME_RULE_TYPE_IDS, ...SYNTHETICS_RULE_TYPE_IDS];
 
 const alertingFeatures = ruleTypes.map((ruleTypeId) => ({
   ruleTypeId,
-  consumers: [PLUGIN.ID, ALERTING_FEATURE_ID, ...DEPRECATED_ALERTING_CONSUMERS],
+  consumers: [PLUGIN.UPTIME_PLUGIN_ID, ALERTING_FEATURE_ID, ...DEPRECATED_ALERTING_CONSUMERS],
 }));
 
 const elasticManagedLocationsEnabledPrivilegeDeprecated: SubFeaturePrivilegeGroupConfig = {
@@ -99,7 +99,7 @@ export const syntheticsFeatureDeprecated = {
         'The uptime feature is deprecated. Please use the synthetics feature instead.',
     }),
   },
-  id: PLUGIN.ID,
+  id: PLUGIN.UPTIME_PLUGIN_ID,
   name: `${PLUGIN.NAME} (Deprecated)`,
   order: 1000,
   category: DEFAULT_APP_CATEGORIES.observability,

@@ -13,8 +13,8 @@ export const PLUGIN = {
     defaultMessage: 'Synthetics monitoring',
     description: 'The description text that will appear in the feature catalogue.',
   }),
-  ID: 'uptime',
-  SYNTHETICS_PLUGIN_ID: 'synthetics',
+  UPTIME_PLUGIN_ID: 'uptime', // v1
+  SYNTHETICS_PLUGIN_ID: 'synthetics', // v2
   LOCAL_STORAGE_KEY: 'xpack.synthetics.',
   NAME: i18n.translate('xpack.synthetics.featureRegistry.syntheticsFeatureName', {
     defaultMessage: 'Synthetics and Uptime',

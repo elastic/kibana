@@ -64,7 +64,8 @@ export function useMonitorListColumns({
   };
 
   const canUsePublicLocations =
-    useKibana().services?.application?.capabilities.uptime.elasticManagedLocationsEnabled ?? true;
+    useKibana().services?.application?.capabilities.synthetics?.elasticManagedLocationsEnabled ??
+    true;
 
   const isPublicLocationsAllowed = (fields: EncryptedSyntheticsSavedMonitor) => {
     const publicLocations = fields.locations.some((loc) => loc.isServiceManaged);

@@ -104,7 +104,7 @@ export const SettingsPage: React.FC = () => {
   const resetForm = () => setFormFields(dss.settings ? { ...dss.settings } : null);
 
   const canEdit: boolean =
-    !!useKibana().services?.application?.capabilities.uptime.configureSettings || false;
+    !!useKibana().services?.application?.capabilities.synthetics?.configureSettings || false;
   const isFormDisabled = dss.loading || !canEdit;
 
   const cannotEditNotice = canEdit ? null : (

@@ -33,7 +33,7 @@ export const getSyntheticsAppProps = (): SyntheticsAppProps => {
     INTEGRATED_SOLUTIONS
   );
 
-  const canSave = (capabilities.uptime.save ?? false) as boolean; // TODO: Determine for synthetics
+  const canSave = (capabilities.synthetics?.save ?? false) as boolean; // TODO: Determine for synthetics
   const darkMode = theme.getTheme().darkMode;
 
   return {

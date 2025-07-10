@@ -45,7 +45,7 @@ export const AlertDefaultsForm = () => {
   const [formFields, setFormFields] = useState<FormFields>(DYNAMIC_SETTINGS_DEFAULTS as FormFields);
 
   const canEdit: boolean =
-    !!useKibana().services?.application?.capabilities.uptime.configureSettings || false;
+    !!useKibana().services?.application?.capabilities.synthetics?.configureSettings || false;
 
   const isDisabled = !canEdit;
 

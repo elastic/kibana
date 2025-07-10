@@ -85,7 +85,7 @@ export const ManageMLJobComponent = ({ hasMLJob, onEnableJob, onJobDelete }: Pro
     </EuiButton>
   );
 
-  const hasUptimeWrite = core.services.application?.capabilities.uptime?.save ?? false;
+  const hasUptimeWrite = core.services.application?.capabilities.synthetics?.save ?? false;
 
   const panels = [
     {

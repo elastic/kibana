@@ -240,7 +240,7 @@ export class UptimePlugin
 
 function registerUptimeRoutesWithNavigation(coreStart: CoreStart, plugins: ClientPluginsStart) {
   async function getUptimeSections() {
-    if (coreStart.application.capabilities.uptime?.show) {
+    if (coreStart.application.capabilities.synthetics?.show) {
       plugins.share.url.locators.create(new UptimeOverviewLocatorDefinition());
 
       return [
@@ -307,7 +307,7 @@ function setUptimeAppStatus(
     registerAlertRules(coreStart, pluginsStart, stackVersion, false);
     updater.next(() => ({ status: AppStatus.accessible }));
   } else {
-    const hasUptimePrivileges = coreStart.application.capabilities.uptime?.show;
+    const hasUptimePrivileges = coreStart.application.capabilities.synthetics?.show;
     if (hasUptimePrivileges) {
       const indexStatusPromise = UptimeDataHelper(coreStart).indexStatus('now-7d/d', 'now/d');
       indexStatusPromise.then((indexStatus) => {

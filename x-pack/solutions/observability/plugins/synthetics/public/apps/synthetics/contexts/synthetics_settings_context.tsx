@@ -100,9 +100,9 @@ export const SyntheticsSettingsContextProvider: React.FC<PropsWithChildren<Synth
 
   const { application } = useKibana().services;
 
-  const canSave = (application?.capabilities.uptime.save ?? false) as boolean;
-  const canManagePrivateLocations = (application?.capabilities.uptime.canManagePrivateLocations ??
-    false) as boolean;
+  const canSave = (application?.capabilities.synthetics?.save ?? false) as boolean;
+  const canManagePrivateLocations = (application?.capabilities.synthetics
+    .canManagePrivateLocations ?? false) as boolean;
 
   const value = useMemo(() => {
     return {

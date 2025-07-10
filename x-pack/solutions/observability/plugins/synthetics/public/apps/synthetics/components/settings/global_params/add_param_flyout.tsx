@@ -71,7 +71,7 @@ export const AddParamFlyout = ({
 
   const { application } = useKibana<ClientPluginsStart>().services;
 
-  const canSave = (application?.capabilities.uptime.save ?? false) as boolean;
+  const canSave = (application?.capabilities.synthetics?.save ?? false) as boolean;
 
   const dispatch = useDispatch();
 

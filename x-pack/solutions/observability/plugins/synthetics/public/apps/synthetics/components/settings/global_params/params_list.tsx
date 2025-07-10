@@ -48,7 +48,7 @@ export const ParamsList = () => {
 
   const { application } = useKibana().services;
 
-  const canSave = (application?.capabilities.uptime.save ?? false) as boolean;
+  const canSave = (application?.capabilities.synthetics?.save ?? false) as boolean;
 
   const columns: Array<EuiBasicTableColumn<ListParamItem>> = [
     {

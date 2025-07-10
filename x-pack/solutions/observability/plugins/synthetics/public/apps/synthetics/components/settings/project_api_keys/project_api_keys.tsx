@@ -58,7 +58,8 @@ export const ProjectAPIKeys = () => {
     !!kServices?.fleet?.authz.integrations.writeIntegrationPolicies;
 
   const canUsePublicLocations =
-    useKibana().services?.application?.capabilities.uptime.elasticManagedLocationsEnabled ?? true;
+    useKibana().services?.application?.capabilities.synthetics?.elasticManagedLocationsEnabled ??
+    true;
 
   const { data, loading, error } = useFetcher(async () => {
     if (loadAPIKey) {
@@ -98,7 +99,7 @@ export const ProjectAPIKeys = () => {
     }
   }, [error, kServices?.notifications?.toasts]);
 
-  const canSave: boolean = !!useKibana().services?.application?.capabilities.uptime.save;
+  const canSave: boolean = !!useKibana().services?.application?.capabilities.synthetics?.save;
 
   if (enablementLoading) {
     return <LoadingState />;

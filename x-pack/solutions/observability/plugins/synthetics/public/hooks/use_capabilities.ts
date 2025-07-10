@@ -12,12 +12,13 @@ import { SYNTHETICS_INDEX_PATTERN } from '../../common/constants';
 import { MonitorLocations } from '../../common/runtime_types';
 
 export const useCanEditSynthetics = () => {
-  return !!useKibana().services?.application?.capabilities.uptime.save;
+  return !!useKibana().services?.application?.capabilities.synthetics?.save;
 };
 
 export const useCanUsePublicLocations = (monLocations?: MonitorLocations) => {
   const canUsePublicLocations =
-    useKibana().services?.application?.capabilities.uptime.elasticManagedLocationsEnabled ?? true;
+    useKibana().services?.application?.capabilities.synthetics?.elasticManagedLocationsEnabled ??
+    true;
   const publicLocations = monLocations?.some((loc) => loc.isServiceManaged);
 
   if (!publicLocations) {
