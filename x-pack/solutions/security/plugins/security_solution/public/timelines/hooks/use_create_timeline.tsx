@@ -21,11 +21,10 @@ import { defaultUdtHeaders } from '../components/timeline/body/column_headers/de
 import { timelineDefaults } from '../store/defaults';
 import { useSelectDataView } from '../../data_view_manager/hooks/use_select_data_view';
 import { DataViewManagerScopeName } from '../../data_view_manager/constants';
-import { useSelectedPatterns } from '../../data_view_manager/hooks/use_selected_patterns';
 import { sourcererActions, sourcererSelectors } from '../../sourcerer/store';
 import { SourcererScopeName } from '../../sourcerer/store/model';
 import { useEnableExperimental } from '../../common/hooks/use_experimental_features';
-import { useDataView } from '../../data_view_manager/hooks/use_data_view';
+import { useSecurityDefaultPatterns } from '../../data_view_manager/hooks/use_security_default_patterns';
 
 export interface UseCreateTimelineParams {
   /**
@@ -59,16 +58,20 @@ export const useCreateTimeline = ({
   ) ?? { id: '', patternList: [] };
 
   const { newDataViewPickerEnabled } = useEnableExperimental();
-  const { dataView: experimentalDataView } = useDataView(DataViewManagerScopeName.default);
-  const experimentalSelectedPatterns = useSelectedPatterns(DataViewManagerScopeName.default);
+
+  const {
+    id: experimentalSecurityDefaultDataViewId,
+    indexPatterns: experimentalSecurityDefaultIndexPatterns,
+  } = useSecurityDefaultPatterns();
 
   const dataViewId = useMemo(
-    () => (newDataViewPickerEnabled ? experimentalDataView.id ?? '' : oldDataViewId),
-    [experimentalDataView.id, newDataViewPickerEnabled, oldDataViewId]
+    () => (newDataViewPickerEnabled ? experimentalSecurityDefaultDataViewId ?? '' : oldDataViewId),
+    [experimentalSecurityDefaultDataViewId, newDataViewPickerEnabled, oldDataViewId]
   );
   const selectedPatterns = useMemo(
-    () => (newDataViewPickerEnabled ? experimentalSelectedPatterns : oldSelectedPatterns),
-    [experimentalSelectedPatterns, newDataViewPickerEnabled, oldSelectedPatterns]
+    () =>
+      newDataViewPickerEnabled ? experimentalSecurityDefaultIndexPatterns : oldSelectedPatterns,
+    [experimentalSecurityDefaultIndexPatterns, newDataViewPickerEnabled, oldSelectedPatterns]
   );
 
   const { timelineFullScreen, setTimelineFullScreen } = useTimelineFullScreen();

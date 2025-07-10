@@ -53,7 +53,7 @@ import { ProcessorMetrics } from '../state_management/simulation_state_machine';
 import { DateProcessorForm } from './date';
 import { ConfigDrivenProcessorFields } from './config_driven/components/fields';
 import { ConfigDrivenProcessorType } from './config_driven/types';
-import { selectPreviewDocuments } from '../state_management/simulation_state_machine/selectors';
+import { selectPreviewRecords } from '../state_management/simulation_state_machine/selectors';
 import { ManualIngestPipelineProcessorForm } from './manual_ingest_pipeline';
 
 export function AddProcessorPanel() {
@@ -76,7 +76,7 @@ export function AddProcessorPanel() {
     () =>
       getDefaultFormStateByType(
         'grok',
-        selectPreviewDocuments(getEnrichmentState().context.simulatorRef?.getSnapshot().context),
+        selectPreviewRecords(getEnrichmentState().context.simulatorRef?.getSnapshot().context),
         { grokCollection }
       ),
     [getEnrichmentState, grokCollection]
@@ -265,7 +265,7 @@ export function EditProcessorPanel({
   const defaultValues = useMemo(
     () =>
       getFormStateFrom(
-        selectPreviewDocuments(getEnrichmentState().context.simulatorRef?.getSnapshot().context),
+        selectPreviewRecords(getEnrichmentState().context.simulatorRef?.getSnapshot().context),
         { grokCollection },
         processor
       ),
@@ -297,7 +297,7 @@ export function EditProcessorPanel({
     const subscription = processorRef.on('processor.changesDiscarded', () => {
       methods.reset(
         getFormStateFrom(
-          selectPreviewDocuments(getEnrichmentState().context.simulatorRef?.getSnapshot().context),
+          selectPreviewRecords(getEnrichmentState().context.simulatorRef?.getSnapshot().context),
           { grokCollection },
           previousProcessor
         )

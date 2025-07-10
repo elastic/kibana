@@ -13,6 +13,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer } from '@elasti
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 
 import { buildEsQuery } from '@kbn/es-query';
+import { DataViewManagerScopeName } from '../../../../data_view_manager/constants';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { dataViewSpecToViewBase } from '../../../../common/lib/kuery';
 import { AlertsByStatus } from '../../../../overview/components/detection_response/alerts_by_status';
@@ -118,11 +119,11 @@ const NetworkDetailsComponent: React.FC = () => {
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
-  const { dataView: experimentalDataView, status } = useDataView();
-  const experimentalSelectedPatterns = useSelectedPatterns();
+  const { dataView: experimentalDataView, status } = useDataView(DataViewManagerScopeName.explore);
+  const experimentalSelectedPatterns = useSelectedPatterns(DataViewManagerScopeName.explore);
 
   const indicesExist = newDataViewPickerEnabled
-    ? !!experimentalDataView.matchedIndices?.length
+    ? experimentalDataView.hasMatchedIndices()
     : oldIndicesExist;
   const selectedPatterns = newDataViewPickerEnabled
     ? experimentalSelectedPatterns
@@ -263,7 +264,7 @@ const NetworkDetailsComponent: React.FC = () => {
               narrowDateRange={narrowDateRange}
               indexPatterns={selectedPatterns}
               jobNameById={jobNameById}
-              scopeId={SourcererScopeName.default}
+              scopeId={SourcererScopeName.explore}
             />
 
             <EuiHorizontalRule />

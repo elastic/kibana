@@ -19,6 +19,7 @@ import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { Filter } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import { LastEventIndexKey } from '@kbn/timelines-plugin/common';
+import { DataViewManagerScopeName } from '../../../../data_view_manager/constants';
 import { SourcererScopeName } from '../../../../sourcerer/store/model';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { dataViewSpecToViewBase } from '../../../../common/lib/kuery';
@@ -117,11 +118,11 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
-  const { dataView: experimentalDataView, status } = useDataView();
-  const experimentalSelectedPatterns = useSelectedPatterns();
+  const { dataView: experimentalDataView, status } = useDataView(DataViewManagerScopeName.explore);
+  const experimentalSelectedPatterns = useSelectedPatterns(DataViewManagerScopeName.explore);
 
   const indicesExist = newDataViewPickerEnabled
-    ? !!experimentalDataView.matchedIndices?.length
+    ? experimentalDataView.hasMatchedIndices()
     : oldIndicesExist;
   const selectedPatterns = newDataViewPickerEnabled
     ? experimentalSelectedPatterns
@@ -279,7 +280,11 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
                   narrowDateRange={narrowDateRange}
                   indexPatterns={selectedPatterns}
                   jobNameById={jobNameById}
-                  scopeId={SourcererScopeName.default}
+                  scopeId={
+                    newDataViewPickerEnabled
+                      ? SourcererScopeName.explore
+                      : SourcererScopeName.default
+                  }
                 />
               )}
             </AnomalyTableProvider>

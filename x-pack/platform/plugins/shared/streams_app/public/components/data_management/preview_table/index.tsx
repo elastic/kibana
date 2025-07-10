@@ -5,14 +5,18 @@
  * 2.0.
  */
 import {
+  EuiButtonIcon,
   EuiDataGrid,
+  EuiDataGridControlColumn,
   EuiDataGridProps,
   EuiDataGridRowHeightsOptions,
   EuiDataGridSorting,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SampleDocument } from '@kbn/streams-schema';
 import React, { useMemo } from 'react';
+import { css } from '@emotion/css';
 import { SimulationContext } from '../stream_detail_enrichment/state_management/simulation_state_machine';
 
 export function PreviewTable({
@@ -26,6 +30,9 @@ export function PreviewTable({
   toolbarVisibility = false,
   setVisibleColumns,
   columnOrderHint = [],
+  selectableRow = false,
+  selectedRowIndex,
+  onRowSelected,
 }: {
   documents: SampleDocument[];
   displayColumns?: string[];
@@ -37,7 +44,11 @@ export function PreviewTable({
   columnOrderHint?: string[];
   sorting?: SimulationContext['previewColumnsSorting'];
   setSorting?: (sorting: SimulationContext['previewColumnsSorting']) => void;
+  selectableRow?: boolean;
+  selectedRowIndex?: number;
+  onRowSelected?: (selectedRowIndex: number) => void;
 }) {
+  const { euiTheme: theme } = useEuiTheme();
   // Determine canonical column order
   const canonicalColumnOrder = useMemo(() => {
     const cols = new Set<string>();
@@ -132,17 +143,61 @@ export function PreviewTable({
     }));
   }, [canonicalColumnOrder, setSorting, setVisibleColumns, visibleColumns.length]);
 
+  const leadingControlColumns: EuiDataGridControlColumn[] = useMemo(
+    () =>
+      selectableRow && visibleColumns.length > 0
+        ? [
+            {
+              id: 'selection',
+              width: 36,
+              headerCellRender: () => null,
+              rowCellRender: ({ rowIndex }) => (
+                <EuiButtonIcon
+                  onClick={() => {
+                    if (selectableRow && onRowSelected) {
+                      onRowSelected(rowIndex);
+                    }
+                  }}
+                  aria-label={i18n.translate(
+                    'xpack.streams.resultPanel.euiDataGrid.preview.selectRowAriaLabel',
+                    {
+                      defaultMessage: 'Select row {rowIndex}',
+                      values: { rowIndex: rowIndex + 1 },
+                    }
+                  )}
+                  iconType={selectedRowIndex === rowIndex && selectableRow ? 'minimize' : 'expand'}
+                  color={selectedRowIndex === rowIndex && selectableRow ? 'primary' : 'text'}
+                />
+              ),
+            },
+          ]
+        : [],
+    [onRowSelected, selectableRow, selectedRowIndex, visibleColumns.length]
+  );
+
   return (
     <EuiDataGrid
       aria-label={i18n.translate('xpack.streams.resultPanel.euiDataGrid.previewLabel', {
         defaultMessage: 'Preview',
       })}
+      leadingControlColumns={leadingControlColumns}
       columns={gridColumns}
       columnVisibility={{
         visibleColumns,
         setVisibleColumns: setVisibleColumns || (() => {}),
         canDragAndDropColumns: false,
       }}
+      gridStyle={
+        selectedRowIndex !== undefined
+          ? {
+              rowClasses: {
+                [String(selectedRowIndex)]: css`
+                  background-color: ${theme.colors.highlight};
+                `,
+              },
+            }
+          : undefined
+      }
       sorting={sortingConfig}
       inMemory={sortingConfig ? { level: 'sorting' } : undefined}
       height={height}
