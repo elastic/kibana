@@ -116,9 +116,11 @@ export const getListHandler: FleetRequestHandler<
     ...request.query,
   });
   const flattenedRes = res.reduce(
+    // exclude the security_ai_prompts package from being shown in Kibana UI
+    // https://github.com/elastic/kibana/pull/227308
     (acc, pkg) => (pkg.id === 'security_ai_prompts' ? acc : [...acc, soToInstallationInfo(pkg)]),
     []
-  ) as PackageList;
+  ) as unknown as PackageList;
 
   if (request.query.withPackagePoliciesCount) {
     const countByPackage = await getPackagePoliciesCountByPackageName(
