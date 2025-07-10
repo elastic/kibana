@@ -80,7 +80,7 @@ const AdditionalToolbarControlsComponent = ({
   const fields = useMemo(
     () =>
       experimentalDataView
-        ? experimentalDataView?.fields.map((field) => field.spec)
+        ? experimentalDataView.fields.map((field) => field.spec)
         : Object.values(oldSourcererDataView.fields || {}),
     [experimentalDataView, oldSourcererDataView.fields]
   );

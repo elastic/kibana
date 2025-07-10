@@ -89,7 +89,7 @@ export const EqlTabContentComponent: React.FC<Props> = ({
 
   const { dataView: experimentalDataView, status } = useDataView(SourcererScopeName.timeline);
   const experimentalSelectedPatterns = useSelectedPatterns(SourcererScopeName.timeline);
-  const experimentalDataViewId = experimentalDataView?.id ?? null;
+  const experimentalDataViewId = experimentalDataView.id ?? null;
 
   const dataViewId = useMemo(
     () => (newDataViewPickerEnabled ? experimentalDataViewId : oldDataViewId),
@@ -102,7 +102,7 @@ export const EqlTabContentComponent: React.FC<Props> = ({
 
   const runtimeMappings = useMemo(() => {
     return newDataViewPickerEnabled
-      ? (experimentalDataView?.getRuntimeMappings() as RunTimeMappings)
+      ? (experimentalDataView.getRuntimeMappings() as RunTimeMappings)
       : (oldSourcererDataViewSpec.runtimeFieldMap as RunTimeMappings);
   }, [newDataViewPickerEnabled, experimentalDataView, oldSourcererDataViewSpec.runtimeFieldMap]);
 

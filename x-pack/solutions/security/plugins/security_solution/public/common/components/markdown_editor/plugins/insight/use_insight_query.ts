@@ -62,7 +62,7 @@ export const useInsightQuery = ({
     ? experimentalSelectedPatterns
     : oldSelectedPatterns;
   const browserFields = newDataViewPickerEnabled ? experimentalBrowserFields : oldBrowserFields;
-  const dataViewId = newDataViewPickerEnabled ? experimentalDataView?.id ?? '' : oldDataViewId;
+  const dataViewId = newDataViewPickerEnabled ? experimentalDataView.id ?? '' : oldDataViewId;
 
   const [hasError, setHasError] = useState(false);
   const combinedQueries = useMemo(() => {

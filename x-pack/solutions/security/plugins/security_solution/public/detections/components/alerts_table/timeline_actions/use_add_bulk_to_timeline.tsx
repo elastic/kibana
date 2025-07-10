@@ -89,13 +89,13 @@ export const useAddBulkToTimelineAction = ({
 
   const runtimeMappings = useMemo(() => {
     return newDataViewPickerEnabled
-      ? (experimentalDataView?.getRuntimeMappings() as RunTimeMappings)
+      ? (experimentalDataView.getRuntimeMappings() as RunTimeMappings)
       : (oldSourcererDataViewSpec.runtimeFieldMap as RunTimeMappings);
   }, [newDataViewPickerEnabled, experimentalDataView, oldSourcererDataViewSpec.runtimeFieldMap]);
 
   const dataViewId = useMemo(
-    () => (newDataViewPickerEnabled ? experimentalDataView?.id ?? '' : oldDataViewId),
-    [experimentalDataView?.id, newDataViewPickerEnabled, oldDataViewId]
+    () => (newDataViewPickerEnabled ? experimentalDataView.id ?? '' : oldDataViewId),
+    [experimentalDataView.id, newDataViewPickerEnabled, oldDataViewId]
   );
   const browserFields = useMemo(
     () => (newDataViewPickerEnabled ? experimentalBrowserFields : oldBrowserFields),

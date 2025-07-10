@@ -101,14 +101,14 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
   );
 
   const dataViewId = useMemo(
-    () => (newDataViewPickerEnabled ? experimentalDataView?.id ?? '' : oldDataViewId),
-    [experimentalDataView?.id, newDataViewPickerEnabled, oldDataViewId]
+    () => (newDataViewPickerEnabled ? experimentalDataView.id ?? '' : oldDataViewId),
+    [experimentalDataView.id, newDataViewPickerEnabled, oldDataViewId]
   );
 
   const runtimeMappings = useMemo(
     () =>
       newDataViewPickerEnabled
-        ? (experimentalDataView?.getRuntimeMappings() as RunTimeMappings)
+        ? (experimentalDataView.getRuntimeMappings() as RunTimeMappings)
         : (oldSourcererDataViewSpec?.runtimeFieldMap as RunTimeMappings),
     [experimentalDataView, newDataViewPickerEnabled, oldSourcererDataViewSpec]
   );

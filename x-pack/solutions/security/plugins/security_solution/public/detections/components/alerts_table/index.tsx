@@ -183,7 +183,7 @@ const DetectionEngineAlertsTableComponent: FC<Omit<DetectionEngineAlertTableProp
   const runtimeMappings = useMemo(
     () =>
       newDataViewPickerEnabled
-        ? experimentalDataView?.getRuntimeMappings()
+        ? experimentalDataView.getRuntimeMappings()
         : (oldSourcererDataView.runtimeFieldMap as RunTimeMappings),
     [newDataViewPickerEnabled, experimentalDataView, oldSourcererDataView]
   );

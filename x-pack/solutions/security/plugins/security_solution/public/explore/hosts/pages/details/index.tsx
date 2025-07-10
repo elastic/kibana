@@ -135,7 +135,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
   const experimentalSelectedPatterns = useSelectedPatterns();
 
   const indicesExist = newDataViewPickerEnabled
-    ? !!experimentalDataView?.matchedIndices?.length
+    ? !!experimentalDataView.matchedIndices?.length
     : oldIndicesExist;
   const selectedPatterns = newDataViewPickerEnabled
     ? experimentalSelectedPatterns

@@ -292,7 +292,7 @@ const InsightEditorComponent = ({
 
   const { dataView: experimentalDataView } = useDataView(SourcererScopeName.default);
   const dataViewName = newDataViewPickerEnabled
-    ? experimentalDataView?.name
+    ? experimentalDataView.name
     : oldSourcererDataView.name;
 
   const {

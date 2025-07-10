@@ -118,8 +118,8 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     [experimentalSelectedPatterns, newDataViewPickerEnabled, oldSelectedPatterns]
   );
   const dataViewId = useMemo(
-    () => (newDataViewPickerEnabled ? experimentalDataView?.id ?? '' : oldDataViewId),
-    [experimentalDataView?.id, newDataViewPickerEnabled, oldDataViewId]
+    () => (newDataViewPickerEnabled ? experimentalDataView.id ?? '' : oldDataViewId),
+    [experimentalDataView.id, newDataViewPickerEnabled, oldDataViewId]
   );
 
   /*
@@ -154,7 +154,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
 
   const runtimeMappings = useMemo(() => {
     return newDataViewPickerEnabled
-      ? (experimentalDataView?.getRuntimeMappings() as RunTimeMappings)
+      ? (experimentalDataView.getRuntimeMappings() as RunTimeMappings)
       : (oldSourcererDataViewSpec.runtimeFieldMap as RunTimeMappings);
   }, [newDataViewPickerEnabled, experimentalDataView, oldSourcererDataViewSpec.runtimeFieldMap]);
 

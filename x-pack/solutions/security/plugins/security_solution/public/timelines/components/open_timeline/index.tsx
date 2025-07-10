@@ -168,8 +168,8 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
     const experimentalSelectedPatterns = useSelectedPatterns(SourcererScopeName.timeline);
 
     const dataViewId = useMemo(
-      () => (newDataViewPickerEnabled ? experimentalDataView?.id || '' : oldDataViewId),
-      [experimentalDataView?.id, newDataViewPickerEnabled, oldDataViewId]
+      () => (newDataViewPickerEnabled ? experimentalDataView.id || '' : oldDataViewId),
+      [experimentalDataView.id, newDataViewPickerEnabled, oldDataViewId]
     );
     const selectedPatterns = useMemo(
       () => (newDataViewPickerEnabled ? experimentalSelectedPatterns : oldSelectedPatterns),

@@ -49,7 +49,7 @@ const DetectionResponseComponent = () => {
   const { dataView: experimentalDataView, status } = useDataView();
 
   const indicesExist = newDataViewPickerEnabled
-    ? !!experimentalDataView?.matchedIndices?.length
+    ? !!experimentalDataView.matchedIndices?.length
     : oldIndicesExist;
   const isSourcererLoading = newDataViewPickerEnabled ? status !== 'ready' : oldIsSourcererLoading;
 

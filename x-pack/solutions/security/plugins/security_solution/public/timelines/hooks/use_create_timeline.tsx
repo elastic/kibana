@@ -63,8 +63,8 @@ export const useCreateTimeline = ({
   const experimentalSelectedPatterns = useSelectedPatterns(DataViewManagerScopeName.default);
 
   const dataViewId = useMemo(
-    () => (newDataViewPickerEnabled ? experimentalDataView?.id ?? '' : oldDataViewId),
-    [experimentalDataView?.id, newDataViewPickerEnabled, oldDataViewId]
+    () => (newDataViewPickerEnabled ? experimentalDataView.id ?? '' : oldDataViewId),
+    [experimentalDataView.id, newDataViewPickerEnabled, oldDataViewId]
   );
   const selectedPatterns = useMemo(
     () => (newDataViewPickerEnabled ? experimentalSelectedPatterns : oldSelectedPatterns),

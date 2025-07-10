@@ -89,7 +89,7 @@ export const NetworkDetails = ({ ip, flowTarget }: NetworkDetailsProps) => {
   const experimentalSelectedPatterns = useSelectedPatterns();
 
   const indicesExist = newDataViewPickerEnabled
-    ? !!experimentalDataView?.matchedIndices?.length
+    ? !!experimentalDataView.matchedIndices?.length
     : oldIndicesExist;
   const selectedPatterns = newDataViewPickerEnabled
     ? experimentalSelectedPatterns

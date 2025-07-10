@@ -245,9 +245,9 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
   const uuidDataViewField = useMemo(
     () =>
       newDataViewPickerEnabled
-        ? experimentalDataView?.fields?.getByName(EXECUTION_UUID_FIELD_NAME)
+        ? experimentalDataView.fields?.getByName(EXECUTION_UUID_FIELD_NAME)
         : oldSourcererDataView.fields?.[EXECUTION_UUID_FIELD_NAME],
-    [experimentalDataView?.fields, newDataViewPickerEnabled, oldSourcererDataView.fields]
+    [experimentalDataView.fields, newDataViewPickerEnabled, oldSourcererDataView.fields]
   );
 
   // Callbacks

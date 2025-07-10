@@ -163,7 +163,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ()
   );
   const runtimeMappings = useMemo(() => {
     return newDataViewPickerEnabled
-      ? (experimentalDataView?.getRuntimeMappings() as RunTimeMappings) ?? {}
+      ? (experimentalDataView.getRuntimeMappings() as RunTimeMappings) ?? {}
       : (oldSourcererDataViewSpec.runtimeFieldMap as RunTimeMappings) ?? {};
   }, [newDataViewPickerEnabled, experimentalDataView, oldSourcererDataViewSpec.runtimeFieldMap]);
 
