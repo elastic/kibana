@@ -50,9 +50,7 @@ export function initializeESQLControlSelections(
   initialState: ESQLControlState,
   controlFetch$: ReturnType<ControlGroupApi['controlFetch$']>
 ) {
-  const availableOptions$ = new BehaviorSubject<string[] | undefined>(
-    initialState.availableOptions ?? []
-  );
+  const availableOptions$ = new BehaviorSubject<string[]>(initialState.availableOptions ?? []);
   const selectedOptions$ = new BehaviorSubject<string[]>(initialState.selectedOptions ?? []);
   const hasSelections$ = new BehaviorSubject<boolean>(false); // hardcoded to false to prevent clear action from appearing.
   const variableName$ = new BehaviorSubject<string>(initialState.variableName ?? '');
