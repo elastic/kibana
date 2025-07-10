@@ -33,16 +33,6 @@ export class CommandRegistry {
   }
 
   /**
-   * Initialize argument state from parsed input for commands with selectors.
-   */
-  initializeArgState(parsedInput: ParsedCommandInterface, enteredCommand: EnteredCommand): void {
-    const handler = this.handlers.get(parsedInput.name);
-    if (handler?.initializeArgState) {
-      handler.initializeArgState(parsedInput, enteredCommand);
-    }
-  }
-
-  /**
    * Reconstruct command text when selector values change.
    */
   reconstructCommandText(parsedInput: ParsedCommandInterface): {

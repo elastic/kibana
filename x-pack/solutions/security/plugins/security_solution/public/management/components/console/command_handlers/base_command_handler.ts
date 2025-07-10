@@ -23,12 +23,6 @@ export interface CommandHandler {
   getEmptyStringArguments(): string[];
 
   /**
-   * Handle argument state initialization from parsed input for commands with selectors.
-   * This is called when command text is updated and selector state needs to be synced.
-   */
-  initializeArgState?(parsedInput: ParsedCommandInterface, enteredCommand: EnteredCommand): void;
-
-  /**
    * Handle command text reconstruction when selector values change.
    * Returns the complete command text including all arguments with proper formatting.
    */
@@ -79,8 +73,6 @@ export abstract class BaseCommandHandler implements CommandHandler {
       parsedInput,
     };
   }
-
-  initializeArgState(parsedInput: ParsedCommandInterface, enteredCommand: EnteredCommand) {}
 
   syncState(parsedInput: ParsedCommandInterface, enteredCommand: EnteredCommand): void {}
 }

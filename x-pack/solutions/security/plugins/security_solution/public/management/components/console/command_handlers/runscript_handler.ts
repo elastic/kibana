@@ -20,28 +20,6 @@ export class RunscriptCommandHandler extends BaseCommandHandler {
     return ['ScriptName', 'CloudFile'];
   }
 
-  initializeArgState(parsedInput: ParsedCommandInterface, enteredCommand: EnteredCommand): void {
-    if (enteredCommand?.argsWithValueSelectors) {
-      for (const argName of Object.keys(enteredCommand.argsWithValueSelectors)) {
-        // Only initialize from parsed input if no selector state exists yet
-        if (
-          parsedInput.hasArg(argName) &&
-          (!enteredCommand.argState[argName] || enteredCommand.argState[argName].length === 0)
-        ) {
-          const parsedValues = parsedInput.args[argName];
-          enteredCommand.argState[argName] = [];
-
-          parsedValues.forEach((parsedValue, index) => {
-            enteredCommand.argState[argName][index] = {
-              value: parsedValue,
-              valueText: String(parsedValue),
-            };
-          });
-        }
-      }
-    }
-  }
-
   reconstructCommandText(parsedInput: ParsedCommandInterface): {
     leftOfCursorText?: string;
     rightOfCursorText?: string;

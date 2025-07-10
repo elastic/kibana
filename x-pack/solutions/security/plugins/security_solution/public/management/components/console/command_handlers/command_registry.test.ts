@@ -64,22 +64,9 @@ describe('CommandRegistry', () => {
       mockHandler = {
         name: 'mock',
         getEmptyStringArguments: jest.fn().mockReturnValue([]),
-        initializeArgState: jest.fn(),
         reconstructCommandText: jest.fn().mockReturnValue('mock command'),
         syncState: jest.fn(),
       };
-    });
-
-    it('calls initializeArgState on registered handler', () => {
-      registry.register(mockHandler);
-      const parsedInput = {
-        name: 'mock',
-        args: {},
-        hasArg: jest.fn(),
-      } as unknown as ParsedCommandInterface;
-      const enteredCommand = {} as EnteredCommand;
-      registry.initializeArgState(parsedInput, enteredCommand);
-      expect(mockHandler.initializeArgState).toHaveBeenCalledWith(parsedInput, enteredCommand);
     });
 
     it('calls reconstructCommandText on registered handler', () => {
@@ -116,7 +103,6 @@ describe('CommandRegistry', () => {
       } as unknown as ParsedCommandInterface;
       const enteredCommand = {} as EnteredCommand;
       // Should not throw and should do nothing for void methods
-      expect(() => registry.initializeArgState(parsedInput, enteredCommand)).not.toThrow();
       expect(() => registry.syncState(parsedInput, enteredCommand)).not.toThrow();
       // Should return default object for reconstructCommandText
       expect(registry.reconstructCommandText(parsedInput)).toEqual({ parsedInput });

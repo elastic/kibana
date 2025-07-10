@@ -73,7 +73,18 @@ export const handleInputAreaState: ConsoleStoreReducer<InputAreaStateAction> = (
               id: uuidV4(),
               input: payload.command,
               display: payload.display ?? payload.command,
-              argState: state.input.enteredCommand?.argState,
+              // We only store the `value` and `valueText`. `store` property of each argument's state
+              // is component instance specific data.
+              argState: Object.entries(payload.argState).reduce(
+                (acc, [argName, argValuesState]) => {
+                  acc[argName] = argValuesState.map(({ value, valueText }) => {
+                    return { value, valueText };
+                  });
+
+                  return acc;
+                },
+                {}
+              ),
             },
             ...state.input.history.slice(0, 99),
           ],
@@ -124,6 +135,7 @@ export const handleInputAreaState: ConsoleStoreReducer<InputAreaStateAction> = (
 
           if (commandDefinition) {
             let argsWithValueSelectors: EnteredCommand['argsWithValueSelectors'];
+            const argState: EnteredCommand['argState'] = adjustedArgState ?? {};
 
             for (const [argName, argDef] of Object.entries(commandDefinition.args ?? {})) {
               if (argDef.SelectorComponent) {
@@ -136,18 +148,11 @@ export const handleInputAreaState: ConsoleStoreReducer<InputAreaStateAction> = (
             }
 
             enteredCommand = {
-              argState: adjustedArgState || {},
+              argState,
               commandDefinition,
               argsWithValueSelectors,
             };
           }
-        }
-
-        // Initialize argument selectors with values from parsed input
-        // but only if selector state doesn't already exist
-        // Delegate to individual command handlers
-        if (enteredCommand) {
-          commandRegistry.initializeArgState(parsedInput, enteredCommand);
         }
 
         // Then always update parsed input with selector values

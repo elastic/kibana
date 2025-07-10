@@ -33,12 +33,6 @@ export class UploadCommandHandler extends BaseCommandHandler {
     };
   }
 
-  // No special initializeArgState needed - let the standard selector system handle it
-
-  initializeArgState(parsedInput: ParsedCommandInterface, enteredCommand: EnteredCommand) {}
-
-  // File selectors work through UI picker, not through string initialization
-
   // Simple syncState - just pass File objects through for execution
   syncState(parsedInput: ParsedCommandInterface, enteredCommand: EnteredCommand): void {
     if (!enteredCommand.argsWithValueSelectors) return;
