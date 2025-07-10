@@ -680,7 +680,6 @@ export const rollbackPackageHandler: FleetRequestHandler<
     appContextService.getInternalUserSOClientWithoutSpaceExtension();
   const spaceId = fleetContext.spaceId;
   const allSpaces = await fleetContext.getAllSpaces();
-  const logger = appContextService.getLogger();
   try {
     const body: RollbackPackageResponse = await rollbackInstallation({
       esClient,
@@ -691,7 +690,7 @@ export const rollbackPackageHandler: FleetRequestHandler<
     });
     return response.ok({ body });
   } catch (error) {
-    logger.error(`Failed to roll back package ${pkgName}: ${error.message}`);
+    error.message = `Failed to roll back package ${pkgName}: ${error.message}`;
     throw error;
   }
 };
