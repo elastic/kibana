@@ -10,7 +10,7 @@ import path from 'path';
 
 const SECURITY_DETECTION_ENGINE_PACKAGES_PATH = path.join(
   path.dirname(__filename),
-  '../import/fixtures/packages'
+  '../fixtures/packages'
 );
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
@@ -20,7 +20,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
   return {
     ...functionalConfig.getAll(),
-    testFiles: [require.resolve('../import/import_with_installing_package')],
+    testFiles: [
+      require.resolve('../import_export/import_with_installing_package'),
+      require.resolve('../prebuilt_rules_package/air_gapped'),
+    ],
     kbnTestServer: {
       ...functionalConfig.get('kbnTestServer'),
       serverArgs: [

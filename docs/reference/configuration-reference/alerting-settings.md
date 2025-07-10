@@ -493,7 +493,7 @@ For more examples, go to [Preconfigured connectors](/reference/connectors-kibana
        * In {{serverless-full}}, the default is `us.anthropic.claude-3-7-sonnet-20250219-v1:0`.
        * In {{stack}} 9.0, the default is `anthropic.claude-3-5-sonnet-20240620-v1:0`.
        * In {{stack}} 9.1 and later, the default is `us.anthropic.claude-3-7-sonnet-20250219-v1:0`. {applies_to}`stack: planned 9.1`
-    * For a [{{gemini}} connector](/reference/connectors-kibana/gemini-action-type.md), current support is for the Gemini models. Defaults to `gemini-1.5-pro-002`.
+    * For a [{{gemini}} connector](/reference/connectors-kibana/gemini-action-type.md), current support is for the Gemini models. Defaults to `gemini-2.5-pro`.
     * For a [OpenAI connector](/reference/connectors-kibana/openai-action-type.md), it is optional and applicable only when `xpack.actions.preconfigured.<connector-id>.config.apiProvider` is `OpenAI`.
 
     Data type: `string`

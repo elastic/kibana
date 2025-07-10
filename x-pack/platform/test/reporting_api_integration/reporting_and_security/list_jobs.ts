@@ -9,7 +9,6 @@ import expect from '@kbn/expect';
 import { ReportApiJSON } from '@kbn/reporting-common/types';
 import { FtrProviderContext } from '../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
   const spacesService = getService('spaces');
   const esArchiver = getService('esArchiver');

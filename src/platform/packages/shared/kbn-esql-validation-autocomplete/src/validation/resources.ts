@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLCommand } from '@kbn/esql-ast';
-import { createMapFromList, isSourceItem, nonNullable } from '../shared/helpers';
+import { isSource, type ESQLCommand } from '@kbn/esql-ast';
+import type { ESQLFieldWithMetadata, ESQLPolicy } from '@kbn/esql-ast/src/commands_registry/types';
+import { createMapFromList, nonNullable } from '../shared/helpers';
 import {
   getFieldsByTypeHelper,
   getPolicyHelper,
@@ -21,7 +22,6 @@ import {
   buildQueryForFieldsInPolicies,
   getEnrichCommands,
 } from './helpers';
-import type { ESQLFieldWithMetadata, ESQLPolicy } from './types';
 
 export async function retrieveFields(
   queryString: string,
@@ -89,7 +89,7 @@ export async function retrievePoliciesFields(
     return new Map();
   }
   const policyNames = enrichCommands
-    .map(({ args }) => (isSourceItem(args[0]) ? args[0].name : undefined))
+    .map(({ args }) => (isSource(args[0]) ? args[0].name : undefined))
     .filter(nonNullable);
   if (!policyNames.every((name) => policies.has(name))) {
     return new Map();
