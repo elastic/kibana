@@ -33,6 +33,130 @@ export const CodeBlock: React.FC<PropsOf<typeof EuiCodeBlock>> = (props) => (
   <EuiCodeBlock isCopyable paddingSize="s" overflowHeight={300} {...props} />
 );
 
+/**
+ * Processes markdown content to identify and properly format JSON code blocks
+ * @param content - The markdown content to process
+ * @returns Processed markdown with properly formatted JSON blocks
+ */
+const processMarkdownWithJson = (content: string): string => {
+  // Regex to find code blocks that contain JSON-like content
+  const codeBlockRegex = /```[\s\S]*?```/g;
+
+  return content.replace(codeBlockRegex, (match) => {
+    // Extract content between the backticks
+    const innerContent = match.replace(/^```[^\n]*\n?/, '').replace(/\n?```$/, '');
+
+    // Check if this looks like JSON
+    const looksLikeJson =
+      innerContent.includes('{') &&
+      innerContent.includes('}') &&
+      innerContent.includes(':') &&
+      (innerContent.includes('"') || innerContent.includes("'"));
+
+    if (looksLikeJson) {
+      // Clean up the JSON content for parsing
+      let cleanedJson = innerContent.trim();
+
+      // Remove any language identifier at the start
+      cleanedJson = cleanedJson.replace(/^\w+\s*\n/, '');
+
+      // Handle the specific case where JSON starts with a quote
+      if (cleanedJson.startsWith("'") && cleanedJson.endsWith("'")) {
+        cleanedJson = cleanedJson.slice(1, -1);
+      }
+
+      try {
+        // Try to parse as valid JSON
+        const parsed = JSON.parse(cleanedJson);
+        const formatted = JSON.stringify(parsed, null, 2);
+        return `\`\`\`json\n${formatted}\n\`\`\``;
+      } catch (error) {
+        // If parsing fails, try to fix common issues and format manually
+        let formattedJson = cleanedJson;
+
+        // Replace <optional> with "<optional>" to make it valid JSON
+        formattedJson = formattedJson.replace(/<([^>]+)>/g, '"<$1>"');
+
+        // More sophisticated bracket balancing
+        let bracketBalance = 0;
+        let needsClosingBraces = 0;
+
+        // Count bracket balance more carefully
+        for (let i = 0; i < formattedJson.length; i++) {
+          if (formattedJson[i] === '{') {
+            bracketBalance++;
+          } else if (formattedJson[i] === '}') {
+            bracketBalance--;
+          }
+        }
+
+        // Only add closing braces if we have unmatched opening braces
+        if (bracketBalance > 0) {
+          needsClosingBraces = bracketBalance;
+          // Add closing braces with proper formatting
+          const closingBraces = Array(needsClosingBraces).fill('}').join('\n');
+          formattedJson += '\n' + closingBraces;
+        }
+
+        // Try to format with proper indentation
+        const lines = formattedJson.split('\n');
+        let indentLevel = 0;
+        const formattedLines = lines.map((line) => {
+          const trimmed = line.trim();
+          if (trimmed.includes('}') || trimmed.includes(']')) {
+            indentLevel = Math.max(0, indentLevel - 1);
+          }
+          const formatted = '  '.repeat(indentLevel) + trimmed;
+          if (trimmed.includes('{') || trimmed.includes('[')) {
+            indentLevel++;
+          }
+          return formatted;
+        });
+
+        const betterFormatted = formattedLines.join('\n');
+        return `\`\`\`json\n${betterFormatted}\n\`\`\``;
+      }
+    }
+
+    // If it doesn't look like JSON, return the original match
+    return match;
+  });
+};
+
+// export const CspFlyoutMarkdown: React.FC<PropsOf<typeof EuiMarkdownFormat>> = (props) => {
+//   const { children, ...otherProps } = props;
+
+//   const processedContent = React.useMemo(() => {
+//     if (typeof children === 'string') {
+//       return processMarkdownWithJson(children);
+//     }
+//     return children;
+//   }, [children]);
+
+//   return (
+//     <EuiMarkdownFormat textSize="s" {...otherProps}>
+//       {processedContent}
+//     </EuiMarkdownFormat>
+//   );
+// };
+
+export const CspFlyoutMarkdownJSON: React.FC<PropsOf<typeof EuiMarkdownFormat>> = (props) => {
+  const { children, ...otherProps } = props;
+
+  const processedContent = React.useMemo(() => {
+    if (typeof children === 'string') {
+      return processMarkdownWithJson(children);
+    }
+    return children;
+  }, [children]);
+
+  return (
+    <EuiMarkdownFormat textSize="s" {...otherProps}>
+      {processedContent}
+    </EuiMarkdownFormat>
+  );
+};
+
 export const CspFlyoutMarkdown: React.FC<PropsOf<typeof EuiMarkdownFormat>> = (props) => (
   <EuiMarkdownFormat textSize="s" {...props} />
 );
