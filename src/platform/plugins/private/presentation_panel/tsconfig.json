@@ -29,7 +29,7 @@
     "@kbn/search-errors",
     "@kbn/shared-ux-markdown",
     "@kbn/react-hooks",
-    "@kbn/shared-ux-utility"
+    "@kbn/shared-ux-utility",
   ],
   "exclude": ["target/**/*"]
 }
