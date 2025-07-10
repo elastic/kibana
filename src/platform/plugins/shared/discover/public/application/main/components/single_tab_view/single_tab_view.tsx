@@ -52,7 +52,7 @@ import { useAsyncFunction } from '../../hooks/use_async_function';
 import { ScopedServicesProvider } from '../../../../components/scoped_services_provider';
 import { HideTabsBar } from '../tabs_view/hide_tabs_bar';
 
-export interface DiscoverSessionViewProps {
+export interface SingleTabViewProps {
   customizationContext: DiscoverCustomizationContext;
   customizationCallbacks: CustomizationCallback[];
   urlStateStorage: IKbnUrlStateStorage;
@@ -70,13 +70,13 @@ type InitializeSession = (options?: {
   shouldClearAllTabs?: boolean;
 }) => Promise<SessionInitializationState>;
 
-export const DiscoverSessionView = ({
+export const SingleTabView = ({
   customizationContext,
   customizationCallbacks,
   urlStateStorage,
   internalState,
   runtimeStateManager,
-}: DiscoverSessionViewProps) => {
+}: SingleTabViewProps) => {
   const dispatch = useInternalStateDispatch();
   const services = useDiscoverServices();
   const { core, history, getScopedHistory } = services;

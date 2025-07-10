@@ -44,7 +44,7 @@ jest.mock('../../customizations', () => {
   };
 });
 
-jest.mock('./components/session_view/main_app', () => {
+jest.mock('./components/single_tab_view/main_app', () => {
   return {
     DiscoverMainApp: jest.fn(() => <div data-test-subj="discover-main-app" />),
   };
