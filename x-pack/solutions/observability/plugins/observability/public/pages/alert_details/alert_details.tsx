@@ -63,6 +63,7 @@ import { AlertSubtitle } from './components/alert_subtitle';
 import { ProximalAlertsCallout } from './proximal_alerts_callout';
 import { useTabId } from './hooks/use_tab_id';
 import { useRelatedDashboards } from './hooks/use_related_dashboards';
+import { useAlertDetailsPageViewEbt } from '../../hooks/use_alert_details_page_view_ebt';
 
 interface AlertDetailsPathParams {
   alertId: string;
@@ -110,6 +111,8 @@ export function AlertDetails() {
   const { rule, refetch } = useFetchRule({
     ruleId: ruleId || '',
   });
+
+  useAlertDetailsPageViewEbt({ ruleType: rule?.ruleTypeId });
 
   const onSuccessAddSuggestedDashboard = useCallback(async () => {
     await Promise.all([refetchRelatedDashboards(), refetch()]);
