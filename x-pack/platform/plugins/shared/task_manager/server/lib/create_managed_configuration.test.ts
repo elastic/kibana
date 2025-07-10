@@ -31,12 +31,11 @@ describe('createManagedConfiguration()', () => {
   const logger = mockLogger();
 
   beforeAll(() => {
-    jest.useFakeTimers();;
+    jest.useFakeTimers();
   });
 
   beforeEach(() => {
     jest.resetAllMocks();
-
   });
 
   afterAll(() => jest.useRealTimers());
@@ -132,7 +131,7 @@ describe('createManagedConfiguration()', () => {
       test('should decrease configuration at the next interval when an error is emitted', async () => {
         const { subscription, errors$ } = setupScenario(10);
         errors$.next(SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b'));
-        jest.advanceTimersByTime(ADJUST_THROUGHPUT_INTERVAL -1);
+        jest.advanceTimersByTime(ADJUST_THROUGHPUT_INTERVAL - 1);
         expect(subscription).toHaveBeenCalledTimes(1);
         expect(subscription).toHaveBeenNthCalledWith(1, 10);
         jest.advanceTimersByTime(1);
