@@ -8,7 +8,7 @@
 import * as React from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { render, waitFor } from '@testing-library/react';
-import { IntlProvider } from 'react-intl';
+import { IntlProvider } from '@kbn/i18n-react';
 import { createMemoryHistory, createLocation } from 'history';
 import { ToastsApi } from '@kbn/core/public';
 import { RuleDetailsRoute, getRuleData } from './rule_details_route';
@@ -50,11 +50,11 @@ describe('rule_details_route', () => {
 
   it('render a loader while fetching data', async () => {
     const rule = mockRule();
-    
+
     const renderResult = renderWithIntl(
       <RuleDetailsRoute {...mockRouterProps(rule)} {...mockApis()} />
     );
-    
+
     await waitFor(() => {
       // Wait for the component to be rendered
       expect(renderResult.container.querySelector('.euiLoadingSpinner')).toBeInTheDocument();
@@ -73,15 +73,15 @@ describe('rule_details_route', () => {
       alias_target_id: rule.id,
       alias_purpose: 'savedObjectConversion',
     }));
-    
+
     renderWithIntl(
       <RuleDetailsRoute {...mockRouterProps(rule)} {...{ ...mockApis(), resolveRule }} />
     );
-    
+
     await waitFor(() => {
       expect(resolveRule).toHaveBeenCalledWith(rule.id);
     });
-    
+
     expect((spacesMock as any).ui.redirectLegacyUrl).toHaveBeenCalledWith({
       path: 'insightsAndAlerting/triggersActions/rule/new_id',
       aliasPurpose: 'savedObjectConversion',
@@ -107,7 +107,7 @@ describe('rule_details_route', () => {
       outcome: 'conflict',
       alias_target_id: rule.id,
     }));
-    
+
     renderWithIntl(
       <RuleDetailsRoute
         {...mockRouterProps(rule)}
@@ -118,7 +118,7 @@ describe('rule_details_route', () => {
     await waitFor(() => {
       expect(resolveRule).toHaveBeenCalledWith(rule.id);
     });
-    
+
     expect((spacesMock as any).ui.components.getLegacyUrlConflict).toHaveBeenCalledWith({
       currentObjectId: 'new_id',
       objectNoun: 'rule',
