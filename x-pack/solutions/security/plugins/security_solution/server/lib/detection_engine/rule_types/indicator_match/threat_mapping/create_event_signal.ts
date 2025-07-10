@@ -81,7 +81,7 @@ export const createEventSignal = async ({
       indexFields: threatIndexFields,
     };
 
-    let signalsQueryMap: SignalIdToMatchedQueriesMap | undefined;
+    let signalIdToMatchedQueriesMap: SignalIdToMatchedQueriesMap | undefined;
     let threatList: ThreatListItem[] | undefined;
     try {
       const result = await getSignalIdToMatchedQueriesMap({
@@ -92,7 +92,7 @@ export const createEventSignal = async ({
           threatMatchedFields,
         }),
       });
-      signalsQueryMap = result.signalIdToMatchedQueriesMap;
+      signalIdToMatchedQueriesMap = result.signalIdToMatchedQueriesMap;
       threatList = result.threatList;
     } catch (exc) {
       // we receive an error if the event list count < threat list count
@@ -110,7 +110,7 @@ export const createEventSignal = async ({
       }
     }
 
-    const ids = Array.from(signalsQueryMap.keys());
+    const ids = Array.from(signalIdToMatchedQueriesMap.keys());
     const indexFilter = {
       query: {
         bool: {
@@ -137,7 +137,7 @@ export const createEventSignal = async ({
     ruleExecutionLogger.debug(`${ids?.length} matched signals found`);
 
     const enrichment = threatEnrichmentFactory({
-      signalsQueryMap,
+      signalIdToMatchedQueriesMap,
       threatIndicatorPath,
       matchedThreats: threatList,
     });

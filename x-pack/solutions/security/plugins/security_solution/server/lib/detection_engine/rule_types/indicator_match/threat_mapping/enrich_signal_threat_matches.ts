@@ -116,7 +116,7 @@ export const enrichSignalThreatMatchesFromSignalsMap = async (
   signals: SignalSourceHit[],
   matchedThreats: ThreatListItem[],
   indicatorPath: string,
-  signalsMap: Map<string, ThreatMatchNamedQuery[]>
+  signalIdToMatchedQueriesMap: Map<string, ThreatMatchNamedQuery[]>
 ): Promise<SignalSourceHit[]> => {
   if (signals.length === 0) {
     return [];
@@ -131,7 +131,7 @@ export const enrichSignalThreatMatchesFromSignalsMap = async (
     enrichmentsWithoutAtomic[hit._id!] = buildEnrichments({
       indicatorPath,
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      queries: signalsMap.get(hit._id!) ?? [],
+      queries: signalIdToMatchedQueriesMap.get(hit._id!) ?? [],
       threats: matchedThreats,
     });
   });

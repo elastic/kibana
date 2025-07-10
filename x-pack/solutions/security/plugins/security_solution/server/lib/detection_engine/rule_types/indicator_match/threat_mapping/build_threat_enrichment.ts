@@ -45,18 +45,17 @@ export const buildThreatEnrichment = ({
       indexFields: threatIndexFields,
     };
 
-    const { signalIdToMatchedQueriesMap: signalsQueryMap, threatList } =
-      await getSignalIdToMatchedQueriesMap({
-        threatSearchParams,
-        eventsCount: signals.length,
-        fieldAndValueToDocIdsMap: getFieldAndValueToDocIdsMap({
-          eventList: signals,
-          threatMatchedFields,
-        }),
-      });
+    const { signalIdToMatchedQueriesMap, threatList } = await getSignalIdToMatchedQueriesMap({
+      threatSearchParams,
+      eventsCount: signals.length,
+      fieldAndValueToDocIdsMap: getFieldAndValueToDocIdsMap({
+        eventList: signals,
+        threatMatchedFields,
+      }),
+    });
 
     const enrichment = threatEnrichmentFactory({
-      signalsQueryMap,
+      signalIdToMatchedQueriesMap,
       threatIndicatorPath,
       matchedThreats: threatList,
     });

@@ -6,8 +6,9 @@
  */
 
 import { ThreatMatchQueryType } from './types';
+import type { FieldAndValueToDocIdsMap } from './types';
 
-import { getSignalsQueryMapFromThreatIndex } from './get_signals_map_from_threat_index';
+import { getSignalIdToMatchedQueriesMap } from './get_signals_map_from_threat_index';
 import { getThreatList } from './get_threat_list';
 import { encodeThreatMatchNamedQuery } from './utils';
 import { MAX_NUMBER_OF_SIGNAL_MATCHES } from './enrich_signal_threat_matches';
@@ -44,16 +45,18 @@ const termsThreatMock = {
   matched_queries: [termsNamedQuery],
 };
 
+const fieldAndValueToDocIdsMapMock: FieldAndValueToDocIdsMap = {};
+
 getThreatListMock.mockReturnValue({ hits: { hits: [] } });
 
-describe('getSignalsQueryMapFromThreatIndex', () => {
+describe('getSignalIdToMatchedQueriesMap', () => {
   it('should call getThreatList to fetch threats from ES', async () => {
     getThreatListMock.mockReturnValue({ hits: { hits: [] } });
 
-    await getSignalsQueryMapFromThreatIndex({
+    await getSignalIdToMatchedQueriesMap({
       threatSearchParams: threatSearchParamsMock,
       eventsCount: 50,
-      termsQueryAllowed: false,
+      fieldAndValueToDocIdsMap: fieldAndValueToDocIdsMapMock,
     });
 
     expect(getThreatListMock).toHaveBeenCalledTimes(1);
@@ -63,13 +66,13 @@ describe('getSignalsQueryMapFromThreatIndex', () => {
   it('should return empty signals map if getThreatList return empty results', async () => {
     getThreatListMock.mockReturnValue({ hits: { hits: [] } });
 
-    const signalsQueryMap = await getSignalsQueryMapFromThreatIndex({
+    const result = await getSignalIdToMatchedQueriesMap({
       threatSearchParams: threatSearchParamsMock,
       eventsCount: 50,
-      termsQueryAllowed: false,
+      fieldAndValueToDocIdsMap: fieldAndValueToDocIdsMapMock,
     });
 
-    expect(signalsQueryMap).toEqual(new Map());
+    expect(result.signalIdToMatchedQueriesMap).toEqual(new Map());
   });
 
   it('should return signalsQueryMap for signals if threats search results exhausted', async () => {
@@ -97,13 +100,13 @@ describe('getSignalsQueryMapFromThreatIndex', () => {
     });
     getThreatListMock.mockReturnValueOnce({ hits: { hits: [] } });
 
-    const signalsQueryMap = await getSignalsQueryMapFromThreatIndex({
+    const result = await getSignalIdToMatchedQueriesMap({
       threatSearchParams: threatSearchParamsMock,
       eventsCount: 50,
-      termsQueryAllowed: false,
+      fieldAndValueToDocIdsMap: fieldAndValueToDocIdsMapMock,
     });
 
-    expect(signalsQueryMap).toEqual(
+    expect(result.signalIdToMatchedQueriesMap).toEqual(
       new Map([
         [
           'source-1',
@@ -153,13 +156,15 @@ describe('getSignalsQueryMapFromThreatIndex', () => {
       },
     });
 
-    const signalsQueryMap = await getSignalsQueryMapFromThreatIndex({
+    const result = await getSignalIdToMatchedQueriesMap({
       threatSearchParams: threatSearchParamsMock,
       eventsCount: 50,
-      termsQueryAllowed: false,
+      fieldAndValueToDocIdsMap: fieldAndValueToDocIdsMapMock,
     });
 
-    expect(signalsQueryMap.get('source-1')).toHaveLength(MAX_NUMBER_OF_SIGNAL_MATCHES);
+    expect(result.signalIdToMatchedQueriesMap.get('source-1')).toHaveLength(
+      MAX_NUMBER_OF_SIGNAL_MATCHES
+    );
   });
 
   it('should return empty signalsQueryMap for terms query if there no signalValueMap', async () => {
@@ -169,13 +174,13 @@ describe('getSignalsQueryMapFromThreatIndex', () => {
       },
     });
 
-    const signalsQueryMap = await getSignalsQueryMapFromThreatIndex({
+    const result = await getSignalIdToMatchedQueriesMap({
       threatSearchParams: threatSearchParamsMock,
       eventsCount: 50,
-      termsQueryAllowed: false,
+      fieldAndValueToDocIdsMap: fieldAndValueToDocIdsMapMock,
     });
 
-    expect(signalsQueryMap).toEqual(new Map());
+    expect(result.signalIdToMatchedQueriesMap).toEqual(new Map());
   });
 
   it('should return empty signalsQueryMap for terms query if there wrong value in threat indicator', async () => {
@@ -196,20 +201,19 @@ describe('getSignalsQueryMapFromThreatIndex', () => {
       },
     });
 
-    const signalValueMap = {
+    const fieldAndValueToDocIdsMap = {
       'event.domain': {
         domain_1: ['signalId1', 'signalId2'],
       },
     };
 
-    const signalsQueryMap = await getSignalsQueryMapFromThreatIndex({
+    const result = await getSignalIdToMatchedQueriesMap({
       threatSearchParams: threatSearchParamsMock,
       eventsCount: 50,
-      signalValueMap,
-      termsQueryAllowed: true,
+      fieldAndValueToDocIdsMap,
     });
 
-    expect(signalsQueryMap).toEqual(new Map());
+    expect(result.signalIdToMatchedQueriesMap).toEqual(new Map());
   });
 
   it('should return signalsQueryMap from threat indicators for termsQuery', async () => {
@@ -230,17 +234,16 @@ describe('getSignalsQueryMapFromThreatIndex', () => {
       },
     });
 
-    const signalValueMap = {
+    const fieldAndValueToDocIdsMap = {
       'event.domain': {
         domain_1: ['signalId1', 'signalId2'],
       },
     };
 
-    const signalsQueryMap = await getSignalsQueryMapFromThreatIndex({
+    const result = await getSignalIdToMatchedQueriesMap({
       threatSearchParams: threatSearchParamsMock,
       eventsCount: 50,
-      signalValueMap,
-      termsQueryAllowed: true,
+      fieldAndValueToDocIdsMap,
     });
 
     const queries = [
@@ -253,7 +256,7 @@ describe('getSignalsQueryMapFromThreatIndex', () => {
       },
     ];
 
-    expect(signalsQueryMap).toEqual(
+    expect(result.signalIdToMatchedQueriesMap).toEqual(
       new Map([
         ['signalId1', queries],
         ['signalId2', queries],
@@ -279,18 +282,17 @@ describe('getSignalsQueryMapFromThreatIndex', () => {
       },
     });
 
-    const signalValueMap = {
+    const fieldAndValueToDocIdsMap = {
       'event.domain': {
         domain_1: ['signalId1'],
         domain_2: ['signalId2'],
       },
     };
 
-    const signalsQueryMap = await getSignalsQueryMapFromThreatIndex({
+    const result = await getSignalIdToMatchedQueriesMap({
       threatSearchParams: threatSearchParamsMock,
       eventsCount: 50,
-      signalValueMap,
-      termsQueryAllowed: true,
+      fieldAndValueToDocIdsMap,
     });
 
     const queries = [
@@ -303,7 +305,7 @@ describe('getSignalsQueryMapFromThreatIndex', () => {
       },
     ];
 
-    expect(signalsQueryMap).toEqual(
+    expect(result.signalIdToMatchedQueriesMap).toEqual(
       new Map([
         ['signalId1', queries],
         ['signalId2', queries],

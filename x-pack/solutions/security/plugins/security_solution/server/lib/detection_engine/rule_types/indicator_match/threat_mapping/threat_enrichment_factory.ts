@@ -13,12 +13,12 @@ import { type SignalIdToMatchedQueriesMap } from './get_signals_map_from_threat_
 
 interface ThreatEnrichmentFactoryOptions {
   threatIndicatorPath: ThreatIndicatorPath;
-  signalsQueryMap: SignalIdToMatchedQueriesMap;
+  signalIdToMatchedQueriesMap: SignalIdToMatchedQueriesMap;
   matchedThreats: ThreatListItem[];
 }
 
 export const threatEnrichmentFactory = ({
-  signalsQueryMap,
+  signalIdToMatchedQueriesMap,
   threatIndicatorPath,
   matchedThreats,
 }: ThreatEnrichmentFactoryOptions) => {
@@ -27,6 +27,6 @@ export const threatEnrichmentFactory = ({
       signals,
       matchedThreats,
       threatIndicatorPath,
-      signalsQueryMap
+      signalIdToMatchedQueriesMap
     );
 };
