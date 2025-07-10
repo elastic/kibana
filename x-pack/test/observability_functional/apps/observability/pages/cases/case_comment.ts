@@ -19,7 +19,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const PageObjects = getPageObjects(['common', 'header']);
   const retry = getService('retry');
 
-  describe('Observability cases', () => {
+  describe('Observability > Cases – paste screenshot into comment', () => {
     let imageMarkdownUrl: string | null = null;
     let driver: WebDriver;
     before(async () => {
@@ -35,7 +35,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await esArchiver.unload('x-pack/test/functional/es_archives/observability/alerts');
     });
 
-    describe('creates a comment', () => {
+    describe('pasting a screenshot into a new comment', () => {
       before(async () => {
         await observability.users.setTestUserRole(
           observability.users.defineBasicObservabilityRole({
@@ -62,14 +62,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           });
         });
       });
-      it('goto case', async () => {
+      it('navigates to an existing Observability case', async () => {
         await cases.navigation.navigateToApp('observabilityCases', 'cases-all-title');
         await cases.casesTable.waitForCasesToBeListed();
         await cases.casesTable.goToFirstListedCase();
         await PageObjects.header.waitUntilLoadingHasFinished();
       });
 
-      it('captures screenshot and pastes content to editor', async () => {
+      it('captures a screenshot and pastes it into the markdown editor', async () => {
         const takeScreenshotResult = await browser.takeScreenshot();
         await driver.executeScript(async (screenshotData: string) => {
           const blob = new Blob([
@@ -96,7 +96,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         }, takeScreenshotResult);
       });
 
-      it('performs the upload and renders the image link', async () => {
+      it('uploads the image and replaces the placeholder with a markdown link', async () => {
         // check that image upload placeholder text is displayed
         await retry.waitFor('textarea to contain upload placeholder text', async () => {
           const textarea = await find.byCssSelector('#newComment');
@@ -118,7 +118,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
       });
 
-      it('displays the image in the markdown editor preview', async () => {
+      it('shows the uploaded image in markdown preview', async () => {
         // open the markdown preview
         await find.clickByButtonText('Preview');
 
@@ -142,7 +142,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         );
       });
 
-      it('creates comment with image', async () => {
+      it('adds the comment and renders the image attachment', async () => {
         // create the comment
         await find.clickByButtonText('Add comment');
 
