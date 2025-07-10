@@ -36,9 +36,7 @@ export const OnechatConversationsView: React.FC<{}> = () => {
     ${backgroundStyles}
     width: 100%;
     height: 100%;
-    max-block-size: calc(
-      100vh - var(--kbnAppHeadersOffset, var(--euiFixedHeadersOffset, 0)) - ${headerHeight}
-    );
+    max-block-size: calc(var(--kbn-application--content-height) - ${headerHeight});
   `;
 
   return (
