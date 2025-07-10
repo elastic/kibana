@@ -8,3 +8,4 @@
  */
 
 export * from './get_cell_renderers';
+export { getColumnsConfiguration } from './get_columns_configuration';
