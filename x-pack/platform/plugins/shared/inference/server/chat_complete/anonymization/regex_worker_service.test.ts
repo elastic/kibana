@@ -51,9 +51,14 @@ describe('RegexWorkerService', () => {
     const regexWorker = new RegexWorkerService(createTestConfig(), logger);
     const result = await regexWorker.run(taskPayload);
     const worker = (regexWorker as any).worker;
-    expect(worker.threads.length).toBeGreaterThanOrEqual(1);
+    expect(worker).toBeDefined();
+    expect(worker.completed).toBe(1);
     expect(result.records[0].email).not.toContain('jorge21@gmail.com');
     expect(result.anonymizations.length).toBe(1);
+
+    // worker completed 2 tasks
+    await regexWorker.run(taskPayload);
+    expect(worker.completed).toBe(2);
   });
   it('times out task if greater than taskTimeout time', async () => {
     const regexWorker = new RegexWorkerService(
