@@ -14,7 +14,7 @@ import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { ISessionsClient, SearchUsageCollector } from '../../..';
-import { SEARCH_SESSIONS_MANAGEMENT_ID } from '../constants';
+import { BACKGROUND_SEARCH_ENABLED, SEARCH_SESSIONS_MANAGEMENT_ID } from '../constants';
 import type { SearchSessionsMgmtAPI } from './lib/api';
 import type { AsyncSearchIntroDocumentation } from './lib/documentation';
 import type { SearchSessionsConfigSchema } from '../../../../server/config';
@@ -44,10 +44,14 @@ export interface AppDependencies {
 
 export const APP = {
   id: SEARCH_SESSIONS_MANAGEMENT_ID,
-  getI18nName: (): string =>
-    i18n.translate('data.mgmt.searchSessions.appTitle', {
-      defaultMessage: 'Search Sessions',
-    }),
+  getI18nName: (): string => {
+    if (BACKGROUND_SEARCH_ENABLED) {
+      return i18n.translate('data.mgmt.searchSessions.appTitleBackgroundSearch', {
+        defaultMessage: 'Background search',
+      });
+    }
+    return 'Search Sessions';
+  },
 };
 
 export function registerSearchSessionsMgmt(

@@ -8,16 +8,17 @@
  */
 
 import moment from 'moment';
-import { ElasticsearchClient } from '@kbn/core/server';
+import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { SearchSessionSavedObjectAttributes, SearchSessionStatus } from '../../../common';
 import { SearchStatus } from './types';
 import { SearchSessionsConfigSchema } from '../../config';
 import { getSearchStatus } from './get_search_status';
 
 export async function getSessionStatus(
-  deps: { internalClient: ElasticsearchClient },
+  deps: { internalClient: ElasticsearchClient; asUserClient: ElasticsearchClient },
   session: SearchSessionSavedObjectAttributes,
-  config: SearchSessionsConfigSchema
+  config: SearchSessionsConfigSchema,
+  logger: Logger
 ): Promise<{ status: SearchSessionStatus; errors?: string[] }> {
   if (session.isCanceled === true) {
     return { status: SearchSessionStatus.CANCELLED };
@@ -32,7 +33,7 @@ export async function getSessionStatus(
   const searches = Object.values(session.idMapping);
   const searchStatuses = await Promise.all(
     searches.map(async (s) => {
-      const status = await getSearchStatus(deps.internalClient, s.id, s);
+      const status = await getSearchStatus(deps.internalClient, s.id, s, logger, deps.asUserClient);
       return {
         ...s,
         ...status,

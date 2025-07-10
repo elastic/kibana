@@ -8,3 +8,8 @@
  */
 
 export const SEARCH_SESSIONS_MANAGEMENT_ID = 'search_sessions';
+
+// TEMPORARY: This is a temporary flag to enable/disable background search until the feature is fully implemented.
+// export const BACKGROUND_SEARCH_ENABLED =
+//  window.localStorage.getItem('backgroundSearchEnabled') === 'true' || false;
+export const BACKGROUND_SEARCH_ENABLED = true;

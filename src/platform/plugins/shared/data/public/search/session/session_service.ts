@@ -53,7 +53,7 @@ import {
 } from './search_session_state';
 import { ISessionsClient } from './sessions_client';
 import { NowProviderInternalContract } from '../../now_provider';
-import { SEARCH_SESSIONS_MANAGEMENT_ID } from './constants';
+import { BACKGROUND_SEARCH_ENABLED, SEARCH_SESSIONS_MANAGEMENT_ID } from './constants';
 import { formatSessionName } from './lib/session_name_formatter';
 
 /**
@@ -293,6 +293,7 @@ export class SessionService {
     });
 
     // keep completed searches alive until user explicitly saves the session
+    // this is no longer necessary for background search
     this.subscription.add(
       this.getSession$()
         .pipe(
@@ -470,8 +471,10 @@ export class SessionService {
    * https://github.com/elastic/kibana/issues/121543
    *
    * @deprecated
+   * we can remove this for background search
    */
   public continue(sessionId: string) {
+    if (BACKGROUND_SEARCH_ENABLED) return;
     if (this.lastSessionSnapshot?.sessionId === sessionId) {
       this.state.set({
         ...this.lastSessionSnapshot,
@@ -554,7 +557,15 @@ export class SessionService {
       sessionStartTime: this.state.get().startTime,
       appendStartTime: currentSessionInfoProvider.appendSessionStartTimeToName,
     });
-
+    console.log({
+      formattedName,
+      sessionId,
+      currentSessionApp,
+      locatorId,
+      restoreState,
+      initialState,
+    });
+    // this is where the saved object is created
     const searchSessionSavedObject = await this.sessionsClient.create({
       name: formattedName,
       appId: currentSessionApp,
@@ -566,6 +577,7 @@ export class SessionService {
 
     // if we are still interested in this result
     if (this.isCurrentSession(sessionId)) {
+      console.log('SessionService: saving session');
       this.state.transitions.store(searchSessionSavedObject);
 
       // trigger a poll for all the searches that are not yet stored to propagate them into newly created search session saved object and extend their keepAlive
@@ -586,6 +598,7 @@ export class SessionService {
 
       // notify all the searches with onSavingSession that session has been saved and saved object has been created
       // don't wait for the result
+      debugger;
       const searchesWithSavingHandler = this.state
         .get()
         .trackedSearches.filter((s) => s.searchDescriptor.onSavingSession);
