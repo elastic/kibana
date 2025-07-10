@@ -152,6 +152,13 @@ export function UnifiedDocViewerFlyout({
         return;
       }
 
+      const isResizableButton =
+        (ev.target as HTMLElement).getAttribute('data-test-subj') === 'euiResizableButton';
+      if (isResizableButton) {
+        // ignore events triggered when the resizable button is focused
+        return;
+      }
+
       if (ev.key === keys.ARROW_LEFT || ev.key === keys.ARROW_RIGHT) {
         ev.preventDefault();
         ev.stopPropagation();

@@ -34,7 +34,7 @@ export const createRule = (
       method: 'POST',
       url: spaceId ? getSpaceUrl(spaceId, DETECTION_ENGINE_RULES_URL) : DETECTION_ENGINE_RULES_URL,
       body: rule,
-      failOnStatusCode: false,
+      failOnStatusCode: true,
     })
   );
 };

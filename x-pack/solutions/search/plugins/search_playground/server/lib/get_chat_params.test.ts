@@ -20,6 +20,7 @@ import {
 import { Prompt, QuestionRewritePrompt } from '../../common/prompt';
 import { KibanaRequest, Logger } from '@kbn/core/server';
 import { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
+import { elasticModelIds } from '@kbn/inference-common';
 
 jest.mock('@kbn/langchain/server', () => {
   const original = jest.requireActual('@kbn/langchain/server');
@@ -229,5 +230,68 @@ describe('getChatParams', () => {
       llmType: 'inference',
     });
     expect(result.chatPrompt).toContain('How does it work?');
+  });
+
+  it('returns the correct params for the EIS connector', async () => {
+    const mockConnector = {
+      id: 'elastic-llm',
+      actionTypeId: INFERENCE_CONNECTOR_ID,
+      config: {
+        providerConfig: {
+          model_id: elasticModelIds.RainbowSprinkles,
+        },
+      },
+    };
+    mockActionsClient.get.mockResolvedValue(mockConnector);
+
+    const result = await getChatParams(
+      {
+        connectorId: 'elastic-llm',
+        prompt: 'How does it work?',
+        citations: false,
+      },
+      { actions, request, logger }
+    );
+
+    expect(result).toMatchObject({
+      connector: mockConnector,
+      summarizationModel: elasticModelIds.RainbowSprinkles,
+    });
+
+    expect(Prompt).toHaveBeenCalledWith('How does it work?', {
+      citations: false,
+      context: true,
+      type: 'openai',
+    });
+    expect(QuestionRewritePrompt).toHaveBeenCalledWith({
+      type: 'openai',
+    });
+  });
+
+  it('it returns provided model with EIS connector', async () => {
+    const mockConnector = {
+      id: 'elastic-llm',
+      actionTypeId: INFERENCE_CONNECTOR_ID,
+      config: {
+        providerConfig: {
+          model_id: elasticModelIds.RainbowSprinkles,
+        },
+      },
+    };
+    mockActionsClient.get.mockResolvedValue(mockConnector);
+
+    const result = await getChatParams(
+      {
+        connectorId: 'elastic-llm',
+        model: 'foo-bar',
+        prompt: 'How does it work?',
+        citations: false,
+      },
+      { actions, request, logger }
+    );
+
+    expect(result).toMatchObject({
+      summarizationModel: 'foo-bar',
+    });
   });
 });

@@ -81,9 +81,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
       this.url
     );
 
-    const isHttps = (this.configurationUtilities.getProxySettings()?.proxyUrl ?? this.url)
-      .toLowerCase()
-      .startsWith('https');
+    const isHttps = this.url.toLowerCase().startsWith('https');
 
     this.openAI =
       this.config.apiProvider === OpenAiProviderType.AzureAi

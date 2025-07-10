@@ -21,6 +21,7 @@ import {
 import { GEMINI_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/gemini/constants';
 import { INFERENCE_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/inference/constants';
 import { Prompt, QuestionRewritePrompt } from '../../common/prompt';
+import { isEISConnector } from '../utils/eis';
 
 export const getChatParams = async (
   {
@@ -43,9 +44,11 @@ export const getChatParams = async (
   chatPrompt: string;
   questionRewritePrompt: string;
   connector: Connector;
+  summarizationModel?: string;
 }> => {
   const abortController = new AbortController();
   const abortSignal = abortController.signal;
+  let summarizationModel = model;
   const actionsClient = await actions.getActionsClientWithRequest(request);
   const connector = await actionsClient.get({ id: connectorId });
   let chatModel;
@@ -55,12 +58,17 @@ export const getChatParams = async (
 
   switch (connector.actionTypeId) {
     case INFERENCE_CONNECTOR_ID:
+      if (isEISConnector(connector)) {
+        if (!summarizationModel && connector.config?.providerConfig?.model_id) {
+          summarizationModel = connector.config?.providerConfig?.model_id;
+        }
+      }
       llmType = 'inference';
       chatModel = new ActionsClientChatOpenAI({
         actionsClient,
         logger,
         connectorId,
-        model: connector?.config?.defaultModel,
+        model: summarizationModel || connector?.config?.defaultModel,
         llmType,
         temperature: getDefaultArguments(llmType).temperature,
         // prevents the agent from retrying on failure
@@ -146,5 +154,11 @@ export const getChatParams = async (
     throw new Error('Invalid connector id');
   }
 
-  return { chatModel, chatPrompt, questionRewritePrompt, connector };
+  return {
+    chatModel,
+    chatPrompt,
+    questionRewritePrompt,
+    connector,
+    summarizationModel: summarizationModel || connector?.config?.defaultModel,
+  };
 };
