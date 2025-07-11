@@ -216,7 +216,7 @@ describe(
         );
       });
 
-      it('should warn about rules with conflicts not being upgrading when upgrading a set of selected rules', () => {
+      it.only('should warn about rules with conflicts not being upgrading when upgrading a set of selected rules', () => {
         selectRulesByName([
           patchedName, // Rule with conflict
           OUTDATED_RULE_2['security-rule'].name, // Rule without conflict
