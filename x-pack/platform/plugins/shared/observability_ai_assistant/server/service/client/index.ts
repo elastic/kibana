@@ -484,7 +484,7 @@ export class ObservabilityAIAssistantClient {
     const options = {
       connectorId,
       system: systemMessage,
-      messages: convertMessagesForInference(messages),
+      messages: convertMessagesForInference(messages, this.dependencies.logger),
       toolChoice,
       tools,
       functionCalling: (simulateFunctionCalling ? 'simulated' : 'auto') as FunctionCallingMode,
@@ -514,8 +514,10 @@ export class ObservabilityAIAssistantClient {
               this.dependencies.inferenceClient
                 .chatComplete({
                   ...options,
+                  temperature: 0.25,
                   stream: true,
-                  messages: convertMessagesForInference(redactedMessages),
+                  maxRetries: 0,
+                  messages: convertMessagesForInference(redactedMessages, this.dependencies.logger),
                 })
                 // unredact complete assistant response event
                 .pipe(this.dependencies.anonymizationService.unredactChatCompletionEvent())
@@ -539,7 +541,9 @@ export class ObservabilityAIAssistantClient {
     } else {
       return this.dependencies.inferenceClient.chatComplete({
         ...options,
-        messages: convertMessagesForInference(messages),
+        messages: convertMessagesForInference(messages, this.dependencies.logger),
+        temperature: 0.25,
+        maxRetries: 0,
         stream: false,
       }) as TStream extends true ? never : Promise<ChatCompleteResponse>;
     }
