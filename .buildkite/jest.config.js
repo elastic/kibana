@@ -7,16 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  DISCOVER_APP_LOCATOR,
-  CANVAS_APP_LOCATOR,
-  DASHBOARD_APP_ID,
-  DISCOVER_APP_ID,
-  VISUALIZE_APP_ID,
-  VISUALIZE_APP_LOCATOR,
-  LENS_APP_LOCATOR,
-  DISCOVER_ESQL_LOCATOR,
-  DASHBOARD_APP_LOCATOR,
-} from './constants';
+const { createJsWithTsEsmPreset } = require('ts-jest');
 
-export type { AppId, DeepLinkId } from './deep_links';
+const tsJestTransformCfg = createJsWithTsEsmPreset().transform;
+
+/** @type {import("jest").Config} **/
+module.exports = {
+  testEnvironment: 'node',
+  transform: {
+    ...tsJestTransformCfg,
+  },
+  transformIgnorePatterns: [
+    'node_modules/(?!(@octokit/.*|universal-user-agent|before-after-hook)/)',
+  ],
+};

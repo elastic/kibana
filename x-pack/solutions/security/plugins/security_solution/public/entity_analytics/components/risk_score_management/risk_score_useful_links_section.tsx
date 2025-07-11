@@ -11,8 +11,8 @@ import { LinkAnchor } from '@kbn/security-solution-navigation/links';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
 import styled from '@emotion/styled';
 import { euiThemeVars } from '@kbn/ui-theme';
-import * as i18n from '../translations';
-import { RiskInformationFlyout } from './risk_information';
+import * as i18n from '../../translations';
+import { RiskInformationFlyout } from '../risk_information';
 
 const StyledList = styled.ul`
   list-style-type: disc;

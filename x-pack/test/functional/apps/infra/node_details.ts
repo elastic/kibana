@@ -271,6 +271,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           { metric: 'network', chartsCount: 1 },
         ].forEach(({ metric, chartsCount }) => {
           it(`should render ${chartsCount} ${metric} chart(s) in the Metrics section`, async () => {
+            await waitForChartsToLoad();
             const hosts = await pageObjects.assetDetails.getOverviewTabHostMetricCharts(metric);
             expect(hosts.length).to.equal(chartsCount);
           });
@@ -558,7 +559,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
       });
 
-      describe('Logs Tab', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/203656
+      describe.skip('Logs Tab', () => {
         before(async () => {
           await pageObjects.assetDetails.clickLogsTab();
           await pageObjects.timePicker.setAbsoluteRange(
@@ -586,7 +588,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
       });
 
-      describe('Osquery Tab', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/216514
+      // We should revisit this test and decide if it is usefull and worth to keep
+      describe.skip('Osquery Tab', () => {
         before(async () => {
           await browser.scrollTop();
           await pageObjects.assetDetails.clickOsqueryTab();
@@ -748,6 +752,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         ].forEach(({ metric, chartsCount }) => {
           it(`should render ${chartsCount} ${metric} chart`, async () => {
             await retry.tryForTime(5000, async () => {
+              await waitForChartsToLoad();
               const charts = await (metric === 'kubernetes'
                 ? pageObjects.assetDetails.getOverviewTabKubernetesMetricCharts()
                 : pageObjects.assetDetails.getOverviewTabHostMetricCharts(metric));
