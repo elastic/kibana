@@ -23,6 +23,10 @@ import {
   LOG_THRESHOLD_ALERT_TYPE_ID,
 } from '@kbn/rule-data-utils';
 import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
+import {
+  SO_SLO_TYPE,
+  syntheticsMonitorSOTypes,
+} from '@kbn/observability-shared-plugin/common/saved_object_types';
 import { sloFeatureId, APM_SERVER_FEATURE_ID, SYNTHETICS_FEATURE_ID } from '../../common';
 
 const syntheticsRuleTypes = [...SYNTHETICS_RULE_TYPE_IDS, ...UPTIME_RULE_TYPE_IDS];
@@ -66,6 +70,8 @@ const observabilityRulePrivileges = [
   })),
 ];
 
+const savedObjectTypes = [SO_SLO_TYPE, ...syntheticsMonitorSOTypes];
+
 export const getManageRulesFeature = (): KibanaFeatureConfig => ({
   id: 'observabilityManageRules',
   name: i18n.translate('xpack.observability.features.manageRulesTitle', {
@@ -87,7 +93,7 @@ export const getManageRulesFeature = (): KibanaFeatureConfig => ({
       api: ['rac'],
       savedObject: {
         all: [],
-        read: [],
+        read: savedObjectTypes,
       },
       alerting: {
         rule: { all: observabilityRulePrivileges },
@@ -104,7 +110,7 @@ export const getManageRulesFeature = (): KibanaFeatureConfig => ({
       api: ['rac'],
       savedObject: {
         all: [],
-        read: [],
+        read: savedObjectTypes,
       },
       alerting: {
         rule: { read: observabilityRulePrivileges },

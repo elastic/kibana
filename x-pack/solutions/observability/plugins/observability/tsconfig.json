@@ -130,7 +130,6 @@
     "@kbn/esql",
     "@kbn/apm-synthtrace-client",
     "@kbn/scout-oblt",
-    "@kbn/infra-plugin",
   ],
   "exclude": ["target/**/*"]
 }
