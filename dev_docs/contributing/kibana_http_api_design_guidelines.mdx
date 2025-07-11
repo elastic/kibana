@@ -267,7 +267,7 @@ DELETE /api/my_domain/my_resources/{id}
 
 **BEWARE: path or query parameters should not expect values of unknown length**
 
-Accepting very long strings (in excess of 200 characters per parameter) in path or query parameters can cause issues for HTTP servers that limit the byte length of certain parts of requests. HTTP servers may limit request header sections to 4096 bytes.
+Accepting very long strings (in excess of 200 characters per parameter) in path or query parameters can cause issues for HTTP servers that limit the byte length of certain parts of requests. HTTP servers may limit request header sections to as little as 4096 bytes!
 
 Use a body parameter for long strings instead and use validation to limit a path param's length if you have an idea of max length.
 
