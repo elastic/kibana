@@ -68,6 +68,7 @@ export function RangeInputField({
           <EuiFieldNumber
             compressed
             value={upperValue}
+            isInvalid={isInvalid}
             data-test-subj={testSubjUpper}
             onChange={onUpperValueChange}
             onBlur={onUpperValueBlur}
