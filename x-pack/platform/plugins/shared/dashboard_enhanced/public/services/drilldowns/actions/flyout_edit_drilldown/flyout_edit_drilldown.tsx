@@ -87,6 +87,7 @@ export const flyoutEditDrilldownAction: ActionDefinition<EmbeddableApiContext> =
       },
       flyoutProps: {
         'data-test-subj': 'editDrilldownFlyout',
+        'aria-labelledby': 'drilldownFlyoutTitleAriaId',
       },
       uuid: apiHasUniqueId(embeddable) ? embeddable.uuid : undefined,
     });

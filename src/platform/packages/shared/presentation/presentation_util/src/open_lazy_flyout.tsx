@@ -57,7 +57,7 @@ interface OpenLazyFlyoutParams {
  */
 export const openLazyFlyout = (params: OpenLazyFlyoutParams) => {
   const { core, parentApi, loadContent, flyoutProps, uuid, triggerId } = params;
-  const ariaLabelledBy = htmlId();
+  const ariaLabelledBy = flyoutProps?.['aria-labelledby'] ?? htmlId();
   const overlayTracker = tracksOverlays(parentApi) ? parentApi : undefined;
 
   const onClose = () => {

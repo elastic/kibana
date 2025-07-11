@@ -57,7 +57,7 @@ export const FlyoutFrame: FC<PropsWithChildren<FlyoutFrameProps>> = ({
           )}
           {title && (
             <EuiFlexItem grow={true}>
-              <h1>{title}</h1>
+              <h1 id='drilldownFlyoutTitleAriaId'>{title}</h1>
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
