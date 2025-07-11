@@ -21,13 +21,12 @@ export enum ToolType {
   esql = 'esql',
 }
 
-// TODO: rename to tool definition
 /**
  * Serializable representation of a tool, without its handler or schema.
  *
  * Use as a common base for browser-side and server-side tool types.
  */
-export interface ToolDescriptor<TConfig extends object = Record<string, unknown>> {
+export interface ToolDefinition<TConfig extends object = Record<string, unknown>> {
   /**
    * A unique id for this tool.
    */
@@ -51,7 +50,7 @@ export interface ToolDescriptor<TConfig extends object = Record<string, unknown>
   configuration: TConfig;
 }
 
-export interface ToolDescriptorWithSchema extends ToolDescriptor {
+export interface ToolDefinitionWithSchema extends ToolDefinition {
   /**
    * the JSON schema associated with this tool's input parameters.
    */

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ToolDescriptor } from './definition';
+import type { ToolDefinition } from './definition';
 
 /**
  * Common ES Field Types
@@ -38,4 +38,4 @@ export interface EsqlToolConfig {
   params: Record<string, EsqlToolParam>;
 }
 
-export type EsqlToolDescriptor = ToolDescriptor<EsqlToolConfig>;
+export type EsqlToolDescriptor = ToolDefinition<EsqlToolConfig>;

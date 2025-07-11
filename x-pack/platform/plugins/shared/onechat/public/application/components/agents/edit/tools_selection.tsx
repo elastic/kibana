@@ -20,7 +20,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { ToolSelection, ToolDescriptor } from '@kbn/onechat-common';
+import type { ToolSelection, ToolDefinition } from '@kbn/onechat-common';
 import {
   toggleProviderSelection,
   toggleToolSelection,
@@ -30,7 +30,7 @@ import {
 import { truncateAtNewline } from '../../../utils/truncate_at_newline';
 
 interface ToolsSelectionProps {
-  tools: ToolDescriptor[];
+  tools: ToolDefinition[];
   toolsLoading: boolean;
   selectedTools: ToolSelection[];
   onToolsChange: (tools: ToolSelection[]) => void;
@@ -46,7 +46,7 @@ export const ToolsSelection: React.FC<ToolsSelectionProps> = ({
 }) => {
   // Group tools by provider
   const toolsByProvider = useMemo(() => {
-    const grouped: Record<string, ToolDescriptor[]> = {};
+    const grouped: Record<string, ToolDefinition[]> = {};
     tools.forEach((tool) => {
       const providerId = tool.type;
       if (!grouped[providerId]) {
@@ -82,12 +82,12 @@ export const ToolsSelection: React.FC<ToolsSelectionProps> = ({
   return (
     <div>
       {Object.entries(toolsByProvider).map(([providerId, providerTools]) => {
-        const columns: Array<EuiBasicTableColumn<ToolDescriptor>> = [
+        const columns: Array<EuiBasicTableColumn<ToolDefinition>> = [
           {
             field: 'id',
             name: i18n.translate('xpack.onechat.tools.toolIdLabel', { defaultMessage: 'Tool' }),
             valign: 'top',
-            render: (id: string, tool: ToolDescriptor) => (
+            render: (id: string, tool: ToolDefinition) => (
               <EuiFlexGroup alignItems="center" gutterSize="s">
                 <EuiFlexItem grow={false}>
                   <EuiCheckbox

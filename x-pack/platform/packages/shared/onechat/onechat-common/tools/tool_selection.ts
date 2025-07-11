@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { ToolDescriptor } from './definition';
+import type { ToolDefinition } from './definition';
 
-export type ToolSelectionRelevantFields = Pick<ToolDescriptor, 'id' | 'type' | 'tags'>;
+export type ToolSelectionRelevantFields = Pick<ToolDefinition, 'id' | 'type' | 'tags'>;
 
 /**
  * "all tools" wildcard which can be used for {@link ByIdsToolSelection}

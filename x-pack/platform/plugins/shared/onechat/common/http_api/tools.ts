@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import type { ToolDescriptorWithSchema, ToolDescriptor } from '@kbn/onechat-common';
+import type { ToolDefinitionWithSchema, ToolDefinition } from '@kbn/onechat-common';
 
 export interface ListToolsResponse {
-  results: ToolDescriptorWithSchema[];
+  results: ToolDefinitionWithSchema[];
 }
 
-export type GetToolResponse = ToolDescriptorWithSchema;
+export type GetToolResponse = ToolDefinitionWithSchema;
 
 export interface DeleteToolResponse {
   success: boolean;
 }
 
-export type CreateToolPayload = Omit<ToolDescriptor, 'type'> &
-  Partial<Pick<ToolDescriptor, 'type'>>;
+export type CreateToolPayload = Omit<ToolDefinition, 'type'> &
+  Partial<Pick<ToolDefinition, 'type'>>;
 
-export type UpdateToolPayload = Partial<Pick<ToolDescriptor, 'description' | 'tags'>> & {
-  configuration?: Partial<ToolDescriptor['configuration']>;
+export type UpdateToolPayload = Partial<Pick<ToolDefinition, 'description' | 'tags'>> & {
+  configuration?: Partial<ToolDefinition['configuration']>;
 };
 
-export type CreateToolResponse = ToolDescriptorWithSchema;
+export type CreateToolResponse = ToolDefinitionWithSchema;
 
-export type UpdateToolResponse = ToolDescriptorWithSchema;
+export type UpdateToolResponse = ToolDefinitionWithSchema;

@@ -7,7 +7,7 @@
 
 import type { z, ZodObject } from '@kbn/zod';
 import type { MaybePromise } from '@kbn/utility-types';
-import type { ToolDescriptor, ToolType } from '@kbn/onechat-common';
+import type { ToolDefinition, ToolType } from '@kbn/onechat-common';
 import type { ToolHandlerFn } from '@kbn/onechat-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 
@@ -15,7 +15,7 @@ export interface InternalToolDefinition<
   TConfig extends object = {},
   TSchema extends ZodObject<any> = ZodObject<any>,
   TResult = unknown
-> extends ToolDescriptor<TConfig> {
+> extends ToolDefinition<TConfig> {
   /**
    * The zod schema attached to this tool.
    */

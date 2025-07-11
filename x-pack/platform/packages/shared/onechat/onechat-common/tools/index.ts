@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export { ToolType, type ToolDescriptor, type ToolDescriptorWithSchema } from './definition';
+export { ToolType, type ToolDefinition, type ToolDefinitionWithSchema } from './definition';
 export { isReservedToolId, isBuiltInToolId } from './tool_ids';
 export { builtinToolIds, builtinTags, builtInToolIdPrefix } from './constants';
 export {

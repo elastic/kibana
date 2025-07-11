@@ -10,7 +10,7 @@ import type { MaybePromise } from '@kbn/utility-types';
 import type { Logger } from '@kbn/logging';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { ToolDescriptor } from '@kbn/onechat-common';
+import type { ToolDefinition } from '@kbn/onechat-common';
 import type { ModelProvider } from './model_provider';
 import type { ScopedRunner, RunToolReturn, ScopedRunnerRunToolsParams } from './runner';
 import type { ToolEventEmitter } from './events';
@@ -21,7 +21,7 @@ import type { ToolEventEmitter } from './events';
 export interface BuiltinToolDefinition<
   RunInput extends ZodObject<any> = ZodObject<any>,
   RunOutput = unknown
-> extends Omit<ToolDescriptor, 'type' | 'configuration'> {
+> extends Omit<ToolDefinition, 'type' | 'configuration'> {
   /**
    * Tool's input schema, defined as a zod schema.
    */
@@ -39,7 +39,7 @@ export interface ExecutableTool<
   TConfig extends object = {},
   TSchema extends ZodObject<any> = ZodObject<any>,
   TResult = unknown
-> extends ToolDescriptor<TConfig> {
+> extends ToolDefinition<TConfig> {
   /**
    * Tool's input schema, defined as a zod schema.
    */

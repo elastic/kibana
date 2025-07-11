@@ -8,8 +8,8 @@
 export type { OnechatEvent } from './base/events';
 export {
   ToolType,
-  type ToolDescriptor,
-  type ToolDescriptorWithSchema,
+  type ToolDefinition,
+  type ToolDefinitionWithSchema,
   builtInToolIdPrefix,
   builtinToolIds,
   builtinTags,
