@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { EuiButtonEmpty, EuiConfirmModal, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiButtonEmpty, EuiConfirmModal, EuiFlexGroup, EuiFlexItem, EuiText, useGeneratedHtmlId } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 
@@ -28,6 +28,8 @@ export const ConfirmDeleteEndpointModal: React.FC<ConfirmDeleteEndpointModalProp
   onConfirm,
   inferenceEndpoint,
 }) => {
+  const confirmModalTitleId = useGeneratedHtmlId();
+
   const [isFetching, setIsFetching] = useState<boolean>(true);
   const [listOfUsages, setListOfUsages] = useState<InferenceUsageInfo[]>([]);
   const [deleteDisabled, setDeleteDisabled] = useState<boolean>(true);
@@ -68,6 +70,8 @@ export const ConfirmDeleteEndpointModal: React.FC<ConfirmDeleteEndpointModalProp
 
   return (
     <EuiConfirmModal
+      aria-labelledby={confirmModalTitleId}
+      titleProps={{ id: confirmModalTitleId }}
       buttonColor="danger"
       cancelButtonText={i18n.CANCEL}
       confirmButtonText={i18n.DELETE_ACTION_LABEL}

@@ -7,7 +7,7 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiConfirmModal } from '@elastic/eui';
+import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 
 import { useDispatch } from '../../mappings_state_context';
 import { NormalizedRuntimeField } from '../../types';
@@ -63,13 +63,17 @@ export const DeleteRuntimeFieldProvider = ({ children }: Props) => {
     closeModal();
   };
 
+  const modalTitleId = useGeneratedHtmlId();
+
   return (
     <>
       {children(deleteField)}
 
       {state.isModalOpen && (
         <EuiConfirmModal
+          aria-labelledby={modalTitleId}
           title={modalTitle}
+          titleProps={{ id: modalTitleId }}
           data-test-subj="runtimeFieldDeleteConfirmModal"
           onCancel={closeModal}
           onConfirm={confirmDelete}

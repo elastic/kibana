@@ -25,6 +25,7 @@ import {
   EuiTabs,
   EuiTab,
   EuiButtonEmpty,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { ReactNode } from 'react';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -72,6 +73,7 @@ const entityStoreLabel = i18n.translate(
 );
 
 export const EntityStoreManagementPage = () => {
+  const modalTitleId = useGeneratedHtmlId();
   const hasEntityAnalyticsCapability = useHasSecurityCapability('entity-analytics');
   const isEntityStoreFeatureFlagDisabled = useIsExperimentalFeatureEnabled('entityStoreDisabled');
   const {
@@ -155,6 +157,7 @@ export const EntityStoreManagementPage = () => {
                       isClearModalVisible,
                       closeClearModal,
                       showClearModal,
+                      modalTitleId,
                     }}
                   />
                 ) : null,
@@ -435,7 +438,8 @@ const ClearEntityDataButton: React.FC<{
   isClearModalVisible: boolean;
   closeClearModal: () => void;
   showClearModal: () => void;
-}> = ({ deleteEntityEngineMutation, isClearModalVisible, closeClearModal, showClearModal }) => {
+  modalTitleId: string;
+}> = ({ deleteEntityEngineMutation, isClearModalVisible, closeClearModal, showClearModal, modalTitleId }) => {
   return (
     <>
       <EuiButtonEmpty
@@ -454,12 +458,14 @@ const ClearEntityDataButton: React.FC<{
       {isClearModalVisible && (
         <EuiConfirmModal
           isLoading={deleteEntityEngineMutation.isLoading}
+          aria-labelledby={modalTitleId}
           title={
             <FormattedMessage
               id="xpack.securitySolution.entityAnalytics.entityStoreManagementPage.clearEntitiesModal.title"
               defaultMessage="Clear Entity data?"
             />
           }
+          titleProps={{ id: modalTitleId }}
           onCancel={closeClearModal}
           onConfirm={() => {
             deleteEntityEngineMutation.mutate();

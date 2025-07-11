@@ -7,7 +7,7 @@
 
 import React, { Fragment, useRef, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiConfirmModal } from '@elastic/eui';
+import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 
 import { Repository } from '../../../common/types';
 import { useServices, useToastNotifications } from '../app_context';
@@ -107,9 +107,11 @@ export const RepositoryDeleteProvider: React.FunctionComponent<Props> = ({ child
     }
 
     const isSingle = repositoryNames.length === 1;
+    const modalTitleId = useGeneratedHtmlId();
 
     return (
       <EuiConfirmModal
+        aria-labelledby={modalTitleId}
         title={
           isSingle ? (
             <FormattedMessage
@@ -125,6 +127,7 @@ export const RepositoryDeleteProvider: React.FunctionComponent<Props> = ({ child
             />
           )
         }
+        titleProps={{ id: modalTitleId }}
         onCancel={closeModal}
         onConfirm={deleteRepository}
         cancelButtonText={

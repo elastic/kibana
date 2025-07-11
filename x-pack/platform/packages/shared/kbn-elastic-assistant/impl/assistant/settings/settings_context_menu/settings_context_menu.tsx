@@ -23,6 +23,7 @@ import {
   EuiToolTip,
   EuiSwitchEvent,
   EuiIcon,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -58,6 +59,7 @@ const ConditionalWrap = ({
 
 export const SettingsContextMenu: React.FC<Params> = React.memo(
   ({ isDisabled = false, onChatCleared, selectedConversation }: Params) => {
+    const confirmModalTitleId = useGeneratedHtmlId();
     const { euiTheme } = useEuiTheme();
     const {
       assistantAvailability,
@@ -396,7 +398,9 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
         )}
         {isResetConversationModalVisible && (
           <EuiConfirmModal
+            aria-labelledby={confirmModalTitleId}
             title={i18n.RESET_CONVERSATION}
+            titleProps={{ id: confirmModalTitleId }}
             onCancel={closeDestroyModal}
             onConfirm={handleReset}
             cancelButtonText={i18n.CANCEL_BUTTON_TEXT}

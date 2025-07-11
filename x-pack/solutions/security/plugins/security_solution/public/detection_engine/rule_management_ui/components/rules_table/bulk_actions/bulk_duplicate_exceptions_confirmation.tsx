@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import { EuiRadioGroup, EuiText, EuiConfirmModal, EuiSpacer, EuiIconTip } from '@elastic/eui';
+import { EuiRadioGroup, EuiText, EuiConfirmModal, EuiSpacer, EuiIconTip, useGeneratedHtmlId } from '@elastic/eui';
 import { DuplicateOptions } from '../../../../../../common/detection_engine/rule_management/constants';
 
 import { bulkDuplicateRuleActions as i18n } from './translations';
@@ -26,6 +26,8 @@ const BulkActionDuplicateExceptionsConfirmationComponent = ({
     DuplicateOptions.withExceptions
   );
 
+  const modalTitleId = useGeneratedHtmlId();
+
   const handleRadioChange = useCallback(
     (optionId: string) => {
       setSelectedDuplicateOption(optionId as DuplicateOptions);
@@ -39,6 +41,8 @@ const BulkActionDuplicateExceptionsConfirmationComponent = ({
 
   return (
     <EuiConfirmModal
+      aria-labelledby={modalTitleId}
+      titleProps={{ id: modalTitleId }}
       title={i18n.MODAL_TITLE(rulesCount)}
       onConfirm={handleConfirm}
       cancelButtonText={i18n.CANCEL_BUTTON}

@@ -17,6 +17,7 @@ import {
   EuiSearchBarProps,
   EuiSpacer,
   EuiText,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -70,6 +71,8 @@ interface Params {
 }
 
 export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ dataViews }) => {
+  const confirmModalTitleId = useGeneratedHtmlId();
+
   const {
     assistantAvailability: { hasManageGlobalKnowledgeBase, isAssistantEnabled },
     assistantTelemetry,
@@ -446,6 +449,8 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
       </Flyout>
       {deleteKBItem && (
         <EuiConfirmModal
+          aria-labelledby={confirmModalTitleId}
+          titleProps={{ id: confirmModalTitleId }}
           data-test-subj="delete-entry-confirmation"
           title={i18n.DELETE_ENTRY_CONFIRMATION_TITLE(deleteKBItem.name)}
           onCancel={handleCancelDeleteEntry}
@@ -462,6 +467,8 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
       )}
       {duplicateKBItem && (
         <EuiConfirmModal
+          aria-labelledby={confirmModalTitleId}
+          titleProps={{ id: confirmModalTitleId }}
           title={i18n.DUPLICATE_ENTRY_CONFIRMATION_TITLE}
           onCancel={handleCancelDuplicateEntry}
           onConfirm={handleDuplicateEntry}

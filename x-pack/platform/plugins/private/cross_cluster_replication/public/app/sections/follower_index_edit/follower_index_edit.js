@@ -10,7 +10,7 @@ import PropTypes from 'prop-types';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { EuiButton, EuiConfirmModal, EuiPageSection, EuiPageTemplate } from '@elastic/eui';
+import { EuiButton, EuiConfirmModal, EuiPageSection, EuiPageTemplate, htmlIdGenerator } from '@elastic/eui';
 
 import { setBreadcrumbs, listBreadcrumb, editBreadcrumb } from '../../services/breadcrumbs';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
@@ -155,6 +155,7 @@ export class FollowerIndexEdit extends PureComponent {
       followerIndexId,
       followerIndex: { isPaused },
     } = this.props;
+    const confirmModalTitleId = htmlIdGenerator()('confirmModalTitle');
     const title = i18n.translate(
       'xpack.crossClusterReplication.followerIndexEditForm.confirmModal.title',
       {
@@ -165,7 +166,9 @@ export class FollowerIndexEdit extends PureComponent {
 
     return (
       <EuiConfirmModal
+        aria-labelledby={confirmModalTitleId}
         title={title}
+        titleProps={{ id: confirmModalTitleId }}
         onCancel={this.closeConfirmModal}
         onConfirm={this.confirmSaveFollowerIhdex}
         cancelButtonText={i18n.translate(

@@ -15,6 +15,7 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiSwitch,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { DeleteAction } from './use_delete_action';
 import { isManagedTransform } from '../../../../common/managed_transforms_utils';
@@ -33,6 +34,8 @@ export const DeleteActionModal: FC<DeleteAction> = ({
   userCanDeleteIndex,
   userCanDeleteDataView,
 }) => {
+  const confirmModalTitleId = useGeneratedHtmlId();
+
   const hasManagedTransforms = useMemo(() => items.some((t) => isManagedTransform(t)), [items]);
   const isBulkAction = items.length > 1;
 
@@ -167,6 +170,8 @@ export const DeleteActionModal: FC<DeleteAction> = ({
       })}
       defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
       buttonColor="danger"
+      aria-labelledby={confirmModalTitleId}
+      titleProps={{ id: confirmModalTitleId }}
     >
       {isBulkAction ? bulkDeleteModalContent : deleteModalContent}
     </EuiConfirmModal>

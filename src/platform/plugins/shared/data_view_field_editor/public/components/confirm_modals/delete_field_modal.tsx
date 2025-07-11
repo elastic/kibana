@@ -9,7 +9,7 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiCallOut, EuiConfirmModal, EuiFieldText, EuiFormRow, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiConfirmModal, EuiFieldText, EuiFormRow, EuiSpacer, useGeneratedHtmlId } from '@elastic/eui';
 
 const geti18nTexts = (fieldsToDelete?: string[]) => {
   let modalTitle = '';
@@ -89,9 +89,12 @@ export function DeleteFieldModal({ fieldsToDelete, closeModal, confirmDelete }: 
   const { modalTitle, confirmButtonText, cancelButtonText, warningMultipleFields } = i18nTexts;
   const isMultiple = Boolean(fieldsToDelete.length > 1);
   const [confirmContent, setConfirmContent] = useState<string>('');
+  const modalTitleId = useGeneratedHtmlId();
   return (
     <EuiConfirmModal
+      aria-labelledby={modalTitleId}
       title={modalTitle}
+      titleProps={{ id: modalTitleId }}
       data-test-subj="runtimeFieldDeleteConfirmModal"
       onCancel={closeModal}
       onConfirm={confirmDelete}

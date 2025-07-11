@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useCallback, useState } from 'react';
-import { EuiButtonEmpty, EuiConfirmModal, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButtonEmpty, EuiConfirmModal, EuiFlexGroup, EuiFlexItem, useGeneratedHtmlId } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
@@ -17,6 +17,7 @@ export const CommandInputClearHistory = memo(() => {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const dispatch = useConsoleStateDispatch();
   const getTestId = useTestIdGenerator(useDataTestSubj());
+  const modalTitleId = useGeneratedHtmlId();
 
   const handleClearInputHistory = useCallback(() => {
     setShowConfirmModal(true);
@@ -35,6 +36,8 @@ export const CommandInputClearHistory = memo(() => {
     <>
       {showConfirmModal && (
         <EuiConfirmModal
+          aria-labelledby={modalTitleId}
+          titleProps={{ id: modalTitleId }}
           title={i18n.translate('xpack.securitySolution.commandInputClearHistory.confirmTitle', {
             defaultMessage: 'Clear input history',
           })}

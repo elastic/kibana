@@ -7,7 +7,7 @@
 
 import React, { type FC, useState, useMemo, useCallback } from 'react';
 import type { EuiCheckboxGroupOption } from '@elastic/eui';
-import { EuiCallOut, EuiCheckboxGroup, EuiConfirmModal, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiCheckboxGroup, EuiConfirmModal, EuiSpacer, useGeneratedHtmlId } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { CoreStart, OverlayStart } from '@kbn/core/public';
@@ -31,6 +31,8 @@ export const StopModelDeploymentsConfirmDialog: FC<ForceStopModelConfirmDialogPr
   onConfirm,
   onCancel,
 }) => {
+  const modalTitleId = useGeneratedHtmlId();
+
   const [checkboxIdToSelectedMap, setCheckboxIdToSelectedMap] = useState<Record<string, boolean>>(
     {}
   );
@@ -115,6 +117,8 @@ export const StopModelDeploymentsConfirmDialog: FC<ForceStopModelConfirmDialogPr
 
   return (
     <EuiConfirmModal
+      aria-labelledby={modalTitleId}
+      titleProps={{ id: modalTitleId }}
       title={i18n.translate('xpack.ml.trainedModels.modelsList.forceStopDialog.title', {
         defaultMessage:
           'Stop {deploymentCount, plural, one {deployment} other {deployments}} of model {modelId}?',

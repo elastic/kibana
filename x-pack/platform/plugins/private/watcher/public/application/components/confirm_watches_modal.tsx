@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { EuiConfirmModal } from '@elastic/eui';
+import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 
@@ -25,10 +24,13 @@ export const ConfirmWatchesModal = ({
     return null;
   }
   const { title, message, buttonType, buttonLabel } = modalOptions;
+  const modalTitleId = useGeneratedHtmlId();
   return (
     <EuiConfirmModal
-      buttonColor={buttonType ? buttonType : 'primary'}
+      aria-labelledby={modalTitleId}
       title={title}
+      titleProps={{ id: modalTitleId }}
+      buttonColor={buttonType ? buttonType : 'primary'}
       onCancel={() => callback()}
       onConfirm={() => {
         callback(true);

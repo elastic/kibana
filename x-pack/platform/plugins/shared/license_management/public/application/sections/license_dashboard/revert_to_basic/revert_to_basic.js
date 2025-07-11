@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { EuiFlexItem, EuiCard, EuiButton, EuiLink, EuiConfirmModal, EuiText } from '@elastic/eui';
+import { EuiFlexItem, EuiCard, EuiButton, EuiLink, EuiConfirmModal, EuiText, htmlIdGenerator } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EXTERNAL_LINKS } from '../../../../../common/constants';
 import { i18n } from '@kbn/i18n';
@@ -28,6 +28,7 @@ export class RevertToBasic extends React.PureComponent {
     if (!needsAcknowledgement) {
       return null;
     }
+    const confirmModalTitleId = htmlIdGenerator()('confirmModalTitle');
     return (
       <EuiConfirmModal
         title={i18n.translate(
@@ -48,8 +49,8 @@ export class RevertToBasic extends React.PureComponent {
             defaultMessage="Confirm"
           />
         }
-        aria-labelledby={'revertToBasicModalTitleId'}
-        titleProps={{ id: 'revertToBasicModalTitleId' }}
+        aria-labelledby={confirmModalTitleId}
+        titleProps={{ id: confirmModalTitleId }}
       >
         <div>
           <EuiText>{firstLine}</EuiText>

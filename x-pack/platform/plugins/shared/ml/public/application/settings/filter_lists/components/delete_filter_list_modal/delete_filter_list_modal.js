@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { context } from '@kbn/kibana-react-plugin/public';
 
-import { EuiButton, EuiConfirmModal, EUI_MODAL_CONFIRM_BUTTON } from '@elastic/eui';
+import { EuiButton, EuiConfirmModal, EUI_MODAL_CONFIRM_BUTTON, htmlIdGenerator } from '@elastic/eui';
 
 import { deleteFilterLists } from './delete_filter_lists';
 
@@ -62,10 +62,12 @@ export class DeleteFilterListModal extends Component {
   render() {
     const { selectedFilterLists, canDeleteFilter } = this.props;
     let modal;
+    const confirmModalTitleId = htmlIdGenerator()('confirmModalTitle');
 
     if (this.state.isModalVisible) {
       modal = (
         <EuiConfirmModal
+          aria-labelledby={confirmModalTitleId}
           title={i18n.translate('xpack.ml.settings.filterLists.deleteFilterListModal.modalTitle', {
             defaultMessage:
               'Delete {selectedFilterListsLength, plural, one {{selectedFilterId}} other {# filter lists}}?',
@@ -74,6 +76,7 @@ export class DeleteFilterListModal extends Component {
               selectedFilterId: !!selectedFilterLists.length && selectedFilterLists[0].filter_id,
             },
           })}
+          titleProps={{ id: confirmModalTitleId }}
           className="eui-textBreakWord"
           onCancel={this.closeModal}
           onConfirm={this.onConfirmDelete}

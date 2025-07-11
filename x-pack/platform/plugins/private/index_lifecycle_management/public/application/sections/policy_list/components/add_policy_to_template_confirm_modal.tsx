@@ -20,6 +20,7 @@ import {
   EuiSwitch,
   EuiButton,
   EuiComboBoxOptionOption,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import { PolicyFromES } from '../../../../../common/types';
@@ -40,6 +41,8 @@ export const AddPolicyToTemplateConfirmModal: React.FunctionComponent<Props> = (
   onSuccess,
   onCancel,
 }) => {
+  const modalTitleId = useGeneratedHtmlId();
+
   const [isLegacy, setIsLegacy] = useState<boolean>(false);
   const [templateName, setTemplateName] = useState<string>('');
   const [aliasName, setAliasName] = useState<string>('');
@@ -264,6 +267,8 @@ export const AddPolicyToTemplateConfirmModal: React.FunctionComponent<Props> = (
     <EuiConfirmModal
       data-test-subj="addPolicyToTemplateModal"
       title={title}
+      aria-labelledby={modalTitleId}
+      titleProps={{ id: modalTitleId }}
       onCancel={onCancel}
       onConfirm={addPolicyToTemplate}
       cancelButtonText={i18n.translate(

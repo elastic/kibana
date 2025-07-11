@@ -8,7 +8,7 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiConfirmModal, EuiCallOut, EuiText, EuiSpacer, EuiButtonEmpty } from '@elastic/eui';
+import { EuiConfirmModal, EuiCallOut, EuiText, EuiSpacer, EuiButtonEmpty, useGeneratedHtmlId } from '@elastic/eui';
 
 import { JsonEditor, OnJsonEditorUpdateHandler } from '../../shared_imports';
 import { validateMappings, MappingsValidationError } from '../../lib';
@@ -129,6 +129,7 @@ export const LoadMappingsProvider = ({ onJson, esNodesPlugins, children }: Props
   const view: ModalView =
     state.json !== undefined && state.errors !== undefined ? 'validationResult' : 'json';
   const i18nTexts = getTexts(view, state.errors?.length);
+  const modalTitleId = useGeneratedHtmlId();
 
   const onJsonUpdate: OnJsonEditorUpdateHandler = useCallback((jsonUpdateData) => {
     jsonContent.current = jsonUpdateData;
@@ -216,7 +217,9 @@ export const LoadMappingsProvider = ({ onJson, esNodesPlugins, children }: Props
 
       {state.isModalOpen && (
         <EuiConfirmModal
+          aria-labelledby={modalTitleId}
           title={i18nTexts.modalTitle}
+          titleProps={{ id: modalTitleId }}
           onCancel={onCancel}
           onConfirm={onConfirm}
           cancelButtonText={i18nTexts.buttons.cancel}

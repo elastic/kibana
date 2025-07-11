@@ -13,6 +13,7 @@ import {
   EuiConfirmModal,
   EuiText,
   EuiCallOut,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useMemo, useState } from 'react';
@@ -30,6 +31,8 @@ const euiCalloutCss = {
 };
 
 const EditSavedQueryPageComponent = () => {
+  const confirmModalTitleId = useGeneratedHtmlId();
+
   const permissions = useKibana().services.application.capabilities.osquery;
 
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
@@ -149,6 +152,8 @@ const EditSavedQueryPageComponent = () => {
       )}
       {isDeleteModalVisible ? (
         <EuiConfirmModal
+          aria-labelledby={confirmModalTitleId}
+          titleProps={{ id: confirmModalTitleId }}
           title={
             <FormattedMessage
               id="xpack.osquery.deleteSavedQuery.confirmationModal.title"

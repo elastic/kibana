@@ -8,7 +8,7 @@
  */
 
 import React, { useState } from 'react';
-import { EuiCallOut, EuiSpacer, EuiConfirmModal, EuiFieldText, EuiFormRow } from '@elastic/eui';
+import { EuiCallOut, EuiSpacer, EuiConfirmModal, EuiFieldText, EuiFormRow, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 const geti18nTexts = (fieldName: string) => ({
@@ -58,10 +58,13 @@ export const SaveFieldTypeOrNameChangedModal: React.FC<Props> = ({
 }) => {
   const i18nTexts = geti18nTexts(fieldName);
   const [confirmContent, setConfirmContent] = useState<string>('');
+  const confirmModalTitleId = useGeneratedHtmlId();
 
   return (
     <EuiConfirmModal
+      aria-labelledby={confirmModalTitleId}
       title={i18nTexts.titleConfirmChanges}
+      titleProps={{ id: confirmModalTitleId }}
       data-test-subj="runtimeFieldSaveConfirmModal"
       cancelButtonText={i18nTexts.cancelButtonText}
       confirmButtonText={i18nTexts.confirmButtonText}

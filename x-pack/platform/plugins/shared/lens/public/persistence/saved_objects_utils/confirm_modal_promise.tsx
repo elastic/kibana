@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiConfirmModal } from '@elastic/eui';
+import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { StartServices } from '../../types';
 
@@ -17,6 +17,8 @@ export function confirmModalPromise(
   confirmBtnText = '',
   startServices: StartServices
 ): Promise<boolean> {
+  const modalTitleId = useGeneratedHtmlId();
+
   return new Promise((resolve, reject) => {
     const cancelButtonText = i18n.translate('xpack.lens.confirmModal.cancelButtonLabel', {
       defaultMessage: 'Cancel',
@@ -25,6 +27,8 @@ export function confirmModalPromise(
     const modal = startServices.overlays.openModal(
       toMountPoint(
         <EuiConfirmModal
+          aria-labelledby={modalTitleId}
+          titleProps={{ id: modalTitleId }}
           onCancel={() => {
             modal.close();
             reject();

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiConfirmModal, EuiText, EuiCode, EuiSpacer, EuiConfirmModalProps } from '@elastic/eui';
+import { EuiConfirmModal, EuiText, EuiCode, EuiSpacer, EuiConfirmModalProps, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
@@ -24,11 +24,15 @@ export const CancelSyncJobModal: React.FC<CancelSyncModalProps> = ({
   onConfirmCb,
   isLoading,
 }) => {
+  const modalTitleId = useGeneratedHtmlId();
+
   return (
     <EuiConfirmModal
+      aria-labelledby={modalTitleId}
       title={i18n.translate('searchConnectors.syncJobs.cancelSyncModal.title', {
         defaultMessage: 'Cancel sync job',
       })}
+      titleProps={{ id: modalTitleId }}
       onCancel={onCancel}
       onConfirm={() => onConfirmCb(syncJobId)}
       cancelButtonText={i18n.translate('searchConnectors.syncJobs.cancelSyncModal.cancelButton', {

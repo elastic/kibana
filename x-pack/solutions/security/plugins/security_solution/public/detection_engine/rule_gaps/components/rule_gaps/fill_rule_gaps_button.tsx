@@ -8,7 +8,7 @@
 import React, { useCallback, useState } from 'react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { Toast } from '@kbn/core/public';
-import { EuiButton, EuiConfirmModal, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiButton, EuiConfirmModal, EuiFlexGroup, EuiFlexItem, EuiText, useGeneratedHtmlId } from '@elastic/eui';
 import * as i18n from './translations';
 import { useBulkFillRuleGapsConfirmation } from '../bulk_fill_rule_gaps/use_bulk_fill_rule_gaps_confirmation';
 import { BulkFillRuleGapsModal } from '../bulk_fill_rule_gaps';
@@ -70,6 +70,8 @@ export const FillRuleGapsButton = ({ ruleId }: Props) => {
   const toasts = useAppToasts();
   const { services: startServices } = useKibana();
   const { startTransaction } = useStartTransaction();
+
+  const confirmModalTitleId = useGeneratedHtmlId();
 
   const onFillGapsClick = useCallback(async () => {
     if (isBulkActionsDryRunLoading || isBulkActionExecuteLoading) {
@@ -194,7 +196,9 @@ export const FillRuleGapsButton = ({ ruleId }: Props) => {
       )}
       {isBulkActionConfirmationVisible && bulkAction && (
         <EuiConfirmModal
+          aria-labelledby={confirmModalTitleId}
           title={i18n.GAPS_FILL_ALL_GAPS_DRY_RUN_MODAL_HEADING}
+          titleProps={{ id: confirmModalTitleId }}
           onCancel={cancelBulkActionConfirmation}
           onConfirm={cancelBulkActionConfirmation}
           confirmButtonText={i18n.GAPS_FILL_ALL_GAPS_DRY_RUN_FAILED_MODAL_CLOSE_BUTTON_LABEL}

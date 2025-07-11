@@ -19,6 +19,7 @@ import {
   EuiLink,
   EuiSpacer,
   EuiText,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { useMutation, useQuery } from '@tanstack/react-query';
 
@@ -175,6 +176,8 @@ export const IntegrationDebugger: React.FunctionComponent = () => {
     (integration) => integration.id === selectedIntegrationId
   );
 
+  const modalTitleId = useGeneratedHtmlId();
+
   return (
     <>
       <EuiText grow={false}>
@@ -255,7 +258,9 @@ export const IntegrationDebugger: React.FunctionComponent = () => {
 
             {isReinstallModalVisible && (
               <EuiConfirmModal
+                aria-labelledby={modalTitleId}
                 title={`Reinstall ${selectedIntegration.title}`}
+                titleProps={{ id: modalTitleId }}
                 onCancel={() => setIsReinstallModalVisible(false)}
                 onConfirm={() => reinstallMutation.mutate(selectedIntegration)}
                 isLoading={reinstallMutation.isLoading}
@@ -278,7 +283,9 @@ export const IntegrationDebugger: React.FunctionComponent = () => {
 
             {isUninstallModalVisible && (
               <EuiConfirmModal
+                aria-labelledby={modalTitleId}
                 title={`Uninstall ${selectedIntegration.title}`}
+                titleProps={{ id: modalTitleId }}
                 onCancel={() => setIsUninstallModalVisible(false)}
                 onConfirm={() => uninstallMutation.mutate(selectedIntegration)}
                 isLoading={uninstallMutation.isLoading}

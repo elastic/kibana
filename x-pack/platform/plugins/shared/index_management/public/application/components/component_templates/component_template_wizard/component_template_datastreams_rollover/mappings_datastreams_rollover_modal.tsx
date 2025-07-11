@@ -7,7 +7,7 @@
 
 import React, { useState, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiConfirmModal, EuiCode, EuiSpacer, EuiText, EuiCallOut, EuiLink } from '@elastic/eui';
+import { EuiConfirmModal, EuiCode, EuiSpacer, EuiText, EuiCallOut, EuiLink, useGeneratedHtmlId } from '@elastic/eui';
 
 import type { useComponentTemplatesContext } from '../../component_templates_context';
 import { documentationService } from '../../../../services/documentation';
@@ -28,6 +28,7 @@ export const MappingsDatastreamRolloverModal: React.FunctionComponent<Props> = (
 }) => {
   const [error, setError] = useState<Error>();
   const [isLoading, setIsLoading] = useState(false);
+  const modalTitleId = useGeneratedHtmlId();
 
   const onConfirm = useCallback(() => {
     async function confirm() {
@@ -57,6 +58,8 @@ export const MappingsDatastreamRolloverModal: React.FunctionComponent<Props> = (
           defaultMessage="Apply mappings now and rollover?"
         />
       }
+      aria-labelledby={modalTitleId}
+      titleProps={{ id: modalTitleId }}
       onCancel={onClose}
       onConfirm={onConfirm}
       cancelButtonText={

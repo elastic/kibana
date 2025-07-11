@@ -7,7 +7,7 @@
 
 import React, { useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiConfirmModal, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
+import { EuiConfirmModal, EuiSwitch, EuiSwitchEvent, useGeneratedHtmlId } from '@elastic/eui';
 
 const UNTRACK_ORPHANED_ALERTS_TITLE = i18n.translate(
   'xpack.triggersActionsUI.sections.untrackAlertsModal.title',
@@ -51,6 +51,8 @@ export const UntrackAlertsModal = (props: UntrackAlertsModalProps) => {
     setIsUntrack(e.target.checked);
   }, []);
 
+  const modalTitleId = useGeneratedHtmlId();
+
   return (
     <EuiConfirmModal
       data-test-subj="untrackAlertsModal"
@@ -59,7 +61,8 @@ export const UntrackAlertsModal = (props: UntrackAlertsModalProps) => {
       onConfirm={() => onConfirm(isUntrack)}
       confirmButtonText={UNTRACK_ORPHANED_ALERTS_CONFIRM_BUTTON_TEXT}
       cancelButtonText={UNTRACK_ORPHANED_ALERTS_CANCEL_BUTTON_TEXT}
-      aria-label={UNTRACK_ORPHANED_ALERTS_TITLE}
+      aria-labelledby={modalTitleId}
+      titleProps={{ id: modalTitleId }}
     >
       <EuiSwitch
         data-test-subj="untrackAlertsModalSwitch"

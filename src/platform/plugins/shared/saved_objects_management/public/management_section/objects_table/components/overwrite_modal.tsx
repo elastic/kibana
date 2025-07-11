@@ -8,7 +8,7 @@
  */
 
 import React, { useState, Fragment, ReactNode } from 'react';
-import { EuiConfirmModal, EUI_MODAL_CONFIRM_BUTTON, EuiText, EuiSuperSelect } from '@elastic/eui';
+import { EuiConfirmModal, EUI_MODAL_CONFIRM_BUTTON, EuiText, EuiSuperSelect, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import type { SavedObjectManagementTypeInfo } from '../../../../common/types';
@@ -22,6 +22,7 @@ export interface OverwriteModalProps {
 }
 
 export const OverwriteModal = ({ conflict, onFinish, allowedTypes }: OverwriteModalProps) => {
+  const confirmModalTitleId = useGeneratedHtmlId();
   const { obj, error } = conflict;
   let initialDestinationId: string | undefined;
   let selectControl: ReactNode = null;
@@ -99,6 +100,8 @@ export const OverwriteModal = ({ conflict, onFinish, allowedTypes }: OverwriteMo
 
   return (
     <EuiConfirmModal
+      aria-labelledby={confirmModalTitleId}
+      titleProps={{ id: confirmModalTitleId }}
       title={i18n.translate('savedObjectsManagement.objectsTable.overwriteModal.title', {
         defaultMessage: 'Overwrite {type}?',
         values: { type: typeDisplayName },

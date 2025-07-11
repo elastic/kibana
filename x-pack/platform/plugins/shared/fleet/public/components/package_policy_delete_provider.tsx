@@ -6,7 +6,7 @@
  */
 
 import React, { Fragment, useCallback, useMemo, useRef, useState } from 'react';
-import { EuiCallOut, EuiConfirmModal, EuiSpacer, EuiIconTip } from '@elastic/eui';
+import { EuiCallOut, EuiConfirmModal, EuiSpacer, EuiIconTip, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useHistory } from 'react-router-dom';
@@ -213,6 +213,8 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
     getPath,
   ]);
 
+  const modalTitleId = useGeneratedHtmlId();
+
   const renderModal = () => {
     const isAgentlessPolicy = agentPolicies?.find((policy) => policy?.supports_agentless === true);
     const packagePolicy = agentPolicies?.[0]?.package_policies?.find(
@@ -224,6 +226,8 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
 
     return (
       <EuiConfirmModal
+        aria-labelledby={modalTitleId}
+        titleProps={{ id: modalTitleId }}
         title={
           isAgentlessPolicy ? (
             <FormattedMessage

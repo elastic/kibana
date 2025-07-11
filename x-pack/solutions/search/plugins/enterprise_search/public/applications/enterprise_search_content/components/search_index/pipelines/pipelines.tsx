@@ -21,6 +21,7 @@ import {
   EuiSpacer,
   EuiTabbedContent,
   EuiTabbedContentTab,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -68,6 +69,8 @@ export const SearchIndexPipelines: React.FC = () => {
   const extractionDisabled = getContentExtractionDisabled(index);
   const [isRevertPipeline, setRevertPipeline] = useState(false);
   const buttonRef = useRef<HTMLButtonElement | null>(null);
+
+  const modalTitleId = useGeneratedHtmlId();
 
   useEffect(() => {
     if (!isDeleteModalOpen) {
@@ -296,12 +299,14 @@ export const SearchIndexPipelines: React.FC = () => {
       )}
       {isDeleteModalOpen && (
         <EuiConfirmModal
+          aria-labelledby={modalTitleId}
           title={i18n.translate(
             'xpack.enterpriseSearch.content.index.pipelines.deleteModal.title',
             {
               defaultMessage: 'Delete custom pipeline',
             }
           )}
+          titleProps={{ id: modalTitleId }}
           isLoading={revertStatus === Status.LOADING}
           onCancel={closeDeleteModal}
           onConfirm={onDeletePipeline}

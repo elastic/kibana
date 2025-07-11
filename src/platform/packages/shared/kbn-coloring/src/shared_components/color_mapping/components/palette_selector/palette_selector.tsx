@@ -9,7 +9,7 @@
 
 import React, { useCallback, useState, useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { EuiColorPalettePicker, EuiConfirmModal, EuiFormRow } from '@elastic/eui';
+import { EuiColorPalettePicker, EuiConfirmModal, EuiFormRow, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { KbnPalettes, getAppendedTag } from '@kbn/palettes';
@@ -45,12 +45,16 @@ export function PaletteSelector({ palettes }: { palettes: KbnPalettes }) {
 
   const [preserveModalPaletteId, setPreserveModalPaletteId] = useState<string | null>(null);
 
+  const confirmModalTitleId = useGeneratedHtmlId();
+
   const preserveChangesModal =
     preserveModalPaletteId !== null ? (
       <EuiConfirmModal
+        aria-labelledby={confirmModalTitleId}
         title={i18n.translate('coloring.colorMapping.colorChangesModal.title', {
           defaultMessage: 'Color changes detected',
         })}
+        titleProps={{ id: confirmModalTitleId }}
         onCancel={() => {
           if (preserveModalPaletteId) switchPaletteFn(preserveModalPaletteId, true);
           setPreserveModalPaletteId(null);

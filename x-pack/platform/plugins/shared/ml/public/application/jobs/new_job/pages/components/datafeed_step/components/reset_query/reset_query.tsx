@@ -9,7 +9,7 @@ import type { FC } from 'react';
 import React, { useContext, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiButtonEmpty, EuiConfirmModal, EuiCodeBlock, EuiSpacer } from '@elastic/eui';
+import { EuiButtonEmpty, EuiConfirmModal, EuiCodeBlock, EuiSpacer, useGeneratedHtmlId } from '@elastic/eui';
 import { JobCreatorContext } from '../../../job_creator_context';
 import { getDefaultDatafeedQuery } from '../../../../../utils/new_job_utils';
 
@@ -17,6 +17,7 @@ export const ResetQueryButton: FC = () => {
   const { jobCreator, jobCreatorUpdate } = useContext(JobCreatorContext);
   const [confirmModalVisible, setConfirmModalVisible] = useState(false);
   const [defaultQueryString] = useState(JSON.stringify(getDefaultDatafeedQuery(), null, 2));
+  const modalTitleId = useGeneratedHtmlId();
 
   const closeModal = () => setConfirmModalVisible(false);
   const showModal = () => setConfirmModalVisible(true);
@@ -30,9 +31,11 @@ export const ResetQueryButton: FC = () => {
     <>
       {confirmModalVisible && (
         <EuiConfirmModal
+          aria-labelledby={modalTitleId}
           title={i18n.translate('xpack.ml.newJob.wizard.datafeedStep.resetQueryConfirm.title', {
             defaultMessage: 'Reset datafeed query',
           })}
+          titleProps={{ id: modalTitleId }}
           onCancel={closeModal}
           onConfirm={resetDatafeed}
           cancelButtonText={i18n.translate(

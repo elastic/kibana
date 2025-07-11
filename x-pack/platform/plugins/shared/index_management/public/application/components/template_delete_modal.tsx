@@ -6,7 +6,7 @@
  */
 
 import React, { Fragment, useState } from 'react';
-import { EuiConfirmModal, EuiCallOut, EuiCheckbox, EuiBadge, EuiSpacer } from '@elastic/eui';
+import { EuiConfirmModal, EuiCallOut, EuiCheckbox, EuiBadge, EuiSpacer, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -22,6 +22,8 @@ export const TemplateDeleteModal = ({
   callback: (data?: { hasDeletedTemplates: boolean }) => void;
 }) => {
   const [isDeleteConfirmed, setIsDeleteConfirmed] = useState<boolean>(false);
+
+  const modalTitleId = useGeneratedHtmlId();
 
   const numTemplatesToDelete = templatesToDelete.length;
 
@@ -86,6 +88,8 @@ export const TemplateDeleteModal = ({
 
   return (
     <EuiConfirmModal
+      aria-labelledby={modalTitleId}
+      titleProps={{ id: modalTitleId }}
       buttonColor="danger"
       data-test-subj="deleteTemplatesConfirmation"
       title={

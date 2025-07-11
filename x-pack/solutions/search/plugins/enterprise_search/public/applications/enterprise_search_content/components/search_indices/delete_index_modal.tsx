@@ -18,6 +18,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTextColor,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -28,6 +29,8 @@ import { ingestionMethodToText } from '../../utils/indices';
 import { IndicesLogic } from './indices_logic';
 
 export const DeleteIndexModal: React.FC = () => {
+  const confirmModalTitleId = useGeneratedHtmlId();
+
   const { closeDeleteModal, deleteIndex } = useActions(IndicesLogic);
   const {
     deleteModalIndexName: indexName,
@@ -45,6 +48,8 @@ export const DeleteIndexModal: React.FC = () => {
 
   return isDeleteModalVisible ? (
     <EuiConfirmModal
+      aria-labelledby={confirmModalTitleId}
+      titleProps={{ id: confirmModalTitleId }}
       title={i18n.translate('xpack.enterpriseSearch.content.searchIndices.deleteModal.title', {
         defaultMessage: 'Are you sure you want to delete {indexName}',
         values: { indexName },

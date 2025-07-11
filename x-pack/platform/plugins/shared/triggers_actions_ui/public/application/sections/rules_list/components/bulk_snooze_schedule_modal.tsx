@@ -18,6 +18,7 @@ import {
   EuiModalFooter,
   EuiSpacer,
   EuiButtonEmpty,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import {
   withBulkRuleOperations,
@@ -124,9 +125,13 @@ export const BulkSnoozeScheduleModal = (props: BulkSnoozeScheduleModalProps) => 
     return deleteConfirmPlural(numberOfSelectedRules);
   }, [rules, filter, numberOfSelectedRules]);
 
+  const modalTitleId = useGeneratedHtmlId();
+
   if (bulkEditAction === 'unschedule' && (rules.length || filter)) {
     return (
       <EuiConfirmModal
+        aria-labelledby={modalTitleId}
+        titleProps={{ id: modalTitleId }}
         title={confirmationTitle}
         onCancel={onClose}
         onConfirm={onRemoveSnoozeSchedule}

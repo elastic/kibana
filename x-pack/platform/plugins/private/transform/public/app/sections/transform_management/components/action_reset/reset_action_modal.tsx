@@ -8,7 +8,7 @@
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EUI_MODAL_CONFIRM_BUTTON, EuiConfirmModal, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
+import { EUI_MODAL_CONFIRM_BUTTON, EuiConfirmModal, EuiFlexGroup, EuiSpacer, useGeneratedHtmlId } from '@elastic/eui';
 import type { ResetAction } from './use_reset_action';
 import { isManagedTransform } from '../../../../common/managed_transforms_utils';
 import { ManagedTransformsWarningCallout } from '../managed_transforms_callout/managed_transforms_callout';
@@ -19,6 +19,7 @@ export const ResetActionModal: FC<ResetAction> = ({
   items,
   shouldForceReset,
 }) => {
+  const modalTitleId = useGeneratedHtmlId();
   const hasManagedTransforms = useMemo(() => items.some((t) => isManagedTransform(t)), [items]);
   const isBulkAction = items.length > 1;
 
@@ -71,7 +72,9 @@ export const ResetActionModal: FC<ResetAction> = ({
   return (
     <EuiConfirmModal
       data-test-subj="transformResetModal"
+      aria-labelledby={modalTitleId}
       title={isBulkAction === true ? bulkResetModalTitle : resetModalTitle}
+      titleProps={{ id: modalTitleId }}
       onCancel={closeModal}
       onConfirm={resetAndCloseModal}
       cancelButtonText={i18n.translate('xpack.transform.transformList.resetModalCancelButton', {
