@@ -9,7 +9,12 @@ import React from 'react';
 import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
 import { getConsoleTestSetup } from '../../../mocks';
 import type { ConsoleTestSetup } from '../../../mocks';
-import type { ConsoleProps, CommandArgDefinition, CommandDefinition, Command } from '../../../types';
+import type {
+  ConsoleProps,
+  CommandArgDefinition,
+  CommandDefinition,
+  Command,
+} from '../../../types';
 import { executionTranslations } from './translations';
 
 describe('When a Console command is entered by the user', () => {

@@ -9,9 +9,13 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { CustomScriptSelector } from './custom_script_selector';
 import { useGetCustomScripts } from '../../hooks/custom_scripts/use_get_custom_scripts';
-import type { CommandArgumentValueSelectorProps, Command, CommandArgDefinition } from '../console/types';
+import type {
+  CommandArgumentValueSelectorProps,
+  Command,
+  CommandArgDefinition,
+} from '../console/types';
 import type { CustomScript } from '../../../../server/endpoint/services';
-import { ParsedCommandInterface } from '../console/service/types';
+import type { ParsedCommandInterface } from '../console/service/types';
 
 jest.mock('../../hooks/custom_scripts/use_get_custom_scripts');
 
