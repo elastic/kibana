@@ -243,9 +243,9 @@ POST /api/my_domain/my_resources
 
 **PUT or PATCH are for updating a resource**
 
-`PUT` is a bit special in that it should _create_ the resource if it does not exist. As a result it should expect a **full** resources to be provided in body of the call.
+`PUT` is a bit special in that it should _create_ the resource if it does not exist. It should expect the **full** resource in the body of the call.
 
-`PATCH` is used for partial updates and should never create a resource that does not already exist.
+`PATCH` is used for partial updates and should never create a resource that does not already exist. It should expect a **partial** resource in the body of the call.
 
 **DELETE is for deleting a resource**
 
