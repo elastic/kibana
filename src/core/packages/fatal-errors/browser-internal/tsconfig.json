@@ -20,11 +20,11 @@
     "@kbn/i18n-react",
     "@kbn/core-injected-metadata-browser-mocks",
     "@kbn/core-theme-browser-mocks",
-    "@kbn/test-subj-selector",
     "@kbn/test-jest-helpers",
     "@kbn/react-kibana-context-root",
     "@kbn/core-analytics-browser-mocks",
     "@kbn/core-analytics-browser",
+    "@kbn/core-i18n-browser-mocks",
   ],
   "exclude": [
     "target/**/*",
