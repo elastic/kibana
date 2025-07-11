@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getValue, setValue, hasTemplateSnippet } from './utils';
+import { getValue, setValue, hasTemplateSnippet, convertProccesorsToJson } from './utils';
 
 describe('get and set values', () => {
   const testObject = Object.freeze([{ onFailure: [{ onFailure: 1 }] }]);
@@ -49,5 +49,25 @@ describe('template snippets', () => {
     expect(hasTemplateSnippet('hello{{{world}}}')).toBe(true);
     expect(hasTemplateSnippet('{{{hello}}}world')).toBe(true);
     expect(hasTemplateSnippet('{{{hello.world}}}')).toBe(true);
+  });
+});
+
+describe('convert processors to json', () => {
+  it('returns converted processors', () => {
+    const obj = {
+      field1: 'mustNotChange',
+      field2: 123,
+      field3: '{1: "mustNotChange"}',
+      value: '{"1": """aaa"bbb"""}',
+      customOptions: '{"customProcessor": """aaa"bbb"""}',
+    };
+
+    expect(convertProccesorsToJson(obj)).toEqual({
+      field1: 'mustNotChange',
+      field2: 123,
+      field3: '{1: "mustNotChange"}',
+      value: { 1: 'aaa"bbb' },
+      customProcessor: 'aaa"bbb',
+    });
   });
 });
