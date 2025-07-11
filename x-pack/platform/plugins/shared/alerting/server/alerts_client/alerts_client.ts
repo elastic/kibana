@@ -261,14 +261,6 @@ export class AlertsClient<
             }
           }
         }
-
-        this.options.logger.info(
-          `[TrackedAlerts] Found ${results.length} tracked alerts with, indices: '${JSON.stringify(
-            this.trackedAlerts.indices
-          )}', seqNo '${JSON.stringify(
-            this.trackedAlerts.seqNo
-          )}' and primaryTerm '${JSON.stringify(this.trackedAlerts.primaryTerm)}'.`
-        );
       } catch (err) {
         this.options.logger.error(
           `Error searching for tracked alerts by UUID ${this.ruleInfoMessage} - ${err.message}`,
