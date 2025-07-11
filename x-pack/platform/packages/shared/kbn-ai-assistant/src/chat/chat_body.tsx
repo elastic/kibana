@@ -340,33 +340,35 @@ export function ChatBody({
           );
           break;
         case ChatActionClickType.visualizeEsqlQuery: {
-        const now = new Date().toISOString();
-        next(
-          messages.concat([
-            {
-              '@timestamp': now,
-              message: {
-                role: MessageRole.User,
-                content: `Visualize the following ES|QL query:\n\n\`\`\`esql\n${payload.query}\n\`\`\``,
-              },
-            },
-            {
-              '@timestamp': now,
-              message: {
-                role: MessageRole.Assistant,
-                content: '',
-                function_call: {
-                  name: 'visualize_query',
-                  arguments: JSON.stringify({
-                    query: payload.query,
-                    intention: VisualizeESQLUserIntention.visualizeAuto,
-                  }),
-                  trigger: MessageRole.User,
+          const now = new Date().toISOString();
+          next(
+            messages.concat([
+              {
+                '@timestamp': now,
+                message: {
+                  role: MessageRole.User,
+                  content: `Visualize the following ES|QL query:\n\n\`\`\`esql\n${payload.query}\n\`\`\``,
                 },
               },
-            })
+              {
+                '@timestamp': now,
+                message: {
+                  role: MessageRole.Assistant,
+                  content: '',
+                  function_call: {
+                    name: 'visualize_query',
+                    arguments: JSON.stringify({
+                      query: payload.query,
+                      intention: VisualizeESQLUserIntention.visualizeAuto,
+                    }),
+                    trigger: MessageRole.User,
+                  },
+                },
+              },
+            ])
           );
           break;
+        }
       }
     },
     [messages, next]
