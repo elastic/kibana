@@ -18,7 +18,7 @@ import {
   type ObservabilityAIAssistantChatService,
   type TelemetryEventTypeWithPayload,
 } from '@kbn/observability-ai-assistant-plugin/public';
-import { aiAssistantAnonymizationSettings } from '@kbn/inference-common';
+import { aiAnonymizationSettings } from '@kbn/inference-common';
 import { AnonymizationSettings } from '@kbn/inference-common';
 import { ChatItem } from './chat_item';
 import { ChatConsolidatedItems } from './chat_consolidated_items';
@@ -163,9 +163,7 @@ export function ChatTimeline({
   `;
 
   const { anonymizationEnabled } = useMemo(() => {
-    const settings = uiSettings?.get<AnonymizationSettings | undefined>(
-      aiAssistantAnonymizationSettings
-    );
+    const settings = uiSettings?.get<AnonymizationSettings | undefined>(aiAnonymizationSettings);
 
     if (!settings) {
       return { anonymizationEnabled: false };

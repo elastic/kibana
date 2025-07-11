@@ -124,7 +124,7 @@ export const OBSERVABILITY_AI_ASSISTANT_SIMULATED_FUNCTION_CALLING =
 export const OBSERVABILITY_AI_ASSISTANT_SEARCH_CONNECTOR_INDEX_PATTERN =
   'observability:aiAssistantSearchConnectorIndexPattern';
 export const AI_ASSISTANT_PREFERRED_AI_ASSISTANT_TYPE = 'aiAssistant:preferredAIAssistantType';
-export const AI_ASSISTANT_ANONYMIZATION_SETTINGS = 'ai:anonymizationSettings';
+export const AI_ANONYMIZATION_SETTINGS = 'ai:anonymizationSettings';
 export const OBSERVABILITY_SEARCH_EXCLUDED_DATA_TIERS = 'observability:searchExcludedDataTiers';
 export const OBSERVABILITY_ENABLE_STREAMS_UI = 'observability:enableStreamsUI';
 export const OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS =

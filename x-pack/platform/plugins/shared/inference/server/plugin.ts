@@ -10,7 +10,7 @@ import type { Logger } from '@kbn/logging';
 import {
   BoundInferenceClient,
   InferenceClient,
-  aiAssistantAnonymizationSettings,
+  aiAnonymizationSettings,
   AnonymizationSettings,
 } from '@kbn/inference-common';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -70,9 +70,7 @@ export class InferencePlugin
     const createAnonymizationRulesPromise = async (request: KibanaRequest) => {
       const soClient = core.savedObjects.getScopedClient(request);
       const uiSettingsClient = core.uiSettings.asScopedToClient(soClient);
-      const settingsStr = await uiSettingsClient.get<string | undefined>(
-        aiAssistantAnonymizationSettings
-      );
+      const settingsStr = await uiSettingsClient.get<string | undefined>(aiAnonymizationSettings);
 
       if (!settingsStr) {
         return [];
