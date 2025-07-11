@@ -120,6 +120,9 @@ export const getCasesTelemetryData = async ({
             casesRes.aggregations?.assigneeFilters.buckets.atLeastOne.doc_count ?? 0,
         },
         ...allAttachmentFrameworkStats,
+        withIncrementalId: casesRes.aggregations?.withIncrementalId.value ?? 0,
+        withoutIncrementalId:
+          casesRes.total - (casesRes.aggregations?.withIncrementalId.value ?? 0),
       },
       sec: getSolutionValues({
         caseAggregations: casesRes.aggregations,
@@ -195,6 +198,11 @@ const getCasesSavedObjectTelemetry = async (
       tags: {
         cardinality: {
           field: `${CASE_SAVED_OBJECT}.attributes.tags`,
+        },
+      },
+      withIncrementalId: {
+        cardinality: {
+          field: `${CASE_SAVED_OBJECT}.attributes.incremental_id`,
         },
       },
     },

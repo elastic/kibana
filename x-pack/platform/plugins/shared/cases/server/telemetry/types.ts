@@ -110,6 +110,7 @@ export type CaseAggregationResult = Record<
   tags: Cardinality;
   totalAssignees: ValueCount;
   totalsByOwner: Buckets;
+  withIncrementalId: Cardinality;
 };
 
 export interface Assignees {
@@ -184,6 +185,8 @@ export interface CasesTelemetry {
         totalWithAlerts: number;
         totalWithConnectors: number;
         latestDates: LatestDates;
+        withIncrementalId: number;
+        withoutIncrementalId: number;
       };
     sec: SolutionTelemetry;
     obs: SolutionTelemetry;
