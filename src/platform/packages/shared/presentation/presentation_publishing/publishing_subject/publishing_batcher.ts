@@ -8,7 +8,7 @@
  */
 
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { BehaviorSubject, combineLatest, debounceTime, skip } from 'rxjs';
+import { combineLatest, debounceTime, skip } from 'rxjs';
 import { AnyPublishingSubject, PublishingSubject, UnwrapPublishingSubjectTuple } from './types';
 
 const hasSubjectsArrayChanged = (
@@ -108,7 +108,9 @@ export const useBatchedOptionalPublishingSubjects = <
  *
  * @param subjects Publishing subjects array.
  */
-export const useBatchedPublishingSubjects = <SubjectsType extends [...AnyPublishingSubject[]]>(
+export const useBatchedPublishingSubjects = <
+  SubjectsType extends [...Array<PublishingSubject<any>>]
+>(
   ...subjects: [...SubjectsType]
 ): UnwrapPublishingSubjectTuple<SubjectsType> => {
   /**
@@ -117,15 +119,6 @@ export const useBatchedPublishingSubjects = <SubjectsType extends [...AnyPublish
   const [latestPublishedValues, setLatestPublishedValues] = useState<
     UnwrapPublishingSubjectTuple<SubjectsType>
   >(() => unwrapPublishingSubjectArray(subjects));
-
-  /**
-   * Convert any undefined subjects to an observable that always returns undefined
-   * This prevents RXJS from throwing an error when passed a non-observable to combineLatest
-   */
-  const infilledSubjects = subjects.map((subject) => {
-    if (!subject?.getValue) return new BehaviorSubject(undefined);
-    return subject;
-  }) as Array<PublishingSubject<any>>;
 
   /**
    * Subscribe to all subjects and update the latest values when any of them change.
@@ -139,7 +132,7 @@ export const useBatchedPublishingSubjects = <SubjectsType extends [...AnyPublish
    */
   const subscription = useMemo(
     () =>
-      combineLatest(infilledSubjects)
+      combineLatest(subjects)
         .pipe(
           // When a new observer subscribes to a BehaviorSubject, it immediately receives the current value. Skip this emit.
           skip(1),
