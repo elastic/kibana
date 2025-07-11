@@ -17,6 +17,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { ClientConfigType, ReportingAPIClient } from '@kbn/reporting-public';
 import { DiagnoseResponse } from '@kbn/reporting-public/reporting_api_client';
@@ -61,6 +62,9 @@ export const ReportDiagnostic = ({ apiClient, clientConfig }: Props) => {
   const { isBusy, chromeStatus, isFlyoutVisible } = state;
   const configAllowsImageReports =
     clientConfig.export_types.pdf.enabled || clientConfig.export_types.png.enabled;
+  const titleId = useGeneratedHtmlId({
+    prefix: 'reportingHelperTitle',
+  });
 
   const closeFlyout = () => setState({ ...initialState, isFlyoutVisible: false });
   const showFlyout = () => setState({ isFlyoutVisible: true });
@@ -123,12 +127,12 @@ export const ReportDiagnostic = ({ apiClient, clientConfig }: Props) => {
       <EuiFlyout
         onClose={closeFlyout}
         data-test-subj="reportDiagnosisFlyout"
-        aria-labelledby="reportingHelperTitle"
+        aria-labelledby={titleId}
         size="m"
       >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
-            <h2>
+            <h2 id={titleId}>
               <FormattedMessage
                 id="xpack.reporting.listing.diagnosticTitle"
                 defaultMessage="Screenshotting Diagnostics"
@@ -143,7 +147,7 @@ export const ReportDiagnostic = ({ apiClient, clientConfig }: Props) => {
             />
           </EuiText>
         </EuiFlyoutHeader>
-        <EuiFlyoutBody banner={outcomeCallout}>
+        <EuiFlyoutBody banner={<div aria-live="polite">{outcomeCallout}</div>}>
           <EuiTitle size="s">
             <h2>
               <FormattedMessage
