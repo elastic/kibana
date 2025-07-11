@@ -13879,6 +13879,10 @@
                 "path": "x-pack/solutions/search/plugins/enterprise_search/public/applications/analytics/components/analytics_collection_view/analytics_collection_explore_table_formulas.ts"
               },
               {
+                "plugin": "@kbn/test-suites-xpack-observability",
+                "path": "x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/apm/data_view/static.spec.ts"
+              },
+              {
                 "plugin": "enterpriseSearch",
                 "path": "x-pack/solutions/search/plugins/enterprise_search/public/applications/analytics/utils/find_or_create_data_view.test.ts"
               },
@@ -14797,7 +14801,9 @@
             "type": "Function",
             "tags": [],
             "label": "isPersisted",
-            "description": [],
+            "description": [
+              "\nReturns true if the data view is persisted, and false if the dataview is adhoc."
+            ],
             "signature": [
               "() => boolean"
             ],
@@ -16023,6 +16029,26 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-common.AbstractDataView.hasMatchedIndices",
+            "type": "Function",
+            "tags": [],
+            "label": "hasMatchedIndices",
+            "description": [
+              "\nChecks if there are any matched indices."
+            ],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "src/platform/plugins/shared/data_views/common/data_views/abstract_data_views.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": [
+              "True if there are matched indices, false otherwise."
+            ]
           }
         ],
         "initialIsOpen": false

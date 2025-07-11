@@ -295,7 +295,7 @@ exports[`LoginPage enabled form state renders as expected when loginHelp is set 
 exports[`LoginPage page renders as expected 1`] = `
 <div>
   <div
-    class="loginWelcome login-form css-1gj8l3e-kbnFullScreenBgCss"
+    class="loginWelcome login-form css-vvcdom-kbnFullScreenBgCss"
   >
     <header
       class="loginWelcome__header"
@@ -475,7 +475,7 @@ exports[`LoginPage page renders as expected 1`] = `
 exports[`LoginPage page renders with custom branding 1`] = `
 <div>
   <div
-    class="loginWelcome login-form css-1gj8l3e-kbnFullScreenBgCss"
+    class="loginWelcome login-form css-vvcdom-kbnFullScreenBgCss"
   >
     <header
       class="loginWelcome__header"

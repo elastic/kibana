@@ -20,11 +20,16 @@ import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/css';
-import { Streams, getSegments, isDescendantOf, isRootStreamDefinition } from '@kbn/streams-schema';
+import {
+  Streams,
+  getIndexPatternsForStream,
+  getSegments,
+  isDescendantOf,
+  isRootStreamDefinition,
+} from '@kbn/streams-schema';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { NestedView } from '../nested_view';
 import { useKibana } from '../../hooks/use_kibana';
-import { getIndexPatterns } from '../../util/hierarchy_helpers';
 
 export interface StreamTree {
   name: string;
@@ -174,7 +179,7 @@ function StreamNode({
   );
 
   const discoverUrl = useMemo(() => {
-    const indexPatterns = getIndexPatterns(node.stream);
+    const indexPatterns = getIndexPatternsForStream(node.stream);
 
     if (!discoverLocator || !indexPatterns) {
       return undefined;

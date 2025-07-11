@@ -9,6 +9,7 @@ KIBANA_IMAGE="docker.elastic.co/kibana-ci/kibana-serverless:pr-$BUILDKITE_PULL_R
 
 deploy() {
   PROJECT_TYPE=$1
+  PRODUCT_TIER=${2:-}
   # BOOKMARK - List of Kibana solutions
   case $PROJECT_TYPE in
     elasticsearch)
@@ -22,11 +23,19 @@ deploy() {
     ;;
   esac
 
-  PROJECT_NAME="kibana-pr-$BUILDKITE_PULL_REQUEST-$PROJECT_TYPE"
+  PRODUCT_TIER_JSON_ENTRY=""
+  PRODUCT_TIER_NAME=""
+  if [ -n "${PRODUCT_TIER:-}" ]; then
+    PRODUCT_TIER_JSON_ENTRY='"product_tier": "'"$PRODUCT_TIER"'",'
+    PRODUCT_TIER_NAME="-$PRODUCT_TIER"
+  fi
+
+  PROJECT_NAME="kibana-pr-$BUILDKITE_PULL_REQUEST-$PROJECT_TYPE$PRODUCT_TIER_NAME"
   VAULT_KEY_NAME="$PROJECT_NAME"
   is_pr_with_label "ci:project-persist-deployment" && PROJECT_NAME="keep_$PROJECT_NAME"
   PROJECT_CREATE_CONFIGURATION='{
     "name": "'"$PROJECT_NAME"'",
+    '"$PRODUCT_TIER_JSON_ENTRY"'
     "region_id": "aws-eu-west-1",
     "overrides": {
         "kibana": {
@@ -36,6 +45,7 @@ deploy() {
   }'
   PROJECT_UPDATE_CONFIGURATION='{
     "name": "'"$PROJECT_NAME"'",
+    '"$PRODUCT_TIER_JSON_ENTRY"'
     "overrides": {
         "kibana": {
             "docker_image": "'"$KIBANA_IMAGE"'"
@@ -161,6 +171,7 @@ EOF
 
 is_pr_with_label "ci:project-deploy-elasticsearch" && deploy "elasticsearch"
 is_pr_with_label "ci:project-deploy-security" && deploy "security"
+is_pr_with_label "ci:project-deploy-log_essentials" && deploy "observability" "logs_essentials"
 if is_pr_with_label "ci:project-deploy-observability" ; then
   # Only deploy observability if the PR is targeting main
   if [[ "$BUILDKITE_PULL_REQUEST_BASE_BRANCH" == "main" ]]; then
