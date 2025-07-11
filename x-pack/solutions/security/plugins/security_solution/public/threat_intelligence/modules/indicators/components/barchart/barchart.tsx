@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import React, { type FC, useState } from 'react';
+import React, { type FC } from 'react';
 import { Axis, BarSeries, Chart, Position, ScaleType, Settings } from '@elastic/charts';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
-import { EuiScreenReaderLive, type EuiComboBoxOptionOption } from '@elastic/eui';
+import { type EuiComboBoxOptionOption } from '@elastic/eui';
 import { type TimeRangeBounds } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { IndicatorBarchartLegendAction } from './legend_action';
 import { barChartTimeAxisLabelFormatter } from '../../../../utils/dates';
 import type { ChartSeries } from '../../services/fetch_aggregated_indicators';
 import { useTimeZone } from '../../../../hooks/use_kibana_ui_settings';
+import { useScreenReaderAnnouncements } from '../../hooks/use_screen_reader_context';
 
 const ID = 'tiIndicator';
 const DEFAULT_CHART_HEIGHT = '200px';
@@ -51,13 +52,10 @@ export const IndicatorsBarChart: FC<IndicatorsBarChartProps> = ({
 }) => {
   const chartBaseTheme = useElasticChartsTheme();
   const timeZone = useTimeZone();
-  const [screenReaderMessage, setScreenReaderMessage] = useState('');
+  const { announce } = useScreenReaderAnnouncements();
 
   return (
     <>
-      <EuiScreenReaderLive aria-live="assertive" aria-atomic="true" focusRegionOnTextChange>
-        {screenReaderMessage}
-      </EuiScreenReaderLive>
       <Chart size={{ width: DEFAULT_CHART_WIDTH, height }}>
         <Settings
           baseTheme={chartBaseTheme}
@@ -66,7 +64,7 @@ export const IndicatorsBarChart: FC<IndicatorsBarChartProps> = ({
           legendSize={DEFAULT_LEGEND_SIZE}
           legendAction={({ label }) => (
             <IndicatorBarchartLegendAction
-              announceFilterChange={setScreenReaderMessage}
+              announceIndicatorActionChange={announce}
               field={field}
               data={label}
             />
