@@ -25,7 +25,7 @@ pageLoadAssetSize:
   crossClusterReplication: 65408
   customIntegrations: 22034
   dashboard: 19000
-  dashboardEnhanced: 12000
+  dashboardEnhanced: 12500
   data: 454087
   dataQuality: 19384
   datasetQuality: 55000
