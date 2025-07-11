@@ -43,6 +43,8 @@ export interface FlyoutSystemOpenMainOptions {
   size: EuiFlyoutSize;
   flyoutProps?: FlyoutSystemConfig['mainFlyoutProps'];
   content: React.ReactNode;
+  title: string;
+  hideTitle?: boolean;
 }
 
 export interface FlyoutSystemOpenChildOptions {

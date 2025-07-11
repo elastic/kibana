@@ -47,7 +47,7 @@ export function flyoutSystemReducer(
 ): FlyoutSystemState {
   switch (action.type) {
     case 'OPEN_MAIN_FLYOUT': {
-      const { size, flyoutProps, content } = action.payload;
+      const { size, flyoutProps, content, title, hideTitle } = action.payload;
       const newHistory = state.activeFlyoutGroup
         ? [state.activeFlyoutGroup, ...state.history]
         : state.history;
@@ -58,6 +58,8 @@ export function flyoutSystemReducer(
           mainSize: size,
           mainFlyoutProps: flyoutProps,
           mainContent: content,
+          mainTitle: title,
+          hideMainTitle: hideTitle,
           childFlyoutProps: {},
         },
       };
