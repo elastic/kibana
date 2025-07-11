@@ -65,7 +65,7 @@ describe('Test discover app state container', () => {
       globalStateContainer: getDiscoverGlobalStateContainer(stateStorage),
       internalState,
     });
-    internalState.dispatch(
+    await internalState.dispatch(
       internalStateActions.initializeTabs({ discoverSessionId: savedSearchState.getState()?.id })
     );
     getCurrentTab = () =>
