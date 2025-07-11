@@ -60,6 +60,7 @@ const savedSearchStartMock = (): SavedSearchPublicPluginStart => ({
         serialized
       )
     ),
+  getDiscoverSession: jest.fn(),
   getAll: jest.fn(),
   getNew: jest.fn().mockImplementation(() => ({
     searchSource: createEmptySearchSource(),

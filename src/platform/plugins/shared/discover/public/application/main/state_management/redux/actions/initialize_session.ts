@@ -9,8 +9,6 @@
 
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import { getSavedSearchFullPathUrl } from '@kbn/saved-search-plugin/public';
-import { i18n } from '@kbn/i18n';
 import { cloneDeep, isEqual } from 'lodash';
 import {
   internalStateSlice,
@@ -25,7 +23,6 @@ import {
 import type { DiscoverStateContainer } from '../../discover_state';
 import { appendAdHocDataViews, setDataView } from './data_views';
 import { cleanupUrlState } from '../../utils/cleanup_url_state';
-import { setBreadcrumbs } from '../../../../../utils/breadcrumbs';
 import { getEsqlDataView } from '../../utils/get_esql_data_view';
 import { loadAndResolveDataView } from '../../utils/resolve_data_view';
 import { isDataViewSource } from '../../../../../../common/data_sources';
@@ -67,7 +64,7 @@ export const initializeSession: InternalStateThunkActionCreator<
   async (
     dispatch,
     getState,
-    { services, customizationContext, runtimeStateManager, urlStateStorage, tabsStorageManager }
+    { services, customizationContext, runtimeStateManager, urlStateStorage }
   ) => {
     dispatch(disconnectTab({ tabId }));
     dispatch(internalStateSlice.actions.resetOnSavedSearchChange({ tabId }));
@@ -167,22 +164,6 @@ export const initializeSession: InternalStateThunkActionCreator<
     /**
      * Session initialization
      */
-
-    // TODO: Needs to happen when switching tabs too?
-    if (customizationContext.displayMode === 'standalone' && persistedDiscoverSession) {
-      if (persistedDiscoverSession.id) {
-        services.chrome.recentlyAccessed.add(
-          getSavedSearchFullPathUrl(persistedDiscoverSession.id),
-          persistedDiscoverSession.title ??
-            i18n.translate('discover.defaultDiscoverSessionTitle', {
-              defaultMessage: 'Untitled Discover session',
-            }),
-          persistedDiscoverSession.id
-        );
-      }
-
-      setBreadcrumbs({ services, titleBreadcrumbText: persistedDiscoverSession.title });
-    }
 
     let dataView: DataView;
 

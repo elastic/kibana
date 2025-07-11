@@ -60,14 +60,14 @@ describe('Test discover app state container', () => {
       urlStateStorage: stateStorage,
       tabsStorageManager,
     });
-    internalState.dispatch(
-      internalStateActions.initializeTabs({ userId: 'mockUserId', spaceId: 'mockSpaceId' })
-    );
     savedSearchState = getSavedSearchContainer({
       services: discoverServiceMock,
       globalStateContainer: getDiscoverGlobalStateContainer(stateStorage),
       internalState,
     });
+    internalState.dispatch(
+      internalStateActions.initializeTabs({ discoverSessionId: savedSearchState.getState()?.id })
+    );
     getCurrentTab = () =>
       selectTab(internalState.getState(), internalState.getState().tabs.unsafeCurrentId);
   });
