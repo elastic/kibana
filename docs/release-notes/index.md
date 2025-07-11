@@ -26,19 +26,40 @@ To check for security updates, go to [Security announcements for the Elastic sta
 ### Features and enhancements [kibana-9.0.4-features-enhancements]
 
 **Data ingestion and Fleet**:
-* Adds tooltip to Last activity column in Agent list UI [#224850]({{kib-pull}}224850).
+* Adds a tooltip to the **Last activity** column in Agent list UI [#224850]({{kib-pull}}224850).
+
+**Machine Learning**:
+* Improves error messages in the AI Connector creation UI and ensures they're surfaced in {kib} [#221859]({{kib-pull}}221859).
 
 
 ### Fixes [kibana-9.0.4-fixes]
 
+**Dashboards and Visualizations**:
+* Stops Dashboard from reccomending adhoc data views [#225705]({{kib-pull}}225705).
+* Prevents Dashboard from making multiple requests [#224761]({{kib-pull}}224761).
+
 **Data ingestion and Fleet**:
-* Fixes export CSV in Agent list [#225050]({{kib-pull}}225050).
-* Replace call to registry when deleting kibana assets for custom packages [#224886]({{kib-pull}}224886).
-* Fixes bulk actions incorrectly selecting agents with namespaces filter [#224036]({{kib-pull}}224036).
+* Fixes bug that causes the CSV export to fail in export CSV in Agent list [#225050]({{kib-pull}}225050).
+* Replaces call to registry when deleting {kib} assets for custom packages [#224886]({{kib-pull}}224886).
+* Updates the query in the delete unenrolled {agents} task [#224808]({{kib-pull}}224808).
+* Fixes bulk actions incorrectly selecting {agents} with the namespaces filter [#224036]({{kib-pull}}224036).
+
+**Discover**:
+* Makes expiration badges singular and plural [#227035]({{kib-pull}}227035).
+* Fixes a bug that prevented fields with invalid inputs from being highlighted the in Data View flyout [#226822]({{kib-pull}}226822).
 
 **Elastic Observability solution**:
 For the Elastic Observability 9.0.4 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
-* No need to remove a task [#226481]({{kib-pull}}226481).
+
+**Elastic Security solution**:
+For the Elastic Security 9.0.4 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+**Kibana platform**:
+* Hides {kib}'s header and side navigation when trying to print or use the dashboard export with print mode [#227095]({{kib-pull}}227095).
+
+**Search**:
+* Fixes an issue in Search Playground where context limit errors were not handled well when using the Elastic Managed LLM [#225360]({{kib-pull}}225360).
+* Adjusted `z-index` of app menu header to avoid conflicts with the portable dev console [#224708]({{kib-pull}}224708).
 
 ## 9.0.3 [kibana-9.0.3-release-notes]
 
