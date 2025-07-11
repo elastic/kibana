@@ -24,7 +24,6 @@ import { commandOptionsWithEqualsSeparator, commandsWithNoCommaArgSeparator } fr
 import { LeafPrinter } from './leaf_printer';
 import { Builder } from '../builder';
 
-type FieldValue = string | number | boolean | null;
 export interface BasicPrettyPrinterOptions {
   /**
    * Whether to break the query into multiple lines on each pipe. Defaults to
