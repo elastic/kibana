@@ -21,13 +21,13 @@ export const ConversationHeader: React.FC<ConversationHeaderProps> = ({
   isSidebarOpen,
   onToggleSidebar,
 }) => {
-  const { conversation } = useConversation();
+  const { conversation, hasActiveConversation } = useConversation();
   return (
     <ConversationGrid>
       <ConversationSidebarToggle isSidebarOpen={isSidebarOpen} onToggle={onToggleSidebar} />
-      {conversation && (
+      {hasActiveConversation && (
         <>
-          <ConversationTitle title={conversation.title} />
+          <ConversationTitle title={conversation?.title ?? ''} />
           <ConversationActions />
         </>
       )}
