@@ -17,6 +17,7 @@ interface DeduplicateAttackDiscoveriesParams {
   connectorId: string;
   esClient: ElasticsearchClient;
   indexPattern: string;
+  isSchedule: boolean;
   logger: Logger;
   ownerId: string;
   replacements: Replacements | undefined;
@@ -28,6 +29,7 @@ export const deduplicateAttackDiscoveries = async ({
   connectorId,
   esClient,
   indexPattern,
+  isSchedule,
   logger,
   ownerId,
   replacements,
@@ -70,8 +72,13 @@ export const deduplicateAttackDiscoveries = async ({
 
   const numDuplicates = attackDiscoveries.length - newDiscoveries.length;
   if (numDuplicates > 0) {
-    logger.info(`Found ${numDuplicates} duplicate alert(s), skipping report for those.`);
-    logger.debug(() => `Duplicated alerts:\n ${JSON.stringify([...foundIds].sort(), null, 2)}`);
+    const logPrefix = isSchedule ? 'Attack Discovery Schedule' : 'Ad-hoc Attack Discovery';
+    logger.info(
+      `${logPrefix}: Found ${numDuplicates} duplicate alert(s), skipping report for those.`
+    );
+    logger.debug(
+      () => `${logPrefix}: Duplicated alerts:\n ${JSON.stringify([...foundIds].sort(), null, 2)}`
+    );
   }
 
   return newDiscoveries;

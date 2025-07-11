@@ -418,6 +418,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
       connectorId: params.apiConfig.connectorId,
       esClient: services.scopedClusterClient.asCurrentUser,
       indexPattern: '.alerts-security.attack.discovery.alerts-test-space',
+      isSchedule: true,
       logger: mockLogger,
       ownerId: executorOptions.rule.id,
       replacements: mockReplacements,
