@@ -415,7 +415,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         pkgInfo,
         enrichedPackagePolicy.vars || {},
         inputs,
-        assetsMap
+        assetsMap,
+        packagePolicyId
       );
 
       elasticsearchPrivileges = pkgInfo.elasticsearch?.privileges;
@@ -2722,15 +2723,20 @@ export function _compilePackagePolicyInputs(
   pkgInfo: PackageInfo,
   vars: PackagePolicy['vars'],
   inputs: PackagePolicyInput[],
-  assetsMap: PackagePolicyAssetsMap
+  assetsMap: PackagePolicyAssetsMap,
+  packagePolicyId?: string
 ): PackagePolicyInput[] {
   return inputs.map((input) => {
-    const compiledInput = _compilePackagePolicyInput(pkgInfo, vars, input, assetsMap);
-    const compiledStreams = _compilePackageStreams(pkgInfo, vars, input, assetsMap);
+    if (input.type === 'otelcol') {
+      return {
+        ...input,
+        streams: _compilePackageStreams(pkgInfo, vars, input, assetsMap, packagePolicyId),
+      };
+    }
     return {
       ...input,
-      compiled_input: compiledInput,
-      streams: compiledStreams,
+      compiled_input: _compilePackagePolicyInput(pkgInfo, vars, input, assetsMap),
+      streams: _compilePackageStreams(pkgInfo, vars, input, assetsMap),
     };
   });
 }
@@ -2788,10 +2794,11 @@ function _compilePackageStreams(
   pkgInfo: PackageInfo,
   vars: PackagePolicy['vars'],
   input: PackagePolicyInput,
-  assetsMap: PackagePolicyAssetsMap
+  assetsMap: PackagePolicyAssetsMap,
+  packagePolicyId?: string
 ) {
   return input.streams.map((stream) =>
-    _compilePackageStream(pkgInfo, vars, input, stream, assetsMap)
+    _compilePackageStream(pkgInfo, vars, input, stream, assetsMap, packagePolicyId)
   );
 }
 
@@ -2857,7 +2864,8 @@ function _compilePackageStream(
   vars: PackagePolicy['vars'],
   input: PackagePolicyInput,
   streamIn: PackagePolicyInputStream,
-  assetsMap: PackagePolicyAssetsMap
+  assetsMap: PackagePolicyAssetsMap,
+  packagePolicyId?: string
 ) {
   let stream = streamIn;
 
@@ -2915,9 +2923,13 @@ function _compilePackageStream(
   const yaml = compileTemplate(
     // Populate template variables from package-, input-, and stream-level vars
     Object.assign({}, vars, input.vars, stream.vars),
-    pkgStreamTemplate.buffer.toString()
+    pkgStreamTemplate.buffer.toString(),
+    input.type,
+    packagePolicyId
   );
-
+  // if (input.type === 'otelcol') {
+  //   return yaml;
+  // }
   stream.compiled_stream = yaml;
 
   return { ...stream };
