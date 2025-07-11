@@ -8,8 +8,8 @@
 import React, { useEffect } from 'react';
 import { EuiText } from '@elastic/eui';
 import type { KibanaReactNotifications } from '@kbn/kibana-react-plugin/public';
-import { IHttpFetchError } from '@kbn/core/public';
-import { CustomScriptsErrorType } from '../../hooks/custom_scripts/use_get_custom_scripts';
+import type { IHttpFetchError } from '@kbn/core/public';
+import type { CustomScriptsErrorType } from '../../hooks/custom_scripts/use_get_custom_scripts';
 
 /**
  * Shows a danger toast with details if scriptsError is present.
