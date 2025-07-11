@@ -12,6 +12,7 @@ import type { TimelineItem } from '@kbn/timelines-plugin/common';
 import type { CSSProperties, FC, PropsWithChildren } from 'react';
 import React, { memo, useMemo, useState, useEffect, useRef, useCallback } from 'react';
 import styled from 'styled-components';
+import { css } from '@emotion/react';
 import { VariableSizeList } from 'react-window';
 import { EuiAutoSizer, useEuiTheme } from '@elastic/eui';
 import type { RowRenderer } from '../../../../../../common/types';
@@ -64,11 +65,11 @@ const VirtualizedCustomDataGridContainer = styled.div<{
 // THE DataGrid Row default is 34px, but we make ours 40 to account for our row actions
 const DEFAULT_UDT_ROW_HEIGHT = 34;
 
-const SCROLLBAR_STYLE: CSSProperties = {
-  scrollbarWidth: 'thin',
-  scrollPadding: '0 0 0 0',
-  overflow: 'auto',
-};
+const SCROLLBAR_STYLE = css`
+  scrollbar-width: thin;
+  scroll-padding: 0 0 0 0;
+  overflow: auto;
+`;
 
 /**
  *
@@ -178,7 +179,8 @@ export const CustomTimelineDataGridBody: FC<CustomTimelineDataGridBodyProps> = m
               className="custom__grid__rows--container"
               data-test-subj="customGridRowsContainer"
               ref={ref}
-              style={{ ...style, position: 'relative' }}
+              style={style}
+              css={{ position: 'relative' }}
               {...rest}
             >
               {children}
@@ -216,17 +218,15 @@ export const CustomTimelineDataGridBody: FC<CustomTimelineDataGridBodyProps> = m
                         itemSize={getRowHeight}
                         overscanCount={5}
                         ref={listRef}
-                        style={SCROLLBAR_STYLE}
+                        css={SCROLLBAR_STYLE}
                         innerElementType={innerRowContainer}
                       >
                         {({ index, style }) => {
                           return (
                             <div
                               role="row"
-                              style={{
-                                ...style,
-                                width: 'fit-content',
-                              }}
+                              style={style}
+                              css={{ width: 'fit-content' }}
                               key={`${gridWidth}-${index}`}
                             >
                               <CustomDataGridSingleRow
