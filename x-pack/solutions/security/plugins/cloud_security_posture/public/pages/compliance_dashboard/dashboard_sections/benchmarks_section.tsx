@@ -205,7 +205,7 @@ export const BenchmarksSection = ({
           </EuiFlexItem>
           <EuiFlexItem grow={dashboardColumnsGrow.third}>
             <div
-              style={{
+              css={{
                 paddingRight: euiTheme.size.base,
               }}
             >
