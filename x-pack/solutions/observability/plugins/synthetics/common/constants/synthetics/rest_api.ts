@@ -12,6 +12,7 @@ export enum SYNTHETICS_API_URLS {
   PRIVATE_LOCATIONS = `/api/synthetics/private_locations`,
   PARAMS = `/api/synthetics/params`,
   LATEST_TEST_RUN = '/api/synthetics/latest_test_run',
+  TEST_NOW_MONITOR = '/api/synthetics/monitor/test',
 
   // Service end points
   INDEX_TEMPLATES = '/internal/synthetics/service/index_templates',
