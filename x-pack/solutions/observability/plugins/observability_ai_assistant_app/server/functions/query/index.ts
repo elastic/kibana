@@ -41,7 +41,7 @@ export function registerQueryFunction({
         a table or chart. You do NOT need to ask permission to execute the query
         after generating it, use the "${EXECUTE_QUERY_FUNCTION_NAME}" tool directly instead.
 
-        Do not use when the user just asks for an example.`,
+        **EXCEPTION**: Do NOT use when the user just asks for an **EXAMPLE**.`,
       parameters: {
         type: 'object',
         properties: {
@@ -128,13 +128,6 @@ export function registerQueryFunction({
           },
         },
         system: `
-* **RULE OF THE CURRENT TASK**: After generating a query you MUST IMMEDIATELY execute it using "${EXECUTE_QUERY_FUNCTION_NAME}".
-  * The ONLY exceptions:
-    * User explicitly requests "example query"
-    * User specifically asks for **visualization** (graphs/charts) instead of raw data
-  *  DETECT DATA REQUESTS:
-    * If the user says to **show, display, list, count, average, sum, stats/statistics, top, how many**, or asks for any specific number/value → you MUST execute the query.
-
 --- CRITICAL INSTRUCTIONS FOR THIS TURN ---
  1. **CHECK YOUR TOOLS FIRST.** Your capabilities are strictly limited to the tools listed in the \`== AVAILABLE TOOLS ==\` section below.
  2. **DISREGARD PAST TOOLS.** 
@@ -147,7 +140,7 @@ export function registerQueryFunction({
       ${JSON.stringify(availableToolDefinitions, null, 4)}
       \'\'\'
  * ALL OTHER tools not listed here are **NOT AVAILABLE** and calls to them will **FAIL**.
-          `,
+  `,
       });
 
       const chatMessageId = v4();
