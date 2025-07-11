@@ -4432,7 +4432,7 @@
           "ISuggestionItem",
           "[]"
         ],
-        "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/utils/complete_items.ts",
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4446,7 +4446,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/utils/complete_items.ts",
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -4465,7 +4465,7 @@
         "signature": [
           "(histogramBarTarget?: number) => { label: string; text: string; asSnippet: true; kind: \"Issue\"; detail: string; sortText: string; command: { title: string; id: string; }; }"
         ],
-        "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/utils/complete_items.ts",
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4479,7 +4479,7 @@
             "signature": [
               "number"
             ],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/utils/complete_items.ts",
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -4499,7 +4499,7 @@
           "(label: string) => ",
           "ISuggestionItem"
         ],
-        "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/utils/complete_items.ts",
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4513,7 +4513,7 @@
             "signature": [
               "string"
             ],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/utils/complete_items.ts",
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -5171,6 +5171,41 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-ast",
+        "id": "def-common.isParametrized",
+        "type": "Function",
+        "tags": [],
+        "label": "isParametrized",
+        "description": [],
+        "signature": [
+          "(node: ",
+          "ESQLProperNode",
+          ") => boolean"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/ast/is.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.isParametrized.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "node",
+            "description": [],
+            "signature": [
+              "ESQLProperNode"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/ast/is.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
           }
         ],
         "returnComment": [],
@@ -6930,12 +6965,7 @@
             "path": "src/platform/packages/shared/kbn-esql-ast/src/types.ts",
             "deprecated": true,
             "trackAdoption": false,
-            "references": [
-              {
-                "plugin": "@kbn/esql-validation-autocomplete",
-                "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/helpers.ts"
-              }
-            ]
+            "references": []
           }
         ],
         "initialIsOpen": false
@@ -10996,6 +11026,21 @@
       },
       {
         "parentPluginId": "@kbn/esql-ast",
+        "id": "def-common.ReasonTypes",
+        "type": "Type",
+        "tags": [],
+        "label": "ReasonTypes",
+        "description": [],
+        "signature": [
+          "\"missingCommand\" | \"unsupportedFunction\" | \"unknownFunction\""
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/definitions/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-ast",
         "id": "def-common.SupportedDataType",
         "type": "Type",
         "tags": [],
@@ -11100,7 +11145,7 @@
         "tags": [],
         "label": "allStarConstant",
         "description": [],
-        "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/utils/complete_items.ts",
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -11111,7 +11156,7 @@
             "tags": [],
             "label": "label",
             "description": [],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/utils/complete_items.ts",
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -11122,7 +11167,7 @@
             "tags": [],
             "label": "text",
             "description": [],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/utils/complete_items.ts",
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -11136,7 +11181,7 @@
             "signature": [
               "\"Constant\""
             ],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/utils/complete_items.ts",
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -11147,7 +11192,7 @@
             "tags": [],
             "label": "detail",
             "description": [],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/utils/complete_items.ts",
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -11158,7 +11203,7 @@
             "tags": [],
             "label": "sortText",
             "description": [],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/utils/complete_items.ts",
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -11172,7 +11217,7 @@
         "tags": [],
         "label": "asCompletionItem",
         "description": [],
-        "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/utils/complete_items.ts",
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -11183,7 +11228,7 @@
             "tags": [],
             "label": "detail",
             "description": [],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/utils/complete_items.ts",
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -11197,7 +11242,7 @@
             "signature": [
               "\"Reference\""
             ],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/utils/complete_items.ts",
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -11208,7 +11253,7 @@
             "tags": [],
             "label": "label",
             "description": [],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/utils/complete_items.ts",
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -11219,7 +11264,7 @@
             "tags": [],
             "label": "sortText",
             "description": [],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/utils/complete_items.ts",
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -11230,7 +11275,7 @@
             "tags": [],
             "label": "text",
             "description": [],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/utils/complete_items.ts",
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -11244,7 +11289,7 @@
         "tags": [],
         "label": "assignCompletionItem",
         "description": [],
-        "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/utils/complete_items.ts",
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -11255,7 +11300,7 @@
             "tags": [],
             "label": "detail",
             "description": [],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/utils/complete_items.ts",
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -11269,7 +11314,7 @@
             "signature": [
               "{ title: string; id: string; }"
             ],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/utils/complete_items.ts",
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -11280,7 +11325,7 @@
             "tags": [],
             "label": "label",
             "description": [],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/utils/complete_items.ts",
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -11294,7 +11339,7 @@
             "signature": [
               "\"Variable\""
             ],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/utils/complete_items.ts",
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -11305,7 +11350,7 @@
             "tags": [],
             "label": "sortText",
             "description": [],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/utils/complete_items.ts",
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -11316,7 +11361,7 @@
             "tags": [],
             "label": "text",
             "description": [],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/utils/complete_items.ts",
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -11352,7 +11397,7 @@
         "tags": [],
         "label": "byCompleteItem",
         "description": [],
-        "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/utils/complete_items.ts",
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -11363,7 +11408,7 @@
             "tags": [],
             "label": "label",
             "description": [],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/utils/complete_items.ts",
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -11374,7 +11419,7 @@
             "tags": [],
             "label": "text",
             "description": [],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/utils/complete_items.ts",
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -11388,7 +11433,7 @@
             "signature": [
               "\"Reference\""
             ],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/utils/complete_items.ts",
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -11399,7 +11444,7 @@
             "tags": [],
             "label": "detail",
             "description": [],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/utils/complete_items.ts",
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -11410,7 +11455,7 @@
             "tags": [],
             "label": "sortText",
             "description": [],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/utils/complete_items.ts",
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -11424,7 +11469,7 @@
             "signature": [
               "{ title: string; id: string; }"
             ],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/utils/complete_items.ts",
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -11441,7 +11486,7 @@
         "signature": [
           "ISuggestionItem"
         ],
-        "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/utils/complete_items.ts",
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -11456,7 +11501,7 @@
         "signature": [
           "ISuggestionItem"
         ],
-        "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/utils/complete_items.ts",
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -12007,7 +12052,7 @@
         "tags": [],
         "label": "listCompleteItem",
         "description": [],
-        "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/utils/complete_items.ts",
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -12018,7 +12063,7 @@
             "tags": [],
             "label": "label",
             "description": [],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/utils/complete_items.ts",
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -12029,7 +12074,7 @@
             "tags": [],
             "label": "text",
             "description": [],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/utils/complete_items.ts",
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -12043,7 +12088,7 @@
             "signature": [
               "true"
             ],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/utils/complete_items.ts",
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -12057,7 +12102,7 @@
             "signature": [
               "\"Operator\""
             ],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/utils/complete_items.ts",
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -12068,7 +12113,7 @@
             "tags": [],
             "label": "detail",
             "description": [],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/utils/complete_items.ts",
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -12079,7 +12124,7 @@
             "tags": [],
             "label": "sortText",
             "description": [],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/utils/complete_items.ts",
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -12093,7 +12138,7 @@
             "signature": [
               "{ title: string; id: string; }"
             ],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/utils/complete_items.ts",
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -12107,7 +12152,7 @@
         "tags": [],
         "label": "pipeCompleteItem",
         "description": [],
-        "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/utils/complete_items.ts",
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -12118,7 +12163,7 @@
             "tags": [],
             "label": "label",
             "description": [],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/utils/complete_items.ts",
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -12129,7 +12174,7 @@
             "tags": [],
             "label": "text",
             "description": [],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/utils/complete_items.ts",
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -12143,7 +12188,7 @@
             "signature": [
               "\"Keyword\""
             ],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/utils/complete_items.ts",
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -12154,7 +12199,7 @@
             "tags": [],
             "label": "detail",
             "description": [],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/utils/complete_items.ts",
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -12165,7 +12210,7 @@
             "tags": [],
             "label": "sortText",
             "description": [],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/utils/complete_items.ts",
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -12179,7 +12224,7 @@
             "signature": [
               "{ title: string; id: string; }"
             ],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/utils/complete_items.ts",
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -12196,7 +12241,7 @@
         "signature": [
           "ISuggestionItem"
         ],
-        "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/utils/complete_items.ts",
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -12291,7 +12336,7 @@
         "tags": [],
         "label": "whereCompleteItem",
         "description": [],
-        "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/utils/complete_items.ts",
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -12302,7 +12347,7 @@
             "tags": [],
             "label": "label",
             "description": [],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/utils/complete_items.ts",
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -12313,7 +12358,7 @@
             "tags": [],
             "label": "text",
             "description": [],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/utils/complete_items.ts",
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -12327,7 +12372,7 @@
             "signature": [
               "\"Reference\""
             ],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/utils/complete_items.ts",
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -12338,7 +12383,7 @@
             "tags": [],
             "label": "detail",
             "description": [],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/utils/complete_items.ts",
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -12349,7 +12394,7 @@
             "tags": [],
             "label": "sortText",
             "description": [],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/utils/complete_items.ts",
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -12363,7 +12408,7 @@
             "signature": [
               "{ title: string; id: string; }"
             ],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/utils/complete_items.ts",
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
             "deprecated": false,
             "trackAdoption": false
           }
