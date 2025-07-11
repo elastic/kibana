@@ -376,7 +376,7 @@ const OutcomePreviewTable = () => {
   const docViewerContext = useMemo(
     () => ({
       originalSample:
-        originalSamples && currentDoc ? originalSamples[currentDoc.index].sample : undefined,
+        originalSamples && currentDoc ? originalSamples[currentDoc.index].document : undefined,
     }),
     [currentDoc, originalSamples]
   );

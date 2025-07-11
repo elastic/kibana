@@ -37,7 +37,7 @@ export interface SimulationInput {
 
 export interface SampleDocumentWithUIAttributes {
   dataSourceIndex: number;
-  sample: SampleDocument;
+  document: SampleDocument;
 }
 
 export type SimulationEvent =

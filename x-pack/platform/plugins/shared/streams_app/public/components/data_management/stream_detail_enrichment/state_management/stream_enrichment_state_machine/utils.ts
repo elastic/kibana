@@ -82,7 +82,7 @@ export function getDataSourcesSamples(
     }
     return snapshot.context.data.map((doc) => ({
       dataSourceIndex,
-      sample: doc,
+      document: doc,
     }));
   });
 }

@@ -260,7 +260,7 @@ export const simulationMachine = setup({
         input: ({ context }) => ({
           streamName: context.streamName,
           documents: context.samples
-            .map((doc) => doc.sample)
+            .map((doc) => doc.document)
             .map(flattenObjectNestedLast) as FlattenRecord[],
           processors: context.processors,
           detectedFields: context.detectedSchemaFields,

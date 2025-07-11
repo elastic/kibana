@@ -27,7 +27,7 @@ export const selectPreviewRecords = createSelector(
   (samples, previewDocsFilter, documents) => {
     if (!previewDocsFilter || !documents) {
       return (
-        (samples?.map((sample) => flattenObjectNestedLast(sample.sample)) as FlattenRecord[]) ||
+        (samples?.map((sample) => flattenObjectNestedLast(sample.document)) as FlattenRecord[]) ||
         EMPTY_ARRAY
       );
     }
@@ -65,7 +65,7 @@ export const selectHasSimulatedRecords = createSelector(
 export const selectUnsupportedDottedFields = createSelector(
   [(context: SimulationContext) => context.samples],
   (samples) => {
-    const properties = samples.flatMap((sample) => getDottedFieldPrefixes(sample.sample));
+    const properties = samples.flatMap((sample) => getDottedFieldPrefixes(sample.document));
 
     return uniq(properties);
   }
