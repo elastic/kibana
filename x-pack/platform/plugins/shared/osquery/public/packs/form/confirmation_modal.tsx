@@ -24,6 +24,7 @@ const ConfirmDeployAgentPolicyModalComponent: React.FC<ConfirmDeployAgentPolicyM
   agentPolicyCount,
 }) => {
   const modalTitleId = useGeneratedHtmlId();
+  const titleProps = useMemo(() => ({ id: modalTitleId }), [modalTitleId]);
 
   return (
     <EuiConfirmModal
@@ -34,7 +35,7 @@ const ConfirmDeployAgentPolicyModalComponent: React.FC<ConfirmDeployAgentPolicyM
           defaultMessage="Save and deploy changes"
         />
       }
-      titleProps={{ id: modalTitleId }}
+      titleProps={titleProps}
       onCancel={onCancel}
       onConfirm={onConfirm}
       cancelButtonText={

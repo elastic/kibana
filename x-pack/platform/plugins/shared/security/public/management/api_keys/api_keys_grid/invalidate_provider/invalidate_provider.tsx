@@ -37,6 +37,7 @@ export const InvalidateProvider: React.FunctionComponent<Props> = ({
   const [apiKeys, setApiKeys] = useState<ApiKeyToInvalidate[]>([]);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const onSuccessCallback = useRef<OnSuccessCallback | null>(null);
+  const modalTitleId = useGeneratedHtmlId();
 
   const invalidateApiKeyPrompt: InvalidateApiKeys = (keys, onSuccess = () => undefined) => {
     if (!keys || !keys.length) {
@@ -126,7 +127,6 @@ export const InvalidateProvider: React.FunctionComponent<Props> = ({
     }
 
     const isSingle = apiKeys.length === 1;
-    const modalTitleId = useGeneratedHtmlId();
 
     return (
       <EuiConfirmModal

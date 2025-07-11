@@ -20,11 +20,13 @@ export const ConfirmWatchesModal = ({
   } | null;
   callback: (isConfirmed?: boolean) => void;
 }) => {
+  const modalTitleId = useGeneratedHtmlId();
+
   if (!modalOptions) {
     return null;
   }
+
   const { title, message, buttonType, buttonLabel } = modalOptions;
-  const modalTitleId = useGeneratedHtmlId();
   return (
     <EuiConfirmModal
       aria-labelledby={modalTitleId}

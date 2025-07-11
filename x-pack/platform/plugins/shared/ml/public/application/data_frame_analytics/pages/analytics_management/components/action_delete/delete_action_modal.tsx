@@ -33,12 +33,13 @@ export const DeleteActionModal: FC<DeleteAction> = ({
   userCanDeleteIndex,
   userCanDeleteDataView,
 }) => {
+  const modalTitleId = useGeneratedHtmlId();
+
   if (item === undefined) {
     return null;
   }
 
   const indexName = item.config.dest.index;
-  const modalTitleId = useGeneratedHtmlId();
 
   return (
     <EuiConfirmModal

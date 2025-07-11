@@ -31,6 +31,7 @@ export const RepositoryDeleteProvider: React.FunctionComponent<Props> = ({ child
   const [repositoryNames, setRepositoryNames] = useState<Array<Repository['name']>>([]);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const onSuccessCallback = useRef<OnSuccessCallback | null>(null);
+  const modalTitleId = useGeneratedHtmlId();
 
   const deleteRepositoryPrompt: DeleteRepository = (names, onSuccess = () => undefined) => {
     if (!names || !names.length) {
@@ -107,7 +108,6 @@ export const RepositoryDeleteProvider: React.FunctionComponent<Props> = ({ child
     }
 
     const isSingle = repositoryNames.length === 1;
-    const modalTitleId = useGeneratedHtmlId();
 
     return (
       <EuiConfirmModal

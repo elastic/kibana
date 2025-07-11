@@ -240,8 +240,6 @@ export class ForecastsTable extends Component {
   }
 
   render() {
-    const modalTitleId = htmlIdGenerator()('confirmModalTitle');
-
     if (this.state.isLoading === true) {
       return (
         <EuiFlexGroup justifyContent="spaceAround">

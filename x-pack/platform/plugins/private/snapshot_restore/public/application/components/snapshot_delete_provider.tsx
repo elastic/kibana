@@ -42,6 +42,7 @@ export const SnapshotDeleteProvider: React.FunctionComponent<Props> = ({ childre
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
   const onSuccessCallback = useRef<OnSuccessCallback | null>(null);
+  const modalTitleId = useGeneratedHtmlId();
 
   const deleteSnapshotPrompt: DeleteSnapshot = (ids, onSuccess = () => undefined) => {
     if (!ids || !ids.length) {
@@ -116,7 +117,6 @@ export const SnapshotDeleteProvider: React.FunctionComponent<Props> = ({ childre
     }
 
     const isSingle = snapshotIds.length === 1;
-    const modalTitleId = useGeneratedHtmlId();
 
     return (
       <EuiConfirmModal

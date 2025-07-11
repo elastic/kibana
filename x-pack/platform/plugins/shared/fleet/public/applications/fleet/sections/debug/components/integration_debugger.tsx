@@ -61,6 +61,8 @@ export const IntegrationDebugger: React.FunctionComponent = () => {
 
   const integrations = useQuery(['debug-integrations'], fetchInstalledIntegrations);
 
+  const modalTitleId = useGeneratedHtmlId();
+
   const uninstallMutation = useMutation(async (integration: PackageListItem) => {
     const response = await sendRemovePackage(
       {
@@ -175,8 +177,6 @@ export const IntegrationDebugger: React.FunctionComponent = () => {
   const selectedIntegration = integrations.data?.find(
     (integration) => integration.id === selectedIntegrationId
   );
-
-  const modalTitleId = useGeneratedHtmlId();
 
   return (
     <>

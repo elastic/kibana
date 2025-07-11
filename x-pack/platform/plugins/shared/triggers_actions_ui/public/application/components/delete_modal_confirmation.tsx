@@ -55,12 +55,12 @@ export const DeleteModalConfirmation = ({
     http,
     notifications: { toasts },
   } = useKibana().services;
+  const modalTitleId = useGeneratedHtmlId();
+
   const numIdsToDelete = idsToDelete.length;
   if (!deleteModalFlyoutVisible) {
     return null;
   }
-
-  const modalTitleId = useGeneratedHtmlId();
 
   return (
     <EuiConfirmModal

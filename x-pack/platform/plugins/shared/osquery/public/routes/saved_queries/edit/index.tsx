@@ -128,6 +128,8 @@ const EditSavedQueryPageComponent = () => {
     [handleDeleteClick]
   );
 
+  const titleProps = useMemo(() => ({ id: confirmModalTitleId }), [confirmModalTitleId]);
+
   const handleSubmit = useCallback(
     async (payload: any) => {
       await updateSavedQueryMutation.mutateAsync(payload);
@@ -153,7 +155,7 @@ const EditSavedQueryPageComponent = () => {
       {isDeleteModalVisible ? (
         <EuiConfirmModal
           aria-labelledby={confirmModalTitleId}
-          titleProps={{ id: confirmModalTitleId }}
+          titleProps={titleProps}
           title={
             <FormattedMessage
               id="xpack.osquery.deleteSavedQuery.confirmationModal.title"

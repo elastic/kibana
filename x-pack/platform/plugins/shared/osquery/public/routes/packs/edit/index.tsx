@@ -119,6 +119,8 @@ const EditPackPageComponent = () => {
     [isReadOnly]
   );
 
+  const titleProps = useMemo(() => ({ id: confirmModalTitleId }), [confirmModalTitleId]);
+
   if (isLoading) return null;
 
   return (
@@ -136,7 +138,7 @@ const EditPackPageComponent = () => {
       {isDeleteModalVisible ? (
         <EuiConfirmModal
           aria-labelledby={confirmModalTitleId}
-          titleProps={{ id: confirmModalTitleId }}
+          titleProps={titleProps}
           title={
             <FormattedMessage
               id="xpack.osquery.deletePack.confirmationModal.title"
