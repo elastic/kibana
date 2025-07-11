@@ -139,6 +139,7 @@ export class AIAssistantManagementSelectionPlugin
           },
         });
         return;
+      // TODO: Add another case for search with the correct copy of the setting.
       default:
         // This case is hit when in stateful Kibana
         return core.uiSettings.register({
