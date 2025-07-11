@@ -21,7 +21,6 @@ import {
   nonNullable,
   sanitizeIdentifierString,
   textExistsAndIsValid,
-  visitSource,
   createBinaryExpression,
   createColumnStar,
   createFakeMultiplyLiteral,
@@ -32,6 +31,7 @@ import {
 import { getPosition } from './helpers';
 import { firstItem, lastItem, resolveItem } from '../visitor/utils';
 import type { Parser } from './parser';
+import { LeafPrinter } from '../pretty_print';
 
 type ESQLAstMatchBooleanExpression = ast.ESQLColumn | ast.ESQLBinaryExpression | ast.ESQLInlineCast;
 
@@ -403,7 +403,7 @@ export class CstToAstConverter {
     const metadataCtx = indexPatternCtx.metadata();
     const sources = indexPatternCtx
       .getTypedRuleContexts(cst.IndexPatternContext as any)
-      .map((sourceCtx) => visitSource(sourceCtx));
+      .map((sourceCtx) => this.toSource(sourceCtx));
 
     command.args.push(...sources);
 
@@ -438,7 +438,7 @@ export class CstToAstConverter {
     const metadataCtx = indexPatternCtx.metadata();
     const sources = indexPatternCtx
       .getTypedRuleContexts(cst.IndexPatternContext as any)
-      .map((sourceCtx) => visitSource(sourceCtx));
+      .map((sourceCtx) => this.toSource(sourceCtx));
 
     command.args.push(...sources);
 
@@ -1015,7 +1015,7 @@ export class CstToAstConverter {
   }
 
   private fromJoinTarget(ctx: cst.JoinTargetContext): ast.ESQLSource | ast.ESQLIdentifier {
-    return visitSource(ctx._index);
+    return this.toSource(ctx._index);
   }
 
   // ------------------------------------------------------------- CHANGE_POINT
@@ -1729,6 +1729,117 @@ export class CstToAstConverter {
     }
 
     return expression;
+  }
+
+  // ----------------------------------------------------- expression: "source"
+
+  private toSource(
+    ctx: antlr.ParserRuleContext,
+    type: 'index' | 'policy' = 'index'
+  ): ast.ESQLSource {
+    const text = this.sanitizeSourceString(ctx);
+
+    let prefix: ast.ESQLStringLiteral | undefined;
+    let index: ast.ESQLStringLiteral | undefined;
+    let selector: ast.ESQLStringLiteral | undefined;
+
+    if (ctx instanceof cst.IndexPatternContext) {
+      const clusterStringCtx = ctx.clusterString();
+      const unquotedIndexString = ctx.unquotedIndexString();
+      const indexStringCtx = ctx.indexString();
+      const selectorStringCtx = ctx.selectorString();
+
+      if (clusterStringCtx) {
+        prefix = this.visitQuotedString(clusterStringCtx);
+      }
+      if (unquotedIndexString) {
+        index = this.visitQuotedString(unquotedIndexString);
+      }
+      if (indexStringCtx) {
+        index = this.visitUnquotedOrQuotedString(indexStringCtx);
+      }
+      if (selectorStringCtx) {
+        selector = this.visitQuotedString(selectorStringCtx);
+      }
+    }
+
+    return Builder.expression.source.node(
+      {
+        sourceType: type,
+        prefix,
+        index,
+        selector,
+        name: text,
+      },
+      {
+        location: getPosition(ctx.start, ctx.stop),
+        incomplete: Boolean(ctx.exception || text === ''),
+        text: ctx?.getText(),
+      }
+    );
+  }
+
+  // TODO: clean up "source" node helpers.
+
+  private createParserFieldsFromTerminalNode(node: antlr.TerminalNode): AstNodeParserFields {
+    const text = node.getText();
+    const symbol = node.symbol;
+    const fields: AstNodeParserFields = {
+      text,
+      location: getPosition(symbol, symbol),
+      incomplete: false,
+    };
+
+    return fields;
+  }
+
+  private sanitizeSourceString(ctx: antlr.ParserRuleContext) {
+    const contextText = ctx.getText();
+    // If wrapped by triple quote, remove
+    if (contextText.startsWith(`"""`) && contextText.endsWith(`"""`)) {
+      return contextText.replace(/\"\"\"/g, '');
+    }
+    // If wrapped by single quote, remove
+    if (contextText.startsWith(`"`) && contextText.endsWith(`"`)) {
+      return contextText.slice(1, -1);
+    }
+    return contextText;
+  }
+
+  private visitQuotedString(ctx: cst.SelectorStringContext): ast.ESQLStringLiteral {
+    const unquotedCtx = ctx.UNQUOTED_SOURCE();
+
+    const valueUnquoted = unquotedCtx.getText();
+    const quotedString = LeafPrinter.string({ valueUnquoted });
+
+    return Builder.expression.literal.string(
+      valueUnquoted,
+      {
+        name: quotedString,
+        unquoted: true,
+      },
+      this.createParserFieldsFromTerminalNode(unquotedCtx)
+    );
+  }
+
+  private visitUnquotedOrQuotedString(ctx: cst.IndexStringContext): ast.ESQLStringLiteral {
+    const unquotedCtx = ctx.UNQUOTED_SOURCE();
+
+    if (unquotedCtx) {
+      const valueUnquoted = unquotedCtx.getText();
+      const quotedString = LeafPrinter.string({ valueUnquoted });
+
+      return Builder.expression.literal.string(
+        valueUnquoted,
+        {
+          name: quotedString,
+          unquoted: true,
+        },
+        this.createParserFieldsFromTerminalNode(unquotedCtx)
+      );
+    }
+
+    return createLiteralString(ctx);
   }
 
   // -------------------------------------------------------- expression: "map"

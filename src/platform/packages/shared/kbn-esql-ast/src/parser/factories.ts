@@ -16,23 +16,16 @@ import {
   FunctionContext,
   IdentifierContext,
   IdentifierOrParameterContext,
-  IndexPatternContext,
   InputDoubleParamsContext,
   InputNamedOrPositionalDoubleParamsContext,
   InputNamedOrPositionalParamContext,
   InputParamContext,
   QualifiedNameContext,
   QualifiedNamePatternContext,
-  SelectorStringContext,
   StringContext,
   type ArithmeticUnaryContext,
-  type DecimalValueContext,
-  type InlineCastContext,
-  type IntegerValueContext,
-  IndexStringContext,
 } from '../antlr/esql_parser';
 import { Builder, type AstNodeParserFields } from '../builder';
-import { LeafPrinter } from '../pretty_print';
 import type {
   BinaryExpressionOperator,
   ESQLAstBaseItem,
@@ -43,17 +36,13 @@ import type {
   ESQLFunction,
   ESQLFunctionCallExpression,
   ESQLIdentifier,
-  ESQLInlineCast,
-  ESQLList,
   ESQLLiteral,
   ESQLLocation,
   ESQLNumericLiteral,
   ESQLNumericLiteralType,
   ESQLParamKinds,
-  ESQLSource,
   ESQLStringLiteral,
   FunctionSubtype,
-  InlineCastingType,
 } from '../types';
 import { DOUBLE_TICKS_REGEX, SINGLE_BACKTICK, TICKS_REGEX } from './constants';
 import { getPosition, parseIdentifier } from './helpers';
@@ -79,18 +68,6 @@ export const createParserFields = (ctx: ParserRuleContext): AstNodeParserFields 
   location: getPosition(ctx.start, ctx.stop),
   incomplete: Boolean(ctx.exception),
 });
-
-export const createParserFieldsFromTerminalNode = (node: TerminalNode): AstNodeParserFields => {
-  const text = node.getText();
-  const symbol = node.symbol;
-  const fields: AstNodeParserFields = {
-    text,
-    location: getPosition(symbol, symbol),
-    incomplete: false,
-  };
-
-  return fields;
-};
 
 export const createCommand = <
   Name extends string,
@@ -386,19 +363,6 @@ function safeBackticksRemoval(text: string | undefined) {
   return text?.replace(TICKS_REGEX, '').replace(DOUBLE_TICKS_REGEX, SINGLE_BACKTICK) || '';
 }
 
-function sanitizeSourceString(ctx: ParserRuleContext) {
-  const contextText = ctx.getText();
-  // If wrapped by triple quote, remove
-  if (contextText.startsWith(`"""`) && contextText.endsWith(`"""`)) {
-    return contextText.replace(/\"\"\"/g, '');
-  }
-  // If wrapped by single quote, remove
-  if (contextText.startsWith(`"`) && contextText.endsWith(`"`)) {
-    return contextText.slice(1, -1);
-  }
-  return contextText;
-}
-
 export function sanitizeIdentifierString(ctx: ParserRuleContext) {
   const result =
     getUnquotedText(ctx)?.getText() ||
@@ -406,88 +370,6 @@ export function sanitizeIdentifierString(ctx: ParserRuleContext) {
     safeBackticksRemoval(ctx.getText()); // for some reason some quoted text is not detected correctly by the parser
   // TODO - understand why <missing null> is now returned as the match text for the FROM command
   return result === '<missing null>' ? '' : result;
-}
-
-const visitQuotedString = (ctx: SelectorStringContext): ESQLStringLiteral => {
-  const unquotedCtx = ctx.UNQUOTED_SOURCE();
-
-  const valueUnquoted = unquotedCtx.getText();
-  const quotedString = LeafPrinter.string({ valueUnquoted });
-
-  return Builder.expression.literal.string(
-    valueUnquoted,
-    {
-      name: quotedString,
-      unquoted: true,
-    },
-    createParserFieldsFromTerminalNode(unquotedCtx)
-  );
-};
-
-const visitUnquotedOrQuotedString = (ctx: IndexStringContext): ESQLStringLiteral => {
-  const unquotedCtx = ctx.UNQUOTED_SOURCE();
-
-  if (unquotedCtx) {
-    const valueUnquoted = unquotedCtx.getText();
-    const quotedString = LeafPrinter.string({ valueUnquoted });
-
-    return Builder.expression.literal.string(
-      valueUnquoted,
-      {
-        name: quotedString,
-        unquoted: true,
-      },
-      createParserFieldsFromTerminalNode(unquotedCtx)
-    );
-  }
-
-  return createLiteralString(ctx);
-};
-
-export function visitSource(
-  ctx: ParserRuleContext,
-  type: 'index' | 'policy' = 'index'
-): ESQLSource {
-  const text = sanitizeSourceString(ctx);
-
-  let prefix: ESQLStringLiteral | undefined;
-  let index: ESQLStringLiteral | undefined;
-  let selector: ESQLStringLiteral | undefined;
-
-  if (ctx instanceof IndexPatternContext) {
-    const clusterStringCtx = ctx.clusterString();
-    const unquotedIndexString = ctx.unquotedIndexString();
-    const indexStringCtx = ctx.indexString();
-    const selectorStringCtx = ctx.selectorString();
-
-    if (clusterStringCtx) {
-      prefix = visitQuotedString(clusterStringCtx);
-    }
-    if (unquotedIndexString) {
-      index = visitQuotedString(unquotedIndexString);
-    }
-    if (indexStringCtx) {
-      index = visitUnquotedOrQuotedString(indexStringCtx);
-    }
-    if (selectorStringCtx) {
-      selector = visitQuotedString(selectorStringCtx);
-    }
-  }
-
-  return Builder.expression.source.node(
-    {
-      sourceType: type,
-      prefix,
-      index,
-      selector,
-      name: text,
-    },
-    {
-      location: getPosition(ctx.start, ctx.stop),
-      incomplete: Boolean(ctx.exception || text === ''),
-      text: ctx?.getText(),
-    }
-  );
 }
 
 export function createColumnStar(ctx: TerminalNode): ESQLColumn {
