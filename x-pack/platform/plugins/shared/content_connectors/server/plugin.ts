@@ -121,11 +121,11 @@ export class SearchConnectorsPlugin
         .info(
           'Agentless is supported, scheduling initial agentless connectors infrastructure watcher task'
         );
-      this.agentlessConnectorDeploymentsSyncService
-        .scheduleInfraSyncTask(this.config, plugins.taskManager)
-        .catch((err) => {
-          this.logger.get().error(`Error scheduling agentless connectors infra sync task`, err);
-        });
+      // this.agentlessConnectorDeploymentsSyncService
+      //   .scheduleInfraSyncTask(this.config, plugins.taskManager)
+      //   .catch((err) => {
+      //     this.logger.get().error(`Error scheduling agentless connectors infra sync task`, err);
+      //   });
     } else {
       this.logger
         .get()
