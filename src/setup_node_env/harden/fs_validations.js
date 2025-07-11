@@ -86,7 +86,7 @@ function validateNoPathTraversal(path) {
 
 function validateFileExtension(path) {
   // Skip validation if path contains __fixtures__
-  if (!isDevOrCI || path.includes('__fixtures__')) {
+  if (isDevOrCI || path.includes('__fixtures__')) {
     return;
   }
 
