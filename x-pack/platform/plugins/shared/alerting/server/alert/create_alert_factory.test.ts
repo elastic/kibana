@@ -9,10 +9,11 @@ import sinon from 'sinon';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { Alert } from './alert';
 import { createAlertFactory, getPublicAlertFactory } from './create_alert_factory';
-import { processAlerts } from '../lib';
+import { categorizeAlerts } from '../lib';
+import { AlertCategory } from '../alerts_client/alert_mapper';
 
 jest.mock('../lib', () => ({
-  processAlerts: jest.fn(),
+  categorizeAlerts: jest.fn(),
 }));
 
 let clock: sinon.SinonFakeTimers;
@@ -27,7 +28,7 @@ describe('createAlertFactory()', () => {
 
   test('creates new alerts for ones not passed in', () => {
     const alertFactory = createAlertFactory({
-      alerts: {},
+      alerts: new Map(),
       logger,
       maxAlerts: 1000,
       autoRecoverAlerts: true,
@@ -54,10 +55,10 @@ describe('createAlertFactory()', () => {
         uuid: 'uuid-previous',
       },
     });
+    const alerts = new Map();
+    alerts.set('1', alert);
     const alertFactory = createAlertFactory({
-      alerts: {
-        '1': alert,
-      },
+      alerts,
       logger,
       maxAlerts: 1000,
       autoRecoverAlerts: true,
@@ -79,7 +80,7 @@ describe('createAlertFactory()', () => {
   });
 
   test('mutates given alerts', () => {
-    const alerts = {};
+    const alerts = new Map();
     const alertFactory = createAlertFactory({
       alerts,
       logger,
@@ -87,17 +88,17 @@ describe('createAlertFactory()', () => {
       autoRecoverAlerts: true,
     });
     alertFactory.create('1');
-    expect(alerts).toMatchObject({
-      1: {
+    expect(alerts.size).toBe(1);
+    expect(alerts.get('1')).toEqual(
+      new Alert('1', {
         meta: {
-          uuid: expect.any(String),
           flappingHistory: [],
+          maintenanceWindowIds: [],
+          uuid: expect.any(String),
         },
         state: {},
-        context: {},
-        id: '1',
-      },
-    });
+      })
+    );
   });
 
   test('gets alert if it exists, returns null if it does not', () => {
@@ -108,10 +109,10 @@ describe('createAlertFactory()', () => {
         uuid: 'uuid-previous',
       },
     });
+    const alerts = new Map();
+    alerts.set('1', alert);
     const alertFactory = createAlertFactory({
-      alerts: {
-        '1': alert,
-      },
+      alerts,
       logger,
       maxAlerts: 1000,
       autoRecoverAlerts: true,
@@ -141,7 +142,7 @@ describe('createAlertFactory()', () => {
 
   test('throws error and sets flag when more alerts are created than allowed', () => {
     const alertFactory = createAlertFactory({
-      alerts: {},
+      alerts: new Map(),
       logger,
       maxAlerts: 3,
       autoRecoverAlerts: true,
@@ -161,7 +162,7 @@ describe('createAlertFactory()', () => {
 
   test('throws error when creating alerts after done() is called', () => {
     const alertFactory = createAlertFactory({
-      alerts: {},
+      alerts: new Map(),
       logger,
       maxAlerts: 1000,
       autoRecoverAlerts: true,
@@ -188,22 +189,26 @@ describe('createAlertFactory()', () => {
   });
 
   test('returns recovered alerts when setsRecoveryContext is true', () => {
-    (processAlerts as jest.Mock).mockReturnValueOnce({
-      recoveredAlerts: {
-        z: {
+    (categorizeAlerts as jest.Mock).mockReturnValueOnce([
+      {
+        alert: {
           id: 'z',
           state: { foo: true },
           meta: { lastScheduledActions: { group: 'default', date: new Date() } },
         },
-        y: {
+        category: AlertCategory.Recovered,
+      },
+      {
+        alert: {
           id: 'y',
           state: { foo: true },
           meta: { lastScheduledActions: { group: 'default', date: new Date() } },
         },
+        category: AlertCategory.Recovered,
       },
-    });
+    ]);
     const alertFactory = createAlertFactory({
-      alerts: {},
+      alerts: new Map(),
       logger,
       canSetRecoveryContext: true,
       maxAlerts: 1000,
@@ -229,36 +234,9 @@ describe('createAlertFactory()', () => {
   });
 
   test('returns empty array if no recovered alerts', () => {
-    (processAlerts as jest.Mock).mockReturnValueOnce({ recoveredAlerts: {} });
+    (categorizeAlerts as jest.Mock).mockReturnValueOnce([]);
     const alertFactory = createAlertFactory({
-      alerts: {},
-      logger,
-      maxAlerts: 1000,
-      canSetRecoveryContext: true,
-      autoRecoverAlerts: true,
-    });
-    const result = alertFactory.create('1');
-    expect(result).toMatchObject({
-      meta: {
-        flappingHistory: [],
-        uuid: expect.any(String),
-      },
-      state: {},
-      context: {},
-      scheduledExecutionOptions: undefined,
-      id: '1',
-    });
-
-    const { getRecoveredAlerts: getRecoveredAlertsFn } = alertFactory.done();
-    const recoveredAlerts = getRecoveredAlertsFn!();
-    expect(Array.isArray(recoveredAlerts)).toBe(true);
-    expect(recoveredAlerts.length).toEqual(0);
-  });
-
-  test('returns empty array if recovered alerts are null', () => {
-    (processAlerts as jest.Mock).mockReturnValueOnce({ recoveredAlerts: null });
-    const alertFactory = createAlertFactory({
-      alerts: {},
+      alerts: new Map(),
       logger,
       maxAlerts: 1000,
       canSetRecoveryContext: true,
@@ -284,7 +262,7 @@ describe('createAlertFactory()', () => {
 
   test('returns empty array if recovered alerts exist but setsRecoveryContext is false', () => {
     const alertFactory = createAlertFactory({
-      alerts: {},
+      alerts: new Map(),
       logger,
       maxAlerts: 1000,
       canSetRecoveryContext: false,
@@ -313,7 +291,7 @@ describe('createAlertFactory()', () => {
 
   test('throws error when checking limit usage if alertLimit.getValue is called but alertLimit.setLimitReached is not', () => {
     const alertFactory = createAlertFactory({
-      alerts: {},
+      alerts: new Map(),
       logger,
       maxAlerts: 1000,
       autoRecoverAlerts: true,
@@ -331,7 +309,7 @@ describe('createAlertFactory()', () => {
 
   test('does not throw error when checking limit usage if alertLimit.getValue is called and alertLimit.setLimitReached is called with reached = true', () => {
     const alertFactory = createAlertFactory({
-      alerts: {},
+      alerts: new Map(),
       logger,
       maxAlerts: 1000,
       autoRecoverAlerts: true,
@@ -346,7 +324,7 @@ describe('createAlertFactory()', () => {
 
   test('does not throw error when checking limit usage if alertLimit.getValue is called and alertLimit.setLimitReached is called with reached = false', () => {
     const alertFactory = createAlertFactory({
-      alerts: {},
+      alerts: new Map(),
       logger,
       maxAlerts: 1000,
       autoRecoverAlerts: true,
@@ -361,7 +339,7 @@ describe('createAlertFactory()', () => {
 
   test('returns empty array if recovered alerts exist but autoRecoverAlerts is false', () => {
     const alertFactory = createAlertFactory({
-      alerts: {},
+      alerts: new Map(),
       logger,
       maxAlerts: 1000,
       canSetRecoveryContext: true,
@@ -393,7 +371,7 @@ describe('createAlertFactory()', () => {
 describe('getPublicAlertFactory', () => {
   test('only returns subset of function from given alert factory', () => {
     const alertFactory = createAlertFactory({
-      alerts: {},
+      alerts: new Map(),
       logger,
       maxAlerts: 1000,
       autoRecoverAlerts: true,

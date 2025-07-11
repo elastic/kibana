@@ -22,8 +22,6 @@ const createAlertsClientMock = () => {
       getSummarizedAlerts: jest.fn(),
       factory: jest.fn(),
       client: jest.fn(),
-      determineDelayedAlerts: jest.fn(),
-      determineFlappingAlerts: jest.fn(),
       getTrackedExecutions: jest.fn(),
     };
   });
