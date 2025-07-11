@@ -743,7 +743,6 @@ export class PrivilegeMonitoringDataClient {
   public async disable() {
     this.log('info', 'Disabling Privileged Monitoring Engine');
     const errors: string[] = [];
-    let indexSources: string[] = [];
     const disabledSources: string[] = [];
     let taskRemoved = false;
     let soStatusUpdated = false;
@@ -763,7 +762,7 @@ export class PrivilegeMonitoringDataClient {
     try {
       // 1. Disable index sources
       this.log('debug', 'Disabling Privileged Monitoring Engine: removing index sources');
-      indexSources = await this.monitoringIndexSourceClient.findByIndex();
+      const indexSources = await this.monitoringIndexSourceClient.findByIndex();
       for (const source of indexSources) {
         await this.monitoringIndexSourceClient.update({ id: source.id, enabled: false });
         disabledSources.push(source.id);
@@ -820,6 +819,9 @@ export class PrivilegeMonitoringDataClient {
       // 2. Re-create the task if it was removed
       if (taskRemoved) {
         try {
+          if (!this.opts.taskManager) {
+            throw new Error('Task Manager is not available');
+          }
           await startPrivilegeMonitoringTask({
             logger: this.opts.logger,
             namespace: this.opts.namespace,

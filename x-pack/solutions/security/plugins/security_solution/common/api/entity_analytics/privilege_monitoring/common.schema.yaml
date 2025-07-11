@@ -13,9 +13,9 @@ components:
         - status
       properties:
         status:
-          $ref: "#/components/schemas/EngineStatus"
+          $ref: "#/components/schemas/PrivilegeMonitoringEngineStatus"
 
-    EngineStatus:
+    PrivilegeMonitoringEngineStatus:
       type: string
       enum:
         - installing

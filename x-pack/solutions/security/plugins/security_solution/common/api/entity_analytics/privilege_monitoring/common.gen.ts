@@ -16,8 +16,8 @@
 
 import { z } from '@kbn/zod';
 
-export type EngineStatus = z.infer<typeof EngineStatus>;
-export const EngineStatus = z.enum([
+export type PrivilegeMonitoringEngineStatus = z.infer<typeof PrivilegeMonitoringEngineStatus>;
+export const PrivilegeMonitoringEngineStatus = z.enum([
   'installing',
   'started',
   'stopped',
@@ -25,12 +25,12 @@ export const EngineStatus = z.enum([
   'error',
   'disabled',
 ]);
-export type EngineStatusEnum = typeof EngineStatus.enum;
-export const EngineStatusEnum = EngineStatus.enum;
+export type PrivilegeMonitoringEngineStatusEnum = typeof PrivilegeMonitoringEngineStatus.enum;
+export const PrivilegeMonitoringEngineStatusEnum = PrivilegeMonitoringEngineStatus.enum;
 
 export type MonitoringEngineDescriptor = z.infer<typeof MonitoringEngineDescriptor>;
 export const MonitoringEngineDescriptor = z.object({
-  status: EngineStatus,
+  status: PrivilegeMonitoringEngineStatus,
 });
 
 export type EngineComponentResource = z.infer<typeof EngineComponentResource>;
