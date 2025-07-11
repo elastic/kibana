@@ -29,6 +29,7 @@ import {
   previewDocsFilterOptions,
 } from './state_management/simulation_state_machine';
 import {
+  selectHasSimulatedRecords,
   selectOriginalPreviewRecords,
   selectPreviewRecords,
 } from './state_management/simulation_state_machine/selectors';
@@ -214,6 +215,9 @@ const OutcomePreviewTable = () => {
   const originalSamples = useSimulatorSelector((snapshot) =>
     selectOriginalPreviewRecords(snapshot.context)
   );
+  const hasSimulatedRecords = useSimulatorSelector((snapshot) =>
+    selectHasSimulatedRecords(snapshot.context)
+  );
 
   const dataSourceRefs = useStreamEnrichmentSelector((state) => state.context.dataSourcesRefs);
 
@@ -378,13 +382,13 @@ const OutcomePreviewTable = () => {
   );
 
   useEffect(() => {
-    if (docViewerContext.originalSample) {
+    if (docViewerContext.originalSample && hasSimulatedRecords) {
       // If the original sample is available, enable the diff tab - otherwise disable it
       docViewsRegistry.enableById(DOC_VIEW_DIFF_ID);
     } else {
       docViewsRegistry.disableById(DOC_VIEW_DIFF_ID);
     }
-  }, [docViewerContext, docViewsRegistry]);
+  }, [docViewerContext, docViewsRegistry, hasSimulatedRecords]);
 
   if (isEmpty(previewDocuments)) {
     return (

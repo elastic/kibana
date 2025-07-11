@@ -52,6 +52,13 @@ export const selectOriginalPreviewRecords = createSelector(
   }
 );
 
+export const selectHasSimulatedRecords = createSelector(
+  [(context: SimulationContext | undefined) => context?.simulation?.documents],
+  (documents) => {
+    return Boolean(documents && documents.length > 0);
+  }
+);
+
 /**
  * Selects the set of dotted fields that are not supported by the current simulation.
  */
