@@ -87,7 +87,8 @@ export const OnboardingFlowForm: FunctionComponent = () => {
         : i18n.translate(
             'xpack.observability_onboarding.logsEssential.onboardingFlowForm.hostDescription',
             {
-              defaultMessage: 'Ingest and analyze logs on your host such as OS, service, application and other logs',
+              defaultMessage:
+                'Ingest and analyze logs on your host such as OS, service, application and other logs',
             }
           ),
       logos: ['opentelemetry', 'apache', 'mysql'],
