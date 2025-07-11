@@ -53,10 +53,10 @@ const globalLayoutStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
     pointer-events: none;
     visibility: hidden;
     position: fixed;
-    top: var(--kbn-layout--application-top, 0px);
-    right: var(--kbn-layout--application-right, 0px);
-    bottom: var(--kbn-layout--application-bottom, 0px);
-    left: var(--kbn-layout--application-left, 0px);
+    top: var(--kbn-application--content-top, 0px);
+    right: var(--kbn-application--content-right, 0px);
+    bottom: var(--kbn-application--content-bottom, 0px);
+    left: var(--kbn-application--content-left, 0px);
   }
 
   .kbnAppWrapper {
