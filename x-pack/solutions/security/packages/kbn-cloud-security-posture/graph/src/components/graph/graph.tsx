@@ -109,10 +109,7 @@ export const Graph = memo<GraphProps>(
         !isArrayOfObjectsEqual(edges, currEdgesRef.current)
       ) {
         const { initialNodes, initialEdges } = processGraph(nodes, edges, isGraphInteractive);
-
-        // console.time("layoutGraph");
         const { nodes: layoutedNodes } = layoutGraph(initialNodes, initialEdges);
-        // console.timeEnd("layoutGraph");
 
         setNodes(layoutedNodes);
         setEdges(initialEdges);
