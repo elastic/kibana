@@ -14,20 +14,15 @@ import { type AstNodeParserFields, Builder } from '../builder';
 import { isCommand } from '../ast/is';
 import {
   computeLocationExtends,
-  createColumn,
   createFunction,
-  createIdentifierOrParam,
   createLiteralString,
   nonNullable,
-  sanitizeIdentifierString,
   textExistsAndIsValid,
   createBinaryExpression,
   createColumnStar,
   createFakeMultiplyLiteral,
-  createFunctionCall,
-  createParam,
 } from './factories';
-import { getPosition } from './helpers';
+import { getPosition, parseIdentifier } from './helpers';
 import { firstItem, lastItem, resolveItem } from '../visitor/utils';
 import type { Parser } from './parser';
 import { LeafPrinter } from '../pretty_print';
@@ -89,6 +84,30 @@ export class CstToAstConverter {
       location: getPosition(ctx.start, ctx.stop),
       incomplete: Boolean(ctx.exception),
     };
+  }
+
+  private getUnquotedText(ctx: antlr.ParserRuleContext) {
+    return [68 /* esql_parser.UNQUOTED_IDENTIFIER */, 77 /* esql_parser.UNQUOTED_SOURCE */]
+      .map((keyCode) => ctx.getToken(keyCode, 0))
+      .filter(nonNullable)[0];
+  }
+
+  /**
+   * Follow a similar logic to the ES one:
+   * * remove backticks at the beginning and at the end
+   * * remove double backticks
+   */
+  private safeBackticksRemoval(text: string | undefined) {
+    return text?.replace(/^`{1}|`{1}$/g, '').replace(/``/g, '`') || '';
+  }
+
+  private sanitizeIdentifierString(ctx: antlr.ParserRuleContext) {
+    const result =
+      this.getUnquotedText(ctx)?.getText() ||
+      this.safeBackticksRemoval(this.getQuotedText(ctx)?.getText()) ||
+      this.safeBackticksRemoval(ctx.getText()); // for some reason some quoted text is not detected correctly by the parser
+    // TODO - understand why <missing null> is now returned as the match text for the FROM command
+    return result === '<missing null>' ? '' : result;
   }
 
   // -------------------------------------------------------------------- query
@@ -698,7 +717,7 @@ export class CstToAstConverter {
 
           for (const arg of renameArgsInOrder) {
             if (textExistsAndIsValid(arg.getText())) {
-              renameFunction.args.push(createColumn(arg));
+              renameFunction.args.push(this.createColumn(arg));
             }
           }
           const firstArg = firstItem(renameFunction.args);
@@ -710,7 +729,7 @@ export class CstToAstConverter {
         }
 
         if (textExistsAndIsValid(clause._oldName?.getText())) {
-          return createColumn(clause._oldName);
+          return this.createColumn(clause._oldName);
         }
       })
       .filter(nonNullable);
@@ -746,7 +765,7 @@ export class CstToAstConverter {
 
     for (const optionCtx of ctx.commandOption_list()) {
       const option = this.toOption(
-        sanitizeIdentifierString(optionCtx.identifier()).toLowerCase(),
+        this.sanitizeIdentifierString(optionCtx.identifier()).toLowerCase(),
         optionCtx
       );
       options.push(option);
@@ -910,7 +929,7 @@ export class CstToAstConverter {
       let max: number = ctx.ON()!.symbol.stop;
 
       if (textExistsAndIsValid(identifier.getText())) {
-        const column = createColumn(identifier);
+        const column = this.createColumn(identifier);
         fn.args.push(column);
         max = column.location.max;
       }
@@ -941,15 +960,18 @@ export class CstToAstConverter {
           const args: ast.ESQLColumn[] = [];
 
           if (clause.ASSIGN()) {
-            args.push(createColumn(clause._newName));
+            args.push(this.createColumn(clause._newName));
             if (textExistsAndIsValid(clause._enrichField?.getText())) {
-              args.push(createColumn(clause._enrichField));
+              args.push(this.createColumn(clause._enrichField));
             }
           } else {
             // if an explicit assign is not set, create a fake assign with
             // both left and right value with the same column
             if (textExistsAndIsValid(clause._enrichField?.getText())) {
-              args.push(createColumn(clause._enrichField), createColumn(clause._enrichField));
+              args.push(
+                this.createColumn(clause._enrichField),
+                this.createColumn(clause._enrichField)
+              );
             }
           }
           if (args.length) {
@@ -1022,7 +1044,7 @@ export class CstToAstConverter {
   private fromChangePointCommand = (
     ctx: cst.ChangePointCommandContext
   ): ast.ESQLAstChangePointCommand => {
-    const value = createColumn(ctx._value);
+    const value = this.createColumn(ctx._value);
     const command = this.createCommand<'change_point', ast.ESQLAstChangePointCommand>(
       'change_point',
       ctx,
@@ -1034,7 +1056,7 @@ export class CstToAstConverter {
     command.args.push(value);
 
     if (ctx._key && ctx._key.getText()) {
-      const key = createColumn(ctx._key);
+      const key = this.createColumn(ctx._key);
       const option = Builder.option(
         {
           name: 'on',
@@ -1050,8 +1072,8 @@ export class CstToAstConverter {
     }
 
     if (ctx._targetType && ctx._targetPvalue) {
-      const type = createColumn(ctx._targetType);
-      const pvalue = createColumn(ctx._targetPvalue);
+      const type = this.createColumn(ctx._targetType);
+      const pvalue = this.createColumn(ctx._targetPvalue);
       const option = Builder.option(
         {
           name: 'as',
@@ -1081,7 +1103,7 @@ export class CstToAstConverter {
     );
 
     if (ctx._targetField && ctx.ASSIGN()) {
-      const targetField = createColumn(ctx._targetField);
+      const targetField = this.createColumn(ctx._targetField);
 
       const prompt = this.visitPrimaryExpression(ctx._prompt) as ast.ESQLSingleAstItem;
       command.prompt = prompt;
@@ -1130,7 +1152,7 @@ export class CstToAstConverter {
         inferenceId = Builder.identifier('', { incomplete: true });
       } else {
         withIncomplete = false;
-        inferenceId = createIdentifierOrParam(ctx._inferenceId)!;
+        inferenceId = this.createIdentifierOrParam(ctx._inferenceId)!;
       }
     }
 
@@ -1316,7 +1338,7 @@ export class CstToAstConverter {
       identifiers
         .filter((child) => textExistsAndIsValid(child.getText()))
         .map((sourceContext) => {
-          return createColumn(sourceContext);
+          return this.createColumn(sourceContext);
         }) ?? [];
 
     return args;
@@ -1366,7 +1388,7 @@ export class CstToAstConverter {
       const fn = createFunction(ctx.ASSIGN()!.getText(), ctx, undefined, 'binary-expression');
 
       fn.args.push(
-        createColumn(ctx.qualifiedName()!),
+        this.createColumn(ctx.qualifiedName()!),
         this.collectBooleanExpression(ctx.booleanExpression())
       );
       fn.location = computeLocationExtends(fn);
@@ -1410,6 +1432,8 @@ export class CstToAstConverter {
    * ```
    * WHERE x IN (1, 2, 3)
    * ```
+   *
+   * @todo Rename this method.
    */
   private visitTuple(
     ctxs: cst.ValueExpressionContext[],
@@ -1561,12 +1585,12 @@ export class CstToAstConverter {
     if (ctx instanceof cst.ConstantDefaultContext) {
       return this.fromConstant(ctx.constant());
     } else if (ctx instanceof cst.DereferenceContext) {
-      return createColumn(ctx.qualifiedName());
+      return this.createColumn(ctx.qualifiedName());
     } else if (ctx instanceof cst.ParenthesizedExpressionContext) {
       return this.collectBooleanExpression(ctx.booleanExpression());
     } else if (ctx instanceof cst.FunctionContext) {
       const functionExpressionCtx = ctx.functionExpression();
-      const fn = createFunctionCall(ctx);
+      const fn = this.createFunctionCall(ctx);
       const asteriskArg = functionExpressionCtx.ASTERISK()
         ? createColumnStar(functionExpressionCtx.ASTERISK()!)
         : undefined;
@@ -1704,7 +1728,7 @@ export class CstToAstConverter {
   private visitMatchBooleanExpression(
     ctx: cst.MatchBooleanExpressionContext
   ): ESQLAstMatchBooleanExpression {
-    let expression: ESQLAstMatchBooleanExpression = createColumn(ctx.qualifiedName());
+    let expression: ESQLAstMatchBooleanExpression = this.createColumn(ctx.qualifiedName());
     const dataTypeCtx = ctx.dataType();
     const constantCtx = ctx.constant();
 
@@ -1841,6 +1865,104 @@ export class CstToAstConverter {
     return createLiteralString(ctx);
   }
 
+  // ----------------------------------------------------- expression: "column"
+
+  private createColumn(ctx: antlr.ParserRuleContext): ast.ESQLColumn {
+    const args: ast.ESQLColumn['args'] = [];
+
+    if (ctx instanceof cst.QualifiedNamePatternContext) {
+      const list = ctx.identifierPattern_list();
+
+      for (const identifierPattern of list) {
+        const ID_PATTERN = identifierPattern.ID_PATTERN();
+
+        if (ID_PATTERN) {
+          const name = parseIdentifier(ID_PATTERN.getText());
+          const node = Builder.identifier({ name }, this.createParserFields(identifierPattern));
+
+          args.push(node);
+        } else {
+          const parameter = this.toParam(identifierPattern.parameter());
+
+          if (parameter) {
+            args.push(parameter);
+          }
+        }
+      }
+    } else if (ctx instanceof cst.QualifiedNameContext) {
+      const list = ctx.identifierOrParameter_list();
+
+      for (const item of list) {
+        if (item instanceof cst.IdentifierOrParameterContext) {
+          const node = this.createIdentifierOrParam(item);
+
+          if (node) {
+            args.push(node);
+          }
+        }
+      }
+    } else {
+      const name = this.sanitizeIdentifierString(ctx);
+      const node = Builder.identifier({ name }, this.createParserFields(ctx));
+
+      args.push(node);
+    }
+
+    const text = this.sanitizeIdentifierString(ctx);
+    const hasQuotes = Boolean(this.getQuotedText(ctx) || this.isQuoted(ctx.getText()));
+    const column = Builder.expression.column(
+      { args },
+      {
+        text: ctx.getText(),
+        location: getPosition(ctx.start, ctx.stop),
+        incomplete: Boolean(ctx.exception || text === ''),
+      }
+    );
+
+    column.name = text;
+    column.quoted = hasQuotes;
+
+    return column;
+  }
+
+  private getQuotedText(ctx: antlr.ParserRuleContext) {
+    return [27 /* esql_parser.QUOTED_STRING */, 69 /* esql_parser.QUOTED_IDENTIFIER */]
+      .map((keyCode) => ctx.getToken(keyCode, 0))
+      .filter(nonNullable)[0];
+  }
+
+  private isQuoted(text: string | undefined) {
+    return text && /^(`)/.test(text);
+  }
+
+  // --------------------------------------------------- expression: "function"
+
+  private createFunctionCall(ctx: cst.FunctionContext): ast.ESQLFunctionCallExpression {
+    const functionExpressionCtx = ctx.functionExpression();
+    const functionName = functionExpressionCtx.functionName();
+    const node: ast.ESQLFunctionCallExpression = {
+      type: 'function',
+      subtype: 'variadic-call',
+      name: functionName.getText().toLowerCase(),
+      text: ctx.getText(),
+      location: getPosition(ctx.start, ctx.stop),
+      args: [],
+      incomplete: Boolean(ctx.exception),
+    };
+
+    const identifierOrParameter = functionName.identifierOrParameter();
+
+    if (identifierOrParameter instanceof cst.IdentifierOrParameterContext) {
+      const operator = this.createIdentifierOrParam(identifierOrParameter);
+
+      if (operator) {
+        node.operator = operator;
+      }
+    }
+
+    return node;
+  }
+
   // -------------------------------------------------------- expression: "map"
 
   private fromMapExpression(ctx: cst.MapExpressionContext): ast.ESQLMap {
@@ -1900,10 +2022,11 @@ export class CstToAstConverter {
     ) {
       return this.toList(ctx);
     } else if (ctx instanceof cst.InputParameterContext && ctx.children) {
+      // TODO: Make a method out of this.
       const values: ast.ESQLLiteral[] = [];
 
       for (const child of ctx.children) {
-        const param = createParam(child);
+        const param = this.toParam(child);
         if (param) values.push(param);
       }
 
@@ -1967,6 +2090,32 @@ export class CstToAstConverter {
     ) as Type extends 'double' ? ast.ESQLDecimalLiteral : ast.ESQLIntegerLiteral;
   }
 
+  private toParam(ctx: antlr.ParseTree): ast.ESQLParam | undefined {
+    if (ctx instanceof cst.InputParamContext || ctx instanceof cst.InputDoubleParamsContext) {
+      const isDoubleParam = ctx instanceof cst.InputDoubleParamsContext;
+      const paramKind: ast.ESQLParamKinds = isDoubleParam ? '??' : '?';
+
+      return Builder.param.unnamed(this.createParserFields(ctx), { paramKind });
+    } else if (
+      ctx instanceof cst.InputNamedOrPositionalParamContext ||
+      ctx instanceof cst.InputNamedOrPositionalDoubleParamsContext
+    ) {
+      const isDoubleParam = ctx instanceof cst.InputNamedOrPositionalDoubleParamsContext;
+      const paramKind: ast.ESQLParamKinds = isDoubleParam ? '??' : '?';
+      const text = ctx.getText();
+      const value = text.slice(isDoubleParam ? 2 : 1);
+      const valueAsNumber = Number(value);
+      const isPositional = String(valueAsNumber) === value;
+      const parserFields = this.createParserFields(ctx);
+
+      if (isPositional) {
+        return Builder.param.positional({ paramKind, value: valueAsNumber }, parserFields);
+      } else {
+        return Builder.param.named({ paramKind, value }, parserFields);
+      }
+    }
+  }
+
   // ---------------------------------------------- constant expression: "list"
 
   private toList(
@@ -2012,5 +2161,28 @@ export class CstToAstConverter {
       name: value + ' ' + unit,
       incomplete: Boolean(ctx.exception),
     };
+  }
+
+  // ---------------------------------------- constant expression: "identifier"
+
+  private createIdentifierOrParam(ctx: cst.IdentifierOrParameterContext) {
+    const identifier = ctx.identifier();
+
+    if (identifier) {
+      return this.createIdentifier(identifier);
+    }
+
+    const parameter = ctx.parameter() ?? ctx.doubleParameter();
+
+    if (parameter) {
+      return this.toParam(parameter);
+    }
+  }
+
+  private createIdentifier(identifier: cst.IdentifierContext): ast.ESQLIdentifier {
+    const text = identifier.getText();
+    const name = parseIdentifier(text);
+
+    return Builder.identifier({ name }, this.createParserFields(identifier));
   }
 }
