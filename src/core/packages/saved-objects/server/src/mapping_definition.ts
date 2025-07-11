@@ -76,7 +76,7 @@ export type SavedObjectsFieldMapping = EsMappingProperty &
      * Note: To limit the number of mapping fields Saved Object types should
      * *never* use `dynamic: true`.
      */
-    dynamic?: 'false' | 'strict';
+    dynamic?: 'false' | 'strict' | false;
     /**
      * Some mapping types do not accept the `properties` attributes. Explicitly adding it as optional to our type
      * to avoid type failures on all code using accessing them via `SavedObjectsFieldMapping.properties`.
