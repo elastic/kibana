@@ -16,6 +16,7 @@ import {
 } from '../../../__tests__/autocomplete';
 import { ICommandCallbacks } from '../../types';
 import { ESQL_COMMON_NUMERIC_TYPES } from '../../../definitions/types';
+import { timeUnitsToSuggest } from '../../../definitions/constants';
 
 const roundParameterTypes = ['double', 'integer', 'long', 'unsigned_long'] as const;
 
@@ -493,29 +494,37 @@ describe('EVAL Autocomplete', () => {
     );
   });
 
-  // test('deep function nesting', async () => {
-  //   for (const nesting of [1, 2, 3, 4]) {
-  //     await assertSuggestions(
-  //       `from a | eval a=${Array(nesting).fill('round(').join('').concat('/')}`,
-  //       [
-  //         ...getFieldNamesByType(roundParameterTypes),
-  //         ...getFunctionSignaturesByReturnType(
-  //           Location.EVAL,
-  //           roundParameterTypes,
-  //           { scalar: true },
-  //           undefined,
-  //           ['round']
-  //         ),
-  //       ],
-  //       { triggerCharacter: '(' }
-  //     );
-  //   }
-  // });
+  test('deep function nesting', async () => {
+    const expectedFields = getFieldNamesByType(roundParameterTypes);
+    (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
+      expectedFields.map((name) => ({ label: name, text: name }))
+    );
+    for (const nesting of [1, 2, 3, 4]) {
+      const query = `from a | eval a=${Array(nesting).fill('round(').join('').concat(' ')}`;
+      const cursorPosition = query.length - 1; // position after the last opening parenthesis
+      await evalExpectSuggestions(
+        query,
+        [
+          ...getFieldNamesByType(roundParameterTypes),
+          ...getFunctionSignaturesByReturnType(
+            Location.EVAL,
+            roundParameterTypes,
+            { scalar: true },
+            undefined,
+            ['round']
+          ),
+        ],
+        mockCallbacks,
+        mockContext,
+        cursorPosition
+      );
+    }
+  });
 
   test('discards query after cursor', async () => {
     // Smoke testing for suggestions in previous position than the end of the statement
     await evalExpectSuggestions(
-      'from a | eval col0 = abs(doubleField) ',
+      'from a | eval col0 = abs(doubleField) / | eval abs(col0)',
       [
         ...getFunctionSignaturesByReturnType(
           Location.EVAL,
@@ -528,11 +537,35 @@ describe('EVAL Autocomplete', () => {
       ],
       mockCallbacks
     );
+
+    const expectedFields = getFieldNamesByType(['double', 'integer', 'long', 'unsigned_long']);
+    (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
+      expectedFields.map((name) => ({ label: name, text: name }))
+    );
+
+    await evalExpectSuggestions(
+      'from a | eval col0 = abs(b ) | eval abs(col0) ',
+      [
+        ...getFieldNamesByType(['double', 'integer', 'long', 'unsigned_long']),
+        ...getFunctionSignaturesByReturnType(
+          Location.EVAL,
+          ['double', 'integer', 'long', 'unsigned_long'],
+          { scalar: true },
+          undefined,
+          ['abs']
+        ),
+      ],
+      mockCallbacks,
+      mockContext,
+      27
+    );
   });
 
   test('date math', async () => {
+    const dateSuggestions = timeUnitsToSuggest.map(({ name }) => name);
+
     await evalExpectSuggestions(
-      'from a | eval col0 = 1 ',
+      'from a | eval a = 1 ',
       [
         ', ',
         '| ',
@@ -545,9 +578,16 @@ describe('EVAL Autocomplete', () => {
       ],
       mockCallbacks
     );
+
     await evalExpectSuggestions(
       'from a | eval a = 1 year ',
       [', ', '| ', '+ $0', '- $0'],
+      mockCallbacks
+    );
+
+    await evalExpectSuggestions(
+      'from a | eval col0=date_trunc(2 ',
+      [...dateSuggestions.map((t) => `${t}, `), ','],
       mockCallbacks
     );
   });
