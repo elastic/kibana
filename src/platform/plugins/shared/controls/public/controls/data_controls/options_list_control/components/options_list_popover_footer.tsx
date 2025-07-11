@@ -46,7 +46,7 @@ export const OptionsListPopoverFooter = () => {
   const [exclude, loading, allowExpensiveQueries] = useBatchedPublishingSubjects(
     componentApi.exclude$,
     componentApi.dataLoading$,
-    componentApi.allowExpensiveQueries$
+    componentApi.parentApi.allowExpensiveQueries$
   );
 
   return (

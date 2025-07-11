@@ -19,6 +19,7 @@ import { getOptionsListContextMock } from '../../mocks/api_mocks';
 import { OptionsListControlContext } from '../options_list_context_provider';
 import type { OptionsListComponentApi } from '../types';
 import { OptionsListPopover } from './options_list_popover';
+import { ControlGroupApi } from '../../../../control_group/types';
 import { EuiThemeProvider } from '@elastic/eui';
 
 const render = (ui: React.ReactElement) => {
@@ -320,6 +321,12 @@ describe('Options list popover', () => {
       } as DataViewField);
       const popover = mountComponent({
         ...contextMock,
+        componentApi: {
+          ...contextMock.componentApi,
+          parentApi: {
+            allowExpensiveQueries$: new BehaviorSubject<boolean>(false),
+          } as unknown as ControlGroupApi,
+        },
       });
       const warning = popover.getByTestId('optionsList-allow-expensive-queries-warning');
       expect(warning).toBeInstanceOf(HTMLDivElement);

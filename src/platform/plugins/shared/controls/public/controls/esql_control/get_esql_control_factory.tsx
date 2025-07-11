@@ -140,13 +140,12 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
       );
 
       const componentApi: OptionsListComponentApi = {
+        ...api,
         ...selections.internalApi,
         uuid,
         makeSelection(key?: string) {
           if (key) selections.internalApi.setSelectedOptions([key]);
         },
-        allowExpensiveQueries$: api.parentApi.allowExpensiveQueries$,
-        defaultTitle$: api.defaultTitle$,
         // Pass no-ops and default values for all of the features of OptionsList that ES|QL controls don't currently use
         ...componentStaticStateManager.api,
         deselectOption: () => {},

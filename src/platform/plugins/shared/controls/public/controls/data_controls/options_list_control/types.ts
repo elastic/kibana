@@ -60,9 +60,11 @@ export type OptionsListComponentApi = PublishesField &
     loadMoreSubject: Subject<void>;
     selectAll: (keys: string[]) => void;
     deselectAll: (keys: string[]) => void;
-    allowExpensiveQueries$: PublishingSubject<boolean>;
-    defaultTitle$: PublishingSubject<string | undefined> | PublishingSubject<undefined>;
+    defaultTitle$?: PublishingSubject<string | undefined>;
     uuid: string;
+    parentApi: {
+      allowExpensiveQueries$: PublishingSubject<boolean>;
+    };
   };
 
 type HideExcludeUnusedState = Pick<OptionsListState, 'exclude'>;

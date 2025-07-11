@@ -9,6 +9,7 @@
 
 import { isEmpty } from 'lodash';
 import React, { useMemo, useState } from 'react';
+import { BehaviorSubject } from 'rxjs';
 import { css } from '@emotion/react';
 import {
   EuiFilterButton,
@@ -102,15 +103,15 @@ export const OptionsListControl = ({
 
   const [isPopoverOpen, setPopoverOpen] = useState<boolean>(false);
   const [
-    excludeSelected = false,
-    existsSelected = false,
+    excludeSelected,
+    existsSelected,
     selectedOptions,
     invalidSelections,
     field,
     loading,
     panelTitle,
     fieldFormatter,
-    defaultPanelTitle = undefined,
+    defaultPanelTitle,
   ] = useBatchedPublishingSubjects(
     componentApi.exclude$,
     componentApi.existsSelected$,
@@ -120,8 +121,9 @@ export const OptionsListControl = ({
     componentApi.dataLoading$,
     componentApi.title$,
     componentApi.fieldFormatter,
-    componentApi.defaultTitle$
+    componentApi.defaultTitle$ ?? new BehaviorSubject(undefined)
   );
+
   const delimiter = useMemo(() => OptionsListStrings.control.getSeparator(field?.type), [field]);
   const styles = useMemoCss(optionListControlStyles);
 
@@ -150,7 +152,7 @@ export const OptionsListControl = ({
                 <>
                   {selectedOptions?.length
                     ? selectedOptions.map((value: OptionsListSelection, i, { length }) => {
-                        const text = `${fieldFormatter(value) ?? value}${
+                        const text = `${fieldFormatter(value)}${
                           i + 1 === length ? '' : delimiter
                         } `;
                         const isInvalid = invalidSelections?.has(value);

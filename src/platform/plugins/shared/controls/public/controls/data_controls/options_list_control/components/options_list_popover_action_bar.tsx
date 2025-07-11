@@ -25,7 +25,7 @@ import {
   useStateFromPublishingSubject,
 } from '@kbn/presentation-publishing';
 
-import { BehaviorSubject, lastValueFrom, take } from 'rxjs';
+import { lastValueFrom, take } from 'rxjs';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { OptionsListSuggestions } from '../../../../../common/options_list';
@@ -76,9 +76,7 @@ export const OptionsListPopoverActionBar = ({
 
   // Using useStateFromPublishingSubject instead of useBatchedPublishingSubjects
   // to avoid debouncing input value
-  const searchString = useStateFromPublishingSubject(
-    componentApi.searchString$ ?? new BehaviorSubject('')
-  );
+  const searchString = useStateFromPublishingSubject(componentApi.searchString$);
 
   const [
     searchTechnique,
@@ -98,7 +96,7 @@ export const OptionsListPopoverActionBar = ({
     componentApi.totalCardinality$,
     componentApi.field$,
     componentApi.fieldName$,
-    componentApi.allowExpensiveQueries$,
+    componentApi.parentApi.allowExpensiveQueries$,
     componentApi.availableOptions$,
     componentApi.dataLoading$,
     componentApi.singleSelect$
