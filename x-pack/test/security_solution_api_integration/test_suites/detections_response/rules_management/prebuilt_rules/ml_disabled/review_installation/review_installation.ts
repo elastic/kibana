@@ -23,7 +23,7 @@ export default ({ getService }: FtrProviderContext): void => {
   describe('@ess @serverless @skipInServerlessMKI Prebuilt rules installation review', function () {
     this.tags('skipFIPS');
 
-    beforeEach(async () => { 
+    beforeEach(async () => {
       await deleteAllRules(supertest, log);
       await deleteAllPrebuiltRuleAssets(es, log);
     });
