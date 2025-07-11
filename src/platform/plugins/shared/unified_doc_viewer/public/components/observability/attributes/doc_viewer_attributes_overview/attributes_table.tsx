@@ -7,17 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
 import { EuiDataGrid, EuiDataGridProps } from '@elastic/eui';
-import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import { i18n } from '@kbn/i18n';
+import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
+import React, { useCallback, useMemo } from 'react';
+import { getUnifiedDocViewerServices } from '../../../../plugin';
+import { FieldRow } from '../../../doc_viewer_table/field_row';
 import { TableCell } from '../../../doc_viewer_table/table_cell';
 import {
   getFieldCellActions,
   getFieldValueCellActions,
 } from '../../../doc_viewer_table/table_cell_actions';
-import { FieldRow } from '../../../doc_viewer_table/field_row';
-import { getUnifiedDocViewerServices } from '../../../../plugin';
 import { AttributeField } from './attributes_overview';
 
 interface AttributesTableProps
@@ -29,6 +29,22 @@ interface AttributesTableProps
   searchTerm: string;
   isEsqlMode: boolean;
 }
+
+const GRID_PROPS: Pick<EuiDataGridProps, 'columnVisibility' | 'rowHeightsOptions' | 'gridStyle'> = {
+  columnVisibility: {
+    visibleColumns: ['name', 'value'],
+    setVisibleColumns: () => null,
+  },
+  rowHeightsOptions: { defaultHeight: 'auto' },
+  gridStyle: {
+    border: 'horizontal',
+    stripes: true,
+    rowHover: 'highlight',
+    header: 'underline',
+    cellPadding: 'm',
+    fontSize: 's',
+  },
+};
 
 export const AttributesTable = ({
   hit,
@@ -42,10 +58,10 @@ export const AttributesTable = ({
   onRemoveColumn,
   isEsqlMode,
 }: AttributesTableProps) => {
-  const flattened = hit.flattened;
+  const flattened = useMemo(() => hit.flattened, [hit.flattened]);
   const { fieldFormats, toasts } = getUnifiedDocViewerServices();
 
-  const onToggleColumn = useMemo(() => {
+  const onToggleColumn = useCallback(() => {
     if (!onRemoveColumn || !onAddColumn || !columns) {
       return undefined;
     }
@@ -85,35 +101,33 @@ export const AttributesTable = ({
     [rows, toasts, filter, isEsqlMode]
   );
 
-  const gridColumns: EuiDataGridProps['columns'] = [
-    {
-      id: 'name',
-      displayAsText: i18n.translate('unifiedDocViewer.docView.attributes.table.nameColumn', {
-        defaultMessage: 'Field',
-      }),
-      actions: false,
-      visibleCellActions: 3,
-      cellActions: fieldCellActions,
-    },
-    {
-      id: 'value',
-      displayAsText: i18n.translate('unifiedDocViewer.docView.attributes.table.valueColumn', {
-        defaultMessage: 'Value',
-      }),
-      actions: false,
-      visibleCellActions: 3,
-      cellActions: fieldValueCellActions,
-    },
-  ];
+  const gridColumns: EuiDataGridProps['columns'] = useMemo(
+    () => [
+      {
+        id: 'name',
+        displayAsText: i18n.translate('unifiedDocViewer.docView.attributes.table.nameColumn', {
+          defaultMessage: 'Field',
+        }),
+        actions: false,
+        visibleCellActions: 3,
+        cellActions: fieldCellActions,
+      },
+      {
+        id: 'value',
+        displayAsText: i18n.translate('unifiedDocViewer.docView.attributes.table.valueColumn', {
+          defaultMessage: 'Value',
+        }),
+        actions: false,
+        visibleCellActions: 3,
+        cellActions: fieldValueCellActions,
+      },
+    ],
+    [fieldCellActions, fieldValueCellActions]
+  );
 
-  return (
-    <EuiDataGrid
-      aria-label={i18n.translate('unifiedDocViewer.docView.attributes.table.ariaLabel', {
-        defaultMessage: 'Attributes table',
-      })}
-      columns={gridColumns}
-      rowCount={rows.length}
-      renderCellValue={({ rowIndex, columnId }) => (
+  const renderCellValue: EuiDataGridProps['renderCellValue'] = useCallback(
+    ({ rowIndex, columnId }) => {
+      return (
         <TableCell
           searchTerm={searchTerm}
           rows={rows}
@@ -121,22 +135,24 @@ export const AttributesTable = ({
           columnId={columnId}
           isDetails={false}
         />
-      )}
-      columnVisibility={{
-        visibleColumns: ['name', 'value'],
-        setVisibleColumns: () => null,
-      }}
-      gridStyle={{
-        border: 'horizontal',
-        stripes: true,
-        rowHover: 'highlight',
-        header: 'underline',
-        cellPadding: 'm',
-        fontSize: 's',
-      }}
-      rowHeightsOptions={{ defaultHeight: 'auto' }}
-      inMemory={{ level: 'enhancements' }}
-      toolbarVisibility={false}
-    />
+      );
+    },
+    [rows, searchTerm]
+  );
+
+  return (
+    <div>
+      <EuiDataGrid
+        aria-label={i18n.translate('unifiedDocViewer.docView.attributes.table.ariaLabel', {
+          defaultMessage: 'Attributes table',
+        })}
+        columns={gridColumns}
+        rowCount={rows.length}
+        renderCellValue={renderCellValue}
+        {...GRID_PROPS}
+        inMemory={{ level: 'enhancements' }}
+        toolbarVisibility={false}
+      />
+    </div>
   );
 };

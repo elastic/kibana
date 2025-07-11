@@ -45,7 +45,7 @@ export function FieldName({
   scripted = false,
   highlight = '',
 }: Props) {
-  const styles = useMemoCss(componentStyles);
+  // const styles = useMemoCss(componentStyles);
 
   const typeName = getFieldTypeName(fieldType);
   const fieldMappingDisplayName = fieldMapping?.displayName ? fieldMapping.displayName : fieldName;
@@ -54,9 +54,8 @@ export function FieldName({
   const tooltip = fieldDisplayName !== fieldName ? `${fieldDisplayName} (${fieldName})` : fieldName;
   const subTypeMulti = fieldMapping && getDataViewFieldSubtypeMulti(fieldMapping.spec);
   const isMultiField = !!subTypeMulti?.multi;
-
   return (
-    <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
+    <EuiFlexGroup responsive={false} gutterSize="s" alignItems="flexStart">
       <EuiFlexItem grow={false}>
         <EuiFlexGroup
           gutterSize="s"
@@ -64,7 +63,7 @@ export function FieldName({
           alignItems="center"
           direction="row"
           wrap={false}
-          css={styles.fieldIconContainer}
+          // css={styles.fieldIconContainer}
         >
           <EuiFlexItem grow={false}>
             <FieldIcon type={fieldType!} label={typeName} scripted={scripted} {...fieldIconProps} />
@@ -76,7 +75,7 @@ export function FieldName({
         <EuiFlexGroup gutterSize="none" responsive={false} alignItems="center" direction="row" wrap>
           <EuiFlexItem
             className="kbnDocViewer__fieldName eui-textBreakAll"
-            css={styles.fieldName}
+            // css={styles.fieldName}
             grow={false}
             data-test-subj={`tableDocViewRow-${fieldName}-name`}
           >
@@ -103,7 +102,7 @@ export function FieldName({
             >
               <EuiBadge
                 title=""
-                css={styles.multiFieldBadge}
+                // css={styles.multiFieldBadge}
                 color="default"
                 data-test-subj={`tableDocViewRow-${fieldName}-multifieldBadge`}
               >
@@ -123,12 +122,18 @@ export function FieldName({
 const componentStyles = {
   fieldIconContainer: ({ euiTheme }: UseEuiTheme) =>
     css({
+      paddingTop: `calc(${euiTheme.size.xs} * 1.5)`,
       lineHeight: euiTheme.font.lineHeightMultiplier,
     }),
   fieldName: (themeContext: UseEuiTheme) => {
+    const { euiTheme } = themeContext;
     const { fontSize } = euiFontSize(themeContext, 's');
 
     return css({
+      padding: euiTheme.size.xs,
+      paddingLeft: 0,
+      lineHeight: euiTheme.font.lineHeightMultiplier,
+
       '.euiDataGridRowCell__popover &': {
         fontSize,
       },
