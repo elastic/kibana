@@ -329,7 +329,7 @@ export const MisconfigurationFindingsDetailsTable = memo(
             sorting={sorting}
             loading={isLoading}
           />
-       </EuiPanel>
+        </EuiPanel>
       </>
     );
   }
