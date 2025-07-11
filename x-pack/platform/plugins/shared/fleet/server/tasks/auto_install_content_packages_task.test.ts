@@ -138,6 +138,13 @@ describe('AutoInstallContentPackagesTask', () => {
             datasets: [{ name: 'system.cpu' }, { name: 'system.memory' }],
           },
         } as any,
+        {
+          name: 'test_package',
+          version: '1.1.0',
+          discovery: {
+            datasets: [{ name: 'system.test' }],
+          },
+        } as any,
       ]);
     });
 
@@ -161,7 +168,36 @@ describe('AutoInstallContentPackagesTask', () => {
         useStreaming: true,
         automaticInstall: true,
       });
+      expect(packageClientMock.installPackage).toHaveBeenCalledTimes(2);
+      expect(esClient.esql.query).toHaveBeenCalledWith({
+        query:
+          'FROM logs-*,metrics-*,traces-* | KEEP @timestamp, data_stream.dataset | WHERE @timestamp > NOW() - 10 minutes | STATS COUNT(*) BY data_stream.dataset | LIMIT 100 ',
+      });
+    });
+
+    it('should install content packages and filter out installed datasets', async () => {
+      mockGetInstalledPackages.mockResolvedValue({
+        items: [
+          {
+            name: 'test_package',
+            version: '1.1.0',
+          },
+        ],
+      });
+
+      await runTask();
+
+      expect(packageClientMock.installPackage).toHaveBeenCalledWith({
+        pkgName: 'kubernetes_otel',
+        pkgVersion: '1.1.0',
+        useStreaming: true,
+        automaticInstall: true,
+      });
       expect(packageClientMock.installPackage).toHaveBeenCalledTimes(1);
+      expect(esClient.esql.query).toHaveBeenCalledWith({
+        query:
+          'FROM logs-*,metrics-*,traces-* | KEEP @timestamp, data_stream.dataset | WHERE @timestamp > NOW() - 10 minutes | STATS COUNT(*) BY data_stream.dataset | LIMIT 100 | WHERE data_stream.dataset NOT IN ("system.test")',
+      });
     });
 
     it('should not call registry if cached', async () => {
@@ -203,12 +239,17 @@ describe('AutoInstallContentPackagesTask', () => {
             name: 'kubernetes_otel',
             version: '1.1.0',
           },
+          {
+            name: 'test_package',
+            version: '1.1.0',
+          },
         ],
       });
 
       await runTask();
 
       expect(packageClientMock.installPackage).not.toHaveBeenCalled();
+      expect(esClient.esql.query).not.toHaveBeenCalled();
     });
   });
 });

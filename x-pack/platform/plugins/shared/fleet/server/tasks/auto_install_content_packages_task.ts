@@ -296,14 +296,9 @@ export class AutoInstallContentPackagesTask {
             .join(',')})`
         : '';
     const response = await esClient.esql.query({
-      query: `FROM logs-*,metrics-*,traces-* | STATS COUNT(*) BY data_stream.dataset | LIMIT 100 ${whereClause}`,
-      filter: {
-        range: {
-          '@timestamp': {
-            gte: `now-${this.taskInterval}`,
-          },
-        },
-      },
+      query: `FROM logs-*,metrics-*,traces-* | KEEP @timestamp, data_stream.dataset | WHERE @timestamp > NOW() - ${this.intervalToEsql(
+        this.taskInterval
+      )} | STATS COUNT(*) BY data_stream.dataset | LIMIT 100 ${whereClause}`,
     });
     this.logger.debug(`[AutoInstallContentPackagesTask] ESQL query took: ${response.took}ms`);
 
@@ -312,6 +307,12 @@ export class AutoInstallContentPackagesTask {
       `[AutoInstallContentPackagesTask] Found datasets with data: ${datasetsWithData.join(', ')}`
     );
     return datasetsWithData;
+  }
+
+  private intervalToEsql(interval: string): string {
+    const value = parseInt(interval, 10);
+    const unit = interval.includes('h') ? 'hours' : 'minutes';
+    return `${value} ${unit}`;
   }
 
   private async getContentPackagesDiscoveryMap(): Promise<DiscoveryMap> {
