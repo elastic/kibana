@@ -117,6 +117,8 @@ export interface InputHistoryItem {
   input: string;
   /** The display value in the UI's input history popup */
   display: string;
+  /** The state of arguments that utilize a value selector component */
+  argState: Record<string, ArgSelectorState[]>;
 }
 
 export interface CommandHistoryItem {

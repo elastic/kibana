@@ -471,7 +471,6 @@ export const getEndpointConsoleCommands = ({
           allowMultiples: false,
           about: CONSOLE_COMMANDS.upload.args.file.about,
           mustHaveValue: 'truthy',
-          selectorEmptyDefaultValue: true,
           SelectorComponent: ArgumentFileSelector,
         },
         overwrite: {
@@ -701,6 +700,7 @@ const adjustCommandsForCrowdstrike = ({
               about: CROWDSTRIKE_CONSOLE_COMMANDS.runscript.args.cloudFile.about,
               mustHaveValue: 'truthy',
               exclusiveOr: true,
+              selectorStringDefaultValue: true,
               SelectorComponent: CustomScriptSelector,
             },
             CommandLine: {
@@ -768,6 +768,7 @@ const adjustCommandsForMicrosoftDefenderEndpoint = ({
               allowMultiples: false,
               about: MS_DEFENDER_ENDPOINT_CONSOLE_COMMANDS.runscript.args.scriptName.about,
               mustHaveValue: 'truthy',
+              selectorStringDefaultValue: true,
               SelectorComponent: CustomScriptSelector,
             },
             Args: {

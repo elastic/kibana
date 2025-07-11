@@ -71,7 +71,7 @@ export interface CommandArgDefinition {
   /**
    * If defined, the selector will use `true` as the default value which results in empty array as args value
    */
-  selectorEmptyDefaultValue?: boolean;
+  selectorStringDefaultValue?: boolean;
 }
 
 /** List of arguments for a Command */
@@ -285,6 +285,18 @@ export interface CommandArgumentValueSelectorProps<TSelection = any, TState = an
    * @param newData
    */
   onChange: (newData: ArgSelectorState<TState>) => void;
+
+  /**
+   * The full Command object containing command definition, input, and parsed arguments.
+   * This provides context that selector components can use to access command metadata.
+   */
+  command: Command;
+
+  /**
+   * Callback to request focus back to the console input after selector operations.
+   * Should be called when the selector component closes or completes its interaction.
+   */
+  requestFocus?: () => void;
 }
 
 /**

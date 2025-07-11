@@ -73,10 +73,10 @@ const parseInputString = (
           response.args[argName].push(newArgValue);
         } else {
           // Argument has no value (bare flag)
-          // Check if this argument has selectorEmptyDefaultValue set to true
+          // Check if this argument has selectorStringDefaultValue set to true
           const argDef = commandDef?.args?.[argName] as CommandArgDefinition | undefined;
-          const useEmptyValue = argDef?.selectorEmptyDefaultValue === true;
-          response.args[argName].push(useEmptyValue ? true : '');
+          const useStringValue = argDef?.selectorStringDefaultValue === true;
+          response.args[argName].push(useStringValue ? '' : true);
         }
       }
     }
@@ -92,7 +92,7 @@ class ParsedCommand implements ParsedCommandInterface {
 
   constructor(
     public readonly input: string,
-    private readonly commandDefinitions: CommandDefinition[] = []
+    public readonly commandDefinitions: CommandDefinition[] = []
   ) {
     const parseInput = parseInputString(input, commandDefinitions);
     this.name = parseInput.name;

@@ -13,6 +13,7 @@ import {
   detectAndPreProcessPastedCommand,
 } from '../../../service/parsed_command_input';
 import type {
+  ArgSelectorState,
   ConsoleDataAction,
   ConsoleDataState,
   ConsoleStoreReducer,
@@ -82,7 +83,7 @@ export const handleInputAreaState: ConsoleStoreReducer<InputAreaStateAction> = (
               display: payload.display ?? payload.command,
               // We only store the `value` and `valueText`. `store` property of each argument's state
               // is component instance specific data.
-              argState: Object.entries(payload.argState).reduce(
+              argState: Object.entries(payload.argState || {}).reduce(
                 (acc, [argName, argValuesState]) => {
                   acc[argName] = argValuesState.map(({ value, valueText }) => {
                     return { value, valueText };
@@ -90,7 +91,7 @@ export const handleInputAreaState: ConsoleStoreReducer<InputAreaStateAction> = (
 
                   return acc;
                 },
-                {}
+                {} as Record<string, ArgSelectorState[]>
               ),
             },
             ...state.input.history.slice(0, 99),
@@ -176,7 +177,7 @@ export const handleInputAreaState: ConsoleStoreReducer<InputAreaStateAction> = (
                 argsWithValueSelectors[argName] = argDef;
 
                 // Clear selector argument values for clean commands (e.g., from history)
-                // This ensures specific selectors start fresh instead of showing old values - when command argument contains selectorEmptyDefaultValue set to true
+                // This ensures specific selectors start fresh instead of showing old values - when command argument contains selectorStringDefaultValue set to true
                 if (parsedInput.hasArg(argName) && parsedInput.args[argName]?.includes(true)) {
                   argState[argName] = [];
                 }

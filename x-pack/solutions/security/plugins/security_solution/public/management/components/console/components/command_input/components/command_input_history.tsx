@@ -99,7 +99,7 @@ export const CommandInputHistory = memo(() => {
           payload: {
             leftOfCursorText: (selected.data as InputHistoryItem).input,
             rightOfCursorText: '',
-            argState: selected.data.argState,
+            argState: (selected.data as InputHistoryItem).argState,
           },
         });
       }
