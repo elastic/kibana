@@ -68,11 +68,8 @@ export async function runCheckFtrConfigsCli() {
           return false;
         }
 
-        // scout playwright config files
-        if (
-          file.match(/\/*playwright*.config.ts$/) ||
-          file.match(/\/*playwright*.api.config.ts$/)
-        ) {
+        // playwright config files
+        if (file.match(/\/*playwright*.config.ts$/)) {
           return false;
         }
 
