@@ -58,7 +58,7 @@ export const getSecurityV4BaseKibanaFeature = ({
     all: {
       app: [APP_ID, CLOUD_POSTURE_APP_ID, 'kibana'],
       catalogue: [APP_ID],
-      api: [APP_ID, 'rac', 'lists-all', 'lists-read', 'lists-summary'],
+      api: [APP_ID, 'rac', 'lists-summary'],
       savedObject: {
         all: [...savedObjects],
         read: [],
@@ -71,7 +71,7 @@ export const getSecurityV4BaseKibanaFeature = ({
     read: {
       app: [APP_ID, CLOUD_POSTURE_APP_ID, 'kibana'],
       catalogue: [APP_ID],
-      api: [APP_ID, 'rac', 'lists-read'],
+      api: [APP_ID, 'rac'],
       savedObject: {
         all: [],
         read: [...savedObjects],

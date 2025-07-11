@@ -42,18 +42,18 @@ export const getExceptionsSubFeaturesMapV3 = (savedObjects) => {
         privileges: [
           {
             id: `${EXCEPTIONS_FEATURE_ID}_all`,
-            includeIn: 'none',
+            includeIn: 'all',
             name: TRANSLATIONS.all,
             savedObject: {
               all: savedObjects,
               read: savedObjects,
             },
             ui: ['read', 'crud'],
-            api: ['exceptions_read', 'exceptions_write'],
+            api: ['exceptions_read', 'exceptions_write', 'lists-all', 'lists-read'],
           },
           {
             id: `${EXCEPTIONS_FEATURE_ID}_read`,
-            includeIn: 'none',
+            includeIn: 'read',
             name: TRANSLATIONS.read,
             catalogue: [APP_ID],
             savedObject: {
@@ -61,7 +61,7 @@ export const getExceptionsSubFeaturesMapV3 = (savedObjects) => {
               read: savedObjects,
             },
             ui: ['read'],
-            api: ['exceptions_read'],
+            api: ['exceptions_read', 'lists-read'],
           },
         ],
       },
