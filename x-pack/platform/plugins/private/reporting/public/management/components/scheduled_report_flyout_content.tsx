@@ -205,7 +205,7 @@ export const ScheduledReportFlyoutContent = ({
     form,
     watch: ['reportTypeId', 'startDate', 'timezone', 'sendByEmail'],
   });
-  const now = useMemo(() => moment().tz(timezone ?? defaultTimezone), [defaultTimezone, timezone]);
+  const now = useMemo(() => moment().set({ second: 0, millisecond: 0 }), []);
   const defaultStartDateValue = useMemo(() => now.toISOString(), [now]);
 
   useEffect(() => {
@@ -331,7 +331,7 @@ export const ScheduledReportFlyoutContent = ({
                       validator: emptyField(i18n.SCHEDULED_REPORT_FORM_START_DATE_REQUIRED_MESSAGE),
                     },
                     {
-                      validator: getStartDateValidator(now),
+                      validator: getStartDateValidator(now, timezone ?? defaultTimezone),
                     },
                   ],
                 }}
