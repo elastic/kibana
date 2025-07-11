@@ -14,11 +14,12 @@ import {
   EuiSelect,
   EuiSpacer,
 } from '@elastic/eui';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useNavigation } from '@kbn/security-solution-navigation';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
+import { encode } from '@kbn/rison';
 import { useGlobalTime } from '../../../../../common/containers/use_global_time';
 import { useQueryToggle } from '../../../../../common/containers/query_toggle';
 import { LinkAnchor } from '../../../../../common/components/links';
@@ -69,6 +70,37 @@ export const UserActivityPrivilegedUsersPanel: React.FC<{
   const toggleOptions = useToggleOptions();
   const { getAppUrl } = useNavigation();
 
+  const { discoverUrl, hasUrlError } = useMemo(() => {
+    if (!generateTableQuery) return { discoverUrl: '', hasUrlError: false };
+
+    const query = generateTableQuery('@timestamp', 'DESC', 100);
+    const appState = {
+      query: {
+        esql: query,
+      },
+    };
+
+    try {
+      const encodedAppState = encode(appState);
+      return {
+        discoverUrl: getAppUrl({
+          appId: 'discover',
+          path: `#/?_a=${encodedAppState}`,
+        }),
+        hasUrlError: false,
+      };
+    } catch (error) {
+      // Return a fallback URL that opens Discover without the pre-filled query
+      return {
+        discoverUrl: getAppUrl({
+          appId: 'discover',
+          path: '#/',
+        }),
+        hasUrlError: true,
+      };
+    }
+  }, [generateTableQuery, getAppUrl]);
+
   return (
     <EuiPanel hasBorder hasShadow={false} data-test-subj="severity-level-panel">
       <HeaderSection
@@ -81,16 +113,16 @@ export const UserActivityPrivilegedUsersPanel: React.FC<{
         outerDirection="column"
         hideSubtitle
       >
-        {generateTableQuery && (
+        {generateTableQuery && discoverUrl && (
           <LinkAnchor
-            href={getAppUrl({
-              appId: 'discover',
-              path: `#/?&_a=(query:(esql:'${generateTableQuery('@timestamp', 'DESC', 100)}'))`,
-            })}
+            href={discoverUrl}
+            title={hasUrlError ? 'Query could not be pre-filled due to encoding error' : undefined}
           >
             <FormattedMessage
               id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.userActivity.linkDescription"
-              defaultMessage="View all events"
+              defaultMessage={
+                hasUrlError ? 'Open Discover (query not pre-filled)' : 'View all events'
+              }
             />
           </LinkAnchor>
         )}
