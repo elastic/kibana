@@ -11,8 +11,9 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { BehaviorSubject, merge } from 'rxjs';
 import { apiPublishesESQLVariables } from '@kbn/esql-types';
-import { apiHasParentApi } from '@kbn/presentation-publishing';
+import { apiHasParentApi, initializeStateManager } from '@kbn/presentation-publishing';
 import { initializeUnsavedChanges, tracksOverlays } from '@kbn/presentation-containers';
+import { OptionsListSelection } from '../../../common/options_list';
 import { ESQL_CONTROL } from '../../../common';
 import type { ESQLControlApi, ESQLControlState } from './types';
 import { ControlFactory } from '../types';
@@ -22,9 +23,12 @@ import {
   initializeDefaultControlManager,
 } from '../default_control_manager';
 import { initializeESQLControlSelections, selectionComparators } from './esql_control_selections';
-import { OptionsListControlContextProvider } from '../data_controls/options_list_control/options_list_context_provider';
+import { OptionsListControlContext } from '../data_controls/options_list_control/options_list_context_provider';
 import { OptionsListControl } from '../data_controls/options_list_control/components/options_list_control';
-import { PartialOptionsListComponentApi } from '../data_controls/options_list_control/types';
+import {
+  OptionsListComponentApi,
+  OptionsListESQLUnusedState,
+} from '../data_controls/options_list_control/types';
 
 const displayName = i18n.translate('controls.esqlValuesControl.displayName', {
   defaultMessage: 'Static values list',
@@ -118,7 +122,24 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
         serializeState,
       });
 
-      const componentApi: PartialOptionsListComponentApi = {
+      const componentStaticState = {
+        singleSelect: true,
+        exclude: false,
+        existsSelected: false,
+        requestSize: 0,
+        dataLoading: false,
+        sort: undefined,
+        runPastTimeout: false,
+        invalidSelections: new Set<OptionsListSelection>(),
+        fieldName: initialState.variableName,
+      };
+      // Generate a state manager for all the props this control isn't expected to use, so the getters and setters are available
+      const componentStaticStateManager = initializeStateManager<OptionsListESQLUnusedState>(
+        componentStaticState,
+        componentStaticState
+      );
+
+      const componentApi: OptionsListComponentApi = {
         ...selections.internalApi,
         uuid,
         makeSelection(key?: string) {
@@ -127,28 +148,30 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
         allowExpensiveQueries$: api.parentApi.allowExpensiveQueries$,
         defaultTitle$: api.defaultTitle$,
         // Pass no-ops and default values for all of the features of OptionsList that ES|QL controls don't currently use
+        ...componentStaticStateManager.api,
         deselectOption: () => {},
         selectAll: () => {},
         deselectAll: () => {},
         loadMoreSubject: new BehaviorSubject<void>(undefined),
         fieldFormatter: new BehaviorSubject((v: string) => v),
-        fieldName$: new BehaviorSubject(initialState.variableName),
       };
 
       return {
         api,
         Component: ({ className: controlPanelClassName }) => (
-          <OptionsListControlContextProvider
-            componentApi={componentApi}
-            hideExclude
-            hideExists
-            hideSort
-            disableInvalidSelections
-            disableLoadSuggestions
-            disableMultiSelect
+          <OptionsListControlContext.Provider
+            value={{
+              componentApi,
+              displaySettings: {
+                hideActionBar: false,
+                hideExclude: true,
+                hideExists: true,
+                hideSort: true,
+              },
+            }}
           >
             <OptionsListControl controlPanelClassName={controlPanelClassName} />
-          </OptionsListControlContextProvider>
+          </OptionsListControlContext.Provider>
         ),
       };
     },

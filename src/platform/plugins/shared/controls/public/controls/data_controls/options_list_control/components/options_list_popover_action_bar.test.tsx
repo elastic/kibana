@@ -11,7 +11,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { take } from 'lodash';
 import { getOptionsListContextMock } from '../../mocks/api_mocks';
-import { OptionsListControlContextProvider } from '../options_list_context_provider';
+import { OptionsListControlContext } from '../options_list_context_provider';
 import type { OptionsListComponentApi } from '../types';
 import { OptionsListPopoverActionBar } from './options_list_popover_action_bar';
 import { OptionsListDisplaySettings } from '../../../../../common/options_list';
@@ -42,12 +42,17 @@ const renderComponent = ({
   showOnlySelected?: boolean;
 }) => {
   return render(
-    <OptionsListControlContextProvider componentApi={componentApi} {...displaySettings}>
+    <OptionsListControlContext.Provider
+      value={{
+        componentApi,
+        displaySettings,
+      }}
+    >
       <OptionsListPopoverActionBar
         showOnlySelected={showOnlySelected ?? false}
         setShowOnlySelected={() => {}}
       />
-    </OptionsListControlContextProvider>
+    </OptionsListControlContext.Provider>
   );
 };
 
@@ -58,8 +63,8 @@ const getSearchInput = () => screen.getByRole('searchbox', { name: /Filter sugge
 describe('Options list popover', () => {
   test('displays search input', async () => {
     const contextMock = getOptionsListContextMock();
-    contextMock.testOnlyMethods.setTotalCardinality(allOptions.length);
-    contextMock.testOnlyMethods.setAvailableOptions(take(allOptions, 5));
+    contextMock.componentApi.setTotalCardinality(allOptions.length);
+    contextMock.componentApi.setAvailableOptions(take(allOptions, 5));
     contextMock.componentApi.setSearchString('moo');
     renderComponent(contextMock);
 
@@ -69,8 +74,8 @@ describe('Options list popover', () => {
 
   test('displays total cardinality for available options', async () => {
     const contextMock = getOptionsListContextMock();
-    contextMock.testOnlyMethods.setTotalCardinality(allOptions.length);
-    contextMock.testOnlyMethods.setAvailableOptions(take(allOptions, 5));
+    contextMock.componentApi.setTotalCardinality(allOptions.length);
+    contextMock.componentApi.setAvailableOptions(take(allOptions, 5));
     renderComponent(contextMock);
 
     expect(screen.getByTestId('optionsList-cardinality-label')).toHaveTextContent(
@@ -80,8 +85,8 @@ describe('Options list popover', () => {
 
   test('displays "Select all" checkbox next to total cardinality', async () => {
     const contextMock = getOptionsListContextMock();
-    contextMock.testOnlyMethods.setTotalCardinality(80);
-    contextMock.testOnlyMethods.setAvailableOptions(take(allOptions, 10));
+    contextMock.componentApi.setTotalCardinality(80);
+    contextMock.componentApi.setAvailableOptions(take(allOptions, 10));
     renderComponent(contextMock);
 
     expect(getSelectAllCheckbox()).toBeEnabled();
@@ -90,9 +95,9 @@ describe('Options list popover', () => {
 
   test('hides "Select all" checkbox if the control only allows single selections', async () => {
     const contextMock = getOptionsListContextMock();
-    contextMock.testOnlyMethods.setTotalCardinality(80);
-    contextMock.testOnlyMethods.setAvailableOptions(take(allOptions, 10));
-    contextMock.testOnlyMethods.setSingleSelect(true);
+    contextMock.componentApi.setTotalCardinality(80);
+    contextMock.componentApi.setAvailableOptions(take(allOptions, 10));
+    contextMock.componentApi.setSingleSelect(true);
     renderComponent(contextMock);
 
     expect(getSelectAllCheckbox()).not.toBeInTheDocument();
@@ -100,9 +105,9 @@ describe('Options list popover', () => {
 
   test('Select all is checked when all available options are selected ', async () => {
     const contextMock = getOptionsListContextMock();
-    contextMock.testOnlyMethods.setTotalCardinality(80);
-    contextMock.testOnlyMethods.setAvailableOptions([{ value: 'moo', docCount: 1 }]);
-    contextMock.testOnlyMethods.setSelectedOptions(['moo']);
+    contextMock.componentApi.setTotalCardinality(80);
+    contextMock.componentApi.setAvailableOptions([{ value: 'moo', docCount: 1 }]);
+    contextMock.componentApi.setSelectedOptions(['moo']);
     renderComponent(contextMock);
 
     expect(getSelectAllCheckbox()).toBeEnabled();
@@ -111,8 +116,8 @@ describe('Options list popover', () => {
 
   test('bulk selections are disabled when there are more than 100 available options', async () => {
     const contextMock = getOptionsListContextMock();
-    contextMock.testOnlyMethods.setTotalCardinality(MAX_OPTIONS_LIST_BULK_SELECT_SIZE + 1);
-    contextMock.testOnlyMethods.setAvailableOptions(take(allOptions, 10));
+    contextMock.componentApi.setTotalCardinality(MAX_OPTIONS_LIST_BULK_SELECT_SIZE + 1);
+    contextMock.componentApi.setAvailableOptions(take(allOptions, 10));
     renderComponent(contextMock);
 
     expect(getSelectAllCheckbox()).toBeDisabled();
@@ -120,8 +125,8 @@ describe('Options list popover', () => {
 
   test('bulk selections are disabled when there are no available options', async () => {
     const contextMock = getOptionsListContextMock();
-    contextMock.testOnlyMethods.setTotalCardinality(0);
-    contextMock.testOnlyMethods.setAvailableOptions([]);
+    contextMock.componentApi.setTotalCardinality(0);
+    contextMock.componentApi.setAvailableOptions([]);
     renderComponent(contextMock);
 
     expect(getSelectAllCheckbox()).toBeDisabled();
@@ -129,8 +134,8 @@ describe('Options list popover', () => {
 
   test('bulk selections are disabled when showOnlySelected is true', async () => {
     const contextMock = getOptionsListContextMock();
-    contextMock.testOnlyMethods.setTotalCardinality(0);
-    contextMock.testOnlyMethods.setAvailableOptions([]);
+    contextMock.componentApi.setTotalCardinality(0);
+    contextMock.componentApi.setAvailableOptions([]);
     renderComponent({ ...contextMock, showOnlySelected: true });
 
     expect(getSelectAllCheckbox()).toBeDisabled();
