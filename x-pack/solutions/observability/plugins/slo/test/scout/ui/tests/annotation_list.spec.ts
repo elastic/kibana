@@ -9,10 +9,9 @@ import { expect } from '@kbn/scout-oblt';
 import { test } from '../fixtures';
 
 test.describe('Annotations List', { tag: ['@ess'] }, () => {
-  test.beforeAll(async ({ sloData, annotationsData }) => {
+  test.beforeAll(async ({ sloData }) => {
     await sloData.generateSloData();
     await sloData.addSLO();
-    await annotationsData.deleteAnnotationsIndex();
   });
 
   test.beforeEach(async ({ pageObjects, browserAuth }) => {
