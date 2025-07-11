@@ -348,18 +348,7 @@ export default function Expressions(props: Props) {
     }
   }, [metadata, setRuleParams]);
 
-  if (paramsError) {
-    return (
-      <>
-        <EuiCallOut color="danger" iconType="warning" data-test-subj="thresholdRuleExpressionError">
-          <p>{paramsError.message}</p>
-        </EuiCallOut>
-        <EuiSpacer size={'m'} />
-      </>
-    );
-  }
-
-  if (!searchSource) {
+  if (!paramsError && !searchSource) {
     return (
       <>
         <EuiEmptyPrompt title={<EuiLoadingSpinner size="xl" />} />
@@ -374,6 +363,7 @@ export default function Expressions(props: Props) {
       defaultMessage: 'Search for observability data… (e.g. host.name:host-1)',
     }
   );
+
   return (
     <>
       {!!paramsWarning && (
@@ -402,6 +392,17 @@ export default function Expressions(props: Props) {
           />
         </h5>
       </EuiTitle>
+      {paramsError && (
+        <EuiCallOut color="danger" iconType="warning" data-test-subj="thresholdRuleExpressionError">
+          <p>
+            {paramsError.message}
+            <br />
+            {i18n.translate('xpack.observability.customThreshold.rule.alertFlyout.error.message', {
+              defaultMessage: 'Select a new data view or create one below.',
+            })}
+          </p>
+        </EuiCallOut>
+      )}
       <EuiSpacer size="s" />
       <DataViewSelectPopover
         dependencies={{ dataViews, dataViewEditor }}

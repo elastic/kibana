@@ -44,15 +44,11 @@ export class CharacterNotAllowedInField extends KbnError {
 export class SavedObjectNotFound extends KbnError {
   public savedObjectType: string;
   public savedObjectId?: string;
-  constructor(type: string, id?: string, link?: string, customMessage?: string) {
+  constructor(type: string, id?: string) {
     const idMsg = id ? ` (id: ${id})` : '';
-    let message = `Could not locate that ${type}${idMsg}`;
+    const message = `Could not locate that ${type}${idMsg}`;
 
-    if (link) {
-      message += `, [click here to re-create it](${link})`;
-    }
-
-    super(customMessage || message);
+    super(message);
 
     this.savedObjectType = type;
     this.savedObjectId = id;
