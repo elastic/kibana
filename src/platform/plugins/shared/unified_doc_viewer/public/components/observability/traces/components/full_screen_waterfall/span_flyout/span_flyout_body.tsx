@@ -12,6 +12,7 @@ import { DataTableRecord } from '@kbn/discover-utils';
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
+import { KibanaSectionErrorBoundary } from '@kbn/shared-ux-error-boundary';
 import SpanOverview from '../../../doc_viewer_span_overview';
 import TransactionOverview from '../../../doc_viewer_transaction_overview';
 import DocViewerTable from '../../../../../doc_viewer_table';
@@ -83,24 +84,32 @@ export const SpanFlyoutBody = ({ hit, loading, dataView }: SpanFlyoutProps) => {
         <>
           <EuiTabs size="s">{renderTabs()}</EuiTabs>
           <EuiSkeletonText isLoading={loading}>
-            {selectedTabId === tabIds.OVERVIEW &&
-              (isSpan ? (
-                <SpanOverview
-                  hit={hit}
-                  indexes={indexes}
-                  showWaterfall={false}
-                  showActions={false}
-                  dataView={dataView}
-                />
-              ) : (
-                <TransactionOverview
-                  hit={hit}
-                  indexes={indexes}
-                  showWaterfall={false}
-                  showActions={false}
-                  dataView={dataView}
-                />
-              ))}
+            {selectedTabId === tabIds.OVERVIEW && (
+              <KibanaSectionErrorBoundary
+                sectionName={i18n.translate(
+                  'unifiedDocViewer.observability.traces.spanFlyout.overview.kibanaSectionErrorBoundary.sectionName',
+                  { defaultMessage: 'Overview' }
+                )}
+              >
+                {isSpan ? (
+                  <SpanOverview
+                    hit={hit}
+                    indexes={indexes}
+                    showWaterfall={false}
+                    showActions={false}
+                    dataView={dataView}
+                  />
+                ) : (
+                  <TransactionOverview
+                    hit={hit}
+                    indexes={indexes}
+                    showWaterfall={false}
+                    showActions={false}
+                    dataView={dataView}
+                  />
+                )}
+              </KibanaSectionErrorBoundary>
+            )}
 
             {selectedTabId === tabIds.TABLE && <DocViewerTable hit={hit} dataView={dataView} />}
 
