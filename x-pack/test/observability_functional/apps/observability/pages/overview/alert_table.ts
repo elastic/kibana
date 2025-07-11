@@ -18,29 +18,41 @@ export default ({ getService }: FtrProviderContext) => {
 
     const observability = getService('observability');
     const retry = getService('retry');
+    const rulesService = getService('rules');
 
-    before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');
-    });
-
-    after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/observability/alerts');
-    });
-
-    describe('Without alerts', function () {
+    describe('Without data', function () {
       it('navigate and open alerts section', async () => {
         await observability.overview.common.navigateToOverviewPageWithoutAlerts();
-        await observability.overview.common.openAlertsSectionAndWaitToAppear();
-      });
-
-      it('should show no data message', async () => {
-        await retry.try(async () => {
-          await observability.overview.common.getAlertsTableNoDataOrFail();
-        });
+        await observability.overview.common.waitForOverviewNoDataPrompt();
       });
     });
 
-    describe('With alerts', function () {
+    describe('With data', function () {
+      before(async () => {
+        await rulesService.api.createRule({
+          name: 'Test',
+          consumer: 'logs',
+          ruleTypeId: '.es-query',
+          params: {
+            size: 100,
+            thresholdComparator: '>',
+            threshold: [-1],
+            index: ['alert-test-data'],
+            timeField: 'date',
+            esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
+            timeWindowSize: 20,
+            timeWindowUnit: 's',
+          },
+          schedule: { interval: '1m' },
+        });
+        await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');
+      });
+
+      after(async () => {
+        await rulesService.api.deleteAllRules();
+        await esArchiver.unload('x-pack/test/functional/es_archives/observability/alerts');
+      });
+
       it('navigate and open alerts section', async () => {
         await observability.overview.common.navigateToOverviewPageWithAlerts();
         await observability.overview.common.openAlertsSectionAndWaitToAppear();
