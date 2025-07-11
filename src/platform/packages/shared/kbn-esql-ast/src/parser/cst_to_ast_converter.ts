@@ -494,8 +494,8 @@ export class CstToAstConverter {
 
   // ----------------------------------------------------------------------- TS
 
-  private fromTimeseriesCommand(ctx: cst.TimeSeriesCommandContext): ast.ESQLAstTimeseriesCommand {
-    const command = this.createCommand('ts', ctx) as ast.ESQLAstTimeseriesCommand;
+  private fromTimeseriesCommand(ctx: cst.TimeSeriesCommandContext): ast.ESQLCommand<'ts'> {
+    const command = this.createCommand('ts', ctx);
     const indexPatternCtx = ctx.indexPatternAndMetadataFields();
     const metadataCtx = indexPatternCtx.metadata();
     const sources = indexPatternCtx

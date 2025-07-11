@@ -7,8 +7,7 @@
 
 import { FtrProviderContext } from '../ftr_provider_context';
 
-export function InfraLogsPageProvider({ getPageObjects, getService }: FtrProviderContext) {
-  const testSubjects = getService('testSubjects');
+export function InfraLogsPageProvider({ getPageObjects }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common']);
 
   return {
@@ -23,10 +22,6 @@ export function InfraLogsPageProvider({ getPageObjects, getService }: FtrProvide
         '',
         { ensureCurrentUrl: false } // Test runner struggles with `rison-node` escaped values
       );
-    },
-
-    async getLogStream() {
-      return await testSubjects.find('logStream');
     },
   };
 }
