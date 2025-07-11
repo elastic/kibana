@@ -3885,7 +3885,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/alerting-fixture-plugin@link:x-pack/test/functional_with_es_ssl/plugins/alerts":
+"@kbn/alerting-fixture-plugin@link:x-pack/platform/test/functional_with_es_ssl/plugins/alerts":
   version "0.0.0"
   uid ""
 
@@ -4273,11 +4273,19 @@
   version "0.0.0"
   uid ""
 
+"@kbn/controls-constants@link:src/platform/packages/shared/controls/controls-constants":
+  version "0.0.0"
+  uid ""
+
 "@kbn/controls-example-plugin@link:examples/controls_example":
   version "0.0.0"
   uid ""
 
 "@kbn/controls-plugin@link:src/platform/plugins/shared/controls":
+  version "0.0.0"
+  uid ""
+
+"@kbn/controls-schemas@link:src/platform/packages/shared/controls/controls-schemas":
   version "0.0.0"
   uid ""
 
@@ -5289,6 +5297,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/data-service-server@link:src/platform/packages/shared/kbn-data-service-server":
+  version "0.0.0"
+  uid ""
+
 "@kbn/data-service@link:src/platform/packages/shared/kbn-data-service":
   version "0.0.0"
   uid ""
@@ -5849,7 +5861,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/functional-with-es-ssl-cases-test-plugin@link:x-pack/test/functional_with_es_ssl/plugins/cases":
+"@kbn/functional-with-es-ssl-cases-test-plugin@link:x-pack/platform/test/functional_with_es_ssl/plugins/cases":
   version "0.0.0"
   uid ""
 
