@@ -5,54 +5,27 @@
  * 2.0.
  */
 
-import React, { useCallback, useRef, useEffect, useState } from 'react';
-import { css } from '@emotion/css';
-import { EuiFlexItem, EuiPanel, useEuiTheme, euiScrollBarStyles } from '@elastic/eui';
-import { oneChatDefaultAgentId } from '@kbn/onechat-common';
-import { useChat } from '../../hooks/use_chat';
+import { EuiFlexGroup, EuiFlexItem, useEuiScrollBar } from '@elastic/eui';
+import { css } from '@emotion/react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import { useConversation } from '../../hooks/use_conversation';
 import { useStickToBottom } from '../../hooks/use_stick_to_bottom';
 import { ConversationInputForm } from './conversation_input_form';
 import { ConversationRounds } from './conversation_rounds/conversation_rounds';
 import { NewConversationPrompt } from './new_conversation_prompt';
 
-const fullHeightClassName = css`
+const conversationContainerStyles = css`
+  width: 100%;
   height: 100%;
 `;
 
-const conversationPanelClass = css`
-  min-height: 100%;
-  max-width: 850px;
-  margin-left: auto;
-  margin-right: auto;
-`;
+export const Conversation: React.FC<{}> = () => {
+  const { conversation, conversationId, hasActiveConversation } = useConversation();
 
-const scrollContainerClassName = (scrollBarStyles: string) => css`
-  overflow-y: auto;
-  ${scrollBarStyles}
-`;
-
-interface ConversationProps {
-  conversationId: string | undefined;
-}
-
-export const Conversation: React.FC<ConversationProps> = ({ conversationId }) => {
-  const [selectedAgentId, setSelectedAgentId] = useState<string>(oneChatDefaultAgentId);
-
-  const { conversation } = useConversation({ conversationId });
-
-  const { agentId: conversationAgentId } = conversation ?? {};
-
-  // We allow to change agent only at the start of the conversation
-  const agentId = conversationId ? conversationAgentId ?? oneChatDefaultAgentId : selectedAgentId;
-
-  const { sendMessage } = useChat({
-    conversationId,
-    agentId,
-  });
-
-  const theme = useEuiTheme();
-  const scrollBarStyles = euiScrollBarStyles(theme);
+  const scrollContainerStyles = css`
+    overflow-y: auto;
+    ${useEuiScrollBar()}
+  `;
 
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
 
@@ -65,41 +38,30 @@ export const Conversation: React.FC<ConversationProps> = ({ conversationId }) =>
     setStickToBottom(true);
   }, [conversationId, setStickToBottom]);
 
-  const onSubmit = useCallback(
-    (message: string) => {
-      setStickToBottom(true);
-      sendMessage(message);
-    },
-    [sendMessage, setStickToBottom]
-  );
-
-  if (!conversationId && (!conversation || conversation.rounds.length === 0)) {
-    return (
-      <NewConversationPrompt
-        onSubmit={onSubmit}
-        selectAgentId={setSelectedAgentId}
-        agentId={selectedAgentId}
-      />
-    );
-  }
+  const onSubmit = useCallback(() => {
+    setStickToBottom(true);
+  }, [setStickToBottom]);
 
   return (
-    <>
-      <EuiFlexItem grow className={scrollContainerClassName(scrollBarStyles)}>
-        <div ref={scrollContainerRef} className={fullHeightClassName}>
-          <EuiPanel hasBorder={false} hasShadow={false} className={conversationPanelClass}>
-            <ConversationRounds conversationRounds={conversation?.rounds ?? []} />
-          </EuiPanel>
-        </div>
-      </EuiFlexItem>
+    <EuiFlexGroup
+      css={conversationContainerStyles}
+      direction="column"
+      gutterSize="l"
+      justifyContent="center"
+      responsive={false}
+    >
+      {hasActiveConversation ? (
+        <EuiFlexItem ref={scrollContainerRef} grow css={scrollContainerStyles}>
+          <ConversationRounds conversationRounds={conversation?.rounds ?? []} />
+        </EuiFlexItem>
+      ) : (
+        <EuiFlexItem grow>
+          <NewConversationPrompt />
+        </EuiFlexItem>
+      )}
       <EuiFlexItem grow={false}>
-        <ConversationInputForm
-          disabled={!agentId}
-          loading={false}
-          onSubmit={onSubmit}
-          selectedAgentId={agentId}
-        />
+        <ConversationInputForm onSubmit={onSubmit} />
       </EuiFlexItem>
-    </>
+    </EuiFlexGroup>
   );
 };
