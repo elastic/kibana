@@ -22,7 +22,4 @@ export type PluginConfig = TypeOf<typeof pluginConfigSchema>;
 
 export const config: PluginConfigDescriptor<PluginConfig> = {
   schema: pluginConfigSchema,
-  dynamicConfig: {
-    cdn: true,
-  },
 };
