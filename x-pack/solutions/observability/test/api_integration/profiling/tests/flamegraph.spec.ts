@@ -22,21 +22,19 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
   const supertest = getService('supertest');
   const bettertest = getBettertest(supertest);
   const es = getService('es');
+  const retry = getService('retry');
 
   const start = new Date('2023-03-17T01:00:00.000Z').getTime();
   const end = new Date('2023-03-17T01:00:30.000Z').getTime();
 
   registry.when('Flamegraph api', { config: 'cloud' }, () => {
-    before(async () => {
-      await setupProfiling(bettertest, log);
-      await loadProfilingData(es, log);
-    });
-
     describe('With data', () => {
       let flamegraph: BaseFlameGraph;
       before(async () => {
-        await setupProfiling(bettertest, log);
-        await loadProfilingData(es, log);
+        await retry.try(async () => {
+          await setupProfiling(bettertest, log);
+          await loadProfilingData(es, log);
+        });
         const response = await profilingApiClient.adminUser({
           endpoint: `GET ${profilingRoutePaths.Flamechart}`,
           params: {

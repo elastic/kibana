@@ -23,6 +23,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
   const bettertest = getBettertest(supertest);
   const start = encodeURIComponent(new Date(Date.now() - 10000).valueOf());
   const end = encodeURIComponent(new Date().valueOf());
+  const retry = getService('retry');
 
   const expect403 = (status: number) => {
     expect(status).to.be(403);
@@ -105,7 +106,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
             `Endpoint: ${endpointPath}
               Status code: ${e.res.status}
               Response: ${e.res}
-    
+
               ${e.message}`
           );
         }
@@ -115,7 +116,9 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
 
   registry.when('Profiling feature controls', { config: 'cloud' }, () => {
     before(async () => {
-      await setupProfiling(bettertest, log);
+      await retry.try(async () => {
+        await setupProfiling(bettertest, log);
+      });
     });
     it(`returns forbidden for users with no access to profiling APIs`, async () => {
       await executeRequests({

@@ -22,6 +22,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
   const bettertest = getBettertest(supertest);
   const logger = getService('log');
   const es = getService('es');
+  const retry = getService('retry');
 
   registry.when('Profiling status check', { config: 'cloud' }, () => {
     describe('Profiling is not set up and no data is loaded', () => {
@@ -78,7 +79,9 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
     describe('Collector integration is not installed', () => {
       let collectorId: string | undefined;
       before(async () => {
-        await setupProfiling(bettertest, logger);
+        await retry.try(async () => {
+          await setupProfiling(bettertest, logger);
+        });
         const response = await getProfilingPackagePolicyIds(bettertest);
         collectorId = response.collectorId;
         if (collectorId) {
@@ -140,7 +143,9 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
     describe('Symbolizer integration is not installed', () => {
       let symbolizerId: string | undefined;
       before(async () => {
-        await setupProfiling(bettertest, logger);
+        await retry.try(async () => {
+          await setupProfiling(bettertest, logger);
+        });
         const response = await getProfilingPackagePolicyIds(bettertest);
         symbolizerId = response.symbolizerId;
         if (symbolizerId) {
@@ -201,8 +206,10 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
 
     describe.skip('APM integration is not installed', () => {
       before(async () => {
-        await setupProfiling(bettertest, logger);
-        await deletePackagePolicy(bettertest, 'elastic-cloud-apm');
+        await retry.try(async () => {
+          await setupProfiling(bettertest, logger);
+          await deletePackagePolicy(bettertest, 'elastic-cloud-apm');
+        });
       });
 
       describe('Admin user', () => {
@@ -254,7 +261,9 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
 
     describe('Profiling is set up', () => {
       before(async () => {
-        await setupProfiling(bettertest, logger);
+        await retry.try(async () => {
+          await setupProfiling(bettertest, logger);
+        });
       });
 
       describe('without data', () => {
@@ -307,7 +316,9 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
 
       describe('with data', () => {
         before(async () => {
-          await loadProfilingData(es, logger);
+          await retry.try(async () => {
+            await loadProfilingData(es, logger);
+          });
         });
         describe('Admin user', () => {
           let statusCheck: ProfilingStatus;
