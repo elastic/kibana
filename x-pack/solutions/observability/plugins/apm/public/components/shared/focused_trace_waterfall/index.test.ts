@@ -99,7 +99,7 @@ describe('flattenChildren', () => {
       {
         traceDoc: {
           id: 'a',
-          timestamp: '1',
+          timestampUs: 1,
           name: 'name-a',
           traceId: 'trace-a',
           duration: 100,
@@ -110,7 +110,7 @@ describe('flattenChildren', () => {
       {
         traceDoc: {
           id: 'b',
-          timestamp: '2',
+          timestampUs: 2,
           name: 'name-b',
           traceId: 'trace-b',
           duration: 200,
@@ -122,7 +122,7 @@ describe('flattenChildren', () => {
     expect(flattenChildren(children)).toEqual([
       {
         id: 'a',
-        timestamp: '1',
+        timestampUs: 1,
         name: 'name-a',
         traceId: 'trace-a',
         duration: 100,
@@ -130,7 +130,7 @@ describe('flattenChildren', () => {
       },
       {
         id: 'b',
-        timestamp: '2',
+        timestampUs: 2,
         name: 'name-b',
         traceId: 'trace-b',
         duration: 200,
@@ -144,7 +144,7 @@ describe('flattenChildren', () => {
       {
         traceDoc: {
           id: 'a',
-          timestamp: '1',
+          timestampUs: 1,
           name: 'name-a',
           traceId: 'trace-a',
           duration: 100,
@@ -154,7 +154,7 @@ describe('flattenChildren', () => {
           {
             traceDoc: {
               id: 'b',
-              timestamp: '1',
+              timestampUs: 1,
               name: 'name-b',
               traceId: 'trace-b',
               duration: 100,
@@ -164,7 +164,7 @@ describe('flattenChildren', () => {
               {
                 traceDoc: {
                   id: 'c',
-                  timestamp: '1',
+                  timestampUs: 1,
                   name: 'name-c',
                   traceId: 'trace-c',
                   duration: 100,
@@ -179,7 +179,7 @@ describe('flattenChildren', () => {
       {
         traceDoc: {
           id: 'd',
-          timestamp: '1',
+          timestampUs: 1,
           name: 'name-d',
           traceId: 'trace-d',
           duration: 100,
@@ -191,7 +191,7 @@ describe('flattenChildren', () => {
     expect(flattenChildren(children)).toEqual([
       {
         id: 'a',
-        timestamp: '1',
+        timestampUs: 1,
         name: 'name-a',
         traceId: 'trace-a',
         duration: 100,
@@ -199,7 +199,7 @@ describe('flattenChildren', () => {
       },
       {
         id: 'b',
-        timestamp: '1',
+        timestampUs: 1,
         name: 'name-b',
         traceId: 'trace-b',
         duration: 100,
@@ -207,7 +207,7 @@ describe('flattenChildren', () => {
       },
       {
         id: 'c',
-        timestamp: '1',
+        timestampUs: 1,
         name: 'name-c',
         traceId: 'trace-c',
         duration: 100,
@@ -215,7 +215,7 @@ describe('flattenChildren', () => {
       },
       {
         id: 'd',
-        timestamp: '1',
+        timestampUs: 1,
         name: 'name-d',
         traceId: 'trace-d',
         duration: 100,
@@ -229,7 +229,7 @@ describe('flattenChildren', () => {
       {
         traceDoc: {
           id: 'a',
-          timestamp: '1',
+          timestampUs: 1,
           name: 'name-a',
           traceId: 'trace-a',
           duration: 100,
@@ -239,7 +239,7 @@ describe('flattenChildren', () => {
       {
         traceDoc: {
           id: 'b',
-          timestamp: '1',
+          timestampUs: 1,
           name: 'name-b',
           traceId: 'trace-b',
           duration: 100,
@@ -251,7 +251,7 @@ describe('flattenChildren', () => {
     expect(flattenChildren(children)).toEqual([
       {
         id: 'a',
-        timestamp: '1',
+        timestampUs: 1,
         name: 'name-a',
         traceId: 'trace-a',
         duration: 100,
@@ -259,7 +259,7 @@ describe('flattenChildren', () => {
       },
       {
         id: 'b',
-        timestamp: '1',
+        timestampUs: 1,
         name: 'name-b',
         traceId: 'trace-b',
         duration: 100,

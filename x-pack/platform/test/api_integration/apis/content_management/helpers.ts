@@ -18,7 +18,7 @@ export const sampleDashboard = {
     references: [],
     overwrite: true,
   },
-  version: 2,
+  version: 1,
 };
 
 const roleEditor = 'content_manager_dashboard';

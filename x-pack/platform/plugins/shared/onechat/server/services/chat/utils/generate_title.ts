@@ -9,7 +9,7 @@ import { z } from '@kbn/zod';
 import { BaseMessageLike } from '@langchain/core/messages';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { ConversationRound, RoundInput } from '@kbn/onechat-common';
-import { conversationToLangchainMessages } from '../../agents/utils';
+import { conversationToLangchainMessages } from '../../agents/modes/utils';
 
 export const generateConversationTitle = async ({
   previousRounds,

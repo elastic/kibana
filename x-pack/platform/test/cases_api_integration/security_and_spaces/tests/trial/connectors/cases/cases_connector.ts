@@ -64,7 +64,6 @@ import {
 } from '../../../../../common/users';
 import { createUsersAndRoles, deleteUsersAndRoles } from '../../../../../common/lib/authentication';
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const supertest = getService('supertest');
@@ -1059,6 +1058,58 @@ export default ({ getService }: FtrProviderContext): void => {
               },
             });
           });
+
+          it('sets rule info to null when `internallyManagedAlerts` is `true`', async () => {
+            await executeConnectorAndVerifyCorrectness({
+              supertest,
+              connectorId,
+              req: getRequest({ groupingBy: ['host.name'], internallyManagedAlerts: true }),
+            });
+
+            const cases = await findCases({ supertest });
+
+            expect(cases.total).to.be(2);
+
+            const firstCaseId = generateCaseId({
+              ruleId: req.params.subActionParams.rule.id,
+              grouping: { 'host.name': 'A' },
+            });
+            const secondCaseId = generateCaseId({
+              ruleId: req.params.subActionParams.rule.id,
+              grouping: { 'host.name': 'B' },
+            });
+
+            const firstCase = removeServerGeneratedData(
+              cases.cases.find((theCase) => theCase.id === firstCaseId)!
+            );
+
+            const firstCaseAttachments = await getAllComments({ supertest, caseId: firstCase.id });
+
+            verifyAlertsAttachedToCase({
+              caseAttachments: firstCaseAttachments,
+              expectedAlertIdsToBeAttachedToCase: new Set([
+                'alert-id-0',
+                'alert-id-2',
+                'alert-id-4',
+              ]),
+              rule: { id: null, name: null },
+            });
+
+            const secondCase = removeServerGeneratedData(
+              cases.cases.find((theCase) => theCase.id === secondCaseId)!
+            );
+
+            const secondCaseAttachments = await getAllComments({
+              supertest,
+              caseId: secondCase.id,
+            });
+
+            verifyAlertsAttachedToCase({
+              caseAttachments: secondCaseAttachments,
+              expectedAlertIdsToBeAttachedToCase: new Set(['alert-id-1', 'alert-id-3']),
+              rule: { id: null, name: null },
+            });
+          });
         });
 
         describe('Non grouped alerts', () => {
@@ -1154,6 +1205,432 @@ export default ({ getService }: FtrProviderContext): void => {
                 id: req.params.subActionParams.rule.id,
                 name: req.params.subActionParams.rule.name,
               },
+            });
+          });
+        });
+      });
+
+      describe('With predefined grouping via `groupedAlerts`', () => {
+        const groupedAlerts = [
+          {
+            alerts: [
+              { _id: 'alert-id-1', _index: 'alert-index-1' },
+              { _id: 'alert-id-2', _index: 'alert-index-1' },
+            ],
+            comments: ['comment-1'],
+            grouping: { field_name_1: 'field_value_1' },
+            title: 'custom-title',
+          },
+          {
+            alerts: [
+              { _id: 'alert-id-3', _index: 'alert-index-2' },
+              { _id: 'alert-id-4', _index: 'alert-index-2' },
+            ],
+            comments: ['comment-2', 'comment-3'],
+            grouping: { field_name_2: 'field_value_2' },
+          },
+          {
+            alerts: [{ _id: 'alert-id-5', _index: 'alert-index-3' }],
+            grouping: { field_name_1: 'field_value_3' },
+          },
+        ];
+        const req = getRequest({ groupedAlerts, internallyManagedAlerts: true });
+
+        describe('Oracle', () => {
+          it('should create the oracle records correctly with grouping', async () => {
+            await executeConnectorAndVerifyCorrectness({
+              supertest,
+              connectorId,
+              req,
+            });
+
+            const firstOracleId = generateOracleId({
+              ruleId: req.params.subActionParams.rule.id,
+              grouping: { field_name_1: 'field_value_1' },
+            });
+
+            const secondOracleId = generateOracleId({
+              ruleId: req.params.subActionParams.rule.id,
+              grouping: { field_name_2: 'field_value_2' },
+            });
+
+            const firstOracleRecord = await getOracleRecord({
+              kibanaServer,
+              oracleId: firstOracleId,
+            });
+
+            const secondOracleRecord = await getOracleRecord({
+              kibanaServer,
+              oracleId: secondOracleId,
+            });
+
+            expect(firstOracleRecord.counter).to.be(1);
+            expect(firstOracleRecord.rules[0]).to.eql({
+              id: req.params.subActionParams.rule.id,
+            });
+
+            expect(secondOracleRecord.counter).to.be(1);
+            expect(secondOracleRecord.rules[0]).to.eql({
+              id: req.params.subActionParams.rule.id,
+            });
+          });
+        });
+
+        describe('Cases & alerts', () => {
+          it('should create cases correctly', async () => {
+            await executeConnectorAndVerifyCorrectness({
+              supertest,
+              connectorId,
+              req,
+            });
+
+            const cases = await findCases({ supertest });
+
+            expect(cases.total).to.be(3);
+
+            const firstCaseId = generateCaseId({
+              ruleId: req.params.subActionParams.rule.id,
+              grouping: { field_name_1: 'field_value_1' },
+            });
+            const secondCaseId = generateCaseId({
+              ruleId: req.params.subActionParams.rule.id,
+              grouping: { field_name_2: 'field_value_2' },
+            });
+            const thirdCaseId = generateCaseId({
+              ruleId: req.params.subActionParams.rule.id,
+              grouping: { field_name_1: 'field_value_3' },
+            });
+
+            const firstCase = removeServerGeneratedData(
+              cases.cases.find((theCase) => theCase.id === firstCaseId)!
+            );
+
+            const secondCase = removeServerGeneratedData(
+              cases.cases.find((theCase) => theCase.id === secondCaseId)!
+            );
+
+            const thirdCase = removeServerGeneratedData(
+              cases.cases.find((theCase) => theCase.id === thirdCaseId)!
+            );
+
+            expect(firstCase).to.eql({
+              assignees: [],
+              category: null,
+              closed_at: null,
+              closed_by: null,
+              comments: [],
+              connector: {
+                fields: null,
+                id: 'none',
+                name: 'none',
+                type: '.none',
+              },
+              created_by: {
+                email: null,
+                full_name: null,
+                username: 'elastic',
+              },
+              customFields: [],
+              description:
+                "This case was created by the rule ['Test rule'](https://example.com/rules/rule-test-id). The assigned alerts are grouped by `field_name_1: field_value_1`.",
+              duration: null,
+              external_service: null,
+              id: firstCaseId,
+              owner: 'securitySolutionFixture',
+              settings: {
+                syncAlerts: false,
+              },
+              severity: 'low',
+              status: 'open',
+              tags: [
+                'auto-generated',
+                'rule:rule-test-id',
+                'field_name_1',
+                'field_name_1:field_value_1',
+                'rule',
+                'test',
+              ],
+              title: 'custom-title',
+              totalAlerts: 2,
+              totalComment: 1,
+              updated_by: {
+                email: null,
+                full_name: null,
+                username: 'elastic',
+              },
+              observables: [],
+            });
+
+            expect(secondCase).to.eql({
+              assignees: [],
+              category: null,
+              closed_at: null,
+              closed_by: null,
+              comments: [],
+              connector: {
+                fields: null,
+                id: 'none',
+                name: 'none',
+                type: '.none',
+              },
+              created_by: {
+                email: null,
+                full_name: null,
+                username: 'elastic',
+              },
+              customFields: [],
+              description:
+                "This case was created by the rule ['Test rule'](https://example.com/rules/rule-test-id). The assigned alerts are grouped by `field_name_2: field_value_2`.",
+              duration: null,
+              external_service: null,
+              id: secondCaseId,
+              owner: 'securitySolutionFixture',
+              settings: {
+                syncAlerts: false,
+              },
+              severity: 'low',
+              status: 'open',
+              tags: [
+                'auto-generated',
+                'rule:rule-test-id',
+                'field_name_2',
+                'field_name_2:field_value_2',
+                'rule',
+                'test',
+              ],
+              title: 'Test rule - Grouping by field_value_2 (Auto-created)',
+              totalAlerts: 2,
+              totalComment: 2,
+              updated_by: {
+                email: null,
+                full_name: null,
+                username: 'elastic',
+              },
+              observables: [],
+            });
+
+            expect(thirdCase).to.eql({
+              assignees: [],
+              category: null,
+              closed_at: null,
+              closed_by: null,
+              comments: [],
+              connector: {
+                fields: null,
+                id: 'none',
+                name: 'none',
+                type: '.none',
+              },
+              created_by: {
+                email: null,
+                full_name: null,
+                username: 'elastic',
+              },
+              customFields: [],
+              description:
+                "This case was created by the rule ['Test rule'](https://example.com/rules/rule-test-id). The assigned alerts are grouped by `field_name_1: field_value_3`.",
+              duration: null,
+              external_service: null,
+              id: thirdCaseId,
+              owner: 'securitySolutionFixture',
+              settings: {
+                syncAlerts: false,
+              },
+              severity: 'low',
+              status: 'open',
+              tags: [
+                'auto-generated',
+                'rule:rule-test-id',
+                'field_name_1',
+                'field_name_1:field_value_3',
+                'rule',
+                'test',
+              ],
+              title: 'Test rule - Grouping by field_value_3 (Auto-created)',
+              totalAlerts: 1,
+              totalComment: 0,
+              updated_by: {
+                email: null,
+                full_name: null,
+                username: 'elastic',
+              },
+              observables: [],
+            });
+          });
+
+          it('should attach the alerts to the correct cases', async () => {
+            await executeConnectorAndVerifyCorrectness({
+              supertest,
+              connectorId,
+              req,
+            });
+
+            const cases = await findCases({ supertest });
+
+            expect(cases.total).to.be(3);
+
+            const firstCaseId = generateCaseId({
+              ruleId: req.params.subActionParams.rule.id,
+              grouping: { field_name_1: 'field_value_1' },
+            });
+            const secondCaseId = generateCaseId({
+              ruleId: req.params.subActionParams.rule.id,
+              grouping: { field_name_2: 'field_value_2' },
+            });
+            const thirdCaseId = generateCaseId({
+              ruleId: req.params.subActionParams.rule.id,
+              grouping: { field_name_1: 'field_value_3' },
+            });
+
+            const firstCase = removeServerGeneratedData(
+              cases.cases.find((theCase) => theCase.id === firstCaseId)!
+            );
+
+            const firstCaseAttachments = await getAllComments({ supertest, caseId: firstCase.id });
+
+            verifyAlertsAttachedToCase({
+              caseAttachments: firstCaseAttachments,
+              expectedAlertIdsToBeAttachedToCase: new Set(['alert-id-1', 'alert-id-2']),
+              rule: { id: null, name: null },
+            });
+
+            const secondCase = removeServerGeneratedData(
+              cases.cases.find((theCase) => theCase.id === secondCaseId)!
+            );
+
+            const secondCaseAttachments = await getAllComments({
+              supertest,
+              caseId: secondCase.id,
+            });
+
+            verifyAlertsAttachedToCase({
+              caseAttachments: secondCaseAttachments,
+              expectedAlertIdsToBeAttachedToCase: new Set(['alert-id-3', 'alert-id-4']),
+              rule: { id: null, name: null },
+            });
+
+            const thirdCase = removeServerGeneratedData(
+              cases.cases.find((theCase) => theCase.id === thirdCaseId)!
+            );
+
+            const thirdCaseAttachments = await getAllComments({
+              supertest,
+              caseId: thirdCase.id,
+            });
+
+            verifyAlertsAttachedToCase({
+              caseAttachments: thirdCaseAttachments,
+              expectedAlertIdsToBeAttachedToCase: new Set(['alert-id-5']),
+              rule: { id: null, name: null },
+            });
+          });
+
+          it('should add more alerts to the same case', async () => {
+            const additionalGroupedAlerts1 = [
+              {
+                alerts: [
+                  { _id: 'alert-id-extra-1', _index: 'alert-index-1' },
+                  { _id: 'alert-id-extra-2', _index: 'alert-index-1' },
+                ],
+                comments: ['comment-2'],
+                grouping: { field_name_1: 'field_value_1' },
+                title: 'custom-title',
+              },
+            ];
+            const additionalGroupedAlerts2 = [
+              {
+                alerts: [{ _id: 'alert-id-extra-5', _index: 'alert-index-2' }],
+                grouping: { field_name_2: 'field_value_2' },
+              },
+            ];
+
+            const totalGroupedAlerts = [...additionalGroupedAlerts1, ...additionalGroupedAlerts2];
+
+            await executeConnectorAndVerifyCorrectness({
+              supertest,
+              connectorId,
+              req,
+            });
+
+            const cases = await findCases({ supertest });
+            expect(cases.total).to.be(3);
+
+            await executeConnectorAndVerifyCorrectness({
+              supertest,
+              connectorId,
+              req: getRequest({
+                groupedAlerts: totalGroupedAlerts,
+                internallyManagedAlerts: true,
+              }),
+            });
+
+            const firstCaseId = generateCaseId({
+              ruleId: req.params.subActionParams.rule.id,
+              grouping: { field_name_1: 'field_value_1' },
+            });
+
+            const secondCaseId = generateCaseId({
+              ruleId: req.params.subActionParams.rule.id,
+              grouping: { field_name_2: 'field_value_2' },
+            });
+
+            const thirdCaseId = generateCaseId({
+              ruleId: req.params.subActionParams.rule.id,
+              grouping: { field_name_1: 'field_value_3' },
+            });
+
+            const firstCase = removeServerGeneratedData(
+              cases.cases.find((theCase) => theCase.id === firstCaseId)!
+            );
+
+            const secondCase = removeServerGeneratedData(
+              cases.cases.find((theCase) => theCase.id === secondCaseId)!
+            );
+
+            const thirdCase = removeServerGeneratedData(
+              cases.cases.find((theCase) => theCase.id === thirdCaseId)!
+            );
+
+            const firstCaseAttachments = await getAllComments({
+              supertest,
+              caseId: firstCase.id,
+            });
+
+            const secondCaseAttachments = await getAllComments({
+              supertest,
+              caseId: secondCase.id,
+            });
+
+            const thirdCaseAttachments = await getAllComments({
+              supertest,
+              caseId: thirdCase.id,
+            });
+
+            verifyAlertsAttachedToCase({
+              caseAttachments: firstCaseAttachments,
+              expectedAlertIdsToBeAttachedToCase: new Set([
+                'alert-id-1',
+                'alert-id-2',
+                'alert-id-extra-1',
+                'alert-id-extra-2',
+              ]),
+              rule: { id: null, name: null },
+            });
+
+            verifyAlertsAttachedToCase({
+              caseAttachments: secondCaseAttachments,
+              expectedAlertIdsToBeAttachedToCase: new Set([
+                'alert-id-3',
+                'alert-id-4',
+                'alert-id-extra-5',
+              ]),
+              rule: { id: null, name: null },
+            });
+
+            verifyAlertsAttachedToCase({
+              caseAttachments: thirdCaseAttachments,
+              expectedAlertIdsToBeAttachedToCase: new Set(['alert-id-5']),
+              rule: { id: null, name: null },
             });
           });
         });
@@ -1303,7 +1780,7 @@ const getRequest = (params: Partial<CasesConnectorRunParams> = {}) => {
       reopenClosedCases,
       maximumCasesToOpen: 5,
       templateId: null,
-      internallyManagedAlerts: false,
+      internallyManagedAlerts: null,
       ...params,
     },
   };
@@ -1377,7 +1854,7 @@ const verifyAlertsAttachedToCase = ({
 }: {
   expectedAlertIdsToBeAttachedToCase: Set<string>;
   caseAttachments: Attachments;
-  rule: { id: string; name: string };
+  rule: { id: string | null; name: string | null };
 }) => {
   const alertsAttachedToCase = caseAttachments.filter(
     (attachment): attachment is AlertAttachment => attachment.type === AttachmentType.alert

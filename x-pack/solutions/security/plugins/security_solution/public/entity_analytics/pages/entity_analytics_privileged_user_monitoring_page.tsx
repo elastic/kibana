@@ -40,6 +40,7 @@ import { PrivilegedUserMonitoringManageDataSources } from '../components/privile
 import { EmptyPrompt } from '../../common/components/empty_prompt';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 import { useLinkInfo, useUpdateLinkConfig } from '../../common/links/links_hooks';
+import { PageLoader } from '../../common/components/page_loader';
 
 type PageState =
   | { type: 'fetchingEngineStatus' }
@@ -200,6 +201,10 @@ export const EntityAnalyticsPrivilegedUserMonitoringPage = () => {
     min-height: calc(100vh - 240px);
   `;
 
+  if (newDataViewPickerEnabled && status === 'pristine') {
+    return <PageLoader />;
+  }
+
   if (!indicesExist) {
     return <EmptyPrompt />;
   }
@@ -338,7 +343,6 @@ export const EntityAnalyticsPrivilegedUserMonitoringPage = () => {
         {state.type === 'manageDataSources' && (
           <PrivilegedUserMonitoringManageDataSources
             onBackToDashboardClicked={onBackToDashboardClicked}
-            onDone={initEngineCallBack}
           />
         )}
 
