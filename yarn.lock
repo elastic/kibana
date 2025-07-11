@@ -5855,7 +5855,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/iframe-embedded-plugin@link:x-pack/test/functional_embedded/plugins/iframe_embedded":
+"@kbn/iframe-embedded-plugin@link:x-pack/platform/test/functional_embedded/plugins/iframe_embedded":
   version "0.0.0"
   uid ""
 
@@ -6019,7 +6019,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/kibana-cors-test-plugin@link:x-pack/test/functional_cors/plugins/kibana_cors_test":
+"@kbn/kibana-cors-test-plugin@link:x-pack/platform/test/functional_cors/plugins/kibana_cors_test":
   version "0.0.0"
   uid ""
 
