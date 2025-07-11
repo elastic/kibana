@@ -62,8 +62,17 @@ export const createScheduledReportShareIntegration = ({
         flyoutSizing: { size: 'm', maxWidth: 500 },
       };
     },
-    prerequisiteCheck: ({ license }) => {
+    prerequisiteCheck: ({ license, capabilities, objectType }) => {
       if (!license || !license.type) {
+        return false;
+      }
+      if (
+        objectType === 'lens' &&
+        capabilities.visualize_v2 &&
+        !capabilities.visualize_v2.generateScreenshot
+      ) {
+        // In Lens, when the only available report type is lens_csv
+        // we shouldn't show the scheduled export button
         return false;
       }
       return SCHEDULED_REPORT_VALID_LICENSES.includes(license.type);
