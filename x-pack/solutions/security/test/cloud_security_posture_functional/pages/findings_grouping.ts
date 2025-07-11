@@ -171,37 +171,28 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     after(async () => {
-      await findings.navigateToLatestFindingsPage();
-      await pageObjects.header.waitUntilLoadingHasFinished();
-      const groupSelector = await findings.groupSelector();
-      await groupSelector.openDropDown();
-      await groupSelector.setValue('None');
-      await findings.index.remove();
+      const maxRetries = 3;
+      for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        try {
+          await findings.navigateToLatestFindingsPage();
+          await pageObjects.header.waitUntilLoadingHasFinished();
+
+          const groupSelector = await findings.groupSelector();
+          await groupSelector.openDropDown();
+
+          await groupSelector.setValue('None');
+          await findings.index.remove();
+
+          break;
+        } catch (error) {
+          if (attempt === maxRetries) {
+            throw error;
+          }
+          // eslint-disable-next-line no-console
+          console.warn(`Retrying after failure (${attempt}/${maxRetries})...`);
+        }
+      }
     });
-
-    // after(async () => {
-    //   const maxRetries = 3;
-    //   for (let attempt = 1; attempt <= maxRetries; attempt++) {
-    //     try {
-    //       await findings.navigateToLatestFindingsPage();
-    //       await pageObjects.header.waitUntilLoadingHasFinished();
-
-    //       const groupSelector = await findings.groupSelector();
-    //       await groupSelector.openDropDown(); // this might throw
-
-    //       await groupSelector.setValue('None');
-    //       await findings.index.remove();
-
-    //       break; // success, exit the loop
-    //     } catch (error) {
-    //       if (attempt === maxRetries) {
-    //         throw error; // rethrow after final attempt
-    //       }
-    //       // eslint-disable-next-line no-console
-    //       console.warn(`Retrying after failure (${attempt}/${maxRetries})...`);
-    //     }
-    //   }
-    // });
 
     describe('Default Grouping', async () => {
       it('groups findings by resource and sort by compliance score desc', async () => {
