@@ -90,6 +90,34 @@ describe('search', () => {
       expect(call.caseOptions).toHaveProperty('rootSearchFields', ['_id']);
     });
 
+    it('search by incremental_id updates search term and adds searchFields', async () => {
+      const findRequest = createCasesClientMockSearchRequest({ search: '#123' });
+
+      await search(findRequest, clientArgs, casesClientMock);
+      await expect(clientArgs.services.caseService.findCasesGroupedByID).toHaveBeenCalled();
+
+      const call = clientArgs.services.caseService.findCasesGroupedByID.mock.calls[0][0];
+
+      expect(call.caseOptions.search).toBe('123');
+      expect(call.caseOptions).toHaveProperty('searchFields', ['incremental_id']);
+    });
+
+    it('search by number adds searchFields', async () => {
+      const findRequest = createCasesClientMockSearchRequest({ search: '123' });
+
+      await search(findRequest, clientArgs, casesClientMock);
+      await expect(clientArgs.services.caseService.findCasesGroupedByID).toHaveBeenCalled();
+
+      const call = clientArgs.services.caseService.findCasesGroupedByID.mock.calls[0][0];
+
+      expect(call.caseOptions.search).toBe('123');
+      expect(call.caseOptions).toHaveProperty('searchFields', [
+        'title',
+        'description',
+        'incremental_id',
+      ]);
+    });
+
     it('regular search term does not cause rootSearchFields to be appended', async () => {
       const searchTerm = 'foobar';
       const findRequest = createCasesClientMockSearchRequest({ search: searchTerm });

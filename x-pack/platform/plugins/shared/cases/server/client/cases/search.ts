@@ -116,7 +116,12 @@ export const search = async (
       authorizationFilter,
     });
 
-    const caseSearch = constructSearch(paramArgs.search, spaceId, savedObjectsSerializer);
+    const caseSearch = constructSearch(
+      paramArgs.search,
+      asArray(paramArgs.searchFields),
+      spaceId,
+      savedObjectsSerializer
+    );
 
     const [cases, statusStats] = await Promise.all([
       caseService.findCasesGroupedByID({
@@ -124,7 +129,7 @@ export const search = async (
           ...paramArgs,
           ...caseQueryOptions,
           ...caseSearch,
-          searchFields: asArray(paramArgs.searchFields),
+          searchFields: caseSearch?.searchFields,
         },
       }),
       caseService.getCaseStatusStats({
