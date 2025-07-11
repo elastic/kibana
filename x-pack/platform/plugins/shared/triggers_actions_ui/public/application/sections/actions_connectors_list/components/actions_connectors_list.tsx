@@ -325,7 +325,7 @@ const ActionsConnectorsList = ({
             {item.isMissingSecrets ? (
               <>
                 {actionTypesIndex && actionTypesIndex[item.actionTypeId]?.enabled ? (
-                  <EuiFlexItem grow={false} css={{ marginLeft: 4 }}>
+                  <EuiFlexItem grow={false} style={{ marginLeft: 4 }}>
                     <EuiToolTip
                       content={i18n.translate(
                         'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.fixActionDescription',
