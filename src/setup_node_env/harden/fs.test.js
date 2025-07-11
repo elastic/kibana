@@ -26,8 +26,8 @@ const safeFsPromises = patchFs(fsPromises);
 
 describe('Hardened FS', () => {
   afterAll(() => {
-    safeFs.unlinkSync(join(DATA_PATH, 'good.json'));
-    safeFs.unlinkSync(join(DATA_PATH, 'stream.json'));
+    // safeFs.unlinkSync(join(DATA_PATH, 'good.json'));
+    // safeFs.unlinkSync(join(DATA_PATH, 'stream.json'));
   });
 
   describe('callback', () => {

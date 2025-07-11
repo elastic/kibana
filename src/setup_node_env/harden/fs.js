@@ -19,6 +19,8 @@ const singlePath = [
 
 const dualPath = ['copyFile', 'copyFileSync'];
 
+const validations = require('./fs_validations');
+
 const { REPO_ROOT } = require('@kbn/repo-info');
 
 const fsEventBus = require('@kbn/security-hardening/fs-event-bus');
@@ -94,24 +96,18 @@ fsEventBus.on('kbn_config_changed', ({ loggerFilePath }) => {
 });
 
 const getSafePath = (userPath) => {
+  validations.validateNoPathTraversal(userPath); // Should I run this on both?
   const normalizedPath = normalize(userPath);
-
-  if (
-    isDevOrCI &&
-    (normalizedPath.endsWith('.txt') ||
-      normalizedPath.endsWith('.md') ||
-      normalizedPath.endsWith('.log') ||
-      normalizedPath.includes('__fixtures__'))
-  ) {
-    return normalizedPath;
-  }
-
-  if (!safePaths.some((path) => normalizedPath.startsWith(path))) {
-    throw new Error(`Unsafe path detected: "${normalizedPath}".`);
-  }
+  validations.validateFileExtension(normalizedPath); // Maintain logic, dont run in prod
+  validations.validatePathIsSubdirectoryOfSafeDirectory(normalizedPath); // Maintain logic, run only in prod
 
   return normalizedPath;
 };
+
+function validateFileData(data) {
+  validations.validateFileExtension(data);
+  validations.validateFileSize(data);
+}
 
 const isMockFsActive = () => {
   try {
@@ -173,6 +169,8 @@ const patchFs = (fs) => {
             return realMethods[prop](userPath, data, options, cb || noop);
           }
 
+          validateFileData(data);
+
           cb ||= options;
           let safePath;
 
@@ -194,6 +192,8 @@ const patchFs = (fs) => {
           if (isMockFsActive()) {
             return realMethods[prop](userSrc, userDest, data, options, cb);
           }
+
+          validateFileData(data);
 
           cb ||= options;
           let srcSafePath;
