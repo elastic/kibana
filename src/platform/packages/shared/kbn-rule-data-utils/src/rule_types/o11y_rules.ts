@@ -23,7 +23,7 @@ export enum ApmRuleType {
 export const APM_RULE_TYPE_IDS = Object.values(ApmRuleType);
 
 /**
- * Synthetics ryle types
+ * Synthetics rule types
  */
 
 export const SYNTHETICS_STATUS_RULE = 'xpack.synthetics.alerts.monitorStatus';
