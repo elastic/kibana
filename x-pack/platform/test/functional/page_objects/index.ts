@@ -20,6 +20,8 @@ import { WatcherPageObject } from './watcher_page';
 import { SearchProfilerPageProvider } from './search_profiler_page';
 import { UpgradeAssistantFlyoutObject } from './upgrade_assistant_page';
 import { UserProfilePageProvider } from './user_profile_page';
+import { SearchSessionsPageProvider } from './search_sessions_management_page';
+import { GraphPageObject } from './graph_page';
 
 // just like services, PageObjects are defined as a map of
 // names to Providers. Merge in Kibana's or pick specific ones
@@ -32,11 +34,13 @@ export const pageObjects = {
   monitoring: MonitoringPageObject,
   accountSetting: AccountSettingsPageObject,
   canvas: CanvasPageProvider,
+  graph: GraphPageObject,
   lens: LensPageProvider,
   maps: GisPageObject,
   reporting: ReportingPageObject,
   watcher: WatcherPageObject,
   searchProfiler: SearchProfilerPageProvider,
+  searchSessionsManagement: SearchSessionsPageProvider,
   upgradeAssistant: UpgradeAssistantFlyoutObject,
   userProfiles: UserProfilePageProvider,
 };
