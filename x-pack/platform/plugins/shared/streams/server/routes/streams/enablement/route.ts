@@ -28,6 +28,13 @@ export const enableStreamsRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
+  responses: {
+    200: {
+      description: 'Example Response - TODO: Add at least one response to statisfy OpenAPI Spec',
+      body: z.looseObject({}),
+      bodyContentType: 'application/json',
+    },
+  },
   handler: async ({ request, getScopedClients }): Promise<EnableStreamsResponse> => {
     const { streamsClient } = await getScopedClients({
       request,
@@ -60,6 +67,13 @@ export const disableStreamsRoute = createServerRoute({
   security: {
     authz: {
       requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+    },
+  },
+  responses: {
+    200: {
+      description: 'Example Response - TODO: Add at least one response to statisfy OpenAPI Spec',
+      body: z.looseObject({}),
+      bodyContentType: 'application/json',
     },
   },
   handler: async ({ request, getScopedClients }): Promise<DisableStreamsResponse> => {

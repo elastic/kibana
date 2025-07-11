@@ -70,6 +70,13 @@ const listDashboardsRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
+  responses: {
+    200: {
+      description: 'Example Response - TODO: Add at least one response to statisfy OpenAPI Spec',
+      body: z.looseObject({}),
+      bodyContentType: 'application/json',
+    },
+  },
   async handler({ params, request, getScopedClients }): Promise<ListDashboardsResponse> {
     const { assetClient, streamsClient } = await getScopedClients({ request });
     await streamsClient.ensureStream(params.path.name);
@@ -112,6 +119,13 @@ const linkDashboardRoute = createServerRoute({
       dashboardId: z.string(),
     }),
   }),
+  responses: {
+    200: {
+      description: 'Example Response - TODO: Add at least one response to statisfy OpenAPI Spec',
+      body: z.looseObject({}),
+      bodyContentType: 'application/json',
+    },
+  },
   handler: async ({ params, request, getScopedClients }): Promise<LinkDashboardResponse> => {
     const { assetClient, streamsClient } = await getScopedClients({ request });
     const {
@@ -153,6 +167,13 @@ const unlinkDashboardRoute = createServerRoute({
       dashboardId: z.string(),
     }),
   }),
+  responses: {
+    200: {
+      description: 'Example Response - TODO: Add at least one response to statisfy OpenAPI Spec',
+      body: z.looseObject({}),
+      bodyContentType: 'application/json',
+    },
+  },
   handler: async ({ params, request, getScopedClients }): Promise<UnlinkDashboardResponse> => {
     const { assetClient, streamsClient } = await getScopedClients({ request });
 
@@ -257,6 +278,13 @@ const bulkDashboardsRoute = createServerRoute({
       ),
     }),
   }),
+  responses: {
+    200: {
+      description: 'Example Response - TODO: Add at least one response to statisfy OpenAPI Spec',
+      body: z.looseObject({}),
+      bodyContentType: 'application/json',
+    },
+  },
   handler: async ({
     params,
     request,
