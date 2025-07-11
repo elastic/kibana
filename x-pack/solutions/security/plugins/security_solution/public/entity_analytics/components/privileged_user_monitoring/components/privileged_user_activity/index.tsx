@@ -115,12 +115,17 @@ export const UserActivityPrivilegedUsersPanel: React.FC<{
       >
         {generateTableQuery && discoverUrl && (
           <LinkAnchor href={discoverUrl}>
-            <FormattedMessage
-              id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.userActivity.linkDescription"
-              defaultMessage={
-                hasUrlError ? 'Open Discover (query not pre-filled)' : 'View all events'
-              }
-            />
+            {hasUrlError ? (
+              <FormattedMessage
+                id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.userActivity.linkDescriptionError"
+                defaultMessage="Open Discover (query not pre-filled)"
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.userActivity.linkDescription"
+                defaultMessage="View all events"
+              />
+            )}
           </LinkAnchor>
         )}
       </HeaderSection>
