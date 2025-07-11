@@ -8,6 +8,7 @@
 import React, { memo } from 'react';
 import { Handle, Position } from '@xyflow/react';
 import { css } from '@emotion/react';
+import { EuiTextTruncate } from '@elastic/eui';
 import {
   LabelNodeContainer,
   LabelShape,
@@ -16,6 +17,7 @@ import {
   NodeButton,
   ACTUAL_LABEL_HEIGHT,
   NODE_LABEL_WIDTH,
+  LABEL_PADDING_X,
 } from './styles';
 import type { LabelNodeViewModel, NodeProps } from '../types';
 import { NodeExpandButton } from './node_expand_button';
@@ -30,7 +32,12 @@ export const LabelNode = memo<NodeProps>((props: NodeProps) => {
     <LabelNodeContainer>
       {interactive && <LabelShapeOnHover color={color} />}
       <LabelShape color={color} textAlign="center">
-        {text}
+        <EuiTextTruncate
+          truncation="end"
+          truncationOffset={20}
+          text={text}
+          width={NODE_LABEL_WIDTH - LABEL_PADDING_X * 2}
+        />
       </LabelShape>
       {interactive && (
         <>

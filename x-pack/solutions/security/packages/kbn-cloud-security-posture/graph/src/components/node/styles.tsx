@@ -87,7 +87,7 @@ export const LabelShape = styled(EuiText)<LabelShapeProps>`
 
   line-height: 1.5;
 
-  padding: 5px ${LABEL_PADDING_X}px;
+  padding: 6px ${LABEL_PADDING_X}px;
   border-radius: 16px;
   min-height: 100%;
   min-width: 100%;

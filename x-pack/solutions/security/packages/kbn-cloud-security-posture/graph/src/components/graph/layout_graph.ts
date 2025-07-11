@@ -21,6 +21,8 @@ import {
   NODE_LABEL_WIDTH,
 } from '../constants';
 
+const GRID_SIZE_OFFSET = GRID_SIZE * 2;
+
 export const layoutGraph = (
   nodes: Array<Node<NodeViewModel>>,
   edges: Array<Edge<EdgeViewModel>>
@@ -32,7 +34,11 @@ export const layoutGraph = (
   };
 
   const g = new Dagre.graphlib.Graph(graphOpts)
-    .setGraph({ rankdir: 'LR', align: 'UL', nodesep: 50 })
+    .setGraph({
+      rankdir: 'LR',
+      align: 'UL',
+      ranksep: GRID_SIZE_OFFSET * 3,
+    })
     .setDefaultEdgeLabel(() => ({}));
 
   edges.forEach((edge) => g.setEdge(edge.source, edge.target));
@@ -101,10 +107,9 @@ export const layoutGraph = (
 
     // We are shifting the dagre node position (anchor=center center) to the top left
     // so it matches the React Flow node anchor point (top left).
-    // We also need to round the position to avoid subpixel rendering
-    const GRID_SIZE_OFFSET = GRID_SIZE * 2;
-    const tempPosX = Math.round(dagreNode.x - (dagreNode.width ?? 0) / 2);
-    const x = Math.round(tempPosX / GRID_SIZE_OFFSET) * GRID_SIZE_OFFSET;
+    // We also need to snap the position to avoid subpixel rendering issues.
+    // Y position is snapped as part of `alignNodesCenterInPlace` function (double snapping will cause misalignments).
+    const x = snapped(Math.round(dagreNode.x - (dagreNode.width ?? 0) / 2));
     const y = Math.round(dagreNode.y - (dagreNode.height ?? 0) / 2);
 
     if (node.data.shape === 'group') {
@@ -154,8 +159,7 @@ const layoutStackedLabels = (
     return Math.max(acc, currLblWidth);
   }, 0);
 
-  const GRID_SIZE_OFFSET = GRID_SIZE * 2;
-  const roundStackHeight = Math.round(stackHeight / GRID_SIZE_OFFSET) * GRID_SIZE_OFFSET;
+  const roundStackHeight = snapped(stackHeight);
   const diffFromRounded = roundStackHeight - stackHeight;
 
   // Layout children relative to parent
@@ -184,10 +188,6 @@ const alignNodesCenterInPlace = (g: Dagre.graphlib.Graph, filter: (node: string)
   const Y = (id: string) => (g.node(id) as Dagre.Node).y;
   const Height = (id: string) => (g.node(id) as Dagre.Node).height;
   const setY = (id: string, y: number) => ((g.node(id) as Dagre.Node).y = y);
-  const GRID_SIZE_OFFSET = GRID_SIZE * 2;
-  const setYSnapped = (id: string, y: number) => {
-    setY(id, Math.round(y / GRID_SIZE_OFFSET) * GRID_SIZE_OFFSET);
-  };
 
   const prevNodeY: Record<string, number> = {};
   const topo = topsort(g, filter);
@@ -213,7 +213,7 @@ const alignNodesCenterInPlace = (g: Dagre.graphlib.Graph, filter: (node: string)
 
       // Log the diff for current node
       prevNodeY[currNode] = prevY;
-      setY(currNode, centerY);
+      setY(currNode, snapped(centerY));
     } else if (children.length === 1) {
       const child = children[0].toString();
       const siblings = (
@@ -239,10 +239,10 @@ const alignNodesCenterInPlace = (g: Dagre.graphlib.Graph, filter: (node: string)
         const firstSiblingNewY = finalChildY - (edgesHeight - Height(child)) / 2;
 
         // Final Y position is effected by the node height (checkout layoutGraph function)
-        const finalfirstSiblingNewY = firstSiblingNewY - firstSiblingInfo.h / 2;
+        const finalFirstSiblingNewY = firstSiblingNewY - firstSiblingInfo.h / 2;
 
         // Calculate the current node position relative to the first sibling
-        const newY = finalfirstSiblingNewY + currY - firstSiblingInfo.top;
+        const newY = snapped(finalFirstSiblingNewY) + currY - firstSiblingInfo.top;
 
         // Log the diff for current node
         prevNodeY[currNode] = currY;
@@ -275,7 +275,7 @@ const alignNodesCenterInPlace = (g: Dagre.graphlib.Graph, filter: (node: string)
 
         // Log the diff for current node
         prevNodeY[currNode] = currY;
-        setYSnapped(currNode, newY);
+        setY(currNode, snapped(newY));
       } else if (parents.length === 1) {
         // There is only one parent, so we just set the current node to the parent's Y position
         const parent = parents[0].toString();
@@ -283,13 +283,13 @@ const alignNodesCenterInPlace = (g: Dagre.graphlib.Graph, filter: (node: string)
 
         // Log the diff for current node
         prevNodeY[currNode] = currY;
-        setYSnapped(currNode, newY);
+        setY(currNode, snapped(newY));
       }
     } else {
       // No children and no parents, so we just set the current node to its own Y position
       // This is a no-op, but we log it for consistency
       prevNodeY[currNode] = currY;
-      setYSnapped(currNode, currY);
+      setY(currNode, snapped(currY));
     }
   }
 };
@@ -338,14 +338,20 @@ function analyzeSiblings(
   );
 
   const firstSiblingInfo = {
+    id: firstSibling,
     h: Height(firstSibling),
     top: (prevNodeY[firstSibling] ?? Y(firstSibling)) - Height(firstSibling) / 2,
     middle: prevNodeY[firstSibling] ?? Y(firstSibling),
   };
   const lastSiblingInfo = {
+    id: lastSibling,
     h: Height(lastSibling),
     top: (prevNodeY[lastSibling] ?? Y(lastSibling)) - Height(lastSibling) / 2,
     middle: prevNodeY[lastSibling] ?? Y(lastSibling),
   };
   return { lastSiblingInfo, firstSiblingInfo };
 }
+
+const snapped = (value: number, method: 'round' | 'floor' = 'round'): number => {
+  return Math[method](value / GRID_SIZE_OFFSET) * GRID_SIZE_OFFSET;
+};
