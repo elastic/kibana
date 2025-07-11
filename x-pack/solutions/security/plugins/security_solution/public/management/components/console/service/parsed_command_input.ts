@@ -6,9 +6,12 @@
  */
 
 import type { ParsedCommandInput, ParsedCommandInterface } from './types';
-import type { CommandDefinition } from '..';
+import type { CommandDefinition, CommandArgDefinition } from '../types';
 
-const parseInputString = (rawInput: string, commandDefinitions: any[] = []): ParsedCommandInput => {
+const parseInputString = (
+  rawInput: string,
+  commandDefinitions: CommandDefinition[] = []
+): ParsedCommandInput => {
   const input = rawInput.trim();
   const response: ParsedCommandInput = {
     name: getCommandNameFromTextInput(input),
@@ -71,7 +74,7 @@ const parseInputString = (rawInput: string, commandDefinitions: any[] = []): Par
         } else {
           // Argument has no value (bare flag)
           // Check if this argument has selectorEmptyDefaultValue set to true
-          const argDef = commandDef?.args?.[argName];
+          const argDef = commandDef?.args?.[argName] as CommandArgDefinition | undefined;
           const useEmptyValue = argDef?.selectorEmptyDefaultValue === true;
           response.args[argName].push(useEmptyValue ? true : '');
         }
@@ -87,7 +90,10 @@ class ParsedCommand implements ParsedCommandInterface {
   public readonly args: Record<string, string[]>;
   public readonly hasArgs: boolean;
 
-  constructor(public readonly input: string, private readonly commandDefinitions: any[] = []) {
+  constructor(
+    public readonly input: string,
+    private readonly commandDefinitions: CommandDefinition[] = []
+  ) {
     const parseInput = parseInputString(input, commandDefinitions);
     this.name = parseInput.name;
     this.args = parseInput.args;
@@ -101,7 +107,7 @@ class ParsedCommand implements ParsedCommandInterface {
 
 export const parseCommandInput = (
   input: string,
-  commandDefinitions: any[] = []
+  commandDefinitions: CommandDefinition[] = []
 ): ParsedCommandInterface => {
   return new ParsedCommand(input, commandDefinitions);
 };
@@ -125,10 +131,12 @@ export const getCommandNameFromTextInput = (input: string): string => {
 export const getArgumentsForCommand = (command: CommandDefinition): string[] => {
   let requiredArgs = '';
   let optionalArgs = '';
-  const exclusiveOrArgs = [];
+  const exclusiveOrArgs: string[] = [];
 
   if (command.args) {
-    for (const [argName, argDefinition] of Object.entries(command.args)) {
+    for (const [argName, argDefinition] of Object.entries(command.args) as Array<
+      [string, CommandArgDefinition]
+    >) {
       if (argDefinition.required) {
         if (requiredArgs.length) {
           requiredArgs += ' ';
@@ -176,13 +184,13 @@ export const getArgumentsForCommand = (command: CommandDefinition): string[] => 
  * Detects and pre-processes pasted commands that contain argument values
  * for arguments that should be handled by selector components.
  *
- * For example: "runscript --ScriptName="test.ps1"" becomes:
+ * For example: "runscript --ScriptName=\"test.ps1\"" becomes:
  * - cleanedCommand: "runscript --ScriptName"
  * - extractedArgState: { ScriptName: [{ value: "test.ps1", valueText: "test.ps1" }] }
  */
 export const detectAndPreProcessPastedCommand = (
   rawInput: string,
-  commandDefinitions: any[] = []
+  commandDefinitions: CommandDefinition[] = []
 ): {
   cleanedCommand: string;
   extractedArgState: Record<string, Array<{ value: string; valueText: string }>>;
@@ -209,7 +217,7 @@ export const detectAndPreProcessPastedCommand = (
 
   // Find arguments that have SelectorComponents (like ScriptName)
   const selectorArguments = Object.entries(commandDef.args).filter(
-    ([_, argDef]: [string, any]) => argDef.SelectorComponent
+    ([_, argDef]: [string, CommandArgDefinition]) => argDef.SelectorComponent
   );
 
   if (selectorArguments.length === 0) {
@@ -221,7 +229,7 @@ export const detectAndPreProcessPastedCommand = (
 
   // Process each selector argument to extract embedded values
   for (const [argName] of selectorArguments) {
-    const argPattern = new RegExp(`--${argName}\\s*[=]\\s*(["'][^"']*["']|\\S+)`, 'g');
+    const argPattern = new RegExp(`--${argName}\\s*[=]\\s*(["'][^"]*["']|\\S+)`, 'g');
     let match;
 
     while ((match = argPattern.exec(rawInput)) !== null) {
