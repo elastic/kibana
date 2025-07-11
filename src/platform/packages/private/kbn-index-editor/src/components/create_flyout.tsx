@@ -39,15 +39,17 @@ export function createFlyout(deps: FlyoutDeps, props: EditLookupIndexContentCont
   });
 
   const onFlyoutClose = async () => {
-    indexUpdateService.discardUnsavedChanges();
+    if (indexUpdateService.mode === 'edition') {
+      indexUpdateService.discardUnsavedChanges();
 
-    const pendingColumnsToBeSaved = await firstValueFrom(
-      indexUpdateService.pendingColumnsToBeSaved$
-    );
+      const pendingColumnsToBeSaved = await firstValueFrom(
+        indexUpdateService.pendingColumnsToBeSaved$
+      );
 
-    if (pendingColumnsToBeSaved.length) {
-      deps.indexUpdateService.setExitAttemptWithUnsavedFields(true);
-      return;
+      if (pendingColumnsToBeSaved.length) {
+        deps.indexUpdateService.setExitAttemptWithUnsavedFields(true);
+        return;
+      }
     }
 
     props.onClose?.({

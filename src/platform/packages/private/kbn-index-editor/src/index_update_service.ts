@@ -542,5 +542,6 @@ export class IndexUpdateService {
 
     await this.http.post(`/internal/esql/lookup_index/${this.getIndexName()}`);
     await this.bulkUpdate(updates);
+    this.setIndexCreated(true);
   }
 }
