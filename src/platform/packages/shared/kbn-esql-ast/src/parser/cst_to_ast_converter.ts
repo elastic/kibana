@@ -31,7 +31,6 @@ import {
   createLiteral,
   createNumericLiteral,
   createParam,
-  createTimeUnit,
 } from './factories';
 import { getPosition } from './helpers';
 import { firstItem, lastItem, resolveItem } from '../visitor/utils';
@@ -1774,9 +1773,7 @@ export class CstToAstConverter {
     if (ctx instanceof cst.NullLiteralContext) {
       return createLiteral('null', ctx.NULL());
     } else if (ctx instanceof cst.QualifiedIntegerLiteralContext) {
-      // despite the generic name, this is a date unit constant:
-      // e.g. 1 year, 15 months
-      return createTimeUnit(ctx);
+      return this.fromQualifiedIntegerLiteral(ctx);
     } else if (ctx instanceof cst.DecimalLiteralContext) {
       return createNumericLiteral(ctx.decimalValue(), 'double');
     } else if (ctx instanceof cst.IntegerLiteralContext) {
@@ -1831,5 +1828,24 @@ export class CstToAstConverter {
     }
 
     return createList(ctx, values);
+  }
+
+  // -------------------------------------- constant expression: "timeInterval"
+
+  private fromQualifiedIntegerLiteral(
+    ctx: cst.QualifiedIntegerLiteralContext
+  ): ast.ESQLTimeInterval {
+    const value = ctx.integerValue().INTEGER_LITERAL().getText();
+    const unit = ctx.UNQUOTED_IDENTIFIER().symbol.text;
+
+    return {
+      type: 'timeInterval',
+      quantity: Number(value),
+      unit,
+      text: ctx.getText(),
+      location: getPosition(ctx.start, ctx.stop),
+      name: value + ' ' + unit,
+      incomplete: Boolean(ctx.exception),
+    };
   }
 }

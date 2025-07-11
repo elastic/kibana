@@ -29,7 +29,6 @@ import {
   type DecimalValueContext,
   type InlineCastContext,
   type IntegerValueContext,
-  type QualifiedIntegerLiteralContext,
   IndexStringContext,
 } from '../antlr/esql_parser';
 import { Builder, type AstNodeParserFields } from '../builder';
@@ -41,7 +40,6 @@ import type {
   ESQLBinaryExpression,
   ESQLColumn,
   ESQLCommand,
-  ESQLCommandOption,
   ESQLFunction,
   ESQLFunctionCallExpression,
   ESQLIdentifier,
@@ -54,8 +52,6 @@ import type {
   ESQLParamKinds,
   ESQLSource,
   ESQLStringLiteral,
-  ESQLTimeInterval,
-  ESQLUnknownItem,
   FunctionSubtype,
   InlineCastingType,
 } from '../types';
@@ -219,20 +215,6 @@ export function createLiteral(
     literalType: type,
     value: text,
   } as ESQLLiteral;
-}
-
-export function createTimeUnit(ctx: QualifiedIntegerLiteralContext): ESQLTimeInterval {
-  return {
-    type: 'timeInterval',
-    quantity: Number(ctx.integerValue().INTEGER_LITERAL().getText()),
-    unit: ctx.UNQUOTED_IDENTIFIER().symbol.text,
-    text: ctx.getText(),
-    location: getPosition(ctx.start, ctx.stop),
-    name: `${ctx.integerValue().INTEGER_LITERAL().getText()} ${
-      ctx.UNQUOTED_IDENTIFIER().symbol.text
-    }`,
-    incomplete: Boolean(ctx.exception),
-  };
 }
 
 export function createFunction<Subtype extends FunctionSubtype>(
