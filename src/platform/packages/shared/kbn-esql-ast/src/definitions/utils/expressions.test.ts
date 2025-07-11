@@ -10,7 +10,7 @@ import { parse } from '../../parser';
 import { SupportedDataType, FunctionDefinitionTypes } from '../types';
 import { Location } from '../../commands_registry/types';
 import { buildPartialMatcher, getExpressionType } from './expressions';
-import { setTestFunctions } from './test_functions';
+import { setTestFunctions } from '../../__tests__/utils';
 
 describe('buildPartialMatcher', () => {
   it('should build a partial matcher', () => {
