@@ -59,14 +59,7 @@ const toInputCharacterDisplayString = (
   let response = item.value;
 
   if (includeArgSelectorValues && item.isArgSelector) {
-    // Handle file values: use the filename
-    if (item.argState?.value instanceof File) {
-      response += `="${item.argState.value.name}"`;
-    }
-    // Handle string values: use valueText if it exists and is not empty
-    else if (item.argState?.valueText && item.argState.valueText.trim() !== '') {
-      response += `="${item.argState.valueText}"`;
-    }
+    response += `="${item.argState?.valueText ?? ''}"`;
   }
 
   return response;

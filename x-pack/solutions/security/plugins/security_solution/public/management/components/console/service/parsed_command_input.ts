@@ -66,11 +66,8 @@ const parseInputString = (rawInput: string): ParsedCommandInput => {
 
           response.args[argName].push(newArgValue);
         } else {
-          // Argument has no value (bare flag)
-          // Use empty string for selector arguments (ScriptName, CloudFile), boolean true for others
-          const selectorArguments = ['ScriptName', 'CloudFile'];
-          const useStringValue = selectorArguments.includes(argName);
-          response.args[argName].push(useStringValue ? '' : true);
+          // Argument has no value (bare flag) - set value to empty string
+          response.args[argName].push('');
         }
       }
     }
@@ -148,29 +145,30 @@ export const getArgumentsForCommand = (command: CommandDefinition): string[] => 
     exclusive?: string;
     optional?: string;
   }) => {
-    return `${required ? required : ''}${exclusive ? ` ${exclusive}` : ''} ${optional && optional.length > 0 ? `[${optional}]` : ''
-      }`.trim();
+    return `${required ? required : ''}${exclusive ? ` ${exclusive}` : ''} ${
+      optional && optional.length > 0 ? `[${optional}]` : ''
+    }`.trim();
   };
 
   return exclusiveOrArgs.length > 0
     ? exclusiveOrArgs.map((exclusiveArg) => {
-      return buildArgumentText({
-        required: requiredArgs,
-        exclusive: exclusiveArg,
-        optional: optionalArgs,
-      });
-    })
+        return buildArgumentText({
+          required: requiredArgs,
+          exclusive: exclusiveArg,
+          optional: optionalArgs,
+        });
+      })
     : requiredArgs || optionalArgs
-      ? [buildArgumentText({ required: requiredArgs, optional: optionalArgs })]
-      : [];
+    ? [buildArgumentText({ required: requiredArgs, optional: optionalArgs })]
+    : [];
 };
 
 /**
  * Detects and pre-processes pasted commands that contain argument values
  * for arguments that should be handled by selector components.
- * 
+ *
  * For example: "runscript --ScriptName="test.ps1"" becomes:
- * - cleanedCommand: "runscript --ScriptName"  
+ * - cleanedCommand: "runscript --ScriptName"
  * - extractedArgState: { ScriptName: [{ value: "test.ps1", valueText: "test.ps1" }] }
  */
 export const detectAndPreProcessPastedCommand = (
@@ -178,7 +176,7 @@ export const detectAndPreProcessPastedCommand = (
   commandDefinitions: any[] = []
 ): {
   cleanedCommand: string;
-  extractedArgState: Record<string, Array<{ value: string; valueText: string }>>
+  extractedArgState: Record<string, Array<{ value: string; valueText: string }>>;
   hasSelectorArguments: boolean;
 } => {
   const result = {
@@ -221,8 +219,10 @@ export const detectAndPreProcessPastedCommand = (
       let value = match[1];
 
       // Remove quotes if present
-      if ((value.startsWith('"') && value.endsWith('"')) ||
-        (value.startsWith("'") && value.endsWith("'"))) {
+      if (
+        (value.startsWith('"') && value.endsWith('"')) ||
+        (value.startsWith("'") && value.endsWith("'"))
+      ) {
         value = value.slice(1, -1);
       }
 
