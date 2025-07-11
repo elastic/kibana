@@ -6,6 +6,7 @@
  */
 
 import { useMemo } from 'react';
+import type { PrivMonPrivilegesResponse } from '../../../common/api/entity_analytics/privilege_monitoring/privileges.gen';
 import type {
   CreateEntitySourceResponse,
   ListEntitySourcesResponse,
@@ -61,6 +62,7 @@ import {
   RISK_ENGINE_SCHEDULE_NOW_URL,
   RISK_ENGINE_CONFIGURE_SO_URL,
   ASSET_CRITICALITY_PUBLIC_LIST_URL,
+  PRIVILEGE_MONITORING_PRIVILEGE_CHECK_API,
 } from '../../../common/constants';
 import type { SnakeToCamelCase } from '../common/utils';
 import { useKibana } from '../../common/lib/kibana/kibana_react';
@@ -411,14 +413,20 @@ export const useEntityAnalyticsRoutes = () => {
       });
     };
 
-    const initPrivilegedMonitoringEngine = async (): Promise<InitMonitoringEngineResponse> =>
+    const initPrivilegedMonitoringEngine = (): Promise<InitMonitoringEngineResponse> =>
       http.fetch<InitMonitoringEngineResponse>(PRIVMON_PUBLIC_INIT, {
         version: API_VERSIONS.public.v1,
         method: 'POST',
       });
 
-    const fetchPrivilegeMonitoringEngineStatus = async (): Promise<PrivMonHealthResponse> =>
+    const fetchPrivilegeMonitoringEngineStatus = (): Promise<PrivMonHealthResponse> =>
       http.fetch<PrivMonHealthResponse>('/api/entity_analytics/monitoring/privileges/health', {
+        version: API_VERSIONS.public.v1,
+        method: 'GET',
+      });
+
+    const fetchPrivilegeMonitoringPrivileges = (): Promise<PrivMonPrivilegesResponse> =>
+      http.fetch<PrivMonPrivilegesResponse>(PRIVILEGE_MONITORING_PRIVILEGE_CHECK_API, {
         version: API_VERSIONS.public.v1,
         method: 'GET',
       });
@@ -471,6 +479,7 @@ export const useEntityAnalyticsRoutes = () => {
       registerPrivMonMonitoredIndices,
       updatePrivMonMonitoredIndices,
       fetchPrivilegeMonitoringEngineStatus,
+      fetchPrivilegeMonitoringPrivileges,
       fetchRiskEngineSettings,
       calculateEntityRiskScore,
       cleanUpRiskEngine,
