@@ -10,15 +10,9 @@ import { EuiPageHeaderSection, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import { NewConversationButton } from './new_conversation_button';
-import { useConversation } from '../../hooks/use_conversation';
 
 export const ConversationActions: React.FC<{}> = () => {
-  const { conversation } = useConversation();
   const { euiTheme } = useEuiTheme();
-
-  if (!conversation) {
-    return null;
-  }
 
   const actionsContainerStyles = css`
     display: flex;

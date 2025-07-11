@@ -7,15 +7,12 @@
 
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React, { useState } from 'react';
-import { i18n } from '@kbn/i18n';
 import { Conversation } from './conversation';
-import { ConversationActions } from './conversation_actions';
-import { ConversationGrid } from './conversation_grid';
+import { ConversationHeader } from './conversation_header';
 import { ConversationSidebar } from './conversation_sidebar';
-import { ConversationSidebarToggle } from './conversation_sidebar_toggle';
-import { ConversationTitle } from './conversation_title';
 
 export const OnechatConversationsView: React.FC<{}> = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -63,16 +60,12 @@ export const OnechatConversationsView: React.FC<{}> = () => {
       )}
 
       <KibanaPageTemplate.Header css={headerStyles} bottomBorder={false} aria-label={labels.header}>
-        <ConversationGrid>
-          <ConversationSidebarToggle
-            isSidebarOpen={isSidebarOpen}
-            onToggle={() => {
-              setIsSidebarOpen((open) => !open);
-            }}
-          />
-          <ConversationTitle />
-          <ConversationActions />
-        </ConversationGrid>
+        <ConversationHeader
+          isSidebarOpen={isSidebarOpen}
+          onToggleSidebar={() => {
+            setIsSidebarOpen((open) => !open);
+          }}
+        />
       </KibanaPageTemplate.Header>
       <KibanaPageTemplate.Section
         paddingSize="none"

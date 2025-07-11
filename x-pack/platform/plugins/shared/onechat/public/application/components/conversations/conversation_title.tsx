@@ -15,10 +15,6 @@ export const ConversationTitle: React.FC<{}> = () => {
   const { conversation } = useConversation();
   const { euiTheme } = useEuiTheme();
 
-  if (!conversation) {
-    return null;
-  }
-
   const labels = {
     ariaLabel: i18n.translate('xpack.onechat.conversationTitle.ariaLabel', {
       defaultMessage: 'Conversation title',
@@ -36,12 +32,11 @@ export const ConversationTitle: React.FC<{}> = () => {
     flex-direction: row;
     gap: ${euiTheme.size.s};
   `;
-  const { title } = conversation;
 
   return (
     <EuiPageHeaderSection css={sectionStyles}>
       <EuiTitle aria-label={labels.ariaLabel} size="xxs">
-        <h1>{title || labels.newConversationDisplay}</h1>
+        <h1>{conversation?.title || labels.newConversationDisplay}</h1>
       </EuiTitle>
     </EuiPageHeaderSection>
   );
