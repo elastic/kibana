@@ -306,6 +306,19 @@ paths:
       summary: List asset criticality records
       tags:
         - Security Entity Analytics API
+  /api/entity_analytics/monitoring/engine/disable:
+    post:
+      operationId: DisableMonitoringEngine
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MonitoringEngineDescriptor'
+          description: Successful response
+      summary: Disable the Privilege Monitoring Engine
+      tags:
+        - Security Entity Analytics API
   /api/entity_analytics/monitoring/engine/init:
     post:
       operationId: InitMonitoringEngine
@@ -338,7 +351,7 @@ paths:
                       - status
                   status:
                     oneOf:
-                      - $ref: '#/components/schemas/EngineStatus'
+                      - $ref: '#/components/schemas/PrivilegeMonitoringEngineStatus'
                       - enum:
                           - not_found
                         type: string
@@ -1730,10 +1743,19 @@ components:
       type: object
       properties:
         status:
-          $ref: '#/components/schemas/EngineStatus'
+          $ref: '#/components/schemas/PrivilegeMonitoringEngineStatus'
       required:
         - type
         - status
+    PrivilegeMonitoringEngineStatus:
+      enum:
+        - installing
+        - started
+        - stopped
+        - updating
+        - error
+        - disabled
+      type: string
     PrivmonUserCsvUploadErrorItem:
       type: object
       properties:

@@ -214,3 +214,24 @@ export const startPrivilegeMonitoringTask = async ({
     throw e;
   }
 };
+
+export const removePrivilegeMonitoringTask = async ({
+  taskManager,
+  namespace,
+  logger,
+}: {
+  taskManager: TaskManagerStartContract;
+  namespace: string;
+  logger: Logger;
+}) => {
+  const taskId = getTaskId(namespace);
+  try {
+    await taskManager.removeIfExists(taskId);
+    logger.info(`Removed privilege monitoring task with id ${taskId}`);
+  } catch (e) {
+    logger.warn(
+      `[Privilege Monitoring]  [task ${taskId}]: error removing task, received ${e.message}`
+    );
+    throw e;
+  }
+};

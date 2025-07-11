@@ -10,6 +10,7 @@ import type { PrivilegeMonitoringDataClient } from './privilege_monitoring_data_
 const createPrivilegeMonitorDataClientMock = () =>
   ({
     init: jest.fn(),
+    disable: jest.fn(),
   } as unknown as jest.Mocked<PrivilegeMonitoringDataClient>);
 
 export const privilegeMonitorDataClientMock = { create: createPrivilegeMonitorDataClientMock };
