@@ -28,7 +28,7 @@ import { css } from '@emotion/react';
 
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import {
-  EVENT_FILTERS_OPERATORS,
+  ENDPOINT_ARTIFACT_OPERATORS,
   hasWrongOperatorWithWildcard,
   hasPartialCodeSignatureEntry,
 } from '@kbn/securitysolution-list-utils';
@@ -573,7 +573,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
           dataTestSubj: 'alert-exception-builder',
           idAria: 'alert-exception-builder',
           onChange: handleOnBuilderChange,
-          operatorsList: EVENT_FILTERS_OPERATORS,
+          operatorsList: ENDPOINT_ARTIFACT_OPERATORS,
           osTypes: exception.os_types,
           showValueListModal: ShowValueListModal,
         }),

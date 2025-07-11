@@ -27,7 +27,7 @@ import { i18n } from '@kbn/i18n';
 import type { AllConditionEntryFields, EntryTypes } from '@kbn/securitysolution-utils';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import {
-  EVENT_FILTERS_OPERATORS,
+  ENDPOINT_ARTIFACT_OPERATORS,
   hasWrongOperatorWithWildcard,
   hasPartialCodeSignatureEntry,
 } from '@kbn/securitysolution-list-utils';
@@ -652,10 +652,10 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
           isOrHidden: true,
           isAndDisabled: false,
           isNestedDisabled: false,
-          dataTestSubj: 'alert-exception-builder',
+          dataTestSubj: getTestId('exceptionBuilder') as string,
           idAria: 'alert-exception-builder',
           onChange: handleOnBuilderChange,
-          operatorsList: EVENT_FILTERS_OPERATORS,
+          operatorsList: ENDPOINT_ARTIFACT_OPERATORS,
           osTypes: trustedApp.os_types,
           showValueListModal: ShowValueListModal,
         }),
@@ -743,6 +743,7 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
                 <StyledButtonGroup
                   legend="Advanced Mode Toggle"
                   color="primary"
+                  data-test-subj={getTestId('advancedModeToggle')}
                   options={advancedModeToggle}
                   idSelected={selectedFormType}
                   onChange={handleAdvancedModeChange}
@@ -759,12 +760,12 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
                 <EuiIcon type="warningFilled" size="s" color="warning" />
               </EuiFlexItem>
               <EuiFlexItem>
-                <EuiText size="s" color="warning">
+                <EuiText size="s" color="warning" data-test-subj={getTestId('advancedModeUsageWarningHeader')}>
                   {USING_ADVANCED_MODE}
                 </EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
-            <EuiText size="s" color="warning">
+            <EuiText size="s" color="warning" data-test-subj={getTestId('advancedModeUsageWarningBody')}>
               {USING_ADVANCED_MODE_DESCRIPTION}
             </EuiText>
           </>

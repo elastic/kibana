@@ -22,7 +22,7 @@ import type {
 } from '../../../../components/artifact_list_page';
 import type { AppContextTestRender } from '../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../common/mock/endpoint';
-import { INPUT_ERRORS } from '../translations';
+import { INPUT_ERRORS, USING_ADVANCED_MODE, USING_ADVANCED_MODE_DESCRIPTION } from '../translations';
 import { licenseService } from '../../../../../common/hooks/use_license';
 import { forceHTMLElementOffsetWidth } from '../../../../components/effected_policy_select/test_utils';
 import type { TrustedAppConditionEntry } from '../../../../../../common/endpoint/types';
