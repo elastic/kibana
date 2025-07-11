@@ -6,7 +6,6 @@
  */
 
 import { ServerSentEventError } from '@kbn/sse-utils';
-import type { SerializedToolIdentifier } from '../tools';
 
 /**
  * Code to identify onechat errors
