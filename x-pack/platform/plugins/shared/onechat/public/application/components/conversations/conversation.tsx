@@ -10,7 +10,7 @@ import { css } from '@emotion/react';
 import React, { useCallback, useEffect, useRef } from 'react';
 import { useConversation } from '../../hooks/use_conversation';
 import { useStickToBottom } from '../../hooks/use_stick_to_bottom';
-import { ConversationInputForm } from './conversation_input_form';
+import { ConversationInputForm } from './conversation_input/conversation_input_form';
 import { ConversationRounds } from './conversation_rounds/conversation_rounds';
 import { NewConversationPrompt } from './new_conversation_prompt';
 
