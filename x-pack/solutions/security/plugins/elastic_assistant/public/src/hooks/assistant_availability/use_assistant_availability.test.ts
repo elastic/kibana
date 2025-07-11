@@ -12,7 +12,6 @@ import { LicenseService } from '../licence/license_service';
 import { renderHook } from '@testing-library/react';
 import { SECURITY_FEATURE_ID } from '../../../../common/constants';
 import { ASSISTANT_FEATURE_ID } from '@kbn/security-solution-features/constants';
-import { AIAssistantType } from '@kbn/ai-assistant-management-plugin/public';
 import { useIsNavControlVisible } from '../is_nav_control_visible/use_is_nav_control_visible';
 
 jest.mock('../licence/use_licence');
@@ -21,7 +20,9 @@ jest.mock('../is_nav_control_visible/use_is_nav_control_visible');
 
 const mockUseLicense = useLicense as jest.MockedFunction<typeof useLicense>;
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
-const mockUseIsNavControlVisible = useIsNavControlVisible as jest.MockedFunction<typeof useIsNavControlVisible>;
+const mockUseIsNavControlVisible = useIsNavControlVisible as jest.MockedFunction<
+  typeof useIsNavControlVisible
+>;
 
 describe('useAssistantAvailability', () => {
   beforeEach(() => {
@@ -57,7 +58,7 @@ describe('useAssistantAvailability', () => {
           },
         },
         aiAssistantManagementSelection: {
-          aiAssistantManagementSelection$: jest.fn(()=>of(AIAssistantType.Security)),
+          aiAssistantManagementSelection$: jest.fn(),
         },
         featureFlags: {
           getBooleanValue: jest.fn().mockReturnValue(true),
@@ -109,7 +110,7 @@ describe('useAssistantAvailability', () => {
           },
         },
         aiAssistantManagementSelection: {
-          aiAssistantManagementSelection$: jest.fn(()=>of(AIAssistantType.Security)),
+          aiAssistantManagementSelection$: jest.fn(),
         },
         featureFlags: {
           getBooleanValue: jest.fn().mockReturnValue(true),

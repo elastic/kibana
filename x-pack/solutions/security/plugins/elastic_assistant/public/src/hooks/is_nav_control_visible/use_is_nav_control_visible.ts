@@ -47,7 +47,6 @@ export function useIsNavControlVisible() {
       aiAssistantManagementSelection.aiAssistantType$,
     ]).subscribe({
       next: ([appId, applications, preferredAssistantType]) => {
-        console.log("HERE", preferredAssistantType)
         setIsVisible(getVisibility(appId, applications, preferredAssistantType));
       },
     });
