@@ -23,12 +23,10 @@ import Papa from 'papaparse';
 import { Readable } from 'stream';
 
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
+import { defaultMonitoringUsersIndex } from '../../../../common/constants';
 import type { PrivmonBulkUploadUsersCSVResponse } from '../../../../common/api/entity_analytics/privilege_monitoring/users/upload_csv.gen';
 import type { HapiReadableStream } from '../../../types';
-import {
-  defaultMonitoringUsersIndex,
-  getPrivilegedMonitorUsersIndex,
-} from '../../../../common/entity_analytics/privilege_monitoring/constants';
+import { getPrivilegedMonitorUsersIndex } from '../../../../common/entity_analytics/privilege_monitoring/utils';
 import type { UpdatePrivMonUserRequestBody } from '../../../../common/api/entity_analytics/privilege_monitoring/users/update.gen';
 
 import type {
@@ -77,7 +75,6 @@ import {
   PRIVMON_EVENT_INGEST_PIPELINE_ID,
   eventIngestPipeline,
 } from './elasticsearch/pipelines/event_ingested';
-
 interface PrivilegeMonitoringClientOpts {
   logger: Logger;
   clusterClient: IScopedClusterClient;
@@ -138,7 +135,7 @@ export class PrivilegeMonitoringDataClient {
     );
     try {
       this.log('debug', 'Creating privilege user monitoring event.ingested pipeline');
-      await this.esClient.ingest.putPipeline(eventIngestPipeline);
+      await this.createIngestPipelineIfDoesNotExist();
 
       await this.createOrUpdateIndex().catch((e) => {
         if (e.meta.body.error.type === 'resource_already_exists_exception') {
@@ -225,8 +222,21 @@ export class PrivilegeMonitoringDataClient {
     }
   }
 
+  public async createIngestPipelineIfDoesNotExist() {
+    const pipelinesResponse = await this.internalUserClient.ingest.getPipeline(
+      { id: PRIVMON_EVENT_INGEST_PIPELINE_ID },
+      { ignore: [404] }
+    );
+    if (!pipelinesResponse[PRIVMON_EVENT_INGEST_PIPELINE_ID]) {
+      this.log('info', 'Privileged user monitoring ingest pipeline does not exist, creating.');
+      await this.internalUserClient.ingest.putPipeline(eventIngestPipeline);
+    } else {
+      this.log('info', 'Privileged user monitoring ingest pipeline already exists.');
+    }
+  }
+
   /**
-   * This create a index for user to populate privileged users.
+   * This creates an index for the user to populate privileged users.
    * It already defines the mappings and settings for the index.
    */
   public createPrivilegesImportIndex(indexName: string, mode: 'lookup' | 'standard') {
