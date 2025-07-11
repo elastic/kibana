@@ -110,6 +110,26 @@ export const ESQLDataCascade = ({
     [dataService.search, dataView, filters, from, to]
   );
 
+  const onCascadeLeafNodeExpanded = useCallback<
+    NonNullable<ComponentProps<typeof DataCascade<DataTableRecord>>['onCascadeLeafNodeExpanded']>
+  >(
+    async ({ nodePath, nodePathMap }) => {
+      const searchResult = await lastValueFrom(
+        dataService.search.search({
+          params: {
+            index: dataView.getIndexPattern(),
+            size: 0,
+            track_total_hits: true,
+            body: {},
+          },
+        })
+      );
+
+      return [];
+    },
+    [dataService.search, dataView]
+  );
+
   return (
     <div
       css={({ euiTheme }) => ({
@@ -119,9 +139,12 @@ export const ESQLDataCascade = ({
         width: '100%',
       })}
     >
-      <DataCascade<DataTableRecord>
+      <DataCascade<DataTableRecord['flattened'] & { id: string }>
         stickyGroupRoot
-        data={initialData}
+        data={initialData.map((datum) => ({
+          id: datum.id,
+          ...datum.flattened,
+        }))}
         cascadeGroups={cascadeGroups}
         tableTitleSlot={({ rows }) => (
           <EuiText>
@@ -138,7 +161,7 @@ export const ESQLDataCascade = ({
         rowHeaderTitleSlot={({ row }) => {
           return (
             <EuiText size="s">
-              <h4>{row.original.flattened[cascadeGroups[row.depth]] as string}</h4>
+              <h4>{row.original[cascadeGroups[row.depth]] as string}</h4>
             </EuiText>
           );
         }}
@@ -154,7 +177,7 @@ export const ESQLDataCascade = ({
                       defaultMessage="{identifier} <badge>{identifierValue}</badge>"
                       values={{
                         identifier,
-                        identifierValue: row.original.flattened[identifier] as string,
+                        identifierValue: row.original[identifier] as string,
                         badge: (chunks) => <EuiBadge color="hollow">{chunks}</EuiBadge>,
                       }}
                     />
@@ -167,7 +190,7 @@ export const ESQLDataCascade = ({
                 aria-label={i18n.translate('discover.esql_data_cascade.grouping.expand', {
                   defaultMessage: 'Expand {groupValue} group',
                   values: {
-                    groupValue: row.original.flattened[cascadeGroups[row.depth]] as string,
+                    groupValue: row.original[cascadeGroups[row.depth]] as string,
                   },
                 })}
                 iconType="expand"
@@ -186,8 +209,7 @@ export const ESQLDataCascade = ({
         }}
         onCascadeGroupingChange={() => {}}
         onCascadeGroupNodeExpanded={onCascadeGroupNodeExpanded}
-        // @ts-expect-error - TODO: implement data fetching for leaf nodes
-        onCascadeLeafNodeExpanded={() => {}}
+        onCascadeLeafNodeExpanded={onCascadeLeafNodeExpanded}
       />
     </div>
   );
