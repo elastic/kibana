@@ -19,6 +19,7 @@ import {
   CDR_EXTENDED_VULN_RETENTION_POLICY,
   VULNERABILITIES_SEVERITY,
 } from '@kbn/cloud-security-posture-common';
+import type { VulnerabilitiesGroupingAggregation } from '@kbn/cloud-security-posture';
 import { buildEsQuery, Filter } from '@kbn/es-query';
 import { checkIsFlattenResults } from '@kbn/grouping/src/containers/query/helpers';
 import {
@@ -31,7 +32,6 @@ import {
 } from '../../../common/constants';
 import { useDataViewContext } from '../../../common/contexts/data_view_context';
 import {
-  VulnerabilitiesGroupingAggregation,
   VulnerabilitiesRootGroupingAggregation,
   useGroupedVulnerabilities,
 } from './use_grouped_vulnerabilities';

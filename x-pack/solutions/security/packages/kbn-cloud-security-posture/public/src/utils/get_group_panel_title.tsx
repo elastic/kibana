@@ -7,13 +7,16 @@
 
 import React from 'react';
 import { GenericBuckets, RawBucket } from '@kbn/grouping/src';
+import { FindingsGroupingAggregation, VulnerabilitiesGroupingAggregation } from '../types';
+
+type GroupingAggregation = VulnerabilitiesGroupingAggregation | FindingsGroupingAggregation;
 
 /**
  * Gets the group panel title in the format "name - id" when aggregationField is provided,
  * otherwise returns just the bucket key as string.
  * This utility is shared between vulnerability and misconfiguration findings.
  */
-export const getGroupPanelTitle = <T extends Record<string, unknown>>(
+export const getGroupPanelTitle = <T extends GroupingAggregation>(
   bucket: RawBucket<T>,
   aggregationField?: keyof T
 ) => {
