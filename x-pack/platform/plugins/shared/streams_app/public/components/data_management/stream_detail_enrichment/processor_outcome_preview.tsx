@@ -23,7 +23,6 @@ import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import { getPercentageFormatter } from '../../../util/formatters';
 import { useKibana } from '../../../hooks/use_kibana';
-import { PreviewTable } from '../preview_table';
 import {
   PreviewDocsFilterOption,
   getTableColumns,
@@ -45,6 +44,7 @@ import { AssetImage } from '../../asset_image';
 import { docViewJson } from './doc_viewer_json';
 import { DOC_VIEW_DIFF_ID, DocViewerContext, docViewDiff } from './doc_viewer_diff';
 import { DataTableRecordWithIndex, PreviewFlyout } from './preview_flyout';
+import { ProcessingPreviewTable } from './processing_preview_table';
 
 export const FLYOUT_WIDTH_KEY = 'streamsEnrichment:flyoutWidth';
 
@@ -229,14 +229,6 @@ const OutcomePreviewTable = () => {
     ]);
     return myRegistry;
   }, [unifiedDocViewer.registry]);
-
-  const rowSourceAvatars = useMemo(() => {
-    if (dataSourceRefs.length < 2) {
-      // If there is only one data source, we don't need to show avatars
-      return undefined;
-    }
-    return originalSamples?.map((sample) => sample.dataSourceName);
-  }, [dataSourceRefs.length, originalSamples]);
 
   const {
     setExplicitlyEnabledPreviewColumns,
@@ -423,10 +415,10 @@ const OutcomePreviewTable = () => {
 
   return (
     <>
-      <PreviewTable
+      <ProcessingPreviewTable
         documents={previewDocuments}
-        rowSourceAvatars={rowSourceAvatars}
-        selectableRow
+        originalSamples={originalSamples}
+        showRowSourceAvatars={dataSourceRefs.length >= 2}
         onRowSelected={onRowSelected}
         selectedRowIndex={hits.findIndex((hit) => hit === currentDoc)}
         displayColumns={previewColumns}

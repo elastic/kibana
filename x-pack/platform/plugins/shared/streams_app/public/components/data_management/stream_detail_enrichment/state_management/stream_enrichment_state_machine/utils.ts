@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { AssignArgs } from 'xstate5';
 import { StreamEnrichmentContextType } from './types';
 import {
-  SampleDocumentFromDatasource,
+  SampleDocumentWithUIAttributes,
   convertToFieldDefinition,
   getMappedSchemaFields,
   getUnmappedSchemaFields,
@@ -71,22 +71,20 @@ export function getDataSourcesUrlState(context: StreamEnrichmentContextType) {
 
 export function getDataSourcesSamples(
   context: StreamEnrichmentContextType
-): SampleDocumentFromDatasource[] {
-  const dataSourcesSnapshots = context.dataSourcesRefs
-    .map((dataSourceRef) => dataSourceRef.getSnapshot())
-    .filter((snapshot) => snapshot.matches('enabled'));
-
-  return dataSourcesSnapshots.flatMap((snapshot, dataSourceIndex) =>
-    snapshot.context.data.map((doc) => ({
-      dataSourceName:
-        snapshot.context.dataSource.name ||
-        i18n.translate('xpack.streams.enrichment.dataSources.defaultName', {
-          defaultMessage: 'Data source {index}',
-          values: { index: dataSourceIndex + 1 },
-        }),
-      sample: doc,
-    }))
+): SampleDocumentWithUIAttributes[] {
+  const dataSourcesSnapshots = context.dataSourcesRefs.map((dataSourceRef) =>
+    dataSourceRef.getSnapshot()
   );
+
+  return dataSourcesSnapshots.flatMap((snapshot, dataSourceIndex) => {
+    if (!snapshot.matches('enabled')) {
+      return [];
+    }
+    return snapshot.context.data.map((doc) => ({
+      dataSourceIndex,
+      sample: doc,
+    }));
+  });
 }
 
 export function getStagedProcessors(context: StreamEnrichmentContextType) {

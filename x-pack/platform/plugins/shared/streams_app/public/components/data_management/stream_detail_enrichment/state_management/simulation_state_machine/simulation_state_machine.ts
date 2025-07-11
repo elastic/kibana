@@ -17,7 +17,7 @@ import {
   SimulationEvent,
   Simulation,
   SimulationMachineDeps,
-  SampleDocumentFromDatasource,
+  SampleDocumentWithUIAttributes,
 } from './types';
 import { PreviewDocsFilterOption } from './simulation_documents_search';
 import {
@@ -33,7 +33,7 @@ export interface ProcessorEventParams {
   processors: ProcessorDefinitionWithUIAttributes[];
 }
 
-const hasSamples = (samples: SampleDocumentFromDatasource[]) => !isEmpty(samples);
+const hasSamples = (samples: SampleDocumentWithUIAttributes[]) => !isEmpty(samples);
 
 const isValidProcessor = (processor: ProcessorDefinitionWithUIAttributes) =>
   isSchema(processorDefinitionSchema, processorConverter.toAPIDefinition(processor));
@@ -57,7 +57,7 @@ export const simulationMachine = setup({
     storeProcessors: assign((_, params: ProcessorEventParams) => ({
       processors: params.processors,
     })),
-    storeSamples: assign((_, params: { samples: SampleDocumentFromDatasource[] }) => ({
+    storeSamples: assign((_, params: { samples: SampleDocumentWithUIAttributes[] }) => ({
       samples: params.samples,
     })),
     storeSimulation: assign((_, params: { simulation: Simulation | undefined }) => ({
@@ -117,7 +117,7 @@ export const simulationMachine = setup({
     canSimulate: ({ context }) =>
       hasSamples(context.samples) && hasValidProcessors(context.processors),
     hasProcessors: (_, params: ProcessorEventParams) => !isEmpty(params.processors),
-    '!hasSamples': (_, params: { samples: SampleDocumentFromDatasource[] }) =>
+    '!hasSamples': (_, params: { samples: SampleDocumentWithUIAttributes[] }) =>
       !hasSamples(params.samples),
   },
 }).createMachine({

@@ -347,12 +347,7 @@ export const streamEnrichmentMachine = setup({
               ],
             },
             'dataSource.change': {
-              actions: [
-                raise({ type: 'url.sync' }),
-                cancel('send-samples-to-simulator'), // Debounce samples sent to simulator on multiple data sources retrieval
-                // Send samples to simulator after data source change because the data includes information about the data source
-                { type: 'sendDataSourcesSamplesToSimulator' },
-              ],
+              actions: raise({ type: 'url.sync' }),
             },
             'dataSource.dataChange': {
               actions: [
