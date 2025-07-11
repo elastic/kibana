@@ -7,6 +7,8 @@
 
 import React, { useMemo } from 'react';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { buildEsQuery } from '@kbn/es-query';
+import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { CONTAINER_ID, SERVICE_ENVIRONMENT, SERVICE_NAME } from '../../../../common/es_fields/apm';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
@@ -17,7 +19,7 @@ import { useTimeRange } from '../../../hooks/use_time_range';
 
 export function ServiceLogs() {
   const {
-    services: { logsShared },
+    services: { logsShared, uiSettings },
   } = useKibana();
 
   const { serviceName } = useApmServiceContext();
@@ -27,7 +29,7 @@ export function ServiceLogs() {
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
   const timeRange = useMemo(() => ({ start, end }), [start, end]);
 
-  const { data: logFilters, status } = useFetcher(
+  const { data: assetFilter, status } = useFetcher(
     async (callApmApi) => {
       if (start == null || end == null) {
         return;
@@ -48,10 +50,25 @@ export function ServiceLogs() {
         }
       );
 
-      return [getInfrastructureFilter({ containerIds, environment, serviceName })];
+      return getInfrastructureFilter({ containerIds, environment, serviceName });
     },
     [environment, kuery, serviceName, start, end]
   );
+
+  const logFilters = useMemo(() => {
+    return [
+      ...(assetFilter != null ? [assetFilter] : []),
+      buildEsQuery(
+        undefined,
+        {
+          language: 'kuery',
+          query: kuery,
+        },
+        [],
+        getEsQueryConfig(uiSettings)
+      ),
+    ];
+  }, [assetFilter, kuery, uiSettings]);
 
   if (status === FETCH_STATUS.SUCCESS || (status === FETCH_STATUS.LOADING && logFilters != null)) {
     return (
