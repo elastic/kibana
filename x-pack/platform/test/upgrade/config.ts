@@ -14,7 +14,7 @@ import { RulesHelper } from './services/rules_upgrade_services';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const apiConfig = await readConfigFile(require.resolve('../api_integration/config'));
-  const functionalConfig = await readConfigFile(require.resolve('../functional/config.base.js'));
+  const functionalConfig = await readConfigFile(require.resolve('../functional/config.base.ts'));
 
   return {
     ...functionalConfig.getAll(),
@@ -24,7 +24,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       require.resolve('./apps/dashboard'),
       require.resolve('./apps/discover'),
       require.resolve('./apps/graph'),
-      require.resolve('./apps/logs'),
       require.resolve('./apps/maps'),
       require.resolve('./apps/reporting'),
       require.resolve('./apps/rules'),
