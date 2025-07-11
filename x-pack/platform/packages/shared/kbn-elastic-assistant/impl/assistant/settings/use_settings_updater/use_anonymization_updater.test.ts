@@ -56,6 +56,7 @@ describe('useAnonymizationUpdater', () => {
   it('should initialize with default values', () => {
     const { result } = renderHook(() =>
       useAnonymizationUpdater({
+        anonymizationAllFields: mockAnonymizationFields,
         anonymizationFields: mockAnonymizationFields,
         http: mockHttp,
         toasts: mockToasts,
@@ -69,6 +70,7 @@ describe('useAnonymizationUpdater', () => {
   it('should update hasPendingChanges and updatedAnonymizationData on onListUpdated', async () => {
     const { result } = renderHook(() =>
       useAnonymizationUpdater({
+        anonymizationAllFields: mockAnonymizationFields,
         anonymizationFields: mockAnonymizationFields,
         http: mockHttp,
         toasts: mockToasts,
@@ -99,6 +101,7 @@ describe('useAnonymizationUpdater', () => {
 
     const { result } = renderHook(() =>
       useAnonymizationUpdater({
+        anonymizationAllFields: mockAnonymizationFields,
         anonymizationFields: mockAnonymizationFields,
         http: mockHttp,
         toasts: mockToasts,
@@ -158,6 +161,7 @@ describe('useAnonymizationUpdater', () => {
 
     const { result } = renderHook(() =>
       useAnonymizationUpdater({
+        anonymizationAllFields: mockAnonymizationFields,
         anonymizationFields: mockAnonymizationFields,
         http: mockHttp,
         toasts: mockToasts,
@@ -203,6 +207,7 @@ describe('useAnonymizationUpdater', () => {
 
     const { result } = renderHook(() =>
       useAnonymizationUpdater({
+        anonymizationAllFields: mockAnonymizationFields,
         anonymizationFields: mockAnonymizationFields,
         http: mockHttp,
         toasts: mockToasts,

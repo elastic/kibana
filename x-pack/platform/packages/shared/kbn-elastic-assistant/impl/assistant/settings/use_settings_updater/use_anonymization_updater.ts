@@ -24,7 +24,7 @@ const DEFAULT_ANONYMIZATION_FIELDS = {
 
 interface Params {
   anonymizationFields: FindAnonymizationFieldsResponse;
-  anonymizationAllFields?: FindAnonymizationFieldsResponse;
+  anonymizationAllFields: FindAnonymizationFieldsResponse;
   http: HttpSetup;
   toasts?: IToasts;
 }
@@ -75,7 +75,7 @@ export const useAnonymizationUpdater = ({
         // If there are pending changes, merge the bulk actions status with the existing data
         return {
           ...anonymizationFields,
-          data: (anonymizationFields.data ?? []).map((f) => {
+          data: anonymizationFields.data.map((f) => {
             const bulkActionField = anonymizationFieldsBulkActions.update?.find(
               (pf) => pf.id === f.id
             );
