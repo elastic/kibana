@@ -5651,7 +5651,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/fec-alerts-test-plugin@link:x-pack/test/functional_execution_context/plugins/alerts":
+"@kbn/fec-alerts-test-plugin@link:x-pack/platform/test/functional_execution_context/plugins/alerts":
   version "0.0.0"
   uid ""
 
@@ -5711,7 +5711,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/foo-plugin@link:x-pack/test/ui_capabilities/common/plugins/foo_plugin":
+"@kbn/foo-plugin@link:x-pack/platform/test/ui_capabilities/common/plugins/foo_plugin":
   version "0.0.0"
   uid ""
 

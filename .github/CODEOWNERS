@@ -493,7 +493,7 @@ examples/feature_flags_example @elastic/kibana-core
 x-pack/platform/test/plugin_api_integration/plugins/feature_usage_test @elastic/kibana-security
 x-pack/platform/plugins/shared/features @elastic/kibana-core
 x-pack/test/security_api_integration/plugins/features_provider @elastic/kibana-security
-x-pack/test/functional_execution_context/plugins/alerts @elastic/kibana-core
+x-pack/platform/test/functional_execution_context/plugins/alerts @elastic/kibana-core
 examples/field_formats_example @elastic/kibana-data-discovery
 src/platform/plugins/shared/field_formats @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-field-types @elastic/kibana-data-discovery
@@ -508,7 +508,7 @@ src/platform/plugins/shared/files @elastic/appex-sharedux
 packages/kbn-find-used-node-modules @elastic/kibana-operations
 x-pack/platform/plugins/shared/fleet @elastic/fleet
 src/platform/packages/shared/kbn-flot-charts @elastic/kibana-operations
-x-pack/test/ui_capabilities/common/plugins/foo_plugin @elastic/kibana-security
+x-pack/platform/test/ui_capabilities/common/plugins/foo_plugin @elastic/kibana-security
 src/platform/plugins/private/ftr_apis @elastic/kibana-core
 src/platform/packages/shared/kbn-ftr-common-functional-services @elastic/kibana-operations @elastic/appex-qa
 src/platform/packages/shared/kbn-ftr-common-functional-ui-services @elastic/appex-qa
@@ -1508,7 +1508,7 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 ^/src/platform/test/functional/screenshots/baseline/tsvb_dashboard.png @elastic/kibana-presentation
 ^/src/platform/test/functional/screenshots/baseline/dashboard_*.png @elastic/kibana-presentation
 ^/src/platform/test/functional/screenshots/baseline/area_chart.png @elastic/kibana-presentation
-/x-pack/test/disable_ems @elastic/kibana-presentation # Assigned per https://github.com/elastic/kibana/pull/165986
+/x-pack/platform/test/disable_ems @elastic/kibana-presentation # Assigned per https://github.com/elastic/kibana/pull/165986
 /x-pack/test/functional/fixtures/kbn_archiver/dashboard* @elastic/kibana-presentation
 ^/src/platform/test/functional/page_objects/dashboard_page* @elastic/kibana-presentation
 ^/src/platform/test/functional/firefox/dashboard.config.ts @elastic/kibana-presentation # Assigned per: https://github.com/elastic/kibana/issues/15023
@@ -1870,7 +1870,7 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /x-pack/test/functional/apps/saved_objects_management @elastic/kibana-core
 /x-pack/platform/test/usage_collection @elastic/kibana-core
 /x-pack/platform/test/licensing_plugin @elastic/kibana-core
-/x-pack/test/functional_execution_context @elastic/kibana-core
+/x-pack/platform/test/functional_execution_context @elastic/kibana-core
 /x-pack/platform/test/api_integration/apis/telemetry @elastic/kibana-core
 /x-pack/platform/test/api_integration/apis/status @elastic/kibana-core
 /x-pack/platform/test/api_integration/apis/stats @elastic/kibana-core
@@ -1982,7 +1982,7 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /x-pack/platform/test/api_integration/apis/security/ @elastic/kibana-security
 /x-pack/platform/test/api_integration/apis/spaces/ @elastic/kibana-security
 /x-pack/platform/test/api_integration_basic/apis/security/ @elastic/kibana-security
-/x-pack/test/ui_capabilities/ @elastic/kibana-security
+/x-pack/platform/test/ui_capabilities/ @elastic/kibana-security
 /x-pack/platform/test/encrypted_saved_objects_api_integration/ @elastic/kibana-security
 /x-pack/platform/test/functional/apps/security/ @elastic/kibana-security
 /x-pack/platform/test/functional/apps/spaces/ @elastic/kibana-security
