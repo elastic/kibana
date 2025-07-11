@@ -6,18 +6,21 @@
  */
 
 import { z } from '@kbn/zod';
-import type { KibanaRequest } from '@kbn/core-http-server';
-import { ToolDescriptor, ToolType } from '@kbn/onechat-common';
-import type { ExecutableTool, ExecutableToolHandlerFn, ToolProvider } from '@kbn/onechat-server';
+import { ToolType } from '@kbn/onechat-common';
+import type {
+  ExecutableTool,
+  ExecutableToolHandlerFn,
+  ToolProvider,
+  ToolHandlerFn,
+} from '@kbn/onechat-server';
 import type { ToolsServiceStart } from '../services/tools/types';
 import type { ToolRegistry } from '../services/tools/tool_registry';
+import type { InternalToolDefinition } from '../services/tools/tool_provider';
 
 export type ToolProviderMock = jest.Mocked<ToolProvider>;
 export type ToolRegistryMock = jest.Mocked<ToolRegistry>;
 
-export type ToolsServiceStartMock = ToolsServiceStart & {
-  getRegistry(opts: { request: KibanaRequest }): Promise<ToolRegistryMock>;
-};
+export type ToolsServiceStartMock = jest.Mocked<ToolsServiceStart>;
 
 export const createToolProviderMock = (): ToolProviderMock => {
   return {
@@ -45,7 +48,9 @@ export const createToolsServiceStartMock = (): ToolsServiceStartMock => {
   };
 };
 
-export type MockedTool = ToolDescriptor;
+export type MockedTool = Omit<InternalToolDefinition, 'handler'> & {
+  handler: jest.MockedFunction<ToolHandlerFn>;
+};
 
 export type MockedExecutableTool = Omit<ExecutableTool, 'execute'> & {
   execute: jest.MockedFunction<ExecutableToolHandlerFn>;
@@ -57,7 +62,9 @@ export const createMockedTool = (parts: Partial<MockedTool> = {}): MockedTool =>
     type: ToolType.builtin,
     description: 'test description',
     configuration: {},
+    schema: z.object({}),
     tags: ['tag-1', 'tag-2'],
+    handler: jest.fn(parts.handler),
     ...parts,
   };
 };
