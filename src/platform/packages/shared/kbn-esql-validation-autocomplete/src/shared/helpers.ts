@@ -9,14 +9,8 @@
 import {
   Walker,
   type ESQLAstCommand,
-  type ESQLAstItem,
-  type ESQLColumn,
-  type ESQLCommandOption,
   type ESQLFunction,
   type ESQLLiteral,
-  type ESQLSingleAstItem,
-  type ESQLSource,
-  type ESQLTimeInterval,
   esqlCommandRegistry,
   timeUnits,
   type FieldType,
@@ -25,72 +19,28 @@ import {
   type FunctionDefinition,
   FunctionDefinitionTypes,
   type FunctionParameter,
-  type FunctionReturnType,
 } from '@kbn/esql-ast';
 import type {
   ESQLFieldWithMetadata,
   ESQLUserDefinedColumn,
 } from '@kbn/esql-ast/src/commands_registry/types';
-import { getColumnForASTNode, getFunctionSignatures } from '@kbn/esql-ast/src/definitions/utils';
+import { getFunctionDefinition } from '@kbn/esql-ast/src/definitions/utils';
 import { aggFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/aggregation_functions';
+import { timeSeriesAggFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/time_series_agg_functions';
 import { groupingFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/grouping_functions';
 import { scalarFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/scalar_functions';
 import { operatorsDefinitions } from '@kbn/esql-ast/src/definitions/all_operators';
-import { getExpressionType } from '@kbn/esql-ast/src/definitions/utils';
 import { getTestFunctions } from '@kbn/esql-ast/src/definitions/utils/test_functions';
-import {
-  ESQLIdentifier,
-  ESQLInlineCast,
-  ESQLLocation,
-  ESQLParamLiteral,
-  ESQLProperNode,
-} from '@kbn/esql-ast/src/types';
+import { ESQLLocation, ESQLParamLiteral, ESQLProperNode } from '@kbn/esql-ast/src/types';
 import { uniqBy } from 'lodash';
 
 import { enrichFieldsWithECSInfo } from '../autocomplete/utils/ecs_metadata_helper';
 import { getLocationFromCommandOrOptionName } from './types';
-import type { ReferenceMaps } from '../validation/types';
 import type { ESQLCallbacks, ReasonTypes } from './types';
 import { collectUserDefinedColumns } from './user_defined_columns';
 
 export function nonNullable<T>(v: T): v is NonNullable<T> {
   return v != null;
-}
-
-export function isSingleItem(arg: ESQLAstItem): arg is ESQLSingleAstItem {
-  return arg && !Array.isArray(arg);
-}
-
-export function isFunctionItem(arg: ESQLAstItem): arg is ESQLFunction {
-  return isSingleItem(arg) && arg.type === 'function';
-}
-
-export function isOptionItem(arg: ESQLAstItem): arg is ESQLCommandOption {
-  return isSingleItem(arg) && arg.type === 'option';
-}
-
-export function isSourceItem(arg: ESQLAstItem): arg is ESQLSource {
-  return isSingleItem(arg) && arg.type === 'source';
-}
-
-export function isColumnItem(arg: ESQLAstItem): arg is ESQLColumn {
-  return isSingleItem(arg) && arg.type === 'column';
-}
-
-export function isLiteralItem(arg: ESQLAstItem): arg is ESQLLiteral {
-  return isSingleItem(arg) && arg.type === 'literal';
-}
-
-export function isInlineCastItem(arg: ESQLAstItem): arg is ESQLInlineCast {
-  return isSingleItem(arg) && arg.type === 'inlineCast';
-}
-
-export function isTimeIntervalItem(arg: ESQLAstItem): arg is ESQLTimeInterval {
-  return isSingleItem(arg) && arg.type === 'timeInterval';
-}
-
-export function isAssignment(arg: ESQLAstItem): arg is ESQLFunction {
-  return isFunctionItem(arg) && arg.name === '=';
 }
 
 export const within = (position: number, location: ESQLLocation | undefined) =>
@@ -109,6 +59,7 @@ function buildFunctionLookup() {
       .concat(
         scalarFunctionDefinitions,
         aggFunctionDefinitions,
+        timeSeriesAggFunctionDefinitions,
         groupingFunctionDefinitions,
         getTestFunctions()
       )
@@ -157,42 +108,7 @@ export function getAllFunctions(options?: {
   return Array.from(fns.values()).filter((fn) => types.has(fn.type));
 }
 
-export function getFunctionDefinition(name: string) {
-  return buildFunctionLookup().get(name.toLowerCase());
-}
-
 const unwrapStringLiteralQuotes = (value: string) => value.slice(1, -1);
-
-function doesLiteralMatchParameterType(argType: FunctionParameterType, item: ESQLLiteral) {
-  if (item.literalType === argType) {
-    return true;
-  }
-
-  if (bothStringTypes(argType, item.literalType)) {
-    // all functions accept keyword literals for text parameters
-    return true;
-  }
-
-  if (item.literalType === 'null') {
-    // all parameters accept null, but this is not yet reflected
-    // in our function definitions so we let it through here
-    return true;
-  }
-
-  // some parameters accept string literals because of ES auto-casting
-  if (
-    item.literalType === 'keyword' &&
-    (argType === 'date' ||
-      argType === 'date_period' ||
-      argType === 'version' ||
-      argType === 'ip' ||
-      argType === 'boolean')
-  ) {
-    return true;
-  }
-
-  return false;
-}
 
 export function isArrayType(type: string): type is ArrayType {
   return type.endsWith('[]');
@@ -223,94 +139,6 @@ export function areFieldAndUserDefinedColumnTypesCompatible(
   return fieldType === userColumnType;
 }
 
-export function printFunctionSignature(arg: ESQLFunction): string {
-  const fnDef = getFunctionDefinition(arg.name);
-  if (fnDef) {
-    const signature = getFunctionSignatures(
-      {
-        ...fnDef,
-        signatures: [
-          {
-            ...fnDef?.signatures[0],
-            params: arg.args.map((innerArg) =>
-              Array.isArray(innerArg)
-                ? { name: `InnerArgument[]`, type: 'any' as const }
-                : // this cast isn't actually correct, but we're abusing the
-                  // getFunctionSignatures API anyways
-                  { name: innerArg.text, type: innerArg.type as FunctionParameterType }
-            ),
-            // this cast isn't actually correct, but we're abusing the
-            // getFunctionSignatures API anyways
-            returnType: '' as FunctionReturnType,
-          },
-        ],
-      },
-      { withTypes: false, capitalize: true }
-    );
-    return signature[0].declaration;
-  }
-  return '';
-}
-
-export function getAllArrayValues(arg: ESQLAstItem) {
-  const values: string[] = [];
-  if (Array.isArray(arg)) {
-    for (const subArg of arg) {
-      if (Array.isArray(subArg)) {
-        break;
-      }
-      if (subArg.type === 'literal') {
-        values.push(String(subArg.value));
-      }
-      if (isColumnItem(subArg) || isTimeIntervalItem(subArg)) {
-        values.push(subArg.name);
-      }
-      if (subArg.type === 'function') {
-        const signature = printFunctionSignature(subArg);
-        if (signature) {
-          values.push(signature);
-        }
-      }
-    }
-  }
-  return values;
-}
-
-export function getAllArrayTypes(
-  arg: ESQLAstItem,
-  parentCommand: string,
-  references: ReferenceMaps
-) {
-  const types = [];
-  if (Array.isArray(arg)) {
-    for (const subArg of arg) {
-      if (Array.isArray(subArg)) {
-        break;
-      }
-      if (subArg.type === 'literal') {
-        types.push(subArg.literalType);
-      }
-      if (subArg.type === 'column') {
-        const hit = getColumnForASTNode(subArg, {
-          fields: references.fields,
-          userDefinedColumns: references.userDefinedColumns,
-        });
-        types.push(hit?.type || 'unsupported');
-      }
-      if (subArg.type === 'timeInterval') {
-        types.push('time_duration');
-      }
-      if (subArg.type === 'function') {
-        if (isSupportedFunction(subArg.name, parentCommand).supported) {
-          const fnDef = buildFunctionLookup().get(subArg.name)!;
-          types.push(fnDef.signatures[0].returnType);
-        }
-      }
-    }
-  }
-  return types;
-}
-
 export function inKnownTimeInterval(timeIntervalUnit: string): boolean {
   return timeUnits.some((unit) => unit === timeIntervalUnit.toLowerCase());
 }
@@ -331,174 +159,8 @@ export function isValidLiteralOption(arg: ESQLLiteral, argDef: FunctionParameter
   );
 }
 
-/**
- * Checks if both types are string types.
- *
- * Functions in ES|QL accept `text` and `keyword` types interchangeably.
- * @param type1
- * @param type2
- * @returns
- */
-function bothStringTypes(type1: string, type2: string): boolean {
-  return (type1 === 'text' || type1 === 'keyword') && (type2 === 'text' || type2 === 'keyword');
-}
-
-/**
- * Checks if an AST function argument is of the correct type
- * given the definition.
- */
-export function checkFunctionArgMatchesDefinition(
-  arg: ESQLSingleAstItem,
-  parameterDefinition: FunctionParameter,
-  references: ReferenceMaps,
-  parentCommand?: string
-): boolean {
-  const parameterType = parameterDefinition.type;
-  if (parameterType === 'any') {
-    return true;
-  }
-  if (isParam(arg)) {
-    return true;
-  }
-  if (arg.type === 'literal') {
-    const matched = doesLiteralMatchParameterType(parameterType, arg);
-    return matched;
-  }
-  if (arg.type === 'function') {
-    if (isSupportedFunction(arg.name, parentCommand).supported) {
-      const fnDef = buildFunctionLookup().get(arg.name)!;
-      return fnDef.signatures.some(
-        (signature) =>
-          signature.returnType === 'unknown' ||
-          parameterType === signature.returnType ||
-          bothStringTypes(parameterType, signature.returnType)
-      );
-    }
-  }
-  if (arg.type === 'timeInterval') {
-    return parameterType === 'time_duration' && inKnownTimeInterval(arg.unit);
-  }
-  if (arg.type === 'column') {
-    const hit = getColumnForASTNode(arg, {
-      fields: references.fields,
-      userDefinedColumns: references.userDefinedColumns,
-    });
-    const validHit = hit;
-    if (!validHit) {
-      return false;
-    }
-    const wrappedTypes: Array<(typeof validHit)['type']> = Array.isArray(validHit.type)
-      ? validHit.type
-      : [validHit.type];
-
-    return wrappedTypes.some(
-      (ct) =>
-        ct === parameterType ||
-        bothStringTypes(ct, parameterType) ||
-        ct === 'null' ||
-        ct === 'unknown'
-    );
-  }
-  if (arg.type === 'inlineCast') {
-    const lowerArgType = parameterType?.toLowerCase();
-    const castedType = getExpressionType(arg);
-    return castedType === lowerArgType;
-  }
-  return false;
-}
-
-function fuzzySearch(fuzzyName: string, resources: IterableIterator<string>) {
-  const wildCardPosition = getWildcardPosition(fuzzyName);
-  if (wildCardPosition !== 'none') {
-    const matcher = getMatcher(fuzzyName, wildCardPosition);
-    for (const resourceName of resources) {
-      if (matcher(resourceName)) {
-        return true;
-      }
-    }
-  }
-}
-
-function getMatcher(name: string, position: 'start' | 'end' | 'middle' | 'multiple-within') {
-  if (position === 'start') {
-    const prefix = name.substring(1);
-    return (resource: string) => resource.endsWith(prefix);
-  }
-  if (position === 'end') {
-    const prefix = name.substring(0, name.length - 1);
-    return (resource: string) => resource.startsWith(prefix);
-  }
-  if (position === 'multiple-within') {
-    // make sure to remove the * at the beginning of the name if present
-    const safeName = name.startsWith('*') ? name.slice(1) : name;
-    // replace 2 ore more consecutive wildcards with a single one
-    const setOfChars = safeName.replace(/\*{2+}/g, '*').split('*');
-    return (resource: string) => {
-      let index = -1;
-      return setOfChars.every((char) => {
-        index = resource.indexOf(char, index + 1);
-        return index !== -1;
-      });
-    };
-  }
-  const [prefix, postFix] = name.split('*');
-  return (resource: string) => resource.startsWith(prefix) && resource.endsWith(postFix);
-}
-
-function getWildcardPosition(name: string) {
-  if (!hasWildcard(name)) {
-    return 'none';
-  }
-  const wildCardCount = name.match(/\*/g)!.length;
-  if (wildCardCount > 1) {
-    return 'multiple-within';
-  }
-  if (name.startsWith('*')) {
-    return 'start';
-  }
-  if (name.endsWith('*')) {
-    return 'end';
-  }
-  return 'middle';
-}
-
 export function hasWildcard(name: string) {
   return /\*/.test(name);
-}
-
-/**
- * This returns the name with any quotes that were present.
- *
- * E.g. "`bytes`" will be "`bytes`"
- *
- * @param node
- * @returns
- */
-export const getQuotedColumnName = (node: ESQLColumn | ESQLIdentifier) =>
-  node.type === 'identifier' ? node.name : node.quoted ? node.text : node.name;
-
-/**
- * TODO - consider calling lookupColumn under the hood of this function. Seems like they should really do the same thing.
- */
-export function getColumnExists(
-  node: ESQLColumn | ESQLIdentifier,
-  { fields, userDefinedColumns }: Pick<ReferenceMaps, 'fields' | 'userDefinedColumns'>
-) {
-  const columnName = node.type === 'identifier' ? node.name : node.parts.join('.');
-  if (fields.has(columnName) || userDefinedColumns.has(columnName)) {
-    return true;
-  }
-
-  // TODO — I don't see this fuzzy searching in lookupColumn... should it be there?
-  if (
-    Boolean(
-      fuzzySearch(columnName, fields.keys()) || fuzzySearch(columnName, userDefinedColumns.keys())
-    )
-  ) {
-    return true;
-  }
-
-  return false;
 }
 
 export const isAggFunction = (arg: ESQLFunction): boolean =>

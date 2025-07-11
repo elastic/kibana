@@ -1319,6 +1319,59 @@
       },
       {
         "parentPluginId": "@kbn/std",
+        "id": "def-common.matchWildcardPattern",
+        "type": "Function",
+        "tags": [],
+        "label": "matchWildcardPattern",
+        "description": [],
+        "signature": [
+          "({ pattern, str }: { pattern: string; str: string; }) => boolean"
+        ],
+        "path": "src/platform/packages/shared/kbn-std/src/match_wildcard_pattern.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/std",
+            "id": "def-common.matchWildcardPattern.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ pattern, str }",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-std/src/match_wildcard_pattern.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/std",
+                "id": "def-common.matchWildcardPattern.$1.pattern",
+                "type": "string",
+                "tags": [],
+                "label": "pattern",
+                "description": [],
+                "path": "src/platform/packages/shared/kbn-std/src/match_wildcard_pattern.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/std",
+                "id": "def-common.matchWildcardPattern.$1.str",
+                "type": "string",
+                "tags": [],
+                "label": "str",
+                "description": [],
+                "path": "src/platform/packages/shared/kbn-std/src/match_wildcard_pattern.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/std",
         "id": "def-common.merge",
         "type": "Function",
         "tags": [],

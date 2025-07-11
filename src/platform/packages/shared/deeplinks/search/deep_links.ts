@@ -21,10 +21,6 @@ import {
   SEARCH_INDICES_START,
   SEARCH_INDICES,
   SEARCH_INDICES_CREATE_INDEX,
-  SEARCH_ELASTICSEARCH,
-  SEARCH_VECTOR_SEARCH,
-  SEARCH_SEMANTIC_SEARCH,
-  SEARCH_AI_SEARCH,
   ES_SEARCH_SYNONYMS_ID,
   SEARCH_QUERY_RULES_ID,
   SEARCH_INDEX_MANAGEMENT,
@@ -45,10 +41,6 @@ export type SearchHomepage = typeof SEARCH_HOMEPAGE;
 export type SearchStart = typeof SEARCH_INDICES_START;
 export type SearchIndices = typeof SEARCH_INDICES;
 export type SearchIndexManagement = typeof SEARCH_INDEX_MANAGEMENT;
-export type SearchElasticsearch = typeof SEARCH_ELASTICSEARCH;
-export type SearchVectorSearch = typeof SEARCH_VECTOR_SEARCH;
-export type SearchSemanticSearch = typeof SEARCH_SEMANTIC_SEARCH;
-export type SearchAISearch = typeof SEARCH_AI_SEARCH;
 
 export type ContentLinkId = 'connectors' | 'webCrawlers';
 
@@ -80,8 +72,4 @@ export type DeepLinkId =
   | SearchStart
   | SearchIndices
   | SearchIndexManagement
-  | SearchElasticsearch
-  | SearchVectorSearch
-  | SearchSemanticSearch
-  | SearchAISearch
   | `${SearchIndices}:${SearchIndicesLinkId}`;

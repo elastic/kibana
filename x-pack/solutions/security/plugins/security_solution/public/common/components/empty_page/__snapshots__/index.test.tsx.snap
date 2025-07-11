@@ -33,7 +33,6 @@ exports[`EmptyPage component renders actions with descriptions 1`] = `
       >
         <div
           class="euiFlexItem emotion-euiFlexItem-growZero"
-          style="max-width: 283px;"
         >
           <div
             class="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard emotion-euiPanel-grow-m-m-plain-hasShadow-euiCard-center"
@@ -123,7 +122,6 @@ exports[`EmptyPage component renders actions without descriptions 1`] = `
       >
         <div
           class="euiFlexItem emotion-euiFlexItem-growZero"
-          style="max-width: 283px;"
         >
           <a
             class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-primary"

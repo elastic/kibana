@@ -51,9 +51,11 @@ describe('getConnectorById', () => {
       throw new Error('Something wrong');
     });
 
-    await expect(() =>
-      getConnectorById({ actionsClient, connectorId })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"No connector found for id 'my-connector-id'"`);
+    await expect(() => getConnectorById({ actionsClient, connectorId })).rejects
+      .toThrowErrorMatchingInlineSnapshot(`
+      "No connector found for id 'my-connector-id'
+      Something wrong"
+    `);
   });
 
   it('throws the connector type is not compatible', async () => {

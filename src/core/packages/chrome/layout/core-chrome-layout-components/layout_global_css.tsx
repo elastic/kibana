@@ -135,12 +135,12 @@ export const LayoutGlobalCSS = () => {
   const applicationBottomBar = css`
     --kbn-application--bottom-bar-height: ${applicationBottomBarHeight}px;
     --kbn-application--bottom-bar-top: calc(
-      --kbn-layout--application-bottom - var(--kbn-application--bottom-bar-height)
+      var(--kbn-layout--application-bottom) - var(--kbn-application--bottom-bar-height)
     );
     --kbn-application--bottom-bar-left: var(--kbn-layout--application-left);
     --kbn-application--bottom-bar-width: var(--kbn-layout--application-width);
     --kbn-application--bottom-bar-right: var(--kbn-layout--application-right);
-    --kbn-application--bottom-bar-bottom: calc(var(--kbn-layout--application-bottom));
+    --kbn-application--bottom-bar-bottom: var(--kbn-layout--application-bottom);
   `;
 
   // The application content is the main area where the application renders its content.

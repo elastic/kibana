@@ -9,7 +9,7 @@
 import { ICommandCallbacks, Location } from '../../types';
 import type { ESQLCommand } from '../../../types';
 import { type ISuggestionItem, type ICommandContext } from '../../types';
-import { pipeCompleteItem, commaCompleteItem } from '../../utils/complete_items';
+import { pipeCompleteItem, commaCompleteItem } from '../../complete_items';
 import {
   handleFragment,
   getFieldsOrFunctionsSuggestions,

@@ -11,8 +11,8 @@
   // This large box shadow helps prevent a flicker of dark
   // background when the content is shown and hidden
   box-shadow: inset 0 $embeddableConsoleInitialHeight 0 $embeddableConsoleBackground, inset 0 600rem 0 $euiPageBackgroundColor;
-  bottom: 0;
-  right: 0;
+  bottom: var(--kbn-application--content-bottom, 0);
+  right: var(--kbn-application--content-right, 0);
   transform: translateY(0);
   height: $embeddableConsoleInitialHeight;
   max-height: $embeddableConsoleMaxHeight;
@@ -23,15 +23,15 @@
   }
 
   &--projectChrome {
-    left: var(--euiCollapsibleNavOffset, 0);
+    left: calc(var(--euiCollapsibleNavOffset, 0) + var(--kbn-application--content-left, 0));
   }
 
   &--classicChrome {
-    left: var(--kbnSolutionNavOffset, 0);
+    left: calc(var(--kbnSolutionNavOffset, 0) + var(--kbn-application--content-left, 0));
   }
 
   &--unknownChrome {
-    left: 0;
+    left: var(--kbn-application--content-left, 0);
   }
 
   &-isOpen {
@@ -40,7 +40,7 @@
     animation-fill-mode: forwards;
     animation-name: embeddableConsoleOpenPanel;
     height: var(--embedded-console-height);
-    bottom: var(--embedded-console-bottom);
+    bottom: calc(var(--embedded-console-bottom) + var(--kbn-application--content-bottom, 0));
   }
 }
 

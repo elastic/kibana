@@ -29,7 +29,7 @@ import { sampleCommand } from './commands/sample';
 import { showCommand } from './commands/show';
 import { timeseriesCommand } from './commands/timeseries';
 import { whereCommand } from './commands/where';
-import { rrfCommand } from './commands/rrf';
+import { fuseCommand } from './commands/fuse';
 
 const esqlCommandRegistry = new CommandRegistry();
 
@@ -54,6 +54,6 @@ esqlCommandRegistry.registerCommand(sampleCommand);
 esqlCommandRegistry.registerCommand(showCommand);
 esqlCommandRegistry.registerCommand(timeseriesCommand);
 esqlCommandRegistry.registerCommand(whereCommand);
-esqlCommandRegistry.registerCommand(rrfCommand);
+esqlCommandRegistry.registerCommand(fuseCommand);
 
 export { esqlCommandRegistry };

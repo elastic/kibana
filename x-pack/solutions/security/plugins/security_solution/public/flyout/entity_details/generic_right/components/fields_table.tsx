@@ -191,7 +191,7 @@ export const FieldsTable: React.FC<FieldsTableProps> = ({
           defaultMessage: 'Value',
         }),
         render: (value: unknown) => (
-          <div style={{ width: '100%' }}>{getDescriptionDisplay(value)}</div>
+          <div css={{ width: '100%' }}>{getDescriptionDisplay(value)}</div>
         ),
       },
     ],

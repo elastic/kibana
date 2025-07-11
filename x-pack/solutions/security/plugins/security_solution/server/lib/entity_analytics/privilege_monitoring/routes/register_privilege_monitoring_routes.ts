@@ -25,16 +25,19 @@ import {
 
 import { padInstallRoute } from './privileged_access_detection/pad_install';
 import { padGetStatusRoute } from './privileged_access_detection/pad_get_installation_status';
+import { privilegesCheckPrivilegeMonitoringRoute } from './privileges';
 
 export const registerPrivilegeMonitoringRoutes = ({
   router,
   logger,
   config,
+  getStartServices,
 }: EntityAnalyticsRoutesDeps) => {
   padInstallRoute(router, logger, config);
   padGetStatusRoute(router, logger, config);
   initPrivilegeMonitoringEngineRoute(router, logger, config);
   healthCheckPrivilegeMonitoringRoute(router, logger, config);
+  privilegesCheckPrivilegeMonitoringRoute(router, logger, getStartServices);
   searchPrivilegeMonitoringIndicesRoute(router, logger);
   createPrivilegeMonitoringIndicesRoute(router, logger);
   monitoringEntitySourceRoute(router, logger, config);

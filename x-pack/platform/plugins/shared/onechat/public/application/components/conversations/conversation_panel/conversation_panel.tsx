@@ -46,7 +46,7 @@ export const ConversationPanel: React.FC<ConversationPanelProps> = ({
     display: flex;
     flex-grow: 1;
     height: 100%;
-    max-block-size: calc(100vh - var(--kbnAppHeadersOffset, var(--euiFixedHeadersOffset, 0)));
+    max-block-size: var(--kbn-application--content-height);
     background-color: ${theme.euiTheme.colors.backgroundBasePlain};
     padding: ${theme.euiTheme.size.base} 0;
   `;

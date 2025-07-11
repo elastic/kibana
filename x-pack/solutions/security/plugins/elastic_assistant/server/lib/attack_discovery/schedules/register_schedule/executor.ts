@@ -128,6 +128,7 @@ export const attackDiscoveryScheduleExecutor = async ({
       indexPattern,
       logger,
       ownerId: rule.id,
+      replacements,
       spaceId,
     });
 
@@ -137,6 +138,7 @@ export const attackDiscoveryScheduleExecutor = async ({
           attackDiscovery,
           connectorId: params.apiConfig.connectorId,
           ownerId: rule.id,
+          replacements,
           spaceId,
         });
         const { uuid: alertDocId } = alertsClient.report({

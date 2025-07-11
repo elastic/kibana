@@ -12,6 +12,9 @@ export const METRICS_INDEX_PATTERN = 'metrics-*,metricbeat-*';
 export const LOGS_INDEX_PATTERN = 'logs-*,filebeat-*,kibana_sample_data_logs*';
 export const METRICS_APP = 'metrics';
 export const LOGS_APP = 'logs';
+export const METRIC_SCHEMA_ECS = 'ecs';
+export const METRIC_SCHEMA_SEMCONV = 'semconv';
+export type MetricSchema = typeof METRIC_SCHEMA_ECS | typeof METRIC_SCHEMA_SEMCONV;
 
 export const METRICS_FEATURE_ID = AlertConsumers.INFRASTRUCTURE;
 export const INFRA_ALERT_FEATURE_ID = AlertConsumers.INFRASTRUCTURE;
@@ -51,6 +54,10 @@ export const KUBERNETES_POD_UID_FIELD = 'kubernetes.pod.uid';
 export const EVENT_MODULE = 'event.module';
 export const METRICSET_MODULE = 'metricset.module';
 export const METRICSET_NAME = 'metricset.name';
+export const DATASTREAM_DATASET = 'data_stream.dataset';
+
+// OTel hostmetricsreceiver
+export const OTEL_RECEIVER_DATASET_VALUE = 'hostmetricsreceiver.otel';
 
 // integrations
 export const SYSTEM_INTEGRATION = 'system';

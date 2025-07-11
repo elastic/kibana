@@ -95,7 +95,7 @@ const MiniCalloutComponent: React.FC<MiniCalloutProps> = ({
 
   return (
     <EuiCallOut size="s" color={color} data-test-subj="mini-callout">
-      <div style={{ display: 'flex' }}>
+      <div css={{ display: 'flex' }}>
         {iconType && <EuiIcon type={iconType} color={color} />}
         {calloutTitle}
       </div>

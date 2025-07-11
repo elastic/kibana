@@ -27,4 +27,10 @@ export const usersAndRolesFactory = (security: SecurityService) => ({
       email: `${username}@elastic.co`,
     });
   },
+  deleteUser: async (username: string) => {
+    return await security.user.delete(username);
+  },
+  deleteRole: async (name: string) => {
+    return await security.role.delete(name);
+  },
 });

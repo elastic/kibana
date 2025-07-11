@@ -11,7 +11,7 @@ import { handleFragment, columnExists } from '../../../definitions/utils/autocom
 import { unescapeColumnName } from '../../../definitions/utils/shared';
 import * as mutate from '../../../mutate';
 import { LeafPrinter } from '../../../pretty_print/leaf_printer';
-import { pipeCompleteItem, commaCompleteItem } from '../../utils/complete_items';
+import { pipeCompleteItem, commaCompleteItem } from '../../complete_items';
 import { buildFieldsDefinitionsWithMetadata } from '../../../definitions/utils/functions';
 import { ICommand } from '../../registry';
 import { ESQLAstJoinCommand, ESQLCommand, ESQLCommandOption } from '../../../types';

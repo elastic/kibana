@@ -17,6 +17,10 @@ import { EngineComponentResourceEnum } from '../../../../common/api/entity_analy
 
 import { startPrivilegeMonitoringTask as mockStartPrivilegeMonitoringTask } from './tasks/privilege_monitoring_task';
 import type { AuditLogger } from '@kbn/core/server';
+import {
+  eventIngestPipeline,
+  PRIVMON_EVENT_INGEST_PIPELINE_ID,
+} from './elasticsearch/pipelines/event_ingested';
 
 jest.mock('./tasks/privilege_monitoring_task', () => {
   return {
@@ -129,6 +133,61 @@ describe('Privilege Monitoring Data Client', () => {
         EngineComponentResourceEnum.privmon_engine,
         'Failed to initialize privilege monitoring engine',
         expect.any(Error)
+      );
+    });
+  });
+
+  describe('createIngestPipelineIfDoesNotExist', () => {
+    it('should simply log a message if the pipeline already exists', async () => {
+      const mockLog = jest.fn();
+      Object.defineProperty(dataClient, 'log', { value: mockLog });
+
+      const mockGetPipeline = jest.fn().mockResolvedValue({
+        [PRIVMON_EVENT_INGEST_PIPELINE_ID]: {},
+      });
+      Object.defineProperty(dataClient, 'internalUserClient', {
+        value: {
+          ingest: {
+            getPipeline: mockGetPipeline,
+          },
+        },
+      });
+
+      await dataClient.createIngestPipelineIfDoesNotExist();
+
+      expect(mockGetPipeline).toHaveBeenCalled();
+
+      expect(mockLog).toHaveBeenCalledWith(
+        'info',
+        'Privileged user monitoring ingest pipeline already exists.'
+      );
+    });
+
+    it('should only create a pipeline if no existing pipeline exists', async () => {
+      const mockLog = jest.fn();
+      Object.defineProperty(dataClient, 'log', { value: mockLog });
+
+      const mockGetPipeline = jest.fn().mockResolvedValue({});
+      const mockPutPipeline = jest.fn();
+
+      Object.defineProperty(dataClient, 'internalUserClient', {
+        value: {
+          ingest: {
+            getPipeline: mockGetPipeline,
+            putPipeline: mockPutPipeline,
+          },
+        },
+      });
+
+      await dataClient.createIngestPipelineIfDoesNotExist();
+
+      expect(mockPutPipeline).toHaveBeenCalledWith(expect.objectContaining(eventIngestPipeline));
+
+      expect(mockLog).toHaveBeenCalledWith(
+        'info',
+        expect.stringContaining(
+          'Privileged user monitoring ingest pipeline does not exist, creating.'
+        )
       );
     });
   });

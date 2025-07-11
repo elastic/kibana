@@ -24,6 +24,7 @@ import {
 import { css } from '@emotion/react';
 import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import type { RiskEngineStatus, StoreStatus } from '../../../../../common/api/entity_analytics';
 import { RiskEngineStatusEnum } from '../../../../../common/api/entity_analytics';
 import { useContractComponents } from '../../../../common/hooks/use_contract_component';
@@ -32,11 +33,10 @@ import {
   ENABLEMENT_DESCRIPTION_ENTITY_STORE_ONLY,
   ENABLEMENT_WARNING_SELECT_TO_PROCEED,
 } from '../translations';
-import { MissingPrivilegesCallout } from './missing_privileges_callout';
+import { EntityStoreMissingPrivilegesCallout } from './entity_store_missing_privileges_callout';
 import { useMissingRiskEnginePrivileges } from '../../../hooks/use_missing_risk_engine_privileges';
 import { RiskEnginePrivilegesCallOut } from '../../risk_engine_privileges_callout';
 import { useEntityEnginePrivileges } from '../hooks/use_entity_engine_privileges';
-
 export interface Enablements {
   riskScore: boolean;
   entityStore: boolean;
@@ -62,6 +62,12 @@ const isInstallButtonEnabled = (
   return false;
 };
 
+const ENTITY_STORE = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.enablements.modal.store',
+  {
+    defaultMessage: 'Entity Store',
+  }
+);
 export const EntityStoreEnablementModal: React.FC<EntityStoreEnablementModalProps> = ({
   visible,
   toggle,
@@ -166,12 +172,7 @@ export const EntityStoreEnablementModal: React.FC<EntityStoreEnablementModalProp
           <EuiFlexItem>
             <EuiFlexGroup justifyContent="flexStart">
               <EuiSwitch
-                label={
-                  <FormattedMessage
-                    id="xpack.securitySolution.entityAnalytics.enablements.modal.store"
-                    defaultMessage="Entity Store"
-                  />
-                }
+                label={ENTITY_STORE}
                 checked={toggleState.entityStore}
                 disabled={!canInstallEntityStore}
                 onChange={() =>
@@ -183,7 +184,7 @@ export const EntityStoreEnablementModal: React.FC<EntityStoreEnablementModalProp
           </EuiFlexItem>
           {!entityEnginePrivileges || entityEnginePrivileges.has_all_required ? null : (
             <EuiFlexItem>
-              <MissingPrivilegesCallout privileges={entityEnginePrivileges} />
+              <EntityStoreMissingPrivilegesCallout privileges={entityEnginePrivileges} />
             </EuiFlexItem>
           )}
           <EuiFlexItem>

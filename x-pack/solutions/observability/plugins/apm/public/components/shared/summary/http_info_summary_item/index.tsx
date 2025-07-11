@@ -9,8 +9,8 @@ import { EuiBadge, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { css } from '@emotion/react';
+import { HttpStatusCode } from '@kbn/apm-ui-shared';
 import { unit } from '../../../../utils/style';
-import { HttpStatusBadge } from '../http_status_badge';
 
 const urlStyles = css`
   display: inline-block;
@@ -62,7 +62,7 @@ export function HttpInfoSummaryItem({ status, method, url }: HttpInfoProps) {
           </EuiToolTip>
         )}
       </EuiBadge>
-      {status && <HttpStatusBadge status={status} />}
+      {status && <HttpStatusCode code={status} showTooltip />}
     </span>
   );
 }

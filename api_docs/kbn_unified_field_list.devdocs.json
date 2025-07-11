@@ -154,9 +154,9 @@
           "<T extends ",
           {
             "pluginId": "@kbn/field-utils",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnFieldUtilsPluginApi",
-            "section": "def-common.FieldBase",
+            "section": "def-public.FieldBase",
             "text": "FieldBase"
           },
           " = ",
@@ -217,9 +217,9 @@
           "<T extends ",
           {
             "pluginId": "@kbn/field-utils",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnFieldUtilsPluginApi",
-            "section": "def-common.FieldBase",
+            "section": "def-public.FieldBase",
             "text": "FieldBase"
           },
           " = ",
@@ -593,9 +593,9 @@
           "<",
           {
             "pluginId": "@kbn/field-utils",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnFieldUtilsPluginApi",
-            "section": "def-common.FieldBase",
+            "section": "def-public.FieldBase",
             "text": "FieldBase"
           },
           "> | undefined) => string[]"
@@ -622,9 +622,9 @@
               "<",
               {
                 "pluginId": "@kbn/field-utils",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnFieldUtilsPluginApi",
-                "section": "def-common.FieldBase",
+                "section": "def-public.FieldBase",
                 "text": "FieldBase"
               },
               "> | undefined"
@@ -659,9 +659,9 @@
           "<",
           {
             "pluginId": "@kbn/field-utils",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnFieldUtilsPluginApi",
-            "section": "def-common.FieldBase",
+            "section": "def-public.FieldBase",
             "text": "FieldBase"
           },
           "> | undefined) => string[]"
@@ -703,9 +703,9 @@
               "<",
               {
                 "pluginId": "@kbn/field-utils",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnFieldUtilsPluginApi",
-                "section": "def-common.FieldBase",
+                "section": "def-public.FieldBase",
                 "text": "FieldBase"
               },
               "> | undefined"
@@ -740,9 +740,9 @@
           "<",
           {
             "pluginId": "@kbn/field-utils",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnFieldUtilsPluginApi",
-            "section": "def-common.FieldBase",
+            "section": "def-public.FieldBase",
             "text": "FieldBase"
           },
           "> | undefined, delimiter?: string) => string"
@@ -784,9 +784,9 @@
               "<",
               {
                 "pluginId": "@kbn/field-utils",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnFieldUtilsPluginApi",
-                "section": "def-common.FieldBase",
+                "section": "def-public.FieldBase",
                 "text": "FieldBase"
               },
               "> | undefined"
@@ -2909,7 +2909,14 @@
             "label": "size",
             "description": [],
             "signature": [
-              "\"s\" | \"xs\" | undefined"
+              {
+                "pluginId": "@kbn/react-field",
+                "scope": "public",
+                "docId": "kibKbnReactFieldPluginApi",
+                "section": "def-public.ButtonSize",
+                "text": "ButtonSize"
+              },
+              " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-field-list/src/components/field_item_button/field_item_button.tsx",
             "deprecated": false,
@@ -5820,12 +5827,12 @@
           },
           {
             "parentPluginId": "@kbn/unified-field-list",
-            "id": "def-public.UnifiedFieldListRestorableState.scrollPosition",
+            "id": "def-public.UnifiedFieldListRestorableState.scrollTop",
             "type": "number",
             "tags": [],
-            "label": "scrollPosition",
+            "label": "scrollTop",
             "description": [
-              "\nScroll position of the field list"
+              "\nScroll position inside the field list"
             ],
             "path": "src/platform/packages/shared/kbn-unified-field-list/src/restorable_state.ts",
             "deprecated": false,
@@ -6207,9 +6214,9 @@
         "signature": [
           {
             "pluginId": "@kbn/field-utils",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnFieldUtilsPluginApi",
-            "section": "def-common.FieldBase",
+            "section": "def-public.FieldBase",
             "text": "FieldBase"
           }
         ],
@@ -6267,9 +6274,9 @@
           "<T extends ",
           {
             "pluginId": "@kbn/field-utils",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnFieldUtilsPluginApi",
-            "section": "def-common.FieldBase",
+            "section": "def-public.FieldBase",
             "text": "FieldBase"
           },
           " = ",

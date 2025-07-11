@@ -12,6 +12,7 @@ import { useParams } from 'react-router-dom';
 import styled from '@emotion/styled';
 import { isTab } from '@kbn/timelines-plugin/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import { DataViewManagerScopeName } from '../../../data_view_manager/constants';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { InputsModelId } from '../../../common/store/inputs/constants';
 import { SecurityPageName } from '../../../app/types';
@@ -94,14 +95,12 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
 
     const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
-    const { dataView, status } = useDataView();
-    const { dataViewSpec } = useDataViewSpec();
-    const experimentalSelectedPatterns = useSelectedPatterns();
+    const { dataView, status } = useDataView(DataViewManagerScopeName.explore);
+    const { dataViewSpec } = useDataViewSpec(DataViewManagerScopeName.explore);
+    const experimentalSelectedPatterns = useSelectedPatterns(DataViewManagerScopeName.explore);
 
     const sourcererDataView = newDataViewPickerEnabled ? dataViewSpec : oldSourcererDataView;
-    const indicesExist = newDataViewPickerEnabled
-      ? !!dataView?.matchedIndices?.length
-      : oldIndicesExist;
+    const indicesExist = newDataViewPickerEnabled ? dataView.hasMatchedIndices() : oldIndicesExist;
     const selectedPatterns = newDataViewPickerEnabled
       ? experimentalSelectedPatterns
       : oldSelectedPatterns;

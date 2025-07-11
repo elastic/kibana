@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useMemo, type CSSProperties } from 'react';
+import React, { memo, useMemo } from 'react';
 import {
   EuiButtonEmpty,
   EuiSkeletonText,
@@ -27,9 +27,9 @@ import type { MaybeImmutable } from '../../../../common/endpoint/types';
 import type { ActionDetails } from '../../../../common/endpoint/types/actions';
 import { ACTION_AGENT_FILE_DOWNLOAD_ROUTE } from '../../../../common/endpoint/constants';
 
-const STYLE_INHERIT_FONT_FAMILY = Object.freeze<CSSProperties>({
+const STYLE_INHERIT_FONT_FAMILY = {
   fontFamily: 'inherit',
-});
+};
 
 const DEFAULT_BUTTON_TITLE = i18n.translate(
   'xpack.securitySolution.responseActionFileDownloadLink.downloadButtonLabel',
@@ -181,7 +181,7 @@ export const ResponseActionFileDownloadLink = memo<ResponseActionFileDownloadLin
           iconType="download"
           data-test-subj={getTestId('downloadButton')}
           flush="left"
-          style={STYLE_INHERIT_FONT_FAMILY}
+          css={STYLE_INHERIT_FONT_FAMILY}
           iconSize="s"
           download
         >

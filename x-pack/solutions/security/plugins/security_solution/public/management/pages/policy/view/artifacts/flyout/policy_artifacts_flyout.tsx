@@ -227,7 +227,7 @@ export const PolicyArtifactsFlyout = React.memo<PolicyArtifactsFlyoutProps>(
             <EuiFlexItem grow={false}>
               <EuiButton
                 className="eui-textTruncate"
-                style={{ maxWidth: '300px' }}
+                css={{ maxWidth: '300px' }}
                 data-test-subj="artifacts-assign-confirm-button"
                 fill
                 onClick={handleOnConfirmAction}

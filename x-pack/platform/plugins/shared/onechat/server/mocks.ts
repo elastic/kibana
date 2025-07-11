@@ -11,7 +11,7 @@ import {
   createToolProviderMock,
   createScopedPublicToolRegistryMock,
 } from './test_utils/tools';
-import { createAgentRegistryMock } from './test_utils/agents';
+import { createMockedAgentClient } from './test_utils/agents';
 
 const createSetupContractMock = (): jest.Mocked<OnechatPluginSetup> => {
   return {
@@ -38,7 +38,7 @@ const createStartContractMock = (): jest.Mocked<OnechatPluginStart> => {
     },
     agents: {
       execute: jest.fn(),
-      registry: createAgentRegistryMock(),
+      getScopedClient: jest.fn().mockImplementation(() => createMockedAgentClient()),
     },
   };
 };

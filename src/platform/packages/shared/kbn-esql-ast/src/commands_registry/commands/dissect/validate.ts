@@ -17,6 +17,7 @@ import type {
 } from '../../../types';
 import type { ICommandContext } from '../../types';
 import type { FieldType } from '../../../definitions/types';
+import { validateCommandArguments } from '../../../definitions/utils/validation';
 
 const validateColumnForGrokDissect = (command: ESQLCommand, context?: ICommandContext) => {
   const acceptedColumnTypes: FieldType[] = ['keyword', 'text'];
@@ -78,5 +79,7 @@ export const validate = (
       })
     );
   }
+
+  messages.push(...validateCommandArguments(command, ast, context));
   return messages;
 };

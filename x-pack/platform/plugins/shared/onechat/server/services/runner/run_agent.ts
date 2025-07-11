@@ -8,10 +8,10 @@
 import type {
   AgentHandlerContext,
   ScopedRunnerRunAgentParams,
-  ConversationalAgentParams,
   RunAgentReturn,
 } from '@kbn/onechat-server';
 import { internalProviderToPublic } from '../tools/utils';
+import { createAgentHandler } from '../agents/modes/create_handler';
 import { createAgentEventEmitter, forkContextForAgentRun } from './utils';
 import type { RunnerManager } from './runner';
 
@@ -19,7 +19,7 @@ export const createAgentHandlerContext = <TParams = Record<string, unknown>>({
   agentExecutionParams,
   manager,
 }: {
-  agentExecutionParams: ScopedRunnerRunAgentParams<TParams>;
+  agentExecutionParams: ScopedRunnerRunAgentParams;
   manager: RunnerManager;
 }): AgentHandlerContext => {
   const { onEvent } = agentExecutionParams;
@@ -39,31 +39,34 @@ export const createAgentHandlerContext = <TParams = Record<string, unknown>>({
   };
 };
 
-export const runAgent = async <TParams = Record<string, unknown>, TResult = unknown>({
+export const runAgent = async ({
   agentExecutionParams,
   parentManager,
 }: {
-  agentExecutionParams: ScopedRunnerRunAgentParams<TParams>;
+  agentExecutionParams: ScopedRunnerRunAgentParams;
   parentManager: RunnerManager;
-}): Promise<RunAgentReturn<TResult>> => {
+}): Promise<RunAgentReturn> => {
   const { agentId, agentParams } = agentExecutionParams;
 
   const context = forkContextForAgentRun({ parentContext: parentManager.context, agentId });
   const manager = parentManager.createChild(context);
 
   const { agentsService, request } = manager.deps;
-  const agent = await agentsService.registry.get({ agentId, request });
-  const agentHandlerContext = createAgentHandlerContext<TParams>({ agentExecutionParams, manager });
-  const agentResult = await agent.handler(
+  const agentClient = await agentsService.getScopedClient({ request });
+  const agent = await agentClient.get(agentId);
+  const agentHandler = createAgentHandler({ agent });
+
+  const agentHandlerContext = createAgentHandlerContext({ agentExecutionParams, manager });
+  const agentResult = await agentHandler(
     {
       runId: manager.context.runId,
-      agentParams: agentParams as ConversationalAgentParams,
+      agentParams,
     },
     agentHandlerContext
   );
 
   return {
     runId: manager.context.runId,
-    result: agentResult.result as TResult,
+    result: agentResult.result,
   };
 };

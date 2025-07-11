@@ -358,7 +358,7 @@ export const EndpointList = () => {
   const hasListData = listData && listData.length > 0;
 
   const refreshStyle = useMemo(() => {
-    return { display: endpointsExist ? 'flex' : 'none', maxWidth: 200 };
+    return { display: endpointsExist ? 'flex' : 'none' };
   }, [endpointsExist]);
 
   const refreshIsPaused = !endpointsExist
@@ -712,7 +712,7 @@ export const EndpointList = () => {
                 <AdminSearchBar />
               </EuiFlexItem>
             )}
-            <EuiFlexItem grow={false} style={refreshStyle}>
+            <EuiFlexItem grow={false} style={refreshStyle} css={{ maxWidth: 200 }}>
               <StyledDatePicker>
                 <EuiSuperDatePicker
                   className="endpointListDatePicker"

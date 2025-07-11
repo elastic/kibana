@@ -19,7 +19,6 @@ import {
   ConversationsService,
   OnechatInternalService,
   ToolsService,
-  AgentProfilesService,
 } from './services';
 import type {
   ConfigSchema,
@@ -67,14 +66,12 @@ export class OnechatPlugin
     const chatService = new ChatService({ http });
     const conversationsService = new ConversationsService({ http });
     const toolsService = new ToolsService({ http });
-    const agentProfilesService = new AgentProfilesService({ http });
 
     this.internalServices = {
       agentService,
       chatService,
       conversationsService,
       toolsService,
-      agentProfilesService,
     };
 
     return {};

@@ -1,17 +1,62 @@
 steps:
-  - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:entity_analytics
-    label: 'Cypress MKI - Entity Analytics'
-    key: test_entity_analytics
-    env:
-      BK_TEST_SUITE_KEY: "serverless-cypress-entity-analytics"
-    agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
-      provider: gcp
-      machineType: n2-standard-4
-    # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
-    timeout_in_minutes: 300
-    parallelism: 2
+  - group: 'Cypress MKI - Entity Analytics'
+    key: cypress_test_entity_analytics
+    steps:
+      - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:entity_analytics
+        label: 'Cypress MKI - Entity Analytics'
+        key: test_entity_analytics
+        env:
+          BK_TEST_SUITE_KEY: "serverless-cypress-entity-analytics"
+        agents:
+          image: family/kibana-ubuntu-2004
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-4
+        # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
+        timeout_in_minutes: 300
+        parallelism: 2
+
+      - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:entity_analytics:dashboards
+        label: 'Cypress MKI - Dashboards'
+        key: test_entity_analytics_dashboards
+        env:
+          BK_TEST_SUITE_KEY: "serverless-cypress-entity-analytics"
+        agents:
+          image: family/kibana-ubuntu-2004
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-4
+        # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
+        timeout_in_minutes: 300
+        parallelism: 1
+
+      - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:entity_analytics:host_details
+        label: 'Cypress MKI - Host Details'
+        key: test_entity_analytics_host_details
+        env:
+          BK_TEST_SUITE_KEY: "serverless-cypress-entity-analytics"
+        agents:
+          image: family/kibana-ubuntu-2004
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-4
+        # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
+        timeout_in_minutes: 300
+        parallelism: 1
+
+      - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:entity_analytics:hosts
+        label: 'Cypress MKI - Hosts'
+        key: test_entity_analytics_hosts
+        env:
+          BK_TEST_SUITE_KEY: "serverless-cypress-entity-analytics"
+        agents:
+          image: family/kibana-ubuntu-2004
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-4
+        # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
+        timeout_in_minutes: 300
+        parallelism: 1
 
   - group: "API MKI - Entity Analytics"
     key: api_test_entity_analytics

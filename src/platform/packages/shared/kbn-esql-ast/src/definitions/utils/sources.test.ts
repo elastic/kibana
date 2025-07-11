@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { joinIndices, timeseriesIndices } from './mocks';
+import { joinIndices, timeseriesIndices } from './test_mocks';
 
 import { specialIndicesToSuggestions, shouldBeQuotedSource, sourceExists } from './sources';
 

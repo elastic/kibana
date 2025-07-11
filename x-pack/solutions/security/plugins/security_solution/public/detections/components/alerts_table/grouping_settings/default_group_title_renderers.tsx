@@ -98,7 +98,7 @@ export const RuleNameGroupContent = React.memo<{
     </EuiBadge>
   );
   return (
-    <div style={{ display: 'table', tableLayout: 'fixed', width: '100%' }}>
+    <div css={{ display: 'table', tableLayout: 'fixed', width: '100%' }}>
       <EuiFlexGroup data-test-subj={RULE_NAME_GROUP_TEST_ID} gutterSize="s" alignItems="center">
         <EuiFlexItem grow={false} css={{ display: 'contents' }}>
           <EuiTitle data-test-subj={RULE_NAME_GROUP_TITLE_TEST_ID} size="xs">

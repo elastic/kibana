@@ -74,7 +74,7 @@ export const MoreActions: FC<TakeActionProps> = ({ indicator }) => {
         iconSize="s"
         size="xs"
         onClick={() => setPopover((prevIsPopoverOpen) => !prevIsPopoverOpen)}
-        style={{ height: '100%' }}
+        css={{ height: '100%' }}
         data-test-subj={MORE_ACTIONS_TEST_ID}
       />
     </EuiToolTip>
