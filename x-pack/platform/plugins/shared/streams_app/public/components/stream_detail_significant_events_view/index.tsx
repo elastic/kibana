@@ -186,6 +186,9 @@ export function StreamDetailSignificantEventsView({
             setIsEditFlyoutOpen(true);
             setQueryToEdit(undefined);
           }}
+          onGenerateClick={() => {
+            setIsGenerateFlyoutOpen(true);
+          }}
         />
         {editFlyout}
         {generateFlyout}
