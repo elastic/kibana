@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { DeprecationBadge } from './components/deprecation_badge';
+export { DeprecationBadge, WarningLevels } from './components/deprecation_badge';
+export { MIGRATION_DEPRECATION_LEVEL } from './types';
