@@ -39,10 +39,7 @@ export interface AgentProperties {
 
 export type AgentProfileStorageSettings = typeof storageSettings;
 
-export type AgentProfileStorage = StorageIndexAdapter<
-  AgentProfileStorageSettings,
-  AgentProperties
->;
+export type AgentProfileStorage = StorageIndexAdapter<AgentProfileStorageSettings, AgentProperties>;
 
 export const createStorage = ({
   logger,
