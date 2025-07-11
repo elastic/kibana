@@ -27,6 +27,7 @@ import {
   CLOUD_POSTURE_APP_ID,
   SERVER_APP_ID,
   RULES_FEATURE_ID,
+  EXCEPTIONS_FEATURE_ID,
 } from '../../constants';
 import type { SecurityFeatureParams } from '../types';
 import type { BaseKibanaFeatureConfig } from '../../types';
@@ -75,6 +76,7 @@ export const getSecurityV3BaseKibanaFeature = ({
   scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
   app: [APP_ID, CLOUD_POSTURE_APP_ID, 'kibana'],
   catalogue: [APP_ID],
+  alerting: alertingFeatures,
   management: {
     insightsAndAlerting: ['triggersActions'],
   },
@@ -90,13 +92,21 @@ export const getSecurityV3BaseKibanaFeature = ({
       replacedBy: {
         default: [
           { feature: RULES_FEATURE_ID, privileges: ['all'] },
+          // { feature: `${EXCEPTIONS_FEATURE_ID}_all`, privileges: ['all'] },
           // note: overriden by product feature endpointArtifactManagement when enabled
           { feature: SECURITY_FEATURE_ID_V4, privileges: ['all'] },
         ],
         minimal: [
-          { feature: RULES_FEATURE_ID, privileges: ['all'] },
+          {
+            feature: RULES_FEATURE_ID,
+            privileges: ['minimal_all', `${EXCEPTIONS_FEATURE_ID}_all`],
+          },
+          // { feature: `${EXCEPTIONS_FEATURE_ID}_all`, privileges: ['all'] },
           // note: overriden by product feature endpointArtifactManagement when enabled
-          { feature: SECURITY_FEATURE_ID_V4, privileges: ['minimal_all'] },
+          {
+            feature: SECURITY_FEATURE_ID_V4,
+            privileges: ['minimal_all'],
+          },
         ],
       },
       app: [APP_ID, CLOUD_POSTURE_APP_ID, 'kibana'],
@@ -105,6 +115,10 @@ export const getSecurityV3BaseKibanaFeature = ({
       savedObject: {
         all: ['alert', ...savedObjects],
         read: [],
+      },
+      alerting: {
+        rule: { all: alertingFeatures },
+        alert: { all: alertingFeatures },
       },
       management: {
         insightsAndAlerting: ['triggersActions'],
@@ -115,13 +129,21 @@ export const getSecurityV3BaseKibanaFeature = ({
       replacedBy: {
         default: [
           { feature: RULES_FEATURE_ID, privileges: ['read'] },
+          // { feature: `${EXCEPTIONS_FEATURE_ID}_read`, privileges: ['read'] },
+
           // note: overriden by product feature endpointArtifactManagement when enabled
           { feature: SECURITY_FEATURE_ID_V4, privileges: ['read'] },
         ],
         minimal: [
-          { feature: RULES_FEATURE_ID, privileges: ['read'] },
+          {
+            feature: RULES_FEATURE_ID,
+            privileges: ['minimal_read', `${EXCEPTIONS_FEATURE_ID}_read`],
+          },
           // note: overriden by product feature endpointArtifactManagement when enabled
-          { feature: SECURITY_FEATURE_ID_V4, privileges: ['minimal_read'] },
+          {
+            feature: SECURITY_FEATURE_ID_V4,
+            privileges: ['minimal_read'],
+          },
         ],
       },
       app: [APP_ID, CLOUD_POSTURE_APP_ID, 'kibana'],
@@ -130,6 +152,14 @@ export const getSecurityV3BaseKibanaFeature = ({
       savedObject: {
         all: [],
         read: [...savedObjects],
+      },
+      alerting: {
+        rule: {
+          read: alertingFeatures,
+        },
+        alert: {
+          all: alertingFeatures,
+        },
       },
       management: {
         insightsAndAlerting: ['triggersActions'],

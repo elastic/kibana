@@ -30,9 +30,17 @@ export const securityDefaultSavedObjects = [
   CLOUD_SECURITY_POSTURE_BENCHMARK_RULE_TEMPLATE,
 ];
 
-export const securityV3SavedObjects = [...securityDefaultSavedObjects, ...savedObjectTypes];
+export const securityV3SavedObjects = [
+  'exception-list',
+  ...securityDefaultSavedObjects,
+  ...savedObjectTypes,
+];
 
-export const securityV1SavedObjects = [...securityDefaultSavedObjects, ...savedObjectTypes];
+export const securityV1SavedObjects = [
+  'exception-list',
+  ...securityDefaultSavedObjects,
+  ...savedObjectTypes,
+];
 
 export const securityTimelineSavedObjects = timelineSavedObjectTypes;
 

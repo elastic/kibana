@@ -61,7 +61,7 @@ const securityProductFeaturesConfig: Record<
 
     baseFeatureConfigModifier: (baseFeatureConfig) => {
       if (
-        !['siem', 'siemV2'].includes(baseFeatureConfig.id) ||
+        !['siem', 'siemV2', 'siemV3'].includes(baseFeatureConfig.id) ||
         !baseFeatureConfig.privileges?.all.replacedBy ||
         !('default' in baseFeatureConfig.privileges.all.replacedBy)
       ) {

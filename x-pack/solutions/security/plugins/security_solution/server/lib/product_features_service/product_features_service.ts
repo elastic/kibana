@@ -73,7 +73,7 @@ export class ProductFeaturesService {
       securityFeature.baseKibanaSubFeatureIds
     );
     const securityV2Feature = getSecurityV2Feature({
-      savedObjects: securityDefaultSavedObjects,
+      savedObjects: securityV3SavedObjects,
       experimentalFeatures: this.experimentalFeatures,
     });
     this.securityV2ProductFeatures = new ProductFeatures(
@@ -84,7 +84,7 @@ export class ProductFeaturesService {
     );
 
     const securityV3Feature = getSecurityV3Feature({
-      savedObjects: securityDefaultSavedObjects,
+      savedObjects: securityV3SavedObjects,
       experimentalFeatures: this.experimentalFeatures,
     });
     this.securityV3ProductFeatures = new ProductFeatures(
