@@ -30,7 +30,7 @@ import {
 import { VulnerabilitySeverityMap } from '../../components/vulnerability_severity_map';
 import { CloudProviderIcon } from '../../components/cloud_provider_icon';
 import { VULNERABILITY_GROUPING_OPTIONS } from '../../common/constants';
-import { getGroupPanelTitle } from '../../common/utils/get_group_panel_title';
+import { getGroupPanelTitle } from '@kbn/cloud-security-posture';
 
 export const groupPanelRenderer: GroupPanelRenderer<VulnerabilitiesGroupingAggregation> = (
   selectedGroup,
