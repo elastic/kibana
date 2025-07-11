@@ -12,7 +12,6 @@ import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const browser = getService('browser');
-  const esArchiver = getService('esArchiver');
   const cases = getService('cases');
   const observability = getService('observability');
   const find = getService('find');
@@ -25,14 +24,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     before(async () => {
       const webDriver = await getService('__webdriver__').init();
       driver = webDriver.driver;
-      await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');
-      await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
-    });
-
-    after(async () => {
-      imageMarkdownUrl = null;
-      await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
-      await esArchiver.unload('x-pack/test/functional/es_archives/observability/alerts');
     });
 
     describe('pasting a screenshot into a new comment', () => {
@@ -62,6 +53,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           });
         });
       });
+
+      after(async () => {
+        await cases.api.deleteAllCases();
+      });
+
       it('navigates to an existing Observability case', async () => {
         await cases.navigation.navigateToApp('observabilityCases', 'cases-all-title');
         await cases.casesTable.waitForCasesToBeListed();

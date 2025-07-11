@@ -20,7 +20,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./pages/alerts/custom_threshold_preview_chart'));
     loadTestFile(require.resolve('./pages/alerts/custom_threshold'));
     loadTestFile(require.resolve('./pages/cases/case_details'));
-    loadTestFile(require.resolve('./pages/cases/case_comment'));
     loadTestFile(require.resolve('./pages/overview/alert_table'));
     loadTestFile(require.resolve('./exploratory_view'));
     loadTestFile(require.resolve('./feature_controls'));
@@ -29,5 +28,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./pages/alert_details_page'));
     loadTestFile(require.resolve('./pages/alerts/metric_threshold'));
     loadTestFile(require.resolve('./sidenav/sidenav'));
+    loadTestFile(require.resolve('./pages/cases/case_comment'));
   });
 }
