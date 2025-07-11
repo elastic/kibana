@@ -430,7 +430,6 @@ describe('Discover state', () => {
           state.getCurrentTab().id
         ).currentDataView$.getValue()
       ).toBe(dataViewMock);
-      expect(state.getCurrentTab().dataViewId).toBe(dataViewMock.id);
     });
 
     test('fetchData', async () => {
@@ -1144,7 +1143,9 @@ describe('Discover state', () => {
     });
 
     test('onDataViewCreated - persisted data view', async () => {
-      const { state, customizationService } = await getState('/', { savedSearch: savedSearchMock });
+      const { state, customizationService, runtimeStateManager } = await getState('/', {
+        savedSearch: savedSearchMock,
+      });
       await state.internalState.dispatch(
         state.injectCurrentTab(internalStateActions.initializeSession)({
           initializeSessionParams: {
@@ -1159,7 +1160,12 @@ describe('Discover state', () => {
       );
       await state.actions.onDataViewCreated(dataViewComplexMock);
       await waitFor(() => {
-        expect(state.getCurrentTab().dataViewId).toBe(dataViewComplexMock.id);
+        expect(
+          selectTabRuntimeState(
+            runtimeStateManager,
+            state.getCurrentTab().id
+          ).currentDataView$.getValue()
+        ).toBe(dataViewComplexMock);
       });
       expect(state.appState.getState().dataSource).toEqual(
         createDataViewDataSource({ dataViewId: dataViewComplexMock.id! })
@@ -1171,7 +1177,9 @@ describe('Discover state', () => {
     });
 
     test('onDataViewCreated - ad-hoc data view', async () => {
-      const { state, customizationService } = await getState('/', { savedSearch: savedSearchMock });
+      const { state, customizationService, runtimeStateManager } = await getState('/', {
+        savedSearch: savedSearchMock,
+      });
       await state.internalState.dispatch(
         state.injectCurrentTab(internalStateActions.initializeSession)({
           initializeSessionParams: {
@@ -1191,7 +1199,12 @@ describe('Discover state', () => {
         );
       await state.actions.onDataViewCreated(dataViewAdHoc);
       await waitFor(() => {
-        expect(state.getCurrentTab().dataViewId).toBe(dataViewAdHoc.id);
+        expect(
+          selectTabRuntimeState(
+            runtimeStateManager,
+            state.getCurrentTab().id
+          ).currentDataView$.getValue()
+        ).toBe(dataViewAdHoc);
       });
       expect(state.appState.getState().dataSource).toEqual(
         createDataViewDataSource({ dataViewId: dataViewAdHoc.id! })
@@ -1203,7 +1216,9 @@ describe('Discover state', () => {
     });
 
     test('onDataViewEdited - persisted data view', async () => {
-      const { state, customizationService } = await getState('/', { savedSearch: savedSearchMock });
+      const { state, customizationService, runtimeStateManager } = await getState('/', {
+        savedSearch: savedSearchMock,
+      });
       await state.internalState.dispatch(
         state.injectCurrentTab(internalStateActions.initializeSession)({
           initializeSessionParams: {
@@ -1216,23 +1231,33 @@ describe('Discover state', () => {
           },
         })
       );
-      const selectedDataViewId = state.getCurrentTab().dataViewId;
+
+      const selectedDataView$ = selectTabRuntimeState(
+        runtimeStateManager,
+        state.getCurrentTab().id
+      ).currentDataView$;
+      const selectedDataViewId = selectedDataView$.getValue()?.id;
       expect(selectedDataViewId).toBe(dataViewMock.id);
       await state.actions.onDataViewEdited(dataViewMock);
       await waitFor(() => {
-        expect(state.getCurrentTab().dataViewId).toBe(selectedDataViewId);
+        expect(selectedDataView$.getValue()?.id).toBe(selectedDataViewId);
       });
       state.actions.stopSyncing();
     });
 
     test('onDataViewEdited - ad-hoc data view', async () => {
-      const { state } = await getState('/', { savedSearch: savedSearchMock });
+      const { state, runtimeStateManager } = await getState('/', { savedSearch: savedSearchMock });
       state.actions.initializeAndSync();
       await state.actions.onDataViewCreated(dataViewAdHoc);
       const previousId = dataViewAdHoc.id;
       await state.actions.onDataViewEdited(dataViewAdHoc);
       await waitFor(() => {
-        expect(state.getCurrentTab().dataViewId).not.toBe(previousId);
+        expect(
+          selectTabRuntimeState(
+            runtimeStateManager,
+            state.getCurrentTab().id
+          ).currentDataView$.getValue()?.id
+        ).not.toBe(previousId);
       });
       state.actions.stopSyncing();
     });
@@ -1318,9 +1343,12 @@ describe('Discover state', () => {
     });
 
     test('undoSavedSearchChanges - when changing data views', async () => {
-      const { state, customizationService, getCurrentUrl } = await getState('/', {
-        savedSearch: savedSearchMock,
-      });
+      const { state, customizationService, runtimeStateManager, getCurrentUrl } = await getState(
+        '/',
+        {
+          savedSearch: savedSearchMock,
+        }
+      );
       // Load a given persisted saved search
       await state.internalState.dispatch(
         state.injectCurrentTab(internalStateActions.initializeSession)({
@@ -1338,7 +1366,12 @@ describe('Discover state', () => {
       const initialUrlState =
         '/#?_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))&_a=(columns:!(default_column),dataSource:(dataViewId:the-data-view-id,type:dataView),interval:auto,sort:!())';
       expect(getCurrentUrl()).toBe(initialUrlState);
-      expect(state.getCurrentTab().dataViewId).toBe(dataViewMock.id!);
+      expect(
+        selectTabRuntimeState(
+          runtimeStateManager,
+          state.getCurrentTab().id
+        ).currentDataView$.getValue()?.id
+      ).toBe(dataViewMock.id);
 
       // Change the data view, this should change the URL and trigger a fetch
       await state.actions.onChangeDataView(dataViewComplexMock.id!);
@@ -1349,7 +1382,12 @@ describe('Discover state', () => {
       await waitFor(() => {
         expect(state.dataState.fetch).toHaveBeenCalledTimes(2);
       });
-      expect(state.getCurrentTab().dataViewId).toBe(dataViewComplexMock.id!);
+      expect(
+        selectTabRuntimeState(
+          runtimeStateManager,
+          state.getCurrentTab().id
+        ).currentDataView$.getValue()?.id
+      ).toBe(dataViewComplexMock.id);
 
       // Undo all changes to the saved search, this should trigger a fetch, again
       await state.actions.undoSavedSearchChanges();
@@ -1358,7 +1396,12 @@ describe('Discover state', () => {
       await waitFor(() => {
         expect(state.dataState.fetch).toHaveBeenCalledTimes(3);
       });
-      expect(state.getCurrentTab().dataViewId).toBe(dataViewMock.id!);
+      expect(
+        selectTabRuntimeState(
+          runtimeStateManager,
+          state.getCurrentTab().id
+        ).currentDataView$.getValue()?.id
+      ).toBe(dataViewMock.id);
 
       state.actions.stopSyncing();
     });

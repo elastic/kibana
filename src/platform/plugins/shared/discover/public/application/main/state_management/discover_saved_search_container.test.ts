@@ -43,9 +43,12 @@ describe('DiscoverSavedSearchContainer', () => {
     urlStateStorage,
     tabsStorageManager,
   });
-  internalState.dispatch(
-    internalStateActions.initializeTabs({ discoverSessionId: savedSearch?.id })
-  );
+
+  beforeAll(async () => {
+    await internalState.dispatch(
+      internalStateActions.initializeTabs({ discoverSessionId: savedSearch?.id })
+    );
+  });
 
   describe('getTitle', () => {
     it('returns undefined for new saved searches', () => {

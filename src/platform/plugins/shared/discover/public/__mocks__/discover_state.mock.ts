@@ -27,6 +27,7 @@ import type { DiscoverCustomizationContext } from '../customizations';
 import { createCustomizationService } from '../customizations/customization_service';
 import { createTabsStorageManager } from '../application/main/state_management/tabs_storage_manager';
 import { internalStateActions } from '../application/main/state_management/redux';
+import { DEFAULT_TAB_STATE } from '../application/main/state_management/redux/constants';
 
 export function getDiscoverStateMock({
   isTimeBased = true,
@@ -72,11 +73,12 @@ export function getDiscoverStateMock({
     urlStateStorage: stateStorageContainer,
     tabsStorageManager,
   });
-  internalState.dispatch(
-    internalStateActions.initializeTabs({
-      discoverSessionId: savedSearch ? savedSearch.id : undefined,
-    })
-  );
+  const initialTabsState = tabsStorageManager.loadLocally({
+    userId: 'mockUserId',
+    spaceId: 'mockSpaceId',
+    defaultTabState: DEFAULT_TAB_STATE,
+  });
+  internalState.dispatch(internalStateActions.setTabs(initialTabsState));
   const container = getDiscoverStateContainer({
     tabId: internalState.getState().tabs.unsafeCurrentId,
     services,
