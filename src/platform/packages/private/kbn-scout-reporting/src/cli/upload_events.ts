@@ -50,8 +50,24 @@ export const uploadAllEventsFromPath = async (
     throw createFlagError(`The provided event log path '${eventLogPath}' does not exist.`);
   }
 
-  // ES connection
+  // If the provided event log path is a file, ensure it ends with .ndjson
+  if (!fs.statSync(eventLogPath).isDirectory()) {
+    if (!eventLogPath.endsWith('.ndjson')) {
+      throw createFlagError(`The provided event log file '${eventLogPath}' must end with .ndjson.`);
+    }
+  } else {
+    // If it's a directory, ensure it contains at least one .ndjson file
+    const files = fs.readdirSync(eventLogPath);
+    const hasNdjsonFile = files.some((file) => file.endsWith('.ndjson'));
+    if (!hasNdjsonFile) {
+      options.log.warning(
+        `The provided event log directory '${eventLogPath}' does not contain any .ndjson files.`
+      );
+      return;
+    }
+  }
 
+  // ES connection
   options.log.info(`Connecting to Elasticsearch at ${options.esURL}`);
   const es = await getValidatedESClient(
     {
