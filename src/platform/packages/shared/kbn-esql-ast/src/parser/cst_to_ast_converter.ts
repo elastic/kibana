@@ -18,7 +18,6 @@ import {
   createFunction,
   createIdentifierOrParam,
   createLiteralString,
-  createOption,
   nonNullable,
   sanitizeIdentifierString,
   textExistsAndIsValid,
@@ -368,6 +367,25 @@ export class CstToAstConverter {
     return command;
   }
 
+  private toOption(name: string, ctx: antlr.ParserRuleContext): ast.ESQLCommandOption {
+    return {
+      type: 'option',
+      name,
+      text: ctx.getText(),
+      location: getPosition(ctx.start, ctx.stop),
+      args: [],
+      incomplete: Boolean(
+        ctx.exception ||
+          ctx.children?.some((c) => {
+            // TODO: 1. Remove this expect error comment
+            // TODO: 2. .isErrorNode is function: .isErrorNode()
+            // @ts-expect-error not exposed in type but exists see https://github.com/antlr/antlr4/blob/v4.11.1/runtime/JavaScript/src/antlr4/tree/ErrorNodeImpl.js#L19
+            return Boolean(c.isErrorNode);
+          })
+      ),
+    };
+  }
+
   // ------------------------------------------------------------------ EXPLAIN
 
   private fromExplainCommand(ctx: cst.ExplainCommandContext): ast.ESQLCommand<'explain'> {
@@ -395,7 +413,7 @@ export class CstToAstConverter {
 
     if (metadataCtx && metadataCtx.METADATA()) {
       const name = metadataCtx.METADATA().getText().toLowerCase();
-      const option = createOption(name, metadataCtx);
+      const option = this.toOption(name, metadataCtx);
       const optionArgs = this.toColumnsFromCommand(metadataCtx);
 
       option.args.push(...optionArgs);
@@ -430,7 +448,7 @@ export class CstToAstConverter {
 
     if (metadataCtx && metadataCtx.METADATA()) {
       const name = metadataCtx.METADATA().getText().toLowerCase();
-      const option = createOption(name, metadataCtx);
+      const option = this.toOption(name, metadataCtx);
       const optionArgs = this.toColumnsFromCommand(metadataCtx);
 
       option.args.push(...optionArgs);
@@ -573,7 +591,7 @@ export class CstToAstConverter {
       return [];
     }
 
-    const option = createOption(byCtx.getText().toLowerCase(), ctx);
+    const option = this.toOption(byCtx.getText().toLowerCase(), ctx);
 
     option.args.push(...this.fromFields(expr));
     option.location.min = byCtx.symbol.start;
@@ -732,7 +750,7 @@ export class CstToAstConverter {
     const options: ast.ESQLCommandOption[] = [];
 
     for (const optionCtx of ctx.commandOption_list()) {
-      const option = createOption(
+      const option = this.toOption(
         sanitizeIdentifierString(optionCtx.identifier()).toLowerCase(),
         optionCtx
       );
@@ -893,7 +911,7 @@ export class CstToAstConverter {
     const identifier = ctx.qualifiedNamePattern();
 
     if (identifier) {
-      const fn = createOption(ctx.ON()!.getText().toLowerCase(), ctx);
+      const fn = this.toOption(ctx.ON()!.getText().toLowerCase(), ctx);
       let max: number = ctx.ON()!.symbol.stop;
 
       if (textExistsAndIsValid(identifier.getText())) {
@@ -918,7 +936,7 @@ export class CstToAstConverter {
     const withCtx = ctx.WITH();
 
     if (withCtx) {
-      const option = createOption(withCtx.getText().toLowerCase(), ctx);
+      const option = this.toOption(withCtx.getText().toLowerCase(), ctx);
       const clauses = ctx.enrichWithClause_list();
 
       options.push(option);
@@ -980,7 +998,7 @@ export class CstToAstConverter {
 
     const joinTarget = this.fromJoinTarget(ctx.joinTarget());
     const joinCondition = ctx.joinCondition();
-    const onOption = createOption('on', joinCondition);
+    const onOption = this.toOption('on', joinCondition);
     const joinPredicates: ast.ESQLAstItem[] = onOption.args;
 
     for (const joinPredicateCtx of joinCondition.joinPredicate_list()) {

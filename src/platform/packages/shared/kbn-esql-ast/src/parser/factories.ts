@@ -602,23 +602,6 @@ export function createColumn(ctx: ParserRuleContext): ESQLColumn {
   return column;
 }
 
-export function createOption(name: string, ctx: ParserRuleContext): ESQLCommandOption {
-  return {
-    type: 'option',
-    name,
-    text: ctx.getText(),
-    location: getPosition(ctx.start, ctx.stop),
-    args: [],
-    incomplete: Boolean(
-      ctx.exception ||
-        ctx.children?.some((c) => {
-          // @ts-expect-error not exposed in type but exists see https://github.com/antlr/antlr4/blob/v4.11.1/runtime/JavaScript/src/antlr4/tree/ErrorNodeImpl.js#L19
-          return Boolean(c.isErrorNode);
-        })
-    ),
-  };
-}
-
 export function createError(exception: RecognitionException) {
   const token = exception.offendingToken;
 
