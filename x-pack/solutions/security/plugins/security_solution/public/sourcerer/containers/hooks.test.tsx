@@ -154,7 +154,9 @@ jest.mock('../../common/lib/kibana', () => ({
   useUiSetting$: jest.fn().mockImplementation(() => [mockPatterns]),
 }));
 
-describe('Sourcerer Hooks', () => {
+// WARN: skipping this test as data view picker is the new default implementation.
+// See https://github.com/elastic/security-team/issues/11959
+describe.skip('Sourcerer Hooks', () => {
   let store = createMockStore();
 
   const StoreProvider: React.FC<React.PropsWithChildren> = ({ children }) => (

@@ -82,7 +82,9 @@ const sourcererDataView: Partial<SelectedDataView> = {
   },
 };
 
-describe('No data', () => {
+// WARN: skipping this test as data view picker is the new default implementation.
+// See https://github.com/elastic/security-team/issues/11959
+describe.skip('No data', () => {
   const mockNoIndicesState = {
     ...mockGlobalState,
     sourcerer: {
@@ -134,7 +136,9 @@ describe('No data', () => {
   });
 });
 
-describe('Update available', () => {
+// WARN: skipping this test as data view picker is the new default implementation.
+// See https://github.com/elastic/security-team/issues/11959
+describe.skip('Update available', () => {
   const state2 = {
     ...mockGlobalState,
     sourcerer: {
@@ -257,7 +261,9 @@ describe('Update available', () => {
   });
 });
 
-describe('Update available for timeline template', () => {
+// WARN: skipping this test as data view picker is the new default implementation.
+// See https://github.com/elastic/security-team/issues/11959
+describe.skip('Update available for timeline template', () => {
   const state2 = {
     ...mockGlobalState,
     timeline: {
@@ -333,7 +339,9 @@ describe('Update available for timeline template', () => {
   });
 });
 
-describe('Missing index patterns', () => {
+// WARN: skipping this test as data view picker is the new default implementation.
+// See https://github.com/elastic/security-team/issues/11959
+describe.skip('Missing index patterns', () => {
   const state2 = {
     ...mockGlobalState,
     timeline: {
@@ -459,7 +467,9 @@ describe('Missing index patterns', () => {
   });
 });
 
-describe('Sourcerer integration tests', () => {
+// WARN: skipping this test as data view picker is the new default implementation.
+// See https://github.com/elastic/security-team/issues/11959
+describe.skip('Sourcerer integration tests', () => {
   const state = {
     ...mockGlobalState,
     sourcerer: {
