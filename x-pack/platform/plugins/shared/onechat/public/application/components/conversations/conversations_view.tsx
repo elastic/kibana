@@ -27,7 +27,7 @@ export const OnechatConversationsView: React.FC<{}> = () => {
     display: flex;
     justify-content: center;
     border: none;
-    max-block-size: ${headerHeight};
+    block-size: ${headerHeight};
   `;
   const mainContentStyles = css`
     ${backgroundStyles}
