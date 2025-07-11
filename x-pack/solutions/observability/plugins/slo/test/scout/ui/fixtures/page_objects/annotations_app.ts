@@ -10,7 +10,7 @@ export class AnnotationsApp {
   constructor(private readonly page: ScoutPage) {}
 
   async goto() {
-    await this.page.gotoApp('observability-overview', {});
+    await this.page.gotoApp('slo', {});
     await expect(this.page.getByText('Annotations')).toBeVisible();
     await this.page.click('text=Annotations');
     await expect(this.page.getByTestId('annotationsPage')).toBeVisible();
