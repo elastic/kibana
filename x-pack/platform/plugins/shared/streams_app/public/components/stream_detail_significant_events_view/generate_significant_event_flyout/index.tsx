@@ -6,20 +6,13 @@
  */
 
 import {
-  EuiBasicTable,
   EuiButton,
-  EuiCallOut,
-  EuiCodeBlock,
   EuiFlexGroup,
-  EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiSpacer,
   EuiTitle,
-  type EuiBasicTableColumn,
-  type EuiTableSelectionType,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { StreamQueryKql } from '@kbn/streams-schema';
@@ -27,6 +20,7 @@ import React, { useState } from 'react';
 import { v4 } from 'uuid';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useSignificantEventsApi } from '../../../hooks/use_significant_events_api';
+import { SignificantEventsGeneratedTable } from './significant_events_generated_table';
 import { useAIFeatures } from './use_ai_features';
 
 interface GenerateSignificantEventFlyoutProps {
@@ -57,30 +51,6 @@ function SignificantEventFlyoutContents(props: GenerateSignificantEventFlyoutPro
 
   const onSelectionChange = (selectedItems: StreamQueryKql[]) => {
     setSelectedQueries(selectedItems);
-  };
-
-  const columns: Array<EuiBasicTableColumn<StreamQueryKql>> = [
-    {
-      field: 'title',
-      name: i18n.translate('xpack.streams.streamDetailView.generateSignificantEvents.titleColumn', {
-        defaultMessage: 'Title',
-      }),
-    },
-    {
-      field: 'kql',
-      name: i18n.translate('xpack.streams.streamDetailView.generateSignificantEvents.queryColumn', {
-        defaultMessage: 'Query',
-      }),
-      render: (_, item: StreamQueryKql) => (
-        <EuiCodeBlock paddingSize="s" fontSize="s">
-          {item.kql.query}
-        </EuiCodeBlock>
-      ),
-    },
-  ];
-
-  const selection: EuiTableSelectionType<StreamQueryKql> = {
-    onSelectionChange,
   };
 
   return (
@@ -150,17 +120,10 @@ function SignificantEventFlyoutContents(props: GenerateSignificantEventFlyoutPro
             </EuiButton>
           </EuiFlexGroup>
 
-          <EuiBasicTable
-            responsiveBreakpoint={false}
-            items={generatedQueries}
-            itemId="id"
-            rowHeader="title"
-            columns={columns}
-            selection={selection}
-            noItemsMessage={i18n.translate(
-              'xpack.streams.streamDetailView.generateSignificantEvents.noQueriesMessage',
-              { defaultMessage: 'No significant events queries generated' }
-            )}
+          <SignificantEventsGeneratedTable
+            generatedQueries={generatedQueries}
+            selectedQueries={selectedQueries}
+            onSelectionChange={onSelectionChange}
           />
         </EuiFlexGroup>
       </EuiFlyoutBody>
