@@ -11,7 +11,7 @@ import { createRule } from '../../../../tasks/api_calls/rules';
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 import {
   saveEditedRuleWithNonBlockingErrors,
-  visitEditRulePage,
+  visitRuleEditPage,
 } from '../../../../tasks/edit_rule';
 import { login } from '../../../../tasks/login';
 
@@ -29,7 +29,7 @@ describe.skip('EQL query rules', { tags: ['@ess', '@serverless'] }, () => {
         index: ['fake*'],
       };
       createRule(rule).then((createdRule) => {
-        visitEditRulePage(createdRule.body.id);
+        visitRuleEditPage(createdRule.body.id);
         saveEditedRuleWithNonBlockingErrors();
       });
     });
@@ -40,7 +40,7 @@ describe.skip('EQL query rules', { tags: ['@ess', '@serverless'] }, () => {
         query: 'any where hello.world',
       };
       createRule(rule).then((createdRule) => {
-        visitEditRulePage(createdRule.body.id);
+        visitRuleEditPage(createdRule.body.id);
         saveEditedRuleWithNonBlockingErrors();
       });
     });
