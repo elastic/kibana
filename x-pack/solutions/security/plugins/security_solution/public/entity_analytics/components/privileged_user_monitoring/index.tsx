@@ -52,7 +52,7 @@ export const PrivilegedUserMonitoring = ({
             title={
               <FormattedMessage
                 id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.dashboard.missingPrivileges.title"
-                defaultMessage="Insufficient privileges to visualize Privileged user monitoring dashboards"
+                defaultMessage="Insufficient privileges to view the privileged user monitoring panels"
               />
             }
           />
