@@ -24,25 +24,25 @@ import type { EntityNodeViewModel, LabelNodeViewModel } from '..';
 
 /**
  * The width of a node in the graph, in pixels.
- * Must be a multiplication of 2 times the value of `GRID_SIZE` (e.g, when `GRID_SIZE` equals 10 it should be dividable by 20).
+ * Must be a multiple of `GRID_SIZE * 2`.
  */
 export const NODE_WIDTH = 100;
 
 /**
  * The height of a node in the graph, in pixels.
- * Must be a multiplication of 2 times the value of `GRID_SIZE` (e.g, when `GRID_SIZE` equals 10 it should be dividable by 20).
+ * Must be a multiple of `GRID_SIZE * 2`.
  */
 export const NODE_HEIGHT = 100;
 
 /**
  * The width of a node label in the graph, in pixels.
- * Must be a multiplication of 2 times the value of `GRID_SIZE` (e.g, when `GRID_SIZE` equals 10 it should be dividable by 20).
+ * Must be a multiple of `GRID_SIZE * 2`.
  */
 export const NODE_LABEL_WIDTH = 140;
 
 /**
  * The height of a node label in the graph, in pixels.
- * Must be a multiplication of 2 times the value of `GRID_SIZE` (e.g, when `GRID_SIZE` equals 10 it should be dividable by 20).
+ * Must be a multiple of `GRID_SIZE * 2`.
  */
 export const NODE_LABEL_HEIGHT = 20;
 
