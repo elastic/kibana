@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import React from 'react';
+import { css } from '@emotion/react';
 import {
   EuiBadge,
   EuiFlexGroup,
@@ -13,11 +15,11 @@ import {
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
-import { GenericBuckets, GroupPanelRenderer, GroupStatsItem, RawBucket } from '@kbn/grouping/src';
-import React from 'react';
+import { GroupPanelRenderer, GroupStatsItem, RawBucket } from '@kbn/grouping/src';
 import { i18n } from '@kbn/i18n';
 import { getAbbreviatedNumber } from '@kbn/cloud-security-posture-common';
+import { getGroupPanelTitle } from '@kbn/cloud-security-posture';
+import type { FindingsGroupingAggregation } from '@kbn/cloud-security-posture';
 import { FINDINGS_GROUPING_OPTIONS } from '../../../common/constants';
 import {
   firstNonNullValue,
@@ -26,14 +28,12 @@ import {
 } from '../../../components/cloud_security_grouping';
 import { CISBenchmarkIcon } from '../../../components/cis_benchmark_icon';
 import { ComplianceScoreBar } from '../../../components/compliance_score_bar';
-import { FindingsGroupingAggregation } from './use_grouped_findings';
 import { NULL_GROUPING_MESSAGES, NULL_GROUPING_UNIT } from './constants';
 import { FINDINGS_GROUPING_COUNTER } from '../test_subjects';
-import { getGroupPanelTitle } from '@kbn/cloud-security-posture';
 
 export const groupPanelRenderer: GroupPanelRenderer<FindingsGroupingAggregation> = (
   selectedGroup: string,
-  bucket: RawBucket<FindingsGroupingAggregation>,
+  bucket,
   nullGroupMessage: string | undefined,
   isLoading: boolean | undefined
 ) => {
