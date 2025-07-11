@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import {
-  Conversation,
-  ConversationRound,
-  ToolCallStep,
-  isToolCallStep,
-  oneChatDefaultAgentId,
-} from '@kbn/onechat-common';
+import { Conversation, ConversationRound, ToolCallStep, isToolCallStep } from '@kbn/onechat-common';
 import { QueryClient, QueryKey, useQuery, useQueryClient } from '@tanstack/react-query';
 import produce from 'immer';
 import { useEffect, useMemo } from 'react';
@@ -166,8 +160,9 @@ export const useConversation = () => {
   return {
     conversation,
     conversationId,
-    agentId: conversation?.agentId ?? oneChatDefaultAgentId,
-    hasActiveConversation: conversationId || (conversation && conversation.rounds.length > 0),
+    hasActiveConversation: Boolean(
+      conversationId || (conversation && conversation.rounds.length > 0)
+    ),
     isLoading,
     actions,
   };
