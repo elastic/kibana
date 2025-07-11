@@ -29,15 +29,15 @@ const globalLayoutStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
     // height of the header banner
     --kbnHeaderBannerHeight: var(--kbn-layout--banner-height, 0px);
 
-    // the total height of all app-area headers
-    --kbnAppHeadersOffset: var(--kbn-application--content-top, 0px);
+    // the current total height of all app-area headers, this variable can be used for sticky headers offset relative to the top of the application area
+    --kbnAppHeadersOffset: var(--kbn-application--top-bar-height, 0px);
+    --kbn-application--sticky-headers-offset: var(
+      --kbn-application--top-bar-height,
+      0px
+    ); // better name alias to --kbnAppHeadersOffset
 
     // height of the project header app action menu which is part of the application area
     --kbnProjectHeaderAppActionMenuHeight: var(--kbn-application--top-bar-height, 0px);
-
-    // for backward compatibility with legacy fixed layout,
-    // this variable can be used for sticky headers offset relative to the top of the application area
-    --kbn-application--sticky-headers-offset: var(--kbn-application--top-bar-height, 0px);
   }
 
   #kibana-body {
