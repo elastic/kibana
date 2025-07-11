@@ -6,7 +6,14 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { EuiButtonEmpty, EuiConfirmModal, EuiFlexGroup, EuiFlexItem, EuiText, useGeneratedHtmlId } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiConfirmModal,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 

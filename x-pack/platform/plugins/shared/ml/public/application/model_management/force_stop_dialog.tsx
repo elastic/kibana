@@ -7,7 +7,13 @@
 
 import React, { type FC, useState, useMemo, useCallback } from 'react';
 import type { EuiCheckboxGroupOption } from '@elastic/eui';
-import { EuiCallOut, EuiCheckboxGroup, EuiConfirmModal, EuiSpacer, useGeneratedHtmlId } from '@elastic/eui';
+import {
+  EuiCallOut,
+  EuiCheckboxGroup,
+  EuiConfirmModal,
+  EuiSpacer,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { CoreStart, OverlayStart } from '@kbn/core/public';

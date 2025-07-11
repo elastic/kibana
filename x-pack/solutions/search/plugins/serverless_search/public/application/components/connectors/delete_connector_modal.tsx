@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { EuiConfirmModal, EuiFieldText, EuiForm, EuiFormRow, useGeneratedHtmlId } from '@elastic/eui';
+import {
+  EuiConfirmModal,
+  EuiFieldText,
+  EuiForm,
+  EuiFormRow,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AcknowledgedResponseBase } from '@elastic/elasticsearch/lib/api/types';
 import { useMutation } from '@tanstack/react-query';

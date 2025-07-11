@@ -439,7 +439,13 @@ const ClearEntityDataButton: React.FC<{
   closeClearModal: () => void;
   showClearModal: () => void;
   modalTitleId: string;
-}> = ({ deleteEntityEngineMutation, isClearModalVisible, closeClearModal, showClearModal, modalTitleId }) => {
+}> = ({
+  deleteEntityEngineMutation,
+  isClearModalVisible,
+  closeClearModal,
+  showClearModal,
+  modalTitleId,
+}) => {
   return (
     <>
       <EuiButtonEmpty

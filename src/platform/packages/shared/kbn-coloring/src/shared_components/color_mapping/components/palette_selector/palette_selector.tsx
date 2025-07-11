@@ -9,7 +9,12 @@
 
 import React, { useCallback, useState, useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { EuiColorPalettePicker, EuiConfirmModal, EuiFormRow, useGeneratedHtmlId } from '@elastic/eui';
+import {
+  EuiColorPalettePicker,
+  EuiConfirmModal,
+  EuiFormRow,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { KbnPalettes, getAppendedTag } from '@kbn/palettes';

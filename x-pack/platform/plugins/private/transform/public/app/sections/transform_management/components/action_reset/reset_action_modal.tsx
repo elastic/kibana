@@ -8,7 +8,13 @@
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EUI_MODAL_CONFIRM_BUTTON, EuiConfirmModal, EuiFlexGroup, EuiSpacer, useGeneratedHtmlId } from '@elastic/eui';
+import {
+  EUI_MODAL_CONFIRM_BUTTON,
+  EuiConfirmModal,
+  EuiFlexGroup,
+  EuiSpacer,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import type { ResetAction } from './use_reset_action';
 import { isManagedTransform } from '../../../../common/managed_transforms_utils';
 import { ManagedTransformsWarningCallout } from '../managed_transforms_callout/managed_transforms_callout';

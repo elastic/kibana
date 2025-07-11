@@ -8,7 +8,14 @@
  */
 
 import React, { useState } from 'react';
-import { EuiCallOut, EuiSpacer, EuiConfirmModal, EuiFieldText, EuiFormRow, useGeneratedHtmlId } from '@elastic/eui';
+import {
+  EuiCallOut,
+  EuiSpacer,
+  EuiConfirmModal,
+  EuiFieldText,
+  EuiFormRow,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 const geti18nTexts = (fieldName: string) => ({

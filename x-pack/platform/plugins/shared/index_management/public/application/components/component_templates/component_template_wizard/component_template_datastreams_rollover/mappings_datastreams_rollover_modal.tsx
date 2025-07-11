@@ -7,7 +7,15 @@
 
 import React, { useState, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiConfirmModal, EuiCode, EuiSpacer, EuiText, EuiCallOut, EuiLink, useGeneratedHtmlId } from '@elastic/eui';
+import {
+  EuiConfirmModal,
+  EuiCode,
+  EuiSpacer,
+  EuiText,
+  EuiCallOut,
+  EuiLink,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 
 import type { useComponentTemplatesContext } from '../../component_templates_context';
 import { documentationService } from '../../../../services/documentation';

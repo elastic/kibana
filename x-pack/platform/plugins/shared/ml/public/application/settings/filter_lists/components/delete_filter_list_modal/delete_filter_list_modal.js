@@ -11,7 +11,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { context } from '@kbn/kibana-react-plugin/public';
 
-import { EuiButton, EuiConfirmModal, EUI_MODAL_CONFIRM_BUTTON, htmlIdGenerator } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiConfirmModal,
+  EUI_MODAL_CONFIRM_BUTTON,
+  htmlIdGenerator,
+} from '@elastic/eui';
 
 import { deleteFilterLists } from './delete_filter_lists';
 

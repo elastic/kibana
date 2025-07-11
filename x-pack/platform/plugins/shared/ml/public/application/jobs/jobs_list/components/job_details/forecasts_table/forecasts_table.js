@@ -7,9 +7,8 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { htmlIdGenerator } from '@elastic/eui';
-
 import {
+  htmlIdGenerator,
   EuiCallOut,
   EuiConfirmModal,
   EuiFlexGroup,

@@ -6,7 +6,14 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import { EuiRadioGroup, EuiText, EuiConfirmModal, EuiSpacer, EuiIconTip, useGeneratedHtmlId } from '@elastic/eui';
+import {
+  EuiRadioGroup,
+  EuiText,
+  EuiConfirmModal,
+  EuiSpacer,
+  EuiIconTip,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import { DuplicateOptions } from '../../../../../../common/detection_engine/rule_management/constants';
 
 import { bulkDuplicateRuleActions as i18n } from './translations';

@@ -9,7 +9,14 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiCallOut, EuiConfirmModal, EuiFieldText, EuiFormRow, EuiSpacer, useGeneratedHtmlId } from '@elastic/eui';
+import {
+  EuiCallOut,
+  EuiConfirmModal,
+  EuiFieldText,
+  EuiFormRow,
+  EuiSpacer,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 
 const geti18nTexts = (fieldsToDelete?: string[]) => {
   let modalTitle = '';

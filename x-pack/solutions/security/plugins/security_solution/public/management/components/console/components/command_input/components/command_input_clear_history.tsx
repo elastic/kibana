@@ -6,7 +6,13 @@
  */
 
 import React, { memo, useCallback, useState } from 'react';
-import { EuiButtonEmpty, EuiConfirmModal, EuiFlexGroup, EuiFlexItem, useGeneratedHtmlId } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiConfirmModal,
+  EuiFlexGroup,
+  EuiFlexItem,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';

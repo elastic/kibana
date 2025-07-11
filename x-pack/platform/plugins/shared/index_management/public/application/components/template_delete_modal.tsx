@@ -6,7 +6,14 @@
  */
 
 import React, { Fragment, useState } from 'react';
-import { EuiConfirmModal, EuiCallOut, EuiCheckbox, EuiBadge, EuiSpacer, useGeneratedHtmlId } from '@elastic/eui';
+import {
+  EuiConfirmModal,
+  EuiCallOut,
+  EuiCheckbox,
+  EuiBadge,
+  EuiSpacer,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 

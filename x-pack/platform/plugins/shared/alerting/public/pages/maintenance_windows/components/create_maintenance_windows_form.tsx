@@ -297,7 +297,14 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
       );
     }
     return m;
-  }, [closeModal, archiveMaintenanceWindow, isModalVisible, maintenanceWindowId, onSuccess, modalTitleId]);
+  }, [
+    closeModal,
+    archiveMaintenanceWindow,
+    isModalVisible,
+    maintenanceWindowId,
+    onSuccess,
+    modalTitleId,
+  ]);
 
   const showNoAvailableSolutionsWarning =
     availableSolutions.length === 0 && isScopedQueryEnabled && isEditMode;

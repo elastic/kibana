@@ -6,7 +6,13 @@
  */
 
 import React, { Component } from 'react';
-import { EuiConfirmModal, EuiFormRow, EuiRange, EuiRangeProps, htmlIdGenerator } from '@elastic/eui';
+import {
+  EuiConfirmModal,
+  EuiFormRow,
+  EuiRange,
+  EuiRangeProps,
+  htmlIdGenerator,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { AggDescriptor } from '../../../../common/descriptor_types';

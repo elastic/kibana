@@ -6,7 +6,13 @@
  */
 
 import React, { Fragment, useCallback, useMemo, useRef, useState } from 'react';
-import { EuiCallOut, EuiConfirmModal, EuiSpacer, EuiIconTip, useGeneratedHtmlId } from '@elastic/eui';
+import {
+  EuiCallOut,
+  EuiConfirmModal,
+  EuiSpacer,
+  EuiIconTip,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useHistory } from 'react-router-dom';

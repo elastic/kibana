@@ -8,7 +8,14 @@
 import React, { useCallback, useState } from 'react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { Toast } from '@kbn/core/public';
-import { EuiButton, EuiConfirmModal, EuiFlexGroup, EuiFlexItem, EuiText, useGeneratedHtmlId } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiConfirmModal,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import * as i18n from './translations';
 import { useBulkFillRuleGapsConfirmation } from '../bulk_fill_rule_gaps/use_bulk_fill_rule_gaps_confirmation';
 import { BulkFillRuleGapsModal } from '../bulk_fill_rule_gaps';

@@ -10,7 +10,13 @@ import classNames from 'classnames';
 import type { DraggableProvidedDragHandleProps } from '@hello-pangea/dnd';
 import { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiIcon, EuiButtonIcon, EuiConfirmModal, EuiButtonEmpty, htmlIdGenerator } from '@elastic/eui';
+import {
+  EuiIcon,
+  EuiButtonIcon,
+  EuiConfirmModal,
+  EuiButtonEmpty,
+  htmlIdGenerator,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TOCEntryActionsPopover } from './toc_entry_actions_popover';
 import {

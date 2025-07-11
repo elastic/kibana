@@ -8,7 +8,13 @@
  */
 
 import React, { useState, Fragment, ReactNode } from 'react';
-import { EuiConfirmModal, EUI_MODAL_CONFIRM_BUTTON, EuiText, EuiSuperSelect, useGeneratedHtmlId } from '@elastic/eui';
+import {
+  EuiConfirmModal,
+  EUI_MODAL_CONFIRM_BUTTON,
+  EuiText,
+  EuiSuperSelect,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import type { SavedObjectManagementTypeInfo } from '../../../../common/types';
