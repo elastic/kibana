@@ -18,7 +18,6 @@ import { createDataSource } from '../../../../../../common/data_sources/utils';
 import type { TabState } from '../types';
 import { selectAllTabs, selectRecentlyClosedTabs, selectTab } from '../selectors';
 import {
-  defaultTabState,
   internalStateSlice,
   type TabActionPayload,
   type InternalStateThunkActionCreator,
@@ -34,6 +33,7 @@ import { APP_STATE_URL_KEY, GLOBAL_STATE_URL_KEY } from '../../../../../../commo
 import type { DiscoverAppState } from '../../discover_app_state_container';
 import { createInternalStateAsyncThunk, createTabItem } from '../utils';
 import { setBreadcrumbs } from '../../../../../utils/breadcrumbs';
+import { DEFAULT_TAB_STATE } from '../constants';
 
 export const setTabs: InternalStateThunkActionCreator<
   [Parameters<typeof internalStateSlice.actions.setTabs>[0]]
@@ -102,7 +102,7 @@ export const updateTabs: InternalStateThunkActionCreator<[TabbedContentState], P
       const existingTab = selectTab(currentState, item.id);
 
       const tab: TabState = {
-        ...defaultTabState,
+        ...DEFAULT_TAB_STATE,
         ...existingTab,
         ...pick(item, 'id', 'label', 'duplicatedFromId'),
       };
@@ -261,7 +261,7 @@ export const initializeTabs = createInternalStateAsyncThunk(
     const initialTabsState = tabsStorageManager.loadLocally({
       userId,
       spaceId,
-      defaultTabState,
+      defaultTabState: DEFAULT_TAB_STATE,
     });
 
     dispatch(setTabs(initialTabsState));
@@ -272,7 +272,7 @@ export const initializeTabs = createInternalStateAsyncThunk(
 
 export const clearAllTabs: InternalStateThunkActionCreator = () => (dispatch) => {
   const defaultTab: TabState = {
-    ...defaultTabState,
+    ...DEFAULT_TAB_STATE,
     ...createTabItem([]),
   };
 
