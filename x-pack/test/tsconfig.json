@@ -27,7 +27,6 @@
     "@kbn/test-suites-src",
     "@kbn/core",
     "@kbn/data-plugin",
-    "@kbn/kibana-usage-collection-plugin",
     "@kbn/share-plugin",
     "@kbn/telemetry-collection-manager-plugin",
     "@kbn/alerting-plugin",
@@ -39,7 +38,6 @@
     "@kbn/features-plugin",
     "@kbn/global-search-plugin",
     "@kbn/infra-plugin",
-    "@kbn/licensing-plugin",
     "@kbn/ml-plugin",
     "@kbn/observability-plugin",
     "@kbn/security-plugin",
@@ -65,7 +63,6 @@
     "@kbn/maps-plugin",
     "@kbn/test-subj-selector",
     "@kbn/rison",
-    "@kbn/reporting-plugin",
     "@kbn/aiops-plugin",
     "@kbn/logging",
     "@kbn/utility-types",
@@ -82,7 +79,6 @@
     "@kbn/rule-registry-plugin",
     "@kbn/controls-plugin",
     "@kbn/core-saved-objects-server",
-    "@kbn/core-provider-plugin",
     "@kbn/user-profile-components",
     "@kbn/apm-synthtrace-client",
     "@kbn/cloud-integration-saml-provider-plugin",
@@ -155,5 +151,6 @@
     "@kbn/event-log-plugin",
     "@kbn/management-settings-ids",
     "@kbn/intercepts-plugin",
+    "@kbn/core-provider-plugin",
   ]
 }

@@ -43,7 +43,13 @@ const ruleFieldsDiffMock: PartialRuleDiff = {
 const renderPerFieldRuleDiffTab = (ruleDiff: PartialRuleDiff) => {
   return render(
     <TestProviders>
-      <PerFieldRuleDiffTab ruleDiff={ruleDiff} />
+      <PerFieldRuleDiffTab
+        ruleDiff={ruleDiff}
+        leftDiffSideLabel={'mock left label'}
+        rightDiffSideLabel={'mock right label'}
+        leftDiffSideDescription={'mock left description'}
+        rightDiffSideDescription={'mock right description'}
+      />
     </TestProviders>
   );
 };
