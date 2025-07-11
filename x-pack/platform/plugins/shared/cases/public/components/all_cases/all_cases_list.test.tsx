@@ -201,10 +201,6 @@ describe('AllCasesListGeneric', () => {
       (await screen.findAllByTestId('case-user-profile-avatar-damaged_raccoon'))[0]
     ).toHaveTextContent('DR');
 
-    const incrementalIdTextElements = screen.getAllByTestId('cases-incremental-id-text');
-    expect(incrementalIdTextElements).toHaveLength(1);
-    expect(incrementalIdTextElements[0]).toHaveTextContent('#1');
-
     expect((await screen.findAllByTestId('case-table-column-tags-coke'))[0]).toHaveAttribute(
       'title',
       useGetCasesMockState.data.cases[0].tags[0]
@@ -224,6 +220,19 @@ describe('AllCasesListGeneric', () => {
 
     expect(screen.queryByTestId('all-cases-maximum-limit-warning')).not.toBeInTheDocument();
     expect(screen.queryByTestId('all-cases-clear-filters-link-icon')).not.toBeInTheDocument();
+  });
+
+  it('should render incremental id if setting is enabled', async () => {
+    useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => true });
+    renderWithTestingProviders(<AllCasesList />, {
+      wrapperProps: { settings: { displayIncrementalCaseId: true } },
+    });
+
+    await screen.findAllByTestId('case-details-link');
+
+    const incrementalIdTextElements = screen.getAllByTestId('cases-incremental-id-text');
+    expect(incrementalIdTextElements).toHaveLength(1);
+    expect(incrementalIdTextElements[0]).toHaveTextContent('#1');
   });
 
   it('should not render incremental id if setting is disabled', async () => {
