@@ -149,7 +149,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   };
 
   // FLAKY: https://github.com/elastic/kibana/issues/220357
-  describe.skip('Findings Page - Grouping', function () {
+  describe('Findings Page - Grouping', function () {
     this.tags(['cloud_security_posture_findings_grouping']);
     let findings: typeof pageObjects.findings;
 
@@ -170,13 +170,37 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await pageObjects.header.waitUntilLoadingHasFinished();
     });
 
+    // after(async () => {
+    //   await findings.navigateToLatestFindingsPage();
+    //   await pageObjects.header.waitUntilLoadingHasFinished();
+    //   const groupSelector = await findings.groupSelector();
+    //   await groupSelector.openDropDown();
+    //   await groupSelector.setValue('None');
+    //   await findings.index.remove();
+    // });
+
     after(async () => {
-      await findings.navigateToLatestFindingsPage();
-      await pageObjects.header.waitUntilLoadingHasFinished();
-      const groupSelector = await findings.groupSelector();
-      await groupSelector.openDropDown();
-      await groupSelector.setValue('None');
-      await findings.index.remove();
+      const maxRetries = 3;
+      for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        try {
+          await findings.navigateToLatestFindingsPage();
+          await pageObjects.header.waitUntilLoadingHasFinished();
+
+          const groupSelector = await findings.groupSelector();
+          await groupSelector.openDropDown(); // this might throw
+
+          await groupSelector.setValue('None');
+          await findings.index.remove();
+
+          break; // success, exit the loop
+        } catch (error) {
+          if (attempt === maxRetries) {
+            throw error; // rethrow after final attempt
+          }
+          // eslint-disable-next-line no-console
+          console.warn(`Retrying after failure (${attempt}/${maxRetries})...`);
+        }
+      }
     });
 
     describe('Default Grouping', async () => {
