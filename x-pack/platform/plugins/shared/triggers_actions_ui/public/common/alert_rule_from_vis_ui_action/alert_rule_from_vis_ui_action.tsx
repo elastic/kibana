@@ -16,6 +16,7 @@ import { apiIsOfType, hasBlockingError } from '@kbn/presentation-publishing';
 import { ALERT_RULE_TRIGGER } from '@kbn/ui-actions-browser/src/triggers';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { openLazyFlyout } from '@kbn/presentation-util';
+import { css } from '@emotion/react';
 import { type ServiceDependencies } from './rule_flyout_component';
 
 interface Context {
@@ -62,7 +63,10 @@ export class AlertRuleFromVisAction implements Action<Context> {
       core: this.startDependencies.coreStart,
       parentApi: embeddable.parentApi,
       flyoutProps: {
+        size: 620,
+        css: css({ containerType: 'inline-size' }),
         'data-test-subj': 'lensAlertRule',
+        'aria-labelledby': 'flyoutTitle',
       },
       loadContent: async ({ closeFlyout }) => {
         const { loadAlertRuleFlyoutContent } = await import('./load_alert_rule_flyout_content');
