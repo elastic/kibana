@@ -17,15 +17,11 @@ import { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import moment from 'moment';
 import pLimit from 'p-limit';
 import { v4 } from 'uuid';
+import type { GeneratedSignificantEventQuery } from '@kbn/streams-schema';
 import { kqlQuery, rangeQuery } from '../../internal/esql/query_helpers';
 import { KQL_GUIDE } from './kql_guide';
 
 const LOOKBACK_DAYS = 7;
-
-export interface GeneratedSignificantEventQuery {
-  title: string;
-  kql: string;
-}
 
 export async function generateSignificantEventDefinitions({
   name,
