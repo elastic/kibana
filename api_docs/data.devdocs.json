@@ -9837,15 +9837,7 @@
             "section": "def-common.TimeRange",
             "text": "TimeRange"
           },
-          " | undefined; refreshInterval?: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataQueryPluginApi",
-            "section": "def-common.RefreshInterval",
-            "text": "RefreshInterval"
-          },
-          " | undefined; filters?: ",
+          " | undefined; refreshInterval?: Readonly<{} & { value: number; pause: boolean; }> | undefined; filters?: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -9884,9 +9876,9 @@
         "label": "RefreshInterval",
         "description": [],
         "signature": [
-          "{ pause: boolean; value: number; }"
+          "{ readonly value: number; readonly pause: boolean; }"
         ],
-        "path": "src/platform/plugins/shared/data/common/query/timefilter/types.ts",
+        "path": "src/platform/packages/shared/kbn-data-service-server/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -25538,6 +25530,21 @@
           "unknown"
         ],
         "path": "src/platform/plugins/shared/data/common/serializable_field.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.RefreshInterval",
+        "type": "Type",
+        "tags": [],
+        "label": "RefreshInterval",
+        "description": [],
+        "signature": [
+          "{ readonly value: number; readonly pause: boolean; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-data-service-server/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

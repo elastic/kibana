@@ -2261,6 +2261,18 @@
                 "path": "x-pack/solutions/observability/test/api_integration/apis/synthetics/sample_data/test_policy.ts"
               },
               {
+                "plugin": "@kbn/test-suites-xpack-observability",
+                "path": "x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/synthetics/sample_data/test_project_monitor_policy.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-observability",
+                "path": "x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/synthetics/sample_data/test_project_monitor_policy.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-observability",
+                "path": "x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/synthetics/sample_data/test_policy.ts"
+              },
+              {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/services/metadata/endpoint_metadata_service.test.ts"
               },
@@ -25673,6 +25685,18 @@
               {
                 "plugin": "@kbn/test-suites-xpack-observability",
                 "path": "x-pack/solutions/observability/test/api_integration/apis/synthetics/sample_data/test_policy.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-observability",
+                "path": "x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/synthetics/sample_data/test_project_monitor_policy.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-observability",
+                "path": "x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/synthetics/sample_data/test_project_monitor_policy.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-observability",
+                "path": "x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/synthetics/sample_data/test_policy.ts"
               },
               {
                 "plugin": "securitySolution",
