@@ -451,37 +451,24 @@ export class IndexUpdateService {
    * @param updates
    */
   public bulkUpdate(updates: DocUpdate[]): Promise<BulkResponse> {
-    // merge updates with the same id
-    const mergedUpdates = updates.reduce((acc, update) => {
-      if (update.id) {
-        acc[update.id] = { ...acc[update.id], ...update.value };
-      } else {
-        // If no id is provided, we assume it's a new row
-        acc[ROW_PLACEHOLDER] = { ...acc[ROW_PLACEHOLDER], ...update.value };
-      }
-      return acc;
-    }, {} as Record<string, Record<string, any>>);
+    // Prepare update operations for existing documents
+    const updateOperations = updates
+      .filter((update) => update.id && update.id !== ROW_PLACEHOLDER)
+      .map((update) => [{ update: { _id: update.id } }, { doc: update.value }]);
+
+    // Merge values for new documents (without an id or with a placeholder id)
+    const newDoc = updates
+      .filter((update) => !update.id || update.id === ROW_PLACEHOLDER)
+      .reduce<DocUpdate['value']>((acc, update) => ({ ...acc, ...update.value }), {});
+
+    const operations: BulkRequest['operations'] = [...updateOperations];
+
+    if (Object.keys(newDoc).length > 0) {
+      operations.push([{ index: {} }, newDoc]);
+    }
+
     const body = JSON.stringify({
-      operations: (
-        Object.entries(mergedUpdates).map(([id, value]) => {
-          if (id !== ROW_PLACEHOLDER) {
-            return [
-              {
-                update: { _id: id },
-              },
-              {
-                doc: value,
-              },
-            ];
-          }
-          return [
-            {
-              index: {},
-            },
-            value,
-          ];
-        }) as BulkRequest['operations']
-      )?.flat(),
+      operations: operations.flat(),
     });
 
     return this.http.post<BulkResponse>(
