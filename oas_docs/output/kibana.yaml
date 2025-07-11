@@ -238,6 +238,9 @@ tags:
       Before you can start using lists, you must create the `.lists` and `.items` data streams for the relevant Kibana space. To do this, use the [Create list data streams](../operation/operation-createlistindex) endpoint. Once these data streams are created, your role needs privileges to manage rules. Refer to [Enable and access detections](https://www.elastic.co/guide/en/security/current/detections-permissions-section.html#enable-detections-ui) for a complete list of requirements.
     name: Security Lists API
     x-displayName: Security lists
+  - description: Run live queries, manage packs and saved queries.
+    name: Security Osquery API
+    x-displayName: Security Osquery
   - description: You can create Timelines and Timeline templates via the API, as well as import new Timelines from an ndjson file.
     name: Security Timeline API
     x-displayName: Security timeline
@@ -43575,6 +43578,385 @@ paths:
       summary: Add or update a note
       tags:
         - Security Timeline API
+  /api/osquery/live_queries:
+    get:
+      description: Get a list of all live queries.
+      operationId: OsqueryFindLiveQueries
+      parameters:
+        - in: query
+          name: kuery
+          required: false
+          schema:
+            $ref: '#/components/schemas/Security_Osquery_API_KueryOrUndefined'
+        - in: query
+          name: page
+          required: false
+          schema:
+            $ref: '#/components/schemas/Security_Osquery_API_PageOrUndefined'
+        - in: query
+          name: pageSize
+          required: false
+          schema:
+            $ref: '#/components/schemas/Security_Osquery_API_PageSizeOrUndefined'
+        - in: query
+          name: sort
+          required: false
+          schema:
+            $ref: '#/components/schemas/Security_Osquery_API_SortOrUndefined'
+        - in: query
+          name: sortOrder
+          required: false
+          schema:
+            $ref: '#/components/schemas/Security_Osquery_API_SortOrderOrUndefined'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Security_Osquery_API_FindLiveQueryResponse'
+          description: OK
+      summary: Get live queries
+      tags:
+        - Security Osquery API
+    post:
+      description: Create and run a live query.
+      operationId: OsqueryCreateLiveQuery
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Security_Osquery_API_CreateLiveQueryRequestBody'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Security_Osquery_API_CreateLiveQueryResponse'
+          description: OK
+      summary: Create a live query
+      tags:
+        - Security Osquery API
+  /api/osquery/live_queries/{id}:
+    get:
+      description: Get the details of a live query using the query ID.
+      operationId: OsqueryGetLiveQueryDetails
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            description: The ID of the live query result you want to retrieve.
+            example: 3c42c847-eb30-4452-80e0-728584042334
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Security_Osquery_API_FindLiveQueryDetailsResponse'
+          description: OK
+      summary: Get live query details
+      tags:
+        - Security Osquery API
+  /api/osquery/live_queries/{id}/results/{actionId}:
+    get:
+      description: Get the results of a live query using the query action ID.
+      operationId: OsqueryGetLiveQueryResults
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            description: The ID of the live query result you want to retrieve.
+            example: 3c42c847-eb30-4452-80e0-728584042334
+            type: string
+        - in: path
+          name: actionId
+          required: true
+          schema:
+            description: The ID of the query action that generated the live query results.
+            example: 609c4c66-ba3d-43fa-afdd-53e244577aa0
+            type: string
+        - in: query
+          name: kuery
+          required: false
+          schema:
+            $ref: '#/components/schemas/Security_Osquery_API_KueryOrUndefined'
+        - in: query
+          name: page
+          required: false
+          schema:
+            $ref: '#/components/schemas/Security_Osquery_API_PageOrUndefined'
+        - in: query
+          name: pageSize
+          required: false
+          schema:
+            $ref: '#/components/schemas/Security_Osquery_API_PageSizeOrUndefined'
+        - in: query
+          name: sort
+          required: false
+          schema:
+            $ref: '#/components/schemas/Security_Osquery_API_SortOrUndefined'
+        - in: query
+          name: sortOrder
+          required: false
+          schema:
+            $ref: '#/components/schemas/Security_Osquery_API_SortOrderOrUndefined'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Security_Osquery_API_GetLiveQueryResultsResponse'
+          description: OK
+      summary: Get live query results
+      tags:
+        - Security Osquery API
+  /api/osquery/packs:
+    get:
+      description: Get a list of all query packs.
+      operationId: OsqueryFindPacks
+      parameters:
+        - in: query
+          name: page
+          required: false
+          schema:
+            $ref: '#/components/schemas/Security_Osquery_API_PageOrUndefined'
+        - in: query
+          name: pageSize
+          required: false
+          schema:
+            $ref: '#/components/schemas/Security_Osquery_API_PageSizeOrUndefined'
+        - in: query
+          name: sort
+          required: false
+          schema:
+            $ref: '#/components/schemas/Security_Osquery_API_SortOrUndefined'
+        - in: query
+          name: sortOrder
+          required: false
+          schema:
+            $ref: '#/components/schemas/Security_Osquery_API_SortOrderOrUndefined'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Security_Osquery_API_FindPacksResponse'
+          description: OK
+      summary: Get packs
+      tags:
+        - Security Osquery API
+    post:
+      description: Create a query pack.
+      operationId: OsqueryCreatePacks
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Security_Osquery_API_CreatePacksRequestBody'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Security_Osquery_API_CreatePacksResponse'
+          description: OK
+      summary: Create a pack
+      tags:
+        - Security Osquery API
+  /api/osquery/packs/{id}:
+    delete:
+      description: Delete a query pack using the pack ID.
+      operationId: OsqueryDeletePacks
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            $ref: '#/components/schemas/Security_Osquery_API_PackId'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                example: {}
+                type: object
+                properties: {}
+          description: OK
+      summary: Delete a pack
+      tags:
+        - Security Osquery API
+    get:
+      description: Get the details of a query pack using the pack ID.
+      operationId: OsqueryGetPacksDetails
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            $ref: '#/components/schemas/Security_Osquery_API_PackId'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Security_Osquery_API_FindPackResponse'
+          description: OK
+      summary: Get pack details
+      tags:
+        - Security Osquery API
+    put:
+      description: |
+        Update a query pack using the pack ID.
+        > info
+        > You cannot update a prebuilt pack.
+      operationId: OsqueryUpdatePacks
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            $ref: '#/components/schemas/Security_Osquery_API_PackId'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Security_Osquery_API_UpdatePacksRequestBody'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Security_Osquery_API_UpdatePacksResponse'
+          description: OK
+      summary: Update a pack
+      tags:
+        - Security Osquery API
+  /api/osquery/saved_queries:
+    get:
+      description: Get a list of all saved queries.
+      operationId: OsqueryFindSavedQueries
+      parameters:
+        - in: query
+          name: page
+          required: false
+          schema:
+            $ref: '#/components/schemas/Security_Osquery_API_PageOrUndefined'
+        - in: query
+          name: pageSize
+          required: false
+          schema:
+            $ref: '#/components/schemas/Security_Osquery_API_PageSizeOrUndefined'
+        - in: query
+          name: sort
+          required: false
+          schema:
+            $ref: '#/components/schemas/Security_Osquery_API_SortOrUndefined'
+        - in: query
+          name: sortOrder
+          required: false
+          schema:
+            $ref: '#/components/schemas/Security_Osquery_API_SortOrderOrUndefined'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Security_Osquery_API_FindSavedQueryResponse'
+          description: OK
+      summary: Get saved queries
+      tags:
+        - Security Osquery API
+    post:
+      description: Create and run a saved query.
+      operationId: OsqueryCreateSavedQuery
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Security_Osquery_API_CreateSavedQueryRequestBody'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Security_Osquery_API_CreateSavedQueryResponse'
+          description: OK
+      summary: Create a saved query
+      tags:
+        - Security Osquery API
+  /api/osquery/saved_queries/{id}:
+    delete:
+      description: Delete a saved query using the query ID.
+      operationId: OsqueryDeleteSavedQuery
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            $ref: '#/components/schemas/Security_Osquery_API_SavedQueryId'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Security_Osquery_API_DefaultSuccessResponse'
+          description: OK
+      summary: Delete a saved query
+      tags:
+        - Security Osquery API
+    get:
+      description: Get the details of a saved query using the query ID.
+      operationId: OsqueryGetSavedQueryDetails
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            $ref: '#/components/schemas/Security_Osquery_API_SavedQueryId'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Security_Osquery_API_FindSavedQueryDetailResponse'
+          description: OK
+      summary: Get saved query details
+      tags:
+        - Security Osquery API
+    put:
+      description: |
+        Update a saved query using the query ID.
+        > info
+        > You cannot update a prebuilt saved query.
+      operationId: OsqueryUpdateSavedQuery
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            $ref: '#/components/schemas/Security_Osquery_API_SavedQueryId'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Security_Osquery_API_UpdateSavedQueryRequestBody'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Security_Osquery_API_UpdateSavedQueryResponse'
+          description: OK
+      summary: Update a saved query
+      tags:
+        - Security Osquery API
   /api/pinned_event:
     patch:
       description: Pin/unpin an event to/from an existing Timeline.
@@ -77137,6 +77519,642 @@ components:
       required:
         - status_code
         - message
+    Security_Osquery_API_ArrayQueries:
+      description: An array of queries to run.
+      items:
+        $ref: '#/components/schemas/Security_Osquery_API_ArrayQueriesItem'
+      type: array
+    Security_Osquery_API_ArrayQueriesItem:
+      type: object
+      properties:
+        ecs_mapping:
+          $ref: '#/components/schemas/Security_Osquery_API_ECSMappingOrUndefined'
+        id:
+          $ref: '#/components/schemas/Security_Osquery_API_QueryId'
+        platform:
+          $ref: '#/components/schemas/Security_Osquery_API_PlatformOrUndefined'
+        query:
+          $ref: '#/components/schemas/Security_Osquery_API_Query'
+        removed:
+          $ref: '#/components/schemas/Security_Osquery_API_RemovedOrUndefined'
+        snapshot:
+          $ref: '#/components/schemas/Security_Osquery_API_SnapshotOrUndefined'
+        version:
+          $ref: '#/components/schemas/Security_Osquery_API_VersionOrUndefined'
+    Security_Osquery_API_CreateLiveQueryRequestBody:
+      example:
+        agent_all: true
+        ecs_mapping:
+          host.uptime:
+            field: total_seconds
+        query: select * from uptime;
+      type: object
+      properties:
+        agent_all:
+          description: When `true`, the query runs on all agents.
+          type: boolean
+        agent_ids:
+          description: A list of agent IDs to run the query on.
+          items:
+            type: string
+          type: array
+        agent_platforms:
+          description: A list of agent platforms to run the query on.
+          items:
+            type: string
+          type: array
+        agent_policy_ids:
+          description: A list of agent policy IDs to run the query on.
+          items:
+            type: string
+          type: array
+        alert_ids:
+          description: A list of alert IDs associated with the live query.
+          items:
+            type: string
+          type: array
+        case_ids:
+          description: A list of case IDs associated with the live query.
+          items:
+            type: string
+          type: array
+        ecs_mapping:
+          $ref: '#/components/schemas/Security_Osquery_API_ECSMappingOrUndefined'
+        event_ids:
+          description: A list of event IDs associated with the live query.
+          items:
+            type: string
+          type: array
+        metadata:
+          description: Custom metadata object associated with the live query.
+          nullable: true
+          type: object
+        pack_id:
+          $ref: '#/components/schemas/Security_Osquery_API_PackIdOrUndefined'
+        queries:
+          $ref: '#/components/schemas/Security_Osquery_API_ArrayQueries'
+        query:
+          $ref: '#/components/schemas/Security_Osquery_API_QueryOrUndefined'
+        saved_query_id:
+          $ref: '#/components/schemas/Security_Osquery_API_SavedQueryIdOrUndefined'
+    Security_Osquery_API_CreateLiveQueryResponse:
+      example:
+        data:
+          '@timestamp': '2022-07-26T09:59:32.220Z'
+          action_id: 3c42c847-eb30-4452-80e0-728584042334
+          agent_all: true
+          agent_ids: []
+          agent_platforms: []
+          agent_policy_ids: []
+          agents:
+            - 16d7caf5-efd2-4212-9b62-73dafc91fa13
+          expiration: '2022-07-26T10:04:32.220Z'
+          input_type: osquery
+          metadata:
+            execution_context:
+              name: osquery
+              url: /app/osquery/live_queries/new
+          queries:
+            - action_id: 609c4c66-ba3d-43fa-afdd-53e244577aa0
+              agents:
+                - 16d7caf5-efd2-4212-9b62-73dafc91fa13
+              ecs_mapping:
+                host.uptime:
+                  field: total_seconds
+              id: 6724a474-cbba-41ef-a1aa-66aebf0879e2
+              query: select * from uptime;
+              timeout: 120
+          type: INPUT_ACTION
+          user_id: elastic
+      type: object
+      properties: {}
+    Security_Osquery_API_CreatePacksRequestBody:
+      example:
+        description: My pack
+        enabled: true
+        name: my_pack
+        policy_ids:
+          - my_policy_id
+          - fleet-server-policy
+        queries:
+          my_query:
+            ecs_mapping:
+              client.port:
+                field: port
+              tags:
+                value:
+                  - tag1
+                  - tag2
+            interval: 60
+            query: SELECT * FROM listening_ports;
+            timeout: 120
+        shards:
+          fleet-server-policy: 58
+          my_policy_id: 35
+      type: object
+      properties:
+        description:
+          $ref: '#/components/schemas/Security_Osquery_API_PackDescriptionOrUndefined'
+        enabled:
+          $ref: '#/components/schemas/Security_Osquery_API_EnabledOrUndefined'
+        name:
+          $ref: '#/components/schemas/Security_Osquery_API_PackName'
+        policy_ids:
+          $ref: '#/components/schemas/Security_Osquery_API_PolicyIdsOrUndefined'
+        queries:
+          $ref: '#/components/schemas/Security_Osquery_API_ObjectQueries'
+        shards:
+          $ref: '#/components/schemas/Security_Osquery_API_Shards'
+    Security_Osquery_API_CreatePacksResponse:
+      example:
+        data:
+          created_at: '2025-02-26T13:37:30.452Z'
+          created_by: elastic
+          description: My pack
+          enabled: true
+          name: my_pack
+          queries:
+            ports:
+              ecs_mapping:
+                client.port:
+                  field: port
+              interval: 60
+              query: SELECT * FROM listening_ports;
+              removed: false
+              snapshot: true
+              timeout: 120
+          saved_object_id: 1c266590-381f-428c-878f-c80c1334f856
+          shards:
+            - key: 47638692-7c4c-4053-aa3e-7186f28df349
+              value: 35
+            - key: 5e267651-fe50-443e-8d3f-3bbc9171b618
+              value: 58
+          updated_at: '2025-02-26T13:37:30.452Z'
+          updated_by: elastic
+      type: object
+      properties: {}
+    Security_Osquery_API_CreateSavedQueryRequestBody:
+      example:
+        description: Saved query description
+        ecs_mapping:
+          host.uptime:
+            field: total_seconds
+        id: saved_query_id
+        interval: '60'
+        platform: linux,darwin
+        query: select * from uptime;
+        timeout: 120
+        version: 2.8.0
+      type: object
+      properties:
+        description:
+          $ref: '#/components/schemas/Security_Osquery_API_SavedQueryDescriptionOrUndefined'
+        ecs_mapping:
+          $ref: '#/components/schemas/Security_Osquery_API_ECSMappingOrUndefined'
+        id:
+          $ref: '#/components/schemas/Security_Osquery_API_SavedQueryId'
+        interval:
+          $ref: '#/components/schemas/Security_Osquery_API_Interval'
+        platform:
+          $ref: '#/components/schemas/Security_Osquery_API_PlatformOrUndefined'
+        query:
+          $ref: '#/components/schemas/Security_Osquery_API_QueryOrUndefined'
+        removed:
+          $ref: '#/components/schemas/Security_Osquery_API_RemovedOrUndefined'
+        snapshot:
+          $ref: '#/components/schemas/Security_Osquery_API_SnapshotOrUndefined'
+        version:
+          $ref: '#/components/schemas/Security_Osquery_API_VersionOrUndefined'
+    Security_Osquery_API_CreateSavedQueryResponse:
+      example:
+        data: {}
+      type: object
+      properties: {}
+    Security_Osquery_API_DefaultSuccessResponse:
+      type: object
+      properties: {}
+    Security_Osquery_API_ECSMapping:
+      additionalProperties:
+        $ref: '#/components/schemas/Security_Osquery_API_ECSMappingItem'
+      description: Map osquery results columns or static values to Elastic Common Schema (ECS) fields
+      example:
+        host.uptime:
+          field: total_seconds
+      type: object
+    Security_Osquery_API_ECSMappingItem:
+      type: object
+      properties:
+        field:
+          description: The ECS field to map to.
+          example: host.uptime
+          type: string
+        value:
+          description: The value to map to the ECS field.
+          example: total_seconds
+          oneOf:
+            - type: string
+            - items:
+                type: string
+              type: array
+    Security_Osquery_API_ECSMappingOrUndefined:
+      $ref: '#/components/schemas/Security_Osquery_API_ECSMapping'
+      nullable: true
+    Security_Osquery_API_Enabled:
+      description: Enables the pack.
+      example: true
+      type: boolean
+    Security_Osquery_API_EnabledOrUndefined:
+      $ref: '#/components/schemas/Security_Osquery_API_Enabled'
+      nullable: true
+    Security_Osquery_API_FindLiveQueryDetailsResponse:
+      example:
+        data:
+          '@timestamp': '2022-07-26T09:59:32.220Z'
+          action_id: 3c42c847-eb30-4452-80e0-728584042334
+          agents:
+            - 16d7caf5-efd2-4212-9b62-73dafc91fa13
+          expiration: '2022-07-26T10:04:32.220Z'
+          queries:
+            - action_id: 609c4c66-ba3d-43fa-afdd-53e244577aa0
+              agents:
+                - 16d7caf5-efd2-4212-9b62-73dafc91fa13
+              docs: 0
+              ecs_mapping:
+                host.uptime:
+                  field: total_seconds
+              failed: 1
+              id: 6724a474-cbba-41ef-a1aa-66aebf0879e2
+              pending: 0
+              query: select * from uptime;
+              responded: 1
+              saved_query_id: 42ba9c50-0cc5-11ed-aa1d-2b27890bc90d
+              status: completed
+              successful: 0
+          status: completed
+          user_id: elastic
+      type: object
+      properties: {}
+    Security_Osquery_API_FindLiveQueryResponse:
+      example:
+        data:
+          items:
+            - fields:
+                '@timestamp': '2023-10-31T00:00:00Z'
+                action_id: 3c42c847-eb30-4452-80e0-728584042334
+                agents:
+                  - 16d7caf5-efd2-4212-9b62-73dafc91fa13
+                expiration: '2023-10-31T00:00:00Z'
+                queries:
+                  - action_id: 609c4c66-ba3d-43fa-afdd-53e244577aa0
+                    agents:
+                      - 16d7caf5-efd2-4212-9b62-73dafc91fa13
+                    ecs_mapping:
+                      host.uptime:
+                        field: total_seconds
+                    id: 6724a474-cbba-41ef-a1aa-66aebf0879e2
+                    query: select * from uptime;
+                    saved_query_id: 42ba9c50-0cc5-11ed-aa1d-2b27890bc90d
+                user_id: elastic
+      type: object
+      properties: {}
+    Security_Osquery_API_FindPackResponse:
+      example:
+        data:
+          created_at: '2022-07-25T19:41:10.263Z'
+          created_by: elastic
+          description: ''
+          enabled: true
+          id: 3c42c847-eb30-4452-80e0-728584042334
+          name: test_pack
+          namespaces:
+            - default
+          policy_ids: []
+          queries:
+            uptime:
+              ecs_mapping:
+                message:
+                  field: days
+              interval: 3600
+              query: select * from uptime
+          read_only: false
+          type: osquery-pack
+          updated_at: '2022-07-25T20:12:01.455Z'
+          updated_by: elastic
+      type: object
+      properties: {}
+    Security_Osquery_API_FindPacksResponse:
+      example:
+        data:
+          - attributes:
+              created_at: '2023-10-31T00:00:00Z'
+              created_by: elastic
+              description: My pack description
+              enabled: true
+              name: My Pack
+              queries:
+                - ecs_mapping:
+                    - host.uptime:
+                        field: total_seconds
+                  id: uptime
+                  interval: '3600'
+                  query: select * from uptime;
+              updated_at: '2023-10-31T00:00:00Z'
+              updated_by: elastic
+            id: 42ba9c50-0cc5-11ed-aa1d-2b27890bc90d
+            namespaces:
+              - default
+            type: osquery-pack
+        page: 1
+        pageSize: 10
+        policy_ids: []
+        total: 1
+      type: object
+      properties: {}
+    Security_Osquery_API_FindSavedQueryDetailResponse:
+      example:
+        data:
+          attributes:
+            created_at: '2022-07-26T09:28:08.597Z'
+            created_by: elastic
+            description: Saved query description
+            ecs_mapping:
+              host.uptime:
+                field: total_seconds
+            id: saved_query_id
+            interval: '60'
+            platform: linux,darwin
+            prebuilt: false
+            query: select * from uptime;
+            updated_at: '2022-07-26T09:28:08.597Z'
+            updated_by: elastic
+            version: 2.8.0
+          coreMigrationVersion: 8.4.0
+          id: 3c42c847-eb30-4452-80e0-728584042334
+          namespaces:
+            - default
+          references: []
+          type: osquery-saved-query
+          updated_at: '2022-07-26T09:28:08.600Z'
+          version: WzQzMTcsMV0=
+      type: object
+      properties: {}
+    Security_Osquery_API_FindSavedQueryResponse:
+      example:
+        data:
+          - attributes:
+              created_at: '2022-07-26T09:28:08.597Z'
+              created_by: elastic
+              description: Saved query description
+              ecs_mapping:
+                host.uptime:
+                  field: total_seconds
+              id: saved_query_id
+              interval: '60'
+              platform: linux,darwin
+              prebuilt: false
+              query: select * from uptime;
+              updated_at: '2022-07-26T09:28:08.597Z'
+              updated_by: elastic
+              version: 2.8.0
+            id: 42ba9c50-0cc5-11ed-aa1d-2b27890bc90d
+            namespaces:
+              - default
+            type: osquery-saved-query
+        page: 1
+        per_page: 100
+        total: 11
+      type: object
+      properties: {}
+    Security_Osquery_API_GetLiveQueryResultsResponse:
+      description: The response for getting live query results.
+      example:
+        data:
+          edges:
+            - {}
+            - {}
+          total: 2
+      type: object
+      properties: {}
+    Security_Osquery_API_Interval:
+      description: An interval, in seconds, on which to run the query.
+      example: '60'
+      type: string
+    Security_Osquery_API_IntervalOrUndefined:
+      $ref: '#/components/schemas/Security_Osquery_API_Interval'
+      nullable: true
+    Security_Osquery_API_KueryOrUndefined:
+      description: The kuery to filter the results by.
+      example: 'agent.id: 16d7caf5-efd2-4212-9b62-73dafc91fa13'
+      nullable: true
+      type: string
+    Security_Osquery_API_ObjectQueries:
+      additionalProperties:
+        $ref: '#/components/schemas/Security_Osquery_API_ObjectQueriesItem'
+      description: An object of queries.
+      type: object
+    Security_Osquery_API_ObjectQueriesItem:
+      type: object
+      properties:
+        ecs_mapping:
+          $ref: '#/components/schemas/Security_Osquery_API_ECSMappingOrUndefined'
+        id:
+          $ref: '#/components/schemas/Security_Osquery_API_QueryId'
+        platform:
+          $ref: '#/components/schemas/Security_Osquery_API_PlatformOrUndefined'
+        query:
+          $ref: '#/components/schemas/Security_Osquery_API_Query'
+        removed:
+          $ref: '#/components/schemas/Security_Osquery_API_RemovedOrUndefined'
+        saved_query_id:
+          $ref: '#/components/schemas/Security_Osquery_API_SavedQueryIdOrUndefined'
+        snapshot:
+          $ref: '#/components/schemas/Security_Osquery_API_SnapshotOrUndefined'
+        version:
+          $ref: '#/components/schemas/Security_Osquery_API_VersionOrUndefined'
+    Security_Osquery_API_PackDescription:
+      description: The pack description.
+      example: Pack description
+      type: string
+    Security_Osquery_API_PackDescriptionOrUndefined:
+      $ref: '#/components/schemas/Security_Osquery_API_PackDescription'
+      nullable: true
+    Security_Osquery_API_PackId:
+      description: The ID of the pack you want to run, retrieve, update, or delete.
+      example: 3c42c847-eb30-4452-80e0-728584042334
+      type: string
+    Security_Osquery_API_PackIdOrUndefined:
+      $ref: '#/components/schemas/Security_Osquery_API_PackId'
+      nullable: true
+    Security_Osquery_API_PackName:
+      description: The pack name.
+      type: string
+    Security_Osquery_API_PageOrUndefined:
+      description: The page number to return. The default is 1.
+      example: 1
+      nullable: true
+      type: integer
+    Security_Osquery_API_PageSizeOrUndefined:
+      description: The number of results to return per page. The default is 20.
+      example: 20
+      nullable: true
+      type: integer
+    Security_Osquery_API_Platform:
+      description: Restricts the query to a specified platform. The default is all platforms. To specify multiple platforms, use commas. For example, `linux,darwin`.
+      example: linux,darwin
+      type: string
+    Security_Osquery_API_PlatformOrUndefined:
+      $ref: '#/components/schemas/Security_Osquery_API_Platform'
+      nullable: true
+    Security_Osquery_API_PolicyIds:
+      description: A list of agents policy IDs.
+      example:
+        - policyId1
+        - policyId2
+      items:
+        type: string
+      type: array
+    Security_Osquery_API_PolicyIdsOrUndefined:
+      $ref: '#/components/schemas/Security_Osquery_API_PolicyIds'
+      nullable: true
+    Security_Osquery_API_Query:
+      description: The SQL query you want to run.
+      example: select * from uptime;
+      type: string
+    Security_Osquery_API_QueryId:
+      description: The ID of the query.
+      example: 3c42c847-eb30-4452-80e0-728584042334
+      type: string
+    Security_Osquery_API_QueryOrUndefined:
+      $ref: '#/components/schemas/Security_Osquery_API_Query'
+      nullable: true
+    Security_Osquery_API_Removed:
+      description: Indicates whether the query is removed.
+      example: false
+      type: boolean
+    Security_Osquery_API_RemovedOrUndefined:
+      $ref: '#/components/schemas/Security_Osquery_API_Removed'
+      nullable: true
+    Security_Osquery_API_SavedQueryDescription:
+      description: The saved query description.
+      example: Saved query description
+      type: string
+    Security_Osquery_API_SavedQueryDescriptionOrUndefined:
+      $ref: '#/components/schemas/Security_Osquery_API_SavedQueryDescription'
+      nullable: true
+    Security_Osquery_API_SavedQueryId:
+      description: The ID of a saved query.
+      example: 3c42c847-eb30-4452-80e0-728584042334
+      type: string
+    Security_Osquery_API_SavedQueryIdOrUndefined:
+      $ref: '#/components/schemas/Security_Osquery_API_SavedQueryId'
+      nullable: true
+    Security_Osquery_API_Shards:
+      additionalProperties:
+        type: number
+      description: An object with shard configuration for policies included in the pack. For each policy, set the shard configuration to a percentage (1–100) of target hosts.
+      example:
+        policy_id: 50
+      type: object
+    Security_Osquery_API_Snapshot:
+      description: Indicates whether the query is a snapshot.
+      example: true
+      type: boolean
+    Security_Osquery_API_SnapshotOrUndefined:
+      $ref: '#/components/schemas/Security_Osquery_API_Snapshot'
+      nullable: true
+    Security_Osquery_API_SortOrderOrUndefined:
+      description: Specifies the sort order.
+      enum:
+        - asc
+        - desc
+      example: desc
+      type: string
+    Security_Osquery_API_SortOrUndefined:
+      default: createdAt
+      description: The field that is used to sort the results.
+      example: createdAt
+      nullable: true
+      type: string
+    Security_Osquery_API_UpdatePacksRequestBody:
+      example:
+        name: updated_my_pack_name
+      type: object
+      properties:
+        description:
+          $ref: '#/components/schemas/Security_Osquery_API_PackDescriptionOrUndefined'
+        enabled:
+          $ref: '#/components/schemas/Security_Osquery_API_EnabledOrUndefined'
+        name:
+          $ref: '#/components/schemas/Security_Osquery_API_PackName'
+        policy_ids:
+          $ref: '#/components/schemas/Security_Osquery_API_PolicyIdsOrUndefined'
+        queries:
+          $ref: '#/components/schemas/Security_Osquery_API_ObjectQueries'
+        shards:
+          $ref: '#/components/schemas/Security_Osquery_API_Shards'
+    Security_Osquery_API_UpdatePacksResponse:
+      example:
+        data:
+          created_at: '2025-02-26T13:37:30.452Z'
+          created_by: elastic
+          description: My pack
+          enabled: true
+          name: updated_my_pack_name
+          queries:
+            ports:
+              ecs_mapping:
+                client.port:
+                  field: port
+              interval: 60
+              query: SELECT * FROM listening_ports;
+              removed: false
+              snapshot: true
+              timeout: 120
+          saved_object_id: 1c266590-381f-428c-878f-c80c1334f856
+          shards:
+            - key: 47638692-7c4c-4053-aa3e-7186f28df349
+              value: 35
+            - key: 5e267651-fe50-443e-8d3f-3bbc9171b618
+              value: 58
+          updated_at: '2025-02-26T13:40:16.297Z'
+          updated_by: elastic
+      type: object
+      properties: {}
+    Security_Osquery_API_UpdateSavedQueryRequestBody:
+      example:
+        id: updated_my_saved_query_name
+      type: object
+      properties:
+        description:
+          $ref: '#/components/schemas/Security_Osquery_API_SavedQueryDescriptionOrUndefined'
+        ecs_mapping:
+          $ref: '#/components/schemas/Security_Osquery_API_ECSMappingOrUndefined'
+        id:
+          $ref: '#/components/schemas/Security_Osquery_API_SavedQueryId'
+        interval:
+          $ref: '#/components/schemas/Security_Osquery_API_IntervalOrUndefined'
+        platform:
+          $ref: '#/components/schemas/Security_Osquery_API_PlatformOrUndefined'
+        query:
+          $ref: '#/components/schemas/Security_Osquery_API_QueryOrUndefined'
+        removed:
+          $ref: '#/components/schemas/Security_Osquery_API_RemovedOrUndefined'
+        snapshot:
+          $ref: '#/components/schemas/Security_Osquery_API_SnapshotOrUndefined'
+        version:
+          $ref: '#/components/schemas/Security_Osquery_API_VersionOrUndefined'
+    Security_Osquery_API_UpdateSavedQueryResponse:
+      example:
+        data: {}
+      type: object
+      properties: {}
+    Security_Osquery_API_Version:
+      description: Uses the Osquery versions greater than or equal to the specified version string.
+      example: 1.0.0
+      type: string
+    Security_Osquery_API_VersionOrUndefined:
+      $ref: '#/components/schemas/Security_Osquery_API_Version'
+      nullable: true
     Security_Timeline_API_AssociatedFilterType:
       description: Filter notes based on their association with a document or saved object.
       enum:
