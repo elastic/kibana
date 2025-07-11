@@ -52,7 +52,6 @@
     "@kbn/esql-types",
     "@kbn/aiops-utils",
     "@kbn/esql-ast",
-    "@kbn/restorable-state",
   ],
   "exclude": [
     "target/**/*",
