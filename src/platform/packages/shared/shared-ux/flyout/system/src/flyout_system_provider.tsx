@@ -24,7 +24,6 @@ import {
 
 // Types definitions
 export interface FlyoutSystemConfig {
-  isSystem?: boolean;
   mainSize?: EuiFlyoutSize;
   mainTitle?: string;
   hideMainTitle?: boolean;
@@ -228,14 +227,12 @@ export const FlyoutSystemProvider: React.FC<FlyoutSystemProviderProps> = ({
           ownFocus={!activeFlyoutGroup.isChildOpen}
           {...flyoutPropsMain}
         >
-          {config?.isSystem && (
-            <FlyoutSystemMenu
-              handleGoBack={handleGoBack}
-              handleGoToHistoryItem={handleGoToHistoryItem}
-              historyItems={state.history}
-              title={!config?.hideMainTitle ? config?.mainTitle : undefined}
-            />
-          )}
+          <FlyoutSystemMenu
+            handleGoBack={handleGoBack}
+            handleGoToHistoryItem={handleGoToHistoryItem}
+            historyItems={state.history}
+            title={!config?.hideMainTitle ? config?.mainTitle : undefined}
+          />
           {config?.mainContent}
           {activeFlyoutGroup.isChildOpen && (
             <EuiFlyoutChild
