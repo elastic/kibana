@@ -146,9 +146,6 @@ export function ChangeKbModel({ knowledgeBase }: { knowledgeBase: UseKnowledgeBa
           knowledgeBase.warmupModel(selectedInferenceId);
         } else {
           knowledgeBase.install(selectedInferenceId);
-          installProductDoc(selectedInferenceId).then(() => {
-            refetchProductDocStatus();
-          });
         }
       } else {
         overlays
