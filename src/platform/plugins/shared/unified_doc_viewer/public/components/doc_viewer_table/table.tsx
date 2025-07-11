@@ -140,6 +140,7 @@ export const DocViewerTable = ({
   hideNullFieldsToggle,
   hideSelectedOnlyToggle,
   hidePagination,
+  hidePin,
 }: DocViewRenderProps) => {
   const styles = useMemoCss(componentStyles);
 
@@ -311,8 +312,8 @@ export const DocViewerTable = ({
   const rows = useMemo(() => [...pinnedRows, ...restRows], [pinnedRows, restRows]);
 
   const leadingControlColumns = useMemo(() => {
-    return [getPinColumnControl({ rows, onTogglePinned })];
-  }, [rows, onTogglePinned]);
+    return hidePin ? [] : [getPinColumnControl({ rows, onTogglePinned })];
+  }, [hidePin, rows, onTogglePinned]);
 
   const { curPageIndex, pageSize, totalPages, changePageIndex, changePageSize } = usePager({
     initialPageSize: getPageSize(storage),

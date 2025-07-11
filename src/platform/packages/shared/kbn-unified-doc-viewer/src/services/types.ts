@@ -49,6 +49,7 @@ export interface DocViewRenderProps {
   hideSelectedOnlyToggle?: boolean;
   hideNullFieldsToggle?: boolean;
   hidePagination?: boolean;
+  hidePin?: boolean;
 }
 export type DocViewerComponent = React.FC<DocViewRenderProps>;
 export type DocViewRenderFn = (

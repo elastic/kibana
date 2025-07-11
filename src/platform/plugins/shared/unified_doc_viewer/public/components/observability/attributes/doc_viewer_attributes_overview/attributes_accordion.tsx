@@ -94,6 +94,7 @@ export const AttributesAccordion = ({
           hideNullFieldsToggle
           hideSelectedOnlyToggle
           hidePagination
+          hidePin
           onAddColumn={onAddColumn}
           onRemoveColumn={onRemoveColumn}
           filter={filter}
