@@ -17,7 +17,6 @@ describe('config validation', () => {
               "enabled": true,
             },
           },
-          "enabled": true,
           "files": Object {
             "allowedMimeTypes": Array [
               "image/aces",
