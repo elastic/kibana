@@ -12,7 +12,7 @@ apiTest.describe('Painless APIs', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
   apiTest.beforeAll(async ({ requestAuth }) => {
     adminApiCredentials = await requestAuth.getApiKey('admin');
   });
-  apiTest('POST api/painless_lab/execute', async ({ apiClient }) => {
+  apiTest('POST api/painless_lab/execute', async ({ apiClient, log }) => {
     const script =
       '"{\\n  \\"script\\": {\\n    \\"source\\": \\"return true;\\",\\n    \\"params\\": {\\n  \\"string_parameter\\": \\"string value\\",\\n  \\"number_parameter\\": 1.5,\\n  \\"boolean_parameter\\": true\\n}\\n  }\\n}"';
     const response = await apiClient.post('api/painless_lab/execute', {
@@ -23,7 +23,7 @@ apiTest.describe('Painless APIs', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
         ...adminApiCredentials.apiKeyHeader,
       },
       responseType: 'json',
-      body: JSON.stringify(script),
+      body: script,
     });
     expect(response.statusCode).toBe(200);
     expect(response.body).toStrictEqual({
@@ -43,7 +43,7 @@ apiTest.describe('Painless APIs', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
         ...adminApiCredentials.apiKeyHeader,
       },
       responseType: 'json',
-      body: JSON.stringify(invalidScript),
+      body: invalidScript,
     });
     expect(response.statusCode).toBe(200);
   });
