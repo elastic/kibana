@@ -134,48 +134,6 @@ export function textExistsAndIsValid(text: string | undefined): text is string {
   return !!(text && !isMissingText(text));
 }
 
-export function createLiteral(
-  type: ESQLLiteral['literalType'],
-  node: TerminalNode | null
-): ESQLLiteral {
-  if (!node) {
-    return {
-      type: 'literal',
-      name: 'unknown',
-      text: 'unknown',
-      value: 'unknown',
-      literalType: type,
-      location: { min: 0, max: 0 },
-      incomplete: false,
-    } as ESQLLiteral;
-  }
-
-  const text = node.getText();
-
-  const partialLiteral: Omit<ESQLLiteral, 'literalType' | 'value'> = {
-    type: 'literal',
-    text,
-    name: text,
-    location: getPosition(node.symbol),
-    incomplete: isMissingText(text),
-  };
-  if (type === 'double' || type === 'integer') {
-    return {
-      ...partialLiteral,
-      literalType: type,
-      value: Number(text),
-      paramType: 'number',
-    } as ESQLNumericLiteral<'double'> | ESQLNumericLiteral<'integer'>;
-  } else if (type === 'param') {
-    throw new Error('Should never happen');
-  }
-  return {
-    ...partialLiteral,
-    literalType: type,
-    value: text,
-  } as ESQLLiteral;
-}
-
 export function createFunction<Subtype extends FunctionSubtype>(
   name: string,
   ctx: ParserRuleContext,

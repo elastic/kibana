@@ -25,7 +25,6 @@ import {
   createColumnStar,
   createFakeMultiplyLiteral,
   createFunctionCall,
-  createLiteral,
   createParam,
 } from './factories';
 import { getPosition } from './helpers';
@@ -1553,7 +1552,7 @@ export class CstToAstConverter {
   private getBooleanValue(ctx: cst.BooleanLiteralContext | cst.BooleanValueContext) {
     const parentNode = ctx instanceof cst.BooleanLiteralContext ? ctx.booleanValue() : ctx;
     const booleanTerminalNode = parentNode.TRUE() || parentNode.FALSE();
-    return createLiteral('boolean', booleanTerminalNode!);
+    return this.toLiteral('boolean', booleanTerminalNode!);
   }
 
   private visitPrimaryExpression(
@@ -1883,7 +1882,7 @@ export class CstToAstConverter {
    */
   private fromConstant(ctx: cst.ConstantContext): ast.ESQLAstItem {
     if (ctx instanceof cst.NullLiteralContext) {
-      return createLiteral('null', ctx.NULL());
+      return this.toLiteral('null', ctx.NULL());
     } else if (ctx instanceof cst.QualifiedIntegerLiteralContext) {
       return this.fromQualifiedIntegerLiteral(ctx);
     } else if (ctx instanceof cst.DecimalLiteralContext) {
@@ -1915,6 +1914,48 @@ export class CstToAstConverter {
   }
 
   // ------------------------------------------- constant expression: "literal"
+
+  private toLiteral(
+    type: ast.ESQLLiteral['literalType'],
+    node: antlr.TerminalNode | null
+  ): ast.ESQLLiteral {
+    if (!node) {
+      return {
+        type: 'literal',
+        name: 'unknown',
+        text: 'unknown',
+        value: 'unknown',
+        literalType: type,
+        location: { min: 0, max: 0 },
+        incomplete: false,
+      } as ast.ESQLLiteral;
+    }
+
+    const text = node.getText();
+    const partialLiteral: Omit<ast.ESQLLiteral, 'literalType' | 'value'> = {
+      type: 'literal',
+      text,
+      name: text,
+      location: getPosition(node.symbol),
+      incomplete: /<missing /.test(text),
+    };
+    if (type === 'double' || type === 'integer') {
+      return {
+        ...partialLiteral,
+        literalType: type,
+        value: Number(text),
+        paramType: 'number',
+      } as ast.ESQLNumericLiteral<'double'> | ast.ESQLNumericLiteral<'integer'>;
+    } else if (type === 'param') {
+      throw new Error('Should never happen');
+    }
+
+    return {
+      ...partialLiteral,
+      literalType: type,
+      value: text,
+    } as ast.ESQLLiteral;
+  }
 
   private toNumericLiteral<Type extends ast.ESQLNumericLiteralType>(
     ctx: cst.DecimalValueContext | cst.IntegerValueContext,
