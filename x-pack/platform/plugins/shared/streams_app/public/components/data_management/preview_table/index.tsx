@@ -144,32 +144,35 @@ export function PreviewTable({
   }, [canonicalColumnOrder, setSorting, setVisibleColumns, visibleColumns.length]);
 
   const leadingControlColumns: EuiDataGridControlColumn[] = useMemo(
-    () => [
-      {
-        id: 'selection',
-        width: 36,
-        headerCellRender: () => null,
-        rowCellRender: ({ rowIndex }) => (
-          <EuiButtonIcon
-            onClick={() => {
-              if (selectableRow && onRowSelected) {
-                onRowSelected(rowIndex);
-              }
-            }}
-            aria-label={i18n.translate(
-              'xpack.streams.resultPanel.euiDataGrid.preview.selectRowAriaLabel',
-              {
-                defaultMessage: 'Select row {rowIndex}',
-                values: { rowIndex: rowIndex + 1 },
-              }
-            )}
-            iconType={selectedRowIndex === rowIndex && selectableRow ? 'minimize' : 'expand'}
-            color={selectedRowIndex === rowIndex && selectableRow ? 'primary' : 'text'}
-          />
-        ),
-      },
-    ],
-    [onRowSelected, selectableRow, selectedRowIndex]
+    () =>
+      selectableRow && visibleColumns.length > 0
+        ? [
+            {
+              id: 'selection',
+              width: 36,
+              headerCellRender: () => null,
+              rowCellRender: ({ rowIndex }) => (
+                <EuiButtonIcon
+                  onClick={() => {
+                    if (selectableRow && onRowSelected) {
+                      onRowSelected(rowIndex);
+                    }
+                  }}
+                  aria-label={i18n.translate(
+                    'xpack.streams.resultPanel.euiDataGrid.preview.selectRowAriaLabel',
+                    {
+                      defaultMessage: 'Select row {rowIndex}',
+                      values: { rowIndex: rowIndex + 1 },
+                    }
+                  )}
+                  iconType={selectedRowIndex === rowIndex && selectableRow ? 'minimize' : 'expand'}
+                  color={selectedRowIndex === rowIndex && selectableRow ? 'primary' : 'text'}
+                />
+              ),
+            },
+          ]
+        : [],
+    [onRowSelected, selectableRow, selectedRowIndex, visibleColumns.length]
   );
 
   return (

@@ -59,3 +59,17 @@ export const isValidFileExternalReferenceMetadata = (
     externalReferenceMetadata?.files?.length >= 1
   );
 };
+
+export const getFileFromReferenceMetadata = ({
+  fileId,
+  externalReferenceMetadata,
+}: {
+  fileId: string;
+  externalReferenceMetadata: FileAttachmentMetadata;
+}) => {
+  const fileMetadata = externalReferenceMetadata.files[0];
+  return {
+    id: fileId,
+    ...fileMetadata,
+  };
+};
