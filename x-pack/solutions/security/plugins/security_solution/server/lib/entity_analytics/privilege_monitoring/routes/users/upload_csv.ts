@@ -20,7 +20,7 @@ import {
   ENABLE_PRIVILEGED_USER_MONITORING_SETTING,
 } from '../../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
-import { checkAndInitPrivilegedMonitoringResources } from '../../check_and_init_prvileged_monitoring_resources';
+import { checkAndInitPrivilegedMonitoringResources } from '../../check_and_init_privileged_monitoring_resources';
 import { assertAdvancedSettingsEnabled } from '../../../utils/assert_advanced_setting_enabled';
 
 export const uploadUsersCSVRoute = (
