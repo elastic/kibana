@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { getAttackDiscoveryMarkdown } from '@kbn/elastic-assistant-common';
+import {
+  getAttackDiscoveryMarkdown,
+  getOriginalAlertIds,
+  transformInternalReplacements,
+} from '@kbn/elastic-assistant-common';
 
 import { MAX_DOCS_PER_PAGE, MAX_TITLE_LENGTH } from '../../../../common/constants';
 import { AttackDiscoveryExpandedAlertsSchema } from './schema';
@@ -38,6 +42,11 @@ export const groupAttackDiscoveryAlerts = (alerts: CaseAlert[]): CasesGroupedAle
     const attackDiscovery = attackAlert.kibana.alert.attack_discovery;
     const alertIds = attackDiscovery.alert_ids;
 
+    const replacements = Array.isArray(attackDiscovery.replacements)
+      ? transformInternalReplacements(attackDiscovery.replacements)
+      : undefined;
+    const originalAlertIds = getOriginalAlertIds({ alertIds, replacements });
+
     const caseTitle = attackDiscovery.title.slice(0, MAX_TITLE_LENGTH);
     const caseComments = [
       getAttackDiscoveryMarkdown({
@@ -62,7 +71,10 @@ export const groupAttackDiscoveryAlerts = (alerts: CaseAlert[]): CasesGroupedAle
      * These SIEM alerts will be added to the case.
      */
     return {
-      alerts: alertIds.map((siemAlertId) => ({ _id: siemAlertId, _index: alertsIndexPattern })),
+      alerts: originalAlertIds.map((siemAlertId) => ({
+        _id: siemAlertId,
+        _index: alertsIndexPattern,
+      })),
       grouping: { attack_discovery: attackDiscoveryId },
       comments: caseComments,
       title: caseTitle,

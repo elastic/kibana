@@ -8,9 +8,30 @@
  */
 
 import React, { ComponentProps, useState } from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createRestorableStateProvider } from './restorable_state_provider';
+
+const mockCustomLocalStorageKey = 'test-restorable-state';
+let mockStoredValue: string | undefined;
+
+// mock localStorage
+jest.mock('@kbn/kibana-utils-plugin/public', () => ({
+  Storage: jest.fn().mockImplementation(() => ({
+    get: jest.fn((key) => {
+      if (key !== mockCustomLocalStorageKey) {
+        throw new Error(`Unexpected key: ${key}`);
+      }
+      return mockStoredValue !== undefined ? JSON.parse(mockStoredValue) : undefined;
+    }),
+    set: jest.fn((key, value) => {
+      if (key !== mockCustomLocalStorageKey) {
+        throw new Error(`Unexpected key: ${key}`);
+      }
+      mockStoredValue = JSON.stringify(value);
+    }),
+  })),
+}));
 
 interface RestorableState {
   count?: number;
@@ -19,6 +40,10 @@ interface RestorableState {
 }
 
 describe('createRestorableStateProvider', () => {
+  beforeEach(() => {
+    mockStoredValue = undefined; // Reset mock storage before each test
+  });
+
   it('withRestorableState should work correctly', async () => {
     const { withRestorableState, useRestorableState } =
       createRestorableStateProvider<RestorableState>();
@@ -154,5 +179,53 @@ describe('createRestorableStateProvider', () => {
 
     render(<WrappedComponent {...props} initialState={{ count: 5 }} />);
     expect(screen.getByTestId('count-button')).toHaveTextContent('5');
+  });
+
+  it('useRestorableLocalStorage should work correctly', async () => {
+    const { useRestorableLocalStorage } = createRestorableStateProvider<RestorableState>();
+
+    const MockComponent = () => {
+      const [message, setMessage] = useRestorableLocalStorage(
+        'message',
+        mockCustomLocalStorageKey,
+        'Hello'
+      );
+      return (
+        <button
+          data-test-subj="local-storage-button"
+          onClick={() => {
+            setMessage((value) => `${value} World`);
+          }}
+        >
+          {message}
+        </button>
+      );
+    };
+
+    expect(mockStoredValue).toBeUndefined();
+    render(<MockComponent />);
+
+    const button = screen.getByTestId('local-storage-button');
+    expect(button).toHaveTextContent('Hello');
+    await userEvent.click(button);
+    expect(button).toHaveTextContent('Hello World');
+    await waitFor(() => {
+      expect(mockStoredValue).toBe(JSON.stringify('Hello World'));
+    });
+
+    // Simulate a page reload
+    render(<MockComponent />);
+    expect(screen.getAllByTestId('local-storage-button')[1]).toHaveTextContent('Hello World');
+    await waitFor(() => {
+      expect(mockStoredValue).toBe(JSON.stringify('Hello World'));
+    });
+
+    // Reset the localStorage value
+    mockStoredValue = undefined;
+    render(<MockComponent />);
+    expect(screen.getAllByTestId('local-storage-button')[2]).toHaveTextContent('Hello');
+    await waitFor(() => {
+      expect(mockStoredValue).toBeUndefined();
+    });
   });
 });
