@@ -6,16 +6,22 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { EuiFlyoutBody, EuiFlyoutHeader, EuiSkeletonText, EuiSkeletonTitle } from '@elastic/eui';
+import {
+  EuiDelayRender,
+  EuiFlyoutBody,
+  EuiFlyoutHeader,
+  EuiSkeletonText,
+  EuiSkeletonTitle,
+} from '@elastic/eui';
 import React from 'react';
 
 export const LoadingFlyout = (
-  <>
+  <EuiDelayRender delay={300}>
     <EuiFlyoutHeader hasBorder>
       <EuiSkeletonTitle size="xs" />
     </EuiFlyoutHeader>
     <EuiFlyoutBody>
       <EuiSkeletonText />
     </EuiFlyoutBody>
-  </>
+  </EuiDelayRender>
 );
