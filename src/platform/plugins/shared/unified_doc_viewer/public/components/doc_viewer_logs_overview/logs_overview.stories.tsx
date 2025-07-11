@@ -30,15 +30,10 @@ const mockDataView = {
   fields: { getAll: () => [], getByName: () => null },
 } as never;
 
-const baseArgs = {
-  hit: {},
-  dataView: mockDataView,
-};
-
 export const Minimal: Story = {
   name: 'Minimal log',
   args: {
-    ...baseArgs,
+    dataView: mockDataView,
     hit: buildDataTableRecord({ fields: { '@timestamp': new Date().toISOString() } }),
   },
 };
@@ -46,7 +41,7 @@ export const Minimal: Story = {
 export const OtelExample: Story = {
   name: 'Otel example log',
   args: {
-    ...baseArgs,
+    ...Minimal.args,
     hit: buildDataTableRecord(otelExampleFixture),
   },
 };

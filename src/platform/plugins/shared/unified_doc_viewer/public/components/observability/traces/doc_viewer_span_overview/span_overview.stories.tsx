@@ -15,7 +15,7 @@ import { mockUnifiedDocViewerServices } from '../../../../__mocks__';
 import { setUnifiedDocViewerServices } from '../../../../plugin';
 import minimalAPMFixture from './__fixtures__/apm/minimal.json';
 import minimalOtelFixture from './__fixtures__/otel/minimal.json';
-import httpServerProcessedOtelFixture from './__fixtures__/otel/http_server_processed.json';
+import redisClientOtelFixture from './__fixtures__/otel/redis_client_processed.json';
 
 import { SpanOverview } from './span_overview';
 
@@ -29,17 +29,6 @@ const meta: Meta<typeof SpanOverview> = {
 
 export default meta;
 type Story = StoryObj<typeof SpanOverview>;
-
-const baseArgs = {
-  hit: buildDataTableRecord({}),
-  indexes: {
-    apm: {
-      traces: 'traces-*',
-      errors: 'errors-*',
-    },
-    logs: 'logs-*',
-  },
-};
 
 (
   mockUnifiedDocViewerServices.data.query.timefilter.timefilter.getAbsoluteTime as jest.Mock
@@ -59,7 +48,7 @@ const unifiedDocViewerServices = produce(mockUnifiedDocViewerServices, (draft) =
   draft.share.url.locators.get = () => {
     return { getRedirectUrl: () => '#' };
   };
-  draft.core.application.capabilities.apm = { show: true };
+  draft.core.application.capabilities.apm = { show: false };
 });
 console.log({ unifiedDocViewerServices });
 //   const canViewApm = core.application.capabilities.apm?.show || false;
@@ -70,7 +59,13 @@ setUnifiedDocViewerServices(unifiedDocViewerServices);
 export const MinimalApm: Story = {
   name: 'Minimal APM span',
   args: {
-    ...baseArgs,
+    indexes: {
+      apm: {
+        traces: 'traces-*',
+        errors: 'errors-*',
+      },
+      logs: 'logs-*',
+    },
     dataView: {
       ...dataViewMockWithTimeField,
       fields: { getByName: () => null },
@@ -82,12 +77,16 @@ export const MinimalApm: Story = {
 export const MinimalOtel: Story = {
   name: 'Minimal Otel span',
   args: {
-    ...baseArgs,
-    dataView: {
-      ...dataViewMockWithTimeField,
-      fields: { getByName: () => null },
-    } as never,
+    ...MinimalApm.args,
     hit: buildDataTableRecord(minimalOtelFixture),
+  },
+};
+
+export const RedisClientOtel: Story = {
+  name: 'Redis client span (processed Otel)',
+  args: {
+    ...MinimalApm.args,
+    hit: buildDataTableRecord(redisClientOtelFixture),
   },
 };
 

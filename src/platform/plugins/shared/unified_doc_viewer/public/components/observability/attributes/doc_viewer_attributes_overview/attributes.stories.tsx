@@ -39,6 +39,6 @@ const baseArgs = {
 export const Basic: Story = { args: { ...baseArgs, hit: buildDataTableRecord(basicFixture) } };
 
 export const RedisSpan: Story = {
-  name: 'Redis span (processed)',
+  name: 'Redis client span (processed)',
   args: { ...baseArgs, hit: buildDataTableRecord(redisSpanFixture) },
 };
