@@ -11,9 +11,8 @@ import type { RetryService } from '@kbn/ftr-common-functional-services';
 import type { IValidatedEvent } from '@kbn/event-log-plugin/server';
 import type { Agent as SuperTestAgent } from 'supertest';
 import expect from '@kbn/expect';
-import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import type { ObjectRemover } from '../../../../common/lib';
-import { getUrlPrefix, getTestRuleData, getEventLog } from '../../../../common/lib';
+import { getUrlPrefix, getTestRuleData } from '../../../../common/lib';
 import { Spaces } from '../../../scenarios';
 import { TEST_CACHE_EXPIRATION_TIME } from '../create_test_data';
 
@@ -147,48 +146,6 @@ export const finishMaintenanceWindow = async ({
   await setTimeoutAsync(TEST_CACHE_EXPIRATION_TIME);
 };
 
-export const getRuleEvents = async ({
-  id,
-  action,
-  newInstance,
-  activeInstance,
-  recoveredInstance,
-  retry,
-  getService,
-}: {
-  id: string;
-  action?: number;
-  newInstance?: number;
-  activeInstance?: number;
-  recoveredInstance?: number;
-  retry: RetryService;
-  getService: FtrProviderContext['getService'];
-}) => {
-  const actions: Array<[string, { equal: number }]> = [];
-  if (action) {
-    actions.push(['execute-action', { equal: action }]);
-  }
-  if (newInstance) {
-    actions.push(['new-instance', { equal: newInstance }]);
-  }
-  if (activeInstance) {
-    actions.push(['active-instance', { equal: activeInstance }]);
-  }
-  if (recoveredInstance) {
-    actions.push(['recovered-instance', { equal: recoveredInstance }]);
-  }
-  return retry.try(async () => {
-    return await getEventLog({
-      getService,
-      spaceId: Spaces.space1.id,
-      type: 'alert',
-      id,
-      provider: 'alerting',
-      actions: new Map(actions),
-    });
-  });
-};
-
 export const expectNoActionsFired = async ({
   id,
   supertest,
@@ -241,22 +198,5 @@ export const expectActionsFired = async ({
     });
 
     expect(actionEvents.length).eql(expectedNumberOfActions);
-  });
-};
-
-export const runSoon = async ({
-  id,
-  supertest,
-  retry,
-}: {
-  id: string;
-  supertest: SuperTestAgent;
-  retry: RetryService;
-}) => {
-  return retry.try(async () => {
-    await supertest
-      .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${id}/_run_soon`)
-      .set('kbn-xsrf', 'foo')
-      .expect(204);
   });
 };
