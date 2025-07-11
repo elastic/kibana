@@ -312,10 +312,6 @@ export function ObservabilityAlertsCommonProvider({
     await testSubjects.click('optionsList-control-0');
   };
 
-  const alertDataIsBeingLoaded = async () => {
-    return testSubjects.existOrFail('internalAlertsPageLoading');
-  };
-
   const alertDataHasLoaded = async () => {
     await retry.waitFor(
       'Alert Table is loaded',
@@ -445,7 +441,6 @@ export function ObservabilityAlertsCommonProvider({
     setWorkflowStatusFilter,
     getWorkflowStatusFilterValue,
     setAlertStatusFilter,
-    alertDataIsBeingLoaded,
     alertDataHasLoaded,
     submitQuery,
     typeInQueryBar,
