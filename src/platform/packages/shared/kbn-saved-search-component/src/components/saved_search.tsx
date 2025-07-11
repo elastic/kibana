@@ -9,7 +9,7 @@
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
-import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
+import { SEARCH_EMBEDDABLE_TYPE, getDefaultSort } from '@kbn/discover-utils';
 import type {
   SearchEmbeddableSerializedState,
   SearchEmbeddableApi,
@@ -17,6 +17,7 @@ import type {
 import { SerializedPanelState } from '@kbn/presentation-publishing';
 import { css } from '@emotion/react';
 import { SavedSearchAttributes } from '@kbn/saved-search-plugin/common';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import { SavedSearchComponentProps } from '../types';
 import { SavedSearchComponentErrorContent } from './error';
 
@@ -72,6 +73,7 @@ export const SavedSearchComponent: React.FC<SavedSearchComponentProps> = (props)
               searchSourceJSON,
             },
             columns,
+            sort: getDefaultSort(dataView, undefined, undefined, isOfAggregateQueryType(query)),
           };
           setInitialSerializedState({
             rawState: {
