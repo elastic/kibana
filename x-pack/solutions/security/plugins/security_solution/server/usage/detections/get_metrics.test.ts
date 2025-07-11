@@ -66,7 +66,7 @@ describe('Detections Usage and Metrics', () => {
       expect(result).toEqual<DetectionMetrics>(getInitialDetectionMetrics());
     });
 
-    it('returns information with rule, alerts and cases', async () => {
+    it('returns information with rule, alerts and cases for elastic non-customized rule', async () => {
       esClient.search.mockResponseOnce(getEventLogAllRules());
       esClient.search.mockResponseOnce(getEventLogElasticRules());
       esClient.search.mockResponseOnce(getElasticLogCustomRules());
@@ -302,7 +302,7 @@ describe('Detections Usage and Metrics', () => {
       });
     });
 
-    it('returns information on non elastic prebuilt rule', async () => {
+    it('returns information on non elastic rule', async () => {
       esClient.search.mockResponseOnce(getEventLogAllRules());
       esClient.search.mockResponseOnce(getEventLogElasticRules());
       esClient.search.mockResponseOnce(getElasticLogCustomRules());

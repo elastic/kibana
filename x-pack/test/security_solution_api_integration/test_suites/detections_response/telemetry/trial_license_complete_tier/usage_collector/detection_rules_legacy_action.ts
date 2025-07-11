@@ -40,7 +40,10 @@ import {
 } from '../../../../../../common/utils/security_solution';
 
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
-import { expectElasticSumBasicInvariant, expectElasticTotals } from './detection_rules';
+import {
+  checkRuleTypeUsageCustomizationInvariant,
+  checkRuleTypeUsageFields,
+} from '../../../utils/telemetry';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
@@ -513,7 +516,7 @@ export default ({ getService }: FtrProviderContext) => {
             has_response_actions_endpoint: false,
             has_response_actions_osquery: false,
           });
-          expectElasticTotals(
+          checkRuleTypeUsageFields(
             stats.detection_rules.detection_rule_usage,
             'notifications_disabled',
             {
@@ -522,7 +525,7 @@ export default ({ getService }: FtrProviderContext) => {
               noncustomized: 0,
             }
           );
-          expectElasticTotals(
+          checkRuleTypeUsageFields(
             stats.detection_rules.detection_rule_usage,
             'legacy_notifications_enabled',
             {
@@ -531,7 +534,7 @@ export default ({ getService }: FtrProviderContext) => {
               noncustomized: 0,
             }
           );
-          expectElasticTotals(
+          checkRuleTypeUsageFields(
             stats.detection_rules.detection_rule_usage,
             'legacy_notifications_disabled',
             {
@@ -540,12 +543,16 @@ export default ({ getService }: FtrProviderContext) => {
               noncustomized: 0,
             }
           );
-          expectElasticTotals(stats.detection_rules.detection_rule_usage, 'notifications_enabled', {
-            total: 0,
-            customized: 0,
-            noncustomized: 0,
-          });
-          expectElasticSumBasicInvariant(stats.detection_rules.detection_rule_usage);
+          checkRuleTypeUsageFields(
+            stats.detection_rules.detection_rule_usage,
+            'notifications_enabled',
+            {
+              total: 0,
+              customized: 0,
+              noncustomized: 0,
+            }
+          );
+          checkRuleTypeUsageCustomizationInvariant(stats.detection_rules.detection_rule_usage);
 
           expect(stats.detection_rules.detection_rule_usage.custom_total).to.eql(
             getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total
@@ -600,7 +607,7 @@ export default ({ getService }: FtrProviderContext) => {
             has_response_actions_endpoint: false,
             has_response_actions_osquery: false,
           });
-          expectElasticTotals(
+          checkRuleTypeUsageFields(
             stats.detection_rules.detection_rule_usage,
             'notifications_disabled',
             {
@@ -609,7 +616,7 @@ export default ({ getService }: FtrProviderContext) => {
               noncustomized: 0,
             }
           );
-          expectElasticTotals(
+          checkRuleTypeUsageFields(
             stats.detection_rules.detection_rule_usage,
             'legacy_notifications_enabled',
             {
@@ -618,7 +625,7 @@ export default ({ getService }: FtrProviderContext) => {
               noncustomized: 0,
             }
           );
-          expectElasticTotals(
+          checkRuleTypeUsageFields(
             stats.detection_rules.detection_rule_usage,
             'legacy_notifications_disabled',
             {
@@ -627,11 +634,15 @@ export default ({ getService }: FtrProviderContext) => {
               noncustomized: 0,
             }
           );
-          expectElasticTotals(stats.detection_rules.detection_rule_usage, 'notifications_enabled', {
-            total: 0,
-            customized: 0,
-            noncustomized: 0,
-          });
+          checkRuleTypeUsageFields(
+            stats.detection_rules.detection_rule_usage,
+            'notifications_enabled',
+            {
+              total: 0,
+              customized: 0,
+              noncustomized: 0,
+            }
+          );
           expect(stats.detection_rules.detection_rule_usage.custom_total).to.eql(
             getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total
           );
