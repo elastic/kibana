@@ -32,7 +32,6 @@
     "@kbn/kibana-react-plugin",
     "@kbn/test-subj-selector",
     "@kbn/datemath",
-    "@kbn/core-http-browser",
     "@kbn/ui-actions-plugin",
     "@kbn/observability-ai-assistant-plugin",
     "@kbn/deeplinks-observability",
@@ -57,7 +56,6 @@
     "@kbn/spaces-plugin",
     "@kbn/analytics",
     "@kbn/usage-collection-plugin",
-    "@kbn/deeplinks-management",
     "@kbn/discover-utils",
   ]
 }
