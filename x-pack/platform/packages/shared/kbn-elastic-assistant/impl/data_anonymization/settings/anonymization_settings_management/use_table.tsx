@@ -65,7 +65,7 @@ export const useTable = (nameSpace: string) => {
     [setSearchQuery]
   );
 
-  const { data: anonymizationPageFields } = useFetchAnonymizationFields({
+  const { data: anonymizationPageFields, refetch: refetchPage } = useFetchAnonymizationFields({
     page: pagination.pageIndex, // EUI uses 0-based index, while API uses 1-based index
     perPage: pagination.pageSize, // Continue use in-memory paging till the new design will be ready
     sortField: sorting.sort?.field,
@@ -89,5 +89,6 @@ export const useTable = (nameSpace: string) => {
     searchQuery,
     handleSearch,
     refetchAll,
+    refetchPage,
   };
 };

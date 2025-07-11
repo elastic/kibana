@@ -99,7 +99,8 @@ const AnonymizationSettingsManagementComponent: React.FC<Props> = ({
     }
 
     await refetchAll();
-  }, [refetchAll, saveAnonymizationSettings, toasts]);
+    selectionActions?.handleUnselectAll();
+  }, [refetchAll, saveAnonymizationSettings, selectionActions, toasts]);
 
   const onSaveButtonClicked = useCallback(() => {
     handleSave();

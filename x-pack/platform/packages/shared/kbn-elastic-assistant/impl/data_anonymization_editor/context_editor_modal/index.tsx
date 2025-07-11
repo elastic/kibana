@@ -190,7 +190,7 @@ const SelectedPromptContextEditorModalComponent = ({ onClose, onSave, promptCont
 
       <EuiModalFooter
         css={css`
-          background: ${euiTheme.colors.mediumShade};
+          background: ${euiTheme.colors.backgroundBaseSubdued};
           padding-block: 16px;
         `}
       >

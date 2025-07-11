@@ -67,6 +67,7 @@ describe('ContextEditor', () => {
           }}
           search={SEARCH}
           handleSearch={jest.fn()}
+          handleTableReset={jest.fn()}
           handleRowReset={jest.fn()}
           handlePageReset={jest.fn()}
           selectionState={{
