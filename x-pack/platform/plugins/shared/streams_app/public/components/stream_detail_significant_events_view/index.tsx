@@ -21,6 +21,7 @@ import { ChangePointSummary } from './change_point_summary';
 import { SignificantEventsViewEmptyState } from './empty_state';
 import { SignificantEventFlyout } from './significant_event_flyout';
 import { SignificantEventsTable } from './significant_events_table';
+import { GenerateSignificantEventFlyout } from './generate_significant_event_flyout';
 
 export function StreamDetailSignificantEventsView({
   definition,
@@ -48,9 +49,11 @@ export function StreamDetailSignificantEventsView({
     end,
   });
 
-  const { addQuery, removeQuery } = useSignificantEventsApi({ name: definition.stream.name }) || {};
+  const { addQuery, removeQuery, bulk } =
+    useSignificantEventsApi({ name: definition.stream.name }) || {};
 
   const [isEditFlyoutOpen, setIsEditFlyoutOpen] = useState(false);
+  const [isGenerateFlyoutOpen, setIsGenerateFlyoutOpen] = useState(false);
 
   const [queryToEdit, setQueryToEdit] = useState<StreamQueryKql | undefined>();
 
@@ -145,6 +148,36 @@ export function StreamDetailSignificantEventsView({
     />
   ) : null;
 
+  const generateFlyout = isGenerateFlyoutOpen ? (
+    <GenerateSignificantEventFlyout
+      name={definition.stream.name}
+      onClose={() => setIsGenerateFlyoutOpen(false)}
+      onSubmit={async (selected) => {
+        await bulk?.(selected.map((s) => ({ index: s }))).then(
+          () => {
+            notifications.toasts.addSuccess({
+              title: i18n.translate(
+                'xpack.streams.significantEvents.addGeneratedSignificantEventSuccessToastTitle',
+                { defaultMessage: `Added generated significant events` }
+              ),
+            });
+            setIsGenerateFlyoutOpen(false);
+            significantEventsFetchState.refresh();
+          },
+          (error) => {
+            notifications.showErrorDialog({
+              title: i18n.translate(
+                'xpack.streams.significantEvents.addGeneratedSignificantEventErrorToastTitle',
+                { defaultMessage: `Could not add generated significant events` }
+              ),
+              error,
+            });
+          }
+        );
+      }}
+    />
+  ) : null;
+
   if (significantEventsFetchState.value.length === 0) {
     return (
       <>
@@ -155,6 +188,7 @@ export function StreamDetailSignificantEventsView({
           }}
         />
         {editFlyout}
+        {generateFlyout}
       </>
     );
   }
@@ -178,6 +212,19 @@ export function StreamDetailSignificantEventsView({
               >
                 {i18n.translate('xpack.streams.significantEvents.addSignificantEventButton', {
                   defaultMessage: 'Add significant event query',
+                })}
+              </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                color="primary"
+                onClick={() => {
+                  setIsGenerateFlyoutOpen(true);
+                }}
+                iconType="sparkles"
+              >
+                {i18n.translate('xpack.streams.significantEvents.generateSignificantEventButton', {
+                  defaultMessage: 'Generate',
                 })}
               </EuiButton>
             </EuiFlexItem>
@@ -206,6 +253,7 @@ export function StreamDetailSignificantEventsView({
         </EuiFlexItem>
       </EuiFlexGroup>
       {editFlyout}
+      {generateFlyout}
     </>
   );
 }

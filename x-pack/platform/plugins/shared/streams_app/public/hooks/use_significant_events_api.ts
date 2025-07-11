@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { StreamQueryKql } from '@kbn/streams-schema';
+import { StreamQueryKql, type SignificantEventsGenerateResponse } from '@kbn/streams-schema';
 import { useMemo } from 'react';
 import { useAbortController } from '@kbn/react-hooks';
+
 import { useKibana } from './use_kibana';
 
 interface SignificantEventsApiBulkOperationCreate {
@@ -25,6 +26,7 @@ interface SignificantEventsApi {
   addQuery: (query: StreamQueryKql) => Promise<void>;
   removeQuery: (id: string) => Promise<void>;
   bulk: (operations: SignificantEventsApiBulkOperation[]) => Promise<void>;
+  generate: ({ connectorId }: { connectorId: string }) => SignificantEventsGenerateResponse;
 }
 
 export function useSignificantEventsApi({ name }: { name: string }): SignificantEventsApi {
@@ -84,6 +86,22 @@ export function useSignificantEventsApi({ name }: { name: string }): Significant
             },
           },
         });
+      },
+      generate: ({ connectorId }: { connectorId: string }) => {
+        return streamsRepositoryClient.stream(
+          `GET /api/streams/{name}/significant_events/_generate 2023-10-31`,
+          {
+            signal,
+            params: {
+              path: {
+                name,
+              },
+              query: {
+                connectorId,
+              },
+            },
+          }
+        );
       },
     };
   }, [name, signal, streamsRepositoryClient]);
