@@ -219,7 +219,7 @@ export class CasePlugin
       scheduleCasesTelemetryTask(plugins.taskManager, this.logger);
 
       if (this.caseConfig.incrementalId.enabled) {
-        scheduleIncrementalIdTask(this.caseConfig, plugins.taskManager, this.logger);
+        void scheduleIncrementalIdTask(this.caseConfig, plugins.taskManager, this.logger);
       }
 
       if (this.caseConfig.analytics.index?.enabled) {
