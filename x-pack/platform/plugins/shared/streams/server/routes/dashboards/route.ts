@@ -62,7 +62,7 @@ const listDashboardsRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({
-      name: z.string(),
+      name: z.string().describe('The name of the stream to fetch dashboards for'),
     }),
   }),
   security: {

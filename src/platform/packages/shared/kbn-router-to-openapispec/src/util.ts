@@ -111,7 +111,7 @@ export const getVersionedHeaderParam = (
   },
 });
 
-export const prepareRoutes = <
+export const pickRoutesForOAS = <
   R extends { path: string; options: { access?: 'public' | 'internal'; excludeFromOAS?: boolean } }
 >(
   routes: R[],

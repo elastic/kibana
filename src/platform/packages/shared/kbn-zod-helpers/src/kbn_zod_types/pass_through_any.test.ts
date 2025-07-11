@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as z from '@kbn/zod';
+import { ZodAny } from '@kbn/zod';
+import { KbnZodTypes } from './kbn_zod_type';
 import { PassThroughAny, isPassThroughAny } from './pass_through_any';
 
 describe('PassThroughAny', () => {
@@ -29,8 +30,17 @@ describe('PassThroughAny', () => {
   });
 
   it('has the correct zod and kbn type', () => {
-    expect(PassThroughAny instanceof z.ZodAny).toBe(true);
-    expect(PassThroughAny._def.typeName).toBe(z.ZodFirstPartyTypeKind.ZodAny);
+    expect(PassThroughAny instanceof ZodAny).toBe(true);
     expect(isPassThroughAny(PassThroughAny)).toBe(true);
+  });
+
+  it('allows additional meta without affecting kbnTypeName', () => {
+    const customMeta = { custom: 'meta' };
+    const passThroughWithMeta = PassThroughAny.meta(customMeta);
+
+    expect(passThroughWithMeta.meta()).toMatchObject({
+      ...customMeta,
+      kbnTypeName: KbnZodTypes.PassThroughAny,
+    });
   });
 });
