@@ -11,6 +11,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { UnifiedDocViewerObservabilityTracesTransactionOverview } from '@kbn/unified-doc-viewer-plugin/public';
 import type { DocViewsRegistry } from '@kbn/unified-doc-viewer';
+import { KibanaSectionErrorBoundary } from '@kbn/shared-ux-error-boundary';
 import type { DocumentProfileProvider } from '../../../../..';
 import type { DocViewerExtensionParams, DocViewerExtension } from '../../../../../types';
 
@@ -22,25 +23,28 @@ export const createGetDocViewer =
   (prev: (params: DocViewerExtensionParams) => DocViewerExtension) =>
   (params: DocViewerExtensionParams) => {
     const prevDocViewer = prev(params);
+    const tabTitle = i18n.translate(
+      'discover.docViews.observability.traces.transactionOverview.title',
+      {
+        defaultMessage: 'Transaction overview',
+      }
+    );
 
     return {
       ...prevDocViewer,
       docViewsRegistry: (registry: DocViewsRegistry) => {
         registry.add({
           id: 'doc_view_obs_traces_transaction_overview',
-          title: i18n.translate(
-            'discover.docViews.observability.traces.transactionOverview.title',
-            {
-              defaultMessage: 'Transaction overview',
-            }
-          ),
+          title: tabTitle,
           order: 0,
           component: (props) => {
             return (
-              <UnifiedDocViewerObservabilityTracesTransactionOverview
-                {...props}
-                indexes={indexes}
-              />
+              <KibanaSectionErrorBoundary sectionName={tabTitle}>
+                <UnifiedDocViewerObservabilityTracesTransactionOverview
+                  {...props}
+                  indexes={indexes}
+                />
+              </KibanaSectionErrorBoundary>
             );
           },
         });
