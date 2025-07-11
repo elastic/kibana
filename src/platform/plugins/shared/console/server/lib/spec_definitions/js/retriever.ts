@@ -35,7 +35,9 @@ export const retriever = (specService: SpecDefinitionsService) => {
     },
     linear: {
       __template: {
-        retrievers: [{}],
+        query: 'search terms',
+        fields: ['field1', 'field2^2'],
+        normalizer: 'minmax',
       },
       rank_window_size: 100,
       filter: {
@@ -52,6 +54,9 @@ export const retriever = (specService: SpecDefinitionsService) => {
           },
         ],
       },
+      query: '',
+      fields: [],
+      normalizer: { __one_of: ['minmax', 'l2_norm', 'none'] },
     },
     rescorer: {
       __template: {
@@ -79,7 +84,8 @@ export const retriever = (specService: SpecDefinitionsService) => {
     },
     rrf: {
       __template: {
-        retrievers: [{}],
+        query: 'search terms',
+        fields: ['field1', 'field2'],
       },
       retrievers: [
         {
@@ -91,6 +97,8 @@ export const retriever = (specService: SpecDefinitionsService) => {
       },
       rank_constant: 60,
       rank_window_size: 100,
+      query: '',
+      fields: [],
     },
     rule: {
       __template: {
@@ -155,33 +163,6 @@ export const retriever = (specService: SpecDefinitionsService) => {
       field: '{field}',
       rank_window_size: 10,
       min_score: 0,
-      filter: {
-        __scope_link: 'GLOBAL.query',
-      },
-    },
-    simplified_linear: {
-      __template: {
-        query: 'search terms',
-        fields: ['field1', 'field2^2'],
-        normalizer: 'minmax',
-      },
-      query: '',
-      fields: [],
-      normalizer: { __one_of: ['minmax', 'l2_norm', 'none'] },
-      rank_window_size: 100,
-      filter: {
-        __scope_link: 'GLOBAL.query',
-      },
-    },
-    simplified_rrf: {
-      __template: {
-        query: 'search terms',
-        fields: ['field1', 'field2'],
-      },
-      query: '',
-      fields: [],
-      rank_constant: 60,
-      rank_window_size: 100,
       filter: {
         __scope_link: 'GLOBAL.query',
       },
