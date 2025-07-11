@@ -31,7 +31,6 @@ export const securitySolutionSetting: Omit<
     [schema.literal(AIAssistantType.Security), schema.literal(AIAssistantType.Never)],
     { defaultValue: AIAssistantType.Security }
   ),
-  // Convert enum values to strings to satisfy UiSettingsParams type
   options: [AIAssistantType.Security, AIAssistantType.Never],
   type: 'select' as const,
   optionLabels: {

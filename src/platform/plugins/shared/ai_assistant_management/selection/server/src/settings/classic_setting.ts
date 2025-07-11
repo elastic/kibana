@@ -39,7 +39,6 @@ export const classicSetting: Omit<UiSettingsParams<AIAssistantType>, 'value'> = 
     ],
     { defaultValue: AIAssistantType.Default }
   ),
-  // Convert enum values to strings to satisfy UiSettingsParams type
   options: [
     AIAssistantType.Default,
     AIAssistantType.Observability,
