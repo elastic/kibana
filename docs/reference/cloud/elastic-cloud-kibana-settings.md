@@ -82,6 +82,12 @@ stack: ga 9.1
 `xpack.banners.linkColor`
 :   The color for the banner link text. Defaults to `#0B64DD`.
 
+`xpack.product_intercept.enabled`
+:   Enable or disable the product intercept feature.
+
+`xpack.product_intercept.interval`:
+:   Set the interval for the product intercept feature.
+
 ### Version 8.18+ [ec_version_8_18]
 
 `xpack.fleet.enableManagedLogsAndMetricsDataviews`
