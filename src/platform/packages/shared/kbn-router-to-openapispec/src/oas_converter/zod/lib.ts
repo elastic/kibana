@@ -285,7 +285,7 @@ const convertObjectMembersToParameterObjects = (
       }
     }
 
-    const isOptional = subShape.safeParse(undefined).success;
+    const isOptional = !subShape.safeParse(undefined).success;
 
     return {
       name: shapeKey,
