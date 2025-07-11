@@ -39,7 +39,7 @@ export default function ({ getService }: FtrProviderContext) {
           documents_found: 0,
           is_partial: false,
           values: [],
-          values_loaded: 0
+          values_loaded: 0,
         });
       });
 
@@ -82,7 +82,7 @@ export default function ({ getService }: FtrProviderContext) {
           documents_found: 3,
           is_partial: false,
           values: [['POINT (-120.9871642 38.68407028)', '2015-09-20T00:00:00.000Z']],
-          values_loaded: 6
+          values_loaded: 6,
         });
       });
     });
