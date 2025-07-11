@@ -12,7 +12,10 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiLink,
+  EuiText,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { StreamQueryKql } from '@kbn/streams-schema';
@@ -40,9 +43,9 @@ export function GenerateSignificantEventFlyout(props: GenerateSignificantEventFl
 
 function SignificantEventFlyoutContents(props: GenerateSignificantEventFlyoutProps) {
   const {
-    core: { notifications },
+    core: { notifications, http },
   } = useKibana();
-  const { enabled: aiEnabled, selectedConnector } = useAIFeatures();
+  const aiFeatures = useAIFeatures();
   const { generate } = useSignificantEventsApi({ name: props.definition.name });
 
   const [isGenerating, setIsGenerating] = useState(false);
@@ -67,10 +70,47 @@ function SignificantEventFlyoutContents(props: GenerateSignificantEventFlyoutPro
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <EuiFlexGroup direction="column" gutterSize="m">
+          {aiFeatures && !aiFeatures.enabled ? (
+            <EuiToolTip
+              content={i18n.translate(
+                'xpack.streams.streamDetailView.generateSignificantEvents.aiAssistantNotEnabledTooltip',
+                {
+                  defaultMessage:
+                    'AI Assistant features are not enabled. To enable features, add an AI connector on the management page.',
+                }
+              )}
+            >
+              {aiFeatures.couldBeEnabled ? (
+                <EuiLink
+                  target="_blank"
+                  href={http.basePath.prepend(
+                    `/app/management/insightsAndAlerting/triggersActionsConnectors/connectors`
+                  )}
+                >
+                  {i18n.translate(
+                    'xpack.streams.streamDetailView.generateSignificantEvents.aiAssistantNotEnabled',
+                    { defaultMessage: 'Enable AI Assistant features' }
+                  )}
+                </EuiLink>
+              ) : (
+                <EuiText>
+                  <h3>
+                    {i18n.translate(
+                      'xpack.streams.streamDetailView.generateSignificantEvents.aiAssistantNotEnabledAskAdmin',
+                      { defaultMessage: 'Ask your administrator to enable AI Assistant features' }
+                    )}
+                  </h3>
+                </EuiText>
+              )}
+            </EuiToolTip>
+          ) : null}
+
           <EuiFlexGroup>
             <EuiButton
               isLoading={isGenerating}
-              disabled={isGenerating || !aiEnabled || !selectedConnector}
+              disabled={
+                isGenerating || !aiFeatures || !aiFeatures.enabled || !aiFeatures.selectedConnector
+              }
               iconType="sparkles"
               onClick={() => {
                 setIsGenerating(true);
@@ -78,7 +118,7 @@ function SignificantEventFlyoutContents(props: GenerateSignificantEventFlyoutPro
                 setSelectedQueries([]);
 
                 const generation$ = generate({
-                  connectorId: selectedConnector!,
+                  connectorId: aiFeatures?.selectedConnector!,
                 });
                 generation$.subscribe({
                   next: (result) => {

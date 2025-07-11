@@ -6,18 +6,19 @@
  */
 
 import { STREAMS_TIERED_AI_FEATURE } from '@kbn/streams-plugin/common';
+import useObservable from 'react-use/lib/useObservable';
 import { useKibana } from '../../../hooks/use_kibana';
 
 export function useAIFeatures() {
   const {
     dependencies: {
-      start: { observabilityAIAssistant },
+      start: { observabilityAIAssistant, licensing },
     },
     core,
   } = useKibana();
 
   const isAIAvailableForTier = core.pricing.isFeatureAvailable(STREAMS_TIERED_AI_FEATURE.id);
-
+  const license = useObservable(licensing.license$);
   const genAiConnectors = observabilityAIAssistant?.useGenAIConnectors();
 
   if (
@@ -26,14 +27,18 @@ export function useAIFeatures() {
     !genAiConnectors ||
     genAiConnectors.loading
   ) {
-    return { enabled: false, selectedConnector: undefined };
+    return null;
   }
 
   const selectedConnector = genAiConnectors.selectedConnector;
+  const couldBeEnabled = Boolean(
+    license?.hasAtLeast('enterprise') && core.application.capabilities.actions?.save
+  );
   const enabled = observabilityAIAssistant.service.isEnabled() && Boolean(selectedConnector);
 
   return {
     enabled,
+    couldBeEnabled,
     selectedConnector,
   };
 }
