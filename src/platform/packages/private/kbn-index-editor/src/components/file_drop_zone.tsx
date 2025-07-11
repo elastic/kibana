@@ -141,7 +141,12 @@ export const FileDropzone: FC<PropsWithChildren<{ noResults: boolean }>> = ({
   let content: React.ReactNode = children;
 
   if (noResults && !showFilePreview) {
-    content = <EmptyPrompt />;
+    content = (
+      <div>
+        {content}
+        <EmptyPrompt />
+      </div>
+    );
   } else if (showFilePreview) {
     content = <FilesPreview />;
   }

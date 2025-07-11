@@ -35,11 +35,11 @@ export const AddColumnPanel: React.FC<AddColumnPanelProps> = ({ onHide }) => {
             compressed
             required
             placeholder={i18n.translate('indexEditor.addColumn.name', {
-              defaultMessage: 'Column name',
+              defaultMessage: 'Field name',
             })}
             value={columnName}
             aria-label={i18n.translate('indexEditor.addColumn.name.aria', {
-              defaultMessage: 'Column name input',
+              defaultMessage: 'Field name input',
             })}
             onChange={(e) => {
               setColumnName(e.target.value);

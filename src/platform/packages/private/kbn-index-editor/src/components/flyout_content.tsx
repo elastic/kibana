@@ -109,7 +109,7 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
                 ) : null}
 
                 <EuiFlexItem grow={true} css={{ minHeight: 0 }}>
-                  {!noResults && dataView && dataViewColumns ? (
+                  {dataView && dataViewColumns ? (
                     <DataGridLazy
                       {...props}
                       dataView={dataView}

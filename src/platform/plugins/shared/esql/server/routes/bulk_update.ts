@@ -50,4 +50,45 @@ export const registerBulkUpdateRoute = (router: IRouter, { logger }: PluginIniti
       }
     }
   );
+
+  router.post(
+    {
+      path: '/internal/esql/lookup_index/{indexName}',
+      validate: {
+        params: schema.object({
+          indexName: schema.string(),
+        }),
+      },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
+    },
+    async (requestHandlerContext, request, response) => {
+      try {
+        const core = await requestHandlerContext.core;
+        const client = core.elasticsearch.client.asCurrentUser;
+
+        const indexName = request.params.indexName;
+
+        const result = await client.indices.create({
+          index: indexName,
+          body: {
+            settings: {
+              ['index.mode']: 'lookup',
+            },
+          },
+        });
+
+        return response.ok({
+          body: result,
+        });
+      } catch (error) {
+        logger.get().debug(error);
+        throw error;
+      }
+    }
+  );
 };

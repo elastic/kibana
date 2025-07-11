@@ -39,7 +39,9 @@ import {
   tap,
   timer,
   withLatestFrom,
+  firstValueFrom,
 } from 'rxjs';
+import { IndexEditorMode } from './types';
 import { parsePrimitive } from './utils';
 
 const BUFFER_TIMEOUT_MS = 5000; // 5 seconds
@@ -69,7 +71,11 @@ type Action =
 export type PendingSave = Map<DocUpdate['id'], DocUpdate['value']>;
 
 export class IndexUpdateService {
-  constructor(private readonly http: HttpStart, private readonly data: DataPublicPluginStart) {
+  constructor(
+    private readonly http: HttpStart,
+    private readonly data: DataPublicPluginStart,
+    public readonly mode: IndexEditorMode
+  ) {
     this.listenForUpdates();
   }
 
@@ -101,17 +107,17 @@ export class IndexUpdateService {
 
   /** ES Documents */
   private readonly _rows$ = new BehaviorSubject<DataTableRecord[]>([
-    {
-      id: 'row_1',
-      raw: {
-        _id: 'row_1',
-      },
-      flattened: {
-        [`Add a column`]: 'Add a value',
-        [`Add a column `]: 'Add a value',
-        [`Add a column  `]: 'Add a value',
-      },
-    },
+    // {
+    //   id: 'row_1',
+    //   raw: {
+    //     _id: 'row_1',
+    //   },
+    //   flattened: {
+    //     [`Add a column`]: 'Add a value',
+    //     [`Add a column `]: 'Add a value',
+    //     [`Add a column  `]: 'Add a value',
+    //   },
+    // },
   ]);
   public readonly rows$: Observable<DataTableRecord[]> = this._rows$.asObservable();
 
@@ -147,7 +153,10 @@ export class IndexUpdateService {
     map((updates) => {
       return updates.reduce((acc, update) => {
         if (update.id) {
-          acc.set(update.id, update.value);
+          acc.set(update.id, {
+            ...acc.get(update.id),
+            ...update.value,
+          });
         }
         return acc;
       }, new Map() as PendingSave);
@@ -157,6 +166,7 @@ export class IndexUpdateService {
 
   // Observable to track the number of milliseconds left to allow undo of the last change
   public readonly undoTimer$: Observable<number> = this.actions$.pipe(
+    skipWhile(() => this.mode === 'creation'),
     filter((action) => action.type === 'add' || action.type === 'undo'),
     switchMap((action) =>
       action.type === 'add'
@@ -259,6 +269,7 @@ export class IndexUpdateService {
     this._subscription.add(
       this.bufferState$
         .pipe(
+          skipWhile(() => this.mode === 'creation'),
           tap((updates) => {
             this._isSaving$.next(updates.length > 0);
           }),
@@ -457,17 +468,27 @@ export class IndexUpdateService {
    * @param updates
    */
   public bulkUpdate(updates: DocUpdate[]): Promise<BulkResponse> {
+    // merge updates with the same id
+    const mergedUpdates = updates.reduce((acc, update) => {
+      if (update.id) {
+        acc[update.id] = { ...acc[update.id], ...update.value };
+      } else {
+        // If no id is provided, we assume it's a new row
+        acc['placeholder-row'] = { ...acc['placeholder-row'], ...update.value };
+      }
+      return acc;
+    }, {} as Record<string, Record<string, any>>);
     const body = JSON.stringify({
       operations: (
-        updates.map((update) => {
-          if (update.id && update.id !== 'row_1') {
-            // //HD row_1?
+        Object.entries(mergedUpdates).map(([id, value]) => {
+          if (id !== 'placeholder-row') {
+            // HD placeholder-row?
             return [
               {
-                update: { _id: update.id },
+                update: { _id: id },
               },
               {
-                doc: update.value,
+                doc: value,
               },
             ];
           }
@@ -475,7 +496,7 @@ export class IndexUpdateService {
             {
               index: {},
             },
-            update.value,
+            value,
           ];
         }) as BulkRequest['operations']
       )?.flat(),
@@ -514,5 +535,12 @@ export class IndexUpdateService {
 
   public destroy() {
     this._subscription.unsubscribe();
+  }
+
+  public async createIndex() {
+    const updates = await firstValueFrom(this.bufferState$);
+
+    await this.http.post(`/internal/esql/lookup_index/${this.getIndexName()}`);
+    await this.bulkUpdate(updates);
   }
 }

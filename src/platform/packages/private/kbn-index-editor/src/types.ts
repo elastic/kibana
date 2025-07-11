@@ -18,6 +18,8 @@ import type { FileUploadManager } from '@kbn/file-upload';
 import type { FileUploadPluginStart, MessageImporter } from '@kbn/file-upload-plugin/public';
 import type { IndexUpdateService } from './index_update_service';
 
+export type IndexEditorMode = 'creation' | 'edition';
+
 export interface EditLookupIndexContentContext {
   indexName?: string;
   doesIndexExist: boolean;

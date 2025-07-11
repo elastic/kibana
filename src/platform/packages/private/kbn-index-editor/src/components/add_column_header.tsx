@@ -65,7 +65,7 @@ export const AddColumnHeader = () => {
             if (e.key === 'Enter') setIsEditing(true);
           }}
         >
-          {`Add a column...`}
+          {`Add a field…`}
         </div>
       </EuiFlexItem>
     </EuiFlexGroup>
