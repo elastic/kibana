@@ -9,10 +9,7 @@ import { renderHook } from '@testing-library/react';
 import type { KibanaReactNotifications } from '@kbn/kibana-react-plugin/public';
 import type { IHttpFetchError } from '@kbn/core/public';
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
-import {
-  useCustomScriptsErrorToast,
-  getMessageFieldFromStringifiedObject,
-} from './use_custom_scripts_error_toast';
+import { useCustomScriptsErrorToast } from './use_custom_scripts_error_toast';
 import type { CustomScriptsErrorType } from '../../hooks/custom_scripts/use_get_custom_scripts';
 
 describe('useCustomScriptsErrorToast', () => {
@@ -36,7 +33,7 @@ describe('useCustomScriptsErrorToast', () => {
     expect(mockToastDanger).not.toHaveBeenCalled();
   });
 
-  test('shows toast with parsed error message from stringified response', () => {
+  test('shows toast with full error message from err.body.message', () => {
     const mockError: IHttpFetchError<CustomScriptsErrorType> = {
       name: 'HttpFetchError',
       message: 'HTTP Error',
@@ -52,7 +49,7 @@ describe('useCustomScriptsErrorToast', () => {
     renderHook(() => useCustomScriptsErrorToast(mockError, mockNotifications));
 
     expect(mockToastDanger).toHaveBeenCalledWith({
-      title: 'Forbidden',
+      title: '403',
       body: expect.any(Object),
     });
   });
@@ -114,41 +111,5 @@ describe('useCustomScriptsErrorToast', () => {
     rerender();
 
     expect(mockToastDanger).toHaveBeenCalledTimes(1);
-  });
-});
-
-describe('getMessageFieldFromStringifiedObject', () => {
-  test('parses error JSON from stringified response', () => {
-    const str = 'Some error. Response body: {"error":{"code":"Forbidden","message":"Test error"}}';
-    const result = getMessageFieldFromStringifiedObject(str);
-    expect(result).toEqual({ error: { code: 'Forbidden', message: 'Test error' } });
-  });
-
-  test('returns undefined if marker is missing', () => {
-    const str = 'No marker here';
-    expect(getMessageFieldFromStringifiedObject(str)).toBeUndefined();
-  });
-
-  test('returns undefined if JSON is invalid', () => {
-    const str = 'Response body: not-json';
-    expect(getMessageFieldFromStringifiedObject(str)).toBeUndefined();
-  });
-
-  test('returns undefined if marker exists but no JSON follows', () => {
-    const str = 'Response body: ';
-    expect(getMessageFieldFromStringifiedObject(str)).toBeUndefined();
-  });
-
-  test('handles complex error structure', () => {
-    const str =
-      'Error occurred. Response body: {"error":{"code":"ValidationError","message":"Invalid input","details":{"field":"name"}}}';
-    const result = getMessageFieldFromStringifiedObject(str);
-    expect(result).toEqual({
-      error: {
-        code: 'ValidationError',
-        message: 'Invalid input',
-        details: { field: 'name' },
-      },
-    });
   });
 });

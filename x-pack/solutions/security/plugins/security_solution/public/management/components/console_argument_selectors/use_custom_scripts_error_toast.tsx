@@ -7,7 +7,6 @@
 
 import React, { useEffect } from 'react';
 import { EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { KibanaReactNotifications } from '@kbn/kibana-react-plugin/public';
 import { IHttpFetchError } from '@kbn/core/public';
 import { CustomScriptsErrorType } from '../../hooks/custom_scripts/use_get_custom_scripts';
@@ -28,14 +27,8 @@ export const useCustomScriptsErrorToast = (
 
       const err = scriptsError;
       if (err?.body?.message) {
-        const { error } = getMessageFieldFromStringifiedObject(err.body.message) || {};
-        if (error) {
-          code = error.code || code;
-          message = error.message;
-        } else {
-          code = err.body.statusCode ? String(err.body.statusCode) : code;
-          message = err.body.message;
-        }
+        message = err.body.message;
+        code = String(err.body.statusCode ?? code);
       } else {
         message = err?.message || String(err);
       }
@@ -45,12 +38,6 @@ export const useCustomScriptsErrorToast = (
           title: code,
           body: (
             <EuiText size="s">
-              <p>
-                <FormattedMessage
-                  id="xpack.securitySolution.endpoint.customScripts.fetchError"
-                  defaultMessage="Failed to fetch Microsoft Defender for Endpoint scripts"
-                />
-              </p>
               <p>{message}</p>
             </EuiText>
           ),
@@ -59,17 +46,4 @@ export const useCustomScriptsErrorToast = (
     }
   }, [scriptsError, notifications]);
 };
-export function getMessageFieldFromStringifiedObject(
-  str: string
-): { error: { code: string; message: string } } | undefined {
-  const marker = 'Response body: ';
-  const idx = str.indexOf(marker);
-  if (idx === -1) return undefined;
 
-  const jsonPart = str.slice(idx + marker.length).trim();
-  try {
-    return JSON.parse(jsonPart);
-  } catch {
-    return undefined;
-  }
-}
