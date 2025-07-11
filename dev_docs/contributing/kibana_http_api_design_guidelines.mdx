@@ -206,8 +206,8 @@ This is sometimes referred to as _idempotency_. It is related to side-effects, b
 Imagine we were to run the following methods 1000x over:
 
 * `GET` always results in the same _server state_
-* `PUT` always results in the same _server state_
-* `DELETE` always results in the same _server state_ (maybe returns 404 after the first request)
+* `PUT` always results in the same _server state_ (returns 409 after the first request)
+* `DELETE` always results in the same _server state_ (returns 404 after the first request)
 * `PATCH` always results in the same _server state_ for the same input! For example: `PATCH /api/coolstore/order/{id} { expected_delivery: "ASAP!" }` will result in the same state.
 
 However...
