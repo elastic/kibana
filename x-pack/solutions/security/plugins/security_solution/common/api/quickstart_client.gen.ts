@@ -2187,6 +2187,9 @@ The edit action is idempotent, meaning that if you add a tag to a rule that alre
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Check if the current user has all required permissions for Privilege Monitoring
+   */
   async privMonPrivileges() {
     this.log.info(`${new Date().toISOString()} Calling API PrivMonPrivileges`);
     return this.kbnClient
