@@ -112,7 +112,7 @@ describe('config validation', () => {
           "incrementalId": Object {
             "enabled": true,
             "taskIntervalMinutes": 10,
-            "taskStartDelayMinutes": 10,
+            "taskStartDelayMinutes": 15,
           },
           "markdownPlugins": Object {
             "lens": true,
