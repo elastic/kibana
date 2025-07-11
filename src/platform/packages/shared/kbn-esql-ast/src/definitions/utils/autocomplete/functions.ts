@@ -22,7 +22,13 @@ import {
   ItemKind,
   ICommandCallbacks,
 } from '../../../commands_registry/types';
-import { ESQLAstItem, ESQLCommand, ESQLFunction, ESQLLocation } from '../../../types';
+import {
+  ESQLAstItem,
+  ESQLCommand,
+  ESQLCommandOption,
+  ESQLFunction,
+  ESQLLocation,
+} from '../../../types';
 import { collectUserDefinedColumns, excludeUserDefinedColumnsFromCurrentCommand } from './columns';
 import { getFunctionDefinition } from '../functions';
 import {
@@ -103,6 +109,29 @@ export function getFunctionsToIgnoreForStats(command: ESQLCommand, argIndex: num
 
 const addCommaIf = (condition: boolean, text: string) => (condition ? `${text},` : text);
 
+const getCommandAndOptionWithinFORK = (
+  command: ESQLCommand<'fork'>
+): {
+  command: ESQLCommand;
+  option: ESQLCommandOption | undefined;
+} => {
+  let option;
+  let subCommand;
+  Walker.walk(command, {
+    visitCommandOption: (_node) => {
+      option = _node;
+    },
+    visitCommand: (_node) => {
+      subCommand = _node;
+    },
+  });
+
+  return {
+    option,
+    command: subCommand ?? command,
+  };
+};
+
 export async function getFunctionArgsSuggestions(
   innerText: string,
   commands: ESQLCommand[],
@@ -111,10 +140,21 @@ export async function getFunctionArgsSuggestions(
   offset: number,
   context?: ICommandContext
 ): Promise<ISuggestionItem[]> {
-  const { command, option, node } = findAstPosition(commands, offset);
+  const astContext = findAstPosition(commands, offset);
+  const node = astContext.node;
   // If the node is not
   if (!node) {
     return [];
+  }
+  let command = astContext.command;
+  let option = astContext.option;
+  if (astContext.command?.name === 'fork') {
+    const { command: forkCommand, option: forkOption } =
+      astContext.command?.name === 'fork'
+        ? getCommandAndOptionWithinFORK(astContext.command as ESQLCommand<'fork'>)
+        : { command: undefined, option: undefined };
+    command = forkCommand || astContext.command;
+    option = forkOption || astContext.option;
   }
   const functionNode = node as ESQLFunction;
   const fnDefinition = getFunctionDefinition(functionNode.name);

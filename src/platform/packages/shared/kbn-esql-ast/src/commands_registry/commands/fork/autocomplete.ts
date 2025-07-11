@@ -13,6 +13,7 @@ import { pipePrecedesCurrentWord } from '../../../definitions/utils/shared';
 import { type ISuggestionItem, type ICommandContext, ICommandCallbacks } from '../../types';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
 import { esqlCommandRegistry } from '../..';
+import { getInsideFunctionsSuggestions } from '../../../definitions/utils/autocomplete/functions';
 
 // ToDo: this is hardcoded, we should find a better way to take care of the fork commands
 const FORK_AVAILABLE_COMMANDS = [
@@ -69,6 +70,16 @@ export async function autocomplete(
 
   if (!subCommand) {
     return [];
+  }
+
+  const functionsSpecificSuggestions = await getInsideFunctionsSuggestions(
+    innerText,
+    cursorPosition,
+    callbacks,
+    context
+  );
+  if (functionsSpecificSuggestions) {
+    return functionsSpecificSuggestions;
   }
 
   const subCommandMethods = esqlCommandRegistry.getCommandMethods(subCommand.name);
