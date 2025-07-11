@@ -153,6 +153,9 @@ const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
               )}
             </div>
           }
+          labelProps={{
+            title: undefined,
+          }}
         />
       </EuiFlexItem>
       {onAddFilter && field.filterable && (
