@@ -111,8 +111,6 @@ export const casesSchema: CasesTelemetrySchema = {
       totalWithAlerts: long,
       totalWithConnectors: long,
       latestDates: latestDatesSchema,
-      withIncrementalId: long,
-      withoutIncrementalId: long,
     },
     sec: solutionTelemetry,
     obs: solutionTelemetry,

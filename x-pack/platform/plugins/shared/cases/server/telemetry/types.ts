@@ -184,8 +184,6 @@ export interface CasesTelemetry {
         totalWithAlerts: number;
         totalWithConnectors: number;
         latestDates: LatestDates;
-        withIncrementalId: number;
-        withoutIncrementalId: number;
       };
     sec: SolutionTelemetry;
     obs: SolutionTelemetry;
