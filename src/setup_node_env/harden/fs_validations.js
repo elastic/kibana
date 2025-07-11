@@ -12,7 +12,7 @@
 const { join } = require('path');
 const { REPO_ROOT } = require('@kbn/repo-info');
 const { tmpdir, homedir } = require('os');
-const { realpathSync } = require('fs');
+const { realpathSync, statSync } = require('fs');
 
 const allowedExtensions = ['.txt', '.md', '.log', '.json', '.yml', '.yaml', '.csv', '.svg', '.png'];
 const allowedMimeTypes = [
@@ -101,9 +101,14 @@ function validateFileExtension(path) {
 }
 
 function validatePathIsSubdirectoryOfSafeDirectory(path) {
-  // if (!isDevOrCI && !safePaths.some((safePath) => path.startsWith(safePath))) {
-  //   throw new Error(`Unsafe path detected: "${path}".`);
-  // }
+  // Skip if Dev or CI environment so it can build Kibana correctly
+  if (isDevOrCI) {
+    return true;
+  }
+
+  if (!safePaths.some((safePath) => path.startsWith(safePath))) {
+    throw new Error(`Unsafe path detected: "${path}".`);
+  }
 }
 
 /**
@@ -127,18 +132,6 @@ function validateFileContent(fileBytes) {
       `Potential invalid mimetypes detected: "${possibleMimeTypes.join(
         ', '
       )}". Allowed mimetypes: ${allowedMimeTypes.join(', ')}`
-    );
-  }
-
-  const possibleExtensions = possibleTypes.map((type) => type.extension);
-  const hasAllowedExtension = possibleExtensions.some((extension) =>
-    allowedExtensions.includes(extension)
-  );
-  if (!hasAllowedExtension) {
-    throw new Error(
-      `Potential invalid extensions detected: "${possibleExtensions.join(
-        ', '
-      )}". Allowed extensions: ${allowedExtensions.join(', ')}`
     );
   }
 
@@ -183,7 +176,7 @@ function validateFileSize(data) {
  */
 function validateFilename(filename) {
   // Only allow alphanumeric characters, underscores, hyphens, and dots
-  const validFilenameRegex = /^[a-zA-Z0-9_\-\.]+$/;
+  const validFilenameRegex = /^[a-zA-Z0-9_\-.]+$/;
 
   if (!validFilenameRegex.test(filename)) {
     throw new Error(
@@ -224,10 +217,10 @@ function validateContentEncoding(content) {
  */
 function validateFilePermissions(filePath) {
   try {
-    const stats = fs.statSync(filePath);
+    const stats = statSync(filePath);
     const mode = stats.mode;
 
-    // Check if file is world-writable (permissions & 0o002)
+    // Check if the file is world-writable (permissions & 0o002)
     if (mode & 0o002) {
       throw new Error(`Insecure file permissions: "${filePath}" is world-writable`);
     }
