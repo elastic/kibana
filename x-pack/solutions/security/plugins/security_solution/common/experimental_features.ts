@@ -191,7 +191,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables scheduling gap fills for rules
    */
-  bulkFillRuleGapsEnabled: false,
+  bulkFillRuleGapsEnabled: true,
 
   /**
    * Adds a new option to filter descendants of a process for Management / Event Filters
