@@ -14,6 +14,9 @@ import { Token } from 'antlr4';
  */
 export const GRAMMAR_ROOT_RULE = 'singleStatement';
 
+/**
+ * @todo Move this out of the parser/ folder.
+ */
 export const EDITOR_MARKER = 'marker_esql_editor';
 
 export const DEFAULT_CHANNEL: number = +(Token as any).DEFAULT_CHANNEL;

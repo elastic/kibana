@@ -10,20 +10,16 @@
 import * as antlr from 'antlr4';
 import * as cst from '../antlr/esql_parser';
 import * as ast from '../types';
-import { type AstNodeParserFields, Builder } from '../builder';
 import { isCommand } from '../ast/is';
-import {
-  computeLocationExtends,
-  nonNullable,
-  textExistsAndIsValid,
-  createBinaryExpression,
-  createColumnStar,
-  createFakeMultiplyLiteral,
-} from './factories';
-import { getPosition, parseIdentifier } from './helpers';
-import { firstItem, lastItem, resolveItem } from '../visitor/utils';
 import { LeafPrinter } from '../pretty_print';
+import { getPosition, parseIdentifier, nonNullable } from './helpers';
+import { firstItem, lastItem, resolveItem } from '../visitor/utils';
+import { type AstNodeParserFields, Builder } from '../builder';
+import { type ArithmeticUnaryContext } from '../antlr/esql_parser';
 import type { Parser } from './parser';
+
+const textExistsAndIsValid = (text: string | undefined): text is string =>
+  !!(text && !/<missing /.test(text));
 
 type ESQLAstMatchBooleanExpression = ast.ESQLColumn | ast.ESQLBinaryExpression | ast.ESQLInlineCast;
 
@@ -82,6 +78,56 @@ export class CstToAstConverter {
       location: getPosition(ctx.start, ctx.stop),
       incomplete: Boolean(ctx.exception),
     };
+  }
+
+  // TODO: Rename this.
+  private computeLocationExtends(fn: ast.ESQLFunction) {
+    const location = fn.location;
+    if (fn.args) {
+      // get min location navigating in depth keeping the left/first arg
+      location.min = this.walkFunctionStructure(fn.args, location, 'min', () => 0);
+      // get max location navigating in depth keeping the right/last arg
+      location.max = this.walkFunctionStructure(
+        fn.args,
+        location,
+        'max',
+        (args) => args.length - 1
+      );
+      // in case of empty array as last arg, bump the max location by 3 chars (empty brackets)
+      if (
+        Array.isArray(fn.args[fn.args.length - 1]) &&
+        !(fn.args[fn.args.length - 1] as ast.ESQLAstItem[]).length
+      ) {
+        location.max += 3;
+      }
+    }
+    return location;
+  }
+
+  /**
+   * @todo Replace this by `Walker`, if necessary, or remove completely.
+   */
+  private walkFunctionStructure(
+    args: ast.ESQLAstItem[],
+    initialLocation: ast.ESQLLocation,
+    prop: 'min' | 'max',
+    getNextItemIndex: (arg: ast.ESQLAstItem[]) => number
+  ) {
+    let nextArg: ast.ESQLAstItem | undefined = args[getNextItemIndex(args)];
+    const location = { ...initialLocation };
+    while (Array.isArray(nextArg) || nextArg) {
+      if (Array.isArray(nextArg)) {
+        nextArg = nextArg[getNextItemIndex(nextArg)];
+      } else {
+        location[prop] = Math[prop](location[prop], nextArg.location[prop]);
+        if (nextArg.type === 'function') {
+          nextArg = nextArg.args[getNextItemIndex(nextArg.args)];
+        } else {
+          nextArg = undefined;
+        }
+      }
+    }
+    return location[prop];
   }
 
   private getUnquotedText(ctx: antlr.ParserRuleContext) {
@@ -715,7 +761,7 @@ export class CstToAstConverter {
 
           for (const arg of renameArgsInOrder) {
             if (textExistsAndIsValid(arg.getText())) {
-              renameFunction.args.push(this.createColumn(arg));
+              renameFunction.args.push(this.toColumn(arg));
             }
           }
           const firstArg = firstItem(renameFunction.args);
@@ -727,7 +773,7 @@ export class CstToAstConverter {
         }
 
         if (textExistsAndIsValid(clause._oldName?.getText())) {
-          return this.createColumn(clause._oldName);
+          return this.toColumn(clause._oldName);
         }
       })
       .filter(nonNullable);
@@ -927,7 +973,7 @@ export class CstToAstConverter {
       let max: number = ctx.ON()!.symbol.stop;
 
       if (textExistsAndIsValid(identifier.getText())) {
-        const column = this.createColumn(identifier);
+        const column = this.toColumn(identifier);
         fn.args.push(column);
         max = column.location.max;
       }
@@ -958,18 +1004,15 @@ export class CstToAstConverter {
           const args: ast.ESQLColumn[] = [];
 
           if (clause.ASSIGN()) {
-            args.push(this.createColumn(clause._newName));
+            args.push(this.toColumn(clause._newName));
             if (textExistsAndIsValid(clause._enrichField?.getText())) {
-              args.push(this.createColumn(clause._enrichField));
+              args.push(this.toColumn(clause._enrichField));
             }
           } else {
             // if an explicit assign is not set, create a fake assign with
             // both left and right value with the same column
             if (textExistsAndIsValid(clause._enrichField?.getText())) {
-              args.push(
-                this.createColumn(clause._enrichField),
-                this.createColumn(clause._enrichField)
-              );
+              args.push(this.toColumn(clause._enrichField), this.toColumn(clause._enrichField));
             }
           }
           if (args.length) {
@@ -1042,7 +1085,7 @@ export class CstToAstConverter {
   private fromChangePointCommand = (
     ctx: cst.ChangePointCommandContext
   ): ast.ESQLAstChangePointCommand => {
-    const value = this.createColumn(ctx._value);
+    const value = this.toColumn(ctx._value);
     const command = this.createCommand<'change_point', ast.ESQLAstChangePointCommand>(
       'change_point',
       ctx,
@@ -1054,7 +1097,7 @@ export class CstToAstConverter {
     command.args.push(value);
 
     if (ctx._key && ctx._key.getText()) {
-      const key = this.createColumn(ctx._key);
+      const key = this.toColumn(ctx._key);
       const option = Builder.option(
         {
           name: 'on',
@@ -1070,8 +1113,8 @@ export class CstToAstConverter {
     }
 
     if (ctx._targetType && ctx._targetPvalue) {
-      const type = this.createColumn(ctx._targetType);
-      const pvalue = this.createColumn(ctx._targetPvalue);
+      const type = this.toColumn(ctx._targetType);
+      const pvalue = this.toColumn(ctx._targetPvalue);
       const option = Builder.option(
         {
           name: 'as',
@@ -1101,7 +1144,7 @@ export class CstToAstConverter {
     );
 
     if (ctx._targetField && ctx.ASSIGN()) {
-      const targetField = this.createColumn(ctx._targetField);
+      const targetField = this.toColumn(ctx._targetField);
 
       const prompt = this.visitPrimaryExpression(ctx._prompt) as ast.ESQLSingleAstItem;
       command.prompt = prompt;
@@ -1114,7 +1157,7 @@ export class CstToAstConverter {
       );
       assignment.args.push(targetField, prompt);
       // update the location of the assign based on arguments
-      assignment.location = computeLocationExtends(assignment);
+      assignment.location = this.computeLocationExtends(assignment);
 
       command.targetField = targetField;
       command.args.push(assignment);
@@ -1336,7 +1379,7 @@ export class CstToAstConverter {
       identifiers
         .filter((child) => textExistsAndIsValid(child.getText()))
         .map((sourceContext) => {
-          return this.createColumn(sourceContext);
+          return this.toColumn(sourceContext);
         }) ?? [];
 
     return args;
@@ -1386,10 +1429,10 @@ export class CstToAstConverter {
       const fn = this.createFunction(ctx.ASSIGN()!.getText(), ctx, undefined, 'binary-expression');
 
       fn.args.push(
-        this.createColumn(ctx.qualifiedName()!),
+        this.toColumn(ctx.qualifiedName()!),
         this.collectBooleanExpression(ctx.booleanExpression())
       );
-      fn.location = computeLocationExtends(fn);
+      fn.location = this.computeLocationExtends(fn);
 
       return [fn];
     }
@@ -1401,7 +1444,7 @@ export class CstToAstConverter {
     const fn = this.createFunction('not', ctx, undefined, 'unary-expression');
     fn.args.push(...this.collectBooleanExpression(ctx.booleanExpression()));
     // update the location of the assign based on arguments
-    const argsLocationExtends = computeLocationExtends(fn);
+    const argsLocationExtends = this.computeLocationExtends(fn);
     fn.location = argsLocationExtends;
     return fn;
   }
@@ -1413,7 +1456,7 @@ export class CstToAstConverter {
       ...this.collectBooleanExpression(ctx._right)
     );
     // update the location of the assign based on arguments
-    const argsLocationExtends = computeLocationExtends(fn);
+    const argsLocationExtends = this.computeLocationExtends(fn);
     fn.location = argsLocationExtends;
     return fn;
   }
@@ -1432,6 +1475,7 @@ export class CstToAstConverter {
    * ```
    *
    * @todo Rename this method.
+   * @todo Move to "list"
    */
   private visitTuple(
     ctxs: cst.ValueExpressionContext[],
@@ -1532,7 +1576,7 @@ export class CstToAstConverter {
         this.visitOperatorExpression(ctx._right)!
       );
       // update the location of the comparisonFn based on arguments
-      const argsLocationExtends = computeLocationExtends(comparisonFn);
+      const argsLocationExtends = this.computeLocationExtends(comparisonFn);
       comparisonFn.location = argsLocationExtends;
 
       return comparisonFn;
@@ -1546,7 +1590,7 @@ export class CstToAstConverter {
       const arg = this.visitOperatorExpression(ctx.operatorExpression());
       // this is a number sign thing
       const fn = this.createFunction('*', ctx, undefined, 'binary-expression');
-      fn.args.push(createFakeMultiplyLiteral(ctx, 'integer'));
+      fn.args.push(this.createFakeMultiplyLiteral(ctx, 'integer'));
       if (arg) {
         fn.args.push(arg);
       }
@@ -1568,12 +1612,27 @@ export class CstToAstConverter {
         }
       }
       // update the location of the assign based on arguments
-      const argsLocationExtends = computeLocationExtends(fn);
+      const argsLocationExtends = this.computeLocationExtends(fn);
       fn.location = argsLocationExtends;
       return fn;
     } else if (ctx instanceof cst.OperatorExpressionDefaultContext) {
       return this.visitPrimaryExpression(ctx.primaryExpression());
     }
+  }
+
+  private createFakeMultiplyLiteral(
+    ctx: ArithmeticUnaryContext,
+    literalType: ast.ESQLNumericLiteralType
+  ): ast.ESQLLiteral {
+    return {
+      type: 'literal',
+      literalType,
+      text: ctx.getText(),
+      name: ctx.getText(),
+      value: ctx.PLUS() ? 1 : -1,
+      location: getPosition(ctx.start, ctx.stop),
+      incomplete: Boolean(ctx.exception),
+    };
   }
 
   private getBooleanValue(ctx: cst.BooleanLiteralContext | cst.BooleanValueContext) {
@@ -1588,14 +1647,14 @@ export class CstToAstConverter {
     if (ctx instanceof cst.ConstantDefaultContext) {
       return this.fromConstant(ctx.constant());
     } else if (ctx instanceof cst.DereferenceContext) {
-      return this.createColumn(ctx.qualifiedName());
+      return this.toColumn(ctx.qualifiedName());
     } else if (ctx instanceof cst.ParenthesizedExpressionContext) {
       return this.collectBooleanExpression(ctx.booleanExpression());
     } else if (ctx instanceof cst.FunctionContext) {
       const functionExpressionCtx = ctx.functionExpression();
       const fn = this.createFunctionCall(ctx);
       const asteriskArg = functionExpressionCtx.ASTERISK()
-        ? createColumnStar(functionExpressionCtx.ASTERISK()!)
+        ? this.toColumnStar(functionExpressionCtx.ASTERISK()!)
         : undefined;
       if (asteriskArg) {
         fn.args.push(asteriskArg);
@@ -1731,7 +1790,7 @@ export class CstToAstConverter {
   private visitMatchBooleanExpression(
     ctx: cst.MatchBooleanExpressionContext
   ): ESQLAstMatchBooleanExpression {
-    let expression: ESQLAstMatchBooleanExpression = this.createColumn(ctx.qualifiedName());
+    let expression: ESQLAstMatchBooleanExpression = this.toColumn(ctx.qualifiedName());
     const dataTypeCtx = ctx.dataType();
     const constantCtx = ctx.constant();
 
@@ -1751,7 +1810,7 @@ export class CstToAstConverter {
     if (constantCtx) {
       const constantExpression = this.fromConstant(constantCtx);
 
-      expression = createBinaryExpression(':', ctx, [expression, constantExpression]);
+      expression = this.createBinaryExpression(':', ctx, [expression, constantExpression]);
     }
 
     return expression;
@@ -1870,7 +1929,7 @@ export class CstToAstConverter {
 
   // ----------------------------------------------------- expression: "column"
 
-  private createColumn(ctx: antlr.ParserRuleContext): ast.ESQLColumn {
+  private toColumn(ctx: antlr.ParserRuleContext): ast.ESQLColumn {
     const args: ast.ESQLColumn['args'] = [];
 
     if (ctx instanceof cst.QualifiedNamePatternContext) {
@@ -1926,6 +1985,24 @@ export class CstToAstConverter {
     column.quoted = hasQuotes;
 
     return column;
+  }
+
+  private toColumnStar(ctx: antlr.TerminalNode): ast.ESQLColumn {
+    const text = ctx.getText();
+    const parserFields = {
+      text,
+      location: getPosition(ctx.symbol),
+      incomplete: ctx.getText() === '',
+      quoted: false,
+    };
+    const node = Builder.expression.column(
+      { args: [Builder.identifier({ name: '*' }, parserFields)] },
+      parserFields
+    );
+
+    node.name = text;
+
+    return node;
   }
 
   private getQuotedText(ctx: antlr.ParserRuleContext) {
@@ -1985,6 +2062,25 @@ export class CstToAstConverter {
     if (subtype) {
       node.subtype = subtype;
     }
+    return node;
+  }
+
+  private createBinaryExpression(
+    operator: ast.BinaryExpressionOperator,
+    ctx: antlr.ParserRuleContext,
+    args: ast.ESQLBinaryExpression['args']
+  ): ast.ESQLBinaryExpression {
+    const node = Builder.expression.func.binary(
+      operator,
+      args,
+      {},
+      {
+        text: ctx.getText(),
+        location: getPosition(ctx.start, ctx.stop),
+        incomplete: Boolean(ctx.exception),
+      }
+    ) as ast.ESQLBinaryExpression;
+
     return node;
   }
 
