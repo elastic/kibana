@@ -46,7 +46,7 @@ To check for security updates, go to [Security announcements for the Elastic sta
 
 **Discover**:
 * Makes expiration badges singular and plural [#227035]({{kib-pull}}227035).
-* Fixes a bug that prevented fields with invalid inputs from being highlighted the in Data View flyout [#226822]({{kib-pull}}226822).
+* Fixes a bug that prevented fields with invalid inputs from being highlighted in the Data View flyout [#226822]({{kib-pull}}226822).
 
 **Elastic Observability solution**:
 For the Elastic Observability 9.0.4 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
