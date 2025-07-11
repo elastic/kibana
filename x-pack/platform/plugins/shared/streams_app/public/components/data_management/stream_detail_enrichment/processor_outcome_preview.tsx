@@ -444,7 +444,12 @@ const OutcomePreviewTable = () => {
         }
       />
       <DocViewerContext.Provider value={docViewerContext}>
-        <PreviewFlyout currentDoc={currentDoc} hits={hits} setExpandedDoc={setExpandedDoc} />
+        <PreviewFlyout
+          currentDoc={currentDoc}
+          hits={hits}
+          setExpandedDoc={setExpandedDoc}
+          docViewsRegistry={docViewsRegistry}
+        />
       </DocViewerContext.Provider>
     </>
   );

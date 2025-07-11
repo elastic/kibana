@@ -11,6 +11,7 @@ import {
   RepositorySupertestClient,
   getAdminApiClient,
   getCustomRoleApiClient,
+  getEditorApiClient,
 } from '../../../../common/utils/server_route_repository/create_admin_service_from_repository';
 
 export type StreamsSupertestRepositoryClient = RepositorySupertestClient<StreamsRouteRepository>;
@@ -19,6 +20,12 @@ export async function createStreamsRepositoryAdminClient(
   st: ReturnType<typeof RoleScopedSupertestProvider>
 ): Promise<StreamsSupertestRepositoryClient> {
   return getAdminApiClient<StreamsRouteRepository>(st);
+}
+
+export async function createStreamsRepositoryEditorClient(
+  st: ReturnType<typeof RoleScopedSupertestProvider>
+): Promise<StreamsSupertestRepositoryClient> {
+  return getEditorApiClient<StreamsRouteRepository>(st);
 }
 
 export async function createStreamsRepositoryCustomRoleClient(
