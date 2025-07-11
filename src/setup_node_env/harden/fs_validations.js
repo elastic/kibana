@@ -25,8 +25,8 @@ const allowedMimeTypes = [
   'image/png',
 ];
 
-// Arbitrary maximum file size in bytes: 100MB
-const MAX_FILE_SIZE = 100 * 1024 * 1024;
+// Arbitrary maximum file size in bytes: 1GB
+const MAX_FILE_SIZE = 1024 * 1024 * 1024;
 
 let magicBytes = require('magic-bytes.js');
 
