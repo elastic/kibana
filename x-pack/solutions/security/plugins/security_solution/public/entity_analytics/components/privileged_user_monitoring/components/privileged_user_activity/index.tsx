@@ -114,10 +114,7 @@ export const UserActivityPrivilegedUsersPanel: React.FC<{
         hideSubtitle
       >
         {generateTableQuery && discoverUrl && (
-          <LinkAnchor
-            href={discoverUrl}
-            title={hasUrlError ? 'Query could not be pre-filled due to encoding error' : undefined}
-          >
+          <LinkAnchor href={discoverUrl}>
             <FormattedMessage
               id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.userActivity.linkDescription"
               defaultMessage={
