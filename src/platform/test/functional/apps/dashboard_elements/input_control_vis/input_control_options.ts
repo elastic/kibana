@@ -82,6 +82,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should replace existing filter pill(s) when new item is selected', async () => {
         await comboBox.clear('listControlSelect0');
+        await common.sleep(500); // give time for filter to be removed and event handlers to fire
         await comboBox.set('listControlSelect0', 'osx');
         await visEditor.inputControlSubmit();
         await common.sleep(1000);
