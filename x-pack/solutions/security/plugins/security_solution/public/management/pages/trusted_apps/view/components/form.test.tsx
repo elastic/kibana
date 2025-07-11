@@ -170,7 +170,6 @@ describe('Trusted apps form', () => {
       },
     ]);
 
-
     formProps = {
       item: latestUpdatedItem,
       mode: 'create',
@@ -191,7 +190,7 @@ describe('Trusted apps form', () => {
     const message = 'oh oh - failed';
     formProps.error = new Error(message) as IHttpFetchError;
     render();
-    
+
     expect(renderResult.getByTestId(`${formPrefix}-submitError`).textContent).toMatch(message);
   });
 
