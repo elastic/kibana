@@ -122,6 +122,7 @@ describe('getCasesTelemetryData', () => {
             },
           ],
         },
+        withIncrementalId: { value: 1 },
       };
 
       const attachmentFramework: AttachmentFrameworkAggsResult = {
@@ -368,6 +369,8 @@ describe('getCasesTelemetryData', () => {
             totalWithAtLeastOne: 0,
           },
           ...attachmentFramework(allAttachmentsTotal, allAttachmentsAverage),
+          withIncrementalId: 1,
+          withoutIncrementalId: 4,
         },
         main: {
           assignees: {
@@ -662,6 +665,11 @@ describe('getCasesTelemetryData', () => {
             "users": Object {
               "cardinality": Object {
                 "field": "cases.attributes.created_by.username",
+              },
+            },
+            "withIncrementalId": Object {
+              "cardinality": Object {
+                "field": "cases.attributes.incremental_id",
               },
             },
           },
