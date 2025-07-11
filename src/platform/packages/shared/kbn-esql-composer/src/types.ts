@@ -49,8 +49,7 @@ export type Params<TQuery extends string = string> = NamedParameter<TQuery> | Fi
 
 export interface QueryPipeline {
   pipe: (...args: QueryOperator[]) => QueryPipeline;
-  asRequest: () => QueryRequest;
-  asString: () => string;
+  asQuery: () => string;
 }
 export interface Query {
   root: ESQLAstQueryExpression;

@@ -62,6 +62,18 @@ export interface BasicPrettyPrinterOptions {
    * Whether to lowercase keywords. Defaults to `false`.
    */
   lowercaseKeywords?: boolean;
+
+  /**
+   * Parameter substitutions to use when printing the query. This is used
+   * to replace parameter literals in the query with their actual values.
+   * The keys in this object should match the parameter names used in the query.
+   * If a parameter is not found in this object, it will be printed as a literal
+   * value (e.g., `?paramName` will be replaced with the value from this object).
+   * If a parameter is not provided, it will be printed as a positional parameter
+   * (e.g., `?0`, `?1`, etc.).
+   * If `undefined`, no parameter substitutions will be made.
+   */
+  parameterSubstitutions?: Record<string, unknown>;
 }
 
 export type BasicPrettyPrinterMultilineOptions = Omit<BasicPrettyPrinterOptions, 'multiline'>;
@@ -73,10 +85,9 @@ export class BasicPrettyPrinter {
    */
   public static readonly print = (
     query: ESQLAstQueryExpression,
-    opts?: BasicPrettyPrinterOptions,
-    parameters?: Array<Record<string, FieldValue> | FieldValue>
+    opts?: BasicPrettyPrinterOptions
   ): string => {
-    const printer = new BasicPrettyPrinter(opts, parameters);
+    const printer = new BasicPrettyPrinter(opts);
     return printer.print(query);
   };
 
@@ -121,14 +132,10 @@ export class BasicPrettyPrinter {
   };
 
   protected readonly opts: Required<BasicPrettyPrinterOptions>;
-  protected readonly positionalParameters: FieldValue[] = [];
-  protected readonly namedParameters: Record<string, FieldValue> = {};
+
   protected positionalParameterIndex: number = 0;
 
-  constructor(
-    opts: BasicPrettyPrinterOptions = {},
-    parameters?: Array<Record<string, FieldValue> | FieldValue>
-  ) {
+  constructor(opts: BasicPrettyPrinterOptions = {}) {
     this.opts = {
       pipeTab: opts.pipeTab ?? '  ',
       multiline: opts.multiline ?? false,
@@ -137,15 +144,8 @@ export class BasicPrettyPrinter {
       lowercaseOptions: opts.lowercaseOptions ?? opts.lowercase ?? false,
       lowercaseFunctions: opts.lowercaseFunctions ?? opts.lowercase ?? false,
       lowercaseKeywords: opts.lowercaseKeywords ?? opts.lowercase ?? false,
+      parameterSubstitutions: opts.parameterSubstitutions ?? {},
     };
-
-    for (const param of parameters ?? []) {
-      if (typeof param === 'object') {
-        Object.assign(this.namedParameters, param);
-      } else {
-        this.positionalParameters.push(param);
-      }
-    }
   }
 
   protected keyword(word: string) {
@@ -187,10 +187,10 @@ export class BasicPrettyPrinter {
     if (isColumn(node)) {
       const argParam = node.args.find((arg) => isParamLiteral(arg));
       if (argParam) {
-        formatted = this.replaceLiteralWithParameter(argParam, formatted);
+        return this.replaceLiteralWithParameter(argParam, formatted);
       }
     } else if (isLiteral(node) && isParamLiteral(node)) {
-      formatted = this.replaceLiteralWithParameter(node, formatted);
+      return this.replaceLiteralWithParameter(node, formatted);
     }
 
     return formatted;
@@ -201,17 +201,17 @@ export class BasicPrettyPrinter {
       return formatted;
     }
 
-    const resolveParamValue = (): FieldValue | undefined => {
+    const resolveParamValue = () => {
       switch (node.paramType) {
         case 'named':
         case 'positional':
-          return this.namedParameters[node.value];
+          return this.opts.parameterSubstitutions[node.value];
         default:
-          return this.positionalParameters[this.positionalParameterIndex++];
+          return this.opts.parameterSubstitutions[this.positionalParameterIndex++];
       }
     };
 
-    const buildLiteral = (value?: FieldValue) => {
+    const buildLiteral = (value?: unknown) => {
       if (value === null) {
         return Builder.expression.literal.nil();
       }
@@ -229,11 +229,18 @@ export class BasicPrettyPrinter {
 
     const value = resolveParamValue();
 
-    return value === undefined
-      ? formatted
-      : node.paramKind === '?'
+    if (!value) {
+      return formatted;
+    }
+
+    return node.paramKind === '?'
       ? LeafPrinter.literal(buildLiteral(value))
-      : LeafPrinter.identifier(Builder.identifier(String(value)));
+      : `${[
+          ...formatted
+            .split('.')
+            .slice(0, -1)
+            .concat(LeafPrinter.identifier(Builder.identifier(String(value)))),
+        ].join('.')}`;
   }
 
   protected simplifyMultiplicationByOne(

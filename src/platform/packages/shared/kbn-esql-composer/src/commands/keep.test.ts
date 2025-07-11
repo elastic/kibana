@@ -14,15 +14,15 @@ describe('keep', () => {
   const source = from('logs-*');
   it('should build KEEP from single strings', () => {
     const pipeline = source.pipe(keep('log.level', 'service.name'));
-    const queryRequest = pipeline.asRequest();
+    const queryRequest = pipeline.asQuery();
 
-    expect(queryRequest.query).toEqual('FROM logs-*\n  | KEEP log.level, service.name');
+    expect(queryRequest).toEqual('FROM logs-*\n  | KEEP log.level, service.name');
   });
 
   it('should build KEEP from array of strings', () => {
     const pipeline = source.pipe(keep(['log.level', 'service.name']));
-    const queryRequest = pipeline.asRequest();
+    const queryRequest = pipeline.asQuery();
 
-    expect(queryRequest.query).toEqual('FROM logs-*\n  | KEEP log.level, service.name');
+    expect(queryRequest).toEqual('FROM logs-*\n  | KEEP log.level, service.name');
   });
 });

@@ -24,7 +24,7 @@ describe('composer', () => {
       sort('avg_duration', { '@timestamp': SortOrder.Desc })
     );
 
-    expect(pipeline.asString()).toEqual(
+    expect(pipeline.asQuery()).toEqual(
       'FROM logs-*\n  | WHERE @timestamp <= NOW() AND @timestamp > NOW() - 24 hours\n  | STATS avg_duration = AVG(transaction.duration.us) BY service.name\n  | KEEP @timestamp, avg_duration, service.name\n  | SORT avg_duration ASC, @timestamp DESC'
     );
   });

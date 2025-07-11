@@ -7,33 +7,43 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isObject, once } from 'lodash';
 import { mutate, BasicPrettyPrinter, Builder } from '@kbn/esql-ast';
-import { Query, QueryPipeline, QueryRequest, Params } from './types';
+import { Query, QueryPipeline, FieldValue } from './types';
 
 export function createPipeline(source: Query): QueryPipeline {
-  const flattenParams = (): Params[] => {
-    return source.params.flatMap<Params>((param) =>
-      isObject(param) ? Object.entries(param).map(([key, value]) => ({ [key]: value })) : param
-    );
+  const getParametersMap = (): Record<string, FieldValue> => {
+    const { params } = source;
+    const parameterMap: Record<string, FieldValue> = {};
+
+    const list = Array.isArray(params) ? params : [params];
+    for (const param of list) {
+      if (typeof param === 'object' && param !== null) {
+        for (const [key, value] of Object.entries(param)) {
+          parameterMap[key] = value as FieldValue;
+        }
+      } else {
+        const index = Object.keys(parameterMap).length;
+        parameterMap[String(index)] = param;
+      }
+    }
+
+    return parameterMap;
   };
 
-  const buildQueryNode = once(() => {
+  const buildQueryNode = () => {
     const { root, commands } = source;
     const rootCopy = Builder.expression.query([...root.commands]);
     for (const command of commands) {
       mutate.generic.commands.append(rootCopy, command);
     }
     return rootCopy;
-  });
+  };
 
-  const asRequest = (): QueryRequest => ({
-    query: BasicPrettyPrinter.print(buildQueryNode(), { multiline: true }),
-    params: flattenParams(),
-  });
-
-  const asString = (): string => {
-    return BasicPrettyPrinter.print(buildQueryNode(), { multiline: true }, flattenParams());
+  const asQuery = (): string => {
+    return BasicPrettyPrinter.print(buildQueryNode(), {
+      multiline: true,
+      parameterSubstitutions: getParametersMap(),
+    });
   };
 
   const pipe = (...operators: Array<(query: Query) => Query>): QueryPipeline => {
@@ -43,7 +53,6 @@ export function createPipeline(source: Query): QueryPipeline {
 
   return {
     pipe,
-    asRequest,
-    asString,
+    asQuery,
   };
 }

@@ -12,9 +12,9 @@ import { ESQLFunction, ESQLMap } from '../../types';
 import { Walker } from '../../walker';
 import { BasicPrettyPrinter, BasicPrettyPrinterMultilineOptions } from '../basic_pretty_printer';
 
-const reprint = (src: string, parameters?: Array<Record<string, any> | any>) => {
+const reprint = (src: string, parameters?: Record<string, any>) => {
   const { root } = parse(src);
-  const text = BasicPrettyPrinter.print(root, undefined, parameters);
+  const text = BasicPrettyPrinter.print(root, { parameterSubstitutions: parameters });
 
   // console.log(JSON.stringify(root, null, 2));
 
@@ -74,13 +74,19 @@ describe('single line query', () => {
         expect(text).toBe('FROM a | SORT b DESC NULLS FIRST');
       });
       test('replace parameter bindings', () => {
-        const { text } = reprint('FROM a | SORT ??fieldName DESC NULLS FIRST', [
-          {
-            fieldName: 'b',
-          },
-        ]);
+        const { text } = reprint('FROM a | SORT ??fieldName DESC NULLS FIRST', {
+          fieldName: 'b',
+        });
 
         expect(text).toBe('FROM a | SORT b DESC NULLS FIRST');
+      });
+
+      test('replace parameter bindings with nested columns', () => {
+        const { text } = reprint('FROM a | SORT nested.column.??fieldName DESC NULLS FIRST', {
+          fieldName: 'b',
+        });
+
+        expect(text).toBe('FROM a | SORT nested.column.b DESC NULLS FIRST');
       });
     });
 
@@ -107,12 +113,10 @@ describe('single line query', () => {
       });
 
       test('replace parameter bindings', () => {
-        const { text } = reprint('FROM a | STATS a(??field1), b(??field2) by asdf', [
-          {
-            field1: 1,
-            field2: 2,
-          },
-        ]);
+        const { text } = reprint('FROM a | STATS a(??field1), b(??field2) by asdf', {
+          field1: 1,
+          field2: 2,
+        });
 
         expect(text).toBe('FROM a | STATS A(`1`), B(`2`) BY asdf');
       });
@@ -562,12 +566,10 @@ describe('single line query', () => {
         });
 
         test('replace named parameter bindings for complex WHERE binary-expression', () => {
-          const { text } = reprint('FROM a | STATS a = agg(123) WHERE b == ?b, d == ?d', [
-            {
-              b: 1,
-              d: '123',
-            },
-          ]);
+          const { text } = reprint('FROM a | STATS a = agg(123) WHERE b == ?b, d == ?d', {
+            b: 1,
+            d: '123',
+          });
 
           expect(text).toBe('FROM a | STATS a = AGG(123) WHERE b == 1, d == "123"');
         });
