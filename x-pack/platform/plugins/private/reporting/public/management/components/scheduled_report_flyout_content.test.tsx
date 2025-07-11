@@ -141,6 +141,10 @@ const mockKibanaServices = {
     getCurrent: jest.fn().mockResolvedValue({ user: { email: TEST_EMAIL } }),
   },
 };
+const defaultTimezone = moment.tz.guess();
+const timezoneSpy = jest
+  .spyOn(useDefaultTimezoneModule, 'useDefaultTimezone')
+  .mockReturnValue({ defaultTimezone, isBrowser: true });
 
 describe('ScheduledReportFlyoutContent', () => {
   beforeEach(() => {
@@ -383,12 +387,8 @@ describe('ScheduledReportFlyoutContent', () => {
   });
 
   it('should use default values for startDate and timezone if not provided', async () => {
-    const defaultTimezone = moment.tz.guess();
     const systemTime = moment('2025-07-01');
     jest.useFakeTimers().setSystemTime(systemTime.toDate());
-    const timezoneSpy = jest
-      .spyOn(useDefaultTimezoneModule, 'useDefaultTimezone')
-      .mockReturnValue({ defaultTimezone, isBrowser: true });
 
     render(
       <TestProviders>
@@ -416,12 +416,8 @@ describe('ScheduledReportFlyoutContent', () => {
   });
 
   it('should show a validation error if startDate is in the past', async () => {
-    const defaultTimezone = moment.tz.guess();
     const systemTime = moment('2025-07-02');
     jest.useFakeTimers().setSystemTime(systemTime.toDate());
-    const timezoneSpy = jest
-      .spyOn(useDefaultTimezoneModule, 'useDefaultTimezone')
-      .mockReturnValue({ defaultTimezone, isBrowser: true });
 
     render(
       <TestProviders>
