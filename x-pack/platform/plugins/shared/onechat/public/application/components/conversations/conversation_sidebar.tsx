@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-import { OnechatConversationsView } from '../components/conversations/conversations_view';
 
-export const OnechatConversationsPage: React.FC = () => {
-  return <OnechatConversationsView />;
+export const ConversationSidebar: React.FC<{}> = () => {
+  return <div>{/* Sidebar content goes here */}</div>;
 };
