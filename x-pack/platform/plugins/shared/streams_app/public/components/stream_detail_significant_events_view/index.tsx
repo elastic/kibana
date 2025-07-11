@@ -150,7 +150,7 @@ export function StreamDetailSignificantEventsView({
 
   const generateFlyout = isGenerateFlyoutOpen ? (
     <GenerateSignificantEventFlyout
-      name={definition.stream.name}
+      definition={definition.stream}
       onClose={() => setIsGenerateFlyoutOpen(false)}
       onSubmit={async (selected) => {
         await bulk?.(selected.map((s) => ({ index: s }))).then(

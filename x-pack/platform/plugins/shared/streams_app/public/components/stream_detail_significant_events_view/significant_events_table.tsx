@@ -69,7 +69,7 @@ export function SignificantEventsTable({
       render: (_, record) => (
         <EuiLink
           target="_blank"
-          href={discover?.locator?.getRedirectUrl(buildDiscoverParams(record, definition))}
+          href={discover?.locator?.getRedirectUrl(buildDiscoverParams(record.query, definition))}
         >
           {record.query.title}
         </EuiLink>

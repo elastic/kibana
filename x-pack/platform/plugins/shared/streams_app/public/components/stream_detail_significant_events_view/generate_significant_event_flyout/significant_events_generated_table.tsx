@@ -8,28 +8,47 @@
 import {
   EuiBasicTable,
   EuiCodeBlock,
+  EuiLink,
   type EuiBasicTableColumn,
   type EuiTableSelectionType,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { StreamQueryKql } from '@kbn/streams-schema';
+import type { StreamQueryKql, Streams } from '@kbn/streams-schema';
 import React from 'react';
+import { useKibana } from '../../../hooks/use_kibana';
+import { buildDiscoverParams } from '../utils/discover_helpers';
 
 export function SignificantEventsGeneratedTable({
   generatedQueries,
   selectedQueries,
   onSelectionChange,
+  definition,
 }: {
   generatedQueries: StreamQueryKql[];
   selectedQueries: StreamQueryKql[];
   onSelectionChange: (selectedItems: StreamQueryKql[]) => void;
+  definition: Streams.all.Definition;
 }) {
+  const {
+    dependencies: {
+      start: { discover },
+    },
+  } = useKibana();
+
   const columns: Array<EuiBasicTableColumn<StreamQueryKql>> = [
     {
       field: 'title',
       name: i18n.translate('xpack.streams.streamDetailView.generateSignificantEvents.titleColumn', {
         defaultMessage: 'Title',
       }),
+      render: (_, query) => (
+        <EuiLink
+          target="_blank"
+          href={discover?.locator?.getRedirectUrl(buildDiscoverParams(query, definition))}
+        >
+          {query.title}
+        </EuiLink>
+      ),
     },
     {
       field: 'kql',

@@ -5,21 +5,17 @@
  * 2.0.
  */
 
+import { Streams, getIndexPatternsForStream, type StreamQueryKql } from '@kbn/streams-schema';
 import { v4 } from 'uuid';
-import { Streams, getIndexPatternsForStream } from '@kbn/streams-schema';
-import { SignificantEventItem } from '../../../hooks/use_fetch_significant_events';
 
-export function buildDiscoverParams(
-  significantEvent: SignificantEventItem,
-  definition: Streams.all.Definition
-) {
+export function buildDiscoverParams(query: StreamQueryKql, definition: Streams.all.Definition) {
   return {
     timeRange: {
       from: 'now-7d',
       to: 'now',
     },
     query: {
-      query: significantEvent.query.kql.query,
+      query: query.kql.query,
       language: 'kuery',
     },
     dataViewSpec: {

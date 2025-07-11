@@ -16,6 +16,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { StreamQueryKql } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import React, { useState } from 'react';
 import { v4 } from 'uuid';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -26,7 +27,7 @@ import { useAIFeatures } from './use_ai_features';
 interface GenerateSignificantEventFlyoutProps {
   onClose?: () => void;
   onSubmit: (selected: StreamQueryKql[]) => Promise<void>;
-  name: string;
+  definition: Streams.all.Definition;
 }
 
 export function GenerateSignificantEventFlyout(props: GenerateSignificantEventFlyoutProps) {
@@ -42,7 +43,7 @@ function SignificantEventFlyoutContents(props: GenerateSignificantEventFlyoutPro
     core: { notifications },
   } = useKibana();
   const { enabled: aiEnabled, selectedConnector } = useAIFeatures();
-  const { generate } = useSignificantEventsApi({ name: props.name });
+  const { generate } = useSignificantEventsApi({ name: props.definition.name });
 
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedQueries, setGeneratedQueries] = useState<StreamQueryKql[]>([]);
@@ -124,6 +125,7 @@ function SignificantEventFlyoutContents(props: GenerateSignificantEventFlyoutPro
             generatedQueries={generatedQueries}
             selectedQueries={selectedQueries}
             onSelectionChange={onSelectionChange}
+            definition={props.definition}
           />
         </EuiFlexGroup>
       </EuiFlyoutBody>
