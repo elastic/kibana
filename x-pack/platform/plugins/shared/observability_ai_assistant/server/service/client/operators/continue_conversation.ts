@@ -7,13 +7,14 @@
 
 import { Logger } from '@kbn/logging';
 import { decode, encode } from 'gpt-tokenizer';
-import { last, pick, take } from 'lodash';
+import { last, omit, pick, take } from 'lodash';
 import {
   catchError,
   concat,
   EMPTY,
   from,
   isObservable,
+  map,
   Observable,
   of,
   OperatorFunction,
@@ -23,7 +24,14 @@ import {
 } from 'rxjs';
 import { withExecuteToolSpan } from '@kbn/inference-tracing';
 import { CONTEXT_FUNCTION_NAME } from '../../../functions/context/context';
-import { createFunctionNotFoundError, Message, MessageRole } from '../../../../common';
+import {
+  CompatibleJSONSchema,
+  createFunctionNotFoundError,
+  Message,
+  MessageAddEvent,
+  MessageRole,
+  StreamingChatResponseEventType,
+} from '../../../../common';
 import {
   createFunctionLimitExceededError,
   MessageOrChatEvent,
@@ -38,6 +46,8 @@ import { catchFunctionNotFoundError } from './catch_function_not_found_error';
 import { extractMessages } from './extract_messages';
 
 const MAX_FUNCTION_RESPONSE_TOKEN_COUNT = 4000;
+
+const EXIT_LOOP_FUNCTION_NAME = 'exit_loop';
 
 function executeFunctionAndCatchError({
   name,
@@ -123,17 +133,42 @@ function executeFunctionAndCatchError({
   );
 }
 
-function getFunctionDefinitions({
+function getFunctionOptions({
   functionClient,
-  functionLimitExceeded,
   disableFunctions,
+  functionLimitExceeded,
 }: {
   functionClient: ChatFunctionClient;
-  functionLimitExceeded: boolean;
   disableFunctions: boolean;
-}) {
-  if (functionLimitExceeded || disableFunctions === true) {
-    return [];
+  functionLimitExceeded: boolean;
+}): {
+  functions?: Array<{ name: string; description: string; parameters?: CompatibleJSONSchema }>;
+  functionCall?: string;
+} {
+  if (disableFunctions === true) {
+    return {};
+  }
+
+  if (functionLimitExceeded) {
+    return {
+      functionCall: EXIT_LOOP_FUNCTION_NAME,
+      functions: [
+        {
+          name: EXIT_LOOP_FUNCTION_NAME,
+          description: `You've run out of tool calls. Call this tool, and explain to the user you've run out of budget.`,
+          parameters: {
+            type: 'object',
+            properties: {
+              response: {
+                type: 'string',
+                description: 'Your textual response',
+              },
+            },
+            required: ['response'],
+          },
+        },
+      ],
+    };
   }
 
   const systemFunctions = functionClient
@@ -147,7 +182,7 @@ function getFunctionDefinitions({
     .concat(actions)
     .map((definition) => pick(definition, 'name', 'description', 'parameters'));
 
-  return allDefinitions;
+  return { functions: allDefinitions };
 }
 
 export function continueConversation({
@@ -179,13 +214,14 @@ export function continueConversation({
 
   const functionLimitExceeded = functionCallsLeft <= 0;
 
-  const functionDefinitions = getFunctionDefinitions({
-    functionLimitExceeded,
+  const functionOptions = getFunctionOptions({
     functionClient,
     disableFunctions,
+    functionLimitExceeded,
   });
 
   const lastMessage = last(initialMessages)?.message;
+
   const isUserMessage = lastMessage?.role === MessageRole.User;
 
   return executeNextStep().pipe(handleEvents());
@@ -199,9 +235,9 @@ export function continueConversation({
 
       return chat(operationName, {
         messages: initialMessages,
-        functions: functionDefinitions,
         connectorId,
         stream: true,
+        ...functionOptions,
       }).pipe(emitWithConcatenatedMessage(), catchFunctionNotFoundError(functionLimitExceeded));
     }
 
@@ -282,7 +318,32 @@ export function continueConversation({
 
   function handleEvents(): OperatorFunction<MessageOrChatEvent, MessageOrChatEvent> {
     return (events$) => {
-      const shared$ = events$.pipe(shareReplay());
+      const shared$ = events$.pipe(
+        shareReplay(),
+        map((event) => {
+          if (event.type === StreamingChatResponseEventType.MessageAdd) {
+            const message = event.message;
+
+            if (message.message.function_call?.name === EXIT_LOOP_FUNCTION_NAME) {
+              const args = JSON.parse(message.message.function_call.arguments ?? '{}') as {
+                response: string;
+              };
+
+              return {
+                ...event,
+                message: {
+                  ...message,
+                  message: {
+                    ...omit(message.message, 'function_call', 'content'),
+                    content: args.response ?? `The model returned an empty response`,
+                  },
+                },
+              } satisfies MessageAddEvent;
+            }
+          }
+          return event;
+        })
+      );
 
       return concat(
         shared$,
