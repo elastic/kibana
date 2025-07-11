@@ -115,18 +115,6 @@ export const createInlineCast = (ctx: InlineCastContext, value: ESQLInlineCast['
     createParserFields(ctx)
   );
 
-export const createList = (ctx: ParserRuleContext, values: ESQLLiteral[]): ESQLList =>
-  Builder.expression.list.literal({ values }, createParserFields(ctx));
-
-export const createNumericLiteral = (
-  ctx: DecimalValueContext | IntegerValueContext,
-  literalType: ESQLNumericLiteralType
-): ESQLLiteral =>
-  Builder.expression.literal.numeric(
-    { value: Number(ctx.getText()), literalType },
-    createParserFields(ctx)
-  );
-
 export function createFakeMultiplyLiteral(
   ctx: ArithmeticUnaryContext,
   literalType: ESQLNumericLiteralType

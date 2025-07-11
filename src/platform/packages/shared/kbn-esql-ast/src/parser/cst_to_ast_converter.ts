@@ -27,9 +27,7 @@ import {
   createFakeMultiplyLiteral,
   createFunctionCall,
   createInlineCast,
-  createList,
   createLiteral,
-  createNumericLiteral,
   createParam,
 } from './factories';
 import { getPosition } from './helpers';
@@ -1775,9 +1773,9 @@ export class CstToAstConverter {
     } else if (ctx instanceof cst.QualifiedIntegerLiteralContext) {
       return this.fromQualifiedIntegerLiteral(ctx);
     } else if (ctx instanceof cst.DecimalLiteralContext) {
-      return createNumericLiteral(ctx.decimalValue(), 'double');
+      return this.toNumericLiteral(ctx.decimalValue(), 'double');
     } else if (ctx instanceof cst.IntegerLiteralContext) {
-      return createNumericLiteral(ctx.integerValue(), 'integer');
+      return this.toNumericLiteral(ctx.integerValue(), 'integer');
     } else if (ctx instanceof cst.BooleanLiteralContext) {
       return this.getBooleanValue(ctx);
     } else if (ctx instanceof cst.StringLiteralContext) {
@@ -1802,6 +1800,18 @@ export class CstToAstConverter {
     return this.fromParserRuleToUnknown(ctx);
   }
 
+  // ------------------------------------------- constant expression: "literal"
+
+  private toNumericLiteral<Type extends ast.ESQLNumericLiteralType>(
+    ctx: cst.DecimalValueContext | cst.IntegerValueContext,
+    literalType: Type
+  ): Type extends 'double' ? ast.ESQLDecimalLiteral : ast.ESQLIntegerLiteral {
+    return Builder.expression.literal.numeric(
+      { value: Number(ctx.getText()), literalType },
+      this.createParserFields(ctx)
+    ) as Type extends 'double' ? ast.ESQLDecimalLiteral : ast.ESQLIntegerLiteral;
+  }
+
   // ---------------------------------------------- constant expression: "list"
 
   private toList(
@@ -1816,7 +1826,7 @@ export class CstToAstConverter {
       const isDecimal =
         numericValue.decimalValue() !== null && numericValue.decimalValue() !== undefined;
       const value = numericValue.decimalValue() || numericValue.integerValue();
-      values.push(createNumericLiteral(value!, isDecimal ? 'double' : 'integer'));
+      values.push(this.toNumericLiteral(value!, isDecimal ? 'double' : 'integer'));
     }
     for (const booleanValue of ctx.getTypedRuleContexts(cst.BooleanValueContext)) {
       values.push(this.getBooleanValue(booleanValue)!);
@@ -1827,7 +1837,7 @@ export class CstToAstConverter {
       values.push(literal);
     }
 
-    return createList(ctx, values);
+    return Builder.expression.list.literal({ values }, this.createParserFields(ctx));
   }
 
   // -------------------------------------- constant expression: "timeInterval"
