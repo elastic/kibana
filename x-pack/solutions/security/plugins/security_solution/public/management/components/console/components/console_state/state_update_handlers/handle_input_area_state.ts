@@ -8,7 +8,10 @@
 import { i18n } from '@kbn/i18n';
 import { v4 as uuidV4 } from 'uuid';
 import type { ParsedCommandInterface } from '../../../service/types';
-import { parseCommandInput, detectAndPreProcessPastedCommand } from '../../../service/parsed_command_input';
+import {
+  parseCommandInput,
+  detectAndPreProcessPastedCommand,
+} from '../../../service/parsed_command_input';
 import type {
   ConsoleDataAction,
   ConsoleDataState,
@@ -116,24 +119,27 @@ export const handleInputAreaState: ConsoleStoreReducer<InputAreaStateAction> = (
         state.input.rightOfCursorText !== newRightOfCursor
       ) {
         const fullCommand = newTextEntered + newRightOfCursor;
-        
+
         // Pre-process pasted commands to handle selector arguments like --ScriptName
         const preProcessResult = detectAndPreProcessPastedCommand(fullCommand, state.commands);
-        
+
         // Use cleaned command for parsing if selector arguments were found
-        const commandToParse = preProcessResult.hasSelectorArguments 
-          ? preProcessResult.cleanedCommand 
+        const commandToParse = preProcessResult.hasSelectorArguments
+          ? preProcessResult.cleanedCommand
           : fullCommand;
-          
-        const parsedInput = parseCommandInput(commandToParse);
+
+        const parsedInput = parseCommandInput(commandToParse, state.commands);
 
         let enteredCommand: ConsoleDataState['input']['enteredCommand'] =
           state.input.enteredCommand;
 
         // Merge extracted argState from pre-processing with adjusted argState
         let finalArgState = adjustedArgState;
-        
-        if (preProcessResult.hasSelectorArguments && Object.keys(preProcessResult.extractedArgState).length > 0) {
+
+        if (
+          preProcessResult.hasSelectorArguments &&
+          Object.keys(preProcessResult.extractedArgState).length > 0
+        ) {
           finalArgState = {
             ...adjustedArgState,
             ...preProcessResult.extractedArgState,
@@ -168,6 +174,12 @@ export const handleInputAreaState: ConsoleStoreReducer<InputAreaStateAction> = (
                 }
 
                 argsWithValueSelectors[argName] = argDef;
+
+                // Clear selector argument values for clean commands (e.g., from history)
+                // This ensures specific selectors start fresh instead of showing old values - when command argument contains selectorEmptyDefaultValue set to true
+                if (parsedInput.hasArg(argName) && parsedInput.args[argName]?.includes(true)) {
+                  argState[argName] = [];
+                }
               }
             }
 
@@ -183,12 +195,10 @@ export const handleInputAreaState: ConsoleStoreReducer<InputAreaStateAction> = (
         setArgSelectorValueToParsedArgs(parsedInput, enteredCommand);
 
         // Use cleaned command text for display if pre-processing occurred
-        const displayLeftText = preProcessResult.hasSelectorArguments 
-          ? preProcessResult.cleanedCommand 
+        const displayLeftText = preProcessResult.hasSelectorArguments
+          ? preProcessResult.cleanedCommand
           : newTextEntered;
-        const displayRightText = preProcessResult.hasSelectorArguments 
-          ? '' 
-          : newRightOfCursor;
+        const displayRightText = preProcessResult.hasSelectorArguments ? '' : newRightOfCursor;
 
         return {
           ...state,

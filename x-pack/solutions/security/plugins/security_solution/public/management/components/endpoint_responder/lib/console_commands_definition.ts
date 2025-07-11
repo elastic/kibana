@@ -471,6 +471,7 @@ export const getEndpointConsoleCommands = ({
           allowMultiples: false,
           about: CONSOLE_COMMANDS.upload.args.file.about,
           mustHaveValue: 'truthy',
+          selectorEmptyDefaultValue: true,
           SelectorComponent: ArgumentFileSelector,
         },
         overwrite: {
