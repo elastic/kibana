@@ -46,6 +46,7 @@ import {
   buildFieldsDefinitionsWithMetadata,
   getFunctionSuggestions,
   getExpressionType,
+  getColumnExists,
   getFunctionDefinition,
 } from '@kbn/esql-ast/src/definitions/utils';
 import { getRecommendedQueriesSuggestionsFromStaticTemplates } from '@kbn/esql-ast/src/commands_registry/options/recommended_queries';
@@ -58,7 +59,7 @@ import {
 } from '@kbn/esql-ast/src/commands_registry/types';
 import { type ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';
 import type { EditorContext } from './types';
-import { isSourceCommand, getAllFunctions, getColumnExists } from '../shared/helpers';
+import { isSourceCommand, getAllFunctions } from '../shared/helpers';
 import {
   collectUserDefinedColumns,
   excludeUserDefinedColumnsFromCurrentCommand,
