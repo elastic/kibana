@@ -74,7 +74,11 @@ Object {
   "dynamic": "strict",
   "properties": Object {
     "accessControl": Object {
+<<<<<<< HEAD
       "dynamic": false,
+=======
+      "dynamic": "false",
+>>>>>>> 05c241b6757 ([Read only dashboards] Root level mapping for access control (#224837))
       "properties": Object {
         "owner": Object {
           "type": "keyword",
