@@ -53,7 +53,7 @@ export function RuleUpgradeTestProviders({ children }: PropsWithChildren<{}>): J
     logger: {
       log: jest.fn(),
       warn: jest.fn(),
-      error: () => { },
+      error: () => {},
     },
   });
   const store = createMockStore();
