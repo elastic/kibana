@@ -29,7 +29,7 @@ import { ComplianceScoreBar } from '../../../components/compliance_score_bar';
 import { FindingsGroupingAggregation } from './use_grouped_findings';
 import { NULL_GROUPING_MESSAGES, NULL_GROUPING_UNIT } from './constants';
 import { FINDINGS_GROUPING_COUNTER } from '../test_subjects';
-import { getGroupPanelTitle } from '../../../common/utils/get_group_panel_title';
+import { getGroupPanelTitle } from '@kbn/cloud-security-posture';
 
 export const groupPanelRenderer: GroupPanelRenderer<FindingsGroupingAggregation> = (
   selectedGroup: string,
