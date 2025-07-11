@@ -17,6 +17,7 @@ import {
   EuiResizableContainer,
   EuiSplitPanel,
   EuiText,
+  EuiTimeline,
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
@@ -244,15 +245,17 @@ const ProcessorsEditor = React.memo(() => {
           `}
         >
           <SortableList onDragItem={handlerItemDrag}>
-            {processorsRefs.map((processorRef, idx) => (
-              <DraggableProcessorListItem
-                isDragDisabled={!canReorderProcessors}
-                key={processorRef.id}
-                idx={idx}
-                processorRef={processorRef}
-                processorMetrics={simulation?.processors_metrics[processorRef.id]}
-              />
-            ))}
+            <EuiTimeline aria-label="Processors list" gutterSize="m">
+              {processorsRefs.map((processorRef, idx) => (
+                <DraggableProcessorListItem
+                  isDragDisabled={!canReorderProcessors}
+                  key={processorRef.id}
+                  idx={idx}
+                  processorRef={processorRef}
+                  processorMetrics={simulation?.processors_metrics[processorRef.id]}
+                />
+              ))}
+            </EuiTimeline>
           </SortableList>
         </EuiPanel>
       ) : (
