@@ -48,7 +48,7 @@ type OptionsListState = Pick<DefaultDataControlState, 'fieldName'> &
 
 type PublishesOptionsListState = SubjectsOf<OptionsListState>;
 type OptionsListStateSetters = Partial<SettersOf<OptionsListState>> &
-  SettersOf<Pick<OptionsListState, 'sort' | 'searchString' | 'requestSize'>>;
+  SettersOf<Pick<OptionsListState, 'sort' | 'searchString' | 'requestSize' | 'exclude'>>;
 
 export type OptionsListComponentApi = PublishesField &
   PublishesOptions &
