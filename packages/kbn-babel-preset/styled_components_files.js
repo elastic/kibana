@@ -214,7 +214,6 @@ module.exports = {
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]common[\/\\]components[\/\\]threat_match[\/\\]and_badge.test.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]common[\/\\]components[\/\\]threat_match[\/\\]and_badge.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]common[\/\\]components[\/\\]threat_match[\/\\]entry_delete_button.tsx/,
-    /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]common[\/\\]components[\/\\]threat_match[\/\\]entry_item.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]common[\/\\]components[\/\\]threat_match[\/\\]index.test.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]common[\/\\]components[\/\\]threat_match[\/\\]index.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]common[\/\\]components[\/\\]threat_match[\/\\]list_item.test.tsx/,
