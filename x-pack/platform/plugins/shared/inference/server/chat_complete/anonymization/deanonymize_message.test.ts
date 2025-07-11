@@ -21,12 +21,24 @@ import {
 import { deanonymizeMessage } from './deanonymize_message';
 import { chunkEvent, messageEvent, tokensEvent } from '../../test_utils';
 import { anonymizeMessages } from './anonymize_messages';
+import { RegexWorkerService } from './regex_worker_service';
+import { AnonymizationWorkerConfig } from '../../config';
+import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 
 function createMask(entityClass: string, value: string) {
   return `${entityClass}_${Buffer.from(value).toString('hex').slice(0, 40)}`;
 }
-
+const testConfig = {
+  enabled: false,
+} as AnonymizationWorkerConfig;
 describe('deanonymizeMessage', () => {
+  let logger: MockedLogger;
+  let regexWorker: RegexWorkerService;
+  beforeEach(() => {
+    jest.resetAllMocks();
+    logger = loggerMock.create();
+    regexWorker = new RegexWorkerService(testConfig, logger);
+  });
   it('passes through all events unchanged when there are no anonymizations', async () => {
     const events = [chunkEvent('chunk'), tokensEvent(), messageEvent('message')];
 
@@ -209,6 +221,7 @@ describe('deanonymizeMessage', () => {
     const originalContent = `try http://sub.domain.co.uk.`;
 
     const { messages: maskedMsgs, anonymizations } = await anonymizeMessages({
+      regexWorker,
       messages: [
         {
           role: MessageRole.User,
