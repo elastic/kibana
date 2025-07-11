@@ -107,7 +107,7 @@ const getTestSubj = (navNode: ChromeProjectNavigationNode, isActive = false): st
   });
 };
 
-const serializeNavNode = (
+export const serializeNavNode = (
   navNode: ChromeProjectNavigationNode,
   {
     isSideNavCollapsed,
