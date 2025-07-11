@@ -7,23 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema, Type } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
+import { controlsGroupSchema } from '@kbn/controls-schemas';
+import { refreshIntervalSchema } from '@kbn/data-service-server';
 import { createOptionsSchemas, updateOptionsSchema } from '@kbn/content-management-utils';
 import type { ContentManagementServicesDefinition as ServicesDefinition } from '@kbn/object-versioning';
-import {
-  type ControlGroupChainingSystem,
-  type ControlLabelPosition,
-  type ControlWidth,
-  CONTROL_CHAINING_OPTIONS,
-  CONTROL_LABEL_POSITION_OPTIONS,
-  CONTROL_WIDTH_OPTIONS,
-  DEFAULT_CONTROL_CHAINING,
-  DEFAULT_CONTROL_GROW,
-  DEFAULT_CONTROL_LABEL_POSITION,
-  DEFAULT_CONTROL_WIDTH,
-  DEFAULT_IGNORE_PARENT_SETTINGS,
-  DEFAULT_AUTO_APPLY_SELECTIONS,
-} from '@kbn/controls-plugin/common';
 import { FilterStateStore } from '@kbn/es-query';
 import { SortDirection } from '@kbn/data-plugin/common/search';
 import {
@@ -38,93 +26,6 @@ const apiError = schema.object({
   message: schema.string(),
   statusCode: schema.number(),
   metadata: schema.maybe(schema.object({}, { unknowns: 'allow' })),
-});
-
-// This schema should be provided by the controls plugin. Perhaps we can resolve this with the embeddable registry.
-// See https://github.com/elastic/kibana/issues/192622
-export const controlGroupInputSchema = schema.object({
-  controls: schema.arrayOf(
-    schema.object(
-      {
-        type: schema.string({ meta: { description: 'The type of the control panel.' } }),
-        controlConfig: schema.maybe(schema.recordOf(schema.string(), schema.any())),
-        id: schema.maybe(
-          schema.string({
-            meta: { description: 'The unique ID of the control.' },
-          })
-        ),
-        order: schema.number({
-          meta: {
-            description: 'The order of the control panel in the control group.',
-          },
-        }),
-        width: schema.oneOf(
-          Object.values(CONTROL_WIDTH_OPTIONS).map((value) => schema.literal(value)) as [
-            Type<ControlWidth>
-          ],
-          {
-            defaultValue: DEFAULT_CONTROL_WIDTH,
-            meta: { description: 'Minimum width of the control panel in the control group.' },
-          }
-        ),
-        grow: schema.boolean({
-          defaultValue: DEFAULT_CONTROL_GROW,
-          meta: { description: 'Expand width of the control panel to fit available space.' },
-        }),
-      },
-      { unknowns: 'allow' }
-    ),
-    {
-      defaultValue: [],
-      meta: { description: 'An array of control panels and their state in the control group.' },
-    }
-  ),
-  labelPosition: schema.oneOf(
-    Object.values(CONTROL_LABEL_POSITION_OPTIONS).map((value) => schema.literal(value)) as [
-      Type<ControlLabelPosition>
-    ],
-    {
-      defaultValue: DEFAULT_CONTROL_LABEL_POSITION,
-      meta: {
-        description: 'Position of the labels for controls. For example, "oneLine", "twoLine".',
-      },
-    }
-  ),
-  chainingSystem: schema.oneOf(
-    Object.values(CONTROL_CHAINING_OPTIONS).map((value) => schema.literal(value)) as [
-      Type<ControlGroupChainingSystem>
-    ],
-    {
-      defaultValue: DEFAULT_CONTROL_CHAINING,
-      meta: {
-        description:
-          'The chaining strategy for multiple controls. For example, "HIERARCHICAL" or "NONE".',
-      },
-    }
-  ),
-  enhancements: schema.maybe(schema.recordOf(schema.string(), schema.any())),
-  ignoreParentSettings: schema.object({
-    ignoreFilters: schema.boolean({
-      meta: { description: 'Ignore global filters in controls.' },
-      defaultValue: DEFAULT_IGNORE_PARENT_SETTINGS.ignoreFilters,
-    }),
-    ignoreQuery: schema.boolean({
-      meta: { description: 'Ignore the global query bar in controls.' },
-      defaultValue: DEFAULT_IGNORE_PARENT_SETTINGS.ignoreQuery,
-    }),
-    ignoreTimerange: schema.boolean({
-      meta: { description: 'Ignore the global time range in controls.' },
-      defaultValue: DEFAULT_IGNORE_PARENT_SETTINGS.ignoreTimerange,
-    }),
-    ignoreValidations: schema.boolean({
-      meta: { description: 'Ignore validations in controls.' },
-      defaultValue: DEFAULT_IGNORE_PARENT_SETTINGS.ignoreValidations,
-    }),
-  }),
-  autoApplySelections: schema.boolean({
-    meta: { description: 'Show apply selections button in controls.' },
-    defaultValue: DEFAULT_AUTO_APPLY_SELECTIONS,
-  }),
 });
 
 const searchSourceSchema = schema.object(
@@ -358,48 +259,10 @@ export const dashboardAttributesSchema = searchResultsAttributesSchema.extends({
   timeTo: schema.maybe(
     schema.string({ meta: { description: 'An ISO string indicating when to restore time from' } })
   ),
-  refreshInterval: schema.maybe(
-    schema.object(
-      {
-        pause: schema.boolean({
-          meta: {
-            description:
-              'Whether the refresh interval is set to be paused while viewing the dashboard.',
-          },
-        }),
-        value: schema.number({
-          meta: {
-            description: 'A numeric value indicating refresh frequency in milliseconds.',
-          },
-        }),
-        display: schema.maybe(
-          schema.string({
-            meta: {
-              description:
-                'A human-readable string indicating the refresh frequency. No longer used.',
-              deprecated: true,
-            },
-          })
-        ),
-        section: schema.maybe(
-          schema.number({
-            meta: {
-              description: 'No longer used.', // TODO what is this legacy property?
-              deprecated: true,
-            },
-          })
-        ),
-      },
-      {
-        meta: {
-          description: 'A container for various refresh interval settings',
-        },
-      }
-    )
-  ),
+  refreshInterval: schema.maybe(refreshIntervalSchema),
 
   // Dashboard Content
-  controlGroupInput: schema.maybe(controlGroupInputSchema),
+  controlGroupInput: schema.maybe(controlsGroupSchema),
   panels: schema.arrayOf(schema.oneOf([panelSchema, sectionSchema]), { defaultValue: [] }),
   options: optionsSchema,
   version: schema.maybe(schema.number({ meta: { deprecated: true } })),
