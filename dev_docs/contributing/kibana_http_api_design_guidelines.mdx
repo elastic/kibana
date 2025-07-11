@@ -155,25 +155,32 @@ GET    /api/my_domain/my_resources              # List - retrieve all resources 
 
 **Use snake case**
 
-`/api/my_api` ✅
+`/api/my_domain/my_api` ✅
 
-`/api/my-api` ❌
-`/api/myApi` ❌
+`/api/my-domain/my-api` ❌
+`/api/myDomain/myApi` ❌
 
 **Should not contain version numbers**
 
-`/api/my_api` ✅
+`/api/my_domain/my_api` ✅
 
-`/api/v1/my_api` ❌
+`/api/my_domain/my_api/v1` ❌
 
 See the section on [versioning](#versioning) for more details.
 
-**For public APIs, prefix with `/api/<domain>`**
+**Prefix public APIs with `/api/<domain>`**
 
 `/api/security/roles` ✅
 
 `/roles` ❌
 `/api/roles` ❌
+
+**Prefix internal APIs with `/internal/<domain>`**
+
+`/internal/security/roles` ✅
+
+`/roles` ❌
+`/internal/roles` ❌
 
 **Pluralize collection names**
 
