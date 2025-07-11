@@ -40,7 +40,6 @@ const createStartContract = (): Start => {
       AggregateQuerySearchBar: jest.fn().mockReturnValue(null),
       FiltersBuilderLazy: jest.fn(),
       QueryStringInput: jest.fn().mockReturnValue('QueryStringInput'),
-      withRestorableState: jest.fn(),
     },
   };
 };
