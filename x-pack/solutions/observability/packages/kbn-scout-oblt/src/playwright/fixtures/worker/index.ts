@@ -7,6 +7,3 @@
 
 export { sloDataFixture } from './slo_data';
 export type { SloDataFixture } from './slo_data';
-
-export { annotationsDataFixture } from './annotations_data';
-export type { AnnotationsDataFixture } from './annotations_data';
