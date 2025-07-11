@@ -10,11 +10,9 @@
 import React, { createContext, useContext, useReducer, useRef, useEffect, useState } from 'react';
 import {
   EuiFlyout,
-  EuiFlyoutProps,
-  EuiFlyoutSize,
   EuiFlyoutChild,
-  EuiFlyoutChildProps,
   EuiFlyoutMenu,
+  EuiFlyoutSize,
   EuiButtonIcon,
   EuiListGroup,
   EuiListGroupItem,
@@ -26,68 +24,70 @@ import {
 
 // Types definitions
 export interface FlyoutSystemConfig {
-  mainSize: EuiFlyoutSize;
+  isSystem?: boolean;
+  mainSize?: EuiFlyoutSize;
   mainTitle?: string;
   hideMainTitle?: boolean;
+  mainContent?: React.ReactNode;
+  mainFlyoutProps?: {
+    [key: string]: unknown;
+  };
   childSize?: 's' | 'm';
   childTitle?: string;
-  mainFlyoutProps?: Partial<Omit<EuiFlyoutProps, 'children'>>;
-  childFlyoutProps?: Partial<Omit<EuiFlyoutChildProps, 'children'>>;
-  isSystem?: boolean;
+  childContent?: React.ReactNode;
+  childFlyoutProps?: {
+    [key: string]: unknown;
+  };
 }
 
-export interface FlyoutSystemOpenMainOptions<Meta = unknown> {
+export interface FlyoutSystemOpenMainOptions {
   size: EuiFlyoutSize;
   flyoutProps?: FlyoutSystemConfig['mainFlyoutProps'];
-  meta?: Meta;
+  content: React.ReactNode;
 }
 
-export interface FlyoutSystemOpenChildOptions<Meta = unknown> {
+export interface FlyoutSystemOpenChildOptions {
   size: 's' | 'm';
   flyoutProps?: FlyoutSystemConfig['childFlyoutProps'];
-  title: string;
-  meta?: Meta;
+  title?: string;
+  content: React.ReactNode;
 }
 
-export interface FlyoutSystemGroup<FlyoutMeta> {
+export interface FlyoutSystemGroup {
   isMainOpen: boolean;
   isChildOpen: boolean;
   config: FlyoutSystemConfig;
-  meta?: FlyoutMeta;
 }
 
-export interface FlyoutSystemState<FlyoutMeta = unknown> {
-  activeFlyoutGroup: FlyoutSystemGroup<FlyoutMeta> | null;
-  history: Array<FlyoutSystemGroup<FlyoutMeta>>;
+export interface FlyoutSystemState {
+  activeFlyoutGroup: FlyoutSystemGroup | null;
+  history: FlyoutSystemGroup[];
 }
 
-export type FlyoutSystemAction<FlyoutMeta = unknown> =
+export type FlyoutSystemAction =
   | {
       type: 'UPDATE_ACTIVE_FLYOUT_CONFIG';
       payload: {
         configChanges: Partial<FlyoutSystemConfig>;
       };
     }
-  | { type: 'OPEN_MAIN_FLYOUT'; payload: FlyoutSystemOpenMainOptions<FlyoutMeta> }
+  | { type: 'OPEN_MAIN_FLYOUT'; payload: FlyoutSystemOpenMainOptions }
   | {
       type: 'OPEN_CHILD_FLYOUT';
-      payload: FlyoutSystemOpenChildOptions<FlyoutMeta>;
+      payload: FlyoutSystemOpenChildOptions;
     }
   | { type: 'GO_BACK' }
   | { type: 'GO_TO_HISTORY_ITEM'; index: number }
   | { type: 'CLOSE_CHILD_FLYOUT' }
   | { type: 'CLOSE_SESSION' };
 
-export interface FlyoutSystemRenderContext<FlyoutMeta = unknown> {
-  activeFlyoutGroup: FlyoutSystemGroup<FlyoutMeta> | null;
-  meta?: FlyoutMeta;
+export interface FlyoutSystemRenderContext {
+  activeFlyoutGroup: FlyoutSystemGroup | null;
 }
 
-export interface FlyoutSystemProviderProps<FlyoutMeta = any> {
+export interface FlyoutSystemProviderProps {
   children: React.ReactNode;
   onUnmount?: () => void;
-  renderMainFlyoutContent: (context: FlyoutSystemRenderContext<FlyoutMeta>) => React.ReactNode;
-  renderChildFlyoutContent?: (context: FlyoutSystemRenderContext<FlyoutMeta>) => React.ReactNode;
 }
 
 export interface FlyoutSystemApi {
@@ -102,7 +102,7 @@ export interface FlyoutSystemApi {
 }
 
 // Initial state for the flyout system
-export const initialFlyoutState: FlyoutSystemState<unknown> = {
+export const initialFlyoutState: FlyoutSystemState = {
   activeFlyoutGroup: null,
   history: [],
 };
@@ -112,8 +112,8 @@ import { flyoutSystemReducer } from './flyout_system_reducer';
 
 // Context for the flyout system
 interface FlyoutSystemContextProps {
-  state: FlyoutSystemState<any>;
-  dispatch: React.Dispatch<FlyoutSystemAction<any>>;
+  state: FlyoutSystemState;
+  dispatch: React.Dispatch<FlyoutSystemAction>;
   onUnmount?: FlyoutSystemProviderProps['onUnmount'];
 }
 
@@ -135,7 +135,7 @@ const FlyoutSystemMenu = ({
   handleGoToHistoryItem,
 }: {
   title?: string;
-  historyItems: Array<FlyoutSystemGroup<unknown>>;
+  historyItems: FlyoutSystemGroup[];
   handleGoBack: () => void;
   handleGoToHistoryItem: (index: number) => void;
 }) => {
@@ -185,8 +185,6 @@ const FlyoutSystemMenu = ({
 // Provider component for the flyout system
 export const FlyoutSystemProvider: React.FC<FlyoutSystemProviderProps> = ({
   children,
-  renderMainFlyoutContent,
-  renderChildFlyoutContent,
   onUnmount,
 }) => {
   const [state, dispatch] = useReducer(flyoutSystemReducer, initialFlyoutState);
@@ -194,8 +192,6 @@ export const FlyoutSystemProvider: React.FC<FlyoutSystemProviderProps> = ({
   const isInitialMount = useRef(true);
 
   useEffect(() => {
-    // When there is no active flyout, we should call the onUnmount callback.
-    // Ensure this is not called on the initial render, only on subsequent state changes.
     if (isInitialMount.current) {
       isInitialMount.current = false;
     } else if (state.activeFlyoutGroup === null) {
@@ -219,25 +215,9 @@ export const FlyoutSystemProvider: React.FC<FlyoutSystemProviderProps> = ({
     dispatch({ type: 'GO_TO_HISTORY_ITEM', index });
   };
 
-  let mainFlyoutContentNode: React.ReactNode = null;
-  let childFlyoutContentNode: React.ReactNode = null;
-
-  if (activeFlyoutGroup) {
-    const renderContext: FlyoutSystemRenderContext = {
-      activeFlyoutGroup,
-      meta: activeFlyoutGroup.meta,
-    };
-    mainFlyoutContentNode = renderMainFlyoutContent(renderContext);
-
-    if (activeFlyoutGroup.isChildOpen && renderChildFlyoutContent) {
-      childFlyoutContentNode = renderChildFlyoutContent(renderContext);
-    }
-  }
-
   const config = activeFlyoutGroup?.config;
   const flyoutPropsMain = config?.mainFlyoutProps || {};
   const flyoutPropsChild = config?.childFlyoutProps || {};
-
   return (
     <FlyoutSystemContext.Provider value={{ state, dispatch, onUnmount }}>
       {children}
@@ -256,15 +236,15 @@ export const FlyoutSystemProvider: React.FC<FlyoutSystemProviderProps> = ({
               title={!config?.hideMainTitle ? config?.mainTitle : undefined}
             />
           )}
-          {mainFlyoutContentNode}
-          {activeFlyoutGroup.isChildOpen && childFlyoutContentNode && (
+          {config?.mainContent}
+          {activeFlyoutGroup.isChildOpen && (
             <EuiFlyoutChild
               onClose={handleCloseChild}
               size={config?.childSize}
               {...flyoutPropsChild}
             >
               {config?.childTitle && <EuiFlyoutMenu title={config.childTitle} />}
-              {childFlyoutContentNode}
+              {config?.childContent}
             </EuiFlyoutChild>
           )}
         </EuiFlyout>

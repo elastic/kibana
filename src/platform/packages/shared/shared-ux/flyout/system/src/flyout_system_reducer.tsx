@@ -10,9 +10,7 @@
 import { FlyoutSystemState, FlyoutSystemAction, FlyoutSystemGroup } from './flyout_system_provider';
 
 // Helper function to apply size constraints
-const applySizeConstraints = <FlyoutMeta,>(
-  group: FlyoutSystemGroup<FlyoutMeta>
-): FlyoutSystemGroup<FlyoutMeta> => {
+const applySizeConstraints = <FlyoutMeta,>(group: FlyoutSystemGroup): FlyoutSystemGroup => {
   const originalMainSize = group.config.mainSize;
   const originalChildSize = group.config.childSize;
   let newMainSize = originalMainSize;
@@ -43,21 +41,25 @@ const applySizeConstraints = <FlyoutMeta,>(
 };
 
 // Reducer to handle all state transitions
-export function flyoutSystemReducer<FlyoutMeta>(
-  state: FlyoutSystemState<FlyoutMeta>,
-  action: FlyoutSystemAction<FlyoutMeta>
-): FlyoutSystemState<FlyoutMeta> {
+export function flyoutSystemReducer(
+  state: FlyoutSystemState,
+  action: FlyoutSystemAction
+): FlyoutSystemState {
   switch (action.type) {
     case 'OPEN_MAIN_FLYOUT': {
-      const { size, flyoutProps, meta } = action.payload;
+      const { size, flyoutProps, content } = action.payload;
       const newHistory = state.activeFlyoutGroup
         ? [state.activeFlyoutGroup, ...state.history]
         : state.history;
-      const newActiveGroup: FlyoutSystemGroup<FlyoutMeta> = {
+      const newActiveGroup: FlyoutSystemGroup = {
         isMainOpen: true,
         isChildOpen: false,
-        config: { mainSize: size, mainFlyoutProps: flyoutProps, childFlyoutProps: {} },
-        meta,
+        config: {
+          mainSize: size,
+          mainFlyoutProps: flyoutProps,
+          mainContent: content,
+          childFlyoutProps: {},
+        },
       };
       return {
         activeFlyoutGroup: applySizeConstraints(newActiveGroup),
@@ -66,22 +68,17 @@ export function flyoutSystemReducer<FlyoutMeta>(
     }
     case 'OPEN_CHILD_FLYOUT': {
       if (!state.activeFlyoutGroup) return state;
-      const { size, flyoutProps, title, meta } = action.payload;
-      const updatedActiveGroup: FlyoutSystemGroup<FlyoutMeta> = {
+      const { size, flyoutProps, title, content } = action.payload;
+      const updatedActiveGroup: FlyoutSystemGroup = {
         ...state.activeFlyoutGroup,
         isChildOpen: true,
         config: {
           ...state.activeFlyoutGroup.config,
           childTitle: title,
           childSize: size,
+          childContent: content,
           childFlyoutProps: flyoutProps,
         },
-        meta:
-          meta !== undefined
-            ? state.activeFlyoutGroup.meta !== undefined
-              ? { ...state.activeFlyoutGroup.meta, ...meta }
-              : meta
-            : state.activeFlyoutGroup.meta,
       };
       return {
         ...state,
@@ -90,7 +87,7 @@ export function flyoutSystemReducer<FlyoutMeta>(
     }
     case 'CLOSE_CHILD_FLYOUT': {
       if (!state.activeFlyoutGroup) return state;
-      const updatedActiveGroup: FlyoutSystemGroup<FlyoutMeta> = {
+      const updatedActiveGroup: FlyoutSystemGroup = {
         ...state.activeFlyoutGroup,
         isChildOpen: false,
         config: { ...state.activeFlyoutGroup.config, childFlyoutProps: {} },
@@ -121,7 +118,7 @@ export function flyoutSystemReducer<FlyoutMeta>(
     case 'UPDATE_ACTIVE_FLYOUT_CONFIG': {
       if (!state.activeFlyoutGroup) return state;
       const { configChanges } = action.payload;
-      const updatedActiveGroup: FlyoutSystemGroup<FlyoutMeta> = {
+      const updatedActiveGroup: FlyoutSystemGroup = {
         ...state.activeFlyoutGroup,
         config: { ...state.activeFlyoutGroup.config, ...configChanges },
       };

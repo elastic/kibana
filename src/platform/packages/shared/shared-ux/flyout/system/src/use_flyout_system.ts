@@ -14,13 +14,25 @@ import {
   FlyoutSystemApi,
 } from './flyout_system_provider';
 
+/**
+ * Hook that provides API access to the FlyoutSystem
+ *
+ * @returns A set of methods to control the flyout system
+ */
 export const useFlyoutSystemApi = (): FlyoutSystemApi => {
   const { state, dispatch } = useFlyoutSystemContext();
 
+  /**
+   * Opens a main flyout with the provided content and options
+   */
   const openFlyout = (options: FlyoutSystemOpenMainOptions) => {
     dispatch({ type: 'OPEN_MAIN_FLYOUT', payload: options });
   };
 
+  /**
+   * Opens a child flyout with the provided content and options
+   * Will only work if there's already an open main flyout
+   */
   const openChildFlyout = (options: FlyoutSystemOpenChildOptions) => {
     if (!state.activeFlyoutGroup || !state.activeFlyoutGroup.isMainOpen) {
       return;
