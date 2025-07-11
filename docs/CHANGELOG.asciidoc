@@ -362,7 +362,7 @@ For more information, check:
 ====
 *Details* +
 The Elastic Managed LLM may be automatically selected as your default connector because of existing connector selection logic. 
-This may occur if you had not previously selected a specific connector for any of the following reasons:
+This can occur if you had not previously specified a connector for any of the following reasons:
 
 - You only had one connector available and it was always automatically picked for your conversations.
 - You had multiple connectors available but didn’t make a specific selection and used the automatically picked connector for your conversations.
