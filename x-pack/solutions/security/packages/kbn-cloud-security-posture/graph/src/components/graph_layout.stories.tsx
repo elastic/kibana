@@ -631,3 +631,36 @@ export const GraphLargeStackedEdgeCases: Story = {
     ]),
   },
 };
+
+const VARIANT_STACK_SIZES_NODES = 8;
+
+export const VariantStackSizes: Story = {
+  args: {
+    ...meta.args,
+    ...extractEdges([
+      ...(Array(VARIANT_STACK_SIZES_NODES)
+        .fill(0)
+        .map((id, idx) => ({
+          id: String.fromCharCode(97 + idx), // 'a', 'b', 'c', ...
+          label: String.fromCharCode(97 + idx).toUpperCase(),
+          color: 'primary',
+          shape: 'ellipse',
+        })) satisfies EnhancedNodeViewModel[]),
+      ...Array(VARIANT_STACK_SIZES_NODES - 1)
+        .fill(0)
+        .map<EnhancedNodeViewModel[]>((_v, idx) =>
+          Array(idx + 1)
+            .fill(0)
+            .map<EnhancedNodeViewModel>((_, idx2) => ({
+              id: `${String.fromCharCode(97 + idx)}-${String.fromCharCode(97 + idx + 1)}`,
+              source: String.fromCharCode(97 + idx),
+              target: String.fromCharCode(97 + idx + 1),
+              label: `${idx2}`,
+              color: 'primary',
+              shape: 'label',
+            }))
+        )
+        .flat(),
+    ]),
+  },
+};

@@ -14,15 +14,11 @@ import {
   HandleStyleOverride,
   LabelShapeOnHover,
   NodeButton,
-  // LABEL_PADDING_X,
-  // LABEL_BORDER_WIDTH,
-  LABEL_HEIGHT,
+  ACTUAL_LABEL_HEIGHT,
   NODE_LABEL_WIDTH,
 } from './styles';
 import type { LabelNodeViewModel, NodeProps } from '../types';
 import { NodeExpandButton } from './node_expand_button';
-
-// const LABEL_MIN_WIDTH = 100;
 
 export const LabelNode = memo<NodeProps>((props: NodeProps) => {
   const { id, color, label, interactive, nodeClick, expandButtonClick } =
@@ -40,9 +36,9 @@ export const LabelNode = memo<NodeProps>((props: NodeProps) => {
         <>
           <NodeButton
             css={css`
-              margin-top: -${LABEL_HEIGHT}px;
+              margin-top: -${ACTUAL_LABEL_HEIGHT}px;
             `}
-            height={LABEL_HEIGHT}
+            height={ACTUAL_LABEL_HEIGHT}
             width={labelWidth}
             onClick={(e) => nodeClick?.(e, props)}
           />
@@ -50,7 +46,9 @@ export const LabelNode = memo<NodeProps>((props: NodeProps) => {
             color={color}
             onClick={(e, unToggleCallback) => expandButtonClick?.(e, props, unToggleCallback)}
             x={`${labelWidth}px`}
-            y={`${-LABEL_HEIGHT + (LABEL_HEIGHT - NodeExpandButton.ExpandButtonSize) / 2}px`}
+            y={`${
+              -ACTUAL_LABEL_HEIGHT + (ACTUAL_LABEL_HEIGHT - NodeExpandButton.ExpandButtonSize) / 2
+            }px`}
           />
         </>
       )}

@@ -8,8 +8,18 @@
 import Dagre from '@dagrejs/dagre';
 import type { Node, Edge } from '@xyflow/react';
 import type { EdgeViewModel, NodeViewModel, Size } from '../types';
-import { calcLabelSize } from './utils';
-import { GroupStyleOverride, NODE_HEIGHT, NODE_WIDTH } from '../node/styles';
+import { ACTUAL_LABEL_HEIGHT, GroupStyleOverride } from '../node/styles';
+import { isStackedLabel } from '../utils';
+import {
+  GRID_SIZE,
+  STACK_NODE_VERTICAL_PADDING,
+  STACK_NODE_HORIZONTAL_PADDING,
+  STACK_NODE_MIN_HEIGHT,
+  NODE_HEIGHT,
+  NODE_WIDTH,
+  NODE_LABEL_HEIGHT,
+  NODE_LABEL_WIDTH,
+} from '../constants';
 
 export const layoutGraph = (
   nodes: Array<Node<NodeViewModel>>,
@@ -38,14 +48,17 @@ export const layoutGraph = (
     let size = { width: NODE_WIDTH, height: node.measured?.height ?? NODE_HEIGHT };
 
     if (node.data.shape === 'label') {
-      size = calcLabelSize(node.data.label);
+      size = {
+        height: NODE_LABEL_HEIGHT,
+        width: NODE_LABEL_WIDTH,
+      };
 
       // TODO: waiting for a fix: https://github.com/dagrejs/dagre/issues/238
       // if (node.parentId) {
       //   g.setParent(node.id, node.parentId);
       // }
     } else if (node.data.shape === 'group') {
-      const res = layoutGroupChildren(node, nodesOfParent[node.id]);
+      const res = layoutStackedLabels(node, nodesOfParent[node.id]);
 
       size = res.size;
 
@@ -70,17 +83,13 @@ export const layoutGraph = (
 
   Dagre.layout(g);
 
-  const innerLabel = (node: string): boolean =>
-    !(nodesById[node].data.shape === 'label' && Boolean(nodesById[node].parentId));
-  const isEntity = (node: string): boolean =>
-    nodesById[node].data.shape !== 'label' && nodesById[node].data.shape !== 'group';
-
-  // centreLeftByRank(g, innerLabel);
-  // alignNodesCenterInPlace(g, innerLabel, isEntity, nodesById);
-  alignNodesCenterInPlace(g, innerLabel, isEntity, nodesById, false);
+  alignNodesCenterInPlace(g, (nodeId: string) => {
+    const node = nodesById[nodeId].data;
+    return node && isStackedLabel(node);
+  });
 
   const layoutedNodes = nodes.map((node) => {
-    // For grouped nodes, we want to keep the original position relative to the parent
+    // For stacked nodes, we want to keep the original position relative to the parent
     if (node.data.shape === 'label' && node.data.parentId) {
       return {
         ...node,
@@ -93,33 +102,24 @@ export const layoutGraph = (
     // We are shifting the dagre node position (anchor=center center) to the top left
     // so it matches the React Flow node anchor point (top left).
     // We also need to round the position to avoid subpixel rendering
-    const x = // Math.round(dagreNode.x) + (20 - (Math.round(dagreNode.x) % 20));
-      Math.round(dagreNode.x - (dagreNode.width ?? 0) / 2) +
-      (20 - (Math.round(dagreNode.x - (dagreNode.width ?? 0) / 2) % 20));
-    const y = // Math.round(dagreNode.y) + (20 - (Math.round(dagreNode.y) % 20));
-      Math.round(dagreNode.y - (dagreNode.height ?? 0) / 2) +
-      (20 - (Math.round(dagreNode.y - (dagreNode.height ?? 0) / 2) % 20));
+    const GRID_SIZE_OFFSET = GRID_SIZE * 2;
+    const tempPosX = Math.round(dagreNode.x - (dagreNode.width ?? 0) / 2);
+    const x = Math.round(tempPosX / GRID_SIZE_OFFSET) * GRID_SIZE_OFFSET;
+    const y = Math.round(dagreNode.y - (dagreNode.height ?? 0) / 2);
 
     if (node.data.shape === 'group') {
       return {
         ...node,
-        // position: { x, y: dagreNode.y },
         position: { x, y },
         style: GroupStyleOverride({
           width: dagreNode.width,
           height: dagreNode.height,
         }),
       };
-    } else if (node.data.shape === 'label') {
+    } else {
       return {
         ...node,
         position: { x, y },
-      };
-    } else {
-      // Align nodes to labels by shifting the node position by it's label height
-      return {
-        ...node,
-        position: { x, y: y + (dagreNode.height - NODE_HEIGHT) / 2 },
       };
     }
   });
@@ -128,12 +128,10 @@ export const layoutGraph = (
     nodesById[node.data.id] = node;
   });
 
-  // alignNodesCenterInPlace(g, innerLabel, isEntity, nodesById, true);
-
   return { nodes: layoutedNodes };
 };
 
-const layoutGroupChildren = (
+const layoutStackedLabels = (
   groupNode: Node<NodeViewModel>,
   nodes: Array<Node<NodeViewModel>>
 ): { size: Size; children: Array<Node<NodeViewModel>> } => {
@@ -141,38 +139,159 @@ const layoutGroupChildren = (
     (child) => child.data.shape === 'label' && child.parentId === groupNode.id
   );
 
-  const STACK_VERTICAL_PADDING = 20;
-  const MIN_STACK_HEIGHT = 60;
-  const PADDING = 20;
   const stackSize = children.length;
   const allChildrenHeight = children.reduce(
-    (prevHeight, node) => prevHeight + calcLabelSize(node.data.label).height,
+    (prevHeight, node) => prevHeight + ACTUAL_LABEL_HEIGHT,
     0
   );
   const stackHeight = Math.max(
-    allChildrenHeight + (stackSize - 1) * STACK_VERTICAL_PADDING,
-    MIN_STACK_HEIGHT
+    allChildrenHeight + (stackSize - 1) * STACK_NODE_VERTICAL_PADDING,
+    STACK_NODE_MIN_HEIGHT
   );
-
   const space = (stackHeight - allChildrenHeight) / (stackSize - 1);
   const groupNodeWidth = children.reduce((acc, child) => {
-    const currLblWidth = PADDING * 2 + calcLabelSize(child.data.label).width;
+    const currLblWidth = STACK_NODE_HORIZONTAL_PADDING * 2 + NODE_LABEL_WIDTH;
     return Math.max(acc, currLblWidth);
   }, 0);
 
+  const GRID_SIZE_OFFSET = GRID_SIZE * 2;
+  const roundStackHeight = Math.round(stackHeight / GRID_SIZE_OFFSET) * GRID_SIZE_OFFSET;
+  const diffFromRounded = roundStackHeight - stackHeight;
+
   // Layout children relative to parent
   children.forEach((child, index) => {
-    const childSize = calcLabelSize(child.data.label);
     child.position = {
-      x: groupNodeWidth / 2 - childSize.width / 2,
-      y: index * (childSize.height + space),
+      x: groupNodeWidth / 2 - NODE_LABEL_WIDTH / 2,
+      y: index * (ACTUAL_LABEL_HEIGHT + space) + diffFromRounded,
     };
   });
 
   return {
-    size: { width: groupNodeWidth, height: stackHeight },
+    size: { width: groupNodeWidth, height: roundStackHeight },
     children,
   };
+};
+
+/**
+ * Re-centre a Dagre-laid-out LR graph so that…
+ *   • any node with children sits at the vertical mid-point of its children
+ *   • any node with ≥2 parents sits at the vertical mid-point of its parents
+ *
+ * Runs in O(V + E) on Dagre's directed graphs.
+ * Mutates the Dagre graph in place.
+ */
+const alignNodesCenterInPlace = (g: Dagre.graphlib.Graph, filter: (node: string) => boolean) => {
+  const Y = (id: string) => (g.node(id) as Dagre.Node).y;
+  const Height = (id: string) => (g.node(id) as Dagre.Node).height;
+  const setY = (id: string, y: number) => ((g.node(id) as Dagre.Node).y = y);
+  const GRID_SIZE_OFFSET = GRID_SIZE * 2;
+  const setYSnapped = (id: string, y: number) => {
+    setY(id, Math.round(y / GRID_SIZE_OFFSET) * GRID_SIZE_OFFSET);
+  };
+
+  const prevNodeY: Record<string, number> = {};
+  const topo = topsort(g, filter);
+
+  for (const currNode of topo.reverse()) {
+    const currY = Y(currNode);
+    const children = (g.successors(currNode)?.filter((sV) => filter(sV.toString())) ?? []).map(
+      (childNode) => childNode.toString()
+    );
+
+    if (children.length > 1) {
+      const first = children.reduce(
+        (min, childNode) => (Y(childNode) < Y(min) ? childNode : min),
+        children[0]
+      );
+      const last = children.reduce(
+        (max, childNode) => (Y(childNode) > Y(max) ? childNode : max),
+        children[0]
+      );
+
+      const centerY = Y(first) + (Y(last) - Y(first)) / 2;
+      const prevY = Y(currNode);
+
+      // Log the diff for current node
+      prevNodeY[currNode] = prevY;
+      setY(currNode, centerY);
+    } else if (children.length === 1) {
+      const child = children[0].toString();
+      const siblings = (
+        g.predecessors(child)?.filter((parentNode) => filter(parentNode.toString())) ?? []
+      ).map((siblingNode) => siblingNode.toString());
+
+      if (siblings.length > 1) {
+        const { lastSiblingInfo, firstSiblingInfo } = analyzeSiblings(
+          siblings,
+          prevNodeY,
+          Y,
+          Height
+        );
+
+        // We want to center the current node vertically between the first and last sibling
+        // So that the edges between the first and last sibling are equal in their length
+        const edgesHeight = lastSiblingInfo.middle - firstSiblingInfo.middle;
+
+        // Final Y position is effected by the node height (checkout layoutGraph function)
+        const finalChildY = Y(child) - Height(child) / 2;
+
+        // Position of the first sibling when adjusted
+        const firstSiblingNewY = finalChildY - (edgesHeight - Height(child)) / 2;
+
+        // Final Y position is effected by the node height (checkout layoutGraph function)
+        const finalfirstSiblingNewY = firstSiblingNewY - firstSiblingInfo.h / 2;
+
+        // Calculate the current node position relative to the first sibling
+        const newY = finalfirstSiblingNewY + currY - firstSiblingInfo.top;
+
+        // Log the diff for current node
+        prevNodeY[currNode] = currY;
+        setY(currNode, newY);
+      } else if (prevNodeY[child] !== undefined) {
+        // There is only one child, and that child was already adjusted
+        const newY = currY - (prevNodeY[child] - Y(child));
+
+        // Log the diff for current node
+        prevNodeY[currNode] = currY;
+        setY(currNode, newY);
+      }
+    } else if (children.length === 0) {
+      // No children, so we center by its parents
+      const parents = (
+        g.predecessors(currNode)?.filter((parentNode) => filter(parentNode.toString())) ?? []
+      ).map((parentNode) => parentNode.toString());
+
+      if (parents.length > 1) {
+        // const avg = parents.reduce((sum, parentNode) => sum + Y(parentNode), 0) / parents.length;
+        const { firstSiblingInfo: firstParentInfo, lastSiblingInfo: lastParentInfo } =
+          analyzeSiblings(parents, prevNodeY, Y, Height);
+
+        // We want to center the current node vertically between the first and last sibling
+        // So that the edges between the first and last sibling are equal in their length
+        const edgesHeight = lastParentInfo.middle - firstParentInfo.middle;
+
+        // Calculate the current node position relative to the first sibling
+        const newY = firstParentInfo.middle + (edgesHeight - Height(currNode)) / 2;
+
+        // Log the diff for current node
+        prevNodeY[currNode] = currY;
+        setYSnapped(currNode, newY);
+      } else if (parents.length === 1) {
+        // There is only one parent, so we just set the current node to the parent's Y position
+        const parent = parents[0].toString();
+        const newY = Y(parent) - Height(currNode) / 2;
+
+        // Log the diff for current node
+        prevNodeY[currNode] = currY;
+        setYSnapped(currNode, newY);
+      }
+    } else {
+      // No children and no parents, so we just set the current node to its own Y position
+      // This is a no-op, but we log it for consistency
+      prevNodeY[currNode] = currY;
+      setYSnapped(currNode, currY);
+    }
+  }
 };
 
 const topsort = (g: Dagre.graphlib.Graph, filter: (node: string) => boolean): string[] => {
@@ -182,7 +301,7 @@ const topsort = (g: Dagre.graphlib.Graph, filter: (node: string) => boolean): st
 
   function visit(node: string): void {
     if (!filter(node)) {
-      return; // Skip labels that are children of groups
+      return;
     }
 
     if (Object.hasOwn(stack, node)) {
@@ -203,75 +322,30 @@ const topsort = (g: Dagre.graphlib.Graph, filter: (node: string) => boolean): st
   return results;
 };
 
-/**
- * Re-centre a Dagre-laid-out LR graph so that…
- *   • any node with children sits at the vertical mid-point of its children
- *   • any node with ≥2 parents sits at the vertical mid-point of its parents
- *
- * Runs in O(V + E) on Dagre's directed graphs.
- * Mutates the Dagre graph in place.
- */
-const alignNodesCenterInPlace = (
-  g: Dagre.graphlib.Graph,
-  filter: (node: string) => boolean,
-  nodeCenter: (node: string) => boolean,
-  nodesById: { [key: string]: Node<NodeViewModel> },
-  useNodesById: boolean
-) => {
-  /* ---------- util ------------ */
-  // const Y = (id: string) => nodesById[id].position.y;
-  // const height = (id: string) => g.node(id).height ?? NODE_HEIGHT;
-  // const setY = (id: string, y: number) => (nodesById[id].position.y = y);
-  const Y = useNodesById
-    ? (id: string) => nodesById[id].position.y
-    : (id: string) => (g.node(id) as Dagre.Node).y;
-  const setY = useNodesById
-    ? (id: string, y: number) => (nodesById[id].position.y = y)
-    : (id: string, y: number) => ((g.node(id) as Dagre.Node).y = y);
-  const adjustNode: Record<string, number> = {};
-  const parentsSum: Record<string, number> = {};
+function analyzeSiblings(
+  siblings: string[],
+  prevNodeY: Record<string, number>,
+  Y: (id: string) => number,
+  Height: (id: string) => number
+) {
+  const firstSibling = siblings.reduce(
+    (min, siblingNode) => ((prevNodeY[siblingNode] ?? Y(siblingNode)) < Y(min) ? siblingNode : min),
+    siblings[0]
+  );
+  const lastSibling = siblings.reduce(
+    (max, siblingNode) => ((prevNodeY[siblingNode] ?? Y(siblingNode)) > Y(max) ? siblingNode : max),
+    siblings[0]
+  );
 
-  /* ---------- topological order ---------- */
-  const topo = topsort(g, filter); // parents appear before children
-
-  /* ---------- 1. bottom-up: centre on children ---------- */
-  for (const v of topo.reverse()) {
-    const kids = g.successors(v)?.filter((sV) => filter(sV.toString())) ?? [];
-
-    if (kids.length > 1) {
-      const avg = kids.reduce((sum, k) => sum + Y(k.toString()), 0) / kids.length;
-      const prevY = Y(v);
-      adjustNode[v] = prevY - avg; // store adjustment for parents
-      setY(v, avg);
-    } else if (kids.length === 1 && adjustNode[kids[0].toString()] !== undefined) {
-      const currY = Y(v);
-      const siblings =
-        g.predecessors(kids[0].toString())?.filter((pV) => filter(pV.toString())) ?? [];
-
-      if (siblings.length > 1 && parentsSum[kids[0].toString()] === undefined) {
-        parentsSum[kids[0].toString()] = siblings.reduce((sum, s) => sum + Y(s.toString()), 0);
-      }
-      // height(siblings.reduce((min, s) => Math.min(min, Y(s.toString())), Infinity));
-
-      const siblingsSum =
-        siblings.length > 1 ? parentsSum[kids[0].toString()] / siblings.length : 0;
-      const centerSiblingsToTarget =
-        siblings.length > 1 ? (Y(kids[0].toString()) - siblingsSum) / 2 : 0;
-
-      // console.log('v', v, 'y', Y(kids[0].toString()));
-      // console.log('siblings', siblings);
-      // console.log('sublingsSum', siblingsSum);
-      // console.log('centerSiblingsToTarget', centerSiblingsToTarget);
-      const newY = currY - adjustNode[kids[0].toString()] - centerSiblingsToTarget;
-      adjustNode[v] = currY - newY; // store adjustment for parents
-      setY(v, newY); // adjust for parents
-    } else if (kids.length === 0) {
-      // no children, so we can by its parents
-      const parents = g.predecessors(v)?.filter((pV) => filter(pV.toString())) ?? [];
-      if (parents.length >= 1) {
-        const avg = parents.reduce((sum, p) => sum + Y(p.toString()), 0) / parents.length;
-        setY(v, avg);
-      }
-    }
-  }
-};
+  const firstSiblingInfo = {
+    h: Height(firstSibling),
+    top: (prevNodeY[firstSibling] ?? Y(firstSibling)) - Height(firstSibling) / 2,
+    middle: prevNodeY[firstSibling] ?? Y(firstSibling),
+  };
+  const lastSiblingInfo = {
+    h: Height(lastSibling),
+    top: (prevNodeY[lastSibling] ?? Y(lastSibling)) - Height(lastSibling) / 2,
+    middle: prevNodeY[lastSibling] ?? Y(lastSibling),
+  };
+  return { lastSiblingInfo, firstSiblingInfo };
+}
