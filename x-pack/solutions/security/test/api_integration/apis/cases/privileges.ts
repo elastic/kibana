@@ -6,15 +6,12 @@
  */
 
 import expect from '@kbn/expect';
-import { APP_ID as CASES_APP_ID } from '@kbn/cases-plugin/common/constants';
 import { AttachmentType } from '@kbn/cases-plugin/common';
 import type {
   CaseStatuses,
   UserCommentAttachmentPayload,
 } from '@kbn/cases-plugin/common/types/domain';
 import { APP_ID as SECURITY_SOLUTION_APP_ID } from '@kbn/security-solution-plugin/common/constants';
-import { observabilityFeatureId as OBSERVABILITY_APP_ID } from '@kbn/observability-plugin/common';
-
 import {
   createCase,
   deleteAllCaseItems,
@@ -27,18 +24,6 @@ import {
 import { getPostCaseRequest } from '@kbn/test-suites-xpack-platform/cases_api_integration/common/lib/mock';
 import { suggestUserProfiles } from '@kbn/test-suites-xpack-platform/cases_api_integration/common/lib/api/user_profiles';
 import {
-  casesAllUser,
-  casesV2AllUser,
-  casesV3AllUser,
-  casesV3NoAssigneeUser,
-  casesV3ReadAndAssignUser,
-  casesNoDeleteUser,
-  casesOnlyDeleteUser,
-  obsCasesAllUser,
-  obsCasesV2AllUser,
-  obsCasesV3AllUser,
-  obsCasesNoDeleteUser,
-  obsCasesOnlyDeleteUser,
   secAllCasesNoDeleteUser,
   secAllCasesNoneUser,
   secAllCasesOnlyDeleteUser,
@@ -50,13 +35,9 @@ import {
   secReadCasesNoneUser,
   secReadCasesReadUser,
   secReadUser,
-  casesV2NoReopenWithCreateCommentUser,
-  casesV2NoCreateCommentWithReopenUser,
-  obsCasesV2NoReopenWithCreateCommentUser,
-  obsCasesV2NoCreateCommentWithReopenUser,
   secCasesV2NoReopenWithCreateCommentUser,
   secCasesV2NoCreateCommentWithReopenUser,
-} from './common/users';
+} from '@kbn/test-suites-xpack-platform/api_integration/apis/cases/common/users';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext): void => {
@@ -73,16 +54,7 @@ export default ({ getService }: FtrProviderContext): void => {
       { user: secAllUser, owner: SECURITY_SOLUTION_APP_ID },
       { user: secCasesV2AllUser, owner: SECURITY_SOLUTION_APP_ID },
       { user: secReadCasesAllUser, owner: SECURITY_SOLUTION_APP_ID },
-      { user: casesAllUser, owner: CASES_APP_ID },
-      { user: casesV2AllUser, owner: CASES_APP_ID },
-      { user: casesNoDeleteUser, owner: CASES_APP_ID },
-      { user: obsCasesAllUser, owner: OBSERVABILITY_APP_ID },
-      { user: obsCasesV2AllUser, owner: OBSERVABILITY_APP_ID },
-      { user: obsCasesNoDeleteUser, owner: OBSERVABILITY_APP_ID },
       { user: secCasesV3AllUser, owner: SECURITY_SOLUTION_APP_ID },
-      { user: casesV3AllUser, owner: CASES_APP_ID },
-      { user: obsCasesV3AllUser, owner: OBSERVABILITY_APP_ID },
-      { user: casesV3NoAssigneeUser, owner: CASES_APP_ID },
     ]) {
       it(`User ${user.username} with role(s) ${user.roles.join()} can create a case`, async () => {
         await createCase(supertest, getPostCaseRequest({ owner }), 200, {
@@ -97,16 +69,7 @@ export default ({ getService }: FtrProviderContext): void => {
       { user: secReadCasesAllUser, owner: SECURITY_SOLUTION_APP_ID },
       { user: secReadCasesReadUser, owner: SECURITY_SOLUTION_APP_ID },
       { user: secReadUser, owner: SECURITY_SOLUTION_APP_ID },
-      { user: casesAllUser, owner: CASES_APP_ID },
-      { user: casesV2AllUser, owner: CASES_APP_ID },
-      { user: casesNoDeleteUser, owner: CASES_APP_ID },
-      { user: obsCasesAllUser, owner: OBSERVABILITY_APP_ID },
-      { user: obsCasesV2AllUser, owner: OBSERVABILITY_APP_ID },
-      { user: obsCasesNoDeleteUser, owner: OBSERVABILITY_APP_ID },
       { user: secCasesV3AllUser, owner: SECURITY_SOLUTION_APP_ID },
-      { user: casesV3AllUser, owner: CASES_APP_ID },
-      { user: obsCasesV3AllUser, owner: OBSERVABILITY_APP_ID },
-      { user: casesV3NoAssigneeUser, owner: CASES_APP_ID },
     ]) {
       it(`User ${user.username} with role(s) ${user.roles.join()} can get a case`, async () => {
         const caseInfo = await createCase(supertest, getPostCaseRequest({ owner }));
@@ -127,9 +90,6 @@ export default ({ getService }: FtrProviderContext): void => {
       { user: secReadCasesReadUser, owner: SECURITY_SOLUTION_APP_ID },
       { user: secReadUser, owner: SECURITY_SOLUTION_APP_ID },
       { user: secReadCasesNoneUser, owner: SECURITY_SOLUTION_APP_ID },
-      { user: casesOnlyDeleteUser, owner: CASES_APP_ID },
-      { user: obsCasesOnlyDeleteUser, owner: OBSERVABILITY_APP_ID },
-      { user: casesV3NoAssigneeUser, owner: CASES_APP_ID },
     ]) {
       it(`User ${
         user.username
@@ -145,8 +105,6 @@ export default ({ getService }: FtrProviderContext): void => {
       { user: secAllCasesNoneUser, owner: SECURITY_SOLUTION_APP_ID },
       { user: secReadCasesNoneUser, owner: SECURITY_SOLUTION_APP_ID },
       { user: secAllCasesOnlyDeleteUser, owner: SECURITY_SOLUTION_APP_ID },
-      { user: casesOnlyDeleteUser, owner: CASES_APP_ID },
-      { user: obsCasesOnlyDeleteUser, owner: OBSERVABILITY_APP_ID },
     ]) {
       it(`User ${user.username} with role(s) ${user.roles.join()} cannot get a case`, async () => {
         const caseInfo = await createCase(supertest, getPostCaseRequest({ owner }));
@@ -164,16 +122,7 @@ export default ({ getService }: FtrProviderContext): void => {
       { user: secAllUser, owner: SECURITY_SOLUTION_APP_ID },
       { user: secCasesV2AllUser, owner: SECURITY_SOLUTION_APP_ID },
       { user: secAllCasesOnlyDeleteUser, owner: SECURITY_SOLUTION_APP_ID },
-      { user: casesAllUser, owner: CASES_APP_ID },
-      { user: casesV2AllUser, owner: CASES_APP_ID },
-      { user: casesOnlyDeleteUser, owner: CASES_APP_ID },
-      { user: obsCasesAllUser, owner: OBSERVABILITY_APP_ID },
-      { user: obsCasesV2AllUser, owner: OBSERVABILITY_APP_ID },
-      { user: obsCasesOnlyDeleteUser, owner: OBSERVABILITY_APP_ID },
       { user: secCasesV3AllUser, owner: SECURITY_SOLUTION_APP_ID },
-      { user: casesV3AllUser, owner: CASES_APP_ID },
-      { user: obsCasesV3AllUser, owner: OBSERVABILITY_APP_ID },
-      { user: casesV3NoAssigneeUser, owner: CASES_APP_ID },
     ]) {
       it(`User ${user.username} with role(s) ${user.roles.join()} can delete a case`, async () => {
         const caseInfo = await createCase(supertest, getPostCaseRequest({ owner }));
@@ -189,8 +138,6 @@ export default ({ getService }: FtrProviderContext): void => {
     for (const { user, owner } of [
       { user: secAllCasesReadUser, owner: SECURITY_SOLUTION_APP_ID },
       { user: secAllCasesNoDeleteUser, owner: SECURITY_SOLUTION_APP_ID },
-      { user: casesNoDeleteUser, owner: CASES_APP_ID },
-      { user: obsCasesNoDeleteUser, owner: OBSERVABILITY_APP_ID },
     ]) {
       it(`User ${
         user.username
@@ -208,13 +155,7 @@ export default ({ getService }: FtrProviderContext): void => {
     for (const { user, owner } of [
       { user: secAllUser, owner: SECURITY_SOLUTION_APP_ID },
       { user: secCasesV2AllUser, owner: SECURITY_SOLUTION_APP_ID },
-      { user: obsCasesAllUser, owner: OBSERVABILITY_APP_ID },
-      { user: obsCasesV2AllUser, owner: OBSERVABILITY_APP_ID },
-      { user: casesAllUser, owner: CASES_APP_ID },
-      { user: casesV2AllUser, owner: CASES_APP_ID },
       { user: secCasesV3AllUser, owner: SECURITY_SOLUTION_APP_ID },
-      { user: casesV3AllUser, owner: CASES_APP_ID },
-      { user: obsCasesV3AllUser, owner: OBSERVABILITY_APP_ID },
     ]) {
       it(`User ${user.username} with role(s) ${user.roles.join()} can reopen a case`, async () => {
         const caseInfo = await createCase(supertest, getPostCaseRequest({ owner }));
@@ -247,21 +188,10 @@ export default ({ getService }: FtrProviderContext): void => {
 
     for (const { user, owner, userWithFullPerms } of [
       {
-        user: casesV2NoCreateCommentWithReopenUser,
-        owner: CASES_APP_ID,
-        userWithFullPerms: casesV3AllUser,
-      },
-      {
-        user: obsCasesV2NoCreateCommentWithReopenUser,
-        owner: OBSERVABILITY_APP_ID,
-        userWithFullPerms: obsCasesV3AllUser,
-      },
-      {
         user: secCasesV2NoCreateCommentWithReopenUser,
         owner: SECURITY_SOLUTION_APP_ID,
         userWithFullPerms: secCasesV3AllUser,
       },
-      { user: casesV3NoAssigneeUser, owner: CASES_APP_ID, userWithFullPerms: casesV3AllUser },
     ]) {
       it(`User ${
         user.username
@@ -295,16 +225,6 @@ export default ({ getService }: FtrProviderContext): void => {
     }
 
     for (const { user, owner, userWithFullPerms } of [
-      {
-        user: casesV2NoReopenWithCreateCommentUser,
-        owner: CASES_APP_ID,
-        userWithFullPerms: casesV3AllUser,
-      },
-      {
-        user: obsCasesV2NoReopenWithCreateCommentUser,
-        owner: OBSERVABILITY_APP_ID,
-        userWithFullPerms: obsCasesV3AllUser,
-      },
       {
         user: secCasesV2NoReopenWithCreateCommentUser,
         owner: SECURITY_SOLUTION_APP_ID,
@@ -345,17 +265,9 @@ export default ({ getService }: FtrProviderContext): void => {
     for (const { user, owner } of [
       { user: secAllUser, owner: SECURITY_SOLUTION_APP_ID },
       { user: secCasesV2AllUser, owner: SECURITY_SOLUTION_APP_ID },
-      { user: obsCasesAllUser, owner: OBSERVABILITY_APP_ID },
-      { user: obsCasesV2AllUser, owner: OBSERVABILITY_APP_ID },
-      { user: casesAllUser, owner: CASES_APP_ID },
-      { user: casesV2AllUser, owner: CASES_APP_ID },
-      { user: casesV2NoReopenWithCreateCommentUser, owner: CASES_APP_ID },
-      { user: obsCasesV2NoReopenWithCreateCommentUser, owner: OBSERVABILITY_APP_ID },
+
       { user: secCasesV2NoReopenWithCreateCommentUser, owner: SECURITY_SOLUTION_APP_ID },
       { user: secCasesV3AllUser, owner: SECURITY_SOLUTION_APP_ID },
-      { user: casesV3AllUser, owner: CASES_APP_ID },
-      { user: obsCasesV3AllUser, owner: OBSERVABILITY_APP_ID },
-      { user: casesV3NoAssigneeUser, owner: CASES_APP_ID },
     ]) {
       it(`User ${user.username} with role(s) ${user.roles.join()} can add comments`, async () => {
         const caseInfo = await createCase(supertest, getPostCaseRequest({ owner }));
@@ -375,29 +287,12 @@ export default ({ getService }: FtrProviderContext): void => {
     }
 
     for (const { user, owner, userWithFullPerms } of [
-      { user: casesV3NoAssigneeUser, owner: CASES_APP_ID, userWithFullPerms: casesV3AllUser },
-      {
-        user: casesV2NoCreateCommentWithReopenUser,
-        owner: CASES_APP_ID,
-        userWithFullPerms: casesV3AllUser,
-      },
-      {
-        user: obsCasesV2NoCreateCommentWithReopenUser,
-        owner: OBSERVABILITY_APP_ID,
-        userWithFullPerms: obsCasesV3AllUser,
-      },
       {
         user: secCasesV2NoCreateCommentWithReopenUser,
         owner: SECURITY_SOLUTION_APP_ID,
         userWithFullPerms: secCasesV3AllUser,
       },
       { user: secReadUser, owner: SECURITY_SOLUTION_APP_ID, userWithFullPerms: secAllUser },
-      { user: casesOnlyDeleteUser, owner: CASES_APP_ID, userWithFullPerms: casesAllUser },
-      {
-        user: obsCasesOnlyDeleteUser,
-        owner: OBSERVABILITY_APP_ID,
-        userWithFullPerms: obsCasesAllUser,
-      },
     ]) {
       it(`User ${
         user.username
@@ -420,19 +315,11 @@ export default ({ getService }: FtrProviderContext): void => {
     }
 
     for (const { user, owner } of [
-      { user: casesV3ReadAndAssignUser, owner: CASES_APP_ID },
       { user: secAllUser, owner: SECURITY_SOLUTION_APP_ID },
-      { user: casesAllUser, owner: CASES_APP_ID },
-      { user: casesV2AllUser, owner: CASES_APP_ID },
+
       { user: secCasesV2AllUser, owner: SECURITY_SOLUTION_APP_ID },
-      { user: obsCasesV2AllUser, owner: OBSERVABILITY_APP_ID },
-      { user: obsCasesAllUser, owner: OBSERVABILITY_APP_ID },
       { user: secCasesV2AllUser, owner: SECURITY_SOLUTION_APP_ID },
-      { user: obsCasesAllUser, owner: OBSERVABILITY_APP_ID },
-      { user: obsCasesV2AllUser, owner: OBSERVABILITY_APP_ID },
       { user: secCasesV3AllUser, owner: SECURITY_SOLUTION_APP_ID },
-      { user: casesV3AllUser, owner: CASES_APP_ID },
-      { user: obsCasesV3AllUser, owner: OBSERVABILITY_APP_ID },
     ]) {
       it(`User ${
         user.username
@@ -455,8 +342,6 @@ export default ({ getService }: FtrProviderContext): void => {
     }
 
     for (const { user, owner } of [
-      { user: casesV2NoCreateCommentWithReopenUser, owner: CASES_APP_ID },
-      { user: obsCasesV2NoCreateCommentWithReopenUser, owner: OBSERVABILITY_APP_ID },
       { user: secCasesV2NoCreateCommentWithReopenUser, owner: SECURITY_SOLUTION_APP_ID },
     ]) {
       it(`User ${

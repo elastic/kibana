@@ -67,7 +67,6 @@ import { InfraSourceConfigurationFormProvider } from './infra_source_configurati
 import { LogsUiProvider } from './logs_ui';
 import { ObservabilityProvider } from './observability';
 import { DataStreamProvider } from './data_stream';
-import { SloUiServiceProvider } from './slo';
 // define the name and providers for services that should be
 // available to your tests. If you don't specify anything here
 // only the built-in services will be available
@@ -130,5 +129,4 @@ export const services = {
   dataStreams: DataStreamProvider,
   slo: kibanaXPackApiIntegrationServices.slo,
   dataViewApi: kibanaXPackApiIntegrationServices.dataViewApi,
-  sloUi: SloUiServiceProvider,
 };

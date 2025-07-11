@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { services as platformServices } from '@kbn/test-suites-xpack-platform/api_integration/services';
-import { InfraLogViewsServiceProvider } from './infra_log_views';
-import { SloApiProvider } from './slo';
+import { services as platformServices } from '@kbn/test-suites-xpack-platform/functional/services';
+import { services as obltApiServices } from '../../api_integration/services';
+import { SloUiServiceProvider } from './slo';
 
 export const services = {
   ...platformServices,
-  infraLogViews: InfraLogViewsServiceProvider,
-  sloApi: SloApiProvider,
+  ...obltApiServices,
+  sloUi: SloUiServiceProvider,
 };

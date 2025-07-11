@@ -11,8 +11,13 @@ import {
 } from '@kbn/test-suites-xpack-platform/cases_api_integration/common/lib/authentication';
 
 import { loginUsers } from '@kbn/test-suites-xpack-platform/cases_api_integration/common/lib/api/user_profiles';
-import { casesAllUser, obsCasesAllUser, secAllUser, users } from './common/users';
-import { roles } from './common/roles';
+import {
+  casesAllUser,
+  obsCasesAllUser,
+  secAllUser,
+  users,
+} from '@kbn/test-suites-xpack-platform/api_integration/apis/cases/common/users';
+import { roles } from '@kbn/test-suites-xpack-platform/api_integration/apis/cases/common/roles';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile, getService }: FtrProviderContext) {
@@ -34,6 +39,5 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
     loadTestFile(require.resolve('./privileges'));
     loadTestFile(require.resolve('./suggest_user_profiles'));
     loadTestFile(require.resolve('./bulk_get_user_profiles'));
-    loadTestFile(require.resolve('./files'));
   });
 }

@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 
 import type { BaseFilesClient } from '@kbn/shared-ux-file-types';
-import type { User } from '@kbn/test-suites-xpack-platform/cases_api_integration/common/lib/authentication/types';
+import type { User } from '../../../cases_api_integration/common/lib/authentication/types';
 import {
   createFile,
   uploadFile,
@@ -18,12 +18,12 @@ import {
   getFileById,
   deleteAllFilesForKind,
   deleteFileForFileKind,
-} from '@kbn/test-suites-xpack-platform/cases_api_integration/common/lib/api';
+} from '../../../cases_api_integration/common/lib/api';
 import {
   CASES_FILE_KIND,
   OBSERVABILITY_FILE_KIND,
   SECURITY_SOLUTION_FILE_KIND,
-} from '@kbn/test-suites-xpack-platform/cases_api_integration/common/lib/constants';
+} from '../../../cases_api_integration/common/lib/constants';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import {
   casesAllUser,

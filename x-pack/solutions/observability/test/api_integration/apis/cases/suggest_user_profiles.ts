@@ -6,24 +6,16 @@
  */
 
 import expect from '@kbn/expect';
-import { APP_ID as CASES_APP_ID, MAX_SUGGESTED_PROFILES } from '@kbn/cases-plugin/common/constants';
-import { APP_ID as SECURITY_SOLUTION_APP_ID } from '@kbn/security-solution-plugin/common/constants';
 import { observabilityFeatureId as OBSERVABILITY_APP_ID } from '@kbn/observability-plugin/common';
 
 import { deleteAllCaseItems } from '@kbn/test-suites-xpack-platform/cases_api_integration/common/lib/api';
 import { suggestUserProfiles } from '@kbn/test-suites-xpack-platform/cases_api_integration/common/lib/api/user_profiles';
-import type { FtrProviderContext } from '../../ftr_provider_context';
 import {
-  casesAllUser,
-  casesOnlyDeleteUser,
-  casesReadUser,
   obsCasesAllUser,
   obsCasesOnlyDeleteUser,
   obsCasesReadUser,
-  secAllCasesNoneUser,
-  secAllCasesReadUser,
-  secAllUser,
-} from './common/users';
+} from '@kbn/test-suites-xpack-platform/api_integration/apis/cases/common/users';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext): void => {
   describe('suggest_user_profiles', () => {
@@ -35,14 +27,6 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     for (const { user, searchTerm, owner } of [
-      { user: secAllUser, searchTerm: secAllUser.username, owner: SECURITY_SOLUTION_APP_ID },
-      {
-        user: secAllCasesReadUser,
-        searchTerm: secAllUser.username,
-        owner: SECURITY_SOLUTION_APP_ID,
-      },
-      { user: casesAllUser, searchTerm: casesAllUser.username, owner: CASES_APP_ID },
-      { user: casesReadUser, searchTerm: casesAllUser.username, owner: CASES_APP_ID },
       { user: obsCasesAllUser, searchTerm: obsCasesAllUser.username, owner: OBSERVABILITY_APP_ID },
       { user: obsCasesReadUser, searchTerm: obsCasesAllUser.username, owner: OBSERVABILITY_APP_ID },
     ]) {
@@ -60,11 +44,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     }
 
-    for (const { user, owner } of [
-      { user: secAllCasesNoneUser, owner: SECURITY_SOLUTION_APP_ID },
-      { user: casesOnlyDeleteUser, owner: CASES_APP_ID },
-      { user: obsCasesOnlyDeleteUser, owner: OBSERVABILITY_APP_ID },
-    ]) {
+    for (const { user, owner } of [{ user: obsCasesOnlyDeleteUser, owner: OBSERVABILITY_APP_ID }]) {
       it(`User ${
         user.username
       } with role(s) ${user.roles.join()} cannot retrieve user profile suggestions because they lack privileges`, async () => {
@@ -76,20 +56,5 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
     }
-
-    describe('errors', () => {
-      it('400s when size parameter is not valid', async () => {
-        await suggestUserProfiles({
-          supertest: supertestWithoutAuth,
-          req: {
-            name: casesAllUser.username,
-            owners: [CASES_APP_ID],
-            size: MAX_SUGGESTED_PROFILES + 1,
-          },
-          auth: { user: casesAllUser, space: null },
-          expectedHttpCode: 400,
-        });
-      });
-    });
   });
 };
