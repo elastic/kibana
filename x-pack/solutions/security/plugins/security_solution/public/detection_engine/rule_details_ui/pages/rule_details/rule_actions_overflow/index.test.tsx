@@ -23,7 +23,7 @@ jest.mock('../../../../../common/hooks/use_experimental_features');
 jest.mock('../../../../rule_management/logic/bulk_actions/use_execute_bulk_action');
 jest.mock('../../../../rule_management/logic/bulk_actions/use_bulk_export');
 jest.mock(
-  '../../../../rule_management/components/rule_details/base_version_diff/base_version_context'
+  '../../../../rule_management/components/rule_details/rule_customizations_diff/rule_customizations_context'
 );
 
 const mockReportEvent = jest.fn();

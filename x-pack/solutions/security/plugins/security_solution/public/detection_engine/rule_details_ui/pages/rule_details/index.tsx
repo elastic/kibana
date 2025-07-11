@@ -770,7 +770,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                       <EuiSpacer />
                       <EuiFlexItem data-test-subj="schedule" component="section" grow={1}>
                         <StepPanel loading={isLoading} title={ruleI18n.SCHEDULE}>
-                          {rule != null && <RuleScheduleSection rule={rule} showModifiedFields />}
+                          {rule != null && <RuleScheduleSection rule={rule} />}
                         </StepPanel>
                       </EuiFlexItem>
                       {hasActions && (
