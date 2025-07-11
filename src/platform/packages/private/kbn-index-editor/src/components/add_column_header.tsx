@@ -32,11 +32,14 @@ export const AddColumnHeader = () => {
       <div style={{ display: 'flex', height: '100%' }}>
         <EuiFieldText
           value={columnName}
+          autoFocus
           compressed
           onChange={(e) => {
             setColumnName(e.target.value);
           }}
-          onBlur={submit}
+          onBlur={() => {
+            setIsEditing(false);
+          }}
           onKeyDown={(event) => {
             if (event.key === 'Enter') {
               submit();

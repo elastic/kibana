@@ -105,11 +105,6 @@ export class IndexUpdateService {
       id: 'row_1',
       raw: {
         _id: 'row_1',
-        _source: {
-          field_1: 'Add a value',
-          field_2: 'Add a value',
-          field_3: 'Add a value',
-        },
       },
       flattened: {
         [`Add a column`]: 'Add a value',
@@ -299,6 +294,7 @@ export class IndexUpdateService {
 
             this._rows$.next(
               rows.map((row) => {
+                // It's only keeping the rows that were there before the update //HD
                 const docId = row.raw._id;
                 const mergedSource = { ...row.raw._source, ...(mappedResponse.get(docId!) ?? {}) };
 
@@ -464,7 +460,8 @@ export class IndexUpdateService {
     const body = JSON.stringify({
       operations: (
         updates.map((update) => {
-          if (update.id) {
+          if (update.id && update.id !== 'row_1') {
+            // //HD row_1?
             return [
               {
                 update: { _id: update.id },

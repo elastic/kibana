@@ -160,10 +160,6 @@ interface InternalUnifiedDataTableProps {
    */
   expandedDoc?: DataTableRecord;
   /**
-   * Optional additional control columns
-   */
-  additionalControlColumns?: EuiDataGridControlColumn[];
-  /**
    * The used data view
    */
   dataView: DataView;
@@ -515,7 +511,6 @@ const InternalUnifiedDataTable = ({
   externalAdditionalControls,
   rowsPerPageOptions,
   externalCustomRenderers,
-  additionalControlColumns = [],
   additionalFieldGroups,
   consumer = 'discover',
   componentsTourSteps,
@@ -1004,10 +999,6 @@ const InternalUnifiedDataTable = ({
       filteredLeadColumns.push(actionsColumn);
     }
 
-    if (additionalControlColumns.length > 0) {
-      filteredLeadColumns.push(...additionalControlColumns);
-    }
-
     return filteredLeadColumns;
   }, [
     canSetExpandedDoc,
@@ -1016,7 +1007,6 @@ const InternalUnifiedDataTable = ({
     externalControlColumns,
     getRowIndicator,
     rowAdditionalLeadingControls,
-    additionalControlColumns,
   ]);
 
   const additionalControls = useMemo(() => {

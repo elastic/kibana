@@ -18,6 +18,7 @@ import {
   DataLoadingState,
   UnifiedDataTable,
   type SortOrder,
+  CustomGridColumnsConfiguration,
 } from '@kbn/unified-data-table';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
@@ -107,7 +108,13 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
     const preservedOrder = intersection(activeColumns, currentColumnNames);
     const newColumns = difference(currentColumnNames, preservedOrder);
 
-    return [...newColumns, ...preservedOrder];
+    const missingPlaceholders = 4 - props.columns.length;
+    const addColumnPlaceholders =
+      missingPlaceholders > 0
+        ? times(missingPlaceholders, (idx) => `add-column-placeholder-${idx}`)
+        : [];
+
+    return [...newColumns, ...preservedOrder, ...addColumnPlaceholders];
   }, [props.columns, hiddenColumns, activeColumns]);
 
   const columnsMeta = useMemo(() => {
@@ -163,23 +170,22 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
     }, {} as CustomCellRenderer);
   }, [CellValueRenderer, visibleColumns]);
 
-  const newColumns = useMemo(() => {
-    const missingColumns = 4 - props.columns.length;
-    if (missingColumns > 0) {
-      return times(missingColumns, (idx) => ({
-        width: 200,
-        id: `add-column-${idx}`,
-        headerCellRender: AddColumnHeader,
-        rowCellRender: () => <div>Add a value...</div>,
-      }));
-    }
-    return [];
-  }, [props.columns]);
+  const customGridColumnsConfiguration = useMemo(() => {
+    return visibleColumns.reduce((acc, columnName) => {
+      if (columnName.startsWith('add-column-placeholder-')) {
+        acc[columnName] = ({ column }) => ({
+          ...column,
+          display: <AddColumnHeader />,
+        });
+      }
+      return acc;
+    }, {} as CustomGridColumnsConfiguration);
+  }, [visibleColumns]);
 
   return (
     <>
       <UnifiedDataTable
-        additionalControlColumns={newColumns}
+        customGridColumnsConfiguration={customGridColumnsConfiguration}
         columns={visibleColumns}
         rows={rows}
         columnsMeta={columnsMeta}
