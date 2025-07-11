@@ -9,6 +9,7 @@ import type { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
 import { ruleTypeUsageSchema } from './schemas/detection_rule_usage';
 import { ruleMetricsSchema } from './schemas/prebuilt_rule_detail';
 import { ruleStatusMetricsSchema } from './schemas/detection_rule_status';
+import { ruleUpgradeStatusSchema } from './schemas/detection_rule_upgrade_status';
 import type { RuleAdoption } from './types';
 
 export const rulesMetricsSchema: MakeSchemaFrom<RuleAdoption> = {
@@ -31,4 +32,5 @@ export const rulesMetricsSchema: MakeSchemaFrom<RuleAdoption> = {
     items: ruleMetricsSchema,
   },
   detection_rule_status: ruleStatusMetricsSchema,
+  detection_rule_upgrade_status: ruleUpgradeStatusSchema,
 };
