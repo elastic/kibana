@@ -117,28 +117,6 @@ export function textExistsAndIsValid(text: string | undefined): text is string {
   return !!(text && !isMissingText(text));
 }
 
-export function createFunction<Subtype extends FunctionSubtype>(
-  name: string,
-  ctx: ParserRuleContext,
-  customPosition?: ESQLLocation,
-  subtype?: Subtype,
-  args: ESQLAstItem[] = [],
-  incomplete?: boolean
-): ESQLFunction<Subtype> {
-  const node: ESQLFunction<Subtype> = {
-    type: 'function',
-    name,
-    text: ctx.getText(),
-    location: customPosition ?? getPosition(ctx.start, ctx.stop),
-    args,
-    incomplete: Boolean(ctx.exception) || !!incomplete,
-  };
-  if (subtype) {
-    node.subtype = subtype;
-  }
-  return node;
-}
-
 export const createBinaryExpression = (
   operator: BinaryExpressionOperator,
   ctx: ParserRuleContext,

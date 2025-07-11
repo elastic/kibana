@@ -14,7 +14,6 @@ import { type AstNodeParserFields, Builder } from '../builder';
 import { isCommand } from '../ast/is';
 import {
   computeLocationExtends,
-  createFunction,
   createLiteralString,
   nonNullable,
   textExistsAndIsValid,
@@ -704,7 +703,7 @@ export class CstToAstConverter {
         const renameToken = asToken || assignToken;
 
         if (renameToken && textExistsAndIsValid(renameToken.getText())) {
-          const renameFunction = createFunction(
+          const renameFunction = this.createFunction(
             renameToken.getText().toLowerCase(),
             clause,
             undefined,
@@ -975,7 +974,7 @@ export class CstToAstConverter {
             }
           }
           if (args.length) {
-            const fn = createFunction('=', clause, undefined, 'binary-expression');
+            const fn = this.createFunction('=', clause, undefined, 'binary-expression');
             fn.args.push(args[0], args[1] ? [args[1]] : []);
             option.args.push(fn);
           }
@@ -1108,7 +1107,7 @@ export class CstToAstConverter {
       const prompt = this.visitPrimaryExpression(ctx._prompt) as ast.ESQLSingleAstItem;
       command.prompt = prompt;
 
-      const assignment = createFunction(
+      const assignment = this.createFunction(
         ctx.ASSIGN().getText(),
         ctx,
         undefined,
@@ -1385,7 +1384,7 @@ export class CstToAstConverter {
    */
   private fromField2(ctx: cst.FieldContext): ast.ESQLAstItem[] {
     if (ctx.qualifiedName() && ctx.ASSIGN()) {
-      const fn = createFunction(ctx.ASSIGN()!.getText(), ctx, undefined, 'binary-expression');
+      const fn = this.createFunction(ctx.ASSIGN()!.getText(), ctx, undefined, 'binary-expression');
 
       fn.args.push(
         this.createColumn(ctx.qualifiedName()!),
@@ -1400,7 +1399,7 @@ export class CstToAstConverter {
   }
 
   private visitLogicalNot(ctx: cst.LogicalNotContext) {
-    const fn = createFunction('not', ctx, undefined, 'unary-expression');
+    const fn = this.createFunction('not', ctx, undefined, 'unary-expression');
     fn.args.push(...this.collectBooleanExpression(ctx.booleanExpression()));
     // update the location of the assign based on arguments
     const argsLocationExtends = computeLocationExtends(fn);
@@ -1409,7 +1408,7 @@ export class CstToAstConverter {
   }
 
   private visitLogicalAndsOrs(ctx: cst.LogicalBinaryContext) {
-    const fn = createFunction(ctx.AND() ? 'and' : 'or', ctx, undefined, 'binary-expression');
+    const fn = this.createFunction(ctx.AND() ? 'and' : 'or', ctx, undefined, 'binary-expression');
     fn.args.push(
       ...this.collectBooleanExpression(ctx._left),
       ...this.collectBooleanExpression(ctx._right)
@@ -1487,7 +1486,7 @@ export class CstToAstConverter {
       this.visitValueExpression(leftCtx) ?? this.fromParserRuleToUnknown(leftCtx)
     ) as ast.ESQLAstExpression;
     const right = this.visitTuple(rightCtxs, ctx.LP(), ctx.RP());
-    const expression = createFunction(
+    const expression = this.createFunction(
       ctx.NOT() ? 'not in' : 'in',
       ctx,
       { min: ctx.start.start, max: ctx.stop?.stop ?? ctx.RP().symbol.stop },
@@ -1523,7 +1522,7 @@ export class CstToAstConverter {
     }
     if (ctx instanceof cst.ComparisonContext) {
       const comparisonNode = ctx.comparisonOperator();
-      const comparisonFn = createFunction(
+      const comparisonFn = this.createFunction(
         this.getComparisonName(comparisonNode),
         comparisonNode,
         undefined,
@@ -1547,14 +1546,19 @@ export class CstToAstConverter {
     if (ctx instanceof cst.ArithmeticUnaryContext) {
       const arg = this.visitOperatorExpression(ctx.operatorExpression());
       // this is a number sign thing
-      const fn = createFunction('*', ctx, undefined, 'binary-expression');
+      const fn = this.createFunction('*', ctx, undefined, 'binary-expression');
       fn.args.push(createFakeMultiplyLiteral(ctx, 'integer'));
       if (arg) {
         fn.args.push(arg);
       }
       return fn;
     } else if (ctx instanceof cst.ArithmeticBinaryContext) {
-      const fn = createFunction(this.getMathOperation(ctx), ctx, undefined, 'binary-expression');
+      const fn = this.createFunction(
+        this.getMathOperation(ctx),
+        ctx,
+        undefined,
+        'binary-expression'
+      );
       const args = [
         this.visitOperatorExpression(ctx._left),
         this.visitOperatorExpression(ctx._right),
@@ -1658,7 +1662,7 @@ export class CstToAstConverter {
             const negate = regex.NOT();
             const likeType = regex instanceof cst.RlikeExpressionContext ? 'rlike' : 'like';
             const fnName = `${negate ? 'not ' : ''}${likeType}`;
-            const fn = createFunction(fnName, regex, undefined, 'binary-expression');
+            const fn = this.createFunction(fnName, regex, undefined, 'binary-expression');
             const arg = this.visitValueExpression(regex.valueExpression());
             if (arg) {
               fn.args.push(arg);
@@ -1681,7 +1685,7 @@ export class CstToAstConverter {
     }
     const negate = ctx.NOT();
     const fnName = `is${negate ? ' not ' : ' '}null`;
-    const fn = createFunction(fnName, ctx, undefined, 'postfix-unary-expression');
+    const fn = this.createFunction(fnName, ctx, undefined, 'postfix-unary-expression');
     const arg = this.visitValueExpression(ctx.valueExpression());
     if (arg) {
       fn.args.push(arg);
@@ -1960,6 +1964,28 @@ export class CstToAstConverter {
       }
     }
 
+    return node;
+  }
+
+  private createFunction<Subtype extends ast.FunctionSubtype>(
+    name: string,
+    ctx: antlr.ParserRuleContext,
+    customPosition?: ast.ESQLLocation,
+    subtype?: Subtype,
+    args: ast.ESQLAstItem[] = [],
+    incomplete?: boolean
+  ): ast.ESQLFunction<Subtype> {
+    const node: ast.ESQLFunction<Subtype> = {
+      type: 'function',
+      name,
+      text: ctx.getText(),
+      location: customPosition ?? getPosition(ctx.start, ctx.stop),
+      args,
+      incomplete: Boolean(ctx.exception) || !!incomplete,
+    };
+    if (subtype) {
+      node.subtype = subtype;
+    }
     return node;
   }
 
