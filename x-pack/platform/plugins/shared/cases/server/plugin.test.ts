@@ -25,11 +25,12 @@ import type { CasesServerSetupDependencies, CasesServerStartDependencies } from 
 
 function getConfig(overrides: Partial<ConfigType> = {}): ConfigType {
   return {
+    enabled: true,
     markdownPlugins: { lens: true },
     files: { maxSize: 1, allowedMimeTypes: ALLOWED_MIME_TYPES },
     stack: { enabled: true },
     incrementalId: { enabled: true, taskIntervalMinutes: 10, taskStartDelayMinutes: 10 },
-    analytics: {},
+    analytics: { index: { enabled: true } },
     ...overrides,
   };
 }

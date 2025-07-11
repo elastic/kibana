@@ -1,0 +1,57 @@
+{
+  "observer": {
+    "geo": {
+      "name": "mpls",
+      "location": "37.926868, -78.024902"
+    },
+    "hostname": "avc-x1x"
+  },
+  "@timestamp": "2019-09-11T03:40:34.371Z",
+  "http": {
+    "rtt": {
+      "response_header": {
+        "us": 262
+      },
+      "total": {
+        "us": 20331
+      },
+      "write_request": {
+        "us": 82
+      },
+      "content": {
+        "us": 57
+      },
+      "validate": {
+        "us": 319
+      }
+    },
+    "response": {
+      "status_code": 200,
+      "body": {
+        "bytes": 3,
+        "hash": "27badc983df1780b60c2b3fa9d3a19a00e46aac798451f0febdca52920faaddf"
+      }
+    }
+  },
+  "monitor": {
+    "duration": {
+      "us": 24627
+    },
+    "ip": "127.0.0.1",
+    "name": "",
+    "check_group": "d76f0762-d445-11e9-88e3-3e80641b9c71",
+    "id": "0002-up",
+    "type": "http",
+    "status": "up"
+  },
+  "url": {
+    "path": "/pattern",
+    "scheme": "http",
+    "port": 5678,
+    "domain": "localhost",
+    "query": "r=200x1",
+    "full": "http://localhost:5678/pattern?r=200x1"
+  },
+  "docId": "h5toHm0B0I9WX_CznN_V",
+  "timestamp": "2019-09-11T03:40:34.371Z"
+}

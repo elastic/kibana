@@ -94,6 +94,7 @@ describe('useFieldBrowserOptions', () => {
     mockIndexPatternFieldEditor.userPermissions.editIndexPattern = () => true;
     useKibanaMock().services.dataViewFieldEditor = mockIndexPatternFieldEditor;
     useKibanaMock().services.data.dataViews.get = () => new Promise(() => undefined);
+    useKibanaMock().services.data.dataViews.clearInstanceCache = () => undefined;
 
     useKibanaMock().services.application.capabilities = {
       ...useKibanaMock().services.application.capabilities,

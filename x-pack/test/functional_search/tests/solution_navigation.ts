@@ -54,6 +54,7 @@ export default function searchSolutionNavigation({
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Connectors' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Search applications' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Synonyms' });
+      await solutionNavigation.sidenav.expectLinkExists({ text: 'Query Rules' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Inference Endpoints' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Dev Tools' });
     });
@@ -65,11 +66,6 @@ export default function searchSolutionNavigation({
       await solutionNavigation.sidenav.expectSectionExists('search_project_nav');
       await solutionNavigation.sidenav.expectLinkActive({
         deepLinkId: 'searchHomepage',
-      });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Build' });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Index Management' });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-        text: 'Indices',
       });
       await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
         text: 'Create your first index',
@@ -177,6 +173,7 @@ export default function searchSolutionNavigation({
         'enterpriseSearchApplications:searchApplications',
         'relevance',
         'searchSynonyms:synonyms',
+        'searchQueryRules',
         'searchInferenceEndpoints:inferenceEndpoints',
         'search_project_nav_footer',
         'dev_tools',

@@ -73,6 +73,8 @@ export const getRuleObjectCorrelations = ({
       has_alert_suppression_missing_fields_strategy_do_not_suppress:
         hasAlertSuppressionMissingFieldsStrategyDoNotSuppress,
       alert_suppression_fields_count: alertSuppressionFieldsCount,
+      has_exceptions:
+        attributes.params.exceptionsList != null && attributes.params.exceptionsList.length > 0,
       has_response_actions: hasResponseActions,
       has_response_actions_endpoint: hasResponseActionsEndpoint,
       has_response_actions_osquery: hasResponseActionsOsquery,

@@ -24,7 +24,7 @@ exports[`KibanaPageTemplateInner isEmpty pageHeader & children 1`] = `
 <_EuiPageTemplate
   className="kbnPageTemplate"
   grow={false}
-  minHeight="var(--kbn-layout--application-height)"
+  minHeight="var(--kbn-application--content-height)"
   offset={0}
 >
   <_EuiPageHeader
@@ -83,7 +83,7 @@ exports[`KibanaPageTemplateInner page sidebar 1`] = `
     sticky={false}
     style={
       Object {
-        "maxHeight": "var(--kbn-layout--application-height, 100vh)",
+        "maxHeight": "var(--kbn-application--content-height, 100vh)",
         "position": "sticky",
         "top": "var(--euiFixedHeadersOffset, 0px)",
       }
