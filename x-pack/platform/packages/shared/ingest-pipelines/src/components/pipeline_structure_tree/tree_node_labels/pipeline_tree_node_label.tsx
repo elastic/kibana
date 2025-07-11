@@ -48,7 +48,7 @@ export const PipelineTreeNodeLabel = ({
             content={i18n.translate(
               'ingestPipelines.pipelineStructureTree.treeNodeDeprecatedTooltip',
               {
-                defaultMessage: 'Deprecate',
+                defaultMessage: 'Deprecated',
               }
             )}
             type="warning"

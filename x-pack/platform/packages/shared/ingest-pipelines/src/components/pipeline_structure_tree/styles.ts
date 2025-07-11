@@ -25,8 +25,7 @@ export const getStyles = (euiTheme: EuiThemeComputed) => css`
     margin-left: ${euiTheme.size.l};
   }
 
-  
-  // We want to disable EUI's logic for activating nodes but EuiTreeViewItems's 
+  // We want to disable EUI's logic for activating nodes but EuiTreeViewItems's
   // isActive prop is not working correctly so we temporarily overwrite its active class
   .euiTreeView__node--active {
     background-color: ${euiTheme.colors.backgroundBasePlain} !important;
