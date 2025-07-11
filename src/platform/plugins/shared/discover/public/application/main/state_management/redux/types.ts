@@ -15,6 +15,7 @@ import type { UnifiedDataTableRestorableState } from '@kbn/unified-data-table';
 import type { UnifiedFieldListRestorableState } from '@kbn/unified-field-list';
 import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram';
 import type { TabItem } from '@kbn/unified-tabs';
+import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import type { DiscoverAppState } from '../discover_app_state_container';
 import type { DiscoverLayoutRestorableState } from '../../components/layout/discover_layout_restorable_state';
 
@@ -89,6 +90,9 @@ export interface RecentlyClosedTabState extends TabState {
 
 export interface DiscoverInternalState {
   initializationState: { hasESData: boolean; hasUserDataView: boolean };
+  userId: string | undefined;
+  spaceId: string | undefined;
+  persistedDiscoverSession: DiscoverSession | undefined;
   savedDataViews: DataViewListItem[];
   defaultProfileAdHocDataViewIds: string[];
   expandedDoc: DataTableRecord | undefined;

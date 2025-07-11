@@ -10,6 +10,8 @@
 import type { TabbedContentState } from '@kbn/unified-tabs/src/components/tabbed_content/tabbed_content';
 import { cloneDeep, differenceBy, omit, pick } from 'lodash';
 import type { QueryState } from '@kbn/data-plugin/common';
+import { getSavedSearchFullPathUrl } from '@kbn/saved-search-plugin/public';
+import { i18n } from '@kbn/i18n';
 import type { TabState } from '../types';
 import { selectAllTabs, selectRecentlyClosedTabs, selectTab } from '../selectors';
 import {
@@ -27,7 +29,8 @@ import {
 } from '../runtime_state';
 import { APP_STATE_URL_KEY, GLOBAL_STATE_URL_KEY } from '../../../../../../common/constants';
 import type { DiscoverAppState } from '../../discover_app_state_container';
-import { createTabItem } from '../utils';
+import { createInternalStateAsyncThunk, createTabItem } from '../utils';
+import { setBreadcrumbs } from '../../../../../utils/breadcrumbs';
 
 export const setTabs: InternalStateThunkActionCreator<
   [Parameters<typeof internalStateSlice.actions.setTabs>[0]]
@@ -184,11 +187,53 @@ export const updateTabAppStateAndGlobalState: InternalStateThunkActionCreator<[T
     );
   };
 
-export const initializeTabs: InternalStateThunkActionCreator<
-  [{ userId: string; spaceId: string }]
-> =
-  ({ userId, spaceId }) =>
-  (dispatch, _, { tabsStorageManager }) => {
+export const initializeTabs = createInternalStateAsyncThunk(
+  'internalState/initializeTabs',
+  async (
+    { discoverSessionId }: { discoverSessionId: string | undefined },
+    { dispatch, getState, extra: { services, tabsStorageManager, customizationContext } }
+  ) => {
+    const { userId: existingUserId, spaceId: existingSpaceId } = getState();
+
+    const getUserId = async () => {
+      try {
+        return (await services.core.security?.authc.getCurrentUser()).profile_uid ?? '';
+      } catch {
+        // ignore as user id might be unavailable for some deployments
+        return '';
+      }
+    };
+
+    const getSpaceId = async () => {
+      try {
+        return (await services.spaces?.getActiveSpace())?.id ?? '';
+      } catch {
+        // ignore
+        return '';
+      }
+    };
+
+    const [userId, spaceId, persistedDiscoverSession] = await Promise.all([
+      existingUserId === undefined ? getUserId() : existingUserId,
+      existingSpaceId === undefined ? getSpaceId() : existingSpaceId,
+      discoverSessionId ? services.savedSearch.getDiscoverSession(discoverSessionId) : undefined,
+    ]);
+
+    if (customizationContext.displayMode === 'standalone' && persistedDiscoverSession) {
+      if (persistedDiscoverSession.id) {
+        services.chrome.recentlyAccessed.add(
+          getSavedSearchFullPathUrl(persistedDiscoverSession.id),
+          persistedDiscoverSession.title ??
+            i18n.translate('discover.defaultDiscoverSessionTitle', {
+              defaultMessage: 'Untitled Discover session',
+            }),
+          persistedDiscoverSession.id
+        );
+      }
+
+      setBreadcrumbs({ services, titleBreadcrumbText: persistedDiscoverSession.title });
+    }
+
     const initialTabsState = tabsStorageManager.loadLocally({
       userId,
       spaceId,
@@ -196,7 +241,10 @@ export const initializeTabs: InternalStateThunkActionCreator<
     });
 
     dispatch(setTabs(initialTabsState));
-  };
+
+    return { userId, spaceId, persistedDiscoverSession };
+  }
+);
 
 export const clearAllTabs: InternalStateThunkActionCreator = () => (dispatch) => {
   const defaultTab: TabState = {

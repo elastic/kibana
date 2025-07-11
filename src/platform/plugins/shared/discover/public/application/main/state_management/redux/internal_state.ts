@@ -34,6 +34,7 @@ import { loadDataViewList } from './actions/data_views';
 import { selectTab } from './selectors';
 import type { TabsStorageManager } from '../tabs_storage_manager';
 import type { DiscoverAppState } from '../discover_app_state_container';
+import { initializeTabs } from './actions';
 
 const MIDDLEWARE_THROTTLE_MS = 300;
 const MIDDLEWARE_THROTTLE_OPTIONS = { leading: false, trailing: true };
@@ -72,6 +73,9 @@ export const defaultTabState: Omit<TabState, keyof TabItem> = {
 
 const initialState: DiscoverInternalState = {
   initializationState: { hasESData: false, hasUserDataView: false },
+  userId: undefined,
+  spaceId: undefined,
+  persistedDiscoverSession: undefined,
   defaultProfileAdHocDataViewIds: [],
   savedDataViews: [],
   expandedDoc: undefined,
@@ -247,6 +251,12 @@ export const internalStateSlice = createSlice({
   extraReducers: (builder) => {
     builder.addCase(loadDataViewList.fulfilled, (state, action) => {
       state.savedDataViews = action.payload;
+    });
+
+    builder.addCase(initializeTabs.fulfilled, (state, action) => {
+      state.userId = action.payload.userId;
+      state.spaceId = action.payload.spaceId;
+      state.persistedDiscoverSession = action.payload.persistedDiscoverSession;
     });
   },
 });
