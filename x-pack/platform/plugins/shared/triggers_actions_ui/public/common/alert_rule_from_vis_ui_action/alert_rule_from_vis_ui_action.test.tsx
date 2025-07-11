@@ -21,9 +21,12 @@ import * as AlertFlyoutComponentModule from './rule_flyout_component';
 import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
 import { AggregateQuery, Query } from '@kbn/es-query';
 
+// wait for the async loadContent to complete
+const tick = () => new Promise((resolve) => setTimeout(resolve, 0));
+
 // mock lazy flyout component
 jest.mock('@kbn/presentation-util', () => ({
-  openLazyFlyout: async ({
+  openLazyFlyout: ({
     loadContent,
   }: {
     loadContent: ({
@@ -32,7 +35,7 @@ jest.mock('@kbn/presentation-util', () => ({
       closeFlyout: () => void;
     }) => Promise<JSX.Element | null | void>;
   }) => {
-    return await loadContent({ closeFlyout: jest.fn() });
+    return loadContent({ closeFlyout: jest.fn() });
   },
 }));
 
@@ -115,6 +118,7 @@ describe('AlertRuleFromVisAction', () => {
         xValues: {},
       },
     });
+    await tick();
 
     expect(getCreateAlertRuleLastCalledInitialValues()).toMatchInlineSnapshot(`
       Object {
@@ -143,6 +147,7 @@ describe('AlertRuleFromVisAction', () => {
         xValues: { 'uhhhhhhhh.field': 'zoop' },
       },
     });
+    await tick();
 
     expect(getCreateAlertRuleLastCalledInitialValues()).toMatchInlineSnapshot(`
       Object {
@@ -171,6 +176,7 @@ describe('AlertRuleFromVisAction', () => {
         xValues: {},
       },
     });
+    await tick();
     expect(getCreateAlertRuleLastCalledInitialValues()).toMatchInlineSnapshot(`
       Object {
         "name": "Elasticsearch query rule from visualization",
@@ -201,6 +207,7 @@ describe('AlertRuleFromVisAction', () => {
         xValues: { 'geo.dest': 'JP' },
       },
     });
+    await tick();
     expect(getCreateAlertRuleLastCalledInitialValues()).toMatchInlineSnapshot(`
       Object {
         "name": "Elasticsearch query rule from visualization",
@@ -228,6 +235,7 @@ describe('AlertRuleFromVisAction', () => {
         xValues: { tags: 'shibbity,bee,bop,doowop' },
       },
     });
+    await tick();
     expect(getCreateAlertRuleLastCalledInitialValues()).toMatchInlineSnapshot(`
       Object {
         "name": "Elasticsearch query rule from visualization",
@@ -263,6 +271,7 @@ describe('AlertRuleFromVisAction', () => {
         xValues: {},
       },
     });
+    await tick();
     expect(getCreateAlertRuleLastCalledInitialValues()).toMatchInlineSnapshot(`
       Object {
         "name": "Elasticsearch query rule from visualization",
@@ -295,6 +304,7 @@ describe('AlertRuleFromVisAction', () => {
         xValues: {},
       },
     });
+    await tick();
     expect(getCreateAlertRuleLastCalledInitialValues()).toMatchInlineSnapshot(`
       Object {
         "name": "Elasticsearch query rule from visualization",
@@ -330,6 +340,7 @@ describe('AlertRuleFromVisAction', () => {
         xValues: {},
       },
     });
+    await tick();
     expect(getCreateAlertRuleLastCalledInitialValues()).toMatchInlineSnapshot(`
       Object {
         "name": "Elasticsearch query rule from visualization",
@@ -369,6 +380,7 @@ describe('AlertRuleFromVisAction', () => {
         xValues: { extension: 'jpg' },
       },
     });
+    await tick();
     expect(getCreateAlertRuleLastCalledInitialValues()).toMatchInlineSnapshot(`
       Object {
         "name": "Elasticsearch query rule from visualization",
@@ -406,6 +418,7 @@ describe('AlertRuleFromVisAction', () => {
         },
       },
     });
+    await tick();
     expect(getCreateAlertRuleLastCalledInitialValues()).toMatchInlineSnapshot(`
       Object {
         "name": "Elasticsearch query rule from visualization",
@@ -478,6 +491,7 @@ describe('AlertRuleFromVisAction', () => {
         parentApi: parentApiMock,
       });
       await action.execute({ embeddable });
+      await tick();
       expect(getCreateAlertRuleLastCalledInitialValues()).toMatchInlineSnapshot(`
         Object {
           "name": "Elasticsearch query rule from visualization",
@@ -545,6 +559,7 @@ describe('AlertRuleFromVisAction', () => {
         })) as unknown as LensApi['serializeState'],
       });
       await action.execute({ embeddable });
+      await tick();
       // wait for the async operations to complete
 
       await act(() => new Promise((resolve) => setTimeout(resolve, 0)));
