@@ -36,7 +36,7 @@ To check for security updates, go to [Security announcements for the Elastic sta
 
 **Dashboards and Visualizations**:
 * Stops dashboards from recommending adhoc data views [#225705]({{kib-pull}}225705).
-* Prevents Dashboard from making multiple requests [#224761]({{kib-pull}}224761).
+* Prevents dashboards from initiating duplicate requests when making a selection on a control [#224761]({{kib-pull}}224761).
 
 **Data ingestion and Fleet**:
 * Fixes bug that causes the CSV export to fail in export CSV in Agent list [#225050]({{kib-pull}}225050).
