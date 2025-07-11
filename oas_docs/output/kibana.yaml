@@ -13358,21 +13358,23 @@ paths:
         - Security Entity Analytics API
   /api/entity_analytics/monitoring/privileges/privileges:
     get:
+      description: Check if the current user has all required permissions for Privilege Monitoring
       operationId: PrivMonPrivileges
       responses:
         '200':
           content:
             application/json:
               example:
-                elasticsearch:
-                  index:
-                    .entity_analytics.monitoring.user-default:
-                      read: true
                 has_all_required: true
+                privileges:
+                  elasticsearch:
+                    index:
+                      .entity_analytics.monitoring.user-default:
+                        read: true
               schema:
                 $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityAnalyticsPrivileges'
           description: Successful response
-      summary: Privileges check on Privilege Monitoring
+      summary: Run a privileges check on Privilege Monitoring
       tags:
         - Security Entity Analytics API
   /api/entity_analytics/monitoring/users:
