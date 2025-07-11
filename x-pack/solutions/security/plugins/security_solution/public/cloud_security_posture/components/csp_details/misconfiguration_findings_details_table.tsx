@@ -143,7 +143,7 @@ export const MisconfigurationFindingsDetailsTable = memo(
     const sortFieldDirection: { [key: string]: string } = {};
     sortFieldDirection[sortField] = sortDirection;
 
-    const { data } = useMisconfigurationFindings({
+    const { data, isLoading } = useMisconfigurationFindings({
       query: buildMisconfigurationEntityFlyoutPreviewQuery(field, value, currentFilter),
       sort: [sortFieldDirection],
       enabled: true,
@@ -327,8 +327,9 @@ export const MisconfigurationFindingsDetailsTable = memo(
             onChange={onTableChange}
             data-test-subj={'securitySolutionFlyoutMisconfigurationFindingsTable'}
             sorting={sorting}
+            loading={isLoading}
           />
-        </EuiPanel>
+       </EuiPanel>
       </>
     );
   }
