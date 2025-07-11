@@ -109,6 +109,7 @@ const getAggregationsByGroupField = (field: string): NamedAggregation[] => {
       return [
         ...aggMetrics,
         getTermAggregation('cloudProvider', VULNERABILITY_FIELDS.CLOUD_PROVIDER),
+        getTermAggregation('accountName', VULNERABILITY_FIELDS.CLOUD_ACCOUNT_NAME),
       ];
     case VULNERABILITY_GROUPING_OPTIONS.CVE:
       return [...aggMetrics, getTermAggregation('description', VULNERABILITY_FIELDS.DESCRIPTION)];

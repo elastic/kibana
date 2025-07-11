@@ -30,6 +30,7 @@ import {
 import { VulnerabilitySeverityMap } from '../../components/vulnerability_severity_map';
 import { CloudProviderIcon } from '../../components/cloud_provider_icon';
 import { VULNERABILITY_GROUPING_OPTIONS } from '../../common/constants';
+import { getGroupPanelTitle } from '../../common/utils/get_group_panel_title';
 
 export const groupPanelRenderer: GroupPanelRenderer<VulnerabilitiesGroupingAggregation> = (
   selectedGroup,
@@ -72,7 +73,7 @@ export const groupPanelRenderer: GroupPanelRenderer<VulnerabilitiesGroupingAggre
                     `}
                     title={bucket.resourceName?.buckets?.[0]?.key as string}
                   >
-                    <strong>{bucket.key_as_string}</strong> {bucket.resourceName?.buckets?.[0]?.key}
+                    {getGroupPanelTitle(bucket, 'resourceName')}
                   </EuiTextBlockTruncate>
                 </EuiText>
               </EuiFlexItem>
@@ -94,7 +95,7 @@ export const groupPanelRenderer: GroupPanelRenderer<VulnerabilitiesGroupingAggre
             <EuiFlexGroup direction="column" gutterSize="none">
               <EuiFlexItem>
                 <EuiText size="s">
-                  <strong>{bucket.key_as_string}</strong>
+                  {getGroupPanelTitle(bucket, 'accountName')}
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem>
@@ -115,7 +116,7 @@ export const groupPanelRenderer: GroupPanelRenderer<VulnerabilitiesGroupingAggre
             <EuiFlexGroup direction="column" gutterSize="none">
               <EuiFlexItem>
                 <EuiText size="s">
-                  <strong>{bucket.key_as_string}</strong>
+                  {getGroupPanelTitle(bucket)}
                 </EuiText>
               </EuiFlexItem>
               {description && (
