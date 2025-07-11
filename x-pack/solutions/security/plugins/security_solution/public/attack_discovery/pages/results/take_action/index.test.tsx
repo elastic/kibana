@@ -8,15 +8,21 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 
-import { SECURITY_FEATURE_ID } from '../../../../../common';
 import { useKibana } from '../../../../common/lib/kibana';
 import { TestProviders } from '../../../../common/mock';
 import { mockAttackDiscovery } from '../../mock/mock_attack_discovery';
 import { getMockAttackDiscoveryAlerts } from '../../mock/mock_attack_discovery_alerts';
+import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
 import { TakeAction } from '.';
 
 const mockMutateAsyncBulk = jest.fn().mockResolvedValue({});
 const mockMutateAsyncStatus = jest.fn().mockResolvedValue({});
+
+jest.mock('../../../../assistant/use_assistant_availability', () => ({
+  useAssistantAvailability: jest.fn(),
+}));
+
+const mockUseAssistantAvailability = useAssistantAvailability as jest.Mock;
 
 jest.mock('../../../../common/lib/kibana', () => ({
   useKibana: jest.fn(),
@@ -54,8 +60,6 @@ jest.mock('../../utils/is_attack_discovery_alert', () => ({
 /** helper function to open the popover */
 const openPopover = () => fireEvent.click(screen.getAllByTestId('takeActionPopoverButton')[0]);
 
-const MOCK_SECURITY_FEATURE_ID = SECURITY_FEATURE_ID;
-
 const defaultProps = {
   attackDiscoveries: [mockAttackDiscovery],
   setSelectedAttackDiscoveries: jest.fn(),
@@ -72,9 +76,6 @@ describe('TakeAction', () => {
             assistant: {
               show: true,
               save: true,
-            },
-            [MOCK_SECURITY_FEATURE_ID]: {
-              configurations: undefined, // AI for SOC is not configured
             },
           },
         },
@@ -103,6 +104,10 @@ describe('TakeAction', () => {
           getBooleanValue: jest.fn().mockReturnValue(true),
         },
       },
+    });
+
+    mockUseAssistantAvailability.mockReturnValue({
+      hasSearchAILakeConfigurations: false, // AI for SOC is not configured
     });
   });
 
@@ -316,14 +321,12 @@ describe('TakeAction', () => {
       setSelectedAttackDiscoveries = jest.fn();
       (useKibana as jest.Mock).mockReturnValue({
         services: {
-          application: {
-            capabilities: {
-              assistant: { show: true, save: true },
-              [MOCK_SECURITY_FEATURE_ID]: { configurations: {} },
-            },
-          },
           cases: { helpers: { canUseCases: () => ({ createComment: true, read: true }) } },
         },
+      });
+
+      mockUseAssistantAvailability.mockReturnValue({
+        hasSearchAILakeConfigurations: true, // AI for SOC IS configured
       });
     });
 
@@ -547,9 +550,6 @@ describe('TakeAction', () => {
               assistant: {
                 show: true,
                 save: true,
-              },
-              [MOCK_SECURITY_FEATURE_ID]: {
-                configurations: undefined,
               },
             },
           },

@@ -21,10 +21,11 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 
+import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
 import { useAddToNewCase } from './use_add_to_case';
 import { useAddToExistingCase } from './use_add_to_existing_case';
 import { useViewInAiAssistant } from '../attack_discovery_panel/view_in_ai_assistant/use_view_in_ai_assistant';
-import { APP_ID, SECURITY_FEATURE_ID } from '../../../../../common';
+import { APP_ID } from '../../../../../common';
 import { useKibana } from '../../../../common/lib/kibana';
 import * as i18n from './translations';
 import { UpdateAlertsModal } from './update_alerts_modal';
@@ -55,12 +56,9 @@ const TakeActionComponent: React.FC<Props> = ({
   );
 
   const {
-    services: {
-      application: { capabilities },
-      cases,
-    },
+    services: { cases },
   } = useKibana();
-  const aiForSoc = capabilities[SECURITY_FEATURE_ID].configurations;
+  const { hasSearchAILakeConfigurations } = useAssistantAvailability();
 
   const { attackDiscoveryAlertsEnabled } = useKibanaFeatureFlags();
 
@@ -165,12 +163,12 @@ const TakeActionComponent: React.FC<Props> = ({
 
       setPendingAction(workflowStatus);
 
-      if (aiForSoc) {
+      if (hasSearchAILakeConfigurations) {
         // there's no modal for AI for SOC, so we call onConfirm directly
         onConfirm({ updateAlerts: false, workflowStatus });
       }
     },
-    [aiForSoc, closePopover, onConfirm]
+    [closePopover, hasSearchAILakeConfigurations, onConfirm]
   );
 
   const onClickAddToNewCase = useCallback(async () => {
@@ -343,7 +341,7 @@ const TakeActionComponent: React.FC<Props> = ({
         <EuiContextMenuPanel size="s" items={allItems} />
       </EuiPopover>
 
-      {pendingAction != null && !aiForSoc && (
+      {pendingAction != null && !hasSearchAILakeConfigurations && (
         <UpdateAlertsModal
           alertsCount={alertIds.length}
           attackDiscoveriesCount={attackDiscoveryIds.length}
