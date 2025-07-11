@@ -6,26 +6,14 @@
  */
 
 import expect from '@kbn/expect';
-import { APP_ID as CASES_APP_ID } from '@kbn/cases-plugin/common/constants';
 import { APP_ID as SECURITY_SOLUTION_APP_ID } from '@kbn/security-solution-plugin/common/constants';
-import { observabilityFeatureId as OBSERVABILITY_APP_ID } from '@kbn/observability-plugin/common';
-
 import { deleteAllCaseItems } from '@kbn/test-suites-xpack-platform/cases_api_integration/common/lib/api';
 import {
   bulkGetUserProfiles,
   suggestUserProfiles,
 } from '@kbn/test-suites-xpack-platform/cases_api_integration/common/lib/api/user_profiles';
+import { secAllUser } from '@kbn/test-suites-xpack-platform/api_integration/apis/cases/common/users';
 import type { FtrProviderContext } from '../../ftr_provider_context';
-import {
-  casesAllUser,
-  casesReadUser,
-  obsCasesAllUser,
-  obsCasesReadUser,
-  secAllUser,
-  secReadCasesReadUser,
-  secAllCasesNoneUser,
-  secNoneUser,
-} from './common/users';
 
 export default ({ getService }: FtrProviderContext): void => {
   describe('bulk_get_user_profiles', () => {
@@ -36,11 +24,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await deleteAllCaseItems(es);
     });
 
-    for (const { user, owner } of [
-      { user: secAllUser, owner: SECURITY_SOLUTION_APP_ID },
-      { user: casesAllUser, owner: CASES_APP_ID },
-      { user: obsCasesAllUser, owner: OBSERVABILITY_APP_ID },
-    ]) {
+    for (const { user, owner } of [{ user: secAllUser, owner: SECURITY_SOLUTION_APP_ID }]) {
       it(`User ${
         user.username
       } with roles(s) ${user.roles.join()} can bulk get valid user profiles`, async () => {
@@ -61,42 +45,6 @@ export default ({ getService }: FtrProviderContext): void => {
 
         expect(profiles.length).to.be(1);
         expect(profiles[0].user.username).to.eql(user.username);
-      });
-    }
-
-    for (const { user } of [
-      { user: secReadCasesReadUser },
-      { user: casesReadUser },
-      { user: obsCasesReadUser },
-      { user: secAllCasesNoneUser },
-    ]) {
-      it(`User ${
-        user.username
-      } with roles(s) ${user.roles.join()} can bulk get user profiles`, async () => {
-        await bulkGetUserProfiles({
-          supertest: supertestWithoutAuth,
-          req: {
-            uids: ['1'],
-            dataPath: 'avatar',
-          },
-          auth: { user, space: null },
-        });
-      });
-    }
-
-    for (const { user } of [{ user: secNoneUser }]) {
-      it(`User ${
-        user.username
-      } with roles(s) ${user.roles.join()} cannot bulk get user profiles because they lack the bulkGetUserProfiles privilege`, async () => {
-        await bulkGetUserProfiles({
-          supertest: supertestWithoutAuth,
-          req: {
-            uids: ['1'],
-            dataPath: 'avatar',
-          },
-          auth: { user, space: null },
-          expectedHttpCode: 403,
-        });
       });
     }
   });
