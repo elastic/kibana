@@ -762,7 +762,6 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                               rule={rule}
                               isInteractive
                               dataTestSubj="definitionRule"
-                              showModifiedFields
                             />
                           )}
                         </StepPanel>
