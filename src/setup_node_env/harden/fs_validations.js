@@ -157,7 +157,7 @@ function validateFileSize(data) {
     return true;
   }
 
-  if (typeof fileSize !== 'number' || fileSize <= 0) {
+  if (typeof fileSize !== 'number') {
     throw new Error(`Invalid file size: ${fileSize}`);
   }
 

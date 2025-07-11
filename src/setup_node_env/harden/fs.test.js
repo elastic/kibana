@@ -38,10 +38,10 @@ describe('Hardened FS', () => {
       });
     });
 
-    it('should prevent writing to unsafe paths', (done) => {
+    it('should prevent writing to Path traversal sequences not alloweds', (done) => {
       safeFs.writeFile('../bad.json', 'pwn', (err) => {
         expect(err).toBeTruthy();
-        expect(err.message).toMatch(/Unsafe path/);
+        expect(err.message).toMatch(/Path traversal sequences not allowed/);
         done();
       });
     });
@@ -54,8 +54,10 @@ describe('Hardened FS', () => {
       ).resolves.not.toThrow();
     });
 
-    it('should prevent writing to unsafe paths', async () => {
-      expect(() => safeFsPromises.writeFile('../../evil2.json', 'hax')).toThrow(/Unsafe path/);
+    it('should prevent writing to Path traversal sequences not alloweds', async () => {
+      expect(() => safeFsPromises.writeFile('../../evil2.json', 'hax')).toThrow(
+        /Path traversal sequences not allowed/
+      );
     });
   });
 
@@ -68,10 +70,10 @@ describe('Hardened FS', () => {
       }).not.toThrow();
     });
 
-    it('should prevent creating write streams to unsafe paths', () => {
+    it('should prevent creating write streams to Path traversal sequences not alloweds', () => {
       expect(() => {
         safeFs.createWriteStream('../../stream-bad.json');
-      }).toThrow(/Unsafe path/);
+      }).toThrow(/Path traversal sequences not allowed/);
     });
   });
 });
