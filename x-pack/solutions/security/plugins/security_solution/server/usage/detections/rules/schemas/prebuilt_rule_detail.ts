@@ -29,7 +29,7 @@ export const ruleMetricsSchema: MakeSchemaFrom<RuleMetric> = {
   is_customized: {
     type: 'boolean',
     _meta: {
-              "description": "Whether this is a customized prebuilt rule"
+      description: 'Whether this is a customized prebuilt rule',
     },
   },
   elastic_rule: {
