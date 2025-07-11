@@ -106,6 +106,7 @@ export const getAlertsTableEmbeddableFactory = (
             loadContent: async ({ closeFlyout, ariaLabelledBy }) => {
               const { openConfigEditor } = await import('../components/open_config_editor');
               return await openConfigEditor({
+                initialConfig: currentTableConfig,
                 ariaLabelledBy,
                 coreServices,
                 closeFlyout,
