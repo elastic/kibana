@@ -161,7 +161,8 @@ function validateFileSize(data) {
     // If data is array-like with length property
     fileSize = data.length;
   } else {
-    fileSize = -1;
+    // If we cant determine the size, skip the validation
+    return true;
   }
 
   if (typeof fileSize !== 'number' || fileSize <= 0) {
