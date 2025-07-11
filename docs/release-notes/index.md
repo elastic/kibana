@@ -59,7 +59,7 @@ For the Elastic Security 9.0.4 release information, refer to [Elastic Security S
 
 **Search**:
 * Fixes handling of context limit errors in Playground when using the Elastic Managed LLM  [#225360]({{kib-pull}}225360).
-* Adjusted `z-index` of app menu header to avoid conflicts with the portable dev console [#224708]({{kib-pull}}224708).
+* Adjusts `z-index` of the header menu to avoid conflicting with Console [#224708]({{kib-pull}}224708).
 
 ## 9.0.3 [kibana-9.0.3-release-notes]
 
