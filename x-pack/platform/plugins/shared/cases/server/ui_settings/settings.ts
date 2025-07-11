@@ -21,7 +21,7 @@ export const ADVANCED_SETTINGS_CONFIG = {
       defaultMessage: 'Show incremental id',
     }),
     schema: schema.boolean(),
-    value: false,
+    value: true,
     readonly: false,
     category: ['cases'],
   },
