@@ -28,6 +28,7 @@ import { SyntheticsParams } from '../../../../../../common/runtime_types';
 import { useParamsList } from '../hooks/use_params_list';
 import { AddParamFlyout } from './add_param_flyout';
 import { DeleteParam } from './delete_param';
+import { useFeatureId } from '../../../../../hooks/use_capabilities';
 
 export interface ListParamItem extends SyntheticsParams {
   id: string;
@@ -47,8 +48,9 @@ export const ParamsList = () => {
   const [deleteParam, setDeleteParam] = useState<ListParamItem[]>([]);
 
   const { application } = useKibana().services;
+  const SYNTHETICS_FEATURE_ID = useFeatureId();
 
-  const canSave = (application?.capabilities.synthetics?.save ?? false) as boolean;
+  const canSave = (application?.capabilities[SYNTHETICS_FEATURE_ID]?.save ?? false) as boolean;
 
   const columns: Array<EuiBasicTableColumn<ListParamItem>> = [
     {

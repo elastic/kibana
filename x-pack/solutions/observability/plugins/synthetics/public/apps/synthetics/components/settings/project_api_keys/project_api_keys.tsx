@@ -21,6 +21,7 @@ import { ClientPluginsStart } from '../../../../../plugin';
 import { useEnablement } from '../../../hooks';
 import { SpaceSelector } from '../components/spaces_select';
 import { useFormWrapped } from '../../../../../hooks/use_form_wrapped';
+import { useFeatureId } from '../../../../../hooks/use_capabilities';
 import { ApiKeyBtn } from './api_key_btn';
 
 const syntheticsTestRunDocsLink =
@@ -32,6 +33,7 @@ export const ProjectAPIKeys = () => {
   const [apiKey, setApiKey] = useState<string | undefined>(undefined);
   const [loadAPIKey, setLoadAPIKey] = useState(false);
   const [accessToElasticManagedLocations, setAccessToElasticManagedLocations] = useState(true);
+  const SYNTHETICS_FEATURE_ID = useFeatureId();
 
   const form = useFormWrapped({
     mode: 'onSubmit',
@@ -58,8 +60,8 @@ export const ProjectAPIKeys = () => {
     !!kServices?.fleet?.authz.integrations.writeIntegrationPolicies;
 
   const canUsePublicLocations =
-    useKibana().services?.application?.capabilities.synthetics?.elasticManagedLocationsEnabled ??
-    true;
+    useKibana().services?.application?.capabilities[SYNTHETICS_FEATURE_ID]
+      ?.elasticManagedLocationsEnabled ?? true;
 
   const { data, loading, error } = useFetcher(async () => {
     if (loadAPIKey) {
@@ -99,7 +101,8 @@ export const ProjectAPIKeys = () => {
     }
   }, [error, kServices?.notifications?.toasts]);
 
-  const canSave: boolean = !!useKibana().services?.application?.capabilities.synthetics?.save;
+  const canSave: boolean =
+    !!useKibana().services?.application?.capabilities[SYNTHETICS_FEATURE_ID]?.save;
 
   if (enablementLoading) {
     return <LoadingState />;

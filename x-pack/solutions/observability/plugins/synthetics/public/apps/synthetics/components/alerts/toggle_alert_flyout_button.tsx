@@ -24,6 +24,7 @@ import { ManageRulesLink } from '../common/links/manage_rules_link';
 import { ClientPluginsStart } from '../../../../plugin';
 import { STATUS_RULE_NAME, TLS_RULE_NAME, ToggleFlyoutTranslations } from './hooks/translations';
 import { useSyntheticsRules } from './hooks/use_synthetics_rules';
+import { useFeatureId } from '../../../../hooks/use_capabilities';
 import {
   selectAlertFlyoutVisibility,
   selectMonitorListState,
@@ -35,7 +36,9 @@ export const ToggleAlertFlyoutButton = () => {
 
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const { application } = useKibana<ClientPluginsStart>().services;
-  const hasAlertingWrite = application?.capabilities.synthetics?.[`alerting:save`] ?? false;
+  const SYNTHETICS_FEATURE_ID = useFeatureId();
+  const hasAlertingWrite =
+    application?.capabilities[SYNTHETICS_FEATURE_ID]?.[`alerting:save`] ?? false;
 
   const { EditAlertFlyout, loading, NewRuleFlyout } = useSyntheticsRules(isOpen);
   const { loaded, data: monitors } = useSelector(selectMonitorListState);

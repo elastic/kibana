@@ -9,16 +9,23 @@ import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { SYNTHETICS_INDEX_PATTERN } from '../../common/constants';
+import { SYNTHETICS_FEATURE_ID } from '../../common/constants/plugin';
 import { MonitorLocations } from '../../common/runtime_types';
 
 export const useCanEditSynthetics = () => {
-  return !!useKibana().services?.application?.capabilities.synthetics?.save;
+  return !!useKibana().services?.application?.capabilities[SYNTHETICS_FEATURE_ID]?.save;
+};
+
+export const useCanEditSyntheticsAlerts = () => {
+  return !!useKibana().services?.application?.capabilities[SYNTHETICS_FEATURE_ID]?.[
+    'alerting:save'
+  ];
 };
 
 export const useCanUsePublicLocations = (monLocations?: MonitorLocations) => {
   const canUsePublicLocations =
-    useKibana().services?.application?.capabilities.synthetics?.elasticManagedLocationsEnabled ??
-    true;
+    useKibana().services?.application?.capabilities[SYNTHETICS_FEATURE_ID]
+      ?.elasticManagedLocationsEnabled ?? true;
   const publicLocations = monLocations?.some((loc) => loc.isServiceManaged);
 
   if (!publicLocations) {
@@ -71,4 +78,8 @@ export const useCanReadSyntheticsIndex = () => {
     loading,
     status,
   };
+};
+
+export const useFeatureId = () => {
+  return SYNTHETICS_FEATURE_ID;
 };

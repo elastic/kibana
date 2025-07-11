@@ -40,6 +40,7 @@ import { MonitorTypeBadge } from '../../../common/components/monitor_type_badge'
 import { getFrequencyLabel } from './labels';
 import { MonitorEnabled } from './monitor_enabled';
 import { MonitorLocations } from './monitor_locations';
+import { useFeatureId } from '../../../../../../hooks/use_capabilities';
 
 export function useMonitorListColumns({
   loading,
@@ -63,9 +64,11 @@ export function useMonitorListColumns({
     return alertStatus(fields[ConfigKey.CONFIG_ID]) === FETCH_STATUS.LOADING;
   };
 
+  const SYNTHETICS_FEATURE_ID = useFeatureId();
+
   const canUsePublicLocations =
-    useKibana().services?.application?.capabilities.synthetics?.elasticManagedLocationsEnabled ??
-    true;
+    useKibana().services?.application?.capabilities[SYNTHETICS_FEATURE_ID]
+      ?.elasticManagedLocationsEnabled ?? true;
 
   const isPublicLocationsAllowed = (fields: EncryptedSyntheticsSavedMonitor) => {
     const publicLocations = fields.locations.some((loc) => loc.isServiceManaged);

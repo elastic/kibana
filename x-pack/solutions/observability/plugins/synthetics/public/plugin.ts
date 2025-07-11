@@ -69,7 +69,7 @@ import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import { registerSyntheticsEmbeddables } from './apps/embeddables/register_embeddables';
 import { kibanaService } from './utils/kibana_service';
-import { PLUGIN } from '../common/constants/plugin';
+import { PLUGIN, SYNTHETICS_FEATURE_ID } from '../common/constants/plugin';
 import { OVERVIEW_ROUTE } from '../common/constants/ui';
 import { locators } from './apps/locators';
 import { syntheticsAlertTypeInitializers } from './apps/synthetics/lib/alert_types';
@@ -275,7 +275,7 @@ function registerSyntheticsRoutesWithNavigation(
   plugins.observabilityShared.navigation.registerSections(
     from(core.getStartServices()).pipe(
       map(([coreStart]) => {
-        if (coreStart.application.capabilities.synthetics?.show) {
+        if (coreStart.application.capabilities[SYNTHETICS_FEATURE_ID]?.show) {
           return [
             {
               label: 'Synthetics',

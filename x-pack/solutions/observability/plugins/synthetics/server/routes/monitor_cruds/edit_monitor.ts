@@ -331,12 +331,13 @@ export const validatePermissions = async (
 };
 
 export const validateLocationPermissions = async ({ server, request }: RouteContext) => {
-  const uptimeFeature = await server.coreStart?.capabilities.resolveCapabilities(request, {
-    capabilityPath: 'uptime.*',
+  const syntheticsFeature = await server.coreStart?.capabilities.resolveCapabilities(request, {
+    capabilityPath: 'synthetics.*',
   });
   const elasticManagedLocationsEnabled =
-    Boolean(uptimeFeature.uptime.elasticManagedLocationsEnabled) ?? true;
-  const canManagePrivateLocations = Boolean(uptimeFeature.uptime.canManagePrivateLocations) ?? true;
+    Boolean(syntheticsFeature.synthetics.elasticManagedLocationsEnabled) ?? true;
+  const canManagePrivateLocations =
+    Boolean(syntheticsFeature.synthetics.canManagePrivateLocations) ?? true;
 
   return {
     canManagePrivateLocations,

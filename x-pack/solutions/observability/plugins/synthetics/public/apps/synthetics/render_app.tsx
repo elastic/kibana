@@ -14,6 +14,7 @@ import { SyntheticsAppProps } from './contexts';
 import { getIntegratedAppAvailability } from './utils/adapters';
 import { DEFAULT_TIMEPICKER_QUICK_RANGES, INTEGRATED_SOLUTIONS } from '../../../common/constants';
 import { SyntheticsApp } from './synthetics_app';
+import { SYNTHETICS_FEATURE_ID } from '../../../common/constants';
 
 export const getSyntheticsAppProps = (): SyntheticsAppProps => {
   const { isDev, isServerless, coreStart, startPlugins, setupPlugins, appMountParameters } =
@@ -33,7 +34,7 @@ export const getSyntheticsAppProps = (): SyntheticsAppProps => {
     INTEGRATED_SOLUTIONS
   );
 
-  const canSave = (capabilities.synthetics?.save ?? false) as boolean; // TODO: Determine for synthetics
+  const canSave = (capabilities[SYNTHETICS_FEATURE_ID]?.save ?? false) as boolean; // TODO: Determine for synthetics
   const darkMode = theme.getTheme().darkMode;
 
   return {

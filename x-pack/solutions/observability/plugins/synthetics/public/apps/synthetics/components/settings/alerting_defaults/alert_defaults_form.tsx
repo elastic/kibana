@@ -18,7 +18,6 @@ import {
   EuiSwitch,
 } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { isEmpty, isEqual } from 'lodash';
 import { hasInvalidEmail } from './validation';
@@ -32,6 +31,7 @@ import {
 import { DefaultConnectorField } from './connector_field';
 import { DynamicSettings } from '../../../../../../common/runtime_types';
 import { useAlertingDefaults } from './hooks/use_alerting_defaults';
+import { useCanEditSyntheticsAlerts } from '../../../../../hooks/use_capabilities';
 
 interface FormFields extends Omit<DynamicSettings, 'defaultEmail'> {
   defaultEmail: Partial<DynamicSettings['defaultEmail']>;
@@ -44,8 +44,7 @@ export const AlertDefaultsForm = () => {
 
   const [formFields, setFormFields] = useState<FormFields>(DYNAMIC_SETTINGS_DEFAULTS as FormFields);
 
-  const canEdit: boolean =
-    !!useKibana().services?.application?.capabilities.synthetics?.['alerting:save'] || false;
+  const canEdit: boolean = useCanEditSyntheticsAlerts();
 
   const isDisabled = !canEdit;
 

@@ -35,6 +35,7 @@ import { ListParamItem } from './params_list';
 import { SyntheticsParams } from '../../../../../../common/runtime_types';
 import { useFormWrapped } from '../../../../../hooks/use_form_wrapped';
 import { AddParamForm } from './add_param_form';
+import { useFeatureId } from '../../../../../hooks/use_capabilities';
 
 export const AddParamFlyout = ({
   items,
@@ -70,8 +71,9 @@ export const AddParamFlyout = ({
   }, [setIsEditingItem]);
 
   const { application } = useKibana<ClientPluginsStart>().services;
+  const SYNTHETICS_FEATURE_ID = useFeatureId();
 
-  const canSave = (application?.capabilities.synthetics?.save ?? false) as boolean;
+  const canSave = (application?.capabilities[SYNTHETICS_FEATURE_ID]?.save ?? false) as boolean;
 
   const dispatch = useDispatch();
 

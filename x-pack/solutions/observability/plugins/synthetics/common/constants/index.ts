@@ -7,6 +7,7 @@
 
 export { CLIENT_DEFAULTS } from './client_defaults';
 export { CONTEXT_DEFAULTS } from './context_defaults';
+export { SYNTHETICS_FEATURE_ID, UPTIME_FEATURE_ID } from './plugin';
 export * from './capabilities';
 export * from './settings_defaults';
 export * from './ui';

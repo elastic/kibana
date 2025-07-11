@@ -9,7 +9,7 @@ import { SavedObject, SavedObjectsFindResult } from '@kbn/core-saved-objects-api
 import { schema, TypeOf } from '@kbn/config-schema';
 import { RouteContext, SyntheticsRestApiRouteFactory } from '../../types';
 import { syntheticsParamType } from '../../../../common/types/saved_objects';
-import { SYNTHETICS_API_URLS } from '../../../../common/constants';
+import { SYNTHETICS_API_URLS, SYNTHETICS_FEATURE_ID } from '../../../../common/constants';
 import { SyntheticsParams, SyntheticsParamsReadonly } from '../../../../common/runtime_types';
 
 const RequestParamsSchema = schema.object({
@@ -68,9 +68,9 @@ const isAnAdminUser = async (routeContext: RouteContext) => {
   const canSave =
     (
       await server.coreStart?.capabilities.resolveCapabilities(request, {
-        capabilityPath: 'uptime.*',
+        capabilityPath: `${SYNTHETICS_FEATURE_ID}.*`,
       })
-    ).uptime.save ?? false;
+    )[SYNTHETICS_FEATURE_ID].save ?? false;
 
   return (isSuperUser || isAdmin) && canSave;
 };

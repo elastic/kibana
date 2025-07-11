@@ -26,3 +26,6 @@ export const PLUGIN = {
     defaultMessage: 'Synthetics',
   }),
 };
+
+export const SYNTHETICS_FEATURE_ID = PLUGIN.SYNTHETICS_PLUGIN_ID;
+export const UPTIME_FEATURE_ID = PLUGIN.UPTIME_PLUGIN_ID;

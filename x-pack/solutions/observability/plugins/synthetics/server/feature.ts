@@ -25,7 +25,7 @@ import {
   syntheticsParamType,
 } from '../common/types/saved_objects';
 
-import { PLUGIN } from '../common/constants/plugin';
+import { PLUGIN, SYNTHETICS_FEATURE_ID, UPTIME_FEATURE_ID } from '../common/constants/plugin';
 import {
   syntheticsSettingsObjectType,
   uptimeSettingsObjectType,
@@ -39,7 +39,12 @@ const ruleTypes = [...UPTIME_RULE_TYPE_IDS, ...SYNTHETICS_RULE_TYPE_IDS];
 
 const alertingFeatures = ruleTypes.map((ruleTypeId) => ({
   ruleTypeId,
-  consumers: [PLUGIN.SYNTHETICS_PLUGIN_ID, ALERTING_FEATURE_ID, ...DEPRECATED_ALERTING_CONSUMERS],
+  consumers: [
+    SYNTHETICS_FEATURE_ID,
+    UPTIME_FEATURE_ID,
+    ALERTING_FEATURE_ID,
+    ...DEPRECATED_ALERTING_CONSUMERS,
+  ],
 }));
 
 const canManageSyntheticsAlerts: SubFeaturePrivilegeGroupConfig = {
@@ -55,6 +60,14 @@ const canManageSyntheticsAlerts: SubFeaturePrivilegeGroupConfig = {
       savedObject: {
         all: [],
         read: [],
+      },
+      alerting: {
+        rule: {
+          all: alertingFeatures,
+        },
+        alert: {
+          all: alertingFeatures,
+        },
       },
       ui: ['alerting:save'],
     },
@@ -74,6 +87,7 @@ const elasticManagedLocationsEnabledPrivilege: SubFeaturePrivilegeGroupConfig = 
         all: [],
         read: [],
       },
+
       ui: ['elasticManagedLocationsEnabled'],
     },
   ],
@@ -99,7 +113,7 @@ const canManagePrivateLocationsPrivilege: SubFeaturePrivilegeGroupConfig = {
 };
 
 export const syntheticsFeature = {
-  id: PLUGIN.SYNTHETICS_PLUGIN_ID,
+  id: SYNTHETICS_FEATURE_ID,
   name: PLUGIN.NAME,
   order: 1000,
   category: DEFAULT_APP_CATEGORIES.observability,

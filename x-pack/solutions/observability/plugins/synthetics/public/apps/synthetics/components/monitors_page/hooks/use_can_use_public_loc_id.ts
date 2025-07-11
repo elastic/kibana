@@ -10,9 +10,12 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { selectServiceLocationsState } from '../../../state';
 import { selectOverviewStatus } from '../../../state/overview_status';
 import { useEnablement } from '../../../hooks';
+import { useFeatureId } from '../../../../../hooks/use_capabilities';
 
 export const useCanUsePublicLocById = (configId: string) => {
   const { allConfigs } = useSelector(selectOverviewStatus);
+
+  const SYNTHETICS_FEATURE_ID = useFeatureId();
 
   const { isServiceAllowed } = useEnablement();
 
@@ -25,8 +28,8 @@ export const useCanUsePublicLocById = (configId: string) => {
   );
 
   const canUsePublicLocations =
-    useKibana().services?.application?.capabilities.synthetics?.elasticManagedLocationsEnabled ??
-    true;
+    useKibana().services?.application?.capabilities[SYNTHETICS_FEATURE_ID]
+      ?.elasticManagedLocationsEnabled ?? true;
 
   if (!isServiceAllowed) {
     return false;

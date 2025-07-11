@@ -25,7 +25,7 @@ import {
   syntheticsParamType,
 } from '../common/types/saved_objects';
 
-import { PLUGIN } from '../common/constants/plugin';
+import { PLUGIN, UPTIME_FEATURE_ID } from '../common/constants/plugin';
 import {
   syntheticsSettingsObjectType,
   uptimeSettingsObjectType,
@@ -99,7 +99,7 @@ export const syntheticsFeatureDeprecated = {
         'The uptime feature is deprecated. Please use the synthetics feature instead.',
     }),
   },
-  id: PLUGIN.UPTIME_PLUGIN_ID,
+  id: UPTIME_FEATURE_ID,
   name: `${PLUGIN.NAME} (Deprecated)`,
   order: 1000,
   category: DEFAULT_APP_CATEGORIES.observability,

@@ -17,6 +17,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ClientPluginsSetup, ClientPluginsStart } from '../../../plugin';
 import { CLIENT_DEFAULTS, CONTEXT_DEFAULTS } from '../../../../common/constants';
 import { useGetUrlParams } from '../hooks';
+import { useFeatureId } from '../../../hooks/use_capabilities';
 
 export interface CommonlyUsedDateRange {
   from: string;
@@ -99,9 +100,10 @@ export const SyntheticsSettingsContextProvider: React.FC<PropsWithChildren<Synth
   const { dateRangeStart, dateRangeEnd } = useGetUrlParams();
 
   const { application } = useKibana().services;
+  const SYNTHETICS_FEATURE_ID = useFeatureId();
 
-  const canSave = (application?.capabilities.synthetics?.save ?? false) as boolean;
-  const canManagePrivateLocations = (application?.capabilities.synthetics
+  const canSave = (application?.capabilities[SYNTHETICS_FEATURE_ID]?.save ?? false) as boolean;
+  const canManagePrivateLocations = (application?.capabilities[SYNTHETICS_FEATURE_ID]
     .canManagePrivateLocations ?? false) as boolean;
 
   const value = useMemo(() => {
