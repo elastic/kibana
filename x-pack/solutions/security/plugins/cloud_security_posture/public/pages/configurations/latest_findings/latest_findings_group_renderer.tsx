@@ -29,6 +29,7 @@ import { ComplianceScoreBar } from '../../../components/compliance_score_bar';
 import { FindingsGroupingAggregation } from './use_grouped_findings';
 import { NULL_GROUPING_MESSAGES, NULL_GROUPING_UNIT } from './constants';
 import { FINDINGS_GROUPING_COUNTER } from '../test_subjects';
+import { getGroupPanelTitle } from '../../../common/utils/get_group_panel_title';
 
 export const groupPanelRenderer: GroupPanelRenderer<FindingsGroupingAggregation> = (
   selectedGroup: string,
@@ -44,22 +45,6 @@ export const groupPanelRenderer: GroupPanelRenderer<FindingsGroupingAggregation>
   const renderNullGroup = (title: string) => (
     <NullGroup title={title} field={selectedGroup} unit={NULL_GROUPING_UNIT} />
   );
-
-  const getGroupPanelTitle = (aggregationField?: keyof FindingsGroupingAggregation) => {
-    const aggregationFieldValue = aggregationField
-      ? (bucket[aggregationField] as { buckets?: GenericBuckets[] })?.buckets?.[0]?.key
-      : null;
-
-    if (aggregationFieldValue) {
-      return (
-        <>
-          <strong>{aggregationFieldValue}</strong> - {bucket.key_as_string}
-        </>
-      );
-    }
-
-    return <strong>{bucket.key_as_string}</strong>;
-  };
 
   switch (selectedGroup) {
     case FINDINGS_GROUPING_OPTIONS.RESOURCE_ID:
@@ -82,7 +67,7 @@ export const groupPanelRenderer: GroupPanelRenderer<FindingsGroupingAggregation>
                     `}
                     title={bucket.resourceName?.buckets?.[0]?.key as string}
                   >
-                    {getGroupPanelTitle('resourceName')}
+                    {getGroupPanelTitle(bucket, 'resourceName')}
                   </EuiTextBlockTruncate>
                 </EuiText>
               </EuiFlexItem>
@@ -103,7 +88,7 @@ export const groupPanelRenderer: GroupPanelRenderer<FindingsGroupingAggregation>
           <EuiFlexItem>
             <EuiFlexGroup direction="column" gutterSize="none">
               <EuiFlexItem>
-                <EuiText size="s"> {getGroupPanelTitle()}</EuiText>
+                <EuiText size="s"> {getGroupPanelTitle(bucket)}</EuiText>
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiText size="xs" color="subdued">
@@ -131,7 +116,7 @@ export const groupPanelRenderer: GroupPanelRenderer<FindingsGroupingAggregation>
           <EuiFlexItem>
             <EuiFlexGroup direction="column" gutterSize="none">
               <EuiFlexItem>
-                <EuiText size="s">{getGroupPanelTitle('accountName')}</EuiText>
+                <EuiText size="s">{getGroupPanelTitle(bucket, 'accountName')}</EuiText>
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiText size="xs" color="subdued">
@@ -158,7 +143,7 @@ export const groupPanelRenderer: GroupPanelRenderer<FindingsGroupingAggregation>
           <EuiFlexItem>
             <EuiFlexGroup direction="column" gutterSize="none">
               <EuiFlexItem>
-                <EuiText size="s">{getGroupPanelTitle('clusterName')}</EuiText>
+                <EuiText size="s">{getGroupPanelTitle(bucket, 'clusterName')}</EuiText>
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiText size="xs" color="subdued">
@@ -177,7 +162,7 @@ export const groupPanelRenderer: GroupPanelRenderer<FindingsGroupingAggregation>
           <EuiFlexItem>
             <EuiFlexGroup direction="column" gutterSize="none">
               <EuiFlexItem>
-                <EuiText size="s">{getGroupPanelTitle()}</EuiText>
+                <EuiText size="s">{getGroupPanelTitle(bucket)}</EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
