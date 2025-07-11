@@ -6,10 +6,8 @@
  */
 
 import type { AnonymizationRegexWorkerTaskPayload } from '@kbn/inference-common';
-import { resolve } from 'path';
 import { executeRegexRuleTask } from './execute_regex_rule_task';
 
-export const regexWorkerFilename = resolve(__filename);
 // eslint-disable-next-line import/no-default-export
 export default function ({ rule, records }: AnonymizationRegexWorkerTaskPayload) {
   return executeRegexRuleTask({ rule, records });

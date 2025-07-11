@@ -5,7 +5,6 @@
  * 2.0.
  */
 /* eslint-disable @kbn/imports/no_boundary_crossing */
-const { workerData } = require('worker_threads');
 
 if (process.env.NODE_ENV !== 'production') {
   require('../../../../../../../../src/setup_node_env');
@@ -15,4 +14,4 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 // eslint-disable-next-line import/no-dynamic-require
-module.exports = require(workerData.fullpath);
+module.exports = require('./regex_worker_task');
