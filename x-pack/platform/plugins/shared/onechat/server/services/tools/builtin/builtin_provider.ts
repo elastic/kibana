@@ -25,7 +25,6 @@ export const createBuiltInToolTypeDefinition = ({
 
 export const createBuiltinToolClient = ({
   registry,
-  request,
 }: {
   registry: BuiltinToolRegistry;
   request: KibanaRequest;
@@ -56,5 +55,6 @@ export const convertTool = (tool: BuiltinToolDefinition): ToolDefinition => {
     tags: tool.tags,
     configuration: {},
     schema: tool.schema,
+    handler: tool.handler,
   };
 };

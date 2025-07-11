@@ -6,3 +6,4 @@
  */
 
 export { toolToDescriptor, toExecutableTool } from './tool_conversion';
+export { registryToProvider } from './registry_to_provider';

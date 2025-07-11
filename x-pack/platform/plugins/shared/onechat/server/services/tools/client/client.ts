@@ -8,21 +8,20 @@
 import { errors as esErrors } from '@elastic/elasticsearch';
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { ToolDescriptor, createToolNotFoundError } from '@kbn/onechat-common';
-import { EsqlToolDefinition } from '@kbn/onechat-server';
-
+import { createToolNotFoundError, createBadRequestError } from '@kbn/onechat-common';
 import { ToolTypeCreateParams, ToolTypeUpdateParams } from '../tool_provider';
 import { ToolStorage, createStorage } from './storage';
-import { fromEs, createAttributes, updateDocument, Document } from './converters';
+import { fromEs, createAttributes, updateDocument } from './converters';
+import { ToolDocument, ToolPersistedDefinition } from './types';
 
 /**
- * Client for tolol persisted definitions.
+ * Client for persisted tool definitions.
  */
 export interface ToolClient {
-  get(toolId: string): Promise<ToolDescriptor>;
-  list(): Promise<ToolDescriptor[]>;
-  create(esqlTool: ToolTypeCreateParams): Promise<ToolDescriptor>;
-  update(toolId: string, updates: ToolTypeUpdateParams): Promise<ToolDescriptor>;
+  get(toolId: string): Promise<ToolPersistedDefinition>;
+  list(): Promise<ToolPersistedDefinition[]>;
+  create(esqlTool: ToolTypeCreateParams): Promise<ToolPersistedDefinition>;
+  update(toolId: string, updates: ToolTypeUpdateParams): Promise<ToolPersistedDefinition>;
   delete(toolId: string): Promise<boolean>;
 }
 
@@ -44,7 +43,7 @@ class ToolClientImpl {
     this.storage = storage;
   }
 
-  async get(id: string): Promise<ToolDescriptor> {
+  async get(id: string): Promise<ToolPersistedDefinition> {
     try {
       const document = await this.storage.getClient().get({ id });
       return fromEs(document);
@@ -59,7 +58,7 @@ class ToolClientImpl {
     }
   }
 
-  async list(): Promise<ToolDescriptor[]> {
+  async list(): Promise<ToolPersistedDefinition[]> {
     const document = await this.storage.getClient().search({
       query: {
         match_all: {},
@@ -68,13 +67,24 @@ class ToolClientImpl {
       track_total_hits: true,
     });
 
-    return document.hits.hits.map((hit) => fromEs(hit as Document));
+    return document.hits.hits.map((hit) => fromEs(hit as ToolDocument));
   }
 
-  async create(createRequest: ToolTypeCreateParams) {
-    // if ((await this.list()).map((t) => t.id).includes(tool.id)) {
-    //  throw createInternalError(`Tool with id ${tool.id} already exists`);
-    // }
+  async create(createRequest: ToolTypeCreateParams): Promise<ToolPersistedDefinition> {
+    let exists: boolean;
+    try {
+      await this.storage.getClient().get({ id: createRequest.id });
+      exists = true;
+    } catch (e) {
+      if (e instanceof esErrors.ResponseError && e.statusCode === 404) {
+        exists = false;
+      } else {
+        throw e;
+      }
+    }
+    if (exists) {
+      throw createBadRequestError(`Tool with id '${createRequest.id}' already exists.`);
+    }
 
     const attributes = createAttributes({ createRequest });
 
@@ -89,10 +99,8 @@ class ToolClientImpl {
     });
   }
 
-  // TODO: all this
-
-  async update(id: string, update: ToolTypeUpdateParams): Promise<ToolDescriptor> {
-    let document: Document;
+  async update(id: string, update: ToolTypeUpdateParams): Promise<ToolPersistedDefinition> {
+    let document: ToolDocument;
     try {
       document = await this.storage.getClient().get({ id });
     } catch (e) {

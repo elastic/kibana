@@ -5,19 +5,25 @@
  * 2.0.
  */
 
-import type { ZodObject } from '@kbn/zod';
+import type { z, ZodObject } from '@kbn/zod';
 import type { MaybePromise } from '@kbn/utility-types';
 import type { ToolDescriptor, ToolType } from '@kbn/onechat-common';
+import type { ToolHandlerFn } from '@kbn/onechat-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 
 export interface ToolDefinition<
   TConfig extends object = {},
-  TSchema extends ZodObject<any> = ZodObject<any>
+  TSchema extends ZodObject<any> = ZodObject<any>,
+  TResult = unknown
 > extends ToolDescriptor<TConfig> {
   /**
    * The zod schema attached to this tool.
    */
   schema: TSchema;
+  /**
+   * Run handler that can be used to execute the tool.
+   */
+  handler: ToolHandlerFn<z.infer<TSchema>, TResult>;
 }
 
 export interface ToolCreateParams<TConfig extends object = {}> {
@@ -92,6 +98,4 @@ export interface ReadonlyToolTypeClient<TConfig extends object = {}> {
    * List all tools for this type.
    */
   list(): MaybePromise<Array<ToolDefinition<TConfig>>>;
-
-  // TODO: execute?
 }

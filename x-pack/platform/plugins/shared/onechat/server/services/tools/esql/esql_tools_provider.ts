@@ -63,7 +63,7 @@ export const createEsqlToolClient = ({
   logger: Logger;
   esClient: ElasticsearchClient;
 }): ToolTypeClient<EsqlToolConfig> => {
-  const toolClient = createClient({ type: ToolType.esql, esClient, logger });
+  const toolClient = createClient({ esClient, logger });
 
   return {
     async has(toolId: string) {

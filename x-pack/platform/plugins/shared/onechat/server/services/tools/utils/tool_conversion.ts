@@ -5,23 +5,26 @@
  * 2.0.
  */
 
-import zodToJsonSchema from 'zod-to-json-schema';
+import zodToJsonSchema, { JsonSchema7ObjectType } from 'zod-to-json-schema';
 import type { ZodObject } from '@kbn/zod';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ToolDescriptorWithSchema } from '@kbn/onechat-common';
 import type { Runner, ExecutableTool } from '@kbn/onechat-server';
-import type { RegisteredToolWithMeta } from '../types';
 import { ToolDefinition } from '../tool_provider';
 
-export const toExecutableTool = <RunInput extends ZodObject<any>, RunOutput>({
+export const toExecutableTool = <
+  TConfig extends object = {},
+  RunInput extends ZodObject<any> = ZodObject<any>,
+  RunOutput = unknown
+>({
   tool,
   runner,
   request,
 }: {
-  tool: RegisteredToolWithMeta<RunInput, RunOutput>;
+  tool: ToolDefinition<TConfig, RunInput, RunOutput>;
   runner: Runner;
   request: KibanaRequest;
-}): ExecutableTool<RunInput, RunOutput> => {
+}): ExecutableTool<TConfig, RunInput, RunOutput> => {
   const { handler, ...toolParts } = tool;
 
   return {
@@ -39,7 +42,6 @@ export const toExecutableTool = <RunInput extends ZodObject<any>, RunOutput>({
  */
 export const toolToDescriptor = (tool: ToolDefinition): ToolDescriptorWithSchema => {
   const { id, type, description, tags, configuration, schema } = tool;
-  const jsonSchema = zodToJsonSchema(schema);
-  // TODO: fix type
+  const jsonSchema = zodToJsonSchema(schema) as JsonSchema7ObjectType;
   return { id, type, description, tags, configuration, schema: jsonSchema };
 };

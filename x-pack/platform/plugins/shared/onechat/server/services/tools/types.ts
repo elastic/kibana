@@ -17,7 +17,7 @@ import type {
   ToolProviderListOptions,
   ExecutableTool,
 } from '@kbn/onechat-server';
-import { ToolClient } from './tool_client';
+import { ToolRegistry } from './tool_client';
 
 export interface ToolsServiceSetup {
   register<RunInput extends ZodObject<any>, RunOutput = unknown>(
@@ -30,8 +30,10 @@ export interface ToolsServiceStart {
    * Create
    * @param opts
    */
-  getRegistry(opts: { request: KibanaRequest }): Promise<ToolClient>;
+  getRegistry(opts: { request: KibanaRequest }): Promise<ToolRegistry>;
 }
+
+// TODO: can delete everything below
 
 /**
  * Registered tool with full meta.

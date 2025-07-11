@@ -51,7 +51,7 @@ export class ToolsService {
     const esqlToolType = createEsqlToolTypeDefinition({ logger, elasticsearch });
 
     const getRegistry: ToolsServiceStart['getRegistry'] = async ({ request }) => {
-      return createToolClient({ request, typesDefinitions: [builtInToolType, esqlToolType] });
+      return createToolClient({ getRunner, request, typesDefinitions: [builtInToolType, esqlToolType] });
     };
 
     return {

@@ -198,19 +198,19 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
         validate: {
           request: {
             body: schema.object({
-              id: schema.string({}),
-              params: schema.recordOf(schema.string(), schema.any()),
+              tool_id: schema.string({}),
+              tool_params: schema.recordOf(schema.string(), schema.any()),
             }),
           },
         },
       },
       wrapHandler(async (ctx, request, response) => {
-        const { id, params } = request.body;
+        const { tool_id: id, tool_params: toolParams } = request.body;
         const { tools: toolService } = getInternalServices();
-        const registry = toolService.registry.asScopedPublicRegistry({ request });
+        const registry = await toolService.getRegistry({ request });
         const tool = await registry.get(id);
 
-        const validation = tool.schema.safeParse(params);
+        const validation = tool.schema.safeParse(toolParams);
         if (validation.error) {
           return response.badRequest({
             body: {
@@ -219,7 +219,7 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
           });
         }
 
-        const toolResult = await tool.execute({ toolParams: params });
+        const toolResult = await registry.execute({ toolId: id, toolParams });
 
         return response.ok({
           body: {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { OpenAPIV3 } from 'openapi-types';
+import type { JsonSchema7ObjectType } from 'zod-to-json-schema';
 
 /**
  * Possible types of tools
@@ -54,10 +54,8 @@ export interface ToolDescriptor<TConfig extends object = Record<string, unknown>
 // TODO: per-type config types configuration
 
 export interface ToolDescriptorWithSchema extends ToolDescriptor {
-  // import zodToJsonSchema from 'zod-to-json-schema';
-  // TODO: doesn't seem like the right type?
   /**
-   * The openAPI json
+   * the JSON schema associated with this tool's input parameters.
    */
-  schema: OpenAPIV3.NonArraySchemaObject;
+  schema: JsonSchema7ObjectType;
 }

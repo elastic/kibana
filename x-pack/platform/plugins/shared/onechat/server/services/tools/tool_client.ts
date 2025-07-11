@@ -12,6 +12,7 @@ import {
   createBadRequestError,
   createInternalError,
 } from '@kbn/onechat-common';
+import type { Runner, RunToolReturn, ScopedRunnerRunToolsParams } from '@kbn/onechat-server';
 import type {
   ToolDefinition,
   ToolCreateParams,
@@ -20,6 +21,7 @@ import type {
   ReadonlyToolTypeClient,
   ToolTypeClient,
 } from './tool_provider';
+import { toExecutableTool } from './utils';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ToolListParams {
@@ -38,31 +40,46 @@ const toolIdPrefixes = {
   [ToolType.builtin]: builtinToolIdPrefix,
 };
 
-export interface ToolClient {
+export interface ToolRegistry {
   has(toolId: string): Promise<boolean>;
   get(toolId: string): Promise<ToolDefinition>;
   list(opts?: ToolListParams): Promise<ToolDefinition[]>;
   create(tool: ToolCreateParams): Promise<ToolDefinition>;
   update(toolId: string, update: ToolUpdateParams): Promise<ToolDefinition>;
   delete(toolId: string): Promise<boolean>;
+  execute<TParams extends object = Record<string, unknown>, TResult = unknown>(
+    params: ScopedRunnerRunToolsParams<TParams>
+  ): Promise<RunToolReturn<TResult>>;
 }
 
 interface CreateToolClientParams {
+  getRunner: () => Runner;
   typesDefinitions: ToolTypeDefinition[];
   request: KibanaRequest;
 }
 
-export const createToolClient = (params: CreateToolClientParams): ToolClient => {
+export const createToolClient = (params: CreateToolClientParams): ToolRegistry => {
   return new ToolClientImpl(params);
 };
 
-class ToolClientImpl implements ToolClient {
+class ToolClientImpl implements ToolRegistry {
   private readonly typesDefinitions: ToolTypeDefinition[];
   private readonly request: KibanaRequest;
+  private readonly getRunner: () => Runner;
 
-  constructor({ typesDefinitions, request }: CreateToolClientParams) {
+  constructor({ typesDefinitions, request, getRunner }: CreateToolClientParams) {
     this.typesDefinitions = typesDefinitions;
     this.request = request;
+    this.getRunner = getRunner;
+  }
+
+  async execute<TParams extends object = Record<string, unknown>, TResult = unknown>(
+    params: ScopedRunnerRunToolsParams<TParams>
+  ): Promise<RunToolReturn<TResult>> {
+    const { toolId, ...otherParams } = params;
+    const tool = await this.get(toolId);
+    const executable = toExecutableTool({ tool, runner: this.getRunner(), request: this.request });
+    return (await executable.execute(otherParams)) as RunToolReturn<TResult>;
   }
 
   async has(toolId: string) {

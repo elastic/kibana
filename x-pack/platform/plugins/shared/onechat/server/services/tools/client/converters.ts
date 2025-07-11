@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import type { GetResponse } from '@elastic/elasticsearch/lib/api/types';
-import type { ToolDescriptor } from '@kbn/onechat-common';
-import { ToolTypeCreateParams, ToolTypeUpdateParams } from '../tool_provider';
+import type { ToolTypeCreateParams, ToolTypeUpdateParams } from '../tool_provider';
 import type { ToolProperties } from './storage';
+import type { ToolDocument, ToolPersistedDefinition } from './types';
 
-export type Document = Pick<GetResponse<ToolProperties>, '_source' | '_id'>;
-
-export const fromEs = (document: Document): ToolDescriptor<Record<string, unknown>> => {
+export const fromEs = <TConfig extends object = {}>(
+  document: ToolDocument
+): ToolPersistedDefinition<TConfig> => {
   if (!document._source) {
     throw new Error('No source found on get conversation response');
   }
@@ -21,14 +20,18 @@ export const fromEs = (document: Document): ToolDescriptor<Record<string, unknow
     type: document._source.type,
     description: document._source.description,
     tags: document._source.tags,
-    configuration: document._source.configuration,
+    configuration: document._source.configuration as TConfig,
+    updated_at: document._source.updated_at,
+    created_at: document._source.created_at,
   };
 };
 
 export const createAttributes = ({
   createRequest,
+  creationDate = new Date(),
 }: {
   createRequest: ToolTypeCreateParams;
+  creationDate?: Date;
 }): ToolProperties => {
   return {
     id: createRequest.id,
@@ -36,8 +39,8 @@ export const createAttributes = ({
     description: createRequest.description ?? '',
     tags: createRequest.tags ?? [],
     configuration: createRequest.configuration,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    created_at: creationDate.toISOString(),
+    updated_at: creationDate.toISOString(),
   };
 };
 
@@ -50,5 +53,13 @@ export const updateDocument = ({
   update: ToolTypeUpdateParams;
   updateDate?: Date;
 }): ToolProperties => {
-  // TODO
+  return {
+    ...current,
+    ...update,
+    configuration: {
+      ...current.configuration,
+      ...update.configuration,
+    },
+    updated_at: updateDate.toISOString(),
+  };
 };

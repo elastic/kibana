@@ -139,17 +139,18 @@ export interface RegisteredToolProvider {
  * Onechat tool, as exposed by the onechat tool registry.
  */
 export interface ExecutableTool<
-  RunInput extends ZodObject<any> = ZodObject<any>,
-  RunOutput = unknown
-> extends ToolDescriptor {
+  TConfig extends object = {},
+  TSchema extends ZodObject<any> = ZodObject<any>,
+  TResult = unknown
+> extends ToolDescriptor<TConfig> {
   /**
    * Tool's input schema, defined as a zod schema.
    */
-  schema: RunInput;
+  schema: TSchema;
   /**
    * Run handler that can be used to execute the tool.
    */
-  execute: ExecutableToolHandlerFn<z.infer<RunInput>, RunOutput>;
+  execute: ExecutableToolHandlerFn<z.infer<TSchema>, TResult>;
 }
 
 /**
@@ -244,7 +245,7 @@ export interface ToolProvider {
  * Options for {@link ToolProvider.has}
  */
 export interface ToolProviderHasOptions {
-  toolId: ToolIdentifier;
+  toolId: string;
   request: KibanaRequest;
 }
 
@@ -252,7 +253,7 @@ export interface ToolProviderHasOptions {
  * Options for {@link ToolProvider.get}
  */
 export interface ToolProviderGetOptions {
-  toolId: ToolIdentifier;
+  toolId: string;
   request: KibanaRequest;
 }
 
