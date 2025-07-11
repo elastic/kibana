@@ -1946,7 +1946,7 @@
     "sharp": "0.32.6",
     "simple-git": "^3.27.0",
     "sinon": "^19.0.2",
-    "sort-package-json": "^3.2.1",
+    "sort-package-json": "^3.4.0",
     "source-map": "^0.7.4",
     "storybook": "^8.6.3",
     "string-replace-loader": "^3.1.0",
