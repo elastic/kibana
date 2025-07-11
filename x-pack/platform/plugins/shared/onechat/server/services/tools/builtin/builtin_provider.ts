@@ -40,7 +40,7 @@ export const createBuiltinToolClient = ({
     get(toolId) {
       const tool = registry.get(toolId);
       if (!tool) {
-        throw createToolNotFoundError({ toolId, toolType: ToolType.builtin });
+        throw createToolNotFoundError({ toolId });
       }
       return convertTool(tool);
     },
