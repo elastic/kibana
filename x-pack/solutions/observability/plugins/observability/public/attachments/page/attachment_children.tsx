@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiLink, EuiCallOut, EuiText, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import { type PersistableStateAttachmentViewProps } from '@kbn/cases-plugin/public/client/attachment_framework/types';
 import type { PageAttachmentPersistedState } from '@kbn/observability-schema';
+import { useKibana } from '../../utils/kibana_react';
 
 interface AttachmentChildrenProps {
   persistableStateAttachmentState: PersistableStateAttachmentViewProps['persistableStateAttachmentState'];
@@ -19,6 +20,15 @@ export function PageAttachmentChildren({
   persistableStateAttachmentState,
 }: AttachmentChildrenProps) {
   const pageState = persistableStateAttachmentState as PageAttachmentPersistedState;
+  const {
+    services: {
+      application,
+      http: {
+        externalUrl: { isInternalUrl },
+      },
+      notifications: { toasts },
+    },
+  } = useKibana();
   const { url } = pageState;
   const label = url?.label;
 
@@ -30,6 +40,48 @@ export function PageAttachmentChildren({
       return '';
     }
   }, [url?.pathAndQuery]);
+
+  const onClick = useCallback(() => {
+    if (!isInternalUrl(href)) {
+      toasts.addDanger({
+        title: i18n.translate('xpack.observability.caseView.pageAttachment.externalUrlWarning', {
+          defaultMessage: 'External URL detected',
+        }),
+        text: i18n.translate('xpack.observability.caseView.pageAttachment.externalUrlWarningText', {
+          defaultMessage: 'External URLs are not supported. Please check the URL and try again.',
+        }),
+      });
+      return;
+    }
+
+    if (href) {
+      application.navigateToUrl(href);
+    }
+  }, [application, href, isInternalUrl, toasts]);
+
+  if (!isInternalUrl(href)) {
+    return (
+      <EuiCallOut
+        title={i18n.translate(
+          'xpack.observability.caseView.pageAttachment.externalUrlWarningTitle',
+          {
+            defaultMessage: 'External URL detected',
+          }
+        )}
+        color="danger"
+        iconType="alert"
+      >
+        <EuiText>
+          <p>
+            {i18n.translate('xpack.observability.caseView.pageAttachment.externalUrlWarningText', {
+              defaultMessage:
+                'External URLs are not supported. Please check the URL and try again.',
+            })}
+          </p>
+        </EuiText>
+      </EuiCallOut>
+    );
+  }
 
   if (!url || !href || !label) {
     return (
@@ -60,7 +112,7 @@ export function PageAttachmentChildren({
           </EuiFlexItem>
         )}
         <EuiFlexItem grow={false}>
-          <EuiLink href={href} data-test-subj="casesPageAttachmentLink">
+          <EuiLink onClick={onClick} data-test-subj="casesPageAttachmentLink">
             <EuiText size="m">{label}</EuiText>
           </EuiLink>
         </EuiFlexItem>
