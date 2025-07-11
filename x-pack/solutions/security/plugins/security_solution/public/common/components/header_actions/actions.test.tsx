@@ -10,23 +10,13 @@ import React from 'react';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { mockTimelineData, mockTimelineModel, TestProviders } from '../../mock';
 import { useShallowEqualSelector } from '../../hooks/use_selector';
-import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { licenseService } from '../../hooks/use_license';
 import { TableId } from '@kbn/securitysolution-data-table';
-import { useTourContext } from '../guided_onboarding_tour';
-import { GuidedOnboardingTourStep, SecurityTourStep } from '../guided_onboarding_tour/tour_step';
-import { SecurityStepId } from '../guided_onboarding_tour/tour_config';
 import { Actions } from './actions';
 import { initialUserPrivilegesState as mockInitialUserPrivilegesState } from '../user_privileges/user_privileges_context';
 import { useUserPrivileges } from '../user_privileges';
-import { useHiddenByFlyout } from '../guided_onboarding_tour/use_hidden_by_flyout';
 import { SECURITY_FEATURE_ID } from '../../../../common/constants';
 
-const useHiddenByFlyoutMock = useHiddenByFlyout as jest.Mock;
-jest.mock('../guided_onboarding_tour/use_hidden_by_flyout', () => ({
-  useHiddenByFlyout: jest.fn(),
-}));
-jest.mock('../guided_onboarding_tour');
 jest.mock('../user_privileges');
 jest.mock('../user_privileges');
 jest.mock('../../../detections/components/user_info', () => ({
@@ -127,142 +117,7 @@ const defaultProps = {
 
 describe('Actions', () => {
   beforeAll(() => {
-    (useTourContext as jest.Mock).mockReturnValue({
-      activeStep: 1,
-      incrementStep: () => null,
-      isTourShown: () => false,
-    });
     (useShallowEqualSelector as jest.Mock).mockReturnValue(mockTimelineModel);
-  });
-
-  describe('Guided Onboarding Step', () => {
-    const incrementStepMock = jest.fn();
-    beforeEach(() => {
-      (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
-      (useTourContext as jest.Mock).mockReturnValue({
-        activeStep: 2,
-        incrementStep: incrementStepMock,
-        isTourShown: () => true,
-      });
-      jest.clearAllMocks();
-    });
-
-    const ecsData = {
-      ...mockTimelineData[0].ecs,
-      kibana: { alert: { rule: { uuid: ['123'], parameters: {} } } },
-    };
-    const isTourAnchorConditions: { [key: string]: unknown } = {
-      ecsData,
-      timelineId: TableId.alertsOnAlertsPage,
-      ariaRowindex: 1,
-    };
-
-    test('if isTourShown is false [isTourAnchor=false], SecurityTourStep is not active', () => {
-      (useTourContext as jest.Mock).mockReturnValue({
-        activeStep: 2,
-        incrementStep: jest.fn(),
-        isTourShown: () => false,
-      });
-
-      const wrapper = mount(
-        <TestProviders>
-          <Actions {...defaultProps} {...isTourAnchorConditions} />
-        </TestProviders>
-      );
-
-      expect(wrapper.find(GuidedOnboardingTourStep).exists()).toEqual(true);
-      expect(wrapper.find(SecurityTourStep).exists()).toEqual(false);
-    });
-
-    test('if all conditions make isTourAnchor=true, SecurityTourStep is active', () => {
-      const wrapper = mount(
-        <TestProviders>
-          <Actions {...defaultProps} {...isTourAnchorConditions} />
-        </TestProviders>
-      );
-
-      expect(wrapper.find(GuidedOnboardingTourStep).exists()).toEqual(true);
-      expect(wrapper.find(SecurityTourStep).exists()).toEqual(true);
-    });
-
-    test('if left expandable flyout is expanded, SecurityTourStep not active', () => {
-      useHiddenByFlyoutMock.mockReturnValue(true);
-
-      const wrapper = mount(
-        <TestProviders>
-          <Actions {...defaultProps} {...isTourAnchorConditions} />
-        </TestProviders>
-      );
-
-      expect(wrapper.find(GuidedOnboardingTourStep).exists()).toEqual(true);
-      expect(wrapper.find(SecurityTourStep).exists()).toEqual(false);
-    });
-
-    test('on expand event click and SecurityTourStep is active, incrementStep', () => {
-      const wrapper = mount(
-        <TestProviders>
-          <Actions {...defaultProps} {...isTourAnchorConditions} />
-        </TestProviders>
-      );
-
-      wrapper.find('[data-test-subj="expand-event"]').first().simulate('click');
-
-      expect(incrementStepMock).toHaveBeenCalledWith(SecurityStepId.alertsCases);
-    });
-
-    test('on expand event click and SecurityTourStep is active, but step is not 2, do not incrementStep', () => {
-      (useTourContext as jest.Mock).mockReturnValue({
-        activeStep: 1,
-        incrementStep: incrementStepMock,
-        isTourShown: () => true,
-      });
-
-      const wrapper = mount(
-        <TestProviders>
-          <Actions {...defaultProps} {...isTourAnchorConditions} />
-        </TestProviders>
-      );
-
-      wrapper.find('[data-test-subj="expand-event"]').first().simulate('click');
-
-      expect(incrementStepMock).not.toHaveBeenCalled();
-    });
-
-    test('on expand event click and SecurityTourStep is not active, do not incrementStep', () => {
-      const wrapper = mount(
-        <TestProviders>
-          <Actions {...defaultProps} />
-        </TestProviders>
-      );
-
-      wrapper.find('[data-test-subj="expand-event"]').first().simulate('click');
-
-      expect(incrementStepMock).not.toHaveBeenCalled();
-    });
-
-    test('if isTourAnchor=false, SecurityTourStep is not active', () => {
-      const wrapper = mount(
-        <TestProviders>
-          <Actions {...defaultProps} />
-        </TestProviders>
-      );
-
-      expect(wrapper.find(GuidedOnboardingTourStep).exists()).toEqual(true);
-      expect(wrapper.find(SecurityTourStep).exists()).toEqual(false);
-    });
-
-    describe.each(Object.keys(isTourAnchorConditions))('tour condition true: %s', (key: string) => {
-      it('Single condition does not make tour step exist', () => {
-        const wrapper = mount(
-          <TestProviders>
-            <Actions {...defaultProps} {...{ [key]: isTourAnchorConditions[key] }} />
-          </TestProviders>
-        );
-
-        expect(wrapper.find(GuidedOnboardingTourStep).exists()).toEqual(true);
-        expect(wrapper.find(SecurityTourStep).exists()).toEqual(false);
-      });
-    });
   });
 
   describe('Alert context menu enabled?', () => {

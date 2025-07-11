@@ -31,7 +31,6 @@ jest.mock('../../../sourcerer/containers', () => ({
     sourcererDataView: {},
   }),
 }));
-jest.mock('../../../common/components/guided_onboarding_tour/tour_step');
 
 describe('RenderCellValue', () => {
   const columnId = '@timestamp';

@@ -5,18 +5,11 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { AttachmentType } from '@kbn/cases-plugin/common';
 import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { APP_ID } from '../../../../../common';
-import { CasesTourSteps } from '../../../../common/components/guided_onboarding_tour/cases_tour_steps';
-import {
-  AlertsCasesTourSteps,
-  sampleCase,
-  SecurityStepId,
-} from '../../../../common/components/guided_onboarding_tour/tour_config';
-import { useTourContext } from '../../../../common/components/guided_onboarding_tour';
 import { useKibana } from '../../../../common/lib/kibana';
 import type { TimelineNonEcsData } from '../../../../../common/search_strategy';
 import { ADD_TO_EXISTING_CASE, ADD_TO_NEW_CASE } from '../translations';
@@ -63,8 +56,6 @@ export const useAddToCaseActions = ({
       : [];
   }, [casesUi.helpers, ecsData, nonEcsData]);
 
-  const { activeStep, endTourStep, incrementStep, isTourShown } = useTourContext();
-
   const onCaseSuccess = useCallback(() => {
     if (onSuccess) {
       onSuccess();
@@ -75,31 +66,12 @@ export const useAddToCaseActions = ({
     }
   }, [onSuccess, refetch]);
 
-  const afterCaseCreated = useCallback(async () => {
-    if (isTourShown(SecurityStepId.alertsCases)) {
-      endTourStep(SecurityStepId.alertsCases);
-    }
-  }, [endTourStep, isTourShown]);
-
-  const prefillCasesValue = useMemo(
-    () =>
-      isTourShown(SecurityStepId.alertsCases) &&
-      (activeStep === AlertsCasesTourSteps.addAlertToCase ||
-        activeStep === AlertsCasesTourSteps.createCase ||
-        activeStep === AlertsCasesTourSteps.submitCase)
-        ? { initialValue: sampleCase }
-        : {},
-    [activeStep, isTourShown]
-  );
-
   const createCaseArgs = useMemo(() => {
     return {
       onClose: onMenuItemClick,
       onSuccess: onCaseSuccess,
-      afterCaseCreated,
-      ...prefillCasesValue,
     };
-  }, [onMenuItemClick, onCaseSuccess, afterCaseCreated, prefillCasesValue]);
+  }, [onMenuItemClick, onCaseSuccess]);
 
   const createCaseFlyout = casesUi.hooks.useCasesAddToNewCaseFlyout(createCaseArgs);
 
@@ -117,21 +89,8 @@ export const useAddToCaseActions = ({
     onMenuItemClick();
     createCaseFlyout.open({
       attachments: caseAttachments,
-      // activeStep will be AlertsCasesTourSteps.addAlertToCase on first render because not yet incremented
-      // if the user closes the flyout without completing the form and comes back, we will be at step AlertsCasesTourSteps.createCase
-      ...(isTourShown(SecurityStepId.alertsCases)
-        ? {
-            headerContent: <CasesTourSteps />,
-          }
-        : {}),
     });
-    if (
-      isTourShown(SecurityStepId.alertsCases) &&
-      activeStep === AlertsCasesTourSteps.addAlertToCase
-    ) {
-      incrementStep(SecurityStepId.alertsCases);
-    }
-  }, [onMenuItemClick, createCaseFlyout, caseAttachments, isTourShown, activeStep, incrementStep]);
+  }, [onMenuItemClick, createCaseFlyout, caseAttachments]);
 
   const handleAddToExistingCaseClick = useCallback(() => {
     // TODO rename this, this is really `closePopover()`
