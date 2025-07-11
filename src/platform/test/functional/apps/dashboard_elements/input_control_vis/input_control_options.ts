@@ -23,6 +23,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const inspector = getService('inspector');
   const find = getService('find');
   const comboBox = getService('comboBox');
+  const retry = getService('retry');
   const FIELD_NAME = 'machine.os.raw';
 
   describe('input control options', () => {
@@ -82,7 +83,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should replace existing filter pill(s) when new item is selected', async () => {
         await comboBox.clear('listControlSelect0');
-        await common.sleep(500); // give time for filter to be removed and event handlers to fire
+        await retry.waitFor('input control is clear', async () => {
+          return (await comboBox.doesComboBoxHaveSelectedOptions('listControlSelect0')) === false;
+        });
         await comboBox.set('listControlSelect0', 'osx');
         await visEditor.inputControlSubmit();
         await common.sleep(1000);
