@@ -5,15 +5,18 @@ import type {
   Plugin,
   Logger,
 } from '@kbn/core/server';
-import { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server/plugin';
-import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { WorkflowExecutionEngineModel } from '@kbn/workflows';
 
-import type { WorkflowsPluginSetup, WorkflowsPluginStart } from './types';
+import { v4 as generateUuid } from 'uuid';
+import type {
+  WorkflowsExecutionEnginePluginStartDeps,
+  WorkflowsPluginSetup,
+  WorkflowsPluginStart,
+} from './types';
 import { defineRoutes } from './routes';
 import { WorkflowsManagementApi } from './api';
 import { workflowsGrouppedByTriggerType } from './mock';
-import { v4 as generateUuid } from 'uuid';
+
 export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPluginStart> {
   private readonly logger: Logger;
 
@@ -33,10 +36,7 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
     };
   }
 
-  public start(
-    core: CoreStart,
-    plugins: { taskManager: TaskManagerStartContract; actions: ActionsPluginStartContract }
-  ) {
+  public start(core: CoreStart, plugins: WorkflowsExecutionEnginePluginStartDeps) {
     this.logger.debug('workflows: Start');
 
     this.logger.debug('workflows: Started');
@@ -68,28 +68,30 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
       }, {} as Record<string, Record<string, any>>);
     };
 
+    async function runWorkflow(
+      workflow: WorkflowExecutionEngineModel,
+      inputs: Record<string, any>
+    ): Promise<string> {
+      const connectorCredentials = await extractConnectorIds(workflow);
+
+      const workflowRunId = generateUuid();
+      plugins.workflowsExecutionEngine.executeWorkflow(workflow, {
+        workflowRunId,
+        inputs,
+        event: 'event' in inputs ? inputs.event : undefined,
+        connectorCredentials,
+      });
+
+      return workflowRunId;
+    }
+
     const pushEvent = async (eventType: string, eventData: Record<string, any>) => {
       try {
         const worklfowsToRun = findWorkflowsByTrigger(eventType);
 
         for (const workflow of worklfowsToRun) {
-          const connectorCredentials = await extractConnectorIds(workflow);
-
-          const workflowRunId = generateUuid();
-
-          plugins.taskManager.schedule({
-            taskType: 'workflow-event',
-            params: {
-              workflowRunId,
-              workflow,
-              eventType,
-              context: {
-                workflowRunId,
-                connectorCredentials,
-                event: eventData,
-              },
-            },
-            state: {},
+          runWorkflow(workflow, {
+            event: eventData,
           });
         }
       } catch (error) {
@@ -99,25 +101,26 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
 
     // TODO: REMOVE THIS AFTER TESTING
     // Simulate pushing events every 10 seconds for testing purposes
-    setInterval(() => {
-      pushEvent('detection-rule', {
-        ruleId: '123',
-        ruleName: 'Example Detection Rule',
-        timestamp: new Date().toISOString(),
-        severity: 'high',
-        description: 'This is an example detection rule that was triggered.',
-        additionalData: {
-          user: 'jdoe',
-          ip: '109.87.123.433',
-          action: 'login',
-          location: 'New York, USA',
-        },
-      });
-    }, 10000);
+    // setInterval(() => {
+    //   pushEvent('detection-rule', {
+    //     ruleId: '123',
+    //     ruleName: 'Example Detection Rule',
+    //     timestamp: new Date().toISOString(),
+    //     severity: 'high',
+    //     description: 'This is an example detection rule that was triggered.',
+    //     additionalData: {
+    //       user: 'jdoe',
+    //       ip: '109.87.123.433',
+    //       action: 'login',
+    //       location: 'New York, USA',
+    //     },
+    //   });
+    // }, 10000);
 
     return {
       // async execute workflow
       pushEvent,
+      runWorkflow,
     };
   }
 

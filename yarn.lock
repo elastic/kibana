@@ -8281,6 +8281,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/workflows-plugin-example@link:examples/workflows":
+  version "0.0.0"
+  uid ""
+
 "@kbn/workflows@link:src/platform/packages/shared/kbn-workflows":
   version "0.0.0"
   uid ""

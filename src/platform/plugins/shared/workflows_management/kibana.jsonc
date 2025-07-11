@@ -9,6 +9,12 @@
     "id": "workflowsManagement",
     "browser": true,
     "server": true,
-    "requiredPlugins": ["kibanaReact", "navigation", "taskManager", "actions"]
+    "requiredPlugins": [
+      "kibanaReact",
+      "navigation",
+      "taskManager",
+      "actions",
+      "workflowsExecutionEngine"
+    ]
   }
 }
