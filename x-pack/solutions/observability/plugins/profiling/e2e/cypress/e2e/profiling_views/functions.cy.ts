@@ -30,7 +30,9 @@ describe('Functions page', () => {
   });
 
   it('validates values in the table', () => {
-    cy.intercept('GET', '/internal/profiling/topn/functions?*').as('getTopNFunctions');
+    cy.intercept('GET', '/internal/profiling/topn/functions?*', {
+      fixture: 'topn_functions.json',
+    }).as('getTopNFunctions');
     cy.visitKibana('/app/profiling/functions', { rangeFrom, rangeTo });
     cy.wait('@getTopNFunctions');
     const firstRowSelector = '[data-grid-row-index="0"] [data-test-subj="dataGridRowCell"]';
@@ -44,7 +46,9 @@ describe('Functions page', () => {
   });
 
   it('shows function details when action button is clicked on the table ', () => {
-    cy.intercept('GET', '/internal/profiling/topn/functions?*').as('getTopNFunctions');
+    cy.intercept('GET', '/internal/profiling/topn/functions?*', {
+      fixture: 'topn_functions.json',
+    }).as('getTopNFunctions');
     cy.visitKibana('/app/profiling/functions', { rangeFrom, rangeTo });
     cy.wait('@getTopNFunctions');
     const firstRowSelector =
@@ -82,7 +86,13 @@ describe('Functions page', () => {
   });
 
   it('adds kql filter', () => {
-    cy.intercept('GET', '/internal/profiling/topn/functions?*').as('getTopNFunctions');
+    cy.intercept('GET', '/internal/profiling/topn/functions?*', (req) => {
+      if (req.url.includes('kuery=Stacktrace.id')) {
+        req.reply({ fixture: 'topn_functions_stacktrace_filtered.json' });
+      } else {
+        req.reply({ fixture: 'topn_functions.json' });
+      }
+    }).as('getTopNFunctions');
     cy.visitKibana('/app/profiling/functions', { rangeFrom, rangeTo });
     cy.wait('@getTopNFunctions');
     const firstRowSelector = '[data-grid-row-index="0"] [data-test-subj="dataGridRowCell"]';
@@ -104,7 +114,16 @@ describe('Functions page', () => {
     afterEach(resetSettings);
 
     it('changes CO2 settings and validate values in the table', () => {
-      cy.intercept('GET', '/internal/profiling/topn/functions?*').as('getTopNFunctions');
+      let callCount = 0;
+      cy.intercept('GET', '/internal/profiling/topn/functions?*', (req) => {
+        callCount += 1;
+
+        if (callCount === 2) {
+          req.reply({ fixture: 'topn_functions_changed_settings.json' });
+        } else {
+          req.reply({ fixture: 'topn_functions.json' });
+        }
+      }).as('getTopNFunctions');
       cy.visitKibana('/app/profiling/functions', { rangeFrom, rangeTo });
       cy.wait('@getTopNFunctions');
       const firstRowSelector = '[data-grid-row-index="0"] [data-test-subj="dataGridRowCell"]';
@@ -129,7 +148,7 @@ describe('Functions page', () => {
       });
       cy.go('back');
       cy.wait('@getTopNFunctions');
-      cy.get(firstRowSelector).eq(5).contains('4.85k lbs / 2.2k kg');
+      cy.get(firstRowSelector).eq(5).contains('4.85 lbs / 2.2 kg');
       const firstRowSelectorActionButton =
         '[data-grid-row-index="0"] [data-test-subj="dataGridRowCell"] .euiButtonIcon';
       cy.get(firstRowSelectorActionButton).click();
@@ -139,12 +158,12 @@ describe('Functions page', () => {
         {
           parentKey: 'impactEstimates',
           key: 'annualizedCo2Emission',
-          value: '4.85k lbs / 2.2k kg',
+          value: '4.85 lbs / 2.2 kg',
         },
         {
           parentKey: 'impactEstimates',
           key: 'annualizedSelfCo2Emission',
-          value: '4.71k lbs / 2.14k kg',
+          value: '5.73 lbs / 2.6 kg',
         },
       ].forEach(({ parentKey, key, value }) => {
         cy.get(`[data-test-subj="${parentKey}_${key}"]`).contains(value);
