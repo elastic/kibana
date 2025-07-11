@@ -25,7 +25,7 @@ describe('IndicatorBarchartLegendAction', () => {
     };
     render(
       <IndicatorBarchartLegendAction
-        announceFilterChange={() => {}}
+        announceIndicatorActionChange={() => {}}
         data={mockDate}
         field={mockField}
       />
@@ -40,7 +40,7 @@ describe('IndicatorBarchartLegendAction', () => {
     };
     render(
       <IndicatorBarchartLegendAction
-        announceFilterChange={() => {}}
+        announceIndicatorActionChange={() => {}}
         data={mockDate}
         field={mockField}
       />
