@@ -170,6 +170,12 @@ describe('uploadAllEventsFromPath', () => {
     expect(mockAddEventsFromFile).toHaveBeenCalledWith(
       'mocked_directory/sub_directory/events.ndjson'
     );
+
+    expect(log.info).toHaveBeenNthCalledWith(1, 'Connecting to Elasticsearch at esURL');
+    expect(log.info).toHaveBeenNthCalledWith(
+      2,
+      "Recursively found 1 .ndjson event log file in directory 'mocked_directory/sub_directory'."
+    );
   });
 
   it('should upload multiple event log files if the provided eventLogPath is a directory and contains .ndjson files', async () => {
@@ -200,5 +206,9 @@ describe('uploadAllEventsFromPath', () => {
     expect(mockAddEventsFromFile).toHaveBeenCalledWith('mocked_directory/file1.ndjson');
     expect(mockAddEventsFromFile).toHaveBeenCalledWith('mocked_directory/file2.ndjson');
     expect(mockAddEventsFromFile).not.toHaveBeenCalledWith('mocked_directory/not_events.txt');
+
+    expect(log.info).toHaveBeenCalledWith(
+      `Recursively found 2 .ndjson event log files in directory 'mocked_directory'.`
+    );
   });
 });

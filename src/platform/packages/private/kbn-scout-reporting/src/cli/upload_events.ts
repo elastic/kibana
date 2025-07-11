@@ -72,18 +72,24 @@ export const uploadAllEventsFromPath = async (
 
   // Event log upload
   const reportDataStream = new ScoutReportDataStream(es, options.log);
-  let directoryContainsNdjsonFiles = false;
+  let numberOfNdjsonFilesFound = 0;
 
   if (fs.statSync(eventLogPath).isDirectory()) {
     readFilesRecursively(eventLogPath, (filePath: string) => {
       if (filePath.endsWith('.ndjson')) {
         reportDataStream.addEventsFromFile(filePath);
-        directoryContainsNdjsonFiles = true;
+        numberOfNdjsonFilesFound += 1;
       }
     });
 
-    if (!directoryContainsNdjsonFiles) {
+    if (numberOfNdjsonFilesFound === 0) {
       options.log.warning(`No .ndjson event log files found in directory '${eventLogPath}'.`);
+    } else {
+      options.log.info(
+        `Recursively found ${numberOfNdjsonFilesFound} .ndjson event log file${
+          numberOfNdjsonFilesFound === 1 ? '' : 's'
+        } in directory '${eventLogPath}'.`
+      );
     }
   } else if (eventLogPath.endsWith('.ndjson')) {
     reportDataStream.addEventsFromFile(eventLogPath);
