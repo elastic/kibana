@@ -9,6 +9,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { get, isEqual, omit } from 'lodash';
 import moment from 'moment';
 import expect from '@kbn/expect';
+import jestExpect from 'expect';
+
 import {
   ALERT_REASON,
   ALERT_RULE_UUID,
@@ -25,7 +27,7 @@ import {
   ALERT_RULE_EXECUTION_TYPE,
 } from '@kbn/rule-data-utils';
 import { flattenWithPrefix } from '@kbn/securitysolution-rules';
-import { ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
+import { ThreatMapping } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema';
 
 import { ThreatMatchRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
 
@@ -1603,6 +1605,226 @@ export default ({ getService }: FtrProviderContext) => {
         const { previewId } = await previewRule({ supertest, rule });
         const previewAlerts = await getPreviewAlerts({ es, previewId });
         expect(previewAlerts.length).equal(2);
+      });
+    });
+
+    describe('DOES NOT MATCH clause', () => {
+      // cases to cover 2 execution paths of IM
+      const cases = [
+        {
+          eventsCount: 20,
+          threatsCount: 5,
+          title: `(threats first) events count is greater than threats count`,
+        },
+
+        {
+          eventsCount: 5,
+          threatsCount: 20,
+          title: `(events first) events count is smaller than threats count`,
+        },
+      ];
+
+      cases.forEach(({ eventsCount, threatsCount, title }) => {
+        describe(`Code execution path: ${title}`, () => {
+          const timestamp = new Date().toISOString();
+
+          const basicThreatMatchRuleWithDoesNotMatch = (
+            id: string
+          ): ThreatMatchRuleCreateProps => ({
+            ...threatMatchRuleEcsComplaint(id),
+            query: `id:${id} and NOT agent.type:threat`,
+            threat_query: `id:${id} and agent.type:threat`,
+            threat_mapping: [
+              {
+                entries: [
+                  {
+                    field: 'user.name',
+                    value: 'user.name',
+                    type: 'mapping',
+                  },
+                  {
+                    field: 'geo.country_name',
+                    value: 'geo.country_name',
+                    type: 'mapping',
+                    negate: true,
+                  },
+                ],
+              },
+            ],
+          });
+
+          it('should create alert when one of fields not matching', async () => {
+            const id = uuidv4();
+
+            // Add filler events to ensure we have more events than threats when threats are first
+            await indexListOfDocuments([
+              ...Array.from({ length: eventsCount }, (_, i) => ({
+                id,
+                '@timestamp': timestamp,
+                user: { name: `filler-user${i + 1}` },
+                geo: { country_name: `filler-country${i + 1}` },
+              })),
+              {
+                id,
+                '@timestamp': timestamp,
+                user: { name: 'user-1' },
+                geo: { country_name: 'France' }, // should generate an alert since geo.country_name does not match with threat but user.name does
+              },
+            ]);
+
+            // Add filler threats to ensure we have more threats than events when events are first
+            await indexListOfDocuments([
+              ...Array.from({ length: threatsCount }, (_, i) => ({
+                ...threatDoc(id, timestamp),
+                user: { name: `filler-threat-user${i + 1}` },
+                geo: { country_name: `filler-threat-country${i + 1}` },
+              })),
+              {
+                ...threatDoc(id, timestamp),
+                user: { name: 'user-1' },
+                geo: { country_name: 'UK' },
+              },
+            ]);
+
+            const { previewId } = await previewRule({
+              supertest,
+              rule: basicThreatMatchRuleWithDoesNotMatch(id),
+              invocationCount: 1,
+            });
+
+            const previewAlerts = await getPreviewAlerts({
+              es,
+              previewId,
+            });
+
+            jestExpect(previewAlerts).toHaveLength(1);
+
+            jestExpect(previewAlerts[0]).toHaveProperty('_source.user.name', 'user-1');
+            jestExpect(previewAlerts[0]).toHaveProperty('_source.geo.country_name', 'France');
+          });
+
+          it('should not create alert when 2 fields matching', async () => {
+            const id = uuidv4();
+
+            // Add filler events to ensure we have more events than threats when threats are first
+            await indexListOfDocuments([
+              ...Array.from({ length: eventsCount }, (_, i) => ({
+                id,
+                '@timestamp': timestamp,
+                user: { name: `filler-user${i + 1}` },
+                geo: { country_name: `filler-country${i + 1}` },
+              })),
+              {
+                id,
+                '@timestamp': timestamp,
+                user: { name: 'user-1' },
+                geo: { country_name: 'UK' },
+              },
+            ]);
+
+            // Add filler threats to ensure we have more threats than events when events are first
+            await indexListOfDocuments([
+              ...Array.from({ length: threatsCount }, (_, i) => ({
+                ...threatDoc(id, timestamp),
+                user: { name: `filler-threat-user${i + 1}` },
+                geo: { country_name: `filler-threat-country${i + 1}` },
+              })),
+              {
+                ...threatDoc(id, timestamp),
+                user: { name: 'user-1' },
+                geo: { country_name: 'UK' },
+              },
+            ]);
+
+            const { previewId } = await previewRule({
+              supertest,
+              rule: basicThreatMatchRuleWithDoesNotMatch(id),
+              invocationCount: 1,
+            });
+
+            const previewAlerts = await getPreviewAlerts({
+              es,
+              previewId,
+            });
+
+            jestExpect(previewAlerts).toHaveLength(0);
+          });
+
+          it('should work with multiple docs', async () => {
+            const id = uuidv4();
+
+            // Add filler events to ensure we have more events than threats when threats are first
+            await indexListOfDocuments([
+              ...Array.from({ length: eventsCount }, (_, i) => ({
+                id,
+                '@timestamp': timestamp,
+                user: { name: `filler-user${i + 1}` },
+                geo: { country_name: `filler-country${i + 1}` },
+              })),
+              {
+                id,
+                '@timestamp': timestamp,
+                user: { name: 'user-1' },
+                geo: { country_name: 'Portugal' },
+              },
+              {
+                id,
+                '@timestamp': timestamp,
+                user: { name: 'user-1' },
+                geo: { country_name: 'Spain' },
+              },
+              {
+                id,
+                '@timestamp': timestamp,
+                user: { name: 'user-1' },
+                geo: { country_name: 'UK' },
+              },
+              {
+                id,
+                '@timestamp': timestamp,
+                user: { name: 'user-2' },
+                geo: { country_name: 'Portugal' },
+              },
+            ]);
+
+            // Add filler threats to ensure we have more threats than events when events are first
+            await indexListOfDocuments([
+              ...Array.from({ length: threatsCount }, (_, i) => ({
+                ...threatDoc(id, timestamp),
+                user: { name: `filler-threat-user${i + 1}` },
+                geo: { country_name: `filler-threat-country${i + 1}` },
+              })),
+              {
+                ...threatDoc(id, timestamp),
+                user: { name: 'user-1' },
+                geo: { country_name: 'UK' },
+              },
+              {
+                ...threatDoc(id, timestamp),
+                user: { name: 'user-2' },
+                geo: { country_name: 'UK' },
+              },
+              {
+                ...threatDoc(id, timestamp),
+                user: { name: 'user-3' },
+                geo: { country_name: 'Norway' },
+              },
+            ]);
+
+            const { previewId } = await previewRule({
+              supertest,
+              rule: basicThreatMatchRuleWithDoesNotMatch(id),
+              invocationCount: 1,
+            });
+
+            const previewAlerts = await getPreviewAlerts({
+              es,
+              previewId,
+            });
+
+            jestExpect(previewAlerts).toHaveLength(3);
+          });
+        });
       });
     });
 

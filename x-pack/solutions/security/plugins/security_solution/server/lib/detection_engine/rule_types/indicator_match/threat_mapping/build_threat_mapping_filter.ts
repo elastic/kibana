@@ -90,23 +90,24 @@ export const createInnerAndClauses = ({
       // These values could be potentially 10k+ large so mutating the array intentionally
       accum.push({
         bool: {
-          should: [
+          [threatMappingEntry.negate ? 'must_not' : 'should']: [
             {
               match: {
                 [threatMappingEntry[entryKey === 'field' ? 'value' : 'field']]: {
                   query: value[0],
-                  _name: encodeThreatMatchNamedQuery({
-                    id: threatListItem._id,
-                    index: threatListItem._index,
-                    field: threatMappingEntry.field,
-                    value: threatMappingEntry.value,
-                    queryType: ThreatMatchQueryType.match,
-                  }),
                 },
               },
             },
           ],
           minimum_should_match: 1,
+          _name: encodeThreatMatchNamedQuery({
+            id: threatListItem._id,
+            index: threatListItem._index,
+            field: threatMappingEntry.field,
+            value: threatMappingEntry.value,
+            queryType: ThreatMatchQueryType.match,
+            negate: threatMappingEntry.negate,
+          }),
         },
       });
     }
@@ -184,6 +185,7 @@ export const buildEntriesMappingFilter = ({
                 field: threatMappingEntry.field,
                 value: threatMappingEntry.value,
                 queryType: ThreatMatchQueryType.term,
+                negate: threatMappingEntry.negate,
               }),
               [threatMappingEntry[entryKey === 'field' ? 'value' : 'field']]: threats,
             },
