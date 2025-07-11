@@ -1701,6 +1701,19 @@ export default ({ getService }: FtrProviderContext) => {
 
             jestExpect(previewAlerts[0]).toHaveProperty('_source.user.name', 'user-1');
             jestExpect(previewAlerts[0]).toHaveProperty('_source.geo.country_name', 'France');
+
+            // threat enriched only for MATCHED condition
+            jestExpect(previewAlerts[0]).toHaveProperty('_source.threat.enrichments', [
+              {
+                matched: {
+                  atomic: 'user-1',
+                  field: 'user.name',
+                  id: jestExpect.any(String),
+                  index: 'ecs_compliant',
+                  type: 'indicator_match_rule',
+                },
+              },
+            ]);
           });
 
           it('should not create alert when 2 fields matching', async () => {

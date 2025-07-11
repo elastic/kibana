@@ -21,7 +21,8 @@ export const THREAT_FIELD = i18n.translate(
 export const THREAT_FIELD_LABEL_HELP_TEXT = i18n.translate(
   'xpack.securitySolution.threatMatch.threatFieldLabelHelpDescription',
   {
-    defaultMessage: 'Select match condition first, then it can be tuned with does not match.',
+    defaultMessage:
+      'Start with the MATCH condition, and refine it with additional MATCH/DOES NOT MATCH conditions if needed',
   }
 );
 

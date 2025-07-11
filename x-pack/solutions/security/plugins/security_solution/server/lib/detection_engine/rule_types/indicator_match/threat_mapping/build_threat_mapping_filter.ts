@@ -7,11 +7,9 @@
 
 import { get } from 'lodash/fp';
 import type { Filter } from '@kbn/es-query';
-import type {
-  ThreatMapping,
-  ThreatMappingEntries,
-} from '@kbn/securitysolution-io-ts-alerting-types';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { ThreatMapping } from '../../../../../../common/api/detection_engine/model/rule_schema';
+
 import type {
   BooleanFilter,
   BuildEntriesMappingFilterOptions,
@@ -21,6 +19,7 @@ import type {
   FilterThreatMappingOptions,
   SplitShouldClausesOptions,
   TermQuery,
+  ThreatMappingEntries,
 } from './types';
 import { ThreatMatchQueryType } from './types';
 import { encodeThreatMatchNamedQuery } from './utils';
@@ -185,7 +184,6 @@ export const buildEntriesMappingFilter = ({
                 field: threatMappingEntry.field,
                 value: threatMappingEntry.value,
                 queryType: ThreatMatchQueryType.term,
-                negate: threatMappingEntry.negate,
               }),
               [threatMappingEntry[entryKey === 'field' ? 'value' : 'field']]: threats,
             },

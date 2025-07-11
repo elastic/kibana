@@ -7,9 +7,9 @@
 
 import moment from 'moment';
 
-import type { ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
 import { get, isEmpty } from 'lodash';
 
+import type { ThreatMapping } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import { TelemetryChannel } from '../../../../telemetry/types';
 import type { ITelemetryEventsSender } from '../../../../telemetry/sender';
 
@@ -156,7 +156,7 @@ const separator = '__SEP__';
 export const encodeThreatMatchNamedQuery = (
   query: ThreatMatchNamedQuery | ThreatTermNamedQuery
 ): string => {
-  const { field, value, queryType } = query;
+  const { field, value, queryType, negate } = query;
   let id;
   let index;
   if ('id' in query) {
@@ -164,16 +164,17 @@ export const encodeThreatMatchNamedQuery = (
     index = query.index;
   }
 
-  return [id, index, field, value, queryType].join(separator);
+  return [id, index, field, value, queryType, ...(negate ? ['negate'] : [])].join(separator);
 };
 
 export const decodeThreatMatchNamedQuery = (encoded: string): DecodedThreatNamedQuery => {
   const queryValues = encoded.split(separator);
-  const [id, index, field, value, queryType] = queryValues;
-  const query = { id, index, field, value, queryType };
+  const [id, index, field, value, queryType, negate] = queryValues;
+  const query = { id, index, field, value, queryType, negate: negate === 'negate' };
   let isValidQuery = false;
   if (queryType === ThreatMatchQueryType.match) {
-    isValidQuery = queryValues.length === 5 && queryValues.every(Boolean);
+    const filterQueryValues = queryValues.filter((v) => v !== 'negate');
+    isValidQuery = filterQueryValues.length === 5 && filterQueryValues.every(Boolean);
   }
   if (queryType === ThreatMatchQueryType.term) {
     isValidQuery = Boolean(field && value);

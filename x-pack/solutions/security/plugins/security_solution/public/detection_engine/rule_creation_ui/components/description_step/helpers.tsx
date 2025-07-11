@@ -21,13 +21,13 @@ import { ALERT_RISK_SCORE } from '@kbn/rule-data-utils';
 import { isEmpty } from 'lodash/fp';
 import React from 'react';
 import styled from 'styled-components';
-
-import type { ThreatMapping, Threats, Type } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { Threats, Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import { FilterBadgeGroup } from '@kbn/unified-search-plugin/public';
 import { IntervalAbbrScreenReader } from '../../../../common/components/accessibility';
 import type {
   AlertSuppressionMissingFieldsStrategy,
   RequiredFieldArray,
+  ThreatMapping,
 } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { AlertSuppressionMissingFieldsStrategyEnum } from '../../../../../common/api/detection_engine/model/rule_schema';
 import {

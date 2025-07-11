@@ -35,7 +35,6 @@ export const threatMapEntry = t.exact(
     field: NonEmptyString,
     type: t.keyof({ mapping: null }),
     value: NonEmptyString,
-    negate: t.union([t.boolean, t.undefined]),
   })
 );
 

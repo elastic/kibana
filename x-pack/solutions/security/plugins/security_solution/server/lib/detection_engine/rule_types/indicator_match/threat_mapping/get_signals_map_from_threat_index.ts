@@ -72,6 +72,7 @@ export async function getSignalsQueryMapFromThreatIndex(
       field: decodedQuery.field,
       value: decodedQuery.value,
       queryType: decodedQuery.queryType,
+      negate: decodedQuery.negate,
     };
 
     if (!signalMatch) {
