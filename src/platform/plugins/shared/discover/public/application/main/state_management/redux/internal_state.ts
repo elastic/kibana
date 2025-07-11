@@ -19,57 +19,22 @@ import {
   createListenerMiddleware,
 } from '@reduxjs/toolkit';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
-import type { TabItem } from '@kbn/unified-tabs';
 import type { DiscoverCustomizationContext } from '../../../../customizations';
 import type { DiscoverServices } from '../../../../build_services';
 import { type RuntimeStateManager, selectTabRuntimeAppState } from './runtime_state';
 import {
-  LoadingStatus,
   type DiscoverInternalState,
   type InternalStateDataRequestParams,
   type TabState,
   type RecentlyClosedTabState,
 } from './types';
-import { loadDataViewList } from './actions/data_views';
+import { loadDataViewList, initializeTabs } from './actions';
 import { selectTab } from './selectors';
 import type { TabsStorageManager } from '../tabs_storage_manager';
 import type { DiscoverAppState } from '../discover_app_state_container';
-import { initializeTabs } from './actions';
 
 const MIDDLEWARE_THROTTLE_MS = 300;
 const MIDDLEWARE_THROTTLE_OPTIONS = { leading: false, trailing: true };
-
-export const defaultTabState: Omit<TabState, keyof TabItem> = {
-  lastPersistedGlobalState: {},
-  dataViewId: undefined,
-  isDataViewLoading: false,
-  dataRequestParams: {
-    timeRangeAbsolute: undefined,
-    timeRangeRelative: undefined,
-    searchSessionId: undefined,
-  },
-  overriddenVisContextAfterInvalidation: undefined,
-  resetDefaultProfileState: {
-    resetId: '',
-    columns: false,
-    rowHeight: false,
-    breakdownField: false,
-    hideChart: false,
-  },
-  documentsRequest: {
-    loadingStatus: LoadingStatus.Uninitialized,
-    result: [],
-  },
-  totalHitsRequest: {
-    loadingStatus: LoadingStatus.Uninitialized,
-    result: 0,
-  },
-  chartRequest: {
-    loadingStatus: LoadingStatus.Uninitialized,
-    result: {},
-  },
-  uiState: {},
-};
 
 const initialState: DiscoverInternalState = {
   initializationState: { hasESData: false, hasUserDataView: false },
@@ -131,15 +96,6 @@ export const internalStateSlice = createSlice({
       state.tabs.unsafeCurrentId = action.payload.selectedTabId;
       state.tabs.recentlyClosedTabIds = action.payload.recentlyClosedTabs.map((tab) => tab.id);
     },
-
-    setDataViewId: (state, action: TabAction<{ dataViewId: string | undefined }>) =>
-      withTab(state, action, (tab) => {
-        if (action.payload.dataViewId !== tab.dataViewId) {
-          state.expandedDoc = undefined;
-        }
-
-        tab.dataViewId = action.payload.dataViewId;
-      }),
 
     setIsDataViewLoading: (state, action: TabAction<{ isDataViewLoading: boolean }>) =>
       withTab(state, action, (tab) => {

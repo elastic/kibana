@@ -9,10 +9,10 @@
 
 import { createTabItem } from './utils';
 import { type TabState } from './types';
-import { defaultTabState } from './internal_state';
+import { DEFAULT_TAB_STATE } from './constants';
 
 const createMockTabState = (id: string, label: string): TabState => ({
-  ...defaultTabState,
+  ...DEFAULT_TAB_STATE,
   id,
   label,
 });
