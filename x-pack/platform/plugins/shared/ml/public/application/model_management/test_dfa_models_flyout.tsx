@@ -7,7 +7,14 @@
 
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
-import { EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, EuiSpacer, EuiTitle } from '@elastic/eui';
+import {
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutHeader,
+  EuiSpacer,
+  EuiTitle,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DFAModelItem } from '../../../common/types/trained_models';
 import { TestPipeline } from '../components/ml_inference/components/test_pipeline';
@@ -34,11 +41,12 @@ export const TestDfaModelsFlyout: FC<Props> = ({ model, onClose }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [model?.model_id]
   );
+  const titleId = useGeneratedHtmlId({ prefix: 'mlTestModelsFlyoutTitle' });
   return (
     <EuiFlyout size="l" onClose={onClose} data-test-subj="mlTestModelsFlyout">
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
-          <h2>
+          <h2 id={titleId}>
             <FormattedMessage
               id="xpack.ml.trainedModels.testDfaModelsFlyout.headerLabel"
               defaultMessage="Test trained model"
