@@ -320,5 +320,4 @@ const componentStyles = {
   title: css({ minWidth: 0 }),
   createdCount: ({ euiTheme }: UseEuiTheme) => css({ color: euiTheme.colors.textSuccess }),
   errorCount: ({ euiTheme }: UseEuiTheme) => css({ color: euiTheme.colors.textDanger }),
-  icon: ({ euiTheme }: UseEuiTheme) => css({ marginLeft: euiTheme.size.xs }),
 };
