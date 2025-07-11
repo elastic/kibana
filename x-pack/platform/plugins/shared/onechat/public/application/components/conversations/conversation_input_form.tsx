@@ -5,16 +5,9 @@
  * 2.0.
  */
 
-import React, { useCallback, useState, KeyboardEvent, useEffect, useRef } from 'react';
-import { css } from '@emotion/css';
-import {
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiTextArea,
-  keys,
-  useEuiTheme,
-} from '@elastic/eui';
+import React, { useCallback, useState, useEffect, useRef } from 'react';
+import { css } from '@emotion/react';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, keys, useEuiTheme } from '@elastic/eui';
 import { oneChatDefaultAgentId } from '@kbn/onechat-common';
 import { i18n } from '@kbn/i18n';
 import { AgentDisplay } from './agent_display';
@@ -27,11 +20,19 @@ interface ConversationInputFormProps {
   onSubmit: () => void;
 }
 
+const fullHeightStyles = css`
+  height: 100%;
+`;
+
 export const ConversationInputForm: React.FC<ConversationInputFormProps> = ({ onSubmit }) => {
   const [message, setMessage] = useState<string>('');
   const { euiTheme } = useEuiTheme();
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
-  const { actions, conversation, hasActiveConversation } = useConversation();
+  const {
+    actions: { setAgentId },
+    conversation,
+    hasActiveConversation,
+  } = useConversation();
   const agentId = conversation?.agentId ?? oneChatDefaultAgentId;
 
   const { status, sendMessage } = useChat();
@@ -53,27 +54,35 @@ export const ConversationInputForm: React.FC<ConversationInputFormProps> = ({ on
     setMessage('');
   }, [message, onSubmit, sendMessage, disabled]);
 
-  const handleChange = useCallback((event: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setMessage(event.currentTarget.value);
-  }, []);
-
-  const handleTextAreaKeyDown = useCallback(
-    (event: KeyboardEvent<HTMLTextAreaElement>) => {
-      if (!event.shiftKey && event.key === keys.ENTER) {
-        event.preventDefault();
-        handleSubmit();
-      }
-    },
-    [handleSubmit]
-  );
-
-  const topContainerClass = css`
-    padding-bottom: ${euiTheme.size.m};
+  const contentStyles = css`
+    ${fullHeightStyles}
+    align-items: stretch;
   `;
-  const textAreaClass = css`
+  const formContainerStyles = css`
+    ${fullHeightStyles}
+    padding: ${euiTheme.size.base};
+    box-shadow: none;
+    border: ${euiTheme.border.thin};
+    border-color: ${euiTheme.border.color};
+    border-radius: ${euiTheme.border.radius.medium};
+    &:focus-within {
+      border-bottom-color: ${euiTheme.colors.primary};
+    }
+  `;
+  const inputContainerStyles = css`
+    display: flex;
+    flex-direction: column;
+  `;
+  const textareaStyles = css`
+    flex-grow: 1;
     border: none;
+    box-shadow: none;
+    padding: 0;
+    resize: none;
+    &:focus:focus-visible {
+      outline: none;
+    }
   `;
-
   const labels = {
     container: i18n.translate('xpack.onechat.conversationInputForm.container', {
       defaultMessage: 'Message input form',
@@ -87,13 +96,14 @@ export const ConversationInputForm: React.FC<ConversationInputFormProps> = ({ on
   };
 
   return (
-    <ConversationContent>
+    <ConversationContent css={contentStyles}>
       <EuiFlexGroup
-        gutterSize="s"
+        css={formContainerStyles}
+        direction="column"
+        gutterSize="m"
         responsive={false}
         alignItems="stretch"
         justifyContent="center"
-        className={topContainerClass}
         aria-label={labels.container}
       >
         <EuiFlexItem>
@@ -104,22 +114,26 @@ export const ConversationInputForm: React.FC<ConversationInputFormProps> = ({ on
             alignItems="stretch"
             justifyContent="center"
           >
-            <EuiFlexItem>
-              <EuiTextArea
+            <EuiFlexItem css={inputContainerStyles}>
+              <textarea
+                css={textareaStyles}
                 data-test-subj="onechatAppConversationInputFormTextArea"
-                fullWidth
-                rows={1}
-                resize="vertical"
                 value={message}
-                onChange={handleChange}
-                onKeyDown={handleTextAreaKeyDown}
+                onChange={(event) => {
+                  setMessage(event.currentTarget.value);
+                }}
+                onKeyDown={(event) => {
+                  if (!event.shiftKey && event.key === keys.ENTER) {
+                    event.preventDefault();
+                    handleSubmit();
+                  }
+                }}
                 placeholder={labels.placeholder}
-                inputRef={textAreaRef}
-                className={textAreaClass}
+                ref={textAreaRef}
               />
             </EuiFlexItem>
 
-            <EuiFlexItem>
+            <EuiFlexItem grow={false}>
               <EuiFlexGroup
                 gutterSize="s"
                 responsive={false}
@@ -133,7 +147,7 @@ export const ConversationInputForm: React.FC<ConversationInputFormProps> = ({ on
                     <AgentSelectDropdown
                       selectedAgentId={agentId}
                       onAgentChange={(newAgentId: string) => {
-                        actions.setAgentId(newAgentId);
+                        setAgentId(newAgentId);
                       }}
                     />
                   )}
