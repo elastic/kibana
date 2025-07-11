@@ -209,7 +209,7 @@ export function PreviewTable({
             },
           ]
         : [],
-    [onRowSelected, selectableRow, rowSourceAvatars, selectedRowIndex, visibleColumns.length]
+    [onRowSelected, rowSourceAvatars, selectableRow, selectedRowIndex, visibleColumns.length]
   );
 
   return (
