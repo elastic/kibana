@@ -49,6 +49,7 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const objectRemover = new ObjectRemover(supertest);
+  const log = getService('log');
 
   async function indexTestDocs() {
     const testAlertDocs = getTestAlertDocs();
@@ -109,6 +110,7 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
         index: '.kibana-event-log*',
         query: { bool: { must: [{ match: { 'event.action': 'delete-alerts' } }] } },
       });
+      log.info(`Event log results: ${JSON.stringify(results.hits.hits)}`);
       expect(results.hits.hits.length).to.eql(1);
       expect(results.hits.hits[0]._source?.event?.outcome).to.eql('success');
       expect(results.hits.hits[0]._source?.kibana?.alert?.deletion?.num_deleted).to.eql(
