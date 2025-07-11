@@ -42,5 +42,7 @@
     "@kbn/deeplinks-management",
     "@kbn/core",
     "@kbn/test-jest-helpers",
+    "@kbn/core-theme-browser-mocks",
+    "@kbn/core-ui-settings-browser-mocks",
   ]
 }
