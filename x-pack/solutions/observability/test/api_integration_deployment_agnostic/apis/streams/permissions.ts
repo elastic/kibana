@@ -22,7 +22,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const config = getService('config');
   const isServerless = !!config.get('serverless');
 
-  describe.only('Fails on missing permissions', function () {
+  describe('Fails on missing permissions', function () {
     before(async () => {
       adminApiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
       editorApiClient = await createStreamsRepositoryEditorClient(roleScopedSupertest);
