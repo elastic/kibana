@@ -13,7 +13,7 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import type { Filter, TimeRange } from '@kbn/es-query';
 import type { UnifiedDataTableRestorableState } from '@kbn/unified-data-table';
 import type { UnifiedFieldListRestorableState } from '@kbn/unified-field-list';
-import type { UnifiedSearchRestorableState } from '@kbn/unified-search-plugin/public';
+import type { UnifiedSearchDraft } from '@kbn/unified-search-plugin/public';
 import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram';
 import type { TabItem } from '@kbn/unified-tabs';
 import type { DiscoverAppState } from '../discover_app_state_container';
@@ -81,7 +81,7 @@ export interface TabState extends TabItem {
     dataGrid?: Partial<UnifiedDataTableRestorableState>;
     fieldList?: Partial<UnifiedFieldListRestorableState>;
     layout?: Partial<DiscoverLayoutRestorableState>;
-    search?: Partial<UnifiedSearchRestorableState>;
+    searchDraft?: Partial<UnifiedSearchDraft>;
   };
 }
 

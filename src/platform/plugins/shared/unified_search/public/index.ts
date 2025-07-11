@@ -25,7 +25,7 @@ export type {
   UnifiedSearchPublicPluginStart,
   UnifiedSearchPluginSetup,
   IUnifiedSearchPluginServices,
-  UnifiedSearchRestorableState,
+  UnifiedSearchDraft,
 } from './types';
 export type { FilterItemsProps } from './filter_bar';
 export type { DataViewPickerProps } from './dataview_picker';

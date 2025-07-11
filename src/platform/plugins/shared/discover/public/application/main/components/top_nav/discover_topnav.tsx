@@ -7,12 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { DataViewType } from '@kbn/data-views-plugin/public';
-import type {
-  DataViewPickerProps,
-  UnifiedSearchRestorableState,
-} from '@kbn/unified-search-plugin/public';
+import type { DataViewPickerProps, UnifiedSearchDraft } from '@kbn/unified-search-plugin/public';
 import { isEqual } from 'lodash';
 import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
 import type { EuiHeaderLinksProps } from '@elastic/eui';
@@ -57,14 +54,7 @@ export const DiscoverTopNav = ({
 }: DiscoverTopNavProps) => {
   const dispatch = useInternalStateDispatch();
   const services = useDiscoverServices();
-  const {
-    dataViewEditor,
-    navigation,
-    dataViewFieldEditor,
-    data,
-    setHeaderActionMenu,
-    unifiedSearch,
-  } = services;
+  const { dataViewEditor, navigation, dataViewFieldEditor, data, setHeaderActionMenu } = services;
   const query = useAppStateSelector((state) => state.query);
   const { savedDataViews, managedDataViews, adHocDataViews } = useDataViewsForPicker();
   const dataView = useCurrentDataView();
@@ -218,53 +208,46 @@ export const DiscoverTopNav = ({
   }, []);
 
   const searchBarCustomization = useDiscoverCustomization('search_bar');
-  const unifiedSearchWithRestorableState = unifiedSearch.ui.withRestorableState;
 
   const SearchBar = useMemo(
-    () =>
-      searchBarCustomization?.CustomSearchBar ??
-      unifiedSearchWithRestorableState(navigation.ui.AggregateQueryTopNavMenu),
-    [
-      searchBarCustomization?.CustomSearchBar,
-      unifiedSearchWithRestorableState,
-      navigation.ui.AggregateQueryTopNavMenu,
-    ]
+    () => searchBarCustomization?.CustomSearchBar ?? navigation.ui.AggregateQueryTopNavMenu,
+    [searchBarCustomization?.CustomSearchBar, navigation.ui.AggregateQueryTopNavMenu]
   );
 
-  const searchUiState = useCurrentTabSelector((state) => state.uiState.search);
-  const setSearchUiState = useCurrentTabAction(internalStateActions.setSearchUiState);
-  const onInitialStateChange = useCallback(
-    (newSearchUiState: Partial<UnifiedSearchRestorableState>) => {
-      // console.log('onInitialStateChange', newSearchUiState);
+  const searchDraft = useCurrentTabSelector((state) => state.uiState.searchDraft);
+  const setSearchDraftUiState = useCurrentTabAction(internalStateActions.setSearchDraftUiState);
+  const onDraftChange = useCallback(
+    (draft: UnifiedSearchDraft | null) => {
       dispatch(
-        setSearchUiState({
-          searchUiState: newSearchUiState,
+        setSearchDraftUiState({
+          searchDraftUiState: {
+            query: draft?.query ?? undefined,
+            dateRangeFrom: draft?.dateRangeFrom ?? undefined,
+            dateRangeTo: draft?.dateRangeTo ?? undefined,
+          },
         })
       );
     },
-    [dispatch, setSearchUiState]
+    [dispatch, setSearchDraftUiState]
   );
 
-  const [draft] = useState(() => {
-    const draftState: Partial<UnifiedSearchRestorableState> = {};
+  const draft = useMemo(() => {
+    const draftState: Partial<UnifiedSearchDraft> = {};
 
-    if (searchUiState?.query && !isEqual(searchUiState.query, query)) {
-      draftState.query = searchUiState.query;
+    if (searchDraft?.query && !isEqual(searchDraft.query, query)) {
+      draftState.query = searchDraft.query;
     }
 
-    if (searchUiState?.dateRangeFrom) {
-      draftState.dateRangeFrom = searchUiState.dateRangeFrom;
+    if (searchDraft?.dateRangeFrom) {
+      draftState.dateRangeFrom = searchDraft.dateRangeFrom;
     }
 
-    if (searchUiState?.dateRangeTo) {
-      draftState.dateRangeTo = searchUiState.dateRangeTo;
+    if (searchDraft?.dateRangeTo) {
+      draftState.dateRangeTo = searchDraft.dateRangeTo;
     }
 
     return Object.keys(draftState).length > 0 ? draftState : undefined;
-  });
-
-  // console.log('searchUiState', searchUiState);
-  // console.log('draft', draft);
+  }, [searchDraft, query]);
 
   const shouldHideDefaultDataviewPicker =
     !!searchBarCustomization?.CustomDataViewPicker || !!searchBarCustomization?.hideDataViewPicker;
@@ -279,7 +262,6 @@ export const DiscoverTopNav = ({
         onCancel={onCancelClick}
         isLoading={isLoading}
         onSavedQueryIdChange={updateSavedQueryId}
-        draft={draft}
         query={query}
         savedQueryId={savedQuery}
         screenTitle={savedSearch.title}
@@ -304,8 +286,8 @@ export const DiscoverTopNav = ({
           ) : undefined
         }
         onESQLDocsFlyoutVisibilityChanged={onESQLDocsFlyoutVisibilityChanged}
-        initialState={searchUiState}
-        onInitialStateChange={onInitialStateChange}
+        draft={draft}
+        onDraftChange={onDraftChange}
       />
       {isESQLToDataViewTransitionModalVisible && (
         <ESQLToDataViewTransitionModal onClose={onESQLToDataViewTransitionModalClose} />

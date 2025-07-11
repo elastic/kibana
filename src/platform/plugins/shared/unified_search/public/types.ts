@@ -22,8 +22,12 @@ import { AutocompleteSetup, AutocompleteStart } from './autocomplete';
 import type { IndexPatternSelectProps, QueryStringInputProps, StatefulSearchBarProps } from '.';
 import type { FiltersBuilderProps } from './filters_builder/filters_builder';
 import { StatefulSearchBarDeps } from './search_bar/create_search_bar';
-import { withRestorableState } from './restorable_state';
-export type { UnifiedSearchRestorableState } from './restorable_state';
+
+export interface UnifiedSearchDraft {
+  query?: AggregateQuery | Query;
+  dateRangeFrom?: string;
+  dateRangeTo?: string;
+}
 
 export interface UnifiedSearchSetupDependencies {
   uiActions: UiActionsSetup;
@@ -57,7 +61,6 @@ export interface UnifiedSearchPublicPluginStartUi {
   AggregateQuerySearchBar: AggQuerySearchBarComp;
   FiltersBuilderLazy: React.ComponentType<FiltersBuilderProps>;
   QueryStringInput: React.ComponentType<Omit<QueryStringInputProps, 'deps'>>;
-  withRestorableState: typeof withRestorableState;
 }
 
 /**

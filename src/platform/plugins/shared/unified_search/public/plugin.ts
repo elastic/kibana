@@ -27,7 +27,6 @@ import type {
 } from './types';
 import { ACTION_GLOBAL_APPLY_FILTER, UPDATE_FILTER_REFERENCES_ACTION } from './actions/constants';
 import { FiltersBuilderLazy } from './filters_builder';
-import { withRestorableState } from './restorable_state';
 
 export class UnifiedSearchPublicPlugin
   implements Plugin<UnifiedSearchPluginSetup, UnifiedSearchPublicPluginStart>
@@ -124,7 +123,6 @@ export class UnifiedSearchPublicPlugin
             autocomplete: autocompleteStart,
           },
         }),
-        withRestorableState,
       },
       autocomplete: autocompleteStart,
     };

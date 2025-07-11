@@ -36,7 +36,7 @@ import { DataView } from '@kbn/data-views-plugin/public';
 
 import { i18n } from '@kbn/i18n';
 import { AdditionalQueryBarMenuItems } from '../query_string_input/query_bar_menu_panels';
-import type { IUnifiedSearchPluginServices } from '../types';
+import type { IUnifiedSearchPluginServices, UnifiedSearchDraft } from '../types';
 import { SavedQueryMeta, SaveQueryForm } from '../saved_query_form';
 import { SavedQueryManagementList } from '../saved_query_management';
 import { QueryBarMenu, QueryBarMenuProps } from '../query_string_input/query_bar_menu';
@@ -86,12 +86,6 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
   dateRangeTo?: string;
   // Query bar - should be in SearchBarInjectedDeps
   query?: QT | Query;
-  // To initialize with a predefined query which has not been submitted yet (in dirty state)
-  draft?: {
-    query?: QT | Query;
-    dateRangeFrom?: string;
-    dateRangeTo?: string;
-  };
   // Show when user has privileges to save. See `canShowSavedQuery(...)` lib.
   showSaveQuery?: boolean;
   // Show the controls to save and load saved queries
@@ -102,6 +96,9 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
     payload: { dateRange: TimeRange; query?: QT | Query },
     isUpdate?: boolean
   ) => void;
+  // To initialize with a predefined query which has not been submitted yet (in dirty state)
+  draft?: UnifiedSearchDraft;
+  onDraftChange?: QueryBarTopRowProps<QT>['onDraftChange'];
   // User has saved the current state as a saved query
   onSaved?: (savedQuery: SavedQuery) => void;
   // User has modified the saved query, your app should persist the update
@@ -503,9 +500,6 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
   }
 
   public render() {
-    // console.log('this.state.query', this.state.query);
-    // console.log('this.props.query', this.props.query);
-    // console.log('this.state.currentProps.query', this.state.currentProps?.query);
     const { theme, query } = this.props;
     const isESQLQuery = isOfAggregateQueryType(query);
     const isScreenshotMode = this.props.isScreenshotMode === true;
@@ -649,6 +643,7 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
           onRefreshChange={this.props.onRefreshChange}
           onCancel={this.props.onCancel}
           onChange={this.onQueryBarChange}
+          onDraftChange={this.props.onDraftChange}
           isDirty={this.isDirty()}
           customSubmitButton={
             this.props.customSubmitButton ? this.props.customSubmitButton : undefined

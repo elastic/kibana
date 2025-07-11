@@ -246,12 +246,12 @@ export const internalStateSlice = createSlice({
         tab.uiState.layout = action.payload.layoutUiState;
       }),
 
-    setSearchUiState: (
+    setSearchDraftUiState: (
       state,
-      action: TabAction<{ searchUiState: Partial<TabState['uiState']['search']> }>
+      action: TabAction<{ searchDraftUiState: Partial<TabState['uiState']['searchDraft']> }>
     ) =>
       withTab(state, action, (tab) => {
-        tab.uiState.search = action.payload.searchUiState;
+        tab.uiState.searchDraft = action.payload.searchDraftUiState;
       }),
   },
   extraReducers: (builder) => {
