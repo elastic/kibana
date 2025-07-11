@@ -273,7 +273,6 @@ export class Plugin implements ISecuritySolutionPlugin {
         logger: this.logger,
         telemetry: core.analytics,
         taskManager: plugins.taskManager,
-        experimentalFeatures,
       });
 
       registerEntityStoreDataViewRefreshTask({
@@ -647,7 +646,6 @@ export class Plugin implements ISecuritySolutionPlugin {
     plugins.elasticAssistant.registerTools(APP_UI_ID, assistantTools);
     const features = {
       assistantModelEvaluation: config.experimentalFeatures.assistantModelEvaluation,
-      advancedEsqlGeneration: config.experimentalFeatures.advancedEsqlGeneration,
     };
     plugins.elasticAssistant.registerFeatures(APP_UI_ID, features);
     plugins.elasticAssistant.registerFeatures('management', features);
