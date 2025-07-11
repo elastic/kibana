@@ -20,15 +20,15 @@ import {
 } from './types';
 
 function getDefaultWriteAccessFlag(
-  writeAccess: boolean,
-  requiredPrivileges: any[],
-  method: SupportedMethod
+  method: SupportedMethod,
+  requiredPrivileges?: any[],
+  writeAccess?: boolean
 ) {
   if (writeAccess && !requiredPrivileges?.length) {
     return true;
   }
   // if the method is not GET, it defaults to requiring write access
-  return method !== 'GET';
+  return method !== 'GET' && writeAccess !== false;
 }
 
 export const createSyntheticsRouteWithAuth = <
@@ -69,7 +69,7 @@ export const createSyntheticsRouteWithAuth = <
     options,
     handler: licenseCheckHandler,
     ...rest,
-    writeAccess: getDefaultWriteAccessFlag(writeAccess, requiredPrivileges, method),
+    writeAccess: getDefaultWriteAccessFlag(method, requiredPrivileges, writeAccess),
   };
 };
 
