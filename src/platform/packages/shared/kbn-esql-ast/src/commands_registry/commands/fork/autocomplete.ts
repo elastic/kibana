@@ -38,19 +38,21 @@ export async function autocomplete(
   query: string,
   command: ESQLCommand,
   callbacks?: ICommandCallbacks,
-  context?: ICommandContext
+  context?: ICommandContext,
+  cursorPosition?: number
 ): Promise<ISuggestionItem[]> {
-  if (/FORK\s+$/i.test(query)) {
+  const innerText = query.substring(0, cursorPosition);
+  if (/FORK\s+$/i.test(innerText)) {
     return [newBranchSuggestion];
   }
 
   const activeBranch = getActiveBranch(command);
   const withinActiveBranch =
     activeBranch &&
-    activeBranch.location.min <= query.length &&
-    activeBranch.location.max >= query.length;
+    activeBranch.location.min <= innerText.length &&
+    activeBranch.location.max >= innerText.length;
 
-  if (!withinActiveBranch && /\)\s+$/i.test(query)) {
+  if (!withinActiveBranch && /\)\s+$/i.test(innerText)) {
     const suggestions = [newBranchSuggestion];
     if (command.args.length > 1) {
       suggestions.push(pipeCompleteItem);
@@ -59,7 +61,7 @@ export async function autocomplete(
   }
 
   // within a branch
-  if (activeBranch?.commands.length === 0 || pipePrecedesCurrentWord(query)) {
+  if (activeBranch?.commands.length === 0 || pipePrecedesCurrentWord(innerText)) {
     return getCommandAutocompleteDefinitions(FORK_AVAILABLE_COMMANDS);
   }
 
@@ -71,7 +73,7 @@ export async function autocomplete(
 
   const subCommandMethods = esqlCommandRegistry.getCommandMethods(subCommand.name);
   return (
-    subCommandMethods?.autocomplete(query, subCommand as ESQLCommand, callbacks, context) || []
+    subCommandMethods?.autocomplete(innerText, subCommand as ESQLCommand, callbacks, context) || []
   );
 }
 

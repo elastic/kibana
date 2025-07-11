@@ -18,12 +18,14 @@ export async function autocomplete(
   query: string,
   command: ESQLCommand,
   callbacks?: ICommandCallbacks,
-  context?: ICommandContext
+  context?: ICommandContext,
+  cursorPosition?: number
 ): Promise<ISuggestionItem[]> {
+  const innerText = query.substring(0, cursorPosition);
   const commandArgs = command.args.filter((arg) => !Array.isArray(arg) && arg.type !== 'unknown');
 
   // GROK field /
-  if (commandArgs.length === 1 && /\s$/.test(query)) {
+  if (commandArgs.length === 1 && /\s$/.test(innerText)) {
     return buildConstantsDefinitions(
       ['"%{WORD:firstWord}"'],
       i18n.translate('kbn-esql-ast.esql.autocomplete.aPatternString', {

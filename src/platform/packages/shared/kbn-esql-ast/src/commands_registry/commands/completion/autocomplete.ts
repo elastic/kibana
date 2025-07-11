@@ -9,7 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import { uniqBy } from 'lodash';
 import { InferenceEndpointAutocompleteItem } from '@kbn/esql-types';
-import type { ESQLCommand, ESQLAstCompletionCommand } from '../../../types';
+import type { ESQLCommand, ESQLAstCompletionCommand, ESQLSingleAstItem } from '../../../types';
 import {
   pipeCompleteItem,
   getNewUserDefinedColumnSuggestion,
@@ -33,12 +33,12 @@ import { getExpressionType, isExpressionComplete } from '../../../definitions/ut
 import { getFunctionDefinition } from '../../../definitions/utils/functions';
 import { getFunctionArgsSuggestions } from '../../../definitions/utils/autocomplete/functions';
 import { parse } from '../../../parser';
-import { correctQuerySyntax } from '../../../definitions/utils/astl';
+import { correctQuerySyntax, findAstPosition } from '../../../definitions/utils/astl';
 
 export enum CompletionPosition {
   AFTER_COMPLETION = 'after_completion',
   AFTER_PROMPT_OR_TARGET = 'after_prompt_or_target',
-  BEFORE_PROMPT = 'before_prompt',
+  BEFORE_PROMPT_FUNCTION = 'before_prompt_function',
   AFTER_PROMPT = 'after_prompt',
   AFTER_WITH = 'after_with',
   AFTER_INFERENCE_ID = 'after_inference_id',
@@ -48,7 +48,8 @@ export enum CompletionPosition {
 function getPosition(
   query: string,
   command: ESQLCommand,
-  context?: ICommandContext
+  context?: ICommandContext,
+  node?: ESQLSingleAstItem
 ): CompletionPosition | undefined {
   const { prompt, inferenceId, targetField } = command as ESQLAstCompletionCommand;
 
@@ -66,8 +67,9 @@ function getPosition(
     context?.fields,
     context?.userDefinedColumns
   );
-  if (!isExpressionComplete(expressionType, query)) {
-    return CompletionPosition.BEFORE_PROMPT;
+
+  if (node && node.type === 'function') {
+    return CompletionPosition.BEFORE_PROMPT_FUNCTION;
   }
 
   if (isExpressionComplete(expressionType, query)) {
@@ -136,9 +138,12 @@ export async function autocomplete(
   if (!callbacks?.getByType) {
     return [];
   }
+  const innerText = query.substring(0, cursorPosition);
   const { prompt } = command as ESQLAstCompletionCommand;
-
-  const position = getPosition(query, command, context);
+  const correctedQuery = correctQuerySyntax(query);
+  const { ast } = parse(correctedQuery, { withFormatting: true });
+  const { node } = findAstPosition(ast, cursorPosition ?? 0);
+  const position = getPosition(innerText, command, context, node);
 
   switch (position) {
     case CompletionPosition.AFTER_COMPLETION:
@@ -158,7 +163,7 @@ export async function autocomplete(
       );
 
       const suggestions = await handleFragment(
-        query,
+        innerText,
         (fragment) => Boolean(columnExists(fragment, context) || getFunctionDefinition(fragment)),
         (_fragment: string, rangeToReplace?: { start: number; end: number }) => {
           return fieldsAndFunctionsSuggestions.map((suggestion) => {
@@ -173,7 +178,7 @@ export async function autocomplete(
         () => []
       );
 
-      const lastWord = findFinalWord(query);
+      const lastWord = findFinalWord(innerText);
 
       if (!lastWord) {
         suggestions.push(defaultPrompt);
@@ -188,11 +193,9 @@ export async function autocomplete(
       return suggestions;
     }
 
-    case CompletionPosition.BEFORE_PROMPT: {
-      const correctedQuery = correctQuerySyntax(query);
-      const { ast } = parse(correctedQuery, { withFormatting: true });
+    case CompletionPosition.BEFORE_PROMPT_FUNCTION: {
       const functionsSpecificSuggestions = await getFunctionArgsSuggestions(
-        query,
+        innerText,
         ast,
         callbacks?.getByType,
         query,

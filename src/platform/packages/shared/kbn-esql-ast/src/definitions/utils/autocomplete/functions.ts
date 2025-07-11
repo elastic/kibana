@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { uniq } from 'lodash';
-import { allStarConstant, commaCompleteItem } from '../../../commands_registry/complete_items';
+import {
+  allStarConstant,
+  commaCompleteItem,
+  listCompleteItem,
+} from '../../../commands_registry/complete_items';
 import {
   ESQLFieldWithMetadata,
   GetColumnsByTypeFn,
@@ -16,11 +20,16 @@ import {
   getLocationFromCommandOrOptionName,
   Location,
   ItemKind,
+  ICommandCallbacks,
 } from '../../../commands_registry/types';
-import { ESQLAstItem, ESQLCommand, ESQLFunction } from '../../../types';
+import { ESQLAstItem, ESQLCommand, ESQLFunction, ESQLLocation } from '../../../types';
 import { collectUserDefinedColumns, excludeUserDefinedColumnsFromCurrentCommand } from './columns';
 import { getFunctionDefinition } from '../functions';
-import { getValidSignaturesAndTypesToSuggestNext } from '../autocomplete';
+import {
+  extractTypeFromASTArg,
+  getFieldsOrFunctionsSuggestions,
+  getValidSignaturesAndTypesToSuggestNext,
+} from '../autocomplete';
 import {
   FunctionDefinitionTypes,
   FunctionParameter,
@@ -31,6 +40,7 @@ import {
   isAssignment,
   isColumn,
   isFunctionExpression,
+  isList,
   isLiteral,
   isOptionNode,
 } from '../../../ast/is';
@@ -41,7 +51,9 @@ import { getFunctionSuggestions, getAllFunctions } from '../functions';
 import { pushItUpInTheList } from '../autocomplete';
 import { FULL_TEXT_SEARCH_FUNCTIONS } from '../../constants';
 import { comparisonFunctions } from '../../all_operators';
-import { findAstPosition } from '../astl';
+import { correctQuerySyntax, findAstPosition } from '../astl';
+import { parse } from '../../../parser';
+import { Walker } from '../../../walker';
 
 function checkContentPerDefinition(fn: ESQLFunction, def: FunctionDefinitionTypes): boolean {
   const fnDef = getFunctionDefinition(fn.name);
@@ -372,3 +384,121 @@ export async function getFunctionArgsSuggestions(
   }
   return suggestions;
 }
+
+const within = (position: number, location: ESQLLocation | undefined) =>
+  Boolean(location && location.min <= position && location.max >= position);
+
+function isOperator(node: ESQLFunction) {
+  return getFunctionDefinition(node.name)?.type === FunctionDefinitionTypes.OPERATOR;
+}
+
+async function getListArgsSuggestions(
+  innerText: string,
+  commands: ESQLCommand[],
+  getFieldsByType: GetColumnsByTypeFn,
+  fieldsMap: Map<string, ESQLFieldWithMetadata>,
+  offset: number
+) {
+  const suggestions = [];
+  const { command, node } = findAstPosition(commands, offset);
+
+  // node is supposed to be the function who support a list argument (like the "in" operator)
+  // so extract the type of the first argument and suggest fields of that type
+  if (node && isFunctionExpression(node)) {
+    const list = node?.args[1];
+
+    if (isList(list)) {
+      const noParens = list.location.min === 0 && list.location.max === 0;
+
+      if (noParens) {
+        suggestions.push(listCompleteItem);
+
+        return suggestions;
+      }
+    }
+
+    const anyUserDefinedColumns = collectUserDefinedColumns(commands, fieldsMap, innerText);
+    // extract the current node from the userDefinedColumns inferred
+    anyUserDefinedColumns.forEach((values, key) => {
+      if (values.some((v) => v.location === node.location)) {
+        anyUserDefinedColumns.delete(key);
+      }
+    });
+    const [firstArg] = node.args;
+    if (isColumn(firstArg)) {
+      const argType = extractTypeFromASTArg(firstArg, {
+        fields: fieldsMap,
+        userDefinedColumns: anyUserDefinedColumns,
+      });
+      if (argType) {
+        // do not propose existing columns again
+        const otherArgs = isList(list)
+          ? list.values
+          : node.args.filter(Array.isArray).flat().filter(isColumn);
+        suggestions.push(
+          ...(await getFieldsOrFunctionsSuggestions(
+            [argType as string],
+            getLocationFromCommandOrOptionName(command.name),
+            getFieldsByType,
+            {
+              functions: true,
+              fields: true,
+              userDefinedColumns: anyUserDefinedColumns,
+            },
+            { ignoreColumns: [firstArg.name, ...otherArgs.map(({ name }) => name)] }
+          ))
+        );
+      }
+    }
+  }
+  return suggestions;
+}
+
+export const getInsideFunctionsSuggestions = async (
+  query: string,
+  cursorPosition?: number,
+  callbacks?: ICommandCallbacks,
+  context?: ICommandContext
+) => {
+  const innerText = query.substring(0, cursorPosition);
+  const correctedQuery = correctQuerySyntax(innerText);
+  const { ast } = parse(correctedQuery, { withFormatting: true });
+  let withinStatsWhereClause = false;
+  Walker.walk(ast, {
+    visitFunction: (fn) => {
+      if (fn.name === 'where' && within(cursorPosition ?? 0, fn.location)) {
+        withinStatsWhereClause = true;
+      }
+    },
+  });
+  const { node, command } = findAstPosition(ast, cursorPosition ?? 0);
+  if (!node) {
+    return undefined;
+  }
+  if (node.type === 'function') {
+    if (['in', 'not in'].includes(node.name)) {
+      // // command ... a in ( <here> )
+      // return { type: 'list' as const, command, node, option, containingFunction };
+      return getListArgsSuggestions(
+        innerText,
+        ast,
+        callbacks?.getByType ?? (() => Promise.resolve([])),
+        context?.fields ?? new Map(),
+        cursorPosition ?? 0
+      );
+    }
+    if (!isOperator(node) || (command.name === 'stats' && !withinStatsWhereClause)) {
+      // command ... fn( <here> )
+      return await getFunctionArgsSuggestions(
+        innerText,
+        ast,
+        callbacks?.getByType ?? (() => Promise.resolve([])),
+        query,
+        cursorPosition ?? 0,
+        context
+      );
+    }
+  }
+
+  return undefined;
+};

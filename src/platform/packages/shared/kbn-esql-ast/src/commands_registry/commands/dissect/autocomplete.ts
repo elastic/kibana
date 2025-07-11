@@ -31,12 +31,14 @@ export async function autocomplete(
   query: string,
   command: ESQLCommand,
   callbacks?: ICommandCallbacks,
-  context?: ICommandContext
+  context?: ICommandContext,
+  cursorPosition?: number
 ): Promise<ISuggestionItem[]> {
+  const innerText = query.substring(0, cursorPosition);
   const commandArgs = command.args.filter((arg) => !Array.isArray(arg) && arg.type !== 'unknown');
 
   // DISSECT field/
-  if (commandArgs.length === 1 && /\s$/.test(query)) {
+  if (commandArgs.length === 1 && /\s$/.test(innerText)) {
     return buildConstantsDefinitions(
       ['"%{firstWord}"'],
       i18n.translate('kbn-esql-ast.esql.autocomplete.aPatternString', {
@@ -56,7 +58,7 @@ export async function autocomplete(
     ];
   }
   // DISSECT field APPEND_SEPARATOR = /
-  else if (/append_separator\s*=\s*$/i.test(query)) {
+  else if (/append_separator\s*=\s*$/i.test(innerText)) {
     return [colonCompleteItem, semiColonCompleteItem];
   }
   // DISSECT field APPEND_SEPARATOR = ":" /
