@@ -1473,6 +1473,7 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 # Observability UX management team
 /src/platform/test/api_integration/apis/suggestions  @elastic/obs-ux-management-team # Assigned per https://github.com/elastic/kibana/pull/200950#discussion_r1853705079
 /x-pack/test/api_integration/services/slo.ts @elastic/obs-ux-management-team
+/x-pack/solutions/observability/test/api_integration/services/slo.ts @elastic/obs-ux-management-team
 /x-pack/solutions/observability/test/services/slo @elastic/obs-ux-management-team
 /x-pack/solutions/observability/test/functional/apps/slo @elastic/obs-ux-management-team
 /x-pack/test/observability_api_integration @elastic/obs-ux-management-team # Assigned per https://github.com/elastic/kibana/pull/182243

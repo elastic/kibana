@@ -6,9 +6,11 @@
  */
 
 import { services as platformServices } from '@kbn/test-suites-xpack-platform/functional/services';
+import { services as obltApiServices } from '../../api_integration/services';
 import { SloUiServiceProvider } from './slo';
 
 export const services = {
   ...platformServices,
+  ...obltApiServices,
   sloUi: SloUiServiceProvider,
 };

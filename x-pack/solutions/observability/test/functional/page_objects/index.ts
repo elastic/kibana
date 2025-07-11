@@ -7,6 +7,6 @@
 
 import { pageObjects as platformPageObjects } from '@kbn/test-suites-xpack-platform/functional/page_objects';
 
-export const services = {
+export const pageObjects = {
   ...platformPageObjects,
 };

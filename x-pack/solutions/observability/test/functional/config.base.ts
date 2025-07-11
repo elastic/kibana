@@ -8,6 +8,7 @@
 import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import { FtrConfigProviderContext } from '@kbn/test';
 import { services } from './services';
+import { pageObjects } from './page_objects';
 
 export async function getApiIntegrationConfig({ readConfigFile }: FtrConfigProviderContext) {
   const xPackPlatformApiIntegrationTestsConfig = await readConfigFile(
@@ -16,6 +17,7 @@ export async function getApiIntegrationConfig({ readConfigFile }: FtrConfigProvi
 
   return {
     services,
+    pageObjects,
     testConfigCategory: ScoutTestRunConfigCategory.UI_TEST,
     servers: xPackPlatformApiIntegrationTestsConfig.get('servers'),
     security: xPackPlatformApiIntegrationTestsConfig.get('security'),

@@ -8,5 +8,6 @@
 import { GenericFtrProviderContext } from '@kbn/test';
 
 import { services } from './services';
+import { pageObjects } from './page_objects';
 
-export type FtrProviderContext = GenericFtrProviderContext<typeof services, {}>;
+export type FtrProviderContext = GenericFtrProviderContext<typeof services, typeof pageObjects>;

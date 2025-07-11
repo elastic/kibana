@@ -30,7 +30,6 @@ import {
   obsCasesV3AllUser,
   obsCasesNoDeleteUser,
   obsCasesOnlyDeleteUser,
-  secCasesV2AllUser,
   obsCasesV2NoReopenWithCreateCommentUser,
   obsCasesV2NoCreateCommentWithReopenUser,
 } from '@kbn/test-suites-xpack-platform/api_integration/apis/cases/common/users';
@@ -302,7 +301,6 @@ export default ({ getService }: FtrProviderContext): void => {
     for (const { user, owner } of [
       { user: obsCasesV2AllUser, owner: OBSERVABILITY_APP_ID },
       { user: obsCasesAllUser, owner: OBSERVABILITY_APP_ID },
-      { user: secCasesV2AllUser, owner: SECURITY_SOLUTION_APP_ID },
       { user: obsCasesAllUser, owner: OBSERVABILITY_APP_ID },
       { user: obsCasesV2AllUser, owner: OBSERVABILITY_APP_ID },
       { user: obsCasesV3AllUser, owner: OBSERVABILITY_APP_ID },
