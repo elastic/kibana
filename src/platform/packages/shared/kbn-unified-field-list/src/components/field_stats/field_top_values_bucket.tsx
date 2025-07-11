@@ -104,7 +104,6 @@ const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
           max={1}
           size="s"
           color={type === 'other' ? 'subdued' : color}
-          // aria-label={`${formattedFieldValue} (${formattedPercentage})`}
           valueText={
             <div data-test-subj={`${dataTestSubject}-topValues-formattedPercentage`}>
               <EuiToolTip
