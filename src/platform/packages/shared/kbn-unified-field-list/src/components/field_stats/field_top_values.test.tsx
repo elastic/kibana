@@ -12,6 +12,7 @@ import { EuiProgress, EuiButtonIcon } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { FieldTopValues, FieldTopValuesProps } from './field_top_values';
+import { getChildrenTextBySelector } from './field_stats.test';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 
@@ -66,8 +67,9 @@ describe('UnifiedFieldList <FieldTopValues />', () => {
 
   it('should render correctly without filter actions', async () => {
     const wrapper = mountWithIntl(<FieldTopValues {...defaultProps} />);
+    const text = getChildrenTextBySelector(wrapper, 'div.euiProgress__data');
 
-    expect(wrapper.text()).toBe('sourceA10.0%0.1sourceB0.0%0.0002Other90.0%0.8998');
+    expect(text).toBe('sourceA10.0%sourceB0.0%Other90.0%');
     expect(wrapper.find(EuiProgress)).toHaveLength(3);
     expect(wrapper.find(EuiButtonIcon)).toHaveLength(0);
   });
@@ -75,8 +77,9 @@ describe('UnifiedFieldList <FieldTopValues />', () => {
   it('should render correctly with filter actions', async () => {
     const mockAddFilter = jest.fn();
     const wrapper = mountWithIntl(<FieldTopValues {...defaultProps} onAddFilter={mockAddFilter} />);
+    const text = getChildrenTextBySelector(wrapper, 'div.euiProgress__data');
 
-    expect(wrapper.text()).toBe('sourceA10.0%0.1sourceB0.0%0.0002Other90.0%0.8998');
+    expect(text).toBe('sourceA10.0%sourceB0.0%Other90.0%');
     expect(wrapper.find(EuiProgress)).toHaveLength(3);
     expect(wrapper.find(EuiButtonIcon)).toHaveLength(4);
 
@@ -105,8 +108,9 @@ describe('UnifiedFieldList <FieldTopValues />', () => {
         ]}
       />
     );
+    const text = getChildrenTextBySelector(wrapper, 'div.euiProgress__data');
 
-    expect(wrapper.text()).toBe('sourceA60.0%0.6sourceB30.0%0.3sourceC10.0%0.1');
+    expect(text).toBe('sourceA60.0%sourceB30.0%sourceC10.0%');
   });
 
   it('should render correctly with empty strings', async () => {
@@ -129,8 +133,9 @@ describe('UnifiedFieldList <FieldTopValues />', () => {
         ]}
       />
     );
+    const text = getChildrenTextBySelector(wrapper, 'div.euiProgress__data');
 
-    expect(wrapper.text()).toBe('(empty)60.0%0.6sourceA30.0%0.3sourceB0.4%0.004Other9.6%0.096');
+    expect(text).toBe('(empty)60.0%sourceA30.0%sourceB0.4%Other9.6%');
   });
 
   it('should render correctly without floating point', async () => {
@@ -145,7 +150,8 @@ describe('UnifiedFieldList <FieldTopValues />', () => {
         ]}
       />
     );
+    const text = getChildrenTextBySelector(wrapper, 'div.euiProgress__data');
 
-    expect(wrapper.text()).toBe('sourceA100%1');
+    expect(text).toBe('sourceA100%');
   });
 });
