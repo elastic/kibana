@@ -7,7 +7,6 @@
 
 import { KibanaRequest } from '@kbn/core-http-server';
 import {
-  ToolType,
   createToolNotFoundError,
   createBadRequestError,
   createInternalError,
@@ -21,7 +20,7 @@ import type {
   ReadonlyToolTypeClient,
   ToolTypeClient,
 } from './tool_provider';
-import { toExecutableTool } from './utils';
+import { toExecutableTool, ensureValidId } from './utils';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ToolListParams {
@@ -32,12 +31,6 @@ export interface ToolListParams {
 
 const isToolTypeClient = (client: ReadonlyToolTypeClient): client is ToolTypeClient => {
   return 'create' in client;
-};
-
-// TODO: handle that thing.
-const builtinToolIdPrefix = '.';
-const toolIdPrefixes = {
-  [ToolType.builtin]: builtinToolIdPrefix,
 };
 
 export interface ToolRegistry {
@@ -58,7 +51,7 @@ interface CreateToolClientParams {
   request: KibanaRequest;
 }
 
-export const createToolClient = (params: CreateToolClientParams): ToolRegistry => {
+export const createToolRegistry = (params: CreateToolClientParams): ToolRegistry => {
   return new ToolClientImpl(params);
 };
 
@@ -114,6 +107,8 @@ class ToolClientImpl implements ToolRegistry {
 
   async create(tool: ToolCreateParams) {
     const { type, ...toolCreateParams } = tool;
+
+    ensureValidId(tool.id);
 
     if (await this.has(tool.id)) {
       throw createBadRequestError(`Tool with id ${tool.id} already exists`);

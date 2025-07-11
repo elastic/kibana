@@ -6,25 +6,8 @@
  */
 
 export { ToolType, type ToolDescriptor, type ToolDescriptorWithSchema } from './definition';
-export {
-  type ToolDescriptorMeta,
-  type PlainIdToolIdentifier,
-  type SerializedToolIdentifier,
-  type StructuredToolIdentifier,
-  type ToolIdentifier,
-  type ToolProviderId,
-  isSerializedToolIdentifier,
-  isStructuredToolIdentifier,
-  isPlainToolIdentifier,
-  toStructuredToolIdentifier,
-  toSerializedToolIdentifier,
-  createBuiltinToolId,
-  toolDescriptorToIdentifier,
-  builtinToolProviderId,
-  esqlToolProviderId,
-  unknownToolProviderId,
-} from './tools';
-export { type FieldTypes, BuiltinToolIds, BuiltinTags } from './constants';
+export { isReservedToolId, isBuiltInToolId } from './tool_ids';
+export { builtinToolIds, builtinTags, builtInToolIdPrefix } from './constants';
 export {
   type ByIdsToolSelection,
   type ToolSelection,
@@ -34,3 +17,4 @@ export {
   allToolsSelectionWildcard,
   allToolsSelection,
 } from './tool_selection';
+export type { EsqlToolConfig, EsqlToolFieldTypes, EsqlToolParam, EsqlToolDescriptor } from './esql';

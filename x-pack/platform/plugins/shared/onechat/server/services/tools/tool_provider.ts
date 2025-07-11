@@ -41,7 +41,10 @@ export interface ToolUpdateParams<TConfig extends object = {}> {
 }
 
 // TODO: duplicate ? delete?
-export type ToolTypeCreateParams<TConfig extends object = {}> = ToolCreateParams<TConfig>;
+export type ToolTypeCreateParams<TConfig extends object = {}> = Omit<
+  ToolCreateParams<TConfig>,
+  'type'
+>;
 export type ToolTypeUpdateParams<TConfig extends object = {}> = ToolUpdateParams<TConfig>;
 
 /**

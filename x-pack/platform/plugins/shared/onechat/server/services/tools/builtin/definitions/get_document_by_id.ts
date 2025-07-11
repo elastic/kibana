@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
-import { BuiltinToolIds, BuiltinTags } from '@kbn/onechat-common';
+import { builtinToolIds, builtinTags } from '@kbn/onechat-common';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import { getDocumentById, GetDocumentByIdResult } from '@kbn/onechat-genai-utils';
 
@@ -20,7 +20,7 @@ export const getDocumentByIdTool = (): BuiltinToolDefinition<
   GetDocumentByIdResult
 > => {
   return {
-    id: BuiltinToolIds.getDocumentById,
+    id: builtinToolIds.getDocumentById,
     description: 'Retrieve the full content (source) of a document based on its ID and index name.',
     schema: getDocumentByIdSchema,
     handler: async ({ id, index }, { esClient }) => {
@@ -29,6 +29,6 @@ export const getDocumentByIdTool = (): BuiltinToolDefinition<
         result,
       };
     },
-    tags: [BuiltinTags.retrieval],
+    tags: [builtinTags.retrieval],
   };
 };

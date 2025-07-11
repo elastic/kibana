@@ -6,18 +6,16 @@
  */
 
 import type { ElasticsearchServiceStart, Logger } from '@kbn/core/server';
-import { builtinToolProviderId, esqlToolProviderId } from '@kbn/onechat-common';
-import type { Runner, BuiltinToolDefinition } from '@kbn/onechat-server';
+import type { Runner } from '@kbn/onechat-server';
 import {
   createBuiltinToolRegistry,
   registerBuiltinTools,
   createBuiltInToolTypeDefinition,
   type BuiltinToolRegistry,
 } from './builtin';
-import type { ToolsServiceSetup, ToolsServiceStart, RegisteredToolProviderWithId } from './types';
-import { createInternalRegistry } from './utils';
+import type { ToolsServiceSetup, ToolsServiceStart } from './types';
 import { createEsqlToolTypeDefinition } from './esql';
-import { createToolClient } from './tool_client';
+import { createToolRegistry } from './tool_registry';
 
 export interface ToolsServiceSetupDeps {
   logger: Logger;
@@ -51,7 +49,11 @@ export class ToolsService {
     const esqlToolType = createEsqlToolTypeDefinition({ logger, elasticsearch });
 
     const getRegistry: ToolsServiceStart['getRegistry'] = async ({ request }) => {
-      return createToolClient({ getRunner, request, typesDefinitions: [builtInToolType, esqlToolType] });
+      return createToolRegistry({
+        getRunner,
+        request,
+        typesDefinitions: [builtInToolType, esqlToolType],
+      });
     };
 
     return {

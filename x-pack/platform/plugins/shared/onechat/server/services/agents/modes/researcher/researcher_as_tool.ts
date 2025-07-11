@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
-import { BuiltinToolIds, BuiltinTags } from '@kbn/onechat-common';
+import { builtinToolIds, builtinTags } from '@kbn/onechat-common';
 import { runResearcherAgent } from './run_researcher_agent';
 
 const researcherSchema = z.object({
@@ -20,7 +20,7 @@ export interface ResearcherResponse {
 
 export const researcherTool = (): BuiltinToolDefinition<typeof researcherSchema, ResearcherResponse> => {
   return {
-    id: BuiltinToolIds.researcherAgent,
+    id: builtinToolIds.researcherAgent,
     description: `An agentic researcher tool to perform search and analysis tasks.
 
       Can be used to perform "deep search" tasks where a single query or search is not enough
@@ -51,7 +51,7 @@ export const researcherTool = (): BuiltinToolDefinition<typeof researcherSchema,
       };
     },
     meta: {
-      tags: [BuiltinTags.retrieval],
+      tags: [builtinTags.retrieval],
     },
   };
 };

@@ -10,34 +10,17 @@ import type {
   ElasticsearchServiceStart,
   ElasticsearchClient,
 } from '@kbn/core-elasticsearch-server';
-import { KibanaRequest } from '@kbn/core-http-server';
 import {
-  createToolNotFoundError,
   isToolNotFoundError,
-  type FieldTypes,
+  createBadRequestError,
   ToolType,
-  ToolDescriptor,
+  EsqlToolConfig,
 } from '@kbn/onechat-common';
 import { ToolTypeClient, ToolTypeDefinition } from '../tool_provider';
 import { createClient } from '../client';
-
-// TODO: move to common
-interface EsqlToolConfig {
-  query: string;
-  params: Record<
-    string,
-    {
-      /**
-       * The data types of the parameter. Must be one of these
-       */
-      type: FieldTypes;
-      /**
-       * Description of the parameter's purpose or expected values.
-       */
-      description: string;
-    }
-  >;
-}
+import type { ToolPersistedDefinition } from '../client';
+import { toToolDefinition } from './utils/to_tool_definition';
+import { configurationSchema, configurationUpdateSchema } from './schemas';
 
 export const createEsqlToolTypeDefinition = ({
   logger,
@@ -77,24 +60,37 @@ export const createEsqlToolClient = ({
         throw e;
       }
     },
+
     async get(toolId) {
       const tool = await toolClient.get(toolId);
-      return tool as ToolDescriptor<EsqlToolConfig>;
+      return toToolDefinition(tool as ToolPersistedDefinition<EsqlToolConfig>);
     },
+
     async list() {
       const tools = await toolClient.list();
-      return tools as Array<ToolDescriptor<EsqlToolConfig>>;
+      return tools.map((tool) => toToolDefinition(tool as ToolPersistedDefinition<EsqlToolConfig>));
     },
+
     async create(createRequest) {
-      // TODO: params validation
-      // TODO: convert tool (add schema)
-      return toolClient.create(createRequest);
+      try {
+        configurationSchema.validate(createRequest.configuration);
+      } catch (e) {
+        throw createBadRequestError(`Invalid configuration for esql tool: ${e.message}`);
+      }
+      const tool = await toolClient.create(createRequest);
+      return toToolDefinition(tool as ToolPersistedDefinition<EsqlToolConfig>);
     },
+
     async update(toolId, updateRequest) {
-      // TODO: params validation
-      // TODO: convert tool (add schema)
-      return toolClient.update(toolId, updateRequest);
+      try {
+        configurationUpdateSchema.validate(updateRequest.configuration);
+      } catch (e) {
+        throw createBadRequestError(`Invalid configuration for esql tool: ${e.message}`);
+      }
+      const tool = await toolClient.update(toolId, updateRequest);
+      return toToolDefinition(tool as ToolPersistedDefinition<EsqlToolConfig>);
     },
+
     async delete(toolId: string) {
       return toolClient.delete(toolId);
     },

@@ -6,11 +6,24 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { ToolType } from '@kbn/onechat-common';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import { toolToDescriptor } from '../services/tools/utils/tool_conversion';
-import type { ListToolsResponse } from '../../common/http_api/tools';
+import type {
+  ListToolsResponse,
+  GetToolResponse,
+  DeleteToolResponse,
+  CreateToolPayload,
+  UpdateToolPayload,
+  CreateToolResponse,
+  UpdateToolResponse,
+} from '../../common/http_api/tools';
 import { apiPrivileges } from '../../common/features';
+import {
+  configurationSchema as esqlConfigSchema,
+  configurationUpdateSchema as esqlConfigUpdateSchema,
+} from '../services/tools/esql/schemas';
 
 export function registerToolsRoutes({ router, getInternalServices, logger }: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
@@ -30,7 +43,7 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
       const tools = await registry.list({});
       return response.ok<ListToolsResponse>({
         body: {
-          tools: tools.map(toolToDescriptor),
+          results: tools.map(toolToDescriptor),
         },
       });
     })
@@ -54,24 +67,11 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
       const { tools: toolService } = getInternalServices();
       const registry = await toolService.getRegistry({ request });
       const tool = await registry.get(id);
-      return response.ok<ListToolsResponse>({
+      return response.ok<GetToolResponse>({
         body: toolToDescriptor(tool),
       });
     })
   );
-
-  const paramValueTypeSchema = schema.oneOf([
-    schema.literal('text'),
-    schema.literal('keyword'),
-    schema.literal('long'),
-    schema.literal('integer'),
-    schema.literal('double'),
-    schema.literal('float'),
-    schema.literal('boolean'),
-    schema.literal('date'),
-    schema.literal('object'),
-    schema.literal('nested'),
-  ]);
 
   // create tool
   router.post(
@@ -83,28 +83,23 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
       validate: {
         body: schema.object({
           id: schema.string(),
-          type: schema.string({ defaultValue: 'esql' }),
+          type: schema.oneOf([schema.literal(ToolType.esql), schema.literal(ToolType.builtin)]),
           description: schema.string({ defaultValue: '' }),
           tags: schema.arrayOf(schema.string(), { defaultValue: [] }),
-          configuration: schema.object({
-            query: schema.string(),
-            params: schema.recordOf(
-              schema.string(),
-              schema.object({
-                type: paramValueTypeSchema,
-                description: schema.string(),
-              })
-            ),
-          }),
+          configuration: esqlConfigSchema,
         }),
       },
     },
     wrapHandler(async (ctx, request, response) => {
       const { tools: toolService } = getInternalServices();
-      const { body } = request;
+      const payload: CreateToolPayload = request.body;
+      const createRequest = {
+        ...payload,
+        type: payload.type ?? ToolType.esql,
+      };
       const registry = await toolService.getRegistry({ request });
-      const tool = await registry.create(body);
-      return response.ok<ListToolsResponse>({
+      const tool = await registry.create(createRequest);
+      return response.ok<CreateToolResponse>({
         body: toolToDescriptor(tool),
       });
     })
@@ -122,31 +117,19 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
           toolId: schema.string(),
         }),
         body: schema.object({
-          description: schema.string({ defaultValue: '' }),
-          tags: schema.arrayOf(schema.string(), { defaultValue: [] }),
-          configuration: schema.object({
-            // TODO: factorize
-            query: schema.string(),
-            params: schema.recordOf(
-              schema.string(),
-              schema.object({
-                type: paramValueTypeSchema,
-                description: schema.string(),
-              })
-            ),
-          }),
+          description: schema.maybe(schema.string()),
+          tags: schema.maybe(schema.arrayOf(schema.string())),
+          configuration: schema.maybe(esqlConfigUpdateSchema),
         }),
       },
     },
     wrapHandler(async (ctx, request, response) => {
       const { tools: toolService } = getInternalServices();
-      const {
-        body,
-        params: { toolId },
-      } = request;
+      const { toolId } = request.params;
+      const update: UpdateToolPayload = request.body;
       const registry = await toolService.getRegistry({ request });
-      const tool = await registry.update(toolId, body);
-      return response.ok<ListToolsResponse>({
+      const tool = await registry.update(toolId, update);
+      return response.ok<UpdateToolResponse>({
         body: toolToDescriptor(tool),
       });
     })
@@ -170,7 +153,7 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
       const { tools: toolService } = getInternalServices();
       const registry = await toolService.getRegistry({ request });
       const success = await registry.delete(id);
-      return response.ok({
+      return response.ok<DeleteToolResponse>({
         body: { success },
       });
     })

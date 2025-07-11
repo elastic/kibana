@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
-import { BuiltinToolIds, BuiltinTags } from '@kbn/onechat-common';
+import { builtinToolIds, builtinTags } from '@kbn/onechat-common';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import { executeEsql, EsqlResponse } from '@kbn/onechat-genai-utils';
 
@@ -19,7 +19,7 @@ export const executeEsqlTool = (): BuiltinToolDefinition<
   EsqlResponse
 > => {
   return {
-    id: BuiltinToolIds.executeEsql,
+    id: builtinToolIds.executeEsql,
     description: 'Execute an ES|QL query and return the results.',
     schema: executeEsqlToolSchema,
     handler: async ({ query }, { esClient }) => {
@@ -28,6 +28,6 @@ export const executeEsqlTool = (): BuiltinToolDefinition<
         result,
       };
     },
-    tags: [BuiltinTags.retrieval],
+    tags: [builtinTags.retrieval],
   };
 };

@@ -51,8 +51,6 @@ export interface ToolDescriptor<TConfig extends object = Record<string, unknown>
   configuration: TConfig;
 }
 
-// TODO: per-type config types configuration
-
 export interface ToolDescriptorWithSchema extends ToolDescriptor {
   /**
    * the JSON schema associated with this tool's input parameters.

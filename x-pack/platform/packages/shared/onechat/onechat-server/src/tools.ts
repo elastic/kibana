@@ -10,12 +10,7 @@ import type { MaybePromise } from '@kbn/utility-types';
 import type { Logger } from '@kbn/logging';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type {
-  ToolDescriptor,
-  ToolIdentifier,
-  PlainIdToolIdentifier,
-  FieldTypes,
-} from '@kbn/onechat-common';
+import type { ToolDescriptor } from '@kbn/onechat-common';
 import type { ModelProvider } from './model_provider';
 import type { ScopedRunner, RunToolReturn, ScopedRunnerRunToolsParams } from './runner';
 import type { ToolEventEmitter } from './events';
@@ -35,104 +30,6 @@ export interface BuiltinToolDefinition<
    * Handler to call to execute the tool.
    */
   handler: ToolHandlerFn<z.infer<RunInput>, RunOutput>;
-}
-
-/**
- * Onechat tool, as registered by built-in tool providers.
- */
-export interface EsqlToolDefinition extends ToolDescriptor {
-  /**
-   * The ESQL Tool name.
-   */
-  name: string;
-
-  /**
-   * The ESQL query to be executed.
-   */
-  query: string;
-
-  /**
-   * Parameters that can be used in the query.
-   * Each parameter has a key identifier and metadata about its type and usage.
-   */
-  params: Record<
-    string,
-    {
-      /**
-       * The data types of the parameter. Must be one of these
-       */
-      type: FieldTypes;
-
-      /**
-       * Description of the parameter's purpose or expected values.
-       */
-      description: string;
-    }
-  >;
-}
-
-export interface EsqlTool<RunInput extends ZodObject<any> = ZodObject<any>, RunOutput = unknown>
-  extends BuiltinToolDefinition<RunInput, RunOutput> {
-  /**
-   * The ESQL id to be executed.
-   */
-  id: string;
-
-  /**
-   * The ESQL Tool name.
-   */
-  name: string;
-
-  /**
-   * The ESQL tool description to be executed.
-   */
-  description: string;
-
-  /**
-   * The ESQL query to be executed.
-   */
-  query: string;
-
-  /**
-   * Parameters that can be used in the query.
-   * Each parameter has a key identifier and metadata about its type and usage.
-   */
-  params: Record<
-    string,
-    {
-      /**
-       * The data types of the parameter.
-       */
-      type: FieldTypes;
-
-      /**
-       * Description of the parameter's purpose or expected values.
-       */
-      description: string;
-    }
-  >;
-}
-
-/**
- * Tool provider interface, as registered by API consumers.
- */
-export interface RegisteredToolProvider {
-  /**
-   * Check if a tool is available in the provider.
-   */
-  has(options: { toolId: PlainIdToolIdentifier; request: KibanaRequest }): Promise<boolean>;
-  /**
-   * Retrieve a tool based on its identifier.
-   * If not found,the provider should throw a {@link OnechatToolNotFoundError}
-   */
-  get(options: {
-    toolId: PlainIdToolIdentifier;
-    request: KibanaRequest;
-  }): Promise<BuiltinToolDefinition>;
-  /**
-   * List all tools present in the provider.
-   */
-  list(options: { request: KibanaRequest }): Promise<BuiltinToolDefinition[]>;
 }
 
 /**

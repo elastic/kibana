@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
-import { BuiltinToolIds, BuiltinTags } from '@kbn/onechat-common';
+import { builtinToolIds, builtinTags } from '@kbn/onechat-common';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import { listIndices, ListIndexInfo } from '@kbn/onechat-genai-utils';
 
@@ -28,7 +28,7 @@ export const listIndicesTool = (): BuiltinToolDefinition<
   ListIndexResponse
 > => {
   return {
-    id: BuiltinToolIds.listIndices,
+    id: builtinToolIds.listIndices,
     description: 'List the indices in the Elasticsearch cluster the current user has access to.',
     schema: listIndicesSchema,
     handler: async ({ pattern = '*' }, { esClient }) => {
@@ -39,6 +39,6 @@ export const listIndicesTool = (): BuiltinToolDefinition<
         },
       };
     },
-    tags: [BuiltinTags.retrieval],
+    tags: [builtinTags.retrieval],
   };
 };

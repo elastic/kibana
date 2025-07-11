@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
-import { BuiltinToolIds, BuiltinTags } from '@kbn/onechat-common';
+import { builtinToolIds, builtinTags } from '@kbn/onechat-common';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import { naturalLanguageSearch, NaturalLanguageSearchResponse } from '@kbn/onechat-genai-utils';
 
@@ -29,7 +29,7 @@ export const naturalLanguageSearchTool = (): BuiltinToolDefinition<
   NaturalLanguageSearchResponse
 > => {
   return {
-    id: BuiltinToolIds.naturalLanguageSearch,
+    id: builtinToolIds.naturalLanguageSearch,
     description: 'Run a DSL search query on one index and return matching documents.',
     schema: searchDslSchema,
     handler: async ({ query, index, context }, { esClient, modelProvider }) => {
@@ -45,6 +45,6 @@ export const naturalLanguageSearchTool = (): BuiltinToolDefinition<
         result,
       };
     },
-    tags: [BuiltinTags.retrieval],
+    tags: [builtinTags.retrieval],
   };
 };
