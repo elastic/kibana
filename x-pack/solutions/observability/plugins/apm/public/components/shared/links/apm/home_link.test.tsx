@@ -12,6 +12,7 @@ import * as useApmRouterModule from '../../../../hooks/use_apm_router';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 
 jest.mock('@elastic/eui', () => ({
+  ...jest.requireActual('@elastic/eui'),
   EuiLink: ({ children, ...props }: any) => <a {...props}>{children || 'Link'}</a>,
 }));
 
