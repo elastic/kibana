@@ -37,19 +37,6 @@ export interface ControlGroupRuntimeState<State extends DefaultControlState = De
   editorConfig?: ControlGroupEditorConfig;
 }
 
-// export interface ControlGroupSerializedState
-//   extends Omit<ControlGroupRuntimeState, 'initialChildControlState'> {
-//   // In runtime state, we refer to this property as `initialChildControlState`, but in
-//   // the serialized state we transform the state object into an array of state objects
-//   // to make it easier for API consumers to add new controls without specifying a uuid key.
-//   controls: Array<
-//     ControlPanelState & {
-//       id?: string;
-//       controlConfig?: object;
-//     }
-//   >;
-// }
-
 /**
  * ----------------------------------------------------------------
  * Control group panel state
