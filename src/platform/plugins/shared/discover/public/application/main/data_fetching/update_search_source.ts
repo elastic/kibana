@@ -11,7 +11,11 @@ import type { ISearchSource } from '@kbn/data-plugin/public';
 import { DataViewType, type DataView } from '@kbn/data-views-plugin/public';
 import type { Filter, TimeRange } from '@kbn/es-query';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
-import { SEARCH_FIELDS_FROM_SOURCE, SORT_DEFAULT_ORDER_SETTING, getSortForSearchSource } from '@kbn/discover-utils';
+import {
+  SEARCH_FIELDS_FROM_SOURCE,
+  SORT_DEFAULT_ORDER_SETTING,
+  getSortForSearchSource,
+} from '@kbn/discover-utils';
 import { DiscoverServices } from '../../../build_services';
 
 /**

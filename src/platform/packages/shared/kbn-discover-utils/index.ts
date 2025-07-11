@@ -68,12 +68,7 @@ export {
   getTieBreakerFieldName,
 } from './src';
 
-export type {
-  LogsContextService,
-  SortOrder,
-  SortInput,
-  SortPair,
-} from './src';
+export type { LogsContextService, SortOrder, SortInput, SortPair } from './src';
 
 export * from './src/types';
 
