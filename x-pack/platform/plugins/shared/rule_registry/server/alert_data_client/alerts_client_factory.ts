@@ -6,21 +6,30 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
+import type {
+  ElasticsearchClient,
+  KibanaRequest,
+  Logger,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import type { RuleTypeRegistry } from '@kbn/alerting-plugin/server/types';
 import type { AlertingAuthorization, AlertingServerStart } from '@kbn/alerting-plugin/server';
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
+import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import type { IRuleDataService } from '../rule_data_plugin_service';
 import { AlertsClient } from './alerts_client';
 
 export interface AlertsClientFactoryProps {
   logger: Logger;
   esClient: ElasticsearchClient;
+  getEsClientScoped?: (request: KibanaRequest) => Promise<ElasticsearchClient>;
   getAlertingAuthorization: (
     request: KibanaRequest
   ) => Promise<PublicMethodsOf<AlertingAuthorization>>;
   securityPluginSetup: SecurityPluginSetup | undefined;
   ruleDataService: IRuleDataService | null;
+  dataViewsServiceAsScoped?: DataViewsServerPluginStart;
+  getSavedObjectClient?: (request: KibanaRequest) => Promise<SavedObjectsClientContract>;
   getRuleType: RuleTypeRegistry['get'];
   getRuleList: RuleTypeRegistry['list'];
   getAlertIndicesAlias: AlertingServerStart['getAlertIndicesAlias'];
@@ -30,6 +39,7 @@ export class AlertsClientFactory {
   private isInitialized = false;
   private logger!: Logger;
   private esClient!: ElasticsearchClient;
+  private getEsClientScoped?: (request: KibanaRequest) => Promise<ElasticsearchClient>;
   private getAlertingAuthorization!: (
     request: KibanaRequest
   ) => Promise<PublicMethodsOf<AlertingAuthorization>>;
@@ -38,6 +48,8 @@ export class AlertsClientFactory {
   private getRuleType!: RuleTypeRegistry['get'];
   private getRuleList!: RuleTypeRegistry['list'];
   private getAlertIndicesAlias!: AlertingServerStart['getAlertIndicesAlias'];
+  private getSavedObjectClient?: (request: KibanaRequest) => Promise<SavedObjectsClientContract>;
+  private dataViewsServiceAsScoped?: DataViewsServerPluginStart;
 
   public initialize(options: AlertsClientFactoryProps) {
     /**
@@ -51,11 +63,14 @@ export class AlertsClientFactory {
     this.isInitialized = true;
     this.logger = options.logger;
     this.esClient = options.esClient;
+    this.getEsClientScoped = options.getEsClientScoped;
     this.securityPluginSetup = options.securityPluginSetup;
     this.ruleDataService = options.ruleDataService;
     this.getRuleType = options.getRuleType;
     this.getRuleList = options.getRuleList;
     this.getAlertIndicesAlias = options.getAlertIndicesAlias;
+    this.getSavedObjectClient = options.getSavedObjectClient;
+    this.dataViewsServiceAsScoped = options.dataViewsServiceAsScoped;
   }
 
   public async create(request: KibanaRequest): Promise<AlertsClient> {
@@ -67,10 +82,15 @@ export class AlertsClientFactory {
       authorization,
       auditLogger: securityPluginSetup?.audit.asScoped(request),
       esClient: this.esClient,
+      esClientScoped: this.getEsClientScoped ? await this.getEsClientScoped(request) : undefined,
       ruleDataService: this.ruleDataService!,
       getRuleType: this.getRuleType,
       getRuleList: this.getRuleList,
       getAlertIndicesAlias: this.getAlertIndicesAlias,
+      savedObjectClient: this.getSavedObjectClient
+        ? await this.getSavedObjectClient(request)
+        : undefined,
+      dataViewsServiceAsScoped: this.dataViewsServiceAsScoped ?? undefined,
     });
   }
 }

@@ -16,7 +16,6 @@ import type {
   CoreStart,
   IContextProvider,
   CoreStatus,
-  SavedObjectsServiceStart,
 } from '@kbn/core/server';
 import { ServiceStatusLevels } from '@kbn/core/server';
 
@@ -26,7 +25,6 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type {
   PluginStart as DataPluginStart,
   PluginSetup as DataPluginSetup,
-  DataViewsServerPluginStart,
 } from '@kbn/data-plugin/server';
 
 import type { RuleRegistryPluginConfig } from './config';
@@ -140,11 +138,7 @@ export class RuleRegistryPlugin
 
         core.http.registerRouteHandlerContext<RacRequestHandlerContext, 'rac'>(
           'rac',
-          this.createRouteHandlerContext(
-            depsStart.alerting,
-            depsStart.data.indexPatterns,
-            _.savedObjects
-          )
+          this.createRouteHandlerContext()
         );
       })
       .catch(() => {});
@@ -172,6 +166,13 @@ export class RuleRegistryPlugin
       async getAlertingAuthorization(request: KibanaRequest) {
         return plugins.alerting.getAlertingAuthorizationWithRequest(request);
       },
+      async getEsClientScoped(request: KibanaRequest) {
+        return core.elasticsearch.client.asScoped(request).asCurrentUser;
+      },
+      async getSavedObjectClient(request: KibanaRequest) {
+        return core.savedObjects.getScopedClient(request);
+      },
+      dataViewsServiceAsScoped: plugins.data.indexPatterns,
       securityPluginSetup: security,
       ruleDataService,
       getRuleType: plugins.alerting.getType,
@@ -189,11 +190,7 @@ export class RuleRegistryPlugin
     };
   }
 
-  private createRouteHandlerContext = (
-    alerting: AlertingServerStart,
-    dataViews: DataViewsServerPluginStart,
-    savedObjects: SavedObjectsServiceStart
-  ): IContextProvider<RacRequestHandlerContext, 'rac'> => {
+  private createRouteHandlerContext = (): IContextProvider<RacRequestHandlerContext, 'rac'> => {
     const { alertsClientFactory } = this;
     return function alertsRouteHandlerContext(context, request): RacApiRequestHandlerContext {
       return {
@@ -201,9 +198,6 @@ export class RuleRegistryPlugin
           const createdClient = await alertsClientFactory.create(request);
           return createdClient;
         },
-        alerting,
-        dataViews,
-        savedObjectsClient: savedObjects.getScopedClient(request),
       };
     };
   };

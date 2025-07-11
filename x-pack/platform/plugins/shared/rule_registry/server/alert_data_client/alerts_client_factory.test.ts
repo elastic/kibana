@@ -58,6 +58,9 @@ describe('AlertsClientFactory', () => {
       getRuleList: alertsClientFactoryParams.getRuleList,
       getRuleType: alertsClientFactoryParams.getRuleType,
       getAlertIndicesAlias: alertsClientFactoryParams.getAlertIndicesAlias,
+      esClientScoped: alertsClientFactoryParams.getEsClientScoped,
+      savedObjectClient: alertsClientFactoryParams.getSavedObjectClient,
+      dataViewsServiceAsScoped: alertsClientFactoryParams.dataViewsServiceAsScoped,
     });
   });
 

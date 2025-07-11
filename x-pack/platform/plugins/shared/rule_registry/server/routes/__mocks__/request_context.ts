@@ -8,11 +8,6 @@
 import { coreMock, elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { alertsClientMock } from '../../alert_data_client/alerts_client.mock';
 import type { RacRequestHandlerContext } from '../../types';
-import { alertingAuthorizationMock } from '@kbn/alerting-plugin/server/authorization/alerting_authorization.mock';
-import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
-import { createIndexPatternsStartMock } from '@kbn/data-views-plugin/server/mocks';
-
-const authorizationMock = alertingAuthorizationMock.create();
 
 const createMockClients = () => ({
   rac: alertsClientMock.create(),
@@ -25,14 +20,7 @@ const createRequestContextMock = (
 ) => {
   const coreContext = coreMock.createRequestHandlerContext();
   return {
-    rac: {
-      getAlertsClient: jest.fn(() => clients.rac),
-      alerting: {
-        ...alertsMock.createStart(),
-        getAlertingAuthorizationWithRequest: jest.fn().mockResolvedValue(authorizationMock),
-      },
-      dataViews: createIndexPatternsStartMock(),
-    },
+    rac: { getAlertsClient: jest.fn(() => clients.rac) },
     core: {
       ...coreContext,
       elasticsearch: {
