@@ -113,7 +113,6 @@ export const processVersionedRouter = async ({
         }`;
       }
 
-      const hasBody = Boolean(extractValidationSchemaFromVersionedHandler(handler)?.request?.body);
       const contentType = extractContentType(route.options.options?.body);
       // If any handler is deprecated we show deprecated: true in the spec
       const hasDeprecations = route.handlers.some(({ options }) => !!options.options?.deprecated);
@@ -124,13 +123,7 @@ export const processVersionedRouter = async ({
         ...(description ? { description } : {}),
         ...(hasDeprecations ? { deprecated: true } : {}),
         ...(route.options.discontinued ? { 'x-discontinued': route.options.discontinued } : {}),
-        requestBody: hasBody
-          ? {
-              content: hasVersionFilter
-                ? extractVersionedRequestBody(handler, route.options.access, converter, contentType)
-                : extractVersionedRequestBodies(route, converter, contentType),
-            }
-          : undefined,
+        requestBody: extractRequestBody(handler, route, converter, contentType, hasVersionFilter),
         responses: hasVersionFilter
           ? extractVersionedResponse(handler, route.options.access, converter, contentType)
           : extractVersionedResponses(route, converter, contentType),
@@ -178,7 +171,7 @@ export const extractVersionedRequestBody = (
   contentType: string[]
 ) => {
   const schemas = extractValidationSchemaFromVersionedHandler(handler);
-  if (!schemas?.request) return {};
+  if (!schemas?.request || converter.isUndefined(schemas.request.body)) return undefined;
   const schema = converter.convert(schemas.request.body);
   return {
     [getVersionedContentTypeString(handler.options.version, access, contentType)]: {
@@ -186,6 +179,23 @@ export const extractVersionedRequestBody = (
     },
   };
 };
+
+function extractRequestBody(
+  handler: VersionedRouterRoute['handlers'][0],
+  route: VersionedRouterRoute,
+  converter: OasConverter,
+  contentType: string[],
+  hasVersionFilter: boolean
+): OpenAPIV3.RequestBodyObject | undefined {
+  const hasBody = Boolean(extractValidationSchemaFromVersionedHandler(handler)?.request?.body);
+  if (!hasBody) return undefined;
+
+  const content = hasVersionFilter
+    ? extractVersionedRequestBody(handler, route.options.access, converter, contentType)
+    : extractVersionedRequestBodies(route, converter, contentType);
+
+  return content ? { content } : undefined;
+}
 
 export const extractVersionedResponse = (
   handler: VersionedRouterRoute['handlers'][0],

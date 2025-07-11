@@ -1381,7 +1381,6 @@
     "yauzl": "^3.2.0",
     "yazl": "^2.5.1",
     "zod": "^3.25.67",
-    "zod-openapi": "^4.2.4",
     "zod-to-json-schema": "^3.24.6"
   },
   "devDependencies": {

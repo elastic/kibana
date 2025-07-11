@@ -68,7 +68,7 @@ const ComplexRouteResponse = z.object({
 });
 
 export const testOasGenerationZ3 = createObservabilityOnboardingServerRoute({
-  endpoint: 'GET /api/test_os_generation/{id}',
+  endpoint: 'PUT /api/test_os_generation/{id}',
   options: {
     tags: [],
     access: 'public',
@@ -81,26 +81,21 @@ export const testOasGenerationZ3 = createObservabilityOnboardingServerRoute({
   },
   params: z.object({
     query: z.object({
-      startDate: z
-        .date()
-        .describe('Start date for the query')
-        .meta({
-          examples: ['2023-10-01T00:00:00Z', 'now-1d'],
-        }),
-      endDate: z
-        .date()
-        .describe('End date for the query')
-        .default('now')
-        .optional()
-        .meta({
-          examples: ['2023-10-31T23:59:59Z', 'now'],
-        }),
+      startDate: z.date().describe('Start date for the query').meta({
+        example: 'now-1d',
+      }),
+      endDate: z.date().describe('End date for the query').default('now').optional().meta({
+        example: '2023-10-31T23:59:59Z',
+      }),
+      ids: z.array(z.number()).describe('List of child IDs to return').optional(),
+      nullableStr: z.string().nullable().describe('A nullable string field').optional(),
     }),
     path: z.object({
       id: z.string().describe('The ID of the resource').meta({
         example: '12345',
       }),
     }),
+    body: z.object({}).describe('Empty body for PUT request').strict(),
   }),
   responses: {
     200: {
@@ -117,7 +112,7 @@ export const testOasGenerationZ3 = createObservabilityOnboardingServerRoute({
     },
   },
   async handler(resources) {
-    const start = resources.params.query?.start;
+    const start = resources.params.query?.startDate;
 
     if (start && isNaN(parseInt(start, 10))) {
       throw Boom.badRequest('Invalid start index');

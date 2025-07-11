@@ -10,8 +10,9 @@
 import { isZod, z } from '@kbn/zod';
 import { isPassThroughAny } from '@kbn/zod-helpers';
 import type { OpenAPIV3 } from 'openapi-types';
+import { toOpenAPI30Nullability } from './open_api_compat/nullability';
 
-import { KnownParameters } from '../../type';
+import { KnownParameters, OpenAPIConverter } from '../../type';
 import { validatePathParameters } from '../common';
 
 export const is = isZod;
@@ -24,7 +25,7 @@ const createError = (message: string): Error => {
  * Asserts that the provided schema is an instance of provided Zod type
  * or else throws an error with the provided message.
  */
-function assertZodType<T extends z.ZodTypeAny>(
+function assertZodType<T extends z.ZodType>(
   schema: unknown,
   type: new (...args: any[]) => T,
   message: string
@@ -34,7 +35,7 @@ function assertZodType<T extends z.ZodTypeAny>(
   }
 }
 
-function postProcessJsonOutput(json: ReturnType<typeof z.toJSONSchema>) {
+function postProcessJsonOutput(json: z.core.JSONSchema.BaseSchema) {
   if (!json || typeof json !== 'object') {
     return json;
   }
@@ -67,10 +68,13 @@ function postProcessJsonOutput(json: ReturnType<typeof z.toJSONSchema>) {
     })
   );
 
+  // Convert Zod nullability (OpenAPI 3.1) to OpenAPI 3.0 nullability
+  json = toOpenAPI30Nullability(json);
+
   // If the JSON has `definitions`, extract it from json and return it as a separate object
-  let definitions: OpenAPIV3.ComponentsObject['schemas'] | undefined;
+  let definitions: ReturnType<OpenAPIConverter['convert']>['shared'] | undefined;
   if (json.definitions) {
-    definitions = json.definitions;
+    definitions = json.definitions as ReturnType<OpenAPIConverter['convert']>['shared'];
     delete json.definitions;
   }
 
@@ -80,18 +84,33 @@ function postProcessJsonOutput(json: ReturnType<typeof z.toJSONSchema>) {
   };
 }
 
-function toJSON(schema: z.ZodTypeAny) {
+function toJSON(schema: z.ZodType) {
+  // If no wrapper is found, this is considered the innermost type.
+  // Check for unsupported types that should be coerced.
+  // const coercedSchema = coerceUnsupportedZodType(schema);
+
   const json = z.toJSONSchema(schema, {
     io: 'input',
     target: 'draft-7',
+    unrepresentable: 'any',
+    override: (ctx) => {
+      ctx.jsonSchema = coerceUnrepresentableTypeIfNeeded(
+        ctx.zodSchema,
+        ctx.jsonSchema as z.core.JSONSchema.BaseSchema
+      );
+    },
   });
 
   return postProcessJsonOutput(json);
 }
 
-const isZodEmptyType = (type: z.ZodTypeAny): type is z.ZodVoid | z.ZodUndefined | z.ZodNever => {
+function isZodEmptyType(type: z.ZodType): type is z.ZodVoid | z.ZodUndefined | z.ZodNever {
   return type instanceof z.ZodVoid || type instanceof z.ZodUndefined || type instanceof z.ZodNever;
-};
+}
+
+export function isUndefined(type: z.ZodType): type is z.ZodUndefined | z.ZodVoid {
+  return isZodEmptyType(type) || type.isOmittedFromOpenAPI();
+}
 
 /**
  * Recursively unwraps a Zod schema to get the innermost, or "starting," type.
@@ -99,9 +118,9 @@ const isZodEmptyType = (type: z.ZodTypeAny): type is z.ZodVoid | z.ZodUndefined 
  * @param schema The Zod schema to unwrap.
  * @returns The innermost Zod schema that is not a wrapper.
  */
-export function getZodInnerType(schema: z.ZodTypeAny): z.ZodTypeAny {
+export function getZodInnerType(schema: z.ZodType): z.ZodType {
   if (schema instanceof z.ZodPipe) {
-    return getZodInnerType(schema.in);
+    return getZodInnerType(schema.in as z.ZodType);
   }
 
   // If schema has `unwrap` method, recursively unwrap it.
@@ -109,41 +128,33 @@ export function getZodInnerType(schema: z.ZodTypeAny): z.ZodTypeAny {
     return getZodInnerType(schema.unwrap());
   }
 
-  // If no wrapper is found, this is considered the innermost type.
-  // Check for unsupported types that should be coerced.
-  return coerceUnsupportedZodType(schema);
+  return schema;
 }
 
 /**
- * Creates a new schema by cloning the original and adding a description.
- * If a description already exists, it is preserved.
+ * Coerces unrepresentable Zod types to a cloned JSON Schema type.
  */
-const withDescription = <T extends z.ZodTypeAny>(schema: T, defaultDescription: string): T => {
-  if (schema.description) {
-    return schema;
-  }
-  return schema.describe(defaultDescription) as T;
-};
-
-/**
- * If type is from a ZodType which Zod V4 toJSONSchema does not support,
- * such as `z.ZodDate` and `z.ZodBigInt`, converts it to a cloned suitable type.
- */
-export function coerceUnsupportedZodType(schema: z.ZodTypeAny): z.ZodTypeAny {
+function coerceUnrepresentableTypeIfNeeded(
+  schema: z.core.$ZodType,
+  json: z.core.JSONSchema.BaseSchema
+): z.core.JSONSchema.BaseSchema {
   if (schema instanceof z.ZodDate) {
-    return withDescription(z.string(), 'ISO DateTime string');
-  }
-  if (schema instanceof z.ZodBigInt) {
-    return withDescription(z.string(), 'Integer');
+    json.type = 'string';
+    json.format = 'date';
   }
 
-  return schema;
+  if (schema instanceof z.ZodBigInt) {
+    json.type = 'string';
+    json.format = 'bigint';
+  }
+
+  return json;
 }
 
 /**
  * Checks if a Zod schema represents a fundamental JSON primitive.
  */
-function isJsonPrimitive(schema: z.ZodTypeAny): boolean {
+function isJsonPrimitive(schema: z.ZodType): boolean {
   const inner = getZodInnerType(schema);
   return (
     inner instanceof z.ZodString ||
@@ -161,20 +172,25 @@ function isJsonPrimitive(schema: z.ZodTypeAny): boolean {
  * Path parameters must be simple primitives or arrays of primitives.
  * Returns `false` for objects and complex arrays as they are not valid in OpenAPI path parameters.
  */
-function isValidOpenApiPathParameterSchema(unwrappedShape: z.ZodTypeAny): boolean {
+function isValidOpenApiPathParameterSchema(unwrappedShape: z.ZodType): boolean {
   if (isJsonPrimitive(unwrappedShape)) {
     return true;
   }
 
   // Path parameters can technically be arrays of primitives (e.g., path: /items/{ids})
   if (unwrappedShape instanceof z.ZodArray) {
-    return isJsonPrimitive(unwrappedShape.element);
+    const arrayElement = unwrappedShape.unwrap();
+    assertZodType(arrayElement, z.ZodType, 'Expected array element to be a Zod type');
+    return isJsonPrimitive(arrayElement);
   }
 
   // Unions for path parameters are tricky but sometimes allowed if all options are primitive.
   // OpenAPI parameters support 'anyOf', so we check if all members are path-compatible.
   if (unwrappedShape instanceof z.ZodUnion || unwrappedShape instanceof z.ZodDiscriminatedUnion) {
-    return unwrappedShape.options.every(isValidOpenApiPathParameterSchema);
+    return unwrappedShape.options.every((option) => {
+      assertZodType(option, z.ZodType, 'Expected union options to be Zod types');
+      return isValidOpenApiPathParameterSchema(option);
+    });
   }
 
   return false;
@@ -185,7 +201,7 @@ function isValidOpenApiPathParameterSchema(unwrappedShape: z.ZodTypeAny): boolea
  * Query parameters can be primitives, arrays of primitives, or simple objects.
  * Deeper nesting in objects is generally discouraged but technically possible.
  */
-function isValidOpenApiQueryParameterSchema(unwrappedShape: z.ZodTypeAny): boolean {
+function isValidOpenApiQueryParameterSchema(unwrappedShape: z.ZodType): boolean {
   // If it's valid for a path parameter, it's also valid for a query parameter
   if (isValidOpenApiPathParameterSchema(unwrappedShape)) {
     return true;
@@ -210,13 +226,17 @@ function isValidOpenApiQueryParameterSchema(unwrappedShape: z.ZodTypeAny): boole
 
   // Arrays of objects are also possible in queries if serialization is defined.
   if (unwrappedShape instanceof z.ZodArray) {
+    assertZodType(unwrappedShape.element, z.ZodType, 'Expected array element to be a Zod type');
     return isValidOpenApiQueryParameterSchema(unwrappedShape.element);
   }
 
   // Unions are allowed (via OpenAPI 'anyOf' / 'oneOf' on parameters).
   // All union members must conform to query parameter rules.
   if (unwrappedShape instanceof z.ZodUnion || unwrappedShape instanceof z.ZodDiscriminatedUnion) {
-    return unwrappedShape.options.every(isValidOpenApiQueryParameterSchema);
+    return unwrappedShape.options.every((option) => {
+      assertZodType(option, z.ZodType, 'Expected union options to be Zod types');
+      isValidOpenApiQueryParameterSchema(option);
+    });
   }
 
   // Other complex types like Maps, Sets are generally not directly mapped well to query strings.
@@ -227,7 +247,7 @@ function isValidOpenApiQueryParameterSchema(unwrappedShape: z.ZodTypeAny): boole
  * Checks if a Zod schema is suitable for a Request Body or Response Body in OpenAPI.
  * These can generally represent any valid JSON structure.
  */
-export function isAllowedAsRequestBodyOrResponseSchema(schema: z.ZodTypeAny): boolean {
+export function isAllowedAsRequestBodyOrResponseSchema(schema: z.ZodType): boolean {
   const inner = getZodInnerType(schema);
 
   // Zod types which are typically "unrepresentable" in OpenAPI
@@ -243,12 +263,11 @@ export function isAllowedAsRequestBodyOrResponseSchema(schema: z.ZodTypeAny): bo
 
 const convertObjectMembersToParameterObjects = (
   schema: z.ZodObject,
-  isPathParameter = false,
-  knownParameters: KnownParameters = {}
+  isPathParameter = false
 ): OpenAPIV3.ParameterObject[] => {
   return Object.entries(schema.shape).map(([shapeKey, subShape]) => {
     assertZodType(subShape, z.ZodType, `Expected schema for ${shapeKey} to be a Zod type`);
-    const unwrappedShape = getZodInnerType(subShape);
+    const unwrappedShape = subShape;
 
     if (isPathParameter) {
       assertZodType(unwrappedShape, z.ZodType, `Path parameter ${shapeKey} must be a Zod type`);
@@ -272,7 +291,7 @@ const convertObjectMembersToParameterObjects = (
       name: shapeKey,
       in: isPathParameter ? 'path' : 'query',
       required: isPathParameter || isOptional,
-      schema: toJSON(unwrappedShape).json,
+      schema: toJSON(subShape).json,
       description: unwrappedShape.description,
     };
   });
@@ -336,7 +355,7 @@ export const convertPathParameters = (schema: unknown, knownParameters: KnownPar
   };
 };
 
-export const convert = (schema: z.ZodTypeAny) => {
+export const convert = (schema: z.ZodType): ReturnType<OpenAPIConverter['convert']> => {
   assertZodType(schema, z.ZodType, 'Expected schema to be an instance of Zod');
   if (!isAllowedAsRequestBodyOrResponseSchema(schema)) {
     throw createError('Schema is not allowed as a request body or response schema');

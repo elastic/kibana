@@ -42,10 +42,10 @@ export const getNoParamsValidationObjectForRouteMethod = (
   const params = z.strictObject({});
   const query = z.strictObject({});
   const body =
-    method === 'get'
+    method === 'get' || method === 'delete'
       ? z.strictObject({}).omitFromOpenAPI()
       : method === 'post'
-      ? z.nullable(z.strictObject({}))
+      ? z.union([z.strictObject({}), z.null()])
       : z.strictObject({});
   return {
     params,
