@@ -15,6 +15,7 @@ import {
   type FunctionParameterType,
   FunctionDefinitionTypes,
   type SupportedDataType,
+  type FunctionReturnType,
 } from '../types';
 import { operatorsDefinitions } from '../all_operators';
 import { aggFunctionDefinitions } from '../generated/aggregation_functions';
@@ -35,7 +36,7 @@ const techPreviewLabel = i18n.translate('kbn-esql-ast.esql.autocomplete.techPrev
 
 let fnLookups: Map<string, FunctionDefinition> | undefined;
 
-function buildFunctionLookup() {
+export function buildFunctionLookup() {
   // we always refresh if we have test functions
   if (!fnLookups || getTestFunctions().length) {
     fnLookups = operatorsDefinitions
@@ -354,3 +355,32 @@ export const buildFieldsDefinitionsWithMetadata = (
 
   return [...suggestions];
 };
+
+export function printFunctionSignature(arg: ESQLFunction): string {
+  const fnDef = getFunctionDefinition(arg.name);
+  if (fnDef) {
+    const signature = getFunctionSignatures(
+      {
+        ...fnDef,
+        signatures: [
+          {
+            ...fnDef?.signatures[0],
+            params: arg.args.map((innerArg) =>
+              Array.isArray(innerArg)
+                ? { name: `InnerArgument[]`, type: 'any' as const }
+                : // this cast isn't actually correct, but we're abusing the
+                  // getFunctionSignatures API anyways
+                  { name: innerArg.text, type: innerArg.type as FunctionParameterType }
+            ),
+            // this cast isn't actually correct, but we're abusing the
+            // getFunctionSignatures API anyways
+            returnType: '' as FunctionReturnType,
+          },
+        ],
+      },
+      { withTypes: false, capitalize: true }
+    );
+    return signature[0].declaration;
+  }
+  return '';
+}
