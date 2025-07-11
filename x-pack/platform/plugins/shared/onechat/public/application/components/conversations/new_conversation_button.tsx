@@ -15,7 +15,7 @@ import { useConversationId } from '../../hooks/use_conversation_id';
 export const NewConversationButton: React.FC<{}> = () => {
   const { createOnechatUrl } = useNavigation();
   const conversationId = useConversationId();
-  const isDisabled = Boolean(!conversationId);
+  const isDisabled = !conversationId;
 
   const buttonProps = isDisabled
     ? {

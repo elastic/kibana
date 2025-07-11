@@ -27,7 +27,7 @@ export const ConversationHeader: React.FC<ConversationHeaderProps> = ({
       <ConversationSidebarToggle isSidebarOpen={isSidebarOpen} onToggle={onToggleSidebar} />
       {conversation && (
         <>
-          <ConversationTitle />
+          <ConversationTitle title={conversation.title} />
           <ConversationActions />
         </>
       )}

@@ -9,10 +9,12 @@ import React from 'react';
 import { EuiTitle, EuiPageHeaderSection, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { useConversation } from '../../hooks/use_conversation';
 
-export const ConversationTitle: React.FC<{}> = () => {
-  const { conversation } = useConversation();
+interface ConversationTitleProps {
+  title: string;
+}
+
+export const ConversationTitle: React.FC<ConversationTitleProps> = ({ title }) => {
   const { euiTheme } = useEuiTheme();
 
   const labels = {
@@ -36,7 +38,7 @@ export const ConversationTitle: React.FC<{}> = () => {
   return (
     <EuiPageHeaderSection css={sectionStyles}>
       <EuiTitle aria-label={labels.ariaLabel} size="xxs">
-        <h1>{conversation?.title || labels.newConversationDisplay}</h1>
+        <h1>{title || labels.newConversationDisplay}</h1>
       </EuiTitle>
     </EuiPageHeaderSection>
   );
