@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { WaterfallLegendType } from '../../../../common/waterfall/legend';
 import type { TraceItem } from '../../../../common/waterfall/unified_trace_item';
-import { WaterfallLegendType } from '../../app/transaction_details/waterfall_with_summary/waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
 import type { TraceWaterfallItem } from './use_trace_waterfall';
 import {
   getTraceWaterfall,

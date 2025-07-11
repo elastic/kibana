@@ -6,16 +6,14 @@
  */
 
 import React, { createContext, useContext, useMemo } from 'react';
+import type { IWaterfallGetRelatedErrorsHref } from '../../../../common/waterfall/typings';
+import type { IWaterfallLegend } from '../../../../common/waterfall/legend';
+import { WaterfallLegendType } from '../../../../common/waterfall/legend';
 import type { TraceItem } from '../../../../common/waterfall/unified_trace_item';
 import { TOGGLE_BUTTON_WIDTH } from './toggle_accordion_button';
 import { ACCORDION_PADDING_LEFT } from './trace_item_row';
 import type { TraceWaterfallItem } from './use_trace_waterfall';
 import { useTraceWaterfall } from './use_trace_waterfall';
-import type {
-  IWaterfallGetRelatedErrorsHref,
-  IWaterfallLegend,
-} from '../../app/transaction_details/waterfall_with_summary/waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
-import { WaterfallLegendType } from '../../app/transaction_details/waterfall_with_summary/waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
 
 interface TraceWaterfallContextProps {
   duration: number;

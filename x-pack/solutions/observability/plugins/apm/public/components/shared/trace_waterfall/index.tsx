@@ -11,13 +11,13 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { AutoSizer, WindowScroller } from 'react-virtualized';
 import type { ListChildComponentProps } from 'react-window';
 import { VariableSizeList as List, areEqual } from 'react-window';
+import type { IWaterfallGetRelatedErrorsHref } from '../../../../common/waterfall/typings';
 import type { TraceItem } from '../../../../common/waterfall/unified_trace_item';
 import { TimelineAxisContainer, VerticalLinesContainer } from '../charts/timeline';
 import { ACCORDION_HEIGHT, BORDER_THICKNESS, TraceItemRow } from './trace_item_row';
 import type { OnErrorClick, OnNodeClick } from './trace_waterfall_context';
 import { TraceWaterfallContextProvider, useTraceWaterfallContext } from './trace_waterfall_context';
 import type { TraceWaterfallItem } from './use_trace_waterfall';
-import type { IWaterfallGetRelatedErrorsHref } from '../../app/transaction_details/waterfall_with_summary/waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
 import { WaterfallLegends } from '../../app/transaction_details/waterfall_with_summary/waterfall_container/waterfall_legends';
 
 export interface Props {

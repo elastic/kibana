@@ -7,9 +7,9 @@
 
 import { euiPaletteColorBlind } from '@elastic/eui';
 import { useMemo } from 'react';
+import type { IWaterfallLegend } from '../../../../common/waterfall/legend';
+import { WaterfallLegendType } from '../../../../common/waterfall/legend';
 import type { TraceItem } from '../../../../common/waterfall/unified_trace_item';
-import type { IWaterfallLegend } from '../../app/transaction_details/waterfall_with_summary/waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
-import { WaterfallLegendType } from '../../app/transaction_details/waterfall_with_summary/waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
 
 export interface TraceWaterfallItem extends TraceItem {
   depth: number;
