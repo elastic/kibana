@@ -22,7 +22,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const config = getService('config');
   const isServerless = !!config.get('serverless');
 
-  describe('Fails on missing permissions', () => {
+  describe('Fails on missing permissions', function () {
+    // fails on MKI, see https://github.com/elastic/kibana/issues/227583
+    this.tags(['failsOnMKI']);
+
     before(async () => {
       adminApiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
       editorApiClient = await createStreamsRepositoryEditorClient(roleScopedSupertest);
