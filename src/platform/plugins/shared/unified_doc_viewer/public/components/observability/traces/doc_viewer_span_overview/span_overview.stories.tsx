@@ -45,10 +45,10 @@ type Story = StoryObj<typeof SpanOverview>;
 setUnifiedDocViewerServices(mockUnifiedDocViewerServices);
 
 const unifiedDocViewerServices = produce(mockUnifiedDocViewerServices, (draft) => {
-  draft.share.url.locators.get = () => {
-    return { getRedirectUrl: () => '#' };
-  };
-  draft.core.application.capabilities.apm = { show: false };
+  draft.share.url.locators.get = jest
+    .fn()
+    .mockReturnValue({ getRedirectUrl: jest.fn().mockReturnValue('#') });
+  draft.core.application.capabilities.apm = { show: true };
 });
 console.log({ unifiedDocViewerServices });
 //   const canViewApm = core.application.capabilities.apm?.show || false;
