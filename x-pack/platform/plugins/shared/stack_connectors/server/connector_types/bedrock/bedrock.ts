@@ -568,7 +568,7 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     signal,
     timeout = DEFAULT_TIMEOUT_MS,
     connectorUsageCollector,
-  }: ConverseStreamParams) {
+  }: ConverseStreamParams): Promise<ConverseActionResponse> {
     const modelId = reqModel ?? this.model;
     const currentModel = encodeURIComponent(decodeURIComponent(modelId));
     const path = `/model/${currentModel}/converse-stream`;
@@ -619,7 +619,7 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
       };
     }
 
-    return { ...response.data };
+    return response;
   }
 
   /**
@@ -644,7 +644,7 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     }: ConverseStreamParams,
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<ConverseActionResponse> {
-    const res = (await this._converseStream({
+    return await this._converseStream({
       messages,
       model: reqModel,
       stopSequences,
@@ -656,11 +656,6 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
       signal,
       timeout,
       connectorUsageCollector,
-    })) as unknown as {
-      stream: IncomingMessage;
-      tokenStream: IncomingMessage;
-    };
-
-    return res;
+    });
   }
 }
