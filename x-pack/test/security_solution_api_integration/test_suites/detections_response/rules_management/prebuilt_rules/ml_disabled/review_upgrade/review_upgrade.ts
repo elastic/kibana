@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-/* eslint-disable no-console */
 
 import expect from 'expect';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
@@ -35,9 +34,9 @@ export default ({ getService }: FtrProviderContext): void => {
       await deleteAllRules(supertest, log);
       await deleteAllPrebuiltRuleAssets(es, log);
 
-      console.error('------------------------');
-      console.error(config.get('esTestCluster.license'));
-      console.error('------------------------');
+      log.info('------------------------');
+      log.info(config.get('esTestCluster.license'));
+      log.info('------------------------');
     });
 
     const ruleId = 'ml-rule';
