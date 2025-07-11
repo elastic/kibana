@@ -10,6 +10,7 @@ import { render } from '@testing-library/react';
 import { TestProvider } from '../../../test/test_provider';
 import { BenchmarkDetailsBox } from './benchmark_details_box';
 import { getBenchmarkMockData } from '../mock';
+import { FINDINGS_FILTER_OPTIONS } from '../../../common/constants';
 
 const mockNavToFindings = jest.fn();
 jest.mock('@kbn/cloud-security-posture/src/hooks/use_navigate_findings', () => ({
@@ -36,9 +37,9 @@ describe('BenchmarkDetailsBox', () => {
 
     expect(mockNavToFindings).toHaveBeenCalledWith(
       {
-        'data_stream.namespace': 'test-namespace',
-        'rule.benchmark.id': 'cis_aws',
-        'rule.benchmark.version': '1.2.3',
+        [FINDINGS_FILTER_OPTIONS.NAMESPACE]: 'test-namespace',
+        [FINDINGS_FILTER_OPTIONS.RULE_BENCHMARK_ID]: 'cis_aws',
+        [FINDINGS_FILTER_OPTIONS.RULE_BENCHMARK_VERSION]: '1.2.3',
       },
       ['cloud.account.id']
     );
