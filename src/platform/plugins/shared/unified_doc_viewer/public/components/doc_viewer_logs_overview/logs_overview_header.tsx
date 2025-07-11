@@ -21,6 +21,7 @@ import {
   LogDocumentOverview,
   fieldConstants,
   getMessageFieldWithFallbacks,
+  DataTableRecord,
 } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 import { Timestamp } from './sub_components/timestamp';
@@ -31,12 +32,19 @@ export const contentLabel = i18n.translate('unifiedDocViewer.docView.logsOvervie
   defaultMessage: 'Content breakdown',
 });
 
-export function LogsOverviewHeader({ doc }: { doc: LogDocumentOverview }) {
+export function LogsOverviewHeader({
+  doc,
+  rawDoc,
+}: {
+  doc: LogDocumentOverview;
+  rawDoc?: DataTableRecord;
+}) {
   const hasLogLevel = Boolean(doc[fieldConstants.LOG_LEVEL_FIELD]);
   const hasTimestamp = Boolean(doc[fieldConstants.TIMESTAMP_FIELD]);
   const { field, value, formattedValue } = getMessageFieldWithFallbacks(doc, {
     includeFormattedValue: true,
   });
+  const rawFieldValue = rawDoc && field ? rawDoc.flattened[field] : undefined;
   const messageCodeBlockProps = formattedValue
     ? { language: 'json', children: formattedValue }
     : { language: 'txt', dangerouslySetInnerHTML: { __html: value ?? '' } };
@@ -60,6 +68,7 @@ export function LogsOverviewHeader({ doc }: { doc: LogDocumentOverview }) {
         <HoverActionPopover
           value={doc[fieldConstants.LOG_LEVEL_FIELD]}
           field={fieldConstants.LOG_LEVEL_FIELD}
+          rawDoc={rawDoc}
         >
           <LogLevel level={doc[fieldConstants.LOG_LEVEL_FIELD]} />
         </HoverActionPopover>
@@ -89,6 +98,8 @@ export function LogsOverviewHeader({ doc }: { doc: LogDocumentOverview }) {
         value={value}
         formattedValue={formattedValue}
         field={field}
+        rawDoc={rawDoc}
+        rawFieldValue={rawFieldValue}
         anchorPosition="downCenter"
         display="block"
       >

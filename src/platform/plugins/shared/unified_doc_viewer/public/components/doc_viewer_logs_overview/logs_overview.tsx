@@ -75,7 +75,7 @@ export const LogsOverview = forwardRef<LogsOverviewApi, LogsOverviewProps>(
         onRemoveColumn={onRemoveColumn}
       >
         <EuiSpacer size="m" />
-        <LogsOverviewHeader doc={parsedDoc} />
+        <LogsOverviewHeader doc={parsedDoc} rawDoc={hit} />
         <EuiHorizontalRule margin="xs" />
         <LogsOverviewHighlights
           formattedDoc={parsedDoc}
