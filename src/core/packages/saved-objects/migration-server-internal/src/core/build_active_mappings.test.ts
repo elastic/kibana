@@ -133,7 +133,7 @@ describe('getBaseMappings', () => {
           type: 'boolean',
         },
         accessControl: {
-          dynamic: false,
+          dynamic: 'false',
           properties: {
             owner: {
               type: 'keyword',

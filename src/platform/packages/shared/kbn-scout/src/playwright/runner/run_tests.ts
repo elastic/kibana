@@ -171,7 +171,7 @@ export async function runPlaywrightTestCheck(log: ToolingLog) {
   const pwBinPath = resolve(REPO_ROOT, './node_modules/.bin/playwright');
   const pwCmdArgs = [
     'test',
-    `--config=x-pack/platform/plugins/private/discover_enhanced/ui_tests/playwright.config.ts`,
+    `--config=x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/playwright.config.ts`,
     `--list`,
   ];
 

@@ -22,7 +22,6 @@ import {
   MaxIndexPatternColumn,
   MedianIndexPatternColumn,
   MinIndexPatternColumn,
-  OperationMetadata,
   OperationType,
   PercentileIndexPatternColumn,
   PersistedIndexPatternLayer,
@@ -78,7 +77,6 @@ export function buildNumberColumn(sourceField: string) {
     sourceField,
     dataType: 'number' as DataType,
     isBucketed: false,
-    scale: 'ratio' as OperationMetadata['scale'],
   };
 }
 
@@ -266,7 +264,6 @@ export class LensAttributes {
       label: labels[sourceField],
       dataType: fieldMeta?.type as DataType,
       operationType: 'terms',
-      scale: 'ordinal',
       isBucketed: true,
       params: {
         orderBy,
@@ -281,7 +278,6 @@ export class LensAttributes {
                 dataType: 'number',
                 operationType: 'count',
                 isBucketed: false,
-                scale: 'ratio',
                 sourceField: '___records___',
               },
             }
@@ -301,7 +297,6 @@ export class LensAttributes {
       dataType: 'number',
       operationType: 'range',
       isBucketed: true,
-      scale: 'interval',
       params: {
         type: 'histogram',
         ranges: [{ from: 0, to: 1000, label: '' }],
@@ -321,7 +316,6 @@ export class LensAttributes {
       label: label ?? 'Filters',
       dataType: 'string',
       operationType: 'filters',
-      scale: 'ordinal',
       isBucketed: true,
       params: {
         filters: paramFilters,
@@ -495,7 +489,6 @@ export class LensAttributes {
       label: '@timestamp',
       operationType: 'date_histogram',
       params: { interval: 'auto', includeEmptyRows: true },
-      scale: 'interval',
     };
   }
 
@@ -506,7 +499,6 @@ export class LensAttributes {
       label: 'Top values of ' + label || sourceField,
       dataType: 'string',
       isBucketed: true,
-      scale: 'ordinal',
       params: {
         size: 10,
         orderBy: {
@@ -864,7 +856,6 @@ export class LensAttributes {
       label: label || 'Count of records',
       customLabel: true,
       operationType: 'count',
-      scale: 'ratio',
       sourceField: RECORDS_FIELD,
       filter: columnFilter,
       ...(timeScale ? { timeScale } : {}),

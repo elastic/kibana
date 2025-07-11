@@ -28,6 +28,8 @@ import {
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { buildPerPolicyTag } from '../../../../../../common/endpoint/service/artifacts/utils';
 
+jest.setTimeout(15_000); // Costly tests, hitting 2 seconds execution time locally
+
 jest.mock('../../../../../common/lib/kibana');
 jest.mock('../../../../../common/containers/source');
 jest.mock('../../../../../common/hooks/use_license', () => {
@@ -174,8 +176,7 @@ describe('Event filter form', () => {
     cleanup();
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/214053
-  describe.skip('Details and Conditions', () => {
+  describe('Details and Conditions', () => {
     it('should display sections', async () => {
       render();
       expect(renderResult.queryByText('Details')).not.toBeNull();

@@ -5,7 +5,7 @@ Object {
   "dynamic": "strict",
   "properties": Object {
     "accessControl": Object {
-      "dynamic": false,
+      "dynamic": "false",
       "properties": Object {
         "owner": Object {
           "type": "keyword",

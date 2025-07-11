@@ -32,4 +32,5 @@ export {
   toolMatchSelection,
   filterToolsBySelection,
   allToolsSelectionWildcard,
+  allToolsSelection,
 } from './tool_selection';
