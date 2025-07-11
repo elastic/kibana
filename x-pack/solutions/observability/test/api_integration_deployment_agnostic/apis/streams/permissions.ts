@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect';
 import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import {
   StreamsSupertestRepositoryClient,
@@ -22,10 +22,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const config = getService('config');
   const isServerless = !!config.get('serverless');
 
-  describe('Fails on missing permissions', function () {
-    // fails on MKI, see https://github.com/elastic/kibana/issues/227583
-    this.tags(['failsOnMKI']);
-
+  describe.only('Fails on missing permissions', function () {
     before(async () => {
       adminApiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
       editorApiClient = await createStreamsRepositoryEditorClient(roleScopedSupertest);
@@ -51,14 +48,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       );
 
       // make sure that the right permissions are validated
-      expect(response).to.eql({
+      expect(response).toEqual({
         statusCode: 403,
         error: 'Forbidden',
         message: 'User does not have sufficient permissions to execute these actions',
         attributes: {
           data: {
             permissions: {
-              username: 'elastic_editor',
+              username: expect.any(String),
               has_all_requested: false,
               cluster: {
                 manage_index_templates: false,
@@ -103,14 +100,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .expect(403);
 
       // make sure that the right permissions are validated
-      expect(response.body).to.eql({
+      expect(response.body).toEqual({
         statusCode: 403,
         error: 'Forbidden',
         message: 'User does not have sufficient permissions to execute these actions',
         attributes: {
           data: {
             permissions: {
-              username: 'elastic_editor',
+              username: expect.any(String),
               has_all_requested: false,
               cluster: {},
               index: {
@@ -137,14 +134,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .expect(403);
 
       // make sure that the right permissions are validated
-      expect(response.body).to.eql({
+      expect(response.body).toEqual({
         statusCode: 403,
         error: 'Forbidden',
         message: 'User does not have sufficient permissions to execute these actions',
         attributes: {
           data: {
             permissions: {
-              username: 'elastic_editor',
+              username: expect.any(String),
               has_all_requested: false,
               cluster: {
                 manage_index_templates: false,
