@@ -100,70 +100,60 @@ export const ConversationInputForm: React.FC<ConversationInputFormProps> = ({ on
       <EuiFlexGroup
         css={formContainerStyles}
         direction="column"
-        gutterSize="m"
+        gutterSize="s"
         responsive={false}
         alignItems="stretch"
         justifyContent="center"
         aria-label={labels.container}
       >
-        <EuiFlexItem>
+        <EuiFlexItem css={inputContainerStyles}>
+          <textarea
+            css={textareaStyles}
+            data-test-subj="onechatAppConversationInputFormTextArea"
+            value={message}
+            onChange={(event) => {
+              setMessage(event.currentTarget.value);
+            }}
+            onKeyDown={(event) => {
+              if (!event.shiftKey && event.key === keys.ENTER) {
+                event.preventDefault();
+                handleSubmit();
+              }
+            }}
+            placeholder={labels.placeholder}
+            ref={textAreaRef}
+          />
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
           <EuiFlexGroup
-            direction="column"
             gutterSize="s"
             responsive={false}
-            alignItems="stretch"
-            justifyContent="center"
+            alignItems="center"
+            justifyContent="flexEnd"
           >
-            <EuiFlexItem css={inputContainerStyles}>
-              <textarea
-                css={textareaStyles}
-                data-test-subj="onechatAppConversationInputFormTextArea"
-                value={message}
-                onChange={(event) => {
-                  setMessage(event.currentTarget.value);
-                }}
-                onKeyDown={(event) => {
-                  if (!event.shiftKey && event.key === keys.ENTER) {
-                    event.preventDefault();
-                    handleSubmit();
-                  }
-                }}
-                placeholder={labels.placeholder}
-                ref={textAreaRef}
-              />
-            </EuiFlexItem>
-
             <EuiFlexItem grow={false}>
-              <EuiFlexGroup
-                gutterSize="s"
-                responsive={false}
-                alignItems="center"
-                justifyContent="flexEnd"
-              >
-                <EuiFlexItem grow={false}>
-                  {hasActiveConversation ? (
-                    <AgentDisplay selectedAgentId={agentId} />
-                  ) : (
-                    <AgentSelectDropdown
-                      selectedAgentId={agentId}
-                      onAgentChange={(newAgentId: string) => {
-                        setAgentId(newAgentId);
-                      }}
-                    />
-                  )}
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButtonIcon
-                    aria-label={labels.submit}
-                    data-test-subj="onechatAppConversationInputFormSubmitButton"
-                    iconType="kqlFunction"
-                    display="fill"
-                    size="m"
-                    disabled={disabled}
-                    onClick={handleSubmit}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
+              {hasActiveConversation ? (
+                <AgentDisplay selectedAgentId={agentId} />
+              ) : (
+                <AgentSelectDropdown
+                  selectedAgentId={agentId}
+                  onAgentChange={(newAgentId: string) => {
+                    setAgentId(newAgentId);
+                  }}
+                />
+              )}
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonIcon
+                aria-label={labels.submit}
+                data-test-subj="onechatAppConversationInputFormSubmitButton"
+                iconType="kqlFunction"
+                display="fill"
+                size="m"
+                disabled={disabled}
+                onClick={handleSubmit}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
