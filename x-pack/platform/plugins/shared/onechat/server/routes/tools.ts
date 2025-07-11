@@ -6,18 +6,32 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { ToolType } from '@kbn/onechat-common';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import { toolToDescriptor } from '../services/tools/utils/tool_conversion';
-import type { ListToolsResponse } from '../../common/http_api/tools';
+import type {
+  ListToolsResponse,
+  GetToolResponse,
+  DeleteToolResponse,
+  CreateToolPayload,
+  UpdateToolPayload,
+  CreateToolResponse,
+  UpdateToolResponse,
+} from '../../common/http_api/tools';
 import { apiPrivileges } from '../../common/features';
+import {
+  configurationSchema as esqlConfigSchema,
+  configurationUpdateSchema as esqlConfigUpdateSchema,
+} from '../services/tools/esql/schemas';
 
 export function registerToolsRoutes({ router, getInternalServices, logger }: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
 
-  router.post(
+  // list tools API
+  router.get(
     {
-      path: '/internal/onechat/tools',
+      path: '/api/chat/tools',
       security: {
         authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
       },
@@ -25,16 +39,129 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
     },
     wrapHandler(async (ctx, request, response) => {
       const { tools: toolService } = getInternalServices();
-      const registry = toolService.registry.asScopedPublicRegistry({ request });
+      const registry = await toolService.getRegistry({ request });
       const tools = await registry.list({});
       return response.ok<ListToolsResponse>({
         body: {
-          tools: tools.map(toolToDescriptor),
+          results: tools.map(toolToDescriptor),
         },
       });
     })
   );
 
+  // get tool by ID
+  router.get(
+    {
+      path: '/api/chat/tools/{id}',
+      security: {
+        authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
+      },
+      validate: {
+        params: schema.object({
+          id: schema.string(),
+        }),
+      },
+    },
+    wrapHandler(async (ctx, request, response) => {
+      const { id } = request.params;
+      const { tools: toolService } = getInternalServices();
+      const registry = await toolService.getRegistry({ request });
+      const tool = await registry.get(id);
+      return response.ok<GetToolResponse>({
+        body: toolToDescriptor(tool),
+      });
+    })
+  );
+
+  // create tool
+  router.post(
+    {
+      path: '/api/chat/tools',
+      security: {
+        authz: { requiredPrivileges: [apiPrivileges.manageOnechat] },
+      },
+      validate: {
+        body: schema.object({
+          id: schema.string(),
+          type: schema.maybe(
+            schema.oneOf([schema.literal(ToolType.esql), schema.literal(ToolType.builtin)])
+          ),
+          description: schema.string({ defaultValue: '' }),
+          tags: schema.arrayOf(schema.string(), { defaultValue: [] }),
+          configuration: esqlConfigSchema,
+        }),
+      },
+    },
+    wrapHandler(async (ctx, request, response) => {
+      const { tools: toolService } = getInternalServices();
+      const payload: CreateToolPayload = request.body;
+      const createRequest = {
+        ...payload,
+        type: payload.type ?? ToolType.esql,
+      };
+      const registry = await toolService.getRegistry({ request });
+      const tool = await registry.create(createRequest);
+      return response.ok<CreateToolResponse>({
+        body: toolToDescriptor(tool),
+      });
+    })
+  );
+
+  // update tool
+  router.put(
+    {
+      path: '/api/chat/tools/{toolId}',
+      security: {
+        authz: { requiredPrivileges: [apiPrivileges.manageOnechat] },
+      },
+      validate: {
+        params: schema.object({
+          toolId: schema.string(),
+        }),
+        body: schema.object({
+          description: schema.maybe(schema.string()),
+          tags: schema.maybe(schema.arrayOf(schema.string())),
+          configuration: schema.maybe(esqlConfigUpdateSchema),
+        }),
+      },
+    },
+    wrapHandler(async (ctx, request, response) => {
+      const { tools: toolService } = getInternalServices();
+      const { toolId } = request.params;
+      const update: UpdateToolPayload = request.body;
+      const registry = await toolService.getRegistry({ request });
+      const tool = await registry.update(toolId, update);
+      return response.ok<UpdateToolResponse>({
+        body: toolToDescriptor(tool),
+      });
+    })
+  );
+
+  // delete tool
+  router.delete(
+    {
+      path: '/api/chat/tools/{id}',
+      security: {
+        authz: { requiredPrivileges: [apiPrivileges.manageOnechat] },
+      },
+      validate: {
+        params: schema.object({
+          id: schema.string(),
+        }),
+      },
+    },
+    wrapHandler(async (ctx, request, response) => {
+      const { id } = request.params;
+      const { tools: toolService } = getInternalServices();
+      const registry = await toolService.getRegistry({ request });
+      const success = await registry.delete(id);
+      return response.ok<DeleteToolResponse>({
+        body: { success },
+      });
+    })
+  );
+
+  // execute a tool
   router.versioned
     .post({
       path: '/api/chat/tools/_execute',
@@ -56,19 +183,19 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
         validate: {
           request: {
             body: schema.object({
-              id: schema.string({}),
-              params: schema.recordOf(schema.string(), schema.any()),
+              tool_id: schema.string({}),
+              tool_params: schema.recordOf(schema.string(), schema.any()),
             }),
           },
         },
       },
       wrapHandler(async (ctx, request, response) => {
-        const { id, params } = request.body;
+        const { tool_id: id, tool_params: toolParams } = request.body;
         const { tools: toolService } = getInternalServices();
-        const registry = toolService.registry.asScopedPublicRegistry({ request });
+        const registry = await toolService.getRegistry({ request });
         const tool = await registry.get(id);
 
-        const validation = tool.schema.safeParse(params);
+        const validation = tool.schema.safeParse(toolParams);
         if (validation.error) {
           return response.badRequest({
             body: {
@@ -77,7 +204,7 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
           });
         }
 
-        const toolResult = await tool.execute({ toolParams: params });
+        const toolResult = await registry.execute({ toolId: id, toolParams });
 
         return response.ok({
           body: {

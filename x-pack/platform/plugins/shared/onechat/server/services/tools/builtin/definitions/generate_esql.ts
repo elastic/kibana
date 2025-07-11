@@ -6,8 +6,8 @@
  */
 
 import { z } from '@kbn/zod';
-import { BuiltinToolIds, BuiltinTags } from '@kbn/onechat-common';
-import type { RegisteredTool } from '@kbn/onechat-server';
+import { builtinToolIds, builtinTags } from '@kbn/onechat-common';
+import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import { generateEsql, GenerateEsqlResponse } from '@kbn/onechat-genai-utils';
 
 const nlToEsqlToolSchema = z.object({
@@ -24,12 +24,12 @@ const nlToEsqlToolSchema = z.object({
     .describe('(optional) Additional context that could be useful to generate the ES|QL query'),
 });
 
-export const generateEsqlTool = (): RegisteredTool<
+export const generateEsqlTool = (): BuiltinToolDefinition<
   typeof nlToEsqlToolSchema,
   GenerateEsqlResponse
 > => {
   return {
-    id: BuiltinToolIds.generateEsql,
+    id: builtinToolIds.generateEsql,
     description: 'Generate an ES|QL query from a natural language query.',
     schema: nlToEsqlToolSchema,
     handler: async ({ query, index, context }, { esClient, modelProvider }) => {
@@ -45,8 +45,6 @@ export const generateEsqlTool = (): RegisteredTool<
         result,
       };
     },
-    meta: {
-      tags: [BuiltinTags.retrieval],
-    },
+    tags: [builtinTags.retrieval],
   };
 };

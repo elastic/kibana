@@ -6,8 +6,8 @@
  */
 
 import { z } from '@kbn/zod';
-import { BuiltinToolIds, BuiltinTags } from '@kbn/onechat-common';
-import type { RegisteredTool } from '@kbn/onechat-server';
+import { builtinToolIds, builtinTags } from '@kbn/onechat-common';
+import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import { relevanceSearch } from '@kbn/onechat-genai-utils';
 
 const relevanceSearchSchema = z.object({
@@ -41,12 +41,12 @@ export interface SearchFulltextResponse {
   results: SearchFulltextResult[];
 }
 
-export const relevanceSearchTool = (): RegisteredTool<
+export const relevanceSearchTool = (): BuiltinToolDefinition<
   typeof relevanceSearchSchema,
   SearchFulltextResponse
 > => {
   return {
-    id: BuiltinToolIds.relevanceSearch,
+    id: builtinToolIds.relevanceSearch,
     description: `Find relevant documents in an index based on a simple fulltext search.
 
     - The 'index' parameter can be used to specify which index to search against. If not provided, the tool will use the index explorer to find the best index to use.
@@ -69,8 +69,6 @@ export const relevanceSearchTool = (): RegisteredTool<
         result,
       };
     },
-    meta: {
-      tags: [BuiltinTags.retrieval],
-    },
+    tags: [builtinTags.retrieval],
   };
 };

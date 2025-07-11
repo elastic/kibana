@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RegisteredTool } from '@kbn/onechat-server';
+import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import type { BuiltinToolRegistry } from './builtin_registry';
 import {
   getDocumentByIdTool,
@@ -16,10 +16,10 @@ import {
   getIndexMappingsTool,
   listIndicesTool,
   indexExplorerTool,
-} from './retrieval';
+} from './definitions';
 
 export const registerBuiltinTools = ({ registry }: { registry: BuiltinToolRegistry }) => {
-  const tools: Array<RegisteredTool<any, any>> = [
+  const tools: Array<BuiltinToolDefinition<any, any>> = [
     getDocumentByIdTool(),
     executeEsqlTool(),
     naturalLanguageSearchTool(),

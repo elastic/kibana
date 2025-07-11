@@ -41,10 +41,10 @@ export const getHandlerWrapper =
             statusCode: e.meta?.statusCode ?? 500,
           });
         } else {
-          logger.error('Unexpected error in handler:', e);
+          logger.error(`Unexpected error in handler: ${e.stack ?? e.message}`);
           return res.customError({
             body: {
-              message: e instanceof Error ? e.message : 'An unexpected error occurred',
+              message: e.message ?? 'An unexpected error occurred',
             },
             statusCode: 500,
           });

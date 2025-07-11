@@ -8,9 +8,9 @@
 import type { GetResponse } from '@elastic/elasticsearch/lib/api/types';
 import { type AgentDefinition, AgentType } from '@kbn/onechat-common';
 import type { AgentCreateRequest, AgentUpdateRequest } from '../../../../common/agents';
-import { AgentProfileProperties } from './storage';
+import { AgentProperties } from './storage';
 
-export type Document = Pick<GetResponse<AgentProfileProperties>, '_source' | '_id'>;
+export type Document = Pick<GetResponse<AgentProperties>, '_source' | '_id'>;
 
 const defaultAgentType = AgentType.chat;
 
@@ -37,7 +37,7 @@ export const createRequestToEs = ({
 }: {
   profile: AgentCreateRequest;
   creationDate: Date;
-}): AgentProfileProperties => {
+}): AgentProperties => {
   return {
     name: profile.name,
     type: defaultAgentType,
@@ -56,11 +56,11 @@ export const updateProfile = ({
   update,
   updateDate,
 }: {
-  profile: AgentProfileProperties;
+  profile: AgentProperties;
   update: AgentUpdateRequest;
   updateDate: Date;
-}): AgentProfileProperties => {
-  const updated: AgentProfileProperties = {
+}): AgentProperties => {
+  const updated: AgentProperties = {
     ...profile,
     ...update,
     configuration: {

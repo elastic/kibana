@@ -8,17 +8,10 @@
 import { StructuredTool, tool as toTool } from '@langchain/core/tools';
 import { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import {
-  toSerializedToolIdentifier,
-  type SerializedToolIdentifier,
-  type StructuredToolIdentifier,
-  toStructuredToolIdentifier,
-  unknownToolProviderId,
-} from '@kbn/onechat-common';
 import type { ToolProvider, ExecutableTool } from '@kbn/onechat-server';
 import type { ToolCall } from './messages';
 
-export type ToolIdMapping = Map<string, SerializedToolIdentifier>;
+export type ToolIdMapping = Map<string, string>;
 
 export interface ToolsAndMappings {
   /**
@@ -47,9 +40,7 @@ export const toolsToLangchain = async ({
 
   const convertedTools = await Promise.all(
     allTools.map((tool) => {
-      const toolId = reverseMappings.get(
-        toSerializedToolIdentifier({ toolId: tool.id, providerId: tool.meta.providerId })
-      );
+      const toolId = reverseMappings.get(tool.id);
       return toolToLangchain({ tool, logger, toolId });
     })
   );
@@ -71,10 +62,7 @@ export const createToolIdMappings = (tools: ExecutableTool[]): ToolIdMapping => 
       toolId = `${toolId}_${index++}`;
     }
     toolIds.add(toolId);
-    mapping.set(
-      toolId,
-      toSerializedToolIdentifier({ toolId: tool.id, providerId: tool.meta.providerId })
-    );
+    mapping.set(toolId, tool.id);
   }
 
   return mapping;
@@ -108,22 +96,14 @@ export const toolToLangchain = ({
       responseFormat: 'content_and_artifact',
       metadata: {
         toolId: tool.id,
-        providerId: tool.meta.providerId,
+        toolType: tool.type,
       },
     }
   );
 };
 
-export const toolIdentifierFromToolCall = (
-  toolCall: ToolCall,
-  mapping: ToolIdMapping
-): StructuredToolIdentifier => {
-  return toStructuredToolIdentifier(
-    mapping.get(toolCall.toolName) ?? {
-      toolId: toolCall.toolName,
-      providerId: unknownToolProviderId,
-    }
-  );
+export const toolIdentifierFromToolCall = (toolCall: ToolCall, mapping: ToolIdMapping): string => {
+  return mapping.get(toolCall.toolName) ?? toolCall.toolName;
 };
 
 function reverseMap<K, V>(map: Map<K, V>): Map<V, K> {

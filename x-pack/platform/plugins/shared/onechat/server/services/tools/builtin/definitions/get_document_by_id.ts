@@ -6,8 +6,8 @@
  */
 
 import { z } from '@kbn/zod';
-import { BuiltinToolIds, BuiltinTags } from '@kbn/onechat-common';
-import type { RegisteredTool } from '@kbn/onechat-server';
+import { builtinToolIds, builtinTags } from '@kbn/onechat-common';
+import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import { getDocumentById, GetDocumentByIdResult } from '@kbn/onechat-genai-utils';
 
 const getDocumentByIdSchema = z.object({
@@ -15,12 +15,12 @@ const getDocumentByIdSchema = z.object({
   index: z.string().describe('Name of the index to retrieve the document from'),
 });
 
-export const getDocumentByIdTool = (): RegisteredTool<
+export const getDocumentByIdTool = (): BuiltinToolDefinition<
   typeof getDocumentByIdSchema,
   GetDocumentByIdResult
 > => {
   return {
-    id: BuiltinToolIds.getDocumentById,
+    id: builtinToolIds.getDocumentById,
     description: 'Retrieve the full content (source) of a document based on its ID and index name.',
     schema: getDocumentByIdSchema,
     handler: async ({ id, index }, { esClient }) => {
@@ -29,8 +29,6 @@ export const getDocumentByIdTool = (): RegisteredTool<
         result,
       };
     },
-    meta: {
-      tags: [BuiltinTags.retrieval],
-    },
+    tags: [builtinTags.retrieval],
   };
 };

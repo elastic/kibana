@@ -16,12 +16,12 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ToolDescriptor } from '@kbn/onechat-common';
+import { ToolDefinition } from '@kbn/onechat-common';
 import React from 'react';
 import { useOnechatBaseTools } from '../../hooks/use_tools';
 import { truncateAtNewline } from '../../utils/truncate_at_newline';
 
-const columns: Array<EuiBasicTableColumn<ToolDescriptor>> = [
+const columns: Array<EuiBasicTableColumn<ToolDefinition>> = [
   {
     field: 'id',
     name: i18n.translate('xpack.onechat.tools.toolIdLabel', { defaultMessage: 'Tool' }),
