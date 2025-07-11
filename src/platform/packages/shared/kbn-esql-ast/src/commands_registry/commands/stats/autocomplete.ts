@@ -110,7 +110,7 @@ export async function autocomplete(
     callbacks,
     context
   );
-  if (functionsSpecificSuggestions?.length) {
+  if (functionsSpecificSuggestions) {
     return functionsSpecificSuggestions;
   }
 

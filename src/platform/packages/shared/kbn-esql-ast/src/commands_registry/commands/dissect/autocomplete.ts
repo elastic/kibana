@@ -14,6 +14,7 @@ import { type ISuggestionItem, type ICommandContext } from '../../types';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
 import { buildConstantsDefinitions } from '../../../definitions/utils/literals';
 import { ESQL_STRING_TYPES } from '../../../definitions/types';
+import { getInsideFunctionsSuggestions } from '../../../definitions/utils/autocomplete/functions';
 
 const appendSeparatorCompletionItem: ISuggestionItem = {
   command: TRIGGER_SUGGESTION_COMMAND,
@@ -37,6 +38,15 @@ export async function autocomplete(
   const innerText = query.substring(0, cursorPosition);
   const commandArgs = command.args.filter((arg) => !Array.isArray(arg) && arg.type !== 'unknown');
 
+  const functionsSpecificSuggestions = await getInsideFunctionsSuggestions(
+    innerText,
+    cursorPosition,
+    callbacks,
+    context
+  );
+  if (functionsSpecificSuggestions) {
+    return functionsSpecificSuggestions;
+  }
   // DISSECT field/
   if (commandArgs.length === 1 && /\s$/.test(innerText)) {
     return buildConstantsDefinitions(

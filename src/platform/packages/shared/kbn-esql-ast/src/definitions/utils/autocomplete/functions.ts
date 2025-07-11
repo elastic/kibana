@@ -494,6 +494,10 @@ async function getListArgsSuggestions(
   return suggestions;
 }
 
+function isNotEnrichClauseAssigment(node: ESQLFunction, command: ESQLCommand) {
+  return node.name !== '=' && command.name !== 'enrich';
+}
+
 export const getInsideFunctionsSuggestions = async (
   query: string,
   cursorPosition?: number,
@@ -515,11 +519,16 @@ export const getInsideFunctionsSuggestions = async (
   if (!node) {
     return undefined;
   }
+
+  if (node.type === 'literal' && node.literalType === 'keyword') {
+    // command ... "<here>"
+    return [];
+  }
   if (node.type === 'function') {
     if (['in', 'not in'].includes(node.name)) {
       // // command ... a in ( <here> )
       // return { type: 'list' as const, command, node, option, containingFunction };
-      return getListArgsSuggestions(
+      return await getListArgsSuggestions(
         innerText,
         ast,
         callbacks?.getByType ?? (() => Promise.resolve([])),
@@ -527,7 +536,10 @@ export const getInsideFunctionsSuggestions = async (
         cursorPosition ?? 0
       );
     }
-    if (!isOperator(node) || (command.name === 'stats' && !withinStatsWhereClause)) {
+    if (
+      isNotEnrichClauseAssigment(node, command) &&
+      (!isOperator(node) || (command.name === 'stats' && !withinStatsWhereClause))
+    ) {
       // command ... fn( <here> )
       return await getFunctionArgsSuggestions(
         innerText,
