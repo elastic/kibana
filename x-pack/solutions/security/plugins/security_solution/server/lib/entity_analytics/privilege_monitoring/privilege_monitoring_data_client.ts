@@ -122,7 +122,14 @@ export class PrivilegeMonitoringDataClient {
       EngineComponentResourceEnum.privmon_engine,
       'Initializing privilege monitoring engine'
     );
-
+    const currentEngineStatus = await this.getEngineStatus();
+    if (currentEngineStatus.status === PRIVILEGE_MONITORING_ENGINE_STATUS.STARTED) {
+      this.log(
+        'debug',
+        'Privilege monitoring engine is already initialized, skipping initialization.'
+      );
+      return this.engineClient.get();
+    }
     const descriptor = await this.engineClient.init();
     this.log('debug', `Initialized privileged monitoring engine saved object`);
     // create default index source for privilege monitoring
