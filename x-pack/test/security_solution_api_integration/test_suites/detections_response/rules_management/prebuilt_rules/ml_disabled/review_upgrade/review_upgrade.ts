@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -33,6 +34,10 @@ export default ({ getService }: FtrProviderContext): void => {
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
       await deleteAllPrebuiltRuleAssets(es, log);
+
+      console.error('------------------------');
+      console.error(config.get('esTestCluster.license'));
+      console.error('------------------------');
     });
 
     const ruleId = 'ml-rule';
