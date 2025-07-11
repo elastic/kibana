@@ -6,43 +6,35 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import React, { useCallback, useMemo, useRef, useState } from 'react';
-import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import {
-  EuiSpacer,
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiSpacer,
   EuiSwitch,
   EuiSwitchEvent,
-  UseEuiTheme,
-  euiFontSize,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { SHOW_MULTIFIELDS, getShouldShowFieldHandler } from '@kbn/discover-utils';
+import { i18n } from '@kbn/i18n';
+import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
+import React, { useCallback, useMemo, useRef } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 
-import {
-  LOCAL_STORAGE_KEY_SEARCH_TERM,
-  useTableFilters,
-} from '../../../doc_viewer_table/table_filters';
 import { getUnifiedDocViewerServices } from '../../../../plugin';
 import {
   DEFAULT_MARGIN_BOTTOM,
   getTabContentAvailableHeight,
 } from '../../../doc_viewer_source/get_height';
-import { AttributesAccordion } from './attributes_accordion';
-import { getAttributesTitle } from './get_attributes_title';
 import { HIDE_NULL_VALUES } from '../../../doc_viewer_table/table';
+import {
+  LOCAL_STORAGE_KEY_SEARCH_TERM,
+  useTableFilters,
+} from '../../../doc_viewer_table/table_filters';
+import { AttributesAccordion } from './attributes_accordion';
 import { AttributesEmptyPrompt } from './attributes_empty_prompt';
+import { getAttributesTitle } from './get_attributes_title';
 import { groupAttributesFields } from './group_attributes_fields';
-
-export interface AttributeField {
-  name: string; // full field name for filtering/actions
-  displayName: string; // stripped prefix for UI display
-}
 
 export function AttributesOverview({
   columns,
@@ -55,8 +47,6 @@ export function AttributesOverview({
   onAddColumn,
   onRemoveColumn,
 }: DocViewRenderProps) {
-  const styles = useMemoCss(componentStyles);
-
   const containerRef = useRef<HTMLDivElement>();
   const { storage, uiSettings } = getUnifiedDocViewerServices();
   const isEsqlMode = Array.isArray(textBasedHits);
@@ -99,12 +89,8 @@ export function AttributesOverview({
     : 0;
 
   const accordionConfigs = useMemo(() => {
-    const filterFieldsBySearchTerm = (fields: AttributeField[]) =>
-      fields.filter(
-        (field) =>
-          field.displayName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          field.name.toLowerCase().includes(searchTerm.toLowerCase())
-      );
+    const filterFieldsBySearchTerm = (fields: string[]) =>
+      fields.filter((field) => field.toLowerCase().includes(searchTerm.toLowerCase()));
     return [
       {
         id: 'signal_attributes',
@@ -159,9 +145,9 @@ export function AttributesOverview({
   }, [
     attributesFields,
     attributesTitle,
+    searchTerm,
     resourceAttributesFields,
     scopeAttributesFields,
-    searchTerm,
   ]);
 
   const onHideNullValuesChange = useCallback(
@@ -247,36 +233,25 @@ export function AttributesOverview({
         {noFields ? (
           <AttributesEmptyPrompt />
         ) : (
-          <EuiFlexGroup
-            direction="column"
-            gutterSize="none"
-            responsive={false}
-            css={styles.tableCellContainer}
-          >
+          <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
             {accordionConfigs.map(({ id, title, ariaLabel, fields, tooltipMessage }) => (
-              <React.Fragment key={id}>
-                <EuiFlexItem grow={false}>
-                  <AttributesAccordion
-                    id={id}
-                    title={title}
-                    ariaLabel={ariaLabel}
-                    tooltipMessage={tooltipMessage}
-                    fields={fields}
-                    hit={hit}
-                    dataView={dataView}
-                    columns={columns}
-                    columnsMeta={columnsMeta}
-                    searchTerm={searchTerm}
-                    onAddColumn={onAddColumn}
-                    onRemoveColumn={onRemoveColumn}
-                    filter={filter}
-                    isEsqlMode={isEsqlMode}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiSpacer size="s" />
-                </EuiFlexItem>
-              </React.Fragment>
+              <EuiFlexItem key={id}>
+                <AttributesAccordion
+                  id={id}
+                  title={title}
+                  ariaLabel={ariaLabel}
+                  tooltipMessage={tooltipMessage}
+                  fields={fields}
+                  hit={hit}
+                  dataView={dataView}
+                  columns={columns}
+                  columnsMeta={columnsMeta}
+                  onAddColumn={onAddColumn}
+                  onRemoveColumn={onRemoveColumn}
+                  filter={filter}
+                  textBasedHits={textBasedHits}
+                />
+              </EuiFlexItem>
             ))}
           </EuiFlexGroup>
         )}
@@ -284,23 +259,3 @@ export function AttributesOverview({
     </EuiFlexGroup>
   );
 }
-
-const componentStyles = {
-  tableCellContainer: (themeContext: UseEuiTheme) => {
-    const { euiTheme } = themeContext;
-    const { fontSize } = euiFontSize(themeContext, 's');
-
-    return css({
-      '.kbnDocViewer__fieldName': {
-        background: 'red',
-        padding: euiTheme.size.xs,
-        paddingLeft: 0,
-        lineHeight: euiTheme.font.lineHeightMultiplier,
-
-        '.euiDataGridRowCell__popover &': {
-          fontSize,
-        },
-      },
-    });
-  },
-};

@@ -6,30 +6,28 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import React from 'react';
-import { EuiAccordion, EuiText, EuiNotificationBadge, EuiIconTip, useEuiTheme } from '@elastic/eui';
-import { DataTableColumnsMeta, DataTableRecord } from '@kbn/discover-utils';
+import React, { useMemo } from 'react';
+import { EuiAccordion, EuiIconTip, EuiNotificationBadge, EuiText, useEuiTheme } from '@elastic/eui';
 import { DataView } from '@kbn/data-views-plugin/common';
+import { DataTableColumnsMeta, DataTableRecord } from '@kbn/discover-utils';
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-import { AttributesTable } from './attributes_table';
+import DocViewerTable from '../../../doc_viewer_table';
 import { AttributesEmptyPrompt } from './attributes_empty_prompt';
-import { AttributeField } from './attributes_overview';
 
 interface AttributesAccordionProps {
   id: string;
   title: string;
   ariaLabel: string;
   tooltipMessage: string;
-  fields: AttributeField[];
+  fields: string[];
   hit: DataTableRecord;
   dataView: DataView;
   columns?: string[];
   columnsMeta?: DataTableColumnsMeta;
-  searchTerm: string;
   onAddColumn?: (col: string) => void;
   onRemoveColumn?: (col: string) => void;
   filter?: DocViewFilterFn;
-  isEsqlMode: boolean;
+  textBasedHits?: DataTableRecord[];
 }
 
 export const AttributesAccordion = ({
@@ -41,12 +39,22 @@ export const AttributesAccordion = ({
   dataView,
   columns,
   columnsMeta,
-  searchTerm,
   onAddColumn,
   onRemoveColumn,
   filter,
-  isEsqlMode = false,
+  textBasedHits,
 }: AttributesAccordionProps) => {
+  const filteredHit = useMemo(
+    () => ({
+      ...hit,
+      flattened: fields.reduce<any>((acc, fieldName) => {
+        acc[fieldName] = hit.flattened[fieldName];
+        return acc;
+      }, {}),
+    }),
+    [fields, hit]
+  );
+
   const { euiTheme } = useEuiTheme();
   return (
     <EuiAccordion
@@ -77,17 +85,19 @@ export const AttributesAccordion = ({
       {fields.length === 0 ? (
         <AttributesEmptyPrompt />
       ) : (
-        <AttributesTable
-          hit={hit}
+        <DocViewerTable
+          hit={filteredHit}
           dataView={dataView}
           columns={columns}
           columnsMeta={columnsMeta}
-          fields={fields}
-          searchTerm={searchTerm}
+          hideTableFilters
+          hideNullFieldsToggle
+          hideSelectedOnlyToggle
+          hidePagination
           onAddColumn={onAddColumn}
           onRemoveColumn={onRemoveColumn}
           filter={filter}
-          isEsqlMode={isEsqlMode}
+          textBasedHits={textBasedHits}
         />
       )}
     </EuiAccordion>

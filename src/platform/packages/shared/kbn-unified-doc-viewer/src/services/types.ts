@@ -45,6 +45,10 @@ export interface DocViewRenderProps {
   docViewsRegistry?: DocViewsRegistry | ((prevRegistry: DocViewsRegistry) => DocViewsRegistry);
   decreaseAvailableHeightBy?: number;
   initialTabId?: string;
+  hideTableFilters?: boolean;
+  hideSelectedOnlyToggle?: boolean;
+  hideNullFieldsToggle?: boolean;
+  hidePagination?: boolean;
 }
 export type DocViewerComponent = React.FC<DocViewRenderProps>;
 export type DocViewRenderFn = (

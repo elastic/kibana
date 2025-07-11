@@ -31,13 +31,9 @@ describe('groupAttributesFields', () => {
       areNullValuesHidden: false,
     });
 
-    expect(result.attributesFields).toEqual([{ name: 'attributes.foo', displayName: 'foo' }]);
-    expect(result.resourceAttributesFields).toEqual([
-      { name: 'resource.attributes.env', displayName: 'env' },
-    ]);
-    expect(result.scopeAttributesFields).toEqual([
-      { name: 'scope.attributes.lib', displayName: 'lib' },
-    ]);
+    expect(result.attributesFields).toEqual(['attributes.foo']);
+    expect(result.resourceAttributesFields).toEqual(['resource.attributes.env']);
+    expect(result.scopeAttributesFields).toEqual(['scope.attributes.lib']);
   });
 
   it('filters by searchTerm', () => {
@@ -50,9 +46,7 @@ describe('groupAttributesFields', () => {
       areNullValuesHidden: false,
     });
 
-    expect(result.resourceAttributesFields).toEqual([
-      { name: 'resource.attributes.env', displayName: 'env' },
-    ]);
+    expect(result.resourceAttributesFields).toEqual(['resource.attributes.env']);
     expect(result.attributesFields).toEqual([]);
     expect(result.scopeAttributesFields).toEqual([]);
   });
@@ -70,6 +64,6 @@ describe('groupAttributesFields', () => {
       areNullValuesHidden: true,
     });
 
-    expect(result.attributesFields).toEqual([{ name: 'attributes.foo', displayName: 'foo' }]);
+    expect(result.attributesFields).toEqual(['attributes.foo']);
   });
 });

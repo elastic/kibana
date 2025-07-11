@@ -7,9 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AttributeField } from './attributes_overview';
-import { getAttributeDisplayName } from './get_attribute_display_name';
-
 interface GroupAttributesFieldsParams {
   allFields: string[];
   flattened: Record<string, unknown>;
@@ -27,13 +24,13 @@ export function groupAttributesFields({
   isEsqlMode,
   areNullValuesHidden,
 }: GroupAttributesFieldsParams): {
-  attributesFields: AttributeField[];
-  resourceAttributesFields: AttributeField[];
-  scopeAttributesFields: AttributeField[];
+  attributesFields: string[];
+  resourceAttributesFields: string[];
+  scopeAttributesFields: string[];
 } {
-  const attributesFields: AttributeField[] = [];
-  const resourceAttributesFields: AttributeField[] = [];
-  const scopeAttributesFields: AttributeField[] = [];
+  const attributesFields: string[] = [];
+  const resourceAttributesFields: string[] = [];
+  const scopeAttributesFields: string[] = [];
   const lowerSearchTerm = searchTerm.toLowerCase();
 
   allFields.forEach((fieldName) => {
@@ -43,17 +40,12 @@ export function groupAttributesFields({
     if (!lowerFieldName.includes(lowerSearchTerm)) return;
     if (isEsqlMode && areNullValuesHidden && flattened[fieldName] == null) return;
 
-    const field: AttributeField = {
-      name: fieldName,
-      displayName: getAttributeDisplayName(fieldName),
-    };
-
     if (lowerFieldName.startsWith('resource.attributes.')) {
-      resourceAttributesFields.push(field);
+      resourceAttributesFields.push(fieldName);
     } else if (lowerFieldName.startsWith('scope.attributes.')) {
-      scopeAttributesFields.push(field);
+      scopeAttributesFields.push(fieldName);
     } else if (lowerFieldName.startsWith('attributes.')) {
-      attributesFields.push(field);
+      attributesFields.push(fieldName);
     }
   });
 
