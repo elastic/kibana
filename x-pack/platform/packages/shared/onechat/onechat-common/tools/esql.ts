@@ -38,4 +38,4 @@ export interface EsqlToolConfig {
   params: Record<string, EsqlToolParam>;
 }
 
-export type EsqlToolDescriptor = ToolDefinition<EsqlToolConfig>;
+export type EsqlToolDefinition = ToolDefinition<EsqlToolConfig>;

@@ -18,4 +18,4 @@ export {
   allToolsSelectionWildcard,
   allToolsSelection,
 } from './tool_selection';
-export type { EsqlToolConfig, EsqlToolFieldTypes, EsqlToolParam, EsqlToolDescriptor } from './esql';
+export type { EsqlToolConfig, EsqlToolFieldTypes, EsqlToolParam, EsqlToolDefinition } from './esql';
