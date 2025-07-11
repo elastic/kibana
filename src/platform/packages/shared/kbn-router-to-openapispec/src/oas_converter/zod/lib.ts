@@ -285,14 +285,14 @@ const convertObjectMembersToParameterObjects = (
       }
     }
 
-    const isOptional = false;
+    const isOptional = subShape.safeParse(undefined).success;
 
     return {
       name: shapeKey,
       in: isPathParameter ? 'path' : 'query',
       required: isPathParameter || isOptional,
       schema: toJSON(subShape).json,
-      description: unwrappedShape.description,
+      description: subShape.description,
     };
   });
 };
