@@ -134,6 +134,23 @@ $$$action-config-email-domain-allowlist$$$
 
     Data type: `string`
 
+`xpack.actions.email.recipient_allowlist` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}") {applies_to}`stack: ga 9.2`
+:    A list of allowed email recipient (`to`, `cc`, or `bcc`) patterns that can be used with email connectors. If you attempt to send an email to a recipient that does not match the allowed patterns, the action will fail. The failure message indicates that the email is not allowed.
+
+    ::::{warning}
+    This setting cannot be used with `xpack.actions.email.domain_allowlist`.
+    ::::
+
+    Data type: `string`
+
+    For example:
+
+    ```yaml
+    xpack.actions.email.recipient_allowlist: ["admin-*@company.org", "sales-*@example.com"]
+    ```
+
+    Only "to", "cc", or "bcc" email addresses that match the listed patterns will be accepted. For example, "admin-network@company.org" or "sales-north@example.com".
+
 `xpack.actions.email.services.ses.host` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :    The SMTP endpoint for an Amazon Simple Email Service (SES) service provider that can be used by email connectors.
 
@@ -168,7 +185,7 @@ $$$action-config-email-domain-allowlist$$$
     Disabled action types will not appear as an option when creating new connectors, but existing connectors and actions of that type will remain in Kibana and will not function.
 
     ::::{important}
-    [Preconfigured connectors](/reference/connectors-kibana/pre-configured-connectors.md) are not affected by this setting. 
+    [Preconfigured connectors](/reference/connectors-kibana/pre-configured-connectors.md) are not affected by this setting.
     ::::
 
     Data type: `string`
@@ -492,8 +509,8 @@ For more examples, go to [Preconfigured connectors](/reference/connectors-kibana
     * For an [{{bedrock}} connector](/reference/connectors-kibana/bedrock-action-type.md), current support is for the Anthropic Claude models.
        * In {{serverless-full}}, the default is `us.anthropic.claude-3-7-sonnet-20250219-v1:0`.
        * In {{stack}} 9.0, the default is `anthropic.claude-3-5-sonnet-20240620-v1:0`.
-       * In {{stack}} 9.1 and later, the default is `us.anthropic.claude-3-7-sonnet-20250219-v1:0`. {applies_to}`stack: planned 9.1`
-    * For a [{{gemini}} connector](/reference/connectors-kibana/gemini-action-type.md), current support is for the Gemini models. Defaults to `gemini-1.5-pro-002`.
+       * In {{stack}} 9.1 and later, the default is `us.anthropic.claude-3-7-sonnet-20250219-v1:0`. {applies_to}`stack: ga 9.1`
+    * For a [{{gemini}} connector](/reference/connectors-kibana/gemini-action-type.md), current support is for the Gemini models. Defaults to `gemini-2.5-pro`.
     * For a [OpenAI connector](/reference/connectors-kibana/openai-action-type.md), it is optional and applicable only when `xpack.actions.preconfigured.<connector-id>.config.apiProvider` is `OpenAI`.
 
     Data type: `string`

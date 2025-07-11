@@ -61,6 +61,7 @@ export async function mountManagementSection({
     docLinks: coreStart.docLinks,
     data: dataService,
     share: shareService,
+    license$,
     actions: actionsService,
     notifications: notificationsService,
   };
@@ -82,15 +83,7 @@ export async function mountManagementSection({
                     render={(routerProps) => {
                       return (
                         <Suspense fallback={<EuiLoadingSpinner size="xl" />}>
-                          <ReportingTabs
-                            coreStart={coreStart}
-                            apiClient={apiClient}
-                            license$={license$}
-                            config={config}
-                            dataService={dataService}
-                            shareService={shareService}
-                            {...routerProps}
-                          />
+                          <ReportingTabs config={config} />
                         </Suspense>
                       );
                     }}

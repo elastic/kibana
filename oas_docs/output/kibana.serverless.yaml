@@ -147,7 +147,7 @@ tags:
     x-displayName: Security detections
   - description: Endpoint Exceptions API allows you to manage detection rule endpoint exceptions to prevent a rule from generating an alert from incoming events even when the rule's other criteria are met.
     name: Security Endpoint Exceptions API
-    x-displayName: Security endpoint exceptions
+    x-displayName: Security Elastic Endpoint exceptions
   - description: Interact with and manage endpoints running the Elastic Defend integration.
     name: Security Endpoint Management API
     x-displayName: Security endpoint management
@@ -10148,7 +10148,7 @@ paths:
         - Security Detections API
   /api/endpoint_list:
     post:
-      description: Create an endpoint exception list, which groups endpoint exception list items. If an endpoint exception list already exists, an empty response is returned.
+      description: Create the exception list for Elastic Endpoint rule exceptions. When you create the exception list, it will have a `list_id` of `endpoint_list`. If the Elastic Endpoint exception list already exists, your request will return an empty response.
       operationId: CreateEndpointList
       responses:
         '200':
@@ -10183,12 +10183,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_SiemErrorResponse'
           description: Internal server error
-      summary: Create an endpoint exception list
+      summary: Create an Elastic Endpoint rule exception list
       tags:
         - Security Endpoint Exceptions API
   /api/endpoint_list/items:
     delete:
-      description: Delete an endpoint exception list item using the `id` or `item_id` field.
+      description: Delete an Elastic Endpoint exception list item, specified by the `id` or `item_id` field.
       operationId: DeleteEndpointListItem
       parameters:
         - description: Either `id` or `item_id` must be specified
@@ -10242,11 +10242,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_SiemErrorResponse'
           description: Internal server error
-      summary: Delete an endpoint exception list item
+      summary: Delete an Elastic Endpoint exception list item
       tags:
         - Security Endpoint Exceptions API
     get:
-      description: Get the details of an endpoint exception list item using the `id` or `item_id` field.
+      description: Get the details of an Elastic Endpoint exception list item, specified by the `id` or `item_id` field.
       operationId: ReadEndpointListItem
       parameters:
         - description: Either `id` or `item_id` must be specified
@@ -10302,11 +10302,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_SiemErrorResponse'
           description: Internal server error
-      summary: Get an endpoint exception list item
+      summary: Get an Elastic Endpoint rule exception list item
       tags:
         - Security Endpoint Exceptions API
     post:
-      description: Create an endpoint exception list item, and associate it with the endpoint exception list.
+      description: Create an Elastic Endpoint exception list item, and associate it with the Elastic Endpoint exception list.
       operationId: CreateEndpointListItem
       requestBody:
         content:
@@ -10381,11 +10381,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_SiemErrorResponse'
           description: Internal server error
-      summary: Create an endpoint exception list item
+      summary: Create an Elastic Endpoint rule exception list item
       tags:
         - Security Endpoint Exceptions API
     put:
-      description: Update an endpoint exception list item using the `id` or `item_id` field.
+      description: Update an Elastic Endpoint exception list item, specified by the `id` or `item_id` field.
       operationId: UpdateEndpointListItem
       requestBody:
         content:
@@ -10465,12 +10465,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_SiemErrorResponse'
           description: Internal server error
-      summary: Update an endpoint exception list item
+      summary: Update an Elastic Endpoint rule exception list item
       tags:
         - Security Endpoint Exceptions API
   /api/endpoint_list/items/_find:
     get:
-      description: Get a list of all endpoint exception list items.
+      description: Get a list of all Elastic Endpoint exception list items.
       operationId: FindEndpointListItems
       parameters:
         - description: |
@@ -10570,7 +10570,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_SiemErrorResponse'
           description: Internal server error
-      summary: Get endpoint exception list items
+      summary: Get Elastic Endpoint exception list items
       tags:
         - Security Endpoint Exceptions API
   /api/endpoint/action:
@@ -44528,7 +44528,6 @@ paths:
                                         type: object
                                         properties:
                                           query:
-                                            minLength: 1
                                             type: string
                                         required:
                                           - query
@@ -45860,7 +45859,6 @@ paths:
                                         type: object
                                         properties:
                                           query:
-                                            minLength: 1
                                             type: string
                                         required:
                                           - query
@@ -47025,7 +47023,6 @@ paths:
                                         type: object
                                         properties:
                                           query:
-                                            minLength: 1
                                             type: string
                                         required:
                                           - query
@@ -48210,7 +48207,6 @@ paths:
                                         type: object
                                         properties:
                                           query:
-                                            minLength: 1
                                             type: string
                                         required:
                                           - query
@@ -49375,7 +49371,6 @@ paths:
                                     type: object
                                     properties:
                                       query:
-                                        minLength: 1
                                         type: string
                                     required:
                                       - query
@@ -52337,7 +52332,6 @@ paths:
                                     type: object
                                     properties:
                                       query:
-                                        minLength: 1
                                         type: string
                                     required:
                                       - query
@@ -52438,7 +52432,6 @@ paths:
                   type: object
                   properties:
                     query:
-                      minLength: 1
                       type: string
                   required:
                     - query
@@ -52467,13 +52460,11 @@ paths:
           name: from
           required: true
           schema:
-            format: date-time
             type: string
         - in: query
           name: to
           required: true
           schema:
-            format: date-time
             type: string
         - in: query
           name: bucketSize
@@ -52494,6 +52485,66 @@ paths:
                 - not: {}
       responses: {}
       summary: Read the significant events
+      tags:
+        - streams
+      x-state: Technical Preview
+  /api/streams/{name}/significant_events/_preview:
+    post:
+      description: 'Preview significant event results based on a given query<br/><br/>[Required authorization] Route required privileges: read_stream.'
+      operationId: post-streams-name-significant-events-preview
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - in: path
+          name: name
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: from
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: to
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: bucketSize
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                query:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    kql:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        query:
+                          type: string
+                      required:
+                        - query
+                  required:
+                    - kql
+              required:
+                - query
+      responses: {}
+      summary: Preview significant events
       tags:
         - streams
       x-state: Technical Preview
@@ -65086,7 +65137,7 @@ components:
       example: This list tracks allowlisted values.
       type: string
     Security_Endpoint_Exceptions_API_ExceptionListHumanId:
-      description: Exception list's human readable string identifier, e.g. `trusted-linux-processes`.
+      description: The exception list's human readable string identifier, `endpoint_list`.
       example: simple_list
       format: nonempty
       minLength: 1
@@ -67671,7 +67722,7 @@ components:
       example: This list tracks allowlisted values.
       type: string
     Security_Exceptions_API_ExceptionListHumanId:
-      description: Exception list's human readable string identifier, e.g. `trusted-linux-processes`.
+      description: The exception list's human readable string identifier, `endpoint_list`.
       example: simple_list
       format: nonempty
       minLength: 1
@@ -71401,7 +71452,7 @@ components:
         defaultModel:
           type: string
           description: The generative artificial intelligence model for Google Gemini to use.
-          default: gemini-1.5-pro-002
+          default: gemini-2.5-pro
         gcpRegion:
           type: string
           description: The GCP region where the Vertex AI endpoint enabled.

@@ -28,6 +28,11 @@ describe('createChatModel', () => {
   let logger: MockedLogger;
   let actions: ReturnType<typeof actionsMock.createStart>;
   let request: ReturnType<typeof httpServerMock.createKibanaRequest>;
+  const mockEsClient = {
+    ml: {
+      inferTrainedModel: jest.fn(),
+    },
+  } as any;
 
   beforeEach(() => {
     logger = loggerMock.create();
@@ -54,6 +59,8 @@ describe('createChatModel', () => {
       chatModelOptions: {
         temperature: 0.3,
       },
+      anonymizationRulesPromise: Promise.resolve([]),
+      esClient: mockEsClient,
     });
 
     expect(createClientMock).toHaveBeenCalledTimes(1);
@@ -61,6 +68,8 @@ describe('createChatModel', () => {
       actions,
       request,
       logger,
+      anonymizationRulesPromise: Promise.resolve([]),
+      esClient: mockEsClient,
     });
   });
 
@@ -76,6 +85,8 @@ describe('createChatModel', () => {
       chatModelOptions: {
         temperature: 0.3,
       },
+      anonymizationRulesPromise: Promise.resolve([]),
+      esClient: mockEsClient,
     });
 
     expect(getConnectorById).toHaveBeenCalledTimes(1);
@@ -102,6 +113,8 @@ describe('createChatModel', () => {
       chatModelOptions: {
         temperature: 0.3,
       },
+      anonymizationRulesPromise: Promise.resolve([]),
+      esClient: mockEsClient,
     });
 
     expect(InferenceChatModelMock).toHaveBeenCalledTimes(1);

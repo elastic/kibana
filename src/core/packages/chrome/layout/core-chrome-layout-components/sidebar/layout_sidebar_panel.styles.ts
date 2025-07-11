@@ -14,7 +14,6 @@ const root = css`
   display: flex;
   grid-area: sidebarPanel;
   height: 100%;
-  overflow: hidden;
   position: sticky;
   width: var(--kbn-layout--sidebar-panel-width);
   z-index: var(--kbn-layout--aboveFlyoutLevel);

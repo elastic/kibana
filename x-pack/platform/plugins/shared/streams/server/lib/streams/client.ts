@@ -28,6 +28,7 @@ import { LOGS_ROOT_STREAM_NAME, rootStreamDefinition } from './root_stream_defin
 import { StreamsStorageClient } from './service';
 import { State } from './state_management/state';
 import { checkAccess, checkAccessBulk } from './stream_crud';
+import { StreamsStatusConflictError } from './errors/streams_status_conflict_error';
 
 interface AcknowledgeResponse<TResult extends Result> {
   acknowledged: true;
@@ -77,7 +78,32 @@ export class StreamsClient {
    * - it is a wired stream (as opposed to an ingest stream)
    */
   async isStreamsEnabled(): Promise<boolean> {
-    const rootLogsStreamExists = await this.getStream(LOGS_ROOT_STREAM_NAME)
+    const streamsStatus = await this.checkStreamStatus();
+
+    if (streamsStatus === 'conflict') {
+      throw new StreamsStatusConflictError(
+        'Streams status conflict: Elasticsearch and root stream status do not match, enable/disable streams again'
+      );
+    }
+
+    return streamsStatus;
+  }
+
+  public async checkStreamStatus(): Promise<boolean | 'conflict'> {
+    const rootLogsStreamExists = await this.checkRootLogsStreamExists();
+    if (this.dependencies.isServerless) {
+      // in serverless, Elasticsearch doesn't natively support streams yet
+      return rootLogsStreamExists;
+    }
+    const isEnabledOnElasticsearch = await this.checkElasticsearchStreamStatus();
+    if (isEnabledOnElasticsearch !== rootLogsStreamExists) {
+      return 'conflict';
+    }
+    return rootLogsStreamExists;
+  }
+
+  private async checkRootLogsStreamExists() {
+    return await this.getStream(LOGS_ROOT_STREAM_NAME)
       .then((definition) => Streams.WiredStream.Definition.is(definition))
       .catch((error) => {
         if (isDefinitionNotFoundError(error)) {
@@ -85,8 +111,6 @@ export class StreamsClient {
         }
         throw error;
       });
-
-    return rootLogsStreamExists;
   }
 
   /**
@@ -94,27 +118,45 @@ export class StreamsClient {
    * If it is already enabled, it is a noop.
    */
   async enableStreams(): Promise<EnableStreamsResponse> {
-    const isEnabled = await this.isStreamsEnabled();
+    try {
+      const isEnabled = await this.isStreamsEnabled();
 
-    if (isEnabled) {
-      return { acknowledged: true, result: 'noop' };
+      if (isEnabled) {
+        return { acknowledged: true, result: 'noop' };
+      }
+    } catch (error) {
+      if (error.name !== 'StreamsStatusConflictError') {
+        throw error;
+      }
     }
 
-    const result = await State.attemptChanges(
-      [
-        {
-          type: 'upsert',
-          definition: rootStreamDefinition,
-        },
-      ],
-      {
-        ...this.dependencies,
-        streamsClient: this,
-      }
-    );
+    const rootStreamExists = await this.checkRootLogsStreamExists();
 
-    if (result.status === 'failed_with_rollback') {
-      throw result.error;
+    if (!rootStreamExists) {
+      await State.attemptChanges(
+        [
+          {
+            type: 'upsert',
+            definition: rootStreamDefinition,
+          },
+        ],
+        {
+          ...this.dependencies,
+          streamsClient: this,
+        }
+      );
+    }
+
+    if (!this.dependencies.isServerless) {
+      // in serverless, Elasticsearch doesn't natively support streams yet
+      const elasticsearchStreamsEnabled = await this.checkElasticsearchStreamStatus();
+
+      if (!elasticsearchStreamsEnabled) {
+        await this.dependencies.scopedClusterClient.asCurrentUser.transport.request({
+          method: 'POST',
+          path: '_streams/logs/_enable',
+        });
+      }
     }
 
     return { acknowledged: true, result: 'created' };
@@ -129,31 +171,45 @@ export class StreamsClient {
    * It does NOT delete unwired streams.
    */
   async disableStreams(): Promise<DisableStreamsResponse> {
-    const isEnabled = await this.isStreamsEnabled();
+    try {
+      const isEnabled = await this.isStreamsEnabled();
 
-    if (!isEnabled) {
-      return { acknowledged: true, result: 'noop' };
-    }
-
-    const result = await State.attemptChanges(
-      [
-        {
-          type: 'delete',
-          name: rootStreamDefinition.name,
-        },
-      ],
-      {
-        ...this.dependencies,
-        streamsClient: this,
+      if (!isEnabled) {
+        return { acknowledged: true, result: 'noop' };
       }
-    );
-
-    if (result.status === 'failed_with_rollback') {
-      throw result.error;
+    } catch (error) {
+      if (error.name !== 'StreamsStatusConflictError') {
+        throw error;
+      }
     }
 
-    const { assetClient, storageClient } = this.dependencies;
-    await Promise.all([assetClient.clean(), storageClient.clean()]);
+    const rootStreamExists = await this.checkRootLogsStreamExists();
+    const elasticsearchStreamsEnabled = await this.checkElasticsearchStreamStatus();
+
+    if (rootStreamExists) {
+      await State.attemptChanges(
+        [
+          {
+            type: 'delete',
+            name: rootStreamDefinition.name,
+          },
+        ],
+        {
+          ...this.dependencies,
+          streamsClient: this,
+        }
+      );
+
+      const { assetClient, storageClient } = this.dependencies;
+      await Promise.all([assetClient.clean(), storageClient.clean()]);
+    }
+
+    if (elasticsearchStreamsEnabled) {
+      await this.dependencies.scopedClusterClient.asCurrentUser.transport.request({
+        method: 'POST',
+        path: '_streams/logs/_disable',
+      });
+    }
 
     return { acknowledged: true, result: 'deleted' };
   }
@@ -204,10 +260,6 @@ export class StreamsClient {
       }
     );
 
-    if (result.status === 'failed_with_rollback') {
-      throw result.error;
-    }
-
     const { dashboards, queries } = request;
 
     // sync dashboards as before
@@ -249,7 +301,7 @@ export class StreamsClient {
       throw new StatusError(`Child stream ${name} already exists`, 409);
     }
 
-    const result = await State.attemptChanges(
+    await State.attemptChanges(
       [
         {
           type: 'upsert',
@@ -285,10 +337,6 @@ export class StreamsClient {
       ],
       { ...this.dependencies, streamsClient: this }
     );
-
-    if (result.status === 'failed_with_rollback') {
-      throw result.error;
-    }
 
     return { acknowledged: true, result: 'created' };
   }
@@ -588,6 +636,19 @@ export class StreamsClient {
     });
   }
 
+  private async checkElasticsearchStreamStatus(): Promise<boolean> {
+    if (this.dependencies.isServerless) {
+      // in serverless, Elasticsearch doesn't natively support streams yet
+      return false;
+    }
+    const response = (await this.dependencies.scopedClusterClient.asCurrentUser.transport.request({
+      method: 'GET',
+      path: '/_streams/status',
+    })) as { logs: { enabled: boolean } };
+
+    return response.logs.enabled;
+  }
+
   /**
    * Deletes a stream, and its Elasticsearch objects, and its data.
    * Also verifies whether the user has access to the stream.
@@ -599,20 +660,7 @@ export class StreamsClient {
       throw new StatusError('Cannot delete root stream', 400);
     }
 
-    const access =
-      definition && Streams.GroupStream.Definition.is(definition)
-        ? { write: true, read: true }
-        : await checkAccess({
-            name,
-            scopedClusterClient: this.dependencies.scopedClusterClient,
-          });
-
-    // Can/should State manage access control as well?
-    if (!access.write) {
-      throw new SecurityError(`Cannot delete stream, insufficient privileges`);
-    }
-
-    const result = await State.attemptChanges(
+    await State.attemptChanges(
       [
         {
           type: 'delete',
@@ -624,10 +672,6 @@ export class StreamsClient {
         streamsClient: this,
       }
     );
-
-    if (result.status === 'failed_with_rollback') {
-      throw result.error;
-    }
 
     await this.dependencies.queryClient.syncQueries(name, []);
 

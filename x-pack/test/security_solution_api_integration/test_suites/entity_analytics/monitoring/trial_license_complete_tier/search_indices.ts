@@ -6,7 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { PRIVILEGED_MONITOR_IMPORT_USERS_INDEX_MAPPING } from '@kbn/security-solution-plugin/server/lib/entity_analytics/privilege_monitoring/indices';
+
+import { PRIVILEGED_MONITOR_IMPORT_USERS_INDEX_MAPPING } from '@kbn/security-solution-plugin/server/lib/entity_analytics/privilege_monitoring/elasticsearch/indices';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
