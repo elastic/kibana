@@ -5,15 +5,30 @@
  * 2.0.
  */
 
-// applyAlertLimit should be first in the applied mapping functions
-export { applyAlertLimit } from './alert_limit';
+import type { AlertInstanceState as State, AlertInstanceContext as Context } from '../../types';
+import { mappers } from './mappers';
+import type { AlertMapperFn, AlertsResult, MapperContext } from './types';
 
-// TODO how to apply an ordering
+function asyncPipe<S extends State, C extends Context, G extends string, R extends string>(
+  ...fns: AlertMapperFn[]
+) {
+  return async (input: AlertsResult<S, C, G>, context: MapperContext<S, C, G, R>) => {
+    let acc = input;
+    for (const mapper of fns) {
+      acc = await mapper({ alerts: acc, context });
+    }
+    return acc;
+  };
+}
 
-// remaining mappers can be imported in any order but we order them
-// for repeatability and consistency
-export { applyMaintenanceWindows } from './maintenance_window';
-export { applyFlapping } from './flapping';
-export { applyFlappingHistory } from './flapping_history';
-export { applyFlappingRecovery } from './flapping_recovery';
-export { applyAlertDelay } from './alert_delay';
+export async function mapAlerts<
+  S extends State,
+  C extends Context,
+  G extends string,
+  R extends string
+>(
+  categorizedAlerts: AlertsResult<S, C, G>,
+  mapperContext: MapperContext<S, C, G, R>
+): Promise<AlertsResult<S, C, G>> {
+  return await asyncPipe<S, C, G, R>(...Object.values(mappers))(categorizedAlerts, mapperContext);
+}

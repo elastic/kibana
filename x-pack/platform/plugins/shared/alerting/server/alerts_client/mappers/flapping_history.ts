@@ -8,9 +8,8 @@
 import { cloneDeep, compact } from 'lodash';
 import type { Alert } from '../../alert/alert';
 import { updateAlertFlappingHistory } from '../../lib/flapping/update_alert_flapping_history';
-import { AlertCategory, filterFor, type AlertMapperFn } from '../alert_mapper';
+import { AlertCategory, filterFor, type AlertMapperFn, type MapperOpts } from './types';
 import type { AlertInstanceState as State, AlertInstanceContext as Context } from '../../types';
-import type { MapperOpts } from '../alert_mapper';
 
 export const applyFlappingHistory: AlertMapperFn = async <
   S extends State,

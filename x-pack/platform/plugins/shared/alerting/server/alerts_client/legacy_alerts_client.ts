@@ -10,9 +10,8 @@ import { Alert } from '../alert/alert';
 import type { AlertFactory } from '../alert/create_alert_factory';
 import { createAlertFactory, getPublicAlertFactory } from '../alert/create_alert_factory';
 import { toRawAlertInstances } from '../lib';
-import { mapAlerts } from './alert_mapper';
+import { mapAlerts } from './mappers';
 
-import { logAlerts } from '../task_runner/log_alerts';
 import type {
   AlertInstanceContext as Context,
   AlertInstanceState as State,
@@ -20,18 +19,21 @@ import type {
 } from '../types';
 import type { RulesSettingsFlappingProperties } from '../../common/rules_settings';
 import { DEFAULT_FLAPPING_SETTINGS } from '../../common/rules_settings';
-import type { IAlertsClient, InitializeExecutionOpts, LogAlertsOpts, TrackedAlerts } from './types';
+import type { AlertRuleData, IAlertsClient, InitializeExecutionOpts, TrackedAlerts } from './types';
 import { DEFAULT_MAX_ALERTS } from '../config';
 import type { UntypedNormalizedRuleType } from '../rule_type_registry';
 import type { MaintenanceWindowsService } from '../task_runner/maintenance_windows';
 import type { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
 import { categorizeAlerts } from '../lib/categorize_alerts';
+import type { CategorizedAlert } from './mappers/types';
+import { AlertCategory, filterFor } from './mappers/types';
 
 export interface LegacyAlertsClientParams {
   alertingEventLogger: AlertingEventLogger;
   logger: Logger;
   maintenanceWindowsService?: MaintenanceWindowsService;
   request: KibanaRequest;
+  rule: AlertRuleData;
   ruleType: UntypedNormalizedRuleType;
   spaceId: string;
 }
@@ -58,22 +60,22 @@ export class LegacyAlertsClient<
   private reportedAlerts: Map<string, Alert<S, C>> = new Map();
 
   private processedAlerts: {
-    new: Record<string, Alert<S, C, G>>;
-    active: Record<string, Alert<S, C, G>>;
-    trackedActiveAlerts: Record<string, Alert<S, C, G>>;
-    recovered: Record<string, Alert<S, C, R>>;
-    trackedRecoveredAlerts: Record<string, Alert<S, C, R>>;
+    new: Map<string, Alert<S, C, G>>;
+    active: Map<string, Alert<S, C, G>>;
+    trackedActiveAlerts: Map<string, Alert<S, C, G>>;
+    recovered: Map<string, Alert<S, C, G>>;
+    trackedRecoveredAlerts: Map<string, Alert<S, C, G>>;
   };
 
   private alertFactory?: AlertFactory<S, C, WithoutReservedActionGroups<G, R>>;
 
   constructor(private readonly options: LegacyAlertsClientParams) {
     this.processedAlerts = {
-      new: {},
-      active: {},
-      trackedActiveAlerts: {},
-      recovered: {},
-      trackedRecoveredAlerts: {},
+      new: new Map(),
+      active: new Map(),
+      trackedActiveAlerts: new Map(),
+      recovered: new Map(),
+      trackedRecoveredAlerts: new Map(),
     };
   }
 
@@ -120,7 +122,7 @@ export class LegacyAlertsClient<
     return !!this.trackedAlerts.active.get(id);
   }
 
-  public async processAlerts() {
+  public async processAlerts(shouldLogAlerts: boolean) {
     const currentTime = this.startedAtString ?? new Date().toISOString();
     const categorizedAlerts = categorizeAlerts<S, C, G>({
       alerts: this.reportedAlerts,
@@ -130,31 +132,46 @@ export class LegacyAlertsClient<
     });
 
     const mapperContext = {
-      alertDelay: 0,
+      alertDelay: this.options.rule.alertDelay,
       alertsClientContext: this.options,
       flappingSettings: this.flappingSettings,
       hasReachedAlertLimit: this.alertFactory!.hasReachedAlertLimit(),
       maxAlerts: this.maxAlerts,
       previousActiveAlerts: this.trackedAlerts.active,
       previousRecoveredAlerts: this.trackedAlerts.recovered,
+      ruleLogPrefix: this.ruleLogPrefix,
+      shouldLogAlerts,
       startedAt: currentTime,
     };
 
     const processedAlerts = await mapAlerts(categorizedAlerts, mapperContext);
-  }
 
-  public logAlerts({ ruleRunMetricsStore, shouldLogAlerts }: LogAlertsOpts) {
-    logAlerts({
-      logger: this.options.logger,
-      alertingEventLogger: this.options.alertingEventLogger,
-      newAlerts: this.processedAlerts.new,
-      activeAlerts: this.processedAlerts.active,
-      recoveredAlerts: this.processedAlerts.recovered,
-      ruleLogPrefix: this.ruleLogPrefix,
-      ruleRunMetricsStore,
-      canSetRecoveryContext: this.options.ruleType.doesSetRecoveryContext ?? false,
-      shouldPersistAlerts: shouldLogAlerts,
-    });
+    const newAlerts = filterFor(processedAlerts, AlertCategory.New);
+    const ongoingAlerts = filterFor(processedAlerts, AlertCategory.Ongoing);
+    const recoveredAlerts = filterFor(processedAlerts, AlertCategory.Recovered);
+    const ongoingRecoveredAlerts = filterFor(processedAlerts, AlertCategory.OngoingRecovered);
+
+    const convertToMap = (alerts: Array<CategorizedAlert<S, C, G>>) =>
+      alerts.reduce((map, { alert }) => {
+        map.set(alert.getId(), alert);
+        return map;
+      }, new Map<string, Alert<S, C, G>>());
+
+    this.processedAlerts.new = convertToMap(newAlerts);
+
+    // active is new + ongoing alerts
+    this.processedAlerts.active = convertToMap([...newAlerts, ...ongoingAlerts]);
+    this.processedAlerts.trackedActiveAlerts = convertToMap([...newAlerts, ...ongoingAlerts]);
+    this.processedAlerts.recovered = convertToMap(recoveredAlerts);
+
+    // tracked recovered is recovered + ongoing recovered alerts
+    this.processedAlerts.trackedRecoveredAlerts = convertToMap([
+      ...recoveredAlerts,
+      ...ongoingRecoveredAlerts,
+    ]);
+
+    // TODO - apm.currentTransaction.addLabels();
+    // TODO - ruleRunMetricsStore
   }
 
   public getProcessedAlerts(
@@ -164,7 +181,7 @@ export class LegacyAlertsClient<
       return this.processedAlerts[type];
     }
 
-    return {};
+    return new Map();
   }
 
   public getRawAlertInstancesForState(shouldOptimizeTaskState?: boolean) {

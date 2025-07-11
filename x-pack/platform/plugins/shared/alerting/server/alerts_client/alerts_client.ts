@@ -18,7 +18,7 @@ import {
   ALERT_RULE_EXECUTION_UUID,
   ALERT_START,
 } from '@kbn/rule-data-utils';
-import { flatMap, get, isEmpty, keys } from 'lodash';
+import { flatMap, get, isEmpty } from 'lodash';
 import type {
   MsearchRequestItem,
   MsearchResponseItem,
@@ -43,7 +43,7 @@ import { LegacyAlertsClient } from './legacy_alerts_client';
 import type { IIndexPatternString } from '../alerts_service/resource_installer_utils';
 import { getIndexTemplateAndPattern } from '../alerts_service/resource_installer_utils';
 import type { CreateAlertsClientParams } from '../alerts_service/alerts_service';
-import type { AlertRule, LogAlertsOpts, SearchResult } from './types';
+import type { AlertRule, SearchResult } from './types';
 import type {
   IAlertsClient,
   InitializeExecutionOpts,
@@ -142,6 +142,7 @@ export class AlertsClient<
       logger: this.options.logger,
       maintenanceWindowsService: this.options.maintenanceWindowsService,
       request: this.options.request,
+      rule: this.options.rule,
       ruleType: this.options.ruleType,
       spaceId: this.options.spaceId,
     });
@@ -379,12 +380,8 @@ export class AlertsClient<
     return this.legacyAlertsClient.checkLimitUsage();
   }
 
-  public async processAlerts() {
-    await this.legacyAlertsClient.processAlerts();
-  }
-
-  public logAlerts(opts: LogAlertsOpts) {
-    this.legacyAlertsClient.logAlerts(opts);
+  public async processAlerts(shouldLogAlerts: boolean) {
+    await this.legacyAlertsClient.processAlerts(shouldLogAlerts);
   }
 
   public getProcessedAlerts(
@@ -496,10 +493,11 @@ export class AlertsClient<
     // event action: new alert = 'new', active alert: 'active', otherwise 'close'
 
     const activeAlertsToIndex: Array<Alert & AlertData> = [];
-    for (const id of keys(rawActiveAlerts)) {
+    for (const id of rawActiveAlerts.keys()) {
       // See if there's an existing active alert document
-      if (activeAlerts[id]) {
-        const trackedAlert = this.trackedAlerts.get(activeAlerts[id].getUuid());
+      if (activeAlerts.has(id)) {
+        const alert = activeAlerts.get(id);
+        const trackedAlert = this.trackedAlerts.get(alert.getUuid());
         if (!!trackedAlert && get(trackedAlert, ALERT_STATUS) === ALERT_STATUS_ACTIVE) {
           const isImproving = isAlertImproving<
             AlertData,
@@ -507,7 +505,7 @@ export class AlertsClient<
             LegacyContext,
             ActionGroupIds,
             RecoveryActionGroupId
-          >(trackedAlert, activeAlerts[id], this.ruleType.actionGroups);
+          >(trackedAlert, alert, this.ruleType.actionGroups);
           activeAlertsToIndex.push(
             buildOngoingAlert<
               AlertData,
@@ -517,7 +515,7 @@ export class AlertsClient<
               RecoveryActionGroupId
             >({
               alert: trackedAlert,
-              legacyAlert: activeAlerts[id],
+              legacyAlert: alert,
               rule: this.rule,
               isImproving,
               runTimestamp: this.runTimestampString,
@@ -530,7 +528,7 @@ export class AlertsClient<
         } else {
           // skip writing the alert document if the number of consecutive
           // active alerts is less than the rule alertDelay threshold
-          if (activeAlerts[id].getActiveCount() < this.options.rule.alertDelay) {
+          if (alert.getActiveCount() < this.options.rule.alertDelay) {
             continue;
           }
           activeAlertsToIndex.push(
@@ -541,7 +539,7 @@ export class AlertsClient<
               ActionGroupIds,
               RecoveryActionGroupId
             >({
-              legacyAlert: activeAlerts[id],
+              legacyAlert: alert,
               rule: this.rule,
               runTimestamp: this.runTimestampString,
               timestamp: currentTime,
@@ -560,13 +558,13 @@ export class AlertsClient<
     }
 
     const recoveredAlertsToIndex: Array<Alert & AlertData> = [];
-    for (const id of keys(rawRecoveredAlerts)) {
+    for (const id of rawRecoveredAlerts.keys()) {
       const trackedAlert = this.trackedAlerts.getById(id);
       // See if there's an existing alert document
       // If there is not, log an error because there should be
       if (trackedAlert) {
         recoveredAlertsToIndex.push(
-          recoveredAlerts[id]
+          recoveredAlerts.has(id)
             ? buildRecoveredAlert<
                 AlertData,
                 LegacyState,
@@ -575,7 +573,7 @@ export class AlertsClient<
                 RecoveryActionGroupId
               >({
                 alert: trackedAlert,
-                legacyAlert: recoveredAlerts[id],
+                legacyAlert: recoveredAlerts.get(id),
                 rule: this.rule,
                 runTimestamp: this.runTimestampString,
                 timestamp: currentTime,
@@ -586,7 +584,7 @@ export class AlertsClient<
               })
             : buildUpdatedRecoveredAlert<AlertData>({
                 alert: trackedAlert,
-                legacyRawAlert: rawRecoveredAlerts[id],
+                legacyRawAlert: rawRecoveredAlerts.get(id)!,
                 runTimestamp: this.runTimestampString,
                 timestamp: currentTime,
                 rule: this.rule,

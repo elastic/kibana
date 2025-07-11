@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { AlertCategory, type AlertMapperFn } from '../alert_mapper';
+import { AlertCategory, type AlertMapperFn, type MapperOpts } from './types';
 import type { AlertInstanceState as State, AlertInstanceContext as Context } from '../../types';
-import type { MapperOpts } from '../alert_mapper';
 
 export const applyMaintenanceWindows: AlertMapperFn = async <
   S extends State,

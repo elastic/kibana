@@ -7,8 +7,7 @@
 
 import { compact } from 'lodash';
 import type { AlertInstanceState as State, AlertInstanceContext as Context } from '../../types';
-import type { MapperOpts } from '../alert_mapper';
-import { AlertCategory, type AlertMapperFn } from '../alert_mapper';
+import { AlertCategory, type AlertMapperFn, type MapperOpts } from './types';
 
 export const applyAlertDelay: AlertMapperFn = async <
   S extends State,

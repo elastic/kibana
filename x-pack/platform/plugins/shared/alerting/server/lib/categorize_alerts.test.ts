@@ -10,7 +10,7 @@ import { cloneDeep } from 'lodash';
 import { categorizeAlerts } from './categorize_alerts';
 import { Alert } from '../alert';
 import type { AlertInstanceState, AlertInstanceContext } from '../types';
-import { AlertCategory } from '../alerts_client/alert_mapper';
+import { AlertCategory } from '../alerts_client/mappers/types';
 
 describe('categorizeAlerts', () => {
   let clock: sinon.SinonFakeTimers;

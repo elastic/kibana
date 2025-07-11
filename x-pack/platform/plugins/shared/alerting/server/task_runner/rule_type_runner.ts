@@ -340,19 +340,19 @@ export class RuleTypeRunner<
       return { state: undefined, error, stackTrace };
     }
 
-    await withAlertingSpan('alerting:process-alerts', () =>
-      this.options.timer.runWithTimer(TaskRunnerTimerSpan.ProcessAlerts, async () => {
-        await alertsClient.processAlerts();
-        // alertsClient.determineFlappingAlerts();
-        // alertsClient.determineDelayedAlerts({
-        //   alertDelay: alertDelay?.active ?? 0,
-        //   ruleRunMetricsStore: context.ruleRunMetricsStore,
-        // });
-      })
+    await this.options.timer.runWithTimer(
+      TaskRunnerTimerSpan.ProcessAlerts,
+      async () => {
+        await alertsClient.processAlerts(
+          this.shouldLogAndScheduleActionsForAlerts(ruleType.cancelAlertsOnRuleTimeout)
+        );
+      },
+      'alerting:process-alerts'
     );
 
-    await withAlertingSpan('alerting:index-alerts-as-data', () =>
-      this.options.timer.runWithTimer(TaskRunnerTimerSpan.PersistAlerts, async () => {
+    await this.options.timer.runWithTimer(
+      TaskRunnerTimerSpan.PersistAlerts,
+      async () => {
         if (this.shouldLogAndScheduleActionsForAlerts(ruleType.cancelAlertsOnRuleTimeout)) {
           const updateAlertsMaintenanceWindowResult = await alertsClient.persistAlerts();
 
@@ -371,15 +371,9 @@ export class RuleTypeRunner<
             `skipping persisting alerts for rule ${context.ruleLogPrefix}: rule execution has been cancelled.`
           );
         }
-      })
+      },
+      'alerting:index-alerts-as-data'
     );
-
-    alertsClient.logAlerts({
-      ruleRunMetricsStore: context.ruleRunMetricsStore,
-      shouldLogAlerts: this.shouldLogAndScheduleActionsForAlerts(
-        ruleType.cancelAlertsOnRuleTimeout
-      ),
-    });
 
     return { state: updatedRuleTypeState };
   }

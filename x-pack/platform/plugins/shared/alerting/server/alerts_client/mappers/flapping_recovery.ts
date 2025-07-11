@@ -6,8 +6,7 @@
  */
 
 import { Alert } from '../../alert/alert';
-import type { MapperOpts } from '../alert_mapper';
-import { type AlertMapperFn, AlertCategory } from '../alert_mapper';
+import { type AlertMapperFn, AlertCategory, type MapperOpts } from './types';
 import type { AlertInstanceState as State, AlertInstanceContext as Context } from '../../types';
 
 export const applyFlappingRecovery: AlertMapperFn = async <

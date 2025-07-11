@@ -10,7 +10,7 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { Alert } from './alert';
 import { createAlertFactory, getPublicAlertFactory } from './create_alert_factory';
 import { categorizeAlerts } from '../lib';
-import { AlertCategory } from '../alerts_client/alert_mapper';
+import { AlertCategory } from '../alerts_client/mappers/types';
 
 jest.mock('../lib', () => ({
   categorizeAlerts: jest.fn(),

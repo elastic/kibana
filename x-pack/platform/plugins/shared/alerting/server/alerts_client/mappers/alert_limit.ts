@@ -7,8 +7,7 @@
 
 import { cloneDeep } from 'lodash';
 import type { AlertInstanceState as State, AlertInstanceContext as Context } from '../../types';
-import type { MapperOpts } from '../alert_mapper';
-import { AlertCategory, filterFor, type AlertMapperFn } from '../alert_mapper';
+import { AlertCategory, filterFor, type AlertMapperFn, type MapperOpts } from './types';
 
 export const applyAlertLimit: AlertMapperFn = async <
   S extends State,

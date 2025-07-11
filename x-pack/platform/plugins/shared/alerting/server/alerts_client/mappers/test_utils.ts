@@ -13,7 +13,8 @@ import type { Alert } from '../../alert/alert';
 import { maintenanceWindowsServiceMock } from '../../task_runner/maintenance_windows/maintenance_windows_service.mock';
 import { alertingEventLoggerMock } from '../../lib/alerting_event_logger/alerting_event_logger.mock';
 import type { UntypedNormalizedRuleType } from '../../rule_type_registry';
-import type { AlertInstanceState as State, AlertInstanceContext as Context } from '../../../types';
+import type { AlertInstanceContext as Context, AlertInstanceState as State } from '../../types';
+import type { AlertRuleData } from '..';
 
 export const logger = loggingSystemMock.createLogger();
 export const alertingEventLogger = alertingEventLoggerMock.create();
@@ -55,11 +56,26 @@ export const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
   validLegacyConsumers: [],
 };
 
+export const alertRuleData: AlertRuleData = {
+  consumer: 'bar',
+  executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+  id: '1',
+  name: 'rule-name',
+  parameters: {
+    bar: true,
+  },
+  revision: 0,
+  spaceId: 'default',
+  tags: ['rule-', '-tags'],
+  alertDelay: 0,
+};
+
 export const alertsClientContext = {
   alertingEventLogger,
   logger,
   request: fakeRequest,
   spaceId: 'space1',
+  rule: alertRuleData,
   ruleType,
   maintenanceWindowsService,
 };

@@ -10,7 +10,7 @@ import { Alert } from '../../alert/alert';
 import { applyAlertLimit } from './alert_limit';
 import { alertToJson, alertsClientContext } from './test_utils';
 import { cloneDeep } from 'lodash';
-import { AlertCategory, type AlertsResult } from '../alert_mapper';
+import { AlertCategory, type AlertsResult } from './types';
 import type { AlertInstanceState as S, AlertInstanceContext as C } from '../../types';
 
 describe('applyAlertLimit', () => {

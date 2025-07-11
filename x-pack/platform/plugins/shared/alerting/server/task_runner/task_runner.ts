@@ -414,8 +414,9 @@ export class TaskRunner<
 
     let actionSchedulerResult: RunResult = { throttledSummaryActions: {} };
 
-    await withAlertingSpan('alerting:schedule-actions', () =>
-      this.timer.runWithTimer(TaskRunnerTimerSpan.TriggerActions, async () => {
+    await this.timer.runWithTimer(
+      TaskRunnerTimerSpan.TriggerActions,
+      async () => {
         if (isRuleSnoozed(rule)) {
           this.logger.debug(`no scheduling of actions for rule ${ruleLabel}: rule is snoozed.`);
         } else if (!this.shouldLogAndScheduleActionsForAlerts()) {
@@ -429,11 +430,12 @@ export class TaskRunner<
             recoveredAlerts: alertsClient.getProcessedAlerts('recovered'),
           });
         }
-      })
+      },
+      'alerting:schedule-actions'
     );
 
-    let alertsToReturn: Record<string, RawAlertInstance> = {};
-    let recoveredAlertsToReturn: Record<string, RawAlertInstance> = {};
+    let alertsToReturn: Map<string, RawAlertInstance> = new Map();
+    let recoveredAlertsToReturn: Map<string, RawAlertInstance> = new Map();
 
     // Only serialize alerts into task state if we're auto-recovering, otherwise
     // we don't need to keep this information around.
@@ -446,8 +448,8 @@ export class TaskRunner<
     return {
       metrics: ruleRunMetricsStore.getMetrics(),
       alertTypeState: updatedRuleTypeState || undefined,
-      alertInstances: alertsToReturn,
-      alertRecoveredInstances: recoveredAlertsToReturn,
+      alertInstances: Object.fromEntries(alertsToReturn),
+      alertRecoveredInstances: Object.fromEntries(recoveredAlertsToReturn),
       summaryActions: actionSchedulerResult.throttledSummaryActions,
       trackedExecutions: getTrackedExecutions({
         trackedExecutions: alertsClient.getTrackedExecutions(),

@@ -6,9 +6,8 @@
  */
 
 import { isAlertFlapping } from '../../lib/flapping/is_alert_flapping';
-import type { AlertMapperFn } from '../alert_mapper';
+import type { AlertMapperFn, MapperOpts } from './types';
 import type { AlertInstanceState as State, AlertInstanceContext as Context } from '../../types';
-import type { MapperOpts } from '../alert_mapper';
 
 export const applyFlapping: AlertMapperFn = async <
   S extends State,

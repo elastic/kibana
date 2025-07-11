@@ -20,7 +20,7 @@ import {
 } from './test_utils';
 import type { AlertInstanceState as S, AlertInstanceContext as C } from '../../types';
 import { cloneDeep } from 'lodash';
-import { AlertCategory, type AlertsResult } from '../alert_mapper';
+import { AlertCategory, type AlertsResult } from './types';
 
 describe('applyMaintenanceWindows', () => {
   let ongoingAlert1: Alert;

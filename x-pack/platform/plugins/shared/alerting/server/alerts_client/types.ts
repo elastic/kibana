@@ -74,8 +74,7 @@ export interface IAlertsClient<
   initializeExecution(opts: InitializeExecutionOpts): Promise<void>;
   hasReachedAlertLimit(): boolean;
   checkLimitUsage(): void;
-  processAlerts(): void;
-  logAlerts(opts: LogAlertsOpts): void;
+  processAlerts(shouldLogAlerts: boolean): void;
   getProcessedAlerts(
     type: 'new' | 'active' | 'trackedActiveAlerts'
   ): Record<string, LegacyAlert<S, C, G>> | {};
@@ -86,8 +85,8 @@ export interface IAlertsClient<
   isTrackedAlert(id: string): boolean;
   getSummarizedAlerts?(params: GetSummarizedAlertsParams): Promise<SummarizedAlerts>;
   getRawAlertInstancesForState(shouldOptimizeTaskState?: boolean): {
-    rawActiveAlerts: Record<string, RawAlertInstance>;
-    rawRecoveredAlerts: Record<string, RawAlertInstance>;
+    rawActiveAlerts: Map<string, RawAlertInstance>;
+    rawRecoveredAlerts: Map<string, RawAlertInstance>;
   };
   factory(): PublicAlertFactory<S, C, WithoutReservedActionGroups<G, R>>;
   client(): PublicAlertsClient<A, S, C, WithoutReservedActionGroups<G, R>> | null;

@@ -71,6 +71,17 @@ export const initializeAlertsClient = async <
     logger,
     maintenanceWindowsService: context.maintenanceWindowsService,
     request: context.request,
+    rule: {
+      consumer: rule.consumer,
+      executionId,
+      id: rule.id,
+      name: rule.name,
+      parameters: rule.params,
+      revision: rule.revision,
+      spaceId: context.spaceId,
+      tags: rule.tags,
+      alertDelay: rule.alertDelay?.active ?? 0,
+    },
     ruleType,
     spaceId: context.spaceId,
   };
@@ -93,17 +104,6 @@ export const initializeAlertsClient = async <
       >({
         ...alertsClientParams,
         namespace: context.namespace ?? DEFAULT_NAMESPACE_STRING,
-        rule: {
-          consumer: rule.consumer,
-          executionId,
-          id: rule.id,
-          name: rule.name,
-          parameters: rule.params,
-          revision: rule.revision,
-          spaceId: context.spaceId,
-          tags: rule.tags,
-          alertDelay: rule.alertDelay?.active ?? 0,
-        },
       })) ?? null;
 
     alertsClient = client

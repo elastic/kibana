@@ -11,7 +11,7 @@ import type { AlertInstanceContext as Context, AlertInstanceState as State } fro
 import type { PublicAlert } from './alert';
 import { Alert } from './alert';
 import { categorizeAlerts } from '../lib';
-import { AlertCategory, filterFor } from '../alerts_client/alert_mapper';
+import { filterFor, AlertCategory } from '../alerts_client/mappers/types';
 
 export interface AlertFactory<S extends State, C extends Context, G extends string> {
   create: (id: string) => PublicAlert<S, C, G>;

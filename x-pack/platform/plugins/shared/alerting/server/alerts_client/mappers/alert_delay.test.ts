@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { AlertCategory } from './types';
 import { Alert } from '../../alert/alert';
 import { applyAlertDelay } from './alert_delay';
 import { alertToJson, alertsClientContext } from './test_utils';
-import { AlertCategory } from '../alert_mapper';
 import { cloneDeep } from 'lodash';
 
 describe('applyAlertDelay', () => {

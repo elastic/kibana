@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { cloneDeep } from 'lodash';
 import { Alert } from '../../alert/alert';
 import { applyFlappingHistory } from './flapping_history';
 import { alertToJson, alertsClientContext } from './test_utils';
 import { DEFAULT_FLAPPING_SETTINGS, DISABLE_FLAPPING_SETTINGS } from '../../types';
-import { AlertCategory } from '../alert_mapper';
-import { cloneDeep } from 'lodash';
+import { AlertCategory } from './types';
 
 describe('applyFlappingHistory', () => {
   let ongoingAlert1: Alert;

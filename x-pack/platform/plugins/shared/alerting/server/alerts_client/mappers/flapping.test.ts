@@ -9,7 +9,7 @@ import { Alert } from '../../alert/alert';
 import { applyFlapping } from './flapping';
 import { alertToJson, alertsClientContext } from './test_utils';
 import { DEFAULT_FLAPPING_SETTINGS } from '../../types';
-import { AlertCategory, type AlertsResult } from '../alert_mapper';
+import { AlertCategory, type AlertsResult } from './types';
 import { cloneDeep } from 'lodash';
 import type { AlertInstanceState as S, AlertInstanceContext as C } from '../../types';
 
