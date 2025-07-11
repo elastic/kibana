@@ -519,6 +519,7 @@
     "@kbn/error-boundary-example-plugin": "link:examples/error_boundary",
     "@kbn/es-errors": "link:src/platform/packages/shared/kbn-es-errors",
     "@kbn/es-query": "link:src/platform/packages/shared/kbn-es-query",
+    "@kbn/es-query-server": "link:src/platform/packages/shared/kbn-es-query-server",
     "@kbn/es-types": "link:src/platform/packages/shared/kbn-es-types",
     "@kbn/es-ui-shared-plugin": "link:src/platform/plugins/shared/es_ui_shared",
     "@kbn/eso-model-version-example": "link:examples/eso_model_version_example",

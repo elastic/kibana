@@ -906,6 +906,8 @@
       "@kbn/es-errors/*": ["src/platform/packages/shared/kbn-es-errors/*"],
       "@kbn/es-query": ["src/platform/packages/shared/kbn-es-query"],
       "@kbn/es-query/*": ["src/platform/packages/shared/kbn-es-query/*"],
+      "@kbn/es-query-server": ["src/platform/packages/shared/kbn-es-query-server"],
+      "@kbn/es-query-server/*": ["src/platform/packages/shared/kbn-es-query-server/*"],
       "@kbn/es-types": ["src/platform/packages/shared/kbn-es-types"],
       "@kbn/es-types/*": ["src/platform/packages/shared/kbn-es-types/*"],
       "@kbn/es-ui-shared-plugin": ["src/platform/plugins/shared/es_ui_shared"],
