@@ -10,7 +10,8 @@ const { workerData } = require('worker_threads');
 if (process.env.NODE_ENV !== 'production') {
   require('../../../../../../../../src/setup_node_env');
 } else {
-  require('../../../../../../../../src/setup_node_env/dist');
+  // eslint-disable-next-line @kbn/imports/no_unresolvable_imports
+  require('../../../../../../src/setup_node_env/dist');
 }
 
 // eslint-disable-next-line import/no-dynamic-require
