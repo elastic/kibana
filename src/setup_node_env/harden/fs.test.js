@@ -37,6 +37,8 @@ describe('Hardened FS', () => {
 
   afterAll(() => {
     process.env.KBN_ENABLE_HARDENED_FS = false;
+    // safeFs.unlinkSync(join(DATA_PATH, 'good.json'));
+    // safeFs.unlinkSync(join(DATA_PATH, 'stream.json'));
   });
 
   describe('callback', () => {

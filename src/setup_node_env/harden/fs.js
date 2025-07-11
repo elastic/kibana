@@ -11,6 +11,7 @@
 const { REPO_ROOT } = require('@kbn/repo-info');
 
 const { fsEventBus, FS_CONFIG_EVENT } = require('@kbn/security-hardening/fs-event-bus');
+const validations = require('./fs_validations');
 
 const { join, normalize } = require('path');
 const { homedir, tmpdir } = require('os');
@@ -69,21 +70,10 @@ fsEventBus.on(FS_CONFIG_EVENT, (config) => {
 });
 
 const getSafePath = (userPath) => {
+  validations.validateNoPathTraversal(userPath); // Should I run this on both?
   const normalizedPath = normalize(userPath);
-
-  if (
-    isDevOrCI &&
-    (normalizedPath.endsWith('.txt') ||
-      normalizedPath.endsWith('.md') ||
-      normalizedPath.endsWith('.log') ||
-      normalizedPath.includes('__fixtures__'))
-  ) {
-    return normalizedPath;
-  }
-
-  if (!safePaths.some((path) => normalizedPath.startsWith(path))) {
-    throw new Error(`Unsafe path detected: "${normalizedPath}".`);
-  }
+  validations.validateFileExtension(normalizedPath); // Maintain logic, dont run in prod
+  validations.validatePathIsSubdirectoryOfSafeDirectory(normalizedPath); // Maintain logic, run only in prod
 
   return normalizedPath;
 };
