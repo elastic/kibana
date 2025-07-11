@@ -124,23 +124,24 @@ export const ApiRequestFlyout: React.FunctionComponent<ViewApiRequestFlyoutProps
           )}
         </div>
         <EuiSpacer size="s" />
-        <EuiScreenReaderOnly>
-          <h3 id={codeBlockTitleId}>
-            <FormattedMessage
-              id="esUi.viewApiRequest.codeBlockTitle"
-              defaultMessage="Request code block"
-            />
-          </h3>
-        </EuiScreenReaderOnly>
-        <EuiCodeBlock
-          aria-labelledby={codeBlockTitleId}
-          language="json"
-          data-test-subj="apiRequestFlyoutBody"
-          overflowHeight={1200}
-          isVirtualized
-        >
-          {request}
-        </EuiCodeBlock>
+        <figure role="group" aria-labelledby={codeBlockTitleId} tabIndex={0}>
+          <EuiScreenReaderOnly>
+            <h3 id={codeBlockTitleId}>
+              <FormattedMessage
+                id="esUi.viewApiRequest.codeBlockTitle"
+                defaultMessage="Request code block"
+              />
+            </h3>
+          </EuiScreenReaderOnly>
+          <EuiCodeBlock
+            language="json"
+            data-test-subj="apiRequestFlyoutBody"
+            overflowHeight={1200}
+            isVirtualized
+          >
+            {request}
+          </EuiCodeBlock>
+        </figure>
       </EuiFlyoutBody>
 
       <EuiFlyoutFooter>
