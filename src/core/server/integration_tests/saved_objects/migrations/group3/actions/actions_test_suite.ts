@@ -90,6 +90,7 @@ export const runActionTestSuite = ({
       aliases: ['existing_index_with_docs_alias'],
       esCapabilities,
       mappings: {
+        // @ts-expect-error allowed for test purposes only (dynamic mapping definition)
         dynamic: true,
         properties: {
           someProperty: {
@@ -153,6 +154,7 @@ export const runActionTestSuite = ({
       aliases: ['existing_index_with_100k_docs_alias'],
       esCapabilities,
       mappings: {
+        // @ts-expect-error allowed for test purposes only (dynamic mapping definition)
         dynamic: true,
         properties: {},
       },
