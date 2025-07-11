@@ -6,26 +6,48 @@
  */
 
 import React from 'react';
-import { EuiDraggable } from '@elastic/eui';
-import { EditProcessorPanel, type EditProcessorPanelProps } from './processors';
+import { useSelector } from '@xstate5/react';
+import { EuiAvatar, EuiDraggable, EuiTimelineItem } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { ProcessorConfiguration, ProcessorConfigurationProps } from './processors';
 
 export const DraggableProcessorListItem = ({
   idx,
-  disableDrag,
+  isDragDisabled,
   ...props
-}: Omit<EditProcessorPanelProps, 'dragHandleProps'> & { idx: number; disableDrag: boolean }) => (
-  <EuiDraggable
-    index={idx}
-    spacing="m"
-    draggableId={props.processorRef.id}
-    hasInteractiveChildren
-    customDragHandle
-    isDragDisabled={disableDrag}
-    css={{
-      paddingLeft: 0,
-      paddingRight: 0,
-    }}
-  >
-    {(provided) => <EditProcessorPanel {...props} dragHandleProps={provided.dragHandleProps} />}
-  </EuiDraggable>
-);
+}: Omit<ProcessorConfigurationProps, 'dragHandleProps'> & {
+  idx: number;
+  isDragDisabled: boolean;
+}) => {
+  const isOpen = useSelector(
+    props.processorRef,
+    (snapshot) => snapshot.matches('draft') || snapshot.matches({ configured: 'editing' })
+  );
+  return (
+    <EuiTimelineItem
+      verticalAlign="top"
+      icon={<EuiAvatar name="Checked" iconType="check" size="s" color="#c9f3e3" />}
+      css={css`
+        [class*='euiTimelineItemEvent'] {
+          min-width: 0;
+        }
+      `}
+    >
+      <EuiDraggable
+        index={idx}
+        spacing="none"
+        draggableId={props.processorRef.id}
+        hasInteractiveChildren
+        customDragHandle
+        isDragDisabled={isDragDisabled}
+      >
+        {(provided) => (
+          <ProcessorConfiguration
+            {...props}
+            dragHandleProps={isDragDisabled ? null : provided.dragHandleProps}
+          />
+        )}
+      </EuiDraggable>
+    </EuiTimelineItem>
+  );
+};

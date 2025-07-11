@@ -72,9 +72,12 @@ export const GrokPatternAISuggestions = ({
               'patterns',
               suggestion.grokProcessor.patterns.map(
                 (value) => new DraftGrokExpression(grokCollection, value)
-              )
+              ),
+              { shouldValidate: true }
             );
-            setValue('pattern_definitions', suggestion.grokProcessor.pattern_definitions);
+            setValue('pattern_definitions', suggestion.grokProcessor.pattern_definitions, {
+              shouldValidate: true,
+            });
           }
           refreshSuggestions(null);
         }}

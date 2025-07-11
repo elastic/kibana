@@ -7,7 +7,7 @@
 import React from 'react';
 import { dynamic } from '@kbn/shared-ux-utility';
 import { Streams, isRootStreamDefinition } from '@kbn/streams-schema';
-import { RootStreamEmptyPrompt } from './root_stream_empty_prompt';
+import { RootStreamEmptyPrompt } from './empty_prompts';
 
 const StreamDetailEnrichmentContent = dynamic(() =>
   import(/* webpackChunkName: "management_enrichment" */ './page_content').then((mod) => ({

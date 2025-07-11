@@ -43,6 +43,7 @@ export type SimulationEvent =
   | { type: 'processor.cancel'; processors: ProcessorDefinitionWithUIAttributes[] }
   | { type: 'processor.change'; processors: ProcessorDefinitionWithUIAttributes[] }
   | { type: 'processor.delete'; processors: ProcessorDefinitionWithUIAttributes[] }
+  | { type: 'processor.edit'; processors: ProcessorDefinitionWithUIAttributes[] }
   | { type: 'simulation.changePreviewDocsFilter'; filter: PreviewDocsFilterOption }
   | { type: 'simulation.fields.map'; field: MappedSchemaField }
   | { type: 'simulation.fields.unmap'; fieldName: string }
