@@ -18,8 +18,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SampleDocument } from '@kbn/streams-schema';
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import { css } from '@emotion/css';
+import { recalcColumnWidths } from '../stream_detail_enrichment/utils';
 import { SimulationContext } from '../stream_detail_enrichment/state_management/simulation_state_machine';
 
 export function PreviewTable({
@@ -121,6 +122,8 @@ export function PreviewTable({
     } as EuiDataGridSorting;
   }, [setSorting, sorting]);
 
+  const [columnWidths, setColumnWidths] = useState<Record<string, number | undefined>>({});
+
   // Derive visibleColumns from canonical order
   const visibleColumns = useMemo(() => {
     if (displayColumns) {
@@ -129,7 +132,21 @@ export function PreviewTable({
     return canonicalColumnOrder;
   }, [canonicalColumnOrder, displayColumns]);
 
-  // Derive gridColumns from canonical order
+  const onColumnResize = useCallback(
+    ({ columnId, width }: { columnId: string; width: number | undefined }) => {
+      setColumnWidths((prev) => {
+        const updated = recalcColumnWidths({
+          columnId,
+          width,
+          prevWidths: prev,
+          visibleColumns,
+        });
+        return updated;
+      });
+    },
+    [visibleColumns]
+  );
+
   const gridColumns = useMemo(() => {
     return canonicalColumnOrder.map((column) => ({
       id: column,
@@ -144,13 +161,13 @@ export function PreviewTable({
               showSortDesc: Boolean(setSorting),
             }
           : (false as false),
-      initialWidth: visibleColumns.length > 10 ? 250 : undefined,
+      initialWidth: columnWidths[column],
     }));
-  }, [canonicalColumnOrder, setSorting, setVisibleColumns, visibleColumns.length]);
+  }, [canonicalColumnOrder, setSorting, setVisibleColumns, columnWidths]);
 
   const leadingControlColumns: EuiDataGridControlColumn[] = useMemo(
     () =>
-      selectableRow || rowSourceAvatars
+      (selectableRow || rowSourceAvatars) && visibleColumns.length > 0
         ? [
             {
               id: 'selection',
@@ -192,7 +209,7 @@ export function PreviewTable({
             },
           ]
         : [],
-    [onRowSelected, rowSourceAvatars, selectableRow, selectedRowIndex]
+    [onRowSelected, selectableRow, rowSourceAvatars, selectedRowIndex, visibleColumns.length]
   );
 
   return (
@@ -224,6 +241,7 @@ export function PreviewTable({
       toolbarVisibility={toolbarVisibility}
       rowCount={documents.length}
       rowHeightsOptions={rowHeightsOptions}
+      onColumnResize={onColumnResize}
       renderCellValue={({ rowIndex, columnId }) => {
         const doc = documents[rowIndex];
         if (!doc || typeof doc !== 'object') {

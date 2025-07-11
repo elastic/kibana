@@ -570,7 +570,7 @@
         "label": "UnifiedHistogramLayout",
         "description": [],
         "signature": [
-          "({ container, unifiedHistogramChart, chart, isChartAvailable, hits, topPanelHeight, onTopPanelHeightChange, children, }: ",
+          "({ unifiedHistogramChart, chart, isChartAvailable, hits, topPanelHeight, onTopPanelHeightChange, children, }: ",
           {
             "pluginId": "@kbn/unified-histogram",
             "scope": "public",
@@ -589,7 +589,7 @@
             "id": "def-public.UnifiedHistogramLayout.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  container,\n  unifiedHistogramChart,\n  chart,\n  isChartAvailable,\n  hits,\n  topPanelHeight,\n  onTopPanelHeightChange,\n  children,\n}",
+            "label": "{\n  unifiedHistogramChart,\n  chart,\n  isChartAvailable,\n  hits,\n  topPanelHeight,\n  onTopPanelHeightChange,\n  children,\n}",
             "description": [],
             "signature": [
               {
@@ -2560,7 +2560,7 @@
         "label": "UnifiedHistogramLayoutProps",
         "description": [],
         "signature": [
-          "{ container: HTMLElement | null; unifiedHistogramChart: React.ReactNode; chart?: ",
+          "{ unifiedHistogramChart: React.ReactNode; chart?: ",
           "UnifiedHistogramChartContext",
           " | undefined; isChartAvailable?: boolean | undefined; hits?: ",
           "UnifiedHistogramHitsContext",
