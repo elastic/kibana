@@ -619,16 +619,6 @@ export function createOption(name: string, ctx: ParserRuleContext): ESQLCommandO
   };
 }
 
-export function createUnknownItem(ctx: ParserRuleContext): ESQLUnknownItem {
-  return {
-    type: 'unknown',
-    name: 'unknown',
-    text: ctx.getText(),
-    location: getPosition(ctx.start, ctx.stop),
-    incomplete: Boolean(ctx.exception),
-  };
-}
-
 export function createError(exception: RecognitionException) {
   const token = exception.offendingToken;
 

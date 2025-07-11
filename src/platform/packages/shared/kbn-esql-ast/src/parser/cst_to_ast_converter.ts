@@ -19,21 +19,26 @@ import {
   createIdentifierOrParam,
   createLiteralString,
   createOption,
-  createUnknownItem,
   nonNullable,
   sanitizeIdentifierString,
   textExistsAndIsValid,
   visitSource,
+  createBinaryExpression,
+  createColumnStar,
+  createFakeMultiplyLiteral,
+  createFunctionCall,
+  createInlineCast,
+  createList,
+  createLiteral,
+  createNumericLiteral,
+  createParam,
+  createTimeUnit,
 } from './factories';
-import {
-  collectBooleanExpression,
-  getConstant,
-  visitPrimaryExpression,
-  visitValueExpression,
-} from './walkers';
 import { getPosition } from './helpers';
 import { firstItem, lastItem, resolveItem } from '../visitor/utils';
 import type { Parser } from './parser';
+
+type ESQLAstMatchBooleanExpression = ast.ESQLColumn | ast.ESQLBinaryExpression | ast.ESQLInlineCast;
 
 /**
  * Transforms an ANTLR ES|QL Concrete Syntax Tree (CST) into a
@@ -80,6 +85,16 @@ export class CstToAstConverter {
     const name = token.text;
 
     return Builder.identifier({ name }, this.createParserFieldsFromToken(token));
+  }
+
+  private fromParserRuleToUnknown(ctx: antlr.ParserRuleContext): ast.ESQLUnknownItem {
+    return {
+      type: 'unknown',
+      name: 'unknown',
+      text: ctx.getText(),
+      location: getPosition(ctx.start, ctx.stop),
+      incomplete: Boolean(ctx.exception),
+    };
   }
 
   // -------------------------------------------------------------------- query
@@ -447,7 +462,7 @@ export class CstToAstConverter {
   private fromLimitCommand(ctx: cst.LimitCommandContext): ast.ESQLCommand<'limit'> {
     const command = this.createCommand('limit', ctx);
     if (ctx.constant()) {
-      const limitValue = getConstant(ctx.constant());
+      const limitValue = this.fromConstant(ctx.constant());
       if (limitValue != null) {
         command.args.push(limitValue);
       }
@@ -472,7 +487,7 @@ export class CstToAstConverter {
   private fromWhereCommand(ctx: cst.WhereCommandContext): ast.ESQLCommand<'where'> {
     const command = this.createCommand('where', ctx);
 
-    const expressions = collectBooleanExpression(ctx.booleanExpression());
+    const expressions = this.collectBooleanExpression(ctx.booleanExpression());
 
     command.args.push(expressions[0]);
 
@@ -526,7 +541,7 @@ export class CstToAstConverter {
       return field;
     }
 
-    const condition = collectBooleanExpression(booleanExpression)[0];
+    const condition = this.collectBooleanExpression(booleanExpression)[0];
     const aggField = Builder.expression.where(
       [field, condition],
       {},
@@ -570,7 +585,7 @@ export class CstToAstConverter {
     return [option];
   }
 
-  // -------------------------------------------------------------------- SORT
+  // --------------------------------------------------------------------- SORT
 
   private fromSortCommand(ctx: cst.SortCommandContext): ast.ESQLCommand<'sort'> {
     const command = this.createCommand('sort', ctx);
@@ -595,7 +610,7 @@ export class CstToAstConverter {
   private fromOrderExpression(
     ctx: cst.OrderExpressionContext
   ): ast.ESQLOrderExpression | ast.ESQLAstItem {
-    const arg = collectBooleanExpression(ctx.booleanExpression())[0];
+    const arg = this.collectBooleanExpression(ctx.booleanExpression())[0];
 
     let order: ast.ESQLOrderExpression['order'] = '';
     let nulls: ast.ESQLOrderExpression['nulls'] = '';
@@ -626,7 +641,7 @@ export class CstToAstConverter {
     );
   }
 
-  // -------------------------------------------------------------------- DROP
+  // --------------------------------------------------------------------- DROP
 
   private fromDropCommand(ctx: cst.DropCommandContext): ast.ESQLCommand<'drop'> {
     const command = this.createCommand('drop', ctx);
@@ -692,7 +707,7 @@ export class CstToAstConverter {
 
   private fromDissectCommand(ctx: cst.DissectCommandContext): ast.ESQLCommand<'dissect'> {
     const command = this.createCommand('dissect', ctx);
-    const primaryExpression = visitPrimaryExpression(ctx.primaryExpression());
+    const primaryExpression = this.visitPrimaryExpression(ctx.primaryExpression());
     const stringContext = ctx.string_();
     const pattern = stringContext.getToken(cst.default.QUOTED_STRING, 0);
     const doParseStringAndOptions = pattern && textExistsAndIsValid(pattern.getText());
@@ -724,7 +739,7 @@ export class CstToAstConverter {
       options.push(option);
       // it can throw while accessing constant for incomplete commands, so try catch it
       try {
-        const optionValue = getConstant(optionCtx.constant());
+        const optionValue = this.fromConstant(optionCtx.constant());
         if (optionValue != null) {
           option.args.push(optionValue);
         }
@@ -740,7 +755,7 @@ export class CstToAstConverter {
 
   private fromGrokCommand(ctx: cst.GrokCommandContext): ast.ESQLCommand<'grok'> {
     const command = this.createCommand('grok', ctx);
-    const primaryExpression = visitPrimaryExpression(ctx.primaryExpression());
+    const primaryExpression = this.visitPrimaryExpression(ctx.primaryExpression());
     const stringContext = ctx.string_();
     const pattern = stringContext.getToken(cst.default.QUOTED_STRING, 0);
     const doParseStringAndOptions = pattern && textExistsAndIsValid(pattern.getText());
@@ -969,7 +984,7 @@ export class CstToAstConverter {
     const joinPredicates: ast.ESQLAstItem[] = onOption.args;
 
     for (const joinPredicateCtx of joinCondition.joinPredicate_list()) {
-      const expression = visitValueExpression(joinPredicateCtx.valueExpression());
+      const expression = this.visitValueExpression(joinPredicateCtx.valueExpression());
 
       if (expression) {
         joinPredicates.push(expression);
@@ -1055,7 +1070,7 @@ export class CstToAstConverter {
     if (ctx._targetField && ctx.ASSIGN()) {
       const targetField = createColumn(ctx._targetField);
 
-      const prompt = visitPrimaryExpression(ctx._prompt) as ast.ESQLSingleAstItem;
+      const prompt = this.visitPrimaryExpression(ctx._prompt) as ast.ESQLSingleAstItem;
       command.prompt = prompt;
 
       const assignment = createFunction(
@@ -1071,7 +1086,7 @@ export class CstToAstConverter {
       command.targetField = targetField;
       command.args.push(assignment);
     } else if (ctx._prompt) {
-      const prompt = visitPrimaryExpression(ctx._prompt) as ast.ESQLSingleAstItem;
+      const prompt = this.visitPrimaryExpression(ctx._prompt) as ast.ESQLSingleAstItem;
       command.prompt = prompt;
       command.args.push(prompt);
     } else {
@@ -1079,7 +1094,7 @@ export class CstToAstConverter {
       // ANTLR does not know if it is trying to type a prompt
       // or a target field, so it does not return neither _prompt nor _targetField. We fill the AST
       // with an unknown item until the user inserts the next keyword and breaks the tie.
-      const unknownItem = createUnknownItem(ctx);
+      const unknownItem = this.fromParserRuleToUnknown(ctx);
       unknownItem.text = ctx.getText().replace(/^completion/i, '');
 
       command.prompt = unknownItem;
@@ -1134,7 +1149,7 @@ export class CstToAstConverter {
     const command = this.createCommand('sample', ctx);
 
     if (ctx.constant()) {
-      const probability = getConstant(ctx.constant());
+      const probability = this.fromConstant(ctx.constant());
       if (probability != null) {
         command.args.push(probability);
       }
@@ -1339,13 +1354,464 @@ export class CstToAstConverter {
 
       fn.args.push(
         createColumn(ctx.qualifiedName()!),
-        collectBooleanExpression(ctx.booleanExpression())
+        this.collectBooleanExpression(ctx.booleanExpression())
       );
       fn.location = computeLocationExtends(fn);
 
       return [fn];
     }
 
-    return collectBooleanExpression(ctx.booleanExpression());
+    return this.collectBooleanExpression(ctx.booleanExpression());
+  }
+
+  private visitLogicalNot(ctx: cst.LogicalNotContext) {
+    const fn = createFunction('not', ctx, undefined, 'unary-expression');
+    fn.args.push(...this.collectBooleanExpression(ctx.booleanExpression()));
+    // update the location of the assign based on arguments
+    const argsLocationExtends = computeLocationExtends(fn);
+    fn.location = argsLocationExtends;
+    return fn;
+  }
+
+  private visitLogicalAndsOrs(ctx: cst.LogicalBinaryContext) {
+    const fn = createFunction(ctx.AND() ? 'and' : 'or', ctx, undefined, 'binary-expression');
+    fn.args.push(
+      ...this.collectBooleanExpression(ctx._left),
+      ...this.collectBooleanExpression(ctx._right)
+    );
+    // update the location of the assign based on arguments
+    const argsLocationExtends = computeLocationExtends(fn);
+    fn.location = argsLocationExtends;
+    return fn;
+  }
+
+  /**
+   * Constructs a tuple list (round parens):
+   *
+   * ```
+   * (1, 2, 3)
+   * ```
+   *
+   * Can be used in IN-expression:
+   *
+   * ```
+   * WHERE x IN (1, 2, 3)
+   * ```
+   */
+  private visitTuple(
+    ctxs: cst.ValueExpressionContext[],
+    leftParen?: antlr.TerminalNode,
+    rightParen?: antlr.TerminalNode
+  ): ast.ESQLList {
+    const values: ast.ESQLAstExpression[] = [];
+    let incomplete = false;
+
+    for (const elementCtx of ctxs) {
+      const element = this.visitValueExpression(elementCtx);
+
+      if (!element) {
+        continue;
+      }
+
+      const resolved = resolveItem(element) as ast.ESQLAstExpression;
+
+      if (!resolved) {
+        continue;
+      }
+
+      values.push(resolved);
+
+      if (resolved.incomplete) {
+        incomplete = true;
+      }
+    }
+
+    if (!values.length) {
+      incomplete = true;
+    }
+
+    const node = Builder.expression.list.tuple(
+      { values },
+      {
+        incomplete,
+        location: getPosition(
+          leftParen?.symbol ?? ctxs[0]?.start,
+          rightParen?.symbol ?? ctxs[ctxs.length - 1]?.stop
+        ),
+      }
+    );
+
+    return node;
+  }
+
+  private visitLogicalIns(ctx: cst.LogicalInContext) {
+    const [leftCtx, ...rightCtxs] = ctx.valueExpression_list();
+    const left = resolveItem(
+      this.visitValueExpression(leftCtx) ?? this.fromParserRuleToUnknown(leftCtx)
+    ) as ast.ESQLAstExpression;
+    const right = this.visitTuple(rightCtxs, ctx.LP(), ctx.RP());
+    const expression = createFunction(
+      ctx.NOT() ? 'not in' : 'in',
+      ctx,
+      { min: ctx.start.start, max: ctx.stop?.stop ?? ctx.RP().symbol.stop },
+      'binary-expression',
+      [left, right],
+      left.incomplete || right.incomplete
+    );
+
+    return expression;
+  }
+
+  private getMathOperation(ctx: cst.ArithmeticBinaryContext) {
+    return (
+      (ctx.PLUS() || ctx.MINUS() || ctx.ASTERISK() || ctx.SLASH() || ctx.PERCENT()).getText() || ''
+    );
+  }
+
+  /**
+   * @todo Inline this method.
+   */
+  private getComparisonName(ctx: cst.ComparisonOperatorContext) {
+    return (
+      (ctx.EQ() || ctx.NEQ() || ctx.LT() || ctx.LTE() || ctx.GT() || ctx.GTE()).getText() || ''
+    );
+  }
+
+  private visitValueExpression(ctx: cst.ValueExpressionContext) {
+    if (!textExistsAndIsValid(ctx.getText())) {
+      return [];
+    }
+    if (ctx instanceof cst.ValueExpressionDefaultContext) {
+      return this.visitOperatorExpression(ctx.operatorExpression());
+    }
+    if (ctx instanceof cst.ComparisonContext) {
+      const comparisonNode = ctx.comparisonOperator();
+      const comparisonFn = createFunction(
+        this.getComparisonName(comparisonNode),
+        comparisonNode,
+        undefined,
+        'binary-expression'
+      );
+      comparisonFn.args.push(
+        this.visitOperatorExpression(ctx._left)!,
+        this.visitOperatorExpression(ctx._right)!
+      );
+      // update the location of the comparisonFn based on arguments
+      const argsLocationExtends = computeLocationExtends(comparisonFn);
+      comparisonFn.location = argsLocationExtends;
+
+      return comparisonFn;
+    }
+  }
+
+  private visitOperatorExpression(
+    ctx: cst.OperatorExpressionContext
+  ): ast.ESQLAstItem | ast.ESQLAstItem[] | undefined {
+    if (ctx instanceof cst.ArithmeticUnaryContext) {
+      const arg = this.visitOperatorExpression(ctx.operatorExpression());
+      // this is a number sign thing
+      const fn = createFunction('*', ctx, undefined, 'binary-expression');
+      fn.args.push(createFakeMultiplyLiteral(ctx, 'integer'));
+      if (arg) {
+        fn.args.push(arg);
+      }
+      return fn;
+    } else if (ctx instanceof cst.ArithmeticBinaryContext) {
+      const fn = createFunction(this.getMathOperation(ctx), ctx, undefined, 'binary-expression');
+      const args = [
+        this.visitOperatorExpression(ctx._left),
+        this.visitOperatorExpression(ctx._right),
+      ];
+      for (const arg of args) {
+        if (arg) {
+          fn.args.push(arg);
+        }
+      }
+      // update the location of the assign based on arguments
+      const argsLocationExtends = computeLocationExtends(fn);
+      fn.location = argsLocationExtends;
+      return fn;
+    } else if (ctx instanceof cst.OperatorExpressionDefaultContext) {
+      return this.visitPrimaryExpression(ctx.primaryExpression());
+    }
+  }
+
+  private getBooleanValue(ctx: cst.BooleanLiteralContext | cst.BooleanValueContext) {
+    const parentNode = ctx instanceof cst.BooleanLiteralContext ? ctx.booleanValue() : ctx;
+    const booleanTerminalNode = parentNode.TRUE() || parentNode.FALSE();
+    return createLiteral('boolean', booleanTerminalNode!);
+  }
+
+  private visitPrimaryExpression(
+    ctx: cst.PrimaryExpressionContext
+  ): ast.ESQLAstItem | ast.ESQLAstItem[] {
+    if (ctx instanceof cst.ConstantDefaultContext) {
+      return this.fromConstant(ctx.constant());
+    } else if (ctx instanceof cst.DereferenceContext) {
+      return createColumn(ctx.qualifiedName());
+    } else if (ctx instanceof cst.ParenthesizedExpressionContext) {
+      return this.collectBooleanExpression(ctx.booleanExpression());
+    } else if (ctx instanceof cst.FunctionContext) {
+      const functionExpressionCtx = ctx.functionExpression();
+      const fn = createFunctionCall(ctx);
+      const asteriskArg = functionExpressionCtx.ASTERISK()
+        ? createColumnStar(functionExpressionCtx.ASTERISK()!)
+        : undefined;
+      if (asteriskArg) {
+        fn.args.push(asteriskArg);
+      }
+
+      // TODO: Remove array manipulations here.
+      const functionArgs = functionExpressionCtx
+        .booleanExpression_list()
+        .flatMap(this.collectBooleanExpression.bind(this))
+        .filter(nonNullable);
+
+      if (functionArgs.length) {
+        fn.args.push(...(functionArgs as any));
+      }
+
+      const mapExpressionCtx = functionExpressionCtx.mapExpression();
+
+      if (mapExpressionCtx) {
+        const trailingMap = this.fromMapExpression(mapExpressionCtx);
+
+        fn.args.push(trailingMap);
+      }
+
+      return fn;
+    } else if (ctx instanceof cst.InlineCastContext) {
+      return this.collectInlineCast(ctx);
+    }
+    return this.fromParserRuleToUnknown(ctx);
+  }
+
+  private collectInlineCast(ctx: cst.InlineCastContext): ast.ESQLInlineCast {
+    const primaryExpression = this.visitPrimaryExpression(ctx.primaryExpression());
+    return createInlineCast(ctx, primaryExpression);
+  }
+
+  private collectLogicalExpression(ctx: cst.BooleanExpressionContext) {
+    if (ctx instanceof cst.LogicalNotContext) {
+      return [this.visitLogicalNot(ctx)];
+    }
+    if (ctx instanceof cst.LogicalBinaryContext) {
+      return [this.visitLogicalAndsOrs(ctx)];
+    }
+    if (ctx instanceof cst.LogicalInContext) {
+      return [this.visitLogicalIns(ctx)];
+    }
+    return [];
+  }
+
+  private collectRegexExpression(ctx: cst.BooleanExpressionContext): ast.ESQLFunction[] {
+    const regexes = ctx.getTypedRuleContexts(cst.RegexBooleanExpressionContext);
+    const ret: ast.ESQLFunction[] = [];
+    return ret.concat(
+      regexes
+        .map((regex) => {
+          if (
+            regex instanceof cst.RlikeExpressionContext ||
+            regex instanceof cst.LikeExpressionContext
+          ) {
+            const negate = regex.NOT();
+            const likeType = regex instanceof cst.RlikeExpressionContext ? 'rlike' : 'like';
+            const fnName = `${negate ? 'not ' : ''}${likeType}`;
+            const fn = createFunction(fnName, regex, undefined, 'binary-expression');
+            const arg = this.visitValueExpression(regex.valueExpression());
+            if (arg) {
+              fn.args.push(arg);
+
+              const literal = createLiteralString(regex.string_());
+
+              fn.args.push(literal);
+            }
+            return fn;
+          }
+          return undefined;
+        })
+        .filter(nonNullable)
+    );
+  }
+
+  private collectIsNullExpression(ctx: cst.BooleanExpressionContext) {
+    if (!(ctx instanceof cst.IsNullContext)) {
+      return [];
+    }
+    const negate = ctx.NOT();
+    const fnName = `is${negate ? ' not ' : ' '}null`;
+    const fn = createFunction(fnName, ctx, undefined, 'postfix-unary-expression');
+    const arg = this.visitValueExpression(ctx.valueExpression());
+    if (arg) {
+      fn.args.push(arg);
+    }
+    return [fn];
+  }
+
+  private collectDefaultExpression(ctx: cst.BooleanExpressionContext) {
+    if (!(ctx instanceof cst.BooleanDefaultContext)) {
+      return [];
+    }
+    const arg = this.visitValueExpression(ctx.valueExpression());
+    return arg ? [arg] : [];
+  }
+
+  private collectBooleanExpression(
+    ctx: cst.BooleanExpressionContext | undefined
+  ): ast.ESQLAstItem[] {
+    const list: ast.ESQLAstItem[] = [];
+
+    if (!ctx) {
+      return list;
+    }
+
+    if (ctx instanceof cst.MatchExpressionContext) {
+      return [this.visitMatchExpression(ctx)];
+    }
+
+    // TODO: Remove these list traversals and concatenations.
+    return list
+      .concat(
+        this.collectLogicalExpression(ctx),
+        this.collectRegexExpression(ctx),
+        this.collectIsNullExpression(ctx),
+        this.collectDefaultExpression(ctx)
+      )
+      .flat();
+  }
+
+  private visitMatchExpression(ctx: cst.MatchExpressionContext): ESQLAstMatchBooleanExpression {
+    return this.visitMatchBooleanExpression(ctx.matchBooleanExpression());
+  }
+
+  private visitMatchBooleanExpression(
+    ctx: cst.MatchBooleanExpressionContext
+  ): ESQLAstMatchBooleanExpression {
+    let expression: ESQLAstMatchBooleanExpression = createColumn(ctx.qualifiedName());
+    const dataTypeCtx = ctx.dataType();
+    const constantCtx = ctx.constant();
+
+    if (dataTypeCtx) {
+      expression = Builder.expression.inlineCast(
+        {
+          castType: dataTypeCtx.getText().toLowerCase() as ast.InlineCastingType,
+          value: expression,
+        },
+        {
+          location: getPosition(ctx.start, dataTypeCtx.stop),
+          incomplete: Boolean(ctx.exception),
+        }
+      );
+    }
+
+    if (constantCtx) {
+      const constantExpression = this.fromConstant(constantCtx);
+
+      expression = createBinaryExpression(':', ctx, [expression, constantExpression]);
+    }
+
+    return expression;
+  }
+
+  // -------------------------------------------------------- expression: "map"
+
+  private fromMapExpression(ctx: cst.MapExpressionContext): ast.ESQLMap {
+    const map = Builder.expression.map(
+      {},
+      {
+        location: getPosition(ctx.start, ctx.stop),
+        incomplete: Boolean(ctx.exception),
+      }
+    );
+    const entryCtxs = ctx.entryExpression_list();
+
+    for (const entryCtx of entryCtxs) {
+      const entry = this.fromMapEntryExpression(entryCtx);
+
+      map.entries.push(entry);
+    }
+
+    return map;
+  }
+
+  private fromMapEntryExpression(ctx: cst.EntryExpressionContext): ast.ESQLMapEntry {
+    const keyCtx = ctx._key;
+    const valueCtx = ctx._value;
+    const key = createLiteralString(keyCtx) as ast.ESQLStringLiteral;
+    const value = this.fromConstant(valueCtx) as ast.ESQLAstExpression;
+    const entry = Builder.expression.entry(key, value, {
+      location: getPosition(ctx.start, ctx.stop),
+      incomplete: Boolean(ctx.exception),
+    });
+
+    return entry;
+  }
+
+  // ----------------------------------------------------- constant expressions
+
+  /**
+   * @todo Make return type more specific.
+   */
+  private fromConstant(ctx: cst.ConstantContext): ast.ESQLAstItem {
+    if (ctx instanceof cst.NullLiteralContext) {
+      return createLiteral('null', ctx.NULL());
+    } else if (ctx instanceof cst.QualifiedIntegerLiteralContext) {
+      // despite the generic name, this is a date unit constant:
+      // e.g. 1 year, 15 months
+      return createTimeUnit(ctx);
+    } else if (ctx instanceof cst.DecimalLiteralContext) {
+      return createNumericLiteral(ctx.decimalValue(), 'double');
+    } else if (ctx instanceof cst.IntegerLiteralContext) {
+      return createNumericLiteral(ctx.integerValue(), 'integer');
+    } else if (ctx instanceof cst.BooleanLiteralContext) {
+      return this.getBooleanValue(ctx);
+    } else if (ctx instanceof cst.StringLiteralContext) {
+      return createLiteralString(ctx.string_());
+    } else if (
+      ctx instanceof cst.NumericArrayLiteralContext ||
+      ctx instanceof cst.BooleanArrayLiteralContext ||
+      ctx instanceof cst.StringArrayLiteralContext
+    ) {
+      return this.toList(ctx);
+    } else if (ctx instanceof cst.InputParameterContext && ctx.children) {
+      const values: ast.ESQLLiteral[] = [];
+
+      for (const child of ctx.children) {
+        const param = createParam(child);
+        if (param) values.push(param);
+      }
+
+      return values;
+    }
+
+    return this.fromParserRuleToUnknown(ctx);
+  }
+
+  // ---------------------------------------------- constant expression: "list"
+
+  private toList(
+    ctx:
+      | cst.NumericArrayLiteralContext
+      | cst.BooleanArrayLiteralContext
+      | cst.StringArrayLiteralContext
+  ): ast.ESQLList {
+    const values: ast.ESQLLiteral[] = [];
+
+    for (const numericValue of ctx.getTypedRuleContexts(cst.NumericValueContext)) {
+      const isDecimal =
+        numericValue.decimalValue() !== null && numericValue.decimalValue() !== undefined;
+      const value = numericValue.decimalValue() || numericValue.integerValue();
+      values.push(createNumericLiteral(value!, isDecimal ? 'double' : 'integer'));
+    }
+    for (const booleanValue of ctx.getTypedRuleContexts(cst.BooleanValueContext)) {
+      values.push(this.getBooleanValue(booleanValue)!);
+    }
+    for (const string of ctx.getTypedRuleContexts(cst.StringContext)) {
+      const literal = createLiteralString(string);
+
+      values.push(literal);
+    }
+
+    return createList(ctx, values);
   }
 }
