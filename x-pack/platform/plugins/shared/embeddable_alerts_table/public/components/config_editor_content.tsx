@@ -59,7 +59,7 @@ import {
   CONFIG_EDITOR_PANEL_DESCRIPTION,
 } from '../translations';
 
-export interface ConfigEditorFlyoutProps {
+export interface ConfigEditorContentProps {
   initialConfig?: EmbeddableAlertsTableConfig;
   onSave: (newConfig: EmbeddableAlertsTableConfig) => void;
   onCancel: () => void;
@@ -95,13 +95,13 @@ const computeFiltersErrors = (
   });
 };
 
-export const ConfigEditorFlyout = ({
+export const ConfigEditorContent = ({
   initialConfig,
   onSave,
   onCancel,
   services,
   ariaLabelledBy,
-}: ConfigEditorFlyoutProps) => {
+}: ConfigEditorContentProps) => {
   const { http, overlays } = services;
   const flyoutBodyRef = useRef<HTMLDivElement>(null);
   const solutionSelectorRef = useRef<EuiSuperSelect<RuleTypeSolution>>(null);

@@ -10,7 +10,7 @@
 import React from 'react';
 import { render, screen, within } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
-import { ConfigEditorFlyout } from './config_editor_flyout';
+import { ConfigEditorContent } from './config_editor_content';
 import { coreMock } from '@kbn/core/public/mocks';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -45,7 +45,7 @@ const queryClient = new QueryClient({
   },
 });
 
-describe('ConfigEditorFlyout', () => {
+describe('ConfigEditorContent', () => {
   afterEach(() => {
     jest.clearAllMocks();
     queryClient.clear();
@@ -55,7 +55,7 @@ describe('ConfigEditorFlyout', () => {
     render(
       <IntlProvider locale="en">
         <QueryClientProvider client={queryClient}>
-          <ConfigEditorFlyout
+          <ConfigEditorContent
             onSave={jest.fn()}
             onCancel={jest.fn()}
             services={core}
@@ -71,7 +71,7 @@ describe('ConfigEditorFlyout', () => {
     render(
       <IntlProvider locale="en">
         <QueryClientProvider client={queryClient}>
-          <ConfigEditorFlyout
+          <ConfigEditorContent
             onSave={jest.fn()}
             onCancel={jest.fn()}
             initialConfig={{
@@ -97,7 +97,7 @@ describe('ConfigEditorFlyout', () => {
     render(
       <IntlProvider locale="en">
         <QueryClientProvider client={queryClient}>
-          <ConfigEditorFlyout
+          <ConfigEditorContent
             ariaLabelledBy="configEditorFlyout"
             onSave={jest.fn()}
             onCancel={jest.fn()}
@@ -123,7 +123,7 @@ describe('ConfigEditorFlyout', () => {
     render(
       <IntlProvider locale="en">
         <QueryClientProvider client={queryClient}>
-          <ConfigEditorFlyout
+          <ConfigEditorContent
             ariaLabelledBy="configEditorFlyout"
             onSave={jest.fn()}
             onCancel={jest.fn()}

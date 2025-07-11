@@ -10,26 +10,28 @@ import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from '../query_client';
 import type { EmbeddableAlertsTableConfig } from '../types';
-import { ConfigEditorFlyout } from './config_editor_flyout';
+import { ConfigEditorContent } from './config_editor_content';
 
-export const openConfigEditor = async ({
-  coreServices,
-  initialConfig,
-  onSave,
-  closeFlyout,
-  ariaLabelledBy,
-}: {
+export interface ConfigEditorProps {
   coreServices: CoreStart;
   initialConfig?: EmbeddableAlertsTableConfig;
   onSave: (newConfig: EmbeddableAlertsTableConfig) => void;
   closeFlyout: () => void;
   ariaLabelledBy: string;
-}) => {
+}
+
+export const ConfigEditor = ({
+  coreServices,
+  initialConfig,
+  onSave,
+  closeFlyout,
+  ariaLabelledBy,
+}: ConfigEditorProps) => {
   const { overlays, http, notifications } = coreServices;
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ConfigEditorFlyout
+      <ConfigEditorContent
         ariaLabelledBy={ariaLabelledBy}
         initialConfig={initialConfig}
         onSave={(newConfig: EmbeddableAlertsTableConfig) => {
