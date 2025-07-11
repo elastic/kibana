@@ -55,16 +55,6 @@ export const uploadAllEventsFromPath = async (
     if (!eventLogPath.endsWith('.ndjson')) {
       throw createFlagError(`The provided event log file '${eventLogPath}' must end with .ndjson.`);
     }
-  } else {
-    // If it's a directory, ensure it contains at least one .ndjson file
-    const files = fs.readdirSync(eventLogPath);
-    const hasNdjsonFile = files.some((file) => file.endsWith('.ndjson'));
-    if (!hasNdjsonFile) {
-      options.log.warning(
-        `The provided event log directory '${eventLogPath}' does not contain any .ndjson files.`
-      );
-      return;
-    }
   }
 
   // ES connection
@@ -82,13 +72,19 @@ export const uploadAllEventsFromPath = async (
 
   // Event log upload
   const reportDataStream = new ScoutReportDataStream(es, options.log);
+  let directoryContainsNdjsonFiles = false;
 
   if (fs.statSync(eventLogPath).isDirectory()) {
     readFilesRecursively(eventLogPath, (filePath: string) => {
       if (filePath.endsWith('.ndjson')) {
         reportDataStream.addEventsFromFile(filePath);
+        directoryContainsNdjsonFiles = true;
       }
     });
+
+    if (!directoryContainsNdjsonFiles) {
+      options.log.warning(`No .ndjson event log files found in directory '${eventLogPath}'.`);
+    }
   } else if (eventLogPath.endsWith('.ndjson')) {
     reportDataStream.addEventsFromFile(eventLogPath);
   }
