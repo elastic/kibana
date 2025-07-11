@@ -283,66 +283,63 @@ export function ChatBody({
     !conversationCalloutDismissed &&
     tourCalloutDismissed;
 
-  const handleActionClick = ({
-    message,
-    payload,
-  }: {
-    message: Message;
-    payload: ChatActionClickPayload;
-  }) => {
-    setStickToBottom(true);
-    switch (payload.type) {
-      case ChatActionClickType.executeEsqlQuery: {
-        const now = new Date().toISOString();
-        next(
-          messages.concat([
-            {
-              '@timestamp': now,
-              message: {
-                role: MessageRole.User,
-                content: `Display results for the following ES|QL query:\n\n\`\`\`esql\n${payload.query}\n\`\`\``,
-              },
-            },
-            {
-              '@timestamp': now,
-              message: {
-                role: MessageRole.Assistant,
-                content: '',
-                function_call: {
-                  name: 'execute_query',
-                  arguments: JSON.stringify({
-                    query: payload.query,
-                  }),
-                  trigger: MessageRole.User,
+  const handleActionClick = useCallback(
+    ({ message, payload }: { message: Message; payload: ChatActionClickPayload }) => {
+      setStickToBottom(true);
+      switch (payload.type) {
+        case ChatActionClickType.executeEsqlQuery: {
+          const now = new Date().toISOString();
+          next(
+            messages.concat([
+              {
+                '@timestamp': now,
+                message: {
+                  role: MessageRole.User,
+                  content: `Display results for the following ES|QL query:\n\n\`\`\`esql\n${payload.query}\n\`\`\``,
                 },
               },
-            },
-          ])
-        );
-        break;
-      }
+              {
+                '@timestamp': now,
+                message: {
+                  role: MessageRole.Assistant,
+                  content: '',
+                  function_call: {
+                    name: 'execute_query',
+                    arguments: JSON.stringify({
+                      query: payload.query,
+                    }),
+                    trigger: MessageRole.User,
+                  },
+                },
+              },
+            ])
+          );
+          break;
+        }
 
-      case ChatActionClickType.updateVisualization:
-        const visualizeQueryResponse = message;
+        case ChatActionClickType.updateVisualization:
+          const visualizeQueryResponse = message;
 
-        const visualizeQueryResponseData = JSON.parse(visualizeQueryResponse.message.data ?? '{}');
+          const visualizeQueryResponseData = JSON.parse(
+            visualizeQueryResponse.message.data ?? '{}'
+          );
 
-        next(
-          messages.slice(0, messages.indexOf(visualizeQueryResponse)).concat({
-            '@timestamp': new Date().toISOString(),
-            message: {
-              name: 'visualize_query',
-              content: visualizeQueryResponse.message.content,
-              data: JSON.stringify({
-                ...visualizeQueryResponseData,
-                userOverrides: payload.userOverrides,
-              }),
-              role: MessageRole.User,
-            },
-          })
-        );
-        break;
-      case ChatActionClickType.visualizeEsqlQuery: {
+          next(
+            messages.slice(0, messages.indexOf(visualizeQueryResponse)).concat({
+              '@timestamp': new Date().toISOString(),
+              message: {
+                name: 'visualize_query',
+                content: visualizeQueryResponse.message.content,
+                data: JSON.stringify({
+                  ...visualizeQueryResponseData,
+                  userOverrides: payload.userOverrides,
+                }),
+                role: MessageRole.User,
+              },
+            })
+          );
+          break;
+        case ChatActionClickType.visualizeEsqlQuery: {
         const now = new Date().toISOString();
         next(
           messages.concat([
@@ -367,13 +364,13 @@ export function ChatBody({
                   trigger: MessageRole.User,
                 },
               },
-            },
-          ])
-        );
-        break;
+            })
+          );
+          break;
       }
-    }
-  };
+    },
+    [messages, next]
+  );
 
   if (!hasCorrectLicense && !initialConversationId) {
     footer = (
