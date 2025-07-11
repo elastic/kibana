@@ -131,6 +131,10 @@
             {
               "plugin": "stackAlerts",
               "path": "x-pack/platform/plugins/shared/stack_alerts/public/rule_types/es_query/index.ts"
+            },
+            {
+              "plugin": "@kbn/test-suites-xpack-platform",
+              "path": "x-pack/platform/test/functional_with_es_ssl/plugins/alerts/public/plugin.ts"
             }
           ],
           "children": [
@@ -3579,6 +3583,10 @@
               {
                 "plugin": "ruleRegistry",
                 "path": "x-pack/platform/plugins/shared/rule_registry/server/utils/rule_executor.test_helpers.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/functional_with_es_ssl/plugins/alerts/server/plugin.ts"
               },
               {
                 "plugin": "@kbn/test-suites-xpack-platform",

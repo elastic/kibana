@@ -10,6 +10,7 @@ import { getMessageFromId } from '../../../definitions/utils/errors';
 import type { ESQLSource, ESQLCommand, ESQLMessage, ESQLAst } from '../../../types';
 import { ENRICH_MODES } from './util';
 import type { ESQLPolicy, ICommandContext } from '../../types';
+import { validateCommandArguments } from '../../../definitions/utils/validation';
 
 function hasWildcard(name: string) {
   return /\*/.test(name);
@@ -64,6 +65,8 @@ export const validate = (
       );
     }
   }
+
+  messages.push(...validateCommandArguments(command, ast, context));
 
   return messages;
 };

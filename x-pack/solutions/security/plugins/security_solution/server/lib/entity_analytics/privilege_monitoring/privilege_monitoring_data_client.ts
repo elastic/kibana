@@ -138,7 +138,7 @@ export class PrivilegeMonitoringDataClient {
     );
     try {
       this.log('debug', 'Creating privilege user monitoring event.ingested pipeline');
-      await this.esClient.ingest.putPipeline(eventIngestPipeline);
+      await this.createIngestPipelineIfDoesNotExist();
 
       await this.createOrUpdateIndex().catch((e) => {
         if (e.meta.body.error.type === 'resource_already_exists_exception') {
@@ -225,8 +225,21 @@ export class PrivilegeMonitoringDataClient {
     }
   }
 
+  public async createIngestPipelineIfDoesNotExist() {
+    const pipelinesResponse = await this.internalUserClient.ingest.getPipeline(
+      { id: PRIVMON_EVENT_INGEST_PIPELINE_ID },
+      { ignore: [404] }
+    );
+    if (!pipelinesResponse[PRIVMON_EVENT_INGEST_PIPELINE_ID]) {
+      this.log('info', 'Privileged user monitoring ingest pipeline does not exist, creating.');
+      await this.internalUserClient.ingest.putPipeline(eventIngestPipeline);
+    } else {
+      this.log('info', 'Privileged user monitoring ingest pipeline already exists.');
+    }
+  }
+
   /**
-   * This create a index for user to populate privileged users.
+   * This creates an index for the user to populate privileged users.
    * It already defines the mappings and settings for the index.
    */
   public createPrivilegesImportIndex(indexName: string, mode: 'lookup' | 'standard') {

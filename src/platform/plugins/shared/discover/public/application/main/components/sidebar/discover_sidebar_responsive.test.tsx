@@ -569,7 +569,7 @@ describe('discover responsive sidebar', function () {
         nameFilter: 'byte',
         selectedFieldTypes: ['number'],
         pageSize: 10,
-        scrollPosition: 0,
+        scrollTop: 0,
         accordionState: {},
       },
     });

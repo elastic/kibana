@@ -6,13 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type {
-  RunToolFn,
-  ScopedRunToolFn,
-  RunAgentFn,
-  ToolProvider,
-  AgentRegistry,
-} from '@kbn/onechat-server';
+import type { RunToolFn, ScopedRunToolFn, RunAgentFn, ToolProvider } from '@kbn/onechat-server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type {
   PluginStartContract as ActionsPluginStart,
@@ -20,6 +14,7 @@ import type {
 } from '@kbn/actions-plugin/server';
 import type { InferenceServerSetup, InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { ToolsServiceSetup, ScopedPublicToolRegistry } from './services/tools';
+import type { AgentClient } from './services/agents';
 
 export interface OnechatSetupDependencies {
   actions: ActionsPluginSetup;
@@ -80,9 +75,9 @@ export interface ScopedToolsStart {
 
 export interface AgentsStart {
   /**
-   * Agents registry
+   * Returns a scoped agent client
    */
-  registry: AgentRegistry;
+  getScopedClient(opts: { request: KibanaRequest }): Promise<AgentClient>;
   /**
    * Execute an agent.
    */

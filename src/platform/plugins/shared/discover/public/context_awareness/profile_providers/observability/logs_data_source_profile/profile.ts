@@ -17,6 +17,7 @@ import {
   getRowAdditionalLeadingControls,
   createGetDefaultAppState,
   getPaginationConfig,
+  getColumnsConfiguration,
 } from './accessors';
 import { extractIndexPatternFrom } from '../../extract_index_pattern_from';
 
@@ -52,6 +53,7 @@ export const createLogsDataSourceProfileProvider = (
     getRowIndicatorProvider,
     getRowAdditionalLeadingControls,
     getPaginationConfig,
+    getColumnsConfiguration,
   },
   resolve: (params) => {
     if (params.rootContext.solutionType !== SolutionType.Observability) {

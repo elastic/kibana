@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { ESQLCommand, ESQLSingleAstItem } from '../../../types';
-import { pipeCompleteItem } from '../../utils/complete_items';
+import { pipeCompleteItem } from '../../complete_items';
 import { suggestForExpression } from '../../../definitions/utils/autocomplete';
 import { isExpressionComplete, getExpressionType } from '../../../definitions/utils/expressions';
 import {

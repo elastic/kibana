@@ -10,6 +10,7 @@ import {
   type AttackDiscovery,
   type AttackDiscoveryAlert,
   type Replacements,
+  getOriginalAlertIds,
 } from '@kbn/elastic-assistant-common';
 import {
   EuiButtonEmpty,
@@ -299,8 +300,9 @@ const TakeActionComponent: React.FC<Props> = ({
         });
 
         if (updateAlerts && alertIds.length > 0) {
+          const originalAlertIds = getOriginalAlertIds({ alertIds, replacements });
           await updateAlertStatus({
-            ids: alertIds,
+            ids: originalAlertIds,
             kibanaAlertWorkflowStatus: pendingAction,
           });
         }
@@ -316,6 +318,7 @@ const TakeActionComponent: React.FC<Props> = ({
       attackDiscoveryIds,
       pendingAction,
       refetchFindAttackDiscoveries,
+      replacements,
       setSelectedAttackDiscoveries,
       updateAlertStatus,
     ]

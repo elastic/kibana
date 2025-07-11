@@ -10,6 +10,7 @@
 export const storybookAliases = {
   ai_assistant: 'x-pack/platform/packages/shared/kbn-ai-assistant/.storybook',
   apm: 'x-pack/solutions/observability/plugins/apm/.storybook',
+  apm_ui_shared: 'src/platform/packages/shared/kbn-apm-ui-shared/.storybook',
   canvas: 'x-pack/platform/plugins/private/canvas/storybook',
   cases: 'src/platform/packages/shared/kbn-cases-components/.storybook',
   cell_actions: 'src/platform/packages/shared/kbn-cell-actions/.storybook',

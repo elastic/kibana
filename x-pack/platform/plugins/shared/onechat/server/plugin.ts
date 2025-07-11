@@ -101,7 +101,7 @@ export class OnechatPlugin
         },
       },
       agents: {
-        registry: agents.registry.asPublicRegistry(),
+        getScopedClient: (args) => agents.getScopedClient(args),
         execute: async (args) => {
           return agents.execute(args);
         },

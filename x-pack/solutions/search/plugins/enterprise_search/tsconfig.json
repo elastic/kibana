@@ -85,7 +85,6 @@
     "@kbn/ui-actions-enhanced-plugin",
     "@kbn/fleet-plugin",
     "@kbn/search-shared-ui",
-    "@kbn/file-upload-common",
     "@kbn/search-indices",
     "@kbn/charts-theme"
   ]

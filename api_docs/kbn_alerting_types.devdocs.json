@@ -1177,6 +1177,63 @@
       },
       {
         "parentPluginId": "@kbn/alerting-types",
+        "id": "def-common.GetBrowserFieldsResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "GetBrowserFieldsResponse",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-alerting-types/browser_fields_response.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/alerting-types",
+            "id": "def-common.GetBrowserFieldsResponse.browserFields",
+            "type": "Object",
+            "tags": [],
+            "label": "browserFields",
+            "description": [],
+            "signature": [
+              "{ [x: string]: Partial<",
+              {
+                "pluginId": "@kbn/alerting-types",
+                "scope": "common",
+                "docId": "kibKbnAlertingTypesPluginApi",
+                "section": "def-common.BrowserField",
+                "text": "BrowserField"
+              },
+              ">; }"
+            ],
+            "path": "src/platform/packages/shared/kbn-alerting-types/browser_fields_response.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-types",
+            "id": "def-common.GetBrowserFieldsResponse.fields",
+            "type": "Array",
+            "tags": [],
+            "label": "fields",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "server",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-server.FieldDescriptor",
+                "text": "FieldDescriptor"
+              },
+              "[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-alerting-types/browser_fields_response.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-types",
         "id": "def-common.IntervalSchedule",
         "type": "Interface",
         "tags": [],

@@ -8,6 +8,7 @@
 import React from 'react';
 import { EuiPanel, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useSelector } from 'react-redux';
 import { CORRELATIONS_DETAILS_TEST_ID } from './test_ids';
 import { RelatedAlertsBySession } from './related_alerts_by_session';
 import { RelatedAlertsBySameSourceEvent } from './related_alerts_by_same_source_event';
@@ -20,8 +21,9 @@ import { useShowRelatedAlertsBySameSourceEvent } from '../../shared/hooks/use_sh
 import { useShowRelatedAlertsBySession } from '../../shared/hooks/use_show_related_alerts_by_session';
 import { RelatedAlertsByAncestry } from './related_alerts_by_ancestry';
 import { SuppressedAlerts } from './suppressed_alerts';
-import { useTimelineDataFilters } from '../../../../timelines/containers/use_timeline_data_filters';
-import { isActiveTimeline } from '../../../../helpers';
+import { useEnableExperimental } from '../../../../common/hooks/use_experimental_features';
+import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
+import { sourcererSelectors } from '../../../../sourcerer/store';
 
 export const CORRELATIONS_TAB_ID = 'correlations';
 
@@ -32,7 +34,13 @@ export const CorrelationsDetails: React.FC = () => {
   const { dataAsNestedObject, eventId, getFieldsData, scopeId, isRulePreview } =
     useDocumentDetailsContext();
 
-  const { selectedPatterns } = useTimelineDataFilters(isActiveTimeline(scopeId));
+  const { newDataViewPickerEnabled } = useEnableExperimental();
+  const oldSecurityDefaultPatterns =
+    useSelector(sourcererSelectors.defaultDataView)?.patternList ?? [];
+  const { indexPatterns: experimentalSecurityDefaultIndexPatterns } = useSecurityDefaultPatterns();
+  const securityDefaultPatterns = newDataViewPickerEnabled
+    ? experimentalSecurityDefaultIndexPatterns
+    : oldSecurityDefaultPatterns;
 
   const { show: showAlertsByAncestry, documentId } = useShowRelatedAlertsByAncestry({
     getFieldsData,
@@ -92,7 +100,7 @@ export const CorrelationsDetails: React.FC = () => {
           {showAlertsByAncestry && (
             <EuiFlexItem>
               <RelatedAlertsByAncestry
-                indices={selectedPatterns}
+                indices={securityDefaultPatterns}
                 scopeId={scopeId}
                 documentId={documentId}
               />

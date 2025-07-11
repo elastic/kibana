@@ -124,7 +124,10 @@ export enum FunctionDefinitionTypes {
   SCALAR = 'scalar',
   OPERATOR = 'operator',
   GROUPING = 'grouping',
+  TIME_SERIES_AGG = 'time_series_agg',
 }
+
+export type ReasonTypes = 'missingCommand' | 'unsupportedFunction' | 'unknownFunction';
 
 /**
  * This is the type of a parameter in a function definition.

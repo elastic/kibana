@@ -4,7 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { MachineImplementationsFrom, assign, and, setup, ActorRefFrom } from 'xstate5';
+import {
+  MachineImplementationsFrom,
+  assign,
+  and,
+  enqueueActions,
+  setup,
+  ActorRefFrom,
+} from 'xstate5';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import { Streams, isSchema, routingDefinitionListSchema } from '@kbn/streams-schema';
 import { ALWAYS_CONDITION } from '../../../../../util/condition';
@@ -24,6 +31,10 @@ import {
 import { routingConverter } from '../../utils';
 import { RoutingDefinitionWithUIAttributes } from '../../types';
 import { selectCurrentRule } from './selectors';
+import {
+  createRoutingSamplesMachineImplementations,
+  routingSamplesMachine,
+} from './routing_samples_state_machine';
 
 export type StreamRoutingActorRef = ActorRefFrom<typeof streamRoutingMachine>;
 
@@ -37,6 +48,7 @@ export const streamRoutingMachine = setup({
     deleteStream: getPlaceholderFor(createDeleteStreamActor),
     forkStream: getPlaceholderFor(createForkStreamActor),
     upsertStream: getPlaceholderFor(createUpsertStreamActor),
+    routingSamplesMachine: getPlaceholderFor(() => routingSamplesMachine),
   },
   actions: {
     notifyStreamSuccess: getPlaceholderFor(createStreamSuccessNofitier),
@@ -149,6 +161,14 @@ export const streamRoutingMachine = setup({
           entry: [{ type: 'addNewRoutingRule' }],
           exit: [{ type: 'resetRoutingChanges' }],
           initial: 'changing',
+          invoke: {
+            id: 'routingSamplesMachine',
+            src: 'routingSamplesMachine',
+            input: ({ context }) => ({
+              definition: context.definition,
+              condition: selectCurrentRule(context).if,
+            }),
+          },
           states: {
             changing: {
               on: {
@@ -157,7 +177,17 @@ export const streamRoutingMachine = setup({
                   actions: [{ type: 'resetRoutingChanges' }],
                 },
                 'routingRule.change': {
-                  actions: [{ type: 'patchRule', params: ({ event }) => event }],
+                  actions: enqueueActions(({ enqueue, event }) => {
+                    enqueue({ type: 'patchRule', params: { routingRule: event.routingRule } });
+
+                    // Trigger samples collection only on condition change
+                    if (event.routingRule.if) {
+                      enqueue.sendTo('routingSamplesMachine', {
+                        type: 'routingSamples.updateCondition',
+                        condition: event.routingRule.if,
+                      });
+                    }
+                  }),
                 },
                 'routingRule.edit': {
                   guard: 'hasManagePrivileges',
@@ -317,12 +347,20 @@ export const createStreamRoutingMachineImplementations = ({
   refreshDefinition,
   streamsRepositoryClient,
   core,
+  data,
+  timeState$,
   forkSuccessNofitier,
 }: StreamRoutingServiceDependencies): MachineImplementationsFrom<typeof streamRoutingMachine> => ({
   actors: {
     deleteStream: createDeleteStreamActor({ streamsRepositoryClient }),
     forkStream: createForkStreamActor({ streamsRepositoryClient, forkSuccessNofitier }),
     upsertStream: createUpsertStreamActor({ streamsRepositoryClient }),
+    routingSamplesMachine: routingSamplesMachine.provide(
+      createRoutingSamplesMachineImplementations({
+        data,
+        timeState$,
+      })
+    ),
   },
   actions: {
     refreshDefinition,

@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiHorizontalRule, EuiTitle, useEuiTheme } from '@elastic/eui';
+import { EuiTitle, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { getFlattenedObject } from '@kbn/std';
 import type { GenericEntityRecord } from '../../../asset_inventory/types/generic_entity_record';
@@ -81,6 +81,13 @@ export const GenericEntityFlyoutContent = ({
 
   return (
     <FlyoutBody>
+      <EntityInsight
+        field={insightsField}
+        value={insightsValue}
+        isPreviewMode={false}
+        isLinkEnabled={true}
+        openDetailsPanel={openGenericEntityDetailsPanelByPath}
+      />
       <ExpandableSection
         title={
           <FormattedMessage
@@ -128,16 +135,6 @@ export const GenericEntityFlyoutContent = ({
           />
         </ExpandablePanel>
       </ExpandableSection>
-
-      <EuiHorizontalRule />
-
-      <EntityInsight
-        field={insightsField}
-        value={insightsValue}
-        isPreviewMode={false}
-        isLinkEnabled={true}
-        openDetailsPanel={openGenericEntityDetailsPanelByPath}
-      />
     </FlyoutBody>
   );
 };

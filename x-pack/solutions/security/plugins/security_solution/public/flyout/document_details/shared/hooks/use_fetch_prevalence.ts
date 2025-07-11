@@ -9,11 +9,12 @@ import { buildEsQuery } from '@kbn/es-query';
 import type { IEsSearchRequest } from '@kbn/search-types';
 import { useQuery } from '@tanstack/react-query';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { useSelector } from 'react-redux';
 import { createFetchData } from '../utils/fetch_data';
 import { useKibana } from '../../../../common/lib/kibana';
-import { useTimelineDataFilters } from '../../../../timelines/containers/use_timeline_data_filters';
-import { isActiveTimeline } from '../../../../helpers';
-import { SourcererScopeName } from '../../../../sourcerer/store/model';
+import { useEnableExperimental } from '../../../../common/hooks/use_experimental_features';
+import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
+import { sourcererSelectors } from '../../../../sourcerer/store';
 
 const QUERY_KEY = 'useFetchFieldValuePairWithAggregation';
 
@@ -103,9 +104,20 @@ export const useFetchPrevalence = ({
   } = useKibana();
 
   // retrieves detections and non-detections indices (for example, the alert security index from the current space and 'logs-*' indices)
-  const { selectedPatterns } = useTimelineDataFilters(isActiveTimeline(SourcererScopeName.default));
+  const { newDataViewPickerEnabled } = useEnableExperimental();
+  const oldSecurityDefaultPatterns =
+    useSelector(sourcererSelectors.defaultDataView)?.patternList ?? [];
+  const { indexPatterns: experimentalSecurityDefaultIndexPatterns } = useSecurityDefaultPatterns();
+  const securityDefaultPatterns = newDataViewPickerEnabled
+    ? experimentalSecurityDefaultIndexPatterns
+    : oldSecurityDefaultPatterns;
 
-  const searchRequest = buildSearchRequest(highlightedFieldsFilters, from, to, selectedPatterns);
+  const searchRequest = buildSearchRequest(
+    highlightedFieldsFilters,
+    from,
+    to,
+    securityDefaultPatterns
+  );
 
   const { data, isLoading, isError } = useQuery(
     [QUERY_KEY, highlightedFieldsFilters, from, to],

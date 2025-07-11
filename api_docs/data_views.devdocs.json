@@ -13879,6 +13879,10 @@
                 "path": "x-pack/solutions/search/plugins/enterprise_search/public/applications/analytics/components/analytics_collection_view/analytics_collection_explore_table_formulas.ts"
               },
               {
+                "plugin": "@kbn/test-suites-xpack-observability",
+                "path": "x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/apm/data_view/static.spec.ts"
+              },
+              {
                 "plugin": "enterpriseSearch",
                 "path": "x-pack/solutions/search/plugins/enterprise_search/public/applications/analytics/utils/find_or_create_data_view.test.ts"
               },

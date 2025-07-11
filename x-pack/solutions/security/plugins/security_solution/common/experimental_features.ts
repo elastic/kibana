@@ -104,11 +104,6 @@ export const allowedExperimentalValues = Object.freeze({
   assistantModelEvaluation: false,
 
   /**
-   * Enables advanced ESQL generation for the Assistant.
-   */
-  advancedEsqlGeneration: false,
-
-  /**
    * Enables the Managed User section inside the new user details flyout.
    */
   newUserDetailsFlyoutManagedUser: false,

@@ -28,7 +28,7 @@ import { withSecuritySpan } from '../../../../utils/with_security_span';
 import type { GenericBulkCreateResponse } from '../factories';
 import type { RulePreviewLoggedRequest } from '../../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
 
-import type { BaseFieldsLatest } from '../../../../../common/api/detection_engine/model/alerts';
+import type { DetectionAlertLatest } from '../../../../../common/api/detection_engine/model/alerts';
 import * as i18n from '../translations';
 
 const createLoggedRequestsConfig = (
@@ -54,7 +54,7 @@ export interface SearchAfterAndBulkCreateFactoryParams extends SearchAfterAndBul
   bulkCreateExecutor: (params: {
     enrichedEvents: SignalSourceHit[];
     toReturn: SearchAfterAndBulkCreateReturnType;
-  }) => Promise<GenericBulkCreateResponse<BaseFieldsLatest>>;
+  }) => Promise<GenericBulkCreateResponse<DetectionAlertLatest>>;
   getWarningMessage: () => string;
 }
 

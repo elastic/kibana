@@ -50,6 +50,7 @@ export default function searchSolutionNavigation({
         { id: 'SearchApplications', label: 'Search Applications' },
         { id: 'Relevance', label: 'Relevance' },
         { id: 'Synonyms', label: 'Synonyms' },
+        { id: 'QueryRules', label: 'Query Rules' },
         { id: 'InferenceEndpoints', label: 'Inference Endpoints' },
       ]);
     });
@@ -87,6 +88,11 @@ export default function searchSolutionNavigation({
           navItem: 'Synonyms',
           breadcrumbs: ['Relevance', 'Synonyms'],
           pageTestSubject: 'searchSynonymsOverviewPage',
+        },
+        {
+          navItem: 'QueryRules',
+          breadcrumbs: ['Relevance', 'Query Rules'],
+          pageTestSubject: 'queryRulesBasePage',
         },
         {
           navItem: 'InferenceEndpoints',
