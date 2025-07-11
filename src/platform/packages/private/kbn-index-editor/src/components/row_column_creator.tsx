@@ -57,7 +57,7 @@ export const RowColumnCreator = () => {
             size="s"
             disabled={activeMode === 'add-column'}
           >
-            <FormattedMessage defaultMessage="Add column" id="indexEditor.addColumn" />
+            <FormattedMessage defaultMessage="Add field" id="indexEditor.addColumn" />
           </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>

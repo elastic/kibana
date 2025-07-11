@@ -17,7 +17,7 @@ import { DataPublicPluginStart, KBN_FIELD_TYPES } from '@kbn/data-plugin/public'
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { DataTableRecord, buildDataTableRecord } from '@kbn/discover-utils';
 import type { Filter } from '@kbn/es-query';
-import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import { DatatableColumn } from '@kbn/expressions-plugin/common';
 import {
   BehaviorSubject,
   Observable,
@@ -39,7 +39,9 @@ import {
   tap,
   timer,
   withLatestFrom,
+  firstValueFrom,
 } from 'rxjs';
+import { ROW_PLACEHOLDER } from './types';
 import { parsePrimitive } from './utils';
 
 const BUFFER_TIMEOUT_MS = 5000; // 5 seconds
@@ -135,7 +137,10 @@ export class IndexUpdateService {
     map((updates) => {
       return updates.reduce((acc, update) => {
         if (update.id) {
-          acc.set(update.id, update.value);
+          acc.set(update.id, {
+            ...acc.get(update.id),
+            ...update.value,
+          });
         }
         return acc;
       }, new Map() as PendingSave);
@@ -145,6 +150,7 @@ export class IndexUpdateService {
 
   // Observable to track the number of milliseconds left to allow undo of the last change
   public readonly undoTimer$: Observable<number> = this.actions$.pipe(
+    skipWhile(() => !this._indexCrated$.getValue()),
     filter((action) => action.type === 'add' || action.type === 'undo'),
     switchMap((action) =>
       action.type === 'add'
@@ -247,6 +253,7 @@ export class IndexUpdateService {
     this._subscription.add(
       this.bufferState$
         .pipe(
+          skipWhile(() => !this._indexCrated$.getValue()),
           tap((updates) => {
             this._isSaving$.next(updates.length > 0);
           }),
@@ -314,8 +321,12 @@ export class IndexUpdateService {
         // Time range updates
         this.data.query.timefilter.timefilter.getTimeUpdate$().pipe(startWith(null)),
         this._refreshSubject$,
+        this.indexCreated$,
       ])
         .pipe(
+          skipWhile(([_dataView, _timeRangeEmit, _refreshSubject, indexCreated]) => {
+            return !indexCreated;
+          }),
           tap(() => {
             this._isFetching$.next(true);
           }),
@@ -440,27 +451,24 @@ export class IndexUpdateService {
    * @param updates
    */
   public bulkUpdate(updates: DocUpdate[]): Promise<BulkResponse> {
+    // Prepare update operations for existing documents
+    const updateOperations = updates
+      .filter((update) => update.id && update.id !== ROW_PLACEHOLDER)
+      .map((update) => [{ update: { _id: update.id } }, { doc: update.value }]);
+
+    // Merge values for new documents (without an id or with a placeholder id)
+    const newDoc = updates
+      .filter((update) => !update.id || update.id === ROW_PLACEHOLDER)
+      .reduce<DocUpdate['value']>((acc, update) => ({ ...acc, ...update.value }), {});
+
+    const operations: BulkRequest['operations'] = [...updateOperations];
+
+    if (Object.keys(newDoc).length > 0) {
+      operations.push([{ index: {} }, newDoc]);
+    }
+
     const body = JSON.stringify({
-      operations: (
-        updates.map((update) => {
-          if (update.id) {
-            return [
-              {
-                update: { _id: update.id },
-              },
-              {
-                doc: update.value,
-              },
-            ];
-          }
-          return [
-            {
-              index: {},
-            },
-            update.value,
-          ];
-        }) as BulkRequest['operations']
-      )?.flat(),
+      operations: operations.flat(),
     });
 
     return this.http.post<BulkResponse>(
@@ -496,5 +504,14 @@ export class IndexUpdateService {
 
   public destroy() {
     this._subscription.unsubscribe();
+  }
+
+  public async createIndex() {
+    const updates = await firstValueFrom(this.bufferState$);
+
+    await this.http.post(`/internal/esql/lookup_index/${this.getIndexName()}`);
+    await this.bulkUpdate(updates);
+    this.setIndexCreated(true);
+    this.actions$.next({ type: 'discard-unsaved-columns' });
   }
 }

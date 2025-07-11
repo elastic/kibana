@@ -25,7 +25,8 @@ export const getCellValueRenderer =
     editingCell: { row: number | null; col: string | null },
     savingDocs: PendingSave | undefined,
     onEditStart: (update: { row: number | null; col: string | null }) => void,
-    onValueChange: OnCellValueChange
+    onValueChange: OnCellValueChange,
+    isIndexCreated: boolean
   ): FunctionComponent<DataGridCellValueElementProps> =>
   ({ rowIndex, columnId }) => {
     const row = rows[rowIndex];
@@ -35,9 +36,9 @@ export const getCellValueRenderer =
 
     let cellValue;
 
-    const isSaving = !isNil(pendingSaveValue);
+    const isPendingToBeSaved = !isNil(pendingSaveValue);
 
-    if (isSaving) {
+    if (isPendingToBeSaved) {
       // If there is a pending save, use the value from the pending save
       cellValue = pendingSaveValue;
     } else if (row.flattened) {
@@ -66,6 +67,14 @@ export const getCellValueRenderer =
       );
     }
 
+    const onEditStartHandler = () => {
+      if (!columns.some((col) => col.id === columnId)) {
+        // If the column is not defined, do not start editing
+        return;
+      }
+      onEditStart({ row: rowIndex, col: columnId });
+    };
+
     return (
       <EuiFlexGroup gutterSize="s" responsive={false} style={{ height: '100%', width: '100%' }}>
         <EuiFlexItem>
@@ -76,15 +85,15 @@ export const getCellValueRenderer =
               height: '100%',
               width: '100%',
             }}
-            onClick={() => onEditStart({ row: rowIndex, col: columnId })}
+            onClick={onEditStartHandler}
             onKeyDown={(e) => {
-              if (e.key === 'Enter') onEditStart({ row: rowIndex, col: columnId });
+              if (e.key === 'Enter') onEditStartHandler();
             }}
           >
             {cellValue}
           </div>
         </EuiFlexItem>
-        {isSaving ? (
+        {isPendingToBeSaved && isIndexCreated ? (
           <EuiFlexItem grow={false}>
             <EuiLoadingSpinner size="s" />
           </EuiFlexItem>

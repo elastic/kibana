@@ -117,6 +117,7 @@ export const IndexName: FC = () => {
         setIsLoading(false);
         if (!indexExists) {
           setIndexValidationStatus(STATUS.COMPLETED);
+          indexUpdateService.setIndexName(value);
           setFileUploadIndexName(value);
           setError([]);
           return true;

@@ -29,10 +29,16 @@ export interface FlyoutFooterProps {
 export const FlyoutFooter: FC<FlyoutFooterProps> = ({ indexUpdateService, onClose }) => {
   const undoTimeLeft = useObservable(indexUpdateService.undoTimer$);
   const isSaving = useObservable(indexUpdateService.isSaving$, false);
+  const isIndexCreated = useObservable(indexUpdateService.indexCreated$, false);
 
   const { uploadStatus, onImportClick, canImport } = useFileUploadContext();
 
   const undoInSeconds = undoTimeLeft ? `${Math.floor(undoTimeLeft / 1000)}s` : null;
+
+  const createIndex = async () => {
+    await indexUpdateService.createIndex();
+    onClose();
+  };
 
   return (
     <EuiFlyoutFooter>
@@ -66,6 +72,17 @@ export const FlyoutFooter: FC<FlyoutFooterProps> = ({ indexUpdateService, onClos
                   &nbsp;
                   <span>{undoInSeconds}</span>
                 </EuiButtonEmpty>
+              </EuiFlexItem>
+            ) : null}
+
+            {!canImport && !isIndexCreated ? (
+              <EuiFlexItem grow={false}>
+                <EuiButton onClick={createIndex}>
+                  <FormattedMessage
+                    id="indexEditor.flyout.footer.primaryButtonLabel.saveIndex"
+                    defaultMessage="Save index"
+                  />
+                </EuiButton>
               </EuiFlexItem>
             ) : null}
 
