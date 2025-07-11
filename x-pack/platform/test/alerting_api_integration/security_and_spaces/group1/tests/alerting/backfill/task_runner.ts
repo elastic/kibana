@@ -38,7 +38,6 @@ import { SuperuserAtSpace1 } from '../../../../scenarios';
 import { queryForAlertDocs, searchScheduledTask, testDocTimestamps } from './test_utils';
 import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
 export default function createBackfillTaskRunnerTests({ getService }: FtrProviderContext) {
   const es = getService('es');
   const retry = getService('retry');
