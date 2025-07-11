@@ -118,6 +118,7 @@ describe('AnalyticsIndex', () => {
       },
       settings: {
         index: {
+          hidden: true,
           auto_expand_replicas: '0-1',
           mode: 'lookup',
           number_of_shards: 1,

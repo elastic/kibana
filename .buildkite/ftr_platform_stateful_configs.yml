@@ -14,8 +14,8 @@ disabled:
   - x-pack/test/api_integration/config.ts
   - x-pack/platform/test/api_integration/config.ts
   - x-pack/test/fleet_api_integration/config.base.ts
-  - x-pack/test/functional_basic/apps/ml/config.base.ts
-  - x-pack/test/functional_basic/apps/transform/config.base.ts
+  - x-pack/platform/test/functional_basic/apps/ml/config.base.ts
+  - x-pack/platform/test/functional_basic/apps/transform/config.base.ts
   - x-pack/platform/test/api_integration_basic/config.basic_license.ts
   - x-pack/platform/test/ui_capabilities/common/config.ts
 
@@ -157,8 +157,7 @@ enabled:
   - x-pack/platform/test/alerting_api_integration/spaces_only/tests/alerting/group4/config_with_schedule_circuit_breaker.ts
   - x-pack/platform/test/alerting_api_integration/spaces_only/tests/actions/config.ts
   - x-pack/platform/test/alerting_api_integration/spaces_only/tests/action_task_params/config.ts
-  - x-pack/test/api_integration/apis/cases/config.ts
-  - x-pack/test/api_integration/apis/security/config.ts
+  - x-pack/platform/test/alerting_api_integration/spaces_only/tests/actions/connector_types/stack/email_recipient_allowlist/config.ts
   - x-pack/platform/test/banners_functional/config.ts
   - x-pack/platform/test/cases_api_integration/security_and_spaces/config_basic.ts
   - x-pack/platform/test/cases_api_integration/security_and_spaces/config_trial.ts
@@ -177,16 +176,16 @@ enabled:
   - x-pack/test/fleet_functional/config.ts
   - x-pack/platform/test/fleet_tasks/config.ts
   - x-pack/platform/test/ftr_apis/security_and_spaces/config.ts
-  - x-pack/test/functional_basic/apps/ml/permissions/config.ts
-  - x-pack/test/functional_basic/apps/ml/data_visualizer/group1/config.ts
-  - x-pack/test/functional_basic/apps/ml/data_visualizer/group2/config.ts
-  - x-pack/test/functional_basic/apps/ml/data_visualizer/group3/config.ts
-  - x-pack/test/functional_basic/apps/transform/creation/index_pattern/config.ts
-  - x-pack/test/functional_basic/apps/transform/actions/config.ts
-  - x-pack/test/functional_basic/apps/transform/edit_clone/config.ts
-  - x-pack/test/functional_basic/apps/transform/creation/runtime_mappings_saved_search/config.ts
-  - x-pack/test/functional_basic/apps/transform/permissions/config.ts
-  - x-pack/test/functional_basic/apps/transform/feature_controls/config.ts
+  - x-pack/platform/test/functional_basic/apps/ml/permissions/config.ts
+  - x-pack/platform/test/functional_basic/apps/ml/data_visualizer/group1/config.ts
+  - x-pack/platform/test/functional_basic/apps/ml/data_visualizer/group2/config.ts
+  - x-pack/platform/test/functional_basic/apps/ml/data_visualizer/group3/config.ts
+  - x-pack/platform/test/functional_basic/apps/transform/creation/index_pattern/config.ts
+  - x-pack/platform/test/functional_basic/apps/transform/actions/config.ts
+  - x-pack/platform/test/functional_basic/apps/transform/edit_clone/config.ts
+  - x-pack/platform/test/functional_basic/apps/transform/creation/runtime_mappings_saved_search/config.ts
+  - x-pack/platform/test/functional_basic/apps/transform/permissions/config.ts
+  - x-pack/platform/test/functional_basic/apps/transform/feature_controls/config.ts
   - x-pack/platform/test/functional_cors/config.ts
   - x-pack/platform/test/functional_embedded/config.ts
   - x-pack/platform/test/functional_execution_context/config.ts
@@ -238,15 +237,15 @@ enabled:
   - x-pack/test/functional/apps/maps/group2/config.ts
   - x-pack/test/functional/apps/maps/group3/config.ts
   - x-pack/test/functional/apps/maps/group4/config.ts
-  - x-pack/test/functional/apps/ml/anomaly_detection_jobs/config.ts
-  - x-pack/test/functional/apps/ml/anomaly_detection_integrations/config.ts
-  - x-pack/test/functional/apps/ml/anomaly_detection_result_views/config.ts
-  - x-pack/test/functional/apps/ml/data_frame_analytics/config.ts
-  - x-pack/test/functional/apps/ml/data_visualizer/config.ts
-  - x-pack/test/functional/apps/ml/permissions/config.ts
-  - x-pack/test/functional/apps/ml/short_tests/config.ts
-  - x-pack/test/functional/apps/ml/stack_management_jobs/config.ts
-  - x-pack/test/functional/apps/ml/memory_usage/config.ts
+  - x-pack/platform/test/functional/apps/ml/anomaly_detection_jobs/config.ts
+  - x-pack/platform/test/functional/apps/ml/anomaly_detection_integrations/config.ts
+  - x-pack/platform/test/functional/apps/ml/anomaly_detection_result_views/config.ts
+  - x-pack/platform/test/functional/apps/ml/data_frame_analytics/config.ts
+  - x-pack/platform/test/functional/apps/ml/data_visualizer/config.ts
+  - x-pack/platform/test/functional/apps/ml/permissions/config.ts
+  - x-pack/platform/test/functional/apps/ml/short_tests/config.ts
+  - x-pack/platform/test/functional/apps/ml/stack_management_jobs/config.ts
+  - x-pack/platform/test/functional/apps/ml/memory_usage/config.ts
   - x-pack/test/functional/apps/monitoring/config.ts
   - x-pack/platform/test/functional/apps/painless_lab/config.ts
   - x-pack/test/functional/apps/remote_clusters/config.ts
@@ -259,12 +258,12 @@ enabled:
   - x-pack/platform/test/functional/apps/snapshot_restore/config.ts
   - x-pack/platform/test/functional/apps/spaces/config.ts
   - x-pack/test/functional/apps/status_page/config.ts
-  - x-pack/test/functional/apps/transform/creation/index_pattern/config.ts
-  - x-pack/test/functional/apps/transform/creation/runtime_mappings_saved_search/config.ts
-  - x-pack/test/functional/apps/transform/actions/config.ts
-  - x-pack/test/functional/apps/transform/edit_clone/config.ts
-  - x-pack/test/functional/apps/transform/permissions/config.ts
-  - x-pack/test/functional/apps/transform/feature_controls/config.ts
+  - x-pack/platform/test/functional/apps/transform/creation/index_pattern/config.ts
+  - x-pack/platform/test/functional/apps/transform/creation/runtime_mappings_saved_search/config.ts
+  - x-pack/platform/test/functional/apps/transform/actions/config.ts
+  - x-pack/platform/test/functional/apps/transform/edit_clone/config.ts
+  - x-pack/platform/test/functional/apps/transform/permissions/config.ts
+  - x-pack/platform/test/functional/apps/transform/feature_controls/config.ts
   - x-pack/platform/test/functional/apps/upgrade_assistant/config.ts
   - x-pack/platform/test/functional/apps/user_profiles/config.ts
   - x-pack/test/functional/apps/visualize/config.ts
@@ -364,6 +363,7 @@ enabled:
   - x-pack/platform/test/custom_branding/config.ts
   # configs migrated to the new Kibana architecture
   - x-pack/platform/test/api_integration/apis/aiops/config.ts
+  - x-pack/platform/test/api_integration/apis/cases/config.ts
   - x-pack/platform/test/api_integration/apis/cloud/config.ts
   - x-pack/platform/test/api_integration/apis/cloud/saml.config.ts
   - x-pack/platform/test/api_integration/apis/console/config.ts
