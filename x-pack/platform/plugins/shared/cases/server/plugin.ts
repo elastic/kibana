@@ -225,6 +225,7 @@ export class CasePlugin
       if (this.caseConfig.incrementalId.enabled) {
         void this.incrementalIdTaskManager?.setupIncrementIdTask(plugins.taskManager, core);
       }
+
       if (this.caseConfig.analytics.index?.enabled) {
         scheduleCasesAnalyticsSyncTasks({ taskManager: plugins.taskManager, logger: this.logger });
         createCasesAnalyticsIndexes({

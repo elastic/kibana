@@ -13,9 +13,10 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import type { CoreSetup, ElasticsearchClient } from '@kbn/core/server';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { ANALYTICS_BACKFILL_TASK_TYPE } from '../../../../common/constants';
 import type { CasesServerStartDependencies } from '../../../types';
 import { CaseAnalyticsIndexBackfillTaskFactory } from './backfill_task_factory';
-import { TASK_TYPE, BACKFILL_RUN_AT } from './constants';
+import { BACKFILL_RUN_AT } from './constants';
 
 export function registerCAIBackfillTask({
   taskManager,
@@ -32,7 +33,7 @@ export function registerCAIBackfillTask({
   };
 
   taskManager.registerTaskDefinitions({
-    [TASK_TYPE]: {
+    [ANALYTICS_BACKFILL_TASK_TYPE]: {
       title: 'Backfill cases analytics indexes.',
       maxAttempts: 3,
       createTaskRunner: (context: RunContext) => {
@@ -60,7 +61,7 @@ export async function scheduleCAIBackfillTask({
   try {
     await taskManager.ensureScheduled({
       id: taskId,
-      taskType: TASK_TYPE,
+      taskType: ANALYTICS_BACKFILL_TASK_TYPE,
       params: { sourceIndex, destIndex, sourceQuery },
       runAt: new Date(Date.now() + BACKFILL_RUN_AT), // todo, value is short for testing but should run after 5 minutes
       state: {},
