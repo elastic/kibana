@@ -103,8 +103,6 @@ module.exports = {
     /x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]timelines[\/\\]public[\/\\]mock[\/\\]test_providers.tsx/,
     /x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]triggers_actions_ui[\/\\]public[\/\\]application[\/\\]sections[\/\\]actions_connectors_list[\/\\]components[\/\\]actions_connectors_list.test.tsx/,
     /x-pack[\/\\]solutions[\/\\]observability[\/\\]plugins[\/\\]observability[\/\\]public[\/\\]pages[\/\\]overview[\/\\]components[\/\\]news_feed[\/\\]news_feed.tsx/,
-    /x-pack[\/\\]solutions[\/\\]observability[\/\\]plugins[\/\\]observability[\/\\]public[\/\\]pages[\/\\]overview[\/\\]components[\/\\]sections[\/\\]empty[\/\\]empty_sections.tsx/,
-    /x-pack[\/\\]solutions[\/\\]observability[\/\\]plugins[\/\\]observability[\/\\]public[\/\\]pages[\/\\]overview[\/\\]components[\/\\]sections[\/\\]uptime[\/\\]uptime_section.tsx/,
     /x-pack[\/\\]solutions[\/\\]observability[\/\\]plugins[\/\\]observability[\/\\]public[\/\\]pages[\/\\]overview[\/\\]components[\/\\]sections[\/\\]ux[\/\\]core_web_vitals[\/\\]color_palette_flex_item.tsx/,
     /x-pack[\/\\]solutions[\/\\]observability[\/\\]plugins[\/\\]observability[\/\\]public[\/\\]pages[\/\\]overview[\/\\]components[\/\\]sections[\/\\]ux[\/\\]core_web_vitals[\/\\]palette_legends.tsx/,
     /x-pack[\/\\]solutions[\/\\]observability[\/\\]plugins[\/\\]observability[\/\\]public[\/\\]pages[\/\\]overview[\/\\]components[\/\\]styled_stat[\/\\]styled_stat.tsx/,
