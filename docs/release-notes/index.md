@@ -55,7 +55,7 @@ For the Elastic Observability 9.0.4 release information, refer to [Elastic Obser
 For the Elastic Security 9.0.4 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
 
 **Kibana platform**:
-* Hides the header and side navigation when printing or exporting the dashboard with **Print layout** selected [#227095]({{kib-pull}}227095).
+* Hides the header and side navigation when printing or exporting a dashboard with **Print layout** selected [#227095]({{kib-pull}}227095).
 
 **Search**:
 * Fixes handling of context limit errors in Playground when using the Elastic Managed LLM  [#225360]({{kib-pull}}225360).
