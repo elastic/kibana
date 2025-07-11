@@ -8,8 +8,6 @@
     "isolatedModules": false,
   },
   "kbn_references": [
-    "@kbn/test",
-    "@kbn/observability-synthetics-test-data",
     "@kbn/scout-oblt",
   ]
 }
