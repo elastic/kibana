@@ -90,7 +90,7 @@ export default ({ getService }: FtrProviderContext) => {
       password: USER_PASSWORD,
     });
 
-  describe('@ess @serverless @skipInServerlessMKI Entity Privilege Monitoring APIs', () => {
+  describe('@ess @skipInServerlessMKI Entity Privilege Monitoring APIs', () => {
     describe('privileges checks', () => {
       before(async () => {
         await createPrivilegeTestUsers();
