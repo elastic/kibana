@@ -566,21 +566,20 @@ export function MachineLearningTestResourcesProvider(
 
       await retry.tryForTime(30 * 1000, async () => {
         const { body, status } = await supertest
-          .post(`/api/fleet/epm/packages/${packageName}/${version}`)
+          .post(`/api/fleet/epm/packages/${packageName}`)
           .set(getCommonRequestHeader(`${API_VERSIONS.public.v1}`));
         mlApi.assertResponseStatusCode(200, status, body);
       });
-
       log.debug(` > Installed`);
       return version;
     },
 
-    async removeFleetPackage(packageName: string, version: string) {
-      log.debug(`Removing Fleet package '${packageName}-${version}'`);
+    async removeFleetPackage(packageName: string) {
+      log.debug(`Removing Fleet package '${packageName}'`);
 
       await retry.tryForTime(30 * 1000, async () => {
         const { body, status } = await supertest
-          .delete(`/api/fleet/epm/packages/${packageName}/${version}`)
+          .delete(`/api/fleet/epm/packages/${packageName}`)
           .set(getCommonRequestHeader(`${API_VERSIONS.public.v1}`));
         mlApi.assertResponseStatusCode(200, status, body);
       });

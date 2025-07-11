@@ -12,11 +12,11 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const ml = getService('ml');
 
   const fleetPackages = ['apache', 'nginx'];
-  const installedPackages: Array<{ pkgName: string; version: string }> = [];
+  const installedPackages: Array<{ pkgName: string }> = [];
 
   // Failing: See https://github.com/elastic/kibana/issues/223984
   // Failing: See https://github.com/elastic/kibana/issues/223984
-  describe.skip('modules', function () {
+  describe('modules', function () {
     before(async () => {
       // use await kibanaServer.savedObjects.cleanStandardList(); to make sure the fleet setup is removed correctly after the tests
       await kibanaServer.savedObjects.cleanStandardList();
@@ -25,8 +25,8 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await ml.testResources.setupFleet();
 
       for (const fleetPackage of fleetPackages) {
-        const version = await ml.testResources.installFleetPackage(fleetPackage);
-        installedPackages.push({ pkgName: fleetPackage, version });
+        await ml.testResources.installFleetPackage(fleetPackage);
+        installedPackages.push({ pkgName: fleetPackage });
       }
 
       // ensure fleet installed packages are ready
@@ -36,7 +36,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
 
     after(async () => {
       for (const fleetPackage of installedPackages) {
-        await ml.testResources.removeFleetPackage(fleetPackage.pkgName, fleetPackage.version);
+        await ml.testResources.removeFleetPackage(fleetPackage.pkgName);
       }
       await kibanaServer.savedObjects.cleanStandardList();
     });
