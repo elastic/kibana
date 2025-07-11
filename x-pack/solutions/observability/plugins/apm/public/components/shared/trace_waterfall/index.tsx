@@ -82,7 +82,7 @@ function TraceWaterfallComponent() {
 
   return (
     <EuiFlexGroup direction="column">
-      {showLegend && (
+      {showLegend && serviceName && (
         <EuiFlexItem>
           <WaterfallLegends serviceName={serviceName} legends={legends} type={colorBy} />
         </EuiFlexItem>
