@@ -915,6 +915,7 @@ export function defineRoutes(
       res: KibanaResponseFactory
     ) => {
       try {
+        const [, { eventLog }] = await core.getStartServices();
         const es = (await context.core).elasticsearch.client.asInternalUser;
         const eventLogClient = eventLog.getClient(req);
 
