@@ -46,12 +46,14 @@ const traverseTree = (
         'data-test-subj': `pipelineTreeNode-${treeNode.pipelineName}-moreChildrenPipelines`,
         className: 'cssTreeNode-morePipelines',
       };
-      currentNode.children.push(morePipelinesNode);
+      currentNode.children!.push(morePipelinesNode);
     }
     return currentNode;
   }
   treeNode.children.forEach((node) => {
-    currentNode.children.push(traverseTree(node, selectedPipeline, setSelectedPipeline, level + 1));
+    currentNode.children!.push(
+      traverseTree(node, selectedPipeline, setSelectedPipeline, level + 1)
+    );
   });
   return currentNode;
 };

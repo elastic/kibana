@@ -20,6 +20,7 @@ type Story = StoryObj<typeof PipelineStructureTree>;
 const pipelineTree = {
   pipelineName: 'logs_kubernetes.container_logs-1.80.2',
   isManaged: true,
+  isDeprecated: true,
   children: [
     {
       pipelineName: 'global@custom',

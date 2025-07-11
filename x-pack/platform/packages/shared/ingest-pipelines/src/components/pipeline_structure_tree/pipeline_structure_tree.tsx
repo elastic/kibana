@@ -27,7 +27,11 @@ export const PipelineStructureTree = ({ pipelineTree }: PipelineStructureTreePro
 
   const [selectedPipeline, setSelectedPipeline] = useState(pipelineTree.pipelineName);
 
-  const treeNode = createTreeNodesFromPipelines(pipelineTree, selectedPipeline, setSelectedPipeline);
+  const treeNode = createTreeNodesFromPipelines(
+    pipelineTree,
+    selectedPipeline,
+    setSelectedPipeline
+  );
 
   return <EuiTreeView items={[treeNode]} showExpansionArrows={true} css={styles} />;
 };
