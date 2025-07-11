@@ -20,6 +20,8 @@ import { GisPageObject } from '@kbn/test-suites-xpack-platform/functional/page_o
 import { LensPageProvider } from '@kbn/test-suites-xpack-platform/functional/page_objects/lens_page';
 import { UpgradeAssistantFlyoutObject } from '@kbn/test-suites-xpack-platform/functional/page_objects/upgrade_assistant_page';
 import { UserProfilePageProvider } from '@kbn/test-suites-xpack-platform/functional/page_objects/user_profile_page';
+import { SearchSessionsPageProvider } from '@kbn/test-suites-xpack-platform/functional/page_objects/search_sessions_management_page';
+import { GraphPageObject } from '@kbn/test-suites-xpack-platform/functional/page_objects/graph_page';
 import { ApiKeysPageProvider } from './api_keys_page';
 import { AssetDetailsProvider } from './asset_details';
 import { BannersPageObject } from './banners_page';
@@ -27,7 +29,6 @@ import { CrossClusterReplicationPageProvider } from './cross_cluster_replication
 import { DetectionsPageObject } from '../../security_solution_ftr/page_objects/detections';
 import { EmbeddedConsoleProvider } from './embedded_console';
 import { GeoFileUploadPageObject } from './geo_file_upload';
-import { GraphPageObject } from './graph_page';
 import { GrokDebuggerPageObject } from './grok_debugger_page';
 import { IndexLifecycleManagementPageProvider } from './index_lifecycle_management_page';
 import { IndexManagementPageProvider } from './index_management_page';
@@ -47,7 +48,6 @@ import { ObservabilityPageProvider } from './observability_page';
 import { AlertControlsProvider } from './alert_controls';
 import { RemoteClustersPageProvider } from './remote_clusters_page';
 import { RollupPageObject } from './rollup_page';
-import { SearchSessionsPageProvider } from './search_sessions_management_page';
 import { ShareSavedObjectsToSpacePageProvider } from './share_saved_objects_to_space_page';
 import { SnapshotRestorePageProvider } from './snapshot_restore_page';
 import { StatusPageObject } from './status_page';

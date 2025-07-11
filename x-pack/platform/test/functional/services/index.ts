@@ -12,6 +12,7 @@ import { UserMenuProvider } from './user_menu';
 import { AceEditorProvider } from './ace_editor';
 import { SampleDataServiceProvider } from './sample_data';
 import { GrokDebuggerProvider } from './grok_debugger';
+import { SearchSessionsService } from './search_sessions';
 
 // define the name and providers for services that should be
 // available to your tests. If you don't specify anything here
@@ -27,4 +28,5 @@ export const services = {
   aceEditor: AceEditorProvider,
   sampleData: SampleDataServiceProvider,
   grokDebugger: GrokDebuggerProvider,
+  searchSessions: SearchSessionsService,
 };
