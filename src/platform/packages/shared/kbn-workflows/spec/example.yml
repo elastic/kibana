@@ -1,0 +1,47 @@
+version: 1
+workflow:
+  id: 'do-we-really-need-this-id'
+  name: 'JAMF Reminder'
+  description: 'Remind users to enroll in JAMF'
+  enabled: true
+  triggers:
+    - type: triggers.elastic.scheduled
+      with:
+        every: 1
+        unit: day
+    - type: triggers.elastic.manual
+  inputs:
+  consts:
+    - name: jamf-server-url
+  steps:
+    - name: Get unenrolled users
+      type: http.get
+      with:
+        url: 'https://jamf.example.com/api/v1/users/?filter=enrollmentStatus=Unenrolled'
+        headers:
+          Authorization: 'Bearer ${{ secrets.JAMF_API_TOKEN }}'
+          Accept: 'application/json'
+          Content-Type: 'application/json'
+    - name: Send reminder
+      type: slack.sendMessage
+      foreach: '{{steps.get_unenrolled_users.results.users}}'
+      with:
+        message: 'Hi {{foreach.value.name}}, please enroll in JAMF.'
+        username: '{{foreach.value.slack_username}}'
+      next: Report success # do we need a branch name? required next pointer is verbose, can we have the default behavior?
+      on-failure:
+        fallback-step: Report failure
+        continue: true # to continue the workflow even if the step fails?
+        retry:
+          max-attempts: 3
+          timeout: 5
+    - name: Report success
+      type: slack.sendMessage
+      with:
+        message: 'Successfully sent reminder to {{keep.len(steps.send_reminder.results)}} users'
+        channel: '{{consts.INFOSEC_CHANNEL}}'
+    - name: Report failure # if we use some default behavior, how to ensure this step is not executed in case of success?
+      type: slack.sendMessage
+      with:
+        message: 'Failed to send JAMF reminder  due to {{error}}'
+        channel: '{{consts.INFOSEC_CHANNEL}}'
