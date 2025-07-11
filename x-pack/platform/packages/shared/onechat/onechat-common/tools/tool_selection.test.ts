@@ -77,19 +77,13 @@ describe('filterToolsBySelection', () => {
     expect(result).toEqual([
       {
         id: 'toolA',
-        description: 'Tool A description',
-        meta: {
-          providerId: 'type1',
-          tags: [],
-        },
+        type: 'type1',
+        tags: [],
       },
       {
         id: 'toolC',
-        description: 'Tool C description',
-        meta: {
-          providerId: 'type2',
-          tags: [],
-        },
+        type: 'type2',
+        tags: [],
       },
     ]);
   });
@@ -108,19 +102,13 @@ describe('filterToolsBySelection', () => {
     expect(result).toEqual([
       {
         id: 'toolA',
-        description: 'Tool A description',
-        meta: {
-          providerId: 'type1',
-          tags: [],
-        },
+        type: 'type1',
+        tags: [],
       },
       {
         id: 'toolB',
-        description: 'Tool B description',
-        meta: {
-          providerId: 'type1',
-          tags: [],
-        },
+        type: 'type1',
+        tags: [],
       },
     ]);
   });
@@ -131,11 +119,8 @@ describe('filterToolsBySelection', () => {
     expect(result).toEqual([
       {
         id: 'toolA',
-        description: 'Tool A description',
-        meta: {
-          providerId: 'type1',
-          tags: [],
-        },
+        type: 'type1',
+        tags: [],
       },
     ]);
   });
@@ -155,19 +140,13 @@ describe('filterToolsBySelection', () => {
     expect(result).toEqual([
       {
         id: 'toolA',
-        description: 'Tool A description',
-        meta: {
-          providerId: 'type1',
-          tags: [],
-        },
+        type: 'type1',
+        tags: [],
       },
       {
         id: 'toolC',
-        description: 'Tool C description',
-        meta: {
-          providerId: 'type2',
-          tags: [],
-        },
+        type: 'type2',
+        tags: [],
       },
     ]);
   });
