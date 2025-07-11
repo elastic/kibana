@@ -9,12 +9,12 @@ import { type MlCapabilitiesResponse } from '@kbn/ml-plugin/public';
 import { createActor, toPromise } from 'xstate5';
 import {
   loadMlCapabilitiesActor,
-  type MlApiDependencies,
+  type MlApiDependency,
   type MlFeatureFlags,
 } from './ml_capabilities';
 
 describe('loadMlCapabilitiesActor', () => {
-  const createMlApi = (overrides: Partial<MlCapabilitiesResponse> = {}): MlApiDependencies => ({
+  const createMlApi = (overrides: Partial<MlCapabilitiesResponse> = {}): MlApiDependency => ({
     checkMlCapabilities: jest.fn().mockResolvedValue({
       isPlatinumOrTrialLicense: true,
       mlFeatureEnabledInSpace: true,

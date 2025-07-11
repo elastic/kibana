@@ -45,6 +45,7 @@ export const GroupingLicenseCtaCallout = React.memo<GroupingLicenseCtaCalloutPro
         title={groupingLicenseCtaMessageTitle}
         iconType="sparkles"
         onDismiss={dismissCtaCallout}
+        data-test-subj="logsOverviewGroupingLicenseCtaCallout"
       >
         <p>{groupingLicenseCtaMessageDescription}</p>
         <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">

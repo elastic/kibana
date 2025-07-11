@@ -21,11 +21,11 @@ export type MlCapabilities =
       reason: 'disabled' | 'insufficientLicense';
     };
 
-export type MlApiDependencies =
+export type MlApiDependency =
   | Pick<NonNullable<MlPluginStart['mlApi']>, 'checkMlCapabilities'>
   | undefined;
 
-export const loadMlCapabilitiesActor = ({ mlApi }: { mlApi: MlApiDependencies }) =>
+export const loadMlCapabilitiesActor = ({ mlApi }: { mlApi: MlApiDependency }) =>
   fromPromise<MlCapabilities, { featureFlags: MlFeatureFlags }>(
     async ({ input: { featureFlags } }) => {
       if (!mlApi || !featureFlags.isPatternsEnabled) {

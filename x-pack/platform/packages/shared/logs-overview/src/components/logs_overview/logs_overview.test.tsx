@@ -9,10 +9,10 @@ import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { createStubDataView } from '@kbn/data-views-plugin/common/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import { logsDataAccessPluginMock } from '@kbn/logs-data-access-plugin/public/mocks';
-import { mlPluginMock } from '@kbn/ml-plugin/public/mocks';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 import '@testing-library/jest-dom';
@@ -24,6 +24,12 @@ import {
   type LogsOverviewDependencies,
   type LogsOverviewProps,
 } from './logs_overview';
+
+// Mock the saved search since it relies on the embeddable registry to be
+// populated correctly otherwise
+jest.mock('@kbn/saved-search-component', () => ({
+  LazySavedSearchComponent: jest.fn((props) => <div data-test-subj="embeddedSavedSearchMock" />),
+}));
 
 const commonDependencies = {
   dataViews: dataViewPluginMocks.createStartContract(),
@@ -44,12 +50,16 @@ const mockLogCategoriesDependencies: Omit<
 
 const mockLogEventsDependencies: Omit<LogEventsDependencies, keyof typeof commonDependencies> = {};
 
+const mockMlApi: LogsOverviewDependencies['mlApi'] = {
+  checkMlCapabilities: jest.fn(),
+};
+
 const mockDependencies: LogsOverviewDependencies = {
   ...commonDependencies,
   ...mockLogCategoriesDependencies,
   ...mockLogEventsDependencies,
   logsDataAccess: logsDataAccessPluginMock.createStartContract(),
-  mlApi: mlPluginMock.createStartContract().mlApi,
+  mlApi: mockMlApi,
 };
 
 describe('LogsOverview', () => {
@@ -58,20 +68,94 @@ describe('LogsOverview', () => {
     height: 400,
     timeRange: { start: '2023-01-01T00:00:00Z', end: '2023-01-02T00:00:00Z' },
   };
+  const mockDataView = createStubDataView({
+    spec: {
+      title: 'logs-test-*',
+    },
+  });
 
   beforeAll(() => {
     jest
       .spyOn(mockDependencies.logsDataAccess.services.logSourcesService, 'getFlattenedLogSources')
       .mockResolvedValue('logs');
+    jest.spyOn(mockDependencies.dataViews, 'create').mockResolvedValue(mockDataView);
+    jest.spyOn(mockMlApi, 'checkMlCapabilities').mockResolvedValue({
+      isPlatinumOrTrialLicense: true,
+      mlFeatureEnabledInSpace: true,
+      upgradeInProgress: false,
+      capabilities: {} as any, // not used by the component
+    });
   });
 
   afterAll(() => {
     jest.resetAllMocks();
   });
 
-  it('renders without crashing', async () => {
+  it('displays the log events by default', async () => {
     const { findByTestId } = renderWithKibanaRenderContext(<LogsOverview {...defaultProps} />);
 
-    expect(await findByTestId('logsOverviewLogEvents')).toBeInTheDocument();
+    expect(await findByTestId('embeddedSavedSearchMock')).toBeInTheDocument();
+  });
+
+  describe('with patterns feature flag enabled', () => {
+    it('shows the grouping selector', async () => {
+      const { findByTestId } = renderWithKibanaRenderContext(
+        <LogsOverview {...defaultProps} featureFlags={{ isPatternsEnabled: true }} />
+      );
+
+      expect(await findByTestId('logsOverviewGroupingSelector')).toBeInTheDocument();
+    });
+  });
+
+  describe('with patterns feature flag disabled', () => {
+    it('does not show the grouping selector', async () => {
+      const { findByTestId, queryByTestId } = renderWithKibanaRenderContext(
+        <LogsOverview {...defaultProps} featureFlags={{ isPatternsEnabled: false }} />
+      );
+
+      expect(await findByTestId('logsExplorerDiscoverFallbackLink')).toBeInTheDocument();
+      expect(queryByTestId('logsOverviewGroupingSelector')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('with ml features being disabled', () => {
+    beforeAll(() => {
+      jest.spyOn(mockMlApi, 'checkMlCapabilities').mockResolvedValue({
+        isPlatinumOrTrialLicense: true,
+        mlFeatureEnabledInSpace: false,
+        upgradeInProgress: false,
+        capabilities: {} as any,
+      });
+    });
+
+    it('does not show the grouping selector', async () => {
+      const { findByTestId, queryByTestId } = renderWithKibanaRenderContext(
+        <LogsOverview {...defaultProps} featureFlags={{ isPatternsEnabled: true }} />
+      );
+
+      expect(await findByTestId('logsExplorerDiscoverFallbackLink')).toBeInTheDocument();
+      expect(queryByTestId('logsOverviewGroupingSelector')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('with an insufficient license', () => {
+    beforeAll(() => {
+      jest.spyOn(mockMlApi, 'checkMlCapabilities').mockResolvedValue({
+        isPlatinumOrTrialLicense: false,
+        mlFeatureEnabledInSpace: true,
+        upgradeInProgress: false,
+        capabilities: {} as any,
+      });
+    });
+
+    afterAll(() => {
+      jest.resetAllMocks();
+    });
+
+    it('displays the insufficient license callout', async () => {
+      const { findByTestId } = renderWithKibanaRenderContext(<LogsOverview {...defaultProps} />);
+
+      expect(await findByTestId('logsOverviewGroupingLicenseCtaCallout')).toBeInTheDocument();
+    });
   });
 });

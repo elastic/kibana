@@ -8,12 +8,11 @@
 import { type QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { type DataViewsContract } from '@kbn/data-views-plugin/public';
 import { type LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
-import { type MlPluginStart } from '@kbn/ml-plugin/public';
 import { createConsoleInspector } from '@kbn/xstate-utils';
 import React, { useCallback } from 'react';
 import { LogsOverviewFeatureFlags } from '../../types';
 import { LogsSourceConfiguration, resolveLogsSourceActor } from '../../utils/logs_source';
-import { loadMlCapabilitiesActor } from '../../utils/ml_capabilities';
+import { MlApiDependency, loadMlCapabilitiesActor } from '../../utils/ml_capabilities';
 import { LogCategories, LogCategoriesDependencies, LogCategoriesProps } from '../log_categories';
 import { LogEvents, LogEventsDependencies, LogEventsProps } from '../log_events';
 import { GroupingCapabilities } from '../shared/control_bar';
@@ -32,7 +31,7 @@ export type LogsOverviewProps = Pick<LogsOverviewContentProps, 'height' | 'timeR
 export type LogsOverviewDependencies = LogsOverviewContentDependencies & {
   logsDataAccess: LogsDataAccessPluginStart;
   dataViews: DataViewsContract;
-  mlApi: MlPluginStart['mlApi'];
+  mlApi: MlApiDependency;
 };
 
 export const LogsOverview: React.FC<LogsOverviewProps> = React.memo(
