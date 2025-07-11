@@ -215,8 +215,15 @@ export class ToastsApi implements IToasts {
    * @returns a {@link Toast}
    */
   public addError(error: Error, options: ErrorToastOptions) {
+    const optionsLabels = {
+      title: options.title,
+      ...(options.toastMessage && { toast_message: options.toastMessage }),
+    };
     apm.captureError(error, {
-      labels: getApmLabels('ToastError'),
+      labels: {
+        ...getApmLabels('ToastError'),
+        ...optionsLabels,
+      },
     });
     const message = options.toastMessage || error.message;
     return this.add({

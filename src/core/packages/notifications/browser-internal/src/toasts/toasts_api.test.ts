@@ -293,11 +293,19 @@ describe('#addError', () => {
     const toasts = new ToastsApi(toastDeps());
     toasts.start(startDeps());
     const error = new Error('unexpected error');
-    const toast = toasts.addError(error, { title: 'Something went wrong' });
+    const toast = toasts.addError(error, {
+      title: 'Something went wrong',
+      toastMessage: 'Please try again later.',
+    });
     expect(toast).toHaveProperty('color', 'danger');
     expect(toast).toHaveProperty('title', 'Something went wrong');
+    expect(toast).toHaveProperty('toastMessage', 'Please try again later.');
     expect(apm.captureError).toBeCalledWith(error, {
-      labels: { error_type: 'ToastError' },
+      labels: {
+        error_type: 'ToastError',
+        title: 'Something went wrong',
+        toast_message: 'Please try again later.',
+      },
     });
   });
 
@@ -309,7 +317,7 @@ describe('#addError', () => {
     const currentToasts = await getCurrentToasts(toasts);
     expect(currentToasts[0]).toBe(toast);
     expect(apm.captureError).toBeCalledWith(error, {
-      labels: { error_type: 'ToastError' },
+      labels: { error_type: 'ToastError', title: 'Something went wrong' },
     });
   });
 });
