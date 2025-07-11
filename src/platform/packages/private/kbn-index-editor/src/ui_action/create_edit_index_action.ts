@@ -35,11 +35,7 @@ export function createEditLookupIndexContentAction(
 
       const { indexName, doesIndexExist } = context;
 
-      const indexUpdateService = new IndexUpdateService(
-        coreStart.http,
-        data,
-        doesIndexExist ? 'edition' : 'creation'
-      );
+      const indexUpdateService = new IndexUpdateService(coreStart.http, data);
 
       const existingIndexName = doesIndexExist ? indexName : null;
 

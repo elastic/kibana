@@ -41,7 +41,7 @@ import {
   withLatestFrom,
   firstValueFrom,
 } from 'rxjs';
-import { IndexEditorMode } from './types';
+import { ROW_PLACEHOLDER } from './types';
 import { parsePrimitive } from './utils';
 
 const BUFFER_TIMEOUT_MS = 5000; // 5 seconds
@@ -71,11 +71,7 @@ type Action =
 export type PendingSave = Map<DocUpdate['id'], DocUpdate['value']>;
 
 export class IndexUpdateService {
-  constructor(
-    private readonly http: HttpStart,
-    private readonly data: DataPublicPluginStart,
-    public readonly mode: IndexEditorMode
-  ) {
+  constructor(private readonly http: HttpStart, private readonly data: DataPublicPluginStart) {
     this.listenForUpdates();
   }
 
@@ -106,19 +102,7 @@ export class IndexUpdateService {
     this._exitAttemptWithUnsavedFields$.asObservable();
 
   /** ES Documents */
-  private readonly _rows$ = new BehaviorSubject<DataTableRecord[]>([
-    // {
-    //   id: 'row_1',
-    //   raw: {
-    //     _id: 'row_1',
-    //   },
-    //   flattened: {
-    //     [`Add a column`]: 'Add a value',
-    //     [`Add a column `]: 'Add a value',
-    //     [`Add a column  `]: 'Add a value',
-    //   },
-    // },
-  ]);
+  private readonly _rows$ = new BehaviorSubject<DataTableRecord[]>([]);
   public readonly rows$: Observable<DataTableRecord[]> = this._rows$.asObservable();
 
   private readonly _totalHits$ = new BehaviorSubject<number>(0);
@@ -166,7 +150,7 @@ export class IndexUpdateService {
 
   // Observable to track the number of milliseconds left to allow undo of the last change
   public readonly undoTimer$: Observable<number> = this.actions$.pipe(
-    skipWhile(() => this.mode === 'creation'),
+    skipWhile(() => !this._indexCrated$.getValue()),
     filter((action) => action.type === 'add' || action.type === 'undo'),
     switchMap((action) =>
       action.type === 'add'
@@ -269,7 +253,7 @@ export class IndexUpdateService {
     this._subscription.add(
       this.bufferState$
         .pipe(
-          skipWhile(() => this.mode === 'creation'),
+          skipWhile(() => !this._indexCrated$.getValue()),
           tap((updates) => {
             this._isSaving$.next(updates.length > 0);
           }),
@@ -305,7 +289,6 @@ export class IndexUpdateService {
 
             this._rows$.next(
               rows.map((row) => {
-                // It's only keeping the rows that were there before the update //HD
                 const docId = row.raw._id;
                 const mergedSource = { ...row.raw._source, ...(mappedResponse.get(docId!) ?? {}) };
 
@@ -474,15 +457,14 @@ export class IndexUpdateService {
         acc[update.id] = { ...acc[update.id], ...update.value };
       } else {
         // If no id is provided, we assume it's a new row
-        acc['placeholder-row'] = { ...acc['placeholder-row'], ...update.value };
+        acc[ROW_PLACEHOLDER] = { ...acc[ROW_PLACEHOLDER], ...update.value };
       }
       return acc;
     }, {} as Record<string, Record<string, any>>);
     const body = JSON.stringify({
       operations: (
         Object.entries(mergedUpdates).map(([id, value]) => {
-          if (id !== 'placeholder-row') {
-            // HD placeholder-row?
+          if (id !== ROW_PLACEHOLDER) {
             return [
               {
                 update: { _id: id },
@@ -543,5 +525,6 @@ export class IndexUpdateService {
     await this.http.post(`/internal/esql/lookup_index/${this.getIndexName()}`);
     await this.bulkUpdate(updates);
     this.setIndexCreated(true);
+    this.actions$.next({ type: 'discard-unsaved-columns' });
   }
 }

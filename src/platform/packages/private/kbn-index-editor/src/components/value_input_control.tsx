@@ -13,7 +13,6 @@ import { type DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { isNil } from 'lodash';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
-import { IndexEditorMode } from '../types';
 import type { PendingSave } from '../index_update_service';
 import { ValueInput } from './value_input';
 
@@ -27,7 +26,7 @@ export const getCellValueRenderer =
     savingDocs: PendingSave | undefined,
     onEditStart: (update: { row: number | null; col: string | null }) => void,
     onValueChange: OnCellValueChange,
-    indexEditorMode: IndexEditorMode
+    isIndexCreated: boolean
   ): FunctionComponent<DataGridCellValueElementProps> =>
   ({ rowIndex, columnId }) => {
     const row = rows[rowIndex];
@@ -94,7 +93,7 @@ export const getCellValueRenderer =
             {cellValue}
           </div>
         </EuiFlexItem>
-        {isPendingToBeSaved && indexEditorMode === 'edition' ? (
+        {isPendingToBeSaved && isIndexCreated ? (
           <EuiFlexItem grow={false}>
             <EuiLoadingSpinner size="s" />
           </EuiFlexItem>

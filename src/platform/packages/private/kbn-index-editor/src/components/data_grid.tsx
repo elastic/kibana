@@ -24,7 +24,7 @@ import React, { useCallback, useMemo, useRef, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { difference, intersection, times } from 'lodash';
 import { buildDataTableRecord } from '@kbn/discover-utils';
-import { KibanaContextExtra } from '../types';
+import { COLUMN_PLACEHOLDER_PREFIX, KibanaContextExtra, ROW_PLACEHOLDER } from '../types';
 import { getCellValueRenderer } from './value_input_control';
 import { AddColumnHeader } from './add_column_header';
 
@@ -62,7 +62,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
 
   const isFetching = useObservable(indexUpdateService.isFetching$, false);
 
-  const indexEditorMode = indexUpdateService.mode;
+  const isIndexCreated = useObservable(indexUpdateService.indexCreated$, false);
 
   const [activeColumns, setActiveColumns] = useState<string[]>(
     (props.initialColumns || props.columns).map((c) => c.name)
@@ -112,7 +112,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
     const missingPlaceholders = 4 - props.columns.length;
     const addColumnPlaceholders =
       missingPlaceholders > 0
-        ? times(missingPlaceholders, (idx) => `add-column-placeholder-${idx}`)
+        ? times(missingPlaceholders, (idx) => `${COLUMN_PLACEHOLDER_PREFIX}-${idx}`)
         : [];
 
     return [...newColumns, ...preservedOrder, ...addColumnPlaceholders];
@@ -122,7 +122,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
     if (props.rows.length === 0) {
       return [
         buildDataTableRecord({
-          _id: 'placeholder-row',
+          _id: ROW_PLACEHOLDER,
         }),
       ];
     }
@@ -172,7 +172,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
       savingDocs,
       setEditingCell,
       onValueChange,
-      indexEditorMode
+      isIndexCreated
     );
   }, [
     renderedRows,
@@ -181,7 +181,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
     setEditingCell,
     onValueChange,
     savingDocs,
-    indexEditorMode,
+    isIndexCreated,
   ]);
 
   const externalCustomRenderers: CustomCellRenderer = useMemo(() => {
@@ -193,7 +193,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
 
   const customGridColumnsConfiguration = useMemo(() => {
     return renderedColumns.reduce((acc, columnName) => {
-      if (columnName.startsWith('add-column-placeholder-')) {
+      if (columnName.startsWith(COLUMN_PLACEHOLDER_PREFIX)) {
         acc[columnName] = ({ column }) => ({
           ...column,
           display: <AddColumnHeader />,
