@@ -15,7 +15,7 @@ import {
 import {
   suggestForExpression,
   getExpressionPosition,
-} from '../../../definitions/utils/autocomplete';
+} from '../../../definitions/utils/autocomplete/helpers';
 import { isExpressionComplete, getExpressionType } from '../../../definitions/utils/expressions';
 import {
   type ISuggestionItem,
@@ -25,7 +25,7 @@ import {
 } from '../../types';
 import { isColumn, isAssignment } from '../../../ast/is';
 import { getInsideFunctionsSuggestions } from '../../../definitions/utils/autocomplete/functions';
-import { isMarkerNode } from '../../../definitions/utils/astl';
+import { isMarkerNode } from '../../../definitions/utils/ast';
 
 export async function autocomplete(
   query: string,

@@ -20,7 +20,7 @@ import {
   findFinalWord,
   handleFragment,
   columnExists,
-} from '../../../definitions/utils/autocomplete';
+} from '../../../definitions/utils/autocomplete/helpers';
 import {
   type ISuggestionItem,
   Location,

@@ -20,12 +20,12 @@ import { Walker } from '../../../walker';
 import {
   findPreviousWord,
   getLastNonWhitespaceChar,
-} from '../../../definitions/utils/autocomplete';
+} from '../../../definitions/utils/autocomplete/helpers';
 import { ISuggestionItem } from '../../types';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
 import { getFunctionDefinition } from '../../../definitions/utils/functions';
 import { FunctionDefinitionTypes } from '../../../definitions/types';
-import { mapToNonMarkerNode, isNotMarkerNodeOrArray } from '../../../definitions/utils/astl';
+import { mapToNonMarkerNode, isNotMarkerNodeOrArray } from '../../../definitions/utils/ast';
 
 function isAssignmentComplete(node: ESQLFunction | undefined) {
   const assignExpression = removeMarkerArgFromArgsList(node)?.args?.[1];

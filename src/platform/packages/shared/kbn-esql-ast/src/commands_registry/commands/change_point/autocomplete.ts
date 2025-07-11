@@ -15,7 +15,7 @@ import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
 import {
   buildUserDefinedColumnsDefinitions,
   findFinalWord,
-} from '../../../definitions/utils/autocomplete';
+} from '../../../definitions/utils/autocomplete/helpers';
 
 export enum Position {
   VALUE = 'value',

@@ -14,7 +14,7 @@ import {
   additionalSourcesSuggestions,
 } from '../../../definitions/utils/sources';
 import { metadataSuggestion, getMetadataSuggestions } from '../../options/metadata';
-import { withinQuotes } from '../../../definitions/utils/autocomplete';
+import { withinQuotes } from '../../../definitions/utils/autocomplete/helpers';
 import { type ISuggestionItem, type ICommandContext, ICommandCallbacks } from '../../types';
 import { getOverlapRange, isRestartingExpression } from '../../../definitions/utils/shared';
 

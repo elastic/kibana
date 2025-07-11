@@ -35,7 +35,7 @@ import {
   extractTypeFromASTArg,
   getFieldsOrFunctionsSuggestions,
   getValidSignaturesAndTypesToSuggestNext,
-} from '../autocomplete';
+} from './helpers';
 import {
   FunctionDefinitionTypes,
   FunctionParameter,
@@ -54,10 +54,10 @@ import { buildValueDefinitions } from '../values';
 import { getCompatibleLiterals, getDateLiterals } from '../literals';
 import { getColumnExists } from '../columns';
 import { getFunctionSuggestions, getAllFunctions } from '../functions';
-import { pushItUpInTheList } from '../autocomplete';
+import { pushItUpInTheList } from './helpers';
 import { FULL_TEXT_SEARCH_FUNCTIONS } from '../../constants';
 import { comparisonFunctions } from '../../all_operators';
-import { correctQuerySyntax, findAstPosition } from '../astl';
+import { correctQuerySyntax, findAstPosition } from '../ast';
 import { parse } from '../../../parser';
 import { Walker } from '../../../walker';
 

@@ -14,7 +14,7 @@ import {
   columnExists,
   getLastNonWhitespaceChar,
   handleFragment,
-} from '../../../definitions/utils/autocomplete';
+} from '../../../definitions/utils/autocomplete/helpers';
 import { isColumn } from '../../../ast/is';
 
 export async function autocomplete(

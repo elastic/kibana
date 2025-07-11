@@ -25,12 +25,12 @@ import {
   handleFragment,
   getControlSuggestionIfSupported,
   suggestForExpression,
-} from '../../../definitions/utils/autocomplete';
+} from '../../../definitions/utils/autocomplete/helpers';
 import { isExpressionComplete, getExpressionType } from '../../../definitions/utils/expressions';
 import { TRIGGER_SUGGESTION_COMMAND, ESQL_VARIABLES_PREFIX } from '../../constants';
 import { getPosition } from './utils';
 import { getInsideFunctionsSuggestions } from '../../../definitions/utils/autocomplete/functions';
-import { isMarkerNode } from '../../../definitions/utils/astl';
+import { isMarkerNode } from '../../../definitions/utils/ast';
 
 function alreadyUsedColumns(command: ESQLCommand) {
   const byOption = command.args.find((arg) => !Array.isArray(arg) && arg.name === 'by') as

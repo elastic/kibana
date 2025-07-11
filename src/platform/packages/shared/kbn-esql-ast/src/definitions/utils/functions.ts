@@ -25,7 +25,7 @@ import { scalarFunctionDefinitions } from '../generated/scalar_functions';
 import { ESQLFieldWithMetadata, ISuggestionItem } from '../../commands_registry/types';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../commands_registry/constants';
 import { buildFunctionDocumentation } from './documentation';
-import { getSafeInsertText, getControlSuggestion } from './autocomplete';
+import { getSafeInsertText, getControlSuggestion } from './autocomplete/helpers';
 import { ESQLAstItem, ESQLFunction } from '../../types';
 import { removeFinalUnknownIdentiferArg, isParamExpressionType } from './shared';
 import { getTestFunctions } from './test_functions';

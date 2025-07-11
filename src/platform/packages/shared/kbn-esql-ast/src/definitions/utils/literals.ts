@@ -12,7 +12,7 @@ import type { ESQLAstItem, ESQLLiteral } from '../../types';
 import { FunctionParameterType } from '../types';
 import { ISuggestionItem } from '../../commands_registry/types';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../commands_registry/constants';
-import { getControlSuggestion } from './autocomplete';
+import { getControlSuggestion } from './autocomplete/helpers';
 import { timeUnits, timeUnitsToSuggest } from '../constants';
 import { isLiteral } from '../../ast/is';
 

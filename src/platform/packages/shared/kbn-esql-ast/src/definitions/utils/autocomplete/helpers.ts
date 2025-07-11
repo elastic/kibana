@@ -9,48 +9,48 @@
 import { i18n } from '@kbn/i18n';
 import { ESQLVariableType, ESQLControlVariable } from '@kbn/esql-types';
 import { uniqBy } from 'lodash';
-import type { ESQLSingleAstItem, ESQLFunction, ESQLAstItem, ESQLLiteral } from '../../types';
+import type { ESQLSingleAstItem, ESQLFunction, ESQLAstItem, ESQLLiteral } from '../../../types';
 import type {
   ISuggestionItem,
   GetColumnsByTypeFn,
   ESQLUserDefinedColumn,
   ICommandContext,
-} from '../../commands_registry/types';
-import { Location } from '../../commands_registry/types';
+} from '../../../commands_registry/types';
+import { Location } from '../../../commands_registry/types';
 import {
   getDateLiterals,
   getCompatibleLiterals,
   buildConstantsDefinitions,
   isLiteralDateItem,
   compareTypesWithLiterals,
-} from './literals';
-import { SINGLE_TICK_REGEX, DOUBLE_BACKTICK, EDITOR_MARKER } from '../../parser/constants';
+} from '../literals';
+import { SINGLE_TICK_REGEX, DOUBLE_BACKTICK, EDITOR_MARKER } from '../../../parser/constants';
 import {
   type SupportedDataType,
   isParameterType,
   FunctionDefinition,
   FunctionReturnType,
   FunctionDefinitionTypes,
-} from '../types';
-import { getColumnForASTNode, getOverlapRange } from './shared';
-import { getExpressionType } from './expressions';
-import { getColumnByName, isParamExpressionType } from './shared';
-import { getFunctionDefinition, getFunctionSuggestions } from './functions';
-import { logicalOperators } from '../all_operators';
+} from '../../types';
+import { getColumnForASTNode, getOverlapRange } from '../shared';
+import { getExpressionType } from '../expressions';
+import { getColumnByName, isParamExpressionType } from '../shared';
+import { getFunctionDefinition, getFunctionSuggestions } from '../functions';
+import { logicalOperators } from '../../all_operators';
 import {
   getOperatorSuggestion,
   getOperatorSuggestions,
   getOperatorsSuggestionsAfterNot,
   getSuggestionsToRightOfOperatorExpression,
-} from './operators';
+} from '../operators';
 import {
   isColumn,
   isFunctionExpression,
   isIdentifier,
   isLiteral,
   isTimeInterval,
-} from '../../ast/is';
-import { Walker } from '../../walker';
+} from '../../../ast/is';
+import { Walker } from '../../../walker';
 
 export const shouldBeQuotedText = (
   text: string,

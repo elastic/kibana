@@ -12,7 +12,7 @@ import {
   commaCompleteItem,
   getNewUserDefinedColumnSuggestion,
 } from '../../complete_items';
-import { findFinalWord, findPreviousWord } from '../../../definitions/utils/autocomplete';
+import { findFinalWord, findPreviousWord } from '../../../definitions/utils/autocomplete/helpers';
 import { unescapeColumnName } from '../../../definitions/utils/shared';
 import {
   type ISuggestionItem,

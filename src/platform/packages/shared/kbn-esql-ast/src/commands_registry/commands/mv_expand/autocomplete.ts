@@ -9,7 +9,7 @@
 import type { ESQLCommand } from '../../../types';
 import { type ISuggestionItem, type ICommandContext, ICommandCallbacks } from '../../types';
 import { pipeCompleteItem } from '../../complete_items';
-import { findFinalWord } from '../../../definitions/utils/autocomplete';
+import { findFinalWord } from '../../../definitions/utils/autocomplete/helpers';
 
 export async function autocomplete(
   query: string,
