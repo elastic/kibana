@@ -48,14 +48,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const retryTimeout = config.get('timeouts.try');
   const es = getService('es');
 
-  describe('Embeddable alerts panel', () => {
+  describe.only('Embeddable alerts panel', () => {
     before(async () => {
       await sampleData.testResources.installAllKibanaSampleData();
 
       const dataViews = await getDataViews();
       const sampleDataLogsDataView = dataViews.find(
         (dataView) => dataView.title === 'kibana_sample_data_logs'
-      );
+      )!;
 
       const [stackRule, observabilityRule, securityRule] = await Promise.all([
         createEsQueryRule(sampleDataLogsDataView.id, 'stack'),
@@ -219,7 +219,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await find.clickByCssSelector(
         '[data-test-subj=customizePanel] [data-test-subj=superDatePickerToggleQuickMenuButton]'
       );
-      await testSubjects.click('superDatePickerCommonlyUsed_Last_24 hours');
+      await testSubjects.click('superDatePickerCommonlyUsed_sample_data range');
       await testSubjects.click('saveCustomizePanelButton');
       await retry.try(async () =>
         expect((await testSubjects.findAll('alertsTableEmptyState')).length).to.equal(1)
@@ -329,8 +329,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
   };
 
-  const getDataViews = async () => {
-    const response = await supertest.get('/api/data_views');
+  const getDataViews = async (): Promise<Array<{ id: string; title: string }>> => {
+    const response = await supertest.get('/api/data_views').expect(200);
 
     return response.body.data_view;
   };

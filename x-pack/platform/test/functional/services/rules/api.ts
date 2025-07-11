@@ -20,6 +20,7 @@ export function RulesAPIServiceProvider({ getService }: FtrProviderContext) {
       ruleTypeId,
       schedule,
       actions = [],
+      tags = [],
     }: {
       consumer: string;
       name: string;
@@ -42,6 +43,7 @@ export function RulesAPIServiceProvider({ getService }: FtrProviderContext) {
           rule_type_id: ruleTypeId,
           schedule,
           actions,
+          tags,
         })
         .expect(200);
       return createdRule;
