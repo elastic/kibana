@@ -12,7 +12,7 @@ import React from 'react';
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import { render } from '@testing-library/react';
 import { getOptionsListContextMock } from '../../mocks/api_mocks';
-import { OptionsListControlContext } from '../options_list_context_provider';
+import { OptionsListControlContextProvider } from '../options_list_context_provider';
 import { OptionsListComponentApi } from '../types';
 import { OptionsListControl } from './options_list_control';
 import { OptionsListDisplaySettings } from '../../../../../common/options_list';
@@ -26,14 +26,9 @@ describe('Options list control', () => {
     displaySettings: OptionsListDisplaySettings;
   }) => {
     return render(
-      <OptionsListControlContext.Provider
-        value={{
-          componentApi,
-          displaySettings,
-        }}
-      >
+      <OptionsListControlContextProvider componentApi={componentApi} {...displaySettings}>
         <OptionsListControl controlPanelClassName="controlPanel" />
-      </OptionsListControlContext.Provider>
+      </OptionsListControlContextProvider>
     );
   };
 
@@ -41,7 +36,7 @@ describe('Options list control', () => {
     const contextMock = getOptionsListContextMock();
     contextMock.componentApi.uuid = 'testExists';
     contextMock.componentApi.setExclude(false);
-    contextMock.componentApi.setExistsSelected(true);
+    contextMock.testOnlyMethods.setExistsSelected(true);
     const control = mountComponent(contextMock);
     const existsOption = control.getByTestId('optionsList-control-testExists');
     expect(existsOption).toHaveTextContent('Exists');
@@ -51,7 +46,7 @@ describe('Options list control', () => {
     const contextMock = getOptionsListContextMock();
     contextMock.componentApi.uuid = 'testDoesNotExist';
     contextMock.componentApi.setExclude(true);
-    contextMock.componentApi.setExistsSelected(true);
+    contextMock.testOnlyMethods.setExistsSelected(true);
     const control = mountComponent(contextMock);
     const existsOption = control.getByTestId('optionsList-control-testDoesNotExist');
     expect(existsOption).toHaveTextContent('DOES NOT Exist');
@@ -61,12 +56,12 @@ describe('Options list control', () => {
     test('keyword field', async () => {
       const contextMock = getOptionsListContextMock();
       contextMock.componentApi.uuid = 'testDelimiter';
-      contextMock.componentApi.setAvailableOptions([
+      contextMock.testOnlyMethods.setAvailableOptions([
         { value: 'woof', docCount: 5 },
         { value: 'bark', docCount: 10 },
         { value: 'meow', docCount: 12 },
       ]);
-      contextMock.componentApi.setSelectedOptions(['woof', 'bark']);
+      contextMock.testOnlyMethods.setSelectedOptions(['woof', 'bark']);
       contextMock.testOnlyMethods.setField({
         name: 'Test keyword field',
         type: 'keyword',
@@ -80,12 +75,12 @@ describe('Options list control', () => {
   test('number field', async () => {
     const contextMock = getOptionsListContextMock();
     contextMock.componentApi.uuid = 'testDelimiter';
-    contextMock.componentApi.setAvailableOptions([
+    contextMock.testOnlyMethods.setAvailableOptions([
       { value: 1, docCount: 5 },
       { value: 2, docCount: 10 },
       { value: 3, docCount: 12 },
     ]);
-    contextMock.componentApi.setSelectedOptions([1, 2]);
+    contextMock.testOnlyMethods.setSelectedOptions([1, 2]);
     contextMock.testOnlyMethods.setField({
       name: 'Test keyword field',
       type: 'number',
@@ -98,13 +93,13 @@ describe('Options list control', () => {
   test('should display invalid state', async () => {
     const contextMock = getOptionsListContextMock();
     contextMock.componentApi.uuid = 'testInvalid';
-    contextMock.componentApi.setAvailableOptions([
+    contextMock.testOnlyMethods.setAvailableOptions([
       { value: 'woof', docCount: 5 },
       { value: 'bark', docCount: 10 },
       { value: 'meow', docCount: 12 },
     ]);
-    contextMock.componentApi.setSelectedOptions(['woof', 'bark']);
-    contextMock.componentApi.setInvalidSelections(new Set(['woof']));
+    contextMock.testOnlyMethods.setSelectedOptions(['woof', 'bark']);
+    contextMock.testOnlyMethods.setInvalidSelections(new Set(['woof']));
     contextMock.testOnlyMethods.setField({
       name: 'Test keyword field',
       type: 'number',

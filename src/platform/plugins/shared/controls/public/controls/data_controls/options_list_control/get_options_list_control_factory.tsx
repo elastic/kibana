@@ -44,7 +44,7 @@ import {
   OPTIONS_LIST_DEFAULT_SORT,
 } from './constants';
 import { fetchAndValidate$ } from './fetch_and_validate';
-import { OptionsListControlContext } from './options_list_context_provider';
+import { OptionsListControlContextProvider } from './options_list_context_provider';
 import { initializeSelectionsManager, selectionComparators } from './selections_manager';
 import { OptionsListStrings } from './options_list_strings';
 import type { OptionsListControlApi, OptionsListComponentApi } from './types';
@@ -466,21 +466,18 @@ export const getOptionsListControlFactory = (): DataControlFactory<
             };
           }, []);
 
+          const displaySettings = {
+            placeholder,
+            hideActionBar,
+            hideExclude,
+            hideExists,
+            hideSort,
+          };
+
           return (
-            <OptionsListControlContext.Provider
-              value={{
-                componentApi,
-                displaySettings: {
-                  placeholder,
-                  hideActionBar,
-                  hideExclude,
-                  hideExists,
-                  hideSort,
-                },
-              }}
-            >
+            <OptionsListControlContextProvider componentApi={componentApi} {...displaySettings}>
               <OptionsListControl controlPanelClassName={controlPanelClassName} />
-            </OptionsListControlContext.Provider>
+            </OptionsListControlContextProvider>
           );
         },
       };

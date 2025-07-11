@@ -14,7 +14,7 @@ import { render, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { getOptionsListContextMock } from '../../mocks/api_mocks';
-import { OptionsListControlContext } from '../options_list_context_provider';
+import { OptionsListControlContextProvider } from '../options_list_context_provider';
 import { OptionsListComponentApi } from '../types';
 import { OptionsListPopoverSortingButton } from './options_list_popover_sorting_button';
 import { OptionsListDisplaySettings } from '../../../../../common/options_list';
@@ -28,14 +28,9 @@ describe('Options list sorting button', () => {
     displaySettings: OptionsListDisplaySettings;
   }) => {
     const component = render(
-      <OptionsListControlContext.Provider
-        value={{
-          componentApi,
-          displaySettings,
-        }}
-      >
+      <OptionsListControlContextProvider componentApi={componentApi} {...displaySettings}>
         <OptionsListPopoverSortingButton showOnlySelected={false} />
-      </OptionsListControlContext.Provider>
+      </OptionsListControlContextProvider>
     );
 
     // open the popover for testing by clicking on the button

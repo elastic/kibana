@@ -16,7 +16,7 @@ import userEvent from '@testing-library/user-event';
 
 import type { OptionsListDisplaySettings } from '../../../../../common/options_list';
 import { getOptionsListContextMock } from '../../mocks/api_mocks';
-import { OptionsListControlContext } from '../options_list_context_provider';
+import { OptionsListControlContextProvider } from '../options_list_context_provider';
 import type { OptionsListComponentApi } from '../types';
 import { OptionsListPopover } from './options_list_popover';
 import { EuiThemeProvider } from '@elastic/eui';
@@ -36,14 +36,9 @@ describe('Options list popover', () => {
     displaySettings: OptionsListDisplaySettings;
   }) => {
     return render(
-      <OptionsListControlContext.Provider
-        value={{
-          componentApi,
-          displaySettings,
-        }}
-      >
+      <OptionsListControlContextProvider componentApi={componentApi} {...displaySettings}>
         <OptionsListPopover />
-      </OptionsListControlContext.Provider>
+      </OptionsListControlContextProvider>
     );
   };
 
@@ -54,7 +49,7 @@ describe('Options list popover', () => {
 
   test('no available options', async () => {
     const contextMock = getOptionsListContextMock();
-    contextMock.componentApi.setAvailableOptions([]);
+    contextMock.testOnlyMethods.setAvailableOptions([]);
     const popover = mountComponent(contextMock);
 
     const availableOptionsDiv = popover.getByTestId('optionsList-control-available-options');
@@ -66,7 +61,7 @@ describe('Options list popover', () => {
 
   test('clicking options calls `makeSelection`', async () => {
     const contextMock = getOptionsListContextMock();
-    contextMock.componentApi.setAvailableOptions([
+    contextMock.testOnlyMethods.setAvailableOptions([
       { value: 'woof', docCount: 5 },
       { value: 'bark', docCount: 10 },
       { value: 'meow', docCount: 12 },
@@ -82,7 +77,7 @@ describe('Options list popover', () => {
     expect(contextMock.componentApi.makeSelection).toBeCalledWith('woof', false);
 
     // simulate `makeSelection`
-    contextMock.componentApi.setSelectedOptions(['woof']);
+    contextMock.testOnlyMethods.setSelectedOptions(['woof']);
     await waitOneTick();
 
     await clickShowOnlySelections(popover);
@@ -95,13 +90,13 @@ describe('Options list popover', () => {
     test('show only selected options', async () => {
       const contextMock = getOptionsListContextMock();
       const selections = ['woof', 'bark'];
-      contextMock.componentApi.setAvailableOptions([
+      contextMock.testOnlyMethods.setAvailableOptions([
         { value: 'woof', docCount: 5 },
         { value: 'bark', docCount: 10 },
         { value: 'meow', docCount: 12 },
       ]);
       const popover = mountComponent(contextMock);
-      contextMock.componentApi.setSelectedOptions(selections);
+      contextMock.testOnlyMethods.setSelectedOptions(selections);
       await waitOneTick();
 
       await clickShowOnlySelections(popover);
@@ -115,12 +110,12 @@ describe('Options list popover', () => {
 
     test('display error message when the show only selected toggle is true but there are no selections', async () => {
       const contextMock = getOptionsListContextMock();
-      contextMock.componentApi.setAvailableOptions([
+      contextMock.testOnlyMethods.setAvailableOptions([
         { value: 'woof', docCount: 5 },
         { value: 'bark', docCount: 10 },
         { value: 'meow', docCount: 12 },
       ]);
-      contextMock.componentApi.setSelectedOptions([]);
+      contextMock.testOnlyMethods.setSelectedOptions([]);
       const popover = mountComponent(contextMock);
 
       await clickShowOnlySelections(popover);
@@ -133,12 +128,12 @@ describe('Options list popover', () => {
 
     test('disable search and sort when show only selected toggle is true', async () => {
       const contextMock = getOptionsListContextMock();
-      contextMock.componentApi.setAvailableOptions([
+      contextMock.testOnlyMethods.setAvailableOptions([
         { value: 'woof', docCount: 5 },
         { value: 'bark', docCount: 10 },
         { value: 'meow', docCount: 12 },
       ]);
-      contextMock.componentApi.setSelectedOptions(['woof', 'bark']);
+      contextMock.testOnlyMethods.setSelectedOptions(['woof', 'bark']);
       const popover = mountComponent(contextMock);
 
       let searchBox = popover.getByTestId('optionsList-control-search-input');
@@ -157,13 +152,13 @@ describe('Options list popover', () => {
   describe('invalid selections', () => {
     test('test single invalid selection', async () => {
       const contextMock = getOptionsListContextMock();
-      contextMock.componentApi.setAvailableOptions([
+      contextMock.testOnlyMethods.setAvailableOptions([
         { value: 'woof', docCount: 5 },
         { value: 'bark', docCount: 75 },
       ]);
       const popover = mountComponent(contextMock);
-      contextMock.componentApi.setSelectedOptions(['woof', 'bark']);
-      contextMock.componentApi.setInvalidSelections(new Set(['woof']));
+      contextMock.testOnlyMethods.setSelectedOptions(['woof', 'bark']);
+      contextMock.testOnlyMethods.setInvalidSelections(new Set(['woof']));
       await waitOneTick();
 
       const validSelection = popover.getByTestId('optionsList-control-selection-bark');
@@ -180,12 +175,12 @@ describe('Options list popover', () => {
 
     test('test title when multiple invalid selections', async () => {
       const contextMock = getOptionsListContextMock();
-      contextMock.componentApi.setAvailableOptions([
+      contextMock.testOnlyMethods.setAvailableOptions([
         { value: 'woof', docCount: 5 },
         { value: 'bark', docCount: 75 },
       ]);
-      contextMock.componentApi.setSelectedOptions(['bark', 'woof', 'meow']);
-      contextMock.componentApi.setInvalidSelections(new Set(['woof', 'meow']));
+      contextMock.testOnlyMethods.setSelectedOptions(['bark', 'woof', 'meow']);
+      contextMock.testOnlyMethods.setInvalidSelections(new Set(['woof', 'meow']));
       const popover = mountComponent(contextMock);
 
       const title = popover.getByTestId('optionList__invalidSelectionLabel');
@@ -219,10 +214,10 @@ describe('Options list popover', () => {
   describe('"Exists" option', () => {
     test('if existsSelected = false and no suggestions, then "Exists" does not show up', async () => {
       const contextMock = getOptionsListContextMock();
-      contextMock.componentApi.setAvailableOptions([]);
+      contextMock.testOnlyMethods.setAvailableOptions([]);
       const popover = mountComponent(contextMock);
 
-      contextMock.componentApi.setExistsSelected(false);
+      contextMock.testOnlyMethods.setExistsSelected(false);
       await waitOneTick();
 
       const existsOption = popover.queryByTestId('optionsList-control-selection-exists');
@@ -231,13 +226,13 @@ describe('Options list popover', () => {
 
     test('if existsSelected = true, "Exists" is the only option when "Show only selected options" is toggled', async () => {
       const contextMock = getOptionsListContextMock();
-      contextMock.componentApi.setAvailableOptions([
+      contextMock.testOnlyMethods.setAvailableOptions([
         { value: 'woof', docCount: 5 },
         { value: 'bark', docCount: 75 },
       ]);
       const popover = mountComponent(contextMock);
 
-      contextMock.componentApi.setExistsSelected(true);
+      contextMock.testOnlyMethods.setExistsSelected(true);
       await waitOneTick();
       await clickShowOnlySelections(popover);
 
@@ -262,7 +257,7 @@ describe('Options list popover', () => {
     });
 
     test('uses field formatter on suggestions', async () => {
-      contextMock.componentApi.setAvailableOptions([
+      contextMock.testOnlyMethods.setAvailableOptions([
         { value: 1000, docCount: 1 },
         { value: 123456789, docCount: 4 },
       ]);
@@ -285,7 +280,7 @@ describe('Options list popover', () => {
     });
 
     test('converts string to number for date field', async () => {
-      contextMock.componentApi.setAvailableOptions([
+      contextMock.testOnlyMethods.setAvailableOptions([
         { value: 1721283696000, docCount: 1 },
         { value: 1721295533000, docCount: 2 },
       ]);

@@ -41,19 +41,22 @@ interface PublishesOptions {
   totalCardinality$: PublishingSubject<number>;
 }
 
-type OptionsListState = Pick<DefaultDataControlState, 'fieldName'> &
+export type OptionsListState = Pick<DefaultDataControlState, 'fieldName'> &
   SelectionsState &
   EditorState &
   TemporaryState & { sort: OptionsListSortingType | undefined };
 
 type PublishesOptionsListState = SubjectsOf<OptionsListState>;
-type OptionsListStateSetters = Partial<SettersOf<OptionsListState>> &
-  SettersOf<Pick<OptionsListState, 'sort' | 'searchString' | 'requestSize' | 'exclude'>>;
+type SettableOptionsListStates = Pick<
+  OptionsListState,
+  'sort' | 'searchString' | 'requestSize' | 'exclude'
+>;
+type OptionsListStateSetters = SettersOf<SettableOptionsListStates>;
 
 export type OptionsListComponentApi = PublishesField &
   PublishesOptions &
-  PublishesOptionsListState &
   Pick<PublishesTitle, 'title$'> &
+  PublishesOptionsListState &
   OptionsListStateSetters & {
     deselectOption: (key: string | undefined) => void;
     makeSelection: (key: string | undefined, showOnlySelected: boolean) => void;
@@ -65,20 +68,26 @@ export type OptionsListComponentApi = PublishesField &
     uuid: string;
   };
 
-type HideExcludeUnusedState = Pick<OptionsListState, 'exclude'>;
-type HideExistsUnusedState = Pick<OptionsListState, 'existsSelected'>;
-type HideSortUnusedState = Pick<OptionsListState, 'sort'>;
-type DisableLoadSuggestionsUnusedState = Pick<
-  OptionsListState,
-  'dataLoading' | 'requestSize' | 'runPastTimeout'
->;
-type DisableMultiSelectUnusedState = Pick<OptionsListState, 'singleSelect'>;
-type DisableInvalidSelectionsUnusedState = Pick<OptionsListState, 'invalidSelections'>;
+type HideExcludeUnusedStateKeys = 'exclude';
+type HideExistsUnusedStateKeys = 'existsSelected';
+type HideSortUnusedStateKeys = 'sort';
+type DisableLoadSuggestionsUnusedStateKeys = 'dataLoading' | 'requestSize' | 'runPastTimeout';
+type DisableMultiSelectUnusedStateKeys = 'singleSelect';
+type DisableInvalidSelectionsUnusedStateKeys = 'invalidSelections';
 
-export type OptionsListESQLUnusedState = HideExcludeUnusedState &
-  HideExistsUnusedState &
-  HideSortUnusedState &
-  DisableLoadSuggestionsUnusedState &
-  DisableMultiSelectUnusedState &
-  DisableInvalidSelectionsUnusedState &
-  Pick<OptionsListState, 'fieldName'>;
+type OptionsListOptionalState = Pick<
+  OptionsListState,
+  | HideExcludeUnusedStateKeys
+  | HideExistsUnusedStateKeys
+  | HideSortUnusedStateKeys
+  | DisableLoadSuggestionsUnusedStateKeys
+  | DisableMultiSelectUnusedStateKeys
+  | DisableInvalidSelectionsUnusedStateKeys
+>;
+
+export type PartialOptionsListComponentApi =
+  | Partial<OptionsListComponentApi>
+  | Exclude<
+      OptionsListComponentApi,
+      SettersOf<OptionsListOptionalState> | SubjectsOf<OptionsListOptionalState>
+    >;

@@ -42,14 +42,24 @@ export const getOptionsListContextMock = () => {
       },
       allowExpensiveQueries$: new BehaviorSubject<boolean>(true),
       fieldFormatter: new BehaviorSubject((value: string | number) => String(value)),
-      makeSelection: jest.fn(),
+      makeSelection: (key: string) => {
+        selectionsManager.api.setExistsSelected(key === 'exists-option');
+      },
       loadMoreSubject: new Subject<void>(),
     } as unknown as Required<OptionsListComponentApi>,
     displaySettings: {} as OptionsListDisplaySettings,
     testOnlyMethods: {
+      // These setters, while they may be defined by the state manager APIs, are only intended to be called from the parent
+      // control, not from within the React component. Define them here to simulate updates from the parent within the tests.
       setField: (next: DataViewField | undefined) => {
         field$.next(next);
       },
+      setExistsSelected: selectionsManager.api.setExistsSelected,
+      setAvailableOptions: temporaryStateManager.api.setAvailableOptions,
+      setSelectedOptions: selectionsManager.api.setSelectedOptions,
+      setTotalCardinality: temporaryStateManager.api.setTotalCardinality,
+      setSingleSelect: editorStateManager.api.setSingleSelect,
+      setInvalidSelections: temporaryStateManager.api.setInvalidSelections,
     },
   };
 };
