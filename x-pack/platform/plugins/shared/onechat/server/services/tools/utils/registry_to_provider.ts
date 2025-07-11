@@ -7,7 +7,7 @@
 
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ToolProvider, Runner } from '@kbn/onechat-server';
-import type { ToolRegistry } from '../tool_client';
+import type { ToolRegistry } from '../tool_registry';
 import { toExecutableTool } from './tool_conversion';
 
 export const registryToProvider = ({

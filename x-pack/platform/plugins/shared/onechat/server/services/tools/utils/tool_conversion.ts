@@ -10,7 +10,7 @@ import type { ZodObject } from '@kbn/zod';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ToolDescriptorWithSchema } from '@kbn/onechat-common';
 import type { Runner, ExecutableTool } from '@kbn/onechat-server';
-import { ToolDefinition } from '../tool_provider';
+import { InternalToolDefinition } from '../tool_provider';
 
 export const toExecutableTool = <
   TConfig extends object = {},
@@ -21,7 +21,7 @@ export const toExecutableTool = <
   runner,
   request,
 }: {
-  tool: ToolDefinition<TConfig, RunInput, RunOutput>;
+  tool: InternalToolDefinition<TConfig, RunInput, RunOutput>;
   runner: Runner;
   request: KibanaRequest;
 }): ExecutableTool<TConfig, RunInput, RunOutput> => {
@@ -40,7 +40,7 @@ export const toExecutableTool = <
  *
  * Can be used to convert/clean tool registration for public-facing APIs.
  */
-export const toolToDescriptor = (tool: ToolDefinition): ToolDescriptorWithSchema => {
+export const toolToDescriptor = (tool: InternalToolDefinition): ToolDescriptorWithSchema => {
   const { id, type, description, tags, configuration, schema } = tool;
   const jsonSchema = zodToJsonSchema(schema) as JsonSchema7ObjectType;
   return { id, type, description, tags, configuration, schema: jsonSchema };

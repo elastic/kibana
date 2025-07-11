@@ -11,6 +11,7 @@ export { builtinToolIds, builtinTags, builtInToolIdPrefix } from './constants';
 export {
   type ByIdsToolSelection,
   type ToolSelection,
+  type ToolSelectionRelevantFields,
   isByIdsToolSelection,
   toolMatchSelection,
   filterToolsBySelection,

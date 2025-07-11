@@ -10,6 +10,7 @@ import type { ScopedRunnerRunToolsParams, OnechatToolEvent } from '@kbn/onechat-
 import {
   createScopedRunnerDepsMock,
   createMockedTool,
+  createToolRegistryMock,
   CreateScopedRunnerDepsMock,
   MockedTool,
 } from '../../test_utils';

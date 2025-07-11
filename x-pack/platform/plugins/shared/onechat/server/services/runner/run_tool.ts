@@ -16,7 +16,7 @@ import { registryToProvider } from '../tools/utils';
 import { forkContextForToolRun } from './utils/run_context';
 import { createToolEventEmitter } from './utils/events';
 import type { RunnerManager } from './runner';
-import type { ToolDefinition } from '../tools/tool_provider';
+import type { InternalToolDefinition } from '../tools/tool_provider';
 
 export const runTool = async <TParams = Record<string, unknown>, TResult = unknown>({
   toolExecutionParams,
@@ -32,7 +32,11 @@ export const runTool = async <TParams = Record<string, unknown>, TResult = unkno
   const { toolsService, request } = manager.deps;
 
   const toolRegistry = await toolsService.getRegistry({ request });
-  const tool = (await toolRegistry.get(toolId)) as ToolDefinition<any, ZodObject<any>, TResult>;
+  const tool = (await toolRegistry.get(toolId)) as InternalToolDefinition<
+    any,
+    ZodObject<any>,
+    TResult
+  >;
 
   const validation = tool.schema.safeParse(toolParams);
   if (validation.error) {

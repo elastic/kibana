@@ -48,7 +48,7 @@ export const ToolsSelection: React.FC<ToolsSelectionProps> = ({
   const toolsByProvider = useMemo(() => {
     const grouped: Record<string, ToolDescriptor[]> = {};
     tools.forEach((tool) => {
-      const providerId = tool.meta.providerId;
+      const providerId = tool.type;
       if (!grouped[providerId]) {
         grouped[providerId] = [];
       }

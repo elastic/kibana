@@ -13,7 +13,7 @@ import {
 } from '@kbn/onechat-common';
 import type { Runner, RunToolReturn, ScopedRunnerRunToolsParams } from '@kbn/onechat-server';
 import type {
-  ToolDefinition,
+  InternalToolDefinition,
   ToolCreateParams,
   ToolUpdateParams,
   ToolTypeDefinition,
@@ -35,10 +35,10 @@ const isToolTypeClient = (client: ReadonlyToolTypeClient): client is ToolTypeCli
 
 export interface ToolRegistry {
   has(toolId: string): Promise<boolean>;
-  get(toolId: string): Promise<ToolDefinition>;
-  list(opts?: ToolListParams): Promise<ToolDefinition[]>;
-  create(tool: ToolCreateParams): Promise<ToolDefinition>;
-  update(toolId: string, update: ToolUpdateParams): Promise<ToolDefinition>;
+  get(toolId: string): Promise<InternalToolDefinition>;
+  list(opts?: ToolListParams): Promise<InternalToolDefinition[]>;
+  create(tool: ToolCreateParams): Promise<InternalToolDefinition>;
+  update(toolId: string, update: ToolUpdateParams): Promise<InternalToolDefinition>;
   delete(toolId: string): Promise<boolean>;
   execute<TParams extends object = Record<string, unknown>, TResult = unknown>(
     params: ScopedRunnerRunToolsParams<TParams>
@@ -96,7 +96,7 @@ class ToolClientImpl implements ToolRegistry {
   }
 
   async list(opts?: ToolListParams | undefined) {
-    const allTools: ToolDefinition[] = [];
+    const allTools: InternalToolDefinition[] = [];
     for (const type of this.typesDefinitions) {
       const client = await type.getClient({ request: this.request });
       const toolsFromType = await client.list();

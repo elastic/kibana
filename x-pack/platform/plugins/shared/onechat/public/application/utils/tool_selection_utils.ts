@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ToolSelection, ToolDescriptor } from '@kbn/onechat-common';
+import type { ToolSelection, ToolType, ToolSelectionRelevantFields } from '@kbn/onechat-common';
 import {
   allToolsSelectionWildcard,
   toolMatchSelection,
@@ -16,7 +16,10 @@ import {
  * Check if a specific tool is selected based on the current tool selections.
  * This uses existing onechat-common utilities for consistent logic.
  */
-export const isToolSelected = (tool: ToolDescriptor, selectedTools: ToolSelection[]): boolean => {
+export const isToolSelected = (
+  tool: ToolSelectionRelevantFields,
+  selectedTools: ToolSelection[]
+): boolean => {
   return selectedTools.some((selection) => toolMatchSelection(tool, selection));
 };
 
@@ -26,11 +29,11 @@ export const isToolSelected = (tool: ToolDescriptor, selectedTools: ToolSelectio
  */
 export const isAllToolsSelectedForProvider = (
   providerId: string,
-  providerTools: ToolDescriptor[],
+  providerTools: ToolSelectionRelevantFields[],
   selectedTools: ToolSelection[]
 ): boolean => {
   // Filter provider tools to only those from the specified provider
-  const filteredProviderTools = providerTools.filter((tool) => tool.meta.providerId === providerId);
+  const filteredProviderTools = providerTools.filter((tool) => tool.type === providerId);
 
   // Use existing filterToolsBySelection to get all selected tools from this provider
   const selectedProviderTools = filterToolsBySelection(filteredProviderTools, selectedTools);
@@ -49,7 +52,7 @@ export const isAllToolsSelectedForProvider = (
 export const filterOutProviderSelections = (
   selectedTools: ToolSelection[],
   providerId: string,
-  providerTools: ToolDescriptor[]
+  providerTools: ToolSelectionRelevantFields[]
 ): ToolSelection[] => {
   return selectedTools.filter((selection) => {
     // Keep selections that don't affect this provider
@@ -79,13 +82,13 @@ export const filterOutProviderSelections = (
  */
 export const toggleProviderSelection = (
   providerId: string,
-  providerTools: ToolDescriptor[],
+  providerTools: ToolSelectionRelevantFields[],
   selectedTools: ToolSelection[]
 ): ToolSelection[] => {
   const allSelected = isAllToolsSelectedForProvider(providerId, providerTools, selectedTools);
 
   // Filter provider tools to only those from the specified provider
-  const filteredProviderTools = providerTools.filter((tool) => tool.meta.providerId === providerId);
+  const filteredProviderTools = providerTools.filter((tool) => tool.type === providerId);
 
   if (allSelected) {
     // Remove all tools from this provider using the helper function
@@ -114,14 +117,15 @@ export const toggleProviderSelection = (
 export const toggleToolSelection = (
   toolId: string,
   providerId: string,
-  providerTools: ToolDescriptor[],
+  providerTools: ToolSelectionRelevantFields[],
   selectedTools: ToolSelection[]
 ): ToolSelection[] => {
   // Create tool descriptor for the current tool
-  const currentTool: ToolDescriptor = {
+  const currentTool: ToolSelectionRelevantFields = {
     id: toolId,
-    meta: { providerId },
-  } as ToolDescriptor;
+    type: providerId as ToolType,
+    tags: [],
+  };
 
   const isCurrentlySelected = isToolSelected(currentTool, selectedTools);
 
@@ -144,9 +148,7 @@ export const toggleToolSelection = (
       );
 
       // Add individual selections for all other tools from this provider
-      const filteredProviderTools = providerTools.filter(
-        (tool) => tool.meta.providerId === providerId
-      );
+      const filteredProviderTools = providerTools.filter((tool) => tool.type === providerId);
       const otherToolIds = filteredProviderTools
         .filter((tool) => tool.id !== toolId)
         .map((tool) => tool.id);

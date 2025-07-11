@@ -20,6 +20,7 @@ export {
   isByIdsToolSelection,
   toolMatchSelection,
   filterToolsBySelection,
+  type ToolSelectionRelevantFields,
   allToolsSelectionWildcard,
   allToolsSelection,
   type EsqlToolConfig,

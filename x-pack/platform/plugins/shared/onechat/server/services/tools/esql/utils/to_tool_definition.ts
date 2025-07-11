@@ -8,14 +8,14 @@
 import { EsqlToolConfig, ToolType } from '@kbn/onechat-common';
 import { z } from '@kbn/zod';
 import type { ToolPersistedDefinition } from '../../client';
-import { ToolDefinition } from '../../tool_provider';
+import { InternalToolDefinition } from '../../tool_provider';
 
 export function toToolDefinition<
   TSchema extends z.ZodObject<any> = z.ZodObject<any>,
   TResult = unknown
 >(
   esqlTool: ToolPersistedDefinition<EsqlToolConfig>
-): ToolDefinition<EsqlToolConfig, TSchema, TResult> {
+): InternalToolDefinition<EsqlToolConfig, TSchema, TResult> {
   const { id, description, tags, configuration } = esqlTool;
   return {
     id,

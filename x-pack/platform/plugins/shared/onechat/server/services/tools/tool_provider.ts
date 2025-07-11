@@ -11,7 +11,7 @@ import type { ToolDescriptor, ToolType } from '@kbn/onechat-common';
 import type { ToolHandlerFn } from '@kbn/onechat-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 
-export interface ToolDefinition<
+export interface InternalToolDefinition<
   TConfig extends object = {},
   TSchema extends ZodObject<any> = ZodObject<any>,
   TResult = unknown
@@ -71,14 +71,14 @@ export interface ToolTypeClient<TConfig extends object = {}>
   /**
    * Create a new tool
    */
-  create(params: ToolTypeCreateParams<TConfig>): MaybePromise<ToolDefinition<TConfig>>;
+  create(params: ToolTypeCreateParams<TConfig>): MaybePromise<InternalToolDefinition<TConfig>>;
   /**
    * Update an existing tool
    */
   update(
     toolId: string,
     update: ToolTypeUpdateParams<TConfig>
-  ): MaybePromise<ToolDefinition<TConfig>>;
+  ): MaybePromise<InternalToolDefinition<TConfig>>;
 
   /**
    * Delete a tool
@@ -96,9 +96,9 @@ export interface ReadonlyToolTypeClient<TConfig extends object = {}> {
    *
    * Should throw a toolNotFoundException is tool is not found.
    */
-  get(toolId: string): MaybePromise<ToolDefinition<TConfig>>;
+  get(toolId: string): MaybePromise<InternalToolDefinition<TConfig>>;
   /**
    * List all tools for this type.
    */
-  list(): MaybePromise<Array<ToolDefinition<TConfig>>>;
+  list(): MaybePromise<Array<InternalToolDefinition<TConfig>>>;
 }

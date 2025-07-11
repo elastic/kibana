@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ToolTypeCreateParams, ToolTypeUpdateParams } from '../tool_provider';
+import type { ToolCreateParams, ToolTypeUpdateParams } from '../tool_provider';
 import type { ToolProperties } from './storage';
 import type { ToolDocument, ToolPersistedDefinition } from './types';
 
@@ -30,7 +30,7 @@ export const createAttributes = ({
   createRequest,
   creationDate = new Date(),
 }: {
-  createRequest: ToolTypeCreateParams;
+  createRequest: ToolCreateParams;
   creationDate?: Date;
 }): ToolProperties => {
   return {

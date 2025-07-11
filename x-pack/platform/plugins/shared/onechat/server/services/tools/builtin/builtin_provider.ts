@@ -8,7 +8,7 @@
 import { KibanaRequest } from '@kbn/core-http-server';
 import { ToolType, createToolNotFoundError } from '@kbn/onechat-common';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
-import { ToolDefinition, ToolTypeDefinition, ReadonlyToolTypeClient } from '../tool_provider';
+import { InternalToolDefinition, ToolTypeDefinition, ReadonlyToolTypeClient } from '../tool_provider';
 import { BuiltinToolRegistry } from './builtin_registry';
 
 export const createBuiltInToolTypeDefinition = ({
@@ -47,7 +47,7 @@ export const createBuiltinToolClient = ({
   };
 };
 
-export const convertTool = (tool: BuiltinToolDefinition): ToolDefinition => {
+export const convertTool = (tool: BuiltinToolDefinition): InternalToolDefinition => {
   return {
     id: tool.id,
     type: ToolType.builtin,

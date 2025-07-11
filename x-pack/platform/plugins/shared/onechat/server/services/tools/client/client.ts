@@ -9,7 +9,7 @@ import { errors as esErrors } from '@elastic/elasticsearch';
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { createToolNotFoundError, createBadRequestError } from '@kbn/onechat-common';
-import { ToolTypeCreateParams, ToolTypeUpdateParams } from '../tool_provider';
+import { ToolCreateParams, ToolTypeUpdateParams } from '../tool_provider';
 import { ToolStorage, createStorage } from './storage';
 import { fromEs, createAttributes, updateDocument } from './converters';
 import { ToolDocument, ToolPersistedDefinition } from './types';
@@ -20,7 +20,7 @@ import { ToolDocument, ToolPersistedDefinition } from './types';
 export interface ToolClient {
   get(toolId: string): Promise<ToolPersistedDefinition>;
   list(): Promise<ToolPersistedDefinition[]>;
-  create(esqlTool: ToolTypeCreateParams): Promise<ToolPersistedDefinition>;
+  create(esqlTool: ToolCreateParams): Promise<ToolPersistedDefinition>;
   update(toolId: string, updates: ToolTypeUpdateParams): Promise<ToolPersistedDefinition>;
   delete(toolId: string): Promise<boolean>;
 }
@@ -70,7 +70,7 @@ class ToolClientImpl {
     return document.hits.hits.map((hit) => fromEs(hit as ToolDocument));
   }
 
-  async create(createRequest: ToolTypeCreateParams): Promise<ToolPersistedDefinition> {
+  async create(createRequest: ToolCreateParams): Promise<ToolPersistedDefinition> {
     let exists: boolean;
     try {
       await this.storage.getClient().get({ id: createRequest.id });

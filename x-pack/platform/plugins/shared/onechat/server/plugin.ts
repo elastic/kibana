@@ -88,7 +88,7 @@ export class OnechatPlugin
 
     return {
       tools: {
-        // TODO: populate
+        getRegistry: ({ request }) => tools.getRegistry({ request }),
         execute: runner.runTool.bind(runner),
       },
       agents: {

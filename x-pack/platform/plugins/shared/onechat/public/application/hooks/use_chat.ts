@@ -74,7 +74,6 @@ export const useChat = ({ conversationId, agentId, connectorId, onError }: UseCh
                 result: '',
                 tool_call_id: event.data.tool_call_id,
                 tool_id: event.data.tool_id,
-                tool_type: event.data.tool_type,
               }),
             });
           } else if (isToolResultEvent(event)) {

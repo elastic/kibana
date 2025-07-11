@@ -7,18 +7,18 @@
 
 import type { Logger } from '@kbn/logging';
 import type {
-  ElasticsearchServiceStart,
   ElasticsearchClient,
+  ElasticsearchServiceStart,
 } from '@kbn/core-elasticsearch-server';
 import {
-  isToolNotFoundError,
   createBadRequestError,
-  ToolType,
   EsqlToolConfig,
+  isToolNotFoundError,
+  ToolType,
 } from '@kbn/onechat-common';
 import { ToolTypeClient, ToolTypeDefinition } from '../tool_provider';
-import { createClient } from '../client';
 import type { ToolPersistedDefinition } from '../client';
+import { createClient } from '../client';
 import { toToolDefinition } from './utils/to_tool_definition';
 import { configurationSchema, configurationUpdateSchema } from './schemas';
 
@@ -77,7 +77,10 @@ export const createEsqlToolClient = ({
       } catch (e) {
         throw createBadRequestError(`Invalid configuration for esql tool: ${e.message}`);
       }
-      const tool = await toolClient.create(createRequest);
+      const tool = await toolClient.create({
+        ...createRequest,
+        type: ToolType.esql,
+      });
       return toToolDefinition(tool as ToolPersistedDefinition<EsqlToolConfig>);
     },
 
