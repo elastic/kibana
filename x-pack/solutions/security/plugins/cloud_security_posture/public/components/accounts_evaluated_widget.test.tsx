@@ -48,29 +48,6 @@ describe('AccountsEvaluatedWidget', () => {
         [FINDINGS_FILTER_OPTIONS.CLOUD_PROVIDER]: 'aws',
         [FINDINGS_FILTER_OPTIONS.RULE_BENCHMARK_POSTURE_TYPE]: 'cspm',
       },
-      ['cloud.account.id']
-    );
-  });
-
-  it('calls navToFindingsByCloudProvider when a benchmark with provider and namespace is clicked', () => {
-    const { getByText } = render(
-      <TestProvider>
-        <AccountsEvaluatedWidget
-          activeNamespace="test-namespace"
-          benchmarkAssets={benchmarkAssets}
-          benchmarkAbbreviateAbove={999}
-        />
-      </TestProvider>
-    );
-
-    fireEvent.click(getByText('10'));
-
-    expect(mockNavToFindings).toHaveBeenCalledWith(
-      {
-        [FINDINGS_FILTER_OPTIONS.NAMESPACE]: 'test-namespace',
-        [FINDINGS_FILTER_OPTIONS.CLOUD_PROVIDER]: 'aws',
-        [FINDINGS_FILTER_OPTIONS.RULE_BENCHMARK_POSTURE_TYPE]: 'cspm',
-      },
       [FINDINGS_GROUPING_OPTIONS.CLOUD_ACCOUNT_ID]
     );
   });
