@@ -31,7 +31,7 @@ import { useFlyoutSystemApi } from './use_flyout_system';
 const loggerAction = action('flyout-system-log');
 
 const meta: Meta<typeof FlyoutSystemProvider> = {
-  title: 'Layout/EuiFlyout/Flyout System',
+  title: 'Flyouts/Flyout System',
   component: FlyoutSystemProvider,
 };
 
@@ -90,6 +90,7 @@ const ShoppingCartContent: React.FC<ShoppingCartContentProps> = ({
   const handleProceedToReview = () => {
     openFlyout({
       size: 'm',
+      title: 'Review order',
       content: <ReviewOrderContent itemQuantity={itemQuantity} />,
       flyoutProps: {
         type: 'push',
@@ -230,6 +231,7 @@ const ECommerceAppControls: React.FC = () => {
   const handleOpenShoppingCart = () => {
     openFlyout({
       size: 'm',
+      title: 'Shopping cart',
       content: <ShoppingCartContent itemQuantity={1} onQuantityChange={() => {}} />,
       flyoutProps: {
         type: 'push',
@@ -320,6 +322,7 @@ const DeepHistoryPage: React.FC<{ page: PageType }> = ({ page }) => {
     if (nextPage) {
       openFlyout({
         size: 'm',
+        title: `Page ${nextPage}`,
         content: <DeepHistoryPage page={nextPage as PageType} />,
         flyoutProps: {
           type: 'push',
@@ -374,6 +377,7 @@ const DeepHistoryAppControls: React.FC = () => {
   const handleOpenFlyout = () => {
     openFlyout({
       size: 'm',
+      title: 'Page 01',
       content: <DeepHistoryPage page="page01" />,
       flyoutProps: {
         type: 'push',
