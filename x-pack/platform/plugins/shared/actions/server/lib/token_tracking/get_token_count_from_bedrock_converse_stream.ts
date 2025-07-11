@@ -30,7 +30,10 @@ export const getTokensFromBedrockConverseStream = async function (
     try {
       await finished(responseStream);
     } catch (e) {
-      logger.error('An error occurred while calculating streaming response tokens');
+      logger.error(
+        'An error occurred while calculating streaming response tokens',
+        e.name ?? e.message ?? e.toString()
+      );
     }
     const usage = responseBuffer[responseBuffer.length - 1] as { metadata: { body: string } };
 
@@ -46,7 +49,10 @@ export const getTokensFromBedrockConverseStream = async function (
     }
     return null; // Return the final tokens once the generator finishes
   } catch (e) {
-    logger.error('Response from Bedrock converse API did not contain usage object');
+    logger.error(
+      'Response from Bedrock converse API did not contain usage object',
+      e.name ?? e.message ?? e.toString()
+    );
     return null;
   }
 };
