@@ -15,6 +15,8 @@ import React from 'react';
 import { BehaviorSubject, map, merge } from 'rxjs';
 import { isEmpty } from 'lodash';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
+import { KibanaSectionErrorBoundary } from '@kbn/shared-ux-error-boundary';
+import { i18n } from '@kbn/i18n';
 import { ApmEmbeddableContext } from '../embeddable_context';
 import type { EmbeddableDeps } from '../types';
 import { APM_TRACE_WATERFALL_EMBEDDABLE } from './constant';
@@ -200,9 +202,18 @@ export const getApmTraceWaterfallEmbeddableFactory = (deps: EmbeddableDeps) => {
           );
 
           return (
-            <ApmEmbeddableContext deps={deps} rangeFrom={rangeFrom} rangeTo={rangeTo}>
-              {content}
-            </ApmEmbeddableContext>
+            <KibanaSectionErrorBoundary
+              sectionName={i18n.translate(
+                'xpack.apm.embeddable.traceWaterfall.kibanaSectionErrorBoundary.sectionName',
+                {
+                  defaultMessage: 'Trace waterfall',
+                }
+              )}
+            >
+              <ApmEmbeddableContext deps={deps} rangeFrom={rangeFrom} rangeTo={rangeTo}>
+                {content}
+              </ApmEmbeddableContext>
+            </KibanaSectionErrorBoundary>
           );
         },
       };
