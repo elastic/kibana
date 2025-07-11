@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export * from './slos_overview.journey';
-export * from './annotation_list.journey';
+export { sloDataFixture } from './slo_data';
+export type { SloDataFixture } from './slo_data';

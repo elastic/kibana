@@ -80,6 +80,7 @@ function AnnotationTooltip({ annotation }: AnnotationTooltipProps) {
         type="column"
         columnWidths={[1, 3]} // Same as [25, 75]
         style={{ maxInlineSize: '400px' }}
+        descriptionProps={{ 'data-test-subj': 'annotation-tooltip-description' }}
       />
     </EuiPanel>
   );

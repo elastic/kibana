@@ -38,19 +38,19 @@ export async function installKibanaAssets(
         })
       : undefined;
 
+    // Ensure kibanaUrl ends with a single slash before appending the API path
+    const baseUrl = kibanaUrl.endsWith('/') ? kibanaUrl.slice(0, -1) : kibanaUrl;
+    const importUrl = `${baseUrl}/api/saved_objects/_import?overwrite=true`;
+
     // Send the saved objects to Kibana using the _import API
-    const response = await axios.post(
-      `${kibanaUrl}/api/saved_objects/_import?overwrite=true`,
-      formData,
-      {
-        headers: {
-          ...formData.getHeaders(),
-          'kbn-xsrf': 'true',
-        },
-        auth: userPassObject,
-        httpsAgent,
-      }
-    );
+    const response = await axios.post(importUrl, formData, {
+      headers: {
+        ...formData.getHeaders(),
+        'kbn-xsrf': 'true',
+      },
+      auth: userPassObject,
+      httpsAgent,
+    });
 
     logger.info(
       `Imported ${response.data.successCount} saved objects from "${filePath}" into Kibana`
