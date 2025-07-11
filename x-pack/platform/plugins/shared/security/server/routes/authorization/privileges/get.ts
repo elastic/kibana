@@ -35,9 +35,9 @@ export function defineGetPrivilegesRoutes({ router, authz }: RouteDefinitionPara
       },
       options: { access: 'public' },
     },
-    createLicensedRouteHandler((context, request, response) => {
+    createLicensedRouteHandler(async (context, request, response) => {
       const respectLicenseLevel = request.query.respectLicenseLevel !== 'false'; // if undefined resolve to true by default
-      const privileges = authz.privileges.get(respectLicenseLevel);
+      const privileges = await authz.privileges.getWithActions(respectLicenseLevel);
       const includeActions = request.query.includeActions === 'true';
       const privilegesResponseBody = includeActions
         ? privileges

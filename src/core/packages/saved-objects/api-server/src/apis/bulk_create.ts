@@ -8,7 +8,7 @@
  */
 
 import type { SavedObjectsMigrationVersion } from '@kbn/core-saved-objects-common';
-import type { SavedObjectReference } from '../..';
+import type { SavedObjectAccessControl, SavedObjectReference } from '../..';
 
 /**
  * Object parameters for the bulk create operation
@@ -64,4 +64,6 @@ export interface SavedObjectsBulkCreateObject<T = unknown> {
    * make their edits to the copy.
    */
   managed?: boolean;
+
+  accessControl?: SavedObjectAccessControl;
 }

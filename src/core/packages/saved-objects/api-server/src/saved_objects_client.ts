@@ -47,6 +47,9 @@ import type {
   SavedObjectsBulkDeleteObject,
   SavedObjectsBulkDeleteOptions,
   SavedObjectsBulkDeleteResponse,
+  SavedObjectsChangeAccessControlResponse,
+  SavedObjectsChangeAccessControlOptions,
+  SavedObjectsChangeAccessControlObject,
 } from './apis';
 
 /**
@@ -433,4 +436,18 @@ export interface SavedObjectsClientContract {
    * @param namespace Space to which the client should be scoped to.
    */
   asScopedToNamespace(namespace: string): SavedObjectsClientContract;
+
+  /**
+   * Changes the ownership of one or more SavedObjects to a new owner.
+   *
+   * @param type - The type of SavedObject to update
+   * @param id - The ID of the SavedObject to update
+   * @param attributes - Attributes to update
+   * @param options {@link SavedObjectsChangeOwnershipOptions} - options for the update operation
+   * @returns the {@link SavedObjectChangeOwnershipResponse}
+   */
+  changeOwnership<T = unknown>(
+    objects: SavedObjectsChangeAccessControlObject[],
+    options: SavedObjectsChangeAccessControlOptions<T>
+  ): Promise<SavedObjectsChangeAccessControlResponse>;
 }

@@ -7,6 +7,7 @@
 
 import type { AuthenticatedUser, CoreSetup, KibanaRequest } from '@kbn/core/server';
 import { SavedObjectsClient } from '@kbn/core/server';
+import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
 import type { AuditServiceSetup } from '@kbn/security-plugin-types-server';
 
 import { SavedObjectsSecurityExtension } from './saved_objects_security_extension';
@@ -20,6 +21,7 @@ interface SetupSavedObjectsParams {
   >;
   savedObjects: CoreSetup['savedObjects'];
   getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
+  getTypeRegistry: () => Promise<ISavedObjectTypeRegistry>;
 }
 
 export function setupSavedObjects({
@@ -27,6 +29,7 @@ export function setupSavedObjects({
   authz,
   savedObjects,
   getCurrentUser,
+  getTypeRegistry,
 }: SetupSavedObjectsParams) {
   savedObjects.setClientFactoryProvider(
     // This is not used by Kibana itself, but it can be leveraged for Kibana to use a third-party authentication header if there is a custom
@@ -50,6 +53,7 @@ export function setupSavedObjects({
           checkPrivileges: authz.checkSavedObjectsPrivilegesWithRequest(request),
           errors: SavedObjectsClient.errors,
           getCurrentUser: () => getCurrentUser(request),
+          getTypeRegistry,
         })
       : undefined;
   });

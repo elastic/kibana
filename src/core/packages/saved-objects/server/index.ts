@@ -86,6 +86,7 @@ export type {
   EncryptedObjectDescriptor,
 } from './src/extensions/encryption';
 export type {
+  AuthorizeObject,
   AuthorizationTypeEntry,
   AuthorizationTypeMap,
   CheckAuthorizationResult,
@@ -111,6 +112,11 @@ export type {
   AuthorizeUpdateSpacesParams,
   AuthorizeFindParams,
   WithAuditName,
+  AuthorizeChangeOwnershipParams,
+  AuthorizeBulkChangeOwnershipParams,
+  AuthorizeChangeAccessModeParams,
+  AuthorizeChangeOwnershipObject,
+  AuthorizeChangeAccessModeObject,
 } from './src/extensions/security';
 export type { ISavedObjectsSpacesExtension } from './src/extensions/spaces';
 export type { SavedObjectsExtensions } from './src/extensions/extensions';

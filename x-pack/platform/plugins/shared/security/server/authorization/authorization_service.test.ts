@@ -73,6 +73,9 @@ it(`#setup returns exposed services`, () => {
   const mockLicense = licenseMock.create();
   const mockCoreSetup = coreMock.createSetup();
 
+  const mockTypeRegistry = coreMock.createStart().savedObjects.getTypeRegistry();
+  const mockGetTypeRegistry = jest.fn().mockResolvedValue(mockTypeRegistry);
+
   const authorizationService = new AuthorizationService();
   const getClusterClient = () => Promise.resolve(mockClusterClient);
   const authz = authorizationService.setup({
@@ -87,6 +90,7 @@ it(`#setup returns exposed services`, () => {
     getSpacesService: mockGetSpacesService,
     getCurrentUser: jest.fn(),
     customBranding: mockCoreSetup.customBranding,
+    getTypeRegistry: mockGetTypeRegistry,
   });
 
   expect(authz.applicationName).toBe(application);
@@ -116,7 +120,12 @@ it(`#setup returns exposed services`, () => {
   );
 
   expect(authz.privileges).toBe(mockPrivilegesService);
-  expect(privilegesFactory).toHaveBeenCalledWith(authz.actions, mockFeaturesSetup, mockLicense);
+  expect(privilegesFactory).toHaveBeenCalledWith(
+    authz.actions,
+    mockFeaturesSetup,
+    mockLicense,
+    mockGetTypeRegistry
+  );
 
   expect(authz.mode).toBe(mockAuthorizationMode);
   expect(authorizationModeFactory).toHaveBeenCalledWith(mockLicense);
@@ -137,6 +146,7 @@ describe('#start', () => {
       mockEsSecurityResponse as Awaited<ReturnType<Client['xpack']['usage']>>
     );
     const mockCoreSetup = coreMock.createSetup();
+    const mockTypeRegistry = coreMock.createStart().savedObjects.getTypeRegistry();
 
     const authorizationService = new AuthorizationService();
     authorizationService.setup({
@@ -153,6 +163,7 @@ describe('#start', () => {
         .mockReturnValue({ getSpaceId: jest.fn(), namespaceToSpaceId: jest.fn() }),
       getCurrentUser: jest.fn(),
       customBranding: mockCoreSetup.customBranding,
+      getTypeRegistry: jest.fn().mockResolvedValue(mockTypeRegistry),
     });
 
     authorizationService.start({
@@ -209,6 +220,7 @@ it('#stop unsubscribes from license and ES updates.', async () => {
   );
   const statusSubject = new Subject<OnlineStatusRetryScheduler>();
   const mockCoreSetup = coreMock.createSetup();
+  const mockTypeRegistry = coreMock.createStart().savedObjects.getTypeRegistry();
 
   const authorizationService = new AuthorizationService();
   authorizationService.setup({
@@ -225,6 +237,7 @@ it('#stop unsubscribes from license and ES updates.', async () => {
       .mockReturnValue({ getSpaceId: jest.fn(), namespaceToSpaceId: jest.fn() }),
     getCurrentUser: jest.fn(),
     customBranding: mockCoreSetup.customBranding,
+    getTypeRegistry: jest.fn().mockResolvedValue(mockTypeRegistry),
   });
 
   authorizationService.start({
