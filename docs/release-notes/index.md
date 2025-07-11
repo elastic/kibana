@@ -35,7 +35,7 @@ To check for security updates, go to [Security announcements for the Elastic sta
 ### Fixes [kibana-9.0.4-fixes]
 
 **Dashboards and Visualizations**:
-* Stops Dashboard from recommending adhoc data views [#225705]({{kib-pull}}225705).
+* Stops dashboards from recommending adhoc data views [#225705]({{kib-pull}}225705).
 * Prevents Dashboard from making multiple requests [#224761]({{kib-pull}}224761).
 
 **Data ingestion and Fleet**:
