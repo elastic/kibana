@@ -15,6 +15,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const installedPackages: Array<{ pkgName: string; version: string }> = [];
 
   // Failing: See https://github.com/elastic/kibana/issues/223984
+  // Failing: See https://github.com/elastic/kibana/issues/223984
   describe.skip('modules', function () {
     before(async () => {
       // use await kibanaServer.savedObjects.cleanStandardList(); to make sure the fleet setup is removed correctly after the tests
