@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import useWindowSize from 'react-use/lib/useWindowSize';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import {
@@ -25,6 +25,7 @@ import {
   EuiSwitch,
   EuiSwitchEvent,
   type UseEuiTheme,
+  EuiDataGridRefProps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
@@ -60,6 +61,7 @@ import {
 import { TableCell } from './table_cell';
 import { getPinColumnControl } from './get_pin_control';
 import { FieldRow } from './field_row';
+import { getCellPositionAfterPinToggle } from './utils';
 
 interface ItemsEntry {
   pinnedRows: FieldRow[];
@@ -140,6 +142,7 @@ export const DocViewerTable = ({
 
   const isEsqlMode = Array.isArray(textBasedHits);
   const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
+  const dataGridRef = useRef<EuiDataGridRefProps | null>(null);
   const { fieldFormats, storage, uiSettings, toasts } = getUnifiedDocViewerServices();
   const showMultiFields = uiSettings.get(SHOW_MULTIFIELDS);
   const currentDataViewId = dataView.id!;
@@ -173,18 +176,6 @@ export const DocViewerTable = ({
       }
     };
   }, [onRemoveColumn, onAddColumn, columns]);
-
-  const onTogglePinned = useCallback(
-    (field: string) => {
-      const newPinned = pinnedFields.includes(field)
-        ? pinnedFields.filter((curField) => curField !== field)
-        : [...pinnedFields, field];
-
-      updatePinnedFieldsState(newPinned, currentDataViewId, storage);
-      setPinnedFields(newPinned);
-    },
-    [currentDataViewId, pinnedFields, storage]
-  );
 
   const { onFilterField, onFindSearchTermMatch, ...tableFiltersProps } = useTableFilters({
     storage,
@@ -303,11 +294,47 @@ export const DocViewerTable = ({
     ]
   );
 
+  const onTogglePinned = useCallback(
+    (field: string) => {
+      const newPinned = pinnedFields.includes(field)
+        ? pinnedFields.filter((curField) => curField !== field)
+        : [...pinnedFields, field];
+
+      updatePinnedFieldsState(newPinned, currentDataViewId, storage);
+      setPinnedFields(newPinned);
+    },
+    [currentDataViewId, pinnedFields, storage]
+  );
+
+  const focusCellAfterPinToggle = useCallback(
+    (field: string) => {
+      if (!dataGridRef) return;
+
+      const position = getCellPositionAfterPinToggle({
+        field,
+        pinnedRows,
+        restRows,
+      });
+      dataGridRef.current?.setFocusedCell({ rowIndex: position, colIndex: 0 });
+    },
+    [pinnedRows, restRows, dataGridRef]
+  );
+
   const rows = useMemo(() => [...pinnedRows, ...restRows], [pinnedRows, restRows]);
 
   const leadingControlColumns = useMemo(() => {
-    return [getPinColumnControl({ rows, onTogglePinned })];
-  }, [rows, onTogglePinned]);
+    return [
+      getPinColumnControl({
+        rows,
+        onTogglePinned: (fieldName, { isKeyboardEvent }) => {
+          onTogglePinned(fieldName);
+          if (isKeyboardEvent) {
+            focusCellAfterPinToggle(fieldName);
+          }
+        },
+      }),
+    ];
+  }, [rows, onTogglePinned, focusCellAfterPinToggle]);
 
   const { curPageIndex, pageSize, totalPages, changePageIndex, changePageSize } = usePager({
     initialPageSize: getPageSize(storage),
@@ -529,6 +556,7 @@ export const DocViewerTable = ({
             })}
             className="kbnDocViewer__fieldsGrid"
             css={styles.fieldsGrid}
+            ref={dataGridRef}
             columns={gridColumns}
             toolbarVisibility={false}
             rowCount={rows.length}
