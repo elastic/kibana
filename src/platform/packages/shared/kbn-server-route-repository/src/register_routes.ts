@@ -213,6 +213,9 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
           version,
           validate: {
             request: validationObject,
+            response: route.responses
+              ? makeZodResponsesValidationObject(route.responses)
+              : undefined,
           },
         },
         wrappedHandler
