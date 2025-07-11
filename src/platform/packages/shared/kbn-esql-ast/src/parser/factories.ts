@@ -109,12 +109,6 @@ export const createCommand = <
   return command;
 };
 
-export const createInlineCast = (ctx: InlineCastContext, value: ESQLInlineCast['value']) =>
-  Builder.expression.inlineCast(
-    { castType: ctx.dataType().getText().toLowerCase() as InlineCastingType, value },
-    createParserFields(ctx)
-  );
-
 export function createFakeMultiplyLiteral(
   ctx: ArithmeticUnaryContext,
   literalType: ESQLNumericLiteralType

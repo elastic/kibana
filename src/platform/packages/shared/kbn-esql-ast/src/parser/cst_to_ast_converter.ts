@@ -26,7 +26,6 @@ import {
   createColumnStar,
   createFakeMultiplyLiteral,
   createFunctionCall,
-  createInlineCast,
   createLiteral,
   createParam,
 } from './factories';
@@ -1602,8 +1601,12 @@ export class CstToAstConverter {
   }
 
   private collectInlineCast(ctx: cst.InlineCastContext): ast.ESQLInlineCast {
-    const primaryExpression = this.visitPrimaryExpression(ctx.primaryExpression());
-    return createInlineCast(ctx, primaryExpression);
+    const value = this.visitPrimaryExpression(ctx.primaryExpression());
+
+    return Builder.expression.inlineCast(
+      { castType: ctx.dataType().getText().toLowerCase() as ast.InlineCastingType, value },
+      this.createParserFields(ctx)
+    );
   }
 
   private collectLogicalExpression(ctx: cst.BooleanExpressionContext) {
