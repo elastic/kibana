@@ -268,7 +268,9 @@ const deleteFleetPackage = (
 
     return rootRequest({
       method: 'DELETE',
-      url: epmRouteService.getRemovePath(packageName),
+      // Using an empty string for package version.
+      // It's required only for cache cleaning and shouldn't impact the workflow.
+      url: epmRouteService.getRemovePath(packageName, ''),
       body: JSON.stringify({ force: true }),
       failOnStatusCode: false,
     }).then((response) => {
