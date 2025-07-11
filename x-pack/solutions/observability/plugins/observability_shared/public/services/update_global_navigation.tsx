@@ -29,7 +29,7 @@ export function updateGlobalNavigation({
   const isCompleteOverviewEnabled = pricing.isFeatureAvailable('observability:complete_overview');
 
   const { apm, metrics, uptime, synthetics, slo } = capabilities.navLinks;
-  const observabilityManageRules = Object.entries(capabilities.observabilityManageRules);
+  const observabilityManageRules = Object.entries(capabilities.observabilityManageRules ?? {});
   const hasManageRules =
     observabilityManageRules.length > 0 && observabilityManageRules.some(([, value]) => value);
   /* logs is a special case.
