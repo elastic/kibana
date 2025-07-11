@@ -108,7 +108,7 @@ export interface DiscoverSessionTab {
   hideChart: boolean;
   isTextBasedQuery: boolean;
   usesAdHocDataView?: boolean;
-  searchSource: ISearchSource;
+  serializedSearchSource: SerializedSearchSourceFields;
   viewMode?: VIEW_MODE;
   hideAggregatedPreview?: boolean;
   rowHeight?: number;

@@ -73,7 +73,9 @@ export function getDiscoverStateMock({
     tabsStorageManager,
   });
   internalState.dispatch(
-    internalStateActions.initializeTabs({ userId: 'mockUserId', spaceId: 'mockSpaceId' })
+    internalStateActions.initializeTabs({
+      discoverSessionId: savedSearch ? savedSearch.id : undefined,
+    })
   );
   const container = getDiscoverStateContainer({
     tabId: internalState.getState().tabs.unsafeCurrentId,

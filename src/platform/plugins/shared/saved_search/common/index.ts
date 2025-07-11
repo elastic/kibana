@@ -16,6 +16,8 @@ export type {
   DiscoverGridSettingsColumn,
   SavedSearch,
   SavedSearchAttributes,
+  DiscoverSession,
+  DiscoverSessionTab,
 } from './types';
 
 export enum VIEW_MODE {

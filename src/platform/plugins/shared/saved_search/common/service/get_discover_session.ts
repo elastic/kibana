@@ -9,7 +9,7 @@
 
 import { injectReferences, parseSearchSourceJSON } from '@kbn/data-plugin/common';
 import type { DataGridDensity } from '@kbn/unified-data-table';
-import type { DiscoverSession, DiscoverSessionTab, SortOrder } from '../types';
+import type { DiscoverSession, SortOrder } from '../types';
 import type { GetSavedSearchDependencies } from './get_saved_searches';
 import { getSearchSavedObject } from './get_saved_searches';
 
@@ -22,42 +22,32 @@ export const getDiscoverSession = async (
     id: so.item.id,
     title: so.item.attributes.title,
     description: so.item.attributes.description,
-    tabs: await Promise.all(
-      so.item.attributes.tabs.map(async (tab) => {
-        const searchSource = await deps.searchSourceCreate(
-          injectReferences(
-            parseSearchSourceJSON(tab.attributes.kibanaSavedObjectMeta?.searchSourceJSON ?? '{}'),
-            so.item.references
-          )
-        );
-
-        const mappedTab: DiscoverSessionTab = {
-          id: tab.id,
-          label: tab.label,
-          sort: tab.attributes.sort as SortOrder[],
-          columns: tab.attributes.columns,
-          grid: tab.attributes.grid,
-          hideChart: tab.attributes.hideChart,
-          isTextBasedQuery: tab.attributes.isTextBasedQuery,
-          usesAdHocDataView: tab.attributes.usesAdHocDataView,
-          searchSource,
-          viewMode: tab.attributes.viewMode,
-          hideAggregatedPreview: tab.attributes.hideAggregatedPreview,
-          rowHeight: tab.attributes.rowHeight,
-          headerRowHeight: tab.attributes.headerRowHeight,
-          timeRestore: tab.attributes.timeRestore,
-          timeRange: tab.attributes.timeRange,
-          refreshInterval: tab.attributes.refreshInterval,
-          rowsPerPage: tab.attributes.rowsPerPage,
-          sampleSize: tab.attributes.sampleSize,
-          breakdownField: tab.attributes.breakdownField,
-          density: tab.attributes.density as DataGridDensity,
-          visContext: tab.attributes.visContext,
-        };
-
-        return mappedTab;
-      })
-    ),
+    tabs: so.item.attributes.tabs.map((tab) => ({
+      id: tab.id,
+      label: tab.label,
+      sort: tab.attributes.sort as SortOrder[],
+      columns: tab.attributes.columns,
+      grid: tab.attributes.grid,
+      hideChart: tab.attributes.hideChart,
+      isTextBasedQuery: tab.attributes.isTextBasedQuery,
+      usesAdHocDataView: tab.attributes.usesAdHocDataView,
+      serializedSearchSource: injectReferences(
+        parseSearchSourceJSON(tab.attributes.kibanaSavedObjectMeta?.searchSourceJSON ?? '{}'),
+        so.item.references
+      ),
+      viewMode: tab.attributes.viewMode,
+      hideAggregatedPreview: tab.attributes.hideAggregatedPreview,
+      rowHeight: tab.attributes.rowHeight,
+      headerRowHeight: tab.attributes.headerRowHeight,
+      timeRestore: tab.attributes.timeRestore,
+      timeRange: tab.attributes.timeRange,
+      refreshInterval: tab.attributes.refreshInterval,
+      rowsPerPage: tab.attributes.rowsPerPage,
+      sampleSize: tab.attributes.sampleSize,
+      breakdownField: tab.attributes.breakdownField,
+      density: tab.attributes.density as DataGridDensity,
+      visContext: tab.attributes.visContext,
+    })),
     managed: Boolean(so.item.managed),
     tags: deps.savedObjectsTagging
       ? deps.savedObjectsTagging.ui.getTagIdsFromReferences(so.item.references)
