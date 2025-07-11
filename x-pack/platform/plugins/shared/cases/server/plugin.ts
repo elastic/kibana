@@ -48,13 +48,14 @@ import type { ConfigType } from './config';
 import { registerConnectorTypes } from './connectors';
 import { registerSavedObjects } from './saved_object_types';
 import type { ServerlessProjectType } from '../common/constants/types';
-import { IncrementalIdTaskManager } from './tasks/incremental_id/incremental_id_task_manager';
 import {
   createCasesAnalyticsIndexes,
   registerCasesAnalyticsIndexesTasks,
   scheduleCasesAnalyticsSyncTasks,
 } from './cases_analytics';
 import { registerUiSettings } from './ui_settings';
+import { scheduleIncrementalIdTask } from './tasks/incremental_id/schedule_incremental_id_task';
+import { registerIncrementalIdTask } from './tasks/incremental_id/register_incremental_id_task';
 
 export class CasePlugin
   implements
@@ -74,7 +75,6 @@ export class CasePlugin
   private persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
   private externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
   private userProfileService: UserProfileService;
-  private incrementalIdTaskManager?: IncrementalIdTaskManager;
   private readonly isServerless: boolean;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
@@ -152,12 +152,7 @@ export class CasePlugin
       }
 
       if (this.caseConfig.incrementalId.enabled) {
-        this.incrementalIdTaskManager = new IncrementalIdTaskManager(
-          plugins.taskManager,
-          this.caseConfig.incrementalId,
-          this.logger,
-          plugins.usageCollection
-        );
+        registerIncrementalIdTask(core, plugins.taskManager, this.logger, plugins.usageCollection);
       }
     }
 
@@ -222,8 +217,9 @@ export class CasePlugin
 
     if (plugins.taskManager) {
       scheduleCasesTelemetryTask(plugins.taskManager, this.logger);
+
       if (this.caseConfig.incrementalId.enabled) {
-        void this.incrementalIdTaskManager?.setupIncrementIdTask(plugins.taskManager, core);
+        scheduleIncrementalIdTask(this.caseConfig, plugins.taskManager, this.logger);
       }
 
       if (this.caseConfig.analytics.index?.enabled) {
