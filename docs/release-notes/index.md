@@ -41,7 +41,7 @@ To check for security updates, go to [Security announcements for the Elastic sta
 **Data ingestion and Fleet**:
 * Fixes bug that causes the CSV export to fail in export CSV in Agent list [#225050]({{kib-pull}}225050).
 * Replaces call to registry when deleting {kib} assets for custom packages [#224886]({{kib-pull}}224886).
-* Updates the query in the delete unenrolled {agents} task [#224808]({{kib-pull}}224808).
+* Fixes an issue where the background task was not deleting some unenrolled {agents} [#224808]({{kib-pull}}224808).
 * Fixes bulk actions incorrectly selecting {agents} with the namespaces filter [#224036]({{kib-pull}}224036).
 
 **Discover**:
@@ -55,10 +55,10 @@ For the Elastic Observability 9.0.4 release information, refer to [Elastic Obser
 For the Elastic Security 9.0.4 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
 
 **Kibana platform**:
-* Hides {kib}'s header and side navigation when trying to print or use the dashboard export with print mode [#227095]({{kib-pull}}227095).
+* Hides the header and side navigation when printing or exporting the dashboard with **Print layout** selected [#227095]({{kib-pull}}227095).
 
 **Search**:
-* Fixes an issue in Search Playground where context limit errors were not handled well when using the Elastic Managed LLM [#225360]({{kib-pull}}225360).
+* Fixes handling of context limit errors in Playground when using the Elastic Managed LLM  [#225360]({{kib-pull}}225360).
 * Adjusted `z-index` of app menu header to avoid conflicts with the portable dev console [#224708]({{kib-pull}}224708).
 
 ## 9.0.3 [kibana-9.0.3-release-notes]
