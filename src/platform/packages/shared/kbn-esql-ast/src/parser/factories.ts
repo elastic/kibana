@@ -84,31 +84,6 @@ export function createFakeMultiplyLiteral(
   };
 }
 
-export function createLiteralString(
-  ctx: Pick<StringContext, 'QUOTED_STRING'> & ParserRuleContext
-): ESQLStringLiteral {
-  const quotedString = ctx.QUOTED_STRING()?.getText() ?? '""';
-  const isTripleQuoted = quotedString.startsWith('"""') && quotedString.endsWith('"""');
-  let valueUnquoted = isTripleQuoted ? quotedString.slice(3, -3) : quotedString.slice(1, -1);
-
-  if (!isTripleQuoted) {
-    valueUnquoted = valueUnquoted
-      .replace(/\\"/g, '"')
-      .replace(/\\r/g, '\r')
-      .replace(/\\n/g, '\n')
-      .replace(/\\t/g, '\t')
-      .replace(/\\\\/g, '\\');
-  }
-
-  return Builder.expression.literal.string(
-    valueUnquoted,
-    {
-      name: quotedString,
-    },
-    createParserFields(ctx)
-  );
-}
-
 function isMissingText(text: string) {
   return /<missing /.test(text);
 }

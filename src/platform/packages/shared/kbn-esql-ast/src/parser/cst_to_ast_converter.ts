@@ -14,7 +14,6 @@ import { type AstNodeParserFields, Builder } from '../builder';
 import { isCommand } from '../ast/is';
 import {
   computeLocationExtends,
-  createLiteralString,
   nonNullable,
   textExistsAndIsValid,
   createBinaryExpression,
@@ -23,8 +22,8 @@ import {
 } from './factories';
 import { getPosition, parseIdentifier } from './helpers';
 import { firstItem, lastItem, resolveItem } from '../visitor/utils';
-import type { Parser } from './parser';
 import { LeafPrinter } from '../pretty_print';
+import type { Parser } from './parser';
 
 type ESQLAstMatchBooleanExpression = ast.ESQLColumn | ast.ESQLBinaryExpression | ast.ESQLInlineCast;
 
@@ -746,7 +745,7 @@ export class CstToAstConverter {
     command.args.push(primaryExpression);
 
     if (doParseStringAndOptions) {
-      const stringNode = createLiteralString(stringContext);
+      const stringNode = this.createLiteralString(stringContext);
 
       command.args.push(stringNode);
       command.args.push(...this.fromCommandOptions(ctx.commandOptions()));
@@ -794,7 +793,7 @@ export class CstToAstConverter {
     command.args.push(primaryExpression);
 
     if (doParseStringAndOptions) {
-      const stringNode = createLiteralString(stringContext);
+      const stringNode = this.createLiteralString(stringContext);
 
       command.args.push(stringNode);
     }
@@ -1667,7 +1666,7 @@ export class CstToAstConverter {
             if (arg) {
               fn.args.push(arg);
 
-              const literal = createLiteralString(regex.string_());
+              const literal = this.createLiteralString(regex.string_());
 
               fn.args.push(literal);
             }
@@ -1866,7 +1865,7 @@ export class CstToAstConverter {
       );
     }
 
-    return createLiteralString(ctx);
+    return this.createLiteralString(ctx);
   }
 
   // ----------------------------------------------------- expression: "column"
@@ -2013,7 +2012,7 @@ export class CstToAstConverter {
   private fromMapEntryExpression(ctx: cst.EntryExpressionContext): ast.ESQLMapEntry {
     const keyCtx = ctx._key;
     const valueCtx = ctx._value;
-    const key = createLiteralString(keyCtx) as ast.ESQLStringLiteral;
+    const key = this.createLiteralString(keyCtx) as ast.ESQLStringLiteral;
     const value = this.fromConstant(valueCtx) as ast.ESQLAstExpression;
     const entry = Builder.expression.entry(key, value, {
       location: getPosition(ctx.start, ctx.stop),
@@ -2040,7 +2039,7 @@ export class CstToAstConverter {
     } else if (ctx instanceof cst.BooleanLiteralContext) {
       return this.getBooleanValue(ctx);
     } else if (ctx instanceof cst.StringLiteralContext) {
-      return createLiteralString(ctx.string_());
+      return this.createLiteralString(ctx.string_());
     } else if (
       ctx instanceof cst.NumericArrayLiteralContext ||
       ctx instanceof cst.BooleanArrayLiteralContext ||
@@ -2116,6 +2115,31 @@ export class CstToAstConverter {
     ) as Type extends 'double' ? ast.ESQLDecimalLiteral : ast.ESQLIntegerLiteral;
   }
 
+  private createLiteralString(
+    ctx: Pick<cst.StringContext, 'QUOTED_STRING'> & antlr.ParserRuleContext
+  ): ast.ESQLStringLiteral {
+    const quotedString = ctx.QUOTED_STRING()?.getText() ?? '""';
+    const isTripleQuoted = quotedString.startsWith('"""') && quotedString.endsWith('"""');
+    let valueUnquoted = isTripleQuoted ? quotedString.slice(3, -3) : quotedString.slice(1, -1);
+
+    if (!isTripleQuoted) {
+      valueUnquoted = valueUnquoted
+        .replace(/\\"/g, '"')
+        .replace(/\\r/g, '\r')
+        .replace(/\\n/g, '\n')
+        .replace(/\\t/g, '\t')
+        .replace(/\\\\/g, '\\');
+    }
+
+    return Builder.expression.literal.string(
+      valueUnquoted,
+      {
+        name: quotedString,
+      },
+      this.createParserFields(ctx)
+    );
+  }
+
   private toParam(ctx: antlr.ParseTree): ast.ESQLParam | undefined {
     if (ctx instanceof cst.InputParamContext || ctx instanceof cst.InputDoubleParamsContext) {
       const isDoubleParam = ctx instanceof cst.InputDoubleParamsContext;
@@ -2162,7 +2186,7 @@ export class CstToAstConverter {
       values.push(this.getBooleanValue(booleanValue)!);
     }
     for (const string of ctx.getTypedRuleContexts(cst.StringContext)) {
-      const literal = createLiteralString(string);
+      const literal = this.createLiteralString(string);
 
       values.push(literal);
     }
