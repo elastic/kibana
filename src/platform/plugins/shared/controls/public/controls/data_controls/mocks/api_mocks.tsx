@@ -40,7 +40,9 @@ export const getOptionsListContextMock = () => {
       setSort: (next: OptionsListSortingType | undefined) => {
         sort$.next(next);
       },
-      allowExpensiveQueries$: new BehaviorSubject<boolean>(true),
+      parentApi: {
+        allowExpensiveQueries$: new BehaviorSubject<boolean>(true),
+      },
       fieldFormatter: new BehaviorSubject((value: string | number) => String(value)),
       makeSelection: jest.fn(),
       loadMoreSubject: new Subject<void>(),
