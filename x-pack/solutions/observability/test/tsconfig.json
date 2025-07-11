@@ -78,5 +78,7 @@
     "@kbn/es-errors",
     "@kbn/content-packs-schema",
     "@kbn/server-route-repository-utils",
+    "@kbn/cases-plugin",
+    "@kbn/infra-forge",
   ]
 }
