@@ -10,17 +10,21 @@
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
 import type { Meta, StoryObj } from '@storybook/react';
+import produce from 'immer';
 import { mockUnifiedDocViewerServices } from '../../../../__mocks__';
 import { setUnifiedDocViewerServices } from '../../../../plugin';
 import minimalAPMFixture from './__fixtures__/apm/minimal.json';
 import minimalOtelFixture from './__fixtures__/otel/minimal.json';
+import httpServerProcessedOtelFixture from './__fixtures__/otel/http_server_processed.json';
+
 import { SpanOverview } from './span_overview';
 
 const meta: Meta<typeof SpanOverview> = {
+  title: 'Span overview',
   component: SpanOverview,
 
   // We might be able to do this to allow pasting in spans
-  //render: ({ hit, ...args }) => <SpanOverview hit={buildDataTableRecord(hit)} {...args} />,
+  // render: ({ hit, ...args }) => <SpanOverview hit={buildDataTableRecord(hit)} {...args} />,
 };
 
 export default meta;
@@ -51,6 +55,15 @@ const baseArgs = {
 });
 setUnifiedDocViewerServices(mockUnifiedDocViewerServices);
 
+const unifiedDocViewerServices = produce(mockUnifiedDocViewerServices, (draft) => {
+  draft.share.url.locators.get = () => {
+    return { getRedirectUrl: () => '#' };
+  };
+  draft.core.application.capabilities.apm = { show: true };
+});
+console.log({ unifiedDocViewerServices });
+//   const canViewApm = core.application.capabilities.apm?.show || false;
+setUnifiedDocViewerServices(unifiedDocViewerServices);
 // TODO: Mock the duration and trace
 // (mockUnifiedDocViewerServices.core.http.post as jest.Mock).mockResolvedValue({});
 
@@ -77,3 +90,4 @@ export const MinimalOtel: Story = {
     hit: buildDataTableRecord(minimalOtelFixture),
   },
 };
+

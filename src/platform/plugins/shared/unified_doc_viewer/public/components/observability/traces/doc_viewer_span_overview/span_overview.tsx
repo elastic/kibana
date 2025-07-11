@@ -119,6 +119,7 @@ export function SpanOverview({
                     />
                   ))}
                 </EuiFlexItem>
+                <EuiSpacer size="m" />
 
                 {spanDuration && (
                   <EuiFlexItem>

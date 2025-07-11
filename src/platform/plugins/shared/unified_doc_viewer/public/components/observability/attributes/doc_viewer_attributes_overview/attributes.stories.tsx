@@ -17,6 +17,7 @@ import { mockUnifiedDocViewerServices } from '../../../../__mocks__';
 import { setUnifiedDocViewerServices } from '../../../../plugin';
 
 const meta: Meta<typeof AttributesOverview> = {
+  title: 'Attributes',
   component: AttributesOverview,
 };
 
