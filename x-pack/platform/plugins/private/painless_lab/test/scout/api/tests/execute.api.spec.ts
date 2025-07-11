@@ -5,46 +5,77 @@
  * 2.0.
  */
 
-import { RoleApiCredentials, apiTest, expect, tags } from '@kbn/scout';
+import { RoleApiCredentials, apiTest, expect } from '@kbn/scout';
 
-apiTest.describe('Painless APIs', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
-  let adminApiCredentials: RoleApiCredentials;
-  apiTest.beforeAll(async ({ requestAuth }) => {
-    adminApiCredentials = await requestAuth.getApiKey('admin');
-  });
-  apiTest('POST api/painless_lab/execute', async ({ apiClient, log }) => {
-    const script =
-      '"{\\n  \\"script\\": {\\n    \\"source\\": \\"return true;\\",\\n    \\"params\\": {\\n  \\"string_parameter\\": \\"string value\\",\\n  \\"number_parameter\\": 1.5,\\n  \\"boolean_parameter\\": true\\n}\\n  }\\n}"';
-    const response = await apiClient.post('api/painless_lab/execute', {
-      headers: {
-        'kbn-xsrf': 'some-xsrf-token',
-        'x-elastic-internal-origin': 'kibana',
-        'Content-Type': 'application/json;charset=UTF-8',
-        ...adminApiCredentials.apiKeyHeader,
-      },
-      responseType: 'json',
-      body: script,
-    });
-    expect(response.statusCode).toBe(200);
-    expect(response.body).toStrictEqual({
-      result: 'true',
-    });
-  });
+const script =
+  '"{\\n  \\"script\\": {\\n    \\"source\\": \\"return true;\\",\\n    \\"params\\": {\\n  \\"string_parameter\\": \\"string value\\",\\n  \\"number_parameter\\": 1.5,\\n  \\"boolean_parameter\\": true\\n}\\n  }\\n}"';
+const invalidScript =
+  '"{\\n  \\"script\\": {\\n    \\"source\\": \\"foobar\\",\\n    \\"params\\": {\\n  \\"string_parameter\\": \\"string value\\",\\n  \\"number_parameter\\": 1.5,\\n  \\"boolean_parameter\\": true\\n}\\n  }\\n}"';
 
-  apiTest('system indices behavior', async ({ apiClient }) => {
-    const invalidScript =
-      '"{\\n  \\"script\\": {\\n    \\"source\\": \\"foobar\\",\\n    \\"params\\": {\\n  \\"string_parameter\\": \\"string value\\",\\n  \\"number_parameter\\": 1.5,\\n  \\"boolean_parameter\\": true\\n}\\n  }\\n}"';
+const commonHeaders = {
+  'kbn-xsrf': 'some-xsrf-token',
+  'x-elastic-internal-origin': 'kibana',
+  'Content-Type': 'application/json;charset=UTF-8',
+};
 
-    const response = await apiClient.post('api/painless_lab/execute', {
-      headers: {
-        'kbn-xsrf': 'some-xsrf-token',
-        'x-elastic-internal-origin': 'kibana',
-        'Content-Type': 'application/json;charset=UTF-8',
-        ...adminApiCredentials.apiKeyHeader,
-      },
-      responseType: 'json',
-      body: invalidScript,
+apiTest.describe(
+  'POST api/painless_lab/execute',
+  { tag: ['@ess', '@svlSecurity', '@svlOblt'] },
+  () => {
+    let adminApiCredentials: RoleApiCredentials;
+    apiTest.beforeAll(async ({ requestAuth }) => {
+      adminApiCredentials = await requestAuth.getApiKey('admin');
     });
-    expect(response.statusCode).toBe(200);
-  });
-});
+    apiTest('should execute a valid painless script', async ({ apiClient }) => {
+      const response = await apiClient.post('api/painless_lab/execute', {
+        headers: {
+          ...commonHeaders,
+          ...adminApiCredentials.apiKeyHeader,
+        },
+        responseType: 'json',
+        body: script,
+      });
+      expect(response.statusCode).toBe(200);
+      expect(response.body).toStrictEqual({
+        result: 'true',
+      });
+    });
+
+    apiTest('should return error response for invalid painless script', async ({ apiClient }) => {
+      const response = await apiClient.post('api/painless_lab/execute', {
+        headers: {
+          ...commonHeaders,
+          ...adminApiCredentials.apiKeyHeader,
+        },
+        responseType: 'json',
+        body: invalidScript,
+      });
+
+      expect(response.statusCode).toBe(200);
+      expect(response.body.error.reason).toBe('compile error');
+    });
+  }
+);
+
+apiTest.describe(
+  '[search serverless] POST api/painless_lab/execute',
+  { tag: ['@svlSearch'] },
+  () => {
+    let adminApiCredentials: RoleApiCredentials;
+    apiTest.beforeAll(async ({ requestAuth }) => {
+      adminApiCredentials = await requestAuth.getApiKey('admin');
+    });
+    apiTest('should return 404', async ({ apiClient }) => {
+      const response = await apiClient.post('api/painless_lab/execute', {
+        headers: {
+          ...commonHeaders,
+          ...adminApiCredentials.apiKeyHeader,
+        },
+        responseType: 'json',
+        body: script,
+      });
+      expect(response.statusCode).toBe(404);
+      expect(response.body.message).toBe('Not Found');
+    });
+  }
+);
