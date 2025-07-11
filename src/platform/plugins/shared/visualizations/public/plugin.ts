@@ -66,6 +66,7 @@ import {
 import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
 import { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
 
+import { css, injectGlobal } from '@emotion/css';
 import type { TypesSetup, TypesStart } from './vis_types';
 import type { VisualizeServices } from './visualize_app/types';
 import {
@@ -174,6 +175,72 @@ export interface VisualizationsStartDeps {
   noDataPage?: NoDataPagePluginStart;
   embeddableEnhanced?: EmbeddableEnhancedPluginStart;
 }
+
+const styles = {
+  visAppWrapper: css({
+    display: 'flex',
+    flexDirection: 'column',
+    flexGrow: 1,
+  }),
+  globalScreenshotMode: css`
+    kbn-top-nav,
+    filter-bar,
+    .kbnTopNavMenu__wrapper,
+    ::-webkit-scrollbar,
+    .euiNavDrawer {
+      display: none !important;
+    }
+  `,
+  visEditorScreenshotMode: css`
+    /* hide unusable controls !important is required to override resizable panel inline display */
+    .visEditor__content .visEditor--default > :not(.visEditor__visualization__wrapper) {
+      display: none !important;
+    }
+
+    /** THIS IS FOR TSVB UNTIL REFACTOR **/
+    .tvbEditorVisualization {
+      position: static !important;
+    }
+    .visualize .tvbVisTimeSeries__legendToggle {
+      /* all non-content rows in interface */
+      display: none;
+    }
+
+    .tvbEditor--hideForReporting {
+      /* all non-content rows in interface */
+      display: none;
+    }
+    /**  END TSVB BAD BAD HACKS **/
+
+    /* remove left padding from visualizations so that map lines up with .leaflet-container and
+    *  setting the position to be fixed and to take up the entire screen, because some zoom levels/viewports
+    *  are triggering the media breakpoints that cause the .visEditor__canvas to take up more room than the viewport */
+
+    .visEditor .visEditor__canvas {
+      padding-left: 0;
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+    }
+
+    /** Visualization tweaks */
+
+    /* hide unusable controls */
+    .visualize .visLegend__toggle,
+    .visualize .kbnAggTable__controls,
+    .visualize .leaflet-container .leaflet-top.leaflet-left,
+    .visualize paginate-controls /* page numbers */ {
+      display: none;
+    }
+
+    /* Ensure the min-height of the small breakpoint isn't used */
+    .vis-editor visualization {
+      min-height: 0 !important;
+    }
+  `,
+};
 
 /**
  * Visualizations Plugin - public
@@ -346,16 +413,15 @@ export class VisualizationsPlugin
           contentManagement: pluginsStart.contentManagement,
         };
 
-        params.element.classList.add('visAppWrapper');
+        params.element.classList.add(styles.visAppWrapper);
         if (pluginsStart.screenshotMode.isScreenshotMode()) {
-          params.element.classList.add('visEditorScreenshotModeActive');
-          // @ts-expect-error TS error, cannot find type declaration for scss
-          await import('./visualize_screenshot_mode.scss');
+          params.element.classList.add(styles.visEditorScreenshotMode);
+          injectGlobal(styles.globalScreenshotMode);
         }
         const unmount = renderApp(params, services);
         return () => {
           data.search.session.clear();
-          params.element.classList.remove('visAppWrapper');
+          params.element.classList.remove(styles.visAppWrapper);
           unlistenParentHistory();
           unmount();
           appUnMounted();
