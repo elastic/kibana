@@ -9714,6 +9714,8 @@ components:
               properties:
                 field:
                   $ref: '#/components/schemas/NonEmptyString'
+                negate:
+                  type: boolean
                 type:
                   enum:
                     - mapping
