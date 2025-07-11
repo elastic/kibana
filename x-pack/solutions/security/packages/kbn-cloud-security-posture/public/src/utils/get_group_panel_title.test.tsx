@@ -5,25 +5,29 @@
  * 2.0.
  */
 
-import React from 'react';
+// React is needed for JSX in the tests
+import { render } from '@testing-library/react';
+import { RawBucket } from '@kbn/grouping/src';
 import { getGroupPanelTitle } from './get_group_panel_title';
 
 describe('getGroupPanelTitle', () => {
-  it('should return bucket key as string when no aggregationField is provided', () => {
+  it('should display bucket key as string when no aggregationField is provided', () => {
     const bucket = {
       key_as_string: 'test-id',
       doc_count: 5,
     };
-    
-    const result = getGroupPanelTitle(bucket);
-    
-    // We can't compare React elements directly, but we can check the structure
-    expect(result).toBeTruthy();
-    expect(result.type).toBe('strong');
-    expect(result.props.children).toBe('test-id');
+
+    const title = getGroupPanelTitle(
+      bucket as RawBucket<{ key_as_string: string; doc_count: number }>
+    );
+
+    const { container } = render(title);
+
+    expect(container.textContent).toBe('test-id');
+    expect(container.querySelector('strong')).not.toBeNull();
   });
 
-  it('should return "name - id" format when aggregationField is provided', () => {
+  it('should display "name - id" format when aggregationField is provided', () => {
     const bucket = {
       key_as_string: 'test-id',
       doc_count: 5,
@@ -31,16 +35,26 @@ describe('getGroupPanelTitle', () => {
         buckets: [{ key: 'test-name' }],
       },
     };
-    
-    const result = getGroupPanelTitle(bucket, 'resourceName');
-    
-    // We can't compare React elements directly, but we can check the structure
-    expect(result).toBeTruthy();
-    expect(result.type).toBe(React.Fragment);
-    expect(result.props.children).toHaveLength(3);
+
+    const title = getGroupPanelTitle(
+      bucket as RawBucket<{
+        key_as_string: string;
+        doc_count: number;
+        resourceName: { buckets: Array<{ key: string }> };
+      }>,
+      'resourceName'
+    );
+
+    const { container } = render(title);
+
+    expect(container.textContent).toBe('test-name - test-id');
+
+    const strongElement = container.querySelector('strong');
+    expect(strongElement).not.toBeNull();
+    expect(strongElement?.textContent).toBe('test-name');
   });
 
-  it('should return just bucket key when aggregationField is provided but no data exists', () => {
+  it('should display just bucket key when aggregationField is provided but no data exists', () => {
     const bucket = {
       key_as_string: 'test-id',
       doc_count: 5,
@@ -48,11 +62,23 @@ describe('getGroupPanelTitle', () => {
         buckets: [],
       },
     };
-    
-    const result = getGroupPanelTitle(bucket, 'resourceName');
-    
-    expect(result).toBeTruthy();
-    expect(result.type).toBe('strong');
-    expect(result.props.children).toBe('test-id');
+
+    const title = getGroupPanelTitle(
+      bucket as unknown as RawBucket<{
+        key_as_string: string;
+        doc_count: number;
+        resourceName: { buckets: Array<{ key: string }> };
+      }>,
+      'resourceName'
+    );
+
+    const { container } = render(title);
+
+    expect(container.textContent).toBe('test-id');
+    expect(container.textContent).not.toContain(' - ');
+
+    const strongElement = container.querySelector('strong');
+    expect(strongElement).not.toBeNull();
+    expect(strongElement?.textContent).toBe('test-id');
   });
 });

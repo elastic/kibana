@@ -13,7 +13,7 @@ import { GenericBuckets, RawBucket } from '@kbn/grouping/src';
  * otherwise returns just the bucket key as string.
  * This utility is shared between vulnerability and misconfiguration findings.
  */
-export const getGroupPanelTitle = <T extends Record<string, any>>(
+export const getGroupPanelTitle = <T extends Record<string, unknown>>(
   bucket: RawBucket<T>,
   aggregationField?: keyof T
 ) => {
@@ -24,7 +24,9 @@ export const getGroupPanelTitle = <T extends Record<string, any>>(
   if (aggregationFieldValue) {
     return (
       <>
-        <strong>{aggregationFieldValue}</strong> - {bucket.key_as_string}
+        <strong>{aggregationFieldValue}</strong>
+        {' - '}
+        {bucket.key_as_string}
       </>
     );
   }
