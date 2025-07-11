@@ -29,7 +29,7 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Adds a tooltip to the **Last activity** column in Agent list UI [#224850]({{kib-pull}}224850).
 
 **Machine Learning**:
-* Improves error messages in the AI Connector creation UI and ensures they're surfaced in {kib} [#221859]({{kib-pull}}221859).
+* Improves error messages in the AI Connector creation UI and ensures they're surfaced in {{kib}} [#221859]({{kib-pull}}221859).
 
 
 ### Fixes [kibana-9.0.4-fixes]
