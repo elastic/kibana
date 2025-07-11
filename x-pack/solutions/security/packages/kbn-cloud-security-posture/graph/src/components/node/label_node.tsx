@@ -26,7 +26,6 @@ export const LabelNode = memo<NodeProps>((props: NodeProps) => {
   const { id, color, label, interactive, nodeClick, expandButtonClick } =
     props.data as LabelNodeViewModel;
   const text = label ? label : id;
-  const labelWidth = NODE_LABEL_WIDTH;
 
   return (
     <LabelNodeContainer>
@@ -46,13 +45,13 @@ export const LabelNode = memo<NodeProps>((props: NodeProps) => {
               margin-top: -${ACTUAL_LABEL_HEIGHT}px;
             `}
             height={ACTUAL_LABEL_HEIGHT}
-            width={labelWidth}
+            width={NODE_LABEL_WIDTH}
             onClick={(e) => nodeClick?.(e, props)}
           />
           <NodeExpandButton
             color={color}
             onClick={(e, unToggleCallback) => expandButtonClick?.(e, props, unToggleCallback)}
-            x={`${labelWidth}px`}
+            x={`${NODE_LABEL_WIDTH}px`}
             y={`${
               -ACTUAL_LABEL_HEIGHT + (ACTUAL_LABEL_HEIGHT - NodeExpandButton.ExpandButtonSize) / 2
             }px`}

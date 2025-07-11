@@ -11,6 +11,7 @@ import type { EdgeProps, EdgeViewModel } from '../types';
 import { getShapeHandlePosition } from './utils';
 import { getMarkerEnd } from './markers';
 import { useEdgeColor } from './styles';
+import { STACK_NODE_HORIZONTAL_PADDING } from '../constants';
 
 type EdgeColor = EdgeViewModel['color'];
 
@@ -52,7 +53,9 @@ export const DefaultEdge = memo(
     const centerX =
       targetX < sourceX
         ? targetX + xOffset
-        : targetX - xOffset + (isExtraAlignment ? 10 : 0) * (labelToEntity ? 1 : -1);
+        : targetX -
+          xOffset +
+          (isExtraAlignment ? STACK_NODE_HORIZONTAL_PADDING / 2 : 0) * (labelToEntity ? 1 : -1);
 
     const [edgePath] = getSmoothStepPath({
       // sourceX and targetX are adjusted to account for the shape handle position

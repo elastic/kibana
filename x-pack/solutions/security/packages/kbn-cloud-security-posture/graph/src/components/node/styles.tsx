@@ -251,7 +251,7 @@ export const useNodeFillColor = (color: NodeColor | undefined) => {
   return useEuiBackgroundColor(fillColor);
 };
 
-export const GroupStyleOverride = (size?: {
+export const GroupStyleOverride = (size: {
   width: number;
   height: number;
 }): React.CSSProperties => ({
@@ -259,6 +259,6 @@ export const GroupStyleOverride = (size?: {
   padding: 0,
   border: '0px solid',
   boxShadow: 'none',
-  width: size?.width ?? 140,
-  height: size?.height ?? 75,
+  width: size.width,
+  height: size.height,
 });
