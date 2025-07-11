@@ -31,7 +31,6 @@ export interface FeatureTypeUsage {
   legacy_investigation_fields: number;
   alert_suppression: AlertSuppressionUsage;
 }
-
 export interface RulesTypeUsage {
   query: FeatureTypeUsage;
   threshold: FeatureTypeUsage;
@@ -40,6 +39,8 @@ export interface RulesTypeUsage {
   threat_match: FeatureTypeUsage;
   new_terms: FeatureTypeUsage;
   elastic_total: FeatureTypeUsage;
+  elastic_customized_total: FeatureTypeUsage;
+  elastic_noncustomized_total: FeatureTypeUsage;
   custom_total: FeatureTypeUsage;
   esql: FeatureTypeUsage;
 }
@@ -57,6 +58,7 @@ export interface RuleMetric {
   rule_version: number;
   enabled: boolean;
   elastic_rule: boolean;
+  is_customized: boolean;
   created_on: string;
   updated_on: string;
   alert_count_daily: number;
