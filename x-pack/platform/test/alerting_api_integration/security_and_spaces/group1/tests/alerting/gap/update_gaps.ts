@@ -12,11 +12,13 @@ import { SuperuserAtSpace1 } from '../../../../scenarios';
 import { getUrlPrefix, ObjectRemover, getTestRuleData } from '../../../../../common/lib';
 import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { getEventLog } from '../../../../../common/lib/get_event_log';
+import { getFindGaps } from './utils';
 
 export default function updateGapsTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const retry = getService('retry');
   const logger = getService('log');
+  const findGaps = getFindGaps({ supertest, logger });
 
   // Failing: See https://github.com/elastic/kibana/issues/224475
   describe('update gaps', () => {
@@ -85,14 +87,12 @@ export default function updateGapsTests({ getService }: FtrProviderContext) {
         });
 
       // Verify gap exists and is unfilled
-      const initialGapResponse = await supertest
-        .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/gaps/_find`)
-        .set('kbn-xsrf', 'foo')
-        .send({
-          rule_id: ruleId,
-          start: gapStart,
-          end: gapEnd,
-        });
+      const initialGapResponse = await findGaps({
+        ruleId,
+        start: gapStart,
+        end: gapEnd,
+        spaceId: space.id,
+      });
 
       expect(initialGapResponse.statusCode).to.eql(200);
       expect(initialGapResponse.body.total).to.eql(1);
@@ -119,14 +119,12 @@ export default function updateGapsTests({ getService }: FtrProviderContext) {
 
       await retry.try(async () => {
         // Verify gap is now filled
-        const finalGapResponse = await supertest
-          .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/gaps/_find`)
-          .set('kbn-xsrf', 'foo')
-          .send({
-            rule_id: ruleId,
-            start: gapStart,
-            end: gapEnd,
-          });
+        const finalGapResponse = await findGaps({
+          ruleId,
+          start: gapStart,
+          end: gapEnd,
+          spaceId: space.id,
+        });
 
         expect(finalGapResponse.statusCode).to.eql(200);
         expect(finalGapResponse.body.total).to.eql(1);
@@ -183,14 +181,12 @@ export default function updateGapsTests({ getService }: FtrProviderContext) {
 
       // Verify intervals are marked as in_progress immediately
       await retry.try(async () => {
-        const inProgressResponse = await supertest
-          .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/gaps/_find`)
-          .set('kbn-xsrf', 'foo')
-          .send({
-            rule_id: ruleId,
-            start: gapStart,
-            end: gapEnd,
-          });
+        const inProgressResponse = await findGaps({
+          ruleId,
+          start: gapStart,
+          end: gapEnd,
+          spaceId: space.id,
+        });
 
         expect(inProgressResponse.statusCode).to.eql(200);
         expect(inProgressResponse.body.total).to.eql(1);
@@ -223,14 +219,12 @@ export default function updateGapsTests({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'foo')
           .send({});
 
-        const finalGapResponse = await supertest
-          .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/gaps/_find`)
-          .set('kbn-xsrf', 'foo')
-          .send({
-            rule_id: ruleId,
-            start: gapStart,
-            end: gapEnd,
-          });
+        const finalGapResponse = await findGaps({
+          ruleId,
+          start: gapStart,
+          end: gapEnd,
+          spaceId: space.id,
+        });
 
         expect(finalGapResponse.statusCode).to.eql(200);
         expect(finalGapResponse.body.total).to.eql(1);
@@ -284,14 +278,12 @@ export default function updateGapsTests({ getService }: FtrProviderContext) {
 
       await retry.try(async () => {
         // Verify gap is partially filled
-        const finalGapResponse = await supertest
-          .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/gaps/_find`)
-          .set('kbn-xsrf', 'foo')
-          .send({
-            rule_id: ruleId,
-            start: gapStart,
-            end: gapEnd,
-          });
+        const finalGapResponse = await findGaps({
+          ruleId,
+          start: gapStart,
+          end: gapEnd,
+          spaceId: space.id,
+        });
 
         expect(finalGapResponse.statusCode).to.eql(200);
         expect(finalGapResponse.body.total).to.eql(1);
@@ -369,14 +361,12 @@ export default function updateGapsTests({ getService }: FtrProviderContext) {
 
       await retry.try(async () => {
         // Verify gap is completely filled
-        const finalGapResponse = await supertest
-          .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/gaps/_find`)
-          .set('kbn-xsrf', 'foo')
-          .send({
-            rule_id: ruleId,
-            start: fiveDaysGapStart.toISOString(),
-            end: fiveDaysGapEnd,
-          });
+        const finalGapResponse = await findGaps({
+          ruleId,
+          start: fiveDaysGapStart.toISOString(),
+          end: fiveDaysGapEnd,
+          spaceId: space.id,
+        });
 
         expect(finalGapResponse.statusCode).to.eql(200);
         expect(finalGapResponse.body.total).to.eql(1);
@@ -434,14 +424,12 @@ export default function updateGapsTests({ getService }: FtrProviderContext) {
 
       // Wait for in-progress state
       await retry.try(async () => {
-        const inProgressResponse = await supertest
-          .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/gaps/_find`)
-          .set('kbn-xsrf', 'foo')
-          .send({
-            rule_id: ruleId,
-            start: gapStart,
-            end: gapEnd,
-          });
+        const inProgressResponse = await findGaps({
+          ruleId,
+          start: gapStart,
+          end: gapEnd,
+          spaceId: space.id,
+        });
 
         expect(inProgressResponse.statusCode).to.eql(200);
         expect(inProgressResponse.body.data[0].status).to.eql('unfilled');
@@ -456,14 +444,12 @@ export default function updateGapsTests({ getService }: FtrProviderContext) {
 
       await retry.try(async () => {
         // Verify gap status is updated
-        const finalGapResponse = await supertest
-          .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/gaps/_find`)
-          .set('kbn-xsrf', 'foo')
-          .send({
-            rule_id: ruleId,
-            start: gapStart,
-            end: gapEnd,
-          });
+        const finalGapResponse = await findGaps({
+          ruleId,
+          start: gapStart,
+          end: gapEnd,
+          spaceId: space.id,
+        });
 
         expect(finalGapResponse.statusCode).to.eql(200);
         expect(finalGapResponse.body.total).to.eql(1);
@@ -517,14 +503,12 @@ export default function updateGapsTests({ getService }: FtrProviderContext) {
       expect(scheduleResponse.statusCode).to.eql(200);
 
       await retry.try(async () => {
-        const firstGapResponse = await supertest
-          .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/gaps/_find`)
-          .set('kbn-xsrf', 'foo')
-          .send({
-            rule_id: ruleId,
-            start: gapStart,
-            end: gapEnd,
-          });
+        const firstGapResponse = await findGaps({
+          ruleId,
+          start: gapStart,
+          end: gapEnd,
+          spaceId: space.id,
+        });
 
         const firstGap = firstGapResponse.body.data[0];
         expect(firstGap.status).to.eql('unfilled');
@@ -556,14 +540,12 @@ export default function updateGapsTests({ getService }: FtrProviderContext) {
 
       await retry.try(async () => {
         // Verify gap status is updated
-        const finalGapResponse = await supertest
-          .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/gaps/_find`)
-          .set('kbn-xsrf', 'foo')
-          .send({
-            rule_id: ruleId,
-            start: gapStart,
-            end: gapEnd,
-          });
+        const finalGapResponse = await findGaps({
+          ruleId,
+          start: gapStart,
+          end: gapEnd,
+          spaceId: space.id,
+        });
 
         expect(finalGapResponse.statusCode).to.eql(200);
         expect(finalGapResponse.body.total).to.eql(1);
