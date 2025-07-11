@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { ESQLCommand } from '../../../types';
-import { pipeCompleteItem, commaCompleteItem } from '../../utils/complete_items';
+import { pipeCompleteItem, commaCompleteItem } from '../../complete_items';
 import {
   getSourcesFromCommands,
   getSourceSuggestions,

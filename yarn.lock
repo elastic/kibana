@@ -4145,7 +4145,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/cloud-integration-saml-provider-plugin@link:x-pack/test/cloud_integration/plugins/saml_provider":
+"@kbn/cloud-integration-saml-provider-plugin@link:x-pack/platform/test/cloud_integration/plugins/saml_provider":
   version "0.0.0"
   uid ""
 
@@ -5294,6 +5294,10 @@
   uid ""
 
 "@kbn/data-search-plugin@link:src/platform/test/plugin_functional/plugins/data_search":
+  version "0.0.0"
+  uid ""
+
+"@kbn/data-service-server@link:src/platform/packages/shared/kbn-data-service-server":
   version "0.0.0"
   uid ""
 

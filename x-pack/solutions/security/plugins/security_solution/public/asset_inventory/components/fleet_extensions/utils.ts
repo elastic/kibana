@@ -22,7 +22,6 @@ import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import {
   SUPPORTED_CLOUDBEAT_INPUTS,
   ASSET_POLICY_TEMPLATE,
-  ASSET_NAMESPACE,
   TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR,
   TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR,
   SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS,
@@ -144,7 +143,6 @@ export const getAssetPolicy = (
   inputVars?: Record<string, PackagePolicyConfigRecordEntry>
 ): NewPackagePolicy => ({
   ...newPolicy,
-  namespace: ASSET_NAMESPACE,
   // Enable new policy input and disable all others
   inputs: newPolicy.inputs.map((item) => getAssetInput(item, inputType, inputVars)),
   // Set hidden policy vars
