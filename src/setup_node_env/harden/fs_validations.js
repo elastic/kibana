@@ -145,13 +145,24 @@ function validateFileContent(fileBytes) {
   return true;
 }
 
-/**
- * Validates that the file size is below the maximum allowed size
- * @param {number} fileSize - Size of the file in bytes
- * @returns {boolean} - Returns true if validation passes
- * @throws {Error} - Throws if validation fails
- */
-function validateFileSize(fileSize) {
+function validateFileSize(data) {
+  let fileSize;
+  if (Buffer.isBuffer(data)) {
+    // If data is a Buffer, get its length
+    fileSize = data.length;
+  } else if (typeof data === 'string') {
+    // If data is a string, get its byte length
+    fileSize = Buffer.byteLength(data);
+  } else if (data instanceof Uint8Array) {
+    // If data is a Uint8Array, get its byte length
+    fileSize = data.byteLength;
+  } else if (data && typeof data === 'object' && 'length' in data) {
+    // If data is array-like with length property
+    fileSize = data.length;
+  } else {
+    fileSize = -1;
+  }
+
   if (typeof fileSize !== 'number' || fileSize <= 0) {
     throw new Error(`Invalid file size: ${fileSize}`);
   }
