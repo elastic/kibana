@@ -9,8 +9,8 @@ paths:
       x-labels: [ess, serverless]
       x-codegen-enabled: true
       operationId: PrivMonPrivileges
-      summary: Privileges check on Privilege Monitoring
-
+      summary: Run a privileges check on Privilege Monitoring
+      description: Check if the current user has all required permissions for Privilege Monitoring
       responses:
         '200':
           description: Successful response
@@ -19,8 +19,9 @@ paths:
               schema:
                 $ref: '../common/common.schema.yaml#/components/schemas/EntityAnalyticsPrivileges'
               example:
-                elasticsearch:
-                  index:
-                    '.entity_analytics.monitoring.user-default':
-                      read: true
+                privileges:
+                  elasticsearch:
+                    index:
+                      '.entity_analytics.monitoring.user-default':
+                        read: true
                 has_all_required: true
