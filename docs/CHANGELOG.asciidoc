@@ -129,7 +129,7 @@ Elastic Security solution::
 For the Elastic Security 8.18.4 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
 Kibana platform::
 * Prevents navigation feedback popup from reappearing in each session ({kibana-pull}227199[#227199]).
-* Hides the header and side navigation when printing or exporting the dashboard with **Print layout** selected ({kibana-pull}227095[#227095]).
+* Hides the header and side navigation when printing or exporting a dashboard with **Print layout** selected ({kibana-pull}227095[#227095]).
 Search::
 * Fixes handling of context limit errors in Playground when using the Elastic Managed LLM ({kibana-pull}225360[#225360]).
 
