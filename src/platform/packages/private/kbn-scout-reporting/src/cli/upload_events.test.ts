@@ -62,7 +62,7 @@ describe('uploadAllEventsFromPath', () => {
     );
   });
 
-  it('should throw an error if the provided eventLogPath does not end with .ndjson', async () => {
+  it('should throw an error if the provided eventLogPath is a file and it does not end with .ndjson', async () => {
     jest.spyOn(fs, 'existsSync').mockReturnValue(true);
     jest.spyOn(fs, 'statSync').mockReturnValue({
       isDirectory: () => false,
@@ -80,7 +80,7 @@ describe('uploadAllEventsFromPath', () => {
     );
   });
 
-  it('should log a warning if the provided folder does not contain any .ndjson file', async () => {
+  it('should log a warning if the provided eventLogPath is a directory and it does not contain any .ndjson file', async () => {
     jest.spyOn(fs, 'existsSync').mockReturnValue(true);
     jest.spyOn(fs, 'statSync').mockReturnValue({
       isDirectory: () => true,
@@ -100,7 +100,7 @@ describe('uploadAllEventsFromPath', () => {
     );
   });
 
-  it('should upload the event log file', async () => {
+  it('should upload the event log file if the provided eventLogPath if a file and ends with .ndjson', async () => {
     // assume the provided event log path exists
     jest.spyOn(fs, 'existsSync').mockReturnValue(true);
 
@@ -119,7 +119,7 @@ describe('uploadAllEventsFromPath', () => {
     expect(mockAddEventsFromFile).toHaveBeenCalledWith('existing_event_log.ndjson');
   });
 
-  it('should upload multiple event log files', async () => {
+  it('should upload multiple event log files if the provided eventLogPath is a directory and contains .ndjson files', async () => {
     jest.spyOn(fs, 'existsSync').mockReturnValue(true);
 
     // Simulate directory contents: 2 .ndjson files, 1 .txt file
