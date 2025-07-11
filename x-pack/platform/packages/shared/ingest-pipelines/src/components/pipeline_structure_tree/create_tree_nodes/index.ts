@@ -5,9 +5,4 @@
  * 2.0.
  */
 
-export interface PipelineTreeNode {
-  pipelineName: string;
-  isManaged: boolean;
-  isDeprecated: boolean;
-  children: PipelineTreeNode[];
-}
+export { createTreeNodesFromPipelines } from './create_tree_nodes';

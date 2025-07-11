@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiTreeView } from '@elastic/eui';
+import React, { useState } from 'react';
+import { EuiTreeView, useEuiTheme } from '@elastic/eui';
 import type { PipelineTreeNode } from './types';
 import { createTreeNodesFromPipelines } from './create_tree_nodes';
-import { styles } from './styles';
+import { getStyles } from './styles';
 
 export interface PipelineStructureTreeProps {
   pipelineTree: PipelineTreeNode;
@@ -17,11 +17,17 @@ export interface PipelineStructureTreeProps {
 
 /**
  * A component for a Pipeline structure tree.
- * If a pipeline node has children pipeline nodes, it means that those pipelines
- * are pipeline processors of the current pipeline.
+ * Children pipeline nodes represent Pipeline processors that run the
+ * corresponding pipelines from the children node.
+ * See more at https://www.elastic.co/docs/reference/enrich-processor/pipeline-processor
  */
-export const PipelineStructureTree = (props: PipelineStructureTreeProps) => {
-  const treeNode = createTreeNodesFromPipelines(props.pipelineTree);
+export const PipelineStructureTree = ({ pipelineTree }: PipelineStructureTreeProps) => {
+  const { euiTheme } = useEuiTheme();
+  const styles = getStyles(euiTheme);
+
+  const [selectedPipeline, setSelectedPipeline] = useState(pipelineTree.pipelineName);
+
+  const treeNode = createTreeNodesFromPipelines(pipelineTree, selectedPipeline, setSelectedPipeline);
 
   return <EuiTreeView items={[treeNode]} showExpansionArrows={true} css={styles} />;
 };

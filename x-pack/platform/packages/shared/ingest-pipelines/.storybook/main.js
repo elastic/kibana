@@ -7,7 +7,4 @@
 
 import { defaultConfig } from '@kbn/storybook';
 
-module.exports = {
-  ...defaultConfig,
-  stories: ['../**/*.stories.+(tsx|mdx)'],
-};
+module.exports = defaultConfig;

@@ -6,18 +6,19 @@
  */
 
 import { createTreeNodesFromPipelines } from './create_tree_nodes';
-import { MAX_TREE_LEVEL } from './constants';
-import type { PipelineTreeNode } from './types';
+import { MAX_TREE_LEVEL } from '../constants';
+import type { PipelineTreeNode } from '../types';
 
 describe('createTreeNodesFromPipelines', () => {
   it('creates a single node with no children', () => {
     const input: PipelineTreeNode = {
       pipelineName: 'root',
       isManaged: false,
+      isDeprecated: false,
       children: [],
     };
 
-    const result = createTreeNodesFromPipelines(input);
+    const result = createTreeNodesFromPipelines(input, 'root', () => {});
 
     expect(result.id).toBe('root');
     expect(result.label).toBe('root');
@@ -27,12 +28,26 @@ describe('createTreeNodesFromPipelines', () => {
 
   it('creates a node with a managed icon', () => {
     const input: PipelineTreeNode = {
-      pipelineName: 'secure-pipeline',
+      pipelineName: 'test-pipeline',
       isManaged: true,
+      isDeprecated: false,
       children: [],
     };
 
-    const result = createTreeNodesFromPipelines(input);
+    const result = createTreeNodesFromPipelines(input, 'secure-pipeline', () => {});
+
+    expect(result.icon).toBeTruthy();
+  });
+
+  it('creates a node with a deprecated icon', () => {
+    const input: PipelineTreeNode = {
+      pipelineName: 'test-pipeline',
+      isManaged: false,
+      isDeprecated: true,
+      children: [],
+    };
+
+    const result = createTreeNodesFromPipelines(input, 'secure-pipeline', () => {});
 
     expect(result.icon).toBeTruthy();
   });
@@ -41,17 +56,18 @@ describe('createTreeNodesFromPipelines', () => {
     // Create a deeply nested structure up to MAX_TREE_LEVEL + 2
     const createDeepTree = (depth: number): PipelineTreeNode => {
       if (depth === 0) {
-        return { pipelineName: `leaf`, isManaged: false, children: [] };
+        return { pipelineName: `leaf`, isManaged: false, isDeprecated: false, children: [] };
       }
       return {
         pipelineName: `node-${depth}`,
         isManaged: false,
+        isDeprecated: false,
         children: [createDeepTree(depth - 1)],
       };
     };
 
     const input = createDeepTree(MAX_TREE_LEVEL + 2);
-    const result = createTreeNodesFromPipelines(input);
+    const result = createTreeNodesFromPipelines(input, 'node-0', () => {});
 
     // Traverse to ensure we only went MAX_TREE_LEVEL deep
     let current = result;
@@ -68,14 +84,17 @@ describe('createTreeNodesFromPipelines', () => {
     const input: PipelineTreeNode = {
       pipelineName: 'root',
       isManaged: false,
+      isDeprecated: false,
       children: [
         {
           pipelineName: 'child1',
           isManaged: false,
+          isDeprecated: false,
           children: [
             {
               pipelineName: 'grandchild1',
               isManaged: false,
+              isDeprecated: false,
               children: [],
             },
           ],
@@ -83,7 +102,7 @@ describe('createTreeNodesFromPipelines', () => {
       ],
     };
 
-    const result = createTreeNodesFromPipelines(input);
+    const result = createTreeNodesFromPipelines(input, 'root', () => {});
     expect(result.id).toBe('root');
     expect(result.children![0].id).toBe('child1');
     expect(result.children![0].children![0].id).toBe('grandchild1');

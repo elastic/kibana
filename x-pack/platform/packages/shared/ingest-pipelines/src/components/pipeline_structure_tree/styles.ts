@@ -6,20 +6,41 @@
  */
 
 import { css } from '@emotion/react';
+import { EuiThemeComputed } from '@elastic/eui';
 
-export const styles = css`
-  [class*='cssTreeNode-level-'] {
-    background-color: #ffffff;
-    padding: 20px 10px;
-    border: 1px solid;
+export const getStyles = (euiTheme: EuiThemeComputed) => css`
+  [class*='cssTreeNode-'] {
+    background-color: ${euiTheme.colors.backgroundBasePlain};
+    padding: ${euiTheme.size.base} ${euiTheme.size.m};
+    border: ${euiTheme.border.thin};
     width: 400px;
-    margin: 20px 0px;
+    margin: ${euiTheme.size.base} 0;
   }
 
-  .cssTreeNode-level-2,
-  .cssTreeNode-level-3,
-  .cssTreeNode-level-4,
-  .cssTreeNode-level-5 {
-    margin-left: 15px;
+  [class*='cssTreeNode-']:hover {
+    background-color: ${euiTheme.colors.backgroundTransparentPrimary};
+  }
+
+  [class*='cssTreeNode-children'] {
+    margin-left: ${euiTheme.size.l};
+  }
+
+  
+  // We want to disable EUI's logic for activating nodes but EuiTreeViewItems's 
+  // isActive prop is not working correctly so we temporarily overwrite its active class
+  .euiTreeView__node--active {
+    background-color: ${euiTheme.colors.backgroundBasePlain} !important;
+  }
+
+  .cssTreeNode-root--active,
+  .cssTreeNode-children--active {
+    background-color: ${euiTheme.colors.backgroundLightPrimary} !important;
+    border: ${euiTheme.border.width.thick} solid ${euiTheme.colors.borderBasePrimary};
+  }
+
+  .cssTreeNode-morePipelines {
+    margin-left: ${euiTheme.size.base};
+    background-color: ${euiTheme.colors.backgroundLightPrimary};
+    border: none;
   }
 `;

@@ -11,36 +11,41 @@ import { PipelineStructureTree } from './pipeline_structure_tree';
 
 const meta: Meta<typeof PipelineStructureTree> = {
   component: PipelineStructureTree,
-  title: 'Ingest Pipelines/Structure Tree',
+  title: 'Ingest Pipelines/Pipeline Structure Tree',
 };
 
 export default meta;
 type Story = StoryObj<typeof PipelineStructureTree>;
 
 const pipelineTree = {
-  pipelineName: 'pipeline1',
+  pipelineName: 'logs_kubernetes.container_logs-1.80.2',
   isManaged: true,
   children: [
     {
-      pipelineName: 'pipeline2',
+      pipelineName: 'global@custom',
       isManaged: true,
+      isDeprecated: true,
       children: [
         {
-          pipelineName: 'pipeline5',
+          pipelineName: 'pipeline-level-3',
           isManaged: false,
+          isDeprecated: false,
           children: [
             {
-              pipelineName: 'pipeline6',
+              pipelineName: 'pipeline-level-4',
               isManaged: false,
+              isDeprecated: true,
               children: [
                 {
-                  pipelineName: 'pipeline7',
+                  pipelineName: 'pipeline-level-5',
                   isManaged: true,
+                  isDeprecated: false,
                   children: [
                     {
                       // This node shouldn't be displayed as it is on level 6
-                      pipelineName: 'pipeline8',
+                      pipelineName: 'pipeline-level-6',
                       isManaged: true,
+                      isDeprecated: false,
                       children: [],
                     },
                   ],
@@ -52,13 +57,21 @@ const pipelineTree = {
       ],
     },
     {
-      pipelineName: 'pipeline3',
+      pipelineName: 'logs@custom',
       isManaged: false,
+      isDeprecated: true,
       children: [],
     },
     {
-      pipelineName: 'pipeline4',
+      pipelineName: 'logs_kubernetes.container_logs-default',
       isManaged: true,
+      isDeprecated: false,
+      children: [],
+    },
+    {
+      pipelineName: 'pipeline-level-2',
+      isManaged: true,
+      isDeprecated: false,
       children: [],
     },
   ],

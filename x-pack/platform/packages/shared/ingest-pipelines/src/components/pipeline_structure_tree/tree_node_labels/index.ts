@@ -5,9 +5,5 @@
  * 2.0.
  */
 
-export interface PipelineTreeNode {
-  pipelineName: string;
-  isManaged: boolean;
-  isDeprecated: boolean;
-  children: PipelineTreeNode[];
-}
+export { PipelineTreeNodeLabel } from './pipeline_tree_node_label';
+export { MorePipelinesLabel } from './more_pipelines_label';
