@@ -4,22 +4,14 @@
     "outDir": "target/types",
     "types": [
       "jest",
-      "node",
-      "react"
+      "node"
     ]
   },
   "include": [
     "**/*.ts",
-    "**/*.tsx",
   ],
   "exclude": [
     "target/**/*"
   ],
-  "kbn_references": [
-    "@kbn/es-query",
-    "@kbn/traced-es-client",
-    "@kbn/alerting-plugin",
-    "@kbn/rule-registry-plugin",
-    "@kbn/rule-data-utils",
-  ]
+  "kbn_references": []
 }

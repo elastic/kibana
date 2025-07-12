@@ -4,22 +4,22 @@
     "outDir": "target/types",
     "types": [
       "jest",
-      "node",
-      "react"
+      "node"
     ]
   },
   "include": [
     "**/*.ts",
-    "**/*.tsx",
   ],
   "exclude": [
     "target/**/*"
   ],
   "kbn_references": [
+    "@kbn/aiops-log-pattern-analysis",
+    "@kbn/calculate-auto",
     "@kbn/es-query",
+    "@kbn/es-types",
+    "@kbn/genai-utils-common",
+    "@kbn/inference-common",
     "@kbn/traced-es-client",
-    "@kbn/alerting-plugin",
-    "@kbn/rule-registry-plugin",
-    "@kbn/rule-data-utils",
   ]
 }

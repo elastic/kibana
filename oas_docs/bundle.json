@@ -58841,6 +58841,60 @@
         "x-state": "Technical Preview"
       }
     },
+    "/api/streams/{name}/significant_events/_generate": {
+      "get": {
+        "description": "Generate significant events queries based on the stream data<br/><br/>[Required authorization] Route required privileges: read_stream.",
+        "operationId": "get-streams-name-significant-events-generate",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "connectorId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "additionalProperties": false,
+                    "properties": {},
+                    "type": "object"
+                  },
+                  {
+                    "enum": [
+                      "null"
+                    ],
+                    "nullable": true
+                  },
+                  {
+                    "not": {}
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {},
+        "summary": "Generate significant events",
+        "tags": [
+          "streams"
+        ],
+        "x-state": "Technical Preview"
+      }
+    },
     "/api/streams/{name}/significant_events/_preview": {
       "post": {
         "description": "Preview significant event results based on a given query<br/><br/>[Required authorization] Route required privileges: read_stream.",
