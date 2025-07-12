@@ -27,6 +27,9 @@ import {
   EuiBadge,
   EuiCodeBlock,
   EuiToolTip,
+  EuiButtonIcon,
+  EuiText,
+  EuiSpacer,
 } from '@elastic/eui';
 
 import { Pipeline } from '../../../../common/types';
@@ -51,17 +54,7 @@ export const PipelineDetailsFlyout: FunctionComponent<Props> = ({
   onDeleteClick,
 }) => {
   const [showPopover, setShowPopover] = useState(false);
-  const actionMenuItems = [
-    /**
-     * Edit pipeline
-     */
-    {
-      name: i18n.translate('xpack.ingestPipelines.list.pipelineDetails.editActionLabel', {
-        defaultMessage: 'Edit',
-      }),
-      icon: <EuiIcon type="pencil" />,
-      onClick: () => onEditClick(pipeline.name),
-    },
+  const popoverActions = [
     /**
      * Clone pipeline
      */
@@ -88,24 +81,20 @@ export const PipelineDetailsFlyout: FunctionComponent<Props> = ({
     },
   ];
 
-  const managePipelineButton = (
-    <EuiButton
-      data-test-subj="managePipelineButton"
+  const actionsPopoverButton = (
+    <EuiButtonIcon
+      display="base"
+      size="m"
+      data-test-subj="actionsPopoverButton"
       aria-label={i18n.translate(
-        'xpack.ingestPipelines.list.pipelineDetails.managePipelineActionsAriaLabel',
+        'xpack.ingestPipelines.list.pipelineDetails.popoverPipelineActionsAriaLabel',
         {
-          defaultMessage: 'Manage pipeline',
+          defaultMessage: 'Other actions',
         }
       )}
       onClick={() => setShowPopover((previousBool) => !previousBool)}
-      iconType="arrowUp"
-      iconSide="right"
-      fill
-    >
-      {i18n.translate('xpack.ingestPipelines.list.pipelineDetails.managePipelineButtonLabel', {
-        defaultMessage: 'Manage',
-      })}
-    </EuiButton>
+      iconType="boxesVertical"
+    />
   );
 
   return (
@@ -117,61 +106,57 @@ export const PipelineDetailsFlyout: FunctionComponent<Props> = ({
       maxWidth={550}
     >
       <EuiFlyoutHeader>
-        <EuiFlexGroup alignItems="center" gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <EuiTitle id="pipelineDetailsFlyoutTitle" data-test-subj="title">
-              <h2>{pipeline.name}</h2>
-            </EuiTitle>
-          </EuiFlexItem>
-          {pipeline.deprecated ? (
+        <EuiTitle id="pipelineDetailsFlyoutTitle" data-test-subj="title">
+          <h2>{pipeline.name}</h2>
+        </EuiTitle>
+
+        <EuiSpacer size="s" />
+
+        <EuiFlexGroup alignItems="center" gutterSize="m">
+          {/* Deprecated badge*/}
+          {pipeline.deprecated && (
             <EuiFlexItem grow={false}>
-              {' '}
               <EuiToolTip content={deprecatedPipelineBadge.badgeTooltip}>
                 <EuiBadge color="warning" data-test-subj="isDeprecatedBadge">
                   {deprecatedPipelineBadge.badge}
                 </EuiBadge>
               </EuiToolTip>
             </EuiFlexItem>
-          ) : null}
-          {pipeline.isManaged ? (
-            <EuiFlexItem grow={false}>
-              {' '}
-              <EuiBadge color="hollow">
-                <FormattedMessage
-                  id="xpack.ingestPipelines.list.pipelineDetails.managedBadgeLabel"
-                  defaultMessage="Managed"
-                />
-              </EuiBadge>
-            </EuiFlexItem>
-          ) : null}
-        </EuiFlexGroup>
-      </EuiFlyoutHeader>
+          )}
 
-      <EuiFlyoutBody>
-        <EuiDescriptionList>
-          {/* Pipeline description */}
-          {pipeline.description && (
-            <>
-              <EuiDescriptionListTitle>
-                {i18n.translate('xpack.ingestPipelines.list.pipelineDetails.descriptionTitle', {
-                  defaultMessage: 'Description',
+          {/* Managed badge*/}
+          {pipeline.isManaged && (
+            <EuiFlexItem grow={false}>
+              <EuiText color="subdued" size="s">
+                <EuiIcon type="lock" color="subdued" size="s" />{' '}
+                {i18n.translate('xpack.ingestPipelines.list.pipelineDetails.managedBadgeLabel', {
+                  defaultMessage: 'Managed',
                 })}
-              </EuiDescriptionListTitle>
-              <EuiDescriptionListDescription>{pipeline.description}</EuiDescriptionListDescription>
-            </>
+              </EuiText>
+            </EuiFlexItem>
           )}
 
           {/* Pipeline version */}
           {pipeline.version && (
-            <>
-              <EuiDescriptionListTitle>
+            <EuiFlexItem grow={false}>
+              <EuiText color="subdued" size="s">
                 {i18n.translate('xpack.ingestPipelines.list.pipelineDetails.versionTitle', {
                   defaultMessage: 'Version',
-                })}
-              </EuiDescriptionListTitle>
-              <EuiDescriptionListDescription>
+                })}{' '}
                 {String(pipeline.version)}
-              </EuiDescriptionListDescription>
+              </EuiText>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      </EuiFlyoutHeader>
+
+      <EuiFlyoutBody>
+        <EuiDescriptionList rowGutterSize="m">
+          {/* Pipeline description */}
+          {pipeline.description && (
+            <>
+              <EuiDescriptionListTitle />
+              <EuiDescriptionListDescription>{pipeline.description}</EuiDescriptionListDescription>
             </>
           )}
 
@@ -233,12 +218,31 @@ export const PipelineDetailsFlyout: FunctionComponent<Props> = ({
               })}
             </EuiButtonEmpty>
           </EuiFlexItem>
-          <EuiFlexGroup gutterSize="none" alignItems="center" justifyContent="flexEnd">
+          <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="flexEnd">
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                data-test-subj="editPipelineButton"
+                aria-label={i18n.translate(
+                  'xpack.ingestPipelines.list.pipelineDetails.editPipelineActionsAriaLabel',
+                  {
+                    defaultMessage: 'Edit pipeline',
+                  }
+                )}
+                onClick={() => onEditClick(pipeline.name)}
+              >
+                {i18n.translate(
+                  'xpack.ingestPipelines.list.pipelineDetails.editPipelineButtonLabel',
+                  {
+                    defaultMessage: 'Edit pipeline',
+                  }
+                )}
+              </EuiButton>
+            </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiPopover
                 isOpen={showPopover}
                 closePopover={() => setShowPopover(false)}
-                button={managePipelineButton}
+                button={actionsPopoverButton}
                 panelPaddingSize="none"
                 repositionOnScroll
               >
@@ -248,13 +252,7 @@ export const PipelineDetailsFlyout: FunctionComponent<Props> = ({
                   panels={[
                     {
                       id: 0,
-                      title: i18n.translate(
-                        'xpack.ingestPipelines.list.pipelineDetails.managePipelinePanelTitle',
-                        {
-                          defaultMessage: 'Pipeline options',
-                        }
-                      ),
-                      items: actionMenuItems,
+                      items: popoverActions,
                     },
                   ]}
                 />
