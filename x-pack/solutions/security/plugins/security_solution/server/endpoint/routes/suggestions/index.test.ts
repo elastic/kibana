@@ -982,10 +982,18 @@ describe('when calling the Suggestions route handler', () => {
         };
       });
 
-      it('should respond with forbidden', async () => {
+      it('should respond with forbidden for event filters', async () => {
         await callRoute(SUGGESTIONS_INTERNAL_ROUTE, {
           params: { suggestion_type: 'eventFilters' },
-          authz: { canReadEventFilters: true, canWriteEventFilters: false },
+          authz: { canReadEventFilters: true, canWriteEventFilters: false, canReadTrustedApplications: true, canWriteTrustedApplications: false },
+        });
+
+        expect(mockResponse.forbidden).toBeCalled();
+      });
+      it('should respond with forbidden for trusted apps', async () => {
+        await callRoute(SUGGESTIONS_INTERNAL_ROUTE, {
+          params: { suggestion_type: 'trustedApps' },
+          authz: { canReadEventFilters: true, canWriteEventFilters: false, canReadTrustedApplications: true, canWriteTrustedApplications: false },
         });
 
         expect(mockResponse.forbidden).toBeCalled();

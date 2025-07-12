@@ -21,6 +21,7 @@ import {
 import styled from 'styled-components';
 import {
   ExceptionListType,
+  ExceptionListTypeEnum,
   ListSchema,
   ListOperatorTypeEnum as OperatorTypeEnum,
   OsTypeArray,
@@ -325,9 +326,11 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
     // for event filters forms
     // show extra operators for wildcards when field supports matches
     const doesFieldSupportMatches = entry.field !== undefined && fieldSupportsMatches(entry.field);
-    const isEventFilterList = listType === 'endpoint_events';
+    const isEventFilterList = listType === ExceptionListTypeEnum.ENDPOINT_EVENTS;
+    const isTrustedAppsList = listType === ExceptionListTypeEnum.ENDPOINT_TRUSTED_APPS;
+
     const augmentedOperatorsList =
-      operatorsList && doesFieldSupportMatches && isEventFilterList
+      operatorsList && doesFieldSupportMatches && (isEventFilterList || isTrustedAppsList)
         ? operatorsList
         : operatorsList?.filter((operator) => operator.type !== OperatorTypeEnum.WILDCARD);
 
