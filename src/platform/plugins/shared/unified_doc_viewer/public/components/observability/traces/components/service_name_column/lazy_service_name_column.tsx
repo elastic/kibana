@@ -7,4 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { createObservabilityTracesDataSourceProfileProviders } from './create_profile_providers';
+import { dynamic } from '@kbn/shared-ux-utility';
+
+export const LazyServiceNameColumn = dynamic(() => import('.'));

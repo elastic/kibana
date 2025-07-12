@@ -18,7 +18,7 @@ jest.mock('../../components/field_with_actions/field_hover_popover_action', () =
   ),
 }));
 
-jest.mock('../../components/highlight_field.tsx', () => ({
+jest.mock('../../components/highlight_field', () => ({
   HighlightField: ({
     value,
     formattedValue,

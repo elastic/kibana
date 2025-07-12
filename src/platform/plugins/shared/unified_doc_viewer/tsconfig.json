@@ -47,6 +47,7 @@
     "@kbn/object-utils",
     "@kbn/es-query",
     "@kbn/css-utils",
+    "@kbn/unified-data-table",
   ],
   "exclude": ["target/**/*"]
 }
