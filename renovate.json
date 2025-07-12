@@ -529,6 +529,7 @@
       "labels": [
         "Team:SharedUX",
         "release_note:skip",
+        "effort:high",
         "backport:all-open"
       ],
       "enabled": true
@@ -593,7 +594,8 @@
       "labels": [
         "Team:SharedUX",
         "release_note:skip",
-        "backport:all-open"
+        "backport:all-open",
+        "effort:high"
       ],
       "enabled": true
     },
@@ -2333,7 +2335,8 @@
         "release_note:skip",
         "Team:Search",
         "Team:Enterprise Search",
-        "backport:all-open"
+        "backport:all-open",
+        "effort:high"
       ],
       "minimumReleaseAge": "7 days",
       "enabled": true
@@ -3370,7 +3373,7 @@
       ],
       "minimumReleaseAge": "7 days",
       "enabled": true
-    },    
+    },
     {
       "groupName": "redux-actions",
       "matchDepNames": [
@@ -3938,7 +3941,8 @@
       "labels": [
         "release_note:skip",
         "backport:all-open",
-        "ci:all-cypress-suites"
+        "ci:all-cypress-suites",
+        "effort:high"
       ],
       "minimumReleaseAge": "7 days",
       "enabled": true
