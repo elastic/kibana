@@ -15,7 +15,8 @@ export const getAccountSwitchesEsqlSource = (
 ) => {
   return `FROM ${indexPattern} METADATA _id, _index
     ${getPrivilegedMonitorUsersJoin(namespace)}
-    | WHERE to_lower(process.command_line) RLIKE "(su|sudo su|sudo -i|sudo -s|ssh [^@]+@[^\s]+)"
-    | RENAME process.command_line AS command_process, process.group_leader.user.name AS target_user, process.parent.real_group.name AS group_name, process.real_user.name as privileged_user, host.ip AS host_ip
+    | WHERE to_lower(process.command_line) RLIKE "(su .*|su|sudo su|sudo -i|sudo -s|ssh [^@]+@[^\s]+)"
+    | EVAL target_user = REPLACE(user.effective.name, "\\\\(.*\\\\)", "")
+    | RENAME process.command_line AS command_process, process.parent.real_group.name AS group_name, user.name as privileged_user, host.ip AS host_ip
     | KEEP @timestamp, privileged_user, host_ip, target_user, group_name, command_process, _id, _index`;
 };
