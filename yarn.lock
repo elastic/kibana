@@ -2319,10 +2319,10 @@
     "@elastic/react-search-ui-views" "1.24.1"
     "@elastic/search-ui" "1.24.1"
 
-"@elastic/request-converter@^9.1.0":
-  version "9.1.0"
-  resolved "https://registry.yarnpkg.com/@elastic/request-converter/-/request-converter-9.1.0.tgz#e2d8c601b7b809d56bb601fd5f390e83fb285cd0"
-  integrity sha512-jwjfF+l6MoH84tvExkaSdINBwV1ecAHNqoQRoJ25CY3QK1AliLhWqZ5qriOLxRMxKNeDd7jP2ShD6cEE0RX2jg==
+"@elastic/request-converter@^9.1.2":
+  version "9.1.2"
+  resolved "https://registry.yarnpkg.com/@elastic/request-converter/-/request-converter-9.1.2.tgz#ffc96b4497e9eecf70c422a63b0308c085f14b7d"
+  integrity sha512-7UTpzcKMAAB75ObfUpTvsE1v00rC5zyoZf2f12KkWsxmCZvaG0RLtYXrsxufSJe9SscUqzTeEgdK/tv3ZJNhYQ==
   dependencies:
     base64url "^3.0.1"
     commander "^12.1.0"
