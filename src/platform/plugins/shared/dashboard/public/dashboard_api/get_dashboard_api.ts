@@ -86,7 +86,7 @@ export function getDashboardApi({
     controlGroupManager.api.controlGroupApi$,
     layoutManager.api.children$
   );
-  const settingsManager = initializeSettingsManager(initialState);
+  const settingsManager = initializeSettingsManager(initialState, viewModeManager.api.viewMode$);
   const unifiedSearchManager = initializeUnifiedSearchManager(
     initialState,
     controlGroupManager.api.controlGroupApi$,

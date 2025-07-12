@@ -7,8 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { SETTING_CATEGORY } from './ui_settings';
-export const plugin = async () => {
-  const { PresentationUtilPlugin } = await import('./plugin');
-  return new PresentationUtilPlugin();
+import { Observable } from 'rxjs';
+
+export interface PublishesPauseFetch {
+  isFetchPaused$: Observable<boolean>;
+}
+
+export const apiPublishesPauseFetch = (
+  unknownApi: null | unknown
+): unknownApi is PublishesPauseFetch => {
+  return Boolean(unknownApi && (unknownApi as PublishesPauseFetch)?.isFetchPaused$ !== undefined);
 };
