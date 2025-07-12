@@ -105,6 +105,7 @@ describe('CreateIndexModal', () => {
     await waitFor(() => {
       expect(screen.getByText(`Error creating index: ${errorMsg}`)).toBeInTheDocument();
     });
+    expect(onCreateMock).not.toHaveBeenCalled();
   });
 
   it('changes index mode when select is changed', () => {
