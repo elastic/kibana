@@ -299,7 +299,8 @@ export const getMockMlDatafeedStatsResponse = () => ({
 });
 
 export const getMockRuleSearchResponse = (
-  immutable: boolean = true
+  immutable: boolean = true,
+  isCustomized: boolean = false
 ): SavedObjectsFindResponse<RuleSearchResult, never> =>
   ({
     page: 1,
@@ -342,6 +343,12 @@ export const getMockRuleSearchResponse = (
             note: 'The Azure Filebeat module must be enabled to use this rule.',
             version: 4,
             exceptionsList: [],
+            ruleSource: isCustomized
+              ? {
+                  type: 'external',
+                  isCustomized: true,
+                }
+              : { type: 'internal' },
           },
           schedule: {
             interval: '5m',

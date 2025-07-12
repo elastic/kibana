@@ -5827,12 +5827,12 @@
           },
           {
             "parentPluginId": "@kbn/unified-field-list",
-            "id": "def-public.UnifiedFieldListRestorableState.scrollPosition",
+            "id": "def-public.UnifiedFieldListRestorableState.scrollTop",
             "type": "number",
             "tags": [],
-            "label": "scrollPosition",
+            "label": "scrollTop",
             "description": [
-              "\nScroll position of the field list"
+              "\nScroll position inside the field list"
             ],
             "path": "src/platform/packages/shared/kbn-unified-field-list/src/restorable_state.ts",
             "deprecated": false,

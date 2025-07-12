@@ -8,7 +8,9 @@
 import { anonymizeRecords } from './anonymize_records';
 import { AnonymizationRule } from '@kbn/inference-common';
 import { MlInferenceResponseResult } from '@elastic/elasticsearch/lib/api/types';
-
+import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
+import { RegexWorkerService } from './regex_worker_service';
+import { AnonymizationWorkerConfig } from '../../config';
 const mockEsClient = {
   ml: {
     inferTrainedModel: jest.fn(),
@@ -20,27 +22,36 @@ const setupMockResponse = (entitiesPerDoc: MlInferenceResponseResult[]) => {
     inference_results: entitiesPerDoc,
   });
 };
+const nerRule: AnonymizationRule = {
+  type: 'NER',
+  enabled: true,
+  modelId: 'model-1',
+};
+const nerRule2: AnonymizationRule = {
+  type: 'NER',
+  enabled: true,
+  modelId: 'model-2',
+};
+const regexRule: AnonymizationRule = {
+  type: 'RegExp',
+  enabled: true,
+  entityClass: 'EMAIL',
+  pattern: '[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}',
+};
+
+const testConfig = {
+  enabled: false,
+} as AnonymizationWorkerConfig;
 
 describe('anonymizeRecords', () => {
-  const nerRule: AnonymizationRule = {
-    type: 'NER',
-    enabled: true,
-    modelId: 'model-1',
-  };
-  const nerRule2: AnonymizationRule = {
-    type: 'NER',
-    enabled: true,
-    modelId: 'model-2',
-  };
-  const regexRule: AnonymizationRule = {
-    type: 'RegExp',
-    enabled: true,
-    entityClass: 'EMAIL',
-    pattern: '[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}',
-  };
+  let logger: MockedLogger;
+
+  let regexWorker: RegexWorkerService;
 
   beforeEach(() => {
     jest.resetAllMocks();
+    logger = loggerMock.create();
+    regexWorker = new RegexWorkerService(testConfig, logger);
   });
 
   it('masks values using regex rule', async () => {
@@ -49,6 +60,7 @@ describe('anonymizeRecords', () => {
     const { records, anonymizations } = await anonymizeRecords({
       input,
       anonymizationRules: [regexRule],
+      regexWorker,
       esClient: mockEsClient,
     });
 
@@ -63,6 +75,7 @@ describe('anonymizeRecords', () => {
     await anonymizeRecords({
       input: [{ content: shortText }],
       anonymizationRules: [nerRule],
+      regexWorker,
       esClient: mockEsClient,
     });
 
@@ -80,6 +93,7 @@ describe('anonymizeRecords', () => {
     const { records } = await anonymizeRecords({
       input: [{ content: longText }],
       anonymizationRules: [nerRule],
+      regexWorker,
       esClient: mockEsClient,
     });
 
@@ -134,6 +148,7 @@ describe('anonymizeRecords', () => {
     const { records, anonymizations } = await anonymizeRecords({
       input,
       anonymizationRules: [nerRule, nerRule2],
+      regexWorker,
       esClient: mockEsClient,
     });
 
@@ -156,6 +171,7 @@ describe('anonymizeRecords', () => {
     const result = await anonymizeRecords({
       input,
       anonymizationRules: [regexRule],
+      regexWorker,
       esClient: mockEsClient,
     });
 
@@ -190,6 +206,7 @@ describe('anonymizeRecords', () => {
     const result = await anonymizeRecords({
       input,
       anonymizationRules: [nerRule],
+      regexWorker,
       esClient: mockEsClient,
     });
 
@@ -242,6 +259,7 @@ describe('anonymizeRecords', () => {
     const result = await anonymizeRecords({
       input,
       anonymizationRules: [nerRule, nerRule2],
+      regexWorker,
       esClient: mockEsClient,
     });
 
