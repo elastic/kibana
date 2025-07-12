@@ -53,10 +53,8 @@ jest.mock('../../../id_generator');
 jest.mock('../dimension_panel/reference_editor', () => ({
   ReferenceEditor: () => null,
 }));
-const TARGET_BAR_COUNT = 100;
 
 const CoreStartMock = createCoreStartMock();
-CoreStartMock.uiSettings.get.mockReturnValue(TARGET_BAR_COUNT);
 
 const indexPatternFields = [
   {
@@ -3273,8 +3271,7 @@ describe('state_helpers', () => {
           fromDate: '2022-11-01T00:00:00.000Z',
           toDate: '2022-11-03T00:00:00.000Z',
         },
-        operationDefinitionMap,
-        TARGET_BAR_COUNT
+        operationDefinitionMap
       );
     });
   });

@@ -9,7 +9,6 @@ import type { FormBasedLayer } from '../../../../..';
 import {
   INTERVAL_OP_MISSING_DATE_HISTOGRAM_TO_COMPUTE_INTERVAL,
   INTERVAL_OP_MISSING_TIME_RANGE,
-  INTERVAL_OP_MISSING_UI_SETTINGS_HISTOGRAM_BAR_TARGET,
   TIMERANGE_OP_DATAVIEW_NOT_TIME_BASED,
   TIMERANGE_OP_MISSING_TIME_RANGE,
 } from '../../../../../user_messages_ids';
@@ -50,8 +49,7 @@ describe('context variables', () => {
             'col1',
             createMockedIndexPattern(),
             { fromDate: new Date().toISOString(), toDate: new Date().toISOString() },
-            {},
-            100
+            {}
           )
         ).toEqual(
           expect.arrayContaining([
@@ -70,33 +68,13 @@ describe('context variables', () => {
             'col1',
             createMockedIndexPattern(),
             undefined,
-            {},
-            100
+            {}
           )
         ).toEqual(
           expect.arrayContaining([
             {
               uniqueId: INTERVAL_OP_MISSING_TIME_RANGE,
               message: 'The current time range interval is not available',
-            },
-          ])
-        );
-      });
-
-      it('should return error if no targetBar is passed over', () => {
-        expect(
-          intervalOperation.getErrorMessage!(
-            createLayer('interval'),
-            'col1',
-            createMockedIndexPattern(),
-            { fromDate: new Date().toISOString(), toDate: new Date().toISOString() },
-            {}
-          )
-        ).toEqual(
-          expect.arrayContaining([
-            {
-              uniqueId: INTERVAL_OP_MISSING_UI_SETTINGS_HISTOGRAM_BAR_TARGET,
-              message: 'Missing "histogram:barTarget" value',
             },
           ])
         );
@@ -126,8 +104,7 @@ describe('context variables', () => {
             'col1',
             createMockedIndexPattern(),
             { fromDate: new Date().toISOString(), toDate: new Date().toISOString() },
-            {},
-            100
+            {}
           )
         ).toHaveLength(0);
       });
@@ -142,8 +119,7 @@ describe('context variables', () => {
             'col1',
             createMockedIndexPattern(),
             undefined,
-            {},
-            100
+            {}
           )
         ).toEqual(
           expect.arrayContaining([
@@ -164,8 +140,7 @@ describe('context variables', () => {
             'col1',
             dataView,
             undefined,
-            {},
-            100
+            {}
           )
         ).toEqual(
           expect.arrayContaining([
