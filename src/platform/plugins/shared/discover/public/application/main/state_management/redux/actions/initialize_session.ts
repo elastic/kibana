@@ -34,16 +34,14 @@ import { APP_STATE_URL_KEY } from '../../../../../../common';
 import { TABS_ENABLED } from '../../../../../constants';
 import { selectTabRuntimeState } from '../runtime_state';
 import type { ConnectedCustomizationService } from '../../../../../customizations';
-import { disconnectTab, clearAllTabs } from './tabs';
+import { disconnectTab } from './tabs';
 import { selectTab } from '../selectors';
 
 export interface InitializeSessionParams {
   stateContainer: DiscoverStateContainer;
   customizationService: ConnectedCustomizationService;
-  discoverSessionId: string | undefined;
   dataViewSpec: DataViewSpec | undefined;
   defaultUrlState: DiscoverAppState | undefined;
-  shouldClearAllTabs: boolean | undefined;
 }
 
 export const initializeSession: InternalStateThunkActionCreator<
@@ -55,23 +53,13 @@ export const initializeSession: InternalStateThunkActionCreator<
     initializeSessionParams: {
       stateContainer,
       customizationService,
-      discoverSessionId,
       dataViewSpec,
       defaultUrlState,
-      shouldClearAllTabs,
     },
   }) =>
-  async (
-    dispatch,
-    getState,
-    { services, customizationContext, runtimeStateManager, urlStateStorage }
-  ) => {
+  async (dispatch, getState, { services, runtimeStateManager, urlStateStorage }) => {
     dispatch(disconnectTab({ tabId }));
     dispatch(internalStateSlice.actions.resetOnSavedSearchChange({ tabId }));
-
-    if (TABS_ENABLED && shouldClearAllTabs) {
-      dispatch(clearAllTabs());
-    }
 
     const {
       currentDataView$,
@@ -132,16 +120,13 @@ export const initializeSession: InternalStateThunkActionCreator<
       .getValue()
       .trackPerformanceEvent('discoverLoadSavedSearch');
 
-    const persistedDiscoverSession = discoverSessionId
-      ? await services.savedSearch.get(discoverSessionId)
+    const { persistedDiscoverSession } = getState();
+    const persistedSavedSearch = persistedDiscoverSession?.id
+      ? await services.savedSearch.get(persistedDiscoverSession.id)
       : undefined;
-    // const test = discoverSessionId
-    //   ? await services.savedSearch.getDiscoverSession(discoverSessionId)
-    //   : undefined;
-    const initialQuery =
-      urlState?.query ?? persistedDiscoverSession?.searchSource.getField('query');
+    const initialQuery = urlState?.query ?? persistedSavedSearch?.searchSource.getField('query');
     const isEsqlMode = isOfAggregateQueryType(initialQuery);
-    const discoverSessionDataView = persistedDiscoverSession?.searchSource.getField('index');
+    const discoverSessionDataView = persistedSavedSearch?.searchSource.getField('index');
     const discoverSessionHasAdHocDataView = Boolean(
       discoverSessionDataView && !discoverSessionDataView.isPersisted()
     );
@@ -181,7 +166,7 @@ export const initializeSession: InternalStateThunkActionCreator<
           ? urlState?.dataSource.dataViewId
           : discoverSessionDataView?.id,
         dataViewSpec,
-        savedSearch: persistedDiscoverSession,
+        savedSearch: persistedSavedSearch,
         isEsqlMode,
         services,
         internalState: stateContainer.internalState,
@@ -199,8 +184,8 @@ export const initializeSession: InternalStateThunkActionCreator<
 
     // This must be executed before updateSavedSearch since
     // it updates the Discover session with timefilter values
-    if (persistedDiscoverSession?.timeRestore && dataView.isTimeBased()) {
-      const { timeRange, refreshInterval } = persistedDiscoverSession;
+    if (persistedSavedSearch?.timeRestore && dataView.isTimeBased()) {
+      const { timeRange, refreshInterval } = persistedSavedSearch;
 
       if (timeRange && isTimeRangeValid(timeRange)) {
         services.timefilter.setTime(timeRange);
@@ -215,13 +200,13 @@ export const initializeSession: InternalStateThunkActionCreator<
     // then get an updated copy of the session with the applied initial state
     const initialState = getInitialState({
       initialUrlState: urlState,
-      savedSearch: persistedDiscoverSession,
+      savedSearch: persistedSavedSearch,
       overrideDataView: dataView,
       services,
     });
     const discoverSession = updateSavedSearch({
-      savedSearch: persistedDiscoverSession
-        ? copySavedSearch(persistedDiscoverSession)
+      savedSearch: persistedSavedSearch
+        ? copySavedSearch(persistedSavedSearch)
         : services.savedSearch.getNew(),
       dataView,
       state: initialState,
@@ -277,10 +262,10 @@ export const initializeSession: InternalStateThunkActionCreator<
      * Update state containers
      */
 
-    if (persistedDiscoverSession) {
+    if (persistedSavedSearch) {
       // Set the persisted session first, then assign the
       // updated session to ensure unsaved changes are detected
-      stateContainer.savedSearchState.set(persistedDiscoverSession);
+      stateContainer.savedSearchState.set(persistedSavedSearch);
       stateContainer.savedSearchState.assignNextSavedSearch(discoverSession);
     } else {
       stateContainer.savedSearchState.set(discoverSession);
