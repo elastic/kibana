@@ -42,7 +42,7 @@ export const GridHeader = memo<GridHeaderProps>(
           )}
           iconType={expandAllIconType}
           onClick={() => onExpandCollapseAll()}
-          style={{ marginLeft: '-5px' }}
+          css={{ marginLeft: '-5px' }}
         />
       ),
       [getTestId, expandAllIconType, onExpandCollapseAll]
