@@ -18,11 +18,6 @@ import { ExpandableSection } from './expandable_section';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { getField } from '../../shared/utils';
 import { EventKind } from '../../shared/constants/event_kinds';
-import { useTourContext } from '../../../../common/components/guided_onboarding_tour';
-import {
-  AlertsCasesTourSteps,
-  SecurityStepId,
-} from '../../../../common/components/guided_onboarding_tour/tour_config';
 
 const KEY = 'insights';
 
@@ -33,12 +28,7 @@ export const InsightsSection = memo(() => {
   const { getFieldsData } = useDocumentDetailsContext();
   const eventKind = getField(getFieldsData('event.kind'));
 
-  const { activeStep, isTourShown } = useTourContext();
-  const isGuidedOnboardingTourShown =
-    isTourShown(SecurityStepId.alertsCases) && activeStep === AlertsCasesTourSteps.createCase;
-
-  const expanded =
-    useExpandSection({ title: KEY, defaultValue: false }) || isGuidedOnboardingTourShown;
+  const expanded = useExpandSection({ title: KEY, defaultValue: false });
 
   return (
     <ExpandableSection

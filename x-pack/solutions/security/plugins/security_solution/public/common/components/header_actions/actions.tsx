@@ -36,10 +36,6 @@ import { EventsTdContent } from '../../../timelines/components/timeline/styles';
 import { AlertContextMenu } from '../../../detections/components/alerts_table/timeline_actions/alert_context_menu';
 import { InvestigateInTimelineAction } from '../../../detections/components/alerts_table/timeline_actions/investigate_in_timeline_action';
 import * as i18n from './translations';
-import { useTourContext } from '../guided_onboarding_tour';
-import { AlertsCasesTourSteps, SecurityStepId } from '../guided_onboarding_tour/tour_config';
-import { isDetectionsAlertsTable } from '../top_n/helpers';
-import { GuidedOnboardingTourStep } from '../guided_onboarding_tour/tour_step';
 import { DEFAULT_ACTION_BUTTON_WIDTH, isAlert } from './helpers';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { useNavigateToAnalyzer } from '../../../flyout/document_details/shared/hooks/use_navigate_to_analyzer';
@@ -157,27 +153,9 @@ const ActionsComponent: React.FC<ActionProps> = ({
     navigateToSessionView();
   }, [navigateToSessionView, startTransaction]);
 
-  const { activeStep, isTourShown, incrementStep } = useTourContext();
-
-  const isTourAnchor = useMemo(
-    () =>
-      isTourShown(SecurityStepId.alertsCases) &&
-      eventType === 'signal' &&
-      isDetectionsAlertsTable(timelineId) &&
-      ariaRowindex === 1,
-    [isTourShown, ariaRowindex, eventType, timelineId]
-  );
-
   const onExpandEvent = useCallback(() => {
-    if (
-      isTourAnchor &&
-      activeStep === AlertsCasesTourSteps.expandEvent &&
-      isTourShown(SecurityStepId.alertsCases)
-    ) {
-      incrementStep(SecurityStepId.alertsCases);
-    }
     onEventDetailsPanelOpened();
-  }, [activeStep, incrementStep, isTourAnchor, isTourShown, onEventDetailsPanelOpened]);
+  }, [onEventDetailsPanelOpened]);
 
   const securitySolutionNotesDisabled = useIsExperimentalFeatureEnabled(
     'securitySolutionNotesDisabled'
@@ -232,27 +210,20 @@ const ActionsComponent: React.FC<ActionProps> = ({
     <ActionsContainer data-test-subj="actions-container">
       <>
         {!disableExpandAction && (
-          <GuidedOnboardingTourStep
-            isTourAnchor={isTourAnchor}
-            onClick={onExpandEvent}
-            step={AlertsCasesTourSteps.expandEvent}
-            tourId={SecurityStepId.alertsCases}
-          >
-            <div key="expand-event">
-              <EventsTdContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
-                <EuiToolTip data-test-subj="expand-event-tool-tip" content={i18n.VIEW_DETAILS}>
-                  <EuiButtonIcon
-                    aria-label={i18n.VIEW_DETAILS_FOR_ROW({ ariaRowindex, columnValues })}
-                    data-test-subj="expand-event"
-                    iconType="expand"
-                    onClick={onExpandEvent}
-                    size="s"
-                    color="text"
-                  />
-                </EuiToolTip>
-              </EventsTdContent>
-            </div>
-          </GuidedOnboardingTourStep>
+          <div key="expand-event">
+            <EventsTdContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
+              <EuiToolTip data-test-subj="expand-event-tool-tip" content={i18n.VIEW_DETAILS}>
+                <EuiButtonIcon
+                  aria-label={i18n.VIEW_DETAILS_FOR_ROW({ ariaRowindex, columnValues })}
+                  data-test-subj="expand-event"
+                  iconType="expand"
+                  onClick={onExpandEvent}
+                  size="s"
+                  color="text"
+                />
+              </EuiToolTip>
+            </EventsTdContent>
+          </div>
         )}
         <>
           {!disableTimelineAction && timelineId !== TimelineId.active && (

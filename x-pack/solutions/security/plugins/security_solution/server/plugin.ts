@@ -29,7 +29,6 @@ import { endpointPackagePoliciesStatsSearchStrategyProvider } from './search_str
 import { turnOffPolicyProtectionsIfNotSupported } from './endpoint/migrations/turn_off_policy_protections';
 import { endpointSearchStrategyProvider } from './search_strategy/endpoint';
 import { getScheduleNotificationResponseActionsService } from './lib/detection_engine/rule_response_actions/schedule_notification_response_actions';
-import { siemGuideId, getSiemGuideConfig } from '../common/guided_onboarding/siem_guide_config';
 import {
   createEqlAlertType,
   createEsqlAlertType,
@@ -541,11 +540,6 @@ export class Plugin implements ISecuritySolutionPlugin {
         plugins.cases.attachmentFramework.registerExternalReference({
           id: CASE_ATTACHMENT_TYPE_ID,
         });
-
-        /**
-         * Register a config for the security guide
-         */
-        plugins.guidedOnboarding?.registerGuideConfig(siemGuideId, getSiemGuideConfig());
 
         this.siemMigrationsService.setup({ esClusterClient: coreStart.elasticsearch.client });
       })

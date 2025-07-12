@@ -8,7 +8,6 @@
 import { EuiBadge, EuiButton, EuiButtonEmpty } from '@elastic/eui';
 import React from 'react';
 import { css } from '@emotion/react';
-import { INSTALL_PREBUILT_RULES_ANCHOR } from '../rules_table/rules_table/guided_onboarding/rules_management_tour';
 import * as i18n from './translations';
 import { useGetSecuritySolutionLinkProps } from '../../../../common/components/links';
 import { SecurityPageName } from '../../../../../common';
@@ -39,7 +38,6 @@ export const AddElasticRulesButton = ({
 
   return (
     <ButtonComponent
-      id={INSTALL_PREBUILT_RULES_ANCHOR}
       fill={fill}
       iconType="plusInCircle"
       color={'primary'}
