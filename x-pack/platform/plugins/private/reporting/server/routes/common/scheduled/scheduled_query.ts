@@ -73,10 +73,24 @@ export function transformSingleResponse(
   );
 
   const schedule = so.attributes.schedule;
-  const _rrule = new RRule({
-    ...schedule.rrule,
-    dtstart: new Date(),
-  });
+
+  // get start date
+  let dtstart = new Date();
+  const rruleStart = schedule.rrule.dtstart;
+  if (rruleStart) {
+    try {
+      // if start date is provided and in the future, use it, otherwise use current time
+      const startDateValue = new Date(rruleStart).valueOf();
+      if (startDateValue > Date.now()) {
+        dtstart = new Date(rruleStart);
+      }
+    } catch (e) {
+      logger.debug(
+        `Failed to parse rrule.dtstart for scheduled report next run calculation - default to now ${id}: ${e.message}`
+      );
+    }
+  }
+  const _rrule = new RRule({ ...schedule.rrule, dtstart });
 
   let payload: ReportApiJSON['payload'] | undefined;
   try {
