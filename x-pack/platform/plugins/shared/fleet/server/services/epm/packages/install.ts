@@ -1138,7 +1138,7 @@ export async function restartInstallation(options: {
   pkgVersion: string;
   installSource: InstallSource;
   verificationResult?: PackageVerificationResult;
-  previousVersion?: string;
+  previousVersion?: string | null;
 }) {
   const {
     savedObjectsClient,
@@ -1154,6 +1154,7 @@ export async function restartInstallation(options: {
     install_status: 'installing',
     install_started_at: new Date().toISOString(),
     install_source: installSource,
+    previous_version: previousVersion,
   };
 
   if (verificationResult) {
@@ -1162,10 +1163,6 @@ export async function restartInstallation(options: {
       verification_key_id: null, // unset any previous verification key id
       ...formatVerificationResultForSO(verificationResult),
     };
-  }
-
-  if (previousVersion) {
-    savedObjectUpdate.previous_version = previousVersion;
   }
 
   auditLoggingService.writeCustomSoAuditLog({

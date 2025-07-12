@@ -430,6 +430,11 @@ export const ReauthorizeTransformResponseSchema = schema.arrayOf(
   })
 );
 
+export const RollbackPackageResponseSchema = schema.object({
+  version: schema.string(),
+  success: schema.boolean(),
+});
+
 export const GetInstalledPackagesRequestSchema = {
   query: schema.object({
     dataStreamType: schema.maybe(
@@ -690,5 +695,11 @@ export const GetInputsRequestSchema = {
     }),
     prerelease: schema.maybe(schema.boolean()),
     ignoreUnverified: schema.maybe(schema.boolean()),
+  }),
+};
+
+export const RollbackPackageRequestSchema = {
+  params: schema.object({
+    pkgName: schema.string(),
   }),
 };
