@@ -81,6 +81,7 @@
     "@kbn/projects-solutions-groups",
     "@kbn/telemetry",
     "@kbn/core-pricing-server-internal",
+    "@kbn/security-hardening",
   ],
   "exclude": [
     "target/**/*",

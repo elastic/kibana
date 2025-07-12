@@ -6,8 +6,8 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+const { EventEmitter } = require('events');
 
-import fsEventBus from './fs-event-bus';
-import './prototype';
-export { unsafeConsole } from './console';
-export { fsEventBus };
+const fsEventBus = new EventEmitter();
+
+module.exports = fsEventBus;
