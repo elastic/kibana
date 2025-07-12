@@ -75,7 +75,7 @@ export const ValueExpression = ({
     >
       <div>
         <ClosablePopoverTitle
-          data-test-subj="valueFieldTitle"
+          dataTestSubj="valueFieldTitle"
           onClose={() => setValuePopoverOpen(false)}
         >
           <>{description}</>
