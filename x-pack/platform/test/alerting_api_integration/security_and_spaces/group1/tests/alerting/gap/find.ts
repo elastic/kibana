@@ -31,6 +31,14 @@ export default function findGapsTests({ getService }: FtrProviderContext) {
       await objectRemover.removeAll();
     });
 
+    beforeEach(async () => {
+      await supertest
+        .post(`${getUrlPrefix(apiOptions.spaceId)}/_test/delete_gaps`)
+        .set('kbn-xsrf', 'foo')
+        .send({})
+        .expect(200);
+    });
+
     function getRule(overwrites = {}) {
       return getTestRuleData({
         rule_type_id: 'test.patternFiringAutoRecoverFalse',

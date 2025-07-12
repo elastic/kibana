@@ -811,6 +811,8 @@ export function defineRoutes(
         },
       });
 
+      await eventLogClient.refreshIndex();
+
       try {
         await pRetry(
           async () => {
@@ -830,6 +832,29 @@ export function defineRoutes(
           body: { message: 'Amount of gaps did not increase' },
         });
       }
+    }
+  );
+
+  router.post(
+    {
+      path: '/_test/event_log/refresh',
+      validate: {},
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+    },
+    async (
+      context: RequestHandlerContext,
+      req: KibanaRequest<any, any, any, any>,
+      res: KibanaResponseFactory
+    ) => {
+      const [, { eventLog }] = await core.getStartServices();
+      const eventLogClient = eventLog.getClient(req);
+      await eventLogClient.refreshIndex();
+      return res.ok({ body: { ok: true } });
     }
   );
 
@@ -890,7 +915,9 @@ export function defineRoutes(
       res: KibanaResponseFactory
     ) => {
       try {
+        const [, { eventLog }] = await core.getStartServices();
         const es = (await context.core).elasticsearch.client.asInternalUser;
+        const eventLogClient = eventLog.getClient(req);
 
         await es.deleteByQuery({
           index: '.kibana-event-log*',
@@ -902,6 +929,8 @@ export function defineRoutes(
           conflicts: 'proceed',
           wait_for_completion: true,
         });
+
+        await eventLogClient.refreshIndex();
 
         return res.ok({ body: { ok: true } });
       } catch (err) {
