@@ -102,4 +102,9 @@ export const appReceivedNewExternalProperties = actionCreator<{
     from?: string;
     to?: string;
   };
+
+  /**
+   * The index that the backend should use to find the originating document.
+   */
+  readonly entityIndex: string;
 }>('APP_RECEIVED_NEW_EXTERNAL_PROPERTIES');
