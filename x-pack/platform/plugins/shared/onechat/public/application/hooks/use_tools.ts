@@ -40,3 +40,20 @@ export const useOnechatEsqlTools = () => {
   );
   return { tools: esqlTools, ...rest };
 };
+
+export const useOnechatToolsTags = () => {
+  const { tools, isLoading, error } = useOnechatTools();
+
+  const tags = useMemo(() => {
+    if (isLoading || error) return [];
+
+    const tagSet = tools.reduce((acc, tool) => {
+      tool.meta.tags.forEach((tag) => acc.add(tag));
+      return acc;
+    }, new Set<string>());
+
+    return Array.from(tagSet);
+  }, [tools, isLoading, error]);
+
+  return { tags, isLoading };
+};
