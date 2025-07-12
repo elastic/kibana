@@ -30,6 +30,9 @@ export const scorePipelineIngestConfig: IngestPutPipelineRequest = {
       },
     },
   ],
+  _meta: {
+    managed: true,
+  },
 };
 
 export const latestFindingsPipelineIngestConfig: IngestPutPipelineRequest = {
