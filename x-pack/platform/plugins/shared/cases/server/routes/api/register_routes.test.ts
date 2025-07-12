@@ -94,7 +94,9 @@ describe('registerRoutes', () => {
           return call[0].path === path;
         }) ?? [];
 
+      // @ts-expect-error upgrade typescript v5.4.5
       const result = await registeredRouteHandler(
+        // @ts-expect-error upgrade typescript v5.4.5
         context,
         { headers },
         { customError, badRequest }
@@ -289,7 +291,9 @@ describe('registerRoutes', () => {
     it('adds the warning header', async () => {
       response.ok.mockReturnValue({ status: 200, options: {} });
       const res = await initAndSimulateDeprecationEndpoint();
+      // @ts-expect-error upgrade typescript v5.4.5
       const warningHeader = res.options.headers.warning;
+      // @ts-expect-error upgrade typescript v5.4.5
       const warningValue = extractWarningValueFromWarningHeader(warningHeader);
       expect(warningValue).toBe('Deprecated endpoint');
     });

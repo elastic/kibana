@@ -42,6 +42,7 @@ export const useReduxEsSearch = <
 
   return useMemo(() => {
     return {
+      // @ts-expect-error upgrade typescript v5.4.5
       data: results[name] as ESSearchResponse<DocumentSource, TParams>,
       loading: loadings[name],
       error: errors[name],

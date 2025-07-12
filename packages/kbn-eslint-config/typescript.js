@@ -59,33 +59,24 @@ module.exports = {
             'error',
             { default: 'array-simple', readonly: 'array-simple' },
           ],
-          '@typescript-eslint/ban-types': [
+          // ##
+          // Replacing old @typescript-eslint/ban-types
+          '@typescript-eslint/no-restricted-types': [
             'error',
             {
               types: {
-                SFC: {
-                  message: 'Use FC or FunctionComponent instead.',
-                  fixWith: 'FC',
-                },
-                'React.SFC': {
-                  message: 'Use FC or FunctionComponent instead.',
-                  fixWith: 'React.FC',
-                },
-                StatelessComponent: {
-                  message: 'Use FunctionComponent instead.',
-                  fixWith: 'FunctionComponent',
-                },
-                'React.StatelessComponent': {
-                  message: 'Use FunctionComponent instead.',
-                  fixWith: 'React.FunctionComponent',
-                },
-                // used in the codebase in the wild
-                '{}': false,
-                object: false,
-                Function: false,
+                SFC: 'Use FC or FunctionComponent instead.',
+                'React.SFC': 'Use React.FC instead.',
+                StatelessComponent: 'Use FunctionComponent instead.',
+                'React.StatelessComponent': 'Use React.FunctionComponent instead.',
+                object: 'Avoid using `object` type.',
               },
             },
           ],
+          '@typescript-eslint/no-unsafe-function-type': 'error',
+          '@typescript-eslint/no-wrapper-object-types': 'error',
+          '@typescript-eslint/no-empty-object-type': 'error',
+          // ##
           camelcase: 'off',
           '@typescript-eslint/naming-convention': [
             'error',
