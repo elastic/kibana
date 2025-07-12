@@ -51,7 +51,7 @@ export class ParameterReplacer {
     return map;
   }
 
-  public shouldReplace(node: ReplaceableNodes): boolean {
+  public isReplaceable(node: ReplaceableNodes): boolean {
     if (isFunctionExpression(node)) {
       return node.name.startsWith('?');
     }
@@ -63,7 +63,7 @@ export class ParameterReplacer {
   }
 
   public replace<TNode extends ReplaceableNodes>(node: TNode): TNode {
-    if (!this.shouldReplace(node)) {
+    if (!this.isReplaceable(node)) {
       return node;
     }
 

@@ -22,17 +22,17 @@ export function createPipeline(source: Query): QueryPipeline {
     const replacer = new ParameterReplacer(source.params);
     Walker.walk(queryAst, {
       visitLiteral: (node) => {
-        if (replacer.shouldReplace(node)) {
+        if (replacer.isReplaceable(node)) {
           Object.assign(node, replacer.replace(node));
         }
       },
       visitColumn: (node) => {
-        if (replacer.shouldReplace(node)) {
+        if (replacer.isReplaceable(node)) {
           Object.assign(node, replacer.replace(node));
         }
       },
       visitFunction: (node) => {
-        if (replacer.shouldReplace(node)) {
+        if (replacer.isReplaceable(node)) {
           Object.assign(node, replacer.replace(node));
         }
       },
