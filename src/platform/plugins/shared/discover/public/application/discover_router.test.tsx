@@ -47,7 +47,7 @@ const renderWithRouter = (path: string) => {
   });
   render(
     <Router history={history}>
-      <DiscoverRoutes customizationContext={mockCustomizationContext} />
+      <DiscoverRoutes onAppLeave={jest.fn()} customizationContext={mockCustomizationContext} />
     </Router>
   );
 
