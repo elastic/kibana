@@ -12,8 +12,8 @@
 import type { Observable } from 'rxjs';
 import { Subject } from 'rxjs';
 
-import type { Option } from 'fp-ts/lib/Option';
-import { none } from 'fp-ts/lib/Option';
+import type { Option } from 'fp-ts/Option';
+import { none } from 'fp-ts/Option';
 import type { Logger } from '@kbn/core/server';
 import { TaskErrorSource } from '../task_running';
 import type { Result } from '../lib/result_type';

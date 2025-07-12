@@ -8,8 +8,8 @@
 import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent, ReactNode, useMemo } from 'react';
-import { flow } from 'fp-ts/lib/function';
-import { map } from 'fp-ts/lib/Array';
+import { flow } from 'fp-ts/function';
+import { map } from 'fp-ts/Array';
 import { map as _map, groupBy as _groupBy } from 'lodash';
 
 import {

@@ -8,8 +8,8 @@
 import { i18n } from '@kbn/i18n';
 import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
 
-import { fromNullable, getOrElse } from 'fp-ts/lib/Option';
-import { pipe } from 'fp-ts/lib/pipeable';
+import { fromNullable, getOrElse } from 'fp-ts/Option';
+import { pipe } from 'fp-ts/pipeable';
 
 export type SavedObjectGetter = (
   ...params: Parameters<SavedObjectsClientContract['get']>

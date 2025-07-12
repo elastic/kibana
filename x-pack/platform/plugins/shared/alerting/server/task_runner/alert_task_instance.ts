@@ -6,8 +6,8 @@
  */
 
 import * as t from 'io-ts';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { fold } from 'fp-ts/lib/Either';
+import { pipe } from 'fp-ts/pipeable';
+import { fold } from 'fp-ts/Either';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { ruleParamsSchema } from '@kbn/alerting-state-types';
 import type { SanitizedRule, RuleTaskState, RuleTaskParams, RuleTypeParams } from '../../common';

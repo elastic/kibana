@@ -9,7 +9,7 @@
 
 import { Reducer } from 'react';
 import { produce } from 'immer';
-import { identity } from 'fp-ts/lib/function';
+import { identity } from 'fp-ts/function';
 import { DevToolsSettings, DEFAULT_SETTINGS } from '../../services';
 import { TextObject } from '../../../common/text_object';
 import { SHELL_TAB_ID } from '../containers/main/constants';

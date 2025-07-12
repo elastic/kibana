@@ -8,7 +8,7 @@
 import * as t from 'io-ts';
 import { schema } from '@kbn/config-schema';
 import { CoreSetup, RequestHandler, Logger } from '@kbn/core/server';
-import { isLeft } from 'fp-ts/lib/Either';
+import { isLeft } from 'fp-ts/Either';
 import { formatErrors } from '@kbn/securitysolution-io-ts-utils';
 import {
   getAnnotationByIdRt,
