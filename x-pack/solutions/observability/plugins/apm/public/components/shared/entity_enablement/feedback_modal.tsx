@@ -17,6 +17,7 @@ import {
   EuiPanel,
   EuiText,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { getSurveyFeedbackURL } from '@kbn/observability-shared-plugin/public';
 import { KibanaEnvironmentContext } from '../../../context/kibana_environment_context/kibana_environment_context';
@@ -33,6 +34,7 @@ export function FeedbackModal({
   const { kibanaVersion, isCloudEnv, isServerlessEnv } = kibanaEnvironment;
   const sanitizedPath = getPathForFeedback(window.location.pathname);
   const { euiTheme } = useEuiTheme();
+  const modalTitleId = useGeneratedHtmlId();
 
   return (
     <>
@@ -66,6 +68,8 @@ export function FeedbackModal({
             </EuiButtonEmpty>
           }
           defaultFocusedButton="confirm"
+          aria-labelledby={modalTitleId}
+          titleProps={{ id: modalTitleId }}
         >
           <EuiPanel hasShadow={false}>
             <EuiFlexGroup

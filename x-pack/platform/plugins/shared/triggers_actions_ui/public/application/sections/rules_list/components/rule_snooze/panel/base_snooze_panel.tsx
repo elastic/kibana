@@ -67,6 +67,8 @@ export const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
   hasTitle,
   inPopover = false,
 }) => {
+  const modalTitleId = useGeneratedHtmlId();
+
   const [intervalValue, setIntervalValue] = useState(parseInterval(interval).value);
   const [intervalUnit, setIntervalUnit] = useState(parseInterval(interval).unit);
 
@@ -433,6 +435,8 @@ export const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
       <EuiSpacer size="s" />
       {isRemoveAllModalVisible && (
         <EuiConfirmModal
+          aria-labelledby={modalTitleId}
+          titleProps={{ id: modalTitleId }}
           title={
             <FormattedMessage
               id="xpack.triggersActionsUI.sections.rulesList.removeAllSnoozeSchedules"
@@ -461,6 +465,8 @@ export const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
       )}
       {isCancelModalVisible && (
         <EuiConfirmModal
+          aria-labelledby={modalTitleId}
+          titleProps={{ id: modalTitleId }}
           title={i18n.translate('xpack.triggersActionsUI.sections.rulesList.cancelSnooze', {
             defaultMessage: 'Cancel snooze',
           })}

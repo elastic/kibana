@@ -12,6 +12,7 @@ import {
   EuiIcon,
   EuiLink,
   EuiPopover,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import React, { useState } from 'react';
 
@@ -95,15 +96,19 @@ export const RuleGroupTitle = (props: Props) => {
     </EuiPopover>
   );
 
+  const modalTitleId = useGeneratedHtmlId();
+
   const confirmChangeModal = showConfirmChangeModal ? (
     <EuiConfirmModal
       data-test-subj="confirmRuleChangeModal"
+      aria-labelledby={modalTitleId}
       title={
         <FormattedMessage
           id="xpack.security.management.editRoleMapping.confirmGroupChangePromptTitle"
           defaultMessage="Change group type?"
         />
       }
+      titleProps={{ id: modalTitleId }}
       onCancel={() => {
         setShowConfirmChangeModal(false);
         setPendingNewRule(null);

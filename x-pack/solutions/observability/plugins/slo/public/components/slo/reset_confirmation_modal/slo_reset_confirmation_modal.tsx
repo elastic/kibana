@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiConfirmModal } from '@elastic/eui';
+import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SLODefinitionResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React from 'react';
@@ -23,8 +23,12 @@ export function SloResetConfirmationModal({
   onConfirm,
 }: SloResetConfirmationModalProps) {
   const { mutate: resetSlo } = useResetSlo();
+  const modalTitleId = useGeneratedHtmlId();
+
   return (
     <EuiConfirmModal
+      aria-labelledby={modalTitleId}
+      titleProps={{ id: modalTitleId }}
       buttonColor="danger"
       data-test-subj="sloResetConfirmationModal"
       title={i18n.translate('xpack.slo.resetConfirmationModal.title', {

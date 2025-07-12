@@ -8,7 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
-import { EuiConfirmModal } from '@elastic/eui';
+import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 
 export function confirmModalPromise(
@@ -22,9 +22,13 @@ export function confirmModalPromise(
       defaultMessage: 'Cancel',
     });
 
+    const confirmModalTitleId = useGeneratedHtmlId();
+
     const modal = startServices.overlays.openModal(
       toMountPoint(
         <EuiConfirmModal
+          aria-labelledby={confirmModalTitleId}
+          titleProps={{ id: confirmModalTitleId }}
           onCancel={() => {
             modal.close();
             reject();

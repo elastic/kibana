@@ -13,6 +13,7 @@ import {
   EuiConfirmModal,
   EuiCallOut,
   EuiSpacer,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -61,6 +62,8 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
   tab = EditConnectorTabs.Configuration,
   onConnectorUpdated,
 }) => {
+  const confirmModalTitleId = useGeneratedHtmlId();
+
   const {
     docLinks,
     application: { capabilities },
@@ -364,6 +367,8 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
       </EuiFlyout>
       {showConfirmModal && (
         <EuiConfirmModal
+          aria-labelledby={confirmModalTitleId}
+          titleProps={{ id: confirmModalTitleId }}
           buttonColor="danger"
           data-test-subj="closeConnectorEditConfirm"
           title={i18n.translate(

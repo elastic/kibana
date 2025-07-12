@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiSpacer, EuiConfirmModal, EuiCallOut } from '@elastic/eui';
+import { EuiSpacer, EuiConfirmModal, EuiCallOut, useGeneratedHtmlId } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
@@ -15,12 +15,16 @@ export const ConfirmUpdate = React.memo<{
   onConfirm: () => void;
   onCancel: () => void;
 }>(({ endpointCount, onCancel, onConfirm }) => {
+  const modalTitleId = useGeneratedHtmlId();
+
   return (
     <EuiConfirmModal
-      data-test-subj="policyDetailsConfirmModal"
+      aria-labelledby={modalTitleId}
       title={i18n.translate('xpack.securitySolution.endpoint.policy.details.updateConfirm.title', {
         defaultMessage: 'Save and deploy changes',
       })}
+      titleProps={{ id: modalTitleId }}
+      data-test-subj="policyDetailsConfirmModal"
       onCancel={onCancel}
       onConfirm={onConfirm}
       confirmButtonText={i18n.translate(

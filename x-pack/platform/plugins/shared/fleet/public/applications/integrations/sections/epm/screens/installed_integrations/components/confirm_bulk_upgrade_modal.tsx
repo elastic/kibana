@@ -19,6 +19,7 @@ import {
   EuiText,
   EuiTextColor,
   useEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -52,8 +53,11 @@ export const ConfirmBulkUpgradeModal: React.FunctionComponent<{
 
   const isSingleItem = selectedItems.length === 1;
 
+  const modalTitleId = useGeneratedHtmlId();
+
   return (
     <EuiConfirmModal
+      aria-labelledby={modalTitleId}
       title={
         isSingleItem
           ? i18n.translate('xpack.fleet.installedIntegrations.bulkUpgradeModal.title', {
@@ -74,6 +78,7 @@ export const ConfirmBulkUpgradeModal: React.FunctionComponent<{
               },
             })
       }
+      titleProps={{ id: modalTitleId }}
       confirmButtonText={i18n.translate(
         'xpack.fleet.installedIntegrations.bulkUpgradeModal.confirmButton',
         { defaultMessage: 'Upgrade to latest version' }

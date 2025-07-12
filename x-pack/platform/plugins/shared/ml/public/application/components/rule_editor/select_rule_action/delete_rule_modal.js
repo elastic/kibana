@@ -13,7 +13,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { EuiConfirmModal, EuiLink, EUI_MODAL_CONFIRM_BUTTON } from '@elastic/eui';
+import { EuiConfirmModal, EuiLink, EUI_MODAL_CONFIRM_BUTTON, htmlIdGenerator } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 export class DeleteRuleModal extends Component {
@@ -40,14 +40,18 @@ export class DeleteRuleModal extends Component {
   };
 
   render() {
+    const confirmModalTitleId = htmlIdGenerator()('confirmModalTitle');
+
     let modal;
 
     if (this.state.isModalVisible) {
       modal = (
         <EuiConfirmModal
+          aria-labelledby={confirmModalTitleId}
           title={i18n.translate('xpack.ml.ruleEditor.deleteRuleModal.deleteRuleTitle', {
             defaultMessage: 'Delete rule?',
           })}
+          titleProps={{ id: confirmModalTitleId }}
           onCancel={this.closeModal}
           onConfirm={this.deleteRule}
           buttonColor="danger"

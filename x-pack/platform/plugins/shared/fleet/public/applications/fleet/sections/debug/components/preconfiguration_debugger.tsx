@@ -16,6 +16,7 @@ import {
   EuiButton,
   EuiLink,
   EuiConfirmModal,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { useMutation, useQuery } from '@tanstack/react-query';
 
@@ -123,6 +124,8 @@ export const PreconfigurationDebugger: React.FunctionComponent = () => {
     return response.data;
   });
 
+  const modalTitleId = useGeneratedHtmlId();
+
   return (
     <>
       <EuiText grow={false}>
@@ -205,10 +208,12 @@ export const PreconfigurationDebugger: React.FunctionComponent = () => {
 
       {isResetModalVisible && selectedPolicy && selectedPolicyId && (
         <EuiConfirmModal
+          aria-labelledby={modalTitleId}
           title={i18n.translate('xpack.fleet.debug.preconfigurationDebugger.resetModalTitle', {
             defaultMessage: 'Reset {policyName}',
             values: { policyName: selectedPolicy.name },
           })}
+          titleProps={{ id: modalTitleId }}
           onCancel={() => setIsResetModalVisible(false)}
           onConfirm={() => resetOnePolicyMutation.mutate(selectedPolicyId)}
           isLoading={resetOnePolicyMutation.isLoading}
@@ -231,9 +236,11 @@ export const PreconfigurationDebugger: React.FunctionComponent = () => {
 
       {isResetAllModalVisible && (
         <EuiConfirmModal
+          aria-labelledby={modalTitleId}
           title={i18n.translate('xpack.fleet.debug.preconfigurationDebugger.resetAllModalTitle', {
             defaultMessage: 'Reset all preconfigured policies',
           })}
+          titleProps={{ id: modalTitleId }}
           onCancel={() => setIsResetAllModalVisible(false)}
           onConfirm={() => resetAllPoliciesMutation.mutate()}
           isLoading={resetAllPoliciesMutation.isLoading}
