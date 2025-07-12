@@ -16,6 +16,7 @@ import type {
   SavedObjectsImportFailure,
   Logger,
 } from '@kbn/core/server';
+import type { RulesClient } from '@kbn/alerting-plugin/server/rules_client';
 import { createListStream } from '@kbn/utils';
 import { partition, chunk, once } from 'lodash';
 
@@ -23,6 +24,7 @@ import { getPathParts } from '../../archive';
 import { KibanaAssetType, KibanaSavedObjectType } from '../../../../types';
 import type { AssetReference, Installation, PackageSpecTags } from '../../../../types';
 import type { KibanaAssetReference, PackageInstallContext } from '../../../../../common/types';
+import { MAX_CONCURRENT_PACKAGE_ASSETS } from '../../../../constants';
 import {
   indexPatternTypes,
   getIndexPatternSavedObjects,
@@ -37,8 +39,14 @@ import { appContextService } from '../../..';
 
 import { tagKibanaAssets } from './tag_assets';
 import { getSpaceAwareSaveobjectsClients } from './saved_objects';
+import { installAlertRules, type AlertRuleAsset } from './alert_rules';
 
 const MAX_ASSETS_TO_INSTALL_IN_PARALLEL = 200;
+
+interface ObjectReference {
+  type: string;
+  id: string;
+}
 
 type SavedObjectsImporterContract = Pick<ISavedObjectsImporter, 'import' | 'resolveImportErrors'>;
 const formatImportErrorsForLog = (errors: SavedObjectsImportFailure[]) =>
@@ -46,10 +54,15 @@ const formatImportErrorsForLog = (errors: SavedObjectsImportFailure[]) =>
     errors.map(({ type, id, error }) => ({ type, id, error })) // discard other fields
   );
 const validKibanaAssetTypes = new Set(Object.values(KibanaAssetType));
-type SavedObjectToBe = Required<Pick<SavedObjectsBulkCreateObject, keyof ArchiveAsset>> & {
+
+type SavedObjectKibanaAssetTypes = Exclude<KibanaAssetType, KibanaAssetType.alert>;
+type SavedObjectToBe = Required<
+  Pick<SavedObjectsBulkCreateObject, keyof Omit<SavedObjectAsset, 'assetType'>>
+> & {
   type: KibanaSavedObjectType;
 };
-export type ArchiveAsset = Pick<
+
+type SavedObjectAsset = Pick<
   SavedObject,
   | 'id'
   | 'attributes'
@@ -61,9 +74,25 @@ export type ArchiveAsset = Pick<
   type: KibanaSavedObjectType;
 };
 
+export type ArchiveAsset = SavedObjectAsset | AlertRuleAsset;
+interface SavedObjectAssetEntry {
+  path: string;
+  asset: SavedObjectAsset;
+  assetType: SavedObjectKibanaAssetTypes;
+}
+
+interface AlertRuleAssetEntry {
+  path: string;
+  asset: AlertRuleAsset;
+  assetType: KibanaAssetType.alert;
+}
+
+type ArchiveAssetEntry = SavedObjectAssetEntry | AlertRuleAssetEntry;
+
 // KibanaSavedObjectTypes are used to ensure saved objects being created for a given
 // KibanaAssetType have the correct type
 export const KibanaSavedObjectTypeMapping: Record<KibanaAssetType, KibanaSavedObjectType> = {
+  [KibanaAssetType.alert]: KibanaSavedObjectType.alert,
   [KibanaAssetType.dashboard]: KibanaSavedObjectType.dashboard,
   [KibanaAssetType.indexPattern]: KibanaSavedObjectType.indexPattern,
   [KibanaAssetType.map]: KibanaSavedObjectType.map,
@@ -80,11 +109,11 @@ export const KibanaSavedObjectTypeMapping: Record<KibanaAssetType, KibanaSavedOb
   [KibanaAssetType.osquerySavedQuery]: KibanaSavedObjectType.osquerySavedQuery,
 };
 
-const AssetFilters: Record<string, (kibanaAssets: ArchiveAsset[]) => ArchiveAsset[]> = {
+const AssetFilters: Record<string, (kibanaAssets: ArchiveAssetEntry[]) => ArchiveAssetEntry[]> = {
   [KibanaAssetType.indexPattern]: removeReservedIndexPatterns,
 };
 
-export function createSavedObjectKibanaAsset(asset: ArchiveAsset): SavedObjectToBe {
+export function createSavedObjectKibanaAsset(asset: SavedObjectAsset): SavedObjectToBe {
   // convert that to an object
   const so: Partial<SavedObjectToBe> = {
     type: asset.type,
@@ -109,14 +138,26 @@ export function createSavedObjectKibanaAsset(asset: ArchiveAsset): SavedObjectTo
 export async function installKibanaAssets(options: {
   savedObjectsClient: SavedObjectsClientContract;
   savedObjectsImporter: SavedObjectsImporterContract;
+  alertingRulesClient: RulesClient;
   logger: Logger;
   pkgName: string;
+  spaceId: string;
+  assetTags?: PackageSpecTags[];
   kibanaAssetsArchiveIterator: ReturnType<typeof getKibanaAssetsArchiveIterator>;
-}): Promise<SavedObjectsImportSuccess[]> {
-  const { kibanaAssetsArchiveIterator, savedObjectsClient, savedObjectsImporter, logger } = options;
+}): Promise<Array<ObjectReference | SavedObjectsImportSuccess>> {
+  const {
+    kibanaAssetsArchiveIterator,
+    savedObjectsClient,
+    savedObjectsImporter,
+    alertingRulesClient,
+    logger,
+    pkgName,
+    spaceId,
+    assetTags,
+  } = options;
 
-  let assetsToInstall: ArchiveAsset[] = [];
-  let res: SavedObjectsImportSuccess[] = [];
+  let assetsToInstall: ArchiveAssetEntry[] = [];
+  let res: Array<ObjectReference | SavedObjectsImportSuccess> = [];
 
   const installManagedIndexPatternOnce = once(() =>
     installManagedIndexPattern({
@@ -125,25 +166,55 @@ export async function installKibanaAssets(options: {
     })
   );
 
+  interface InstallGroups {
+    asSavedObjects: SavedObjectAsset[];
+    asAlertRules: AlertRuleAsset[];
+  }
+  const createInstallGroups = (assetEntries: ArchiveAssetEntry[]) => {
+    return assetEntries.reduce<InstallGroups>(
+      (installGroups, assetEntry) => {
+        if (assetEntry.assetType === KibanaAssetType.alert) {
+          installGroups.asAlertRules = [...installGroups.asAlertRules, assetEntry.asset];
+          return installGroups;
+        }
+
+        installGroups.asSavedObjects = [...installGroups.asSavedObjects, assetEntry.asset];
+        return installGroups;
+      },
+      { asSavedObjects: [], asAlertRules: [] }
+    );
+  };
+
   async function flushAssetsToInstall() {
     await installManagedIndexPatternOnce();
+
+    // split assets into SO installs and alert rule installs
+    const { asSavedObjects, asAlertRules } = createInstallGroups(assetsToInstall);
+
+    const installedAlertRules = await installAlertRules({
+      logger,
+      alertingRulesClient,
+      alertRuleAssets: asAlertRules,
+      assetsChunkSize: MAX_CONCURRENT_PACKAGE_ASSETS,
+      context: { pkgName, spaceId, assetTags },
+    });
 
     const installedAssets = await installKibanaSavedObjects({
       logger,
       savedObjectsImporter,
-      kibanaAssets: assetsToInstall,
+      kibanaAssets: asSavedObjects,
       assetsChunkSize: MAX_ASSETS_TO_INSTALL_IN_PARALLEL,
     });
     assetsToInstall = [];
-    res = [...res, ...installedAssets];
+    res = [...res, ...installedAssets, ...installedAlertRules];
   }
 
-  await kibanaAssetsArchiveIterator(async ({ assetType, asset }) => {
-    const assetFilter = AssetFilters[assetType];
+  await kibanaAssetsArchiveIterator(async (entry) => {
+    const assetFilter = AssetFilters[entry.assetType];
     if (assetFilter) {
-      assetsToInstall = [...assetsToInstall, ...assetFilter([asset])];
+      assetsToInstall = [...assetsToInstall, ...assetFilter([entry])];
     } else {
-      assetsToInstall.push(asset);
+      assetsToInstall.push(entry);
     }
 
     if (assetsToInstall.length >= MAX_ASSETS_TO_INSTALL_IN_PARALLEL) {
@@ -188,6 +259,7 @@ export async function createDefaultIndexPatterns(
 
 export async function installKibanaAssetsAndReferencesMultispace({
   savedObjectsClient,
+  alertingRulesClient,
   logger,
   pkgName,
   pkgTitle,
@@ -198,6 +270,7 @@ export async function installKibanaAssetsAndReferencesMultispace({
   installAsAdditionalSpace,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
+  alertingRulesClient: RulesClient;
   logger: Logger;
   pkgName: string;
   pkgTitle: string;
@@ -211,6 +284,7 @@ export async function installKibanaAssetsAndReferencesMultispace({
     // Install in every space => upgrades
     const refs = await installKibanaAssetsAndReferences({
       savedObjectsClient,
+      alertingRulesClient,
       logger,
       pkgName,
       pkgTitle,
@@ -226,6 +300,7 @@ export async function installKibanaAssetsAndReferencesMultispace({
     )) {
       await installKibanaAssetsAndReferences({
         savedObjectsClient,
+        alertingRulesClient,
         logger,
         pkgName,
         pkgTitle,
@@ -241,6 +316,7 @@ export async function installKibanaAssetsAndReferencesMultispace({
 
   return installKibanaAssetsAndReferences({
     savedObjectsClient,
+    alertingRulesClient,
     logger,
     pkgName,
     pkgTitle,
@@ -254,6 +330,7 @@ export async function installKibanaAssetsAndReferencesMultispace({
 
 export async function installKibanaAssetsAndReferences({
   savedObjectsClient,
+  alertingRulesClient,
   logger,
   pkgName,
   pkgTitle,
@@ -264,6 +341,7 @@ export async function installKibanaAssetsAndReferences({
   installAsAdditionalSpace,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
+  alertingRulesClient: RulesClient;
   logger: Logger;
   pkgName: string;
   pkgTitle: string;
@@ -287,15 +365,18 @@ export async function installKibanaAssetsAndReferences({
     savedObjectsClient,
     logger,
     savedObjectsImporter,
+    alertingRulesClient,
     pkgName,
+    spaceId,
+    assetTags,
     kibanaAssetsArchiveIterator,
   });
   const assets = importedAssets.map(
-    ({ id, type, destinationId }) =>
+    (asset) =>
       ({
-        id: destinationId ?? id,
-        ...(destinationId ? { originId: id } : {}),
-        type,
+        id: 'destinationId' in asset && asset.destinationId ? asset.destinationId : asset.id,
+        ...('destinationId' in asset && asset.destinationId ? { originId: asset.id } : {}),
+        type: asset.type,
       } as KibanaAssetReference)
   );
   installedKibanaAssetsRefs = await saveKibanaAssetsRefs(
@@ -356,13 +437,7 @@ export const isKibanaAssetType = (path: string) => {
 };
 
 function getKibanaAssetsArchiveIterator(packageInstallContext: PackageInstallContext) {
-  return (
-    onEntry: (entry: {
-      path: string;
-      asset: ArchiveAsset;
-      assetType: KibanaAssetType;
-    }) => Promise<void>
-  ) => {
+  return (onEntry: (entry: ArchiveAssetEntry) => Promise<void>) => {
     return packageInstallContext.archiveIterator.traverseEntries(async (entry) => {
       if (!entry.buffer) {
         return;
@@ -371,11 +446,10 @@ function getKibanaAssetsArchiveIterator(packageInstallContext: PackageInstallCon
       const asset = JSON.parse(entry.buffer.toString('utf8'));
 
       const assetType = getPathParts(entry.path).type as KibanaAssetType;
-      const soType = KibanaSavedObjectTypeMapping[assetType];
       if (!validKibanaAssetTypes.has(assetType)) {
         return;
       }
-
+      const soType = KibanaSavedObjectTypeMapping[assetType];
       if (asset.type === soType) {
         await onEntry({ path: entry.path, assetType, asset });
       }
@@ -423,7 +497,7 @@ export async function installKibanaSavedObjects({
   assetsChunkSize,
   logger,
 }: {
-  kibanaAssets: ArchiveAsset[];
+  kibanaAssets: SavedObjectAsset[];
   savedObjectsImporter: SavedObjectsImporterContract;
   logger: Logger;
   assetsChunkSize?: number;
@@ -479,7 +553,7 @@ async function installKibanaSavedObjectsChunk({
   logger,
   refresh,
 }: {
-  kibanaAssets: ArchiveAsset[];
+  kibanaAssets: SavedObjectAsset[];
   savedObjectsImporter: SavedObjectsImporterContract;
   logger: Logger;
   refresh?: boolean | 'wait_for';
@@ -575,10 +649,10 @@ async function installKibanaSavedObjectsChunk({
 }
 
 // Filter out any reserved index patterns
-function removeReservedIndexPatterns(kibanaAssets: ArchiveAsset[]) {
+function removeReservedIndexPatterns(kibanaAssets: ArchiveAssetEntry[]) {
   const reservedPatterns = indexPatternTypes.map((pattern) => `${pattern}-*`);
 
-  return kibanaAssets.filter((asset) => !reservedPatterns.includes(asset.id));
+  return kibanaAssets.filter((assetEntry) => !reservedPatterns.includes(assetEntry.asset.id));
 }
 
 export function toAssetReference({ id, type }: SavedObject) {
@@ -587,6 +661,6 @@ export function toAssetReference({ id, type }: SavedObject) {
   return reference;
 }
 
-function hasReferences(assetsToInstall: ArchiveAsset[]) {
-  return assetsToInstall.some((asset) => asset.references?.length);
+function hasReferences(assetsToInstall: SavedObjectAsset[]) {
+  return assetsToInstall.some((asset) => asset.references.length);
 }

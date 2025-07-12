@@ -21,6 +21,7 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 import pRetry from 'p-retry';
 import type { LicenseType } from '@kbn/licensing-plugin/server';
+import type { RulesClient } from '@kbn/alerting-plugin/server';
 
 import type {
   KibanaAssetReference,
@@ -40,7 +41,6 @@ import type {
   InstallResult,
   InstallSource,
   InstallType,
-  KibanaAssetType,
   PackageVerificationResult,
   InstallResultStatus,
 } from '../../../types';
@@ -72,8 +72,6 @@ import {
   unpackBufferToAssetsMap,
 } from '../archive';
 import { createArchiveIteratorFromMap } from '../archive/archive_iterator';
-import { toAssetReference } from '../kibana/assets/install';
-import type { ArchiveAsset } from '../kibana/assets/install';
 import type { PackageUpdateEvent } from '../../upgrade_sender';
 import { sendTelemetryEvents, UpdateEventType } from '../../upgrade_sender';
 import { auditLoggingService } from '../../audit_logging';
@@ -177,6 +175,7 @@ export async function ensureInstalledPackage(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgName: string;
   esClient: ElasticsearchClient;
+  alertingRulesClient: RulesClient;
   pkgVersion?: string;
   spaceId?: string;
   force?: boolean;
@@ -186,6 +185,7 @@ export async function ensureInstalledPackage(options: {
     savedObjectsClient,
     pkgName,
     esClient,
+    alertingRulesClient,
     pkgVersion,
     force = false,
     spaceId = DEFAULT_SPACE_ID,
@@ -218,6 +218,7 @@ export async function ensureInstalledPackage(options: {
       pkgkey,
       spaceId,
       esClient,
+      alertingRulesClient,
       neverIgnoreVerificationError: !force,
       force: true, // Always force outdated packages to be installed if a later version isn't installed
       authorizationHeader,
@@ -273,6 +274,7 @@ export async function handleInstallPackageFailure({
   pkgVersion,
   installedPkg,
   esClient,
+  alertingRulesClient,
   spaceId,
   authorizationHeader,
   keepFailedInstallation,
@@ -283,6 +285,7 @@ export async function handleInstallPackageFailure({
   pkgVersion: string;
   installedPkg: SavedObject<Installation> | undefined;
   esClient: ElasticsearchClient;
+  alertingRulesClient: RulesClient;
   spaceId: string;
   authorizationHeader?: HTTPAuthorizationHeader | null;
   keepFailedInstallation?: boolean;
@@ -340,6 +343,7 @@ export async function handleInstallPackageFailure({
         savedObjectsClient,
         pkgkey,
         esClient,
+        alertingRulesClient,
         spaceId,
         authorizationHeader,
         retryFromLastState: true,
@@ -361,6 +365,7 @@ export async function handleInstallPackageFailure({
         savedObjectsClient,
         pkgkey: prevVersion,
         esClient,
+        alertingRulesClient,
         spaceId,
         force: true,
         authorizationHeader,
@@ -397,6 +402,7 @@ interface InstallRegistryPackageParams {
   savedObjectsClient: SavedObjectsClientContract;
   pkgkey: string;
   esClient: ElasticsearchClient;
+  alertingRulesClient: RulesClient;
   spaceId: string;
   force?: boolean;
   neverIgnoreVerificationError?: boolean;
@@ -418,6 +424,7 @@ interface InstallCustomPackageParams {
   pkgName: string;
   datasets: CustomPackageDatasetConfiguration[];
   esClient: ElasticsearchClient;
+  alertingRulesClient: RulesClient;
   spaceId: string;
   force?: boolean;
   authorizationHeader?: HTTPAuthorizationHeader | null;
@@ -426,6 +433,7 @@ interface InstallCustomPackageParams {
 interface InstallUploadedArchiveParams {
   savedObjectsClient: SavedObjectsClientContract;
   esClient: ElasticsearchClient;
+  alertingRulesClient: RulesClient;
   archiveBuffer: Buffer;
   contentType: string;
   spaceId: string;
@@ -461,6 +469,7 @@ async function installPackageFromRegistry({
   savedObjectsClient,
   pkgkey,
   esClient,
+  alertingRulesClient,
   spaceId,
   authorizationHeader,
   force = false,
@@ -561,6 +570,7 @@ async function installPackageFromRegistry({
       installType,
       savedObjectsClient,
       esClient,
+      alertingRulesClient,
       spaceId,
       force,
       packageInstallContext,
@@ -601,6 +611,7 @@ export async function installPackageWithStateMachine(options: {
   installType: InstallType;
   savedObjectsClient: SavedObjectsClientContract;
   esClient: ElasticsearchClient;
+  alertingRulesClient: RulesClient;
   spaceId: string;
   force?: boolean;
   packageInstallContext: PackageInstallContext;
@@ -625,6 +636,7 @@ export async function installPackageWithStateMachine(options: {
     savedObjectsClient,
     force,
     esClient,
+    alertingRulesClient,
     spaceId,
     verificationResult,
     authorizationHeader,
@@ -726,6 +738,7 @@ export async function installPackageWithStateMachine(options: {
       savedObjectTagAssignmentService,
       savedObjectTagClient,
       esClient,
+      alertingRulesClient,
       logger,
       installedPkg,
       packageInstallContext,
@@ -771,6 +784,7 @@ export async function installPackageWithStateMachine(options: {
           installedPkg,
           spaceId,
           esClient,
+          alertingRulesClient,
           authorizationHeader,
           keepFailedInstallation,
         });
@@ -799,6 +813,7 @@ export async function installPackageWithStateMachine(options: {
 async function installPackageByUpload({
   savedObjectsClient,
   esClient,
+  alertingRulesClient,
   archiveBuffer,
   contentType,
   spaceId,
@@ -883,6 +898,7 @@ async function installPackageByUpload({
       installType,
       savedObjectsClient,
       esClient,
+      alertingRulesClient,
       spaceId,
       force: true, // upload has implicit force
       paths,
@@ -921,7 +937,7 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
   }
 
   const logger = appContextService.getLogger();
-  const { savedObjectsClient, esClient } = args;
+  const { savedObjectsClient, esClient, alertingRulesClient } = args;
 
   const authorizationHeader = args.authorizationHeader;
 
@@ -951,6 +967,7 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
       const response = await installPackageByUpload({
         savedObjectsClient,
         esClient,
+        alertingRulesClient,
         archiveBuffer,
         contentType: 'application/zip',
         spaceId,
@@ -970,6 +987,7 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
       savedObjectsClient,
       pkgkey,
       esClient,
+      alertingRulesClient,
       spaceId,
       force,
       neverIgnoreVerificationError,
@@ -995,6 +1013,7 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
     const response = await installPackageByUpload({
       savedObjectsClient,
       esClient,
+      alertingRulesClient,
       archiveBuffer,
       contentType,
       spaceId,
@@ -1011,6 +1030,7 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
       pkgName,
       datasets,
       esClient,
+      alertingRulesClient,
       spaceId,
       force,
       authorizationHeader,
@@ -1027,6 +1047,7 @@ export async function installCustomPackage(
   const {
     savedObjectsClient,
     esClient,
+    alertingRulesClient,
     spaceId,
     pkgName,
     force,
@@ -1077,6 +1098,7 @@ export async function installCustomPackage(
     installType: 'install',
     savedObjectsClient,
     esClient,
+    alertingRulesClient,
     spaceId,
     force,
     paths,
@@ -1237,12 +1259,6 @@ export async function createInstallation(options: {
   return created;
 }
 
-export const kibanaAssetsToAssetsRef = (
-  kibanaAssets: Record<KibanaAssetType, ArchiveAsset[]>
-): KibanaAssetReference[] => {
-  return Object.values(kibanaAssets).flat().map(toAssetReference);
-};
-
 export const saveKibanaAssetsRefs = async (
   savedObjectsClient: SavedObjectsClientContract,
   pkgName: string,
@@ -1301,7 +1317,8 @@ export const saveKibanaAssetsRefs = async (
 
 export async function ensurePackagesCompletedInstall(
   savedObjectsClient: SavedObjectsClientContract,
-  esClient: ElasticsearchClient
+  esClient: ElasticsearchClient,
+  alertingRulesClient: RulesClient
 ) {
   const installingPackages = await getPackageSavedObjects(savedObjectsClient, {
     searchFields: ['install_status'],
@@ -1321,6 +1338,7 @@ export async function ensurePackagesCompletedInstall(
             savedObjectsClient,
             pkgkey,
             esClient,
+            alertingRulesClient,
             spaceId: pkg.attributes.installed_kibana_space_id || DEFAULT_SPACE_ID,
           })
         );

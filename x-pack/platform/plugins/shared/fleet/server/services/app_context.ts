@@ -11,6 +11,7 @@ import { kibanaPackageJson } from '@kbn/repo-info';
 
 import type { HttpServiceSetup, KibanaRequest } from '@kbn/core-http-server';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
+import type { AlertingServerStart } from '@kbn/alerting-plugin/server';
 import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import type {
   EncryptedSavedObjectsClient,
@@ -45,6 +46,7 @@ import type {
   PostAgentPolicyCreateCallback,
   PostAgentPolicyUpdateCallback,
 } from '../types';
+import { KibanaSavedObjectType } from '../types';
 import type { FleetAppContext } from '../plugin';
 import type { TelemetryEventsSender } from '../telemetry/sender';
 import { UNINSTALL_TOKENS_SAVED_OBJECT_TYPE } from '../constants';
@@ -61,6 +63,7 @@ class AppContextService {
   private data: DataPluginStart | undefined;
   private esClient: ElasticsearchClient | undefined;
   private experimentalFeatures: ExperimentalFeatures = allowedExperimentalValues;
+  private alertingStart: AlertingServerStart | undefined;
   private securityCoreStart: SecurityServiceStart | undefined;
   private securitySetup: SecurityPluginSetup | undefined;
   private securityStart: SecurityPluginStart | undefined;
@@ -90,6 +93,7 @@ class AppContextService {
     this.encryptedSavedObjectsStart = appContext.encryptedSavedObjectsStart;
     this.encryptedSavedObjects = appContext.encryptedSavedObjectsStart?.getClient();
     this.encryptedSavedObjectsSetup = appContext.encryptedSavedObjectsSetup;
+    this.alertingStart = appContext.alertingStart;
     this.securityCoreStart = appContext.securityCoreStart;
     this.securitySetup = appContext.securitySetup;
     this.securityStart = appContext.securityStart;
@@ -135,6 +139,10 @@ class AppContextService {
       throw new Error('Encrypted saved object start service not set.');
     }
     return this.encryptedSavedObjects;
+  }
+
+  public getAlerting() {
+    return this.alertingStart!;
   }
 
   public getSecurityCore() {
@@ -203,7 +211,7 @@ class AppContextService {
 
     // soClient as kibana internal users, be careful on how you use it, security is not enabled
     return appContextService.getSavedObjects().getScopedClient(request, {
-      includedHiddenTypes: [UNINSTALL_TOKENS_SAVED_OBJECT_TYPE],
+      includedHiddenTypes: [UNINSTALL_TOKENS_SAVED_OBJECT_TYPE, KibanaSavedObjectType.alert],
       excludedExtensions: [SECURITY_EXTENSION_ID],
     });
   }
