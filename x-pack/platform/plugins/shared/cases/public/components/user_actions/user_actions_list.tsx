@@ -18,6 +18,7 @@ import { useCasesContext } from '../cases_context/use_cases_context';
 import { builderMap } from './builder';
 import { useCaseViewParams } from '../../common/navigation';
 import { useUserActionsHandler } from './use_user_actions_handler';
+import { scaledMarkdownImages } from '../utils';
 
 const getCommentListCss = (euiTheme: EuiThemeComputed<{}>) => css`
   & .userAction__comment.outlined .euiCommentEvent {
@@ -25,6 +26,8 @@ const getCommentListCss = (euiTheme: EuiThemeComputed<{}>) => css`
     margin: 0.5em;
     transition: 0.8s;
   }
+
+  ${scaledMarkdownImages}
 
   & .draftFooter {
     & .euiCommentEvent__body {

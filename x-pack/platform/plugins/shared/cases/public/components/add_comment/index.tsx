@@ -200,6 +200,7 @@ export const AddComment = React.memo(
                   ref: editorRef,
                   id,
                   draftStorageKey,
+                  caseId,
                   idAria: 'caseComment',
                   isDisabled: isLoading,
                   dataTestSubj: 'add-comment',
