@@ -7,6 +7,7 @@
 
 import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import type { FilterControlConfig } from '@kbn/alerts-ui-shared';
+import { z } from '@kbn/zod';
 import * as i18n from './translations';
 
 export { SecurityPageName } from '@kbn/security-solution-navigation';
@@ -517,3 +518,11 @@ export const JEST_ENVIRONMENT = typeof jest !== 'undefined';
  * The tag to mark promotion rules that are related to the AI for SOC integrations
  */
 export const PROMOTION_RULE_TAG = 'Promotion';
+
+export const AlertClosingReasonSchema = z.enum([
+  'FALSE_POSITIVE',
+  'DUPLICATE',
+  'INVESTIGATION_REQUIRED',
+]);
+export type AlertClosingReason = z.infer<typeof AlertClosingReasonSchema>;
+export const AlertClosingReasonValues = AlertClosingReasonSchema.enum;
