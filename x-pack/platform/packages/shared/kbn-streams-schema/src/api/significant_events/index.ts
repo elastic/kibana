@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Observable } from 'rxjs';
+import { ServerSentEventBase } from '@kbn/sse-utils';
 import { StreamQueryKql } from '../../queries';
 
 /**
@@ -40,8 +42,19 @@ type SignificantEventsPreviewResponse = Pick<
   'occurrences' | 'change_points' | 'kql'
 >;
 
+interface GeneratedSignificantEventQuery {
+  title: string;
+  kql: string;
+}
+
+type SignificantEventsGenerateResponse = Observable<
+  ServerSentEventBase<'generated_queries', { query: GeneratedSignificantEventQuery }>
+>;
+
 export type {
   SignificantEventsResponse,
   SignificantEventsGetResponse,
   SignificantEventsPreviewResponse,
+  GeneratedSignificantEventQuery,
+  SignificantEventsGenerateResponse,
 };

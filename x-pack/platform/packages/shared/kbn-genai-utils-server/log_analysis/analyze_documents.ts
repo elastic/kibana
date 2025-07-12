@@ -6,11 +6,10 @@
  */
 
 import { mapValues } from 'lodash';
-import { mergeSampleDocumentsWithFieldCaps } from '@kbn/observability-utils-common/llm/log_analysis/merge_sample_documents_with_field_caps';
-import { DocumentAnalysis } from '@kbn/observability-utils-common/llm/log_analysis/document_analysis';
+import { DocumentAnalysis } from '@kbn/genai-utils-common/log_analysis/document_analysis';
 import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
-import { kqlQuery } from '../es/queries/kql_query';
-import { rangeQuery } from '../es/queries/range_query';
+import { kqlQuery, rangeQuery } from '@kbn/es-query';
+import { mergeSampleDocumentsWithFieldCaps } from './merge_sample_documents_with_field_caps';
 
 export async function analyzeDocuments({
   esClient,
@@ -40,6 +39,7 @@ export async function analyzeDocuments({
         index,
         size: 1000,
         track_total_hits: true,
+        timeout: '5s',
         query: {
           bool: {
             must: [...kqlQuery(kuery), ...rangeQuery(start, end)],

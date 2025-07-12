@@ -9,7 +9,13 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { AssetImage } from '../asset_image';
 
-export function SignificantEventsViewEmptyState({ onAddClick }: { onAddClick?: () => void }) {
+export function SignificantEventsViewEmptyState({
+  onAddClick,
+  onGenerateClick,
+}: {
+  onAddClick?: () => void;
+  onGenerateClick?: () => void;
+}) {
   return (
     <EuiFlexGroup direction="column" alignItems="center" justifyContent="center">
       <AssetImage type="significantEventsEmptyState" size="s" />
@@ -35,6 +41,17 @@ export function SignificantEventsViewEmptyState({ onAddClick }: { onAddClick?: (
         >
           {i18n.translate('xpack.streams.significantEvents.emptyState.addEvent', {
             defaultMessage: 'Add new event',
+          })}
+        </EuiButton>
+        <EuiButton
+          iconType="sparkles"
+          fill
+          onClick={() => {
+            onGenerateClick?.();
+          }}
+        >
+          {i18n.translate('xpack.streams.significantEvents.emptyState.generateEvents', {
+            defaultMessage: 'Generate new events',
           })}
         </EuiButton>
       </EuiFlexGroup>
