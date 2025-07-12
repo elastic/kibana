@@ -25,6 +25,8 @@ import {
   TRANSACTION_ID,
   TRANSACTION_NAME,
   TIMESTAMP_US,
+  SPAN_TYPE,
+  SPAN_SUBTYPE,
 } from '../../../common/es_fields/apm';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import type { TraceItem } from '../../../common/waterfall/unified_trace_item';
@@ -45,6 +47,8 @@ const optionalFields = asMutableArray([
   PARENT_ID,
   STATUS_CODE,
   TIMESTAMP_US,
+  SPAN_TYPE,
+  SPAN_SUBTYPE,
 ] as const);
 
 export function getErrorCountByDocId(unifiedTraceErrors: UnifiedTraceErrors) {
@@ -160,6 +164,7 @@ export async function getUnifiedTraceItems({
             : false),
         parentId: event.parent?.id,
         serviceName: event.service.name,
+        spanType: event.span?.subtype || event.span?.type,
       } as TraceItem;
     })
     .filter((_) => _) as TraceItem[];

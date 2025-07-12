@@ -10,6 +10,7 @@ import styled from '@emotion/styled';
 import { i18n } from '@kbn/i18n';
 import type { ReactNode } from 'react';
 import React, { useEffect, useRef, useState } from 'react';
+import type { IWaterfallGetRelatedErrorsHref } from '../../../../../../../common/waterfall/typings';
 import { useApmPluginContext } from '../../../../../../context/apm_plugin/use_apm_plugin_context';
 import { isMobileAgentName, isRumAgentName } from '../../../../../../../common/agent_name';
 import { SPAN_ID, TRACE_ID, TRANSACTION_ID } from '../../../../../../../common/es_fields/apm';
@@ -24,10 +25,7 @@ import { SyncBadge } from './badge/sync_badge';
 import { FailureBadge } from './failure_badge';
 import { OrphanItemTooltipIcon } from './orphan_item_tooltip_icon';
 import { SpanMissingDestinationTooltip } from './span_missing_destination_tooltip';
-import type {
-  IWaterfallGetRelatedErrorsHref,
-  IWaterfallSpanOrTransaction,
-} from './waterfall_helpers/waterfall_helpers';
+import type { IWaterfallSpanOrTransaction } from './waterfall_helpers/waterfall_helpers';
 
 type ItemType = 'transaction' | 'span' | 'error';
 

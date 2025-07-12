@@ -20,13 +20,13 @@ import { WindowScroller, AutoSizer } from 'react-virtualized';
 import type { ListChildComponentProps } from 'react-window';
 import { areEqual, VariableSizeList as List } from 'react-window';
 import { css } from '@emotion/react';
+import type { IWaterfallGetRelatedErrorsHref } from '../../../../../../../common/waterfall/typings';
 import { asBigNumber } from '../../../../../../../common/utils/formatters';
 import type { Margins } from '../../../../../shared/charts/timeline';
 import type {
   IWaterfallNodeFlatten,
   IWaterfall,
   IWaterfallSpanOrTransaction,
-  IWaterfallGetRelatedErrorsHref,
 } from './waterfall_helpers/waterfall_helpers';
 import { WaterfallItem } from './waterfall_item';
 import { WaterfallContextProvider } from './context/waterfall_context';

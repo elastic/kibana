@@ -15,12 +15,12 @@ import React from 'react';
 import { BehaviorSubject, map, merge } from 'rxjs';
 import { isEmpty } from 'lodash';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
+import type { IWaterfallGetRelatedErrorsHref } from '../../../common/waterfall/typings';
 import { ApmEmbeddableContext } from '../embeddable_context';
 import type { EmbeddableDeps } from '../types';
 import { APM_TRACE_WATERFALL_EMBEDDABLE } from './constant';
 import { TraceWaterfallEmbeddable } from './trace_waterfall_embeddable';
 import { FocusedTraceWaterfallEmbeddable } from './focused_trace_waterfall_embeddable';
-import type { IWaterfallGetRelatedErrorsHref } from '../../components/app/transaction_details/waterfall_with_summary/waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
 
 interface BaseProps {
   traceId: string;
