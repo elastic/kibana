@@ -5,18 +5,31 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiSpacer, EuiTab, EuiTabs, EuiTitle } from '@elastic/eui';
+import {
+  EuiSpacer,
+  EuiTab,
+  EuiTabs,
+  EuiTitle,
+  EuiIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonEmpty,
+  useEuiTheme,
+} from '@elastic/eui';
 import { useKnowledgeBase } from '@kbn/ai-assistant';
+import { SolutionView } from '@kbn/spaces-plugin/common';
+import type { TabsRt } from '../config';
 import { useAppContext } from '../../hooks/use_app_context';
 import { SettingsTab } from './settings_tab/settings_tab';
 import { KnowledgeBaseTab } from './knowledge_base_tab';
+import { useKibana } from '../../hooks/use_kibana';
+import { SearchConnectorTab } from './search_connector_tab';
+import { getSolutionSpecificLogos } from '../../helpers/get_solution_specific_logos';
+import { getSolutionSpecificLabels } from '../../helpers/get_solution_specific_labels';
 import { useObservabilityAIAssistantManagementRouterParams } from '../../hooks/use_observability_management_params';
 import { useObservabilityAIAssistantManagementRouter } from '../../hooks/use_observability_management_router';
-import type { TabsRt } from '../config';
-import { SearchConnectorTab } from './search_connector_tab';
-import { useKibana } from '../../hooks/use_kibana';
 
 export function SettingsPage() {
   const { setBreadcrumbs } = useAppContext();
@@ -24,26 +37,53 @@ export function SettingsPage() {
     services: {
       application: { navigateToApp, isAppRegistered },
       serverless,
+      spaces,
+      cloud,
     },
   } = useKibana();
 
   const router = useObservabilityAIAssistantManagementRouter();
   const knowledgeBase = useKnowledgeBase();
+  const { euiTheme } = useEuiTheme();
+
+  const [currentSpaceSolution, setCurrentSpaceSolution] = useState<SolutionView>();
+
+  // Determine the current solution.
+  let currentSolution: SolutionView | undefined;
+  if (serverless) {
+    const projectType = cloud?.serverless?.projectType;
+    currentSolution = projectType === 'observability' ? 'oblt' : 'es';
+  } else {
+    currentSolution = currentSpaceSolution;
+  }
 
   const {
     query: { tab },
   } = useObservabilityAIAssistantManagementRouterParams('/');
 
   useEffect(() => {
+    const getCurrentSpace = async () => {
+      if (spaces) {
+        const space = await spaces.getActiveSpace();
+        setCurrentSpaceSolution(space?.solution);
+      }
+    };
+
+    getCurrentSpace();
+  }, [spaces]);
+
+  const { breadcrumbText, title } = getSolutionSpecificLabels({
+    solution: currentSolution,
+    isServerless: !!serverless,
+  });
+
+  const logos = getSolutionSpecificLogos(currentSolution);
+
+  useEffect(() => {
     if (serverless) {
       serverless.setBreadcrumbs([
         {
-          text: i18n.translate(
-            'xpack.observabilityAiAssistantManagement.breadcrumb.serverless.observability',
-            {
-              defaultMessage: 'AI Assistant for Observability and Search Settings',
-            }
-          ),
+          text: breadcrumbText,
         },
       ]);
     } else {
@@ -58,16 +98,11 @@ export function SettingsPage() {
           },
         },
         {
-          text: i18n.translate(
-            'xpack.observabilityAiAssistantManagement.breadcrumb.observability',
-            {
-              defaultMessage: 'Observability',
-            }
-          ),
+          text: breadcrumbText,
         },
       ]);
     }
-  }, [navigateToApp, serverless, setBreadcrumbs]);
+  }, [breadcrumbText, navigateToApp, serverless, setBreadcrumbs]);
 
   const tabs: Array<{ id: TabsRt; name: string; content: JSX.Element; disabled?: boolean }> = [
     {
@@ -82,7 +117,7 @@ export function SettingsPage() {
       name: i18n.translate(
         'xpack.observabilityAiAssistantManagement.settingsPage.knowledgeBaseLabel',
         {
-          defaultMessage: 'Knowledge base',
+          defaultMessage: 'Knowledge Base',
         }
       ),
       content: <KnowledgeBaseTab />,
@@ -110,18 +145,51 @@ export function SettingsPage() {
 
   return (
     <div data-test-subj="aiAssistantSettingsPage">
-      <EuiTitle size="l">
-        <h2>
-          {i18n.translate(
-            'xpack.observabilityAiAssistantManagement.settingsPage.h2.settingsLabel',
-            {
-              defaultMessage: 'Settings',
-            }
-          )}
-        </h2>
-      </EuiTitle>
+      <EuiFlexGroup
+        alignItems="center"
+        justifyContent="spaceBetween"
+        gutterSize="s"
+        responsive={false}
+      >
+        <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false} direction="row">
+          {logos.map((logo) => (
+            <EuiFlexItem key={logo} grow={false}>
+              <EuiIcon
+                size="xl"
+                type={logo}
+                style={{
+                  backgroundColor: euiTheme.colors.backgroundBasePlain,
+                  borderRadius: '50%',
+                  padding: 6,
+                  boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.12)',
+                }}
+              />
+            </EuiFlexItem>
+          ))}
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="l">
+              <h2>{title}</h2>
+            </EuiTitle>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            size="s"
+            iconType="gear"
+            onClick={() => navigateToApp('management', { path: 'kibana/genAiSettings' })} // TODO: update path when available
+            data-test-subj="genAiSettingsLink"
+          >
+            {i18n.translate(
+              'xpack.observabilityAiAssistantManagement.settingsPage.genAiSettingsLinkLabel',
+              {
+                defaultMessage: 'GenAI Settings',
+              }
+            )}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      </EuiFlexGroup>
 
-      <EuiSpacer size="m" />
+      <EuiSpacer size="l" />
 
       <EuiTabs data-test-subj="settingsPageTabs">
         {tabs

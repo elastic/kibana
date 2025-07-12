@@ -14,6 +14,7 @@ import {
   EuiCallOut,
   EuiCard,
   EuiFlexGrid,
+  EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   EuiLink,
@@ -135,7 +136,22 @@ export function AiAssistantSelectionPage() {
             }
             display="plain"
             hasBorder
-            icon={<EuiIcon size="xxl" type="logoObservability" />}
+            icon={
+              <EuiFlexGroup
+                gutterSize="m"
+                alignItems="center"
+                responsive={false}
+                direction="row"
+                justifyContent="center"
+              >
+                <EuiFlexItem grow={false}>
+                  <EuiIcon size="xxl" type="logoObservability" />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiIcon size="xxl" type="logoEnterpriseSearch" />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            }
             isDisabled={!observabilityAIAssistantEnabled}
             title={i18n.translate(
               'aiAssistantManagementSelection.aiAssistantSelectionPage.observabilityLabel',
