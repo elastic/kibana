@@ -92,6 +92,7 @@ const SummaryComponent: React.FC<Props> = ({
         <EuiToolTip
           content={showAnonymized ? SHOW_REAL_VALUES : SHOW_ANONYMIZED_LABEL}
           data-test-subj="toggleAnonymizedToolTip"
+          disableScreenReaderOutput
         >
           <EuiButtonIcon
             aria-label={showAnonymized ? SHOW_REAL_VALUES : SHOW_ANONYMIZED_LABEL}

@@ -88,7 +88,7 @@ export const FieldHoverActionPopover = ({
         </EuiPopoverTitle>
         <EuiFlexGroup wrap gutterSize="none" alignItems="center" justifyContent="spaceBetween">
           {uiFieldActions.map((action) => (
-            <EuiToolTip content={action.label} key={action.id}>
+            <EuiToolTip content={action.label} key={action.id} disableScreenReaderOutput>
               <EuiButtonIcon
                 data-test-subj="unifiedDocViewerObservabilityTracesFieldHoverActionPopoverButton"
                 size="xs"

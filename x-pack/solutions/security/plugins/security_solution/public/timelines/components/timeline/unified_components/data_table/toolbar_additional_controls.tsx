@@ -76,6 +76,7 @@ export const ToolbarAdditionalControlsComponent: React.FC<Props> = ({ timelineId
         <EuiToolTip
           ref={toolTipRef}
           content={fullScreen ? i18n.EXIT_FULL_SCREEN : i18n.FULL_SCREEN}
+          disableScreenReaderOutput
         >
           <EuiButtonIcon
             aria-label={fullScreen ? i18n.EXIT_FULL_SCREEN : i18n.FULL_SCREEN}

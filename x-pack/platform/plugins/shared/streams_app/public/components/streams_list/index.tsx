@@ -260,6 +260,7 @@ function StreamNode({
             content={i18n.translate('xpack.streams.streamsTable.openInNewTab', {
               defaultMessage: 'Open in new tab',
             })}
+            disableScreenReaderOutput
           >
             <EuiButtonIcon
               data-test-subj="streamsAppStreamNodeButton"
@@ -275,6 +276,7 @@ function StreamNode({
             content={i18n.translate('xpack.streams.streamsTable.openInDiscover', {
               defaultMessage: 'Open in Discover',
             })}
+            disableScreenReaderOutput
           >
             <EuiButtonIcon
               data-test-subj="streamsAppStreamNodeButton"
@@ -289,6 +291,7 @@ function StreamNode({
             content={i18n.translate('xpack.streams.streamsTable.management', {
               defaultMessage: 'Management',
             })}
+            disableScreenReaderOutput
           >
             <EuiButtonIcon
               data-test-subj="streamsAppStreamNodeButton"

@@ -224,7 +224,7 @@ const ViewResultsInLensActionComponent: React.FC<ViewResultsInDiscoverActionProp
   }
 
   return (
-    <EuiToolTip content={VIEW_IN_LENS}>
+    <EuiToolTip content={VIEW_IN_LENS} disableScreenReaderOutput>
       <EuiButtonIcon
         iconType="lensApp"
         isDisabled={!logsDataView}
@@ -313,7 +313,7 @@ const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverAction
   }
 
   return (
-    <EuiToolTip content={VIEW_IN_DISCOVER}>
+    <EuiToolTip content={VIEW_IN_DISCOVER} disableScreenReaderOutput>
       <EuiButtonIcon
         iconType="discoverApp"
         aria-label={VIEW_IN_DISCOVER}

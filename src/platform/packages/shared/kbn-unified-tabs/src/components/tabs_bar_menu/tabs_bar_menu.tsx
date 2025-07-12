@@ -91,7 +91,7 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
           css: popoverCss,
         }}
         button={
-          <EuiToolTip content={menuButtonLabel}>
+          <EuiToolTip content={menuButtonLabel} disableScreenReaderOutput>
             <EuiButtonIcon
               aria-label={menuButtonLabel}
               color="text"

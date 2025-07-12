@@ -279,6 +279,7 @@ export function QueryList({
                   content={i18n.translate('esqlEditor.query.esqlQueriesListRun', {
                     defaultMessage: 'Run query',
                   })}
+                  disableScreenReaderOutput
                 >
                   <EuiButtonIcon
                     iconType="play"

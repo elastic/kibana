@@ -83,7 +83,7 @@ export function SeriesActions({ seriesId, series, seriesConfig, onEditClick }: P
   return (
     <EuiFlexGroup alignItems="center" gutterSize="none" justifyContent="flexEnd" responsive={false}>
       <EuiFlexItem grow={false}>
-        <EuiToolTip content={EDIT_SERIES_LABEL}>
+        <EuiToolTip content={EDIT_SERIES_LABEL} disableScreenReaderOutput>
           <EuiButtonIcon
             iconType="pencil"
             color="text"

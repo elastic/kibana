@@ -193,7 +193,11 @@ export const VarConfig: FC<Props> = ({
             </EuiToolTip>
           }
           extraAction={
-            <EuiToolTip position="top" content={strings.getAddTooltipLabel()}>
+            <EuiToolTip
+              position="top"
+              content={strings.getAddTooltipLabel()}
+              disableScreenReaderOutput
+            >
               <EuiButtonIcon
                 color="primary"
                 iconType="plusInCircle"

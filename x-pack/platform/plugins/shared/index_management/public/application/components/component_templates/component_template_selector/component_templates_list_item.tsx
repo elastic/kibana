@@ -83,7 +83,7 @@ export const ComponentTemplatesListItem = ({
             <EuiFlexGroup gutterSize="xs">
               {actions!.map((action, i) => (
                 <EuiFlexItem key={i}>
-                  <EuiToolTip content={action.label}>
+                  <EuiToolTip content={action.label} disableScreenReaderOutput>
                     <EuiButtonIcon
                       iconType={action.icon}
                       onClick={() => action.handler(component)}
