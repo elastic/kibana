@@ -26,12 +26,32 @@ export function RetentionColumn({ lifecycle }: { lifecycle: IngestStreamEffectiv
   const ilmLocator = share.url.locators.get<IlmLocatorParams>(ILM_LOCATOR_ID);
 
   if (isErrorLifecycle(lifecycle)) {
-    return <EuiBadge color="hollow">{lifecycle.error.message}</EuiBadge>;
+    return (
+      <EuiBadge
+        color="hollow"
+        aria-label={i18n.translate('xpack.streams.streamsRetentionColumn.errorBadgeAriaLabel', {
+          defaultMessage: 'Retention policy error: {message}',
+          values: { message: lifecycle.error.message },
+        })}
+        role="status"
+        aria-live="polite"
+      >
+        {lifecycle.error.message}
+      </EuiBadge>
+    );
   }
 
   if (isIlmLifecycle(lifecycle)) {
     return (
-      <EuiBadge color="hollow">
+      <EuiBadge
+        color="hollow"
+        tabIndex={0}
+        role="region"
+        aria-label={i18n.translate('xpack.streams.streamsRetentionColumn.ilmBadgeAriaLabel', {
+          defaultMessage: 'ILM retention policy: {name}',
+          values: { name: lifecycle.ilm.policy },
+        })}
+      >
         <EuiLink
           data-test-subj="streamsAppLifecycleBadgeIlmPolicyNameLink"
           color="text"
@@ -40,6 +60,11 @@ export function RetentionColumn({ lifecycle }: { lifecycle: IngestStreamEffectiv
             policyName: lifecycle.ilm.policy,
           })}
           target="_blank"
+          aria-label={i18n.translate('xpack.streams.streamsRetentionColumn.ilmLinkAriaLabel', {
+            defaultMessage: 'Edit ILM policy {name} (opens in new tab)',
+            values: { name: lifecycle.ilm.policy },
+          })}
+          aria-describedby="ilm-policy-description"
         >
           {i18n.translate('xpack.streams.streamsRetentionColumn.ilmBadgeLabel', {
             defaultMessage: 'ILM policy: {name}',
@@ -48,16 +73,56 @@ export function RetentionColumn({ lifecycle }: { lifecycle: IngestStreamEffectiv
             },
           })}
         </EuiLink>
+        <span id="ilm-policy-description" className="euiScreenReaderOnly">
+          {i18n.translate('xpack.streams.streamsRetentionColumn.ilmPolicyDescription', {
+            defaultMessage: 'Index Lifecycle Management policy that controls data retention',
+          })}
+        </span>
       </EuiBadge>
     );
   }
 
   if (isDslLifecycle(lifecycle)) {
-    return lifecycle.dsl.data_retention || <EuiIcon type="infinity" size="m" />;
+    const retentionValue = lifecycle.dsl.data_retention;
+
+    if (retentionValue) {
+      return (
+        <span
+          tabIndex={0}
+          aria-label={i18n.translate('xpack.streams.streamsRetentionColumn.dslRetentionAriaLabel', {
+            defaultMessage: 'Data retention period: {retention}',
+            values: { retention: retentionValue },
+          })}
+        >
+          {retentionValue}
+        </span>
+      );
+    }
+
+    return (
+      <EuiIcon
+        type="infinity"
+        size="m"
+        aria-label={i18n.translate(
+          'xpack.streams.streamsRetentionColumn.infiniteRetentionAriaLabel',
+          {
+            defaultMessage: 'Infinite retention - data is kept indefinitely',
+          }
+        )}
+        tabIndex={0}
+        role="img"
+      />
+    );
   }
 
   return (
-    <EuiText color="subdued">
+    <EuiText
+      color="subdued"
+      tabIndex={0}
+      aria-label={i18n.translate('xpack.streams.streamsRetentionColumn.noDataAriaLabel', {
+        defaultMessage: 'No retention policy configured',
+      })}
+    >
       {i18n.translate('xpack.streams.streamsRetentionColumn.noDataLabel', {
         defaultMessage: 'N/A',
       })}
