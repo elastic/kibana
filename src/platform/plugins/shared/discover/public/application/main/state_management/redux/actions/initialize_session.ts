@@ -120,19 +120,19 @@ export const initializeSession: InternalStateThunkActionCreator<
       }
     }
 
-    const discoverSessionLoadTracker = scopedEbtManager$
+    const discoverTabLoadTracker = scopedEbtManager$
       .getValue()
       .trackPerformanceEvent('discoverLoadSavedSearch');
 
     const { persistedDiscoverSession } = getState();
-    const persistedSavedSearch = persistedDiscoverSession?.id
+    const persistedTabSavedSearch = persistedDiscoverSession?.id
       ? await services.savedSearch.get(persistedDiscoverSession.id)
       : undefined;
-    const initialQuery = urlState?.query ?? persistedSavedSearch?.searchSource.getField('query');
+    const initialQuery = urlState?.query ?? persistedTabSavedSearch?.searchSource.getField('query');
     const isEsqlMode = isOfAggregateQueryType(initialQuery);
-    const discoverSessionDataView = persistedSavedSearch?.searchSource.getField('index');
-    const discoverSessionHasAdHocDataView = Boolean(
-      discoverSessionDataView && !discoverSessionDataView.isPersisted()
+    const persistedTabDataView = persistedTabSavedSearch?.searchSource.getField('index');
+    const peristedTabHasAdHocDataView = Boolean(
+      persistedTabDataView && !persistedTabDataView.isPersisted()
     );
     const { initializationState, defaultProfileAdHocDataViewIds } = getState();
     const profileDataViews = runtimeStateManager.adHocDataViews$
@@ -142,7 +142,7 @@ export const initializeSession: InternalStateThunkActionCreator<
     const locationStateHasDataViewSpec = Boolean(dataViewSpec);
     const canAccessWithoutPersistedDataView =
       isEsqlMode ||
-      discoverSessionHasAdHocDataView ||
+      peristedTabHasAdHocDataView ||
       profileDataViewsExist ||
       locationStateHasDataViewSpec;
 
@@ -151,7 +151,7 @@ export const initializeSession: InternalStateThunkActionCreator<
     }
 
     /**
-     * Session initialization
+     * Tab initialization
      */
 
     let dataView: DataView;
@@ -160,7 +160,7 @@ export const initializeSession: InternalStateThunkActionCreator<
       // Regardless of what was requested, we always use ad hoc data views for ES|QL
       dataView = await getEsqlDataView(
         initialQuery,
-        discoverSessionDataView ?? currentDataView$.getValue(),
+        persistedTabDataView ?? currentDataView$.getValue(),
         services
       );
     } else {
@@ -168,9 +168,9 @@ export const initializeSession: InternalStateThunkActionCreator<
       const result = await loadAndResolveDataView({
         dataViewId: isDataViewSource(urlState?.dataSource)
           ? urlState?.dataSource.dataViewId
-          : discoverSessionDataView?.id,
+          : persistedTabDataView?.id,
         dataViewSpec,
-        savedSearch: persistedSavedSearch,
+        savedSearch: persistedTabSavedSearch,
         isEsqlMode,
         services,
         internalState: stateContainer.internalState,
@@ -187,9 +187,9 @@ export const initializeSession: InternalStateThunkActionCreator<
     }
 
     // This must be executed before updateSavedSearch since
-    // it updates the Discover session with timefilter values
-    if (persistedSavedSearch?.timeRestore && dataView.isTimeBased()) {
-      const { timeRange, refreshInterval } = persistedSavedSearch;
+    // it updates the tab saved search with timefilter values
+    if (persistedTabSavedSearch?.timeRestore && dataView.isTimeBased()) {
+      const { timeRange, refreshInterval } = persistedTabSavedSearch;
 
       if (timeRange && isTimeRangeValid(timeRange)) {
         services.timefilter.setTime(timeRange);
@@ -200,17 +200,17 @@ export const initializeSession: InternalStateThunkActionCreator<
       }
     }
 
-    // Get the initial state based on a combo of the URL and persisted session,
-    // then get an updated copy of the session with the applied initial state
+    // Get the initial state based on a combo of the URL and persisted tab saved search,
+    // then get an updated copy of the saved search with the applied initial state
     const initialState = getInitialState({
       initialUrlState: urlState,
-      savedSearch: persistedSavedSearch,
+      savedSearch: persistedTabSavedSearch,
       overrideDataView: dataView,
       services,
     });
-    const discoverSession = updateSavedSearch({
-      savedSearch: persistedSavedSearch
-        ? copySavedSearch(persistedSavedSearch)
+    const savedSearch = updateSavedSearch({
+      savedSearch: persistedTabSavedSearch
+        ? copySavedSearch(persistedTabSavedSearch)
         : services.savedSearch.getNew(),
       dataView,
       state: initialState,
@@ -254,25 +254,22 @@ export const initializeSession: InternalStateThunkActionCreator<
       services.data.query.queryString.setQuery(initialState.query);
     }
 
-    // Make sure global filters make it to the Discover session
+    // Make sure global filters make it to the tab saved search
     if (!urlState && shouldUpdateWithGlobalFilters) {
-      discoverSession.searchSource.setField(
-        'filter',
-        cloneDeep(services.filterManager.getFilters())
-      );
+      savedSearch.searchSource.setField('filter', cloneDeep(services.filterManager.getFilters()));
     }
 
     /**
      * Update state containers
      */
 
-    if (persistedSavedSearch) {
-      // Set the persisted session first, then assign the
-      // updated session to ensure unsaved changes are detected
-      stateContainer.savedSearchState.set(persistedSavedSearch);
-      stateContainer.savedSearchState.assignNextSavedSearch(discoverSession);
+    if (persistedTabSavedSearch) {
+      // Set the persisted tab saved search first, then assign the
+      // updated saved search to ensure unsaved changes are detected
+      stateContainer.savedSearchState.set(persistedTabSavedSearch);
+      stateContainer.savedSearchState.assignNextSavedSearch(savedSearch);
     } else {
-      stateContainer.savedSearchState.set(discoverSession);
+      stateContainer.savedSearchState.set(savedSearch);
     }
 
     // Make sure app state container is completely reset
@@ -286,7 +283,7 @@ export const initializeSession: InternalStateThunkActionCreator<
     // Begin syncing the state and trigger the initial fetch
     stateContainer.actions.initializeAndSync();
     stateContainer.actions.fetchData(true);
-    discoverSessionLoadTracker.reportEvent();
+    discoverTabLoadTracker.reportEvent();
 
     return { showNoDataPage: false };
   };
