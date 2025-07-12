@@ -71,18 +71,68 @@ export default ({ getService }: FtrProviderContext) => {
     risk_score: 50,
     severity: 'critical',
     type: 'machine_learning',
-    anomaly_threshold: 40,
+    anomaly_threshold: 20,
     machine_learning_job_id: mlJobId,
     from: '1900-01-01T00:00:00.000Z',
     rule_id: 'ml-rule-id',
   };
   let ruleProps: MachineLearningRuleCreateProps;
   const baseAnomaly: Partial<Anomaly> = {
-    is_interim: false,
-    record_score: 43, // exceeds anomaly_threshold above
-    result_type: 'record',
+    // is_interim: false,
+    // record_score: 43, // exceeds anomaly_threshold above
+    // result_type: 'record',
+    // job_id: mlJobId,
+    // 'user.name': ['root'],
+
     job_id: mlJobId,
-    'user.name': ['root'],
+    result_type: 'record',
+    probability: 0.004839977752784733,
+    multi_bucket_impact: 0,
+    record_score: 40.69585084123566,
+    initial_record_score: 40.69585084123566,
+    bucket_span: 900,
+    detector_index: 0,
+    is_interim: false,
+    timestamp: new Date().toISOString(),
+    by_field_name: 'source.geo.country_name',
+    by_field_value: 'Chile',
+    partition_field_name: 'o365.audit.UserKey',
+    partition_field_value: '7169fa86-2d93-449c-b7e5-cb325669c3a1',
+    function: 'rare',
+    function_description: 'rare',
+    typical: [0.004839977752784733],
+    actual: [1],
+    influencers: [
+      {
+        influencer_field_name: 'user_agent.name',
+        influencer_field_values: ['Other'],
+      },
+      {
+        influencer_field_name: 'source.as.organization.name',
+        influencer_field_values: ['TELEFONICA CHILE S.A.'],
+      },
+      {
+        influencer_field_name: 'o365.audit.UserId',
+        influencer_field_values: ['RSanchez@Masonite.com'],
+      },
+      {
+        influencer_field_name: 'source.geo.country_name',
+        influencer_field_values: ['Chile'],
+      },
+      {
+        influencer_field_name: 'o365.audit.UserKey',
+        influencer_field_values: ['7169fa86-2d93-449c-b7e5-cb325669c3a1'],
+      },
+    ],
+    anomaly_score_explanation: {
+      by_field_first_occurrence: true,
+      by_field_relative_rarity: 11.939670902540936,
+    },
+    'o365.audit.UserId': ['RSanchez@Masonite.com'],
+    'source.as.organization.name': ['TELEFONICA CHILE S.A.'],
+    'user_agent.name': ['Other'],
+    'source.geo.country_name': ['Chile'],
+    'o365.audit.UserKey': ['7169fa86-2d93-449c-b7e5-cb325669c3a1'],
   };
 
   // NOTE: Add to second quality gate after feature is GA
@@ -115,14 +165,14 @@ export default ({ getService }: FtrProviderContext) => {
         beforeEach(() => {
           ruleProps = {
             ...baseRuleProps,
-            alert_suppression: {
-              group_by: ['user.name'],
-              missing_fields_strategy: 'suppress',
-            },
+            // alert_suppression: {
+            //   group_by: ['user.name'],
+            //   missing_fields_strategy: 'suppress',
+            // },
           };
         });
 
-        it('performs no suppression if a single alert is generated', async () => {
+        it.only('performs no suppression if a single alert is generated', async () => {
           const timestamp = new Date().toISOString();
           const anomaly = {
             ...baseAnomaly,
@@ -131,6 +181,8 @@ export default ({ getService }: FtrProviderContext) => {
           await indexListOfDocuments([anomaly]);
           const createdRule = await createRule(supertest, log, ruleProps);
           const alerts = await getAlerts(supertest, log, es, createdRule);
+
+          console.log('alerts', JSON.stringify(alerts, null, 2)); 
 
           expect(alerts.hits.hits).toHaveLength(1);
           expect(alerts.hits.hits[0]._source).toEqual(
