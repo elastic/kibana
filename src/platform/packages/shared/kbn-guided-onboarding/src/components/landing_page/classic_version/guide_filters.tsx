@@ -82,19 +82,6 @@ export const GuideFilters = ({ activeFilter, setActiveFilter, application }: Gui
       <EuiFlexItem grow={false}>
         <EuiButton
           onClick={onSelectFilter}
-          data-filter-id="observability"
-          color="text"
-          css={[filterButtonCss, activeFilter === 'observability' && activeFilterFill]}
-        >
-          <FormattedMessage
-            id="guidedOnboardingPackage.gettingStarted.guideFilter.observability.buttonLabel"
-            defaultMessage="Observability"
-          />
-        </EuiButton>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiButton
-          onClick={onSelectFilter}
           data-filter-id="security"
           color="text"
           css={[filterButtonCss, activeFilter === 'security' && activeFilterFill]}

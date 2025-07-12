@@ -51,7 +51,6 @@ import type { AiopsPluginStart } from '@kbn/aiops-plugin/public/types';
 import type { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
 import type { ExploratoryViewPublicStart } from '@kbn/exploratory-view-plugin/public';
-import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import type { LicenseManagementUIPluginSetup } from '@kbn/license-management-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
@@ -148,7 +147,6 @@ export interface ObservabilityPublicPluginsStart {
   embeddable: EmbeddableStart;
   exploratoryView?: ExploratoryViewPublicStart;
   fieldFormats: FieldFormatsStart;
-  guidedOnboarding?: GuidedOnboardingPluginStart;
   lens: LensPublicStart;
   licensing: LicensingPluginStart;
   licenseManagement?: LicenseManagementUIPluginSetup;

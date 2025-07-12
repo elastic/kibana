@@ -23,9 +23,7 @@ import type {
   KibanaPageTemplateProps,
   KibanaPageTemplateKibanaDependencies,
 } from '@kbn/shared-ux-page-kibana-template';
-import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import { SearchBarPortal } from './search_bar_portal';
-import { ObservabilityTour } from '../tour';
 import { NavNameWithBadge, hideBadge } from './nav_name_with_badge';
 import { NavNameWithBetaBadge } from './nav_name_with_beta_badge';
 
@@ -87,7 +85,6 @@ export interface ObservabilityPageTemplateDependencies {
   navigateToApp: ApplicationStart['navigateToApp'];
   navigationSections$: Observable<NavigationSection[]>;
   getPageTemplateServices: () => KibanaPageTemplateKibanaDependencies;
-  guidedOnboardingApi: GuidedOnboardingPluginStart['guidedOnboardingApi'];
   isSidebarEnabled$: BehaviorSubject<boolean>;
 }
 
@@ -109,7 +106,6 @@ export function ObservabilityPageTemplate({
   bottomBar,
   bottomBarProps,
   pageSectionProps,
-  guidedOnboardingApi,
   topSearchBar,
   ...pageTemplateProps
 }: ObservabilityPageTemplateProps): React.ReactElement | null {
@@ -193,52 +189,37 @@ export function ObservabilityPageTemplate({
 
   return (
     <KibanaPageTemplateKibanaProvider {...getPageTemplateServices()}>
-      <ObservabilityTour
-        navigateToApp={navigateToApp}
-        prependBasePath={services?.http?.basePath.prepend}
-        guidedOnboardingApi={guidedOnboardingApi}
-        isPageDataLoaded={isPageDataLoaded}
-        // The tour is dependent on the solution nav, and should not render if it is not visible
-        showTour={showSolutionNav}
-      >
-        {({ isTourVisible }) => {
-          return (
-            <KibanaPageTemplate
-              restrictWidth={false}
-              {...pageTemplateProps}
-              solutionNav={
-                showSolutionNav
-                  ? {
-                      icon: 'logoObservability',
-                      items: sideNavItems,
-                      name: sideNavTitle,
-                      // Only false if tour is active
-                      canBeCollapsed: isTourVisible === false,
-                    }
-                  : undefined
+      <KibanaPageTemplate
+        restrictWidth={false}
+        {...pageTemplateProps}
+        solutionNav={
+          showSolutionNav
+            ? {
+                icon: 'logoObservability',
+                items: sideNavItems,
+                name: sideNavTitle,
               }
+            : undefined
+        }
+      >
+        <KibanaErrorBoundaryProvider analytics={services.analytics}>
+          <KibanaErrorBoundary>
+            <KibanaPageTemplate.Section
+              component="div"
+              alignment={pageTemplateProps.isEmptyState ? 'center' : 'top'}
+              {...pageSectionProps}
             >
-              <KibanaErrorBoundaryProvider analytics={services.analytics}>
-                <KibanaErrorBoundary>
-                  <KibanaPageTemplate.Section
-                    component="div"
-                    alignment={pageTemplateProps.isEmptyState ? 'center' : 'top'}
-                    {...pageSectionProps}
-                  >
-                    {topSearchBar && <SearchBarPortal>{topSearchBar}</SearchBarPortal>}
-                    {children}
-                  </KibanaPageTemplate.Section>
-                </KibanaErrorBoundary>
-              </KibanaErrorBoundaryProvider>
-              {bottomBar && (
-                <KibanaPageTemplate.BottomBar {...bottomBarProps}>
-                  {bottomBar}
-                </KibanaPageTemplate.BottomBar>
-              )}
-            </KibanaPageTemplate>
-          );
-        }}
-      </ObservabilityTour>
+              {topSearchBar && <SearchBarPortal>{topSearchBar}</SearchBarPortal>}
+              {children}
+            </KibanaPageTemplate.Section>
+          </KibanaErrorBoundary>
+        </KibanaErrorBoundaryProvider>
+        {bottomBar && (
+          <KibanaPageTemplate.BottomBar {...bottomBarProps}>
+            {bottomBar}
+          </KibanaPageTemplate.BottomBar>
+        )}
+      </KibanaPageTemplate>
     </KibanaPageTemplateKibanaProvider>
   );
 }
