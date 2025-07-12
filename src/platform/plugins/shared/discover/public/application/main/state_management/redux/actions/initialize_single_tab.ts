@@ -37,20 +37,20 @@ import type { ConnectedCustomizationService } from '../../../../../customization
 import { disconnectTab } from './tabs';
 import { selectTab } from '../selectors';
 
-export interface InitializeSessionParams {
+export interface InitializeSingleTabsParams {
   stateContainer: DiscoverStateContainer;
   customizationService: ConnectedCustomizationService;
   dataViewSpec: DataViewSpec | undefined;
   defaultUrlState: DiscoverAppState | undefined;
 }
 
-export const initializeSession: InternalStateThunkActionCreator<
-  [TabActionPayload<{ initializeSessionParams: InitializeSessionParams }>],
+export const initializeSingleTab: InternalStateThunkActionCreator<
+  [TabActionPayload<{ initializeSingleTabParams: InitializeSingleTabsParams }>],
   Promise<{ showNoDataPage: boolean }>
 > =
   ({
     tabId,
-    initializeSessionParams: {
+    initializeSingleTabParams: {
       stateContainer,
       customizationService,
       dataViewSpec,
