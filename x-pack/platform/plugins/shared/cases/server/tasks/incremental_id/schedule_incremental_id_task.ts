@@ -59,7 +59,7 @@ export async function scheduleIncrementalIdTask(
     .then(
       (taskInstance) => {
         logger.info(
-          `${CASES_INCREMENTAL_ID_SYNC_TASK_ID} scheduled with interval ${taskInstance.schedule?.interval}`
+          `${CASES_INCREMENTAL_ID_SYNC_TASK_ID} scheduled with interval ${taskInstance?.schedule?.interval}`
         );
       },
       (e) => {
