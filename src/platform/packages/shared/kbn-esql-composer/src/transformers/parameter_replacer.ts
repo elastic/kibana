@@ -33,8 +33,12 @@ export class ParameterReplacer {
 
   private buildParametersMap(params?: Params): Record<string, FieldValue> {
     const map: Record<string, FieldValue> = {};
-    const list = Array.isArray(params) ? params : params ? [params] : [];
+    if (!params) {
+      return map;
+    }
+
     let index = 0;
+    const list = Array.isArray(params) ? params : [params];
 
     for (const param of list) {
       if (typeof param === 'object' && param !== null) {
@@ -43,10 +47,26 @@ export class ParameterReplacer {
         map[String(index++)] = param;
       }
     }
+
     return map;
   }
 
-  public maybeReplace<TNode extends ReplaceableNodes>(node: TNode): TNode {
+  public shouldReplace(node: ReplaceableNodes): boolean {
+    if (isFunctionExpression(node)) {
+      return node.name.startsWith('?');
+    }
+    if (isColumn(node)) {
+      return node.args.some((arg) => this.isNamedOrIndexParameterLiteral(arg));
+    }
+
+    return this.isNamedOrIndexParameterLiteral(node);
+  }
+
+  public replace<TNode extends ReplaceableNodes>(node: TNode): TNode {
+    if (!this.shouldReplace(node)) {
+      return node;
+    }
+
     if (isFunctionExpression(node)) {
       return this.replaceFunctionExpression(node) as TNode;
     }
@@ -81,10 +101,6 @@ export class ParameterReplacer {
   }
 
   private replaceColumnExpression(node: ESQLColumn): ESQLColumn {
-    if (!node.args.some((arg) => this.isNamedOrIndexParameterLiteral(arg))) {
-      return node;
-    }
-
     return Builder.expression.column({
       ...node,
       args: node.args.map((arg) =>
@@ -120,10 +136,6 @@ export class ParameterReplacer {
   }
 
   private resolveFunctionName(node: ESQLFunction): string {
-    if (!node.name.startsWith('?')) {
-      return node.name;
-    }
-
     const paramKey = node.name.replace(/^\?{1,2}/, '');
     const paramValue = this.parametersMap[paramKey];
 
