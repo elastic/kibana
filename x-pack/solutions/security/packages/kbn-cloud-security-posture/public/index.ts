@@ -22,3 +22,4 @@ export { ActionableBadge, type MultiValueCellAction } from './src/components/act
 export { MultiValueCellPopover } from './src/components/multi_value_cell_popover';
 export { findReferenceLink } from './src/utils/find_reference_link.util';
 export { getVulnerabilitiesQuery } from './src/utils/findings_query_builders';
+export { getGroupPanelTitle } from './src/utils/get_group_panel_title';
