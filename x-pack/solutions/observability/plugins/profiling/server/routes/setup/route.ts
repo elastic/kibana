@@ -155,6 +155,7 @@ export function registerSetupRoute({
         // and is not guaranteed to complete before Kibana sends a response.
         return response.accepted();
       } catch (error) {
+        console.log(error, 'error here');
         if (dependencies.telemetryUsageCounter) {
           dependencies.telemetryUsageCounter.incrementCounter({
             counterName: `POST ${paths.HasSetupESResources}`,

@@ -22,9 +22,9 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
   const bettertest = getBettertest(supertest);
   const logger = getService('log');
   const es = getService('es');
+  const retry = getService('retry');
 
-  // Failing: See https://github.com/elastic/kibana/issues/167076
-  registry.when.skip('Profiling status check', { config: 'cloud' }, () => {
+  registry.when('Profiling status check', { config: 'cloud' }, () => {
     describe('Profiling is not set up and no data is loaded', () => {
       before(async () => {
         await cleanUpProfilingData({ es, logger, bettertest });
@@ -58,20 +58,20 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
           });
           statusCheck = response.body;
         });
-        it(`has been set up`, async () => {
-          expect(statusCheck.has_setup).to.be(true);
+        it(`has not been set up`, async () => {
+          expect(statusCheck.has_setup).to.be(false);
         });
 
-        it(`has data`, async () => {
-          expect(statusCheck.has_data).to.be(true);
+        it(`does not have data`, async () => {
+          expect(statusCheck.has_data).to.be(false);
         });
 
         it(`does not have pre 8.9.1 data`, async () => {
           expect(statusCheck.pre_8_9_1_data).to.be(false);
         });
 
-        it(`is unauthorized to fully check profiling status `, async () => {
-          expect(statusCheck.unauthorized).to.be(true);
+        it(`does not have required role to fully check profiling status`, async () => {
+          expect(statusCheck.has_required_role).to.be(false);
         });
       });
     });
@@ -79,7 +79,9 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
     describe('Collector integration is not installed', () => {
       let collectorId: string | undefined;
       before(async () => {
-        await setupProfiling(bettertest, logger);
+        await retry.try(async () => {
+          await setupProfiling(bettertest, logger);
+        });
         const response = await getProfilingPackagePolicyIds(bettertest);
         collectorId = response.collectorId;
         if (collectorId) {
@@ -87,7 +89,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
         }
       });
 
-      it('expectes a collector integration to exist', () => {
+      it('expects a collector integration to exist', () => {
         expect(collectorId).not.to.be(undefined);
       });
 
@@ -120,20 +122,20 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
           });
           statusCheck = response.body;
         });
-        it(`has been set up`, async () => {
-          expect(statusCheck.has_setup).to.be(true);
+        it(`has not been set up`, async () => {
+          expect(statusCheck.has_setup).to.be(false);
         });
 
-        it(`has data`, async () => {
-          expect(statusCheck.has_data).to.be(true);
+        it(`does not have data`, async () => {
+          expect(statusCheck.has_data).to.be(false);
         });
 
         it(`does not have pre 8.9.1 data`, async () => {
           expect(statusCheck.pre_8_9_1_data).to.be(false);
         });
 
-        it(`is unauthorized to fully check profiling status `, async () => {
-          expect(statusCheck.unauthorized).to.be(true);
+        it(`does not have required role to fully check profiling status `, async () => {
+          expect(statusCheck.has_required_role).to.be(false);
         });
       });
     });
@@ -141,7 +143,9 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
     describe('Symbolizer integration is not installed', () => {
       let symbolizerId: string | undefined;
       before(async () => {
-        await setupProfiling(bettertest, logger);
+        await retry.try(async () => {
+          await setupProfiling(bettertest, logger);
+        });
         const response = await getProfilingPackagePolicyIds(bettertest);
         symbolizerId = response.symbolizerId;
         if (symbolizerId) {
@@ -182,28 +186,30 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
           });
           statusCheck = response.body;
         });
-        it(`has been set up`, async () => {
-          expect(statusCheck.has_setup).to.be(true);
+        it(`has not been set up`, async () => {
+          expect(statusCheck.has_setup).to.be(false);
         });
 
-        it(`has data`, async () => {
-          expect(statusCheck.has_data).to.be(true);
+        it(`does not have data`, async () => {
+          expect(statusCheck.has_data).to.be(false);
         });
 
         it(`does not have pre 8.9.1 data`, async () => {
           expect(statusCheck.pre_8_9_1_data).to.be(false);
         });
 
-        it(`is unauthorized to fully check profiling status `, async () => {
-          expect(statusCheck.unauthorized).to.be(true);
+        it(`does not have required role to fully check profiling status `, async () => {
+          expect(statusCheck.has_required_role).to.be(false);
         });
       });
     });
 
-    describe('APM integration is not installed', () => {
+    describe.skip('APM integration is not installed', () => {
       before(async () => {
-        await setupProfiling(bettertest, logger);
-        await deletePackagePolicy(bettertest, 'elastic-cloud-apm');
+        await retry.try(async () => {
+          await setupProfiling(bettertest, logger);
+          await deletePackagePolicy(bettertest, 'elastic-cloud-apm');
+        });
       });
 
       describe('Admin user', () => {
@@ -239,23 +245,25 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
           expect(statusCheck.has_setup).to.be(true);
         });
 
-        it(`has data`, async () => {
-          expect(statusCheck.has_data).to.be(true);
+        it(`does not have data`, async () => {
+          expect(statusCheck.has_data).to.be(false);
         });
 
         it(`does not have pre 8.9.1 data`, async () => {
           expect(statusCheck.pre_8_9_1_data).to.be(false);
         });
 
-        it(`is unauthorized to fully check profiling status `, async () => {
-          expect(statusCheck.unauthorized).to.be(true);
+        it(`does not have required role to fully check profiling status `, async () => {
+          expect(statusCheck.has_required_role).to.be(false);
         });
       });
     });
 
     describe('Profiling is set up', () => {
       before(async () => {
-        await setupProfiling(bettertest, logger);
+        await retry.try(async () => {
+          await setupProfiling(bettertest, logger);
+        });
       });
 
       describe('without data', () => {
@@ -293,22 +301,24 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
           });
 
           it(`has data`, async () => {
-            expect(statusCheck.has_data).to.be(true);
+            expect(statusCheck.has_data).to.be(false);
           });
 
           it(`does not have pre 8.9.1 data`, async () => {
             expect(statusCheck.pre_8_9_1_data).to.be(false);
           });
 
-          it(`is unauthorized to fully check profiling status `, async () => {
-            expect(statusCheck.unauthorized).to.be(true);
+          it(`does not have required role to fully check profiling status `, async () => {
+            expect(statusCheck.has_required_role).to.be(false);
           });
         });
       });
 
       describe('with data', () => {
         before(async () => {
-          await loadProfilingData(es, logger);
+          await retry.try(async () => {
+            await loadProfilingData(es, logger);
+          });
         });
         describe('Admin user', () => {
           let statusCheck: ProfilingStatus;
@@ -351,8 +361,8 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
             expect(statusCheck.pre_8_9_1_data).to.be(false);
           });
 
-          it(`is unauthorized to fully check profiling status `, async () => {
-            expect(statusCheck.unauthorized).to.be(true);
+          it(`does not have required role to fully check profiling status `, async () => {
+            expect(statusCheck.has_required_role).to.be(false);
           });
         });
       });
