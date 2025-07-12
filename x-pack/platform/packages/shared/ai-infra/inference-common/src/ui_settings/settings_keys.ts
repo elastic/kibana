@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export const aiAssistantAnonymizationSettings = 'aiAssistant:anonymizationSettings';
+export const aiAnonymizationSettings = 'ai:anonymizationSettings';

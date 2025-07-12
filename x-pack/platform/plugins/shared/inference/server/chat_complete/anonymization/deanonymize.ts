@@ -26,19 +26,17 @@ export function deanonymize<TMessage extends Message>(
     reversedAnonymizations.forEach(({ entity }) => {
       let index = next.indexOf(entity.mask);
 
-      let offset = 0;
-
       while (index !== -1) {
-        const start = index + offset;
-        const end = start + entity.mask.length;
+        const start = index;
+        const end = start + entity.value.length;
 
         deanonymizations.push({ start, end, entity });
 
+        // Replace the mask with the original value
         next = next.slice(0, start) + entity.value + next.slice(start + entity.mask.length);
 
-        index = next.indexOf(entity.mask, end);
-
-        offset += entity.value.length;
+        // Continue searching after the replaced value to avoid infinite loops
+        index = next.indexOf(entity.mask, start + entity.value.length);
       }
     });
 

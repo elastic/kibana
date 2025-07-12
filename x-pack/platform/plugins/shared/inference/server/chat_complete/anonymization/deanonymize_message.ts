@@ -18,6 +18,10 @@ import {
 import { OperatorFunction, mergeMap, filter, of, identity } from 'rxjs';
 import { deanonymize } from './deanonymize';
 
+export function deanonymizeMessage<T extends ChatCompletionEvent>(
+  anonymization: AnonymizationOutput
+): OperatorFunction<T, T>;
+
 export function deanonymizeMessage(
   anonymization: AnonymizationOutput
 ): OperatorFunction<ChatCompletionEvent, ChatCompletionEvent> {
@@ -28,7 +32,10 @@ export function deanonymizeMessage(
   return (source$) => {
     return source$.pipe(
       // Filter out original chunk events (we recreate a single deanonymized chunk later)
-      filter((event) => event.type !== ChatCompletionEventType.ChatCompletionChunk),
+      filter(
+        (event): event is Exclude<ChatCompletionEvent, ChatCompletionChunkEvent> =>
+          event.type !== ChatCompletionEventType.ChatCompletionChunk
+      ),
       // Process message events and create a new chunk plus the message
       mergeMap((event) => {
         if (event.type === ChatCompletionEventType.ChatCompletionMessage) {

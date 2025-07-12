@@ -19,65 +19,67 @@ function createMask(entityClass: string, value: string) {
 }
 
 describe('deanonymize', () => {
-  const value = 'jorge@gmail.com';
-  const mask = createMask('EMAIL', value);
+  describe('email mask', () => {
+    const value = 'jorge@gmail.com';
+    const mask = createMask('EMAIL', value);
 
-  const anonymization: Anonymization = {
-    entity: {
-      class_name: 'EMAIL',
-      value,
-      mask,
-    },
-    rule: {
-      type: 'RegExp',
-    },
-  };
-
-  it('restores plain user message content and returns correct positions', () => {
-    const message: UserMessage = {
-      role: MessageRole.User,
-      content: `My email is ${mask}.`,
-    };
-
-    const { message: deanonymized, deanonymizations } = deanonymize(message, [anonymization]);
-
-    expect((deanonymized as UserMessage).content).toBe(`My email is ${value}.`);
-
-    const startIndex = `My email is `.length;
-    expect(deanonymizations).toEqual([
-      {
-        start: startIndex,
-        end: startIndex + mask.length,
-        entity: anonymization.entity,
+    const anonymization: Anonymization = {
+      entity: {
+        class_name: 'EMAIL',
+        value,
+        mask,
       },
-    ]);
-  });
-
-  it('restores assistant message tool call arguments as well as content', () => {
-    const toolMask = mask;
-    const assistantMsg: AssistantMessage = {
-      role: MessageRole.Assistant,
-      content: `Your email is ${toolMask}`,
-      toolCalls: [
-        {
-          function: {
-            name: 'sendEmail',
-            arguments: { to: toolMask },
-          },
-          toolCallId: '1',
-        },
-      ],
+      rule: {
+        type: 'RegExp',
+      },
     };
 
-    const { message: deanonymized } = deanonymize(assistantMsg, [anonymization]);
+    it('restores plain user message content and returns correct positions', () => {
+      const message: UserMessage = {
+        role: MessageRole.User,
+        content: `My email is ${mask}.`,
+      };
 
-    expect(deanonymized.content).toContain(value);
-    const args = (
-      deanonymized as AssistantMessage & {
-        toolCalls: [{ function: { arguments: { to: string } } }];
-      }
-    ).toolCalls?.[0].function.arguments;
-    expect(args.to).toBe(value);
+      const { message: deanonymized, deanonymizations } = deanonymize(message, [anonymization]);
+
+      expect((deanonymized as UserMessage).content).toBe(`My email is ${value}.`);
+
+      const startIndex = `My email is `.length;
+      expect(deanonymizations).toEqual([
+        {
+          start: startIndex,
+          end: startIndex + value.length,
+          entity: anonymization.entity,
+        },
+      ]);
+    });
+
+    it('restores assistant message tool call arguments as well as content', () => {
+      const toolMask = mask;
+      const assistantMsg: AssistantMessage = {
+        role: MessageRole.Assistant,
+        content: `Your email is ${toolMask}`,
+        toolCalls: [
+          {
+            function: {
+              name: 'sendEmail',
+              arguments: { to: toolMask },
+            },
+            toolCallId: '1',
+          },
+        ],
+      };
+
+      const { message: deanonymized } = deanonymize(assistantMsg, [anonymization]);
+
+      expect(deanonymized.content).toContain(value);
+      const args = (
+        deanonymized as AssistantMessage & {
+          toolCalls: [{ function: { arguments: { to: string } } }];
+        }
+      ).toolCalls?.[0].function.arguments;
+      expect(args.to).toBe(value);
+    });
   });
 
   it('handles no anonymizations gracefully (returns identical message)', () => {

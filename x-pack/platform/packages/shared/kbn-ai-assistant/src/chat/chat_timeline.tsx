@@ -18,7 +18,7 @@ import {
   type ObservabilityAIAssistantChatService,
   type TelemetryEventTypeWithPayload,
 } from '@kbn/observability-ai-assistant-plugin/public';
-import { aiAssistantAnonymizationSettings } from '@kbn/inference-common';
+import { aiAnonymizationSettings } from '@kbn/inference-common';
 import { AnonymizationSettings } from '@kbn/inference-common';
 import { ChatItem } from './chat_item';
 import { ChatConsolidatedItems } from './chat_consolidated_items';
@@ -150,21 +150,6 @@ export function ChatTimeline({
     services: { uiSettings },
   } = useKibana();
 
-  const { anonymizationEnabled } = useMemo(() => {
-    // the response is JSON but will be a string while the setting is hidden temporarily (unregistered)
-    const anonymizationRulesSettingsStr = uiSettings?.get<string | undefined>(
-      aiAssistantAnonymizationSettings,
-      JSON.stringify({ rules: [] })
-    );
-
-    const settings = anonymizationRulesSettingsStr
-      ? (JSON.parse(anonymizationRulesSettingsStr) as AnonymizationSettings)
-      : undefined;
-
-    return {
-      anonymizationEnabled: settings && settings.rules.some((rule) => rule.enabled),
-    };
-  }, [uiSettings]);
   const { euiTheme } = useEuiTheme();
 
   const stickyCalloutContainerClassName = css`
@@ -176,6 +161,18 @@ export function ChatTimeline({
       display: none;
     }
   `;
+
+  const { anonymizationEnabled } = useMemo(() => {
+    const settings = uiSettings?.get<AnonymizationSettings | undefined>(aiAnonymizationSettings);
+
+    if (!settings) {
+      return { anonymizationEnabled: false };
+    }
+
+    return {
+      anonymizationEnabled: settings.rules.some((rule) => rule.enabled),
+    };
+  }, [uiSettings]);
 
   const items = useMemo(() => {
     const timelineItems = getTimelineItemsfromConversation({
