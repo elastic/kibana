@@ -16,6 +16,7 @@ import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
 import type { BoolQuery } from '@kbn/es-query';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import { ALERT_STATUS } from '@kbn/rule-data-utils';
+import { usePerformanceContext } from '@kbn/ebt-tools';
 import { ruleDetailsLocatorID } from '../../../common';
 import {
   ALERT_STATUS_ALL,
@@ -58,6 +59,7 @@ interface RuleDetailsPathParams {
   ruleId: string;
 }
 export function RuleDetailsPage() {
+  const { onPageReady } = usePerformanceContext();
   const { services } = useKibana();
   const {
     application: { capabilities, navigateToUrl, navigateToApp },
@@ -214,6 +216,12 @@ export function RuleDetailsPage() {
       : rule
       ? rulesStatusesTranslationsMapping[rule.executionStatus.status]
       : '';
+
+  useEffect(() => {
+    if (onPageReady && !isLoading) {
+      onPageReady();
+    }
+  }, [onPageReady, isLoading]);
 
   if (isLoading || isRuleDeleting) return <CenterJustifiedSpinner />;
   if (!rule || isError) return <NoRuleFoundPanel />;
