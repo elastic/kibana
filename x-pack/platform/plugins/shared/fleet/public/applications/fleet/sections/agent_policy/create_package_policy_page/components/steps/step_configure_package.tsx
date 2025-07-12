@@ -20,14 +20,13 @@ import {
   isIntegrationPolicyTemplate,
   getRegistryStreamWithDataStreamForInputType,
 } from '../../../../../../../../common/services';
+import { isInputAllowedForDeploymentMode } from '../../../../../../../../common/services/agentless_policy_helper';
 
 import type { PackageInfo, NewPackagePolicy, NewPackagePolicyInput } from '../../../../../types';
 import { Loading } from '../../../../../components';
 import { doesPackageHaveIntegrations } from '../../../../../services';
 
 import type { PackagePolicyValidationResults } from '../../services';
-
-import { AGENTLESS_DISABLED_INPUTS } from '../../../../../../../../common/constants';
 
 import { PackagePolicyInputPanel } from './components';
 
@@ -101,11 +100,15 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
                 });
               };
 
-              return packagePolicyInput &&
-                !(
-                  (isAgentlessSelected || packagePolicy.supports_agentless === true) &&
-                  AGENTLESS_DISABLED_INPUTS.includes(packagePolicyInput.type)
-                ) ? (
+              const isInputAvailable =
+                packagePolicyInput &&
+                isInputAllowedForDeploymentMode(
+                  packagePolicyInput,
+                  isAgentlessSelected && packagePolicy.supports_agentless ? 'agentless' : 'default',
+                  packageInfo
+                );
+
+              return isInputAvailable ? (
                 <EuiFlexItem key={packageInput.type}>
                   <PackagePolicyInputPanel
                     packageInput={packageInput}
