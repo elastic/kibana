@@ -15,7 +15,7 @@ export {
   ILLEGAL_CHARACTERS_VISIBLE,
   ILLEGAL_CHARACTERS,
   validateDataView,
-} from '../common/lib';
+} from '@kbn/data-view-validation';
 
 export type { IIndexPatternFieldList, TypeMeta, RuntimeType } from '../common';
 export type {
