@@ -23,7 +23,6 @@ import type {
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { getNamedParams, mapVariableToColumn } from '@kbn/esql-utils';
 import { getIndexPatternFromESQLQuery, fixESQLQueryWithVariables } from '@kbn/esql-utils';
-import { zipObject } from 'lodash';
 import { catchError, defer, map, Observable, switchMap, tap, throwError } from 'rxjs';
 import { buildEsQuery, type Filter } from '@kbn/es-query';
 import type { ESQLSearchParams, ESQLSearchResponse } from '@kbn/es-types';
@@ -355,12 +354,18 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
             (body.all_columns ?? body.columns)?.map(({ name, type, original_types }) => {
               const originalTypes = original_types ?? [];
               const hasConflict = type === 'unsupported' && originalTypes.length > 1;
+              const kibanaFieldType = hasConflict
+                ? KBN_FIELD_TYPES.CONFLICT
+                : esFieldTypeToKibanaFieldType(type);
               return {
                 id: name,
                 name,
                 meta: {
-                  type: hasConflict ? KBN_FIELD_TYPES.CONFLICT : esFieldTypeToKibanaFieldType(type),
+                  type: kibanaFieldType,
                   esType: type,
+                  params: {
+                    id: kibanaFieldType,
+                  },
                   sourceParams:
                     type === 'date'
                       ? {
@@ -391,7 +396,14 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
           }
           const columnNames = updatedWithVariablesColumns?.map(({ name }) => name);
 
-          const rows = body.values.map((row) => zipObject(columnNames, row));
+          const rows = body.values.map((row) =>
+            columnNames.reduce<Record<string, unknown>>((ret, c, i) => {
+              const v = row[i];
+              // replace every `null` value with the `__missing__` to handle correctly the formatting
+              ret[c] = v == null ? '__missing__' : v;
+              return ret;
+            }, {})
+          );
 
           return {
             type: 'datatable',
