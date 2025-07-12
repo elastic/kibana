@@ -39,7 +39,7 @@ export const ManyChildren: StoryFn<{}> = () => {
           duration: 5000000,
           serviceName: 'frontend',
           traceId: 'ed1aacaf31264b93e0e405e42b00af74',
-          hasError: true,
+          errorCount: 1,
         },
         ...Array(200)
           .fill(0)
@@ -51,6 +51,7 @@ export const ManyChildren: StoryFn<{}> = () => {
             parentId: '1',
             serviceName: 'child-service',
             traceId: 'ed1aacaf31264b93e0e405e42b00af74',
+            errorCount: 0,
           })),
       ]}
     />
@@ -70,7 +71,7 @@ export const ExampleClockSkew: StoryFn<{}> = () => {
           duration: 5000000,
           serviceName: 'frontend',
           traceId: 'ed1aacaf31264b93e0e405e42b00af74',
-          hasError: true,
+          errorCount: 1,
         },
         {
           id: 'cdd3568d81149715',
@@ -80,6 +81,7 @@ export const ExampleClockSkew: StoryFn<{}> = () => {
           parentId: 'd2efb76164a77608',
           serviceName: 'quote',
           traceId: 'ed1aacaf31264b93e0e405e42b00af74',
+          errorCount: 0,
         },
         {
           id: 'a111aabbccddeeff',
@@ -89,6 +91,7 @@ export const ExampleClockSkew: StoryFn<{}> = () => {
           parentId: 'cdd3568d81149715',
           serviceName: 'database',
           traceId: 'ed1aacaf31264b93e0e405e42b00af74',
+          errorCount: 0,
         },
       ]}
     />
@@ -104,7 +107,7 @@ export const Example: StoryFn<{}> = () => {
           name: 'POST',
           traceId: 'cc847a76570773d6fc96fac63dfcddd2',
           duration: 53170917,
-          hasError: false,
+          errorCount: 0,
           serviceName: 'load-generator',
         },
         {
@@ -113,7 +116,7 @@ export const Example: StoryFn<{}> = () => {
           name: 'executing api route (pages) /api/checkout',
           traceId: 'cc847a76570773d6fc96fac63dfcddd2',
           duration: 51298750,
-          hasError: false,
+          errorCount: 0,
           parentId: '06b480d1e6e2ac2e',
           serviceName: 'frontend',
         },
@@ -123,7 +126,7 @@ export const Example: StoryFn<{}> = () => {
           name: 'grpc.oteldemo.ProductCatalogService/GetProduct',
           traceId: 'cc847a76570773d6fc96fac63dfcddd2',
           duration: 1187042,
-          hasError: false,
+          errorCount: 0,
           parentId: '2b18312dfedbf16a',
           serviceName: 'frontend',
         },
@@ -133,7 +136,7 @@ export const Example: StoryFn<{}> = () => {
           name: 'oteldemo.ProductCatalogService/GetProduct',
           traceId: 'cc847a76570773d6fc96fac63dfcddd2',
           duration: 90416,
-          hasError: false,
+          errorCount: 0,
           parentId: '41b39c13ec0166a8',
           serviceName: 'product-catalog',
         },

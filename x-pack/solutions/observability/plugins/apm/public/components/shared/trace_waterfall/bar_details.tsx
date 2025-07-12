@@ -12,6 +12,7 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiText,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -36,7 +37,12 @@ export function BarDetails({
 
   const viewRelatedErrorsLabel = i18n.translate(
     'xpack.apm.waterfall.embeddableRelatedErrors.unifedErrorCount',
-    { defaultMessage: 'View related errors' }
+    {
+      defaultMessage: '{count, plural, one {View related error} other {View # related errors}}',
+      values: {
+        count: item.errorCount,
+      },
+    }
   );
 
   return (
@@ -77,14 +83,30 @@ export function BarDetails({
             {asDuration(item.duration)}
           </EuiText>
         </EuiFlexItem>
-        {item.hasError ? (
+        {item.isFailure && (
+          <EuiFlexItem grow={false}>
+            <EuiToolTip
+              data-test-subj="apmBarDetailsFailureTooltip"
+              content={i18n.translate('xpack.apm.barDetails.failureTooltip', {
+                defaultMessage: 'event.outcome = failure',
+              })}
+            >
+              <EuiBadge data-test-subj="apmBarDetailsFailureBadge" color="danger">
+                {i18n.translate('xpack.apm.barDetails.failureBadge', {
+                  defaultMessage: 'failure',
+                })}
+              </EuiBadge>
+            </EuiToolTip>
+          </EuiFlexItem>
+        )}
+        {item.errorCount > 0 ? (
           <EuiFlexItem grow={false}>
             {onErrorClick ? (
               <EuiButtonIcon
                 aria-label={i18n.translate('xpack.apm.barDetails.errorButton.ariaLabel', {
                   defaultMessage: 'View error details',
                 })}
-                data-test-subj="apmBarDetailsButton"
+                data-test-subj="apmBarDetailsErrorButton"
                 color="danger"
                 iconType="errorFilled"
                 iconSize="s"
@@ -110,11 +132,17 @@ export function BarDetails({
                 role="button"
                 aria-label={viewRelatedErrorsLabel}
                 onClickAriaLabel={viewRelatedErrorsLabel}
+                data-test-subj="apmBarDetailsErrorBadge"
               >
                 {viewRelatedErrorsLabel}
               </EuiBadge>
             ) : (
-              <EuiIcon type="errorFilled" color={theme.euiTheme.colors.danger} size="s" />
+              <EuiIcon
+                type="errorFilled"
+                color={theme.euiTheme.colors.danger}
+                size="s"
+                data-test-subj="apmBarDetailsErrorIcon"
+              />
             )}
           </EuiFlexItem>
         ) : null}

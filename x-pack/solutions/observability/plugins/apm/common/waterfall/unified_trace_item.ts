@@ -11,7 +11,8 @@ export interface TraceItem {
   name: string;
   traceId: string;
   duration: number;
-  hasError?: boolean;
+  errorCount: number;
+  isFailure?: boolean;
   parentId?: string;
   serviceName: string;
 }
