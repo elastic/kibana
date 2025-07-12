@@ -175,3 +175,7 @@ export const findPunctuationToken = (
       channel === DEFAULT_CHANNEL && text.length === 1 && punctuationChars.has(text)
   );
 };
+
+export const nonNullable = <T>(v: T): v is NonNullable<T> => {
+  return v != null;
+};
