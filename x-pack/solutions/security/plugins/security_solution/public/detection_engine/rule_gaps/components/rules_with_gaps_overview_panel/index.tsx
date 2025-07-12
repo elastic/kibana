@@ -33,18 +33,20 @@ export const RulesWithGapsOverviewPanel = () => {
   const {
     state: {
       filterOptions: { gapSearchRange, showRulesWithGaps },
+      lastUpdated: rulesTableLastUpdatedAt,
     },
     actions: { setFilterOptions },
   } = useRulesTableContext();
-  const { data: totalRulesWithGaps } = useGetRuleIdsWithGaps({
+  const { data: totalRulesWithGaps, refetch: refetchGetRuleIdsWithGaps } = useGetRuleIdsWithGaps({
     gapRange: gapSearchRange ?? defaultRangeValue,
     statuses: [gapStatus.UNFILLED, gapStatus.PARTIALLY_FILLED],
   });
-  const { data: inProgressRulesWithGaps } = useGetRuleIdsWithGaps({
-    gapRange: gapSearchRange ?? defaultRangeValue,
-    statuses: [gapStatus.UNFILLED, gapStatus.PARTIALLY_FILLED],
-    hasInProgressIntervals: true,
-  });
+  const { data: inProgressRulesWithGaps, refetch: refetchGetRuleIdsWithGapsInProgressIntervals } =
+    useGetRuleIdsWithGaps({
+      gapRange: gapSearchRange ?? defaultRangeValue,
+      statuses: [gapStatus.UNFILLED, gapStatus.PARTIALLY_FILLED],
+      hasInProgressIntervals: true,
+    });
   const [isPopoverOpen, setPopover] = useState(false);
   const telemetry = useKibana().services.telemetry;
 
@@ -57,6 +59,15 @@ export const RulesWithGapsOverviewPanel = () => {
       });
     };
   }, [setFilterOptions]);
+
+  useEffect(() => {
+    refetchGetRuleIdsWithGaps();
+    refetchGetRuleIdsWithGapsInProgressIntervals();
+  }, [
+    rulesTableLastUpdatedAt,
+    refetchGetRuleIdsWithGaps,
+    refetchGetRuleIdsWithGapsInProgressIntervals,
+  ]);
 
   const rangeValueToLabel = {
     [GapRangeValue.LAST_24_H]: i18n.RULE_GAPS_OVERVIEW_PANEL_LAST_24_HOURS_LABEL,

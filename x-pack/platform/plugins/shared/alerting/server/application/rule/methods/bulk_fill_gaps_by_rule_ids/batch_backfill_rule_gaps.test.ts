@@ -6,7 +6,7 @@
  */
 
 import type { Gap } from '../../../../lib/rule_gaps/gap';
-import { processAllGapsInTimeRange } from '../../../../lib/rule_gaps/process_all_gaps_in_time_range';
+import { processAllRuleGaps } from '../../../../lib/rule_gaps/process_all_rule_gaps';
 import { batchBackfillRuleGaps } from './batch_backfill_rule_gaps';
 import { rulesClientContextMock } from '../../../../rules_client/rules_client.mock';
 import type { BulkGapFillError } from './utils';
@@ -21,13 +21,13 @@ jest.mock('./process_gaps_batch', () => {
 
 const processGapsBatchMock = processGapsBatch as jest.Mock;
 
-jest.mock('../../../../lib/rule_gaps/process_all_gaps_in_time_range', () => {
+jest.mock('../../../../lib/rule_gaps/process_all_rule_gaps', () => {
   return {
-    processAllGapsInTimeRange: jest.fn(),
+    processAllRuleGaps: jest.fn(),
   };
 });
 
-const processAllGapsInTimeRangeMock = processAllGapsInTimeRange as jest.Mock;
+const processAllRuleGapsMock = processAllRuleGaps as jest.Mock;
 
 jest.mock('../../../backfill/methods/schedule', () => {
   return {
@@ -75,7 +75,7 @@ describe('batchBackfillRuleGaps', () => {
 
   beforeEach(() => {
     processGapsBatchMock.mockResolvedValue(true);
-    processAllGapsInTimeRangeMock.mockImplementation(async ({ processGapsBatch: processFn }) => {
+    processAllRuleGapsMock.mockImplementation(async ({ processGapsBatch: processFn }) => {
       const results: Awaited<ReturnType<typeof processFn>> = [];
       for (const batch of gapsBatches) {
         results.push(await processFn(batch));
@@ -91,8 +91,8 @@ describe('batchBackfillRuleGaps', () => {
     });
 
     it('should trigger the batch fetching of the gaps of the rule correctly', () => {
-      expect(processAllGapsInTimeRangeMock).toHaveBeenCalledTimes(1);
-      expect(processAllGapsInTimeRangeMock).toHaveBeenCalledWith({
+      expect(processAllRuleGapsMock).toHaveBeenCalledTimes(1);
+      expect(processAllRuleGapsMock).toHaveBeenCalledWith({
         logger: context.logger.get('gaps'),
         options: {
           maxFetchedGaps: 1000,
@@ -125,15 +125,13 @@ describe('batchBackfillRuleGaps', () => {
       return (result as { outcome: string; error: BulkGapFillError }).error;
     };
 
-    it('should propagate the error when processAllGapsInTimeRange errors', async () => {
-      processAllGapsInTimeRangeMock.mockRejectedValueOnce(
-        new Error('processAllGapsInTimeRange failed')
-      );
+    it('should propagate the error when processAllRuleGaps errors', async () => {
+      processAllRuleGapsMock.mockRejectedValueOnce(new Error('processAllRuleGaps failed'));
       await callBatchBackfillRuleGaps();
 
       expect(result.outcome).toEqual(BulkFillGapsScheduleResult.ERRORED);
       expect(getErrorFromResult()).toEqual({
-        errorMessage: 'processAllGapsInTimeRange failed',
+        errorMessage: 'processAllRuleGaps failed',
         rule,
         step: BulkGapsFillStep.SCHEDULING,
       });
