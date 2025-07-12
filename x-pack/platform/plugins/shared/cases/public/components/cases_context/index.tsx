@@ -51,6 +51,7 @@ export interface CasesContextValue {
   releasePhase: ReleasePhase;
   dispatch: CasesContextValueDispatch;
   settings: CasesSettings;
+  isServerless?: boolean;
 }
 
 export interface CasesContextProps
@@ -60,6 +61,7 @@ export interface CasesContextProps
     | 'permissions'
     | 'externalReferenceAttachmentTypeRegistry'
     | 'persistableStateAttachmentTypeRegistry'
+    | 'isServerless'
   > {
   basePath?: string;
   features?: CasesFeatures;
@@ -80,6 +82,7 @@ export const CasesProvider: FC<
   value: {
     externalReferenceAttachmentTypeRegistry,
     persistableStateAttachmentTypeRegistry,
+    isServerless,
     owner,
     permissions,
     basePath = DEFAULT_BASE_PATH,
@@ -106,6 +109,7 @@ export const CasesProvider: FC<
     () => ({
       externalReferenceAttachmentTypeRegistry,
       persistableStateAttachmentTypeRegistry,
+      isServerless,
       owner,
       permissions: {
         all: permissions.all,

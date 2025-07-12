@@ -31,6 +31,7 @@ import { CreateCaseFormFields } from './form_fields';
 import { getConfigurationByOwner } from '../../containers/configure/utils';
 import { CreateCaseOwnerSelector } from './owner_selector';
 import { useAvailableCasesOwners } from '../app/use_available_owners';
+import { useOwnerSelectorVisibility } from '../app/use_owner_selector_visibility';
 import { getInitialCaseValue, getOwnerDefaultValue } from './utils';
 
 export interface CreateCaseFormProps extends Pick<Partial<CreateCaseFormFieldsProps>, 'withSteps'> {
@@ -64,9 +65,14 @@ export const FormFieldsWithFormContext: React.FC<FormFieldsWithFormContextProps>
     selectedOwner,
     onSelectedOwner,
   }) => {
-    const { owner } = useCasesContext();
+    const { shouldShowOwnerSelector, defaultOwnerValue } = useOwnerSelectorVisibility();
     const availableOwners = useAvailableCasesOwners();
-    const shouldShowOwnerSelector = Boolean(!owner.length && availableOwners.length > 1);
+
+    if (!shouldShowOwnerSelector) {
+      onSelectedOwner(defaultOwnerValue);
+      // do I need to reset the form here similar to the onOwnerChange function
+    }
+
     const { reset } = useFormContext();
 
     const { data: connectors = [], isLoading: isLoadingConnectors } =
@@ -124,7 +130,6 @@ export const CreateCaseForm: React.FC<CreateCaseFormProps> = React.memo(
     const availableOwners = useAvailableCasesOwners();
     const defaultOwnerValue = owner[0] ?? getOwnerDefaultValue(availableOwners);
     const [selectedOwner, onSelectedOwner] = useState<string>(defaultOwnerValue);
-
     const { data: configurations, isLoading: isLoadingCaseConfiguration } =
       useGetAllCaseConfigurations();
 

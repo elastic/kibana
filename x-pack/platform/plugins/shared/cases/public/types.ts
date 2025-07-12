@@ -112,6 +112,7 @@ export interface RenderAppProps {
   kibanaVersion: string;
   externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
+  isServerless?: boolean;
 }
 
 export interface CasesPublicSetup {

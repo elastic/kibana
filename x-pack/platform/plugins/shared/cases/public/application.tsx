@@ -34,6 +34,7 @@ interface CasesAppWithContextProps {
   externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
   getFilesClient: (scope: string) => ScopedFilesClient;
+  isServerless?: boolean;
 }
 
 const CasesAppWithContext: React.FC<CasesAppWithContextProps> = React.memo(
@@ -41,12 +42,14 @@ const CasesAppWithContext: React.FC<CasesAppWithContextProps> = React.memo(
     externalReferenceAttachmentTypeRegistry,
     persistableStateAttachmentTypeRegistry,
     getFilesClient,
+    isServerless,
   }) => {
     return (
       <CasesApp
         externalReferenceAttachmentTypeRegistry={externalReferenceAttachmentTypeRegistry}
         persistableStateAttachmentTypeRegistry={persistableStateAttachmentTypeRegistry}
         getFilesClient={getFilesClient}
+        isServerless={isServerless}
       />
     );
   }
@@ -55,7 +58,7 @@ const CasesAppWithContext: React.FC<CasesAppWithContextProps> = React.memo(
 CasesAppWithContext.displayName = 'CasesAppWithContext';
 
 export const App: React.FC<{ deps: RenderAppProps }> = ({ deps }) => {
-  const { mountParams, coreStart, pluginsStart, storage, kibanaVersion } = deps;
+  const { mountParams, coreStart, pluginsStart, storage, kibanaVersion, isServerless } = deps;
   const { history } = mountParams;
 
   return (
@@ -73,6 +76,7 @@ export const App: React.FC<{ deps: RenderAppProps }> = ({ deps }) => {
             externalReferenceAttachmentTypeRegistry={deps.externalReferenceAttachmentTypeRegistry}
             persistableStateAttachmentTypeRegistry={deps.persistableStateAttachmentTypeRegistry}
             getFilesClient={pluginsStart.files.filesClientFactory.asScoped}
+            isServerless={isServerless}
           />
         </Router>
       </KibanaContextProvider>

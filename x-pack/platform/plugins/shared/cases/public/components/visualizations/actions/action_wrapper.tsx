@@ -22,6 +22,7 @@ export const DEFAULT_DARK_MODE = 'theme:darkMode' as const;
 interface Props {
   casesActionContextProps: CasesActionContextProps;
   currentAppId?: string;
+  isServerless?: boolean;
 }
 
 const ActionWrapperWithContext: React.FC<PropsWithChildren<Props>> = ({
@@ -30,7 +31,6 @@ const ActionWrapperWithContext: React.FC<PropsWithChildren<Props>> = ({
   currentAppId,
 }) => {
   const { application, ...startServices } = useKibana().services;
-
   const owner = getCaseOwnerByAppId(currentAppId);
   const casePermissions = canUseCases(application.capabilities)(owner ? [owner] : undefined);
   // TODO: Remove when https://github.com/elastic/kibana/issues/143201 is developed
