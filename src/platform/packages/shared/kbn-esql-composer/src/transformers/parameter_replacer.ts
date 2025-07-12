@@ -46,7 +46,7 @@ export class ParameterReplacer {
     return map;
   }
 
-  public replace<TNode extends ReplaceableNodes>(node: TNode): TNode {
+  public maybeReplace<TNode extends ReplaceableNodes>(node: TNode): TNode {
     if (isFunctionExpression(node)) {
       return this.replaceFunctionExpression(node) as TNode;
     }
@@ -55,13 +55,13 @@ export class ParameterReplacer {
       return this.replaceColumnExpression(node) as TNode;
     }
 
-    if (this.isParamReplaceable(node)) {
-      return this.getAstNodeFromParameter(node) as TNode;
+    if (this.isNamedOrIndexParameterLiteral(node)) {
+      return this.buildReplacementAstNode(node) as TNode;
     }
 
     return node;
   }
-  private isParamReplaceable(node: ESQLAstExpressionNode): node is ESQLParamLiteral {
+  private isNamedOrIndexParameterLiteral(node: ESQLAstExpressionNode): node is ESQLParamLiteral {
     return (
       isParamLiteral(node) &&
       (node.paramType === 'named' ||
@@ -81,14 +81,16 @@ export class ParameterReplacer {
   }
 
   private replaceColumnExpression(node: ESQLColumn): ESQLColumn {
-    if (!node.args.some((arg) => this.isParamReplaceable(arg))) {
+    if (!node.args.some((arg) => this.isNamedOrIndexParameterLiteral(arg))) {
       return node;
     }
 
     return Builder.expression.column({
       ...node,
       args: node.args.map((arg) =>
-        this.isParamReplaceable(arg) ? (this.getAstNodeFromParameter(arg) as ESQLIdentifier) : arg
+        this.isNamedOrIndexParameterLiteral(arg)
+          ? (this.buildReplacementAstNode(arg) as ESQLIdentifier)
+          : arg
       ),
     });
   }
@@ -103,7 +105,7 @@ export class ParameterReplacer {
     }
   }
 
-  private getAstNodeFromParameter(node: ESQLParamLiteral): ESQLAstBaseItem {
+  private buildReplacementAstNode(node: ESQLParamLiteral): ESQLAstBaseItem {
     const value = this.resolveParamValue(node);
 
     if (!value) {

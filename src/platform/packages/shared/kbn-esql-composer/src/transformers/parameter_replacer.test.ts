@@ -53,7 +53,7 @@ describe('ParameterReplacer', () => {
     const replacer = new ParameterReplacer(params);
 
     const node = createParamLiteral('named', '?', 'foo');
-    const substituted = replacer.replace(node);
+    const substituted = replacer.maybeReplace(node);
 
     expect(substituted).toEqual(Builder.expression.literal.string('bar'));
   });
@@ -63,7 +63,7 @@ describe('ParameterReplacer', () => {
     const replacer = new ParameterReplacer(params);
 
     const node = createParamLiteral('positional', '?', '0');
-    const substituted = replacer.replace(node);
+    const substituted = replacer.maybeReplace(node);
 
     expect(substituted).toEqual(Builder.expression.literal.string('positional_value'));
   });
@@ -73,7 +73,7 @@ describe('ParameterReplacer', () => {
     const replacer = new ParameterReplacer(params);
 
     const node = createParamLiteral('named', '?', 'missing');
-    const substituted = replacer.replace(node);
+    const substituted = replacer.maybeReplace(node);
 
     expect(substituted).toBe(node);
   });
@@ -84,7 +84,7 @@ describe('ParameterReplacer', () => {
 
     const node = createColumnWithParam('named', '??', 'foo');
 
-    const substituted = replacer.replace(node);
+    const substituted = replacer.maybeReplace(node);
 
     expect(substituted.args[0].type).toBe('identifier');
     expect(substituted.args[0].name).toBe('bar');
