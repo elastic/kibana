@@ -16,8 +16,8 @@ import type {
   Reducer,
 } from 'redux';
 import { applyMiddleware, createStore as createReduxStore } from 'redux';
-import { composeWithDevTools } from 'redux-devtools-extension/developmentOnly';
-import type { EnhancerOptions } from 'redux-devtools-extension';
+import { composeWithDevTools } from '@redux-devtools/extension';
+import type { EnhancerOptions } from '@redux-devtools/extension';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import reduceReducers from 'reduce-reducers';
