@@ -221,8 +221,8 @@ export const Criterion: React.FC<Props> = ({
                 <EuiExpression
                   description={
                     criterion.comparator
-                      // @ts-expect-error upgrade typescript v5.4.5
-                      ? ComparatorToi18nMap[`${criterion.comparator}:${fieldInfo?.type}`] ??
+                      ? // @ts-expect-error upgrade typescript v5.4.5
+                        ComparatorToi18nMap[`${criterion.comparator}:${fieldInfo?.type}`] ??
                         ComparatorToi18nMap[criterion.comparator] ??
                         ''
                       : ''
