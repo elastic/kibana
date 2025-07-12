@@ -6,6 +6,9 @@
  */
 
 import React from 'react';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { RuleStatusDropdown, ComponentOpts } from './rule_status_dropdown';
 
@@ -139,5 +142,50 @@ describe('RuleStatusDropdown', () => {
     expect(wrapper.find('[data-test-subj="statusDropdownReadonly"]').first().props().children).toBe(
       'Enabled'
     );
+  });
+
+  describe('autoRecoverAlerts', () => {
+    it('shows untrack active alerts modal if `autoRecoverAlerts` is `true`', async () => {
+      render(<RuleStatusDropdown {...{ ...props, autoRecoverAlerts: true }} />);
+
+      await userEvent.click(await screen.findByTestId('ruleStatusDropdownBadge'));
+      await waitForEuiPopoverOpen();
+      expect(await screen.findByTestId('statusDropdown')).toBeInTheDocument();
+
+      expect(await screen.findByTestId('statusDropdownDisabledItem')).toBeInTheDocument();
+      await userEvent.click(screen.getByTestId('statusDropdownDisabledItem'));
+
+      expect(await screen.findByTestId('untrackAlertsModal')).toBeInTheDocument();
+    });
+
+    it('shows untrack active alerts modal if `autoRecoverAlerts` is `undefined`', async () => {
+      render(<RuleStatusDropdown {...{ ...props, autoRecoverAlerts: undefined }} />);
+
+      await userEvent.click(await screen.findByTestId('ruleStatusDropdownBadge'));
+      await waitForEuiPopoverOpen();
+      expect(await screen.findByTestId('statusDropdown')).toBeInTheDocument();
+
+      expect(await screen.findByTestId('statusDropdownDisabledItem')).toBeInTheDocument();
+      await userEvent.click(screen.getByTestId('statusDropdownDisabledItem'));
+
+      expect(await screen.findByTestId('untrackAlertsModal')).toBeInTheDocument();
+    });
+
+    it('does not show untrack active alerts modal if `autoRecoverAlerts` is `false`', async () => {
+      render(<RuleStatusDropdown {...{ ...props, autoRecoverAlerts: false }} />);
+
+      await userEvent.click(await screen.findByTestId('ruleStatusDropdownBadge'));
+      await waitForEuiPopoverOpen();
+      expect(await screen.findByTestId('statusDropdown')).toBeInTheDocument();
+
+      expect(await screen.findByTestId('statusDropdownDisabledItem')).toBeInTheDocument();
+      await userEvent.click(screen.getByTestId('statusDropdownDisabledItem'));
+
+      expect(await screen.queryByTestId('untrackAlertsModal')).not.toBeInTheDocument();
+
+      await waitFor(() => {
+        expect(disableRule).toHaveBeenCalledWith(false);
+      });
+    });
   });
 });
