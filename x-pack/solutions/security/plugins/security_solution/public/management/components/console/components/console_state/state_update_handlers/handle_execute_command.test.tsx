@@ -239,6 +239,569 @@ describe('When a Console command is entered by the user', () => {
     expect(renderResult.getByTestId('exec-output')).toBeTruthy();
   });
 
+  describe('allowUnknownArguments feature', () => {
+    it('should allow unknown arguments when allowUnknownArguments is true', async () => {
+      // Create a command that allows unknown arguments
+      const testCommand = commands.find((command) => command.name === 'cmd2');
+      if (!testCommand) {
+        throw new Error('cmd2 definition not found');
+      }
+
+      // Set allowUnknownArguments to true
+      testCommand.allowUnknownArguments = true;
+
+      render();
+      await enterCommand('cmd2 --file test --foo value1 --bar value2');
+
+      // Should execute successfully without error
+      expect(renderResult.getByTestId('exec-output')).toBeTruthy();
+      expect(renderResult.queryByTestId('test-badArgument-message')).toBeNull();
+    });
+
+    it('should still validate unknown arguments when allowUnknownArguments is false', async () => {
+      const testCommand = commands.find((command) => command.name === 'cmd2');
+      if (!testCommand) {
+        throw new Error('cmd2 definition not found');
+      }
+
+      // Explicitly set allowUnknownArguments to false
+      testCommand.allowUnknownArguments = false;
+
+      render();
+      await enterCommand('cmd2 --file test --foo value1 --bar value2');
+
+      // Should show error for unknown arguments
+      expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
+        'The following cmd2 arguments are not supported by this command: --foo, --bar'
+      );
+    });
+
+    it('should still validate unknown arguments when allowUnknownArguments is undefined (default behavior)', async () => {
+      const testCommand = commands.find((command) => command.name === 'cmd2');
+      if (!testCommand) {
+        throw new Error('cmd2 definition not found');
+      }
+
+      // Make sure allowUnknownArguments is undefined (default)
+      delete testCommand.allowUnknownArguments;
+
+      render();
+      await enterCommand('cmd2 --file test --foo value1 --bar value2');
+
+      // Should show error for unknown arguments (current behavior)
+      expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
+        'The following cmd2 arguments are not supported by this command: --foo, --bar'
+      );
+    });
+
+    it('should work with mustHaveArgs when allowUnknownArguments is true', async () => {
+      const testCommand = commands.find((command) => command.name === 'cmd2');
+      if (!testCommand) {
+        throw new Error('cmd2 definition not found');
+      }
+
+      testCommand.allowUnknownArguments = true;
+      testCommand.mustHaveArgs = true;
+
+      render();
+      await enterCommand('cmd2 --foo value1 --bar value2');
+
+      // Should execute successfully - unknown args satisfy mustHaveArgs requirement
+      expect(renderResult.getByTestId('exec-output')).toBeTruthy();
+      expect(renderResult.queryByTestId('test-badArgument-message')).toBeNull();
+    });
+
+    it('should still require known required arguments when allowUnknownArguments is true', async () => {
+      const testCommand = commands.find((command) => command.name === 'cmd2');
+      if (!testCommand) {
+        throw new Error('cmd2 definition not found');
+      }
+
+      testCommand.allowUnknownArguments = true;
+
+      render();
+      await enterCommand('cmd2 --foo value1 --bar value2');
+
+      // Should show error for missing required --file argument
+      expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
+        'Missing required arguments: --file'
+      );
+    });
+
+    it('should allow unknown arguments with various value formats', async () => {
+      const testCommand = commands.find((command) => command.name === 'cmd2');
+      if (!testCommand) {
+        throw new Error('cmd2 definition not found');
+      }
+
+      testCommand.allowUnknownArguments = true;
+
+      render();
+      await enterCommand('cmd2 --file test --foo=value1 --bar "value with spaces" --flag');
+
+      // Should execute successfully with different argument formats
+      expect(renderResult.getByTestId('exec-output')).toBeTruthy();
+      expect(renderResult.queryByTestId('test-badArgument-message')).toBeNull();
+    });
+
+    it('should pass unknown arguments to command execution component', async () => {
+      const testCommand = commands.find((command) => command.name === 'cmd2');
+      if (!testCommand) {
+        throw new Error('cmd2 definition not found');
+      }
+
+      testCommand.allowUnknownArguments = true;
+
+      // Mock the render component to capture the command args
+      let capturedCommand: any;
+      const originalRenderComponent = testCommand.RenderComponent;
+      testCommand.RenderComponent = (props: any) => {
+        capturedCommand = props.command;
+        return originalRenderComponent(props);
+      };
+
+      render();
+      await enterCommand('cmd2 --file test --foo value1 --bar value2');
+
+      // Should pass unknown arguments to the execution component
+      expect(capturedCommand.args.foo).toEqual(['value1']);
+      expect(capturedCommand.args.bar).toEqual(['value2']);
+      expect(capturedCommand.args.file).toEqual(['test']);
+    });
+
+    it('should work with exclusive arguments when allowUnknownArguments is true', async () => {
+      const testCommand = commands.find((command) => command.name === 'cmd6');
+      if (!testCommand) {
+        throw new Error('cmd6 definition not found');
+      }
+
+      testCommand.allowUnknownArguments = true;
+
+      render();
+      await enterCommand('cmd6 --foo 234 --unknownArg value');
+
+      // Should execute successfully with exclusive + unknown args
+      expect(renderResult.getByTestId('exec-output')).toBeTruthy();
+      expect(renderResult.queryByTestId('test-badArgument-message')).toBeNull();
+    });
+
+    it('should still validate exclusive arguments conflict when allowUnknownArguments is true', async () => {
+      const testCommand = commands.find((command) => command.name === 'cmd6');
+      if (!testCommand) {
+        throw new Error('cmd6 definition not found');
+      }
+
+      testCommand.allowUnknownArguments = true;
+
+      render();
+      await enterCommand('cmd6 --foo 234 --bar 123 --unknownArg value');
+
+      // Should show error for exclusive arguments conflict
+      expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
+        'This command supports only one of the following arguments: --foo, --bar'
+      );
+    });
+
+    describe('runscript command scenarios', () => {
+      it('should allow script arguments to be passed directly for runscript command', async () => {
+        // Create a mock runscript command with allowUnknownArguments
+        const runscriptCommand: CommandDefinition = {
+          name: 'runscript',
+          about: 'Execute a custom script',
+          allowUnknownArguments: true,
+          RenderComponent: () => <div data-test-subj="exec-output">Script executed</div>,
+          args: {
+            ScriptName: {
+              required: true,
+              allowMultiples: false,
+              about: 'Name of the script to execute',
+              mustHaveValue: 'non-empty-string',
+            },
+            comment: {
+              required: false,
+              allowMultiples: false,
+              about: 'Optional comment',
+              mustHaveValue: 'non-empty-string',
+            },
+          },
+        };
+
+        // Add to commands list temporarily
+        commands.push(runscriptCommand);
+
+        render();
+        await enterCommand('runscript --ScriptName test.ps1 --foo value1 --bar value2');
+
+        // Should execute successfully with script arguments
+        expect(renderResult.getByTestId('exec-output')).toBeTruthy();
+        expect(renderResult.queryByTestId('test-badArgument-message')).toBeNull();
+
+        // Clean up
+        commands.pop();
+      });
+
+      it('should preserve script argument values for runscript command', async () => {
+        const runscriptCommand: CommandDefinition = {
+          name: 'runscript',
+          about: 'Execute a custom script',
+          allowUnknownArguments: true,
+          RenderComponent: (props: any) => {
+            // Verify that script arguments are preserved
+            const { command } = props;
+            expect(command.args.foo).toEqual(['value1']);
+            expect(command.args.bar).toEqual(['value with spaces']);
+            expect(command.args.flag).toEqual([true]); // bare argument
+            return <div data-test-subj="exec-output">Script executed</div>;
+          },
+          args: {
+            ScriptName: {
+              required: true,
+              allowMultiples: false,
+              about: 'Name of the script to execute',
+              mustHaveValue: 'truthy',
+            },
+          },
+        };
+
+        commands.push(runscriptCommand);
+
+        render();
+        await enterCommand(
+          'runscript --ScriptName test.ps1 --foo value1 --bar "value with spaces" --flag'
+        );
+
+        expect(renderResult.getByTestId('exec-output')).toBeTruthy();
+
+        commands.pop();
+      });
+    });
+  });
+
+  describe('Comprehensive runscript scenarios across EDRs', () => {
+    describe('CrowdStrike runscript with both direct args and CommandLine', () => {
+      let crowdstrikeRunscriptCommand: CommandDefinition;
+
+      beforeEach(() => {
+        crowdstrikeRunscriptCommand = {
+          name: 'runscript',
+          about: 'Execute a custom script on CrowdStrike',
+          allowUnknownArguments: true,
+          RenderComponent: (props: any) => {
+            return <div data-test-subj="exec-output">CrowdStrike script executed</div>;
+          },
+          args: {
+            Raw: {
+              required: false,
+              allowMultiples: false,
+              about: 'Raw script content',
+              mustHaveValue: 'non-empty-string',
+              exclusiveOr: true,
+            },
+            CloudFile: {
+              required: false,
+              allowMultiples: false,
+              about: 'Cloud file name',
+              mustHaveValue: 'truthy',
+              exclusiveOr: true,
+            },
+            CommandLine: {
+              required: false,
+              allowMultiples: false,
+              about: 'Command line arguments',
+              mustHaveValue: 'non-empty-string',
+            },
+            HostPath: {
+              required: false,
+              allowMultiples: false,
+              about: 'Host path to script',
+              mustHaveValue: 'non-empty-string',
+              exclusiveOr: true,
+            },
+            Timeout: {
+              required: false,
+              allowMultiples: false,
+              about: 'Execution timeout',
+              mustHaveValue: 'number-greater-than-zero',
+            },
+          },
+        };
+        commands.push(crowdstrikeRunscriptCommand);
+      });
+
+      afterEach(() => {
+        commands.pop();
+      });
+
+      it('should support direct script arguments: --CloudFile="script.sh" --foo=value --bar=value', async () => {
+        let capturedCommand: any;
+        crowdstrikeRunscriptCommand.RenderComponent = (props: any) => {
+          capturedCommand = props.command;
+          return <div data-test-subj="exec-output">CrowdStrike script executed</div>;
+        };
+
+        render();
+        await enterCommand(
+          'runscript --CloudFile="do_something.sh" --foo=some_value --bar=some_value'
+        );
+
+        expect(renderResult.getByTestId('exec-output')).toBeTruthy();
+        expect(renderResult.queryByTestId('test-badArgument-message')).toBeNull();
+        expect(capturedCommand.args.CloudFile).toEqual(['do_something.sh']);
+        expect(capturedCommand.args.foo).toEqual(['some_value']);
+        expect(capturedCommand.args.bar).toEqual(['some_value']);
+      });
+
+      it('should support CommandLine with equals: --CommandLine="--foo=value --bar=value"', async () => {
+        let capturedCommand: any;
+        crowdstrikeRunscriptCommand.RenderComponent = (props: any) => {
+          capturedCommand = props.command;
+          return <div data-test-subj="exec-output">CrowdStrike script executed</div>;
+        };
+
+        render();
+        await enterCommand(
+          'runscript --CloudFile="do_something.sh" --CommandLine="--foo=some_value --bar=some_value"'
+        );
+
+        expect(renderResult.getByTestId('exec-output')).toBeTruthy();
+        expect(renderResult.queryByTestId('test-badArgument-message')).toBeNull();
+        expect(capturedCommand.args.CloudFile).toEqual(['do_something.sh']);
+        expect(capturedCommand.args.CommandLine).toEqual(['--foo=some_value --bar=some_value']);
+      });
+
+      it('should support CommandLine with spaces: --CommandLine="--foo value --bar value"', async () => {
+        let capturedCommand: any;
+        crowdstrikeRunscriptCommand.RenderComponent = (props: any) => {
+          capturedCommand = props.command;
+          return <div data-test-subj="exec-output">CrowdStrike script executed</div>;
+        };
+
+        render();
+        await enterCommand(
+          'runscript --CloudFile="do_something.sh" --CommandLine="--foo some_value --bar some_value"'
+        );
+
+        expect(renderResult.getByTestId('exec-output')).toBeTruthy();
+        expect(renderResult.queryByTestId('test-badArgument-message')).toBeNull();
+        expect(capturedCommand.args.CloudFile).toEqual(['do_something.sh']);
+        expect(capturedCommand.args.CommandLine).toEqual(['--foo some_value --bar some_value']);
+      });
+
+      it('should support mixed approach: both direct args and CommandLine together', async () => {
+        let capturedCommand: any;
+        crowdstrikeRunscriptCommand.RenderComponent = (props: any) => {
+          capturedCommand = props.command;
+          return <div data-test-subj="exec-output">CrowdStrike script executed</div>;
+        };
+
+        render();
+        await enterCommand(
+          'runscript --CloudFile="do_something.sh" --CommandLine="--param1 value1" --foo=direct_value --bar direct_flag'
+        );
+
+        expect(renderResult.getByTestId('exec-output')).toBeTruthy();
+        expect(renderResult.queryByTestId('test-badArgument-message')).toBeNull();
+        expect(capturedCommand.args.CloudFile).toEqual(['do_something.sh']);
+        expect(capturedCommand.args.CommandLine).toEqual(['--param1 value1']);
+        expect(capturedCommand.args.foo).toEqual(['direct_value']);
+        expect(capturedCommand.args.bar).toEqual([true]); // bare argument
+      });
+
+      it('should support Raw script with direct arguments', async () => {
+        let capturedCommand: any;
+        crowdstrikeRunscriptCommand.RenderComponent = (props: any) => {
+          capturedCommand = props.command;
+          return <div data-test-subj="exec-output">CrowdStrike script executed</div>;
+        };
+
+        render();
+        await enterCommand('runscript --Raw="Get-Process" --foo=process_name --bar=verbose');
+
+        expect(renderResult.getByTestId('exec-output')).toBeTruthy();
+        expect(renderResult.queryByTestId('test-badArgument-message')).toBeNull();
+        expect(capturedCommand.args.Raw).toEqual(['Get-Process']);
+        expect(capturedCommand.args.foo).toEqual(['process_name']);
+        expect(capturedCommand.args.bar).toEqual(['verbose']);
+      });
+    });
+
+    describe('Microsoft Defender runscript with direct arguments', () => {
+      let mdeRunscriptCommand: CommandDefinition;
+
+      beforeEach(() => {
+        mdeRunscriptCommand = {
+          name: 'runscript',
+          about: 'Execute a custom script on Microsoft Defender Endpoint',
+          allowUnknownArguments: true,
+          RenderComponent: (props: any) => {
+            return <div data-test-subj="exec-output">MDE script executed</div>;
+          },
+          args: {
+            ScriptName: {
+              required: true,
+              allowMultiples: false,
+              about: 'Name of the script to execute',
+              mustHaveValue: 'truthy',
+            },
+            Args: {
+              required: false,
+              allowMultiples: false,
+              about: 'Script arguments',
+              mustHaveValue: 'non-empty-string',
+            },
+          },
+        };
+        commands.push(mdeRunscriptCommand);
+      });
+
+      afterEach(() => {
+        commands.pop();
+      });
+
+      it('should support direct script arguments: --ScriptName="script.ps1" --foo=value --bar=value', async () => {
+        let capturedCommand: any;
+        mdeRunscriptCommand.RenderComponent = (props: any) => {
+          capturedCommand = props.command;
+          return <div data-test-subj="exec-output">MDE script executed</div>;
+        };
+
+        render();
+        await enterCommand(
+          'runscript --ScriptName="test_script.ps1" --foo=some_value --bar=some_value'
+        );
+
+        expect(renderResult.getByTestId('exec-output')).toBeTruthy();
+        expect(renderResult.queryByTestId('test-badArgument-message')).toBeNull();
+        expect(capturedCommand.args.ScriptName).toEqual(['test_script.ps1']);
+        expect(capturedCommand.args.foo).toEqual(['some_value']);
+        expect(capturedCommand.args.bar).toEqual(['some_value']);
+      });
+
+      it('should support both Args parameter and direct arguments', async () => {
+        let capturedCommand: any;
+        mdeRunscriptCommand.RenderComponent = (props: any) => {
+          capturedCommand = props.command;
+          return <div data-test-subj="exec-output">MDE script executed</div>;
+        };
+
+        render();
+        await enterCommand(
+          'runscript --ScriptName="test_script.ps1" --Args="param1=value1" --foo=direct_value --bar=direct_value'
+        );
+
+        expect(renderResult.getByTestId('exec-output')).toBeTruthy();
+        expect(renderResult.queryByTestId('test-badArgument-message')).toBeNull();
+        expect(capturedCommand.args.ScriptName).toEqual(['test_script.ps1']);
+        expect(capturedCommand.args.Args).toEqual(['param1=value1']);
+        expect(capturedCommand.args.foo).toEqual(['direct_value']);
+        expect(capturedCommand.args.bar).toEqual(['direct_value']);
+      });
+
+      it('should support complex argument formats', async () => {
+        let capturedCommand: any;
+        mdeRunscriptCommand.RenderComponent = (props: any) => {
+          capturedCommand = props.command;
+          return <div data-test-subj="exec-output">MDE script executed</div>;
+        };
+
+        render();
+        await enterCommand(
+          'runscript --ScriptName="complex_script.ps1" --param="value with spaces" --count=42 --enabled --config="{json: true}"'
+        );
+
+        expect(renderResult.getByTestId('exec-output')).toBeTruthy();
+        expect(renderResult.queryByTestId('test-badArgument-message')).toBeNull();
+        expect(capturedCommand.args.ScriptName).toEqual(['complex_script.ps1']);
+        expect(capturedCommand.args.param).toEqual(['value with spaces']);
+        expect(capturedCommand.args.count).toEqual(['42']);
+        expect(capturedCommand.args.enabled).toEqual([true]); // bare argument
+        expect(capturedCommand.args.config).toEqual(['{json: true}']);
+      });
+
+      it('should still require ScriptName when using direct arguments', async () => {
+        render();
+        await enterCommand('runscript --foo=value --bar=value');
+
+        expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
+          'Missing required arguments: --ScriptName'
+        );
+      });
+    });
+
+    describe('Backward compatibility validation', () => {
+      it('should maintain existing CrowdStrike CommandLine behavior', async () => {
+        const crowdstrikeCommand = {
+          name: 'runscript',
+          about: 'Execute a custom script on CrowdStrike',
+          allowUnknownArguments: true,
+          RenderComponent: () => <div data-test-subj="exec-output">Legacy CommandLine works</div>,
+          args: {
+            CloudFile: {
+              required: false,
+              allowMultiples: false,
+              about: 'Cloud file name',
+              mustHaveValue: 'truthy',
+              exclusiveOr: true,
+            },
+            CommandLine: {
+              required: false,
+              allowMultiples: false,
+              about: 'Command line arguments',
+              mustHaveValue: 'non-empty-string',
+            },
+          },
+        };
+        commands.push(crowdstrikeCommand);
+
+        render();
+        // Test traditional CrowdStrike approach still works
+        await enterCommand(
+          'runscript --CloudFile="legacy_script.sh" --CommandLine="traditional args"'
+        );
+
+        expect(renderResult.getByTestId('exec-output')).toBeTruthy();
+        expect(renderResult.queryByTestId('test-badArgument-message')).toBeNull();
+
+        commands.pop();
+      });
+
+      it('should maintain existing Microsoft Defender Args behavior', async () => {
+        const mdeCommand = {
+          name: 'runscript',
+          about: 'Execute a custom script on Microsoft Defender',
+          allowUnknownArguments: true,
+          RenderComponent: () => <div data-test-subj="exec-output">Legacy Args works</div>,
+          args: {
+            ScriptName: {
+              required: true,
+              allowMultiples: false,
+              about: 'Script name',
+              mustHaveValue: 'truthy',
+            },
+            Args: {
+              required: false,
+              allowMultiples: false,
+              about: 'Script arguments',
+              mustHaveValue: 'non-empty-string',
+            },
+          },
+        };
+        commands.push(mdeCommand);
+
+        render();
+        // Test traditional Microsoft Defender approach still works
+        await enterCommand(
+          'runscript --ScriptName="legacy_script.ps1" --Args="traditional arguments"'
+        );
+
+        expect(renderResult.getByTestId('exec-output')).toBeTruthy();
+        expect(renderResult.queryByTestId('test-badArgument-message')).toBeNull();
+
+        commands.pop();
+      });
+    });
+  });
+
   describe('Argument value validators', () => {
     let command: CommandDefinition;
 

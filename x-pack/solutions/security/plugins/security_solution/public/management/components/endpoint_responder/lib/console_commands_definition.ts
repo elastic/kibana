@@ -686,6 +686,7 @@ const adjustCommandsForCrowdstrike = ({
           ...command,
           exampleUsage: `runscript --Raw=\`\`\`Get-ChildItem .\`\`\` --CommandLine=""`,
           helpUsage: CROWDSTRIKE_CONSOLE_COMMANDS.runscript.helpUsage,
+          allowUnknownArguments: true,
           args: {
             Raw: {
               required: false,
@@ -761,6 +762,7 @@ const adjustCommandsForMicrosoftDefenderEndpoint = ({
         return {
           ...command,
           exampleUsage: `runscript --ScriptName='test.ps1'`,
+          allowUnknownArguments: true,
           args: {
             ScriptName: {
               required: true,

@@ -121,6 +121,18 @@ export interface CommandDefinition<TMeta = any> {
   mustHaveArgs?: boolean;
 
   /**
+   * If `true`, then this command allows unknown arguments to be passed.
+   * When enabled, the console validation will not reject arguments that are
+   * not defined in the command's `args` property, allowing users to pass
+   * script arguments directly without escaping.
+   * 
+   * Example: `runscript --ScriptName="test.ps1" --foo=value1 --bar=value2`
+   * 
+   * Default: `false` (maintain existing behavior)
+   */
+  allowUnknownArguments?: boolean;
+
+  /**
    * Displayed in the input hint area when the user types the command. The Command usage will be
    * appended to this value
    */
