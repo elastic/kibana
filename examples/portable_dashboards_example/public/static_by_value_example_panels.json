@@ -190,7 +190,6 @@
                       "sourceField": "bytes"
                     },
                     "b5f3dc78-dba8-4db8-87b6-24a0b9cca260": {
-                      "customLabel": true,
                       "dataType": "number",
                       "isBucketed": false,
                       "label": "% of visits",
@@ -209,7 +208,6 @@
                       "scale": "ratio"
                     },
                     "b5f3dc78-dba8-4db8-87b6-24a0b9cca260X0": {
-                      "customLabel": true,
                       "dataType": "number",
                       "isBucketed": false,
                       "label": "Part of count() / overall_sum(count())",
@@ -218,7 +216,6 @@
                       "sourceField": "___records___"
                     },
                     "b5f3dc78-dba8-4db8-87b6-24a0b9cca260X1": {
-                      "customLabel": true,
                       "dataType": "number",
                       "isBucketed": false,
                       "label": "Part of count() / overall_sum(count())",
@@ -227,7 +224,6 @@
                       "sourceField": "___records___"
                     },
                     "b5f3dc78-dba8-4db8-87b6-24a0b9cca260X2": {
-                      "customLabel": true,
                       "dataType": "number",
                       "isBucketed": false,
                       "label": "Part of count() / overall_sum(count())",
@@ -236,7 +232,6 @@
                       "scale": "ratio"
                     },
                     "b5f3dc78-dba8-4db8-87b6-24a0b9cca260X3": {
-                      "customLabel": true,
                       "dataType": "number",
                       "isBucketed": false,
                       "label": "Part of count() / overall_sum(count())",

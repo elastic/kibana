@@ -1886,7 +1886,6 @@ describe('terms', () => {
 
       layer.columns.col1 = {
         label: 'MyCustomLabel',
-        customLabel: true,
         dataType: 'string',
         isBucketed: true,
         operationType: 'terms',

@@ -37,7 +37,6 @@ const mockDataView = {
 const lensPluginMockStart = lensPluginMock.createStartContract();
 
 const getDataLayer = (formula: string): GenericIndexPatternColumn => ({
-  customLabel: false,
   dataType: 'number',
   filter: undefined,
   isBucketed: false,
@@ -71,7 +70,6 @@ const getHistogramLayer = (interval: string, includeEmptyRows?: boolean) => ({
 });
 
 const REFERENCE_LINE_LAYER: ReferenceBasedIndexPatternColumn = {
-  customLabel: true,
   dataType: 'number',
   isBucketed: false,
   isStaticValue: true,

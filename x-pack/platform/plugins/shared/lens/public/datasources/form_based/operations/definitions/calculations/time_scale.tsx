@@ -63,7 +63,7 @@ export const timeScaleOperation: OperationDefinition<TimeScaleIndexPatternColumn
             dateColumnId: dateColumn ? [dateColumn] : [],
             inputColumnId: [currentColumn.references[0]],
             outputColumnId: [columnId],
-            outputColumnName: [currentColumn.label],
+            outputColumnName: [currentColumn.label ?? ''],
             targetUnit: [currentColumn.params.unit!],
             reducedTimeRange: currentColumn.reducedTimeRange
               ? [currentColumn.reducedTimeRange]
@@ -74,7 +74,6 @@ export const timeScaleOperation: OperationDefinition<TimeScaleIndexPatternColumn
     },
     buildColumn: ({ referenceIds, previousColumn, layer, indexPattern }, columnParams) => {
       return {
-        label: NORMALIZE_BY_UNIT_NAME,
         dataType: 'number',
         operationType: NORMALIZE_BY_UNIT_ID,
         isBucketed: false,

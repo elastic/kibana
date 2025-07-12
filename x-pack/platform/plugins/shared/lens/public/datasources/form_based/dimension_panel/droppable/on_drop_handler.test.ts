@@ -997,7 +997,6 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
                       label: '',
                       isBucketed: false,
                       sourceField: '___records___',
-                      customLabel: true,
                     },
                     col6: {
                       dataType: 'number',
@@ -1005,7 +1004,6 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
                       label: '',
                       isBucketed: false,
                       sourceField: '___records___',
-                      customLabel: true,
                     },
                   },
                 },
@@ -2045,7 +2043,6 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
                       operationType: 'count',
                       isBucketed: false,
                       sourceField: '___records___',
-                      customLabel: true,
                     },
                     firstColumn: {
                       label: 'count()',
@@ -2068,7 +2065,6 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
                       operationType: 'count',
                       isBucketed: false,
                       sourceField: '___records___',
-                      customLabel: true,
                     },
                     second: {
                       label: 'count()',
@@ -2131,7 +2127,6 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
                     references: ['newColumnX0'],
                   },
                   newColumnX0: {
-                    customLabel: true,
                     dataType: 'number',
                     filter: undefined,
                     isBucketed: false,
@@ -2187,7 +2182,6 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
                     references: ['secondX0'],
                   },
                   secondX0: {
-                    customLabel: true,
                     dataType: 'number',
                     filter: undefined,
                     isBucketed: false,

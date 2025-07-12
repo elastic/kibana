@@ -429,8 +429,6 @@ describe('Textbased Data Source', () => {
               {
                 columnId: 'bytes',
                 fieldName: 'bytes',
-                customLabel: false,
-                label: 'bytes',
                 inMetricDimension: true,
                 meta: {
                   type: 'number',
@@ -439,8 +437,6 @@ describe('Textbased Data Source', () => {
               {
                 columnId: 'dest',
                 fieldName: 'dest',
-                customLabel: false,
-                label: 'dest',
                 meta: {
                   type: 'string',
                 },
@@ -521,8 +517,6 @@ describe('Textbased Data Source', () => {
         {
           id: '@timestamp',
           name: '@timestamp',
-          customLabel: false,
-          label: '@timestamp',
           meta: {
             type: 'date',
           },
@@ -530,8 +524,6 @@ describe('Textbased Data Source', () => {
         {
           id: 'dest',
           name: 'dest',
-          customLabel: false,
-          label: 'dest',
           meta: {
             type: 'string',
           },
@@ -571,7 +563,6 @@ describe('Textbased Data Source', () => {
               {
                 columnId: '@timestamp',
                 fieldName: '@timestamp',
-                customLabel: false,
                 label: '@timestamp',
                 inMetricDimension: true,
                 meta: {
@@ -581,7 +572,6 @@ describe('Textbased Data Source', () => {
               {
                 columnId: 'dest',
                 fieldName: 'dest',
-                customLabel: false,
                 label: 'dest',
                 inMetricDimension: true,
                 meta: {

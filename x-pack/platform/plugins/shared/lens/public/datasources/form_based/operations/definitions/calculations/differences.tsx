@@ -69,11 +69,9 @@ export const derivativeOperation: OperationDefinition<
     return dateBasedOperationToExpression(layer, columnId, 'derivative');
   },
   buildColumn: ({ referenceIds, previousColumn, layer }, columnParams) => {
-    const ref = layer.columns[referenceIds[0]];
     const differencesColumnParams = columnParams as DerivativeIndexPatternColumn;
     const timeScale = differencesColumnParams?.timeScale ?? previousColumn?.timeScale;
     return {
-      label: ofName(ref?.label, previousColumn?.timeScale, previousColumn?.timeShift),
       dataType: 'number',
       operationType: DIFFERENCES_ID,
       isBucketed: false,

@@ -91,11 +91,9 @@ export const movingAverageOperation: OperationDefinition<
     });
   },
   buildColumn: ({ referenceIds, previousColumn, layer }, columnParams) => {
-    const metric = layer.columns[referenceIds[0]];
     const window = columnParams?.window ?? MOVING_AVERAGE_WINDOW_DEFAULT_VALUE;
 
     return {
-      label: ofName(metric?.label, previousColumn?.timeScale, previousColumn?.timeShift),
       dataType: 'number',
       operationType: 'moving_average',
       isBucketed: false,
