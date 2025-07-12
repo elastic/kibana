@@ -10,6 +10,8 @@ import type { DataViewBase } from '@kbn/es-query';
 import {
   containsInvalidItems,
   singleEntryThreat,
+  containsInvalidNotMatchClauses,
+  containsSingledNotMatchClause,
 } from '../../../../../common/components/threat_match/helpers';
 import type { FormData, ValidationFunc } from '../../../../../shared_imports';
 import type { ThreatMapEntries } from '../../../../../common/components/threat_match/types';
@@ -108,6 +110,34 @@ export function threatMatchMappingValidatorFactory({
             values: {
               unknownThreatMatchIndicesFields: `"${unknownThreatMatchIndicesFields.join('", "')}"`,
             },
+          }
+        ),
+      };
+    }
+
+    if (containsSingledNotMatchClause(value)) {
+      return {
+        code: THREAT_MATCH_MAPPING_ERROR_CODES.ERR_SINGLE_NOT_MATCH_CLAUSE,
+        path,
+        message: i18n.translate(
+          'xpack.securitySolution.detectionEngine.ruleManagement.threatMappingField.singleNotMatchClauseError',
+          {
+            defaultMessage:
+              'Not match cannot be used as a single entry in AND condition. It must be used with at least one match clause.',
+          }
+        ),
+      };
+    }
+
+    if (containsInvalidNotMatchClauses(value)) {
+      return {
+        code: THREAT_MATCH_MAPPING_ERROR_CODES.ERR_INVALID_NOT_MATCH_CLAUSE,
+        path,
+        message: i18n.translate(
+          'xpack.securitySolution.detectionEngine.ruleManagement.threatMappingField.invalidNotMatchClauseError',
+          {
+            defaultMessage:
+              'Not match field clause can not use same mapping fields as match clause in same AND condition.',
           }
         ),
       };

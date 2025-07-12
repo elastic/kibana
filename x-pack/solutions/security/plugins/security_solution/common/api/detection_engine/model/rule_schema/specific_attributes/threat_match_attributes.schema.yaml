@@ -37,6 +37,8 @@ components:
                     - mapping
                 value:
                   $ref: '../../../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+                negate:
+                  type: boolean
               required:
                 - field
                 - type

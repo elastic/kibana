@@ -6,7 +6,7 @@
  */
 
 import type { DataViewFieldBase } from '@kbn/es-query';
-import type { ThreatMap, ThreatMapEntry } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { ThreatMapping } from '../../../../common/api/detection_engine/model/rule_schema';
 
 export interface FormattedEntry {
   id: string;
@@ -14,16 +14,19 @@ export interface FormattedEntry {
   type: 'mapping';
   value: DataViewFieldBase | undefined;
   entryIndex: number;
+  negate?: boolean;
 }
 
 export interface EmptyEntry {
   field: string | undefined;
   type: 'mapping';
   value: string | undefined;
+  negate?: boolean;
 }
 
+type ThreatMapEntry = ThreatMapping['0']['entries']['0'];
 export type Entry = ThreatMapEntry | EmptyEntry;
 
-export type ThreatMapEntries = Omit<ThreatMap, 'entries'> & {
+export interface ThreatMapEntries {
   entries: Entry[];
-};
+}
