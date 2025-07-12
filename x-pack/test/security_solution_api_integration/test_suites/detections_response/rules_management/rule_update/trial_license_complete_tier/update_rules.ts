@@ -442,13 +442,13 @@ export default ({ getService }: FtrProviderContext) => {
             ...existingRule,
             threshold: {
               ...existingRule.threshold,
-              field: ['field-1', 'field-2', 'field-3', 'field-4'],
+              field: ['field-1', 'field-2', 'field-3', 'field-4', 'field-5', 'field-6'],
             },
           };
           const { body } = await securitySolutionApi.updateRule({ body: rule }).expect(400);
 
           expect(body).to.eql({
-            message: ['Number of fields must be 3 or less'],
+            message: ['Number of fields must be 5 or less'],
             status_code: 400,
           });
         });

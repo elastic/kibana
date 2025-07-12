@@ -67,8 +67,8 @@ const validateThreshold = (props: RuleUpdateProps): string[] => {
       ) {
         errors.push('Cardinality of a field that is being aggregated on is always 1');
       }
-      if (Array.isArray(props.threshold.field) && props.threshold.field.length > 3) {
-        errors.push('Number of fields must be 3 or less');
+      if (Array.isArray(props.threshold.field) && props.threshold.field.length > 5) {
+        errors.push('Number of fields must be 5 or less');
       }
     }
   }

@@ -158,13 +158,13 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      it('should result in partial success if more than 3 threshold fields', async () => {
+      it('should result in partial success if more than 5 threshold fields', async () => {
         const baseRule = getThresholdRuleForAlertTesting(['*']);
         const rule = {
           ...baseRule,
           threshold: {
             ...baseRule.threshold,
-            field: ['field-1', 'field-2', 'field-3', 'field-4'],
+            field: ['field-1', 'field-2', 'field-3', 'field-4', 'field-5', 'field-6'],
           },
         };
         const ndjson = combineToNdJson(rule);
@@ -178,7 +178,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         expect(body.errors[0]).toEqual({
           error: {
-            message: 'Number of fields must be 3 or less',
+            message: 'Number of fields must be 5 or less',
             status_code: 400,
           },
         });

@@ -70,8 +70,8 @@ const validateThreshold = (rule: PatchRuleRequestBody): string[] => {
       if (rule.threshold.value <= 0) {
         errors.push('"threshold.value" has to be bigger than 0');
       }
-      if (Array.isArray(rule.threshold.field) && rule.threshold.field.length > 3) {
-        errors.push('Number of fields must be 3 or less');
+      if (Array.isArray(rule.threshold.field) && rule.threshold.field.length > 5) {
+        errors.push('Number of fields must be 5 or less');
       }
     }
   }
