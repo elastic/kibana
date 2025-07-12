@@ -23,6 +23,7 @@ import {
 } from '../simulation_state_machine';
 import { MappedSchemaField, SchemaField } from '../../../schema_editor/types';
 import { isGrokProcessor } from '../../utils';
+import { DataSourceActorSnapshot } from '../data_source_state_machine';
 
 const consoleInspector = createConsoleInspector();
 
@@ -166,6 +167,17 @@ const ListenForDefinitionChanges = ({
 
 export const useSimulatorRef = () => {
   return useStreamEnrichmentSelector((state) => state.context.simulatorRef);
+};
+
+export const useDataSourceSelector = <T,>(
+  idx: number,
+  selector: (snapshot: DataSourceActorSnapshot) => T
+) => {
+  const ref = useStreamEnrichmentSelector((state) => state.context.dataSourcesRefs[idx]);
+  if (!ref) {
+    throw new Error(`Data source at index ${idx} does not exist`);
+  }
+  return useSelector(ref, selector);
 };
 
 export const useSimulatorSelector = <T,>(selector: (snapshot: SimulationActorSnapshot) => T): T => {
