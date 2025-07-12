@@ -80,6 +80,7 @@ export interface DiscoverInternalState {
   isESQLToDataViewTransitionModalVisible: boolean;
   tabsBarVisibility: TabsBarVisibility;
   tabs: {
+    areInitializing: boolean;
     byId: Record<string, TabState | RecentlyClosedTabState>;
     allIds: string[];
     recentlyClosedTabIds: string[];

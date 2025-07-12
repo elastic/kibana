@@ -23,6 +23,7 @@ import {
   InternalStateProvider,
   internalStateActions,
   useInternalStateDispatch,
+  useInternalStateSelector,
 } from './state_management/redux';
 import type { RootProfileState } from '../../context_awareness';
 import { useRootProfile, useDefaultAdHocDataViews } from '../../context_awareness';
@@ -200,10 +201,11 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
     id: currentDiscoverSessionId || 'new',
   });
 
+  const areTabsInitializing = useInternalStateSelector((state) => state.tabs.areInitializing);
   const isLoading =
     rootProfileState.rootProfileLoading ||
     mainRouteInitializationState.loading ||
-    tabsInitializationState.loading;
+    areTabsInitializing;
 
   if (isLoading) {
     return <BrandedLoadingIndicator />;
