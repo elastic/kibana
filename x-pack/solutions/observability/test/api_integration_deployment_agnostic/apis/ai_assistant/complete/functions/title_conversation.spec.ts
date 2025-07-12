@@ -76,9 +76,10 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
 
       it('sends the correct system message to the LLM for the title', () => {
+        const systemMessage = TITLE_SYSTEM_MESSAGE.replace(/\{scope\}/, 'Elastic Observability');
         expect(
           titleRequestBody.messages.find((message) => message.role === MessageRole.System)?.content
-        ).to.be(TITLE_SYSTEM_MESSAGE);
+        ).to.be(systemMessage);
       });
 
       it('sends the correct user message to the LLM for the title', () => {

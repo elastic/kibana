@@ -227,6 +227,7 @@ export class ObservabilityAIAssistantClient {
           : getGeneratedTitle({
               messages: initialMessages,
               logger: this.dependencies.logger,
+              scopes: this.dependencies.scopes,
               chat: (name, chatParams) =>
                 withInferenceSpan('get_title', () =>
                   this.chat(name, {
