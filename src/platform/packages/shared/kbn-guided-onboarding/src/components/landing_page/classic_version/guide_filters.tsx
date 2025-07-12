@@ -92,19 +92,6 @@ export const GuideFilters = ({ activeFilter, setActiveFilter, application }: Gui
           />
         </EuiButton>
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiButton
-          onClick={onSelectFilter}
-          data-filter-id="security"
-          color="text"
-          css={[filterButtonCss, activeFilter === 'security' && activeFilterFill]}
-        >
-          <FormattedMessage
-            id="guidedOnboardingPackage.gettingStarted.guideFilter.security.buttonLabel"
-            defaultMessage="Security"
-          />
-        </EuiButton>
-      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };

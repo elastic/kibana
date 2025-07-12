@@ -44,7 +44,6 @@ import type {
   SavedObjectsTaggingApi,
   SavedObjectTaggingOssPluginStart,
 } from '@kbn/saved-objects-tagging-oss-plugin/public';
-import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
@@ -124,7 +123,7 @@ export interface StartPlugins {
   embeddable: EmbeddableStart;
   inspector: InspectorStart;
   fleet?: FleetStart;
-  guidedOnboarding?: GuidedOnboardingPluginStart;
+  guidedOnboarding?: unknown; // :GuidedOnboardingPluginStart comes from '@kbn/guided-onboarding-plugin/public'
   lens: LensPublicStart;
   lists?: ListsPluginStart;
   licensing: LicensingPluginStart;
