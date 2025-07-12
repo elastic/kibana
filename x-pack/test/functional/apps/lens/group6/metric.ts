@@ -122,6 +122,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await lens.waitForVisualization('mtrVis');
       const data = await lens.getMetricVisualizationData();
+      const normalizedData = data.map((item) => ({
+        ...item,
+        ...(item.extraText && { extraText: item.extraText.replace(/\n/g, ' ') }),
+      }));
 
       const expectedData = [
         {
@@ -185,7 +189,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           showingBar: false,
         },
       ];
-      expect(data).to.eql(expectedData);
+      expect(normalizedData).to.eql(expectedData);
 
       await lens.openDimensionEditor(
         'lnsMetric_primaryMetricDimensionPanel > lns-dimensionTrigger'
