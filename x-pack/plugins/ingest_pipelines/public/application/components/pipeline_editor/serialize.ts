@@ -8,6 +8,7 @@
 import { Processor } from '../../../../common/types';
 
 import { ProcessorInternal } from './types';
+import { convertProccesorsToJson } from './utils';
 
 interface SerializeArgs {
   /**
@@ -35,7 +36,7 @@ const convertProcessorInternalToProcessor = (
   const { options, onFailure, type, id } = processor;
   const outProcessor = {
     [type]: {
-      ...options,
+      ...convertProccesorsToJson(options),
     },
   };
 
