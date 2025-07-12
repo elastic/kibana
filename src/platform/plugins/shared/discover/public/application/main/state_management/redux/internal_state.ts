@@ -47,7 +47,13 @@ const initialState: DiscoverInternalState = {
   expandedDoc: undefined,
   isESQLToDataViewTransitionModalVisible: false,
   tabsBarVisibility: TabsBarVisibility.default,
-  tabs: { byId: {}, allIds: [], unsafeCurrentId: '', recentlyClosedTabIds: [] },
+  tabs: {
+    areInitializing: false,
+    byId: {},
+    allIds: [],
+    unsafeCurrentId: '',
+    recentlyClosedTabIds: [],
+  },
 };
 
 export type TabActionPayload<T extends { [key: string]: unknown } = {}> = { tabId: string } & T;
@@ -231,11 +237,22 @@ export const internalStateSlice = createSlice({
       state.savedDataViews = action.payload;
     });
 
+    builder.addCase(initializeTabs.pending, (state) => {
+      state.tabs.areInitializing = true;
+    });
+
     builder.addCase(initializeTabs.fulfilled, (state, action) => {
       state.userId = action.payload.userId;
       state.spaceId = action.payload.spaceId;
       state.persistedDiscoverSession = action.payload.persistedDiscoverSession;
     });
+
+    builder.addMatcher(
+      (action) => initializeTabs.fulfilled.match(action) || initializeTabs.rejected.match(action),
+      (state) => {
+        state.tabs.areInitializing = false;
+      }
+    );
   },
 });
 
