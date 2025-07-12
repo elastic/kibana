@@ -8,6 +8,7 @@
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
+import type { PluginInitializerContext } from '@kbn/core/public';
 import type {
   BrowserUrlService,
   SharePluginSetup,
@@ -43,6 +44,7 @@ import {
   type MetricsExplorerLocator,
   type TransactionDetailsByTraceIdLocator,
 } from '../common';
+import { ObservabilitySharedBrowserConfig } from '../common/config';
 import { updateGlobalNavigation } from './services/update_global_navigation';
 import {
   DependencyOverviewLocator,
@@ -87,12 +89,14 @@ interface ObservabilitySharedLocators {
 export class ObservabilitySharedPlugin implements Plugin {
   private readonly navigationRegistry = createNavigationRegistry();
   private isSidebarEnabled$: BehaviorSubject<boolean>;
+  private config?: ObservabilitySharedBrowserConfig;
 
-  constructor() {
+  constructor(private readonly initializerContext: PluginInitializerContext) {
     this.isSidebarEnabled$ = new BehaviorSubject<boolean>(true);
   }
 
   public setup(coreSetup: CoreSetup, pluginsSetup: ObservabilitySharedSetup) {
+    this.config = this.initializerContext.config.get<ObservabilitySharedBrowserConfig>();
     coreSetup.getStartServices().then(([coreStart]) => {
       coreStart.chrome
         .getChromeStyle$()
@@ -128,6 +132,7 @@ export class ObservabilitySharedPlugin implements Plugin {
         registerSections: this.navigationRegistry.registerSections,
       },
       updateGlobalNavigation,
+      config: this.config,
     };
   }
 
