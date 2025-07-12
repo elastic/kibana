@@ -43,9 +43,9 @@ type Source = estypes.SearchSourceFilter | boolean | estypes.Fields;
 
 type TopMetricKeysOf<TAggregationContainer extends AggregationsAggregationContainer> =
   TAggregationContainer extends { top_metrics: { metrics: { field: infer TField } } }
-    ? TField
+    ? Extract<TField, string | number | symbol>
     : TAggregationContainer extends { top_metrics: { metrics: Array<{ field: infer TField }> } }
-    ? TField
+    ? Extract<TField, string | number | symbol>
     : string;
 
 type ValueTypeOfField<T> = T extends Record<string, string | number>

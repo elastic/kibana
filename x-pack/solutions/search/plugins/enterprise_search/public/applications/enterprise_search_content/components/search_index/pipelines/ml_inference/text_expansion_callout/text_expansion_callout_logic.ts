@@ -254,14 +254,12 @@ export const TextExpansionCalloutLogic = kea<
       null,
       {
         clearTextExpansionModelPollingId: () => null,
-        // @ts-expect-error upgrade typescript v5.1.6
         setTextExpansionModelPollingId: (_, { pollTimeoutId }) => pollTimeoutId,
       },
     ],
     elserModelId: [
       '',
       {
-        // @ts-expect-error upgrade typescript v5.1.6
         setElserModelId: (_, { elserModelId }) => elserModelId,
       },
     ],

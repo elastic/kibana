@@ -397,5 +397,5 @@ export function getProcessorConfig<TProcessorDefinition extends ProcessorDefinit
 ): ProcessorConfig {
   const type = getProcessorType(processor);
 
-  return processor[type as keyof TProcessorDefinition];
+  return processor[type as keyof TProcessorDefinition] as ProcessorConfig;
 }

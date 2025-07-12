@@ -281,7 +281,6 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
     storeReducer,
     undefined,
     undefined,
-    // @ts-expect-error ts upgrade v4.7.4
     [...managementMiddlewareFactory(coreStart, depsStart), middlewareSpy.actionSpyMiddleware]
   );
 

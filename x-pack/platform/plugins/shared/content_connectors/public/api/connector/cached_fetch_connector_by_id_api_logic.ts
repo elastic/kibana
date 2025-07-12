@@ -117,7 +117,6 @@ export const CachedFetchConnectorByIdApiLogic = kea<
       null,
       {
         apiReset: () => null,
-        // @ts-expect-error upgrade typescript v5.1.6
         apiSuccess: (currentState, newConnectorData) => {
           return isEqual(currentState, newConnectorData.connector)
             ? currentState
@@ -129,7 +128,6 @@ export const CachedFetchConnectorByIdApiLogic = kea<
       '',
       {
         apiReset: () => '',
-        // @ts-expect-error upgrade typescript v5.1.6
         startPolling: (_, { connectorId }) => connectorId,
       },
     ],
@@ -137,7 +135,6 @@ export const CachedFetchConnectorByIdApiLogic = kea<
       null,
       {
         clearPollTimeout: () => null,
-        // @ts-expect-error upgrade typescript v5.1.6
         setTimeoutId: (_, { id }) => id,
       },
     ],
