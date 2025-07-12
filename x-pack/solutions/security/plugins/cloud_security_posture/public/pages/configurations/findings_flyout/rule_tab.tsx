@@ -11,7 +11,7 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { CspFinding } from '@kbn/cloud-security-posture-common';
 import { RulesDetectionRuleCounter } from '../../rules/rules_detection_rule_counter';
-import { BenchmarkIcons, CspFlyoutMarkdown, EMPTY_VALUE, RuleNameLink } from './findings_flyout';
+import { BenchmarkIcons, CspFlyoutMarkdown, CspFlyoutMarkdownJSON, EMPTY_VALUE, RuleNameLink } from './findings_flyout';
 
 const getReferenceFromRule = (rule?: CspFinding['rule']) => {
   return rule?.reference || rule?.references;
@@ -112,7 +112,7 @@ export const getRuleList = (
       title: i18n.translate('xpack.csp.findings.findingsFlyout.ruleTab.auditTitle', {
         defaultMessage: 'Audit',
       }),
-      description: rule?.audit ? <CspFlyoutMarkdown>{rule.audit}</CspFlyoutMarkdown> : EMPTY_VALUE,
+      description: rule?.audit ? <CspFlyoutMarkdownJSON>{rule.audit}</CspFlyoutMarkdownJSON> : EMPTY_VALUE,
     },
     {
       title: i18n.translate('xpack.csp.findings.findingsFlyout.ruleTab.referencesTitle', {

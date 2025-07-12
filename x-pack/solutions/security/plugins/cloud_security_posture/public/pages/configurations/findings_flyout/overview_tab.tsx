@@ -44,7 +44,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { MultiValueCellPopover, type CspClientPluginStartDeps } from '@kbn/cloud-security-posture';
 import { css } from '@emotion/css';
 import { COPY_ARIA_LABEL } from '../../../components/copy_button';
-import { CodeBlock, CspFlyoutMarkdown, EMPTY_VALUE } from './findings_flyout';
+import { CodeBlock, CspFlyoutMarkdown, CspFlyoutMarkdownJSON, EMPTY_VALUE } from './findings_flyout';
 import { FindingsDetectionRuleCounter } from './findings_detection_rule_counter';
 import { TruncatedCopyableText } from './findings_right/header';
 
@@ -237,7 +237,7 @@ export const getRemediationList = (rule: CspFinding['rule']) => [
   {
     title: '',
     description: rule?.remediation ? (
-      <CspFlyoutMarkdown>{rule?.remediation}</CspFlyoutMarkdown>
+      <CspFlyoutMarkdownJSON>{rule?.remediation}</CspFlyoutMarkdownJSON>
     ) : (
       EMPTY_VALUE
     ),
