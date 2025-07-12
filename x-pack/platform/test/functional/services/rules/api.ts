@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { RuleResponse } from '@kbn/alerting-plugin/common/routes/rule/response';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export function RulesAPIServiceProvider({ getService }: FtrProviderContext) {
@@ -69,6 +70,12 @@ export function RulesAPIServiceProvider({ getService }: FtrProviderContext) {
       for (const rule of body.data) {
         await this.deleteRule(rule.id);
       }
+    },
+
+    async getRule(id: string): Promise<RuleResponse> {
+      log.debug(`Getting rule with id ${id}...`);
+      const { body: rule } = await kbnSupertest.get(`/api/alerting/rule/${id}`).expect(200);
+      return rule;
     },
   };
 }

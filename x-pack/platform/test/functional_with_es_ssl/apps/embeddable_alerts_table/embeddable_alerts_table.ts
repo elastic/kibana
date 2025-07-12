@@ -44,9 +44,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const toasts = getService('toasts');
   const sampleData = getService('sampleData');
   const rules = getService('rules');
+  const es = getService('es');
   const config = getService('config');
   const retryTimeout = config.get('timeouts.try');
-  const es = getService('es');
 
   describe('Embeddable alerts panel', () => {
     before(async () => {
@@ -63,9 +63,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         createSecurityRule(sampleDataLogsDataView.id),
       ]);
 
-      await waitForAlertsToBeCreated('.alerts-*', stackRule.id);
-      await waitForAlertsToBeCreated('.alerts-*', observabilityRule.id);
-      await waitForAlertsToBeCreated('.alerts-*', securityRule.id);
+      await waitForRuleToBecomeActive(stackRule.id);
+      await waitForRuleToBecomeActive(observabilityRule.id);
+      await waitForRuleToBecomeActive(securityRule.id);
+
+      await waitForAlertsToBeCreated(stackRule.id);
+      await waitForAlertsToBeCreated(observabilityRule.id);
+      await waitForAlertsToBeCreated(securityRule.id);
 
       await pageObjects.dashboard.gotoDashboardURL();
     });
@@ -304,10 +308,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     return createdRule;
   };
 
-  const waitForAlertsToBeCreated = async (index: string, ruleId: string) => {
+  const waitForAlertsToBeCreated = async (ruleId: string) => {
     return await retry.tryForTime(retryTimeout, async () => {
       const response = await es.search({
-        index,
+        index: '.alerts*',
         query: {
           bool: {
             filter: [
@@ -322,10 +326,25 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       if (response.hits.hits.length === 0) {
-        throw new Error('No hits found');
+        throw new Error(`No hits found for index .alerts* and ruleId ${ruleId}`);
       }
 
       return response;
+    });
+  };
+
+  const waitForRuleToBecomeActive = async (ruleId: string) => {
+    return await retry.tryForTime(retryTimeout, async () => {
+      const rule = await rules.api.getRule(ruleId);
+
+      const { execution_status: executionStatus } = rule || {};
+      const { status } = executionStatus || {};
+
+      if (status === 'active' || status === 'ok') {
+        return executionStatus?.status;
+      }
+
+      throw new Error(`waitForStatus(active|ok): got ${status}`);
     });
   };
 
