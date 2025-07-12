@@ -32,7 +32,6 @@ function getVisibility(
 
   if (
     preferredAssistantType === AIAssistantType.Observability ||
-    preferredAssistantType === AIAssistantType.Default ||
     space.solution === 'es' ||
     space.solution === 'oblt'
   ) {
