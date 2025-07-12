@@ -34,13 +34,15 @@ export interface ICommandMethods<TContext = any> {
    * @param command The parsed Abstract Syntax Tree.
    * @param cursorPosition The current cursor position in the query string.
    * @param context Additional context for suggestions (e.g., available functions, field types).
+   * @param callbacks Optional callbacks for handling specific events during autocompletion.
    * @returns An array of suggested completion items.
    */
   autocomplete: (
     query: string,
     command: ESQLCommand,
     callbacks?: ICommandCallbacks,
-    context?: TContext
+    context?: TContext,
+    cursorPosition?: number
   ) => Promise<ISuggestionItem[]>;
 
   /**

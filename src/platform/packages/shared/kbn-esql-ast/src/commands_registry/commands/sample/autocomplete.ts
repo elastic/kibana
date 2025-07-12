@@ -15,10 +15,12 @@ export async function autocomplete(
   query: string,
   command: ESQLCommand,
   callbacks?: ICommandCallbacks,
-  context?: ICommandContext
+  context?: ICommandContext,
+  cursorPosition?: number
 ): Promise<ISuggestionItem[]> {
+  const innerText = query.substring(0, cursorPosition);
   // test for a number and at least one whitespace char at the end of the query
-  if (/[0-9]\s+$/.test(query)) {
+  if (/[0-9]\s+$/.test(innerText)) {
     return [pipeCompleteItem];
   }
 

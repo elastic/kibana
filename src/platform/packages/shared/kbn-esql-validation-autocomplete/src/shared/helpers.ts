@@ -7,36 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import {
-  Walker,
   type ESQLAstCommand,
-  type ESQLFunction,
-  type ESQLLiteral,
   esqlCommandRegistry,
-  timeUnits,
   type FieldType,
-  type FunctionParameterType,
-  type ArrayType,
   type FunctionDefinition,
-  FunctionDefinitionTypes,
-  type FunctionParameter,
 } from '@kbn/esql-ast';
 import type {
   ESQLFieldWithMetadata,
   ESQLUserDefinedColumn,
 } from '@kbn/esql-ast/src/commands_registry/types';
-import { getFunctionDefinition } from '@kbn/esql-ast/src/definitions/utils';
-import { aggFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/aggregation_functions';
-import { timeSeriesAggFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/time_series_agg_functions';
-import { groupingFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/grouping_functions';
-import { scalarFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/scalar_functions';
-import { operatorsDefinitions } from '@kbn/esql-ast/src/definitions/all_operators';
-import { getTestFunctions } from '@kbn/esql-ast/src/definitions/utils/test_functions';
-import { ESQLLocation, ESQLParamLiteral, ESQLProperNode } from '@kbn/esql-ast/src/types';
+import { ESQLLocation, ESQLParamLiteral } from '@kbn/esql-ast/src/types';
 import { uniqBy } from 'lodash';
 
 import { enrichFieldsWithECSInfo } from '../autocomplete/utils/ecs_metadata_helper';
-import { getLocationFromCommandOrOptionName } from './types';
-import type { ESQLCallbacks, ReasonTypes } from './types';
+import type { ESQLCallbacks } from './types';
 import { collectUserDefinedColumns } from './user_defined_columns';
 
 export function nonNullable<T>(v: T): v is NonNullable<T> {
@@ -48,77 +32,6 @@ export const within = (position: number, location: ESQLLocation | undefined) =>
 
 export function isSourceCommand({ label }: { label: string }) {
   return ['FROM', 'ROW', 'SHOW', 'TS'].includes(label);
-}
-
-let fnLookups: Map<string, FunctionDefinition> | undefined;
-
-function buildFunctionLookup() {
-  // we always refresh if we have test functions
-  if (!fnLookups || getTestFunctions().length) {
-    fnLookups = operatorsDefinitions
-      .concat(
-        scalarFunctionDefinitions,
-        aggFunctionDefinitions,
-        timeSeriesAggFunctionDefinitions,
-        groupingFunctionDefinitions,
-        getTestFunctions()
-      )
-      .reduce((memo, def) => {
-        memo.set(def.name, def);
-        if (def.alias) {
-          for (const alias of def.alias) {
-            memo.set(alias, def);
-          }
-        }
-        return memo;
-      }, new Map<string, FunctionDefinition>());
-  }
-  return fnLookups;
-}
-
-export function isSupportedFunction(
-  name: string,
-  parentCommand?: string,
-  option?: string
-): { supported: boolean; reason: ReasonTypes | undefined } {
-  if (!parentCommand) {
-    return {
-      supported: false,
-      reason: 'missingCommand',
-    };
-  }
-  const fn = buildFunctionLookup().get(name);
-  const isSupported = Boolean(
-    fn?.locationsAvailable.includes(getLocationFromCommandOrOptionName(option ?? parentCommand))
-  );
-  return {
-    supported: isSupported,
-    reason: isSupported ? undefined : fn ? 'unsupportedFunction' : 'unknownFunction',
-  };
-}
-
-export function getAllFunctions(options?: {
-  type: Array<FunctionDefinition['type']> | FunctionDefinition['type'];
-}) {
-  const fns = buildFunctionLookup();
-  if (!options?.type) {
-    return Array.from(fns.values());
-  }
-  const types = new Set(Array.isArray(options.type) ? options.type : [options.type]);
-  return Array.from(fns.values()).filter((fn) => types.has(fn.type));
-}
-
-const unwrapStringLiteralQuotes = (value: string) => value.slice(1, -1);
-
-export function isArrayType(type: string): type is ArrayType {
-  return type.endsWith('[]');
-}
-
-/**
- * Given an array type for example `string[]` it will return `string`
- */
-export function unwrapArrayOneLevel(type: FunctionParameterType): FunctionParameterType {
-  return isArrayType(type) ? (type.slice(0, -2) as FunctionParameterType) : type;
 }
 
 export function createMapFromList<T extends { name: string }>(arr: T[]): Map<string, T> {
@@ -139,74 +52,16 @@ export function areFieldAndUserDefinedColumnTypesCompatible(
   return fieldType === userColumnType;
 }
 
-export function inKnownTimeInterval(timeIntervalUnit: string): boolean {
-  return timeUnits.some((unit) => unit === timeIntervalUnit.toLowerCase());
-}
-
-/**
- * Checks if this argument is one of the possible options
- * if they are defined on the arg definition.
- *
- * TODO - Consider merging with isEqualType to create a unified arg validation function
- */
-export function isValidLiteralOption(arg: ESQLLiteral, argDef: FunctionParameter) {
-  return (
-    arg.literalType === 'keyword' &&
-    argDef.acceptedValues &&
-    !argDef.acceptedValues
-      .map((option) => option.toLowerCase())
-      .includes(unwrapStringLiteralQuotes(arg.value).toLowerCase())
-  );
-}
-
-export function hasWildcard(name: string) {
-  return /\*/.test(name);
-}
-
-export const isAggFunction = (arg: ESQLFunction): boolean =>
-  getFunctionDefinition(arg.name)?.type === FunctionDefinitionTypes.AGG;
-
 export const isParam = (x: unknown): x is ESQLParamLiteral =>
   !!x &&
   typeof x === 'object' &&
   (x as ESQLParamLiteral).type === 'literal' &&
   (x as ESQLParamLiteral).literalType === 'param';
 
-export const isFunctionOperatorParam = (fn: ESQLFunction): boolean =>
-  !!fn.operator && isParam(fn.operator);
-
-/**
- * Returns `true` if the function is an aggregation function or a function
- * name is a parameter, which potentially could be an aggregation function.
- */
-export const isMaybeAggFunction = (fn: ESQLFunction): boolean =>
-  isAggFunction(fn) || isFunctionOperatorParam(fn);
-
-export const isParametrized = (node: ESQLProperNode): boolean => Walker.params(node).length > 0;
-
 /**
  * Compares two strings in a case-insensitive manner
  */
 export const noCaseCompare = (a: string, b: string) => a.toLowerCase() === b.toLowerCase();
-
-/**
- * Gets the signatures of a function that match the number of arguments
- * provided in the AST.
- */
-export function getSignaturesWithMatchingArity(
-  fnDef: FunctionDefinition,
-  astFunction: ESQLFunction
-) {
-  return fnDef.signatures.filter((def) => {
-    if (def.minParams) {
-      return astFunction.args.length >= def.minParams;
-    }
-    return (
-      astFunction.args.length >= def.params.filter(({ optional }) => !optional).length &&
-      astFunction.args.length <= def.params.length
-    );
-  });
-}
 
 /**
  * Given a function signature, returns the parameter at the given position.

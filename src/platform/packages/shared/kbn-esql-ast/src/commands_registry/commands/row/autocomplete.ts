@@ -22,15 +22,17 @@ export async function autocomplete(
   query: string,
   command: ESQLCommand,
   callbacks?: ICommandCallbacks,
-  context?: ICommandContext
+  context?: ICommandContext,
+  cursorPosition?: number
 ): Promise<ISuggestionItem[]> {
+  const innerText = query.substring(0, cursorPosition);
   // ROW col0 = /
-  if (/=\s*$/.test(query)) {
+  if (/=\s*$/.test(innerText)) {
     return getFunctionSuggestions({ location: Location.ROW });
   }
 
   // ROW col0 = 23 /
-  else if (command.args.length > 0 && !isRestartingExpression(query)) {
+  else if (command.args.length > 0 && !isRestartingExpression(innerText)) {
     return [
       { ...pipeCompleteItem, command: TRIGGER_SUGGESTION_COMMAND },
       { ...commaCompleteItem, text: ', ', command: TRIGGER_SUGGESTION_COMMAND },

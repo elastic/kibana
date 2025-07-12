@@ -90,7 +90,7 @@ describe('autocomplete.suggest', () => {
       });
 
       test('on assignment expression, shows all agg and eval functions', async () => {
-        await assertSuggestions('from a | stats a=/', [
+        await assertSuggestions('from a | stats a= /', [
           ...allAggFunctions,
           ...allGroupingFunctions,
           ...allEvalFunctions,

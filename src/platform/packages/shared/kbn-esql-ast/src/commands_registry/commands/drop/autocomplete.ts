@@ -13,7 +13,7 @@ import {
   getLastNonWhitespaceChar,
   handleFragment,
   columnExists,
-} from '../../../definitions/utils/autocomplete';
+} from '../../../definitions/utils/autocomplete/helpers';
 import { type ISuggestionItem, type ICommandContext, ICommandCallbacks } from '../../types';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
 
@@ -21,12 +21,14 @@ export async function autocomplete(
   query: string,
   command: ESQLCommand,
   callbacks?: ICommandCallbacks,
-  context?: ICommandContext
+  context?: ICommandContext,
+  cursorPosition?: number
 ): Promise<ISuggestionItem[]> {
+  const innerText = query.substring(0, cursorPosition);
   if (
-    /\s/.test(query[query.length - 1]) &&
-    getLastNonWhitespaceChar(query) !== ',' &&
-    !/drop\s+\S*$/i.test(query)
+    /\s/.test(innerText[innerText.length - 1]) &&
+    getLastNonWhitespaceChar(innerText) !== ',' &&
+    !/drop\s+\S*$/i.test(innerText)
   ) {
     return [pipeCompleteItem, commaCompleteItem];
   }
@@ -35,7 +37,7 @@ export async function autocomplete(
   const fieldSuggestions = (await callbacks?.getByType?.('any', alreadyDeclaredFields)) ?? [];
 
   return handleFragment(
-    query,
+    innerText,
     (fragment) => columnExists(fragment, context),
     (_fragment: string, rangeToReplace?: { start: number; end: number }) => {
       // KEEP fie<suggest>

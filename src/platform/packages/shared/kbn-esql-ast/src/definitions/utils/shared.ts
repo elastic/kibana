@@ -13,7 +13,7 @@ import type {
   ICommandContext,
 } from '../../commands_registry/types';
 import { DOUBLE_TICKS_REGEX, SINGLE_BACKTICK } from '../../parser/constants';
-import { getLastNonWhitespaceChar } from './autocomplete';
+import { getLastNonWhitespaceChar } from './autocomplete/helpers';
 import type { ESQLAstItem } from '../../types';
 import type { SupportedDataType } from '../types';
 /**

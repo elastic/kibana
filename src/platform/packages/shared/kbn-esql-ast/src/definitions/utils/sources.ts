@@ -10,7 +10,7 @@ import { IndexAutocompleteItem } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
 import type { ESQLCommand, ESQLSource } from '../../types';
 import type { ISuggestionItem, ESQLSourceResult } from '../../commands_registry/types';
-import { handleFragment } from './autocomplete';
+import { handleFragment } from './autocomplete/helpers';
 import { pipeCompleteItem, commaCompleteItem } from '../../commands_registry/complete_items';
 import { EDITOR_MARKER } from '../../parser/constants';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../commands_registry/constants';
