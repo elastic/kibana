@@ -47,7 +47,7 @@ export interface DataViewPickerProps {
   /**
    * Data views managed by the application
    */
-  managedDataViews?: DataView[];
+  // managedDataViews?: DataView[];
   /**
    * Saved data views
    */
@@ -82,7 +82,7 @@ export const DataViewPicker = ({
   isMissingCurrent,
   currentDataViewId,
   adHocDataViews,
-  managedDataViews,
+  // managedDataViews,
   savedDataViews,
   onChangeDataView,
   onEditDataView,
@@ -106,7 +106,7 @@ export const DataViewPicker = ({
       onCreateDefaultAdHocDataView={onCreateDefaultAdHocDataView}
       trigger={trigger}
       adHocDataViews={adHocDataViews}
-      managedDataViews={managedDataViews}
+      // managedDataViews={managedDataViews}
       savedDataViews={savedDataViews}
       selectableProps={selectableProps}
       isDisabled={isDisabled}

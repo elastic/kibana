@@ -102,8 +102,8 @@ const IndexPatternEditorFlyoutContentComponent = ({
     services: { application, dataViews, uiSettings, overlays, docLinks },
   } = useKibana<DataViewEditorContext>();
 
-  const canSave = dataViews.getCanSaveSync();
-
+  const canSave = dataViews.getCanSaveSync() && !editData?.managed;
+  // console.log(editData);
   const { form } = useForm<IndexPatternConfig, FormInternal>({
     // Prefill with data if editData exists
     defaultValue: {

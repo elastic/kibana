@@ -19,7 +19,7 @@ import { sharedStateSelector } from '../../redux/selectors';
 import { sharedDataViewManagerSlice } from '../../redux/slices';
 import { useSelectDataView } from '../../hooks/use_select_data_view';
 import { DataViewManagerScopeName } from '../../constants';
-import { useManagedDataViews } from '../../hooks/use_managed_data_views';
+// import { useManagedDataViews } from '../../hooks/use_managed_data_views';
 import { useSavedDataViews } from '../../hooks/use_saved_data_views';
 import { DEFAULT_SECURITY_DATA_VIEW, LOADING } from './translations';
 import { DATA_VIEW_PICKER_TEST_ID } from './constants';
@@ -67,7 +67,7 @@ export const DataViewPicker = memo(({ scope, onClosePopover, disabled }: DataVie
       .map((spec) => new DataView({ spec, fieldFormats }));
   }, [adhocDataViewSpecs, fieldFormats]);
 
-  const managedDataViews = useManagedDataViews();
+  // const managedDataViews = useManagedDataViews();
   const savedDataViews = useSavedDataViews();
 
   const isDefaultSourcerer = scope === DataViewManagerScopeName.default;
@@ -185,7 +185,7 @@ export const DataViewPicker = memo(({ scope, onClosePopover, disabled }: DataVie
         onDataViewCreated={createNewDataView}
         adHocDataViews={adhocDataViews}
         savedDataViews={savedDataViews}
-        managedDataViews={managedDataViews}
+        // managedDataViews={managedDataViews}
         onClosePopover={onClosePopover}
       />
     </div>

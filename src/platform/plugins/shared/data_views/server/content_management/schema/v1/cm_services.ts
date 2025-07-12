@@ -65,6 +65,7 @@ const dataViewCreateOptionsSchema = schema.object({
   id: createOptionsSchemas.id,
   initialNamespaces: createOptionsSchemas.initialNamespaces,
   overwrite: schema.maybe(createOptionsSchemas.overwrite),
+  managed: schema.maybe(schema.boolean()),
 });
 
 const dataViewSearchOptionsSchema = schema.object({
