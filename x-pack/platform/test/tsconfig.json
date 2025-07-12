@@ -123,5 +123,8 @@
     "@kbn/core-provider-plugin",
     "@kbn/reporting-plugin",
     "@kbn/kibana-usage-collection-plugin",
+    "@kbn/saved-objects-management-plugin",
+    "@kbn/es",
+    "@kbn/mock-idp-utils",
   ]
 }

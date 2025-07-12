@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { getPreConfiguredActions } from '@kbn/test-suites-xpack-platform/alerting_api_integration/common/config';
-import { getTlsWebhookServerUrls } from '@kbn/test-suites-xpack-platform/alerting_api_integration/common/lib/get_tls_webhook_servers';
+import { getPreConfiguredActions } from '../../alerting_api_integration/common/config';
+import { getTlsWebhookServerUrls } from '../../alerting_api_integration/common/lib/get_tls_webhook_servers';
 
 export const updateKbnServerArguments = async (kbnServerArgs: string[]) => {
   const tlsWebhookServers = await getTlsWebhookServerUrls(6300, 6399);

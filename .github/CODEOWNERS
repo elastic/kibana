@@ -1875,8 +1875,8 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /x-pack/platform/test/api_integration/apis/status @elastic/kibana-core
 /x-pack/platform/test/api_integration/apis/stats @elastic/kibana-core
 /x-pack/platform/test/api_integration/apis/kibana/stats @elastic/kibana-core
-/x-pack/test/api_integration/deployment_agnostic/apis/core/ @elastic/kibana-core
-/x-pack/test/api_integration/deployment_agnostic/apis/saved_objects_management/ @elastic/kibana-core
+/x-pack/platform/test/api_integration_deployment_agnostic/apis/core/ @elastic/kibana-core
+/x-pack/platform/test/api_integration_deployment_agnostic/apis/saved_objects_management/ @elastic/kibana-core
 /x-pack/test_serverless/functional/test_suites/security/config.saved_objects_management.ts @elastic/kibana-core
 /config/ @elastic/kibana-core
 /config/serverless.yml @elastic/kibana-core @elastic/kibana-security
@@ -2145,7 +2145,7 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /x-pack/platform/test/functional/apps/upgrade_assistant @elastic/kibana-management
 /x-pack/platform/test/functional/apps/dev_tools @elastic/kibana-management
 /x-pack/test/upgrade_assistant_integration @elastic/kibana-management
-/x-pack/test/api_integration/deployment_agnostic/apis/console/ @elastic/kibana-management
+/x-pack/platform/test/api_integration_deployment_agnostic/apis/console/ @elastic/kibana-management
 ^/src/platform/test/accessibility/apps/management.ts @elastic/kibana-management
 ^/src/platform/test/accessibility/apps/console.ts @elastic/kibana-management
 /x-pack/test/api_integration/services/index_management.ts @elastic/kibana-management
@@ -2172,8 +2172,8 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /x-pack/test_serverless/functional/test_suites/common/dev_tools/ @elastic/kibana-management
 /x-pack/test_serverless/**/test_suites/common/grok_debugger/ @elastic/kibana-management
 /x-pack/platform/test/api_integration/apis/management/ @elastic/kibana-management
-/x-pack/test/api_integration/deployment_agnostic/apis/management/ @elastic/kibana-management
-/x-pack/test/api_integration/deployment_agnostic/apis/painless_lab/ @elastic/kibana-management
+/x-pack/platform/test/api_integration_deployment_agnostic/apis/management/ @elastic/kibana-management
+/x-pack/platform/test/api_integration_deployment_agnostic/apis/painless_lab/ @elastic/kibana-management
 /x-pack/test/functional/apps/rollup_job/ @elastic/kibana-management
 /x-pack/platform/test/api_integration/apis/grok_debugger @elastic/kibana-management
 /x-pack/test/accessibility/apps/group1/advanced_settings.ts @elastic/kibana-management

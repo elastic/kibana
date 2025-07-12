@@ -17,9 +17,9 @@ import {
   StreamingChatResponseEventType,
 } from '@kbn/observability-ai-assistant-plugin/common/conversation_complete';
 import { ObservabilityAIAssistantScreenContextRequest } from '@kbn/observability-ai-assistant-plugin/common/types';
+import { SupertestWithRoleScope } from '@kbn/test-suites-xpack-platform/api_integration_deployment_agnostic/services/role_scoped_supertest';
 import { createLlmProxy, LlmProxy } from '../utils/create_llm_proxy';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
-import { SupertestWithRoleScope } from '../../../../services/role_scoped_supertest';
 import {
   systemMessageSorted,
   clearConversations,

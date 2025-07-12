@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { v4 as uuid } from 'uuid';
 import { APIReturnType } from '@kbn/dataset-quality-plugin/common/rest';
-import { CustomIntegration } from '../../../services/package_api';
+import { CustomIntegration } from '@kbn/test-suites-xpack-platform/api_integration_deployment_agnostic/services/package_api';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { RoleCredentials, SupertestWithRoleScopeType } from '../../../services';
 

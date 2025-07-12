@@ -8,9 +8,11 @@
 import { createServerlessTestConfig } from '../../default_configs/serverless.config.base';
 
 export default createServerlessTestConfig({
-  serverlessProject: 'es',
-  testFiles: [require.resolve('./search.index.ts')],
+  serverlessProject: 'oblt',
+  tier: 'oblt_logs_essentials',
+  testFiles: [require.resolve('./oblt.logs_essentials.index.ts')],
   junit: {
-    reportName: 'Serverless Search - Deployment-agnostic API Integration Tests',
+    reportName:
+      'Serverless Observability Logs Essentials - Deployment-agnostic platform API Integration Tests',
   },
 });

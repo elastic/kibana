@@ -7,7 +7,7 @@
 import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext) {
-  describe('Serverless Security - Deployment-agnostic api integration tests', () => {
+  describe('Serverless Security - Deployment-agnostic platform api integration tests', () => {
     // load new security and platform deployment-agnostic test here
     loadTestFile(require.resolve('../../apis/console'));
     loadTestFile(require.resolve('../../apis/core'));
