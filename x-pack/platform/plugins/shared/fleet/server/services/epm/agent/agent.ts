@@ -9,7 +9,7 @@ import Handlebars from '@kbn/handlebars';
 import { load, dump } from 'js-yaml';
 import type { Logger } from '@kbn/core/server';
 
-import type { PackagePolicyConfigRecord } from '../../../../common/types';
+import type { OTelCollectorConfig, PackagePolicyConfigRecord } from '../../../../common/types';
 import { PackagePolicyValidationError } from '../../../../common/errors';
 import { toCompiledSecretRef } from '../../secrets';
 import { PackageInvalidArchiveError } from '../../../errors';
@@ -22,7 +22,12 @@ import {
 
 const handlebars = Handlebars.create();
 
-export function compileTemplate(variables: PackagePolicyConfigRecord, templateStr: string) {
+export function compileTemplate(
+  variables: PackagePolicyConfigRecord,
+  templateStr: string,
+  inputType?: string,
+  packagePolicyId?: string
+) {
   const logger = appContextService.getLogger();
   const { vars, yamlValues } = buildTemplateVariables(logger, variables);
   let compiledTemplate: string;
@@ -43,9 +48,14 @@ export function compileTemplate(variables: PackagePolicyConfigRecord, templateSt
   try {
     const yamlFromCompiledTemplate = load(compiledTemplate, {});
 
+    let patchedYaml = yamlFromCompiledTemplate;
+    if (inputType === 'otelcol' && packagePolicyId) {
+      patchedYaml = patchYamlForOtelcol(yamlFromCompiledTemplate, packagePolicyId);
+    }
+
     // Hack to keep empty string ('') values around in the end yaml because
     // `load` replaces empty strings with null
-    const patchedYamlFromCompiledTemplate = Object.entries(yamlFromCompiledTemplate).reduce(
+    const patchedYamlFromCompiledTemplate = Object.entries(patchedYaml).reduce(
       (acc, [key, value]) => {
         if (value === null && typeof vars[key] === 'string' && vars[key].trim() === '') {
           acc[key] = '';
@@ -61,6 +71,49 @@ export function compileTemplate(variables: PackagePolicyConfigRecord, templateSt
   } catch (error) {
     throw new PackagePolicyValidationError(error);
   }
+}
+// Patch YAML for OTEL Collector - adds the package policy ID to the first key under 'receivers'.
+function patchYamlForOtelcol(yaml: any, packagePolicyId: string): OTelCollectorConfig {
+  const parentKey = 'receivers';
+  const keyToUpdate = Object.keys(yaml[parentKey])[0];
+
+  const updatedYaml = replaceKeyByParent(
+    yaml,
+    parentKey,
+    keyToUpdate,
+    `${keyToUpdate}/${packagePolicyId}`
+  );
+  return updatedYaml;
+}
+
+// Recursive function, replaces keys by parent key
+function replaceKeyByParent(
+  obj: any,
+  targetParent: string,
+  oldKey: string,
+  newKey: string,
+  parentKey: string | null = null
+): any {
+  if (Array.isArray(obj)) {
+    if (parentKey === targetParent) {
+      return obj.map((item) =>
+        item === oldKey ? newKey : replaceKeyByParent(item, targetParent, oldKey, newKey, parentKey)
+      );
+    } else {
+      return obj.map((item) => replaceKeyByParent(item, targetParent, oldKey, newKey, parentKey));
+    }
+  } else if (typeof obj === 'object' && obj !== null) {
+    const newObj: any = {};
+    for (const key in obj) {
+      if (Object.hasOwn(obj, key)) {
+        const value = obj[key];
+        const updatedKey = parentKey === targetParent && key === oldKey ? newKey : key;
+        newObj[updatedKey] = replaceKeyByParent(value, targetParent, oldKey, newKey, key);
+      }
+    }
+    return newObj;
+  }
+  return obj;
 }
 
 function isValidKey(key: string) {
