@@ -23,13 +23,13 @@ import {
   throwError,
 } from 'rxjs';
 import { withExecuteToolSpan } from '@kbn/inference-tracing';
-import { CONTEXT_FUNCTION_NAME } from '../../../functions/context/context';
 import {
-  CompatibleJSONSchema,
+  CONTEXT_FUNCTION_NAME,
   createFunctionNotFoundError,
   Message,
-  MessageAddEvent,
   MessageRole,
+  CompatibleJSONSchema,
+  MessageAddEvent,
   StreamingChatResponseEventType,
 } from '../../../../common';
 import {

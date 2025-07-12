@@ -235,7 +235,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
                   messages.map((msg) => msg.message);
 
                 expect(systemMessage).to.contain(
-                  'You are a helpful assistant for Elastic Observability. Your goal is '
+                  '# System Prompt: Elastic Observability Assistant\n\n## Role and Goal\n\nYou are a specialized, helpful assistant for Elastic Observability users.'
                 );
 
                 expect(systemMessageSorted(systemMessage!)).to.eql(

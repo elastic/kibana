@@ -126,7 +126,6 @@ export class ObservabilityAIAssistantPlugin
     }));
 
     // Update existing index assets (mappings, templates, etc). This will not create assets if they do not exist.
-
     runStartupMigrations({
       core,
       logger: this.logger,

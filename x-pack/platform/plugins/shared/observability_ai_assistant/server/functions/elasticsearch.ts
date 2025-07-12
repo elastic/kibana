@@ -6,8 +6,7 @@
  */
 
 import type { FunctionRegistrationParameters } from '.';
-
-export const ELASTICSEARCH_FUNCTION_NAME = 'elasticsearch';
+import { ELASTICSEARCH_FUNCTION_NAME } from '..';
 
 export function registerElasticsearchFunction({
   functions,
