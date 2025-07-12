@@ -88,4 +88,5 @@ export interface ActionResultsRequestOptions extends RequestOptionsPaginated {
   actionId: string;
   startDate?: string;
   useNewDataStream?: boolean;
+  integrationNamespaces?: string[];
 }
