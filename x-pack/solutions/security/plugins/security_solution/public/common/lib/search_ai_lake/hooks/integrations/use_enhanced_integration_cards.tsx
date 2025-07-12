@@ -27,6 +27,7 @@ export const FEATURED_INTEGRATION_SORT_ORDER = [
   'epr:microsoft_sentinel',
   'epr:sentinel_one',
   'epr:crowdstrike',
+  'epr:elastic_security',
 ];
 const INTEGRATION_CARD_MIN_HEIGHT_PX = 88;
 

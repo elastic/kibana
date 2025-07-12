@@ -32,6 +32,7 @@ export interface UseFetchIntegrationsResult {
  * - microsoft_sentinel
  * - sentinel_one
  * - crowdstrike
+ * - elastic_security
  */
 export const useFetchIntegrations = (): UseFetchIntegrationsResult => {
   // TODO this might need to be revisited once the integration make it out of prerelease
