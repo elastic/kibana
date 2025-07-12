@@ -107,7 +107,7 @@ export const useTimelineSavePrompt = (
   ]);
 
   useEffect(() => {
-    onAppLeave((actions, nextAppId) => {
+    onAppLeave((actions, { nextAppId }) => {
       // Confirm when the user has made any changes to a timeline
       if (
         !(nextAppId ?? '').includes(APP_ID) &&

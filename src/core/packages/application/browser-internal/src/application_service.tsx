@@ -35,7 +35,7 @@ import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 import { AppRouter } from './ui';
 import type { InternalApplicationSetup, InternalApplicationStart, Mounter } from './types';
 
-import { getLeaveAction, isConfirmAction } from './application_leave';
+import { getLeaveAction, isCancelAction, isConfirmAction } from './application_leave';
 import { getUserConfirmationHandler } from './navigation_confirm';
 import {
   appendAppPath,
@@ -286,7 +286,12 @@ export class ApplicationService {
       const currentAppId = this.currentAppId$.value;
       const navigatingToSameApp = currentAppId === appId;
       const shouldNavigate =
-        navigatingToSameApp || skipAppLeave ? true : await this.shouldNavigate(overlays, appId);
+        navigatingToSameApp || skipAppLeave
+          ? true
+          : await this.shouldNavigate(overlays, {
+              nextAppId: appId,
+              options: { deepLinkId, path, state, replace, openInNewTab, skipAppLeave },
+            });
 
       const targetApp = applications$.value.get(appId);
 
@@ -407,15 +412,15 @@ export class ApplicationService {
     this.currentActionMenu$.next(currentActionMenu);
   };
 
-  private async shouldNavigate(overlays: OverlayStart, nextAppId: string): Promise<boolean> {
+  private async shouldNavigate(
+    overlays: OverlayStart,
+    next: { nextAppId: string; options: NavigateToAppOptions }
+  ): Promise<boolean> {
     const currentAppId = this.currentAppId$.value;
     if (currentAppId === undefined) {
       return true;
     }
-    const action = getLeaveAction(
-      this.appInternalStates.get(currentAppId)?.leaveHandler,
-      nextAppId
-    );
+    const action = getLeaveAction(this.appInternalStates.get(currentAppId)?.leaveHandler, next);
     if (isConfirmAction(action)) {
       const confirmed = await overlays.openConfirm(action.text, {
         title: action.title,
@@ -430,6 +435,10 @@ export class ApplicationService {
         return false;
       }
     }
+    if (isCancelAction(action)) {
+      return false;
+    }
+
     return true;
   }
 
