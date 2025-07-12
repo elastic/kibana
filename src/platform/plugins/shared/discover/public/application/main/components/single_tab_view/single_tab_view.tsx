@@ -56,7 +56,7 @@ interface SessionInitializationState {
   showNoDataPage: boolean;
 }
 
-type InitializeSession = (options?: {
+type InitializeSingleSession = (options?: {
   dataViewSpec?: DataViewSpec | undefined;
   defaultUrlState?: DiscoverAppState;
 }) => Promise<SessionInitializationState>;
@@ -80,8 +80,8 @@ export const SingleTabView = ({
     runtimeStateManager,
     (tab) => tab.customizationService$
   );
-  const initializeSessionAction = useCurrentTabAction(internalStateActions.initializeSession);
-  const [initializeSessionState, initializeSession] = useAsyncFunction<InitializeSession>(
+  const initializeTabAction = useCurrentTabAction(internalStateActions.initializeSingleTab);
+  const [initializeTabState, initializeTab] = useAsyncFunction<InitializeSingleSession>(
     async ({ dataViewSpec, defaultUrlState } = {}) => {
       const stateContainer = getDiscoverStateContainer({
         tabId: currentTabId,
@@ -97,8 +97,8 @@ export const SingleTabView = ({
       });
 
       return dispatch(
-        initializeSessionAction({
-          initializeSessionParams: {
+        initializeTabAction({
+          initializeSingleTabParams: {
             stateContainer,
             customizationService,
             dataViewSpec,
@@ -111,11 +111,11 @@ export const SingleTabView = ({
       ? { loading: false, value: { showNoDataPage: false } }
       : { loading: true }
   );
-  const initializeSessionWithDefaultLocationState = useLatest(() => {
+  const initializeTabWithDefaultLocationState = useLatest(() => {
     const historyLocationState = getScopedHistory<
       MainHistoryLocationState & { defaultState?: DiscoverAppState }
     >()?.location.state;
-    initializeSession({
+    initializeTab({
       dataViewSpec: historyLocationState?.dataViewSpec,
       defaultUrlState: historyLocationState?.defaultState,
     });
@@ -137,19 +137,19 @@ export const SingleTabView = ({
 
   useMount(() => {
     if (!currentStateContainer || !currentCustomizationService) {
-      initializeSessionWithDefaultLocationState.current();
+      initializeTabWithDefaultLocationState.current();
     }
   });
 
-  if (initializeSessionState.loading) {
+  if (initializeTabState.loading) {
     return <BrandedLoadingIndicator />;
   }
 
-  if (initializeSessionState.error) {
-    return <InitializationError error={initializeSessionState.error} />;
+  if (initializeTabState.error) {
+    return <InitializationError error={initializeTabState.error} />;
   }
 
-  if (initializeSessionState.value.showNoDataPage) {
+  if (initializeTabState.value.showNoDataPage) {
     return (
       <NoDataPage
         {...initializationState}
@@ -162,14 +162,14 @@ export const SingleTabView = ({
             })
           );
           const dataView = dataViewUnknown as DataView;
-          initializeSession({
+          initializeTab({
             defaultUrlState: dataView.id
               ? { dataSource: createDataViewDataSource({ dataViewId: dataView.id }) }
               : undefined,
           });
         }}
         onESQLNavigationComplete={() => {
-          initializeSession();
+          initializeTab();
         }}
       />
     );

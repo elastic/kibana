@@ -266,8 +266,8 @@ describe('Discover state', () => {
       };
       const { state, customizationService } = await getState('/', { savedSearch: nextSavedSearch });
       await state.internalState.dispatch(
-        state.injectCurrentTab(internalStateActions.initializeSession)({
-          initializeSessionParams: {
+        state.injectCurrentTab(internalStateActions.initializeSingleTab)({
+          initializeSingleTabParams: {
             stateContainer: state,
             customizationService,
             discoverSessionId: savedSearchMock.id,
@@ -438,8 +438,8 @@ describe('Discover state', () => {
       await state.internalState.dispatch(internalStateActions.loadDataViewList());
       expect(dataState.data$.main$.value.fetchStatus).toBe(FetchStatus.LOADING);
       await state.internalState.dispatch(
-        state.injectCurrentTab(internalStateActions.initializeSession)({
-          initializeSessionParams: {
+        state.injectCurrentTab(internalStateActions.initializeSingleTab)({
+          initializeSingleTabParams: {
             stateContainer: state,
             customizationService,
             discoverSessionId: undefined,
@@ -467,8 +467,8 @@ describe('Discover state', () => {
       const { state, customizationService, getCurrentUrl } = await getState('');
       await state.internalState.dispatch(internalStateActions.loadDataViewList());
       await state.internalState.dispatch(
-        state.injectCurrentTab(internalStateActions.initializeSession)({
-          initializeSessionParams: {
+        state.injectCurrentTab(internalStateActions.initializeSingleTab)({
+          initializeSingleTabParams: {
             stateContainer: state,
             customizationService,
             discoverSessionId: undefined,
@@ -510,8 +510,8 @@ describe('Discover state', () => {
     test('loadNewSavedSearch given an empty URL using loadSavedSearch', async () => {
       const { state, customizationService, getCurrentUrl } = await getState('/');
       await state.internalState.dispatch(
-        state.injectCurrentTab(internalStateActions.initializeSession)({
-          initializeSessionParams: {
+        state.injectCurrentTab(internalStateActions.initializeSingleTab)({
+          initializeSingleTabParams: {
             stateContainer: state,
             customizationService,
             discoverSessionId: undefined,
@@ -537,8 +537,8 @@ describe('Discover state', () => {
         { isEmptyUrl: false }
       );
       await state.internalState.dispatch(
-        state.injectCurrentTab(internalStateActions.initializeSession)({
-          initializeSessionParams: {
+        state.injectCurrentTab(internalStateActions.initializeSingleTab)({
+          initializeSingleTabParams: {
             stateContainer: state,
             customizationService,
             discoverSessionId: undefined,
@@ -564,8 +564,8 @@ describe('Discover state', () => {
         { isEmptyUrl: false }
       );
       await state.internalState.dispatch(
-        state.injectCurrentTab(internalStateActions.initializeSession)({
-          initializeSessionParams: {
+        state.injectCurrentTab(internalStateActions.initializeSingleTab)({
+          initializeSingleTabParams: {
             stateContainer: state,
             customizationService,
             discoverSessionId: undefined,
@@ -604,8 +604,8 @@ describe('Discover state', () => {
         return Promise.resolve(savedSearchWithDefaults);
       });
       await state.internalState.dispatch(
-        state.injectCurrentTab(internalStateActions.initializeSession)({
-          initializeSessionParams: {
+        state.injectCurrentTab(internalStateActions.initializeSingleTab)({
+          initializeSingleTabParams: {
             stateContainer: state,
             customizationService,
             discoverSessionId: 'the-saved-search-id',
@@ -632,8 +632,8 @@ describe('Discover state', () => {
         isEmptyUrl: false,
       });
       await state.internalState.dispatch(
-        state.injectCurrentTab(internalStateActions.initializeSession)({
-          initializeSessionParams: {
+        state.injectCurrentTab(internalStateActions.initializeSingleTab)({
+          initializeSingleTabParams: {
             stateContainer: state,
             customizationService,
             discoverSessionId: savedSearchMock.id,
@@ -664,8 +664,8 @@ describe('Discover state', () => {
         isEmptyUrl: false,
       });
       await state.internalState.dispatch(
-        state.injectCurrentTab(internalStateActions.initializeSession)({
-          initializeSessionParams: {
+        state.injectCurrentTab(internalStateActions.initializeSingleTab)({
+          initializeSingleTabParams: {
             stateContainer: state,
             customizationService,
             discoverSessionId: savedSearchMock.id,
@@ -697,8 +697,8 @@ describe('Discover state', () => {
         isEmptyUrl: false,
       });
       await state.internalState.dispatch(
-        state.injectCurrentTab(internalStateActions.initializeSession)({
-          initializeSessionParams: {
+        state.injectCurrentTab(internalStateActions.initializeSingleTab)({
+          initializeSingleTabParams: {
             stateContainer: state,
             customizationService,
             discoverSessionId: savedSearchMock.id,
@@ -730,8 +730,8 @@ describe('Discover state', () => {
         isEmptyUrl: false,
       });
       await state.internalState.dispatch(
-        state.injectCurrentTab(internalStateActions.initializeSession)({
-          initializeSessionParams: {
+        state.injectCurrentTab(internalStateActions.initializeSingleTab)({
+          initializeSingleTabParams: {
             stateContainer: state,
             customizationService,
             discoverSessionId: savedSearchMock.id,
@@ -750,8 +750,8 @@ describe('Discover state', () => {
       const url = '/#?_a=(hideChart:true,columns:!(message))&_g=()';
       const { state, customizationService } = await getState(url, { savedSearch: savedSearchMock });
       await state.internalState.dispatch(
-        state.injectCurrentTab(internalStateActions.initializeSession)({
-          initializeSessionParams: {
+        state.injectCurrentTab(internalStateActions.initializeSingleTab)({
+          initializeSingleTabParams: {
             stateContainer: state,
             customizationService,
             discoverSessionId: undefined,
@@ -772,8 +772,8 @@ describe('Discover state', () => {
         isEmptyUrl: false,
       });
       await state.internalState.dispatch(
-        state.injectCurrentTab(internalStateActions.initializeSession)({
-          initializeSessionParams: {
+        state.injectCurrentTab(internalStateActions.initializeSingleTab)({
+          initializeSingleTabParams: {
             stateContainer: state,
             customizationService,
             discoverSessionId: undefined,
@@ -801,8 +801,8 @@ describe('Discover state', () => {
         isEmptyUrl: false,
       });
       await state.internalState.dispatch(
-        state.injectCurrentTab(internalStateActions.initializeSession)({
-          initializeSessionParams: {
+        state.injectCurrentTab(internalStateActions.initializeSingleTab)({
+          initializeSingleTabParams: {
             stateContainer: state,
             customizationService,
             discoverSessionId: undefined,
@@ -823,8 +823,8 @@ describe('Discover state', () => {
         isEmptyUrl: false,
       });
       await state.internalState.dispatch(
-        state.injectCurrentTab(internalStateActions.initializeSession)({
-          initializeSessionParams: {
+        state.injectCurrentTab(internalStateActions.initializeSingleTab)({
+          initializeSingleTabParams: {
             stateContainer: state,
             customizationService,
             discoverSessionId: savedSearchMock.id,
@@ -863,8 +863,8 @@ describe('Discover state', () => {
         return Promise.resolve(savedSearchWithDefaults);
       });
       await state.internalState.dispatch(
-        state.injectCurrentTab(internalStateActions.initializeSession)({
-          initializeSessionParams: {
+        state.injectCurrentTab(internalStateActions.initializeSingleTab)({
+          initializeSingleTabParams: {
             stateContainer: state,
             customizationService,
             discoverSessionId: savedSearchMock.id,
@@ -894,8 +894,8 @@ describe('Discover state', () => {
       });
       history.push('/');
       await state.internalState.dispatch(
-        state.injectCurrentTab(internalStateActions.initializeSession)({
-          initializeSessionParams: {
+        state.injectCurrentTab(internalStateActions.initializeSingleTab)({
+          initializeSingleTabParams: {
             stateContainer: state,
             customizationService,
             discoverSessionId: 'the-saved-search-id-with-timefield',
@@ -924,8 +924,8 @@ describe('Discover state', () => {
         return Promise.resolve(savedSearchWithDefaults);
       });
       await state.internalState.dispatch(
-        state.injectCurrentTab(internalStateActions.initializeSession)({
-          initializeSessionParams: {
+        state.injectCurrentTab(internalStateActions.initializeSingleTab)({
+          initializeSingleTabParams: {
             stateContainer: state,
             customizationService,
             discoverSessionId: savedSearchMock.id,
@@ -959,8 +959,8 @@ describe('Discover state', () => {
         isPersisted: () => false,
       }));
       await state.internalState.dispatch(
-        state.injectCurrentTab(internalStateActions.initializeSession)({
-          initializeSessionParams: {
+        state.injectCurrentTab(internalStateActions.initializeSingleTab)({
+          initializeSingleTabParams: {
             stateContainer: state,
             customizationService,
             discoverSessionId: undefined,
@@ -985,8 +985,8 @@ describe('Discover state', () => {
     test('loadSavedSearch resetting query & filters of data service', async () => {
       const { state, customizationService } = await getState('/', { savedSearch: savedSearchMock });
       await state.internalState.dispatch(
-        state.injectCurrentTab(internalStateActions.initializeSession)({
-          initializeSessionParams: {
+        state.injectCurrentTab(internalStateActions.initializeSingleTab)({
+          initializeSingleTabParams: {
             stateContainer: state,
             customizationService,
             discoverSessionId: savedSearchMock.id,
@@ -1010,8 +1010,8 @@ describe('Discover state', () => {
         savedSearch: savedSearchWithQueryAndFilters,
       });
       await state.internalState.dispatch(
-        state.injectCurrentTab(internalStateActions.initializeSession)({
-          initializeSessionParams: {
+        state.injectCurrentTab(internalStateActions.initializeSingleTab)({
+          initializeSingleTabParams: {
             stateContainer: state,
             customizationService,
             discoverSessionId: savedSearchMock.id,
@@ -1032,8 +1032,8 @@ describe('Discover state', () => {
         savedSearch: savedSearchAdHocCopy,
       });
       await state.internalState.dispatch(
-        state.injectCurrentTab(internalStateActions.initializeSession)({
-          initializeSessionParams: {
+        state.injectCurrentTab(internalStateActions.initializeSingleTab)({
+          initializeSingleTabParams: {
             stateContainer: state,
             customizationService,
             discoverSessionId: savedSearchAdHoc.id,
@@ -1058,8 +1058,8 @@ describe('Discover state', () => {
         isEmptyUrl: false,
       });
       await state.internalState.dispatch(
-        state.injectCurrentTab(internalStateActions.initializeSession)({
-          initializeSessionParams: {
+        state.injectCurrentTab(internalStateActions.initializeSingleTab)({
+          initializeSingleTabParams: {
             stateContainer: state,
             customizationService,
             discoverSessionId: savedSearchMockWithESQL.id,
@@ -1108,8 +1108,8 @@ describe('Discover state', () => {
       const { actions, savedSearchState, dataState } = state;
 
       await state.internalState.dispatch(
-        state.injectCurrentTab(internalStateActions.initializeSession)({
-          initializeSessionParams: {
+        state.injectCurrentTab(internalStateActions.initializeSingleTab)({
+          initializeSingleTabParams: {
             stateContainer: state,
             customizationService,
             discoverSessionId: savedSearchMock.id,
@@ -1147,8 +1147,8 @@ describe('Discover state', () => {
         savedSearch: savedSearchMock,
       });
       await state.internalState.dispatch(
-        state.injectCurrentTab(internalStateActions.initializeSession)({
-          initializeSessionParams: {
+        state.injectCurrentTab(internalStateActions.initializeSingleTab)({
+          initializeSingleTabParams: {
             stateContainer: state,
             customizationService,
             discoverSessionId: savedSearchMock.id,
@@ -1181,8 +1181,8 @@ describe('Discover state', () => {
         savedSearch: savedSearchMock,
       });
       await state.internalState.dispatch(
-        state.injectCurrentTab(internalStateActions.initializeSession)({
-          initializeSessionParams: {
+        state.injectCurrentTab(internalStateActions.initializeSingleTab)({
+          initializeSingleTabParams: {
             stateContainer: state,
             customizationService,
             discoverSessionId: savedSearchMock.id,
@@ -1220,8 +1220,8 @@ describe('Discover state', () => {
         savedSearch: savedSearchMock,
       });
       await state.internalState.dispatch(
-        state.injectCurrentTab(internalStateActions.initializeSession)({
-          initializeSessionParams: {
+        state.injectCurrentTab(internalStateActions.initializeSingleTab)({
+          initializeSingleTabParams: {
             stateContainer: state,
             customizationService,
             discoverSessionId: savedSearchMock.id,
@@ -1265,8 +1265,8 @@ describe('Discover state', () => {
     test('onOpenSavedSearch - same target id', async () => {
       const { state, customizationService } = await getState('/', { savedSearch: savedSearchMock });
       await state.internalState.dispatch(
-        state.injectCurrentTab(internalStateActions.initializeSession)({
-          initializeSessionParams: {
+        state.injectCurrentTab(internalStateActions.initializeSingleTab)({
+          initializeSingleTabParams: {
             stateContainer: state,
             customizationService,
             discoverSessionId: savedSearchMock.id,
@@ -1292,8 +1292,8 @@ describe('Discover state', () => {
         return state.appState.getState().filters!;
       });
       await state.internalState.dispatch(
-        state.injectCurrentTab(internalStateActions.initializeSession)({
-          initializeSessionParams: {
+        state.injectCurrentTab(internalStateActions.initializeSingleTab)({
+          initializeSingleTabParams: {
             stateContainer: state,
             customizationService,
             discoverSessionId: savedSearchMock.id,
@@ -1306,8 +1306,8 @@ describe('Discover state', () => {
       expect(state.appState.get().filters).toHaveLength(1);
       history.push('/');
       await state.internalState.dispatch(
-        state.injectCurrentTab(internalStateActions.initializeSession)({
-          initializeSessionParams: {
+        state.injectCurrentTab(internalStateActions.initializeSingleTab)({
+          initializeSingleTabParams: {
             stateContainer: state,
             customizationService,
             discoverSessionId: undefined,
@@ -1323,8 +1323,8 @@ describe('Discover state', () => {
     test('onCreateDefaultAdHocDataView', async () => {
       const { state, customizationService } = await getState('/', { savedSearch: savedSearchMock });
       await state.internalState.dispatch(
-        state.injectCurrentTab(internalStateActions.initializeSession)({
-          initializeSessionParams: {
+        state.injectCurrentTab(internalStateActions.initializeSingleTab)({
+          initializeSingleTabParams: {
             stateContainer: state,
             customizationService,
             discoverSessionId: savedSearchMock.id,
@@ -1351,8 +1351,8 @@ describe('Discover state', () => {
       );
       // Load a given persisted saved search
       await state.internalState.dispatch(
-        state.injectCurrentTab(internalStateActions.initializeSession)({
-          initializeSessionParams: {
+        state.injectCurrentTab(internalStateActions.initializeSingleTab)({
+          initializeSingleTabParams: {
             stateContainer: state,
             customizationService,
             discoverSessionId: savedSearchMock.id,
@@ -1420,8 +1420,8 @@ describe('Discover state', () => {
       mockServices.data.query.timefilter.timefilter.setTime = setTime;
       mockServices.data.query.timefilter.timefilter.setRefreshInterval = setRefreshInterval;
       await state.internalState.dispatch(
-        state.injectCurrentTab(internalStateActions.initializeSession)({
-          initializeSessionParams: {
+        state.injectCurrentTab(internalStateActions.initializeSingleTab)({
+          initializeSingleTabParams: {
             stateContainer: state,
             customizationService,
             discoverSessionId: savedSearchMock.id,

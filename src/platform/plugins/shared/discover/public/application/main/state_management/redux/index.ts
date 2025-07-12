@@ -12,7 +12,7 @@ import { internalStateSlice } from './internal_state';
 import {
   loadDataViewList,
   appendAdHocDataViews,
-  initializeSession,
+  initializeSingleTab,
   replaceAdHocDataViewWithId,
   setAdHocDataViews,
   setDataView,
@@ -51,7 +51,7 @@ export const internalStateActions = {
   setDefaultProfileAdHocDataViews,
   appendAdHocDataViews,
   replaceAdHocDataViewWithId,
-  initializeSession,
+  initializeSingleTab,
   updateTabAppStateAndGlobalState,
   restoreTab,
   clearAllTabs,
