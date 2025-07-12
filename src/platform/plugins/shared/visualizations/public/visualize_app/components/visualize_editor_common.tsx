@@ -34,6 +34,7 @@ import {
   CHARTS_TO_BE_DEPRECATED,
   isSplitChart as isSplitChartFn,
 } from '../utils/split_chart_warning_helpers';
+import { visualizeStyle } from '../../vis.styles';
 
 const flexParentStyle = css({
   flex: '1 1 auto',
@@ -243,7 +244,7 @@ export const VisualizeEditorCommon = ({
       <div
         className={isChromeVisible ? 'visEditor__content' : 'visualize'}
         ref={visEditorRef}
-        css={isChromeVisible && styles.content}
+        css={isChromeVisible ? styles.content : visualizeStyle}
       />
     </div>
   );
