@@ -46,6 +46,7 @@ export function AssistantProvider({ children }: { children: React.ReactElement }
   const inferenceEnabled = useInferenceEnabled();
 
   const basePath = useBasePath();
+  const { isVisible } = useIsNavControlVisible();
   const assistantAvailability = useAssistantAvailability();
 
   const assistantTelemetry = useAssistantTelemetry();
@@ -112,8 +113,6 @@ export function AssistantProvider({ children }: { children: React.ReactElement }
       assistantContextValue
     );
   }, [assistantContextValue, elasticAssistantSharedState.assistantContextValue]);
-
-  const { isVisible } = useIsNavControlVisible();
 
   if (!isVisible) {
     return null;
