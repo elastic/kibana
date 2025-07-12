@@ -32,12 +32,12 @@ describe('composer', () => {
   it('escapes malicious query parameter', () => {
     const pipeline = source.pipe(
       where(`service.name == ?malicious"`, {
-        malicious: 'malicious OR 1=1 --',
+        malicious: '"malicious" OR 1=1 --',
       })
     );
 
     expect(pipeline.asQuery()).toEqual(
-      'FROM logs-*\n  | WHERE service.name == "malicious OR 1=1 --"'
+      'FROM logs-*\n  | WHERE service.name == "\\"malicious\\" OR 1=1 --"'
     );
   });
 });
