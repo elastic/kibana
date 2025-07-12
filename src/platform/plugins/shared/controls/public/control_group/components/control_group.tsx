@@ -143,7 +143,13 @@ export function ControlGroup({
             }}
           >
             <SortableContext items={controlsInOrder} strategy={rectSortingStrategy}>
-              <EuiFlexGroup className="controlGroup" alignItems="center" gutterSize="s" wrap={true}>
+              <EuiFlexGroup
+                component="ul"
+                className="controlGroup"
+                alignItems="center"
+                gutterSize="s"
+                wrap={true}
+              >
                 {controlsInOrder.map(({ id, type }) => (
                   <ControlRenderer
                     key={id}
