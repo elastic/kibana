@@ -576,12 +576,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       after(async () => {
         await disableStreams(apiClient);
-
-        await esClient.indices.deleteDataStream({ name: 'logs.invalid_pipeline' });
-        await esClient.indices.deleteIndexTemplate({ name: 'logs.invalid_pipeline@stream' });
-        await esClient.cluster.deleteComponentTemplate({
-          name: 'logs.invalid_pipeline@stream.layer',
-        });
       });
 
       it('inherit fields', async () => {

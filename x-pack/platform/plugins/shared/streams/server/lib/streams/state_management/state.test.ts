@@ -34,6 +34,9 @@ describe('State', () => {
       withLock: (_, cb) => cb(),
     } as LockManagerService,
     isDev: true,
+    logger: {
+      error: jest.fn(),
+    },
   } as any;
 
   it('loads the state and initializes the correct Stream class instances', async () => {
@@ -166,7 +169,7 @@ describe('State', () => {
     ).rejects.toThrow('Excessive cascading changes');
   });
 
-  it('reports when it fails to make the desired changes', async () => {
+  it('reports when it fails to make the desired changes and attempts a rollback', async () => {
     searchMock.mockImplementationOnce(() => ({
       hits: {
         hits: [],
@@ -174,9 +177,19 @@ describe('State', () => {
       },
     }));
 
-    jest
-      .spyOn(streamFromDefinition, 'streamFromDefinition')
-      .mockImplementation((definition) => failingStream(stateDependenciesMock));
+    const FailingStream = failingStream();
+    const createActionsSpy = jest.spyOn(FailingStream.prototype as any, 'doDetermineCreateActions');
+    const deleteActionsSpy = jest.spyOn(FailingStream.prototype as any, 'doDetermineDeleteActions');
+    const rollbackSpy = jest.spyOn(State.prototype, 'attemptRollBack');
+    jest.spyOn(streamFromDefinition, 'streamFromDefinition').mockImplementation(
+      (definition) =>
+        new FailingStream(
+          {
+            name: 'stream_that_fails',
+          },
+          stateDependenciesMock
+        )
+    );
 
     await expect(
       async () =>
@@ -196,6 +209,10 @@ describe('State', () => {
           stateDependenciesMock
         )
     ).rejects.toThrow('Failed to change state');
+
+    expect(rollbackSpy).toHaveBeenCalled();
+    expect(createActionsSpy).toHaveBeenCalledTimes(1); // For the creation attempt
+    expect(deleteActionsSpy).toHaveBeenCalledTimes(1); // For the rollback
   });
 
   it('delegates control to StreamActiveRecord and ExecutionPlan', async () => {
@@ -344,7 +361,7 @@ function streamThatCascadesTooMuch(stateDependenciesMock: any) {
   );
 }
 
-function failingStream(stateDependenciesMock: any) {
+function failingStream() {
   class FailingStream extends StreamActiveRecord<any> {
     protected async doHandleUpsertChange(): Promise<{
       cascadingChanges: StreamChange[];
@@ -393,12 +410,7 @@ function failingStream(stateDependenciesMock: any) {
     }
   }
 
-  return new FailingStream(
-    {
-      name: 'stream_that_fails',
-    },
-    stateDependenciesMock
-  );
+  return FailingStream;
 }
 
 function flowStream() {

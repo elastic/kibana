@@ -95,6 +95,15 @@ export class State {
             if (error instanceof InsufficientPermissionsError) {
               throw error;
             }
+
+            try {
+              await desiredState.attemptRollBack(startingState);
+            } catch (rollBackError) {
+              dependencies.logger.error(`Failed to roll back state: ${rollBackError.message}`, {
+                error: rollBackError,
+              });
+            }
+
             throw new FailedToChangeStateError(
               `Failed to change state: ${error.message}. The cluster state may be inconsistent. If you experience issues, please use the resync API to restore a consistent state.`,
               error.statusCode ?? 500
@@ -236,6 +245,27 @@ export class State {
     const executionPlan = new ExecutionPlan(this.dependencies);
     await executionPlan.plan(
       await this.determineElasticsearchActions(this.changedStreams(), this, startingState)
+    );
+    await executionPlan.execute();
+  }
+
+  async attemptRollBack(startingState: State) {
+    const rollbackTargets = this.changedStreams().map((stream) => {
+      if (startingState.has(stream.definition.name)) {
+        const changedStreamToRevert = startingState.get(stream.definition.name)!.clone();
+        changedStreamToRevert.markAsUpserted();
+        return changedStreamToRevert;
+      } else {
+        const createdStreamToCleanUp = stream.clone();
+        createdStreamToCleanUp.markAsDeleted();
+        return createdStreamToCleanUp;
+      }
+    });
+
+    const emptyState = new State([], this.dependencies);
+    const executionPlan = new ExecutionPlan(this.dependencies);
+    await executionPlan.plan(
+      await this.determineElasticsearchActions(rollbackTargets, startingState, emptyState)
     );
     await executionPlan.execute();
   }

@@ -28,5 +28,6 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     loadTestFile(require.resolve('./metadata'));
     loadTestFile(require.resolve('./conflicts'));
     loadTestFile(require.resolve('./permissions'));
+    loadTestFile(require.resolve('./rollback'));
   });
 }
