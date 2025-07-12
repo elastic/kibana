@@ -16,7 +16,7 @@ export async function plugin(ctx: PluginInitializerContext<SLOConfig>) {
   return new SLOPlugin(ctx);
 }
 
-export type { SloClient } from './client';
+export type { SloClient } from './client/slo_client';
 
 export type { SLOServerSetup, SLOServerStart } from './types';
 

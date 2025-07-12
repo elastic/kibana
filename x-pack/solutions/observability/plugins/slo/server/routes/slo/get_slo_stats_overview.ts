@@ -22,10 +22,7 @@ export const getSLOStatsOverview = createSloServerRoute({
   handler: async ({ request, logger, params, plugins, getScopedClients }) => {
     await assertPlatinumLicense(plugins);
     const { scopedClusterClient, spaceId, soClient, rulesClient, racClient } =
-      await getScopedClients({
-        request,
-        logger,
-      });
+      await getScopedClients(request);
 
     const slosOverview = new GetSLOStatsOverview(
       soClient,

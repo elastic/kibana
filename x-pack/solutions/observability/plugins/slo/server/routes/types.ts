@@ -9,7 +9,6 @@ import {
   CoreSetup,
   IScopedClusterClient,
   KibanaRequest,
-  Logger,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import { DataViewsService } from '@kbn/data-views-plugin/common/data_views';
@@ -18,13 +17,7 @@ import type { DefaultRouteHandlerResources } from '@kbn/server-route-repository'
 import { SLORepository, TransformManager } from '../services';
 import { SLOPluginSetupDependencies, SLOPluginStartDependencies } from '../types';
 
-export type GetScopedClients = ({
-  request,
-  logger,
-}: {
-  request: KibanaRequest;
-  logger: Logger;
-}) => Promise<RouteHandlerScopedClients>;
+export type GetScopedClients = (request: KibanaRequest) => Promise<RouteHandlerScopedClients>;
 
 export interface RouteHandlerScopedClients {
   scopedClusterClient: IScopedClusterClient;

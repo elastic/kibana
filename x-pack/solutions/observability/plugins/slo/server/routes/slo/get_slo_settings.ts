@@ -17,10 +17,9 @@ export const getSloSettingsRoute = createSloServerRoute({
       requiredPrivileges: ['slo_read'],
     },
   },
-  handler: async ({ context, plugins }) => {
+  handler: async ({ plugins, getScopedClients, request }) => {
     await assertPlatinumLicense(plugins);
-
-    const soClient = (await context.core).savedObjects.client;
+    const { soClient } = await getScopedClients(request);
 
     return await getSloSettings(soClient);
   },

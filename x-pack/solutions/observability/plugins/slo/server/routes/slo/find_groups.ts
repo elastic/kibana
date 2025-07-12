@@ -21,7 +21,7 @@ export const findSLOGroupsRoute = createSloServerRoute({
   params: findSLOGroupsParamsSchema,
   handler: async ({ request, logger, params, plugins, getScopedClients }) => {
     await assertPlatinumLicense(plugins);
-    const { scopedClusterClient, soClient, spaceId } = await getScopedClients({ request, logger });
+    const { scopedClusterClient, soClient, spaceId } = await getScopedClients(request);
 
     const findSLOGroups = new FindSLOGroups(scopedClusterClient, soClient, logger, spaceId);
     return await findSLOGroups.execute(params?.query ?? {});

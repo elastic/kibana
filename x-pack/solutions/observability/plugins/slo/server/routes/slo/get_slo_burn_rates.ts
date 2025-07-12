@@ -21,10 +21,7 @@ export const getSloBurnRates = createSloServerRoute({
   params: getSLOBurnRatesParamsSchema,
   handler: async ({ request, logger, params, plugins, getScopedClients }) => {
     await assertPlatinumLicense(plugins);
-    const { scopedClusterClient, soClient, spaceId } = await getScopedClients({
-      request,
-      logger,
-    });
+    const { scopedClusterClient, soClient, spaceId } = await getScopedClients(request);
 
     const { instanceId, windows, remoteName } = params.body;
 
