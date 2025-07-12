@@ -39,6 +39,7 @@ import type { ActionParamsType as ServiceNowSIRActionParams } from './servicenow
 import { getSentinelOneConnectorType } from './sentinelone';
 import { getCrowdstrikeConnectorType } from './crowdstrike';
 import type { ExperimentalFeatures } from '../../common/experimental_features';
+import { getConnectorTypes as getKeepConnectorTypes } from './keep';
 
 export { ConnectorTypeId as CasesWebhookConnectorTypeId } from './cases_webhook';
 export type { ActionParamsType as CasesWebhookActionParams } from './cases_webhook';
@@ -116,6 +117,9 @@ export function registerConnectorTypes({
   actions.registerSubActionConnectorType(getResilientConnectorType());
   actions.registerSubActionConnectorType(getTheHiveConnectorType());
   actions.registerSubActionConnectorType(getXSOARConnectorType());
+  getKeepConnectorTypes().forEach((connectorType) => {
+    actions.registerSubActionConnectorType(connectorType);
+  });
 
   if (experimentalFeatures.sentinelOneConnectorOn) {
     actions.registerSubActionConnectorType(getSentinelOneConnectorType());
