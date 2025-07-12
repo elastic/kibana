@@ -124,7 +124,7 @@ export class IncrementalIdTaskManager {
       const running =
         taskDoc.status === TaskStatus.Claiming || taskDoc.status === TaskStatus.Running;
       if (scheduledToRunInTheFuture || running) {
-        this.logger.info(
+        this.logger.debug(
           `${CASES_INCREMENTAL_ID_SYNC_TASK_ID} is already ${
             scheduledToRunInTheFuture
               ? `scheduled (time: ${taskDoc.runAt})`
@@ -154,7 +154,7 @@ export class IncrementalIdTaskManager {
       })
       .then(
         (taskInstance) => {
-          this.logger.info(
+          this.logger.debug(
             `${CASES_INCREMENTAL_ID_SYNC_TASK_ID} scheduled with interval ${taskInstance.schedule?.interval}`
           );
         },
