@@ -19,6 +19,59 @@ describe('getErrorMessage', () => {
     expect(getErrorMessage(error)).toBe('Test error message. Caused by: Test cause message');
   });
 
+  it('should return the HTTP error body message for HTTP errors with body message', () => {
+    const httpError = new Error('HTTP Error') as Error & {
+      body?: Record<string, unknown>;
+      request?: any;
+      name: string;
+    };
+    httpError.request = {};
+    httpError.name = 'HttpError';
+    httpError.body = { message: 'HTTP body error message' };
+
+    expect(getErrorMessage(httpError)).toBe('HTTP body error message');
+  });
+
+  it('should return the error message for HTTP errors without body message', () => {
+    const httpError = new Error('HTTP Error') as Error & {
+      body?: Record<string, unknown>;
+      request?: any;
+      name: string;
+    };
+    httpError.request = {};
+    httpError.name = 'HttpError';
+    httpError.body = { status: 404 };
+
+    expect(getErrorMessage(httpError)).toBe('HTTP Error');
+  });
+
+  it('should return the error message for HTTP errors with invalid body', () => {
+    const httpError = new Error('HTTP Error') as Error & {
+      body?: Record<string, unknown>;
+      request?: any;
+      name: string;
+    };
+    httpError.request = {};
+    httpError.name = 'HttpError';
+    httpError.body = 'invalid body' as any;
+
+    expect(getErrorMessage(httpError)).toBe('HTTP Error');
+  });
+
+  it('should prioritize HTTP body message over cause for HTTP errors', () => {
+    const httpError = new Error('HTTP Error') as Error & {
+      body?: Record<string, unknown>;
+      request?: any;
+      name: string;
+    };
+    httpError.request = {};
+    httpError.name = 'HttpError';
+    httpError.body = { message: 'HTTP body error message' };
+    httpError.cause = new Error('Cause message');
+
+    expect(getErrorMessage(httpError)).toBe('HTTP body error message');
+  });
+
   it('should return the input if it is a string', () => {
     const errorMessage = 'Test error message';
     expect(getErrorMessage(errorMessage)).toBe(errorMessage);

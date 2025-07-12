@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { EuiFlexGroup, EuiLoadingSpinner } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
@@ -19,26 +19,39 @@ import { usePlaygroundBreadcrumbs } from '../../hooks/use_playground_breadcrumbs
 import { useSavedPlaygroundParameters } from '../../hooks/use_saved_playground_parameters';
 import { useShowSetupPage } from '../../hooks/use_show_setup_page';
 import {
-  PlaygroundPageMode,
-  PlaygroundViewMode,
-  SavedPlaygroundForm,
-  SavedPlaygroundFormFields,
-} from '../../types';
-import { Header } from '../header';
-import {
   SAVED_PLAYGROUND_CHAT_PATH,
   SAVED_PLAYGROUND_CHAT_QUERY_PATH,
   SAVED_PLAYGROUND_SEARCH_PATH,
   SAVED_PLAYGROUND_SEARCH_QUERY_PATH,
 } from '../../routes';
+import {
+  PlaygroundPageMode,
+  PlaygroundViewMode,
+  SavedPlaygroundForm,
+  SavedPlaygroundFormFields,
+} from '../../types';
+import { isSavedPlaygroundFormDirty } from '../../utils/saved_playgrounds';
+
 import { Chat } from '../chat';
+import { SavedPlaygroundHeader } from './saved_playground_header';
 import { ChatSetupPage } from '../setup_page/chat_setup_page';
 import { SearchMode } from '../search_mode/search_mode';
 import { SearchQueryMode } from '../query_mode/search_query_mode';
 
 import { SavedPlaygroundFetchError } from './saved_playground_fetch_error';
+import { EditPlaygroundNameModal } from './edit_name_modal';
+import { DeletePlaygroundModal } from './delete_playground_modal';
+import { SavePlaygroundModal } from './save_playground_modal';
+
+enum SavedPlaygroundModals {
+  None,
+  EditName,
+  Delete,
+  Copy,
+}
 
 export const SavedPlayground = () => {
+  const [shownModal, setShownModal] = useState<SavedPlaygroundModals>(SavedPlaygroundModals.None);
   const models = useLLMsModels();
   const { playgroundId, pageMode, viewMode } = useSavedPlaygroundParameters();
   const { application } = useKibana().services;
@@ -54,8 +67,8 @@ export const SavedPlayground = () => {
     hasConnectors: Boolean(connectors?.length),
   });
   const navigateToView = useCallback(
-    (page: PlaygroundPageMode, view?: PlaygroundViewMode, searchParams?: string) => {
-      let path = `/p/${playgroundId}/${page}`;
+    (id: string, page: PlaygroundPageMode, view?: PlaygroundViewMode, searchParams?: string) => {
+      let path = `/p/${id}/${page}`;
       if (view && view !== PlaygroundViewMode.preview) {
         path += `/${view}`;
       }
@@ -66,7 +79,7 @@ export const SavedPlayground = () => {
         path,
       });
     },
-    [application, playgroundId]
+    [application]
   );
   useEffect(() => {
     if (formState.isLoading) return;
@@ -74,6 +87,7 @@ export const SavedPlayground = () => {
       // If there is not a pageMode set we redirect based on if there is a model set in the
       // saved playground as a best guess for default mode. until we save mode with the playground
       navigateToView(
+        playgroundId,
         summarizationModel !== undefined ? PlaygroundPageMode.Chat : PlaygroundPageMode.Search,
         PlaygroundViewMode.preview
       );
@@ -82,15 +96,16 @@ export const SavedPlayground = () => {
     // Handle Unknown modes
     if (!Object.values(PlaygroundPageMode).includes(pageMode)) {
       navigateToView(
+        playgroundId,
         summarizationModel !== undefined ? PlaygroundPageMode.Chat : PlaygroundPageMode.Search,
         PlaygroundViewMode.preview
       );
       return;
     }
     if (!Object.values(PlaygroundViewMode).includes(viewMode)) {
-      navigateToView(pageMode, PlaygroundViewMode.preview);
+      navigateToView(playgroundId, pageMode, PlaygroundViewMode.preview);
     }
-  }, [pageMode, viewMode, summarizationModel, formState.isLoading, navigateToView]);
+  }, [playgroundId, pageMode, viewMode, summarizationModel, formState.isLoading, navigateToView]);
   useEffect(() => {
     // When opening chat mode without a model selected try to select a default model
     // if one is available.
@@ -106,11 +121,17 @@ export const SavedPlayground = () => {
       }
     }
   }, [formState.isLoading, pageMode, summarizationModel, models, setValue]);
+  const { isDirty, dirtyFields } = formState;
+  const savedFormIsDirty = useMemo(() => {
+    if (!isDirty) return false;
+    return isSavedPlaygroundFormDirty(dirtyFields);
+  }, [isDirty, dirtyFields]);
+  const onCloseModal = useCallback(() => setShownModal(SavedPlaygroundModals.None), []);
 
   const handleModeChange = (id: PlaygroundViewMode) =>
-    navigateToView(pageMode ?? PlaygroundPageMode.Search, id, location.search);
+    navigateToView(playgroundId, pageMode ?? PlaygroundPageMode.Search, id, location.search);
   const handlePageModeChange = (mode: PlaygroundPageMode) =>
-    navigateToView(mode, viewMode, location.search);
+    navigateToView(playgroundId, mode, viewMode, location.search);
 
   const { isLoading } = formState;
   if (isLoading || pageMode === undefined) {
@@ -127,15 +148,17 @@ export const SavedPlayground = () => {
   }
   return (
     <>
-      <Header
+      <SavedPlaygroundHeader
         playgroundName={playgroundName}
-        hasChanges={false}
+        hasChanges={savedFormIsDirty}
         pageMode={pageMode}
         viewMode={viewMode}
-        showDocs={false}
         onModeChange={handleModeChange}
         isActionsDisabled={false}
         onSelectPageModeChange={handlePageModeChange}
+        onEditName={() => setShownModal(SavedPlaygroundModals.EditName)}
+        onDeletePlayground={() => setShownModal(SavedPlaygroundModals.Delete)}
+        onCopyPlayground={() => setShownModal(SavedPlaygroundModals.Copy)}
       />
       <Routes>
         {showSetupPage ? (
@@ -162,6 +185,26 @@ export const SavedPlayground = () => {
           </>
         )}
       </Routes>
+      {shownModal === SavedPlaygroundModals.EditName && (
+        <EditPlaygroundNameModal playgroundName={playgroundName} onClose={onCloseModal} />
+      )}
+      {shownModal === SavedPlaygroundModals.Delete && (
+        <DeletePlaygroundModal
+          playgroundId={playgroundId}
+          playgroundName={playgroundName}
+          onClose={onCloseModal}
+        />
+      )}
+      {shownModal === SavedPlaygroundModals.Copy && (
+        <SavePlaygroundModal
+          saveAs
+          playgroundName={playgroundName}
+          onClose={onCloseModal}
+          navigateToNewPlayground={(id: string) => {
+            navigateToView(id, pageMode ?? PlaygroundPageMode.Chat, viewMode, location.search);
+          }}
+        />
+      )}
     </>
   );
 };

@@ -49,6 +49,7 @@ export const UploadFileButton: React.FC<Props> = ({ isSetup }) => {
         </EuiButtonEmpty>
       ) : (
         <EuiButton
+          color="text"
           size="s"
           fill={false}
           iconType="plusInCircle"
