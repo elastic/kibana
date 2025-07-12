@@ -8,7 +8,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { EuiFormRow } from '@elastic/eui';
+import { EuiFormRow, EuiScreenReaderLive } from '@elastic/eui';
 import { debounce } from 'lodash';
 import { CodeEditor } from '@kbn/code-editor';
 
@@ -77,27 +77,32 @@ function JsonEditorComp<T extends object = { [key: string]: any }>({
     [isControlled, debouncedSetContent, onUpdate]
   );
 
+  const hasErrors = typeof error === 'string';
+
   return (
     <EuiFormRow
       label={label}
       helpText={helpText}
-      isInvalid={typeof error === 'string'}
+      isInvalid={hasErrors}
       error={error}
       fullWidth
       {...rest}
     >
-      <CodeEditor
-        languageId="json"
-        height={500}
-        options={{
-          lineNumbers: 'off',
-          tabSize: 2,
-          automaticLayout: true,
-        }}
-        value={isControlled ? value! : content}
-        onChange={onEuiCodeEditorChange}
-        {...codeEditorProps}
-      />
+      <>
+        <CodeEditor
+          languageId="json"
+          height={500}
+          options={{
+            lineNumbers: 'off',
+            tabSize: 2,
+            automaticLayout: true,
+          }}
+          value={isControlled ? value! : content}
+          onChange={onEuiCodeEditorChange}
+          {...codeEditorProps}
+        />
+        <EuiScreenReaderLive role="alert">{hasErrors && error}</EuiScreenReaderLive>
+      </>
     </EuiFormRow>
   );
 }
