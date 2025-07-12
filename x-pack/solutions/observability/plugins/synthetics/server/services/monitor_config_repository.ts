@@ -7,6 +7,7 @@
 
 import {
   SavedObject,
+  type SavedObjectsBulkCreateObject,
   SavedObjectsClientContract,
   type SavedObjectsCreateOptions,
   SavedObjectsFindOptions,
@@ -141,16 +142,22 @@ export class MonitorConfigRepository {
     monitors: Array<{ id: string; monitor: MonitorFields }>;
     savedObjectType?: string;
   }) {
-    const newMonitors = monitors.map(({ id, monitor }) => ({
-      id,
-      type: savedObjectType ?? syntheticsMonitorSavedObjectType,
-      attributes: formatSecrets({
-        ...monitor,
-        [ConfigKey.MONITOR_QUERY_ID]: monitor[ConfigKey.CUSTOM_HEARTBEAT_ID] || id,
-        [ConfigKey.CONFIG_ID]: id,
-        revision: 1,
-      }),
-    }));
+    const newMonitors: Array<SavedObjectsBulkCreateObject<EncryptedSyntheticsMonitorAttributes>> =
+      monitors.map(({ id, monitor }) => {
+        const { spaces } = monitor;
+
+        return {
+          id,
+          type: savedObjectType ?? syntheticsMonitorSavedObjectType,
+          attributes: formatSecrets({
+            ...monitor,
+            [ConfigKey.MONITOR_QUERY_ID]: monitor[ConfigKey.CUSTOM_HEARTBEAT_ID] || id,
+            [ConfigKey.CONFIG_ID]: id,
+            revision: 1,
+          }),
+          ...(!isEmpty(spaces) && { initialNamespaces: spaces }),
+        };
+      });
     const result = await this.soClient.bulkCreate<EncryptedSyntheticsMonitorAttributes>(
       newMonitors
     );
