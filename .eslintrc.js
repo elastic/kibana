@@ -1607,7 +1607,7 @@ module.exports = {
       settings: {
         playwright: {
           globalAliases: {
-            test: ['test', 'spaceTest'],
+            test: ['test', 'spaceTest', 'apiTest'],
           },
         },
       },
