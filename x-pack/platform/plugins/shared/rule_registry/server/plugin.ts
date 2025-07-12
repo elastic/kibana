@@ -135,16 +135,16 @@ export class RuleRegistryPlugin
           RULE_SEARCH_STRATEGY_NAME,
           ruleRegistrySearchStrategy
         );
+
+        core.http.registerRouteHandlerContext<RacRequestHandlerContext, 'rac'>(
+          'rac',
+          this.createRouteHandlerContext()
+        );
       })
       .catch(() => {});
 
     // ALERTS ROUTES
     const router = core.http.createRouter<RacRequestHandlerContext>();
-    core.http.registerRouteHandlerContext<RacRequestHandlerContext, 'rac'>(
-      'rac',
-      this.createRouteHandlerContext()
-    );
-
     defineRoutes(router);
 
     return {
@@ -166,6 +166,13 @@ export class RuleRegistryPlugin
       async getAlertingAuthorization(request: KibanaRequest) {
         return plugins.alerting.getAlertingAuthorizationWithRequest(request);
       },
+      async getEsClientScoped(request: KibanaRequest) {
+        return core.elasticsearch.client.asScoped(request).asCurrentUser;
+      },
+      async getSavedObjectClient(request: KibanaRequest) {
+        return core.savedObjects.getScopedClient(request);
+      },
+      dataViewsServiceAsScoped: plugins.data.indexPatterns,
       securityPluginSetup: security,
       ruleDataService,
       getRuleType: plugins.alerting.getType,
