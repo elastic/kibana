@@ -601,7 +601,7 @@ function isNumberSearch(search: string) {
 
 export const constructSearch = (
   search: string | undefined,
-  paramSearchFields: string[],
+  searchFields: string[],
   spaceId: string,
   savedObjectsSerializer: ISavedObjectsSerializer
 ): { search: string; rootSearchFields?: string[]; searchFields?: string[] } | undefined => {
@@ -619,6 +619,7 @@ export const constructSearch = (
     return {
       search: `"${search}" "${rawId}"`,
       rootSearchFields: ['_id'],
+      searchFields,
     };
   }
 
@@ -632,11 +633,11 @@ export const constructSearch = (
   if (isNumberSearch(search)) {
     return {
       search,
-      searchFields: paramSearchFields.concat(['incremental_id']),
+      searchFields: searchFields.concat(['incremental_id']),
     };
   }
 
-  return { search, searchFields: paramSearchFields };
+  return { search, searchFields };
 };
 
 /**
