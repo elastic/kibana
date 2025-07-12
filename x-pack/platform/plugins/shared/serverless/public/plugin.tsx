@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import { EuiButton } from '@elastic/eui';
 import { InternalChromeStart } from '@kbn/core-chrome-browser-internal';
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { i18n } from '@kbn/i18n';
-import { toMountPoint } from '@kbn/react-kibana-mount';
+
 import React from 'react';
 import {
   generateManageOrgMembersNavCard,
@@ -45,7 +43,7 @@ export class ServerlessPlugin
     core: CoreStart,
     dependencies: ServerlessPluginStartDependencies
   ): ServerlessPluginStart {
-    const { chrome, rendering } = core;
+    const { chrome } = core;
 
     // Casting the "chrome.project" service to an "internal" type: this is intentional to obscure the property from Typescript.
     const { project } = chrome as InternalChromeStart;
@@ -60,25 +58,6 @@ export class ServerlessPlugin
 
     const activeNavigationNodes$ = project.getActiveNavigationNodes$();
     const navigationTreeUi$ = project.getNavigationTreeUi$();
-
-    chrome.navControls.registerRight({
-      order: 1,
-      mount: toMountPoint(
-        <EuiButton
-          href="https://ela.st/serverless-feedback"
-          size={'s'}
-          color={'warning'}
-          iconType={'popout'}
-          iconSide={'right'}
-          target={'_blank'}
-        >
-          {i18n.translate('xpack.serverless.header.giveFeedbackBtn.label', {
-            defaultMessage: 'Give feedback',
-          })}
-        </EuiButton>,
-        rendering
-      ),
-    });
 
     return {
       setSideNavComponentDeprecated: (sideNavigationComponent) =>
