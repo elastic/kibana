@@ -19,7 +19,7 @@ import { createFilter } from './create_filters_from_value_click';
 import type { MultiValueClickContext } from '../multi_value_click_action';
 import { mapAndFlattenFilters } from '../../query';
 
-type MultiValueClickDataContext = MultiValueClickContext['data'];
+export type MultiValueClickDataContext = MultiValueClickContext['data'];
 
 export const truthy = <T>(value: T): value is Truthy<T> => !!value;
 
