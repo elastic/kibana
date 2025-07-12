@@ -36,6 +36,7 @@ export interface ApplicationLinksUpdateParams {
 class ApplicationLinksUpdater {
   private readonly linksSubject$ = new BehaviorSubject<AppLinkItems>([]);
   private readonly normalizedLinksSubject$ = new BehaviorSubject<NormalizedLinks>({});
+  private lastUpdateParams?: ApplicationLinksUpdateParams | undefined;
 
   /** Observable that stores the links recursive hierarchy */
   public readonly links$: Observable<AppLinkItems>;
@@ -51,16 +52,10 @@ class ApplicationLinksUpdater {
    * Updates the internal app links applying the filter by permissions
    */
   public update(appLinksToUpdate: AppLinkItems, params: ApplicationLinksUpdateParams) {
+    this.lastUpdateParams = params;
     const processedAppLinks = this.processAppLinks(appLinksToUpdate, params);
     this.linksSubject$.next(Object.freeze(processedAppLinks));
     this.normalizedLinksSubject$.next(Object.freeze(this.getNormalizedLinks(processedAppLinks)));
-  }
-
-  /**
-   * Returns the current links value
-   */
-  public getLinksValue(): AppLinkItems {
-    return this.linksSubject$.getValue();
   }
 
   /**
@@ -68,6 +63,36 @@ class ApplicationLinksUpdater {
    */
   public getNormalizedLinksValue(): NormalizedLinks {
     return this.normalizedLinksSubject$.getValue();
+  }
+
+  /**
+   * Updates a specific app link by its `SecurityPageName` identifier.
+   */
+  public updateAppLink(id: SecurityPageName, appLink: Partial<LinkItem>) {
+    if (!this.lastUpdateParams) {
+      throw new Error(
+        'Cannot update app link without previous update params. Please call `update` method first.'
+      );
+    }
+    const currentLinks = this.linksSubject$.getValue();
+    const updatedLinks = this.getUpdatedAppLink(id, appLink, currentLinks);
+    this.update(updatedLinks, this.lastUpdateParams);
+  }
+
+  private getUpdatedAppLink(
+    id: SecurityPageName,
+    appLinkUpdate: Partial<LinkItem>,
+    currentLinks: AppLinkItems
+  ): LinkItem[] {
+    return currentLinks.map((link) => {
+      if (link.id === id) {
+        return { ...link, ...appLinkUpdate };
+      }
+      if (link.links) {
+        return { ...link, links: this.getUpdatedAppLink(id, appLinkUpdate, link.links) };
+      }
+      return link;
+    });
   }
 
   /**

@@ -7,6 +7,8 @@
 import { useMemo, useCallback } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import type { SecurityPageName } from '@kbn/security-solution-navigation';
+import memoizeOne from 'memoize-one';
+import { isEqual } from 'lodash';
 import type { LinkInfo, NormalizedLink, NormalizedLinks } from './types';
 import { applicationLinksUpdater } from '../../app/links/application_links_updater';
 
@@ -77,4 +79,23 @@ export const useParentLinks = (id: SecurityPageName): LinkInfo[] => {
     }
     return ancestors.reverse();
   }, [normalizedLinks, id]);
+};
+
+/**
+ * Hook that returns a function to update a specific link configuration.
+ * It takes the `SecurityPageName` id and a partial `LinkInfo` object to update the link.
+ * The function will update the links observable and trigger a re-render of components that depend on the links.
+ * Use with caution, as it will also trigger an update of the plugin deepLinks configuration as well.
+ */
+type UpdateLinkConfig = (id: SecurityPageName, update: Partial<Omit<LinkInfo, 'id'>>) => void;
+export const useUpdateLinkConfig = (): UpdateLinkConfig => {
+  const updateLinkConfig = useMemo<UpdateLinkConfig>(
+    () =>
+      // make sure to only update if the update is different, this is important to avoid unnecessary updates
+      memoizeOne<UpdateLinkConfig>((id, update) => {
+        applicationLinksUpdater.updateAppLink(id, update);
+      }, isEqual), // deep equality check
+    []
+  );
+  return updateLinkConfig;
 };
