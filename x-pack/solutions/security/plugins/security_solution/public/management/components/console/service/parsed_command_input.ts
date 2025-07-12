@@ -6,9 +6,12 @@
  */
 
 import type { ParsedCommandInput, ParsedCommandInterface } from './types';
-import type { CommandDefinition } from '..';
+import type { CommandDefinition, CommandArgDefinition } from '../types';
 
-const parseInputString = (rawInput: string): ParsedCommandInput => {
+const parseInputString = (
+  rawInput: string,
+  commandDefinitions: CommandDefinition[] = []
+): ParsedCommandInput => {
   const input = rawInput.trim();
   const response: ParsedCommandInput = {
     name: getCommandNameFromTextInput(input),
@@ -24,6 +27,9 @@ const parseInputString = (rawInput: string): ParsedCommandInput => {
     inputFirstSpacePosition === -1
       ? []
       : input.substring(inputFirstSpacePosition).trim().split(/--/);
+
+  // Find command definition for selector argument handling
+  const commandDef = commandDefinitions.find((def) => def.name === response.name);
 
   for (const rawArg of rawArguments) {
     const argNameAndValueTrimmedString = rawArg.trim();
@@ -66,8 +72,11 @@ const parseInputString = (rawInput: string): ParsedCommandInput => {
 
           response.args[argName].push(newArgValue);
         } else {
-          // Argument has not value (bare), set it to empty string
-          response.args[argName].push(true);
+          // Argument has no value (bare flag)
+          // Check if this argument has selectorStringDefaultValue set to true
+          const argDef = commandDef?.args?.[argName] as CommandArgDefinition | undefined;
+          const useStringValue = argDef?.selectorStringDefaultValue === true;
+          response.args[argName].push(useStringValue ? '' : true);
         }
       }
     }
@@ -81,8 +90,11 @@ class ParsedCommand implements ParsedCommandInterface {
   public readonly args: Record<string, string[]>;
   public readonly hasArgs: boolean;
 
-  constructor(public readonly input: string) {
-    const parseInput = parseInputString(input);
+  constructor(
+    public readonly input: string,
+    public readonly commandDefinitions: CommandDefinition[] = []
+  ) {
+    const parseInput = parseInputString(input, commandDefinitions);
     this.name = parseInput.name;
     this.args = parseInput.args;
     this.hasArgs = Object.keys(this.args).length > 0;
@@ -93,8 +105,11 @@ class ParsedCommand implements ParsedCommandInterface {
   }
 }
 
-export const parseCommandInput = (input: string): ParsedCommandInterface => {
-  return new ParsedCommand(input);
+export const parseCommandInput = (
+  input: string,
+  commandDefinitions: CommandDefinition[] = []
+): ParsedCommandInterface => {
+  return new ParsedCommand(input, commandDefinitions);
 };
 
 export const getCommandNameFromTextInput = (input: string): string => {
@@ -116,10 +131,12 @@ export const getCommandNameFromTextInput = (input: string): string => {
 export const getArgumentsForCommand = (command: CommandDefinition): string[] => {
   let requiredArgs = '';
   let optionalArgs = '';
-  const exclusiveOrArgs = [];
+  const exclusiveOrArgs: string[] = [];
 
   if (command.args) {
-    for (const [argName, argDefinition] of Object.entries(command.args)) {
+    for (const [argName, argDefinition] of Object.entries(command.args) as Array<
+      [string, CommandArgDefinition]
+    >) {
       if (argDefinition.required) {
         if (requiredArgs.length) {
           requiredArgs += ' ';
@@ -161,4 +178,89 @@ export const getArgumentsForCommand = (command: CommandDefinition): string[] => 
     : requiredArgs || optionalArgs
     ? [buildArgumentText({ required: requiredArgs, optional: optionalArgs })]
     : [];
+};
+
+/**
+ * Detects and pre-processes pasted commands that contain argument values
+ * for arguments that should be handled by selector components.
+ *
+ * For example: "runscript --ScriptName=\"test.ps1\"" becomes:
+ * - cleanedCommand: "runscript --ScriptName"
+ * - extractedArgState: { ScriptName: [{ value: "test.ps1", valueText: "test.ps1" }] }
+ */
+export const detectAndPreProcessPastedCommand = (
+  rawInput: string,
+  commandDefinitions: CommandDefinition[] = []
+): {
+  cleanedCommand: string;
+  extractedArgState: Record<string, Array<{ value: string; valueText: string }>>;
+  hasSelectorArguments: boolean;
+} => {
+  const result = {
+    cleanedCommand: rawInput,
+    extractedArgState: {} as Record<string, Array<{ value: string; valueText: string }>>,
+    hasSelectorArguments: false,
+  };
+
+  // Early return if no input
+  if (!rawInput.trim()) {
+    return result;
+  }
+
+  const commandName = getCommandNameFromTextInput(rawInput);
+  const commandDef = commandDefinitions.find((def) => def.name === commandName);
+
+  // Early return if command not found or has no selector arguments
+  if (!commandDef?.args) {
+    return result;
+  }
+
+  // Find arguments that have SelectorComponents (like ScriptName)
+  const selectorArguments = Object.entries(commandDef.args).filter(
+    ([_, argDef]: [string, CommandArgDefinition]) => argDef.SelectorComponent
+  );
+
+  if (selectorArguments.length === 0) {
+    return result;
+  }
+
+  let cleanedCommand = rawInput;
+  let hasExtractedValues = false;
+
+  // Process each selector argument to extract embedded values
+  for (const [argName] of selectorArguments) {
+    const argPattern = new RegExp(`--${argName}\\s*[=]\\s*(["'][^"]*["']|\\S+)`, 'g');
+    let match;
+
+    while ((match = argPattern.exec(rawInput)) !== null) {
+      let value = match[1];
+
+      // Remove quotes if present
+      if (
+        (value.startsWith('"') && value.endsWith('"')) ||
+        (value.startsWith("'") && value.endsWith("'"))
+      ) {
+        value = value.slice(1, -1);
+      }
+
+      // Store the extracted value in argState format
+      if (!result.extractedArgState[argName]) {
+        result.extractedArgState[argName] = [];
+      }
+
+      result.extractedArgState[argName].push({
+        value,
+        valueText: value,
+      });
+
+      // Replace the full argument with value with just the argument name
+      cleanedCommand = cleanedCommand.replace(match[0], `--${argName}`);
+      hasExtractedValues = true;
+    }
+  }
+
+  result.cleanedCommand = cleanedCommand;
+  result.hasSelectorArguments = hasExtractedValues;
+
+  return result;
 };
