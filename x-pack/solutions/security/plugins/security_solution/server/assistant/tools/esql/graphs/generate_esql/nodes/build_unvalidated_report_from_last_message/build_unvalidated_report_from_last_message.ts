@@ -19,7 +19,7 @@ export const getBuildUnvalidatedReportFromLastMessageNode = () => {
         messages: [
           `${
             lastMessageWithUnvalidatedReport(lastMessage.content as string).content
-          }\n\n The resulting query was generated as a best effort example, but we are unable to validate it. Please provide the name of the index and fields that should be used in the query. Make sure to include this in the final response`,
+          }\n\nRepeat the following message in your response:\nThe resulting query was generated as a best effort example, but we are unable to validate it. Please provide the name of the index and fields that should be used in the query.`,
         ],
       },
     });
