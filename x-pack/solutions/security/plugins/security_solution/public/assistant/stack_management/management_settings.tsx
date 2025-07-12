@@ -42,7 +42,7 @@ export const ManagementSettings = React.memo(() => {
   const handleTabChange = useCallback(
     (tab: string) => {
       navigateToApp('management', {
-        path: `kibana/securityAiAssistantManagement?tab=${tab}`,
+        path: `ai/securityAiAssistantManagement?tab=${tab}`,
       });
     },
     [navigateToApp]
@@ -80,7 +80,7 @@ export const ManagementSettings = React.memo(() => {
           }),
           onClick: (e) => {
             e.preventDefault();
-            navigateToApp('management', { path: '/kibana/aiAssistantManagementSelection' });
+            navigateToApp('management', { path: '/ai/aiAssistantManagementSelection' });
           },
         },
         {

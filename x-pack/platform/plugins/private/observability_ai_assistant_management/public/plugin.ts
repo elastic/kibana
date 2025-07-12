@@ -75,14 +75,14 @@ export class AiAssistantManagementObservabilityPlugin
           defaultMessage: 'Manage your AI Assistant for Observability and Search.',
         }),
         icon: 'sparkles',
-        path: '/app/management/kibana/ai-assistant/observability',
+        path: '/app/management/ai/ai-assistant/observability',
         showOnHomePage: false,
         category: 'admin',
       });
     }
 
     if (observabilityAIAssistant) {
-      management.sections.section.kibana.registerApp({
+      management.sections.section.ai.registerApp({
         id: 'observabilityAiAssistantManagement',
         title,
         hideFromSidebar: true,

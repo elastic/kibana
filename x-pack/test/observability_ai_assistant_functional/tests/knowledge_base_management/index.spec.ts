@@ -70,7 +70,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
       async function getKnowledgeBaseEntries() {
         await common.navigateToUrlWithBrowserHistory(
           'management',
-          '/kibana/observabilityAiAssistantManagement',
+          '/ai/observabilityAiAssistantManagement',
           'tab=knowledge_base'
         );
 
@@ -148,7 +148,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
         await clearKnowledgeBase(es);
         await common.navigateToUrlWithBrowserHistory(
           'management',
-          '/kibana/observabilityAiAssistantManagement',
+          '/ai/observabilityAiAssistantManagement',
           'tab=knowledge_base'
         );
       });
@@ -216,7 +216,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
       async function getKnowledgeBaseEntryCount() {
         await common.navigateToUrlWithBrowserHistory(
           'management',
-          '/kibana/observabilityAiAssistantManagement',
+          '/ai/observabilityAiAssistantManagement',
           'tab=knowledge_base'
         );
 
@@ -248,7 +248,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
         await clearKnowledgeBase(es);
         await common.navigateToUrlWithBrowserHistory(
           'management',
-          '/kibana/observabilityAiAssistantManagement',
+          '/ai/observabilityAiAssistantManagement',
           'tab=knowledge_base'
         );
       });
