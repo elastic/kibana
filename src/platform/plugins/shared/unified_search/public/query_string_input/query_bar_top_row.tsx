@@ -615,6 +615,7 @@ export const QueryBarTopRow = React.memo(
             <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
               {shouldRenderDatePicker() ? renderDatePicker() : null}
               {shouldRenderUpdatebutton() ? button : null}
+              <EuiFlexItem>{data.search.renderBackgroundSearchButton()}</EuiFlexItem>
             </EuiFlexGroup>
           </NoDataPopover>
         </EuiFlexItem>

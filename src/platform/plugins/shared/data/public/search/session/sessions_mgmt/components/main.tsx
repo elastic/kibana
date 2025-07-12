@@ -8,9 +8,17 @@
  */
 
 import React from 'react';
-import { EuiButtonEmpty, EuiPageHeader, EuiSpacer } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutHeader,
+  EuiPageHeader,
+  EuiSpacer,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { CoreStart, HttpStart } from '@kbn/core/public';
+import { BACKGROUND_SEARCH_ENABLED } from '../../constants';
 import type { SearchSessionsMgmtAPI } from '../lib/api';
 import type { AsyncSearchIntroDocumentation } from '../lib/documentation';
 import { SearchSessionsMgmtTable } from './table';
@@ -30,6 +38,25 @@ interface Props {
 }
 
 export function SearchSessionsMgmtMain({ documentation, ...tableProps }: Props) {
+  if (BACKGROUND_SEARCH_ENABLED) {
+    return (
+      <>
+        <EuiPageHeader
+          pageTitle={
+            <FormattedMessage
+              id="data.mgmt.searchSessions.main.sectionTitleBackgroundSearch"
+              defaultMessage="Background search"
+            />
+          }
+          bottomBorder
+        />
+
+        <EuiSpacer size="l" />
+        <SearchSessionsMgmtTable data-test-subj="search-sessions-mgmt-table" {...tableProps} />
+      </>
+    );
+  }
+
   return (
     <>
       <EuiPageHeader
@@ -66,5 +93,21 @@ export function SearchSessionsMgmtMain({ documentation, ...tableProps }: Props) 
       <EuiSpacer size="l" />
       <SearchSessionsMgmtTable data-test-subj="search-sessions-mgmt-table" {...tableProps} />
     </>
+  );
+}
+
+export function SearchSessionsMgmtFlyout({ documentation, ...tableProps }: Props) {
+  return (
+    <EuiFlyout onClose={() => console('close-di-close')}>
+      <EuiFlyoutHeader>
+        <FormattedMessage
+          id="data.mgmt.searchSessions.main.sectionTitle"
+          defaultMessage="Search Sessions"
+        />
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody>
+        <SearchSessionsMgmtTable data-test-subj="search-sessions-mgmt-table" {...tableProps} />
+      </EuiFlyoutBody>
+    </EuiFlyout>
   );
 }
