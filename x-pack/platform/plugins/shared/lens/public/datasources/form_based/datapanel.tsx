@@ -41,6 +41,7 @@ import type { FormBasedPrivateState } from './types';
 import { IndexPatternServiceAPI } from '../../data_views_service/service';
 import { FieldItem } from '../common/field_item';
 import { dataPanelStyles } from '../common/datapanel.styles';
+import { nonNullable } from '../../utils';
 
 export type FormBasedDataPanelProps = Omit<
   DatasourceDataPanelProps<FormBasedPrivateState, Query>,
@@ -268,6 +269,9 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
       onSelectedFieldFilter,
       onOverrideFieldGroupDetails,
       getNewFieldsBySpec,
+      sortedSelectedFields: layerFields
+        ?.map((fieldName) => currentIndexPattern?.getFieldByName(fieldName))
+        .filter(nonNullable),
     });
 
   const closeFieldEditor = useRef<() => void | undefined>();

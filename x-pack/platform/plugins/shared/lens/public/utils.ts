@@ -132,7 +132,7 @@ export async function refreshIndexPatternsList({
   // collect all the onRefreshIndex callbacks from datasources
   const onRefreshCallbacks = Object.values(activeDatasources)
     .map((datasource) => datasource?.onRefreshIndexPattern)
-    .filter(Boolean);
+    .filter(nonNullable);
 
   const newlyMappedIndexPattern = await indexPatternService.loadIndexPatterns({
     cache: {},

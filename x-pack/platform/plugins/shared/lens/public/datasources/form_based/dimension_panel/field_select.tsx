@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { partition } from 'lodash';
+import { groupBy } from 'lodash';
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiComboBoxOptionOption, EuiComboBoxProps } from '@elastic/eui';
@@ -52,20 +52,51 @@ export function FieldSelect({
   const memoizedFieldOptions = useMemo(() => {
     const fields = [...operationByField.keys()].sort();
 
+    // TODO: filter out here too once we have a way to know the used fields
+    // and an instance to the original dataView
+
     const currentOperationType = incompleteOperation ?? selectedOperationType;
 
     function isCompatibleWithCurrentOperation(fieldName: string) {
       return !currentOperationType || operationByField.get(fieldName)!.has(currentOperationType);
     }
 
-    const [specialFields, normalFields] = partition(
-      fields,
-      (field) => currentIndexPattern.getFieldByName(field)?.type === 'document'
-    );
-
     function containsData(fieldName: string) {
       return fieldContainsData(fieldName, currentIndexPattern, hasFieldData);
     }
+
+    const isTimeSeriesFields = (field: string) => {
+      return (
+        showTimeSeriesDimensions && currentIndexPattern.getFieldByName(field)?.timeSeriesDimension
+      );
+    };
+
+    const {
+      specialFields,
+      metaFields,
+      availableNonTimeseriesFields,
+      availableTimeSeriesFields,
+      emptyTimeSeriesFields,
+      emptyNonTimeSeriesFields,
+    } = groupBy(fields, (field) => {
+      const fieldInstance = currentIndexPattern.getFieldByName(field);
+      if (fieldInstance?.type === 'document') {
+        return 'specialFields'; // Document fields are treated as special
+      }
+      if (fieldInstance?.meta) {
+        return 'metaFields'; // Meta fields
+      }
+      if (isTimeSeriesFields(field)) {
+        if (containsData(field)) {
+          return 'availableTimeSeriesFields'; // Time series fields with data
+        }
+        return 'emptyTimeSeriesFields'; // Time series fields without data
+      }
+      if (containsData(field)) {
+        return 'availableNonTimeseriesFields'; // Fields with data
+      }
+      return 'emptyNonTimeSeriesFields'; // Fields with no data
+    });
 
     interface FieldOption {
       label: string;
@@ -84,7 +115,7 @@ export function FieldSelect({
           const exists = containsData(field);
           const fieldInstance = currentIndexPattern.getFieldByName(field);
           return {
-            label: currentIndexPattern.getFieldByName(field)?.displayName ?? field,
+            label: fieldInstance?.displayName ?? field,
             value: {
               type: 'field' as const,
               field,
@@ -105,12 +136,6 @@ export function FieldSelect({
         .sort((a, b) => b.compatible - a.compatible);
     }
 
-    const [metaFields, nonMetaFields] = partition(
-      normalFields,
-      (field) => currentIndexPattern.getFieldByName(field)?.meta
-    );
-    const [availableFields, emptyFields] = partition(nonMetaFields, containsData);
-
     const constructFieldsOptions = (
       fieldsArr: string[],
       label: string
@@ -119,21 +144,6 @@ export function FieldSelect({
         label,
         options: fieldNamesToOptions(fieldsArr),
       };
-
-    const isTimeSeriesFields = (field: string) => {
-      return (
-        showTimeSeriesDimensions && currentIndexPattern.getFieldByName(field)?.timeSeriesDimension
-      );
-    };
-
-    const [availableTimeSeriesFields, availableNonTimeseriesFields] = partition(
-      availableFields,
-      isTimeSeriesFields
-    );
-    const [emptyTimeSeriesFields, emptyNonTimeseriesFields] = partition(
-      emptyFields,
-      isTimeSeriesFields
-    );
 
     const timeSeriesFieldsOptions = constructFieldsOptions(
       // This group includes both available and empty fields
@@ -151,7 +161,7 @@ export function FieldSelect({
     );
 
     const emptyFieldsOptions = constructFieldsOptions(
-      emptyNonTimeseriesFields,
+      emptyNonTimeSeriesFields,
       i18n.translate('xpack.lens.indexPattern.emptyFieldsLabel', {
         defaultMessage: 'Empty fields',
       })
