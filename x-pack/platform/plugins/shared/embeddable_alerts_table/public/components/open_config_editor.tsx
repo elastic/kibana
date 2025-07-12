@@ -13,9 +13,25 @@ import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from '../query_client';
 import type { EmbeddableAlertsTableConfig } from '../types';
+import { EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
+import { withSuspense } from '@kbn/shared-ux-utility';
+
+
+const ConfigEditorFlyout = React.lazy(() => import('./config_editor_flyout'));
+
+const FallbackComponent = (
+  <EuiPanel className="eui-textCenter">
+    <EuiLoadingSpinner size="l" />
+  </EuiPanel>
+);
+
+const ConfigEditorFlyout1 = withSuspense(
+  ConfigEditorFlyout,
+  FallbackComponent
+);
 
 export const openConfigEditor = async ({
-  coreServices,
+  coreServices, 
   parentApi,
   initialConfig,
 }: {
@@ -23,13 +39,18 @@ export const openConfigEditor = async ({
   parentApi: CanAddNewPanel;
   initialConfig?: EmbeddableAlertsTableConfig;
 }): Promise<EmbeddableAlertsTableConfig> => {
-  const { ConfigEditorFlyout } = await import('./config_editor_flyout');
+
+  var t0 = performance.now();
+
+  var t1 = performance.now();
+  console.log('what is this crap', t1-t0  );
   const { overlays, http, notifications, ...startServices } = coreServices;
 
   /**
    * If available, the parent API will keep track of which flyout is open and close it
    * if the app changes, disable certain actions when the flyout is open, etc.
    */
+
   const overlayTracker = tracksOverlays(parentApi) ? parentApi : undefined;
 
   return new Promise((resolve, reject) => {
@@ -45,10 +66,12 @@ export const openConfigEditor = async ({
       overlayTracker?.clearOverlays();
     };
 
-    const flyoutSession = overlays.openFlyout(
+    var t1 = performance.now();
+    console.log('what is this crap', t1-t0  );
+    const flyoutSession = overlays.openFlyout(  // 80ms
       toMountPoint(
         <QueryClientProvider client={queryClient}>
-          <ConfigEditorFlyout
+          <ConfigEditorFlyout1
             initialConfig={initialConfig}
             onSave={onSave}
             onCancel={onCancel}
@@ -58,9 +81,7 @@ export const openConfigEditor = async ({
         startServices
       ),
       {
-        onClose: () => {
-          onCancel();
-        },
+        onClose: onCancel,
         size: 'm',
         maxWidth: 500,
         paddingSize: 'm',
@@ -68,6 +89,9 @@ export const openConfigEditor = async ({
         'data-test-subj': 'createAlertsTableEmbeddableFlyout',
       }
     );
+
+    var t1 = performance.now();
+    console.log('what is this crap', t1-t0  );
 
     overlayTracker?.openOverlay(flyoutSession);
   });

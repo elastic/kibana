@@ -40,9 +40,10 @@ export const addLinksPanelAction: ActionDefinition<EmbeddableApiContext> = {
     if (!isParentApiCompatible(embeddable)) throw new IncompatibleActionError();
     const runtimeState = await openEditorFlyout({
       parentDashboard: embeddable,
-    });
+    });  
     if (!runtimeState) return;
 
+  
     function serializeState() {
       if (!runtimeState) return;
 

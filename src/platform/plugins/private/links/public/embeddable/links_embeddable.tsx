@@ -226,6 +226,7 @@ export const getLinksEmbeddableFactory = () => {
           });
         },
         onEdit: async () => {
+          // TODO - here we have to open flyout first
           const { openEditorFlyout } = await import('../editor/open_editor_flyout');
           const newState = await openEditorFlyout({
             initialState: {
@@ -253,6 +254,7 @@ export const getLinksEmbeddableFactory = () => {
           }
 
           stateManager.reinitializeState(newState);
+
         },
       });
 

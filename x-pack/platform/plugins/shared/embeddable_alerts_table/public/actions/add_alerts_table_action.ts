@@ -4,10 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import React from 'react';
 import { ADD_PANEL_VISUALIZATION_GROUP } from '@kbn/embeddable-plugin/public';
 import { apiIsPresentationContainer } from '@kbn/presentation-containers';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
+import { withSuspense } from '@kbn/shared-ux-utility';
 import type { CoreStart } from '@kbn/core/public';
 import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
@@ -15,6 +17,8 @@ import { openConfigEditor } from '../components/open_config_editor';
 import { ADD_ALERTS_TABLE_ACTION_ID, EMBEDDABLE_ALERTS_TABLE_ID } from '../constants';
 import { ADD_ALERTS_TABLE_ACTION_LABEL } from '../translations';
 import { getInternalRuleTypesWithCache } from '../utils/get_internal_rule_types_with_cache';
+
+
 
 const checkRuleTypesPermissions = async (http: CoreStart['http']) => {
   try {
@@ -40,11 +44,16 @@ export const getAddAlertsTableAction = (
       return apiIsPresentationContainer(embeddable) && hasAccessToAnyRuleTypes;
     },
     execute: async ({ embeddable }) => {
+
+      var t0 = performance.now();
       if (!apiIsPresentationContainer(embeddable)) throw new IncompatibleActionError();
       const tableConfig = await openConfigEditor({
         coreServices,
         parentApi: embeddable,
-      });
+      }); //TODO
+
+    var t1 = performance.now();
+    console.log('getAddAlertsTableAction',t1 - t0);
       await embeddable.addNewPanel(
         {
           panelType: EMBEDDABLE_ALERTS_TABLE_ID,
