@@ -39,6 +39,7 @@ export const kbnFullScreenBgCss = ({ euiTheme, colorMode }: UseEuiTheme) => {
     background: 'inherit',
     backgroundColor: euiTheme.colors.backgroundBasePlain,
     overflow: 'auto',
+    opacity: 1,
     [euiCanAnimate]: {
       opacity: 0,
       animation: `${fullScreenGraphicsFadeIn} ${euiTheme.animation.extraSlow} ${euiTheme.animation.resistance} 0s forwards`,

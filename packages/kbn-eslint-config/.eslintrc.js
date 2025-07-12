@@ -321,6 +321,7 @@ module.exports = {
     '@kbn/eslint/require_kibana_feature_privileges_naming': 'warn',
     '@kbn/eslint/no_trailing_import_slash': 'error',
     '@kbn/eslint/no_constructor_args_in_property_initializers': 'error',
+    '@kbn/eslint/no_animation_without_euiCanAnimate': 'error',
     '@kbn/eslint/no_this_in_property_initializers': 'error',
     '@kbn/eslint/no_unsafe_console': 'error',
     '@kbn/eslint/no_unsafe_hash': 'error',
