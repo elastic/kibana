@@ -14,6 +14,7 @@ import type {
   HasType,
   PublishesDataLoading,
   PublishesDataViews,
+  PublishesSavedObjectId,
   PublishesUnifiedSearch,
   SerializedTimeRange,
   SerializedTitles,
@@ -57,6 +58,7 @@ export type MapApi = DefaultEmbeddableApi<MapSerializedState> &
   PublishesDataLoading &
   PublishesDataViews &
   PublishesUnifiedSearch &
+  PublishesSavedObjectId &
   HasLibraryTransforms<MapSerializedState, MapSerializedState> & {
     getLayerList: () => ILayer[];
     reload: () => void;

@@ -162,9 +162,10 @@ export class MapsPlugin
 
       // Override this when we know we are taking a screenshot (i.e. no user interaction)
       // to avoid a blank-canvas issue when rendering maps on a PDF
-      preserveDrawingBuffer: plugins.screenshotMode?.isScreenshotMode()
-        ? true
-        : config.preserveDrawingBuffer,
+      // preserveDrawingBuffer: plugins.screenshotMode?.isScreenshotMode()
+      //   ? true
+      //   : config.preserveDrawingBuffer,
+      preserveDrawingBuffer: true,
     });
 
     const locator = plugins.share.url.locators.create(

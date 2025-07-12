@@ -192,6 +192,9 @@ export const mapEmbeddableFactory: EmbeddableFactory<MapSerializedState, MapApi>
     api = finalizeApi({
       defaultTitle$,
       defaultDescription$,
+      savedObjectId$: new BehaviorSubject(
+        savedMap.getSavedObjectId() ? savedMap.getSavedObjectId() : uuid
+      ),
       ...unsavedChangesApi,
       ...timeRangeManager.api,
       ...(dynamicActionsManager?.api ?? {}),

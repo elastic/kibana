@@ -8,6 +8,7 @@
  */
 
 import { ContentInsightsClient } from '@kbn/content-management-content-insights-public';
+import { Subscription } from 'rxjs';
 import { DashboardState } from '../../common';
 import { getDashboardBackupService } from '../services/dashboard_backup_service';
 import { getDashboardContentManagementService } from '../services/dashboard_content_management_service';
@@ -17,6 +18,7 @@ import { DEFAULT_DASHBOARD_STATE } from './default_dashboard_state';
 import { getDashboardApi } from './get_dashboard_api';
 import { startQueryPerformanceTracking } from './performance/query_performance_tracking';
 import { DashboardCreationOptions } from './types';
+import { startPreviewScreenshotting } from './preview_screenshot';
 
 export async function loadDashboardApi({
   getCreationOptions,
@@ -90,6 +92,12 @@ export async function loadDashboardApi({
     creationStartTime,
   });
 
+  let previewScreenshotSubscription: Subscription | undefined;
+
+  if (savedObjectId) {
+    startPreviewScreenshotting(api, savedObjectId);
+  }
+
   if (savedObjectId && !incomingEmbeddable) {
     // We count a new view every time a user opens a dashboard, both in view or edit mode
     // We don't count views when a user is editing a dashboard and is returning from an editor after saving
@@ -107,6 +115,9 @@ export async function loadDashboardApi({
     cleanup: () => {
       cleanup();
       performanceSubscription.unsubscribe();
+      if (previewScreenshotSubscription) {
+        previewScreenshotSubscription.unsubscribe();
+      }
     },
     internalApi,
   };

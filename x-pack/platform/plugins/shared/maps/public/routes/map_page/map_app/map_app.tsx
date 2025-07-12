@@ -35,6 +35,7 @@ import {
   IKbnUrlStateStorage,
 } from '@kbn/kibana-utils-plugin/public';
 import { getManagedContentBadge } from '@kbn/managed-content-badge';
+import { takePreviewScreenshot } from '@kbn/preview-screenshots';
 import {
   getData,
   getExecutionContextService,
@@ -229,6 +230,17 @@ export class MapApp extends React.Component<Props, State> {
     });
   }
 
+  _savePreviewScreenshot = async () => {
+    const savedObjectId = this.props.savedMap.getSavedObjectId();
+
+    if (savedObjectId) {
+      takePreviewScreenshot({
+        savedObjectId,
+        querySelector: '#react-maps-root',
+      });
+    }
+  };
+
   _updateFromGlobalState = ({
     changes,
     state: globalState,
@@ -388,6 +400,7 @@ export class MapApp extends React.Component<Props, State> {
   _updateStateFromSavedQuery = (savedQuery: SavedQuery) => {
     this.setState({ savedQuery: { ...savedQuery } });
     this._appStateManager.setQueryAndFilters({ savedQueryId: savedQuery.id });
+    this._savePreviewScreenshot();
 
     const { filterManager } = getData().query;
     const savedQueryFilters = savedQuery.attributes.filters || [];
@@ -429,6 +442,7 @@ export class MapApp extends React.Component<Props, State> {
 
     try {
       await this.props.savedMap.whenReady();
+      await this._savePreviewScreenshot();
     } catch (err) {
       if (this._isMounted) {
         getToasts().addWarning({

@@ -19,6 +19,7 @@ import {
   PublishesDataLoading,
   PublishesDataViews,
   PublishesRendered,
+  PublishesSavedObjectId,
   PublishesTimeRange,
   PublishesTitle,
   SerializedTimeRange,
@@ -75,6 +76,7 @@ export type VisualizeApi = Partial<HasEditCapabilities> &
   PublishesDataViews &
   PublishesDataLoading &
   PublishesRendered &
+  PublishesSavedObjectId &
   Required<PublishesTitle> &
   HasVisualizeConfig &
   HasInspectorAdapters &
