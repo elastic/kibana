@@ -7,5 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { FatalError } from './src/fatal_error';
-export type { FatalErrorsSetup, FatalErrorsStart } from './src/contract';
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/src/core/packages/http/rate-limiter-server-internal'],
+};

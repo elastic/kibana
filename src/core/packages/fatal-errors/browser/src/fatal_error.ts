@@ -7,9 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const mockRender = jest.fn();
-jest.mock('react-dom', () => {
-  return {
-    render: mockRender,
-  };
-});
+/**
+ * @public
+ */
+export interface FatalError<T extends Error | string = Error | string> {
+  /**
+   * The error to display.
+   */
+  error: T;
+
+  /**
+   * A prefix to the error message.
+   */
+  source?: string;
+}

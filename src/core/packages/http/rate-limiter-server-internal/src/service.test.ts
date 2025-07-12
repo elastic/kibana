@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Subject } from 'rxjs';
+import { firstValueFrom, Subject } from 'rxjs';
 import type { OnPreAuthHandler } from '@kbn/core-http-server';
 import {
   httpServerMock,
@@ -15,8 +15,9 @@ import {
   type InternalHttpServiceSetupMock,
 } from '@kbn/core-http-server-mocks';
 import { metricsServiceMock } from '@kbn/core-metrics-server-mocks';
+import { ServiceStatusLevels } from '@kbn/core-status-common';
 import type { UnwrapObservable } from '@kbn/utility-types';
-import { HttpRateLimiterService } from './service';
+import { HttpRateLimiterService, type InternalRateLimiterSetup } from './service';
 
 describe('HttpRateLimiterService', () => {
   let service: HttpRateLimiterService;
@@ -48,6 +49,7 @@ describe('HttpRateLimiterService', () => {
 
     describe('when enabled', () => {
       let handler: OnPreAuthHandler;
+      let setup: InternalRateLimiterSetup;
       let request: ReturnType<typeof httpServerMock.createKibanaRequest>;
       let response: ReturnType<typeof httpServerMock.createResponseFactory>;
       let toolkit: ReturnType<typeof httpServerMock.createToolkit>;
@@ -65,8 +67,34 @@ describe('HttpRateLimiterService', () => {
         toolkit.next.mockReturnValue(ignored);
         response.customError.mockReturnValue(throttled);
 
-        service.setup({ http, metrics });
+        setup = service.setup({ http, metrics });
         [handler] = http.registerOnPreAuth.mock.lastCall!;
+      });
+
+      it('should return `available` status initially', async () => {
+        await expect(firstValueFrom(setup.status$)).resolves.toHaveProperty(
+          'level',
+          ServiceStatusLevels.available
+        );
+      });
+
+      it('should return `degraded` status when overloaded', async () => {
+        service.start();
+        elu$.next({ short: 0.9, medium: 0.9, long: 0.9 });
+        await expect(firstValueFrom(setup.status$)).resolves.toHaveProperty(
+          'level',
+          ServiceStatusLevels.degraded
+        );
+      });
+
+      it('should return `available` status when recovered', async () => {
+        service.start();
+        elu$.next({ short: 0.9, medium: 0.9, long: 0.9 });
+        elu$.next({ short: 0.1, medium: 0.1, long: 0.1 });
+        await expect(firstValueFrom(setup.status$)).resolves.toHaveProperty(
+          'level',
+          ServiceStatusLevels.available
+        );
       });
 
       it('should register a handler if the rate limiter is enabled', () => {
@@ -133,6 +161,71 @@ describe('HttpRateLimiterService', () => {
           expect(handler(request, response, toolkit)).toBe(expected);
         }
       );
+
+      it.each`
+        term        | timeout
+        ${'short'}  | ${15}
+        ${'medium'} | ${30}
+        ${'long'}   | ${60}
+      `(
+        'should return headers with the $timeout seconds timeout for the $term-term',
+        ({ term, timeout }) => {
+          config.term = term;
+          service.setup({ http, metrics });
+          [handler] = http.registerOnPreAuth.mock.lastCall!;
+          service.start();
+
+          elu$.next({ short: 0.9, medium: 0.9, long: 0.9 });
+          handler(request, response, toolkit);
+
+          expect(response.customError).toHaveBeenCalledWith(
+            expect.objectContaining({
+              headers: {
+                'Retry-After': `${timeout}`,
+                RateLimit: `"elu";r=0;t=${timeout}`,
+              },
+            })
+          );
+        }
+      );
+
+      it('should not reset timer on consecutive overload', () => {
+        service.start();
+        elu$.next({ short: 0.9, medium: 0.9, long: 0.9 });
+        jest.useFakeTimers().setSystemTime(Date.now() + 7 * 1000);
+        elu$.next({ short: 0.9, medium: 0.9, long: 0.9 });
+        handler(request, response, toolkit);
+        jest.useRealTimers();
+
+        expect(response.customError).toHaveBeenCalledWith(
+          expect.objectContaining({
+            headers: {
+              'Retry-After': '8',
+              RateLimit: `"elu";r=0;t=8`,
+            },
+          })
+        );
+      });
+
+      it('should reset timer when it is below collection interval', () => {
+        jest.useFakeTimers();
+        service.start();
+        for (let i = 0; i < 3; i++) {
+          jest.setSystemTime(Date.now() + 5 * 1000);
+          elu$.next({ short: 0.9, medium: 0.9, long: 0.9 });
+        }
+        handler(request, response, toolkit);
+        jest.useRealTimers();
+
+        expect(response.customError).toHaveBeenCalledWith(
+          expect.objectContaining({
+            headers: {
+              'Retry-After': '20',
+              RateLimit: `"elu";r=0;t=20`,
+            },
+          })
+        );
+      });
     });
   });
 });

@@ -7,12 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/**
- * Represents the `message` and `stack` of a fatal Error
- *
- * @public
- * */
-export interface FatalErrorInfo {
-  message: string;
-  stack: string | undefined;
-}
+export const mockGetRetryAfter = jest.fn(() => 0);
+export const mockIsRateLimiterError = jest.fn();
+
+jest.mock('./utils', () => ({
+  getRetryAfter: mockGetRetryAfter,
+  isRateLimiterError: mockIsRateLimiterError,
+}));

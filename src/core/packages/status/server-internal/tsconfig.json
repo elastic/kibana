@@ -40,6 +40,7 @@
     "@kbn/core-analytics-server-mocks",
     "@kbn/core-logging-server-internal",
     "@kbn/core-logging-server-mocks",
+    "@kbn/core-http-rate-limiter-server-internal",
   ],
   "exclude": [
     "target/**/*",

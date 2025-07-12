@@ -29,6 +29,7 @@ import type {
   InternalHttpServiceSetup,
   InternalHttpServicePreboot,
 } from '@kbn/core-http-server-internal';
+import type { InternalRateLimiterSetup } from '@kbn/core-http-rate-limiter-server-internal';
 import type { InternalElasticsearchServiceSetup } from '@kbn/core-elasticsearch-server-internal';
 import type { InternalMetricsServiceSetup } from '@kbn/core-metrics-server-internal';
 import type { InternalSavedObjectsServiceSetup } from '@kbn/core-saved-objects-server-internal';
@@ -63,6 +64,7 @@ export interface StatusServiceSetupDeps {
   environment: InternalEnvironmentServiceSetup;
   pluginDependencies: ReadonlyMap<PluginName, PluginName[]>;
   http: InternalHttpServiceSetup;
+  httpRateLimiter: Pick<InternalRateLimiterSetup, 'status$'>;
   metrics: InternalMetricsServiceSetup;
   savedObjects: Pick<InternalSavedObjectsServiceSetup, 'status$'>;
   coreUsageData: Pick<InternalCoreUsageDataSetup, 'incrementUsageCounter'>;
@@ -94,13 +96,18 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
     elasticsearch,
     pluginDependencies,
     http,
+    httpRateLimiter,
     metrics,
     savedObjects,
     environment,
     coreUsageData,
   }: StatusServiceSetupDeps) {
     const statusConfig = await firstValueFrom(this.config$);
-    const core$ = (this.core$ = this.setupCoreStatus({ elasticsearch, savedObjects }));
+    const core$ = (this.core$ = this.setupCoreStatus({
+      elasticsearch,
+      httpRateLimiter,
+      savedObjects,
+    }));
     this.pluginsStatus = new PluginsStatusService({ core$, pluginDependencies });
 
     this.overall$ = combineLatest([core$, this.pluginsStatus.getAll$()]).pipe(
@@ -198,11 +205,20 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
 
   private setupCoreStatus({
     elasticsearch,
+    httpRateLimiter,
     savedObjects,
-  }: Pick<StatusServiceSetupDeps, 'elasticsearch' | 'savedObjects'>): Observable<CoreStatus> {
-    return combineLatest([elasticsearch.status$, savedObjects.status$]).pipe(
-      map(([elasticsearchStatus, savedObjectsStatus]) => ({
+  }: Pick<
+    StatusServiceSetupDeps,
+    'elasticsearch' | 'httpRateLimiter' | 'savedObjects'
+  >): Observable<CoreStatus> {
+    return combineLatest([
+      elasticsearch.status$,
+      httpRateLimiter.status$,
+      savedObjects.status$,
+    ]).pipe(
+      map(([elasticsearchStatus, httpRateLimiterStatus, savedObjectsStatus]) => ({
         elasticsearch: elasticsearchStatus,
+        http: httpRateLimiterStatus,
         savedObjects: savedObjectsStatus,
       })),
       distinctUntilChanged<CoreStatus>(isDeepStrictEqual),
