@@ -25,4 +25,5 @@ export interface GraphEdge {
   targetIds: Array<string | null> | string;
   isOrigin: boolean;
   isOriginAlert: boolean;
+  isAlert: boolean;
 }

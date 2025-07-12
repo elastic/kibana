@@ -34,7 +34,10 @@ export default function ({ getService }: FtrProviderContext) {
     // see details: https://github.com/elastic/kibana/issues/208903
     this.tags(['failsOnMKI']);
     before(async () => {
-      await esArchiver.loadIfNeeded(
+      await esArchiver.load(
+        'x-pack/solutions/security/test/cloud_security_posture_api/es_archives/security_alerts'
+      );
+      await esArchiver.load(
         'x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_audit'
       );
       supertestViewer = await roleScopedSupertest.getSupertestWithRoleScope('viewer', {
@@ -44,6 +47,9 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     after(async () => {
+      await esArchiver.unload(
+        'x-pack/solutions/security/test/cloud_security_posture_api/es_archives/security_alerts'
+      );
       await esArchiver.unload(
         'x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_audit'
       );
