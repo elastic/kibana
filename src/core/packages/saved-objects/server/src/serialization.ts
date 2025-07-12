@@ -8,6 +8,7 @@
  */
 
 import type { SavedObjectsMigrationVersion } from '@kbn/core-saved-objects-common';
+import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-api-server';
 import type { SavedObjectReference } from '..';
 
 /**
@@ -92,7 +93,7 @@ export interface SavedObjectsRawDocSource {
   references?: SavedObjectReference[];
   originId?: string;
   managed?: boolean;
-
+  accessControl?: SavedObjectAccessControl;
   [typeMapping: string]: any;
 }
 
@@ -117,6 +118,7 @@ export interface SavedObjectDoc<T = unknown> {
   created_by?: string;
   originId?: string;
   managed?: boolean;
+  accessControl?: SavedObjectAccessControl;
 }
 
 /**
