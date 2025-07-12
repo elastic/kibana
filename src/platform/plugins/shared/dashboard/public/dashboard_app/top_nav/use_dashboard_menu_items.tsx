@@ -23,6 +23,7 @@ import { coreServices, shareService } from '../../services/kibana_services';
 import { getDashboardCapabilities } from '../../utils/get_dashboard_capabilities';
 import { topNavStrings } from '../_dashboard_app_strings';
 import { ShowShareModal } from './share/show_share_modal';
+import { ShowAddMenu } from '../../dashboard_renderer/show_add_menu';
 
 export const useDashboardMenuItems = ({
   isLabsShown,
@@ -162,9 +163,11 @@ export const useDashboardMenuItems = ({
 
       interactiveSave: {
         disableButton: disableTopNav,
-        emphasize: !Boolean(lastSavedId),
+        emphasize: true,
         id: 'interactive-save',
         testId: 'dashboardInteractiveSaveMenuItem',
+        iconType: Boolean(lastSavedId) ? 'arrowDown' : undefined,
+        iconOnly: Boolean(lastSavedId),
         run: dashboardInteractiveSave,
         label:
           viewMode === 'view'
@@ -210,9 +213,22 @@ export const useDashboardMenuItems = ({
       settings: {
         ...topNavStrings.settings,
         id: 'settings',
+        iconType: 'gear',
+        iconOnly: true,
         testId: 'dashboardSettingsButton',
         disableButton: disableTopNav,
         run: () => openSettingsFlyout(dashboardApi),
+      },
+
+      add: {
+        ...topNavStrings.add,
+        id: 'add',
+        iconType: 'plusInCircle',
+        iconOnly: true,
+        testId: 'dashboardAddButton',
+        disableButton: disableTopNav,
+        run: (anchorElement: HTMLElement) =>
+          ShowAddMenu({ dashboardApi, anchorElement, coreServices }),
       },
     };
   }, [
@@ -313,26 +329,32 @@ export const useDashboardMenuItems = ({
     const editModeItems: TopNavMenuData[] = [];
 
     if (lastSavedId) {
-      editModeItems.push(menuItems.interactiveSave, menuItems.switchToViewMode);
+      // editModeItems.push(menuItems.switchToViewMode);
 
-      if (showResetChange) {
-        editModeItems.push(resetChangesMenuItem);
-      }
+      // if (showResetChange) {
+      //   editModeItems.push(resetChangesMenuItem);
+      // }
 
-      editModeItems.push(menuItems.quickSave);
+      editModeItems.push(menuItems.quickSave, menuItems.interactiveSave);
     } else {
       editModeItems.push(menuItems.switchToViewMode, menuItems.interactiveSave);
     }
 
-    const editModeTopNavConfigItems = [...labsMenuItem, menuItems.settings, ...editModeItems];
+    const editModeTopNavConfigItems = [
+      ...labsMenuItem,
+      menuItems.add,
+      menuItems.settings,
+      ...editModeItems,
+    ];
 
     // insert share menu item before the last item in edit mode
-    editModeTopNavConfigItems.splice(-1, 0, ...shareMenuItem);
+    editModeTopNavConfigItems.splice(-2, 0, ...shareMenuItem);
 
     return editModeTopNavConfigItems;
   }, [
     isLabsEnabled,
     menuItems.labs,
+    menuItems.add,
     menuItems.export,
     menuItems.share,
     menuItems.settings,
@@ -341,8 +363,8 @@ export const useDashboardMenuItems = ({
     menuItems.quickSave,
     hasExportIntegration,
     lastSavedId,
-    showResetChange,
-    resetChangesMenuItem,
+    // showResetChange,
+    // resetChangesMenuItem,
   ]);
 
   return { viewModeTopNavConfig, editModeTopNavConfig };
