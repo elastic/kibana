@@ -14,6 +14,7 @@ import { getEndpointPrivilegesInitialState, useEndpointPrivileges } from './endp
 import type { EndpointPrivileges } from '../../../../common/endpoint/types';
 import { extractTimelineCapabilities } from '../../utils/timeline_capabilities';
 import { extractNotesCapabilities } from '../../utils/notes_capabilities';
+import { extractExceptionsCapabilities } from '../../utils/exceptions_capabilities';
 
 export interface UserPrivilegesState {
   listPrivileges: ReturnType<typeof useFetchListPrivileges>;
@@ -70,6 +71,11 @@ export const UserPrivilegesProvider = ({
     [kibanaCapabilities]
   );
 
+  const exceptionsPrivileges = useMemo(
+    () => extractExceptionsCapabilities(kibanaCapabilities),
+    [kibanaCapabilities]
+  );
+
   const contextValue = useMemo(
     () => ({
       listPrivileges,
@@ -78,6 +84,7 @@ export const UserPrivilegesProvider = ({
       kibanaSecuritySolutionsPrivileges,
       timelinePrivileges,
       notesPrivileges,
+      exceptionsPrivileges,
     }),
     [
       listPrivileges,
@@ -86,6 +93,7 @@ export const UserPrivilegesProvider = ({
       kibanaSecuritySolutionsPrivileges,
       timelinePrivileges,
       notesPrivileges,
+      exceptionsPrivileges,
     ]
   );
 

@@ -30,6 +30,7 @@ import {
   getSavedObjectTypes,
 } from '@kbn/securitysolution-list-utils';
 import { useEndpointExceptionsCapability } from '../../../../exceptions/hooks/use_endpoint_exceptions_capability';
+import { extractExceptionsCapabilities } from '../../../../common/utils/exceptions_capabilities';
 import { useUserData } from '../../../../detections/components/user_info';
 import { useKibana, useToasts } from '../../../../common/lib/kibana';
 import { ExceptionsViewerSearchBar } from './search_bar';
@@ -97,6 +98,7 @@ const ExceptionsViewerComponent = ({
 }: ExceptionsViewerProps): JSX.Element => {
   const { services } = useKibana();
   const toasts = useToasts();
+  const exceptionsCaps = extractExceptionsCapabilities(services.application.capabilities);
   const [{ canUserCRUD, hasIndexWrite }] = useUserData();
   const exceptionListsToQuery = useMemo(
     () =>

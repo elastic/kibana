@@ -36,8 +36,11 @@ export const getExceptionList = async ({
   if (id != null) {
     try {
       const savedObject = await savedObjectsClient.get<ExceptionListSoSchema>(savedObjectType, id);
+      console.error('WHAT IS RETURNED', savedObject);
+
       return transformSavedObjectToExceptionList({ savedObject });
     } catch (err) {
+      console.error('WHAT IS ERROR', err);
       if (!SavedObjectsErrorHelpers.isNotFoundError(err)) {
         throw err;
       }
@@ -54,6 +57,8 @@ export const getExceptionList = async ({
       sortOrder: 'desc',
       type: savedObjectType,
     });
+    console.error('WHAT IS RETURNED', savedObject);
+
     if (savedObject.saved_objects[0] != null) {
       return transformSavedObjectToExceptionList({
         savedObject: savedObject.saved_objects[0],
