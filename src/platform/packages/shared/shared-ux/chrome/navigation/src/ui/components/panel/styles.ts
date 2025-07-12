@@ -7,12 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type EuiThemeComputed } from '@elastic/eui';
-import { css } from '@emotion/css';
+import { Theme, css } from '@emotion/react';
 
 const PANEL_WIDTH = '248px';
 
-export const getPanelWrapperStyles = () => css`
+export const panelWrapperStyles = css`
   clip-path: polygon(
     0 0,
     150% 0,
@@ -25,7 +24,7 @@ export const getPanelWrapperStyles = () => css`
   top: 0;
 `;
 
-export const getNavPanelStyles = (euiTheme: EuiThemeComputed<{}>) => css`
+export const navPanelStyles = ({ euiTheme }: Theme) => css`
   background-color: ${euiTheme.colors.backgroundBaseSubdued};
   height: 100%;
   width: ${PANEL_WIDTH};

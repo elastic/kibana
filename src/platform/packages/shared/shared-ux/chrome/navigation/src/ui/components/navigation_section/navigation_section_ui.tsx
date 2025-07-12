@@ -61,8 +61,7 @@ const getRenderAs = (
   navNode: ChromeProjectNavigationNode,
   { isSideNavCollapsed }: { isSideNavCollapsed: boolean }
 ): RenderAs => {
-  if (isSideNavCollapsed && navNode.renderAs === 'panelOpener' && !nodeHasLink(navNode))
-    return 'accordion'; // When the side nav is collapsed, we render panel openers as accordions if they don't have a landing page
+  if (isSideNavCollapsed && navNode.renderAs === 'panelOpener') return 'accordion'; // When the side nav is collapsed, we render panel openers as accordions
   if (navNode.renderAs) return navNode.renderAs;
   if (!navNode.children) return 'item';
   return DEFAULT_RENDER_AS;
@@ -108,7 +107,7 @@ const getTestSubj = (navNode: ChromeProjectNavigationNode, isActive = false): st
   });
 };
 
-const serializeNavNode = (
+export const serializeNavNode = (
   navNode: ChromeProjectNavigationNode,
   {
     isSideNavCollapsed,
