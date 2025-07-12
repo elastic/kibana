@@ -276,6 +276,7 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
               error={srcUrlError}
             >
               <EuiTextArea
+                isInvalid={!!srcUrlError}
                 data-test-subj={'imageEmbeddableEditorUrlInput'}
                 fullWidth
                 compressed={true}

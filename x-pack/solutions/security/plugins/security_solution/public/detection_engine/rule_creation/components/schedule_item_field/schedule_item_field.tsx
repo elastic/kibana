@@ -144,6 +144,7 @@ export function ScheduleItemField({
       describedByIds={idAria ? [idAria] : undefined}
     >
       <EuiFieldNumber
+        isInvalid={isInvalid}
         append={
           <EuiSelect
             css={timeUnitSelectStyles}

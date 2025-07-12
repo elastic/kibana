@@ -480,6 +480,10 @@ const InsightEditorComponent = ({
               fullWidth
             >
               <EuiFieldText
+                isInvalid={
+                  labelController.field.value !== undefined &&
+                  labelController.field.value.trim().length === 0
+                }
                 {...{
                   ...formMethods.register('label'),
                   ref: null,

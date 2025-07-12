@@ -329,6 +329,7 @@ export const AutocompleteFieldMatchComponent: React.FC<AutocompleteFieldMatchPro
             fullWidth
           >
             <EuiFieldNumber
+              isInvalid={selectedField != null && error != null}
               placeholder={inputPlaceholder}
               onBlur={setIsTouchedValue}
               value={

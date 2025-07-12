@@ -176,6 +176,7 @@ export const CalendarForm: FC<Props> = ({
             isInvalid={!isNewCalendarIdValid}
           >
             <EuiFieldText
+              isInvalid={!isNewCalendarIdValid}
               name="calendarId"
               value={calendarId}
               onChange={onCalendarIdChange}

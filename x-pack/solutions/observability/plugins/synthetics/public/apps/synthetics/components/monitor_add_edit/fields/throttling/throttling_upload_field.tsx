@@ -56,6 +56,10 @@ export const ThrottlingUploadField = ({
       }
     >
       <EuiFieldNumber
+        isInvalid={
+          (validate ? !!validate?.[ConfigKey.THROTTLING_CONFIG]?.(throttling) : false) ||
+          exceedsUploadLimits
+        }
         fullWidth
         min={0}
         step={0.001}

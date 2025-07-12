@@ -405,7 +405,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
                 namespace: (selectedOptions.length ? selectedOptions[0] : '') as string,
               });
             }}
-            isInvalid={Boolean(touchedFields.namespace && validation.namespace)}
+            isInvalid={Boolean(validation.namespace)}
             onBlur={() => setTouchedFields({ ...touchedFields, namespace: true })}
           />
         </EuiFormRow>

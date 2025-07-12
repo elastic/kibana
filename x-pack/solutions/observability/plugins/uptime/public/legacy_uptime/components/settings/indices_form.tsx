@@ -73,6 +73,7 @@ export const IndicesForm: React.FC<SettingsFormProps> = ({
         }
       >
         <EuiFieldText
+          isInvalid={!!fieldErrors?.heartbeatIndices}
           data-test-subj={`heartbeat-indices-input-${loading ? 'loading' : 'loaded'}`}
           fullWidth
           disabled={isDisabled}

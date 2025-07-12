@@ -94,6 +94,7 @@ export const ConfigurePipeline: React.FC = () => {
               isInvalid={nameError}
             >
               <EuiFieldText
+                isInvalid={nameError}
                 data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-configureInferencePipeline-uniqueName`}
                 disabled={inputsDisabled}
                 fullWidth
