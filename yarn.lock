@@ -6169,6 +6169,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/kibana-plugin-graph@link:packages/kbn-kibana-plugin-graph":
+  version "0.0.0"
+  uid ""
+
 "@kbn/kibana-react-plugin@link:src/platform/plugins/shared/kibana_react":
   version "0.0.0"
   uid ""
