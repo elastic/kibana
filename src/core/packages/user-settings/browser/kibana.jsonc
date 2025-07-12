@@ -1,0 +1,9 @@
+{
+  "type": "shared-browser",
+  "id": "@kbn/core-user-settings-browser",
+  "owner": [
+    "@elastic/security-threat-hunting-investigations"
+  ],
+  "group": "platform",
+  "visibility": "shared"
+}
