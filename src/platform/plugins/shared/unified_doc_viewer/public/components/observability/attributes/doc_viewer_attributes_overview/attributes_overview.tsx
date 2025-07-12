@@ -6,39 +6,35 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import React, { useCallback, useMemo, useState } from 'react';
-import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import {
-  EuiSpacer,
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiSpacer,
   EuiSwitch,
   EuiSwitchEvent,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { SHOW_MULTIFIELDS, getShouldShowFieldHandler } from '@kbn/discover-utils';
+import { i18n } from '@kbn/i18n';
+import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
+import React, { useCallback, useMemo, useRef } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import {
-  LOCAL_STORAGE_KEY_SEARCH_TERM,
-  useTableFilters,
-} from '../../../doc_viewer_table/table_filters';
+
 import { getUnifiedDocViewerServices } from '../../../../plugin';
 import {
   DEFAULT_MARGIN_BOTTOM,
   getTabContentAvailableHeight,
 } from '../../../doc_viewer_source/get_height';
-import { AttributesAccordion } from './attributes_accordion';
-import { getAttributesTitle } from './get_attributes_title';
 import { HIDE_NULL_VALUES } from '../../../doc_viewer_table/table';
+import {
+  LOCAL_STORAGE_KEY_SEARCH_TERM,
+  useTableFilters,
+} from '../../../doc_viewer_table/table_filters';
+import { AttributesAccordion } from './attributes_accordion';
 import { AttributesEmptyPrompt } from './attributes_empty_prompt';
+import { getAttributesTitle } from './get_attributes_title';
 import { groupAttributesFields } from './group_attributes_fields';
-
-export interface AttributeField {
-  name: string; // full field name for filtering/actions
-  displayName: string; // stripped prefix for UI display
-}
 
 export function AttributesOverview({
   columns,
@@ -51,7 +47,7 @@ export function AttributesOverview({
   onAddColumn,
   onRemoveColumn,
 }: DocViewRenderProps) {
-  const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
+  const containerRef = useRef<HTMLDivElement>();
   const { storage, uiSettings } = getUnifiedDocViewerServices();
   const isEsqlMode = Array.isArray(textBasedHits);
   const showMultiFields = uiSettings.get(SHOW_MULTIFIELDS);
@@ -61,7 +57,7 @@ export function AttributesOverview({
   });
   const [areNullValuesHidden, setAreNullValuesHidden] = useLocalStorage(HIDE_NULL_VALUES, false);
 
-  const flattened = hit.flattened;
+  const flattened = useMemo(() => hit.flattened, [hit.flattened]);
 
   const shouldShowFieldHandler = useMemo(
     () => getShouldShowFieldHandler(Object.keys(flattened), dataView, showMultiFields),
@@ -70,9 +66,9 @@ export function AttributesOverview({
 
   const attributesTitle = getAttributesTitle(hit);
 
-  const allFields = Object.keys(flattened);
+  const allFields = useMemo(() => Object.keys(flattened), [flattened]);
 
-  const groupedFields = useMemo(
+  const { attributesFields, resourceAttributesFields, scopeAttributesFields } = useMemo(
     () =>
       groupAttributesFields({
         allFields,
@@ -85,67 +81,74 @@ export function AttributesOverview({
     [allFields, flattened, searchTerm, shouldShowFieldHandler, isEsqlMode, areNullValuesHidden]
   );
 
-  const { attributesFields, resourceAttributesFields, scopeAttributesFields } = groupedFields;
-
   const containerHeight = containerRef
-    ? getTabContentAvailableHeight(containerRef, decreaseAvailableHeightBy ?? DEFAULT_MARGIN_BOTTOM)
+    ? getTabContentAvailableHeight(
+        containerRef.current,
+        decreaseAvailableHeightBy ?? DEFAULT_MARGIN_BOTTOM
+      )
     : 0;
 
-  const filterFieldsBySearchTerm = (fields: AttributeField[]) =>
-    fields.filter(
-      (field) =>
-        field.displayName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        field.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-
-  const accordionConfigs = [
-    {
-      id: 'signal_attributes',
-      title: attributesTitle,
-      ariaLabel: attributesTitle,
-      fields: filterFieldsBySearchTerm(attributesFields),
-      tooltipMessage: i18n.translate(
-        'unifiedDocViewer.docView.attributes.signalAttributesTooltip',
-        {
-          defaultMessage:
-            'Metadata added by the instrumentation library to describe the telemetry data (e.g., HTTP method, user agent).',
-        }
-      ),
-    },
-    {
-      id: 'resource_attributes',
-      title: i18n.translate('unifiedDocViewer.docView.attributes.resourceAttributesTitle', {
-        defaultMessage: 'Resource attributes',
-      }),
-      ariaLabel: i18n.translate(
-        'unifiedDocViewer.docView.attributes.resourceAttributesTitle.ariaLabel',
-        { defaultMessage: 'Resource attributes' }
-      ),
-      fields: filterFieldsBySearchTerm(resourceAttributesFields),
-      tooltipMessage: i18n.translate(
-        'unifiedDocViewer.docView.attributes.resourceAttributesTooltip',
-        {
-          defaultMessage:
-            'Metadata originally set at the source of the telemetry, such as in the SDK or agent that generated the data.',
-        }
-      ),
-    },
-    {
-      id: 'scope_attributes',
-      title: i18n.translate('unifiedDocViewer.docView.attributes.scopeAttributesTitle', {
-        defaultMessage: 'Scope attributes',
-      }),
-      ariaLabel: i18n.translate(
-        'unifiedDocViewer.docView.attributes.scopeAttributesTitle.ariaLabel',
-        { defaultMessage: 'Scope attributes' }
-      ),
-      fields: filterFieldsBySearchTerm(scopeAttributesFields),
-      tooltipMessage: i18n.translate('unifiedDocViewer.docView.attributes.scopeAttributesTooltip', {
-        defaultMessage:
-          'Metadata associated with the instrumentation scope (i.e., the library/module that produced the telemetry), helping identify its origin and version.',
-      }),
-    },
-  ];
+  const accordionConfigs = useMemo(() => {
+    const filterFieldsBySearchTerm = (fields: string[]) =>
+      fields.filter((field) => field.toLowerCase().includes(searchTerm.toLowerCase()));
+    return [
+      {
+        id: 'signal_attributes',
+        title: attributesTitle,
+        ariaLabel: attributesTitle,
+        fields: filterFieldsBySearchTerm(attributesFields),
+        tooltipMessage: i18n.translate(
+          'unifiedDocViewer.docView.attributes.signalAttributesTooltip',
+          {
+            defaultMessage:
+              'Metadata added by the instrumentation library to describe the telemetry data (e.g., HTTP method, user agent).',
+          }
+        ),
+      },
+      {
+        id: 'resource_attributes',
+        title: i18n.translate('unifiedDocViewer.docView.attributes.resourceAttributesTitle', {
+          defaultMessage: 'Resource attributes',
+        }),
+        ariaLabel: i18n.translate(
+          'unifiedDocViewer.docView.attributes.resourceAttributesTitle.ariaLabel',
+          { defaultMessage: 'Resource attributes' }
+        ),
+        fields: filterFieldsBySearchTerm(resourceAttributesFields),
+        tooltipMessage: i18n.translate(
+          'unifiedDocViewer.docView.attributes.resourceAttributesTooltip',
+          {
+            defaultMessage:
+              'Metadata originally set at the source of the telemetry, such as in the SDK or agent that generated the data.',
+          }
+        ),
+      },
+      {
+        id: 'scope_attributes',
+        title: i18n.translate('unifiedDocViewer.docView.attributes.scopeAttributesTitle', {
+          defaultMessage: 'Scope attributes',
+        }),
+        ariaLabel: i18n.translate(
+          'unifiedDocViewer.docView.attributes.scopeAttributesTitle.ariaLabel',
+          { defaultMessage: 'Scope attributes' }
+        ),
+        fields: filterFieldsBySearchTerm(scopeAttributesFields),
+        tooltipMessage: i18n.translate(
+          'unifiedDocViewer.docView.attributes.scopeAttributesTooltip',
+          {
+            defaultMessage:
+              'Metadata associated with the instrumentation scope (i.e., the library/module that produced the telemetry), helping identify its origin and version.',
+          }
+        ),
+      },
+    ];
+  }, [
+    attributesFields,
+    attributesTitle,
+    searchTerm,
+    resourceAttributesFields,
+    scopeAttributesFields,
+  ]);
 
   const onHideNullValuesChange = useCallback(
     (e: EuiSwitchEvent) => {
@@ -161,7 +164,7 @@ export function AttributesOverview({
 
   return (
     <EuiFlexGroup
-      ref={setContainerRef}
+      ref={containerRef}
       direction="column"
       gutterSize="none"
       responsive={false}
@@ -230,31 +233,25 @@ export function AttributesOverview({
         {noFields ? (
           <AttributesEmptyPrompt />
         ) : (
-          <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
+          <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
             {accordionConfigs.map(({ id, title, ariaLabel, fields, tooltipMessage }) => (
-              <React.Fragment key={id}>
-                <EuiFlexItem grow={false}>
-                  <AttributesAccordion
-                    id={id}
-                    title={title}
-                    ariaLabel={ariaLabel}
-                    tooltipMessage={tooltipMessage}
-                    fields={fields}
-                    hit={hit}
-                    dataView={dataView}
-                    columns={columns}
-                    columnsMeta={columnsMeta}
-                    searchTerm={searchTerm}
-                    onAddColumn={onAddColumn}
-                    onRemoveColumn={onRemoveColumn}
-                    filter={filter}
-                    isEsqlMode={isEsqlMode}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiSpacer size="s" />
-                </EuiFlexItem>
-              </React.Fragment>
+              <EuiFlexItem key={id}>
+                <AttributesAccordion
+                  id={id}
+                  title={title}
+                  ariaLabel={ariaLabel}
+                  tooltipMessage={tooltipMessage}
+                  fields={fields}
+                  hit={hit}
+                  dataView={dataView}
+                  columns={columns}
+                  columnsMeta={columnsMeta}
+                  onAddColumn={onAddColumn}
+                  onRemoveColumn={onRemoveColumn}
+                  filter={filter}
+                  textBasedHits={textBasedHits}
+                />
+              </EuiFlexItem>
             ))}
           </EuiFlexGroup>
         )}
