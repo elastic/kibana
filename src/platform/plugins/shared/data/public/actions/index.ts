@@ -7,9 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { createFiltersFromValueClickAction } from './filters/create_filters_from_value_click';
-export { createFiltersFromRangeSelectAction } from './filters/create_filters_from_range_select';
-export { createFiltersFromMultiValueClickAction } from './filters/create_filters_from_multi_value_click';
-export * from './select_range_action';
-export * from './value_click_action';
-export * from './multi_value_click_action';
+import type { MultiValueClickDataContext } from './filters/create_filters_from_multi_value_click';
+import type { RangeSelectDataContext } from './filters/create_filters_from_range_select';
+import type { ValueClickDataContext } from './filters/create_filters_from_value_click';
+
+export const actions = {
+  createFiltersFromValueClickAction: async (context: ValueClickDataContext) => {
+    const { createFiltersFromValueClickAction } = await import(
+      './filters/create_filters_from_value_click'
+    );
+    return await createFiltersFromValueClickAction(context);
+  },
+  createFiltersFromRangeSelectAction: async (context: RangeSelectDataContext) => {
+    const { createFiltersFromRangeSelectAction } = await import(
+      './filters/create_filters_from_range_select'
+    );
+    return await createFiltersFromRangeSelectAction(context);
+  },
+  createFiltersFromMultiValueClickAction: async (context: MultiValueClickDataContext) => {
+    const { createFiltersFromMultiValueClickAction } = await import(
+      './filters/create_filters_from_multi_value_click'
+    );
+    return await createFiltersFromMultiValueClickAction(context);
+  },
+};

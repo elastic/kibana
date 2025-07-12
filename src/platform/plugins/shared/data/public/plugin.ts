@@ -36,18 +36,11 @@ import {
   setUiSettings,
   setTheme,
 } from './services';
-import {
-  createFiltersFromValueClickAction,
-  createFiltersFromRangeSelectAction,
-  createFiltersFromMultiValueClickAction,
-  createMultiValueClickActionDefinition,
-  createValueClickActionDefinition,
-  createSelectRangeActionDefinition,
-} from './actions';
 import { applyFilterTrigger } from './triggers';
 import { getTableViewDescription } from './utils/table_inspector_view';
 import { NowProvider, NowProviderInternalContract } from './now_provider';
 import { getAggsFormats, DatatableUtilitiesService } from '../common';
+import { actions } from './actions';
 
 export class DataPublicPlugin
   implements
@@ -167,29 +160,39 @@ export class DataPublicPlugin
     });
     setSearchService(search);
 
-    const rangeSelectAction = createSelectRangeActionDefinition(() => ({
-      uiActions,
-    }));
-    uiActions.addTriggerAction('SELECT_RANGE_TRIGGER', rangeSelectAction);
+    uiActions.addTriggerActionAsync('SELECT_RANGE_TRIGGER', 'ACTION_SELECT_RANGE', async () => {
+      const { createSelectRangeActionDefinition } = await import('./actions/select_range_action');
+      const rangeSelectAction = createSelectRangeActionDefinition(() => ({
+        uiActions,
+      }));
+      return rangeSelectAction;
+    });
 
-    const valueClickAction = createValueClickActionDefinition(() => ({
-      uiActions,
-    }));
+    uiActions.addTriggerActionAsync('VALUE_CLICK_TRIGGER', 'ACTION_VALUE_CLICK', async () => {
+      const { createValueClickActionDefinition } = await import('./actions/value_click_action');
+      const valueClickAction = createValueClickActionDefinition(() => ({
+        uiActions,
+      }));
+      return valueClickAction;
+    });
 
-    uiActions.addTriggerAction('VALUE_CLICK_TRIGGER', valueClickAction);
-
-    const multiValueClickAction = createMultiValueClickActionDefinition(() => ({
-      query,
-    }));
-    uiActions.addTriggerAction('MULTI_VALUE_CLICK_TRIGGER', multiValueClickAction);
+    uiActions.addTriggerActionAsync(
+      'MULTI_VALUE_CLICK_TRIGGER',
+      'ACTION_MULTI_VALUE_CLICK',
+      async () => {
+        const { createMultiValueClickActionDefinition } = await import(
+          './actions/multi_value_click_action'
+        );
+        const multiValueClickAction = createMultiValueClickActionDefinition(() => ({
+          query,
+        }));
+        return multiValueClickAction;
+      }
+    );
 
     const datatableUtilities = new DatatableUtilitiesService(search.aggs, dataViews, fieldFormats);
     const dataServices = {
-      actions: {
-        createFiltersFromValueClickAction,
-        createFiltersFromRangeSelectAction,
-        createFiltersFromMultiValueClickAction,
-      },
+      actions,
       datatableUtilities,
       fieldFormats,
       indexPatterns: dataViews,

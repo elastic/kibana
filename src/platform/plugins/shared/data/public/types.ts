@@ -19,16 +19,15 @@ import {
 import { ScreenshotModePluginStart } from '@kbn/screenshot-mode-plugin/public';
 import { SharePluginStart } from '@kbn/share-plugin/public';
 import { ManagementSetup } from '@kbn/management-plugin/public';
+import type { Filter } from '@kbn/es-query';
 import { DatatableUtilitiesService } from '../common';
-import {
-  createFiltersFromMultiValueClickAction,
-  createFiltersFromRangeSelectAction,
-  createFiltersFromValueClickAction,
-} from './actions';
 import type { ISearchSetup, ISearchStart } from './search';
 import { QuerySetup, QueryStart } from './query';
 import { DataViewsContract } from './data_views';
 import { NowProviderPublicContract } from './now_provider';
+import { MultiValueClickDataContext } from './actions/filters/create_filters_from_multi_value_click';
+import { RangeSelectDataContext } from './actions/filters/create_filters_from_range_select';
+import { ValueClickDataContext } from './actions/filters/create_filters_from_value_click';
 
 export interface DataSetupDependencies {
   expressions: ExpressionsSetup;
@@ -60,9 +59,11 @@ export interface DataPublicPluginSetup {
  * utilities to generate filters from action context
  */
 export interface DataPublicPluginStartActions {
-  createFiltersFromValueClickAction: typeof createFiltersFromValueClickAction;
-  createFiltersFromRangeSelectAction: typeof createFiltersFromRangeSelectAction;
-  createFiltersFromMultiValueClickAction: typeof createFiltersFromMultiValueClickAction;
+  createFiltersFromValueClickAction: (context: ValueClickDataContext) => Promise<Filter[]>;
+  createFiltersFromRangeSelectAction: (event: RangeSelectDataContext) => Promise<Filter[]>;
+  createFiltersFromMultiValueClickAction: (
+    context: MultiValueClickDataContext
+  ) => Promise<Filter[] | undefined>;
 }
 
 /**
