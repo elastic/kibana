@@ -42,7 +42,7 @@ export const lensVisTypeAlias: VisTypeAlias = {
       client: getLensClient,
       toListItem(savedObject) {
         const { id, type, updatedAt, attributes, managed } = savedObject;
-        const { title, description } = attributes as { title: string; description?: string };
+        const { title, description } = attributes;
         return {
           id,
           title,

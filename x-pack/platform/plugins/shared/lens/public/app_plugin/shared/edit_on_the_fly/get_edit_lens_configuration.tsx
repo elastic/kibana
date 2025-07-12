@@ -30,7 +30,7 @@ import { generateId } from '../../../id_generator';
 import type { DatasourceMap, VisualizationMap } from '../../../types';
 import { LensEditConfigurationFlyout } from './lens_configuration_flyout';
 import type { EditConfigPanelProps } from './types';
-import { SavedObjectIndexStore, type LensDocument } from '../../../persistence';
+import { LensDocumentService, type LensDocument } from '../../../persistence';
 import { DOC_TYPE } from '../../../../common/constants';
 
 export type EditLensConfigurationProps = Omit<
@@ -134,7 +134,7 @@ export async function getEditLensConfiguration(
   const lensServices = await getLensServices(
     coreStart,
     startDependencies,
-    getLensAttributeService(coreStart, startDependencies)
+    getLensAttributeService(startDependencies)
   );
 
   return ({
@@ -172,8 +172,8 @@ export async function getEditLensConfiguration(
      */
     const saveByRef = useCallback(
       async (attrs: LensDocument) => {
-        const savedObjectStore = new SavedObjectIndexStore(lensServices.contentManagement);
-        await savedObjectStore.save({
+        const lensDocumentService = new LensDocumentService(lensServices.contentManagement);
+        await lensDocumentService.save({
           ...attrs,
           savedObjectId,
           type: DOC_TYPE,

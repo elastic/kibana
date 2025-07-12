@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isEqual } from 'lodash';
+import { isEqual, noop } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import { AggregateQuery, isOfAggregateQueryType, Query } from '@kbn/es-query';
@@ -683,8 +683,7 @@ export const LensTopNavMenu = ({
                   shareLocatorParams,
                   { application, data },
                   configuration,
-                  shareUrlEnabled,
-                  isCurrentStateDirty
+                  shareUrlEnabled
                 );
 
                 return !currentDoc?.savedObjectId ? (await shareableUrl)! : savedObjectURL.href;
@@ -836,6 +835,7 @@ export const LensTopNavMenu = ({
                   returnToOrigin: true,
                   ...(contextFromEmbeddable && { newDescription: initialContext.description }),
                   panelTimeRange: contextFromEmbeddable ? initialContext.panelTimeRange : undefined,
+                  onTitleDuplicate: noop, // Title can never change from this action
                 },
                 {
                   saveToLibrary: Boolean(initialInput?.savedObjectId),

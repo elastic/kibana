@@ -6,8 +6,9 @@
  */
 
 import { ReactElement } from 'react';
-import { SavedObjectReference } from '@kbn/core/public';
 import { isFragment } from 'react-is';
+
+import type { Reference } from '@kbn/content-management-utils';
 import { coreMock } from '@kbn/core/public/mocks';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { FormBasedPersistedState, FormBasedPrivateState } from './types';
@@ -317,7 +318,7 @@ describe('IndexPattern Data Source', () => {
             },
           },
         },
-        savedObjectReferences: [
+        references: [
           { name: 'indexpattern-datasource-layer-first', type: 'index-pattern', id: '1' },
         ],
       });
@@ -4167,7 +4168,7 @@ describe('IndexPattern Data Source', () => {
       },
     };
 
-    const references1: SavedObjectReference[] = [
+    const references1: Reference[] = [
       {
         id: 'some-id',
         name: 'indexpattern-datasource-layer-8bd66b66-aba3-49fb-9ff2-4bf83f2be08e',
@@ -4175,7 +4176,7 @@ describe('IndexPattern Data Source', () => {
       },
     ];
 
-    const references2: SavedObjectReference[] = [
+    const references2: Reference[] = [
       {
         id: 'some-DIFFERENT-id',
         name: 'indexpattern-datasource-layer-8bd66b66-aba3-49fb-9ff2-4bf83f2be08e',

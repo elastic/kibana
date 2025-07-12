@@ -553,21 +553,21 @@ export const getMetricVisualization = ({
     });
     // early return if there's no datasource found
     if (!datasourceLayer) {
-      return { state, savedObjectReferences: [] };
+      return { state, references: [] };
     }
     // this should clean up the secondary trend state if in conflict
     const { isNumeric: isMetricNumeric } = getAccessorType(datasourceLayer, state.metricAccessor);
     const colorMode = getColorMode(state.secondaryTrend, isMetricNumeric);
     // if there are no conflicts, it's all persistable as is
     if (colorMode === state.secondaryTrend?.type) {
-      return { state, savedObjectReferences: [] };
+      return { state, references: [] };
     }
     return {
       state: {
         ...state,
         secondaryTrend: getDefaultConfigForMode(colorMode),
       },
-      savedObjectReferences: [],
+      references: [],
     };
   },
 

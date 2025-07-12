@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SavedObjectReference } from '@kbn/core/types';
+import type { Reference } from '@kbn/content-management-utils';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
 import { VisParams } from '../../../common';
 
@@ -38,7 +38,7 @@ const doForExtractedIndices = (action: Action, visParams: VisParams) => {
 export const extractTimeSeriesReferences = (
   visType: string,
   visParams: VisParams,
-  references: SavedObjectReference[] = [],
+  references: Reference[] = [],
   prefix: string = 'metrics'
 ) => {
   let i = 0;
@@ -62,7 +62,7 @@ export const extractTimeSeriesReferences = (
 export const injectTimeSeriesReferences = (
   visType: string,
   visParams: VisParams,
-  references: SavedObjectReference[]
+  references: Reference[]
 ) => {
   if (isMetricsVis(visType)) {
     doForExtractedIndices((object, key) => {

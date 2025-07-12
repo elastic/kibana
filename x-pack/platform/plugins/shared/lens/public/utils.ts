@@ -11,7 +11,8 @@ import moment from 'moment-timezone';
 import type { Serializable } from '@kbn/utility-types';
 import { DEFAULT_COLOR_MAPPING_CONFIG } from '@kbn/coloring';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
-import type { IUiSettingsClient, SavedObjectReference } from '@kbn/core/public';
+import type { Reference } from '@kbn/content-management-utils';
+import type { IUiSettingsClient } from '@kbn/core/public';
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
 import { emptyTitleText } from '@kbn/visualization-ui-components';
@@ -20,7 +21,7 @@ import { ISearchStart } from '@kbn/data-plugin/public';
 import type { DraggingIdentifier, DropType } from '@kbn/dom-drag-drop';
 import { getAbsoluteTimeRange } from '@kbn/data-plugin/common';
 import { DateRange } from '../common/types';
-import type { LensDocument } from './persistence/saved_object_store';
+import type { LensDocument } from './persistence';
 import {
   Datasource,
   DatasourceMap,
@@ -160,20 +161,22 @@ export function extractReferencesFromState({
   datasourceStates: DatasourceStates;
   visualizationState: unknown;
   activeVisualization?: Visualization;
-}): SavedObjectReference[] {
-  const references: SavedObjectReference[] = [];
+}): Reference[] {
+  const references: Reference[] = [];
   Object.entries(activeDatasources).forEach(([id, datasource]) => {
-    const { savedObjectReferences } = datasource.getPersistableState(datasourceStates[id].state);
-    references.push(...savedObjectReferences);
+    const { references: persistableReferences } = datasource.getPersistableState(
+      datasourceStates[id].state
+    );
+    references.push(...persistableReferences);
   });
 
   if (activeVisualization?.getPersistableState) {
-    const { savedObjectReferences } = activeVisualization.getPersistableState(
+    const { references: persistableReferences } = activeVisualization.getPersistableState(
       visualizationState,
       activeDatasourceId ? activeDatasources[activeDatasourceId] : undefined,
       activeDatasourceId ? datasourceStates[activeDatasourceId] : undefined
     );
-    references.push(...savedObjectReferences);
+    references.push(...persistableReferences);
   }
   return references;
 }
@@ -191,7 +194,7 @@ export function getIndexPatternsIds({
   visualizationState: unknown;
   activeVisualization?: Visualization;
 }): string[] {
-  const references: SavedObjectReference[] = extractReferencesFromState({
+  const references = extractReferencesFromState({
     activeDatasourceId,
     activeDatasources,
     datasourceStates,

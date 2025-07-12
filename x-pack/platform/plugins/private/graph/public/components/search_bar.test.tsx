@@ -14,7 +14,6 @@ import {
   IUiSettingsClient,
   NotificationsStart,
   OverlayStart,
-  SavedObjectsStart,
 } from '@kbn/core/public';
 import { act } from 'react-dom/test-utils';
 import { QueryStringInput } from '@kbn/unified-search-plugin/public';
@@ -29,7 +28,6 @@ import { GraphStore, setDatasource, submitSearchSaga } from '../state_management
 import { ReactWrapper } from 'enzyme';
 import { createMockGraphStore } from '../state_management/mocks';
 import { Provider } from 'react-redux';
-import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import { createQueryStringInput } from '@kbn/unified-search-plugin/public/query_string_input/get_query_string_input';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
@@ -55,8 +53,6 @@ function getServiceMocks() {
   } as IUiSettingsClient;
 
   return {
-    savedObjects: {} as SavedObjectsStart,
-    savedObjectsManagement: {} as SavedObjectsManagementPluginStart,
     overlays: {} as OverlayStart,
     unifiedSearch: {
       ui: {

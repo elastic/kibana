@@ -593,15 +593,6 @@ export const getTopNavConfig = (
                   savedVis.tags = selectedTags;
                 }
 
-                const saveOptions = {
-                  confirmOverwrite: false,
-                  isTitleDuplicateConfirmed,
-                  onTitleDuplicate,
-                  returnToOrigin,
-                  dashboardId: !!dashboardId ? dashboardId : undefined,
-                  copyOnSave: newCopyOnSave,
-                };
-
                 // If we're adding to a dashboard and not saving to library,
                 // we'll want to use a by-value operation
                 if (dashboardId && !addToLibrary) {
@@ -633,7 +624,14 @@ export const getTopNavConfig = (
 
                 // We're adding the viz to a library so we need to save it and then
                 // add to a dashboard if necessary
-                const response = await doSave(saveOptions);
+                const response = await doSave({
+                  confirmOverwrite: false,
+                  isTitleDuplicateConfirmed,
+                  onTitleDuplicate,
+                  returnToOrigin,
+                  dashboardId: !!dashboardId ? dashboardId : undefined,
+                  copyOnSave: newCopyOnSave,
+                });
                 // If the save wasn't successful, put the original values back.
                 if (!response.id || response.error) {
                   savedVis.title = currentTitle;

@@ -233,7 +233,7 @@ describe('Textbased Data Source', () => {
         state: {
           layers: baseState.layers,
         },
-        savedObjectReferences: [
+        references: [
           { name: 'textBasedLanguages-datasource-layer-a', type: 'index-pattern', id: 'foo' },
         ],
       });
