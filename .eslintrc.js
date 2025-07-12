@@ -794,6 +794,7 @@ module.exports = {
         'x-pack/test/profiling_api_integration/**/*.ts',
         'x-pack/test/security_solution_api_integration/*/test_suites/**/*',
         'x-pack/test/security_solution_api_integration/**/config*.ts',
+        '**/playwright.config.ts',
       ],
       rules: {
         'import/no-default-export': 'off',
