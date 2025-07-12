@@ -10,12 +10,15 @@
 import { DashboardPlugin } from './plugin';
 import { coreMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import { createEmbeddableStartMock } from '@kbn/embeddable-plugin/server/mocks';
 import { scheduleDashboardTelemetry, TASK_ID } from './usage/dashboard_telemetry_collection_task';
 
 jest.mock('./usage/dashboard_telemetry_collection_task', () => ({
   scheduleDashboardTelemetry: jest.fn().mockResolvedValue('ok'),
   TASK_ID: 'mockTaskID',
 }));
+
+const mockEmbeddable = createEmbeddableStartMock();
 
 describe('DashboardPlugin', () => {
   describe('start', () => {
@@ -36,6 +39,7 @@ describe('DashboardPlugin', () => {
     test('should call mockTaskManager.runSoon', async () => {
       const dashboardPlugin = new DashboardPlugin(initContext);
       dashboardPlugin.start(mockCoreStart, {
+        embeddable: mockEmbeddable,
         taskManager: mockTaskManager,
       });
       expect(scheduleDashboardTelemetry).toHaveBeenCalledTimes(1);
@@ -47,6 +51,7 @@ describe('DashboardPlugin', () => {
       const dashboardPlugin = new DashboardPlugin(initContext);
       mockTaskManager.runSoon.mockRejectedValueOnce(500);
       const response = dashboardPlugin.start(mockCoreStart, {
+        embeddable: mockEmbeddable,
         taskManager: mockTaskManager,
       });
       expect(scheduleDashboardTelemetry).toHaveBeenCalledTimes(1);

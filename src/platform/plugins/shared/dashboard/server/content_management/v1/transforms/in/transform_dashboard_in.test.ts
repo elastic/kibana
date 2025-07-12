@@ -11,7 +11,7 @@ import { DEFAULT_DASHBOARD_OPTIONS } from '../../../../../common/content_managem
 import { DashboardAttributes } from '../../types';
 import { transformDashboardIn } from './transform_dashboard_in';
 
-describe('itemAttrsToSavedObject', () => {
+describe('transformDashboardIn', () => {
   test('should transform dashboard state to saved object', async () => {
     const dashboardState: DashboardAttributes = {
       controlGroupInput: {

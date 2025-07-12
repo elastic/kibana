@@ -7,13 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { WithAllKeys } from '@kbn/presentation-publishing';
-import { BookAttributes } from './types';
+export type { BookEmbeddableState, BookByReferenceState } from './book';
 
-export const defaultBookAttributes: WithAllKeys<BookAttributes> = {
-  bookTitle: 'Pillars of the earth',
-  authorName: 'Ken follett',
-  numberOfPages: 973,
-  bookSynopsis:
-    'A spellbinding epic set in 12th-century England, The Pillars of the Earth tells the story of the struggle to build the greatest Gothic cathedral the world has known.',
-};
+export {
+  BOOK_CONTENT_ID,
+  BOOK_EMBEDDABLE_TYPE,
+  BOOK_LATEST_VERSION,
+  BOOK_SAVED_OBJECT_TYPE,
+} from './book';
