@@ -33,6 +33,10 @@ export default ({ getService }: FtrProviderContext): void => {
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
       await deleteAllPrebuiltRuleAssets(es, log);
+
+      log.info('------------------------');
+      log.info(config.get('esTestCluster.license'));
+      log.info('------------------------');
     });
 
     const ruleId = 'ml-rule';
