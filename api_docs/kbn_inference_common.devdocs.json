@@ -1978,6 +1978,54 @@
       },
       {
         "parentPluginId": "@kbn/inference-common",
+        "id": "def-common.AnonymizationRegexWorkerTaskPayload",
+        "type": "Interface",
+        "tags": [],
+        "label": "AnonymizationRegexWorkerTaskPayload",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/anonymization/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/inference-common",
+            "id": "def-common.AnonymizationRegexWorkerTaskPayload.rule",
+            "type": "Object",
+            "tags": [],
+            "label": "rule",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.RegexAnonymizationRule",
+                "text": "RegexAnonymizationRule"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/anonymization/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/inference-common",
+            "id": "def-common.AnonymizationRegexWorkerTaskPayload.records",
+            "type": "Array",
+            "tags": [],
+            "label": "records",
+            "description": [],
+            "signature": [
+              "Record<string, string>[]"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/anonymization/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inference-common",
         "id": "def-common.AnonymizationSettings",
         "type": "Interface",
         "tags": [],
