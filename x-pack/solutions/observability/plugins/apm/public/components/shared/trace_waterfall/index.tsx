@@ -5,9 +5,10 @@
  * 2.0.
  */
 import type { EuiAccordionProps } from '@elastic/eui';
-import { useEuiTheme } from '@elastic/eui';
+import { EuiCallOut, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import { AutoSizer, WindowScroller } from 'react-virtualized';
 import type { ListChildComponentProps } from 'react-window';
 import { VariableSizeList as List, areEqual } from 'react-window';
@@ -66,7 +67,20 @@ function TraceWaterfallComponent() {
   } = useTraceWaterfallContext();
 
   if (!rootItem) {
-    return null;
+    return (
+      <EuiCallOut
+        size="s"
+        color="warning"
+        iconType="warning"
+        title={i18n.translate(
+          'xpack.apm.traceWaterfallComponent.euiCallOut.traceDataIsIncompleteLabel',
+          {
+            defaultMessage:
+              'The waterfall may appear incomplete or not at all until processing finishes.',
+          }
+        )}
+      />
+    );
   }
 
   return (
