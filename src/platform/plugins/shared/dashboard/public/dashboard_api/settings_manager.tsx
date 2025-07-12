@@ -20,6 +20,9 @@ import { DEFAULT_DASHBOARD_STATE } from './default_dashboard_state';
 
 // SERIALIZED STATE ONLY TODO: This could be simplified by using src/platform/packages/shared/presentation/presentation_publishing/state_manager/state_manager.ts
 export function initializeSettingsManager(initialState?: DashboardState) {
+  /**
+   * @deprecated See https://github.com/elastic/kibana/issues/200272
+   */
   const syncColors$ = new BehaviorSubject<boolean>(
     initialState?.syncColors ?? DEFAULT_DASHBOARD_STATE.syncColors
   );

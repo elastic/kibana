@@ -34,6 +34,9 @@ export interface ExpressionWrapperProps {
   ) => void;
   onRender$: (count: number) => void;
   renderMode?: RenderMode;
+  /**
+   * @deprecated See https://github.com/elastic/kibana/issues/200272
+   */
   syncColors?: boolean;
   syncTooltips?: boolean;
   syncCursor?: boolean;
