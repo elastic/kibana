@@ -26,12 +26,12 @@ describe('stats', () => {
   it('handles STATS with params', () => {
     const pipeline = source.pipe(
       stats(
-        '??func(??transaction.??duration.us), COUNT(??svcName) WHERE agent.name == ?agentName BY ??env',
+        '?func(??spanType.??fieldName.us), COUNT(??svcName) WHERE agent.name == ?agentName BY ??env',
         {
           func: 'AVG',
           agentName: 'java',
-          transaction: 'transaction',
-          duration: 'duration',
+          spanType: 'transaction',
+          fieldName: 'duration',
           svcName: 'service.name',
           env: 'service.environment',
         }

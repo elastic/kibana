@@ -125,7 +125,6 @@ export class ParameterReplacer {
     const paramKey = node.name.replace(/^\?{1,2}/, '');
     const paramValue = this.parametersMap[paramKey];
 
-    // Fallback to the original name if the parameter was not found
     return paramValue !== undefined ? String(paramValue) : node.name;
   }
 
