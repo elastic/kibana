@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { append } from '../append';
+import { append } from '../pipeline/append';
 
 export function drop(...columns: Array<string | string[]>) {
   const command = `DROP ${columns.flatMap((column) => column).join(', ')}`;

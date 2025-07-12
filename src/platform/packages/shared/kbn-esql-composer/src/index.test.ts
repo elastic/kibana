@@ -28,4 +28,16 @@ describe('composer', () => {
       'FROM logs-*\n  | WHERE @timestamp <= NOW() AND @timestamp > NOW() - 24 hours\n  | STATS avg_duration = AVG(transaction.duration.us) BY service.name\n  | KEEP @timestamp, avg_duration, service.name\n  | SORT avg_duration ASC, @timestamp DESC'
     );
   });
+
+  it('escapes malicious query parameter', () => {
+    const pipeline = source.pipe(
+      where(`service.name == ?malicious"`, {
+        malicious: 'malicious OR 1=1 --',
+      })
+    );
+
+    expect(pipeline.asQuery()).toEqual(
+      'FROM logs-*\n  | WHERE service.name == "malicious OR 1=1 --"'
+    );
+  });
 });

@@ -8,7 +8,7 @@
  */
 
 import { Params, QueryOperator } from '../types';
-import { append } from '../append';
+import { append } from '../pipeline/append';
 
 export enum SortOrder {
   Asc = 'ASC',

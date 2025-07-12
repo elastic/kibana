@@ -8,7 +8,7 @@
  */
 
 import { Params } from '../types';
-import { append } from '../append';
+import { append } from '../pipeline/append';
 
 export function stats<TQuery extends string, TParams extends Params<TQuery>>(
   body: TQuery,

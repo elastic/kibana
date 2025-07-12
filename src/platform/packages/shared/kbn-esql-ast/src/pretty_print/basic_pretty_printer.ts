@@ -13,7 +13,6 @@ import {
   isDoubleLiteral,
   isIntegerLiteral,
   isLiteral,
-  isParamLiteral,
   isProperNode,
 } from '../ast/is';
 import { BinaryExpressionGroup, binaryExpressionGroup } from '../ast/grouping';
@@ -22,7 +21,6 @@ import { ESQLAstExpressionNode, Visitor } from '../visitor';
 import { resolveItem } from '../visitor/utils';
 import { commandOptionsWithEqualsSeparator, commandsWithNoCommaArgSeparator } from './constants';
 import { LeafPrinter } from './leaf_printer';
-import { Builder } from '../builder';
 
 export interface BasicPrettyPrinterOptions {
   /**
@@ -61,18 +59,6 @@ export interface BasicPrettyPrinterOptions {
    * Whether to lowercase keywords. Defaults to `false`.
    */
   lowercaseKeywords?: boolean;
-
-  /**
-   * Parameter substitutions to use when printing the query. This is used
-   * to replace parameter literals in the query with their actual values.
-   * The keys in this object should match the parameter names used in the query.
-   * If a parameter is not found in this object, it will be printed as a literal
-   * value (e.g., `?paramName` will be replaced with the value from this object).
-   * If a parameter is not provided, it will be printed as a positional parameter
-   * (e.g., `?0`, `?1`, etc.).
-   * If `undefined`, no parameter substitutions will be made.
-   */
-  parameterSubstitutions?: Record<string, unknown>;
 }
 
 export type BasicPrettyPrinterMultilineOptions = Omit<BasicPrettyPrinterOptions, 'multiline'>;
@@ -132,8 +118,6 @@ export class BasicPrettyPrinter {
 
   protected readonly opts: Required<BasicPrettyPrinterOptions>;
 
-  protected positionalParameterIndex: number = 0;
-
   constructor(opts: BasicPrettyPrinterOptions = {}) {
     this.opts = {
       pipeTab: opts.pipeTab ?? '  ',
@@ -143,7 +127,6 @@ export class BasicPrettyPrinter {
       lowercaseOptions: opts.lowercaseOptions ?? opts.lowercase ?? false,
       lowercaseFunctions: opts.lowercaseFunctions ?? opts.lowercase ?? false,
       lowercaseKeywords: opts.lowercaseKeywords ?? opts.lowercase ?? false,
-      parameterSubstitutions: opts.parameterSubstitutions ?? {},
     };
   }
 
@@ -177,69 +160,6 @@ export class BasicPrettyPrinter {
     }
 
     return formatted;
-  }
-
-  protected decorateWithSubstitutedParameters<T extends ESQLAstBaseItem>(
-    node: T,
-    formatted: string
-  ): string {
-    if (isColumn(node)) {
-      const argParam = node.args.find((arg) => isParamLiteral(arg));
-      if (argParam) {
-        return this.replaceLiteralWithParameter(argParam, formatted);
-      }
-    } else if (isLiteral(node) && isParamLiteral(node)) {
-      return this.replaceLiteralWithParameter(node, formatted);
-    }
-
-    return formatted;
-  }
-
-  protected replaceLiteralWithParameter(node: ESQLAstExpressionNode, formatted: string): string {
-    if (!isLiteral(node) || !isParamLiteral(node)) {
-      return formatted;
-    }
-
-    const resolveParamValue = () => {
-      switch (node.paramType) {
-        case 'named':
-        case 'positional':
-          return this.opts.parameterSubstitutions[node.value];
-        default:
-          return this.opts.parameterSubstitutions[this.positionalParameterIndex++];
-      }
-    };
-
-    const buildLiteral = (value?: unknown) => {
-      if (value === null) {
-        return Builder.expression.literal.nil();
-      }
-
-      switch (typeof value) {
-        case 'number':
-          return Builder.expression.literal.numeric({
-            value,
-            literalType: Number.isInteger(value) ? 'integer' : 'double',
-          });
-        default:
-          return Builder.expression.literal.string(String(value));
-      }
-    };
-
-    const value = resolveParamValue();
-
-    if (!value) {
-      return formatted;
-    }
-
-    return node.paramKind === '?'
-      ? LeafPrinter.literal(buildLiteral(value))
-      : `${[
-          ...formatted
-            .split('.')
-            .slice(0, -1)
-            .concat(LeafPrinter.identifier(Builder.identifier(String(value)))),
-        ].join('.')}`;
   }
 
   protected simplifyMultiplicationByOne(
@@ -305,7 +225,6 @@ export class BasicPrettyPrinter {
 
     .on('visitIdentifierExpression', (ctx) => {
       const formatted = LeafPrinter.identifier(ctx.node);
-
       return this.decorateWithComments(ctx.node, formatted);
     })
 
@@ -315,20 +234,12 @@ export class BasicPrettyPrinter {
     })
 
     .on('visitColumnExpression', (ctx) => {
-      const formatted = this.decorateWithSubstitutedParameters(
-        ctx.node,
-        LeafPrinter.column(ctx.node)
-      );
-
+      const formatted = LeafPrinter.column(ctx.node);
       return this.decorateWithComments(ctx.node, formatted);
     })
 
     .on('visitLiteralExpression', (ctx) => {
-      const formatted = this.decorateWithSubstitutedParameters(
-        ctx.node,
-        LeafPrinter.literal(ctx.node)
-      );
-
+      const formatted = LeafPrinter.literal(ctx.node);
       return this.decorateWithComments(ctx.node, formatted);
     })
 
@@ -537,7 +448,6 @@ export class BasicPrettyPrinter {
         const needsSeparator = !!args;
         const needsComma = !commandsWithNoCommaArgSeparator.has(ctx.node.name);
         const separator = needsSeparator ? (needsComma ? ',' : '') + ' ' : '';
-
         args += separator + source;
       }
 

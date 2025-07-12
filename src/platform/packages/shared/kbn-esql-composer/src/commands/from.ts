@@ -8,7 +8,7 @@
  */
 
 import { parse } from '@kbn/esql-ast';
-import { createPipeline } from '../create_pipeline';
+import { createPipeline } from '../pipeline/create_pipeline';
 import type { QueryPipeline } from '../types';
 
 export function from(...patterns: Array<string | string[]>): QueryPipeline {

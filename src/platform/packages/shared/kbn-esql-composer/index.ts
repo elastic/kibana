@@ -8,7 +8,7 @@
  */
 
 export { from } from './src/commands/from';
-export { append } from './src/append';
+export { append } from './src/pipeline/append';
 export { drop } from './src/commands/drop';
 export { evaluate } from './src/commands/eval';
 export { keep } from './src/commands/keep';

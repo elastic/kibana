@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { append } from '../append';
+import { append } from '../pipeline/append';
 
 export function limit(value: number) {
   return append({ command: `LIMIT ${value}` });

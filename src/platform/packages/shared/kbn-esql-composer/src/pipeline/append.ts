@@ -7,16 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isObject } from 'lodash';
 import { synth } from '@kbn/esql-ast';
-import { QueryOperator, Params, Query } from './types';
+import { QueryOperator, Params, Query } from '../types';
 
 export function append({ command, params }: { command: string; params?: Params }): QueryOperator {
   return (source): Query => {
+    const commandAst = synth.cmd`${command}`;
+
     return {
       root: source.root,
-      commands: source.commands.concat(synth.cmd`${command}`),
-      params: !!params ? source.params.concat(isObject(params) ? params : [params]) : source.params,
+      commands: source.commands.concat(commandAst),
+      params: params
+        ? source.params.concat(Array.isArray(params) ? params : [params])
+        : source.params,
     };
   };
 }
