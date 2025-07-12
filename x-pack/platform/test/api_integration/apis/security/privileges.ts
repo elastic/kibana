@@ -81,6 +81,7 @@ export default function ({ getService }: FtrProviderContext) {
         'case_reopen',
         'cases_assign',
       ],
+      observabilityManageRules: ['all', 'read', 'minimal_all', 'minimal_read'],
       observabilityAIAssistant: ['all', 'read', 'minimal_all', 'minimal_read'],
       onechat: ['all', 'read', 'minimal_all', 'minimal_read'],
       slo: ['all', 'read', 'minimal_all', 'minimal_read'],

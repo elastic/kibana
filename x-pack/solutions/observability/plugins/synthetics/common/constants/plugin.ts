@@ -7,13 +7,15 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const SYNTHETICS_FEATURE_ID = 'uptime';
+
 export const PLUGIN = {
   APP_ROOT_ID: 'react-uptime-root',
   DESCRIPTION: i18n.translate('xpack.synthetics.pluginDescription', {
     defaultMessage: 'Synthetics monitoring',
     description: 'The description text that will appear in the feature catalogue.',
   }),
-  ID: 'uptime',
+  ID: SYNTHETICS_FEATURE_ID,
   SYNTHETICS_PLUGIN_ID: 'synthetics',
   LOCAL_STORAGE_KEY: 'xpack.synthetics.',
   NAME: i18n.translate('xpack.synthetics.featureRegistry.syntheticsFeatureName', {

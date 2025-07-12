@@ -4,14 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { syntheticsMonitorSOTypes } from '@kbn/observability-shared-plugin/common/saved_object_types';
 
 export const legacySyntheticsMonitorTypeSingle = 'synthetics-monitor';
-export const legacyMonitorAttributes = `${legacySyntheticsMonitorTypeSingle}.attributes`;
 
 export const syntheticsMonitorSavedObjectType = 'synthetics-monitor-multi-space';
-export const syntheticsMonitorAttributes = `${syntheticsMonitorSavedObjectType}.attributes`;
 
-export const syntheticsParamType = 'synthetics-param';
+export const syntheticsMonitorSOTypes = [
+  syntheticsMonitorSavedObjectType,
+  legacySyntheticsMonitorTypeSingle,
+];
 
-export { syntheticsMonitorSOTypes };
+export const SO_SLO_TYPE = 'slo';
