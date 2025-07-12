@@ -67,6 +67,7 @@ const FormView: React.FC<FormViewProps> = ({
             {i18n.REQUIRED_LABEL}
           </EuiText>
         }
+        aria-label={i18n.MESSAGE_FIELD_LABEL}
       >
         <TextFieldWithMessageVariables
           index={index}
@@ -103,6 +104,7 @@ const FormView: React.FC<FormViewProps> = ({
         data-test-subj="opsgenie-alias-row"
         fullWidth
         label={i18n.ALIAS_FIELD_LABEL}
+        aria-label={i18n.ALIAS_FIELD_LABEL}
         helpText={i18n.OPSGENIE_ALIAS_HELP}
       >
         <TextFieldWithMessageVariables

@@ -83,6 +83,7 @@ const TagsComponent: React.FC<TagsProps> = ({ onChange, values, executionMode })
       fullWidth
       label={i18n.TAGS_FIELD_LABEL}
       helpText={i18n.TAGS_HELP}
+      aria-label={i18n.TAGS_FIELD_LABEL}
     >
       <EuiComboBox
         rowHeight={50}

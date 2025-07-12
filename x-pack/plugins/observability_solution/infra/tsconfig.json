@@ -118,7 +118,8 @@
     "@kbn/zod",
     "@kbn/observability-utils-server",
     "@kbn/observability-utils-common",
-    "@kbn/core-test-helpers-model-versions"
+    "@kbn/core-test-helpers-model-versions",
+    "@kbn/shared-ux-error-boundary"
   ],
   "exclude": ["target/**/*"]
 }

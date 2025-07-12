@@ -246,6 +246,8 @@ To search all fields, enter a simple string in the query bar.
 [role="screenshot"]
 image:images/discover-search-field.png[Search field in Discover]
 
+NOTE: Free text searches that don't specify a field may not return expected results depending on how the {ref}/index-modules.html#index-query-default-field[`index.query.default_field` index setting] is configured for the indices matching the current data view.
+
 To search particular fields and
 build more complex queries, use the <<kuery-query,Kibana Query language>>.
 As you type, KQL prompts you with the fields you can search and the operators

@@ -379,7 +379,7 @@ describe('licensing plugin', () => {
         let customClient: ClusterClientMock;
         let coreStatus$: BehaviorSubject<CoreStatus>;
         let coreStatus: CoreStatus;
-        const customPollingFrequency = 100;
+        const customPollingFrequency = 1000;
 
         async function setElasticsearchStatus(esStatus: ServiceStatusLevel) {
           coreStatus$.next({
