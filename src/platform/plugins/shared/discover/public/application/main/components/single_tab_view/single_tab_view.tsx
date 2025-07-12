@@ -8,16 +8,10 @@
  */
 
 import React from 'react';
-import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
-import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
-import { useParams } from 'react-router-dom';
+import { type IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import useLatest from 'react-use/lib/useLatest';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
-import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import useMount from 'react-use/lib/useMount';
-import useUpdateEffect from 'react-use/lib/useUpdateEffect';
-import { useUrl } from '../../hooks/use_url';
-import { useAlertResultsToast } from '../../hooks/use_alert_results_toast';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
 import type { MainHistoryLocationState } from '../../../../../common';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -42,15 +36,14 @@ import {
   DiscoverCustomizationProvider,
   getConnectedCustomizationService,
 } from '../../../../customizations';
-import { DiscoverError } from '../../../../components/common/error_alert';
 import { NoDataPage } from './no_data_page';
 import { DiscoverMainProvider } from '../../state_management/discover_state_provider';
 import { BrandedLoadingIndicator } from './branded_loading_indicator';
-import { RedirectWhenSavedObjectNotFound } from './redirect_not_found';
 import { DiscoverMainApp } from './main_app';
 import { useAsyncFunction } from '../../hooks/use_async_function';
 import { ScopedServicesProvider } from '../../../../components/scoped_services_provider';
 import { HideTabsBar } from '../tabs_view/hide_tabs_bar';
+import { InitializationError } from './initialization_error';
 
 export interface SingleTabViewProps {
   customizationContext: DiscoverCustomizationContext;
@@ -67,7 +60,6 @@ interface SessionInitializationState {
 type InitializeSession = (options?: {
   dataViewSpec?: DataViewSpec | undefined;
   defaultUrlState?: DiscoverAppState;
-  shouldClearAllTabs?: boolean;
 }) => Promise<SessionInitializationState>;
 
 export const SingleTabView = ({
@@ -79,8 +71,7 @@ export const SingleTabView = ({
 }: SingleTabViewProps) => {
   const dispatch = useInternalStateDispatch();
   const services = useDiscoverServices();
-  const { core, history, getScopedHistory } = services;
-  const { id: discoverSessionId } = useParams<{ id?: string }>();
+  const { getScopedHistory } = services;
   const currentTabId = useCurrentTabSelector((tab) => tab.id);
   const currentStateContainer = useCurrentTabRuntimeState(
     runtimeStateManager,
@@ -92,7 +83,7 @@ export const SingleTabView = ({
   );
   const initializeSessionAction = useCurrentTabAction(internalStateActions.initializeSession);
   const [initializeSessionState, initializeSession] = useAsyncFunction<InitializeSession>(
-    async ({ dataViewSpec, defaultUrlState, shouldClearAllTabs = false } = {}) => {
+    async ({ dataViewSpec, defaultUrlState } = {}) => {
       const stateContainer = getDiscoverStateContainer({
         tabId: currentTabId,
         services,
@@ -111,10 +102,8 @@ export const SingleTabView = ({
           initializeSessionParams: {
             stateContainer,
             customizationService,
-            discoverSessionId,
             dataViewSpec,
             defaultUrlState,
-            shouldClearAllTabs,
           },
         })
       );
@@ -123,18 +112,15 @@ export const SingleTabView = ({
       ? { loading: false, value: { showNoDataPage: false } }
       : { loading: true }
   );
-  const initializeSessionWithDefaultLocationState = useLatest(
-    (options?: { shouldClearAllTabs?: boolean }) => {
-      const historyLocationState = getScopedHistory<
-        MainHistoryLocationState & { defaultState?: DiscoverAppState }
-      >()?.location.state;
-      initializeSession({
-        dataViewSpec: historyLocationState?.dataViewSpec,
-        defaultUrlState: historyLocationState?.defaultState,
-        shouldClearAllTabs: options?.shouldClearAllTabs,
-      });
-    }
-  );
+  const initializeSessionWithDefaultLocationState = useLatest(() => {
+    const historyLocationState = getScopedHistory<
+      MainHistoryLocationState & { defaultState?: DiscoverAppState }
+    >()?.location.state;
+    initializeSession({
+      dataViewSpec: historyLocationState?.dataViewSpec,
+      defaultUrlState: historyLocationState?.defaultState,
+    });
+  });
   const initializationState = useInternalStateSelector((state) => state.initializationState);
   const scopedProfilesManager = useCurrentTabRuntimeState(
     runtimeStateManager,
@@ -156,41 +142,12 @@ export const SingleTabView = ({
     }
   });
 
-  useUpdateEffect(() => {
-    initializeSessionWithDefaultLocationState.current();
-  }, [discoverSessionId, initializeSessionWithDefaultLocationState]);
-
-  useUrl({
-    history,
-    savedSearchId: discoverSessionId,
-    onNewUrl: () => {
-      initializeSessionWithDefaultLocationState.current({ shouldClearAllTabs: true });
-    },
-  });
-
-  useAlertResultsToast();
-
-  useExecutionContext(core.executionContext, {
-    type: 'application',
-    page: 'app',
-    id: discoverSessionId || 'new',
-  });
-
   if (initializeSessionState.loading) {
     return <BrandedLoadingIndicator />;
   }
 
   if (initializeSessionState.error) {
-    if (initializeSessionState.error instanceof SavedObjectNotFound) {
-      return (
-        <RedirectWhenSavedObjectNotFound
-          error={initializeSessionState.error}
-          discoverSessionId={discoverSessionId}
-        />
-      );
-    }
-
-    return <DiscoverError error={initializeSessionState.error} />;
+    return <InitializationError error={initializeSessionState.error} />;
   }
 
   if (initializeSessionState.value.showNoDataPage) {
