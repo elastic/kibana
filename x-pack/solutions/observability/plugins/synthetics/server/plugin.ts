@@ -31,6 +31,7 @@ import { syntheticsServiceApiKey } from './saved_objects/service_api_key';
 import { SYNTHETICS_RULE_TYPES_ALERT_CONTEXT } from '../common/constants/synthetics_alerts';
 import { syntheticsRuleTypeFieldMap } from './alert_rules/common';
 import { SyncPrivateLocationMonitorsTask } from './tasks/sync_private_locations_monitors_task';
+import { syntheticsFeatureDeprecated } from './feature_deprecated';
 
 export class Plugin implements PluginType {
   private savedObjectsClient?: SavedObjectsClientContract;
@@ -85,6 +86,7 @@ export class Plugin implements PluginType {
 
     this.telemetryEventsSender.setup(plugins.telemetry);
 
+    plugins.features.registerKibanaFeature(syntheticsFeatureDeprecated);
     plugins.features.registerKibanaFeature(syntheticsFeature);
 
     initSyntheticsServer(this.server, this.syntheticsMonitorClient, plugins, ruleDataClient);

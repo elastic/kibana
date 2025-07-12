@@ -9,7 +9,7 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { SyntheticsRestApiRouteFactory } from '../types';
 import { isStatusEnabled } from '../../../common/runtime_types/monitor_management/alert_config';
 import { ConfigKey, EncryptedSyntheticsMonitorAttributes } from '../../../common/runtime_types';
-import { SYNTHETICS_API_URLS } from '../../../common/constants';
+import { SYNTHETICS_API_URLS, SYNTHETICS_FEATURE_ID } from '../../../common/constants';
 import { getMonitorNotFoundResponse } from '../synthetics_service/service_errors';
 import { mapSavedObjectToMonitor } from './formatters/saved_object_to_monitor';
 
@@ -45,9 +45,9 @@ export const getSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
       const canSave =
         (
           await coreStart?.capabilities.resolveCapabilities(request, {
-            capabilityPath: 'uptime.*',
+            capabilityPath: `${SYNTHETICS_FEATURE_ID}.*`,
           })
-        ).uptime.save ?? false;
+        )[SYNTHETICS_FEATURE_ID].save ?? false;
 
       if (Boolean(canSave)) {
         // only user with write permissions can decrypt the monitor

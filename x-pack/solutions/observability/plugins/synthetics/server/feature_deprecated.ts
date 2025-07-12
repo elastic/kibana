@@ -25,7 +25,7 @@ import {
   syntheticsParamType,
 } from '../common/types/saved_objects';
 
-import { PLUGIN, SYNTHETICS_FEATURE_ID, UPTIME_FEATURE_ID } from '../common/constants/plugin';
+import { PLUGIN, UPTIME_FEATURE_ID } from '../common/constants/plugin';
 import {
   syntheticsSettingsObjectType,
   uptimeSettingsObjectType,
@@ -33,48 +33,15 @@ import {
 import { syntheticsApiKeyObjectType } from './saved_objects/service_api_key';
 
 export const PRIVATE_LOCATION_WRITE_API = 'private-location-write';
-export const SYNTHETICS_ALERTS_WRITE_API = 'synthetics-alerts-write';
 
 const ruleTypes = [...UPTIME_RULE_TYPE_IDS, ...SYNTHETICS_RULE_TYPE_IDS];
 
 const alertingFeatures = ruleTypes.map((ruleTypeId) => ({
   ruleTypeId,
-  consumers: [
-    SYNTHETICS_FEATURE_ID,
-    UPTIME_FEATURE_ID,
-    ALERTING_FEATURE_ID,
-    ...DEPRECATED_ALERTING_CONSUMERS,
-  ],
+  consumers: [PLUGIN.UPTIME_PLUGIN_ID, ALERTING_FEATURE_ID, ...DEPRECATED_ALERTING_CONSUMERS],
 }));
 
-const canManageSyntheticsAlerts: SubFeaturePrivilegeGroupConfig = {
-  groupType: 'independent' as SubFeaturePrivilegeGroupType,
-  privileges: [
-    {
-      id: 'can_manage_synthetics_alerts',
-      name: i18n.translate('xpack.synthetics.features.canManageSyntheticsAlerts', {
-        defaultMessage: 'Can manage synthetics rules and alerts',
-      }),
-      includeIn: 'all',
-      api: [SYNTHETICS_ALERTS_WRITE_API],
-      savedObject: {
-        all: [],
-        read: [],
-      },
-      alerting: {
-        rule: {
-          all: alertingFeatures,
-        },
-        alert: {
-          all: alertingFeatures,
-        },
-      },
-      ui: ['alerting:save'],
-    },
-  ],
-};
-
-const elasticManagedLocationsEnabledPrivilege: SubFeaturePrivilegeGroupConfig = {
+const elasticManagedLocationsEnabledPrivilegeDeprecated: SubFeaturePrivilegeGroupConfig = {
   groupType: 'independent' as SubFeaturePrivilegeGroupType,
   privileges: [
     {
@@ -83,17 +50,22 @@ const elasticManagedLocationsEnabledPrivilege: SubFeaturePrivilegeGroupConfig = 
         defaultMessage: 'Elastic managed locations enabled',
       }),
       includeIn: 'all',
+      replacedBy: [
+        {
+          feature: PLUGIN.SYNTHETICS_PLUGIN_ID,
+          privileges: ['elastic_managed_locations_enabled'],
+        },
+      ],
       savedObject: {
         all: [],
         read: [],
       },
-
       ui: ['elasticManagedLocationsEnabled'],
     },
   ],
 };
 
-const canManagePrivateLocationsPrivilege: SubFeaturePrivilegeGroupConfig = {
+const canManagePrivateLocationsPrivilegeDeprecated: SubFeaturePrivilegeGroupConfig = {
   groupType: 'independent' as SubFeaturePrivilegeGroupType,
   privileges: [
     {
@@ -102,6 +74,12 @@ const canManagePrivateLocationsPrivilege: SubFeaturePrivilegeGroupConfig = {
         defaultMessage: 'Can manage private locations',
       }),
       includeIn: 'all',
+      replacedBy: [
+        {
+          feature: PLUGIN.SYNTHETICS_PLUGIN_ID,
+          privileges: ['can_manage_private_locations'],
+        },
+      ],
       api: [PRIVATE_LOCATION_WRITE_API],
       savedObject: {
         all: [privateLocationSavedObjectName, legacyPrivateLocationsSavedObjectName],
@@ -112,9 +90,17 @@ const canManagePrivateLocationsPrivilege: SubFeaturePrivilegeGroupConfig = {
   ],
 };
 
-export const syntheticsFeature = {
-  id: SYNTHETICS_FEATURE_ID,
-  name: PLUGIN.NAME,
+export const syntheticsFeatureDeprecated = {
+  deprecated: {
+    // User-facing justification for privilege deprecation that we can display
+    // to the user when we ask them to perform role migration.
+    notice: i18n.translate('xpack.synthetics.features.app.alertingFeature', {
+      defaultMessage:
+        'The uptime feature is deprecated. Please use the synthetics feature instead.',
+    }),
+  },
+  id: UPTIME_FEATURE_ID,
+  name: `${PLUGIN.NAME} (Deprecated)`,
   order: 1000,
   category: DEFAULT_APP_CATEGORIES.observability,
   app: ['uptime', 'kibana', 'synthetics'],
@@ -129,6 +115,7 @@ export const syntheticsFeature = {
       app: ['uptime', 'kibana', 'synthetics'],
       catalogue: ['uptime'],
       api: ['uptime-read', 'uptime-write', 'lists-all', 'rac'],
+      replacedBy: [{ feature: PLUGIN.SYNTHETICS_PLUGIN_ID, privileges: ['all'] }],
       savedObject: {
         all: [
           syntheticsSettingsObjectType,
@@ -153,12 +140,13 @@ export const syntheticsFeature = {
       management: {
         insightsAndAlerting: ['triggersActions'],
       },
-      ui: ['save', 'configureSettings', 'show', 'alerting:show'],
+      ui: ['save', 'configureSettings', 'show', 'alerting:save'],
     },
     read: {
       app: ['uptime', 'kibana', 'synthetics'],
       catalogue: ['uptime'],
       api: ['uptime-read', 'lists-read', 'rac'],
+      replacedBy: [{ feature: PLUGIN.SYNTHETICS_PLUGIN_ID, privileges: ['read'] }],
       savedObject: {
         all: [],
         read: [
@@ -184,20 +172,10 @@ export const syntheticsFeature = {
       management: {
         insightsAndAlerting: ['triggersActions'],
       },
-      ui: ['show', 'alerting:show'],
+      ui: ['show', 'alerting:save'],
     },
   },
   subFeatures: [
-    {
-      name: i18n.translate('xpack.synthetics.features.app.alerts', {
-        defaultMessage: 'Synthetics alerts',
-      }),
-      description: i18n.translate('xpack.synthetics.features.app.alertsDescription', {
-        defaultMessage:
-          'This feature allows you to create and manage Synthetics rules and alerting settings.',
-      }),
-      privilegeGroups: [canManageSyntheticsAlerts],
-    },
     {
       name: i18n.translate('xpack.synthetics.features.app.elastic', {
         defaultMessage: 'Elastic managed locations',
@@ -206,7 +184,8 @@ export const syntheticsFeature = {
         defaultMessage:
           'This feature enables users to create monitors that execute tests from Elastic managed infrastructure around the globe. There is an additional charge to use Elastic Managed testing locations. See the Elastic Cloud Pricing https://www.elastic.co/pricing page for current prices.',
       }),
-      privilegeGroups: [elasticManagedLocationsEnabledPrivilege],
+
+      privilegeGroups: [elasticManagedLocationsEnabledPrivilegeDeprecated],
     },
     {
       name: i18n.translate('xpack.synthetics.features.app.private', {
@@ -216,7 +195,7 @@ export const syntheticsFeature = {
         defaultMessage:
           'This feature allows you to manage your private locations, for example adding, or deleting them.',
       }),
-      privilegeGroups: [canManagePrivateLocationsPrivilege],
+      privilegeGroups: [canManagePrivateLocationsPrivilegeDeprecated],
     },
   ],
 };

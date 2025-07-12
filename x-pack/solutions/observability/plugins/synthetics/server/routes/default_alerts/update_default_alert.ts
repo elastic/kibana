@@ -10,11 +10,13 @@ import { DefaultAlertService } from './default_alert_service';
 import { SyntheticsRestApiRouteFactory } from '../types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { DEFAULT_ALERT_RESPONSE } from '../../../common/types/default_alerts';
+import { SYNTHETICS_ALERTS_WRITE_API } from '../../feature';
 
 export const updateDefaultAlertingRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'PUT',
   path: SYNTHETICS_API_URLS.ENABLE_DEFAULT_ALERTING,
   validate: {},
+  requiredPrivileges: [SYNTHETICS_ALERTS_WRITE_API],
   handler: async ({ context, server, savedObjectsClient }): Promise<DEFAULT_ALERT_RESPONSE> => {
     const defaultAlertService = new DefaultAlertService(context, server, savedObjectsClient);
     const { defaultTLSRuleEnabled, defaultStatusRuleEnabled } = await getSyntheticsDynamicSettings(

@@ -37,7 +37,7 @@ export function renderApp(
     INTEGRATED_SOLUTIONS
   );
 
-  const canSave = (capabilities.uptime.save ?? false) as boolean;
+  const canSave = (capabilities.synthetics?.save ?? false) as boolean;
   const darkMode = theme.getTheme().darkMode;
 
   const props: UptimeAppProps = {

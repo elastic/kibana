@@ -15,7 +15,7 @@ import { validateSpaceId } from '../services/validate_space_id';
 import { RouteContext, SyntheticsRestApiRouteFactory } from '../../types';
 import { ProjectMonitor } from '../../../../common/runtime_types';
 
-import { SYNTHETICS_API_URLS } from '../../../../common/constants';
+import { SYNTHETICS_API_URLS, SYNTHETICS_FEATURE_ID } from '../../../../common/constants';
 import { ProjectMonitorFormatter } from '../../../synthetics_service/project_monitor/project_monitor_formatter';
 
 const MAX_PAYLOAD_SIZE = 1048576 * 100; // 50MiB
@@ -123,7 +123,7 @@ export const REQUEST_TOO_LARGE_LIGHTWEIGHT = i18n.translate(
 );
 
 export const validatePermissions = async (
-  { server, response, request }: RouteContext,
+  { server, request }: RouteContext,
   projectMonitors: ProjectMonitor[]
 ) => {
   const hasPublicLocations = projectMonitors.some(({ locations }) => (locations ?? []).length > 0);
@@ -135,9 +135,9 @@ export const validatePermissions = async (
     Boolean(
       (
         await server.coreStart?.capabilities.resolveCapabilities(request, {
-          capabilityPath: 'uptime.*',
+          capabilityPath: `${SYNTHETICS_FEATURE_ID}.*`,
         })
-      ).uptime.elasticManagedLocationsEnabled
+      )[SYNTHETICS_FEATURE_ID].elasticManagedLocationsEnabled
     ) ?? true;
   if (!elasticManagedLocationsEnabled) {
     return ELASTIC_MANAGED_LOCATIONS_DISABLED;

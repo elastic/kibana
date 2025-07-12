@@ -119,7 +119,7 @@ export const MachineLearningFlyout: React.FC<Props> = ({ onClose }) => {
         dispatch(getExistingMLJobAction.get({ monitorId: monitorId as string }));
         refreshApp();
 
-        const hasUptimeWrite = core.services.application?.capabilities.uptime?.save ?? false;
+        const hasUptimeWrite = core.services.application?.capabilities.synthetics?.save ?? false;
         if (hasUptimeWrite) {
           dispatch(setAlertFlyoutType(CLIENT_ALERT_TYPES.DURATION_ANOMALY));
           dispatch(setAlertFlyoutVisible(true));

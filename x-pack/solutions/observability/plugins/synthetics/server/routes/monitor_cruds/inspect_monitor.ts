@@ -10,7 +10,7 @@ import { PrivateLocationAttributes } from '../../runtime_types/private_locations
 import { SyntheticsRestApiRouteFactory } from '../types';
 import { unzipFile } from '../../common/unzip_project_code';
 import { ConfigKey, MonitorFields, SyntheticsMonitor } from '../../../common/runtime_types';
-import { SYNTHETICS_API_URLS } from '../../../common/constants';
+import { SYNTHETICS_API_URLS, SYNTHETICS_FEATURE_ID } from '../../../common/constants';
 import { DEFAULT_FIELDS } from '../../../common/constants/monitor_defaults';
 import { validateMonitor } from './monitor_validation';
 import { getPrivateLocationsForMonitor } from './add_monitor/utils';
@@ -57,9 +57,9 @@ export const inspectSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =
       Boolean(
         (
           await server.coreStart?.capabilities.resolveCapabilities(request, {
-            capabilityPath: 'uptime.*',
+            capabilityPath: `${SYNTHETICS_FEATURE_ID}.*`,
           })
-        ).uptime.save
+        )[SYNTHETICS_FEATURE_ID].save
       ) ?? false;
 
     try {

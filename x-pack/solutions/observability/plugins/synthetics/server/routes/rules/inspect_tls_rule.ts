@@ -9,6 +9,7 @@ import { TLSRuleParams, tlsRuleParamsSchema } from '@kbn/response-ops-rule-param
 import { SyntheticsRestApiRouteFactory } from '../types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { TLSRuleExecutor } from '../../alert_rules/tls_rule/tls_rule_executor';
+import { SYNTHETICS_ALERTS_WRITE_API } from '../../feature';
 
 export const syntheticsInspectTLSRuleRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'POST',
@@ -16,6 +17,8 @@ export const syntheticsInspectTLSRuleRoute: SyntheticsRestApiRouteFactory = () =
   validate: {
     body: tlsRuleParamsSchema,
   },
+  requiredPrivileges: [SYNTHETICS_ALERTS_WRITE_API],
+
   handler: async ({
     request,
     server,

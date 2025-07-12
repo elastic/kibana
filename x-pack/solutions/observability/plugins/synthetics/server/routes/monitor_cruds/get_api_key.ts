@@ -11,6 +11,7 @@ import { ELASTIC_MANAGED_LOCATIONS_DISABLED } from './project_monitor/add_monito
 import { SyntheticsRestApiRouteFactory } from '../types';
 import { generateProjectAPIKey } from '../../synthetics_service/get_api_key';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
+import { SYNTHETICS_FEATURE_ID } from '../../../common/constants';
 
 export interface ProjectAPIKeyResponse {
   apiKey: SecurityCreateApiKeyResponse | null;
@@ -37,9 +38,9 @@ export const getAPIKeySyntheticsRoute: SyntheticsRestApiRouteFactory = () => ({
         Boolean(
           (
             await server.coreStart?.capabilities.resolveCapabilities(request, {
-              capabilityPath: 'uptime.*',
+              capabilityPath: `${SYNTHETICS_FEATURE_ID}.*`,
             })
-          ).uptime.elasticManagedLocationsEnabled
+          )[SYNTHETICS_FEATURE_ID].elasticManagedLocationsEnabled
         ) ?? true;
       if (!elasticManagedLocationsEnabled) {
         return response.customError({

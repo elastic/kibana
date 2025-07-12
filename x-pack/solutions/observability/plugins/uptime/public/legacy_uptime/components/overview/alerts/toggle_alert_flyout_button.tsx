@@ -49,7 +49,7 @@ export const ToggleAlertFlyoutButtonComponent: React.FC<Props> = ({
     services: { observability },
   } = useKibana<ClientPluginsStart>();
   const manageRulesUrl = observability.useRulesLink();
-  const hasUptimeWrite = kibana.services.application?.capabilities.uptime?.save ?? false;
+  const hasUptimeWrite = kibana.services.application?.capabilities.synthetics?.save ?? false;
 
   const monitorStatusAlertContextMenuItem: EuiContextMenuPanelItemDescriptor = {
     'aria-label': ToggleFlyoutTranslations.toggleMonitorStatusAriaLabel,
