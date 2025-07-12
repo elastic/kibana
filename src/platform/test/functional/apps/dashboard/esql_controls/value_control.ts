@@ -26,7 +26,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esql = getService('esql');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const browser = getService('browser');
-  const comboBox = getService('comboBox');
   const dashboardPanelActions = getService('dashboardPanelActions');
 
   describe('dashboard - add a value type ES|QL control', function () {
@@ -110,7 +109,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.waitForRenderComplete();
       await header.waitUntilLoadingHasFinished();
       // change the control value
-      await comboBox.set('esqlControlValuesDropdown', 'AO');
+      const controlId = (await dashboardControls.getAllControlIds())[0];
+      await dashboardControls.optionsListOpenPopover(controlId);
+      await dashboardControls.optionsListPopoverSelectOption('AO');
       await dashboard.waitForRenderComplete();
 
       const tableContent = await testSubjects.getVisibleText('lnsTableCellContent');
