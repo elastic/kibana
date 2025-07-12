@@ -41,7 +41,7 @@ export const useCellActionsOptions = (
   } = context ?? {};
   const oldGetFieldSpec = useGetFieldSpec(SourcererScopeName.detections);
   const oldDataViewId = useDataViewId(SourcererScopeName.detections);
-  const dataViewId = newDataViewPickerEnabled ? experimentalDataView?.id : oldDataViewId;
+  const dataViewId = newDataViewPickerEnabled ? experimentalDataView.id : oldDataViewId;
 
   const cellActionsMetadata = useMemo(
     () => ({ scopeId: tableId, dataViewId }),
@@ -52,7 +52,7 @@ export const useCellActionsOptions = (
       columns.map(
         (column) =>
           (newDataViewPickerEnabled
-            ? experimentalDataView?.fields?.getByName(column.id)?.toSpec()
+            ? experimentalDataView.fields?.getByName(column.id)?.toSpec()
             : oldGetFieldSpec(column.id)) ?? {
             name: '',
             type: '', // When type is an empty string all cell actions are incompatible
@@ -60,7 +60,7 @@ export const useCellActionsOptions = (
             searchable: false,
           }
       ),
-    [columns, experimentalDataView?.fields, oldGetFieldSpec, newDataViewPickerEnabled]
+    [columns, experimentalDataView.fields, oldGetFieldSpec, newDataViewPickerEnabled]
   );
 
   /**

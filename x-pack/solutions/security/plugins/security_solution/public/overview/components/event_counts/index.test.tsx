@@ -13,6 +13,7 @@ import { OverviewHost } from '../overview_host';
 import { OverviewNetwork } from '../overview_network';
 
 import { EventCounts } from '.';
+import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
 
 jest.mock('../../../common/components/link_to');
 jest.mock('../overview_host', () => ({
@@ -36,6 +37,7 @@ describe('EventCounts', () => {
     from,
     indexNames: [],
     dataViewSpec: mockDataViewSpec,
+    dataView: createStubDataView({ spec: {} }),
     setQuery: jest.fn(),
     to,
     query: {

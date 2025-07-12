@@ -40,7 +40,6 @@ import { useUserPrivileges } from '../../common/components/user_privileges';
 import { useAlertsPrivileges } from '../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { EmptyPrompt } from '../../common/components/empty_prompt';
 import { useSelectedPatterns } from '../../data_view_manager/hooks/use_selected_patterns';
-import { useDataViewSpec } from '../../data_view_manager/hooks/use_data_view_spec';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { PageLoader } from '../../common/components/page_loader';
@@ -63,13 +62,11 @@ const OverviewComponent = () => {
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
-  const { dataView, status } = useDataView();
-  const { dataViewSpec } = useDataViewSpec();
+  const { dataView: experimentalDataView, status } = useDataView();
   const experimentalSelectedPatterns = useSelectedPatterns();
 
-  const sourcererDataView = newDataViewPickerEnabled ? dataViewSpec : oldSourcererDataView;
   const indicesExist = newDataViewPickerEnabled
-    ? !!dataView?.matchedIndices?.length
+    ? !!experimentalDataView.matchedIndices?.length
     : oldIndicesExist;
   const selectedPatterns = newDataViewPickerEnabled
     ? experimentalSelectedPatterns
@@ -109,7 +106,10 @@ const OverviewComponent = () => {
       {indicesExist ? (
         <>
           <FiltersGlobal>
-            <SiemSearchBar id={InputsModelId.global} sourcererDataView={sourcererDataView} />
+            <SiemSearchBar
+              id={InputsModelId.global}
+              sourcererDataView={oldSourcererDataView} // TODO: newDataViewPicker - Can be removed after migration to new dataview picker
+            />
           </FiltersGlobal>
 
           <SecuritySolutionPageWrapper>
@@ -140,7 +140,8 @@ const OverviewComponent = () => {
                       deleteQuery={deleteQuery}
                       filters={filters}
                       from={from}
-                      dataViewSpec={sourcererDataView}
+                      dataViewSpec={oldSourcererDataView}
+                      dataView={experimentalDataView}
                       query={query}
                       queryType="overview"
                       to={to}
@@ -152,7 +153,8 @@ const OverviewComponent = () => {
                       filters={filters}
                       from={from}
                       indexNames={selectedPatterns}
-                      dataViewSpec={sourcererDataView}
+                      dataViewSpec={oldSourcererDataView}
+                      dataView={experimentalDataView}
                       query={query}
                       setQuery={setQuery}
                       to={to}

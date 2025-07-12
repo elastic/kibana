@@ -8,7 +8,7 @@
 import React, { useMemo } from 'react';
 import { isEmpty, pick } from 'lodash/fp';
 import { useSelector } from 'react-redux';
-import { type DataViewSpec, getEsQueryConfig } from '@kbn/data-plugin/common';
+import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { TimerangeInput } from '@kbn/timelines-plugin/common';
 import { EuiPanel } from '@elastic/eui';
 import { useEnableExperimental } from '../../../../common/hooks/use_experimental_features';
@@ -29,7 +29,7 @@ import {
   startSelector,
 } from '../../../../common/components/super_date_picker/selectors';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
-import { useDataViewSpec } from '../../../../data_view_manager/hooks/use_data_view_spec';
+import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 
 interface KpiExpandedProps {
   timelineId: string;
@@ -38,7 +38,7 @@ interface KpiExpandedProps {
 export const TimelineKpisContainer = ({ timelineId }: KpiExpandedProps) => {
   const { newDataViewPickerEnabled } = useEnableExperimental();
   const experimentalBrowserFields = useBrowserFields(SourcererScopeName.timeline);
-  const { dataViewSpec: experimentalDataViewSpec } = useDataViewSpec(SourcererScopeName.timeline);
+  const { dataView: experimentalDataView } = useDataView(SourcererScopeName.timeline);
   const experimentalSelectedPatterns = useSelectedPatterns(SourcererScopeName.timeline);
 
   const {
@@ -50,10 +50,6 @@ export const TimelineKpisContainer = ({ timelineId }: KpiExpandedProps) => {
   const browserFields = useMemo(
     () => (newDataViewPickerEnabled ? experimentalBrowserFields : oldBrowserFields),
     [experimentalBrowserFields, newDataViewPickerEnabled, oldBrowserFields]
-  );
-  const dataViewSpec: DataViewSpec = useMemo(
-    () => (newDataViewPickerEnabled ? experimentalDataViewSpec : oldSourcererDataViewSpec),
-    [experimentalDataViewSpec, newDataViewPickerEnabled, oldSourcererDataViewSpec]
   );
   const selectedPatterns = useMemo(
     () => (newDataViewPickerEnabled ? experimentalSelectedPatterns : oldSelectedPatterns),
@@ -106,13 +102,23 @@ export const TimelineKpisContainer = ({ timelineId }: KpiExpandedProps) => {
       combineQueries({
         config: esQueryConfig,
         dataProviders,
-        dataViewSpec,
+        dataViewSpec: oldSourcererDataViewSpec,
+        dataView: experimentalDataView,
         browserFields,
         filters: filters ? filters : [],
         kqlQuery,
         kqlMode,
       }),
-    [browserFields, dataProviders, esQueryConfig, filters, dataViewSpec, kqlMode, kqlQuery]
+    [
+      esQueryConfig,
+      dataProviders,
+      oldSourcererDataViewSpec,
+      experimentalDataView,
+      browserFields,
+      filters,
+      kqlQuery,
+      kqlMode,
+    ]
   );
 
   const isBlankTimeline: boolean = useMemo(

@@ -88,7 +88,8 @@ export const TableSection = memo(({ dataView, packages, ruleResponse }: TableSec
         <GroupedAlertsTable
           accordionButtonContent={groupTitleRenderers}
           accordionExtraActionGroupStats={accordionExtraActionGroupStats}
-          dataViewSpec={dataViewSpec}
+          dataView={dataView}
+          dataViewSpec={dataViewSpec} // TODO: newDataViewPickerEnabled - can be removed when old sourcerer is removed
           defaultGroupingOptions={groupingOptions}
           from={from}
           globalFilters={filters}
