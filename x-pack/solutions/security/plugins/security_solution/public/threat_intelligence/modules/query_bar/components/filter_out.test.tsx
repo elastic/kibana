@@ -75,7 +75,12 @@ describe('<FilterOutButtonIcon /> <FilterOutButtonEmpty /> <FilterOutContextMenu
 
   it('should render one EuiContextMenuItem (for EuiContextMenu use)', () => {
     const { getByTestId } = render(
-      <FilterOutContextMenu data={mockIndicator} field={mockField} data-test-subj={TEST_ID} />,
+      <FilterOutContextMenu
+        announceFilterOutChange={() => {}}
+        data={mockIndicator}
+        field={mockField}
+        data-test-subj={TEST_ID}
+      />,
       {
         wrapper: TestProvidersComponent,
       }

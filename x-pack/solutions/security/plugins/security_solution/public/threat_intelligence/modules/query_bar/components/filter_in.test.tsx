@@ -76,7 +76,12 @@ describe('<FilterInButtonIcon /> <FilterInContextMenu /> <FilterInCellAction />'
 
   it('should render one EuiContextMenuItem (for EuiContextMenu use)', () => {
     const { getByTestId } = render(
-      <FilterInContextMenu data={mockIndicator} field={mockField} data-test-subj={TEST_ID} />,
+      <FilterInContextMenu
+        announceFilterInChange={() => {}}
+        data={mockIndicator}
+        field={mockField}
+        data-test-subj={TEST_ID}
+      />,
       {
         wrapper: TestProvidersComponent,
       }
