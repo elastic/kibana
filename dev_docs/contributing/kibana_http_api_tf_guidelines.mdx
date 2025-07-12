@@ -1,10 +1,10 @@
 ---
-id: kibHttpApiGuidelines
-slug: /kibana-dev-docs/contributing/http-api-guidelines
+id: kibHttpApiTfGuidelines
+slug: /kibana-dev-docs/contributing/http-api-tf-guidelines
 title: Guidelines for Terraform friendly HTTP APIs
 description: Guidelines for designing Terraform friendly HTTP APIs
 date: 2025-06-16
-tags: ['kibana','contributor', 'dev', 'http', 'api']
+tags: ['terraform', 'tf', 'kibana','contributor', 'dev', 'http', 'api']
 ---
 
 Kibana's role has expanded beyond the UI. APIs have become the backbone for how customers automate their workflows, build custom scripts, and create their own integrations. With GitOps becoming the standard and Terraform establishing itself as the go-to infrastructure-as-code tool, HTTP APIs are now business-critical. The rise in Search AI means that it's more important than ever to make sure our APIs are easily understood by LLMs.
@@ -16,29 +16,6 @@ These guidelines will help you build APIs that are easy to use, whether someone'
 ## Terraform provider developer-friendly API design
 
 Terraform can work with any API, but some APIs are easier to deal with than others. Here are some tips to make your API more Terraform provider-friendly:
-
-### Think in terms of resources
-
-APIs that stick to a consistent set of arguments or parameters are much easier to map into Terraform. Terraform can describe the "thing" your API is managing. RPC-based APIs are harder to work with since they’re not declarative. Your HTTP APIs should describe REST-like actions (GET, POST, DELETE, etc.) against resources not remote procedures like: executeJob.
-
-APIs designed around resources are easier to support than those focused on action-oriented endpoints.
-
-✅ Preferred: REST-like actions against resources
-
-```
-GET    /api/alerting/rule/{id}     # Kibana Alerting API
-POST   /api/alerting/rule/{id}     # Create rule
-PUT    /api/alerting/rule/{id}     # Update rule
-DELETE /api/alerting/rule/{id}     # Delete rule
-```
-
-⚠️ Alternative: action-style endpoints
-
-```
-POST /api/executeJob
-POST /api/processSpaceUpdate
-POST /api/triggerIndexRebalance
-```
 
 #### Example
 
@@ -97,132 +74,6 @@ resource "elasticstack_elasticsearch_index_lifecycle" "my_ilm" {
     delete {}
   }
 }
-```
-
-### Implement complete CRUD operations
-
-For Terraform to properly manage resources, your API must implement a complete set of CRUD operations on each resource. This is essential for the Terraform lifecycle (create, read, update, delete) to work properly.
-
-#### Required endpoints for each resource
-
-For every resource type, implement these HTTP endpoints:
-
-```
-GET    /api/resource/{id}         # Read - retrieve an existing resource
-POST   /api/resource              # Create - create a new resource
-PUT    /api/resource/{id}         # Update - update an existing resource
-DELETE /api/resource/{id}         # Delete - remove an existing resource
-GET    /api/resource              # List - retrieve all resources (with pagination)
-```
-
-<DocCallOut title="Terraform import">
-  The "List" operation is critical for Terraform's data source and import functionality ([see the docs](https://developer.hashicorp.com/terraform/cli/import)).
-</DocCallOut>
-
-#### Implementation considerations
-
-1. **Consistent response structures**: Ensure GET and POST/PUT responses return the same structure with identical fields.
-
-2. **Idempotent operations**: POST for creation and PUT for updates should be idempotent - running the same request multiple times should result in the same state. This is related to read/GETs without side-effects.
-
-3. **Complete state**: After each operation, return the complete state of the resource, not just acknowledgment.
-
-   ```json
-   // Good - returns complete state
-   {
-     "id": "my-resource", // it is best to call this field "id"
-     "name": "My Resource",
-     "config": { "setting1": "value1" },
-     "created_at": "2025-06-24T08:15:30Z",
-     "updated_at": "2025-06-24T08:15:30Z"
-   }
-
-   // Bad - returns only acknowledgment
-   {
-     "result": "success",
-     "message": "Resource created successfully"
-   }
-   ```
-
-4. **HTTP status codes**: Use appropriate HTTP status codes:
-   - `200/201` for successful operations
-   - `404` when a resource doesn't exist
-   - `409` for conflicts (e.g., resource already exists)
-   - `400` for validation errors
-
-5. **Validation**: Validate input at creation/update time and return comprehensive errors.
-
-#### Example: Complete API for a resource
-
-```typescript
-// Retrieve 1 resource
-router.get(
-  {
-    path: '/api/resource/{id}',
-    validate: false, // `get` should not have bodies
-  },
-  async (context, request, response) => {
-    // Implementation...
-    return response.ok({ body: completeResourceState });
-  }
-);
-
-// Create, update
-router.(post|put)(
-  {
-    path: '/api/resource',
-    validate: {
-      body: schema.object({
-        name: schema.string(),
-        config: schema.object({...}),
-      }),
-    },
-  },
-  async (context, request, response) => {
-    // Implementation...
-    return response.ok({ body: completeResourceState });
-  }
-);
-
-// Delete
-router.delete(
-  {
-    path: '/api/resource/{id}',
-    validate: {
-      params: schema.object({
-        id: schema.string(),
-      }),
-    },
-  },
-  async (context, request, response) => {
-    // Implementation...
-    return response.ok();
-  }
-);
-
-// List many resources
-router.get(
-  {
-    path: '/api/resource',
-    validate: {
-      query: schema.object({
-        page: schema.maybe(schema.number()),
-        perPage: schema.maybe(schema.number()),
-      }),
-    },
-  },
-  async (context, request, response) => {
-    // Implementation...
-    return response.ok({
-      body: {
-        items: resources,
-        total: totalCount,
-        page: currentPage,
-        perPage: itemsPerPage
-      }
-    });
-  }
-);
 ```
 
 #### API imposed challenges
@@ -334,25 +185,6 @@ router.post(
 );
 ```
 
-### Design human-friendly APIs
-
-APIs with clear, descriptive field names and logical resource structures make both manual testing and Terraform resource development much smoother.
-
-#### Use intuitive field names
-
-Clear, descriptive field names translate to intuitive Terraform resources. Elasticsearch APIs generally follow this pattern, and we end up self-documenting configuration.
-
-[Index resource](https://github.com/elastic/terraform-provider-elasticstack/blob/main/docs/resources/elasticsearch_index.md)
-```terraform
-resource "elasticstack_elasticsearch_index" "example" {
-  name                    = "my-index"              # Obvious purpose
-  number_of_shards       = 1                       # Self-documenting
-  number_of_replicas     = 2                       # Clear meaning
-  deletion_protection    = true                    # Prevent accidents
-  search_idle_after      = "20s"                   # Human-readable duration
-}
-```
-
 ##### Complex configuration handling
 
 Complex mappings (e.g. saved objects) make life difficult but not impossible. One *can* make complex mappings readable through JSON encoding:
@@ -412,42 +244,6 @@ Detail: [allocate] exclude doesn't support values of type: VALUE_STRING
 
 The cost of not catching errors early is interrupted workflow, repetitive plan/apply failures and frustrated consumers.
 
-### No side effects during HTTP GET or read requests
-
-Terraform expects GET requests to be non-destructive and side-effect-free. If your API creates objects, updates data, or does anything else during a GET request, you’re in for trouble.
-
-If you have to have side effects (like updating a ‘last-read’ timestamp), consumers have to work around it by, for example, limiting the number of times something’s read or building custom tooling to handle state drift.
-
-### Standardize patterns across your API
-
-Consistency is key for Terraform resource development. Using standard patterns make reusable abstractions and helper functions possible.
-
-For example, all Elasticsearch resources use the same authentication patterns, whether you're working with indices, security roles, or lifecycle policies:
-
-```terraform
-provider "elasticstack" {
-  elasticsearch {
-    username  = "elastic"
-    password  = "changeme"
-    endpoints = ["http://localhost:9200"]
-  }
-}
-```
-
-[Provider configuration example](https://github.com/elastic/terraform-provider-elasticstack/blob/main/examples/provider/provider.tf)
-
-OpenAPI specifications make generating consistent Kibana and Fleet clients possible:
-
-```bash
-# From Makefile - generates standardized clients
-internal/clients/fleet/:
-	oapi-codegen -package fleet fleet-openapi.json
-```
-
-[Provider makefile](https://github.com/elastic/terraform-provider-elasticstack/blob/main/Makefile)
-
-Standardization means authentication, error handling, and request patterns become reusable across all resources.
-
 ### Return as much as you can, and handle defaults carefully
 
 Terraform needs complete information to track resource state effectively. If your API doesn't return enough details, Terraform can't properly detect changes or manage drift.
@@ -458,7 +254,7 @@ Many Kibana APIs have extensive configuration options. Requiring users to specif
 
 ### Be predictable
 
-Terraform relies on the same input resulting in the same output.  Avoid using fields like "last modified time"—Terraform can’t compare those meaningfully. This can be tricky with sensitive fields or when your API relies on randomness.
+Terraform relies on the same input resulting in the same output. Avoid using fields like "last modified time"—Terraform can’t compare those meaningfully. This can be tricky with sensitive fields or when your API relies on randomness.
 
 Constantly changing fields in API responses create a difficult situation for Terraform implementations because they cause constant drift.
 
@@ -483,7 +279,7 @@ The [Alerting Rules API](https://www.elastic.co/docs/api/doc/kibana/operation/op
 }
 ```
 
-Users see Terraform detecting "changes" on every refresh, even when nothing in their configuration has actually changed\!
+Users see Terraform detecting "changes" on every refresh, even when nothing in their configuration has actually changed!
 
 An alternative is to separate volatile runtime data from stable configuration data in responses:
 
@@ -504,132 +300,6 @@ An alternative is to separate volatile runtime data from stable configuration da
 Volatile fields create a challenging choice: include them (causing constant configuration drift) or exclude them (losing valuable runtime information).
 
 Including and separating them makes it easier for the TF provider to specifically ignore sets of fields (marking them as [readonly](https://registry.terraform.io/providers/elastic/elasticstack/latest/docs/resources/kibana_alerting_rule#read-only)) but needs to be built into the client generator.
-
-### Keep fields isomorphic
-
-**Changing field types break terraform**
-
-Terraform expects fields to maintain the same data type throughout a resource's lifecycle. When a field that was once a string suddenly becomes an array or object, it forces breaking changes that disrupt existing user configurations.
-
-This is exactly what happened when Elasticsearch APIs [changed field types](https://github.com/elastic/terraform-provider-elasticstack/issues/926):
-
-```terraform
-# Version 1.0 - field was a string
-resource "elasticstack_transform" "example" {
-  group_by = "field_name"  # String type
-}
-
-# Version 2.0 - same field became an array
-resource "elasticstack_transform" "example" {
-  group_by = ["field_name"]  # Array type - BREAKING CHANGE!
-}
-```
-
-Another example is when the Kibana SLO API changed `group_by` from `string` to `string | string[]`.
-
-Changing a field to make it more lenient might look harmless on the surface but means that the API will return values clients don't expect.
-
-**Design for consistency**
-
-If your API needs to support multiple data types for the same logical concept, consider these approaches:
-
-1. **Use separate, clearly named fields**
-   ```json
-   {
-     "group_by_field": "field_name",      // Single field
-     "group_by_fields": ["field1", "field2"]  // Multiple fields
-   }
-   ```
-
-2. **Use the most flexible type from the start**
-   ```json
-   {
-     "group_by": ["field_name"]  // Always an array, even for single values
-   }
-   ```
-
-**When you have to support flexible types**
-
-If polymorphic behavior is unavoidable, JSON strings provide a workaround—but use them sparingly:
-
-```terraform
-resource "elasticstack_elasticsearch_index" "example" {
-  # Structured fields for simple, predictable values
-  number_of_shards   = 1
-  number_of_replicas = 2
-  # JSON strings only for truly complex, variable structures
-  mappings = jsonencode({
-    properties = {
-      user = { type = "keyword" }
-      timestamp = { type = "date" }
-    }
-  })
-}
-```
-
-[Index resource schema](https://github.com/elastic/terraform-provider-elasticstack/blob/main/internal/elasticsearch/index/schema.go)
-
-**What's the issue with JSON strings?**
-
-`jsonencode()` and `jsondecode()` come with significant downsides:
-
-- **Limited validation**: Terraform can only validate JSON syntax during plan, not the actual content structure
-- **Poor user experience**: Users lose autocompletion, type checking, and clear error messages
-- **Complex validation logic**: Content validation is left to the API layer, leading to runtime errors that could have been plan-time validation
-
-**Bottom line**
-
-Consistent field types make everyone's life easier—API consumers, Terraform provider developers, and your future self. When designing your API, choose field types that can accommodate future needs rather than changing them later.
-
-### Make requests transactional
-
-Terraform expects changes to take effect immediately. Design your API so that changes take effect immediately upon successful response.
-
-Consider the scenario:
-
-A user wants to create alerting rules with different configurations, depending on the space they are in.
-
-In Kibana’s UI, they’d create a space, change into that space and then create the rule.
-
-Through curl, the flow would be similar, although they’d probably GET the space to make sure it exists before POSTing the rule.
-
-In terraform, it’s different. Both resources can (and often are) configured at the same time! In the scenario above, the client [needs the space ID](https://github.com/elastic/terraform-provider-elasticstack/blame/0826f4385a29fa58a79f785249f204e13ee3d47c/internal/clients/kibana/alerting.go#L192) to create the rule:
-
-```go
-req := client.CreateRuleId(ctxWithAuth, rule.SpaceID, rule.RuleID).KbnXsrf("true").CreateRuleRequest(reqModel)
-```
-
-When requests aren’t transactional, we’d need to build the POST & GET workflow into the client, adding complexity to what could have been simple.
-
-Make sure this is the case by, for example,  [setting \`refresh: wait\_for\`](https://github.com/elastic/kibana/blob/188669773e9cc1981b5e89f24afcfdc379ad3058/x-pack/platform/plugins/shared/alerting/server/alerts_client/alerts_client.ts#L644-L657) on the relevant indices in POST requests.
-
-```ts
-private async persistAlertsHelper() {
-  ...
-  await resolveAlertConflicts({
-    logger: this.options.logger,
-    esClient,
-    bulkRequest: {
-      refresh: 'wait_for', // Ensure the index is refreshed after the operation
-      index: this.indexTemplateAndPattern.alias,
-      require_alias: !this.isUsingDataStreams(),
-      operations: bulkBody,
-    },
-    bulkResponse: response,
-    ruleId: this.options.rule.id,
-    ruleName: this.options.rule.name,
-    ruleType: this.ruleType.id,
-  });
-  ...
-}
-
-```
-
-### Offer compare-and-swap
-
-Between refreshing state and applying changes, there’s a gap where someone could modify your API. Generally it's ok to take the approach of last-write-wins.
-
-If you have to consider concurrency control, support mechanisms like ETags and checksums, and the \`version\` property on saved objects.
 
 ### Ignore the robustness principle: don’t normalize output
 
@@ -713,9 +383,9 @@ When a Terraform configuration manages hundreds of similar resources, individual
 Add these bulk operation endpoints to complement your individual resource operations:
 
 ```
-POST   /api/resource/_bulk_create   # Create multiple resources
-POST   /api/resource/_bulk_update   # Update multiple resources
-POST   /api/resource/_bulk_delete   # Delete multiple resources
+POST   /api/resources/_bulk_create   # Create multiple resources
+POST   /api/resources/_bulk_update   # Update multiple resources
+POST   /api/resources/_bulk_delete   # Delete multiple resources
 ```
 
 #### Design principles for bulk APIs
