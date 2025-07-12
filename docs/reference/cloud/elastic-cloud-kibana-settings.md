@@ -54,6 +54,14 @@ If you want to allow anonymous authentication in Kibana, these settings are supp
 
 You can configure the following X-Pack settings from the Kibana **User Settings** editor.
 
+### Version 9.1.0 [ec_version_9_1_0]
+
+`xpack.product_intercept.enabled`
+:   Enable or disable the product intercept feature.
+
+`xpack.product_intercept.interval`:
+:   Set the interval for the product intercept feature.
+
 ### Version 8.18+ [ec_version_8_18]
 
 `xpack.fleet.enableManagedLogsAndMetricsDataviews`
