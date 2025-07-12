@@ -688,6 +688,23 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           `The cluster state may be inconsistent. If you experience issues, please use the resync API to restore a consistent state.`
         );
       });
+
+      it('does not allow super deeply nested streams', async () => {
+        const body: Streams.WiredStream.UpsertRequest = {
+          dashboards: [],
+          queries: [],
+          stream: {
+            description: '',
+            ingest: {
+              lifecycle: { inherit: {} },
+              processing: [],
+              wired: { fields: {}, routing: [] },
+            },
+          },
+        };
+
+        await putStream(apiClient, 'logs.super.duper.hyper.deeply.nested.streamname', body, 400);
+      });
     });
   });
 }
