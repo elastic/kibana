@@ -47,6 +47,7 @@ export default function searchSolutionNavigation({
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Playground' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Search applications' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Behavioral Analytics' });
+      await solutionNavigation.sidenav.expectLinkExists({ text: 'Query Rules' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Inference Endpoints' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'App Search' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Workplace Search' });
@@ -295,6 +296,7 @@ export default function searchSolutionNavigation({
         'build',
         'searchPlayground',
         'searchSynonyms:synonyms',
+        'searchQueryRules',
         'enterpriseSearchApplications:searchApplications',
         'enterpriseSearchAnalytics',
         'relevance',

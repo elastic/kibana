@@ -48,6 +48,7 @@ export default function searchSolutionNavigation({
         { id: 'SearchApplications', label: 'Search Applications' },
         { id: 'BehavioralAnalytics', label: 'Behavioral Analytics' },
         { id: 'Relevance', label: 'Relevance' },
+        { id: 'QueryRules', label: 'Query Rules' },
         { id: 'InferenceEndpoints', label: 'Inference Endpoints' },
         { id: 'Synonyms', label: 'Synonyms' },
         { id: 'GettingStarted', label: 'Getting started' },
