@@ -14,9 +14,9 @@ import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
 import { Filter, RangeFilterParams, buildRangeFilter } from '@kbn/es-query';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
+import { RANGE_SLIDER_CONTROL } from '@kbn/controls-constants';
 
 import { isCompressed } from '../../../control_group/utils/is_compressed';
-import { RANGE_SLIDER_CONTROL } from '../../../../common';
 import {
   defaultDataControlComparators,
   initializeDataControlManager,

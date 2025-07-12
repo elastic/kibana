@@ -8,7 +8,7 @@
  */
 
 import { EmbeddableRegistryDefinition } from '@kbn/embeddable-plugin/server';
-import { TIME_SLIDER_CONTROL } from '../../common';
+import { TIME_SLIDER_CONTROL } from '@kbn/controls-constants';
 import { createTimeSliderExtract, createTimeSliderInject } from './time_slider_persistable_state';
 
 export const timeSliderPersistableStateServiceFactory = (): EmbeddableRegistryDefinition => {

@@ -11,7 +11,7 @@ import React, { useEffect, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { EuiContextMenuItem } from '@elastic/eui';
 import type { ControlGroupApi } from '@kbn/controls-plugin/public';
-import { TIME_SLIDER_CONTROL } from '@kbn/controls-plugin/common';
+import { TIME_SLIDER_CONTROL } from '@kbn/controls-constants';
 
 import { apiHasType } from '@kbn/presentation-publishing';
 import {

@@ -42,7 +42,9 @@
     "@kbn/esql-types",
     "@kbn/css-utils",
     "@kbn/esql-utils",
-    "@kbn/search-types"
+    "@kbn/search-types",
+    "@kbn/controls-constants",
+    "@kbn/controls-schemas",
   ],
   "exclude": ["target/**/*"]
 }

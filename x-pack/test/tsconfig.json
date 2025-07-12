@@ -72,7 +72,6 @@
     "@kbn/ml-string-hash",
     "@kbn/visualizations-plugin",
     "@kbn/rule-registry-plugin",
-    "@kbn/controls-plugin",
     "@kbn/core-saved-objects-server",
     "@kbn/apm-synthtrace-client",
     "@kbn/security-api-integration-helpers",
@@ -121,5 +120,6 @@
     "@kbn/logging",
     "@kbn/alerts-as-data-utils",
     "@kbn/response-ops-rule-params",
+    "@kbn/controls-constants",
   ]
 }

@@ -25,7 +25,7 @@ import {
 import { IncompatibleActionError, type Action } from '@kbn/ui-actions-plugin/public';
 
 import { apiIsPresentationContainer } from '@kbn/presentation-containers';
-import { CONTROL_GROUP_TYPE } from '../../common';
+import { CONTROLS_GROUP_TYPE } from '@kbn/controls-constants';
 import { ACTION_EDIT_CONTROL } from './constants';
 import { DataControlApi } from '../controls/data_controls/types';
 
@@ -36,7 +36,7 @@ const compatibilityCheck = (api: unknown): api is DataControlApi => {
       hasEditCapabilities(api) &&
       apiHasParentApi(api) &&
       apiCanAccessViewMode(api.parentApi) &&
-      apiIsOfType(api.parentApi, CONTROL_GROUP_TYPE) &&
+      apiIsOfType(api.parentApi, CONTROLS_GROUP_TYPE) &&
       apiIsPresentationContainer(api.parentApi)
   );
 };

@@ -22,7 +22,7 @@ import {
 } from '@kbn/presentation-publishing';
 
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
-import { TIME_SLIDER_CONTROL } from '../../../common';
+import { TIME_SLIDER_CONTROL } from '@kbn/controls-constants';
 import {
   defaultControlComparators,
   initializeDefaultControlManager,

@@ -9,7 +9,7 @@
 
 import { EmbeddableRegistryDefinition } from '@kbn/embeddable-plugin/server';
 
-import { RANGE_SLIDER_CONTROL } from '../../common';
+import { RANGE_SLIDER_CONTROL } from '@kbn/controls-constants';
 import {
   createRangeSliderExtract,
   createRangeSliderInject,

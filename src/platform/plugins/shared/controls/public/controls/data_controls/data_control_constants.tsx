@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { RANGE_SLIDER_CONTROL } from '../../../common';
+import { RANGE_SLIDER_CONTROL } from '@kbn/controls-constants';
 
 export const DataControlEditorStrings = {
   manageControl: {

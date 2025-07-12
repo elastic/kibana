@@ -12,7 +12,7 @@ import { FC } from 'react';
 import React from 'react';
 import { act, render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { ControlGroupRendererApi, ControlGroupRuntimeState } from '@kbn/controls-plugin/public';
-import { OPTIONS_LIST_CONTROL } from '@kbn/controls-plugin/common';
+import { OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
 import { ControlGroupOutput, initialInputData, sampleOutputData } from './mocks/data';
 import {
   COMMON_OPTIONS_LIST_CONTROL_INPUTS,

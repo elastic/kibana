@@ -24,7 +24,7 @@ import { buildExistsFilter, buildPhraseFilter, buildPhrasesFilter, Filter } from
 import { PublishingSubject } from '@kbn/presentation-publishing';
 
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
-import { OPTIONS_LIST_CONTROL } from '../../../../common';
+import { OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
 import type {
   OptionsListControlState,
   OptionsListSortingType,

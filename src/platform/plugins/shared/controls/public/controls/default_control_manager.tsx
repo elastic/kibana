@@ -10,12 +10,10 @@
 import { StateComparators } from '@kbn/presentation-publishing';
 
 import { initializeStateManager } from '@kbn/presentation-publishing/state_manager';
+import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '@kbn/controls-constants';
 import { BehaviorSubject } from 'rxjs';
-import {
-  DEFAULT_CONTROL_GROW,
-  type DefaultControlState,
-  DEFAULT_CONTROL_WIDTH,
-} from '../../common';
+import type { ControlWidth } from '@kbn/controls-schemas';
+import type { DefaultControlState } from '../../common';
 import type { ControlApiInitialization, DefaultControlApi } from './types';
 
 export type ControlApi = ControlApiInitialization<DefaultControlApi>;
@@ -27,7 +25,7 @@ export const defaultControlComparators: StateComparators<DefaultControlState> = 
 
 export const defaultControlDefaultValues = {
   grow: DEFAULT_CONTROL_GROW,
-  width: DEFAULT_CONTROL_WIDTH,
+  width: DEFAULT_CONTROL_WIDTH as ControlWidth,
 };
 
 export const initializeDefaultControlManager = (state: DefaultControlState) => {

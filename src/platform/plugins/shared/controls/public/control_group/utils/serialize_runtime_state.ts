@@ -9,20 +9,25 @@
 
 import { SerializedPanelState } from '@kbn/presentation-publishing';
 import { omit } from 'lodash';
+import type {
+  ControlsChainingSystem,
+  ControlsGroupState,
+  ControlsIgnoreParentSettings,
+  ControlsLabelPosition,
+} from '@kbn/controls-schemas';
 import {
-  ControlGroupRuntimeState,
-  ControlGroupSerializedState,
   DEFAULT_AUTO_APPLY_SELECTIONS,
-  DEFAULT_CONTROL_CHAINING,
-  DEFAULT_CONTROL_LABEL_POSITION,
+  DEFAULT_CONTROLS_CHAINING,
+  DEFAULT_CONTROLS_LABEL_POSITION,
   DEFAULT_IGNORE_PARENT_SETTINGS,
-} from '../../../common';
+} from '@kbn/controls-constants';
+import { ControlGroupRuntimeState } from '../../../common';
 
 export const defaultRuntimeState = {
-  labelPosition: DEFAULT_CONTROL_LABEL_POSITION,
-  chainingSystem: DEFAULT_CONTROL_CHAINING,
+  labelPosition: DEFAULT_CONTROLS_LABEL_POSITION as ControlsLabelPosition,
+  chainingSystem: DEFAULT_CONTROLS_CHAINING as ControlsChainingSystem,
   autoApplySelections: DEFAULT_AUTO_APPLY_SELECTIONS,
-  ignoreParentSettings: DEFAULT_IGNORE_PARENT_SETTINGS,
+  ignoreParentSettings: DEFAULT_IGNORE_PARENT_SETTINGS as ControlsIgnoreParentSettings,
 };
 
 /**
@@ -32,7 +37,7 @@ export const defaultRuntimeState = {
  */
 export function serializeRuntimeState(
   runtimeState: Partial<ControlGroupRuntimeState>
-): SerializedPanelState<ControlGroupSerializedState> {
+): SerializedPanelState<ControlsGroupState> {
   return {
     rawState: {
       ...defaultRuntimeState,

@@ -7,12 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  ControlWidth,
-  OPTIONS_LIST_CONTROL,
-  RANGE_SLIDER_CONTROL,
-} from '@kbn/controls-plugin/common';
-import { ControlGroupChainingSystem } from '@kbn/controls-plugin/common';
+import { OPTIONS_LIST_CONTROL, RANGE_SLIDER_CONTROL } from '@kbn/controls-constants';
+import type { ControlWidth, ControlsChainingSystem } from '@kbn/controls-schemas';
 import { OptionsListSearchTechnique } from '@kbn/controls-plugin/common/options_list/suggestions_searching';
 import { OptionsListSortingType } from '@kbn/controls-plugin/common/options_list/suggestions_sorting';
 import expect from '@kbn/expect';
@@ -155,12 +151,12 @@ export class DashboardPageControls extends FtrService {
     await this.testSubjects.click('control-group-editor-save');
   }
 
-  public async updateChainingSystem(chainingSystem: ControlGroupChainingSystem) {
+  public async updateChainingSystem(chainingSystem: ControlsChainingSystem) {
     this.log.debug(`Update control group chaining system to ${chainingSystem}`);
     await this.openControlGroupSettingsFlyout();
     await this.testSubjects.existOrFail('control-group-chaining');
     // currently there are only two chaining systems, so a switch is used.
-    const switchStateToChainingSystem: { [key: string]: ControlGroupChainingSystem } = {
+    const switchStateToChainingSystem: { [key: string]: ControlsChainingSystem } = {
       true: 'HIERARCHICAL',
       false: 'NONE',
     };
