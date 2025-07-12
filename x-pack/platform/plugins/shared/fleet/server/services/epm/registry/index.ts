@@ -88,6 +88,9 @@ export async function fetchList(
     if (params.prerelease) {
       url.searchParams.set('prerelease', params.prerelease.toString());
     }
+    if (params.type) {
+      url.searchParams.set('type', params.type);
+    }
   }
 
   setConstraints(url);

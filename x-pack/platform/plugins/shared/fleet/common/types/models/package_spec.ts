@@ -37,11 +37,13 @@ export interface PackageSpecManifest {
   };
   asset_tags?: PackageSpecTags[];
   discovery?: {
-    fields?: Array<{
-      name: string;
-    }>;
+    datasets?: DiscoveryDataset[];
   };
 }
+export interface DiscoveryDataset {
+  name: string;
+}
+
 export interface PackageSpecTags {
   text: string;
   asset_types?: string[];
