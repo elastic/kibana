@@ -9,7 +9,8 @@
 
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { DataViewType } from '@kbn/data-views-plugin/public';
-import type { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
+import type { DataViewPickerProps, UnifiedSearchDraft } from '@kbn/unified-search-plugin/public';
+import { isEqual } from 'lodash';
 import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
 import type { EuiHeaderLinksProps } from '@elastic/eui';
 import { useSavedSearchInitial } from '../../state_management/discover_state_provider';
@@ -25,6 +26,8 @@ import { ESQLToDataViewTransitionModal } from './esql_dataview_transition';
 import {
   internalStateActions,
   useCurrentDataView,
+  useCurrentTabAction,
+  useCurrentTabSelector,
   useDataViewsForPicker,
   useInternalStateDispatch,
   useInternalStateSelector,
@@ -211,6 +214,41 @@ export const DiscoverTopNav = ({
     [searchBarCustomization?.CustomSearchBar, navigation.ui.AggregateQueryTopNavMenu]
   );
 
+  const searchDraft = useCurrentTabSelector((state) => state.uiState.searchDraft);
+  const setSearchDraftUiState = useCurrentTabAction(internalStateActions.setSearchDraftUiState);
+  const onDraftChange = useCallback(
+    (draft: UnifiedSearchDraft | null) => {
+      dispatch(
+        setSearchDraftUiState({
+          searchDraftUiState: {
+            query: draft?.query ?? undefined,
+            dateRangeFrom: draft?.dateRangeFrom ?? undefined,
+            dateRangeTo: draft?.dateRangeTo ?? undefined,
+          },
+        })
+      );
+    },
+    [dispatch, setSearchDraftUiState]
+  );
+
+  const draft = useMemo(() => {
+    const draftState: Partial<UnifiedSearchDraft> = {};
+
+    if (searchDraft?.query && !isEqual(searchDraft.query, query)) {
+      draftState.query = searchDraft.query;
+    }
+
+    if (searchDraft?.dateRangeFrom) {
+      draftState.dateRangeFrom = searchDraft.dateRangeFrom;
+    }
+
+    if (searchDraft?.dateRangeTo) {
+      draftState.dateRangeTo = searchDraft.dateRangeTo;
+    }
+
+    return Object.keys(draftState).length > 0 ? draftState : undefined;
+  }, [searchDraft, query]);
+
   const shouldHideDefaultDataviewPicker =
     !!searchBarCustomization?.CustomDataViewPicker || !!searchBarCustomization?.hideDataViewPicker;
 
@@ -248,6 +286,8 @@ export const DiscoverTopNav = ({
           ) : undefined
         }
         onESQLDocsFlyoutVisibilityChanged={onESQLDocsFlyoutVisibilityChanged}
+        draft={draft}
+        onDraftChange={onDraftChange}
       />
       {isESQLToDataViewTransitionModalVisible && (
         <ESQLToDataViewTransitionModal onClose={onESQLToDataViewTransitionModalClose} />

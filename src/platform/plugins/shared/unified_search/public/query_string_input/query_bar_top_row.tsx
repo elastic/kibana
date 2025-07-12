@@ -46,7 +46,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import type { PersistedLog } from '@kbn/data-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import type { IUnifiedSearchPluginServices } from '../types';
+import type { IUnifiedSearchPluginServices, UnifiedSearchDraft } from '../types';
 import { QueryStringInput } from './query_string_input';
 import { NoDataPopover } from './no_data_popover';
 import { shallowEqual } from '../utils/shallow_equal';
@@ -146,6 +146,7 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
   onRefreshChange?: (options: { isPaused: boolean; refreshInterval: number }) => void;
   onSubmit: (payload: { dateRange: TimeRange; query?: Query | QT }) => void;
   onCancel?: () => void;
+  onDraftChange?: (draft: UnifiedSearchDraft | null) => void;
   placeholder?: string;
   prepend?: React.ComponentProps<typeof EuiFieldText>['prepend'];
   query?: Query | QT;
@@ -230,6 +231,29 @@ export const QueryBarTopRow = React.memo(
   function QueryBarTopRow<QT extends Query | AggregateQuery = Query>(
     props: QueryBarTopRowProps<QT>
   ) {
+    const {
+      onDraftChange,
+      isDirty: draftIsDirty,
+      query: draftQuery,
+      dateRangeFrom: draftDateRangeFrom,
+      dateRangeTo: draftDateRangeTo,
+    } = props;
+    const draft = useMemo(
+      () =>
+        onDraftChange && draftIsDirty
+          ? {
+              query: draftQuery,
+              dateRangeFrom: draftDateRangeFrom,
+              dateRangeTo: draftDateRangeTo,
+            }
+          : null,
+      [onDraftChange, draftIsDirty, draftQuery, draftDateRangeFrom, draftDateRangeTo]
+    );
+
+    useEffect(() => {
+      onDraftChange?.(draft);
+    }, [onDraftChange, draft]);
+
     const isMobile = useIsWithinBreakpoints(['xs', 's']);
     const [isXXLarge, setIsXXLarge] = useState<boolean>(false);
     const submitButtonStyle: QueryBarTopRowProps['submitButtonStyle'] =

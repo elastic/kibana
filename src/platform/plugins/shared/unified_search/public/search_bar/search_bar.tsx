@@ -36,7 +36,7 @@ import { DataView } from '@kbn/data-views-plugin/public';
 
 import { i18n } from '@kbn/i18n';
 import { AdditionalQueryBarMenuItems } from '../query_string_input/query_bar_menu_panels';
-import type { IUnifiedSearchPluginServices } from '../types';
+import type { IUnifiedSearchPluginServices, UnifiedSearchDraft } from '../types';
 import { SavedQueryMeta, SaveQueryForm } from '../saved_query_form';
 import { SavedQueryManagementList } from '../saved_query_management';
 import { QueryBarMenu, QueryBarMenuProps } from '../query_string_input/query_bar_menu';
@@ -96,6 +96,9 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
     payload: { dateRange: TimeRange; query?: QT | Query },
     isUpdate?: boolean
   ) => void;
+  // To initialize with a predefined query which has not been submitted yet (in dirty state)
+  draft?: UnifiedSearchDraft;
+  onDraftChange?: QueryBarTopRowProps<QT>['onDraftChange'];
   // User has saved the current state as a saved query
   onSaved?: (savedQuery: SavedQuery) => void;
   // User has modified the saved query, your app should persist the update
@@ -263,9 +266,13 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
     openQueryBarMenu: false,
     showSavedQueryPopover: false,
     currentProps: this.props,
-    query: this.props.query ? { ...this.props.query } : undefined,
-    dateRangeFrom: get(this.props, 'dateRangeFrom', 'now-15m'),
-    dateRangeTo: get(this.props, 'dateRangeTo', 'now'),
+    query: this.props.draft?.query
+      ? { ...this.props.draft.query }
+      : this.props.query
+      ? { ...this.props.query }
+      : undefined,
+    dateRangeFrom: this.props.draft?.dateRangeFrom || get(this.props, 'dateRangeFrom', 'now-15m'),
+    dateRangeTo: this.props.draft?.dateRangeTo || get(this.props, 'dateRangeTo', 'now'),
   } as SearchBarState<QT>;
 
   public isDirty = () => {
@@ -636,6 +643,7 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
           onRefreshChange={this.props.onRefreshChange}
           onCancel={this.props.onCancel}
           onChange={this.onQueryBarChange}
+          onDraftChange={this.props.onDraftChange}
           isDirty={this.isDirty()}
           customSubmitButton={
             this.props.customSubmitButton ? this.props.customSubmitButton : undefined

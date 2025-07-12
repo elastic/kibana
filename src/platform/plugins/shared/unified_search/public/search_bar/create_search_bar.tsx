@@ -245,6 +245,8 @@ export function createSearchBar({
             onCancel={props.onCancel}
             filters={filters}
             query={query}
+            draft={props.draft}
+            onDraftChange={props.onDraftChange}
             onFiltersUpdated={defaultFiltersUpdated(data.query, props.onFiltersUpdated)}
             onRefreshChange={
               !props.isAutoRefreshDisabled
