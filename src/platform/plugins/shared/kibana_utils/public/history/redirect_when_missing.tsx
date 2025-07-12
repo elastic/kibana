@@ -16,13 +16,23 @@ import ReactDOM from 'react-dom';
 import { ApplicationStart, HttpStart, ToastsSetup } from '@kbn/core/public';
 import type { ThemeServiceStart } from '@kbn/core/public';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
+import { uriTransformer } from 'react-markdown';
 import { SavedObjectNotFound } from '..';
 import { KibanaThemeProvider } from '../theme';
 
 const ReactMarkdown = React.lazy(() => import('react-markdown'));
-const ErrorRenderer = (props: { children: string }) => (
+const ErrorRenderer = ({
+  basePath,
+  children,
+}: {
+  basePath: HttpStart['basePath'];
+  children: string;
+}) => (
   <React.Suspense fallback={<EuiLoadingSpinner />}>
-    <ReactMarkdown {...props} />
+    <ReactMarkdown
+      children={children}
+      transformLinkUri={(href) => uriTransformer(basePath.prepend(href))}
+    />
   </React.Suspense>
 );
 
@@ -102,7 +112,7 @@ export function redirectWhenMissing({
       text: (element: HTMLElement) => {
         ReactDOM.render(
           <KibanaThemeProvider theme$={theme.theme$} userProfile={userProfile}>
-            <ErrorRenderer>{error.message}</ErrorRenderer>
+            <ErrorRenderer basePath={basePath}>{error.message}</ErrorRenderer>
           </KibanaThemeProvider>,
           element
         );

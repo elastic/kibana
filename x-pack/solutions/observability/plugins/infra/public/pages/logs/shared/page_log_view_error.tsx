@@ -104,7 +104,7 @@ const LogSourceErrorMessage: React.FC<{ error: Error }> = ({ error }) => {
             id="xpack.infra.logSourceErrorPage.savedObjectNotFoundErrorMessage"
             defaultMessage="Failed to locate that {savedObjectType}: {savedObjectId}"
             values={{
-              savedObjectType: error.cause.savedObjectType,
+              savedObjectType: error.cause.savedObjectTypeDisplayName,
               savedObjectId: error.cause.savedObjectId,
             }}
           />

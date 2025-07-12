@@ -89,7 +89,7 @@ describe('ObservabilityDataViews', function () {
 
   it('should creates missing index pattern', async function () {
     dataViews!.get = jest.fn().mockImplementation(() => {
-      throw new SavedObjectNotFound('index_pattern');
+      throw new SavedObjectNotFound({ type: 'index_pattern' });
     });
 
     dataViews!.createAndSave = jest.fn().mockReturnValue({ id: dataViewList.ux });

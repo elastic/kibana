@@ -11,7 +11,8 @@ import { v4 as uuid } from 'uuid';
 import { escapeRegExp } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import type { TabItem } from '@kbn/unified-tabs';
-import { createAsyncThunk } from '@reduxjs/toolkit';
+import { createAsyncThunk, miniSerializeError } from '@reduxjs/toolkit';
+import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import type { DiscoverInternalState, TabState } from './types';
 import type {
   InternalStateDispatch,
@@ -29,8 +30,22 @@ type CreateInternalStateAsyncThunk = ReturnType<
   }>
 >;
 
-export const createInternalStateAsyncThunk: CreateInternalStateAsyncThunk =
-  createAsyncThunk.withTypes();
+export const createInternalStateAsyncThunk: CreateInternalStateAsyncThunk = ((
+  ...[typePrefix, payloadCreator, options]: Parameters<CreateInternalStateAsyncThunk>
+) => {
+  return createAsyncThunk(typePrefix, payloadCreator, {
+    ...options,
+    serializeError: (error) => {
+      if (options?.serializeError) {
+        return options.serializeError(error);
+      }
+      if (error instanceof SavedObjectNotFound) {
+        return error;
+      }
+      return miniSerializeError(error);
+    },
+  });
+}) as CreateInternalStateAsyncThunk;
 
 type WithoutTabId<TPayload extends TabActionPayload> = Omit<TPayload, 'tabId'>;
 type VoidIfEmpty<T> = keyof T extends never ? void : T;
