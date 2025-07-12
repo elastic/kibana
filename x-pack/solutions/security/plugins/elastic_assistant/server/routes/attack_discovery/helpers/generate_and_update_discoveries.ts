@@ -110,6 +110,7 @@ export const generateAndUpdateAttackDiscoveries = async ({
         attackDiscoveries: attackDiscoveries ?? [],
         connectorId: apiConfig.connectorId,
         indexPattern,
+        isSchedule: false,
         logger,
         ownerId: authenticatedUser.username ?? authenticatedUser.profile_uid,
         replacements: latestReplacements,
