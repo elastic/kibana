@@ -225,6 +225,14 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
 
         const consumerSelect = await testSubjects.find('ruleConsumerSelection');
         await consumerSelect.click();
+
+        await retry.waitFor('consumer options to have text', async () => {
+          const firstOption = await find.byCssSelector(
+            '[data-test-subj="comboBoxOptionsList ruleConsumerSelectionInput-optionsList"] .euiComboBoxOption__content'
+          );
+          return (await firstOption.getVisibleText()) !== '';
+        });
+
         const consumerOptionsList = await testSubjects.find(
           'comboBoxOptionsList ruleConsumerSelectionInput-optionsList'
         );
