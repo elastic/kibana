@@ -5,45 +5,33 @@
  * 2.0.
  */
 
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import type { SharePluginStart } from '@kbn/share-plugin/public';
-import React, { useMemo } from 'react';
-import type { ResolvedIndexNameLogsSourceConfiguration } from '../../utils/logs_source';
-import { DiscoverLink } from '../discover_link';
+import React from 'react';
+import { ControlBar, ControlBarDependencies, ControlBarProps } from '../shared/control_bar';
 
-export interface LogCategoriesControlBarProps {
-  documentFilters?: QueryDslQueryContainer[];
-  logsSource: ResolvedIndexNameLogsSourceConfiguration;
-  timeRange: {
-    start: string;
-    end: string;
-  };
-  dependencies: LogCategoriesControlBarDependencies;
-}
+export type LogCategoriesControlBarProps = ControlBarProps;
 
-export interface LogCategoriesControlBarDependencies {
-  share: SharePluginStart;
-}
+export type LogCategoriesControlBarDependencies = ControlBarDependencies;
 
 export const LogCategoriesControlBar: React.FC<LogCategoriesControlBarProps> = React.memo(
-  ({ dependencies, documentFilters, logsSource, timeRange }) => {
-    const linkFilters = useMemo(
-      () => documentFilters?.map((filter) => ({ filter })),
-      [documentFilters]
-    );
-
+  ({
+    dependencies,
+    documentFilters,
+    logsSource,
+    timeRange,
+    grouping,
+    groupingCapabilities,
+    onChangeGrouping,
+  }) => {
     return (
-      <EuiFlexGroup direction="row" justifyContent="flexEnd" alignItems="center" gutterSize="s">
-        <EuiFlexItem grow={false}>
-          <DiscoverLink
-            dependencies={dependencies}
-            documentFilters={linkFilters}
-            logsSource={logsSource}
-            timeRange={timeRange}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <ControlBar
+        dependencies={dependencies}
+        documentFilters={documentFilters}
+        logsSource={logsSource}
+        timeRange={timeRange}
+        grouping={grouping}
+        groupingCapabilities={groupingCapabilities}
+        onChangeGrouping={onChangeGrouping}
+      />
     );
   }
 );

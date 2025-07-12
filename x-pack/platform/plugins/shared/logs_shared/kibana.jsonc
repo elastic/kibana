@@ -28,6 +28,7 @@
     ],
     "optionalPlugins": [
       "observabilityAIAssistant",
+      "ml",
     ],
     "requiredBundles": [
       "kibanaUtils",
