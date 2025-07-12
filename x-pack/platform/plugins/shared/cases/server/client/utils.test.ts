@@ -1087,7 +1087,7 @@ describe('utils', () => {
     it('returns the rootSearchFields and search with correct values when given a uuid', () => {
       const uuid = 'b52e293e-4a37-4e67-9aa6-716bb6e69b42'; // the specific version is irrelevant
 
-      expect(constructSearch(uuid, DEFAULT_NAMESPACE_STRING, savedObjectsSerializer))
+      expect(constructSearch(uuid, [], DEFAULT_NAMESPACE_STRING, savedObjectsSerializer))
         .toMatchInlineSnapshot(`
         Object {
           "rootSearchFields": Array [
@@ -1100,16 +1100,16 @@ describe('utils', () => {
 
     it('search value not changed and no rootSearchFields when search is non-uuid', () => {
       const search = 'foobar';
-      const result = constructSearch(search, DEFAULT_NAMESPACE_STRING, savedObjectsSerializer);
+      const result = constructSearch(search, [], DEFAULT_NAMESPACE_STRING, savedObjectsSerializer);
 
       expect(result).not.toHaveProperty('rootSearchFields');
-      expect(result).toEqual({ search });
+      expect(result).toEqual({ search, searchFields: [] });
     });
 
     it('returns undefined if search term undefined', () => {
-      expect(constructSearch(undefined, DEFAULT_NAMESPACE_STRING, savedObjectsSerializer)).toEqual(
-        undefined
-      );
+      expect(
+        constructSearch(undefined, [], DEFAULT_NAMESPACE_STRING, savedObjectsSerializer)
+      ).toEqual(undefined);
     });
   });
 

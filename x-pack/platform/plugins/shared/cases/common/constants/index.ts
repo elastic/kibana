@@ -178,6 +178,8 @@ export const DEFAULT_FEATURES: CasesFeaturesAllRequired = Object.freeze({
 export const CASES_TELEMETRY_TASK_NAME = 'cases-telemetry-task';
 export const ANALYTICS_BACKFILL_TASK_TYPE = 'cai:cases_analytics_index_backfill';
 export const ANALYTICS_SYNCHRONIZATION_TASK_TYPE = 'cai:cases_analytics_index_synchronization';
+export const CASES_INCREMENTAL_ID_SYNC_TASK_TYPE = 'cases_incremental_id_assignment';
+export const CASES_INCREMENTAL_ID_SYNC_TASK_ID = `cases:${CASES_INCREMENTAL_ID_SYNC_TASK_TYPE}`;
 
 /**
  * Telemetry

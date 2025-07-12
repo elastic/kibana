@@ -20,6 +20,7 @@ import {
   EuiIcon,
   EuiToolTip,
   RIGHT_ALIGNMENT,
+  EuiFlexGroup,
 } from '@elastic/eui';
 import { Status } from '@kbn/cases-components/src/status/status';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
@@ -113,14 +114,14 @@ export const useCasesColumns = ({
             const caseDetailsLinkComponent = isSelectorView ? (
               theCase.title
             ) : (
-              <div>
+              <EuiFlexGroup direction="column" gutterSize="none">
                 <CaseDetailsLink detailName={theCase.id} title={theCase.title}>
                   <TruncatedText text={theCase.title} />
                 </CaseDetailsLink>
                 {settings.displayIncrementalCaseId && typeof theCase.incrementalId === 'number' ? (
                   <IncrementalIdText incrementalId={theCase.incrementalId} />
                 ) : null}
-              </div>
+              </EuiFlexGroup>
             );
 
             return caseDetailsLinkComponent;

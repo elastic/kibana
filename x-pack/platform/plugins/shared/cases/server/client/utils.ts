@@ -589,11 +589,22 @@ export const convertSortField = (
   }
 };
 
+const incrementalIdRegEx = /^#\d{1,50}\s*$/;
+function isIncrementalIdSearch(search: string) {
+  return incrementalIdRegEx.test(search);
+}
+
+const onlyNumberRegEx = /^\d{1,50}\s*$/;
+function isNumberSearch(search: string) {
+  return onlyNumberRegEx.test(search);
+}
+
 export const constructSearch = (
   search: string | undefined,
+  searchFields: string[],
   spaceId: string,
   savedObjectsSerializer: ISavedObjectsSerializer
-): { search: string; rootSearchFields?: string[] } | undefined => {
+): { search: string; rootSearchFields?: string[]; searchFields?: string[] } | undefined => {
   if (!search) {
     return undefined;
   }
@@ -608,10 +619,25 @@ export const constructSearch = (
     return {
       search: `"${search}" "${rawId}"`,
       rootSearchFields: ['_id'],
+      searchFields,
     };
   }
 
-  return { search };
+  if (isIncrementalIdSearch(search)) {
+    return {
+      search: search.replace('#', ''),
+      searchFields: ['incremental_id'],
+    };
+  }
+
+  if (isNumberSearch(search)) {
+    return {
+      search,
+      searchFields: searchFields.concat(['incremental_id']),
+    };
+  }
+
+  return { search, searchFields };
 };
 
 /**
