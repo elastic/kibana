@@ -107,6 +107,7 @@ describe('utils', () => {
           },
         ],
       },
+      withIncrementalId: { value: 1 },
     };
 
     const attachmentFramework: AttachmentFrameworkAggsResult = {

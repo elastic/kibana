@@ -3539,6 +3539,12 @@
                       "type": "keyword"
                     }
                   }
+                },
+                "withIncrementalId": {
+                  "type": "long"
+                },
+                "withoutIncrementalId": {
+                  "type": "long"
                 }
               }
             },
