@@ -472,7 +472,6 @@ describe('indexpattern_datasource utils', () => {
                   language: 'kuery',
                   query: 'my:field',
                 },
-                isBucketed: false,
                 label: 'Failures',
                 operationType: 'count',
                 params: {
@@ -487,7 +486,6 @@ describe('indexpattern_datasource utils', () => {
                   language: 'kuery',
                   query: 'my:field',
                 },
-                isBucketed: false,
                 label: 'Success',
                 operationType: 'formula',
                 params: {

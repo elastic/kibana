@@ -93,7 +93,6 @@ function buildOverallMetricOperation<T extends OverallMetricIndexPatternColumn<s
         ),
         dataType: 'number',
         operationType: `overall_${metric}`,
-        isBucketed: false,
         references: referenceIds,
         params: getFormatFromPreviousColumn(previousColumn),
       } as T;

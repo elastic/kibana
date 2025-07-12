@@ -82,6 +82,7 @@ export const rangeOperation: OperationDefinition<
   }),
   priority: 4, // Higher than terms, so numbers get histogram
   input: 'field',
+  isBucketed: true,
   scale: (column) => {
     const type = column.params?.type ?? MODES.Histogram;
     return type === MODES.Histogram ? 'interval' : 'ordinal';
@@ -113,7 +114,6 @@ export const rangeOperation: OperationDefinition<
       dataType: type === MODES.Histogram ? 'number' : 'string', // string for Range
       operationType: 'range',
       sourceField: field.name,
-      isBucketed: true,
       params: {
         includeEmptyRows: columnParams?.includeEmptyRows ?? true,
         type: columnParams?.type ?? MODES.Histogram,

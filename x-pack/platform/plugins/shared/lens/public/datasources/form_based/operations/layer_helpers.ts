@@ -43,6 +43,7 @@ import type { TimeScaleUnit } from '../../../../common/expressions';
 import { documentField } from '../document_field';
 import { isColumnOfType } from './definitions/helpers';
 import type { DataType } from '../../..';
+import { isBucketed } from '../utils';
 
 export interface ColumnAdvancedParams {
   filter?: Query | undefined;
@@ -362,8 +363,8 @@ export function insertNewColumn({
       // like we do for fullReferences to show a seamless transition
     }
     const possibleOperation = operationDefinition.getPossibleOperation(indexPattern);
-    const isBucketed = Boolean(possibleOperation?.isBucketed);
-    const addOperationFn = isBucketed ? addBucket : addMetric;
+    const isBucketedColumn = Boolean(possibleOperation?.isBucketed);
+    const addOperationFn = isBucketedColumn ? addBucket : addMetric;
     const buildColumnFn = columnParams
       ? operationDefinition.buildColumn({ ...baseOptions, layer }, columnParams)
       : operationDefinition.buildColumn({ ...baseOptions, layer });
@@ -417,9 +418,9 @@ export function insertNewColumn({
     if (!possibleOperation) {
       throw new Error(`Can't create operation ${op} because it's incompatible with the data view`);
     }
-    const isBucketed = Boolean(possibleOperation.isBucketed);
+    const isBucketedColumn = Boolean(possibleOperation.isBucketed);
 
-    const addOperationFn = isBucketed ? addBucket : addMetric;
+    const addOperationFn = isBucketedColumn ? addBucket : addMetric;
     const buildColumnFn = columnParams
       ? operationDefinition.buildColumn(
           { ...baseOptions, layer: tempLayer, referenceIds },
@@ -449,8 +450,8 @@ export function insertNewColumn({
         `Tried to create an invalid operation ${operationDefinition.type} using previously selected field ${invalidField.name}`
       );
     }
-    const isBucketed = Boolean(possibleOperation.isBucketed);
-    if (isBucketed) {
+    const isBucketedColumn = Boolean(possibleOperation.isBucketed);
+    if (isBucketedColumn) {
       return updateDefaultLabels(
         addBucket(
           layer,
@@ -495,8 +496,8 @@ export function insertNewColumn({
   }
 
   const newColumn = operationDefinition.buildColumn({ ...baseOptions, layer, field }, columnParams);
-  const isBucketed = Boolean(possibleOperation.isBucketed);
-  const addOperationFn = isBucketed ? addBucket : addMetric;
+  const isBucketedColumn = Boolean(possibleOperation.isBucketed);
+  const addOperationFn = isBucketedColumn ? addBucket : addMetric;
   return updateDefaultLabels(
     addOperationFn(layer, newColumn, columnId, visualizationGroups, targetGroup, respectOrder),
     indexPattern
@@ -1200,9 +1201,8 @@ function addBucket(
   targetGroup?: string,
   respectOrder?: boolean
 ): FormBasedLayer {
-  const [buckets, metrics] = partition(
-    layer.columnOrder,
-    (colId) => layer.columns[colId].isBucketed
+  const [buckets, metrics] = partition(layer.columnOrder, (colId) =>
+    isBucketed(layer.columns[colId])
   );
 
   const oldDateHistogramIndex = layer.columnOrder.findIndex(
@@ -1480,7 +1480,7 @@ export function getColumnOrder(layer: FormBasedLayer): string[] {
     }
   });
 
-  const [aggregations, metrics] = partition(entries, ([, col]) => col.isBucketed);
+  const [aggregations, metrics] = partition(entries, ([, col]) => isBucketed(col));
 
   return aggregations.map(([id]) => id).concat(metrics.map(([id]) => id));
 }
@@ -1491,7 +1491,7 @@ export function getExistingColumnGroups(layer: FormBasedLayer): [string[], strin
     layer.columnOrder,
     (columnId) => layer.columns[columnId] && !('references' in layer.columns[columnId])
   );
-  return [...partition(direct, (columnId) => layer.columns[columnId]?.isBucketed), referenced];
+  return [...partition(direct, (columnId) => isBucketed(layer.columns[columnId])), referenced];
 }
 
 /**

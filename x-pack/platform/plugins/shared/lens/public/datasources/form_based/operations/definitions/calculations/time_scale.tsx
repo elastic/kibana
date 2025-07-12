@@ -15,6 +15,7 @@ import { getErrorsForDateReference } from './utils';
 import type { FieldBasedOperationErrorMessage, OperationDefinition } from '..';
 import { getFormatFromPreviousColumn } from '../helpers';
 import { FormBasedLayer } from '../../../types';
+import { isBucketed } from '../../../utils';
 
 export type TimeScaleIndexPatternColumn = FormattedIndexPatternColumn &
   ReferenceBasedIndexPatternColumn & {
@@ -50,7 +51,7 @@ export const timeScaleOperation: OperationDefinition<TimeScaleIndexPatternColumn
     },
     toExpression: (layer, columnId) => {
       const currentColumn = layer.columns[columnId] as unknown as TimeScaleIndexPatternColumn;
-      const buckets = layer.columnOrder.filter((colId) => layer.columns[colId].isBucketed);
+      const buckets = layer.columnOrder.filter((colId) => isBucketed(layer.columns[colId]));
       const dateColumn = buckets.find(
         (colId) => layer.columns[colId].operationType === 'date_histogram'
       );
@@ -77,7 +78,6 @@ export const timeScaleOperation: OperationDefinition<TimeScaleIndexPatternColumn
         label: NORMALIZE_BY_UNIT_NAME,
         dataType: 'number',
         operationType: NORMALIZE_BY_UNIT_ID,
-        isBucketed: false,
         references: referenceIds,
         params: {
           ...getFormatFromPreviousColumn(previousColumn),

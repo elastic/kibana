@@ -34,7 +34,6 @@ function getStringBasedOperationColumn(field = 'source') {
   return {
     label: `Top value of ${field}`,
     dataType: 'string',
-    isBucketed: true,
     operationType: 'terms',
     params: {
       orderBy: { type: 'alphabetical' },
@@ -53,7 +52,6 @@ function getReferenceBasedOperationColumn(
     label: `Difference of ${subOp} of ${field}`,
     dataType: 'number',
     operationType: 'differences',
-    isBucketed: false,
     references: ['colX'],
   };
 }
@@ -63,7 +61,6 @@ function getManagedBasedOperationColumn(): ReferenceBasedIndexPatternColumn {
     label: 'Static value: 100',
     dataType: 'number',
     operationType: 'static_value',
-    isBucketed: false,
     params: { value: 100 },
     references: [],
   } as ReferenceBasedIndexPatternColumn;
@@ -73,7 +70,6 @@ function getCountOperationColumn(): GenericIndexPatternColumn {
   return {
     label: 'Count',
     dataType: 'number',
-    isBucketed: false,
     sourceField: '___records___',
     operationType: 'count',
   };
@@ -289,7 +285,6 @@ describe('FieldInput', () => {
       layer.columns.col2 = {
         label: 'Min of TSDB counter',
         dataType: 'number',
-        isBucketed: false,
         sourceField: 'bytes_counter',
         operationType: 'min',
       };

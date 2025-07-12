@@ -148,7 +148,6 @@ describe('loader', () => {
             columns: {
               col1: {
                 dataType: 'date',
-                isBucketed: true,
                 label: 'My date',
                 operationType: 'date_histogram',
                 params: {
@@ -158,7 +157,6 @@ describe('loader', () => {
               } as DateHistogramIndexPatternColumn,
               col2: {
                 dataType: 'number',
-                isBucketed: false,
                 label: 'Sum of bytes',
                 operationType: 'sum',
                 sourceField: 'bytes',
@@ -196,7 +194,6 @@ describe('loader', () => {
             columns: {
               col1: {
                 dataType: 'date',
-                isBucketed: true,
                 label: 'My date',
                 operationType: 'date_histogram',
                 params: {
@@ -206,7 +203,6 @@ describe('loader', () => {
               } as DateHistogramIndexPatternColumn,
               col2: {
                 dataType: 'number',
-                isBucketed: false,
                 label: 'Sum of bytes',
                 operationType: 'sum',
                 sourceField: 'bytes',
@@ -251,7 +247,6 @@ describe('loader', () => {
           columns: {
             col1: {
               dataType: 'number',
-              isBucketed: false,
               label: '',
               operationType: 'average',
               sourceField: 'myfield',
@@ -264,7 +259,6 @@ describe('loader', () => {
           columns: {
             col2: {
               dataType: 'number',
-              isBucketed: false,
               label: '',
               operationType: 'average',
               sourceField: 'myfield2',
@@ -353,7 +347,6 @@ describe('loader', () => {
             columns: {
               col1: {
                 dataType: 'string',
-                isBucketed: true,
                 label: '',
                 operationType: 'terms',
                 sourceField: 'bytes',
@@ -383,7 +376,6 @@ describe('loader', () => {
           columns: {
             col1: {
               dataType: 'string',
-              isBucketed: true,
               label: '',
               operationType: 'terms',
               sourceField: 'bytes',
@@ -415,7 +407,6 @@ describe('loader', () => {
             columns: {
               col2: {
                 dataType: 'date',
-                isBucketed: true,
                 label: 'My hist',
                 operationType: 'date_histogram',
                 params: {
@@ -453,7 +444,6 @@ describe('loader', () => {
             columns: {
               col2: {
                 dataType: 'date',
-                isBucketed: true,
                 label: 'My hist',
                 operationType: 'date_histogram',
                 params: {

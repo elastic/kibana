@@ -33,7 +33,6 @@ const getBaseLayer = (): PersistedIndexPatternLayer => ({
   columns: {
     col1: {
       dataType: 'date',
-      isBucketed: true,
       label: '@timestamp',
       operationType: 'date_histogram',
       params: { interval: 'auto' },
@@ -87,7 +86,6 @@ describe('createFormulaPublicApi', () => {
       {
         customLabel: false,
         dataType: 'number',
-        isBucketed: false,
         label: 'count()',
         operationType: 'formula',
         params: { formula: 'count()' },
@@ -98,7 +96,6 @@ describe('createFormulaPublicApi', () => {
         columns: {
           col1: {
             dataType: 'date',
-            isBucketed: true,
             label: '@timestamp',
             operationType: 'date_histogram',
             params: { interval: 'auto' },
@@ -130,7 +127,6 @@ describe('createFormulaPublicApi', () => {
       {
         customLabel: false,
         dataType: 'number',
-        isBucketed: false,
         label: 'count()',
         operationType: 'formula',
         params: { formula: 'count()', format: undefined },
@@ -147,7 +143,6 @@ describe('createFormulaPublicApi', () => {
         columns: {
           col1: {
             dataType: 'date',
-            isBucketed: true,
             label: '@timestamp',
             operationType: 'date_histogram',
             params: { interval: 'auto' },

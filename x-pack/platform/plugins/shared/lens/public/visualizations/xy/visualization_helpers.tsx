@@ -455,7 +455,7 @@ export const isNumericMetric = (op: OperationMetadata) =>
 
 export const isNumericDynamicMetric = (op: OperationMetadata) =>
   isNumericMetric(op) && !op.isStaticValue;
-export const isBucketed = (op: OperationMetadata) => op.isBucketed;
+export const isBucketed = (op: OperationMetadata) => op.isBucketed || false;
 
 export const isTimeChart = (
   dataLayers: XYDataLayerConfig[],

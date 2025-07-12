@@ -88,8 +88,8 @@ function isPartitionVisConfiguration(
   return context.type === 'lnsPie';
 }
 
-const bucketedOperations = (op: OperationMetadata) => op.isBucketed;
-const numberMetricOperations = (op: OperationMetadata) =>
+const bucketedOperations = (op: OperationMetadata) => op.isBucketed || false;
+const numberMetricOperations = (op: OperationMetadata): boolean =>
   !op.isBucketed && op.dataType === 'number' && !op.isStaticValue;
 
 export const isCollapsed = (columnId: string, layer: PieLayerState) =>

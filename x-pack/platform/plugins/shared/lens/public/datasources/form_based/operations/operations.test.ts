@@ -72,7 +72,7 @@ describe('getOperationTypesForField', () => {
             aggregatable: true,
             searchable: true,
           },
-          (op) => op.isBucketed
+          (op) => op.isBucketed || false
         )
       ).toEqual(['terms']);
     });

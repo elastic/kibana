@@ -151,7 +151,6 @@ const initialState: FormBasedPrivateState = {
         col1: {
           label: 'My Op',
           dataType: 'string',
-          isBucketed: true,
           operationType: 'terms',
           sourceField: 'source',
           params: {
@@ -165,7 +164,6 @@ const initialState: FormBasedPrivateState = {
         col2: {
           label: 'My Op',
           dataType: 'number',
-          isBucketed: false,
           operationType: 'average',
           sourceField: 'memory',
         },
