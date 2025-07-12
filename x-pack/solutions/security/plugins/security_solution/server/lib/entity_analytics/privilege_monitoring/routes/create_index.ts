@@ -10,8 +10,13 @@ import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { CreatePrivilegesImportIndexRequestBody } from '../../../../../common/api/entity_analytics/monitoring/create_index.gen';
-import { API_VERSIONS, APP_ID } from '../../../../../common/constants';
+import {
+  API_VERSIONS,
+  APP_ID,
+  ENABLE_PRIVILEGED_USER_MONITORING_SETTING,
+} from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
+import { assertAdvancedSettingsEnabled } from '../../utils/assert_advanced_setting_enabled';
 
 export const createPrivilegeMonitoringIndicesRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -42,6 +47,11 @@ export const createPrivilegeMonitoringIndicesRoute = (
         const siemResponse = buildSiemResponse(response);
         const indexName = request.body.name;
         const indexMode = request.body.mode;
+
+        await assertAdvancedSettingsEnabled(
+          await context.core,
+          ENABLE_PRIVILEGED_USER_MONITORING_SETTING
+        );
 
         try {
           await secSol

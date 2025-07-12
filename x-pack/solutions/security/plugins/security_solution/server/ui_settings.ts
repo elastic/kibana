@@ -43,6 +43,7 @@ import {
   NEWS_FEED_URL_SETTING,
   NEWS_FEED_URL_SETTING_DEFAULT,
   SHOW_RELATED_INTEGRATIONS_SETTING,
+  ENABLE_PRIVILEGED_USER_MONITORING_SETTING,
 } from '../common/constants';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import { LogLevelSetting } from '../common/api/detection_engine/rule_monitoring';
@@ -399,6 +400,32 @@ export const initUiSettings = (
       requiresPageReload: false,
       solution: 'security',
     },
+    ...(experimentalFeatures.privilegedUserMonitoringDisabled
+      ? {}
+      : {
+          [ENABLE_PRIVILEGED_USER_MONITORING_SETTING]: {
+            name: i18n.translate(
+              'xpack.securitySolution.uiSettings.enablePrivilegedUserMonitoringLabel',
+              {
+                defaultMessage: 'Privileged user monitoring',
+              }
+            ),
+            value: false,
+            description: i18n.translate(
+              'xpack.securitySolution.uiSettings.enablePrivilegedUserMonitoringDescription',
+              {
+                defaultMessage:
+                  '<p>Enables the privileged user monitoring dashboard and onboarding experience which are in technical preview.</p>',
+                values: { p: (chunks) => `<p>${chunks}</p>` },
+              }
+            ),
+            type: 'boolean',
+            category: [APP_ID],
+            requiresPageReload: true,
+            schema: schema.boolean(),
+            solution: 'security',
+          },
+        }),
     ...(experimentalFeatures.extendedRuleExecutionLoggingEnabled
       ? {
           [EXTENDED_RULE_EXECUTION_LOGGING_ENABLED_SETTING]: {
