@@ -22,3 +22,4 @@ export * from './secret';
 export * from './setup_technology';
 export * from './fleet_setup_lock';
 export * from './remote_synced_integrations';
+export * from './otelcol_config';

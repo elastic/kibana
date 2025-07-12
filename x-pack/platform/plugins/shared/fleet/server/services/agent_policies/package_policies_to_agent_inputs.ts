@@ -19,6 +19,7 @@ import type {
 import { DEFAULT_OUTPUT } from '../../constants';
 import { pkgToPkgKey } from '../epm/registry';
 import { GLOBAL_DATA_TAG_EXCLUDED_INPUTS } from '../../../common/constants/epm';
+import { OTEL_COLLECTOR_INPUT_TYPE } from '../../../common/constants/otelcol';
 
 const isPolicyEnabled = (packagePolicy: PackagePolicy) => {
   return packagePolicy.enabled && packagePolicy.inputs && packagePolicy.inputs.length;
@@ -43,6 +44,11 @@ export const storedPackagePolicyToAgentInputs = (
 
   packagePolicy.inputs.forEach((input) => {
     if (!input.enabled) {
+      return;
+    }
+
+    // otelcol is a convenience input name that indicates that the input must be resolved as OTel Collector configuration.
+    if (input.type === OTEL_COLLECTOR_INPUT_TYPE) {
       return;
     }
 
