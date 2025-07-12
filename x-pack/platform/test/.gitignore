@@ -1,0 +1,4 @@
+/functional/failure_debug
+/functional/screenshots
+/functional/apps/**/reports/session
+/reporting/configs/failure_debug/
