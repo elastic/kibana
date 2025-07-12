@@ -22,8 +22,8 @@
     "@kbn/screenshot-mode-plugin",
     "@kbn/presentation-containers",
     "@kbn/presentation-publishing",
-    "@kbn/react-kibana-mount",
-    "@kbn/embeddable-enhanced-plugin"
+    "@kbn/embeddable-enhanced-plugin",
+    "@kbn/presentation-util"
   ],
   "exclude": ["target/**/*"]
 }

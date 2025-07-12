@@ -9,17 +9,12 @@
 
 import React from 'react';
 import deepEqual from 'react-fast-compare';
-
-import { OverlayRef } from '@kbn/core/public';
+import { openLazyFlyout } from '@kbn/presentation-util';
 import { i18n } from '@kbn/i18n';
-import { tracksOverlays } from '@kbn/presentation-containers';
-import { apiHasParentApi } from '@kbn/presentation-publishing';
-import { toMountPoint } from '@kbn/react-kibana-mount';
 
 import type { DefaultDataControlState } from '../../../common';
 import { coreServices } from '../../services/kibana_services';
 import type { ControlGroupApi } from '../../control_group/types';
-import { DataControlEditor } from './data_control_editor';
 
 export const openDataControlEditor = <
   State extends DefaultDataControlState = DefaultDataControlState
@@ -37,17 +32,10 @@ export const openDataControlEditor = <
   initialDefaultPanelTitle?: string;
   onSave: ({ type, state }: { type: string; state: Partial<State> }) => void;
   controlGroupApi: ControlGroupApi;
-}): void => {
-  const closeOverlay = (overlayRef: OverlayRef) => {
-    if (apiHasParentApi(controlGroupApi) && tracksOverlays(controlGroupApi.parentApi)) {
-      controlGroupApi.parentApi.clearOverlays();
-    }
-    overlayRef.close();
-  };
-
-  const onCancel = (newState: Partial<State>, overlay: OverlayRef) => {
+}) => {
+  const onCancel = (newState: Partial<State>, closeFlyout: () => void) => {
     if (deepEqual(initialState, newState)) {
-      closeOverlay(overlay);
+      closeFlyout();
       return;
     }
     coreServices.overlays
@@ -70,38 +58,34 @@ export const openDataControlEditor = <
       )
       .then((confirmed) => {
         if (confirmed) {
-          closeOverlay(overlay);
+          closeFlyout();
         }
       });
   };
 
-  const overlay = coreServices.overlays.openFlyout(
-    toMountPoint(
-      <DataControlEditor<State>
-        controlGroupApi={controlGroupApi}
-        initialState={initialState}
-        controlType={controlType}
-        controlId={controlId}
-        initialDefaultPanelTitle={initialDefaultPanelTitle}
-        onCancel={(state) => {
-          onCancel(state, overlay);
-        }}
-        onSave={(state, selectedControlType) => {
-          closeOverlay(overlay);
-          onSave({ type: selectedControlType, state });
-        }}
-      />,
-      coreServices
-    ),
-    {
-      size: 'm',
-      maxWidth: 500,
-      paddingSize: 'm',
-      onClose: () => closeOverlay(overlay),
-    }
-  );
-
-  if (apiHasParentApi(controlGroupApi) && tracksOverlays(controlGroupApi.parentApi)) {
-    controlGroupApi.parentApi.openOverlay(overlay);
-  }
+  openLazyFlyout({
+    core: coreServices,
+    parentApi: controlGroupApi.parentApi,
+    loadContent: async ({ closeFlyout }) => {
+      const { DataControlEditor } = await import('./data_control_editor');
+      return (
+        <DataControlEditor<State>
+          ariaLabelledBy="control-editor-title-input"
+          controlGroupApi={controlGroupApi}
+          initialState={initialState}
+          controlType={controlType}
+          controlId={controlId}
+          initialDefaultPanelTitle={initialDefaultPanelTitle}
+          onCancel={(state) => {
+            onCancel(state, closeFlyout);
+          }}
+          onSave={(state, selectedControlType) => {
+            closeFlyout();
+            onSave({ type: selectedControlType, state });
+          }}
+        />
+      );
+    },
+    triggerId: 'dashboard-controls-menu-button',
+  });
 };

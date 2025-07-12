@@ -58,13 +58,13 @@ export interface ImageEditorFlyoutProps {
   onSave: (imageConfig: ImageConfig) => void;
   initialImageConfig?: ImageConfig;
   user?: AuthenticatedUser;
+  ariaLabelledBy: string;
 }
 
 export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
   const isEditing = !!props.initialImageConfig;
   const { euiTheme } = useEuiTheme();
   const { validateUrl } = useImageViewerContext();
-
   const [fileId, setFileId] = useState<undefined | string>(() =>
     props.initialImageConfig?.src?.type === 'file' ? props.initialImageConfig.src.fileId : undefined
   );
@@ -120,9 +120,9 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
 
   return (
     <>
-      <EuiFlyoutHeader hasBorder={true}>
+      <EuiFlyoutHeader hasBorder={true} data-test-subj="createImageEmbeddableFlyout">
         <EuiTitle size="s">
-          <h2 id="image-editor-flyout-title">
+          <h2 id={props.ariaLabelledBy}>
             {isEditing ? (
               <FormattedMessage
                 id="imageEmbeddable.imageEditor.editImagetitle"

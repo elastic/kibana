@@ -22,7 +22,7 @@ import type { TypeRegistry } from '../../application/type_registry';
 const mockRuleFormFlyout = jest.fn((props) => <div data-test-subj={props['data-test-subj']} />);
 
 jest.mock('@kbn/response-ops-rule-form/flyout', () => ({
-  RuleFormFlyout: (...args: Parameters<typeof mockRuleFormFlyout>) => mockRuleFormFlyout(...args),
+  RuleForm: (...args: Parameters<typeof mockRuleFormFlyout>) => mockRuleFormFlyout(...args),
 }));
 
 function createRegistryMock<
@@ -61,13 +61,14 @@ async function renderFlyout(
     ruleTypeRegistry,
     actionTypeRegistry,
     parentApi,
+    jest.fn(),
     {
       ...initialValues,
       params: defaultParams,
     } as RuleFormData<EsQueryRuleParams>
   );
 
-  return render(<Component />);
+  return render(Component);
 }
 
 describe('Alert rules API', () => {

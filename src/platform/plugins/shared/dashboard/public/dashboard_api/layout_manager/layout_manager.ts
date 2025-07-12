@@ -203,8 +203,8 @@ export function initializeLayoutManager(
     displaySuccessMessage?: boolean,
     gridData?: DashboardPanel['gridData']
   ) => {
-    const uuid = v4();
-    const { panelType: type, serializedState } = panelPackage;
+    const { panelType: type, serializedState, maybePanelId } = panelPackage;
+    const uuid = maybePanelId ?? v4();
     usageCollectionService?.reportUiCounter(DASHBOARD_UI_METRIC_ID, METRIC_TYPE.CLICK, type);
 
     if (serializedState) currentChildState[uuid] = serializedState;

@@ -53,10 +53,12 @@ export const CustomizePanelEditor = ({
   api,
   onClose,
   focusOnTitle,
+  ariaLabelledBy,
 }: {
   onClose: () => void;
   focusOnTitle?: boolean;
   api: CustomizePanelActionApi;
+  ariaLabelledBy?: string;
 }) => {
   /**
    * eventually the panel editor could be made to use state from the API instead (which will allow us to use a push flyout)
@@ -295,7 +297,7 @@ export const CustomizePanelEditor = ({
     <>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
-          <h2>
+          <h2 id={ariaLabelledBy}>
             <FormattedMessage
               id="presentationPanel.action.customizePanel.flyout.title"
               defaultMessage="Settings"

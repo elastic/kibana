@@ -77,11 +77,11 @@ function getDefaultLensApiMock() {
     serializeState: jest.fn(),
     saveToLibrary: jest.fn(async () => 'saved-id'),
     onEdit: jest.fn(),
+    getEditPanel: jest.fn(async () => <div data-test-subj="editLensFlyout" />),
     isEditingEnabled: jest.fn(() => true),
     getTypeDisplayName: jest.fn(() => 'Lens'),
     setTitle: jest.fn(),
     setHideTitle: jest.fn(),
-    mountInlineFlyout: jest.fn(),
     phase$: new BehaviorSubject<PhaseEvent | undefined>({
       id: faker.string.uuid(),
       status: 'rendered',

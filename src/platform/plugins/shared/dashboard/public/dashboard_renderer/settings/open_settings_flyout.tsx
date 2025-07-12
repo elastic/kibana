@@ -9,34 +9,26 @@
 
 import React from 'react';
 
-import { toMountPoint } from '@kbn/react-kibana-mount';
-
+import { openLazyFlyout } from '@kbn/presentation-util';
 import { DashboardApi } from '../../dashboard_api/types';
 import { DashboardContext } from '../../dashboard_api/use_dashboard_api';
 import { coreServices } from '../../services/kibana_services';
-import { DashboardSettingsFlyout } from './settings_flyout';
 
 export function openSettingsFlyout(dashboardApi: DashboardApi) {
-  dashboardApi.openOverlay(
-    coreServices.overlays.openFlyout(
-      toMountPoint(
+  openLazyFlyout({
+    core: coreServices,
+    parentApi: dashboardApi,
+    loadContent: async ({ closeFlyout, ariaLabelledBy }) => {
+      const { DashboardSettingsFlyout } = await import('./settings_flyout');
+      return (
         <DashboardContext.Provider value={dashboardApi}>
-          <DashboardSettingsFlyout
-            onClose={() => {
-              dashboardApi.clearOverlays();
-            }}
-          />
-        </DashboardContext.Provider>,
-        coreServices
-      ),
-      {
-        size: 's',
-        'data-test-subj': 'dashboardSettingsFlyout',
-        onClose: (flyout) => {
-          dashboardApi.clearOverlays();
-          flyout.close();
-        },
-      }
-    )
-  );
+          <DashboardSettingsFlyout onClose={closeFlyout} ariaLabelledBy={ariaLabelledBy} />
+        </DashboardContext.Provider>
+      );
+    },
+    flyoutProps: {
+      'data-test-subj': 'dashboardSettingsFlyout',
+    },
+    triggerId: 'dashboardSettingsButton',
+  });
 }
