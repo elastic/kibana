@@ -14,7 +14,7 @@ import { RuleDetailsFlyout, TabContentPadding } from '../rule_details_flyout';
 import * as ruleDetailsI18n from '../translations';
 import * as i18n from './translations';
 import { RuleDiffTab } from '../rule_diff_tab';
-import { BaseVersionDiffFlyoutSubheader } from './base_version_flyout_subheader';
+import { RuleCustomizationsFlyoutSubheader } from './rule_customizations_flyout_subheader';
 import {
   getRevertRuleErrorStatusCode,
   useRevertPrebuiltRule,
@@ -27,7 +27,7 @@ interface PrebuiltRuleConcurrencyControl {
   revision: number;
 }
 
-interface PrebuiltRulesBaseVersionFlyoutComponentProps {
+interface RuleCustomizationsFlyoutProps {
   currentRule: RuleResponse;
   baseRule: RuleResponse;
   diff: PartialRuleDiff;
@@ -35,19 +35,19 @@ interface PrebuiltRulesBaseVersionFlyoutComponentProps {
   isReverting: boolean;
 }
 
-export const PrebuiltRulesBaseVersionFlyout = memo(function PrebuiltRulesBaseVersionFlyout({
+export const RuleCustomizationsFlyout = memo(function RuleCustomizationsFlyout({
   currentRule,
   baseRule,
   diff,
   closeFlyout,
   isReverting,
-}: PrebuiltRulesBaseVersionFlyoutComponentProps): JSX.Element {
+}: RuleCustomizationsFlyoutProps): JSX.Element {
   const isOutdated = useConcurrencyControl(currentRule);
 
   const { mutateAsync: revertPrebuiltRule, isLoading } = useRevertPrebuiltRule();
   const subHeader = useMemo(
     () => (
-      <BaseVersionDiffFlyoutSubheader
+      <RuleCustomizationsFlyoutSubheader
         currentRule={currentRule}
         diff={diff}
         isOutdated={isOutdated}
@@ -101,8 +101,8 @@ export const PrebuiltRulesBaseVersionFlyout = memo(function PrebuiltRulesBaseVer
     const updatesTab = {
       id: 'updates',
       name: (
-        <EuiToolTip position="top" content={i18n.BASE_VERSION_FLYOUT_UPDATES_TAB_TOOLTIP}>
-          <>{i18n.BASE_VERSION_FLYOUT_UPDATES_TAB_TITLE}</>
+        <EuiToolTip position="top" content={i18n.RULE_CUSTOMIZATIONS_FLYOUT_UPDATES_TAB_TOOLTIP}>
+          <>{i18n.RULE_CUSTOMIZATIONS_FLYOUT_UPDATES_TAB_TITLE}</>
         </EuiToolTip>
       ),
       content: (
@@ -123,7 +123,7 @@ export const PrebuiltRulesBaseVersionFlyout = memo(function PrebuiltRulesBaseVer
     const jsonViewTab = {
       id: 'jsonViewUpdates',
       name: (
-        <EuiToolTip position="top" content={i18n.BASE_VERSION_FLYOUT_JSON_TAB_TOOLTIP}>
+        <EuiToolTip position="top" content={i18n.RULE_CUSTOMIZATIONS_FLYOUT_JSON_TAB_TOOLTIP}>
           <>{ruleDetailsI18n.JSON_VIEW_UPDATES_TAB_LABEL}</>
         </EuiToolTip>
       ),

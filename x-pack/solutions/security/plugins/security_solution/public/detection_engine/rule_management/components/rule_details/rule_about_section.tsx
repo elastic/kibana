@@ -274,7 +274,6 @@ interface PrepareAboutSectionListItemsProps {
   rule: Partial<RuleResponse>;
   hideName?: boolean;
   hideDescription?: boolean;
-  showModifiedFields?: boolean;
 }
 
 // eslint-disable-next-line complexity
@@ -282,7 +281,6 @@ const prepareAboutSectionListItems = ({
   rule,
   hideName,
   hideDescription,
-  showModifiedFields = false,
 }: PrepareAboutSectionListItemsProps): EuiDescriptionListProps['listItems'] => {
   const aboutSectionListItems: EuiDescriptionListProps['listItems'] = [];
 
@@ -311,7 +309,7 @@ const prepareAboutSectionListItems = ({
     aboutSectionListItems.push({
       title: (
         <span data-test-subj="buildingBlockPropertyTitle">
-          <RuleFieldName fieldName="building_block" showModifiedFields={showModifiedFields} />
+          <RuleFieldName fieldName="building_block" />
         </span>
       ),
       description: <BuildingBlock type="default" />,
@@ -322,7 +320,7 @@ const prepareAboutSectionListItems = ({
     aboutSectionListItems.push({
       title: (
         <span data-test-subj="severityPropertyTitle">
-          <RuleFieldName fieldName="severity" showModifiedFields={showModifiedFields} />
+          <RuleFieldName fieldName="severity" />
         </span>
       ),
       description: <SeverityBadge value={rule.severity} data-test-subj="severityPropertyValue" />,
@@ -338,10 +336,7 @@ const prepareAboutSectionListItems = ({
             title:
               index === 0 ? (
                 <span data-test-subj="severityOverridePropertyTitle">
-                  <RuleFieldName
-                    fieldName="severity_mapping"
-                    showModifiedFields={showModifiedFields}
-                  />
+                  <RuleFieldName fieldName="severity_mapping" />
                 </span>
               ) : (
                 ''
@@ -356,7 +351,7 @@ const prepareAboutSectionListItems = ({
     aboutSectionListItems.push({
       title: (
         <span data-test-subj="riskScorePropertyTitle">
-          <RuleFieldName fieldName="risk_score" showModifiedFields={showModifiedFields} />
+          <RuleFieldName fieldName="risk_score" />
         </span>
       ),
       description: <RiskScore riskScore={rule.risk_score} />,
@@ -372,10 +367,7 @@ const prepareAboutSectionListItems = ({
             title:
               index === 0 ? (
                 <span data-test-subj="riskScoreOverridePropertyTitle">
-                  <RuleFieldName
-                    fieldName="risk_score_mapping"
-                    showModifiedFields={showModifiedFields}
-                  />
+                  <RuleFieldName fieldName="risk_score_mapping" />
                 </span>
               ) : (
                 ''
@@ -392,7 +384,7 @@ const prepareAboutSectionListItems = ({
     aboutSectionListItems.push({
       title: (
         <span data-test-subj="referencesPropertyTitle">
-          <RuleFieldName fieldName="references" showModifiedFields={showModifiedFields} />
+          <RuleFieldName fieldName="references" />
         </span>
       ),
       description: <References references={rule.references} />,
@@ -403,7 +395,7 @@ const prepareAboutSectionListItems = ({
     aboutSectionListItems.push({
       title: (
         <span data-test-subj="falsePositivesPropertyTitle">
-          <RuleFieldName fieldName="false_positives" showModifiedFields={showModifiedFields} />
+          <RuleFieldName fieldName="false_positives" />
         </span>
       ),
       description: <FalsePositives falsePositives={rule.false_positives} />,
@@ -414,7 +406,7 @@ const prepareAboutSectionListItems = ({
     aboutSectionListItems.push({
       title: (
         <span data-test-subj="investigationFieldsPropertyTitle">
-          <RuleFieldName fieldName="investigation_fields" showModifiedFields={showModifiedFields} />
+          <RuleFieldName fieldName="investigation_fields" />
         </span>
       ),
       description: (
@@ -434,7 +426,7 @@ const prepareAboutSectionListItems = ({
     aboutSectionListItems.push({
       title: (
         <span data-test-subj="ruleNameOverridePropertyTitle">
-          <RuleFieldName fieldName="rule_name_override" showModifiedFields={showModifiedFields} />
+          <RuleFieldName fieldName="rule_name_override" />
         </span>
       ),
       description: <RuleNameOverride ruleNameOverride={rule.rule_name_override} />,
@@ -445,7 +437,7 @@ const prepareAboutSectionListItems = ({
     aboutSectionListItems.push({
       title: (
         <span data-test-subj="threatPropertyTitle">
-          <RuleFieldName fieldName="threat" showModifiedFields={showModifiedFields} />
+          <RuleFieldName fieldName="threat" />
         </span>
       ),
       description: <Threat threat={rule.threat} />,
@@ -456,10 +448,7 @@ const prepareAboutSectionListItems = ({
     aboutSectionListItems.push({
       title: (
         <span data-test-subj="threatIndicatorPathPropertyTitle">
-          <RuleFieldName
-            fieldName="threat_indicator_path"
-            showModifiedFields={showModifiedFields}
-          />
+          <RuleFieldName fieldName="threat_indicator_path" />
         </span>
       ),
       description: <ThreatIndicatorPath threatIndicatorPath={rule.threat_indicator_path} />,
@@ -470,7 +459,7 @@ const prepareAboutSectionListItems = ({
     aboutSectionListItems.push({
       title: (
         <span data-test-subj="timestampOverridePropertyTitle">
-          <RuleFieldName fieldName="timestamp_override" showModifiedFields={showModifiedFields} />
+          <RuleFieldName fieldName="timestamp_override" />
         </span>
       ),
       description: <TimestampOverride timestampOverride={rule.timestamp_override} />,
@@ -481,7 +470,7 @@ const prepareAboutSectionListItems = ({
     aboutSectionListItems.push({
       title: (
         <span data-test-subj="maxSignalsPropertyTitle">
-          <RuleFieldName fieldName="max_signals" showModifiedFields={showModifiedFields} />
+          <RuleFieldName fieldName="max_signals" />
         </span>
       ),
       description: <MaxSignals maxSignals={rule.max_signals} />,
@@ -492,7 +481,7 @@ const prepareAboutSectionListItems = ({
     aboutSectionListItems.push({
       title: (
         <span data-test-subj="tagsPropertyTitle">
-          <RuleFieldName fieldName="tags" showModifiedFields={showModifiedFields} />
+          <RuleFieldName fieldName="tags" />
         </span>
       ),
       description: <Tags tags={rule.tags} />,
@@ -507,7 +496,6 @@ export interface RuleAboutSectionProps extends React.ComponentProps<typeof EuiDe
   columnWidths?: EuiDescriptionListProps['columnWidths'];
   hideName?: boolean;
   hideDescription?: boolean;
-  showModifiedFields?: boolean;
 }
 
 export const RuleAboutSection = ({
@@ -515,14 +503,12 @@ export const RuleAboutSection = ({
   columnWidths = DEFAULT_DESCRIPTION_LIST_COLUMN_WIDTHS,
   hideName,
   hideDescription,
-  showModifiedFields,
   ...descriptionListProps
 }: RuleAboutSectionProps) => {
   const aboutSectionListItems = prepareAboutSectionListItems({
     rule,
     hideName,
     hideDescription,
-    showModifiedFields,
   });
 
   return (

@@ -40,9 +40,9 @@ import {
 } from '@kbn/securitysolution-data-table';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import {
-  PrebuiltRuleBaseVersionFlyoutContextProvider,
-  usePrebuiltRuleBaseVersionContext,
-} from '../../../rule_management/components/rule_details/base_version_diff/base_version_context';
+  RuleCustomizationsContextProvider,
+  useRuleCustomizationsContext,
+} from '../../../rule_management/components/rule_details/rule_customizations_diff/rule_customizations_context';
 import { useGroupTakeActionsItems } from '../../../../detections/hooks/alerts_table/use_group_take_action_items';
 import { useDataViewSpec } from '../../../../data_view_manager/hooks/use_data_view_spec';
 import {
@@ -343,8 +343,8 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   }, [navigateToApp, ruleId]);
 
   const {
-    actions: { setBaseVersionRule },
-  } = usePrebuiltRuleBaseVersionContext();
+    actions: { setCustomizationsRule: setBaseVersionRule },
+  } = useRuleCustomizationsContext();
 
   // persist rule until refresh is complete
   useEffect(() => {
@@ -762,7 +762,6 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                               rule={rule}
                               isInteractive
                               dataTestSubj="definitionRule"
-                              showModifiedFields
                             />
                           )}
                         </StepPanel>
@@ -770,7 +769,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                       <EuiSpacer />
                       <EuiFlexItem data-test-subj="schedule" component="section" grow={1}>
                         <StepPanel loading={isLoading} title={ruleI18n.SCHEDULE}>
-                          {rule != null && <RuleScheduleSection rule={rule} showModifiedFields />}
+                          {rule != null && <RuleScheduleSection rule={rule} />}
                         </StepPanel>
                       </EuiFlexItem>
                       {hasActions && (
@@ -904,9 +903,9 @@ RuleDetailsPageComponent.displayName = 'RuleDetailsPageComponent';
 const ConnectedRuleDetailsPage = connector(React.memo(RuleDetailsPageComponent));
 
 export const RuleDetailsPage = () => (
-  <PrebuiltRuleBaseVersionFlyoutContextProvider>
+  <RuleCustomizationsContextProvider>
     <ConnectedRuleDetailsPage />
-  </PrebuiltRuleBaseVersionFlyoutContextProvider>
+  </RuleCustomizationsContextProvider>
 );
 
 RuleDetailsPage.displayName = 'RuleDetailsPage';
