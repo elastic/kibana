@@ -8,3 +8,4 @@
  */
 
 export { transformDashboardOut } from './transform_dashboard_out';
+export { transformReferencesOut } from './transform_references_out';

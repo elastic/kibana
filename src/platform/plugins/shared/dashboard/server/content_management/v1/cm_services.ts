@@ -167,7 +167,6 @@ export const panelSchema = schema.object({
     }
   ),
   type: schema.string({ meta: { description: 'The embeddable type' } }),
-  panelRefName: schema.maybe(schema.string()),
   gridData: panelGridDataSchema,
   panelIndex: schema.maybe(
     schema.string({

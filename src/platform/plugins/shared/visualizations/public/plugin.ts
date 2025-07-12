@@ -473,14 +473,20 @@ export class VisualizationsPlugin
     });
     embeddable.registerAddFromLibraryType<VisualizationSavedObjectAttributes>({
       onAdd: async (container, savedObject) => {
+        const { SAVED_OBJECT_REF_NAME } = await import('@kbn/presentation-publishing');
         container.addNewPanel<VisualizeSavedObjectInputState>(
           {
             panelType: VISUALIZE_EMBEDDABLE_TYPE,
             serializedState: {
-              rawState: {
-                savedObjectId: savedObject.id,
-              },
-              references: savedObject.references,
+              rawState: {},
+              references: [
+                ...savedObject.references,
+                {
+                  name: SAVED_OBJECT_REF_NAME,
+                  type: VISUALIZE_EMBEDDABLE_TYPE,
+                  id: savedObject.id,
+                },
+              ],
             },
           },
           true
