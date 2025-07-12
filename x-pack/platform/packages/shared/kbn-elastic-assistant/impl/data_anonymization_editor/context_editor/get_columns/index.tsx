@@ -12,7 +12,9 @@ import styled from 'styled-components';
 
 import { BulkActions } from '../bulk_actions';
 import * as i18n from '../translations';
-import { BatchUpdateListItem, ContextEditorRow, FIELDS } from '../types';
+import { ContextEditorRow, FIELDS } from '../types';
+import { HandleRowChecked } from '../selection/types';
+import type { OnListUpdated } from '../../../assistant/settings/use_settings_updater/use_anonymization_updater';
 
 const AnonymizedButton = styled(EuiButtonEmpty)`
   max-height: 24px;
@@ -20,14 +22,18 @@ const AnonymizedButton = styled(EuiButtonEmpty)`
 
 export const getColumns = ({
   compressed = true,
+  handleRowChecked,
   hasUpdateAIAssistantAnonymization,
   onListUpdated,
   rawData,
+  selectedFields,
 }: {
   compressed?: boolean;
+  handleRowChecked: HandleRowChecked;
   hasUpdateAIAssistantAnonymization: boolean;
-  onListUpdated: (updates: BatchUpdateListItem[]) => void;
+  onListUpdated: OnListUpdated;
   rawData: Record<string, string[]> | null;
+  selectedFields: string[];
 }): Array<EuiBasicTableColumn<ContextEditorRow>> => {
   const actionsColumn: EuiBasicTableColumn<ContextEditorRow> = {
     field: FIELDS.ACTIONS,
@@ -42,7 +48,9 @@ export const getColumns = ({
           disableAnonymize={!row.allowed || (row.allowed && row.anonymized)}
           disableUnanonymize={!row.allowed || (row.allowed && !row.anonymized)}
           onListUpdated={onListUpdated}
-          selected={[row]}
+          selectedField={row.field}
+          selectedFields={selectedFields}
+          handleRowChecked={handleRowChecked}
         />
       );
     },
@@ -72,6 +80,7 @@ export const getColumns = ({
           showLabel={false}
           compressed={compressed}
           onChange={() => {
+            handleRowChecked(field);
             onListUpdated([
               {
                 field,
@@ -96,15 +105,16 @@ export const getColumns = ({
           flush="both"
           iconType={anonymized ? 'eyeClosed' : 'eye'}
           isSelected={anonymized ? true : false}
-          onClick={() =>
+          onClick={() => {
+            handleRowChecked(field);
             onListUpdated([
               {
                 field,
                 operation: anonymized ? 'remove' : 'add',
                 update: rawData == null ? 'defaultAllowReplacement' : 'allowReplacement',
               },
-            ])
-          }
+            ]);
+          }}
         >
           <EuiText size="xs">{anonymized ? i18n.YES : i18n.NO}</EuiText>
         </AnonymizedButton>

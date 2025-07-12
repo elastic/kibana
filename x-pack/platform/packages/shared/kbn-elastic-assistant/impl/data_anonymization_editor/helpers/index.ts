@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common';
 import { SelectedPromptContext } from '../../assistant/prompt_context/types';
 
 export const getIsDataAnonymizable = (rawData: string | Record<string, string[]>): boolean =>
@@ -44,15 +45,15 @@ export const updateSelectedPromptContext = ({
         ...selectedPromptContext,
         contextAnonymizationFields: {
           ...contextAnonymizationFields,
-          data: [
-            ...contextAnonymizationFields.data.filter((f) => f.field !== field),
-
-            {
-              // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-              ...contextAnonymizationFields.data.find((f) => f.field === field)!,
-              allowed: operation === 'add',
+          data: contextAnonymizationFields.data.reduce<FindAnonymizationFieldsResponse['data']>(
+            (acc, currentField) => {
+              if (currentField.field === field) {
+                return [...acc, { ...currentField, allowed: operation === 'add' }];
+              }
+              return [...acc, currentField];
             },
-          ],
+            []
+          ),
         },
       };
     case 'allowReplacement':
@@ -60,15 +61,15 @@ export const updateSelectedPromptContext = ({
         ...selectedPromptContext,
         contextAnonymizationFields: {
           ...contextAnonymizationFields,
-          data: [
-            ...contextAnonymizationFields.data.filter((f) => f.field !== field),
-
-            {
-              // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-              ...contextAnonymizationFields.data.find((f) => f.field === field)!,
-              anonymized: operation === 'add',
+          data: contextAnonymizationFields.data.reduce<FindAnonymizationFieldsResponse['data']>(
+            (acc, currentField) => {
+              if (currentField.field === field) {
+                return [...acc, { ...currentField, anonymized: operation === 'add' }];
+              }
+              return [...acc, currentField];
             },
-          ],
+            []
+          ),
         },
       };
     default:
