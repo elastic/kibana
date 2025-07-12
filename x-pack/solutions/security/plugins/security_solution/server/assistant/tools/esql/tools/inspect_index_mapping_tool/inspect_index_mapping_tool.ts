@@ -25,11 +25,11 @@ export const toolDetails = {
 Index mapping:
 {"user":{"address":{"city":{"name":{"type":"keyword"},"zip":{"type":"integer"}}}}}}
 
-Call #1:
-Property: "" // empty string to get the root
+Function Call #1:
+Property: "." // to get the root of the index mapping
 Function response: {"user":{"address":{"city":"...","zip":"..."}}}
 
-Call #2:
+Function Call #2:
 Property: "user.address.city"
 Function response: {"name":{"type":"keyword"}
 `,
@@ -66,8 +66,9 @@ export const getInspectIndexMappingTool = ({
       schema: z.object({
         property: z
           .string()
+          .default('.')
           .describe(
-            `The property to inspect. The property should be a dot-separated path to the field in the index mapping. For example, "user.name" or "user.address.city". Empty string will return the root.`
+            `The property to inspect. The property should be a dot-separated path to the field in the index mapping. For example, "user.name" or "user.address.city". Pass "." to get the root.`
           ),
       }),
     }
