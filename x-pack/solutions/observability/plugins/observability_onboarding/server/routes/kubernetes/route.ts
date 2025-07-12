@@ -17,7 +17,6 @@ import { hasLogMonitoringPrivileges } from '../../lib/api_key/has_log_monitoring
 import { createShipperApiKey } from '../../lib/api_key/create_shipper_api_key';
 import { getAgentVersionInfo } from '../../lib/get_agent_version';
 import { createManagedOtlpServiceApiKey } from '../../lib/api_key/create_managed_otlp_service_api_key';
-import { getManagedOtlpServiceUrl } from '../../lib/get_managed_otlp_service_url';
 
 export interface CreateKubernetesOnboardingFlowRouteResponse {
   apiKeyEncoded: string;
@@ -90,7 +89,7 @@ const createKubernetesOnboardingFlowRoute = createObservabilityOnboardingServerR
       apiKeyEncoded,
       elasticsearchUrl: elasticsearchUrlList.length > 0 ? elasticsearchUrlList[0] : '',
       elasticAgentVersionInfo,
-      managedOtlpServiceUrl: await getManagedOtlpServiceUrl(resources),
+      managedOtlpServiceUrl: plugins.observability.setup.managedOtlpServiceUrl ?? '',
     };
   },
 });
