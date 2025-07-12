@@ -11,20 +11,16 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { EuiBadge } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common';
 import { type FieldFormatConvertFunction } from '@kbn/field-formats-plugin/common';
-import { type VisParams } from '@kbn/visualizations-plugin/common';
 import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { FormatOverrides } from './helpers';
+import { getSecondaryMetricInfo } from './secondary_metric_info';
+import type {
+  SecondaryMetricInfoArgs as SecondaryMetricProps,
+  TrendConfig,
+} from './secondary_metric_info';
 
-export interface TrendConfig {
-  icon: boolean;
-  value: boolean;
-  palette: [string, string, string];
-  baselineValue: number | undefined;
-  borderColor?: string;
-  compareToPrimary: boolean;
-}
+// TODO: Remove helper functions below when all logic is moved to getSecondaryMetricInfo
 
 const notAvailable = i18n.translate('expressionMetricVis.secondaryMetric.notAvailable', {
   defaultMessage: 'N/A',
@@ -48,7 +44,7 @@ function getBadgeConfiguration(trendConfig: TrendConfig, deltaValue: number) {
   }
   if (deltaValue < 0) {
     return {
-      icon: trendConfig.icon ? '\u{2193}' : undefined, // ↓
+      icon: trendConfig.showIcon ? '\u{2193}' : undefined, // ↓
       iconLabel: i18n.translate('expressionMetricVis.secondaryMetric.trend.decrease', {
         defaultMessage: 'downward direction',
       }),
@@ -57,7 +53,7 @@ function getBadgeConfiguration(trendConfig: TrendConfig, deltaValue: number) {
   }
   if (deltaValue > 0) {
     return {
-      icon: trendConfig.icon ? '\u{2191}' : undefined, // ↑
+      icon: trendConfig.showIcon ? '\u{2191}' : undefined, // ↑
       iconLabel: i18n.translate('expressionMetricVis.secondaryMetric.trend.increase', {
         defaultMessage: 'upward direction',
       }),
@@ -65,7 +61,7 @@ function getBadgeConfiguration(trendConfig: TrendConfig, deltaValue: number) {
     };
   }
   return {
-    icon: trendConfig.icon ? '\u{003D}' : undefined, // =
+    icon: trendConfig.showIcon ? '\u{003D}' : undefined, // =
     iconLabel: i18n.translate('expressionMetricVis.secondaryMetric.trend.stable', {
       defaultMessage: 'stable',
     }),
@@ -152,31 +148,38 @@ function SecondaryMetricValue({
       trendConfig.compareToPrimary
     );
     // If no value is shown and no icon should be shown (i.e. N/A) then do not render the badge at all
-    if (trendConfig.icon && !trendConfig.value && !icon) {
+    if (trendConfig.showIcon && !trendConfig.showValue && !icon) {
       return (
         <span
           data-test-subj={`expressionMetricVis-secondaryMetric-badge-${rawValue}`}
-          aria-label={getTrendDescription(trendConfig.value, icon != null, valueToShow, iconLabel)}
+          aria-label={getTrendDescription(
+            trendConfig.showValue,
+            icon != null,
+            valueToShow,
+            iconLabel
+          )}
         />
       );
     }
+
     return (
       <EuiBadge
         aria-label={
           // Make the information accessible also for screen readers
           // so show it only when icon only mode to avoid to be reduntant
-          getTrendDescription(trendConfig.value, icon != null, valueToShow, iconLabel)
+          getTrendDescription(trendConfig.showValue, icon != null, valueToShow, iconLabel)
         }
         color={trendColor}
         data-test-subj={`expressionMetricVis-secondaryMetric-badge-${rawValue}`}
         css={badgeCss}
       >
-        {trendConfig.value ? valueToShow : null}
-        {trendConfig.value && trendConfig.icon && icon ? ' ' : ''}
-        {trendConfig.icon && icon ? icon : null}
+        {trendConfig.showValue ? valueToShow : null}
+        {trendConfig.showValue && trendConfig.showIcon && icon ? ' ' : ''}
+        {trendConfig.showIcon && icon ? icon : null}
       </EuiBadge>
     );
   }
+
   if (color) {
     return (
       <EuiBadge
@@ -188,20 +191,7 @@ function SecondaryMetricValue({
       </EuiBadge>
     );
   }
-  return formattedValue;
-}
-
-export interface SecondaryMetricProps {
-  columns: DatatableColumn[];
-  row: DatatableRow;
-  config: Pick<VisParams, 'metric' | 'dimensions'>;
-  trendConfig?: TrendConfig;
-  color?: string;
-  getMetricFormatter: (
-    accessor: string,
-    columns: DatatableColumn[],
-    formatOverrides?: FormatOverrides | undefined
-  ) => FieldFormatConvertFunction;
+  return <span>{formattedValue}</span>;
 }
 
 function getMetricColumnAndFormatter(
@@ -243,8 +233,11 @@ export function SecondaryMetric({
   config,
   getMetricFormatter,
   trendConfig,
-  color,
+  staticColor,
 }: SecondaryMetricProps) {
+  const props = { columns, row, config, getMetricFormatter, trendConfig, staticColor };
+  const data = getSecondaryMetricInfo(props);
+
   const { metricFormatter, metricColumn } =
     getMetricColumnAndFormatter(
       columns,
@@ -252,20 +245,67 @@ export function SecondaryMetric({
       getMetricFormatter,
       getEnhancedNumberSignFormatter(trendConfig)
     ) || {};
+
+  // TODO: Check if None we should show prefix
   const prefix = config.metric.secondaryPrefix ?? metricColumn?.name;
   const value = metricColumn ? row[metricColumn.id] : undefined;
 
+  const shouldShowBadge = !!data.badgeColor;
+
   return (
-    <span data-test-subj="metric-secondary-element">
-      {prefix}
+    <span
+      {...(data.description ? { 'aria-describedby': data.description } : {})}
+      css={styles.wrapper}
+      data-test-subj="metric-secondary-element"
+    >
+      {/* {prefix}
       {prefix ? ' ' : ''}
       <SecondaryMetricValue
         rawValue={value}
         formattedValue={metricFormatter?.(value)}
-        trendConfig={color ? undefined : trendConfig}
-        color={color}
+        trendConfig={staticColor ? undefined : trendConfig}
+        color={staticColor}
         formatter={metricFormatter}
-      />
+      /> */}
+      <span css={styles.label}>{data.label}</span>
+      {shouldShowBadge ? (
+        <EuiBadge color={data.badgeColor} css={[styles.badge, styles.value]}>
+          {data.value}
+        </EuiBadge>
+      ) : (
+        <span css={styles.value}>{data.value}</span>
+      )}
     </span>
   );
 }
+
+const styles = {
+  wrapper: css({
+    display: 'flex',
+    alignItems: 'center',
+    minWidth: 0,
+    overflow: 'hidden',
+    whiteSpace: 'nowrap',
+    width: '100%',
+  }),
+  label: css({
+    flex: '1 1 20%',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+    minWidth: 0,
+    marginRight: 4,
+  }),
+  badge: css({
+    fontSize: 'inherit',
+    lineHeight: 'inherit',
+  }),
+  value: css({
+    flex: '0 1 auto',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+    minWidth: 0,
+    maxWidth: '80%',
+  }),
+};

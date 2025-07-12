@@ -35,10 +35,11 @@ import { useResizeObserver, useEuiScrollBar, EuiIcon, useEuiTheme } from '@elast
 import { AllowedChartOverrides, AllowedSettingsOverrides } from '@kbn/charts-plugin/common';
 import { type ChartSizeEvent, getOverridesFor } from '@kbn/chart-expressions-common';
 import { DEFAULT_TRENDLINE_NAME } from '../../common/constants';
-import { VisParams } from '../../common';
+import { MetricVisParam, VisParams } from '../../common';
 import { getThemeService, getFormatService } from '../services';
 import { getColor, getMetricFormatter } from './helpers';
-import { SecondaryMetric, TrendConfig } from './secondary_metric';
+import { SecondaryMetric } from './secondary_metric';
+import { TrendConfig } from './secondary_metric_info';
 
 const buildFilterEvent = (rowIdx: number, columnIdx: number, table: Datatable) => {
   const column = table.columns[columnIdx];
@@ -61,6 +62,22 @@ const getIcon =
   (type: string) =>
   ({ width, height, color }: { width: number; height: number; color: string }) =>
     <EuiIcon type={type} fill={color} css={{ width, height }} />;
+
+function buildTrendConfig(
+  { palette, visuals, baseline }: MetricVisParam['secondaryTrend'],
+  value: number | string
+) {
+  if (!palette) return undefined;
+
+  return {
+    showIcon: visuals !== 'value',
+    showValue: visuals !== 'icon',
+    baselineValue: baseline === 'primary' && typeof value === 'number' ? value : Number(baseline),
+    palette,
+    borderColor: undefined,
+    compareToPrimary: baseline === 'primary',
+  } satisfies TrendConfig;
+}
 
 export interface MetricVisComponentProps {
   data: Datatable;
@@ -165,19 +182,7 @@ export const MetricVis = ({
           ) ?? defaultColor
         : config.metric.color ?? defaultColor;
 
-    const trendConfig: TrendConfig | undefined = config.metric.secondaryTrend.palette
-      ? {
-          icon: config.metric.secondaryTrend.visuals !== 'value',
-          value: config.metric.secondaryTrend.visuals !== 'icon',
-          baselineValue:
-            config.metric.secondaryTrend.baseline === 'primary' && typeof value === 'number'
-              ? value
-              : Number(config.metric.secondaryTrend.baseline),
-          palette: config.metric.secondaryTrend.palette,
-          borderColor: undefined,
-          compareToPrimary: config.metric.secondaryTrend.baseline === 'primary',
-        }
-      : undefined;
+    const trendConfig = buildTrendConfig(config.metric.secondaryTrend, value);
 
     if (typeof value !== 'number') {
       const nonNumericMetricBase: Omit<MetricWText, 'value'> = {
@@ -190,7 +195,7 @@ export const MetricVis = ({
             config={config}
             columns={data.columns}
             getMetricFormatter={getMetricFormatter}
-            color={config.metric.secondaryColor}
+            staticColor={config.metric.secondaryColor}
             trendConfig={
               hasDynamicColoring && trendConfig
                 ? { ...trendConfig, borderColor: color }
@@ -217,7 +222,7 @@ export const MetricVis = ({
           config={config}
           columns={data.columns}
           getMetricFormatter={getMetricFormatter}
-          color={config.metric.secondaryColor}
+          staticColor={config.metric.secondaryColor}
           trendConfig={
             hasDynamicColoring && trendConfig ? { ...trendConfig, borderColor: color } : trendConfig
           }
@@ -298,12 +303,15 @@ export const MetricVis = ({
   return (
     <div
       ref={scrollContainerRef}
-      css={css`
-        height: 100%;
-        width: 100%;
-        overflow-y: auto;
-        ${useEuiScrollBar()}
-      `}
+      css={[
+        styles.layout,
+        css`
+          height: 100%;
+          width: 100%;
+          overflow-y: auto;
+          ${useEuiScrollBar()}
+        `,
+      ]}
     >
       <div
         css={css`
@@ -360,4 +368,18 @@ export const MetricVis = ({
       </div>
     </div>
   );
+};
+
+const styles = {
+  layout: css({
+    '.echMetricText__valuesBlock': {
+      display: 'flex',
+      minWidth: 0,
+      maxWidth: '100%',
+    },
+    '.echMetricText__valuesBlock > div': {
+      minWidth: 'inherit',
+      maxWidth: 'inherit',
+    },
+  }),
 };
