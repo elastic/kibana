@@ -15,209 +15,99 @@ import {
   getCreateExceptionListMinimalSchemaMock,
 } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
 import { getCreateExceptionListItemMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_item_schema.mock';
-import { ROLES } from '@kbn/security-solution-plugin/common/test';
 import { getUpdateMinimalExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/request/update_exception_list_item_schema.mock';
 import { UpdateExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import TestAgent from 'supertest/lib/agent';
 import { deleteAllExceptions } from '../../../../../lists_and_exception_lists/utils';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
-  const supertest = getService('supertest');
   const log = getService('log');
-  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const utils = getService('securitySolutionUtils');
 
-  // Skipping in MKI due to roles testing not yet being available
-  describe('@serverless @skipInServerlessMKI exception item comments - serverless specific behavior', () => {
-    // FLAKY: https://github.com/elastic/kibana/issues/181507
-    describe.skip('Rule Exceptions', () => {
-      afterEach(async () => {
-        await deleteAllExceptions(supertest, log);
-      });
+  let admin: TestAgent;
+  let platformEngineer: TestAgent;
 
-      it('Add comment on a new exception, add another comment has unicode from a different user', async () => {
-        await supertest
-          .post(EXCEPTION_LIST_URL)
-          .set('kbn-xsrf', 'true')
-          .send(getCreateExceptionListDetectionSchemaMock())
-          .expect(200);
-
-        const { os_types, ...ruleException } = getCreateExceptionListItemMinimalSchemaMock();
-
-        // Add comment by another user
-        await supertestWithoutAuth
-          .post(EXCEPTION_LIST_ITEM_URL)
-          .auth(ROLES.t3_analyst, 'changeme')
-          .set('kbn-xsrf', 'true')
-          .send({
-            ...ruleException,
-            comments: [{ comment: 'Comment by user@t3_analyst' }],
-          })
-          .expect(200);
-        const { body: items } = await supertest
-          .get(
-            `${EXCEPTION_LIST_ITEM_URL}/_find?list_id=${
-              getCreateExceptionListMinimalSchemaMock().list_id
-            }`
-          )
-          .set('kbn-xsrf', 'true')
-          .send()
-          .expect(200);
-
-        // Validate the first user comment
-        expect(items.total).toEqual(1);
-        const [item] = items.data;
-        const t3AnalystComments = item.comments;
-        expect(t3AnalystComments.length).toEqual(1);
-
-        expect(t3AnalystComments[0]).toEqual(
-          expect.objectContaining({
-            created_by: 't3_analyst',
-            comment: 'Comment by user@t3_analyst',
-          })
-        );
-
-        const expectedId = item.id;
-
-        // Update exception comment by different user
-        const { item_id: _, ...updateItemWithoutItemId } =
-          getUpdateMinimalExceptionListItemSchemaMock();
-
-        const updatePayload: UpdateExceptionListItemSchema = {
-          ...updateItemWithoutItemId,
-          comments: [
-            ...(updateItemWithoutItemId.comments || []),
-            { comment: 'Comment by elastic_serverless' },
-          ],
-          id: expectedId,
-        };
-        await supertest
-          .put(EXCEPTION_LIST_ITEM_URL)
-          .set('kbn-xsrf', 'true')
-          .send(updatePayload)
-          .expect(200);
-
-        const { body: itemsAfterUpdate } = await supertest
-          .get(
-            `${EXCEPTION_LIST_ITEM_URL}/_find?list_id=${
-              getCreateExceptionListMinimalSchemaMock().list_id
-            }`
-          )
-          .set('kbn-xsrf', 'true')
-          .send()
-          .expect(200);
-
-        const [itemAfterUpdate] = itemsAfterUpdate.data;
-        const comments = itemAfterUpdate.comments;
-
-        expect(comments.length).toEqual(2);
-
-        expect(comments).toEqual(
-          expect.arrayContaining([
-            expect.objectContaining({
-              created_by: 't3_analyst',
-              comment: 'Comment by user@t3_analyst',
-            }),
-            expect.objectContaining({
-              created_by: 'elastic_serverless',
-              comment: 'Comment by elastic_serverless',
-            }),
-          ])
-        );
-      });
+  describe('@serverless exception item comments - serverless specific behavior', () => {
+    before(async () => {
+      admin = await utils.createSuperTest('admin');
+      platformEngineer = await utils.createSuperTest('platform_engineer');
+      await deleteAllExceptions(admin, log);
     });
-    describe('Endpoint Exceptions', () => {
-      afterEach(async () => {
-        await deleteAllExceptions(supertest, log);
-      });
 
-      it('Add comment on a new exception, add another comment has unicode from a different user', async () => {
-        await supertest
-          .post(EXCEPTION_LIST_URL)
-          .set('kbn-xsrf', 'true')
-          .send(getCreateExceptionListMinimalSchemaMock())
-          .expect(200);
+    afterEach(async () => {
+      await deleteAllExceptions(admin, log);
+    });
 
-        // Add comment by the t3 analyst
-        await supertestWithoutAuth
-          .post(EXCEPTION_LIST_ITEM_URL)
-          .auth(ROLES.t3_analyst, 'changeme')
-          .set('kbn-xsrf', 'true')
-          .send({
-            ...getCreateExceptionListItemMinimalSchemaMock(),
-            comments: [{ comment: 'Comment by user@t3_analyst' }],
-          })
-          .expect(200);
+    it('Add comment on a new exception, add another comment has unicode from a different user', async () => {
+      await platformEngineer
+        .post(EXCEPTION_LIST_URL)
+        .send(getCreateExceptionListDetectionSchemaMock())
+        .expect(200);
 
-        const { body: items } = await supertest
-          .get(
-            `${EXCEPTION_LIST_ITEM_URL}/_find?list_id=${
-              getCreateExceptionListMinimalSchemaMock().list_id
-            }`
-          )
-          .set('kbn-xsrf', 'true')
-          .send()
-          .expect(200);
+      const { os_types, ...ruleException } = getCreateExceptionListItemMinimalSchemaMock();
 
-        // Validate the first user comment
-        expect(items.total).toEqual(1);
-        const [item] = items.data;
-        const t3AnalystComments = item.comments;
-        expect(t3AnalystComments.length).toEqual(1);
+      // Add item with comment by platformEngineer
+      await platformEngineer
+        .post(EXCEPTION_LIST_ITEM_URL)
+        .send({
+          ...ruleException,
+          comments: [{ comment: 'Comment by platformEngineer' }],
+        })
+        .expect(200);
+      const { body: items } = await platformEngineer
+        .get(
+          `${EXCEPTION_LIST_ITEM_URL}/_find?list_id=${
+            getCreateExceptionListMinimalSchemaMock().list_id
+          }`
+        )
+        .send()
+        .expect(200);
 
-        expect(t3AnalystComments[0]).toEqual(
+      const platformEngineerId = items.data[0].comments[0].created_by;
+
+      expect(items.data[0].comments[0]).toEqual(
+        expect.objectContaining({
+          created_by: platformEngineerId,
+          comment: 'Comment by platformEngineer',
+        })
+      );
+
+      // Add exception comment by different user
+      const { item_id: _, ...updateItemWithoutItemId } =
+        getUpdateMinimalExceptionListItemSchemaMock();
+
+      const updatePayload: UpdateExceptionListItemSchema = {
+        ...updateItemWithoutItemId,
+        comments: [{ comment: 'Comment by admin' }],
+        id: items.data[0].id,
+      };
+      await admin.put(EXCEPTION_LIST_ITEM_URL).send(updatePayload).expect(200);
+      const { body: itemsAfterUpdate } = await admin
+        .get(
+          `${EXCEPTION_LIST_ITEM_URL}/_find?list_id=${
+            getCreateExceptionListMinimalSchemaMock().list_id
+          }`
+        )
+        .send()
+        .expect(200);
+
+      const [itemAfterUpdate] = itemsAfterUpdate.data;
+      const comments = itemAfterUpdate.comments;
+
+      expect(comments.length).toEqual(2);
+      expect(comments).toEqual(
+        expect.arrayContaining([
           expect.objectContaining({
-            created_by: 't3_analyst',
-            comment: 'Comment by user@t3_analyst',
-          })
-        );
-
-        const expectedId = item.id;
-
-        // Update exception comment by different user
-        const { item_id: _, ...updateItemWithoutItemId } =
-          getUpdateMinimalExceptionListItemSchemaMock();
-
-        const updatePayload: UpdateExceptionListItemSchema = {
-          ...updateItemWithoutItemId,
-          comments: [
-            ...(updateItemWithoutItemId.comments || []),
-            { comment: 'Comment by elastic_serverless' },
-          ],
-          id: expectedId,
-        };
-        await supertest
-          .put(EXCEPTION_LIST_ITEM_URL)
-          .set('kbn-xsrf', 'true')
-          .send(updatePayload)
-          .expect(200);
-
-        const { body: itemsAfterUpdate } = await supertest
-          .get(
-            `${EXCEPTION_LIST_ITEM_URL}/_find?list_id=${
-              getCreateExceptionListMinimalSchemaMock().list_id
-            }`
-          )
-          .set('kbn-xsrf', 'true')
-          .send()
-          .expect(200);
-        const [itemAfterUpdate] = itemsAfterUpdate.data;
-        const comments = itemAfterUpdate.comments;
-
-        expect(comments.length).toEqual(2);
-
-        expect(comments).toEqual(
-          expect.arrayContaining([
-            expect.objectContaining({
-              created_by: 't3_analyst',
-              comment: 'Comment by user@t3_analyst',
-            }),
-            expect.objectContaining({
-              created_by: 'elastic_serverless',
-              comment: 'Comment by elastic_serverless',
-            }),
-          ])
-        );
-      });
+            created_by: platformEngineerId,
+            comment: 'Comment by platformEngineer',
+          }),
+          expect.objectContaining({
+            created_by: comments[1].created_by,
+            comment: 'Comment by admin',
+          }),
+        ])
+      );
     });
   });
 };
