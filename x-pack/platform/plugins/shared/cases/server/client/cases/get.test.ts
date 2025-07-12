@@ -6,7 +6,8 @@
  */
 
 import { createCasesClientMockArgs } from '../mocks';
-import { getCasesByAlertID, getTags, getReporters, getCategories } from './get';
+import { getCasesByAlertID, getTags, getReporters, getCategories, resolve } from './get';
+import { mockCaseAttributes } from './mock';
 
 describe('get', () => {
   const clientArgs = createCasesClientMockArgs();
@@ -51,6 +52,45 @@ describe('get', () => {
       await expect(getCategories({ owner: 'cases', foo: 'bar' }, clientArgs)).rejects.toThrow(
         'invalid keys "foo"'
       );
+    });
+  });
+
+  describe('resolve', () => {
+    const uuId = 'eadd59eb-0bf1-4b17-ab30-24c5287e5b41';
+    const incrementalId = '42';
+    it('resolves by incremental_id', async () => {
+      clientArgs.services.caseService.getResolveCaseByIncrementalId.mockResolvedValue({
+        saved_object: {
+          id: '123',
+          attributes: mockCaseAttributes,
+          type: '',
+          references: [],
+        },
+        outcome: 'exactMatch',
+      });
+
+      await resolve({ id: incrementalId }, clientArgs);
+      expect(clientArgs.services.caseService.getResolveCaseByIncrementalId).toHaveBeenCalledWith({
+        incremental_id: incrementalId,
+      });
+    });
+
+    it('resolves by uuId', async () => {
+      clientArgs.services.caseService.getResolveCase.mockResolvedValue({
+        saved_object: {
+          id: '123',
+          attributes: mockCaseAttributes,
+          type: '',
+          references: [],
+        },
+        outcome: 'exactMatch',
+      });
+
+      await resolve({ id: uuId }, clientArgs);
+      expect(clientArgs.services.caseService.getResolveCaseByIncrementalId).not.toHaveBeenCalled();
+      expect(clientArgs.services.caseService.getResolveCase).toHaveBeenCalledWith({
+        id: uuId,
+      });
     });
   });
 });

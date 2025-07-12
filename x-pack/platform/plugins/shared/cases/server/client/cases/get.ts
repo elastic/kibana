@@ -225,6 +225,7 @@ export const get = async (
   }
 };
 
+const incrementalIdRegex = /^\d{1,25}$/;
 /**
  * Retrieves a case resolving its ID and optionally loading its comments.
  *
@@ -241,12 +242,15 @@ export const resolve = async (
   } = clientArgs;
 
   try {
+    const idIsPotentiallyIncrementalId = incrementalIdRegex.test(id);
     const {
       saved_object: resolvedSavedObject,
       ...resolveData
-    }: SavedObjectsResolveResponse<CaseAttributes> = await caseService.getResolveCase({
-      id,
-    });
+    }: SavedObjectsResolveResponse<CaseAttributes> = await (idIsPotentiallyIncrementalId
+      ? caseService.getResolveCaseByIncrementalId({ incremental_id: id })
+      : caseService.getResolveCase({
+          id,
+        }));
 
     await authorization.ensureAuthorized({
       operation: Operations.resolveCase,

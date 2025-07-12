@@ -7,13 +7,44 @@
 
 import type { CaseUserActionsDeprecatedResponse } from '../../../common/types/api';
 import type { AlertAttachment, Attachment } from '../../../common/types/domain';
+import type { CaseTransformedAttributes } from '../../common/types/case';
 import {
   AttachmentType,
+  CaseSeverity,
+  CaseStatuses,
   ConnectorTypes,
   ExternalReferenceStorageType,
   UserActionActions,
 } from '../../../common/types/domain';
 import { SECURITY_SOLUTION_OWNER, FILE_ATTACHMENT_TYPE } from '../../../common/constants';
+
+export const mockCaseAttributes: CaseTransformedAttributes = {
+  title: 'Test Case',
+  tags: [],
+  description: 'This is used for testing',
+  connector: {
+    id: '.none',
+    name: 'None',
+    type: ConnectorTypes.none,
+    fields: null,
+  },
+  customFields: [],
+  observables: [],
+  settings: { syncAlerts: true },
+  severity: CaseSeverity.LOW,
+  owner: SECURITY_SOLUTION_OWNER,
+  assignees: [{ uid: '1' }],
+  status: CaseStatuses.open,
+  created_at: '',
+  closed_at: '',
+  created_by: { email: 'a@b.com', full_name: 'wef', username: 'a' },
+  closed_by: null,
+  updated_at: null,
+  updated_by: null,
+  category: 'test',
+  duration: 0,
+  external_service: null,
+};
 
 export const updateUser = {
   updated_at: '2020-03-13T08:34:53.450Z',
