@@ -68,7 +68,7 @@ export const SortFields = () => {
     },
     {
       label: ALPHABETICAL_LABEL,
-      value: `${ConfigKey.NAME}.keyword`,
+      value: `${ConfigKey.NAME}`,
       checked: sortField === `${ConfigKey.NAME}.keyword`,
       defaultSortOrder: 'asc',
       onClick: () => {
@@ -116,7 +116,7 @@ export const SortFields = () => {
 
 const getOrderContent = (sortField: MonitorListSortField) => {
   switch (sortField) {
-    case `${ConfigKey.NAME}.keyword`:
+    case `${ConfigKey.NAME}`:
       return {
         asc: SORT_ALPHABETICAL_ASC,
         desc: SORT_ALPHABETICAL_DESC,

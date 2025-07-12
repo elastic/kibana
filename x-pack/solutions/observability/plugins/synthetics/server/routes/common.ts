@@ -13,8 +13,11 @@ import { useLogicalAndFields } from '../../common/constants';
 import { RouteContext } from './types';
 import { MonitorSortFieldSchema } from '../../common/runtime_types/monitor_management/sort_field';
 import { getAllLocations } from '../synthetics_service/get_all_locations';
-import { PrivateLocation, ServiceLocation } from '../../common/runtime_types';
-import { syntheticsMonitorAttributes } from '../../common/types/saved_objects';
+import { PrivateLocation, ServiceLocation, ConfigKey } from '../../common/runtime_types';
+import {
+  legacyMonitorAttributes,
+  syntheticsMonitorAttributes,
+} from '../../common/types/saved_objects';
 
 const StringOrArraySchema = schema.maybe(
   schema.oneOf([schema.string(), schema.arrayOf(schema.string())])
@@ -86,7 +89,7 @@ interface Filters {
 
 export const getMonitorFilters = async (
   context: RouteContext<Record<string, any>, OverviewStatusQuery>,
-  attr: string = syntheticsMonitorAttributes
+  attributesList: string[] = [syntheticsMonitorAttributes, legacyMonitorAttributes]
 ) => {
   const {
     tags,
@@ -100,19 +103,21 @@ export const getMonitorFilters = async (
   } = context.request.query;
   const locations = await parseLocationFilter(context, queryLocations);
 
-  return parseArrayFilters(
-    {
-      filter,
-      tags,
-      monitorTypes,
-      projects,
-      schedules,
-      monitorQueryIds,
-      locations,
-    },
-    useLogicalAndFor,
-    attr
-  );
+  return {
+    filtersStr: parseArrayFilters(
+      {
+        filter,
+        tags,
+        monitorTypes,
+        projects,
+        schedules,
+        monitorQueryIds,
+        locations,
+      },
+      { useLogicalAndFor, attributesList }
+    ),
+    locationIds: locations,
+  };
 };
 
 export const parseArrayFilters = (
@@ -125,49 +130,78 @@ export const parseArrayFilters = (
     schedules,
     monitorQueryIds,
     locations,
-  }: Filters,
-  useLogicalAndFor: MonitorsQuery['useLogicalAndFor'] = [],
-  attributes: string = syntheticsMonitorAttributes
+    journeyIds,
+  }: Filters & { journeyIds?: string[] },
+  {
+    useLogicalAndFor,
+    attributesList: attributes,
+  }: { useLogicalAndFor?: MonitorsQuery['useLogicalAndFor']; attributesList: string[] } = {
+    useLogicalAndFor: [],
+    attributesList: [syntheticsMonitorAttributes, legacyMonitorAttributes],
+  }
 ) => {
-  const filtersStr = [
+  return [
     filter,
     getSavedObjectKqlFilter({
       field: 'tags',
       values: tags,
-      operator: useLogicalAndFor.includes('tags') ? 'AND' : 'OR',
+      operator: useLogicalAndFor?.includes('tags') ? 'AND' : 'OR',
       attributes,
     }),
-    getSavedObjectKqlFilter({ field: 'project_id', values: projects, attributes }),
-    getSavedObjectKqlFilter({ field: 'type', values: monitorTypes, attributes }),
+    getSavedObjectKqlFilter({
+      field: 'project_id',
+      values: projects,
+      attributes,
+    }),
+    getSavedObjectKqlFilter({
+      field: 'type',
+      values: monitorTypes,
+      attributes,
+    }),
     getSavedObjectKqlFilter({
       field: 'locations.id',
       values: locations,
-      operator: useLogicalAndFor.includes('locations') ? 'AND' : 'OR',
+      operator: useLogicalAndFor?.includes('locations') ? 'AND' : 'OR',
       attributes,
     }),
-    getSavedObjectKqlFilter({ field: 'schedule.number', values: schedules, attributes }),
-    getSavedObjectKqlFilter({ field: 'id', values: monitorQueryIds, attributes }),
-    getSavedObjectKqlFilter({ field: 'config_id', values: configIds, attributes }),
+    getSavedObjectKqlFilter({
+      field: 'schedule.number',
+      values: schedules,
+      attributes,
+    }),
+    getSavedObjectKqlFilter({
+      field: 'id',
+      values: monitorQueryIds,
+      attributes,
+    }),
+    getSavedObjectKqlFilter({
+      field: 'config_id',
+      values: configIds,
+      attributes,
+    }),
+    getSavedObjectKqlFilter({
+      field: ConfigKey.JOURNEY_ID,
+      values: journeyIds,
+      attributes,
+    }),
   ]
     .filter((f) => !!f)
     .join(' AND ');
-
-  return { filtersStr, locationIds: locations };
 };
 
 export const getSavedObjectKqlFilter = ({
   field,
   values,
+  attributes = syntheticsMonitorAttributes,
   operator = 'OR',
   searchAtRoot = false,
-  attributes = syntheticsMonitorAttributes,
 }: {
   field: string;
   values?: string | string[];
   operator?: string;
   searchAtRoot?: boolean;
-  attributes?: string;
-}) => {
+  attributes?: string | string[];
+}): string | undefined => {
   if (values === 'All' || (Array.isArray(values) && values?.includes('All'))) {
     return undefined;
   }
@@ -175,6 +209,25 @@ export const getSavedObjectKqlFilter = ({
   if (isEmpty(values) || !values) {
     return '';
   }
+
+  // If attributes is an array, generate OR across all attributes
+  if (Array.isArray(attributes)) {
+    const filters: string[] = attributes
+      .map((attr) =>
+        getSavedObjectKqlFilter({
+          field,
+          values,
+          operator,
+          searchAtRoot,
+          attributes: attr,
+        })
+      )
+      .filter(Boolean) as string[];
+    if (filters.length === 0) return '';
+    if (filters.length === 1) return filters[0];
+    return `(${filters.join(' OR ')})`;
+  }
+
   let fieldKey = '';
   if (searchAtRoot) {
     fieldKey = `${field}`;
@@ -260,6 +313,8 @@ export const isMonitorsQueryFiltered = (monitorQuery: MonitorsQuery) => {
 export function parseMappingKey(key: string | undefined) {
   switch (key) {
     case 'schedule.keyword':
+      return 'schedule.number';
+    case 'schedule':
       return 'schedule.number';
     case 'project_id.keyword':
       return 'project_id';

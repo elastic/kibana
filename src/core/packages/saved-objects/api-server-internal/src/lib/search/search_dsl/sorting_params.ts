@@ -8,9 +8,11 @@
  */
 
 import Boom from '@hapi/boom';
-import type { SortOrder, SortCombinations } from '@elastic/elasticsearch/lib/api/types';
+import type { SortCombinations, SortOrder } from '@elastic/elasticsearch/lib/api/types';
 import type { SavedObjectsPitParams } from '@kbn/core-saved-objects-api-server/src/apis';
 import { getProperty, type IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
+import type { SavedObjectsFieldMapping } from '@kbn/core-saved-objects-server';
+import { getKeywordField, getMergedFieldType, isValidSortingField } from './sorting_params_utils';
 
 const TOP_LEVEL_FIELDS = ['_id', '_score'];
 
@@ -20,7 +22,7 @@ export function getSortingParams(
   sortField?: string,
   sortOrder?: SortOrder,
   pit?: SavedObjectsPitParams
-): { sort?: SortCombinations[] } {
+): { sort?: SortCombinations[]; runtime_mappings?: Record<string, any> } {
   if (!sortField) {
     // if we are performing a PIT search, we must sort by some criteria
     // in order to get the 'sort' property for each of the results.
@@ -45,22 +47,89 @@ export function getSortingParams(
 
   if (types.length > 1) {
     const rootField = getProperty(mappings, sortField);
-    if (!rootField) {
-      throw Boom.badRequest(
-        `Unable to sort multiple types by field ${sortField}, not a root property`
-      );
-    }
-
-    return {
-      sort: [
-        {
-          [sortField]: {
-            order: sortOrder,
-            unmapped_type: rootField.type,
+    if (rootField) {
+      return {
+        sort: [
+          {
+            [sortField]: {
+              order: sortOrder,
+              unmapped_type: rootField.type,
+            },
           },
-        },
-      ],
-    };
+        ],
+      };
+    } else {
+      // Only create a runtime field if the sort field is present in all types
+      const allTypesHaveField = types.every((t) => !!getProperty(mappings, `${t}.${sortField}`));
+      if (allTypesHaveField) {
+        // Throw error if any field is text without keyword subfield
+        for (const t of types) {
+          const fieldMapping = getProperty(mappings, `${t}.${sortField}`);
+          if (!isValidSortingField(fieldMapping) && fieldMapping) {
+            throw Boom.badRequest(
+              `Sort field "${t}.${sortField}" is of type "${
+                fieldMapping.type
+              }" which is not sortable. ${
+                fieldMapping.type === 'text'
+                  ? ' Sorting on text fields requires a "keyword" subfield.'
+                  : ''
+              }`
+            );
+          }
+        }
+        const mergedFieldName = `merged_${sortField}`;
+        // Collect field mappings for type detection
+        const fieldMappings = types
+          .map((t) => getProperty(mappings, `${t}.${sortField}`))
+          .filter(Boolean) as SavedObjectsFieldMapping[];
+        const mergedFieldType = getMergedFieldType(fieldMappings);
+
+        // Instead of emitting only the first found value, emit all possible values for the field across types
+        // This ensures that sorting is done across all types as a single field
+        // Use if/else if/else to ensure only one emit is called
+        const scriptLines = types.map((t, idx) => {
+          const fieldName = `${t}.${sortField}`;
+          const fieldMapping = getProperty(mappings, fieldName);
+          let scriptField = fieldName;
+          const keywordSubField = getKeywordField(fieldMapping);
+          if (keywordSubField) {
+            scriptField = `${fieldName}.${keywordSubField}`;
+          }
+          const prefix = idx === 0 ? 'if' : 'else if';
+          return `${prefix} (doc.containsKey('${scriptField}') && doc['${scriptField}'].size() != 0) { emit(doc['${scriptField}'].value); }`;
+        });
+        // Only emit else { emit("") } for keyword type, otherwise omit else for proper sorting
+        if (mergedFieldType === 'keyword') {
+          scriptLines.push('else { emit(""); }');
+        }
+        const scriptSource = scriptLines.join(' ');
+
+        return {
+          runtime_mappings: {
+            [mergedFieldName]: {
+              type: mergedFieldType,
+              script: {
+                source: scriptSource,
+              },
+            },
+          },
+          sort: [
+            {
+              [mergedFieldName]: {
+                order: sortOrder,
+              },
+            },
+          ],
+        };
+      } else {
+        // If not present in all types, throw an error
+        // this ensures that we do not attempt to sort by a field that is not available in all types
+        // but this can be relaxed if needed since ES allows sorting by fields that are not present in all documents
+        throw Boom.badRequest(
+          `Sort field "${sortField}" must be present in all types to use in sorting when multiple types are specified.`
+        );
+      }
+    }
   }
 
   const [typeField] = types;
