@@ -32,6 +32,7 @@ describe('User actions', () => {
         id: 'basic-comment-id',
         version: 'WzQ3LDFc',
         comment_id: 'basic-comment-id',
+        is_generated_by_assistant: false,
       },
     ];
 
@@ -63,5 +64,19 @@ describe('User actions', () => {
         right: defaultRequest,
       });
     });
+
+    test.each([undefined, null, false, true])(
+      'has expected attributes in request if the `isGeneratedByAssistant` is %s',
+      (isGeneratedByAssistant) => {
+        const query = UserActionsRt.decode([
+          { ...defaultRequest[0], is_generated_by_assistant: isGeneratedByAssistant },
+        ]);
+
+        expect(query).toStrictEqual({
+          _tag: 'Right',
+          right: [{ ...defaultRequest[0], is_generated_by_assistant: isGeneratedByAssistant }],
+        });
+      }
+    );
   });
 });

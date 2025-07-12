@@ -18,6 +18,7 @@ interface UserActionCommonPersistedAttributes {
   created_at: string;
   created_by: User;
   owner: string;
+  is_generated_by_assistant?: boolean | null;
 }
 
 export interface UserActionPersistedAttributes extends UserActionCommonPersistedAttributes {
