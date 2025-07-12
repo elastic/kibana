@@ -8,7 +8,12 @@
 import path from 'path';
 
 import { CA_CERT_PATH } from '@kbn/dev-utils';
-import { FtrConfigProviderContext, kbnTestConfig, kibanaTestUser } from '@kbn/test';
+import {
+  FtrConfigProviderContext,
+  kbnTestConfig,
+  kibanaTestUser,
+  getKibanaCliLoggers,
+} from '@kbn/test';
 import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import { services as baseServices } from './services';
 import { PRECONFIGURED_ACTION_CONNECTORS } from '../shared';
@@ -123,6 +128,16 @@ export function createTestConfig(options: CreateTestConfigOptions, testFiles?: s
                 `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
               ]
             : []),
+          `--logging.loggers=${JSON.stringify([
+            ...getKibanaCliLoggers(xPackApiIntegrationTestsConfig.get('kbnTestServer.serverArgs')),
+            // Enable debug fleet logs by default
+            {
+              name: 'plugins.taskManager',
+              // level: 'info',
+              level: 'debug',
+              appenders: ['default'],
+            },
+          ])}`,
         ],
       },
       mochaOpts: {
