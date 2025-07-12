@@ -73,12 +73,52 @@ export function getDiscoverStateMock({
     urlStateStorage: stateStorageContainer,
     tabsStorageManager,
   });
+  const finalSavedSearch =
+    savedSearch === false
+      ? undefined
+      : savedSearch
+      ? savedSearch
+      : isTimeBased
+      ? savedSearchMockWithTimeField
+      : savedSearchMock;
+  const mockUserId = 'mockUserId';
+  const mockSpaceId = 'mockSpaceId';
   const initialTabsState = tabsStorageManager.loadLocally({
-    userId: 'mockUserId',
-    spaceId: 'mockSpaceId',
+    userId: mockUserId,
+    spaceId: mockSpaceId,
     defaultTabState: DEFAULT_TAB_STATE,
   });
   internalState.dispatch(internalStateActions.setTabs(initialTabsState));
+  internalState.dispatch(
+    internalStateActions.initializeTabs.fulfilled(
+      {
+        userId: mockUserId,
+        spaceId: mockSpaceId,
+        persistedDiscoverSession: finalSavedSearch
+          ? {
+              ...finalSavedSearch,
+              title: finalSavedSearch.title ?? '',
+              description: finalSavedSearch.description ?? '',
+              tabs: [
+                {
+                  ...finalSavedSearch,
+                  id: finalSavedSearch.id ?? '',
+                  label: finalSavedSearch.title ?? '',
+                  serializedSearchSource: finalSavedSearch.searchSource.getSerializedFields(),
+                  sort: finalSavedSearch.sort ?? [],
+                  columns: finalSavedSearch.columns ?? [],
+                  grid: finalSavedSearch.grid ?? {},
+                  hideChart: finalSavedSearch.hideChart ?? false,
+                  isTextBasedQuery: finalSavedSearch.isTextBasedQuery ?? false,
+                },
+              ],
+            }
+          : undefined,
+      },
+      'requestId',
+      { discoverSessionId: finalSavedSearch?.id }
+    )
+  );
   const container = getDiscoverStateContainer({
     tabId: internalState.getState().tabs.unsafeCurrentId,
     services,
@@ -96,10 +136,8 @@ export function getDiscoverStateMock({
     cleanup: async () => {},
   });
   tabRuntimeState.stateContainer$.next(container);
-  if (savedSearch !== false) {
-    container.savedSearchState.set(
-      savedSearch ? savedSearch : isTimeBased ? savedSearchMockWithTimeField : savedSearchMock
-    );
+  if (finalSavedSearch) {
+    container.savedSearchState.set(finalSavedSearch);
   }
 
   return container;

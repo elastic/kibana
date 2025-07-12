@@ -79,6 +79,34 @@ async function getState(
       nextState.savedSearchState.set(copySavedSearch(savedSearch));
       return Promise.resolve(savedSearch);
     });
+    nextState.internalState.dispatch(
+      internalStateActions.initializeTabs.fulfilled(
+        {
+          userId: '',
+          spaceId: '',
+          persistedDiscoverSession: {
+            ...savedSearch,
+            title: savedSearch.title ?? '',
+            description: savedSearch.description ?? '',
+            tabs: [
+              {
+                ...savedSearch,
+                id: savedSearch.id ?? '',
+                label: savedSearch.title ?? '',
+                serializedSearchSource: savedSearch.searchSource.getSerializedFields(),
+                sort: savedSearch.sort ?? [],
+                columns: savedSearch.columns ?? [],
+                grid: savedSearch.grid ?? {},
+                hideChart: savedSearch.hideChart ?? false,
+                isTextBasedQuery: savedSearch.isTextBasedQuery ?? false,
+              },
+            ],
+          },
+        },
+        'requestId',
+        { discoverSessionId: savedSearch.id }
+      )
+    );
   } else {
     jest.spyOn(mockServices.savedSearch, 'get').mockImplementation(() => {
       nextState.savedSearchState.set(copySavedSearch(savedSearchMockWithTimeFieldNew));
@@ -270,10 +298,8 @@ describe('Discover state', () => {
           initializeSingleTabParams: {
             stateContainer: state,
             customizationService,
-            discoverSessionId: savedSearchMock.id,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
-            shouldClearAllTabs: false,
           },
         })
       );
@@ -442,10 +468,8 @@ describe('Discover state', () => {
           initializeSingleTabParams: {
             stateContainer: state,
             customizationService,
-            discoverSessionId: undefined,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
-            shouldClearAllTabs: false,
           },
         })
       );
@@ -471,10 +495,8 @@ describe('Discover state', () => {
           initializeSingleTabParams: {
             stateContainer: state,
             customizationService,
-            discoverSessionId: undefined,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
-            shouldClearAllTabs: false,
           },
         })
       );
@@ -514,10 +536,8 @@ describe('Discover state', () => {
           initializeSingleTabParams: {
             stateContainer: state,
             customizationService,
-            discoverSessionId: undefined,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
-            shouldClearAllTabs: false,
           },
         })
       );
@@ -541,10 +561,8 @@ describe('Discover state', () => {
           initializeSingleTabParams: {
             stateContainer: state,
             customizationService,
-            discoverSessionId: undefined,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
-            shouldClearAllTabs: false,
           },
         })
       );
@@ -568,10 +586,8 @@ describe('Discover state', () => {
           initializeSingleTabParams: {
             stateContainer: state,
             customizationService,
-            discoverSessionId: undefined,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
-            shouldClearAllTabs: false,
           },
         })
       );
@@ -608,10 +624,8 @@ describe('Discover state', () => {
           initializeSingleTabParams: {
             stateContainer: state,
             customizationService,
-            discoverSessionId: 'the-saved-search-id',
             dataViewSpec: undefined,
             defaultUrlState: undefined,
-            shouldClearAllTabs: false,
           },
         })
       );
@@ -636,10 +650,8 @@ describe('Discover state', () => {
           initializeSingleTabParams: {
             stateContainer: state,
             customizationService,
-            discoverSessionId: savedSearchMock.id,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
-            shouldClearAllTabs: false,
           },
         })
       );
@@ -668,10 +680,8 @@ describe('Discover state', () => {
           initializeSingleTabParams: {
             stateContainer: state,
             customizationService,
-            discoverSessionId: savedSearchMock.id,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
-            shouldClearAllTabs: false,
           },
         })
       );
@@ -701,10 +711,8 @@ describe('Discover state', () => {
           initializeSingleTabParams: {
             stateContainer: state,
             customizationService,
-            discoverSessionId: savedSearchMock.id,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
-            shouldClearAllTabs: false,
           },
         })
       );
@@ -734,10 +742,8 @@ describe('Discover state', () => {
           initializeSingleTabParams: {
             stateContainer: state,
             customizationService,
-            discoverSessionId: savedSearchMock.id,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
-            shouldClearAllTabs: false,
           },
         })
       );
@@ -754,10 +760,8 @@ describe('Discover state', () => {
           initializeSingleTabParams: {
             stateContainer: state,
             customizationService,
-            discoverSessionId: undefined,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
-            shouldClearAllTabs: false,
           },
         })
       );
@@ -768,7 +772,10 @@ describe('Discover state', () => {
     test('loadSavedSearch without id ignoring invalid index in URL, adding a warning toast', async () => {
       const url = '/#?_a=(dataSource:(dataViewId:abc,type:dataView))&_g=()';
       const { state, customizationService } = await getState(url, {
-        savedSearch: savedSearchMock,
+        savedSearch: {
+          ...savedSearchMock,
+          id: undefined,
+        },
         isEmptyUrl: false,
       });
       await state.internalState.dispatch(
@@ -776,10 +783,8 @@ describe('Discover state', () => {
           initializeSingleTabParams: {
             stateContainer: state,
             customizationService,
-            discoverSessionId: undefined,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
-            shouldClearAllTabs: false,
           },
         })
       );
@@ -797,7 +802,10 @@ describe('Discover state', () => {
       const url =
         "/#?_a=(dataSource:(dataViewId:abcde,type:dataView),query:(esql:'FROM test'))&_g=()";
       const { state, customizationService } = await getState(url, {
-        savedSearch: savedSearchMock,
+        savedSearch: {
+          ...savedSearchMock,
+          id: undefined,
+        },
         isEmptyUrl: false,
       });
       await state.internalState.dispatch(
@@ -805,10 +813,8 @@ describe('Discover state', () => {
           initializeSingleTabParams: {
             stateContainer: state,
             customizationService,
-            discoverSessionId: undefined,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
-            shouldClearAllTabs: false,
           },
         })
       );
@@ -827,10 +833,8 @@ describe('Discover state', () => {
           initializeSingleTabParams: {
             stateContainer: state,
             customizationService,
-            discoverSessionId: savedSearchMock.id,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
-            shouldClearAllTabs: false,
           },
         })
       );
@@ -867,10 +871,8 @@ describe('Discover state', () => {
           initializeSingleTabParams: {
             stateContainer: state,
             customizationService,
-            discoverSessionId: savedSearchMock.id,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
-            shouldClearAllTabs: false,
           },
         })
       );
@@ -898,10 +900,8 @@ describe('Discover state', () => {
           initializeSingleTabParams: {
             stateContainer: state,
             customizationService,
-            discoverSessionId: 'the-saved-search-id-with-timefield',
             dataViewSpec: undefined,
             defaultUrlState: {},
-            shouldClearAllTabs: false,
           },
         })
       );
@@ -928,14 +928,12 @@ describe('Discover state', () => {
           initializeSingleTabParams: {
             stateContainer: state,
             customizationService,
-            discoverSessionId: savedSearchMock.id,
             dataViewSpec: undefined,
             defaultUrlState: {
               dataSource: createDataViewDataSource({
                 dataViewId: 'index-pattern-with-timefield-id',
               }),
             },
-            shouldClearAllTabs: false,
           },
         })
       );
@@ -963,10 +961,8 @@ describe('Discover state', () => {
           initializeSingleTabParams: {
             stateContainer: state,
             customizationService,
-            discoverSessionId: undefined,
             dataViewSpec: dataViewSpecMock,
             defaultUrlState: undefined,
-            shouldClearAllTabs: false,
           },
         })
       );
@@ -989,10 +985,8 @@ describe('Discover state', () => {
           initializeSingleTabParams: {
             stateContainer: state,
             customizationService,
-            discoverSessionId: savedSearchMock.id,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
-            shouldClearAllTabs: false,
           },
         })
       );
@@ -1014,10 +1008,8 @@ describe('Discover state', () => {
           initializeSingleTabParams: {
             stateContainer: state,
             customizationService,
-            discoverSessionId: savedSearchMock.id,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
-            shouldClearAllTabs: false,
           },
         })
       );
@@ -1036,10 +1028,8 @@ describe('Discover state', () => {
           initializeSingleTabParams: {
             stateContainer: state,
             customizationService,
-            discoverSessionId: savedSearchAdHoc.id,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
-            shouldClearAllTabs: false,
           },
         })
       );
@@ -1062,10 +1052,8 @@ describe('Discover state', () => {
           initializeSingleTabParams: {
             stateContainer: state,
             customizationService,
-            discoverSessionId: savedSearchMockWithESQL.id,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
-            shouldClearAllTabs: false,
           },
         })
       );
@@ -1112,10 +1100,8 @@ describe('Discover state', () => {
           initializeSingleTabParams: {
             stateContainer: state,
             customizationService,
-            discoverSessionId: savedSearchMock.id,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
-            shouldClearAllTabs: false,
           },
         })
       );
@@ -1151,10 +1137,8 @@ describe('Discover state', () => {
           initializeSingleTabParams: {
             stateContainer: state,
             customizationService,
-            discoverSessionId: savedSearchMock.id,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
-            shouldClearAllTabs: false,
           },
         })
       );
@@ -1185,10 +1169,8 @@ describe('Discover state', () => {
           initializeSingleTabParams: {
             stateContainer: state,
             customizationService,
-            discoverSessionId: savedSearchMock.id,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
-            shouldClearAllTabs: false,
           },
         })
       );
@@ -1224,10 +1206,8 @@ describe('Discover state', () => {
           initializeSingleTabParams: {
             stateContainer: state,
             customizationService,
-            discoverSessionId: savedSearchMock.id,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
-            shouldClearAllTabs: false,
           },
         })
       );
@@ -1269,10 +1249,8 @@ describe('Discover state', () => {
           initializeSingleTabParams: {
             stateContainer: state,
             customizationService,
-            discoverSessionId: savedSearchMock.id,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
-            shouldClearAllTabs: false,
           },
         })
       );
@@ -1296,10 +1274,8 @@ describe('Discover state', () => {
           initializeSingleTabParams: {
             stateContainer: state,
             customizationService,
-            discoverSessionId: savedSearchMock.id,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
-            shouldClearAllTabs: false,
           },
         })
       );
@@ -1310,10 +1286,8 @@ describe('Discover state', () => {
           initializeSingleTabParams: {
             stateContainer: state,
             customizationService,
-            discoverSessionId: undefined,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
-            shouldClearAllTabs: false,
           },
         })
       );
@@ -1327,10 +1301,8 @@ describe('Discover state', () => {
           initializeSingleTabParams: {
             stateContainer: state,
             customizationService,
-            discoverSessionId: savedSearchMock.id,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
-            shouldClearAllTabs: false,
           },
         })
       );
@@ -1355,10 +1327,8 @@ describe('Discover state', () => {
           initializeSingleTabParams: {
             stateContainer: state,
             customizationService,
-            discoverSessionId: savedSearchMock.id,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
-            shouldClearAllTabs: false,
           },
         })
       );
@@ -1424,10 +1394,8 @@ describe('Discover state', () => {
           initializeSingleTabParams: {
             stateContainer: state,
             customizationService,
-            discoverSessionId: savedSearchMock.id,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
-            shouldClearAllTabs: false,
           },
         })
       );
