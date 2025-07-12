@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AggregationTemporality, MetricReader } from '@opentelemetry/sdk-metrics-base';
+import { metrics } from '@elastic/opentelemetry-node/sdk';
 import {
   PrometheusExporter as OpenTelemetryPrometheusExporter,
   ExporterConfig,
@@ -13,7 +13,7 @@ import {
 } from '@opentelemetry/exporter-prometheus';
 import { KibanaResponseFactory } from '@kbn/core/server';
 
-export class PrometheusExporter extends MetricReader {
+export class PrometheusExporter extends metrics.MetricReader {
   private readonly prefix?: string;
   private readonly appendTimestamp: boolean;
   private serializer: PrometheusSerializer;
@@ -29,8 +29,8 @@ export class PrometheusExporter extends MetricReader {
     this.serializer = new PrometheusSerializer(this.prefix, this.appendTimestamp);
   }
 
-  selectAggregationTemporality(): AggregationTemporality {
-    return AggregationTemporality.CUMULATIVE;
+  selectAggregationTemporality(): metrics.AggregationTemporality {
+    return metrics.AggregationTemporality.CUMULATIVE;
   }
 
   protected onForceFlush(): Promise<void> {

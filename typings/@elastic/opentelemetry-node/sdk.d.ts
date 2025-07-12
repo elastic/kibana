@@ -7,14 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Counter, Meter } from '@opentelemetry/api';
-
-export class Metrics {
-  requestCounter: Counter;
-
-  constructor(meter: Meter) {
-    this.requestCounter = meter.createCounter('request_count', {
-      description: 'Counts total number of requests',
-    });
-  }
+declare module '@elastic/opentelemetry-node/sdk' {
+  export * from '@elastic/opentelemetry-node/types/sdk';
 }
