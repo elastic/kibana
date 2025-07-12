@@ -88,3 +88,25 @@ actions:
                   $ref: '../examples/get_spaces_response1.yaml'
                 getSpacesResponseExample2:
                   $ref: '../examples/get_spaces_response2.yaml'
+# Test addition of space variations
+  - target: "$.paths['/api/alerting/rule/{id}']['post']"
+    description: 'Add description to create rule API'
+    update:
+      description: |
+        **All methods and paths for this operation:**
+
+        - `POST /s/{space_id}/api/alerting/rule/`
+        - `POST /api/alerting/rule/{id}`
+  - target: "$.paths['/api/alerting/rule/{id}']['put']"
+    description: 'Add description to update rule API'
+    update:
+      description: >
+        [Learn](../topic/topic-kibana-spaces) how to select a space for this request.
+  - target: "$.paths['/api/alerting/rule/{id}']['delete']"
+    description: 'Add extension to delete rule API'
+    update:
+      x-path-variations:
+        - POST `/s/{space_id}/api/alerting/rule/`
+        - POST `/api/alerting/rule/{id}`
+      
+      
