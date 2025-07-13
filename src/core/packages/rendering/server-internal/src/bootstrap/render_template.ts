@@ -12,6 +12,7 @@ export interface BootstrapTemplateData {
   themeTagName: string;
   jsDependencyPaths: string[];
   publicPathMap: string;
+  cssTemplates: string[];
 }
 
 export const renderTemplate = ({
@@ -19,6 +20,7 @@ export const renderTemplate = ({
   colorMode,
   jsDependencyPaths,
   publicPathMap,
+  cssTemplates
 }: BootstrapTemplateData) => {
   const kbnThemeTagTemplate =
     colorMode === 'system'
@@ -116,13 +118,24 @@ if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
 
     var stylesheetTarget = document.querySelector('head meta[name="add-styles-here"]')
     function loadStyleSheet(url, cb) {
-      var dom = document.createElement('link');
-      dom.rel = 'stylesheet';
-      dom.type = 'text/css';
-      dom.href = url;
-      dom.addEventListener('error', failure);
-      dom.addEventListener('load', cb);
-      document.head.insertBefore(dom, stylesheetTarget);
+      var preloadLink = document.createElement('link');
+      preloadLink.rel = 'preload';
+      preloadLink.as = 'style';
+      preloadLink.href = url;
+
+      preloadLink.onload = function() {
+        this.onload = null;
+        this.rel = 'stylesheet';
+      };
+
+      if (typeof failure === 'function') {
+        preloadLink.addEventListener('error', failure);
+      }
+      if (typeof cb === 'function') {
+        preloadLink.addEventListener('load', cb);
+      }
+
+      document.head.insertBefore(preloadLink, stylesheetTarget);
     }
 
     var scriptsTarget = document.querySelector('head meta[name="add-scripts-here"]')
@@ -161,6 +174,11 @@ if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
 
     load([
       ${jsDependencyPaths.map((path) => `'${path}'`).join(',')}
+    ], function () {
+      __kbnBundles__.get('entry/core/public').__kbnBootstrap__();
+    });
+ load([
+      ${cssTemplates.map((path) => `'${path}'`).join(',')}
     ], function () {
       __kbnBundles__.get('entry/core/public').__kbnBootstrap__();
     });

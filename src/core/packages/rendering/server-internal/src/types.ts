@@ -36,7 +36,6 @@ export interface RenderingMetadata {
   locale: string;
   themeVersion: ThemeVersion;
   darkMode: DarkModeValue;
-  stylesheetPaths: string[];
   scriptPaths: string[];
   injectedMetadata: InjectedMetadata;
   customBranding: CustomBranding;

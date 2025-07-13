@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { RenderingMetadata } from '../types';
 import { Fonts } from './fonts';
 import { Logo } from './logo';
-import { Styles } from './styles';
+import { InlineStyles } from './styles';
 
 interface Props {
   metadata: RenderingMetadata;
@@ -24,7 +24,6 @@ export const Template: FunctionComponent<Props> = ({
     uiPublicUrl,
     locale,
     darkMode,
-    stylesheetPaths,
     scriptPaths,
     injectedMetadata,
     bootstrapScriptUrl,
@@ -44,6 +43,8 @@ export const Template: FunctionComponent<Props> = ({
   return (
     <html lang={locale}>
       <head>
+
+      <script src={bootstrapScriptUrl} async />
         <meta charSet="utf-8" />
         <meta httpEquiv="X-UA-Compatible" content="IE=edge,chrome=1" />
         <meta name="viewport" content="width=device-width" />
@@ -57,19 +58,17 @@ export const Template: FunctionComponent<Props> = ({
         {/* Inject EUI reset and global styles before all other component styles */}
         <meta name={EUI_STYLES_GLOBAL} />
         <meta name="emotion" />
-        <Styles
-          darkMode={darkMode}
-          themeName={injectedMetadata.theme.name}
-          stylesheetPaths={stylesheetPaths}
-        />
+         {darkMode !== 'system' && <InlineStyles darkMode={darkMode} themeName={injectedMetadata.theme.name} />}
         {scriptPaths.map((path) => (
           <script key={path} src={path} />
         ))}
+
         {/* Inject stylesheets into the <head> before scripts so that KP plugins with bundled styles will override them */}
         <meta name="add-styles-here" />
         <meta name="add-scripts-here" />
         {/* Inject EUI CSS utilties after all other styles for CSS specificity */}
         <meta name={EUI_STYLES_UTILS} />
+
       </head>
       <body>
         {createElement('kbn-csp', {
@@ -134,7 +133,6 @@ export const Template: FunctionComponent<Props> = ({
             window.__kbnCspNotEnforced__ = true;
           `}
         </script>
-        <script src={bootstrapScriptUrl} />
       </body>
     </html>
   );

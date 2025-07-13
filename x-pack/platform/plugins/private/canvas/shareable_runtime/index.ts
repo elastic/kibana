@@ -6,5 +6,4 @@
  */
 
 export * from './api';
-import '@kbn/core-apps-server-internal/assets/legacy_light_theme.css';
 import '../public/style/index.scss';

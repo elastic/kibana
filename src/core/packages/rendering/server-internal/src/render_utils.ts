@@ -56,7 +56,6 @@ export const getCommonStylesheetPaths = ({ baseHref }: { baseHref: string }) => 
   const bundlesHref = getBundlesHref(baseHref);
   return [
     `${bundlesHref}/kbn-ui-shared-deps-src/${UiSharedDepsSrc.cssDistFilename}`,
-    `${baseHref}/ui/legacy_styles.css`,
   ];
 };
 
@@ -67,11 +66,7 @@ export const getThemeStylesheetPaths = ({
   darkMode: boolean;
   baseHref: string;
 }) => {
-  return [
-    ...(darkMode
-      ? [`${baseHref}/ui/legacy_dark_theme.min.css`]
-      : [`${baseHref}/ui/legacy_light_theme.min.css`]),
-  ];
+  return [];
 };
 
 export const getBrowserLoggingConfig = async (

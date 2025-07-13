@@ -47,7 +47,9 @@ export const ReactRouterDom = require('react-router-dom');
 export const ReactRouterDomV5Compat = require('react-router-dom-v5-compat');
 // eslint-disable-next-line @kbn/eslint/module_migration
 export const StyledComponents = require('styled-components');
-export const FastestLevenshtein = require('fastest-levenshtein');
+export const Zod = require('zod');
+export const Semver = require('semver');
+export const QueryString = require('query-string');
 export const ReactUse = {
   useAsync: require('react-use/lib/useAsync'),
   useAsyncFn: require('react-use/lib/useAsyncFn'),

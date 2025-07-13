@@ -22,7 +22,7 @@ import { InternalUserSettingsServiceSetup } from '@kbn/core-user-settings-server
 import { getPluginsBundlePaths } from './get_plugin_bundle_paths';
 import { getJsDependencyPaths } from './get_js_dependency_paths';
 import { renderTemplate } from './render_template';
-import { getBundlesHref } from '../render_utils';
+import { getBundlesHref, getCommonStylesheetPaths } from '../render_utils';
 
 export type BootstrapRendererFactory = (factoryOptions: FactoryOptions) => BootstrapRenderer;
 export type BootstrapRenderer = (options: RenderedOptions) => Promise<RendererResult>;
@@ -113,6 +113,7 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
       themeTagName,
       jsDependencyPaths,
       publicPathMap,
+      cssTemplates: getCommonStylesheetPaths({ baseHref }),
     });
 
     const hash = createHash('sha1'); // eslint-disable-line @kbn/eslint/no_unsafe_hash

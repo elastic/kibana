@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getThemeStylesheetPaths, getCommonStylesheetPaths, getScriptPaths } from './render_utils';
+import { getThemeStylesheetPaths, getScriptPaths } from './render_utils';
 
 describe('getScriptPaths', () => {
   it('returns the correct list when darkMode is `system`', () => {
@@ -41,21 +41,6 @@ describe('getScriptPaths', () => {
   });
 });
 
-describe('getCommonStylesheetPaths', () => {
-  it('returns the correct list', () => {
-    expect(
-      getCommonStylesheetPaths({
-        baseHref: '/base-path',
-      })
-    ).toMatchInlineSnapshot(`
-      Array [
-        "/base-path/bundles/kbn-ui-shared-deps-src/kbn-ui-shared-deps-src.css",
-        "/base-path/ui/legacy_styles.css",
-      ]
-    `);
-  });
-});
-
 describe('getStylesheetPaths', () => {
   describe('when darkMode is `true`', () => {
     it('returns the correct list', () => {
@@ -64,11 +49,7 @@ describe('getStylesheetPaths', () => {
           darkMode: true,
           baseHref: '/base-path/buildShaShort',
         })
-      ).toMatchInlineSnapshot(`
-          Array [
-            "/base-path/buildShaShort/ui/legacy_dark_theme.min.css",
-          ]
-        `);
+      ).toMatchInlineSnapshot(`Array []`);
     });
   });
   describe('when darkMode is `false`', () => {
@@ -78,11 +59,7 @@ describe('getStylesheetPaths', () => {
           darkMode: false,
           baseHref: '/base-path/buildShaShort',
         })
-      ).toMatchInlineSnapshot(`
-          Array [
-            "/base-path/buildShaShort/ui/legacy_light_theme.min.css",
-          ]
-        `);
+      ).toMatchInlineSnapshot(`Array []`);
     });
   });
 });

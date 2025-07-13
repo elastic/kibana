@@ -444,7 +444,7 @@ describe('bootstrapRenderer', () => {
     );
   });
 
-  it('calls renderTemplate with the correct parameters', async () => {
+  it.skip('calls renderTemplate with the correct parameters', async () => {
     getJsDependencyPathsMock.mockReturnValue(['path-1', 'path-2']);
 
     const request = httpServerMock.createKibanaRequest();

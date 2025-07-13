@@ -40,7 +40,6 @@ import {
 import { registerBootstrapRoute, bootstrapRendererFactory } from './bootstrap';
 import {
   getSettingValue,
-  getCommonStylesheetPaths,
   getThemeStylesheetPaths,
   getScriptPaths,
   getBrowserLoggingConfig,
@@ -245,9 +244,7 @@ export class RenderingService {
         darkMode: mode,
         baseHref: staticAssetsHrefBase,
       });
-    const commonStylesheetPaths = getCommonStylesheetPaths({
-      baseHref: staticAssetsHrefBase,
-    });
+
     const themeName = this.themeName$.getValue();
 
     const scriptPaths = getScriptPaths({
@@ -278,7 +275,6 @@ export class RenderingService {
       locale,
       themeVersion,
       darkMode,
-      stylesheetPaths: commonStylesheetPaths,
       scriptPaths,
       customBranding: {
         faviconSVG: branding?.faviconSVG,

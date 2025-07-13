@@ -75,10 +75,6 @@ export function PromptPage({
   const emotionStyles = constructStyleTagsFromChunks(chunks);
 
   const uiPublicURL = staticAssets.prependPublicUrl('/ui');
-  const regularBundlePath = staticAssets.prependPublicUrl('/bundles');
-  const styleSheetPaths = [
-    `${regularBundlePath}/kbn-ui-shared-deps-src/${UiSharedDepsSrc.cssDistFilename}`,
-  ];
 
   return (
     <html lang={i18n.getLocale()}>
@@ -86,9 +82,6 @@ export function PromptPage({
         <title>{customBranding.pageTitle ? customBranding.pageTitle : 'Elastic'}</title>
         {/* eslint-disable-next-line react/no-danger */}
         <style dangerouslySetInnerHTML={{ __html: `</style>${emotionStyles}` }} />
-        {styleSheetPaths.map((path) => (
-          <link href={path} rel="stylesheet" key={path} />
-        ))}
         <Fonts url={uiPublicURL} />
         {/* The alternate icon is a fallback for Safari which does not yet support SVG favicons */}
         {customBranding.faviconPNG ? (

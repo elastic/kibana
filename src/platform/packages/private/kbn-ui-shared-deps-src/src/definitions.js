@@ -75,7 +75,9 @@ const externals = {
   redux: '__kbnSharedDeps__.Redux',
   immer: '__kbnSharedDeps__.Immer',
   reselect: '__kbnSharedDeps__.Reselect',
-  'fastest-levenshtein': '__kbnSharedDeps__.FastestLevenshtein',
+  'zod': '__kbnSharedDeps__.Zod',
+  'semver': '__kbnSharedDeps__.Semver',
+  'query-string': '__kbnSharedDeps__.QueryString',
   'chroma-js': '__kbnSharedDeps__.ChromaJs',
   // cache some used methods of the react-use library
   ...[

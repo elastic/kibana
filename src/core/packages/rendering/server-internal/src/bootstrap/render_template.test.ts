@@ -16,6 +16,7 @@ function mockParams() {
     jsDependencyPaths: ['/js-1', '/js-2'],
     styleSheetPaths: ['/style-1', '/style-2'],
     publicPathMap: '{"foo": "bar"}',
+    cssTemplates: [],
   };
 }
 

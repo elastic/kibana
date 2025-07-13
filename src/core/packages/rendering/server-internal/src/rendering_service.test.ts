@@ -179,22 +179,6 @@ function renderTestCases(
       expect(data.legacyMetadata.globalUiSettings.user).toEqual({}); // user settings are not injected
     });
 
-    it('calls `getCommonStylesheetPaths` with the correct parameters', async () => {
-      getSettingValueMock.mockImplementation((settingName: string) => {
-        if (settingName === 'theme:darkMode') {
-          return true;
-        }
-        return settingName;
-      });
-
-      const [render] = await getRender();
-      await render(createKibanaRequest(), uiSettings);
-
-      expect(getCommonStylesheetPathsMock).toHaveBeenCalledTimes(1);
-      expect(getCommonStylesheetPathsMock).toHaveBeenCalledWith({
-        baseHref: '/mock-server-basepath',
-      });
-    });
 
     it('calls `getScriptPaths` with the correct parameters', async () => {
       getSettingValueMock.mockImplementation((settingName: string) => {
