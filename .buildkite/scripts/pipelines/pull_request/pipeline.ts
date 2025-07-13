@@ -178,6 +178,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
     if (
       GITHUB_PR_LABELS.includes('ci:project-deploy-elasticsearch') ||
       GITHUB_PR_LABELS.includes('ci:project-deploy-observability') ||
+      GITHUB_PR_LABELS.includes('ci:project-deploy-log_essentials') ||
       GITHUB_PR_LABELS.includes('ci:project-deploy-security') ||
       GITHUB_PR_LABELS.includes('ci:project-deploy-ai4soc')
     ) {

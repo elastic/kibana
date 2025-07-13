@@ -16,14 +16,14 @@
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/es-types",
     "@kbn/es-query",
-    "@kbn/observability-utils-common",
     "@kbn/traced-es-client",
     "@kbn/alerting-plugin",
     "@kbn/rule-registry-plugin",
     "@kbn/rule-data-utils",
+    "@kbn/observability-utils-common",
     "@kbn/aiops-log-pattern-analysis",
+    "@kbn/es-types",
     "@kbn/calculate-auto",
   ]
 }

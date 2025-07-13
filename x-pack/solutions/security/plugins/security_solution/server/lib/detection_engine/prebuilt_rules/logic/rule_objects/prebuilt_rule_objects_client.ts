@@ -11,6 +11,7 @@ import type {
   RuleResponse,
   RuleSignatureId,
   RuleTagArray,
+  RuleVersion,
 } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import { withSecuritySpan } from '../../../../../utils/with_security_span';
 import { findRules } from '../../../rule_management/logic/search/find_rules';
@@ -22,7 +23,6 @@ import type {
   SortOrder,
 } from '../../../../../../common/api/detection_engine';
 import { MAX_PREBUILT_RULES_COUNT } from '../../../rule_management/logic/search/get_existing_prepackaged_rules';
-import type { RuleVersionSpecifier } from '../rule_versions/rule_version_specifier';
 
 interface FetchAllInstalledRulesArgs {
   page?: number;
@@ -50,10 +50,12 @@ interface FetchInstalledRulesByIdsArgs {
   sortOrder?: SortOrder;
 }
 
-type RuleSummary = RuleVersionSpecifier & {
+interface RuleSummary {
   id: RuleObjectId;
+  rule_id: RuleSignatureId;
+  version: RuleVersion;
   tags: RuleTagArray;
-};
+}
 
 export interface IPrebuiltRuleObjectsClient {
   fetchInstalledRulesByIds(args: FetchInstalledRulesByIdsArgs): Promise<RuleResponse[]>;

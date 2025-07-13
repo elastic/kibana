@@ -11,8 +11,7 @@ import type { EuiThemeComputed } from '@elastic/eui';
 import { calculateWidthFromEntries } from '@kbn/calculate-width-from-char-count';
 import { DataViewListItemEnhanced } from './dataview_list';
 
-const MIN_WIDTH = 300;
-const MAX_MOBILE_WIDTH = 350;
+const DEFAULT_WIDTH = 350;
 
 export const changeDataViewStyles = ({
   fullWidth,
@@ -27,7 +26,7 @@ export const changeDataViewStyles = ({
 }) => {
   return {
     trigger: {
-      maxWidth: fullWidth ? undefined : MIN_WIDTH,
+      maxWidth: fullWidth ? undefined : DEFAULT_WIDTH,
       backgroundColor: theme.colors.backgroundBasePlain,
       border: `${theme.border.width.thin} solid ${theme.colors.borderBasePlain}`,
       borderTopLeftRadius: 0,
@@ -35,8 +34,8 @@ export const changeDataViewStyles = ({
     },
     popoverContent: {
       width: calculateWidthFromEntries(dataViewsList, ['name', 'id'], {
-        minWidth: MIN_WIDTH,
-        ...(isMobile && { maxWidth: MAX_MOBILE_WIDTH }),
+        minWidth: DEFAULT_WIDTH,
+        ...(isMobile && { maxWidth: DEFAULT_WIDTH }),
       }),
     },
   };

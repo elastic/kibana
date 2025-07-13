@@ -160,8 +160,6 @@ export const loadDashboardState = async ({
       panels,
       query,
       title,
-
-      viewMode: 'view', // dashboards loaded from saved object default to view mode. If it was edited recently, the view mode from session storage will override this.
       tags:
         savedObjectsTaggingService?.getTaggingApi()?.ui.getTagIdsFromReferences(references) ?? [],
 

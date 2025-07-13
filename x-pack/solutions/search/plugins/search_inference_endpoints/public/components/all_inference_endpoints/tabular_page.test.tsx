@@ -89,11 +89,11 @@ const inferenceEndpoints = [
     },
   },
   {
-    inference_id: '.elser-v2-elastic',
+    inference_id: '.elser-2-elastic',
     task_type: 'sparse_embedding',
     service: 'elastic',
     service_settings: {
-      model_id: 'elser-v2',
+      model_id: 'elser_model_2',
     },
   },
   {
@@ -101,7 +101,7 @@ const inferenceEndpoints = [
     task_type: 'sparse_embedding',
     service: 'elastic',
     service_settings: {
-      model_id: 'elser-v2',
+      model_id: 'elser_model_2',
     },
   },
 ] as InferenceAPIConfigResponse[];
@@ -117,8 +117,8 @@ describe('When the tabular page is loaded', () => {
     render(<TabularPage inferenceEndpoints={inferenceEndpoints} />);
 
     const rows = screen.getAllByRole('row');
-    expect(rows[1]).toHaveTextContent('.elser-2-elasticsearch');
-    expect(rows[2]).toHaveTextContent('.elser-v2-elastic');
+    expect(rows[1]).toHaveTextContent('.elser-2-elastic');
+    expect(rows[2]).toHaveTextContent('.elser-2-elasticsearch');
     expect(rows[3]).toHaveTextContent('.multilingual-e5-small-elasticsearch');
     expect(rows[4]).toHaveTextContent('.sparkles');
     expect(rows[5]).toHaveTextContent('custom-inference-id');
@@ -132,11 +132,11 @@ describe('When the tabular page is loaded', () => {
     render(<TabularPage inferenceEndpoints={inferenceEndpoints} />);
 
     const rows = screen.getAllByRole('row');
-    expect(rows[1]).toHaveTextContent('Elasticsearch');
-    expect(rows[1]).toHaveTextContent('.elser_model_2');
+    expect(rows[1]).toHaveTextContent('Elastic');
+    expect(rows[1]).toHaveTextContent('.elser-2-elastic');
 
-    expect(rows[2]).toHaveTextContent('Elastic');
-    expect(rows[2]).toHaveTextContent('.elser-v2-elastic');
+    expect(rows[2]).toHaveTextContent('Elasticsearch');
+    expect(rows[2]).toHaveTextContent('.elser_model_2');
 
     expect(rows[3]).toHaveTextContent('Elasticsearch');
     expect(rows[3]).toHaveTextContent('.multilingual-e5-small');
@@ -145,7 +145,7 @@ describe('When the tabular page is loaded', () => {
     expect(rows[4]).toHaveTextContent('rainbow-sprinkles');
 
     expect(rows[5]).toHaveTextContent('Elastic');
-    expect(rows[5]).toHaveTextContent('elser-v2');
+    expect(rows[5]).toHaveTextContent('elser_model_2');
 
     expect(rows[6]).toHaveTextContent('Elasticsearch');
     expect(rows[6]).toHaveTextContent('.rerank-v1');
@@ -201,14 +201,14 @@ describe('When the tabular page is loaded', () => {
     expect(rows[9]).not.toHaveTextContent(preconfigured);
   });
 
-  it('should show tech preview badge only for reranker-v1 model, rainbow-sprinkles, and preconfigured elser-v2', () => {
+  it('should show tech preview badge only for reranker-v1 model, rainbow-sprinkles, and preconfigured elser_model_2', () => {
     render(<TabularPage inferenceEndpoints={inferenceEndpoints} />);
 
     const techPreview = 'TECH PREVIEW';
 
     const rows = screen.getAllByRole('row');
-    expect(rows[1]).not.toHaveTextContent(techPreview);
-    expect(rows[2]).toHaveTextContent(techPreview);
+    expect(rows[1]).toHaveTextContent(techPreview);
+    expect(rows[2]).not.toHaveTextContent(techPreview);
     expect(rows[3]).not.toHaveTextContent(techPreview);
     expect(rows[4]).toHaveTextContent(techPreview);
     expect(rows[5]).not.toHaveTextContent(techPreview);

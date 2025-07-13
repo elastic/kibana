@@ -40,8 +40,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./data_shared_attributes'));
     loadTestFile(require.resolve('./embed_mode'));
     loadTestFile(require.resolve('./dashboard_back_button'));
-    loadTestFile(require.resolve('./legacy_urls'));
-    loadTestFile(require.resolve('./saved_search_embeddable'));
     loadTestFile(require.resolve('./dashboard_panel_listing'));
 
     // Note: This one must be last because it unloads some data for one of its tests!
