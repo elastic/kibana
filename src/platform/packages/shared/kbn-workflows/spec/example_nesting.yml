@@ -1,0 +1,34 @@
+version: 1
+workflow:
+  name: 'Malicious Alert Handler' # this should be unique if no id?
+  description: 'Handle alerts based on maliciousness'
+  enabled: true
+  triggers:
+    - type: triggers.elastic.scheduled
+      with:
+        every: 1
+        unit: day
+    - type: triggers.elastic.manual
+  steps:
+    - name: Check if alert is malicious
+      type: if
+      condition: "{{alert.is_malicious}}"
+      steps:
+        - name: Create case
+          type: create_case
+        - name: Add to case
+          type: add_to_case
+        - name: Notify team
+          type: forEach
+          foreach: "{{alert.teams}}"
+          steps:
+            - name: Send message
+              type: slack.sendMessage
+              with:
+                message: "Alert for {{foreach.value}}"
+                channel: "{{foreach.value}}"
+      else:
+        - name: Add note
+          type: add_note
+        - name: Close alert
+          type: close_alert

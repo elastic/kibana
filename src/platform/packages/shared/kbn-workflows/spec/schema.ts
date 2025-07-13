@@ -152,7 +152,6 @@ export const WorkflowConstsSchema = z.record(
 
 /* --- Workflow --- */
 export const WorkflowSchema = z.object({
-  id: z.string(),
   name: z.string().min(1),
   description: z.string().optional(),
   enabled: z.boolean().default(true),
