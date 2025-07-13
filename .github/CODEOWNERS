@@ -1456,7 +1456,6 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/test/common/utils/synthtrace @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team # Assigned per https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/kbn-apm-synthtrace/kibana.jsonc#L5
 /x-pack/solutions/observability/test/common/utils/synthtrace @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
 /x-pack/solutions/observability/test/common/utils/server_route_repository @elastic/obs-knowledge-team
-/x-pack/test/common/utils/server_route_repository @elastic/obs-knowledge-team
 /src/platform/test/functional/services/synthtrace/logs_synthtrace_es_client.ts @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
 
 ## Streams parts owned by Logs UX
@@ -1803,6 +1802,7 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /x-pack/platform/test/upgrade/ftr_provider_context.d.ts @elastic/appex-qa
 /x-pack/platform/test/upgrade/config.ts @elastic/appex-qa
 /x-pack/platform/test/functional_basic/ftr_provider_context.d.ts @elastic/appex-qa
+x-pack/test/functional/services/index.ts @elastic/appex-qa
 /x-pack/test/functional/services/remote_es/remote_es.ts @elastic/appex-qa
 /x-pack/test/functional/services/random.js @elastic/appex-qa
 /x-pack/platform/test/functional/services/index.ts @elastic/appex-qa
