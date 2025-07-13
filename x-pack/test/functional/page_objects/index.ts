@@ -36,8 +36,6 @@ import { IndexManagementPageProvider } from './index_management_page';
 import { InfraHomePageProvider } from './infra_home_page';
 import { InfraHostsViewProvider } from './infra_hosts_view';
 import { InfraLogsPageProvider } from './infra_logs_page';
-import { InfraMetricsExplorerProvider } from './infra_metrics_explorer';
-import { InfraSavedViewsProvider } from './infra_saved_views';
 import { IngestPipelinesPageProvider } from './ingest_pipelines_page';
 import { LicenseManagementPageProvider } from './license_management_page';
 import { LogstashPageObject } from './logstash_page';
@@ -82,8 +80,6 @@ export const pageObjects = {
   infraHome: InfraHomePageProvider,
   infraHostsView: InfraHostsViewProvider,
   infraLogs: InfraLogsPageProvider,
-  infraMetricsExplorer: InfraMetricsExplorerProvider,
-  infraSavedViews: InfraSavedViewsProvider,
   ingestPipelines: IngestPipelinesPageProvider,
   lens: LensPageProvider,
   licenseManagement: LicenseManagementPageProvider,

@@ -1398,6 +1398,7 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.stateful.config.ts @elastic/obs-ux-infra_services-team
 /x-pack/solutions/observability/test/functional/page_objects/asset_details.ts @elastic/obs-ux-infra_services-team # Assigned per https://github.com/elastic/kibana/pull/200157/files/c83fae62151fe634342c498aca69b686b739fe45#r1842202022
 /x-pack/test/functional/page_objects/infra_* @elastic/obs-ux-infra_services-team
+/x-pack/solutions/observability/test/functional/page_objects/infra_* @elastic/obs-ux-infra_services-team
 /x-pack/test/functional/es_archives/infra @elastic/obs-ux-infra_services-team
 /x-pack/test_serverless/**/test_suites/observability/infra/ @elastic/obs-ux-infra_services-team
 /src/platform/test/common/plugins/otel_metrics @elastic/obs-ux-infra_services-team
@@ -1583,11 +1584,6 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/test_serverless/functional/test_suites/observability/cypress @elastic/obs-ux-logs-team
 /x-pack/test/functional/services/infra_source_configuration_form.ts @elastic/obs-ux-infra_services-team
 /x-pack/solutions/observability/test/functional/services/infra_source_configuration_form.ts @elastic/obs-ux-infra_services-team
-/x-pack/solutions/observability/test/functional/page_objects/infra_home_page.ts @elastic/obs-ux-logs-team
-/x-pack/solutions/observability/test/functional/page_objects/infra_hosts_view.ts @elastic/obs-ux-logs-team
-/x-pack/solutions/observability/test/functional/page_objects/infra_logs_page.ts @elastic/obs-ux-logs-team
-/x-pack/solutions/observability/test/functional/page_objects/infra_metrics_explorer.ts @elastic/obs-ux-logs-team
-/x-pack/solutions/observability/test/functional/page_objects/infra_saved_views.ts @elastic/obs-ux-logs-team
 /x-pack/test/functional/services/logs_ui @elastic/obs-ux-logs-team
 /x-pack/test/functional/page_objects/observability_logs_explorer.ts @elastic/obs-ux-logs-team
 /src/platform/test/functional/services/selectable.ts @elastic/obs-ux-logs-team
