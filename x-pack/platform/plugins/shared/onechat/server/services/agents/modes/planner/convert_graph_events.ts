@@ -17,7 +17,7 @@ import {
   ToolResultEvent,
   isToolCallEvent,
   isToolResultEvent,
-} from '@kbn/onechat-common/agents';
+} from '@kbn/onechat-common';
 import {
   matchGraphName,
   matchEvent,
