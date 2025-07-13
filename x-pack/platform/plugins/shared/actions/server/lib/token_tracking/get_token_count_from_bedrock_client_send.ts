@@ -14,7 +14,7 @@ export type SmithyStream = SmithyMessageDecoderStream<{
   };
 }>;
 
-export const getTokensFromBedrockConverseStream = async function (
+export const getTokensFromBedrockClientSend = async function (
   responseStream: SmithyStream,
   logger: Logger
 ): Promise<{ total_tokens: number; prompt_tokens: number; completion_tokens: number } | null> {
