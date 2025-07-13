@@ -1762,7 +1762,6 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /src/platform/packages/shared/kbn-es/src/serverless_resources/project_roles/oblt/roles.yml @elastic/appex-qa
 /src/platform/packages/shared/kbn-es/src/serverless_resources/project_roles/security/roles.yml @elastic/appex-qa
 /x-pack/platform/test/common/ftr_provider_context.ts @elastic/appex-qa
-/x-pack/platform/test/common/lib/test_data_loader.ts @elastic/appex-qa # temporarily
 /x-pack/platform/plugins/shared/maps/test/scout @elastic/appex-qa # temporarily
 /x-pack/platform/plugins/private/discover_enhanced/test/scout/ @elastic/appex-qa # temporarily
 /x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/tests/discover_cdp_perf.spec.ts @elastic/kibana-data-discovery # test tracks bundle size limits
@@ -1973,7 +1972,7 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /x-pack/test/functional/page_objects/status_page.ts @elastic/kibana-core
 /x-pack/test/functional/page_objects/share_saved_objects_to_space_page.ts @elastic/kibana-core
 /x-pack/platform/test/functional/page_objects/banners_page.ts @elastic/kibana-core
-/x-pack/test/common/lib/test_data_loader.ts @elastic/kibana-core
+/x-pack/platform/test/common/lib/test_data_loader.ts @elastic/kibana-core
 /x-pack/test/api_integration/services/usage_api.ts @elastic/kibana-core
 /x-pack/platform/test/api_integration/apis/kibana @elastic/kibana-core
 /src/platform/test/api_integration/fixtures/import.ndjson @elastic/kibana-core
