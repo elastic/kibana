@@ -116,7 +116,7 @@ export const Graph = memo<GraphProps>(
         currNodesRef.current = nodes;
         currEdgesRef.current = edges;
         setTimeout(() => {
-          fitViewRef.current?.(fitViewOptions);
+          fitViewRef.current?.();
         }, 30);
       }
     }, [nodes, edges, setNodes, setEdges, isGraphInteractive]);

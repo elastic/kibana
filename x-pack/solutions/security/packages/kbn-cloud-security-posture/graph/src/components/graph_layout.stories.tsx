@@ -19,9 +19,10 @@ import type {
 } from '.';
 import { Graph } from '.';
 
-const meta: Meta<typeof Graph> = {
-  component: Graph,
-  render: ({ nodes, edges, interactive }: GraphData) => {
+type GraphPropsAndCustomArgs = React.ComponentProps<typeof Graph> & {};
+
+const meta = {
+  render: ({ nodes, edges, interactive }: Partial<GraphPropsAndCustomArgs>) => {
     return (
       <ThemeProvider theme={{ darkMode: false }}>
         <Graph
@@ -29,9 +30,9 @@ const meta: Meta<typeof Graph> = {
             height: 100%;
             width: 100%;
           `}
-          nodes={nodes}
-          edges={edges}
-          interactive={interactive}
+          nodes={nodes ?? []}
+          edges={edges ?? []}
+          interactive={interactive ?? false}
         />
       </ThemeProvider>
     );
@@ -44,16 +45,10 @@ const meta: Meta<typeof Graph> = {
     interactive: true,
   },
   decorators: [GlobalStylesStorybookDecorator],
-};
+} satisfies Meta<Partial<GraphPropsAndCustomArgs>>;
 
 export default meta;
 type Story = StoryObj<typeof Graph>;
-
-interface GraphData {
-  nodes: NodeViewModel[];
-  edges: EdgeViewModel[];
-  interactive: boolean;
-}
 
 type EnhancedNodeViewModel =
   | EntityNodeViewModel

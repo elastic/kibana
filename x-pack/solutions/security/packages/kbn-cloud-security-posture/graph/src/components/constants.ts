@@ -27,7 +27,7 @@ export const STACK_NODE_HORIZONTAL_PADDING = 20;
 
 /**
  * Minimum height of a stack node, in pixels.
- * Must be a multiplication of 2 times the value of `GRID_SIZE` (e.g, when `GRID_SIZE` equals 10 it should be dividable by 20).
+ * Must be a multiple of `GRID_SIZE * 2`.
  */
 export const STACK_NODE_MIN_HEIGHT = 60;
 
