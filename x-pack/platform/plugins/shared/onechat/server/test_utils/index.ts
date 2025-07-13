@@ -27,12 +27,9 @@ export {
 } from './tools';
 export {
   createAgentsServiceStartMock,
-  createAgentRegistryMock,
-  createAgentProviderMock,
-  createInternalAgentRegistryMock,
+  createMockedAgentClient,
   createMockedAgent,
   type AgentsServiceStartMock,
-  type AgentRegistryMock,
-  type InternalAgentRegistryMock,
+  type AgentClientMock,
   type MockedAgent,
 } from './agents';
