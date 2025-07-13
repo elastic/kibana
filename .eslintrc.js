@@ -783,6 +783,7 @@ module.exports = {
         'x-pack/solutions/*/test/**/*config*.ts',
         'x-pack/solutions/*/test/**/tests/**/*',
         'x-pack/solutions/*/test/api_integration_deployment_agnostic/*configs/**/*',
+        'x-pack/solutions/*/test/alerting_api_integration/**/*',
         'x-pack/test/*/{tests,test_suites,apis,apps}/**/*',
         'x-pack/test/*/*config.*ts',
         'x-pack/platform/test/saved_object_api_integration/*/apis/**/*',
