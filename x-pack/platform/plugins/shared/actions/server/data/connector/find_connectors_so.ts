@@ -11,10 +11,18 @@ import { MAX_ACTIONS_RETURNED } from './constants';
 export const findConnectorsSo = async ({
   savedObjectsClient,
   namespace,
+  connectorsIds,
 }: FindConnectorsSoParams): Promise<FindConnectorsSoResult> => {
+  let search: string | undefined;
+
+  if (connectorsIds && connectorsIds.length) {
+    search = '';
+  }
+
   return savedObjectsClient.find({
     perPage: MAX_ACTIONS_RETURNED,
     type: 'action',
     ...(namespace ? { namespaces: [namespace] } : {}),
+    search,
   });
 };

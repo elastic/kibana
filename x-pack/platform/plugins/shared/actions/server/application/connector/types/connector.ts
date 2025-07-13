@@ -25,3 +25,7 @@ export interface Connector {
 export interface ConnectorWithExtraFindData extends Connector {
   referencedByCount: ConnectorWithExtraFindDataSchema['referencedByCount'];
 }
+
+export interface ConnectorWithDecryptedSecrets extends ConnectorWithExtraFindData {
+  secrets: Record<string, unknown>;
+}

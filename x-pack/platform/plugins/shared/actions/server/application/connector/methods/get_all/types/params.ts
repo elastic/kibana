@@ -8,6 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { ISavedObjectsRepository, Logger } from '@kbn/core/server';
 import type { AuditLogger } from '@kbn/security-plugin/server';
+import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { InMemoryConnector } from '../../../../..';
 import type { ActionsClientContext } from '../../../../../actions_client';
 import type { Connector } from '../../../types';
@@ -25,6 +26,15 @@ export interface GetAllUnsecuredParams {
   kibanaIndices: string[];
   logger: Logger;
   spaceId: string;
+}
+
+export interface GetByIdsWithSecretsUnsecuredParams {
+  esClient: ElasticsearchClient;
+  encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
+  inMemoryConnectors: InMemoryConnector[];
+  internalSavedObjectsRepository: ISavedObjectsRepository;
+  spaceId: string;
+  connectorIds: string[];
 }
 
 export interface InjectExtraFindDataParams {

@@ -7,6 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import type { IClusterClient, ISavedObjectsRepository, Logger } from '@kbn/core/server';
+import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import type {
   BulkUnsecuredExecutionEnqueuer,
   ExecuteOptions,
@@ -16,8 +17,14 @@ import { asNotificationExecutionSource } from '../lib';
 import type { RelatedSavedObjects, ActionExecutorContract } from '../lib';
 import type { ActionTypeExecutorResult, InMemoryConnector } from '../types';
 import { asBackgroundTaskExecutionSource } from '../lib/action_execution_source';
-import type { ConnectorWithExtraFindData } from '../application/connector/types';
-import { getAllUnsecured } from '../application/connector/methods/get_all/get_all';
+import type {
+  ConnectorWithDecryptedSecrets,
+  ConnectorWithExtraFindData,
+} from '../application/connector/types';
+import {
+  getAllUnsecured,
+  getByIdsWithSecretsDecryptedUnsecured,
+} from '../application/connector/methods/get_all';
 
 // requests from the notification service (for system notification)
 const NOTIFICATION_REQUESTER_ID = 'notifications';
@@ -37,6 +44,7 @@ const ALLOWED_REQUESTER_IDS = [
 export interface UnsecuredActionsClientOpts {
   actionExecutor: ActionExecutorContract;
   clusterClient: IClusterClient;
+  encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   executionEnqueuer: BulkUnsecuredExecutionEnqueuer<ExecutionResponse>;
   inMemoryConnectors: InMemoryConnector[];
   internalSavedObjectsRepository: ISavedObjectsRepository;
@@ -51,6 +59,10 @@ type UnsecuredExecuteOptions = Omit<ExecuteOptions, 'source'> & {
 
 export interface IUnsecuredActionsClient {
   getAll: (spaceId: string) => Promise<ConnectorWithExtraFindData[]>;
+  getByIdsWithDecryptedSecrets: (
+    spaceId: string,
+    connectorIds: string[]
+  ) => Promise<ConnectorWithDecryptedSecrets[]>;
   execute: (opts: UnsecuredExecuteOptions) => Promise<ActionTypeExecutorResult<unknown>>;
   bulkEnqueueExecution: (
     requesterId: string,
@@ -127,6 +139,21 @@ export class UnsecuredActionsClient {
       logger: this.opts.logger,
       internalSavedObjectsRepository: this.opts.internalSavedObjectsRepository,
       spaceId,
+    });
+  }
+
+  // TODO Ihor
+  public async getByIdsWithDecryptedSecrets(
+    spaceId: string,
+    connectorIds: string[]
+  ): Promise<ConnectorWithDecryptedSecrets[]> {
+    return getByIdsWithSecretsDecryptedUnsecured({
+      esClient: this.opts.clusterClient.asInternalUser,
+      encryptedSavedObjectsClient: this.opts.encryptedSavedObjectsClient,
+      inMemoryConnectors: this.opts.inMemoryConnectors,
+      internalSavedObjectsRepository: this.opts.internalSavedObjectsRepository,
+      spaceId,
+      connectorIds,
     });
   }
 

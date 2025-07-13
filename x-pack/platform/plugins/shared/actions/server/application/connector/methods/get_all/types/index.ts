@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export type { GetAllParams, InjectExtraFindDataParams } from './params';
+export type {
+  GetAllParams,
+  InjectExtraFindDataParams,
+  GetByIdsWithSecretsUnsecuredParams,
+} from './params';

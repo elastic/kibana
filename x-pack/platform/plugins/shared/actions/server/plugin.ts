@@ -505,6 +505,7 @@ export class ActionsPlugin
       ]);
 
       return new UnsecuredActionsClient({
+        encryptedSavedObjectsClient,
         actionExecutor: actionExecutor!,
         clusterClient: core.elasticsearch.client,
         executionEnqueuer: createBulkUnsecuredExecutionEnqueuerFunction({

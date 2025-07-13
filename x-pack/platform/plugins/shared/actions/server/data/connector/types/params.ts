@@ -20,6 +20,7 @@ export interface SearchConnectorsSoParams {
 export interface FindConnectorsSoParams {
   savedObjectsClient: SavedObjectClientForFind;
   namespace?: string;
+  connectorsIds?: string[];
 }
 
 export interface GetConnectorSoParams {

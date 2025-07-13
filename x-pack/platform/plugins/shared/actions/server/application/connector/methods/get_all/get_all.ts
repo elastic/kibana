@@ -19,8 +19,9 @@ import { findConnectorsSo, searchConnectorsSo } from '../../../../data/connector
 import type { GetAllParams, InjectExtraFindDataParams } from './types';
 import { ConnectorAuditAction, connectorAuditEvent } from '../../../../lib/audit_events';
 import { connectorFromSavedObject, isConnectorDeprecated } from '../../lib';
-import type { ConnectorWithExtraFindData } from '../../types';
-import type { GetAllUnsecuredParams } from './types/params';
+import type { ConnectorWithExtraFindData, ConnectorWithDecryptedSecrets } from '../../types';
+import type { GetAllUnsecuredParams, GetByIdsWithSecretsUnsecuredParams } from './types/params';
+import { RawAction } from '@kbn/actions-plugin/server/types';
 
 interface GetAllHelperOpts {
   auditLogger?: AuditLogger;
@@ -29,6 +30,7 @@ interface GetAllHelperOpts {
   kibanaIndices: string[];
   logger: Logger;
   namespace?: string;
+  connectorIdsFilter?: string[];
   savedObjectsClient: SavedObjectClientForFind;
 }
 
@@ -79,6 +81,65 @@ export async function getAllUnsecured({
     namespace,
     savedObjectsClient: internalSavedObjectsRepository,
   });
+}
+
+export async function getByIdsWithSecretsDecryptedUnsecured({
+  esClient,
+  encryptedSavedObjectsClient,
+  inMemoryConnectors,
+  internalSavedObjectsRepository,
+  spaceId,
+  connectorIds,
+}: GetByIdsWithSecretsUnsecuredParams): Promise<ConnectorWithDecryptedSecrets[]> {
+  const namespace = spaceId && spaceId !== 'default' ? spaceId : undefined;
+  const connectorIdsSet = new Set(connectorIds);
+  const savedObjectsActions = (
+    await findConnectorsSo({ savedObjectsClient: internalSavedObjectsRepository, namespace })
+  ).saved_objects
+    .map((rawAction) => {
+      const connector = connectorFromSavedObject(
+        rawAction,
+        isConnectorDeprecated(rawAction.attributes)
+      );
+      return connector;
+    })
+    .filter((connector) => connectorIdsSet.has(connector.id));
+
+  const mergedResult = [
+    ...savedObjectsActions,
+    ...(await filterInferenceConnectors(esClient, inMemoryConnectors))
+      .filter((connector) => connectorIdsSet.has(connector.id))
+      .map((connector) => {
+        return {
+          id: connector.id,
+          actionTypeId: connector.actionTypeId,
+          name: connector.name,
+          isPreconfigured: connector.isPreconfigured,
+          isDeprecated: isConnectorDeprecated(connector),
+          isSystemAction: connector.isSystemAction,
+          ...(connector.exposeConfig ? { config: connector.config } : {}),
+        };
+      }),
+  ].sort((a, b) => a.name.localeCompare(b.name));
+
+  const result: ConnectorWithDecryptedSecrets[] = [];
+
+  for (const connector of mergedResult) {
+    const rawAction = await encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawAction>(
+      'action',
+      connector.id,
+      {
+        namespace: namespace === 'default' ? undefined : namespace,
+      }
+    );
+
+    result.push({
+      ...connector,
+      secrets: rawAction.attributes.secrets,
+    } as ConnectorWithDecryptedSecrets);
+  }
+
+  return result;
 }
 
 async function getAllHelper({
