@@ -1603,6 +1603,7 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /src/platform/test/functional/apps/discover/observability/logs @elastic/obs-ux-logs-team
 /x-pack/solutions/observability/plugins/observability/public/pages/landing @elastic/obs-ux-logs-team
 /x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/landing.spec.ts @elastic/obs-ux-logs-team
+/x-pack/solutions/observability/test/functional/config.firefox.ts @elastic/obs-ux-logs-team
 
 # Observability-ui
 /x-pack/test_serverless/api_integration/test_suites/observability/index.ts @elastic/observability-ui
