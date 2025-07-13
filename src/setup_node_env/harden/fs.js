@@ -19,13 +19,11 @@ const singlePath = [
 
 const dualPath = ['copyFile', 'copyFileSync'];
 
-const validations = require('./fs_validations');
-
 const { REPO_ROOT } = require('@kbn/repo-info');
 
 const fsEventBus = require('@kbn/security-hardening/fs-event-bus');
 
-const { join, normalize } = require('path');
+const { join } = require('path');
 const { homedir, tmpdir } = require('os');
 const {
   realpathSync,
@@ -39,6 +37,8 @@ const {
   rename,
   renameSync,
 } = require('fs');
+
+const { getSafePath, validateAndSanitizeFileData } = require('./fs_validations');
 
 const isDevOrCI = process.env.NODE_ENV !== 'production' || process.env.CI === 'true';
 const baseSafePaths = [join(REPO_ROOT, 'data'), join(REPO_ROOT, '.es')];
@@ -95,20 +95,6 @@ fsEventBus.on('kbn_config_changed', ({ loggerFilePath }) => {
   safePaths.push(loggerFilePath);
 });
 
-const getSafePath = (userPath) => {
-  validations.validateNoPathTraversal(userPath); // Should I run this on both?
-  const normalizedPath = normalize(userPath);
-  validations.validateFileExtension(normalizedPath); // Maintain logic, dont run in prod
-  validations.validatePathIsSubdirectoryOfSafeDirectory(normalizedPath); // Maintain logic, run only in prod
-
-  return normalizedPath;
-};
-
-function validateFileData(data) {
-  validations.validateFileExtension(data);
-  validations.validateFileSize(data);
-}
-
 const isMockFsActive = () => {
   try {
     // This is the most reliable way to detect mock-fs
@@ -160,7 +146,7 @@ const patchFs = (fs) => {
       }
 
       if (singlePath.includes(prop) && typeof target[prop] === 'function') {
-        return (userPath, data, options, cb) => {
+        return async (userPath, data, options, cb) => {
           if (isMockFsActive()) {
             // Use the original function directly to avoid infinite recursion.
             // When mock-fs is active, it replaces the fs.[method] with its own implementation,
@@ -169,13 +155,12 @@ const patchFs = (fs) => {
             return realMethods[prop](userPath, data, options, cb || noop);
           }
 
-          validateFileData(data);
-
           cb ||= options;
           let safePath;
 
           try {
             safePath = getSafePath(userPath);
+            data = await validateAndSanitizeFileData(data, safePath);
           } catch (err) {
             // ensure that we invoke the callback asynchronously
             if (typeof cb === 'function') return process.nextTick(() => cb(err));
@@ -188,12 +173,10 @@ const patchFs = (fs) => {
       }
 
       if (dualPath.includes(prop) && typeof target[prop] === 'function') {
-        return (userSrc, userDest, data, options, cb) => {
+        return async (userSrc, userDest, data, options, cb) => {
           if (isMockFsActive()) {
             return realMethods[prop](userSrc, userDest, data, options, cb);
           }
-
-          validateFileData(data);
 
           cb ||= options;
           let srcSafePath;
@@ -201,6 +184,7 @@ const patchFs = (fs) => {
 
           try {
             srcSafePath = getSafePath(userSrc);
+            data = await validateAndSanitizeFileData(data, srcSafePath);
             destSafePath = getSafePath(userDest);
           } catch (err) {
             // ensure that we invoke the callback asynchronously

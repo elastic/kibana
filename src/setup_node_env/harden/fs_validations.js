@@ -9,10 +9,11 @@
 
 /* eslint-disable no-restricted-syntax */
 
-const { join } = require('path');
+const { join, normalize } = require('path');
 const { REPO_ROOT } = require('@kbn/repo-info');
 const { tmpdir, homedir } = require('os');
-const { realpathSync, statSync } = require('fs');
+const { realpathSync } = require('fs');
+const { sanitizeSvg, sanitizePng } = require('./fs_sanitizations');
 
 const allowedExtensions = ['.txt', '.md', '.log', '.json', '.yml', '.yaml', '.csv', '.svg', '.png'];
 const allowedMimeTypes = [
@@ -64,6 +65,20 @@ const devOrCIPaths = [
 
 const safePaths = [...baseSafePaths, ...(isDevOrCI ? devOrCIPaths : [])];
 
+function isDevOrCIEnvironment() {
+  return isDevOrCI;
+}
+
+/**
+ * Validates that a path does not contain any path traversal sequences or dangerous characters
+ * that could be used to access files outside of the intended directory.
+ *
+ * @param {string|Object} path - The path to validate (will be converted to string)
+ * @throws {Error} - Throws if path contains null bytes (e.g., \0 or %00)
+ * @throws {Error} - Throws if path contains URL encoded path sequences (e.g., %2e or %2f)
+ * @throws {Error} - Throws if path contains directory traversal sequences (e.g., ../ or ..\)
+ * @returns {void}
+ */
 function validateNoPathTraversal(path) {
   // Force string conversion to handle objects with toString methods
   path = String(path);
@@ -84,40 +99,96 @@ function validateNoPathTraversal(path) {
   }
 }
 
-function validateFileExtension(path) {
-  // Skip validation if path contains __fixtures__
-  if (isDevOrCI || path.includes('__fixtures__')) {
-    return;
+/**
+ * Gets the file extension from a path
+ * @param {string} path - The file path
+ * @returns {string} - The file extension including the dot (e.g., '.json'), or empty string if no extension
+ */
+function getFileExtension(path) {
+  // Force string conversion to handle objects with toString methods
+  path = String(path);
+
+  // Find the last dot in the filename part of the path (after the last / or \)
+  const lastSlashIndex = Math.max(path.lastIndexOf('/'), path.lastIndexOf('\\'));
+  const lastDotIndex = path.lastIndexOf('.');
+
+  // If there's no dot, or the dot is before the last slash (part of a directory name),
+  // or the dot is the last character, then there's no extension
+  if (lastDotIndex === -1 || lastDotIndex < lastSlashIndex || lastDotIndex === path.length - 1) {
+    return '';
   }
 
-  // Check if the file has an allowed extension
+  // Return the extension including the dot
+  return path.slice(lastDotIndex).toLowerCase();
+}
+
+function validateFileExtension(path) {
   const hasAllowedExtension = allowedExtensions.some((ext) => path.toLowerCase().endsWith(ext));
 
   if (!hasAllowedExtension) {
     throw new Error(
-      `Invalid file type: "${path}". Only .txt, .md, and .log files are allowed outside of __fixtures__ directories.`
+      `Invalid file type: "${path}". Only ${allowedExtensions.join(', ')} files are allowed.`
     );
   }
 }
 
-function validatePathIsSubdirectoryOfSafeDirectory(path) {
-  // Skip if Dev or CI environment so it can build Kibana correctly
-  if (isDevOrCI) {
+function validatePathIsSubdirectoryOfSafeDirectory(path, isDevOrCiEnvironmentOverride) {
+  // Skip if Dev or CI environment so Kibana can build correctly
+  // If isDevOrCiEnvironmentOverride is defined, use it, otherwise call isDevOrCIEnvironment()
+  if (
+    isDevOrCiEnvironmentOverride === true ||
+    (isDevOrCiEnvironmentOverride !== false && isDevOrCIEnvironment())
+  ) {
     return true;
   }
 
-  if (!safePaths.some((safePath) => path.startsWith(safePath))) {
+  // Check if the path is actually a subdirectory of any safe path
+  const isSafePath = safePaths.some((safePath) => {
+    // Path exactly matches a safe path
+    if (path === safePath) {
+      return true;
+    }
+
+    // Path is a subdirectory of a safe path - must start with safe path followed by a separator
+    if (path.startsWith(safePath)) {
+      const nextChar = path.charAt(safePath.length);
+      // Check if the next character after the safe path is a path separator (/ or \)
+      return nextChar === '/' || nextChar === '\\';
+    }
+
+    return false;
+  });
+
+  if (!isSafePath) {
     throw new Error(`Unsafe path detected: "${path}".`);
   }
 }
 
 /**
- * Validates that the file content bytes have an allowed mimetype and extension
- * @param {Buffer|Uint8Array} fileBytes - The bytes of the file to validate
- * @returns {boolean} - Returns true if validation passes
- * @throws {Error} - Throws if validation fails
+ * Validates that the file content has an allowed MIME type and sanitizes SVG content
+ * @param {Buffer} fileBytes - The bytes of the file to validate
+ * @param {string} [path] - The file path used to check file extension to see if this validation applies
+ * @returns {Buffer} - Returns the original Buffer for most files or a sanitized Buffer for SVGs
+ * @throws {Error} - Throws if validation fails (unrecognized content type or disallowed MIME type)
+ * @throws {Error} - Throws if SVG sanitization fails
  */
-function validateFileContent(fileBytes) {
+async function validateFileContent(fileBytes, path) {
+  const fileExtension = getFileExtension(path);
+
+  const textBasedExtensionsNotHandledByMagicBytes = [
+    '.json',
+    '.yml',
+    '.yaml',
+    '.md',
+    '.txt',
+    '.log',
+    '.csv',
+  ];
+
+  if (textBasedExtensionsNotHandledByMagicBytes.includes(fileExtension)) {
+    return fileBytes;
+  }
+
   // Use magic-bytes to detect mimetype
   const possibleTypes = magicBytes.filetypeinfo(fileBytes);
 
@@ -135,31 +206,38 @@ function validateFileContent(fileBytes) {
     );
   }
 
-  return true;
+  // Check if the content is an SVG and sanitize it
+  if (possibleMimeTypes.includes('image/svg+xml')) {
+    try {
+      // Return the sanitized content as Buffer
+      return sanitizeSvg(fileBytes);
+    } catch (error) {
+      throw new Error(`Failed to sanitize SVG content: ${error.message}`);
+    }
+  }
+
+  // Check if the content is a PNG and sanitize it
+  if (possibleMimeTypes.includes('image/png')) {
+    try {
+      // Return the sanitized content as Buffer
+      return await sanitizePng(fileBytes);
+    } catch (error) {
+      throw new Error(`Failed to sanitize PNG content: ${error.message}`);
+    }
+  }
+
+  return fileBytes;
 }
 
+/**
+ * Validates that the file size is within acceptable limits
+ * @param {Buffer} data - The file data as a Buffer
+ * @returns {boolean} - Returns true if validation passes
+ * @throws {Error} - Throws if file size is invalid or exceeds the maximum allowed size
+ */
 function validateFileSize(data) {
-  let fileSize;
-  if (Buffer.isBuffer(data)) {
-    // If data is a Buffer, get its length
-    fileSize = data.length;
-  } else if (typeof data === 'string') {
-    // If data is a string, get its byte length
-    fileSize = Buffer.byteLength(data);
-  } else if (data instanceof Uint8Array) {
-    // If data is a Uint8Array, get its byte length
-    fileSize = data.byteLength;
-  } else if (data && typeof data === 'object' && 'length' in data) {
-    // If data is array-like with length property
-    fileSize = data.length;
-  } else {
-    // If we cant determine the size, skip the validation
-    return true;
-  }
-
-  if (typeof fileSize !== 'number') {
-    throw new Error(`Invalid file size: ${fileSize}`);
-  }
+  // Since data is guaranteed to be a Buffer, we can directly use its length property
+  const fileSize = data.length;
 
   if (fileSize > MAX_FILE_SIZE) {
     throw new Error(`File size exceeds maximum allowed size of ${MAX_FILE_SIZE} bytes`);
@@ -169,80 +247,12 @@ function validateFileSize(data) {
 }
 
 /**
- * Validates that a filename contains only allowed characters
- * @param {string} filename - The filename to validate (without path)
- * @returns {boolean} - Returns true if validation passes
- * @throws {Error} - Throws if validation fails
- */
-function validateFilename(filename) {
-  // Only allow alphanumeric characters, underscores, hyphens, and dots
-  const validFilenameRegex = /^[a-zA-Z0-9_\-.]+$/;
-
-  if (!validFilenameRegex.test(filename)) {
-    throw new Error(
-      `Invalid filename: "${filename}". Filenames can only contain alphanumeric characters, underscores, hyphens, and dots.`
-    );
-  }
-
-  return true;
-}
-
-/**
- * Validates that file content is valid UTF-8 encoded text
- * @param {Buffer} content - The file content to validate
- * @returns {boolean} - Returns true if validation passes
- * @throws {Error} - Throws if validation fails
- */
-function validateContentEncoding(content) {
-  try {
-    // Attempt to decode as UTF-8
-    const decoded = content.toString('utf8');
-
-    // Check for the replacement character � which indicates invalid UTF-8
-    if (decoded.includes('�')) {
-      throw new Error('Content contains invalid UTF-8 sequences');
-    }
-
-    return true;
-  } catch (error) {
-    throw new Error(`Invalid content encoding: ${error.message}`);
-  }
-}
-
-/**
- * Validates that file permissions are secure (not world-writable)
- * @param {string} filePath - Path to the file
- * @returns {boolean} - Returns true if validation passes
- * @throws {Error} - Throws if validation fails
- */
-function validateFilePermissions(filePath) {
-  try {
-    const stats = statSync(filePath);
-    const mode = stats.mode;
-
-    // Check if the file is world-writable (permissions & 0o002)
-    if (mode & 0o002) {
-      throw new Error(`Insecure file permissions: "${filePath}" is world-writable`);
-    }
-
-    return true;
-  } catch (error) {
-    if (error.code === 'ENOENT') {
-      throw new Error(`File not found: "${filePath}"`);
-    }
-    throw error;
-  }
-}
-
-/**
  * Validates content length against expected size range for the content type
  * @param {Buffer} content - The file content
  * @param {string} mimeType - The detected MIME type
- * @returns {boolean} - Returns true if validation passes
  * @throws {Error} - Throws if validation fails
  */
 function validateContentLength(content, mimeType) {
-  // Define reasonable size ranges for different content types
   const sizeRanges = {
     'application/json': { min: 2, max: 10 * 1024 * 1024 }, // 2B to 10MB
     'text/yaml': { min: 1, max: 5 * 1024 * 1024 }, // 1B to 5MB
@@ -260,31 +270,56 @@ function validateContentLength(content, mimeType) {
       );
     }
   }
-
-  return true;
 }
 
 /**
- * Validates that a path is not a symbolic link
- * @param {string} filePath - Path to check
- * @returns {boolean} - Returns true if validation passes
- * @throws {Error} - Throws if validation fails
+ * Validates and normalizes a user-provided path to ensure it's safe to use
+ * @param {string} userPath - The user-provided path to validate and normalize
+ * @returns {string} - The normalized path if validation passes
+ * @throws {Error} - Throws if the path contains traversal sequences, has invalid file extension,
+ *                   or is outside of safe directories in production environments
  */
-function validateNoSymlinks(filePath) {
-  try {
-    const fs = require('fs');
-    const stats = fs.lstatSync(filePath);
-    if (stats.isSymbolicLink()) {
-      throw new Error(`Symbolic links are not allowed: "${filePath}"`);
-    }
-    return true;
-  } catch (error) {
-    if (error.code === 'ENOENT') {
-      // File doesn't exist, so it's not a symlink
-      return true;
-    }
-    throw error;
+function getSafePath(userPath) {
+  validateNoPathTraversal(userPath); // Should I run this on both?
+  const normalizedPath = normalize(userPath);
+  validateFileExtension(normalizedPath); // Maintain logic, dont run in prod
+  validatePathIsSubdirectoryOfSafeDirectory(normalizedPath); // Maintain logic, run only in prod
+
+  return normalizedPath;
+}
+
+/**
+ * Validates and sanitizes file data, ensuring consistent Buffer processing
+ * @param {Buffer|Uint8Array|string|*} data - The data to validate and sanitize
+ * @param {string} [path] - The file path, used to determine content type when magic-bytes detection fails
+ * @returns {Buffer} - Returns the validated and sanitized content
+ * @throws {Error} - Throws if file size exceeds maximum allowed size
+ * @throws {Error} - Throws if content type cannot be determined or is not allowed
+ * @throws {Error} - Throws if input type is not supported
+ * @throws {Error} - Throws if SVG sanitization fails
+ */
+async function validateAndSanitizeFileData(data, path) {
+  // Convert input to Buffer if needed
+  let dataBuffer;
+
+  if (Buffer.isBuffer(data)) {
+    // Already a Buffer, no conversion needed
+    dataBuffer = data;
+  } else if (data instanceof Uint8Array) {
+    // Convert Uint8Array to Buffer
+    dataBuffer = Buffer.from(data);
+  } else if (typeof data === 'string') {
+    // Convert string to Buffer
+    dataBuffer = Buffer.from(data, 'utf8');
+  } else if (data && typeof data === 'object' && 'buffer' in data && Buffer.isBuffer(data.buffer)) {
+    // Handle objects with buffer property (like some stream outputs)
+    dataBuffer = data.buffer;
+  } else {
+    throw new Error('Unsupported data type: input must be Buffer, Uint8Array, or string');
   }
+
+  validateFileSize(dataBuffer);
+  return await validateFileContent(dataBuffer, path);
 }
 
 module.exports = {
@@ -293,9 +328,7 @@ module.exports = {
   validatePathIsSubdirectoryOfSafeDirectory,
   validateFileContent,
   validateFileSize,
-  validateFilename,
-  validateContentEncoding,
-  validateFilePermissions,
-  validateContentLength,
-  validateNoSymlinks,
+  getSafePath,
+  validateAndSanitizeFileData,
+  getFileExtension,
 };
