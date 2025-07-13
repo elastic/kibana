@@ -7,7 +7,7 @@
 
 import { FtrConfigProviderContext } from '@kbn/test';
 import { resolve } from 'path';
-import { pageObjects, services } from '../ftr_provider_context';
+import { pageObjects, services } from './ftr_provider_context';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const baseConfig = await readConfigFile(
@@ -23,11 +23,11 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         '--uiSettings.overrides.observability:enableLegacyUptimeApp=true',
       ],
     },
-    testFiles: [resolve(__dirname, './uptime')],
+    testFiles: [resolve(__dirname, './apps')],
     pageObjects,
     services,
     junit: {
-      reportName: 'Chrome X-Pack UI Functional Tests with ES SSL - Uptime',
+      reportName: 'Chrome X-Pack Observability UI Functional Tests with ES SSL',
     },
   };
 }

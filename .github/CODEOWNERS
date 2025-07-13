@@ -1552,12 +1552,14 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 
 # Uptime
 /x-pack/test/functional/page_objects/uptime_page.ts @elastic/obs-ux-management-team
-/x-pack/test/functional_with_es_ssl/apps/uptime/ @elastic/obs-ux-management-team
-/x-pack/test/functional_with_es_ssl/apps/config.ts @elastic/obs-ux-management-team
-/x-pack/test/functional_with_es_ssl/ftr_provider_context.ts @elastic/obs-ux-management-team
-/x-pack/test/functional/apps/uptime @elastic/obs-ux-management-team
+/x-pack/solutions/observability/test/accessibility/apps/uptime.ts @elastic/obs-ux-management-team
+/x-pack/solutions/observability/test/functional_with_es_ssl/apps/uptime/ @elastic/obs-ux-management-team
+/x-pack/solutions/observability/test/functional_with_es_ssl/config.ts @elastic/obs-ux-management-team
+/x-pack/solutions/observability/test/functional_with_es_ssl/ftr_provider_context.ts @elastic/obs-ux-management-team
+/x-pack/solutions/observability/test/functional/apps/uptime @elastic/obs-ux-management-team
 /x-pack/test/functional/es_archives/uptime @elastic/obs-ux-management-team
 /x-pack/test/functional/services/uptime @elastic/obs-ux-management-team
+/x-pack/solutions/observability/test/functional/services/uptime @elastic/obs-ux-management-team
 /x-pack/solutions/observability/test/api_integration/apis/uptime @elastic/obs-ux-management-team
 /x-pack/solutions/observability/test/api_integration/apis/synthetics @elastic/obs-ux-management-team
 /x-pack/solutions/observability/test/alerting_api_integration/observability/synthetics_rule.ts @elastic/obs-ux-management-team
@@ -1942,6 +1944,11 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /x-pack/solutions/observability/test/functional/ftr_provider_context.d.ts @elastic/appex-qa
 /x-pack/solutions/observability/test/functional/page_objects/index.ts @elastic/appex-qa
 /x-pack/solutions/observability/test/functional/services/index.ts @elastic/appex-qa
+/x-pack/solutions/observability/test/accessibility/config.ts @elastic/appex-qa
+/x-pack/solutions/observability/test/accessibility/ftr_provider_context.d.ts @elastic/appex-qa
+/x-pack/solutions/observability/test/accessibility/index.ts @elastic/appex-qa
+/x-pack/solutions/observability/test/accessibility/page_objects.ts @elastic/appex-qa
+/x-pack/solutions/observability/test/accessibility/services.ts @elastic/appex-qa
 
 # Core
 /src/platform/test/api_integration/fixtures/kbn_archiver/management/saved_objects/relationships.json @elastic/kibana-core @elastic/kibana-data-discovery

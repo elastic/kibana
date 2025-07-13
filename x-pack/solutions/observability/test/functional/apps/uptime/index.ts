@@ -5,35 +5,9 @@
  * 2.0.
  */
 
-import {
-  settingsObjectType,
-  settingsObjectId,
-} from '@kbn/uptime-plugin/server/legacy_uptime/lib/saved_objects/uptime_settings';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const ARCHIVE = 'x-pack/test/functional/es_archives/uptime/full_heartbeat';
-
-export const deleteUptimeSettingsObject = async (server: any) => {
-  // delete the saved object
-  try {
-    await server.savedObjects.delete({
-      type: settingsObjectType,
-      id: settingsObjectId,
-    });
-  } catch (e) {
-    // a 404 just means the doc is already missing
-    if (e.response.status !== 404) {
-      const { status, statusText, data, headers, config } = e.response;
-      throw new Error(
-        `error attempting to delete settings:\n${JSON.stringify(
-          { status, statusText, data, headers, config },
-          null,
-          2
-        )}`
-      );
-    }
-  }
-};
 
 export default ({ loadTestFile, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
@@ -43,7 +17,7 @@ export default ({ loadTestFile, getService }: FtrProviderContext) => {
 
   describe('Uptime app', function () {
     beforeEach('delete settings', async () => {
-      await deleteUptimeSettingsObject(server);
+      await uptime.common.deleteUptimeSettingsObject();
     });
 
     describe('with generated data', () => {

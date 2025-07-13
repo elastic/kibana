@@ -8,20 +8,16 @@
 import { GenericFtrProviderContext, GenericFtrService } from '@kbn/test';
 
 import { pageObjects as platformPageObjects } from '@kbn/test-suites-xpack-platform/functional_with_es_ssl/page_objects';
-import { services as platformServices } from '../functional/services';
-import { UptimePageObject } from '../functional/page_objects/uptime_page';
-import { InfraLogsPageProvider } from '../functional/page_objects/infra_logs_page';
-import { UptimeProvider } from '../functional/services/uptime';
+import { pageObjects as obltPageObjects } from '../functional/page_objects';
+import { services as obltFunctionalServices } from '../functional/services';
 
 export const pageObjects = {
   ...platformPageObjects,
-  infraLogs: InfraLogsPageProvider,
-  uptime: UptimePageObject,
+  ...obltPageObjects,
 };
 
 export const services = {
-  ...platformServices,
-  uptime: UptimeProvider,
+  ...obltFunctionalServices,
 };
 export type FtrProviderContext = GenericFtrProviderContext<typeof services, typeof pageObjects>;
 export class FtrService extends GenericFtrService<FtrProviderContext> {}
