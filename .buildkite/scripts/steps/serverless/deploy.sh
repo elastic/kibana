@@ -25,7 +25,6 @@ deploy() {
 
   PRODUCT_TIER_JSON_ENTRY=""
   PRODUCT_TIER_NAME=""
-
   if [ -n "${PRODUCT_TIER:-}" ]; then
     PRODUCT_TIER_NAME="-$PRODUCT_TIER"
 
@@ -41,7 +40,6 @@ deploy() {
 
   PROJECT_NAME="kibana-pr-$BUILDKITE_PULL_REQUEST-$PROJECT_TYPE$PRODUCT_TIER_NAME"
   VAULT_KEY_NAME="$PROJECT_NAME"
-
   is_pr_with_label "ci:project-persist-deployment" && PROJECT_NAME="keep_$PROJECT_NAME"
   PROJECT_CREATE_CONFIGURATION='{
     "name": "'"$PROJECT_NAME"'",
