@@ -1266,11 +1266,112 @@
           },
           {
             "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableRestorableState.isFilterActive",
+            "type": "boolean",
+            "tags": [],
+            "label": "isFilterActive",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-unified-data-table/src/restorable_state.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableRestorableState.pageIndex",
+            "type": "number",
+            "tags": [],
+            "label": "pageIndex",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-unified-data-table/src/restorable_state.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableRestorableState.inTableSearch",
+            "type": "Object",
+            "tags": [],
+            "label": "inTableSearch",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/data-grid-in-table-search",
+                "scope": "public",
+                "docId": "kibKbnDataGridInTableSearchPluginApi",
+                "section": "def-public.InTableSearchRestorableState",
+                "text": "InTableSearchRestorableState"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-data-table/src/restorable_state.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
             "id": "def-public.UnifiedDataTableRestorableState.isCompareActive",
             "type": "boolean",
             "tags": [],
             "label": "isCompareActive",
             "description": [],
+            "path": "src/platform/packages/shared/kbn-unified-data-table/src/restorable_state.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableRestorableState.comparisonSettingShowDiff",
+            "type": "boolean",
+            "tags": [],
+            "label": "comparisonSettingShowDiff",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-unified-data-table/src/restorable_state.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableRestorableState.comparisonSettingShowDiffDecorations",
+            "type": "boolean",
+            "tags": [],
+            "label": "comparisonSettingShowDiffDecorations",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-unified-data-table/src/restorable_state.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableRestorableState.comparisonSettingShowAllFields",
+            "type": "boolean",
+            "tags": [],
+            "label": "comparisonSettingShowAllFields",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-unified-data-table/src/restorable_state.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableRestorableState.comparisonSettingShowMatchingValues",
+            "type": "boolean",
+            "tags": [],
+            "label": "comparisonSettingShowMatchingValues",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-unified-data-table/src/restorable_state.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableRestorableState.comparisonSettingDiffMode",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "comparisonSettingDiffMode",
+            "description": [],
+            "signature": [
+              "\"basic\" | \"chars\" | \"words\" | \"lines\""
+            ],
             "path": "src/platform/packages/shared/kbn-unified-data-table/src/restorable_state.ts",
             "deprecated": false,
             "trackAdoption": false
