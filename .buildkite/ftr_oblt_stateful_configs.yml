@@ -51,6 +51,7 @@ enabled:
   - x-pack/solutions/observability/test/functional/apps/slo/embeddables/config.ts
   - x-pack/solutions/observability/test/api_integration/apis/security/config.ts
   - x-pack/solutions/observability/test/accessibility/config.ts
+  - x-pack/solutions/observability/test/functional/apps/infra/config.ts
   # stateful configs that run deployment-agnostic tests
   - x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.stateful.config.ts
   - x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.apm.stateful.config.ts

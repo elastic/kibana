@@ -26,7 +26,6 @@ import { GraphPageObject } from '@kbn/test-suites-xpack-platform/functional/page
 import { MaintenanceWindowsPageProvider } from '@kbn/test-suites-xpack-platform/functional/page_objects/maintenance_windows_page';
 import { BannersPageObject } from '@kbn/test-suites-xpack-platform/functional/page_objects/banners_page';
 import { ApiKeysPageProvider } from './api_keys_page';
-import { AssetDetailsProvider } from './asset_details';
 import { CrossClusterReplicationPageProvider } from './cross_cluster_replication_page';
 import { DetectionsPageObject } from '../../security_solution_ftr/page_objects/detections';
 import { EmbeddedConsoleProvider } from './embedded_console';
@@ -69,7 +68,6 @@ import { SearchNavigationProvider } from './search_navigation';
 export const pageObjects = {
   ...kibanaFunctionalPageObjects,
   apiKeys: ApiKeysPageProvider,
-  assetDetails: AssetDetailsProvider,
   banners: BannersPageObject,
   canvas: CanvasPageProvider,
   copySavedObjectsToSpace: CopySavedObjectsToSpacePageProvider,
