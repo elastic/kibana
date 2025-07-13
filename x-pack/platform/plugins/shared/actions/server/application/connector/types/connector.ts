@@ -27,5 +27,5 @@ export interface ConnectorWithExtraFindData extends Connector {
 }
 
 export interface ConnectorWithDecryptedSecrets extends ConnectorWithExtraFindData {
-  secrets: Record<string, unknown>;
+  secrets: Record<string, unknown> | undefined;
 }

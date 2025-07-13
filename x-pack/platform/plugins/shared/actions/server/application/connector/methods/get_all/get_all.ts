@@ -87,23 +87,33 @@ export async function getByIdsWithSecretsDecryptedUnsecured({
   esClient,
   encryptedSavedObjectsClient,
   inMemoryConnectors,
-  internalSavedObjectsRepository,
   spaceId,
   connectorIds,
 }: GetByIdsWithSecretsUnsecuredParams): Promise<ConnectorWithDecryptedSecrets[]> {
   const namespace = spaceId && spaceId !== 'default' ? spaceId : undefined;
   const connectorIdsSet = new Set(connectorIds);
-  const savedObjectsActions = (
-    await findConnectorsSo({ savedObjectsClient: internalSavedObjectsRepository, namespace })
-  ).saved_objects
-    .map((rawAction) => {
-      const connector = connectorFromSavedObject(
-        rawAction,
-        isConnectorDeprecated(rawAction.attributes)
-      );
-      return connector;
-    })
-    .filter((connector) => connectorIdsSet.has(connector.id));
+  const savedObjectsActions: ConnectorWithDecryptedSecrets[] = [];
+  const ramainingConnectorIdsForFetch = [...connectorIds];
+  const batchSize = 4; // don't know what value to use here, picked a random one
+
+  while (ramainingConnectorIdsForFetch.length) {
+    const connectorsWithSecrets = await Promise.all(
+      ramainingConnectorIdsForFetch.splice(0, batchSize).map((connectorId) =>
+        encryptedSavedObjectsClient
+          .getDecryptedAsInternalUser<RawAction>('action', connectorId, {
+            namespace: namespace === 'default' ? undefined : namespace,
+          })
+          .then(
+            (rawAction) =>
+              ({
+                ...connectorFromSavedObject(rawAction, isConnectorDeprecated(rawAction.attributes)),
+                secrets: rawAction.attributes.secrets,
+              } as ConnectorWithDecryptedSecrets)
+          )
+      )
+    );
+    savedObjectsActions.push(...connectorsWithSecrets);
+  }
 
   const mergedResult = [
     ...savedObjectsActions,
@@ -118,28 +128,12 @@ export async function getByIdsWithSecretsDecryptedUnsecured({
           isDeprecated: isConnectorDeprecated(connector),
           isSystemAction: connector.isSystemAction,
           ...(connector.exposeConfig ? { config: connector.config } : {}),
-        };
+          secrets: undefined,
+        } as ConnectorWithDecryptedSecrets;
       }),
   ].sort((a, b) => a.name.localeCompare(b.name));
 
-  const result: ConnectorWithDecryptedSecrets[] = [];
-
-  for (const connector of mergedResult) {
-    const rawAction = await encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawAction>(
-      'action',
-      connector.id,
-      {
-        namespace: namespace === 'default' ? undefined : namespace,
-      }
-    );
-
-    result.push({
-      ...connector,
-      secrets: rawAction.attributes.secrets,
-    } as ConnectorWithDecryptedSecrets);
-  }
-
-  return result;
+  return mergedResult;
 }
 
 async function getAllHelper({

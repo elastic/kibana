@@ -151,7 +151,6 @@ export class UnsecuredActionsClient {
       esClient: this.opts.clusterClient.asInternalUser,
       encryptedSavedObjectsClient: this.opts.encryptedSavedObjectsClient,
       inMemoryConnectors: this.opts.inMemoryConnectors,
-      internalSavedObjectsRepository: this.opts.internalSavedObjectsRepository,
       spaceId,
       connectorIds,
     });

@@ -32,7 +32,6 @@ export interface GetByIdsWithSecretsUnsecuredParams {
   esClient: ElasticsearchClient;
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   inMemoryConnectors: InMemoryConnector[];
-  internalSavedObjectsRepository: ISavedObjectsRepository;
   spaceId: string;
   connectorIds: string[];
 }
