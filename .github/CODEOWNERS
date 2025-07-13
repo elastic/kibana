@@ -1397,6 +1397,7 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.index.ts @elastic/obs-ux-infra_services-team
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.stateful.config.ts @elastic/obs-ux-infra_services-team
 /x-pack/solutions/observability/test/functional/page_objects/asset_details.ts @elastic/obs-ux-infra_services-team # Assigned per https://github.com/elastic/kibana/pull/200157/files/c83fae62151fe634342c498aca69b686b739fe45#r1842202022
+/x-pack/test/functional/page_objects/asset_details.ts @elastic/obs-ux-infra_services-team
 /x-pack/test/functional/page_objects/infra_* @elastic/obs-ux-infra_services-team
 /x-pack/solutions/observability/test/functional/page_objects/infra_* @elastic/obs-ux-infra_services-team
 /x-pack/test/functional/es_archives/infra @elastic/obs-ux-infra_services-team
