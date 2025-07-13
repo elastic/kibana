@@ -1805,7 +1805,6 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /x-pack/platform/test/functional_basic/ftr_provider_context.d.ts @elastic/appex-qa
 /x-pack/test/functional/services/remote_es/remote_es.ts @elastic/appex-qa
 /x-pack/test/functional/services/random.js @elastic/appex-qa
-/x-pack/test/functional/services/index.ts @elastic/appex-qa
 /x-pack/platform/test/functional/services/index.ts @elastic/appex-qa
 /x-pack/test/functional/page_objects/index.ts @elastic/appex-qa
 /x-pack/platform/test/functional/page_objects/index.ts @elastic/appex-qa

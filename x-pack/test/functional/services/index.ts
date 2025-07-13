@@ -61,8 +61,6 @@ import { PipelineListProvider } from './pipeline_list';
 import { PipelineEditorProvider } from './pipeline_editor';
 // @ts-ignore not ts yet
 import { RandomProvider } from './random';
-// @ts-ignore not ts yet
-import { UptimeProvider } from './uptime';
 import { InfraSourceConfigurationFormProvider } from './infra_source_configuration_form';
 import { ObservabilityProvider } from './observability';
 import { DataStreamProvider } from './data_stream';
@@ -112,7 +110,6 @@ export const services = {
   canvasElement: CanvasElementProvider,
   grokDebugger: GrokDebuggerProvider,
   userMenu: UserMenuProvider,
-  uptime: UptimeProvider,
   infraSourceConfigurationForm: InfraSourceConfigurationFormProvider,
   ml: MachineLearningProvider,
   transform: TransformProvider,
