@@ -11,11 +11,12 @@
 const { REPO_ROOT } = require('@kbn/repo-info');
 
 const { fsEventBus, FS_CONFIG_EVENT } = require('@kbn/security-hardening/fs-event-bus');
-const validations = require('./fs_validations');
 
-const { join, normalize } = require('path');
+const { join } = require('path');
 const { homedir, tmpdir } = require('os');
 const { realpathSync } = require('fs');
+
+const { getSafePath, validateAndSanitizeFileData } = require('./fs_validations');
 
 const isDevOrCI = process.env.NODE_ENV !== 'production' || process.env.CI === 'true';
 
@@ -68,15 +69,6 @@ fsEventBus.on(FS_CONFIG_EVENT, (config) => {
   hardeningConfig = config;
   safePaths.push(...config.safe_paths);
 });
-
-const getSafePath = (userPath) => {
-  validations.validateNoPathTraversal(userPath); // Should I run this on both?
-  const normalizedPath = normalize(userPath);
-  validations.validateFileExtension(normalizedPath); // Maintain logic, dont run in prod
-  validations.validatePathIsSubdirectoryOfSafeDirectory(normalizedPath); // Maintain logic, run only in prod
-
-  return normalizedPath;
-};
 
 const shouldEnableHardenedFs = () => {
   const isJestTest = Boolean(process.env.JEST_WORKER_ID);
