@@ -93,15 +93,15 @@ export async function getByIdsWithSecretsDecryptedUnsecured({
   const namespace = spaceId && spaceId !== 'default' ? spaceId : undefined;
   const connectorIdsSet = new Set(connectorIds);
   const savedObjectsActions: ConnectorWithDecryptedSecrets[] = [];
-  const ramainingConnectorIdsForFetch = [...connectorIds];
+  const remainingConnectorIdsToFetch = [...connectorIds];
   const batchSize = 4; // don't know what value to use here, picked a random one
 
-  while (ramainingConnectorIdsForFetch.length) {
+  while (remainingConnectorIdsToFetch.length) {
     const connectorsWithSecrets = await Promise.all(
-      ramainingConnectorIdsForFetch.splice(0, batchSize).map((connectorId) =>
+      remainingConnectorIdsToFetch.splice(0, batchSize).map((connectorId) =>
         encryptedSavedObjectsClient
           .getDecryptedAsInternalUser<RawAction>('action', connectorId, {
-            namespace: namespace === 'default' ? undefined : namespace,
+            namespace,
           })
           .then(
             (rawAction) =>
@@ -117,20 +117,23 @@ export async function getByIdsWithSecretsDecryptedUnsecured({
 
   const mergedResult = [
     ...savedObjectsActions,
-    ...(await filterInferenceConnectors(esClient, inMemoryConnectors))
-      .filter((connector) => connectorIdsSet.has(connector.id))
-      .map((connector) => {
-        return {
-          id: connector.id,
-          actionTypeId: connector.actionTypeId,
-          name: connector.name,
-          isPreconfigured: connector.isPreconfigured,
-          isDeprecated: isConnectorDeprecated(connector),
-          isSystemAction: connector.isSystemAction,
-          ...(connector.exposeConfig ? { config: connector.config } : {}),
-          secrets: undefined,
-        } as ConnectorWithDecryptedSecrets;
-      }),
+    ...(
+      await filterInferenceConnectors(
+        esClient,
+        inMemoryConnectors.filter((inMemoryConnector) => connectorIdsSet.has(inMemoryConnector.id))
+      )
+    ).map((connector) => {
+      return {
+        id: connector.id,
+        actionTypeId: connector.actionTypeId,
+        name: connector.name,
+        isPreconfigured: connector.isPreconfigured,
+        isDeprecated: isConnectorDeprecated(connector),
+        isSystemAction: connector.isSystemAction,
+        ...(connector.exposeConfig ? { config: connector.config } : {}),
+        secrets: undefined,
+      } as ConnectorWithDecryptedSecrets;
+    }),
   ].sort((a, b) => a.name.localeCompare(b.name));
 
   return mergedResult;
