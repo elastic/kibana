@@ -12,7 +12,6 @@ const ARCHIVE = 'x-pack/test/functional/es_archives/uptime/full_heartbeat';
 export default ({ loadTestFile, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const server = getService('kibanaServer');
   const uptime = getService('uptime');
 
   describe('Uptime app', function () {

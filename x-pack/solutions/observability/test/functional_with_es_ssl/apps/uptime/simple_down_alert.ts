@@ -12,7 +12,6 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   describe('uptime simple status alert', () => {
     const pageObjects = getPageObjects(['common', 'header', 'uptime']);
-    const server = getService('kibanaServer');
     const uptimeService = getService('uptime');
     const retry = getService('retry');
     const supertest = getService('supertest');

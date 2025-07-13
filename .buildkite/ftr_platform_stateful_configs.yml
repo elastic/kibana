@@ -269,7 +269,6 @@ enabled:
   - x-pack/platform/test/functional/apps/watcher/config.ts
   - x-pack/platform/test/functional/config_security_basic.ts
   - x-pack/test/functional/config.ccs.ts
-  - x-pack/test/functional/config.firefox.js
   - x-pack/platform/test/functional/config.firefox.ts
   - x-pack/platform/test/functional/config.upgrade_assistant.ts
   - x-pack/platform/test/functional_cloud/config.ts

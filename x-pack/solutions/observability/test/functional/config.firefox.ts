@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-export default async function ({ readConfigFile }) {
-  const chromeConfig = await readConfigFile(require.resolve('./config.base.js'));
+import { FtrConfigProviderContext } from '@kbn/test';
+
+export default async function ({ readConfigFile }: FtrConfigProviderContext) {
+  const chromeConfig = await readConfigFile(require.resolve('./config.base.ts'));
 
   return {
     ...chromeConfig.getAll(),
@@ -23,7 +25,7 @@ export default async function ({ readConfigFile }) {
     },
 
     junit: {
-      reportName: 'Firefox XPack UI Functional Tests',
+      reportName: 'Firefox XPack Observability UI Functional Tests',
     },
   };
 }
