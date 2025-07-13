@@ -1934,8 +1934,6 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /x-pack/solutions/security/test/api_integration/services/index.ts @elastic/appex-qa
 /x-pack/solutions/security/test/alerting_api_integration/ftr_provider_context.d.ts @elastic/appex-qa
 /x-pack/test/apm_api_integration  @elastic/appex-qa # temporarily due to SKA tests relocation
-/x-pack/test/common/utils/observability  @elastic/appex-qa # temporarily due to SKA tests relocation
-/x-pack/test/common/utils/uptime  @elastic/appex-qa # temporarily due to SKA tests relocation
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/feature_flag_configs/serverless/oblt.index.ts @elastic/appex-qa # temporarily due to SKA tests relocation
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/feature_flag_configs/serverless/oblt.serverless.config.ts @elastic/appex-qa # temporarily due to SKA tests relocation
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/feature_flag_configs/stateful/oblt.index.ts @elastic/appex-qa # temporarily due to SKA tests relocation
