@@ -11,11 +11,12 @@ import { Aggregators, MetricThresholdParams } from '@kbn/infra-plugin/common/ale
 
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import { InfraRuleType } from '@kbn/rule-data-utils';
-import { createRule } from '../../../common/utils/observability/alerting_api_helper';
+import { createRule } from '../../../alerting_api_integration/observability/helpers/alerting_api_helper';
 import {
   waitForDocumentInIndex,
   waitForRuleStatus,
-} from '../../../common/utils/observability/alerting_wait_for_helpers';
+} from '../../../alerting_api_integration/observability/helpers/alerting_wait_for_helpers';
+
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { DATES } from './constants';
 

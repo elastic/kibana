@@ -9,10 +9,12 @@ import { services as platformServices } from '@kbn/test-suites-xpack-platform/fu
 import { services as obltApiServices } from '../../api_integration/services';
 import { SloUiServiceProvider } from './slo';
 import { UptimeProvider } from './uptime';
+import { InfraSourceConfigurationFormProvider } from './infra_source_configuration_form';
 
 export const services = {
   ...platformServices,
   ...obltApiServices,
+  infraSourceConfigurationForm: InfraSourceConfigurationFormProvider,
   sloUi: SloUiServiceProvider,
   uptime: UptimeProvider,
 };

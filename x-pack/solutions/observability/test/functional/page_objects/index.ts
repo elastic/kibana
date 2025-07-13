@@ -12,9 +12,11 @@ import { InfraLogsPageProvider } from './infra_logs_page';
 import { InfraMetricsExplorerProvider } from './infra_metrics_explorer';
 import { InfraSavedViewsProvider } from './infra_saved_views';
 import { UptimePageObject } from './uptime_page';
+import { AssetDetailsProvider } from './asset_details';
 
 export const pageObjects = {
   ...platformPageObjects,
+  assetDetails: AssetDetailsProvider,
   infraHome: InfraHomePageProvider,
   infraHostsView: InfraHostsViewProvider,
   infraLogs: InfraLogsPageProvider,
