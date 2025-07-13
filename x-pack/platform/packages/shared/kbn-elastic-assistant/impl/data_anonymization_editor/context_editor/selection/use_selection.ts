@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useMemo, useState } from 'react';
-import { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common';
+import { FindAnonymizationFieldsClientResponse } from './types';
 
 const EMPTY_CONVERSATIONS_ARRAY: string[] = [];
 
@@ -16,8 +16,8 @@ export const useSelection = ({
   anonymizationAllFields,
   anonymizationPageFields,
 }: {
-  anonymizationAllFields: FindAnonymizationFieldsResponse;
-  anonymizationPageFields: FindAnonymizationFieldsResponse;
+  anonymizationAllFields: FindAnonymizationFieldsClientResponse;
+  anonymizationPageFields: FindAnonymizationFieldsClientResponse;
 }) => {
   const [isSelectAll, setIsSelectAll] = useState(false);
   const [selectedFields, setSelectedFields] = useState<string[]>(EMPTY_CONVERSATIONS_ARRAY);

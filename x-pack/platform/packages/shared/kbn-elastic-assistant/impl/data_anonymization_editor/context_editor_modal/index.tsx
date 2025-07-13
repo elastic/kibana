@@ -181,6 +181,7 @@ const SelectedPromptContextEditorModalComponent = ({ onClose, onSave, promptCont
               page: 1,
               perPage: 1000,
               data: [],
+              all: [],
             }
           }
           onListUpdated={onListUpdated}

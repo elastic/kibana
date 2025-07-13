@@ -14,7 +14,6 @@ import type {
 } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 
-import { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common/impl/schemas';
 import styled from '@emotion/styled';
 import { css } from '@emotion/react';
 import { getColumns } from './get_columns';
@@ -30,6 +29,7 @@ import type {
   HandleRowReset,
   OnListUpdated,
 } from '../../assistant/settings/use_settings_updater/use_anonymization_updater';
+import type { FindAnonymizationFieldsClientResponse } from './selection/types';
 
 const Wrapper = styled.div`
   > div > .euiSpacer {
@@ -38,8 +38,8 @@ const Wrapper = styled.div`
 `;
 
 export interface Props {
-  anonymizationAllFields: FindAnonymizationFieldsResponse;
-  anonymizationPageFields: FindAnonymizationFieldsResponse;
+  anonymizationAllFields: FindAnonymizationFieldsClientResponse;
+  anonymizationPageFields: FindAnonymizationFieldsClientResponse;
   compressed?: boolean;
   onListUpdated: OnListUpdated;
   rawData: Record<string, string[]> | null;

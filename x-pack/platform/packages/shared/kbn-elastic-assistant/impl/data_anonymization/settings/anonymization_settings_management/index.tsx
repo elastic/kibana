@@ -50,13 +50,14 @@ const AnonymizationSettingsManagementComponent: React.FC<Props> = ({
   const { http, toasts, nameSpace } = useAssistantContext();
 
   const {
-    anonymizationPageFields,
+    anonymizationFields,
     anonymizationAllFields,
+    anonymizationFieldsStatus,
     onTableChange,
     pagination,
     sorting,
     handleSearch,
-    refetchAll,
+    refetch,
   } = useTable(nameSpace);
 
   const {
@@ -69,14 +70,14 @@ const AnonymizationSettingsManagementComponent: React.FC<Props> = ({
     updatedAnonymizationData: updatedAnonymizationPageData,
   } = useAnonymizationUpdater({
     anonymizationAllFields,
-    anonymizationFields: anonymizationPageFields,
+    anonymizationFields,
     http,
     toasts,
   });
 
   const { selectionActions, selectionState } = useSelection({
     anonymizationAllFields,
-    anonymizationPageFields,
+    anonymizationPageFields: anonymizationFields,
   });
 
   const handleTableReset = useCallback(() => {
@@ -98,9 +99,9 @@ const AnonymizationSettingsManagementComponent: React.FC<Props> = ({
       });
     }
 
-    await refetchAll();
+    await refetch();
     selectionActions?.handleUnselectAll();
-  }, [refetchAll, saveAnonymizationSettings, selectionActions, toasts]);
+  }, [refetch, saveAnonymizationSettings, selectionActions, toasts]);
 
   const onSaveButtonClicked = useCallback(() => {
     handleSave();
@@ -120,8 +121,9 @@ const AnonymizationSettingsManagementComponent: React.FC<Props> = ({
 
           <EuiFlexGroup alignItems="center" data-test-subj="summary" gutterSize="none">
             <Stats
+              anonymizationFieldsStatus={anonymizationFieldsStatus}
               isDataAnonymizable={true}
-              anonymizationFields={anonymizationAllFields.data}
+              anonymizationFields={anonymizationFields.data}
               titleSize="m"
               gap={euiTheme.size.s}
             />
@@ -166,6 +168,7 @@ const AnonymizationSettingsManagementComponent: React.FC<Props> = ({
 
         <EuiFlexGroup alignItems="center" data-test-subj="summary" gutterSize="none">
           <Stats
+            anonymizationFieldsStatus={anonymizationFieldsStatus}
             isDataAnonymizable={true}
             anonymizationFields={anonymizationAllFields.data}
             titleSize="m"

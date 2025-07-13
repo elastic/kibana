@@ -14,17 +14,19 @@ import type { HttpSetup } from '@kbn/core-http-browser';
 import type { IToasts } from '@kbn/core-notifications-browser';
 import { BatchUpdateListItem } from '../../../data_anonymization_editor/context_editor/types';
 import { bulkUpdateAnonymizationFields } from '../../api/anonymization_fields/bulk_update_anonymization_fields';
+import type { FindAnonymizationFieldsClientResponse } from '../../../data_anonymization_editor/context_editor/selection/types';
 
 const DEFAULT_ANONYMIZATION_FIELDS = {
   page: 0,
   perPage: 0,
   total: 0,
   data: [],
+  all: [],
 };
 
 interface Params {
-  anonymizationFields: FindAnonymizationFieldsResponse;
-  anonymizationAllFields: FindAnonymizationFieldsResponse;
+  anonymizationFields: FindAnonymizationFieldsClientResponse;
+  anonymizationAllFields: FindAnonymizationFieldsClientResponse;
   http: HttpSetup;
   toasts?: IToasts;
 }
@@ -32,7 +34,7 @@ interface Params {
 export type OnListUpdated = (
   updates: BatchUpdateListItem[],
   isSelectAll?: boolean,
-  anonymizationAllFields?: FindAnonymizationFieldsResponse
+  anonymizationAllFields?: FindAnonymizationFieldsClientResponse
 ) => void;
 
 export type HandleRowReset = (field: string) => void;
@@ -43,7 +45,7 @@ interface AnonymizationUpdater {
   onListUpdated: OnListUpdated;
   resetAnonymizationSettings: () => void;
   saveAnonymizationSettings: () => Promise<boolean>;
-  updatedAnonymizationData: FindAnonymizationFieldsResponse;
+  updatedAnonymizationData: FindAnonymizationFieldsClientResponse;
   handleRowReset: HandleRowReset;
   handlePageReset: HandlePageReset;
 }
@@ -58,7 +60,7 @@ export const useAnonymizationUpdater = ({
   const [anonymizationFieldsBulkActions, setAnonymizationFieldsBulkActions] =
     useState<PerformAnonymizationFieldsBulkActionRequestBody>({});
   const [updatedAnonymizationData, setUpdatedAnonymizationData] =
-    useState<FindAnonymizationFieldsResponse>(anonymizationFields);
+    useState<FindAnonymizationFieldsClientResponse>(anonymizationFields);
 
   useEffect(() => {
     setUpdatedAnonymizationData(() => {

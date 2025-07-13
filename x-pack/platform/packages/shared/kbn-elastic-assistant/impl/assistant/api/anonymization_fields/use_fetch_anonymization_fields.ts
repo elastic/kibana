@@ -21,6 +21,7 @@ export interface UseFetchAnonymizationFieldsParams {
   sortOrder?: 'asc' | 'desc';
   signal?: AbortSignal;
   filter?: string;
+  all?: boolean; // If true, fetch all anonymization fields additionally, otherwise fetch only the provided page
 }
 
 export interface FetchAnonymizationFields {
@@ -75,6 +76,7 @@ export const useFetchAnonymizationFields = (
   params?: UseFetchAnonymizationFieldsParams
 ): FetchAnonymizationFields => {
   const {
+    all,
     page = DEFAULTS.page,
     perPage = DEFAULTS.perPage,
     sortField = DEFAULTS.sortField,
@@ -89,13 +91,14 @@ export const useFetchAnonymizationFields = (
   } = useAssistantContext();
 
   const fetchPage = useCallback(
-    async ({ pageParam = { page, perPage, sortField, sortOrder, filter } }) => {
+    async ({ pageParam = { page, perPage, sortField, sortOrder, filter, all } }) => {
       const {
         page: p = page,
         perPage: pp = perPage,
         sortField: sf = sortField,
         sortOrder: so = sortOrder,
         filter: f = '',
+        all: isAll,
       } = pageParam;
       const queryFilter = getFilter(f);
 
@@ -110,12 +113,13 @@ export const useFetchAnonymizationFields = (
             sort_field: sf,
             sort_order: so,
             ...(queryFilter ? { filter: queryFilter } : {}),
+            all_data: isAll,
           },
           signal,
         }
       );
     },
-    [page, perPage, sortField, sortOrder, http, signal, filter]
+    [page, perPage, sortField, sortOrder, filter, all, http, signal]
   );
 
   // Next page param: include current sorting in next request
@@ -142,6 +146,7 @@ export const useFetchAnonymizationFields = (
     ELASTIC_AI_ASSISTANT_ANONYMIZATION_FIELDS_URL_FIND,
     page,
     filter,
+    all,
   ];
 
   const { refetch, data, isFetched, isFetching, isError, isLoading } = useInfiniteQuery<
@@ -161,9 +166,11 @@ export const useFetchAnonymizationFields = (
         perPage,
         total: 0,
         data: [],
+        aggregations: {},
+        ...(all ? { all: [] } : {}),
       }
     );
-  }, [data?.pages, page, perPage]);
+  }, [data, page, perPage, all]);
 
   return {
     refetch,

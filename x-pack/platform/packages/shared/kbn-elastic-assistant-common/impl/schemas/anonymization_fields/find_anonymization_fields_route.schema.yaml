@@ -65,6 +65,12 @@ paths:
             minimum: 0
             default: 20
           example: 20
+        - name: 'all_data'
+          in: query
+          description: If true, fetch all anonymization fields additionally, otherwise fetch only the provided page
+          required: false
+          schema:
+            type: boolean
 
       responses:
         200:
@@ -84,6 +90,37 @@ paths:
                     type: array
                     items:
                       $ref: './bulk_crud_anonymization_fields_route.schema.yaml#/components/schemas/AnonymizationFieldResponse'
+                  all:
+                    type: array
+                    items:
+                      $ref: './bulk_crud_anonymization_fields_route.schema.yaml#/components/schemas/AnonymizationFieldResponse'
+                  aggregations:
+                    type: object
+                    properties:
+                      field_status:
+                        type: object
+                        properties:
+                          buckets:
+                            type: object
+                            properties:
+                              anonymized:
+                                type: object
+                                properties:
+                                  doc_count:
+                                    type: integer
+                                    default: 0
+                              allowed:
+                                type: object
+                                properties:
+                                  doc_count:
+                                    type: integer
+                                    default: 0
+                              denied:
+                                type: object
+                                properties:
+                                  doc_count:
+                                    type: integer
+                                    default: 0
                 required:
                   - page
                   - perPage
@@ -104,6 +141,26 @@ paths:
                     createdBy: 'user1'
                     updatedBy: 'user1'
                     namespace: 'default'
+                all:
+                  - id: '1'
+                    field: 'user.name'
+                    anonymized: true
+                    allowed: true
+                    timestamp: '2023-10-31T12:00:00Z'
+                    createdAt: '2023-10-31T12:00:00Z'
+                    updatedAt: '2023-10-31T12:00:00Z'
+                    createdBy: 'user1'
+                    updatedBy: 'user1'
+                    namespace: 'default'
+                aggregations:
+                  anonymized:
+                    buckets:
+                      allowed:
+                        doc_count: 50
+                      anonymized:
+                        doc_count: 30
+                      denied:
+                        doc_count: 20
         400:
           description: Generic Error
           content:
