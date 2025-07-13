@@ -6,7 +6,6 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-// We now need EuiFlexGroup, EuiFlexItem, and EuiText
 import { EuiSuperSelect, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -40,7 +39,7 @@ export const NamespaceSelector = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       ),
-      'data-test-subj': `namespace-selector-option-${namespace}`,
+      'data-test-subj': `namespace-selector-menu-item-${namespace}`,
     }));
   }, [namespaces]);
 
@@ -51,7 +50,7 @@ export const NamespaceSelector = ({
   return (
     <div style={{ width: '250px' }}>
       <EuiSuperSelect
-        data-test-subj="namespace-selector-superselect"
+        data-test-subj="namespace-selector-dropdown-button"
         options={namespaceOptions}
         valueOfSelected={activeNamespace}
         onChange={onSelectedNamespaceChange}
