@@ -5,15 +5,22 @@
  * 2.0.
  */
 
-import type { Logger, IScopedClusterClient } from '@kbn/core/server';
+import type {
+  Logger,
+  IScopedClusterClient,
+  UiSettingsRequestHandlerContext,
+} from '@kbn/core/server';
 import type { GraphResponse } from '@kbn/cloud-security-posture-common/types/graph/v1';
+import { SECURITY_SOLUTION_ENABLE_ASSET_INVENTORY_SETTING } from '@kbn/management-settings-ids';
 import { fetchGraph } from './fetch_graph';
 import type { EsQuery, OriginEventId } from './types';
 import { parseRecords } from './parse_records';
+import { fetchEntityData } from './fetch_entity_data';
 
 export interface GraphContextServices {
   logger: Logger;
   esClient: IScopedClusterClient;
+  uiSettings: UiSettingsRequestHandlerContext;
 }
 
 export interface GetGraphParams {
@@ -31,7 +38,7 @@ export interface GetGraphParams {
 }
 
 export const getGraph = async ({
-  services: { esClient, logger },
+  services: { esClient, logger, uiSettings },
   query: { originEventIds, spaceId = 'default', indexPatterns, start, end, esQuery },
   showUnknownTarget,
   nodesLimit,
@@ -42,6 +49,10 @@ export const getGraph = async ({
     `Fetching graph for [originEventIds: ${originEventIds.join(
       ', '
     )}] in [spaceId: ${spaceId}] [indexPatterns: ${indexPatterns.join(',')}]`
+  );
+
+  const assetInventoryEnabled = await uiSettings.client.get(
+    SECURITY_SOLUTION_ENABLE_ASSET_INVENTORY_SETTING
   );
 
   const results = await fetchGraph({
@@ -56,5 +67,35 @@ export const getGraph = async ({
   });
 
   // Convert results into set of nodes and edges
-  return parseRecords(logger, results.records, nodesLimit);
+  const graphData = parseRecords(logger, results.records, nodesLimit);
+
+  // Collect all entity IDs from nodes to fetch entity data
+  const entityIds = new Set<string>();
+  graphData.nodes.forEach((node) => {
+    // assuming node.id is the entity ID
+    entityIds.add(node.id);
+  });
+
+  // Fetch entity data for all entity IDs
+  let assetData: Record<string, any> = {};
+  if (assetInventoryEnabled) {
+    try {
+      assetData = await fetchEntityData(esClient, logger, Array.from(entityIds));
+    } catch (error) {
+      logger.error(`Error fetching entity data: ${error}`);
+      // Continue without entity data if fetch fails
+    }
+  }
+
+  // Enhance nodes with entity data
+  const enhancedNodes = graphData.nodes.map((node, index) => ({
+    ...node,
+    assetData: entityIds.has(node.id) ? assetData[node.id] : undefined,
+  }));
+
+  // Return enhanced graph data
+  return {
+    ...graphData,
+    nodes: enhancedNodes,
+  };
 };

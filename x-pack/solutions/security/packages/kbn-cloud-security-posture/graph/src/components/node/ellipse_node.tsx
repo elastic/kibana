@@ -8,6 +8,7 @@
 import React, { memo } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { Handle, Position } from '@xyflow/react';
+import type { AssetProps } from '@kbn/cloud-security-posture-common';
 import {
   NodeShapeContainer,
   NodeShapeOnHoverSvg,
@@ -27,7 +28,7 @@ const NODE_SHAPE_WIDTH = 90;
 const NODE_SHAPE_HEIGHT = 90;
 
 export const EllipseNode = memo<NodeProps>((props: NodeProps) => {
-  const { id, color, icon, label, interactive, expandButtonClick, nodeClick } =
+  const { id, color, icon, label, interactive, expandButtonClick, nodeClick, assetData } =
     props.data as EntityNodeViewModel;
   const { euiTheme } = useEuiTheme();
   return (
@@ -83,7 +84,7 @@ export const EllipseNode = memo<NodeProps>((props: NodeProps) => {
           style={HandleStyleOverride}
         />
       </NodeShapeContainer>
-      <Label text={label ? label : id} />
+      <Label text={label ? label : id} entityName={assetData?.['entity.name']} />
     </>
   );
 });

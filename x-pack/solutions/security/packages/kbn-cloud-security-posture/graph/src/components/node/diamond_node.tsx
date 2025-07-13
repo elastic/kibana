@@ -27,7 +27,7 @@ const NODE_SHAPE_WIDTH = 99;
 const NODE_SHAPE_HEIGHT = 98;
 
 export const DiamondNode = memo<NodeProps>((props: NodeProps) => {
-  const { id, color, icon, label, interactive, expandButtonClick, nodeClick } =
+  const { id, color, icon, label, interactive, expandButtonClick, nodeClick, assetData } =
     props.data as EntityNodeViewModel;
   const { euiTheme } = useEuiTheme();
   return (
@@ -83,7 +83,7 @@ export const DiamondNode = memo<NodeProps>((props: NodeProps) => {
           style={HandleStyleOverride}
         />
       </NodeShapeContainer>
-      <Label text={label ? label : id} />
+      <Label text={label ? label : id} entityName={assetData?.['entity.name']} />
     </>
   );
 });

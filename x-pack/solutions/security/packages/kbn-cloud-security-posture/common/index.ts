@@ -18,6 +18,7 @@ export type {
   CspSetupStatus,
 } from './types/status';
 export type { CspFinding, CspFindingResult } from './types/findings';
+export type { AssetProps } from './types/assets';
 export type {
   CspVulnerabilityFinding,
   Vulnerability,

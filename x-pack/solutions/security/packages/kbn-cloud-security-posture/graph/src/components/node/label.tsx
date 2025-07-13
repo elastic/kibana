@@ -6,7 +6,7 @@
  */
 
 import React, { memo, type PropsWithChildren } from 'react';
-import { EuiText, EuiTextTruncate, EuiToolTip } from '@elastic/eui';
+import { EuiText, EuiTextTruncate, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import { NODE_LABEL_WIDTH, NODE_WIDTH } from './styles';
@@ -60,10 +60,15 @@ GeneratedText.displayName = 'GeneratedText';
 
 export interface LabelProps {
   text?: string;
+  entityName?: string;
 }
 
-const LabelComponent = ({ text = '' }: LabelProps) => {
+const LabelComponent = ({ text = '', entityName = '' }: LabelProps) => {
   const [isTruncated, setIsTruncated] = React.useState(false);
+  const { euiTheme } = useEuiTheme();
+
+  // Determine display text - prioritize entityName if available
+  const displayText = entityName || text;
 
   return (
     <EuiText
@@ -74,14 +79,15 @@ const LabelComponent = ({ text = '' }: LabelProps) => {
         margin-left: ${-(NODE_LABEL_WIDTH - NODE_WIDTH) / 2}px;
         overflow: hidden;
         text-overflow: ellipsis;
-        max-height: 32px;
+        max-height: ${euiTheme.size.xl};
+        font-weight: ${euiTheme.font.weight.bold};
       `}
     >
-      <EuiToolTip content={isTruncated ? text : ''} position="bottom">
+      <EuiToolTip content={isTruncated ? displayText : ''} position="bottom">
         <EuiTextTruncate
           truncation="end"
           truncationOffset={20}
-          text={text}
+          text={displayText}
           width={NODE_LABEL_WIDTH * 1.5}
         >
           {(truncatedText) => (
