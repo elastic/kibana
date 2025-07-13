@@ -20,7 +20,7 @@ const DATE_WITHOUT_DATA = {
 
 const ALERTS_TITLE = 'Alerts';
 const ALERTS_ACCORDION_SELECTOR = `accordion-${ALERTS_TITLE}`;
-const ALERTS_SECTION_BUTTON_CSS_SELECTOR = `[data-test-subj=${ALERTS_ACCORDION_SELECTOR}] button.euiAccordion__button`;
+const ALERTS_SECTION_CSS_SELECTOR = `[data-test-subj=${ALERTS_ACCORDION_SELECTOR}]`;
 const ALERTS_TABLE_NO_DATA_SELECTOR = 'alertsTableEmptyState';
 const ALERTS_TABLE_WITH_DATA_SELECTOR = 'alertsTableIsLoaded';
 const ALERTS_TABLE_LOADING_SELECTOR = 'internalAlertsPageLoading';
@@ -74,7 +74,7 @@ export function ObservabilityOverviewCommonProvider({
 
   const openAlertsSection = async () => {
     await waitForAlertsAccordionToAppear();
-    await find.clickByCssSelector(ALERTS_SECTION_BUTTON_CSS_SELECTOR);
+    await find.clickByCssSelector(ALERTS_SECTION_CSS_SELECTOR);
   };
 
   const openAlertsSectionAndWaitToAppear = async () => {
@@ -88,6 +88,12 @@ export function ObservabilityOverviewCommonProvider({
     });
   };
 
+  const waitForOverviewNoDataPrompt = async () => {
+    await retry.waitFor('no data prompt to appear', async () => {
+      return await testSubjects.exists('obltOverviewNoDataPrompt');
+    });
+  };
+
   const getAlertsTableNoDataOrFail = async () => {
     return await testSubjects.existOrFail(ALERTS_TABLE_NO_DATA_SELECTOR);
   };
@@ -98,5 +104,6 @@ export function ObservabilityOverviewCommonProvider({
     navigateToOverviewPageWithoutAlerts,
     navigateToOverviewPage,
     openAlertsSectionAndWaitToAppear,
+    waitForOverviewNoDataPrompt,
   };
 }
