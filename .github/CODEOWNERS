@@ -1616,7 +1616,7 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 
 # Observability onboarding tour
 /x-pack/solutions/observability/plugins/observability_shared/public/components/tour @elastic/appex-sharedux
-/ x-pack/solutions/observability/test/functional/apps/infra/tour.ts @elastic/appex-sharedux
+/x-pack/solutions/observability/test/functional/apps/infra/tour.ts @elastic/appex-sharedux
 
 # Observability settings
 /x-pack/plugins/observability_solution/observability/server/ui_settings.ts @elastic/obs-docs
