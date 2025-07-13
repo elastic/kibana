@@ -94,6 +94,26 @@ export const nodeShapeSchema = schema.oneOf([
   schema.literal('group'),
 ]);
 
+// Define entity data schema based on AssetProps interface from ../../types/assets.ts
+// All fields are made optional with schema.maybe() and unknown additional fields are allowed
+export const assetDataSchema = schema.object(
+  {
+    '@timestamp': schema.maybe(schema.string()),
+    'cloud.account.id': schema.maybe(schema.string()),
+    'cloud.account.name': schema.maybe(schema.string()),
+    'cloud.provider': schema.maybe(schema.string()),
+    'cloud.region': schema.maybe(schema.string()),
+    'cloud.service.name': schema.maybe(schema.string()),
+    'entity.EngineMetadata.Type': schema.maybe(schema.string()),
+    'entity.id': schema.maybe(schema.string()),
+    'entity.name': schema.maybe(schema.string()),
+    'entity.source': schema.maybe(schema.string()),
+    'entity.type': schema.maybe(schema.string()),
+    'event.ingested': schema.maybe(schema.string()),
+  },
+  { unknowns: 'allow' }
+);
+
 export const nodeBaseDataSchema = schema.object({
   id: schema.string(),
   label: schema.maybe(schema.string()),
@@ -116,6 +136,7 @@ export const entityNodeDataSchema = schema.allOf([
     ips: schema.maybe(schema.arrayOf(schema.string())),
     countryCodes: schema.maybe(schema.arrayOf(schema.string())),
     documentsData: schema.maybe(schema.arrayOf(nodeDocumentDataSchema)),
+    assetData: schema.maybe(assetDataSchema),
   }),
 ]);
 
@@ -133,6 +154,7 @@ export const labelNodeDataSchema = schema.allOf([
     parentId: schema.maybe(schema.string()),
     color: nodeColorSchema,
     documentsData: schema.maybe(schema.arrayOf(nodeDocumentDataSchema)),
+    assetData: schema.maybe(assetDataSchema),
   }),
 ]);
 
