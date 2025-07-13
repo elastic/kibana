@@ -10,11 +10,13 @@ import { services as obltApiServices } from '../../api_integration/services';
 import { SloUiServiceProvider } from './slo';
 import { UptimeProvider } from './uptime';
 import { InfraSourceConfigurationFormProvider } from './infra_source_configuration_form';
+import { ObservabilityProvider } from './observability';
 
 export const services = {
   ...platformServices,
   ...obltApiServices,
   infraSourceConfigurationForm: InfraSourceConfigurationFormProvider,
+  observability: ObservabilityProvider,
   sloUi: SloUiServiceProvider,
   uptime: UptimeProvider,
 };

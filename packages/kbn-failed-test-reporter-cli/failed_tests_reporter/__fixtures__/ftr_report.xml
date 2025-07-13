@@ -32,7 +32,7 @@ Wait timed out after 10055ms
     at process._tickCallback (internal/process/next_tick.js:68:7) name: 'NoSuchSessionError', remoteStacktrace: '' }]]>
       </failure>
     </testcase>
-    <testcase name="InfraOps app feature controls infrastructure security global infrastructure all privileges shows infrastructure navlink" classname="Chrome X-Pack UI Functional Tests. x-pack/solutions/observability/test/functional/apps/infra/feature_controls/infrastructure_security·ts" owners="elastic/kibana-presentation">
+    <testcase name="InfraOps app feature controls infrastructure security global infrastructure all privileges shows infrastructure navlink" classname="Chrome X-Pack UI Functional Tests.x-pack/solutions/observability/test/functional/apps/infra/feature_controls/infrastructure_security·ts" owners="elastic/kibana-presentation">
       <system-out>
         <![CDATA[[00:00:00]       │
 [00:05:13]         └-: InfraOps app

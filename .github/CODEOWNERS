@@ -1363,7 +1363,7 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/test_serverless/api_integration/test_suites/common/data_usage @elastic/kibana-management
 /x-pack/test_serverless/functional/test_suites/common/data_usage @elastic/kibana-management
 /x-pack/test_serverless/functional/page_objects/svl_data_usage.ts @elastic/kibana-management
-/x-pack/test/observability_ai_assistant_functional @elastic/obs-ai-assistant
+/x-pack/solutions/observability/test/observability_ai_assistant_functional @elastic/obs-ai-assistant
 /x-pack/test/functional/es_archives/observability/ai_assistant @elastic/obs-ai-assistant
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/ai_assistant @elastic/obs-ai-assistant
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.ai_assistant.index.ts @elastic/obs-ai-assistant
@@ -1466,8 +1466,8 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/test/common/services/infra_synthtrace_kibana_client.ts @elastic/obs-ux-infra_services-team
 /x-pack/test/common/services/infra_log_views.ts @elastic/obs-ux-infra_services-team # Assigned per https://github.com/elastic/kibana/pull/188204
 /x-pack/test/api_integration/apis/infra @elastic/obs-ux-infra_services-team
-/ x-pack/solutions/observability/test/functional/apps/infra @elastic/obs-ux-infra_services-team
-/ x-pack/solutions/observability/test/functional/apps/infra/logs @elastic/obs-ux-logs-team
+/x-pack/solutions/observability/test/functional/apps/infra @elastic/obs-ux-infra_services-team
+/x-pack/solutions/observability/test/functional/apps/infra/logs @elastic/obs-ux-logs-team
 /x-pack/solutions/observability/test/api_integration/services/index.ts @elastic/obs-ux-infra_services-team
 /x-pack/solutions/observability/test/api_integration/services/infra_log_views.ts @elastic/obs-ux-infra_services-team
 
@@ -1477,14 +1477,15 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/solutions/observability/test/api_integration/services/slo.ts @elastic/obs-ux-management-team
 /x-pack/solutions/observability/test/services/slo @elastic/obs-ux-management-team
 /x-pack/solutions/observability/test/functional/apps/slo @elastic/obs-ux-management-team
-/x-pack/test/observability_api_integration @elastic/obs-ux-management-team # Assigned per https://github.com/elastic/kibana/pull/182243
+/x-pack/solutions/observability/test/observability_api_integration @elastic/obs-ux-management-team # Assigned per https://github.com/elastic/kibana/pull/182243
 /x-pack/test/functional/services/observability @elastic/obs-ux-management-team
+/x-pack/solutions/observability/test/functional/services/observability @elastic/obs-ux-management-team
 /x-pack/test/api_integration/apis/slos @elastic/obs-ux-management-team
 /x-pack/test/accessibility/apps/group1/uptime.ts @elastic/obs-ux-management-team
 /x-pack/solutions/observability/test/accessibility/apps/observability.ts @elastic/obs-ux-management-team
 /x-pack/solutions/observability/test/functional/services/slo/ @elastic/obs-ux-management-team
 /x-pack/packages/observability/alert_details @elastic/obs-ux-management-team
-/x-pack/test/observability_functional @elastic/obs-ux-management-team
+/x-pack/solutions/observability/test/observability_functional @elastic/obs-ux-management-team
 /x-pack/solutions/observability/test/api_integration/apis/security/ @elastic/obs-ux-management-team
 /x-pack/solutions/observability/plugins/infra/public/alerting @elastic/obs-ux-management-team
 /x-pack/solutions/observability/plugins/infra/server/lib/alerting @elastic/obs-ux-management-team
@@ -1552,6 +1553,7 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 
 # Uptime
 /x-pack/test/functional/page_objects/uptime_page.ts @elastic/obs-ux-management-team
+/x-pack/solutions/observability/test/functional/page_objects/uptime_page.ts @elastic/obs-ux-management-team
 /x-pack/solutions/observability/test/accessibility/apps/uptime.ts @elastic/obs-ux-management-team
 /x-pack/solutions/observability/test/functional_with_es_ssl/apps/uptime/ @elastic/obs-ux-management-team
 /x-pack/solutions/observability/test/functional_with_es_ssl/config.ts @elastic/obs-ux-management-team
@@ -1580,10 +1582,16 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/test_serverless/functional/test_suites/observability/index* @elastic/obs-ux-logs-team
 /x-pack/test_serverless/functional/test_suites/observability/cypress @elastic/obs-ux-logs-team
 /x-pack/test/functional/services/infra_source_configuration_form.ts @elastic/obs-ux-infra_services-team
+/x-pack/solutions/observability/test/functional/services/infra_source_configuration_form.ts @elastic/obs-ux-infra_services-team
+/x-pack/solutions/observability/test/functional/page_objects/infra_home_page.ts @elastic/obs-ux-logs-team
+/x-pack/solutions/observability/test/functional/page_objects/infra_hosts_view.ts @elastic/obs-ux-logs-team
+/x-pack/solutions/observability/test/functional/page_objects/infra_logs_page.ts @elastic/obs-ux-logs-team
+/x-pack/solutions/observability/test/functional/page_objects/infra_metrics_explorer.ts @elastic/obs-ux-logs-team
+/x-pack/solutions/observability/test/functional/page_objects/infra_saved_views.ts @elastic/obs-ux-logs-team
 /x-pack/test/functional/services/logs_ui @elastic/obs-ux-logs-team
 /x-pack/test/functional/page_objects/observability_logs_explorer.ts @elastic/obs-ux-logs-team
 /src/platform/test/functional/services/selectable.ts @elastic/obs-ux-logs-team
-/x-pack/test/observability_onboarding_api_integration @elastic/obs-ux-logs-team
+/x-pack/solutions/observability/test/observability_onboarding_api_integration @elastic/obs-ux-logs-team
 /x-pack/test_serverless/api_integration/test_suites/observability/index.feature_flags.ts @elastic/obs-ux-logs-team
 /x-pack/solutions/observability/test/api_integration/apis/logs_ui @elastic/obs-ux-logs-team
 /x-pack/test/dataset_quality_api_integration @elastic/obs-ux-logs-team
@@ -1949,6 +1957,8 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /x-pack/solutions/observability/test/accessibility/index.ts @elastic/appex-qa
 /x-pack/solutions/observability/test/accessibility/page_objects.ts @elastic/appex-qa
 /x-pack/solutions/observability/test/accessibility/services.ts @elastic/appex-qa
+/x-pack/solutions/observability/test/accessibility/apps/index.ts @elastic/appex-qa
+/x-pack/solutions/observability/test/functional_with_es_ssl/apps/index.ts @elastic/appex-qa
 
 # Core
 /src/platform/test/api_integration/fixtures/kbn_archiver/management/saved_objects/relationships.json @elastic/kibana-core @elastic/kibana-data-discovery
