@@ -366,7 +366,7 @@ export class IndexUpdateService {
 
     // Subscribe to pendingColumnsToBeSaved$ and update _pendingColumnsToBeSaved$
     this._subscription.add(
-      this.actions$
+      this._actions$
         .pipe(
           scan((acc: ColumnAddition[], action) => {
             if (action.type === 'add-column') {
@@ -418,7 +418,7 @@ export class IndexUpdateService {
     const response = await this.bulkUpdate([{ value: newRow }]);
 
     if (!response.errors) {
-      this.actions$.next({ type: 'new-row-added', payload: newRow });
+      this._actions$.next({ type: 'new-row-added', payload: newRow });
     }
     return response;
   }
@@ -479,7 +479,7 @@ export class IndexUpdateService {
   }
 
   public addNewColumn(filedName: string) {
-    this.actions$.next({ type: 'add-column', payload: { name: filedName } });
+    this._actions$.next({ type: 'add-column', payload: { name: filedName } });
   }
 
   public setExitAttemptWithUnsavedFields(value: boolean) {
@@ -487,11 +487,11 @@ export class IndexUpdateService {
   }
 
   public deleteUnsavedColumns() {
-    this.actions$.next({ type: 'discard-unsaved-columns' });
+    this._actions$.next({ type: 'discard-unsaved-columns' });
   }
 
   public discardUnsavedChanges() {
-    this.actions$.next({ type: 'discard-unsaved-changes' });
+    this._actions$.next({ type: 'discard-unsaved-changes' });
   }
 
   public destroy() {
