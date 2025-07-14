@@ -149,20 +149,14 @@ const StepAboutRuleToggleDetailsComponent: React.FC<StepPanelProps> = ({
               </EuiResizeObserver>
             )}
             {selectedToggleOption === 'notes' && (
-              <VerticalOverflowContainer
-                data-test-subj="stepAboutDetailsNoteContent"
-                maxHeight={aboutPanelHeight}
-              >
+              <VerticalOverflowContainer maxHeight={aboutPanelHeight}>
                 <VerticalOverflowContent maxHeight={aboutPanelHeight}>
                   <RuleInvestigationGuide note={stepDataDetails.note} />
                 </VerticalOverflowContent>
               </VerticalOverflowContainer>
             )}
             {selectedToggleOption === 'setup' && (
-              <VerticalOverflowContainer
-                data-test-subj="stepAboutDetailsSetupContent"
-                maxHeight={aboutPanelHeight}
-              >
+              <VerticalOverflowContainer maxHeight={aboutPanelHeight}>
                 <VerticalOverflowContent maxHeight={aboutPanelHeight}>
                   <RuleSetupGuide setup={stepDataDetails.setup} />
                 </VerticalOverflowContent>
@@ -179,12 +173,10 @@ export const StepAboutRuleToggleDetails = memo(StepAboutRuleToggleDetailsCompone
 
 interface VerticalOverflowContainerProps {
   maxHeight: number;
-  'data-test-subj'?: string;
 }
 
 function VerticalOverflowContainer({
   maxHeight,
-  'data-test-subj': dataTestSubject,
   children,
 }: PropsWithChildren<VerticalOverflowContainerProps>): JSX.Element {
   return (
@@ -194,7 +186,6 @@ function VerticalOverflowContainer({
         overflow-y: hidden;
         word-break: break-word;
       `}
-      data-test-subj={dataTestSubject}
     >
       {children}
     </div>
@@ -243,6 +234,7 @@ const RuleInvestigationGuide = ({ note }: { note: string }) => (
         description: <MarkdownRenderer>{note}</MarkdownRenderer>,
       },
     ]}
+    descriptionProps={{ 'data-test-subj': 'stepAboutDetailsNoteContent' }}
   />
 );
 
@@ -254,5 +246,6 @@ const RuleSetupGuide = ({ setup }: { setup: string }) => (
         description: <MarkdownRenderer>{setup}</MarkdownRenderer>,
       },
     ]}
+    descriptionProps={{ 'data-test-subj': 'stepAboutDetailsSetupContent' }}
   />
 );
