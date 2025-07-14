@@ -237,7 +237,7 @@ Output:
 
 ```sql
   FROM logs-*
-  | EVAL latestTs = MAX(@timestamp)
+  | EVAL type = CASE(languages <= 1, "monolingual",languages <= 2, "bilingual","polyglot")
 ```
 
 
