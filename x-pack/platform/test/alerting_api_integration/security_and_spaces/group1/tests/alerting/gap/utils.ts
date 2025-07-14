@@ -5,10 +5,17 @@
  * 2.0.
  */
 
-import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import type supertest from 'supertest';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { getUrlPrefix } from '../../../../../common/lib';
 
-export const getFindGaps = ({ supertest, logger }: FtrProviderContext) => {
+export const getFindGaps = ({
+  supertest,
+  logger,
+}: {
+  supertest: supertest.Agent;
+  logger: ToolingLog;
+}) => {
   return async ({
     ruleId,
     start,
