@@ -176,6 +176,7 @@
     "@kbn/ai-assistant-icon": "link:x-pack/platform/packages/shared/ai-assistant/icon",
     "@kbn/ai-assistant-management-plugin": "link:src/platform/plugins/shared/ai_assistant_management/selection",
     "@kbn/ai-security-labs-content": "link:x-pack/solutions/security/packages/ai-security-labs-content",
+    "@kbn/ai-tools": "link:x-pack/platform/packages/shared/kbn-ai-tools",
     "@kbn/aiops-change-point-detection": "link:x-pack/platform/packages/private/ml/aiops_change_point_detection",
     "@kbn/aiops-common": "link:x-pack/platform/packages/shared/ml/aiops_common",
     "@kbn/aiops-components": "link:x-pack/platform/packages/private/ml/aiops_components",
