@@ -7,16 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FunctionComponent } from 'react';
-import React, { useMemo, useReducer } from 'react';
+import React, { FunctionComponent, useMemo, useReducer } from 'react';
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { AlertsDataGrid } from './alerts_data_grid';
-import type { AlertsDataGridProps, BulkActionsState } from '../types';
-import type { AdditionalContext, RenderContext } from '../types';
-import type { EuiDataGridColumnCellAction } from '@elastic/eui';
-import { EuiButton, EuiButtonIcon, EuiFlexItem } from '@elastic/eui';
+import { AlertsDataGridProps, BulkActionsState } from '../types';
+import { AdditionalContext, RenderContext } from '../types';
+import { EuiButton, EuiButtonIcon, EuiDataGridColumnCellAction, EuiFlexItem } from '@elastic/eui';
 import { bulkActionsReducer } from '../reducers/bulk_actions_reducer';
 import { getJsDomPerformanceFix } from '../utils/test';
 import { useCaseViewNavigation } from '../hooks/use_case_view_navigation';

@@ -10,10 +10,9 @@
 import * as React from 'react';
 import { shallow, mount } from 'enzyme';
 import { v4 as uuidv4 } from 'uuid';
-import type { ComponentOpts } from './with_bulk_rule_api_operations';
-import { withBulkRuleOperations } from './with_bulk_rule_api_operations';
-import type { SortField } from '../../../lib/rule_api/load_execution_log_aggregations';
-import type { Rule } from '../../../../types';
+import { withBulkRuleOperations, ComponentOpts } from './with_bulk_rule_api_operations';
+import { SortField } from '../../../lib/rule_api/load_execution_log_aggregations';
+import { Rule } from '../../../../types';
 import { useKibana } from '../../../../common/lib/kibana';
 
 jest.mock('../../../../common/lib/kibana');

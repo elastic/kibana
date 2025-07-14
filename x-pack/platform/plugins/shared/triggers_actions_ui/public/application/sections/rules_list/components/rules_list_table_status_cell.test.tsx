@@ -8,9 +8,11 @@
 import React from 'react';
 
 import { render } from '@testing-library/react';
-import type { RulesListTableStatusCellProps } from './rules_list_table_status_cell';
-import { RulesListTableStatusCell } from './rules_list_table_status_cell';
-import type { RuleTableItem } from '../../../../types';
+import {
+  RulesListTableStatusCell,
+  RulesListTableStatusCellProps,
+} from './rules_list_table_status_cell';
+import { RuleTableItem } from '../../../../types';
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 

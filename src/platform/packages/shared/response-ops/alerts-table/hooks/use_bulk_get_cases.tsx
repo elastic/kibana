@@ -10,13 +10,12 @@
 import { i18n } from '@kbn/i18n';
 import { useQuery } from '@tanstack/react-query';
 import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
-import type { QueryOptionsOverrides } from '@kbn/alerts-ui-shared/src/common/types/tanstack_query_utility_types';
-import type { ServerError } from '@kbn/response-ops-alerts-apis/types';
+import { QueryOptionsOverrides } from '@kbn/alerts-ui-shared/src/common/types/tanstack_query_utility_types';
+import { ServerError } from '@kbn/response-ops-alerts-apis/types';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import { queryKeys } from '../constants';
-import type { Case, CasesBulkGetResponse } from '../apis/bulk_get_cases';
-import { bulkGetCases } from '../apis/bulk_get_cases';
+import { bulkGetCases, Case, CasesBulkGetResponse } from '../apis/bulk_get_cases';
 
 const ERROR_TITLE = i18n.translate('xpack.triggersActionsUI.cases.api.bulkGet', {
   defaultMessage: 'Error fetching cases data',

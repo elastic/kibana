@@ -9,8 +9,7 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import type { CustomGridBodyProps } from './non_virtualized_grid_body';
-import { NonVirtualizedGridBody } from './non_virtualized_grid_body';
+import { CustomGridBodyProps, NonVirtualizedGridBody } from './non_virtualized_grid_body';
 import { mockAlerts } from '../mocks/context.mock';
 import { ALERT_RULE_UUID, ALERT_STATUS } from '@kbn/rule-data-utils';
 import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';

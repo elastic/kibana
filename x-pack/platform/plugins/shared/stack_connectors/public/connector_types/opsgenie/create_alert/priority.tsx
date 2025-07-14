@@ -11,7 +11,7 @@ import { EuiFormRow, EuiSelect } from '@elastic/eui';
 
 import type { OpsgenieCreateAlertParams } from '../../../../server/connector_types';
 import * as i18n from './translations';
-import type { EditActionCallback } from '../types';
+import { EditActionCallback } from '../types';
 import { OptionalFieldLabel } from '../../../common/optional_field_label';
 
 interface PriorityComponentProps {

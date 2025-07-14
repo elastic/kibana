@@ -8,8 +8,13 @@
 import React from 'react';
 
 import { CaseStatuses } from '@kbn/cases-components';
-import type { EuiSuperSelectOption } from '@elastic/eui';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiSuperSelect } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSuperSelect,
+  EuiSuperSelectOption,
+} from '@elastic/eui';
 
 import * as i18n from './translations';
 

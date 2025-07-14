@@ -10,8 +10,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { fireEvent, render, screen, waitFor, cleanup } from '@testing-library/react';
 import { useKibana } from '../../../../common/lib/kibana';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import type { RuleEventLogListTableProps } from './rule_event_log_list_table';
-import { RuleEventLogListTable } from './rule_event_log_list_table';
+import { RuleEventLogListTable, RuleEventLogListTableProps } from './rule_event_log_list_table';
 import {
   RULE_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS,
   GLOBAL_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS,

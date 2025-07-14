@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ReactNode } from 'react';
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiImage, EuiText, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EsQuerySnapshot } from '@kbn/alerting-types';
@@ -16,7 +15,7 @@ import { css } from '@emotion/react';
 import icon from '../assets/illustration_product_no_results_magnifying_glass.svg';
 import { AlertsQueryInspector } from './alerts_query_inspector';
 import { ALERTS_TABLE_TITLE } from '../translations';
-import type { AlertsTableProps } from '../types';
+import { AlertsTableProps } from '../types';
 
 const heights = {
   tall: 490,

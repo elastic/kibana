@@ -27,7 +27,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { RuleSpecificFlappingProperties } from '@kbn/alerting-types';
+import { RuleSpecificFlappingProperties } from '@kbn/alerting-types';
 import {
   RuleSettingsFlappingForm,
   RuleSettingsFlappingTitleTooltip,

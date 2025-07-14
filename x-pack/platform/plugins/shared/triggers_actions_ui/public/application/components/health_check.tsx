@@ -5,21 +5,18 @@
  * 2.0.
  */
 
-import type { FC, PropsWithChildren } from 'react';
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { css } from '@emotion/react';
-import type { Option } from 'fp-ts/Option';
-import { none, some, fold, isSome } from 'fp-ts/Option';
+import { Option, none, some, fold, isSome } from 'fp-ts/Option';
 import { pipe } from 'fp-ts/pipeable';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import type { EuiThemeComputed } from '@elastic/eui';
-import { EuiLink, EuiSpacer, useEuiTheme } from '@elastic/eui';
+import { EuiLink, EuiSpacer, useEuiTheme, EuiThemeComputed } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { EuiEmptyPrompt } from '@elastic/eui';
-import type { DocLinksStart, HttpSetup } from '@kbn/core/public';
-import type { AlertingFrameworkHealth } from '@kbn/alerting-types';
+import { DocLinksStart, HttpSetup } from '@kbn/core/public';
+import { AlertingFrameworkHealth } from '@kbn/alerting-types';
 import { fetchUiHealthStatus as triggersActionsUiHealth } from '@kbn/alerts-ui-shared/src/common/apis/fetch_ui_health_status';
 import { fetchAlertingFrameworkHealth as alertingFrameworkHealth } from '@kbn/alerts-ui-shared/src/common/apis/fetch_alerting_framework_health';
 import { useHealthContext } from '../context/health_context';

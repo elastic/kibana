@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ActionTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
+import { ActionTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
 import { TypeRegistry } from '@kbn/triggers-actions-ui-plugin/public/application/type_registry';
 import { registerConnectorTypes } from '..';
 import { experimentalFeaturesMock, registrationServicesMock } from '../../mocks';

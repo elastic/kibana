@@ -5,9 +5,17 @@
  * 2.0.
  */
 
-import type { Dispatch, PropsWithChildren, SetStateAction } from 'react';
-import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
-import type { AlertsGroupingState, GroupModel } from '../types';
+import React, {
+  createContext,
+  Dispatch,
+  PropsWithChildren,
+  SetStateAction,
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+} from 'react';
+import { AlertsGroupingState, GroupModel } from '../types';
 
 const initialActiveGroups = ['none'];
 

@@ -7,8 +7,7 @@
 
 import React from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
-import type { DataViewSelectPopoverProps } from './data_view_select_popover';
-import { DataViewSelectPopover } from './data_view_select_popover';
+import { DataViewSelectPopover, DataViewSelectPopoverProps } from './data_view_select_popover';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { indexPatternEditorPluginMock as dataViewEditorPluginMock } from '@kbn/data-view-editor-plugin/public/mocks';

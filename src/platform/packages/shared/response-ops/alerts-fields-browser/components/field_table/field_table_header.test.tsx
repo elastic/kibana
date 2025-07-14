@@ -10,8 +10,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
-import type { FieldTableHeaderProps } from './field_table_header';
-import { FieldTableHeader } from './field_table_header';
+import { FieldTableHeader, FieldTableHeaderProps } from './field_table_header';
 
 const mockOnFilterSelectedChange = jest.fn();
 const defaultProps: FieldTableHeaderProps = {

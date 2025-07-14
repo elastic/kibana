@@ -10,7 +10,7 @@
 import React from 'react';
 import { EuiButton, EuiCode, EuiCopy, EuiEmptyPrompt } from '@elastic/eui';
 import { ERROR_PROMPT_TEST_ID } from '../constants';
-import type { FallbackComponent } from './error_boundary';
+import { FallbackComponent } from './error_boundary';
 import {
   ALERTS_TABLE_UNKNOWN_ERROR_COPY_TO_CLIPBOARD_LABEL,
   ALERTS_TABLE_UNKNOWN_ERROR_MESSAGE,

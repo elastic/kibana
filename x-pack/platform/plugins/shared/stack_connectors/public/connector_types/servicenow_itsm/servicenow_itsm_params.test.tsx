@@ -10,11 +10,10 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { act, render, waitFor, screen } from '@testing-library/react';
 import { merge } from 'lodash';
 
-import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { ActionConnectorMode } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { ActionConnector, ActionConnectorMode } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { useGetChoices } from '../lib/servicenow/use_get_choices';
 import ServiceNowITSMParamsFields from './servicenow_itsm_params';
-import type { Choice } from '../lib/servicenow/types';
+import { Choice } from '../lib/servicenow/types';
 import { ACTION_GROUP_RECOVERED } from '../lib/servicenow/helpers';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';

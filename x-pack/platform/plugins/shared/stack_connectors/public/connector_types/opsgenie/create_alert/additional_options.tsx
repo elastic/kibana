@@ -13,7 +13,7 @@ import {
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer } from '@elastic/eui';
 
 import * as i18n from './translations';
-import type { CreateAlertProps } from '.';
+import { CreateAlertProps } from '.';
 
 type AdditionalOptionsProps = Pick<
   CreateAlertProps,

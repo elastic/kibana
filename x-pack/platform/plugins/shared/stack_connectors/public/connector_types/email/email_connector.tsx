@@ -12,12 +12,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink } from '@elastic/eui';
 import { InvalidEmailReason } from '@kbn/actions-plugin/common';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
-import type { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
-import type { FieldConfig } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
 import {
   UseField,
   useFormContext,
   useFormData,
+  FieldConfig,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import {
   NumericField,

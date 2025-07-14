@@ -23,7 +23,7 @@ import type { Alert } from '@kbn/alerting-types';
 import { ALERT_RULE_CATEGORY } from '@kbn/rule-data-utils';
 
 import { DefaultAlertsFlyoutBody, DefaultAlertsFlyoutHeader } from './default_alerts_flyout';
-import type {
+import {
   AdditionalContext,
   FlyoutSectionProps,
   FlyoutSectionRenderer,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RuleSnooze, RuleSnoozeSchedule } from '@kbn/alerting-plugin/common';
+import { RuleSnooze, RuleSnoozeSchedule } from '@kbn/alerting-plugin/common';
 import moment from 'moment';
 
 export const isRuleSnoozed = (rule: { isSnoozedUntil?: Date | null; muteAll: boolean }) =>

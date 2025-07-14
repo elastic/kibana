@@ -7,15 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FC } from 'react';
-import React, { lazy, Suspense, useCallback, useMemo } from 'react';
-import type {
+import React, { FC, lazy, Suspense, useCallback, useMemo } from 'react';
+import {
+  EuiDataGrid,
   EuiDataGridControlColumn,
   EuiDataGridProps,
   EuiDataGridStyle,
   RenderCellValue,
+  tint,
+  useEuiTheme,
 } from '@elastic/eui';
-import { EuiDataGrid, tint, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { ActionsCellHost } from './actions_cell_host';
@@ -23,7 +24,7 @@ import { ControlColumnHeaderCell } from './control_column_header_cell';
 import { CellValueHost } from './cell_value_host';
 import { BulkActionsCell } from './bulk_actions_cell';
 import { BulkActionsHeader } from './bulk_actions_header_cell';
-import type { AdditionalContext, AlertsDataGridProps, CellActionsOptions } from '../types';
+import { AdditionalContext, AlertsDataGridProps, CellActionsOptions } from '../types';
 import { useGetToolbarVisibility } from '../hooks/use_toolbar_visibility';
 import { InspectButtonContainer } from './alerts_query_inspector';
 import { typedMemo } from '../utils/react';

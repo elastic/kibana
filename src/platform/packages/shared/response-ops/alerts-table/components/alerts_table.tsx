@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Ref, FC } from 'react';
 import React, {
   useState,
   useCallback,
@@ -17,16 +16,18 @@ import React, {
   useEffect,
   useImperativeHandle,
   forwardRef,
+  Ref,
   memo,
+  FC,
 } from 'react';
 import { isEmpty } from 'lodash';
-import type {
+import {
   EuiDataGridColumn,
+  EuiProgress,
   EuiDataGridSorting,
   EuiDataGridControlColumn,
   EuiDataGridRefProps,
 } from '@elastic/eui';
-import { EuiProgress } from '@elastic/eui';
 import {
   ALERT_CASE_IDS,
   ALERT_MAINTENANCE_WINDOW_IDS,
@@ -40,7 +41,7 @@ import { useSearchAlertsQuery } from '@kbn/alerts-ui-shared/src/common/hooks/use
 import { DEFAULT_ALERTS_PAGE_SIZE } from '@kbn/alerts-ui-shared/src/common/constants';
 import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
 import deepEqual from 'fast-deep-equal';
-import type { Alert } from '@kbn/alerting-types';
+import { Alert } from '@kbn/alerting-types';
 import { useGetMutedAlertsQuery } from '@kbn/response-ops-alerts-apis/hooks/use_get_muted_alerts_query';
 import { queryKeys as alertsQueryKeys } from '@kbn/response-ops-alerts-apis/query_keys';
 import { ErrorFallback } from './error_fallback';
@@ -49,8 +50,8 @@ import { Storage } from '../utils/storage';
 import { queryKeys } from '../constants';
 import { AlertsDataGrid } from './alerts_data_grid';
 import { EmptyState } from './empty_state';
-import type { RenderContext, RowSelectionState } from '../types';
-import type {
+import { RenderContext, RowSelectionState } from '../types';
+import {
   AdditionalContext,
   AlertsDataGridProps,
   AlertsTableImperativeApi,

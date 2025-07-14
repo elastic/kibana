@@ -17,8 +17,12 @@ import {
   hasMustacheTokens,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { isPlainObject } from 'lodash';
-import type { PagerDutyConfig, PagerDutySecrets, PagerDutyActionParams } from '../types';
-import { EventActionOptions } from '../types';
+import {
+  PagerDutyConfig,
+  PagerDutySecrets,
+  PagerDutyActionParams,
+  EventActionOptions,
+} from '../types';
 
 export function getConnectorType(): ConnectorTypeModel<
   PagerDutyConfig,

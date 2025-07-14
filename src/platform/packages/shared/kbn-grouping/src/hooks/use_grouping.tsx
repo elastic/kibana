@@ -7,16 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FieldSpec } from '@kbn/data-views-plugin/common';
+import { FieldSpec } from '@kbn/data-views-plugin/common';
 import React, { useCallback, useMemo, useReducer } from 'react';
-import type { UiCounterMetricType } from '@kbn/analytics';
+import { UiCounterMetricType } from '@kbn/analytics';
 import { groupsReducerWithStorage, initialState as reducerInitialGroupings } from './state/reducer';
-import type { GroupingProps, GroupSelectorProps } from '..';
-import { isNoneGroup } from '..';
+import { GroupingProps, GroupSelectorProps, isNoneGroup } from '..';
 import { groupActions, groupByIdSelector } from './state';
 import { useGetGroupSelector } from './use_get_group_selector';
-import type { GroupMap, GroupOption } from './types';
-import { defaultGroup } from './types';
+import { defaultGroup, GroupMap, GroupOption } from './types';
 import { Grouping as GroupingComponent } from '../components/grouping';
 
 /** Interface for grouping object where T is the `GroupingAggregation`

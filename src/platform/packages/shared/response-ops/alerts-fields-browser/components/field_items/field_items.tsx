@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 import type { BrowserFields } from '@kbn/rule-registry-plugin/common';
 import { EcsFlat } from '@elastic/ecs';
-import type { EcsMetadata } from '@kbn/alerts-as-data-utils/src/field_maps/types';
+import { EcsMetadata } from '@kbn/alerts-as-data-utils/src/field_maps/types';
 
 import { ALERT_CASE_IDS, ALERT_MAINTENANCE_WINDOW_IDS } from '@kbn/rule-data-utils';
 import type { BrowserFieldItem, FieldTableColumns, GetFieldTableColumns } from '../../types';

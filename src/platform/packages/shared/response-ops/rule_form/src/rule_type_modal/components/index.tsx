@@ -11,8 +11,7 @@ import { countBy } from 'lodash';
 import React, { useMemo, useState } from 'react';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { ToastsStart } from '@kbn/core-notifications-browser';
-import type { RuleTypeModel } from '@kbn/alerts-ui-shared';
-import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared';
+import { RuleTypeModel, useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared';
 import { RuleTypeModal, type RuleTypeModalProps } from './rule_type_modal';
 import { filterAndCountRuleTypes } from './helpers/filter_and_count_rule_types';
 

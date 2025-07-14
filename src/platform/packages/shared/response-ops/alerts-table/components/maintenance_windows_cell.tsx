@@ -11,7 +11,7 @@ import React, { memo, useMemo } from 'react';
 import { EuiSkeletonText, EuiToolTip } from '@elastic/eui';
 import type { MaintenanceWindow } from '@kbn/alerting-plugin/common';
 import { ALERT_MAINTENANCE_WINDOW_IDS, TIMESTAMP } from '@kbn/rule-data-utils';
-import type { CellComponent } from '../types';
+import { CellComponent } from '../types';
 import { TooltipContent } from './maintenance_windows_tooltip_content';
 
 const isMaintenanceWindowValid = (mw: MaintenanceWindow | undefined): mw is MaintenanceWindow => {

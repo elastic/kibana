@@ -9,7 +9,7 @@ import React, { useState } from 'react';
 import { EuiButtonEmpty, EuiContextMenu, EuiPopover, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-import type { Rule } from '../../../..';
+import { Rule } from '../../../..';
 
 export interface RuleActionsPopoverProps {
   rule: Rule;

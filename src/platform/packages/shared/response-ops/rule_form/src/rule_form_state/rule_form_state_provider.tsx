@@ -8,10 +8,9 @@
  */
 
 import React, { useReducer, useState, useCallback } from 'react';
-import type { RuleFormState } from '../types';
+import { RuleFormState } from '../types';
 import { RuleFormStateContext, RuleFormReducerContext } from './rule_form_state_context';
-import type { RuleFormStateReducerAction } from './rule_form_state_reducer';
-import { ruleFormStateReducer } from './rule_form_state_reducer';
+import { RuleFormStateReducerAction, ruleFormStateReducer } from './rule_form_state_reducer';
 import { validateRuleBase, validateRuleParams } from '../validation';
 
 export interface RuleFormStateProviderProps {

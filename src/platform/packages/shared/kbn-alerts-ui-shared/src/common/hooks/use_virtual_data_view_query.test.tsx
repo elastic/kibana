@@ -7,13 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FunctionComponent } from 'react';
-import React from 'react';
+import React, { FunctionComponent } from 'react';
 import * as ReactQuery from '@tanstack/react-query';
 import { waitFor, renderHook } from '@testing-library/react';
 import { testQueryClientConfig } from '../test_utils/test_query_client_config';
 import { queryKeyPrefix, useVirtualDataViewQuery } from './use_virtual_data_view_query';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import { DataView } from '@kbn/data-views-plugin/common';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 
 const { QueryClient, QueryClientProvider } = ReactQuery;

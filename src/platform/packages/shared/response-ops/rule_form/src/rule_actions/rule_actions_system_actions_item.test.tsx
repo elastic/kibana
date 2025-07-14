@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import type { RuleType } from '@kbn/alerting-types';
+import { RuleType } from '@kbn/alerting-types';
 import userEvent from '@testing-library/user-event';
 import type { ActionTypeModel } from '@kbn/alerts-ui-shared';
 import { TypeRegistry } from '@kbn/alerts-ui-shared/lib';
@@ -19,7 +19,7 @@ import {
   getActionTypeModel,
   getConnector,
 } from '../common/test_utils/actions_test_utils';
-import type { RuleActionsMessageProps } from './rule_actions_message';
+import { RuleActionsMessageProps } from './rule_actions_message';
 import { RuleActionsSystemActionsItem } from './rule_actions_system_actions_item';
 import { I18nProvider } from '@kbn/i18n-react';
 

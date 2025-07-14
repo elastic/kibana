@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useState, useMemo, memo } from 'react';
-import type { BoolQuery, Filter } from '@kbn/es-query';
+import { BoolQuery, Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { AlertFilterControls } from '@kbn/alerts-ui-shared/src/alert_filter_controls';
 import { ControlGroupRenderer } from '@kbn/controls-plugin/public';
@@ -18,7 +18,7 @@ import {
   ALERTS_SEARCH_BAR_PARAMS_URL_STORAGE_KEY,
   RESET_FILTER_CONTROLS_TEST_SUBJ,
 } from './constants';
-import type { AlertsSearchBarProps } from './types';
+import { AlertsSearchBarProps } from './types';
 import AlertsSearchBar from './alerts_search_bar';
 import { buildEsQuery } from './build_es_query';
 import { ErrorBoundary } from '../common/components/error_boundary';

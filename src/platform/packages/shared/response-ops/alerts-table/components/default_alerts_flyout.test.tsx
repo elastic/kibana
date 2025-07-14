@@ -12,7 +12,7 @@ import { waitFor } from '@testing-library/react';
 import { mount } from 'enzyme';
 import type { ReactWrapper } from 'enzyme';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
-import type {
+import {
   AdditionalContext,
   AlertsTableFlyoutBaseProps,
   FlyoutSectionProps,

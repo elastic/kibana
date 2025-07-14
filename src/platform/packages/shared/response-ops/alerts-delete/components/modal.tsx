@@ -8,7 +8,6 @@
  */
 
 import React, { useState } from 'react';
-import type { EuiSelectOption } from '@elastic/eui';
 import {
   EuiModal,
   EuiModalHeader,
@@ -21,6 +20,7 @@ import {
   EuiSpacer,
   EuiCheckbox,
   EuiFormRow,
+  EuiSelectOption,
   EuiHorizontalRule,
   EuiFieldText,
   EuiPanel,
@@ -32,7 +32,7 @@ import {
 } from '@elastic/eui';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
-import type { HttpStart } from '@kbn/core/public';
+import { HttpStart } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { type AlertDeleteCategoryIds } from '@kbn/alerting-plugin/common/constants/alert_delete';
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';

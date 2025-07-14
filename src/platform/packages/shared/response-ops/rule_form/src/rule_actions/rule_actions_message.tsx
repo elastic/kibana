@@ -16,11 +16,10 @@ import {
   EuiSpacer,
   EuiSwitch,
 } from '@elastic/eui';
-import type { ActionVariable, RuleActionParam } from '@kbn/alerting-types';
-import type { ActionConnector } from '@kbn/alerts-ui-shared';
-import { ActionConnectorMode } from '@kbn/alerts-ui-shared';
+import { ActionVariable, RuleActionParam } from '@kbn/alerting-types';
+import { ActionConnector, ActionConnectorMode } from '@kbn/alerts-ui-shared';
 import { useRuleFormState } from '../hooks';
-import type { RuleAction, RuleUiAction } from '../common';
+import { RuleAction, RuleUiAction } from '../common';
 import { getSelectedActionGroup } from '../utils';
 import { ACTION_USE_AAD_TEMPLATE_FIELDS_LABEL } from '../translations';
 

@@ -8,13 +8,12 @@
  */
 
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
-import type { UiCounterMetricType } from '@kbn/analytics';
-import { METRIC_TYPE } from '@kbn/analytics';
+import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
 import React, { useCallback, useEffect, useMemo } from 'react';
 
 import { groupActions, groupByIdSelector } from './state';
-import type { GroupOption, Action, GroupMap } from './types';
-import { defaultGroup } from './types';
+import type { GroupOption } from './types';
+import { Action, defaultGroup, GroupMap } from './types';
 import { GroupSelector, isNoneGroup } from '..';
 import { getTelemetryEvent } from '../telemetry/const';
 

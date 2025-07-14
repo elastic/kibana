@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EuiSelectableProps } from '@elastic/eui';
 import {
   EuiButton,
   EuiCard,
@@ -28,14 +27,18 @@ import {
   EuiToolTip,
   useEuiTheme,
   EuiSelectable,
+  EuiSelectableProps,
   useCurrentEuiBreakpoint,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { ActionConnector } from '@kbn/alerts-ui-shared';
-import { type ActionTypeModel, checkActionFormActionTypeEnabled } from '@kbn/alerts-ui-shared';
+import {
+  ActionConnector,
+  type ActionTypeModel,
+  checkActionFormActionTypeEnabled,
+} from '@kbn/alerts-ui-shared';
 import React, { Suspense, useCallback, useMemo, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import type { RuleFormParamsErrors } from '../common/types';
+import { RuleFormParamsErrors } from '../common/types';
 import { DEFAULT_FREQUENCY } from '../constants';
 import { useRuleFormDispatch, useRuleFormState } from '../hooks';
 import {

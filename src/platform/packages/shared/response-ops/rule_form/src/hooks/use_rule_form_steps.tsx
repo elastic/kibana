@@ -8,10 +8,8 @@
  */
 
 import { omit } from 'lodash';
-import type { EuiStepsProps, EuiStepsHorizontalProps } from '@elastic/eui';
-import { EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
-import type { PropsWithChildren } from 'react';
-import React, { useState, useMemo, useCallback } from 'react';
+import { EuiHorizontalRule, EuiSpacer, EuiStepsProps, EuiStepsHorizontalProps } from '@elastic/eui';
+import React, { useState, useMemo, useCallback, PropsWithChildren } from 'react';
 import { useRuleFormState } from './use_rule_form_state';
 import { RuleActions } from '../rule_actions';
 import { RuleDefinition } from '../rule_definition';

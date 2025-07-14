@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useCallback, useState, useRef } from 'react';
-import type {
+import {
   RulesSettingsFlappingProperties,
   RulesSettingsProperties,
   RulesSettingsQueryDelayProperties,

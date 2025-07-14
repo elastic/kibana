@@ -8,8 +8,13 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import type { Pagination, Direction, CriteriaWithPagination } from '@elastic/eui';
-import { EuiInMemoryTable, useEuiTheme } from '@elastic/eui';
+import {
+  EuiInMemoryTable,
+  Pagination,
+  Direction,
+  useEuiTheme,
+  CriteriaWithPagination,
+} from '@elastic/eui';
 import type { BrowserFields } from '@kbn/rule-registry-plugin/common';
 import { getFieldColumns, getFieldItemsData } from '../field_items';
 import { CATEGORY_TABLE_CLASS_NAME, TABLE_HEIGHT } from '../../helpers';

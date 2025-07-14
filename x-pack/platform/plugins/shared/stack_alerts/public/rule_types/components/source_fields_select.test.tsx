@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import type { PropsWithChildren } from 'react';
-import React from 'react';
+import React, { PropsWithChildren } from 'react';
 import { cleanup, render, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { SourceFields } from './source_fields_select';
-import type { SourceField } from '../es_query/types';
+import { SourceField } from '../es_query/types';
 
 const AppWrapper = React.memo<PropsWithChildren<unknown>>(({ children }) => (
   <I18nProvider>{children}</I18nProvider>

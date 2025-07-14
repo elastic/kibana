@@ -12,10 +12,10 @@ import { screen, render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ALERT_MAINTENANCE_WINDOW_IDS } from '@kbn/rule-data-utils';
 import { MaintenanceWindowsCell } from './maintenance_windows_cell';
-import type { CellComponentProps } from '../types';
+import { CellComponentProps } from '../types';
 import { getMaintenanceWindowsMapMock } from '../mocks/maintenance_windows.mock';
 import { getCasesMapMock } from '../mocks/cases.mock';
-import type { Alert } from '@kbn/alerting-types';
+import { Alert } from '@kbn/alerting-types';
 import { createPartialObjectMock } from '../utils/test';
 
 const casesMap = getCasesMapMock();

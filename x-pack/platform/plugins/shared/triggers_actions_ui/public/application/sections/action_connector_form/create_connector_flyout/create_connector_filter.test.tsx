@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-import type { AppMockRenderer } from '../../test_utils';
-import { createAppMockRenderer } from '../../test_utils';
+import { AppMockRenderer, createAppMockRenderer } from '../../test_utils';
 import { CreateConnectorFilter } from './create_connector_filter';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';

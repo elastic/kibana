@@ -18,7 +18,7 @@ import { BehaviorSubject } from 'rxjs';
 import { AlertRuleFromVisAction } from './alert_rule_from_vis_ui_action';
 import * as AlertFlyoutComponentModule from './rule_flyout_component';
 import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
-import type { AggregateQuery, Query } from '@kbn/es-query';
+import { AggregateQuery, Query } from '@kbn/es-query';
 
 const ruleTypeRegistry: jest.Mocked<RuleTypeRegistryContract> = {
   has: jest.fn(),

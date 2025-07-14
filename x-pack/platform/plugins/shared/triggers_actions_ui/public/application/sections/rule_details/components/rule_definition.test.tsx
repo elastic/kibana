@@ -5,14 +5,13 @@
  * 2.0.
  */
 import React from 'react';
-import type { ReactWrapper } from 'enzyme';
-import { mount } from 'enzyme';
+import { mount, ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { nextTick } from '@kbn/test-jest-helpers';
 import { RuleDefinition } from './rule_definition';
 import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
-import type { ActionTypeModel, Rule, RuleTypeModel } from '../../../../types';
+import { ActionTypeModel, Rule, RuleTypeModel } from '../../../../types';
 import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 

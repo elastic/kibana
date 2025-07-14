@@ -11,8 +11,7 @@ import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut } from '@elastic/eui';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
-import type { KibanaServices } from './types';
-import { MaintenanceWindowStatus } from './types';
+import { MaintenanceWindowStatus, KibanaServices } from './types';
 import { useFetchActiveMaintenanceWindows } from './use_fetch_active_maintenance_windows';
 import { MAINTENANCE_WINDOW_FEATURE_ID } from './constants';
 import {

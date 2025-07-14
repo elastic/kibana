@@ -12,13 +12,13 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { act } from 'react-dom/test-utils';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
-import type { ValidationResult, GenericValidationResult, RuleUiAction } from '../../../types';
+import { ValidationResult, GenericValidationResult, RuleUiAction } from '../../../types';
 import ActionForm from './action_form';
 import { useKibana } from '../../../common/lib/kibana';
-import type { SanitizedRuleAction } from '@kbn/alerting-plugin/common';
 import {
   RecoveredActionGroup,
   isActionGroupDisabledForActionTypeId,
+  SanitizedRuleAction,
 } from '@kbn/alerting-plugin/common';
 
 jest.mock('../../../common/lib/kibana');

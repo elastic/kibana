@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { PropsWithChildren } from 'react';
-import React from 'react';
+import React, { PropsWithChildren } from 'react';
 import { fireEvent, render, waitFor, screen, act } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { of, Subject } from 'rxjs';
@@ -15,9 +14,9 @@ import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
-import type { DataPublicPluginStart, ISearchStart } from '@kbn/data-plugin/public';
+import { DataPublicPluginStart, ISearchStart } from '@kbn/data-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { EsQueryRuleParams, SearchType } from '../types';
+import { EsQueryRuleParams, SearchType } from '../types';
 import { EsQueryExpression } from './es_query_expression';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => {

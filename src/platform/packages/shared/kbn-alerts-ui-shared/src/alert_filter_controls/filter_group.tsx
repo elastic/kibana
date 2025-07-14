@@ -20,8 +20,7 @@ import type {
   DefaultDataControlState,
   ControlStateTransform,
 } from '@kbn/controls-plugin/public';
-import type { PropsWithChildren } from 'react';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { PropsWithChildren, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { debounce, isEqual, isEqualWith } from 'lodash';
 import type { FilterGroupProps, FilterControlConfig } from './types';

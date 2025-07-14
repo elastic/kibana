@@ -16,7 +16,7 @@ import {
   getDisabledByLicenseRuleTypeFromApi,
   ruleType,
 } from './test_helpers';
-import type { IToasts } from '@kbn/core/public';
+import { IToasts } from '@kbn/core/public';
 import { render, screen, waitForElementToBeRemoved, fireEvent } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';

@@ -19,6 +19,8 @@ import type {
   Note,
   PinnedEvent,
   TimelineResponse,
+} from '../../../../common/api/timeline';
+import {
   DataProviderTypeEnum,
   RowRendererValues,
   TimelineStatusEnum,

@@ -17,15 +17,14 @@ import {
   EuiLink,
   EuiFieldSearch,
 } from '@elastic/eui';
-import type { ActionType, RulesListFilters, UpdateFiltersProps } from '../../../../types';
+import { ActionType, RulesListFilters, UpdateFiltersProps } from '../../../../types';
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 import { RulesListStatuses } from './rules_list_statuses';
 import { RulesListAutoRefresh } from './rules_list_auto_refresh';
 import { RuleExecutionStatusFilter } from './rule_execution_status_filter';
 import { RuleLastRunOutcomeFilter } from './rule_last_run_outcome_filter';
 import { RulesListErrorBanner } from './rules_list_error_banner';
-import type { TypeFilterProps } from './type_filter';
-import { TypeFilter } from './type_filter';
+import { TypeFilter, TypeFilterProps } from './type_filter';
 import { ActionTypeFilter } from './action_type_filter';
 import { RuleTagFilter } from './rule_tag_filter';
 import { RuleStatusFilter } from './rule_status_filter';

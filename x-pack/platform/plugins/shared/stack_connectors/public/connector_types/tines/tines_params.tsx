@@ -6,11 +6,11 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiBadge,
   EuiCallOut,
   EuiComboBox,
+  EuiComboBoxOptionOption,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -18,8 +18,7 @@ import {
   EuiHighlight,
   EuiSpacer,
 } from '@elastic/eui';
-import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
-import { ActionConnectorMode } from '@kbn/triggers-actions-ui-plugin/public';
+import { ActionConnectorMode, ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   JsonEditorWithMessageVariables,
   useSubAction,

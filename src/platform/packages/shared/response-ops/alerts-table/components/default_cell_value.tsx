@@ -7,12 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ComponentProps } from 'react';
-import React from 'react';
+import React, { ComponentProps } from 'react';
 import { isEmpty } from 'lodash';
-import type { AlertConsumers } from '@kbn/rule-data-utils';
 import {
   ALERT_DURATION,
+  AlertConsumers,
   ALERT_RULE_NAME,
   ALERT_RULE_UUID,
   ALERT_START,
@@ -21,8 +20,8 @@ import {
   ALERT_RULE_PRODUCER,
 } from '@kbn/rule-data-utils';
 import { EuiBadge, EuiLink } from '@elastic/eui';
-import type { JsonValue } from '@kbn/utility-types';
-import type { AlertsTableSupportedConsumers, GetAlertsTableProp } from '../types';
+import { JsonValue } from '@kbn/utility-types';
+import { AlertsTableSupportedConsumers, GetAlertsTableProp } from '../types';
 import {
   alertProducersData,
   observabilityFeatureIds,

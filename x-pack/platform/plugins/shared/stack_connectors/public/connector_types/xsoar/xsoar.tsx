@@ -6,10 +6,10 @@
  */
 
 import { lazy } from 'react';
-import type { GenericValidationResult } from '@kbn/triggers-actions-ui-plugin/public/types';
-import type { XSOARConnector } from './types';
+import { GenericValidationResult } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { XSOARConnector } from './types';
 import { XSOAR_CONNECTOR_ID, SUB_ACTION, XSOAR_TITLE } from '../../../common/xsoar/constants';
-import type { ExecutorParams } from '../../../common/xsoar/types';
+import { ExecutorParams } from '../../../common/xsoar/types';
 import * as i18n from './translations';
 
 interface ValidationErrors {

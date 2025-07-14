@@ -6,8 +6,7 @@
  */
 
 import React, { useState, useCallback } from 'react';
-import type { EuiFieldNumberProps } from '@elastic/eui';
-import { EuiFieldNumber } from '@elastic/eui';
+import { EuiFieldNumber, EuiFieldNumberProps } from '@elastic/eui';
 
 export const NumberField: React.FC<
   EuiFieldNumberProps & {

@@ -17,9 +17,9 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 
 import { RuleDefinition } from './rule_definition';
-import type { RuleType } from '@kbn/alerting-types';
-import type { RuleTypeModel } from '../common/types';
-import type { RuleSettingsFlappingFormProps } from '@kbn/alerts-ui-shared/src/rule_settings/rule_settings_flapping_form';
+import { RuleType } from '@kbn/alerting-types';
+import { RuleTypeModel } from '../common/types';
+import { RuleSettingsFlappingFormProps } from '@kbn/alerts-ui-shared/src/rule_settings/rule_settings_flapping_form';
 import { ALERT_FLAPPING_DETECTION_TITLE } from '../translations';
 import userEvent from '@testing-library/user-event';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';

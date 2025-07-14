@@ -22,8 +22,7 @@ import type { Action } from '@kbn/ui-actions-plugin/public';
 import { pick } from 'lodash';
 import { tracksOverlays } from '@kbn/presentation-containers';
 import { buildAdditionalQuery } from './build_additional_query';
-import type { ServiceDependencies } from './rule_flyout_component';
-import { getRuleFlyoutComponent } from './rule_flyout_component';
+import { ServiceDependencies, getRuleFlyoutComponent } from './rule_flyout_component';
 
 interface Context {
   data?: AlertRuleFromVisUIActionData;

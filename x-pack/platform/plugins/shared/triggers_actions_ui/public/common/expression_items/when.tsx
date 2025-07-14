@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiExpression, EuiPopover, EuiSelect } from '@elastic/eui';
 import { builtInAggregationTypes } from '../constants';
-import type { AggregationType } from '../types';
+import { AggregationType } from '../types';
 import { ClosablePopoverTitle } from './components';
 
 export interface WhenExpressionProps {

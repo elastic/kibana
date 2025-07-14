@@ -8,17 +8,19 @@
 import React, { lazy, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiTabbedContent, useEuiTheme } from '@elastic/eui';
-import type { AlertStatusValues } from '@kbn/alerting-plugin/common';
+import { AlertStatusValues } from '@kbn/alerting-plugin/common';
 import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import { defaultAlertsTableColumns } from '@kbn/response-ops-alerts-table/configuration';
 import type { AlertsTable as AlertsTableType } from '@kbn/response-ops-alerts-table';
 import { useKibana } from '../../../../common/lib/kibana';
-import type { Rule, RuleSummary, AlertStatus, RuleType } from '../../../../types';
-import type { ComponentOpts as RuleApis } from '../../common/components/with_bulk_rule_api_operations';
-import { withBulkRuleOperations } from '../../common/components/with_bulk_rule_api_operations';
+import { Rule, RuleSummary, AlertStatus, RuleType } from '../../../../types';
+import {
+  ComponentOpts as RuleApis,
+  withBulkRuleOperations,
+} from '../../common/components/with_bulk_rule_api_operations';
 
 import type { RuleEventLogListProps } from './rule_event_log_list';
-import type { AlertListItem, RefreshToken } from './types';
+import { AlertListItem, RefreshToken } from './types';
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 import { suspendedComponentWithProps } from '../../../lib/suspended_component_with_props';
 import {

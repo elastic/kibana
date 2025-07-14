@@ -23,7 +23,7 @@ import type { HttpStart } from '@kbn/core-http-browser';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import { getFilterMetadata } from '../filters_metadata';
 import { AlertsFiltersFormContextProvider } from '../contexts/alerts_filters_form_context';
-import type {
+import {
   AlertsFilter,
   AlertsFiltersExpression,
   AlertsFiltersType,

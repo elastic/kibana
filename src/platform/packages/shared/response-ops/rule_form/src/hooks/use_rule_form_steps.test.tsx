@@ -17,7 +17,7 @@ import {
   RULE_FORM_PAGE_RULE_DEFINITION_TITLE_SHORT,
   RULE_FORM_PAGE_RULE_DETAILS_TITLE_SHORT,
 } from '../translations';
-import type { RuleFormData } from '../types';
+import { RuleFormData } from '../types';
 import { EuiSteps, EuiStepsHorizontal } from '@elastic/eui';
 
 jest.mock('../rule_definition', () => ({

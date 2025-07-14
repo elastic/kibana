@@ -8,13 +8,12 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import type { EuiTabbedContentTab } from '@elastic/eui';
-import { EuiDescriptionList, EuiPanel, EuiTitle } from '@elastic/eui';
+import { EuiDescriptionList, EuiPanel, EuiTabbedContentTab, EuiTitle } from '@elastic/eui';
 import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
 import { i18n } from '@kbn/i18n';
 import { ScrollableFlyoutTabbedContent, AlertFieldsTable } from '@kbn/alerts-ui-shared';
-import type { JsonValue } from '@kbn/utility-types';
-import type { AdditionalContext, FlyoutSectionProps } from '../types';
+import { JsonValue } from '@kbn/utility-types';
+import { AdditionalContext, FlyoutSectionProps } from '../types';
 import { defaultAlertsTableColumns } from '../configuration';
 import { DefaultCellValue } from './default_cell_value';
 

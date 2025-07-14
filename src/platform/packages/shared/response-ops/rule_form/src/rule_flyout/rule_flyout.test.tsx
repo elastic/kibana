@@ -15,7 +15,7 @@ import {
   RULE_FORM_PAGE_RULE_ACTIONS_TITLE,
   RULE_FORM_PAGE_RULE_DETAILS_TITLE_SHORT,
 } from '../translations';
-import type { RuleFormData } from '../types';
+import { RuleFormData } from '../types';
 import { RuleFormStepId } from '../constants';
 
 jest.mock('../rule_definition', () => ({

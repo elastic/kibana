@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { ReactNode } from 'react';
-import React, { memo } from 'react';
+import React, { memo, ReactNode } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import {
   ComboBoxField,

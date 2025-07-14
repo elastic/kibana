@@ -6,8 +6,8 @@
  */
 
 import { parseEsqlQuery } from '@kbn/securitysolution-utils';
-import type {
-  UpdateRuleMigrationRule,
+import type { UpdateRuleMigrationRule } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
+import {
   RuleMigrationTranslationResultEnum,
   type RuleMigrationTranslationResult,
 } from '../../../../../../common/siem_migrations/model/rule_migration.gen';

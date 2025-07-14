@@ -25,9 +25,9 @@ import {
   EuiBetaBadge,
 } from '@elastic/eui';
 import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../translations';
-import type { RuleUiAction, ActionTypeIndex, ActionConnector } from '../../../types';
+import { RuleUiAction, ActionTypeIndex, ActionConnector } from '../../../types';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
-import type { ActionAccordionFormProps } from './action_form';
+import { ActionAccordionFormProps } from './action_form';
 import { useKibana } from '../../../common/lib/kibana';
 import { getValidConnectors } from '../common/connectors';
 import { ConnectorsSelection } from './connectors_selection';

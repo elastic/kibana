@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PropsWithChildren } from 'react';
-import React, { createContext, useContext } from 'react';
-import type { AlertsFiltersFormContextValue } from '../types';
+import React, { createContext, PropsWithChildren, useContext } from 'react';
+import { AlertsFiltersFormContextValue } from '../types';
 
 export const AlertsFiltersFormContext = createContext<AlertsFiltersFormContextValue | undefined>(
   undefined

@@ -7,7 +7,7 @@
 
 import React, { useState } from 'react';
 import { EuiTextArea, EuiFormRow } from '@elastic/eui';
-import type { ActionVariable } from '@kbn/alerting-plugin/common';
+import { ActionVariable } from '@kbn/alerting-plugin/common';
 import { AddMessageVariablesOptional } from './add_message_variables_optional';
 import { getIsExperimentalFeatureEnabled } from '../../common/get_experimental_features';
 import { TextAreaWithAutocomplete } from './text_area_with_autocomplete';

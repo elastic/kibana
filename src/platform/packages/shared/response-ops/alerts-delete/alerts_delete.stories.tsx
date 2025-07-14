@@ -11,7 +11,7 @@ import React, { useState } from 'react';
 import type { StoryObj } from '@storybook/react';
 import { EuiButton } from '@elastic/eui';
 import { EuiFlyout, EuiFlyoutBody } from '@elastic/eui';
-import type { HttpStart, NotificationsStart } from '@kbn/core/public';
+import { HttpStart, NotificationsStart } from '@kbn/core/public';
 import { AlertDeleteDescriptiveFormGroup } from './components/descriptive_form_group';
 import { AlertDeleteModal } from './components/modal';
 

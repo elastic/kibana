@@ -7,7 +7,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSuperSelect } from '@elastic/eui';
-import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
+import { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { SUB_ACTION } from '../../../common/sentinelone/constants';
 import type { SentinelOneActionParams } from '../../../common/sentinelone/types';
 import * as i18n from './translations';

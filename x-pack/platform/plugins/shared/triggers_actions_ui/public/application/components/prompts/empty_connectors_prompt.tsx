@@ -17,7 +17,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { DocLinksStart } from '@kbn/core-doc-links-browser';
+import { DocLinksStart } from '@kbn/core-doc-links-browser';
 
 export const EmptyConnectorsPrompt = ({
   onCTAClicked,

@@ -7,18 +7,18 @@
 
 import React from 'react';
 
-import type {
+import {
   IExecutionLogResult,
   IExecutionErrorsResult,
   IExecutionKPIResult,
 } from '@kbn/alerting-plugin/common';
-import type { AlertingFrameworkHealth } from '@kbn/alerting-types';
+import { AlertingFrameworkHealth } from '@kbn/alerting-types';
 import { fetchAlertingFrameworkHealth as alertingFrameworkHealth } from '@kbn/alerts-ui-shared/src/common/apis/fetch_alerting_framework_health';
 import { resolveRule } from '@kbn/response-ops-rule-form';
 import { muteAlertInstance } from '@kbn/response-ops-alerts-apis/apis/mute_alert_instance';
 import { unmuteAlertInstance } from '@kbn/response-ops-alerts-apis/apis/unmute_alert_instance';
 import { getRuleTypes } from '@kbn/response-ops-rules-apis/apis/get_rule_types';
-import type {
+import {
   Rule,
   RuleType,
   RuleTaskState,

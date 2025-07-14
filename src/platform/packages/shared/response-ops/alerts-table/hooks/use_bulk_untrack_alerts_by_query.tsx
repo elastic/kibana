@@ -9,7 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { useMutation } from '@tanstack/react-query';
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';

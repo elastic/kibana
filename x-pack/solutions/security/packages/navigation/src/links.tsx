@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, type { HTMLAttributeAnchorTarget , type MouseEventHandler, type MouseEvent, useCallback } from 'react';
+import type { HTMLAttributeAnchorTarget } from 'react';
+import React, { type MouseEventHandler, type MouseEvent, useCallback } from 'react';
 import { EuiButton, EuiLink, type EuiLinkProps } from '@elastic/eui';
 import type { SecurityPageName } from '@kbn/deeplinks-security';
 import type { AppDeepLinkId } from '@kbn/core-chrome-browser';

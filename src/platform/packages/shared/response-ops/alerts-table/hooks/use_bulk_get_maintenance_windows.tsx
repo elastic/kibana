@@ -10,14 +10,16 @@
 import { i18n } from '@kbn/i18n';
 import { useQuery } from '@tanstack/react-query';
 import type { MaintenanceWindow } from '@kbn/alerting-plugin/common';
-import type { QueryOptionsOverrides } from '@kbn/alerts-ui-shared/src/common/types/tanstack_query_utility_types';
-import type { ServerError } from '@kbn/response-ops-alerts-apis/types';
+import { QueryOptionsOverrides } from '@kbn/alerts-ui-shared/src/common/types/tanstack_query_utility_types';
+import { ServerError } from '@kbn/response-ops-alerts-apis/types';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
-import type { ApplicationStart } from '@kbn/core-application-browser';
+import { ApplicationStart } from '@kbn/core-application-browser';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
-import type { BulkGetMaintenanceWindowsResult } from '../apis/bulk_get_maintenance_windows';
-import { bulkGetMaintenanceWindows } from '../apis/bulk_get_maintenance_windows';
+import {
+  bulkGetMaintenanceWindows,
+  BulkGetMaintenanceWindowsResult,
+} from '../apis/bulk_get_maintenance_windows';
 import { queryKeys } from '../constants';
 import { useLicense } from './use_license';
 

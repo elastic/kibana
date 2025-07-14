@@ -8,27 +8,31 @@
 import React, { useCallback, useEffect, useState, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import datemath from '@kbn/datemath';
-import type { EuiDataGridSorting, OnTimeChangeProps, EuiDataGridColumn } from '@elastic/eui';
 import {
   EuiFieldSearch,
   EuiFlexItem,
   EuiFlexGroup,
   EuiProgress,
   EuiSpacer,
+  EuiDataGridSorting,
   EuiSuperDatePicker,
+  OnTimeChangeProps,
   EuiSwitch,
+  EuiDataGridColumn,
 } from '@elastic/eui';
-import type { SpacesContextProps } from '@kbn/spaces-plugin/public';
-import type { IExecutionLog } from '@kbn/actions-plugin/common';
+import { SpacesContextProps } from '@kbn/spaces-plugin/public';
+import { IExecutionLog } from '@kbn/actions-plugin/common';
 import { useKibana } from '../../../../common/lib/kibana';
 import {
   GLOBAL_CONNECTOR_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS,
   CONNECTOR_LOCKED_COLUMNS,
 } from '../../../constants';
 import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
-import type { LoadGlobalConnectorExecutionLogAggregationsProps } from '../../../lib/action_connector_api/load_execution_log_aggregations';
-import type { ComponentOpts as ConnectorApis } from '../../common/components/with_actions_api_operations';
-import { withActionOperations } from '../../common/components/with_actions_api_operations';
+import { LoadGlobalConnectorExecutionLogAggregationsProps } from '../../../lib/action_connector_api/load_execution_log_aggregations';
+import {
+  ComponentOpts as ConnectorApis,
+  withActionOperations,
+} from '../../common/components/with_actions_api_operations';
 import { RefineSearchPrompt } from '../../common/components/refine_search_prompt';
 import { ConnectorEventLogListKPIWithApi as ConnectorEventLogListKPI } from './actions_connectors_event_log_list_kpi';
 import {

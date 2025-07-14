@@ -6,11 +6,13 @@
  */
 import React from 'react';
 import { waitFor, renderHook } from '@testing-library/react';
-import type { UseLoadRuleAggregationsQueryProps } from './use_load_rule_aggregations_query';
-import { useLoadRuleAggregationsQuery as useLoadRuleAggregations } from './use_load_rule_aggregations_query';
-import type { RuleStatus } from '../../types';
+import {
+  UseLoadRuleAggregationsQueryProps,
+  useLoadRuleAggregationsQuery as useLoadRuleAggregations,
+} from './use_load_rule_aggregations_query';
+import { RuleStatus } from '../../types';
 import { useKibana } from '../../common/lib/kibana';
-import type { IToasts } from '@kbn/core-notifications-browser';
+import { IToasts } from '@kbn/core-notifications-browser';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 jest.mock('../../common/lib/kibana');

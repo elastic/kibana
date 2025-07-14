@@ -7,13 +7,17 @@
 
 import React from 'react';
 
-import type { IExecutionLogResult, IExecutionKPIResult } from '@kbn/actions-plugin/common';
-import type { ActionType } from '../../../../types';
+import { IExecutionLogResult, IExecutionKPIResult } from '@kbn/actions-plugin/common';
+import { ActionType } from '../../../../types';
 import { loadActionTypes } from '../../../lib/action_connector_api';
-import type { LoadGlobalConnectorExecutionKPIAggregationsProps } from '../../../lib/action_connector_api/load_execution_kpi_aggregations';
-import { loadGlobalConnectorExecutionKPIAggregations } from '../../../lib/action_connector_api/load_execution_kpi_aggregations';
-import type { LoadGlobalConnectorExecutionLogAggregationsProps } from '../../../lib/action_connector_api/load_execution_log_aggregations';
-import { loadGlobalConnectorExecutionLogAggregations } from '../../../lib/action_connector_api/load_execution_log_aggregations';
+import {
+  loadGlobalConnectorExecutionKPIAggregations,
+  LoadGlobalConnectorExecutionKPIAggregationsProps,
+} from '../../../lib/action_connector_api/load_execution_kpi_aggregations';
+import {
+  loadGlobalConnectorExecutionLogAggregations,
+  LoadGlobalConnectorExecutionLogAggregationsProps,
+} from '../../../lib/action_connector_api/load_execution_log_aggregations';
 import { useKibana } from '../../../../common/lib/kibana';
 
 export interface ComponentOpts {

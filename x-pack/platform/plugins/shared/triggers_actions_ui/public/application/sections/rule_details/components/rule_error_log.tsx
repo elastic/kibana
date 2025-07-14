@@ -8,29 +8,29 @@
 import React, { useCallback, useEffect, useState, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import datemath from '@kbn/datemath';
-import type {
-  Pagination,
-  OnTimeChangeProps,
-  EuiTableSortingType,
-  EuiBasicTableColumn,
-} from '@elastic/eui';
 import {
   EuiFieldSearch,
   EuiFlexItem,
   EuiFlexGroup,
   EuiProgress,
   EuiSpacer,
+  Pagination,
   EuiSuperDatePicker,
+  OnTimeChangeProps,
   EuiBasicTable,
+  EuiTableSortingType,
+  EuiBasicTableColumn,
 } from '@elastic/eui';
-import type { IExecutionErrors } from '@kbn/alerting-plugin/common';
+import { IExecutionErrors } from '@kbn/alerting-plugin/common';
 import { useKibana } from '../../../../common/lib/kibana';
 
 import { RefineSearchPrompt } from '../../common/components/refine_search_prompt';
-import type { ComponentOpts as RuleApis } from '../../common/components/with_bulk_rule_api_operations';
-import { withBulkRuleOperations } from '../../common/components/with_bulk_rule_api_operations';
+import {
+  ComponentOpts as RuleApis,
+  withBulkRuleOperations,
+} from '../../common/components/with_bulk_rule_api_operations';
 import { EventLogListCellRenderer } from '../../common/components/event_log';
-import type { RefreshToken } from './types';
+import { RefreshToken } from './types';
 
 const getParsedDate = (date: string) => {
   if (date.includes('now')) {

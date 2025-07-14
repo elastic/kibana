@@ -6,9 +6,12 @@
  */
 
 import React from 'react';
-import type { ActionConnectorFieldsProps } from '@kbn/triggers-actions-ui-plugin/public';
-import type { ConfigFieldSchema, SecretsFieldSchema } from '@kbn/triggers-actions-ui-plugin/public';
-import { SimpleConnectorForm } from '@kbn/triggers-actions-ui-plugin/public';
+import { ActionConnectorFieldsProps } from '@kbn/triggers-actions-ui-plugin/public';
+import {
+  ConfigFieldSchema,
+  SimpleConnectorForm,
+  SecretsFieldSchema,
+} from '@kbn/triggers-actions-ui-plugin/public';
 
 import { URL_LABEL, API_KEY_LABEL, API_KEY_ID_LABEL, API_KEY_ID_HELP_TEXT } from './translations';
 

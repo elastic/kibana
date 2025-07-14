@@ -12,17 +12,21 @@ import { httpServiceMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
-import type { CommonEsQueryRuleParams, EsQueryRuleMetaData, EsQueryRuleParams } from '../types';
-import { SearchType } from '../types';
+import {
+  CommonEsQueryRuleParams,
+  EsQueryRuleMetaData,
+  EsQueryRuleParams,
+  SearchType,
+} from '../types';
 import { EsQueryRuleTypeExpression } from './expression';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { Subject } from 'rxjs';
-import type { ISearchSource } from '@kbn/data-plugin/common';
+import { ISearchSource } from '@kbn/data-plugin/common';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { act } from 'react-dom/test-utils';
 import { indexPatternEditorPluginMock as dataViewEditorPluginMock } from '@kbn/data-view-editor-plugin/public/mocks';
-import type { ReactWrapper } from 'enzyme';
+import { ReactWrapper } from 'enzyme';
 
 jest.mock('@kbn/code-editor', () => {
   const original = jest.requireActual('@kbn/code-editor');

@@ -6,7 +6,6 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import type { Criteria } from '@elastic/eui';
 import {
   EuiInMemoryTable,
   EuiButton,
@@ -18,6 +17,7 @@ import {
   EuiToolTip,
   EuiButtonIcon,
   EuiEmptyPrompt,
+  Criteria,
   EuiButtonEmpty,
   EuiBadge,
   EuiPageTemplate,
@@ -37,8 +37,12 @@ import {
 } from '../../../lib/capabilities';
 import { DeleteModalConfirmation } from '../../../components/delete_modal_confirmation';
 
-import type { ActionConnector, ActionConnectorTableItem, ActionTypeIndex } from '../../../../types';
-import { EditConnectorTabs } from '../../../../types';
+import {
+  ActionConnector,
+  ActionConnectorTableItem,
+  ActionTypeIndex,
+  EditConnectorTabs,
+} from '../../../../types';
 import { EmptyConnectorsPrompt } from '../../../components/prompts/empty_connectors_prompt';
 import { useKibana } from '../../../../common/lib/kibana';
 import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';

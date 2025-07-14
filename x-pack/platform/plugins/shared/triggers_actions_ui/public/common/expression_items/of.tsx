@@ -19,8 +19,8 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { builtInAggregationTypes } from '../constants';
-import type { AggregationType, FieldOption, ValidNormalizedTypes } from '../types';
-import type { IErrorObject } from '../../types';
+import { AggregationType, FieldOption, ValidNormalizedTypes } from '../types';
+import { IErrorObject } from '../../types';
 import { ClosablePopoverTitle } from './components';
 
 interface OfFieldOption {

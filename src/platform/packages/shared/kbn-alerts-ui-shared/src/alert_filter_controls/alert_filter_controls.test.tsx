@@ -9,8 +9,7 @@
 
 import React from 'react';
 import { act, render, screen } from '@testing-library/react';
-import type { AlertFilterControlsProps } from './alert_filter_controls';
-import { AlertFilterControls } from './alert_filter_controls';
+import { AlertFilterControls, AlertFilterControlsProps } from './alert_filter_controls';
 import { DEFAULT_CONTROLS } from './constants';
 import { useAlertsDataView } from '../common/hooks/use_alerts_data_view';
 import { FilterGroup } from './filter_group';

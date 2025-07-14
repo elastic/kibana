@@ -6,11 +6,13 @@
  */
 
 import React from 'react';
-import type { RenderResult } from '@testing-library/react';
-import { act, render, screen } from '@testing-library/react';
+import { act, render, RenderResult, screen } from '@testing-library/react';
 import { FormTestProvider } from './test_utils';
-import type { ConfigFieldSchema, SecretsFieldSchema } from './simple_connector_form';
-import { SimpleConnectorForm } from './simple_connector_form';
+import {
+  ConfigFieldSchema,
+  SecretsFieldSchema,
+  SimpleConnectorForm,
+} from './simple_connector_form';
 import userEvent from '@testing-library/user-event';
 
 const fillForm = async ({ getByTestId }: RenderResult) => {

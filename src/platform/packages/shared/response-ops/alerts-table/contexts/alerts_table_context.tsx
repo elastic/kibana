@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PropsWithChildren } from 'react';
-import React, { createContext, useContext } from 'react';
+import React, { PropsWithChildren, createContext, useContext } from 'react';
 import { typedMemo } from '../utils/react';
-import type { AdditionalContext, RenderContext } from '../types';
+import { AdditionalContext, RenderContext } from '../types';
 
 const AlertsTableContext = createContext({});
 

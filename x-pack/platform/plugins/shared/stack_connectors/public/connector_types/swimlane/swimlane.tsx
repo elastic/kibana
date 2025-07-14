@@ -11,7 +11,7 @@ import type {
   ActionTypeModel as ConnectorTypeModel,
   GenericValidationResult,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import type { SwimlaneConfig, SwimlaneSecrets, SwimlaneActionParams } from './types';
+import { SwimlaneConfig, SwimlaneSecrets, SwimlaneActionParams } from './types';
 
 export const SW_SELECT_MESSAGE_TEXT = i18n.translate(
   'xpack.stackConnectors.components.swimlane.selectMessageText',

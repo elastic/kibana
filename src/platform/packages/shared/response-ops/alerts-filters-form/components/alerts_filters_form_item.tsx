@@ -12,7 +12,7 @@ import { EuiFormRow, EuiSuperSelect, EuiText } from '@elastic/eui';
 import type { EuiSuperSelectOption } from '@elastic/eui/src/components/form/super_select/super_select_item';
 import { FILTERS_FORM_ITEM_SUBJ } from '../constants';
 import { alertsFiltersMetadata } from '../filters_metadata';
-import type { AlertsFilterComponentType, AlertsFiltersType } from '../types';
+import { AlertsFilterComponentType, AlertsFiltersType } from '../types';
 import {
   FORM_ITEM_FILTER_BY_LABEL,
   FORM_ITEM_FILTER_BY_PLACEHOLDER,

@@ -12,8 +12,7 @@ import { render, screen } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { alertsFiltersMetadata } from '../filters_metadata';
-import type { AlertsFiltersFormItemProps } from './alerts_filters_form_item';
-import { AlertsFiltersFormItem } from './alerts_filters_form_item';
+import { AlertsFiltersFormItem, AlertsFiltersFormItemProps } from './alerts_filters_form_item';
 
 jest.mock('../filters_metadata', () => {
   const original: { alertsFiltersMetadata: typeof alertsFiltersMetadata } =

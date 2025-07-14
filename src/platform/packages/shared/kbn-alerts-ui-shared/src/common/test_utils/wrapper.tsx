@@ -8,8 +8,7 @@
  */
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import type { PropsWithChildren } from 'react';
-import React from 'react';
+import React, { PropsWithChildren } from 'react';
 import { AlertsQueryContext } from '../contexts/alerts_query_context';
 import { testQueryClientConfig } from './test_query_client_config';
 

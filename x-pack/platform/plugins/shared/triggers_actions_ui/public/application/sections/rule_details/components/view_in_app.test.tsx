@@ -7,11 +7,11 @@
 
 import * as React from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import type { ReactWrapper } from 'enzyme';
+import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
-import type { Rule } from '../../../../types';
+import { Rule } from '../../../../types';
 import { ViewInApp } from './view_in_app';
 import { useKibana } from '../../../../common/lib/kibana';
 jest.mock('../../../../common/lib/kibana');

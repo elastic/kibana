@@ -7,16 +7,16 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import { isEmpty } from 'lodash';
-import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import {
   Form,
+  FormHook,
   useForm,
   useFormIsModified,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { EuiSpacer } from '@elastic/eui';
-import type { ActionTypeModel, ConnectorValidationFunc } from '../../../types';
+import { ActionTypeModel, ConnectorValidationFunc } from '../../../types';
 import { ConnectorFormFields } from './connector_form_fields';
-import type { ConnectorFormSchema } from './types';
+import { ConnectorFormSchema } from './types';
 import { EncryptedFieldsCallout } from './encrypted_fields_callout';
 
 const MIN_ALLOCATIONS = 0;

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { Decorator } from '@storybook/react';
+import { Decorator } from '@storybook/react';
 import { Title, Subtitle, Description, Primary, Stories } from '@storybook/blocks';
 import { StorybookContextDecorator } from './decorator';
 

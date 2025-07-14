@@ -10,7 +10,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ConnectorProvider } from '../application/context/connector_context';
 import { RulesList } from '../application/sections';
 import type { RulesListProps } from '../application/sections/rules_list/components/rules_list';
-import type { ConnectorServices } from '../types';
+import { ConnectorServices } from '../types';
 
 const queryClient = new QueryClient();
 

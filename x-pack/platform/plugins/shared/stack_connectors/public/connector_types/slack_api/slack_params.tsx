@@ -11,17 +11,17 @@ import { JsonEditorWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { TextAreaWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/public';
-import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiSpacer,
   EuiFormRow,
   EuiComboBox,
+  EuiComboBoxOptionOption,
   EuiFieldText,
   EuiButtonGroup,
   EuiLink,
 } from '@elastic/eui';
 import { useSubAction, useKibana } from '@kbn/triggers-actions-ui-plugin/public';
-import type { UserConfiguredActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { UserConfiguredActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
 import type {
   PostBlockkitParams,
   PostMessageParams,

@@ -7,8 +7,10 @@
 
 import React, { useCallback, useEffect, useRef, useMemo } from 'react';
 import { EuiFormRow, EuiSpacer, EuiTitle, EuiText, EuiSelect, EuiIconTip } from '@elastic/eui';
-import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
-import { JsonEditorWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/public';
+import {
+  ActionParamsProps,
+  JsonEditorWithMessageVariables,
+} from '@kbn/triggers-actions-ui-plugin/public';
 import {
   TextAreaWithMessageVariables,
   TextFieldWithMessageVariables,
@@ -17,7 +19,7 @@ import {
 
 import * as i18n from '../lib/servicenow/translations';
 import { useChoices } from '../lib/servicenow/use_choices';
-import type { ServiceNowITOMActionParams } from './types';
+import { ServiceNowITOMActionParams } from './types';
 import { choicesToEuiOptions, isFieldInvalid } from '../lib/servicenow/helpers';
 
 const choicesFields = ['severity'];

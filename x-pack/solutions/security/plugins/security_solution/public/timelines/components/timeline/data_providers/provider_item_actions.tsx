@@ -41,7 +41,7 @@ interface OwnProps {
   closePopover: () => void;
   deleteProvider: () => void;
   field: string;
-  kqlQuery: string;
+  kqlQuery: string; // eslint-disable-line react/no-unused-prop-types
   isEnabled: boolean;
   isExcluded: boolean;
   isOpen: boolean;

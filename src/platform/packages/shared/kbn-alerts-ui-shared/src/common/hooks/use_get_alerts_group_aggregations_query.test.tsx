@@ -10,7 +10,7 @@
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { HttpStart } from '@kbn/core-http-browser';
-import type { ToastsStart } from '@kbn/core-notifications-browser';
+import { ToastsStart } from '@kbn/core-notifications-browser';
 
 import { useGetAlertsGroupAggregationsQuery } from './use_get_alerts_group_aggregations_query';
 import { waitFor, renderHook } from '@testing-library/react';

@@ -27,7 +27,7 @@ import {
   JsonEditorWithMessageVariables,
   useKibana,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import type { IndexActionParams } from '../types';
+import { IndexActionParams } from '../types';
 
 export const IndexParamsFields = ({
   actionParams,

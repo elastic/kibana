@@ -7,8 +7,8 @@
 
 import React, { lazy, Suspense } from 'react';
 import { AlertSummaryWidgetLoader } from '../application/sections/alert_summary_widget/components';
-import type { AlertSummaryWidgetProps } from '../application/sections/alert_summary_widget';
-import type { AlertSummaryWidgetDependencies } from '../application/sections/alert_summary_widget/types';
+import { AlertSummaryWidgetProps } from '../application/sections/alert_summary_widget';
+import { AlertSummaryWidgetDependencies } from '../application/sections/alert_summary_widget/types';
 
 const AlertSummaryWidgetLazy: React.FC<AlertSummaryWidgetProps & AlertSummaryWidgetDependencies> =
   lazy(() => import('../application/sections/alert_summary_widget/alert_summary_widget'));

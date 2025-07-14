@@ -6,10 +6,9 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import type { SnoozeSchedule } from '../../../../../../types';
+import { SnoozeSchedule } from '../../../../../../types';
 import { RuleSnoozeScheduler } from '../scheduler';
-import type { BaseSnoozePanelProps } from './base_snooze_panel';
-import { BaseSnoozePanel } from './base_snooze_panel';
+import { BaseSnoozePanel, BaseSnoozePanelProps } from './base_snooze_panel';
 
 export { futureTimeToInterval } from './helpers';
 

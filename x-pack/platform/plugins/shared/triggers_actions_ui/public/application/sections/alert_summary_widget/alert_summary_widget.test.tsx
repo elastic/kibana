@@ -10,7 +10,7 @@ import { render } from '@testing-library/react';
 import { uiSettingsServiceMock } from '@kbn/core/public/mocks';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { AlertSummaryWidget } from './alert_summary_widget';
-import type { AlertSummaryWidgetDependencies, AlertSummaryWidgetProps } from './types';
+import { AlertSummaryWidgetDependencies, AlertSummaryWidgetProps } from './types';
 import { mockedAlertSummaryTimeRange, mockedChartProps } from '../../mock/alert_summary_widget';
 import { useLoadAlertSummary } from '../../hooks/use_load_alert_summary';
 import {

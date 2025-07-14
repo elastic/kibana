@@ -39,15 +39,17 @@ import {
 } from '../../../lib/capabilities';
 import { getAlertingSectionBreadcrumb } from '../../../lib/breadcrumb';
 import { getCurrentDocTitle } from '../../../lib/doc_title';
-import type {
+import {
   Rule,
   RuleType,
   ActionType,
   ActionConnector,
   TriggersActionsUiConfig,
 } from '../../../../types';
-import type { ComponentOpts as BulkOperationsComponentOpts } from '../../common/components/with_bulk_rule_api_operations';
-import { withBulkRuleOperations } from '../../common/components/with_bulk_rule_api_operations';
+import {
+  ComponentOpts as BulkOperationsComponentOpts,
+  withBulkRuleOperations,
+} from '../../common/components/with_bulk_rule_api_operations';
 import { RuleRouteWithApi } from './rule_route';
 import { ViewInApp } from './view_in_app';
 import { routeToRules } from '../../../constants';
@@ -65,7 +67,7 @@ import {
   MULTIPLE_RULE_TITLE,
 } from '../../rules_list/translations';
 import { useBulkOperationToast } from '../../../hooks/use_bulk_operation_toast';
-import type { RefreshToken } from './types';
+import { RefreshToken } from './types';
 import { UntrackAlertsModal } from '../../common/components/untrack_alerts_modal';
 
 export type RuleDetailsProps = {

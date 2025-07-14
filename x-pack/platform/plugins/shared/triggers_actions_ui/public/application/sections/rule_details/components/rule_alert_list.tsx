@@ -6,23 +6,22 @@
  */
 
 import React, { useMemo, useCallback, useState } from 'react';
-import type { Duration } from 'moment';
-import moment from 'moment';
+import moment, { Duration } from 'moment';
 import { padStart, chunk } from 'lodash';
 import { EuiBasicTable, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { AlertStatus } from '@kbn/rule-data-utils';
 import {
+  AlertStatus,
   ALERT_STATUS_ACTIVE,
   ALERT_STATUS_RECOVERED,
   ALERT_STATUS_UNTRACKED,
 } from '@kbn/rule-data-utils';
-import type { AlertStatusValues, MaintenanceWindow } from '@kbn/alerting-plugin/common';
+import { AlertStatusValues, MaintenanceWindow } from '@kbn/alerting-plugin/common';
 import { useBulkGetMaintenanceWindowsQuery } from '@kbn/response-ops-alerts-table/hooks/use_bulk_get_maintenance_windows';
 import { MaintenanceWindowBaseCell } from '@kbn/response-ops-alerts-table/components/maintenance_windows_cell';
 import { DEFAULT_SEARCH_PAGE_SIZE } from '../../../constants';
-import type { Pagination } from '../../../../types';
-import type { AlertListItem } from './types';
+import { Pagination } from '../../../../types';
+import { AlertListItem } from './types';
 import { AlertMutedSwitch } from './alert_muted_switch';
 import { AlertLifecycleStatusBadge } from '../../../components/alert_lifecycle_status_badge';
 import { useKibana } from '../../../../common';

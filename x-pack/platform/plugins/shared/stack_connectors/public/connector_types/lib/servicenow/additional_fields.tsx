@@ -8,7 +8,7 @@
 import { EuiIconTip } from '@elastic/eui';
 import { JsonEditorWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/public';
 import React from 'react';
-import type { ActionVariable } from '@kbn/alerting-types';
+import { ActionVariable } from '@kbn/alerting-types';
 import { isEmpty } from 'lodash';
 import * as i18n from './translations';
 

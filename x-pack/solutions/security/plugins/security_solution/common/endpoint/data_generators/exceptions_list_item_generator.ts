@@ -10,6 +10,8 @@ import type {
   CreateExceptionListItemSchema,
   UpdateExceptionListItemSchema,
   EntriesArray,
+} from '@kbn/securitysolution-io-ts-list-types';
+import {
   ListOperatorTypeEnum,
   type ListOperatorType,
 } from '@kbn/securitysolution-io-ts-list-types';

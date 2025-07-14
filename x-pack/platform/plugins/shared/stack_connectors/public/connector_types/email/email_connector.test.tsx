@@ -11,8 +11,8 @@ import { act, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 import EmailActionConnectorFields from './email_connector';
-import type { AppMockRenderer } from '../lib/test_utils';
 import {
+  AppMockRenderer,
   ConnectorFormTestProvider,
   createAppMockRenderer,
   waitForComponentToUpdate,

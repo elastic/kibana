@@ -8,7 +8,7 @@
 import React from 'react';
 import { act, within, render, screen, waitFor } from '@testing-library/react';
 
-import type { ConnectorValidationFunc } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { ConnectorValidationFunc } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 import { updateActionConnector } from '@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api';
 import ServiceNowConnectorFields from './servicenow_connectors';

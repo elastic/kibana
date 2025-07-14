@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RuleType } from '../../types';
+import { RuleType } from '../../types';
 import { checkRuleTypeEnabled } from './check_rule_type_enabled';
 
 describe('checkRuleTypeEnabled', () => {

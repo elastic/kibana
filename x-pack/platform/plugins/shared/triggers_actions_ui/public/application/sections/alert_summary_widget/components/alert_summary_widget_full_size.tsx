@@ -21,7 +21,7 @@ import { EuiFlexItem, EuiPanel, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AlertCounts } from './alert_counts';
 import { TOOLTIP_DATE_FORMAT } from './constants';
-import type { Alert, ChartProps, DependencyProps } from '../types';
+import { Alert, ChartProps, DependencyProps } from '../types';
 
 export interface AlertSummaryWidgetFullSizeProps {
   activeAlertCount: number;

@@ -13,7 +13,7 @@ import userEvent from '@testing-library/user-event';
 import { RuleActionsConnectorsBody } from './rule_actions_connectors_body';
 import type { ActionConnector, ActionTypeModel } from '@kbn/alerts-ui-shared';
 import { TypeRegistry } from '@kbn/alerts-ui-shared/lib';
-import type { ActionType } from '@kbn/actions-types';
+import { ActionType } from '@kbn/actions-types';
 import {
   getActionType,
   getActionTypeModel,

@@ -9,7 +9,7 @@
 
 import { EuiSkeletonText } from '@elastic/eui';
 import React from 'react';
-import type { GetAlertsTableProp, SystemCellId } from '../types';
+import { GetAlertsTableProp, SystemCellId } from '../types';
 import { DefaultCellValue } from './default_cell_value';
 import { SystemCell, systemCells } from './system_cell';
 import { ErrorBoundary } from './error_boundary';

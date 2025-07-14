@@ -6,12 +6,12 @@
  */
 
 import React from 'react';
-import type { ConfigFieldSchema, SecretsFieldSchema } from '@kbn/triggers-actions-ui-plugin/public';
+import { ConfigFieldSchema, SecretsFieldSchema } from '@kbn/triggers-actions-ui-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink, EuiText } from '@elastic/eui';
 import { DEFAULT_OPENAI_MODEL, OpenAiProviderType } from '../../../common/openai/constants';
 import * as i18n from './translations';
-import type { Config } from './types';
+import { Config } from './types';
 
 export const DEFAULT_URL = 'https://api.openai.com/v1/chat/completions' as const;
 export const DEFAULT_URL_AZURE =

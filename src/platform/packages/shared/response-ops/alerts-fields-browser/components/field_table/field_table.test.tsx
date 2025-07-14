@@ -8,13 +8,11 @@
  */
 
 import React from 'react';
-import type { RenderResult } from '@testing-library/react';
-import { render } from '@testing-library/react';
+import { render, RenderResult } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { mockBrowserFields } from '../../mock';
 
-import type { FieldTableProps } from './field_table';
-import { FieldTable } from './field_table';
+import { FieldTable, FieldTableProps } from './field_table';
 
 const timestampFieldId = '@timestamp';
 

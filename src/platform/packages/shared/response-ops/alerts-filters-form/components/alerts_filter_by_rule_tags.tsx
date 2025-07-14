@@ -7,11 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiComboBox, EuiFormRow } from '@elastic/eui';
+import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
 import { useGetRuleTagsQuery } from '@kbn/response-ops-rules-apis/hooks/use_get_rule_tags_query';
 import React, { useCallback, useMemo } from 'react';
-import type { EuiComboBoxProps } from '@elastic/eui/src/components/combo_box/combo_box';
+import { EuiComboBoxProps } from '@elastic/eui/src/components/combo_box/combo_box';
 import { nodeBuilder, toKqlExpression } from '@kbn/es-query';
 import { ALERT_RULE_TAGS } from '@kbn/rule-data-utils';
 import { RULE_TAGS_FILTER_SUBJ } from '../constants';
@@ -22,7 +21,7 @@ import {
   RULE_TAGS_LOAD_ERROR_MESSAGE,
 } from '../translations';
 import { useAlertsFiltersFormContext } from '../contexts/alerts_filters_form_context';
-import type { AlertsFilterComponentType, AlertsFilterMetadata } from '../types';
+import { AlertsFilterComponentType, AlertsFilterMetadata } from '../types';
 
 export const AlertsFilterByRuleTags: AlertsFilterComponentType<string[]> = ({
   value,

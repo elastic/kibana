@@ -7,10 +7,15 @@
 
 import _ from 'lodash';
 import React from 'react';
-import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiComboBox, EuiHighlight, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiComboBox,
+  EuiComboBoxOptionOption,
+  EuiHighlight,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 import { FieldIcon } from '@kbn/react-field';
-import type { DataViewField } from '@kbn/data-views-plugin/public';
+import { DataViewField } from '@kbn/data-views-plugin/public';
 
 function fieldsToOptions(fields?: DataViewField[]): Array<EuiComboBoxOptionOption<DataViewField>> {
   if (!fields) {

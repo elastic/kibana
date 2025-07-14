@@ -7,8 +7,7 @@
 
 import * as React from 'react';
 import { shallow, mount } from 'enzyme';
-import type { ComponentOpts } from './with_actions_api_operations';
-import { withActionOperations } from './with_actions_api_operations';
+import { withActionOperations, ComponentOpts } from './with_actions_api_operations';
 import * as actionApis from '../../../lib/action_connector_api';
 import { useKibana } from '../../../../common/lib/kibana';
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;

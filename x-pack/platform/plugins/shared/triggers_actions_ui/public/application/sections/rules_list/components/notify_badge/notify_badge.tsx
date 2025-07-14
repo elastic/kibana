@@ -19,11 +19,11 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { RRuleParams } from '@kbn/alerting-types';
+import { RRuleParams } from '@kbn/alerting-types';
 import { Weekday } from '@kbn/rrule/types';
 import { RRule } from '@kbn/rrule';
 import { useKibana } from '../../../../../common/lib/kibana';
-import type { RuleSnoozeSettings, SnoozeSchedule } from '../../../../../types';
+import { RuleSnoozeSettings, SnoozeSchedule } from '../../../../../types';
 import { i18nAbbrMonthDayDate, i18nMonthDayDate } from '../../../../lib/i18n_month_day_date';
 import { SnoozePanel, futureTimeToInterval } from '../rule_snooze';
 import { getNextRuleSnoozeSchedule, isRuleSnoozed } from './helpers';
@@ -37,7 +37,7 @@ import {
   INVALID_SNOOZE_TOOLTIP_TITLE,
   INVALID_SNOOZE_TOOLTIP_CONTENT,
 } from './translations';
-import type { RulesListNotifyBadgeProps } from './types';
+import { RulesListNotifyBadgeProps } from './types';
 
 function getTimeRemaining(endtime: Date): string {
   const duration = moment.duration(moment(endtime).diff(moment()));

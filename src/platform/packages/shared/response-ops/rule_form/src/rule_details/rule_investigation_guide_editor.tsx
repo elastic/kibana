@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EuiMarkdownAstNode, EuiMarkdownParseError } from '@elastic/eui';
-import { EuiMarkdownEditor } from '@elastic/eui';
+import { EuiMarkdownAstNode, EuiMarkdownEditor, EuiMarkdownParseError } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback } from 'react';

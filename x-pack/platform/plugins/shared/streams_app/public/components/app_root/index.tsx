@@ -46,7 +46,7 @@ export function AppRoot({
   return (
     <StreamsAppContextProvider context={context}>
       <RedirectAppLinks coreStart={coreStart}>
-        {/* @ts-expect-error upgrade typescript v5.4.5 */}
+        { /* @ts-expect-error upgrade typescript v5.4.5 */}
         <RouterProvider history={history} router={streamsAppRouter}>
           <KbnUrlStateStorageFromRouterProvider>
             <BreadcrumbsContextProvider>

@@ -21,18 +21,18 @@ import {
   EuiEmptyPrompt,
   EuiText,
 } from '@elastic/eui';
-import type {
+import {
   RuleActionAlertsFilterProperty,
   RuleActionFrequency,
   RuleActionParam,
   RuleSystemAction,
 } from '@kbn/alerting-plugin/common';
 import { v4 as uuidv4 } from 'uuid';
-import type { ActionGroupWithMessageVariables } from '@kbn/triggers-actions-ui-types';
+import { ActionGroupWithMessageVariables } from '@kbn/triggers-actions-ui-types';
 import { checkActionFormActionTypeEnabled } from '@kbn/alerts-ui-shared/src/check_action_type_enabled';
 import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../translations';
 import { loadActionTypes, loadAllActions as loadConnectors } from '../../lib/action_connector_api';
-import type {
+import {
   ActionTypeModel,
   ActionTypeIndex,
   ActionConnector,

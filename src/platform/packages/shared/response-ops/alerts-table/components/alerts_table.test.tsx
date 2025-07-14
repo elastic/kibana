@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FunctionComponent } from 'react';
-import React from 'react';
+import React, { FunctionComponent } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import userEvent from '@testing-library/user-event';
 import { get } from 'lodash';
@@ -26,13 +25,13 @@ import { applicationServiceMock, notificationServiceMock } from '@kbn/core/publi
 import { afterAll } from '@elastic/synthetics';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
-import type {
+import {
   AlertsDataGridProps,
   AlertsTableProps,
   AdditionalContext,
   RenderContext,
+  AlertsField,
 } from '../types';
-import { AlertsField } from '../types';
 import { AlertsTable } from './alerts_table';
 import { AlertsDataGrid } from './alerts_data_grid';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';

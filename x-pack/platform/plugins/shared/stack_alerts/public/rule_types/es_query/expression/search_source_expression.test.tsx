@@ -5,24 +5,22 @@
  * 2.0.
  */
 
-import type { PropsWithChildren } from 'react';
-import React from 'react';
+import React, { PropsWithChildren } from 'react';
 import { fireEvent, render, waitFor, screen, act } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
-import type { EsQueryRuleParams } from '../types';
-import { SearchType } from '../types';
+import { EsQueryRuleParams, SearchType } from '../types';
 import { SearchSourceExpression } from './search_source_expression';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { Subject } from 'rxjs';
-import type { ISearchSource } from '@kbn/data-plugin/common';
-import type { IUiSettingsClient } from '@kbn/core/public';
+import { ISearchSource } from '@kbn/data-plugin/common';
+import { IUiSettingsClient } from '@kbn/core/public';
 import { copyToClipboard } from '@elastic/eui';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { indexPatternEditorPluginMock as dataViewEditorPluginMock } from '@kbn/data-view-editor-plugin/public/mocks';
-import type { DataPlugin } from '@kbn/data-plugin/public';
+import { DataPlugin } from '@kbn/data-plugin/public';
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');

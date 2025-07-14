@@ -7,11 +7,11 @@
 
 import React, { useCallback } from 'react';
 import { useKibana } from '../../../../../common/lib/kibana';
-import type { SnoozeSchedule } from '../../../../../types';
+import { SnoozeSchedule } from '../../../../../types';
 import { unsnoozeRule as unsnoozeRuleApi } from '../../../../lib/rule_api/unsnooze';
 import { snoozeRule as snoozeRuleApi } from '../../../../lib/rule_api/snooze';
 import { RulesListNotifyBadge } from './notify_badge';
-import type { RulesListNotifyBadgePropsWithApi } from './types';
+import { RulesListNotifyBadgePropsWithApi } from './types';
 
 export const RulesListNotifyBadgeWithApi: React.FunctionComponent<
   RulesListNotifyBadgePropsWithApi

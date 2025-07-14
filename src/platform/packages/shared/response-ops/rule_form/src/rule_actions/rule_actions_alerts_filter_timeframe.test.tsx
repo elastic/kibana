@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Moment } from 'moment';
+import { Moment } from 'moment';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import { RuleActionsAlertsFilterTimeframe } from './rule_actions_alerts_filter_timeframe';
-import type { AlertsFilterTimeframe } from '@kbn/alerting-types';
+import { AlertsFilterTimeframe } from '@kbn/alerting-types';
 import { getAction } from '../common/test_utils/actions_test_utils';
 
 describe('ruleActionsAlertsFilterTimeframe', () => {

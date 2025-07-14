@@ -6,8 +6,10 @@
  */
 
 import React, { useMemo } from 'react';
-import type { ActionConnectorFieldsProps } from '@kbn/triggers-actions-ui-plugin/public';
-import { SimpleConnectorForm } from '@kbn/triggers-actions-ui-plugin/public';
+import {
+  ActionConnectorFieldsProps,
+  SimpleConnectorForm,
+} from '@kbn/triggers-actions-ui-plugin/public';
 import {
   FilePickerField,
   SelectField,
