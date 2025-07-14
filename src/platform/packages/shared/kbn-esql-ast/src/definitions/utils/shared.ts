@@ -12,7 +12,7 @@ import type {
   ESQLUserDefinedColumn,
   ICommandContext,
 } from '../../commands_registry/types';
-import { getLastNonWhitespaceChar } from './autocomplete';
+import { getLastNonWhitespaceChar } from './autocomplete/helpers';
 import type { ESQLAstItem } from '../../types';
 import type { SupportedDataType } from '../types';
 /**
