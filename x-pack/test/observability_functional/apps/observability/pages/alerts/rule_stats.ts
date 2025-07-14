@@ -46,35 +46,33 @@ export default ({ getService }: FtrProviderContext) => {
         const names = ['a', 'b', 'c', 'd', 'e', 'f'];
         const ids: string[] = [];
 
-        await Promise.all(
-          names.map(async (name) => {
-            const rule = await createRule({
-              supertest,
-              objectRemover,
-              overwrites: {
-                rule_type_id: 'apm.anomaly',
-                name,
-                consumer: 'alerts',
-                tags: [uniqueKey],
-                params: {
-                  windowSize: 30,
-                  windowUnit: 'm',
-                  anomalySeverityType: 'critical',
-                  anomalyDetectorTypes: ['txLatency', 'txThroughput', 'txFailureRate'],
-                  environment: 'ENVIRONMENT_ALL',
-                },
-                schedule: {
-                  interval: '1m',
-                },
-                actions: [],
-                alert_delay: {
-                  active: 1,
-                },
+        for await (const name of names) {
+          const rule = await createRule({
+            supertest,
+            objectRemover,
+            overwrites: {
+              rule_type_id: 'apm.anomaly',
+              name,
+              consumer: 'alerts',
+              tags: [uniqueKey],
+              params: {
+                windowSize: 30,
+                windowUnit: 'm',
+                anomalySeverityType: 'critical',
+                anomalyDetectorTypes: ['txLatency', 'txThroughput', 'txFailureRate'],
+                environment: 'ENVIRONMENT_ALL',
               },
-            });
-            ids.push(rule.id);
-          })
-        );
+              schedule: {
+                interval: '1m',
+              },
+              actions: [],
+              alert_delay: {
+                active: 1,
+              },
+            },
+          });
+          ids.push(rule.id);
+        }
 
         await disableRule({ supertest, alertId: ids[1] });
         await muteRule({ supertest, alertId: ids[5] });
