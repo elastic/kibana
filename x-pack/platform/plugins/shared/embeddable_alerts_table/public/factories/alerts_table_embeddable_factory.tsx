@@ -48,8 +48,8 @@ export const getAlertsTableEmbeddableFactory = (
       ...deps,
     };
 
-    const currentTableConfig = initialState.rawState.tableConfig;
-    const tableConfig$ = new BehaviorSubject<EmbeddableAlertsTableConfig>(currentTableConfig);
+    const initialTableConfig = initialState.rawState.tableConfig;
+    const tableConfig$ = new BehaviorSubject<EmbeddableAlertsTableConfig>(initialTableConfig);
 
     const serializeState = () => ({
       rawState: {
@@ -81,9 +81,9 @@ export const getAlertsTableEmbeddableFactory = (
 
     const ruleTypes = await getInternalRuleTypesWithCache(coreServices.http);
     const ruleTypeIdsForSolution =
-      !ruleTypes || !currentTableConfig?.solution
+      !ruleTypes || !initialTableConfig?.solution
         ? []
-        : getRuleTypeIdsForSolution(ruleTypes, currentTableConfig.solution);
+        : getRuleTypeIdsForSolution(ruleTypes, initialTableConfig.solution);
 
     const api = finalizeApi({
       ...timeRangeManager.api,
@@ -95,7 +95,7 @@ export const getAlertsTableEmbeddableFactory = (
         // Users cannot edit panels based on a solution they cannot access.
         // The first condition ensures panels are editable even if the table configuration is
         // unexpectedly undefined or incomplete
-        return !currentTableConfig?.solution || ruleTypeIdsForSolution.length > 0;
+        return !initialTableConfig?.solution || ruleTypeIdsForSolution.length > 0;
       },
       getTypeDisplayName: () => ALERTS_PANEL_LABEL,
       onEdit: async () => {
