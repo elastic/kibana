@@ -121,14 +121,13 @@ describe('ChangeKbModel', () => {
   it('disables the `Update` button when selected model is the same as current and no redeployment needed', () => {
     const mockKb = createMockKnowledgeBase();
     renderComponent(mockKb);
+
     const button = screen.getByTestId('observabilityAiAssistantKnowledgeBaseUpdateModelButton');
     expect(button).toBeDisabled();
   });
 
   it('enables the `Update` button when a different model is selected', async () => {
-    const mockKb = createMockKnowledgeBase({
-      status: createMockStatus({ currentInferenceId: ELSER_IN_EIS_INFERENCE_ID }),
-    });
+    const mockKb = createMockKnowledgeBase();
     renderComponent(mockKb);
 
     const button = screen.getByTestId('observabilityAiAssistantKnowledgeBaseUpdateModelButton');
@@ -148,6 +147,7 @@ describe('ChangeKbModel', () => {
   it('disables the `Update` button when knowledge base is installing', () => {
     const mockKb = createMockKnowledgeBase({ isInstalling: true });
     renderComponent(mockKb);
+
     const button = screen.getByTestId('observabilityAiAssistantKnowledgeBaseUpdateModelButton');
     expect(button).toBeDisabled();
   });
