@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { ReactElement, ReactNode } from 'react';
-import React, { type FC, useMemo, useCallback } from 'react';
+import React, type { ReactElement, ReactNode , type FC, useMemo, useCallback } from 'react';
 import { type Criteria, EuiBasicTable, formatDate } from '@elastic/eui';
 import { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { Filter } from '@kbn/es-query';

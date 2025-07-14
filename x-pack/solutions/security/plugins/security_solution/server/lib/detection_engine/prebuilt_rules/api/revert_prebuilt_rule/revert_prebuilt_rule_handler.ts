@@ -9,8 +9,8 @@ import type { IKibanaResponse, KibanaRequest, KibanaResponseFactory } from '@kbn
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { getErrorMessage, getErrorStatusCode } from '../../../../../utils/error_helpers';
 import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema';
-import type { BulkActionReversionSkipResult } from '../../../../../../common/api/detection_engine/prebuilt_rules';
-import {
+import type {
+  BulkActionReversionSkipResult,
   type RevertPrebuiltRulesRequest,
   type RevertPrebuiltRulesResponseBody,
 } from '../../../../../../common/api/detection_engine/prebuilt_rules';

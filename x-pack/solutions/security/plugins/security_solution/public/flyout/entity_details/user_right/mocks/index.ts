@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { ManagedUserFields } from '../../../../../common/search_strategy/security_solution/users/managed_details';
-import {
+import type {
+  ManagedUserFields,
   ManagedUserDatasetKey,
   type ManagedUserHits,
 } from '../../../../../common/search_strategy/security_solution/users/managed_details';

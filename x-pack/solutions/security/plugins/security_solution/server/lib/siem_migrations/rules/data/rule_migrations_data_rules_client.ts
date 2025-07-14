@@ -25,8 +25,6 @@ import {
 import type {
   RuleMigrationAllIntegrationsStats,
   RuleMigrationRule,
-} from '../../../../../common/siem_migrations/model/rule_migration.gen';
-import {
   type RuleMigrationTaskStats,
   type RuleMigrationTranslationStats,
 } from '../../../../../common/siem_migrations/model/rule_migration.gen';

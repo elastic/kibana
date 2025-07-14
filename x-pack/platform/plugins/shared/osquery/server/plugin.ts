@@ -119,7 +119,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
       ...plugins.fleet,
       ruleRegistryService: plugins.ruleRegistry,
       // @ts-expect-error update types
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
       config: this.config!,
       logger: this.logger,
       registerIngestCallback,
