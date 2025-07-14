@@ -73476,6 +73476,8 @@ components:
               properties:
                 field:
                   $ref: '#/components/schemas/Security_Detections_API_NonEmptyString'
+                negate:
+                  type: boolean
                 type:
                   enum:
                     - mapping
