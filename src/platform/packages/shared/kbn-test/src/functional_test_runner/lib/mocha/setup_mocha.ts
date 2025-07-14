@@ -48,9 +48,14 @@ export async function setupMocha({
   reporter,
   reporterOptions,
 }: Options) {
+  const rootHooks = config.get('mochaOpts.rootHooks');
+
   // configure mocha
   const mocha = new Mocha({
     ...config.get('mochaOpts'),
+    rootHooks: {
+      beforeAll: rootHooks?.beforeAll ? () => rootHooks.beforeAll(providers) : undefined,
+    },
     reporter:
       reporter || (await providers.loadExternalService('mocha reporter', MochaReporterProvider)),
     reporterOptions,
@@ -72,7 +77,7 @@ export async function setupMocha({
     paths: config.get('testFiles'),
   });
 
-  // valiate that there aren't any tests in multiple ciGroups
+  // validate that there aren't any tests in multiple ciGroups
   validateCiGroupTags(log, mocha);
 
   filterSuites({

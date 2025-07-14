@@ -151,6 +151,13 @@ export const schema = Joi.object()
         slow: Joi.number().default(30000),
         timeout: Joi.number().default(INSPECTING ? 360000 * 100 : 360000),
         ui: Joi.string().default('bdd'),
+        // Mocha's rootHooks support beforeAll, afterAll, beforeEach and afterEach.
+        // Use only beforeAll for now.
+        rootHooks: Joi.object()
+          .keys({
+            beforeAll: Joi.function().optional(),
+          })
+          .optional(),
       })
       .default(),
 
