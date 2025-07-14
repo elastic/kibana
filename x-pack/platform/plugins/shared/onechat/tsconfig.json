@@ -47,5 +47,6 @@
     "@kbn/core-application-browser",
     "@kbn/core-ui-settings-server",
     "@kbn/utility-types",
+    "@kbn/esql-validation-autocomplete",
   ]
 }
