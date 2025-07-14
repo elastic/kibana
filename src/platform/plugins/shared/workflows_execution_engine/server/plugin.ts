@@ -6,10 +6,6 @@ import type {
   Logger,
 } from '@kbn/core/server';
 import {
-  IUnsecuredActionsClient,
-  PluginStartContract as ActionsPluginStartContract,
-} from '@kbn/actions-plugin/server';
-import {
   ExecutionStatus,
   WorkflowExecutionEngineModel,
   WorkflowStepExecution,
@@ -47,24 +43,22 @@ export class WorkflowsExecutionEnginePlugin
   public setup(core: CoreSetup, plugins: WorkflowsExecutionEnginePluginSetupDeps) {
     this.logger.debug('workflows-execution-engine: Setup');
 
-    async function getActionsClient(): Promise<IUnsecuredActionsClient> {
-      const { actions } = await core.plugins.onStart<{ actions: ActionsPluginStartContract }>(
-        'actions'
-      );
-      if (!actions.found) {
-        throw new Error('Task Manager plugin is not available');
-      }
+    return {};
+  }
 
-      return await actions.contract.getUnsecuredActionsClient();
-    }
+  public start(core: CoreStart, plugins: WorkflowsExecutionEnginePluginStartDeps) {
+    this.logger.debug('workflows-execution-engine: Start');
 
-    const runStep = async (
+    const executeWorkflow = async (
       workflow: WorkflowExecutionEngineModel,
       context: Record<string, any>
     ) => {
       const workflowRunId = context['workflowRunId'];
       const stepRunner = new StepRunner(
-        new ConnectorExecutor(context.connectorCredentials, await getActionsClient()),
+        new ConnectorExecutor(
+          context.connectorCredentials,
+          await plugins.actions.getUnsecuredActionsClient()
+        ),
         new TemplatingEngine()
       );
 
@@ -121,35 +115,9 @@ export class WorkflowsExecutionEnginePlugin
       }
     };
 
-    plugins.taskManager.registerTaskDefinitions({
-      ['workflow-event']: {
-        title: 'Receive workflow events',
-        timeout: '2m',
-        stateSchemaByVersion: {},
-        createTaskRunner: ({ taskInstance }) => ({
-          run: async () => {
-            const { eventType, workflow, context } = taskInstance.params;
-            this.logger.debug(`Starting workflow ${workflow.name} for event type: ${eventType}`);
-
-            await runStep(workflow, context);
-
-            this.logger.debug(`Workflow ${workflow.name} is finished for event type: ${eventType}`);
-
-            return {
-              state: {},
-            };
-          },
-          cancel: async () => {},
-        }),
-      },
-    });
-
-    return {};
-  }
-
-  public start(core: CoreStart, plugins: WorkflowsExecutionEnginePluginStartDeps) {
-    this.logger.debug('workflows-execution-engine: Start');
-    return {};
+    return {
+      executeWorkflow,
+    };
   }
 
   public stop() {}

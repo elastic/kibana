@@ -105,7 +105,7 @@ export interface WorkflowExecutionModel {
 }
 
 // TODO: convert to actual elastic document spec
-export interface WorkflowModel {
+export interface EsWorkflowSchema {
   id: string;
   name: string;
   description: string;
@@ -122,6 +122,8 @@ export interface WorkflowModel {
   steps: WorkflowStep[];
   nodes: WorkflowNode[];
 }
+
+export type WorkflowModel = EsWorkflowSchema;
 
 export type WorkflowListItemModel = Pick<
   WorkflowModel,

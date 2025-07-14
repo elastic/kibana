@@ -15,20 +15,20 @@ import type {
   Logger,
 } from '@kbn/core/server';
 import { Client } from '@elastic/elasticsearch';
-
-import { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server/plugin';
-import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import { WorkflowExecutionEngineModel } from '@kbn/workflows';
-
-import { v4 as generateUuid } from 'uuid';
+import { IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
 import type { WorkflowsPluginSetup, WorkflowsPluginStart } from './types';
-import { defineRoutes } from './routes';
-import { WorkflowsManagementApi, WorkflowsManagementApiClass } from './api';
-import { workflowsGrouppedByTriggerType } from './mock';
+import { defineRoutes } from './workflows_management/workflows_management_routes';
+import { WorkflowsManagementApi } from './workflows_management/workflows_management_api';
+import { WorkflowsService } from './workflows_management/workflows_management_service';
+import type { WorkflowsExecutionEnginePluginStartDeps } from './types';
+import { SchedulerService } from './scheduler/scheduler_service';
 
 export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPluginStart> {
   private readonly logger: Logger;
-
+  private workflowsService: WorkflowsService | null = null;
+  private schedulerService: SchedulerService | null = null;
+  private unsecureActionsClient: IUnsecuredActionsClient | null = null;
+  // TODO: replace with esClient promise from core
   private esClient: Client = new Client({
     node: 'http://localhost:9200', // or your ES URL
     auth: {
@@ -36,9 +36,6 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
       password: 'changeme',
     },
   });
-  private workflowsApi: WorkflowsManagementApiClass = new WorkflowsManagementApiClass(
-    this.esClient
-  );
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
@@ -46,101 +43,63 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
 
   public setup(core: CoreSetup) {
     this.logger.debug('Workflows Management: Setup');
+
+    this.logger.debug('Workflows Management: Creating router');
     const router = core.http.createRouter();
 
+    this.logger.debug('Workflows Management: Creating workflows service');
+    this.workflowsService = new WorkflowsService(
+      Promise.resolve(this.esClient),
+      this.logger,
+      '.workflows'
+    );
+    const api = new WorkflowsManagementApi(this.workflowsService);
+
     // Register server side APIs
-    defineRoutes(router, this.workflowsApi);
+    defineRoutes(router, api);
 
     return {
-      management: WorkflowsManagementApi,
+      management: api,
     };
   }
 
-  public start(
-    core: CoreStart,
-    plugins: { taskManager: TaskManagerStartContract; actions: ActionsPluginStartContract }
-  ) {
-    this.logger.debug('workflows: Start');
+  public start(core: CoreStart, plugins: WorkflowsExecutionEnginePluginStartDeps) {
+    this.logger.debug('Workflows Management: Start');
 
-    this.logger.debug('workflows: Started');
+    this.unsecureActionsClient = plugins.actions.getUnsecuredActionsClient();
 
-    const findWorkflowsByTrigger = (triggerType: string): WorkflowExecutionEngineModel[] => {
-      return workflowsGrouppedByTriggerType[triggerType] || [];
-    };
+    this.logger.debug('Workflows Management: Creating scheduler service');
+    this.schedulerService = new SchedulerService(
+      this.logger,
+      this.workflowsService!,
+      this.unsecureActionsClient!,
+      plugins.workflowsExecutionEngine
+    );
 
-    const extractConnectorIds = async (
-      workflow: WorkflowExecutionEngineModel
-    ): Promise<Record<string, Record<string, any>>> => {
-      const connectorNames = workflow.steps
-        .filter((step) => step.connectorType.endsWith('-connector'))
-        .map((step) => step.connectorName);
-      const distinctConnectorNames = Array.from(new Set(connectorNames));
-      const allConnectors = await plugins.actions.getUnsecuredActionsClient().getAll('default');
-      const connectorNameIdMap = new Map<string, string>(
-        allConnectors.map((connector) => [connector.name, connector.id])
-      );
-
-      return distinctConnectorNames.reduce((acc, name) => {
-        const connectorId = connectorNameIdMap.get(name);
-        if (connectorId) {
-          acc['connector.' + name] = {
-            id: connectorId,
-          };
-        }
-        return acc;
-      }, {} as Record<string, Record<string, any>>);
-    };
-
-    const pushEvent = async (eventType: string, eventData: Record<string, any>) => {
-      try {
-        const worklfowsToRun = findWorkflowsByTrigger(eventType);
-
-        for (const workflow of worklfowsToRun) {
-          const connectorCredentials = await extractConnectorIds(workflow);
-
-          const workflowRunId = generateUuid();
-
-          plugins.taskManager.schedule({
-            taskType: 'workflow-event',
-            params: {
-              workflowRunId,
-              workflow,
-              eventType,
-              context: {
-                workflowRunId,
-                connectorCredentials,
-                event: eventData,
-              },
-            },
-            state: {},
-          });
-        }
-      } catch (error) {
-        this.logger.error(`Failed to push event: ${error.message}`);
-      }
-    };
+    this.logger.debug('Workflows Management: Started');
 
     // TODO: REMOVE THIS AFTER TESTING
     // Simulate pushing events every 10 seconds for testing purposes
-    setInterval(() => {
-      pushEvent('detection-rule', {
-        ruleId: '123',
-        ruleName: 'Example Detection Rule',
-        timestamp: new Date().toISOString(),
-        severity: 'high',
-        description: 'This is an example detection rule that was triggered.',
-        additionalData: {
-          user: 'jdoe',
-          ip: '109.87.123.433',
-          action: 'login',
-          location: 'New York, USA',
-        },
-      });
-    }, 10000);
+    // setInterval(() => {
+    //   pushEvent('detection-rule', {
+    //     ruleId: '123',
+    //     ruleName: 'Example Detection Rule',
+    //     timestamp: new Date().toISOString(),
+    //     severity: 'high',
+    //     description: 'This is an example detection rule that was triggered.',
+    //     additionalData: {
+    //       user: 'jdoe',
+    //       ip: '109.87.123.433',
+    //       action: 'login',
+    //       location: 'New York, USA',
+    //     },
+    //   });
+    // }, 10000);
 
     return {
-      // async execute workflow
-      pushEvent,
+      // TODO: use api abstraction instead of schedulerService methods directly
+      pushEvent: this.schedulerService!.pushEvent.bind(this.schedulerService),
+      runWorkflow: this.schedulerService!.runWorkflow.bind(this.schedulerService),
     };
   }
 

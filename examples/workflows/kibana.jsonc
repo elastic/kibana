@@ -1,0 +1,12 @@
+{
+  "type": "plugin",
+  "id": "@kbn/workflows-plugin-example",
+  "owner": "@elastic/kibana-core",
+  "description": "a plugin for One Workflow",
+  "plugin": {
+    "id": "workflowsExample",
+    "server": true,
+    "browser": true,
+    "requiredPlugins": ["developerExamples", "navigation", "workflowsManagement"]
+  }
+}
