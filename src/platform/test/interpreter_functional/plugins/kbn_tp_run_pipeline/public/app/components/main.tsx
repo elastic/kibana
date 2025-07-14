@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import './main.scss';
-
 import React from 'react';
 import { EuiPage, EuiPageBody, EuiPageSection, EuiPageHeader } from '@elastic/eui';
 import { first, pluck } from 'rxjs';

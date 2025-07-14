@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import type { AIMessageChunk } from '@langchain/core/messages';
 import { StreamEvent as LangchainStreamEvent } from '@langchain/core/tracers/log_stream';
 import {
-  ChatAgentEventType,
+  ChatEventType,
   MessageChunkEvent,
-  ReasoningEvent,
   MessageCompleteEvent,
-} from '@kbn/onechat-common/agents';
-import { extractTextContent } from './messages';
+  ReasoningEvent,
+  ToolCallEvent,
+  ToolResultEvent,
+} from '@kbn/onechat-common';
 
 export const isStreamEvent = (input: any): input is LangchainStreamEvent => {
   return 'event' in input && 'name' in input;
@@ -39,15 +39,49 @@ export const hasTag = (event: LangchainStreamEvent, tag: string): boolean => {
   return (event.tags ?? []).includes(tag);
 };
 
+export const createToolCallEvent = (data: {
+  toolCallId: string;
+  toolId: string;
+  toolType: string;
+  params: Record<string, unknown>;
+}): ToolCallEvent => {
+  return {
+    type: ChatEventType.toolCall,
+    data: {
+      tool_call_id: data.toolCallId,
+      tool_id: data.toolId,
+      tool_type: data.toolType,
+      params: data.params,
+    },
+  };
+};
+
+export const createToolResultEvent = (data: {
+  toolCallId: string;
+  toolId: string;
+  toolType: string;
+  result: string;
+}): ToolResultEvent => {
+  return {
+    type: ChatEventType.toolResult,
+    data: {
+      tool_call_id: data.toolCallId,
+      tool_id: data.toolId,
+      tool_type: data.toolType,
+      result: data.result,
+    },
+  };
+};
+
 export const createTextChunkEvent = (
-  chunk: AIMessageChunk,
-  { defaultMessageId = 'unknown' }: { defaultMessageId?: string } = {}
+  chunk: string,
+  { messageId = 'unknown' }: { messageId?: string } = {}
 ): MessageChunkEvent => {
   return {
-    type: ChatAgentEventType.messageChunk,
+    type: ChatEventType.messageChunk,
     data: {
-      messageId: chunk.id ?? defaultMessageId,
-      textChunk: extractTextContent(chunk),
+      message_id: messageId,
+      text_chunk: chunk,
     },
   };
 };
@@ -57,17 +91,17 @@ export const createMessageEvent = (
   { messageId = 'unknown' }: { messageId?: string } = {}
 ): MessageCompleteEvent => {
   return {
-    type: ChatAgentEventType.messageComplete,
+    type: ChatEventType.messageComplete,
     data: {
-      messageId,
-      messageContent: content,
+      message_id: messageId,
+      message_content: content,
     },
   };
 };
 
 export const createReasoningEvent = (reasoning: string): ReasoningEvent => {
   return {
-    type: ChatAgentEventType.reasoning,
+    type: ChatEventType.reasoning,
     data: {
       reasoning,
     },

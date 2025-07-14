@@ -36,6 +36,7 @@
         "^\\.github/CODEOWNERS$",
         "/plugins/[^/]+/readme\\.(md|asciidoc)$"
       ],
+      "enable_trigger_checkbox": true,
       "kibana_versions_check": true,
       "kibana_build_reuse": true,
       "kibana_build_reuse_pipeline_slugs": ["kibana-pull-request", "kibana-on-merge"],
@@ -64,6 +65,7 @@
       "build_on_comment": true,
       "build_drafts": false,
       "trigger_comment_regex": "^(?:(?:buildkite\\W+)?(?:deploy)\\W+(?:project))$",
+      "enable_trigger_checkbox": true,
       "kibana_versions_check": true,
       "kibana_build_reuse": true,
       "kibana_build_reuse_pipeline_slugs": ["kibana-pull-request", "kibana-on-merge", "kibana-deploy-project-from-pr"],
@@ -92,6 +94,7 @@
       "build_on_comment": true,
       "build_drafts": false,
       "trigger_comment_regex": "^(?:(?:buildkite\\W+)?(?:deploy)\\W+(?:cloud))$",
+      "enable_trigger_checkbox": true,
       "kibana_versions_check": true,
       "kibana_build_reuse": true,
       "kibana_build_reuse_pipeline_slugs": ["kibana-pull-request", "kibana-on-merge", "kibana-deploy-cloud-from-pr"],
