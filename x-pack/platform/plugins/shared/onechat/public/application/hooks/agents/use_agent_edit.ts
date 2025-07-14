@@ -8,7 +8,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
-  builtinToolProviderId,
+  ToolType,
   type AgentDefinition,
   type ToolSelection,
   allToolsSelectionWildcard,
@@ -22,7 +22,7 @@ export type AgentEditState = Omit<AgentDefinition, 'type'>;
 
 const defaultToolSelection: ToolSelection[] = [
   {
-    type: builtinToolProviderId,
+    type: ToolType.builtin,
     tool_ids: [allToolsSelectionWildcard],
   },
 ];
