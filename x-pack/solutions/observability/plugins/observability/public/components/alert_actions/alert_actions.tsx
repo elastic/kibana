@@ -20,7 +20,6 @@ import { useRouteMatch } from 'react-router-dom';
 import { SLO_ALERTS_TABLE_ID } from '@kbn/observability-shared-plugin/common';
 import { DefaultAlertActions } from '@kbn/response-ops-alerts-table/components/default_alert_actions';
 import { ALERT_UUID } from '@kbn/rule-data-utils';
-import { useKibana } from '../../utils/kibana_react';
 import { useCaseActions } from './use_case_actions';
 import { RULE_DETAILS_PAGE_ID } from '../../pages/rule_details/constants';
 import { paths, SLO_DETAIL_PATH } from '../../../common/locators/paths';
@@ -39,9 +38,9 @@ export const AlertActions: GetObservabilityAlertsTableProp<'renderActionsCell'> 
   refresh,
   openAlertInFlyout,
   parentAlert,
+  services,
   ...rest
 }) => {
-  const services = useKibana().services;
   const {
     http: {
       basePath: { prepend },
@@ -85,6 +84,9 @@ export const AlertActions: GetObservabilityAlertsTableProp<'renderActionsCell'> 
     useCaseActions({
       refresh,
       alerts: [alert],
+      services: {
+        cases,
+      },
     });
 
   const closeActionsPopover = useCallback(() => {
@@ -139,6 +141,7 @@ export const AlertActions: GetObservabilityAlertsTableProp<'renderActionsCell'> 
           refresh={refresh}
           alert={alert}
           openAlertInFlyout={openAlertInFlyout}
+          services={services}
           {...rest}
         />
       ),
@@ -148,6 +151,7 @@ export const AlertActions: GetObservabilityAlertsTableProp<'renderActionsCell'> 
         observabilityRuleTypeRegistry,
         openAlertInFlyout,
         refresh,
+        services,
         rest,
         tableId,
       ]

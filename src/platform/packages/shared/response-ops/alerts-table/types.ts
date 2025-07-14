@@ -56,6 +56,7 @@ import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import type { GetRuleIdFromEvent } from '@kbn/cases-plugin/public/types';
 import type { Case } from './apis/bulk_get_cases';
 
 export interface Consumer {
@@ -109,6 +110,7 @@ export interface CasesService {
   helpers: {
     groupAlertsByRule: (items: any[]) => any[];
     canUseCases: (owners: Array<'securitySolution' | 'observability' | 'cases'>) => any;
+    getRuleIdFromEvent: GetRuleIdFromEvent;
   };
 }
 

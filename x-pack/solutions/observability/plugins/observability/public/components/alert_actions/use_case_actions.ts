@@ -9,11 +9,24 @@ import { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
 import { useCallback, useState } from 'react';
 import { AttachmentType } from '@kbn/cases-plugin/common';
 import type { Alert } from '@kbn/alerting-types';
+import { CasesService } from '@kbn/response-ops-alerts-table/types';
 import type { EventNonEcsData } from '../../../common/typings';
-import { useKibana } from '../../utils/kibana_react';
 
-export const useCaseActions = ({ alerts, refresh }: { alerts: Alert[]; refresh?: () => void }) => {
-  const { cases } = useKibana().services;
+export const useCaseActions = ({
+  alerts,
+  refresh,
+  services,
+}: {
+  alerts: Alert[];
+  refresh?: () => void;
+  services: {
+    /**
+     * The cases service is optional: cases features will be disabled if not provided
+     */
+    cases?: CasesService;
+  };
+}) => {
+  const { cases } = services;
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
 
   const onSuccess = useCallback(() => {
