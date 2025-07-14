@@ -17,9 +17,11 @@ interface DeduplicateAttackDiscoveriesParams {
   connectorId: string;
   esClient: ElasticsearchClient;
   indexPattern: string;
-  isSchedule: boolean;
   logger: Logger;
-  ownerId: string;
+  ownerInfo: {
+    id: string;
+    isSchedule: boolean;
+  };
   replacements: Replacements | undefined;
   spaceId: string;
 }
@@ -29,15 +31,16 @@ export const deduplicateAttackDiscoveries = async ({
   connectorId,
   esClient,
   indexPattern,
-  isSchedule,
   logger,
-  ownerId,
+  ownerInfo,
   replacements,
   spaceId,
 }: DeduplicateAttackDiscoveriesParams): Promise<AttackDiscoveries> => {
   if (!attackDiscoveries || attackDiscoveries.length === 0) {
     return attackDiscoveries;
   }
+
+  const { id: ownerId, isSchedule } = ownerInfo;
 
   // 1. Transform all attackDiscoveries to alert documents and collect alertUuids
   const alertDocs = attackDiscoveries.map((attack) => {
@@ -72,7 +75,9 @@ export const deduplicateAttackDiscoveries = async ({
 
   const numDuplicates = attackDiscoveries.length - newDiscoveries.length;
   if (numDuplicates > 0) {
-    const logPrefix = isSchedule ? 'Attack Discovery Schedule' : 'Ad-hoc Attack Discovery';
+    const logPrefix = isSchedule
+      ? `Attack Discovery Schedule [${ownerId}]`
+      : 'Ad-hoc Attack Discovery';
     logger.info(
       `${logPrefix}: Found ${numDuplicates} duplicate alert(s), skipping report for those.`
     );

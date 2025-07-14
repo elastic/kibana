@@ -110,9 +110,11 @@ export const generateAndUpdateAttackDiscoveries = async ({
         attackDiscoveries: attackDiscoveries ?? [],
         connectorId: apiConfig.connectorId,
         indexPattern,
-        isSchedule: false,
         logger,
-        ownerId: authenticatedUser.username ?? authenticatedUser.profile_uid,
+        ownerInfo: {
+          id: authenticatedUser.username ?? authenticatedUser.profile_uid,
+          isSchedule: false,
+        },
         replacements: latestReplacements,
         spaceId: dataClient.spaceId,
       });

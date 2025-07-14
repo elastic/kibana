@@ -126,9 +126,11 @@ export const attackDiscoveryScheduleExecutor = async ({
       attackDiscoveries: attackDiscoveries ?? [],
       connectorId: params.apiConfig.connectorId,
       indexPattern,
-      isSchedule: true,
       logger,
-      ownerId: rule.id,
+      ownerInfo: {
+        id: rule.id,
+        isSchedule: true,
+      },
       replacements,
       spaceId,
     });
