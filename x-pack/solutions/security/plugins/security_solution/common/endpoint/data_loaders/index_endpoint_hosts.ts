@@ -40,8 +40,6 @@ import {
 import type {
   DeleteIndexedEndpointFleetActionsResponse,
   IndexedEndpointAndFleetActionsForHostResponse,
-} from './index_endpoint_fleet_actions';
-import {
   buildIEndpointAndFleetActionsBulkOperations,
   deleteIndexedEndpointAndFleetActions,
   type IndexEndpointAndFleetActionsForHostOptions,

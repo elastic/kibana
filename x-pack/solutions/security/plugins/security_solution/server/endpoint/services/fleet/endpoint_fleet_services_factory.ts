@@ -13,8 +13,11 @@ import type {
   PackageClient,
 } from '@kbn/fleet-plugin/server';
 import { AgentNotFoundError } from '@kbn/fleet-plugin/server';
-import type { AgentPolicy } from '@kbn/fleet-plugin/common';
-import { PACKAGE_POLICY_SAVED_OBJECT_TYPE, type PackagePolicy } from '@kbn/fleet-plugin/common';
+import type {
+  AgentPolicy,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  type PackagePolicy,
+} from '@kbn/fleet-plugin/common';
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import {
   AgentPolicyNotFoundError,

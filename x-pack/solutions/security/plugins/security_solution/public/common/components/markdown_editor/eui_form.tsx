@@ -13,7 +13,6 @@ import { getFieldValidityAndErrorMessage } from '../../../shared_imports';
 import type { MarkdownEditorRef } from './editor';
 import { MarkdownEditor } from './editor';
 
-/* eslint-disable react/no-unused-prop-types */
 type MarkdownEditorFormProps = EuiMarkdownEditorProps & {
   field: FieldHook;
   dataTestSubj: string;
@@ -21,7 +20,6 @@ type MarkdownEditorFormProps = EuiMarkdownEditorProps & {
   isDisabled?: boolean;
   includePlugins?: boolean;
 };
-/* eslint-enable react/no-unused-prop-types */
 
 export const MarkdownEditorForm = React.memo(
   forwardRef<MarkdownEditorRef, MarkdownEditorFormProps>(
