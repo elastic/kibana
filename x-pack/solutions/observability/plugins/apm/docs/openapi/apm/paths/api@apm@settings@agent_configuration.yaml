@@ -43,7 +43,7 @@ delete:
     content:
       application/json:
         schema:
-          $ref: '../components/schemas/service_object.yaml'
+          $ref: '../components/schemas/delete_service_object.yaml'
   responses:
     '200':
       description: Successful response
