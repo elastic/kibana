@@ -12,11 +12,11 @@ import { TSESTree } from '@typescript-eslint/typescript-estree';
 /*
     Attempts to get a string representation of the intent
     out of an array of nodes.
-    
+
     Currently supported node types in the array:
     * String literal text (JSXText)
     * Translated text via <FormattedMessage> component -> uses prop `defaultMessage`
-    * Translated text via {i18n.translate} call -> uses passed options object key `defaultMessage` 
+    * Translated text via {i18n.translate} call -> uses passed options object key `defaultMessage`
 */
 export function getIntentFromNode(originalNode: TSESTree.JSXOpeningElement): string {
   if (!originalNode.parent) return '';
@@ -79,7 +79,7 @@ export function getIntentFromNode(originalNode: TSESTree.JSXOpeningElement): str
         }
 
         const args: TSESTree.CallExpressionArgument[] = expression.arguments;
-        const callee: TSESTree.LeftHandSideExpression = expression.callee;
+        const callee: TSESTree.LeftHandSideExpression = expression.callee as TSESTree.LeftHandSideExpression;
 
         if (!('object' in callee)) {
           return '';

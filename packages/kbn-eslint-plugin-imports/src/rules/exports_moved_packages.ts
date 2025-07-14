@@ -161,7 +161,7 @@ function inspectImports(
           ) {
             const name = T.isStringLiteral(specifier.imported)
               ? specifier.imported.value
-              : specifier.imported.name;
+              : (specifier.imported?.type === 'Identifier' ? specifier.imported.name : 'name');
             const local = specifier.local.name;
             return {
               node: specifier,
@@ -177,8 +177,8 @@ function inspectImports(
           ) {
             const name = T.isStringLiteral(specifier.exported)
               ? specifier.exported.value
-              : specifier.exported.name;
-            const local = specifier.local.name;
+              : (specifier.exported?.type === 'Identifier' ? specifier.exported.name : 'name');
+            const local = specifier.local.type === 'Identifier' ? specifier.local.name : '';
             return {
               node: specifier,
               name: local,
