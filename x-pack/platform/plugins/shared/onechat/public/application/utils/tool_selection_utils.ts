@@ -24,90 +24,83 @@ export const isToolSelected = (
 };
 
 /**
- * Check if all tools for a provider are selected.
+ * Check if all tools for a type are selected.
  * This uses existing onechat-common utilities for consistent logic.
  */
-export const isAllToolsSelectedForProvider = (
-  providerId: string,
-  providerTools: ToolSelectionRelevantFields[],
+export const isAllToolsSelectedForType = (
+  type: string,
+  typeTools: ToolSelectionRelevantFields[],
   selectedTools: ToolSelection[]
 ): boolean => {
-  // Filter provider tools to only those from the specified provider
-  const filteredProviderTools = providerTools.filter((tool) => tool.type === providerId);
+  // Filter type tools to only those from the specified ty[e
+  const filteredTypeTools = typeTools.filter((tool) => tool.type === type);
 
-  // Use existing filterToolsBySelection to get all selected tools from this provider
-  const selectedProviderTools = filterToolsBySelection(filteredProviderTools, selectedTools);
+  // Use existing filterToolsBySelection to get all selected tools from this type
+  const selectedTypeTools = filterToolsBySelection(filteredTypeTools, selectedTools);
 
   // All tools are selected if the count matches
-  return (
-    selectedProviderTools.length === filteredProviderTools.length &&
-    filteredProviderTools.length > 0
-  );
+  return selectedTypeTools.length === filteredTypeTools.length && filteredTypeTools.length > 0;
 };
 
 /**
- * Remove tool selections that affect a specific provider.
+ * Remove tool selections that affect a specific type.
  * This is a helper function for filtering selections.
  */
-export const filterOutProviderSelections = (
+export const filterOutTypeSelections = (
   selectedTools: ToolSelection[],
-  providerId: string,
-  providerTools: ToolSelectionRelevantFields[]
+  toolType: string,
+  typeTools: ToolSelectionRelevantFields[]
 ): ToolSelection[] => {
   return selectedTools.filter((selection) => {
-    // Keep selections that don't affect this provider
-    if (selection.type && selection.type !== providerId) {
+    // Keep selections that don't affect this type
+    if (selection.type && selection.type !== toolType) {
       return true;
     }
 
-    // Remove wildcard selections for this provider
+    // Remove wildcard selections for this type
     if (
       selection.tool_ids.includes(allToolsSelectionWildcard) &&
-      (!selection.type || selection.type === providerId)
+      (!selection.type || selection.type === toolType)
     ) {
       return false;
     }
 
-    // Remove selections that contain any tools from this provider
-    const hasProviderTools = selection.tool_ids.some((toolId) =>
-      providerTools.some((tool) => tool.id === toolId)
+    // Remove selections that contain any tools from this type
+    const hasTypeTools = selection.tool_ids.some((toolId) =>
+      typeTools.some((tool) => tool.id === toolId)
     );
 
-    return !hasProviderTools;
+    return !hasTypeTools;
   });
 };
 
 /**
- * Toggle selection for all tools of a specific provider.
+ * Toggle selection for all tools of a specific type.
  */
-export const toggleProviderSelection = (
-  providerId: string,
-  providerTools: ToolSelectionRelevantFields[],
+export const toggleTypeSelection = (
+  toolType: string,
+  typeTools: ToolSelectionRelevantFields[],
   selectedTools: ToolSelection[]
 ): ToolSelection[] => {
-  const allSelected = isAllToolsSelectedForProvider(providerId, providerTools, selectedTools);
+  const allSelected = isAllToolsSelectedForType(toolType, typeTools, selectedTools);
 
-  // Filter provider tools to only those from the specified provider
-  const filteredProviderTools = providerTools.filter((tool) => tool.type === providerId);
+  // Filter type tools to only those from the specified type
+  const filteredTypeTools = typeTools.filter((tool) => tool.type === toolType);
 
   if (allSelected) {
-    // Remove all tools from this provider using the helper function
-    return filterOutProviderSelections(selectedTools, providerId, filteredProviderTools);
+    // Remove all tools from this type using the helper function
+    return filterOutTypeSelections(selectedTools, toolType, filteredTypeTools);
   } else {
-    // Add all tools from this provider using wildcard
-    // First, remove any existing selections that affect this provider
-    const cleanedSelection = filterOutProviderSelections(
-      selectedTools,
-      providerId,
-      filteredProviderTools
-    );
+    // Add all tools from this type using wildcard
+    // First, remove any existing selections that affect this type
+    const cleanedSelection = filterOutTypeSelections(selectedTools, toolType, filteredTypeTools);
 
-    const newProviderSelection: ToolSelection = {
-      type: providerId,
+    const newTypeSelection: ToolSelection = {
+      type: toolType,
       tool_ids: [allToolsSelectionWildcard],
     };
 
-    return [...cleanedSelection, newProviderSelection];
+    return [...cleanedSelection, newTypeSelection];
   }
 };
 
@@ -116,14 +109,14 @@ export const toggleProviderSelection = (
  */
 export const toggleToolSelection = (
   toolId: string,
-  providerId: string,
-  providerTools: ToolSelectionRelevantFields[],
+  toolType: string,
+  typeTools: ToolSelectionRelevantFields[],
   selectedTools: ToolSelection[]
 ): ToolSelection[] => {
   // Create tool descriptor for the current tool
   const currentTool: ToolSelectionRelevantFields = {
     id: toolId,
-    type: providerId as ToolType,
+    type: toolType as ToolType,
     tags: [],
   };
 
@@ -134,7 +127,7 @@ export const toggleToolSelection = (
     const hasWildcardSelection = selectedTools.some(
       (selection) =>
         selection.tool_ids.includes(allToolsSelectionWildcard) &&
-        (!selection.type || selection.type === providerId)
+        (!selection.type || selection.type === toolType)
     );
 
     if (hasWildcardSelection) {
@@ -143,19 +136,19 @@ export const toggleToolSelection = (
         (selection) =>
           !(
             selection.tool_ids.includes(allToolsSelectionWildcard) &&
-            (!selection.type || selection.type === providerId)
+            (!selection.type || selection.type === toolType)
           )
       );
 
-      // Add individual selections for all other tools from this provider
-      const filteredProviderTools = providerTools.filter((tool) => tool.type === providerId);
-      const otherToolIds = filteredProviderTools
+      // Add individual selections for all other tools from this type
+      const filteredTypeTools = typeTools.filter((tool) => tool.type === toolType);
+      const otherToolIds = filteredTypeTools
         .filter((tool) => tool.id !== toolId)
         .map((tool) => tool.id);
 
       if (otherToolIds.length > 0) {
         newSelection.push({
-          type: providerId,
+          type: toolType,
           tool_ids: otherToolIds,
         });
       }

@@ -22,10 +22,10 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { ToolSelection, ToolDefinition } from '@kbn/onechat-common';
 import {
-  toggleProviderSelection,
+  toggleTypeSelection,
   toggleToolSelection,
   isToolSelected,
-  isAllToolsSelectedForProvider,
+  isAllToolsSelectedForType,
 } from '../../../utils/tool_selection_utils';
 import { truncateAtNewline } from '../../../utils/truncate_at_newline';
 
@@ -45,34 +45,34 @@ export const ToolsSelection: React.FC<ToolsSelectionProps> = ({
   disabled = false,
 }) => {
   // Group tools by provider
-  const toolsByProvider = useMemo(() => {
+  const toolsByType = useMemo(() => {
     const grouped: Record<string, ToolDefinition[]> = {};
     tools.forEach((tool) => {
-      const providerId = tool.type;
-      if (!grouped[providerId]) {
-        grouped[providerId] = [];
+      const toolType = tool.type;
+      if (!grouped[toolType]) {
+        grouped[toolType] = [];
       }
-      grouped[providerId].push(tool);
+      grouped[toolType].push(tool);
     });
     return grouped;
   }, [tools]);
 
-  const handleToggleProviderTools = useCallback(
-    (providerId: string) => {
-      const providerTools = toolsByProvider[providerId] || [];
-      const newSelection = toggleProviderSelection(providerId, providerTools, selectedTools);
+  const handleToggleTypeTools = useCallback(
+    (type: string) => {
+      const providerTools = toolsByType[type] || [];
+      const newSelection = toggleTypeSelection(type, providerTools, selectedTools);
       onToolsChange(newSelection);
     },
-    [selectedTools, onToolsChange, toolsByProvider]
+    [selectedTools, onToolsChange, toolsByType]
   );
 
   const handleToggleTool = useCallback(
     (toolId: string, providerId: string) => {
-      const providerTools = toolsByProvider[providerId] || [];
+      const providerTools = toolsByType[providerId] || [];
       const newSelection = toggleToolSelection(toolId, providerId, providerTools, selectedTools);
       onToolsChange(newSelection);
     },
-    [selectedTools, onToolsChange, toolsByProvider]
+    [selectedTools, onToolsChange, toolsByType]
   );
 
   if (toolsLoading) {
@@ -81,7 +81,7 @@ export const ToolsSelection: React.FC<ToolsSelectionProps> = ({
 
   return (
     <div>
-      {Object.entries(toolsByProvider).map(([providerId, providerTools]) => {
+      {Object.entries(toolsByType).map(([providerId, providerTools]) => {
         const columns: Array<EuiBasicTableColumn<ToolDefinition>> = [
           {
             field: 'id',
@@ -142,8 +142,8 @@ export const ToolsSelection: React.FC<ToolsSelectionProps> = ({
                       })}
                     </EuiText>
                   }
-                  checked={isAllToolsSelectedForProvider(providerId, providerTools, selectedTools)}
-                  onChange={() => handleToggleProviderTools(providerId)}
+                  checked={isAllToolsSelectedForType(providerId, providerTools, selectedTools)}
+                  onChange={() => handleToggleTypeTools(providerId)}
                   disabled={disabled}
                 />
               </EuiFlexItem>

@@ -8,10 +8,10 @@
 import type { ToolSelection, ToolSelectionRelevantFields, ToolType } from '@kbn/onechat-common';
 import { allToolsSelectionWildcard } from '@kbn/onechat-common';
 import {
-  toggleProviderSelection,
+  toggleTypeSelection,
   toggleToolSelection,
   isToolSelected,
-  isAllToolsSelectedForProvider,
+  isAllToolsSelectedForType,
 } from './tool_selection_utils';
 
 describe('tool_selection_utils', () => {
@@ -57,7 +57,7 @@ describe('tool_selection_utils', () => {
       const selectedTools: ToolSelection[] = [{ tool_ids: ['tool1', 'tool2'] }];
       const provider1Tools = mockTools.filter((t) => t.type === ('provider1' as ToolType));
 
-      expect(isAllToolsSelectedForProvider('provider1', provider1Tools, selectedTools)).toBe(true);
+      expect(isAllToolsSelectedForType('provider1', provider1Tools, selectedTools)).toBe(true);
     });
 
     it('should return true when all tools are selected via wildcard', () => {
@@ -66,14 +66,14 @@ describe('tool_selection_utils', () => {
       ];
       const provider1Tools = mockTools.filter((t) => t.type === ('provider1' as ToolType));
 
-      expect(isAllToolsSelectedForProvider('provider1', provider1Tools, selectedTools)).toBe(true);
+      expect(isAllToolsSelectedForType('provider1', provider1Tools, selectedTools)).toBe(true);
     });
 
     it('should return false when only some tools are selected', () => {
       const selectedTools: ToolSelection[] = [{ tool_ids: ['tool1'] }];
       const provider1Tools = mockTools.filter((t) => t.type === ('provider1' as ToolType));
 
-      expect(isAllToolsSelectedForProvider('provider1', provider1Tools, selectedTools)).toBe(false);
+      expect(isAllToolsSelectedForType('provider1', provider1Tools, selectedTools)).toBe(false);
     });
   });
 
@@ -82,7 +82,7 @@ describe('tool_selection_utils', () => {
       const selectedTools: ToolSelection[] = [];
       const provider1Tools = mockTools.filter((t) => t.type === ('provider1' as ToolType));
 
-      const result = toggleProviderSelection('provider1', provider1Tools, selectedTools);
+      const result = toggleTypeSelection('provider1', provider1Tools, selectedTools);
 
       expect(result).toEqual([{ type: 'provider1', tool_ids: [allToolsSelectionWildcard] }]);
     });
@@ -93,7 +93,7 @@ describe('tool_selection_utils', () => {
       ];
       const provider1Tools = mockTools.filter((t) => t.type === ('provider1' as ToolType));
 
-      const result = toggleProviderSelection('provider1', provider1Tools, selectedTools);
+      const result = toggleTypeSelection('provider1', provider1Tools, selectedTools);
 
       expect(result).toEqual([]);
     });
