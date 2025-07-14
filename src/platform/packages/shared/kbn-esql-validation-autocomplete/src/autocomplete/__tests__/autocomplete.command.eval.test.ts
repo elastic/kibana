@@ -360,7 +360,7 @@ describe('autocomplete.suggest', () => {
     test('deep function nesting', async () => {
       for (const nesting of [1, 2, 3, 4]) {
         await assertSuggestions(
-          `from a | eval a=${Array(nesting).fill('round(/').join('')}`,
+          `from a | eval a=${Array(nesting).fill('round(').join('').concat('/')}`,
           [
             ...getFieldNamesByType(roundParameterTypes),
             ...getFunctionSignaturesByReturnType(
