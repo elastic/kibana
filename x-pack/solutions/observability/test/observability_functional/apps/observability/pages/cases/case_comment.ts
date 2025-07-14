@@ -18,7 +18,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const PageObjects = getPageObjects(['common', 'header']);
   const retry = getService('retry');
 
-  describe('Observability > Cases – paste screenshot into comment', () => {
+  describe('Observability > Cases – paste screenshot into comment', function () {
+    // this suite uses a paste image trick that will likely not work well in Firefox
+    // @ts-ignore – mocha typings don’t include tags
+    this.tags(['skipFirefox']);
+
     let imageMarkdownUrl: string | null = null;
     let driver: WebDriver;
     before(async () => {
