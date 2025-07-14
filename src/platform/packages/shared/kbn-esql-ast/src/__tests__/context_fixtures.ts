@@ -71,7 +71,7 @@ export const policies = [
   },
 ];
 
-const indexes = [
+export const indexes = [
   'a_index',
   'index',
   'other_index',
@@ -88,6 +88,29 @@ const inferenceEndpoints: InferenceEndpointAutocompleteItem[] = [
     task_type: 'completion',
   },
 ];
+
+export const editorExtensions = {
+  recommendedQueries: [
+    {
+      name: 'Logs Count by Host',
+      query: 'from logs* | STATS count(*) by host',
+    },
+  ],
+  recommendedFields: [
+    {
+      name: 'host.name',
+      pattern: 'logs*',
+    },
+    {
+      name: 'user.name',
+      pattern: 'logs*',
+    },
+    {
+      name: 'kubernetes.something.something',
+      pattern: 'logs*',
+    },
+  ],
+};
 
 export const mockContext: ICommandContext = {
   userDefinedColumns: new Map<string, ESQLUserDefinedColumn[]>([
@@ -176,5 +199,8 @@ export const mockContext: ICommandContext = {
     type: 'Index',
   })),
   joinSources: joinIndices,
+  timeSeriesSources: timeseriesIndices,
   inferenceEndpoints,
+  editorExtensions,
+  histogramBarTarget: 50,
 };

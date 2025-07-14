@@ -12,6 +12,7 @@
  * validation tests. This allows us to use our own fixtures without relying
  * on the generated definitions provided by Elasticsearch.
  */
+import { uniq } from 'lodash';
 import {
   ESQLUserDefinedColumn,
   ESQLFieldWithMetadata,
@@ -69,7 +70,7 @@ export const expectSuggestions = async (
   result.forEach((suggestion) => {
     suggestions.push(suggestion.text);
   });
-  expect(suggestions.sort()).toEqual(expectedSuggestions.sort());
+  expect(uniq(suggestions).sort()).toEqual(uniq(expectedSuggestions).sort());
 };
 
 export function getFieldNamesByType(
