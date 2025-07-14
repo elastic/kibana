@@ -19,6 +19,7 @@ import { TestProviders } from '../../../common/mock/test_providers';
 import { useSelectDataView } from '../../hooks/use_select_data_view';
 import { useUpdateUrlParam } from '../../../common/utils/global_query_string';
 import { URL_PARAM_KEY } from '../../../common/hooks/constants';
+import { useKibana as mockUseKibana } from '../../../common/lib/kibana/__mocks__';
 
 jest.mock('../../../common/utils/global_query_string', () => ({
   useUpdateUrlParam: jest.fn(),
@@ -39,9 +40,7 @@ jest.mock('react-redux', () => {
   };
 });
 
-jest.mock('../../../common/lib/kibana', () => ({
-  useKibana: jest.fn(),
-}));
+jest.mock('../../../common/lib/kibana');
 
 jest.mock('@kbn/unified-search-plugin/public', () => ({
   ...jest.requireActual('@kbn/unified-search-plugin/public'),
@@ -93,12 +92,12 @@ describe('DataViewPicker', () => {
 
     jest.mocked(useKibana).mockReturnValue({
       services: {
+        ...mockUseKibana().services,
         dataViewFieldEditor: { openEditor: jest.fn() },
         dataViewEditor: {
           openEditor: jest.fn(),
           userPermissions: { editDataView: jest.fn().mockReturnValue(true) },
         },
-        data: { dataViews: { get: jest.fn() } },
       },
     } as unknown as ReturnType<typeof useKibana>);
   });

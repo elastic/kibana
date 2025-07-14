@@ -2168,12 +2168,12 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui-amsterdam@npm:@elastic/eui@103.1.0-amsterdam.0", "@elastic/eui@103.1.0-amsterdam.0":
-  version "103.1.0-amsterdam.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-103.1.0-amsterdam.0.tgz#d4c0969258ceb22cd85257e81c9a5c182c63faab"
-  integrity sha512-fMSfoR0QOS15DGlLLvx+z2hica5PEPwMycklSd3waYeegjABA21o9VsMILBZNtVkrvMMVGIjNRd1KFv6GYW9aA==
+"@elastic/eui-amsterdam@npm:@elastic/eui@104.0.0-amsterdam.0", "@elastic/eui@104.0.0-amsterdam.0":
+  version "104.0.0-amsterdam.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-104.0.0-amsterdam.0.tgz#9eb69d025bf50367dbed544f21c6d2adedc2dd45"
+  integrity sha512-mXZL4+TdFtfBYnB4GV3FMNgZTlywG4YFuqsUgE55ncdepsMRButzralO+i/8usdMIEFMmkEsUM8k/xgjxGQqWA==
   dependencies:
-    "@elastic/eui-theme-common" "1.2.1"
+    "@elastic/eui-theme-common" "2.0.0"
     "@elastic/prismjs-esql" "^1.1.0"
     "@hello-pangea/dnd" "^16.6.0"
     "@types/lodash" "^4.14.202"
@@ -2209,10 +2209,10 @@
     uuid "^8.3.0"
     vfile "^4.2.1"
 
-"@elastic/eui-theme-common@1.2.1":
-  version "1.2.1"
-  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-common/-/eui-theme-common-1.2.1.tgz#958b546d7832c6a17eb691d72de66deee933aede"
-  integrity sha512-fbFHjanNXau0RCvJcakhZPvJwD/L2LN8tEOlVS5T6P8uhGhpDYFC7WxQAqGbkaAA8Z7Xgalad8705WOtsjqtlg==
+"@elastic/eui-theme-common@2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-common/-/eui-theme-common-2.0.0.tgz#248973f7161924943a2d6ad96c2ea82f0ca332f4"
+  integrity sha512-cLgC0Y/ugS/5nGeU3e4lQzM9+ObOaoMzNLv/kM5Tnjdezmrgt+6xeVxiBOEe64S99pXbjfSF6u3d/y4YloNOhg==
   dependencies:
     "@types/lodash" "^4.14.202"
     chroma-js "^2.4.2"
@@ -3911,7 +3911,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/application-usage-test-plugin@link:x-pack/test/usage_collection/plugins/application_usage_test":
+"@kbn/application-usage-test-plugin@link:x-pack/platform/test/usage_collection/plugins/application_usage_test":
   version "0.0.0"
   uid ""
 
@@ -5651,7 +5651,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/fec-alerts-test-plugin@link:x-pack/test/functional_execution_context/plugins/alerts":
+"@kbn/fec-alerts-test-plugin@link:x-pack/platform/test/functional_execution_context/plugins/alerts":
   version "0.0.0"
   uid ""
 
@@ -5711,7 +5711,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/foo-plugin@link:x-pack/test/ui_capabilities/common/plugins/foo_plugin":
+"@kbn/foo-plugin@link:x-pack/platform/test/ui_capabilities/common/plugins/foo_plugin":
   version "0.0.0"
   uid ""
 
@@ -5855,7 +5855,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/iframe-embedded-plugin@link:x-pack/test/functional_embedded/plugins/iframe_embedded":
+"@kbn/iframe-embedded-plugin@link:x-pack/platform/test/functional_embedded/plugins/iframe_embedded":
   version "0.0.0"
   uid ""
 
@@ -6019,7 +6019,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/kibana-cors-test-plugin@link:x-pack/test/functional_cors/plugins/kibana_cors_test":
+"@kbn/kibana-cors-test-plugin@link:x-pack/platform/test/functional_cors/plugins/kibana_cors_test":
   version "0.0.0"
   uid ""
 
@@ -7583,7 +7583,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/stack-management-usage-test-plugin@link:x-pack/test/usage_collection/plugins/stack_management_usage_test":
+"@kbn/stack-management-usage-test-plugin@link:x-pack/platform/test/usage_collection/plugins/stack_management_usage_test":
   version "0.0.0"
   uid ""
 
@@ -7703,7 +7703,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/test-feature-usage-plugin@link:x-pack/test/licensing_plugin/plugins/test_feature_usage":
+"@kbn/test-feature-usage-plugin@link:x-pack/platform/test/licensing_plugin/plugins/test_feature_usage":
   version "0.0.0"
   uid ""
 
@@ -24201,10 +24201,10 @@ moment-duration-format@^2.3.2:
   resolved "https://registry.yarnpkg.com/moment-duration-format/-/moment-duration-format-2.3.2.tgz#5fa2b19b941b8d277122ff3f87a12895ec0d6212"
   integrity sha512-cBMXjSW+fjOb4tyaVHuaVE/A5TqkukDWiOfxxAjY+PEqmmBQlLwn+8OzwPiG3brouXKY5Un4pBjAeB6UToXHaQ==
 
-moment-timezone@^0.5.47:
-  version "0.5.47"
-  resolved "https://registry.yarnpkg.com/moment-timezone/-/moment-timezone-0.5.47.tgz#d4d1a21b78372d914d6d69ae285454732a429749"
-  integrity sha512-UbNt/JAWS0m/NJOebR0QMRHBk0hu03r5dx9GK8Cs0AS3I81yDcOc9k+DytPItgVvBP7J6Mf6U2n3BPAacAV9oA==
+moment-timezone@^0.6.0:
+  version "0.6.0"
+  resolved "https://registry.yarnpkg.com/moment-timezone/-/moment-timezone-0.6.0.tgz#c5a6519171f31a64739ea75d33f5c136c08ff608"
+  integrity sha512-ldA5lRNm3iJCWZcBCab4pnNL3HSZYXVb/3TYr75/1WCTWYuTqYUb5f/S384pncYjJ88lbO8Z4uPDvmoluHJc8Q==
   dependencies:
     moment "^2.29.4"
 

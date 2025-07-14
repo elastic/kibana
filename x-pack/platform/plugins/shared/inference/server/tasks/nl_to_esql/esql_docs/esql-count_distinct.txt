@@ -1,6 +1,6 @@
-# COUNT_DISTINCT
+## COUNT_DISTINCT
 
-The COUNT_DISTINCT function calculates the approximate number of distinct values in a specified field.
+The `COUNT_DISTINCT` function returns the approximate number of distinct values in a column or expression.
 
 ## Syntax
 
@@ -8,36 +8,42 @@ The COUNT_DISTINCT function calculates the approximate number of distinct values
 
 ### Parameters
 
-#### field
+#### `field`
 
 The column or literal for which to count the number of distinct values.
 
-#### precision
+#### `precision`
 
-(Optional) The precision threshold. The counts are approximate. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.
+(Optional) The precision threshold. The maximum supported value is 40,000. Thresholds above this value will behave as if set to 40,000. The default value is 3,000. Higher precision thresholds may increase memory usage and processing time.
 
 ## Examples
 
-The following example calculates the number of distinct values in the `ip0` and `ip1` fields:
+Counting distinct values in multiple columns
 
 ```esql
 FROM hosts
 | STATS COUNT_DISTINCT(ip0), COUNT_DISTINCT(ip1)
 ```
 
-You can also specify a precision threshold. In the following example, the precision threshold for `ip0` is set to 80000 and for `ip1` to 5:
+This example calculates the approximate number of distinct values in the `ip0` and `ip1` columns.
+
+Configuring the precision threshold
 
 ```esql
 FROM hosts
 | STATS COUNT_DISTINCT(ip0, 80000), COUNT_DISTINCT(ip1, 5)
 ```
 
-The COUNT_DISTINCT function can also be used with inline functions. This example splits a string into multiple values using the `SPLIT` function and counts the unique values:
+This example demonstrates how to specify a precision threshold for each column. The `ip0` column uses a high precision threshold of 80,000, while the `ip1` column uses a low threshold of 5.
+
+Counting distinct values from a split string
 
 ```esql
 ROW words="foo;bar;baz;qux;quux;foo"
 | STATS distinct_word_count = COUNT_DISTINCT(SPLIT(words, ";"))
 ```
+
+This example splits the `words` string into multiple values using the `SPLIT` function and counts the unique values. The result is the number of distinct words in the string.
 
 ### Notes
 
