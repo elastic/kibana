@@ -88,7 +88,11 @@ export const CommonFlyout = <T extends FormData = FormData, I extends FormData =
   );
 
   return (
-    <EuiFlyout onClose={onCloseFlyout} aria-labelledby={modalTitleId} data-test-subj="common-flyout">
+    <EuiFlyout
+      onClose={onCloseFlyout}
+      aria-labelledby={modalTitleId}
+      data-test-subj="common-flyout"
+    >
       <EuiFlyoutHeader hasBorder data-test-subj="common-flyout-header">
         <EuiTitle size="s">
           <h3 id={modalTitleId}>{renderHeader()}</h3>

@@ -107,9 +107,15 @@ export const ArtifactDeleteModal = memo<DeleteArtifactModalProps>(
     }, [isDeleting, onCancel]);
 
     return (
-      <EuiModal onClose={handleOnCancel} data-test-subj={dataTestSubj} aria-labelledby={modalTitleId}>
+      <EuiModal
+        onClose={handleOnCancel}
+        data-test-subj={dataTestSubj}
+        aria-labelledby={modalTitleId}
+      >
         <EuiModalHeader data-test-subj={getTestId('header')}>
-          <EuiModalHeaderTitle id={modalTitleId}>{labels.deleteModalTitle(item.name)}</EuiModalHeaderTitle>
+          <EuiModalHeaderTitle id={modalTitleId}>
+            {labels.deleteModalTitle(item.name)}
+          </EuiModalHeaderTitle>
         </EuiModalHeader>
 
         <EuiModalBody data-test-subj={getTestId('body')}>

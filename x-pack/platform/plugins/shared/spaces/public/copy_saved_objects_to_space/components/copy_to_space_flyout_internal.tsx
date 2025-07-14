@@ -251,7 +251,12 @@ export const CopyToSpaceFlyoutInternal = (props: CopyToSpaceFlyoutProps) => {
   };
 
   return (
-    <EuiFlyout onClose={onClose} maxWidth={600} data-test-subj="copy-to-space-flyout" aria-labelledby={modalTitleId}>
+    <EuiFlyout
+      onClose={onClose}
+      maxWidth={600}
+      data-test-subj="copy-to-space-flyout"
+      aria-labelledby={modalTitleId}
+    >
       <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup alignItems="center" gutterSize="m">
           <EuiFlexItem grow={false}>

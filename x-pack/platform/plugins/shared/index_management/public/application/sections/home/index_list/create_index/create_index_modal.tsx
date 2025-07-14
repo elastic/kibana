@@ -91,7 +91,12 @@ export const CreateIndexModal = ({ closeModal, loadIndices }: CreateIndexModalPr
   };
 
   return (
-    <EuiModal aria-labelledby={modalTitleId} onClose={closeModal} initialFocus="[name=indexName]" css={{ width: 450 }}>
+    <EuiModal
+      aria-labelledby={modalTitleId}
+      onClose={closeModal}
+      initialFocus="[name=indexName]"
+      css={{ width: 450 }}
+    >
       <EuiModalHeader>
         <EuiModalHeaderTitle id={modalTitleId}>
           <FormattedMessage

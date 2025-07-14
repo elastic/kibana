@@ -128,7 +128,11 @@ export const ChangeDataViewModal: FC<Props> = ({ onClose }) => {
 
   return (
     <>
-      <EuiModal onClose={onClose} data-test-subj="mlJobMgmtImportJobsFlyout" aria-labelledby={modalTitleId}>
+      <EuiModal
+        onClose={onClose}
+        data-test-subj="mlJobMgmtImportJobsFlyout"
+        aria-labelledby={modalTitleId}
+      >
         <EuiModalHeader>
           <EuiModalHeaderTitle id={modalTitleId}>
             <FormattedMessage

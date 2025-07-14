@@ -90,7 +90,12 @@ export const SynonymRuleFlyout: React.FC<SynonymRuleFlyoutProps> = ({
   });
 
   return (
-    <EuiFlyout onClose={onClose} size={'33%'} outsideClickCloses={false} aria-labelledby={modalTitleId}>
+    <EuiFlyout
+      onClose={onClose}
+      size={'33%'}
+      outsideClickCloses={false}
+      aria-labelledby={modalTitleId}
+    >
       <EuiFlyoutHeader hasBorder>
         <EuiText data-test-subj="searchSynonymsSynonymRuleFlyoutRuleIdText" id={modalTitleId}>
           <b>

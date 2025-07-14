@@ -138,7 +138,11 @@ export const AddIntegrationFlyout: React.FunctionComponent<{
   return (
     <Suspense fallback={<Loading />}>
       <EuiErrorBoundary>
-        <EuiFlyout onClose={onClose} data-test-subj="addIntegrationFlyout" aria-labelledby={modalTitleId}>
+        <EuiFlyout
+          onClose={onClose}
+          data-test-subj="addIntegrationFlyout"
+          aria-labelledby={modalTitleId}
+        >
           <EuiFlyoutHeader hasBorder>
             <EuiFlexGroup direction="column" gutterSize="s">
               <EuiFlexItem>

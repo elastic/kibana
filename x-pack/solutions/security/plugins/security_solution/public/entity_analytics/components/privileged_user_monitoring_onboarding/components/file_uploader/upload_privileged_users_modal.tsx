@@ -6,7 +6,14 @@
  */
 
 import React from 'react';
-import { EuiModal, EuiModalHeader, EuiModalHeaderTitle, EuiModalBody, EuiText, useGeneratedHtmlId } from '@elastic/eui';
+import {
+  EuiModal,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
+  EuiModalBody,
+  EuiText,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { PrivilegedUsersFileUploader } from './privileged_users_file_uploader';
 

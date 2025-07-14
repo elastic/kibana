@@ -340,7 +340,11 @@ export const DeleteSpaceAwareItemCheckModal: FC<Props> = ({
   }
 
   return (
-    <EuiModal aria-labelledby={modalTitleId} onClose={onCloseCallback} data-test-subj="mlDeleteSpaceAwareItemCheckModalOverlay">
+    <EuiModal
+      aria-labelledby={modalTitleId}
+      onClose={onCloseCallback}
+      data-test-subj="mlDeleteSpaceAwareItemCheckModalOverlay"
+    >
       <>
         <EuiModalHeader>
           <EuiModalHeaderTitle id={modalTitleId}>

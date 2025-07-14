@@ -67,7 +67,9 @@ export class ConfirmDelete extends Component<Props, State> {
     return (
       <EuiModal onClose={this.props.onCancel} aria-labelledby={modalTitleId}>
         <EuiModalHeader>
-          <EuiModalHeaderTitle id={modalTitleId} data-test-subj="confirmModalTitleText">{title}</EuiModalHeaderTitle>
+          <EuiModalHeaderTitle id={modalTitleId} data-test-subj="confirmModalTitleText">
+            {title}
+          </EuiModalHeaderTitle>
         </EuiModalHeader>
         <EuiModalBody>
           <EuiText>

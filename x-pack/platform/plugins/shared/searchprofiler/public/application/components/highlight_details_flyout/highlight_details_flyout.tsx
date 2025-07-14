@@ -45,9 +45,15 @@ export const HighlightDetailsFlyout = ({ indexName, operation, shardName, onClos
   const flyoutTitleId = useGeneratedHtmlId();
 
   return (
-    <EuiFlyout className="prfDevTool__details" onClose={() => onClose()} aria-labelledby={flyoutTitleId}>
+    <EuiFlyout
+      className="prfDevTool__details"
+      onClose={() => onClose()}
+      aria-labelledby={flyoutTitleId}
+    >
       <EuiFlyoutHeader hasBorder={true}>
-        <EuiText size="s" id={flyoutTitleId}>{indexName}</EuiText>
+        <EuiText size="s" id={flyoutTitleId}>
+          {indexName}
+        </EuiText>
         <EuiText>{shardName}</EuiText>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>

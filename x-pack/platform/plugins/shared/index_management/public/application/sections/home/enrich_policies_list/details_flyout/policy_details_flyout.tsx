@@ -33,7 +33,13 @@ export const PolicyDetailsFlyout: FunctionComponent<Props> = ({ policy, onClose 
   const flyoutTitleId = useGeneratedHtmlId();
 
   return (
-    <EuiFlyout onClose={onClose} data-test-subj="policyDetailsFlyout" size="m" maxWidth={550} aria-labelledby={flyoutTitleId}>
+    <EuiFlyout
+      onClose={onClose}
+      data-test-subj="policyDetailsFlyout"
+      size="m"
+      maxWidth={550}
+      aria-labelledby={flyoutTitleId}
+    >
       <EuiFlyoutHeader>
         <EuiFlexGroup alignItems="center" gutterSize="s">
           <EuiFlexItem grow={false}>

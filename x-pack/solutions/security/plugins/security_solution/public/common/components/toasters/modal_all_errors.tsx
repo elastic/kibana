@@ -46,7 +46,9 @@ const ModalAllErrorsComponent: React.FC<FullErrorProps> = ({ isShowing, toast, t
   return (
     <EuiModal onClose={handleClose} aria-labelledby={modalAllErrorsTitleId}>
       <EuiModalHeader>
-        <EuiModalHeaderTitle id={modalAllErrorsTitleId}>{i18n.TITLE_ERROR_MODAL}</EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id={modalAllErrorsTitleId}>
+          {i18n.TITLE_ERROR_MODAL}
+        </EuiModalHeaderTitle>
       </EuiModalHeader>
 
       <EuiModalBody>

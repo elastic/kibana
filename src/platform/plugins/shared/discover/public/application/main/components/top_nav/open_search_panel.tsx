@@ -38,7 +38,12 @@ export function OpenSearchPanel(props: OpenSearchPanelProps) {
     capabilities.savedObjectsManagement?.edit || capabilities.savedObjectsManagement?.delete;
 
   return (
-    <EuiFlyout aria-labelledby={modalTitleId} ownFocus onClose={props.onClose} data-test-subj="loadSearchForm">
+    <EuiFlyout
+      aria-labelledby={modalTitleId}
+      ownFocus
+      onClose={props.onClose}
+      data-test-subj="loadSearchForm"
+    >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h2 id={modalTitleId}>

@@ -140,7 +140,12 @@ export class OptInExampleFlyout extends React.PureComponent<Props, State> {
     const modalTitleId = htmlIdGenerator()('flyoutTitle');
     return (
       <EuiPortal>
-        <EuiFlyout aria-labelledby={modalTitleId} ownFocus onClose={this.props.onClose} maxWidth={true}>
+        <EuiFlyout
+          aria-labelledby={modalTitleId}
+          ownFocus
+          onClose={this.props.onClose}
+          maxWidth={true}
+        >
           <EuiFlyoutHeader>
             <EuiTitle>
               <h2 id={modalTitleId}>

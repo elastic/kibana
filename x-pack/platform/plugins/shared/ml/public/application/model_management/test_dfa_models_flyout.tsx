@@ -43,7 +43,12 @@ export const TestDfaModelsFlyout: FC<Props> = ({ model, onClose }) => {
   );
   const flyoutTitleId = useGeneratedHtmlId({ prefix: 'mlTestModelsFlyoutTitle' });
   return (
-    <EuiFlyout size="l" onClose={onClose} aria-labelledby={flyoutTitleId} data-test-subj="mlTestModelsFlyout">
+    <EuiFlyout
+      size="l"
+      onClose={onClose}
+      aria-labelledby={flyoutTitleId}
+      data-test-subj="mlTestModelsFlyout"
+    >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h2 id={flyoutTitleId}>

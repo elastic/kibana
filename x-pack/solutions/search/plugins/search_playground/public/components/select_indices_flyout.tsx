@@ -132,7 +132,13 @@ export const SelectIndicesFlyout: React.FC<SelectIndicesFlyout> = ({ onClose }) 
   };
 
   return (
-    <EuiFlyout size="s" ownFocus onClose={onClose} data-test-subj="selectIndicesFlyout" aria-labelledby={modalTitleId}>
+    <EuiFlyout
+      size="s"
+      ownFocus
+      onClose={onClose}
+      data-test-subj="selectIndicesFlyout"
+      aria-labelledby={modalTitleId}
+    >
       <EuiSelectable
         data-test-subj="indicesTable"
         searchable

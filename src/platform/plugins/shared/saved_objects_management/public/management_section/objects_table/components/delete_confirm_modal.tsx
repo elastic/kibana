@@ -79,7 +79,11 @@ export const DeleteConfirmModal: FC<DeleteConfirmModalProps> = ({
   // can't use `EuiConfirmModal` here as the confirm modal body is wrapped
   // inside a `<p>` element, causing UI glitches with the table.
   return (
-    <EuiModal initialFocus="soDeleteConfirmModalConfirmBtn" onClose={onCancel} aria-labelledby={modalTitleId}>
+    <EuiModal
+      initialFocus="soDeleteConfirmModalConfirmBtn"
+      onClose={onCancel}
+      aria-labelledby={modalTitleId}
+    >
       <EuiModalHeader>
         <EuiModalHeaderTitle id={modalTitleId}>
           <FormattedMessage

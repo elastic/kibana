@@ -31,7 +31,9 @@ const BulkActionRuleLimitErrorModalComponent = ({
   return (
     <EuiModal onClose={onClose} aria-labelledby={modalTitleId}>
       <EuiModalHeader>
-        <EuiModalHeaderTitle id={modalTitleId}>{i18n.BULK_ACTION_LIMIT_ERROR_MODAL_TITLE}</EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id={modalTitleId}>
+          {i18n.BULK_ACTION_LIMIT_ERROR_MODAL_TITLE}
+        </EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>{message}</EuiModalBody>
       <EuiModalFooter>

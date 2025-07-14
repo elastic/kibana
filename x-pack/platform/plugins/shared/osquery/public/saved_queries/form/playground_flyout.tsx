@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { EuiFlyout, EuiFlyoutHeader, EuiTitle, EuiFlyoutBody, useGeneratedHtmlId } from '@elastic/eui';
+import {
+  EuiFlyout,
+  EuiFlyoutHeader,
+  EuiTitle,
+  EuiFlyoutBody,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 

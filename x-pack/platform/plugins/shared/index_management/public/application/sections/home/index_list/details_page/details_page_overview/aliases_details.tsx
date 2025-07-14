@@ -104,7 +104,11 @@ export const AliasesDetails: FunctionComponent<{ aliases: Index['aliases'] }> = 
         }}
       />
       {isShowingAliases && (
-        <EuiFlyout aria-labelledby={flyoutTitleId} ownFocus onClose={() => setIsShowingAliases(false)}>
+        <EuiFlyout
+          aria-labelledby={flyoutTitleId}
+          ownFocus
+          onClose={() => setIsShowingAliases(false)}
+        >
           <EuiFlyoutHeader hasBorder>
             <EuiTitle size="m">
               <h2 id={flyoutTitleId}>

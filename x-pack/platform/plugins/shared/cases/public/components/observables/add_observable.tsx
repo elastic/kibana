@@ -62,7 +62,11 @@ const AddObservableComponent: React.FC<AddObservableProps> = ({ caseData }) => {
         {i18n.ADD_OBSERVABLE}
       </EuiButton>
       {isModalVisible && (
-        <EuiModal data-test-subj="cases-observables-add-modal" onClose={closeModal} aria-labelledby={modalTitleId}>
+        <EuiModal
+          data-test-subj="cases-observables-add-modal"
+          onClose={closeModal}
+          aria-labelledby={modalTitleId}
+        >
           <EuiModalHeader>
             <EuiModalHeaderTitle id={modalTitleId}>{i18n.ADD_OBSERVABLE}</EuiModalHeaderTitle>
           </EuiModalHeader>

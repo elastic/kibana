@@ -75,7 +75,11 @@ export const PostInstallGoogleCloudShellModal: React.FunctionComponent<{
   });
 
   return (
-    <EuiModal data-test-subj="postInstallGoogleCloudShellModal" onClose={onCancel} aria-labelledby={modalTitleId}>
+    <EuiModal
+      data-test-subj="postInstallGoogleCloudShellModal"
+      onClose={onCancel}
+      aria-labelledby={modalTitleId}
+    >
       <EuiModalHeader>
         <EuiModalHeaderTitle id={modalTitleId} data-test-subj="confirmGoogleCloudShellTitleText">
           <FormattedMessage

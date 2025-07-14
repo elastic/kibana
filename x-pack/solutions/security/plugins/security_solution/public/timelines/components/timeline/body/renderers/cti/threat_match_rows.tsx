@@ -119,7 +119,9 @@ const ThreatMatchRowModal: FC<ThreatMatchRowModalProps> = ({ title, renderChildr
     modal = (
       <EuiModal onClose={closeModal} aria-labelledby={modalTitleId}>
         <EuiModalHeader data-test-subj="threat-match-row-modal">
-          <EuiModalHeaderTitle id={modalTitleId}>{ALL_INDICATOR_MATCHES_MODAL_HEADER}</EuiModalHeaderTitle>
+          <EuiModalHeaderTitle id={modalTitleId}>
+            {ALL_INDICATOR_MATCHES_MODAL_HEADER}
+          </EuiModalHeaderTitle>
         </EuiModalHeader>
         <EuiModalBody>{renderChildren()}</EuiModalBody>
         <EuiModalFooter>

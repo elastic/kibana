@@ -88,7 +88,12 @@ export const ViewCodeFlyout: React.FC<ViewCodeFlyoutProps> = ({ onClose, selecte
   }, [usageTracker, selectedLanguage]);
 
   return (
-    <EuiFlyout ownFocus onClose={onClose} data-test-subj="viewCodeFlyout" aria-labelledby={flyoutTitleId}>
+    <EuiFlyout
+      ownFocus
+      onClose={onClose}
+      data-test-subj="viewCodeFlyout"
+      aria-labelledby={flyoutTitleId}
+    >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h2 id={flyoutTitleId}>

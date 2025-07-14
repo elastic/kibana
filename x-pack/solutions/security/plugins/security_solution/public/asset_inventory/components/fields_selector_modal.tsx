@@ -48,7 +48,11 @@ export const FieldsSelectorModal = ({
   const fieldsSelectorModalTitleId = useGeneratedHtmlId();
 
   return (
-    <EuiModal onClose={closeModal} data-test-subj={ASSET_INVENTORY_FIELDS_SELECTOR_MODAL} aria-labelledby={fieldsSelectorModalTitleId}>
+    <EuiModal
+      onClose={closeModal}
+      data-test-subj={ASSET_INVENTORY_FIELDS_SELECTOR_MODAL}
+      aria-labelledby={fieldsSelectorModalTitleId}
+    >
       <EuiModalHeader>
         <EuiModalHeaderTitle id={fieldsSelectorModalTitleId}>{title}</EuiModalHeaderTitle>
       </EuiModalHeader>

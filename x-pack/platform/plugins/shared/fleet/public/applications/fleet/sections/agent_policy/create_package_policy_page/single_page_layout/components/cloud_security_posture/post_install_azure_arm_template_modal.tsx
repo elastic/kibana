@@ -55,9 +55,16 @@ export const PostInstallAzureArmTemplateModal: React.FunctionComponent<{
   });
 
   return (
-    <EuiModal data-test-subj="postInstallAzureArmTemplateModal" onClose={onCancel} aria-labelledby={modalTitleId}>
+    <EuiModal
+      data-test-subj="postInstallAzureArmTemplateModal"
+      onClose={onCancel}
+      aria-labelledby={modalTitleId}
+    >
       <EuiModalHeader>
-        <EuiModalHeaderTitle data-test-subj="confirmAzureArmTemplateModalTitleText" id={modalTitleId}>
+        <EuiModalHeaderTitle
+          data-test-subj="confirmAzureArmTemplateModalTitleText"
+          id={modalTitleId}
+        >
           <FormattedMessage
             id="xpack.fleet.agentPolicy.postInstallAzureArmTemplateModalModalTitle"
             defaultMessage="ARM Template deployment"

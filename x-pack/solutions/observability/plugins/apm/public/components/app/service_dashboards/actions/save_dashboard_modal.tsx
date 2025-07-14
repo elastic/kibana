@@ -146,7 +146,11 @@ export function SaveDashboardModal({
   );
 
   return (
-    <EuiModal onClose={onClose} data-test-subj="apmSelectServiceDashboard" aria-labelledby={modalTitleId}>
+    <EuiModal
+      onClose={onClose}
+      data-test-subj="apmSelectServiceDashboard"
+      aria-labelledby={modalTitleId}
+    >
       <EuiModalHeader>
         <EuiModalHeaderTitle id={modalTitleId}>
           {isEditMode

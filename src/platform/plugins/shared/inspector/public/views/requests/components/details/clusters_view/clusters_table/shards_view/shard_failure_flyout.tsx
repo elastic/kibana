@@ -31,7 +31,12 @@ export function ShardFailureFlyout({ failures, onClose }: Props) {
   const flyoutTitleId = useGeneratedHtmlId();
 
   return (
-    <EuiFlyout onClose={onClose} ownFocus={false} hideCloseButton={true} aria-labelledby={flyoutTitleId}>
+    <EuiFlyout
+      onClose={onClose}
+      ownFocus={false}
+      hideCloseButton={true}
+      aria-labelledby={flyoutTitleId}
+    >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
           <h1 id={flyoutTitleId}>

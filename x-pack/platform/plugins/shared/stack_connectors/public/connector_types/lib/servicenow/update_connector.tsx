@@ -120,7 +120,12 @@ const UpdateConnectorComponent: React.FC<Props> = ({
 
   return (
     <Form form={form}>
-      <EuiFlyout aria-labelledby={modalTitleId} ownFocus onClose={onCancel} data-test-subj="updateConnectorForm">
+      <EuiFlyout
+        aria-labelledby={modalTitleId}
+        ownFocus
+        onClose={onCancel}
+        data-test-subj="updateConnectorForm"
+      >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
             <h1 id={modalTitleId}>{title}</h1>

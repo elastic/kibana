@@ -96,7 +96,11 @@ export const CloseJobsConfirmModal: FC<Props> = ({
     );
 
     return (
-      <EuiModal data-test-subj="mlCloseJobsConfirmModal" onClose={closeModal} aria-labelledby={modalTitleId}>
+      <EuiModal
+        data-test-subj="mlCloseJobsConfirmModal"
+        onClose={closeModal}
+        aria-labelledby={modalTitleId}
+      >
         <EuiModalHeader>
           <EuiModalHeaderTitle id={modalTitleId}>{title}</EuiModalHeaderTitle>
         </EuiModalHeader>

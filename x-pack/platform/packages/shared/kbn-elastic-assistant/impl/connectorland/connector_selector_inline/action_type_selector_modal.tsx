@@ -72,9 +72,15 @@ export const ActionTypeSelectorModal = React.memo(
     if (actionTypeSelectorInline) return <>{content}</>;
 
     return (
-      <EuiModal onClose={onClose} data-test-subj="action-type-selector-modal" aria-labelledby={modalTitleId}>
+      <EuiModal
+        onClose={onClose}
+        data-test-subj="action-type-selector-modal"
+        aria-labelledby={modalTitleId}
+      >
         <EuiModalHeader>
-          <EuiModalHeaderTitle id={modalTitleId}>{i18n.INLINE_CONNECTOR_PLACEHOLDER}</EuiModalHeaderTitle>
+          <EuiModalHeaderTitle id={modalTitleId}>
+            {i18n.INLINE_CONNECTOR_PLACEHOLDER}
+          </EuiModalHeaderTitle>
         </EuiModalHeader>
 
         <EuiModalBody>{content}</EuiModalBody>

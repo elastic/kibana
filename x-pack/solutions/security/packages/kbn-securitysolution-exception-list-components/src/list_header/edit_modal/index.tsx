@@ -41,7 +41,12 @@ const EditModalComponent: FC<EditModalProps> = ({ listDetails, onSave, onCancel 
   const editModalTitleId = useGeneratedHtmlId();
 
   return (
-    <EuiModal aria-labelledby={editModalTitleId} data-test-subj="EditModal" onClose={onCancel} initialFocus="[name=popswitch]">
+    <EuiModal
+      aria-labelledby={editModalTitleId}
+      data-test-subj="EditModal"
+      onClose={onCancel}
+      initialFocus="[name=popswitch]"
+    >
       {showProgress && (
         <EuiProgress data-test-subj="editModalProgess" size="xs" position="absolute" />
       )}

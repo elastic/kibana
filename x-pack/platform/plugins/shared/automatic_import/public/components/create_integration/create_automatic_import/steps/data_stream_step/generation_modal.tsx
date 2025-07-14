@@ -75,7 +75,11 @@ export const GenerationModal = React.memo<GenerationModalProps>(
     const generationModalTitleId = useGeneratedHtmlId();
 
     return (
-      <EuiModal onClose={onClose} aria-labelledby={generationModalTitleId} data-test-subj="generationModal">
+      <EuiModal
+        onClose={onClose}
+        aria-labelledby={generationModalTitleId}
+        data-test-subj="generationModal"
+      >
         <EuiModalHeader css={headerCss}>
           <EuiModalHeaderTitle id={generationModalTitleId}>{i18n.ANALYZING}</EuiModalHeaderTitle>
         </EuiModalHeader>

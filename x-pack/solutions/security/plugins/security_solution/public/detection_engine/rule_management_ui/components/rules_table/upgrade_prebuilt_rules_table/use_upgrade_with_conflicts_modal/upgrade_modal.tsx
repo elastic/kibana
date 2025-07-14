@@ -50,9 +50,15 @@ export const UpgradeWithConflictsModal = memo(function ConfirmUpgradeWithConflic
   const modalTitleId = useGeneratedHtmlId();
 
   return (
-    <EuiModal data-test-subj="upgradeConflictsModal" onClose={onCancel} aria-labelledby={modalTitleId}>
+    <EuiModal
+      data-test-subj="upgradeConflictsModal"
+      onClose={onCancel}
+      aria-labelledby={modalTitleId}
+    >
       <EuiModalHeader>
-        <EuiModalHeaderTitle id={modalTitleId}>{i18n.UPGRADE_CONFLICTS_MODAL_TITLE}</EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id={modalTitleId}>
+          {i18n.UPGRADE_CONFLICTS_MODAL_TITLE}
+        </EuiModalHeaderTitle>
       </EuiModalHeader>
 
       <EuiModalBody>

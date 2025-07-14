@@ -6,9 +6,10 @@
  */
 
 import React, { useRef } from 'react';
-import { useGeneratedHtmlId } from '@elastic/eui';
 
 import { useValues, useActions } from 'kea';
+
+import { useGeneratedHtmlId } from '@elastic/eui';
 
 import {
   EuiButton,

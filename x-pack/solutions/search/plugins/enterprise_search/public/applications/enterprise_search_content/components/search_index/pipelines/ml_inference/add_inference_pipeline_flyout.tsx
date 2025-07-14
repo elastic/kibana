@@ -67,7 +67,12 @@ export const AddInferencePipelineFlyout = (props: AddInferencePipelineFlyoutProp
   }, [indexName]);
 
   return (
-    <EuiFlyout onClose={props.onClose} className="enterpriseSearchInferencePipelineFlyout" size="l" aria-labelledby={modalTitleId}>
+    <EuiFlyout
+      onClose={props.onClose}
+      className="enterpriseSearchInferencePipelineFlyout"
+      size="l"
+      aria-labelledby={modalTitleId}
+    >
       <EuiFlyoutHeader>
         <EuiTitle size="m">
           <h3 id={modalTitleId}>

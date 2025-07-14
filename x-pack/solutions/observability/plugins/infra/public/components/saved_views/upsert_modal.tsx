@@ -65,7 +65,11 @@ export const UpsertViewModal = ({
   };
 
   return (
-    <EuiModal onClose={onClose} data-test-subj="savedViews-upsertModal" aria-labelledby={modalTitleId}>
+    <EuiModal
+      onClose={onClose}
+      data-test-subj="savedViews-upsertModal"
+      aria-labelledby={modalTitleId}
+    >
       <EuiModalHeader>
         <EuiModalHeaderTitle id={modalTitleId}>{title}</EuiModalHeaderTitle>
       </EuiModalHeader>

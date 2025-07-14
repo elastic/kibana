@@ -110,7 +110,11 @@ export function KnowledgeBaseCategoryFlyout({
     CATEGORY_MAP[category.categoryKey as unknown as keyof typeof CATEGORY_MAP]?.description;
 
   return (
-    <EuiFlyout onClose={onClose} data-test-subj="knowledgeBaseCategoryFlyout" aria-labelledby={modalTitleId}>
+    <EuiFlyout
+      onClose={onClose}
+      data-test-subj="knowledgeBaseCategoryFlyout"
+      aria-labelledby={modalTitleId}
+    >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle>
           <h2 id={modalTitleId}>{capitalize(category.categoryKey)}</h2>

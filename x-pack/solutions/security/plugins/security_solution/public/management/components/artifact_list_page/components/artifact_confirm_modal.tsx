@@ -43,7 +43,11 @@ export const ArtifactConfirmModal = memo<ConfirmArtifactModalProps>(
     const artifactConfirmModalTitleId = useGeneratedHtmlId();
 
     return (
-      <EuiModal onClose={onCancel} data-test-subj={dataTestSubj} aria-labelledby={artifactConfirmModalTitleId}>
+      <EuiModal
+        onClose={onCancel}
+        data-test-subj={dataTestSubj}
+        aria-labelledby={artifactConfirmModalTitleId}
+      >
         <EuiModalHeader data-test-subj={getTestId('header')}>
           <EuiModalHeaderTitle id={artifactConfirmModalTitleId}>{title}</EuiModalHeaderTitle>
         </EuiModalHeader>

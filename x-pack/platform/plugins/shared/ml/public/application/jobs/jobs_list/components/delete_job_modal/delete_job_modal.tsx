@@ -112,7 +112,11 @@ export const DeleteJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, 
 
   if (canDelete) {
     return (
-      <EuiModal aria-labelledby={deleteJobModalTitleId} data-test-subj="mlDeleteJobConfirmModal" onClose={closeModal}>
+      <EuiModal
+        aria-labelledby={deleteJobModalTitleId}
+        data-test-subj="mlDeleteJobConfirmModal"
+        onClose={closeModal}
+      >
         <EuiModalHeader>
           <EuiModalHeaderTitle id={deleteJobModalTitleId}>
             <FormattedMessage

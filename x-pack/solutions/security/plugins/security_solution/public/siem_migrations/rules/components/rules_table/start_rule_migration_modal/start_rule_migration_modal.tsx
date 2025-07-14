@@ -128,7 +128,11 @@ export const StartRuleMigrationModal: FC<StartRuleMigrationModalProps> = React.m
 
     return (
       <EuiOutsideClickDetector onOutsideClick={closeModal}>
-        <EuiModal aria-labelledby={startRuleMigrationModalTitleId} onClose={closeModal} data-test-subj={DATA_TEST_SUBJ_PREFIX}>
+        <EuiModal
+          aria-labelledby={startRuleMigrationModalTitleId}
+          onClose={closeModal}
+          data-test-subj={DATA_TEST_SUBJ_PREFIX}
+        >
           <EuiModalHeader>
             <EuiModalHeaderTitle
               data-test-subj={`${DATA_TEST_SUBJ_PREFIX}-Title`}

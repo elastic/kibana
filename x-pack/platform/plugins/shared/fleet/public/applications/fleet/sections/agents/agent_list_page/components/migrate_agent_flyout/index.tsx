@@ -141,7 +141,11 @@ export const AgentMigrateFlyout: React.FC<Props> = ({
 
   return (
     <>
-      <EuiFlyout data-test-subj="migrateAgentFlyout" onClose={onClose} aria-labelledby={flyoutTitleId}>
+      <EuiFlyout
+        data-test-subj="migrateAgentFlyout"
+        onClose={onClose}
+        aria-labelledby={flyoutTitleId}
+      >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="l">
             <h1 id={flyoutTitleId}>

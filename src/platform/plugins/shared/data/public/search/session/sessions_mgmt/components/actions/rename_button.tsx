@@ -63,7 +63,11 @@ const RenameDialog = ({
   const isNewNameValid = newName && originalName !== newName;
 
   return (
-    <EuiModal onClose={onActionDismiss} aria-labelledby={modalTitleId} initialFocus="[name=newName]">
+    <EuiModal
+      onClose={onActionDismiss}
+      aria-labelledby={modalTitleId}
+      initialFocus="[name=newName]"
+    >
       <EuiModalHeader>
         <EuiModalHeaderTitle id={modalTitleId}>{title}</EuiModalHeaderTitle>
       </EuiModalHeader>

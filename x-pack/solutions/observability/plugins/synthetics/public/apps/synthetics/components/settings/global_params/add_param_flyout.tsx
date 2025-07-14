@@ -136,7 +136,13 @@ export const AddParamFlyout = ({
   if (isFlyoutVisible) {
     flyout = (
       <FormProvider {...form}>
-        <EuiFlyout ownFocus onClose={closeFlyout} size="m" style={{ minWidth: 500 }} aria-labelledby={flyoutTitleId}>
+        <EuiFlyout
+          ownFocus
+          onClose={closeFlyout}
+          size="m"
+          style={{ minWidth: 500 }}
+          aria-labelledby={flyoutTitleId}
+        >
           <EuiFlyoutHeader hasBorder>
             <EuiTitle size="m">
               <h2 id={flyoutTitleId}>{isEditingItem ? EDIT_PARAM : CREATE_PARAM}</h2>

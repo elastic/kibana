@@ -111,13 +111,21 @@ export const ValueListModal = ({ listId, onCloseModal, canWriteIndex }: ValueLis
   const isListExist = !isListLoading && !!list;
 
   return (
-    <EuiModal aria-labelledby={modalTitleId} maxWidth={false} className={modalWindow} onClose={onCloseModal}>
+    <EuiModal
+      aria-labelledby={modalTitleId}
+      maxWidth={false}
+      className={modalWindow}
+      onClose={onCloseModal}
+    >
       <>
         <EuiModalHeader>
           {isListExist && (
             <EuiFlexGroup justifyContent="spaceBetween" wrap>
               <EuiFlexItem grow={false}>
-                <EuiModalHeaderTitle id={modalTitleId} data-test-subj="value-list-items-modal-title">
+                <EuiModalHeaderTitle
+                  id={modalTitleId}
+                  data-test-subj="value-list-items-modal-title"
+                >
                   {list.id}
                 </EuiModalHeaderTitle>
                 <EuiSpacer size="s" />

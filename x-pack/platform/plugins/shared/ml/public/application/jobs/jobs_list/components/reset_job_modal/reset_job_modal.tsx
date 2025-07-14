@@ -95,7 +95,11 @@ export const ResetJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, r
   }
 
   return (
-    <EuiModal data-test-subj="mlResetJobConfirmModal" onClose={closeModal} aria-labelledby={modalTitleId}>
+    <EuiModal
+      data-test-subj="mlResetJobConfirmModal"
+      onClose={closeModal}
+      aria-labelledby={modalTitleId}
+    >
       <EuiModalHeader>
         <EuiModalHeaderTitle id={modalTitleId}>
           <FormattedMessage

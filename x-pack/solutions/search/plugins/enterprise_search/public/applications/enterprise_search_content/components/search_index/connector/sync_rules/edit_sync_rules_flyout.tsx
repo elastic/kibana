@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+
 import { useGeneratedHtmlId } from '@elastic/eui';
 
 import {
@@ -94,7 +95,12 @@ export const EditSyncRulesFlyout: React.FC<EditFilteringFlyoutProps> = ({
   ];
 
   return (
-    <EuiFlyout ownFocus onClose={() => setIsEditing(false)} aria-labelledby={flyoutTitleId} size="l">
+    <EuiFlyout
+      ownFocus
+      onClose={() => setIsEditing(false)}
+      aria-labelledby={flyoutTitleId}
+      size="l"
+    >
       <EuiFlyoutHeader>
         <EuiTitle size="m">
           <h2 id={flyoutTitleId}>

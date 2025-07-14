@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, EuiTitle, useGeneratedHtmlId } from '@elastic/eui';
+import {
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutHeader,
+  EuiTitle,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { FC, useCallback, useMemo } from 'react';
 
@@ -54,7 +60,12 @@ export const AddEmbeddableFlyout: FC<Props> = ({
   );
 
   return (
-    <EuiFlyout ownFocus onClose={onClose} data-test-subj="dashboardAddPanel" aria-labelledby={modalTitleId}>
+    <EuiFlyout
+      ownFocus
+      onClose={onClose}
+      data-test-subj="dashboardAddPanel"
+      aria-labelledby={modalTitleId}
+    >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h2 id={modalTitleId}>{strings.getTitleText()}</h2>

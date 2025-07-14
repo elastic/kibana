@@ -59,7 +59,10 @@ export const CreateRulesetModal = ({ onClose }: CreateRulesetModalProps) => {
   return (
     <EuiModal onClose={onClose} aria-labelledby={modalTitleId}>
       <EuiModalHeader>
-        <EuiModalHeaderTitle id={modalTitleId} data-test-subj="searchRulesetCreateRulesetModalHeader">
+        <EuiModalHeaderTitle
+          id={modalTitleId}
+          data-test-subj="searchRulesetCreateRulesetModalHeader"
+        >
           <FormattedMessage
             id="xpack.queryRules.createRulesetModal.title"
             defaultMessage="Create ruleset"

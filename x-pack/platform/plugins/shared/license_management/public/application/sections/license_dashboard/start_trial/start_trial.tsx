@@ -80,7 +80,11 @@ export class StartTrial extends Component<Props, State> {
     const modalTitleId = htmlIdGenerator()('modalTitle');
 
     return (
-      <EuiModal className="licManagement__modal" onClose={this.cancel} aria-labelledby={modalTitleId}>
+      <EuiModal
+        className="licManagement__modal"
+        onClose={this.cancel}
+        aria-labelledby={modalTitleId}
+      >
         <EuiModalHeader>
           <EuiModalHeaderTitle id={modalTitleId} data-test-subj="confirmModalTitleText">
             <FormattedMessage

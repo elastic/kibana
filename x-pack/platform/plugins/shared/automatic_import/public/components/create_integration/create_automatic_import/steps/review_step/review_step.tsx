@@ -98,7 +98,10 @@ export const ReviewStep = React.memo<ReviewStepProps>(
             </>
           )}
           {isPipelineEditionVisible && (
-            <EuiFlyout onClose={() => setIsPipelineEditionVisible(false)} aria-labelledby={flyoutTitleId}>
+            <EuiFlyout
+              onClose={() => setIsPipelineEditionVisible(false)}
+              aria-labelledby={flyoutTitleId}
+            >
               <EuiFlyoutHeader hasBorder>
                 <EuiTitle size="s">
                   <h2 id={flyoutTitleId}>{i18n.INGEST_PIPELINE_TITLE}</h2>

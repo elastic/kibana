@@ -46,7 +46,12 @@ export function MLFlyoutView({ isCreatingJob, onClickCreate, onClose, canCreateM
   const flyoutTitleId = useGeneratedHtmlId();
 
   return (
-    <EuiFlyout onClose={onClose} size="s" data-test-subj="uptimeMLFlyout" aria-labelledby={flyoutTitleId}>
+    <EuiFlyout
+      onClose={onClose}
+      size="s"
+      data-test-subj="uptimeMLFlyout"
+      aria-labelledby={flyoutTitleId}
+    >
       <EuiFlyoutHeader>
         <EuiTitle>
           <h2 id={flyoutTitleId}>{labels.ENABLE_ANOMALY_DETECTION}</h2>

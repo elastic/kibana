@@ -60,7 +60,11 @@ export const PostInstallCloudFormationModal: React.FunctionComponent<{
   });
 
   return (
-    <EuiModal aria-labelledby={modalTitleId} data-test-subj="postInstallCloudFormationModal" onClose={onCancel}>
+    <EuiModal
+      aria-labelledby={modalTitleId}
+      data-test-subj="postInstallCloudFormationModal"
+      onClose={onCancel}
+    >
       <EuiModalHeader>
         <EuiModalHeaderTitle id={modalTitleId} data-test-subj="confirmCloudFormationModalTitleText">
           <FormattedMessage

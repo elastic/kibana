@@ -85,7 +85,11 @@ export function KnowledgeBaseBulkImportFlyout({ onClose }: { onClose: () => void
   };
 
   return (
-    <EuiFlyout onClose={onClose} data-test-subj="knowledgeBaseBulkImportFlyout" aria-labelledby={modalTitleId}>
+    <EuiFlyout
+      onClose={onClose}
+      data-test-subj="knowledgeBaseBulkImportFlyout"
+      aria-labelledby={modalTitleId}
+    >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle>
           <h2 id={modalTitleId}>

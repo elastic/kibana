@@ -97,7 +97,11 @@ export const StopDatafeedsConfirmModal: FC<Props> = ({
     );
 
     return (
-      <EuiModal data-test-subj="mlStopDatafeedsConfirmModal" onClose={closeModal} aria-labelledby={modalTitleId}>
+      <EuiModal
+        data-test-subj="mlStopDatafeedsConfirmModal"
+        onClose={closeModal}
+        aria-labelledby={modalTitleId}
+      >
         <EuiModalHeader>
           <EuiModalHeaderTitle id={modalTitleId}>{title}</EuiModalHeaderTitle>
         </EuiModalHeader>

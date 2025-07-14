@@ -34,7 +34,11 @@ export const PostInstallAddAgentModal: React.FunctionComponent<{
   const modalTitleId = useGeneratedHtmlId();
 
   return (
-    <EuiModal data-test-subj="postInstallAddAgentModal" onClose={onCancel} aria-labelledby={modalTitleId}>
+    <EuiModal
+      data-test-subj="postInstallAddAgentModal"
+      onClose={onCancel}
+      aria-labelledby={modalTitleId}
+    >
       <EuiModalHeader>
         <EuiModalHeaderTitle data-test-subj="confirmModalTitleText" id={modalTitleId}>
           <FormattedMessage
