@@ -35,9 +35,7 @@ export const retriever = (specService: SpecDefinitionsService) => {
     },
     linear: {
       __template: {
-        query: 'search terms',
-        fields: ['field1', 'field2^2'],
-        normalizer: 'minmax',
+        retrievers: [{}],
       },
       rank_window_size: 100,
       filter: {
@@ -84,8 +82,7 @@ export const retriever = (specService: SpecDefinitionsService) => {
     },
     rrf: {
       __template: {
-        query: 'search terms',
-        fields: ['field1', 'field2'],
+        retrievers: [{}],
       },
       retrievers: [
         {
