@@ -1,5 +1,7 @@
 disabled:
   # Stateful base config for deployment-agnostic tests
+  - x-pack/platform/test/api_integration_deployment_agnostic/default_configs/stateful.config.base.ts
+  - x-pack/platform/test/api_integration_deployment_agnostic/default_configs/feature_flag.stateful.config.base.ts
   - x-pack/test/api_integration/deployment_agnostic/default_configs/stateful.config.base.ts
   - x-pack/test/api_integration/deployment_agnostic/default_configs/feature_flag.stateful.config.base.ts
 
@@ -21,7 +23,7 @@ disabled:
 
   # QA suites that are run out-of-band
   - x-pack/test/stack_functional_integration/configs/config.stack_functional_integration_base.js
-  - x-pack/test/upgrade/config.ts
+  - x-pack/platform/test/upgrade/config.ts
   - src/platform/test/functional/config.edge.js
   - x-pack/platform/test/functional/config.edge.ts
   - x-pack/test/functional/config.edge.js
@@ -52,12 +54,12 @@ disabled:
   # Gen AI suites, running with their own pipeline
   - x-pack/test/functional_gen_ai/inference/config.ts
 
-
 defaultQueue: 'n2-4-spot'
 enabled:
   - src/platform/test/accessibility/config.ts
   - src/platform/test/analytics/config.ts
   - src/platform/test/api_integration/config.js
+  - src/platform/test/api_integration/apis/unused_urls_task/config.ts
   - src/platform/test/examples/config.js
   - src/platform/test/functional/apps/bundles/config.ts
   - src/platform/test/functional/apps/console/config.ts
@@ -275,8 +277,8 @@ enabled:
   - x-pack/platform/test/functional_cloud/config.ts
   - x-pack/platform/test/functional_cloud/saml.config.ts
   - x-pack/test/functional_solution_sidenav/config.ts
-  - x-pack/test/licensing_plugin/config.public.ts
-  - x-pack/test/licensing_plugin/config.ts
+  - x-pack/platform/test/licensing_plugin/config.public.ts
+  - x-pack/platform/test/licensing_plugin/config.ts
   - x-pack/test/plugin_functional/config.ts
   - x-pack/platform/test/reporting_api_integration/reporting_and_security.config.ts
   - x-pack/platform/test/reporting_api_integration/reporting_without_security.config.ts
@@ -291,7 +293,7 @@ enabled:
   - x-pack/test/saved_object_tagging/api_integration/tagging_usage_collection/config.ts
   - x-pack/test/saved_object_tagging/functional/config.ts
   - x-pack/test/saved_objects_field_count/config.ts
-  - x-pack/test/search_sessions_integration/config.ts
+  - x-pack/platform/test/search_sessions_integration/config.ts
   - x-pack/test/security_api_integration/anonymous_es_anonymous.config.ts
   - x-pack/test/security_api_integration/anonymous.config.ts
   - x-pack/test/security_api_integration/api_keys.config.ts
@@ -327,14 +329,14 @@ enabled:
   - x-pack/test/security_functional/user_profiles.config.ts
   - x-pack/test/security_functional/expired_session.config.ts
   - x-pack/test/session_view/basic/config.ts
-  - x-pack/test/spaces_api_integration/security_and_spaces/config_basic.ts
-  - x-pack/test/spaces_api_integration/security_and_spaces/config_trial.ts
-  - x-pack/test/spaces_api_integration/spaces_only/config.ts
+  - x-pack/platform/test/spaces_api_integration/security_and_spaces/config_basic.ts
+  - x-pack/platform/test/spaces_api_integration/security_and_spaces/config_trial.ts
+  - x-pack/platform/test/spaces_api_integration/spaces_only/config.ts
   - x-pack/platform/test/task_manager_claimer_update_by_query/config.ts
   - x-pack/platform/test/ui_capabilities/security_and_spaces/config.ts
   - x-pack/platform/test/ui_capabilities/spaces_only/config.ts
   - x-pack/test/upgrade_assistant_integration/config.ts
-  - x-pack/test/usage_collection/config.ts
+  - x-pack/platform/test/usage_collection/config.ts
   - x-pack/performance/journeys_e2e/aiops_log_rate_analysis.ts
   - x-pack/performance/journeys_e2e/ecommerce_dashboard.ts
   - x-pack/performance/journeys_e2e/ecommerce_dashboard_http2.ts
@@ -360,8 +362,6 @@ enabled:
   - x-pack/performance/journeys_e2e/apm_service_inventory.ts
   - x-pack/performance/journeys_e2e/infra_hosts_view.ts
   - x-pack/test/custom_branding/config.ts
-  # stateful config files that run deployment-agnostic tests
-  - x-pack/test/api_integration/deployment_agnostic/configs/stateful/platform.stateful.config.ts
   # configs migrated to the new Kibana architecture
   - x-pack/platform/test/api_integration/apis/aiops/config.ts
   - x-pack/platform/test/api_integration/apis/cloud/config.ts
@@ -406,4 +406,5 @@ enabled:
   - x-pack/platform/test/saved_object_api_integration/security_and_spaces/config_trial.ts
   - x-pack/platform/test/saved_object_api_integration/spaces_only/config.ts
   - x-pack/platform/test/saved_object_api_integration/user_profiles/config.ts
-  - src/platform/test/api_integration/apis/unused_urls_task/config.ts
+    # stateful config files that run deployment-agnostic tests
+  - x-pack/platform/test/api_integration_deployment_agnostic/configs/stateful/platform.stateful.config.ts

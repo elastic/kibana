@@ -9,8 +9,8 @@ import expect from '@kbn/expect';
 import { MessageRole, type Message } from '@kbn/observability-ai-assistant-plugin/common';
 import { PassThrough } from 'stream';
 import { times } from 'lodash';
+import { SupertestWithRoleScope } from '@kbn/test-suites-xpack-platform/api_integration_deployment_agnostic/services/role_scoped_supertest';
 import { createLlmProxy, LlmProxy } from '../utils/create_llm_proxy';
-import { SupertestWithRoleScope } from '../../../../services/role_scoped_supertest';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 
 const SYSTEM_MESSAGE = `this is a system message`;

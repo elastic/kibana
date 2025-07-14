@@ -10,10 +10,13 @@ import expect from '@kbn/expect';
 import {
   IngestStreamEffectiveLifecycle,
   IngestStreamLifecycle,
+  IngestStreamLifecycleDisabled,
   Streams,
+  isDisabledLifecycle,
   isDslLifecycle,
   isIlmLifecycle,
 } from '@kbn/streams-schema';
+import { IndicesManagedBy } from '@elastic/elasticsearch/lib/api/types';
 import {
   disableStreams,
   enableStreams,
@@ -48,10 +51,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     const dataStreams = await esClient.indices.getDataStream({ name: streams });
     for (const dataStream of dataStreams.data_streams) {
       if (isDslLifecycle(expectedLifecycle)) {
+        const managedBy: IndicesManagedBy = 'Data stream lifecycle';
+        expect(dataStream.next_generation_managed_by).to.eql(managedBy);
         expect(dataStream.lifecycle?.data_retention).to.eql(expectedLifecycle.dsl.data_retention);
-        expect(
-          dataStream.indices.every((index) => index.managed_by === 'Data stream lifecycle')
-        ).to.eql(true, 'backing indices should be managed by DSL');
+        expect(dataStream.indices.every((index) => index.managed_by === managedBy)).to.eql(
+          true,
+          'backing indices should be managed by DSL'
+        );
 
         if (!isServerless) {
           expect(dataStream.prefer_ilm).to.eql(
@@ -64,6 +70,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           );
         }
       } else if (isIlmLifecycle(expectedLifecycle)) {
+        const managedBy: IndicesManagedBy = 'Index Lifecycle Management';
+        expect(dataStream.next_generation_managed_by).to.eql(managedBy);
         expect(dataStream.prefer_ilm).to.eql(
           true,
           `data stream ${dataStream.name} should specify prefer_ilm`
@@ -74,9 +82,17 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             (index) =>
               index.prefer_ilm &&
               index.ilm_policy === expectedLifecycle.ilm.policy &&
-              index.managed_by === 'Index Lifecycle Management'
+              index.managed_by === managedBy
           )
         ).to.eql(true, 'backing indices should be managed by ILM');
+      } else if (isDisabledLifecycle(expectedLifecycle)) {
+        const managedBy: IndicesManagedBy = 'Unmanaged';
+        expect(dataStream.next_generation_managed_by).to.eql(managedBy);
+        expect(dataStream.indices.every((index) => index.managed_by === managedBy));
+      } else {
+        throw new Error(
+          `Check against lifecycle [${JSON.stringify(expectedLifecycle)}] is not implemented`
+        );
       }
     }
   }
@@ -439,7 +455,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       let clean: () => Promise<void>;
       afterEach(() => clean?.());
 
-      const createDataStream = async (name: string, lifecycle: IngestStreamLifecycle) => {
+      const createDataStream = async (
+        name: string,
+        lifecycle: IngestStreamLifecycle | IngestStreamLifecycleDisabled
+      ) => {
         await esClient.indices.putIndexTemplate({
           name,
           index_patterns: [name],
@@ -462,7 +481,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               }
             : undefined,
         });
-        await esClient.indices.createDataStream({ name });
+        await esClient.index({ index: name, document: { '@timestamp': new Date() } });
 
         clean = async () => {
           await esClient.indices.deleteDataStream({ name });
@@ -470,15 +489,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         };
       };
 
-      it('cannot update to inherit lifecycle', async () => {
-        const indexName = 'unwired-stream-inherit';
+      it('inherit falls back to template dsl configuration', async () => {
+        const indexName = 'unwired-stream-inherit-dsl';
         await createDataStream(indexName, { dsl: { data_retention: '77d' } });
 
         // initially set to inherit which is a noop
         await putStream(apiClient, indexName, unwiredPutBody);
+        await esClient.indices.rollover({ alias: indexName });
         await expectLifecycle([indexName], { dsl: { data_retention: '77d' } });
 
-        // update to dsl
+        // update lifecycle
         await putStream(apiClient, indexName, {
           dashboards: [],
           queries: [],
@@ -492,9 +512,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
         await expectLifecycle([indexName], { dsl: { data_retention: '2d' } });
 
-        // fail to set inherit
-        await putStream(apiClient, indexName, unwiredPutBody, 400);
-        await expectLifecycle([indexName], { dsl: { data_retention: '2d' } });
+        // inherit sets the lifecycle back to the template configuration
+        await putStream(apiClient, indexName, unwiredPutBody, 200);
+        await expectLifecycle([indexName], { dsl: { data_retention: '77d' } });
       });
 
       it('overrides dsl retention', async () => {
@@ -575,6 +595,93 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           });
 
           await expectLifecycle([indexName], { ilm: { policy: 'my-policy' } });
+        });
+
+        it('inherit falls back to template dsl or ilm configuration', async () => {
+          const indexName = 'unwired-stream-inherit-dsl-ilm';
+          const templateLifecycle = { ilm: { policy: 'my-policy' } };
+          await createDataStream(indexName, templateLifecycle);
+
+          // initially set to inherit which is a noop
+          await putStream(apiClient, indexName, unwiredPutBody);
+          await esClient.indices.rollover({ alias: indexName });
+          await expectLifecycle([indexName], templateLifecycle);
+
+          // update lifecycle
+          await putStream(apiClient, indexName, {
+            dashboards: [],
+            queries: [],
+            stream: {
+              description: '',
+              ingest: {
+                ...unwiredPutBody.stream.ingest,
+                lifecycle: { dsl: { data_retention: '2d' } },
+              },
+            },
+          });
+          await expectLifecycle([indexName], { dsl: { data_retention: '2d' } });
+
+          // inherit sets the lifecycle back to the template configuration
+          await putStream(apiClient, indexName, unwiredPutBody);
+          await expectLifecycle([indexName], templateLifecycle);
+
+          // update the template to use a new ilm policy
+          await createDataStream(indexName, { ilm: { policy: 'my-updated-policy' } });
+          await esClient.indices.rollover({ alias: indexName });
+
+          // since inherit gives control back to the template, new write indices should
+          // pick up the updated template
+          const {
+            data_streams: [{ indices }],
+          } = await esClient.indices.getDataStream({ name: indexName });
+          expect(indices[indices.length - 1].ilm_policy).to.eql('my-updated-policy');
+          expect(indices.slice(0, -1).every((index) => index.ilm_policy === 'my-policy')).to.eql(
+            true,
+            'all indices up until the update should use the former policy'
+          );
+        });
+
+        it('inherit falls back to template disabled configuration', async () => {
+          const indexName = 'unwired-stream-inherit-disabled';
+          const templateLifecycle = { disabled: {} };
+          await createDataStream(indexName, templateLifecycle);
+
+          // initially set to inherit which is a noop
+          await putStream(apiClient, indexName, unwiredPutBody);
+          await esClient.indices.rollover({ alias: indexName });
+          await expectLifecycle([indexName], templateLifecycle);
+
+          // update lifecycle to dsl
+          await putStream(apiClient, indexName, {
+            dashboards: [],
+            queries: [],
+            stream: {
+              description: '',
+              ingest: {
+                ...unwiredPutBody.stream.ingest,
+                lifecycle: { dsl: { data_retention: '2d' } },
+              },
+            },
+          });
+          await expectLifecycle([indexName], { dsl: { data_retention: '2d' } });
+
+          // update lifecycle to ilm
+          await putStream(apiClient, indexName, {
+            dashboards: [],
+            queries: [],
+            stream: {
+              description: '',
+              ingest: {
+                ...unwiredPutBody.stream.ingest,
+                lifecycle: { ilm: { policy: 'my-policy' } },
+              },
+            },
+          });
+          await expectLifecycle([indexName], { ilm: { policy: 'my-policy' } });
+
+          // inherit sets the lifecycle back to the template configuration
+          await putStream(apiClient, indexName, unwiredPutBody);
+          await expectLifecycle([indexName], templateLifecycle);
         });
       }
     });
