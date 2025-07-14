@@ -11,15 +11,19 @@
  * 2.0.
  */
 
-import type { FieldDescriptor, FieldSpec } from '@kbn/data-views-plugin/server';
+import type { FieldDescriptor } from '@kbn/data-views-plugin/server';
 
 export const mergeUniqueFieldsByName = (
   otherFields: FieldDescriptor[],
-  siemFields: FieldSpec[]
+  siemFields: FieldDescriptor[]
 ): FieldDescriptor[] => {
   const uniqueMap = new Map();
 
-  function addToMap(fields: FieldDescriptor[] | FieldSpec[]) {
+  function addToMap(fields: FieldDescriptor[]) {
+    if (!fields || !fields.length) {
+      return;
+    }
+
     fields.forEach((field) => {
       uniqueMap.set(field.name, field);
     });

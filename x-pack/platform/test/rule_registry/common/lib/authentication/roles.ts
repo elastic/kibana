@@ -220,7 +220,7 @@ export const securitySolutionOnlyAllSpace2WithReadESIndices: Role = {
       indices: [
         {
           names: ['*'],
-          privileges: ['all'],
+          privileges: ['read'],
         },
       ],
     },

@@ -30,7 +30,7 @@ export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const retry = getService('retry');
   const SPACE1 = 'space1';
-  const TEST_URL = '/internal/rac/alerts/alert_fields';
+  const TEST_URL = '/internal/rac/alerts/fields';
 
   const createEsQueryRule = async (
     index: string,
