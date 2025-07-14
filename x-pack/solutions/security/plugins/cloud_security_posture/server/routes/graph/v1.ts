@@ -69,6 +69,42 @@ export const getGraph = async ({
   // Convert results into set of nodes and edges
   const graphData = parseRecords(logger, results.records, nodesLimit);
 
+  // Enhance nodes with entity data
+  const enhancedGraphData = await enhanceGraphWithEntityData({
+    logger,
+    graphData,
+    esClient,
+    assetInventoryEnabled,
+  });
+
+  // Return enhanced graph data
+  return enhancedGraphData;
+};
+
+/**
+ * Enhances graph nodes with entity data from asset inventory
+ *
+ * @param logger Logger instance for reporting issues
+ * @param graphData Graph data from parseRecords function
+ * @param esClient Elasticsearch client for fetching entity data
+ * @param assetInventoryEnabled Whether asset inventory feature is enabled
+ * @returns Enhanced graph data with entity information
+ */
+export const enhanceGraphWithEntityData = async ({
+  logger,
+  graphData,
+  esClient,
+  assetInventoryEnabled,
+}: {
+  logger: Logger;
+  graphData: Pick<GraphResponse, 'nodes' | 'edges' | 'messages'>;
+  esClient: IScopedClusterClient;
+  assetInventoryEnabled: boolean;
+}): Promise<Pick<GraphResponse, 'nodes' | 'edges' | 'messages'>> => {
+  if (!assetInventoryEnabled) {
+    return graphData;
+  }
+
   // Collect all entity IDs from nodes to fetch entity data
   const entityIds = new Set<string>();
   graphData.nodes.forEach((node) => {
@@ -78,13 +114,11 @@ export const getGraph = async ({
 
   // Fetch entity data for all entity IDs
   let assetData: Record<string, any> = {};
-  if (assetInventoryEnabled) {
-    try {
-      assetData = await fetchEntityData(esClient, logger, Array.from(entityIds));
-    } catch (error) {
-      logger.error(`Error fetching entity data: ${error}`);
-      // Continue without entity data if fetch fails
-    }
+  try {
+    assetData = await fetchEntityData(esClient, logger, Array.from(entityIds));
+  } catch (error) {
+    logger.error(`Error fetching entity data: ${error}`);
+    // Continue without entity data if fetch fails
   }
 
   // Enhance nodes with entity data
