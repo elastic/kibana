@@ -7,6 +7,8 @@ date: 2025-07-02
 tags: ['kibana', 'contributor', 'dev', 'http', 'api', 'rest', 'design']
 ---
 
+Kibana's public HTTP APIs are the focus of this document. See the section about [Internal vs Public APIs](#internal-vs-public-apis) for more details.
+
 [Click here](#structure-and-conventions) to skip to the structure and conventions guides.
 
 ## Design principles
@@ -20,6 +22,7 @@ Consistency is key to a great API-user experience. APIs should be consistent in 
 3. **Consistent validation**: Apply the same validation rules across all APIs.
 4. **Consistent error messages**: Use the same structure for error messages. See the [section on errors](#errors).
 5. **Sufficient security controls**: Don't disable authentication or authorization requirements unless there's a strong and well-defined need.
+6. **Predictability**: APIs should be predictable in their behavior. For example, deleting a resource in one API domain should not have unexpected side-effects in another domain.
 
 This principle is embodied in the rest of this document, so read on for examples!
 
@@ -32,7 +35,7 @@ For example, a UI might want to optimize it's network requests by bundling multi
 A view or component in the UI might do the following for some, UI-specific purpose:
 ```
 GET /internal/some_related_resources_for_this_page?ids_only=true&page=1
-# Which returns:
+# responds with:
 {
   "a_ids": ["1", "2"],
   "b_ids": ["2"]
@@ -42,14 +45,15 @@ GET /internal/some_related_resources_for_this_page?ids_only=true&page=1
 While API clients are better designed as:
 ```
 # Request 1
-GET /api/resource_as?page=1
+GET /api/my_domain/my_resource_as?page=1
+# responds with
 {
   "items": [{ id: "1", "name": "Resource A 1" }, { id: "2", "name": "Resource A 2" }],
   "page": 1,
   "total": 2
 }
 # Request 2
-GET /api/resource_bs?page=1
+GET /api/my_domain/my_resource_bs?page=1
 {
   "items": [{ id: "1", "name": "Resource B 1" }],
   "page": 1,
@@ -93,8 +97,6 @@ First release new HTTP APIs internally or as `Technical Preview` behind a <DocLi
 </DocCallOut>
 
 ## Internal vs Public APIs
-
-Public HTTP APIs are exposed to users. They are also used by plugins and external tools. They are the focus of this document.
 
 Internal HTTP APIs are only used by code Elastic owns, like the UI. By default, when you register a new HTTP API it will be classified as `internal`. For example, this API is internal:
 
@@ -200,15 +202,17 @@ Carefully consider cases where this pattern may make sense as it is more user-fr
 
 ### Methods
 
-**Side effects**
+**Side-effects**
 
-* `GET` should not have side-effects
-* `PATCH`, `PUT` and `DELETE` should have side-effects (alter some resource)
-* `POST` should have side-effects (like creating some resource, read on!)
+A side-effect is the result of some action that will (or would) alter server state. Different methods have different expections with respect to side-effects:
+
+* `GET` **should not** have side-effects
+* `PATCH`, `PUT` and `DELETE` **should** have side-effects
+* `POST` **should** have side-effects (like creating some resource, read on!)
 
 **Same method, same result?**
 
-This is sometimes referred to as _idempotency_. It is related to side-effects, but not quite the same thing.
+This is sometimes referred to as _idempotency_. It is related to side-effects, but not quite the same thing. Idempotency is a **very important** to consider when designing HTTP APIs.
 
 Imagine we were to run the following methods 1000x over:
 
@@ -221,17 +225,17 @@ However...
 
 * `POST` should result in a different _server state_. For example: `POST /api/coolstore/order` will result in a new order each time!
 
-**POST is (mostly) for creating a resource**
-
-Sometimes `POST` can be used for an action against a resource or for actions like a `GET` but with a body. In this case, `POST` may be both side-effect free and idempotent! In most cases it will not be because your request will open a PIT: see [pagination and sorting](#pagination-and-sorting).
-
-If you expect you need to support a lot of input for searching or listing resources it might be good to reserve `POST` for this purposes.
-
 **GET does not accept a body**
 
 `GET /api/my_domain/my_resources/{id}` ✅
 
 `GET /api/my_domain/my_resources/{id} { body: { params } }` ❌
+
+**POST is (mostly) for creating a resource**
+
+Sometimes `POST` can be used for an action against a resource or for actions like a `GET` but with a body. In this case, `POST` may be both side-effect free and idempotent! In most cases it will not be because your request will open a PIT: see [pagination and sorting](#pagination-and-sorting).
+
+If you expect you need to support a lot of input for searching or listing resources reserving `POST` for this purpose:
 
 ```
 POST /api/my_domain/my_resources
@@ -241,11 +245,11 @@ POST /api/my_domain/my_resources
 }
 ```
 
-**PUT or PATCH are for updating a resource**
+**PUT and PATCH are for updating a resource**
 
-`PUT` is a bit special in that it should _create_ the resource if it does not exist. It should expect the **full** resource in the body of the call.
+`PUT` must _create_ the resource if it does not exist and expect the **full** resource in the body of the call.
 
-`PATCH` is used for partial updates and should never create a resource that does not already exist. It should expect a **partial** resource in the body of the call.
+`PATCH` must _update_ the resource if it does not exist and expect a **partial** resource in the body of the call.
 
 **DELETE is for deleting a resource**
 
@@ -258,11 +262,11 @@ DELETE /api/my_domain/my_resources/{id}
 
 **Stick to simple methods**
 
-`GET`, `POST`, `PUT`, `PATCH`, `DELETE` should cover almost all cases. If you are considering `HEAD` or some other method make sure you have a good justification for your HTTP API.
+`GET`, `POST`, `PUT`, `PATCH`, `DELETE` are often enough to cover almost all cases. If you are considering `HEAD` or some other method make sure you have a good justification for your HTTP API.
 
 ### Path and query parameters
 
-**Should use snake case**
+**Use snake case**
 
 `/api/my_api/{my_id}` ✅
 
@@ -272,7 +276,7 @@ DELETE /api/my_domain/my_resources/{id}
 
 `/api/my_api?camelCase=false` ❌
 
-**BEWARE: path or query parameters should not expect values of unknown length**
+**BEWARE: path and query parameters should not expect values of unknown length**
 
 Accepting very long strings (in excess of 200 characters per parameter) in path or query parameters can cause issues for HTTP servers that limit the byte length of certain parts of requests. HTTP servers may limit request header sections to as little as 4096 bytes!
 
@@ -280,7 +284,7 @@ Use a body parameter for long strings instead and use validation to limit a path
 
 ### Bodies
 
-**Should contain snake case keys**
+**Contain snake case keys**
 
 ```
 POST /api/my_domain/my_api
@@ -290,7 +294,7 @@ POST /api/my_domain/my_api
 ```
 
 <DocCallOut title="Snakes and camels">
-  In Kibana's TypeScript code it is considered a formatting issue to use snake case variable names. This clashes with the convenient [object destructuring assignments](https://www.typescriptlang.org/docs/handbook/variable-declarations.html#object-destructuring) that are common in throughout the codebase.
+  In Kibana's TypeScript code it is considered a formatting issue to use snake case variable names. This clashes with the convenient [object destructuring assignments](https://www.typescriptlang.org/docs/handbook/variable-declarations.html#object-destructuring) that are common throughout the codebase.
 
   If you would like to use object destructuring in your code:
   - Convert to camel case by renaming inline `const { snake_case: camelCase } = body`
@@ -337,7 +341,7 @@ Changing the value of a default may, in some cases, have a devastating result si
 
 `schema.object({ id: schema.string() })` ❌
 
-**It is easier to relax requirements than tighten them**
+**It is easier to relax requirements than tighten them up**
 
 If you are in doubt, rather go with stricter validation. Making a requirement more lax if needed is never a breaking change!
 
@@ -387,9 +391,9 @@ See the [MDN docs](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/S
 ```
 POST /api/my_domain/my_resources
 {
-  pit_id: "abc",
-  search_after: ["valueA", 123],
-  size: 10,
+  "pit_id": "abc",
+  "search_after": ["valueA", 123],
+  "size": 10,
 }
 ```
 
@@ -401,7 +405,7 @@ Where `pit_id` is the PIT ID  and `["valueA", 123]` are the sort values that ide
 {
   "items": [...],
   "total": 100,
-  pit_id: "abc",
+  "pit_id": "abc",
   "search_after": ["valueA", 123], // The next search_after value
   "size": 10
 }
@@ -439,7 +443,7 @@ Utilities for working with KQL queries are available in the `@kbn/es-query` pack
 <DocCallOut title="Beware of leaky filters!" color="warning">
   Do not let API consumers directly query based on the schema of your database (saved) objects. This is leaking implementation detail that will make your API unversionable!
 
-  `coolField: "value" AND otherField: "value"` : ✅
+  `cool_field: "value" AND other_field: "value"` : ✅
 
   `internalFieldName: "value" AND otherField: "value"` : ❌
 
@@ -573,8 +577,9 @@ Kibana's internal HTTP APIs can be versioned too, but for a very different purpo
 
 Please see the tutorial on <DocLink id="kibDevTutorialVersioningHTTPAPIs" text="versioning HTTP APIs" /> for more details.
 
+## Advanced concepts
 
-### Data modelling
+###  Data modelling
 
 If your API needs to support multiple data types for the same logical concept, consider these approaches:
 
