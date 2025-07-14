@@ -94,7 +94,7 @@ export const AddNote = React.memo<{
 
   return (
     <AddNotesContainer onKeyDown={onKeyDown} role="dialog">
-      <div style={{ width: '100%' }}>
+      <div css={{ width: '100%' }}>
         <EuiScreenReaderOnly data-test-subj="screenReaderOnly">
           <p>{i18n.YOU_ARE_EDITING_A_NOTE}</p>
         </EuiScreenReaderOnly>
