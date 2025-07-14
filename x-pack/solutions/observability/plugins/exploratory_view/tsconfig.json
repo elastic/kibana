@@ -46,7 +46,6 @@
     "@kbn/expressions-plugin",
     "@kbn/ebt-tools",
     "@kbn/config-schema",
-    "@kbn/shared-ux-error-boundary"
   ],
   "exclude": ["target/**/*"]
 }

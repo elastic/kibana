@@ -391,6 +391,7 @@ describe('Transform attack discoveries to alert documents', () => {
       spaceId: 'test-space-2',
       connectorId: 'test-connector-2',
       ownerId: 'test-user-2',
+      replacements: undefined,
     };
 
     it('generates a deterministic UUID for the same attack discovery and space', () => {
@@ -441,6 +442,43 @@ describe('Transform attack discoveries to alert documents', () => {
       const uuidB = generateAttackDiscoveryAlertHash({
         ...defaultProps,
         attackDiscovery: attackDiscoveryB,
+      });
+      expect(uuidA).toBe(uuidB);
+    });
+
+    it('generates different UUIDs for the attack discovery with anonymized `id` field and without', () => {
+      const attackDiscovery = { ...mockAttackDiscoveries[0], alertIds: ['a', 'b', 'c'] };
+      const replacements = { a: 'alert1', b: 'alert2', c: 'alert3' };
+      const uuidA = generateAttackDiscoveryAlertHash({
+        ...defaultProps,
+        attackDiscovery,
+        replacements,
+      });
+      const uuidB = generateAttackDiscoveryAlertHash({
+        ...defaultProps,
+        attackDiscovery,
+      });
+      expect(uuidA).not.toBe(uuidB);
+      expect(uuidA).toBe('d9e5eb4aa18d47aa031701c6140781ba476956274ddd5a9d52cf9018891bcf47');
+      expect(uuidB).toBe('45aeded7d9ab955aab433eb82743d7d45c5d0b408ba2ccc4dd3d458a2b7d30ab');
+    });
+
+    it('generates a deterministic UUID for the same de-anonymized `id` values', () => {
+      const attackDiscoveryA = { ...mockAttackDiscoveries[0], alertIds: ['a', 'b', 'c'] };
+      const replacementsA = { a: 'alert1', b: 'alert2', c: 'alert3' };
+
+      const attackDiscoveryB = { ...mockAttackDiscoveries[0], alertIds: ['d', 'e', 'f'] };
+      const replacementsB = { d: 'alert1', e: 'alert2', f: 'alert3' };
+
+      const uuidA = generateAttackDiscoveryAlertHash({
+        ...defaultProps,
+        attackDiscovery: attackDiscoveryA,
+        replacements: replacementsA,
+      });
+      const uuidB = generateAttackDiscoveryAlertHash({
+        ...defaultProps,
+        attackDiscovery: attackDiscoveryB,
+        replacements: replacementsB,
       });
       expect(uuidA).toBe(uuidB);
     });
