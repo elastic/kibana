@@ -322,8 +322,15 @@ export const EsDeprecationsTable: React.FunctionComponent<Props> = ({
         ) : (
           <EuiTableBody>
             {visibleDeprecations.map((deprecation, index) => {
+              // Calculate the absolute index in the full deprecations array
+              // This ensures stable keys across pagination
+              // For example: with 10 items per page:
+              // - Page 1: firstItemIndex=0, keys will be deprecation-row-0 to deprecation-row-9
+              // - Page 2: firstItemIndex=10, keys will be deprecation-row-10 to deprecation-row-19
+              // This prevents React from reusing components incorrectly when navigating between pages
+              const absoluteIndex = pager.firstItemIndex + index;
               return (
-                <EuiTableRow data-test-subj="deprecationTableRow" key={`deprecation-row-${index}`}>
+                <EuiTableRow data-test-subj="deprecationTableRow" key={`deprecation-row-${absoluteIndex}`}>
                   {renderTableRowCells(deprecation, mlUpgradeModeEnabled)}
                 </EuiTableRow>
               );
