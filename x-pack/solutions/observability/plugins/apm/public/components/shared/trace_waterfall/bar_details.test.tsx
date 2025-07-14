@@ -128,16 +128,22 @@ describe('BarDetails', () => {
     });
   });
 
-  describe('in case of failure', () => {
+  describe('in case of failure or error', () => {
     const mockItemWithFailure = {
       name: 'Test Span',
       duration: 1234,
       isFailure: true,
+      status: {
+        fieldName: 'fieldName',
+        value: 'value',
+      },
     } as unknown as TraceItem;
 
     it('renders failure badge', () => {
       const { getByTestId } = render(<BarDetails item={mockItemWithFailure} left={10} />);
-      expect(getByTestId('apmBarDetailsFailureBadge')).toBeInTheDocument();
+      const badgeElement = getByTestId('apmBarDetailsFailureBadge');
+      expect(badgeElement).toBeInTheDocument();
+      expect(badgeElement).toHaveTextContent(mockItemWithFailure.status?.value ?? '');
     });
 
     it('shows failure badge tooltip on hover', async () => {
@@ -147,7 +153,11 @@ describe('BarDetails', () => {
       await user.hover(getByTestId('apmBarDetailsFailureBadge'));
 
       await waitFor(() => {
-        expect(getByTestId('apmBarDetailsFailureTooltip')).toBeInTheDocument();
+        const tooltipElement = getByTestId('apmBarDetailsFailureTooltip');
+        expect(tooltipElement).toBeInTheDocument();
+        expect(tooltipElement).toHaveTextContent(
+          `${mockItemWithFailure.status?.fieldName} = ${mockItemWithFailure.status?.value}`
+        );
       });
     });
   });

@@ -12,7 +12,10 @@ export interface TraceItem {
   traceId: string;
   duration: number;
   errorCount: number;
-  isFailure?: boolean;
+  status?: {
+    fieldName: string;
+    value: string;
+  };
   parentId?: string;
   serviceName: string;
 }

@@ -25,13 +25,14 @@ import {
   TRANSACTION_ID,
   TRANSACTION_NAME,
   TIMESTAMP_US,
+  EVENT_OUTCOME,
 } from '../../../common/es_fields/apm';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import type { TraceItem } from '../../../common/waterfall/unified_trace_item';
 import { MAX_ITEMS_PER_PAGE } from './get_trace_items';
 import type { UnifiedTraceErrors } from './get_unified_trace_errors';
 
-const fields = asMutableArray(['@timestamp', 'trace.id', 'service.name', 'event.outcome'] as const);
+const fields = asMutableArray(['@timestamp', 'trace.id', 'service.name'] as const);
 
 const optionalFields = asMutableArray([
   SPAN_ID,
@@ -45,6 +46,8 @@ const optionalFields = asMutableArray([
   PARENT_ID,
   STATUS_CODE,
   TIMESTAMP_US,
+  EVENT_OUTCOME,
+  STATUS_CODE,
 ] as const);
 
 export function getErrorCountByDocId(unifiedTraceErrors: UnifiedTraceErrors) {
@@ -146,13 +149,19 @@ export async function getUnifiedTraceItems({
       }
 
       const docErrorCount = errorCountByDocId[id] || 0;
+      const isFailureOrError = event.event?.outcome === 'failure' || event.status?.code === 'Error';
       return {
         id: event.span?.id ?? event.transaction?.id,
         timestampUs: event.timestamp?.us ?? toMicroseconds(event[AT_TIMESTAMP]),
         name: event.span?.name ?? event.transaction?.name,
         traceId: event.trace.id,
         duration: resolveDuration(apmDuration, event.duration),
-        isFailure: event.event?.outcome === 'failure',
+        ...(isFailureOrError && {
+          status: {
+            fieldName: event.event?.outcome ? EVENT_OUTCOME : STATUS_CODE,
+            value: event.event?.outcome || event.status?.code,
+          },
+        }),
         errorCount: docErrorCount,
         parentId: event.parent?.id,
         serviceName: event.service.name,

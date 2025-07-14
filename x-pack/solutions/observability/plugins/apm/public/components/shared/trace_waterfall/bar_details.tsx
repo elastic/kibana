@@ -83,18 +83,14 @@ export function BarDetails({
             {asDuration(item.duration)}
           </EuiText>
         </EuiFlexItem>
-        {item.isFailure && (
+        {item.status && (
           <EuiFlexItem grow={false}>
             <EuiToolTip
               data-test-subj="apmBarDetailsFailureTooltip"
-              content={i18n.translate('xpack.apm.barDetails.failureTooltip', {
-                defaultMessage: 'event.outcome = failure',
-              })}
+              content={`${item.status.fieldName} = ${item.status.value}`}
             >
               <EuiBadge data-test-subj="apmBarDetailsFailureBadge" color="danger">
-                {i18n.translate('xpack.apm.barDetails.failureBadge', {
-                  defaultMessage: 'failure',
-                })}
+                {item.status.value}
               </EuiBadge>
             </EuiToolTip>
           </EuiFlexItem>
