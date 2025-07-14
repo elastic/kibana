@@ -66,7 +66,7 @@ export const useAssistant = ({
   dataFormattedForFieldBrowser,
   isAlert,
 }: UseAssistantParams): UseAssistantResult => {
-  const { hasAssistantPrivilege, isAssistantEnabled } = useAssistantAvailability();
+  const { hasAssistantPrivilege, isAssistantEnabled, isAssistantVisible } = useAssistantAvailability();
   const { basePromptContexts } = useAssistantContext();
   const suggestedUserPrompt = useMemo(
     () =>
@@ -107,7 +107,7 @@ export const useAssistant = ({
   );
 
   return {
-    showAssistant: isAssistantEnabled && hasAssistantPrivilege && promptContextId !== null,
+    showAssistant: isAssistantEnabled && hasAssistantPrivilege && promptContextId !== null && isAssistantVisible,
     showAssistantOverlay,
     promptContextId: promptContextId || '',
   };
