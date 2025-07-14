@@ -10,7 +10,10 @@
 import type { IRouter, PluginInitializerContext } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 
-export const registerBulkUpdateRoute = (router: IRouter, { logger }: PluginInitializerContext) => {
+export const registerLookupIndexRoutes = (
+  router: IRouter,
+  { logger }: PluginInitializerContext
+) => {
   router.post(
     {
       path: '/internal/esql/lookup_index/{indexName}/update',
@@ -75,10 +78,8 @@ export const registerBulkUpdateRoute = (router: IRouter, { logger }: PluginIniti
 
         const result = await client.indices.create({
           index: indexName,
-          body: {
-            settings: {
-              ['index.mode']: 'lookup',
-            },
+          settings: {
+            mode: 'lookup',
           },
         });
 

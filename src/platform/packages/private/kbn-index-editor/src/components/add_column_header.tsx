@@ -9,6 +9,7 @@
 
 import { EuiFieldText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useAddColumnName } from '../hooks/use_add_column_name';
 
 export const AddColumnHeader = () => {
@@ -29,24 +30,22 @@ export const AddColumnHeader = () => {
 
   if (isEditing) {
     return (
-      <div style={{ display: 'flex', height: '100%' }}>
-        <EuiFieldText
-          value={columnName}
-          autoFocus
-          compressed
-          onChange={(e) => {
-            setColumnName(e.target.value);
-          }}
-          onBlur={() => {
-            setIsEditing(false);
-          }}
-          onKeyDown={(event) => {
-            if (event.key === 'Enter') {
-              submit();
-            }
-          }}
-        />
-      </div>
+      <EuiFieldText
+        value={columnName}
+        autoFocus
+        compressed
+        onChange={(e) => {
+          setColumnName(e.target.value);
+        }}
+        onBlur={() => {
+          setIsEditing(false);
+        }}
+        onKeyDown={(event) => {
+          if (event.key === 'Enter') {
+            submit();
+          }
+        }}
+      />
     );
   }
 
@@ -65,7 +64,10 @@ export const AddColumnHeader = () => {
             if (e.key === 'Enter') setIsEditing(true);
           }}
         >
-          {`Add a field…`}
+          <FormattedMessage
+            id="indexEditor.flyout.grid.columnHeader.default"
+            defaultMessage="Add a field…"
+          />
         </div>
       </EuiFlexItem>
     </EuiFlexGroup>

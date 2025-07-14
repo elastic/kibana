@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { EuiFlexGroup, EuiForm, EuiButtonIcon, EuiFieldText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useAddColumnName } from '../hooks/use_add_column_name';
@@ -19,12 +19,15 @@ interface AddColumnPanelProps {
 export const AddColumnPanel: React.FC<AddColumnPanelProps> = ({ onHide }) => {
   const { columnName, setColumnName, saveNewColumn } = useAddColumnName();
 
-  const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    if (await saveNewColumn()) {
-      onHide();
-    }
-  };
+  const onSubmit = useCallback(
+    async (event: React.FormEvent<HTMLFormElement>) => {
+      event.preventDefault();
+      if (await saveNewColumn()) {
+        onHide();
+      }
+    },
+    [saveNewColumn, onHide]
+  );
 
   return (
     <EuiForm component="form" onSubmit={onSubmit}>

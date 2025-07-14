@@ -26,7 +26,7 @@ export const useAddColumnName = () => {
     if (!columnName) {
       notifications.toasts.addWarning({
         title: i18n.translate('indexEditor.addColumn.emptyName', {
-          defaultMessage: 'Column name cannot be empty',
+          defaultMessage: 'Field name cannot be empty',
         }),
       });
       return false;
@@ -35,7 +35,7 @@ export const useAddColumnName = () => {
     if (columns.some((existingColumn) => existingColumn.name === columnName)) {
       notifications.toasts.addWarning({
         title: i18n.translate('indexEditor.addColumn.duplicatedName', {
-          defaultMessage: 'Column name {columnName} already exists',
+          defaultMessage: 'Field name {columnName} already exists',
           values: { columnName },
         }),
       });
@@ -45,11 +45,11 @@ export const useAddColumnName = () => {
     indexUpdateService.addNewColumn(columnName);
     notifications.toasts.addSuccess({
       title: i18n.translate('indexEditor.addColumn.success', {
-        defaultMessage: 'Column {columnName} has been partially added',
+        defaultMessage: 'Field {columnName} has been partially added',
         values: { columnName },
       }),
       text: i18n.translate('indexEditor.addColumn.successDescription', {
-        defaultMessage: 'You need to add at least one value to this column before it is saved.',
+        defaultMessage: 'You need to add at least one value to this field before it is saved.',
       }),
       toastLifeTimeMs: 10000, // 10 seconds
     });

@@ -104,11 +104,7 @@ export class IndexUpdateService {
     this._exitAttemptWithUnsavedFields$.asObservable();
 
   /** ES Documents */
-  private readonly _rows$ = new BehaviorSubject<DataTableRecord[]>([
-    buildDataTableRecord({
-      _id: `${ROW_PLACEHOLDER_PREFIX}${this._rowPlaceholderCount++}`,
-    }),
-  ]);
+  private readonly _rows$ = new BehaviorSubject<DataTableRecord[]>([this.buildPlaceholderRow()]);
   public readonly rows$: Observable<DataTableRecord[]> = this._rows$.asObservable();
 
   private readonly _totalHits$ = new BehaviorSubject<number>(0);
@@ -138,7 +134,7 @@ export class IndexUpdateService {
     shareReplay(1) // keep latest buffer for retries
   );
 
-  /** Docs that are currently being saved */
+  /** Docs that are pending to be saved*/
   public readonly savingDocs$: Observable<PendingSave> = this.bufferState$.pipe(
     map((updates) => {
       return updates.reduce((acc, update) => {
@@ -406,6 +402,12 @@ export class IndexUpdateService {
     );
   }
 
+  private buildPlaceholderRow(): DataTableRecord {
+    return buildDataTableRecord({
+      _id: `${ROW_PLACEHOLDER_PREFIX}${this._rowPlaceholderCount++}`,
+    });
+  }
+
   public refresh() {
     this._isFetching$.next(true);
     this._refreshSubject$.next(Date.now());
@@ -438,12 +440,7 @@ export class IndexUpdateService {
   }
 
   public addEmptyRow() {
-    this._rows$.next([
-      buildDataTableRecord({
-        _id: `${ROW_PLACEHOLDER_PREFIX}${this._rowPlaceholderCount++}`,
-      }),
-      ...this._rows$.getValue(),
-    ]);
+    this._rows$.next([this.buildPlaceholderRow(), ...this._rows$.getValue()]);
   }
 
   /* Partial doc update */
@@ -472,7 +469,7 @@ export class IndexUpdateService {
     const newDocs = updates
       .filter((update) => !update.id || update.id.startsWith(ROW_PLACEHOLDER_PREFIX))
       .reduce<Record<string, Record<string, any>>>((acc, update) => {
-        const docId = update.id || 'adasd';
+        const docId = update.id || 'new-row';
         acc[docId] = { ...acc[docId], ...update.value };
         return acc;
       }, {});
@@ -529,5 +526,7 @@ export class IndexUpdateService {
     await this.bulkUpdate(updates);
     this.setIndexCreated(true);
     this.actions$.next({ type: 'discard-unsaved-columns' });
+
+    // TODO: error management, should be done here or in the calling component?
   }
 }

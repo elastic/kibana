@@ -30,6 +30,7 @@ export const FlyoutFooter: FC<FlyoutFooterProps> = ({ indexUpdateService, onClos
   const undoTimeLeft = useObservable(indexUpdateService.undoTimer$);
   const isSaving = useObservable(indexUpdateService.isSaving$, false);
   const isIndexCreated = useObservable(indexUpdateService.indexCreated$, false);
+  const docsPendingToBeSaved = useObservable(indexUpdateService.savingDocs$, new Map());
 
   const { uploadStatus, onImportClick, canImport } = useFileUploadContext();
 
@@ -77,7 +78,7 @@ export const FlyoutFooter: FC<FlyoutFooterProps> = ({ indexUpdateService, onClos
 
             {!canImport && !isIndexCreated ? (
               <EuiFlexItem grow={false}>
-                <EuiButton onClick={createIndex}>
+                <EuiButton onClick={createIndex} disabled={!docsPendingToBeSaved.size}>
                   <FormattedMessage
                     id="indexEditor.flyout.footer.primaryButtonLabel.saveIndex"
                     defaultMessage="Save index"

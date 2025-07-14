@@ -69,7 +69,7 @@ export const getCellValueRenderer =
 
     const onEditStartHandler = () => {
       if (!columns.some((col) => col.id === columnId)) {
-        // If the column is not defined, do not start editing
+        // If the column is not defined, do not allow editing
         return;
       }
       onEditStart({ row: rowIndex, col: columnId });
