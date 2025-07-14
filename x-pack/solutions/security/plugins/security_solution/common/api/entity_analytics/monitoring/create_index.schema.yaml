@@ -1,0 +1,42 @@
+openapi: 3.0.0
+
+info:
+  title: Create an index for Privileges Monitoring import
+  version: '2023-10-31'
+paths:
+  /api/entity_analytics/monitoring/privileges/indices:
+    put:
+      x-labels: [ess, serverless]
+      x-internal: true
+      x-codegen-enabled: true
+      operationId: CreatePrivilegesImportIndex
+      summary: Create an index for Privileges Monitoring import
+      
+      requestBody:
+        description: Schema for the entity store initialization
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:      
+                name:
+                  type: string
+                  description: The index name to create
+                mode: 
+                  type: string
+                  enum: [standard, lookup]
+                  description: The mode of index creation, either 'standard' or 'lookup'
+              required:
+                - name
+                - mode                
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean

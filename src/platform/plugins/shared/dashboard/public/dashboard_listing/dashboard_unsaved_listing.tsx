@@ -22,7 +22,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { ViewMode } from '@kbn/presentation-publishing';
 import { css } from '@emotion/react';
-import { useMemoizedStyles } from '@kbn/core/public';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { DashboardAttributes } from '../../server/content_management';
 import {
   DASHBOARD_PANELS_UNSAVED_ID,
@@ -77,7 +77,7 @@ const DashboardUnsavedItem = ({
   onOpenClick: () => void;
   onDiscardClick: () => void;
 }) => {
-  const styles = useMemoizedStyles(unsavedItemStyles);
+  const styles = useMemoCss(unsavedItemStyles);
   return (
     <div css={styles.item}>
       <EuiFlexGroup alignItems="center" gutterSize="none" css={styles.heading} responsive={false}>

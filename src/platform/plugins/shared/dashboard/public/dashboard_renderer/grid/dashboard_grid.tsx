@@ -14,11 +14,10 @@ import { GridLayout, GridPanelData, GridSectionData, type GridLayoutData } from 
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import classNames from 'classnames';
 import { default as React, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useMemoizedStyles } from '@kbn/core/public';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { DASHBOARD_GRID_COLUMN_COUNT } from '../../../common/content_management/constants';
-import { GridData } from '../../../common/content_management/v2/types';
-import { areLayoutsEqual } from '../../dashboard_api/are_layouts_equal';
-import { DashboardLayout } from '../../dashboard_api/types';
+import type { GridData } from '../../../server/content_management';
+import { areLayoutsEqual, type DashboardLayout } from '../../dashboard_api/layout_manager';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { useDashboardInternalApi } from '../../dashboard_api/use_dashboard_internal_api';
 import {
@@ -111,7 +110,6 @@ export const DashboardGrid = ({
           updatedLayout.sections[widget.id] = {
             collapsed: widget.isCollapsed,
             title: widget.title,
-            id: widget.id,
             gridData: {
               i: widget.id,
               y: widget.row,
@@ -167,7 +165,7 @@ export const DashboardGrid = ({
     [appFixedViewport, dashboardContainerRef, dashboardInternalApi.layout$]
   );
 
-  const styles = useMemoizedStyles(dashboardGridStyles);
+  const styles = useMemoCss(dashboardGridStyles);
 
   useEffect(() => {
     /**
@@ -284,6 +282,9 @@ const dashboardGridStyles = {
         paddingTop: euiTheme.size.s,
         '.embPanel__content, .embPanel, .embPanel__hoverActionsAnchor, .lnsExpressionRenderer': {
           borderRadius: 0,
+        },
+        '.embPanel__content, .embPanel__header': {
+          backgroundColor: euiTheme.colors.backgroundBasePlain,
         },
       },
       // drag handle visibility when dashboard is in edit mode or a panel is expanded

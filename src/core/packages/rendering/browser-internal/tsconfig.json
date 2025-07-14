@@ -14,7 +14,6 @@
     "**/*.tsx"
   ],
   "kbn_references": [
-    "@kbn/core-application-common",
     "@kbn/core-application-browser-internal",
     "@kbn/core-overlays-browser",
     "@kbn/core-chrome-browser-internal",
@@ -33,7 +32,10 @@
     "@kbn/core-user-profile-browser-mocks",
     "@kbn/core-execution-context-browser-mocks",
     "@kbn/core-execution-context-browser",
-    "@kbn/react-kibana-context-render"
+    "@kbn/react-kibana-context-render",
+    "@kbn/core-feature-flags-browser",
+    "@kbn/core-chrome-layout",
+    "@kbn/core-feature-flags-browser-mocks"
   ],
   "exclude": [
     "target/**/*"

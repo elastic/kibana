@@ -39,7 +39,7 @@ export type AddRuleMigrationRulesInput = Omit<
   RuleMigrationRule,
   '@timestamp' | 'id' | 'status' | 'created_by'
 >;
-export type RuleMigrationDataStats = Omit<RuleMigrationTaskStats, 'status'>;
+export type RuleMigrationDataStats = Omit<RuleMigrationTaskStats, 'name' | 'status'>;
 export type RuleMigrationAllDataStats = RuleMigrationDataStats[];
 
 export interface RuleMigrationGetRulesOptions {

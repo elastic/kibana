@@ -25,7 +25,6 @@ import {
 } from './common';
 import { createDataStream, deleteDataStream } from '../../../create_test_data';
 
-// eslint-disable-next-line import/no-default-export
 export default function ruleTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const {
@@ -205,16 +204,21 @@ export default function ruleTests({ getService }: FtrProviderContext) {
     });
 
     it('runs correctly: threshold on grouped hit with all columns', async () => {
+      // This test is sensitive to the fields in the index; when adding new fields,
+      // you should drop them here, as it has a limit of 10 or so for grouping,
+      // or otherwise change the grouping values that result.
+      const columnsToDrop = ['tags'];
+
       // write documents from now to the future end date in groups
       await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE, endDate);
       await createRule({
         name: 'never fire',
-        esqlQuery: 'from kibana-alerting-test-data | limit 0',
+        esqlQuery: `from kibana-alerting-test-data | drop ${columnsToDrop} | limit 0`,
         groupBy: 'row',
       });
       await createRule({
         name: 'always fire',
-        esqlQuery: 'from kibana-alerting-test-data',
+        esqlQuery: `from kibana-alerting-test-data | drop ${columnsToDrop}`,
         groupBy: 'row',
       });
 

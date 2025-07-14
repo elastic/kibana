@@ -320,7 +320,7 @@ export class FeatureTable extends Component<Props, State> {
     ) {
       infoIcon = (
         <EuiIconTip
-          type="iInCircle"
+          type="info"
           content={
             <FormattedMessage
               id="xpack.security.management.editRole.featureTable.privilegeCustomizationTooltip"

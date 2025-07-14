@@ -4,28 +4,29 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { FormProvider as ReactHookFormProvider, useForm } from 'react-hook-form';
+import { FormProvider as ReactHookFormProvider, useForm, UseFormGetValues } from 'react-hook-form';
 import React, { useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom-v5-compat';
 import { useDebounceFn } from '@kbn/react-hooks';
+import { DEFAULT_CONTEXT_DOCUMENTS } from '../../common';
+import { DEFAULT_LLM_PROMPT } from '../../common/prompt';
 import { useIndicesValidation } from '../hooks/use_indices_validation';
 import { useLoadFieldsByIndices } from '../hooks/use_load_fields_by_indices';
-import { useUserQueryValidations } from '../hooks/use_user_query_validations';
 import { PlaygroundForm, PlaygroundFormFields } from '../types';
 import { useLLMsModels } from '../hooks/use_llms_models';
+import { playgroundFormResolver } from '../utils/playground_form_resolver';
 
 type PartialPlaygroundForm = Partial<PlaygroundForm>;
 export const LOCAL_STORAGE_KEY = 'search_playground_session';
-export const LOCAL_STORAGE_DEBOUNCE_OPTIONS = { wait: 100 };
+export const LOCAL_STORAGE_DEBOUNCE_OPTIONS = { wait: 100, maxWait: 500 };
 
 const DEFAULT_FORM_VALUES: PartialPlaygroundForm = {
-  prompt: 'You are an assistant for question-answering tasks.',
-  doc_size: 3,
+  prompt: DEFAULT_LLM_PROMPT,
+  doc_size: DEFAULT_CONTEXT_DOCUMENTS,
   source_fields: {},
   indices: [],
   summarization_model: undefined,
   [PlaygroundFormFields.userElasticsearchQuery]: null,
-  [PlaygroundFormFields.userElasticsearchQueryValidations]: undefined,
 };
 
 const getLocalSession = (storage: Storage): PartialPlaygroundForm => {
@@ -42,14 +43,10 @@ const getLocalSession = (storage: Storage): PartialPlaygroundForm => {
   }
 };
 
-const setLocalSession = (formState: PartialPlaygroundForm, storage: Storage) => {
+const setLocalSession = (getValues: UseFormGetValues<PlaygroundForm>, storage: Storage) => {
+  const formState = getValues();
   // omit question and search_query from the session state
-  const {
-    question,
-    search_query: _searchQuery,
-    [PlaygroundFormFields.userElasticsearchQueryValidations]: _queryValidations,
-    ...state
-  } = formState;
+  const { question, search_query: _searchQuery, ...state } = formState;
 
   storage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(state));
 };
@@ -76,6 +73,8 @@ export const UnsavedFormProvider: React.FC<React.PropsWithChildren<UnsavedFormPr
       indices: [],
       search_query: '',
     },
+    resolver: playgroundFormResolver,
+    reValidateMode: 'onChange',
   });
   const { isValidated: isValidatedIndices, validIndices } = useIndicesValidation(
     defaultIndex || sessionState.indices || []
@@ -85,21 +84,17 @@ export const UnsavedFormProvider: React.FC<React.PropsWithChildren<UnsavedFormPr
     setValue: form.setValue,
     getValues: form.getValues,
   });
-  useUserQueryValidations({
-    watch: form.watch,
-    setValue: form.setValue,
-    getValues: form.getValues,
-  });
 
   const setLocalSessionDebounce = useDebounceFn(setLocalSession, LOCAL_STORAGE_DEBOUNCE_OPTIONS);
   useEffect(() => {
-    const subscription = form.watch((values) =>
-      setLocalSessionDebounce.run(values as PartialPlaygroundForm, storage)
+    const subscription = form.watch((_values) =>
+      setLocalSessionDebounce.run(form.getValues, storage)
     );
     return () => subscription.unsubscribe();
   }, [form, storage, setLocalSessionDebounce]);
 
   useEffect(() => {
+    if (models.length === 0) return; // don't continue if there are no models
     const defaultModel = models.find((model) => !model.disabled);
     const currentModel = form.getValues(PlaygroundFormFields.summarizationModel);
 
@@ -111,6 +106,7 @@ export const UnsavedFormProvider: React.FC<React.PropsWithChildren<UnsavedFormPr
   useEffect(() => {
     if (isValidatedIndices) {
       form.setValue(PlaygroundFormFields.indices, validIndices);
+      form.trigger();
     }
   }, [form, isValidatedIndices, validIndices]);
 

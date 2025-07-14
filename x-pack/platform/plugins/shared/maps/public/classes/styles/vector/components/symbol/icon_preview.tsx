@@ -181,7 +181,7 @@ export class IconPreview extends Component<Props, State> {
                     {i18n.translate('xpack.maps.customIconModal.elementPreviewTitle', {
                       defaultMessage: 'Render preview',
                     })}{' '}
-                    <EuiIcon color="subdued" type="questionInCircle" />
+                    <EuiIcon color="subdued" type="question" />
                   </>
                 </EuiToolTip>
               </h4>

@@ -112,7 +112,12 @@
     "@kbn/charts-plugin",
     "@kbn/response-ops-rule-params",
     "@kbn/response-ops-rule-form",
-    "@kbn/fields-metadata-plugin"
+    "@kbn/fields-metadata-plugin",
+    "@kbn/alerts-ui-shared",
+    "@kbn/core-lifecycle-server",
+    "@kbn/shared-ux-error-boundary",
+    "@kbn/field-formats-plugin",
+    "@kbn/core-ui-settings-browser"
   ],
   "exclude": ["target/**/*"]
 }

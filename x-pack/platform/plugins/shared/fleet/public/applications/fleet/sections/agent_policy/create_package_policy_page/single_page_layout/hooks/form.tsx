@@ -233,12 +233,14 @@ export function useOnSubmit({
 
   // Used to render extension components only when package policy is initialized
   const [isInitialized, setIsInitialized] = useState<boolean>(false);
+  const isFetchingBasePackage = useRef<boolean>(false);
 
   const [agentPolicies, setAgentPolicies] = useState<AgentPolicy[]>([]);
   // New package policy state
   const [packagePolicy, setPackagePolicy] = useState<NewPackagePolicy>({
     ...DEFAULT_PACKAGE_POLICY,
   });
+  const [integration, setIntegration] = useState<string | undefined>(integrationToEnable);
 
   // Validation state
   const [validationResults, setValidationResults] = useState<PackagePolicyValidationResults>();
@@ -310,37 +312,56 @@ export function useOnSubmit({
   // Initial loading of package info
   useEffect(() => {
     async function init() {
-      if (!packageInfo || packageInfo.name === packagePolicy.package?.name) {
+      if (
+        !packageInfo ||
+        (packageInfo.name === packagePolicy.package?.name && integrationToEnable === integration)
+      ) {
         return;
+      }
+      if (integrationToEnable !== integration) {
+        setIntegration(integrationToEnable);
       }
 
       // Fetch all packagePolicies having the package name
-      const { data: packagePolicyData } = await sendGetPackagePolicies({
-        perPage: SO_SEARCH_LIMIT,
-        page: 1,
-        kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${packageInfo.name}`,
-      });
-      const incrementedName = getMaxPackageName(packageInfo.name, packagePolicyData?.items);
+      if (!isFetchingBasePackage.current) {
+        // Prevent multiple calls to fetch base package
+        isFetchingBasePackage.current = true;
+        const { data: packagePolicyData } = await sendGetPackagePolicies({
+          perPage: SO_SEARCH_LIMIT,
+          page: 1,
+          kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${packageInfo.name}`,
+        });
+        const incrementedName = getMaxPackageName(packageInfo.name, packagePolicyData?.items);
 
-      const basePackagePolicy = packageToPackagePolicy(
-        packageInfo,
-        agentPolicies.map((policy) => policy.id),
-        '',
-        DEFAULT_PACKAGE_POLICY.name || incrementedName,
-        DEFAULT_PACKAGE_POLICY.description,
-        integrationToEnable
-      );
-      updatePackagePolicy(basePackagePolicy);
-      setIsInitialized(true);
+        const basePackagePolicy = packageToPackagePolicy(
+          packageInfo,
+          agentPolicies.map((policy) => policy.id),
+          '',
+          DEFAULT_PACKAGE_POLICY.name || incrementedName,
+          DEFAULT_PACKAGE_POLICY.description,
+          integrationToEnable
+        );
+
+        // Set the package policy with the fetched package
+        updatePackagePolicy(basePackagePolicy);
+        setIsInitialized(true);
+        isFetchingBasePackage.current = false;
+      }
     }
-    init();
+    if (!isInitialized) {
+      // Fetch agent policies
+      init();
+    }
   }, [
+    isFetchingBasePackage,
     packageInfo,
     agentPolicies,
     updatePackagePolicy,
     integrationToEnable,
     isInitialized,
     packagePolicy.package?.name,
+    integration,
+    setIntegration,
   ]);
 
   useEffect(() => {

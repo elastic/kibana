@@ -10,6 +10,7 @@
 import { i18n } from '@kbn/i18n';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
+import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { ISearchGeneric } from '@kbn/search-types';
 import type { ESQLVariableType, ESQLControlState } from '@kbn/esql-types';
 import type { ESQLControlVariable } from '@kbn/esql-types';
@@ -32,7 +33,11 @@ export class CreateESQLControlAction implements Action<Context> {
   public id = ACTION_CREATE_ESQL_CONTROL;
   public order = 50;
 
-  constructor(protected readonly core: CoreStart, protected readonly search: ISearchGeneric) {}
+  constructor(
+    protected readonly core: CoreStart,
+    protected readonly search: ISearchGeneric,
+    protected readonly timefilter: TimefilterContract
+  ) {}
 
   public getDisplayName(): string {
     return i18n.translate('esql.createESQLControlLabel', {
@@ -61,6 +66,7 @@ export class CreateESQLControlAction implements Action<Context> {
       queryString,
       core: this.core,
       search: this.search,
+      timefilter: this.timefilter,
       variableType,
       esqlVariables,
       onSaveControl,

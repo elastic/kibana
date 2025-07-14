@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { RecommendedQuery, ResolveIndexResponse } from '@kbn/esql-types';
+import type { ResolveIndexResponse } from '@kbn/esql-types';
 
 /**
  * Returns a boolean if the pattern exists in the sources.
@@ -98,8 +98,8 @@ function createPatternRegex(pattern: string): RegExp {
  * @param pattern The pattern string (e.g., "logs*", "my_index", "logs-02122024").
  * @returns An array of matching index names.
  */
-export function findMatchingIndicesFromPattern(
-  registry: Map<string, RecommendedQuery[]>,
+export function findMatchingIndicesFromPattern<T>(
+  registry: Map<string, T[]>,
   indexPattern: string
 ): string[] {
   const matchingIndices: string[] = [];

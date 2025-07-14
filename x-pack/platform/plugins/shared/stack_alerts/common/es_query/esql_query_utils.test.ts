@@ -668,6 +668,17 @@ describe('ESQL query utils', () => {
           ]
         )
       ).toEqual(['c', 'h']);
+
+      expect(
+        getAlertIdFields(
+          'FROM test-index | STATS count = COUNT(*) BY error.code, host | RENAME code = error.code, h = host | RENAME c = code',
+          [
+            { name: 'h', type: 'keyword' },
+            { name: 'c', type: 'keyword' },
+            { name: 'count', type: 'number' },
+          ]
+        )
+      ).toEqual(['c', 'h']);
     });
 
     it('correctly gets the alertId from an ESQL query that uses STATS...BY and drops fields', () => {

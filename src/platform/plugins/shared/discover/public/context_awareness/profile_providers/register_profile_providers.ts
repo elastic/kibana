@@ -24,11 +24,13 @@ import { createSecurityRootProfileProvider } from './security/security_root_prof
 import type { ProfileProviderServices } from './profile_provider_services';
 import { createProfileProviderServices } from './profile_provider_services';
 import type { DiscoverServices } from '../../build_services';
-import { createObservabilityRootProfileProviders } from './observability/observability_root_profile';
 import { createTracesDataSourceProfileProvider } from './observability/traces_data_source_profile';
 import { createDeprecationLogsDataSourceProfileProvider } from './common/deprecation_logs';
 import { createClassicNavRootProfileProvider } from './common/classic_nav_root_profile';
 import { createObservabilityDocumentProfileProviders } from './observability/observability_profile_providers';
+import { createPatternDataSourceProfileProvider } from './common/patterns';
+import { createSecurityDocumentProfileProvider } from './security/security_document_profile';
+import { createObservabilityRootProfileProvider } from './observability/observability_root_profile/profile';
 
 /**
  * Register profile providers for root, data source, and document contexts to the profile profile services
@@ -136,7 +138,7 @@ const createRootProfileProviders = (providerServices: ProfileProviderServices) =
   createExampleSolutionViewRootProfileProvider(),
   createClassicNavRootProfileProvider(providerServices),
   createSecurityRootProfileProvider(providerServices),
-  ...createObservabilityRootProfileProviders(providerServices),
+  createObservabilityRootProfileProvider(providerServices),
 ];
 
 /**
@@ -146,6 +148,7 @@ const createRootProfileProviders = (providerServices: ProfileProviderServices) =
  */
 const createDataSourceProfileProviders = (providerServices: ProfileProviderServices) => [
   createExampleDataSourceProfileProvider(),
+  createPatternDataSourceProfileProvider(providerServices),
   createDeprecationLogsDataSourceProfileProvider(),
   createTracesDataSourceProfileProvider(providerServices),
   ...createObservabilityLogsDataSourceProfileProviders(providerServices),
@@ -158,5 +161,6 @@ const createDataSourceProfileProviders = (providerServices: ProfileProviderServi
  */
 const createDocumentProfileProviders = (providerServices: ProfileProviderServices) => [
   createExampleDocumentProfileProvider(),
+  createSecurityDocumentProfileProvider(providerServices),
   ...createObservabilityDocumentProfileProviders(providerServices),
 ];

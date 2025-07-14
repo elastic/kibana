@@ -10,7 +10,7 @@
     - 'src/plugins/bfetch/**/*.*'
 - 'Team:obs-ux-infra_services':
     - 'x-pack/solutions/observability/plugins/apm/**/*.*'
-    - 'x-pack/test/apm_api_integration/**/*.*'
+    - 'x-pack/solutions/observability/test/apm_api_integration/**/*.*'
     - 'src/platform/packages/shared/kbn-apm-synthtrace/**/*.*'
     - 'src/platform/packages/shared/kbn-apm-synthtrace-client/**/*.*'
     - 'src/platform/packages/shared/kbn-apm-utils/**/*.*'
@@ -26,8 +26,7 @@
 - 'Team:Obs AI Assistant':
     - 'x-pack/platform/plugins/shared/observability_ai_assistant/**/*.*'
     - 'x-pack/plugins/observability_solution/observability_ai_assistant_*/**/*.*'
-    - 'x-pack/test/observability_ai_assistant_api_integration/**/*.*'
-    - 'x-pack/test/observability_ai_assistant_functional/**/*.*'
+    - 'x-pack/solutions/observability/test/observability_ai_assistant_functional/**/*.*'
 - 'ci:project-deploy-observability':
     - 'packages/kbn-apm-*/**/*.*'
     - 'src/platform/plugins/shared/ai_assistant_management/**/*.*'
@@ -38,5 +37,5 @@
     - 'x-pack/solutions/observability/packages/observability-ai/**/*.*'
     - 'x-pack/solutions/observability/plugins/observability_ai_assistant_app/**/*.*'
     - 'x-pack/solutions/observability/plugins/serverless_observability/**/*.*'
-    - 'x-pack/test/apm_api_integration/**/*.*'
+    - 'x-pack/solutions/observability/test/apm_api_integration/**/*.*'
     - 'x-pack/test/observability_*/**/*.*'

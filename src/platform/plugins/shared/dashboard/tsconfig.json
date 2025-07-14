@@ -86,7 +86,11 @@
     "@kbn/saved-objects-tagging-plugin",
     "@kbn/react-kibana-context-theme",
     "@kbn/std",
-    "@kbn/content-management-content-source"
+    "@kbn/content-management-content-source",
+    "@kbn/css-utils",
+    "@kbn/data-service-server",
+    "@kbn/controls-schemas",
+    "@kbn/controls-constants"
   ],
   "exclude": ["target/**/*"]
 }

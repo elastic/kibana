@@ -21,6 +21,7 @@ import {
   createMockUsageCounter,
 } from './__mocks__';
 import { TelemetryEventsSender } from './sender';
+import type { ExperimentalFeatures } from '../../../common';
 
 jest.mock('axios');
 jest.mock('./receiver');
@@ -1006,7 +1007,10 @@ describe('AsyncTelemetryEventsSender', () => {
 
   describe('ITelemetryEventsSender integration', () => {
     it('should send events using the async service', async () => {
-      const serviceV1 = new TelemetryEventsSender(loggingSystemMock.createLogger());
+      const serviceV1 = new TelemetryEventsSender(
+        loggingSystemMock.createLogger(),
+        {} as ExperimentalFeatures
+      );
 
       service.setup(DEFAULT_RETRY_CONFIG, DEFAULT_QUEUE_CONFIG, receiver, telemetryPluginSetup);
       service.start(telemetryPluginStart);
@@ -1038,7 +1042,10 @@ describe('AsyncTelemetryEventsSender', () => {
       const bufferTimeSpanMillis = initialTimeSpan * 10;
       const events = ['e1', 'e2', 'e3'];
       const expectedBody = events.map((e) => JSON.stringify(e)).join('\n');
-      const serviceV1 = new TelemetryEventsSender(loggingSystemMock.createLogger());
+      const serviceV1 = new TelemetryEventsSender(
+        loggingSystemMock.createLogger(),
+        {} as ExperimentalFeatures
+      );
 
       serviceV1.setup(receiver, telemetryPluginSetup, undefined, telemetryUsageCounter, service);
 
@@ -1077,7 +1084,10 @@ describe('AsyncTelemetryEventsSender', () => {
         ...detectionAlertsBefore,
         bufferTimeSpanMillis: 5001,
       };
-      const serviceV1 = new TelemetryEventsSender(loggingSystemMock.createLogger());
+      const serviceV1 = new TelemetryEventsSender(
+        loggingSystemMock.createLogger(),
+        {} as ExperimentalFeatures
+      );
 
       serviceV1.setup(receiver, telemetryPluginSetup, undefined, telemetryUsageCounter, service);
 

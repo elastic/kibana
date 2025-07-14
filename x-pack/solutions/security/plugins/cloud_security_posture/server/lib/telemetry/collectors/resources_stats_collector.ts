@@ -7,9 +7,9 @@
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/core/server';
 import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
+import { CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS } from '@kbn/cloud-security-posture-common';
 import { getIdentifierRuntimeMapping } from '../../../../common/runtime_mappings/get_identifier_runtime_mapping';
 import type { CspmResourcesStats } from './types';
-import { LATEST_FINDINGS_INDEX_DEFAULT_NS } from '../../../../common/constants';
 
 interface ResourcesStats {
   accounts: {
@@ -144,12 +144,12 @@ export const getResourcesStats = async (
 ): Promise<CspmResourcesStats[]> => {
   try {
     const isIndexExists = await esClient.indices.exists({
-      index: LATEST_FINDINGS_INDEX_DEFAULT_NS,
+      index: CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS,
     });
 
     if (isIndexExists) {
       const resourcesStatsResponse = await esClient.search<unknown, ResourcesStats>(
-        getResourcesStatsQuery(LATEST_FINDINGS_INDEX_DEFAULT_NS)
+        getResourcesStatsQuery(CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS)
       );
 
       const cspmResourcesStats = resourcesStatsResponse.aggregations

@@ -13,7 +13,7 @@ import {
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 // Defined in CSP plugin
-const LATEST_FINDINGS_INDEX = 'logs-cloud_security_posture.findings_latest-default';
+const LATEST_FINDINGS_INDEX = 'security_solution-cloud_security_posture.misconfiguration_latest';
 
 export function CspDashboardPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');

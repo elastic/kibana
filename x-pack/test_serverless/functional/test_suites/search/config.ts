@@ -50,5 +50,8 @@ export default createTestConfig({
     searchInferenceEndpoints: {
       pathname: '/app/elasticsearch/relevance/inference_endpoints',
     },
+    searchHomepage: {
+      pathname: '/app/elasticsearch/home',
+    },
   },
 });

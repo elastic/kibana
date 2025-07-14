@@ -8,6 +8,8 @@
 import expect from '@kbn/expect';
 import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 import { pull } from 'lodash';
+import { v4 as uuidv4 } from 'uuid';
+
 import { Spaces } from '../../../../../scenarios';
 import type { FtrProviderContext } from '../../../../../../common/ftr_provider_context';
 import { getUrlPrefix, ObjectRemover } from '../../../../../../common/lib';
@@ -27,11 +29,19 @@ import {
   RULE_TYPE_ID,
 } from './common';
 
-// eslint-disable-next-line import/no-default-export
+const TEST_HOSTNAME = 'test.alerting.example.com';
+
 export default function ruleTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const { es, esTestIndexTool, esTestIndexToolOutput, createEsDocumentsInGroups, waitForDocs } =
-    getRuleServices(getService);
+  const {
+    es,
+    esTestIndexTool,
+    esTestIndexToolOutput,
+    createEsDocumentsInGroups,
+    waitForDocs,
+    waitForAADDocs,
+    removeAllAADDocs,
+  } = getRuleServices(getService);
 
   describe('Query DSL only', () => {
     let endDate: string;
@@ -52,6 +62,8 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       endDate = new Date(endDateMillis).toISOString();
 
       await createDataStream(es, ES_TEST_DATA_STREAM_NAME);
+
+      await removeAllAADDocs();
     });
 
     afterEach(async () => {
@@ -59,6 +71,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       await esTestIndexTool.destroy();
       await esTestIndexToolOutput.destroy();
       await deleteDataStream(es, ES_TEST_DATA_STREAM_NAME);
+      await removeAllAADDocs();
     });
 
     it(`runs correctly: runtime fields for esQuery search type`, async () => {
@@ -267,6 +280,41 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       }
     });
 
+    it(`runs correctly: copies fields from groups into alerts`, async () => {
+      const tag = 'example-tag-A';
+      const ruleName = 'group by tag';
+      await createDocWithTags([tag]);
+
+      await createRule({
+        name: ruleName,
+        esQuery: JSON.stringify({ query: { match_all: {} } }),
+        timeField: '@timestamp',
+        size: 100,
+        thresholdComparator: '>',
+        threshold: [0],
+        groupBy: 'top',
+        termField: 'tags',
+        termSize: 3,
+        sourceFields: [{ label: 'host.hostname', searchPath: 'host.hostname.keyword' }],
+      });
+
+      const docs = await waitForAADDocs(1);
+      const alert = docs[0]._source || {};
+      expect(alert['kibana.alert.rule.name']).to.be(ruleName);
+      expect(alert['kibana.alert.evaluation.value']).to.be('1');
+
+      // eslint-disable-next-line dot-notation
+      const tags = alert['tags'];
+      expect(Array.isArray(tags)).to.be(true);
+      expect(tags.length).to.be(1);
+      expect(tags[0]).to.be(tag);
+
+      const hostname = alert['host.hostname'];
+      expect(Array.isArray(hostname)).to.be(true);
+      expect(hostname.length).to.be(1);
+      expect(hostname[0]).to.be(TEST_HOSTNAME);
+    });
+
     async function createRule(params: CreateRuleParams): Promise<string> {
       const action = {
         id: connectorId,
@@ -324,7 +372,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
               esQuery: params.esQuery,
             };
 
-      const { body: createdRule } = await supertest
+      const response = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send({
@@ -344,15 +392,42 @@ export default function ruleTests({ getService }: FtrProviderContext) {
             searchType: params.searchType,
             aggType: params.aggType || 'count',
             groupBy: params.groupBy || 'all',
+            termField: params.termField,
+            termSize: params.termSize,
+            sourceFields: params.sourceFields,
             ...ruleParams,
           },
-        })
-        .expect(200);
+        });
+
+      const { body: createdRule, statusCode } = response;
+      expect(statusCode).to.be(200);
 
       const ruleId = createdRule.id;
       objectRemover.add(Spaces.space1.id, ruleId, 'rule', 'alerting');
 
       return ruleId;
+    }
+
+    async function createDocWithTags(tags: string[]) {
+      const document = {
+        '@timestamp': new Date().toISOString(),
+        tags,
+        host: {
+          hostname: TEST_HOSTNAME,
+        },
+      };
+
+      const response = await es.index({
+        id: uuidv4(),
+        index: ES_TEST_INDEX_NAME,
+        refresh: 'wait_for',
+        op_type: 'create',
+        body: document,
+      });
+
+      if (response.result !== 'created') {
+        throw new Error(`document not created: ${JSON.stringify(response)}`);
+      }
     }
   });
 }

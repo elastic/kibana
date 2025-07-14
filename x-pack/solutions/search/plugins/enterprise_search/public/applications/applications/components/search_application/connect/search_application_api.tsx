@@ -223,7 +223,7 @@ export const SearchApplicationAPI = () => {
         />
       ) : null}
       <EuiCallOut
-        iconType="iInCircle"
+        iconType="info"
         title={
           <FormattedMessage
             id="xpack.enterpriseSearch.searchApplications.searchApplication.searchApi.searchApiCallout.title"

@@ -20,3 +20,4 @@ export { expandFlattenedAlert } from './format_alert';
 export { sanitizeBulkErrorResponse } from './sanitize_bulk_response';
 export { initializeAlertsClient } from './initialize_alerts_client';
 export { isAlertImproving } from './is_alert_improving';
+export { shouldCreateAlertsInAllSpaces } from './should_create_alerts_in_all_spaces';

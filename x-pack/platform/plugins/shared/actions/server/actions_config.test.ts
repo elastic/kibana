@@ -7,7 +7,6 @@
 
 import { ByteSizeValue } from '@kbn/config-schema';
 import type { ActionsConfig } from './config';
-import { DEFAULT_USAGE_API_URL } from './config';
 import {
   DEFAULT_MICROSOFT_EXCHANGE_URL,
   DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
@@ -41,9 +40,6 @@ const defaultActionsConfig: ActionsConfig = {
   microsoftGraphApiUrl: DEFAULT_MICROSOFT_GRAPH_API_URL,
   microsoftGraphApiScope: DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
   microsoftExchangeUrl: DEFAULT_MICROSOFT_EXCHANGE_URL,
-  usage: {
-    url: DEFAULT_USAGE_API_URL,
-  },
 };
 
 describe('ensureUriAllowed', () => {
@@ -518,6 +514,63 @@ describe('validateEmailAddresses()', () => {
       `"not valid emails: invalid-email-address, (garbage); not allowed emails: bob@elastic.co, jim@elastic.co, hal@bad.com, lou@notgood.org"`
     );
   });
+
+  describe('recipient_allowlist', () => {
+    const recipientAllowlist = ['dev.*@company.co'];
+    const validRecipientEmails = ['dev.team@company.co', 'dev.backend@company.co'];
+
+    test('return no error message when only valid emails are present', () => {
+      const acu = getActionsConfigurationUtilities({
+        ...defaultActionsConfig,
+        email: {
+          recipient_allowlist: recipientAllowlist,
+        },
+      });
+
+      const message = acu.validateEmailAddresses(validRecipientEmails);
+      expect(message).toBe(undefined);
+    });
+
+    test('return no error message when the recipient_allowlist is all', () => {
+      const acu = getActionsConfigurationUtilities({
+        ...defaultActionsConfig,
+        email: {
+          recipient_allowlist: ['*'],
+        },
+      });
+
+      const message = acu.validateEmailAddresses([...testEmailsOk, ...testEmailsNotAllowed]);
+      expect(message).toBe(undefined);
+    });
+
+    test('return error message when invalid and not allowed emails are present', () => {
+      const acu = getActionsConfigurationUtilities({
+        ...defaultActionsConfig,
+        email: {
+          recipient_allowlist: recipientAllowlist,
+        },
+      });
+
+      const message = acu.validateEmailAddresses([...testEmailsAll, ...validRecipientEmails]);
+      expect(message).toMatchInlineSnapshot(
+        `"not valid emails: invalid-email-address, (garbage); not allowed emails: bob@elastic.co, jim@elastic.co, hal@bad.com, lou@notgood.org"`
+      );
+    });
+
+    test('no allowed recipient emails if config set to empty array', () => {
+      const acu = getActionsConfigurationUtilities({
+        ...defaultActionsConfig,
+        email: {
+          recipient_allowlist: [],
+        },
+      });
+
+      const message = acu.validateEmailAddresses([...testEmailsAll, ...validRecipientEmails]);
+      expect(message).toMatchInlineSnapshot(
+        `"not valid emails: invalid-email-address, (garbage); not allowed emails: bob@elastic.co, jim@elastic.co, hal@bad.com, lou@notgood.org, dev.team@company.co, dev.backend@company.co"`
+      );
+    });
+  });
 });
 
 describe('getMaxAttempts()', () => {
@@ -572,6 +625,56 @@ describe('getMaxQueued()', () => {
   });
 });
 
+describe('getWebhookSettings()', () => {
+  test('returns the webhook settings from config', () => {
+    const config: ActionsConfig = {
+      ...defaultActionsConfig,
+      webhook: {
+        ssl: {
+          pfx: {
+            enabled: true,
+          },
+        },
+      },
+    };
+    const webhookSettings = getActionsConfigurationUtilities(config).getWebhookSettings();
+    expect(webhookSettings).toEqual({
+      ssl: {
+        pfx: {
+          enabled: true,
+        },
+      },
+    });
+  });
+
+  test('returns the webhook settings from config when pfx is false', () => {
+    const config: ActionsConfig = {
+      ...defaultActionsConfig,
+      webhook: {
+        ssl: {
+          pfx: {
+            enabled: false,
+          },
+        },
+      },
+    };
+    const webhookSettings = getActionsConfigurationUtilities(config).getWebhookSettings();
+    expect(webhookSettings).toEqual({
+      ssl: {
+        pfx: {
+          enabled: false,
+        },
+      },
+    });
+  });
+
+  test('returns true when no webhook settings are defined', () => {
+    const config: ActionsConfig = defaultActionsConfig;
+    const webhookSettings = getActionsConfigurationUtilities(config).getWebhookSettings();
+    expect(webhookSettings).toEqual({ ssl: { pfx: { enabled: true } } });
+  });
+});
+
 describe('getAwsSesConfig()', () => {
   test('returns null when no email config set', () => {
     const acu = getActionsConfigurationUtilities(defaultActionsConfig);
@@ -580,6 +683,14 @@ describe('getAwsSesConfig()', () => {
 
   test('returns null when no email.services config set', () => {
     const acu = getActionsConfigurationUtilities({ ...defaultActionsConfig, email: {} });
+    expect(acu.getAwsSesConfig()).toEqual(null);
+  });
+
+  test('returns null when no email.services.ses config set', () => {
+    const acu = getActionsConfigurationUtilities({
+      ...defaultActionsConfig,
+      email: { services: {} },
+    });
     expect(acu.getAwsSesConfig()).toEqual(null);
   });
 
@@ -600,5 +711,49 @@ describe('getAwsSesConfig()', () => {
       port: 1234,
       secure: true,
     });
+  });
+});
+
+describe('getEnabledEmailServices()', () => {
+  test('returns all services when no email config set', () => {
+    const acu = getActionsConfigurationUtilities(defaultActionsConfig);
+    expect(acu.getEnabledEmailServices()).toEqual(['*']);
+  });
+
+  test('returns all services when no email.services config set', () => {
+    const acu = getActionsConfigurationUtilities({ ...defaultActionsConfig, email: {} });
+    expect(acu.getEnabledEmailServices()).toEqual(['*']);
+  });
+
+  test('returns all services when no email.services.enabled config set', () => {
+    const acu = getActionsConfigurationUtilities({
+      ...defaultActionsConfig,
+      email: { services: {} },
+    });
+    expect(acu.getEnabledEmailServices()).toEqual(['*']);
+  });
+
+  test('returns only enabled services', () => {
+    const acu = getActionsConfigurationUtilities({
+      ...defaultActionsConfig,
+      email: {
+        services: {
+          enabled: ['google-mail', 'microsoft-exchange'],
+        },
+      },
+    });
+    expect(acu.getEnabledEmailServices()).toEqual(['google-mail', 'microsoft-exchange']);
+  });
+
+  test('returns all services when enabled is set to "*" in config', () => {
+    const acu = getActionsConfigurationUtilities({
+      ...defaultActionsConfig,
+      email: {
+        services: {
+          enabled: ['*'],
+        },
+      },
+    });
+    expect(acu.getEnabledEmailServices()).toEqual(['*']);
   });
 });
