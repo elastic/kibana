@@ -176,6 +176,7 @@ describe('getNormalizeCommonFields', () => {
           max_attempts: 2,
           labels: {},
           maintenance_windows: [],
+          spaces: [],
         },
       });
     }
@@ -243,6 +244,7 @@ describe('getNormalizeCommonFields', () => {
         max_attempts: 2,
         labels: {},
         maintenance_windows: [],
+        spaces: [],
       },
     });
   });
