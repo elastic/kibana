@@ -1942,6 +1942,8 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /x-pack/solutions/observability/test/functional/ftr_provider_context.d.ts @elastic/appex-qa
 /x-pack/solutions/observability/test/functional/page_objects/index.ts @elastic/appex-qa
 /x-pack/solutions/observability/test/functional/services/index.ts @elastic/appex-qa
+/x-pack/platform/test/.gitignore @elastic/appex-qa
+/x-pack/solutions/**/test/.gitignore @elastic/appex-qa
 
 # Core
 /src/platform/test/api_integration/fixtures/kbn_archiver/management/saved_objects/relationships.json @elastic/kibana-core @elastic/kibana-data-discovery
