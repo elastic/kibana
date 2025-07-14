@@ -31,7 +31,6 @@ import type { KnowledgeBaseService } from '../knowledge_base_service';
 import { observableIntoStream } from '../util/observable_into_stream';
 import type { ObservabilityAIAssistantConfig } from '../../config';
 import type { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
-import { AnonymizationService } from '../anonymization';
 
 interface ChunkDelta {
   content?: string | undefined;
@@ -190,13 +189,6 @@ describe('Observability AI Assistant client', () => {
       },
       inferenceClient: inferenceClientMock,
       knowledgeBaseService: knowledgeBaseServiceMock,
-      anonymizationService: new AnonymizationService({
-        esClient: {
-          asCurrentUser: currentUserEsClientMock,
-        },
-        anonymizationRules: [],
-        logger: loggerMock,
-      }),
       logger: loggerMock,
       namespace: 'default',
       user: {
