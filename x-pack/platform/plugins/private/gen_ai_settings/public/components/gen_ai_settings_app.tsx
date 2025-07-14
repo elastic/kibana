@@ -23,11 +23,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { CoreStart } from '@kbn/core/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
-import {
-  getConnectorsManagementHref,
-  getElasticManagedLlmConnector,
-} from '@kbn/observability-ai-assistant-plugin/public';
-import { useGenAIConnectors } from '@kbn/ai-assistant/src/hooks';
+import { getConnectorsManagementHref } from '@kbn/observability-ai-assistant-plugin/public';
 
 interface GenAiSettingsAppProps {
   setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
@@ -56,8 +52,6 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({
   coreStart,
 }) => {
   const { application, http, docLinks } = coreStart;
-  const connectors = useGenAIConnectors();
-  const elasticManagedLlm = getElasticManagedLlmConnector(connectors.connectors);
 
   useEffect(() => {
     setBreadcrumbs([
@@ -117,33 +111,26 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({
               </EuiFlexGroup>
             }
             description={
-              !!elasticManagedLlm ? (
-                <p>
-                  <FormattedMessage
-                    id="genAiSettings.aiConnectorDescriptionWithLink"
-                    defaultMessage={`Elastic AI Assistant and other AI features are powered by an LLM. The Elastic Managed LLM connector is used by default ({link}) when no custom connectors are available. Select "Manage connectors" to configure and use a custom connector.`}
-                    values={{
-                      link: (
-                        <EuiLink
-                          href={docLinks?.links?.observability?.elasticManagedLlmUsageCost}
-                          target="_blank"
-                        >
-                          {i18n.translate('genAiSettings.additionalCostsLink', {
-                            defaultMessage: 'additional costs incur',
-                          })}
-                        </EuiLink>
-                      ),
-                    }}
-                  />
-                </p>
-              ) : (
-                <p>
-                  {i18n.translate('genAiSettings.aiConnectorDescription', {
-                    defaultMessage:
-                      'A large language model (LLM) is required to power the AI Assistant and AI-driven features in Elastic. In order to use the AI Assistant you must set up a Generative AI connector.',
-                  })}
-                </p>
-              )
+              <p>
+                <FormattedMessage
+                  id="genAiSettings.aiConnectorDescriptionWithLink"
+                  defaultMessage={`A large language model (LLM) is required to power the AI Assistant and AI-powered features. By default, Elastic uses its {elasticManagedLlm} connector ({link}) when no custom connectors are available. When available, Elastic uses the last used custom connector. Set up your own connectors or disable the AI Assistant from the {aiFeatureVisibility} setting below.`}
+                  values={{
+                    link: (
+                      <EuiLink
+                        href={docLinks?.links?.observability?.elasticManagedLlmUsageCost}
+                        target="_blank"
+                      >
+                        {i18n.translate('genAiSettings.additionalCostsLink', {
+                          defaultMessage: 'additional costs incur',
+                        })}
+                      </EuiLink>
+                    ),
+                    elasticManagedLlm: <strong>Elastic Managed LLM</strong>,
+                    aiFeatureVisibility: <strong>AI feature visibility</strong>,
+                  }}
+                />
+              </p>
             }
           >
             <EuiFormRow fullWidth>
@@ -172,19 +159,20 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({
             fullWidth
             title={
               <h3>
-                {i18n.translate('genAiSettings.showAIAssistantButtonLabel', {
-                  defaultMessage:
-                    'Show AI Assistant button and Contextual Insights in Observability apps',
+                {i18n.translate('genAiSettings.aiFeatureVisibilityLabel', {
+                  defaultMessage: 'AI feature visibility',
                 })}
               </h3>
             }
             description={
               <p>
-                {i18n.translate('genAiSettings.showAIAssistantDescriptionLabel', {
-                  defaultMessage:
-                    'Toggle the AI Assistant button and Contextual Insights on or off in Observability apps by checking or unchecking the AI Assistant feature in Spaces > <your space> > Features.',
-                  ignoreTag: true,
-                })}
+                <FormattedMessage
+                  id="genAiSettings.showAIAssistantDescriptionLabel"
+                  defaultMessage="Enable or disable AI-powered features in the {spaces} settings."
+                  values={{
+                    spaces: <strong>Spaces</strong>,
+                  }}
+                />
               </p>
             }
           >

@@ -10,8 +10,7 @@
     "@kbn/kibana-react-plugin",
     "@kbn/i18n",
     "@kbn/i18n-react",
-    "@kbn/observability-ai-assistant-plugin",
-    "@kbn/ai-assistant"
+    "@kbn/observability-ai-assistant-plugin"
   ],
   "exclude": ["target/**/*"]
 }
