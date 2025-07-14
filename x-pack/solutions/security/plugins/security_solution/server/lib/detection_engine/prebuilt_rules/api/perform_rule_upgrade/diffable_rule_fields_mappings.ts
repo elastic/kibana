@@ -12,8 +12,8 @@ import type {
   InlineKqlQuery,
   ThreeWayDiff,
   DiffableRuleTypes,
+  type AllFieldsDiff,
 } from '../../../../../../common/api/detection_engine';
-import { type AllFieldsDiff } from '../../../../../../common/api/detection_engine';
 import type { PrebuiltRuleAsset } from '../../model/rule_assets/prebuilt_rule_asset';
 
 /**

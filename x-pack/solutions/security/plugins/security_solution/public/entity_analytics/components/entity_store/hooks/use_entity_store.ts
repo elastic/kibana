@@ -15,8 +15,8 @@ import type {
   InitEntityStoreResponse,
 } from '../../../../../common/api/entity_analytics/entity_store/enable.gen';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
-import type { EntityType } from '../../../../../common/api/entity_analytics';
-import {
+import type {
+  EntityType,
   type DeleteEntityEngineResponse,
   type StopEntityEngineResponse,
 } from '../../../../../common/api/entity_analytics';

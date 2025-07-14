@@ -8,6 +8,7 @@
 import React, { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { IconType } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -22,25 +23,24 @@ import {
   EuiBetaBadge,
   EuiSplitPanel,
   EuiCallOut,
-  IconType,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { isEmpty, partition, some } from 'lodash';
-import { ActionVariable, RuleActionParam } from '@kbn/alerting-plugin/common';
-import { ActionGroupWithMessageVariables } from '@kbn/triggers-actions-ui-types';
+import type { ActionVariable, RuleActionParam } from '@kbn/alerting-plugin/common';
+import type { ActionGroupWithMessageVariables } from '@kbn/triggers-actions-ui-types';
 import { checkActionFormActionTypeEnabled, transformActionVariables } from '@kbn/alerts-ui-shared';
 import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../translations';
-import {
+import type {
   IErrorObject,
   RuleSystemAction,
   ActionTypeIndex,
   ActionConnector,
   ActionVariables,
   ActionTypeRegistryContract,
-  ActionConnectorMode,
 } from '../../../types';
-import { ActionAccordionFormProps } from './action_form';
+import { ActionConnectorMode } from '../../../types';
+import type { ActionAccordionFormProps } from './action_form';
 import { useKibana } from '../../../common/lib/kibana';
 import { validateParamsForWarnings } from '../../lib/validate_params_for_warnings';
 import { useRuleTypeAlertFields } from '../../hooks/use_rule_alert_fields';

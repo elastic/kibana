@@ -13,8 +13,8 @@ import { waitFor, renderHook } from '@testing-library/react';
 import type { HttpStart } from '@kbn/core-http-browser';
 
 import { useUpdateRule } from './use_update_rule';
-import { UpdateRuleBody } from '../apis/update_rule';
-import { RuleTypeParams } from '../types';
+import type { UpdateRuleBody } from '../apis/update_rule';
+import type { RuleTypeParams } from '../types';
 
 const ruleToUpdate: UpdateRuleBody<RuleTypeParams> = {
   params: {

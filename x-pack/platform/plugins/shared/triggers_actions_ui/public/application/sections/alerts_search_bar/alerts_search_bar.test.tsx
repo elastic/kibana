@@ -8,9 +8,10 @@
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { useAlertsDataView } from '@kbn/alerts-ui-shared/src/common/hooks/use_alerts_data_view';
-import { Filter, FilterStateStore } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
+import { FilterStateStore } from '@kbn/es-query';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { NotificationsStart } from '@kbn/core-notifications-browser';
+import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { AlertsSearchBar } from './alerts_search_bar';
 

@@ -7,8 +7,7 @@
 
 import { EuiAccordion, EuiFlexGroup, EuiSpacer, EuiTitle, useGeneratedHtmlId } from '@elastic/eui';
 import type { EuiFlexGroupProps } from '@elastic/eui';
-import type { ReactElement } from 'react';
-import React, { type VFC } from 'react';
+import React, type { ReactElement , type VFC } from 'react';
 import { useAccordionState } from '../hooks/use_accordion_state';
 
 export const HEADER_TEST_ID = 'Header';

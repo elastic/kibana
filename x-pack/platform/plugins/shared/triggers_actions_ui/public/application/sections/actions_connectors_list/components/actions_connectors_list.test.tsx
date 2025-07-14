@@ -13,12 +13,13 @@ import { ThemeProvider } from 'styled-components';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import ActionsConnectorsList from './actions_connectors_list';
 import { coreMock } from '@kbn/core/public/mocks';
-import { ReactWrapper } from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
 import { useKibana } from '../../../../common/lib/kibana';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { ActionConnector, EditConnectorTabs, GenericValidationResult } from '../../../../types';
+import type { ActionConnector, GenericValidationResult } from '../../../../types';
+import { EditConnectorTabs } from '../../../../types';
 import { times } from 'lodash';
 import { useHistory, useParams } from 'react-router-dom';
 

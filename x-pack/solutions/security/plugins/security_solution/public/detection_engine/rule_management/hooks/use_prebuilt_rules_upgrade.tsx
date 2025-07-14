@@ -14,8 +14,8 @@ import { useIsUpgradingSecurityPackages } from '../logic/use_upgrade_security_pa
 import { usePrebuiltRulesCustomizationStatus } from '../logic/prebuilt_rules/use_prebuilt_rules_customization_status';
 import { usePerformUpgradeRules } from '../logic/prebuilt_rules/use_perform_rule_upgrade';
 import { usePrebuiltRulesUpgradeReview } from '../logic/prebuilt_rules/use_prebuilt_rules_upgrade_review';
-import type { PerformRuleUpgradeRequestBody } from '../../../../common/api/detection_engine';
-import {
+import type {
+  PerformRuleUpgradeRequestBody,
   type FindRulesSortField,
   type RuleFieldsToUpgrade,
   type RuleResponse,

@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import type { FindingsVulnerabilityPanelExpandableFlyoutProps } from '@kbn/cloud-security-posture';
-import {
+import type {
+  FindingsVulnerabilityPanelExpandableFlyoutProps,
   SeverityStatusBadge,
   getNormalizedSeverity,
   type FindingVulnerabilityFullFlyoutContentProps,

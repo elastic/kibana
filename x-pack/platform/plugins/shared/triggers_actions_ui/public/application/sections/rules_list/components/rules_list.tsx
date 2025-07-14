@@ -9,47 +9,42 @@
 
 import { i18n } from '@kbn/i18n';
 import { capitalize, isEmpty, isEqual, sortBy } from 'lodash';
-import { KueryNode } from '@kbn/es-query';
+import type { KueryNode } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { parseRuleCircuitBreakerErrorMessage } from '@kbn/alerting-plugin/common';
 import { RuleTypeModal } from '@kbn/response-ops-rule-form';
-import React, { useEffect, useState, ReactNode, useCallback, useMemo, useRef } from 'react';
-import {
-  EuiSpacer,
-  EuiPageTemplate,
-  EuiTableSortingType,
-  EuiButtonIcon,
-  EuiSelectableOption,
-  EuiDescriptionList,
-} from '@elastic/eui';
-import { EuiSelectableOptionCheckedType } from '@elastic/eui/src/components/selectable/selectable_option';
+import type { ReactNode } from 'react';
+import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
+import type { EuiTableSortingType, EuiSelectableOption } from '@elastic/eui';
+import { EuiSpacer, EuiPageTemplate, EuiButtonIcon, EuiDescriptionList } from '@elastic/eui';
+import type { EuiSelectableOptionCheckedType } from '@elastic/eui/src/components/selectable/selectable_option';
 import { useHistory } from 'react-router-dom';
 
+import type { RuleExecutionStatus } from '@kbn/alerting-plugin/common';
 import {
-  RuleExecutionStatus,
   RuleExecutionStatusErrorReasons,
   RuleLastRunOutcomeValues,
 } from '@kbn/alerting-plugin/common';
+import type { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
 import {
-  RuleCreationValidConsumer,
   ruleDetailsRoute as commonRuleDetailsRoute,
   getCreateRuleRoute,
   getEditRuleRoute,
 } from '@kbn/rule-data-utils';
 import { MaintenanceWindowCallout, useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared';
-import {
+import type {
   Rule,
   RuleTableItem,
   RuleType,
   RuleStatus,
   Pagination,
-  Percentiles,
   SnoozeSchedule,
   UpdateFiltersProps,
   BulkEditActions,
   UpdateRulesToBulkEditProps,
 } from '../../../../types';
+import { Percentiles } from '../../../../types';
 import { BulkOperationPopover } from '../../common/components/bulk_operation_popover';
 import { RuleQuickEditButtonsWithApi as RuleQuickEditButtons } from '../../common/components/rule_quick_edit_buttons';
 import { CollapsedItemActionsWithApi as CollapsedItemActions } from './collapsed_item_actions';

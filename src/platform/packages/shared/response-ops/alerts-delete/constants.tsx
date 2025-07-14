@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiSelectOption } from '@elastic/eui';
+import type { EuiSelectOption } from '@elastic/eui';
 import * as i18n from './translations';
 
 export const THRESHOLD_UNITS: EuiSelectOption[] = [
