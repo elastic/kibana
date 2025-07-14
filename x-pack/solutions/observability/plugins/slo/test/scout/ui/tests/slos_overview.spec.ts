@@ -24,13 +24,10 @@ test.describe('SLOs Overview', { tag: ['@ess', '@svlOblt'] }, () => {
     await pageObjects.slo.goto();
   });
 
-  test('Go to slos overview', async ({ page }) => {
+  test('Go to slos overview and validate data retention tab', async ({ page }) => {
     // Already navigated in beforeEach
     // This test ensures the page loads
     expect(page).toBeDefined();
-  });
-
-  test('validate data retention tab', async ({ page }) => {
     await expect(async () => {
       await page.getByTestId('querySubmitButton').click();
 
