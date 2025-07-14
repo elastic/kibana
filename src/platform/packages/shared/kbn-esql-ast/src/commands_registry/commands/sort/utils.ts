@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ESQLCommand } from '../../../..';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
 import { ISuggestionItem } from '../../types';
 
@@ -62,7 +63,7 @@ export const getSortPos = (
     return 'empty_expression';
   }
 
-  if (isSingleItem(lastArg) && lastArg.type !== 'order') {
+  if (!Array.isArray(lastArg) && lastArg.type !== 'order') {
     return 'expression';
   }
 

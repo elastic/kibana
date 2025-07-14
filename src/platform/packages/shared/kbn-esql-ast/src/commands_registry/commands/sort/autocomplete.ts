@@ -6,24 +6,22 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+// import { isColumn } from '../../../ast/is';
+import { getExpressionType, isExpressionComplete } from '../../../definitions/utils/expressions';
 import { ICommandCallbacks, Location } from '../../types';
 import type { ESQLCommand } from '../../../types';
 import { type ISuggestionItem, type ICommandContext } from '../../types';
 import { pipeCompleteItem, commaCompleteItem } from '../../complete_items';
 import {
   handleFragment,
-  getFieldsOrFunctionsSuggestions,
-  pushItUpInTheList,
-  columnExists,
+  suggestForExpression,
 } from '../../../definitions/utils/autocomplete/helpers';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
 import { getSortPos, sortModifierSuggestions } from './utils';
 
-const noCaseCompare = (a: string, b: string) => a.toLowerCase() === b.toLowerCase();
-
 export async function autocomplete(
   query: string,
-  command: ESQLCommand,
+  command: ESQLCommand<'sort'>,
   callbacks?: ICommandCallbacks,
   context?: ICommandContext,
   cursorPosition?: number
@@ -41,24 +39,26 @@ export async function autocomplete(
   switch (pos) {
     case 'empty_expression': {
       return await suggestForExpression({
-        ...params,
+        innerText,
+        getColumnsByType: callbacks?.getByType,
         expressionRoot: undefined,
         location: Location.SORT,
-        preferredExpressionType: 'boolean',
+        context,
       });
     }
     case 'expression': {
       const expressionRoot = command.args[command.args.length - 1];
-      if (!expressionRoot || !isSingleItem(expressionRoot)) {
+      if (!expressionRoot || Array.isArray(expressionRoot)) {
         // guaranteed by the getSortPos function, but we check it here for type safety
         return [];
       }
 
       const suggestions = await suggestForExpression({
-        ...params,
+        innerText,
+        getColumnsByType: callbacks?.getByType,
         expressionRoot,
         location: Location.SORT,
-        preferredExpressionType: 'boolean',
+        context,
       });
 
       const sortCommandKeywordSuggestions = [
@@ -66,11 +66,24 @@ export async function autocomplete(
         sortModifierSuggestions.DESC,
         sortModifierSuggestions.NULLS_FIRST,
         sortModifierSuggestions.NULLS_LAST,
-        pipeCompleteItem,
-        { ...commaCompleteItem, text: ', ', command: TRIGGER_SUGGESTION_COMMAND },
+        { ...pipeCompleteItem, sortText: 'AAA' },
+        { ...commaCompleteItem, text: ', ', command: TRIGGER_SUGGESTION_COMMAND, sortText: 'AAA' },
       ];
 
-      if (isExpressionComplete(getExpressionType(expressionRoot), innerText)) {
+      // // special case: cursor right after a column name
+      // if (isColumn(expressionRoot) && !/\s+$/.test(innerText)) {
+      //   sortCommandKeywordSuggestions.forEach((s) => {
+      //     s.text = `${expressionRoot.text} ${s.text}`; // add a space after the column name
+      //     s.filterText = expressionRoot.text; // turn off Monaco's filtering by the suggestion text
+      //   });
+      // }
+
+      if (
+        isExpressionComplete(
+          getExpressionType(expressionRoot, context?.fields, context?.userDefinedColumns),
+          innerText
+        )
+      ) {
         suggestions.push(...sortCommandKeywordSuggestions);
       }
 
@@ -134,58 +147,4 @@ export async function autocomplete(
       return [];
     }
   }
-
-  const fieldSuggestions =
-    (await callbacks?.getByType('any', [], {
-      openSuggestions: true,
-    })) ?? [];
-  const functionSuggestions = await getFieldsOrFunctionsSuggestions(
-    ['any'],
-    Location.SORT,
-    callbacks?.getByType,
-    {
-      functions: true,
-      fields: false,
-    }
-  );
-
-  return await handleFragment(
-    innerText,
-    (fragment: string) => columnExists(fragment, context),
-    (_fragment: string, rangeToReplace?: { start: number; end: number }) => {
-      // SORT fie<suggest>
-      return [
-        ...pushItUpInTheList(
-          fieldSuggestions.map((suggestion) => {
-            // if there is already a command, we don't want to override it
-            if (suggestion.command) return suggestion;
-            return {
-              ...suggestion,
-              command: TRIGGER_SUGGESTION_COMMAND,
-              rangeToReplace,
-            };
-          }),
-          true
-        ),
-        ...functionSuggestions,
-      ];
-    },
-    (fragment: string, rangeToReplace: { start: number; end: number }) => {
-      // SORT field<suggest>
-      return [
-        { ...pipeCompleteItem, text: ' | ' },
-        { ...commaCompleteItem, text: ', ' },
-        prependSpace(sortModifierSuggestions.ASC),
-        prependSpace(sortModifierSuggestions.DESC),
-        prependSpace(sortModifierSuggestions.NULLS_FIRST),
-        prependSpace(sortModifierSuggestions.NULLS_LAST),
-      ].map<ISuggestionItem>((s) => ({
-        ...s,
-        filterText: fragment,
-        text: fragment + s.text,
-        command: TRIGGER_SUGGESTION_COMMAND,
-        rangeToReplace,
-      }));
-    }
-  );
 }
