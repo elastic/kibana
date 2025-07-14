@@ -28954,6 +28954,36 @@
       },
       {
         "parentPluginId": "fleet",
+        "id": "def-common.FLEET_CLOUD_SECURITY_ASSET_PACKAGE",
+        "type": "string",
+        "tags": [],
+        "label": "FLEET_CLOUD_SECURITY_ASSET_PACKAGE",
+        "description": [],
+        "signature": [
+          "\"cloud_asset_inventory\""
+        ],
+        "path": "x-pack/platform/plugins/shared/fleet/common/constants/epm.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-common.FLEET_CLOUD_SECURITY_POSTURE_ASSET_INVENTORY_POLICY_TEMPLATE",
+        "type": "string",
+        "tags": [],
+        "label": "FLEET_CLOUD_SECURITY_POSTURE_ASSET_INVENTORY_POLICY_TEMPLATE",
+        "description": [],
+        "signature": [
+          "\"asset_inventory\""
+        ],
+        "path": "x-pack/platform/plugins/shared/fleet/common/constants/epm.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
         "id": "def-common.FLEET_CLOUD_SECURITY_POSTURE_CNVM_POLICY_TEMPLATE",
         "type": "string",
         "tags": [],
