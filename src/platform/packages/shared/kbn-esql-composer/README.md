@@ -53,6 +53,57 @@ The above example will output
   `,
   params: [{ svcEnv: 'production' }]
 }
+```
+
+### Conditional commands
+
+Queries can be conditionally built using `.pipeIf()` or or with typical if-statements.
+
+```ts
+
+import { from, where, sort, keep, limit, SortOrder } from '@kbn/esql-composer';
+
+
+const limitReturnedFields = req.query('limitReturnedFields')
+let pipelipine = from('logs-*').pipe(
+  where('@timestamp <= NOW() AND @timestamp > NOW() - 24 hours'),
+  limit(10s)
+);
+
+if (limitReturnedFields) {
+  pipeline = pipeline.pipe(keep('@timestamp', 'service.name'))
+}
+
+pipeline.toString()
+
+// OR
+
+let pipelipine = from('logs-*').pipe(
+  where('@timestamp <= NOW() AND @timestamp > NOW() - 24 hours'),
+  limit(10s)
+).pipeIf(limitReturnedFields, keep('@timestamp', 'service.name'));
+
+pipeline.toString()
+
+```
+
+The above example will output 
+
+- if `limitReturnedFields` is `true`
+
+```sql
+FROM logs-*
+  | WHERE @timestamp >= NOW() - 1 hour
+  | LIMIT 10
+  | KEEP @timetsamp, service.name
+```
+- if `limitReturnedFields` is `false`
+
+```sql
+FROM logs-*
+  | WHERE @timestamp >= NOW() - 1 hour
+  | LIMIT 10
+```
 
 ## Output methods
 
@@ -60,7 +111,7 @@ The above example will output
 `asRequest()` – outputs an object for Elasticsearch’s ES|QL query API, including parameters.
 
 
-## Features and examples
+## Example of commands
 
 ### `WHERE`
 
