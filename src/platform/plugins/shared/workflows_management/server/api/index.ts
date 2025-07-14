@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
+import { Client } from '@elastic/elasticsearch';
 import { ExecutionStatus, WorkflowListModel, WorkflowModel, WorkflowStatus } from '@kbn/workflows';
 
 export const mockWorkflow: WorkflowModel = {
@@ -96,3 +96,21 @@ export const WorkflowsManagementApi = {
     return Promise.resolve(mockWorkflow);
   },
 };
+
+export class WorkflowsManagementApiClass {
+  private static stepExecutionsIndex = 'workflow-step-executions';
+  constructor(private esClient: Client) {}
+
+  async getStepExecutions(workflowExecutionId: string): Promise<any> {
+    return this.esClient
+      .search({
+        index: WorkflowsManagementApiClass.stepExecutionsIndex,
+        query: {
+          match: { workflowRunId: workflowExecutionId },
+        },
+      })
+      .then((response) => {
+        return response.hits.hits.map((hit) => hit._source);
+      });
+  }
+}

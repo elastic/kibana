@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type {
   PluginInitializerContext,
   CoreSetup,
@@ -5,17 +14,31 @@ import type {
   Plugin,
   Logger,
 } from '@kbn/core/server';
+import { Client } from '@elastic/elasticsearch';
+
 import { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server/plugin';
 import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { WorkflowExecutionEngineModel } from '@kbn/workflows';
 
+import { v4 as generateUuid } from 'uuid';
 import type { WorkflowsPluginSetup, WorkflowsPluginStart } from './types';
 import { defineRoutes } from './routes';
-import { WorkflowsManagementApi } from './api';
+import { WorkflowsManagementApi, WorkflowsManagementApiClass } from './api';
 import { workflowsGrouppedByTriggerType } from './mock';
-import { v4 as generateUuid } from 'uuid';
+
 export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPluginStart> {
   private readonly logger: Logger;
+
+  private esClient: Client = new Client({
+    node: 'http://localhost:9200', // or your ES URL
+    auth: {
+      username: 'elastic',
+      password: 'changeme',
+    },
+  });
+  private workflowsApi: WorkflowsManagementApiClass = new WorkflowsManagementApiClass(
+    this.esClient
+  );
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
@@ -26,7 +49,7 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
     const router = core.http.createRouter();
 
     // Register server side APIs
-    defineRoutes(router);
+    defineRoutes(router, this.workflowsApi);
 
     return {
       management: WorkflowsManagementApi,
