@@ -33,6 +33,7 @@ import type {
   FullAgentPolicyInput,
   FullAgentPolicyMonitoring,
   FullAgentPolicyOutputPermissions,
+  OTelCollectorConfig,
   PackageInfo,
 } from '../../../common/types';
 import { agentPolicyService } from '../agent_policy';
@@ -171,6 +172,34 @@ export async function getFullAgentPolicy(
             : {}),
         };
       }
+    } else if (input.type === 'otelcol') {
+      // Generate OTel Collector input structure
+      const otelInputs: OTelCollectorConfig[] = (input?.otelcol_config ?? []).flatMap((config) => {
+        return {
+          ...(config?.compiled_stream?.receivers
+            ? { receivers: config?.compiled_stream?.receivers }
+            : {}),
+          ...(config?.compiled_stream?.service
+            ? { service: config?.compiled_stream?.service }
+            : {}),
+          ...(config?.compiled_stream?.extensions
+            ? { service: config?.compiled_stream?.extensions }
+            : {}),
+          ...(config?.compiled_stream?.processors
+            ? { service: config?.compiled_stream?.processors }
+            : {}),
+        };
+      });
+      input = {
+        id: input.id,
+        type: input.type,
+        name: input.name,
+        revision: input.revision,
+        use_output: input.use_output,
+        package_policy_id: input.package_policy_id,
+        data_stream: input.data_stream,
+        ...(otelInputs && otelInputs?.length > 0 ? { otelcol: otelInputs } : {}),
+      };
     }
     return input;
   });

@@ -2730,7 +2730,8 @@ export function _compilePackagePolicyInputs(
     if (input.type === 'otelcol') {
       return {
         ...input,
-        streams: _compilePackageStreams(pkgInfo, vars, input, assetsMap, packagePolicyId),
+        otelcol_config: _compilePackageStreams(pkgInfo, vars, input, assetsMap, packagePolicyId),
+        streams: [],
       };
     }
     return {
@@ -2927,9 +2928,7 @@ function _compilePackageStream(
     input.type,
     packagePolicyId
   );
-  // if (input.type === 'otelcol') {
-  //   return yaml;
-  // }
+
   stream.compiled_stream = yaml;
 
   return { ...stream };

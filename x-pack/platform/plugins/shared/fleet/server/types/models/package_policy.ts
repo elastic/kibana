@@ -405,6 +405,7 @@ export const PackagePolicySchema = schema.object({
     schema.object({
       ...PackagePolicyInputsSchema,
       compiled_input: schema.maybe(schema.any()),
+      otelcol_config: schema.maybe(schema.any()),
     })
   ),
   secret_references: schema.maybe(

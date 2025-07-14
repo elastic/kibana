@@ -117,6 +117,7 @@ export const getFullInputStreams = (
 ): FullAgentPolicyInputStream => {
   return {
     ...(input.compiled_input || {}),
+    ...(input.type === 'otelcol' ? { otelcol_config: input.otelcol_config } : {}),
     ...(input.streams.length
       ? {
           streams: input.streams

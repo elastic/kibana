@@ -791,3 +791,23 @@ export interface IndexTemplateEntry {
   templateName: string;
   indexTemplate: IndexTemplate;
 }
+
+export interface OTelCollectorConfig {
+  extensions?: Record<OTelCollectorComponentID, any>;
+  receivers?: Record<OTelCollectorComponentID, any>;
+  processors?: Record<OTelCollectorComponentID, any>;
+  service?: {
+    extensions?: OTelCollectorComponentID[];
+    pipelines?: Record<OTelCollectorPipelineID, OTelCollectorPipeline>;
+  };
+}
+
+export interface OTelCollectorPipeline {
+  receivers?: OTelCollectorComponentID[];
+  processors?: OTelCollectorComponentID[];
+  exporters?: OTelCollectorComponentID[];
+}
+
+export type OTelCollectorComponentID = string;
+
+export type OTelCollectorPipelineID = 'logs' | 'metrics' | 'traces' | string;
