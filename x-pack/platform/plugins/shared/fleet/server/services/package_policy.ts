@@ -55,6 +55,7 @@ import {
   LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   DATA_STREAM_TYPE_VAR_NAME,
+  OTEL_COLLECTOR_INPUT_TYPE,
 } from '../../common/constants';
 import type {
   PostDeletePackagePoliciesResponse,
@@ -2727,7 +2728,7 @@ export function _compilePackagePolicyInputs(
   packagePolicyId?: string
 ): PackagePolicyInput[] {
   return inputs.map((input) => {
-    if (input.type === 'otelcol') {
+    if (input.type === OTEL_COLLECTOR_INPUT_TYPE) {
       return {
         ...input,
         otelcol_config: _compilePackageStreams(pkgInfo, vars, input, assetsMap, packagePolicyId),

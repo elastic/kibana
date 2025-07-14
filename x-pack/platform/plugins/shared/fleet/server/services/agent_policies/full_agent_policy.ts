@@ -41,6 +41,7 @@ import {
   dataTypes,
   DEFAULT_OUTPUT,
   kafkaCompressionType,
+  OTEL_COLLECTOR_INPUT_TYPE,
   outputType,
 } from '../../../common/constants';
 import { getSettingsValuesForAgentPolicy } from '../form_settings';
@@ -172,7 +173,7 @@ export async function getFullAgentPolicy(
             : {}),
         };
       }
-    } else if (input.type === 'otelcol') {
+    } else if (input.type === OTEL_COLLECTOR_INPUT_TYPE) {
       // Generate OTel Collector input structure
       const otelInputs: OTelCollectorConfig[] = (input?.otelcol_config ?? []).flatMap((config) => {
         return {

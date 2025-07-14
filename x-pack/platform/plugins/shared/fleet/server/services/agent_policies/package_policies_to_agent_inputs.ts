@@ -18,7 +18,10 @@ import type {
 } from '../../types';
 import { DEFAULT_OUTPUT } from '../../constants';
 import { pkgToPkgKey } from '../epm/registry';
-import { GLOBAL_DATA_TAG_EXCLUDED_INPUTS } from '../../../common/constants/epm';
+import {
+  GLOBAL_DATA_TAG_EXCLUDED_INPUTS,
+  OTEL_COLLECTOR_INPUT_TYPE,
+} from '../../../common/constants/epm';
 
 const isPolicyEnabled = (packagePolicy: PackagePolicy) => {
   return packagePolicy.enabled && packagePolicy.inputs && packagePolicy.inputs.length;
@@ -117,7 +120,7 @@ export const getFullInputStreams = (
 ): FullAgentPolicyInputStream => {
   return {
     ...(input.compiled_input || {}),
-    ...(input.type === 'otelcol' ? { otelcol_config: input.otelcol_config } : {}),
+    ...(input.type === OTEL_COLLECTOR_INPUT_TYPE ? { otelcol_config: input.otelcol_config } : {}),
     ...(input.streams.length
       ? {
           streams: input.streams

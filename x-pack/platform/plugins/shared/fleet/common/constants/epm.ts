@@ -114,3 +114,5 @@ export const displayedAssetTypes: DisplayedAssetTypes = [
 ];
 
 export const displayedAssetTypesLookup = new Set<string>(displayedAssetTypes);
+
+export const OTEL_COLLECTOR_INPUT_TYPE = 'otelcol';

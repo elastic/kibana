@@ -19,6 +19,7 @@ import {
   getHandlebarsCompiledTemplateCache,
   setHandlebarsCompiledTemplateCache,
 } from '../packages/cache';
+import { OTEL_COLLECTOR_INPUT_TYPE } from '../../../../common/constants';
 
 const handlebars = Handlebars.create();
 
@@ -49,7 +50,7 @@ export function compileTemplate(
     const yamlFromCompiledTemplate = load(compiledTemplate, {});
 
     let patchedYaml = yamlFromCompiledTemplate;
-    if (inputType === 'otelcol' && packagePolicyId) {
+    if (inputType === OTEL_COLLECTOR_INPUT_TYPE && packagePolicyId) {
       patchedYaml = patchYamlForOtelcol(yamlFromCompiledTemplate, packagePolicyId);
     }
 
