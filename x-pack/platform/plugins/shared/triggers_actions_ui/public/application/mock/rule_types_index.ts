@@ -45,7 +45,7 @@ export const ruleTypesIndex = new Map([
           read: true,
           all: true,
         },
-        uptime: {
+        synthetics: {
           read: true,
           all: true,
         },
@@ -121,7 +121,7 @@ export const ruleTypesIndex = new Map([
           read: true,
           all: true,
         },
-        uptime: {
+        synthetics: {
           read: true,
           all: true,
         },
@@ -197,7 +197,7 @@ export const ruleTypesIndex = new Map([
           read: true,
           all: true,
         },
-        uptime: {
+        synthetics: {
           read: true,
           all: true,
         },
@@ -273,7 +273,7 @@ export const ruleTypesIndex = new Map([
           read: true,
           all: true,
         },
-        uptime: {
+        synthetics: {
           read: true,
           all: true,
         },
@@ -349,7 +349,7 @@ export const ruleTypesIndex = new Map([
           read: true,
           all: true,
         },
-        uptime: {
+        synthetics: {
           read: true,
           all: true,
         },
@@ -425,7 +425,7 @@ export const ruleTypesIndex = new Map([
           read: true,
           all: true,
         },
-        uptime: {
+        synthetics: {
           read: true,
           all: true,
         },
@@ -513,7 +513,7 @@ export const ruleTypesIndex = new Map([
           read: true,
           all: true,
         },
-        uptime: {
+        synthetics: {
           read: true,
           all: true,
         },
@@ -589,7 +589,7 @@ export const ruleTypesIndex = new Map([
           read: true,
           all: true,
         },
-        uptime: {
+        synthetics: {
           read: true,
           all: true,
         },
@@ -665,7 +665,7 @@ export const ruleTypesIndex = new Map([
           read: true,
           all: true,
         },
-        uptime: {
+        synthetics: {
           read: true,
           all: true,
         },
@@ -741,7 +741,7 @@ export const ruleTypesIndex = new Map([
           read: true,
           all: true,
         },
-        uptime: {
+        synthetics: {
           read: true,
           all: true,
         },
@@ -817,7 +817,7 @@ export const ruleTypesIndex = new Map([
           read: true,
           all: true,
         },
-        uptime: {
+        synthetics: {
           read: true,
           all: true,
         },
@@ -893,7 +893,7 @@ export const ruleTypesIndex = new Map([
           read: true,
           all: true,
         },
-        uptime: {
+        synthetics: {
           read: true,
           all: true,
         },
@@ -969,7 +969,7 @@ export const ruleTypesIndex = new Map([
           read: true,
           all: true,
         },
-        uptime: {
+        synthetics: {
           read: true,
           all: true,
         },
@@ -1053,7 +1053,7 @@ export const ruleTypesIndex = new Map([
           read: true,
           all: true,
         },
-        uptime: {
+        synthetics: {
           read: true,
           all: true,
         },
@@ -1133,7 +1133,7 @@ export const ruleTypesIndex = new Map([
           read: true,
           all: true,
         },
-        uptime: {
+        synthetics: {
           read: true,
           all: true,
         },
@@ -1213,7 +1213,7 @@ export const ruleTypesIndex = new Map([
           read: true,
           all: true,
         },
-        uptime: {
+        synthetics: {
           read: true,
           all: true,
         },
@@ -1289,7 +1289,7 @@ export const ruleTypesIndex = new Map([
           read: true,
           all: true,
         },
-        uptime: {
+        synthetics: {
           read: true,
           all: true,
         },
@@ -1365,7 +1365,7 @@ export const ruleTypesIndex = new Map([
           read: true,
           all: true,
         },
-        uptime: {
+        synthetics: {
           read: true,
           all: true,
         },
@@ -1441,7 +1441,7 @@ export const ruleTypesIndex = new Map([
           read: true,
           all: true,
         },
-        uptime: {
+        synthetics: {
           read: true,
           all: true,
         },
@@ -1517,7 +1517,7 @@ export const ruleTypesIndex = new Map([
           read: true,
           all: true,
         },
-        uptime: {
+        synthetics: {
           read: true,
           all: true,
         },
@@ -1593,7 +1593,7 @@ export const ruleTypesIndex = new Map([
           read: true,
           all: true,
         },
-        uptime: {
+        synthetics: {
           read: true,
           all: true,
         },
@@ -1669,7 +1669,7 @@ export const ruleTypesIndex = new Map([
           read: true,
           all: true,
         },
-        uptime: {
+        synthetics: {
           read: true,
           all: true,
         },
@@ -1745,7 +1745,7 @@ export const ruleTypesIndex = new Map([
           read: true,
           all: true,
         },
-        uptime: {
+        synthetics: {
           read: true,
           all: true,
         },
@@ -1821,7 +1821,7 @@ export const ruleTypesIndex = new Map([
           read: true,
           all: true,
         },
-        uptime: {
+        synthetics: {
           read: true,
           all: true,
         },
@@ -1897,7 +1897,7 @@ export const ruleTypesIndex = new Map([
           read: true,
           all: true,
         },
-        uptime: {
+        synthetics: {
           read: true,
           all: true,
         },
@@ -1973,7 +1973,7 @@ export const ruleTypesIndex = new Map([
           read: true,
           all: true,
         },
-        uptime: {
+        synthetics: {
           read: true,
           all: true,
         },
@@ -2049,7 +2049,7 @@ export const ruleTypesIndex = new Map([
           read: true,
           all: true,
         },
-        uptime: {
+        synthetics: {
           read: true,
           all: true,
         },
@@ -2125,7 +2125,7 @@ export const ruleTypesIndex = new Map([
           read: true,
           all: true,
         },
-        uptime: {
+        synthetics: {
           read: true,
           all: true,
         },
@@ -2201,7 +2201,7 @@ export const ruleTypesIndex = new Map([
           read: true,
           all: true,
         },
-        uptime: {
+        synthetics: {
           read: true,
           all: true,
         },
@@ -2277,7 +2277,7 @@ export const ruleTypesIndex = new Map([
           read: true,
           all: true,
         },
-        uptime: {
+        synthetics: {
           read: true,
           all: true,
         },
@@ -2353,7 +2353,7 @@ export const ruleTypesIndex = new Map([
           read: true,
           all: true,
         },
-        uptime: {
+        synthetics: {
           read: true,
           all: true,
         },
@@ -2429,7 +2429,7 @@ export const ruleTypesIndex = new Map([
           read: true,
           all: true,
         },
-        uptime: {
+        synthetics: {
           read: true,
           all: true,
         },
@@ -2505,7 +2505,7 @@ export const ruleTypesIndex = new Map([
           read: true,
           all: true,
         },
-        uptime: {
+        synthetics: {
           read: true,
           all: true,
         },
@@ -2581,7 +2581,7 @@ export const ruleTypesIndex = new Map([
           read: true,
           all: true,
         },
-        uptime: {
+        synthetics: {
           read: true,
           all: true,
         },
@@ -2657,7 +2657,7 @@ export const ruleTypesIndex = new Map([
           read: true,
           all: true,
         },
-        uptime: {
+        synthetics: {
           read: true,
           all: true,
         },
@@ -2733,7 +2733,7 @@ export const ruleTypesIndex = new Map([
           read: true,
           all: true,
         },
-        uptime: {
+        synthetics: {
           read: true,
           all: true,
         },
@@ -2809,7 +2809,7 @@ export const ruleTypesIndex = new Map([
           read: true,
           all: true,
         },
-        uptime: {
+        synthetics: {
           read: true,
           all: true,
         },
@@ -2885,7 +2885,7 @@ export const ruleTypesIndex = new Map([
           read: true,
           all: true,
         },
-        uptime: {
+        synthetics: {
           read: true,
           all: true,
         },
@@ -2961,7 +2961,7 @@ export const ruleTypesIndex = new Map([
           read: true,
           all: true,
         },
-        uptime: {
+        synthetics: {
           read: true,
           all: true,
         },
@@ -3037,7 +3037,7 @@ export const ruleTypesIndex = new Map([
           read: true,
           all: true,
         },
-        uptime: {
+        synthetics: {
           read: true,
           all: true,
         },
@@ -3113,7 +3113,7 @@ export const ruleTypesIndex = new Map([
           read: true,
           all: true,
         },
-        uptime: {
+        synthetics: {
           read: true,
           all: true,
         },
@@ -3189,7 +3189,7 @@ export const ruleTypesIndex = new Map([
           read: true,
           all: true,
         },
-        uptime: {
+        synthetics: {
           read: true,
           all: true,
         },
@@ -3265,7 +3265,7 @@ export const ruleTypesIndex = new Map([
           read: true,
           all: true,
         },
-        uptime: {
+        synthetics: {
           read: true,
           all: true,
         },
@@ -3341,7 +3341,7 @@ export const ruleTypesIndex = new Map([
           read: true,
           all: true,
         },
-        uptime: {
+        synthetics: {
           read: true,
           all: true,
         },

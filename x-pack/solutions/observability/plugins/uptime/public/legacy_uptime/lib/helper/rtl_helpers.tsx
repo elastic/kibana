@@ -357,7 +357,7 @@ export const makeUptimePermissionsCore = (
   return {
     application: {
       capabilities: {
-        uptime: {
+        synthetics: {
           'alerting:save': true,
           configureSettings: true,
           save: true,
