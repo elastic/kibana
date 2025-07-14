@@ -230,7 +230,7 @@ export class ProviderItemActions extends React.PureComponent<OwnProps> {
         panelPaddingSize="none"
         ownFocus={true}
       >
-        <div style={{ userSelect: 'none' }}>
+        <div css={{ userSelect: 'none' }}>
           <EuiContextMenu initialPanelId={0} panels={panelTree} data-test-subj="providerActions" />
         </div>
       </MyEuiPopover>
