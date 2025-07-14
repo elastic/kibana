@@ -11,7 +11,7 @@ import React from 'react';
 import { upperFirst } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { EuiCard, EuiLink } from '@elastic/eui';
-import { ActionType } from '@kbn/actions-types';
+import type { ActionType } from '@kbn/actions-types';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { VIEW_LICENSE_OPTIONS_LINK } from '../common/constants';
 

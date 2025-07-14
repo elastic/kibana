@@ -9,6 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { Suspense, useCallback, useMemo, useState } from 'react';
+import type { RecursivePartial } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -22,11 +23,10 @@ import {
   EuiTab,
   EuiToolTip,
   EuiBadge,
-  RecursivePartial,
   EuiBetaBadge,
   EuiEmptyPrompt,
 } from '@elastic/eui';
-import {
+import type {
   ActionVariable,
   AlertsFilter,
   AlertsFilterTimeframe,
@@ -35,16 +35,16 @@ import {
   RuleActionParam,
   RuleActionParams,
 } from '@kbn/alerting-types';
+import type { ActionConnector } from '@kbn/alerts-ui-shared';
 import {
-  ActionConnector,
   checkActionFormActionTypeEnabled,
   getAvailableActionVariables,
 } from '@kbn/alerts-ui-shared';
 import { isEmpty, some } from 'lodash';
 import { css } from '@emotion/react';
-import { SavedObjectAttribute } from '@kbn/core/types';
+import type { SavedObjectAttribute } from '@kbn/core/types';
 import { useRuleFormDispatch, useRuleFormState } from '../hooks';
-import { RuleFormParamsErrors } from '../common/types';
+import type { RuleFormParamsErrors } from '../common/types';
 import { validateAction, validateParamsForWarnings } from '../validation';
 
 import { RuleActionsSettings } from './rule_actions_settings';

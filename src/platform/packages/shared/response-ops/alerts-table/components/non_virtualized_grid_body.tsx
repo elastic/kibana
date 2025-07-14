@@ -9,7 +9,7 @@
 
 import React, { memo } from 'react';
 import styled from '@emotion/styled';
-import { EuiDataGridProps, EuiDataGridStyle } from '@elastic/eui';
+import type { EuiDataGridProps, EuiDataGridStyle } from '@elastic/eui';
 import type { Alert } from '@kbn/alerting-types';
 
 const Row = styled.div`

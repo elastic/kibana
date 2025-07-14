@@ -9,10 +9,11 @@
 
 import React from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
-import { EuiSuperSelectProps } from '@elastic/eui';
+import type { EuiSuperSelectProps } from '@elastic/eui';
 import { act } from 'react-dom/test-utils';
 import { RuleActionsNotifyWhen } from './rule_actions_notify_when';
-import { RuleAction, RuleNotifyWhen } from '@kbn/alerting-types';
+import type { RuleAction } from '@kbn/alerting-types';
+import { RuleNotifyWhen } from '@kbn/alerting-types';
 import { DEFAULT_FREQUENCY } from '../constants';
 
 describe('ruleActionsNotifyWhen', () => {

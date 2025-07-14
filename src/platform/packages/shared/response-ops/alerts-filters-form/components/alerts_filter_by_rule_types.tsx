@@ -7,15 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { useGetInternalRuleTypesQuery } from '@kbn/response-ops-rules-apis/hooks/use_get_internal_rule_types_query';
-import { EuiComboBoxProps } from '@elastic/eui/src/components/combo_box/combo_box';
-import { SetRequired } from 'type-fest';
+import type { EuiComboBoxProps } from '@elastic/eui/src/components/combo_box/combo_box';
+import type { SetRequired } from 'type-fest';
 import { nodeBuilder, toKqlExpression } from '@kbn/es-query';
 import { ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { RULE_TYPES_FILTER_SUBJ } from '../constants';
-import { AlertsFilterComponentType, AlertsFilterMetadata } from '../types';
+import type { AlertsFilterComponentType, AlertsFilterMetadata } from '../types';
 import { useAlertsFiltersFormContext } from '../contexts/alerts_filters_form_context';
 import {
   RULE_TYPES_FILTER_LABEL,
