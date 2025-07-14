@@ -78,7 +78,7 @@ const DashboardViewComponent: React.FC<DashboardViewProps> = ({
       <SecuritySolutionPageWrapper>
         <EuiFlexGroup
           direction="column"
-          style={dashboardViewFlexGroupStyle}
+          css={dashboardViewFlexGroupStyle}
           gutterSize="none"
           data-test-subj="dashboard-view-wrapper"
         >
