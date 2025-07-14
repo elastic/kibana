@@ -14,6 +14,7 @@ import type {
 } from '@kbn/scout';
 import type { ProfilingSetupFixture } from './worker';
 import { ObltPageObjects } from '../page_objects';
+import { SloDataFixture } from './worker';
 
 export interface ObltTestFixtures extends ScoutTestFixtures {
   pageObjects: ObltPageObjects;
@@ -23,7 +24,11 @@ export type ObltApiServicesFixture = ApiServicesFixture;
 
 export interface ObltWorkerFixtures extends ScoutWorkerFixtures {
   apiServices: ObltApiServicesFixture;
+<<<<<<< HEAD
   profilingSetup: ProfilingSetupFixture;
+=======
+  sloData: SloDataFixture;
+>>>>>>> 726042c9a91 ([SLO] Migrate synthetics to scout !! (#225035))
 }
 
 export interface ObltParallelTestFixtures extends ScoutParallelTestFixtures {
