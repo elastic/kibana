@@ -26,8 +26,7 @@ export const Styles: FC<Props> = ({ darkMode, stylesheetPaths }) => {
   );
 };
 
-const InlineStyles: FC<{ darkMode: boolean;}> = ({ darkMode }) => {
-
+const InlineStyles: FC<{ darkMode: boolean }> = ({ darkMode }) => {
   /* eslint-disable react/no-danger */
   return (
     <style
