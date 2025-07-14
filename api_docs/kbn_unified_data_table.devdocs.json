@@ -861,6 +861,107 @@
       },
       {
         "parentPluginId": "@kbn/unified-data-table",
+        "id": "def-public.UnifiedDataTableSummaryColumnHeader",
+        "type": "Function",
+        "tags": [],
+        "label": "UnifiedDataTableSummaryColumnHeader",
+        "description": [],
+        "signature": [
+          "({ headerRowHeight, columnDisplayName, tooltipContent, tooltipTitle, iconTipDataTestSubj, }: { headerRowHeight?: number | undefined; columnDisplayName?: string | undefined; tooltipContent?: React.ReactNode; tooltipTitle?: string | undefined; iconTipDataTestSubj?: string | undefined; }) => React.JSX.Element"
+        ],
+        "path": "src/platform/packages/shared/kbn-unified-data-table/src/components/data_table_summary_column_header.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableSummaryColumnHeader.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  headerRowHeight = ROWS_HEIGHT_OPTIONS.single,\n  columnDisplayName = SUMMARY_COLUMN_NAME,\n  tooltipContent = DEFAULT_COLUMN_HEADER_TOOLTIP_CONTENT,\n  tooltipTitle = DEFAULT_COLUMN_HEADER_TOOLTIP_TITLE,\n  iconTipDataTestSubj = 'unifiedDataTable_headerSummaryIcon',\n}",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-unified-data-table/src/components/data_table_summary_column_header.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/unified-data-table",
+                "id": "def-public.UnifiedDataTableSummaryColumnHeader.$1.headerRowHeight",
+                "type": "number",
+                "tags": [],
+                "label": "headerRowHeight",
+                "description": [],
+                "signature": [
+                  "number | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-unified-data-table/src/components/data_table_summary_column_header.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/unified-data-table",
+                "id": "def-public.UnifiedDataTableSummaryColumnHeader.$1.columnDisplayName",
+                "type": "string",
+                "tags": [],
+                "label": "columnDisplayName",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-unified-data-table/src/components/data_table_summary_column_header.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/unified-data-table",
+                "id": "def-public.UnifiedDataTableSummaryColumnHeader.$1.tooltipContent",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "tooltipContent",
+                "description": [],
+                "signature": [
+                  "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-unified-data-table/src/components/data_table_summary_column_header.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/unified-data-table",
+                "id": "def-public.UnifiedDataTableSummaryColumnHeader.$1.tooltipTitle",
+                "type": "string",
+                "tags": [],
+                "label": "tooltipTitle",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-unified-data-table/src/components/data_table_summary_column_header.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/unified-data-table",
+                "id": "def-public.UnifiedDataTableSummaryColumnHeader.$1.iconTipDataTestSubj",
+                "type": "string",
+                "tags": [],
+                "label": "iconTipDataTestSubj",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-unified-data-table/src/components/data_table_summary_column_header.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/unified-data-table",
         "id": "def-public.useColumns",
         "type": "Function",
         "tags": [],
@@ -1165,11 +1266,112 @@
           },
           {
             "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableRestorableState.isFilterActive",
+            "type": "boolean",
+            "tags": [],
+            "label": "isFilterActive",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-unified-data-table/src/restorable_state.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableRestorableState.pageIndex",
+            "type": "number",
+            "tags": [],
+            "label": "pageIndex",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-unified-data-table/src/restorable_state.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableRestorableState.inTableSearch",
+            "type": "Object",
+            "tags": [],
+            "label": "inTableSearch",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/data-grid-in-table-search",
+                "scope": "public",
+                "docId": "kibKbnDataGridInTableSearchPluginApi",
+                "section": "def-public.InTableSearchRestorableState",
+                "text": "InTableSearchRestorableState"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-data-table/src/restorable_state.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
             "id": "def-public.UnifiedDataTableRestorableState.isCompareActive",
             "type": "boolean",
             "tags": [],
             "label": "isCompareActive",
             "description": [],
+            "path": "src/platform/packages/shared/kbn-unified-data-table/src/restorable_state.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableRestorableState.comparisonSettingShowDiff",
+            "type": "boolean",
+            "tags": [],
+            "label": "comparisonSettingShowDiff",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-unified-data-table/src/restorable_state.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableRestorableState.comparisonSettingShowDiffDecorations",
+            "type": "boolean",
+            "tags": [],
+            "label": "comparisonSettingShowDiffDecorations",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-unified-data-table/src/restorable_state.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableRestorableState.comparisonSettingShowAllFields",
+            "type": "boolean",
+            "tags": [],
+            "label": "comparisonSettingShowAllFields",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-unified-data-table/src/restorable_state.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableRestorableState.comparisonSettingShowMatchingValues",
+            "type": "boolean",
+            "tags": [],
+            "label": "comparisonSettingShowMatchingValues",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-unified-data-table/src/restorable_state.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableRestorableState.comparisonSettingDiffMode",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "comparisonSettingDiffMode",
+            "description": [],
+            "signature": [
+              "\"basic\" | \"chars\" | \"words\" | \"lines\""
+            ],
             "path": "src/platform/packages/shared/kbn-unified-data-table/src/restorable_state.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1859,7 +2061,7 @@
           "\nRow height might be a value from -1 to 20\nA value of -1 automatically adjusts the row height to fit the contents.\nA value from 1 to 20 represents number of lines of Document explorer row to display."
         ],
         "signature": [
-          "{ readonly auto: -1; readonly default: 3; }"
+          "{ readonly auto: -1; readonly single: 1; readonly default: 3; }"
         ],
         "path": "src/platform/packages/shared/kbn-unified-data-table/src/constants.ts",
         "deprecated": false,

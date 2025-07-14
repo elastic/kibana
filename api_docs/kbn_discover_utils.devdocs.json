@@ -1668,6 +1668,109 @@
       },
       {
         "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.getDefaultSort",
+        "type": "Function",
+        "tags": [],
+        "label": "getDefaultSort",
+        "description": [
+          "\nuse in case the user didn't manually sort.\nthe default sort is returned depending on the data view or non for ES|QL queries"
+        ],
+        "signature": [
+          "(dataView: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataView",
+            "text": "DataView"
+          },
+          " | undefined, defaultSortOrder: string, hidingTimeColumn: boolean, isEsqlMode: boolean) => ",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.SortOrder",
+            "text": "SortOrder"
+          },
+          "[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/sorting/get_default_sort.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.getDefaultSort.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "dataView",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/sorting/get_default_sort.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.getDefaultSort.$2",
+            "type": "string",
+            "tags": [],
+            "label": "defaultSortOrder",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/sorting/get_default_sort.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.getDefaultSort.$3",
+            "type": "boolean",
+            "tags": [],
+            "label": "hidingTimeColumn",
+            "description": [],
+            "signature": [
+              "boolean"
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/sorting/get_default_sort.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.getDefaultSort.$4",
+            "type": "boolean",
+            "tags": [],
+            "label": "isEsqlMode",
+            "description": [],
+            "signature": [
+              "boolean"
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/sorting/get_default_sort.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
         "id": "def-common.getDocId",
         "type": "Function",
         "tags": [],
@@ -1711,6 +1814,116 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.getEsQuerySort",
+        "type": "Function",
+        "tags": [],
+        "label": "getEsQuerySort",
+        "description": [
+          "\nReturns `EsQuerySort` which is used to sort records in the ES query\nhttps://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-sort.html"
+        ],
+        "signature": [
+          "({\n  sortDir,\n  timeFieldName,\n  tieBreakerFieldName,\n  isTimeNanosBased,\n}: { sortDir: ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.SortDirection",
+            "text": "SortDirection"
+          },
+          "; timeFieldName: string; tieBreakerFieldName: string; isTimeNanosBased: boolean; }) => [",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.EsQuerySortValue",
+            "text": "EsQuerySortValue"
+          },
+          ", ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.EsQuerySortValue",
+            "text": "EsQuerySortValue"
+          },
+          "]"
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/sorting/get_es_query_sort.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.getEsQuerySort.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  sortDir,\n  timeFieldName,\n  tieBreakerFieldName,\n  isTimeNanosBased,\n}",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/sorting/get_es_query_sort.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/discover-utils",
+                "id": "def-common.getEsQuerySort.$1.sortDir",
+                "type": "Enum",
+                "tags": [],
+                "label": "sortDir",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "data",
+                    "scope": "common",
+                    "docId": "kibDataSearchPluginApi",
+                    "section": "def-common.SortDirection",
+                    "text": "SortDirection"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/sorting/get_es_query_sort.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/discover-utils",
+                "id": "def-common.getEsQuerySort.$1.timeFieldName",
+                "type": "string",
+                "tags": [],
+                "label": "timeFieldName",
+                "description": [],
+                "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/sorting/get_es_query_sort.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/discover-utils",
+                "id": "def-common.getEsQuerySort.$1.tieBreakerFieldName",
+                "type": "string",
+                "tags": [],
+                "label": "tieBreakerFieldName",
+                "description": [],
+                "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/sorting/get_es_query_sort.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/discover-utils",
+                "id": "def-common.getEsQuerySort.$1.isTimeNanosBased",
+                "type": "boolean",
+                "tags": [],
+                "label": "isTimeNanosBased",
+                "description": [],
+                "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/sorting/get_es_query_sort.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           }
         ],
         "returnComment": [],
@@ -2297,6 +2510,349 @@
       },
       {
         "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.getSort",
+        "type": "Function",
+        "tags": [],
+        "label": "getSort",
+        "description": [
+          "\nTake a sorting array and make it into an object"
+        ],
+        "signature": [
+          "(sort: ",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.SortPair",
+            "text": "SortPair"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.SortPair",
+            "text": "SortPair"
+          },
+          "[], dataView: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataView",
+            "text": "DataView"
+          },
+          ", isEsqlMode: boolean) => ",
+          "SortPairObj",
+          "[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/sorting/get_sort.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.getSort.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "sort",
+            "description": [
+              "two dimensional array [[fieldToSort, directionToSort]]\nor an array of objects [{fieldToSort: directionToSort}]"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.SortPair",
+                "text": "SortPair"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.SortPair",
+                "text": "SortPair"
+              },
+              "[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/sorting/get_sort.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.getSort.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "dataView",
+            "description": [
+              "used for determining default sort"
+            ],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/sorting/get_sort.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.getSort.$3",
+            "type": "boolean",
+            "tags": [],
+            "label": "isEsqlMode",
+            "description": [],
+            "signature": [
+              "boolean"
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/sorting/get_sort.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "Array<{object}> an array of sort objects"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.getSortArray",
+        "type": "Function",
+        "tags": [],
+        "label": "getSortArray",
+        "description": [
+          "\ncompared to getSort it doesn't return an array of objects, it returns an array of arrays\n[[fieldToSort: directionToSort]]"
+        ],
+        "signature": [
+          "(sort: ",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.SortInput",
+            "text": "SortInput"
+          },
+          ", dataView: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataView",
+            "text": "DataView"
+          },
+          ", isEsqlMode: boolean) => ",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.SortOrder",
+            "text": "SortOrder"
+          },
+          "[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/sorting/get_sort.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.getSortArray.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "sort",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.SortInput",
+                "text": "SortInput"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/sorting/get_sort.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.getSortArray.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "dataView",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/sorting/get_sort.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.getSortArray.$3",
+            "type": "boolean",
+            "tags": [],
+            "label": "isEsqlMode",
+            "description": [],
+            "signature": [
+              "boolean"
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/sorting/get_sort.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.getSortForSearchSource",
+        "type": "Function",
+        "tags": [],
+        "label": "getSortForSearchSource",
+        "description": [
+          "\nPrepares sort for search source, that's sending the request to ES\n- Adds default sort if necessary\n- Handles the special case when there's sorting by date_nanos typed fields\n  the addon of the numeric_type guarantees the right sort order\n  when there are indices with date and indices with date_nanos field"
+        ],
+        "signature": [
+          "({\n  sort,\n  dataView,\n  defaultSortDir,\n  includeTieBreaker = false,\n}: { sort: ",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.SortOrder",
+            "text": "SortOrder"
+          },
+          "[] | undefined; dataView: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataView",
+            "text": "DataView"
+          },
+          " | undefined; defaultSortDir: string; includeTieBreaker?: boolean | undefined; }) => ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.EsQuerySortValue",
+            "text": "EsQuerySortValue"
+          },
+          "[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/sorting/get_sort_for_search_source.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.getSortForSearchSource.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  sort,\n  dataView,\n  defaultSortDir,\n  includeTieBreaker = false,\n}",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/sorting/get_sort_for_search_source.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/discover-utils",
+                "id": "def-common.getSortForSearchSource.$1.sort",
+                "type": "Array",
+                "tags": [],
+                "label": "sort",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/discover-utils",
+                    "scope": "common",
+                    "docId": "kibKbnDiscoverUtilsPluginApi",
+                    "section": "def-common.SortOrder",
+                    "text": "SortOrder"
+                  },
+                  "[] | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/sorting/get_sort_for_search_source.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/discover-utils",
+                "id": "def-common.getSortForSearchSource.$1.dataView",
+                "type": "Object",
+                "tags": [],
+                "label": "dataView",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "dataViews",
+                    "scope": "common",
+                    "docId": "kibDataViewsPluginApi",
+                    "section": "def-common.DataView",
+                    "text": "DataView"
+                  },
+                  " | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/sorting/get_sort_for_search_source.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/discover-utils",
+                "id": "def-common.getSortForSearchSource.$1.defaultSortDir",
+                "type": "string",
+                "tags": [],
+                "label": "defaultSortDir",
+                "description": [],
+                "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/sorting/get_sort_for_search_source.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/discover-utils",
+                "id": "def-common.getSortForSearchSource.$1.includeTieBreaker",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "includeTieBreaker",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/sorting/get_sort_for_search_source.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
         "id": "def-common.getSpanDocumentOverview",
         "type": "Function",
         "tags": [],
@@ -2423,6 +2979,74 @@
                 "trackAdoption": false
               }
             ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.getTieBreakerFieldName",
+        "type": "Function",
+        "tags": [],
+        "label": "getTieBreakerFieldName",
+        "description": [
+          "\nReturns a field from the intersection of the set of sortable fields in the\ngiven data view and a given set of candidate field names."
+        ],
+        "signature": [
+          "(dataView: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataView",
+            "text": "DataView"
+          },
+          ", uiSettings: Pick<",
+          "IUiSettingsClient",
+          ", \"get\">) => any"
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/sorting/get_es_query_sort.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.getTieBreakerFieldName.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "dataView",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/sorting/get_es_query_sort.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.getTieBreakerFieldName.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "uiSettings",
+            "description": [],
+            "signature": [
+              "Pick<",
+              "IUiSettingsClient",
+              ", \"get\">"
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/sorting/get_es_query_sort.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
           }
         ],
         "returnComment": [],
@@ -6551,6 +7175,74 @@
           "\"discover:sort:defaultOrder\""
         ],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.SortInput",
+        "type": "Type",
+        "tags": [],
+        "label": "SortInput",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.SortPair",
+            "text": "SortPair"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.SortPair",
+            "text": "SortPair"
+          },
+          "[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/sorting/get_sort.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.SortOrder",
+        "type": "Type",
+        "tags": [],
+        "label": "SortOrder",
+        "description": [],
+        "signature": [
+          "[string, string]"
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/sorting/get_sort.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.SortPair",
+        "type": "Type",
+        "tags": [],
+        "label": "SortPair",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.SortOrder",
+            "text": "SortOrder"
+          },
+          " | ",
+          "SortPairObj"
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/sorting/get_sort.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -11,7 +11,6 @@ export type ESQLAst = ESQLAstCommand[];
 
 export type ESQLAstCommand =
   | ESQLCommand
-  | ESQLAstTimeseriesCommand
   | ESQLAstJoinCommand
   | ESQLAstChangePointCommand
   | ESQLAstRerankCommand
@@ -92,10 +91,6 @@ export interface ESQLCommand<Name = string> extends ESQLAstBaseItem<Name> {
   commandType?: string;
 
   args: ESQLAstItem[];
-}
-
-export interface ESQLAstTimeseriesCommand extends ESQLCommand<'ts'> {
-  sources: ESQLSource[];
 }
 
 export interface ESQLAstJoinCommand extends ESQLCommand<'join'> {
