@@ -1710,7 +1710,23 @@
             "section": "def-common.ChatCompletionChunkToolCall",
             "text": "ChatCompletionChunkToolCall"
           },
-          "[]; } & { type: ",
+          "[]; deanonymized_input?: { message: any; deanonymizations: ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.Deanonymization",
+            "text": "Deanonymization"
+          },
+          "[]; }[] | undefined; deanonymized_output?: { message: any; deanonymizations: ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.Deanonymization",
+            "text": "Deanonymization"
+          },
+          "[]; } | undefined; } & { type: ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
@@ -1795,6 +1811,254 @@
       }
     ],
     "interfaces": [
+      {
+        "parentPluginId": "@kbn/inference-common",
+        "id": "def-common.Anonymization",
+        "type": "Interface",
+        "tags": [],
+        "label": "Anonymization",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/anonymization/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/inference-common",
+            "id": "def-common.Anonymization.rule",
+            "type": "Object",
+            "tags": [],
+            "label": "rule",
+            "description": [],
+            "signature": [
+              "{ type: string; }"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/anonymization/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/inference-common",
+            "id": "def-common.Anonymization.entity",
+            "type": "Object",
+            "tags": [],
+            "label": "entity",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.AnonymizationEntity",
+                "text": "AnonymizationEntity"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/anonymization/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inference-common",
+        "id": "def-common.AnonymizationEntity",
+        "type": "Interface",
+        "tags": [],
+        "label": "AnonymizationEntity",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/anonymization/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/inference-common",
+            "id": "def-common.AnonymizationEntity.class_name",
+            "type": "string",
+            "tags": [],
+            "label": "class_name",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/anonymization/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/inference-common",
+            "id": "def-common.AnonymizationEntity.value",
+            "type": "string",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/anonymization/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/inference-common",
+            "id": "def-common.AnonymizationEntity.mask",
+            "type": "string",
+            "tags": [],
+            "label": "mask",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/anonymization/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inference-common",
+        "id": "def-common.AnonymizationOutput",
+        "type": "Interface",
+        "tags": [],
+        "label": "AnonymizationOutput",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/anonymization/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/inference-common",
+            "id": "def-common.AnonymizationOutput.messages",
+            "type": "Array",
+            "tags": [],
+            "label": "messages",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.Message",
+                "text": "Message"
+              },
+              "[]"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/anonymization/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/inference-common",
+            "id": "def-common.AnonymizationOutput.anonymizations",
+            "type": "Array",
+            "tags": [],
+            "label": "anonymizations",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.Anonymization",
+                "text": "Anonymization"
+              },
+              "[]"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/anonymization/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/inference-common",
+            "id": "def-common.AnonymizationOutput.system",
+            "type": "string",
+            "tags": [],
+            "label": "system",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/anonymization/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inference-common",
+        "id": "def-common.AnonymizationRegexWorkerTaskPayload",
+        "type": "Interface",
+        "tags": [],
+        "label": "AnonymizationRegexWorkerTaskPayload",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/anonymization/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/inference-common",
+            "id": "def-common.AnonymizationRegexWorkerTaskPayload.rule",
+            "type": "Object",
+            "tags": [],
+            "label": "rule",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.RegexAnonymizationRule",
+                "text": "RegexAnonymizationRule"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/anonymization/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/inference-common",
+            "id": "def-common.AnonymizationRegexWorkerTaskPayload.records",
+            "type": "Array",
+            "tags": [],
+            "label": "records",
+            "description": [],
+            "signature": [
+              "Record<string, string>[]"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/anonymization/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inference-common",
+        "id": "def-common.AnonymizationSettings",
+        "type": "Interface",
+        "tags": [],
+        "label": "AnonymizationSettings",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/anonymization/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/inference-common",
+            "id": "def-common.AnonymizationSettings.rules",
+            "type": "Array",
+            "tags": [],
+            "label": "rules",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.AnonymizationRule",
+                "text": "AnonymizationRule"
+              },
+              "[]"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/anonymization/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/inference-common",
         "id": "def-common.BoundInferenceClient",
@@ -2528,6 +2792,97 @@
       },
       {
         "parentPluginId": "@kbn/inference-common",
+        "id": "def-common.Deanonymization",
+        "type": "Interface",
+        "tags": [],
+        "label": "Deanonymization",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/anonymization/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/inference-common",
+            "id": "def-common.Deanonymization.start",
+            "type": "number",
+            "tags": [],
+            "label": "start",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/anonymization/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/inference-common",
+            "id": "def-common.Deanonymization.end",
+            "type": "number",
+            "tags": [],
+            "label": "end",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/anonymization/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/inference-common",
+            "id": "def-common.Deanonymization.entity",
+            "type": "Object",
+            "tags": [],
+            "label": "entity",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.AnonymizationEntity",
+                "text": "AnonymizationEntity"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/anonymization/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inference-common",
+        "id": "def-common.DeanonymizationOutput",
+        "type": "Interface",
+        "tags": [],
+        "label": "DeanonymizationOutput",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/anonymization/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/inference-common",
+            "id": "def-common.DeanonymizationOutput.messages",
+            "type": "Array",
+            "tags": [],
+            "label": "messages",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.DeanonymizedMessage",
+                "text": "DeanonymizedMessage"
+              },
+              "[]"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/anonymization/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inference-common",
         "id": "def-common.InferenceClient",
         "type": "Interface",
         "tags": [],
@@ -3022,6 +3377,69 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/model_provider/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inference-common",
+        "id": "def-common.NamedEntityRecognitionRule",
+        "type": "Interface",
+        "tags": [],
+        "label": "NamedEntityRecognitionRule",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.NamedEntityRecognitionRule",
+            "text": "NamedEntityRecognitionRule"
+          },
+          " extends AnonymizationRuleBase"
+        ],
+        "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/anonymization/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/inference-common",
+            "id": "def-common.NamedEntityRecognitionRule.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"NER\""
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/anonymization/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/inference-common",
+            "id": "def-common.NamedEntityRecognitionRule.modelId",
+            "type": "string",
+            "tags": [],
+            "label": "modelId",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/anonymization/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/inference-common",
+            "id": "def-common.NamedEntityRecognitionRule.allowedEntityClasses",
+            "type": "Array",
+            "tags": [],
+            "label": "allowedEntityClasses",
+            "description": [],
+            "signature": [
+              "(\"PER\" | \"ORG\" | \"LOC\" | \"MISC\")[] | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/anonymization/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3626,6 +4044,80 @@
       },
       {
         "parentPluginId": "@kbn/inference-common",
+        "id": "def-common.RegexAnonymizationRule",
+        "type": "Interface",
+        "tags": [],
+        "label": "RegexAnonymizationRule",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.RegexAnonymizationRule",
+            "text": "RegexAnonymizationRule"
+          },
+          " extends AnonymizationRuleBase"
+        ],
+        "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/anonymization/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/inference-common",
+            "id": "def-common.RegexAnonymizationRule.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"RegExp\""
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/anonymization/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/inference-common",
+            "id": "def-common.RegexAnonymizationRule.pattern",
+            "type": "string",
+            "tags": [],
+            "label": "pattern",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/anonymization/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/inference-common",
+            "id": "def-common.RegexAnonymizationRule.entityClass",
+            "type": "string",
+            "tags": [],
+            "label": "entityClass",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/anonymization/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/inference-common",
+            "id": "def-common.RegexAnonymizationRule.mask",
+            "type": "string",
+            "tags": [],
+            "label": "mask",
+            "description": [],
+            "signature": [
+              "RuleMaskType | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/anonymization/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inference-common",
         "id": "def-common.ToolCall",
         "type": "Interface",
         "tags": [],
@@ -3989,6 +4481,50 @@
       }
     ],
     "misc": [
+      {
+        "parentPluginId": "@kbn/inference-common",
+        "id": "def-common.aiAssistantAnonymizationSettings",
+        "type": "string",
+        "tags": [],
+        "label": "aiAssistantAnonymizationSettings",
+        "description": [],
+        "signature": [
+          "\"aiAssistant:anonymizationSettings\""
+        ],
+        "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/ui_settings/settings_keys.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inference-common",
+        "id": "def-common.AnonymizationRule",
+        "type": "Type",
+        "tags": [],
+        "label": "AnonymizationRule",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.NamedEntityRecognitionRule",
+            "text": "NamedEntityRecognitionRule"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.RegexAnonymizationRule",
+            "text": "RegexAnonymizationRule"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/anonymization/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/inference-common",
         "id": "def-common.AssistantMessage",
@@ -4576,7 +5112,23 @@
             "section": "def-common.ChatCompletionChunkToolCall",
             "text": "ChatCompletionChunkToolCall"
           },
-          "[]; } & { type: ",
+          "[]; deanonymized_input?: { message: any; deanonymizations: ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.Deanonymization",
+            "text": "Deanonymization"
+          },
+          "[]; }[] | undefined; deanonymized_output?: { message: any; deanonymizations: ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.Deanonymization",
+            "text": "Deanonymization"
+          },
+          "[]; } | undefined; } & { type: ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
@@ -4609,7 +5161,23 @@
             "section": "def-common.ChatCompletionChunkToolCall",
             "text": "ChatCompletionChunkToolCall"
           },
-          "[]; } & { type: ",
+          "[]; deanonymized_input?: { message: any; deanonymizations: ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.Deanonymization",
+            "text": "Deanonymization"
+          },
+          "[]; }[] | undefined; deanonymized_output?: { message: any; deanonymizations: ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.Deanonymization",
+            "text": "Deanonymization"
+          },
+          "[]; } | undefined; } & { type: ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
@@ -4641,7 +5209,39 @@
             "section": "def-common.ToolCallsOf",
             "text": "ToolCallsOf"
           },
-          "<TToolOptions>[\"toolCalls\"]; } & { type: ",
+          "<TToolOptions>[\"toolCalls\"]; deanonymized_input?: { message: ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.Message",
+            "text": "Message"
+          },
+          "; deanonymizations: ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.Deanonymization",
+            "text": "Deanonymization"
+          },
+          "[]; }[] | undefined; deanonymized_output?: { message: ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.Message",
+            "text": "Message"
+          },
+          "; deanonymizations: ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.Deanonymization",
+            "text": "Deanonymization"
+          },
+          "[]; } | undefined; } & { type: ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
@@ -4674,7 +5274,39 @@
             "section": "def-common.ToolCallsOf",
             "text": "ToolCallsOf"
           },
-          "<TToolOptions>[\"toolCalls\"]; } & { type: ",
+          "<TToolOptions>[\"toolCalls\"]; deanonymized_input?: { message: ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.Message",
+            "text": "Message"
+          },
+          "; deanonymizations: ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.Deanonymization",
+            "text": "Deanonymization"
+          },
+          "[]; }[] | undefined; deanonymized_output?: { message: ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.Message",
+            "text": "Message"
+          },
+          "; deanonymizations: ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.Deanonymization",
+            "text": "Deanonymization"
+          },
+          "[]; } | undefined; } & { type: ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
@@ -4822,6 +5454,36 @@
           "[] | undefined; }>"
         ],
         "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/errors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inference-common",
+        "id": "def-common.DeanonymizedMessage",
+        "type": "Type",
+        "tags": [],
+        "label": "DeanonymizedMessage",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.Message",
+            "text": "Message"
+          },
+          " & { deanonymizations: ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.Deanonymization",
+            "text": "Deanonymization"
+          },
+          "[]; }"
+        ],
+        "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/anonymization/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
