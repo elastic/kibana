@@ -81,5 +81,15 @@
     "@kbn/server-route-repository-utils",
     "@kbn/cases-plugin",
     "@kbn/infra-forge",
+    "@kbn/test-suites-src",
+    "@kbn/ftr-common-functional-ui-services",
+    "@kbn/config-schema",
+    "@kbn/guided-onboarding-plugin",
+    "@kbn/ml-string-hash",
+    "@kbn/test-subj-selector",
+    "@kbn/datemath",
+    "@kbn/typed-react-router-config",
+    "@kbn/observability-ai-assistant-app-plugin",
+    "@kbn/dev-utils",
   ]
 }
