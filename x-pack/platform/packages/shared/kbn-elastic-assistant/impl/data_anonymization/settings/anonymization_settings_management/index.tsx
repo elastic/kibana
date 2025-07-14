@@ -79,9 +79,9 @@ const AnonymizationSettingsManagementComponent: React.FC<Props> = ({
     onClose?.();
   }, [handleSave, onClose]);
 
-  if (modalMode) {
-    const modalTitleId = useGeneratedHtmlId();
+  const modalTitleId = useGeneratedHtmlId();
 
+  if (modalMode) {
     return (
       <EuiModal onClose={onCancelClick} aria-labelledby={modalTitleId}>
         <EuiModalHeader>
