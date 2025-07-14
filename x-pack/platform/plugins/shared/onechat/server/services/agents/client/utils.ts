@@ -9,6 +9,7 @@ import { createBadRequestError } from '@kbn/onechat-common';
 import type { ToolSelection } from '@kbn/onechat-common';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { ToolRegistry } from '../../tools';
+import type { InternalToolDefinition } from '../../tools/tool_provider';
 
 // - Must start and end with letter or digit
 // - Can contain letters, digits, hyphens, underscores
@@ -33,7 +34,7 @@ export async function validateToolSelection({
 }: ValidateToolSelectionParams): Promise<string[]> {
   const errors: string[] = [];
   const allTools = await toolRegistry.list({ request });
-  const allProviders = new Set(allTools.map((t: any) => t.meta.providerId));
+  const allProviders = new Set(allTools.map((t: InternalToolDefinition) => t.type));
 
   for (const selection of toolSelection) {
     const { type, tool_ids: toolIds } = selection;
@@ -41,10 +42,10 @@ export async function validateToolSelection({
       // If provider is not specified, check for ambiguity
       for (const toolId of toolIds) {
         if (toolId === '*') continue;
-        const matchingTools = allTools.filter((t: any) => t.id === toolId);
+        const matchingTools = allTools.filter((t: InternalToolDefinition) => t.id === toolId);
         if (matchingTools.length > 1) {
           const matchingProviders = Array.from(
-            new Set(matchingTools.map((t: any) => t.meta.providerId))
+            new Set(matchingTools.map((t: InternalToolDefinition) => t.type))
           );
           errors.push(
             `Tool id '${toolId}' is ambiguous. Please specify a provider. Matching providers: [${matchingProviders.join(
