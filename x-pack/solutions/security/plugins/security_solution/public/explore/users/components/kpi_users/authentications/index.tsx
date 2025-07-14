@@ -19,7 +19,7 @@ import type { UsersKpiProps } from '../types';
 
 const ID = 'usersKpiAuthentications';
 
-export const useGetAuthenticationsStatItems: () => readonly StatItems[] = () => {
+export const useGetAuthenticationsStatItems: () => Readonly<StatItems[]> = () => {
   const { euiTheme } = useEuiTheme();
   return useMemo(
     () => [

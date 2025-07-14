@@ -6,12 +6,8 @@
  */
 
 import moment from 'moment';
-import type {
-  AnalyticsServiceSetup,
-  AuditLogger,
-  type Logger,
-  SavedObjectsErrorHelpers,
-} from '@kbn/core/server';
+import type { AnalyticsServiceSetup, AuditLogger } from '@kbn/core/server';
+import { type Logger, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type {
   ConcreteTaskInstance,
   TaskManagerSetupContract,

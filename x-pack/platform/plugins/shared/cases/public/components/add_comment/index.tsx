@@ -48,6 +48,7 @@ export interface AddCommentRefObject {
   editor: MarkdownEditorRef | null;
 }
 
+/* eslint-disable react/no-unused-prop-types */
 export interface AddCommentProps {
   id: string;
   caseId: string;
@@ -56,6 +57,7 @@ export interface AddCommentProps {
   showLoading?: boolean;
   statusActionButton: JSX.Element | null;
 }
+/* eslint-enable react/no-unused-prop-types */
 
 export const AddComment = React.memo(
   forwardRef<AddCommentRefObject, AddCommentProps>(

@@ -11,4 +11,4 @@ export interface SubfieldChange {
   readonly newSubfieldValue: string;
 }
 
-export type SubfieldChanges = readonly SubfieldChange[];
+export type SubfieldChanges = Readonly<SubfieldChange[]>;

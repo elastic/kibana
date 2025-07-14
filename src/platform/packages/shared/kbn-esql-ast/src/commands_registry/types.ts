@@ -84,7 +84,7 @@ export interface ISuggestionItem {
 }
 
 export type GetColumnsByTypeFn = (
-  type: Readonly<string> | readonly string[],
+  type: Readonly<string> | Readonly<string[]>,
   ignored?: string[],
   options?: {
     advanceCursor?: boolean;

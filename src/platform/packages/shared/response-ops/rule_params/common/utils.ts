@@ -39,7 +39,7 @@ export const jobsSelectionSchema = schema.object(
   }
 );
 
-export const oneOfLiterals = (arrayOfLiterals: readonly string[]) =>
+export const oneOfLiterals = (arrayOfLiterals: Readonly<string[]>) =>
   schema.string({
     validate: (value) =>
       arrayOfLiterals.includes(value) ? undefined : `must be one of ${arrayOfLiterals.join(' | ')}`,

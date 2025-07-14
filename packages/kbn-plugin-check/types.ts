@@ -71,12 +71,12 @@ export interface PluginInfo {
 // Convenience type to include an `all` field of combined, unique dependency names
 // for any given subset.
 interface All {
-  all: readonly string[];
+  all: Readonly<string[]>;
 }
 
 /** Dependencies organized by whether or not they are required. */
 export type Dependencies = {
-  [requirement in PluginRequirement]: readonly string[];
+  [requirement in PluginRequirement]: Readonly<string[]>;
 } & {
   /** From where the dependencies were derived-- e.g. a type or instance method. */
   source: SourceOfType;
@@ -96,7 +96,7 @@ export type PluginDependencies = {
 
 /** Dependencies organized by manifest requirement. */
 export type ManifestDependencies = {
-  [requirement in ManifestRequirement]: readonly string[];
+  [requirement in ManifestRequirement]: Readonly<string[]>;
 } & All;
 
 // The hierarchical representation of a plugin's dependencies:

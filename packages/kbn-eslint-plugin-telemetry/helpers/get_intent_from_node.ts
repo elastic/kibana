@@ -76,8 +76,7 @@ export function getIntentFromNode(originalNode: TSESTree.JSXOpeningElement): str
         }
 
         const args: TSESTree.CallExpressionArgument[] = expression.arguments;
-        const callee: TSESTree.LeftHandSideExpression =
-          expression.callee as TSESTree.LeftHandSideExpression;
+        const callee: TSESTree.LeftHandSideExpression = expression.callee as TSESTree.LeftHandSideExpression;
 
         if (!('object' in callee)) {
           return '';

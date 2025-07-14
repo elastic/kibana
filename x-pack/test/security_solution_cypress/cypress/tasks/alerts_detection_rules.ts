@@ -236,13 +236,13 @@ export const openIntegrationsPopover = () => {
   cy.get(INTEGRATIONS_POPOVER).click();
 };
 
-export const selectRulesByName = (ruleNames: readonly string[]) => {
+export const selectRulesByName = (ruleNames: Readonly<string[]>) => {
   for (const ruleName of ruleNames) {
     selectRuleByName(ruleName);
   }
 };
 
-export const unselectRulesByName = (ruleNames: readonly string[]) => {
+export const unselectRulesByName = (ruleNames: Readonly<string[]>) => {
   for (const ruleName of ruleNames) {
     unselectRuleByName(ruleName);
   }

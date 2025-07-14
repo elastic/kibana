@@ -9,7 +9,8 @@ import { useEffect, useMemo, useRef } from 'react';
 import { isEqual } from 'lodash';
 import usePrevious from 'react-use/lib/usePrevious';
 import type { EqlOptions } from '../../../../../common/search_strategy';
-import type { FieldHook, type FormHook, useFormData } from '../../../../shared_imports';
+import type { FieldHook } from '../../../../shared_imports';
+import { type FormHook, useFormData } from '../../../../shared_imports';
 import type { DefineStepRule } from '../../../common/types';
 import {
   isEqlRule,

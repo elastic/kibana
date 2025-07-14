@@ -11,8 +11,8 @@ import type { estypes } from '@elastic/elasticsearch';
 import { isProcessesAction } from '../service/response_actions/type_guards';
 import { ENDPOINT_ACTION_RESPONSES_DS, ENDPOINT_ACTIONS_DS } from '../constants';
 import { BaseDataGenerator } from './base_data_generator';
-import type {
-  GetProcessesActionOutputContent,
+import type { GetProcessesActionOutputContent } from '../types';
+import {
   type ActionDetails,
   type ActionResponseOutput,
   ActivityLogItemTypes,

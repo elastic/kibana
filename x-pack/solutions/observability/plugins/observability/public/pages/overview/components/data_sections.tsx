@@ -18,7 +18,7 @@ interface Props {
   bucketSize: BucketSize;
 }
 export type DataSectionsApps = 'alert' | 'infra_logs' | 'infra_metrics' | 'apm' | 'ux';
-export const DATA_SECTIONS: readonly DataSectionsApps[] = [
+export const DATA_SECTIONS: Readonly<DataSectionsApps[]> = [
   'alert',
   'infra_logs',
   'infra_metrics',
