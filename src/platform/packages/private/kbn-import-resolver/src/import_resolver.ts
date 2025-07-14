@@ -205,6 +205,8 @@ export class ImportResolver {
     } catch (error) {
       if (error && error.code === 'MODULE_NOT_FOUND') {
         // fallback: attempt to resolve using the "exports" map in package.json
+        //
+        // TODO: Kibana operations team to look again into this once working on https://github.com/elastic/kibana-operations/issues/309 . Resolve library should have added native support for exports by then.
         const expRes = this.tryExportsResolve(req, dirname);
         if (expRes) {
           return expRes;
