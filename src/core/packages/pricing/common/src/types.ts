@@ -36,4 +36,9 @@ export interface IPricingTiersClient {
    * @returns True if the feature is available in the current pricing tier, false otherwise
    */
   isFeatureAvailable<TFeatureId extends string>(featureId: TFeatureId): boolean;
+
+  /**
+   * @deprecated Don't rely on this API for customizing serverless tiers. Register a dedicated feature and use `isFeatureAvailable` instead.
+   */
+  product(): PricingProduct | undefined;
 }

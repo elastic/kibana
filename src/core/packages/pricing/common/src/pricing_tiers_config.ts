@@ -70,7 +70,11 @@ export const tiersConfigSchema = schema.object({
     traditional: schema.literal(false),
     options: { defaultValue: false },
   }),
-  products: schema.maybe(schema.arrayOf(pricingProductsSchema)),
+  /**
+   * Note: We only support a single active product at a time with maxSize: 1, even if the schema could allow for multiple active products in the future.
+   * If we ever change this assumption, we'll need to update the pricing service to support multiple active products.
+   */
+  products: schema.maybe(schema.arrayOf(pricingProductsSchema, { maxSize: 1 })),
 });
 
 /**

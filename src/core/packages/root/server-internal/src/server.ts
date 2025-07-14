@@ -209,8 +209,6 @@ export class Server {
 
       this.capabilities.preboot({ http: httpPreboot });
 
-      this.pricing.preboot({ http: httpPreboot });
-
       const elasticsearchServicePreboot = await this.elasticsearch.preboot();
 
       await this.status.preboot({ http: httpPreboot });

@@ -111,4 +111,31 @@ describe('PricingTiersClient', () => {
       });
     });
   });
+  describe('product', () => {
+    describe('when tiers are disabled', () => {
+      beforeEach(() => {
+        tiersConfig = {
+          enabled: false,
+          products: undefined,
+        };
+        client = new PricingTiersClient(tiersConfig, productFeaturesRegistry);
+      });
+      it('returns undefined', () => {
+        expect(client.product()).toBeUndefined();
+      });
+    });
+    describe('when tiers are enabled', () => {
+      beforeEach(() => {
+        tiersConfig = {
+          enabled: true,
+          products: [{ name: 'observability', tier: 'complete' }],
+        };
+        client = new PricingTiersClient(tiersConfig, productFeaturesRegistry);
+      });
+      it('returns the current active product', () => {
+        // Note this test and implementation assumes only one product is active at a time
+        expect(client.product()).toEqual({ name: 'observability', tier: 'complete' });
+      });
+    });
+  });
 });

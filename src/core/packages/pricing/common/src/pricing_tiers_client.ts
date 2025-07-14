@@ -70,7 +70,7 @@ export class PricingTiersClient implements IPricingTiersClient {
    * @param featureId - The identifier of the feature to check
    * @returns True if the feature is available in the current pricing tier, false otherwise
    */
-  isFeatureAvailable = <TFeatureId extends string>(featureId: TFeatureId): boolean => {
+  public isFeatureAvailable = <TFeatureId extends string>(featureId: TFeatureId): boolean => {
     /**
      * We assume that when the pricing tiers are disabled, features are available globally
      * and not constrained by any product tier.
@@ -86,5 +86,9 @@ export class PricingTiersClient implements IPricingTiersClient {
     }
 
     return false;
+  };
+
+  public product = () => {
+    return this.tiers.enabled && this.tiers.products != null ? this.tiers.products[0] : undefined;
   };
 }

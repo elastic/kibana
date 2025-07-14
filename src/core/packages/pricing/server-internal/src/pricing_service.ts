@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CoreContext } from '@kbn/core-base-server-internal';
+import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type { Logger } from '@kbn/logging';
 import { Subject, firstValueFrom } from 'rxjs';
 import type { IConfigService } from '@kbn/config';
@@ -16,23 +16,17 @@ import {
   ProductFeaturesRegistry,
   PricingTiersClient,
 } from '@kbn/core-pricing-common';
-import type {
-  InternalHttpServicePreboot,
-  InternalHttpServiceSetup,
-} from '@kbn/core-http-server-internal';
+import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
+import { PricingServiceSetup, PricingServiceStart } from '@kbn/core-pricing-server';
 import type { PricingConfigType } from './pricing_config';
 import { registerRoutes } from './routes';
-
-interface PrebootDeps {
-  http: InternalHttpServicePreboot;
-}
 
 interface SetupDeps {
   http: InternalHttpServiceSetup;
 }
 
 /** @internal */
-export class PricingService {
+export class PricingService implements CoreService<PricingServiceSetup, PricingServiceStart> {
   private readonly configService: IConfigService;
   private readonly logger: Logger;
   private readonly productFeaturesRegistry: ProductFeaturesRegistry;
@@ -52,18 +46,6 @@ export class PricingService {
       this.pricingConfig.tiers,
       this.productFeaturesRegistry
     );
-  }
-
-  public preboot({ http }: PrebootDeps) {
-    this.logger.debug('Prebooting pricing service');
-
-    // The preboot server has no need for real pricing.
-    http.registerRoutes('', (router) => {
-      registerRoutes(router, {
-        pricingConfig: this.pricingConfig,
-        productFeaturesRegistry: this.productFeaturesRegistry,
-      });
-    });
   }
 
   public async setup({ http }: SetupDeps) {
@@ -110,7 +92,21 @@ export class PricingService {
     }
 
     return {
+      /**
+       * Checks if a specific feature is available in the current pricing tier configuration.
+       */
       isFeatureAvailable: this.tiersClient.isFeatureAvailable,
+      /**
+       * @deprecated Don't rely on this API for customizing serverless tiers. Register a dedicated feature and use `isFeatureAvailable` instead.
+       */
+      product:
+        this.pricingConfig.tiers.enabled && this.pricingConfig.tiers.products != null
+          ? this.pricingConfig.tiers.products[0]
+          : undefined,
     };
+  }
+
+  public stop() {
+    // No-op
   }
 }
