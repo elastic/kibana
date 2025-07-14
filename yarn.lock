@@ -3911,7 +3911,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/application-usage-test-plugin@link:x-pack/test/usage_collection/plugins/application_usage_test":
+"@kbn/application-usage-test-plugin@link:x-pack/platform/test/usage_collection/plugins/application_usage_test":
   version "0.0.0"
   uid ""
 
@@ -5651,7 +5651,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/fec-alerts-test-plugin@link:x-pack/test/functional_execution_context/plugins/alerts":
+"@kbn/fec-alerts-test-plugin@link:x-pack/platform/test/functional_execution_context/plugins/alerts":
   version "0.0.0"
   uid ""
 
@@ -5711,7 +5711,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/foo-plugin@link:x-pack/test/ui_capabilities/common/plugins/foo_plugin":
+"@kbn/foo-plugin@link:x-pack/platform/test/ui_capabilities/common/plugins/foo_plugin":
   version "0.0.0"
   uid ""
 
@@ -7583,7 +7583,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/stack-management-usage-test-plugin@link:x-pack/test/usage_collection/plugins/stack_management_usage_test":
+"@kbn/stack-management-usage-test-plugin@link:x-pack/platform/test/usage_collection/plugins/stack_management_usage_test":
   version "0.0.0"
   uid ""
 
@@ -7703,7 +7703,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/test-feature-usage-plugin@link:x-pack/test/licensing_plugin/plugins/test_feature_usage":
+"@kbn/test-feature-usage-plugin@link:x-pack/platform/test/licensing_plugin/plugins/test_feature_usage":
   version "0.0.0"
   uid ""
 
