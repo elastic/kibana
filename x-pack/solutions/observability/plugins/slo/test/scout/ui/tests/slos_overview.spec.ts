@@ -38,7 +38,7 @@ test.describe('SLOs Overview', { tag: ['@ess', '@svlOblt'] }, () => {
         .poll(() => page.locator('text=Test Stack SLO').count(), { timeout: 1000 })
         .toBeGreaterThan(5);
     }).toPass({
-      intervals: [20000],
+      intervals: [10000],
       timeout: TEST_TIMEOUT,
     });
   });
