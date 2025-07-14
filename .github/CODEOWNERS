@@ -1331,7 +1331,7 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/test_serverless/functional/fixtures/kbn_archiver/reporting @elastic/response-ops
 
 ### Global Experience Tagging
-/x-pack/test/saved_object_tagging/ @elastic/appex-sharedux
+/x-pack/platform/test/saved_object_tagging/ @elastic/appex-sharedux
 
 ### Kibana React (to be deprecated)
 /src/plugins/kibana_react/public/ @elastic/appex-sharedux @elastic/kibana-presentation
