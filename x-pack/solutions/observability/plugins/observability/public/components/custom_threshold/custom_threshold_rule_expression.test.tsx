@@ -303,7 +303,7 @@ describe('Expression', () => {
     });
     const { wrapper } = await setup();
     expect(wrapper.find(`[data-test-subj="thresholdRuleExpressionError"]`).first().text()).toBe(
-      errorMessage
+      errorMessage + 'Click here to choose a new data view'
     );
   });
 
