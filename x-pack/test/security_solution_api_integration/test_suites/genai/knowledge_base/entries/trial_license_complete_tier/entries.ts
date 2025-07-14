@@ -33,7 +33,7 @@ export default ({ getService }: FtrProviderContext) => {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const log = getService('log');
   const es = getService('es');
-  const ml = getService('ml') as ReturnType<typeof MachineLearningProvider>;
+  const ml = getService('ml') as unknown as ReturnType<typeof MachineLearningProvider>;
 
   // Failing: See https://github.com/elastic/kibana/issues/218325
   describe.skip('@ess Basic Security AI Assistant Knowledge Base Entries', () => {
