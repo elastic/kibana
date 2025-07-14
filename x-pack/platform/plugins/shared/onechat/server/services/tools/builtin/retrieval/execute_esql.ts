@@ -20,7 +20,10 @@ export const executeEsqlTool = (): RegisteredTool<typeof executeEsqlToolSchema, 
     description: 'Execute an ES|QL query and return the results.',
     schema: executeEsqlToolSchema,
     handler: async ({ query }, { esClient }) => {
-      return executeEsql({ query, esClient: esClient.asCurrentUser });
+      const result = await executeEsql({ query, esClient: esClient.asCurrentUser });
+      return {
+        result,
+      };
     },
     meta: {
       tags: [BuiltinTags.retrieval],

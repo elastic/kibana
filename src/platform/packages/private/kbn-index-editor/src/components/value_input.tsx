@@ -10,9 +10,8 @@
 import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { EuiToolTip } from '@elastic/eui';
 import { getInputComponentForType } from './value_inputs_factory';
-import { KibanaContextExtra } from '../types';
 
 interface ValueInputProps {
   value?: string;
@@ -35,9 +34,6 @@ export const ValueInput = ({
   autoFocus = false,
   className = '',
 }: ValueInputProps) => {
-  const {
-    services: { notifications },
-  } = useKibana<KibanaContextExtra>();
   const [editValue, setEditValue] = useState(value);
   const [error, setError] = useState<string | null>(null);
 
@@ -52,9 +48,6 @@ export const ValueInput = ({
       event.stopPropagation();
 
       if (error) {
-        notifications.toasts.addDanger({
-          title: error,
-        });
         return;
       }
 
@@ -62,36 +55,30 @@ export const ValueInput = ({
     }
   };
 
-  const onBlurHandler = (event: React.FocusEvent<HTMLInputElement>) => {
-    if (error) {
-      notifications.toasts.addDanger({
-        title: error,
-      });
-      return;
-    }
-    onBlur?.(event);
-  };
-
-  const InputComponent = useMemo(() => getInputComponentForType(columnType), [columnType]);
+  const InputComponent = useMemo(() => {
+    return getInputComponentForType(columnType);
+  }, [columnType]);
 
   return (
-    <InputComponent
-      autoFocus={autoFocus}
-      placeholder={columnName}
-      label={columnName}
-      value={editValue}
-      aria-label={i18n.translate('indexEditor.cellValueInput.aria', {
-        defaultMessage: 'Value for {columnName}',
-        values: { columnName },
-      })}
-      onChange={(e) => {
-        setEditValue(e.target.value);
-        onChange?.(e.target.value);
-      }}
-      onError={setError}
-      onBlur={onBlurHandler}
-      onKeyDown={onKeyDown}
-      className={className}
-    />
+    <EuiToolTip position="top" content={error}>
+      <InputComponent
+        autoFocus={autoFocus}
+        placeholder={columnName}
+        label={columnName}
+        value={editValue}
+        aria-label={i18n.translate('indexEditor.cellValueInput.aria', {
+          defaultMessage: 'Value for {columnName}',
+          values: { columnName },
+        })}
+        onChange={(e) => {
+          setEditValue(e.target.value);
+          onChange?.(e.target.value);
+        }}
+        onError={setError}
+        onBlur={onBlur}
+        onKeyDown={onKeyDown}
+        className={className}
+      />
+    </EuiToolTip>
   );
 };

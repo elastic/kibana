@@ -76,14 +76,6 @@ jest.mock('@kbn/fleet-plugin/public/services/experimental_features');
 
 const onChange = jest.fn();
 
-jest.mock('../../common/experimental_features_service', () => ({
-  ExperimentalFeaturesService: {
-    get: jest.fn().mockReturnValue({
-      cloudSecurityNamespaceSupportEnabled: true,
-    }),
-  },
-}));
-
 const createReactQueryResponseWithRefetch = (
   data: Parameters<typeof createReactQueryResponse>[0]
 ) => {
