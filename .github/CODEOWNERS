@@ -2301,6 +2301,7 @@ x-pack/platform/test/functional/page_objects/search_profiler_page.ts @elastic/se
 /x-pack/test/functional/page_objects/*_management_page.ts @elastic/kibana-management
 /src/platform/test/functional/services/saved_query_management_component.ts @elastic/kibana-management
 /src/platform/test/functional/services/management @elastic/kibana-management
+/src/platform/test/functional/services/synthtrace/sythtrace.ts  @elastic/kibana-management
 /x-pack/test/functional/apps/cross_cluster_replication @elastic/kibana-management
 /x-pack/test/functional/apps/ingest_pipelines @elastic/kibana-management
 /x-pack/test/functional/apps/home @elastic/kibana-management
