@@ -41,19 +41,19 @@ export const createServerRoute: CreateServerRouteFactory<
           ) {
             switch (error.statusCode) {
               case 400:
-                throw badRequest(error);
+                throw badRequest(error, 'data' in error ? error.data : undefined);
 
               case 403:
-                throw forbidden(error);
+                throw forbidden(error, 'data' in error ? error.data : undefined);
 
               case 404:
-                throw notFound(error);
+                throw notFound(error, 'data' in error ? error.data : undefined);
 
               case 409:
-                throw conflict(error);
+                throw conflict(error, 'data' in error ? error.data : undefined);
 
               case 500:
-                throw internal(error);
+                throw internal(error, 'data' in error ? error.data : undefined);
             }
           }
           throw error;

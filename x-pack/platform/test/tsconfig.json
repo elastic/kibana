@@ -134,5 +134,9 @@
     "@kbn/embeddable-alerts-table-plugin",
     "@kbn/apm-synthtrace-client",
     "@kbn/apm-synthtrace",
+    "@kbn/ml-string-hash",
+    "@kbn/data-visualizer-plugin",
+    "@kbn/cloud-integration-saml-provider-plugin",
+    "@kbn/ci-stats-reporter",
   ]
 }
