@@ -33,7 +33,7 @@ export const registerFindRoute = (
 
   router.get(
     {
-      path: '/api/kibana/management/saved_objects/_find',
+      path: '/api/kibana/management/savedObjects/_find',
       security: {
         authz: {
           enabled: false,
