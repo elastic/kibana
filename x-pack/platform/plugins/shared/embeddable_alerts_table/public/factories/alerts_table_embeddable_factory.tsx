@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { BehaviorSubject, map, merge } from 'rxjs';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
+import { BehaviorSubject, map, merge } from 'rxjs';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import type { PresentationContainer } from '@kbn/presentation-containers';
 import {
