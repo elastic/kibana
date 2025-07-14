@@ -91,6 +91,7 @@ export interface FleetConfigType {
       excludePackages: string[];
       searchAiLakePackageAllowlistEnabled?: boolean;
     };
+    excludeDataStreamTypes: string[];
   };
   createArtifactsBulkBatchSize?: number;
   autoUpgrades?: {

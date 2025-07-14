@@ -161,7 +161,7 @@ export async function getPackages(
   ).filter((p): p is Installable<any> => p !== null);
 
   const filteredPackages = getFilteredSearchPackages();
-  const packageList = registryItems
+  let packageList = registryItems
     .map((item) =>
       createInstallableFrom(
         item,
@@ -181,6 +181,8 @@ export async function getPackages(
     });
   }
 
+  packageList = filterOutExcludedDataStreamTypes(packageList);
+
   if (!excludeInstallStatus) {
     return packageList;
   }
@@ -197,6 +199,27 @@ export async function getPackages(
   });
 
   return packageListWithoutStatus as PackageList;
+}
+
+function filterOutExcludedDataStreamTypes(
+  packageList: Array<Installable<any>>
+): Array<Installable<any>> {
+  const excludeDataStreamTypes = appContextService.getConfig().internal.excludeDataStreamTypes;
+  if (excludeDataStreamTypes.length > 0) {
+    // filter out packages where all data streams have excluded types e.g. metrics
+    return packageList.filter((pkg) => {
+      const shouldInclude =
+        (pkg.data_streams || [])?.length === 0 ||
+        pkg.data_streams?.some((dataStream) => {
+          return !excludeDataStreamTypes.includes(dataStream.type);
+        });
+      // if (!shouldInclude) {
+      //   console.log('Excluding package:', pkg.name);
+      // }
+      return shouldInclude;
+    });
+  }
+  return packageList;
 }
 
 interface GetInstalledPackagesOptions {
@@ -538,12 +561,49 @@ export async function getPackageInfo({
     licensePath: Registry.getLicensePath(paths || []),
     keepPoliciesUpToDate: savedObject?.attributes.keep_policies_up_to_date ?? false,
   };
-  const updated = { ...packageInfo, ...additions };
+
+  const { filteredDataStreams, filteredPolicyTemplates } =
+    getFilteredDataStreamsAndPolicyTemplates(packageInfo);
+
+  const updated = {
+    ...packageInfo,
+    ...additions,
+    data_streams: filteredDataStreams,
+    policy_templates: filteredPolicyTemplates,
+  };
 
   const installable = createInstallableFrom(updated, savedObject);
   setPackageInfoCache(pkgName, pkgVersion, installable);
 
   return installable;
+}
+
+function getFilteredDataStreamsAndPolicyTemplates(packageInfo: ArchivePackage | RegistryPackage) {
+  const excludeDataStreamTypes = appContextService.getConfig().internal.excludeDataStreamTypes;
+  let filteredDataStreams = packageInfo.data_streams;
+  let filteredPolicyTemplates = packageInfo.policy_templates;
+
+  if (excludeDataStreamTypes.length > 0) {
+    filteredDataStreams = packageInfo.data_streams?.filter(
+      (dataStream) => !excludeDataStreamTypes.includes(dataStream.type)
+    );
+    // filter out matching types e.g. nginx/metrics
+    filteredPolicyTemplates = packageInfo.policy_templates?.reduce((acc, policyTemplate) => {
+      const filteredInputs = policyTemplate.inputs?.filter((input) => {
+        const shouldInclude = !excludeDataStreamTypes.some((excludedType) =>
+          input.type.includes(excludedType)
+        );
+        // if (!shouldInclude) {
+        //   console.log('Excluding input type: ' + input.type + " for policy template: " + policyTemplate.name);
+        // }
+        return shouldInclude;
+      });
+      acc.push({ ...policyTemplate, inputs: filteredInputs ?? [] });
+      return acc;
+    }, []);
+  }
+
+  return { filteredDataStreams, filteredPolicyTemplates };
 }
 
 export const getPackageUsageStats = async ({

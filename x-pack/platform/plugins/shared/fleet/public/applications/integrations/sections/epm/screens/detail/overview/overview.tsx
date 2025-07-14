@@ -6,6 +6,7 @@
  */
 import React, { memo, useMemo, useEffect, useState, useCallback, useRef } from 'react';
 import type { MouseEventHandler } from 'react';
+import { isEqual } from 'lodash';
 
 import styled from 'styled-components';
 import {
@@ -108,6 +109,23 @@ const UnverifiedCallout: React.FC = () => {
           />
         </p>
       </EuiCallOut>
+      <EuiSpacer size="l" />
+    </>
+  );
+};
+
+const LogsEssentialsCallout: React.FC = () => {
+  return (
+    <>
+      <EuiCallOut
+        data-test-subj="logsEssentialsCallout"
+        title={i18n.translate('xpack.fleet.epm.logsEssentialsCalloutTitle', {
+          defaultMessage:
+            'As this is a Logs Essentials project, these integrations will only install and configure for logs collection, even if the description mentions metrics.',
+        })}
+        iconType="iInCircle"
+        color="primary"
+      />
       <EuiSpacer size="l" />
     </>
   );
@@ -291,6 +309,8 @@ export const OverviewPage: React.FC<Props> = memo(
     const requireAgentRootPrivileges = isRootPrivilegesRequired(packageInfo);
     const hideDashboards = config?.hideDashboards;
 
+    const showLogsEssentialsCallout = isEqual(config?.internal.excludeDataStreamTypes, ['metrics']);
+
     return (
       <EuiFlexGroup alignItems="flexStart" data-test-subj="epm.OverviewPage">
         <SideBar grow={2}>
@@ -305,6 +325,7 @@ export const OverviewPage: React.FC<Props> = memo(
         </SideBar>
         <EuiFlexItem grow={9} className="eui-textBreakWord">
           {isUnverified && <UnverifiedCallout />}
+          {showLogsEssentialsCallout && <LogsEssentialsCallout />}
 
           <BidirectionalIntegrationsBanner integrationPackageName={packageInfo.name} />
           <CloudPostureThirdPartySupportCallout packageInfo={packageInfo} />
