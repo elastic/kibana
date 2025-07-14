@@ -70,7 +70,7 @@ export const QueryRuleMetadataEditor: React.FC<QueryRuleMetadataEditorProps> = (
                     )}
                   >
                     <EuiIcon
-                      type="questionInCircle"
+                      type="question"
                       color="subdued"
                       aria-label={i18n.translate(
                         'xpack.search.queryRulesetDetail.queryRuleFlyout.metadataEditorTooltipLabel',
@@ -247,7 +247,7 @@ export const QueryRuleMetadataEditor: React.FC<QueryRuleMetadataEditorProps> = (
                           )}
                         >
                           <EuiIcon
-                            type="questionInCircle"
+                            type="question"
                             color="subdued"
                             aria-label={i18n.translate(
                               'xpack.search.queryRulesetDetail.queryRuleFlyout.metadataEditorValuesTooltipLabel',
