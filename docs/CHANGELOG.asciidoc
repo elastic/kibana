@@ -110,8 +110,6 @@ The 8.18.4 release includes the following fixes.
 === Fixes
 Alerting::
 * Fixes an issue causing reports to fail with an invalid header error ({kibana-pull}225919[#225919]).
-Dashboards and Visualizations::
-* Registers Machine Learning embeddables synchronously to prevent dashboards from rendering embeddables before they are available ({kibana-pull}225110[#225110]).
 Data ingestion and Fleet::
 * Fixes an issue with agentless integration policies appearing under the Agent-based section ({kibana-pull}225767[#225767]).
 * Fixes an issue where the background task was not deleting some unenrolled agents ({kibana-pull}224808[#224808]).
