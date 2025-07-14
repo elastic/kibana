@@ -40,6 +40,7 @@ import { PrivilegedUserMonitoringManageDataSources } from '../components/privile
 import { EmptyPrompt } from '../../common/components/empty_prompt';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 import { PageLoader } from '../../common/components/page_loader';
+import { DataViewManagerScopeName } from '../../data_view_manager/constants';
 
 type PageState =
   | { type: 'fetchingEngineStatus' }
@@ -109,8 +110,8 @@ export const EntityAnalyticsPrivilegedUserMonitoringPage = () => {
     sourcererDataView: oldSourcererDataViewSpec,
   } = useSourcererDataView();
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const { dataView, status } = useDataView();
-  const { dataViewSpec } = useDataViewSpec();
+  const { dataView, status } = useDataView(DataViewManagerScopeName.explore);
+  const { dataViewSpec } = useDataViewSpec(DataViewManagerScopeName.explore);
 
   const isSourcererLoading = useMemo(
     () => (newDataViewPickerEnabled ? status !== 'ready' : oldIsSourcererLoading),
