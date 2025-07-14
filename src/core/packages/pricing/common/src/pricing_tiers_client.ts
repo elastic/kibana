@@ -8,8 +8,8 @@
  */
 
 import { isEqual } from 'lodash';
-import { IPricingTiersClient, PricingProduct } from './types';
-import { IPricingProduct, TiersConfig } from './pricing_tiers_config';
+import type { IPricingTiersClient, PricingProduct, PricingProductSecurity } from './types';
+import type { IPricingProduct, TiersConfig } from './pricing_tiers_config';
 import { ProductFeaturesRegistry } from './product_features_registry';
 
 /**
@@ -96,30 +96,18 @@ export class PricingTiersClient implements IPricingTiersClient {
     if (this.tiers.products[0].name === 'observability') {
       return {
         type: 'observability' as const,
-        tier: this.tiers.products[0].tier as 'complete' | 'logs_essentials',
+        tier: this.tiers.products[0].tier,
       };
     } else {
-      // Assert all products are security-related product lines
-      const securityProductLines = ['ai_soc', 'endpoint', 'cloud', 'security'] as const;
-      const allProductsAreSecurityRelated = this.tiers.products.every((product) =>
-        securityProductLines.includes(product.name as any)
-      );
-
-      if (!allProductsAreSecurityRelated) {
-        throw new Error(
-          'Mixed product types detected: all products must be either observability or security-related'
-        );
-      }
-
-      // Note: We can safely use products[0].tier here because the schema validates
-      // that all products have the same tier
+      // Security product type - schema validation guarantees all products are security-related
+      // and have the same tier
       return {
         type: 'security' as const,
         tier: this.tiers.products[0].tier,
         // 'security' is not a real product line / addon, it's only used to be able to define the tier when no addons are active
         product_lines: this.tiers.products
           .map((p) => p.name)
-          .filter((name): name is 'ai_soc' | 'endpoint' | 'cloud' => name !== 'security'),
+          .filter((name) => name !== 'security') as PricingProductSecurity['product_lines'],
       };
     }
   };

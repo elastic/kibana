@@ -43,13 +43,13 @@ export interface IPricingTiersClient {
   getActiveProduct(): PricingProduct | undefined;
 }
 
-interface PricingProductSecurity {
+export interface PricingProductSecurity {
   type: 'security';
   tier: 'search_ai_lake' | 'complete' | 'essentials';
   product_lines: Array<'ai_soc' | 'endpoint' | 'cloud'>;
 }
 
-interface PricingProductObservability {
+export interface PricingProductObservability {
   type: 'observability';
   tier: 'complete' | 'logs_essentials';
 }
