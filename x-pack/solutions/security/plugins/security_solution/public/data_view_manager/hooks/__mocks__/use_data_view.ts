@@ -5,4 +5,9 @@
  * 2.0.
  */
 
-export const useDataView = jest.fn(() => ({ dataView: undefined, status: 'pristine' }));
+import { mockDataView } from '../../mocks/mock_data_view';
+
+export const useDataView = jest.fn(() => ({
+  dataView: mockDataView,
+  status: 'pristine',
+}));

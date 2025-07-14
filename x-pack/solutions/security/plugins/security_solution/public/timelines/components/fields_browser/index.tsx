@@ -115,7 +115,7 @@ export const useFieldBrowserOptions: UseFieldBrowserOptions = ({
             // Using cleanCache since the number of fields might have not changed, but we need to update the state anyway
             if (newDataViewPickerEnabled) {
               browserFieldsManager.removeFromCache(sourcererScope);
-              await dataViews.clearInstanceCache(selectedDataViewId);
+              dataViews.clearInstanceCache(selectedDataViewId);
             } else {
               await indexFieldsSearch({ dataViewId: selectedDataViewId, cleanCache: true });
             }
@@ -178,7 +178,7 @@ export const useFieldBrowserOptions: UseFieldBrowserOptions = ({
 
             if (newDataViewPickerEnabled) {
               browserFieldsManager.removeFromCache(sourcererScope);
-              await dataViews.clearInstanceCache(selectedDataViewId);
+              dataViews.clearInstanceCache(selectedDataViewId);
             } else {
               await indexFieldsSearch({ dataViewId: selectedDataViewId, cleanCache: true });
             }
