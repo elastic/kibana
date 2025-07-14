@@ -12,13 +12,14 @@ import {
   getLogPatterns,
   sortAndTruncateAnalyzedFields,
 } from '@kbn/genai-utils-server';
-import type { InferenceClient } from '@kbn/inference-common';
+import { createPrompt, type InferenceClient } from '@kbn/inference-common';
 import { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import moment from 'moment';
 import pLimit from 'p-limit';
 import { v4 } from 'uuid';
 import { kqlQuery, rangeQuery } from '../../internal/esql/query_helpers';
 import { KQL_GUIDE } from './kql_guide';
+import { z } from 'zod';
 
 const LOOKBACK_DAYS = 7;
 
@@ -45,6 +46,46 @@ export async function generateSignificantEventDefinitions({
 
   const start = mstart.valueOf();
   const end = mend.valueOf();
+
+  const prompt = createPrompt({
+    name: 'analyze_dataset',
+    description: 'Analyze a dataset',
+    input: z.object({
+      prompt: z.string(),
+    }),
+  })
+    .version({
+      system: `You are a helpful assistant.`,
+      template: {
+        mustache: {
+          template: '',
+        },
+      },
+      temperature: 0.25,
+      toolChoice: {
+        function: 'describe_dataset',
+      },
+      tools: {
+        describe_dataset: {
+          description: `Get dataset description via sampling of documents`,
+          schema: {
+            type: 'object',
+            properties: {
+              index: {
+                type: 'string',
+                description: 'Index, data stream or index pattern you want to analyze',
+              },
+              kql: {
+                type: 'string',
+                description: 'KQL for filtering the data',
+              },
+            },
+            required: ['index'],
+          },
+        },
+      },
+    })
+    .get();
 
   const analysis = await analyzeDocuments({
     esClient,

@@ -5,9 +5,9 @@
  * 2.0.
  */
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { rangeQuery } from '@kbn/es-query';
 import { getSampleDocuments } from './get_sample_documents';
 import { mergeSampleDocumentsWithFieldCaps } from './merge_sample_documents_with_field_caps';
-import { rangeQuery } from './queries';
 
 export async function describeDataset({
   esClient,
