@@ -201,6 +201,5 @@ export const mockContext: ICommandContext = {
   joinSources: joinIndices,
   timeSeriesSources: timeseriesIndices,
   inferenceEndpoints,
-  editorExtensions,
   histogramBarTarget: 50,
 };
