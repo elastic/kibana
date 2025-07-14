@@ -61,7 +61,7 @@ export const useFetchIntegrations = (): UseFetchIntegrationsResult => {
   return useMemo(
     () => ({
       availablePackages,
-      installedPackages,
+      installedPackages: availablePackages,
       isLoading,
     }),
     [availablePackages, installedPackages, isLoading]

@@ -91,6 +91,7 @@ export type Inputs = InputsRange | InputsRangeTimeOnly;
 export interface InputsModel {
   global: InputsRange;
   timeline: InputsRange;
+  valueReport: InputsRangeTimeOnly;
   // TODO: remove ? when isSocTrendsEnabled feature flag is removed
   socTrends?: InputsRangeTimeOnly;
 }
@@ -101,6 +102,7 @@ export interface UrlInputsModelInputs {
 export interface UrlInputsModel {
   global: UrlInputsModelInputs;
   timeline: UrlInputsModelInputs;
+  valueReport: UrlInputsModelInputs;
   // TODO: remove ? when isSocTrendsEnabled feature flag is removed
   socTrends?: UrlInputsModelInputs;
 }

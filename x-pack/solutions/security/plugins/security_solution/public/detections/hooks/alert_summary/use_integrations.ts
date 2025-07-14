@@ -71,9 +71,7 @@ export const useIntegrations = ({
     const result: EuiSelectableOption[] = [];
 
     packages.forEach((p: PackageListItem) => {
-      const matchingRule = ruleResponse.rules.find((r: RuleResponse) =>
-        r.related_integrations.map((ri) => ri.package).includes(p.name)
-      );
+      const matchingRule = ruleResponse.rules.find((r: RuleResponse) => r.name === p.name);
 
       if (matchingRule) {
         // Retrieves the filter from the key/value pair
