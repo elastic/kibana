@@ -6,53 +6,43 @@
  */
 
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
-import { ToolDescriptorMeta } from '@kbn/onechat-common';
+import { ToolType } from '@kbn/onechat-common';
 import { IndexStorageSettings, StorageIndexAdapter, types } from '@kbn/storage-adapter';
 
-export const esqlToolIndexName = '.kibana_onechat_esql_tools';
+export const toolIndexName = '.kibana_onechat_tools';
 
 const storageSettings = {
-  name: esqlToolIndexName,
+  name: toolIndexName,
   schema: {
     properties: {
       id: types.keyword({}),
-      name: types.keyword({}),
+      type: types.keyword({}),
       description: types.text({}),
-      query: types.text({}),
-      params: types.object({
-        dynamic: true,
+      configuration: types.object({
+        dynamic: false,
         properties: {},
       }),
-      meta: types.object({
-        properties: {
-          providerId: types.keyword({}),
-          tags: types.keyword({}),
-        },
-      }),
+      tags: types.keyword({}),
       created_at: types.date({}),
       updated_at: types.date({}),
     },
   },
 } satisfies IndexStorageSettings;
 
-export interface EsqlToolProperties {
+export interface ToolProperties<TConfig extends object = Record<string, unknown>> {
   id: string;
-  name: string;
+  type: ToolType;
   description: string;
-  query: string;
-  params: Record<
-    string,
-    {
-      type: string;
-      description: string;
-    }
-  >;
-  meta: ToolDescriptorMeta;
+  configuration: TConfig;
+  tags: string[];
+  created_at: string;
+  updated_at: string;
 }
 
-export type EsqlToolStorageSettings = typeof storageSettings;
+export type ToolStorageSettings = typeof storageSettings;
 
-export type EsqlToolStorage = StorageIndexAdapter<EsqlToolStorageSettings, EsqlToolProperties>;
+// @ts-expect-error type mismatch for tags type
+export type ToolStorage = StorageIndexAdapter<ToolStorageSettings, ToolProperties>;
 
 export const createStorage = ({
   logger,
@@ -60,8 +50,9 @@ export const createStorage = ({
 }: {
   logger: Logger;
   esClient: ElasticsearchClient;
-}): EsqlToolStorage => {
-  return new StorageIndexAdapter<EsqlToolStorageSettings, EsqlToolProperties>(
+}): ToolStorage => {
+  // @ts-expect-error type mismatch for tags type
+  return new StorageIndexAdapter<ToolStorageSettings, ToolProperties>(
     esClient,
     logger,
     storageSettings

@@ -10,18 +10,18 @@ import type {
   ScopedRunnerRunAgentParams,
   RunAgentReturn,
 } from '@kbn/onechat-server';
-import { internalProviderToPublic } from '../tools/utils';
+import { registryToProvider } from '../tools/utils';
 import { createAgentHandler } from '../agents/modes/create_handler';
 import { createAgentEventEmitter, forkContextForAgentRun } from './utils';
 import type { RunnerManager } from './runner';
 
-export const createAgentHandlerContext = <TParams = Record<string, unknown>>({
+export const createAgentHandlerContext = async <TParams = Record<string, unknown>>({
   agentExecutionParams,
   manager,
 }: {
   agentExecutionParams: ScopedRunnerRunAgentParams;
   manager: RunnerManager;
-}): AgentHandlerContext => {
+}): Promise<AgentHandlerContext> => {
   const { onEvent } = agentExecutionParams;
   const { request, defaultConnectorId, elasticsearch, modelProviderFactory, toolsService, logger } =
     manager.deps;
@@ -31,9 +31,10 @@ export const createAgentHandlerContext = <TParams = Record<string, unknown>>({
     esClient: elasticsearch.client.asScoped(request),
     modelProvider: modelProviderFactory({ request, defaultConnectorId }),
     runner: manager.getRunner(),
-    toolProvider: internalProviderToPublic({
-      provider: toolsService.registry,
+    toolProvider: registryToProvider({
+      registry: await toolsService.getRegistry({ request }),
       getRunner: manager.getRunner,
+      request,
     }),
     events: createAgentEventEmitter({ eventHandler: onEvent, context: manager.context }),
   };
@@ -56,7 +57,7 @@ export const runAgent = async ({
   const agent = await agentClient.get(agentId);
   const agentHandler = createAgentHandler({ agent });
 
-  const agentHandlerContext = createAgentHandlerContext({ agentExecutionParams, manager });
+  const agentHandlerContext = await createAgentHandlerContext({ agentExecutionParams, manager });
   const agentResult = await agentHandler(
     {
       runId: manager.context.runId,
