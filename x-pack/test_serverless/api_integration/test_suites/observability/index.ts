@@ -15,5 +15,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./cases'));
     loadTestFile(require.resolve('./synthetics'));
     loadTestFile(require.resolve('./dataset_quality_api_integration'));
+    loadTestFile(require.resolve('./platform_security'));
   });
 }
