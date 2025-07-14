@@ -11,10 +11,11 @@ import { IKibanaResponse } from '@kbn/core-http-server';
 import { PrivateLocationAttributes } from '../../runtime_types/private_locations';
 import { RouteContext, SyntheticsRestApiRouteFactory } from '../types';
 import { TestNowResponse } from '../../../common/types';
-import { ConfigKey, MonitorFields } from '../../../common/runtime_types';
+import { ConfigKey, MonitorFields, SyntheticsMonitor } from '../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { getPrivateLocationsForMonitor } from '../monitor_cruds/add_monitor/utils';
 import { getMonitorNotFoundResponse } from './service_errors';
+import { NO_BACKTICKS_ERROR_MESSAGE } from '../../../common/translations/translations';
 
 export const testNowMonitorRoute: SyntheticsRestApiRouteFactory<TestNowResponse> = () => ({
   method: 'POST',
@@ -45,6 +46,23 @@ export const triggerTestNow = async (
 
   try {
     const { normalizedMonitor } = await monitorConfigRepository.getDecrypted(monitorId, spaceId);
+
+    // Narrow SyntheticsMonitor to the browser variant that contains an inline script
+    const hasInlineScript = (
+      m: SyntheticsMonitor
+    ): m is SyntheticsMonitor & {
+      [ConfigKey.SOURCE_INLINE]: string;
+    } => typeof (m as any)[ConfigKey.SOURCE_INLINE] === 'string';
+
+    const monitorAttrs = normalizedMonitor.attributes as SyntheticsMonitor;
+
+    if (hasInlineScript(monitorAttrs) && monitorAttrs[ConfigKey.SOURCE_INLINE].includes('`')) {
+      return response.badRequest({
+        body: {
+          message: NO_BACKTICKS_ERROR_MESSAGE,
+        },
+      });
+    }
 
     const { [ConfigKey.SCHEDULE]: schedule, [ConfigKey.LOCATIONS]: locations } =
       normalizedMonitor.attributes;

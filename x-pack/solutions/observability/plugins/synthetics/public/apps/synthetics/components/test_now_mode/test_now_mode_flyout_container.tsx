@@ -72,6 +72,9 @@ export function TestNowModeFlyoutContainer() {
         onDone={onDone}
         isPushing={flyoutOpenTestRun.status === 'loading'}
         errors={flyoutOpenTestRun.errors ?? []}
+        serviceError={
+          flyoutOpenTestRun.fetchError ? new Error(flyoutOpenTestRun.fetchError.message) : undefined
+        }
       />
     ) : null;
 

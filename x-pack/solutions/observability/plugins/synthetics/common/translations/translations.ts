@@ -17,3 +17,11 @@ export const STATUS_DOWN_LABEL = i18n.translate(
     defaultMessage: 'Down',
   }
 );
+
+export const NO_BACKTICKS_ERROR_MESSAGE = i18n.translate(
+  'xpack.synthetics.monitorManagement.testNow.monitorInlineScriptBacktickError',
+  {
+    defaultMessage:
+      'UI monitors do not support backtick (`) characters. Consider using Project Monitors instead.',
+  }
+);

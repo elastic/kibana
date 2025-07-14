@@ -12,6 +12,7 @@ import { SyntheticsRestApiRouteFactory } from '../types';
 import { ConfigKey, MonitorFields } from '../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { validateMonitor } from '../monitor_cruds/monitor_validation';
+import { NO_BACKTICKS_ERROR_MESSAGE } from '../../../common/translations/translations';
 
 export const runOnceSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'POST',
@@ -33,6 +34,11 @@ export const runOnceSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =
     const { monitorId } = request.params;
     if (isEmpty(monitor)) {
       return response.badRequest({ body: { message: 'Monitor data is empty.' } });
+    }
+    if (monitor[ConfigKey.SOURCE_INLINE] && monitor[ConfigKey.SOURCE_INLINE].includes('`')) {
+      return response.badRequest({
+        body: { message: NO_BACKTICKS_ERROR_MESSAGE },
+      });
     }
 
     const validationResult = validateMonitor(monitor, spaceId);

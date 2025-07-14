@@ -8,6 +8,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { Locations, ServiceLocationErrors } from '../../monitor_add_edit/types';
+import { NO_BACKTICKS_ERROR_MESSAGE } from '../../../../../../common/translations/translations';
 
 export function useRunOnceErrors({
   testRunId,
@@ -61,6 +62,15 @@ export function useRunOnceErrors({
     (locationErrors?.length && locationErrors?.length === locations.length);
 
   const errorMessages = useMemo(() => {
+    if (runOnceServiceError?.message?.includes(NO_BACKTICKS_ERROR_MESSAGE)) {
+      return [
+        {
+          name: 'Error',
+          title: RunErrorLabel,
+          message: runOnceServiceError.message,
+        },
+      ];
+    }
     if (hasBlockingError) {
       return locationErrorReasons.length === 1
         ? [
@@ -84,7 +94,7 @@ export function useRunOnceErrors({
     }
 
     return [];
-  }, [locationsById, locationErrors, locationErrorReasons, hasBlockingError]);
+  }, [locationsById, locationErrors, locationErrorReasons, hasBlockingError, runOnceServiceError]);
 
   return {
     expectPings,

@@ -7,10 +7,12 @@
 import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { Controller, useFormContext } from 'react-hook-form';
 import { EuiTabbedContent, EuiFormRow } from '@elastic/eui';
 import { CodeEditor } from './code_editor';
 import { ScriptRecorderFields } from './script_recorder_fields';
 import { ConfigKey, MonacoEditorLangId } from '../types';
+import { NO_BACKTICKS_ERROR_MESSAGE } from '../../../../../../common/translations/translations';
 
 enum SourceType {
   INLINE = 'syntheticsBrowserInlineConfig',
@@ -32,6 +34,7 @@ export interface SourceFieldProps {
 }
 
 export const SourceField = ({ onChange, onBlur, value, isEditFlow = false }: SourceFieldProps) => {
+  const { control, clearErrors } = useFormContext();
   const [sourceType, setSourceType] = useState<SourceType>(
     value.type === 'inline' ? SourceType.INLINE : SourceType.SCRIPT_RECORDER
   );
@@ -82,34 +85,53 @@ export const SourceField = ({ onChange, onBlur, value, isEditFlow = false }: Sou
       ),
       'data-test-subj': `syntheticsSourceTab__inline`,
       content: (
-        <EuiFormRow
-          helpText={
-            <FormattedMessage
-              id="xpack.synthetics.addEditMonitor.scriptEditor.helpText"
-              defaultMessage="Runs Synthetic test scripts that are defined inline."
-            />
-          }
-          fullWidth
-        >
-          <CodeEditor
-            ariaLabel={i18n.translate('xpack.synthetics.addEditMonitor.scriptEditor.ariaLabel', {
-              defaultMessage: 'JavaScript code editor',
-            })}
-            id="javascript"
-            languageId={MonacoEditorLangId.JAVASCRIPT}
-            onChange={(code) => {
-              setConfig((prevConfig) => ({ ...prevConfig, script: code }));
-              onBlur(ConfigKey.SOURCE_INLINE);
-            }}
-            value={config.script}
-            placeholder={i18n.translate(
-              'xpack.synthetics.addEditMonitor.scriptEditor.placeholder',
-              {
-                defaultMessage: '// Paste your Playwright script here...',
+        <Controller
+          name={ConfigKey.SOURCE_INLINE}
+          control={control}
+          rules={{
+            validate: (v?: string) => (v && v.includes('`') ? NO_BACKTICKS_ERROR_MESSAGE : true),
+          }}
+          render={({ field, fieldState }) => (
+            <EuiFormRow
+              isInvalid={!!fieldState.error}
+              error={fieldState.error?.message}
+              helpText={
+                <FormattedMessage
+                  id="xpack.synthetics.addEditMonitor.scriptEditor.helpText"
+                  defaultMessage="Runs Synthetic test scripts that are defined inline."
+                />
               }
-            )}
-          />
-        </EuiFormRow>
+              fullWidth
+            >
+              <CodeEditor
+                {...field}
+                ariaLabel={i18n.translate(
+                  'xpack.synthetics.addEditMonitor.scriptEditor.ariaLabel',
+                  {
+                    defaultMessage: 'JavaScript code editor',
+                  }
+                )}
+                id="javascript"
+                languageId={MonacoEditorLangId.JAVASCRIPT}
+                placeholder={i18n.translate(
+                  'xpack.synthetics.addEditMonitor.scriptEditor.placeholder',
+                  {
+                    defaultMessage: '// Paste your Playwright script here...',
+                  }
+                )}
+                value={field.value ?? ''}
+                onChange={(code) => {
+                  field.onChange(code);
+                  setConfig((prev) => ({ ...prev, script: code }));
+                  if (!code.includes('`')) {
+                    clearErrors(ConfigKey.SOURCE_INLINE);
+                  }
+                  onBlur(ConfigKey.SOURCE_INLINE);
+                }}
+              />
+            </EuiFormRow>
+          )}
+        />
       ),
     },
   ];
