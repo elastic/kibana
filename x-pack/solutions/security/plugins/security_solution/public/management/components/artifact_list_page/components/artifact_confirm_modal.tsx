@@ -15,6 +15,7 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiText,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 
@@ -39,11 +40,12 @@ export const ArtifactConfirmModal = memo<ConfirmArtifactModalProps>(
     'data-test-subj': dataTestSubj,
   }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
+    const artifactConfirmModalTitleId = useGeneratedHtmlId();
 
     return (
-      <EuiModal onClose={onCancel} data-test-subj={dataTestSubj}>
+      <EuiModal onClose={onCancel} data-test-subj={dataTestSubj} aria-labelledby={artifactConfirmModalTitleId}>
         <EuiModalHeader data-test-subj={getTestId('header')}>
-          <EuiModalHeaderTitle>{title}</EuiModalHeaderTitle>
+          <EuiModalHeaderTitle id={artifactConfirmModalTitleId}>{title}</EuiModalHeaderTitle>
         </EuiModalHeader>
 
         <EuiModalBody data-test-subj={getTestId('body')}>

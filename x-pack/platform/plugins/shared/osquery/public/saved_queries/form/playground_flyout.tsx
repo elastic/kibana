@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlyout, EuiFlyoutHeader, EuiTitle, EuiFlyoutBody } from '@elastic/eui';
+import { EuiFlyout, EuiFlyoutHeader, EuiTitle, EuiFlyoutBody, useGeneratedHtmlId } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -34,11 +34,19 @@ const PlaygroundFlyoutComponent: React.FC<PlaygroundFlyoutProps> = ({ enabled, o
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const serializedFormData = useMemo(() => serializer(watchedValues), [ecsMapping]);
 
+  const flyoutTitleId = useGeneratedHtmlId();
+
   return (
-    <EuiFlyout type="push" size="m" onClose={onClose} data-test-subj={'osquery-save-query-flyout'}>
+    <EuiFlyout
+      type="push"
+      size="m"
+      onClose={onClose}
+      data-test-subj={'osquery-save-query-flyout'}
+      aria-labelledby={flyoutTitleId}
+    >
       <EuiFlyoutHeader css={euiFlyoutHeaderCss} hasBorder>
         <EuiTitle size="s">
-          <h5>
+          <h5 id={flyoutTitleId}>
             <FormattedMessage
               id="xpack.osquery.queryPlaygroundFlyout.title"
               defaultMessage="Test query"

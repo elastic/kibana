@@ -15,6 +15,7 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiText,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -30,11 +31,12 @@ export const PostInstallAddAgentModal: React.FunctionComponent<{
   packageInfo: PackageInfo;
 }> = ({ onConfirm, onCancel, packageInfo }) => {
   const isGuidedOnboardingActive = useIsGuidedOnboardingActive(packageInfo.name);
+  const modalTitleId = useGeneratedHtmlId();
 
   return (
-    <EuiModal data-test-subj="postInstallAddAgentModal" onClose={onCancel}>
+    <EuiModal data-test-subj="postInstallAddAgentModal" onClose={onCancel} aria-labelledby={modalTitleId}>
       <EuiModalHeader>
-        <EuiModalHeaderTitle data-test-subj="confirmModalTitleText">
+        <EuiModalHeaderTitle data-test-subj="confirmModalTitleText" id={modalTitleId}>
           <FormattedMessage
             id="xpack.fleet.agentPolicy.postInstallAddAgentModal"
             defaultMessage="{packageName} integration added"

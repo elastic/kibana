@@ -16,6 +16,7 @@ import {
   EuiFlyoutHeader,
   EuiText,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { capitalize } from 'lodash';
 import type { KnowledgeBaseEntry } from '@kbn/observability-ai-assistant-plugin/common/types';
@@ -49,6 +50,8 @@ export function KnowledgeBaseCategoryFlyout({
   category: KnowledgeBaseEntryCategory;
   onClose: () => void;
 }) {
+  const modalTitleId = useGeneratedHtmlId();
+
   const { uiSettings } = useKibana().services;
   const dateFormat = uiSettings.get('dateFormat');
 
@@ -107,10 +110,10 @@ export function KnowledgeBaseCategoryFlyout({
     CATEGORY_MAP[category.categoryKey as unknown as keyof typeof CATEGORY_MAP]?.description;
 
   return (
-    <EuiFlyout onClose={onClose} data-test-subj="knowledgeBaseCategoryFlyout">
+    <EuiFlyout onClose={onClose} data-test-subj="knowledgeBaseCategoryFlyout" aria-labelledby={modalTitleId}>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle>
-          <h2>{capitalize(category.categoryKey)}</h2>
+          <h2 id={modalTitleId}>{capitalize(category.categoryKey)}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>

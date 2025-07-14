@@ -26,6 +26,7 @@ import {
   EuiHorizontalRule,
   EuiSuperSelect,
   EuiText,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -63,6 +64,8 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({
   closeFlyout,
   refresh,
 }) => {
+  const modalTitleId = useGeneratedHtmlId();
+
   const mlApi = useMlApi();
   const { toasts } = useNotifications();
   const { loadAnomalyDataForJob, loadEventRateForJob } = useMemo(
@@ -173,10 +176,10 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({
 
   return (
     <>
-      <EuiFlyout onClose={closeFlyout} hideCloseButton size="m">
+      <EuiFlyout onClose={closeFlyout} hideCloseButton size="m" aria-labelledby={modalTitleId}>
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="s">
-            <h5>
+            <h5 id={modalTitleId}>
               <FormattedMessage
                 id="xpack.ml.newJob.wizard.revertModelSnapshotFlyout.title"
                 defaultMessage="Revert to model snapshot {ssId}"

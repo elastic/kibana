@@ -23,6 +23,7 @@ import {
   EuiTextColor,
   EuiTitle,
   useEuiFontSize,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import { Index } from '../../../../../../../common';
@@ -33,6 +34,8 @@ const MAX_VISIBLE_ALIASES = 3;
 export const AliasesDetails: FunctionComponent<{ aliases: Index['aliases'] }> = ({ aliases }) => {
   const largeFontSize = useEuiFontSize('l').fontSize;
   const [isShowingAliases, setIsShowingAliases] = useState<boolean>(false);
+  const flyoutTitleId = useGeneratedHtmlId();
+
   if (!Array.isArray(aliases)) {
     return null;
   }
@@ -101,10 +104,10 @@ export const AliasesDetails: FunctionComponent<{ aliases: Index['aliases'] }> = 
         }}
       />
       {isShowingAliases && (
-        <EuiFlyout ownFocus onClose={() => setIsShowingAliases(false)}>
+        <EuiFlyout aria-labelledby={flyoutTitleId} ownFocus onClose={() => setIsShowingAliases(false)}>
           <EuiFlyoutHeader hasBorder>
             <EuiTitle size="m">
-              <h2>
+              <h2 id={flyoutTitleId}>
                 {i18n.translate('xpack.idxMgmt.indexDetails.overviewTab.aliases.cardTitle', {
                   defaultMessage: 'Aliases',
                 })}

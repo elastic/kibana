@@ -13,6 +13,7 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -45,10 +46,12 @@ export const FieldsSelectorModal = ({
   onRemoveColumn,
   onResetColumns,
 }: FieldsSelectorModalProps) => {
+  const modalTitleId = useGeneratedHtmlId();
+
   return (
-    <EuiModal onClose={closeModal} data-test-subj={CSP_FIELDS_SELECTOR_MODAL}>
+    <EuiModal onClose={closeModal} data-test-subj={CSP_FIELDS_SELECTOR_MODAL} aria-labelledby={modalTitleId}>
       <EuiModalHeader>
-        <EuiModalHeaderTitle>{title}</EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id={modalTitleId}>{title}</EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
         <FieldsSelectorTable

@@ -25,6 +25,7 @@ import {
   EuiSpacer,
   EuiText,
   useEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SynonymsSynonymRule } from '@elastic/elasticsearch/lib/api/types';
@@ -52,6 +53,8 @@ export const SynonymRuleFlyout: React.FC<SynonymRuleFlyoutProps> = ({
   synonymsSetId,
 }) => {
   const { euiTheme } = useEuiTheme();
+
+  const modalTitleId = useGeneratedHtmlId();
 
   const [backendError, setBackendError] = React.useState<string | null>(null);
   const usageTracker = useUsageTracker();
@@ -87,9 +90,9 @@ export const SynonymRuleFlyout: React.FC<SynonymRuleFlyoutProps> = ({
   });
 
   return (
-    <EuiFlyout onClose={onClose} size={'33%'} outsideClickCloses={false}>
+    <EuiFlyout onClose={onClose} size={'33%'} outsideClickCloses={false} aria-labelledby={modalTitleId}>
       <EuiFlyoutHeader hasBorder>
-        <EuiText data-test-subj="searchSynonymsSynonymRuleFlyoutRuleIdText">
+        <EuiText data-test-subj="searchSynonymsSynonymRuleFlyoutRuleIdText" id={modalTitleId}>
           <b>
             {i18n.translate('xpack.searchSynonyms.synonymsSetRuleFlyout.title.ruleId', {
               defaultMessage: 'Rule ID: {ruleId}',

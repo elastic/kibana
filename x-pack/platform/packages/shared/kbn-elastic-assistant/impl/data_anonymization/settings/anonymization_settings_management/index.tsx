@@ -18,6 +18,7 @@ import {
   EuiSpacer,
   EuiText,
   useEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import React, { useCallback } from 'react';
 
@@ -79,10 +80,12 @@ const AnonymizationSettingsManagementComponent: React.FC<Props> = ({
   }, [handleSave, onClose]);
 
   if (modalMode) {
+    const modalTitleId = useGeneratedHtmlId();
+
     return (
-      <EuiModal onClose={onCancelClick}>
+      <EuiModal onClose={onCancelClick} aria-labelledby={modalTitleId}>
         <EuiModalHeader>
-          <EuiModalHeaderTitle>{i18n.SETTINGS_TITLE}</EuiModalHeaderTitle>
+          <EuiModalHeaderTitle id={modalTitleId}>{i18n.SETTINGS_TITLE}</EuiModalHeaderTitle>
         </EuiModalHeader>
         <EuiModalBody>
           <EuiText size="m">{i18n.SETTINGS_DESCRIPTION}</EuiText>

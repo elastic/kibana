@@ -33,7 +33,7 @@ interface CreateRulesetModalProps {
   onClose: () => void;
 }
 export const CreateRulesetModal = ({ onClose }: CreateRulesetModalProps) => {
-  const titleId = useGeneratedHtmlId({ prefix: 'createRulesetModalTitle' });
+  const modalTitleId = useGeneratedHtmlId({ prefix: 'createRulesetModalTitle' });
   const formId = useGeneratedHtmlId({ prefix: 'createRulesetModalForm' });
 
   const [name, setName] = useState('');
@@ -57,9 +57,9 @@ export const CreateRulesetModal = ({ onClose }: CreateRulesetModalProps) => {
   } = useKibana();
 
   return (
-    <EuiModal onClose={onClose}>
+    <EuiModal onClose={onClose} aria-labelledby={modalTitleId}>
       <EuiModalHeader>
-        <EuiModalHeaderTitle id={titleId} data-test-subj="searchRulesetCreateRulesetModalHeader">
+        <EuiModalHeaderTitle id={modalTitleId} data-test-subj="searchRulesetCreateRulesetModalHeader">
           <FormattedMessage
             id="xpack.queryRules.createRulesetModal.title"
             defaultMessage="Create ruleset"

@@ -16,6 +16,7 @@ import {
   EuiFlexItem,
   EuiButtonEmpty,
   EuiButton,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { FormHook, FormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib/types';
 
@@ -55,6 +56,8 @@ export const CommonFlyout = <T extends FormData = FormData, I extends FormData =
     }),
   });
 
+  const modalTitleId = useGeneratedHtmlId();
+
   const { submit } = formState;
 
   const handleSaveField = useCallback(async () => {
@@ -85,10 +88,10 @@ export const CommonFlyout = <T extends FormData = FormData, I extends FormData =
   );
 
   return (
-    <EuiFlyout onClose={onCloseFlyout} data-test-subj="common-flyout">
+    <EuiFlyout onClose={onCloseFlyout} aria-labelledby={modalTitleId} data-test-subj="common-flyout">
       <EuiFlyoutHeader hasBorder data-test-subj="common-flyout-header">
         <EuiTitle size="s">
-          <h3 id="flyoutTitle">{renderHeader()}</h3>
+          <h3 id={modalTitleId}>{renderHeader()}</h3>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>{memoizedChildren}</EuiFlyoutBody>

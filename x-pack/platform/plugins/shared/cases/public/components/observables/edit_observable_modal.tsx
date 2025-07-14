@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiModal, EuiModalHeader, EuiModalHeaderTitle, EuiModalBody } from '@elastic/eui';
+import { EuiModal, EuiModalHeader, EuiModalHeaderTitle, EuiModalBody, useGeneratedHtmlId } from '@elastic/eui';
 import React, { type FC } from 'react';
 import type { ObservablePatch } from '../../../common/types/api/observable/v1';
 import type { Observable } from '../../../common/types/domain/observable/v1';
@@ -25,6 +25,8 @@ export const EditObservableModal: FC<EditObservableModalProps> = ({
   observable,
   caseData,
 }) => {
+  const modalTitleId = useGeneratedHtmlId();
+
   const { isLoading, mutateAsync: patchObservable } = usePatchObservable(
     caseData.id,
     observable.id
@@ -37,9 +39,9 @@ export const EditObservableModal: FC<EditObservableModalProps> = ({
   };
 
   return (
-    <EuiModal data-test-subj="case-observables-edit-modal" onClose={closeModal}>
+    <EuiModal data-test-subj="case-observables-edit-modal" onClose={closeModal} aria-labelledby={modalTitleId}>
       <EuiModalHeader>
-        <EuiModalHeaderTitle>{i18n.EDIT_OBSERVABLE}</EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id={modalTitleId}>{i18n.EDIT_OBSERVABLE}</EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
         <ObservableForm

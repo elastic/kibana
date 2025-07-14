@@ -15,6 +15,7 @@ import {
   EuiModalHeaderTitle,
   EuiButton,
   EuiSkeletonText,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -44,10 +45,12 @@ export const LicenseModal: React.FunctionComponent<Props> = ({
     });
   }
 
+  const licenseModalTitleId = useGeneratedHtmlId();
+
   return (
-    <EuiModal maxWidth={true} onClose={onClose}>
+    <EuiModal maxWidth={true} onClose={onClose} aria-labelledby={licenseModalTitleId}>
       <EuiModalHeader>
-        <EuiModalHeaderTitle>{licenseName}</EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id={licenseModalTitleId}>{licenseName}</EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
         <EuiSkeletonText lines={10} size="s" isLoading={isLoading} contentAriaLabel="License text">

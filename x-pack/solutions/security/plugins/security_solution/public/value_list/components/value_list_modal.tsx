@@ -18,6 +18,7 @@ import {
   EuiLoadingSpinner,
   EuiSpacer,
   EuiSearchBar,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { useFindListItems, useGetListById } from '@kbn/securitysolution-list-hooks';
 import { FormattedDate } from '../../common/components/formatted_date';
@@ -52,6 +53,8 @@ const tableStyle = css`
 `;
 
 export const ValueListModal = ({ listId, onCloseModal, canWriteIndex }: ValueListModalProps) => {
+  const modalTitleId = useGeneratedHtmlId();
+
   const [filter, setFilter] = useState('');
   const http = useKibana().services.http;
   const [pageIndex, setPageIndex] = useState(0);
@@ -108,13 +111,13 @@ export const ValueListModal = ({ listId, onCloseModal, canWriteIndex }: ValueLis
   const isListExist = !isListLoading && !!list;
 
   return (
-    <EuiModal maxWidth={false} className={modalWindow} onClose={onCloseModal}>
+    <EuiModal aria-labelledby={modalTitleId} maxWidth={false} className={modalWindow} onClose={onCloseModal}>
       <>
         <EuiModalHeader>
           {isListExist && (
             <EuiFlexGroup justifyContent="spaceBetween" wrap>
               <EuiFlexItem grow={false}>
-                <EuiModalHeaderTitle data-test-subj="value-list-items-modal-title">
+                <EuiModalHeaderTitle id={modalTitleId} data-test-subj="value-list-items-modal-title">
                   {list.id}
                 </EuiModalHeaderTitle>
                 <EuiSpacer size="s" />

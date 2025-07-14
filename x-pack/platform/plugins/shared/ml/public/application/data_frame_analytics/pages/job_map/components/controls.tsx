@@ -27,6 +27,7 @@ import {
   EuiPopover,
   EuiPortal,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-date-utils';
 import { JOB_MAP_NODE_TYPES } from '@kbn/ml-data-frame-analytics-utils';
@@ -246,6 +247,8 @@ export const Controls: FC<Props> = React.memo(
       return null;
     }
 
+    const modalTitleId = useGeneratedHtmlId();
+
     const button = (
       <EuiButton size="s" iconType="arrowDown" iconSide="right" onClick={onActionsButtonClick}>
         <FormattedMessage
@@ -356,12 +359,12 @@ export const Controls: FC<Props> = React.memo(
 
     return (
       <EuiPortal>
-        <EuiFlyout ownFocus size="m" onClose={deselect} data-test-subj="mlAnalyticsJobMapFlyout">
+        <EuiFlyout aria-labelledby={modalTitleId} ownFocus size="m" onClose={deselect} data-test-subj="mlAnalyticsJobMapFlyout">
           <EuiFlyoutHeader>
             <EuiFlexGroup direction="column" gutterSize="xs">
               <EuiFlexItem grow={false}>
                 <EuiTitle size="s">
-                  <h3 data-test-subj="mlDataFrameAnalyticsNodeDetailsTitle">
+                  <h3 id={modalTitleId} data-test-subj="mlDataFrameAnalyticsNodeDetailsTitle">
                     <FormattedMessage
                       id="xpack.ml.dataframe.analyticsMap.flyoutHeaderTitle"
                       defaultMessage="Details for {type} {id}"

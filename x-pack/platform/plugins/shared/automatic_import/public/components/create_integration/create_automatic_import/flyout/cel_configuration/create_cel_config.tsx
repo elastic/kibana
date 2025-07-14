@@ -18,6 +18,7 @@ import {
   EuiSpacer,
   EuiStepNumber,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { CelInput } from '../../../../../../common';
@@ -120,12 +121,14 @@ export const CreateCelConfigFlyout = React.memo<CreateCelConfigFlyoutProps>(
       setNeedsGeneration(updatedNeedsGeneration);
     }, []);
 
+    const flyoutTitleId = useGeneratedHtmlId();
+
     return (
-      <EuiFlyout onClose={() => setShowCelCreateFlyout(false)}>
+      <EuiFlyout onClose={() => setShowCelCreateFlyout(false)} aria-labelledby={flyoutTitleId}>
         <EuiFlyoutHeader hasBorder>
           <EuiFlexGroup alignItems="center" gutterSize="s">
             <EuiTitle size="m">
-              <h2>{i18n.OPEN_API_SPEC_TITLE}</h2>
+              <h2 id={flyoutTitleId}>{i18n.OPEN_API_SPEC_TITLE}</h2>
             </EuiTitle>
           </EuiFlexGroup>
         </EuiFlyoutHeader>

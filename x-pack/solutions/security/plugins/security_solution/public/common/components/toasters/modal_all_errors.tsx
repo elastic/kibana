@@ -16,6 +16,7 @@ import {
   EuiCodeBlock,
   EuiModalFooter,
   EuiAccordion,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
@@ -38,12 +39,14 @@ interface FullErrorProps {
 const ModalAllErrorsComponent: React.FC<FullErrorProps> = ({ isShowing, toast, toggle }) => {
   const handleClose = useCallback(() => toggle(toast), [toggle, toast]);
 
+  const modalAllErrorsTitleId = useGeneratedHtmlId();
+
   if (!isShowing || toast == null) return null;
 
   return (
-    <EuiModal onClose={handleClose}>
+    <EuiModal onClose={handleClose} aria-labelledby={modalAllErrorsTitleId}>
       <EuiModalHeader>
-        <EuiModalHeaderTitle>{i18n.TITLE_ERROR_MODAL}</EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id={modalAllErrorsTitleId}>{i18n.TITLE_ERROR_MODAL}</EuiModalHeaderTitle>
       </EuiModalHeader>
 
       <EuiModalBody>

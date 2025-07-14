@@ -20,6 +20,7 @@ import {
   EuiModal,
   EuiFormRow,
   EuiCallOut,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -57,6 +58,7 @@ export const IndexSelectorModal = ({
     indexPattern?: string;
   };
 }) => {
+  const modalTitleId = useGeneratedHtmlId();
   const [selectedOptions, setSelected] = useState<Array<EuiComboBoxOptionOption<string>>>(
     editDataSource?.indexPattern?.split(',').map((index) => ({ label: index })) ?? []
   );
@@ -116,9 +118,9 @@ export const IndexSelectorModal = ({
   return isCreateIndexModalOpen ? (
     <CreateIndexModal onClose={hideCreateIndexModal} onCreate={onCreateIndex} />
   ) : (
-    <EuiModal onClose={onClose} maxWidth="624px" data-test-subj="index-selector-modal">
+    <EuiModal onClose={onClose} maxWidth="624px" data-test-subj="index-selector-modal" aria-labelledby={modalTitleId}>
       <EuiModalHeader>
-        <EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id={modalTitleId}>
           <FormattedMessage
             id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.selectIndex.title"
             defaultMessage="Select index"

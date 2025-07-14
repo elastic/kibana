@@ -52,6 +52,7 @@ const SelectedPromptContextEditorModalComponent = ({ onClose, onSave, promptCont
   const { http, toasts } = useAssistantContext();
   const [checked, setChecked] = useState(false);
   const checkboxId = useGeneratedHtmlId({ prefix: 'updateSettingPresetsCheckbox' });
+  const modalTitleId = useGeneratedHtmlId();
 
   const { data: anonymizationFields, refetch: anonymizationFieldsRefetch } =
     useFetchAnonymizationFields();
@@ -151,7 +152,7 @@ const SelectedPromptContextEditorModalComponent = ({ onClose, onSave, promptCont
   }, []);
 
   return (
-    <EuiModal onClose={onClose}>
+    <EuiModal onClose={onClose} aria-labelledby={modalTitleId}>
       <EuiModalHeader
         css={css`
           flex-direction: column;
@@ -159,7 +160,7 @@ const SelectedPromptContextEditorModalComponent = ({ onClose, onSave, promptCont
           padding-bottom: 0;
         `}
       >
-        <EuiModalHeaderTitle>{i18n.SETTINGS_TITLE}</EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id={modalTitleId}>{i18n.SETTINGS_TITLE}</EuiModalHeaderTitle>
         <EuiSpacer size="xs" />
         <EuiText size={'xs'}>{i18n.SETTINGS_DESCRIPTION}</EuiText>
         <EuiHorizontalRule margin="s" />

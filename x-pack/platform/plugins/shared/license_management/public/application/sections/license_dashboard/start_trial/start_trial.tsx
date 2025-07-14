@@ -20,6 +20,7 @@ import {
   EuiModalHeader,
   EuiModalBody,
   EuiModalHeaderTitle,
+  htmlIdGenerator,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -76,10 +77,12 @@ export class StartTrial extends Component<Props, State> {
       return null;
     }
 
+    const modalTitleId = htmlIdGenerator()('modalTitle');
+
     return (
-      <EuiModal className="licManagement__modal" onClose={this.cancel}>
+      <EuiModal className="licManagement__modal" onClose={this.cancel} aria-labelledby={modalTitleId}>
         <EuiModalHeader>
-          <EuiModalHeaderTitle data-test-subj="confirmModalTitleText">
+          <EuiModalHeaderTitle id={modalTitleId} data-test-subj="confirmModalTitleText">
             <FormattedMessage
               id="xpack.licenseMgmt.licenseDashboard.startTrial.confirmModalTitle"
               defaultMessage="Start your free 30-day trial"

@@ -14,6 +14,7 @@ import {
   EuiSpacer,
   EuiTextColor,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { OverlayRef } from '@kbn/core/public';
 import type { Query } from '@kbn/es-query';
@@ -101,6 +102,8 @@ export const LogEntryFlyout = ({
   onSetFieldFilter,
   logViewReference,
 }: LogEntryFlyoutProps) => {
+  const modalTitleId = useGeneratedHtmlId();
+
   const {
     cancelRequest: cancelLogEntryRequest,
     errors: logEntryErrors,
@@ -127,12 +130,12 @@ export const LogEntryFlyout = ({
   }, [fetchLogEntry, logViewReference, logEntryId]);
 
   return (
-    <EuiFlyout onClose={onCloseFlyout} size="m">
+    <EuiFlyout onClose={onCloseFlyout} size="m" aria-labelledby={modalTitleId}>
       <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup alignItems="center">
           <EuiFlexItem>
             <EuiTitle size="s">
-              <h3 id="flyoutTitle">
+              <h3 id={modalTitleId}>
                 <FormattedMessage
                   defaultMessage="Details for log entry {logEntryId}"
                   id="xpack.logsShared.logFlyout.flyoutTitle"

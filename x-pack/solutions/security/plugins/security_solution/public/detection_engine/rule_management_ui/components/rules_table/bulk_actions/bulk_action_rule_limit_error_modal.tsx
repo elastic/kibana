@@ -13,6 +13,7 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import * as i18n from '../../../../common/translations';
 
@@ -25,10 +26,12 @@ const BulkActionRuleLimitErrorModalComponent = ({
   onClose,
   message,
 }: BulkManualRuleRunRulesLimitErrorModalProps) => {
+  const modalTitleId = useGeneratedHtmlId();
+
   return (
-    <EuiModal onClose={onClose}>
+    <EuiModal onClose={onClose} aria-labelledby={modalTitleId}>
       <EuiModalHeader>
-        <EuiModalHeaderTitle>{i18n.BULK_ACTION_LIMIT_ERROR_MODAL_TITLE}</EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id={modalTitleId}>{i18n.BULK_ACTION_LIMIT_ERROR_MODAL_TITLE}</EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>{message}</EuiModalBody>
       <EuiModalFooter>

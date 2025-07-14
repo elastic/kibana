@@ -19,6 +19,7 @@ import {
   EuiButton,
   EuiText,
   EuiSwitch,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -39,6 +40,8 @@ interface Props {
 }
 
 export const ResetJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, refreshJobs }) => {
+  const modalTitleId = useGeneratedHtmlId();
+
   const {
     services: {
       notifications: { toasts },
@@ -92,9 +95,9 @@ export const ResetJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, r
   }
 
   return (
-    <EuiModal data-test-subj="mlResetJobConfirmModal" onClose={closeModal}>
+    <EuiModal data-test-subj="mlResetJobConfirmModal" onClose={closeModal} aria-labelledby={modalTitleId}>
       <EuiModalHeader>
-        <EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id={modalTitleId}>
           <FormattedMessage
             id="xpack.ml.jobsList.resetJobModal.resetJobsTitle"
             defaultMessage="Reset {jobsCount, plural, one {{jobId}} other {# jobs}}?"

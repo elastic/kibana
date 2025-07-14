@@ -18,6 +18,7 @@ import {
   EuiFlyoutHeader,
   EuiSteps,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -102,6 +103,8 @@ const UpdateConnectorComponent: React.FC<Props> = ({
   onConfirm,
   updateErrorMessage,
 }) => {
+  const modalTitleId = useGeneratedHtmlId();
+
   const { form } = useForm<UpdateConnectorFormSchema>();
   const { submit, isValid } = form;
 
@@ -117,10 +120,10 @@ const UpdateConnectorComponent: React.FC<Props> = ({
 
   return (
     <Form form={form}>
-      <EuiFlyout ownFocus onClose={onCancel} data-test-subj="updateConnectorForm">
+      <EuiFlyout aria-labelledby={modalTitleId} ownFocus onClose={onCancel} data-test-subj="updateConnectorForm">
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
-            <h1>{title}</h1>
+            <h1 id={modalTitleId}>{title}</h1>
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody

@@ -20,6 +20,7 @@ import {
   EuiLoadingSpinner,
   EuiText,
   EuiSwitch,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -52,6 +53,8 @@ export const DeleteJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, 
   const [canDelete, setCanDelete] = useState(false);
   const [deleteUserAnnotations, setDeleteUserAnnotations] = useState(false);
   const [deleteAlertingRules, setDeleteAlertingRules] = useState(false);
+
+  const deleteJobModalTitleId = useGeneratedHtmlId();
 
   useEffect(() => {
     if (typeof setShowFunction === 'function') {
@@ -109,9 +112,9 @@ export const DeleteJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, 
 
   if (canDelete) {
     return (
-      <EuiModal data-test-subj="mlDeleteJobConfirmModal" onClose={closeModal}>
+      <EuiModal aria-labelledby={deleteJobModalTitleId} data-test-subj="mlDeleteJobConfirmModal" onClose={closeModal}>
         <EuiModalHeader>
-          <EuiModalHeaderTitle>
+          <EuiModalHeaderTitle id={deleteJobModalTitleId}>
             <FormattedMessage
               id="xpack.ml.jobsList.deleteJobModal.deleteJobsTitle"
               defaultMessage="Delete {jobsCount, plural, one {{jobId}} other {# jobs}}?"

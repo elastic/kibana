@@ -15,6 +15,7 @@ import {
   EuiModalBody,
   EuiModalHeader,
   EuiModalHeaderTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { ActionType } from '@kbn/actions-plugin/common';
 import { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
@@ -39,6 +40,8 @@ const itemClassName = css`
 
 export const ActionTypeSelectorModal = React.memo(
   ({ actionTypes, actionTypeRegistry, onClose, onSelect, actionTypeSelectorInline }: Props) => {
+    const modalTitleId = useGeneratedHtmlId();
+
     const content = useMemo(
       () => (
         <EuiFlexGroup justifyContent="center" responsive={false} wrap={true}>
@@ -69,9 +72,9 @@ export const ActionTypeSelectorModal = React.memo(
     if (actionTypeSelectorInline) return <>{content}</>;
 
     return (
-      <EuiModal onClose={onClose} data-test-subj="action-type-selector-modal">
+      <EuiModal onClose={onClose} data-test-subj="action-type-selector-modal" aria-labelledby={modalTitleId}>
         <EuiModalHeader>
-          <EuiModalHeaderTitle>{i18n.INLINE_CONNECTOR_PLACEHOLDER}</EuiModalHeaderTitle>
+          <EuiModalHeaderTitle id={modalTitleId}>{i18n.INLINE_CONNECTOR_PLACEHOLDER}</EuiModalHeaderTitle>
         </EuiModalHeader>
 
         <EuiModalBody>{content}</EuiModalBody>

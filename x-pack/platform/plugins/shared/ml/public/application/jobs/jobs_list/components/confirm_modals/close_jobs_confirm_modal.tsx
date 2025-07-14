@@ -17,6 +17,7 @@ import {
   EuiModalFooter,
   EuiButtonEmpty,
   EuiButton,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useMlApi, useMlKibana } from '../../../../contexts/kibana';
@@ -49,6 +50,8 @@ export const CloseJobsConfirmModal: FC<Props> = ({
   const [jobsToReset, setJobsToReset] = useState<MlSummaryJob[]>([]);
 
   const jobIds = useMemo(() => jobsToReset.map(({ id }) => id), [jobsToReset]);
+
+  const modalTitleId = useGeneratedHtmlId();
 
   useEffect(() => {
     if (typeof setShowFunction === 'function') {
@@ -93,9 +96,9 @@ export const CloseJobsConfirmModal: FC<Props> = ({
     );
 
     return (
-      <EuiModal data-test-subj="mlCloseJobsConfirmModal" onClose={closeModal}>
+      <EuiModal data-test-subj="mlCloseJobsConfirmModal" onClose={closeModal} aria-labelledby={modalTitleId}>
         <EuiModalHeader>
-          <EuiModalHeaderTitle>{title}</EuiModalHeaderTitle>
+          <EuiModalHeaderTitle id={modalTitleId}>{title}</EuiModalHeaderTitle>
         </EuiModalHeader>
         <EuiModalBody>
           <ManagedJobsWarningCallout

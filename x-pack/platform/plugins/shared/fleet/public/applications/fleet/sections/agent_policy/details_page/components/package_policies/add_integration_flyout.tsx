@@ -21,6 +21,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import React, { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 
@@ -39,6 +40,8 @@ export const AddIntegrationFlyout: React.FunctionComponent<{
   onClose: () => void;
   agentPolicy: AgentPolicy;
 }> = ({ onClose, agentPolicy }) => {
+  const modalTitleId = useGeneratedHtmlId();
+
   const [prerelease, setPrerelease] = React.useState<boolean>(false);
   const { data: settings } = useGetSettings();
 
@@ -135,14 +138,14 @@ export const AddIntegrationFlyout: React.FunctionComponent<{
   return (
     <Suspense fallback={<Loading />}>
       <EuiErrorBoundary>
-        <EuiFlyout onClose={onClose} data-test-subj="addIntegrationFlyout">
+        <EuiFlyout onClose={onClose} data-test-subj="addIntegrationFlyout" aria-labelledby={modalTitleId}>
           <EuiFlyoutHeader hasBorder>
             <EuiFlexGroup direction="column" gutterSize="s">
               <EuiFlexItem>
                 <EuiFlexGroup alignItems="baseline" gutterSize="s">
                   <EuiFlexItem grow={false}>
                     <EuiTitle>
-                      <h2>
+                      <h2 id={modalTitleId}>
                         <FormattedMessage
                           id="xpack.fleet.addIntegrationFlyout.flyoutHeaderTitle"
                           defaultMessage="Add integration to policy"

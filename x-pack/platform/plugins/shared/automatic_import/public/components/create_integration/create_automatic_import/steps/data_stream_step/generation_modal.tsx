@@ -20,6 +20,7 @@ import {
   EuiSpacer,
   EuiText,
   useEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
@@ -71,10 +72,12 @@ export const GenerationModal = React.memo<GenerationModalProps>(
       [progress]
     );
 
+    const generationModalTitleId = useGeneratedHtmlId();
+
     return (
-      <EuiModal onClose={onClose} data-test-subj="generationModal">
+      <EuiModal onClose={onClose} aria-labelledby={generationModalTitleId} data-test-subj="generationModal">
         <EuiModalHeader css={headerCss}>
-          <EuiModalHeaderTitle>{i18n.ANALYZING}</EuiModalHeaderTitle>
+          <EuiModalHeaderTitle id={generationModalTitleId}>{i18n.ANALYZING}</EuiModalHeaderTitle>
         </EuiModalHeader>
         <EuiModalBody css={bodyCss}>
           <EuiFlexGroup direction="column" gutterSize="l" justifyContent="center">

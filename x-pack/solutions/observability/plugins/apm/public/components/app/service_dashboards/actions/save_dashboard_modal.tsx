@@ -21,6 +21,7 @@ import {
   EuiToolTip,
   EuiIcon,
   EuiButtonEmpty,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { callApmApi } from '../../../../services/rest/create_call_apm_api';
@@ -46,6 +47,8 @@ export function SaveDashboardModal({
   serviceDashboards,
   serviceName,
 }: Props) {
+  const modalTitleId = useGeneratedHtmlId();
+
   const {
     core: { notifications },
   } = useApmPluginContext();
@@ -143,9 +146,9 @@ export function SaveDashboardModal({
   );
 
   return (
-    <EuiModal onClose={onClose} data-test-subj="apmSelectServiceDashboard">
+    <EuiModal onClose={onClose} data-test-subj="apmSelectServiceDashboard" aria-labelledby={modalTitleId}>
       <EuiModalHeader>
-        <EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id={modalTitleId}>
           {isEditMode
             ? i18n.translate('xpack.apm.serviceDashboards.selectDashboard.modalTitle.edit', {
                 defaultMessage: 'Edit dashboard',

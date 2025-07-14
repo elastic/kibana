@@ -12,6 +12,7 @@ import {
   EuiModalBody,
   EuiModalHeader,
   EuiModalHeaderTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import React, { useState, useCallback } from 'react';
 
@@ -47,6 +48,8 @@ const AddObservableComponent: React.FC<AddObservableProps> = ({ caseData }) => {
     [postObservables]
   );
 
+  const modalTitleId = useGeneratedHtmlId();
+
   return permissions.create && permissions.update ? (
     <EuiFlexItem grow={false}>
       <EuiButton
@@ -59,9 +62,9 @@ const AddObservableComponent: React.FC<AddObservableProps> = ({ caseData }) => {
         {i18n.ADD_OBSERVABLE}
       </EuiButton>
       {isModalVisible && (
-        <EuiModal data-test-subj="cases-observables-add-modal" onClose={closeModal}>
+        <EuiModal data-test-subj="cases-observables-add-modal" onClose={closeModal} aria-labelledby={modalTitleId}>
           <EuiModalHeader>
-            <EuiModalHeaderTitle>{i18n.ADD_OBSERVABLE}</EuiModalHeaderTitle>
+            <EuiModalHeaderTitle id={modalTitleId}>{i18n.ADD_OBSERVABLE}</EuiModalHeaderTitle>
           </EuiModalHeader>
           <EuiModalBody>
             <ObservableForm

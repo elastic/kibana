@@ -23,6 +23,7 @@ import {
   EuiModalFooter,
   EuiSpacer,
   EuiText,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import { LOOKUP_INDEX_MODE, STANDARD_INDEX_MODE } from '../../../../../../common/constants';
@@ -43,6 +44,8 @@ export interface CreateIndexModalProps {
 }
 
 export const CreateIndexModal = ({ closeModal, loadIndices }: CreateIndexModalProps) => {
+  const modalTitleId = useGeneratedHtmlId();
+
   const [indexName, setIndexName] = useState<string>('');
   const [indexMode, setIndexMode] = useState<string>(STANDARD_INDEX_MODE);
   const [indexNameError, setIndexNameError] = useState<string | undefined>();
@@ -88,9 +91,9 @@ export const CreateIndexModal = ({ closeModal, loadIndices }: CreateIndexModalPr
   };
 
   return (
-    <EuiModal onClose={closeModal} initialFocus="[name=indexName]" css={{ width: 450 }}>
+    <EuiModal aria-labelledby={modalTitleId} onClose={closeModal} initialFocus="[name=indexName]" css={{ width: 450 }}>
       <EuiModalHeader>
-        <EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id={modalTitleId}>
           <FormattedMessage
             id="xpack.idxMgmt.createIndex.modal.title"
             defaultMessage="Create index"

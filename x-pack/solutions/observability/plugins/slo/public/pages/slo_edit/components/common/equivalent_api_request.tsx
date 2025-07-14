@@ -14,6 +14,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -33,6 +34,7 @@ export function EquivalentApiRequest({ disabled, isEditMode, slo }: Props) {
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   const { getValues, trigger } = useFormContext<CreateSLOForm>();
   const [sloData, setSloData] = useState<CreateSLOInput>();
+  const flyoutTitleId = useGeneratedHtmlId();
 
   useEffect(() => {
     if (!isFlyoutVisible) {
@@ -50,10 +52,10 @@ export function EquivalentApiRequest({ disabled, isEditMode, slo }: Props) {
 
   if (isFlyoutVisible) {
     flyout = (
-      <EuiFlyout ownFocus onClose={() => setIsFlyoutVisible(false)}>
+      <EuiFlyout aria-labelledby={flyoutTitleId} ownFocus onClose={() => setIsFlyoutVisible(false)}>
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
-            <h2>
+            <h2 id={flyoutTitleId}>
               {i18n.translate('xpack.slo.equivalentApiRequest.h2.equivalentAPIRequestToLabel', {
                 defaultMessage: 'Equivalent API request',
               })}

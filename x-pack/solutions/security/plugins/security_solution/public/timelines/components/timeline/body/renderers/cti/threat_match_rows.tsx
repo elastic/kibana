@@ -16,6 +16,7 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { get } from 'lodash';
 import type { FC, ReactElement } from 'react';
@@ -109,13 +110,16 @@ const ThreatMatchRowModal: FC<ThreatMatchRowModalProps> = ({ title, renderChildr
   const [isModalVisible, setShowModal] = useState(false);
   const closeModal = () => setShowModal(false);
   const showModal = () => setShowModal(true);
+
+  const modalTitleId = useGeneratedHtmlId();
+
   let modal;
 
   if (isModalVisible) {
     modal = (
-      <EuiModal onClose={closeModal}>
+      <EuiModal onClose={closeModal} aria-labelledby={modalTitleId}>
         <EuiModalHeader data-test-subj="threat-match-row-modal">
-          <EuiModalHeaderTitle>{ALL_INDICATOR_MATCHES_MODAL_HEADER}</EuiModalHeaderTitle>
+          <EuiModalHeaderTitle id={modalTitleId}>{ALL_INDICATOR_MATCHES_MODAL_HEADER}</EuiModalHeaderTitle>
         </EuiModalHeader>
         <EuiModalBody>{renderChildren()}</EuiModalBody>
         <EuiModalFooter>

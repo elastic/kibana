@@ -18,6 +18,7 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { ShardFailureTable } from './shard_failure_table';
 
@@ -27,11 +28,13 @@ interface Props {
 }
 
 export function ShardFailureFlyout({ failures, onClose }: Props) {
+  const flyoutTitleId = useGeneratedHtmlId();
+
   return (
-    <EuiFlyout onClose={onClose} ownFocus={false} hideCloseButton={true}>
+    <EuiFlyout onClose={onClose} ownFocus={false} hideCloseButton={true} aria-labelledby={flyoutTitleId}>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
-          <h1>
+          <h1 id={flyoutTitleId}>
             <EuiButtonIcon iconType="sortLeft" onClick={onClose} />
             {i18n.translate('inspector.requests.clusters.shards.flyoutTitle', {
               defaultMessage:

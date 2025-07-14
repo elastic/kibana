@@ -16,6 +16,7 @@ import {
   EuiPanel,
   EuiText,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { CodeEditor } from '@kbn/code-editor';
@@ -68,6 +69,8 @@ export const ReviewStep = React.memo<ReviewStepProps>(
       setIsPipelineEditionVisible(false);
     }, [updatedPipeline]);
 
+    const flyoutTitleId = useGeneratedHtmlId();
+
     return (
       <StepContentWrapper
         title={i18n.TITLE}
@@ -95,10 +98,10 @@ export const ReviewStep = React.memo<ReviewStepProps>(
             </>
           )}
           {isPipelineEditionVisible && (
-            <EuiFlyout onClose={() => setIsPipelineEditionVisible(false)}>
+            <EuiFlyout onClose={() => setIsPipelineEditionVisible(false)} aria-labelledby={flyoutTitleId}>
               <EuiFlyoutHeader hasBorder>
                 <EuiTitle size="s">
-                  <h2>{i18n.INGEST_PIPELINE_TITLE}</h2>
+                  <h2 id={flyoutTitleId}>{i18n.INGEST_PIPELINE_TITLE}</h2>
                 </EuiTitle>
               </EuiFlyoutHeader>
               <EuiFlyoutBody css={flyoutBodyCss}>

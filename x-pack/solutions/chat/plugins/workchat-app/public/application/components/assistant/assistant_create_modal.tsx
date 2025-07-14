@@ -19,6 +19,7 @@ import {
   EuiFieldText,
   EuiSuperSelect,
   EuiText,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormProvider, useForm, Controller } from 'react-hook-form';
@@ -35,6 +36,8 @@ export interface CreateNewAssistantModalProps {
 }
 
 export const CreateNewAssistantModal: React.FC<CreateNewAssistantModalProps> = ({ onClose }) => {
+  const modalTitleId = useGeneratedHtmlId();
+
   const {
     services: { notifications },
   } = useKibana();
@@ -86,9 +89,9 @@ export const CreateNewAssistantModal: React.FC<CreateNewAssistantModalProps> = (
   }, [useCase, setValue]);
 
   return (
-    <EuiModal onClose={onClose} style={{ width: 640 }}>
+    <EuiModal onClose={onClose} style={{ width: 640 }} aria-labelledby={modalTitleId}>
       <EuiModalHeader>
-        <EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id={modalTitleId}>
           {i18n.translate('workchatApp.assistants.create.title', {
             defaultMessage: 'Create new assistant',
           })}

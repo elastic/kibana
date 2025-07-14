@@ -21,6 +21,7 @@ import {
   EuiButton,
   EuiText,
   EuiSpacer,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import useDebounce from 'react-use/lib/useDebounce';
 import type {
@@ -242,6 +243,8 @@ export const DeleteSpaceAwareItemCheckModal: FC<Props> = ({
   hasManagedJob,
   onUntagCallback,
 }) => {
+  const modalTitleId = useGeneratedHtmlId();
+
   const [buttonContent, setButtonContent] = useState<JSX.Element | undefined>();
   const [modalContent, setModalContent] = useState<JSX.Element | undefined>();
   const [hasUntagged, setHasUntagged] = useState<boolean>(false);
@@ -337,10 +340,10 @@ export const DeleteSpaceAwareItemCheckModal: FC<Props> = ({
   }
 
   return (
-    <EuiModal onClose={onCloseCallback} data-test-subj="mlDeleteSpaceAwareItemCheckModalOverlay">
+    <EuiModal aria-labelledby={modalTitleId} onClose={onCloseCallback} data-test-subj="mlDeleteSpaceAwareItemCheckModalOverlay">
       <>
         <EuiModalHeader>
-          <EuiModalHeaderTitle>
+          <EuiModalHeaderTitle id={modalTitleId}>
             <FormattedMessage
               id="xpack.ml.deleteSpaceAwareItemCheckModal.modalTitle"
               defaultMessage="Checking space permissions"

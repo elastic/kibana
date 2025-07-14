@@ -21,6 +21,7 @@ import {
   EuiSpacer,
   EuiSwitch,
   EuiText,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { NonEmptyString } from '@kbn/io-ts-utils';
 
@@ -45,6 +46,7 @@ export const UpsertViewModal = ({
   initialIncludeTime = false,
   title,
 }: Props) => {
+  const modalTitleId = useGeneratedHtmlId();
   const [viewName, setViewName] = useState(initialName);
   const [shouldIncludeTime, setIncludeTime] = useState(initialIncludeTime);
 
@@ -63,9 +65,9 @@ export const UpsertViewModal = ({
   };
 
   return (
-    <EuiModal onClose={onClose} data-test-subj="savedViews-upsertModal">
+    <EuiModal onClose={onClose} data-test-subj="savedViews-upsertModal" aria-labelledby={modalTitleId}>
       <EuiModalHeader>
-        <EuiModalHeaderTitle>{title}</EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id={modalTitleId}>{title}</EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
         <EuiFieldText

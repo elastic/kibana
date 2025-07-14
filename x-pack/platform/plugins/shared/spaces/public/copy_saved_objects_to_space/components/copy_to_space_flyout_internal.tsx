@@ -18,6 +18,7 @@ import {
   EuiLoadingSpinner,
   EuiText,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { mapValues } from 'lodash';
 import React, { useEffect, useMemo, useState } from 'react';
@@ -39,6 +40,8 @@ const CREATE_NEW_COPIES_DEFAULT = true;
 const OVERWRITE_ALL_DEFAULT = true;
 
 export const CopyToSpaceFlyoutInternal = (props: CopyToSpaceFlyoutProps) => {
+  const modalTitleId = useGeneratedHtmlId();
+
   const { spacesManager, spacesDataPromise, services } = useSpaces();
   const { notifications } = services;
   const toastNotifications = notifications!.toasts;
@@ -248,7 +251,7 @@ export const CopyToSpaceFlyoutInternal = (props: CopyToSpaceFlyoutProps) => {
   };
 
   return (
-    <EuiFlyout onClose={onClose} maxWidth={600} data-test-subj="copy-to-space-flyout">
+    <EuiFlyout onClose={onClose} maxWidth={600} data-test-subj="copy-to-space-flyout" aria-labelledby={modalTitleId}>
       <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup alignItems="center" gutterSize="m">
           <EuiFlexItem grow={false}>
@@ -256,7 +259,7 @@ export const CopyToSpaceFlyoutInternal = (props: CopyToSpaceFlyoutProps) => {
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiTitle size="m">
-              <h2>
+              <h2 id={modalTitleId}>
                 <FormattedMessage
                   id="xpack.spaces.management.copyToSpaceFlyoutHeader"
                   defaultMessage="Copy to spaces"

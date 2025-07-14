@@ -16,6 +16,7 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiText,
+  htmlIdGenerator,
 } from '@elastic/eui';
 import React, { Component, Fragment } from 'react';
 
@@ -54,6 +55,7 @@ export class ConfirmDelete extends Component<Props, State> {
   public render() {
     const { rolesToDelete, buildFlavor } = this.props;
     const moreThanOne = rolesToDelete.length > 1;
+    const modalTitleId = htmlIdGenerator()('confirmDeleteModalTitle');
     const title = i18n.translate('xpack.security.management.roles.deleteRoleTitle', {
       defaultMessage: `Delete role{value, plural, one {{roleName}} other {s}}?`,
       values: { value: rolesToDelete.length, roleName: ` ${rolesToDelete[0]}` },
@@ -63,9 +65,9 @@ export class ConfirmDelete extends Component<Props, State> {
     // to disable the buttons since this could be a long-running operation
 
     return (
-      <EuiModal onClose={this.props.onCancel}>
+      <EuiModal onClose={this.props.onCancel} aria-labelledby={modalTitleId}>
         <EuiModalHeader>
-          <EuiModalHeaderTitle data-test-subj="confirmModalTitleText">{title}</EuiModalHeaderTitle>
+          <EuiModalHeaderTitle id={modalTitleId} data-test-subj="confirmModalTitleText">{title}</EuiModalHeaderTitle>
         </EuiModalHeader>
         <EuiModalBody>
           <EuiText>

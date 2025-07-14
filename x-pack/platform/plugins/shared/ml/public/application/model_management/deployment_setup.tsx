@@ -37,6 +37,7 @@ import {
   EuiSwitch,
   EuiText,
   useEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { CoreStart, OverlayStart } from '@kbn/core/public';
 import { css } from '@emotion/react';
@@ -732,6 +733,8 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
       : defaultParams;
   }, [deploymentParamsMapper, isModelNotDownloaded, model, modelId, showNodeInfo]);
 
+  const [modalTitleId] = useState(() => useGeneratedHtmlId());
+
   const [config, setConfig] = useState<DeploymentParamsUI>(initialParams ?? getDefaultParams());
 
   const deploymentIdValidator = useMemo(() => {
@@ -773,12 +776,12 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
     (model?.state === MODEL_STATE.DOWNLOADING || model?.state === MODEL_STATE.DOWNLOADED);
 
   return (
-    <EuiModal onClose={onClose} data-test-subj="mlModelsStartDeploymentModal" maxWidth={640}>
+    <EuiModal aria-labelledby={modalTitleId} onClose={onClose} data-test-subj="mlModelsStartDeploymentModal" maxWidth={640}>
       {/* Override padding to allow progress bar to take full width */}
       <EuiModalHeader css={{ paddingInline: `${euiTheme.size.l} 0px` }}>
         <EuiFlexGroup direction="column" gutterSize="s">
           <EuiFlexItem css={{ paddingInline: `0px ${euiTheme.size.xxl}` }}>
-            <EuiModalHeaderTitle size="s">
+            <EuiModalHeaderTitle id={modalTitleId} size="s">
               {isUpdate ? (
                 <FormattedMessage
                   id="xpack.ml.trainedModels.modelsList.updateDeployment.modalTitle"

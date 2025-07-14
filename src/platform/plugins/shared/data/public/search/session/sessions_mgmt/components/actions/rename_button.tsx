@@ -18,6 +18,7 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -43,6 +44,8 @@ const RenameDialog = ({
   const [isLoading, setIsLoading] = useState(false);
   const [newName, setNewName] = useState(originalName);
 
+  const modalTitleId = useGeneratedHtmlId();
+
   const title = i18n.translate('data.mgmt.searchSessions.renameModal.title', {
     defaultMessage: 'Edit search session name',
   });
@@ -60,9 +63,9 @@ const RenameDialog = ({
   const isNewNameValid = newName && originalName !== newName;
 
   return (
-    <EuiModal onClose={onActionDismiss} initialFocus="[name=newName]">
+    <EuiModal onClose={onActionDismiss} aria-labelledby={modalTitleId} initialFocus="[name=newName]">
       <EuiModalHeader>
-        <EuiModalHeaderTitle>{title}</EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id={modalTitleId}>{title}</EuiModalHeaderTitle>
       </EuiModalHeader>
 
       <EuiModalBody>

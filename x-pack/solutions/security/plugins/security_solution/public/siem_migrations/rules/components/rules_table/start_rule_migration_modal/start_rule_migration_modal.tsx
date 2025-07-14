@@ -74,7 +74,7 @@ export const StartRuleMigrationModal: FC<StartRuleMigrationModalProps> = React.m
       !skipPrebuiltRulesMatching
     );
 
-    const modalTitleId = useGeneratedHtmlId();
+    const startRuleMigrationModalTitleId = useGeneratedHtmlId();
 
     const connectorOptions: ConnectorSelectorProps['connectors'] = useMemo(() => {
       return aiConnectors.map((connector) => {
@@ -128,11 +128,11 @@ export const StartRuleMigrationModal: FC<StartRuleMigrationModalProps> = React.m
 
     return (
       <EuiOutsideClickDetector onOutsideClick={closeModal}>
-        <EuiModal onClose={closeModal} data-test-subj={DATA_TEST_SUBJ_PREFIX}>
+        <EuiModal aria-labelledby={startRuleMigrationModalTitleId} onClose={closeModal} data-test-subj={DATA_TEST_SUBJ_PREFIX}>
           <EuiModalHeader>
             <EuiModalHeaderTitle
               data-test-subj={`${DATA_TEST_SUBJ_PREFIX}-Title`}
-              id={modalTitleId}
+              id={startRuleMigrationModalTitleId}
             >
               {i18n.REPROCESS_RULES_DIALOG_TITLE(numberOfRules)}
             </EuiModalHeaderTitle>

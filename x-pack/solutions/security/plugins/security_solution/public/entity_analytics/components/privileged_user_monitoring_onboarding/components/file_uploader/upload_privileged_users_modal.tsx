@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiModal, EuiModalHeader, EuiModalHeaderTitle, EuiModalBody, EuiText } from '@elastic/eui';
+import { EuiModal, EuiModalHeader, EuiModalHeaderTitle, EuiModalBody, EuiText, useGeneratedHtmlId } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { PrivilegedUsersFileUploader } from './privileged_users_file_uploader';
 
@@ -20,11 +20,12 @@ export const UploadPrivilegedUsersModal: React.FC<ImportPrivilegedUsersModalProp
   onImport,
 }) => {
   // TODO handle missing permissions
+  const modalTitleId = useGeneratedHtmlId();
 
   return (
-    <EuiModal onClose={onClose}>
+    <EuiModal onClose={onClose} aria-labelledby={modalTitleId}>
       <EuiModalHeader>
-        <EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id={modalTitleId}>
           <FormattedMessage
             id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.uploadPrivilegedUsersModal.title"
             defaultMessage="Import file"

@@ -18,6 +18,7 @@ import {
   EuiModalHeaderTitle,
   EuiSpacer,
   EuiText,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { AutoFocusButton } from '../../../../common/components/autofocus_button/autofocus_button';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
@@ -87,6 +88,7 @@ interface DeleteArtifactModalProps {
 export const ArtifactDeleteModal = memo<DeleteArtifactModalProps>(
   ({ apiClient, item, onCancel, onSuccess, 'data-test-subj': dataTestSubj, labels }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
+    const modalTitleId = useGeneratedHtmlId();
 
     const { deleteArtifactItem, isLoading: isDeleting } = useWithArtifactDeleteItem(
       apiClient,
@@ -105,9 +107,9 @@ export const ArtifactDeleteModal = memo<DeleteArtifactModalProps>(
     }, [isDeleting, onCancel]);
 
     return (
-      <EuiModal onClose={handleOnCancel} data-test-subj={dataTestSubj}>
+      <EuiModal onClose={handleOnCancel} data-test-subj={dataTestSubj} aria-labelledby={modalTitleId}>
         <EuiModalHeader data-test-subj={getTestId('header')}>
-          <EuiModalHeaderTitle>{labels.deleteModalTitle(item.name)}</EuiModalHeaderTitle>
+          <EuiModalHeaderTitle id={modalTitleId}>{labels.deleteModalTitle(item.name)}</EuiModalHeaderTitle>
         </EuiModalHeader>
 
         <EuiModalBody data-test-subj={getTestId('body')}>

@@ -6,6 +6,7 @@
  */
 
 import React, { useRef } from 'react';
+import { useGeneratedHtmlId } from '@elastic/eui';
 
 import { useValues, useActions } from 'kea';
 
@@ -49,6 +50,8 @@ const Callout = (
   </EuiCallOut>
 );
 export const DefaultSettingsFlyout: React.FC<DefaultSettingsFlyoutProps> = ({ closeFlyout }) => {
+  const modalTitleId = useGeneratedHtmlId();
+
   const { makeRequest, setPipeline } = useActions(SettingsLogic);
   const { defaultPipeline, hasNoChanges, isLoading, pipelineState } = useValues(SettingsLogic);
   const {
@@ -59,10 +62,10 @@ export const DefaultSettingsFlyout: React.FC<DefaultSettingsFlyoutProps> = ({ cl
   // Reference the first focusable element in the flyout for accessibility on click or Enter key action either Reset or Save button
   const firstFocusInFlyoutRef = useRef<HTMLAnchorElement>(null);
   return (
-    <EuiFlyout onClose={closeFlyout} size="s" paddingSize="l">
+    <EuiFlyout onClose={closeFlyout} size="s" paddingSize="l" aria-labelledby={modalTitleId}>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle>
-          <h4>
+          <h4 id={modalTitleId}>
             {i18n.translate(
               'xpack.enterpriseSearch.defaultSettingsFlyout.h2.defaultSettingsLabel',
               { defaultMessage: 'Default Settings' }
