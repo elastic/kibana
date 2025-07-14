@@ -30,7 +30,7 @@ export const EmptyPrompt: FC = () => {
   return (
     <EuiEmptyPrompt
       body={
-        <p>
+        <div>
           <EuiText color="subdued" textAlign="center" size="s">
             <FormattedMessage
               id="indexEditor.emptyPrompt.description"
@@ -38,7 +38,7 @@ export const EmptyPrompt: FC = () => {
               values={{ uploading }}
             />
           </EuiText>
-        </p>
+        </div>
       }
     />
   );

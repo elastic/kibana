@@ -49,6 +49,8 @@ export const ValueInput = ({
 
   const onKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === 'Enter') {
+      event.stopPropagation();
+
       if (error) {
         notifications.toasts.addDanger({
           title: error,
