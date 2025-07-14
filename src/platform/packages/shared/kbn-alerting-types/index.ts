@@ -22,3 +22,4 @@ export * from './rule_settings';
 export * from './search_strategy_types';
 export * from './alert_delete_types';
 export * from './browser_fields_response';
+export * from './new_alert_fields_type';

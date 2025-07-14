@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { within, waitFor, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import type { AppMockRenderer } from '../../../lib/test_utils';
 import { createAppMockRenderer } from '../../../lib/test_utils';
 import type { CreateMaintenanceWindowFormProps } from './create_maintenance_windows_form';
@@ -182,108 +181,24 @@ describe('CreateMaintenanceWindowForm', () => {
     expect(timezoneInput).toHaveValue('America/Los_Angeles');
   });
 
-  it('should initialize MW with selected solution id properly', async () => {
-    appMockRenderer.render(
-      <CreateMaintenanceWindowForm
-        {...formProps}
-        initialValue={{
-          title: 'test',
-          startDate: '2023-03-24',
-          endDate: '2023-03-26',
-          timezone: ['America/Los_Angeles'],
-          recurring: true,
-          solutionId: 'observability',
-          scopedQuery: {
-            filters: [],
-            kql: 'kibana.alert.job_errors_results.job_id : * ',
-            dsl: '{"bool":{"must":[],"filter":[{"bool":{"should":[{"exists":{"field":"kibana.alert.job_errors_results.job_id"}}],"minimum_should_match":1}}],"should":[],"must_not":[]}}',
-          },
-        }}
-      />
-    );
+  it('should show "Filter alerts" toggle', async () => {
+    appMockRenderer.render(<CreateMaintenanceWindowForm {...formProps} />);
 
-    await waitFor(() => {
-      expect(
-        screen.queryByTestId('maintenanceWindowSolutionSelectionLoading')
-      ).not.toBeInTheDocument();
-    });
-
-    await waitFor(() => {
-      expect(screen.getByTestId('maintenanceWindowSolutionSelection')).toBeInTheDocument();
-    });
-
-    const observabilityInput = screen.getByLabelText('Observability rules');
-    const securityInput = screen.getByLabelText('Security rules');
-    const managementInput = screen.getByLabelText('Stack rules');
-
-    expect(observabilityInput).toBeChecked();
-    expect(managementInput).not.toBeChecked();
-    expect(securityInput).not.toBeChecked();
+    expect(await screen.findByTestId('maintenanceWindowScopedQuerySwitch')).toBeInTheDocument();
   });
 
-  it('can select one in the time solution id', async () => {
-    const user = userEvent.setup();
-    const result = appMockRenderer.render(<CreateMaintenanceWindowForm {...formProps} />);
-
-    await waitFor(() => {
-      expect(
-        result.queryByTestId('maintenanceWindowSolutionSelectionLoading')
-      ).not.toBeInTheDocument();
-    });
-
-    await waitFor(() => {
-      expect(screen.queryByTestId('maintenanceWindowSolutionSelection')).not.toBeInTheDocument();
-    });
-
-    const switchContainer = screen.getByTestId('maintenanceWindowScopedQuerySwitch');
-    const scopedQueryToggle = within(switchContainer).getByRole('switch');
-
-    expect(scopedQueryToggle).not.toBeChecked();
-    await user.click(scopedQueryToggle);
-    expect(scopedQueryToggle).toBeChecked();
-
-    const observabilityInput = screen.getByLabelText('Observability rules');
-    const securityInput = screen.getByLabelText('Security rules');
-    const managementInput = screen.getByLabelText('Stack rules');
-
-    await user.click(securityInput);
-
-    expect(observabilityInput).not.toBeChecked();
-    expect(managementInput).not.toBeChecked();
-    expect(securityInput).toBeChecked();
-
-    await user.click(observabilityInput);
-
-    expect(observabilityInput).toBeChecked();
-    expect(managementInput).not.toBeChecked();
-    expect(securityInput).not.toBeChecked();
-  });
-
-  it('should hide "Filter alerts" toggle when do not have access to any solutions', async () => {
+  it('should show "Filter alerts" toggle even when no rule types', async () => {
     loadRuleTypes.mockResolvedValue([]);
-    const result = appMockRenderer.render(<CreateMaintenanceWindowForm {...formProps} />);
+    appMockRenderer.render(<CreateMaintenanceWindowForm {...formProps} />);
 
-    await waitFor(() => {
-      expect(
-        result.queryByTestId('maintenanceWindowSolutionSelectionLoading')
-      ).not.toBeInTheDocument();
-    });
-
-    expect(screen.queryByTestId('maintenanceWindowScopedQuerySwitch')).not.toBeInTheDocument();
+    expect(await screen.findByTestId('maintenanceWindowScopedQuerySwitch')).toBeInTheDocument();
   });
 
-  it('should show warning when edit if "Filter alerts" toggle on when do not have access to chosen solution', async () => {
-    loadRuleTypes.mockResolvedValue([]);
-    const result = appMockRenderer.render(
-      <CreateMaintenanceWindowForm {...formPropsForEditMode} />
-    );
+  it('should show warning to inform user that multiple solution categories are not available', async () => {
+    appMockRenderer.render(<CreateMaintenanceWindowForm {...formPropsForEditMode} />);
 
-    await waitFor(() => {
-      expect(
-        result.queryByTestId('maintenanceWindowSolutionSelectionLoading')
-      ).not.toBeInTheDocument();
-    });
-
-    expect(screen.getByTestId('maintenanceWindowNoAvailableSolutionsWarning')).toBeInTheDocument();
+    expect(
+      await screen.findByTestId('maintenanceWindowSolutionCategoryRemovedCallout')
+    ).toBeInTheDocument();
   });
 });

@@ -7,12 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './use_alerts_data_view';
-export * from './use_fetch_alerts_index_names_query';
-export * from './use_get_alerts_group_aggregations_query';
-export * from './use_health_check';
-export * from './use_load_alerting_framework_health';
-export * from './use_get_rule_types_permissions';
-export * from './use_load_ui_health';
-export * from './use_alerts_new_api_data_view';
-export * from './use_fetch_alerts_fields_new_api';
+import type { HttpSetup } from '@kbn/core-http-browser';
+
+export interface FetchAlertsFieldsNewApiParams {
+  // Dependencies
+  http: HttpSetup;
+
+  // Params
+  /**
+   * Array of rule type ids used for authorization and area-based filtering
+   */
+  ruleTypeIds: string[];
+}

@@ -12,7 +12,6 @@ import type { RecurringSchedule } from '@kbn/response-ops-recurring-schedule-for
 import { getRecurringScheduleFormSchema } from '@kbn/response-ops-recurring-schedule-form/schemas/recurring_schedule_form_schema';
 import * as i18n from '../translations';
 import type { ScopedQueryAttributes } from '../../../../common';
-import { VALID_CATEGORIES } from '../constants';
 
 const { emptyField } = fieldValidators;
 
@@ -36,25 +35,6 @@ export const schema: FormSchema<FormProps> = {
         validator: emptyField(i18n.CREATE_FORM_NAME_REQUIRED),
       },
     ],
-  },
-  solutionId: {
-    type: FIELD_TYPES.SELECT,
-    validations: [
-      {
-        validator: ({ value }: { value: string }) => {
-          if (value === undefined) {
-            return;
-          }
-          if (!VALID_CATEGORIES.includes(value)) {
-            return {
-              message: `Value must be one of: ${VALID_CATEGORIES.join(', ')}`,
-            };
-          }
-        },
-      },
-    ],
-    // The empty string appears by default because of how form libraries typically handle form inputs
-    deserializer: (value) => (value === '' ? undefined : value),
   },
   scopedQuery: {
     defaultValue: {

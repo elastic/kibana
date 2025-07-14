@@ -46,10 +46,8 @@ import { useGetRuleTypes } from '../../../hooks/use_get_rule_types';
 import { useUiSetting } from '../../../utils/kibana_react';
 import { DatePickerRangeField } from './fields/date_picker_range_field';
 import { useArchiveMaintenanceWindow } from '../../../hooks/use_archive_maintenance_window';
-import { MaintenanceWindowSolutionSelection } from './maintenance_window_category_selection';
 import { MaintenanceWindowScopedQuerySwitch } from './maintenance_window_scoped_query_switch';
 import { MaintenanceWindowScopedQuery } from './maintenance_window_scoped_query';
-import { VALID_CATEGORIES } from '../constants';
 
 const UseField = getUseField({ component: Field });
 
@@ -140,17 +138,6 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
     };
   }, [isScopedQueryEnabled, query, filters]);
 
-  const validRuleTypes = useMemo(() => {
-    if (!ruleTypes) {
-      return [];
-    }
-    return ruleTypes.filter((ruleType) => VALID_CATEGORIES.includes(ruleType.category));
-  }, [ruleTypes]);
-
-  const availableSolutions = useMemo(() => {
-    return [...new Set(validRuleTypes.map((ruleType) => ruleType.category))];
-  }, [validRuleTypes]);
-
   const submitMaintenanceWindow = useCallback<FormSubmitHandler<FormProps>>(
     async (formData, isValid) => {
       if (!isValid || scopedQueryErrors.length !== 0) {
@@ -172,8 +159,7 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
           timezone: formData.timezone ? formData.timezone[0] : defaultTimezone,
           recurringSchedule: formData.recurringSchedule,
         }),
-        categoryIds: formData.solutionId ? [formData.solutionId] : null,
-        scopedQuery: availableSolutions.length !== 0 ? scopedQueryPayload : null,
+        scopedQuery: scopedQueryPayload ?? null,
       };
 
       if (isEditMode) {
@@ -190,7 +176,6 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
       isScopedQueryEnabled,
       scopedQueryPayload,
       defaultTimezone,
-      availableSolutions.length,
       isEditMode,
       updateMaintenanceWindow,
       maintenanceWindowId,
@@ -206,11 +191,10 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
     onSubmit: submitMaintenanceWindow,
   });
 
-  const [{ recurring, timezone, solutionId, startDate, endDate }, _, mounted] =
-    useFormData<FormProps>({
-      form,
-      watch: ['recurring', 'timezone', 'solutionId', 'scopedQuery', 'startDate', 'endDate'],
-    });
+  const [{ recurring, timezone, startDate, endDate }, _, mounted] = useFormData<FormProps>({
+    form,
+    watch: ['recurring', 'timezone', 'scopedQuery', 'startDate', 'endDate'],
+  });
 
   const isRecurring = recurring || false;
   const showTimezone = isBrowser || initialValue?.timezone !== undefined;
@@ -218,44 +202,19 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
   const closeModal = useCallback(() => setIsModalVisible(false), []);
   const showModal = useCallback(() => setIsModalVisible(true), []);
 
-  const { setFieldValue } = form;
-
   const ruleTypeIds = useMemo(() => {
-    if (!Array.isArray(validRuleTypes) || !mounted) {
+    if (!Array.isArray(ruleTypes) || !mounted) {
       return [];
     }
 
-    const uniqueRuleTypeIds = new Set<string>();
-
-    validRuleTypes.forEach((ruleType) => {
-      if (solutionId === ruleType.category) {
-        uniqueRuleTypeIds.add(ruleType.id);
-      }
-    });
-
-    return [...uniqueRuleTypeIds];
-  }, [validRuleTypes, solutionId, mounted]);
-
-  const onSolutionIdChange = useCallback(
-    (id: string) => {
-      if (!solutionId) {
-        return;
-      }
-      setFieldValue('solutionId', id);
-    },
-    [solutionId, setFieldValue]
-  );
+    return ruleTypes.map((ruleType) => ruleType.id);
+  }, [ruleTypes, mounted]);
 
   const onScopeQueryToggle = useCallback(
     (isEnabled: boolean) => {
-      if (isEnabled) {
-        setFieldValue('solutionId', availableSolutions.sort()[0]);
-      } else {
-        setFieldValue('solutionId', undefined);
-      }
       setIsScopedQueryEnabled(isEnabled);
     },
-    [setFieldValue, availableSolutions]
+    [setIsScopedQueryEnabled]
   );
 
   const onQueryChange = useCallback(
@@ -294,23 +253,8 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
     return m;
   }, [closeModal, archiveMaintenanceWindow, isModalVisible, maintenanceWindowId, onSuccess]);
 
-  const showNoAvailableSolutionsWarning =
-    availableSolutions.length === 0 && isScopedQueryEnabled && isEditMode;
-
   return (
     <Form form={form} data-test-subj="createMaintenanceWindowForm">
-      {showNoAvailableSolutionsWarning && (
-        <>
-          <EuiCallOut
-            data-test-subj="maintenanceWindowNoAvailableSolutionsWarning"
-            title={i18n.NO_AVAILABLE_SOLUTIONS_WARNING_TITLE}
-            color="warning"
-          >
-            <p>{i18n.NO_AVAILABLE_SOLUTIONS_WARNING_SUBTITLE}</p>
-          </EuiCallOut>
-          <EuiSpacer size="xl" />
-        </>
-      )}
       <EuiFlexGroup direction="column" responsive={false}>
         <EuiFlexItem>
           <UseField
@@ -417,53 +361,48 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
           </EuiFlexItem>
         )}
 
-        {availableSolutions.length > 0 && (
-          <>
-            <EuiFlexItem>
-              <EuiHorizontalRule margin="xl" />
-              <UseField path="scopedQuery">
-                {() => (
-                  <MaintenanceWindowScopedQuerySwitch
-                    checked={isScopedQueryEnabled}
-                    onEnabledChange={onScopeQueryToggle}
-                  />
-                )}
-              </UseField>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <UseField path="solutionId">
-                {(field) => (
-                  <MaintenanceWindowSolutionSelection
-                    isScopedQueryEnabled={isScopedQueryEnabled}
-                    isLoading={isLoadingRuleTypes}
-                    selectedSolution={solutionId}
-                    availableSolutions={availableSolutions}
-                    errors={field.errors.map((error) => error.message)}
-                    onChange={onSolutionIdChange}
-                  />
-                )}
-              </UseField>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <UseField path="scopedQuery">
-                {() => (
-                  <MaintenanceWindowScopedQuery
-                    ruleTypeIds={ruleTypeIds}
-                    query={query}
-                    filters={filters}
-                    isLoading={isLoadingRuleTypes}
-                    isEnabled={isScopedQueryEnabled}
-                    errors={scopedQueryErrors}
-                    onQueryChange={onQueryChange}
-                    onFiltersChange={setFilters}
-                  />
-                )}
-              </UseField>
-            </EuiFlexItem>
-          </>
-        )}
-        <EuiHorizontalRule margin="xl" />
+        <>
+          <EuiFlexItem>
+            <EuiHorizontalRule margin="xl" />
+            <UseField path="scopedQuery">
+              {() => (
+                <MaintenanceWindowScopedQuerySwitch
+                  checked={isScopedQueryEnabled}
+                  onEnabledChange={onScopeQueryToggle}
+                />
+              )}
+            </UseField>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <UseField path="scopedQuery">
+              {() => (
+                <MaintenanceWindowScopedQuery
+                  ruleTypeIds={ruleTypeIds}
+                  query={query}
+                  filters={filters}
+                  isLoading={isLoadingRuleTypes}
+                  isEnabled={isScopedQueryEnabled}
+                  errors={scopedQueryErrors}
+                  onQueryChange={onQueryChange}
+                  onFiltersChange={setFilters}
+                />
+              )}
+            </UseField>
+          </EuiFlexItem>
+        </>
+        <EuiFlexItem>
+          <EuiHorizontalRule margin="xl" />
+          <EuiCallOut
+            data-test-subj="maintenanceWindowSolutionCategoryRemovedCallout"
+            title={i18n.MULTIPLE_SOLUTION_CATEGORIES_REMOVED_TITLE}
+            color="warning"
+          >
+            <p>{i18n.MULTIPLE_SOLUTION_CATEGORIES_REMOVED_SUBTITLE}</p>
+          </EuiCallOut>
+        </EuiFlexItem>
+        <EuiSpacer size="s" />
       </EuiFlexGroup>
+
       {isEditMode && (
         <>
           <EuiCallOut title={i18n.ARCHIVE_TITLE} color="danger" iconType="trash">

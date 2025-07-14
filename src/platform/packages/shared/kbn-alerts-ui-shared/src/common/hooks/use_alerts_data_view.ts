@@ -25,6 +25,7 @@ export interface UseAlertsDataViewParams {
   http: HttpStart;
   dataViewsService: DataViewsContract;
   toasts: ToastsStart;
+  enableNewAPIForFields?: boolean;
 
   // Params
   /**
@@ -97,6 +98,7 @@ export const useAlertsDataView = ({
   dataViewsService,
   toasts,
   ruleTypeIds,
+  enableNewAPIForFields = false,
 }: UseAlertsDataViewParams): UseAlertsDataViewResult => {
   const includesSecurity = ruleTypeIds.some(isSiemRuleType);
   const isOnlySecurity = ruleTypeIds.length > 0 && ruleTypeIds.every(isSiemRuleType);
@@ -111,7 +113,8 @@ export const useAlertsDataView = ({
     { http, ruleTypeIds },
     {
       // Don't fetch index names when ruleTypeIds includes both Security Solution and other features
-      enabled: !!ruleTypeIds.length && (isOnlySecurity || !includesSecurity),
+      enabled:
+        !!ruleTypeIds.length && (isOnlySecurity || !includesSecurity) && !enableNewAPIForFields,
     }
   );
 
@@ -124,7 +127,7 @@ export const useAlertsDataView = ({
     { http, ruleTypeIds },
     {
       // Don't fetch fields when ruleTypeIds includes Security Solution
-      enabled: !!ruleTypeIds.length && !includesSecurity,
+      enabled: !!ruleTypeIds.length && !includesSecurity && !enableNewAPIForFields,
     }
   );
 

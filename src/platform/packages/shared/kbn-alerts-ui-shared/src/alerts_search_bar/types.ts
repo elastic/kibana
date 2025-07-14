@@ -40,4 +40,5 @@ export interface AlertsSearchBarProps {
   toasts: ToastsStart;
   unifiedSearchBar: UnifiedSearchPublicPluginStart['ui']['SearchBar'];
   dataService: DataPublicPluginStart;
+  enableNewAPIForFields?: boolean;
 }

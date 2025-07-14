@@ -14,11 +14,12 @@ import { isSiemRuleType } from '@kbn/rule-data-utils';
 import { NO_INDEX_PATTERNS } from './constants';
 import { SEARCH_BAR_PLACEHOLDER } from './translations';
 import type { AlertsSearchBarProps, QueryLanguageType } from './types';
-import { useAlertsDataView } from '../common/hooks';
+import { useAlertsDataView, useFetchAlertsFieldsNewApi } from '../common/hooks';
 
 export type { AlertsSearchBarProps } from './types';
 
 const SA_ALERTS = { type: 'alerts', fields: {} } as SuggestionsAbstraction;
+const DEFAULT_INDEX_PATTERN_TITLE = 'all-rule-types';
 
 export const AlertsSearchBar = ({
   appName,
@@ -40,6 +41,7 @@ export const AlertsSearchBar = ({
   toasts,
   unifiedSearchBar,
   dataService,
+  enableNewAPIForFields = false,
 }: AlertsSearchBarProps) => {
   const [queryLanguage, setQueryLanguage] = useState<QueryLanguageType>('kuery');
   const { dataView } = useAlertsDataView({
@@ -47,7 +49,15 @@ export const AlertsSearchBar = ({
     http,
     toasts,
     dataViewsService: dataService.dataViews,
+    enableNewAPIForFields,
   });
+
+  const { data: alertFields } = useFetchAlertsFieldsNewApi(
+    { http, ruleTypeIds, toasts },
+    {
+      enabled: enableNewAPIForFields,
+    }
+  );
 
   const indexPatterns = useMemo(() => {
     if (ruleTypeIds.length > 0 && dataView?.fields?.length) {
@@ -57,8 +67,16 @@ export const AlertsSearchBar = ({
     if (dataView) {
       return [dataView];
     }
+
+    if (ruleTypeIds.length > 0 && alertFields?.fields.length) {
+      return [{ title: ruleTypeIds.join(','), fields: alertFields.fields }];
+    }
+
+    if (!ruleTypeIds.length && alertFields?.fields.length) {
+      return [{ title: DEFAULT_INDEX_PATTERN_TITLE, fields: alertFields.fields }];
+    }
     return null;
-  }, [dataView, ruleTypeIds]);
+  }, [dataView, ruleTypeIds, alertFields]);
 
   const isSecurity = ruleTypeIds?.some(isSiemRuleType) ?? false;
 
@@ -113,7 +131,7 @@ export const AlertsSearchBar = ({
     showSubmitButton,
     submitOnBlur,
     onQueryChange: onSearchQueryChange,
-    suggestionsAbstraction: isSecurity ? undefined : SA_ALERTS,
+    suggestionsAbstraction: isSecurity && !enableNewAPIForFields ? undefined : SA_ALERTS,
   });
 };
 
