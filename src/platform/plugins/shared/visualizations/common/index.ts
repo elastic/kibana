@@ -189,7 +189,12 @@ export type {
   AddUserMessages,
   VisualizationType,
 } from './lens/lens_types';
-export * from './lens/datasources/lens_types';
+export type {
+  FormBasedLayer,
+  FormBasedPersistedState,
+  PersistedIndexPatternLayer,
+  FormBasedPrivateState,
+} from './lens/datasources/lens_types';
 export type { LegendSize, LegendLayout } from './lens/visualizations/expression_types';
 export type {
   CategoryDisplayType,
@@ -199,7 +204,16 @@ export type {
   CollapseFunction,
 } from './lens/visualizations/lens_types';
 export * from './lens/visualizations/datatable/expression_types';
-export * from './lens/visualizations/datatable/lens_types';
+export type {
+  LensDatatableSortingState,
+  LensDatatablePagingState,
+  LensDatatableArgs,
+  LensGridDirection,
+  DatatableColumnConfig,
+  DatatableColumnArgs,
+  DatatableColumnResult,
+  ColumnState,
+} from './lens/visualizations/datatable/lens_types';
 export type {
   GaugeColorMode,
   GaugeShape,
@@ -256,8 +270,11 @@ export type {
   LensPartitionLayerState,
   LensPartitionVisualizationState,
 } from './lens/visualizations/partition/lens_types';
-export * from './lens/visualizations/tagcloud/expression_types';
-export * from './lens/visualizations/tagcloud/lens_types';
+export type { ExpressionTagCloudCommonParams } from './lens/visualizations/tagcloud/expression_types';
+export type {
+  LensTagcloudState,
+  LensTagcloudConfig,
+} from './lens/visualizations/tagcloud/lens_types';
 export * from './lens/visualizations/xy/expression_types';
 export type {
   YAxisMode,
@@ -337,7 +354,11 @@ export {
   PARTITION_VALUE_FORMATS,
   LENS_PARTITION_DEFAULT_PERCENT_DECIMALS,
 } from './lens/visualizations/partition/constants';
-export * from './lens/visualizations/tagcloud/constants';
+export {
+  TAGCLOUD_ORIENTATION,
+  TAGCLOUD_SCALE_OPTIONS,
+  LENS_TAGCLOUD_DEFAULT_STATE,
+} from './lens/visualizations/tagcloud/constants';
 export type {
   YAxisModes,
   SeriesTypes,

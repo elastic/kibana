@@ -12,30 +12,6 @@ import type { FormatFactory, RowHeightMode } from '../../../types';
 import type { DatatableColumnResult } from '../../impl/datatable/datatable_column';
 import type { DatatableExpressionFunction } from './types';
 
-export interface SortingState {
-  columnId: string | undefined;
-  direction: 'asc' | 'desc' | 'none';
-}
-
-export interface PagingState {
-  size: number;
-  enabled: boolean;
-}
-
-export interface DatatableArgs {
-  title: string;
-  description?: string;
-  columns: DatatableColumnResult[];
-  sortingColumnId: SortingState['columnId'];
-  sortingDirection: SortingState['direction'];
-  fitRowToContent?: boolean;
-  rowHeightLines?: number;
-  headerRowHeight?: RowHeightMode;
-  headerRowHeightLines?: number;
-  pageSize?: PagingState['size'];
-  density?: DataGridDensity;
-}
-
 /**
  * Available datatables logged to inspector
  */

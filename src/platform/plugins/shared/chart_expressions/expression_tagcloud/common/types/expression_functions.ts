@@ -7,35 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { $Values } from '@kbn/utility-types';
-import type { PaletteOutput } from '@kbn/coloring';
 import {
   Datatable,
   ExpressionFunctionDefinition,
   ExpressionValueRender,
 } from '@kbn/expressions-plugin/common';
-import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
+import { ExpressionTagCloudCommonParams } from '@kbn/visualizations-plugin/common';
 import type { AllowedSettingsOverrides, AllowedChartOverrides } from '@kbn/charts-plugin/common';
-import { EXPRESSION_NAME, ScaleOptions, Orientation } from '../constants';
+import { EXPRESSION_NAME } from '../constants';
 
-interface TagCloudCommonParams {
-  scale?: $Values<typeof ScaleOptions>;
-  orientation: $Values<typeof Orientation>;
-  minFontSize: number;
-  maxFontSize: number;
-  showLabel: boolean;
-  ariaLabel?: string;
-  metric: ExpressionValueVisDimension | string;
-  bucket?: ExpressionValueVisDimension | string;
-  palette: PaletteOutput;
-  colorMapping?: string; // JSON stringified object of the color mapping
-}
-
-export interface TagCloudVisConfig extends TagCloudCommonParams {
+export interface TagCloudVisConfig extends ExpressionTagCloudCommonParams {
   isPreview?: boolean;
 }
 
-export interface TagCloudRendererParams extends TagCloudCommonParams {
+export interface TagCloudRendererParams extends ExpressionTagCloudCommonParams {
   isPreview: boolean;
 }
 

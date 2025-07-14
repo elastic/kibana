@@ -8,7 +8,6 @@
  */
 
 import type { Position } from '@elastic/charts';
-import type { LegendSize } from '@kbn/visualizations-plugin/common';
 import type { ColorMapping, PaletteOutput } from '@kbn/coloring';
 import type {
   CategoryDisplayType,
@@ -18,6 +17,7 @@ import type {
   NumberDisplayType,
 } from '../lens_types';
 import type { PartitionChartType, PartitionLegendValue } from './expression_types';
+import { LegendSize } from '../expression_types';
 
 export interface SharedPartitionLayerState {
   metrics: string[];

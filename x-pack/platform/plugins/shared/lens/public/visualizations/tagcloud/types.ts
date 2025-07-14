@@ -5,32 +5,10 @@
  * 2.0.
  */
 
-import { $Values } from '@kbn/utility-types';
 import { Datatable } from '@kbn/expressions-plugin/common';
-import { PaletteOutput, ColorMapping } from '@kbn/coloring';
-import { Orientation } from '@kbn/expression-tagcloud-plugin/common';
-
-export interface TagcloudState {
-  layerId: string;
-  tagAccessor?: string;
-  valueAccessor?: string;
-  maxFontSize: number;
-  minFontSize: number;
-  orientation: $Values<typeof Orientation>;
-  /**
-   * @deprecated use `colorMapping` config
-   */
-  palette?: PaletteOutput;
-  showLabel: boolean;
-  colorMapping?: ColorMapping.Config;
-}
-
-export interface TagcloudConfig extends TagcloudState {
-  title: string;
-  description: string;
-}
+import { LensTagcloudConfig } from '@kbn/visualizations-plugin/common';
 
 export interface TagcloudProps {
   data: Datatable;
-  args: TagcloudConfig;
+  args: LensTagcloudConfig;
 }

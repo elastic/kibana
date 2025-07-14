@@ -71,3 +71,5 @@ export const LENS_METRIC_AVAILABLE_METRIC_ICONS = {
   GLOBE: 'globe',
   TEMPERATURE: 'temperature',
 } as const;
+
+export const EXPRESSION_METRIC_TRENDLINE_NAME = 'metricTrendline';

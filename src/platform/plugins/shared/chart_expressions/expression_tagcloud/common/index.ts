@@ -7,6 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { EXPRESSION_NAME, ScaleOptions, Orientation } from './constants';
+export { EXPRESSION_NAME } from './constants';
 
 export type { ExpressionTagcloudFunctionDefinition } from './types/expression_functions';

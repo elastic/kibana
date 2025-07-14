@@ -8,14 +8,11 @@
  */
 
 import { $Values } from '@kbn/utility-types';
-import type {
-  ExpressionValueVisDimension,
-  InspectorLogTable,
-} from '@kbn/visualizations-plugin/common';
 import { LayoutDirection, MetricStyle, MetricWTrend } from '@elastic/charts';
 import { PaletteOutput } from '@kbn/coloring';
 import { CustomPaletteState } from '@kbn/charts-plugin/common';
 import { Datatable } from '@kbn/expressions-plugin/common';
+import { ExpressionValueVisDimension, InspectorLogTable } from '../../..';
 import { EXPRESSION_METRIC_TRENDLINE_NAME, LENS_METRIC_AVAILABLE_METRIC_ICONS } from './constants';
 
 export type AvailableMetricIcon = $Values<typeof LENS_METRIC_AVAILABLE_METRIC_ICONS>;
