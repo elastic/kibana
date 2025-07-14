@@ -14,6 +14,7 @@ import { createUploadState, type UploadState } from '@kbn/shared-ux-file-upload/
 import { useUploadDone } from '../files/use_upload_done';
 import type { MarkdownEditorRef } from './types';
 import { NO_SIMULTANEOUS_UPLOADS_MESSAGE, UNSUPPORTED_MIME_TYPE_MESSAGE } from './translations';
+import { SUPPORTED_PASTE_MIME_TYPES } from './constants';
 
 interface UseImagePasteUploadArgs {
   editorRef: React.ForwardedRef<MarkdownEditorRef | null>;
@@ -45,8 +46,6 @@ function getTextarea(editorRef: React.ForwardedRef<MarkdownEditorRef | null>) {
   }
   return editorRef.current.textarea;
 }
-
-const ALLOWED_IMAGE_MIME_TYPES = ['image/png', 'image/jpeg'] as const;
 
 export function useImagePasteUpload({
   editorRef,
@@ -165,7 +164,9 @@ export function useImagePasteUpload({
         // don't modify textarea value when receiving files
         e.preventDefault();
         if (
-          !ALLOWED_IMAGE_MIME_TYPES.includes(file.type as (typeof ALLOWED_IMAGE_MIME_TYPES)[number])
+          !SUPPORTED_PASTE_MIME_TYPES.includes(
+            file.type as (typeof SUPPORTED_PASTE_MIME_TYPES)[number]
+          )
         ) {
           setErrors([UNSUPPORTED_MIME_TYPE_MESSAGE]);
           return;
