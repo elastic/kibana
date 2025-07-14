@@ -56069,6 +56069,191 @@ paths:
       tags:
         - streams
       x-state: Technical Preview
+  /api/synthetics/monitor/test/{monitorId}:
+    post:
+      description: |
+        Trigger an immediate test execution for the specified monitor. The response includes the generated `testRunId`, monitor schedule, locations, and a copy of the monitor configuration.
+      operationId: post-synthetics-monitor-test
+      parameters:
+        - description: The ID (config_id) of the monitor to test.
+          in: path
+          name: monitorId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                testNowMonitorResponseExample1:
+                  value: |-
+                    {
+                      "testRunId": "2bd506e5-4f9a-4aa6-a019-7988500afba0",
+                      "schedule": {
+                        "number": "3",
+                        "unit": "m"
+                      },
+                      "locations": [
+                        {
+                          "id": "us_central",
+                          "label": "North America - US Central",
+                          "geo": {
+                            "lat": 41.25,
+                            "lon": -95.86
+                          },
+                          "isServiceManaged": true
+                        }
+                      ],
+                      "configId": "7dbf2c0c-9e1b-4a0f-af3a-397850570f52",
+                      "monitor": {
+                        "type": "http",
+                        "form_monitor_type": "http",
+                        "enabled": true,
+                        "alert": {
+                          "status": {
+                            "enabled": true
+                          },
+                          "tls": {
+                            "enabled": true
+                          }
+                        },
+                        "schedule": {
+                          "number": "3",
+                          "unit": "m"
+                        },
+                        "service.name": "",
+                        "config_id": "7dbf2c0c-9e1b-4a0f-af3a-397850570f52",
+                        "tags": [],
+                        "timeout": "16",
+                        "name": "https://www.google.com",
+                        "locations": [
+                          {
+                            "id": "us_central",
+                            "label": "North America - US Central",
+                            "geo": {
+                              "lat": 41.25,
+                              "lon": -95.86
+                            },
+                            "isServiceManaged": true
+                          }
+                        ],
+                        "namespace": "default",
+                        "origin": "ui",
+                        "journey_id": "",
+                        "hash": "",
+                        "id": "7dbf2c0c-9e1b-4a0f-af3a-397850570f52",
+                        "params": "",
+                        "labels": {},
+                        "max_attempts": 2,
+                        "maintenance_windows": [],
+                        "spaces": [
+                          "default"
+                        ],
+                        "revision": 1,
+                        "__ui": {
+                          "is_tls_enabled": false
+                        },
+                        "urls": "https://www.google.com",
+                        "max_redirects": "0",
+                        "url.port": null,
+                        "password": "",
+                        "proxy_url": "",
+                        "proxy_headers": {},
+                        "check.response.body.negative": [],
+                        "check.response.body.positive": [],
+                        "check.response.json": [],
+                        "response.include_body": "on_error",
+                        "check.response.headers": {},
+                        "response.include_headers": true,
+                        "check.response.status": [],
+                        "check.request.body": {
+                          "type": "text",
+                          "value": ""
+                        },
+                        "check.request.headers": {},
+                        "check.request.method": "GET",
+                        "username": "",
+                        "mode": "any",
+                        "response.include_body_max_bytes": "1024",
+                        "ipv4": true,
+                        "ipv6": true,
+                        "ssl.certificate_authorities": "",
+                        "ssl.certificate": "",
+                        "ssl.key": "",
+                        "ssl.key_passphrase": "",
+                        "ssl.verification_mode": "full",
+                        "ssl.supported_protocols": [
+                          "TLSv1.1",
+                          "TLSv1.2",
+                          "TLSv1.3"
+                        ]
+                      }
+                    }
+              schema:
+                type: object
+                properties:
+                  configId:
+                    description: The ID of the monitor that was tested.
+                    type: string
+                  locations:
+                    items:
+                      type: object
+                      properties:
+                        geo:
+                          type: object
+                          properties:
+                            lat:
+                              type: number
+                            lon:
+                              type: number
+                          required:
+                            - lat
+                            - lon
+                        id:
+                          type: string
+                        isServiceManaged:
+                          type: boolean
+                        label:
+                          type: string
+                      required:
+                        - id
+                        - label
+                        - geo
+                        - isServiceManaged
+                    type: array
+                  monitor:
+                    additionalProperties: true
+                    description: The full monitor configuration at the time of the test.
+                    type: object
+                  schedule:
+                    description: The monitor schedule.
+                    type: object
+                    properties:
+                      number:
+                        description: Interval value for the schedule.
+                        type: number
+                      unit:
+                        description: Time unit for the schedule (e.g. "m" for minutes).
+                        type: string
+                    required:
+                      - number
+                      - unit
+                  testRunId:
+                    description: Unique identifier for the triggered test run.
+                    type: string
+                required:
+                  - testRunId
+                  - schedule
+                  - locations
+                  - configId
+                  - monitor
+          description: Test run triggered successfully.
+        '404':
+          description: Monitor not found.
+      summary: Trigger an on-demand test run for a monitor
+      tags:
+        - synthetics
   /api/synthetics/monitors:
     get:
       description: |
