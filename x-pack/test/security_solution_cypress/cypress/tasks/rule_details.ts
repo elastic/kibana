@@ -131,8 +131,12 @@ export const goToAlertsTab = () => {
   cy.get(ALERTS_TAB).click();
 };
 
+// TODO remove the `{ force: true }` option
+// see https://github.com/elastic/eui/pull/8771
+// https://github.com/orgs/elastic/projects/1079/views/2?pane=issue&itemId=119405120
 export const goToExceptionsTab = () => {
-  cy.get(EXCEPTIONS_TAB).click();
+  // eslint-disable-next-line cypress/no-force
+  cy.get(EXCEPTIONS_TAB).click({ force: true });
 };
 
 export const goToExecutionLogTab = () => {
