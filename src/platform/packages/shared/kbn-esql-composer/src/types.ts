@@ -49,7 +49,7 @@ export type Params<TQuery extends string = string> = NamedParameter<TQuery> | Fi
 
 export interface QueryPipeline {
   pipe: (...args: QueryOperator[]) => QueryPipeline;
-  pipeIf(condition: boolean, ...args: QueryOperator[]): QueryPipeline;
+  pipeIf(condition: boolean | (() => boolean), ...args: QueryOperator[]): QueryPipeline;
   toString: () => string;
   asRequest: () => QueryRequest;
 }

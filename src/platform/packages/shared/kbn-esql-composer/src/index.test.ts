@@ -85,7 +85,7 @@ describe('composer', () => {
         keep('@timestamp', 'avg_duration', 'service.name')
       )
       .pipe(sort({ '@timestamp': SortOrder.Desc }))
-      .pipeIf(false, limit(100));
+      .pipeIf(() => false, limit(100));
 
     expect(pipeline.toString()).toEqual(
       'FROM logs-*\n  | WHERE @timestamp <= NOW() AND @timestamp > NOW() - 24 hours\n  | STATS avg_duration = AVG(transaction.duration.us) BY service.name\n  | KEEP @timestamp, avg_duration, service.name\n  | SORT @timestamp DESC'

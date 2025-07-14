@@ -291,7 +291,7 @@ from('logs-*')
       logLevel: 'log.level',
     })
   )
-  .asRequest();
+  .toString();
 ```
 
 Output:
