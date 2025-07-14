@@ -104,15 +104,11 @@ export class CasePlugin
     );
 
     registerCaseFileKinds(this.caseConfig.files, plugins.files, core.security.fips.isEnabled());
-
-    if (this.caseConfig.analytics.index.enabled) {
-      registerCasesAnalyticsIndexesTasks({
-        taskManager: plugins.taskManager,
-        logger: this.logger,
-        core,
-        analyticsConfig: this.caseConfig.analytics,
-      });
-    }
+    registerCasesAnalyticsIndexesTasks({
+      taskManager: plugins.taskManager,
+      logger: this.logger,
+      core,
+    });
 
     this.securityPluginSetup = plugins.security;
     this.lensEmbeddableFactory = plugins.lens.lensEmbeddableFactory;
@@ -230,13 +226,15 @@ export class CasePlugin
         void this.incrementalIdTaskManager?.setupIncrementIdTask(plugins.taskManager, core);
       }
 
-      scheduleCasesAnalyticsSyncTasks({ taskManager: plugins.taskManager, logger: this.logger });
-      createCasesAnalyticsIndexes({
-        esClient: core.elasticsearch.client.asInternalUser,
-        logger: this.logger,
-        isServerless: this.isServerless,
-        taskManager: plugins.taskManager,
-      }).catch(() => {}); // it shouldn't reject, but just in case
+      if (this.caseConfig.analytics.index?.enabled) {
+        scheduleCasesAnalyticsSyncTasks({ taskManager: plugins.taskManager, logger: this.logger });
+        createCasesAnalyticsIndexes({
+          esClient: core.elasticsearch.client.asInternalUser,
+          logger: this.logger,
+          isServerless: this.isServerless,
+          taskManager: plugins.taskManager,
+        }).catch(() => {}); // it shouldn't reject, but just in case
+      }
     }
 
     this.userProfileService.initialize({
