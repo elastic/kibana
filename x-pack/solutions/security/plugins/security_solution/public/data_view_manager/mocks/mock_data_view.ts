@@ -18,6 +18,7 @@ export const getMockDataView = () =>
 export const getMockDataViewWithMatchedIndices = (matchedIndices: string[] = ['test']) => {
   const dataView = getMockDataView();
   dataView.matchedIndices = matchedIndices;
+  dataView.setIndexPattern(matchedIndices.join(','));
 
   return dataView;
 };
