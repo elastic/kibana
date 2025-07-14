@@ -159,34 +159,31 @@ export function useImagePasteUpload({
         setErrors([NO_SIMULTANEOUS_UPLOADS_MESSAGE]);
         return;
       }
-      for (const item of items) {
-        const file = item.getAsFile();
-        if (file) {
-          // don't modify textarea value when receiving files
-          e.preventDefault();
-          if (
-            !ALLOWED_IMAGE_MIME_TYPES.includes(
-              file.type as (typeof ALLOWED_IMAGE_MIME_TYPES)[number]
-            )
-          ) {
-            setErrors([UNSUPPORTED_MIME_TYPE_MESSAGE]);
-            return;
-          }
-          try {
-            // this will throw if image size is too large
-            // it also throws if mime type is not supported, but we already limit mime type
-            // because of constraints on images we can display
-            uploadState.setFiles([file]);
-          } catch (err) {
-            setErrors((prev) => (prev.includes(err) ? prev : [...prev, err]));
-          }
-          if (uploadState.hasFiles()) {
-            setErrors([]);
-            uploadState.upload({
-              caseIds: [caseId],
-              owner,
-            });
-          }
+      const item = items[0];
+      const file = item.getAsFile();
+      if (file) {
+        // don't modify textarea value when receiving files
+        e.preventDefault();
+        if (
+          !ALLOWED_IMAGE_MIME_TYPES.includes(file.type as (typeof ALLOWED_IMAGE_MIME_TYPES)[number])
+        ) {
+          setErrors([UNSUPPORTED_MIME_TYPE_MESSAGE]);
+          return;
+        }
+        try {
+          // this will throw if image size is too large
+          // it also throws if mime type is not supported, but we already limit mime type
+          // because of constraints on images we can display
+          uploadState.setFiles([file]);
+        } catch (err) {
+          setErrors((prev) => (prev.includes(err) ? prev : [...prev, err]));
+        }
+        if (uploadState.hasFiles()) {
+          setErrors([]);
+          uploadState.upload({
+            caseIds: [caseId],
+            owner,
+          });
         }
       }
     };
