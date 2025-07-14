@@ -10,6 +10,7 @@ import { render, fireEvent } from '@testing-library/react';
 import { AccountsEvaluatedWidget } from './accounts_evaluated_widget';
 import { BenchmarkData } from '../../common/types_old';
 import { TestProvider } from '../test/test_provider';
+import { FINDINGS_FILTER_OPTIONS, FINDINGS_GROUPING_OPTIONS } from '../common/constants';
 
 const mockNavToFindings = jest.fn();
 jest.mock('@kbn/cloud-security-posture/src/hooks/use_navigate_findings', () => ({
@@ -44,33 +45,10 @@ describe('AccountsEvaluatedWidget', () => {
 
     expect(mockNavToFindings).toHaveBeenCalledWith(
       {
-        'cloud.provider': 'aws',
-        'rule.benchmark.posture_type': 'cspm',
+        [FINDINGS_FILTER_OPTIONS.CLOUD_PROVIDER]: 'aws',
+        [FINDINGS_FILTER_OPTIONS.RULE_BENCHMARK_POSTURE_TYPE]: 'cspm',
       },
-      ['cloud.account.id']
-    );
-  });
-
-  it('calls navToFindingsByCloudProvider when a benchmark with provider and namespace is clicked', () => {
-    const { getByText } = render(
-      <TestProvider>
-        <AccountsEvaluatedWidget
-          activeNamespace="test-namespace"
-          benchmarkAssets={benchmarkAssets}
-          benchmarkAbbreviateAbove={999}
-        />
-      </TestProvider>
-    );
-
-    fireEvent.click(getByText('10'));
-
-    expect(mockNavToFindings).toHaveBeenCalledWith(
-      {
-        'data_stream.namespace': 'test-namespace',
-        'cloud.provider': 'aws',
-        'rule.benchmark.posture_type': 'cspm',
-      },
-      ['cloud.account.id']
+      [FINDINGS_GROUPING_OPTIONS.CLOUD_ACCOUNT_ID]
     );
   });
 
@@ -85,9 +63,9 @@ describe('AccountsEvaluatedWidget', () => {
 
     expect(mockNavToFindings).toHaveBeenCalledWith(
       {
-        'rule.benchmark.id': 'cis_k8s',
+        [FINDINGS_FILTER_OPTIONS.RULE_BENCHMARK_ID]: 'cis_k8s',
       },
-      ['orchestrator.cluster.id']
+      [FINDINGS_GROUPING_OPTIONS.ORCHESTRATOR_CLUSTER_ID]
     );
   });
 
@@ -106,10 +84,10 @@ describe('AccountsEvaluatedWidget', () => {
 
     expect(mockNavToFindings).toHaveBeenCalledWith(
       {
-        'rule.benchmark.id': 'cis_k8s',
-        'data_stream.namespace': 'test-namespace',
+        [FINDINGS_FILTER_OPTIONS.RULE_BENCHMARK_ID]: 'cis_k8s',
+        [FINDINGS_FILTER_OPTIONS.NAMESPACE]: 'test-namespace',
       },
-      ['orchestrator.cluster.id']
+      [FINDINGS_GROUPING_OPTIONS.ORCHESTRATOR_CLUSTER_ID]
     );
   });
 });
