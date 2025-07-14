@@ -10,7 +10,7 @@ steps:
       imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-2
-      diskSizeGb: 80
+      diskSizeGb: 85
     retry:
       automatic:
         - exit_status: '*'
@@ -40,7 +40,7 @@ steps:
       provider: gcp
       machineType: n2-highcpu-8
       preemptible: true
-      diskSizeGb: 80
+      diskSizeGb: 85
     timeout_in_minutes: 60
     retry:
       automatic:
@@ -70,7 +70,7 @@ steps:
       provider: gcp
       machineType: n2-standard-16
       preemptible: true
-      diskSizeGb: 80
+      diskSizeGb: 85
     timeout_in_minutes: 60
     retry:
       automatic:
@@ -85,7 +85,7 @@ steps:
       provider: gcp
       machineType: n2-standard-32
       preemptible: true
-      diskSizeGb: 80
+      diskSizeGb: 85
     timeout_in_minutes: 60
     retry:
       automatic:
@@ -102,7 +102,7 @@ steps:
       diskType: 'hyperdisk-balanced'
       preemptible: true
       spotZones: us-central1-a,us-central1-b,us-central1-c
-      diskSizeGb: 80
+      diskSizeGb: 85
     timeout_in_minutes: 60
     retry:
       automatic:
@@ -134,7 +134,7 @@ steps:
       provider: gcp
       machineType: n2-highmem-4
       preemptible: true
-      diskSizeGb: 80
+      diskSizeGb: 85
     timeout_in_minutes: 80
     retry:
       automatic:
@@ -150,7 +150,7 @@ steps:
       imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-2
-      diskSizeGb: 80
+      diskSizeGb: 85
     timeout_in_minutes: 10
     depends_on:
       - build
@@ -167,7 +167,7 @@ steps:
       imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-2
-      diskSizeGb: 80
+      diskSizeGb: 85
     timeout_in_minutes: 10
     env:
       JEST_UNIT_SCRIPT: '.buildkite/scripts/steps/test/jest.sh'
@@ -555,8 +555,7 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
-    artifact_paths:
-      "target/plugin_so_types_snapshot.json"
+    artifact_paths: 'target/plugin_so_types_snapshot.json'
     timeout_in_minutes: 30
     retry:
       automatic:

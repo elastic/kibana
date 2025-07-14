@@ -2,9 +2,9 @@ steps:
   - group: 'Serverless MKI QA Rule Management - Cypress Test'
     key: cypress_test_rule_management
     steps:
-      - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:rule_management
-        label: 'Cypress MKI - Rule Management'
-        key: test_rule_management
+      - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:rule_management:authorization
+        label: 'Cypress MKI - Authorization'
+        key: test_rule_management_authorization
         env:
           BK_TEST_SUITE_KEY: 'serverless-cypress-rule-management'
         agents:
@@ -14,10 +14,38 @@ steps:
           machineType: n2-standard-4
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
         timeout_in_minutes: 300
-        parallelism: 8
+        parallelism: 1
+
+      - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:rule_management:coverage_overview
+        label: 'Cypress MKI - Coverage Overview'
+        key: test_rule_management_coverage_overview
+        env:
+          BK_TEST_SUITE_KEY: 'serverless-cypress-rule-management'
+        agents:
+          image: family/kibana-ubuntu-2004
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-4
+        # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
+        timeout_in_minutes: 300
+        parallelism: 1
+
+      - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:rule_management:maintenance_windows
+        label: 'Cypress MKI - Maintenance Windows'
+        key: test_rule_management_maintenance_windows
+        env:
+          BK_TEST_SUITE_KEY: 'serverless-cypress-rule-management'
+        agents:
+          image: family/kibana-ubuntu-2004
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-4
+        # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
+        timeout_in_minutes: 300
+        parallelism: 1
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:rule_management:prebuilt_rules
-        label: 'Cypress MKI - Rule Management - Prebuilt Rules'
+        label: 'Cypress MKI - Prebuilt Rules'
         key: test_rule_management_prebuilt_rules
         env:
           BK_TEST_SUITE_KEY: 'serverless-cypress-rule-management'
@@ -28,7 +56,63 @@ steps:
           machineType: n2-standard-4
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
         timeout_in_minutes: 300
-        parallelism: 4
+        parallelism: 3
+
+      - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:rule_management:related_integrations
+        label: 'Cypress MKI - Related Integrations'
+        key: test_rule_management_related_integrations
+        env:
+          BK_TEST_SUITE_KEY: 'serverless-cypress-rule-management'
+        agents:
+          image: family/kibana-ubuntu-2004
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-4
+        # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
+        timeout_in_minutes: 300
+        parallelism: 1
+
+      - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:rule_management:rule_actions
+        label: 'Cypress MKI - Rule Actions'
+        key: test_rule_management_rule_actions
+        env:
+          BK_TEST_SUITE_KEY: 'serverless-cypress-rule-management'
+        agents:
+          image: family/kibana-ubuntu-2004
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-4
+        # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
+        timeout_in_minutes: 300
+        parallelism: 2
+
+      - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:rule_management:rule_details
+        label: 'Cypress MKI - Rule Details'
+        key: test_rule_management_rule_details
+        env:
+          BK_TEST_SUITE_KEY: 'serverless-cypress-rule-management'
+        agents:
+          image: family/kibana-ubuntu-2004
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-4
+        # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
+        timeout_in_minutes: 300
+        parallelism: 1
+
+      - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:rule_management:rules_table
+        label: 'Cypress MKI - Rules Table'
+        key: test_rule_management_rules_table
+        env:
+          BK_TEST_SUITE_KEY: 'serverless-cypress-rule-management'
+        agents:
+          image: family/kibana-ubuntu-2004
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-4
+        # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
+        timeout_in_minutes: 300
+        parallelism: 1
 
   - group: 'API MKI - Rule Management'
     key: api_test_rule_management
