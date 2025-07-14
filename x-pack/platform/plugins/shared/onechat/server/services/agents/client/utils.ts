@@ -8,7 +8,7 @@
 import { createBadRequestError } from '@kbn/onechat-common';
 import type { ToolSelection } from '@kbn/onechat-common';
 import type { KibanaRequest } from '@kbn/core/server';
-import type { InternalToolRegistry } from '../../tools/types';
+import type { ToolRegistry } from '../../tools';
 
 // - Must start and end with letter or digit
 // - Can contain letters, digits, hyphens, underscores
@@ -21,7 +21,7 @@ export const ensureValidId = (id: string) => {
 };
 
 export interface ValidateToolSelectionParams {
-  toolRegistry: InternalToolRegistry;
+  toolRegistry: ToolRegistry;
   request: KibanaRequest;
   toolSelection: ToolSelection[];
 }
@@ -65,10 +65,7 @@ export async function validateToolSelection({
       // Check each tool exists for the provider
       for (const toolId of toolIds) {
         if (toolId === '*') continue;
-        const exists = await toolRegistry.has({
-          toolId: { toolId, providerId: type },
-          request,
-        });
+        const exists = await toolRegistry.has(toolId);
         if (!exists) {
           errors.push(`Tool id '${toolId}' does not exist for provider '${type}'.`);
         }
