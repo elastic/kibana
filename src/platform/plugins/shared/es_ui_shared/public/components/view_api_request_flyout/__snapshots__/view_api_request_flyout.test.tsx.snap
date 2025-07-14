@@ -77,21 +77,26 @@ exports[`ViewApiRequestFlyout is rendered 1`] = `
         <div
           class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
         />
-        <h3
-          class="emotion-euiScreenReaderOnly"
-          id="generated-id"
+        <div
+          aria-labelledby="generated-id"
+          tabindex="0"
         >
-          Request code block
-        </h3>
-        <div>
-          <pre>
-            <code
-              data-code-language="json"
-              data-test-subj="apiRequestFlyoutBody"
-            >
-              Hello world
-            </code>
-          </pre>
+          <h3
+            class="emotion-euiScreenReaderOnly"
+            id="generated-id"
+          >
+            Request code block
+          </h3>
+          <div>
+            <pre>
+              <code
+                data-code-language="json"
+                data-test-subj="apiRequestFlyoutBody"
+              >
+                Hello world
+              </code>
+            </pre>
+          </div>
         </div>
       </div>
     </div>

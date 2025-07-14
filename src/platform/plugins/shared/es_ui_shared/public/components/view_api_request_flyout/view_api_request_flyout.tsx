@@ -124,7 +124,7 @@ export const ApiRequestFlyout: React.FunctionComponent<ViewApiRequestFlyoutProps
           )}
         </div>
         <EuiSpacer size="s" />
-        <figure role="group" aria-labelledby={codeBlockTitleId} tabIndex={0}>
+        <div aria-labelledby={codeBlockTitleId} tabIndex={0}>
           <EuiScreenReaderOnly>
             <h3 id={codeBlockTitleId}>
               <FormattedMessage
@@ -141,7 +141,7 @@ export const ApiRequestFlyout: React.FunctionComponent<ViewApiRequestFlyoutProps
           >
             {request}
           </EuiCodeBlock>
-        </figure>
+        </div>
       </EuiFlyoutBody>
 
       <EuiFlyoutFooter>
