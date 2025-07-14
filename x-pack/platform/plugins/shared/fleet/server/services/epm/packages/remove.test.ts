@@ -47,6 +47,7 @@ const mockPackagePolicyService = packagePolicyService as jest.Mocked<typeof pack
 describe('removeInstallation', () => {
   let soClientMock: any;
   const esClientMock = {} as any;
+  let alertingRulesClientMock: any;
   beforeEach(() => {
     soClientMock = {
       get: jest.fn().mockResolvedValue({ attributes: { installed_kibana: [], installed_es: [] } }),
@@ -55,6 +56,9 @@ describe('removeInstallation', () => {
       find: jest.fn().mockResolvedValue({ saved_objects: [] }),
       bulkResolve: jest.fn().mockResolvedValue({ resolved_objects: [] }),
     } as any;
+    alertingRulesClientMock = {
+      bulkDeleteRules: jest.fn().mockResolvedValue({}),
+    };
   });
   it('should remove package policies when force', async () => {
     await removeInstallation({
@@ -62,6 +66,7 @@ describe('removeInstallation', () => {
       pkgName: 'system',
       pkgVersion: '1.0.0',
       esClient: esClientMock,
+      alertingRulesClient: alertingRulesClientMock,
       force: true,
     });
     expect(mockPackagePolicyService.delete).toHaveBeenCalledWith(
@@ -79,6 +84,7 @@ describe('removeInstallation', () => {
         pkgName: 'system',
         pkgVersion: '1.0.0',
         esClient: esClientMock,
+        alertingRulesClient: alertingRulesClientMock,
         force: false,
       })
     ).rejects.toThrowError(
@@ -92,6 +98,7 @@ describe('removeInstallation', () => {
       pkgName: 'elastic_agent',
       pkgVersion: '1.0.0',
       esClient: esClientMock,
+      alertingRulesClient: alertingRulesClientMock,
       force: false,
     });
     expect(mockPackagePolicyService.delete).toHaveBeenCalledTimes(2);
@@ -103,6 +110,7 @@ describe('removeInstallation', () => {
       pkgName: 'system',
       pkgVersion: '1.0.0',
       esClient: esClientMock,
+      alertingRulesClient: alertingRulesClientMock,
       force: true,
     });
 
@@ -148,6 +156,7 @@ describe('deleteESAsset', () => {
   describe('cleanupAssets', () => {
     let soClientMock: any;
     const esClientMock = {} as any;
+    let alertingRulesClientMock: any;
     beforeEach(() => {
       soClientMock = {
         get: jest
@@ -165,6 +174,9 @@ describe('deleteESAsset', () => {
         find: jest.fn().mockResolvedValue({ saved_objects: [] }),
         bulkResolve: jest.fn().mockResolvedValue({ resolved_objects: [] }),
       } as any;
+      alertingRulesClientMock = {
+        bulkDeleteRules: jest.fn().mockResolvedValue({}),
+      };
     });
 
     it('should remove assets marked for deletion', async () => {
@@ -216,6 +228,7 @@ describe('deleteESAsset', () => {
         installationToDelete,
         installation,
         esClientMock,
+        alertingRulesClientMock,
         soClientMock
       );
 
