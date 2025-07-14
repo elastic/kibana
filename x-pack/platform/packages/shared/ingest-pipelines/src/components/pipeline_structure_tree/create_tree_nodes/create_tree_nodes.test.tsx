@@ -5,106 +5,111 @@
  * 2.0.
  */
 
+import React from 'react';
+import { render, fireEvent } from '@testing-library/react';
 import { createTreeNodesFromPipelines } from './create_tree_nodes';
 import { MAX_TREE_LEVEL } from '../constants';
 import type { PipelineTreeNode } from '../types';
+import { EuiTreeView } from '@elastic/eui';
+
+const renderTreeNode = (node: ReturnType<typeof createTreeNodesFromPipelines>) => {
+  return render(<EuiTreeView items={[node]} display="compressed" aria-label="Pipeline tree" />);
+};
 
 describe('createTreeNodesFromPipelines', () => {
-  it('creates a single node with no children', () => {
-    const input: PipelineTreeNode = {
-      pipelineName: 'root',
+  it('renders a basic pipeline node label', () => {
+    const setSelectedPipeline = jest.fn();
+    const pipeline: PipelineTreeNode = {
+      pipelineName: 'root-pipeline',
       isManaged: false,
       isDeprecated: false,
       children: [],
     };
 
-    const result = createTreeNodesFromPipelines(input, 'root', () => {});
+    const node = createTreeNodesFromPipelines(pipeline, '', setSelectedPipeline);
+    const { getByTestId } = renderTreeNode(node);
 
-    expect(result.id).toBe('root');
-    expect(result.label).toBe('root');
-    expect(result.children).toHaveLength(0);
-    expect(result.icon).toBeUndefined();
+    expect(getByTestId('pipelineTreeNode-root-pipeline')).toBeInTheDocument();
   });
 
-  it('creates a node with a managed icon', () => {
-    const input: PipelineTreeNode = {
-      pipelineName: 'test-pipeline',
+  it('renders managed and deprecated icons', () => {
+    const setSelectedPipeline = jest.fn();
+    const pipeline: PipelineTreeNode = {
+      pipelineName: 'managed-deprecated',
       isManaged: true,
-      isDeprecated: false,
-      children: [],
-    };
-
-    const result = createTreeNodesFromPipelines(input, 'secure-pipeline', () => {});
-
-    expect(result.icon).toBeTruthy();
-  });
-
-  it('creates a node with a deprecated icon', () => {
-    const input: PipelineTreeNode = {
-      pipelineName: 'test-pipeline',
-      isManaged: false,
       isDeprecated: true,
       children: [],
     };
 
-    const result = createTreeNodesFromPipelines(input, 'secure-pipeline', () => {});
+    const node = createTreeNodesFromPipelines(pipeline, '', setSelectedPipeline);
+    const { getByTestId } = renderTreeNode(node);
 
-    expect(result.icon).toBeTruthy();
+    expect(getByTestId('pipelineTreeNode-managed-deprecated-managedIcon')).toBeInTheDocument();
+    expect(getByTestId('pipelineTreeNode-managed-deprecated-deprecatedIcon')).toBeInTheDocument();
   });
 
-  it('creates nested child nodes up to the max depth', () => {
-    // Create a deeply nested structure up to MAX_TREE_LEVEL + 2
-    const createDeepTree = (depth: number): PipelineTreeNode => {
-      if (depth === 0) {
-        return { pipelineName: `leaf`, isManaged: false, isDeprecated: false, children: [] };
+  it('calls setSelectedPipeline when node label is clicked', () => {
+    const setSelectedPipeline = jest.fn();
+    const pipeline: PipelineTreeNode = {
+      pipelineName: 'test-pipeline',
+      isManaged: false,
+      isDeprecated: false,
+      children: [],
+    };
+
+    const node = createTreeNodesFromPipelines(pipeline, '', setSelectedPipeline);
+    const { getByTestId } = renderTreeNode(node);
+
+    fireEvent.click(getByTestId('pipelineTreeNodeLink-test-pipeline'));
+    expect(setSelectedPipeline).toHaveBeenCalledWith('test-pipeline');
+  });
+
+  it('adds active class when selectedPipeline matches', () => {
+    const setSelectedPipeline = jest.fn();
+    const pipeline: PipelineTreeNode = {
+      pipelineName: 'selected-one',
+      isManaged: false,
+      isDeprecated: false,
+      children: [],
+    };
+
+    const node = createTreeNodesFromPipelines(pipeline, 'selected-one', setSelectedPipeline);
+
+    expect(node.className).toContain('--active');
+  });
+
+  it('adds a "+ more pipelines" label when max depth is reached', () => {
+    const setSelectedPipeline = jest.fn();
+
+    // Create a deeply nested tree exceeding MAX_TREE_LEVEL
+    const deepTree = (level: number): PipelineTreeNode => {
+      if (level === 0) {
+        return {
+          pipelineName: 'leaf',
+          isManaged: false,
+          isDeprecated: false,
+          children: [],
+        };
       }
       return {
-        pipelineName: `node-${depth}`,
+        pipelineName: `node-${level}`,
         isManaged: false,
         isDeprecated: false,
-        children: [createDeepTree(depth - 1)],
+        children: [deepTree(level - 1)],
       };
     };
 
-    const input = createDeepTree(MAX_TREE_LEVEL + 2);
-    const result = createTreeNodesFromPipelines(input, 'node-0', () => {});
+    const root = deepTree(MAX_TREE_LEVEL + 1);
+    const node = createTreeNodesFromPipelines(root, '', setSelectedPipeline);
 
-    // Traverse to ensure we only went MAX_TREE_LEVEL deep
-    let current = result;
-    let level = 1;
-    while (current.children!.length > 0) {
+    // Traverse to the level that contains the "more pipelines" node
+    let current = node;
+    for (let i = 0; i < MAX_TREE_LEVEL - 1; i++) {
       current = current.children![0];
-      level++;
     }
 
-    expect(level).toBe(MAX_TREE_LEVEL);
-  });
-
-  it('sets the correct label and id for nested nodes', () => {
-    const input: PipelineTreeNode = {
-      pipelineName: 'root',
-      isManaged: false,
-      isDeprecated: false,
-      children: [
-        {
-          pipelineName: 'child1',
-          isManaged: false,
-          isDeprecated: false,
-          children: [
-            {
-              pipelineName: 'grandchild1',
-              isManaged: false,
-              isDeprecated: false,
-              children: [],
-            },
-          ],
-        },
-      ],
-    };
-
-    const result = createTreeNodesFromPipelines(input, 'root', () => {});
-    expect(result.id).toBe('root');
-    expect(result.children![0].id).toBe('child1');
-    expect(result.children![0].children![0].id).toBe('grandchild1');
+    const finalLevelChildren = current.children!;
+    expect(finalLevelChildren).toHaveLength(1);
+    expect(finalLevelChildren[0].id).toMatch(/-moreChildrenPipelines$/);
   });
 });

@@ -27,7 +27,6 @@ const traverseTree = (
         setSelected={() => setSelectedPipeline(treeNode.pipelineName)}
       />
     ),
-    'data-test-subj': `pipelineTreeNode-${treeNode.pipelineName}`,
     className:
       (level === 1 ? 'cssTreeNode-root' : 'cssTreeNode-children') +
       (treeNode.pipelineName === selectedPipeline ? '--active' : ''),

@@ -15,7 +15,7 @@ interface MorePipelinesLabelProps {
 
 export const MorePipelinesLabel = ({ count }: MorePipelinesLabelProps) => {
   return (
-    <EuiLink color="primary" onClick={() => {}}>
+    <EuiLink color="primary" onClick={() => {}} data-test-subj="morePipelinesNodeLabel">
       <FormattedMessage
         id="ingestPipelines.pipelineStructureTree.morePipelinesTreeNodeLabel"
         defaultMessage="+{count} more {count, plural,one {pipeline} other {pipelines}}"

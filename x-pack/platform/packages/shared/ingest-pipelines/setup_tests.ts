@@ -5,8 +5,5 @@
  * 2.0.
  */
 
-module.exports = {
-  preset: '@kbn/test',
-  rootDir: '../../../../..',
-  roots: ['<rootDir>/x-pack/platform/packages/shared/ingest-pipelines'],
-};
+// eslint-disable-next-line import/no-extraneous-dependencies
+import '@testing-library/jest-dom';

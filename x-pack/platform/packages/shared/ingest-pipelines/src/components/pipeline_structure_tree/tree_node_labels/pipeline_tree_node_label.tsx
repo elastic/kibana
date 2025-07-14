@@ -23,14 +23,24 @@ export const PipelineTreeNodeLabel = ({
   setSelected,
 }: PipelineTreeNodeLabelProps) => {
   return (
-    <EuiFlexGroup direction="row" gutterSize="none" css={{ width: '350px' }} alignItems="center">
+    <EuiFlexGroup
+      direction="row"
+      gutterSize="none"
+      css={{ width: '350px' }}
+      alignItems="center"
+      data-test-subj={`pipelineTreeNode-${pipelineName}`}
+    >
       <EuiFlexItem grow={8}>
-        <EuiLink color="text" onClick={setSelected}>
+        <EuiLink
+          color="text"
+          onClick={setSelected}
+          data-test-subj={`pipelineTreeNodeLink-${pipelineName}`}
+        >
           {pipelineName}
         </EuiLink>
       </EuiFlexItem>
       {isManaged && (
-        <EuiFlexItem grow={true}>
+        <EuiFlexItem grow={true} data-test-subj={`pipelineTreeNode-${pipelineName}-managedIcon`}>
           <EuiIconTip
             content={i18n.translate(
               'ingestPipelines.pipelineStructureTree.treeNodeManagedTooltip',
@@ -43,7 +53,7 @@ export const PipelineTreeNodeLabel = ({
         </EuiFlexItem>
       )}
       {isDeprecated && (
-        <EuiFlexItem grow={true}>
+        <EuiFlexItem grow={true} data-test-subj={`pipelineTreeNode-${pipelineName}-deprecatedIcon`}>
           <EuiIconTip
             content={i18n.translate(
               'ingestPipelines.pipelineStructureTree.treeNodeDeprecatedTooltip',
