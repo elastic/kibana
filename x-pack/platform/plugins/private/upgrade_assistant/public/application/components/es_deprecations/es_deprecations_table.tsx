@@ -330,7 +330,10 @@ export const EsDeprecationsTable: React.FunctionComponent<Props> = ({
               // This prevents React from reusing components incorrectly when navigating between pages
               const absoluteIndex = pager.firstItemIndex + index;
               return (
-                <EuiTableRow data-test-subj="deprecationTableRow" key={`deprecation-row-${absoluteIndex}`}>
+                <EuiTableRow
+                  data-test-subj="deprecationTableRow"
+                  key={`deprecation-row-${absoluteIndex}`}
+                >
                   {renderTableRowCells(deprecation, mlUpgradeModeEnabled)}
                 </EuiTableRow>
               );
