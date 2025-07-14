@@ -190,7 +190,7 @@ describe('ChangeKbModel', () => {
         expect(dropdown).toHaveTextContent(elserTitle);
       });
 
-      it('disables the `Update` button when the knowledge base is installed with ELSER and the current inference id is ${LEGACY_CUSTOM_INFERENCE_ID}', () => {
+      it(`disables the 'Update' button when the knowledge base is installed with ELSER and the current inference id is ${LEGACY_CUSTOM_INFERENCE_ID}`, () => {
         const mockKb = createMockKnowledgeBase({
           status: createMockStatus({
             currentInferenceId: LEGACY_CUSTOM_INFERENCE_ID,
@@ -208,7 +208,7 @@ describe('ChangeKbModel', () => {
         expect(button).toBeDisabled();
       });
 
-      it('enables the `Update` button when user selects E5 model from the dropdown and the current inference id is ${LEGACY_CUSTOM_INFERENCE_ID} ', async () => {
+      it(`enables the 'Update' button when user selects E5 model from the dropdown and the current inference id is ${LEGACY_CUSTOM_INFERENCE_ID}`, async () => {
         const mockKb = createMockKnowledgeBase({
           status: createMockStatus({
             currentInferenceId: LEGACY_CUSTOM_INFERENCE_ID,
