@@ -15,3 +15,4 @@ export function plugin() {
   return new WorkflowsPlugin();
 }
 export type { WorkflowsPluginSetup, WorkflowsPluginStart } from './types';
+export { StepExecutions } from './features/workflow-detail/components/step-executions';

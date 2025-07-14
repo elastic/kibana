@@ -7,6 +7,6 @@
     "id": "workflowsExample",
     "server": true,
     "browser": true,
-    "requiredPlugins": ["developerExamples", "navigation", "workflowsManagement"]
+    "requiredPlugins": ["kibanaReact", "developerExamples", "navigation", "workflowsManagement"]
   }
 }

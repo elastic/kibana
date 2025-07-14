@@ -30,5 +30,22 @@ export const connectors: Record<string, Provider> = {
       },
     },
   },
+  delay: {
+    type: 'delay',
+    action: async (stepInputs?: Record<string, any>) => {
+      if (!stepInputs?.delay) {
+        throw new Error('Delay input is required');
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, stepInputs.delay));
+    },
+    inputsDefinition: {
+      message: {
+        type: 'string',
+        required: true,
+        defaultValue: 'Default message from console provider',
+      },
+    },
+  },
   // Add more providers as needed
 };
