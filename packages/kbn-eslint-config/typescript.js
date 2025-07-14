@@ -2,7 +2,9 @@
 // in order to lint typescript files with eslint.
 // Some IDEs could not be running eslint with the correct extensions yet
 // as this package was moved from typescript-eslint-parser to @typescript-eslint/parser
+require('@kbn/babel-register').install();
 
+const { REPO_ROOT } = require('@kbn/repo-info');
 const eslintConfigPrettierRules = require('eslint-config-prettier').rules;
 
 // The current implementation excluded all the variables matching the regexp.
@@ -55,10 +57,7 @@ module.exports = {
           //
           // Old recommended tslint rules
           '@typescript-eslint/adjacent-overload-signatures': 'error',
-          '@typescript-eslint/array-type': [
-            'error',
-            { default: 'array-simple', readonly: 'array-simple' },
-          ],
+          '@typescript-eslint/array-type': 'off',
           // ##
           // Replacing old @typescript-eslint/ban-types
           '@typescript-eslint/no-restricted-types': [
@@ -69,20 +68,19 @@ module.exports = {
                 'React.SFC': 'Use React.FC instead.',
                 StatelessComponent: 'Use FunctionComponent instead.',
                 'React.StatelessComponent': 'Use React.FunctionComponent instead.',
-                object: 'Avoid using `object` type.',
               },
             },
           ],
-          '@typescript-eslint/no-unsafe-function-type': 'error',
-          '@typescript-eslint/no-wrapper-object-types': 'error',
-          '@typescript-eslint/no-empty-object-type': 'error',
+          '@typescript-eslint/no-unsafe-function-type': 'off',
+          '@typescript-eslint/no-wrapper-object-types': 'off',
+          '@typescript-eslint/no-empty-object-type': 'off',
           // ##
           camelcase: 'off',
           '@typescript-eslint/naming-convention': [
             'error',
             {
               selector: 'default',
-              format: ['camelCase', 'PascalCase'],
+              format: ['camelCase', 'PascalCase', 'UPPER_CASE', 'snake_case'],
               filter: {
                 regex: allowedNameRegexp,
                 match: false,
