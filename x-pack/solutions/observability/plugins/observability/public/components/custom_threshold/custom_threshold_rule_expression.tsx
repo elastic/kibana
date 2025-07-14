@@ -20,6 +20,7 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
+import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 import { ISearchSource, Query } from '@kbn/data-plugin/common';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { DataViewBase } from '@kbn/es-query';
@@ -88,7 +89,7 @@ export default function Expressions(props: Props) {
   const [dataViewTimeFieldError, setDataViewTimeFieldError] = useState<string>();
   const [searchSource, setSearchSource] = useState<ISearchSource>();
   const [triggerResetDataView, setTriggerResetDataView] = useState<boolean>(false);
-  const [paramsError, setParamsError] = useState<Error>();
+  const [paramsError, setParamsError] = useState<SavedObjectNotFound>();
   const [paramsWarning, setParamsWarning] = useState<string>();
   const [isNoDataChecked, setIsNoDataChecked] = useState<boolean>(
     (hasGroupBy && !!ruleParams.alertOnGroupDisappear) ||
@@ -408,7 +409,7 @@ export default function Expressions(props: Props) {
               'xpack.observability.customThreshold.rule.alertFlyout.error.messageDescription',
               {
                 defaultMessage: 'Could not locate that data view (id: {id})',
-                values: { id: paramsError?.message?.split('(id: ')[1].substring(0, 36) }, // Extract id from error message
+                values: { id: paramsError?.savedObjectId },
               }
             )}
             <br />
