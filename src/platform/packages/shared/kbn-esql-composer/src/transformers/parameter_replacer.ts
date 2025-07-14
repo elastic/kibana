@@ -18,7 +18,6 @@ import {
   isFunctionExpression,
   isParamLiteral,
 } from '@kbn/esql-ast';
-import { ESQLAstExpressionNode } from '@kbn/esql-ast/src/visitor';
 import { ESQLIdentifier } from '@kbn/esql-ast/src/types';
 import { FieldValue, Params } from '../types';
 
@@ -42,7 +41,9 @@ export class ParameterReplacer {
 
     for (const param of list) {
       if (typeof param === 'object' && param !== null) {
-        Object.assign(map, param);
+        for (const [key, value] of Object.entries(param)) {
+          map[key.toLowerCase()] = value as FieldValue;
+        }
       } else {
         map[String(index++)] = param;
       }
@@ -51,19 +52,19 @@ export class ParameterReplacer {
     return map;
   }
 
-  public isReplaceable(node: ReplaceableNodes): boolean {
+  public shouldReplaceNode(node: ReplaceableNodes): boolean {
     if (isFunctionExpression(node)) {
       return node.name.startsWith('?');
     }
     if (isColumn(node)) {
-      return node.args.some((arg) => this.isNamedOrIndexParameterLiteral(arg));
+      return node.args.some((arg) => isParamLiteral(arg));
     }
 
-    return this.isNamedOrIndexParameterLiteral(node);
+    return isParamLiteral(node);
   }
 
   public replace<TNode extends ReplaceableNodes>(node: TNode): TNode {
-    if (!this.isReplaceable(node)) {
+    if (!this.shouldReplaceNode(node)) {
       return node;
     }
 
@@ -75,19 +76,7 @@ export class ParameterReplacer {
       return this.replaceColumnExpression(node) as TNode;
     }
 
-    if (this.isNamedOrIndexParameterLiteral(node)) {
-      return this.buildReplacementAstNode(node) as TNode;
-    }
-
-    return node;
-  }
-  private isNamedOrIndexParameterLiteral(node: ESQLAstExpressionNode): node is ESQLParamLiteral {
-    return (
-      isParamLiteral(node) &&
-      (node.paramType === 'named' ||
-        node.paramType === 'positional' ||
-        node.paramType === 'unnamed')
-    );
+    return this.buildReplacementAstNode(node) as TNode;
   }
 
   private replaceFunctionExpression(node: ESQLFunction): ESQLFunction {
@@ -104,9 +93,7 @@ export class ParameterReplacer {
     return Builder.expression.column({
       ...node,
       args: node.args.map((arg) =>
-        this.isNamedOrIndexParameterLiteral(arg)
-          ? (this.buildReplacementAstNode(arg) as ESQLIdentifier)
-          : arg
+        isParamLiteral(arg) ? (this.buildReplacementAstNode(arg) as ESQLIdentifier) : arg
       ),
     });
   }
@@ -115,13 +102,17 @@ export class ParameterReplacer {
     switch (node.paramType) {
       case 'named':
       case 'positional':
-        return this.parametersMap[node.value];
+        return this.parametersMap[String(node.value).toLowerCase()];
       default:
         return this.parametersMap[this.positionalIndex++];
     }
   }
 
-  private buildReplacementAstNode(node: ESQLParamLiteral): ESQLAstBaseItem {
+  private buildReplacementAstNode(node: ESQLParamLiteral | ESQLLiteral): ESQLAstBaseItem {
+    if (!isParamLiteral(node)) {
+      return node;
+    }
+
     const value = this.resolveParamValue(node);
 
     if (!value) {
@@ -136,7 +127,7 @@ export class ParameterReplacer {
   }
 
   private resolveFunctionName(node: ESQLFunction): string {
-    const paramKey = node.name.replace(/^\?{1,2}/, '');
+    const paramKey = node.name.replace(/^\?{1,2}/, '').toLocaleLowerCase();
     const paramValue = this.parametersMap[paramKey];
 
     return paramValue !== undefined ? String(paramValue) : node.name;

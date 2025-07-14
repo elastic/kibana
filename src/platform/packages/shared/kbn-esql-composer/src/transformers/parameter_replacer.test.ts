@@ -9,7 +9,7 @@
 
 import { ParameterReplacer } from './parameter_replacer';
 import { Builder, ESQLColumn } from '@kbn/esql-ast';
-import { ESQLParamLiteral, ESQLUnnamedParamLiteral } from '@kbn/esql-ast/src/types';
+import { ESQLFunction, ESQLParamLiteral, ESQLUnnamedParamLiteral } from '@kbn/esql-ast/src/types';
 
 // Helper to create a param literal node
 function createParamLiteral(
@@ -44,6 +44,17 @@ function createColumnWithParam(
     text: '',
     name: 'test_column',
     parts: ['test_column'],
+  };
+}
+
+function createFunctionWithParam(functionName: string): ESQLFunction {
+  return {
+    name: `?${functionName}`,
+    args: [],
+    location: { min: 0, max: 0 },
+    text: '',
+    incomplete: false,
+    type: 'function',
   };
 }
 
@@ -88,5 +99,14 @@ describe('ParameterReplacer', () => {
 
     expect(substituted.args[0].type).toBe('identifier');
     expect(substituted.args[0].name).toBe('bar');
+  });
+
+  it('replaces function name from named parameter', () => {
+    const funcNode = createFunctionWithParam('functionName');
+
+    const replacer = new ParameterReplacer({ functionName: 'AVG' });
+    const replacedNode = replacer.replace(funcNode);
+
+    expect(replacedNode.name).toBe('AVG');
   });
 });

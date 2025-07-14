@@ -7,42 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { mutate, BasicPrettyPrinter, Builder, Walker } from '@kbn/esql-ast';
+import { BasicPrettyPrinter } from '@kbn/esql-ast';
 import { Query, QueryPipeline } from '../types';
-import { ParameterReplacer } from '../transformers/parameter_replacer';
+import { buildQueryAst } from './build_query_ast';
 
 export function createPipeline(source: Query): QueryPipeline {
-  const buildQueryAst = () => {
-    const { root, commands } = source;
-    const queryAst = Builder.expression.query([...root.commands]);
-    for (const command of commands) {
-      mutate.generic.commands.append(queryAst, command);
-    }
-
-    const replacer = new ParameterReplacer(source.params);
-    Walker.walk(queryAst, {
-      visitLiteral: (node) => {
-        if (replacer.isReplaceable(node)) {
-          Object.assign(node, replacer.replace(node));
-        }
-      },
-      visitColumn: (node) => {
-        if (replacer.isReplaceable(node)) {
-          Object.assign(node, replacer.replace(node));
-        }
-      },
-      visitFunction: (node) => {
-        if (replacer.isReplaceable(node)) {
-          Object.assign(node, replacer.replace(node));
-        }
-      },
-    });
-
-    return queryAst;
-  };
-
   const asQuery = (): string => {
-    return BasicPrettyPrinter.print(buildQueryAst(), {
+    return BasicPrettyPrinter.print(buildQueryAst(source), {
       multiline: true,
     });
   };
