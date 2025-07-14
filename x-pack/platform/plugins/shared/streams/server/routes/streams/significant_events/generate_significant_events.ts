@@ -17,9 +17,9 @@ import { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import moment from 'moment';
 import pLimit from 'p-limit';
 import { v4 } from 'uuid';
+import { z } from '@kbn/zod';
 import { kqlQuery, rangeQuery } from '../../internal/esql/query_helpers';
 import { KQL_GUIDE } from './kql_guide';
-import { z } from 'zod';
 
 const LOOKBACK_DAYS = 7;
 
@@ -64,6 +64,9 @@ export async function generateSignificantEventDefinitions({
       temperature: 0.25,
       toolChoice: {
         function: 'describe_dataset',
+        arguments: {
+          index: 'logs',
+        },
       },
       tools: {
         describe_dataset: {
@@ -86,6 +89,16 @@ export async function generateSignificantEventDefinitions({
       },
     })
     .get();
+
+  const wtf = await inferenceClient.prompt({
+    prompt,
+    input: {
+      prompt: 'analyze logs',
+    },
+    connectorId,
+  });
+
+  console.dir(['wtf', wtf], { depth: 100 });
 
   const analysis = await analyzeDocuments({
     esClient,

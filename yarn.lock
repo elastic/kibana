@@ -3837,6 +3837,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ai-tools@link:x-pack/platform/packages/shared/kbn-ai-tools":
+  version "0.0.0"
+  uid ""
+
 "@kbn/aiops-change-point-detection@link:x-pack/platform/packages/private/ml/aiops_change_point_detection":
   version "0.0.0"
   uid ""
