@@ -280,8 +280,11 @@ export const PolicySelector = memo<PolicySelectorProps>(
     const totalItems: number = useMemo(() => {
       // Use stored unfiltered total when available, otherwise fall back to current total
       const baseTotalCount = unfilteredTotalCount ?? policyListResponse?.total ?? 0;
-      return baseTotalCount + (additionalListItems?.length ?? 0);
-    }, [additionalListItems?.length, policyListResponse?.total, unfilteredTotalCount]);
+      // Count only selectable additional items, excluding group labels
+      const selectableAdditionalItems =
+        additionalListItems?.filter((item) => !item.isGroupLabel).length ?? 0;
+      return baseTotalCount + selectableAdditionalItems;
+    }, [additionalListItems, policyListResponse?.total, unfilteredTotalCount]);
 
     // @ts-expect-error EUI does not seem to have correctly types the `windowProps` which come from React-Window `FixedSizeList` component
     const listProps: EuiSelectableProps['listProps'] = useMemo(() => {

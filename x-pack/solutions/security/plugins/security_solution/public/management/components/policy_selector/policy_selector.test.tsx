@@ -431,6 +431,35 @@ describe('PolicySelector component', () => {
       expect(getByTestId('test-customItem1-checkbox')).toBeTruthy();
       expect(getByTestId('test-customItem2-checkbox')).toBeTruthy();
     });
+
+    it('should exclude group labels from total count calculation', async () => {
+      // Override additionalListItems to include a group label
+      props.additionalListItems = [
+        {
+          label: 'Additional filters',
+          isGroupLabel: true, // This should NOT be counted
+        },
+        {
+          label: 'Global entries',
+          checked: 'on',
+          'data-test-subj': 'globalOption',
+        },
+        {
+          label: 'Unassigned entries',
+          checked: undefined,
+          'data-test-subj': 'unassignedOption',
+        },
+      ];
+      props.selectedPolicyIds = [testPolicyId1];
+
+      const { getByTestId } = await render();
+
+      // Should be 1 policy + 2 selectable items = 52 total (50 + 2), not 53 (50 + 3)
+      // The group label "Additional filters" should be excluded from count
+      expect(getByTestId(testUtils.testIds.policyFetchTotal).textContent).toEqual(
+        '2 of 52 selected'
+      );
+    });
   });
 
   it('should default queryOptions.kuery to endpoint packages filter', async () => {
