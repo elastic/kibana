@@ -398,6 +398,7 @@ enabled:
   - x-pack/platform/test/encrypted_saved_objects_api_integration/config.ts
   - x-pack/platform/test/fleet_multi_cluster/config.ts
   - x-pack/platform/test/monitoring_api_integration/config.ts
+  - x-pack/platform/test/onechat_api_integration/config.ts
   - x-pack/platform/test/plugin_api_integration/config.ts
   - x-pack/platform/test/saved_object_api_integration/security_and_spaces/config_basic.ts
   - x-pack/platform/test/saved_object_api_integration/security_and_spaces/config_trial.ts

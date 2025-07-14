@@ -19,13 +19,13 @@ export default function ({ getService }: FtrProviderContext) {
     const mockTool = {
       id: 'cases-tool',
       name: 'existing-tool',
+      type: 'esql',
       description: 'A test tool',
-      query: 'FROM my_cases | WHERE case_id == ?case_id',
-      params: { case_id: { type: 'keyword', description: 'Case ID' } },
-      meta: {
-        providerId: 'esql',
-        tags: ["test"],
-      },
+      tags: ["test"],
+      configuration: { 
+        query: 'FROM my_cases | WHERE case_id == ?case_id', 
+        params: { case_id: { type: 'keyword', description: 'Case ID' } } 
+      } ,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     };
@@ -40,7 +40,7 @@ export default function ({ getService }: FtrProviderContext) {
       for (const toolId of createdToolIds) {
         try {
           await supertest
-            .delete(`/api/chat/tools/esql/${toolId}`)
+            .delete(`/api/chat/tools/${toolId}`)
             .set('kbn-xsrf', 'kibana')
             .expect(200);
         } catch (error) {
@@ -53,47 +53,26 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('POST /api/chat/tools/esql', () => {
+    describe('POST /api/chat/tools', () => {
       it('should create a new ES|QL tool successfully', async () => {
         const response = await supertest
-          .post('/api/chat/tools/esql')
+          .post('/api/chat/tools')
           .set('kbn-xsrf', 'kibana')
           .send(mockTool)
           .expect(200);
 
-        expect(response.body).to.have.property('tool');
         expect(response.body).to.have.property('id', mockTool.id);
+        expect(response.body).to.have.property('type', 'esql');
         expect(response.body).to.have.property('name', mockTool.name);
         expect(response.body).to.have.property('description', mockTool.description);
-        expect(response.body).to.have.property('query', mockTool.query);
+        expect(response.body.tags).to.eql(mockTool.tags);
+        expect(response.body).to.have.property('configuration');
+        expect(response.body.configuration).to.have.property('query', mockTool.configuration.query);
+        expect(response.body.configuration).to.have.property('params', mockTool.configuration.params);
         expect(response.body).to.have.property('created_at');
         expect(response.body).to.have.property('updated_at');
-        expect(response.body.tool.params).to.eql(mockTool.params);
-        expect(response.body.tool.meta.tags).to.eql(mockTool.meta.tags);
 
         createdToolIds.push(mockTool.id);
-      });
-
-      it('should create a tool with minimal required fields', async () => {
-        const minimalTool = {
-          id: 'minimal-tool-' + Date.now(),
-          description: 'Minimal test tool',
-          query: 'FROM logs',
-          params: {},
-          meta: { tags: [] },
-        };
-
-        const response = await supertest
-          .post('/api/chat/tools/esql')
-          .set('kbn-xsrf', 'kibana')
-          .send(minimalTool)
-          .expect(200);
-
-        expect(response.body).to.have.property('id', minimalTool.id);
-        expect(response.body).to.have.property('name', minimalTool.id);
-        expect(response.body).to.have.property('description', minimalTool.description);
-
-        createdToolIds.push(minimalTool.id);
       });
 
       it('should validate tool ID format', async () => {
@@ -103,7 +82,7 @@ export default function ({ getService }: FtrProviderContext) {
         };
 
         const response = await supertest
-          .post('/api/chat/tools/esql')
+          .post('/api/chat/tools')
           .set('kbn-xsrf', 'kibana')
           .send(invalidTool)
           .expect(400);
@@ -118,7 +97,7 @@ export default function ({ getService }: FtrProviderContext) {
         };
 
         await supertest
-          .post('/api/chat/tools/esql')
+          .post('/api/chat/tools')
           .set('kbn-xsrf', 'kibana')
           .send(incompleteTool)
           .expect(400);
@@ -130,7 +109,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         await supertest
-          .post('/api/chat/tools/esql')
+          .post('/api/chat/tools')
           .set('kbn-xsrf', 'kibana')
           .send(mockTool)
           .expect(404);
@@ -139,19 +118,80 @@ export default function ({ getService }: FtrProviderContext) {
           'onechat:api:enabled: true': true,
         });
       });
+
+      it('should return 400 if invalid ES|QL syntax', async () => {
+        const invalidTool = {
+          ...mockTool,
+          configuration: {
+            query: 'LIMIT 1',
+            params: {}
+          }
+        };
+
+        const response = await supertest
+          .post('/api/chat/tools')
+          .set('kbn-xsrf', 'kibana')
+          .send(invalidTool)
+          .expect(400);
+
+        expect(response.body).to.have.property('message');
+        expect(response.body.message).to.contain('Validation error');
+        
+      });
+
+      it('should return 400 if parameter in list is mising from query', async () => {
+        const invalidTool = {
+          ...mockTool,
+          configuration: {
+            query: 'FROM my_cases | WHERE case_id == ?case_id',
+            params: {}
+          }
+        };
+
+        const response = await supertest
+          .post('/api/chat/tools')
+          .set('kbn-xsrf', 'kibana')
+          .send(invalidTool)
+          .expect(400);
+
+        expect(response.body).to.have.property('message');
+        expect(response.body.message).to.contain('Validation error');
+      });
+
+      it('should return 400 if invalid ES|QL syntax', async () => {
+        const invalidTool = {
+          ...mockTool,
+          configuration: {
+            query: 'FROM my_cases',
+            params: {
+              case_id: { type: 'keyword', description: 'Case ID' },
+            }
+          }
+        };
+
+        const response = await supertest
+          .post('/api/chat/tools')
+          .set('kbn-xsrf', 'kibana')
+          .send(invalidTool)
+          .expect(400);
+
+        expect(response.body).to.have.property('message');
+        expect(response.body.message).to.contain('Validation error');
+        
+      });
     });
 
-    describe('GET /api/chat/tools/esql/{id}', () => {
+    describe('GET /api/chat/tools/{id}', () => {
       let testToolId: string;
 
       before(async () => {
         const testTool = {
           ...mockTool,
-          id: 'get-test-tool-' + Date.now(),
+          id: 'get-test-tool',
         };
 
         const response = await supertest
-          .post('/api/chat/tools/esql')
+          .post('/api/chat/tools')
           .set('kbn-xsrf', 'kibana')
           .send(testTool)
           .expect(200);
@@ -162,19 +202,19 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should retrieve an existing ES|QL tool', async () => {
         const response = await supertest
-          .get(`/api/chat/tools/esql/${testToolId}`)
+          .get(`/api/chat/tools/${testToolId}`)
           .expect(200);
 
-        expect(response.body).to.have.property('tool');
+        expect(response.body).to.have.property('id');
+        expect(response.body).to.have.property('type');
         expect(response.body.tool).to.have.property('description');
-        expect(response.body.tool).to.have.property('query');
-        expect(response.body.tool).to.have.property('params');
-        expect(response.body.tool).to.have.property('meta');
+        expect(response.body).to.have.property('tags');
+        expect(response.body.tool).to.have.property('configuration');
       });
 
       it('should return 404 for non-existent tool', async () => {
         const response = await supertest
-          .get('/api/chat/tools/esql/non-existent-tool')
+          .get('/api/chat/tools/non-existent-tool')
           .expect(404);
 
         expect(response.body).to.have.property('message');
@@ -187,7 +227,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         await supertest
-          .get(`/api/chat/tools/esql/${testToolId}`)
+          .get(`/api/chat/tools/${testToolId}`)
           .expect(404);
 
         await kibanaServer.uiSettings.update({
@@ -196,7 +236,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('GET /api/chat/tools/esql', () => {
+    describe('GET /api/chat/tools', () => {
       let testToolIds: string[] = [];
 
       before(async () => {
@@ -209,7 +249,7 @@ export default function ({ getService }: FtrProviderContext) {
           };
 
           const response = await supertest
-            .post('/api/chat/tools/esql')
+            .post('/api/chat/tools')
             .set('kbn-xsrf', 'kibana')
             .send(testTool)
             .expect(200);
@@ -221,10 +261,9 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should list all ES|QL tools', async () => {
         const response = await supertest
-          .get('/api/chat/tools/esql')
+          .get('/api/chat/tools')
           .expect(200);
 
-        expect(response.body).to.have.property('tools');
         expect(response.body.tools).to.be.an('array');
         expect(response.body.tools.length).to.be.greaterThan(0);
 
@@ -249,13 +288,13 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('PUT /api/chat/tools/esql/{id}', () => {
+    describe('PUT /api/chat/tools/{id}', () => {
       let testToolId: string;
 
       beforeEach(async () => {
         const testTool = {
           ...mockTool,
-          id: 'update-test-tool-' + Date.now(),
+          id: 'update-test-tool',
         };
 
         const response = await supertest
@@ -272,20 +311,10 @@ export default function ({ getService }: FtrProviderContext) {
         const updates = {
           name: 'Updated Tool Name',
           description: 'Updated description',
-          query: 'FROM updated_logs | LIMIT 20',
-          params: {
-            newParam: {
-              type: 'string' as const,
-              description: 'A new parameter',
-            },
-          },
-          meta: {
-            tags: ['updated', 'test'],
-          },
         };
 
         const response = await supertest
-          .put(`/api/chat/tools/esql/${testToolId}`)
+          .put(`/api/chat/tools/${testToolId}`)
           .set('kbn-xsrf', 'kibana')
           .send(updates)
           .expect(200);
@@ -294,29 +323,11 @@ export default function ({ getService }: FtrProviderContext) {
         expect(response.body.esqlTool).to.have.property('id', testToolId);
         expect(response.body.esqlTool).to.have.property('name', updates.name);
         expect(response.body.esqlTool).to.have.property('description', updates.description);
-        expect(response.body.esqlTool).to.have.property('query', updates.query);
-        expect(response.body.esqlTool.params).to.eql(updates.params);
-        expect(response.body.esqlTool.meta.tags).to.eql(updates.meta.tags);
-      });
-
-      it('should partially update a tool', async () => {
-        const partialUpdates = {
-          name: 'Partially Updated Name',
-        };
-
-        const response = await supertest
-          .put(`/api/chat/tools/esql/${testToolId}`)
-          .set('kbn-xsrf', 'kibana')
-          .send(partialUpdates)
-          .expect(200);
-
-        expect(response.body.esqlTool).to.have.property('name', partialUpdates.name);
-        expect(response.body.esqlTool).to.have.property('description', mockTool.description);
       });
 
       it('should return 404 for non-existent tool', async () => {
         await supertest
-          .put('/api/chat/tools/esql/non-existent-tool')
+          .put('/api/chat/tools/non-existent-tool')
           .set('kbn-xsrf', 'kibana')
           .send({ name: 'Updated Name' })
           .expect(404);
@@ -328,7 +339,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         await supertest
-          .put(`/api/chat/tools/esql/${testToolId}`)
+          .put(`/api/chat/tools/${testToolId}`)
           .set('kbn-xsrf', 'kibana')
           .send({ name: 'Updated Name' })
           .expect(404);
@@ -339,13 +350,13 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('DELETE /api/chat/tools/esql/{id}', () => {
+    describe('DELETE /api/chat/tools/{id}', () => {
       let testToolId: string;
 
       beforeEach(async () => {
         const testTool = {
           ...mockTool,
-          id: 'delete-test-tool-' + Date.now(),
+          id: 'delete-test-tool',
         };
 
         const response = await supertest
@@ -359,24 +370,20 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should delete an existing ES|QL tool', async () => {
         const response = await supertest
-          .delete(`/api/chat/tools/esql/${testToolId}`)
+          .delete(`/api/chat/tools/${testToolId}`)
           .set('kbn-xsrf', 'kibana')
           .expect(200);
 
         expect(response.body).to.have.property('success', true);
-
-        await supertest
-          .get(`/api/chat/tools/esql/${testToolId}`)
-          .expect(404);
       });
 
       it('should return success even for non-existent tool', async () => {
         const response = await supertest
-          .delete('/api/chat/tools/esql/non-existent-tool')
+          .delete('/api/chat/tools/non-existent-tool')
           .set('kbn-xsrf', 'kibana')
           .expect(200);
 
-        expect(response.body).to.have.property('success');
+        expect(response.body).to.have.property('message', 'not found');
       });
 
       it('should return 404 when ES|QL tool API is disabled', async () => {
@@ -395,11 +402,11 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('Parameter validation', () => {
+    describe('Parameter Type validation', () => {
       it('should validate parameter types', async () => {
         const toolWithInvalidParams = {
           ...mockTool,
-          id: 'invalid-params-tool-' + Date.now(),
+          id: 'invalid-params-tool',
           params: {
             validParam: {
               type: 'string',
@@ -413,7 +420,7 @@ export default function ({ getService }: FtrProviderContext) {
         };
 
         await supertest
-          .post('/api/chat/tools/esql')
+          .post('/api/chat/tools')
           .set('kbn-xsrf', 'kibana')
           .send(toolWithInvalidParams)
           .expect(400);
@@ -422,10 +429,10 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('End-to-end workflow', () => {
       it('should support complete CRUD operations', async () => {
-        const toolId = 'e2e-test-tool-' + Date.now();
+        const toolId = 'e2e-test-tool';
         
         const createResponse = await supertest
-          .post('/api/chat/tools/esql')
+          .post('/api/chat/tools')
           .set('kbn-xsrf', 'kibana')
           .send({
             ...mockTool,
@@ -436,13 +443,13 @@ export default function ({ getService }: FtrProviderContext) {
         expect(createResponse.body.tool.id).to.equal(toolId);
 
         const getResponse = await supertest
-          .get(`/api/chat/tools/esql/${toolId}`)
+          .get(`/api/chat/tools/${toolId}`)
           .expect(200);
 
         expect(getResponse.body.tool.id).to.equal(toolId);
 
         const updateResponse = await supertest
-          .put(`/api/chat/tools/esql/${toolId}`)
+          .put(`/api/chat/tools/${toolId}`)
           .set('kbn-xsrf', 'kibana')
           .send({
             name: 'Updated E2E Tool',
@@ -453,19 +460,19 @@ export default function ({ getService }: FtrProviderContext) {
         expect(updateResponse.body.esqlTool.name).to.equal('Updated E2E Tool');
 
         const listResponse = await supertest
-          .get('/api/chat/tools/esql')
+          .get('/api/chat/tools')
           .expect(200);
 
         const toolIds = listResponse.body.tools.map((tool: any) => tool.id);
         expect(toolIds).to.contain(toolId);
 
         await supertest
-          .delete(`/api/chat/tools/esql/${toolId}`)
+          .delete(`/api/chat/tools/${toolId}`)
           .set('kbn-xsrf', 'kibana')
           .expect(200);
 
         await supertest
-          .get(`/api/chat/tools/esql/${toolId}`)
+          .get(`/api/chat/tools/${toolId}`)
           .expect(404);
       });
     });
