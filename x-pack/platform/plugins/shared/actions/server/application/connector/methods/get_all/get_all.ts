@@ -12,6 +12,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import type { AuditLogger } from '@kbn/security-plugin-types-server';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { omit } from 'lodash';
+import type { RawAction } from '../../../../types';
 import type { InMemoryConnector } from '../../../..';
 import type { SavedObjectClientForFind } from '../../../../data/connector/types/params';
 import { connectorWithExtraFindDataSchema } from '../../schemas';
@@ -21,7 +22,6 @@ import { ConnectorAuditAction, connectorAuditEvent } from '../../../../lib/audit
 import { connectorFromSavedObject, isConnectorDeprecated } from '../../lib';
 import type { ConnectorWithExtraFindData, ConnectorWithDecryptedSecrets } from '../../types';
 import type { GetAllUnsecuredParams, GetByIdsWithSecretsUnsecuredParams } from './types/params';
-import { RawAction } from '@kbn/actions-plugin/server/types';
 
 interface GetAllHelperOpts {
   auditLogger?: AuditLogger;
