@@ -27,12 +27,12 @@ This will ensure all Onechat features are available in your Kibana instance.
 If running in Serverless or Cloud dev environments, it may be more practical to adjust these via API:
 
 ```
-POST kbn://api/kibana/settings
+POST kbn://internal/kibana/settings
 {
    "changes": {
       "onechat:mcp:enabled": true,
       "onechat:api:enabled": true,
-      "onechat:ui:enabled": true,
+      "onechat:ui:enabled": true
    }
 }
 ```
