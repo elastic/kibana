@@ -76,7 +76,7 @@ export const Wrapper = memo(({ packages, ruleResponse }: WrapperProps) => {
 
   const { dataView: experimentalDataView, status } = useDataView(SourcererScopeName.detections);
   const signalIndexName = newDataViewPickerEnabled
-    ? experimentalDataView.getIndexPattern() ?? ''
+    ? experimentalDataView?.getIndexPattern() ?? ''
     : oldSignalIndexName;
   const loading = newDataViewPickerEnabled ? status !== 'ready' : oldDataViewLoading;
   const dataView = newDataViewPickerEnabled ? experimentalDataView : oldDataView;
