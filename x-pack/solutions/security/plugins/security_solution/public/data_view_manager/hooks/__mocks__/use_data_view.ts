@@ -5,9 +5,19 @@
  * 2.0.
  */
 
-import { getMockDataView } from '../../mocks/mock_data_view';
+import { getMockDataView, getMockDataViewWithMatchedIndices } from '../../mocks/mock_data_view';
+import type { UseDataViewReturnValue } from '../use_data_view';
 
-export const useDataView = jest.fn(() => ({
-  dataView: getMockDataView(),
-  status: 'ready',
-}));
+const defaultImplementation = () =>
+  ({
+    dataView: getMockDataView(),
+    status: 'ready',
+  } as UseDataViewReturnValue);
+
+export const withMatchedIndices = () =>
+  ({
+    dataView: getMockDataViewWithMatchedIndices(),
+    status: 'ready',
+  } as UseDataViewReturnValue);
+
+export const useDataView = jest.fn(defaultImplementation);

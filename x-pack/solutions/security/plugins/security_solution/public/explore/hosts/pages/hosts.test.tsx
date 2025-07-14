@@ -18,9 +18,7 @@ import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { InputsModelId } from '../../../common/store/inputs/constants';
 import { HostsTabs } from './hosts_tabs';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
-import { getMockDataView } from '@kbn/security-solution-plugin/public/data_view_manager/mocks/mock_data_view';
-
-jest.mock('../../../data_view_manager/hooks/use_data_view');
+import { getMockDataView } from '../../../data_view_manager/mocks/mock_data_view';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),

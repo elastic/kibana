@@ -20,13 +20,18 @@ const INITIAL_DV = new DataView({
   fieldFormats: {} as FieldFormatsStartCommon,
 });
 
+export interface UseDataViewReturnValue {
+  dataView: DataView;
+  status: SharedDataViewSelectionState['status'];
+}
+
 /*
  * This hook should be used whenever we need the actual DataView and not just the spec for the
  * selected data view.
  */
 export const useDataView = (
   dataViewManagerScope: DataViewManagerScopeName = DataViewManagerScopeName.default
-): { dataView: DataView; status: SharedDataViewSelectionState['status'] } => {
+): UseDataViewReturnValue => {
   const {
     services: { dataViews },
     notifications,
