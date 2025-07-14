@@ -17,11 +17,14 @@ import {
 import type { ActionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
 import type { ConnectorWithExtraFindData } from '@kbn/actions-plugin/server/application/connector/types';
 import { merge } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
+import { applyEsClientSearchMock } from '../../../../mocks/utils.mock';
 import type { KillOrSuspendProcessRequestBody } from '../../../../../../common/endpoint/types';
 import { SentinelOneDataGenerator } from '../../../../../../common/endpoint/data_generators/sentinelone_data_generator';
 import type { NormalizedExternalConnectorClient, ResponseActionsClientMethods } from '../../..';
 import type { ResponseActionsClientOptionsMock } from '../mocks';
 import { responseActionsClientMock } from '../mocks';
+import { SENTINEL_ONE_AGENT_INDEX_PATTERN } from '../../../../../../common/endpoint/service/response_actions/sentinel_one';
 
 export interface SentinelOneActionsClientOptionsMock extends ResponseActionsClientOptionsMock {
   connectorActions: NormalizedExternalConnectorClient;
@@ -307,12 +310,30 @@ const createConnectorActionsClientMock = (): ActionsClientMock => {
 };
 
 const createConstructorOptionsMock = (): SentinelOneActionsClientOptionsMock => {
-  return {
+  const options = {
     ...responseActionsClientMock.createConstructorOptions(),
     connectorActions: responseActionsClientMock.createNormalizedExternalConnectorClient(
       createConnectorActionsClientMock()
     ),
   };
+
+  // Mock some of the Endpoint services methods
+
+  // Mock some of the ES queries against S1 indexes
+  const esClientMock = options.esClient;
+  const generator = new SentinelOneDataGenerator('seed');
+
+  applyEsClientSearchMock({
+    esClientMock,
+    index: SENTINEL_ONE_AGENT_INDEX_PATTERN,
+    response: set(
+      generator.generateAgentEsSearchResponse(),
+      'hits.hits[0].inner_hits.most_recent.hits.hits[0]._source',
+      generator.generateAgentEsDoc({ sentinel_one: { agent: { agent: { id: '1-2-3' } } } })
+    ),
+  });
+
+  return options;
 };
 
 const createKillProcessOptionsMock = (

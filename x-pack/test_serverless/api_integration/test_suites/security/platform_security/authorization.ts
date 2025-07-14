@@ -3897,6 +3897,12 @@ export default function ({ getService }: FtrProviderContext) {
                 "ui:siemV2/writeFileOperations",
                 "ui:siemV3/writeFileOperations",
               ],
+              "global_artifact_management_all": Array [
+                "login:",
+                "api:securitySolution-writeGlobalArtifacts",
+                "ui:siemV2/writeGlobalArtifacts",
+                "ui:siemV3/writeGlobalArtifacts",
+              ],
               "host_isolation_all": Array [
                 "login:",
                 "api:securitySolution-writeHostIsolationRelease",
