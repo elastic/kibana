@@ -272,6 +272,11 @@ class SavedObjectSaveModalComponent extends React.Component<
       onTitleDuplicate: this.onTitleDuplicate,
       newDescription: this.state.visualizationDescription,
     });
+
+    // Reset isLoading to false after save completes so the save button can be used again in case save error
+    this.setState({
+      isLoading: false,
+    });
   };
 
   private onTitleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
