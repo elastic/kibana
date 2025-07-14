@@ -7,7 +7,6 @@
 
 import expect from 'expect';
 import { KNOWLEDGE_BASE_ENTRIES_TABLE_MAX_PAGE_SIZE } from '@kbn/elastic-assistant-plugin/common/constants';
-import { MachineLearningProvider } from '@kbn/test-suites-xpack-platform/functional/services/ml';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { createEntry, createEntryForUser } from '../utils/create_entry';
 import { findEntries } from '../utils/find_entry';
@@ -33,12 +32,12 @@ export default ({ getService }: FtrProviderContext) => {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const log = getService('log');
   const es = getService('es');
-  const ml = getService('ml') as unknown as ReturnType<typeof MachineLearningProvider>;
+  const ml = getService('ml');
 
   // Failing: See https://github.com/elastic/kibana/issues/218325
   describe.skip('@ess Basic Security AI Assistant Knowledge Base Entries', () => {
     before(async () => {
-      await installTinyElser({ es, ml, log });
+      await installTinyElser({ es, mlApi: ml.api, log });
       await setupKnowledgeBase(supertest, log);
     });
 

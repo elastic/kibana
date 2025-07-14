@@ -35,22 +35,22 @@ export const TINY_ELSER_INFERENCE_ID = `${TINY_ELSER.id}_elasticsearch`;
  */
 export const installTinyElser = async ({
   es,
-  ml,
+  mlApi,
   log,
 }: {
   es: Client;
-  ml: ReturnType<typeof MachineLearningProvider>;
+  mlApi: ReturnType<typeof MachineLearningProvider>['api'];
   log: ToolingLog;
 }) => {
   try {
     const config = {
-      ...ml.api.getTrainedModelConfig(TINY_ELSER.name),
+      ...mlApi.getTrainedModelConfig(TINY_ELSER.name),
       input: {
         field_names: ['text_field'],
       },
     };
-    await ml.api.assureMlStatsIndexExists();
-    await ml.api.importTrainedModel(TINY_ELSER.name, TINY_ELSER.id, config);
+    await mlApi.assureMlStatsIndexExists();
+    await mlApi.importTrainedModel(TINY_ELSER.name, TINY_ELSER.id, config);
   } catch (e) {
     log.error(`Error installing Tiny Elser: ${e}`);
   }
@@ -87,7 +87,10 @@ export const deleteTinyElser = async ({
   log,
 }: {
   es: Client;
-  ml: ReturnType<typeof MachineLearningProvider>;
+  ml: {
+    api: ReturnType<typeof MachineLearningProvider>['api'];
+    testResources: ReturnType<typeof MachineLearningProvider>['testResources'];
+  };
   log: ToolingLog;
 }) => {
   try {

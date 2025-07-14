@@ -12,7 +12,6 @@ import {
 } from '@kbn/elastic-assistant-common';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import os from 'os';
-import { MachineLearningProvider } from '@kbn/test-suites-xpack-platform/functional/services/ml';
 import { getSecurityGenAIConfigFromEnvVar } from '../../../../scripts/genai/vault/manage_secrets';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
@@ -33,7 +32,7 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const log = getService('log');
   const es = getService('es');
-  const ml = getService('ml') as unknown as ReturnType<typeof MachineLearningProvider>;
+  const ml = getService('ml');
   const esArchiver = getService('esArchiver');
   const isEvalLocalPrompts = process.env.IS_SECURITY_AI_PROMPT_TEST === 'true';
 
@@ -47,7 +46,7 @@ export default ({ getService }: FtrProviderContext) => {
    */
   describe('@ess Basic Security AI Assistant Evaluations', () => {
     before(async () => {
-      await installTinyElser({ ml, es, log });
+      await installTinyElser({ mlApi: ml.api, es, log });
       await setupKnowledgeBase(supertest, log);
       await es.ingest.putPipeline({
         id: 'set-timestamp-pipeline',
