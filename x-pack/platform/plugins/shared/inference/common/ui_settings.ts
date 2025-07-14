@@ -87,5 +87,7 @@ export const uiSettings: Record<string, UiSettingsParams> = {
     }),
     type: 'json',
     requiresPageReload: true,
+    solution: 'oblt',
+    technicalPreview: true,
   },
 };
