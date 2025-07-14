@@ -12,7 +12,6 @@ import {
   EuiDataGridRowHeightsOptions,
   EuiFlexGroup,
   EuiToolTip,
-  euiPaletteColorBlindBehindText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SampleDocument } from '@kbn/streams-schema';
@@ -24,7 +23,7 @@ import {
 import { PreviewTable } from '../preview_table';
 import { DATA_SOURCES_I18N } from './data_sources_flyout/translations';
 import { EnrichmentDataSourceWithUIAttributes } from './types';
-import { useDataSourceSelector } from './state_management/stream_enrichment_state_machine';
+import { useDataSourceSelectorById } from './state_management/data_source_state_machine/use_data_source_selector';
 
 export function ProcessingPreviewTable({
   selectedRowIndex,
@@ -88,8 +87,6 @@ export function ProcessingPreviewTable({
   return <PreviewTable {...otherProps} leadingControlColumns={leadingControlColumns} />;
 }
 
-const dataSourceColors = euiPaletteColorBlindBehindText();
-
 function dataSourceTypeToI18nKey(type: EnrichmentDataSourceWithUIAttributes['type']) {
   switch (type) {
     case 'random-samples':
@@ -102,13 +99,20 @@ function dataSourceTypeToI18nKey(type: EnrichmentDataSourceWithUIAttributes['typ
 }
 
 function RowSourceAvatar({ originalSample }: { originalSample: SampleDocumentWithUIAttributes }) {
-  const dataSource = useDataSourceSelector(
-    originalSample.dataSourceIndex,
-    (snapshot) => snapshot.context.dataSource
+  const dataSourceContext = useDataSourceSelectorById(
+    originalSample.dataSourceId,
+    (snapshot) => snapshot?.context
   );
-  const color = dataSourceColors[originalSample.dataSourceIndex % dataSourceColors.length];
+  if (!dataSourceContext) {
+    // If the data source context is not available, we cannot render the avatar
+    return null;
+  }
+  const {
+    uiAttributes: { color },
+    dataSource: { type: dataSourceType, name: rawDataSourceName },
+  } = dataSourceContext;
   const name =
-    dataSource.name || DATA_SOURCES_I18N[dataSourceTypeToI18nKey(dataSource.type)].placeholderName;
+    rawDataSourceName || DATA_SOURCES_I18N[dataSourceTypeToI18nKey(dataSourceType)].placeholderName;
   return (
     <EuiToolTip content={name}>
       <EuiAvatar size="s" color={color} initialsLength={1} name={name} />

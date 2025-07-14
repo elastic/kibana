@@ -72,16 +72,13 @@ export function getDataSourcesUrlState(context: StreamEnrichmentContextType) {
 export function getDataSourcesSamples(
   context: StreamEnrichmentContextType
 ): SampleDocumentWithUIAttributes[] {
-  const dataSourcesSnapshots = context.dataSourcesRefs.map((dataSourceRef) =>
-    dataSourceRef.getSnapshot()
-  );
+  const dataSourcesSnapshots = context.dataSourcesRefs
+    .map((dataSourceRef) => dataSourceRef.getSnapshot())
+    .filter((snapshot) => snapshot.matches('enabled'));
 
-  return dataSourcesSnapshots.flatMap((snapshot, dataSourceIndex) => {
-    if (!snapshot.matches('enabled')) {
-      return [];
-    }
+  return dataSourcesSnapshots.flatMap((snapshot) => {
     return snapshot.context.data.map((doc) => ({
-      dataSourceIndex,
+      dataSourceId: snapshot.context.dataSource.id,
       document: doc,
     }));
   });
