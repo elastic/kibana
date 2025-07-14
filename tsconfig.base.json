@@ -776,6 +776,8 @@
       "@kbn/data-view-management-plugin/*": ["src/platform/plugins/shared/data_view_management/*"],
       "@kbn/data-view-utils": ["src/platform/packages/shared/kbn-data-view-utils"],
       "@kbn/data-view-utils/*": ["src/platform/packages/shared/kbn-data-view-utils/*"],
+      "@kbn/data-view-validation": ["src/platform/packages/shared/kbn-data-view-validation"],
+      "@kbn/data-view-validation/*": ["src/platform/packages/shared/kbn-data-view-validation/*"],
       "@kbn/data-views-plugin": ["src/platform/plugins/shared/data_views"],
       "@kbn/data-views-plugin/*": ["src/platform/plugins/shared/data_views/*"],
       "@kbn/data-visualizer-plugin": ["x-pack/platform/plugins/private/data_visualizer"],

@@ -5333,6 +5333,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/data-view-validation@link:src/platform/packages/shared/kbn-data-view-validation":
+  version "0.0.0"
+  uid ""
+
 "@kbn/data-views-plugin@link:src/platform/plugins/shared/data_views":
   version "0.0.0"
   uid ""

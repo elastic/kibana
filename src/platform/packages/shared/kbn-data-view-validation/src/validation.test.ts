@@ -7,9 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CONTAINS_SPACES_KEY, ILLEGAL_CHARACTERS_KEY, ILLEGAL_CHARACTERS_VISIBLE } from './types';
-
-import { validateDataView } from './validate_data_view';
+import {
+  CONTAINS_SPACES_KEY,
+  ILLEGAL_CHARACTERS_KEY,
+  ILLEGAL_CHARACTERS_VISIBLE,
+} from './constants';
+import { validateDataView } from './validation';
 
 describe('Index Pattern Utils', () => {
   describe('Validation', () => {
