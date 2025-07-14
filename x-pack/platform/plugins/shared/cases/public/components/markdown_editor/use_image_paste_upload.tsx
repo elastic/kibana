@@ -6,7 +6,7 @@
  */
 
 import { type Subscription } from 'rxjs';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { useFilesContext } from '@kbn/shared-ux-file-context';
 import type { DoneNotification, FileState } from '@kbn/shared-ux-file-upload/src/upload_state';
@@ -146,55 +146,66 @@ export function useImagePasteUpload({
     setUploadPlaceholder(placeholder);
   }, [uploadingFileName, uploadPlaceholder, textarea, field, caseId]);
 
-  const pasteListenerRef = useRef<(e: ClipboardEvent) => void>();
+  const pasteHandlerRef = useRef<(e: ClipboardEvent) => void>();
 
-  useEffect(() => {
-    if (!textarea || !caseId) return;
-
-    const handlePaste: (e: ClipboardEvent) => void = (e) => {
+  /*
+   * Keep the paste handler up-to-date with the latest props, but without
+   * re-attaching the DOM listener. The ref swap happens synchronously in
+   * layout effect which runs before the browser paints.
+   */
+  useLayoutEffect(() => {
+    pasteHandlerRef.current = (e: ClipboardEvent) => {
       const items = e.clipboardData?.items;
       if (!items || items.length === 0) return;
+
       if (items.length > 1) {
         setErrors([NO_SIMULTANEOUS_UPLOADS_MESSAGE]);
         return;
       }
-      const item = items[0];
-      const file = item.getAsFile();
-      if (file) {
-        // don't modify textarea value when receiving files
-        e.preventDefault();
-        if (
-          !SUPPORTED_PASTE_MIME_TYPES.includes(
-            file.type as (typeof SUPPORTED_PASTE_MIME_TYPES)[number]
-          )
-        ) {
-          setErrors([UNSUPPORTED_MIME_TYPE_MESSAGE]);
-          return;
-        }
-        try {
-          // this will throw if image size is too large
-          // it also throws if mime type is not supported, but we already limit mime type
-          // because of constraints on images we can display
-          uploadState.setFiles([file]);
-        } catch (err) {
-          setErrors((prev) => (prev.includes(err) ? prev : [...prev, err]));
-        }
-        if (uploadState.hasFiles() && uploadState.uploading$.value === false) {
-          setErrors([]);
-          uploadState.upload({
-            caseIds: [caseId],
-            owner,
-          });
-        }
+
+      const file = items[0].getAsFile();
+      if (!file) return;
+
+      // prevent the default paste behaviour (inserts base64 string, etc.)
+      e.preventDefault();
+
+      if (
+        !SUPPORTED_PASTE_MIME_TYPES.includes(
+          file.type as (typeof SUPPORTED_PASTE_MIME_TYPES)[number]
+        )
+      ) {
+        setErrors([UNSUPPORTED_MIME_TYPE_MESSAGE]);
+        return;
+      }
+
+      try {
+        uploadState.setFiles([file]);
+      } catch (err) {
+        setErrors((prev) => (prev.includes(err) ? prev : [...prev, err]));
+      }
+
+      if (uploadState.hasFiles() && uploadState.uploading$.value === false && caseId) {
+        setErrors([]);
+        uploadState.upload({ caseIds: [caseId], owner });
       }
     };
+  }, [caseId, owner, uploadState, setErrors]);
 
-    pasteListenerRef.current = handlePaste;
-    textarea.addEventListener('paste', handlePaste);
+  /*
+   * Attach the listener once for the lifetime of the textarea element.
+   * The delegating listener calls the mutable ref so it always has the
+   * freshest logic without re-binding.
+   */
+  useLayoutEffect(() => {
+    if (!textarea) return;
+
+    const delegatingListener = (e: ClipboardEvent) => pasteHandlerRef.current?.(e);
+
+    textarea.addEventListener('paste', delegatingListener);
     return () => {
-      textarea.removeEventListener('paste', handlePaste);
+      textarea.removeEventListener('paste', delegatingListener);
     };
-  }, [textarea, uploadState, caseId, owner, setErrors]);
+  }, [textarea]);
 
   return { isUploading, uploadState };
 }
