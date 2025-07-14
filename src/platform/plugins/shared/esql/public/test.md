@@ -1,1 +1,0 @@
-[security detection engine rules](https://www.elastic.co/docs/api/doc/kibana/operation/operation-readrule)

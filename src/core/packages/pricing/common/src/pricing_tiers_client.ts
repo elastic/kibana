@@ -88,7 +88,7 @@ export class PricingTiersClient implements IPricingTiersClient {
     return false;
   };
 
-  public product = (): PricingProduct | undefined => {
+  public getActiveProduct = (): PricingProduct | undefined => {
     if (this.tiers.enabled === false || this.tiers.products == null) {
       return undefined;
     }
@@ -115,7 +115,7 @@ export class PricingTiersClient implements IPricingTiersClient {
       // that all products have the same tier
       return {
         type: 'security' as const,
-        tier: this.tiers.products[0].tier as 'search_ai_lake' | 'complete' | 'essentials',
+        tier: this.tiers.products[0].tier,
         // 'security' is not a real product line / addon, it's only used to be able to define the tier when no addons are active
         product_lines: this.tiers.products
           .map((p) => p.name)

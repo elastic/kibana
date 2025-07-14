@@ -164,7 +164,7 @@ describe('PricingService', () => {
       const start = service.start();
 
       // Mock config has observability complete enabled
-      expect(start.product()).toMatchObject({ type: 'observability', tier: 'complete' });
+      expect(start.getActiveProduct()).toMatchObject({ type: 'observability', tier: 'complete' });
     });
   });
 });

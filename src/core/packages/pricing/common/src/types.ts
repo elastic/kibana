@@ -40,7 +40,7 @@ export interface IPricingTiersClient {
   /**
    * @deprecated Don't rely on this API for customizing serverless tiers. Register a dedicated feature and use `isFeatureAvailable` instead.
    */
-  product(): PricingProduct | undefined;
+  getActiveProduct(): PricingProduct | undefined;
 }
 
 interface PricingProductSecurity {
