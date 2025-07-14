@@ -14,6 +14,7 @@ import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context
 import {
   StreamsSupertestRepositoryClient,
   createStreamsRepositoryAdminClient,
+  createStreamsRepositoryViewerClient,
 } from './helpers/repository_client';
 import {
   disableStreams,
@@ -29,6 +30,7 @@ import {
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
   let apiClient: StreamsSupertestRepositoryClient;
+  let viewerApiClient: StreamsSupertestRepositoryClient;
   const config = getService('config');
   const isServerless = !!config.get('serverless');
   const esClient = getService('es');
@@ -62,14 +64,15 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
   }
 
-  describe('Basic functionality', () => {
+  describe.only('Basic functionality', () => {
     async function getEnabled() {
-      const response = await apiClient.fetch('GET /api/streams/_status').expect(200);
+      const response = await viewerApiClient.fetch('GET /api/streams/_status').expect(200);
       return response.body.enabled;
     }
 
     before(async () => {
       apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
+      viewerApiClient = await createStreamsRepositoryViewerClient(roleScopedSupertest);
     });
 
     describe('initially', () => {
