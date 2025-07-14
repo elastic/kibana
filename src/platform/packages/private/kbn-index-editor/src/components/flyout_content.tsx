@@ -65,7 +65,7 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
     }
   );
 
-  const noResults = !isLoading && rows.length === 0;
+  const noResults = !isLoading && dataViewColumns?.length === 0;
 
   return (
     <KibanaContextProvider

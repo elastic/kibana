@@ -41,7 +41,7 @@ import {
   withLatestFrom,
   firstValueFrom,
 } from 'rxjs';
-import { ROW_PLACEHOLDER } from './types';
+import { ROW_PLACEHOLDER_PREFIX } from './types';
 import { parsePrimitive } from './utils';
 
 const BUFFER_TIMEOUT_MS = 5000; // 5 seconds
@@ -75,6 +75,8 @@ export class IndexUpdateService {
     this.listenForUpdates();
   }
 
+  private _rowPlaceholderCount = 0;
+
   private _indexName$ = new BehaviorSubject<string | null>(null);
   public readonly indexName$: Observable<string | null> = this._indexName$.asObservable();
 
@@ -102,7 +104,11 @@ export class IndexUpdateService {
     this._exitAttemptWithUnsavedFields$.asObservable();
 
   /** ES Documents */
-  private readonly _rows$ = new BehaviorSubject<DataTableRecord[]>([]);
+  private readonly _rows$ = new BehaviorSubject<DataTableRecord[]>([
+    buildDataTableRecord({
+      _id: `${ROW_PLACEHOLDER_PREFIX}${this._rowPlaceholderCount++}`,
+    }),
+  ]);
   public readonly rows$: Observable<DataTableRecord[]> = this._rows$.asObservable();
 
   private readonly _totalHits$ = new BehaviorSubject<number>(0);
@@ -150,7 +156,7 @@ export class IndexUpdateService {
 
   // Observable to track the number of milliseconds left to allow undo of the last change
   public readonly undoTimer$: Observable<number> = this.actions$.pipe(
-    skipWhile(() => !this._indexCrated$.getValue()),
+    skipWhile(() => !this.getIndexCreated()),
     filter((action) => action.type === 'add' || action.type === 'undo'),
     switchMap((action) =>
       action.type === 'add'
@@ -253,7 +259,7 @@ export class IndexUpdateService {
     this._subscription.add(
       this.bufferState$
         .pipe(
-          skipWhile(() => !this._indexCrated$.getValue()),
+          skipWhile(() => !this.getIndexCreated()),
           tap((updates) => {
             this._isSaving$.next(updates.length > 0);
           }),
@@ -321,12 +327,9 @@ export class IndexUpdateService {
         // Time range updates
         this.data.query.timefilter.timefilter.getTimeUpdate$().pipe(startWith(null)),
         this._refreshSubject$,
-        this.indexCreated$,
       ])
         .pipe(
-          skipWhile(([_dataView, _timeRangeEmit, _refreshSubject, indexCreated]) => {
-            return !indexCreated;
-          }),
+          skipWhile(() => !this.getIndexCreated()),
           tap(() => {
             this._isFetching$.next(true);
           }),
@@ -434,6 +437,15 @@ export class IndexUpdateService {
     return response;
   }
 
+  public addEmptyRow() {
+    this._rows$.next([
+      buildDataTableRecord({
+        _id: `${ROW_PLACEHOLDER_PREFIX}${this._rowPlaceholderCount++}`,
+      }),
+      ...this._rows$.getValue(),
+    ]);
+  }
+
   /* Partial doc update */
   public updateDoc(id: string, update: Record<string, unknown>) {
     const parsedUpdate = Object.entries(update).reduce<Record<string, unknown>>(
@@ -453,19 +465,23 @@ export class IndexUpdateService {
   public bulkUpdate(updates: DocUpdate[]): Promise<BulkResponse> {
     // Prepare update operations for existing documents
     const updateOperations = updates
-      .filter((update) => update.id && update.id !== ROW_PLACEHOLDER)
+      .filter((update) => update.id && !update.id.startsWith(ROW_PLACEHOLDER_PREFIX))
       .map((update) => [{ update: { _id: update.id } }, { doc: update.value }]);
 
-    // Merge values for new documents (without an id or with a placeholder id)
-    const newDoc = updates
-      .filter((update) => !update.id || update.id === ROW_PLACEHOLDER)
-      .reduce<DocUpdate['value']>((acc, update) => ({ ...acc, ...update.value }), {});
+    // Group updates by update.id and create new doc operations
+    const newDocs = updates
+      .filter((update) => !update.id || update.id.startsWith(ROW_PLACEHOLDER_PREFIX))
+      .reduce<Record<string, Record<string, any>>>((acc, update) => {
+        const docId = update.id || 'adasd';
+        acc[docId] = { ...acc[docId], ...update.value };
+        return acc;
+      }, {});
 
-    const operations: BulkRequest['operations'] = [...updateOperations];
+    const newDocOperations = Object.entries(newDocs).map(([id, doc]) => {
+      return [{ index: {} }, doc];
+    });
 
-    if (Object.keys(newDoc).length > 0) {
-      operations.push([{ index: {} }, newDoc]);
-    }
+    const operations: BulkRequest['operations'] = [...updateOperations, ...newDocOperations];
 
     const body = JSON.stringify({
       operations: operations.flat(),

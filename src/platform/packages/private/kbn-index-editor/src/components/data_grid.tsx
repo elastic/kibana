@@ -23,8 +23,7 @@ import {
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { difference, intersection, times } from 'lodash';
-import { buildDataTableRecord } from '@kbn/discover-utils';
-import { COLUMN_PLACEHOLDER_PREFIX, KibanaContextExtra, ROW_PLACEHOLDER } from '../types';
+import { COLUMN_PLACEHOLDER_PREFIX, KibanaContextExtra } from '../types';
 import { getCellValueRenderer } from './value_input_control';
 import { AddColumnHeader } from './add_column_header';
 
@@ -45,6 +44,8 @@ const ROWS_PER_PAGE_OPTIONS = [10, 25];
 
 const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
   const [sortOrder, setSortOrder] = useState<SortOrder[]>([]);
+
+  const { rows } = props;
 
   const {
     services: {
@@ -118,17 +119,6 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
     return [...newColumns, ...preservedOrder, ...addColumnPlaceholders];
   }, [props.columns, hiddenColumns, activeColumns]);
 
-  const renderedRows = useMemo(() => {
-    if (props.rows.length === 0) {
-      return [
-        buildDataTableRecord({
-          _id: ROW_PLACEHOLDER,
-        }),
-      ];
-    }
-    return props.rows;
-  }, [props.rows]);
-
   const columnsMeta = useMemo(() => {
     return props.columns.reduce((acc, column) => {
       acc[column.id] = {
@@ -166,7 +156,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
 
   const CellValueRenderer = useMemo(() => {
     return getCellValueRenderer(
-      renderedRows,
+      rows,
       props.columns,
       editingCell,
       savingDocs,
@@ -174,15 +164,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
       onValueChange,
       isIndexCreated
     );
-  }, [
-    renderedRows,
-    props.columns,
-    editingCell,
-    setEditingCell,
-    onValueChange,
-    savingDocs,
-    isIndexCreated,
-  ]);
+  }, [rows, props.columns, editingCell, setEditingCell, onValueChange, savingDocs, isIndexCreated]);
 
   const externalCustomRenderers: CustomCellRenderer = useMemo(() => {
     return renderedColumns.reduce((acc, columnId) => {
@@ -208,7 +190,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
       <UnifiedDataTable
         customGridColumnsConfiguration={customGridColumnsConfiguration}
         columns={renderedColumns}
-        rows={renderedRows}
+        rows={rows}
         columnsMeta={columnsMeta}
         services={services}
         enableInTableSearch
