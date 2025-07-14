@@ -8,16 +8,18 @@
  */
 import type { ESQLCommand } from '../../../types';
 import { type ISuggestionItem, type ICommandContext, ICommandCallbacks } from '../../types';
-import { pipeCompleteItem } from '../../utils/complete_items';
+import { pipeCompleteItem } from '../../complete_items';
 import { buildConstantsDefinitions } from '../../../definitions/utils/literals';
 
 export async function autocomplete(
   query: string,
   command: ESQLCommand,
   callbacks?: ICommandCallbacks,
-  context?: ICommandContext
+  context?: ICommandContext,
+  cursorPosition?: number
 ): Promise<ISuggestionItem[]> {
-  if (/[0-9]\s+$/.test(query)) {
+  const innerText = query.substring(0, cursorPosition);
+  if (/[0-9]\s+$/.test(innerText)) {
     return [pipeCompleteItem];
   }
 
