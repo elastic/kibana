@@ -447,7 +447,7 @@
     "@kbn/css-utils": "link:src/platform/packages/shared/kbn-css-utils",
     "@kbn/custom-branding-plugin": "link:x-pack/platform/plugins/private/custom_branding",
     "@kbn/custom-icons": "link:src/platform/packages/shared/kbn-custom-icons",
-    "@kbn/custom-integrations": "link:x-pack/solutions/observability/packages/kbn-custom-integrations",
+
     "@kbn/custom-integrations-plugin": "link:src/platform/plugins/shared/custom_integrations",
     "@kbn/dashboard-enhanced-plugin": "link:x-pack/platform/plugins/shared/dashboard_enhanced",
     "@kbn/dashboard-plugin": "link:src/platform/plugins/shared/dashboard",
