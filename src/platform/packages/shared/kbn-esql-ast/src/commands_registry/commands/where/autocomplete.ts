@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { ESQLCommand, ESQLSingleAstItem } from '../../../types';
-import { pipeCompleteItem } from '../../utils/complete_items';
-import { suggestForExpression } from '../../../definitions/utils/autocomplete';
+import { pipeCompleteItem } from '../../complete_items';
+import { suggestForExpression } from '../../../definitions/utils/autocomplete/helpers';
 import { isExpressionComplete, getExpressionType } from '../../../definitions/utils/expressions';
 import {
   type ISuggestionItem,
@@ -16,25 +16,38 @@ import {
   Location,
   ICommandCallbacks,
 } from '../../types';
+import { getInsideFunctionsSuggestions } from '../../../definitions/utils/autocomplete/functions';
 
 export async function autocomplete(
   query: string,
   command: ESQLCommand,
   callbacks?: ICommandCallbacks,
-  context?: ICommandContext
+  context?: ICommandContext,
+  cursorPosition?: number
 ): Promise<ISuggestionItem[]> {
   if (!callbacks?.getByType) {
     return [];
   }
+  const innerText = query.substring(0, cursorPosition);
   const expressionRoot = command.args[0] as ESQLSingleAstItem | undefined;
   const suggestions = await suggestForExpression({
-    innerText: query,
+    innerText,
     getColumnsByType: callbacks.getByType,
     expressionRoot,
     location: Location.WHERE,
     preferredExpressionType: 'boolean',
     context,
   });
+
+  const functionsSpecificSuggestions = await getInsideFunctionsSuggestions(
+    innerText,
+    cursorPosition,
+    callbacks,
+    context
+  );
+  if (functionsSpecificSuggestions) {
+    return functionsSpecificSuggestions;
+  }
 
   // Is this a complete boolean expression?
   // If so, we can call it done and suggest a pipe
@@ -43,7 +56,7 @@ export async function autocomplete(
     context?.fields,
     context?.userDefinedColumns
   );
-  if (expressionType === 'boolean' && isExpressionComplete(expressionType, query)) {
+  if (expressionType === 'boolean' && isExpressionComplete(expressionType, innerText)) {
     suggestions.push(pipeCompleteItem);
   }
 

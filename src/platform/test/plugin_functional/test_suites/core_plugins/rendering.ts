@@ -382,7 +382,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.observabilityAiAssistantManagement.visibilityEnabled (boolean?)',
         'xpack.observabilityShared.unsafe.investigativeExperienceEnabled (boolean?)',
         'share.new_version.enabled (boolean?)',
-        'aiAssistantManagementSelection.preferredAIAssistantType (default?|never?|observability?)',
+        'aiAssistantManagementSelection.preferredAIAssistantType (default?|never?|observability?|security?)',
         /**
          * Rule form V2 feature flags
          */
