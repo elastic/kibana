@@ -142,7 +142,6 @@ export class UnsecuredActionsClient {
     });
   }
 
-  // TODO Ihor
   public async getByIdsWithDecryptedSecrets(
     spaceId: string,
     connectorIds: string[]
