@@ -37,9 +37,6 @@ describe('config validation', () => {
         "preconfigured": Object {},
         "preconfiguredAlertHistoryEsIndex": false,
         "responseTimeout": "PT1M",
-        "usage": Object {
-          "url": "https://usage-api.usage-api/api/v1/usage",
-        },
       }
     `);
   });
@@ -83,9 +80,6 @@ describe('config validation', () => {
         },
         "preconfiguredAlertHistoryEsIndex": false,
         "responseTimeout": "PT1M",
-        "usage": Object {
-          "url": "https://usage-api.usage-api/api/v1/usage",
-        },
       }
     `);
   });
@@ -224,9 +218,6 @@ describe('config validation', () => {
           "proxyVerificationMode": "none",
           "verificationMode": "none",
         },
-        "usage": Object {
-          "url": "https://usage-api.usage-api/api/v1/usage",
-        },
       }
     `);
   });
@@ -238,7 +229,7 @@ describe('config validation', () => {
 
     config.email = {};
     expect(() => configSchema.validate(config)).toThrowErrorMatchingInlineSnapshot(
-      `"[email]: email.domain_allowlist or email.services must be defined"`
+      `"[email]: email.domain_allowlist, email.recipient_allowlist, or email.services must be defined"`
     );
 
     config.email = { domain_allowlist: [] };
@@ -248,6 +239,62 @@ describe('config validation', () => {
     config.email = { domain_allowlist: ['a.com', 'b.c.com', 'd.e.f.com'] };
     result = configSchema.validate(config);
     expect(result.email?.domain_allowlist).toEqual(['a.com', 'b.c.com', 'd.e.f.com']);
+  });
+
+  describe('email.recipient_allowlist', () => {
+    const config: Record<string, unknown> = {};
+    test('validates no email config at all', () => {
+      const result = configSchema.validate(config);
+      expect(result.email === undefined);
+    });
+
+    test('validates empty email config', () => {
+      config.email = {};
+      expect(() => configSchema.validate(config)).toThrowErrorMatchingInlineSnapshot(
+        `"[email]: email.domain_allowlist, email.recipient_allowlist, or email.services must be defined"`
+      );
+    });
+
+    test('validates email config with recipient_allowlist = null', () => {
+      config.email = { recipient_allowlist: null };
+      expect(() => configSchema.validate(config)).toThrowErrorMatchingInlineSnapshot(
+        `"[email.recipient_allowlist]: expected value of type [array] but got [null]"`
+      );
+    });
+
+    test('validates email config with recipient_allowlist = []', () => {
+      config.email = { recipient_allowlist: [] };
+      expect(() => configSchema.validate(config)).toThrowErrorMatchingInlineSnapshot(
+        `"[email.recipient_allowlist]: array size is [0], but cannot be smaller than [1]"`
+      );
+    });
+
+    test('validates email config with recipient_allowlist', () => {
+      config.email = {
+        recipient_allowlist: ['*.bar@a.com', 'foo.*@b.com', '*@d.e.f.com'],
+      };
+
+      const result = configSchema.validate(config);
+      expect(result.email?.recipient_allowlist).toEqual([
+        '*.bar@a.com',
+        'foo.*@b.com',
+        '*@d.e.f.com',
+      ]);
+    });
+  });
+
+  test('throws when domain_allowlist and recipient_allowlist are used at the same time', () => {
+    const config: Record<string, unknown> = {};
+    const result = configSchema.validate(config);
+    expect(result.email === undefined);
+
+    config.email = {
+      domain_allowlist: ['a.com'],
+      recipient_allowlist: ['*.bar@a.com'],
+    };
+    expect(() => configSchema.validate(config)).toThrowErrorMatchingInlineSnapshot(
+      `"[email]: email.domain_allowlist and email.recipient_allowlist can not be used at the same time"`
+    );
   });
 
   test('validates rate limiter connector name', () => {
@@ -287,9 +334,6 @@ describe('config validation', () => {
           },
         },
         "responseTimeout": "PT1M",
-        "usage": Object {
-          "url": "https://usage-api.usage-api/api/v1/usage",
-        },
       }
     `);
   });
@@ -329,7 +373,7 @@ describe('config validation', () => {
     test('validates empty email config', () => {
       config.email = {};
       expect(() => configSchema.validate(config)).toThrowErrorMatchingInlineSnapshot(
-        `"[email]: email.domain_allowlist or email.services must be defined"`
+        `"[email]: email.domain_allowlist, email.recipient_allowlist, or email.services must be defined"`
       );
     });
 

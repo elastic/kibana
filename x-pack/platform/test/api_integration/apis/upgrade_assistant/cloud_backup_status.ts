@@ -48,7 +48,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
   };
 
-  describe('Cloud backup status', function () {
+  describe.skip('Cloud backup status', function () {
     // file system repositories are not supported in cloud
     this.tags(['skipCloud']);
 

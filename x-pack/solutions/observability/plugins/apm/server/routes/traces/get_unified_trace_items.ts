@@ -24,6 +24,7 @@ import {
   TRANSACTION_DURATION,
   TRANSACTION_ID,
   TRANSACTION_NAME,
+  TIMESTAMP_US,
 } from '../../../common/es_fields/apm';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import type { TraceItem } from '../../../common/waterfall/unified_trace_item';
@@ -43,6 +44,7 @@ const optionalFields = asMutableArray([
   PROCESSOR_EVENT,
   PARENT_ID,
   STATUS_CODE,
+  TIMESTAMP_US,
 ] as const);
 
 export function getErrorCountByDocId(unifiedTraceErrors: UnifiedTraceErrors) {
@@ -147,7 +149,7 @@ export async function getUnifiedTraceItems({
       const docErrorCount = errorCountByDocId[id] || 0;
       return {
         id: event.span?.id ?? event.transaction?.id,
-        timestamp: event[AT_TIMESTAMP],
+        timestampUs: event.timestamp?.us ?? toMicroseconds(event[AT_TIMESTAMP]),
         name: event.span?.name ?? event.transaction?.name,
         traceId: event.trace.id,
         duration: resolveDuration(apmDuration, event.duration),
@@ -179,3 +181,5 @@ function resolveDuration(apmDuration?: number, otelDuration?: number[] | string)
 
   return duration * 0.001;
 }
+
+const toMicroseconds = (ts: string) => new Date(ts).getTime() * 1000; // Convert ms to us
