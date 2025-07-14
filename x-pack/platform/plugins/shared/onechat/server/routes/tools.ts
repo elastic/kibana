@@ -83,9 +83,7 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
       validate: {
         body: schema.object({
           id: schema.string(),
-          type: schema.maybe(
-            schema.oneOf([schema.literal(ToolType.esql), schema.literal(ToolType.builtin)])
-          ),
+          type: schema.maybe(schema.oneOf([schema.literal(ToolType.esql)])),
           description: schema.string({ defaultValue: '' }),
           tags: schema.arrayOf(schema.string(), { defaultValue: [] }),
           configuration: esqlConfigSchema,
