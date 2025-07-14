@@ -119,7 +119,7 @@ describe('STATS Autocomplete', () => {
     }
     return autocomplete(query, command, mockCallbacks, mockContext, cursorPosition);
   };
-  describe('FORK ...', () => {
+  describe('STATS ...', () => {
     describe('... <aggregates> ...', () => {
       test('suggestions for a fresh expression', async () => {
         const expected = EXPECTED_FOR_EMPTY_EXPRESSION;
