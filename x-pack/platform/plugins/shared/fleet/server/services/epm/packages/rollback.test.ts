@@ -34,7 +34,6 @@ const pkgName = 'test-package';
 const oldPkgVersion = '1.0.0';
 const newPkgVersion = '1.5.0';
 const spaceId = 'default';
-const spaceIds = ['default'];
 
 jest.mock('./install', () => ({
   installPackage: jest.fn(),
@@ -53,7 +52,7 @@ describe('rollbackInstallation', () => {
     } as any;
 
     await expect(
-      rollbackInstallation({ esClient, savedObjectsClient, pkgName, spaceId, spaceIds })
+      rollbackInstallation({ esClient, savedObjectsClient, pkgName, spaceId })
     ).rejects.toThrow('Package test-package not found');
   });
 
@@ -71,7 +70,7 @@ describe('rollbackInstallation', () => {
     } as any;
 
     await expect(
-      rollbackInstallation({ esClient, savedObjectsClient, pkgName, spaceId, spaceIds })
+      rollbackInstallation({ esClient, savedObjectsClient, pkgName, spaceId })
     ).rejects.toThrow('No previous version found for package test-package');
   });
 
@@ -89,7 +88,7 @@ describe('rollbackInstallation', () => {
     } as any;
 
     await expect(
-      rollbackInstallation({ esClient, savedObjectsClient, pkgName, spaceId, spaceIds })
+      rollbackInstallation({ esClient, savedObjectsClient, pkgName, spaceId })
     ).rejects.toThrow('test-package was not installed from the registry (install source: upload)');
   });
 
@@ -121,7 +120,7 @@ describe('rollbackInstallation', () => {
     } as any);
 
     await expect(
-      rollbackInstallation({ esClient, savedObjectsClient, pkgName, spaceId, spaceIds })
+      rollbackInstallation({ esClient, savedObjectsClient, pkgName, spaceId })
     ).rejects.toThrow('No previous version found for package policies: test-package-policy');
   });
 
@@ -163,9 +162,9 @@ describe('rollbackInstallation', () => {
     } as any);
 
     await expect(
-      rollbackInstallation({ esClient, savedObjectsClient, pkgName, spaceId, spaceIds })
+      rollbackInstallation({ esClient, savedObjectsClient, pkgName, spaceId })
     ).rejects.toThrow(
-      'Wrong previous version for package policies: test-package-policy:prev (version: 1.2.0, expected: 1.0.0)'
+      'Wrong previous version for package policies: test-package-policy (version: 1.2.0, expected: 1.0.0)'
     );
   });
 
@@ -208,7 +207,7 @@ describe('rollbackInstallation', () => {
     } as any);
 
     await expect(
-      rollbackInstallation({ esClient, savedObjectsClient, pkgName, spaceId, spaceIds })
+      rollbackInstallation({ esClient, savedObjectsClient, pkgName, spaceId })
     ).rejects.toThrow(
       'Failed to rollback package test-package to version 1.0.0: Installation failed'
     );
@@ -264,7 +263,7 @@ describe('rollbackInstallation', () => {
       ],
     } as any);
 
-    await rollbackInstallation({ esClient, savedObjectsClient, pkgName, spaceId, spaceIds });
+    await rollbackInstallation({ esClient, savedObjectsClient, pkgName, spaceId });
     expect(packagePolicyServiceMock.rollback).toHaveBeenCalled();
     expect(installPackage).toHaveBeenCalledWith({
       esClient,
