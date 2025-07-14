@@ -30,6 +30,7 @@ import {
   EuiButtonIcon,
   EuiText,
   EuiSpacer,
+  useEuiTheme,
 } from '@elastic/eui';
 
 import { Pipeline } from '../../../../common/types';
@@ -53,14 +54,15 @@ export const PipelineDetailsFlyout: FunctionComponent<Props> = ({
   onCloneClick,
   onDeleteClick,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const [showPopover, setShowPopover] = useState(false);
   const popoverActions = [
     /**
      * Clone pipeline
      */
     {
-      name: i18n.translate('xpack.ingestPipelines.list.pipelineDetails.cloneActionLabel', {
-        defaultMessage: 'Clone',
+      name: i18n.translate('xpack.ingestPipelines.list.pipelineDetails.duplicateActionLabel', {
+        defaultMessage: 'Duplicate',
       }),
       icon: <EuiIcon type="copy" />,
       onClick: () => onCloneClick(pipeline.name),
@@ -78,6 +80,7 @@ export const PipelineDetailsFlyout: FunctionComponent<Props> = ({
         setShowPopover(false);
         onDeleteClick([pipeline]);
       },
+      css: { color: euiTheme.colors.dangerText },
     },
   ];
 
@@ -259,6 +262,7 @@ export const PipelineDetailsFlyout: FunctionComponent<Props> = ({
                       items: popoverActions,
                     },
                   ]}
+                  css={{ width: '150px' }}
                 />
               </EuiPopover>
             </EuiFlexItem>
