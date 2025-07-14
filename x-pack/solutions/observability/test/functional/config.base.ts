@@ -10,29 +10,30 @@ import { FtrConfigProviderContext } from '@kbn/test';
 import { services } from './services';
 import { pageObjects } from './page_objects';
 
-export async function getApiIntegrationConfig({ readConfigFile }: FtrConfigProviderContext) {
-  const xPackPlatformApiIntegrationTestsConfig = await readConfigFile(
+export async function getFunctionalConfig({ readConfigFile }: FtrConfigProviderContext) {
+  const xPackPlatformFunctionalTestsConfig = await readConfigFile(
     require.resolve('@kbn/test-suites-xpack-platform/functional/config.base')
   );
 
   return {
+    ...xPackPlatformFunctionalTestsConfig.getAll(),
     services,
     pageObjects,
     testConfigCategory: ScoutTestRunConfigCategory.UI_TEST,
-    servers: xPackPlatformApiIntegrationTestsConfig.get('servers'),
-    security: xPackPlatformApiIntegrationTestsConfig.get('security'),
+    servers: xPackPlatformFunctionalTestsConfig.get('servers'),
+    security: xPackPlatformFunctionalTestsConfig.get('security'),
     junit: {
       reportName: 'X-Pack Observability Functional UI Tests',
     },
     kbnTestServer: {
-      ...xPackPlatformApiIntegrationTestsConfig.get('kbnTestServer'),
-      serverArgs: [...xPackPlatformApiIntegrationTestsConfig.get('kbnTestServer.serverArgs')],
+      ...xPackPlatformFunctionalTestsConfig.get('kbnTestServer'),
+      serverArgs: [...xPackPlatformFunctionalTestsConfig.get('kbnTestServer.serverArgs')],
     },
     esTestCluster: {
-      ...xPackPlatformApiIntegrationTestsConfig.get('esTestCluster'),
-      serverArgs: [...xPackPlatformApiIntegrationTestsConfig.get('esTestCluster.serverArgs')],
+      ...xPackPlatformFunctionalTestsConfig.get('esTestCluster'),
+      serverArgs: [...xPackPlatformFunctionalTestsConfig.get('esTestCluster.serverArgs')],
     },
   };
 }
 
-export default getApiIntegrationConfig;
+export default getFunctionalConfig;
