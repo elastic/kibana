@@ -411,6 +411,20 @@ module.exports = {
 
   overrides: [
     /**
+     * Disable parser for any dev code
+     */
+    {
+      files: DEV_PATTERNS,
+      parserOptions: {
+        sourceType: 'module',
+        ecmaVersion: 2018,
+        ecmaFeatures: {
+          jsx: true,
+        },
+        project: undefined,
+      },
+    },
+    /**
      * Temporarily disable some react rules for specific plugins, remove in separate PRs
      */
     {
@@ -1167,20 +1181,6 @@ module.exports = {
         ],
       },
     },
-    {
-      files: [
-        'x-pack/solutions/observability/plugins/apm/**/*.{js,mjs,ts,tsx}',
-        'x-pack/solutions/observability/plugins/apm_data_access/**/*.{js,mjs,ts,tsx}',
-        'x-pack/solutions/observability/plugins/infra/**/*.{js,mjs,ts,tsx}',
-        'x-pack/solutions/observability/plugins/inventory/**/*.{js,mjs,ts,tsx}',
-        'x-pack/solutions/observability/plugins/metrics_data_access/**/*.{js,mjs,ts,tsx}',
-        'x-pack/solutions/observability/plugins/profiling/**/*.{js,mjs,ts,tsx}',
-        'x-pack/solutions/observability/plugins/profiling_data_access/**/*.{js,mjs,ts,tsx}',
-      ],
-      rules: {
-        '@typescript-eslint/consistent-type-imports': 'error',
-      },
-    },
 
     /**
      * Fleet overrides
@@ -1190,7 +1190,6 @@ module.exports = {
       plugins: ['testing-library'],
       rules: {
         'testing-library/await-async-utils': 'error',
-        '@typescript-eslint/consistent-type-imports': 'error',
         'import/order': [
           'warn',
           {
@@ -1214,7 +1213,6 @@ module.exports = {
         'import/no-nodejs-modules': 'error',
         'no-duplicate-imports': 'off',
         'import/no-duplicates': 'error',
-        '@typescript-eslint/consistent-type-imports': 'error',
         'no-restricted-imports': [
           'error',
           {
@@ -1223,24 +1221,6 @@ module.exports = {
             paths: RESTRICTED_IMPORTS,
           },
         ],
-      },
-    },
-
-    /**
-     * ML overrides
-     */
-    {
-      files: [
-        'x-pack/platform/plugins/shared/aiops/**/*.{js,mjs,ts,tsx}',
-        'x-pack/platform/plugins/private/data_visualizer/**/*.{js,mjs,ts,tsx}',
-        'x-pack/platform/plugins/shared/ml/**/*.{js,mjs,ts,tsx}',
-        'x-pack/platform/plugins/private/transform/**/*.{js,mjs,ts,tsx}',
-        'x-pack/platform/packages/shared/ml/**/*.{js,mjs,ts,tsx}',
-        'x-pack/platform/packages/private/ml/**/*.{js,mjs,ts,tsx}',
-        'x-pack/platform/plugins/private/file_upload/**/*.{js,mjs,ts,tsx}',
-      ],
-      rules: {
-        '@typescript-eslint/consistent-type-imports': 'error',
       },
     },
 
@@ -1463,24 +1443,6 @@ module.exports = {
         'vars-on-top': 'error',
         'import/no-duplicates': ['error'],
       },
-      overrides: [
-        {
-          files: [
-            'x-pack/platform/plugins/shared/cases/**/*.{js,mjs,ts,tsx}',
-            'x-pack/solutions/security/plugins/ecs_data_quality_dashboard/**/*.{js,mjs,ts,tsx}',
-            'x-pack/solutions/security/plugins/security_solution/**/*.{js,mjs,ts,tsx}',
-            'x-pack/solutions/security/plugins/security_solution_ess/**/*.{js,mjs,ts,tsx}',
-            'x-pack/solutions/security/plugins/security_solution_serverless/**/*.{js,mjs,ts,tsx}',
-            'x-pack/solutions/security/packages/data-stream-adapter/**/*.{js,mjs,ts,tsx}',
-            'x-pack/solutions/security/packages/features/**/*.{js,mjs,ts,tsx}',
-            'x-pack/solutions/security/packages/navigation/**/*.{js,mjs,ts,tsx}',
-            'src/platform/packages/shared/kbn-cell-actions/**/*.{js,mjs,ts,tsx}',
-          ],
-          rules: {
-            '@typescript-eslint/consistent-type-imports': 'error',
-          },
-        },
-      ],
     },
     {
       files: ['x-pack/platform/plugins/shared/cases/public/**/*.{js,mjs,ts,tsx}'],
@@ -1781,42 +1743,6 @@ module.exports = {
         '@typescript-eslint/no-explicit-any': 'error',
       },
     },
-    /**
-     * ResponseOps overrides
-     */
-    {
-      files: [
-        'src/platform/packages/shared/response-ops/**/*.{ts, tsx}',
-        'x-pack/platform/plugins/shared/alerting/**/*.{ts,tsx}',
-        'x-pack/platform/plugins/shared/actions/**/*.{ts,tsx}',
-        'x-pack/platform/plugins/shared/stack_alerts/**/*.{ts, tsx}',
-        'x-pack/platform/plugins/shared/stack_connectors/**/*.{ts, tsx}',
-        'x-pack/platform/plugins/shared/triggers_actions_ui/**/*.{ts, tsx}',
-        'x-pack/platform/plugins/shared/event_log/**/*.{ts, tsx}',
-        'x-pack/platform/plugins/shared/rule_registry/**/*.{ts, tsx}',
-        'x-pack/platform/plugins/shared/task_manager/**/*.{ts, tsx}',
-        'x-pack/solutions/observability/packages/kbn-alerts-grouping/**/*.{ts, tsx}',
-        'src/platform/packages/shared/kbn-alerts-ui-shared/**/*.{ts, tsx}',
-        'src/platform/packages/shared/kbn-alerting-types/**/*.{ts, tsx}',
-        'src/platform/packages/shared/kbn-cases-components/**/*.{ts, tsx}',
-        'src/platform/packages/shared/kbn-actions-types/**/*.{ts, tsx}',
-        'src/platform/packages/shared/kbn-alerts-as-data-utils/**/*.{ts, tsx}',
-        'src/platform/packages/shared/kbn-grouping/**/*.{ts, tsx}',
-        'src/platform/packages/shared/kbn-rrule/**/*.{ts, tsx}',
-        'src/platform/packages/shared/kbn-rule-data-utils/**/*.{ts, tsx}',
-        'src/platform/packages/shared/kbn-triggers-actions-ui-types/**/*.{ts, tsx}',
-        'x-pack/platform/packages/shared/kbn-alerting-comparators/**/*.{ts, tsx}',
-        'x-pack/platform/plugins/shared/embeddable_alerts_table/**/*.{ts,tsx}',
-        'x-pack/platform/test/alerting_api_integration/**/*.{ts, tsx}',
-        'x-pack/platform/test/cases_api_integration/**/*.{ts, tsx}',
-        'x-pack/solutions/**/test/cases_api_integration/**/*.{ts, tsx}',
-        'x-pack/test/rule_registry/**/*.{ts, tsx}',
-        'x-pack/test/api_integration/apis/cases/**/*.{ts, tsx}',
-      ],
-      rules: {
-        '@typescript-eslint/consistent-type-imports': 'error',
-      },
-    },
 
     /**
      * Lens overrides
@@ -1837,7 +1763,6 @@ module.exports = {
         'src/platform/plugins/shared/saved_search/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
-        '@typescript-eslint/consistent-type-imports': 'error',
         '@typescript-eslint/no-explicit-any': 'error',
         '@typescript-eslint/ban-ts-comment': [
           'error',
@@ -2075,7 +2000,6 @@ module.exports = {
         'prefer-arrow-callback': 'error',
         'no-unused-vars': 'off',
         'react/prop-types': 'off',
-        '@typescript-eslint/consistent-type-imports': 'error',
         '@typescript-eslint/explicit-module-boundary-types': 'off',
       },
     },
@@ -2118,7 +2042,6 @@ module.exports = {
         'x-pack/platform/test/spaces_api_integration/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
-        '@typescript-eslint/consistent-type-imports': 1,
         'import/order': [
           // This rule sorts import declarations
           'error',

@@ -13,36 +13,35 @@ const eslintConfigPrettierRules = require('eslint-config-prettier').rules;
 // Due to the same reason we have to duplicate the "filter" option for "default" and other "selectors".
 const allowedNameRegexp = '^(UNSAFE_|_{1,3})|_{1,3}$';
 module.exports = {
+  parser: '@typescript-eslint/parser',
+
+  plugins: ['@typescript-eslint', 'ban', 'import', 'eslint-comments'],
+
+  env: {
+    es6: true,
+    node: true,
+    mocha: true,
+    browser: true,
+  },
+
+  parserOptions: {
+    sourceType: 'module',
+    ecmaVersion: 2018,
+    ecmaFeatures: {
+      jsx: true,
+    },
+    // NOTE: That is to avoid a known performance issue related with the `ts.Program` used by
+    // typescript eslint. As we are not using rules that need types information, we can safely
+    // disabling that feature setting the project to undefined. That issue is being addressed
+    // by the typescript eslint team. More info could be found here:
+    // https://github.com/typescript-eslint/typescript-eslint/issues/389
+    // https://github.com/typescript-eslint/typescript-eslint/issues/243
+    // https://github.com/typescript-eslint/typescript-eslint/pull/361
+    project: undefined,
+  },
   overrides: [
     {
       files: ['**/*.{ts,tsx}'],
-      parser: '@typescript-eslint/parser',
-
-      plugins: ['@typescript-eslint', 'ban', 'import', 'eslint-comments'],
-
-      env: {
-        es6: true,
-        node: true,
-        mocha: true,
-        browser: true,
-      },
-
-      parserOptions: {
-        sourceType: 'module',
-        ecmaVersion: 2018,
-        ecmaFeatures: {
-          jsx: true,
-        },
-        // NOTE: That is to avoid a known performance issue related with the `ts.Program` used by
-        // typescript eslint. As we are not using rules that need types information, we can safely
-        // disabling that feature setting the project to undefined. That issue is being addressed
-        // by the typescript eslint team. More info could be found here:
-        // https://github.com/typescript-eslint/typescript-eslint/issues/389
-        // https://github.com/typescript-eslint/typescript-eslint/issues/243
-        // https://github.com/typescript-eslint/typescript-eslint/pull/361
-        project: undefined,
-      },
-
       // NOTE: we can't override the extends option here to apply
       // all the recommend rules as it is not allowed yet
       // more info on: https://github.com/eslint/rfcs/pull/13 and
@@ -263,5 +262,83 @@ module.exports = {
         eslintConfigPrettierRules
       ),
     },
+    {
+      files: [
+        'x-pack/solutions/observability/plugins/apm/**/*.{ts,tsx}',
+        'x-pack/solutions/observability/plugins/apm_data_access/**/*.{ts,tsx}',
+        'x-pack/solutions/observability/plugins/infra/**/*.{ts,tsx}',
+        'x-pack/solutions/observability/plugins/inventory/**/*.{ts,tsx}',
+        'x-pack/solutions/observability/plugins/metrics_data_access/**/*.{ts,tsx}',
+        'x-pack/solutions/observability/plugins/profiling/**/*.{ts,tsx}',
+        'x-pack/solutions/observability/plugins/profiling_data_access/**/*.{ts,tsx}',
+        'x-pack/platform/plugins/shared/fleet/**/*.{ts,tsx}',
+        'x-pack/platform/plugins/shared/automatic_import/public/**/*.{ts,tsx}',
+        'x-pack/platform/plugins/shared/automatic_import/common/**/*.{ts,tsx}',
+        'x-pack/platform/plugins/shared/aiops/**/*.{ts,tsx}',
+        'x-pack/platform/plugins/private/data_visualizer/**/*.{ts,tsx}',
+        'x-pack/platform/plugins/shared/ml/**/*.{ts,tsx}',
+        'x-pack/platform/plugins/private/transform/**/*.{ts,tsx}',
+        'x-pack/platform/packages/shared/ml/**/*.{ts,tsx}',
+        'x-pack/platform/packages/private/ml/**/*.{ts,tsx}',
+        'x-pack/platform/plugins/private/file_upload/**/*.{ts,tsx}',
+        'x-pack/platform/plugins/shared/cases/**/*.{ts,tsx}',
+        'x-pack/solutions/security/plugins/ecs_data_quality_dashboard/**/*.{ts,tsx}',
+        'x-pack/solutions/security/plugins/security_solution/**/*.{ts,tsx}',
+        'x-pack/solutions/security/plugins/security_solution_ess/**/*.{ts,tsx}',
+        'x-pack/solutions/security/plugins/security_solution_serverless/**/*.{ts,tsx}',
+        'x-pack/solutions/security/packages/data-stream-adapter/**/*.{ts,tsx}',
+        'x-pack/solutions/security/packages/features/**/*.{ts,tsx}',
+        'x-pack/solutions/security/packages/navigation/**/*.{ts,tsx}',
+        'src/platform/packages/shared/kbn-cell-actions/**/*.{ts,tsx}',
+        'src/platform/packages/shared/response-ops/**/*.{ts,tsx}',
+        'x-pack/platform/plugins/shared/alerting/**/*.{ts,tsx}',
+        'x-pack/platform/plugins/shared/actions/**/*.{ts,tsx}',
+        'x-pack/platform/plugins/shared/stack_alerts/**/*.{ts,tsx}',
+        'x-pack/platform/plugins/shared/stack_connectors/**/*.{ts,tsx}',
+        'x-pack/platform/plugins/shared/triggers_actions_ui/**/*.{ts,tsx}',
+        'x-pack/platform/plugins/shared/event_log/**/*.{ts,tsx}',
+        'x-pack/platform/plugins/shared/rule_registry/**/*.{ts,tsx}',
+        'x-pack/platform/plugins/shared/task_manager/**/*.{ts,tsx}',
+        'x-pack/solutions/observability/packages/kbn-alerts-grouping/**/*.{ts,tsx}',
+        'src/platform/packages/shared/kbn-alerts-ui-shared/**/*.{ts,tsx}',
+        'src/platform/packages/shared/kbn-alerting-types/**/*.{ts,tsx}',
+        'src/platform/packages/shared/kbn-cases-components/**/*.{ts,tsx}',
+        'src/platform/packages/shared/kbn-actions-types/**/*.{ts,tsx}',
+        'src/platform/packages/shared/kbn-alerts-as-data-utils/**/*.{ts,tsx}',
+        'src/platform/packages/shared/kbn-grouping/**/*.{ts,tsx}',
+        'src/platform/packages/shared/kbn-rrule/**/*.{ts,tsx}',
+        'src/platform/packages/shared/kbn-rule-data-utils/**/*.{ts,tsx}',
+        'src/platform/packages/shared/kbn-triggers-actions-ui-types/**/*.{ts,tsx}',
+        'x-pack/platform/packages/shared/kbn-alerting-comparators/**/*.{ts,tsx}',
+        'x-pack/platform/plugins/shared/embeddable_alerts_table/**/*.{ts,tsx}',
+        'x-pack/platform/test/alerting_api_integration/**/*.{ts,tsx}',
+        'x-pack/platform/test/cases_api_integration/**/*.{ts,tsx}',
+        'x-pack/solutions/**/test/cases_api_integration/**/*.{ts,tsx}',
+        'x-pack/test/rule_registry/**/*.{ts,tsx}',
+        'x-pack/test/api_integration/apis/cases/**/*.{ts,tsx}',
+        'src/platform/plugins/shared/discover/**/*.{ts,tsx}',
+        'src/platform/plugins/shared/saved_search/**/*.{ts,tsx}',
+        'x-pack/platform/plugins/shared/osquery/**/*.{ts,tsx}',
+        'src/platform/plugins/private/interactive_setup/**/*.{ts,tsx}',
+        'src/platform/test/interactive_setup_api_integration/**/*.{ts,tsx}',
+        'src/platform/test/interactive_setup_functional/**/*.{ts,tsx}',
+        'packages/kbn-mock-idp-plugin/**/*.{ts,tsx}',
+        'src/platform/packages/private/kbn-mock-idp-utils/**/*.{ts,tsx}',
+        'src/platform/packages/shared/kbn-security-hardening/**/*.{ts,tsx}',
+        'src/platform/packages/shared/kbn-user-profile-components/**/*.{ts,tsx}',
+        'x-pack/platform/plugins/shared/encrypted_saved_objects/**/*.{ts,tsx}',
+        'x-pack/platform/test/encrypted_saved_objects_api_integration/**/*.{ts,tsx}',
+        'x-pack/platform/plugins/shared/security/**/*.{ts,tsx}',
+        'x-pack/platform/packages/private/security/**/*.{ts,tsx}',
+        'x-pack/platform/packages/shared/security/**/*.{ts,tsx}',
+        'x-pack/test/security_api_integration/**/*.{ts,tsx}',
+        'x-pack/test/security_functional/**/*.{ts,tsx}',
+        'x-pack/platform/plugins/shared/spaces/**/*.{ts,tsx}',
+        'x-pack/platform/test/spaces_api_integration/**/*.{ts,tsx}',
+      ],
+      rules: {
+        '@typescript-eslint/consistent-type-imports': 'error',
+      },
+    }
   ],
 };
