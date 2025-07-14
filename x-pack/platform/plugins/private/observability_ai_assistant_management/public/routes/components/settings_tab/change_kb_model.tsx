@@ -26,7 +26,6 @@ import {
 } from '@kbn/ai-assistant/src/utils/get_model_options_for_inference_endpoints';
 import { useInferenceEndpoints, UseKnowledgeBaseResult } from '@kbn/ai-assistant/src/hooks';
 import {
-  ELSER_IN_EIS_INFERENCE_ID,
   ELSER_ON_ML_NODE_INFERENCE_ID,
   KnowledgeBaseState,
   LEGACY_CUSTOM_INFERENCE_ID,
@@ -49,8 +48,7 @@ export function ChangeKbModel({ knowledgeBase }: { knowledgeBase: UseKnowledgeBa
 
   const currentlyDeployedInferenceId = useMemo(() => {
     if (knowledgeBase.status.value?.currentInferenceId === LEGACY_CUSTOM_INFERENCE_ID) {
-      const hasElserEIS = modelOptions.some((option) => option.key === ELSER_IN_EIS_INFERENCE_ID);
-      return hasElserEIS ? ELSER_IN_EIS_INFERENCE_ID : ELSER_ON_ML_NODE_INFERENCE_ID;
+      return ELSER_ON_ML_NODE_INFERENCE_ID;
     }
     return knowledgeBase.status.value?.currentInferenceId;
   }, [knowledgeBase.status.value?.currentInferenceId, modelOptions]);
@@ -237,9 +235,7 @@ export function ChangeKbModel({ knowledgeBase }: { knowledgeBase: UseKnowledgeBa
               !selectedInferenceId ||
               isKnowledgeBaseInLoadingState ||
               (knowledgeBase.status?.value?.endpoint?.inference_id === LEGACY_CUSTOM_INFERENCE_ID &&
-                [ELSER_ON_ML_NODE_INFERENCE_ID, ELSER_IN_EIS_INFERENCE_ID].includes(
-                  selectedInferenceId
-                )) ||
+                selectedInferenceId === ELSER_ON_ML_NODE_INFERENCE_ID) ||
               (knowledgeBase.status?.value?.kbState !== KnowledgeBaseState.NOT_INSTALLED &&
                 selectedInferenceId === knowledgeBase.status?.value?.endpoint?.inference_id &&
                 !doesModelNeedRedeployment)
