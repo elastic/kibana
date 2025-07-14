@@ -1201,14 +1201,6 @@
           },
           {
             "plugin": "canvas",
-            "path": "x-pack/platform/plugins/private/canvas/public/services/canvas_workpad_service.ts"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/platform/plugins/private/canvas/public/services/canvas_workpad_service.ts"
-          },
-          {
-            "plugin": "canvas",
             "path": "x-pack/platform/plugins/private/canvas/public/components/home/hooks/use_upload_workpad.ts"
           },
           {
@@ -1953,14 +1945,6 @@
           {
             "plugin": "lens",
             "path": "x-pack/platform/plugins/shared/lens/public/types.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/platform/plugins/shared/maps/public/routes/map_page/saved_map/load_from_library.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/platform/plugins/shared/maps/public/routes/map_page/saved_map/load_from_library.ts"
           },
           {
             "plugin": "maps",
