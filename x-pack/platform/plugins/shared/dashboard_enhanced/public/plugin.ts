@@ -13,6 +13,7 @@ import {
   EmbeddableStart,
 } from '@kbn/embeddable-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { DashboardStart } from '@kbn/dashboard-plugin/public';
 import {
   AdvancedUiActionsSetup,
   AdvancedUiActionsStart,
@@ -29,6 +30,7 @@ export interface SetupDependencies {
 
 export interface StartDependencies {
   uiActionsEnhanced: AdvancedUiActionsStart;
+  dashboard: DashboardStart;
   data: DataPublicPluginStart;
   embeddable: EmbeddableStart;
   share: SharePluginStart;
