@@ -1094,6 +1094,7 @@ describe('utils', () => {
             "_id",
           ],
           "search": "\\"b52e293e-4a37-4e67-9aa6-716bb6e69b42\\" \\"cases:b52e293e-4a37-4e67-9aa6-716bb6e69b42\\"",
+          "searchFields": Array [],
         }
       `);
     });
