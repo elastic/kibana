@@ -7,7 +7,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 
-import { ROUTE_VERSIONS } from '../../common';
+import { ROUTE_VERSIONS, SearchPlaygroundQueryKeys } from '../../common';
 import { APIRoutes, PlaygroundListResponse } from '../types';
 import { useKibana } from './use_kibana';
 
@@ -25,7 +25,7 @@ export const usePlaygroundsList = ({
   const { http } = useKibana().services;
 
   return useQuery({
-    queryKey: ['playgroundsList', page, sortField, sortOrder],
+    queryKey: [SearchPlaygroundQueryKeys.PlaygroundsList, page, sortField, sortOrder],
     queryFn: async () =>
       http.get<PlaygroundListResponse>(APIRoutes.GET_PLAYGROUNDS, {
         query: { page, sortField, sortOrder },

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import {
   formatDate,
   CriteriaWithPagination,
@@ -22,7 +23,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { PlaygroundListObject, PlaygroundListResponse } from '../../types';
 import { useKibana } from '../../hooks/use_kibana';
-import { PLUGIN_ID } from '../../../common';
+import { PLUGIN_ID, SearchPlaygroundQueryKeys } from '../../../common';
+import { DeletePlaygroundModal } from '../saved_playground/delete_playground_modal';
 
 export interface PlaygroundsTableProps {
   playgroundsData: PlaygroundListResponse;
@@ -37,13 +39,19 @@ export const PlaygroundsTable = ({
   sortField,
   sortDirection,
 }: PlaygroundsTableProps) => {
+  const [playgroundToDelete, setPlaygroundToDelete] = useState<PlaygroundListObject | null>(null);
   const { application } = useKibana().services;
+  const queryClient = useQueryClient();
   const onNavigateToPlayground = useCallback(
     (id: string) => {
       application?.navigateToApp(PLUGIN_ID, { path: `/p/${id}` });
     },
     [application]
   );
+  const onDeletePlaygroundSuccess = useCallback(() => {
+    setPlaygroundToDelete(null);
+    queryClient.invalidateQueries({ queryKey: [SearchPlaygroundQueryKeys.PlaygroundsList] });
+  }, [queryClient]);
   const columns: Array<EuiBasicTableColumn<PlaygroundListObject>> = useMemo(
     () => [
       {
@@ -70,6 +78,34 @@ export const PlaygroundsTable = ({
         render: (updatedAt: PlaygroundListObject['updatedAt']) =>
           updatedAt ? formatDate(updatedAt) : '---',
         sortable: true,
+      },
+      {
+        actions: [
+          {
+            name: i18n.translate(
+              'xpack.searchPlayground.playgroundsList.table.columns.actions.delete.title',
+              {
+                defaultMessage: 'Delete',
+              }
+            ),
+            description: (playground: PlaygroundListObject) =>
+              i18n.translate(
+                'xpack.searchPlayground.playgroundsList.table.columns.actions.delete.description',
+                {
+                  defaultMessage: 'Delete playground {name}',
+                  values: { name: playground.name },
+                }
+              ),
+            icon: 'trash',
+            color: 'danger',
+            type: 'icon',
+            'data-test-subj': 'playgroundsListTableDeleteActionButton',
+            isPrimary: true,
+            onClick: (playground: PlaygroundListObject) => {
+              setPlaygroundToDelete(playground);
+            },
+          },
+        ],
       },
     ],
     [onNavigateToPlayground]
@@ -114,9 +150,7 @@ export const PlaygroundsTable = ({
       </EuiText>
       <EuiSpacer size="s" />
       <EuiBasicTable
-        tableCaption={i18n.translate('xpack.searchPlayground.playgroundsList.table.caption', {
-          defaultMessage: 'Caption for playgrounds table', // TODO: fix copy
-        })}
+        data-test-subj="playgroundsTable"
         items={playgroundsData.items}
         columns={columns}
         pagination={{
@@ -128,6 +162,16 @@ export const PlaygroundsTable = ({
         sorting={sorting}
         onChange={onChange}
       />
+      {playgroundToDelete !== null && (
+        <DeletePlaygroundModal
+          playgroundId={playgroundToDelete.id}
+          playgroundName={playgroundToDelete.name}
+          onClose={() => {
+            setPlaygroundToDelete(null);
+          }}
+          onDeleteSuccess={onDeletePlaygroundSuccess}
+        />
+      )}
     </>
   );
 };

@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+export enum SearchPlaygroundQueryKeys {
+  PlaygroundsList = 'searchPlaygroundPlaygroundsList',
+}
+
 export enum SearchPlaygroundMutationKeys {
   DeletePlayground = 'searchPlaygroundDeletePlayground',
   SavePlayground = 'searchPlaygroundSavePlayground',
