@@ -2,9 +2,9 @@ steps:
   - group: 'Cypress MKI - Detection Engine'
     key: cypress_test_detections_engine
     steps:
-      - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:detection_engine
-        label: 'Cypress MKI - Detection Engine'
-        key: test_detection_engine
+      - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:detection_engine:alert_suppression
+        label: 'Cypress MKI - Alert Suppression'
+        key: test_detection_engine_alert_suppression
         env:
           BK_TEST_SUITE_KEY: 'serverless-cypress-detection-engine'
         agents:
@@ -14,10 +14,24 @@ steps:
           machineType: n2-standard-4
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
         timeout_in_minutes: 300
-        parallelism: 8
+        parallelism: 3
+
+      - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:detection_engine:detection_alerts
+        label: 'Cypress MKI - Detection Alerts'
+        key: test_detection_engine_detection_alerts
+        env:
+          BK_TEST_SUITE_KEY: 'serverless-cypress-detection-engine'
+        agents:
+          image: family/kibana-ubuntu-2004
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-4
+        # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
+        timeout_in_minutes: 300
+        parallelism: 2
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:detection_engine:exceptions
-        label: 'Cypress MKI - Detection Engine - Exceptions'
+        label: 'Cypress MKI - Exceptions'
         key: test_detection_engine_exceptions
         env:
           BK_TEST_SUITE_KEY: 'serverless-cypress-detection-engine'
@@ -26,9 +40,93 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
-          # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
+        # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
         timeout_in_minutes: 300
-        parallelism: 6
+        parallelism: 4
+
+      - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:detection_engine:overview
+        label: 'Cypress MKI - Overview'
+        key: test_detection_engine_overview
+        env:
+          BK_TEST_SUITE_KEY: 'serverless-cypress-detection-engine'
+        agents:
+          image: family/kibana-ubuntu-2004
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-4
+        # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
+        timeout_in_minutes: 300
+        parallelism: 1
+
+      - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:detection_engine:rule_actions
+        label: 'Cypress MKI - Rule Actions'
+        key: test_detection_engine_rule_actions
+        env:
+          BK_TEST_SUITE_KEY: 'serverless-cypress-detection-engine'
+        agents:
+          image: family/kibana-ubuntu-2004
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-4
+        # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
+        timeout_in_minutes: 300
+        parallelism: 1
+
+      - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:detection_engine:rule_creation
+        label: 'Cypress MKI - Rule Creation'
+        key: test_detection_engine_rule_creation
+        env:
+          BK_TEST_SUITE_KEY: 'serverless-cypress-detection-engine'
+        agents:
+          image: family/kibana-ubuntu-2004
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-4
+        # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
+        timeout_in_minutes: 300
+        parallelism: 3
+
+      - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:detection_engine:rule_edit
+        label: 'Cypress MKI - Rule Edit'
+        key: test_detection_engine_rule_edit
+        env:
+          BK_TEST_SUITE_KEY: 'serverless-cypress-detection-engine'
+        agents:
+          image: family/kibana-ubuntu-2004
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-4
+        # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
+        timeout_in_minutes: 300
+        parallelism: 1
+
+      - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:detection_engine:rule_gaps
+        label: 'Cypress MKI - Rule Gaps'
+        key: test_detection_engine_rule_gaps
+        env:
+          BK_TEST_SUITE_KEY: 'serverless-cypress-detection-engine'
+        agents:
+          image: family/kibana-ubuntu-2004
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-4
+        # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
+        timeout_in_minutes: 300
+        parallelism: 1
+
+      - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:detection_engine:value_lists
+        label: 'Cypress MKI - Value Lists'
+        key: test_detection_engine_value_lists
+        env:
+          BK_TEST_SUITE_KEY: 'serverless-cypress-detection-engine'
+        agents:
+          image: family/kibana-ubuntu-2004
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-4
+        # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
+        timeout_in_minutes: 300
+        parallelism: 1
 
   - group: 'API MKI - Detection Engine - '
     key: api_test_detections_engine
