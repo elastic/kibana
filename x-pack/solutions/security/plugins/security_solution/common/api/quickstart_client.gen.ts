@@ -284,6 +284,7 @@ import type {
 } from './entity_analytics/privilege_monitoring/monitoring_entity_source/monitoring_entity_source.gen';
 import type { InstallPrivilegedAccessDetectionPackageResponse } from './entity_analytics/privilege_monitoring/privileged_access_detection/install.gen';
 import type { GetPrivilegedAccessDetectionPackageStatusResponse } from './entity_analytics/privilege_monitoring/privileged_access_detection/status.gen';
+import type { PrivMonPrivilegesResponse } from './entity_analytics/privilege_monitoring/privileges.gen';
 import type {
   CreatePrivMonUserRequestBodyInput,
   CreatePrivMonUserResponse,
@@ -2192,6 +2193,21 @@ The edit action is idempotent, meaning that if you add a tag to a rule that alre
     return this.kbnClient
       .request<PrivMonHealthResponse>({
         path: '/api/entity_analytics/monitoring/privileges/health',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'GET',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Check if the current user has all required permissions for Privilege Monitoring
+   */
+  async privMonPrivileges() {
+    this.log.info(`${new Date().toISOString()} Calling API PrivMonPrivileges`);
+    return this.kbnClient
+      .request<PrivMonPrivilegesResponse>({
+        path: '/api/entity_analytics/monitoring/privileges/privileges',
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
