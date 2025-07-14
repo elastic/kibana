@@ -13,6 +13,7 @@ import type { ExportShare, SharePluginSetup } from '@kbn/share-plugin/public';
 import { ContentSourceLoader } from '@kbn/content-management-content-source';
 import type { DashboardApi } from '../dashboard_api/types';
 import { coreServices, untilPluginStartServicesReady } from '../services/kibana_services';
+import { DASHBOARD_APP_ID } from '../../common/constants';
 
 export interface DashboardSharingData {
   getSerializedState: DashboardApi['getSerializedState'];
@@ -26,7 +27,7 @@ export const registerDashboardExportIntegration = async (shareSetup: SharePlugin
     false
   );
   if (dashboardJsonEnabled) {
-    shareSetup.registerShareIntegration<ExportShare>(dashboardExportProvider());
+    shareSetup.registerShareIntegration<ExportShare>(DASHBOARD_APP_ID, dashboardExportProvider());
   }
 };
 
