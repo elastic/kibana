@@ -11,6 +11,7 @@ import type { ESQLAst, ESQLCommand, ESQLMessage } from '../../../types';
 import { isColumn, isOptionNode } from '../../../ast/is';
 import { isNumericType } from '../../../definitions/types';
 import type { ICommandContext } from '../../types';
+import { validateCommandArguments } from '../../../definitions/utils/validation';
 
 export const validate = (
   command: ESQLCommand,
@@ -75,6 +76,8 @@ export const validate = (
       }
     });
   }
+
+  messages.push(...validateCommandArguments(command, ast, context));
 
   return messages;
 };
