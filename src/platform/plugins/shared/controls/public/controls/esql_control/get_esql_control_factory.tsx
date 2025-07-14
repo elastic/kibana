@@ -10,12 +10,12 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { BehaviorSubject, merge } from 'rxjs';
-import { apiPublishesESQLVariables } from '@kbn/esql-types';
+import { apiPublishesESQLVariables, ESQLControlState } from '@kbn/esql-types';
 import { apiHasParentApi, initializeStateManager } from '@kbn/presentation-publishing';
 import { initializeUnsavedChanges, tracksOverlays } from '@kbn/presentation-containers';
 import { OptionsListSelection } from '../../../common/options_list';
 import { ESQL_CONTROL } from '../../../common';
-import type { ESQLControlApi, ESQLControlState } from './types';
+import type { ESQLControlApi } from './types';
 import { ControlFactory } from '../types';
 import { uiActionsService } from '../../services/kibana_services';
 import {

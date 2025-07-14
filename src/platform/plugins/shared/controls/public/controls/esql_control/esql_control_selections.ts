@@ -11,6 +11,7 @@ import { BehaviorSubject, combineLatest, debounceTime, filter, map, merge, switc
 import { ESQLVariableType } from '@kbn/esql-types';
 import { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
 import { DataViewField } from '@kbn/data-views-plugin/common';
+import { ESQLControlVariable, ESQLControlState, EsqlControlType } from '@kbn/esql-types';
 import {
   OptionsListSearchTechnique,
   OptionsListSelection,
@@ -19,7 +20,6 @@ import {
 import { dataService } from '../../services/kibana_services';
 import { ControlGroupApi } from '../../control_group/types';
 import { getESQLSingleColumnValues } from './utils/get_esql_single_column_values';
-import { ESQLControlVariable, ESQLControlState, EsqlControlType } from './types';
 
 function selectedOptionsComparatorFunction(a?: OptionsListSelection[], b?: OptionsListSelection[]) {
   return deepEqual(a ?? [], b ?? []);
