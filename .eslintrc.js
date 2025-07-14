@@ -410,20 +410,20 @@ module.exports = {
   extends: ['@kbn/eslint-config'],
 
   overrides: [
-    /**
-     * Disable parser for any dev code
-     */
-    {
-      files: DEV_PATTERNS,
-      parserOptions: {
-        sourceType: 'module',
-        ecmaVersion: 2018,
-        ecmaFeatures: {
-          jsx: true,
-        },
-        project: undefined,
-      },
-    },
+    // /**
+    //  * Disable parser for any dev code
+    //  */
+    // {
+    //   files: DEV_PATTERNS,
+    //   parserOptions: {
+    //     sourceType: 'module',
+    //     ecmaVersion: 2018,
+    //     ecmaFeatures: {
+    //       jsx: true,
+    //     },
+    //     project: undefined,
+    //   },
+    // },
     /**
      * Temporarily disable some react rules for specific plugins, remove in separate PRs
      */
@@ -1181,6 +1181,20 @@ module.exports = {
         ],
       },
     },
+    {
+      files: [
+        'x-pack/solutions/observability/plugins/apm/**/*.{ts,tsx}',
+        'x-pack/solutions/observability/plugins/apm_data_access/**/*.{ts,tsx}',
+        'x-pack/solutions/observability/plugins/infra/**/*.{ts,tsx}',
+        'x-pack/solutions/observability/plugins/inventory/**/*.{ts,tsx}',
+        'x-pack/solutions/observability/plugins/metrics_data_access/**/*.{ts,tsx}',
+        'x-pack/solutions/observability/plugins/profiling/**/*.{ts,tsx}',
+        'x-pack/solutions/observability/plugins/profiling_data_access/**/*.{ts,tsx}',
+      ],
+      rules: {
+        '@typescript-eslint/consistent-type-imports': 'error',
+      },
+    },
 
     /**
      * Fleet overrides
@@ -1221,6 +1235,33 @@ module.exports = {
             paths: RESTRICTED_IMPORTS,
           },
         ],
+      },
+    },
+    {
+      files: [
+        'x-pack/platform/plugins/shared/automatic_import/public/**/*.{ts,tsx}',
+        'x-pack/platform/plugins/shared/automatic_import/common/**/*.{ts,tsx}',
+      ],
+      rules: {
+        '@typescript-eslint/consistent-type-imports': 'error',
+      },
+    },
+
+    /**
+     * ML overrides
+     */
+    {
+      files: [
+        'x-pack/platform/plugins/shared/aiops/**/*.{ts,tsx}',
+        'x-pack/platform/plugins/private/data_visualizer/**/*.{ts,tsx}',
+        'x-pack/platform/plugins/shared/ml/**/*.{ts,tsx}',
+        'x-pack/platform/plugins/private/transform/**/*.{ts,tsx}',
+        'x-pack/platform/packages/shared/ml/**/*.{ts,tsx}',
+        'x-pack/platform/packages/private/ml/**/*.{ts,tsx}',
+        'x-pack/platform/plugins/private/file_upload/**/*.{ts,tsx}',
+      ],
+      rules: {
+        '@typescript-eslint/consistent-type-imports': 'error',
       },
     },
 
@@ -1443,6 +1484,24 @@ module.exports = {
         'vars-on-top': 'error',
         'import/no-duplicates': ['error'],
       },
+      overrides: [
+        {
+          files: [
+            'x-pack/platform/plugins/shared/cases/**/*.{ts,tsx}',
+            'x-pack/solutions/security/plugins/ecs_data_quality_dashboard/**/*.{ts,tsx}',
+            'x-pack/solutions/security/plugins/security_solution/**/*.{ts,tsx}',
+            'x-pack/solutions/security/plugins/security_solution_ess/**/*.{ts,tsx}',
+            'x-pack/solutions/security/plugins/security_solution_serverless/**/*.{ts,tsx}',
+            'x-pack/solutions/security/packages/data-stream-adapter/**/*.{ts,tsx}',
+            'x-pack/solutions/security/packages/features/**/*.{ts,tsx}',
+            'x-pack/solutions/security/packages/navigation/**/*.{ts,tsx}',
+            'src/platform/packages/shared/kbn-cell-actions/**/*.{ts,tsx}',
+          ],
+          rules: {
+            '@typescript-eslint/consistent-type-imports': 'error',
+          },
+        },
+      ],
     },
     {
       files: ['x-pack/platform/plugins/shared/cases/public/**/*.{js,mjs,ts,tsx}'],
@@ -1743,6 +1802,42 @@ module.exports = {
         '@typescript-eslint/no-explicit-any': 'error',
       },
     },
+    /**
+     * ResponseOps overrides
+     */
+    {
+      files: [
+        'src/platform/packages/shared/response-ops/**/*.{ts, tsx}',
+        'x-pack/platform/plugins/shared/alerting/**/*.{ts,tsx}',
+        'x-pack/platform/plugins/shared/actions/**/*.{ts,tsx}',
+        'x-pack/platform/plugins/shared/stack_alerts/**/*.{ts, tsx}',
+        'x-pack/platform/plugins/shared/stack_connectors/**/*.{ts, tsx}',
+        'x-pack/platform/plugins/shared/triggers_actions_ui/**/*.{ts, tsx}',
+        'x-pack/platform/plugins/shared/event_log/**/*.{ts, tsx}',
+        'x-pack/platform/plugins/shared/rule_registry/**/*.{ts, tsx}',
+        'x-pack/platform/plugins/shared/task_manager/**/*.{ts, tsx}',
+        'x-pack/solutions/observability/packages/kbn-alerts-grouping/**/*.{ts, tsx}',
+        'src/platform/packages/shared/kbn-alerts-ui-shared/**/*.{ts, tsx}',
+        'src/platform/packages/shared/kbn-alerting-types/**/*.{ts, tsx}',
+        'src/platform/packages/shared/kbn-cases-components/**/*.{ts, tsx}',
+        'src/platform/packages/shared/kbn-actions-types/**/*.{ts, tsx}',
+        'src/platform/packages/shared/kbn-alerts-as-data-utils/**/*.{ts, tsx}',
+        'src/platform/packages/shared/kbn-grouping/**/*.{ts, tsx}',
+        'src/platform/packages/shared/kbn-rrule/**/*.{ts, tsx}',
+        'src/platform/packages/shared/kbn-rule-data-utils/**/*.{ts, tsx}',
+        'src/platform/packages/shared/kbn-triggers-actions-ui-types/**/*.{ts, tsx}',
+        'x-pack/platform/packages/shared/kbn-alerting-comparators/**/*.{ts, tsx}',
+        'x-pack/platform/plugins/shared/embeddable_alerts_table/**/*.{ts,tsx}',
+        'x-pack/platform/test/alerting_api_integration/**/*.{ts, tsx}',
+        'x-pack/platform/test/cases_api_integration/**/*.{ts, tsx}',
+        'x-pack/solutions/**/test/cases_api_integration/**/*.{ts, tsx}',
+        'x-pack/test/rule_registry/**/*.{ts, tsx}',
+        'x-pack/test/api_integration/apis/cases/**/*.{ts, tsx}',
+      ],
+      rules: {
+        '@typescript-eslint/consistent-type-imports': 'error',
+      },
+    },
 
     /**
      * Lens overrides
@@ -1770,6 +1865,15 @@ module.exports = {
             'ts-expect-error': false,
           },
         ],
+      },
+    },
+    {
+      files: [
+        'src/platform/plugins/shared/discover/**/*.{ts,tsx}',
+        'src/platform/plugins/shared/saved_search/**/*.{ts,tsx}',
+      ],
+      rules: {
+        '@typescript-eslint/consistent-type-imports': 'error',
       },
     },
 
@@ -2004,6 +2108,12 @@ module.exports = {
       },
     },
     {
+      files: ['x-pack/platform/plugins/shared/osquery/**/*.{ts,tsx}'],
+      rules: {
+        '@typescript-eslint/consistent-type-imports': 'error',
+      },
+    },
+    {
       // typescript and javascript for front end react performance
       files: ['x-pack/platform/plugins/shared/osquery/public/**/!(*.test).{js,mjs,ts,tsx}'],
       plugins: ['react', 'react-perf'],
@@ -2079,6 +2189,33 @@ module.exports = {
             ignoreDeclarationSort: true,
           },
         ],
+      },
+    },
+    {
+      files: [
+        'src/platform/plugins/private/interactive_setup/**/*.{ts,tsx}',
+        'src/platform/test/interactive_setup_api_integration/**/*.{ts,tsx}',
+        'src/platform/test/interactive_setup_functional/**/*.{ts,tsx}',
+
+        'packages/kbn-mock-idp-plugin/**/*.{ts,tsx}',
+        'src/platform/packages/private/kbn-mock-idp-utils/**/*.{ts,tsx}',
+        'src/platform/packages/shared/kbn-security-hardening/**/*.{ts,tsx}',
+        'src/platform/packages/shared/kbn-user-profile-components/**/*.{ts,tsx}',
+
+        'x-pack/platform/plugins/shared/encrypted_saved_objects/**/*.{ts,tsx}',
+        'x-pack/platform/test/encrypted_saved_objects_api_integration/**/*.{ts,tsx}',
+
+        'x-pack/platform/plugins/shared/security/**/*.{ts,tsx}',
+        'x-pack/platform/packages/private/security/**/*.{ts,tsx}',
+        'x-pack/platform/packages/shared/security/**/*.{ts,tsx}',
+        'x-pack/test/security_api_integration/**/*.{ts,tsx}',
+        'x-pack/test/security_functional/**/*.{ts,tsx}',
+
+        'x-pack/platform/plugins/shared/spaces/**/*.{ts,tsx}',
+        'x-pack/platform/test/spaces_api_integration/**/*.{ts,tsx}',
+      ],
+      rules: {
+        '@typescript-eslint/consistent-type-imports': 1,
       },
     },
 
