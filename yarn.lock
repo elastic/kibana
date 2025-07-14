@@ -2128,6 +2128,8 @@
 
 "@elastic/ecs@^9.0.0":
   version "9.0.0"
+  resolved "https://registry.yarnpkg.com/@elastic/ecs/-/ecs-9.0.0.tgz#5599c87f72a1b2137467f80c158777ff5c4fdd81"
+  integrity sha512-FVFOFGgo8D2XoYs/2M9gaC76VzKhMKkrVqnGkbuQAB0CKoAFy9k5I2K7IMmDs6l4R5OVFiJk6uwfLiTXyHyjDA==
 
 "@elastic/elasticsearch-types@npm:@elastic/elasticsearch@^8.2.1":
   version "8.6.0"
