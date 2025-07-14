@@ -14,7 +14,6 @@ import {
   ESQLFunction,
   ESQLLiteral,
   ESQLParamLiteral,
-  isBinaryExpression,
   isColumn,
   isFunctionExpression,
   isParamLiteral,
@@ -123,7 +122,13 @@ export class ParameterReplacer {
       return node;
     }
 
-    if (node.paramKind === '??' || (node.paramKind === '?' && !isBinaryExpression(parent))) {
+    if (
+      node.paramKind === '??' ||
+      (parent &&
+        node.paramKind === '?' &&
+        isFunctionExpression(parent) &&
+        parent.subtype === 'variadic-call')
+    ) {
       return Builder.identifier(String(value));
     }
 

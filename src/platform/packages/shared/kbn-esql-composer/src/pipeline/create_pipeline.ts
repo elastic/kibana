@@ -38,13 +38,13 @@ export function createPipeline(source: Query): QueryPipeline {
   };
 
   const pipeIf = (
-    condition: boolean,
+    condition: boolean | (() => boolean),
     ...operators: Array<(query: Query) => Query>
   ): QueryPipeline => {
-    if (!condition) {
-      return createPipeline(source);
+    if (typeof condition === 'function' ? condition() : condition) {
+      return pipe(...operators);
     }
-    return pipe(...operators);
+    return createPipeline(source);
   };
 
   return {
