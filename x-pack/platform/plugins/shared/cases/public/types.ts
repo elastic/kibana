@@ -188,4 +188,3 @@ export type CaseAttachmentsWithoutOwner = CaseAttachmentWithoutOwner[];
 export type { LensProps } from './components/visualizations/types';
 
 export type ServerError = IHttpFetchError<ResponseErrorBody>;
-export type GetRuleIdFromEvent = typeof getRuleIdFromEvent;

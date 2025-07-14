@@ -47,6 +47,5 @@
     "@kbn/core-user-profile-browser-mocks",
     "@kbn/utility-types-jest",
     "@kbn/utility-types",
-    "@kbn/cases-plugin",
   ]
 }
