@@ -1188,7 +1188,7 @@
     "commander": "^4.1.1",
     "constate": "^3.3.3",
     "copy-to-clipboard": "^3.3.3",
-    "core-js": "^3.42.0",
+    "core-js": "^3.44.0",
     "cronstrue": "^1.51.0",
     "css-box-model": "^1.2.1",
     "css.escape": "^1.5.1",
