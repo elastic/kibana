@@ -24,140 +24,213 @@ import {
   configurationSchema as esqlConfigSchema,
   configurationUpdateSchema as esqlConfigUpdateSchema,
 } from '../services/tools/esql/schemas';
+import { getTechnicalPreviewWarning } from './utils';
+
+const TECHNICAL_PREVIEW_WARNING = getTechnicalPreviewWarning('Elastic Tool API');
 
 export function registerToolsRoutes({ router, getInternalServices, logger }: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
 
   // list tools API
-  router.get(
-    {
+  router.versioned
+    .get({
       path: '/api/chat/tools',
       security: {
         authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
       },
-      validate: false,
-    },
-    wrapHandler(async (ctx, request, response) => {
-      const { tools: toolService } = getInternalServices();
-      const registry = await toolService.getRegistry({ request });
-      const tools = await registry.list({});
-      return response.ok<ListToolsResponse>({
-        body: {
-          results: tools.map(toolToDescriptor),
+      access: 'public',
+      summary: 'List tools',
+      description: TECHNICAL_PREVIEW_WARNING,
+      options: {
+        tags: ['tools'],
+        availability: {
+          stability: 'experimental',
         },
-      });
+      },
     })
-  );
+    .addVersion(
+      { version: '2023-10-31', validate: false },
+      wrapHandler(async (ctx, request, response) => {
+        const { tools: toolService } = getInternalServices();
+        const registry = await toolService.getRegistry({ request });
+        const tools = await registry.list({});
+        return response.ok<ListToolsResponse>({
+          body: {
+            results: tools.map(toolToDescriptor),
+          },
+        });
+      })
+    );
 
   // get tool by ID
-  router.get(
-    {
+  router.versioned
+    .get({
       path: '/api/chat/tools/{id}',
       security: {
         authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
       },
-      validate: {
-        params: schema.object({
-          id: schema.string(),
-        }),
+      access: 'public',
+      summary: 'Get a tool by id',
+      description: TECHNICAL_PREVIEW_WARNING,
+      options: {
+        tags: ['tools'],
+        availability: {
+          stability: 'experimental',
+        },
       },
-    },
-    wrapHandler(async (ctx, request, response) => {
-      const { id } = request.params;
-      const { tools: toolService } = getInternalServices();
-      const registry = await toolService.getRegistry({ request });
-      const tool = await registry.get(id);
-      return response.ok<GetToolResponse>({
-        body: toolToDescriptor(tool),
-      });
     })
-  );
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: {
+            params: schema.object({
+              id: schema.string(),
+            }),
+          },
+        },
+      },
+      wrapHandler(async (ctx, request, response) => {
+        const { id } = request.params;
+        const { tools: toolService } = getInternalServices();
+        const registry = await toolService.getRegistry({ request });
+        const tool = await registry.get(id);
+        return response.ok<GetToolResponse>({
+          body: toolToDescriptor(tool),
+        });
+      })
+    );
 
   // create tool
-  router.post(
-    {
+  router.versioned
+    .post({
       path: '/api/chat/tools',
       security: {
         authz: { requiredPrivileges: [apiPrivileges.manageOnechat] },
       },
-      validate: {
-        body: schema.object({
-          id: schema.string(),
-          type: schema.maybe(schema.oneOf([schema.literal(ToolType.esql)])),
-          description: schema.string({ defaultValue: '' }),
-          tags: schema.arrayOf(schema.string(), { defaultValue: [] }),
-          configuration: esqlConfigSchema,
-        }),
+      access: 'public',
+      summary: 'Create a tool',
+      description: TECHNICAL_PREVIEW_WARNING,
+      options: {
+        tags: ['tools'],
+        availability: {
+          stability: 'experimental',
+        },
       },
-    },
-    wrapHandler(async (ctx, request, response) => {
-      const { tools: toolService } = getInternalServices();
-      const payload: CreateToolPayload = request.body;
-      const createRequest = {
-        ...payload,
-        type: payload.type ?? ToolType.esql,
-      };
-      const registry = await toolService.getRegistry({ request });
-      const tool = await registry.create(createRequest);
-      return response.ok<CreateToolResponse>({
-        body: toolToDescriptor(tool),
-      });
     })
-  );
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: {
+            body: schema.object({
+              id: schema.string(),
+              type: schema.maybe(schema.oneOf([schema.literal(ToolType.esql)])),
+              description: schema.string({ defaultValue: '' }),
+              tags: schema.arrayOf(schema.string(), { defaultValue: [] }),
+              configuration: esqlConfigSchema,
+            }),
+          },
+        },
+      },
+      wrapHandler(async (ctx, request, response) => {
+        const { tools: toolService } = getInternalServices();
+        const payload: CreateToolPayload = request.body;
+        const createRequest = {
+          ...payload,
+          type: payload.type ?? ToolType.esql,
+        };
+        const registry = await toolService.getRegistry({ request });
+        const tool = await registry.create(createRequest);
+        return response.ok<CreateToolResponse>({
+          body: toolToDescriptor(tool),
+        });
+      })
+    );
 
   // update tool
-  router.put(
-    {
+  router.versioned
+    .put({
       path: '/api/chat/tools/{toolId}',
       security: {
         authz: { requiredPrivileges: [apiPrivileges.manageOnechat] },
       },
-      validate: {
-        params: schema.object({
-          toolId: schema.string(),
-        }),
-        body: schema.object({
-          description: schema.maybe(schema.string()),
-          tags: schema.maybe(schema.arrayOf(schema.string())),
-          configuration: schema.maybe(esqlConfigUpdateSchema),
-        }),
+      access: 'public',
+      summary: 'Update a tool',
+      description: TECHNICAL_PREVIEW_WARNING,
+      options: {
+        tags: ['tools'],
+        availability: {
+          stability: 'experimental',
+        },
       },
-    },
-    wrapHandler(async (ctx, request, response) => {
-      const { tools: toolService } = getInternalServices();
-      const { toolId } = request.params;
-      const update: UpdateToolPayload = request.body;
-      const registry = await toolService.getRegistry({ request });
-      const tool = await registry.update(toolId, update);
-      return response.ok<UpdateToolResponse>({
-        body: toolToDescriptor(tool),
-      });
     })
-  );
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: {
+            params: schema.object({
+              toolId: schema.string(),
+            }),
+            body: schema.object({
+              description: schema.maybe(schema.string()),
+              tags: schema.maybe(schema.arrayOf(schema.string())),
+              configuration: schema.maybe(esqlConfigUpdateSchema),
+            }),
+          },
+        },
+      },
+      wrapHandler(async (ctx, request, response) => {
+        const { tools: toolService } = getInternalServices();
+        const { toolId } = request.params;
+        const update: UpdateToolPayload = request.body;
+        const registry = await toolService.getRegistry({ request });
+        const tool = await registry.update(toolId, update);
+        return response.ok<UpdateToolResponse>({
+          body: toolToDescriptor(tool),
+        });
+      })
+    );
 
   // delete tool
-  router.delete(
-    {
+  router.versioned
+    .delete({
       path: '/api/chat/tools/{id}',
       security: {
         authz: { requiredPrivileges: [apiPrivileges.manageOnechat] },
       },
-      validate: {
-        params: schema.object({
-          id: schema.string(),
-        }),
+      access: 'public',
+      summary: 'Delete a tool',
+      description: TECHNICAL_PREVIEW_WARNING,
+      options: {
+        tags: ['tools'],
+        availability: {
+          stability: 'experimental',
+        },
       },
-    },
-    wrapHandler(async (ctx, request, response) => {
-      const { id } = request.params;
-      const { tools: toolService } = getInternalServices();
-      const registry = await toolService.getRegistry({ request });
-      const success = await registry.delete(id);
-      return response.ok<DeleteToolResponse>({
-        body: { success },
-      });
     })
-  );
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: {
+            params: schema.object({
+              id: schema.string(),
+            }),
+          },
+        },
+      },
+      wrapHandler(async (ctx, request, response) => {
+        const { id } = request.params;
+        const { tools: toolService } = getInternalServices();
+        const registry = await toolService.getRegistry({ request });
+        const success = await registry.delete(id);
+        return response.ok<DeleteToolResponse>({
+          body: { success },
+        });
+      })
+    );
 
   // execute a tool
   router.versioned
