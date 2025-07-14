@@ -20,12 +20,12 @@ import { StreamsAppServices } from '../../services/types';
 import { KbnUrlStateStorageFromRouterProvider } from '../../util/kbn_url_state_context';
 
 export function AppRoot({
-                          coreStart,
-                          pluginsStart,
-                          services,
-                          appMountParameters,
-                          isServerless,
-                        }: {
+  coreStart,
+  pluginsStart,
+  services,
+  appMountParameters,
+  isServerless,
+}: {
   coreStart: CoreStart;
   pluginsStart: StreamsAppStartDependencies;
   services: StreamsAppServices;
