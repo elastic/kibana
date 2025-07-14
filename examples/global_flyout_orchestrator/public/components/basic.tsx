@@ -30,7 +30,7 @@ import { TYPES } from '@elastic/eui/src/components/flyout/flyout';
 type EuiFlyoutType = (typeof TYPES)[number];
 
 const BasicFlyoutContent: React.FC = () => {
-  const { clearHistory } = useEuiFlyoutSession();
+  const { closeSession } = useEuiFlyoutSession();
   return (
     <>
       <EuiFlyoutHeader hasBorder>
@@ -47,7 +47,7 @@ const BasicFlyoutContent: React.FC = () => {
         </EuiText>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
-        <EuiButton color="danger" onClick={clearHistory}>
+        <EuiButton color="danger" onClick={closeSession}>
           Close Flyout
         </EuiButton>
       </EuiFlyoutFooter>

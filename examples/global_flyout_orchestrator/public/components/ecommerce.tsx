@@ -51,7 +51,7 @@ const ShoppingCartContent: React.FC<ShoppingCartContentProps> = ({
   itemQuantity,
   onQuantityChange,
 }) => {
-  const { openChildFlyout, openSystemFlyout, closeChildFlyout, clearHistory, isChildFlyoutOpen } =
+  const { openChildFlyout, openSystemFlyout, closeChildFlyout, closeSession, isChildFlyoutOpen } =
     useEuiFlyoutSession();
 
   const handleOpenItemDetails = () => {
@@ -124,7 +124,7 @@ const ShoppingCartContent: React.FC<ShoppingCartContentProps> = ({
         </EuiButton>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
-        <EuiButton onClick={clearHistory} color="danger">
+        <EuiButton onClick={closeSession} color="danger">
           Close
         </EuiButton>
       </EuiFlyoutFooter>
@@ -133,7 +133,7 @@ const ShoppingCartContent: React.FC<ShoppingCartContentProps> = ({
 };
 
 const ReviewOrderContent: React.FC<ReviewOrderContentProps> = ({ itemQuantity }) => {
-  const { clearHistory } = useEuiFlyoutSession();
+  const { closeSession } = useEuiFlyoutSession();
 
   return (
     <>
@@ -153,7 +153,7 @@ const ReviewOrderContent: React.FC<ReviewOrderContentProps> = ({ itemQuantity })
         </EuiButton>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
-        <EuiButton onClick={clearHistory} color="danger">
+        <EuiButton onClick={closeSession} color="danger">
           Close
         </EuiButton>
       </EuiFlyoutFooter>
@@ -195,14 +195,14 @@ const ECommerceAppControls: React.FC = () => {
     canGoBack,
     isChildFlyoutOpen,
     closeChildFlyout,
-    clearHistory,
+    closeSession,
   } = useEuiFlyoutSession();
 
   const handleCloseOrGoBack = () => {
     if (canGoBack) {
       goBack();
     } else {
-      clearHistory();
+      closeSession();
     }
   };
   const handleOpenShoppingCart = () => {
@@ -218,7 +218,7 @@ const ECommerceAppControls: React.FC = () => {
         'aria-label': 'Shopping cart',
         onClose: (event) => {
           console.log('Shopping cart onClose triggered', event);
-          clearHistory(); // If we add an onClose handler to the main flyout, we have to call clearHistory within it for the flyout to actually close
+          closeSession(); // If we add an onClose handler to the main flyout, we have to call clearHistory within it for the flyout to actually close
         },
       },
     };

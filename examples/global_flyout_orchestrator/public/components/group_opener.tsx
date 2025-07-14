@@ -32,7 +32,7 @@ const GroupOpenerControls: React.FC<{
   parentSize: 's' | 'm';
   parentType: 'push' | 'overlay';
 }> = ({ childBackgroundStyle: backgroundStyle, parentSize, parentType }) => {
-  const { openFlyoutGroup, isFlyoutOpen, isChildFlyoutOpen, clearHistory } = useEuiFlyoutSession();
+  const { openFlyoutGroup, isFlyoutOpen, isChildFlyoutOpen, closeSession } = useEuiFlyoutSession();
 
   const handleOpenGroup = () => {
     // make the child flyout size be different than the main
@@ -82,7 +82,7 @@ const GroupOpenerControls: React.FC<{
       {(isFlyoutOpen || isChildFlyoutOpen) && (
         <>
           <EuiSpacer />
-          <EuiButton onClick={clearHistory} color="danger">
+          <EuiButton onClick={closeSession} color="danger">
             Close All Flyouts
           </EuiButton>
         </>
@@ -93,7 +93,7 @@ const GroupOpenerControls: React.FC<{
 
 export const GroupOpenerApp: React.FC = () => {
   const MainFlyoutContent = () => {
-    const { clearHistory } = useEuiFlyoutSession();
+    const { closeSession } = useEuiFlyoutSession();
     return (
       <>
         <EuiFlyoutHeader>
@@ -110,7 +110,7 @@ export const GroupOpenerApp: React.FC = () => {
           </EuiText>
         </EuiFlyoutBody>
         <EuiFlyoutFooter>
-          <EuiButton onClick={clearHistory} color="danger">
+          <EuiButton onClick={closeSession} color="danger">
             Close All Flyouts
           </EuiButton>
         </EuiFlyoutFooter>

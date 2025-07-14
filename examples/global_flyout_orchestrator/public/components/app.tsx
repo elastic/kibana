@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/* eslint-disable no-console */
-
 import React from 'react';
 
 import { EuiPageTemplate, EuiSpacer, EuiTabbedContent, EuiTitle } from '@elastic/eui';
@@ -82,14 +80,7 @@ export const App = ({ basename, navigation }: AppDeps) => {
           </EuiTitle>
         </EuiPageTemplate.Header>
         <EuiPageTemplate.Section>
-          <EuiTabbedContent
-            tabs={tabs}
-            initialSelectedTab={tabs[0]}
-            autoFocus="selected"
-            onTabClick={(tab) => {
-              console.log('clicked tab', tab);
-            }}
-          />
+          <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} autoFocus="selected" />
         </EuiPageTemplate.Section>
       </EuiPageTemplate>
     </Router>

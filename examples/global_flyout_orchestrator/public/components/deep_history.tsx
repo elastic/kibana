@@ -44,7 +44,7 @@ const getHistorySystemFlyoutOptions = (
 };
 
 const DeepHistoryPage: React.FC<DeepHistoryAppMeta> = ({ page }) => {
-  const { openSystemFlyout, clearHistory } = useEuiFlyoutSession();
+  const { openSystemFlyout, closeSession } = useEuiFlyoutSession();
   const [nextPage, setNextPage] = useState<DeepHistoryAppMeta['page']>('');
 
   useEffect(() => {
@@ -100,7 +100,7 @@ const DeepHistoryPage: React.FC<DeepHistoryAppMeta> = ({ page }) => {
         )}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
-        <EuiButton onClick={clearHistory} color="danger">
+        <EuiButton onClick={closeSession} color="danger">
           Close
         </EuiButton>
       </EuiFlyoutFooter>
