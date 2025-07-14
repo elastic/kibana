@@ -9,6 +9,7 @@
 import { render } from '@testing-library/react';
 import { RawBucket } from '@kbn/grouping/src';
 import { getGroupPanelTitle } from './get_group_panel_title';
+import type { GroupingAggregation } from './get_group_panel_title';
 
 describe('getGroupPanelTitle', () => {
   it('should display bucket key as string when no aggregationField is provided', () => {
@@ -17,9 +18,7 @@ describe('getGroupPanelTitle', () => {
       doc_count: 5,
     };
 
-    const title = getGroupPanelTitle(
-      bucket as RawBucket<{ key_as_string: string; doc_count: number }>
-    );
+    const title = getGroupPanelTitle(bucket as RawBucket<GroupingAggregation>);
 
     const { container } = render(title);
 
@@ -36,14 +35,7 @@ describe('getGroupPanelTitle', () => {
       },
     };
 
-    const title = getGroupPanelTitle(
-      bucket as RawBucket<{
-        key_as_string: string;
-        doc_count: number;
-        resourceName: { buckets: Array<{ key: string }> };
-      }>,
-      'resourceName'
-    );
+    const title = getGroupPanelTitle(bucket as RawBucket<GroupingAggregation>, 'resourceName');
 
     const { container } = render(title);
 
@@ -64,11 +56,7 @@ describe('getGroupPanelTitle', () => {
     };
 
     const title = getGroupPanelTitle(
-      bucket as unknown as RawBucket<{
-        key_as_string: string;
-        doc_count: number;
-        resourceName: { buckets: Array<{ key: string }> };
-      }>,
+      bucket as unknown as RawBucket<GroupingAggregation>,
       'resourceName'
     );
 
