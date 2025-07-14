@@ -3036,6 +3036,11 @@
       }
     }
   },
+  "privmon-api-key": {
+    "dynamic": false,
+    "properties": {
+    }
+  },
   "product-doc-install-status": {
     "dynamic": false,
     "properties": {

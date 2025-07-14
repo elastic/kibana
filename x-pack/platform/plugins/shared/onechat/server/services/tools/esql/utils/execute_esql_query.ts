@@ -52,10 +52,7 @@ function createSchemaFromParams(params: EsqlToolDefinition['params']): z.ZodObje
     schemaFields[key] = field;
   }
 
-  const schema = z.object({
-    params: z.object(schemaFields).describe('Parameters needed to execute the query'),
-  });
-
+  const schema = z.object(schemaFields).describe('Parameters needed to execute the query');
   return schema;
 }
 
@@ -69,15 +66,22 @@ export const registeredToolCreator = (tool: EsqlToolDefinition): RegisteredTool 
     query: tool.query,
     params: tool.params,
     schema: esqlSchema,
-    handler: async ({ params }, { esClient }) => {
+    handler: async (params, { esClient }) => {
       const client = esClient.asCurrentUser;
+      const paramArray = Object.entries(params).map(([key, value]) => ({ [key]: value }));
 
-      const response = await client.esql.query({
-        query: tool.query,
-        params: [params],
+      const response = await client.transport.request({
+        method: 'POST',
+        path: '/_query',
+        body: {
+          query: tool.query,
+          params: paramArray,
+        },
       });
 
-      return response;
+      return {
+        result: response,
+      };
     },
     meta: tool.meta,
   };

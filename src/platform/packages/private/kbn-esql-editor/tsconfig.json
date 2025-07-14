@@ -26,7 +26,6 @@
     "@kbn/index-management-shared-types",
     "@kbn/code-editor",
     "@kbn/fields-metadata-plugin",
-    "@kbn/esql-validation-autocomplete",
     "@kbn/esql-utils",
     "@kbn/content-management-favorites-public",
     "@kbn/usage-collection-plugin",
@@ -38,8 +37,8 @@
     "@kbn/field-types",
     "@kbn/licensing-plugin",
     "@kbn/i18n-react",
-    "@kbn/index-editor",
-    "@kbn/esql-ast"
+    "@kbn/esql-ast",
+    "@kbn/index-editor"
   ],
   "exclude": [
     "target/**/*",
