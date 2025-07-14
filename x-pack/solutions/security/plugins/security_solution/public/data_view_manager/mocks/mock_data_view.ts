@@ -9,7 +9,8 @@ import { DataView } from '@kbn/data-plugin/common';
 import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID } from '../constants';
 
-export const mockDataView = new DataView({
-  spec: { id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID },
-  fieldFormats: {} as unknown as FieldFormatsStartCommon,
-});
+export const getMockDataView = () =>
+  new DataView({
+    spec: { id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID },
+    fieldFormats: {} as unknown as FieldFormatsStartCommon,
+  });
