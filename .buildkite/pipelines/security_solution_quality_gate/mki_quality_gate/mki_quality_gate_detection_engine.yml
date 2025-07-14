@@ -2,7 +2,7 @@ steps:
   - group: 'Cypress MKI - Detection Engine'
     key: cypress_test_detections_engine
     steps:
-      - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:detection_engine
+      - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:detection_engine:all_except
         label: 'Cypress MKI - Detection Engine'
         key: test_detection_engine
         env:
