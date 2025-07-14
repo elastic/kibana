@@ -17,7 +17,6 @@ const RULE_INTERVAL_SECONDS = 6;
 const RULE_INTERVALS_TO_WRITE = 1;
 const RULE_INTERVAL_MILLIS = RULE_INTERVAL_SECONDS * 1000;
 
-// eslint-disable-next-line import/no-default-export
 export default function maxAlertsRuleTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const retry = getService('retry');

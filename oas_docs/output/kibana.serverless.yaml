@@ -11197,6 +11197,27 @@ paths:
       summary: Health check on Privilege Monitoring
       tags:
         - Security Entity Analytics API
+  /api/entity_analytics/monitoring/privileges/privileges:
+    get:
+      description: Check if the current user has all required permissions for Privilege Monitoring
+      operationId: PrivMonPrivileges
+      responses:
+        '200':
+          content:
+            application/json:
+              example:
+                has_all_required: true
+                privileges:
+                  elasticsearch:
+                    index:
+                      .entity_analytics.monitoring.user-default:
+                        read: true
+              schema:
+                $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityAnalyticsPrivileges'
+          description: Successful response
+      summary: Run a privileges check on Privilege Monitoring
+      tags:
+        - Security Entity Analytics API
   /api/entity_analytics/monitoring/users:
     post:
       operationId: CreatePrivMonUser
@@ -44528,7 +44549,6 @@ paths:
                                         type: object
                                         properties:
                                           query:
-                                            minLength: 1
                                             type: string
                                         required:
                                           - query
@@ -45860,7 +45880,6 @@ paths:
                                         type: object
                                         properties:
                                           query:
-                                            minLength: 1
                                             type: string
                                         required:
                                           - query
@@ -47025,7 +47044,6 @@ paths:
                                         type: object
                                         properties:
                                           query:
-                                            minLength: 1
                                             type: string
                                         required:
                                           - query
@@ -48210,7 +48228,6 @@ paths:
                                         type: object
                                         properties:
                                           query:
-                                            minLength: 1
                                             type: string
                                         required:
                                           - query
@@ -49375,7 +49392,6 @@ paths:
                                     type: object
                                     properties:
                                       query:
-                                        minLength: 1
                                         type: string
                                     required:
                                       - query
@@ -52337,7 +52353,6 @@ paths:
                                     type: object
                                     properties:
                                       query:
-                                        minLength: 1
                                         type: string
                                     required:
                                       - query
@@ -52438,7 +52453,6 @@ paths:
                   type: object
                   properties:
                     query:
-                      minLength: 1
                       type: string
                   required:
                     - query
@@ -52467,13 +52481,11 @@ paths:
           name: from
           required: true
           schema:
-            format: date-time
             type: string
         - in: query
           name: to
           required: true
           schema:
-            format: date-time
             type: string
         - in: query
           name: bucketSize
@@ -52494,6 +52506,66 @@ paths:
                 - not: {}
       responses: {}
       summary: Read the significant events
+      tags:
+        - streams
+      x-state: Technical Preview
+  /api/streams/{name}/significant_events/_preview:
+    post:
+      description: 'Preview significant event results based on a given query<br/><br/>[Required authorization] Route required privileges: read_stream.'
+      operationId: post-streams-name-significant-events-preview
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - in: path
+          name: name
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: from
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: to
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: bucketSize
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                query:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    kql:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        query:
+                          type: string
+                      required:
+                        - query
+                  required:
+                    - kql
+              required:
+                - query
+      responses: {}
+      summary: Preview significant events
       tags:
         - streams
       x-state: Technical Preview
@@ -66987,6 +67059,40 @@ components:
         - $ref: '#/components/schemas/Security_Entity_Analytics_API_HostEntity'
         - $ref: '#/components/schemas/Security_Entity_Analytics_API_ServiceEntity'
         - $ref: '#/components/schemas/Security_Entity_Analytics_API_GenericEntity'
+    Security_Entity_Analytics_API_EntityAnalyticsPrivileges:
+      type: object
+      properties:
+        has_all_required:
+          type: boolean
+        has_read_permissions:
+          type: boolean
+        has_write_permissions:
+          type: boolean
+        privileges:
+          type: object
+          properties:
+            elasticsearch:
+              type: object
+              properties:
+                cluster:
+                  additionalProperties:
+                    type: boolean
+                  type: object
+                index:
+                  additionalProperties:
+                    additionalProperties:
+                      type: boolean
+                    type: object
+                  type: object
+            kibana:
+              additionalProperties:
+                type: boolean
+              type: object
+          required:
+            - elasticsearch
+      required:
+        - has_all_required
+        - privileges
     Security_Entity_Analytics_API_EntityRiskLevels:
       enum:
         - Unknown

@@ -34,13 +34,16 @@ export const generateEsqlTool = (): RegisteredTool<
     schema: nlToEsqlToolSchema,
     handler: async ({ query, index, context }, { esClient, modelProvider }) => {
       const model = await modelProvider.getDefaultModel();
-      return generateEsql({
+      const result = await generateEsql({
         query,
         context,
         index,
         model,
         esClient: esClient.asCurrentUser,
       });
+      return {
+        result,
+      };
     },
     meta: {
       tags: [BuiltinTags.retrieval],

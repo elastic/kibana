@@ -56,7 +56,6 @@ import {
   type NewPackagePolicyPostureInput,
   hasErrors,
   POLICY_TEMPLATE_FORM_DTS,
-  POSTURE_NAMESPACE,
   getCloudDefaultAwsCredentialConfig,
   getCloudConnectorRemoteRoleTemplate,
 } from './utils';
@@ -76,7 +75,6 @@ import { SetupTechnologySelector } from './setup_technology_selector/setup_techn
 import { useSetupTechnology } from './setup_technology_selector/use_setup_technology';
 import { AZURE_CREDENTIALS_TYPE } from './azure_credentials_form/azure_credentials_form';
 import { useKibana } from '../../common/hooks/use_kibana';
-import { ExperimentalFeaturesService } from '../../common/experimental_features_service';
 
 const DEFAULT_INPUT_TYPE = {
   kspm: CLOUDBEAT_VANILLA,
@@ -547,28 +545,6 @@ const IntegrationSettings = ({ onChange, fields }: IntegrationInfoFieldsProps) =
   </div>
 );
 
-const useEnsureDefaultNamespace = ({
-  newPolicy,
-  input,
-  updatePolicy,
-  cloudSecurityNamespaceSupportEnabled,
-}: {
-  newPolicy: NewPackagePolicy;
-  input: NewPackagePolicyPostureInput;
-  updatePolicy: (policy: NewPackagePolicy, isExtensionLoaded?: boolean) => void;
-  cloudSecurityNamespaceSupportEnabled: boolean;
-}) => {
-  useEffect(() => {
-    // If the namespace support is enabled, we don't need to set the default namespace
-    if (cloudSecurityNamespaceSupportEnabled) return;
-    if (input.type.includes('vuln_mgmt')) return;
-    if (newPolicy.namespace === POSTURE_NAMESPACE) return;
-
-    const policy = { ...getPosturePolicy(newPolicy, input.type), namespace: POSTURE_NAMESPACE };
-    updatePolicy(policy);
-  }, [newPolicy, input, updatePolicy, cloudSecurityNamespaceSupportEnabled]);
-};
-
 const usePolicyTemplateInitialName = ({
   isEditPage,
   integration,
@@ -714,10 +690,6 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
 
     const { euiTheme } = useEuiTheme();
 
-    const cloudSecurityNamespaceSupportEnabled = useMemo(() => {
-      return ExperimentalFeaturesService.get().cloudSecurityNamespaceSupportEnabled;
-    }, []);
-
     const shouldRenderAgentlessSelector =
       (!isEditPage && isAgentlessAvailable) || (isEditPage && isAgentlessEnabled);
 
@@ -855,13 +827,6 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       setIntegrationToEnable?.(input.policy_template);
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [setupTechnology]);
-
-    useEnsureDefaultNamespace({
-      newPolicy,
-      input,
-      updatePolicy,
-      cloudSecurityNamespaceSupportEnabled,
-    });
 
     useCloudFormationTemplate({
       packageInfo,
@@ -1014,7 +979,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
         />
 
         {/* Namespace selector */}
-        {cloudSecurityNamespaceSupportEnabled && !input.type.includes('vuln_mgmt') && (
+        {!input.type.includes('vuln_mgmt') && (
           <>
             <EuiSpacer size="m" />
             <EuiAccordion

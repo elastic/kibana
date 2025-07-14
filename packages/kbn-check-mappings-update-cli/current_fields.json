@@ -913,6 +913,9 @@
   "privilege-monitoring-status": [
     "status"
   ],
+  "privmon-api-key": [
+    "apiKey"
+  ],
   "product-doc-install-status": [
     "index_name",
     "inference_id",

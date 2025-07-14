@@ -154,7 +154,7 @@ describe('UseRunQueryRuleset', () => {
             criteria: [
               {
                 metadata: 'user_query',
-                values: 'search term',
+                values: ['search term'],
                 type: 'exact',
               },
               {
@@ -174,7 +174,7 @@ describe('UseRunQueryRuleset', () => {
 
     const buttonProps = (TryInConsoleButton as jest.Mock).mock.calls[0][0];
     expect(buttonProps.request).toContain('"user_query": "search term"');
-    expect(buttonProps.request).toMatch(/"user_location":\s*\[\s*"US",\s*"UK"\s*\]/);
+    expect(buttonProps.request).toMatch(/"user_location":\s*"US"/);
   });
 
   it('handles complex nested criteria values', () => {
@@ -185,7 +185,7 @@ describe('UseRunQueryRuleset', () => {
             criteria: [
               {
                 values: {
-                  nested_field: 'nested value',
+                  nested_field: ['nested value'],
                   another_field: ['array', 'of', 'values'],
                 },
                 type: 'exact',
@@ -202,6 +202,6 @@ describe('UseRunQueryRuleset', () => {
 
     const buttonProps = (TryInConsoleButton as jest.Mock).mock.calls[0][0];
     expect(buttonProps.request).toContain('"nested_field": "nested value"');
-    expect(buttonProps.request).toMatch(/"another_field":\s*\[\s*"array",\s*"of",\s*"values"\s*\]/);
+    expect(buttonProps.request).toMatch(/"another_field":\s*"array"s*/);
   });
 });
