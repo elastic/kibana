@@ -17,7 +17,6 @@ import {
   ObjectRemover,
 } from '../../../../common/lib';
 
-// eslint-disable-next-line import/no-default-export
 export default function createMuteInstanceTests({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 

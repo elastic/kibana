@@ -13,9 +13,9 @@ import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import { KibanaMcpHttpTransport } from '../utils/kibana_mcp_http_transport';
 import { ONECHAT_MCP_SERVER_UI_SETTING_ID } from '../../common/constants';
+import { getTechnicalPreviewWarning } from './utils';
 
-const TECHNICAL_PREVIEW_WARNING =
-  'Elastic MCP Server is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.';
+const TECHNICAL_PREVIEW_WARNING = getTechnicalPreviewWarning('Elastic MCP Server');
 
 const MCP_SERVER_NAME = 'elastic-mcp-server';
 const MCP_SERVER_VERSION = '0.0.1';
@@ -48,89 +48,85 @@ export function registerMCPRoutes({ router, getInternalServices, logger }: Route
           request: { body: schema.object({}, { unknowns: 'allow' }) },
         },
       },
-      wrapHandler(async (ctx, request, response) => {
-        let transport: KibanaMcpHttpTransport | undefined;
-        let server: McpServer | undefined;
+      wrapHandler(
+        async (ctx, request, response) => {
+          let transport: KibanaMcpHttpTransport | undefined;
+          let server: McpServer | undefined;
 
-        const { uiSettings } = await ctx.core;
-        const enabled = await uiSettings.client.get(ONECHAT_MCP_SERVER_UI_SETTING_ID);
-
-        if (!enabled) {
-          return response.notFound();
-        }
-
-        try {
-          transport = new KibanaMcpHttpTransport({ sessionIdGenerator: undefined, logger });
-
-          // Instantiate new MCP server upon every request, no session persistence
-          server = new McpServer({
-            name: MCP_SERVER_NAME,
-            version: MCP_SERVER_VERSION,
-          });
-
-          const { tools: toolService } = getInternalServices();
-
-          const registry = toolService.registry.asScopedPublicRegistry({ request });
-          const tools = await registry.list({});
-
-          // Expose tools scoped to the request
-          for (const tool of tools) {
-            server.tool(
-              tool.id,
-              tool.description,
-              tool.schema.shape,
-              async (args: { [x: string]: any }) => {
-                const toolResult = await tool.execute({ toolParams: args });
-                return {
-                  content: [{ type: 'text' as const, text: JSON.stringify(toolResult) }],
-                };
-              }
-            );
-          }
-
-          request.events.aborted$.subscribe(async () => {
-            await transport?.close().catch((error) => {
-              logger.error('MCP Server: Error closing transport', { error });
-            });
-            await server?.close().catch((error) => {
-              logger.error('MCP Server: Error closing server', { error });
-            });
-          });
-
-          await server.connect(transport);
-
-          return await transport.handleRequest(request, response);
-        } catch (error) {
-          logger.error('MCP Server: Error handling request', { error });
           try {
-            await transport?.close();
-          } catch (closeError) {
-            logger.error('MCP Server: Error closing transport during error handling', {
-              error: closeError,
+            transport = new KibanaMcpHttpTransport({ sessionIdGenerator: undefined, logger });
+
+            // Instantiate new MCP server upon every request, no session persistence
+            server = new McpServer({
+              name: MCP_SERVER_NAME,
+              version: MCP_SERVER_VERSION,
             });
-          }
-          if (server) {
+
+            const { tools: toolService } = getInternalServices();
+
+            const registry = await toolService.getRegistry({ request });
+            const tools = await registry.list({});
+
+            // Expose tools scoped to the request
+            for (const tool of tools) {
+              server.tool(
+                tool.id,
+                tool.description,
+                tool.schema.shape,
+                async (args: { [x: string]: any }) => {
+                  const toolResult = await registry.execute({ toolId: tool.id, toolParams: args });
+                  return {
+                    content: [{ type: 'text' as const, text: JSON.stringify(toolResult) }],
+                  };
+                }
+              );
+            }
+
+            request.events.aborted$.subscribe(async () => {
+              await transport?.close().catch((error) => {
+                logger.error('MCP Server: Error closing transport', { error });
+              });
+              await server?.close().catch((error) => {
+                logger.error('MCP Server: Error closing server', { error });
+              });
+            });
+
+            await server.connect(transport);
+
+            return await transport.handleRequest(request, response);
+          } catch (error) {
+            logger.error('MCP Server: Error handling request', { error });
             try {
-              await server.close();
+              await transport?.close();
             } catch (closeError) {
-              logger.error('MCP Server: Error closing server during error handling', {
+              logger.error('MCP Server: Error closing transport during error handling', {
                 error: closeError,
               });
             }
-          }
+            if (server) {
+              try {
+                await server.close();
+              } catch (closeError) {
+                logger.error('MCP Server: Error closing server during error handling', {
+                  error: closeError,
+                });
+              }
+            }
 
-          logger.error('MCP Server: Error handling request', { error });
-          return response.customError({
-            statusCode: 500,
-            body: {
-              message: `Internal server error: ${error}`,
-              attributes: {
-                code: ErrorCode.InternalError,
+            logger.error('MCP Server: Error handling request', { error });
+            return response.customError({
+              statusCode: 500,
+              body: {
+                message: `Internal server error: ${error}`,
+                attributes: {
+                  code: ErrorCode.InternalError,
+                },
               },
-            },
-          });
-        }
-      })
+            });
+          }
+        },
+        { featureFlag: ONECHAT_MCP_SERVER_UI_SETTING_ID }
+      )
     );
 
   router.versioned
@@ -154,23 +150,20 @@ export function registerMCPRoutes({ router, getInternalServices, logger }: Route
         version: '2023-10-31',
         validate: false,
       },
-      wrapHandler(async (ctx, _, response) => {
-        const { uiSettings } = await ctx.core;
-        const enabled = await uiSettings.client.get(ONECHAT_MCP_SERVER_UI_SETTING_ID);
-
-        if (!enabled) {
-          return response.notFound();
-        }
-        return response.customError({
-          statusCode: 405,
-          body: {
-            message: 'Method not allowed',
-            attributes: {
-              code: ErrorCode.ConnectionClosed,
+      wrapHandler(
+        async (ctx, _, response) => {
+          return response.customError({
+            statusCode: 405,
+            body: {
+              message: 'Method not allowed',
+              attributes: {
+                code: ErrorCode.ConnectionClosed,
+              },
             },
-          },
-        });
-      })
+          });
+        },
+        { featureFlag: ONECHAT_MCP_SERVER_UI_SETTING_ID }
+      )
     );
 
   router.versioned
@@ -195,22 +188,19 @@ export function registerMCPRoutes({ router, getInternalServices, logger }: Route
         version: '2023-10-31',
         validate: false,
       },
-      wrapHandler(async (ctx, _, response) => {
-        const { uiSettings } = await ctx.core;
-        const enabled = await uiSettings.client.get(ONECHAT_MCP_SERVER_UI_SETTING_ID);
-
-        if (!enabled) {
-          return response.notFound();
-        }
-        return response.customError({
-          statusCode: 405,
-          body: {
-            message: 'Method not allowed',
-            attributes: {
-              code: ErrorCode.ConnectionClosed,
+      wrapHandler(
+        async (ctx, _, response) => {
+          return response.customError({
+            statusCode: 405,
+            body: {
+              message: 'Method not allowed',
+              attributes: {
+                code: ErrorCode.ConnectionClosed,
+              },
             },
-          },
-        });
-      })
+          });
+        },
+        { featureFlag: ONECHAT_MCP_SERVER_UI_SETTING_ID }
+      )
     );
 }
