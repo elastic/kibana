@@ -15,7 +15,7 @@ import { ConversationHeader } from './conversation_header';
 import { ConversationSidebar } from './conversation_sidebar/conversation_sidebar';
 
 export const OnechatConversationsView: React.FC<{}> = () => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { euiTheme } = useEuiTheme();
 
   const mainStyles = css`
