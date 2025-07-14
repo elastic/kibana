@@ -159,7 +159,7 @@ export async function openSaveModal({
   } catch (error) {
     coreServices.notifications.toasts.addDanger({
       title: i18n.translate('dashboard.dashboardWasNotSavedDangerMessage', {
-        defaultMessage: `OODashboard ''{title}'' was not saved. Error: {errorMessage}`,
+        defaultMessage: `Dashboard ''{title}'' was not saved. Error: {errorMessage}`,
         values: {
           title: dashboardState.title,
           errorMessage: error.message,
