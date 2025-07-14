@@ -733,7 +733,7 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
       : defaultParams;
   }, [deploymentParamsMapper, isModelNotDownloaded, model, modelId, showNodeInfo]);
 
-  const [modalTitleId] = useState(() => useGeneratedHtmlId());
+  const modalTitleId = useGeneratedHtmlId();
 
   const [config, setConfig] = useState<DeploymentParamsUI>(initialParams ?? getDefaultParams());
 
@@ -776,7 +776,12 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
     (model?.state === MODEL_STATE.DOWNLOADING || model?.state === MODEL_STATE.DOWNLOADED);
 
   return (
-    <EuiModal aria-labelledby={modalTitleId} onClose={onClose} data-test-subj="mlModelsStartDeploymentModal" maxWidth={640}>
+    <EuiModal
+      aria-labelledby={modalTitleId}
+      onClose={onClose}
+      data-test-subj="mlModelsStartDeploymentModal"
+      maxWidth={640}
+    >
       {/* Override padding to allow progress bar to take full width */}
       <EuiModalHeader css={{ paddingInline: `${euiTheme.size.l} 0px` }}>
         <EuiFlexGroup direction="column" gutterSize="s">

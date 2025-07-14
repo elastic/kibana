@@ -243,11 +243,11 @@ export const Controls: FC<Props> = React.memo(
       [isModalVisible, deleteItem, didUntag]
     );
 
+    const modalTitleId = useGeneratedHtmlId();
+
     if (showFlyout === false) {
       return null;
     }
-
-    const modalTitleId = useGeneratedHtmlId();
 
     const button = (
       <EuiButton size="s" iconType="arrowDown" iconSide="right" onClick={onActionsButtonClick}>
@@ -359,7 +359,13 @@ export const Controls: FC<Props> = React.memo(
 
     return (
       <EuiPortal>
-        <EuiFlyout aria-labelledby={modalTitleId} ownFocus size="m" onClose={deselect} data-test-subj="mlAnalyticsJobMapFlyout">
+        <EuiFlyout
+          aria-labelledby={modalTitleId}
+          ownFocus
+          size="m"
+          onClose={deselect}
+          data-test-subj="mlAnalyticsJobMapFlyout"
+        >
           <EuiFlyoutHeader>
             <EuiFlexGroup direction="column" gutterSize="xs">
               <EuiFlexItem grow={false}>
