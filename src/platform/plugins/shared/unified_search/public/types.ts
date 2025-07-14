@@ -96,7 +96,6 @@ export interface IUnifiedSearchPluginServices extends Partial<CoreStart> {
   appName: string;
   chrome: CoreStart['chrome'];
   uiSettings: CoreStart['uiSettings'];
-  savedObjects: CoreStart['savedObjects'];
   notifications: CoreStart['notifications'];
   application: CoreStart['application'];
   http: CoreStart['http'];
