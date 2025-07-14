@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Builder, Walker, mutate } from '@kbn/esql-ast';
-import { ParameterReplacer } from '../transformers/parameter_replacer';
+import { Builder, mutate } from '@kbn/esql-ast';
 import { Query } from '../types';
 
 export const buildQueryAst = (source: Query) => {
@@ -17,25 +16,6 @@ export const buildQueryAst = (source: Query) => {
   for (const command of commands) {
     mutate.generic.commands.append(queryAst, command);
   }
-
-  const parameterReplacer = new ParameterReplacer(source.params);
-  Walker.walk(queryAst, {
-    visitLiteral: (node) => {
-      if (parameterReplacer.shouldReplaceNode(node)) {
-        Object.assign(node, parameterReplacer.replace(node));
-      }
-    },
-    visitColumn: (node) => {
-      if (parameterReplacer.shouldReplaceNode(node)) {
-        Object.assign(node, parameterReplacer.replace(node));
-      }
-    },
-    visitFunction: (node) => {
-      if (parameterReplacer.shouldReplaceNode(node)) {
-        Object.assign(node, parameterReplacer.replace(node));
-      }
-    },
-  });
 
   return queryAst;
 };

@@ -16,7 +16,7 @@ import { where } from './commands/where';
 describe('composer', () => {
   const source = from('logs-*');
 
-  it('applies operators in order', () => {
+  it('returns query in string format', () => {
     const pipeline = source.pipe(
       where(`@timestamp <= NOW() AND @timestamp > NOW() - 24 hours`),
       stats(`avg_duration = AVG(transaction.duration.us) BY service.name`),
@@ -24,9 +24,32 @@ describe('composer', () => {
       sort('avg_duration', { '@timestamp': SortOrder.Desc })
     );
 
-    expect(pipeline.asQuery()).toEqual(
+    expect(pipeline.toString()).toEqual(
       'FROM logs-*\n  | WHERE @timestamp <= NOW() AND @timestamp > NOW() - 24 hours\n  | STATS avg_duration = AVG(transaction.duration.us) BY service.name\n  | KEEP @timestamp, avg_duration, service.name\n  | SORT avg_duration ASC, @timestamp DESC'
     );
+  });
+
+  it('returns query in request format', () => {
+    const pipeline = source.pipe(
+      where(`@timestamp <= NOW() AND @timestamp > NOW() - 24 hours`),
+      stats(`avg_duration = ?func(??duration) BY service.name`, {
+        func: 'AVG',
+        duration: 'transaction.duration.us',
+      }),
+      keep('@timestamp', 'avg_duration', 'service.name'),
+      sort('avg_duration', { '@timestamp': SortOrder.Desc })
+    );
+
+    expect(pipeline.asRequest()).toEqual({
+      query:
+        'FROM logs-*\n  | WHERE @timestamp <= NOW() AND @timestamp > NOW() - 24 hours\n  | STATS avg_duration = ?FUNC(??duration) BY service.name\n  | KEEP @timestamp, avg_duration, service.name\n  | SORT avg_duration ASC, @timestamp DESC',
+      params: [
+        {
+          func: 'AVG',
+          duration: 'transaction.duration.us',
+        },
+      ],
+    });
   });
 
   it('escapes malicious query parameter', () => {
@@ -36,7 +59,7 @@ describe('composer', () => {
       })
     );
 
-    expect(pipeline.asQuery()).toEqual(
+    expect(pipeline.toString()).toEqual(
       'FROM logs-*\n  | WHERE service.name == "\\"malicious\\" OR 1=1 --"'
     );
   });

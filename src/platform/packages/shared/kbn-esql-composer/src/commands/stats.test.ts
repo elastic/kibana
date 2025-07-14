@@ -18,7 +18,7 @@ describe('stats', () => {
       stats('avg_duration = AVG(transaction.duration.us) BY service.name')
     );
 
-    expect(pipeline.asQuery()).toEqual(
+    expect(pipeline.toString()).toEqual(
       'FROM logs-*\n  | STATS avg_duration = AVG(transaction.duration.us) BY service.name'
     );
   });
@@ -38,7 +38,7 @@ describe('stats', () => {
       )
     );
 
-    expect(pipeline.asQuery()).toEqual(
+    expect(pipeline.toString()).toEqual(
       'FROM logs-*\n  | STATS AVG(transaction.duration.us), COUNT(`service.name`) WHERE agent.name == "java" BY `service.environment`'
     );
   });

@@ -14,14 +14,14 @@ describe('drop', () => {
   const source = from('logs-*');
   it('handles single strings', () => {
     const pipeline = source.pipe(drop('log.level', 'service.name'));
-    const queryRequest = pipeline.asQuery();
+    const queryRequest = pipeline.toString();
 
     expect(queryRequest).toEqual('FROM logs-*\n  | DROP log.level, service.name');
   });
 
   it('handles arrays of strings', () => {
     const pipeline = source.pipe(drop(['log.level', 'service.name']));
-    const queryRequest = pipeline.asQuery();
+    const queryRequest = pipeline.toString();
 
     expect(queryRequest).toEqual('FROM logs-*\n  | DROP log.level, service.name');
   });

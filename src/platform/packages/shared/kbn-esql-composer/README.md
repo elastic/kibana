@@ -2,7 +2,7 @@
 
 
 ## Basic Usage
-A query starts by invoking a source command like `from()`, which returns a `QueryPipeline`. This pipeline can be extended through `.pipe(...)` calls and rendered as a string with `.asQuery()`.
+A query starts by invoking a source command like `from()`, which returns a `QueryPipeline`. This pipeline can be extended through `.pipe(...)` calls and rendered as a string with `.toString()` or request object with `asRequest`.
 
 ```ts
 import { from, where, sort, keep, limit, SortOrder } from '@kbn/esql-composer';
@@ -14,7 +14,7 @@ const query = from('logs-*')
     keep('service.name', 'log.level'),
     limit(10)
   )
-  .asQuery();
+  .toString();
 ```
 
 The above example will output
@@ -27,9 +27,37 @@ FROM logs-*
   | LIMIT 10
 ```
 
+```ts
+import { from, where, sort, keep, limit, SortOrder } from '@kbn/esql-composer';
+const query = from('logs-*')
+  .pipe(
+    where('@timestamp >= NOW() - 1 hour AND service.environment == ?svcEnv', {
+      svcEnv: 'production'
+    }),
+    sort({ '@timestamp': SortOrder.Desc }),
+    keep('service.name', 'log.level'),
+    limit(10)
+  )
+  .asRequest();
+```
+
+The above example will output
+
+```ts
+{ 
+  query: `FROM logs-*
+  | WHERE @timestamp >= NOW() - 1 hour AND service.environment == ?svcEnv
+  | SORT @timestamp DESC
+  | KEEP service.name, log.level
+  | LIMIT 10
+  `,
+  params: [{ svcEnv: 'production' }]
+}
+
 ## Output methods
 
-`asQuery()` – outputs the ES|QL query as a readable string.
+`toString()` – outputs the ES|QL query as a readable string.
+`asRequest()` – outputs an object for Elasticsearch’s ES|QL query API, including parameters.
 
 
 ## Features and examples
@@ -44,7 +72,7 @@ import { from, where } from '@kbn/esql-composer';
 
 from('logs-*')
   .pipe(where('@timestamp <= NOW() AND @timestamp > NOW() - 24 hours'))
-  .asQuery();
+  .toString();
 ```
 
 Output: 
@@ -66,7 +94,7 @@ from('logs-*')
       serviceName: 'my-service'
     }
   ))
-  .asQuery();
+  .toString();
 ```
 
 Output: 
@@ -83,7 +111,7 @@ import { from, where } from '@kbn/esql-composer';
 
 from('logs-*')
   .pipe(where('host.name IN (?,?,?)', ['my-host-1', 'my-host-2', 'my-host-3']))
-  .asQuery();
+  .toString();
 ```
 
 Output: 
@@ -103,7 +131,7 @@ import { from, stats } from '@kbn/esql-composer';
 
 from('logs-*')
   .pipe(stats('avg_duration = AVG(transaction.duration.us) BY service.name'))
-  .asQuery();
+  .toString();
 
 ```
 
@@ -128,7 +156,7 @@ from('logs-*')
       env: 'service.environment',
     })
   )
-  .asQuery();
+  .toString();
 ```
 
 Returns
@@ -150,7 +178,7 @@ from('logs-*')
   .pipe(
     evaluate('type = CASE(languages <= 1, "monolingual",languages <= 2, "bilingual","polyglot")')
   )
-  .asQuery();
+  .toString();
 
 ```
 
@@ -186,7 +214,7 @@ import { from, sort } from '@kbn/esql-composer';
 
 from('logs-*')
   .pipe(sort('@timestamp', 'log.level'))
-  .asQuery();
+  .toString();
 ```
 
 Output: 
@@ -204,7 +232,7 @@ import { from, evaluate } from '@kbn/esql-composer';
 
 from('logs-*')
   .pipe(sort({ '@timestamp': SortOrder.Desc }))
-  .asQuery();
+  .toString();
 ```
 Output:
 

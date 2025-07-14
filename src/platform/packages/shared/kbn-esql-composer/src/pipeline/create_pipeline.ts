@@ -8,14 +8,28 @@
  */
 
 import { BasicPrettyPrinter } from '@kbn/esql-ast';
-import { Query, QueryPipeline } from '../types';
+import { Query, QueryPipeline, QueryRequest } from '../types';
 import { buildQueryAst } from './build_query_ast';
+import { replaceParameters } from './replace_parameters';
 
 export function createPipeline(source: Query): QueryPipeline {
-  const asQuery = (): string => {
-    return BasicPrettyPrinter.print(buildQueryAst(source), {
+  const toString = (): string => {
+    const ast = buildQueryAst(source);
+    replaceParameters(ast, source.params);
+
+    return BasicPrettyPrinter.print(ast, {
       multiline: true,
     });
+  };
+
+  const asRequest = (): QueryRequest => {
+    const ast = buildQueryAst(source);
+    return {
+      query: BasicPrettyPrinter.print(ast, {
+        multiline: true,
+      }),
+      params: source.params,
+    };
   };
 
   const pipe = (...operators: Array<(query: Query) => Query>): QueryPipeline => {
@@ -25,6 +39,7 @@ export function createPipeline(source: Query): QueryPipeline {
 
   return {
     pipe,
-    asQuery,
+    toString,
+    asRequest,
   };
 }

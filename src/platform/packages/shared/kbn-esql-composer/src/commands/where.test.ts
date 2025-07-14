@@ -15,7 +15,7 @@ describe('where', () => {
   it('appends a basic WHERE clause', () => {
     const pipeline = source.pipe(where(`@timestamp <= NOW() AND @timestamp > NOW() - 24 hours`));
 
-    expect(pipeline.asQuery()).toEqual(
+    expect(pipeline.toString()).toEqual(
       'FROM logs-*\n  | WHERE @timestamp <= NOW() AND @timestamp > NOW() - 24 hours'
     );
   });
@@ -23,7 +23,7 @@ describe('where', () => {
   it('appends a WHERE clause with positional parameters', () => {
     const pipeline = source.pipe(where('timestamp.us >= ?', 1704892605838000));
 
-    expect(pipeline.asQuery()).toEqual('FROM logs-*\n  | WHERE timestamp.us >= 1704892605838000');
+    expect(pipeline.toString()).toEqual('FROM logs-*\n  | WHERE timestamp.us >= 1704892605838000');
   });
 
   it('appends a WHERE clause with named parameters', () => {
@@ -32,7 +32,7 @@ describe('where', () => {
       where('host.name == ?hostName AND service.name == ?serviceName', params)
     );
 
-    expect(pipeline.asQuery()).toEqual(
+    expect(pipeline.toString()).toEqual(
       'FROM logs-*\n  | WHERE host.name == "host" AND service.name == "service"'
     );
   });
@@ -42,7 +42,7 @@ describe('where', () => {
     const hosts = ['host1', 'host2', 'host3'];
     const pipeline = source.pipe(where(`host.name IN (${hosts.map(() => '?').join(',')})`, hosts));
 
-    expect(pipeline.asQuery()).toEqual(
+    expect(pipeline.toString()).toEqual(
       'FROM logs-*\n  | WHERE host.name IN ("host1", "host2", "host3")'
     );
   });

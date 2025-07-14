@@ -8,8 +8,9 @@
  */
 
 import { Builder, BasicPrettyPrinter, synth, parse } from '@kbn/esql-ast';
-import { buildQueryAst } from './build_query_ast'; // Adjust to correct path
-import { Query } from '../types'; // Adjust to correct path
+import { replaceParameters } from './replace_parameters';
+import { Query } from '../types';
+import { buildQueryAst } from './build_query_ast';
 
 describe('buildQueryAst', () => {
   const { root } = parse('logs-*');
@@ -22,6 +23,7 @@ describe('buildQueryAst', () => {
     };
 
     const ast = buildQueryAst(source);
+    replaceParameters(ast, source.params);
     const queryString = BasicPrettyPrinter.print(ast, { multiline: false });
 
     expect(queryString).toContain('host.name == "my-host"');
@@ -30,11 +32,12 @@ describe('buildQueryAst', () => {
   it('replaces column using named parameter', () => {
     const source: Query = {
       root,
-      commands: [synth.cmd`WHERE host.??field == 'my-host'`],
+      commands: [synth.cmd`WHERE host.??field == "my-host"`],
       params: [{ field: 'name' }],
     };
 
     const ast = buildQueryAst(source);
+    replaceParameters(ast, source.params);
     const queryString = BasicPrettyPrinter.print(ast, { multiline: false });
 
     expect(queryString).toContain('host.name == "my-host"');
@@ -48,6 +51,7 @@ describe('buildQueryAst', () => {
     };
 
     const ast = buildQueryAst(source);
+    replaceParameters(ast, source.params);
     const queryString = BasicPrettyPrinter.print(ast, { multiline: false });
 
     expect(queryString).toContain('STATS AVG(foo) BY bar');
@@ -61,6 +65,7 @@ describe('buildQueryAst', () => {
     };
 
     const ast = buildQueryAst(source);
+    replaceParameters(ast, source.params);
     const queryString = BasicPrettyPrinter.print(ast, { multiline: false });
 
     expect(queryString).toContain('host.name == ?host');

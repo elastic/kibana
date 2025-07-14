@@ -11,10 +11,10 @@ import { from } from './from';
 
 describe('from', () => {
   it('handles single strings', () => {
-    expect(from('logs-*', 'traces-*').asQuery()).toEqual('FROM logs-*, traces-*');
+    expect(from('logs-*', 'traces-*').toString()).toEqual('FROM logs-*, traces-*');
   });
 
   it('handles arrays of strings', () => {
-    expect(from(['logs-*', 'traces-*']).asQuery()).toEqual('FROM logs-*, traces-*');
+    expect(from(['logs-*', 'traces-*']).toString()).toEqual('FROM logs-*, traces-*');
   });
 });
