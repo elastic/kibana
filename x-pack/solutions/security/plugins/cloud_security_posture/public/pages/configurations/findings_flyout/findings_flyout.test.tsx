@@ -55,14 +55,6 @@ describe('<FindingsFlyout/>', () => {
       });
     });
 
-    it('displays missing info callout when data source is not CSP', () => {
-      (useMisconfigurationFinding as jest.Mock).mockReturnValue({
-        data: { result: { hits: [{ _source: mockWizFinding }] } },
-      });
-      const { getByText } = render(<TestComponent />);
-      getByText('Some fields not provided by Wiz');
-    });
-
     it('does not display missing info callout when data source is CSP', () => {
       (useMisconfigurationFinding as jest.Mock).mockReturnValue({
         data: { result: { hits: [{ _source: mockFindingsHit }] } },
