@@ -6,12 +6,7 @@
  */
 import { ActorRefFrom, MachineImplementationsFrom, SnapshotFrom, assign, setup } from 'xstate5';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
-import {
-  FlattenRecord,
-  SampleDocument,
-  isSchema,
-  processorDefinitionSchema,
-} from '@kbn/streams-schema';
+import { FlattenRecord, isSchema, processorDefinitionSchema } from '@kbn/streams-schema';
 import { isEmpty } from 'lodash';
 import { flattenObjectNestedLast } from '@kbn/object-utils';
 import { ProcessorDefinitionWithUIAttributes } from '../../types';
@@ -22,6 +17,7 @@ import {
   SimulationEvent,
   Simulation,
   SimulationMachineDeps,
+  SampleDocumentWithUIAttributes,
 } from './types';
 import { PreviewDocsFilterOption } from './simulation_documents_search';
 import {
@@ -37,7 +33,7 @@ export interface ProcessorEventParams {
   processors: ProcessorDefinitionWithUIAttributes[];
 }
 
-const hasSamples = (samples: SampleDocument[]) => !isEmpty(samples);
+const hasSamples = (samples: SampleDocumentWithUIAttributes[]) => !isEmpty(samples);
 
 const isValidProcessor = (processor: ProcessorDefinitionWithUIAttributes) =>
   isSchema(processorDefinitionSchema, processorConverter.toAPIDefinition(processor));
@@ -61,7 +57,7 @@ export const simulationMachine = setup({
     storeProcessors: assign((_, params: ProcessorEventParams) => ({
       processors: params.processors,
     })),
-    storeSamples: assign((_, params: { samples: SampleDocument[] }) => ({
+    storeSamples: assign((_, params: { samples: SampleDocumentWithUIAttributes[] }) => ({
       samples: params.samples,
     })),
     storeSimulation: assign((_, params: { simulation: Simulation | undefined }) => ({
@@ -121,7 +117,8 @@ export const simulationMachine = setup({
     canSimulate: ({ context }) =>
       hasSamples(context.samples) && hasValidProcessors(context.processors),
     hasProcessors: (_, params: ProcessorEventParams) => !isEmpty(params.processors),
-    '!hasSamples': (_, params: { samples: SampleDocument[] }) => !hasSamples(params.samples),
+    '!hasSamples': (_, params: { samples: SampleDocumentWithUIAttributes[] }) =>
+      !hasSamples(params.samples),
   },
 }).createMachine({
   /** @xstate-layout N4IgpgJg5mDOIC5SwJYFsCuAbAhgFxQHsA7AYlU1wJIDoBjACx2JgAUAnMANxTAHcAIoTqwAYiix4w7ANoAGALqJQAB0KpqxZSAAeiAGwBmOTQDsAJnP65AFnMAOAIw2598wBoQAT0SOArFY09vqmjmGGNvZy+vY2AL5xnhTY+ERkyVRpNJywYHjySkggahpp2noIALSWNEYAnHX2fnX6djHRNp4+CI76zjRycobNFo729sOmCUnoKZrks5m0nHRgKFxgAPqwOGgqWHAF2iUomuWI1ea1hg1NLW1RrV2+poamNC6N5n5+hs4u8USIAyqRIC0ooOI2TAq3WWx2ewOsBkjkKqnUpzKRQqfhs7zq5j+hn0dUihkM5kczwQrT8NEsch++gC9xsfmmwMWkPBcyyKzWG22u32h3MaOKGLO2IuNXqjWarSsj063l8wRMTmsv1iAICHJB8xU7GEcFghHYsBoACojkUTlLQBVLtdbgqHh1qc5KQM6q9hrZzHi7PquYbjatYGb2PRmKssLb0aUSOcqrKbvL7kqPaqen5HO8frY-NFHHI6sNDCGIWGTZHzfQmCwwAmJUmtNKqnZHEFTAFHFZGhEbL7qTZ+pZ9MzYsFxvpzFXeWCjbWozQIGADlIW-asY6LjcbDRjKXeuY6qWKXVqbT6eZGYr7HVi8GgQa0qRlxHV+vN83UcdJV3XQZSuOU7kVdonhzRwn3eAd-EMR9zFMYJ9AXJYoRQCADh5DCaAAM14LAIEtNAcBUbdAOTDtBwGQkbGJQkjG+a8JmuRlA0aYcbnsdDIRoLCcLfWhCI3EiaAwYgyIoxQALbFNaLkejGOJCk-GpFCTFcYl7FCfsfgaPjNDXMAACNCEkugUBYABhRsYFgUgdFgPB8DAGgcHwqR2AACk-U1zTs5gYAEMyLOIVYABV0DAABKXD+PXczLOsqAgqbZFZLtKj2z3BBFOUudVJY6CbneG5GV6Nw3jeKZX1DLIcEjaQCBYAAlMAAEcMBQTg0DAYg8Ecyj5I7UsGnpCJkMiX0YLnT1-HeGJTBsGwjCGH5AyMxrmvYVqoA67rerAfrBuG-9stGvKwjCGgfjW4YGKUlDDGvN52NxRDkIJX1tuWSTiFSgBlBqwQgEh3OsrhCAAa3c4TiDagHpAAQToPBzRGzFqLy4d7BoMYVvLZDhhHHN7jMJw7y9AldLqP6oXYAHgdBshpGNaN9nwfDzTQGgEaR4hiFR9HMayxNsdy4CEDxgndO4kmRmpXTuwpR4KUGUlCQSIFiEIdd4CKBG5MllNKjWuoez7AcJlWsnunzcqLFGKx82sAkGYE7CwBNh1paMfG5DGVxTDqaIzz+akrEPXTkOD30-GZJ9PaS8KrNs+y4F9oCKiKmgw4JSdVv8RxhmpAI6WZIY7HJL6+k9prcj21LDp6vqBqG7Ocel893jkImmn7sc8XscviXz5xGVMUwy0QtlPaZoWWerICd27iown0AZcRJBik7ZUecyQj4z2YomZ7LHW4iAA */
@@ -266,7 +263,9 @@ export const simulationMachine = setup({
         src: 'runSimulation',
         input: ({ context }) => ({
           streamName: context.streamName,
-          documents: context.samples.map(flattenObjectNestedLast) as FlattenRecord[],
+          documents: context.samples
+            .map((doc) => doc.document)
+            .map(flattenObjectNestedLast) as FlattenRecord[],
           processors: context.processors,
           detectedFields: context.detectedSchemaFields,
         }),
