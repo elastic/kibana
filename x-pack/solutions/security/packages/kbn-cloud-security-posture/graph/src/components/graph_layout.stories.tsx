@@ -542,6 +542,59 @@ const baseGraph: EnhancedNodeViewModel[] = [
   },
 ];
 
+// Asset inventory data for graph nodes
+const serverAssetData = {
+  '@timestamp': '2025-07-12T10:15:42.529Z',
+  'cloud.account.id': '123456789012',
+  'cloud.account.name': 'elastic-dev-account',
+  'cloud.provider': 'aws',
+  'cloud.region': 'us-east-1',
+  'cloud.service.name': 'AWS EC2',
+  'entity.EngineMetadata.Type': 'instance',
+  'entity.id': 'siem-windows',
+  'entity.name': 'SIEM Windows Server',
+  'entity.source': '.ds-logs-cloud_asset_inventory.asset_inventory-default-2025.07.12-000001',
+  'entity.type': 'AWS EC2 Instance',
+  'event.ingested': '2025-07-12T10:20:27.158Z',
+  'aws.instance.type': 't3.large',
+  'aws.instance.state': 'running',
+};
+
+const adminUserAssetData = {
+  '@timestamp': '2025-07-12T09:45:12.321Z',
+  'cloud.account.id': '123456789012',
+  'cloud.account.name': 'elastic-dev-account',
+  'cloud.provider': 'aws',
+  'cloud.region': 'us-east-1',
+  'cloud.service.name': 'AWS IAM',
+  'entity.EngineMetadata.Type': 'identity',
+  'entity.id': 'user',
+  'entity.name': 'Admin User',
+  'entity.source': '.ds-logs-cloud_asset_inventory.asset_inventory-default-2025.07.12-000001',
+  'entity.type': 'AWS IAM User',
+  'event.ingested': '2025-07-12T09:50:15.652Z',
+  'aws.iam.user.created': '2024-01-15T00:00:00.000Z',
+  'aws.iam.user.console_access': true,
+};
+
+const suspiciousUserAssetData = {
+  '@timestamp': '2025-07-12T11:30:05.876Z',
+  'cloud.account.id': '987654321098',
+  'cloud.account.name': 'compromised-account',
+  'cloud.provider': 'aws',
+  'cloud.region': 'ap-southeast-1',
+  'cloud.service.name': 'AWS IAM',
+  'entity.EngineMetadata.Type': 'identity',
+  'entity.id': 'hackeruser',
+  'entity.name': 'Suspicious User',
+  'entity.source': '.ds-logs-cloud_asset_inventory.asset_inventory-default-2025.07.12-000001',
+  'entity.type': 'AWS IAM User',
+  'event.ingested': '2025-07-12T11:35:10.422Z',
+  'aws.iam.user.created': '2025-07-11T23:15:32.000Z',
+  'aws.iam.user.policies': ['AdministratorAccess'],
+  'aws.iam.user.mfa_active': false,
+};
+
 export const LargeGraph: Story = {
   args: {
     ...meta.args,
@@ -664,6 +717,54 @@ export const VariantStackSizes: Story = {
             }))
         )
         .flat(),
+    ]),
+  },
+};
+
+export const GraphWithAssetInventoryData: Story = {
+  args: {
+    ...meta.args,
+    ...extractEdges([
+      ...baseGraph.map((node, index) => {
+        // Add asset data to specific nodes
+        if (index === 0) {
+          // First item - siem-windows node
+          return {
+            ...node,
+            assetData: serverAssetData,
+          };
+        } else if (index === 2) {
+          // Third item - user node
+          return {
+            ...node,
+            assetData: adminUserAssetData,
+          };
+        } else if (index === 4) {
+          // Fifth item - hackeruser node
+          return {
+            ...node,
+            assetData: suspiciousUserAssetData,
+          };
+        }
+        return node;
+      }),
+      // Add the same additional nodes as GraphStackedEdgeCases
+      {
+        id: 'a(oktauser)-b(hackeruser)',
+        source: 'oktauser',
+        target: 'hackeruser',
+        label: 'CreateUser2',
+        color: 'primary',
+        shape: 'label',
+      },
+      {
+        id: 'a(siem-windows)-b(user)',
+        source: 'siem-windows',
+        target: 'user',
+        label: 'User login to OKTA2',
+        color: 'danger',
+        shape: 'label',
+      },
     ]),
   },
 };

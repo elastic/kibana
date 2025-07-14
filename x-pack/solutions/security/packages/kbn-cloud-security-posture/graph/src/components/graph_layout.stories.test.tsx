@@ -10,7 +10,7 @@ import { composeStories } from '@storybook/react';
 import { render } from '@testing-library/react';
 import * as stories from './graph_layout.stories';
 
-const { GraphLargeStackedEdgeCases } = composeStories(stories);
+const { GraphLargeStackedEdgeCases, GraphWithAssetInventoryData } = composeStories(stories);
 
 const TRANSLATE_XY_REGEX =
   /translate\(\s*([+-]?\d+(\.\d+)?)(px|%)?\s*,\s*([+-]?\d+(\.\d+)?)(px|%)?\s*\)/;
@@ -91,6 +91,78 @@ describe('GraphLargeStackedEdgeCases story', () => {
         }
 
         labelsBoundingRect.push(labelRect!);
+      }
+    }
+  });
+});
+
+describe('GraphWithAssetInventoryData story', () => {
+  it('should display entity names for nodes with asset data', async () => {
+    const { container } = render(<GraphWithAssetInventoryData />);
+
+    // Extract the nodes with asset data from the story
+    const nodes = GraphWithAssetInventoryData.args?.nodes ?? [];
+    const nodesWithAssetData = nodes.filter((node) => 'assetData' in node && node.assetData);
+
+    // We expect to find three nodes with asset data (indices 0, 2, and 4 from the baseGraph)
+    expect(nodesWithAssetData.length).toBe(3);
+
+    // Get all ellipse nodes in the rendered component
+    const nodeElements = container.querySelectorAll('.react-flow__node');
+
+    // For each node with asset data, verify the entity name is displayed
+    for (const node of nodesWithAssetData) {
+      // Find the DOM element for this node
+      const nodeElement = Array.from(nodeElements).find(
+        (el) => el.getAttribute('data-id') === node.id
+      );
+
+      expect(nodeElement).not.toBeNull();
+
+      if (nodeElement) {
+        // Find the EuiText element within this node
+        const textElement = nodeElement.querySelector('.euiText');
+
+        // Verify the entity name is displayed
+        const assetData = node.assetData as { [key: string]: string };
+        const expectedEntityName = assetData['entity.name'];
+        expect(expectedEntityName).toBeDefined();
+
+        // Check that the EuiText element contains the entity name
+        expect(textElement).not.toBeNull();
+        expect(textElement?.textContent).toContain(expectedEntityName);
+      }
+    }
+  });
+
+  it('should render nodes labels without asset data', async () => {
+    const { container } = render(<GraphWithAssetInventoryData />);
+
+    // Extract nodes without asset data (excluding label and group nodes)
+    const nodes = GraphWithAssetInventoryData.args?.nodes ?? [];
+    const regularNodes = nodes.filter(
+      (node) => !('assetData' in node) && node.shape !== 'label' && node.shape !== 'group'
+    );
+
+    // We should have nodes without asset data
+    expect(regularNodes.length).toBeGreaterThan(0);
+
+    // Get all node elements in the rendered component
+    const nodeElements = container.querySelectorAll('.react-flow__node');
+
+    // Check that each node is rendered in the DOM
+    for (const node of regularNodes) {
+      // Find the DOM element for this node
+      const nodeElement = Array.from(nodeElements).find(
+        (el) => el.getAttribute('data-id') === node.id
+      );
+
+      // Verify the node is in the document
+      expect(nodeElement).not.toBeNull();
+
+      // For nodes with labels, verify the label is displayed
+      if (node.label) {
+        expect(nodeElement?.textContent).toContain(node.label);
       }
     }
   });
