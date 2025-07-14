@@ -63,7 +63,7 @@ export interface SavedObjectsMappingProperties {
   [field: string]: SavedObjectsFieldMapping;
 }
 
-export interface SavedObjectsMappingPropertiesSafe {
+export interface SavedObjectsMappingPropertiesSafe extends SavedObjectsMappingProperties {
   [field: string]: SavedObjectsFieldMappingSafe;
 }
 
