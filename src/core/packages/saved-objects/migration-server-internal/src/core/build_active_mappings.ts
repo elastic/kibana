@@ -12,6 +12,7 @@ import type { SavedObjectsMappingProperties } from '@kbn/core-saved-objects-serv
 import type {
   IndexMapping,
   IndexMappingMeta,
+  IndexMappingSafe,
   SavedObjectsTypeMappingDefinitions,
 } from '@kbn/core-saved-objects-base-server-internal';
 
@@ -40,7 +41,7 @@ export function buildActiveMappings(
  *
  * @returns {IndexMapping}
  */
-export function getBaseMappings(): IndexMapping {
+export function getBaseMappings(): IndexMappingSafe {
   // Important: the ZDT algorithm won't trigger a reindex on documents
   // when changes on root field mappings are detected, meaning that adding
   // a non-indexed root field and then later switching it to indexed is

@@ -22,12 +22,6 @@ export { suggest } from './src/autocomplete/autocomplete';
  * for the ES|QL language
  */
 export { collectUserDefinedColumns } from './src/shared/user_defined_columns';
-export {
-  getAllFunctions,
-  isSupportedFunction,
-  printFunctionSignature,
-  checkFunctionArgMatchesDefinition as isEqualType,
-} from './src/shared/helpers';
 
 export {
   getFieldsByTypeHelper,

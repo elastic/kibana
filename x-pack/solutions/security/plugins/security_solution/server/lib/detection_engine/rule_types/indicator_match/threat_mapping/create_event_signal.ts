@@ -21,6 +21,7 @@ import { searchAfterAndBulkCreateSuppressedAlerts } from '../../utils/search_aft
 import { threatEnrichmentFactory } from './threat_enrichment_factory';
 import { FAILED_CREATE_QUERY_MAX_CLAUSE, MANY_NESTED_CLAUSES_ERR } from './utils';
 import { alertSuppressionTypeGuard } from '../../utils/get_is_alert_suppression_active';
+import { validateCompleteThreatMatches } from './validate_complete_threat_matches';
 
 export const createEventSignal = async ({
   sharedParams,
@@ -43,7 +44,7 @@ export const createEventSignal = async ({
     exceptionFilter,
     inputIndex,
     completeRule: {
-      ruleParams: { type, language, query, savedId },
+      ruleParams: { threatMapping, type, language, query, savedId },
     },
   } = sharedParams;
   const threatIndicatorPath =
@@ -80,7 +81,16 @@ export const createEventSignal = async ({
     }
   }
 
-  const ids = Array.from(signalIdToMatchedQueriesMap.keys());
+  const { matchedEvents, skippedIds } = validateCompleteThreatMatches(
+    signalIdToMatchedQueriesMap,
+    threatMapping
+  );
+
+  if (skippedIds.length > 0) {
+    ruleExecutionLogger.debug(`Skipping not matched documents: ${skippedIds.join(', ')}`);
+  }
+
+  const ids = Array.from(matchedEvents.keys());
   if (ids.length === 0) {
     return currentResult;
   }
@@ -110,7 +120,7 @@ export const createEventSignal = async ({
   ruleExecutionLogger.debug(`${ids?.length} matched signals found`);
 
   const enrichment = threatEnrichmentFactory({
-    signalIdToMatchedQueriesMap,
+    signalIdToMatchedQueriesMap: matchedEvents,
     threatIndicatorPath,
     matchedThreats: threatList,
   });
