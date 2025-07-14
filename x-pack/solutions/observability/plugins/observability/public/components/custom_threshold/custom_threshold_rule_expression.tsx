@@ -22,7 +22,7 @@ import {
 } from '@elastic/eui';
 import { ISearchSource, Query } from '@kbn/data-plugin/common';
 import { DataView } from '@kbn/data-views-plugin/common';
-import { DataViewBase } from '@kbn/es-query';
+import { DataViewBase, type Filter } from '@kbn/es-query';
 import { DataViewSelectPopover } from '@kbn/stack-alerts-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -62,6 +62,8 @@ export const defaultExpression: MetricExpression = {
   timeSize: 1,
   timeUnit: 'm',
 };
+
+const EMPTY_FILTERS: Filter[] = [];
 
 // eslint-disable-next-line import/no-default-export
 export default function Expressions(props: Props) {
@@ -434,7 +436,7 @@ export default function Expressions(props: Props) {
         indexPatterns={dataView ? [dataView] : undefined}
         showQueryInput={true}
         showQueryMenu={false}
-        showFilterBar={!!ruleParams.searchConfiguration?.filter}
+        showFilterBar={true}
         showDatePicker={false}
         showSubmitButton={false}
         displayStyle="inPage"
@@ -442,7 +444,7 @@ export default function Expressions(props: Props) {
         onQuerySubmit={onFilterChange}
         dataTestSubj="thresholdRuleUnifiedSearchBar"
         query={ruleParams.searchConfiguration?.query}
-        filters={ruleParams.searchConfiguration?.filter}
+        filters={ruleParams.searchConfiguration?.filter ?? EMPTY_FILTERS}
         onFiltersUpdated={(filter) => {
           setRuleParams(
             'searchConfiguration',
