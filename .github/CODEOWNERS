@@ -1114,7 +1114,6 @@ x-pack/solutions/security/plugins/session_view @elastic/kibana-cloud-security-po
 x-pack/solutions/security/test
 x-pack/test
 x-pack/test_serverless
-x-pack/test/cloud_integration/plugins/saml_provider @elastic/kibana-core
 x-pack/test/functional_with_es_ssl/plugins/alerts @elastic/response-ops
 x-pack/test/functional_with_es_ssl/plugins/cases @elastic/response-ops
 x-pack/test/plugin_functional/plugins/global_search_test @elastic/kibana-core
