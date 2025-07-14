@@ -107,7 +107,7 @@ export const useAssistant = ({
   );
 
   return {
-    showAssistant: hasAssistantPrivilege && promptContextId !== null,
+    showAssistant: isAssistantEnabled && hasAssistantPrivilege && promptContextId !== null,
     showAssistantOverlay,
     promptContextId: promptContextId || '',
   };

@@ -79,6 +79,22 @@ describe('useAssistant', () => {
     expect(hookResult.result.current.promptContextId).toEqual('123');
   });
 
+  it(`should return showAssistant false if isAssistantEnabled is false`, () => {
+    jest.mocked(useAssistantAvailability).mockReturnValue({
+      hasSearchAILakeConfigurations: false,
+      hasAssistantPrivilege: true,
+      hasConnectorsAllPrivilege: true,
+      hasConnectorsReadPrivilege: true,
+      hasUpdateAIAssistantAnonymization: true,
+      hasManageGlobalKnowledgeBase: true,
+      isAssistantEnabled: false,
+    });
+
+    hookResult = renderUseAssistant();
+
+    expect(hookResult.result.current.showAssistant).toEqual(false);
+  });
+
   it(`should return showAssistant false if hasAssistantPrivilege is false`, () => {
     jest.mocked(useAssistantAvailability).mockReturnValue({
       hasSearchAILakeConfigurations: false,
