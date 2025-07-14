@@ -86,7 +86,7 @@ export function getFieldsByTypeHelper(queryText: string, resourceRetriever?: ESQ
 
   return {
     getFieldsByType: async (
-      expectedType: Readonly<string> | Readonly<string[]> = 'any',
+      expectedType: Readonly<string> | readonly string[] = 'any',
       ignored: string[] = []
     ): Promise<ESQLFieldWithMetadata[]> => {
       const types = Array.isArray(expectedType) ? expectedType : [expectedType];

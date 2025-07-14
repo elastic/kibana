@@ -20,8 +20,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { CelInput } from '../../../../../../common';
-import { type CelAuthType } from '../../../../../../common';
+import type { CelInput, type CelAuthType } from '../../../../../../common';
 import { useActions, type State } from '../../state';
 import * as i18n from './translations';
 import { UploadSpecStep } from './steps/upload_spec_step';

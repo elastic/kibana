@@ -54,7 +54,7 @@ export interface NavigationKibanaDependencies {
     chrome: {
       recentlyAccessed: { get$: () => Observable<ChromeRecentlyAccessedHistoryItem[]> };
       navLinks: {
-        getNavLinks$: () => Observable<Readonly<ChromeNavLink[]>>;
+        getNavLinks$: () => Observable<readonly ChromeNavLink[]>;
       };
       sideNav: {
         getIsCollapsed$: () => Observable<boolean>;

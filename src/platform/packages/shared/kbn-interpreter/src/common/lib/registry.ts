@@ -12,7 +12,7 @@ import { clone } from 'lodash';
 export class Registry<ItemSpec, Item> {
   private readonly _prop: string;
   // eslint-disable-next-line @typescript-eslint/ban-types
-  private _indexed: Object;
+  private _indexed: object;
 
   constructor(prop = 'name') {
     if (typeof prop !== 'string') throw new Error('Registry property name must be a string');

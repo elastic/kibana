@@ -36,7 +36,7 @@ const SUPPORTED_ES_FIELD_TYPES = [
   ES_FIELD_TYPES.BOOLEAN,
 ];
 
-export const oneOfLiterals = (arrayOfLiterals: Readonly<string[]>) =>
+export const oneOfLiterals = (arrayOfLiterals: readonly string[]) =>
   schema.string({
     validate: (value) =>
       arrayOfLiterals.includes(value) ? undefined : `must be one of ${arrayOfLiterals.join(' | ')}`,
