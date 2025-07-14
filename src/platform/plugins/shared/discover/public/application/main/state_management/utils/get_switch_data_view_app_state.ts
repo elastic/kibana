@@ -11,7 +11,7 @@ import { uniq } from 'lodash';
 import { isOfAggregateQueryType, Query, AggregateQuery } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
-import { getSortArray } from '../../../../utils/sorting';
+import { getSortArray } from '@kbn/discover-utils';
 import { DiscoverAppState } from '../discover_app_state_container';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
 
