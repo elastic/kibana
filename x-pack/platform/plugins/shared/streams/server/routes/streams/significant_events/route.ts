@@ -5,21 +5,20 @@
  * 2.0.
  */
 
-import { badRequest } from '@hapi/boom';
 import {
   SignificantEventsGetResponse,
   SignificantEventsPreviewResponse,
 } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
-import { SecurityError } from '../../../lib/streams/errors/security_error';
 import {
   STREAMS_API_PRIVILEGES,
   STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE,
 } from '../../../../common/constants';
+import { SecurityError } from '../../../lib/streams/errors/security_error';
 import { createServerRoute } from '../../create_server_route';
+import { assertEnterpriseLicense } from '../../utils/assert_enterprise_license';
 import { previewSignificantEvents } from './preview_significant_events';
 import { readSignificantEventsFromAlertsIndices } from './read_significant_events_from_alerts_indices';
-import { assertEnterpriseLicense } from '../../utils/assert_enterprise_license';
 
 // Make sure strings are expected for input, but still converted to a
 // Date, without breaking the OpenAPI generator
@@ -67,11 +66,6 @@ const previewSignificantEventsRoute = createServerRoute({
     const { streamsClient, scopedClusterClient } = await getScopedClients({
       request,
     });
-
-    const isStreamEnabled = await streamsClient.isStreamsEnabled();
-    if (!isStreamEnabled) {
-      throw badRequest('Streams is not enabled');
-    }
 
     const {
       body: { query },
@@ -133,15 +127,10 @@ const readSignificantEventsRoute = createServerRoute({
       throw new SecurityError(`Cannot access API on the current pricing tier`);
     }
 
-    const { streamsClient, assetClient, scopedClusterClient, licensing } = await getScopedClients({
+    const { assetClient, scopedClusterClient, licensing } = await getScopedClients({
       request,
     });
     await assertEnterpriseLicense(licensing);
-
-    const isStreamEnabled = await streamsClient.isStreamsEnabled();
-    if (!isStreamEnabled) {
-      throw badRequest('Streams are not enabled');
-    }
 
     const { name } = params.path;
     const { from, to, bucketSize } = params.query;

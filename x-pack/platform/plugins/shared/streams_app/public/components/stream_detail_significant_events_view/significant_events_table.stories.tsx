@@ -57,6 +57,7 @@ export const Empty: StoryFn<{}> = () => {
         error: undefined,
       }}
       xFormatter={xFormatter}
+      canManage={true}
     />
   );
 };
@@ -97,6 +98,7 @@ export const SomeThings: StoryFn<{}> = () => {
         error: undefined,
       }}
       xFormatter={xFormatter}
+      canManage={true}
     />
   );
 };

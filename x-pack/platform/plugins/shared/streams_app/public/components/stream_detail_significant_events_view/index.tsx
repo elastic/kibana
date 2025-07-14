@@ -5,8 +5,9 @@
  * 2.0.
  */
 import { niceTimeFormatter } from '@elastic/charts';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { STREAMS_UI_PRIVILEGES } from '@kbn/streams-plugin/public';
 import { StreamQueryKql, Streams } from '@kbn/streams-schema';
 import React, { useMemo, useState } from 'react';
 import { useFetchSignificantEvents } from '../../hooks/use_fetch_significant_events';
@@ -30,7 +31,14 @@ export function StreamDetailSignificantEventsView({
   refreshDefinition: () => void;
 }) {
   const {
-    core: { notifications },
+    core: {
+      notifications,
+      application: {
+        capabilities: {
+          streams: { [STREAMS_UI_PRIVILEGES.manage]: canManageSignificantEvents },
+        },
+      },
+    },
   } = useKibana();
   const {
     timeState: { start, end },
@@ -168,18 +176,33 @@ export function StreamDetailSignificantEventsView({
               <StreamsAppSearchBar showQueryInput={false} showDatePicker />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton
-                color="primary"
-                onClick={() => {
-                  setIsEditFlyoutOpen(true);
-                  setQueryToEdit(undefined);
-                }}
-                iconType="plusInCircle"
+              <EuiToolTip
+                content={
+                  !canManageSignificantEvents
+                    ? i18n.translate(
+                        'xpack.streams.significantEvents.addSignificantEventButton.insufficientPrivileges',
+                        {
+                          defaultMessage:
+                            "You don't have sufficient privileges to add significant events.",
+                        }
+                      )
+                    : undefined
+                }
               >
-                {i18n.translate('xpack.streams.significantEvents.addSignificantEventButton', {
-                  defaultMessage: 'Add significant event query',
-                })}
-              </EuiButton>
+                <EuiButton
+                  color="primary"
+                  disabled={!canManageSignificantEvents}
+                  onClick={() => {
+                    setIsEditFlyoutOpen(true);
+                    setQueryToEdit(undefined);
+                  }}
+                  iconType="plusInCircle"
+                >
+                  {i18n.translate('xpack.streams.significantEvents.addSignificantEventButton', {
+                    defaultMessage: 'Add significant event query',
+                  })}
+                </EuiButton>
+              </EuiToolTip>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
@@ -202,6 +225,7 @@ export function StreamDetailSignificantEventsView({
               });
             }}
             xFormatter={xFormatter}
+            canManage={Boolean(canManageSignificantEvents)}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

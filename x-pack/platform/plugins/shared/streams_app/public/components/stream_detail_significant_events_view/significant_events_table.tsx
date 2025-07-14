@@ -4,7 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiBasicTable, EuiBasicTableColumn, EuiButtonIcon, EuiLink } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiBasicTableColumn,
+  EuiButtonIcon,
+  EuiLink,
+  EuiToolTip,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AbortableAsyncState } from '@kbn/react-hooks';
 import React, { useMemo, useState } from 'react';
@@ -37,18 +43,42 @@ function WithLoadingSpinner({ onClick, ...props }: React.ComponentProps<typeof E
   );
 }
 
+function WithPrivilegeTooltip({
+  canManage,
+  children,
+}: {
+  canManage: boolean;
+  children: React.ReactElement;
+}) {
+  return (
+    <EuiToolTip
+      content={
+        !canManage
+          ? i18n.translate('xpack.streams.significantEventsTable.action.insufficientPrivileges', {
+              defaultMessage: "You don't have sufficient privileges.",
+            })
+          : undefined
+      }
+    >
+      {children}
+    </EuiToolTip>
+  );
+}
+
 export function SignificantEventsTable({
   definition,
   response,
   onDeleteClick,
   onEditClick,
   xFormatter,
+  canManage,
 }: {
   definition: Streams.all.Definition;
   response: Pick<AbortableAsyncState<SignificantEventItem[]>, 'value' | 'loading' | 'error'>;
   onDeleteClick?: (query: SignificantEventItem) => void;
   onEditClick?: (query: SignificantEventItem) => void;
   xFormatter: TickFormatter;
+  canManage: boolean;
 }) {
   const {
     dependencies: {
@@ -111,20 +141,25 @@ export function SignificantEventsTable({
           name: i18n.translate('xpack.streams.significantEventsTable.editQueryActionTitle', {
             defaultMessage: 'Edit',
           }),
+
           description: i18n.translate(
             'xpack.streams.significantEventsTable.editQueryActionDescription',
             {
               defaultMessage: 'Edit query',
             }
           ),
+          enabled: () => !!canManage,
           render: (item) => {
             return (
-              <WithLoadingSpinner
-                iconType="pencil"
-                onClick={() => {
-                  return onEditClick?.(item);
-                }}
-              />
+              <WithPrivilegeTooltip canManage={canManage}>
+                <WithLoadingSpinner
+                  iconType="pencil"
+                  disabled={!canManage}
+                  onClick={() => {
+                    return onEditClick?.(item);
+                  }}
+                />
+              </WithPrivilegeTooltip>
             );
           },
         },
@@ -138,14 +173,18 @@ export function SignificantEventsTable({
               defaultMessage: 'Remove query from stream',
             }
           ),
+          enabled: () => !!canManage,
           render: (item) => {
             return (
-              <WithLoadingSpinner
-                iconType="trash"
-                onClick={() => {
-                  return onDeleteClick?.(item);
-                }}
-              />
+              <WithPrivilegeTooltip canManage={canManage}>
+                <WithLoadingSpinner
+                  disabled={!canManage}
+                  iconType="trash"
+                  onClick={() => {
+                    return onDeleteClick?.(item);
+                  }}
+                />
+              </WithPrivilegeTooltip>
             );
           },
         },
