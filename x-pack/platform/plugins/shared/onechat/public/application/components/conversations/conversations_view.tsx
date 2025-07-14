@@ -12,24 +12,37 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React, { useState } from 'react';
 import { Conversation } from './conversation';
 import { ConversationHeader } from './conversation_header';
-import { ConversationSidebar } from './conversation_sidebar';
+import { ConversationSidebar } from './conversation_sidebar/conversation_sidebar';
 
 export const OnechatConversationsView: React.FC<{}> = () => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const { euiTheme } = useEuiTheme();
 
+  const mainStyles = css`
+    border: none;
+  `;
   const backgroundStyles = css`
     background-color: ${euiTheme.colors.backgroundBasePlain};
   `;
-  const headerHeight = `calc(${euiTheme.size.xxl} * 2)`;
+  const sidebarStyles = css`
+    ${backgroundStyles}
+    padding: ${euiTheme.size.base};
+  `;
+  const headerHeight = `calc(${euiTheme.size.xl} * 2)`;
   const headerStyles = css`
     ${backgroundStyles}
     display: flex;
+    flex-direction: column;
     justify-content: center;
+    padding-block: ${euiTheme.size.base};
+    padding-inline: ${euiTheme.size.base};
     border: none;
     block-size: ${headerHeight};
+    & > div {
+      padding: 0;
+    }
   `;
-  const mainContentStyles = css`
+  const contentStyles = css`
     ${backgroundStyles}
     width: 100%;
     height: 100%;
@@ -52,9 +65,12 @@ export const OnechatConversationsView: React.FC<{}> = () => {
       data-test-subj="onechatPageConversations"
       grow={false}
       panelled={false}
+      mainProps={{
+        css: mainStyles,
+      }}
     >
       {isSidebarOpen && (
-        <KibanaPageTemplate.Sidebar data-test-subj="onechatSidebar">
+        <KibanaPageTemplate.Sidebar data-test-subj="onechatSidebar" css={sidebarStyles}>
           <ConversationSidebar />
         </KibanaPageTemplate.Sidebar>
       )}
@@ -71,7 +87,7 @@ export const OnechatConversationsView: React.FC<{}> = () => {
         paddingSize="none"
         grow
         contentProps={{
-          css: mainContentStyles,
+          css: contentStyles,
         }}
         aria-label={labels.content}
       >
