@@ -2181,7 +2181,6 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /x-pack/platform/test/functional_with_es_ssl/config.base.ts @elastic/response-ops # Assigned per https://github.com/elastic/kibana/pull/197070
 /x-pack/platform/test/functional_with_es_ssl/lib/alert_api_actions.ts @elastic/response-ops
 /x-pack/platform/test/functional_with_es_ssl/lib/get_test_data.ts @elastic/response-ops
-/x-pack/platform/test/functional_with_es_ssl/lib/apm_es_client.ts @elastic/response-ops
 /x-pack/platform/test/functional_with_es_ssl/page_objects/index.ts @elastic/response-ops # Assigned per git blame
 /x-pack/platform/test/functional_with_es_ssl/page_objects/triggers_actions_ui_page.ts @elastic/response-ops
 /x-pack/platform/test/functional_with_es_ssl/page_objects/rule_details.ts @elastic/response-ops

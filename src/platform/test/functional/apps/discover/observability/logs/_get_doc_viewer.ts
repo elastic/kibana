@@ -32,7 +32,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       synthEsLogsClient = logsEsClient;
 
-      synthEsLogsClient.index([
+      await synthEsLogsClient.index([
         timerange(start, end)
           .interval('1m')
           .rate(5)
