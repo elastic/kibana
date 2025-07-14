@@ -14,13 +14,10 @@ import { Token } from 'antlr4';
  */
 export const GRAMMAR_ROOT_RULE = 'singleStatement';
 
+/**
+ * @todo Move this out of the parser/ folder.
+ */
 export const EDITOR_MARKER = 'marker_esql_editor';
-
-export const TICKS_REGEX = /^`{1}|`{1}$/g;
-export const DOUBLE_TICKS_REGEX = /``/g;
-export const SINGLE_TICK_REGEX = /`/g;
-export const SINGLE_BACKTICK = '`';
-export const DOUBLE_BACKTICK = '``';
 
 export const DEFAULT_CHANNEL: number = +(Token as any).DEFAULT_CHANNEL;
 export const HIDDEN_CHANNEL: number = +(Token as any).HIDDEN_CHANNEL;
