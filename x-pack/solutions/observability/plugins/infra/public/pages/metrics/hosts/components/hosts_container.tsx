@@ -11,7 +11,7 @@ import { UnifiedSearchBar } from './search_bar/unified_search_bar';
 import { HostsContent } from './hosts_content';
 import { UnifiedSearchProvider } from '../hooks/use_unified_search';
 
-export const HostContainer = () => {
+export const HostsContainer = () => {
   return (
     <UnifiedSearchProvider>
       <UnifiedSearchBar />
