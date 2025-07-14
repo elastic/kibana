@@ -142,7 +142,7 @@ export class AutoInstallContentPackagesTask {
     // Check that this task is current
     if (taskInstance.id !== this.taskId) {
       this.logger.debug(
-        `[DeleteUnenrolledAgentsTask] Outdated task version: Got [${taskInstance.id}] from task instance. Current version is [${this.taskId}]`
+        `[AutoInstallContentPackagesTask] Outdated task version: Got [${taskInstance.id}] from task instance. Current version is [${this.taskId}]`
       );
       return getDeleteTaskRunResult();
     }
