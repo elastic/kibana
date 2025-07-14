@@ -671,7 +671,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "fleet-package-policies|10.2.0: 36e535787e2e056808d594a62a0e9f499f8555c6",
         "fleet-package-policies|10.1.0: 77e39fefd98deaeb0f41bb74d4330d871351bd4a",
         "=======================================================================",
-        "fleet-preconfiguration-deletion-record|global: 454e9b7ef4c25e0f85b5ea12895e0ed720d12581",
+        "fleet-preconfiguration-deletion-record|global: a047f456e093d317d16fdb68736505989ec23fc9",
         "fleet-preconfiguration-deletion-record|mappings: 3b2d71720dd99d3a4848f0dc81c6d307a167fc1e",
         "fleet-preconfiguration-deletion-record|schemas: da39a3ee5e6b4b0d3255bfef95601890afd80709",
         "========================================================================================",
