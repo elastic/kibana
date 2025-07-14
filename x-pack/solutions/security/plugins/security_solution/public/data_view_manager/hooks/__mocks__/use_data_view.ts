@@ -14,6 +14,7 @@ const defaultImplementation = () =>
     status: 'ready',
   } as UseDataViewReturnValue);
 
+// TODO: consider if this should be the default mock implementation?
 export const withMatchedIndices = () =>
   ({
     dataView: getMockDataViewWithMatchedIndices(),
