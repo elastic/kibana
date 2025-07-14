@@ -179,7 +179,7 @@ export function useImagePasteUpload({
         } catch (err) {
           setErrors((prev) => (prev.includes(err) ? prev : [...prev, err]));
         }
-        if (uploadState.hasFiles()) {
+        if (uploadState.hasFiles() && uploadState.uploading$.value === false) {
           setErrors([]);
           uploadState.upload({
             caseIds: [caseId],
