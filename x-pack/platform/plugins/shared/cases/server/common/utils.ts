@@ -69,14 +69,16 @@ export const nullUser: User = { username: null, full_name: null, email: null };
 
 export const transformNewCase = ({
   user,
-  newCase: { isGeneratedByAssistant, ...restNewCase },
+  newCase,
+  isGeneratedByAssistant,
 }: {
   user: User;
   newCase: CasePostRequest;
+  isGeneratedByAssistant?: boolean;
 }): CaseTransformedAttributes => ({
-  ...restNewCase,
+  ...newCase,
   duration: null,
-  severity: restNewCase.severity ?? CaseSeverity.LOW,
+  severity: newCase.severity ?? CaseSeverity.LOW,
   closed_at: null,
   closed_by: null,
   created_at: new Date().toISOString(),
@@ -85,9 +87,9 @@ export const transformNewCase = ({
   status: CaseStatuses.open,
   updated_at: null,
   updated_by: null,
-  assignees: dedupAssignees(restNewCase.assignees) ?? [],
-  category: restNewCase.category ?? null,
-  customFields: restNewCase.customFields ?? [],
+  assignees: dedupAssignees(newCase.assignees) ?? [],
+  category: newCase.category ?? null,
+  customFields: newCase.customFields ?? [],
   observables: [],
   incremental_id: undefined,
   is_generated_by_assistant: isGeneratedByAssistant,

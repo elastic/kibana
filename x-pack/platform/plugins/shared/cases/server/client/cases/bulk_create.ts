@@ -35,7 +35,8 @@ import type { CaseTransformedAttributes } from '../../common/types/case';
 export const bulkCreate = async (
   data: BulkCreateCasesRequest,
   clientArgs: CasesClientArgs,
-  casesClient: CasesClient
+  casesClient: CasesClient,
+  isGeneratedByAssistant?: boolean
 ): Promise<BulkCreateCasesResponse> => {
   const {
     services: { caseService, userActionService, licensingService, notificationService },
@@ -79,7 +80,12 @@ export const bulkCreate = async (
       validateRequest({ theCase, customFieldsConfiguration, hasPlatinumLicenseOrGreater });
 
       bulkCreateRequest.push(
-        createBulkCreateCaseRequest({ theCase, user, customFieldsConfiguration })
+        createBulkCreateCaseRequest({
+          theCase,
+          user,
+          customFieldsConfiguration,
+          isGeneratedByAssistant,
+        })
       );
     }
 
@@ -188,10 +194,12 @@ const validateAssigneesUsage = ({
 
 const createBulkCreateCaseRequest = ({
   theCase,
+  isGeneratedByAssistant,
   customFieldsConfiguration,
   user,
 }: {
   theCase: { id: string } & BulkCreateCasesRequest['cases'][number];
+  isGeneratedByAssistant?: boolean;
   customFieldsConfiguration?: CustomFieldsConfiguration;
   user: User;
 }): BulkCreateCasesArgs['cases'][number] => {
@@ -210,6 +218,7 @@ const createBulkCreateCaseRequest = ({
     ...transformNewCase({
       user,
       newCase: normalizedCase,
+      isGeneratedByAssistant,
     }),
   };
 };

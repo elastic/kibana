@@ -360,12 +360,13 @@ describe('common utils', () => {
 
     it('transform correctly with isGeneratedByAssistant provided', () => {
       const myCase = {
-        newCase: { ...newCase, connector, isGeneratedByAssistant: true },
+        newCase: { ...newCase, connector },
         user: {
           email: 'elastic@elastic.co',
           full_name: 'Elastic',
           username: 'elastic',
         },
+        isGeneratedByAssistant: true,
       };
 
       const res = transformNewCase(myCase);

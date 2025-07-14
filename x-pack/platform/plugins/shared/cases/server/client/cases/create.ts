@@ -31,7 +31,8 @@ import { normalizeCreateCaseRequest } from './utils';
 export const create = async (
   data: CasePostRequest,
   clientArgs: CasesClientArgs,
-  casesClient: CasesClient
+  casesClient: CasesClient,
+  isGeneratedByAssistant?: boolean
 ): Promise<Case> => {
   const {
     services: { caseService, userActionService, licensingService, notificationService },
@@ -94,6 +95,7 @@ export const create = async (
       attributes: transformNewCase({
         user,
         newCase: normalizedCase,
+        isGeneratedByAssistant,
       }),
       id: savedObjectID,
       refresh: false,

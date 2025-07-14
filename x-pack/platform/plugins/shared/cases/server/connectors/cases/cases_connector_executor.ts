@@ -729,9 +729,12 @@ export class CasesConnectorExecutor {
     /**
      * cases.bulkCreate throws an error on errors
      */
-    const bulkCreateCasesResponse = await this.casesClient.cases.bulkCreate({
-      cases: bulkCreateReq,
-    });
+    const bulkCreateCasesResponse = await this.casesClient.cases.bulkCreate(
+      {
+        cases: bulkCreateReq,
+      },
+      params.isGeneratedByAssistant ?? false
+    );
 
     this.logger.debug(
       `[CasesConnector][CasesConnectorExecutor][upsertCases] The total number of created cases is ${bulkCreateCasesResponse.cases.length}`,
@@ -809,7 +812,6 @@ export class CasesConnectorExecutor {
       ...(caseFieldsFromTemplate?.category ? { category: caseFieldsFromTemplate?.category } : null),
       owner: params.owner,
       customFields: builtCustomFields,
-      isGeneratedByAssistant: params.isGeneratedByAssistant ?? false,
     };
   }
 
@@ -1080,9 +1082,12 @@ export class CasesConnectorExecutor {
     /**
      * cases.bulkCreate throws an error on errors
      */
-    const bulkCreateCasesResponse = await this.casesClient.cases.bulkCreate({
-      cases: bulkCreateReq,
-    });
+    const bulkCreateCasesResponse = await this.casesClient.cases.bulkCreate(
+      {
+        cases: bulkCreateReq,
+      },
+      params.isGeneratedByAssistant ?? false
+    );
 
     this.logger.debug(
       `[CasesConnector][CasesConnectorExecutor][createNewCasesOutOfClosedCases] The total number of created cases is ${bulkCreateCasesResponse.cases.length}`,

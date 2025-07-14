@@ -261,7 +261,6 @@ describe('CasesConnectorExecutor', () => {
                       "customFields": Array [],
                       "description": "This case was created by the rule ['Test rule'](https://example.com/rules/rule-test-id). The assigned alerts are grouped by \`host.name: A\` and \`dest.ip: 0.0.0.1\`.",
                       "id": "mock-id-1",
-                      "isGeneratedByAssistant": false,
                       "owner": "cases",
                       "settings": Object {
                         "syncAlerts": false,
@@ -288,7 +287,6 @@ describe('CasesConnectorExecutor', () => {
                       "customFields": Array [],
                       "description": "This case was created by the rule ['Test rule'](https://example.com/rules/rule-test-id). The assigned alerts are grouped by \`host.name: B\` and \`dest.ip: 0.0.0.1\`.",
                       "id": "mock-id-2",
-                      "isGeneratedByAssistant": false,
                       "owner": "cases",
                       "settings": Object {
                         "syncAlerts": false,
@@ -315,7 +313,6 @@ describe('CasesConnectorExecutor', () => {
                       "customFields": Array [],
                       "description": "This case was created by the rule ['Test rule'](https://example.com/rules/rule-test-id). The assigned alerts are grouped by \`host.name: B\` and \`dest.ip: 0.0.0.3\`.",
                       "id": "mock-id-3",
-                      "isGeneratedByAssistant": false,
                       "owner": "cases",
                       "settings": Object {
                         "syncAlerts": false,
@@ -334,6 +331,7 @@ describe('CasesConnectorExecutor', () => {
                     },
                   ],
                 },
+                false,
               ],
             ]
           `);
@@ -573,7 +571,6 @@ describe('CasesConnectorExecutor', () => {
                   "customFields": Array [],
                   "description": "This case was created by the rule ['Test rule'](https://example.com/rules/rule-test-id). The assigned alerts are grouped by \`host.name: B\` and \`dest.ip: 0.0.0.3\`.",
                   "id": "mock-id-3",
-                  "isGeneratedByAssistant": false,
                   "owner": "cases",
                   "settings": Object {
                     "syncAlerts": false,
@@ -948,7 +945,6 @@ describe('CasesConnectorExecutor', () => {
                   "customFields": Array [],
                   "description": "This case was created by the rule ['Test rule'](https://example.com/rules/rule-test-id). The assigned alerts are grouped by \`host.name: A\` and \`dest.ip: 0.0.0.1\`.",
                   "id": "mock-id-4",
-                  "isGeneratedByAssistant": false,
                   "owner": "cases",
                   "settings": Object {
                     "syncAlerts": false,
@@ -1115,7 +1111,6 @@ describe('CasesConnectorExecutor', () => {
                     ],
                     "description": "case desc",
                     "id": "mock-id-4",
-                    "isGeneratedByAssistant": false,
                     "owner": "cases",
                     "settings": Object {
                       "syncAlerts": true,
@@ -1199,7 +1194,6 @@ describe('CasesConnectorExecutor', () => {
                     ],
                     "description": "This case was created by the rule ['Test rule'](https://example.com/rules/rule-test-id). The assigned alerts are grouped by \`host.name: A\` and \`dest.ip: 0.0.0.1\`.",
                     "id": "mock-id-4",
-                    "isGeneratedByAssistant": false,
                     "owner": "cases",
                     "settings": Object {
                       "syncAlerts": false,
@@ -1312,7 +1306,6 @@ describe('CasesConnectorExecutor', () => {
                     ],
                     "description": "This case was created by the rule ['Test rule'](https://example.com/rules/rule-test-id). The assigned alerts are grouped by \`host.name: B\` and \`dest.ip: 0.0.0.3\`.",
                     "id": "mock-id-3",
-                    "isGeneratedByAssistant": false,
                     "owner": "cases",
                     "settings": Object {
                       "syncAlerts": false,
@@ -1387,7 +1380,6 @@ describe('CasesConnectorExecutor', () => {
                     ],
                     "description": "This case was created by the rule ['Test rule'](https://example.com/rules/rule-test-id). The assigned alerts are grouped by \`host.name: A\` and \`dest.ip: 0.0.0.1\`.",
                     "id": "mock-id-4",
-                    "isGeneratedByAssistant": false,
                     "owner": "cases",
                     "settings": Object {
                       "syncAlerts": false,
@@ -3347,7 +3339,6 @@ describe('CasesConnectorExecutor', () => {
                       "customFields": Array [],
                       "description": "This case was created by the rule ['Test rule'](https://example.com/rules/rule-test-id). The assigned alerts are grouped by \`field_name_1: field_value_1\`.",
                       "id": "mock-id-1",
-                      "isGeneratedByAssistant": true,
                       "owner": "cases",
                       "settings": Object {
                         "syncAlerts": false,
@@ -3372,7 +3363,6 @@ describe('CasesConnectorExecutor', () => {
                       "customFields": Array [],
                       "description": "This case was created by the rule ['Test rule'](https://example.com/rules/rule-test-id). The assigned alerts are grouped by \`field_name_2: field_value_2\`.",
                       "id": "mock-id-2",
-                      "isGeneratedByAssistant": true,
                       "owner": "cases",
                       "settings": Object {
                         "syncAlerts": false,
@@ -3397,7 +3387,6 @@ describe('CasesConnectorExecutor', () => {
                       "customFields": Array [],
                       "description": "This case was created by the rule ['Test rule'](https://example.com/rules/rule-test-id). The assigned alerts are grouped by \`field_name_1: field_value_3\`.",
                       "id": "mock-id-3",
-                      "isGeneratedByAssistant": true,
                       "owner": "cases",
                       "settings": Object {
                         "syncAlerts": false,
@@ -3414,6 +3403,7 @@ describe('CasesConnectorExecutor', () => {
                     },
                   ],
                 },
+                true,
               ],
             ]
           `);

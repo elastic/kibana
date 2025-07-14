@@ -50,11 +50,14 @@ export interface CasesSubClient {
   /**
    * Creates a case.
    */
-  create(data: CasePostRequest): Promise<Case>;
+  create(data: CasePostRequest, isGeneratedByAssistant?: boolean): Promise<Case>;
   /**
    * Bulk create cases.
    */
-  bulkCreate(data: BulkCreateCasesRequest): Promise<BulkCreateCasesResponse>;
+  bulkCreate(
+    data: BulkCreateCasesRequest,
+    isGeneratedByAssistant?: boolean
+  ): Promise<BulkCreateCasesResponse>;
   /**
    * Returns cases that match the search criteria.
    *
@@ -141,8 +144,10 @@ export const createCasesSubClient = (
   casesClientInternal: CasesClientInternal
 ): CasesSubClient => {
   const casesSubClient: CasesSubClient = {
-    create: (data: CasePostRequest) => create(data, clientArgs, casesClient),
-    bulkCreate: (data: BulkCreateCasesRequest) => bulkCreate(data, clientArgs, casesClient),
+    create: (data: CasePostRequest, isGeneratedByAssistant?: boolean) =>
+      create(data, clientArgs, casesClient, isGeneratedByAssistant),
+    bulkCreate: (data: BulkCreateCasesRequest, isGeneratedByAssistant?: boolean) =>
+      bulkCreate(data, clientArgs, casesClient, isGeneratedByAssistant),
     search: (params: CasesSearchRequest) => search(params, clientArgs, casesClient),
     get: (params: GetParams) => get(params, clientArgs),
     resolve: (params: GetParams) => resolve(params, clientArgs),
