@@ -24,6 +24,22 @@ describe('buildQueryAst', () => {
 
     const ast = buildQueryAst(source);
     replaceParameters(ast, source.params);
+
+    expect(ast.commands[0].args[0]).toEqual(
+      expect.objectContaining(
+        Builder.expression.func.node({
+          name: '==',
+          subtype: 'binary-expression',
+          args: [
+            Builder.expression.column({
+              args: [Builder.identifier({ name: 'host' }), Builder.identifier({ name: 'name' })],
+            }),
+            [Builder.expression.literal.string('my-host')],
+          ],
+        })
+      )
+    );
+
     const queryString = BasicPrettyPrinter.print(ast, { multiline: false });
 
     expect(queryString).toContain('host.name == "my-host"');
@@ -38,6 +54,22 @@ describe('buildQueryAst', () => {
 
     const ast = buildQueryAst(source);
     replaceParameters(ast, source.params);
+
+    expect(ast.commands[0].args[0]).toEqual(
+      expect.objectContaining(
+        Builder.expression.func.node({
+          name: '==',
+          subtype: 'binary-expression',
+          args: [
+            Builder.expression.column({
+              args: [Builder.identifier({ name: 'host' }), Builder.identifier({ name: 'name' })],
+            }),
+            Builder.expression.literal.string('my-host'),
+          ],
+        })
+      )
+    );
+
     const queryString = BasicPrettyPrinter.print(ast, { multiline: false });
 
     expect(queryString).toContain('host.name == "my-host"');
@@ -51,7 +83,19 @@ describe('buildQueryAst', () => {
     };
 
     const ast = buildQueryAst(source);
+
     replaceParameters(ast, source.params);
+
+    expect(ast.commands[0].args[0]).toEqual(
+      expect.objectContaining(
+        Builder.expression.func.node({
+          name: 'AVG',
+          args: [Builder.expression.column('foo')],
+          operator: Builder.identifier('AVG'),
+        })
+      )
+    );
+
     const queryString = BasicPrettyPrinter.print(ast, { multiline: false });
 
     expect(queryString).toContain('STATS AVG(foo) BY bar');
@@ -66,6 +110,22 @@ describe('buildQueryAst', () => {
 
     const ast = buildQueryAst(source);
     replaceParameters(ast, source.params);
+
+    expect(ast.commands[0].args[0]).toEqual(
+      expect.objectContaining(
+        Builder.expression.func.node({
+          name: '==',
+          subtype: 'binary-expression',
+          args: [
+            Builder.expression.column({
+              args: [Builder.identifier({ name: 'host' }), Builder.identifier({ name: 'name' })],
+            }),
+            [Builder.param.named({ value: 'host' })],
+          ],
+        })
+      )
+    );
+
     const queryString = BasicPrettyPrinter.print(ast, { multiline: false });
 
     expect(queryString).toContain('host.name == ?host');

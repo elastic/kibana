@@ -11,11 +11,10 @@ import { ParameterReplacer } from './parameter_replacer';
 import { Builder, ESQLColumn } from '@kbn/esql-ast';
 import { ESQLFunction, ESQLParamLiteral, ESQLUnnamedParamLiteral } from '@kbn/esql-ast/src/types';
 
-// Helper to create a param literal node
 function createParamLiteral(
   paramType: 'named' | 'positional',
-  paramKind: '?' | '??',
-  value: string
+  value: string,
+  paramKind: '?' | '??' = '?'
 ): ESQLParamLiteral {
   return {
     type: 'literal',
@@ -30,16 +29,12 @@ function createParamLiteral(
   };
 }
 
-function createColumnWithParam(
-  paramType: 'named' | 'positional',
-  paramKind: '?' | '??',
-  value: string
-): ESQLColumn {
+function createColumnWithParam(paramType: 'named' | 'positional', value: string): ESQLColumn {
   return {
     type: 'column',
     quoted: false,
     incomplete: false,
-    args: [createParamLiteral(paramType, paramKind, value)] as ESQLUnnamedParamLiteral[],
+    args: [createParamLiteral(paramType, value, '??')] as ESQLUnnamedParamLiteral[],
     location: { min: 0, max: 0 },
     text: '',
     name: 'test_column',
@@ -63,7 +58,7 @@ describe('ParameterReplacer', () => {
     const params = { foo: 'bar' };
     const replacer = new ParameterReplacer(params);
 
-    const node = createParamLiteral('named', '?', 'foo');
+    const node = createParamLiteral('named', 'foo');
     const substituted = replacer.replace(node);
 
     expect(substituted).toEqual(Builder.expression.literal.string('bar'));
@@ -73,7 +68,7 @@ describe('ParameterReplacer', () => {
     const params = ['positional_value'];
     const replacer = new ParameterReplacer(params);
 
-    const node = createParamLiteral('positional', '?', '0');
+    const node = createParamLiteral('positional', '0');
     const substituted = replacer.replace(node);
 
     expect(substituted).toEqual(Builder.expression.literal.string('positional_value'));
@@ -83,7 +78,7 @@ describe('ParameterReplacer', () => {
     const params = {};
     const replacer = new ParameterReplacer(params);
 
-    const node = createParamLiteral('named', '?', 'missing');
+    const node = createParamLiteral('named', 'missing');
     const substituted = replacer.replace(node);
 
     expect(substituted).toBe(node);
@@ -93,7 +88,7 @@ describe('ParameterReplacer', () => {
     const params = { foo: 'bar' };
     const replacer = new ParameterReplacer(params);
 
-    const node = createColumnWithParam('named', '??', 'foo');
+    const node = createColumnWithParam('named', 'foo');
 
     const substituted = replacer.replace(node);
 

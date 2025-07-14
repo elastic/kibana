@@ -14,20 +14,30 @@ import { Params } from '../types';
 export function replaceParameters(queryAst: ESQLAstQueryExpression, params?: Params) {
   const parameterReplacer = new ParameterReplacer(params);
   Walker.walk(queryAst, {
-    visitLiteral: (node) => {
+    visitLiteral: (node, parent) => {
       if (parameterReplacer.shouldReplaceNode(node)) {
-        Object.assign(node, parameterReplacer.replace(node));
+        replaceInPlace(node, parameterReplacer.replace(node, parent));
       }
     },
-    visitColumn: (node) => {
+    visitColumn: (node, parent) => {
       if (parameterReplacer.shouldReplaceNode(node)) {
-        Object.assign(node, parameterReplacer.replace(node));
+        replaceInPlace(node, parameterReplacer.replace(node, parent));
       }
     },
     visitFunction: (node) => {
       if (parameterReplacer.shouldReplaceNode(node)) {
-        Object.assign(node, parameterReplacer.replace(node));
+        replaceInPlace(node, parameterReplacer.replace(node));
       }
     },
   });
+}
+
+function replaceInPlace<T extends Record<string, any>>(target: T, replacement: T): void {
+  Object.keys(target).forEach((key) => {
+    if (!Object.prototype.hasOwnProperty.call(replacement, key)) {
+      delete target[key];
+    }
+  });
+
+  Object.assign(target, replacement);
 }

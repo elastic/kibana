@@ -37,7 +37,6 @@ describe('where', () => {
     );
   });
 
-  // ast has a problem with positional parameters in IN operator
   it('handles WHERE clause with IN operator and positional parameters', () => {
     const hosts = ['host1', 'host2', 'host3'];
     const pipeline = source.pipe(where(`host.name IN (${hosts.map(() => '?').join(',')})`, hosts));

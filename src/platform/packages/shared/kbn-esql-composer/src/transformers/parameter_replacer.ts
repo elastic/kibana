@@ -14,11 +14,12 @@ import {
   ESQLFunction,
   ESQLLiteral,
   ESQLParamLiteral,
+  isBinaryExpression,
   isColumn,
   isFunctionExpression,
   isParamLiteral,
 } from '@kbn/esql-ast';
-import { ESQLIdentifier } from '@kbn/esql-ast/src/types';
+import { ESQLIdentifier, ESQLProperNode } from '@kbn/esql-ast/src/types';
 import { FieldValue, Params } from '../types';
 
 type ReplaceableNodes = ESQLParamLiteral | ESQLLiteral | ESQLColumn | ESQLFunction;
@@ -63,7 +64,7 @@ export class ParameterReplacer {
     return isParamLiteral(node);
   }
 
-  public replace<TNode extends ReplaceableNodes>(node: TNode): TNode {
+  public replace<TNode extends ReplaceableNodes>(node: TNode, parent?: ESQLProperNode): TNode {
     if (!this.shouldReplaceNode(node)) {
       return node;
     }
@@ -76,7 +77,7 @@ export class ParameterReplacer {
       return this.replaceColumnExpression(node) as TNode;
     }
 
-    return this.buildReplacementAstNode(node) as TNode;
+    return this.buildReplacementAstNode(node, parent) as TNode;
   }
 
   private replaceFunctionExpression(node: ESQLFunction): ESQLFunction {
@@ -89,11 +90,11 @@ export class ParameterReplacer {
       : node;
   }
 
-  private replaceColumnExpression(node: ESQLColumn): ESQLColumn {
+  private replaceColumnExpression(node: ESQLColumn, parent?: ESQLProperNode): ESQLColumn {
     return Builder.expression.column({
       ...node,
       args: node.args.map((arg) =>
-        isParamLiteral(arg) ? (this.buildReplacementAstNode(arg) as ESQLIdentifier) : arg
+        isParamLiteral(arg) ? (this.buildReplacementAstNode(arg, parent) as ESQLIdentifier) : arg
       ),
     });
   }
@@ -108,7 +109,10 @@ export class ParameterReplacer {
     }
   }
 
-  private buildReplacementAstNode(node: ESQLParamLiteral | ESQLLiteral): ESQLAstBaseItem {
+  private buildReplacementAstNode(
+    node: ESQLParamLiteral | ESQLLiteral,
+    parent?: ESQLProperNode
+  ): ESQLAstBaseItem {
     if (!isParamLiteral(node)) {
       return node;
     }
@@ -119,7 +123,7 @@ export class ParameterReplacer {
       return node;
     }
 
-    if (node.paramKind === '??') {
+    if (node.paramKind === '??' || (node.paramKind === '?' && !isBinaryExpression(parent))) {
       return Builder.identifier(String(value));
     }
 
