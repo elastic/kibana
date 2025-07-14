@@ -8,7 +8,7 @@ import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context
 
 export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext) {
   describe('Serverless Observability - Deployment-agnostic API integration tests', function () {
-    // load new oblt and platform deployment-agnostic test here
+    // load new oblt deployment-agnostic test here
     // Note: if your tests runtime is over 5 minutes, create a new index and config file
     loadTestFile(require.resolve('../../apis/observability/infra'));
     loadTestFile(require.resolve('../../apis/observability/alerting'));
