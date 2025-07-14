@@ -17,7 +17,6 @@ import type {
 } from '../../commands_registry/types';
 import { Location } from '../../commands_registry/types';
 import { getDateLiterals, getCompatibleLiterals, buildConstantsDefinitions } from './literals';
-import { SINGLE_TICK_REGEX, DOUBLE_BACKTICK } from '../../parser/constants';
 import { type SupportedDataType, isParameterType } from '../types';
 import { getOverlapRange } from './shared';
 import { getExpressionType } from './expressions';
@@ -41,9 +40,7 @@ export const shouldBeQuotedText = (
 };
 
 export const getSafeInsertText = (text: string, options: { dashSupported?: boolean } = {}) => {
-  return shouldBeQuotedText(text, options)
-    ? `\`${text.replace(SINGLE_TICK_REGEX, DOUBLE_BACKTICK)}\``
-    : text;
+  return shouldBeQuotedText(text, options) ? `\`${text.replace(/`/g, '``')}\`` : text;
 };
 
 export const buildUserDefinedColumnsDefinitions = (
