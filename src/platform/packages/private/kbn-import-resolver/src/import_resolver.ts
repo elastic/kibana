@@ -11,17 +11,14 @@ import Path from 'path';
 
 import Resolve from 'resolve';
 import { REPO_ROOT } from '@kbn/repo-info';
-import {
-  getPackages,
-  type Package,
-  type ParsedPackageJson,
-  type PackageExports,
-} from '@kbn/repo-packages';
-
+import { getPackages, type Package, type ParsedPackageJson } from '@kbn/repo-packages';
+import { exports as resolvePackageExports } from 'resolve.exports';
 import { safeStat, readFileSync } from './helpers/fs';
 import { ResolveResult } from './resolve_result';
 import { getRelativeImportReq } from './helpers/import_req';
 import { memoize } from './helpers/memoize';
+
+// Use lightweight resolver for "exports" maps
 
 const NODE_MODULE_SEG = Path.sep + 'node_modules' + Path.sep;
 
@@ -242,19 +239,22 @@ export class ImportResolver {
   }
 
   private tryExportsResolve(req: string, dirname: string): ResolveResult | null {
-    // Only handle bare specifiers – ignore relative/absolute paths
+    // Ignore relative or absolute requests – only handle bare specifiers
     if (req.startsWith('.') || Path.isAbsolute(req)) {
       return null;
     }
 
+    // Split into <packageName> and sub-path segments
     const parts = req.split('/');
     const pkgName = parts[0].startsWith('@') ? `${parts[0]}/${parts[1]}` : parts[0];
     const subPathParts = parts.slice(pkgName.startsWith('@') ? 2 : 1);
-    // If there is no sub-path then exports map does not apply
+
+    // "exports" maps only apply to sub-paths (eg. "pkg/foo")
     if (subPathParts.length === 0) {
       return null;
     }
 
+    // Locate the dependency's package.json
     let manifestPath: string | undefined;
     try {
       manifestPath = Resolve.sync(`${pkgName}/package.json`, {
@@ -278,81 +278,18 @@ export class ImportResolver {
       return null;
     }
 
-    const exportsField = pkgJson.exports;
+    // Use resolve.exports to determine the correct file for the sub-path
+    const entry = `./${subPathParts.join('/')}`;
+    const targets = resolvePackageExports(pkgJson as any, entry) as string[] | undefined;
 
-    if (!exportsField) {
+    if (!targets || targets.length === 0) {
       return null;
     }
 
-    // The requested sub-path key in the exports map always starts with './'
-    const subPathKey = `./${subPathParts.join('/')}`;
-
-    // Find the export target path
-    const pickTarget = (source: PackageExports): string | undefined => {
-      if (!source) {
-        return undefined;
-      }
-
-      if (typeof source === 'string') {
-        return source;
-      }
-
-      if (Array.isArray(source)) {
-        for (const item of source) {
-          const target = pickTarget(item);
-          if (target) return target;
-        }
-        return undefined;
-      }
-
-      const target =
-        pickTarget(source.import) ??
-        pickTarget(source.require) ??
-        pickTarget(source.types) ??
-        pickTarget(source.default) ??
-        pickTarget(source[subPathKey]);
-
-      if (target) {
-        return target;
-      }
-
-      // try to match by wildcard
-      for (const [key, val] of Object.entries(source)) {
-        if (!key.includes('*')) continue;
-        // Split the key on the first '*', everything before is the prefix, after is the suffix
-        const starIndex = key.indexOf('*');
-        const prefix = key.slice(0, starIndex);
-        const suffix = key.slice(starIndex + 1);
-
-        if (subPathKey.startsWith(prefix) && subPathKey.endsWith(suffix)) {
-          // Extract the part matched by the wildcard
-          const wildcardSegment = subPathKey.slice(
-            prefix.length,
-            subPathKey.length - suffix.length
-          );
-
-          // Resolve the value similar to exact match logic
-          const resolved = pickTarget(val);
-
-          if (typeof resolved === 'string') {
-            return resolved.replace('*', wildcardSegment);
-          }
-        }
-      }
-
-      return undefined;
-    };
-
-    const target = pickTarget(exportsField);
-
-    if (!target) {
-      return null;
-    }
-
-    const absolute = Path.resolve(pkgDir, target);
+    // Prefer the first resolved target
+    const absolute = Path.resolve(pkgDir, targets[0]);
     const stat = this.safeStat(absolute);
     if (!stat || !stat.isFile()) {
-      // We only support files for now
       return null;
     }
 

@@ -1931,6 +1931,25 @@
       "enabled": true
     },
     {
+      "groupName": "resolve.exports",
+      "matchDepNames": [
+        "resolve.exports"
+      ],
+      "reviewers": [
+        "team:kibana-operations"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:Operations",
+        "backport:all-open",
+        "release_note:skip"
+      ],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
       "groupName": "mocha",
       "matchDepNames": [
         "mocha",
