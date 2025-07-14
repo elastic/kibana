@@ -25,7 +25,7 @@ import { scalarFunctionDefinitions } from '../generated/scalar_functions';
 import { ESQLFieldWithMetadata, ISuggestionItem } from '../../commands_registry/types';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../commands_registry/constants';
 import { buildFunctionDocumentation } from './documentation';
-import { getSafeInsertText, getControlSuggestion } from './autocomplete';
+import { getSafeInsertText, getControlSuggestion } from './autocomplete/helpers';
 import { ESQLAstItem, ESQLFunction } from '../../types';
 import { removeFinalUnknownIdentiferArg, isParamExpressionType } from './shared';
 import { getTestFunctions } from './test_functions';
@@ -109,6 +109,17 @@ export const filterFunctionDefinitions = (
     return true;
   });
 };
+
+export function getAllFunctions(options?: {
+  type: Array<FunctionDefinition['type']> | FunctionDefinition['type'];
+}) {
+  const fns = buildFunctionLookup();
+  if (!options?.type) {
+    return Array.from(fns.values());
+  }
+  const types = new Set(Array.isArray(options.type) ? options.type : [options.type]);
+  return Array.from(fns.values()).filter((fn) => types.has(fn.type));
+}
 
 export function printArguments(
   {
