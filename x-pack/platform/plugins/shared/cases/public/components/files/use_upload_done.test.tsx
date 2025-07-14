@@ -10,16 +10,16 @@
 import { renderHook, act } from '@testing-library/react';
 import type { DoneNotification } from '@kbn/shared-ux-file-upload';
 
-// Mock the deleteFileAttachments API -------------------------
+// Mock the deleteFileAttachments API
 const mockDeleteFileAttachments = jest.fn();
 jest.mock('../../containers/api', () => ({
   deleteFileAttachments: (...args: unknown[]) => mockDeleteFileAttachments(...args),
 }));
 
-// Import the hook after mocks are in place -------------------
+// Import the hook after mocks are in place
 import { useUploadDone } from './use_upload_done';
 
-// Utility factory to create a DoneNotification ---------------
+// Utility factory to create a DoneNotification
 // The overrides helper needs to allow callers to pass only the subset of
 // fields they care about inside `fileJSON`. Declare a dedicated helper type
 // to express that the top-level values are optional and the nested
@@ -77,8 +77,8 @@ describe('useUploadDone', () => {
       createDoneNotification({
         fileJSON: {
           name: 'badfile',
-          extension: undefined as unknown as string | undefined,
-          mimeType: undefined as unknown as string | undefined,
+          extension: undefined,
+          mimeType: undefined,
         },
       }),
     ];
