@@ -1,8 +1,8 @@
 # @kbn/esql-composer
 
-`@kbn/esql-composer` is a library to generate ES|QL queries in a way that is similar to Observables. Its eventual goal is to be able to create fully typed queries (with autocomplete on column names et cetera).
 
-Every query starts with a source command. Currently only `from` is available. Source commands return a `QueryPipeline`, which allows you to pipe the source data into other commands, and eventually get the ES|QL query as a raw string. Here's an example:
+## Basic Usage
+A query starts by invoking a source command like `from()`, which returns a `QueryPipeline`. This pipeline can be extended through `.pipe(...)` calls and rendered as a string with `.asQuery()`.
 
 ```ts
 import { from, where, sort, keep, limit, SortOrder } from '@kbn/esql-composer';
@@ -14,7 +14,7 @@ const query = from('logs-*')
     keep('service.name', 'log.level'),
     limit(10)
   )
-  .asString();
+  .asQuery();
 ```
 
 The above example will output
@@ -27,11 +27,10 @@ FROM logs-*
   | LIMIT 10
 ```
 
-## Output formats
+## Output methods
 
-`asString()` – outputs the ES|QL query as a readable string.
+`asQuery()` – outputs the ES|QL query as a readable string.
 
-`asRequest()` – outputs an object suitable for Elasticsearch’s ES|QL query API, including parameters.
 
 ## Features and examples
 
@@ -45,13 +44,13 @@ import { from, where } from '@kbn/esql-composer';
 
 from('logs-*')
   .pipe(where('@timestamp <= NOW() AND @timestamp > NOW() - 24 hours'))
-  .asString();
+  .asQuery();
 ```
 
-output: 
+Output: 
 
 ```sql
-FROM logs-*
+  FROM logs-*
   | WHERE @timestamp <= NOW() AND @timestamp > NOW() - 24 hours
 ```
 
@@ -63,22 +62,18 @@ import { from, where } from '@kbn/esql-composer';
 from('logs-*')
   .pipe(where('host.name == ?hostName AND service.name == ?serviceName', 
     {
-      hostName: 'host1',
-      serviceName: 'opbeans'
+      hostName: 'my-host',
+      serviceName: 'my-service'
     }
   ))
-  .asRequest();
+  .asQuery();
 ```
 
-The example above will create the following object
-```ts
-{ 
-  query: `FROM logs-*
-  | WHERE host.name == ?hostName AND service.name == ?serviceName AND service.name == ?hostName
-  `,
-  params: [{ hostName: 'host' }, { serviceName: 'service' }]
-}
+Output: 
 
+```sql
+  FROM logs-*
+  | WHERE host.name == "my-host" AND service.name == "my-service"
 ```
 
 #### `WHERE` with positional parameters
@@ -87,19 +82,15 @@ The example above will create the following object
 import { from, where } from '@kbn/esql-composer';
 
 from('logs-*')
-  .pipe(where('host.name IN (?,?,?)', ['host1', 'host2', 'host3']))
-  .asRequest();
+  .pipe(where('host.name IN (?,?,?)', ['my-host-1', 'my-host-2', 'my-host-3']))
+  .asQuery();
 ```
 
-The example above will create the following request
-```ts
-{ 
-  query: `FROM logs-*
-  | WHERE host.name IN (?,?,?)
-  `,
-  params: ['host1', 'host2', 'host3']
-}
+Output: 
 
+```sql
+  FROM logs-*
+  | WHERE host.name IN ("my-host-1", "my-host-2", "my-host-3")
 ```
 
 ### `STATS`
@@ -112,45 +103,41 @@ import { from, stats } from '@kbn/esql-composer';
 
 from('logs-*')
   .pipe(stats('avg_duration = AVG(transaction.duration.us) BY service.name'))
-  .asRequest();
+  .asQuery();
 
 ```
 
-`STATS`  also supports named parameters for dynamic field names
+Output: 
+
+```sql
+  FROM logs-*
+  | WHERE avg_duration = AVG(transaction.duration.us) BY service.name
+```
+
+`STATS` with named parameters for dynamic field and function names
 
 ```ts
 import { from, stats } from '@kbn/esql-composer';
 
 from('logs-*')
   .pipe(
-    stats('AVG(??duration), COUNT(??svcName) WHERE agent.name == "java" BY ??env', {
+    stats('?func(??duration), COUNT(??svcName) WHERE agent.name == "java" BY ??env', {
+      func: 'AVG',
       duration: 'transaction.duration.us',
       svcName: 'service.name',
       env: 'service.environment',
     })
   )
-  .asRequest();
+  .asQuery();
 ```
 
 Returns
 
-```ts
-{ 
-  query: `FROM logs-*
-  | AVG(??duration), COUNT(??svcName) WHERE agent.name == "java" BY ??env`,
-  params: [
-    {
-      duration: 'transaction.duration.us',
-    },
-    {
-      svcName: 'service.name',
-    },
-    {
-      env: 'service.environment',
-    },
-  ]
-}
+```sql
+  FROM logs-*
+  | STATS AVG(transaction.duration.us), COUNT(service.name) WHERE agent.name == "java" BY sevice.environment
 ```
+
 
 ### `EVAL`
 
@@ -163,11 +150,11 @@ from('logs-*')
   .pipe(
     evaluate('type = CASE(languages <= 1, "monolingual",languages <= 2, "bilingual","polyglot")')
   )
-  .asString();
+  .asQuery();
 
 ```
 
-`EVAL`  also supports named parameters for dynamic field names
+`EVAL`  with named parameters for dynamic field names
 
 ```ts
 import { from, evaluate } from '@kbn/esql-composer';
@@ -181,16 +168,11 @@ from('logs-*')
   .asRequest();
 ```
 
-```ts
-{ 
-  query: `FROM logs-*
-  | EVAL latestTs = MAX(??ts)`,
-  params: [
-    {
-      ts: '@timestamp',
-    }
-  ]
-}
+Output: 
+
+```sql
+  FROM logs-*
+  | EVAL latestTs = MAX(@timestamp)
 ```
 
 
@@ -204,7 +186,14 @@ import { from, sort } from '@kbn/esql-composer';
 
 from('logs-*')
   .pipe(sort('@timestamp', 'log.level'))
-  .asString();
+  .asQuery();
+```
+
+Output: 
+
+```sql
+  FROM logs-*
+  | SORT @timestamp, log.level ASC
 ```
 
 `SORT` with explicit order
@@ -215,7 +204,13 @@ import { from, evaluate } from '@kbn/esql-composer';
 
 from('logs-*')
   .pipe(sort({ '@timestamp': SortOrder.Desc }))
-  .asString();
+  .asQuery();
+```
+Output:
+
+```sql
+  FROM logs-*
+  | SORT @timestamp DESC
 ```
 
 
@@ -234,15 +229,9 @@ from('logs-*')
   .asRequest();
 ```
 
-Returns
- 
-```ts
-{
-  query: `FROM logs-*
-  | SORT ??timestamp DESC, ??logLevel ASC`,
-  params: [
-    { timestamp: '@timestamp' },
-    { logLevel: 'log.level' }
-  ]
-}
+Output:
+
+```sql
+  FROM logs-*
+  | SORT @timestamp DESC, log.level ASC
 ```
