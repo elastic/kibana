@@ -25,7 +25,10 @@ describe('bedrockClaudeAdapter', () => {
       return {
         actionId: '',
         status: 'ok',
-        data: new PassThrough(),
+        data: {
+          stream: new PassThrough(),
+          tokenStream: new PassThrough(),
+        },
       };
     });
   });
@@ -390,7 +393,7 @@ Human:`,
 
       const { toolChoice, tools, system } = getCallParams();
       expect(toolChoice).toBeUndefined();
-      expect(tools).toEqual([]);
+      expect(tools).toEqual(undefined); // Claude requires tools to be undefined when no tools are available
 
       expect(system).toEqual([{ text: addNoToolUsageDirective('some system instruction') }]);
     });
