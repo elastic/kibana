@@ -16,7 +16,6 @@ import {
 
 import React, { useMemo, useState, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { CasesPublicStart } from '@kbn/cases-plugin/public';
 import { useRouteMatch } from 'react-router-dom';
 import { SLO_ALERTS_TABLE_ID } from '@kbn/observability-shared-plugin/common';
 import { DefaultAlertActions } from '@kbn/response-ops-alerts-table/components/default_alert_actions';
@@ -47,15 +46,13 @@ export const AlertActions: GetObservabilityAlertsTableProp<'renderActionsCell'> 
     http: {
       basePath: { prepend },
     },
+    cases,
   } = services;
-  const {
-    helpers: { canUseCases },
-  } = services.cases! as unknown as CasesPublicStart; // Cases is guaranteed to be defined in Observability
   const isSLODetailsPage = useRouteMatch(SLO_DETAIL_PATH);
 
   const isInApp = Boolean(tableId === SLO_ALERTS_TABLE_ID && isSLODetailsPage);
 
-  const userCasesPermissions = canUseCases([observabilityFeatureId]);
+  const userCasesPermissions = cases?.helpers.canUseCases([observabilityFeatureId]);
   const [viewInAppUrl, setViewInAppUrl] = useState<string>();
 
   const parseObservabilityAlert = useMemo(
@@ -99,7 +96,7 @@ export const AlertActions: GetObservabilityAlertsTableProp<'renderActionsCell'> 
   };
 
   const actionsMenuItems = [
-    ...(userCasesPermissions.createComment && userCasesPermissions.read
+    ...(userCasesPermissions?.createComment && userCasesPermissions?.read
       ? [
           <EuiContextMenuItem
             data-test-subj="add-to-existing-case-action"
