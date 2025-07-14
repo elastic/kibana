@@ -27,7 +27,7 @@ import { STATEFUL_ROLES_ROOT_PATH } from '@kbn/es';
 import { DeploymentAgnosticCommonServices, services } from '../services';
 import { AI_ASSISTANT_SNAPSHOT_REPO_PATH } from './common_paths';
 
-interface CreateTestConfigOptions<T extends DeploymentAgnosticCommonServices> {
+interface CreateTestConfigOptions<T> {
   esServerArgs?: string[];
   kbnServerArgs?: string[];
   services?: T;
