@@ -6,20 +6,20 @@
  */
 
 import { z } from '@kbn/zod';
-import { BuiltinToolIds, BuiltinTags } from '@kbn/onechat-common';
-import type { RegisteredTool } from '@kbn/onechat-server';
+import { builtinToolIds, builtinTags } from '@kbn/onechat-common';
+import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import { getIndexMappings, GetIndexMappingsResult } from '@kbn/onechat-genai-utils';
 
 const getIndexMappingsSchema = z.object({
   indices: z.array(z.string()).min(1).describe('List of indices to retrieve mappings for.'),
 });
 
-export const getIndexMappingsTool = (): RegisteredTool<
+export const getIndexMappingsTool = (): BuiltinToolDefinition<
   typeof getIndexMappingsSchema,
   GetIndexMappingsResult
 > => {
   return {
-    id: BuiltinToolIds.getIndexMapping,
+    id: builtinToolIds.getIndexMapping,
     description: 'Retrieve mappings for the specified index or indices.',
     schema: getIndexMappingsSchema,
     handler: async ({ indices }, { esClient }) => {
@@ -28,8 +28,6 @@ export const getIndexMappingsTool = (): RegisteredTool<
         result,
       };
     },
-    meta: {
-      tags: [BuiltinTags.retrieval],
-    },
+    tags: [builtinTags.retrieval],
   };
 };

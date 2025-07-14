@@ -6,11 +6,7 @@
  */
 
 export type {
-  RegisteredToolMeta,
-  RegisteredTool,
-  RegisteredToolProvider,
-  EsqlToolDefinition,
-  EsqlTool,
+  BuiltinToolDefinition,
   ToolHandlerFn,
   ToolHandlerReturn,
   ToolHandlerContext,
