@@ -30,9 +30,9 @@ export function defineRoutes(
     async (context, request, response) => {
       try {
         const { workflow, inputs } = request.body;
-        const workflowManager = await getWorkflowManager();
+        const workflowsManagement = await getWorkflowManager();
 
-        await workflowManager.runWorkflow(workflow, inputs);
+        await workflowsManagement.runWorkflow(workflow, inputs);
 
         return response.ok();
       } catch (error) {

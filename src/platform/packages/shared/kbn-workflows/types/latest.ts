@@ -1,4 +1,5 @@
 export type {
+  EsWorkflowSchema,
   WorkflowExecution,
   WorkflowExecutionLogModel,
   WorkflowExecutionModel,

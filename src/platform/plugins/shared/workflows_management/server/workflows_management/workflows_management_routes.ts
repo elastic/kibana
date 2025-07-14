@@ -1,8 +1,8 @@
 import { schema } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core/server';
-import { WorkflowsManagementApi, type GetWorkflowsParams } from '../api';
+import { WorkflowsManagementApi, type GetWorkflowsParams } from './workflows_management_api';
 
-export function defineRoutes(router: IRouter) {
+export function defineRoutes(router: IRouter, api: WorkflowsManagementApi) {
   router.post(
     {
       path: '/api/workflows',
@@ -17,7 +17,7 @@ export function defineRoutes(router: IRouter) {
       try {
         const { limit, offset } = request.query as GetWorkflowsParams;
         return response.ok({
-          body: await WorkflowsManagementApi.getWorkflows({
+          body: await api.getWorkflows({
             limit,
             offset,
           }),
@@ -51,7 +51,7 @@ export function defineRoutes(router: IRouter) {
       try {
         const { id } = request.params as { id: string };
         return response.ok({
-          body: await WorkflowsManagementApi.getWorkflow(id),
+          body: await api.getWorkflow(id),
         });
       } catch (error) {
         console.error(error);
