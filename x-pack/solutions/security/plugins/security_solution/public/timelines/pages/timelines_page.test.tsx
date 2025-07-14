@@ -11,6 +11,8 @@ import React from 'react';
 import { TimelinesPage } from './timelines_page';
 import { useSourcererDataView } from '../../sourcerer/containers';
 import { useUserPrivileges } from '../../common/components/user_privileges';
+import { useDataView } from '../../data_view_manager/hooks/use_data_view';
+import { getMockDataView } from '../../data_view_manager/mocks/mock_data_view';
 
 jest.mock('react-router-dom', () => {
   const originalModule = jest.requireActual('react-router-dom');
@@ -25,9 +27,7 @@ jest.mock('react-router-dom', () => {
 jest.mock('../../overview/components/events_by_dataset');
 jest.mock('../../sourcerer/containers');
 jest.mock('../../common/components/user_privileges');
-jest.mock('../../data_view_manager/hooks/use_data_view', () => ({
-  useDataView: jest.fn(() => ({ dataView: { matchedIndices: [] } })),
-}));
+jest.mock('../../data_view_manager/hooks/use_data_view');
 jest.mock('../../common/hooks/use_experimental_features');
 
 describe('TimelinesPage', () => {
@@ -51,11 +51,11 @@ describe('TimelinesPage', () => {
     expect(wrapper.exists('[data-test-subj="stateful-open-timeline"]')).toBeFalsy();
   });
 
-  it('should show the correct elements if user has crud', () => {
-    (useSourcererDataView as unknown as jest.Mock).mockReturnValue({
-      indicesExist: true,
-      sourcererDataView: {},
-    });
+  it('should show the correct elements if user has crud and indices exist', () => {
+    const dataView = getMockDataView();
+    dataView.matchedIndices = ['test'];
+    jest.mocked(useDataView).mockReturnValue({ dataView, status: 'ready' });
+
     (useUserPrivileges as jest.Mock).mockReturnValue({
       timelinePrivileges: {
         crud: true,
