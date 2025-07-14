@@ -18,12 +18,11 @@ export async function rollbackInstallation(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgName: string;
   spaceId: string;
-  spaceIds: string[];
 }): Promise<{
   version: string;
   success: boolean;
 }> {
-  const { esClient, savedObjectsClient, pkgName, spaceId, spaceIds } = options;
+  const { esClient, savedObjectsClient, pkgName, spaceId } = options;
   const logger = appContextService.getLogger();
   logger.info(`Starting installation rollback for package: ${pkgName}`);
 
@@ -57,13 +56,13 @@ export async function rollbackInstallation(options: {
     {
       searchFields: ['package.name'],
       search: pkgName,
-      spaceIds,
+      spaceIds: ['*'],
     }
   );
-  const packagePolicySO = packagePolicySORes.saved_objects;
+  const packagePolicySOs = packagePolicySORes.saved_objects;
 
-  if (packagePolicySO.length > 0) {
-    const policyIds = packagePolicySO.map((so) => so.id);
+  if (packagePolicySOs.length > 0) {
+    const policyIds = packagePolicySOs.map((so) => so.id);
     const policyIdsWithNoPreviousVersion = policyIds.filter((soId) => {
       if (!soId.endsWith(':prev')) {
         return !policyIds.includes(`${soId}:prev`);
@@ -78,7 +77,7 @@ export async function rollbackInstallation(options: {
       );
     }
 
-    const policiesOnWrongPreviousVersion = packagePolicySO.filter((so) => {
+    const policiesOnWrongPreviousVersion = packagePolicySOs.filter((so) => {
       if (so.id.endsWith(':prev')) {
         return so.attributes.package?.version !== previousVersion;
       }
@@ -86,7 +85,9 @@ export async function rollbackInstallation(options: {
     });
     if (policiesOnWrongPreviousVersion.length > 0) {
       const report = policiesOnWrongPreviousVersion.map((so) => {
-        return `${so.id} (version: ${so.attributes.package?.version}, expected: ${previousVersion})`;
+        return `${so.id.replace(':prev', '')} (version: ${
+          so.attributes.package?.version
+        }, expected: ${previousVersion})`;
       });
       throw new PackageRollbackError(
         `Wrong previous version for package policies: ${report.join(', ')}`
@@ -95,7 +96,7 @@ export async function rollbackInstallation(options: {
   }
 
   // Roll back package policies.
-  const rollbackResult = await packagePolicyService.rollback(savedObjectsClient, packagePolicySO);
+  const rollbackResult = await packagePolicyService.rollback(savedObjectsClient, packagePolicySOs);
 
   // Roll back package.
   const res = await installPackage({

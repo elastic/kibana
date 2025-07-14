@@ -1855,8 +1855,9 @@ class AgentPolicyService {
     const savedObjectType = await getAgentPolicySavedObjectType();
 
     const objects = agentPolicyIds.map((id: string) => ({ id, type: savedObjectType }));
+    const opts = spaceId ? { namespace: spaceId } : undefined;
     const bulkGetResponse = await internalSoClientWithoutSpaceExtension
-      .bulkGet<AgentPolicySOAttributes>(objects, { namespace: spaceId })
+      .bulkGet<AgentPolicySOAttributes>(objects, opts)
       .catch(
         catchAndSetErrorStackTrace.withMessage(
           `Failed to bulk get agent policies [${agentPolicyIds.join(', ')}]`

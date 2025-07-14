@@ -2614,7 +2614,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     > = {};
 
     packagePolicies.forEach((policy) => {
-      const namespace = policy.namespaces?.[0];
+      const namespace = policy.namespaces?.[0] || policy.attributes.namespace;
       if (namespace) {
         if (!policy.id.endsWith(':prev')) {
           const previousRevision = packagePolicies.find((p) => p.id === `${policy.id}:prev`);
@@ -2665,7 +2665,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     for (const [namespace, policies] of Object.entries(policiesToUpdate)) {
       await soClient
         .bulkUpdate<PackagePolicySOAttributes>(policies, { namespace })
-        .catch(catchAndSetErrorStackTrace.withMessage(`Saved objects bulk update failed]`));
+        .catch(catchAndSetErrorStackTrace.withMessage(`Saved objects bulk update failed`));
       for (const policy of policies) {
         auditLoggingService.writeCustomSoAuditLog({
           action: 'update',
@@ -2697,7 +2697,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       }));
       await soClient
         .bulkUpdate<PackagePolicySOAttributes>(policiesToUpdate, { namespace })
-        .catch(catchAndSetErrorStackTrace.withMessage(`Saved objects bulk update failed]`));
+        .catch(catchAndSetErrorStackTrace.withMessage(`Saved objects bulk update failed`));
       for (const policy of policies) {
         auditLoggingService.writeCustomSoAuditLog({
           action: 'update',

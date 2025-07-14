@@ -679,14 +679,12 @@ export const rollbackPackageHandler: FleetRequestHandler<
   const internalSoClientWithoutSpaceExtension =
     appContextService.getInternalUserSOClientWithoutSpaceExtension();
   const spaceId = fleetContext.spaceId;
-  const allSpaces = await fleetContext.getAllSpaces();
   try {
     const body: RollbackPackageResponse = await rollbackInstallation({
       esClient,
       savedObjectsClient: internalSoClientWithoutSpaceExtension,
       pkgName,
       spaceId,
-      spaceIds: allSpaces.map((space) => space.id),
     });
     return response.ok({ body });
   } catch (error) {
