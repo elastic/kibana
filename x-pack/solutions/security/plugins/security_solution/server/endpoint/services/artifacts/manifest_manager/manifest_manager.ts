@@ -7,11 +7,8 @@
 
 import semver from 'semver';
 import { chunk, isEmpty, isEqual, keyBy } from 'lodash';
-import type {
-  ElasticsearchClient,
-  type Logger,
-  type SavedObjectsClientContract,
-} from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import { type Logger, type SavedObjectsClientContract } from '@kbn/core/server';
 import { ENDPOINT_ARTIFACT_LISTS, ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import type { Artifact, PackagePolicyClient } from '@kbn/fleet-plugin/server';
@@ -46,6 +43,8 @@ import type {
   InternalUnifiedManifestBaseSchema,
   InternalUnifiedManifestSchema,
   InternalUnifiedManifestUpdateSchema,
+} from '../../../schemas/artifacts';
+import {
   internalArtifactCompleteSchema,
   type InternalArtifactCompleteSchema,
   type InternalManifestSchema,

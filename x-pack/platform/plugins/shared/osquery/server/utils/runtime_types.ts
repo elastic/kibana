@@ -15,9 +15,13 @@ import { get } from 'lodash';
 type ErrorFactory = (message: string) => Error;
 
 export type GenericIntersectionC =
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   | rt.IntersectionC<[any, any]>
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   | rt.IntersectionC<[any, any, any]>
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   | rt.IntersectionC<[any, any, any, any]>
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   | rt.IntersectionC<[any, any, any, any, any]>;
 
 export const createPlainError = (message: string) => new Error(message);
@@ -32,7 +36,11 @@ export const decodeOrThrow =
     pipe(runtimeType.decode(inputValue), fold(throwErrors(createError), identity));
 
 const getProps = (
-  codec: rt.HasProps | rt.RecordC<rt.StringC, any> | GenericIntersectionC
+  codec:
+    | rt.HasProps
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    | rt.RecordC<rt.StringC, any>
+    | GenericIntersectionC
 ): rt.Props | null => {
   if (codec == null) {
     return null;
@@ -71,8 +79,9 @@ const getProps = (
 };
 
 const getExcessProps = (
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   props: rt.Props | rt.RecordC<rt.StringC, any>,
-
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   r: any
 ): string[] =>
   Object.keys(r).reduce<string[]>((acc, k) => {

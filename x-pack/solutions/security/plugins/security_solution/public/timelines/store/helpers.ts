@@ -15,9 +15,8 @@ import type {
   QueryOperator,
 } from '../components/timeline/data_providers/data_provider';
 import { EXISTS_OPERATOR, IS_OPERATOR } from '../components/timeline/data_providers/data_provider';
-import type {
-  RowRendererId,
-  TimelineType,
+import type { RowRendererId, TimelineType } from '../../../common/api/timeline';
+import {
   type DataProviderType,
   DataProviderTypeEnum,
   TimelineStatusEnum,

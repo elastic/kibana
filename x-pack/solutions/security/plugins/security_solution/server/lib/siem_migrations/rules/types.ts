@@ -17,8 +17,8 @@ import type {
   RuleMigrationRule,
   RuleMigrationTranslationResult,
   UpdateRuleMigrationRule,
-  type RuleMigrationResource,
 } from '../../../../common/siem_migrations/model/rule_migration.gen';
+import { type RuleMigrationResource } from '../../../../common/siem_migrations/model/rule_migration.gen';
 import type { RuleVersions } from './data/rule_migrations_data_prebuilt_rules_client';
 import type { Stored } from '../types';
 

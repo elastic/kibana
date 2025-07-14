@@ -7,7 +7,8 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { isEmpty } from 'lodash';
-import type { FormHook, useForm, type FormConfig, type FormData } from '../../../shared_imports';
+import type { FormHook } from '../../../shared_imports';
+import { useForm, type FormConfig, type FormData } from '../../../shared_imports';
 import type { FormHookWithWarnings } from './form_hook_with_warnings';
 import { extractValidationResults } from './extract_validation_results';
 import type { ValidationResults } from './validation_results';

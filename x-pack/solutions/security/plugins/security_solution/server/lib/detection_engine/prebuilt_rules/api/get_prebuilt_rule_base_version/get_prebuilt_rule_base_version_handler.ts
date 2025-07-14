@@ -9,8 +9,8 @@ import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { pickBy } from 'lodash';
 import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema';
-import type {
-  FullRuleDiff,
+import type { FullRuleDiff } from '../../../../../../common/api/detection_engine/prebuilt_rules';
+import {
   ThreeWayDiffOutcome,
   type GetPrebuiltRuleBaseVersionRequest,
   type GetPrebuiltRuleBaseVersionResponseBody,

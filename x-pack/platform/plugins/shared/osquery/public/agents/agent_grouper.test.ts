@@ -73,6 +73,7 @@ describe('AgentGrouper', () => {
       agentGrouper.setTotalAgents(100);
       const groups = agentGrouper.generateOptions();
 
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const allGroup = groups[AGENT_GROUP_KEY.All].options![0];
       expect(allGroup.label).toEqual(ALL_AGENTS_LABEL);
       const size: number = (allGroup.value as GroupOptionValue).size;
@@ -98,6 +99,7 @@ describe('AgentGrouper', () => {
         expect(options).toBeTruthy();
 
         data.forEach((datum, i) => {
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           const opt = options![i];
           expect(opt.label).toEqual(`test ${dataName} ${i} (${datum.id})`);
           expect(opt.key).toEqual(datum.id);
@@ -128,6 +130,7 @@ describe('AgentGrouper', () => {
       const options = groups[0].options;
       expect(options).toBeTruthy();
       agentData.forEach((ag, i) => {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         const opt = options![i];
         expect(opt.label).toEqual(
           `${ag.local_metadata.host.hostname} (${ag.local_metadata.elastic.agent.id})`

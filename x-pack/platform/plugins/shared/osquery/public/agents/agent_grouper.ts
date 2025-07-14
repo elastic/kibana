@@ -75,6 +75,7 @@ export class AgentGrouper {
     ),
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   updateGroup(key: AGENT_GROUP_KEY, data: any[], append = false) {
     if (!data?.length || key === AGENT_GROUP_KEY.All) {
       return;

@@ -6,7 +6,8 @@
  */
 
 import { EuiCode, EuiIcon, EuiLink, useEuiTheme } from '@elastic/eui';
-import React, type { ReactElement , useMemo, type FC, type PropsWithChildren } from 'react';
+import type { ReactElement } from 'react';
+import React, { useMemo, type FC, type PropsWithChildren } from 'react';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useRuleDetailsLink } from '../../shared/hooks/use_rule_details_link';

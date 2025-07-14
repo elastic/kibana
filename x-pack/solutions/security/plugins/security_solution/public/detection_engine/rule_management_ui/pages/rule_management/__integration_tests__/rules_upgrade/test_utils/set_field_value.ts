@@ -27,6 +27,8 @@ import type {
   RuleKqlQuery,
   ThreatIndex,
   Threshold,
+} from '../../../../../../../../common/api/detection_engine';
+import {
   DataSourceType,
   type BuildingBlockObject,
   type DiffableAllFields,

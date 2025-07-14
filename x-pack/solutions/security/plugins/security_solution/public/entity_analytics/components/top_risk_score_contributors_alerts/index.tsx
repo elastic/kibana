@@ -21,8 +21,8 @@ import {
 import { HeaderSection } from '../../../common/components/header_section';
 import * as i18n from './translations';
 import type { RiskInputs } from '../../../../common/entity_analytics/risk_engine';
-import type {
-  EntityRiskScore,
+import type { EntityRiskScore } from '../../../../common/search_strategy';
+import {
   EntityType,
   type HostRiskScore,
   type UserRiskScore,
