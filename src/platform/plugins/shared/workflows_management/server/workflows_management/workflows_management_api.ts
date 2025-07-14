@@ -31,4 +31,8 @@ export class WorkflowsManagementApi {
   public async getWorkflow(id: string): Promise<WorkflowModel> {
     return await this.workflowsService.getWorkflow(id);
   }
+
+  public async getStepExecutions(workflowExecutionId: string): Promise<any> {
+    return await this.workflowsService.searchStepExecutions({ workflowExecutionId });
+  }
 }

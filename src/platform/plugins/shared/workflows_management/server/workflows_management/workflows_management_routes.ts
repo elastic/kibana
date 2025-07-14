@@ -66,7 +66,7 @@ export function defineRoutes(router: IRouter, api: WorkflowsManagementApi) {
   );
   router.get(
     {
-      path: '/api/workflows/{workflowExecutionId}/stepExecutions',
+      path: '/api/workflowRun/{workflowExecutionId}/stepExecutions',
       security: {
         authz: {
           requiredPrivileges: ['all'],
@@ -74,14 +74,14 @@ export function defineRoutes(router: IRouter, api: WorkflowsManagementApi) {
       },
       validate: {
         params: schema.object({
-          id: schema.string(),
+          workflowExecutionId: schema.string(),
         }),
       },
     },
     async (context, request, response) => {
       try {
-        const { workflowExecutionId } = request.params as any;
-        const stepExecutions: any = await workflowsApi.getStepExecutions(workflowExecutionId);
+        const { workflowExecutionId } = request.params;
+        const stepExecutions: any = await api.getStepExecutions(workflowExecutionId);
         return response.ok({
           body: stepExecutions,
         });

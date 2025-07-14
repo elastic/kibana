@@ -73,7 +73,7 @@ export class WorkflowsExecutionEnginePlugin
         const stepStartedAt = new Date();
 
         await this.esClient.index({
-          index: 'workflow-step-executions',
+          index: '.workflow-step-executions',
           id: workflowExecutionId,
           refresh: true,
           document: {
@@ -101,7 +101,7 @@ export class WorkflowsExecutionEnginePlugin
         const executionTimeMs = completedAt.getTime() - stepStartedAt.getTime();
 
         await this.esClient.update({
-          index: 'workflow-step-executions',
+          index: '.workflow-step-executions',
           id: workflowExecutionId,
           refresh: true,
           doc: {
