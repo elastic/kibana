@@ -28,7 +28,7 @@ import {
 } from './functions';
 import { removeFinalUnknownIdentiferArg, getOverlapRange } from './shared';
 import { ESQLAstItem, ESQLFunction } from '../../types';
-import { getTestFunctions } from '../../__tests__/utils';
+import { getTestFunctions } from './test_functions';
 
 export function getOperatorSuggestion(fn: FunctionDefinition): ISuggestionItem {
   const hasArgs = fn.signatures.some(({ params }) => params.length > 1);

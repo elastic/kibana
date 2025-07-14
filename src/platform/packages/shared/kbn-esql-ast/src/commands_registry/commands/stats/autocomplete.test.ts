@@ -25,7 +25,7 @@ import {
 } from '../../../definitions/types';
 import { correctQuerySyntax, findAstPosition } from '../../../definitions/utils/ast';
 import { parse } from '../../../parser';
-import { setTestFunctions } from '../../../__tests__/utils';
+import { setTestFunctions } from '../../../definitions/utils/test_functions';
 import { allStarConstant, getDateHistogramCompletionItem } from '../../../..';
 
 const roundParameterTypes = ['double', 'integer', 'long', 'unsigned_long'] as const;

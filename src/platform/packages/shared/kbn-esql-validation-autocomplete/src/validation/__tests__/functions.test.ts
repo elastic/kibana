@@ -9,7 +9,7 @@
 
 import { FunctionDefinition, FunctionDefinitionTypes } from '@kbn/esql-ast';
 import { Location } from '@kbn/esql-ast/src/commands_registry/types';
-import { setTestFunctions } from '@kbn/esql-ast/src/__tests__/utils';
+import { setTestFunctions } from '@kbn/esql-ast/src/definitions/utils/test_functions';
 import { setup } from './helpers';
 
 describe('function validation', () => {
