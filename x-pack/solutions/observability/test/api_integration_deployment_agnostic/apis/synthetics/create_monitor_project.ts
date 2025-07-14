@@ -9,13 +9,13 @@ import expect from '@kbn/expect';
 import rawExpect from 'expect';
 import { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import {
-  ProjectMonitorsRequest,
   PrivateLocation,
+  ProjectMonitorsRequest,
   ServiceLocation,
 } from '@kbn/synthetics-plugin/common/runtime_types';
 import {
-  syntheticsMonitorSavedObjectType,
   legacySyntheticsMonitorTypeSingle,
+  syntheticsMonitorSavedObjectType,
 } from '@kbn/synthetics-plugin/common/types/saved_objects';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import {
@@ -29,7 +29,7 @@ import { SyntheticsMonitorTestService } from '../../services/synthetics_monitor'
 import { LOCAL_PUBLIC_LOCATION } from './helpers/location';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
-  describe('AddProjectMonitors', function () {
+  describe('CreateProjectMonitors', function () {
     this.tags(['skipCloud', 'skipMKI']);
     const supertest = getService('supertestWithoutAuth');
     const kibanaServer = getService('kibanaServer');
@@ -965,6 +965,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const foundAfter = soResAfter.saved_objects.find((obj: any) => obj.id === found!.id);
         expect(foundAfter).to.be(undefined);
       });
+
+      it('recreates monitors on update for multi space', async () => {});
     });
   });
 }

@@ -192,18 +192,71 @@ export class MonitorConfigRepository {
     monitors: Array<{
       attributes: MonitorFields;
       id: string;
-      soType: string;
+      previousMonitor: SavedObject<SyntheticsMonitorWithSecretsAttributes>;
     }>;
     namespace?: string;
   }) {
-    return this.soClient.bulkUpdate<MonitorFields>(
-      monitors.map(({ attributes, id, soType }) => ({
-        type: soType,
+    // Split monitors into those needing recreation and those that can be updated
+    const toRecreate: Array<{
+      id: string;
+      attributes: MonitorFields;
+      previousMonitor: SavedObject<SyntheticsMonitorWithSecretsAttributes>;
+    }> = [];
+    const toUpdate: Array<{
+      type: string;
+      id: string;
+      attributes: MonitorFields;
+      namespace?: string;
+    }> = [];
+
+    for (const monitor of monitors) {
+      const { attributes, id, previousMonitor } = monitor;
+      const prevSpaces = (previousMonitor.namespaces || []).sort();
+      const spaces = (attributes.spaces || []).sort();
+      if (!isEqual(prevSpaces, spaces) && !isEmpty(spaces)) {
+        toRecreate.push({ id, attributes, previousMonitor });
+        continue;
+      }
+
+      toUpdate.push({
+        type: previousMonitor?.type,
         id,
         attributes,
         namespace,
-      }))
-    );
+      });
+    }
+
+    // Bulk delete legacy monitors if spaces changed
+    if (toRecreate.length > 0) {
+      const deleteObjects = toRecreate.map(({ id, previousMonitor }) => ({
+        id,
+        type: previousMonitor.type,
+      }));
+      await this.soClient.bulkDelete(deleteObjects, { force: true });
+    }
+
+    // Use bulkCreate for recreations
+    let recreateResults: Array<SavedObject<MonitorFields>> = [];
+    if (toRecreate.length > 0) {
+      const bulkCreateObjects = toRecreate.map(({ id, attributes, previousMonitor }) => ({
+        id,
+        type: syntheticsMonitorSavedObjectType,
+        attributes,
+        ...(!isEmpty(attributes.spaces) && { initialNamespaces: attributes.spaces }),
+      }));
+      const bulkCreateResult = await this.soClient.bulkCreate<MonitorFields>(bulkCreateObjects);
+      recreateResults = bulkCreateResult.saved_objects;
+    }
+
+    // Bulk update the rest
+    const bulkUpdateResult = toUpdate.length
+      ? await this.soClient.bulkUpdate<MonitorFields>(toUpdate)
+      : { saved_objects: [] };
+
+    // Combine results
+    return {
+      saved_objects: [...bulkUpdateResult.saved_objects, ...recreateResults],
+    };
   }
 
   async find<T>(
