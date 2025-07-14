@@ -9,5 +9,5 @@ import { mockDataView } from '../../mocks/mock_data_view';
 
 export const useDataView = jest.fn(() => ({
   dataView: mockDataView,
-  status: 'pristine',
+  status: 'ready',
 }));

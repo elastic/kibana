@@ -44,6 +44,8 @@ import * as notesApi from '../../../../../notes/api/api';
 import { getMockTimelineSearchSubscription } from '../../../../../common/mock/mock_timeline_search_service';
 import * as useTimelineEventsModule from '../../../../containers';
 
+jest.mock('../../../../../data_view_manager/hooks/use_data_view');
+
 jest.mock('../../../../../common/utils/route/use_route_spy', () => {
   return {
     useRouteSpy: jest.fn().mockReturnValue([
