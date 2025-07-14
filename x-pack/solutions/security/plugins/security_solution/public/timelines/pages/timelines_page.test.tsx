@@ -9,10 +9,9 @@ import type { ShallowWrapper } from 'enzyme';
 import { shallow } from 'enzyme';
 import React from 'react';
 import { TimelinesPage } from './timelines_page';
-import { useSourcererDataView } from '../../sourcerer/containers';
 import { useUserPrivileges } from '../../common/components/user_privileges';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
-import { getMockDataView } from '../../data_view_manager/mocks/mock_data_view';
+import { getMockDataViewWithMatchedIndices } from '../../data_view_manager/mocks/mock_data_view';
 
 jest.mock('react-router-dom', () => {
   const originalModule = jest.requireActual('react-router-dom');
@@ -34,10 +33,6 @@ describe('TimelinesPage', () => {
   let wrapper: ShallowWrapper;
 
   it('should render landing page if no indicesExist', () => {
-    (useSourcererDataView as unknown as jest.Mock).mockReturnValue({
-      indicesExist: false,
-      sourcererDataView: {},
-    });
     (useUserPrivileges as jest.Mock).mockReturnValue({
       timelinePrivileges: {
         crud: true,
@@ -52,9 +47,9 @@ describe('TimelinesPage', () => {
   });
 
   it('should show the correct elements if user has crud and indices exist', () => {
-    const dataView = getMockDataView();
-    dataView.matchedIndices = ['test'];
-    jest.mocked(useDataView).mockReturnValue({ dataView, status: 'ready' });
+    jest
+      .mocked(useDataView)
+      .mockReturnValue({ dataView: getMockDataViewWithMatchedIndices(), status: 'ready' });
 
     (useUserPrivileges as jest.Mock).mockReturnValue({
       timelinePrivileges: {

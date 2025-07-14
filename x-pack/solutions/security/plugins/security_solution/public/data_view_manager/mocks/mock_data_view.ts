@@ -14,3 +14,10 @@ export const getMockDataView = () =>
     spec: { id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID },
     fieldFormats: {} as unknown as FieldFormatsStartCommon,
   });
+
+export const getMockDataViewWithMatchedIndices = (matchedIndices: string[] = ['test']) => {
+  const dataView = getMockDataView();
+  dataView.matchedIndices = matchedIndices;
+
+  return dataView;
+};
