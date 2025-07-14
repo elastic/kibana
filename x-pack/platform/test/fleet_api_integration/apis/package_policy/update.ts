@@ -56,9 +56,10 @@ export default function (providerContext: FtrProviderContext) {
     let packagePolicyId2: string;
     let packagePolicyId3: string;
     let managedAgentPolicyId: string;
-    let packagePolicySecrets: string;
+    let packagePolicySecrets: any;
     let packagePolicySecretsId: string;
     let endpointPackagePolicyId: string;
+    let inputOnlyPackagePolicyId: string;
     let inputOnlyBasePackagePolicy: NewPackagePolicy;
 
     before(async function () {
