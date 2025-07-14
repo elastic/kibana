@@ -27,8 +27,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     const userText1 = 'My name is Claudia and my email is claudia@example.com';
     const userText2 = 'my website is http://claudia.is';
     // LLM proxy is not working on MKI
-    this.tags(['failsOnMKI']);
-
+    this.tags(['skipCloud']);
     before(async () => {
       await clearConversations(es);
       proxy = await createLlmProxy(log);
