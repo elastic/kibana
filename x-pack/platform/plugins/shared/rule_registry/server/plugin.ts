@@ -169,10 +169,6 @@ export class RuleRegistryPlugin
       async getEsClientScoped(request: KibanaRequest) {
         return core.elasticsearch.client.asScoped(request).asCurrentUser;
       },
-      async getSavedObjectClient(request: KibanaRequest) {
-        return core.savedObjects.getScopedClient(request);
-      },
-      dataViewsServiceAsScoped: plugins.data.indexPatterns,
       securityPluginSetup: security,
       ruleDataService,
       getRuleType: plugins.alerting.getType,

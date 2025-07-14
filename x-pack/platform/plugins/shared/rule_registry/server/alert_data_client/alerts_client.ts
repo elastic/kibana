@@ -42,14 +42,9 @@ import {
   WriteOperations,
   AlertingAuthorizationEntity,
 } from '@kbn/alerting-plugin/server';
-import type {
-  Logger,
-  ElasticsearchClient,
-  EcsEvent,
-  SavedObjectsClientContract,
-} from '@kbn/core/server';
+import type { Logger, ElasticsearchClient, EcsEvent } from '@kbn/core/server';
 import type { AuditLogger } from '@kbn/security-plugin/server';
-import type { DataViewsServerPluginStart, FieldDescriptor } from '@kbn/data-plugin/server';
+import type { FieldDescriptor } from '@kbn/data-plugin/server';
 import { IndexPatternsFetcher } from '@kbn/data-plugin/server';
 import { isEmpty, partition } from 'lodash';
 import type { RuleTypeRegistry } from '@kbn/alerting-plugin/server/types';
@@ -103,8 +98,6 @@ export interface ConstructorOptions {
   esClient: ElasticsearchClient;
   esClientScoped?: ElasticsearchClient;
   ruleDataService: IRuleDataService;
-  dataViewsServiceAsScoped?: DataViewsServerPluginStart;
-  savedObjectClient?: SavedObjectsClientContract;
   getRuleType: RuleTypeRegistry['get'];
   getRuleList: RuleTypeRegistry['list'];
   getAlertIndicesAlias: AlertingServerStart['getAlertIndicesAlias'];
@@ -192,8 +185,6 @@ export class AlertsClient {
   private readonly ruleDataService: IRuleDataService;
   private readonly getRuleList: RuleTypeRegistry['list'];
   private getAlertIndicesAlias!: AlertingServerStart['getAlertIndicesAlias'];
-  private readonly dataViewsServiceAsScoped?: DataViewsServerPluginStart;
-  private readonly savedObjectClient?: SavedObjectsClientContract;
 
   constructor(options: ConstructorOptions) {
     this.logger = options.logger;
@@ -205,10 +196,8 @@ export class AlertsClient {
     // Otherwise, if space is enabled and not specified, it is "default"
     this.spaceId = this.authorization.getSpaceId();
     this.ruleDataService = options.ruleDataService;
-    this.dataViewsServiceAsScoped = options.dataViewsServiceAsScoped;
     this.getRuleList = options.getRuleList;
     this.getAlertIndicesAlias = options.getAlertIndicesAlias;
-    this.savedObjectClient = options.savedObjectClient;
   }
 
   private getOutcome(
@@ -1291,25 +1280,21 @@ export class AlertsClient {
     ]);
 
     const indexPatternsFetcherAsInternalUser = new IndexPatternsFetcher(this.esClient);
-    const dataViewsService =
-      this.dataViewsServiceAsScoped && this.savedObjectClient && this.esClientScoped
-        ? await this.dataViewsServiceAsScoped.dataViewsServiceFactory(
-            this.savedObjectClient,
-            this.esClientScoped
-          )
-        : undefined;
+    const indexPatternsFetcherAsScoped = this.esClientScoped
+      ? new IndexPatternsFetcher(this.esClientScoped)
+      : undefined;
 
-    const [specFields, { fields: descriptorFields }] = await Promise.all([
+    const [{ fields: specFields }, { fields: descriptorFields }] = await Promise.all([
       // Fetch fields for SIEM indices using current user client
-      siemIndices.length && dataViewsService
-        ? await dataViewsService.getFieldsForWildcard({
+      siemIndices.length && indexPatternsFetcherAsScoped
+        ? await indexPatternsFetcherAsScoped.getFieldsForWildcard({
             pattern: siemIndices.join(','),
             metaFields: ['_id', '_index'],
-            allowNoIndex: true,
+            fieldCapsOptions: { allow_no_indices: true },
             includeEmptyFields: false,
             indexFilter: INDEX_FILTER,
           })
-        : [],
+        : { fields: [] },
       // Fetch fields for other indices using internal user client
       otherIndices.length
         ? await indexPatternsFetcherAsInternalUser.getFieldsForWildcard({

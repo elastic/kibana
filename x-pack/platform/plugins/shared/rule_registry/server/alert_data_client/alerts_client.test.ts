@@ -11,7 +11,6 @@ import { ruleDataServiceMock } from '../rule_data_plugin_service/rule_data_plugi
 import type { ConstructorOptions } from './alerts_client';
 import { AlertsClient } from './alerts_client';
 import { fromKueryExpression } from '@kbn/es-query';
-import { createIndexPatternsStartMock } from '@kbn/data-views-plugin/server/mocks';
 import { IndexPatternsFetcher } from '@kbn/data-views-plugin/server';
 
 describe('AlertsClient', () => {
@@ -21,7 +20,6 @@ describe('AlertsClient', () => {
   const esClientScopedMock = requestHandlerContext.elasticsearch.client.asCurrentUser;
   const esClientMock = requestHandlerContext.elasticsearch.client.asInternalUser;
   const getRuleListMock = jest.fn();
-  const dataViewsServiceMock = createIndexPatternsStartMock();
   const getAlertIndicesAliasMock = jest.fn();
 
   let alertsClient: AlertsClient;
@@ -57,8 +55,6 @@ describe('AlertsClient', () => {
       getRuleType: jest.fn(),
       getRuleList: getRuleListMock,
       getAlertIndicesAlias: getAlertIndicesAliasMock,
-      dataViewsServiceAsScoped: dataViewsServiceMock,
-      savedObjectClient: requestHandlerContext.savedObjects.client,
     };
 
     alertsClient = new AlertsClient(alertsClientParams);
@@ -316,10 +312,6 @@ describe('AlertsClient', () => {
           return Promise.resolve([]);
         });
 
-      jest.spyOn(dataViewsServiceMock, 'dataViewsServiceFactory').mockResolvedValue({
-        getFieldsForWildcard: jest.fn().mockResolvedValueOnce([]),
-      });
-
       IndexPatternsFetcher.prototype.getFieldsForWildcard = jest.fn().mockResolvedValue({
         fields: [],
         indices: [],
@@ -386,21 +378,23 @@ describe('AlertsClient', () => {
           }
         });
 
-      jest.spyOn(dataViewsServiceMock, 'dataViewsServiceFactory').mockResolvedValue({
-        getFieldsForWildcard: jest.fn().mockResolvedValueOnce([
-          { name: '@timestamp', type: 'date' },
-          { name: 'event.category', type: 'string' },
-          { name: 'signal.status', type: 'keyword' },
-        ]),
-      });
-
-      IndexPatternsFetcher.prototype.getFieldsForWildcard = jest.fn().mockResolvedValueOnce({
-        fields: [
-          { name: 'message', type: 'string' },
-          { name: 'log.level', type: 'string' },
-        ],
-        indices: ['.alerts-stack.alerts-default', '.alerts-observability.logs.alerts-default'],
-      });
+      IndexPatternsFetcher.prototype.getFieldsForWildcard = jest
+        .fn()
+        .mockResolvedValueOnce({
+          fields: [
+            { name: '@timestamp', type: 'date' },
+            { name: 'event.category', type: 'string' },
+            { name: 'signal.status', type: 'keyword' },
+          ],
+          indices: ['.alerts-security.alerts-default'],
+        })
+        .mockResolvedValueOnce({
+          fields: [
+            { name: 'message', type: 'string' },
+            { name: 'log.level', type: 'string' },
+          ],
+          indices: ['.alerts-stack.alerts-default', '.alerts-observability.logs.alerts-default'],
+        });
 
       const response = await alertsClient.getAlertFields([
         '.es-query',
@@ -446,33 +440,30 @@ describe('AlertsClient', () => {
           }
         });
 
-      jest.spyOn(dataViewsServiceMock, 'dataViewsServiceFactory').mockResolvedValue({
-        getFieldsForWildcard: jest.fn().mockResolvedValueOnce([
-          { name: '@timestamp', type: 'date' },
-          { name: 'event.category', type: 'string' },
-          { name: 'signal.status', type: 'keyword' },
-        ]),
-      });
-
-      IndexPatternsFetcher.prototype.getFieldsForWildcard = jest.fn().mockResolvedValueOnce({
-        fields: [],
-        indices: [],
-      });
+      IndexPatternsFetcher.prototype.getFieldsForWildcard = jest
+        .fn()
+        .mockResolvedValueOnce({
+          fields: [
+            { name: '@timestamp', type: 'date' },
+            { name: 'event.category', type: 'string' },
+            { name: 'signal.status', type: 'keyword' },
+          ],
+          indices: ['.alerts-security.alerts-default'],
+        })
+        .mockResolvedValueOnce({
+          fields: [],
+          indices: [],
+        });
 
       const response = await alertsClient.getAlertFields(['siem.esqlRule']);
 
       // should not fetch other fields as there are no other indices
-      expect(IndexPatternsFetcher.prototype.getFieldsForWildcard).not.toHaveBeenCalled();
+      expect(IndexPatternsFetcher.prototype.getFieldsForWildcard).toHaveBeenCalledTimes(1);
 
-      expect(
-        (
-          await dataViewsServiceMock.dataViewsServiceFactory(
-            requestHandlerContext.savedObjects.client,
-            esClientScopedMock
-          )
-        ).getFieldsForWildcard
-      ).toHaveBeenCalledWith({
-        allowNoIndex: true,
+      expect(IndexPatternsFetcher.prototype.getFieldsForWildcard).toHaveBeenCalledWith({
+        fieldCapsOptions: {
+          allow_no_indices: true,
+        },
         includeEmptyFields: false,
         indexFilter: {
           range: {
@@ -513,28 +504,30 @@ describe('AlertsClient', () => {
           }
         });
 
-      jest.spyOn(dataViewsServiceMock, 'dataViewsServiceFactory').mockResolvedValue({
-        getFieldsForWildcard: jest.fn().mockResolvedValueOnce([
-          { name: 'user.name', type: 'string' },
-          { name: 'source.ip', type: 'ip' },
-        ]),
-      });
-
-      IndexPatternsFetcher.prototype.getFieldsForWildcard = jest.fn().mockResolvedValueOnce({
-        fields: [
-          { name: 'source.ip', type: 'ip' },
-          { name: 'destination.port', type: 'number' },
-        ],
-        indices: ['.alerts-stack.alerts-default'],
-      });
+      IndexPatternsFetcher.prototype.getFieldsForWildcard = jest
+        .fn()
+        .mockResolvedValue({
+          fields: [
+            { name: 'user.name', type: 'string' },
+            { name: 'source.ip', type: 'ip' },
+          ],
+          indices: ['.alerts-security.alerts-default'],
+        })
+        .mockResolvedValueOnce({
+          fields: [
+            { name: 'source.ip', type: 'ip' },
+            { name: 'destination.port', type: 'number' },
+          ],
+          indices: ['.alerts-stack.alerts-default'],
+        });
 
       const response = await alertsClient.getAlertFields(['siem.esqlRule', '.es-query']);
 
       expect(response.fields).toHaveLength(3);
       expect(response.fields).toEqual([
+        { name: 'user.name', type: 'string' },
         { name: 'source.ip', type: 'ip' },
         { name: 'destination.port', type: 'number' },
-        { name: 'user.name', type: 'string' },
       ]);
     });
 
