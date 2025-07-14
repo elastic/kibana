@@ -79,7 +79,6 @@ exports[`ViewApiRequestFlyout is rendered 1`] = `
         />
         <div
           aria-labelledby="generated-id"
-          tabindex="0"
         >
           <h3
             class="emotion-euiScreenReaderOnly"

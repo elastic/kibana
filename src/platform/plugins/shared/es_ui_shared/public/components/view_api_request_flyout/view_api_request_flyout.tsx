@@ -124,7 +124,7 @@ export const ApiRequestFlyout: React.FunctionComponent<ViewApiRequestFlyoutProps
           )}
         </div>
         <EuiSpacer size="s" />
-        <div aria-labelledby={codeBlockTitleId} tabIndex={0}>
+        <div aria-labelledby={codeBlockTitleId}>
           <EuiScreenReaderOnly>
             <h3 id={codeBlockTitleId}>
               <FormattedMessage
