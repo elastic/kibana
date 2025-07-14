@@ -17,12 +17,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const listingTable = getService('listingTable');
 
-  const { common, dashboard, visualize, timePicker, timeToVisualize } = getPageObjects([
+  const { common, dashboard, visualize, timePicker, timeToVisualize, visualBuilder } = getPageObjects([
     'common',
     'dashboard',
     'visualize',
     'timePicker',
     'timeToVisualize',
+    'visualBuilder'
   ]);
 
   describe('Add to Dashboard', function describeIndexTests() {
@@ -33,6 +34,31 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     after(async () => {
       await common.unsetTime();
     });
+
+    it('add a TSVB to a new dashboard by ref and clone the panel', async () => {
+        await visualize.gotoVisualizationLandingPage();
+        await visualize.navigateToNewVisualization();
+        await visualize.clickVisualBuilder();
+        await visualBuilder.checkVisualBuilderIsPresent();
+        await visualBuilder.clickMetric();
+        await visualBuilder.checkMetricTabIsPresent();
+        await visualBuilder.clickPanelOptions('metric');
+        await visualBuilder.setIndexPatternValue('long-window-logstash-*', true)
+        const value = await visualBuilder.getMetricValue();
+        expect(value).to.eql('35');
+        await testSubjects.click('visualizeSaveButton');
+        await timeToVisualize.saveFromModal('TSVB count', {
+          addToDashboard: 'new',
+          saveToLibrary: true,
+        });
+        await dashboard.waitForRenderComplete();
+        await dashboardExpect.tsvbMetricValuesExist(['35']);
+        await dashboardPanelActions.openContextMenuByTitle('TSVB count');
+        await testSubjects.click('embeddablePanelAction-clonePanel');
+        await dashboard.waitForRenderComplete();
+        await dashboardExpect.tsvbMetricValuesExist(['35', '35']);
+    });
+
     it('adding a new metric to a new dashboard by value', async function () {
       await visualize.navigateToNewAggBasedVisualization();
       await visualize.clickMetric();
