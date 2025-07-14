@@ -77,6 +77,7 @@ export {
   getAncestorsAndSelf,
   getParentId,
   getSegments,
+  MAX_NESTING_LEVEL,
   isRoot,
 } from './src/shared/hierarchy';
 
@@ -111,6 +112,9 @@ export {
   type IlmPolicyHotPhase,
   type IlmPolicyDeletePhase,
   type IngestStreamLifecycleILM,
+  type IngestStreamLifecycleDSL,
+  type IngestStreamLifecycleDisabled,
+  type IngestStreamLifecycleInherit,
   type IngestStreamEffectiveLifecycle,
   type PhaseName,
   isDslLifecycle,
