@@ -71,6 +71,7 @@ export default function Expressions(props: Props) {
     data,
     dataViews,
     dataViewEditor,
+
     unifiedSearch: {
       ui: { SearchBar },
     },
@@ -86,6 +87,7 @@ export default function Expressions(props: Props) {
   const [dataView, setDataView] = useState<DataView>();
   const [dataViewTimeFieldError, setDataViewTimeFieldError] = useState<string>();
   const [searchSource, setSearchSource] = useState<ISearchSource>();
+  const [triggerResetDataView, setTriggerResetDataView] = useState<boolean>(false);
   const [paramsError, setParamsError] = useState<Error>();
   const [paramsWarning, setParamsWarning] = useState<string>();
   const [isNoDataChecked, setIsNoDataChecked] = useState<boolean>(
@@ -395,7 +397,7 @@ export default function Expressions(props: Props) {
         </h5>
       </EuiTitle>
       <EuiSpacer size="s" />
-      {paramsError ? (
+      {paramsError && !triggerResetDataView ? (
         <EuiCallOut color="danger" iconType="warning" data-test-subj="thresholdRuleExpressionError">
           <p>
             {paramsError.message}
@@ -405,6 +407,7 @@ export default function Expressions(props: Props) {
               flush="left"
               onClick={() => {
                 initSearchSource(true, data);
+                setTriggerResetDataView(true);
               }}
             >
               {i18n.translate(
