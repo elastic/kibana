@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import type { ToolProviderId, PlainIdToolIdentifier, ToolDescriptor } from './tools';
+import type { ToolDefinition } from './definition';
+
+export type ToolSelectionRelevantFields = Pick<ToolDefinition, 'id' | 'type' | 'tags'>;
 
 /**
  * "all tools" wildcard which can be used for {@link ByIdsToolSelection}
@@ -14,7 +16,7 @@ export const allToolsSelectionWildcard = '*';
 /**
  * Constant tool selection to select all tools
  */
-export const allToolsSelection: ToolSelection[] = [{ toolIds: [allToolsSelectionWildcard] }];
+export const allToolsSelection: ToolSelection[] = [{ tool_ids: [allToolsSelectionWildcard] }];
 
 /**
  * Represents a tool selection based on individual tool IDs, and optionally a provider ID.
@@ -24,27 +26,27 @@ export const allToolsSelection: ToolSelection[] = [{ toolIds: [allToolsSelection
  * @example
  * ```ts
  * // select all available tools
- * const allTools: ByIdsToolSelection = { toolIds: ['*'] }
+ * const allTools: ByIdsToolSelection = { tool_ids: ['*'] }
  *
  * // select all tools from provider "dolly"
- * const allTools: ByIdsToolSelection = { provider: 'dolly', toolIds: ['*'] }
+ * const allTools: ByIdsToolSelection = { provider: 'dolly', tool_ids: ['*'] }
  *
  * // select toolA and toolB, regardless of the provider
- * const toolAB: ByIdsToolSelection = { toolIds: ['toolA', 'toolB'] }
+ * const toolAB: ByIdsToolSelection = { tool_ids: ['toolA', 'toolB'] }
  *
  * // select foo from provider 'custom'
- * const toolAB: ByIdsToolSelection = { provider: 'custom', toolIds: ['foo'] }
+ * const toolAB: ByIdsToolSelection = { provider: 'custom', tool_ids: ['foo'] }
  * ```
  */
 export interface ByIdsToolSelection {
   /**
    * The id of the provider to select tools from
    */
-  provider?: ToolProviderId;
+  type?: string;
   /**
    * List of individual tool ids to select.
    */
-  toolIds: PlainIdToolIdentifier[];
+  tool_ids: string[];
 }
 
 /**
@@ -58,13 +60,13 @@ export type ToolSelection = ByIdsToolSelection;
 export const isByIdsToolSelection = (
   toolSelection: ToolSelection
 ): toolSelection is ByIdsToolSelection => {
-  return 'toolIds' in toolSelection && Array.isArray(toolSelection.toolIds);
+  return 'tool_ids' in toolSelection && Array.isArray(toolSelection.tool_ids);
 };
 
 /**
  * Returns all tools matching ay least one of the provided tool selection.
  */
-export const filterToolsBySelection = <TType extends ToolDescriptor>(
+export const filterToolsBySelection = <TType extends ToolSelectionRelevantFields>(
   tools: TType[],
   toolSelection: ToolSelection[]
 ): TType[] => {
@@ -76,15 +78,18 @@ export const filterToolsBySelection = <TType extends ToolDescriptor>(
 /**
  * Returns true if the given tool descriptor matches the provided tool selection.
  */
-export const toolMatchSelection = (tool: ToolDescriptor, toolSelection: ToolSelection): boolean => {
+export const toolMatchSelection = (
+  tool: ToolSelectionRelevantFields,
+  toolSelection: ToolSelection
+): boolean => {
   if (isByIdsToolSelection(toolSelection)) {
-    if (toolSelection.provider && toolSelection.provider !== tool.meta.providerId) {
+    if (toolSelection.type && toolSelection.type !== tool.type) {
       return false;
     }
-    if (toolSelection.toolIds.includes(allToolsSelectionWildcard)) {
+    if (toolSelection.tool_ids.includes(allToolsSelectionWildcard)) {
       return true;
     }
-    return toolSelection.toolIds.includes(tool.id);
+    return toolSelection.tool_ids.includes(tool.id);
   }
   throw new Error(`Invalid tool selection : ${JSON.stringify(toolSelection)}`);
 };

@@ -652,6 +652,65 @@
       },
       {
         "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.getOriginalAlertIds",
+        "type": "Function",
+        "tags": [],
+        "label": "getOriginalAlertIds",
+        "description": [],
+        "signature": [
+          "({ alertIds, replacements, }: { alertIds: string[]; replacements?: Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined; }) => string[]"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/utils/attack_discovery_helpers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/elastic-assistant-common",
+            "id": "def-common.getOriginalAlertIds.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  alertIds,\n  replacements,\n}",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/utils/attack_discovery_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/elastic-assistant-common",
+                "id": "def-common.getOriginalAlertIds.$1.alertIds",
+                "type": "Array",
+                "tags": [],
+                "label": "alertIds",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/utils/attack_discovery_helpers.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/elastic-assistant-common",
+                "id": "def-common.getOriginalAlertIds.$1.replacements",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "replacements",
+                "description": [],
+                "signature": [
+                  "Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/utils/attack_discovery_helpers.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
         "id": "def-common.getRawDataOrDefault",
         "type": "Function",
         "tags": [],
@@ -1668,6 +1727,39 @@
       },
       {
         "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.transformInternalReplacements",
+        "type": "Function",
+        "tags": [],
+        "label": "transformInternalReplacements",
+        "description": [],
+        "signature": [
+          "(internal: { value: string; uuid: string; }[]) => Record<string, string>"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/utils/attack_discovery_helpers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/elastic-assistant-common",
+            "id": "def-common.transformInternalReplacements.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "internal",
+            "description": [],
+            "signature": [
+              "{ value: string; uuid: string; }[]"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/utils/attack_discovery_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
         "id": "def-common.transformRawData",
         "type": "Function",
         "tags": [],
@@ -2262,7 +2354,7 @@
           "\nInterface for features available to the elastic assistant"
         ],
         "signature": [
-          "{ readonly assistantModelEvaluation: boolean; readonly defendInsights: boolean; readonly advancedEsqlGeneration: boolean; }"
+          "{ readonly assistantModelEvaluation: boolean; readonly defendInsights: boolean; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/capabilities/index.ts",
         "deprecated": false,
@@ -9387,7 +9479,7 @@
           "\nDefault features available to the elastic assistant"
         ],
         "signature": [
-          "{ readonly assistantModelEvaluation: false; readonly defendInsights: true; readonly advancedEsqlGeneration: false; }"
+          "{ readonly assistantModelEvaluation: false; readonly defendInsights: true; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/capabilities/index.ts",
         "deprecated": false,

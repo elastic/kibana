@@ -10,7 +10,6 @@ import {
   OnechatError,
   OnechatErrorCode,
   isConversationCreatedEvent,
-  isConversationUpdatedEvent,
   isMessageChunkEvent,
   isMessageCompleteEvent,
   isOnechatError,
@@ -26,19 +25,18 @@ import { useOnechatServices } from './use_onechat_service';
 export type ChatStatus = 'ready' | 'loading' | 'error';
 
 interface UseChatProps {
-  conversationId: string | undefined;
-  agentId: string;
   connectorId?: string;
   onError?: (error: OnechatError<OnechatErrorCode>) => void;
 }
 
-export const useChat = ({ conversationId, agentId, connectorId, onError }: UseChatProps) => {
+export const useChat = ({ connectorId, onError }: UseChatProps = {}) => {
   const { chatService } = useOnechatServices();
   const {
     services: { notifications },
   } = useKibana();
   const [status, setStatus] = useState<ChatStatus>('ready');
-  const { actions } = useConversation({ conversationId });
+  const { actions, conversationId, conversation } = useConversation();
+  const { agentId } = conversation ?? {};
 
   const sendMessage = useCallback(
     (nextMessage: string) => {
@@ -74,17 +72,14 @@ export const useChat = ({ conversationId, agentId, connectorId, onError }: UseCh
                 result: '',
                 tool_call_id: event.data.tool_call_id,
                 tool_id: event.data.tool_id,
-                tool_type: event.data.tool_type,
               }),
             });
           } else if (isToolResultEvent(event)) {
-            actions.setToolCallResult({
-              result: event.data.result,
-              toolCallId: event.data.tool_call_id,
-            });
-          } else if (isConversationCreatedEvent(event) || isConversationUpdatedEvent(event)) {
+            const { tool_call_id: toolCallId, result } = event.data;
+            actions.setToolCallResult({ result, toolCallId });
+          } else if (isConversationCreatedEvent(event)) {
             const { conversation_id: id, title } = event.data;
-            actions.onConversationUpdate({ conversationId: id, title });
+            actions.onConversationCreated({ conversationId: id, title });
           }
         },
         complete: () => {

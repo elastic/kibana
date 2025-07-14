@@ -6,14 +6,12 @@
  */
 
 import type { AgentService } from './agents';
-import type { AgentProfilesService } from './agents/profiles';
 import type { ChatService } from './chat';
 import type { ConversationsService } from './conversations';
 import type { ToolsService } from './tools';
 
 export interface OnechatInternalService {
   agentService: AgentService;
-  agentProfilesService: AgentProfilesService;
   chatService: ChatService;
   conversationsService: ConversationsService;
   toolsService: ToolsService;
