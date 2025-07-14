@@ -21,8 +21,9 @@ export {
   getFunctionSignatures,
   getFunctionDefinition,
 } from './functions';
-export { getDateLiterals, getCompatibleLiterals } from './literals';
+export { getDateLiterals, getCompatibleLiterals, compareTypesWithLiterals } from './literals';
 export { getColumnForASTNode, pipePrecedesCurrentWord } from './shared';
 export { getExpressionType } from './expressions';
 export { getMessageFromId, errors } from './errors';
 export { sourceExists } from './sources';
+export { getColumnExists } from './columns';

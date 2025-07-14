@@ -99,7 +99,9 @@ function validateConfig(
   }
 
   const emails = [config.from];
-  const invalidEmailsMessage = configurationUtilities.validateEmailAddresses(emails);
+  const invalidEmailsMessage = configurationUtilities.validateEmailAddresses(emails, {
+    isSender: true,
+  });
   if (invalidEmailsMessage) {
     throw new Error(`[from]: ${invalidEmailsMessage}`);
   }
@@ -336,7 +338,9 @@ async function executor(
     return { status: 'error', actionId, message: `[to/cc/bcc]: ${invalidEmailsMessage}` };
   }
 
-  invalidEmailsMessage = configurationUtilities.validateEmailAddresses([config.from]);
+  invalidEmailsMessage = configurationUtilities.validateEmailAddresses([config.from], {
+    isSender: true,
+  });
   if (invalidEmailsMessage) {
     return { status: 'error', actionId, message: `[from]: ${invalidEmailsMessage}` };
   }
