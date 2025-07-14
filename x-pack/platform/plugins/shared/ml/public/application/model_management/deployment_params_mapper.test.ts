@@ -106,11 +106,11 @@ describe('DeploymentParamsMapper', () => {
           deploymentParams: {
             deployment_id: 'test-deployment',
             priority: 'normal',
-            threads_per_allocation: 16,
+            threads_per_allocation: 4,
           },
           adaptiveAllocationsParams: {
             enabled: true,
-            max_number_of_allocations: 2,
+            max_number_of_allocations: 8,
             min_number_of_allocations: 0,
           },
         });
@@ -271,7 +271,7 @@ describe('DeploymentParamsMapper', () => {
           deploymentParams: {
             deployment_id: 'test-deployment',
             priority: 'normal',
-            threads_per_allocation: 8,
+            threads_per_allocation: 4,
             number_of_allocations: 1,
           },
         });
@@ -288,8 +288,8 @@ describe('DeploymentParamsMapper', () => {
           deploymentParams: {
             deployment_id: 'test-deployment',
             priority: 'normal',
-            threads_per_allocation: 8,
-            number_of_allocations: 1,
+            threads_per_allocation: 4,
+            number_of_allocations: 2,
           },
         });
 
@@ -379,7 +379,7 @@ describe('DeploymentParamsMapper', () => {
           deploymentParams: {
             deployment_id: 'test-deployment',
             priority: 'normal',
-            threads_per_allocation: 8,
+            threads_per_allocation: 4,
           },
           adaptiveAllocationsParams: {
             enabled: true,
@@ -400,12 +400,12 @@ describe('DeploymentParamsMapper', () => {
           deploymentParams: {
             deployment_id: 'test-deployment',
             priority: 'normal',
-            threads_per_allocation: 8,
+            threads_per_allocation: 4,
           },
           adaptiveAllocationsParams: {
             enabled: true,
             min_number_of_allocations: 1,
-            max_number_of_allocations: 1,
+            max_number_of_allocations: 2,
           },
         });
       });
@@ -559,8 +559,8 @@ describe('DeploymentParamsMapper', () => {
           deploymentParams: {
             deployment_id: 'test-deployment',
             priority: 'normal',
-            threads_per_allocation: 8,
-            number_of_allocations: 4,
+            threads_per_allocation: 4,
+            number_of_allocations: 8,
           },
         });
 
@@ -576,8 +576,9 @@ describe('DeploymentParamsMapper', () => {
           deploymentParams: {
             deployment_id: 'test-deployment',
             priority: 'normal',
-            threads_per_allocation: 8,
-            number_of_allocations: 12499,
+            threads_per_allocation: 4,
+            // todo check
+            number_of_allocations: 24999,
           },
         });
       });
@@ -616,12 +617,12 @@ describe('DeploymentParamsMapper', () => {
           deploymentParams: {
             deployment_id: 'test-deployment',
             priority: 'normal',
-            threads_per_allocation: 8,
+            threads_per_allocation: 4,
           },
           adaptiveAllocationsParams: {
             enabled: true,
             min_number_of_allocations: 1,
-            max_number_of_allocations: 4,
+            max_number_of_allocations: 8,
           },
         });
 
@@ -637,11 +638,11 @@ describe('DeploymentParamsMapper', () => {
           deploymentParams: {
             deployment_id: 'test-deployment',
             priority: 'normal',
-            threads_per_allocation: 8,
+            threads_per_allocation: 4,
           },
           adaptiveAllocationsParams: {
             enabled: true,
-            max_number_of_allocations: 12499,
+            max_number_of_allocations: 24999,
             min_number_of_allocations: 1,
           },
         });

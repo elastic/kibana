@@ -17,7 +17,12 @@ import type { StartAllocationParams } from '../services/ml_api_service/trained_m
 export type MlStartTrainedModelDeploymentRequestNew = MlStartTrainedModelDeploymentRequest &
   AdaptiveAllocations;
 
-const THREADS_MAX_EXPONENT = 5;
+/** Maximum allowed number of threads per allocation */
+const MAX_NUMBER_OF_THREADS = 8;
+
+/** To allow maximum number of threads to be 2^THREADS_MAX_EXPONENT */
+const THREADS_MAX_EXPONENT =
+  MAX_NUMBER_OF_THREADS > 1 ? Math.floor(Math.log2(MAX_NUMBER_OF_THREADS)) : 0;
 
 type VCPUBreakpoints = Record<
   DeploymentParamsUI['vCPUUsage'],
