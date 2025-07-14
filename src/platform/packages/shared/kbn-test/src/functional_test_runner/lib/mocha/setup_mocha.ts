@@ -31,6 +31,7 @@ interface Options {
   config: Config;
   providers: ProviderCollection;
   esVersion: EsVersion;
+  skipRootHooks?: boolean;
   reporter?: any;
   reporterOptions?: any;
 }
@@ -45,6 +46,7 @@ export async function setupMocha({
   config,
   providers,
   esVersion,
+  skipRootHooks,
   reporter,
   reporterOptions,
 }: Options) {
@@ -54,7 +56,8 @@ export async function setupMocha({
   const mocha = new Mocha({
     ...config.get('mochaOpts'),
     rootHooks: {
-      beforeAll: rootHooks?.beforeAll ? () => rootHooks.beforeAll(providers) : undefined,
+      beforeAll:
+        rootHooks?.beforeAll && !skipRootHooks ? () => rootHooks.beforeAll(providers) : undefined,
     },
     reporter:
       reporter || (await providers.loadExternalService('mocha reporter', MochaReporterProvider)),

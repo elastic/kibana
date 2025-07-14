@@ -1189,17 +1189,12 @@ export default ({ getService }: FtrProviderContext): void => {
           );
 
           // import old exception version
-          const response = await supertest
+          const { body } = await supertest
             .post(DETECTION_ENGINE_RULES_IMPORT_URL)
             .set('kbn-xsrf', 'true')
             .set('elastic-api-version', '2023-10-31')
-            .attach('file', Buffer.from(ndjson), 'rules.ndjson');
-
-          if (response.status !== 200) {
-            throw new Error(response.body);
-          }
-
-          const body = response.body;
+            .attach('file', Buffer.from(ndjson), 'rules.ndjson')
+            .expect(200);
 
           expect(body).toMatchObject({
             success: true,
