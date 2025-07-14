@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { METADATA_FIELDS } from '../../shared/constants';
+import { METADATA_FIELDS } from '@kbn/esql-ast';
 import { setup } from './helpers';
 
 const metadataFields = [...METADATA_FIELDS].sort();

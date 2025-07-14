@@ -14,7 +14,6 @@ import { DataView } from '@kbn/data-views-plugin/common';
 import { FormulaPublicApi } from '@kbn/lens-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
-import { KibanaErrorBoundary } from '@kbn/shared-ux-error-boundary';
 import { useAppDataView } from './use_app_data_view';
 import type { ExploratoryViewPublicPluginsStart } from '../../../..';
 import type { ExploratoryEmbeddableProps, ExploratoryEmbeddableComponentProps } from './embeddable';
@@ -128,21 +127,19 @@ export function getExploratoryViewEmbeddable(
     }
 
     return (
-      <KibanaErrorBoundary>
-        <KibanaContextProvider services={services}>
-          <Wrapper customHeight={props.customHeight} data-test-subj={props.dataTestSubj}>
-            <ExploratoryViewEmbeddable
-              {...embedProps}
-              dataViewState={dataViews}
-              lens={lens}
-              lensFormulaHelper={lensHelper?.formula}
-              searchSessionId={services.data.search.session.getSessionId()}
-              onLoad={onLensLoaded}
-              analytics={analytics}
-            />
-          </Wrapper>
-        </KibanaContextProvider>
-      </KibanaErrorBoundary>
+      <KibanaContextProvider services={services}>
+        <Wrapper customHeight={props.customHeight} data-test-subj={props.dataTestSubj}>
+          <ExploratoryViewEmbeddable
+            {...embedProps}
+            dataViewState={dataViews}
+            lens={lens}
+            lensFormulaHelper={lensHelper?.formula}
+            searchSessionId={services.data.search.session.getSessionId()}
+            onLoad={onLensLoaded}
+            analytics={analytics}
+          />
+        </Wrapper>
+      </KibanaContextProvider>
     );
   };
 }

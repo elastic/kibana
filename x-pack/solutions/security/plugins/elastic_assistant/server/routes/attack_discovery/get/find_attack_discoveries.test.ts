@@ -7,49 +7,45 @@
 
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { httpServiceMock, httpServerMock } from '@kbn/core-http-server-mocks';
-import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 import { findAttackDiscoveriesRoute } from './find_attack_discoveries';
 import * as helpers from '../../helpers';
+import { hasReadAttackDiscoveryAlertsPrivileges } from '../helpers/index_privileges';
 import { getMockAttackDiscoveryFindResponse } from '../../../__mocks__/attack_discovery_find_response';
 import { mockAuthenticatedUser } from '../../../__mocks__/mock_authenticated_user';
+import { requestContextMock } from '../../../__mocks__/request_context';
+import { AttackDiscoveryDataClient } from '../../../lib/attack_discovery/persistence';
 
 const mockAttackDiscoveryFindResponse = getMockAttackDiscoveryFindResponse();
 
+jest.mock('../helpers/index_privileges', () => {
+  const original = jest.requireActual('../helpers/index_privileges');
+
+  return {
+    ...original,
+    hasReadAttackDiscoveryAlertsPrivileges: jest.fn(),
+  };
+});
+
+const { context: mockContext } = requestContextMock.createTools();
+
 describe('findAttackDiscoveriesRoute', () => {
   let router: ReturnType<typeof httpServiceMock.createRouter>;
-  let mockContext: {
-    resolve: jest.Mock;
-    elasticAssistant: Promise<{
-      logger: ReturnType<typeof loggingSystemMock.createLogger>;
-      eventLogIndex: string;
-      getSpaceId: () => string;
-      getAttackDiscoveryDataClient: jest.Mock;
-    }>;
-  };
   let mockRequest: Partial<KibanaRequest<unknown, unknown, unknown>>;
   let mockResponse: ReturnType<typeof httpServerMock.createResponseFactory>;
   let mockDataClient: { findAttackDiscoveryAlerts: jest.Mock };
-  let mockLogger: ReturnType<typeof loggingSystemMock.createLogger>;
   let addVersionMock: jest.Mock;
   let getHandler: (ctx: unknown, req: unknown, res: unknown) => Promise<unknown>;
 
   beforeEach(() => {
     jest.clearAllMocks();
     router = httpServiceMock.createRouter();
-    mockLogger = loggingSystemMock.createLogger();
     mockDataClient = {
       findAttackDiscoveryAlerts: jest.fn().mockResolvedValue(mockAttackDiscoveryFindResponse),
     };
-    mockContext = {
-      resolve: jest.fn().mockResolvedValue({ core: {}, elasticAssistant: {}, licensing: {} }),
-      elasticAssistant: Promise.resolve({
-        logger: mockLogger,
-        eventLogIndex: 'event-log-index',
-        getSpaceId: () => 'default',
-        getAttackDiscoveryDataClient: jest.fn().mockResolvedValue(mockDataClient),
-      }),
-    };
+    mockContext.elasticAssistant.getAttackDiscoveryDataClient.mockResolvedValue(
+      mockDataClient as unknown as AttackDiscoveryDataClient
+    );
     mockRequest = {
       query: { page: 1, per_page: 10 },
     };
@@ -62,6 +58,9 @@ describe('findAttackDiscoveriesRoute', () => {
     (router.versioned.get as jest.Mock).mockReturnValue({ addVersion: addVersionMock });
     findAttackDiscoveriesRoute(router);
     getHandler = addVersionMock.mock.calls[0][1];
+    (hasReadAttackDiscoveryAlertsPrivileges as jest.Mock).mockResolvedValue({
+      isSuccess: true,
+    });
   });
 
   it('returns 200 and the expected discoveries on success', async () => {
@@ -98,6 +97,19 @@ describe('findAttackDiscoveriesRoute', () => {
     const result = await getHandler(mockContext, mockRequest, mockResponse);
 
     expect(result).toEqual({ status: 403, payload: { message: 'Forbidden' } });
+  });
+
+  it('returns an error when hasReadAttackDiscoveryAlertsPrivileges fails', async () => {
+    (hasReadAttackDiscoveryAlertsPrivileges as jest.Mock).mockImplementation(({ response }) => {
+      return Promise.resolve({
+        isSuccess: false,
+        response: { status: 403, payload: { message: 'no privileges' } },
+      });
+    });
+
+    const result = await getHandler(mockContext, mockRequest, mockResponse);
+
+    expect(result).toEqual({ status: 403, payload: { message: 'no privileges' } });
   });
 
   describe('when data client throws', () => {
