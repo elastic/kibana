@@ -24,7 +24,7 @@ import {
   EuiPopover,
   EuiContextMenu,
   EuiButton,
-  EuiBadge,
+  EuiBetaBadge,
   EuiCodeBlock,
   EuiToolTip,
   EuiButtonIcon,
@@ -113,29 +113,6 @@ export const PipelineDetailsFlyout: FunctionComponent<Props> = ({
         <EuiSpacer size="s" />
 
         <EuiFlexGroup alignItems="center" gutterSize="m">
-          {/* Deprecated badge*/}
-          {pipeline.deprecated && (
-            <EuiFlexItem grow={false}>
-              <EuiToolTip content={deprecatedPipelineBadge.badgeTooltip}>
-                <EuiBadge color="warning" data-test-subj="isDeprecatedBadge">
-                  {deprecatedPipelineBadge.badge}
-                </EuiBadge>
-              </EuiToolTip>
-            </EuiFlexItem>
-          )}
-
-          {/* Managed badge*/}
-          {pipeline.isManaged && (
-            <EuiFlexItem grow={false}>
-              <EuiText color="subdued" size="s">
-                <EuiIcon type="lock" color="subdued" size="s" />{' '}
-                {i18n.translate('xpack.ingestPipelines.list.pipelineDetails.managedBadgeLabel', {
-                  defaultMessage: 'Managed',
-                })}
-              </EuiText>
-            </EuiFlexItem>
-          )}
-
           {/* Pipeline version */}
           {pipeline.version && (
             <EuiFlexItem grow={false}>
@@ -145,6 +122,33 @@ export const PipelineDetailsFlyout: FunctionComponent<Props> = ({
                 })}{' '}
                 {String(pipeline.version)}
               </EuiText>
+            </EuiFlexItem>
+          )}
+
+          {/* Managed badge*/}
+          {pipeline.isManaged && (
+            <EuiFlexItem grow={false}>
+              <EuiBetaBadge
+                label={i18n.translate(
+                  'xpack.ingestPipelines.list.pipelineDetails.managedBadgeLabel',
+                  { defaultMessage: 'Managed' }
+                )}
+                size="s"
+                color="hollow"
+              />
+            </EuiFlexItem>
+          )}
+
+          {/* Deprecated badge*/}
+          {pipeline.deprecated && (
+            <EuiFlexItem grow={false}>
+              <EuiToolTip content={deprecatedPipelineBadge.badgeTooltip}>
+                <EuiBetaBadge
+                  label={deprecatedPipelineBadge.badge}
+                  size="s"
+                  data-test-subj="isDeprecatedBadge"
+                />
+              </EuiToolTip>
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
