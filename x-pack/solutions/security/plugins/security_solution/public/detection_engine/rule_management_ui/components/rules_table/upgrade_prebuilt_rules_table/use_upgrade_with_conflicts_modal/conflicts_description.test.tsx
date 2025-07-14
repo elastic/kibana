@@ -7,7 +7,7 @@
 
 import { render } from '@testing-library/react';
 import React from 'react';
-import { UpgradeConflictsDescription } from './upgrade_conflicts_description';
+import { ConflictsDescription } from './conflicts_description';
 import { TestProviders } from '../../../../../../common/mock';
 
 // Removes extra whitespace from the text content to make it easier to compare
@@ -18,7 +18,7 @@ function normalizeText(text: string | null): string {
 describe('UpgradeConflictsDescription displays proper text when there are', () => {
   it('only rules with solvable conflicts', () => {
     const { container } = render(
-      <UpgradeConflictsDescription
+      <ConflictsDescription
         numOfRulesWithoutConflicts={0}
         numOfRulesWithSolvableConflicts={5}
         numOfRulesWithNonSolvableConflicts={0}
@@ -39,7 +39,7 @@ describe('UpgradeConflictsDescription displays proper text when there are', () =
 
   it('only rules with non-solvable conflicts', () => {
     const { container } = render(
-      <UpgradeConflictsDescription
+      <ConflictsDescription
         numOfRulesWithoutConflicts={0}
         numOfRulesWithSolvableConflicts={0}
         numOfRulesWithNonSolvableConflicts={5}
@@ -57,7 +57,7 @@ describe('UpgradeConflictsDescription displays proper text when there are', () =
 
   it('rules with solvable conflicts and rules with non-solvable conflicts', () => {
     const { container } = render(
-      <UpgradeConflictsDescription
+      <ConflictsDescription
         numOfRulesWithoutConflicts={0}
         numOfRulesWithSolvableConflicts={3}
         numOfRulesWithNonSolvableConflicts={5}
@@ -80,7 +80,7 @@ describe('UpgradeConflictsDescription displays proper text when there are', () =
 
   it('rules with solvable conflicts and conflict-free rules', () => {
     const { container } = render(
-      <UpgradeConflictsDescription
+      <ConflictsDescription
         numOfRulesWithoutConflicts={10}
         numOfRulesWithSolvableConflicts={3}
         numOfRulesWithNonSolvableConflicts={0}
@@ -103,7 +103,7 @@ describe('UpgradeConflictsDescription displays proper text when there are', () =
 
   it('rules with non-solvable conflicts and conflict-free rules', () => {
     const { container } = render(
-      <UpgradeConflictsDescription
+      <ConflictsDescription
         numOfRulesWithoutConflicts={10}
         numOfRulesWithSolvableConflicts={0}
         numOfRulesWithNonSolvableConflicts={5}
@@ -123,7 +123,7 @@ describe('UpgradeConflictsDescription displays proper text when there are', () =
 
   it('rules with non-solvable conflicts, rules with solvable conflicts and conflict-free rules', () => {
     const { container } = render(
-      <UpgradeConflictsDescription
+      <ConflictsDescription
         numOfRulesWithoutConflicts={10}
         numOfRulesWithSolvableConflicts={3}
         numOfRulesWithNonSolvableConflicts={5}

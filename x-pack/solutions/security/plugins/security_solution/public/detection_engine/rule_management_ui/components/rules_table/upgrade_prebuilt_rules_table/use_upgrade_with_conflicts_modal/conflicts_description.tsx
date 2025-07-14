@@ -15,7 +15,7 @@ export interface RulesConflictStats {
   numOfRulesWithNonSolvableConflicts: number;
 }
 
-export function UpgradeConflictsDescription({
+export function ConflictsDescription({
   numOfRulesWithoutConflicts,
   numOfRulesWithSolvableConflicts,
   numOfRulesWithNonSolvableConflicts,

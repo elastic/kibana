@@ -17,10 +17,7 @@ import {
 import React, { memo, useCallback } from 'react';
 import { ConfirmRulesUpgrade } from './use_upgrade_modal';
 import * as i18n from './translations';
-import {
-  UpgradeConflictsDescription,
-  type RulesConflictStats,
-} from './upgrade_conflicts_description';
+import { ConflictsDescription, type RulesConflictStats } from './conflicts_description';
 
 export interface UpgradeWithConflictsModalProps extends RulesConflictStats {
   onCancel: () => void;
@@ -50,7 +47,7 @@ export const UpgradeWithConflictsModal = memo(function ConfirmUpgradeWithConflic
       </EuiModalHeader>
 
       <EuiModalBody>
-        <UpgradeConflictsDescription
+        <ConflictsDescription
           numOfRulesWithoutConflicts={numOfRulesWithoutConflicts}
           numOfRulesWithSolvableConflicts={numOfRulesWithSolvableConflicts}
           numOfRulesWithNonSolvableConflicts={numOfRulesWithNonSolvableConflicts}
