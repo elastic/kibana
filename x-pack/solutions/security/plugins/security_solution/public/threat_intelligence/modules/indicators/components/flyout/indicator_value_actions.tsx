@@ -104,7 +104,7 @@ export const IndicatorValueActions: FC<IndicatorValueActions> = ({
               iconSize="s"
               size="xs"
               onClick={() => setPopover((prevIsPopoverOpen) => !prevIsPopoverOpen)}
-              style={{ height: '100%' }}
+              css={{ height: '100%' }}
             />
           </EuiToolTip>
         }
