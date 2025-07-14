@@ -15,13 +15,9 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 import { createConfigService } from '@kbn/core-http-server-mocks';
-import {
-  HttpService,
-  InternalHttpServicePreboot,
-  InternalHttpServiceSetup,
-} from '@kbn/core-http-server-internal';
+import { HttpService, InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
 import { PricingService } from '@kbn/core-pricing-server-internal';
-import type { PricingProductFeature, PricingProduct } from '@kbn/core-pricing-common';
+import type { PricingProductFeature, IPricingProduct } from '@kbn/core-pricing-common';
 import { createInternalHttpService } from '../utilities';
 
 const coreId = Symbol('core');
@@ -32,7 +28,6 @@ const configService = createConfigService();
 
 describe('PricingService', () => {
   let server: HttpService;
-  let httpPreboot: InternalHttpServicePreboot;
   let httpSetup: InternalHttpServiceSetup;
 
   let service: PricingService;
@@ -40,7 +35,6 @@ describe('PricingService', () => {
 
   beforeEach(async () => {
     server = createInternalHttpService();
-    httpPreboot = await server.preboot({ context: contextServiceMock.createPrebootContract() });
     httpSetup = await server.setup({
       context: contextServiceMock.createSetupContract(),
       executionContext: executionContextServiceMock.createInternalSetupContract(),
@@ -51,7 +45,6 @@ describe('PricingService', () => {
       logger: loggingSystemMock.create(),
       configService,
     });
-    await service.preboot({ http: httpPreboot });
     serviceSetup = await service.setup({ http: httpSetup });
     await server.start();
   });
@@ -96,7 +89,7 @@ describe('PricingService', () => {
         products: [
           { name: 'observability', tier: 'complete' },
           { name: 'security', tier: 'essentials' },
-        ] as PricingProduct[],
+        ] as IPricingProduct[],
       };
 
       serviceSetup.registerProductFeatures([testFeature]);
@@ -116,7 +109,7 @@ describe('PricingService', () => {
         products: [
           { name: 'observability', tier: 'complete' },
           { name: 'security', tier: 'essentials' },
-        ] as PricingProduct[],
+        ] as IPricingProduct[],
       };
 
       const feature2: PricingProductFeature = {
@@ -127,7 +120,7 @@ describe('PricingService', () => {
             name: 'security',
             tier: 'complete',
           },
-        ] as PricingProduct[],
+        ] as IPricingProduct[],
       };
 
       serviceSetup.registerProductFeatures([feature1, feature2]);
