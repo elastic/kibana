@@ -466,7 +466,7 @@ function InheritModalUnwired({
       <EuiModalBody>
         {i18n.translate('xpack.streams.streamDetailLifecycle.defaultLifecycleUnwiredDesc', {
           defaultMessage:
-            'All custom retention settings for this stream will be removed, resetting it to use the configuration of the data stream.',
+            'All custom retention settings for this stream will be removed, resetting it to use the configuration of the template.',
         })}
       </EuiModalBody>
 

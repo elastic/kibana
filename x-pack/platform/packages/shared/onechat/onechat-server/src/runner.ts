@@ -6,11 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type {
-  ToolIdentifier,
-  SerializedToolIdentifier,
-  SerializedAgentIdentifier,
-} from '@kbn/onechat-common';
+import type { ToolIdentifier, SerializedToolIdentifier } from '@kbn/onechat-common';
 import type { ToolEventHandlerFn } from './events';
 import type { RunAgentFn, ScopedRunAgentFn } from '../agents/runner';
 
@@ -80,7 +76,7 @@ export type RunContextStackEntry =
   /** tool invocation */
   | { type: 'tool'; toolId: SerializedToolIdentifier }
   /** agent invocation */
-  | { type: 'agent'; agentId: SerializedAgentIdentifier };
+  | { type: 'agent'; agentId: string };
 
 /**
  * Params for {@link RunToolFn}
