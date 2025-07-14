@@ -8,6 +8,7 @@
 import { Route, Routes } from '@kbn/shared-ux-router';
 import React from 'react';
 import { Redirect } from 'react-router-dom';
+import { PlaygroundsListPage } from './playground_list_page';
 import { PlaygroundOverview } from './playground_overview';
 import { SavedPlaygroundPage } from './saved_playground';
 
@@ -26,7 +27,11 @@ export const PlaygroundRouter: React.FC = () => {
 
   return (
     <Routes>
-      <Redirect exact from={ROOT_PATH} to={SEARCH_PLAYGROUND_CHAT_PATH} />
+      {isSearchModeEnabled ? (
+        <Route exact path={ROOT_PATH} component={PlaygroundsListPage} />
+      ) : (
+        <Redirect exact from={ROOT_PATH} to={SEARCH_PLAYGROUND_CHAT_PATH} />
+      )}
       {!isSearchModeEnabled && (
         <Redirect from={SEARCH_PLAYGROUND_SEARCH_PATH} to={SEARCH_PLAYGROUND_CHAT_PATH} />
       )}
