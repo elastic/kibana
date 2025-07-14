@@ -23,10 +23,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const inspector = getService('inspector');
   const find = getService('find');
   const comboBox = getService('comboBox');
+  const retry = getService('retry');
   const FIELD_NAME = 'machine.os.raw';
 
-  // Failing: See https://github.com/elastic/kibana/issues/225165
-  describe.skip('input control options', () => {
+  describe('input control options', () => {
     before(async () => {
       await visualize.initTests();
       await timePicker.resetDefaultAbsoluteRangeViaUiSettings();
@@ -83,6 +83,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should replace existing filter pill(s) when new item is selected', async () => {
         await comboBox.clear('listControlSelect0');
+        await retry.waitFor('input control is clear', async () => {
+          return (await comboBox.doesComboBoxHaveSelectedOptions('listControlSelect0')) === false;
+        });
         await comboBox.set('listControlSelect0', 'osx');
         await visEditor.inputControlSubmit();
         await common.sleep(1000);

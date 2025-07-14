@@ -71,7 +71,7 @@ export function ServiceNameLink({
           <ServiceNameWithIcon agentName={agentName} formattedServiceName={formattedServiceName} />
         </EuiLink>
       ) : (
-        serviceName
+        content
       )}
     </>
   );
