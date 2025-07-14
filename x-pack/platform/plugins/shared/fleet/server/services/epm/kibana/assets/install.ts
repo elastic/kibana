@@ -62,7 +62,7 @@ type SavedObjectToBe = Required<
   type: KibanaSavedObjectType;
 };
 
-type SavedObjectAsset = Pick<
+export type SavedObjectAsset = Pick<
   SavedObject,
   | 'id'
   | 'attributes'
@@ -165,25 +165,6 @@ export async function installKibanaAssets(options: {
       savedObjectsImporter,
     })
   );
-
-  interface InstallGroups {
-    asSavedObjects: SavedObjectAsset[];
-    asAlertRules: AlertRuleAsset[];
-  }
-  const createInstallGroups = (assetEntries: ArchiveAssetEntry[]) => {
-    return assetEntries.reduce<InstallGroups>(
-      (installGroups, assetEntry) => {
-        if (assetEntry.assetType === KibanaAssetType.alert) {
-          installGroups.asAlertRules = [...installGroups.asAlertRules, assetEntry.asset];
-          return installGroups;
-        }
-
-        installGroups.asSavedObjects = [...installGroups.asSavedObjects, assetEntry.asset];
-        return installGroups;
-      },
-      { asSavedObjects: [], asAlertRules: [] }
-    );
-  };
 
   async function flushAssetsToInstall() {
     await installManagedIndexPatternOnce();
@@ -667,7 +648,7 @@ function removeReservedIndexPatterns(kibanaAssets: ArchiveAssetEntry[]) {
   return kibanaAssets.filter((assetEntry) => !reservedPatterns.includes(assetEntry.asset.id));
 }
 
-export function toAssetReference({ id, type }: SavedObject) {
+export function toAssetReference({ id, type }: ArchiveAsset) {
   const reference: AssetReference = { id, type: type as KibanaSavedObjectType };
 
   return reference;
@@ -675,4 +656,24 @@ export function toAssetReference({ id, type }: SavedObject) {
 
 function hasReferences(assetsToInstall: SavedObjectAsset[]) {
   return assetsToInstall.some((asset) => asset.references.length);
+}
+
+interface InstallGroups {
+  asSavedObjects: SavedObjectAsset[];
+  asAlertRules: AlertRuleAsset[];
+}
+
+export function createInstallGroups(assetEntries: ArchiveAssetEntry[]) {
+  return assetEntries.reduce<InstallGroups>(
+    (installGroups, assetEntry) => {
+      if (assetEntry.assetType === KibanaAssetType.alert) {
+        installGroups.asAlertRules = [...installGroups.asAlertRules, assetEntry.asset];
+        return installGroups;
+      }
+
+      installGroups.asSavedObjects = [...installGroups.asSavedObjects, assetEntry.asset];
+      return installGroups;
+    },
+    { asSavedObjects: [], asAlertRules: [] }
+  );
 }

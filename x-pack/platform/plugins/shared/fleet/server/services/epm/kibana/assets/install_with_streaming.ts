@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract } from '@kbn/core/server';
-import type { RulesClient } from '@kbn/alerting-plugin/server/rules_client';
+import type { SavedObjectsClientContract, Logger } from '@kbn/core/server';
+import type { RulesClientApi } from '@kbn/alerting-plugin/server/types';
 
+import { MAX_CONCURRENT_PACKAGE_ASSETS } from '../../../../constants';
 import type { PackageInstallContext } from '../../../../../common/types';
-import type { KibanaAssetReference, KibanaAssetType } from '../../../../types';
+import { type KibanaAssetReference, KibanaAssetType } from '../../../../types';
 import { getPathParts } from '../../archive';
 
 import { saveKibanaAssetsRefs } from '../../packages/install';
 
-import type { ArchiveAsset } from './install';
+import type { ArchiveAsset, SavedObjectAsset } from './install';
 import {
   KibanaSavedObjectTypeMapping,
   createSavedObjectKibanaAsset,
@@ -23,20 +24,24 @@ import {
   toAssetReference,
 } from './install';
 import { getSpaceAwareSaveobjectsClients } from './saved_objects';
+import { installAlertRules, type AlertRuleAsset } from './alert_rules';
 
 interface InstallKibanaAssetsWithStreamingArgs {
+  logger: Logger;
   pkgName: string;
   packageInstallContext: PackageInstallContext;
   spaceId: string;
   savedObjectsClient: SavedObjectsClientContract;
-  alertingRulesClient: RulesClient;
+  alertingRulesClient: RulesClientApi;
 }
 
 const MAX_ASSETS_TO_INSTALL_IN_PARALLEL = 100;
 
 export async function installKibanaAssetsWithStreaming({
+  logger,
   spaceId,
   packageInstallContext,
+  alertingRulesClient,
   savedObjectsClient,
   pkgName,
 }: InstallKibanaAssetsWithStreamingArgs): Promise<KibanaAssetReference[]> {
@@ -50,8 +55,10 @@ export async function installKibanaAssetsWithStreaming({
     savedObjectsClient,
   });
 
+  const assetTags = packageInstallContext.packageInfo?.asset_tags;
   const assetRefs: KibanaAssetReference[] = [];
-  let batch: ArchiveAsset[] = [];
+  let savedObjectBatch: SavedObjectAsset[] = [];
+  let alertRuleBatch: AlertRuleAsset[] = [];
 
   await archiveIterator.traverseEntries(async ({ path, buffer }) => {
     if (!buffer || !isKibanaAssetType(path)) {
@@ -64,26 +71,52 @@ export async function installKibanaAssetsWithStreaming({
       return;
     }
 
-    batch.push(savedObject);
+    if (assetType === KibanaAssetType.alert) {
+      alertRuleBatch.push(savedObject as AlertRuleAsset);
+    } else {
+      savedObjectBatch.push(savedObject as SavedObjectAsset);
+    }
+
     assetRefs.push(toAssetReference(savedObject));
 
-    if (batch.length >= MAX_ASSETS_TO_INSTALL_IN_PARALLEL) {
+    if (savedObjectBatch.length >= MAX_ASSETS_TO_INSTALL_IN_PARALLEL) {
       await bulkCreateSavedObjects({
         savedObjectsClient: savedObjectClientWithSpace,
-        kibanaAssets: batch,
+        kibanaAssets: savedObjectBatch,
         refresh: false,
       });
-      batch = [];
+      savedObjectBatch = [];
     }
   });
 
+  if (alertRuleBatch.length >= MAX_CONCURRENT_PACKAGE_ASSETS) {
+    await installAlertRules({
+      logger,
+      alertingRulesClient,
+      alertRuleAssets: alertRuleBatch,
+      assetsChunkSize: MAX_CONCURRENT_PACKAGE_ASSETS,
+      context: { pkgName, spaceId, assetTags },
+    });
+    alertRuleBatch = [];
+  }
+
   // install any remaining assets
-  if (batch.length) {
+  if (savedObjectBatch.length) {
     await bulkCreateSavedObjects({
       savedObjectsClient: savedObjectClientWithSpace,
-      kibanaAssets: batch,
+      kibanaAssets: savedObjectBatch,
       // Use wait_for with the last batch to ensure all assets are readable once the install is complete
       refresh: 'wait_for',
+    });
+  }
+
+  if (alertRuleBatch.length) {
+    await installAlertRules({
+      logger,
+      alertingRulesClient,
+      alertRuleAssets: alertRuleBatch,
+      assetsChunkSize: MAX_CONCURRENT_PACKAGE_ASSETS,
+      context: { pkgName, spaceId, assetTags },
     });
   }
 
@@ -98,7 +131,7 @@ async function bulkCreateSavedObjects({
   kibanaAssets,
   refresh,
 }: {
-  kibanaAssets: ArchiveAsset[];
+  kibanaAssets: SavedObjectAsset[];
   savedObjectsClient: SavedObjectsClientContract;
   refresh?: boolean | 'wait_for';
 }) {

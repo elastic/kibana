@@ -28,7 +28,7 @@ import {
   SO_SEARCH_LIMIT,
   USER_SETTINGS_TEMPLATE_SUFFIX,
 } from '../../../constants';
-import { ElasticsearchAssetType } from '../../../types';
+import { ElasticsearchAssetType, KibanaSavedObjectType } from '../../../types';
 import type {
   AssetReference,
   AssetType,
@@ -175,7 +175,7 @@ export async function deleteKibanaAssets({
   // which might create high memory pressure if a package has a lot of assets.
   const [alertAssets, soAssets] = partition(
     installedObjects,
-    (installedObject) => installedObject.type === 'alert'
+    (installedObject) => installedObject.type === KibanaSavedObjectType.alert
   );
 
   if (minKibana && minKibana.major >= 8) {
