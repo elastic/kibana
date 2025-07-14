@@ -1,9 +1,9 @@
 disabled:
   # Stateful base config for deployment-agnostic tests
+  - x-pack/platform/test/api_integration_deployment_agnostic/default_configs/stateful.config.base.ts
+  - x-pack/platform/test/api_integration_deployment_agnostic/default_configs/feature_flag.stateful.config.base.ts
   - x-pack/test/api_integration/deployment_agnostic/default_configs/stateful.config.base.ts
   - x-pack/test/api_integration/deployment_agnostic/default_configs/feature_flag.stateful.config.base.ts
-  - x-pack/platform/test/spaces_api_integration/deployment_agnostic/default_configs/serverless.config.base.ts
-  - x-pack/platform/test/spaces_api_integration/deployment_agnostic/default_configs/stateful.config.base.ts
 
   # Base config files, only necessary to inform config finding script
   - src/platform/test/functional/config.base.js
@@ -362,8 +362,6 @@ enabled:
   - x-pack/performance/journeys_e2e/apm_service_inventory.ts
   - x-pack/performance/journeys_e2e/infra_hosts_view.ts
   - x-pack/test/custom_branding/config.ts
-  # stateful config files that run deployment-agnostic tests
-  - x-pack/test/api_integration/deployment_agnostic/configs/stateful/platform.stateful.config.ts
   # configs migrated to the new Kibana architecture
   - x-pack/platform/test/api_integration/apis/aiops/config.ts
   - x-pack/platform/test/api_integration/apis/cloud/config.ts
@@ -408,3 +406,5 @@ enabled:
   - x-pack/platform/test/saved_object_api_integration/security_and_spaces/config_trial.ts
   - x-pack/platform/test/saved_object_api_integration/spaces_only/config.ts
   - x-pack/platform/test/saved_object_api_integration/user_profiles/config.ts
+    # stateful config files that run deployment-agnostic tests
+  - x-pack/platform/test/api_integration_deployment_agnostic/configs/stateful/platform.stateful.config.ts
