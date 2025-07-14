@@ -22,7 +22,7 @@ import {
   IndicesMetadataConfiguration,
   IndicesMetadataConfigurationSchema,
 } from './indices_metadata.types';
-const REFRESH_CONFIG_INTERVAL_MS = 30 * 1000; // 60 * 60 * 1000;
+export const REFRESH_CONFIG_INTERVAL_MS = 60 * 60 * 1000;
 const CONFIGURATION_ARTIFACT_NAME = 'indices-metadata-configuration';
 
 export class ConfigurationService {
@@ -68,7 +68,6 @@ export class ConfigurationService {
     try {
       this.logger.debug('Getting indices metadata configuration');
       const artifact = await this.artifactService.getArtifact(CONFIGURATION_ARTIFACT_NAME);
-
       if (!artifact.modified) {
         this.logger.debug('Indices metadata configuration has not been modified');
         return undefined;
