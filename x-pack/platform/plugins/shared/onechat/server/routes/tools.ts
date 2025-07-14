@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 import { ToolType } from '@kbn/onechat-common';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
-import { toolToDescriptor } from '../services/tools/utils/tool_conversion';
+import { toDescriptorWithSchema } from '../services/tools/utils/tool_conversion';
 import type {
   ListToolsResponse,
   GetToolResponse,
@@ -56,7 +56,7 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
         const tools = await registry.list({});
         return response.ok<ListToolsResponse>({
           body: {
-            results: tools.map(toolToDescriptor),
+            results: tools.map(toDescriptorWithSchema),
           },
         });
       })
@@ -96,7 +96,7 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
         const registry = await toolService.getRegistry({ request });
         const tool = await registry.get(id);
         return response.ok<GetToolResponse>({
-          body: toolToDescriptor(tool),
+          body: toDescriptorWithSchema(tool),
         });
       })
     );
@@ -125,7 +125,7 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
           request: {
             body: schema.object({
               id: schema.string(),
-              type: schema.maybe(schema.oneOf([schema.literal(ToolType.esql)])),
+              type: schema.oneOf([schema.literal(ToolType.esql)]),
               description: schema.string({ defaultValue: '' }),
               tags: schema.arrayOf(schema.string(), { defaultValue: [] }),
               configuration: esqlConfigSchema,
@@ -135,15 +135,11 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
       },
       wrapHandler(async (ctx, request, response) => {
         const { tools: toolService } = getInternalServices();
-        const payload: CreateToolPayload = request.body;
-        const createRequest = {
-          ...payload,
-          type: payload.type ?? ToolType.esql,
-        };
+        const createRequest: CreateToolPayload = request.body;
         const registry = await toolService.getRegistry({ request });
         const tool = await registry.create(createRequest);
         return response.ok<CreateToolResponse>({
-          body: toolToDescriptor(tool),
+          body: toDescriptorWithSchema(tool),
         });
       })
     );
@@ -188,7 +184,7 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
         const registry = await toolService.getRegistry({ request });
         const tool = await registry.update(toolId, update);
         return response.ok<UpdateToolResponse>({
-          body: toolToDescriptor(tool),
+          body: toDescriptorWithSchema(tool),
         });
       })
     );

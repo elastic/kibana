@@ -17,8 +17,8 @@ export interface DeleteToolResponse {
   success: boolean;
 }
 
-export type CreateToolPayload = Omit<ToolDefinition, 'type'> &
-  Partial<Pick<ToolDefinition, 'type'>>;
+export type CreateToolPayload = Omit<ToolDefinition, 'description' | 'tags'> &
+  Partial<Pick<ToolDefinition, 'description' | 'tags'>>;
 
 export type UpdateToolPayload = Partial<Pick<ToolDefinition, 'description' | 'tags'>> & {
   configuration?: Partial<ToolDefinition['configuration']>;

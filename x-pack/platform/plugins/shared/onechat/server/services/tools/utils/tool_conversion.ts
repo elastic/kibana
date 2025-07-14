@@ -40,7 +40,7 @@ export const toExecutableTool = <
  *
  * Can be used to convert/clean tool registration for public-facing APIs.
  */
-export const toolToDescriptor = (tool: InternalToolDefinition): ToolDefinitionWithSchema => {
+export const toDescriptorWithSchema = (tool: InternalToolDefinition): ToolDefinitionWithSchema => {
   const { id, type, description, tags, configuration, schema } = tool;
   const jsonSchema = zodToJsonSchema(schema) as JsonSchema7ObjectType;
   return { id, type, description, tags, configuration, schema: jsonSchema };

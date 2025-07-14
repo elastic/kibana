@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export { toolToDescriptor, toExecutableTool } from './tool_conversion';
+export { toDescriptorWithSchema, toExecutableTool } from './tool_conversion';
 export { registryToProvider } from './registry_to_provider';
 export { ensureValidId } from './validation';
