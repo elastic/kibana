@@ -29,11 +29,6 @@ export default function (providerContext: FtrProviderContext) {
     skipIfNoDockerRegistry(providerContext);
     let agentPolicyId: string;
     let packagePolicyId: string;
-    let packagePolicyId2: string;
-    let packagePolicyId3: string;
-    let managedAgentPolicyId: string;
-    let packagePolicySecrets: string;
-    let packagePolicySecretsId: string;
     let endpointPackagePolicyId: string;
     let inputOnlyBasePackagePolicy: NewPackagePolicy;
 
@@ -61,18 +56,6 @@ export default function (providerContext: FtrProviderContext) {
         ]);
 
       agentPolicyId = agentPolicyResponse.item.id;
-
-      // if one already exists, re-use that
-      const managedExists = managedAgentPolicyResponse.statusCode === 409;
-      if (managedExists) {
-        const errorRegex = /^agent policy \'(?<id>[\w,\-]+)\' already exists/i;
-        const result = errorRegex.exec(managedAgentPolicyResponse.message);
-        if (result?.groups?.id) {
-          managedAgentPolicyId = result.groups.id;
-        }
-      } else {
-        managedAgentPolicyId = managedAgentPolicyResponse.item.id;
-      }
 
       inputOnlyBasePackagePolicy = {
         name: 'input-only-test-1',
@@ -119,7 +102,6 @@ export default function (providerContext: FtrProviderContext) {
             version: '0.1.0',
           },
         });
-      packagePolicyId = packagePolicyResponse.item.id;
 
       const { body: packagePolicyResponse2 } = await supertest
         .post(`/api/fleet/package_policies`)
@@ -161,7 +143,6 @@ export default function (providerContext: FtrProviderContext) {
             version: '0.1.0',
           },
         });
-      packagePolicyId3 = packagePolicyResponse3.item.id;
 
       const { body: endpointPackagePolicyResponse } = await supertest
         .post(`/api/fleet/package_policies`)
@@ -213,8 +194,6 @@ export default function (providerContext: FtrProviderContext) {
             version: '1.1.0',
           },
         });
-      packagePolicySecrets = secretsPackagePolicyResponse.item;
-      packagePolicySecretsId = secretsPackagePolicyResponse.item.id;
 
       const { body: inputOnlyPolicyResponse } = await supertest
         .post(`/api/fleet/package_policies`)
