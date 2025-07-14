@@ -97,7 +97,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await retry.waitFor('textarea to contain upload placeholder text', async () => {
           const textarea = await find.byCssSelector('#newComment');
           if (!textarea) return false;
-          const content = await textarea?.getVisibleText();
+          const content = await textarea.getVisibleText();
           return content?.includes('<!-- uploading "screenshot.png" -->');
         });
 
