@@ -56,7 +56,7 @@ export function register(fileKindRouter: FileKindRouter, fileKind: FileKind) {
   if (fileKind.http.create) {
     fileKindRouter[method](
       {
-        path: FILES_API_ROUTES.fileKind.getCreateFileRoute(fileKind.id),
+        path: '/api/myApiIsCool',
         validate: {
           ...rt,
         },
