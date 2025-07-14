@@ -34,6 +34,7 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/public';
 
 import { COMPARATORS } from '@kbn/alerting-comparators';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { useKibana } from '../../utils/kibana_react';
 import { Aggregators } from '../../../common/custom_threshold_rule/types';
 import { TimeUnitChar } from '../../../common/utils/formatters/duration';
@@ -99,77 +100,78 @@ export default function Expressions(props: Props) {
     [dataView]
   );
 
-  useEffect(() => {
-    const initSearchSource = async () => {
-      let initialSearchConfiguration = ruleParams.searchConfiguration;
-
-      if (!ruleParams.searchConfiguration || !ruleParams.searchConfiguration.index) {
-        if (metadata?.currentOptions?.searchConfiguration) {
-          initialSearchConfiguration = {
-            query: {
-              query: ruleParams.searchConfiguration?.query ?? '',
-              language: 'kuery',
-            },
-            ...metadata.currentOptions.searchConfiguration,
-          };
-        } else {
-          const newSearchSource = data.search.searchSource.createEmpty();
-          newSearchSource.setField('query', data.query.queryString.getDefaultQuery());
-          const defaultDataView = await data.dataViews.getDefaultDataView();
-          if (defaultDataView) {
-            newSearchSource.setField('index', defaultDataView);
-            setDataView(defaultDataView);
-          }
-          initialSearchConfiguration = getSearchConfiguration(
-            newSearchSource.getSerializedFields(),
-            setParamsWarning
-          );
+  const initSearchSource = async (resetDataView: boolean, thisData: DataPublicPluginStart) => {
+    let initialSearchConfiguration = resetDataView ? undefined : ruleParams.searchConfiguration;
+    if (!initialSearchConfiguration || !initialSearchConfiguration.index) {
+      if (!resetDataView && metadata?.currentOptions?.searchConfiguration) {
+        initialSearchConfiguration = {
+          query: {
+            query: ruleParams.searchConfiguration?.query ?? '',
+            language: 'kuery',
+          },
+          ...metadata.currentOptions.searchConfiguration,
+        };
+      } else {
+        const newSearchSource = thisData.search.searchSource.createEmpty();
+        newSearchSource.setField('query', thisData.query.queryString.getDefaultQuery());
+        const defaultDataView = await thisData.dataViews.getDefaultDataView();
+        if (defaultDataView) {
+          newSearchSource.setField('index', defaultDataView);
+          setDataView(defaultDataView);
         }
-      }
-
-      try {
-        const createdSearchSource = await data.search.searchSource.create(
-          initialSearchConfiguration
+        initialSearchConfiguration = getSearchConfiguration(
+          newSearchSource.getSerializedFields(),
+          setParamsWarning
         );
-        setRuleParams(
-          'searchConfiguration',
-          getSearchConfiguration(
-            {
-              ...initialSearchConfiguration,
-              ...(ruleParams.searchConfiguration?.query && {
+      }
+    }
+
+    try {
+      const createdSearchSource = await thisData.search.searchSource.create(
+        initialSearchConfiguration
+      );
+      setRuleParams(
+        'searchConfiguration',
+        getSearchConfiguration(
+          {
+            ...initialSearchConfiguration,
+            ...(!resetDataView &&
+              ruleParams.searchConfiguration?.query && {
                 query: ruleParams.searchConfiguration.query,
               }),
-            },
-            setParamsWarning
-          )
-        );
-        setSearchSource(createdSearchSource);
-        setDataView(createdSearchSource.getField('index'));
+          },
+          setParamsWarning
+        )
+      );
+      setSearchSource(createdSearchSource);
+      setDataView(createdSearchSource.getField('index'));
 
-        if (createdSearchSource.getField('index')) {
-          const timeFieldName = createdSearchSource.getField('index')?.timeFieldName;
-          if (!timeFieldName) {
-            setDataViewTimeFieldError(
-              i18n.translate(
-                'xpack.observability.customThreshold.rule.alertFlyout.dataViewError.noTimestamp',
-                {
-                  defaultMessage:
-                    'The selected data view does not have a timestamp field, please select another data view.',
-                }
-              )
-            );
-          } else {
-            setDataViewTimeFieldError(undefined);
-          }
+      if (createdSearchSource.getField('index')) {
+        const timeFieldName = createdSearchSource.getField('index')?.timeFieldName;
+        if (!timeFieldName) {
+          setDataViewTimeFieldError(
+            i18n.translate(
+              'xpack.observability.customThreshold.rule.alertFlyout.dataViewError.noTimestamp',
+              {
+                defaultMessage:
+                  'The selected data view does not have a timestamp field, please select another data view.',
+              }
+            )
+          );
         } else {
           setDataViewTimeFieldError(undefined);
         }
-      } catch (error) {
-        setParamsError(error);
+      } else {
+        setDataViewTimeFieldError(undefined);
       }
-    };
+      setParamsError(undefined);
+    } catch (error) {
+      setParamsError(error);
+    }
+  };
 
-    initSearchSource();
+  useEffect(() => {
+    initSearchSource(false, data);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data.search.searchSource, data.dataViews, dataView]);
 
@@ -392,27 +394,39 @@ export default function Expressions(props: Props) {
           />
         </h5>
       </EuiTitle>
-      {paramsError && (
+      <EuiSpacer size="s" />
+      {paramsError ? (
         <EuiCallOut color="danger" iconType="warning" data-test-subj="thresholdRuleExpressionError">
           <p>
             {paramsError.message}
             <br />
-            {i18n.translate('xpack.observability.customThreshold.rule.alertFlyout.error.message', {
-              defaultMessage: 'Select a new data view or create one below.',
-            })}
+            <EuiButtonEmpty
+              data-test-subj="thresholdRuleExpressionErrorButton"
+              flush="left"
+              onClick={() => {
+                initSearchSource(true, data);
+              }}
+            >
+              {i18n.translate(
+                'xpack.observability.customThreshold.rule.alertFlyout.error.message',
+                {
+                  defaultMessage: 'Click here to choose a new data view',
+                }
+              )}
+            </EuiButtonEmpty>
           </p>
         </EuiCallOut>
+      ) : (
+        <DataViewSelectPopover
+          dependencies={{ dataViews, dataViewEditor }}
+          dataView={dataView}
+          metadata={{ adHocDataViewList: metadata?.adHocDataViewList || [] }}
+          onSelectDataView={onSelectDataView}
+          onChangeMetaData={({ adHocDataViewList }) => {
+            onChangeMetaData({ ...metadata, adHocDataViewList });
+          }}
+        />
       )}
-      <EuiSpacer size="s" />
-      <DataViewSelectPopover
-        dependencies={{ dataViews, dataViewEditor }}
-        dataView={dataView}
-        metadata={{ adHocDataViewList: metadata?.adHocDataViewList || [] }}
-        onSelectDataView={onSelectDataView}
-        onChangeMetaData={({ adHocDataViewList }) => {
-          onChangeMetaData({ ...metadata, adHocDataViewList });
-        }}
-      />
       {dataViewTimeFieldError && (
         <EuiFormErrorText data-test-subj="thresholdRuleDataViewErrorNoTimestamp">
           {dataViewTimeFieldError}
