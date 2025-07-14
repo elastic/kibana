@@ -260,6 +260,9 @@ export const PolicySelector = memo<PolicySelectorProps>(
       view
     );
 
+    // Store the initial unfiltered total count for consistent display
+    const [unfilteredTotalCount, setUnfilteredTotalCount] = useState<number | null>(null);
+
     const selectedCount = useMemo(() => {
       return (
         selectedPolicyIds.length +
@@ -267,9 +270,18 @@ export const PolicySelector = memo<PolicySelectorProps>(
       );
     }, [additionalListItems, selectedPolicyIds.length]);
 
+    // Set the unfiltered total count when we first get data without search
+    useEffect(() => {
+      if (policyListResponse && !userSearchValue && unfilteredTotalCount === null) {
+        setUnfilteredTotalCount(policyListResponse.total);
+      }
+    }, [policyListResponse, userSearchValue, unfilteredTotalCount]);
+
     const totalItems: number = useMemo(() => {
-      return (policyListResponse?.total ?? 0) + additionalListItems?.length ?? 0;
-    }, [additionalListItems?.length, policyListResponse?.total]);
+      // Use stored unfiltered total when available, otherwise fall back to current total
+      const baseTotalCount = unfilteredTotalCount ?? policyListResponse?.total ?? 0;
+      return baseTotalCount + (additionalListItems?.length ?? 0);
+    }, [additionalListItems?.length, policyListResponse?.total, unfilteredTotalCount]);
 
     // @ts-expect-error EUI does not seem to have correctly types the `windowProps` which come from React-Window `FixedSizeList` component
     const listProps: EuiSelectableProps['listProps'] = useMemo(() => {
