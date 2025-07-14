@@ -8,7 +8,6 @@
 import React, { memo } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { Handle, Position } from '@xyflow/react';
-import type { AssetProps } from '@kbn/cloud-security-posture-common';
 import {
   NodeShapeContainer,
   NodeShapeOnHoverSvg,
