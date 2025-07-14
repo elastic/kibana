@@ -162,7 +162,7 @@ export function getFunctionSignaturesByReturnType(
     timeseriesAgg?: boolean;
     skipAssign?: boolean;
   } = {},
-  paramsTypes?: Readonly<FunctionParameterType[]>,
+  paramsTypes?: readonly FunctionParameterType[],
   ignored?: string[],
   option?: string
 ): PartialSuggestionWithText[] {

@@ -36,7 +36,7 @@ export const PROCESS_DESCENDANT_EVENT_FILTER_EXTRA_ENTRY_TEXT: string = `${
 // TODO: refact all uses of `ALL_ENDPOINT_ARTIFACTS_LIST_IDS to sue new const from shared package
 export const ALL_ENDPOINT_ARTIFACT_LIST_IDS = ENDPOINT_ARTIFACT_LIST_IDS;
 
-export const DEFAULT_EXCEPTION_LIST_ITEM_SEARCHABLE_FIELDS: Readonly<string[]> = [
+export const DEFAULT_EXCEPTION_LIST_ITEM_SEARCHABLE_FIELDS: readonly string[] = [
   `name`,
   `description`,
   `entries.value`,

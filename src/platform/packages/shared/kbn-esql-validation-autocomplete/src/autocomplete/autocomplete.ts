@@ -246,7 +246,7 @@ export function getFieldsByTypeRetriever(
   const lastCharIsQuestionMark = lastCharacterTyped === ESQL_VARIABLES_PREFIX;
   return {
     getFieldsByType: async (
-      expectedType: Readonly<string> | Readonly<string[]> = 'any',
+      expectedType: Readonly<string> | readonly string[] = 'any',
       ignored: string[] = [],
       options
     ) => {

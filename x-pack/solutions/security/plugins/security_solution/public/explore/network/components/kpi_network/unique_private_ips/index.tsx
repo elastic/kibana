@@ -23,7 +23,7 @@ import {
 
 export const ID = 'networkKpiUniquePrivateIpsQuery';
 
-export const useGetUniquePrivateIpsStatItems: () => Readonly<StatItems[]> = () => {
+export const useGetUniquePrivateIpsStatItems: () => readonly StatItems[] = () => {
   const { euiTheme } = useEuiTheme();
   return useMemo(
     () => [

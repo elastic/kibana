@@ -7,8 +7,8 @@
 
 import React, { useMemo } from 'react';
 import { capitalize } from 'lodash';
-import type { EuiThemeComputed } from '@elastic/eui';
-import {
+import type {
+  EuiThemeComputed,
   EuiLoadingSpinner,
   EuiFlexItem,
   EuiText,

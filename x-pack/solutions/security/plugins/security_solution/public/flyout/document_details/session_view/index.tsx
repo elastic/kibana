@@ -7,8 +7,11 @@
 
 import type { FC } from 'react';
 import React, { memo, useCallback, useMemo } from 'react';
-import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
-import { type PanelPath, useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import type {
+  FlyoutPanelProps,
+  type PanelPath,
+  useExpandableFlyoutApi,
+} from '@kbn/expandable-flyout';
 import { PanelContent } from './content';
 import { PanelHeader } from './header';
 import type { CustomProcess } from './context';
