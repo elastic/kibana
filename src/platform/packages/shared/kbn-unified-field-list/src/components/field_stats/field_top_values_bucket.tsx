@@ -155,6 +155,9 @@ const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
           }
           labelProps={{
             title: undefined,
+            css: css`
+              white-space: unset !important;
+            `,
           }}
         />
       </EuiFlexItem>
