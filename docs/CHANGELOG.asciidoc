@@ -113,6 +113,8 @@ Alerting::
 Data ingestion and Fleet::
 * Fixes an issue with agentless integration policies appearing under the Agent-based section ({kibana-pull}225767[#225767]).
 * Fixes an issue where the background task was not deleting some unenrolled agents ({kibana-pull}224808[#224808]).
+Discover::
+* Prevents selected document from changing when resizing the **Document** flyout with a keyboard ({kibana-pull}225594[#225594]).
 Elastic Observability solution::
 * Fixes sparklines in the **Dependencies** table ({kibana-pull}227211[#227211]).
 * Shows **Uptime Monitors** in the Observability solution view when enabled in Advanced Settings ({kibana-pull}226999[#226999]).
