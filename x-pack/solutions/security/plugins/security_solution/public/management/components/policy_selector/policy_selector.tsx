@@ -310,6 +310,9 @@ export const PolicySelector = memo<PolicySelectorProps>(
             appPath={urlPath}
             target="_blank"
             data-test-subj={getTestId(`policy-${policy.id}-policyLink`)}
+            onClick={(event) => {
+              event.stopPropagation();
+            }}
           >
             <FormattedMessage
               id="xpack.securitySolution.effectedPolicySelect.viewPolicyLinkLabel"
