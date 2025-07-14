@@ -25,67 +25,28 @@ export function useHackSyncPushFlyout() {
   useEffect(() => {
     const targetNode = document.body;
 
-    const callback: MutationCallback = (mutationsList: MutationRecord[]) => {
-      for (const mutation of mutationsList) {
-        if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
-          // const newPaddingInlineStart = window.getComputedStyle(targetNode).paddingInlineStart;
-          const styleAttribute = targetNode.getAttribute('style') ?? '';
+    const callback: MutationCallback = () => {
+      // If the style attribute has changed, we need to re-evaluate the padding values
+      const styleAttribute = targetNode.getAttribute('style') ?? '';
 
-          function parseCSSDeclaration(styleAttr: string) {
-            return styleAttr
-              .trim()
-              .split(';')
-              .filter((s) => s !== '')
-              .map((declaration) => {
-                const colonIndex = declaration.indexOf(':');
-                if (colonIndex === -1) {
-                  throw new Error('Invalid CSS declaration: no colon found.');
-                }
+      const parsedStyle = parseCSSDeclaration(styleAttribute);
+      const paddingInline = parsedStyle.find((style) => style.property === 'padding-inline')?.value;
+      let paddingInlineStart = parsedStyle.find(
+        (style) => style.property === 'padding-inline-start'
+      )?.value;
+      let paddingInlineEnd = parsedStyle.find(
+        (style) => style.property === 'padding-inline-end'
+      )?.value;
 
-                const property = declaration.slice(0, colonIndex).trim();
-                const value = declaration.slice(colonIndex + 1).trim();
+      const [start, end] = paddingInline?.split(' ') ?? ['', ''];
 
-                return { property, value };
-              });
-          }
+      paddingInlineStart = paddingInlineStart ?? start;
+      paddingInlineEnd = paddingInlineEnd ?? end;
 
-          const parsedStyle = parseCSSDeclaration(styleAttribute);
-          const paddingInline = parsedStyle.find(
-            (style) => style.property === 'padding-inline'
-          )?.value;
-          let paddingInlineStart = parsedStyle.find(
-            (style) => style.property === 'padding-inline-start'
-          )?.value;
-          let paddingInlineEnd = parsedStyle.find(
-            (style) => style.property === 'padding-inline-end'
-          )?.value;
-
-          const [start, end] = paddingInline?.split(' ') ?? ['', ''];
-
-          paddingInlineStart = paddingInlineStart ?? start;
-          paddingInlineEnd = paddingInlineEnd ?? end;
-
-          if (paddingInlineStart) {
-            setGlobalCSSVariables({
-              [hackEuiPushFlyoutPaddingInlineStart]: paddingInlineStart,
-            });
-          } else {
-            setGlobalCSSVariables({
-              [hackEuiPushFlyoutPaddingInlineStart]: null,
-            });
-          }
-
-          if (paddingInlineEnd) {
-            setGlobalCSSVariables({
-              [hackEuiPushFlyoutPaddingInlineEnd]: paddingInlineEnd,
-            });
-          } else {
-            setGlobalCSSVariables({
-              [hackEuiPushFlyoutPaddingInlineEnd]: null,
-            });
-          }
-        }
-      }
+      setGlobalCSSVariables({
+        [hackEuiPushFlyoutPaddingInlineStart]: paddingInlineStart ?? null,
+        [hackEuiPushFlyoutPaddingInlineEnd]: paddingInlineEnd ?? null,
+      });
     };
 
     const observer = new MutationObserver(callback);
@@ -96,4 +57,22 @@ export function useHackSyncPushFlyout() {
       observer.disconnect();
     };
   }, [setGlobalCSSVariables]);
+}
+
+function parseCSSDeclaration(styleAttr: string) {
+  return styleAttr
+    .trim()
+    .split(';')
+    .filter((s) => s !== '')
+    .map((declaration) => {
+      const colonIndex = declaration.indexOf(':');
+      if (colonIndex === -1) {
+        throw new Error('Invalid CSS declaration: no colon found.');
+      }
+
+      const property = declaration.slice(0, colonIndex).trim();
+      const value = declaration.slice(colonIndex + 1).trim();
+
+      return { property, value };
+    });
 }
